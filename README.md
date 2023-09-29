@@ -5,7 +5,7 @@ Profilarr is a Python-based tool that enables seamless synchronization of custom
 ## ⚠️ Before Continuing
 
 - **This tool will overwrite any custom formats in your Radarr installation that have the same name.**
-- **Custom Formats MUST be imported before syncing a profile.**
+- **Custom Formats MUST be imported before syncing any premade profile.**
 
 ## 🛠️ Installation
 
