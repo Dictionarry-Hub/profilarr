@@ -12,6 +12,7 @@ Profilarr is a Python-based tool that enables seamless synchronization of custom
 ### Prerequisites
 
 - Python 3.x installed. You can download it from [python.org](https://www.python.org/downloads/).
+- Radarr / Sonarr
 
 ### Steps
 
