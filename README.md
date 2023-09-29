@@ -2,6 +2,8 @@
 
 Profilarr is a Python-based tool that enables seamless synchronization of custom formats and quality profiles in Radarr / Sonarr. It's designed to aid users in sharing / importing custom formats & quality profiles seamlessly. 
 
+Companion tool to Dictionarry to mass import custom formats / profiles quickly.
+
 ## ⚠️ Before Continuing
 
 - **This tool will overwrite any custom formats in your Radarr installation that have the same name.**
