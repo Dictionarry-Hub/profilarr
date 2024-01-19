@@ -21,7 +21,7 @@ Profilarr is a Python-based tool designed to add import / export functionality t
 
 ### Initial Setup
 
-1. Download the Profilarr package from the release section.
+1. Download the latest Profilarr package from the release section.
 2. Extract its contents into a folder.
 3. Open the `config.json` file in a text editor.
    - Add your Radarr / Sonarr API key and modify the base URL as necessary.
