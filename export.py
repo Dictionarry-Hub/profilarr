@@ -22,6 +22,12 @@ if response.status_code != 200:
     exit()
 
 def export_cf():
+    # Prompt the user to specify the source (Radarr or Sonarr)
+    source = input("Enter the source (radarr/sonarr): ").lower()
+    while source not in ["radarr", "sonarr"]:
+        print("Invalid input. Please enter either 'radarr' or 'sonarr'.")
+        source = input("Enter the source (radarr/sonarr): ").lower()
+
     custom_format_url = f"{base_url}/api/v3/customformat"
     response = requests.get(custom_format_url, params=params, headers=headers)
     
@@ -31,15 +37,12 @@ def export_cf():
         # Remove 'id' from each custom format
         for custom_format in data:
             custom_format.pop('id', None)
-
-        # Ensure the ./custom_formats directory exists
-        if not os.path.exists('./custom_formats'):
-            os.makedirs('./custom_formats')
         
-        # Save to JSON file
-        with open('./custom_formats/cf.json', 'w') as f:
+        # Save to JSON file with adjusted name based on source
+        file_path = f'./custom_formats/{source}_custom_formats.json'
+        with open(file_path, 'w') as f:
             json.dump(data, f, indent=4)
-        print("Custom Formats have been saved to './custom_formats/cf.json'")
+        print(f"Custom Formats have been saved to '{file_path}'")
     else:
         print(f"Failed to retrieve custom formats! (HTTP {response.status_code})")
         print("Response Content: ", response.content)
@@ -50,6 +53,15 @@ def sanitize_filename(filename):
     return sanitized_filename
 
 def export_qf():
+    # Prompt the user to specify the source (Radarr or Sonarr)
+    source = input("Enter the source (radarr/sonarr): ").lower()
+    while source not in ["radarr", "sonarr"]:
+        print("Invalid input. Please enter either 'radarr' or 'sonarr'.")
+        source = input("Enter the source (radarr/sonarr): ").lower()
+
+    # Capitalize the first letter of the source
+    source = source.capitalize()
+
     response = requests.get(f"{base_url}/api/v3/qualityprofile", params=params, headers=headers)
 
     if response.status_code == 200:
@@ -63,10 +75,10 @@ def export_qf():
         for profile in quality_profiles:
             profile.pop('id', None)  # Remove the 'id' field
 
-            # Use the name of the profile to create a filename
+            # Use the name of the profile to create a filename and append the source
             profile_name = profile.get('name', 'unnamed_profile')  # Use a default name if the profile has no name
             profile_name = sanitize_filename(profile_name)  # Sanitize the filename
-            profile_filename = f"{profile_name}.json"
+            profile_filename = f"{profile_name} ({source}).json"
             profile_filepath = os.path.join('./profiles', profile_filename)
 
             # Save the individual profile to a file as a single-element array
@@ -77,8 +89,6 @@ def export_qf():
     else:
         print("Failed to retrieve quality profiles!")
         print("Response Content: ", response.content.decode('utf-8'))
-
-
 
 if __name__ == "__main__":
     export_cf()

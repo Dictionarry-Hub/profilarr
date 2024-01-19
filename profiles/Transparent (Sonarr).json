@@ -1,6 +1,6 @@
 [
     {
-        "name": "Transparent (Sonarr)",
+        "name": "Transparent",
         "upgradeAllowed": true,
         "cutoff": 1001,
         "items": [
@@ -240,6 +240,51 @@
         "cutoffFormatScore": 500,
         "formatItems": [
             {
+                "format": 224,
+                "name": "h265",
+                "score": -9999
+            },
+            {
+                "format": 223,
+                "name": "LiNG",
+                "score": 80
+            },
+            {
+                "format": 221,
+                "name": "hdalx",
+                "score": 80
+            },
+            {
+                "format": 220,
+                "name": "VLAD",
+                "score": 80
+            },
+            {
+                "format": 219,
+                "name": "AJP69",
+                "score": 80
+            },
+            {
+                "format": 218,
+                "name": "iON",
+                "score": 80
+            },
+            {
+                "format": 217,
+                "name": "BTN",
+                "score": 30
+            },
+            {
+                "format": 216,
+                "name": "pcroland",
+                "score": 80
+            },
+            {
+                "format": 215,
+                "name": "CJ",
+                "score": 80
+            },
+            {
                 "format": 214,
                 "name": "LQ",
                 "score": -9999
@@ -282,7 +327,7 @@
             {
                 "format": 206,
                 "name": "Dolby Vision w/out Fallback",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 205,
@@ -302,22 +347,22 @@
             {
                 "format": 202,
                 "name": "HDR10 (Missing)",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 201,
                 "name": "HDR10",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 200,
                 "name": "Dolby Vision",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 199,
                 "name": "HDR10+",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 198,
