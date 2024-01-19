@@ -1,0 +1,25 @@
+{
+  "master": {
+    "sonarr": {
+      "base_url": "http://localhost:8989",
+      "api_key": "API_GOES_HERE"
+    },
+    "radarr": {
+      "base_url": "http://localhost:7878",
+      "api_key": "API_GOES_HERE"
+    }
+  },
+  "extra_installations": [
+    {
+      "name": "example",
+      "sonarr": {
+        "base_url": "http://otherhost1:8989",
+        "api_key": "API_GOES_HERE"
+      },
+      "radarr": {
+        "base_url": "http://otherhost1:7878",
+        "api_key": "API_GOES_HERE"
+      }
+    }
+  ]
+}
