@@ -1,12 +1,12 @@
 # Profilarr!
 
-Profilarr is a Python-based tool designed to add import / export functionality to the \*arr suite. It allows custom formats and quality profiles. It offers a user-friendly way to export and import custom formats and quality profiles between Radarr and Sonarr installations.
+Profilarr is a Python-based tool designed to add import / export functionality to the \*arr suite. It offers a user-friendly way to export and import custom formats and quality profiles between Radarr and Sonarr installations.
 
 ## ⚠️ Before Continuing
 
 - **This tool will overwrite any custom formats in your \*arr installation that have the same name.**
 - **Custom Formats MUST be imported before syncing any premade profile.**
-- **Always back up your Radarr and Sonarr configurations before using Profilarr to avoid unintended data loss.**
+- **Always back up your Radarr and Sonarr configurations before using Profilarr to avoid unintended data loss.** (Seriously, do it. Even I've lost data to this tool because I forgot to back up my configs.)
 
 ## 🛠️ Installation
 
