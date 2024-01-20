@@ -70,8 +70,8 @@ def ensure_directory_exists(directory):
         os.makedirs(directory)
         print(Colors.OKBLUE + f"Created directory: {directory}" + Colors.ENDC)
 
-def export_cf(source):
-    ensure_directory_exists('./custom_formats')  # Ensure the directory exists
+def export_cf(source, save_path='./custom_formats'):
+    ensure_directory_exists(save_path)  # Ensure the directory exists with the given save_path
 
     base_url, api_key = get_app_config(source)
     headers = {"X-Api-Key": api_key}
@@ -93,9 +93,10 @@ def export_cf(source):
                 custom_format.pop('id', None)
                 saved_formats.append(custom_format['name'])
             
-            file_path = f'./custom_formats/Custom Formats ({source.capitalize()}).json'
+            file_path = f'{save_path}/Custom Formats ({source.capitalize()}).json'
             with open(file_path, 'w') as f:
                 json.dump(data, f, indent=4)
+
             print_saved_items(saved_formats, "Custom Formats")
             print(Colors.OKGREEN + f"Saved to '{file_path}'" + Colors.ENDC)
             print()
@@ -107,8 +108,8 @@ def export_cf(source):
 
 
 
-def export_qf(source):
-    ensure_directory_exists('./profiles')  # Ensure the directory exists
+def export_qf(source, save_path='./profiles'):
+    ensure_directory_exists(save_path)  # Ensure the directory exists with the given save_path
 
     base_url, api_key = get_app_config(source)
     headers = {"X-Api-Key": api_key}
@@ -132,13 +133,13 @@ def export_qf(source):
                 profile_name = profile.get('name', 'unnamed_profile')
                 profile_name = sanitize_filename(profile_name)
                 profile_filename = f"{profile_name} ({source.capitalize()}).json"
-                profile_filepath = os.path.join('./profiles', profile_filename)
+                profile_filepath = os.path.join(save_path, profile_filename)
                 saved_profiles.append(profile_name)
 
                 with open(profile_filepath, 'w') as file:
                     json.dump([profile], file, indent=4)
             print_saved_items(saved_profiles, "Quality Profiles")
-            print(Colors.OKGREEN + "Saved to the ./profiles directory" + Colors.ENDC)
+            print(Colors.OKGREEN + f"Saved to '{profile_filepath}'" + Colors.ENDC)
             print()
         else:
             handle_response_errors(response)
