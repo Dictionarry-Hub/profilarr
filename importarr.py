@@ -56,7 +56,7 @@ def select_file(directory):
     choice = int(input("Select a file to import: "))
     return files[choice - 1]
 
-def import_custom_formats(source_config):
+def import_custom_formats(source_config, import_path='./custom_formats', auto_select_file=False):
     headers = {"X-Api-Key": source_config['api_key']}
     get_url = f"{source_config['base_url']}/api/v3/customformat"
     try:
@@ -65,10 +65,15 @@ def import_custom_formats(source_config):
             existing_formats = response.json()
             existing_names_to_id = {format['name']: format['id'] for format in existing_formats}
 
-            selected_file = select_file('./custom_formats')
+            files = os.listdir(import_path)
+            if auto_select_file and len(files) == 1:
+                selected_file = files[0]
+            else:
+                selected_file = select_file(import_path)
+
             added_count, updated_count = 0, 0
 
-            with open(os.path.join('./custom_formats', selected_file), 'r') as import_file:
+            with open(os.path.join(import_path, selected_file), 'r') as import_file:
                 import_formats = json.load(import_file)
 
             print()
@@ -108,71 +113,79 @@ def import_custom_formats(source_config):
     except requests.exceptions.ConnectionError:
         print_connection_error()
 
-def import_quality_profiles(source_config):
+def import_quality_profiles(source_config, import_path='./profiles'):
     headers = {"X-Api-Key": source_config['api_key']}
     try:
         cf_import_sync(source_config)
 
-        profile_dir = './profiles'
+        profile_dir = import_path
         profiles = [f for f in os.listdir(profile_dir) if f.endswith('.json')]
 
         print()
         print(Colors.HEADER + "Available Profiles:" + Colors.ENDC)
         for i, profile in enumerate(profiles, 1):
             print(f"{i}. {profile}")
+        print(f"{len(profiles) + 1}. Import all profiles")
 
         print()
-        selection = input("Please enter the number of the profile you want to import: ")
+        selection = input("Please enter the number of the profile you want to import (or enter " + str(len(profiles) + 1) + " to import all): ")
+        selected_files = []
         try:
-            selected_file = profiles[int(selection) - 1]
+            selection = int(selection)
+            if selection == len(profiles) + 1:
+                selected_files = profiles
+            else:
+                selected_files = [profiles[selection - 1]]
         except (ValueError, IndexError):
             print_error("Invalid selection, please enter a valid number.")
             return
 
-        with open(os.path.join(profile_dir, selected_file), 'r') as file:
-            try:
-                quality_profiles = json.load(file)
-            except json.JSONDecodeError as e:
-                print_error(f"Error loading selected profile: {e}")
-                return
+        for selected_file in selected_files:
+            with open(os.path.join(profile_dir, selected_file), 'r') as file:
+                try:
+                    quality_profiles = json.load(file)
+                except json.JSONDecodeError as e:
+                    print_error(f"Error loading selected profile: {e}")
+                    continue
 
-            for profile in quality_profiles:
-                existing_format_names = set()
-                if 'formatItems' in profile:
-                    for format_item in profile['formatItems']:
-                        format_name = format_item.get('name')
-                        if format_name:
-                            existing_format_names.add(format_name)
-                            if format_name in source_config['custom_formats']:
-                                format_item['format'] = source_config['custom_formats'][format_name]
+                for profile in quality_profiles:
+                    existing_format_names = set()
+                    if 'formatItems' in profile:
+                        for format_item in profile['formatItems']:
+                            format_name = format_item.get('name')
+                            if format_name:
+                                existing_format_names.add(format_name)
+                                if format_name in source_config['custom_formats']:
+                                    format_item['format'] = source_config['custom_formats'][format_name]
 
-                for format_name, format_id in source_config['custom_formats'].items():
-                    if format_name not in existing_format_names:
-                        profile.setdefault('formatItems', []).append({
-                            "format": format_id,
-                            "name": format_name,
-                            "score": 0
-                        })
+                    for format_name, format_id in source_config['custom_formats'].items():
+                        if format_name not in existing_format_names:
+                            profile.setdefault('formatItems', []).append({
+                                "format": format_id,
+                                "name": format_name,
+                                "score": 0
+                            })
 
-                post_url = f"{source_config['base_url']}/api/v3/qualityprofile"
-                response = requests.post(post_url, json=profile, headers=headers)
+                    post_url = f"{source_config['base_url']}/api/v3/qualityprofile"
+                    response = requests.post(post_url, json=profile, headers=headers)
 
-                if response.status_code in [200, 201]:
-                    print_success(f"Successfully added Quality Profile {profile['name']}")
-                elif response.status_code == 409:
-                    print_error(f"Failed to add Quality Profile {profile['name']} due to a naming conflict. Quality profile names must be unique. (HTTP {response.status_code})")
-                else:
-                    try:
-                        errors = response.json()
-                        message = errors.get("message", "No Message Provided")
-                        print_error(f"Failed to add Quality Profile {profile['name']}! (HTTP {response.status_code})")
-                        print(message)
-                    except json.JSONDecodeError:
-                        print_error("Failed to parse error message:")
-                        print(response.text)
+                    if response.status_code in [200, 201]:
+                        print_success(f"Successfully added Quality Profile {profile['name']}")
+                    elif response.status_code == 409:
+                        print_error(f"Failed to add Quality Profile {profile['name']} due to a naming conflict. Quality profile names must be unique. (HTTP {response.status_code})")
+                    else:
+                        try:
+                            errors = response.json()
+                            message = errors.get("message", "No Message Provided")
+                            print_error(f"Failed to add Quality Profile {profile['name']}! (HTTP {response.status_code})")
+                            print(message)
+                        except json.JSONDecodeError:
+                            print_error("Failed to parse error message:")
+                            print(response.text)
 
     except requests.exceptions.ConnectionError:
         print_connection_error()
+
 
 def cf_import_sync(source_config):
     headers = {"X-Api-Key": source_config['api_key']}

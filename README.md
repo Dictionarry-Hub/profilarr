@@ -1,6 +1,6 @@
 # Profilarr
 
-Profilarr is a Python-based tool designed to add import / export functionality to the \*arr suite. It offers a user-friendly way to export and import custom formats and quality profiles between Radarr and Sonarr installations.
+Profilarr is a Python-based tool designed to add import/export functionality to the \*arr suite. It offers a user-friendly way to export and import custom formats and quality profiles between Radarr and Sonarr installations.
 
 ## ⚠️ Before Continuing
 
@@ -28,23 +28,28 @@ Profilarr is a Python-based tool designed to add import / export functionality t
    - If importing / exporting, only change the master installation's API key and base URL.
    - If syncing, add the API keys and base URLs of all instances you want to sync.
    - The master install will be the one that all other instances sync to.
-   - Sync coming soon (so don't worry about it for now)
 4. Save the changes.
 
 ## 🚀 Usage
 
 ### Exporting
 
-1. Run `python export.py` in your command line interface.
+1. Run `python exportarr.py` in your command line interface.
 2. Follow the on-screen prompts to select the app (Radarr or Sonarr) and the data (Custom Formats or Quality Profiles) you want to export.
 3. Exported data will be saved in respective directories within the tool's folder.
 
 ### Importing
 
-1. Run `python import.py` in your command line interface.
+1. Run `python importarr.py` in your command line interface.
 2. Follow the on-screen prompts to select the app and the data you want to import.
 3. Choose the specific file for Custom Formats or select a profile for Quality Profiles.
 4. The data will be imported to your selected Radarr or Sonarr installation.
+
+### Syncing
+
+1. Run `python syncarr.py` in your command line interface.
+2. The script will automatically export data from the master instance and import it to all other instances specified in `config.json`.
+3. This feature is designed to manage multiple Radarr/Sonarr instances, syncing profiles and formats seamlessly.
 
 ### Radarr and Sonarr Compatibility
 
@@ -54,9 +59,5 @@ Profilarr is a Python-based tool designed to add import / export functionality t
 ## 🌟 Upcoming Features
 
 - **Lidarr Support:** Expand functionality to include Lidarr, allowing users to manage music quality profiles and custom formats.
-
-- **Syncing Multiple Instances:** Simplify the management of multiple Radarr/Sonarr instances. This feature aims to enable seamless syncing of profiles and formats across different installations.
-
 - **User Interface (UI):** Development of a graphical user interface (GUI) for easier and more intuitive interaction with Profilarr. This UI will cater to users who prefer graphical over command-line interactions.
-
 - **Automatic Updates:** Implement an auto-update mechanism for Profilarr, ensuring users always have access to the latest features, improvements, and bug fixes without manual intervention.
