@@ -2,24 +2,37 @@
   "master": {
     "sonarr": {
       "base_url": "http://localhost:8989",
-      "api_key": "API_GOES_HERE"
+      "api_key": "API_KEY_HERE"
     },
     "radarr": {
       "base_url": "http://localhost:7878",
-      "api_key": "API_GOES_HERE"
+      "api_key": "API_KEY_HERE"
     }
   },
-  "extra_installations": [
-    {
-      "name": "example",
-      "sonarr": {
-        "base_url": "http://otherhost1:8989",
-        "api_key": "API_GOES_HERE"
+  "extra_installations": {
+    "radarr": [
+      {
+        "name": "extra_radarr1",
+        "base_url": "http://localhost:7788",
+        "api_key": "API_KEY_HERE"
       },
-      "radarr": {
-        "base_url": "http://otherhost1:7878",
-        "api_key": "API_GOES_HERE"
+      {
+        "name": "extra_radarr2",
+        "base_url": "http://localhost:7789",
+        "api_key": "API_KEY_HERE"
       }
-    }
-  ]
+    ],
+    "sonarr": [
+      {
+        "name": "extra_sonarr1",
+        "base_url": "http://localhost:8988",
+        "api_key": "API_KEY_HERE"
+      },
+      {
+        "name": "extra_sonarr2",
+        "base_url": "http://localhost:8987",
+        "api_key": "API_KEY_HERE"
+      }
+    ]
+  }
 }
