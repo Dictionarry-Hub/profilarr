@@ -1,6 +1,6 @@
 [
     {
-        "name": "Transparent",
+        "name": "1080p Transparent (Single Grab)",
         "upgradeAllowed": true,
         "cutoff": 1002,
         "items": [
@@ -364,7 +364,7 @@
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 500,
+        "cutoffFormatScore": 0,
         "formatItems": [
             {
                 "format": 333,
@@ -419,7 +419,7 @@
             {
                 "format": 322,
                 "name": "Dolby Vision w/out Fallback",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 321,
@@ -434,27 +434,27 @@
             {
                 "format": 317,
                 "name": "TrueHD (Missing)",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 316,
                 "name": "HDR10 (Missing)",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 315,
                 "name": "HDR10",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 314,
                 "name": "Dolby Vision",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 312,
                 "name": "HDR10+",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 308,
@@ -474,7 +474,7 @@
             {
                 "format": 303,
                 "name": "mHD",
-                "score": -999999
+                "score": -99999
             },
             {
                 "format": 302,
@@ -574,12 +574,12 @@
             {
                 "format": 281,
                 "name": "TrueHD",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 280,
                 "name": "DTS-X",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 279,
@@ -589,7 +589,7 @@
             {
                 "format": 278,
                 "name": "DTS-HD MA",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 276,

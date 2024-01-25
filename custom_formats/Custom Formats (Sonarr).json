@@ -14,7 +14,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])D-Z0N3\\b",
                         "type": "textbox",
@@ -41,7 +41,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])DON\\b",
                         "type": "textbox",
@@ -68,7 +68,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])EbP\\b",
                         "type": "textbox",
@@ -95,7 +95,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])Geek\\b",
                         "type": "textbox",
@@ -122,7 +122,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])TayTo\\b",
                         "type": "textbox",
@@ -149,7 +149,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])ZQ\\b",
                         "type": "textbox",
@@ -176,7 +176,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])VietHD\\b",
                         "type": "textbox",
@@ -203,7 +203,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])CtrlHD\\b",
                         "type": "textbox",
@@ -292,7 +292,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])HiFi\\b",
                         "type": "textbox",
@@ -319,7 +319,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])FoRM\\b",
                         "type": "textbox",
@@ -346,7 +346,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])HiDt\\b",
                         "type": "textbox",
@@ -373,7 +373,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])SA89\\b",
                         "type": "textbox",
@@ -462,7 +462,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])CRiSC\\b",
                         "type": "textbox",
@@ -489,7 +489,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])NTb\\b",
                         "type": "textbox",
@@ -640,7 +640,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])decibeL\\b",
                         "type": "textbox",
@@ -667,7 +667,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])NCmt\\b",
                         "type": "textbox",
@@ -694,7 +694,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=[\\s.-])de\\[[4][2]\\](?!\\S)",
                         "type": "textbox",
@@ -721,7 +721,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])IDE\\b",
                         "type": "textbox",
@@ -748,7 +748,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])HDMaNiAcS\\b",
                         "type": "textbox",
@@ -775,7 +775,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])LolHD\\b",
                         "type": "textbox",
@@ -802,7 +802,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])BMF\\b",
                         "type": "textbox",
@@ -829,7 +829,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])EA\\b",
                         "type": "textbox",
@@ -856,7 +856,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])TBB\\b",
                         "type": "textbox",
@@ -945,7 +945,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])nmd\\b",
                         "type": "textbox",
@@ -972,7 +972,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])SbR\\b",
                         "type": "textbox",
@@ -999,7 +999,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])PTer\\b",
                         "type": "textbox",
@@ -1026,7 +1026,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])Dariush\\b",
                         "type": "textbox",
@@ -1115,7 +1115,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])TDD\\b",
                         "type": "textbox",
@@ -1142,7 +1142,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])Penumbra\\b",
                         "type": "textbox",
@@ -1169,7 +1169,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])FTW-HD\\b",
                         "type": "textbox",
@@ -1196,7 +1196,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])xander\\b",
                         "type": "textbox",
@@ -1223,7 +1223,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])Chotab\\b",
                         "type": "textbox",
@@ -1250,7 +1250,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])ESiR\\b",
                         "type": "textbox",
@@ -1277,7 +1277,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])Positive\\b",
                         "type": "textbox",
@@ -1304,7 +1304,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])ORiGEN\\b",
                         "type": "textbox",
@@ -1331,7 +1331,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])SaNcTi\\b",
                         "type": "textbox",
@@ -1358,7 +1358,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])ThD\\b",
                         "type": "textbox",
@@ -1385,7 +1385,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])ZIMBO\\b",
                         "type": "textbox",
@@ -1412,7 +1412,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])NyHD\\b",
                         "type": "textbox",
@@ -1439,7 +1439,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])luvBB\\b",
                         "type": "textbox",
@@ -1466,7 +1466,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])GALAXY\\b",
                         "type": "textbox",
@@ -1493,7 +1493,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])HiP\\b",
                         "type": "textbox",
@@ -1520,7 +1520,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])GS88\\b",
                         "type": "textbox",
@@ -1547,7 +1547,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])W4NK3R\\b",
                         "type": "textbox",
@@ -1574,7 +1574,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])SiMPLE\\b",
                         "type": "textbox",
@@ -1601,7 +1601,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])BV\\b",
                         "type": "textbox",
@@ -1628,7 +1628,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])GutS\\b",
                         "type": "textbox",
@@ -1655,7 +1655,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])E\\.N\\.D\\b",
                         "type": "textbox",
@@ -1682,7 +1682,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])playHD\\b",
                         "type": "textbox",
@@ -1709,7 +1709,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])WMING\\b",
                         "type": "textbox",
@@ -1736,7 +1736,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])KASHMiR\\b",
                         "type": "textbox",
@@ -1763,7 +1763,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])c0ke\\b",
                         "type": "textbox",
@@ -1790,7 +1790,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])HANDJOB\\b",
                         "type": "textbox",
@@ -1879,7 +1879,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])EDPH\\b",
                         "type": "textbox",
@@ -1906,7 +1906,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])MTeam\\b",
                         "type": "textbox",
@@ -1933,7 +1933,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])iFT\\b",
                         "type": "textbox",
@@ -1960,7 +1960,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])FraMeSToR\\b",
                         "type": "textbox",
@@ -1981,7 +1981,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "REMUX",
                         "type": "textbox",
@@ -2008,7 +2008,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])LEGi0N\\b",
                         "type": "textbox",
@@ -2035,7 +2035,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])BHDStudio\\b",
                         "type": "textbox",
@@ -2062,7 +2062,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "[.\\- (\\[]?1080p",
                         "type": "textbox",
@@ -2083,7 +2083,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])2160p\\b",
                         "type": "textbox",
@@ -2104,7 +2104,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "[.\\- (\\[]?(720p)",
                         "type": "textbox",
@@ -2125,7 +2125,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])480p|360p|576p|540p\\b",
                         "type": "textbox",
@@ -2152,7 +2152,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "[.\\- (\\[]?(720p)",
                         "type": "textbox",
@@ -2173,7 +2173,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "[.\\- (\\[]?1080p",
                         "type": "textbox",
@@ -2194,7 +2194,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])2160p\\b",
                         "type": "textbox",
@@ -2215,7 +2215,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])480p|360p|576p|540p\\b",
                         "type": "textbox",
@@ -2242,7 +2242,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.\\-(])(2160p|UHD)\\b",
                         "type": "textbox",
@@ -2263,7 +2263,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "[.\\- (\\[]?1080p",
                         "type": "textbox",
@@ -2284,7 +2284,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "[.\\- (\\[]?(720p)",
                         "type": "textbox",
@@ -2305,7 +2305,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])480p|360p|576p|540p\\b",
                         "type": "textbox",
@@ -2468,7 +2468,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(?!.*(?i:remux)).*([xh](\\.?264)|DVDRip)",
                         "type": "textbox",
@@ -2489,7 +2489,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?i)[-. ]Xvid",
                         "type": "textbox",
@@ -2510,7 +2510,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(?!.*\\b((?<!HD[._ -]|HD)DVD|BDRip|MKV|XviD|WMV|d3g|BDREMUX|REMUX|^(?=.*1080p)(?=.*HEVC)|[xh][-_. ]?26[45]|German.*DL|((?<=\\d{4}).*German.*(DL)?)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2)\\b))\\b)(((?=.*\\b(Blu[-_. ]?ray|BD|HD[-_. ]?DVD)\\b)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2|BDMV|ISO)\\b))|^((?=.*\\b(^((?=.*\\b((.*_)?COMPLETE.*|Dis[ck])\\b)(?=.*(Blu[-_. ]?ray|HD[-_. ]?DVD)))|3D[-_. ]?BD|BR[-_. ]?DISK|Full[-_. ]?Blu[-_. ]?ray|^((?=.*((BD|UHD)[-_. ]?(25|50|66|100|ISO)))))))).*|(?i)(DVD9|DVD5|NTSC|PAL|VOB IFO|VC-1|AVC|MPEG-2|\\bCOMPLETE[-.\\s]?(?:UHD[-.\\s])?BLU[-.\\s]?RAY\\b|\\bCOMPLETE BLURAY\\b|\\bBR-Disk\\b)",
                         "type": "textbox",
@@ -2531,7 +2531,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?i)(REMUX)",
                         "type": "textbox",
@@ -2620,7 +2620,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "REMUX",
                         "type": "textbox",
@@ -2709,7 +2709,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(amzn|amazon)\\b",
                         "type": "textbox",
@@ -2798,7 +2798,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<!dts[ .-]?hd[ .-]?)ma\\b(?=.*\\bweb[ ._-]?(dl|rip)\\b)",
                         "type": "textbox",
@@ -2887,7 +2887,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(atvp|aptv|Apple TV\\+)\\b",
                         "type": "textbox",
@@ -2976,7 +2976,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dsnp|dsny|disney|Disney\\+)\\b",
                         "type": "textbox",
@@ -3065,7 +3065,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b((?<!hbo[ ._-])max)\\b(?=[ ._-]web[ ._-]?(dl|rip)\\b)|\\b(hmax|hbom|hbo[ ._-]max)\\b(?=[ ._-]web[ ._-]?(dl|rip)\\b)",
                         "type": "textbox",
@@ -3154,7 +3154,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(nf|netflix)\\b",
                         "type": "textbox",
@@ -3243,7 +3243,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(hulu)\\b",
                         "type": "textbox",
@@ -3332,7 +3332,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(pcok|peacock)\\b",
                         "type": "textbox",
@@ -3421,7 +3421,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(pmtp|Paramount Plus)\\b",
                         "type": "textbox",
@@ -3510,7 +3510,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(it|itunes)\\b(?=[ ._-]web[ ._-]?(dl|rip)\\b)",
                         "type": "textbox",
@@ -3661,7 +3661,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[P+](A)?|\\b(e[-_. ]?ac3)\\b",
                         "type": "textbox",
@@ -3682,7 +3682,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "True[ .-]?HD",
                         "type": "textbox",
@@ -3703,7 +3703,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDTS(\\b|\\d)",
                         "type": "textbox",
@@ -3724,7 +3724,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bFLAC(\\b|\\d)",
                         "type": "textbox",
@@ -3745,7 +3745,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bAAC(\\b|\\d)",
                         "type": "textbox",
@@ -3766,7 +3766,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(l?)PCM(\\b|\\d)",
                         "type": "textbox",
@@ -3793,7 +3793,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDTS(\\b|\\d)",
                         "type": "textbox",
@@ -3814,7 +3814,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dts[-_. ]?(ma|hd([-_. ]?ma)?|xll))\\b",
                         "type": "textbox",
@@ -3835,7 +3835,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "dts[-. ]?(es|(hd[. ]?)?(hr|hi))",
                         "type": "textbox",
@@ -3856,7 +3856,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[P+]|\\b(e[-_. ]?ac3)\\b",
                         "type": "textbox",
@@ -3877,7 +3877,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "True[ .-]?HD|\\bATMOS(\\b|\\d)",
                         "type": "textbox",
@@ -3898,7 +3898,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[^a-z+]|(?<!e)ac3",
                         "type": "textbox",
@@ -3919,7 +3919,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dts[-_. ]?x)\\b(?!\\d)",
                         "type": "textbox",
@@ -3940,7 +3940,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bFLAC(\\b|\\d)",
                         "type": "textbox",
@@ -3961,7 +3961,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bAAC(\\b|\\d)",
                         "type": "textbox",
@@ -3982,7 +3982,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(l?)PCM(\\b|\\d)",
                         "type": "textbox",
@@ -4009,7 +4009,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[^a-z+]|(?<!e)(a(c3|ac))",
                         "type": "textbox",
@@ -4030,7 +4030,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[P+]|\\b(e[-_. ]?ac3)\\b",
                         "type": "textbox",
@@ -4051,7 +4051,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "True[ .-]?HD|\\bATMOS(\\b|\\d)",
                         "type": "textbox",
@@ -4072,7 +4072,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDTS(\\b|\\d)",
                         "type": "textbox",
@@ -4093,7 +4093,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bFLAC(\\b|\\d)",
                         "type": "textbox",
@@ -4114,7 +4114,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bAAC(\\b|\\d)",
                         "type": "textbox",
@@ -4135,7 +4135,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(l?)PCM(\\b|\\d)",
                         "type": "textbox",
@@ -4162,7 +4162,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bATMOS(\\b|\\d)",
                         "type": "textbox",
@@ -4183,7 +4183,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "dd[p+]+a",
                         "type": "textbox",
@@ -4204,7 +4204,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "TrueHDA",
                         "type": "textbox",
@@ -4231,7 +4231,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bIMAX\\b",
                         "type": "textbox",
@@ -4252,7 +4252,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(?=.*(DSNP|CORE(?=[ ._-]web[ ._-]?(dl|rip)\\b)|\\bBC(?=[ ._-]web[ ._-]?(dl|rip)\\b)|IMAX[- .]Enhanced)\\b)(?=.*\\b(IMAX|IMAX[- .]Enhanced)\\b).*",
                         "type": "textbox",
@@ -4279,7 +4279,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(?!.*(?i:remux)).*([x](\\.?265)|HEVC)",
                         "type": "textbox",
@@ -4300,7 +4300,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(?!.*\\b((?<!HD[._ -]|HD)DVD|BDRip|MKV|XviD|WMV|d3g|BDREMUX|REMUX|^(?=.*1080p)(?=.*HEVC)|[xh][-_. ]?26[45]|German.*DL|((?<=\\d{4}).*German.*(DL)?)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2)\\b))\\b)(((?=.*\\b(Blu[-_. ]?ray|BD|HD[-_. ]?DVD)\\b)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2|BDMV|ISO)\\b))|^((?=.*\\b(^((?=.*\\b((.*_)?COMPLETE.*|Dis[ck])\\b)(?=.*(Blu[-_. ]?ray|HD[-_. ]?DVD)))|3D[-_. ]?BD|BR[-_. ]?DISK|Full[-_. ]?Blu[-_. ]?ray|^((?=.*((BD|UHD)[-_. ]?(25|50|66|100|ISO)))))))).*|(?i)(DVD9|DVD5|NTSC|PAL|VOB IFO|VC-1|AVC|MPEG-2|\\bCOMPLETE[-.\\s]?(?:UHD[-.\\s])?BLU[-.\\s]?RAY\\b|\\bCOMPLETE BLURAY\\b|\\bBR-Disk\\b)",
                         "type": "textbox",
@@ -4321,7 +4321,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?i)(REMUX|DVDRip)",
                         "type": "textbox",
@@ -4348,7 +4348,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dts[-_. ]?(ma|hd([-_. ]?ma)?|xll))\\b",
                         "type": "textbox",
@@ -4369,7 +4369,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "True[ .-]?HD|\\bATMOS(\\b|\\d)",
                         "type": "textbox",
@@ -4390,7 +4390,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[P+]|\\b(e[-_. ]?ac3)\\b",
                         "type": "textbox",
@@ -4411,7 +4411,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[^a-z+]|(?<!e)ac3",
                         "type": "textbox",
@@ -4432,7 +4432,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dts[-_. ]?x)\\b(?!\\d)",
                         "type": "textbox",
@@ -4453,7 +4453,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bFLAC(\\b|\\d)",
                         "type": "textbox",
@@ -4474,7 +4474,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bAAC(\\b|\\d)",
                         "type": "textbox",
@@ -4495,7 +4495,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(l?)PCM(\\b|\\d)",
                         "type": "textbox",
@@ -4516,7 +4516,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "dts[-. ]?(es|(hd[. ]?)?(hr|hi))",
                         "type": "textbox",
@@ -4543,7 +4543,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bFLAC(\\b|\\d)",
                         "type": "textbox",
@@ -4564,7 +4564,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(l?)PCM(\\b|\\d)",
                         "type": "textbox",
@@ -4585,7 +4585,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bAAC(\\b|\\d)",
                         "type": "textbox",
@@ -4606,7 +4606,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDTS(\\b|\\d)",
                         "type": "textbox",
@@ -4627,7 +4627,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "True[ .-]?HD|\\bATMOS(\\b|\\d)",
                         "type": "textbox",
@@ -4648,7 +4648,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[^a-z+]|(?<!e)ac3",
                         "type": "textbox",
@@ -4669,7 +4669,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[P+]|\\b(e[-_. ]?ac3)\\b",
                         "type": "textbox",
@@ -4696,7 +4696,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dts[-_. ]?x)\\b(?!\\d)",
                         "type": "textbox",
@@ -4717,7 +4717,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "DTS[ .]?[1-9]",
                         "type": "textbox",
@@ -4738,7 +4738,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[^a-z+]|(?<!e)ac3",
                         "type": "textbox",
@@ -4759,7 +4759,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[P+]|\\b(e[-_. ]?ac3)\\b",
                         "type": "textbox",
@@ -4780,7 +4780,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "True[ .-]?HD|\\bATMOS(\\b|\\d)",
                         "type": "textbox",
@@ -4801,7 +4801,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bFLAC(\\b|\\d)",
                         "type": "textbox",
@@ -4822,7 +4822,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bAAC(\\b|\\d)",
                         "type": "textbox",
@@ -4843,7 +4843,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(l?)PCM(\\b|\\d)",
                         "type": "textbox",
@@ -4870,7 +4870,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "True[ .-]?HD",
                         "type": "textbox",
@@ -4891,7 +4891,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[P+]|\\b(e[-_. ]?ac3)\\b",
                         "type": "textbox",
@@ -4912,7 +4912,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDTS(\\b|\\d)",
                         "type": "textbox",
@@ -4933,7 +4933,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bFLAC(\\b|\\d)",
                         "type": "textbox",
@@ -4954,7 +4954,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bDD[^a-z+]|(?<!e)ac3",
                         "type": "textbox",
@@ -4981,7 +4981,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?i)\\bblack\\s*[.-]?\\s*(?:and|&)\\s*[.-]?\\s*white\\b",
                         "type": "textbox",
@@ -5008,7 +5008,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])RightSIZE\\b",
                         "type": "textbox",
@@ -5351,7 +5351,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])3d\\b",
                         "type": "textbox",
@@ -5378,7 +5378,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(?!.*\\b((?<!HD[._ -]|HD)DVD|BDRip|MKV|XviD|WMV|d3g|BDREMUX|REMUX|^(?=.*1080p)(?=.*HEVC)|[xh][-_. ]?26[45]|German.*DL|((?<=\\d{4}).*German.*(DL)?)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2)\\b))\\b)(((?=.*\\b(Blu[-_. ]?ray|BD|HD[-_. ]?DVD)\\b)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2|BDMV|ISO)\\b))|^((?=.*\\b(^((?=.*\\b((.*_)?COMPLETE.*|Dis[ck])\\b)(?=.*(Blu[-_. ]?ray|HD[-_. ]?DVD)))|3D[-_. ]?BD|BR[-_. ]?DISK|Full[-_. ]?Blu[-_. ]?ray|^((?=.*((BD|UHD)[-_. ]?(25|50|66|100|ISO)))))))).*|(?i)(DVD9|DVD5|NTSC|PAL|VOB IFO|VC-1|AVC|MPEG-2|\\bCOMPLETE[-.\\s]?(?:UHD[-.\\s])?BLU[-.\\s]?RAY\\b|\\bCOMPLETE BLURAY\\b|\\bBR-Disk\\b)",
                         "type": "textbox",
@@ -5399,7 +5399,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?i)(REMUX|DVDRip)",
                         "type": "textbox",
@@ -5426,7 +5426,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])BeyondHD\\b",
                         "type": "textbox",
@@ -5453,7 +5453,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(roku)\\b",
                         "type": "textbox",
@@ -5604,7 +5604,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(amzn|amazon)\\b",
                         "type": "textbox",
@@ -5625,7 +5625,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<!dts[ .-]?hd[ .-]?)ma\\b(?=.*\\bweb[ ._-]?(dl|rip)\\b)",
                         "type": "textbox",
@@ -5646,7 +5646,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(atvp|aptv|Apple TV\\+)\\b",
                         "type": "textbox",
@@ -5667,7 +5667,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dsnp|dsny|disney|Disney\\+)\\b",
                         "type": "textbox",
@@ -5688,7 +5688,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(hmax|hbom|hbo[ ._-]max)\\b(?=[ ._-]web[ ._-]?(dl|rip)\\b)",
                         "type": "textbox",
@@ -5709,7 +5709,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(nf|netflix)\\b",
                         "type": "textbox",
@@ -5730,7 +5730,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(pcok|peacock)\\b",
                         "type": "textbox",
@@ -5751,7 +5751,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(pmtp|Paramount Plus)\\b",
                         "type": "textbox",
@@ -5834,7 +5834,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(roku)\\b",
                         "type": "textbox",
@@ -5855,7 +5855,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])EVO|CMRG\\b",
                         "type": "textbox",
@@ -5876,7 +5876,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(hulu)\\b",
                         "type": "textbox",
@@ -5897,7 +5897,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(it|itunes)\\b(?=[ ._-]web[ ._-]?(dl|rip)\\b)",
                         "type": "textbox",
@@ -5924,7 +5924,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])HANDJOB\\b",
                         "type": "textbox",
@@ -6013,7 +6013,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "REMUX",
                         "type": "textbox",
@@ -6164,7 +6164,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "DVD",
                         "type": "textbox",
@@ -6191,7 +6191,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?i)[-. ]Xvid",
                         "type": "textbox",
@@ -6218,7 +6218,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])TBB\\b",
                         "type": "textbox",
@@ -6307,7 +6307,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])Dariush\\b",
                         "type": "textbox",
@@ -6526,7 +6526,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?i)(\\b|\\.)(extra[s]?|special feature[s]?)\\b",
                         "type": "textbox",
@@ -6553,7 +6553,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])VVC\\b",
                         "type": "textbox",
@@ -6580,7 +6580,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])AV-1\\b",
                         "type": "textbox",
@@ -6607,7 +6607,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bmHD\\b",
                         "type": "textbox",
@@ -6634,7 +6634,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])SPARKS\\b",
                         "type": "textbox",
@@ -6655,7 +6655,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])DRONES\\b",
                         "type": "textbox",
@@ -6676,7 +6676,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])ROVERS\\b",
                         "type": "textbox",
@@ -6697,7 +6697,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])SPRINTER\\b",
                         "type": "textbox",
@@ -6718,7 +6718,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])GECKOS\\b",
                         "type": "textbox",
@@ -6739,7 +6739,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])SHORTBREHD\\b",
                         "type": "textbox",
@@ -6760,7 +6760,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])EDITH\\b",
                         "type": "textbox",
@@ -6781,7 +6781,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])FilmHD\\b",
                         "type": "textbox",
@@ -6802,7 +6802,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])P0W4HD\\b",
                         "type": "textbox",
@@ -6823,9 +6823,30 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])HD4U\\b",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "TENEIGHTY",
+                "implementation": "ReleaseGroupSpecification",
+                "implementationName": "Release Group",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": false,
+                "required": false,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "(?<=^|[\\s.-])TENEIGHTY\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -6850,7 +6871,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])LoRD\\b",
                         "type": "textbox",
@@ -6877,7 +6898,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])BHDStudio\\b",
                         "type": "textbox",
@@ -6904,7 +6925,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bHDR10(\\+|P(lus)?\\b)",
                         "type": "textbox",
@@ -6925,7 +6946,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(PQ)\\b",
                         "type": "textbox",
@@ -6946,7 +6967,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(HLG)\\b",
                         "type": "textbox",
@@ -6967,7 +6988,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bSDR(\\b|\\d)",
                         "type": "textbox",
@@ -6994,7 +7015,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dv|dovi|dolby[ .]?vision)\\b",
                         "type": "textbox",
@@ -7015,7 +7036,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(DV[ .]HLG)\\b",
                         "type": "textbox",
@@ -7036,7 +7057,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(DV[ .]SDR)\\b",
                         "type": "textbox",
@@ -7063,7 +7084,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "HDR",
                         "type": "textbox",
@@ -7084,7 +7105,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bHDR10(\\+|P(lus)?\\b)",
                         "type": "textbox",
@@ -7105,7 +7126,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bHLG(\\b|\\d)",
                         "type": "textbox",
@@ -7126,7 +7147,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(PQ)\\b",
                         "type": "textbox",
@@ -7147,7 +7168,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bSDR(\\b|\\d)",
                         "type": "textbox",
@@ -7174,7 +7195,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(FraMeSToR|HQMUX|SiCFoI|playBD|RYU|ElNeekster|CiNEPHiLES|3L|EDV|Kenobi|TRiToN|HDH|TekMUX)\\b",
                         "type": "textbox",
@@ -7257,7 +7278,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bSDR(\\b|\\d)",
                         "type": "textbox",
@@ -7278,7 +7299,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bHDR10(\\+|P(lus)?\\b)",
                         "type": "textbox",
@@ -7299,7 +7320,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "HDR",
                         "type": "textbox",
@@ -7326,7 +7347,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])TRiToN|EPSiLON|NoGroup\\b",
                         "type": "textbox",
@@ -7409,7 +7430,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "Remux",
                         "type": "textbox",
@@ -7430,7 +7451,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dts[-_. ]?(ma|hd([-_. ]?ma)?|xll))\\b",
                         "type": "textbox",
@@ -7451,7 +7472,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(dts[-_. ]?x)\\b(?!\\d)",
                         "type": "textbox",
@@ -7472,7 +7493,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "True[ .-]?HD",
                         "type": "textbox",
@@ -7493,7 +7514,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bFLAC(\\b|\\d)",
                         "type": "textbox",
@@ -7582,7 +7603,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "True[ .-]?HD[ .-]?7\\.1",
                         "type": "textbox",
@@ -7603,7 +7624,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bATMOS(\\b|\\d)",
                         "type": "textbox",
@@ -7630,7 +7651,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\[\\d{4}\\]",
                         "type": "textbox",
@@ -7719,7 +7740,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(?!.*(HDR|HULU|REMUX))(?=.*\\b(DV|Dovi|Dolby[- .]?V(ision)?)\\b)",
                         "type": "textbox",
@@ -7746,7 +7767,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])3L\\b",
                         "type": "textbox",
@@ -7773,7 +7794,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])TRiToN\\b",
                         "type": "textbox",
@@ -7800,7 +7821,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])WiLDCAT\\b",
                         "type": "textbox",
@@ -7827,7 +7848,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])PmP\\b",
                         "type": "textbox",
@@ -7854,7 +7875,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])BLURANiUM\\b",
                         "type": "textbox",
@@ -7881,7 +7902,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])playBD\\b",
                         "type": "textbox",
@@ -7908,7 +7929,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])EPSiLON\\b",
                         "type": "textbox",
@@ -7935,7 +7956,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\b(24xHD)\\b",
                         "type": "textbox",
@@ -7956,7 +7977,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(41RGB)$",
                         "type": "textbox",
@@ -7977,7 +7998,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(4K4U)$",
                         "type": "textbox",
@@ -7998,7 +8019,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(AROMA)$",
                         "type": "textbox",
@@ -8019,7 +8040,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(aXXo)$",
                         "type": "textbox",
@@ -8040,7 +8061,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(AZAZE)$",
                         "type": "textbox",
@@ -8061,7 +8082,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(BARC0DE)$",
                         "type": "textbox",
@@ -8082,7 +8103,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(BdC)$",
                         "type": "textbox",
@@ -8103,7 +8124,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(beAst)$",
                         "type": "textbox",
@@ -8124,7 +8145,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(BiTOR)$",
                         "type": "textbox",
@@ -8145,7 +8166,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(C4K)$",
                         "type": "textbox",
@@ -8166,7 +8187,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(CDDHD)$",
                         "type": "textbox",
@@ -8187,7 +8208,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(CHAOS)$",
                         "type": "textbox",
@@ -8208,7 +8229,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(CHD)$",
                         "type": "textbox",
@@ -8229,7 +8250,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(CiNE)$",
                         "type": "textbox",
@@ -8250,7 +8271,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(CREATiVE24)$",
                         "type": "textbox",
@@ -8271,7 +8292,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(CrEwSaDe)$",
                         "type": "textbox",
@@ -8292,7 +8313,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(CTFOH)$",
                         "type": "textbox",
@@ -8313,7 +8334,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(d3g)$",
                         "type": "textbox",
@@ -8334,7 +8355,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(DDR)$",
                         "type": "textbox",
@@ -8355,7 +8376,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(DNL)$",
                         "type": "textbox",
@@ -8376,7 +8397,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(EPiC)$",
                         "type": "textbox",
@@ -8397,7 +8418,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(EuReKA)$",
                         "type": "textbox",
@@ -8418,7 +8439,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(FaNGDiNG0)$",
                         "type": "textbox",
@@ -8439,7 +8460,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(FGT)$",
                         "type": "textbox",
@@ -8460,7 +8481,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(FRDS)$",
                         "type": "textbox",
@@ -8481,7 +8502,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(FZHD)$",
                         "type": "textbox",
@@ -8502,7 +8523,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(GalaxyRG)$",
                         "type": "textbox",
@@ -8523,7 +8544,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(GHD)$",
                         "type": "textbox",
@@ -8544,7 +8565,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(GPTHD)$",
                         "type": "textbox",
@@ -8565,7 +8586,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(HDS)$",
                         "type": "textbox",
@@ -8586,7 +8607,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(HDT)$",
                         "type": "textbox",
@@ -8607,7 +8628,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(HDTime)$",
                         "type": "textbox",
@@ -8628,7 +8649,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(HDWinG)$",
                         "type": "textbox",
@@ -8649,7 +8670,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(iNTENSO)$",
                         "type": "textbox",
@@ -8670,7 +8691,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(iPlanet)$",
                         "type": "textbox",
@@ -8691,7 +8712,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(JFF)$",
                         "type": "textbox",
@@ -8712,7 +8733,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(KiNGDOM)$",
                         "type": "textbox",
@@ -8733,7 +8754,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(KIRA)$",
                         "type": "textbox",
@@ -8754,7 +8775,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(L0SERNIGHT)$",
                         "type": "textbox",
@@ -8775,7 +8796,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(LAMA)$",
                         "type": "textbox",
@@ -8796,7 +8817,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(Leffe)$",
                         "type": "textbox",
@@ -8817,7 +8838,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(Liber8)$",
                         "type": "textbox",
@@ -8838,7 +8859,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(LiGaS)$",
                         "type": "textbox",
@@ -8859,7 +8880,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(MeGusta)$",
                         "type": "textbox",
@@ -8880,7 +8901,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(mHD)$",
                         "type": "textbox",
@@ -8901,7 +8922,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(mSD)$",
                         "type": "textbox",
@@ -8922,7 +8943,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(MTeam|MT)$",
                         "type": "textbox",
@@ -8943,7 +8964,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(MySiLU)$",
                         "type": "textbox",
@@ -8964,7 +8985,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(NhaNc3)$",
                         "type": "textbox",
@@ -8985,7 +9006,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(nHD)$",
                         "type": "textbox",
@@ -9006,7 +9027,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(nikt0)$",
                         "type": "textbox",
@@ -9027,7 +9048,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "NoGr(ou)?p",
                         "type": "textbox",
@@ -9048,7 +9069,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(nSD)$",
                         "type": "textbox",
@@ -9069,7 +9090,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(OFT)$",
                         "type": "textbox",
@@ -9090,7 +9111,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "Pahe\\.(ph|in)\\b",
                         "type": "textbox",
@@ -9111,7 +9132,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(PATOMiEL)$",
                         "type": "textbox",
@@ -9132,7 +9153,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(PiRaTeS)$",
                         "type": "textbox",
@@ -9153,7 +9174,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(PRODJi)$",
                         "type": "textbox",
@@ -9174,7 +9195,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(PSA)$",
                         "type": "textbox",
@@ -9195,7 +9216,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(PTNK)$",
                         "type": "textbox",
@@ -9216,7 +9237,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(RARBG)$",
                         "type": "textbox",
@@ -9237,7 +9258,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(RDN)$",
                         "type": "textbox",
@@ -9258,7 +9279,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(Rifftrax)$",
                         "type": "textbox",
@@ -9279,7 +9300,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(RU4HD)$",
                         "type": "textbox",
@@ -9300,7 +9321,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(SANTi)$",
                         "type": "textbox",
@@ -9321,7 +9342,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(SLOT)$",
                         "type": "textbox",
@@ -9342,7 +9363,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(STUTTERSHIT)$",
                         "type": "textbox",
@@ -9363,7 +9384,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(SWTYBLZ)$",
                         "type": "textbox",
@@ -9384,7 +9405,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(TBS)$",
                         "type": "textbox",
@@ -9405,7 +9426,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(TEKNO3D)$",
                         "type": "textbox",
@@ -9426,7 +9447,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(Tigole)$",
                         "type": "textbox",
@@ -9447,7 +9468,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(TIKO)$",
                         "type": "textbox",
@@ -9468,7 +9489,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(VISIONPLUSHDR(-X|1000)?)$",
                         "type": "textbox",
@@ -9489,7 +9510,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(WAF)$",
                         "type": "textbox",
@@ -9510,7 +9531,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(WiKi)$",
                         "type": "textbox",
@@ -9531,7 +9552,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(x0r)$",
                         "type": "textbox",
@@ -9552,7 +9573,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(YIFY)$",
                         "type": "textbox",
@@ -9573,7 +9594,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(YTS(.(MX|LT|AG))?)$",
                         "type": "textbox",
@@ -9594,7 +9615,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(Zeus)$",
                         "type": "textbox",
@@ -9621,7 +9642,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])CJ\\b",
                         "type": "textbox",
@@ -9710,7 +9731,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])pcroland\\b",
                         "type": "textbox",
@@ -9799,7 +9820,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])BTN\\b",
                         "type": "textbox",
@@ -9888,7 +9909,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])iON\\b",
                         "type": "textbox",
@@ -9977,7 +9998,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])AJP69\\b",
                         "type": "textbox",
@@ -10066,7 +10087,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])VLAD\\b",
                         "type": "textbox",
@@ -10155,7 +10176,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])hdalx\\b",
                         "type": "textbox",
@@ -10244,7 +10265,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?<=^|[\\s.-])LiNG\\b",
                         "type": "textbox",
@@ -10333,7 +10354,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(?!.*(?i:remux)).*([h](\\.?265)|HEVC)",
                         "type": "textbox",
@@ -10354,7 +10375,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "^(?!.*\\b((?<!HD[._ -]|HD)DVD|BDRip|MKV|XviD|WMV|d3g|BDREMUX|REMUX|^(?=.*1080p)(?=.*HEVC)|[xh][-_. ]?26[45]|German.*DL|((?<=\\d{4}).*German.*(DL)?)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2)\\b))\\b)(((?=.*\\b(Blu[-_. ]?ray|BD|HD[-_. ]?DVD)\\b)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2|BDMV|ISO)\\b))|^((?=.*\\b(^((?=.*\\b((.*_)?COMPLETE.*|Dis[ck])\\b)(?=.*(Blu[-_. ]?ray|HD[-_. ]?DVD)))|3D[-_. ]?BD|BR[-_. ]?DISK|Full[-_. ]?Blu[-_. ]?ray|^((?=.*((BD|UHD)[-_. ]?(25|50|66|100|ISO)))))))).*|(?i)(DVD9|DVD5|NTSC|PAL|VOB IFO|VC-1|AVC|MPEG-2|\\bCOMPLETE[-.\\s]?(?:UHD[-.\\s])?BLU[-.\\s]?RAY\\b|\\bCOMPLETE BLURAY\\b|\\bBR-Disk\\b)",
                         "type": "textbox",
@@ -10375,7 +10396,7 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
+                        "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?i)(REMUX|DVDRip)",
                         "type": "textbox",
