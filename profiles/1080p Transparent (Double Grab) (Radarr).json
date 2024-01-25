@@ -1,6 +1,6 @@
 [
     {
-        "name": "Transparent - HD Fallback",
+        "name": "1080p Transparent (Double Grab)",
         "upgradeAllowed": true,
         "cutoff": 1002,
         "items": [
@@ -65,6 +65,17 @@
                 ],
                 "allowed": false,
                 "id": 1001
+            },
+            {
+                "quality": {
+                    "id": 6,
+                    "name": "Bluray-720p",
+                    "source": "bluray",
+                    "resolution": 720,
+                    "modifier": "none"
+                },
+                "items": [],
+                "allowed": false
             },
             {
                 "quality": {
@@ -162,17 +173,6 @@
                 "allowed": true
             },
             {
-                "quality": {
-                    "id": 9,
-                    "name": "HDTV-1080p",
-                    "source": "tv",
-                    "resolution": 1080,
-                    "modifier": "none"
-                },
-                "items": [],
-                "allowed": true
-            },
-            {
                 "name": "DVD",
                 "items": [
                     {
@@ -184,7 +184,7 @@
                             "modifier": "screener"
                         },
                         "items": [],
-                        "allowed": true
+                        "allowed": false
                     },
                     {
                         "quality": {
@@ -195,7 +195,7 @@
                             "modifier": "none"
                         },
                         "items": [],
-                        "allowed": true
+                        "allowed": false
                     },
                     {
                         "quality": {
@@ -224,6 +224,17 @@
                 "id": 1003
             },
             {
+                "quality": {
+                    "id": 9,
+                    "name": "HDTV-1080p",
+                    "source": "tv",
+                    "resolution": 1080,
+                    "modifier": "none"
+                },
+                "items": [],
+                "allowed": true
+            },
+            {
                 "name": "Transparent Capable",
                 "items": [
                     {
@@ -236,17 +247,6 @@
                         },
                         "items": [],
                         "allowed": true
-                    },
-                    {
-                        "quality": {
-                            "id": 6,
-                            "name": "Bluray-720p",
-                            "source": "bluray",
-                            "resolution": 720,
-                            "modifier": "none"
-                        },
-                        "items": [],
-                        "allowed": false
                     },
                     {
                         "quality": {
@@ -364,17 +364,17 @@
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 500,
+        "cutoffFormatScore": 140,
         "formatItems": [
             {
                 "format": 333,
                 "name": "h265",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 331,
                 "name": "Golden Popcorn 720p",
-                "score": 120
+                "score": 0
             },
             {
                 "format": 330,
@@ -419,7 +419,7 @@
             {
                 "format": 322,
                 "name": "Dolby Vision w/out Fallback",
-                "score": -99999
+                "score": -9999
             },
             {
                 "format": 321,
@@ -449,7 +449,7 @@
             {
                 "format": 314,
                 "name": "Dolby Vision",
-                "score": -99999
+                "score": -9999
             },
             {
                 "format": 312,
@@ -534,7 +534,7 @@
             {
                 "format": 290,
                 "name": "ROKU",
-                "score": 30
+                "score": 60
             },
             {
                 "format": 289,
@@ -609,12 +609,12 @@
             {
                 "format": 273,
                 "name": "IMAX",
-                "score": 10
+                "score": 0
             },
             {
                 "format": 272,
                 "name": "ATMOS",
-                "score": 5
+                "score": 0
             },
             {
                 "format": 271,
@@ -639,37 +639,37 @@
             {
                 "format": 267,
                 "name": "Paramount+",
-                "score": 30
+                "score": 60
             },
             {
                 "format": 266,
                 "name": "Peacock TV",
-                "score": 30
+                "score": 60
             },
             {
                 "format": 265,
                 "name": "Hulu",
-                "score": 30
+                "score": 60
             },
             {
                 "format": 264,
                 "name": "Netflix",
-                "score": 40
+                "score": 60
             },
             {
                 "format": 263,
                 "name": "HBO Max",
-                "score": 40
+                "score": 60
             },
             {
                 "format": 262,
                 "name": "Disney+",
-                "score": 40
+                "score": 60
             },
             {
                 "format": 261,
                 "name": "Apple TV+",
-                "score": 50
+                "score": 60
             },
             {
                 "format": 260,
@@ -679,7 +679,7 @@
             {
                 "format": 259,
                 "name": "Amazon Prime",
-                "score": 50
+                "score": 60
             },
             {
                 "format": 258,
@@ -709,7 +709,7 @@
             {
                 "format": 252,
                 "name": "720p",
-                "score": -120
+                "score": -10000
             },
             {
                 "format": 250,
@@ -719,7 +719,7 @@
             {
                 "format": 249,
                 "name": "BHDStudio",
-                "score": 30
+                "score": 50
             },
             {
                 "format": 248,
