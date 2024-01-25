@@ -62,6 +62,44 @@ Profilarr is a Python-based tool designed to add import/export/sync functionalit
 - **User Interface (UI):** Development of a graphical user interface (GUI) for easier and more intuitive interaction with Profilarr. This UI will cater to users who prefer graphical over command-line interactions.
 - **Automatic Updates:** Implement an auto-update mechanism for Profilarr, ensuring users always have access to the latest features, improvements, and bug fixes without manual intervention.
 
+# Profilarr Development
+
+This section provides concise instructions for developers to set up Profilarr for further development, customization, or contribution.
+
+## Getting Started
+
+To get started with Profilarr development, follow these steps:
+
+1. **Run Docker Compose**:
+
+   - Start Radarr and Sonarr instances using the provided Docker Compose files:
+     ```bash
+     docker-compose up -d
+     ```
+   - This command will set up isolated instances of Radarr and Sonarr for development purposes.
+
+2. **Configure API Keys**:
+
+   - Once Radarr and Sonarr are running, access their web interfaces to obtain the API keys.
+   - Update the `config.json` file with these API keys. This step is crucial for Profilarr to communicate with your Radarr and Sonarr instances.
+
+3. **Import Custom Formats**:
+
+   - Use Profilarr to import any initial custom formats you need. This step sets the baseline for your development environment.
+   - Run `python importarr.py` and follow the prompts to import custom formats into Radarr or Sonarr.
+
+4. **Developing New Profiles and Custom Formats**:
+   - With the setup complete, you can now start developing new profiles and custom formats.
+   - Test your changes by exporting from Profilarr and verifying the behavior in the Radarr/Sonarr instances.
+
+## Development Tips
+
+- **Always Back Up**: Before making major changes, back up your Radarr and Sonarr configurations.
+- **Iterative Testing**: Test your changes incrementally to ensure stability and expected behavior.
+- **Document Your Changes**: Keep track of modifications for future reference or contribution to the project.
+
+By following these steps, you'll have a working development environment for Profilarr, allowing you to create and test new profiles and custom formats effectively.
+
 # TRASH Guides
 
 Some custom formats found here have been interated on from the trash guides. Credit for these goes entirely to trash, and can be found on their site here. It is not my intention to steal their work, but rather to build on it and make it more accessible to the average user through my quality profiles. Please check out their site for more information on their work.
