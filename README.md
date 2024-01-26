@@ -37,6 +37,8 @@ Profilarr is a Python-based tool designed to add import/export/sync functionalit
 1. Run `python exportarr.py` in your command line interface.
 2. Follow the on-screen prompts to select the app (Radarr or Sonarr) and the data (Custom Formats or Quality Profiles) you want to export.
 3. Exported data will be saved in respective directories within the tool's folder.
+- Please be careful when running this tool, it will OVERWRITE the given custom formats file and you'll need to download it again if you want to import the quality profiles.
+- In future, there will be a config option to set where the files export to.
 
 ### Importing
 
