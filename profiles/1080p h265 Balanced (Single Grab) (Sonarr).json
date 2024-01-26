@@ -233,6 +233,16 @@
         "cutoffFormatScore": 0,
         "formatItems": [
             {
+                "format": 226,
+                "name": "PCM",
+                "score": 0
+            },
+            {
+                "format": 225,
+                "name": "Blu-Ray (Remux)",
+                "score": 0
+            },
+            {
                 "format": 224,
                 "name": "h265",
                 "score": 60
@@ -280,7 +290,7 @@
             {
                 "format": 206,
                 "name": "Dolby Vision w/out Fallback",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 205,
@@ -300,22 +310,22 @@
             {
                 "format": 202,
                 "name": "HDR10 (Missing)",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 201,
                 "name": "HDR10",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 200,
                 "name": "Dolby Vision",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 199,
                 "name": "HDR10+",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 198,
@@ -450,7 +460,7 @@
             {
                 "format": 172,
                 "name": "x265",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 171,

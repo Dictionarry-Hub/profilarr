@@ -2382,6 +2382,27 @@
                         "isFloat": false
                     }
                 ]
+            },
+            {
+                "name": "Remux",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "Remux",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
             }
         ]
     },
@@ -4335,7 +4356,7 @@
     },
     {
         "name": "DTS-HD MA",
-        "includeCustomFormatWhenRenaming": true,
+        "includeCustomFormatWhenRenaming": false,
         "specifications": [
             {
                 "name": "DTS-HD MA",
@@ -4350,7 +4371,7 @@
                         "name": "value",
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "\\b(dts[-_. ]?(ma|hd([-_. ]?ma)?|xll))\\b",
+                        "value": "\\b(dts[-_. ]?(ma|hd([-_. ]?ma)?|xll))(\\b|\\d)",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -5346,14 +5367,56 @@
                 "implementationName": "Release Title",
                 "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
                 "negate": false,
-                "required": true,
+                "required": false,
                 "fields": [
                     {
                         "order": 0,
                         "name": "value",
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])3d\\b",
+                        "value": "\\b(3d|sbs|half[ .-]ou|half[ .-]sbs)\\b",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "BluRay3D",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": false,
+                "required": false,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\b(BluRay3D)\\b",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "BD3D",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": false,
+                "required": false,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\b(BD3D)\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -7197,7 +7260,7 @@
                         "name": "value",
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "\\b(FraMeSToR|HQMUX|SiCFoI|playBD|RYU|ElNeekster|CiNEPHiLES|3L|EDV|Kenobi|TRiToN|HDH|TekMUX)\\b",
+                        "value": "\\b(FraMeSToR|HQMUX|SiCFoI|playBD|RYU|ElNeekster|CiNEPHiLES|3L|EDV|Kenobi|TRiToN|HDH|TekMUX|NTb)\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -7531,68 +7594,6 @@
         "includeCustomFormatWhenRenaming": false,
         "specifications": [
             {
-                "name": "2160p",
-                "implementation": "ResolutionSpecification",
-                "implementationName": "Resolution",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": false,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Resolution",
-                        "value": 2160,
-                        "type": "select",
-                        "advanced": false,
-                        "selectOptions": [
-                            {
-                                "value": 0,
-                                "name": "Unknown",
-                                "order": 0
-                            },
-                            {
-                                "value": 360,
-                                "name": "R360P",
-                                "order": 360
-                            },
-                            {
-                                "value": 480,
-                                "name": "R480P",
-                                "order": 480
-                            },
-                            {
-                                "value": 540,
-                                "name": "R540p",
-                                "order": 540
-                            },
-                            {
-                                "value": 576,
-                                "name": "R576p",
-                                "order": 576
-                            },
-                            {
-                                "value": 720,
-                                "name": "R720p",
-                                "order": 720
-                            },
-                            {
-                                "value": 1080,
-                                "name": "R1080p",
-                                "order": 1080
-                            },
-                            {
-                                "value": 2160,
-                                "name": "R2160p",
-                                "order": 2160
-                            }
-                        ],
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
                 "name": "TrueHD",
                 "implementation": "ReleaseTitleSpecification",
                 "implementationName": "Release Title",
@@ -7627,6 +7628,27 @@
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bATMOS(\\b|\\d)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "7.1",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "7.1",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -7742,7 +7764,7 @@
                         "name": "value",
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "^(?!.*(HDR|HULU|REMUX))(?=.*\\b(DV|Dovi|Dolby[- .]?V(ision)?)\\b)",
+                        "value": "^(?!.*(HDR|HULU|REMUX|Bluray))(?=.*\\b(DV|Dovi|Dolby[- .]?V(ision)?)\\b)",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -10356,7 +10378,7 @@
                         "name": "value",
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "^(?!.*(?i:remux)).*([h](\\.?265)|HEVC)",
+                        "value": "^(?!.*(?i:remux)).*([hH]\\\\s*\\\\.?\\\\s*265)",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -10399,6 +10421,248 @@
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "(?i)(REMUX|DVDRip)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Blu-Ray (Remux)",
+        "includeCustomFormatWhenRenaming": false,
+        "specifications": [
+            {
+                "name": "Blu-Ray",
+                "implementation": "SourceSpecification",
+                "implementationName": "Source",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Source",
+                        "value": 6,
+                        "type": "select",
+                        "advanced": false,
+                        "selectOptions": [
+                            {
+                                "value": 0,
+                                "name": "Unknown",
+                                "order": 0
+                            },
+                            {
+                                "value": 1,
+                                "name": "Television",
+                                "order": 1
+                            },
+                            {
+                                "value": 2,
+                                "name": "TelevisionRaw",
+                                "order": 2
+                            },
+                            {
+                                "value": 3,
+                                "name": "Web",
+                                "order": 3
+                            },
+                            {
+                                "value": 4,
+                                "name": "WebRip",
+                                "order": 4
+                            },
+                            {
+                                "value": 5,
+                                "name": "DVD",
+                                "order": 5
+                            },
+                            {
+                                "value": 6,
+                                "name": "Bluray",
+                                "order": 6
+                            },
+                            {
+                                "value": 7,
+                                "name": "BlurayRaw",
+                                "order": 7
+                            }
+                        ],
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Remux",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "Remux",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "PCM",
+        "includeCustomFormatWhenRenaming": false,
+        "specifications": [
+            {
+                "name": "PCM",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\b(l?)PCM(\\b|\\d)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Not AAC",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\bAAC(\\b|\\d)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Not FLAC",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\bFLAC(\\b|\\d)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Not DTS",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\bDTS(\\b|\\d)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Not TrueHD/ATMOS",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "True[ .-]?HD|\\bATMOS(\\b|\\d)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Not Basic Dolby Digital",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\bDD[^a-z+]|(?<!e)ac3",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Not Dolby Digital Plus ",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\bDD[P+]|\\b(e[-_. ]?ac3)\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
