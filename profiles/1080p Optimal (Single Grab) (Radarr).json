@@ -90,29 +90,7 @@
                     "modifier": "none"
                 },
                 "items": [],
-                "allowed": false
-            },
-            {
-                "quality": {
-                    "id": 2,
-                    "name": "DVD",
-                    "source": "dvd",
-                    "resolution": 0,
-                    "modifier": "none"
-                },
-                "items": [],
-                "allowed": false
-            },
-            {
-                "quality": {
-                    "id": 23,
-                    "name": "DVD-R",
-                    "source": "dvd",
-                    "resolution": 480,
-                    "modifier": "remux"
-                },
-                "items": [],
-                "allowed": false
+                "allowed": true
             },
             {
                 "name": "WEB 480p",
@@ -126,7 +104,7 @@
                             "modifier": "none"
                         },
                         "items": [],
-                        "allowed": false
+                        "allowed": true
                     },
                     {
                         "quality": {
@@ -137,11 +115,33 @@
                             "modifier": "none"
                         },
                         "items": [],
-                        "allowed": false
+                        "allowed": true
                     }
                 ],
-                "allowed": false,
+                "allowed": true,
                 "id": 1000
+            },
+            {
+                "quality": {
+                    "id": 2,
+                    "name": "DVD",
+                    "source": "dvd",
+                    "resolution": 0,
+                    "modifier": "none"
+                },
+                "items": [],
+                "allowed": true
+            },
+            {
+                "quality": {
+                    "id": 23,
+                    "name": "DVD-R",
+                    "source": "dvd",
+                    "resolution": 480,
+                    "modifier": "remux"
+                },
+                "items": [],
+                "allowed": true
             },
             {
                 "quality": {
