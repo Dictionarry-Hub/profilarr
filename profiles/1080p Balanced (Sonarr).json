@@ -233,6 +233,16 @@
         "cutoffFormatScore": 500,
         "formatItems": [
             {
+                "format": 226,
+                "name": "PCM",
+                "score": 0
+            },
+            {
+                "format": 225,
+                "name": "Blu-Ray (Remux)",
+                "score": 0
+            },
+            {
                 "format": 224,
                 "name": "h265",
                 "score": -9999

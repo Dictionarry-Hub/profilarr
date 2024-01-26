@@ -1,8 +1,8 @@
 [
     {
-        "name": "2160p Optimal",
+        "name": "1080p Optimal (Single Grab)",
         "upgradeAllowed": true,
-        "cutoff": 21,
+        "cutoff": 20,
         "items": [
             {
                 "quality": {
@@ -65,115 +65,94 @@
                 "allowed": false
             },
             {
-                "name": "Fallback SD",
-                "items": [
-                    {
-                        "quality": {
-                            "id": 1,
-                            "name": "SDTV",
-                            "source": "television",
-                            "resolution": 480
-                        },
-                        "items": [],
-                        "allowed": false
-                    },
-                    {
-                        "quality": {
-                            "id": 12,
-                            "name": "WEBRip-480p",
-                            "source": "webRip",
-                            "resolution": 480
-                        },
-                        "items": [],
-                        "allowed": false
-                    },
-                    {
-                        "quality": {
-                            "id": 8,
-                            "name": "WEBDL-480p",
-                            "source": "web",
-                            "resolution": 480
-                        },
-                        "items": [],
-                        "allowed": false
-                    },
-                    {
-                        "quality": {
-                            "id": 2,
-                            "name": "DVD",
-                            "source": "dvd",
-                            "resolution": 480
-                        },
-                        "items": [],
-                        "allowed": false
-                    }
-                ],
-                "allowed": false,
-                "id": 1003
+                "quality": {
+                    "id": 1,
+                    "name": "SDTV",
+                    "source": "television",
+                    "resolution": 480
+                },
+                "items": [],
+                "allowed": false
             },
             {
-                "name": "Fallback 1080p",
-                "items": [
-                    {
-                        "quality": {
-                            "id": 10,
-                            "name": "Raw-HD",
-                            "source": "televisionRaw",
-                            "resolution": 1080
-                        },
-                        "items": [],
-                        "allowed": false
-                    },
-                    {
-                        "quality": {
-                            "id": 9,
-                            "name": "HDTV-1080p",
-                            "source": "television",
-                            "resolution": 1080
-                        },
-                        "items": [],
-                        "allowed": false
-                    }
-                ],
-                "allowed": false,
-                "id": 1002
+                "quality": {
+                    "id": 12,
+                    "name": "WEBRip-480p",
+                    "source": "webRip",
+                    "resolution": 480
+                },
+                "items": [],
+                "allowed": false
             },
             {
-                "name": "Transparent Capable",
-                "items": [
-                    {
-                        "quality": {
-                            "id": 3,
-                            "name": "WEBDL-1080p",
-                            "source": "web",
-                            "resolution": 1080
-                        },
-                        "items": [],
-                        "allowed": false
-                    },
-                    {
-                        "quality": {
-                            "id": 15,
-                            "name": "WEBRip-1080p",
-                            "source": "webRip",
-                            "resolution": 1080
-                        },
-                        "items": [],
-                        "allowed": false
-                    },
-                    {
-                        "quality": {
-                            "id": 7,
-                            "name": "Bluray-1080p",
-                            "source": "bluray",
-                            "resolution": 1080
-                        },
-                        "items": [],
-                        "allowed": false
-                    }
-                ],
-                "allowed": false,
-                "id": 1001
+                "quality": {
+                    "id": 8,
+                    "name": "WEBDL-480p",
+                    "source": "web",
+                    "resolution": 480
+                },
+                "items": [],
+                "allowed": false
+            },
+            {
+                "quality": {
+                    "id": 2,
+                    "name": "DVD",
+                    "source": "dvd",
+                    "resolution": 480
+                },
+                "items": [],
+                "allowed": false
+            },
+            {
+                "quality": {
+                    "id": 10,
+                    "name": "Raw-HD",
+                    "source": "televisionRaw",
+                    "resolution": 1080
+                },
+                "items": [],
+                "allowed": false
+            },
+            {
+                "quality": {
+                    "id": 9,
+                    "name": "HDTV-1080p",
+                    "source": "television",
+                    "resolution": 1080
+                },
+                "items": [],
+                "allowed": false
+            },
+            {
+                "quality": {
+                    "id": 15,
+                    "name": "WEBRip-1080p",
+                    "source": "webRip",
+                    "resolution": 1080
+                },
+                "items": [],
+                "allowed": false
+            },
+            {
+                "quality": {
+                    "id": 7,
+                    "name": "Bluray-1080p",
+                    "source": "bluray",
+                    "resolution": 1080
+                },
+                "items": [],
+                "allowed": false
+            },
+            {
+                "quality": {
+                    "id": 3,
+                    "name": "WEBDL-1080p",
+                    "source": "web",
+                    "resolution": 1080
+                },
+                "items": [],
+                "allowed": true
             },
             {
                 "quality": {
@@ -183,7 +162,7 @@
                     "resolution": 1080
                 },
                 "items": [],
-                "allowed": false
+                "allowed": true
             },
             {
                 "quality": {
@@ -223,7 +202,7 @@
                     "resolution": 2160
                 },
                 "items": [],
-                "allowed": true
+                "allowed": false
             },
             {
                 "quality": {
@@ -233,31 +212,26 @@
                     "resolution": 2160
                 },
                 "items": [],
-                "allowed": true
+                "allowed": false
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 320,
+        "cutoffFormatScore": 0,
         "formatItems": [
             {
                 "format": 226,
                 "name": "PCM",
-                "score": 0
+                "score": 30
             },
             {
                 "format": 225,
                 "name": "Blu-Ray (Remux)",
-                "score": 0
+                "score": 60
             },
             {
                 "format": 224,
                 "name": "h265",
-                "score": 0
-            },
-            {
-                "format": 223,
-                "name": "LiNG",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 214,
@@ -322,22 +296,22 @@
             {
                 "format": 202,
                 "name": "HDR10 (Missing)",
-                "score": 10
+                "score": -9999
             },
             {
                 "format": 201,
                 "name": "HDR10",
-                "score": 10
+                "score": -9999
             },
             {
                 "format": 200,
                 "name": "Dolby Vision",
-                "score": 30
+                "score": -9999
             },
             {
                 "format": 199,
                 "name": "HDR10+",
-                "score": 20
+                "score": -9999
             },
             {
                 "format": 198,
@@ -377,7 +351,7 @@
             {
                 "format": 191,
                 "name": "480p",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 190,
@@ -387,27 +361,27 @@
             {
                 "format": 189,
                 "name": "TBB SD",
-                "score": 0
+                "score": 30
             },
             {
                 "format": 188,
                 "name": "Xvid",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 187,
                 "name": "DVD",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 186,
                 "name": "DVD REMUX ",
-                "score": -9999
+                "score": 40
             },
             {
                 "format": 185,
                 "name": "HANDJOB SD",
-                "score": 0
+                "score": 20
             },
             {
                 "format": 184,
@@ -447,7 +421,7 @@
             {
                 "format": 177,
                 "name": "Black and White",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 176,
@@ -462,12 +436,12 @@
             {
                 "format": 174,
                 "name": "FLAC",
-                "score": 40
+                "score": 30
             },
             {
                 "format": 173,
                 "name": "DTS-HD MA",
-                "score": 40
+                "score": 50
             },
             {
                 "format": 172,
@@ -477,7 +451,7 @@
             {
                 "format": 171,
                 "name": "IMAX",
-                "score": 0
+                "score": 10
             },
             {
                 "format": 170,
@@ -557,7 +531,7 @@
             {
                 "format": 155,
                 "name": "x264",
-                "score": -9999
+                "score": 10
             },
             {
                 "format": 154,
@@ -567,12 +541,12 @@
             {
                 "format": 153,
                 "name": "Blu-Ray",
-                "score": 60
+                "score": -9999
             },
             {
                 "format": 152,
                 "name": "2160p",
-                "score": 60
+                "score": -9999
             },
             {
                 "format": 151,
@@ -582,7 +556,7 @@
             {
                 "format": 150,
                 "name": "1080p",
-                "score": -9999
+                "score": 60
             },
             {
                 "format": 149,
@@ -747,7 +721,7 @@
             {
                 "format": 117,
                 "name": "Dariush SD",
-                "score": 0
+                "score": 30
             },
             {
                 "format": 116,
@@ -912,6 +886,11 @@
             {
                 "format": 221,
                 "name": "hdalx",
+                "score": 0
+            },
+            {
+                "format": 223,
+                "name": "LiNG",
                 "score": 0
             }
         ]
