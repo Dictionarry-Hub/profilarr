@@ -31,6 +31,96 @@ Profilarr is a Python-based tool designed to add import/export/sync functionalit
 
 ## 🚀 Usage
 
+### Importing
+
+1. Run `python importarr.py` in your command line interface.
+2. Follow the on-screen prompts to select the app and the data you want to import.
+3. Choose the specific file for Custom Formats or select a profile for Quality Profiles.
+4. The data will be imported to your selected Radarr or Sonarr installation.
+
+#### Custom Format Import Example
+
+```bash
+PS Z:\Profilarr> py importarr.py
+Available instances to import to:
+1. Sonarr [Master]
+2. Radarr [Master]
+3. Sonarr [4k-sonarr]
+4. Radarr [4k-radarr]
+Enter the number of the instance to import to: 4
+
+
+Choose what to import:
+1. Custom Formats
+2. Quality Profiles
+Enter your choice (1/2): 1
+
+Available files:
+1. Custom Formats (Radarr).json
+Select a file to import (or 'all' for all files): 1
+
+Adding custom format 'D-Z0N3': SUCCESS
+Adding custom format 'DON': SUCCESS
+Adding custom format 'EbP': SUCCESS
+Adding custom format 'Geek': SUCCESS
+Adding custom format 'TayTo': SUCCESS
+Adding custom format 'ZQ': SUCCESS
+Adding custom format 'VietHD': SUCCESS
+Adding custom format 'CtrlHD': SUCCESS
+Adding custom format 'HiFi': SUCCESS
+Adding custom format 'FoRM': SUCCESS
+Adding custom format 'HiDt': SUCCESS
+Adding custom format 'SA89': SUCCESS
+...
+
+Successfully added 0 custom formats, updated 131 custom formats.
+```
+
+#### Quality Profile Import Example
+
+```bash
+PS Z:\Profilarr> py importarr.py
+Available instances to import to:
+1. Sonarr [Master]
+2. Radarr [Master]
+3. Sonarr [4k-sonarr]
+4. Radarr [4k-radarr]
+Enter the number of the instance to import to: 4
+
+
+Choose what to import:
+1. Custom Formats
+2. Quality Profiles
+Enter your choice (1/2): 2
+
+Available files:
+1. 1080p Balanced (Radarr).json
+2. 1080p Balanced (Single Grab) (Radarr).json
+3. 1080p h265 Balanced (Radarr).json
+4. 1080p h265 Balanced (Single Grab) (Radarr).json
+5. 1080p Optimal (Radarr).json
+6. 1080p Optimal (Single Grab) (Radarr).json
+7. 1080p Transparent (Double Grab) (Radarr).json
+8. 1080p Transparent (Radarr).json
+9. 1080p Transparent (Single Grab) (Radarr).json
+10. 2160p Optimal (Radarr).json
+11. 2160p Optimal (Single Grab) (Radarr).json
+Select a file to import (or 'all' for all files): all
+
+Successfully added Quality Profile 1080p Balanced
+Successfully added Quality Profile 1080p Balanced (Single Grab)
+Successfully added Quality Profile 1080p h265 Balanced
+Successfully added Quality Profile 1080p h265 Balanced (Single Grab)
+Successfully added Quality Profile 1080p Optimal
+Successfully added Quality Profile 1080p Optimal (Single Grab)
+Successfully added Quality Profile 1080p Transparent (Double Grab)
+Successfully added Quality Profile 1080p Transparent
+Successfully added Quality Profile 1080p Transparent (Single Grab)
+Successfully added Quality Profile 2160p Optimal
+Successfully added Quality Profile 2160p Optimal (Single Grab)
+PS Z:\Profilarr>
+```
+
 ### Exporting
 
 1. Run `python exportarr.py` in your command line interface.
@@ -85,58 +175,6 @@ Found 13 quality profiles.
 ... and 3 more.
 Saved to 'exports\radarr\master\profiles'
 
-PS Z:\Profilarr>
-```
-
-### Importing
-
-1. Run `python importarr.py` in your command line interface.
-2. Follow the on-screen prompts to select the app and the data you want to import.
-3. Choose the specific file for Custom Formats or select a profile for Quality Profiles.
-4. The data will be imported to your selected Radarr or Sonarr installation.
-
-#### Example
-
-```bash
-PS Z:\Profilarr> py importarr.py
-Available instances to import to:
-1. Sonarr [Master]
-2. Radarr [Master]
-3. Sonarr [4k-sonarr]
-4. Radarr [4k-radarr]
-Enter the number of the instance to import to: 4
-
-
-Choose what to import:
-1. Custom Formats
-2. Quality Profiles
-Enter your choice (1/2): 2
-
-Available files:
-1. 1080p Balanced (Radarr).json
-2. 1080p Balanced (Single Grab) (Radarr).json
-3. 1080p h265 Balanced (Radarr).json
-4. 1080p h265 Balanced (Single Grab) (Radarr).json
-5. 1080p Optimal (Radarr).json
-6. 1080p Optimal (Single Grab) (Radarr).json
-7. 1080p Transparent (Double Grab) (Radarr).json
-8. 1080p Transparent (Radarr).json
-9. 1080p Transparent (Single Grab) (Radarr).json
-10. 2160p Optimal (Radarr).json
-11. 2160p Optimal (Single Grab) (Radarr).json
-Select a file to import (or 'all' for all files): all
-
-Successfully added Quality Profile 1080p Balanced
-Successfully added Quality Profile 1080p Balanced (Single Grab)
-Successfully added Quality Profile 1080p h265 Balanced
-Successfully added Quality Profile 1080p h265 Balanced (Single Grab)
-Successfully added Quality Profile 1080p Optimal
-Successfully added Quality Profile 1080p Optimal (Single Grab)
-Successfully added Quality Profile 1080p Transparent (Double Grab)
-Successfully added Quality Profile 1080p Transparent
-Successfully added Quality Profile 1080p Transparent (Single Grab)
-Successfully added Quality Profile 2160p Optimal
-Successfully added Quality Profile 2160p Optimal (Single Grab)
 PS Z:\Profilarr>
 ```
 
