@@ -1,7 +1,8 @@
-import json
 import requests
 import os
 import re
+import yaml
+import json
 
 # ANSI escape sequences for colors
 class Colors:
@@ -15,16 +16,39 @@ class Colors:
     UNDERLINE = '\033[4m'
 
 # Load configuration for main app
-with open('config.json', 'r') as config_file:
-    config = json.load(config_file)['master']
+with open('config.yml', 'r') as config_file:
+    config = yaml.safe_load(config_file)
+    master_config = config['instances']['master']
+    export_base_path = config['settings']['export_path']
 
 def get_user_choice():
-    choice = input("Enter an app to export from (radarr/sonarr): ").lower()
-    while choice not in ["radarr", "sonarr"]:
-        print(Colors.FAIL + "Invalid input. Please enter either 'radarr' or 'sonarr'." + Colors.ENDC)
-        choice = input("Enter the source (radarr/sonarr): ").lower()
+    sources = []
+    print(Colors.HEADER + "Available sources to export from:" + Colors.ENDC)
+
+    # Add master installations
+    for app in master_config:
+        sources.append((app, f"{app.capitalize()} [Master]", "master"))
+
+    # Add extra installations
+    if "extras" in config['instances']:
+        for app, instances in config['instances']['extras'].items():
+            for install in instances:
+                sources.append((app, f"{app.capitalize()} [{install['name']}]", install['name']))
+
+    # Display sources with numbers
+    for idx, (app, name, _) in enumerate(sources, start=1):
+        print(f"{idx}. {name}")
+
+    # User selection
+    choice = input("Enter the number of the app to export from: ").strip()
+    while not choice.isdigit() or int(choice) < 1 or int(choice) > len(sources):
+        print(Colors.FAIL + "Invalid input. Please enter a valid number." + Colors.ENDC)
+        choice = input("Enter the number of the app to export from: ").strip()
+
+    selected_app, instance_name = sources[int(choice) - 1][0], sources[int(choice) - 1][2]
     print()
-    return choice
+    return selected_app, instance_name
+
 
 def get_export_choice():
     print(Colors.HEADER + "Choose what to export:" + Colors.ENDC)
@@ -39,7 +63,7 @@ def get_export_choice():
     return choice
 
 def get_app_config(source):
-    app_config = config[source]
+    app_config = master_config[source]
     return app_config['base_url'], app_config['api_key']
 
 def sanitize_filename(filename):
@@ -70,8 +94,10 @@ def ensure_directory_exists(directory):
         os.makedirs(directory)
         print(Colors.OKBLUE + f"Created directory: {directory}" + Colors.ENDC)
 
-def export_cf(source, save_path='./custom_formats'):
-    ensure_directory_exists(save_path)  # Ensure the directory exists with the given save_path
+def export_cf(source, instance_name, save_path=None):
+    if save_path is None:
+        save_path = os.path.join(export_base_path, source, instance_name, 'custom_formats')
+    ensure_directory_exists(save_path)
 
     base_url, api_key = get_app_config(source)
     headers = {"X-Api-Key": api_key}
@@ -93,7 +119,7 @@ def export_cf(source, save_path='./custom_formats'):
                 custom_format.pop('id', None)
                 saved_formats.append(custom_format['name'])
             
-            file_path = f'{save_path}/Custom Formats ({source.capitalize()}).json'
+            file_path = os.path.join(save_path, f'Custom Formats ({source.capitalize()}).json')
             with open(file_path, 'w') as f:
                 json.dump(data, f, indent=4)
 
@@ -108,8 +134,10 @@ def export_cf(source, save_path='./custom_formats'):
 
 
 
-def export_qf(source, save_path='./profiles'):
-    ensure_directory_exists(save_path)  # Ensure the directory exists with the given save_path
+def export_qf(source, instance_name, save_path=None):
+    if save_path is None:
+        save_path = os.path.join(export_base_path, source, instance_name, 'profiles')
+    ensure_directory_exists(save_path)
 
     base_url, api_key = get_app_config(source)
     headers = {"X-Api-Key": api_key}
@@ -124,9 +152,6 @@ def export_qf(source, save_path='./profiles'):
             quality_profiles = response.json()
             print(Colors.OKGREEN + f"Found {len(quality_profiles)} quality profiles." + Colors.ENDC)
 
-            if not os.path.exists('./profiles'):
-                os.makedirs('./profiles')
-
             saved_profiles = []
             for profile in quality_profiles:
                 profile.pop('id', None)
@@ -134,12 +159,12 @@ def export_qf(source, save_path='./profiles'):
                 profile_name = sanitize_filename(profile_name)
                 profile_filename = f"{profile_name} ({source.capitalize()}).json"
                 profile_filepath = os.path.join(save_path, profile_filename)
-                saved_profiles.append(profile_name)
-
                 with open(profile_filepath, 'w') as file:
                     json.dump([profile], file, indent=4)
+                saved_profiles.append(profile_name)  # Add the profile name to the list
+
             print_saved_items(saved_profiles, "Quality Profiles")
-            print(Colors.OKGREEN + f"Saved to '{profile_filepath}'" + Colors.ENDC)
+            print(Colors.OKGREEN + f"Saved to '{os.path.normpath(save_path)}'" + Colors.ENDC)  # Normalize the path
             print()
         else:
             handle_response_errors(response)
@@ -149,10 +174,10 @@ def export_qf(source, save_path='./profiles'):
 
 
 if __name__ == "__main__":
-    user_choice = get_user_choice()
+    user_choice, instance_name = get_user_choice()
     export_choice = get_export_choice()
 
     if export_choice in ["1", "3"]:
-        export_cf(user_choice)
+        export_cf(user_choice, instance_name)
     if export_choice in ["2", "3"]:
-        export_qf(user_choice)
+        export_qf(user_choice, instance_name)
