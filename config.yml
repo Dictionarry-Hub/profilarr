@@ -1,0 +1,20 @@
+instances:
+  master:
+    sonarr:
+      base_url: "http://localhost:8989"
+      api_key: "cebbd35f27554964bc5203b19ec58673"
+    radarr:
+      base_url: "http://localhost:7878"
+      api_key: "611c1454f0034196bdbdb4c2c2f5f859"
+  extras:
+    sonarr:
+      - name: "4k-sonarr"
+        base_url: "http://localhost:8998"
+        api_key: "8b22f808956f4036ac01ccd5a2e9658f"
+    radarr:
+      - name: "4k-radarr"
+        base_url: "http://localhost:7887"
+        api_key: "a60e8976b6804462b70578d87145ba59"
+
+settings:
+  export_path: "./exports"
