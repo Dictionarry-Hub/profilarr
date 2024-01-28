@@ -23,11 +23,13 @@ Profilarr is a Python-based tool designed to add import/export/sync functionalit
 
 1. Download the latest Profilarr package from the release section.
 2. Extract its contents into a folder.
-3. Open the `config.yml` file in a text editor.
+3. Run `python setup.py` in your command line interface to generate a config file.
+   - This will create a `config.yml` file in the same directory as `setup.py`.
+4. Open the `config.yml` file in a text editor.
    - Add the URL and API key to the master instances of Radarr / Sonarr.
    - If syncing, add the URL, API key and a name to each extra instance of Radarr / Sonarr.
    - If exporting, adjust the `export_path` to your desired export location.
-4. Save the changes.
+5. Save the changes.
 
 ## 🚀 Usage
 

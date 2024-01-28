@@ -1,3 +1,4 @@
+config_content = """
 instances:
   master:
     sonarr:
@@ -18,3 +19,7 @@ instances:
 
 settings:
   export_path: "./exports"
+"""
+
+with open('config.yml', 'w') as file:
+    file.write(config_content)
