@@ -8928,6 +8928,27 @@
                         "isFloat": false
                     }
                 ]
+            },
+            {
+                "name": "ETHEL",
+                "implementation": "ReleaseGroupSpecification",
+                "implementationName": "Release Group",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": false,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "(?<=^|[\\s.-])ETHEL\\b",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
             }
         ]
     },
@@ -9272,7 +9293,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "\\b(FraMeSToR|HQMUX|SiCFoI|playBD|RYU|ElNeekster|CiNEPHiLES|3L|EDV|Kenobi|TRiToN|HDH|NTb)\\b",
+                        "value": "\\b(FraMeSToR|HQMUX|SiCFoI|playBD|RYU|ElNeekster|CiNEPHiLES|3L|EDV|Kenobi|TRiToN|HDH|NTb|Flights)\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -11896,7 +11917,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "^(?!.*(?i:remux)).*([hH]\\s*\\.?\\s*265)",
+                        "value": "(?i)h\\s*\\.?\\s*265",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -11938,7 +11959,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?i)(REMUX|DVDRip)",
+                        "value": "Remux",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -11948,8 +11969,8 @@
             },
             {
                 "name": "WEB",
-                "implementation": "ReleaseTitleSpecification",
-                "implementationName": "Release Title",
+                "implementation": "SourceSpecification",
+                "implementationName": "Source",
                 "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
                 "negate": false,
                 "required": true,
@@ -11957,11 +11978,142 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
-                        "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<!dts[ .-]?hd[ .-]?)ma\\b(?=.*\\bweb[ ._-]?(dl|rip)\\b)|\\b(amzn|amazon)\\b|\\b(atvp|aptv|Apple TV\\+)\\b|\\b(dsnp|dsny|disney|Disney\\+)\\b|\\b(nf|netflix)\\b|\\b(hmax|hbom|hbo[ ._-]max)\\b(?=[ ._-]web[ ._-]?(dl|rip)\\b)|\\b(hulu)\\b|\\b(pcok|peacock)\\b|\\b(pmtp|Paramount Plus)\\b|\\b(it|itunes)\\b(?=[ ._-]web[ ._-]?(dl|rip)\\b)",
-                        "type": "textbox",
+                        "label": "Source",
+                        "value": 7,
+                        "type": "select",
                         "advanced": false,
+                        "selectOptions": [
+                            {
+                                "value": 0,
+                                "name": "UNKNOWN",
+                                "order": 0,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 1,
+                                "name": "CAM",
+                                "order": 1,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 2,
+                                "name": "TELESYNC",
+                                "order": 2,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 3,
+                                "name": "TELECINE",
+                                "order": 3,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 4,
+                                "name": "WORKPRINT",
+                                "order": 4,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 5,
+                                "name": "DVD",
+                                "order": 5,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 6,
+                                "name": "TV",
+                                "order": 6,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 7,
+                                "name": "WEBDL",
+                                "order": 7,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 8,
+                                "name": "WEBRIP",
+                                "order": 8,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 9,
+                                "name": "BLURAY",
+                                "order": 9,
+                                "dividerAfter": false
+                            }
+                        ],
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "4k",
+                "implementation": "ResolutionSpecification",
+                "implementationName": "Resolution",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Resolution",
+                        "value": 2160,
+                        "type": "select",
+                        "advanced": false,
+                        "selectOptions": [
+                            {
+                                "value": 0,
+                                "name": "Unknown",
+                                "order": 0,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 360,
+                                "name": "R360p",
+                                "order": 360,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 480,
+                                "name": "R480p",
+                                "order": 480,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 540,
+                                "name": "R540p",
+                                "order": 540,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 576,
+                                "name": "R576p",
+                                "order": 576,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 720,
+                                "name": "R720p",
+                                "order": 720,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 1080,
+                                "name": "R1080p",
+                                "order": 1080,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 2160,
+                                "name": "R2160p",
+                                "order": 2160,
+                                "dividerAfter": false
+                            }
+                        ],
                         "privacy": "normal",
                         "isFloat": false
                     }
@@ -12224,6 +12376,418 @@
                         "value": "remux",
                         "type": "textbox",
                         "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "MAX",
+        "includeCustomFormatWhenRenaming": true,
+        "specifications": [
+            {
+                "name": "Max",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\b((?<!hbo[ ._-])max)\\b(?=[ ._-]web[ ._-]?(dl|rip)\\b)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "WEBDL",
+                "implementation": "SourceSpecification",
+                "implementationName": "Source",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": false,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Source",
+                        "value": 7,
+                        "type": "select",
+                        "advanced": false,
+                        "selectOptions": [
+                            {
+                                "value": 0,
+                                "name": "UNKNOWN",
+                                "order": 0,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 1,
+                                "name": "CAM",
+                                "order": 1,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 2,
+                                "name": "TELESYNC",
+                                "order": 2,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 3,
+                                "name": "TELECINE",
+                                "order": 3,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 4,
+                                "name": "WORKPRINT",
+                                "order": 4,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 5,
+                                "name": "DVD",
+                                "order": 5,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 6,
+                                "name": "TV",
+                                "order": 6,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 7,
+                                "name": "WEBDL",
+                                "order": 7,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 8,
+                                "name": "WEBRIP",
+                                "order": 8,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 9,
+                                "name": "BLURAY",
+                                "order": 9,
+                                "dividerAfter": false
+                            }
+                        ],
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "WEBRIP",
+                "implementation": "SourceSpecification",
+                "implementationName": "Source",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": false,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Source",
+                        "value": 8,
+                        "type": "select",
+                        "advanced": false,
+                        "selectOptions": [
+                            {
+                                "value": 0,
+                                "name": "UNKNOWN",
+                                "order": 0,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 1,
+                                "name": "CAM",
+                                "order": 1,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 2,
+                                "name": "TELESYNC",
+                                "order": 2,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 3,
+                                "name": "TELECINE",
+                                "order": 3,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 4,
+                                "name": "WORKPRINT",
+                                "order": 4,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 5,
+                                "name": "DVD",
+                                "order": 5,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 6,
+                                "name": "TV",
+                                "order": 6,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 7,
+                                "name": "WEBDL",
+                                "order": 7,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 8,
+                                "name": "WEBRIP",
+                                "order": 8,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 9,
+                                "name": "BLURAY",
+                                "order": 9,
+                                "dividerAfter": false
+                            }
+                        ],
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "h265 (4k)",
+        "includeCustomFormatWhenRenaming": false,
+        "specifications": [
+            {
+                "name": "h265",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "(?i)h\\s*\\.?\\s*265",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Disc",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "^(?!.*\\b((?<!HD[._ -]|HD)DVD|BDRip|MKV|XviD|WMV|d3g|BDREMUX|REMUX|^(?=.*1080p)(?=.*HEVC)|[xh][-_. ]?26[45]|German.*DL|((?<=\\d{4}).*German.*(DL)?)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2)\\b))\\b)(((?=.*\\b(Blu[-_. ]?ray|BD|HD[-_. ]?DVD)\\b)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2|BDMV|ISO)\\b))|^((?=.*\\b(^((?=.*\\b((.*_)?COMPLETE.*|Dis[ck])\\b)(?=.*(Blu[-_. ]?ray|HD[-_. ]?DVD)))|3D[-_. ]?BD|BR[-_. ]?DISK|Full[-_. ]?Blu[-_. ]?ray|^((?=.*((BD|UHD)[-_. ]?(25|50|66|100|ISO)))))))).*|(?i)(DVD9|DVD5|NTSC|PAL|VOB IFO|VC-1|AVC|MPEG-2|\\bCOMPLETE[-.\\s]?(?:UHD[-.\\s])?BLU[-.\\s]?RAY\\b|\\bCOMPLETE BLURAY\\b|\\bBR-Disk\\b)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Remux",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "Remux",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "WEB",
+                "implementation": "SourceSpecification",
+                "implementationName": "Source",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Source",
+                        "value": 7,
+                        "type": "select",
+                        "advanced": false,
+                        "selectOptions": [
+                            {
+                                "value": 0,
+                                "name": "UNKNOWN",
+                                "order": 0,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 1,
+                                "name": "CAM",
+                                "order": 1,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 2,
+                                "name": "TELESYNC",
+                                "order": 2,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 3,
+                                "name": "TELECINE",
+                                "order": 3,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 4,
+                                "name": "WORKPRINT",
+                                "order": 4,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 5,
+                                "name": "DVD",
+                                "order": 5,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 6,
+                                "name": "TV",
+                                "order": 6,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 7,
+                                "name": "WEBDL",
+                                "order": 7,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 8,
+                                "name": "WEBRIP",
+                                "order": 8,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 9,
+                                "name": "BLURAY",
+                                "order": 9,
+                                "dividerAfter": false
+                            }
+                        ],
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "4k",
+                "implementation": "ResolutionSpecification",
+                "implementationName": "Resolution",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Resolution",
+                        "value": 2160,
+                        "type": "select",
+                        "advanced": false,
+                        "selectOptions": [
+                            {
+                                "value": 0,
+                                "name": "Unknown",
+                                "order": 0,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 360,
+                                "name": "R360p",
+                                "order": 360,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 480,
+                                "name": "R480p",
+                                "order": 480,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 540,
+                                "name": "R540p",
+                                "order": 540,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 576,
+                                "name": "R576p",
+                                "order": 576,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 720,
+                                "name": "R720p",
+                                "order": 720,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 1080,
+                                "name": "R1080p",
+                                "order": 1080,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 2160,
+                                "name": "R2160p",
+                                "order": 2160,
+                                "dividerAfter": false
+                            }
+                        ],
                         "privacy": "normal",
                         "isFloat": false
                     }
