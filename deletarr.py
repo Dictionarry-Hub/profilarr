@@ -65,16 +65,18 @@ def delete_custom_formats(source_config):
             formats_to_delete = response.json()
 
             for format in formats_to_delete:
+                print(Colors.OKBLUE + f"Deleting custom format '{format['name']}':" + Colors.ENDC, end='')
                 delete_url = f"{get_url}/{format['id']}"
                 del_response = requests.delete(delete_url, headers=headers)
                 if del_response.status_code in [200, 202, 204]:
-                    print_success(f"Successfully deleted custom format '{format['name']}'")
+                    print_success("SUCCESS")
                 else:
-                    print_error(f"Failed to delete custom format '{format['name']}': HTTP {del_response.status_code}")
+                    print_error("FAIL")
         else:
             print_error(f"Failed to retrieve custom formats for deletion! (HTTP {response.status_code})")
     except requests.exceptions.ConnectionError:
         print_connection_error()
+
 
 def get_app_config(app_name, instance_name):
     if instance_name.endswith("[Master]"):
