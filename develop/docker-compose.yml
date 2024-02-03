@@ -1,0 +1,23 @@
+version: "3.3"
+services:
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    environment:
+      - PUID=1000 # user id, change as necessary
+      - PGID=1000 # group id, change as necessary
+      - TZ=Europe/London # timezone, change as necessary
+    ports:
+      - "7887:7878" # change the left value to the desired host port for Radarr
+    restart: unless-stopped
+
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    environment:
+      - PUID=1000 # user id, change as necessary
+      - PGID=1000 # group id, change as necessary
+      - TZ=Europe/London # timezone, change as necessary
+    ports:
+      - "8998:8989" # change the left value to the desired host port for Sonarr
+    restart: unless-stopped
