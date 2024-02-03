@@ -1,6 +1,7 @@
 import requests
 import os
 import yaml
+import json
 
 # ANSI escape sequences for colors
 class Colors:
@@ -117,7 +118,20 @@ def delete_quality_profiles(source_config):
                 if del_response.status_code in [200, 202, 204]:
                     print(Colors.OKBLUE + f"Deleting quality profile '{profile_name}': " + Colors.ENDC + Colors.OKGREEN + "SUCCESS" + Colors.ENDC)
                 else:
-                    print(Colors.OKBLUE + f"Deleting quality profile '{profile_name}': " + Colors.ENDC + Colors.FAIL + "FAIL" + Colors.ENDC)
+                    # Handle failure due to the profile being in use or other errors
+                    error_message = "Failed to delete due to an unknown error."
+                    try:
+                        # Attempt to parse JSON error message from response
+                        error_details = del_response.json()
+                        if 'message' in error_details:
+                            error_message = error_details['message']
+                        elif 'error' in error_details:
+                            error_message = error_details['error']
+                    except json.JSONDecodeError:
+                        # If response is not JSON or doesn't have expected fields
+                        error_message = del_response.text or "Failed to delete with no detailed error message."
+                    
+                    print(Colors.OKBLUE + f"Deleting quality profile '{profile_name}': " + Colors.ENDC + Colors.FAIL + f"FAIL - {error_message}" + Colors.ENDC)
         else:
             print_error("Failed to retrieve quality profiles for deletion!")
     except requests.exceptions.ConnectionError:
