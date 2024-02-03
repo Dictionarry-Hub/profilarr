@@ -65,7 +65,7 @@ def delete_custom_formats(source_config):
             formats_to_delete = response.json()
 
             for format in formats_to_delete:
-                print(Colors.OKBLUE + f"Deleting custom format '{format['name']}':" + Colors.ENDC, end='')
+                print(Colors.OKBLUE + f"Deleting custom format '{format['name']}': " + Colors.ENDC, end='')
                 delete_url = f"{get_url}/{format['id']}"
                 del_response = requests.delete(delete_url, headers=headers)
                 if del_response.status_code in [200, 202, 204]:
@@ -76,6 +76,28 @@ def delete_custom_formats(source_config):
             print_error(f"Failed to retrieve custom formats for deletion! (HTTP {response.status_code})")
     except requests.exceptions.ConnectionError:
         print_connection_error()
+
+def delete_quality_profiles(source_config):
+    headers = {"X-Api-Key": source_config['api_key']}
+    get_url = f"{source_config['base_url']}/api/v3/qualityprofile"
+
+    try:
+        response = requests.get(get_url, headers=headers)
+        if response.status_code == 200:
+            profiles_to_delete = response.json()
+
+            for profile in profiles_to_delete:
+                delete_url = f"{get_url}/{profile['id']}"
+                del_response = requests.delete(delete_url, headers=headers)
+                if del_response.status_code in [200, 202, 204]:
+                    print(Colors.OKBLUE + f"Deleting quality profile '{profile['name']}':" + Colors.ENDC + Colors.OKGREEN + "SUCCESS" + Colors.ENDC)
+                else:
+                    print(Colors.OKBLUE + f"Deleting quality profile '{profile['name']}':" + Colors.ENDC + Colors.FAIL + "FAIL" + Colors.ENDC)
+        else:
+            print_error("Failed to retrieve quality profiles for deletion!")
+    except requests.exceptions.ConnectionError:
+        print_connection_error()
+
 
 
 def get_app_config(app_name, instance_name):
@@ -93,4 +115,13 @@ if __name__ == "__main__":
     selected_app, selected_instance = get_user_choice()
     source_config = get_app_config(selected_app, selected_instance)
     source_config['app_name'] = selected_app
-    delete_custom_formats(source_config)
+
+    print("Choose what to delete:")
+    print("1. Custom Formats")
+    print("2. Quality Profiles")
+    choice = input("Enter your choice (1/2): ").strip()
+
+    if choice == "1":
+        delete_custom_formats(source_config)
+    elif choice == "2":
+        delete_quality_profiles(source_config)
