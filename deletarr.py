@@ -4,12 +4,11 @@ import yaml
 
 # ANSI escape sequences for colors
 class Colors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
+    HEADER = '\033[95m'  # Purple for questions and headers
+    OKBLUE = '\033[94m'  # Blue for actions
+    OKGREEN = '\033[92m'  # Green for success messages
+    FAIL = '\033[91m'  # Red for error messages
+    ENDC = '\033[0m'  # Reset to default
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
@@ -28,8 +27,8 @@ def print_connection_error():
     print(Colors.FAIL + "Failed to connect to the service! Please check if it's running and accessible." + Colors.ENDC)
 
 def get_user_choice():
+    print(Colors.HEADER + "\nAvailable instances to delete from:" + Colors.ENDC)
     sources = []
-    print(Colors.HEADER + "Available instances to delete from:" + Colors.ENDC)
 
     # Add master installations
     for app in master_config:
@@ -46,16 +45,38 @@ def get_user_choice():
         print(f"{idx}. {name}")
 
     # User selection
-    choice = input("Enter the number of the instance to delete from: ").strip()
+    choice = input(Colors.HEADER + "Enter the number of the instance to delete from: " + Colors.ENDC).strip()
     while not choice.isdigit() or int(choice) < 1 or int(choice) > len(sources):
         print_error("Invalid input. Please enter a valid number.")
-        choice = input("Enter the number of the instance to delete from: ").strip()
+        choice = input(Colors.HEADER + "Enter the number of the instance to delete from: " + Colors.ENDC).strip()
 
     selected_app, selected_name = sources[int(choice) - 1]
     print()
     return selected_app, selected_name
 
+def user_select_items_to_delete(items):
+    print(Colors.HEADER + "\nAvailable items:" + Colors.ENDC)
+    for idx, item in enumerate(items, start=1):
+        print(f"{idx}. {item['name']}")
+    print(Colors.HEADER + "Type the number(s) of the items you wish to delete separated by commas, or type 'all' to delete everything." + Colors.ENDC)
+    
+    selection = input(Colors.HEADER + "Your choice: " + Colors.ENDC).strip().lower()
+    if selection == 'all':
+        return [item['id'] for item in items]  # Return all IDs if "all" is selected
+    else:
+        selected_ids = []
+        try:
+            selected_indices = [int(i) - 1 for i in selection.split(',') if i.isdigit()]
+            for idx in selected_indices:
+                if idx < len(items):
+                    selected_ids.append(items[idx]['id'])
+            return selected_ids
+        except ValueError:
+            print_error("Invalid input. Please enter a valid number or 'all'.")
+            return []
+
 def delete_custom_formats(source_config):
+    print(Colors.OKBLUE + "\nDeleting selected custom formats..." + Colors.ENDC)
     headers = {"X-Api-Key": source_config['api_key']}
     get_url = f"{source_config['base_url']}/api/v3/customformat"
 
@@ -63,21 +84,23 @@ def delete_custom_formats(source_config):
         response = requests.get(get_url, headers=headers)
         if response.status_code == 200:
             formats_to_delete = response.json()
+            selected_ids = user_select_items_to_delete(formats_to_delete)
 
-            for format in formats_to_delete:
-                print(Colors.OKBLUE + f"Deleting custom format '{format['name']}': " + Colors.ENDC, end='')
-                delete_url = f"{get_url}/{format['id']}"
+            for format_id in selected_ids:
+                delete_url = f"{get_url}/{format_id}"
                 del_response = requests.delete(delete_url, headers=headers)
+                format_name = next((item['name'] for item in formats_to_delete if item['id'] == format_id), "Unknown")
                 if del_response.status_code in [200, 202, 204]:
-                    print_success("SUCCESS")
+                    print(Colors.OKBLUE + f"Deleting custom format '{format_name}': " + Colors.ENDC + Colors.OKGREEN + "SUCCESS" + Colors.ENDC)
                 else:
-                    print_error("FAIL")
+                    print(Colors.OKBLUE + f"Deleting custom format '{format_name}': " + Colors.ENDC + Colors.FAIL + "FAIL" + Colors.ENDC)
         else:
-            print_error(f"Failed to retrieve custom formats for deletion! (HTTP {response.status_code})")
+            print_error("Failed to retrieve custom formats for deletion!")
     except requests.exceptions.ConnectionError:
         print_connection_error()
 
 def delete_quality_profiles(source_config):
+    print(Colors.OKBLUE + "\nDeleting selected quality profiles..." + Colors.ENDC)
     headers = {"X-Api-Key": source_config['api_key']}
     get_url = f"{source_config['base_url']}/api/v3/qualityprofile"
 
@@ -85,20 +108,20 @@ def delete_quality_profiles(source_config):
         response = requests.get(get_url, headers=headers)
         if response.status_code == 200:
             profiles_to_delete = response.json()
+            selected_ids = user_select_items_to_delete(profiles_to_delete)
 
-            for profile in profiles_to_delete:
-                delete_url = f"{get_url}/{profile['id']}"
+            for profile_id in selected_ids:
+                delete_url = f"{get_url}/{profile_id}"
                 del_response = requests.delete(delete_url, headers=headers)
+                profile_name = next((item['name'] for item in profiles_to_delete if item['id'] == profile_id), "Unknown")
                 if del_response.status_code in [200, 202, 204]:
-                    print(Colors.OKBLUE + f"Deleting quality profile '{profile['name']}':" + Colors.ENDC + Colors.OKGREEN + "SUCCESS" + Colors.ENDC)
+                    print(Colors.OKBLUE + f"Deleting quality profile '{profile_name}': " + Colors.ENDC + Colors.OKGREEN + "SUCCESS" + Colors.ENDC)
                 else:
-                    print(Colors.OKBLUE + f"Deleting quality profile '{profile['name']}':" + Colors.ENDC + Colors.FAIL + "FAIL" + Colors.ENDC)
+                    print(Colors.OKBLUE + f"Deleting quality profile '{profile_name}': " + Colors.ENDC + Colors.FAIL + "FAIL" + Colors.ENDC)
         else:
             print_error("Failed to retrieve quality profiles for deletion!")
     except requests.exceptions.ConnectionError:
         print_connection_error()
-
-
 
 def get_app_config(app_name, instance_name):
     if instance_name.endswith("[Master]"):
@@ -116,10 +139,10 @@ if __name__ == "__main__":
     source_config = get_app_config(selected_app, selected_instance)
     source_config['app_name'] = selected_app
 
-    print("Choose what to delete:")
+    print(Colors.HEADER + "\nChoose what to delete:" + Colors.ENDC)
     print("1. Custom Formats")
     print("2. Quality Profiles")
-    choice = input("Enter your choice (1/2): ").strip()
+    choice = input(Colors.HEADER + "Enter your choice (1/2): " + Colors.ENDC).strip()
 
     if choice == "1":
         delete_custom_formats(source_config)
