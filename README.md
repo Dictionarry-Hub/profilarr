@@ -252,6 +252,66 @@ Deleted temporary directory: ./temp_directory
 PS Z:\Profilarr>
 ```
 
+### Deleting
+
+1. Run `python deletarr.py` in your command line interface.
+2. Select the instance from which you wish to delete data.
+3. Choose between deleting Custom Formats or Quality Profiles.
+4. Select specific items by typing their numbers separated by commas, or type 'all' to delete everything.
+
+#### Example: Deleting Custom Formats
+
+```plaintext
+PS Z:\Profilarr> python deletarr.py
+
+Available instances to delete from:
+1. Sonarr [Master]
+2. Radarr [Master]
+Enter the number of the instance to delete from: 2
+
+Choose what to delete:
+1. Custom Formats
+2. Quality Profiles
+Enter your choice (1/2): 1
+
+Deleting selected custom formats...
+
+Available items:
+1. UHDBits
+2. Dolby Vision w/out Fallback
+...
+132. h265 (4k)
+133. MAX
+Your choice: all
+
+Deleting custom format 'UHDBits': SUCCESS
+...
+Deleting custom format 'MAX': SUCCESS
+```
+
+#### Example: Deleting Quality Profiles
+
+```plaintext
+PS Z:\Profilarr> python deletarr.py
+
+Choose what to delete:
+1. Custom Formats
+2. Quality Profiles
+Enter your choice (1/2): 2
+
+Deleting selected quality profiles...
+
+Available items:
+1. 1080p Balanced
+...
+11. 2160p Optimal
+Your choice: all
+
+Deleting quality profile '1080p Balanced': SUCCESS
+...
+Deleting quality profile '2160p Optimal': SUCCESS
+```
+
 ### Radarr and Sonarr Compatibility
 
 - You are only able to import / sync files to the app that is included in the file name (e.g. `Radarr` or `Sonarr`).
