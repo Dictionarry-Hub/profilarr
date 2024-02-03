@@ -6916,27 +6916,6 @@
                         "isFloat": false
                     }
                 ]
-            },
-            {
-                "name": "ETHEL",
-                "implementation": "ReleaseGroupSpecification",
-                "implementationName": "Release Group",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": false,
-                "required": false,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Language",
-                        "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])ETHEL\\b",
-                        "type": "textbox",
-                        "advanced": false,
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
             }
         ]
     },
@@ -7281,7 +7260,7 @@
                         "name": "value",
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "\\b(FraMeSToR|HQMUX|SiCFoI|playBD|RYU|ElNeekster|CiNEPHiLES|3L|EDV|Kenobi|TRiToN|HDH|NTb|Flights)\\b",
+                        "value": "\\b(FraMeSToR|HQMUX|SiCFoI|playBD|RYU|ElNeekster|CiNEPHiLES|3L|EDV|Kenobi|TRiToN|HDH|TekMUX|NTb)\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -10399,7 +10378,28 @@
                         "name": "value",
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?i)h\\s*\\.?\\s*265",
+                        "value": "^(?!.*(?i:remux)).*([hH]\\\\s*\\\\.?\\\\s*265)",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Disc",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Language",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "^(?!.*\\b((?<!HD[._ -]|HD)DVD|BDRip|MKV|XviD|WMV|d3g|BDREMUX|REMUX|^(?=.*1080p)(?=.*HEVC)|[xh][-_. ]?26[45]|German.*DL|((?<=\\d{4}).*German.*(DL)?)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2)\\b))\\b)(((?=.*\\b(Blu[-_. ]?ray|BD|HD[-_. ]?DVD)\\b)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2|BDMV|ISO)\\b))|^((?=.*\\b(^((?=.*\\b((.*_)?COMPLETE.*|Dis[ck])\\b)(?=.*(Blu[-_. ]?ray|HD[-_. ]?DVD)))|3D[-_. ]?BD|BR[-_. ]?DISK|Full[-_. ]?Blu[-_. ]?ray|^((?=.*((BD|UHD)[-_. ]?(25|50|66|100|ISO)))))))).*|(?i)(DVD9|DVD5|NTSC|PAL|VOB IFO|VC-1|AVC|MPEG-2|\\bCOMPLETE[-.\\s]?(?:UHD[-.\\s])?BLU[-.\\s]?RAY\\b|\\bCOMPLETE BLURAY\\b|\\bBR-Disk\\b)",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -10420,133 +10420,9 @@
                         "name": "value",
                         "label": "Language",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "Remux",
+                        "value": "(?i)(REMUX|DVDRip)",
                         "type": "textbox",
                         "advanced": false,
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
-                "name": "WEB",
-                "implementation": "SourceSpecification",
-                "implementationName": "Source",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": false,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Source",
-                        "value": 3,
-                        "type": "select",
-                        "advanced": false,
-                        "selectOptions": [
-                            {
-                                "value": 0,
-                                "name": "Unknown",
-                                "order": 0
-                            },
-                            {
-                                "value": 1,
-                                "name": "Television",
-                                "order": 1
-                            },
-                            {
-                                "value": 2,
-                                "name": "TelevisionRaw",
-                                "order": 2
-                            },
-                            {
-                                "value": 3,
-                                "name": "Web",
-                                "order": 3
-                            },
-                            {
-                                "value": 4,
-                                "name": "WebRip",
-                                "order": 4
-                            },
-                            {
-                                "value": 5,
-                                "name": "DVD",
-                                "order": 5
-                            },
-                            {
-                                "value": 6,
-                                "name": "Bluray",
-                                "order": 6
-                            },
-                            {
-                                "value": 7,
-                                "name": "BlurayRaw",
-                                "order": 7
-                            }
-                        ],
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
-                "name": "4k",
-                "implementation": "ResolutionSpecification",
-                "implementationName": "Resolution",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": true,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Resolution",
-                        "value": 2160,
-                        "type": "select",
-                        "advanced": false,
-                        "selectOptions": [
-                            {
-                                "value": 0,
-                                "name": "Unknown",
-                                "order": 0
-                            },
-                            {
-                                "value": 360,
-                                "name": "R360P",
-                                "order": 360
-                            },
-                            {
-                                "value": 480,
-                                "name": "R480P",
-                                "order": 480
-                            },
-                            {
-                                "value": 540,
-                                "name": "R540p",
-                                "order": 540
-                            },
-                            {
-                                "value": 576,
-                                "name": "R576p",
-                                "order": 576
-                            },
-                            {
-                                "value": 720,
-                                "name": "R720p",
-                                "order": 720
-                            },
-                            {
-                                "value": 1080,
-                                "name": "R1080p",
-                                "order": 1080
-                            },
-                            {
-                                "value": 2160,
-                                "name": "R2160p",
-                                "order": 2160
-                            }
-                        ],
                         "privacy": "normal",
                         "isFloat": false
                     }
@@ -10789,350 +10665,6 @@
                         "value": "\\bDD[P+]|\\b(e[-_. ]?ac3)\\b",
                         "type": "textbox",
                         "advanced": false,
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "name": "h265 (4k)",
-        "includeCustomFormatWhenRenaming": false,
-        "specifications": [
-            {
-                "name": "h265",
-                "implementation": "ReleaseTitleSpecification",
-                "implementationName": "Release Title",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": false,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Language",
-                        "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?i)h\\s*\\.?\\s*265",
-                        "type": "textbox",
-                        "advanced": false,
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
-                "name": "Disc",
-                "implementation": "ReleaseTitleSpecification",
-                "implementationName": "Release Title",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": true,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Language",
-                        "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "^(?!.*\\b((?<!HD[._ -]|HD)DVD|BDRip|MKV|XviD|WMV|d3g|BDREMUX|REMUX|^(?=.*1080p)(?=.*HEVC)|[xh][-_. ]?26[45]|German.*DL|((?<=\\d{4}).*German.*(DL)?)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2)\\b))\\b)(((?=.*\\b(Blu[-_. ]?ray|BD|HD[-_. ]?DVD)\\b)(?=.*\\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2|BDMV|ISO)\\b))|^((?=.*\\b(^((?=.*\\b((.*_)?COMPLETE.*|Dis[ck])\\b)(?=.*(Blu[-_. ]?ray|HD[-_. ]?DVD)))|3D[-_. ]?BD|BR[-_. ]?DISK|Full[-_. ]?Blu[-_. ]?ray|^((?=.*((BD|UHD)[-_. ]?(25|50|66|100|ISO)))))))).*|(?i)(DVD9|DVD5|NTSC|PAL|VOB IFO|VC-1|AVC|MPEG-2|\\bCOMPLETE[-.\\s]?(?:UHD[-.\\s])?BLU[-.\\s]?RAY\\b|\\bCOMPLETE BLURAY\\b|\\bBR-Disk\\b)",
-                        "type": "textbox",
-                        "advanced": false,
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
-                "name": "Remux",
-                "implementation": "ReleaseTitleSpecification",
-                "implementationName": "Release Title",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": true,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Language",
-                        "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "Remux",
-                        "type": "textbox",
-                        "advanced": false,
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
-                "name": "WEB",
-                "implementation": "SourceSpecification",
-                "implementationName": "Source",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": false,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Source",
-                        "value": 7,
-                        "type": "select",
-                        "advanced": false,
-                        "selectOptions": [
-                            {
-                                "value": 0,
-                                "name": "Unknown",
-                                "order": 0
-                            },
-                            {
-                                "value": 1,
-                                "name": "Television",
-                                "order": 1
-                            },
-                            {
-                                "value": 2,
-                                "name": "TelevisionRaw",
-                                "order": 2
-                            },
-                            {
-                                "value": 3,
-                                "name": "Web",
-                                "order": 3
-                            },
-                            {
-                                "value": 4,
-                                "name": "WebRip",
-                                "order": 4
-                            },
-                            {
-                                "value": 5,
-                                "name": "DVD",
-                                "order": 5
-                            },
-                            {
-                                "value": 6,
-                                "name": "Bluray",
-                                "order": 6
-                            },
-                            {
-                                "value": 7,
-                                "name": "BlurayRaw",
-                                "order": 7
-                            }
-                        ],
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
-                "name": "4k",
-                "implementation": "ResolutionSpecification",
-                "implementationName": "Resolution",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": false,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Resolution",
-                        "value": 2160,
-                        "type": "select",
-                        "advanced": false,
-                        "selectOptions": [
-                            {
-                                "value": 0,
-                                "name": "Unknown",
-                                "order": 0
-                            },
-                            {
-                                "value": 360,
-                                "name": "R360P",
-                                "order": 360
-                            },
-                            {
-                                "value": 480,
-                                "name": "R480P",
-                                "order": 480
-                            },
-                            {
-                                "value": 540,
-                                "name": "R540p",
-                                "order": 540
-                            },
-                            {
-                                "value": 576,
-                                "name": "R576p",
-                                "order": 576
-                            },
-                            {
-                                "value": 720,
-                                "name": "R720p",
-                                "order": 720
-                            },
-                            {
-                                "value": 1080,
-                                "name": "R1080p",
-                                "order": 1080
-                            },
-                            {
-                                "value": 2160,
-                                "name": "R2160p",
-                                "order": 2160
-                            }
-                        ],
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "name": "MAX",
-        "includeCustomFormatWhenRenaming": true,
-        "specifications": [
-            {
-                "name": "Max",
-                "implementation": "ReleaseTitleSpecification",
-                "implementationName": "Release Title",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": false,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Language",
-                        "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "\\b((?<!hbo[ ._-])max)\\b(?=[ ._-]web[ ._-]?(dl|rip)\\b)",
-                        "type": "textbox",
-                        "advanced": false,
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
-                "name": "WEBDL",
-                "implementation": "SourceSpecification",
-                "implementationName": "Source",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": false,
-                "required": false,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Source",
-                        "value": 7,
-                        "type": "select",
-                        "advanced": false,
-                        "selectOptions": [
-                            {
-                                "value": 0,
-                                "name": "Unknown",
-                                "order": 0
-                            },
-                            {
-                                "value": 1,
-                                "name": "Television",
-                                "order": 1
-                            },
-                            {
-                                "value": 2,
-                                "name": "TelevisionRaw",
-                                "order": 2
-                            },
-                            {
-                                "value": 3,
-                                "name": "Web",
-                                "order": 3
-                            },
-                            {
-                                "value": 4,
-                                "name": "WebRip",
-                                "order": 4
-                            },
-                            {
-                                "value": 5,
-                                "name": "DVD",
-                                "order": 5
-                            },
-                            {
-                                "value": 6,
-                                "name": "Bluray",
-                                "order": 6
-                            },
-                            {
-                                "value": 7,
-                                "name": "BlurayRaw",
-                                "order": 7
-                            }
-                        ],
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
-                "name": "WEBRIP",
-                "implementation": "SourceSpecification",
-                "implementationName": "Source",
-                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-                "negate": false,
-                "required": false,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Source",
-                        "value": 8,
-                        "type": "select",
-                        "advanced": false,
-                        "selectOptions": [
-                            {
-                                "value": 0,
-                                "name": "Unknown",
-                                "order": 0
-                            },
-                            {
-                                "value": 1,
-                                "name": "Television",
-                                "order": 1
-                            },
-                            {
-                                "value": 2,
-                                "name": "TelevisionRaw",
-                                "order": 2
-                            },
-                            {
-                                "value": 3,
-                                "name": "Web",
-                                "order": 3
-                            },
-                            {
-                                "value": 4,
-                                "name": "WebRip",
-                                "order": 4
-                            },
-                            {
-                                "value": 5,
-                                "name": "DVD",
-                                "order": 5
-                            },
-                            {
-                                "value": 6,
-                                "name": "Bluray",
-                                "order": 6
-                            },
-                            {
-                                "value": 7,
-                                "name": "BlurayRaw",
-                                "order": 7
-                            }
-                        ],
                         "privacy": "normal",
                         "isFloat": false
                     }
