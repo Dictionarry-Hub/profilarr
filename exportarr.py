@@ -17,9 +17,9 @@ def prompt_export_choice():
     else:
         return [options[choice] for choice in user_choice.split(',') if choice in options]
 
-def create_export_path(export_path, app, instance):
+def create_export_path(export_path, app):
     # Create a directory path for the export
-    dir_path = os.path.join(export_path, 'custom_formats', app, instance)
+    dir_path = os.path.join(export_path, 'custom_formats', app)
 
     # Create the directory if it doesn't exist
     os.makedirs(dir_path, exist_ok=True)
@@ -39,7 +39,7 @@ def export_custom_formats(app, instances, config):
         export_path = config['settings']['export_path']
 
         # Create the export directory
-        dir_path = create_export_path(export_path, app, instance['name'])
+        dir_path = create_export_path(export_path, app)
 
         # Assuming 'export' is a valid resource_type for the API
         response = make_request('get', url, api_key, 'customformat')
@@ -56,7 +56,7 @@ def export_custom_formats(app, instances, config):
             successful_exports += 1  # Increment the counter if the export was successful
 
         # Hardcode the file name as 'Custom Formats (Radarr).json'
-        file_name = 'Custom Formats (Radarr).json'
+        file_name = f"Custom Formats ({app.capitalize()} - {instance['name']}).json"
 
         # Save all custom formats to a single file in the export directory
         try:
@@ -71,12 +71,12 @@ def export_custom_formats(app, instances, config):
         print_message(f"Exported {successful_exports} custom formats to {dir_path} for {instance['name']}", 'yellow')
         print()
 
-def create_quality_profiles_export_path(app, instance, config):
+def create_quality_profiles_export_path(app, config):
     # Get the export path from the config
     export_path = config['settings']['export_path']
 
     # Create a directory path for the export
-    dir_path = os.path.join(export_path, 'quality_profiles', app, instance)
+    dir_path = os.path.join(export_path, 'quality_profiles', app)
 
     # Create the directory if it doesn't exist
     os.makedirs(dir_path, exist_ok=True)
@@ -90,7 +90,7 @@ def export_quality_profiles(app, instances, config):
         api_key = instance['api_key']
 
         # Create the export directory
-        dir_path = create_quality_profiles_export_path(app, instance['name'], config)
+        dir_path = create_quality_profiles_export_path(app, config)
 
         # Assuming 'qualityprofile' is the valid resource_type for the API
         response = make_request('get', url, api_key, 'qualityprofile')
@@ -103,7 +103,7 @@ def export_quality_profiles(app, instances, config):
             quality_profile.pop('id', None)
 
             # Create a file name from the quality profile name and app
-            file_name = f"{quality_profile['name']} ({app}).json"
+            file_name = f"{quality_profile['name']} ({app.capitalize()} - {instance['name']}).json"
             file_name = re.sub(r'[\\/*?:"<>|]', '', file_name)  # Remove invalid characters
 
             # Save the quality profile to a file in the export directory

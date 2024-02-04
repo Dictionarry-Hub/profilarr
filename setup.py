@@ -16,6 +16,7 @@ instances:
       api_key: "API_KEY"
 settings:
   export_path: "./exports"
+  import_path: "./imports"
 
 """
 
