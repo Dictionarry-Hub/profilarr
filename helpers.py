@@ -104,6 +104,7 @@ def make_request(request_type, url, api_key, resource_type, json_payload=None):
             response = requests.put(full_url, headers=headers, json=json_payload)
         elif request_type.lower() == 'delete':
             response = requests.delete(full_url, headers=headers)
+            return response.status_code
         elif request_type.lower() == 'patch':
             response = requests.patch(full_url, headers=headers, json=json_payload)
         else:
