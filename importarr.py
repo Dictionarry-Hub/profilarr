@@ -104,6 +104,7 @@ def user_select_profiles(profiles):
     while True:
         # Display prompt message
         print_message("Enter the numbers of the profiles you want to import separated by commas, or type 'all' to import all profiles: ", "blue", newline=False)
+        print()
         user_input = input().strip()
 
         if user_input.lower() == 'all':

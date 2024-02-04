@@ -70,7 +70,7 @@ def get_instance_choice(app):
     for i, instance in enumerate(app_instances, start=1):
         print_message(f"{i}. {app.capitalize()} ({instance['name']})")
 
-    print_message("Choose an instance by number or type 'all' for all instances: ", "blue")
+    print_message("Choose an instance by number, multiple numbers separated by commas or type 'all' for all instances: ", "blue")
     choice = input().strip()
     print()
     selected_instances = []
@@ -78,11 +78,14 @@ def get_instance_choice(app):
     if choice.lower() == 'all':
         selected_instances = app_instances
     else:
-        while not choice.isdigit() or int(choice) < 1 or int(choice) > len(app_instances):
-            print_message("Invalid input. Please select a valid number.", "warning")
-            choice = input().strip()
-        selected_instance = app_instances[int(choice) - 1]
-        selected_instances = [selected_instance]
+        choices = choice.split(',')
+        for choice in choices:
+            choice = choice.strip()  # remove any leading/trailing whitespace
+            while not choice.isdigit() or int(choice) < 1 or int(choice) > len(app_instances):
+                print_message("Invalid input. Please select a valid number.", "warning")
+                choice = input().strip()
+            selected_instance = app_instances[int(choice) - 1]
+            selected_instances.append(selected_instance)
 
     return selected_instances
 
