@@ -19,7 +19,7 @@ def prompt_export_choice():
 
 def create_export_path(export_path, app, instance):
     # Create a directory path for the export
-    dir_path = os.path.join(export_path, app, instance, 'custom_formats')
+    dir_path = os.path.join(export_path, 'custom_formats', app, instance)
 
     # Create the directory if it doesn't exist
     os.makedirs(dir_path, exist_ok=True)
@@ -76,7 +76,7 @@ def create_quality_profiles_export_path(app, instance, config):
     export_path = config['settings']['export_path']
 
     # Create a directory path for the export
-    dir_path = os.path.join(export_path, app, instance, 'quality_profiles')
+    dir_path = os.path.join(export_path, 'quality_profiles', app, instance)
 
     # Create the directory if it doesn't exist
     os.makedirs(dir_path, exist_ok=True)
