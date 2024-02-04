@@ -1,12 +1,15 @@
 import yaml
 import json
+import requests
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+import json
 
 class Colors:
-    QUESTION = '\033[94m'
-    INFO = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    OK = '\033[92m'
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    PURPLE = '\033[95m'
     ENDC = '\033[0m'
 
 class Apps:
@@ -16,21 +19,26 @@ class Apps:
         # Add more apps here as needed
     }
 
-def print_message(message, message_type):
+def print_message(message, message_type='', newline=True):
     color = Colors.ENDC  # default color
+    message_type = message_type.lower()
 
-    if message_type == 'success':
-        color = Colors.OK
-    elif message_type == 'error':
-        color = Colors.FAIL
-    elif message_type == 'warning':
-        color = Colors.WARNING
-    elif message_type == 'info':
-        color = Colors.INFO
-    elif message_type == 'question':
-        color = Colors.QUESTION
+    if message_type == 'green':
+        color = Colors.GREEN
+    elif message_type == 'red':
+        color = Colors.RED
+    elif message_type == 'yellow':
+        color = Colors.YELLOW
+    elif message_type == 'blue':
+        color = Colors.BLUE
+    elif message_type == 'purple':
+        color = Colors.PURPLE
 
-    print(color + message + Colors.ENDC)
+    if newline:
+        print(color + message + Colors.ENDC)
+    else:
+        print(color + message + Colors.ENDC, end='')
+
 
 def load_config():
     with open('config.yml', 'r') as config_file:
@@ -38,16 +46,15 @@ def load_config():
     return config
 
 def get_app_choice():
-    print_message("Select your app of choice", "question")
+    print_message("Select your app of choice", "blue")
     # Dynamically generate the app selection menu
     app_menu = "\n".join([f"{key}. {value}" for key, value in Apps.APP_CHOICES.items()])
-    print_message(app_menu, "info")
-    print_message("Enter your choice: ", "question")
+    print_message(app_menu)
+    print_message("Enter your choice: ", "blue")
     app_choice = input().strip()
-    print()
 
     while app_choice not in Apps.APP_CHOICES.keys():
-        print_message("Invalid input. Please enter a valid choice.", "warning")
+        print_message("Invalid input. Please enter a valid choice.", "red")
         app_choice = input().strip()
 
     app = Apps.APP_CHOICES[app_choice]
@@ -58,12 +65,12 @@ def get_instance_choice(app):
     config = load_config() 
     app_instances = config['instances'].get(app.lower(), [])
 
-    print_message(f"Select your {app.capitalize()} instance", "question")
+    print_message(f"Select your {app.capitalize()} instance", "blue")
     # Display instances and prompt for choice
     for i, instance in enumerate(app_instances, start=1):
-        print_message(f"{i}. {app.capitalize()} ({instance['name']})", "info")
+        print_message(f"{i}. {app.capitalize()} ({instance['name']})")
 
-    print_message("Choose an instance by number or type 'all' for all instances: ", "question")
+    print_message("Choose an instance by number or type 'all' for all instances: ", "blue")
     choice = input().strip()
     print()
     selected_instances = []
@@ -79,7 +86,42 @@ def get_instance_choice(app):
 
     return selected_instances
 
-# Example usage
-app_choice = get_app_choice()  # This function needs to ask for 'sonarr' or 'radarr'
-selected_instances = get_instance_choice(app_choice)
-print(selected_instances)
+def make_request(request_type, url, api_key, resource_type, json_payload=None):
+    full_url = f"{url}/api/v3/{resource_type}"
+
+    headers = {"X-Api-Key": api_key}
+    
+    try:
+        # Make the appropriate request based on the request_type
+        if request_type.lower() == 'get':
+            response = requests.get(full_url, headers=headers, json=json_payload)
+        elif request_type.lower() == 'post':
+            response = requests.post(full_url, headers=headers, json=json_payload)
+        elif request_type.lower() == 'put':
+            response = requests.put(full_url, headers=headers, json=json_payload)
+        elif request_type.lower() == 'delete':
+            response = requests.delete(full_url, headers=headers)
+        elif request_type.lower() == 'patch':
+            response = requests.patch(full_url, headers=headers, json=json_payload)
+        else:
+            raise ValueError("Unsupported request type provided.")
+
+        # Process response
+        if response.status_code in [200, 201, 202]:
+            try:
+                return response.json()
+            except json.JSONDecodeError:
+                print_message("Failed to decode JSON response.", "red")
+                return None
+        elif response.status_code == 401:
+            print_message("Unauthorized. Check your API key.", "red")
+        elif response.status_code == 409:
+            print_message("Conflict detected. The requested action could not be completed.", "red")
+        else:
+            print_message(f"HTTP Error {response.status_code}.", "red")
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        # Update the message here to suggest checking the application's accessibility
+        print_message("Network error. Make sure the application is running and accessible.", "red")
+
+    return None
+
