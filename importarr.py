@@ -200,4 +200,5 @@ def main():
     import_custom_formats(app, instances)
     import_quality_profiles(app, instances)
 
-main()
+if __name__ == "__main__":
+    main()

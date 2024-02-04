@@ -129,4 +129,5 @@ def main():
     export_custom_formats(app, instances, config)
     export_quality_profiles(app, instances, config)
 
-main()
+if __name__ == "__main__":
+    main()
