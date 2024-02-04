@@ -102,14 +102,14 @@ def export_quality_profiles(app, instances, config):
             # Remove the 'id' field
             quality_profile.pop('id', None)
 
-            # Create a file name from the quality profile name
-            file_name = f"{quality_profile['name']}.json"
+            # Create a file name from the quality profile name and app
+            file_name = f"{quality_profile['name']} ({app}).json"
             file_name = re.sub(r'[\\/*?:"<>|]', '', file_name)  # Remove invalid characters
 
             # Save the quality profile to a file in the export directory
             try:
                 with open(os.path.join(dir_path, file_name), 'w') as f:
-                    json.dump(quality_profile, f, indent=4)
+                    json.dump([quality_profile], f, indent=4)  # Wrap quality_profile in a list
                 status = 'SUCCESS'
                 status_color = 'green'
             except Exception as e:

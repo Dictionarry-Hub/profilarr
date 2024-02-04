@@ -360,6 +360,21 @@
         "cutoffFormatScore": 0,
         "formatItems": [
             {
+                "format": 338,
+                "name": "TEST FLAC",
+                "score": 0
+            },
+            {
+                "format": 337,
+                "name": "h265 (4k)",
+                "score": 0
+            },
+            {
+                "format": 336,
+                "name": "MAX",
+                "score": 0
+            },
+            {
                 "format": 335,
                 "name": "Blu-Ray (Remux)",
                 "score": 0
