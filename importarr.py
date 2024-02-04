@@ -4,7 +4,7 @@ import fnmatch
 import json
 
 def get_custom_formats(app):
-    import_path = './custom_formats'
+    import_path = f'./imports/custom_formats/{app}'  # Append app type to the path
     for file in os.listdir(import_path):
         if fnmatch.fnmatch(file, f'*{app}*'):
             return file
@@ -48,7 +48,7 @@ def import_custom_formats(app, instances):
             continue
 
         added_count, updated_count = 0, 0
-        with open(os.path.join('./custom_formats', app_file), 'r') as import_file:
+        with open(f'./imports/custom_formats/{app}/{app_file}', 'r') as import_file:
             import_formats = json.load(import_file)
 
         print_message(f"Importing custom formats to {app} : {instance['name']}", "purple")
@@ -68,7 +68,7 @@ def import_custom_formats(app, instances):
         print()
 
 def get_profiles(app):
-    import_path = './profiles'
+    import_path = f'./imports/quality_profiles/{app.lower()}'  # Append app type to the path
     matching_files = []  # Create an empty list to hold matching files
     for file in os.listdir(import_path):
         if fnmatch.fnmatch(file, f'*{app}*'):
@@ -160,7 +160,7 @@ def process_profile(profile, base_url, api_key, custom_formats, existing_profile
 
     # Determine the status and print the status in green (OK) or red (FAIL)
     if response:
-        print_message(" : OK", "green")
+        print_message(" : SUCCESS", "green")
     else:
         print_message(" : FAIL", "red")
 
@@ -181,7 +181,7 @@ def import_quality_profiles(app, instances):
         print()
 
         for profile_file in selected_profiles_names:
-            with open(os.path.join('./profiles', profile_file), 'r') as file:
+            with open(f'./imports/quality_profiles/{app}/{profile_file}', 'r') as file:
                 try:
                     quality_profiles = json.load(file)
                 except json.JSONDecodeError as e:
