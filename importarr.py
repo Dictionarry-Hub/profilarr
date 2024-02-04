@@ -33,9 +33,7 @@ def process_format(format, existing_names_to_id, base_url, api_key):
             print_message(" : FAIL", "red", newline=False)
     return 0, 0
 
-def import_custom_formats():
-    app = get_app_choice()
-    instances = get_instance_choice(app)
+def import_custom_formats(app, instances):
 
     for instance in instances:
         api_key = instance['api_key']
@@ -97,6 +95,34 @@ def cf_import_sync(instances):
             print_message("No custom formats found for this instance.", "purple")
             print()
 
+def user_select_profiles(profiles):
+    print_message("Available profiles:", "purple")
+    for idx, profile in enumerate(profiles, start=1):
+        print(f"{idx}. {profile}")
+    print()
+
+    while True:
+        # Display prompt message
+        print_message("Enter the numbers of the profiles you want to import separated by commas, or type 'all' to import all profiles: ", "blue", newline=False)
+        user_input = input().strip()
+
+        if user_input.lower() == 'all':
+            return profiles  # Return all profiles if 'all' is selected
+
+        selected_profiles = []
+        try:
+            selected_indices = [int(index.strip()) for index in user_input.split(',')]
+            for index in selected_indices:
+                if 1 <= index <= len(profiles):
+                    selected_profiles.append(profiles[index - 1])
+                else:
+                    raise ValueError(f"Invalid selection: {index}. Please enter valid numbers.")  # Raise an error to trigger except block
+            return selected_profiles  # Return the selected profiles if all inputs are valid
+        except ValueError as e:
+            print_message(str(e), "red")  # Display error message in red
+
+
+
 def process_profile(profile, base_url, api_key, custom_formats, existing_profiles):
     profile_name = profile.get('name')
     existing_profile = existing_profiles.get(profile_name)
@@ -137,15 +163,12 @@ def process_profile(profile, base_url, api_key, custom_formats, existing_profile
     else:
         print_message(" : FAIL", "red")
 
-
-
-def import_quality_profiles():
-    app = get_app_choice()
-    instances = get_instance_choice(app)
+def import_quality_profiles(app, instances):
 
     cf_import_sync(instances)
 
-    profiles = get_profiles(app)
+    all_profiles = get_profiles(app)
+    selected_profiles_names = user_select_profiles(all_profiles)
 
     for instance in instances:
         base_url = instance['base_url']
@@ -153,7 +176,10 @@ def import_quality_profiles():
         custom_formats = instance.get('custom_formats', {})
         existing_profiles = get_existing_profiles(base_url, api_key)  # Retrieve existing profiles
 
-        for profile_file in profiles:
+        print_message(f"Importing Quality Profiles to {app} : {instance['name']}", "purple")
+        print()
+
+        for profile_file in selected_profiles_names:
             with open(os.path.join('./profiles', profile_file), 'r') as file:
                 try:
                     quality_profiles = json.load(file)
@@ -163,7 +189,14 @@ def import_quality_profiles():
 
                 for profile in quality_profiles:
                     process_profile(profile, base_url, api_key, custom_formats, existing_profiles)
+        
+        print()
 
+def main():
+    app = get_app_choice()
+    instances = get_instance_choice(app)
 
-# import_custom_formats()
-import_quality_profiles()
+    import_custom_formats(app, instances)
+    import_quality_profiles(app, instances)
+
+main()
