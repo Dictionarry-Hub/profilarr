@@ -1,183 +1,133 @@
-import requests
+from helpers import *
 import os
 import re
-import yaml
-import json
 
-# ANSI escape sequences for colors
-class Colors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+def prompt_export_choice():
+    options = { "1": "Custom Formats", "2": "Quality Profiles" }
 
-# Load configuration for main app
-with open('config.yml', 'r') as config_file:
-    config = yaml.safe_load(config_file)
-    master_config = config['instances']['master']
-    export_base_path = config['settings']['export_path']
+    print_message("Please select what you want to export:", "blue")
+    for number, option in options.items():
+        print_message(f"{number}. {option}", "green")
+    print_message("Enter the number(s) of your choice, multiple separated by commas, or type 'all' for all options", "yellow")
 
-def get_user_choice():
-    sources = []
-    print(Colors.HEADER + "Available sources to export from:" + Colors.ENDC)
+    user_choice = input("Your choice: ")
 
-    # Add master installations
-    for app in master_config:
-        sources.append((app, f"{app.capitalize()} [Master]", "master"))
-
-    # Add extra installations
-    if "extras" in config['instances']:
-        for app, instances in config['instances']['extras'].items():
-            for install in instances:
-                sources.append((app, f"{app.capitalize()} [{install['name']}]", install['name']))
-
-    # Display sources with numbers
-    for idx, (app, name, _) in enumerate(sources, start=1):
-        print(f"{idx}. {name}")
-
-    # User selection
-    choice = input("Enter the number of the app to export from: ").strip()
-    while not choice.isdigit() or int(choice) < 1 or int(choice) > len(sources):
-        print(Colors.FAIL + "Invalid input. Please enter a valid number." + Colors.ENDC)
-        choice = input("Enter the number of the app to export from: ").strip()
-
-    selected_app, instance_name = sources[int(choice) - 1][0], sources[int(choice) - 1][2]
-    print()
-    return selected_app, instance_name
-
-
-def get_export_choice():
-    print(Colors.HEADER + "Choose what to export:" + Colors.ENDC)
-    print("1. Custom Formats")
-    print("2. Quality Profiles")
-    print("3. Both")
-    choice = input("Enter your choice (1/2/3): ").strip()
-    while choice not in ["1", "2", "3"]:
-        print(Colors.FAIL + "Invalid input. Please enter 1, 2, or 3." + Colors.ENDC)
-        choice = input("Enter your choice (1/2/3): ").strip()
-    print()
-    return choice
-
-def get_app_config(source):
-    app_config = master_config[source]
-    return app_config['base_url'], app_config['api_key']
-
-def sanitize_filename(filename):
-    sanitized_filename = re.sub(r'[\\/*?:"<>|]', '_', filename)
-    return sanitized_filename
-
-def handle_response_errors(response):
-    if response.status_code == 401:
-        print(Colors.FAIL + "Authentication error: Invalid API key." + Colors.ENDC)
-    elif response.status_code == 403:
-        print(Colors.FAIL + "Forbidden: Access is denied." + Colors.ENDC)
+    if user_choice.lower() == 'all':
+        return list(options.values())
     else:
-        print(Colors.FAIL + f"An error occurred! (HTTP {response.status_code})" + Colors.ENDC)
-        print("Response Content: ", response.content.decode('utf-8'))
+        return [options[choice] for choice in user_choice.split(',') if choice in options]
 
-def print_saved_items(items, item_type):
-    if len(items) > 10:
-        items_to_display = items[:10]
-        for item in items_to_display:
-            print(f" - {item}")
-        print(f"... and {len(items) - 10} more.")
-    else:
-        for item in items:
-            print(f" - {item}")
+def create_export_path(export_path, app):
+    # Create a directory path for the export
+    dir_path = os.path.join(export_path, 'custom_formats', app)
 
-def ensure_directory_exists(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-        print(Colors.OKBLUE + f"Created directory: {directory}" + Colors.ENDC)
+    # Create the directory if it doesn't exist
+    os.makedirs(dir_path, exist_ok=True)
 
-def export_cf(source, instance_name, save_path=None):
-    if save_path is None:
-        save_path = os.path.join(export_base_path, source, instance_name, 'custom_formats')
-    ensure_directory_exists(save_path)
+    return dir_path
 
-    base_url, api_key = get_app_config(source)
-    headers = {"X-Api-Key": api_key}
-    params = {"apikey": api_key}
+def export_custom_formats(app, instances, config):
 
-    print(Colors.OKBLUE + f"Attempting to access {source.capitalize()} at {base_url}" + Colors.ENDC)
 
-    custom_format_url = f"{base_url}/api/v3/customformat"
-
-    try:
-        response = requests.get(custom_format_url, params=params, headers=headers)
+    for instance in instances:
+        print_message(f"Exporting Custom Formats for {app} : {instance['name']}", 'blue')
         
-        if response.status_code == 200:
-            data = response.json()
-            print(Colors.OKGREEN + f"Found {len(data)} custom formats." + Colors.ENDC)
+        url = instance['base_url']
+        api_key = instance['api_key']
 
-            saved_formats = []
-            for custom_format in data:
-                custom_format.pop('id', None)
-                saved_formats.append(custom_format['name'])
-            
-            file_path = os.path.join(save_path, f'Custom Formats ({source.capitalize()}).json')
-            with open(file_path, 'w') as f:
-                json.dump(data, f, indent=4)
+        # Get the export path from the config
+        export_path = config['settings']['export_path']
 
-            print_saved_items(saved_formats, "Custom Formats")
-            print(Colors.OKGREEN + f"Saved to '{file_path}'" + Colors.ENDC)
-            print()
-        else:
-            handle_response_errors(response)
+        # Create the export directory
+        dir_path = create_export_path(export_path, app)
 
-    except requests.exceptions.ConnectionError:
-        print(Colors.FAIL + f"Failed to connect to {source.capitalize()}! Please check if it's running and accessible." + Colors.ENDC)
+        # Assuming 'export' is a valid resource_type for the API
+        response = make_request('get', url, api_key, 'customformat')
 
+        successful_exports = 0  # Counter for successful exports
 
+        # Scrub the JSON data and save each custom format in its own file
+        all_custom_formats = []
+        for custom_format in response:
+            # Remove the 'id' field
+            custom_format.pop('id', None)
 
-def export_qf(source, instance_name, save_path=None):
-    if save_path is None:
-        save_path = os.path.join(export_base_path, source, instance_name, 'profiles')
-    ensure_directory_exists(save_path)
+            all_custom_formats.append(custom_format)
+            successful_exports += 1  # Increment the counter if the export was successful
 
-    base_url, api_key = get_app_config(source)
-    headers = {"X-Api-Key": api_key}
-    params = {"apikey": api_key}
+        # Hardcode the file name as 'Custom Formats (Radarr).json'
+        file_name = f"Custom Formats ({app.capitalize()} - {instance['name']}).json"
 
-    print(Colors.OKBLUE + f"Attempting to access {source.capitalize()} at {base_url}" + Colors.ENDC)
-    
-    try:
-        response = requests.get(f"{base_url}/api/v3/qualityprofile", params=params, headers=headers)
+        # Save all custom formats to a single file in the export directory
+        try:
+            with open(os.path.join(dir_path, file_name), 'w') as f:
+                json.dump(all_custom_formats, f, indent=4)
+            status = 'SUCCESS'
+            status_color = 'green'
+        except Exception as e:
+            status = 'FAILED'
+            status_color = 'red'
 
-        if response.status_code == 200:
-            quality_profiles = response.json()
-            print(Colors.OKGREEN + f"Found {len(quality_profiles)} quality profiles." + Colors.ENDC)
+        print_message(f"Exported {successful_exports} custom formats to {dir_path} for {instance['name']}", 'yellow')
+        print()
 
-            saved_profiles = []
-            for profile in quality_profiles:
-                profile.pop('id', None)
-                profile_name = profile.get('name', 'unnamed_profile')
-                profile_name = sanitize_filename(profile_name)
-                profile_filename = f"{profile_name} ({source.capitalize()}).json"
-                profile_filepath = os.path.join(save_path, profile_filename)
-                with open(profile_filepath, 'w') as file:
-                    json.dump([profile], file, indent=4)
-                saved_profiles.append(profile_name)  # Add the profile name to the list
+def create_quality_profiles_export_path(app, config):
+    # Get the export path from the config
+    export_path = config['settings']['export_path']
 
-            print_saved_items(saved_profiles, "Quality Profiles")
-            print(Colors.OKGREEN + f"Saved to '{os.path.normpath(save_path)}'" + Colors.ENDC)  # Normalize the path
-            print()
-        else:
-            handle_response_errors(response)
+    # Create a directory path for the export
+    dir_path = os.path.join(export_path, 'quality_profiles', app)
 
-    except requests.exceptions.ConnectionError:
-        print(Colors.FAIL + f"Failed to connect to {source.capitalize()}! Please check if it's running and accessible." + Colors.ENDC)
+    # Create the directory if it doesn't exist
+    os.makedirs(dir_path, exist_ok=True)
 
+    return dir_path
+
+def export_quality_profiles(app, instances, config):
+    for instance in instances:
+        print_message(f"Exporting Quality Profiles for {app} : {instance['name']}...", 'blue')
+        url = instance['base_url']
+        api_key = instance['api_key']
+
+        # Create the export directory
+        dir_path = create_quality_profiles_export_path(app, config)
+
+        # Assuming 'qualityprofile' is the valid resource_type for the API
+        response = make_request('get', url, api_key, 'qualityprofile')
+
+        successful_exports = 0  # Counter for successful exports
+
+        # Scrub the JSON data and save each quality profile in its own file
+        for quality_profile in response:
+            # Remove the 'id' field
+            quality_profile.pop('id', None)
+
+            # Create a file name from the quality profile name and app
+            file_name = f"{quality_profile['name']} ({app.capitalize()} - {instance['name']}).json"
+            file_name = re.sub(r'[\\/*?:"<>|]', '', file_name)  # Remove invalid characters
+
+            # Save the quality profile to a file in the export directory
+            try:
+                with open(os.path.join(dir_path, file_name), 'w') as f:
+                    json.dump([quality_profile], f, indent=4)  # Wrap quality_profile in a list
+                status = 'SUCCESS'
+                status_color = 'green'
+            except Exception as e:
+                status = 'FAILED'
+                status_color = 'red'
+            if status == 'SUCCESS':
+                successful_exports += 1  # Increment the counter if the export was successful
+
+        print_message(f"Exported {successful_exports} quality profiles to {dir_path} for {instance['name']}", 'yellow')
+        print()
+
+def main():
+    app = get_app_choice()
+    instances = get_instance_choice(app)
+    config = load_config()
+
+    export_custom_formats(app, instances, config)
+    export_quality_profiles(app, instances, config)
 
 if __name__ == "__main__":
-    user_choice, instance_name = get_user_choice()
-    export_choice = get_export_choice()
-
-    if export_choice in ["1", "3"]:
-        export_cf(user_choice, instance_name)
-    if export_choice in ["2", "3"]:
-        export_qf(user_choice, instance_name)
+    main()

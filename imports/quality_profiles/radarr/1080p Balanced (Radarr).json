@@ -1,6 +1,6 @@
 [
     {
-        "name": "1080p h265 Balanced",
+        "name": "1080p Balanced",
         "upgradeAllowed": true,
         "cutoff": 1004,
         "items": [
@@ -364,8 +364,23 @@
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 1000,
+        "cutoffFormatScore": 500,
         "formatItems": [
+            {
+                "format": 338,
+                "name": "TEST FLAC",
+                "score": 0
+            },
+            {
+                "format": 337,
+                "name": "h265 (4k)",
+                "score": -9999
+            },
+            {
+                "format": 336,
+                "name": "MAX",
+                "score": 0
+            },
             {
                 "format": 335,
                 "name": "Blu-Ray (Remux)",
@@ -379,7 +394,7 @@
             {
                 "format": 333,
                 "name": "h265",
-                "score": 60
+                "score": -9999
             },
             {
                 "format": 331,
@@ -429,7 +444,7 @@
             {
                 "format": 322,
                 "name": "Dolby Vision w/out Fallback",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 321,
@@ -449,22 +464,22 @@
             {
                 "format": 316,
                 "name": "HDR10 (Missing)",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 315,
                 "name": "HDR10",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 314,
                 "name": "Dolby Vision",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 312,
                 "name": "HDR10+",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 308,
