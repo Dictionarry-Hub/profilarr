@@ -8949,6 +8949,130 @@
                         "isFloat": false
                     }
                 ]
+            },
+            {
+                "name": "WEB",
+                "implementation": "SourceSpecification",
+                "implementationName": "Source",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": true,
+                "required": false,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Source",
+                        "value": 7,
+                        "type": "select",
+                        "advanced": false,
+                        "selectOptions": [
+                            {
+                                "value": 0,
+                                "name": "UNKNOWN",
+                                "order": 0,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 1,
+                                "name": "CAM",
+                                "order": 1,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 2,
+                                "name": "TELESYNC",
+                                "order": 2,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 3,
+                                "name": "TELECINE",
+                                "order": 3,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 4,
+                                "name": "WORKPRINT",
+                                "order": 4,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 5,
+                                "name": "DVD",
+                                "order": 5,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 6,
+                                "name": "TV",
+                                "order": 6,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 7,
+                                "name": "WEBDL",
+                                "order": 7,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 8,
+                                "name": "WEBRIP",
+                                "order": 8,
+                                "dividerAfter": false
+                            },
+                            {
+                                "value": 9,
+                                "name": "BLURAY",
+                                "order": 9,
+                                "dividerAfter": false
+                            }
+                        ],
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "AMiABLE",
+                "implementation": "ReleaseGroupSpecification",
+                "implementationName": "Release Group",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": false,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "(?<=^|[\\s.-])AMiABLE\\b",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "PiGNUS",
+                "implementation": "ReleaseGroupSpecification",
+                "implementationName": "Release Group",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": false,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "(?<=^|[\\s.-])PiGNUS\\b",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
             }
         ]
     },
@@ -12788,6 +12912,33 @@
                                 "dividerAfter": false
                             }
                         ],
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "TEST FLAC",
+        "includeCustomFormatWhenRenaming": false,
+        "specifications": [
+            {
+                "name": "flac",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "[.\\- ]FLAC",
+                        "type": "textbox",
+                        "advanced": false,
                         "privacy": "normal",
                         "isFloat": false
                     }
