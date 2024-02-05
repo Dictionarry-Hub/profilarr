@@ -87,8 +87,6 @@ Importing Quality Profiles to Radarr : 4k-radarr
 
 Adding '1080p Transparent' quality profile : SUCCESS
 Adding '2160p Optimal' quality profile : SUCCESS
-
-samchau@SamPC:/mnt/z/Profilarr$
 ```
 
 ### Exporting
@@ -118,8 +116,6 @@ Exported 134 custom formats to ./exports/custom_formats/Radarr for 4k-radarr
 
 Exporting Quality Profiles for Radarr : 4k-radarr...
 Exported 2 quality profiles to ./exports/quality_profiles/Radarr for 4k-radarr
-
-samchau@SamPC:/mnt/z/Profilarr$
 ```
 
 ### Syncing
