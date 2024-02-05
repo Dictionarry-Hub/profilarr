@@ -1,8 +1,8 @@
 [
     {
-        "name": "1080p Optimal",
+        "name": "2160p Optimal (Single Grab)",
         "upgradeAllowed": true,
-        "cutoff": 30,
+        "cutoff": 31,
         "items": [
             {
                 "quality": {
@@ -90,36 +90,7 @@
                     "modifier": "none"
                 },
                 "items": [],
-                "allowed": true
-            },
-            {
-                "name": "WEB 480p",
-                "items": [
-                    {
-                        "quality": {
-                            "id": 12,
-                            "name": "WEBRip-480p",
-                            "source": "webrip",
-                            "resolution": 480,
-                            "modifier": "none"
-                        },
-                        "items": [],
-                        "allowed": true
-                    },
-                    {
-                        "quality": {
-                            "id": 8,
-                            "name": "WEBDL-480p",
-                            "source": "webdl",
-                            "resolution": 480,
-                            "modifier": "none"
-                        },
-                        "items": [],
-                        "allowed": true
-                    }
-                ],
-                "allowed": true,
-                "id": 1000
+                "allowed": false
             },
             {
                 "quality": {
@@ -130,7 +101,7 @@
                     "modifier": "none"
                 },
                 "items": [],
-                "allowed": true
+                "allowed": false
             },
             {
                 "quality": {
@@ -141,7 +112,36 @@
                     "modifier": "remux"
                 },
                 "items": [],
-                "allowed": true
+                "allowed": false
+            },
+            {
+                "name": "WEB 480p",
+                "items": [
+                    {
+                        "quality": {
+                            "id": 8,
+                            "name": "WEBDL-480p",
+                            "source": "webdl",
+                            "resolution": 480,
+                            "modifier": "none"
+                        },
+                        "items": [],
+                        "allowed": false
+                    },
+                    {
+                        "quality": {
+                            "id": 12,
+                            "name": "WEBRip-480p",
+                            "source": "webrip",
+                            "resolution": 480,
+                            "modifier": "none"
+                        },
+                        "items": [],
+                        "allowed": false
+                    }
+                ],
+                "allowed": false,
+                "id": 1000
             },
             {
                 "quality": {
@@ -181,9 +181,9 @@
                 "items": [
                     {
                         "quality": {
-                            "id": 14,
-                            "name": "WEBRip-720p",
-                            "source": "webrip",
+                            "id": 5,
+                            "name": "WEBDL-720p",
+                            "source": "webdl",
                             "resolution": 720,
                             "modifier": "none"
                         },
@@ -192,9 +192,9 @@
                     },
                     {
                         "quality": {
-                            "id": 5,
-                            "name": "WEBDL-720p",
-                            "source": "webdl",
+                            "id": 14,
+                            "name": "WEBRip-720p",
+                            "source": "webrip",
                             "resolution": 720,
                             "modifier": "none"
                         },
@@ -228,26 +228,33 @@
                 "allowed": false
             },
             {
-                "quality": {
-                    "id": 15,
-                    "name": "WEBRip-1080p",
-                    "source": "webrip",
-                    "resolution": 1080,
-                    "modifier": "none"
-                },
-                "items": [],
-                "allowed": false
-            },
-            {
-                "quality": {
-                    "id": 3,
-                    "name": "WEBDL-1080p",
-                    "source": "webdl",
-                    "resolution": 1080,
-                    "modifier": "none"
-                },
-                "items": [],
-                "allowed": true
+                "name": "WEB 1080p",
+                "items": [
+                    {
+                        "quality": {
+                            "id": 3,
+                            "name": "WEBDL-1080p",
+                            "source": "webdl",
+                            "resolution": 1080,
+                            "modifier": "none"
+                        },
+                        "items": [],
+                        "allowed": false
+                    },
+                    {
+                        "quality": {
+                            "id": 15,
+                            "name": "WEBRip-1080p",
+                            "source": "webrip",
+                            "resolution": 1080,
+                            "modifier": "none"
+                        },
+                        "items": [],
+                        "allowed": false
+                    }
+                ],
+                "allowed": false,
+                "id": 1002
             },
             {
                 "quality": {
@@ -269,7 +276,7 @@
                     "modifier": "remux"
                 },
                 "items": [],
-                "allowed": true
+                "allowed": false
             },
             {
                 "quality": {
@@ -283,33 +290,15 @@
                 "allowed": false
             },
             {
-                "name": "WEB 2160p",
-                "items": [
-                    {
-                        "quality": {
-                            "id": 17,
-                            "name": "WEBRip-2160p",
-                            "source": "webrip",
-                            "resolution": 2160,
-                            "modifier": "none"
-                        },
-                        "items": [],
-                        "allowed": false
-                    },
-                    {
-                        "quality": {
-                            "id": 18,
-                            "name": "WEBDL-2160p",
-                            "source": "webdl",
-                            "resolution": 2160,
-                            "modifier": "none"
-                        },
-                        "items": [],
-                        "allowed": false
-                    }
-                ],
-                "allowed": false,
-                "id": 1003
+                "quality": {
+                    "id": 17,
+                    "name": "WEBRip-2160p",
+                    "source": "webrip",
+                    "resolution": 2160,
+                    "modifier": "none"
+                },
+                "items": [],
+                "allowed": false
             },
             {
                 "quality": {
@@ -324,6 +313,17 @@
             },
             {
                 "quality": {
+                    "id": 18,
+                    "name": "WEBDL-2160p",
+                    "source": "webdl",
+                    "resolution": 2160,
+                    "modifier": "none"
+                },
+                "items": [],
+                "allowed": true
+            },
+            {
+                "quality": {
                     "id": 31,
                     "name": "Remux-2160p",
                     "source": "bluray",
@@ -331,7 +331,7 @@
                     "modifier": "remux"
                 },
                 "items": [],
-                "allowed": false
+                "allowed": true
             },
             {
                 "quality": {
@@ -357,22 +357,37 @@
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 1000,
+        "cutoffFormatScore": 0,
         "formatItems": [
+            {
+                "format": 338,
+                "name": "TEST FLAC",
+                "score": 0
+            },
+            {
+                "format": 337,
+                "name": "h265 (4k)",
+                "score": 0
+            },
+            {
+                "format": 336,
+                "name": "MAX",
+                "score": 0
+            },
             {
                 "format": 335,
                 "name": "Blu-Ray (Remux)",
-                "score": 60
+                "score": 0
             },
             {
                 "format": 334,
                 "name": "PCM",
-                "score": 30
+                "score": 0
             },
             {
                 "format": 333,
                 "name": "h265",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 331,
@@ -442,22 +457,22 @@
             {
                 "format": 316,
                 "name": "HDR10 (Missing)",
-                "score": -9999
+                "score": 10
             },
             {
                 "format": 315,
                 "name": "HDR10",
-                "score": -9999
+                "score": 10
             },
             {
                 "format": 314,
                 "name": "Dolby Vision",
-                "score": -9999
+                "score": 30
             },
             {
                 "format": 312,
                 "name": "HDR10+",
-                "score": -9999
+                "score": 20
             },
             {
                 "format": 308,
@@ -497,7 +512,7 @@
             {
                 "format": 298,
                 "name": "480p",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 297,
@@ -507,27 +522,27 @@
             {
                 "format": 296,
                 "name": "TBB SD",
-                "score": 30
+                "score": 0
             },
             {
                 "format": 295,
                 "name": "Xvid",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 294,
                 "name": "DVD",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 293,
                 "name": "DVD REMUX ",
-                "score": 40
+                "score": -9999
             },
             {
                 "format": 292,
                 "name": "HANDJOB SD",
-                "score": 20
+                "score": 0
             },
             {
                 "format": 291,
@@ -572,7 +587,7 @@
             {
                 "format": 283,
                 "name": "Black and White",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 281,
@@ -587,12 +602,12 @@
             {
                 "format": 279,
                 "name": "FLAC",
-                "score": 30
+                "score": 40
             },
             {
                 "format": 278,
                 "name": "DTS-HD MA",
-                "score": 50
+                "score": 40
             },
             {
                 "format": 276,
@@ -602,7 +617,7 @@
             {
                 "format": 275,
                 "name": "Golden Popcorn SD",
-                "score": 30
+                "score": 0
             },
             {
                 "format": 274,
@@ -612,7 +627,7 @@
             {
                 "format": 273,
                 "name": "IMAX",
-                "score": 10
+                "score": 0
             },
             {
                 "format": 272,
@@ -692,7 +707,7 @@
             {
                 "format": 256,
                 "name": "x264",
-                "score": 10
+                "score": -9999
             },
             {
                 "format": 255,
@@ -702,12 +717,12 @@
             {
                 "format": 254,
                 "name": "Blu-Ray",
-                "score": -9999
+                "score": 60
             },
             {
                 "format": 253,
                 "name": "2160p",
-                "score": -9999
+                "score": 60
             },
             {
                 "format": 252,
@@ -717,7 +732,7 @@
             {
                 "format": 250,
                 "name": "1080p",
-                "score": 60
+                "score": -9999
             },
             {
                 "format": 249,
@@ -882,7 +897,7 @@
             {
                 "format": 217,
                 "name": "Dariush SD",
-                "score": 30
+                "score": 0
             },
             {
                 "format": 216,
