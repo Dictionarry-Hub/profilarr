@@ -35,11 +35,13 @@ Profilarr is a Python-based tool designed to add import/export/sync functionalit
 
 ### Importing
 
+Note: For users who start using Profilarr before v0.3, you no longer need to manually import custom formats. They will be imported automatically. Quality Profiles still require manual selection.
+
 1. If importing Dictionarry files, make sure the import path is `./imports` (This is the default path).
 2. If importing non Dictionarry files, make sure the import path is set to your desired import location.
 3. Run `python importarr.py` in your command line interface.
 4. Follow the on-screen prompts to select your desired app and which instance(s) to import to.
-5. Custom Formats will be imported AUTOMATICALLY, but Quality Profiles will require manual selection.
+5. Choose your desired quality profile(s) to import.
 
 #### Example: Importing 1080p Transparent and 2160p Optimal Quality Profiles
 
@@ -91,10 +93,11 @@ samchau@SamPC:/mnt/z/Profilarr$
 
 ### Exporting
 
-1. Run `python exportarr.py` in your command line interface.
-2. Follow the on-screen prompts to select your desired app and which instance(s) to export from.
-3. Choose the data you want to export.
-4. The data will be exported to `exports/{data_type}/{app}/`.
+1. Make sure the export path is set to your desired export location. The default is `./exports`.
+2. Run `python exportarr.py` in your command line interface.
+3. Follow the on-screen prompts to select your desired app and which instance(s) to export from.
+4. Choose the data you want to export.
+5. The data will be exported to `exports/{data_type}/{app}/`.
 
 #### Example
 
@@ -121,7 +124,7 @@ samchau@SamPC:/mnt/z/Profilarr$
 
 ### Syncing
 
-1. Make sure the import path is set to whatever your export path is. The default is `./exports`
+1. Make sure the import path is set to whatever your export path is. This is important, as the script will look for the exported files in this location.
 1. Run `python syncarr.py` in your command line interface.
 1. The script will automatically export data from the master instance and import it to all other instances specified in `config.json`.
 
@@ -129,73 +132,62 @@ samchau@SamPC:/mnt/z/Profilarr$
 
 ```bash
 PS Z:\Profilarr> py syncarr.py
-Select the app you want to sync:
+Select your app of choice
 1. Radarr
 2. Sonarr
-Enter your choice (1 or 2): 2
-Attempting to access Sonarr at http://localhost:8989
-Found 135 custom formats.
- - D-Z0N3
- - DON
- - EbP
- - Geek
- - TayTo
- - ZQ
- - VietHD
- - CtrlHD
- - HiFi
- - FoRM
-... and 125 more.
-Saved to './temp_directory/custom_formats\Custom Formats (Sonarr).json'
+Enter your choice:
+1
+Exporting Custom Formats for radarr : Master
+Exported 134 custom formats to ./exports\custom_formats\radarr for Master
 
-Attempting to access Sonarr at http://localhost:8989
-Found 11 quality profiles.
- - 1080p Transparent
- - 2160p Optimal
- - 1080p Transparent (Single Grab)
- - 1080p Transparent (Double Grab)
- - 1080p Balanced
- - 1080p Balanced (Single Grab)
- - 1080p h265 Balanced
- - 1080p h265 Balanced (Single Grab)
- - 1080p Optimal
- - 1080p Optimal (Single Grab)
-... and 1 more.
-Saved to 'temp_directory\quality_profiles'
+Exporting Quality Profiles for radarr : Master...
+Exported 14 quality profiles to ./exports\quality_profiles\radarr for Master
 
-Importing to instance: 4k-sonarr
-Adding custom format 'D-Z0N3': SUCCESS
-Adding custom format 'DON': SUCCESS
-Adding custom format 'EbP': SUCCESS
-Adding custom format 'Geek': SUCCESS
-Adding custom format 'TayTo': SUCCESS
-Adding custom format 'ZQ': SUCCESS
-Adding custom format 'VietHD': SUCCESS
-Adding custom format 'CtrlHD': SUCCESS
-Adding custom format 'HiFi': SUCCESS
-... and 125 more.
+Importing custom formats to radarr : 4k-radarr
 
-Successfully added 135 custom formats, updated 0 custom formats.
-Successfully added Quality Profile 1080p Balanced (Single Grab)
-Successfully added Quality Profile 1080p Balanced
-Successfully added Quality Profile 1080p h265 Balanced
-Successfully added Quality Profile 1080p h265 Balanced (Single Grab)
-Successfully added Quality Profile 1080p Optimal (Single Grab)
-Successfully added Quality Profile 1080p Optimal
-Successfully added Quality Profile 1080p Transparent (Double Grab)
-Successfully added Quality Profile 1080p Transparent (Single Grab)
-Successfully added Quality Profile 1080p Transparent
-Successfully added Quality Profile 2160p Optimal (Single Grab)
-Successfully added Quality Profile 2160p Optimal
-Deleted temporary directory: ./temp_directory
-PS Z:\Profilarr>
+...
+Updating custom format 'Blu-Ray (Remux)' : SUCCESS
+Updating custom format 'MAX' : SUCCESS
+Updating custom format 'h265 (4k)' : SUCCESS
+Updating custom format 'TEST FLAC' : SUCCESS
+
+Successfully added 134 custom formats, updated 0 custom formats.
+
+Available profiles:
+1. 1080p Balanced (Radarr).json
+2. 1080p Balanced (Single Grab) (Radarr).json
+3. 1080p h265 Balanced (Radarr).json
+4. 1080p h265 Balanced (Single Grab) (Radarr).json
+5. 1080p Optimal (Radarr).json
+6. 1080p Optimal (Single Grab) (Radarr).json
+7. 1080p Transparent (Double Grab) (Radarr).json
+8. 1080p Transparent (Radarr).json
+9. 1080p Transparent (Single Grab) (Radarr).json
+10. 2160p Optimal (Radarr).json
+11. 2160p Optimal (Single Grab) (Radarr).json
+
+Enter the numbers of the profiles you want to import separated by commas, or type 'all' to import all profiles:
+all
+Importing Quality Profiles to radarr : 4k-radarr
+
+Adding '1080p Balanced' quality profile : SUCCESS
+Adding '1080p Balanced (Single Grab)' quality profile : SUCCESS
+Adding '1080p h265 Balanced' quality profile : SUCCESS
+Adding '1080p h265 Balanced (Single Grab)' quality profile : SUCCESS
+Adding '1080p Optimal' quality profile : SUCCESS
+Adding '1080p Optimal (Single Grab)' quality profile : SUCCESS
+Adding '1080p Transparent (Double Grab)' quality profile : SUCCESS
+Updating '1080p Transparent' quality profile : SUCCESS
+Adding '1080p Transparent (Single Grab)' quality profile : SUCCESS
+Updating '2160p Optimal' quality profile : SUCCESS
+Adding '2160p Optimal (Single Grab)' quality profile : SUCCESS
 ```
 
 ### Deleting
 
 1. Run `python deletarr.py` in your command line interface.
-2. Select the instance from which you wish to delete data.
-3. Choose between deleting Custom Formats or Quality Profiles.
+2. Select the instance(s) from which you wish to delete data.
+3. Choose between deleting Custom Formats, Quality Profiles or both
 4. Select specific items by typing their numbers separated by commas, or type 'all' to delete everything.
 
 #### Example: Deleting Custom Formats
@@ -231,24 +223,68 @@ Deleting custom format 'MAX': SUCCESS
 #### Example: Deleting Quality Profiles
 
 ```plaintext
-PS Z:\Profilarr> python deletarr.py
+Select your app of choice
+1. Radarr
+2. Sonarr
+Enter your choice:
+1
+Select your Radarr instance
+1. Radarr (Master)
+2. Radarr (4k-radarr)
+Choose an instance by number, multiple numbers separated by commas or type 'all' for all instances:
+2
 
-Choose what to delete:
+Please select what you want to delete:
 1. Custom Formats
 2. Quality Profiles
-Enter your choice (1/2): 2
-
-Deleting selected quality profiles...
-
-Available items:
-1. 1080p Balanced
+3. Both
+Enter your choice: 3
+Available items to delete:
+1. D-Z0N3
+2. DON
+3. EbP
+4. Geek
+5. TayTo
+6. ZQ
 ...
-11. 2160p Optimal
+
+Enter the number(s) of the items you wish to delete, separated by commas, or type 'all' for all:
+Your choice: all
+Deleting Custom Format (D-Z0N3) : SUCCESS
+Deleting Custom Format (DON) : SUCCESS
+Deleting Custom Format (EbP) : SUCCESS
+Deleting Custom Format (Geek) : SUCCESS
+Deleting Custom Format (TayTo) : SUCCESS
+Deleting Custom Format (ZQ) : SUCCESS
+
+Available items to delete:
+1. 1080p Transparent
+2. 2160p Optimal
+3. 1080p Balanced
+4. 1080p Balanced (Single Grab)
+5. 1080p h265 Balanced
+6. 1080p h265 Balanced (Single Grab)
+7. 1080p Optimal
+8. 1080p Optimal (Single Grab)
+9. 1080p Transparent (Double Grab)
+10. 1080p Transparent (Single Grab)
+11. 2160p Optimal (Single Grab)
+
+Enter the number(s) of the items you wish to delete, separated by commas, or type 'all' for all:
 Your choice: all
 
-Deleting quality profile '1080p Balanced': SUCCESS
-...
-Deleting quality profile '2160p Optimal': SUCCESS
+Deleting Quality Profile (1080p Transparent) : SUCCESS
+Deleting Quality Profile (2160p Optimal) : SUCCESS
+Deleting Quality Profile (1080p Balanced) : SUCCESS
+Deleting Quality Profile (1080p Balanced (Single Grab)) : SUCCESS
+Deleting Quality Profile (1080p h265 Balanced) : SUCCESS
+Deleting Quality Profile (1080p h265 Balanced (Single Grab)) : SUCCESS
+Deleting Quality Profile (1080p Optimal) : SUCCESS
+Deleting Quality Profile (1080p Optimal (Single Grab)) : SUCCESS
+Deleting Quality Profile (1080p Transparent (Double Grab)) : SUCCESS
+Deleting Quality Profile (1080p Transparent (Single Grab)) : SUCCESS
+Deleting Quality Profile (2160p Optimal (Single Grab)) : SUCCESS
+PS Z:\Profilarr>
 ```
 
 ### Radarr and Sonarr Compatibility
