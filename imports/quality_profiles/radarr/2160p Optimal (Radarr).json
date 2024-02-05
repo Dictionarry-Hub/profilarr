@@ -360,6 +360,31 @@
         "cutoffFormatScore": 320,
         "formatItems": [
             {
+                "format": 344,
+                "name": "jennaortegaUHD",
+                "score": -99999
+            },
+            {
+                "format": 342,
+                "name": "Freeleech25",
+                "score": 3
+            },
+            {
+                "format": 341,
+                "name": "Freeleech50",
+                "score": 2
+            },
+            {
+                "format": 340,
+                "name": "Freeleech75",
+                "score": 1
+            },
+            {
+                "format": 339,
+                "name": "Freeleech100",
+                "score": 4
+            },
+            {
                 "format": 338,
                 "name": "TEST FLAC",
                 "score": 0
@@ -377,7 +402,7 @@
             {
                 "format": 335,
                 "name": "Blu-Ray (Remux)",
-                "score": 0
+                "score": 60
             },
             {
                 "format": 334,
