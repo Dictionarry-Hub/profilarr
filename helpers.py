@@ -14,8 +14,8 @@ class Colors:
 
 class Apps:
     APP_CHOICES = {
-        "1": "Radarr",
-        "2": "Sonarr",
+        "1": "radarr",
+        "2": "sonarr",
         # Add more apps here as needed
     }
 

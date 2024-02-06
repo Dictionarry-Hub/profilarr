@@ -1,6 +1,6 @@
 [
     {
-        "name": "1080p Transparent (Double Grab)",
+        "name": "1080p Transparent (Single Grab)",
         "upgradeAllowed": true,
         "cutoff": 1002,
         "items": [
@@ -364,8 +364,33 @@
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 140,
+        "cutoffFormatScore": 0,
         "formatItems": [
+            {
+                "format": 344,
+                "name": "jennaortegaUHD",
+                "score": 0
+            },
+            {
+                "format": 342,
+                "name": "Freeleech25",
+                "score": 0
+            },
+            {
+                "format": 341,
+                "name": "Freeleech50",
+                "score": 0
+            },
+            {
+                "format": 340,
+                "name": "Freeleech75",
+                "score": 0
+            },
+            {
+                "format": 339,
+                "name": "Freeleech100",
+                "score": 0
+            },
             {
                 "format": 338,
                 "name": "TEST FLAC",
@@ -459,7 +484,7 @@
             {
                 "format": 317,
                 "name": "TrueHD (Missing)",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 316,
@@ -499,7 +524,7 @@
             {
                 "format": 303,
                 "name": "mHD",
-                "score": -999999
+                "score": -99999
             },
             {
                 "format": 302,
@@ -559,7 +584,7 @@
             {
                 "format": 290,
                 "name": "ROKU",
-                "score": 60
+                "score": 30
             },
             {
                 "format": 289,
@@ -599,12 +624,12 @@
             {
                 "format": 281,
                 "name": "TrueHD",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 280,
                 "name": "DTS-X",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 279,
@@ -614,7 +639,7 @@
             {
                 "format": 278,
                 "name": "DTS-HD MA",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 276,
@@ -634,12 +659,12 @@
             {
                 "format": 273,
                 "name": "IMAX",
-                "score": 0
+                "score": 10
             },
             {
                 "format": 272,
                 "name": "ATMOS",
-                "score": 0
+                "score": 5
             },
             {
                 "format": 271,
@@ -664,37 +689,37 @@
             {
                 "format": 267,
                 "name": "Paramount+",
-                "score": 60
+                "score": 30
             },
             {
                 "format": 266,
                 "name": "Peacock TV",
-                "score": 60
+                "score": 30
             },
             {
                 "format": 265,
                 "name": "Hulu",
-                "score": 60
+                "score": 30
             },
             {
                 "format": 264,
                 "name": "Netflix",
-                "score": 60
+                "score": 40
             },
             {
                 "format": 263,
                 "name": "HBO Max",
-                "score": 60
+                "score": 40
             },
             {
                 "format": 262,
                 "name": "Disney+",
-                "score": 60
+                "score": 40
             },
             {
                 "format": 261,
                 "name": "Apple TV+",
-                "score": 60
+                "score": 50
             },
             {
                 "format": 260,
@@ -704,7 +729,7 @@
             {
                 "format": 259,
                 "name": "Amazon Prime",
-                "score": 60
+                "score": 50
             },
             {
                 "format": 258,
@@ -744,7 +769,7 @@
             {
                 "format": 249,
                 "name": "BHDStudio",
-                "score": 50
+                "score": 30
             },
             {
                 "format": 248,

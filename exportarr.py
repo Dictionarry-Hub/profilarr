@@ -18,8 +18,10 @@ def prompt_export_choice():
         return [options[choice] for choice in user_choice.split(',') if choice in options]
 
 def create_export_path(export_path, app):
-    # Create a directory path for the export
-    dir_path = os.path.join(export_path, 'custom_formats', app)
+    # Convert app to lowercase
+    app = app.lower()  # Ensure app is in lowercase
+    # Create a directory path for the export in lowercase
+    dir_path = os.path.join(export_path, 'custom_formats', app).lower()  # Convert entire path to lowercase
 
     # Create the directory if it doesn't exist
     os.makedirs(dir_path, exist_ok=True)
@@ -30,7 +32,7 @@ def export_custom_formats(app, instances, config):
 
 
     for instance in instances:
-        print_message(f"Exporting Custom Formats for {app} : {instance['name']}", 'blue')
+        print_message(f"Exporting Custom Formats for {app.capitalize()} : {instance['name']}", 'blue')
         
         url = instance['base_url']
         api_key = instance['api_key']
@@ -55,8 +57,7 @@ def export_custom_formats(app, instances, config):
             all_custom_formats.append(custom_format)
             successful_exports += 1  # Increment the counter if the export was successful
 
-        # Hardcode the file name as 'Custom Formats (Radarr).json'
-        file_name = f"Custom Formats ({app.capitalize()} - {instance['name']}).json"
+        file_name = f"custom formats ({app.lower()} - {instance['name'].lower()}).json"
 
         # Save all custom formats to a single file in the export directory
         try:
@@ -85,7 +86,7 @@ def create_quality_profiles_export_path(app, config):
 
 def export_quality_profiles(app, instances, config):
     for instance in instances:
-        print_message(f"Exporting Quality Profiles for {app} : {instance['name']}...", 'blue')
+        print_message(f"Exporting Quality Profiles for {app.capitalize()} : {instance['name']}", 'blue')
         url = instance['base_url']
         api_key = instance['api_key']
 
@@ -103,7 +104,7 @@ def export_quality_profiles(app, instances, config):
             quality_profile.pop('id', None)
 
             # Create a file name from the quality profile name and app
-            file_name = f"{quality_profile['name']} ({app.capitalize()} - {instance['name']}).json"
+            file_name = f"{quality_profile['name']} ({app.lower()} - {instance['name'].lower()}).json"
             file_name = re.sub(r'[\\/*?:"<>|]', '', file_name)  # Remove invalid characters
 
             # Save the quality profile to a file in the export directory
