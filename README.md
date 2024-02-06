@@ -32,6 +32,7 @@ Profilarr is a Python-based tool designed to add import/export/sync functionalit
 5. Save the changes.
 
 ## 🚀 Usage
+- If using Windows, use `python script.py` or `py script.py`. If on Linux, use `python3 script.py`.
 
 ### Importing
 
