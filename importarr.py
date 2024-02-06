@@ -20,7 +20,7 @@ def process_format(format, existing_names_to_id, base_url, api_key):
         if response is not None:
             print_message(f"Updating custom format '{format_name}'", "yellow", newline=False)
             print_message(" : SUCCESS", "green")
-            return 1, 0
+            return 0, 1
         else:
             print_message(f"Updating custom format '{format_name}'", "yellow", newline=False)
             print_message(" : FAIL", "red", newline=False)
@@ -29,7 +29,7 @@ def process_format(format, existing_names_to_id, base_url, api_key):
         if response is not None:
             print_message(f"Adding custom format '{format_name}'", "blue", newline=False)
             print_message(" : SUCCESS", "green")
-            return 0, 1
+            return 1, 0
         else:
             print_message(f"Adding custom format '{format_name}'", "blue", newline=False)
             print_message(" : FAIL", "red", newline=False)
