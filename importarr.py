@@ -5,7 +5,7 @@ import json
 
 def get_custom_formats(app):
     config = load_config()
-    import_path = f"{config['settings']['import_path']}/custom_formats/{app}"  # Adjusted path
+    import_path = f"{config['settings']['import_path']}/custom_formats/{app.lower()}"  # Adjusted path
     for file in os.listdir(import_path):
         if fnmatch.fnmatch(file, f'*{app}*'):
             return file
@@ -20,7 +20,7 @@ def process_format(format, existing_names_to_id, base_url, api_key):
         if response is not None:
             print_message(f"Updating custom format '{format_name}'", "yellow", newline=False)
             print_message(" : SUCCESS", "green")
-            return 1, 0
+            return 0, 1
         else:
             print_message(f"Updating custom format '{format_name}'", "yellow", newline=False)
             print_message(" : FAIL", "red", newline=False)
@@ -29,7 +29,7 @@ def process_format(format, existing_names_to_id, base_url, api_key):
         if response is not None:
             print_message(f"Adding custom format '{format_name}'", "blue", newline=False)
             print_message(" : SUCCESS", "green")
-            return 0, 1
+            return 1, 0
         else:
             print_message(f"Adding custom format '{format_name}'", "blue", newline=False)
             print_message(" : FAIL", "red", newline=False)
@@ -52,10 +52,10 @@ def import_custom_formats(app, instances):
             continue
 
         added_count, updated_count = 0, 0
-        with open(f"{config['settings']['import_path']}/custom_formats/{app}/{app_file}", 'r') as import_file:
+        with open(f"{config['settings']['import_path']}/custom_formats/{app.lower()}/{app_file}", 'r') as import_file:
             import_formats = json.load(import_file)
 
-        print_message(f"Importing custom formats to {app} : {instance['name']}", "purple")
+        print_message(f"Importing custom formats to {app.capitalize()} : {instance['name']}", "purple")
         print()
 
         for format in import_formats:
@@ -188,7 +188,7 @@ def import_quality_profiles(app, instances):
         print()
 
         for profile_file in selected_profiles_names:
-            with open(f"{config['settings']['import_path']}/quality_profiles/{app}/{profile_file}", 'r') as file:
+            with open(f"{config['settings']['import_path']}/quality_profiles/{app.lower()}/{profile_file}", 'r') as file:
                 try:
                     quality_profiles = json.load(file)
                 except json.JSONDecodeError as e:

@@ -1,6 +1,6 @@
 [
     {
-        "name": "1080p Balanced",
+        "name": "1080p h265 Balanced (Single Grab)",
         "upgradeAllowed": true,
         "cutoff": 1004,
         "items": [
@@ -364,8 +364,33 @@
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 500,
+        "cutoffFormatScore": 0,
         "formatItems": [
+            {
+                "format": 344,
+                "name": "jennaortegaUHD",
+                "score": 0
+            },
+            {
+                "format": 342,
+                "name": "Freeleech25",
+                "score": 0
+            },
+            {
+                "format": 341,
+                "name": "Freeleech50",
+                "score": 0
+            },
+            {
+                "format": 340,
+                "name": "Freeleech75",
+                "score": 0
+            },
+            {
+                "format": 339,
+                "name": "Freeleech100",
+                "score": 0
+            },
             {
                 "format": 338,
                 "name": "TEST FLAC",
@@ -374,7 +399,7 @@
             {
                 "format": 337,
                 "name": "h265 (4k)",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 336,
@@ -394,7 +419,7 @@
             {
                 "format": 333,
                 "name": "h265",
-                "score": -9999
+                "score": 60
             },
             {
                 "format": 331,
@@ -444,7 +469,7 @@
             {
                 "format": 322,
                 "name": "Dolby Vision w/out Fallback",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 321,
@@ -464,22 +489,22 @@
             {
                 "format": 316,
                 "name": "HDR10 (Missing)",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 315,
                 "name": "HDR10",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 314,
                 "name": "Dolby Vision",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 312,
                 "name": "HDR10+",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 308,
