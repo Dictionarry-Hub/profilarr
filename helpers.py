@@ -3,6 +3,7 @@ import json
 import requests
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
+import sys
 
 class Colors:
     GREEN = '\033[92m'
@@ -20,24 +21,41 @@ class Apps:
     }
 
 def print_message(message, message_type='', newline=True):
-    color = Colors.ENDC  # default color
-    message_type = message_type.lower()
+    config = load_config()
+    ansi_colors = config['settings']['ansi_colors']
+    
+    if ansi_colors:
+        # Initialize color as default.
+        color = Colors.ENDC
+        message_type = message_type.lower()
 
-    if message_type == 'green':
-        color = Colors.GREEN
-    elif message_type == 'red':
-        color = Colors.RED
-    elif message_type == 'yellow':
-        color = Colors.YELLOW
-    elif message_type == 'blue':
-        color = Colors.BLUE
-    elif message_type == 'purple':
-        color = Colors.PURPLE
+        # Assign color based on message type.
+        if message_type == 'green':
+            color = Colors.GREEN
+        elif message_type == 'red':
+            color = Colors.RED
+        elif message_type == 'yellow':
+            color = Colors.YELLOW
+        elif message_type == 'blue':
+            color = Colors.BLUE
+        elif message_type == 'purple':
+            color = Colors.PURPLE
+        
+        # Prepare the end color reset code.
+        end_color = Colors.ENDC
 
-    if newline:
-        print(color + message + Colors.ENDC)
+        # Print the colored message.
+        if newline:
+            print(color + message + end_color)
+        else:
+            print(color + message + end_color, end='')
     else:
-        print(color + message + Colors.ENDC, end='')
+        # Print the message without color if ANSI colors are disabled.
+        if newline:
+            print(message)
+        else:
+            print(message, end='')
+
 
 
 def load_config():
@@ -119,6 +137,7 @@ def make_request(request_type, url, api_key, resource_type, json_payload=None):
                 return None
         elif response.status_code == 401:
             print_message("Unauthorized. Check your API key.", "red")
+            sys.exit()
         elif response.status_code == 409:
             print_message("Conflict detected. The requested action could not be completed.", "red")
         else:
@@ -126,6 +145,7 @@ def make_request(request_type, url, api_key, resource_type, json_payload=None):
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         # Update the message here to suggest checking the application's accessibility
         print_message("Network error. Make sure the application is running and accessible.", "red")
+        sys.exit()
 
     return None
 
