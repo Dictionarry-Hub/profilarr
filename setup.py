@@ -17,7 +17,7 @@ instances:
 settings:
   export_path: "./exports"
   import_path: "./imports"
-  ansi_colors: "true"
+  ansi_colors: true
 
 """
 
