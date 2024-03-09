@@ -18,22 +18,19 @@ Come join us at https://discord.gg/ZxywYBGRB9 if you need any help or want to ta
 - Python 3.x installed. You can download it from [python.org](https://www.python.org/downloads/).
 - Radarr / Sonarr
 
-### 📦 Dependencies
-
-- run `pip install -r requirements.txt` to install dependencies.
-
 ### Initial Setup
 
 1. Download the latest Profilarr package from the release section.
 2. Extract its contents into a folder.
-3. Run `python setup.py` in your command line interface to generate a config file.
+3. run `pip install -r requirements.txt` to install dependencies.
+4. Run `python setup.py` in your command line interface to generate a config file.
    - This will create a `config.yml` file in the same directory as `setup.py`.
-4. Open the `config.yml` file in a text editor.
+5. Open the `config.yml` file in a text editor.
    - Add the URL and API key to the master instances of Radarr / Sonarr.
    - If syncing, add the URL, API key, and a name to each extra instance of Radarr / Sonarr.
    - If exporting, adjust the `export_path` to your desired export location.
    - If importing non-Dictionary files, adjust the `import_path` to your desired import location.
-5. Configure ANSI Color Support (Optional):
+6. Configure ANSI Color Support (Optional):
    - The Profilarr scripts use ANSI colors in terminal output for better readability. By default, this feature is enabled (`ansi_colors: true`).
    - **If your terminal does not properly display ANSI colors** (e.g., you see codes like `←[94m` instead of colored text), you may want to disable this feature to improve readability.
    - To disable ANSI colors, find the `settings` section in your `config.yml` file and change `ansi_colors` to `false`.
@@ -43,7 +40,7 @@ Come join us at https://discord.gg/ZxywYBGRB9 if you need any help or want to ta
      import_path: "./imports"
      ansi_colors: false # Disable ANSI colors if your terminal doesn't support them
    ```
-6. Save the changes to your `config.yml` file after making the necessary adjustments.
+7. Save the changes to your `config.yml` file after making the necessary adjustments.
 
 ## 🚀 Usage
 
