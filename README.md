@@ -20,28 +20,55 @@ Come join us at https://discord.gg/ZxywYBGRB9 if you need any help or want to ta
 
 ### Initial Setup
 
-1. Download the latest Profilarr package from the release section.
-2. Extract its contents into a folder.
-3. Navigate to this extracted folder inside your terminal using `cd`
-4. Run `pip install -r requirements.txt` to install dependencies.
-5. Run `python setup.py` in your command line interface to generate a config file.
-   - This will create a `config.yml` file.
-6. Open the `config.yml` file in a text editor.
-   - Add the URL and API key to the master instances of Radarr / Sonarr.
-   - If syncing, add the URL, API key, and a name to each extra instance of Radarr / Sonarr.
-   - If exporting, adjust the `export_path` to your desired export location.
-   - If importing non-Dictionary files, adjust the `import_path` to your desired import location.
-7. Configure ANSI Color Support (Optional):
-   - The Profilarr scripts use ANSI colors in terminal output for better readability. By default, this feature is enabled (`ansi_colors: true`).
-   - **If your terminal does not properly display ANSI colors** (e.g., you see codes like `←[94m` instead of colored text), you may want to disable this feature to improve readability.
-   - To disable ANSI colors, find the `settings` section in your `config.yml` file and change `ansi_colors` to `false`.
-   ```yaml
-   settings:
-     export_path: "./exports"
-     import_path: "./imports"
-     ansi_colors: false # Disable ANSI colors if your terminal doesn't support them
-   ```
-8. Save the changes to your `config.yml` file after making the necessary adjustments.
+#### Step 1: Download Profilarr
+
+1. **Download Profilarr:**
+   - Go to the Profilarr GitHub page and find the "Releases" [section](https://github.com/santiagosayshey/Profilarr/releases).
+   - Download the latest release package.
+
+2. **Extract Files:**
+   - Once downloaded, extract the zip file to a folder of your choice.
+
+#### Step 2: Install Profilarr
+
+1. **Open Your Terminal:**
+   - **Windows:** Search for `Command Prompt` or `PowerShell` in your start menu.
+   - **MacOS:** Search for `Terminal`.
+   - **Linux:** Use your desktop environment's application launcher to find `Terminal`, or press `Ctrl+Alt+T` if that's a shortcut in your Linux distro.
+
+2. **Navigate to Profilarr Folder:**
+   - Type `cd path/to/your/folder` and press Enter. Replace `path/to/your/folder` with the actual path to where you extracted Profilarr. This command works the same on Windows, MacOS, and Linux.
+
+3. **Install Dependencies:**
+   - Type `pip install -r requirements.txt` and press Enter. This command tells Python to install the necessary software components Profilarr needs to run. The command is the same across all platforms.
+
+4. **Setup Configuration:**
+   - Type `python setup.py` and press Enter. This will run a setup script that prepares Profilarr for use by generating a `config.yml` file, essentially Profilarr's settings book.
+
+#### Step 3: Configure Profilarr
+
+1. **Edit `config.yml`:**
+   - Open the `config.yml` file in a text editor. Windows users might use Notepad, MacOS users might use TextEdit, and Linux users can use any text editor like Gedit, Nano, or Vim.
+   - This file contains different settings that you can adjust to tell Profilarr how to operate.
+
+2. **Add Master Instance Details:**
+   - Look for the section related to Radarr/Sonarr.
+   - Here, enter the URL and API key for your Radarr/Sonarr instances to link Profilarr with your movie/TV series managers.
+
+3. **Configure Syncing or Exporting (if needed):**
+   - **Syncing:** For syncing additional Radarr/Sonarr instances, add their URL, API key, and a name for each.
+   - **Exporting:** To set where Profilarr saves files it creates, adjust the `export_path`.
+   - **Importing:** If you have settings or lists from other sources, set `import_path` to their location.
+
+4. **Configure ANSI Color Support (Optional):**
+   - Profilarr can show colorful text in the terminal. If it's not displaying correctly (like showing `←[94m` instead of colors), you can fix this:
+     - In the `settings` section, find `ansi_colors: true`.
+     - Change it to `ansi_colors: false`. This disables colorful output for better compatibility with your terminal's capabilities.
+
+5. **Save Your Changes:**
+   - After adjusting these settings, save and close the `config.yml` file.
+
+#### You're All Set!
 
 ## 🚀 Usage
 
