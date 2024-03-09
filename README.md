@@ -22,7 +22,7 @@ Come join us at https://discord.gg/ZxywYBGRB9 if you need any help or want to ta
 
 1. Download the latest Profilarr package from the release section.
 2. Extract its contents into a folder.
-3. run `pip install -r requirements.txt` to install dependencies.
+3. Run `pip install -r requirements.txt` to install dependencies.
 4. Run `python setup.py` in your command line interface to generate a config file.
    - This will create a `config.yml` file in the same directory as `setup.py`.
 5. Open the `config.yml` file in a text editor.
