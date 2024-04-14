@@ -1,6 +1,6 @@
 [
     {
-        "name": "1080p Transparent",
+        "name": "2160p Balanced",
         "upgradeAllowed": true,
         "cutoff": 1002,
         "items": [
@@ -235,7 +235,7 @@
                 "allowed": true
             },
             {
-                "name": "Transparent Capable",
+                "name": "Balanced Capable",
                 "items": [
                     {
                         "quality": {
@@ -269,10 +269,32 @@
                         },
                         "items": [],
                         "allowed": true
+                    },
+                    {
+                        "quality": {
+                            "id": 18,
+                            "name": "WEBDL-2160p",
+                            "source": "webdl",
+                            "resolution": 2160,
+                            "modifier": "none"
+                        },
+                        "items": [],
+                        "allowed": false
                     }
                 ],
                 "allowed": true,
                 "id": 1002
+            },
+            {
+                "quality": {
+                    "id": 19,
+                    "name": "Bluray-2160p",
+                    "source": "bluray",
+                    "resolution": 2160,
+                    "modifier": "none"
+                },
+                "items": [],
+                "allowed": false
             },
             {
                 "quality": {
@@ -298,31 +320,9 @@
             },
             {
                 "quality": {
-                    "id": 18,
-                    "name": "WEBDL-2160p",
-                    "source": "webdl",
-                    "resolution": 2160,
-                    "modifier": "none"
-                },
-                "items": [],
-                "allowed": false
-            },
-            {
-                "quality": {
                     "id": 17,
                     "name": "WEBRip-2160p",
                     "source": "webrip",
-                    "resolution": 2160,
-                    "modifier": "none"
-                },
-                "items": [],
-                "allowed": false
-            },
-            {
-                "quality": {
-                    "id": 19,
-                    "name": "Bluray-2160p",
-                    "source": "bluray",
                     "resolution": 2160,
                     "modifier": "none"
                 },
@@ -364,7 +364,7 @@
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 500,
+        "cutoffFormatScore": 1000,
         "formatItems": [
             {
                 "format": 353,
@@ -439,12 +439,12 @@
             {
                 "format": 337,
                 "name": "h265 (4k)",
-                "score": 0
+                "score": 120
             },
             {
                 "format": 336,
                 "name": "MAX",
-                "score": 0
+                "score": 40
             },
             {
                 "format": 335,
@@ -519,7 +519,7 @@
             {
                 "format": 318,
                 "name": "ATMOS (Missing)",
-                "score": 0
+                "score": 10
             },
             {
                 "format": 317,
@@ -529,22 +529,22 @@
             {
                 "format": 316,
                 "name": "HDR10 (Missing)",
-                "score": -9999
+                "score": 10
             },
             {
                 "format": 315,
                 "name": "HDR10",
-                "score": -9999
+                "score": 10
             },
             {
                 "format": 314,
                 "name": "Dolby Vision",
-                "score": -9999
+                "score": 30
             },
             {
                 "format": 312,
                 "name": "HDR10+",
-                "score": -9999
+                "score": 20
             },
             {
                 "format": 308,
@@ -559,7 +559,7 @@
             {
                 "format": 306,
                 "name": "Scene",
-                "score": 30
+                "score": -9999
             },
             {
                 "format": 303,
@@ -704,7 +704,7 @@
             {
                 "format": 272,
                 "name": "ATMOS",
-                "score": 5
+                "score": 10
             },
             {
                 "format": 271,
@@ -794,7 +794,7 @@
             {
                 "format": 253,
                 "name": "2160p",
-                "score": -9999
+                "score": 120
             },
             {
                 "format": 252,
