@@ -295,22 +295,22 @@
             },
             {
                 "quality": {
-                    "id": 30,
-                    "name": "Remux-1080p",
-                    "source": "bluray",
-                    "resolution": 1080,
-                    "modifier": "remux"
+                    "id": 18,
+                    "name": "WEBDL-2160p",
+                    "source": "webdl",
+                    "resolution": 2160,
+                    "modifier": "none"
                 },
                 "items": [],
                 "allowed": true
             },
             {
                 "quality": {
-                    "id": 18,
-                    "name": "WEBDL-2160p",
-                    "source": "webdl",
-                    "resolution": 2160,
-                    "modifier": "none"
+                    "id": 30,
+                    "name": "Remux-1080p",
+                    "source": "bluray",
+                    "resolution": 1080,
+                    "modifier": "remux"
                 },
                 "items": [],
                 "allowed": true
@@ -350,7 +350,7 @@
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 1000,
+        "cutoffFormatScore": 350,
         "formatItems": [
             {
                 "format": 353,
@@ -395,7 +395,7 @@
             {
                 "format": 344,
                 "name": "jennaortegaUHD",
-                "score": 0
+                "score": -9999
             },
             {
                 "format": 342,
@@ -445,7 +445,7 @@
             {
                 "format": 333,
                 "name": "h265",
-                "score": -9999
+                "score": 0
             },
             {
                 "format": 331,
@@ -775,7 +775,7 @@
             {
                 "format": 254,
                 "name": "Blu-Ray",
-                "score": -9999
+                "score": 60
             },
             {
                 "format": 253,
