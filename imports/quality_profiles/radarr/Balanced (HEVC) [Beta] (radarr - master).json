@@ -1,6 +1,6 @@
 [
     {
-        "name": "1080p h265 Balanced",
+        "name": "Balanced (HEVC) [Beta]",
         "upgradeAllowed": true,
         "cutoff": 1004,
         "items": [
@@ -364,8 +364,108 @@
             }
         ],
         "minFormatScore": 0,
-        "cutoffFormatScore": 1000,
+        "cutoffFormatScore": 520,
         "formatItems": [
+            {
+                "format": 373,
+                "name": "Tigole",
+                "score": 500
+            },
+            {
+                "format": 372,
+                "name": "x265 (Missing)",
+                "score": -500
+            },
+            {
+                "format": 371,
+                "name": "edge2020",
+                "score": 500
+            },
+            {
+                "format": 370,
+                "name": "x265 (Web)",
+                "score": -9999
+            },
+            {
+                "format": 369,
+                "name": "MainFrame",
+                "score": 700
+            },
+            {
+                "format": 368,
+                "name": "LEGi0N (x265)",
+                "score": 500
+            },
+            {
+                "format": 367,
+                "name": "SEV",
+                "score": 500
+            },
+            {
+                "format": 366,
+                "name": "LSt",
+                "score": 700
+            },
+            {
+                "format": 365,
+                "name": "AnoZu",
+                "score": 500
+            },
+            {
+                "format": 364,
+                "name": "dkore",
+                "score": 680
+            },
+            {
+                "format": 363,
+                "name": "R1GY3B / B3YG1R",
+                "score": -9999
+            },
+            {
+                "format": 362,
+                "name": "QxR",
+                "score": 680
+            },
+            {
+                "format": 361,
+                "name": "Ralphy",
+                "score": 680
+            },
+            {
+                "format": 360,
+                "name": "Vyndros",
+                "score": 680
+            },
+            {
+                "format": 359,
+                "name": "TAoE",
+                "score": 680
+            },
+            {
+                "format": 358,
+                "name": "GRiMM",
+                "score": 680
+            },
+            {
+                "format": 357,
+                "name": "Chivaman",
+                "score": 700
+            },
+            {
+                "format": 356,
+                "name": "TimeDistortion",
+                "score": 680
+            },
+            {
+                "format": 355,
+                "name": "NAN0",
+                "score": 780
+            },
+            {
+                "format": 354,
+                "name": "HONE",
+                "score": 780
+            },
             {
                 "format": 353,
                 "name": "BHDStudio (1080p x265)",
@@ -684,7 +784,7 @@
             {
                 "format": 276,
                 "name": "x265",
-                "score": -9999
+                "score": -500
             },
             {
                 "format": 275,
