@@ -5769,7 +5769,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "\\b(roku)\\b",
+                        "value": "b(1080p\\s?ROKU(\\.WEB-DL)?|ROKU(\\s?WEB-DL)?)\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
