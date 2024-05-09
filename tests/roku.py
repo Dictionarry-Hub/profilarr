@@ -11,6 +11,16 @@ def roku(debug_level=0):
     roku_value_radarr = get_regex(roku_radarr, "roku", debug_level)
     roku_value_sonarr = get_regex(roku_sonarr, "roku", debug_level)
 
+    if debug_level == 0:
+        print(f"Testing with regex: {roku_value_radarr}")
+
+    # Compare Radarr and Sonarr Roku regex values
+    if roku_value_radarr != roku_value_sonarr:
+        print("Test Failed: regex value not same.")
+        print(f"Radarr regex: {roku_value_radarr}")
+        print(f"Sonarr regex: {roku_value_sonarr}")
+        sys.exit(1)
+
     radarr_good_matches = [
         "Weird The Al Yankovic Story 2022 1080p ROKU WEB-DL DD5.1 H.264-SMURF",
         "The.Spiderwick.Chronicles.2024.S01E06.1028.Teeth.1080p.ROKU.WEB-DL.DD5.1.H.264-playWEB",
@@ -75,3 +85,6 @@ if __name__ == "__main__":
             for platform, term in failed_good_matches:
                 print(f"- {platform}: {term}")
         sys.exit(1)
+
+
+        
