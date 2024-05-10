@@ -1,18 +1,20 @@
 # run_tests.py
 import sys
 from roku import roku
+from h265verify import h265
 # ... import other test functions
 
 def run_tests():
     tests = [
         ("ROKU", roku),
+        ("h265 Verified Groups", h265)
         # ... add other test functions
     ]
 
     failed_tests = []
     for test_name, test_func in tests:
         print(f"Running test: {test_name}")
-        test_result, failed_good_matches, failed_bad_matches = test_func(debug_level=0)
+        test_result, failed_good_matches, failed_bad_matches = test_func(debug_level=1)
         if test_result:
             print(f"Test passed: {test_name}\n")
         else:
