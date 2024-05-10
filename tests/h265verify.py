@@ -2,6 +2,11 @@ from extract import get_custom_format, get_regex
 import re
 import sys
 
+# ANSI escape codes for colors
+GREEN = '\033[92m'
+RED = '\033[91m'
+RESET = '\033[0m'
+
 def h265(debug_level=0):
     # Get the custom formats for "h265" from both Radarr and Sonarr
     h265_radarr = get_custom_format("h265", "radarr", debug_level)
@@ -15,7 +20,7 @@ def h265(debug_level=0):
     h265_value_radarr = h265_value_radarr.replace("(?<=^|[\\s.-])", "(?:^|[\\s.-])")
     h265_value_sonarr = h265_value_sonarr.replace("(?<=^|[\\s.-])", "(?:^|[\\s.-])")
 
-    if debug_level == 0:
+    if debug_level > 1:
         print(f"Testing with regex: {h265_value_radarr}")
 
     # Compare Radarr and Sonarr h265 regex values
@@ -70,48 +75,48 @@ def h265(debug_level=0):
     failed_good_matches = []
     failed_bad_matches = []
 
-    # Check Radarr good matches
+    # Print Radarr Good Matches
+    print("\nRadarr Releases:")
+    print("----------------")
+    print("Should Match:")
     for term in radarr_good_matches:
-        if not re.search(h265_value_radarr, term, re.IGNORECASE):
-            failed_good_matches.append(("Radarr", term))
-
-    # Check Radarr bad matches
-    for term in radarr_bad_matches:
         if re.search(h265_value_radarr, term, re.IGNORECASE):
+            print(f"  - {term}: {GREEN}Passed{RESET}")
+        else:
+            failed_good_matches.append(("Radarr", term))
+            print(f"  - {term}: {RED}Failed{RESET}")
+
+    # Print Radarr Bad Matches
+    print("\nShould NOT Match:")
+    for term in radarr_bad_matches:
+        if not re.search(h265_value_radarr, term, re.IGNORECASE):
+            print(f"  - {term}: {GREEN}Passed{RESET}")
+        else:
             failed_bad_matches.append(("Radarr", term))
+            print(f"  - {term}: {RED}Failed{RESET}")
 
-    # Check Sonarr good matches
+    # Print Sonarr Good Matches
+    print("\nSonarr Releases:")
+    print("----------------")
+    print("Should Match:")
     for term in sonarr_good_matches:
-        if not re.search(h265_value_sonarr, term, re.IGNORECASE):
-            failed_good_matches.append(("Sonarr", term))
-
-    # Check Sonarr bad matches
-    for term in sonarr_bad_matches:
         if re.search(h265_value_sonarr, term, re.IGNORECASE):
+            print(f"  - {term}: {GREEN}Passed{RESET}")
+        else:
+            failed_good_matches.append(("Sonarr", term))
+            print(f"  - {term}: {RED}Failed{RESET}")
+
+    # Print Sonarr Bad Matches
+    print("\nShould NOT Match:")
+    for term in sonarr_bad_matches:
+        if not re.search(h265_value_sonarr, term, re.IGNORECASE):
+            print(f"  - {term}: {GREEN}Passed{RESET}")
+        else:
             failed_bad_matches.append(("Sonarr", term))
+            print(f"  - {term}: {RED}Failed{RESET}")
 
-    # Return test result as a tuple (status, failed_good_matches, failed_bad_matches)
+    # Determine and print overall test result
     if not failed_good_matches and not failed_bad_matches:
-        if debug_level > 0:
-            print("Test Passed!")
-        return True, [], []
+        return True
     else:
-        return False, failed_good_matches, failed_bad_matches
-
-# Call the test function with debug level
-if __name__ == "__main__":
-    test_result, failed_good_matches, failed_bad_matches = h265(1)
-    if not test_result:
-        print("Test Failed!")
-        if failed_bad_matches:
-            print("\nThe following terms should not have matched:")
-            for platform, term in failed_bad_matches:
-                print(f"- {platform}: {term}")
-        if failed_good_matches:
-            print("\nThe following terms should have matched:")
-            for platform, term in failed_good_matches:
-                print(f"- {platform}: {term}")
-        sys.exit(1)
-
-
-        
+        return False
