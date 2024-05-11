@@ -12120,25 +12120,25 @@
     "name": "QxR",
     "includeCustomFormatWhenRenaming": true,
     "specifications": [
-      {
-        "name": "QxR",
-        "implementation": "ReleaseTitleSpecification",
-        "implementationName": "Release Title",
-        "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
-        "negate": false,
-        "required": true,
-        "fields": [
-          {
-            "order": 0,
-            "name": "value",
-            "label": "Regular Expression",
-            "helpText": "Custom Format RegEx is Case Insensitive",
-            "value": "(?<=^|[\\s.-])QxR\\b",
-            "type": "textbox",
-            "advanced": false,
-            "privacy": "normal",
-            "isFloat": false
-          }
+        {
+            "name": "QxR",
+            "implementation": "ReleaseTitleSpecification",
+            "implementationName": "Release Title",
+            "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+            "negate": false,
+            "required": true,
+            "fields": [
+                {
+                    "order": 0,
+                    "name": "value",
+                    "label": "Regular Expression",
+                    "helpText": "Custom Format RegEx is Case Insensitive",
+                    "value": "(?<=^|[\\s.-])(Tigole|FreetheFish|SAMPA|afm72|Silence|r00t|YOGI|MONOLITH|Panda|Kappa|t3nzin|RCVR|ImE|RZero|Garshasp|Ghost|Bandi|QxR)(?![.\\d])",
+                    "type": "textbox",
+                    "advanced": false,
+                    "privacy": "normal",
+                    "isFloat": false
+                }
         ]
       }
     ]
