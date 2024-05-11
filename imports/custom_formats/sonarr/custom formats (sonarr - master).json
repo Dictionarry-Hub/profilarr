@@ -12163,7 +12163,7 @@
           ]
         },
         {
-            "name": "h265",
+            "name": "UTR",
             "implementation": "ReleaseTitleSpecification",
             "implementationName": "Release Title",
             "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
@@ -12175,7 +12175,7 @@
                     "name": "value",
                     "label": "Regular Expression",
                     "helpText": "Custom Format RegEx is Case Insensitive",
-                    "value": "(?i)h\\s*\\.?\\s*265",
+                    "value": "(?<=^|[\\s.-])(UTR)(?![.\\d])",
                     "type": "textbox",
                     "advanced": false,
                     "privacy": "normal",
@@ -12184,7 +12184,7 @@
             ]
         }
     ]
-  },
+},
   {
     "name": "dkore",
     "includeCustomFormatWhenRenaming": true,
