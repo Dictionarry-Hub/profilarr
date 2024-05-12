@@ -14999,28 +14999,7 @@
                 ]
             },
             {
-                "name": "UTR",
-                "implementation": "ReleaseGroupSpecification",
-                "implementationName": "Release Group",
-                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
-                "negate": true,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Regular Expression",
-                        "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])(UTR)(?![.\\d])",
-                        "type": "textbox",
-                        "advanced": false,
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            },
-            {
-                "name": "UTR",
+                "name": "UTR (Group)",
                 "implementation": "ReleaseGroupSpecification",
                 "implementationName": "Release Group",
                 "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
@@ -15033,6 +15012,27 @@
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "UTR",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "UTR (Title)",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "(?<=^|[\\s.-])(UTR)(?![.\\d])",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
