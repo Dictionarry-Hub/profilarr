@@ -12024,14 +12024,14 @@
                 "implementationName": "Release Title",
                 "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
                 "negate": false,
-                "required": false,
+                "required": true,
                 "fields": [
                     {
                         "order": 0,
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "TAoE",
+                        "value": "(?<=^|[\\s.-])(Goki|Frys|JBENT|DNU|Ainz|TheSickle|ANONAZ|Species180|r0b0t|xtrem3|HxD|ArcX|WEM|Nostradamus|Erie|DUHIT|jb2049|DrainedDay|AJJMIN|TAoE)(?![.\\d])",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
