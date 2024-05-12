@@ -14496,33 +14496,6 @@
         ]
     },
     {
-        "name": "QxR",
-        "includeCustomFormatWhenRenaming": true,
-        "specifications": [
-            {
-                "name": "QxR",
-                "implementation": "ReleaseTitleSpecification",
-                "implementationName": "Release Title",
-                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
-                "negate": false,
-                "required": true,
-                "fields": [
-                    {
-                        "order": 0,
-                        "name": "value",
-                        "label": "Regular Expression",
-                        "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])QxR\\b",
-                        "type": "textbox",
-                        "advanced": false,
-                        "privacy": "normal",
-                        "isFloat": false
-                    }
-                ]
-            }
-        ]
-    },
-    {
         "name": "R1GY3B / B3YG1R",
         "includeCustomFormatWhenRenaming": true,
         "specifications": [
@@ -14959,13 +14932,13 @@
         ]
     },
     {
-        "name": "Tigole",
-        "includeCustomFormatWhenRenaming": false,
+        "name": "QxR",
+        "includeCustomFormatWhenRenaming": true,
         "specifications": [
             {
-                "name": "Tigole",
-                "implementation": "ReleaseGroupSpecification",
-                "implementationName": "Release Group",
+                "name": "QxR",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
                 "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
                 "negate": false,
                 "required": true,
@@ -14975,7 +14948,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])Tigole\\b",
+                        "value": "(?<=^|[\\s.-])(Tigole|FreetheFish|SAMPA|afm72|Silence|r00t|YOGI|MONOLITH|Panda|Kappa|t3nzin|RCVR|ImE|RZero|Garshasp|Ghost|Bandi|QxR)(?![.\\d])",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -14984,7 +14957,28 @@
                 ]
             },
             {
-                "name": "QxR",
+                "name": "x265",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "^(?!.*(?i:remux))(?=.*(\\b[x]\\s?(\\.?265)\\b|HEVC)).*$",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "h265",
                 "implementation": "ReleaseTitleSpecification",
                 "implementationName": "Release Title",
                 "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
@@ -14996,7 +14990,49 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])QxR\\b",
+                        "value": "(?i)h\\s*\\.?\\s*265",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "UTR",
+                "implementation": "ReleaseGroupSpecification",
+                "implementationName": "Release Group",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "UTR",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "UTR",
+                "implementation": "ReleaseGroupSpecification",
+                "implementationName": "Release Group",
+                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "UTR",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
