@@ -14948,7 +14948,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])(Tigole|FreetheFish|SAMPA|afm72|Silence|r00t|YOGI|MONOLITH|Panda|Kappa|t3nzin|RCVR|ImE|RZero|Garshasp|Ghost|Bandi|QxR)(?![.\\d])",
+                        "value": "(?<=^|[\\s.-])(Tigole|FreetheFish|SAMPA|afm72|Silence|r00t|YOGI|MONOLITH|Panda|Kappa|t3nzin|RCVR|ImE|RZero|Garshasp|Ghost|Bandi|QxR|Natty)(?![.\\d])",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
