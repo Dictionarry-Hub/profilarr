@@ -20,7 +20,7 @@ def h265(debug_level=0):
     h265_value_radarr = h265_value_radarr.replace("(?<=^|[\\s.-])", "(?:^|[\\s.-])")
     h265_value_sonarr = h265_value_sonarr.replace("(?<=^|[\\s.-])", "(?:^|[\\s.-])")
 
-    if debug_level > 1:
+    if debug_level > 0:
         print(f"Testing with regex: {h265_value_radarr}")
 
     # Compare Radarr and Sonarr h265 regex values
