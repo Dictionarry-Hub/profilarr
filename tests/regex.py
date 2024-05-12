@@ -1,6 +1,8 @@
 import sys
 from roku import roku
 from h265verify import h265
+from qxr import qxr
+from utr import utr
 # ... import other test functions
 
 # ANSI escape codes for colors
@@ -13,7 +15,10 @@ RESET = '\033[0m'
 def run_tests():
     tests = [
         ("ROKU", roku),
-        ("h265 Verified Groups", h265)
+        ("h265 Verified Groups", h265),
+        ("QxR Groups", qxr),
+        ("UTR Groups", utr)
+
         # ... add other test functions
     ]
 
