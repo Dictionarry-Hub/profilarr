@@ -2716,7 +2716,7 @@
         ]
     },
     {
-        "name": "Amazon Prime",
+        "name": "Amazon Prime (H264)",
         "includeCustomFormatWhenRenaming": true,
         "specifications": [
             {
@@ -2732,7 +2732,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "\\b(amzn|amazon)\\b",
+                        "value": "\\b(amzn|amazon)[. \\-_]1080p|1080p[. \\-_](amzn|amazon)\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
@@ -2815,7 +2815,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "^(?!.*(?i:remux)).*([x]\\s?(\\.?265))",
+                        "value": "^(?!.*(?i:remux))(?=.*(\\b[x]\\s?(\\.?265)\\b|HEVC)).*$",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
