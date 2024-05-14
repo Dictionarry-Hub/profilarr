@@ -11628,7 +11628,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "^(?!.*(?i:remux)).*([x]\\s?(\\.?265))",
+                        "value": "^(?!.*(?i:remux))(?=.*(\\b[x]\\s?(\\.?265)\\b|HEVC|\\bDS4K\\b)).*$",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
