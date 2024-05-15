@@ -42,7 +42,7 @@ def amzn(debug_level=0):
     failed_bad_matches = []
 
     # Print
-    print("\nRadarr Releases:")
+    print("\nTesting with old regex:")
     print("----------------")
     print("Should Match:")
     for term in radarr_good_matches:
@@ -54,7 +54,7 @@ def amzn(debug_level=0):
 
     
     # Print
-    print("\nRadarr Releases:")
+    print("\nTesting with new regex:")
     print("----------------")
     print("Should Match:")
     for term in radarr_good_matches:
