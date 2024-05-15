@@ -3,6 +3,7 @@ from roku import roku
 from h265verify import h265
 from qxr import qxr
 from utr import utr
+from amzn import amzn
 # ... import other test functions
 
 # ANSI escape codes for colors
@@ -14,10 +15,7 @@ RESET = '\033[0m'
 
 def run_tests():
     tests = [
-        ("ROKU", roku),
-        ("h265 Verified Groups", h265),
-        ("QxR Groups", qxr),
-        ("UTR Groups", utr)
+        ("Amazon Prime", amzn)
 
         # ... add other test functions
     ]
