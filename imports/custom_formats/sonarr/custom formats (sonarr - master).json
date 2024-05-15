@@ -12085,7 +12085,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])Ralphy\\b",
+                        "value": "(?<=^|[\\s.-])Ralphy(?:P)?\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
