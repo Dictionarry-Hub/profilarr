@@ -12295,7 +12295,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?:-.*|\\([^\\)]*[\\s.-])(?:\\bTigole\\b|\\bFreetheFish\\b|\\bSAMPA\\b|\\bafm72\\b|\\bSilence\\b|\\br00t\\b|\\bYOGI\\b|\\bMONOLITH\\b|\\bPanda\\b|\\bKappa\\b|\\bt3nzin\\b|\\bRCVR\\b|\\bImE\\b|\\bRZero\\b|\\bGarshasp\\b|\\bGhost\\b|\\bBandi\\b|\\bNatty\\b|\\bQxR\\b)(?![.\\d])",
+                        "value": "(?:-.*|\\([^\\)]*[\\s.-])\\b(?:Tigole|FreetheFish|SAMPA|afm72|Silence|r00t|YOGI|MONOLITH|Panda|Kappa|t3nzin|RCVR|ImE|RZero|Garshasp|Ghost|Bandi|Natty|QxR)\\b(?![.\\d])",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
