@@ -12073,7 +12073,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?i)h\\s*\\.?\\s*265",
+                        "value": "(?i)h\\\\s*\\\\.?\\\\s*265",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
