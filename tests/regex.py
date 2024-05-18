@@ -3,6 +3,7 @@ from roku import roku
 from h265verify import h265
 from qxr import qxr
 from utr import utr
+from x265web import x265WEB
 # ... import other test functions
 
 # ANSI escape codes for colors
@@ -17,7 +18,8 @@ def run_tests():
         ("ROKU", roku),
         ("h265 Verified Groups", h265),
         ("QxR Groups", qxr),
-        ("UTR Groups", utr)
+        ("UTR Groups", utr),
+        ("x265 (Web)", x265WEB)
 
         # ... add other test functions
     ]
