@@ -14422,9 +14422,9 @@
                 "name": "TAoE",
                 "implementation": "ReleaseTitleSpecification",
                 "implementationName": "Release Title",
-                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
                 "negate": false,
-                "required": false,
+                "required": true,
                 "fields": [
                     {
                         "order": 0,
@@ -14432,6 +14432,48 @@
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
                         "value": "\\bTAoE\\b|\\b(Goki|Frys|JBENT|DNU|Ainz|TheSickle|ANONAZ|Species180|r0b0t|xtrem3x|HxD|ArcX|WEM|Nostradamus|Erie|DUHIT|jb2049|DrainedDay|AJJMIN)\\W*([A-Z]|(\\[SEV\\])?\\W*(TAoE)?\\W*(mkv)?)$",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "x265",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "^(?!.*(?i:remux))(?=.*(\\b[x]\\s?(\\.?265)\\b|HEVC)).*$",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "h265",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "(?i)h\\\\s*\\\\.?\\\\s*265",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
