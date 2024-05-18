@@ -2,7 +2,6 @@ import sys
 from roku import roku
 from h265verify import h265
 from QxR import QxR
-from utr import utr
 from ralphy import Ralphy
 # ... import other test functions
 
