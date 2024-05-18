@@ -6926,7 +6926,7 @@
         "includeCustomFormatWhenRenaming": false,
         "specifications": [
             {
-                "name": "AV-1",
+                "name": "AV1",
                 "implementation": "ReleaseGroupSpecification",
                 "implementationName": "Release Group",
                 "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
