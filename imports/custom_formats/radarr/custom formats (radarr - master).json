@@ -15053,7 +15053,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?:^|[\\s.-])(?:UTR|\\[UTR\\])(?![.\\d])\\b",
+                        "value": "(?:^|[\\s.-])(?:UTR|\\[UTR\\])\\b(?![.\\d])|(?:^|[\\s.-])\\[UTR\\]$",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
