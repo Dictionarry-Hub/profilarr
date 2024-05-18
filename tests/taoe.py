@@ -5,7 +5,10 @@ import sys
 # ANSI escape codes for colors
 GREEN = '\033[92m'
 RED = '\033[91m'
+BLUE = '\033[94m'
+ORANGE = '\033[38;5;208m'
 RESET = '\033[0m'
+
 
 good_matches = [
     "Black Sails 2014 S02 1080p BluRay x265 10bit DTS-HD MA 5.1 + DD 5.1-Goki TAoE",
@@ -304,7 +307,7 @@ def taoe(debug_level=0):
     taoe_value_sonarr = taoe_value_sonarr.replace(r"(?<=^|[\s.-])", r"(?:^|[\s.-])")
 
     if debug_level > 0:
-        print(f"Testing with regex: {taoe_value_radarr}")
+        print(f"Testing with regex: {ORANGE}{taoe_value_radarr}{RESET}\n")
 
     # Compare Radarr and Sonarr taoe regex values
     if taoe_value_radarr != taoe_value_sonarr:
@@ -338,8 +341,11 @@ def taoe(debug_level=0):
             print(f"  - {release}: {GREEN}Passed{RESET}")
 
     print("\nFailed matches:")
-    for release in good_matches_failed + bad_matches_passed:
-        print(f"  - {release}")
+    if good_matches_failed or bad_matches_passed:
+        for release in good_matches_failed + bad_matches_passed:
+            print(f"  - {release}")
+    else:
+        print(f"{GREEN}None, Great Job! :){RESET}")
 
     total_matches = len(good_matches) + len(bad_matches)
     passed_matches = len(good_matches_passed) + len(bad_matches_failed)
@@ -351,8 +357,6 @@ def taoe(debug_level=0):
     print(f"Rate: {success_rate:.2f}%")
 
     if success_rate >= 99.8:
-        print("Test Passed")
         return True
     else:
-        print("Test Failed")
         return False
