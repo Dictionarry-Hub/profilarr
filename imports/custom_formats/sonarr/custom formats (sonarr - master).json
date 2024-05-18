@@ -6922,7 +6922,7 @@
         ]
     },
     {
-        "name": "AV-1",
+        "name": "AV1",
         "includeCustomFormatWhenRenaming": false,
         "specifications": [
             {
@@ -6938,7 +6938,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])AV-1\\b",
+                        "value": "\\bAV1\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
