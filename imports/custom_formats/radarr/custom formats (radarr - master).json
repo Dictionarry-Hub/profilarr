@@ -14620,7 +14620,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])SEV\\b",
+                        "value": "\\bSEV\\b|\\b(Kira|D0ct0rLew)\\W*([A-Z]|(SEV)?(mkv)?)$",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
