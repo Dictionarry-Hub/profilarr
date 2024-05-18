@@ -3,6 +3,7 @@ from roku import roku
 from h265verify import h265
 from qxr import qxr
 from utr import utr
+from taoe import taoe
 from ralphy import Ralphy
 # ... import other test functions
 
@@ -19,6 +20,7 @@ def run_tests():
         ("h265 Verified Groups", h265),
         ("QxR Groups", qxr),
         ("UTR Groups", utr),
+        ("TAoE Groups", taoe),
         ("Ralphy", Ralphy)
 
         # ... add other test functions
