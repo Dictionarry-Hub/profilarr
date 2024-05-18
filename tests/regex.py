@@ -1,7 +1,7 @@
 import sys
 from roku import roku
 from h265verify import h265
-from QxR import QxR
+from qxr import qxr
 from ralphy import Ralphy
 # ... import other test functions
 
@@ -16,7 +16,7 @@ def run_tests():
     tests = [
         ("ROKU", roku),
         ("h265 Verified Groups", h265),
-        ("QxR Groups", QxR),
+        ("QxR Groups", qxr),
         ("Ralphy", Ralphy)
 
         # ... add other test functions

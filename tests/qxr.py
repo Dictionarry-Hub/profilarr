@@ -407,7 +407,7 @@ hone_bad_matches = [
     "ASIAN KUNG-FU GENERATION - BEST HIT AKG Official Bootleg “HONE” (2018) [Anthology] [FLAC 24bit Lossless / WEB]"
 ]
 
-def QxR(debug_level=0):
+def qxr(debug_level=0):
     # Get the custom formats for "QxR" from both Radarr and Sonarr
     QxR_radarr = get_custom_format("QxR", "radarr", debug_level)
     QxR_sonarr = get_custom_format("QxR", "sonarr", debug_level)
