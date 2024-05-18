@@ -11680,8 +11680,8 @@
             },
             {
                 "name": "WEB",
-                "implementation": "ReleaseTitleSpecification",
-                "implementationName": "Release Title",
+                "implementation": "SourceSpecification",
+                "implementationName": "Source",
                 "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
                 "negate": false,
                 "required": true,
@@ -11689,11 +11689,52 @@
                     {
                         "order": 0,
                         "name": "value",
-                        "label": "Regular Expression",
-                        "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "WEB",
-                        "type": "textbox",
+                        "label": "Source",
+                        "value": 3,
+                        "type": "select",
                         "advanced": false,
+                        "selectOptions": [
+                            {
+                                "value": 0,
+                                "name": "Unknown",
+                                "order": 0
+                            },
+                            {
+                                "value": 1,
+                                "name": "Television",
+                                "order": 1
+                            },
+                            {
+                                "value": 2,
+                                "name": "TelevisionRaw",
+                                "order": 2
+                            },
+                            {
+                                "value": 3,
+                                "name": "Web",
+                                "order": 3
+                            },
+                            {
+                                "value": 4,
+                                "name": "WebRip",
+                                "order": 4
+                            },
+                            {
+                                "value": 5,
+                                "name": "DVD",
+                                "order": 5
+                            },
+                            {
+                                "value": 6,
+                                "name": "Bluray",
+                                "order": 6
+                            },
+                            {
+                                "value": 7,
+                                "name": "BlurayRaw",
+                                "order": 7
+                            }
+                        ],
                         "privacy": "normal",
                         "isFloat": false
                     }
