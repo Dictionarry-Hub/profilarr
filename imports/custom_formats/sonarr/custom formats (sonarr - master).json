@@ -12285,9 +12285,9 @@
         "includeCustomFormatWhenRenaming": false,
         "specifications": [
             {
-                "name": "SEV",
-                "implementation": "ReleaseGroupSpecification",
-                "implementationName": "Release Group",
+                "name": "x265",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
                 "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
                 "negate": false,
                 "required": true,
@@ -12297,7 +12297,91 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])SEV\\b",
+                        "value": "^(?!.*(?i:remux))(?=.*(\\b[x]\\s?(\\.?265)\\b|HEVC)).*$",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "Goki",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\b(goki)\\b",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "UTR",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "(?:^|[\\s.-])(UTR)(?![.\\d])\\b",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "UTR",
+                "implementation": "ReleaseGroupSpecification",
+                "implementationName": "Release Group",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": true,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "UTR",
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ]
+            },
+            {
+                "name": "SEV",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
+                "negate": false,
+                "required": true,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "value",
+                        "label": "Regular Expression",
+                        "helpText": "Custom Format RegEx is Case Insensitive",
+                        "value": "\\bSEV\\b|\\b(Kira|D0ct0rLew)\\W*([A-Z]|(SEV)?(mkv)?)$",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
