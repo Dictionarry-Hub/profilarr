@@ -20,7 +20,7 @@ def run_tests():
         ("ROKU", roku),
         ("h265 Verified Groups", h265),
         ("QxR Groups", qxr),
-        ("x265 (Web)", x265WEB)
+        ("x265 (Web)", x265WEB),
         ("TAoE Groups", taoe),
         ("Ralphy", Ralphy),
         ("AV1", AV1),
