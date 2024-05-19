@@ -9225,14 +9225,14 @@
         ]
     },
     {
-        "name": "AV-1",
+        "name": "AV1",
         "includeCustomFormatWhenRenaming": false,
         "specifications": [
             {
-                "name": "AV-1",
-                "implementation": "ReleaseGroupSpecification",
-                "implementationName": "Release Group",
-                "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
+                "name": "AV1",
+                "implementation": "ReleaseTitleSpecification",
+                "implementationName": "Release Title",
+                "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats-2",
                 "negate": false,
                 "required": true,
                 "fields": [
@@ -9241,7 +9241,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(?<=^|[\\s.-])AV-1\\b",
+                        "value": "\\bAV1\\b",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",

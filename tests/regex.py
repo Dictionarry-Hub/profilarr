@@ -2,9 +2,9 @@ import sys
 from roku import roku
 from h265verify import h265
 from qxr import qxr
-from utr import utr
 from taoe import taoe
 from ralphy import Ralphy
+from av1 import AV1
 # ... import other test functions
 
 # ANSI escape codes for colors
@@ -19,9 +19,9 @@ def run_tests():
         ("ROKU", roku),
         ("h265 Verified Groups", h265),
         ("QxR Groups", qxr),
-        ("UTR Groups", utr),
         ("TAoE Groups", taoe),
-        ("Ralphy", Ralphy)
+        ("Ralphy", Ralphy),
+        ("AV1", AV1),
 
         # ... add other test functions
     ]
