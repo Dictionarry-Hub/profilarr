@@ -6,6 +6,7 @@ from x265web import x265WEB
 from taoe import taoe
 from ralphy import Ralphy
 from av1 import AV1
+from sev import sev
 # ... import other test functions
 
 # ANSI escape codes for colors
@@ -24,6 +25,7 @@ def run_tests():
         ("TAoE Groups", taoe),
         ("Ralphy", Ralphy),
         ("AV1", AV1),
+        ("SEV", sev),
 
         # ... add other test functions
     ]
