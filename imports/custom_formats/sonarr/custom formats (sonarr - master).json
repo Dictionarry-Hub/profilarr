@@ -12615,7 +12615,7 @@
                         "name": "value",
                         "label": "Regular Expression",
                         "helpText": "Custom Format RegEx is Case Insensitive",
-                        "value": "(Up[-\\.\\s]?scale|Re[-\\.\\s]?Grade|AI[-\\.\\s]?enhanced)",
+                        "value": "(Up[-\\.\\s]?scale|Re[-\\.\\s]?Grade|\\bAIUS\\b|AI[-\\.\\s]?enhanced)",
                         "type": "textbox",
                         "advanced": false,
                         "privacy": "normal",
