@@ -102,7 +102,7 @@ def Upscaled(debug_level=0):
     # Reporting failed matches
     print("\nFailed matches:")
     if good_matches_failed or bad_matches_passed:
-        for release in good_matches_failed + bad_matches_passed:
+        for release in good_matches_failed + bad_matches_failed:
             print(f"  - {release}")
     else:
         print(f"{GREEN}None, Great Job! :){RESET}")
