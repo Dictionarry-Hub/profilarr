@@ -7,6 +7,7 @@ from taoe import taoe
 from ralphy import Ralphy
 from av1 import AV1
 from sev import sev
+from upscale import Upscaled
 # ... import other test functions
 
 # ANSI escape codes for colors
@@ -26,6 +27,8 @@ def run_tests():
         ("Ralphy", Ralphy),
         ("AV1", AV1),
         ("SEV", sev),
+        ("Upscaled", Upscaled),
+
 
         # ... add other test functions
     ]

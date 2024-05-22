@@ -1093,6 +1093,11 @@
                 "format": 191,
                 "name": "D-Z0N3",
                 "score": 0
+            },
+            {
+                "format": 340,
+                "name": "Upscaled",
+                "score": -9999
             }
         ],
         "language": {
