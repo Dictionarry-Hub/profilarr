@@ -294,6 +294,7 @@ Deleting Quality Profile (2160p Optimal (Single Grab)) : SUCCESS
 PS Z:\Profilarr>
 ```
 
+
 ### Radarr and Sonarr Compatibility
 
 - You are only able to import / sync files to the app that is included in the file name (e.g. `Radarr` or `Sonarr`).
@@ -307,6 +308,9 @@ PS Z:\Profilarr>
 - **Lidarr Support:** Expand functionality to include Lidarr, allowing users to manage music quality profiles and custom formats.
 - **User Interface (UI):** Development of a graphical user interface (GUI) for easier and more intuitive interaction with Profilarr. This UI will cater to users who prefer graphical over command-line interactions.
 - **Automatic Updates:** Implement an auto-update mechanism for Profilarr, ensuring users always have access to the latest features, improvements, and bug fixes without manual intervention.
+
+## Known Issues
+- You may encounter a `JSON Encode Error`. This occurs when the base_url is entered incorrectly. Measures have been taken to prevent this, but if you encounter this error, please check your base_url in the config.yml file.
 
 ## Contributing
 
