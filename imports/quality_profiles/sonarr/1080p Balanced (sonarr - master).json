@@ -364,7 +364,7 @@
             },
             {
                 "format": 194,
-                "name": "AV-1",
+                "name": "AV1",
                 "score": -9999
             },
             {
@@ -921,6 +921,11 @@
                 "format": 223,
                 "name": "LiNG",
                 "score": 0
+            },
+            {
+                "format": 224,
+                "name": "Upscaled",
+                "score": -9999
             }
         ]
     }

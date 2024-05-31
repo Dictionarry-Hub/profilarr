@@ -411,7 +411,7 @@
             },
             {
                 "format": 194,
-                "name": "AV-1",
+                "name": "AV1",
                 "score": -9999
             },
             {
@@ -928,6 +928,11 @@
                 "format": 91,
                 "name": "D-Z0N3",
                 "score": 120
+            },
+            {
+                "format": 92,
+                "name": "Upscaled",
+                "score": -9999
             }
         ]
     }

@@ -376,7 +376,7 @@
             },
             {
                 "format": 194,
-                "name": "AV-1",
+                "name": "AV1",
                 "score": -9999
             },
             {
@@ -928,6 +928,11 @@
                 "format": 221,
                 "name": "hdalx",
                 "score": 0
+            },
+            {
+                "format": 222,
+                "name": "Upscaled",
+                "score": -9999
             }
         ]
     }
