@@ -1,6 +1,10 @@
 # Profilarr
 
-Profilarr is a Python-based tool designed to add import/export/sync functionality to the \*arr suite. It offers a user-friendly way to export existing custom formats / profiles, import new ones or sync a master instance of Radarr / Sonarr with extras.
+Profilarr is a Python-based tool designed to add import/export/sync/delete functionality to the \*arr suite. It offers a user-friendly way to:
+- Export existing custom formats / profiles
+- Import new custom formats / profiles
+- Sync a master instance of Radarr / Sonarr with other instances
+- Delete existing custom formats / quality profiles
 
 ## Discord
 
