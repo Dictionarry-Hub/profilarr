@@ -72,7 +72,7 @@ jobs:
                   id
                 }
               }
-            }' -f repository="${{ github.repository }}" -f owner="${{ github.repository_owner.login }}" -F number=$ISSUE_NUMBER --jq '.data.repository.issue.id')
+            }' -f repository="${{ github.repository }}" -f owner="${{ github.repository_owner.login }}" -f number=$ISSUE_NUMBER --jq '.data.repository.issue.id')
           echo "ISSUE_NODE_ID=$ISSUE_NODE_ID"
 
           # Set the status to "In Development"
