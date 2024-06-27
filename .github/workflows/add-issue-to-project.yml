@@ -15,16 +15,19 @@ jobs:
         with:
           project-url: https://github.com/orgs/Dictionarry-Hub/projects/1
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
-      
+
+      - name: Wait for project item to be created
+        run: sleep 10
+
       - name: Get project item ID
         id: get-project-item-id
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
           PROJECT_ID: "PVT_kwDOCjbMFM4AjuUh"
-          ISSUE_ID: ${{ github.event.issue.node_id }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           item_id=$(gh api graphql -f query='
-            query($project:ID!, $issue:ID!) {
+            query($project:ID!, $number:Int!) {
               node(id: $project) {
                 ... on ProjectV2 {
                   items(first: 100) {
@@ -32,14 +35,14 @@ jobs:
                       id
                       content {
                         ... on Issue {
-                          id
+                          number
                         }
                       }
                     }
                   }
                 }
               }
-            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.node.items.nodes[] | select(.content.id == $ISSUE_ID) | .id')
+            }' -f project=$PROJECT_ID -F number=$ISSUE_NUMBER --jq '.data.node.items.nodes[] | select(.content.number == $ISSUE_NUMBER) | .id')
           echo "PROJECT_ITEM_ID=$item_id" >> $GITHUB_OUTPUT
 
       - name: Set component, type, and status
