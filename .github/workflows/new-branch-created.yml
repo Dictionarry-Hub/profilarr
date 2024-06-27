@@ -1,0 +1,99 @@
+name: Set Issue to In Development on Branch Creation
+
+on:
+  create:
+    branches:
+      - '*'
+
+jobs:
+  update-issue-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract issue number from branch name
+        id: extract-issue-number
+        run: |
+          BRANCH_NAME="${GITHUB_REF##*/}"
+          if [[ "$BRANCH_NAME" =~ ^([0-9]+)- ]]; then
+            ISSUE_NUMBER="${BASH_REMATCH[1]}"
+            echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+          else
+            echo "No issue number found in branch name."
+            exit 1
+          fi
+
+      - name: Get project data
+        env:
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          ORGANIZATION: Dictionarry-Hub
+          PROJECT_NUMBER: 1
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $number: Int!) {
+              organization(login: $org){
+                projectV2(number: $number) {
+                  id
+                  fields(first:20) {
+                    nodes {
+                      ... on ProjectV2Field {
+                        id
+                        name
+                      }
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+
+          echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
+          echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'IN_DEVELOPMENT_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="In Development") |.id' project_data.json) >> $GITHUB_ENV
+
+      - name: Set issue status to "In Development"
+        env:
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          PROJECT_ID: ${{ env.PROJECT_ID }}
+          ISSUE_NUMBER: ${{ env.ISSUE_NUMBER }}
+          STATUS_FIELD_ID: ${{ env.STATUS_FIELD_ID }}
+          IN_DEVELOPMENT_OPTION_ID: ${{ env.IN_DEVELOPMENT_OPTION_ID }}
+        run: |
+          # Get the content ID of the issue
+          ISSUE_NODE_ID=$(gh api graphql -f query='
+            query($repository: String!, $owner: String!, $number: Int!) {
+              repository(name: $repository, owner: $owner) {
+                issue(number: $number) {
+                  id
+                }
+              }
+            }' -f repository="${{ github.repository }}" -f owner="${{ github.repository_owner.login }}" -f number=$ISSUE_NUMBER --jq '.data.repository.issue.id')
+          echo "ISSUE_NODE_ID=$ISSUE_NODE_ID"
+
+          # Set the status to "In Development"
+          result=$(gh api graphql -f query='
+            mutation (
+              $project: ID!
+              $item: ID!
+              $status_field: ID!
+              $status_value: String!
+            ) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $status_field
+                value: {
+                  singleSelectOptionId: $status_value
+                }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f item=$ISSUE_NODE_ID -f status_field=$STATUS_FIELD_ID -f status_value=$IN_DEVELOPMENT_OPTION_ID)
+          echo "Set status result: $result"
