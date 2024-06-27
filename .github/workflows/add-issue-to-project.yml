@@ -16,7 +16,7 @@ jobs:
       
       - name: Set component, type, and status
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
           ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
         run: |
           # Set component to "Profilarr"
