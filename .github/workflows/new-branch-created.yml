@@ -56,7 +56,7 @@ jobs:
           echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
           echo 'IN_DEVELOPMENT_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="In Development") |.id' project_data.json) >> $GITHUB_ENV
 
-      - name: Set issue status to "In Development"
+    - name: Set issue status to "In Development"
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
           PROJECT_ID: ${{ env.PROJECT_ID }}
@@ -72,7 +72,7 @@ jobs:
                   id
                 }
               }
-            }' -f repository="${{ github.repository }}" -f owner="${{ github.repository_owner.login }}" -f number=$ISSUE_NUMBER --jq '.data.repository.issue.id')
+            }' -f repository="${{ github.repository }}" -f owner="${{ github.repository_owner.login }}" -F number=$ISSUE_NUMBER --jq '.data.repository.issue.id')
           echo "ISSUE_NODE_ID=$ISSUE_NODE_ID"
 
           # Set the status to "In Development"
