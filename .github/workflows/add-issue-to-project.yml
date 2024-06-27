@@ -1,0 +1,86 @@
+name: Add Issue to Project
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  add-to-project:
+    name: Add issue to project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: https://github.com/orgs/Dictionarry-Hub/projects/1
+          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+      
+      - name: Set component, type, and status
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
+        run: |
+          # Set component to "Profilarr"
+          gh api graphql -f query='
+            mutation($project:ID!, $item:ID!, $fieldId:ID!, $value:String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $fieldId
+                value: { 
+                  singleSelectOptionId: $value
+                }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project="PVT_kwDOCjbMFM4AjuUh" -f item="${ISSUE_NODE_ID}" -f fieldId="PVTSSF_lADOCjbMFM4AjuUhzgcCr_E" -f value="48fc49c7"
+          
+          # Set status to "Backlog"
+          gh api graphql -f query='
+            mutation($project:ID!, $item:ID!, $fieldId:ID!, $value:String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $fieldId
+                value: { 
+                  singleSelectOptionId: $value
+                }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project="PVT_kwDOCjbMFM4AjuUh" -f item="${ISSUE_NODE_ID}" -f fieldId="PVTSSF_lADOCjbMFM4AjuUhzgcCn8s" -f value="f75ad846"
+          
+          # Get the label of the issue
+          LABEL=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }} --jq '.labels[0].name')
+          
+          # Set issue type based on label
+          ISSUE_TYPE_ID=$(case $LABEL in
+            "bug") echo "b760225f" ;;
+            "feature request") echo "1341bde2" ;;
+            "improvement") echo "cb34d96f" ;;
+            "documentation") echo "269885d0" ;;
+            "refactor") echo "4996f537" ;;
+            "infrastructure") echo "45a91bfe" ;;
+            *) echo "" ;;
+          esac)
+          
+          if [ ! -z "$ISSUE_TYPE_ID" ]; then
+            gh api graphql -f query='
+              mutation($project:ID!, $item:ID!, $fieldId:ID!, $value:String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $project
+                  itemId: $item
+                  fieldId: $fieldId
+                  value: { 
+                    singleSelectOptionId: $value
+                  }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }' -f project="PVT_kwDOCjbMFM4AjuUh" -f item="${ISSUE_NODE_ID}" -f fieldId="PVTSSF_lADOCjbMFM4AjuUhzgcCswQ" -f value="$ISSUE_TYPE_ID"
+          fi
