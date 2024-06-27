@@ -23,8 +23,8 @@ jobs:
           PROJECT_ID: "PVT_kwDOCjbMFM4AjuUh"
         run: |
           echo "Fetching project item ID for issue number: $ISSUE_NUMBER"
-          item_id=$(gh api graphql -f query='
-            query($project:ID!, $number:Int!) {
+          QUERY='
+            query fetchProjectItem($project:ID!, $number:Int!) {
               node(id: $project) {
                 ... on ProjectV2 {
                   items(first: 100) {
@@ -39,13 +39,16 @@ jobs:
                   }
                 }
               }
-            }' -f project=$PROJECT_ID -f number=$ISSUE_NUMBER --jq '.data.node.items.nodes[] | select(.content.number == $number) | .id')
+            }'
+          echo "Running query with PROJECT_ID: $PROJECT_ID and ISSUE_NUMBER: $ISSUE_NUMBER"
+          item_id=$(gh api graphql -f query="$QUERY" -f project=$PROJECT_ID -f number=$ISSUE_NUMBER --jq '.data.node.items.nodes[] | select(.content.number == $number) | .id')
           if [ -z "$item_id" ]; then
             echo "Error: Project item ID not found for issue number $ISSUE_NUMBER"
             exit 1
           else
             echo "Project item ID found: $item_id"
             echo "PROJECT_ITEM_ID=$item_id" >> $GITHUB_ENV
+
 
 
       - name: Set status to In Development
