@@ -39,7 +39,7 @@ jobs:
                   }
                 }
               }
-            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.node.items.nodes[] | select(.content.id == env.ISSUE_ID) | .id')
+            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.node.items.nodes[] | select(.content.id == $ISSUE_ID) | .id')
           echo "PROJECT_ITEM_ID=$item_id" >> $GITHUB_OUTPUT
 
       - name: Set component, type, and status
