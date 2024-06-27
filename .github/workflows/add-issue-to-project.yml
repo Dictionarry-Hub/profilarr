@@ -20,20 +20,26 @@ jobs:
         id: get-project-item-id
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
-          ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
+          PROJECT_ID: "PVT_kwDOCjbMFM4AjuUh"
+          ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
           item_id=$(gh api graphql -f query='
-            query($org: String!, $number: Int!, $nodeId: ID!) {
-              organization(login: $org){
-                projectV2(number: $number) {
-                  items(first: 1, filter: {ids: [$nodeId]}) {
+            query($project:ID!, $issue:ID!) {
+              node(id: $project) {
+                ... on ProjectV2 {
+                  items(first: 100) {
                     nodes {
                       id
+                      content {
+                        ... on Issue {
+                          id
+                        }
+                      }
                     }
                   }
                 }
               }
-            }' -f org="Dictionarry-Hub" -F number=1 -f nodeId=$ISSUE_NODE_ID --jq '.data.organization.projectV2.items.nodes[0].id')
+            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.node.items.nodes[] | select(.content.id == env.ISSUE_ID) | .id')
           echo "PROJECT_ITEM_ID=$item_id" >> $GITHUB_OUTPUT
 
       - name: Set component, type, and status
@@ -103,8 +109,8 @@ jobs:
                   }
                 }) {
                   projectV2Item {
-                  id
+                    id
+                  }
                 }
-              }
-            }' -f project="PVT_kwDOCjbMFM4AjuUh" -f item="${PROJECT_ITEM_ID}" -f fieldId="PVTSSF_lADOCjbMFM4AjuUhzgcCswQ" -f value="$ISSUE_TYPE_ID"
+              }' -f project="PVT_kwDOCjbMFM4AjuUh" -f item="${PROJECT_ITEM_ID}" -f fieldId="PVTSSF_lADOCjbMFM4AjuUhzgcCswQ" -f value="$ISSUE_TYPE_ID"
           fi
