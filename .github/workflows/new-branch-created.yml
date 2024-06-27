@@ -1,7 +1,7 @@
 name: Update Issue Status to In Development
 
 on:
-  push:
+  create:
     branches:
       - '*-*'
 
@@ -19,44 +19,40 @@ jobs:
       - name: Get project item ID
         id: get-project-item-id
         env:
-          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PROJECT_ID: "PVT_kwDOCjbMFM4AjuUh"
         run: |
           echo "Fetching project item ID for issue number: $ISSUE_NUMBER"
-          QUERY='
-            query fetchProjectItem($project:ID!, $number:Int!) {
-              node(id: $project) {
-                ... on ProjectV2 {
-                  items(first: 100) {
-                    nodes {
-                      id
-                      content {
-                        ... on Issue {
-                          number
-                        }
+          QUERY='query fetchProjectItem($project:ID!, $number:Int!) {
+            node(id: $project) {
+              ... on ProjectV2 {
+                items(first: 100) {
+                  nodes {
+                    id
+                    content {
+                      ... on Issue {
+                        number
                       }
                     }
                   }
                 }
               }
-            }'
-          echo "Running query with PROJECT_ID: $PROJECT_ID and ISSUE_NUMBER: $ISSUE_NUMBER"
-          item_id=$(gh api graphql -f query="$QUERY" -f project=$PROJECT_ID -f number=$ISSUE_NUMBER --jq '.data.node.items.nodes[] | select(.content.number == $number) | .id')
+            }
+          }'
+          item_id=$(gh api graphql -f query="$QUERY" -f project=$PROJECT_ID -f number=$ISSUE_NUMBER --jq '.data.node.items.nodes[] | select(.content.number == env.ISSUE_NUMBER) | .id')
           if [ -z "$item_id" ]; then
             echo "Error: Project item ID not found for issue number $ISSUE_NUMBER"
             exit 1
-          else
+          else:
             echo "Project item ID found: $item_id"
             echo "PROJECT_ITEM_ID=$item_id" >> $GITHUB_ENV
 
-
-
       - name: Set status to In Development
         env:
-          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
-          PROJECT_ITEM_ID: ${{ env.PROJECT_ITEM_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT_ITEM_ID: ${{ steps.get-project-item-id.outputs.PROJECT_ITEM_ID }}
         run: |
-          echo "Setting status for Project Item ID: $PROJECT_ITEM_ID"
+          echo "Setting status for Project Item ID: ${PROJECT_ITEM_ID}"
           result=$(gh api graphql -f query='
             mutation($project:ID!, $item:ID!, $fieldId:ID!, $value:String!) {
               updateProjectV2ItemFieldValue(input: {
