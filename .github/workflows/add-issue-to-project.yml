@@ -16,9 +16,6 @@ jobs:
           project-url: https://github.com/orgs/Dictionarry-Hub/projects/1
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
 
-      - name: Wait for project item to be created
-        run: sleep 10
-
       - name: Get project item ID
         id: get-project-item-id
         env:
