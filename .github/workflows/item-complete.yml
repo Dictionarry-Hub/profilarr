@@ -49,6 +49,7 @@ jobs:
             }
           }'
           items=$(gh api graphql -f query="$QUERY" -f project=$PROJECT_ID --jq '.data.node.items.nodes[] | select(.fieldValues.nodes[] | select(.name == "Testing")) | .id')
+          items=$(echo $items | tr '\n' ' ')
           echo "Items with 'Testing' status: $items"
           echo "TESTING_ITEMS=$items" >> $GITHUB_ENV
 
@@ -97,8 +98,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
           FIELD_ID: ${{ env.FIELD_ID }}
           COMPLETE_OPTION_ID: ${{ env.COMPLETE_OPTION_ID }}
+          TESTING_ITEMS: ${{ steps.get-testing-issues.outputs.TESTING_ITEMS }}
         run: |
-          IFS=$'\n' read -rd '' -a items <<<"$TESTING_ITEMS"
+          IFS=' ' read -ra items <<< "$TESTING_ITEMS"
           for item in "${items[@]}"; do
             echo "Setting status to Complete for Project Item ID: $item"
             result=$(gh api graphql -f query='
