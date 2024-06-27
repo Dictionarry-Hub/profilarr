@@ -3,7 +3,7 @@ name: Set Issue Status to Testing on Merge to Dev
 on:
   pull_request:
     branches:
-      - dev
+      - main
     types:
       - closed
 
