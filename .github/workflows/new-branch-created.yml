@@ -21,26 +21,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
           PROJECT_ID: "PVT_kwDOCjbMFM4AjuUh"
-          ISSUE_NUMBER: ${{ env.ISSUE_NUMBER }}
         run: |
           echo "Fetching project item ID for issue number: $ISSUE_NUMBER"
-          item_id=$(gh api graphql -f query='
-            query($project:ID!) {
-              node(id: $project) {
-                ... on ProjectV2 {
-                  items(first: 100) {
-                    nodes {
-                      id
-                      content {
-                        ... on Issue {
-                          number
-                        }
+          QUERY='
+          query fetchProjectItem($project: ID!) {
+            node(id: $project) {
+              ... on ProjectV2 {
+                items(first: 100) {
+                  nodes {
+                    id
+                    content {
+                      ... on Issue {
+                        number
                       }
                     }
                   }
                 }
               }
-            }' -f project=$PROJECT_ID --jq ".data.node.items.nodes[] | select(.content.number == $ISSUE_NUMBER) | .id")
+            }
+          }'
+          item_id=$(gh api graphql -f query="$QUERY" -f project=$PROJECT_ID --jq '.data.node.items.nodes[] | select(.content.number == '"$ISSUE_NUMBER"') | .id')
           if [ -z "$item_id" ]; then
             echo "Error: Project item ID not found for issue number $ISSUE_NUMBER"
             exit 1
@@ -49,10 +49,51 @@ jobs:
             echo "PROJECT_ITEM_ID=$item_id" >> $GITHUB_ENV
           fi
 
+      - name: Get single select field ID and options
+        id: get-field-options
+        env:
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          PROJECT_ID: "PVT_kwDOCjbMFM4AjuUh"
+        run: |
+          echo "Fetching field ID and options for status"
+          QUERY='
+          query($project:ID!) {
+            node(id: $project) {
+              ... on ProjectV2 {
+                fields(first: 100) {
+                  nodes {
+                    ... on ProjectV2SingleSelectField {
+                      id
+                      name
+                      options {
+                        id
+                        name
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }'
+          field_data=$(gh api graphql -f query="$QUERY" -f project=$PROJECT_ID --jq '.data.node.fields.nodes[] | select(.name == "Status")')
+          field_id=$(echo $field_data | jq -r '.id')
+          in_development_option_id=$(echo $field_data | jq -r '.options[] | select(.name == "In Development") | .id')
+          if [ -z "$field_id" ] || [ -z "$in_development_option_id" ]; then
+            echo "Error: Field ID or In Development option ID not found"
+            exit 1
+          else
+            echo "Field ID: $field_id"
+            echo "In Development option ID: $in_development_option_id"
+            echo "FIELD_ID=$field_id" >> $GITHUB_ENV
+            echo "IN_DEVELOPMENT_OPTION_ID=$in_development_option_id" >> $GITHUB_ENV
+          fi
+
       - name: Set status to In Development
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
           PROJECT_ITEM_ID: ${{ env.PROJECT_ITEM_ID }}
+          FIELD_ID: ${{ env.FIELD_ID }}
+          IN_DEVELOPMENT_OPTION_ID: ${{ env.IN_DEVELOPMENT_OPTION_ID }}
         run: |
           echo "Setting status for Project Item ID: ${PROJECT_ITEM_ID}"
           result=$(gh api graphql -f query='
@@ -69,5 +110,5 @@ jobs:
                   id
                 }
               }
-            }' -f project="PVT_kwDOCjbMFM4AjuUh" -f item="${PROJECT_ITEM_ID}" -f fieldId="PVTSSF_lADOCjbMFM4AjuUhzgcCn8s" -f value="in_development_option_id") # Replace "in_development_option_id" with your actual option ID for "In Development"
-          echo "Set status result: $resul
+            }' -f project="PVT_kwDOCjbMFM4AjuUh" -f item="${PROJECT_ITEM_ID}" -f fieldId="${FIELD_ID}" -f value="${IN_DEVELOPMENT_OPTION_ID}")
+          echo "Set status result: $result"
