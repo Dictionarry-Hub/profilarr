@@ -99,8 +99,11 @@ jobs:
           LABEL=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }} --jq '.labels[0].name')
           echo "Issue label: $LABEL"
           
+          # Convert label to lowercase for comparison
+          LABEL_LOWER=$(echo "$LABEL" | tr '[:upper:]' '[:lower:]')
+          
           # Set issue type based on label
-          ISSUE_TYPE_ID=$(case $LABEL in
+          ISSUE_TYPE_ID=$(case $LABEL_LOWER in
             "bug") echo "b760225f" ;;
             "feature request") echo "1341bde2" ;;
             "improvement") echo "cb34d96f" ;;
