@@ -39,13 +39,14 @@ jobs:
               }
             }
           }'
-          item_id=$(gh api graphql -f query="$QUERY" -f project=$PROJECT_ID -f number=$ISSUE_NUMBER --jq '.data.node.items.nodes[] | select(.content.number == env.ISSUE_NUMBER) | .id')
+          item_id=$(gh api graphql -f query="$QUERY" -f project=$PROJECT_ID -f number=$ISSUE_NUMBER --jq '.data.node.items.nodes[] | select(.content.number == '"$ISSUE_NUMBER"') | .id')
           if [ -z "$item_id" ]; then
             echo "Error: Project item ID not found for issue number $ISSUE_NUMBER"
             exit 1
-          else:
+          else
             echo "Project item ID found: $item_id"
             echo "PROJECT_ITEM_ID=$item_id" >> $GITHUB_ENV
+          fi
 
       - name: Set status to In Development
         env:
