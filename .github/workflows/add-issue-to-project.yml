@@ -93,7 +93,7 @@ jobs:
           echo "Set status result: $result"
 
           # Get the label of the issue
-          LABEL=$(gh api repos/Dictionarry-Hub/profilarr/issues/123 --jq '.labels[0].name')
+          LABEL=$(gh api repos/Dictionarry-Hub/website/issues/${{ github.event.issue.number }} --jq '.labels[0].name')
           echo "Issue label: $LABEL"
 
           # Convert label to lowercase for comparison
