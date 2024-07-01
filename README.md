@@ -25,13 +25,15 @@ Come join us at https://discord.gg/ZxywYBGRB9 if you need any help or want to ta
 ### Initial Setup
 
 #### Step 1: Download Profilarr
-
-1. **Download Profilarr:**
-   - Go to the Profilarr GitHub page and find the "Releases" [section](https://github.com/santiagosayshey/Profilarr/releases).
-   - Download the latest release package.
-
-2. **Extract Files:**
-   - Once downloaded, extract the zip file to a folder of your choice.
+1. **Get Profilarr:**
+   - Option 1: Clone repository (latest changes)
+     ```
+     git clone https://github.com/santiagosayshey/Profilarr.git
+     ```
+   - Option 2: Download latest release (most stable)
+     - Go to [Releases](https://github.com/santiagosayshey/Profilarr/releases)
+     - Download the latest `Profilarr-vX.X.X.zip`
+     - Extract the zip file to your preferred location.
 
 #### Step 2: Install Profilarr
 
