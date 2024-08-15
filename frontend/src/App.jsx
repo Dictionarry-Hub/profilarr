@@ -27,6 +27,7 @@ function App() {
         {activeTab === 'regex' ? <RegexManager /> : <CustomFormatManager />}
       </div>
     </div>
+    
   );
 }
 

@@ -14,15 +14,37 @@ def regex101_proxy():
         logging.debug(f"Received data from frontend: {request.json}")
 
         # Validate the request data before sending
-        required_fields = ['regex', 'flags', 'delimiter', 'flavor']
+        required_fields = ['regex', 'delimiter', 'flavor']
         for field in required_fields:
             if field not in request.json:
                 logging.error(f"Missing required field: {field}")
                 return jsonify({"error": f"Missing required field: {field}"}), 400
 
-        # Ensure testString is present
-        if 'testString' not in request.json or not request.json['testString']:
-            request.json['testString'] = "Sample test string"  # Add a default test string
+        # Set default flags to 'gmi' for global, multiline, and case-insensitive matching
+        request.json['flags'] = 'gmi'
+
+        # Include a separate test string if not provided
+        if 'testString' not in request.json:
+            request.json['testString'] = "Sample test string"
+
+        # Always include unit tests with every request
+        request.json['unitTests'] = [
+            {
+                "description": "Sample DOES_MATCH test",
+                "testString": request.json['testString'],  # Use the main test string
+                "criteria": "DOES_MATCH",
+                "target": "REGEX"
+            },
+            {
+                "description": "Sample DOES_NOT_MATCH test",
+                "testString": "Non-matching string",  # This should not match the regex
+                "criteria": "DOES_NOT_MATCH",
+                "target": "REGEX"
+            }
+        ]
+
+        # Log the complete payload before sending
+        logging.debug(f"Final payload being sent to Regex101 API: {json.dumps(request.json, indent=2)}")
 
         # Construct the data payload for curl
         data = json.dumps(request.json)
@@ -44,6 +66,8 @@ def regex101_proxy():
     except Exception as e:
         logging.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({"error": "An unexpected error occurred"}), 500
+
+
 
 @bp.route('', methods=['GET', 'POST'])
 def handle_items():

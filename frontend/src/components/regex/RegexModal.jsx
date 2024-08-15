@@ -11,6 +11,7 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
   const [newTag, setNewTag] = useState('');
   const [regex101Link, setRegex101Link] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const initialRegexRef = useRef(regex);
 
   useEffect(() => {
@@ -31,41 +32,72 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
       }
       setError('');
       setNewTag('');
+      setIsLoading(false);
     }
   }, [regex, isOpen]);
 
   const handleCreateRegex101Link = async () => {
+    if (!pattern.trim()) {
+      setError('Please provide a regex pattern before creating tests.');
+      return;
+    }
+
+    // Define your unit tests here
+    const unitTests = [
+        {
+            description: "Test if 'D-Z0N3' is detected correctly",
+            testString: "Test D-Z0N3 pattern",
+            criteria: "DOES_MATCH",
+            target: "REGEX"
+        },
+        {
+            description: "Test if 'random text' does not match",
+            testString: "random text",
+            criteria: "DOES_NOT_MATCH",
+            target: "REGEX"
+        }
+        // Add more unit tests as needed
+    ];
+
+    setIsLoading(true);
     try {
-      const response = await createRegex101Link({
-        regex: pattern,
-        flavor: 'pcre',
-        flags: 'gm',
-        delimiter: '/',
-      });
-      const permalinkFragment = response.permalinkFragment;
+        const response = await createRegex101Link({
+            regex: pattern,
+            flavor: 'pcre',
+            flags: 'gmi',
+            delimiter: '/',
+            unitTests: unitTests
+        });
+        const permalinkFragment = response.permalinkFragment;
 
-      const regex101Link = `https://regex101.com/r/${permalinkFragment}`;
-      setRegex101Link(regex101Link);
+        const regex101Link = `https://regex101.com/r/${permalinkFragment}`;
+        setRegex101Link(regex101Link);
 
-      await saveRegex({
-        id: regex ? regex.id : 0,
-        name,
-        pattern,
-        description,
-        tags,
-        regex101Link,
-      });
+        await saveRegex({
+            id: regex ? regex.id : 0,
+            name,
+            pattern,
+            description,
+            tags,
+            regex101Link,
+        });
 
-      window.open(regex101Link, '_blank');
-      onSave(); // Refresh the list after saving
-      setError('');
+        window.open(regex101Link, '_blank');
+        onSave(); // Refresh the list after saving
+        setError('');
     } catch (error) {
-      console.error('Error creating regex101 link:', error);
-      setError('Failed to create regex101 link. Please try again.');
+        console.error('Error creating regex101 link:', error);
+        setError('Failed to create regex101 link. Please try again.');
+    } finally {
+        setIsLoading(false);
     }
   };
 
   const handleRemoveRegex101Link = async () => {
+    const confirmRemoval = window.confirm("Are you sure you want to remove this Regex101 link?");
+    if (!confirmRemoval) return;
+
+    setIsLoading(true);
     setRegex101Link('');  // Clear the regex101Link in state
 
     try {
@@ -83,12 +115,14 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
     } catch (error) {
       console.error('Error removing regex101 link:', error);
       setError('Failed to remove regex101 link. Please try again.');
+    } finally {
+        setIsLoading(false);
     }
   };
 
   const handleSave = async () => {
-    if (!name.trim() || !pattern.trim() || !description.trim()) {
-      setError('Name, pattern, and description are all required.');
+    if (!name.trim() || !pattern.trim()) {
+      setError('Name and pattern are required.');
       return;
     }
     try {
@@ -109,15 +143,16 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
   };
 
   const handleDelete = async () => {
-    if (regex && regex.id) {
-      try {
-        await deleteRegex(regex.id);
-        onSave();
-        onClose();
-      } catch (error) {
-        console.error('Error deleting regex:', error);
-        setError('Failed to delete regex. Please try again.');
-      }
+    const confirmDeletion = window.confirm("Are you sure you want to delete this regex?");
+    if (!confirmDeletion) return;
+
+    try {
+      await deleteRegex(regex.id);
+      onSave();
+      onClose();
+    } catch (error) {
+      console.error('Error deleting regex:', error);
+      setError('Failed to delete regex. Please try again.');
     }
   };
 
@@ -165,7 +200,7 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
       </div>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Description
+          Description (Optional)
         </label>
         <input
           type="text"
@@ -206,29 +241,31 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
       <div className="mb-4">
         {regex101Link ? (
           <>
-            <p className="mt-2">
-              <a
-                href={regex101Link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                Open in Regex101
-              </a>
-            </p>
-            <button
-              onClick={handleRemoveRegex101Link}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors mt-2"
-            >
-              Remove Link
-            </button>
+            <div className="flex justify-between">
+              <div>
+                <button
+                  onClick={() => window.open(regex101Link, '_blank')}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                >
+                  Open in Regex101
+                </button>
+                <button
+                  onClick={handleRemoveRegex101Link}
+                  className="bg-red-500 text-white px-4 py-2 rounded ml-2 hover:bg-red-600 transition-colors"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Removing...' : 'Remove Link'}
+                </button>
+              </div>
+            </div>
           </>
         ) : (
           <button
             onClick={handleCreateRegex101Link}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+            disabled={isLoading}
           >
-            Create Tests
+            {isLoading ? 'Creating Tests...' : 'Create Tests'}
           </button>
         )}
       </div>
