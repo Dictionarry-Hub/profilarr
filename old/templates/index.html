@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex and Custom Format Manager</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover-color: #45a049;
+            --secondary-color: #333;
+            --background-color: #f2f2f2;
+            --accent-color: #3498db;
+            --accent-hover-color: #2980b9;
+            --tab-active-bg-color: #888;
+            --tab-bg-color: #ccc;
+            --border-color: #ccc;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #2ecc71;
+            --primary-hover-color: #27ae60;
+            --secondary-color: #f2f2f2;
+            --background-color: #121212;
+            --accent-color: #3498db;
+            --accent-hover-color: #2980b9;
+            --tab-active-bg-color: #444;
+            --tab-bg-color: #222;
+            --border-color: #555;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--secondary-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--secondary-color);
+        }
+
+        input,
+        select,
+        button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--secondary-color);
+        }
+
+        input:focus,
+        select:focus,
+        button:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover-color);
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: var(--tab-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            width: 200px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal.hide {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: var(--background-color);
+            padding: 20px;
+            border-radius: 10px;
+            width: 500px;
+            max-width: 90%;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+
+        .dark-mode-toggle {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: var(--accent-hover-color);
+        }
+
+        h1 {
+            display: inline-block;
+            margin: 0;
+            padding: 0;
+            color: var(--secondary-color);
+            font-size: 24px;
+        }
+
+        .checkbox-group {
+            margin: 10px 0;
+        }
+
+        .checkbox-container {
+            display: block;
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            user-select: none;
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 25px;
+            width: 25px;
+            background-color: var(--background-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 5px;
+        }
+
+        .checkbox-container:hover input~.checkmark {
+            background-color: var(--accent-color);
+            opacity: 0.7;
+        }
+
+        .checkbox-container input:checked~.checkmark {
+            background-color: var(--accent-color);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .checkbox-container input:checked~.checkmark:after {
+            display: block;
+        }
+
+        .checkbox-container .checkmark:after {
+            left: 9px;
+            top: 5px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+        .tooltip {
+            position: absolute;
+            display: none;
+            background-color: var(--secondary-color);
+            color: var(--background-color);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+            max-width: 300px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <h1>Regex and Custom Format Manager</h1>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'RegexTab')" id="defaultOpen">Regex</button>
+        <button class="tablinks" onclick="openTab(event, 'CustomFormatTab')">Custom Format</button>
+    </div>
+
+    <div id="CustomFormatTab" class="tabcontent">
+        <h2>Manage Custom Formats</h2>
+        <div id="customFormatList" class="card-container"></div>
+        <button onclick="openCustomFormatModal()">Add New Custom Format</button>
+    </div>
+
+    <div id="RegexTab" class="tabcontent">
+        <h2>Manage Regex Patterns</h2>
+        <div id="regexList" class="card-container"></div>
+        <button onclick="openRegexModal()">Add New Regex Pattern</button>
+    </div>
+
+    <!-- Custom Format Modal -->
+    <div id="customFormatModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCustomFormatModal()">&times;</span>
+            <h3>Edit/Create Custom Format</h3>
+            <input type="text" id="formatName" placeholder="Format Name">
+            <input type="text" id="formatDescription" placeholder="Description">
+
+            <h3>Conditions</h3>
+            <div id="conditionsList" class="card-container"></div>
+            <button onclick="openConditionModal()">Add Condition</button>
+
+            <button onclick="saveFormat()">Save Format</button>
+            <button id="deleteFormatButton" onclick="deleteFormat()"
+                style="background-color: red; color: white; display: none;">Delete</button>
+        </div>
+    </div>
+
+    <!-- Condition Modal -->
+    <div id="conditionModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeConditionModal()">&times;</span>
+            <h3>Add/Edit Condition</h3>
+            <input type="text" id="conditionName" placeholder="Condition Name">
+            <select id="conditionType" onchange="toggleConditionFields()">
+                <option value="regex">Regex</option>
+                <option value="size">Size</option>
+            </select>
+            <div id="regexCondition">
+                <select id="existingRegex"></select>
+            </div>
+            <div id="sizeCondition" style="display:none;">
+                <input type="number" id="minSize" placeholder="Min Size (bytes)">
+                <input type="number" id="maxSize" placeholder="Max Size (bytes)">
+            </div>
+            <div class="checkbox-group">
+                <label class="checkbox-container"
+                    onmouseover="showTooltip(event, 'Negate: Inverts the condition. If checked, the condition is true when it\'s not met.')"
+                    onmouseout="hideTooltip()">
+                    <input type="checkbox" id="conditionNegate">
+                    <span class="checkmark"></span>
+                    Negate
+                </label>
+            </div>
+            <div class="checkbox-group">
+                <label class="checkbox-container"
+                    onmouseover="showTooltip(event, 'Required: Makes the condition mandatory. If checked, the format is invalid when this condition is not met.')"
+                    onmouseout="hideTooltip()">
+                    <input type="checkbox" id="conditionRequired">
+                    <span class="checkmark"></span>
+                    Required
+                </label>
+            </div>
+            <button onclick="saveCondition()">Save Condition</button>
+        </div>
+    </div>
+
+    <div id="regexModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegexModal()">&times;</span>
+            <h3>Edit/Create Regex Pattern</h3>
+            <input type="text" id="regexName" placeholder="Regex Name">
+            <input type="text" id="regexPattern" placeholder="Regex Pattern" oninput="testRegex()">
+            <input type="text" id="regexDescription" placeholder="Description">
+            <h3>Test Regex</h3>
+            <input type="text" id="testPhrase" placeholder="Enter phrase to test" oninput="testRegex()">
+            <div id="testResult"></div>
+            <div id="regexError" style="color: red; margin-top: 10px;"></div>
+            <button onclick="saveRegex()">Save Regex</button>
+            <button id="deleteRegexButton" onclick="deleteRegex()"
+                style="background-color: red; color: white; display: none;">Delete</button>
+        </div>
+    </div>
+
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+        let currentFormatConditions = [];
+
+        document.getElementById("defaultOpen").click();
+
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        function toggleDarkMode() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            document.body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+        }
+
+        // Ensure Regex Dropdown is populated when the modal is opened
+        function openCustomFormatModal(format = null) {
+            const modal = document.getElementById('customFormatModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+                modal.classList.remove('hide');
+            }, 10); // Small delay to trigger the transition
+
+            const deleteButton = document.getElementById('deleteFormatButton');
+
+            if (format) {
+                loadCustomFormat(format);
+                deleteButton.style.display = 'inline-block'; // Show delete button
+                deleteButton.setAttribute('onclick', `deleteFormat(${format.id})`); // Set delete action
+            } else {
+                clearFormatInputs();
+                deleteButton.style.display = 'none'; // Hide delete button
+            }
+        }
+
+        function closeCustomFormatModal() {
+            const modal = document.getElementById('customFormatModal');
+            modal.classList.add('hide');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300); // Hide after fade-out
+        }
+
+        function openRegexModal(regex = null) {
+            const modal = document.getElementById('regexModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+                modal.classList.remove('hide');
+            }, 10); // Small delay to trigger the transition
+
+            const deleteButton = document.getElementById('deleteRegexButton');
+
+            if (regex) {
+                loadRegex(regex);
+                deleteButton.style.display = 'inline-block'; // Show delete button
+                deleteButton.setAttribute('onclick', `deleteRegex(${regex.id})`); // Set delete action
+            } else {
+                clearRegexInputs();
+                deleteButton.style.display = 'none'; // Hide delete button
+            }
+        }
+        function closeRegexModal() {
+            const modal = document.getElementById('regexModal');
+            modal.classList.add('hide');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300); // Hide after fade-out
+        }
+
+        function openConditionModal(condition = null) {
+            const modal = document.getElementById('conditionModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+                modal.classList.remove('hide');
+            }, 10); // Small delay to trigger the transition
+
+            if (condition) {
+                loadCondition(condition);
+            } else {
+                clearConditionInputs();
+            }
+        }
+
+        function loadCondition(condition) {
+            document.getElementById('conditionName').value = condition.name;
+            document.getElementById('conditionType').value = condition.regex_name ? 'regex' : 'size';
+            toggleConditionFields(); // Toggle visibility based on type
+
+            if (condition.regex_name) {
+                document.getElementById('existingRegex').value = condition.regex_name;
+            } else {
+                document.getElementById('minSize').value = condition.min || '';
+                document.getElementById('maxSize').value = condition.max || '';
+            }
+
+            document.getElementById('conditionNegate').checked = condition.negate;
+            document.getElementById('conditionRequired').checked = condition.required;
+        }
+
+        function closeConditionModal() {
+            const modal = document.getElementById('conditionModal');
+            modal.classList.add('hide');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300); // Hide after fade-out
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function (event) {
+            const customFormatModal = document.getElementById('customFormatModal');
+            const regexModal = document.getElementById('regexModal');
+            const conditionModal = document.getElementById('conditionModal');
+            if (event.target === customFormatModal) {
+                closeCustomFormatModal();
+            }
+            if (event.target === regexModal) {
+                closeRegexModal();
+            }
+            if (event.target === conditionModal) {
+                closeConditionModal();
+            }
+        }
+        function saveRegex() {
+            const regex = {
+                id: 0, // This will be set by the backend to the next available ID
+                name: document.getElementById('regexName').value,
+                pattern: document.getElementById('regexPattern').value,
+                description: document.getElementById('regexDescription').value
+            };
+            fetch(`${API_BASE_URL}/save_regex`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(regex),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    clearRegexInputs();
+                    updateRegexList();
+                    updateRegexSelect(); // Refresh the regex select list after saving
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function clearRegexInputs() {
+            document.getElementById('regexName').value = '';
+            document.getElementById('regexPattern').value = '';
+            document.getElementById('regexDescription').value = '';
+        }
+
+        function testRegex() {
+            const pattern = document.getElementById('regexPattern').value;
+            const phrase = document.getElementById('testPhrase').value;
+            const resultDiv = document.getElementById('testResult');
+            const errorDiv = document.getElementById('regexError');
+
+            resultDiv.innerHTML = '';
+            errorDiv.innerHTML = '';
+
+            try {
+                const regex = new RegExp(pattern, 'gi');
+
+                if (regex.test(phrase)) {
+                    const matches = phrase.replace(regex, match => `<mark>${match}</mark>`);
+                    resultDiv.innerHTML = `Matched: ${matches}`;
+                } else {
+                    resultDiv.innerHTML = 'No match found.';
+                }
+            } catch (e) {
+                errorDiv.innerHTML = `Invalid regex: ${e.message}`;
+            }
+        }
+
+        function loadRegex(regex) {
+            document.getElementById('regexName').value = regex.name;
+            document.getElementById('regexPattern').value = regex.pattern;
+            document.getElementById('regexDescription').value = regex.description;
+            testRegex();
+        }
+
+        function updateRegexList() {
+            fetch(`${API_BASE_URL}/get_regexes`)
+                .then(response => response.json())
+                .then(regexes => {
+                    const list = document.getElementById('regexList');
+                    list.innerHTML = '';
+                    regexes.forEach(regex => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `${regex.name}`;
+                        card.onclick = () => openRegexModal(regex);
+                        list.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function updateRegexSelect() {
+            fetch(`${API_BASE_URL}/get_regexes`)
+                .then(response => response.json())
+                .then(regexes => {
+                    const select = document.getElementById('existingRegex');
+                    select.innerHTML = '';
+                    regexes.forEach(regex => {
+                        const option = document.createElement('option');
+                        option.value = regex.name;
+                        option.textContent = `${regex.name}: ${regex.pattern}`;
+                        select.appendChild(option);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function addCondition() {
+            const condition = {
+                name: document.getElementById('conditionName').value,
+                negate: document.getElementById('conditionNegate').checked,
+                required: document.getElementById('conditionRequired').checked
+            };
+
+            const conditionType = document.getElementById('conditionType').value;
+            if (conditionType === 'regex') {
+                condition.regex_name = document.getElementById('existingRegex').value;
+            } else if (conditionType === 'size') {
+                condition.min = parseInt(document.getElementById('minSize').value);
+                condition.max = parseInt(document.getElementById('maxSize').value);
+            }
+
+            currentFormatConditions.push(condition);
+            updateConditionsList();
+            clearConditionInputs();
+        }
+
+        function clearConditionInputs() {
+            document.getElementById('conditionName').value = '';
+            document.getElementById('conditionType').value = 'regex';
+            document.getElementById('conditionNegate').checked = false;
+            document.getElementById('conditionRequired').checked = false;
+            document.getElementById('minSize').value = '';
+            document.getElementById('maxSize').value = '';
+        }
+
+        function updateConditionsList() {
+            const list = document.getElementById('conditionsList');
+            list.innerHTML = '';
+            currentFormatConditions.forEach((condition, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.textContent = `${condition.name} (${condition.regex_name ? 'regex: ' + condition.regex_name : 'size'})`;
+                if (condition.negate) card.textContent += ' [Negated]';
+                if (condition.required) card.textContent += ' [Required]';
+                card.onclick = () => openConditionModal(condition); // Click to edit
+                list.appendChild(card);
+            });
+        }
+
+        function editCondition(index) {
+            const condition = currentFormatConditions[index];
+            document.getElementById('conditionName').value = condition.name;
+            document.getElementById('conditionType').value = condition.regex_name ? 'regex' : 'size';
+            toggleConditionFields(); // Toggle visibility based on type
+
+            if (condition.regex_name) {
+                document.getElementById('existingRegex').value = condition.regex_name;
+            } else {
+                document.getElementById('minSize').value = condition.min || '';
+                document.getElementById('maxSize').value = condition.max || '';
+            }
+
+            document.getElementById('conditionNegate').checked = condition.negate;
+            document.getElementById('conditionRequired').checked = condition.required;
+
+            // Update the 'add' button to save the changes
+            document.querySelector('button[onclick="addCondition()"]').setAttribute('onclick', `saveCondition(${index})`);
+        }
+
+        function saveCondition() {
+            const condition = {
+                name: document.getElementById('conditionName').value,
+                negate: document.getElementById('conditionNegate').checked,
+                required: document.getElementById('conditionRequired').checked
+            };
+
+            if (document.getElementById('conditionType').value === 'regex') {
+                condition.regex_name = document.getElementById('existingRegex').value;
+            } else {
+                condition.min = parseInt(document.getElementById('minSize').value);
+                condition.max = parseInt(document.getElementById('maxSize').value);
+            }
+
+            currentFormatConditions.push(condition);
+            updateConditionsList();
+            closeConditionModal();
+        }
+        function saveFormat() {
+            const format = {
+                id: 0, // This will be set by the backend to the next available ID
+                name: document.getElementById('formatName').value,
+                description: document.getElementById('formatDescription').value,
+                conditions: currentFormatConditions
+            };
+            fetch(`${API_BASE_URL}/save_format`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(format),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    clearFormatInputs();
+                    updateCustomFormatList();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function clearFormatInputs() {
+            document.getElementById('formatName').value = '';
+            document.getElementById('formatDescription').value = '';
+            currentFormatConditions = [];
+            updateConditionsList();
+        }
+
+        function loadCustomFormat(format) {
+            document.getElementById('formatName').value = format.name;
+            document.getElementById('formatDescription').value = format.description;
+            currentFormatConditions = format.conditions || [];
+            updateConditionsList();
+        }
+
+        function updateCustomFormatList() {
+            fetch(`${API_BASE_URL}/get_formats`)
+                .then(response => response.json())
+                .then(formats => {
+                    const list = document.getElementById('customFormatList');
+                    list.innerHTML = '';
+                    formats.forEach(format => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `${format.name}`;
+                        card.onclick = () => openCustomFormatModal(format);
+                        list.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function deleteRegex(id) {
+            if (confirm("Are you sure you want to delete this regex?")) {
+                fetch(`${API_BASE_URL}/delete_regex/${id}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Delete Success:', data);
+                        closeRegexModal(); // Close the modal after deletion
+                        updateRegexList(); // Refresh the list after deletion
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            }
+        }
+
+        function deleteFormat(id) {
+            if (confirm("Are you sure you want to delete this custom format?")) {
+                fetch(`${API_BASE_URL}/delete_format/${id}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Delete Success:', data);
+                        closeCustomFormatModal(); // Close the modal after deletion
+                        updateCustomFormatList(); // Refresh the list after deletion
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            }
+        }
+
+        function showTooltip(event, text) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.innerHTML = text;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY + 10) + 'px';
+        }
+
+        function hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.display = 'none';
+        }
+
+
+        // On page load
+        updateCustomFormatList();
+        updateRegexList();
+        updateRegexSelect();
+
+    </script>
+</body>
+
+</html>

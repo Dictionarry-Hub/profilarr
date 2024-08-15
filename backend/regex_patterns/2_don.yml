@@ -1,0 +1,9 @@
+date_created: '2024-08-15T10:46:36.718655'
+date_modified: '2024-08-15T13:15:49.306167'
+description: 'Release Group: DON'
+id: 2
+name: DON
+pattern: (?<=^|[\s.-])DON\b
+tags:
+- Release Group
+- HDB Internal

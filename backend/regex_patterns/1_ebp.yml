@@ -1,0 +1,9 @@
+date_created: '2024-08-15T10:46:19.929335'
+date_modified: '2024-08-15T12:02:00.531530'
+description: 'Release group: EbP'
+id: 1
+name: EbP
+pattern: (?<=^|[\s.-])EbP\b
+tags:
+- Release Group
+- HDB Internal

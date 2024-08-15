@@ -1,0 +1,28 @@
+conditions:
+- name: EbP
+  negate: false
+  regex_name: EbP
+  required: false
+- name: DON
+  negate: false
+  regex_name: DON
+  required: false
+- name: D-Z0N3
+  negate: false
+  regex_name: D-Z0N3
+  required: false
+- flag: golden-popcorn
+  name: Golden Popcorn
+  negate: false
+  required: true
+- flag: internal
+  name: Internal
+  negate: false
+  required: true
+date_created: '2024-08-15T11:17:33.784024'
+date_modified: '2024-08-15T12:02:29.062961'
+description: Tier 1 Release Groups
+id: 1
+name: T1
+tags:
+- Release Group Tier
