@@ -9,7 +9,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:5000
+      - VITE_API_URL=http://backend:5000  # Use the service name
 
   backend:
     build: ./backend

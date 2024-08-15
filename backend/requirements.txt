@@ -2,3 +2,4 @@ Flask==2.0.1
 Flask-CORS==3.0.10
 PyYAML==5.4.1
 requests==2.26.0
+Werkzeug==2.0.1
