@@ -1,8 +1,0 @@
-conditions:
-- name: A
-  negate: false
-  regex_name: A
-  required: true
-description: A
-id: 0
-name: A
