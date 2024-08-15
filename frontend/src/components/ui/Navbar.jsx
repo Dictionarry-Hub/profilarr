@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 
+
 function ToggleSwitch({ checked, onChange }) {
   return (
     <label className="flex items-center cursor-pointer">
@@ -27,7 +28,7 @@ function Navbar({ activeTab, setActiveTab, darkMode, setDarkMode }) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             <h1 className="text-2xl font-bold text-white">
-              Regex and Format Manager
+              Regexerr
             </h1>
             <div className="flex space-x-2">
               <button

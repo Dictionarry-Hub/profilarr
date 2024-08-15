@@ -42,15 +42,49 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
         flags: 'gm',
         delimiter: '/',
       });
-      const permalink = `https://regex101.com/r/${response.permalinkFragment}`;
-      setRegex101Link(permalink);
-      window.open(permalink, '_blank');
+      const permalinkFragment = response.permalinkFragment;
+
+      const regex101Link = `https://regex101.com/r/${permalinkFragment}`;
+      setRegex101Link(regex101Link);
+
+      await saveRegex({
+        id: regex ? regex.id : 0,
+        name,
+        pattern,
+        description,
+        tags,
+        regex101Link,
+      });
+
+      window.open(regex101Link, '_blank');
+      onSave(); // Refresh the list after saving
+      setError('');
     } catch (error) {
       console.error('Error creating regex101 link:', error);
       setError('Failed to create regex101 link. Please try again.');
     }
   };
 
+  const handleRemoveRegex101Link = async () => {
+    setRegex101Link('');  // Clear the regex101Link in state
+
+    try {
+      await saveRegex({
+        id: regex ? regex.id : 0,
+        name,
+        pattern,
+        description,
+        tags,
+        regex101Link: '',  // Save the regex with an empty link
+      });
+
+      onSave(); // Refresh the list after saving
+      setError('');
+    } catch (error) {
+      console.error('Error removing regex101 link:', error);
+      setError('Failed to remove regex101 link. Please try again.');
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim() || !pattern.trim() || !description.trim()) {
@@ -170,23 +204,32 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
         </div>
       </div>
       <div className="mb-4">
-        <button
-          onClick={handleCreateRegex101Link}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-        >
-          Test this regex
-        </button>
-        {regex101Link && (
-          <p className="mt-2">
-            <a
-              href={regex101Link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
+        {regex101Link ? (
+          <>
+            <p className="mt-2">
+              <a
+                href={regex101Link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                Open in Regex101
+              </a>
+            </p>
+            <button
+              onClick={handleRemoveRegex101Link}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors mt-2"
             >
-              Open in Regex101
-            </a>
-          </p>
+              Remove Link
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={handleCreateRegex101Link}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+          >
+            Create Tests
+          </button>
         )}
       </div>
       <div className="flex justify-between">
@@ -216,6 +259,7 @@ RegexModal.propTypes = {
     pattern: PropTypes.string.isRequired,
     description: PropTypes.string,
     tags: PropTypes.arrayOf(PropTypes.string),
+    regex101Link: PropTypes.string,
   }),
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,

@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app.utils.file_operations import REGEX_DIR, save_to_file, load_all_from_directory, delete_file, load_from_file
-import requests
+import json
 import logging
+import subprocess
 
 bp = Blueprint('regex', __name__, url_prefix='/regex')
 logging.basicConfig(level=logging.DEBUG)
@@ -19,23 +20,29 @@ def regex101_proxy():
                 logging.error(f"Missing required field: {field}")
                 return jsonify({"error": f"Missing required field: {field}"}), 400
 
-        # Send the POST request to regex101 with a timeout
-        response = requests.post('https://regex101.com/api/regex', json=request.json, timeout=10)
+        # Ensure testString is present
+        if 'testString' not in request.json or not request.json['testString']:
+            request.json['testString'] = "Sample test string"  # Add a default test string
+
+        # Construct the data payload for curl
+        data = json.dumps(request.json)
+        curl_command = ["curl", "-s", "-X", "POST", "-H", "Content-Type: application/json", "-d", data, "https://regex101.com/api/regex"]
+
+        # Execute the curl command
+        response = subprocess.check_output(curl_command)
 
         # Log the response from regex101
-        logging.debug(f"Response from regex101: {response.text}")
+        logging.debug(f"Response from regex101: {response.decode('utf-8')}")
 
-        # Return the JSON response and status code back to the frontend
-        return jsonify(response.json()), response.status_code
+        # Return the JSON response back to the frontend
+        return jsonify(json.loads(response)), 200
 
-    except requests.RequestException as e:
-        # Log the exception details
-        logging.error(f"Request to regex101 failed: {e}")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"cURL command failed: {str(e)}")
         return jsonify({"error": "Failed to connect to regex101"}), 500
 
     except Exception as e:
-        # Log any other exception that might occur
-        logging.error(f"An unexpected error occurred: {e}")
+        logging.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({"error": "An unexpected error occurred"}), 500
 
 @bp.route('', methods=['GET', 'POST'])

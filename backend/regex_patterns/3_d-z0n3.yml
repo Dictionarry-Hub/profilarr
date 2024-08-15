@@ -1,9 +1,10 @@
-date_created: '2024-08-15T10:46:41.183752'
-date_modified: '2024-08-15T12:54:02.651463'
-description: 'Release Group: D-Z0N3'
 id: 3
 name: D-Z0N3
-pattern: (?<=^|[\s.-])D-Z0N3\b
+description: 'Release Group: D-Z0N3'
 tags:
 - Release Group
-- AHD Internal
+- HDB Internal
+pattern: (?<=^|[\s.-])D-Z0N3\b
+regex101Link: ''
+date_created: '2024-08-15T15:37:02.733456'
+date_modified: '2024-08-15T15:38:23.541760'

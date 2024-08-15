@@ -21,7 +21,7 @@ function FormatCard({ format, onEdit, showDate, formatDate }) {
               condition.negate ? 'bg-red-500 text-white' :
               condition.required ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'
             }`}
-            style={{ minHeight: '1.5rem', lineHeight: '1.5rem' }}
+            style={{ minHeight: '0.6rem', lineHeight: '0.6rem' }}
           >
             {condition.name}
           </span>

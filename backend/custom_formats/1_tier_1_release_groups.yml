@@ -1,3 +1,9 @@
+id: 1
+name: Tier 1 Release Groups
+description: Will match any phrase that contains a valid tier 1 release group. This
+  contains a number of AHD and HDB internal encoders!
+tags:
+- Release Group Tier
 conditions:
 - name: EbP
   negate: false
@@ -20,9 +26,4 @@ conditions:
   negate: false
   required: true
 date_created: '2024-08-15T11:17:33.784024'
-date_modified: '2024-08-15T12:02:29.062961'
-description: Tier 1 Release Groups
-id: 1
-name: T1
-tags:
-- Release Group Tier
+date_modified: '2024-08-15T15:40:51.051690'

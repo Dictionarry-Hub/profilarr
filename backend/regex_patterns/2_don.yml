@@ -1,9 +1,10 @@
-date_created: '2024-08-15T10:46:36.718655'
-date_modified: '2024-08-15T13:15:49.306167'
-description: 'Release Group: DON'
 id: 2
 name: DON
-pattern: (?<=^|[\s.-])DON\b
+description: 'Release Group: DON'
 tags:
 - Release Group
 - HDB Internal
+pattern: (?<=^|[\s.-])DON\b
+regex101Link: https://regex101.com/r/rH36F9
+date_created: '2024-08-15T10:46:36.718655'
+date_modified: '2024-08-15T15:38:30.549125'

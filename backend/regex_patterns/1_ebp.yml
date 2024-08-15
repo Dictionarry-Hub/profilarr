@@ -1,9 +1,10 @@
-date_created: '2024-08-15T10:46:19.929335'
-date_modified: '2024-08-15T12:02:00.531530'
-description: 'Release group: EbP'
 id: 1
 name: EbP
-pattern: (?<=^|[\s.-])EbP\b
+description: 'Release group: EbP'
 tags:
 - Release Group
 - HDB Internal
+pattern: (?<=^|[\s.-])EbP\b
+regex101Link: https://regex101.com/r/5fR6ms
+date_created: '2024-08-15T10:46:19.929335'
+date_modified: '2024-08-15T15:43:51.614741'
