@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 function AddNewCard({ onAdd }) {
   return (
     <div
-      className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl rounded-lg p-4 cursor-pointer border-2 border-dashed border-gray-400 dark:border-gray-600 flex items-center justify-center transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+      className="bg-white dark:bg-gray-800 border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-4 shadow-sm cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 flex items-center justify-center"
       onClick={onAdd}
       style={{ minHeight: '150px' }}
     >
