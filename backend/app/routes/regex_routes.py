@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.utils.file_operations import REGEX_DIR, save_to_file, load_all_from_directory, delete_file, load_from_file
+from app.utils.regex_operations import save_regex, load_all_regexes, delete_regex, load_regex
 import json
 import logging
 import subprocess
@@ -70,34 +70,28 @@ def regex101_proxy():
 
 
 @bp.route('', methods=['GET', 'POST'])
-def handle_items():
+def handle_regexes():
     if request.method == 'POST':
         data = request.json
-        # Ensure regex101Link is included in the data
-        if 'regex101Link' not in data:
-            data['regex101Link'] = ''
-        saved_data = save_to_file(REGEX_DIR, data)
+        saved_data = save_regex(data)
         return jsonify(saved_data), 201
     else:
-        items = load_all_from_directory(REGEX_DIR)
-        return jsonify(items)
+        regexes = load_all_regexes()
+        return jsonify(regexes)
 
 @bp.route('/<int:id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_item(id):
+def handle_regex(id):
     if request.method == 'GET':
-        item = load_from_file(REGEX_DIR, id)
-        if item:
-            return jsonify(item)
-        return jsonify({"error": "Item not found"}), 404
+        regex = load_regex(id)
+        if regex:
+            return jsonify(regex)
+        return jsonify({"error": "Regex not found"}), 404
     elif request.method == 'PUT':
         data = request.json
         data['id'] = id
-        # Ensure regex101Link is included in the data
-        if 'regex101Link' not in data:
-            data['regex101Link'] = ''
-        saved_data = save_to_file(REGEX_DIR, data)
+        saved_data = save_regex(data)
         return jsonify(saved_data)
     elif request.method == 'DELETE':
-        if delete_file(REGEX_DIR, id):
-            return jsonify({"message": f"Item with ID {id} deleted."}), 200
-        return jsonify({"error": f"Item with ID {id} not found."}), 404
+        if delete_regex(id):
+            return jsonify({"message": f"Regex with ID {id} deleted."}), 200
+        return jsonify({"error": f"Regex with ID {id} not found."}), 404

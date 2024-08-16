@@ -1,12 +1,6 @@
 import PropTypes from 'prop-types';
 
 function ConditionCard({ condition, onEdit }) {
-  const conditionType = condition.regex_name
-    ? 'Regex'
-    : condition.min !== undefined && condition.max !== undefined
-    ? 'Size'
-    : 'Flag';
-
   return (
     <div
       onClick={() => onEdit(condition)}
@@ -15,19 +9,24 @@ function ConditionCard({ condition, onEdit }) {
       <div className="flex justify-between items-center mb-2">
         <h4 className="font-bold text-md dark:text-gray-200">{condition.name}</h4>
         <span className="text-xs text-gray-600 dark:text-gray-400">
-          {conditionType}
+          {condition.type.charAt(0).toUpperCase() + condition.type.slice(1)}
         </span>
       </div>
-      {conditionType === 'Regex' && (
+      {condition.type === 'regex' && (
         <div className="bg-gray-100 dark:bg-gray-600 rounded p-2 mb-2">
           <pre className="text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-            {condition.regex_name}
+            Regex ID: {condition.regex_id || condition.id}  {/* Display regex_id */}
           </pre>
         </div>
       )}
-      {conditionType === 'Size' && (
+      {condition.type === 'size' && (
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
           Size: {condition.min || 'Any'} - {condition.max || 'Any'} bytes
+        </p>
+      )}
+      {condition.type === 'flag' && (
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+          Flag: {condition.flag}
         </p>
       )}
       <div className="flex space-x-2 mt-2">
@@ -46,14 +45,15 @@ function ConditionCard({ condition, onEdit }) {
 
 ConditionCard.propTypes = {
   condition: PropTypes.shape({
-    name: PropTypes.string,
-    regex_name: PropTypes.string,
+    type: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    regex_id: PropTypes.number, // Updated to regex_id
     min: PropTypes.number,
     max: PropTypes.number,
+    flag: PropTypes.string,
     negate: PropTypes.bool,
     required: PropTypes.bool,
-    flag: PropTypes.string,  // Include flag in prop types
-  }),
+  }).isRequired,
   onEdit: PropTypes.func.isRequired,
 };
 

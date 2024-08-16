@@ -4,7 +4,7 @@ from app.routes import regex_routes, format_routes
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+    CORS(app, resources={r"/*": {"origins": "*"}})
     app.register_blueprint(regex_routes.bp)
     app.register_blueprint(format_routes.bp)
     return app

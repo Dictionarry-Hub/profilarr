@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Modal from '../ui/Modal';
 
@@ -13,7 +13,7 @@ function ConditionModal({
 }) {
   const [name, setName] = useState('');
   const [type, setType] = useState('regex');
-  const [regexName, setRegexName] = useState('');
+  const [regexId, setRegexId] = useState(null);
   const [minSize, setMinSize] = useState('');
   const [maxSize, setMaxSize] = useState('');
   const [flag, setFlag] = useState('');
@@ -27,70 +27,68 @@ function ConditionModal({
       initialConditionRef.current = condition;
       if (condition) {
         setName(condition.name);
-        if (condition.regex_name) {
-          setType('regex');
-          setRegexName(condition.regex_name);
-        } else if (condition.min !== undefined && condition.max !== undefined) {
-          setType('size');
-          setMinSize(condition.min);
-          setMaxSize(condition.max);
-        } else if (condition.flag) {
-          setType('flag');
-          setFlag(condition.flag);
-        }
+        setType(condition.type);
+        setRegexId(condition.regex_id || condition.id); // Read regex_id instead of id
+        setMinSize(condition.min?.toString() || '');
+        setMaxSize(condition.max?.toString() || '');
+        setFlag(condition.flag || '');
         setNegate(condition.negate || false);
         setRequired(condition.required || false);
       } else {
-        setName('');
-        setType('regex');
-        setRegexName('');
-        setMinSize('');
-        setMaxSize('');
-        setFlag('');
-        setNegate(false);
-        setRequired(false);
+        resetForm();
       }
-      setError('');
     }
   }, [condition, isOpen]);
+
+  const resetForm = () => {
+    setName('');
+    setType('regex');
+    setRegexId(null);
+    setMinSize('');
+    setMaxSize('');
+    setFlag('');
+    setNegate(false);
+    setRequired(false);
+    setError('');
+  };
 
   const handleSave = () => {
     if (!name.trim()) {
       setError('Condition name is required.');
       return;
     }
-  
-    if (type === 'regex' && !regexName) {
+
+    if (type === 'regex' && !regexId) {
       setError('Please select a regex pattern.');
       return;
     }
-  
+
     if (type === 'size' && (!minSize || !maxSize)) {
       setError('Both minimum and maximum sizes are required.');
       return;
     }
-  
+
     if (type === 'flag' && !flag) {
       setError('Please select a flag.');
       return;
     }
-  
+
     const newCondition = {
       type,
       name,
       negate,
       required,
-      ...(type === 'regex' ? { id: regexes.find(regex => regex.name === regexName)?.id } : {}),
+      ...(type === 'regex' ? { regex_id: regexId } : {}), // Save regex_id
       ...(type === 'size' ? { min: parseInt(minSize), max: parseInt(maxSize) } : {}),
       ...(type === 'flag' ? { flag } : {}),
     };
-  
+
     onSave(newCondition);
     onClose();
   };
 
   const handleDelete = () => {
-    if (initialConditionRef.current) {
+    if (initialConditionRef.current && onDelete) {
       onDelete(initialConditionRef.current);
       onClose();
     }
@@ -100,11 +98,8 @@ function ConditionModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      level={level}
       title={initialConditionRef.current ? 'Edit Condition' : 'Add Condition'}
-      disableCloseOnOutsideClick={true}
-      disableCloseOnEscape={true}
-      className="max-w-2xl min-h-72"
+      level={level}
     >
       {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
@@ -139,13 +134,13 @@ function ConditionModal({
             Regex Pattern
           </label>
           <select
-            value={regexName}
-            onChange={(e) => setRegexName(e.target.value)}
+            value={regexId || ''}
+            onChange={(e) => setRegexId(e.target.value ? Number(e.target.value) : null)}
             className="w-full p-3 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
           >
             <option value="">Select a regex</option>
             {regexes.map((regex) => (
-              <option key={regex.id} value={regex.name}>
+              <option key={regex.id} value={regex.id}>
                 {regex.name}
               </option>
             ))}
@@ -242,13 +237,14 @@ function ConditionModal({
 
 ConditionModal.propTypes = {
   condition: PropTypes.shape({
+    type: PropTypes.string,
     name: PropTypes.string,
-    regex_name: PropTypes.string,
+    regex_id: PropTypes.number, // Updated to regex_id
     min: PropTypes.number,
     max: PropTypes.number,
+    flag: PropTypes.string,
     negate: PropTypes.bool,
     required: PropTypes.bool,
-    flag: PropTypes.string,
   }),
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,

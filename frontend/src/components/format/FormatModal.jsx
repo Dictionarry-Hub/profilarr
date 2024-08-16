@@ -63,6 +63,7 @@ function FormatModal({ format = null, isOpen, onClose, onSave }) {
   };
 
   const handleDelete = async () => {
+    console.log(`Trying to delete format with id: ${initialFormatRef.current.id}`);
     if (initialFormatRef.current && initialFormatRef.current.id) {
       try {
         await deleteFormat(initialFormatRef.current.id);

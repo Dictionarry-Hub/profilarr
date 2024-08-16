@@ -1,33 +1,31 @@
-# app/routes/format_routes.py
-
 from flask import Blueprint, request, jsonify
-from app.utils.file_operations import FORMAT_DIR, REGEX_DIR, save_to_file, load_all_from_directory, delete_file, load_from_file
+from app.utils.format_operations import save_format, load_all_formats, delete_format, load_format
 
-bp = Blueprint('format', __name__, url_prefix='/format')  
+bp = Blueprint('format', __name__, url_prefix='/format')
 
 @bp.route('', methods=['GET', 'POST'])
-def handle_items():
+def handle_formats():
     if request.method == 'POST':
         data = request.json
-        saved_data = save_to_file(FORMAT_DIR, data)
+        saved_data = save_format(data)
         return jsonify(saved_data), 201
     else:
-        items = load_all_from_directory(FORMAT_DIR)
-        return jsonify(items)
+        formats = load_all_formats()
+        return jsonify(formats)
 
 @bp.route('/<int:id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_item(id):
+def handle_format(id):
     if request.method == 'GET':
-        item = load_from_file(FORMAT_DIR, id)
-        if item:
-            return jsonify(item)
-        return jsonify({"error": "Item not found"}), 404
+        format = load_format(id)
+        if format:
+            return jsonify(format)
+        return jsonify({"error": "Format not found"}), 404
     elif request.method == 'PUT':
         data = request.json
         data['id'] = id
-        saved_data = save_to_file(FORMAT_DIR, data)
+        saved_data = save_format(data)
         return jsonify(saved_data)
     elif request.method == 'DELETE':
-        if delete_file(FORMAT_DIR, id):
-            return jsonify({"message": f"Item with ID {id} deleted."}), 200
-        return jsonify({"error": f"Item with ID {id} not found."}), 404
+        if delete_format(id):
+            return jsonify({"message": f"Format with ID {id} deleted."}), 200
+        return jsonify({"error": f"Format with ID {id} not found."}), 404
