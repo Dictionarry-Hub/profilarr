@@ -45,6 +45,11 @@ function RegexManager() {
     handleCloseModal();
   };
 
+  const handleCloneRegex = (regex) => {
+    const clonedRegex = { ...regex, id: 0, name: `${regex.name} [COPY]` };
+    handleOpenModal(clonedRegex);
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
@@ -68,41 +73,41 @@ function RegexManager() {
       return 0;
     });
 
-    return (
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Manage Regex Patterns</h2>
-        <div className="mb-4 flex items-center space-x-4">
-          <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
-          <FilterMenu
-            filterType={filterType}
-            setFilterType={setFilterType}
-            filterValue={filterValue}
-            setFilterValue={setFilterValue}
-            allTags={allTags}
-          />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-          {sortedAndFilteredRegexes.map((regex) => (
-            <RegexCard
-              key={regex.id}
-              regex={regex}
-              onEdit={() => handleOpenModal(regex)}
-              showDate={sortBy !== 'title'}
-              formatDate={formatDate}
-            />
-          ))}
-          <AddNewCard onAdd={() => handleOpenModal()} />
-        </div>
-        <RegexModal
-          regex={selectedRegex}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onSave={handleSaveRegex}
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Manage Regex Patterns</h2>
+      <div className="mb-4 flex items-center space-x-4">
+        <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
+        <FilterMenu
+          filterType={filterType}
+          setFilterType={setFilterType}
+          filterValue={filterValue}
+          setFilterValue={setFilterValue}
           allTags={allTags}
         />
       </div>
-    );
-  }
-  
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+        {sortedAndFilteredRegexes.map((regex) => (
+          <RegexCard
+            key={regex.id}
+            regex={regex}
+            onEdit={() => handleOpenModal(regex)}
+            onClone={handleCloneRegex} // Pass the clone handler
+            showDate={sortBy !== 'title'}
+            formatDate={formatDate}
+          />
+        ))}
+        <AddNewCard onAdd={() => handleOpenModal()} />
+      </div>
+      <RegexModal
+        regex={selectedRegex}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveRegex}
+        allTags={allTags}
+      />
+    </div>
+  );
+}
 
 export default RegexManager;

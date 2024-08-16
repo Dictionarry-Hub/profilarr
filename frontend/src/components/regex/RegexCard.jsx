@@ -1,15 +1,31 @@
 import PropTypes from 'prop-types';
 
-function RegexCard({ regex, onEdit, showDate, formatDate }) {
+function RegexCard({ regex, onEdit, onClone, showDate, formatDate }) {
   return (
     <div
       className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500 transition-shadow"
       onClick={() => onEdit(regex)}
     >
-      <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200 truncate">
-        {regex.name}
-      </h3>
-      <div className="bg-gray-100 dark:bg-gray-700 rounded p-2 mb-2">
+      <div className="flex justify-between items-center">
+        <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
+          {regex.name}
+        </h3>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClone(regex);
+          }}
+          className="relative group"
+        >
+          <img 
+            src="/clone.svg" 
+            alt="Clone" 
+            className="w-5 h-5 transition-transform transform group-hover:scale-125 group-hover:rotate-12 group-hover:-translate-y-1 group-hover:translate-x-1"
+          />
+          <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+        </button>
+      </div>
+      <div className="mt-2 mb-2 bg-gray-100 dark:bg-gray-700 rounded p-2">
         <pre className="text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
           {regex.pattern}
         </pre>
@@ -43,6 +59,7 @@ RegexCard.propTypes = {
     tags: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
   onEdit: PropTypes.func.isRequired,
+  onClone: PropTypes.func.isRequired, // Added clone handler prop
   showDate: PropTypes.bool.isRequired,
   formatDate: PropTypes.func.isRequired,
 };
