@@ -46,7 +46,12 @@ function RegexManager() {
   };
 
   const handleCloneRegex = (regex) => {
-    const clonedRegex = { ...regex, id: 0, name: `${regex.name} [COPY]` };
+    const clonedRegex = { 
+      ...regex, 
+      id: 0, 
+      name: `${regex.name} [COPY]`, 
+      regex101Link: '', // Remove the regex101 link when cloning
+    };
     handleOpenModal(clonedRegex);
   };
 
