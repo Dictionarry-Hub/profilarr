@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 function FormatCard({ format, onEdit, onClone, showDate, formatDate }) {
   return (
     <div
-      className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl rounded-lg p-4 cursor-pointer border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500 transition-shadow"
       onClick={() => onEdit(format)}
     >
       <div className="flex justify-between items-center">
@@ -65,7 +65,7 @@ FormatCard.propTypes = {
     tags: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
   onEdit: PropTypes.func.isRequired,
-  onClone: PropTypes.func.isRequired, // New prop for cloning
+  onClone: PropTypes.func.isRequired,
   showDate: PropTypes.bool.isRequired,
   formatDate: PropTypes.func.isRequired,
 };

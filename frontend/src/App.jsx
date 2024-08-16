@@ -4,7 +4,7 @@ import CustomFormatManager from './components/format/FormatManager';
 import Navbar from './components/ui/Navbar';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('regex');
+  const [activeTab, setActiveTab] = useState('format');
   const [darkMode, setDarkMode] = useState(true);
 
   useEffect(() => {

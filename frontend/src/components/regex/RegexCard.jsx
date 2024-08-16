@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 function RegexCard({ regex, onEdit, showDate, formatDate }) {
   return (
     <div
-      className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl rounded-lg p-4 cursor-pointer border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500 transition-shadow"
       onClick={() => onEdit(regex)}
     >
       <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200 truncate">
