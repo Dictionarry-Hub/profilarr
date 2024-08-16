@@ -59,30 +59,32 @@ function ConditionModal({
       setError('Condition name is required.');
       return;
     }
-
+  
     if (type === 'regex' && !regexName) {
       setError('Please select a regex pattern.');
       return;
     }
-
+  
     if (type === 'size' && (!minSize || !maxSize)) {
       setError('Both minimum and maximum sizes are required.');
       return;
     }
-
+  
     if (type === 'flag' && !flag) {
       setError('Please select a flag.');
       return;
     }
-
+  
     const newCondition = {
+      type,
       name,
       negate,
       required,
-      ...(type === 'regex' ? { regex_name: regexName } : {}),
+      ...(type === 'regex' ? { id: regexes.find(regex => regex.name === regexName)?.id } : {}),
       ...(type === 'size' ? { min: parseInt(minSize), max: parseInt(maxSize) } : {}),
       ...(type === 'flag' ? { flag } : {}),
     };
+  
     onSave(newCondition);
     onClose();
   };
