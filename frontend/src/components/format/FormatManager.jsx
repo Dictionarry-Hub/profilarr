@@ -45,6 +45,11 @@ function FormatManager() {
     handleCloseModal();
   };
 
+  const handleCloneFormat = (format) => {
+    const clonedFormat = { ...format, id: 0, name: `${format.name} [COPY]` };
+    handleOpenModal(clonedFormat);
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
@@ -87,6 +92,7 @@ function FormatManager() {
             key={format.id} 
             format={format} 
             onEdit={() => handleOpenModal(format)}
+            onClone={handleCloneFormat} // Pass the clone handler
             showDate={sortBy !== 'title'}
             formatDate={formatDate}
           />

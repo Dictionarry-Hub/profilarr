@@ -1,12 +1,25 @@
 import PropTypes from 'prop-types';
 
-function FormatCard({ format, onEdit, showDate, formatDate }) {
+function FormatCard({ format, onEdit, onClone, showDate, formatDate }) {
   return (
     <div
       className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl rounded-lg p-4 cursor-pointer border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1"
       onClick={() => onEdit(format)}
     >
-      <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{format.name}</h3>
+      <div className="flex justify-between items-center">
+        <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
+          {format.name}
+        </h3>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClone(format);
+          }}
+          className="text-blue-500 hover:text-blue-700"
+        >
+          <img src="/clone.svg" alt="Clone" className="w-6 h-6" />
+        </button>
+      </div>
       <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{format.description}</p>
       {showDate && (
         <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">
@@ -52,6 +65,7 @@ FormatCard.propTypes = {
     tags: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
   onEdit: PropTypes.func.isRequired,
+  onClone: PropTypes.func.isRequired, // New prop for cloning
   showDate: PropTypes.bool.isRequired,
   formatDate: PropTypes.func.isRequired,
 };
