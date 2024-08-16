@@ -46,8 +46,13 @@ function FormatManager() {
   };
 
   const handleCloneFormat = (format) => {
-    const clonedFormat = { ...format, id: 0, name: `${format.name} [COPY]` };
-    handleOpenModal(clonedFormat);
+    const clonedFormat = { 
+      ...format, 
+      id: 0, // Ensure the ID is 0 for a new entry
+      name: `${format.name} [COPY]` 
+    };
+    setSelectedFormat(clonedFormat); // Set cloned format
+    setIsModalOpen(true); // Open modal in Add mode
   };
 
   const formatDate = (dateString) => {

@@ -19,23 +19,25 @@ function FormatModal({ format = null, isOpen, onClose, onSave }) {
 
   useEffect(() => {
     if (isOpen) {
-      initialFormatRef.current = format;
-      if (format) {
+      if (format && format.id !== 0) {  // Check if this is an existing format
+        initialFormatRef.current = format;
         setName(format.name);
         setDescription(format.description);
         setConditions(format.conditions || []);
         setTags(format.tags || []);
-      } else {
-        setName('');
-        setDescription('');
-        setConditions([]);
-        setTags([]);
+      } else {  // This is a new format (or cloned)
+        initialFormatRef.current = null;
+        setName(format ? format.name : '');
+        setDescription(format ? format.description : '');
+        setConditions(format ? format.conditions : []);
+        setTags(format ? format.tags : []);
       }
       setError('');
       setNewTag('');
       fetchRegexes();
     }
   }, [format, isOpen]);
+  
 
   const fetchRegexes = async () => {
     try {

@@ -48,11 +48,12 @@ function RegexManager() {
   const handleCloneRegex = (regex) => {
     const clonedRegex = { 
       ...regex, 
-      id: 0, 
+      id: 0, // Ensure the ID is 0 for a new entry
       name: `${regex.name} [COPY]`, 
-      regex101Link: '', // Remove the regex101 link when cloning
+      regex101Link: '' // Remove the regex101 link
     };
-    handleOpenModal(clonedRegex);
+    setSelectedRegex(clonedRegex); // Set cloned regex
+    setIsModalOpen(true); // Open modal in Add mode
   };
 
   const formatDate = (dateString) => {

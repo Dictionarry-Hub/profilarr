@@ -16,18 +16,19 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
 
   useEffect(() => {
     if (isOpen) {
-      initialRegexRef.current = regex;
-      if (regex) {
+      if (regex && regex.id !== 0) {  // Check if this is an existing regex
+        initialRegexRef.current = regex;
         setName(regex.name);
         setPattern(regex.pattern);
         setDescription(regex.description);
         setTags(regex.tags || []);
         setRegex101Link(regex.regex101Link || '');
-      } else {
-        setName('');
-        setPattern('');
-        setDescription('');
-        setTags([]);
+      } else {  // This is a new regex (or cloned)
+        initialRegexRef.current = null;
+        setName(regex ? regex.name : '');
+        setPattern(regex ? regex.pattern : '');
+        setDescription(regex ? regex.description : '');
+        setTags(regex ? regex.tags : []);
         setRegex101Link('');
       }
       setError('');
@@ -35,6 +36,7 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
       setIsLoading(false);
     }
   }, [regex, isOpen]);
+  
 
   const handleCreateRegex101Link = async () => {
     if (!pattern.trim()) {
