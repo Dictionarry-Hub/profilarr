@@ -1,9 +1,8 @@
 import os
 import yaml
-import re
 import logging
 from collections import OrderedDict
-from .file_utils import get_next_id, generate_filename, get_current_timestamp
+from .file_utils import get_next_id, generate_filename, get_current_timestamp, sanitize_input
 
 FORMAT_DIR = 'custom_formats'
 
@@ -15,21 +14,6 @@ def represent_ordereddict(dumper, data):
     return dumper.represent_mapping('tag:yaml.org,2002:map', data.items())
 
 yaml.add_representer(OrderedDict, represent_ordereddict, Dumper=yaml.SafeDumper)
-
-def sanitize_input(input_str):
-    # Trim leading/trailing whitespace
-    sanitized_str = input_str.strip()
-
-    # Replace special characters that could affect YAML formatting
-    sanitized_str = re.sub(r'[:#\-\*>\|&]', '', sanitized_str)
-
-    # Ensure there are no tabs (which can cause issues in YAML)
-    sanitized_str = sanitized_str.replace('\t', ' ')
-
-    # Optionally: Collapse multiple spaces into a single space
-    sanitized_str = re.sub(r'\s+', ' ', sanitized_str)
-
-    return sanitized_str
 
 def save_format(data):
     # Log the received data

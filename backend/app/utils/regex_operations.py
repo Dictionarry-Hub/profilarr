@@ -1,7 +1,7 @@
 import os
 import yaml
 from collections import OrderedDict
-from .file_utils import get_next_id, generate_filename, get_current_timestamp
+from .file_utils import get_next_id, generate_filename, get_current_timestamp, sanitize_input
 
 REGEX_DIR = 'regex_patterns'
 
@@ -12,10 +12,10 @@ def save_regex(data):
     else:
         ordered_data['id'] = get_next_id(REGEX_DIR)
     
-    ordered_data['name'] = data.get('name', '')
-    ordered_data['description'] = data.get('description', '')
-    ordered_data['pattern'] = data.get('pattern', '')
-    ordered_data['regex101Link'] = data.get('regex101Link', '')
+    ordered_data['name'] = sanitize_input(data.get('name', ''))
+    ordered_data['description'] = sanitize_input(data.get('description', ''))
+    ordered_data['pattern'] = sanitize_input(data.get('pattern', ''))
+    ordered_data['regex101Link'] = sanitize_input(data.get('regex101Link', ''))
     
     if ordered_data['id'] != 0:  # Existing regex
         existing_data = load_regex(ordered_data['id'])
@@ -27,7 +27,7 @@ def save_regex(data):
         ordered_data['date_created'] = get_current_timestamp()
    
     ordered_data['date_modified'] = get_current_timestamp()
-    ordered_data['tags'] = data.get('tags', [])
+    ordered_data['tags'] = [sanitize_input(tag) for tag in data.get('tags', [])]
     
     filename = generate_filename(REGEX_DIR, ordered_data['id'], ordered_data['name'])
     with open(filename, 'w') as file:
@@ -42,6 +42,7 @@ def save_regex(data):
                 file.write(f'{key}: {value}\n')
     
     return ordered_data
+
 
 def load_regex(id):
     files = [f for f in os.listdir(REGEX_DIR) if f.startswith(f"{id}_") and f.endswith('.yml')]

@@ -13,3 +13,12 @@ def generate_filename(directory, id, name):
 
 def get_current_timestamp():
     return datetime.datetime.now().isoformat()
+
+import re
+
+def sanitize_input(input_str):
+    sanitized_str = input_str.strip()
+    sanitized_str = re.sub(r'[:#\-\*>\|&]', '', sanitized_str)
+    sanitized_str = sanitized_str.replace('\t', ' ')
+    sanitized_str = re.sub(r'\s+', ' ', sanitized_str)
+    return sanitized_str
