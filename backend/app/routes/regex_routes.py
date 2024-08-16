@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.utils.regex_operations import save_regex, load_all_regexes, delete_regex, load_regex
+from app.utils.format_operations import load_all_formats
 import json
 import logging
 import subprocess
@@ -92,6 +93,11 @@ def handle_regex(id):
         saved_data = save_regex(data)
         return jsonify(saved_data)
     elif request.method == 'DELETE':
+        # Check if the regex is used in any custom formats
+        formats_using_regex = [format for format in load_all_formats() if any(condition.get('regex_id') == id for condition in format.get('conditions', []))]
+        if formats_using_regex:
+            return jsonify({"error": "Regex in use"}), 409  # 409 Conflict if in use
+
         if delete_regex(id):
             return jsonify({"message": f"Regex with ID {id} deleted."}), 200
         return jsonify({"error": f"Regex with ID {id} not found."}), 404

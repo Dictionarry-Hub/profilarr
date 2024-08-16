@@ -34,13 +34,18 @@ export const updateRegex = async (id, regex) => {
 
 export const deleteRegex = async (id) => {
     try {
-        const response = await axios.delete(`${API_BASE_URL}/regex/${id}`);
+        const response = await axios.delete(`${API_BASE_URL}/regex/${id}`, {
+            validateStatus: (status) => {
+                return status >= 200 && status < 300 || status === 409; // Accept 200-299 or 409 Conflict
+            }
+        });
         return response.data;
     } catch (error) {
         console.error('Error deleting regex:', error);
         throw error;
     }
 };
+
 
 export const getFormats = async () => {
     try {

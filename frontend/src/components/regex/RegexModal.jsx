@@ -149,14 +149,24 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
     if (!confirmDeletion) return;
 
     try {
-      await deleteRegex(regex.id);
-      onSave();
-      onClose();
+        // Attempt to delete the regex
+        const response = await deleteRegex(regex.id);
+        if (response.error) {
+            if (response.error === 'Regex in use') {
+                setError('This regex is being used in one or more custom formats. Please remove it from those formats before deleting.');
+            } else {
+                setError('Failed to delete regex. Please try again.');
+            }
+        } else {
+            onSave();
+            onClose();
+        }
     } catch (error) {
-      console.error('Error deleting regex:', error);
-      setError('Failed to delete regex. Please try again.');
+        console.error('Error deleting regex:', error);
+        setError('Failed to delete regex. Please try again.');
     }
-  };
+};
+
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {

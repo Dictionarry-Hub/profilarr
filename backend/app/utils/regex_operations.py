@@ -11,12 +11,13 @@ def save_regex(data):
         ordered_data['id'] = data['id']
     else:
         ordered_data['id'] = get_next_id(REGEX_DIR)
-    
+   
     ordered_data['name'] = sanitize_input(data.get('name', ''))
     ordered_data['description'] = sanitize_input(data.get('description', ''))
     ordered_data['pattern'] = sanitize_input(data.get('pattern', ''))
     ordered_data['regex101Link'] = sanitize_input(data.get('regex101Link', ''))
-    
+    ordered_data['regex101DeleteCode'] = sanitize_input(data.get('regex101DeleteCode', ''))  # Add this line to save the delete code
+   
     if ordered_data['id'] != 0:  # Existing regex
         existing_data = load_regex(ordered_data['id'])
         if existing_data:
@@ -28,11 +29,11 @@ def save_regex(data):
    
     ordered_data['date_modified'] = get_current_timestamp()
     ordered_data['tags'] = [sanitize_input(tag) for tag in data.get('tags', [])]
-    
+   
     filename = generate_filename(REGEX_DIR, ordered_data['id'], ordered_data['name'])
     with open(filename, 'w') as file:
         for key, value in ordered_data.items():
-            if key in ['description', 'date_created', 'date_modified', 'regex101Link']:
+            if key in ['description', 'date_created', 'date_modified', 'regex101Link', 'regex101DeleteCode']:  # Add 'regex101DeleteCode' to this list
                 file.write(f"{key}: '{value}'\n")
             elif key == 'tags':
                 file.write('tags:\n')
@@ -40,7 +41,7 @@ def save_regex(data):
                     file.write(f'- {tag}\n')
             else:
                 file.write(f'{key}: {value}\n')
-    
+   
     return ordered_data
 
 
