@@ -15,9 +15,14 @@ function FormatCard({ format, onEdit, onClone, showDate, formatDate }) {
             e.stopPropagation();
             onClone(format);
           }}
-          className="text-blue-500 hover:text-blue-700"
+          className="relative group"
         >
-          <img src="/clone.svg" alt="Clone" className="w-6 h-6" />
+          <img 
+            src="/clone.svg" 
+            alt="Clone" 
+            className="w-5 h-5 transition-transform transform group-hover:scale-125 group-hover:rotate-12 group-hover:-translate-y-1 group-hover:translate-x-1"
+          />
+          <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
         </button>
       </div>
       <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{format.description}</p>
