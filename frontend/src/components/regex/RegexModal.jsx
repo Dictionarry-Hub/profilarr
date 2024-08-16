@@ -16,14 +16,14 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
 
   useEffect(() => {
     if (isOpen) {
-      if (regex && regex.id !== 0) {  // Check if this is an existing regex
+      if (regex && regex.id !== 0) { 
         initialRegexRef.current = regex;
         setName(regex.name);
         setPattern(regex.pattern);
         setDescription(regex.description);
         setTags(regex.tags || []);
         setRegex101Link(regex.regex101Link || '');
-      } else {  // This is a new regex (or cloned)
+      } else {
         initialRegexRef.current = null;
         setName(regex ? regex.name : '');
         setPattern(regex ? regex.pattern : '');
@@ -201,6 +201,35 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
         />
       </div>
       <div className="mb-4">
+        {regex101Link ? (
+          <div className="flex items-center space-x-2">
+            <a 
+              href={regex101Link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:text-blue-600 transition-colors"
+            >
+              View in Regex101
+            </a>
+            <button
+              onClick={handleRemoveRegex101Link}
+              className="text-red-500 hover:text-red-600 transition-colors"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Removing...' : 'Remove Link'}
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleCreateRegex101Link}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Creating Tests...' : 'Create Tests in Regex101'}
+          </button>
+        )}
+      </div>
+      <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Description (Optional)
         </label>
@@ -240,57 +269,23 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
           </button>
         </div>
       </div>
-      <div className="mb-4">
-        {regex101Link ? (
-          <>
-            <div className="flex justify-between">
-              <div>
-                <button
-                  onClick={() => window.open(regex101Link, '_blank')}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-                >
-                  Open in Regex101
-                </button>
-                <button
-                  onClick={handleRemoveRegex101Link}
-                  className="bg-red-500 text-white px-4 py-2 rounded ml-2 hover:bg-red-600 transition-colors"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Removing...' : 'Remove Link'}
-                </button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <button
-            onClick={handleCreateRegex101Link}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Creating Tests...' : 'Create Tests'}
-          </button>
-        )}
-      </div>
       <div className="flex justify-between">
+        <button
+          onClick={handleDelete}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+        >
+          Delete
+        </button>
         <button
           onClick={handleSave}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
         >
           Save
         </button>
-        {regex && (
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-          >
-            Delete
-          </button>
-        )}
       </div>
     </Modal>
   );
 }
-
 RegexModal.propTypes = {
   regex: PropTypes.shape({
     id: PropTypes.number,
