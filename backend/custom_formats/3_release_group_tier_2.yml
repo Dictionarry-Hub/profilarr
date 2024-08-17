@@ -1,0 +1,32 @@
+id: 3
+name: Release Group Tier 2
+description: Test 2
+date_created: '2024-08-16T07:16:57.505528'
+date_modified: '2024-08-16T07:16:57.505543'
+conditions:
+- type: regex
+  name: Geek
+  negate: false
+  required: false
+  regex_id: 4
+- type: flag
+  name: Tracker Internal
+  negate: false
+  required: false
+  flag: internal
+- type: regex
+  name: Tayto
+  negate: false
+  required: false
+  regex_id: 5
+- type: regex
+  name: ZQ
+  negate: false
+  required: false
+  regex_id: 6
+- type: regex
+  name: Chotab
+  negate: false
+  required: false
+  regex_id: 8
+tags: []

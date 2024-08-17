@@ -1,0 +1,10 @@
+id: 4
+name: Geek
+description: 'Release group: Geek'
+pattern: (?<=^|[\s.-])Geek\b
+regex101Link: 'https://regex101.com/r/fjF1dV'
+date_created: '2024-08-15T23:23:39.653442'
+date_modified: '2024-08-16T04:23:58.217800'
+tags:
+- HDB Internal
+- Release Group
