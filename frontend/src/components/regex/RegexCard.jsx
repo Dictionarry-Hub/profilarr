@@ -1,5 +1,9 @@
 import PropTypes from 'prop-types';
 
+function unsanitize(text) {
+  return text.replace(/\\:/g, ':').replace(/\\n/g, '\n'); 
+}
+
 function RegexCard({ regex, onEdit, onClone, showDate, formatDate }) {
   return (
     <div
@@ -8,7 +12,7 @@ function RegexCard({ regex, onEdit, onClone, showDate, formatDate }) {
     >
       <div className="flex justify-between items-center">
         <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
-          {regex.name}
+          {unsanitize(regex.name)}
         </h3>
         <button
           onClick={(e) => {
@@ -31,7 +35,7 @@ function RegexCard({ regex, onEdit, onClone, showDate, formatDate }) {
         </pre>
       </div>
       <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">
-        {regex.description}
+        {unsanitize(regex.description)}
       </p>
       {showDate && (
         <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">

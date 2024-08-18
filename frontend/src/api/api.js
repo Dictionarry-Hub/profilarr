@@ -46,7 +46,6 @@ export const deleteRegex = async (id) => {
     }
 };
 
-
 export const getFormats = async () => {
     try {
         const response = await axios.get(`${API_BASE_URL}/format`);
@@ -94,5 +93,144 @@ export const createRegex101Link = async (regexData) => {
     } catch (error) {
         console.error('Error creating regex101 link:', error);
         throw error;
+    }
+};
+
+export const getSettings = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/settings`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching settings:', error);
+        throw error;
+    }
+};
+
+export const saveSettings = async (settings) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings`, settings);
+        return response.data;
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        throw error;
+    }
+};
+
+export const getGitStatus = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/settings/status`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching Git status:', error);
+        throw error;
+    }
+};
+
+export const getBranches = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/settings/branches`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching branches:', error);
+        throw error;
+    }
+};
+
+export const checkoutBranch = async (branchName) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings/checkout`, { branch: branchName });
+        return response.data;
+    } catch (error) {
+        console.error('Error checking out branch:', error);
+        throw error;
+    }
+};
+
+export const createBranch = async (branchName, baseBranch) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings/branch`, { name: branchName, base: baseBranch });
+        return response.data;
+    } catch (error) {
+        console.error('Error creating branch:', error);
+        throw error;
+    }
+};
+
+export const deleteBranch = async (branchName) => {
+    try {
+        const response = await axios.delete(`${API_BASE_URL}/settings/branch/${branchName}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting branch:', error);
+        throw error;
+    }
+};
+
+export const pullBranch = async (branchName) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings/pull`, { branch: branchName });
+        return response.data;
+    } catch (error) {
+        console.error('Error pulling branch:', error);
+        throw error;
+    }
+};
+
+export const addFiles = async (files) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings/stage`, { files });
+        return response.data;
+    } catch (error) {
+        console.error('Error staging files:', error);
+        throw error;
+    }
+};
+
+export const pushFiles = async (files, commitMessage) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings/push`, {
+            files,
+            commit_message: commitMessage
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error pushing files:', error);
+        throw error;
+    }
+};
+
+export const revertFile = async (filePath) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings/revert`, {
+            file_path: filePath
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error reverting file:', error);
+        throw error;
+    }
+};
+
+export const revertAll = async () => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings/revert-all`);
+
+        return response.data;
+    } catch (error) {
+        console.error('Error reverting all changes:', error);
+        throw error;
+    }
+};
+
+export const deleteFile = async (filePath) => {
+    try {
+        const response = await axios.delete(`${API_BASE_URL}/settings/file`, {
+            data: { file_path: filePath },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting file:', error);
+        return { success: false, error: 'Error deleting file' };
     }
 };

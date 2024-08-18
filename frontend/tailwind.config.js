@@ -13,9 +13,14 @@ module.exports = {
           '0%': { opacity: 0, transform: 'scale(0.95)' },
           '100%': { opacity: 1, transform: 'scale(1)' },
         },
+        'fade-in': {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
       },
       animation: {
         'modal-open': 'modal-open 0.3s ease-out forwards',
+        'fade-in': 'fade-in 0.5s ease-in-out forwards',
       },
       colors: {
         'dark-bg': '#1a1c23',
@@ -24,6 +29,11 @@ module.exports = {
         'dark-border': '#4a5568',
         'dark-button': '#3182ce',
         'dark-button-hover': '#2c5282',
+      },
+      borderRadius: {
+        'lg': '0.5rem',
+        'md': '0.375rem',
+        'sm': '0.25rem',
       },
     },
   },

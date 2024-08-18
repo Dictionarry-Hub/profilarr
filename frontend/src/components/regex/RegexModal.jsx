@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import { saveRegex, deleteRegex, createRegex101Link } from '../../api/api';
 import Modal from '../ui/Modal';
 
+function unsanitize(text) {
+  return text.replace(/\\:/g, ':').replace(/\\n/g, '\n'); 
+}
+
 function RegexModal({ regex = null, isOpen, onClose, onSave }) {
   const [name, setName] = useState('');
   const [pattern, setPattern] = useState('');
@@ -18,17 +22,17 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
     if (isOpen) {
       if (regex && regex.id !== 0) { 
         initialRegexRef.current = regex;
-        setName(regex.name);
+        setName(unsanitize(regex.name));
         setPattern(regex.pattern);
-        setDescription(regex.description);
-        setTags(regex.tags || []);
+        setDescription(unsanitize(regex.description));
+        setTags(regex.tags ? regex.tags.map(unsanitize) : []);
         setRegex101Link(regex.regex101Link || '');
       } else {
         initialRegexRef.current = null;
-        setName(regex ? regex.name : '');
+        setName(regex ? unsanitize(regex.name) : '');
         setPattern(regex ? regex.pattern : '');
-        setDescription(regex ? regex.description : '');
-        setTags(regex ? regex.tags : []);
+        setDescription(regex ? unsanitize(regex.description) : '');
+        setTags(regex ? regex.tags.map(unsanitize) : []);
         setRegex101Link('');
       }
       setError('');
@@ -36,7 +40,6 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
       setIsLoading(false);
     }
   }, [regex, isOpen]);
-  
 
   const handleCreateRegex101Link = async () => {
     if (!pattern.trim()) {
@@ -44,7 +47,6 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
       return;
     }
 
-    // Define your unit tests here
     const unitTests = [
         {
             description: "Test if 'D-Z0N3' is detected correctly",
@@ -58,7 +60,6 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
             criteria: "DOES_NOT_MATCH",
             target: "REGEX"
         }
-        // Add more unit tests as needed
     ];
 
     setIsLoading(true);
@@ -85,7 +86,7 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
         });
 
         window.open(regex101Link, '_blank');
-        onSave(); // Refresh the list after saving
+        onSave();
         setError('');
     } catch (error) {
         console.error('Error creating regex101 link:', error);
@@ -100,7 +101,7 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
     if (!confirmRemoval) return;
 
     setIsLoading(true);
-    setRegex101Link('');  // Clear the regex101Link in state
+    setRegex101Link('');
 
     try {
       await saveRegex({
@@ -109,10 +110,10 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
         pattern,
         description,
         tags,
-        regex101Link: '',  // Save the regex with an empty link
+        regex101Link: '',
       });
 
-      onSave(); // Refresh the list after saving
+      onSave();
       setError('');
     } catch (error) {
       console.error('Error removing regex101 link:', error);
@@ -149,7 +150,6 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
     if (!confirmDeletion) return;
 
     try {
-        // Attempt to delete the regex
         const response = await deleteRegex(regex.id);
         if (response.error) {
             if (response.error === 'Regex in use') {
@@ -165,8 +165,7 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
         console.error('Error deleting regex:', error);
         setError('Failed to delete regex. Please try again.');
     }
-};
-
+  };
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -296,6 +295,7 @@ function RegexModal({ regex = null, isOpen, onClose, onSave }) {
     </Modal>
   );
 }
+
 RegexModal.propTypes = {
   regex: PropTypes.shape({
     id: PropTypes.number,
