@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import RegexPage from "./components/regex/RegexPage";
 import FormatPage from "./components/format/FormatPage";
+import ProfilePage from "./components/profile/ProfilePage";
 import SettingsPage from "./components/settings/SettingsPage";
 import Navbar from "./components/ui/Navbar";
 import { ToastContainer } from "react-toastify";
@@ -26,6 +27,7 @@ function App() {
           <Routes>
             <Route path="/regex" element={<RegexPage />} />
             <Route path="/format" element={<FormatPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/" element={<SettingsPage />} />
           </Routes>

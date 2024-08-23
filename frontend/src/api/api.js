@@ -244,3 +244,43 @@ export const getDiff = async (filePath) => {
         throw error;
     }
 };
+
+export const getProfiles = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/profile`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching profiles:', error);
+        throw error;
+    }
+};
+
+export const saveProfile = async (profile) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/profile`, profile);
+        return response.data;
+    } catch (error) {
+        console.error('Error saving profile:', error);
+        throw error;
+    }
+};
+
+export const updateProfile = async (id, profile) => {
+    try {
+        const response = await axios.put(`${API_BASE_URL}/profile/${id}`, profile);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        throw error;
+    }
+};
+
+export const deleteProfile = async (id) => {
+    try {
+        const response = await axios.delete(`${API_BASE_URL}/profile/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting profile:', error);
+        throw error;
+    }
+};

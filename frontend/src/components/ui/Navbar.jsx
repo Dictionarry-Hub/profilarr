@@ -44,6 +44,7 @@ function Navbar({ darkMode, setDarkMode }) {
   const getActiveTab = (pathname) => {
     if (pathname.startsWith("/regex")) return "regex";
     if (pathname.startsWith("/format")) return "format";
+    if (pathname.startsWith("/profile")) return "profile";
     if (pathname.startsWith("/settings")) return "settings";
     return "settings"; // default to settings if no match
   };
@@ -78,7 +79,7 @@ function Navbar({ darkMode, setDarkMode }) {
                     : "text-gray-300 hover:bg-gray-700 hover:text-white"
                 }`}
               >
-                Regex
+                Regex Patterns
               </Link>
               <Link
                 to="/format"
@@ -89,7 +90,18 @@ function Navbar({ darkMode, setDarkMode }) {
                     : "text-gray-300 hover:bg-gray-700 hover:text-white"
                 }`}
               >
-                Custom Format
+                Custom Formats
+              </Link>
+              <Link
+                to="/profile"
+                ref={(el) => (tabsRef.current["profile"] = el)}
+                className={`px-3 py-2 rounded-md text-sm font-medium relative z-10 ${
+                  activeTab === "profile"
+                    ? "text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                }`}
+              >
+                Profiles
               </Link>
               <Link
                 to="/settings"
