@@ -6,7 +6,11 @@ import logging
 from .utils import get_next_id, generate_filename, get_current_timestamp, sanitize_input
 
 bp = Blueprint('format', __name__, url_prefix='/format')
-FORMAT_DIR = os.path.join('data', 'db', 'custom_formats')
+DATA_DIR = '/app/data'
+FORMAT_DIR = os.path.join(DATA_DIR, 'db', 'custom_formats')
+
+# Ensure the directory exists
+os.makedirs(FORMAT_DIR, exist_ok=True)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

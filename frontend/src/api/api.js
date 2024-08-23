@@ -166,16 +166,6 @@ export const deleteBranch = async (branchName) => {
     }
 };
 
-export const pullBranch = async (branchName) => {
-    try {
-        const response = await axios.post(`${API_BASE_URL}/settings/pull`, { branch: branchName });
-        return response.data;
-    } catch (error) {
-        console.error('Error pulling branch:', error);
-        throw error;
-    }
-};
-
 export const addFiles = async (files) => {
     try {
         const response = await axios.post(`${API_BASE_URL}/settings/stage`, { files });
@@ -232,5 +222,25 @@ export const deleteFile = async (filePath) => {
     } catch (error) {
         console.error('Error deleting file:', error);
         return { success: false, error: 'Error deleting file' };
+    }
+};
+
+export const pullBranch = async (branchName) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings/pull`, { branch: branchName });
+        return response.data;
+    } catch (error) {
+        console.error('Error pulling branch:', error);
+        throw error;
+    }
+};
+
+export const getDiff = async (filePath) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/settings/diff`, { file_path: filePath });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching diff:', error);
+        throw error;
     }
 };

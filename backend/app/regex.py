@@ -8,9 +8,12 @@ import subprocess
 from .utils import get_next_id, generate_filename, get_current_timestamp, sanitize_input
 
 bp = Blueprint('regex', __name__, url_prefix='/regex')
-REGEX_DIR = os.path.join('data', 'db', 'regex_patterns')
-
+DATA_DIR = '/app/data'
+REGEX_DIR = os.path.join(DATA_DIR, 'db', 'regex_patterns')
 logging.basicConfig(level=logging.DEBUG)
+
+# Ensure the directory exists
+os.makedirs(REGEX_DIR, exist_ok=True)
 
 @bp.route('/regex101', methods=['POST'])
 def regex101_proxy():

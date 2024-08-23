@@ -9,6 +9,7 @@ function Modal({
   level = 0,
   disableCloseOnOutsideClick = false,
   disableCloseOnEscape = false,
+  size = 'lg', // Default size, can be overridden by the child component
 }) {
   const modalRef = useRef();
   const [isAnimating, setIsAnimating] = useState(false);
@@ -47,6 +48,17 @@ function Modal({
     }
   };
 
+  const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
+  };
+
   return (
     <div
       className={`fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center transition-opacity duration-300 ease-in-out ${
@@ -58,7 +70,7 @@ function Modal({
       <div className="fixed inset-0 bg-black bg-opacity-50" style={{ zIndex: 1000 + level * 10 }}></div>
       <div
         ref={modalRef}
-        className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-lg transform transition-all duration-300 ease-in-out ${
+        className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full ${sizeClasses[size]} transform transition-all duration-300 ease-in-out ${
           isAnimating ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}
         style={{
@@ -94,6 +106,7 @@ Modal.propTypes = {
   level: PropTypes.number,
   disableCloseOnOutsideClick: PropTypes.bool,
   disableCloseOnEscape: PropTypes.bool,
+  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl']), // Size prop
 };
 
 export default Modal;

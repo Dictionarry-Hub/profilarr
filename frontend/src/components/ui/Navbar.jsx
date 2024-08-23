@@ -40,7 +40,7 @@ function Navbar({ activeTab, setActiveTab, darkMode, setDarkMode }) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             <h1 className="text-2xl font-bold text-white">
-              Regexerr
+              Profilarr
             </h1>
             <div className="relative flex space-x-2">
               <div

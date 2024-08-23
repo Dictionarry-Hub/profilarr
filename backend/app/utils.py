@@ -5,6 +5,7 @@ import re
 import yaml
 from yaml import safe_load
 from collections import OrderedDict
+import logging
 
 def get_next_id(directory):
     max_id = 0
@@ -13,9 +14,12 @@ def get_next_id(directory):
             file_path = os.path.join(directory, filename)
             with open(file_path, 'r') as file:
                 content = yaml.safe_load(file)
-                file_id = content.get('id', 0)
-                if isinstance(file_id, int) and file_id > max_id:
-                    max_id = file_id
+                file_id = content.get('id', None)
+                if isinstance(file_id, int):
+                    if file_id > max_id:
+                        max_id = file_id
+                else:
+                    logging.warning(f"File {filename} has an invalid or missing 'id': {file_id}")
     return max_id + 1
 
 def generate_filename(directory, id, name):

@@ -1,12 +1,31 @@
-import React from 'react';
-import { CheckSquare, GitCommit, RotateCcw, Loader } from 'lucide-react';
-import Textarea from '../ui/TextArea';
-import Tooltip from '../ui/Tooltip';
+import React from "react";
+import {
+  CheckSquare,
+  GitCommit,
+  RotateCcw,
+  Loader,
+  Download,
+} from "lucide-react";
+import Textarea from "../ui/TextArea";
+import Tooltip from "../ui/Tooltip";
 
-const CommitSection = ({ status, commitMessage, setCommitMessage, handleStageAll, handleCommitAll, handleRevertAll, loadingAction }) => {
-  const hasUnstagedChanges = status.changes.some(change => !change.staged || (change.staged && change.modified));
-  const hasStagedChanges = status.changes.some(change => change.staged);
-  const hasAnyChanges = status.changes.length > 0;
+const CommitSection = ({
+  status,
+  commitMessage,
+  setCommitMessage,
+  handleStageAll,
+  handleCommitAll,
+  handleRevertAll,
+  loadingAction,
+  hasIncomingChanges,
+}) => {
+  const hasUnstagedChanges = status.outgoing_changes.some(
+    (change) => !change.staged || (change.staged && change.modified)
+  );
+  const hasStagedChanges = status.outgoing_changes.some(
+    (change) => change.staged
+  );
+  const hasAnyChanges = status.outgoing_changes.length > 0;
 
   const funMessages = [
     "No changes detected. Your regex is so precise, it could find a needle in a haystack... made of needles. 🧵🔍",
@@ -18,18 +37,23 @@ const CommitSection = ({ status, commitMessage, setCommitMessage, handleStageAll
     "No alterations found. Your file naming scheme is so consistent, it's bringing tears to OCD eyes. 😢👀",
     "All systems nominal. Your download queue is so orderly, it's making Marie Kondo question her career. 🧹✨",
     "No revisions necessary. Your automation scripts are so smart, they're solving captchas for fun. 🤖🧩",
-    "Steady as she goes. Your media collection is so complete, Netflix is asking you for recommendations. 🎬👑"
+    "Steady as she goes. Your media collection is so complete, Netflix is asking you for recommendations. 🎬👑",
   ];
 
-  const randomMessage = funMessages[Math.floor(Math.random() * funMessages.length)];
+  const randomMessage =
+    funMessages[Math.floor(Math.random() * funMessages.length)];
 
   const CommitButton = () => (
     <button
       onClick={handleCommitAll}
       className="flex items-center justify-center px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors text-sm"
-      disabled={loadingAction === 'commit_all' || !commitMessage.trim()}
+      disabled={loadingAction === "commit_all" || !commitMessage.trim()}
     >
-      {loadingAction === 'commit_all' ? <Loader size={16} className="animate-spin mr-2" /> : <GitCommit className="mr-2" size={16} />}
+      {loadingAction === "commit_all" ? (
+        <Loader size={16} className="animate-spin mr-2" />
+      ) : (
+        <GitCommit className="mr-2" size={16} />
+      )}
       Commit All
     </button>
   );
@@ -37,7 +61,7 @@ const CommitSection = ({ status, commitMessage, setCommitMessage, handleStageAll
   return (
     <div className="mt-4">
       <h3 className="text-sm font-semibold text-gray-100 mb-4">Changes:</h3>
-      {hasAnyChanges ? (
+      {hasAnyChanges || hasIncomingChanges ? (
         <>
           {hasStagedChanges && (
             <Textarea
@@ -52,27 +76,34 @@ const CommitSection = ({ status, commitMessage, setCommitMessage, handleStageAll
               <button
                 onClick={handleStageAll}
                 className="flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm"
-                disabled={loadingAction === 'stage_all'}
+                disabled={loadingAction === "stage_all"}
               >
-                {loadingAction === 'stage_all' ? <Loader size={16} className="animate-spin mr-2" /> : <CheckSquare className="mr-2" size={16} />}
+                {loadingAction === "stage_all" ? (
+                  <Loader size={16} className="animate-spin mr-2" />
+                ) : (
+                  <CheckSquare className="mr-2" size={16} />
+                )}
                 Stage All
               </button>
             )}
-            {hasStagedChanges && (
-              !commitMessage.trim() ? (
+            {hasStagedChanges &&
+              (!commitMessage.trim() ? (
                 <Tooltip content="Commit message is required">
                   <CommitButton />
                 </Tooltip>
               ) : (
                 <CommitButton />
-              )
-            )}
+              ))}
             <button
               onClick={handleRevertAll}
               className="flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
-              disabled={loadingAction === 'revert_all'}
+              disabled={loadingAction === "revert_all"}
             >
-              {loadingAction === 'revert_all' ? <Loader size={16} className="animate-spin mr-2" /> : <RotateCcw className="mr-2" size={16} />}
+              {loadingAction === "revert_all" ? (
+                <Loader size={16} className="animate-spin mr-2" />
+              ) : (
+                <RotateCcw className="mr-2" size={16} />
+              )}
               Revert All
             </button>
           </div>

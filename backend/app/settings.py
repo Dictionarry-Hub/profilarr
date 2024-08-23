@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint('settings', __name__, url_prefix='/settings')
 
-SETTINGS_FILE = 'data/config/settings.yml'
+DATA_DIR = '/app/data'
+DB_DIR = os.path.join(DATA_DIR, 'db')
+REGEX_DIR = os.path.join(DB_DIR, 'regex_patterns')
+FORMAT_DIR = os.path.join(DB_DIR, 'custom_formats')
+SETTINGS_FILE = os.path.join(DATA_DIR, 'config', 'settings.yml')
 
 def load_settings():
     try:
@@ -95,7 +99,7 @@ def parse_diff(diff_text):
     
     return parsed_diff, local_version, incoming_version
 
-def get_changes(repo):
+def get_outgoing_changes(repo):
     status = repo.git.status('--porcelain', '-z').split('\0')
     logger.debug(f"Raw porcelain status: {status}")
 
@@ -163,6 +167,35 @@ def get_changes(repo):
     logger.debug(f"Final changes: {json.dumps(changes, indent=2)}")
     return changes
 
+def get_incoming_changes(repo, branch):
+    incoming_changes = []
+    diff = repo.git.diff(f'HEAD...origin/{branch}', name_only=True)
+    changed_files = diff.split('\n') if diff else []
+    
+    for file_path in changed_files:
+        if file_path:
+            full_path = os.path.join(repo.working_dir, file_path)
+            file_data = extract_data_from_yaml(full_path) if os.path.exists(full_path) else None
+            
+            # Correcting the git show command
+            commit_message = repo.git.show(f'HEAD...origin/{branch}', '--format=%B', '-s', file_path).strip()
+            
+            incoming_changes.append({
+                'name': file_data.get('name', os.path.basename(file_path)) if file_data else os.path.basename(file_path),
+                'id': file_data.get('id') if file_data else None,
+                'type': determine_type(file_path),
+                'status': 'Incoming',
+                'file_path': file_path,
+                'commit_message': commit_message,  # Include commit message here
+                'staged': False,
+                'modified': True,
+                'deleted': False
+            })
+    
+    return incoming_changes
+
+
+
 def extract_data_from_yaml(file_path):
     logger.debug(f"Extracting data from file: {file_path}")
     try:
@@ -224,7 +257,7 @@ class SettingsManager:
     def __init__(self):
         self.settings = load_settings()
         self.repo_url = self.settings.get('gitRepo') if self.settings else None
-        self.repo_path = self.settings.get('localRepoPath') if self.settings else None
+        self.repo_path = DB_DIR
 
     def get_default_branch(self):
         try:
@@ -282,18 +315,25 @@ class SettingsManager:
                     os.makedirs(folder_path)
                     logger.debug(f"Created missing folder: {folder_name} in the cloned repository.")
 
+                # Collect IDs from the cloned files
                 cloned_files = [f for f in os.listdir(folder_path) if f.endswith('.yml')]
-                max_id = max([int(f.split('_')[0]) for f in cloned_files], default=0)
+                cloned_ids = set(int(f.split('.')[0]) for f in cloned_files)
 
+                # Now handle local files from the backup directory
                 if os.path.exists(backup_folder_path):
                     local_files = [f for f in os.listdir(backup_folder_path) if f.endswith('.yml')]
                     for file_name in local_files:
                         old_file_path = os.path.join(backup_folder_path, file_name)
                         with open(old_file_path, 'r') as file:
                             data = yaml.safe_load(file)
-                        max_id += 1
-                        data['id'] = max_id
-                        new_file_name = f"{max_id}_{data['name'].replace(' ', '_').lower()}.yml"
+
+                        # Increment the ID only if it's already in the cloned set
+                        while data['id'] in cloned_ids:
+                            data['id'] += 1
+
+                        cloned_ids.add(data['id'])  # Add to the set to track used IDs
+
+                        new_file_name = f"{data['id']}_{data['name'].replace(' ', '_').lower()}.yml"
                         new_file_path = os.path.join(folder_path, new_file_name)
                         with open(new_file_path, 'w') as file:
                             yaml.dump(data, file)
@@ -322,11 +362,9 @@ class SettingsManager:
             repo = git.Repo(self.repo_path)
             logger.debug(f"Successfully created Repo object")
 
-            # Now, actually call get_changes to process the status lines
-            changes = get_changes(repo)
-            logger.debug(f"Changes detected by get_changes: {changes}")
+            outgoing_changes = get_outgoing_changes(repo)
+            logger.debug(f"Outgoing changes detected: {outgoing_changes}")
 
-            # Fetch only if necessary
             branch = repo.active_branch.name
             remote_branch_exists = f"origin/{branch}" in [ref.name for ref in repo.remotes.origin.refs]
 
@@ -335,17 +373,21 @@ class SettingsManager:
                 commits_behind = get_commits_behind(repo, branch)
                 commits_ahead = get_commits_ahead(repo, branch)
                 logger.debug(f"Commits behind: {len(commits_behind)}, Commits ahead: {len(commits_ahead)}")
+
+                incoming_changes = get_incoming_changes(repo, branch)
             else:
                 commits_behind = []
                 commits_ahead = []
-                logger.debug("Remote branch does not exist, skipping commits ahead/behind calculation.")
+                incoming_changes = []
+                logger.debug("Remote branch does not exist, skipping commits ahead/behind and incoming changes calculation.")
 
             status = {
                 "branch": branch,
                 "remote_branch_exists": remote_branch_exists,
-                "changes": changes,
+                "outgoing_changes": outgoing_changes,
                 "commits_behind": len(commits_behind),
                 "commits_ahead": len(commits_ahead),
+                "incoming_changes": incoming_changes,
             }
             logger.debug(f"Final status object: {json.dumps(status, indent=2)}")
             return True, status
@@ -710,3 +752,26 @@ def delete_file():
     except Exception as e:
         logger.error(f"Error deleting file: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': f"Error deleting file: {str(e)}"}), 400
+    
+@bp.route('/pull', methods=['POST'])
+def pull_branch():
+    branch_name = request.json.get('branch')
+    try:
+        repo = git.Repo(settings_manager.repo_path)
+        repo.git.pull('origin', branch_name)
+        return jsonify({'success': True, 'message': f'Successfully pulled changes for branch {branch_name}.'}), 200
+    except Exception as e:
+        logger.error(f"Error pulling branch: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': f"Error pulling branch: {str(e)}"}), 400
+
+@bp.route('/diff', methods=['POST'])
+def get_diff():
+    file_path = request.json.get('file_path')
+    try:
+        repo = git.Repo(settings_manager.repo_path)
+        branch = repo.active_branch.name
+        diff = repo.git.diff(f'HEAD...origin/{branch}', file_path)
+        return jsonify({'success': True, 'diff': diff}), 200
+    except Exception as e:
+        logger.error(f"Error getting diff for file {file_path}: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': f"Error getting diff for file: {str(e)}"}), 400

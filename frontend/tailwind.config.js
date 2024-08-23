@@ -8,6 +8,9 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        'code': ['Courier New', 'monospace'], // Custom pre font
+      },
       keyframes: {
         'modal-open': {
           '0%': { opacity: 0, transform: 'scale(0.95)' },

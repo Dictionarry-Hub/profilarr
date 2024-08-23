@@ -8,7 +8,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://backend:5000
+      - VITE_API_URL=http://192.168.1.111:5000  # Replace with your host machine's IP
       - CHOKIDAR_USEPOLLING=true
 
   backend:
@@ -17,3 +17,7 @@ services:
       - "5000:5000"
     volumes:
       - ./backend:/app
+      - backend_data:/app/data
+
+volumes:
+  backend_data:
