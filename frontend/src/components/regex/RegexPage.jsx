@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import RegexCard from "./RegexCard";
 import RegexModal from "./RegexModal";
 import AddNewCard from "../ui/AddNewCard";
 import { getRegexes } from "../../api/api";
 import FilterMenu from "../ui/FilterMenu";
 import SortMenu from "../ui/SortMenu";
+import { Loader } from "lucide-react";
 
 function RegexPage() {
   const [regexes, setRegexes] = useState([]);
@@ -15,6 +16,15 @@ function RegexPage() {
   const [filterValue, setFilterValue] = useState("");
   const [allTags, setAllTags] = useState([]);
   const [isCloning, setIsCloning] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadingMessages = [
+    "Matching patterns in the digital universe...",
+    "Capturing groups of binary brilliance...",
+    "Escaping special characters in the wild...",
+    "Quantifying the unquantifiable...",
+    "Regex-ing the un-regex-able...",
+  ];
 
   useEffect(() => {
     fetchRegexes();
@@ -30,6 +40,8 @@ function RegexPage() {
       setAllTags(tags);
     } catch (error) {
       console.error("Error fetching regexes:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -86,6 +98,17 @@ function RegexPage() {
         return new Date(b.date_modified) - new Date(a.date_modified);
       return 0;
     });
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Loader size={48} className="animate-spin text-blue-500 mb-4" />
+        <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+          {loadingMessages[Math.floor(Math.random() * loadingMessages.length)]}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>

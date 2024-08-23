@@ -224,6 +224,8 @@ def determine_type(file_path):
         return 'Regex Pattern'
     elif 'custom_formats' in file_path:
         return 'Custom Format'
+    elif 'profiles' in file_path:
+        return 'Quality Profile'
     return 'Unknown'
 
 def interpret_git_status(x, y):

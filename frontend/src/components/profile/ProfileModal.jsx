@@ -25,6 +25,7 @@ function ProfileModal({
   const [formatTags, setFormatTags] = useState([]);
   const [tagScores, setTagScores] = useState({});
   const [tagFilter, setTagFilter] = useState("");
+  const [formatFilter, setFormatFilter] = useState("");
   const [error, setError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -161,8 +162,12 @@ function ProfileModal({
     tag.toLowerCase().includes(tagFilter.toLowerCase())
   );
 
+  const filteredFormats = customFormats.filter((format) =>
+    format.name.toLowerCase().includes(formatFilter.toLowerCase())
+  );
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
+    <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size="7xl">
       {loading ? (
         <div className="flex justify-center items-center">
           <Loader size={24} className="animate-spin text-gray-300" />
@@ -170,117 +175,134 @@ function ProfileModal({
       ) : (
         <>
           {error && <div className="text-red-500 mb-4">{error}</div>}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Profile Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter profile name"
-              className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter description"
-              className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
-              rows="3"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Tags
-            </label>
-            <div className="flex flex-wrap mb-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
-                >
-                  {tag}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Profile Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter profile name"
+                  className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter description"
+                  className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 resize-none"
+                  rows="5"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tags
+                </label>
+                <div className="flex flex-wrap mb-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
+                    >
+                      {tag}
+                      <button
+                        onClick={() => handleRemoveTag(tag)}
+                        className="ml-1 text-xs"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex">
+                  <input
+                    type="text"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add a tag"
+                    className="flex-grow p-2 border rounded-l dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                  />
                   <button
-                    onClick={() => handleRemoveTag(tag)}
-                    className="ml-1 text-xs"
+                    onClick={handleAddTag}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600 transition-colors"
                   >
-                    &times;
+                    Add
                   </button>
-                </span>
-              ))}
-            </div>
-            <div className="flex">
-              <input
-                type="text"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Add a tag"
-                className="flex-grow p-2 border rounded-l dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
-              />
-              <button
-                onClick={handleAddTag}
-                className="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600 transition-colors"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Custom Formats
-            </label>
-            <div className="max-h-60 overflow-y-auto">
-              {customFormats.map((format) => (
-                <div
-                  key={format.id}
-                  className="flex items-center space-x-2 mb-2"
-                >
-                  <span className="flex-grow">{format.name}</span>
-                  <input
-                    type="number"
-                    value={format.score}
-                    onChange={(e) =>
-                      handleScoreChange(format.id, e.target.value)
-                    }
-                    className="w-20 p-1 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
-                    min="0"
-                  />
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Tag-based Scoring
-            </label>
-            <input
-              type="text"
-              value={tagFilter}
-              onChange={(e) => setTagFilter(e.target.value)}
-              placeholder="Filter tags"
-              className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
-            />
-            <div className="max-h-60 overflow-y-auto">
-              {filteredTags.map((tag) => (
-                <div key={tag} className="flex items-center space-x-2 mb-2">
-                  <span className="flex-grow">{tag}</span>
-                  <input
-                    type="number"
-                    value={tagScores[tag]}
-                    onChange={(e) => handleTagScoreChange(tag, e.target.value)}
-                    className="w-20 p-1 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
-                    min="0"
-                  />
+            <div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Custom Formats
+                </label>
+                <input
+                  type="text"
+                  value={formatFilter}
+                  onChange={(e) => setFormatFilter(e.target.value)}
+                  placeholder="Filter formats"
+                  className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                />
+                <div className="max-h-96 overflow-y-auto">
+                  {filteredFormats.map((format) => (
+                    <div
+                      key={format.id}
+                      className="flex items-center space-x-2 mb-2"
+                    >
+                      <span className="flex-grow">{format.name}</span>
+                      <input
+                        type="number"
+                        value={format.score}
+                        onChange={(e) =>
+                          handleScoreChange(format.id, e.target.value)
+                        }
+                        className="w-20 p-1 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                        min="0"
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            </div>
+            <div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tag-based Scoring
+                </label>
+                <input
+                  type="text"
+                  value={tagFilter}
+                  onChange={(e) => setTagFilter(e.target.value)}
+                  placeholder="Filter tags"
+                  className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                />
+                <div className="max-h-96 overflow-y-auto">
+                  {filteredTags.map((tag) => (
+                    <div key={tag} className="flex items-center space-x-2 mb-2">
+                      <span className="flex-grow">{tag}</span>
+                      <input
+                        type="number"
+                        value={tagScores[tag]}
+                        onChange={(e) =>
+                          handleTagScoreChange(tag, e.target.value)
+                        }
+                        className="w-20 p-1 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                        min="0"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between mt-4">
             {initialProfile && (
               <button
                 onClick={handleDelete}

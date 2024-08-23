@@ -67,6 +67,8 @@ function Modal({
     "3xl": "max-w-3xl",
     "4xl": "max-w-4xl",
     "5xl": "max-w-5xl",
+    "6xl": "max-w-6xl",
+    "7xl": "max-w-7xl",
   };
 
   return (
@@ -91,6 +93,8 @@ function Modal({
         style={{
           zIndex: 1001 + level * 10,
           minHeight: "300px",
+          maxHeight: "90vh",
+          overflowY: "auto",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -130,7 +134,18 @@ Modal.propTypes = {
   level: PropTypes.number,
   disableCloseOnOutsideClick: PropTypes.bool,
   disableCloseOnEscape: PropTypes.bool,
-  size: PropTypes.oneOf(["sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl"]),
+  size: PropTypes.oneOf([
+    "sm",
+    "md",
+    "lg",
+    "xl",
+    "2xl",
+    "3xl",
+    "4xl",
+    "5xl",
+    "6xl",
+    "7xl",
+  ]),
 };
 
 export default Modal;

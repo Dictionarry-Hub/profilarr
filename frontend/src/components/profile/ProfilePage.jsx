@@ -5,6 +5,7 @@ import AddNewCard from "../ui/AddNewCard";
 import { getProfiles, getFormats } from "../../api/api";
 import FilterMenu from "../ui/FilterMenu";
 import SortMenu from "../ui/SortMenu";
+import { Loader } from "lucide-react";
 
 function ProfilePage() {
   const [profiles, setProfiles] = useState([]);
@@ -16,6 +17,15 @@ function ProfilePage() {
   const [filterValue, setFilterValue] = useState("");
   const [allTags, setAllTags] = useState([]);
   const [isCloning, setIsCloning] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadingMessages = [
+    "Profiling your media collection...",
+    "Organizing your digital hoard...",
+    "Calibrating the flux capacitor...",
+    "Synchronizing with the movie matrix...",
+    "Optimizing your binge-watching potential...",
+  ];
 
   useEffect(() => {
     fetchProfiles();
@@ -32,6 +42,8 @@ function ProfilePage() {
       setAllTags(tags);
     } catch (error) {
       console.error("Error fetching profiles:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -104,6 +116,17 @@ function ProfilePage() {
         return new Date(b.date_modified) - new Date(a.date_modified);
       return 0;
     });
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Loader size={48} className="animate-spin text-blue-500 mb-4" />
+        <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+          {loadingMessages[Math.floor(Math.random() * loadingMessages.length)]}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
