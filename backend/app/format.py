@@ -4,6 +4,7 @@ import os
 import yaml
 import logging
 from .utils import get_next_id, generate_filename, get_current_timestamp, sanitize_input
+from .data_operations import load_all_profiles, load_all_formats
 
 bp = Blueprint('format', __name__, url_prefix='/format')
 DATA_DIR = '/app/data'
@@ -38,9 +39,18 @@ def handle_format(id):
         saved_data = save_format(data)
         return jsonify(saved_data)
     elif request.method == 'DELETE':
-        if delete_format(id):
-            return jsonify({"message": f"Format with ID {id} deleted."}), 200
-        return jsonify({"error": f"Format with ID {id} not found."}), 404
+        result = delete_format(id)
+        if "error" in result:
+            return jsonify(result), 400
+        return jsonify(result), 200
+
+def is_format_used_in_profile(format_id):
+    profiles = load_all_profiles()
+    for profile in profiles:
+        for custom_format in profile.get('custom_formats', []):
+            if custom_format.get('id') == format_id and custom_format.get('score', 0) != 0:
+                return True
+    return False
 
 def save_format(data):
     logger.info("Received data for saving format: %s", data)
@@ -115,19 +125,12 @@ def load_format(id):
             return data
     return None
 
-
-def load_all_formats():
-    formats = []
-    for filename in os.listdir(FORMAT_DIR):
-        if filename.endswith('.yml'):
-            with open(os.path.join(FORMAT_DIR, filename), 'r') as file:
-                data = yaml.safe_load(file)
-                formats.append(data)
-    return formats
-
 def delete_format(id):
+    if is_format_used_in_profile(id):
+        return {"error": "Format in use", "message": "This format is being used in one or more profiles."}
+    
     filename = os.path.join(FORMAT_DIR, f"{id}.yml")
     if os.path.exists(filename):
         os.remove(filename)
-        return True
-    return False
+        return {"message": f"Format with ID {id} deleted."}
+    return {"error": f"Format with ID {id} not found."}

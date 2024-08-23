@@ -4,6 +4,7 @@ import os
 import yaml
 import logging
 from .utils import get_next_id, generate_filename, get_current_timestamp, sanitize_input
+from .data_operations import load_all_profiles, load_all_formats
 
 bp = Blueprint('profile', __name__, url_prefix='/profile')
 DATA_DIR = '/app/data'
@@ -68,6 +69,20 @@ def save_profile(data):
     # Process tags
     tags = [sanitize_input(tag) for tag in data.get('tags', [])]
 
+    # Get all existing formats
+    all_formats = load_all_formats()
+
+    # Process custom formats
+    custom_formats = {format['id']: format['score'] for format in data.get('custom_formats', [])}
+    
+    # Ensure all formats are included with a minimum score of 0
+    final_custom_formats = []
+    for format in all_formats:
+        final_custom_formats.append({
+            'id': format['id'],
+            'score': max(custom_formats.get(format['id'], 0), 0)  # Ensure minimum score of 0
+        })
+
     # Construct the ordered data
     ordered_data = OrderedDict([
         ('id', profile_id),
@@ -75,7 +90,8 @@ def save_profile(data):
         ('description', description),
         ('date_created', str(date_created)),
         ('date_modified', str(date_modified)),
-        ('tags', tags)
+        ('tags', tags),
+        ('custom_formats', final_custom_formats)
     ])
 
     # Generate the filename using only the ID
@@ -94,15 +110,6 @@ def load_profile(id):
             data = yaml.safe_load(file)
             return data
     return None
-
-def load_all_profiles():
-    profiles = []
-    for filename in os.listdir(PROFILE_DIR):
-        if filename.endswith('.yml'):
-            with open(os.path.join(PROFILE_DIR, filename), 'r') as file:
-                data = yaml.safe_load(file)
-                profiles.append(data)
-    return profiles
 
 def delete_profile(id):
     filename = os.path.join(PROFILE_DIR, f"{id}.yml")

@@ -6,6 +6,7 @@ import json
 import logging
 import subprocess
 from .utils import get_next_id, generate_filename, get_current_timestamp, sanitize_input
+from .format import load_all_formats
 
 bp = Blueprint('regex', __name__, url_prefix='/regex')
 DATA_DIR = '/app/data'
@@ -88,9 +89,10 @@ def handle_regex(id):
         saved_data = save_regex(data)
         return jsonify(saved_data)
     elif request.method == 'DELETE':
-        if delete_regex(id):
-            return jsonify({"message": f"Regex with ID {id} deleted."}), 200
-        return jsonify({"error": f"Regex with ID {id} not found."}), 404
+        result = delete_regex(id)
+        if "error" in result:
+            return jsonify(result), 400
+        return jsonify(result), 200
 
 def save_regex(data):
     ordered_data = OrderedDict()
@@ -145,6 +147,13 @@ def save_regex(data):
 
     return ordered_data
 
+def is_regex_used_in_format(regex_id):
+    formats = load_all_formats()
+    for format in formats:
+        for condition in format.get('conditions', []):
+            if condition.get('type') == 'regex' and condition.get('regex_id') == regex_id:
+                return True
+    return False
 
 def find_existing_file(regex_id):
     """Find the existing filename for a given regex ID."""
@@ -174,8 +183,11 @@ def load_all_regexes():
     return regexes
 
 def delete_regex(id):
+    if is_regex_used_in_format(id):
+        return {"error": "Regex in use", "message": "This regex is being used in one or more custom formats."}
+    
     filename = os.path.join(REGEX_DIR, f"{id}.yml")
     if os.path.exists(filename):
         os.remove(filename)
-        return True
-    return False
+        return {"message": f"Regex with ID {id} deleted."}
+    return {"error": f"Regex with ID {id} not found."}
