@@ -6,8 +6,6 @@ import {
   addFiles,
   pushFiles,
   revertFile,
-  revertAll,
-  deleteFile,
   pullBranch,
   getDiff,
 } from "../../api/api";
@@ -27,6 +25,9 @@ import {
   Download,
   ArrowDown,
   ArrowUp,
+  CheckCircle,
+  File,
+  Settings,
 } from "lucide-react";
 import Alert from "../ui/Alert";
 import CommitSection from "./CommitSection";
@@ -42,10 +43,16 @@ const SettingsPage = () => {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [commitMessage, setCommitMessage] = useState("");
   const [selectedIncomingChanges, setSelectedIncomingChanges] = useState([]);
+  const [selectedOutgoingChanges, setSelectedOutgoingChanges] = useState([]);
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [diffContent, setDiffContent] = useState("");
   const [currentChange, setCurrentChange] = useState(null);
   const [loadingDiff, setLoadingDiff] = useState(false);
+  const [selectionType, setSelectionType] = useState(null);
+  const [sortConfig, setSortConfig] = useState({
+    key: "type",
+    direction: "descending",
+  });
 
   useEffect(() => {
     fetchSettings();
@@ -63,6 +70,48 @@ const SettingsPage = () => {
     } catch (error) {
       console.error("Error fetching settings:", error);
     }
+  };
+
+  const sortedChanges = (changes) => {
+    if (!sortConfig.key) return changes;
+
+    return [...changes].sort((a, b) => {
+      if (a[sortConfig.key] < b[sortConfig.key]) {
+        return sortConfig.direction === "ascending" ? -1 : 1;
+      }
+      if (a[sortConfig.key] > b[sortConfig.key]) {
+        return sortConfig.direction === "ascending" ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  const requestSort = (key) => {
+    let direction = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const SortableHeader = ({ children, sortKey }) => {
+    const isSorted = sortConfig.key === sortKey;
+    return (
+      <th
+        className="px-4 py-2 text-left text-gray-300 cursor-pointer hover:bg-gray-500"
+        onClick={() => requestSort(sortKey)}
+      >
+        <div className="flex items-center">
+          {children}
+          {isSorted &&
+            (sortConfig.direction === "ascending" ? (
+              <ArrowUp size={14} className="ml-1" />
+            ) : (
+              <ArrowDown size={14} className="ml-1" />
+            ))}
+        </div>
+      </th>
+    );
   };
 
   const handleSaveSettings = async (newSettings) => {
@@ -125,33 +174,30 @@ const SettingsPage = () => {
         <table className="w-full text-sm">
           <thead className="bg-gray-600">
             <tr>
-              <th className="px-4 py-2 text-left text-gray-300 w-1/4">
-                Status
+              <SortableHeader sortKey="status">Status</SortableHeader>
+              <SortableHeader sortKey="type">Type</SortableHeader>
+              <SortableHeader sortKey="name">Name</SortableHeader>
+              <th className="px-4 py-2 text-left text-gray-300 w-1/5">
+                Actions
               </th>
-              <th className="px-4 py-2 text-left text-gray-300 w-1/4">Type</th>
-              <th className="px-4 py-2 text-left text-gray-300 w-1/3">Name</th>
-              {isIncoming && (
-                <th className="px-4 py-2 text-left text-gray-300 w-1/6">
-                  Actions
-                </th>
-              )}
-              {isIncoming && (
-                <th className="px-4 py-2 text-right text-gray-300 w-1/12">
-                  Select
-                </th>
-              )}
+              <th className="px-4 py-2 text-right text-gray-300 w-1/10">
+                Select
+              </th>
             </tr>
           </thead>
           <tbody>
-            {changes.map((change, index) => (
+            {sortedChanges(changes).map((change, index) => (
               <tr
                 key={`${isIncoming ? "incoming" : "outgoing"}-${index}`}
                 className={`border-t border-gray-600 cursor-pointer hover:bg-gray-700 ${
-                  selectedIncomingChanges.includes(change.file_path)
+                  (isIncoming
+                    ? selectedIncomingChanges
+                    : selectedOutgoingChanges
+                  ).includes(change.file_path)
                     ? "bg-gray-700"
                     : ""
                 }`}
-                onClick={() => handleSelectChange(change.file_path)}
+                onClick={() => handleSelectChange(change.file_path, isIncoming)}
               >
                 <td className="px-4 py-2 text-gray-300">
                   <div className="flex items-center">
@@ -172,66 +218,75 @@ const SettingsPage = () => {
                 <td className="px-4 py-2 text-gray-300">
                   {change.name || "Unnamed"}
                 </td>
-                {isIncoming && (
-                  <td className="px-4 py-2 text-left align-middle">
-                    <Tooltip content="View differences">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewDiff(change); // Pass the change object to view its diff
-                        }}
-                        className="flex items-center justify-center px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-xs"
-                        style={{ width: "100%" }} // Ensure the button takes up the full width of the cell
-                      >
-                        {loadingDiff ? (
-                          <Loader size={12} className="animate-spin" />
-                        ) : (
-                          <>
-                            <Eye size={12} className="mr-1" />
-                            View Diff
-                          </>
-                        )}
-                      </button>
-                    </Tooltip>
-                  </td>
-                )}
-                {isIncoming && (
-                  <td className="px-4 py-2 text-right text-gray-300 align-middle">
-                    <input
-                      type="checkbox"
-                      checked={selectedIncomingChanges.includes(
-                        change.file_path
+                <td className="px-4 py-2 text-left align-middle">
+                  <Tooltip content="View differences">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewDiff(change);
+                      }}
+                      className="flex items-center justify-center px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-xs"
+                      style={{ width: "100%" }}
+                    >
+                      {loadingDiff ? (
+                        <Loader size={12} className="animate-spin" />
+                      ) : (
+                        <>
+                          <Eye size={12} className="mr-1" />
+                          View Diff
+                        </>
                       )}
-                      onChange={(e) => e.stopPropagation()}
-                    />
-                  </td>
-                )}
+                    </button>
+                  </Tooltip>
+                </td>
+                <td className="px-4 py-2 text-right text-gray-300 align-middle">
+                  <input
+                    type="checkbox"
+                    checked={(isIncoming
+                      ? selectedIncomingChanges
+                      : selectedOutgoingChanges
+                    ).includes(change.file_path)}
+                    onChange={(e) => e.stopPropagation()}
+                    disabled={!isIncoming && change.staged}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {isIncoming && changes.length > 0 && (
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={handlePullSelectedChanges}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 ease-in-out text-xs"
-            disabled={
-              loadingAction === "pull_changes" ||
-              selectedIncomingChanges.length === 0
-            }
-          >
-            {loadingAction === "pull_changes" ? (
-              <Loader size={12} className="animate-spin" />
-            ) : (
-              <Download className="mr-1" size={12} />
-            )}
-            Pull Selected Changes
-          </button>
-        </div>
-      )}
     </div>
   );
+
+  const getStageButtonTooltip = () => {
+    if (selectionType === "staged") {
+      return "These files are already staged";
+    }
+    if (selectedOutgoingChanges.length === 0) {
+      return "Select files to stage";
+    }
+    return "Stage selected files";
+  };
+
+  const getCommitButtonTooltip = () => {
+    if (selectionType === "unstaged") {
+      return "You can only commit staged files";
+    }
+    if (selectedOutgoingChanges.length === 0) {
+      return "Select files to commit";
+    }
+    if (!commitMessage.trim()) {
+      return "Enter a commit message";
+    }
+    return "Commit selected files";
+  };
+
+  const getRevertButtonTooltip = () => {
+    if (selectedOutgoingChanges.length === 0) {
+      return "Select files to revert";
+    }
+    return "Revert selected files";
+  };
 
   const handleViewDiff = async (change) => {
     setLoadingDiff(true); // Start loading
@@ -253,56 +308,33 @@ const SettingsPage = () => {
     }
   };
 
-  const handleAddFile = async (filePath) => {
-    setLoadingAction(`add-${filePath}`);
-    try {
-      const response = await addFiles([filePath]);
-      if (response.success) {
-        await fetchGitStatus(); // Refresh status
-        Alert.success(response.message);
-      } else {
-        Alert.error(response.error);
-      }
-    } catch (error) {
-      Alert.error("An unexpected error occurred while adding the file.");
-      console.error("Error adding untracked file:", error);
-    } finally {
-      setLoadingAction("");
-    }
-  };
-
-  const handleStageAll = async () => {
-    const unstagedChanges = status.outgoing_changes.filter(
-      (change) => !change.staged || (change.staged && change.modified)
-    );
-
-    if (unstagedChanges.length === 0) {
-      Alert.warning("There are no changes to stage.");
+  const handleStageSelectedChanges = async () => {
+    if (selectedOutgoingChanges.length === 0) {
+      Alert.warning("Please select at least one change to stage.");
       return;
     }
-    setLoadingAction("stage_all");
+
+    setLoadingAction("stage_selected");
     try {
-      const response = await addFiles([]);
+      const response = await addFiles(selectedOutgoingChanges);
       if (response.success) {
         await fetchGitStatus();
+        setSelectedOutgoingChanges([]); // Clear the selected changes after staging
         Alert.success(response.message);
       } else {
         Alert.error(response.error);
       }
     } catch (error) {
-      Alert.error("An unexpected error occurred while staging files.");
-      console.error("Error staging files:", error);
+      Alert.error("An unexpected error occurred while staging changes.");
+      console.error("Error staging changes:", error);
     } finally {
       setLoadingAction("");
     }
   };
 
-  const handleCommitAll = async () => {
-    if (
-      !status.outgoing_changes ||
-      !status.outgoing_changes.some((change) => change.staged)
-    ) {
-      Alert.warning("There are no staged changes to commit.");
+  const handleCommitSelectedChanges = async () => {
+    if (selectedOutgoingChanges.length === 0) {
+      Alert.warning("Please select at least one change to commit.");
       return;
     }
 
@@ -311,100 +343,47 @@ const SettingsPage = () => {
       return;
     }
 
-    setLoadingAction("commit_all");
+    setLoadingAction("commit_selected");
     try {
-      const stagedFiles = status.outgoing_changes
-        .filter((change) => change.staged)
-        .map((change) => change.file_path);
-      const response = await pushFiles(stagedFiles, commitMessage);
+      const response = await pushFiles(selectedOutgoingChanges, commitMessage);
       if (response.success) {
         await fetchGitStatus();
+        setSelectedOutgoingChanges([]); // Clear the selected changes after committing
         setCommitMessage("");
         Alert.success(response.message);
       } else {
         Alert.error(response.error);
       }
     } catch (error) {
-      Alert.error("An unexpected error occurred while committing files.");
-      console.error("Error committing files:", error);
+      Alert.error("An unexpected error occurred while committing changes.");
+      console.error("Error committing changes:", error);
     } finally {
       setLoadingAction("");
     }
   };
 
-  const handleRevertFile = async (filePath) => {
-    const fileToRevert = status.changes.find(
-      (change) => change.file_path === filePath
-    );
-
-    const isDeletedFile =
-      fileToRevert && fileToRevert.status.includes("Deleted");
-
-    if (
-      !fileToRevert ||
-      (!fileToRevert.staged && !fileToRevert.modified && !isDeletedFile)
-    ) {
-      Alert.warning("There is nothing to revert for this file.");
+  const handleRevertSelectedChanges = async () => {
+    if (selectedOutgoingChanges.length === 0) {
+      Alert.warning("Please select at least one change to revert.");
       return;
     }
 
-    setLoadingAction(`revert-${filePath}`);
+    setLoadingAction("revert_selected");
     try {
-      const response = await revertFile(filePath);
-      if (response.success) {
+      const response = await Promise.all(
+        selectedOutgoingChanges.map((filePath) => revertFile(filePath))
+      );
+      const allSuccessful = response.every((res) => res.success);
+      if (allSuccessful) {
         await fetchGitStatus();
-        Alert.success(response.message);
+        setSelectedOutgoingChanges([]); // Clear the selected changes after reverting
+        Alert.success("Selected changes have been reverted successfully.");
       } else {
-        Alert.error(response.error);
+        Alert.error("Some changes could not be reverted. Please try again.");
       }
     } catch (error) {
-      Alert.error("An unexpected error occurred while reverting the file.");
-      console.error("Error reverting file:", error);
-    } finally {
-      setLoadingAction("");
-    }
-  };
-
-  const handleRevertAll = async () => {
-    const hasChangesToRevert = status.changes.some(
-      (change) => change.staged || change.modified
-    );
-
-    if (!hasChangesToRevert) {
-      Alert.warning("There are no changes to revert.");
-      return;
-    }
-
-    setLoadingAction("revert_all");
-    try {
-      const response = await revertAll();
-      if (response.success) {
-        await fetchGitStatus();
-        Alert.success(response.message);
-      } else {
-        Alert.error(response.error);
-      }
-    } catch (error) {
-      Alert.error("An unexpected error occurred while reverting all changes.");
-      console.error("Error reverting all changes:", error);
-    } finally {
-      setLoadingAction("");
-    }
-  };
-
-  const handleDeleteFile = async (filePath) => {
-    setLoadingAction(`delete-${filePath}`);
-    try {
-      const response = await deleteFile(filePath);
-      if (response.success) {
-        await fetchGitStatus(); // Refresh the status after deletion
-        Alert.success(`File ${filePath} has been deleted.`);
-      } else {
-        Alert.error(response.error);
-      }
-    } catch (error) {
-      Alert.error("An unexpected error occurred while deleting the file.");
-      console.error("Error deleting file:", error);
+      Alert.error("An unexpected error occurred while reverting changes.");
+      console.error("Error reverting changes:", error);
     } finally {
       setLoadingAction("");
     }
@@ -435,47 +414,39 @@ const SettingsPage = () => {
     }
   };
 
-  const handleSelectChange = (filePath) => {
-    setSelectedIncomingChanges((prevSelected) => {
-      if (prevSelected.includes(filePath)) {
-        return prevSelected.filter((path) => path !== filePath);
-      } else {
-        return [...prevSelected, filePath];
-      }
-    });
-  };
-
-  const getActionButton = (change) => {
-    if (change.status === "Untracked") {
-      return (
-        <button
-          onClick={() => handleDeleteFile(change.file_path)}
-          className="flex items-center px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-xs"
-          disabled={loadingAction === `delete-${change.file_path}`}
-        >
-          {loadingAction === `delete-${change.file_path}` ? (
-            <Loader size={12} className="animate-spin" />
-          ) : (
-            <MinusCircle className="mr-1" size={12} />
-          )}
-          Delete
-        </button>
-      );
+  const handleSelectChange = (filePath, isIncoming) => {
+    if (isIncoming) {
+      setSelectedIncomingChanges((prevSelected) => {
+        if (prevSelected.includes(filePath)) {
+          return prevSelected.filter((path) => path !== filePath);
+        } else {
+          return [...prevSelected, filePath];
+        }
+      });
     } else {
-      return (
-        <button
-          onClick={() => handleRevertFile(change.file_path)}
-          className="flex items-center px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-xs"
-          disabled={loadingAction === `revert-${change.file_path}`}
-        >
-          {loadingAction === `revert-${change.file_path}` ? (
-            <Loader size={12} className="animate-spin" />
-          ) : (
-            <RotateCcw className="mr-1" size={12} />
-          )}
-          Revert
-        </button>
+      const change = status.outgoing_changes.find(
+        (c) => c.file_path === filePath
       );
+      const isStaged = change.staged;
+
+      setSelectedOutgoingChanges((prevSelected) => {
+        if (prevSelected.includes(filePath)) {
+          const newSelection = prevSelected.filter((path) => path !== filePath);
+          if (newSelection.length === 0) setSelectionType(null);
+          return newSelection;
+        } else {
+          if (
+            prevSelected.length === 0 ||
+            (isStaged && selectionType === "staged") ||
+            (!isStaged && selectionType === "unstaged")
+          ) {
+            setSelectionType(isStaged ? "staged" : "unstaged");
+            return [...prevSelected, filePath];
+          } else {
+            return prevSelected;
+          }
+        }
+      });
     }
   };
 
@@ -522,8 +493,10 @@ const SettingsPage = () => {
         return <Code className="text-blue-400" size={16} />;
       case "Custom Format":
         return <FileText className="text-green-400" size={16} />;
+      case "Quality Profile":
+        return <Settings className="text-purple-400" size={16} />;
       default:
-        return <AlertCircle className="text-gray-400" size={16} />;
+        return <File className="text-gray-400" size={16} />;
     }
   };
 
@@ -597,12 +570,69 @@ const SettingsPage = () => {
                     status={status}
                     commitMessage={commitMessage}
                     setCommitMessage={setCommitMessage}
-                    handleStageAll={handleStageAll}
-                    handleCommitAll={handleCommitAll}
-                    handleRevertAll={handleRevertAll}
                     loadingAction={loadingAction}
                     hasIncomingChanges={status.incoming_changes.length > 0}
                   />
+
+                  {/* Buttons Below Commit Section */}
+                  <div className="mt-4 flex justify-end space-x-2">
+                    {/* Conditionally render Stage button */}
+                    {selectedOutgoingChanges.length > 0 &&
+                      selectionType !== "staged" && (
+                        <Tooltip content={getStageButtonTooltip()}>
+                          <button
+                            onClick={handleStageSelectedChanges}
+                            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 ease-in-out text-xs"
+                            disabled={loadingAction === "stage_selected"}
+                          >
+                            {loadingAction === "stage_selected" ? (
+                              <Loader size={12} className="animate-spin" />
+                            ) : (
+                              <Plus className="mr-1" size={12} />
+                            )}
+                            Stage Selected
+                          </button>
+                        </Tooltip>
+                      )}
+
+                    {/* Conditionally render Commit button */}
+                    {selectedOutgoingChanges.length > 0 &&
+                      commitMessage.trim() &&
+                      selectionType !== "unstaged" && (
+                        <Tooltip content={getCommitButtonTooltip()}>
+                          <button
+                            onClick={handleCommitSelectedChanges}
+                            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 ease-in-out text-xs"
+                            disabled={loadingAction === "commit_selected"}
+                          >
+                            {loadingAction === "commit_selected" ? (
+                              <Loader size={12} className="animate-spin" />
+                            ) : (
+                              <CheckCircle className="mr-1" size={12} />
+                            )}
+                            Commit Selected
+                          </button>
+                        </Tooltip>
+                      )}
+
+                    {/* Conditionally render Revert button */}
+                    {selectedOutgoingChanges.length > 0 && (
+                      <Tooltip content={getRevertButtonTooltip()}>
+                        <button
+                          onClick={handleRevertSelectedChanges}
+                          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 ease-in-out text-xs"
+                          disabled={loadingAction === "revert_selected"}
+                        >
+                          {loadingAction === "revert_selected" ? (
+                            <Loader size={12} className="animate-spin" />
+                          ) : (
+                            <RotateCcw className="mr-1" size={12} />
+                          )}
+                          Revert Selected
+                        </button>
+                      </Tooltip>
+                    )}
+                  </div>
                 </>
               )
             )}

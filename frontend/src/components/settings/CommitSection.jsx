@@ -1,22 +1,10 @@
 import React from "react";
-import {
-  CheckSquare,
-  GitCommit,
-  RotateCcw,
-  Loader,
-  Download,
-} from "lucide-react";
 import Textarea from "../ui/TextArea";
-import Tooltip from "../ui/Tooltip";
 
 const CommitSection = ({
   status,
   commitMessage,
   setCommitMessage,
-  handleStageAll,
-  handleCommitAll,
-  handleRevertAll,
-  loadingAction,
   hasIncomingChanges,
 }) => {
   const hasUnstagedChanges = status.outgoing_changes.some(
@@ -43,70 +31,23 @@ const CommitSection = ({
   const randomMessage =
     funMessages[Math.floor(Math.random() * funMessages.length)];
 
-  const CommitButton = () => (
-    <button
-      onClick={handleCommitAll}
-      className="flex items-center justify-center px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors text-sm"
-      disabled={loadingAction === "commit_all" || !commitMessage.trim()}
-    >
-      {loadingAction === "commit_all" ? (
-        <Loader size={16} className="animate-spin mr-2" />
-      ) : (
-        <GitCommit className="mr-2" size={16} />
-      )}
-      Commit All
-    </button>
-  );
-
   return (
     <div className="mt-4">
-      <h3 className="text-sm font-semibold text-gray-100 mb-4">Changes:</h3>
       {hasAnyChanges || hasIncomingChanges ? (
         <>
           {hasStagedChanges && (
-            <Textarea
-              value={commitMessage}
-              onChange={(e) => setCommitMessage(e.target.value)}
-              placeholder="Enter your commit message here..."
-              className="w-full p-2 text-sm text-gray-200 bg-gray-600 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y h-[75px] mb-2"
-            />
+            <>
+              <h3 className="text-sm font-semibold text-gray-100 mb-4">
+                Commit Message:
+              </h3>
+              <Textarea
+                value={commitMessage}
+                onChange={(e) => setCommitMessage(e.target.value)}
+                placeholder="Enter your commit message here..."
+                className="w-full p-2 text-sm text-gray-200 bg-gray-600 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y h-[75px] mb-2"
+              />
+            </>
           )}
-          <div className="flex justify-end space-x-2">
-            {hasUnstagedChanges && (
-              <button
-                onClick={handleStageAll}
-                className="flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm"
-                disabled={loadingAction === "stage_all"}
-              >
-                {loadingAction === "stage_all" ? (
-                  <Loader size={16} className="animate-spin mr-2" />
-                ) : (
-                  <CheckSquare className="mr-2" size={16} />
-                )}
-                Stage All
-              </button>
-            )}
-            {hasStagedChanges &&
-              (!commitMessage.trim() ? (
-                <Tooltip content="Commit message is required">
-                  <CommitButton />
-                </Tooltip>
-              ) : (
-                <CommitButton />
-              ))}
-            <button
-              onClick={handleRevertAll}
-              className="flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
-              disabled={loadingAction === "revert_all"}
-            >
-              {loadingAction === "revert_all" ? (
-                <Loader size={16} className="animate-spin mr-2" />
-              ) : (
-                <RotateCcw className="mr-2" size={16} />
-              )}
-              Revert All
-            </button>
-          </div>
         </>
       ) : (
         <div className="text-gray-300 text-sm italic">{randomMessage}</div>

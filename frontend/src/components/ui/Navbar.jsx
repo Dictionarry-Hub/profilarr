@@ -101,7 +101,7 @@ function Navbar({ darkMode, setDarkMode }) {
                     : "text-gray-300 hover:bg-gray-700 hover:text-white"
                 }`}
               >
-                Profiles
+                Quality Profiles
               </Link>
               <Link
                 to="/settings"
