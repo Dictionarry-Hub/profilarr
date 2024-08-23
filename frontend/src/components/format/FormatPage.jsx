@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
-import FormatCard from './FormatCard';
-import FormatModal from './FormatModal';
-import AddNewCard from '../ui/AddNewCard';
-import { getFormats } from '../../api/api';
-import FilterMenu from '../ui/FilterMenu';
-import SortMenu from '../ui/SortMenu';
+import { useState, useEffect } from "react";
+import FormatCard from "./FormatCard";
+import FormatModal from "./FormatModal";
+import AddNewCard from "../ui/AddNewCard";
+import { getFormats } from "../../api/api";
+import FilterMenu from "../ui/FilterMenu";
+import SortMenu from "../ui/SortMenu";
 
-function FormatManager() {
+function FormatPage() {
   const [formats, setFormats] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState(null);
-  const [sortBy, setSortBy] = useState('title');
-  const [filterType, setFilterType] = useState('none');
-  const [filterValue, setFilterValue] = useState('');
+  const [sortBy, setSortBy] = useState("title");
+  const [filterType, setFilterType] = useState("none");
+  const [filterValue, setFilterValue] = useState("");
   const [allTags, setAllTags] = useState([]);
 
   useEffect(() => {
@@ -23,10 +23,12 @@ function FormatManager() {
     try {
       const fetchedFormats = await getFormats();
       setFormats(fetchedFormats);
-      const tags = [...new Set(fetchedFormats.flatMap(format => format.tags || []))];
+      const tags = [
+        ...new Set(fetchedFormats.flatMap((format) => format.tags || [])),
+      ];
       setAllTags(tags);
     } catch (error) {
-      console.error('Error fetching formats:', error);
+      console.error("Error fetching formats:", error);
     }
   };
 
@@ -46,10 +48,10 @@ function FormatManager() {
   };
 
   const handleCloneFormat = (format) => {
-    const clonedFormat = { 
-      ...format, 
+    const clonedFormat = {
+      ...format,
       id: 0, // Ensure the ID is 0 for a new entry
-      name: `${format.name} [COPY]` 
+      name: `${format.name} [COPY]`,
     };
     setSelectedFormat(clonedFormat); // Set cloned format
     setIsModalOpen(true); // Open modal in Add mode
@@ -60,11 +62,11 @@ function FormatManager() {
   };
 
   const sortedAndFilteredFormats = formats
-    .filter(format => {
-      if (filterType === 'tag') {
+    .filter((format) => {
+      if (filterType === "tag") {
         return format.tags && format.tags.includes(filterValue);
       }
-      if (filterType === 'date') {
+      if (filterType === "date") {
         const formatDate = new Date(format.date_modified);
         const filterDate = new Date(filterValue);
         return formatDate.toDateString() === filterDate.toDateString();
@@ -72,9 +74,11 @@ function FormatManager() {
       return true;
     })
     .sort((a, b) => {
-      if (sortBy === 'title') return a.name.localeCompare(b.name);
-      if (sortBy === 'dateCreated') return new Date(b.date_created) - new Date(a.date_created);
-      if (sortBy === 'dateModified') return new Date(b.date_modified) - new Date(a.date_modified);
+      if (sortBy === "title") return a.name.localeCompare(b.name);
+      if (sortBy === "dateCreated")
+        return new Date(b.date_created) - new Date(a.date_created);
+      if (sortBy === "dateModified")
+        return new Date(b.date_modified) - new Date(a.date_modified);
       return 0;
     });
 
@@ -93,12 +97,12 @@ function FormatManager() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
         {sortedAndFilteredFormats.map((format) => (
-          <FormatCard 
-            key={format.id} 
-            format={format} 
+          <FormatCard
+            key={format.id}
+            format={format}
             onEdit={() => handleOpenModal(format)}
             onClone={handleCloneFormat} // Pass the clone handler
-            showDate={sortBy !== 'title'}
+            showDate={sortBy !== "title"}
             formatDate={formatDate}
           />
         ))}
@@ -115,4 +119,4 @@ function FormatManager() {
   );
 }
 
-export default FormatManager;
+export default FormatPage;

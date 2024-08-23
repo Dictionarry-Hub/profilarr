@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
-import RegexCard from './RegexCard';
-import RegexModal from './RegexModal';
-import AddNewCard from '../ui/AddNewCard';
-import { getRegexes } from '../../api/api';
-import FilterMenu from '../ui/FilterMenu';
-import SortMenu from '../ui/SortMenu';
+import { useState, useEffect } from "react";
+import RegexCard from "./RegexCard";
+import RegexModal from "./RegexModal";
+import AddNewCard from "../ui/AddNewCard";
+import { getRegexes } from "../../api/api";
+import FilterMenu from "../ui/FilterMenu";
+import SortMenu from "../ui/SortMenu";
 
-function RegexManager() {
+function RegexPage() {
   const [regexes, setRegexes] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRegex, setSelectedRegex] = useState(null);
-  const [sortBy, setSortBy] = useState('title');
-  const [filterType, setFilterType] = useState('none');
-  const [filterValue, setFilterValue] = useState('');
+  const [sortBy, setSortBy] = useState("title");
+  const [filterType, setFilterType] = useState("none");
+  const [filterValue, setFilterValue] = useState("");
   const [allTags, setAllTags] = useState([]);
 
   useEffect(() => {
@@ -23,10 +23,12 @@ function RegexManager() {
     try {
       const fetchedRegexes = await getRegexes();
       setRegexes(fetchedRegexes);
-      const tags = [...new Set(fetchedRegexes.flatMap(regex => regex.tags || []))];
+      const tags = [
+        ...new Set(fetchedRegexes.flatMap((regex) => regex.tags || [])),
+      ];
       setAllTags(tags);
     } catch (error) {
-      console.error('Error fetching regexes:', error);
+      console.error("Error fetching regexes:", error);
     }
   };
 
@@ -46,11 +48,11 @@ function RegexManager() {
   };
 
   const handleCloneRegex = (regex) => {
-    const clonedRegex = { 
-      ...regex, 
+    const clonedRegex = {
+      ...regex,
       id: 0, // Ensure the ID is 0 for a new entry
-      name: `${regex.name} [COPY]`, 
-      regex101Link: '' // Remove the regex101 link
+      name: `${regex.name} [COPY]`,
+      regex101Link: "", // Remove the regex101 link
     };
     setSelectedRegex(clonedRegex); // Set cloned regex
     setIsModalOpen(true); // Open modal in Add mode
@@ -61,11 +63,11 @@ function RegexManager() {
   };
 
   const sortedAndFilteredRegexes = regexes
-    .filter(regex => {
-      if (filterType === 'tag') {
+    .filter((regex) => {
+      if (filterType === "tag") {
         return regex.tags && regex.tags.includes(filterValue);
       }
-      if (filterType === 'date') {
+      if (filterType === "date") {
         const regexDate = new Date(regex.date_modified);
         const filterDate = new Date(filterValue);
         return regexDate.toDateString() === filterDate.toDateString();
@@ -73,9 +75,11 @@ function RegexManager() {
       return true;
     })
     .sort((a, b) => {
-      if (sortBy === 'title') return a.name.localeCompare(b.name);
-      if (sortBy === 'dateCreated') return new Date(b.date_created) - new Date(a.date_created);
-      if (sortBy === 'dateModified') return new Date(b.date_modified) - new Date(a.date_modified);
+      if (sortBy === "title") return a.name.localeCompare(b.name);
+      if (sortBy === "dateCreated")
+        return new Date(b.date_created) - new Date(a.date_created);
+      if (sortBy === "dateModified")
+        return new Date(b.date_modified) - new Date(a.date_modified);
       return 0;
     });
 
@@ -99,7 +103,7 @@ function RegexManager() {
             regex={regex}
             onEdit={() => handleOpenModal(regex)}
             onClone={handleCloneRegex} // Pass the clone handler
-            showDate={sortBy !== 'title'}
+            showDate={sortBy !== "title"}
             formatDate={formatDate}
           />
         ))}
@@ -116,4 +120,4 @@ function RegexManager() {
   );
 }
 
-export default RegexManager;
+export default RegexPage;

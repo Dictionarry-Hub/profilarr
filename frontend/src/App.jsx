@@ -1,41 +1,48 @@
-import { useState, useEffect } from 'react';
-import RegexManager from './components/regex/RegexManager';
-import CustomFormatManager from './components/format/FormatManager';
-import Settings from './components/settings/SettingsManager';
-import Navbar from './components/ui/Navbar';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
+import RegexPage from "./components/regex/RegexPage";
+import FormatPage from "./components/format/FormatPage";
+import SettingsPage from "./components/settings/SettingsPage";
+import Navbar from "./components/ui/Navbar";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  const [activeTab, setActiveTab] = useState('settings');
   const [darkMode, setDarkMode] = useState(true);
 
   useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
 
   return (
-    <>
-        <div className="min-h-screen bg-gray-900 text-gray-100">
-          <Navbar
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            darkMode={darkMode}
-            setDarkMode={setDarkMode}
-          />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-            {activeTab === 'regex' && <RegexManager />}
-            {activeTab === 'format' && <CustomFormatManager />}
-            {activeTab === 'settings' && <Settings />}
-          </div>
+    <Router>
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+          <Routes>
+            <Route path="/regex" element={<RegexPage />} />
+            <Route path="/format" element={<FormatPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/" element={<SettingsPage />} />
+          </Routes>
         </div>
-        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
-    </>
-
+      </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </Router>
   );
 }
 

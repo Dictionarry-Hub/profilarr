@@ -33,7 +33,7 @@ import CommitSection from "./CommitSection";
 import Tooltip from "../ui/Tooltip";
 import DiffModal from "./DiffModal";
 
-const SettingsManager = () => {
+const SettingsPage = () => {
   const [settings, setSettings] = useState(null);
   const [status, setStatus] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -637,4 +637,4 @@ const SettingsManager = () => {
   );
 };
 
-export default SettingsManager;
+export default SettingsPage;

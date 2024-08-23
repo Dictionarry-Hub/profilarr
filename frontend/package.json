@@ -17,6 +17,8 @@
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "react-router-dom": "^6.26.1",
+        "react-syntax-highlighter": "^15.5.0",
         "react-toastify": "^10.0.5",
         "tailwind-merge": "^2.5.2"
     },
