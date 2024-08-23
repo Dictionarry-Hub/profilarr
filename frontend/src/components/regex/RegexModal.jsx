@@ -8,7 +8,13 @@ function unsanitize(text) {
   return text.replace(/\\:/g, ":").replace(/\\n/g, "\n");
 }
 
-function RegexModal({ regex: initialRegex, isOpen, onClose, onSave }) {
+function RegexModal({
+  regex: initialRegex,
+  isOpen,
+  onClose,
+  onSave,
+  isCloning = false,
+}) {
   const [name, setName] = useState("");
   const [pattern, setPattern] = useState("");
   const [description, setDescription] = useState("");
@@ -18,10 +24,20 @@ function RegexModal({ regex: initialRegex, isOpen, onClose, onSave }) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
 
   useEffect(() => {
     if (isOpen) {
-      if (initialRegex && initialRegex.id !== 0) {
+      // Set the modal title
+      if (isCloning) {
+        setModalTitle("Clone Regex Pattern");
+      } else if (initialRegex && initialRegex.id !== 0) {
+        setModalTitle("Edit Regex Pattern");
+      } else {
+        setModalTitle("Add Regex Pattern");
+      }
+
+      if (initialRegex && (initialRegex.id !== 0 || isCloning)) {
         setName(unsanitize(initialRegex.name));
         setPattern(initialRegex.pattern);
         setDescription(unsanitize(initialRegex.description));
@@ -39,7 +55,7 @@ function RegexModal({ regex: initialRegex, isOpen, onClose, onSave }) {
       setIsLoading(false);
       setIsDeleting(false);
     }
-  }, [initialRegex, isOpen]);
+  }, [initialRegex, isOpen, isCloning]);
 
   const handleCreateRegex101Link = async () => {
     if (!pattern.trim()) {
@@ -184,11 +200,7 @@ function RegexModal({ regex: initialRegex, isOpen, onClose, onSave }) {
 
   return (
     <>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title={initialRegex ? "Edit Regex Pattern" : "Add Regex Pattern"}
-      >
+      <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
         {error && <div className="text-red-500 mb-4">{error}</div>}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -326,6 +338,7 @@ RegexModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  isCloning: PropTypes.bool,
 };
 
 export default RegexModal;

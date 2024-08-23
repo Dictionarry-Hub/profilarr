@@ -14,6 +14,7 @@ function FormatPage() {
   const [filterType, setFilterType] = useState("none");
   const [filterValue, setFilterValue] = useState("");
   const [allTags, setAllTags] = useState([]);
+  const [isCloning, setIsCloning] = useState(false);
 
   useEffect(() => {
     fetchFormats();
@@ -35,26 +36,29 @@ function FormatPage() {
   const handleOpenModal = (format = null) => {
     setSelectedFormat(format);
     setIsModalOpen(true);
+    setIsCloning(false);
   };
 
   const handleCloseModal = () => {
     setSelectedFormat(null);
     setIsModalOpen(false);
-  };
-
-  const handleSaveFormat = () => {
-    fetchFormats();
-    handleCloseModal();
+    setIsCloning(false);
   };
 
   const handleCloneFormat = (format) => {
     const clonedFormat = {
       ...format,
-      id: 0, // Ensure the ID is 0 for a new entry
+      id: 0,
       name: `${format.name} [COPY]`,
     };
-    setSelectedFormat(clonedFormat); // Set cloned format
-    setIsModalOpen(true); // Open modal in Add mode
+    setSelectedFormat(clonedFormat);
+    setIsModalOpen(true);
+    setIsCloning(true);
+  };
+
+  const handleSaveFormat = () => {
+    fetchFormats();
+    handleCloseModal();
   };
 
   const formatDate = (dateString) => {
@@ -114,6 +118,7 @@ function FormatPage() {
         onClose={handleCloseModal}
         onSave={handleSaveFormat}
         allTags={allTags}
+        isCloning={isCloning}
       />
     </div>
   );

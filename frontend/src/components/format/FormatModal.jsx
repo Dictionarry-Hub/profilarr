@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { saveFormat, deleteFormat, getRegexes } from "../../api/api";
 import ConditionModal from "../condition/ConditionModal";
@@ -6,7 +6,13 @@ import ConditionCard from "../condition/ConditionCard";
 import Modal from "../ui/Modal";
 import Alert from "../ui/Alert";
 
-function FormatModal({ format: initialFormat, isOpen, onClose, onSave }) {
+function FormatModal({
+  format: initialFormat,
+  isOpen,
+  onClose,
+  onSave,
+  isCloning = false,
+}) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [conditions, setConditions] = useState([]);
@@ -17,10 +23,19 @@ function FormatModal({ format: initialFormat, isOpen, onClose, onSave }) {
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
 
   useEffect(() => {
     if (isOpen) {
-      if (initialFormat && initialFormat.id !== 0) {
+      if (isCloning) {
+        setModalTitle("Clone Custom Format");
+      } else if (initialFormat && initialFormat.id !== 0) {
+        setModalTitle("Edit Custom Format");
+      } else {
+        setModalTitle("Add Custom Format");
+      }
+
+      if (initialFormat && (initialFormat.id !== 0 || isCloning)) {
         setName(initialFormat.name);
         setDescription(initialFormat.description);
         setConditions(initialFormat.conditions || []);
@@ -31,12 +46,13 @@ function FormatModal({ format: initialFormat, isOpen, onClose, onSave }) {
         setConditions([]);
         setTags([]);
       }
+
       setError("");
       setNewTag("");
       setIsDeleting(false);
       fetchRegexes();
     }
-  }, [initialFormat, isOpen]);
+  }, [isOpen, initialFormat, isCloning]);
 
   const fetchRegexes = async () => {
     try {
@@ -133,7 +149,7 @@ function FormatModal({ format: initialFormat, isOpen, onClose, onSave }) {
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title={initialFormat ? "Edit Custom Format" : "Add Custom Format"}
+        title={modalTitle}
         className="max-w-3xl min-h-96"
       >
         {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -213,17 +229,17 @@ function FormatModal({ format: initialFormat, isOpen, onClose, onSave }) {
         >
           Add Condition
         </button>
-        <div className="flex justify-between">
+        <div className="flex justify-between mt-6">
           <button
             onClick={handleSave}
-            className="bg-blue-500 text-white px-4 py-3 rounded hover:bg-blue-600 transition-colors"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
           >
             Save
           </button>
-          {initialFormat && (
+          {initialFormat && initialFormat.id !== 0 && (
             <button
               onClick={handleDelete}
-              className={`bg-red-500 text-white px-4 py-3 rounded hover:bg-red-600 transition-colors ${
+              className={`bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ${
                 isDeleting ? "bg-red-600" : ""
               }`}
             >
@@ -262,6 +278,7 @@ FormatModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  isCloning: PropTypes.bool,
 };
 
 export default FormatModal;

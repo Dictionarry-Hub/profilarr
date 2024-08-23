@@ -14,6 +14,7 @@ function RegexPage() {
   const [filterType, setFilterType] = useState("none");
   const [filterValue, setFilterValue] = useState("");
   const [allTags, setAllTags] = useState([]);
+  const [isCloning, setIsCloning] = useState(false);
 
   useEffect(() => {
     fetchRegexes();
@@ -35,27 +36,30 @@ function RegexPage() {
   const handleOpenModal = (regex = null) => {
     setSelectedRegex(regex);
     setIsModalOpen(true);
+    setIsCloning(false);
   };
 
   const handleCloseModal = () => {
     setSelectedRegex(null);
     setIsModalOpen(false);
-  };
-
-  const handleSaveRegex = () => {
-    fetchRegexes();
-    handleCloseModal();
+    setIsCloning(false);
   };
 
   const handleCloneRegex = (regex) => {
     const clonedRegex = {
       ...regex,
-      id: 0, // Ensure the ID is 0 for a new entry
+      id: 0,
       name: `${regex.name} [COPY]`,
-      regex101Link: "", // Remove the regex101 link
+      regex101Link: "",
     };
-    setSelectedRegex(clonedRegex); // Set cloned regex
-    setIsModalOpen(true); // Open modal in Add mode
+    setSelectedRegex(clonedRegex);
+    setIsModalOpen(true);
+    setIsCloning(true);
+  };
+
+  const handleSaveRegex = () => {
+    fetchRegexes();
+    handleCloseModal();
   };
 
   const formatDate = (dateString) => {
@@ -115,6 +119,7 @@ function RegexPage() {
         onClose={handleCloseModal}
         onSave={handleSaveRegex}
         allTags={allTags}
+        isCloning={isCloning}
       />
     </div>
   );

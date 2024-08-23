@@ -1,22 +1,25 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ProfileCard from "./ProfileCard";
 import ProfileModal from "./ProfileModal";
 import AddNewCard from "../ui/AddNewCard";
-import { getProfiles } from "../../api/api";
+import { getProfiles, getFormats } from "../../api/api";
 import FilterMenu from "../ui/FilterMenu";
 import SortMenu from "../ui/SortMenu";
 
 function ProfilePage() {
   const [profiles, setProfiles] = useState([]);
+  const [formats, setFormats] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [sortBy, setSortBy] = useState("name");
   const [filterType, setFilterType] = useState("none");
   const [filterValue, setFilterValue] = useState("");
   const [allTags, setAllTags] = useState([]);
+  const [isCloning, setIsCloning] = useState(false);
 
   useEffect(() => {
     fetchProfiles();
+    fetchFormats();
   }, []);
 
   const fetchProfiles = async () => {
@@ -32,14 +35,43 @@ function ProfilePage() {
     }
   };
 
+  const fetchFormats = async () => {
+    try {
+      const fetchedFormats = await getFormats();
+      setFormats(fetchedFormats);
+    } catch (error) {
+      console.error("Error fetching formats:", error);
+    }
+  };
+
   const handleOpenModal = (profile = null) => {
-    setSelectedProfile(profile);
+    const safeProfile = profile
+      ? {
+          ...profile,
+          custom_formats: profile.custom_formats || [],
+        }
+      : null;
+    setSelectedProfile(safeProfile);
     setIsModalOpen(true);
+    setIsCloning(false);
   };
 
   const handleCloseModal = () => {
     setSelectedProfile(null);
     setIsModalOpen(false);
+    setIsCloning(false);
+  };
+
+  const handleCloneProfile = (profile) => {
+    const clonedProfile = {
+      ...profile,
+      id: 0,
+      name: `${profile.name} [COPY]`,
+      custom_formats: profile.custom_formats || [],
+    };
+    setSelectedProfile(clonedProfile);
+    setIsModalOpen(true);
+    setIsCloning(true);
   };
 
   const handleSaveProfile = () => {
@@ -47,16 +79,7 @@ function ProfilePage() {
     handleCloseModal();
   };
 
-  const handleCloneProfile = (profile) => {
-    const clonedProfile = {
-      ...profile,
-      id: 0, // Ensure the ID is 0 for a new entry
-      name: `${profile.name} [COPY]`,
-    };
-    setSelectedProfile(clonedProfile);
-    setIsModalOpen(true);
-  };
-
+  // Define the missing formatDate function
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
@@ -103,7 +126,7 @@ function ProfilePage() {
             onEdit={() => handleOpenModal(profile)}
             onClone={handleCloneProfile}
             showDate={sortBy !== "name"}
-            formatDate={formatDate}
+            formatDate={formatDate} // Pass the formatDate function to the ProfileCard
           />
         ))}
         <AddNewCard onAdd={() => handleOpenModal()} />
@@ -113,7 +136,8 @@ function ProfilePage() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveProfile}
-        allTags={allTags}
+        formats={formats}
+        isCloning={isCloning}
       />
     </div>
   );
