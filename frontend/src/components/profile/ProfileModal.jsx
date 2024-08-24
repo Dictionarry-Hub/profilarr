@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { saveProfile, deleteProfile } from "../../api/api";
 import Modal from "../ui/Modal";
 import Alert from "../ui/Alert";
-import { Loader } from "lucide-react";
+import { Loader, ArrowUp, ArrowDown } from "lucide-react";
 
 function unsanitize(text) {
   return text.replace(/\\:/g, ":").replace(/\\n/g, "\n");
@@ -30,6 +30,10 @@ function ProfileModal({
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [modalTitle, setModalTitle] = useState("");
+  const [formatSortKey, setFormatSortKey] = useState("score");
+  const [formatSortDirection, setFormatSortDirection] = useState("desc");
+  const [tagSortKey, setTagSortKey] = useState("name");
+  const [tagSortDirection, setTagSortDirection] = useState("desc");
 
   useEffect(() => {
     if (isOpen) {
@@ -57,17 +61,17 @@ function ProfileModal({
           name: format.name,
           score: existingFormat ? existingFormat.score : 0,
           tags: format.tags || [],
+          date_created: format.date_created,
+          date_modified: format.date_modified,
         };
       });
       setCustomFormats(safeCustomFormats);
 
-      // Extract all unique tags from custom formats
       const allTags = [
         ...new Set(safeCustomFormats.flatMap((format) => format.tags)),
       ];
       setFormatTags(allTags);
 
-      // Initialize tag scores
       const initialTagScores = {};
       allTags.forEach((tag) => {
         initialTagScores[tag] = 0;
@@ -170,6 +174,91 @@ function ProfileModal({
     event.target.select();
   };
 
+  const sortedFormats = [...filteredFormats].sort((a, b) => {
+    if (formatSortKey === "name") {
+      return formatSortDirection === "asc"
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name);
+    } else if (formatSortKey === "score") {
+      return formatSortDirection === "asc"
+        ? a.score - b.score
+        : b.score - a.score;
+    } else if (formatSortKey === "dateCreated") {
+      return formatSortDirection === "asc"
+        ? new Date(a.date_created) - new Date(b.date_created)
+        : new Date(b.date_created) - new Date(a.date_created);
+    } else if (formatSortKey === "dateModified") {
+      return formatSortDirection === "asc"
+        ? new Date(a.date_modified) - new Date(b.date_modified)
+        : new Date(b.date_modified) - new Date(a.date_modified);
+    }
+    return 0;
+  });
+
+  const sortedTags = [...filteredTags].sort((a, b) => {
+    if (tagSortKey === "name") {
+      return tagSortDirection === "asc"
+        ? a.localeCompare(b)
+        : b.localeCompare(a);
+    } else if (tagSortKey === "score") {
+      return tagSortDirection === "asc"
+        ? tagScores[a] - tagScores[b]
+        : tagScores[b] - tagScores[a];
+    } else if (tagSortKey === "dateCreated") {
+      return tagSortDirection === "asc"
+        ? new Date(a.date_created) - new Date(b.date_created)
+        : new Date(b.date_created) - new Date(a.date_created);
+    } else if (tagSortKey === "dateModified") {
+      return tagSortDirection === "asc"
+        ? new Date(a.date_modified) - new Date(b.date_modified)
+        : new Date(b.date_modified) - new Date(a.date_modified);
+    }
+    return 0;
+  });
+
+  const SortDropdown = ({ options, currentKey, currentDirection, onSort }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleSort = (key) => {
+      if (key === currentKey) {
+        onSort(key, currentDirection === "asc" ? "desc" : "asc");
+      } else {
+        onSort(key, "desc");
+      }
+      setIsOpen(false);
+    };
+
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center space-x-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+        >
+          <span>Sort</span>
+          <ArrowDown size={14} />
+        </button>
+        {isOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg z-10">
+            {options.map((option) => (
+              <button
+                key={option.key}
+                onClick={() => handleSort(option.key)}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                {option.label}
+                {currentKey === option.key && (
+                  <span className="float-right">
+                    {currentDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size="7xl">
       {loading ? (
@@ -181,19 +270,24 @@ function ProfileModal({
           {error && <div className="text-red-500 mb-4">{error}</div>}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Profile Name
                 </label>
+                <div style={{ visibility: "hidden", pointerEvents: "none" }}>
+                  <SortDropdown />
+                </div>
+              </div>
+              <div className="flex justify-between items-center mb-4">
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter profile name"
                   className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
-                  onClick={handleInputFocus}
                 />
               </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Description
@@ -245,24 +339,42 @@ function ProfileModal({
             </div>
             <div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Custom Formats
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Custom Formats
+                  </label>
+                  <SortDropdown
+                    options={[
+                      { key: "name", label: "Name" },
+                      { key: "score", label: "Score" },
+                      { key: "dateCreated", label: "Date Created" },
+                      { key: "dateModified", label: "Date Modified" },
+                    ]}
+                    currentKey={formatSortKey}
+                    currentDirection={formatSortDirection}
+                    onSort={(key, direction) => {
+                      setFormatSortKey(key);
+                      setFormatSortDirection(direction);
+                    }}
+                  />
+                </div>
                 <input
                   onClick={handleInputFocus}
                   type="text"
                   value={formatFilter}
                   onChange={(e) => setFormatFilter(e.target.value)}
                   placeholder="Filter formats"
-                  className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                  className="w-full p-2 border rounded mb-2 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
                 />
                 <div className="max-h-96 overflow-y-auto">
-                  {filteredFormats.map((format) => (
+                  {sortedFormats.map((format) => (
                     <div
                       key={format.id}
-                      className="flex items-center space-x-2 mb-2"
+                      className="flex items-center space-x-2 mb-2 p-2 border rounded dark:border-gray-600 dark:bg-gray-700"
                     >
-                      <span className="flex-grow">{format.name}</span>
+                      <span className="flex-grow whitespace-nowrap overflow-hidden text-ellipsis">
+                        {format.name}
+                      </span>
                       <input
                         onClick={handleInputFocus}
                         type="number"
@@ -280,21 +392,40 @@ function ProfileModal({
             </div>
             <div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Tag-based Scoring
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Tag-based Scoring
+                  </label>
+                  <SortDropdown
+                    options={[
+                      { key: "name", label: "Name" },
+                      { key: "score", label: "Score" },
+                    ]}
+                    currentKey={tagSortKey}
+                    currentDirection={tagSortDirection}
+                    onSort={(key, direction) => {
+                      setTagSortKey(key);
+                      setTagSortDirection(direction);
+                    }}
+                  />
+                </div>
                 <input
                   onClick={handleInputFocus}
                   type="text"
                   value={tagFilter}
                   onChange={(e) => setTagFilter(e.target.value)}
                   placeholder="Filter tags"
-                  className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                  className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800"
                 />
                 <div className="max-h-96 overflow-y-auto">
-                  {filteredTags.map((tag) => (
-                    <div key={tag} className="flex items-center space-x-2 mb-2">
-                      <span className="flex-grow">{tag}</span>
+                  {sortedTags.map((tag) => (
+                    <div
+                      key={tag}
+                      className="flex items-center space-x-2 mb-2 p-2 border rounded dark:border-gray-600 dark:bg-gray-700"
+                    >
+                      <span className="flex-grow whitespace-nowrap overflow-hidden text-ellipsis">
+                        {tag}
+                      </span>
                       <input
                         onClick={handleInputFocus}
                         type="number"

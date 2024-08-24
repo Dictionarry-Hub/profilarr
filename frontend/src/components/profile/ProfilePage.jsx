@@ -12,7 +12,7 @@ function ProfilePage() {
   const [formats, setFormats] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState("title");
   const [filterType, setFilterType] = useState("none");
   const [filterValue, setFilterValue] = useState("");
   const [allTags, setAllTags] = useState([]);
