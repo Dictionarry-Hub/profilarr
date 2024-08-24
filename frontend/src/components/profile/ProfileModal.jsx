@@ -166,6 +166,10 @@ function ProfileModal({
     format.name.toLowerCase().includes(formatFilter.toLowerCase())
   );
 
+  const handleInputFocus = (event) => {
+    event.target.select();
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size="7xl">
       {loading ? (
@@ -187,6 +191,7 @@ function ProfileModal({
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter profile name"
                   className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                  onClick={handleInputFocus}
                 />
               </div>
               <div className="mb-4">
@@ -244,6 +249,7 @@ function ProfileModal({
                   Custom Formats
                 </label>
                 <input
+                  onClick={handleInputFocus}
                   type="text"
                   value={formatFilter}
                   onChange={(e) => setFormatFilter(e.target.value)}
@@ -258,6 +264,7 @@ function ProfileModal({
                     >
                       <span className="flex-grow">{format.name}</span>
                       <input
+                        onClick={handleInputFocus}
                         type="number"
                         value={format.score}
                         onChange={(e) =>
@@ -277,6 +284,7 @@ function ProfileModal({
                   Tag-based Scoring
                 </label>
                 <input
+                  onClick={handleInputFocus}
                   type="text"
                   value={tagFilter}
                   onChange={(e) => setTagFilter(e.target.value)}
@@ -288,6 +296,7 @@ function ProfileModal({
                     <div key={tag} className="flex items-center space-x-2 mb-2">
                       <span className="flex-grow">{tag}</span>
                       <input
+                        onClick={handleInputFocus}
                         type="number"
                         value={tagScores[tag]}
                         onChange={(e) =>
