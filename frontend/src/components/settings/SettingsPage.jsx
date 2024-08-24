@@ -289,13 +289,15 @@ const SettingsPage = () => {
   };
 
   const handleViewDiff = async (change) => {
-    setLoadingDiff(true); // Start loading
+    setLoadingDiff(true);
     try {
       const response = await getDiff(change.file_path);
+      console.log("Diff response:", response); // Add this line to log the response
       if (response.success) {
-        setDiffContent(response.diff); // Store the diff content
-        setCurrentChange(change); // Set the current change being viewed
-        setShowDiffModal(true); // Open the modal
+        console.log("Diff content:", response.diff); // Add this line to log the diff content
+        setDiffContent(response.diff);
+        setCurrentChange(change);
+        setShowDiffModal(true);
       } else {
         Alert.error(response.error);
       }
@@ -303,7 +305,7 @@ const SettingsPage = () => {
       Alert.error("An unexpected error occurred while fetching the diff.");
       console.error("Error fetching diff:", error);
     } finally {
-      setLoadingDiff(false); // Stop loading
+      setLoadingDiff(false);
       setLoadingAction("");
     }
   };

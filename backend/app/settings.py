@@ -69,36 +69,6 @@ def validate_git_token(repo_url, git_token):
     except Exception as e:
         return False
 
-def parse_diff(diff_text):
-    diff_lines = diff_text.splitlines()
-    parsed_diff = []
-    
-    local_version = []
-    incoming_version = []
-    in_local = False
-    in_incoming = False
-    
-    for line in diff_lines:
-        if line.startswith('--- a/'):
-            in_local = True
-            in_incoming = False
-        elif line.startswith('+++ b/'):
-            in_incoming = True
-            in_local = False
-        elif line.startswith('@@'):
-            # Context lines that indicate a change
-            parsed_diff.append({'context': line, 'type': 'context'})
-        elif line.startswith('-'):
-            local_version.append(line[1:])
-            parsed_diff.append({'text': line[1:], 'type': 'local'})
-        elif line.startswith('+'):
-            incoming_version.append(line[1:])
-            parsed_diff.append({'text': line[1:], 'type': 'incoming'})
-        else:
-            parsed_diff.append({'text': line, 'type': 'unchanged'})
-    
-    return parsed_diff, local_version, incoming_version
-
 def get_outgoing_changes(repo):
     status = repo.git.status('--porcelain', '-z').split('\0')
     logger.debug(f"Raw porcelain status: {status}")
@@ -119,7 +89,19 @@ def get_outgoing_changes(repo):
 
         full_path = os.path.join(repo.working_dir, file_path)
 
-        if os.path.isdir(full_path):
+        if x == 'D' or y == 'D':
+            # Handle deleted files
+            changes.append({
+                'name': 'Deleted File',
+                'id': '',
+                'type': determine_type(file_path),
+                'status': 'Deleted',
+                'file_path': file_path,
+                'staged': x != '?',
+                'modified': False,
+                'deleted': True
+            })
+        elif os.path.isdir(full_path):
             logger.debug(f"Found directory: {file_path}, going through folder.")
             for root, dirs, files in os.walk(full_path):
                 for file in files:
@@ -139,17 +121,14 @@ def get_outgoing_changes(repo):
                                 'file_path': os.path.relpath(file_full_path, repo.working_dir),
                                 'staged': x != '?' and x != ' ',
                                 'modified': y == 'M',
-                                'deleted': x == 'D' or y == 'D'
+                                'deleted': False
                             })
                         else:
                             logger.debug(f"No data extracted from file: {file_full_path}")
         else:
             logger.debug(f"Found file: {full_path}, going through file.")
             file_data = extract_data_from_yaml(full_path)
-            if file_data or x == 'D' or y == 'D':  # Ensure that deleted files are handled
-                if not file_data:
-                    logger.debug(f"No data found, using default file name as name")
-                    file_data = {'name': os.path.basename(file_path).replace('.yml', ''), 'id': None}
+            if file_data:
                 logger.debug(f"File contents: {file_data}")
                 logger.debug(f"Found ID: {file_data.get('id')}")
                 logger.debug(f"Found Name: {file_data.get('name')}")
@@ -161,7 +140,19 @@ def get_outgoing_changes(repo):
                     'file_path': file_path,
                     'staged': x != '?' and x != ' ',
                     'modified': y == 'M',
-                    'deleted': x == 'D' or y == 'D'
+                    'deleted': False
+                })
+            else:
+                logger.debug(f"No data found, using default file name as name")
+                changes.append({
+                    'name': os.path.basename(file_path).replace('.yml', ''),
+                    'id': '',
+                    'type': determine_type(file_path),
+                    'status': interpret_git_status(x, y),
+                    'file_path': file_path,
+                    'staged': x != '?' and x != ' ',
+                    'modified': y == 'M',
+                    'deleted': False
                 })
 
     logger.debug(f"Final changes: {json.dumps(changes, indent=2)}")
@@ -772,8 +763,23 @@ def get_diff():
     try:
         repo = git.Repo(settings_manager.repo_path)
         branch = repo.active_branch.name
-        diff = repo.git.diff(f'HEAD...origin/{branch}', file_path)
-        return jsonify({'success': True, 'diff': diff}), 200
+
+        # Check if the file is untracked
+        untracked_files = repo.untracked_files
+        if file_path in untracked_files:
+            with open(os.path.join(repo.working_dir, file_path), 'r') as file:
+                content = file.read()
+            diff = "\n".join([f"+{line}" for line in content.splitlines()])
+        else:
+            # Check if the file is deleted
+            if not os.path.exists(os.path.join(repo.working_dir, file_path)):
+                diff = "-Deleted File"
+            else:
+                # Get the diff for modified files
+                diff = repo.git.diff(f'HEAD', file_path)
+
+        logger.debug(f"Diff for file {file_path}: {diff}")
+        return jsonify({'success': True, 'diff': diff if diff else ""}), 200
     except Exception as e:
         logger.error(f"Error getting diff for file {file_path}: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': f"Error getting diff for file: {str(e)}"}), 400
