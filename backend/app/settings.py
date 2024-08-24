@@ -89,15 +89,17 @@ def get_outgoing_changes(repo):
 
         full_path = os.path.join(repo.working_dir, file_path)
 
-        if x == 'D' or y == 'D':
-            # Handle deleted files
+        is_staged = x != ' ' and x != '?'
+        is_deleted = x == 'D' or y == 'D'
+
+        if is_deleted:
             changes.append({
                 'name': 'Deleted File',
                 'id': '',
                 'type': determine_type(file_path),
                 'status': 'Deleted',
                 'file_path': file_path,
-                'staged': x != '?',
+                'staged': is_staged,
                 'modified': False,
                 'deleted': True
             })
@@ -126,32 +128,27 @@ def get_outgoing_changes(repo):
                         else:
                             logger.debug(f"No data extracted from file: {file_full_path}")
         else:
-            logger.debug(f"Found file: {full_path}, going through file.")
-            file_data = extract_data_from_yaml(full_path)
+            file_data = extract_data_from_yaml(full_path) if os.path.exists(full_path) else None
             if file_data:
-                logger.debug(f"File contents: {file_data}")
-                logger.debug(f"Found ID: {file_data.get('id')}")
-                logger.debug(f"Found Name: {file_data.get('name')}")
                 changes.append({
                     'name': file_data.get('name', ''),
                     'id': file_data.get('id', ''),
                     'type': determine_type(file_path),
                     'status': interpret_git_status(x, y),
                     'file_path': file_path,
-                    'staged': x != '?' and x != ' ',
-                    'modified': y == 'M',
+                    'staged': is_staged,
+                    'modified': y != ' ',
                     'deleted': False
                 })
             else:
-                logger.debug(f"No data found, using default file name as name")
                 changes.append({
                     'name': os.path.basename(file_path).replace('.yml', ''),
                     'id': '',
                     'type': determine_type(file_path),
                     'status': interpret_git_status(x, y),
                     'file_path': file_path,
-                    'staged': x != '?' and x != ' ',
-                    'modified': y == 'M',
+                    'staged': is_staged,
+                    'modified': y != ' ',
                     'deleted': False
                 })
 
@@ -699,9 +696,22 @@ def revert_file():
     
     try:
         repo = git.Repo(settings_manager.repo_path)
-        repo.git.restore(file_path)
-        repo.git.restore('--staged', file_path)  # Ensure staged changes are also reverted
-        message = f"File {file_path} has been reverted."
+        
+        # Check if the file is staged for deletion
+        staged_deletions = repo.index.diff("HEAD", R=True)
+        is_staged_for_deletion = any(d.a_path == file_path for d in staged_deletions)
+        
+        if is_staged_for_deletion:
+            # If the file is staged for deletion, we need to unstage it and restore it
+            repo.git.reset("--", file_path)  # Unstage the deletion
+            repo.git.checkout('HEAD', "--", file_path)  # Restore the file from HEAD
+            message = f"File {file_path} has been restored and unstaged from deletion."
+        else:
+            # For other changes, use the existing revert logic
+            repo.git.restore("--", file_path)
+            repo.git.restore('--staged', "--", file_path)
+            message = f"File {file_path} has been reverted."
+        
         return jsonify({'success': True, 'message': message}), 200
     
     except Exception as e:
