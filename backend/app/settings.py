@@ -87,15 +87,24 @@ def get_outgoing_changes(repo):
         x, y, file_path = item[0], item[1], item[3:]
         logger.debug(f"Parsed status: x={x}, y={y}, file_path={file_path}")
 
-        full_path = os.path.join(repo.working_dir, file_path)
-
         is_staged = x != ' ' and x != '?'
         is_deleted = x == 'D' or y == 'D'
 
         if is_deleted:
+            try:
+                # Get the content of the file from the last commit
+                file_content = repo.git.show(f'HEAD:{file_path}')
+                yaml_content = yaml.safe_load(file_content)
+                original_name = yaml_content.get('name', 'Unknown')
+                original_id = yaml_content.get('id', '')
+            except Exception as e:
+                logger.warning(f"Could not retrieve original name for deleted file {file_path}: {str(e)}")
+                original_name = "Unknown"
+                original_id = ""
+
             changes.append({
-                'name': 'Deleted File',
-                'id': '',
+                'name': original_name,
+                'id': original_id,
                 'type': determine_type(file_path),
                 'status': 'Deleted',
                 'file_path': file_path,
