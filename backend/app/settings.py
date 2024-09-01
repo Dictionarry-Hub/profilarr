@@ -90,6 +90,8 @@ def get_outgoing_changes(repo):
         is_staged = x != ' ' and x != '?'
         is_deleted = x == 'D' or y == 'D'
 
+        full_path = os.path.join(repo.working_dir, file_path)
+
         if is_deleted:
             try:
                 # Get the content of the file from the last commit
