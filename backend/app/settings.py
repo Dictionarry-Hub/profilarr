@@ -292,20 +292,31 @@ class SettingsManager:
     def clone_repository(self):
         try:
             if not validate_git_token(self.repo_url, self.settings["gitToken"]):
+                logger.error("Invalid Git token provided")
                 return False, "Invalid Git token. Please check your credentials and try again."
 
             default_branch = self.get_default_branch()
             if not default_branch:
+                logger.error("Unable to determine the default branch")
                 return False, "Unable to determine the default branch."
 
             temp_dir = f"{self.repo_path}_temp"
-            auth_repo_url = self.repo_url.replace('https://', f'https://{self.settings["gitToken"]}:x-oauth-basic@')
-            git.Repo.clone_from(auth_repo_url, temp_dir, branch=default_branch, single_branch=True)
-
             backup_dir = f"{self.repo_path}_backup"
+            
+            logger.info(f"Cloning repository from {self.repo_url} to {temp_dir}")
+            auth_repo_url = self.repo_url.replace('https://', f'https://{self.settings["gitToken"]}:x-oauth-basic@')
+            
+            try:
+                git.Repo.clone_from(auth_repo_url, temp_dir, branch=default_branch, single_branch=True)
+            except GitCommandError as e:
+                logger.error(f"Git clone failed: {str(e)}")
+                return False, f"Failed to clone repository: {str(e)}"
+
             if os.path.exists(self.repo_path):
+                logger.info(f"Backing up existing repo to {backup_dir}")
                 shutil.move(self.repo_path, backup_dir)
 
+            logger.info(f"Moving cloned repo from {temp_dir} to {self.repo_path}")
             shutil.move(temp_dir, self.repo_path)
 
             for folder_name in ['regex_patterns', 'custom_formats']:
@@ -313,14 +324,14 @@ class SettingsManager:
                 backup_folder_path = os.path.join(backup_dir, folder_name)
 
                 if not os.path.exists(folder_path):
+                    logger.info(f"Creating missing folder: {folder_name}")
                     os.makedirs(folder_path)
-                    logger.debug(f"Created missing folder: {folder_name} in the cloned repository.")
 
                 # Collect IDs from the cloned files
                 cloned_files = [f for f in os.listdir(folder_path) if f.endswith('.yml')]
                 cloned_ids = set(int(f.split('.')[0]) for f in cloned_files)
 
-                # Now handle local files from the backup directory
+                # Handle local files from the backup directory
                 if os.path.exists(backup_folder_path):
                     local_files = [f for f in os.listdir(backup_folder_path) if f.endswith('.yml')]
                     for file_name in local_files:
@@ -338,18 +349,16 @@ class SettingsManager:
                         new_file_path = os.path.join(folder_path, new_file_name)
                         with open(new_file_path, 'w') as file:
                             yaml.dump(data, file)
+                        logger.info(f"Merged local file: {new_file_name}")
 
             if os.path.exists(backup_dir):
+                logger.info(f"Removing backup directory: {backup_dir}")
                 shutil.rmtree(backup_dir)
 
+            logger.info("Repository cloned and set up successfully")
             return True, "Repository cloned successfully and local files updated"
-        except GitCommandError as e:
-            if os.path.exists(temp_dir):
-                shutil.rmtree(temp_dir)
-            if os.path.exists(backup_dir):
-                shutil.move(backup_dir, self.repo_path)
-            return False, f"Git error: {str(e)}"
         except Exception as e:
+            logger.exception("Unexpected error during repository cloning")
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
             if os.path.exists(backup_dir):
@@ -552,17 +561,31 @@ def handle_settings():
 def update_settings():
     try:
         new_settings = request.json
+        logger.info(f"Received new settings: {new_settings}")
+        
+        # Validate required fields
+        required_fields = ['gitRepo', 'gitToken']
+        for field in required_fields:
+            if field not in new_settings:
+                logger.error(f"Missing required field: {field}")
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
         save_settings(new_settings)
         settings_manager.__init__()
         success, message = settings_manager.clone_repository()
+        
         if success:
+            logger.info("Settings updated and repository cloned successfully")
             return jsonify(new_settings), 200
         else:
             if "Invalid Git token" in message:
+                logger.warning("Invalid Git token provided")
                 return jsonify({"error": message}), 401
+            logger.error(f"Failed to clone repository: {message}")
             return jsonify({"error": message}), 400
     except Exception as e:
-        return jsonify({"error": "Failed to update settings"}), 500
+        logger.exception("Unexpected error in update_settings")
+        return jsonify({"error": f"Failed to update settings: {str(e)}"}), 500
 
 @bp.route('/status', methods=['GET'])
 def get_status():
