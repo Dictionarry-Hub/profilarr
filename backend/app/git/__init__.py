@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
 from .status.status import get_git_status
 from .status.diff import get_diff
-from .branches.branches import Branch_Manager
-from .operations.operations import GitOperations
-from .unlink_repo import unlink_repository
-from .clone_repo import clone_repository
-from .authenticate import validate_git_token
+from .branches.manager import Branch_Manager
+from .operations.manager import GitOperations
+from .repo.unlink import unlink_repository
+from .repo.clone import clone_repository
+from .auth.authenticate import validate_git_token
 from ..settings_utils import save_settings
 import logging
 
@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint('git', __name__, url_prefix='/git')
 
-# Assume these are set up elsewhere, perhaps in a config file
 REPO_PATH = '/app/data/db'
 branch_manager = Branch_Manager(REPO_PATH)
 git_operations = GitOperations(REPO_PATH)
@@ -189,7 +188,7 @@ def handle_stage_files():
         return jsonify({'success': False, 'error': message}), 400
 
 @bp.route('/unlink', methods=['POST'])
-def unlink_repo():
+def unlink():
     data = request.get_json()
     remove_files = data.get('removeFiles', False)
     success, message = unlink_repository(REPO_PATH, remove_files)

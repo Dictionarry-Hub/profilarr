@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, request
 import logging
 
 # Import settings utilities
-from ..settings_utils import save_settings, load_settings
+from ...settings_utils import save_settings, load_settings
 
 logger = logging.getLogger(__name__)
 

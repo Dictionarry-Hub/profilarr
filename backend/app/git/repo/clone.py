@@ -6,7 +6,7 @@ import logging
 import yaml
 from git.exc import GitCommandError
 import git
-from .authenticate import validate_git_token
+from ..auth.authenticate import validate_git_token
 
 logger = logging.getLogger(__name__)
 
