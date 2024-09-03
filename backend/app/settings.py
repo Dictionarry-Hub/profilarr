@@ -570,11 +570,14 @@ def update_settings():
                 logger.error(f"Missing required field: {field}")
                 return jsonify({"error": f"Missing required field: {field}"}), 400
 
-        save_settings(new_settings)
-        settings_manager.__init__()
+        # Attempt to clone the repository before saving settings
+        settings_manager.settings = new_settings
+        settings_manager.repo_url = new_settings['gitRepo']
         success, message = settings_manager.clone_repository()
         
         if success:
+            # Only save the settings if the clone was successful
+            save_settings(new_settings)
             logger.info("Settings updated and repository cloned successfully")
             return jsonify(new_settings), 200
         else:
