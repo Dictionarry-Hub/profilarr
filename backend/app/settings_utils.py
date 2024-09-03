@@ -22,3 +22,8 @@ def save_settings(settings):
             yaml.dump(settings, file)
     except Exception as e:
         pass
+
+def create_empty_settings_if_not_exists():
+    if not os.path.exists(SETTINGS_FILE):
+        save_settings({})
+    

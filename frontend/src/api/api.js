@@ -110,16 +110,6 @@ export const getSettings = async () => {
     }
 };
 
-export const saveSettings = async (settings) => {
-    try {
-        const response = await axios.post(`${API_BASE_URL}/settings`, settings);
-        return response.data;
-    } catch (error) {
-        console.error('Error saving settings:', error);
-        throw error;
-    }
-};
-
 export const getGitStatus = async () => {
     try {
         const response = await axios.get(`${API_BASE_URL}/git/status`);
@@ -243,6 +233,16 @@ export const getDiff = async (filePath) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching diff:', error);
+        throw error;
+    }
+};
+
+export const cloneRepo = async (gitRepo, gitToken) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/git/clone`, { gitRepo, gitToken });
+        return response.data;
+    } catch (error) {
+        console.error('Error cloning repository:', error);
         throw error;
     }
 };

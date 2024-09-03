@@ -1,11 +1,13 @@
-from flask import Flask
+# app/__init__.py
+
+import os
+from flask import Flask, jsonify
 from flask_cors import CORS
 from .regex import bp as regex_bp
 from .format import bp as format_bp
-from .settings import bp as settings_bp
 from .profile import bp as profile_bp
 from .git import bp as git_bp
-import os
+from .settings_utils import create_empty_settings_if_not_exists, load_settings
 
 REGEX_DIR = os.path.join('data', 'db', 'regex_patterns')
 FORMAT_DIR = os.path.join('data', 'db', 'custom_formats')
@@ -15,16 +17,22 @@ def create_app():
     app = Flask(__name__)
     CORS(app, resources={r"/*": {"origins": "*"}})
     
-    # Initialize directories to avoid issues with non-existing directories
+    # Initialize directories and create empty settings file if it doesn't exist
     initialize_directories()
+    create_empty_settings_if_not_exists()
     
     # Register Blueprints
     app.register_blueprint(regex_bp)
     app.register_blueprint(format_bp)
-    app.register_blueprint(settings_bp)
     app.register_blueprint(profile_bp)
-    app.register_blueprint(git_bp) 
-    
+    app.register_blueprint(git_bp)
+
+    # Add settings route
+    @app.route('/settings', methods=['GET'])
+    def handle_settings():
+        settings = load_settings()
+        return jsonify(settings), 200
+
     return app
 
 def initialize_directories():

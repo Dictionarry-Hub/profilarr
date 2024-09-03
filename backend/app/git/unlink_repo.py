@@ -3,22 +3,28 @@ import shutil
 from flask import Blueprint, jsonify
 import logging
 
+# Import settings utilities
+from ..settings_utils import save_settings, load_settings
+
 logger = logging.getLogger(__name__)
 
-repo_bp = Blueprint('repository', __name__, url_prefix='/repository')
-
-def unlink_repository(settings_manager):
+def unlink_repository(repo_path):
     try:
+        # Load current settings
+        settings = load_settings()
+        if not settings:
+            return False, "Settings file not found or could not be loaded"
+
         # Remove the .git folder
-        git_folder = os.path.join(settings_manager.repo_path, '.git')
+        git_folder = os.path.join(repo_path, '.git')
         if os.path.exists(git_folder):
             shutil.rmtree(git_folder)
-            logger.info(f"Removed .git folder from {settings_manager.repo_path}")
+            logger.info(f"Removed .git folder from {repo_path}")
 
         # Update settings
-        settings_manager.settings.pop('gitRepo', None)
-        settings_manager.settings.pop('gitToken', None)
-        settings_manager.save_settings(settings_manager.settings)
+        settings.pop('gitRepo', None)
+        settings.pop('gitToken', None)
+        save_settings(settings)
         logger.info("Updated settings to remove git information")
 
         return True, "Repository successfully unlinked"

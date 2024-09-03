@@ -4,6 +4,9 @@ from .status.diff import get_diff
 from .branches.branches import Branch_Manager
 from .operations.operations import GitOperations
 from .unlink_repo import unlink_repository
+from .clone_repo import clone_repository
+from .authenticate import validate_git_token
+from ..settings_utils import save_settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,6 +17,41 @@ bp = Blueprint('git', __name__, url_prefix='/git')
 REPO_PATH = '/app/data/db'
 branch_manager = Branch_Manager(REPO_PATH)
 git_operations = GitOperations(REPO_PATH)
+
+@bp.route('/clone', methods=['POST'])
+def handle_clone_repository():
+    try:
+        new_settings = request.json
+        logger.info(f"Received new settings: {new_settings}")
+
+        # Validate required fields
+        required_fields = ['gitRepo', 'gitToken']
+        for field in required_fields:
+            if field not in new_settings:
+                logger.error(f"Missing required field: {field}")
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        # Validate Git token
+        if not validate_git_token(new_settings['gitRepo'], new_settings['gitToken']):
+            logger.warning("Invalid Git token provided")
+            return jsonify({"error": "Invalid Git token. Please check your credentials and try again."}), 401
+
+        # Attempt to clone the repository
+        success, message = clone_repository(new_settings['gitRepo'], REPO_PATH, new_settings['gitToken'])
+
+        if success:
+            # Only save the settings if the clone was successful
+            save_settings(new_settings)
+            logger.info("Settings updated and repository cloned successfully")
+            return jsonify({"message": "Repository cloned and settings updated successfully"}), 200
+        else:
+            logger.error(f"Failed to clone repository: {message}")
+            return jsonify({"error": message}), 400
+
+    except Exception as e:
+        logger.exception("Unexpected error in clone_repository")
+        return jsonify({"error": f"Failed to clone repository: {str(e)}"}), 500
+
 
 @bp.route('/status', methods=['GET'])
 def get_status():

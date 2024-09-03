@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   getSettings,
-  saveSettings,
   getGitStatus,
   addFiles,
   pushFiles,
@@ -10,7 +9,7 @@ import {
   getDiff,
   unlinkRepo,
 } from "../../api/api";
-import SettingsModal from "./SettingsModal";
+import ApiKeyModal from "./ApiKeyModal";
 import SettingsBranchModal from "./SettingsBranchModal";
 import {
   FileText,
@@ -63,11 +62,9 @@ const SettingsPage = () => {
   const fetchSettings = async () => {
     try {
       const fetchedSettings = await getSettings();
+      setSettings(fetchedSettings);
       if (fetchedSettings) {
-        setSettings(fetchedSettings);
         await fetchGitStatus();
-      } else {
-        setShowModal(true);
       }
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -114,27 +111,6 @@ const SettingsPage = () => {
         </div>
       </th>
     );
-  };
-
-  const handleSaveSettings = async (newSettings) => {
-    try {
-      setLoadingAction("save_settings"); // Set a loading state if needed
-      const response = await saveSettings(newSettings);
-
-      if (response) {
-        setSettings(response); // Update the settings in the state
-        Alert.success("Settings saved successfully!");
-        await fetchGitStatus(); // Optionally refresh the Git status after saving
-      } else {
-        Alert.error("Failed to save settings. Please try again.");
-      }
-    } catch (error) {
-      Alert.error("An unexpected error occurred while saving the settings.");
-      console.error("Error saving settings:", error);
-    } finally {
-      setLoadingAction(""); // Reset the loading state
-      setShowModal(false); // Close the modal after saving
-    }
   };
 
   const fetchGitStatus = async () => {
@@ -504,6 +480,13 @@ const SettingsPage = () => {
     }
   };
 
+  const handleLinkRepo = async () => {
+    setLoadingAction("");
+    setShowModal(false);
+    await fetchSettings();
+  };
+  
+
   const handleUnlinkRepo = async () => {
     if (window.confirm("Are you sure you want to unlink this repository? This action cannot be undone.")) {
       setLoadingAction("unlink_repo");
@@ -530,6 +513,14 @@ const SettingsPage = () => {
       <h2 className="text-xl font-bold mb-4 text-gray-100">
         Git Repository Settings
       </h2>
+      {!settings && (
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 ease-in-out text-xs"
+        >
+          Link Repository
+        </button>
+      )}
       {settings && (
         <div className="space-y-4">
           <div className="bg-gray-700 p-4 rounded-md">
@@ -680,11 +671,6 @@ const SettingsPage = () => {
           </div>
         </div>
       )}
-      <SettingsModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSave={(newSettings) => handleSaveSettings(newSettings)}
-      />
       {settings && status && (
         <SettingsBranchModal
           isOpen={showBranchModal}
@@ -704,6 +690,11 @@ const SettingsPage = () => {
           commitMessage={currentChange.commit_message}
         />
       )}
+      <ApiKeyModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleLinkRepo}
+      />
     </div>
   );
 };
