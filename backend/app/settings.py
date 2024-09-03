@@ -13,6 +13,7 @@ from .git.unlink_repo import repo_bp, unlink_repository
 from .git.clone_repo import clone_repository
 from .git.authenticate import validate_git_token
 from .git.status.status import get_git_status
+from .git.status.diff import get_diff
 from .settings_utils import load_settings, save_settings
 
 logging.basicConfig(level=logging.DEBUG)
@@ -463,26 +464,10 @@ def pull_branch():
         return jsonify({'success': False, 'error': f"Error pulling branch: {str(e)}"}), 400
 
 @bp.route('/diff', methods=['POST'])
-def get_diff():
+def diff_file():
     file_path = request.json.get('file_path')
     try:
-        repo = git.Repo(settings_manager.repo_path)
-        branch = repo.active_branch.name
-
-        # Check if the file is untracked
-        untracked_files = repo.untracked_files
-        if file_path in untracked_files:
-            with open(os.path.join(repo.working_dir, file_path), 'r') as file:
-                content = file.read()
-            diff = "\n".join([f"+{line}" for line in content.splitlines()])
-        else:
-            # Check if the file is deleted
-            if not os.path.exists(os.path.join(repo.working_dir, file_path)):
-                diff = "-Deleted File"
-            else:
-                # Get the diff for modified files
-                diff = repo.git.diff(f'HEAD', file_path)
-
+        diff = get_diff(settings_manager.repo_path, file_path)
         logger.debug(f"Diff for file {file_path}: {diff}")
         return jsonify({'success': True, 'diff': diff if diff else ""}), 200
     except Exception as e:
