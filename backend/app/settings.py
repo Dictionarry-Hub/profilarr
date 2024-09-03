@@ -326,7 +326,7 @@ class SettingsManager:
             logger.info(f"Moving cloned repo from {temp_dir} to {self.repo_path}")
             shutil.move(temp_dir, self.repo_path)
 
-            for folder_name in ['regex_patterns', 'custom_formats']:
+            for folder_name in ['regex_patterns', 'custom_formats', 'profiles']:
                 folder_path = os.path.join(self.repo_path, folder_name)
                 backup_folder_path = os.path.join(backup_dir, folder_name)
 
