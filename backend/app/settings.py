@@ -10,6 +10,8 @@ from datetime import datetime
 import json
 import requests
 from .git.unlink_repo import repo_bp, unlink_repository
+from .git.clone_repo import clone_repository
+from .git.authenticate import validate_git_token
 from .settings_utils import load_settings, save_settings
 
 logging.basicConfig(level=logging.DEBUG)
@@ -23,34 +25,6 @@ DB_DIR = os.path.join(DATA_DIR, 'db')
 SETTINGS_FILE = os.path.join(DATA_DIR, 'config', 'settings.yml')
 REGEX_DIR = os.path.join(DB_DIR, 'regex_patterns')
 FORMAT_DIR = os.path.join(DB_DIR, 'custom_formats')
-
-def validate_git_token(repo_url, git_token):
-    try:
-        parts = repo_url.strip('/').split('/')
-        if len(parts) < 2:
-            return False
-
-        repo_owner, repo_name = parts[-2], parts[-1].replace('.git', '')
-        api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}"
-
-        curl_command = [
-            'curl', '-s', '-o', '/dev/null', '-w', '%{http_code}',
-            '-H', f'Authorization: Bearer {git_token}',
-            '-H', 'Accept: application/vnd.github+json',
-            api_url
-        ]
-
-        result = subprocess.run(curl_command, capture_output=True, text=True)
-        http_status_code = int(result.stdout.strip())
-
-        if http_status_code == 200:
-            return True
-        elif http_status_code == 401:
-            return False
-        else:
-            return False
-    except Exception as e:
-        return False
 
 def get_outgoing_changes(repo):
     status = repo.git.status('--porcelain', '-z').split('\0')
@@ -273,104 +247,7 @@ class SettingsManager:
             return None
 
     def clone_repository(self):
-        try:
-            if not validate_git_token(self.repo_url, self.settings["gitToken"]):
-                logger.error("Invalid Git token provided")
-                return False, "Invalid Git token. Please check your credentials and try again."
-
-            temp_dir = f"{self.repo_path}_temp"
-            backup_dir = f"{self.repo_path}_backup"
-            
-            logger.info(f"Cloning repository from {self.repo_url} to {temp_dir}")
-            auth_repo_url = self.repo_url.replace('https://', f'https://{self.settings["gitToken"]}:x-oauth-basic@')
-            
-            try:
-                repo = git.Repo.clone_from(auth_repo_url, temp_dir)
-                logger.info("Repository cloned successfully")
-            except GitCommandError as e:
-                if "remote: Repository not found" in str(e):
-                    logger.info("Repository not found. Creating a new empty repository.")
-                    repo = git.Repo.init(temp_dir)
-                    repo.create_remote('origin', self.repo_url)
-                else:
-                    logger.error(f"Git clone failed: {str(e)}")
-                    return False, f"Failed to clone repository: {str(e)}"
-
-            try:
-                repo.head.reference
-            except ValueError:
-                logger.info("Repository is empty. Initializing with basic structure.")
-                self._initialize_empty_repo(repo)
-
-            if os.path.exists(self.repo_path):
-                logger.info(f"Backing up existing repo to {backup_dir}")
-                shutil.move(self.repo_path, backup_dir)
-
-            logger.info(f"Moving cloned repo from {temp_dir} to {self.repo_path}")
-            shutil.move(temp_dir, self.repo_path)
-
-            for folder_name in ['regex_patterns', 'custom_formats', 'profiles']:
-                folder_path = os.path.join(self.repo_path, folder_name)
-                backup_folder_path = os.path.join(backup_dir, folder_name)
-
-                if not os.path.exists(folder_path):
-                    logger.info(f"Creating missing folder: {folder_name}")
-                    os.makedirs(folder_path)
-
-                cloned_files = [f for f in os.listdir(folder_path) if f.endswith('.yml')]
-                cloned_ids = set(int(f.split('.')[0]) for f in cloned_files)
-
-                if os.path.exists(backup_folder_path):
-                    local_files = [f for f in os.listdir(backup_folder_path) if f.endswith('.yml')]
-                    for file_name in local_files:
-                        old_file_path = os.path.join(backup_folder_path, file_name)
-                        with open(old_file_path, 'r') as file:
-                            data = yaml.safe_load(file)
-
-                        while data['id'] in cloned_ids:
-                            data['id'] += 1
-
-                        cloned_ids.add(data['id'])
-
-                        new_file_name = f"{data['id']}_{data['name'].replace(' ', '_').lower()}.yml"
-                        new_file_path = os.path.join(folder_path, new_file_name)
-                        with open(new_file_path, 'w') as file:
-                            yaml.dump(data, file)
-                        logger.info(f"Merged local file: {new_file_name}")
-
-            if os.path.exists(backup_dir):
-                logger.info(f"Removing backup directory: {backup_dir}")
-                shutil.rmtree(backup_dir)
-
-            logger.info("Repository cloned and set up successfully")
-            return True, "Repository cloned successfully and local files updated"
-        except Exception as e:
-            logger.exception("Unexpected error during repository cloning")
-            if os.path.exists(temp_dir):
-                shutil.rmtree(temp_dir)
-            if os.path.exists(backup_dir):
-                shutil.move(backup_dir, self.repo_path)
-            return False, f"Unexpected error: {str(e)}"
-        
-    def _initialize_empty_repo(self, repo, default_branch):
-        # Create basic folder structure
-        os.makedirs(os.path.join(repo.working_tree_dir, 'regex_patterns'), exist_ok=True)
-        os.makedirs(os.path.join(repo.working_tree_dir, 'custom_formats'), exist_ok=True)
-        os.makedirs(os.path.join(repo.working_tree_dir, 'quality_profiles'), exist_ok=True)
-
-        # Create a README file
-        with open(os.path.join(repo.working_tree_dir, 'README.md'), 'w') as f:
-            f.write("# Profilarr Repository\n\nThis repository contains regex patterns, custom formats and quality profiles.")
-
-        repo.git.add(A=True)
-        repo.index.commit("Initial commit: Basic repository structure")
-        repo.create_head('main')
-        repo.heads.main.checkout()
-        origin = repo.remote(name='origin')
-        origin.push('main')
-        origin.push('main:main')
-
-        logger.info(f"Initialized empty repository with basic structure and pushed to {default_branch}")
+        return clone_repository(self.repo_url, self.repo_path, self.settings["gitToken"])
     
     def get_git_status(self):
         try:
@@ -577,6 +454,11 @@ def update_settings():
                 logger.error(f"Missing required field: {field}")
                 return jsonify({"error": f"Missing required field: {field}"}), 400
 
+        # Validate Git token
+        if not validate_git_token(new_settings['gitRepo'], new_settings['gitToken']):
+            logger.warning("Invalid Git token provided")
+            return jsonify({"error": "Invalid Git token. Please check your credentials and try again."}), 401
+
         # Attempt to clone the repository before saving settings
         settings_manager.settings = new_settings
         settings_manager.repo_url = new_settings['gitRepo']
@@ -588,9 +470,6 @@ def update_settings():
             logger.info("Settings updated and repository cloned successfully")
             return jsonify(new_settings), 200
         else:
-            if "Invalid Git token" in message:
-                logger.warning("Invalid Git token provided")
-                return jsonify({"error": message}), 401
             logger.error(f"Failed to clone repository: {message}")
             return jsonify({"error": message}), 400
     except Exception as e:
