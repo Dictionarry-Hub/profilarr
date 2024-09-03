@@ -288,3 +288,13 @@ export const deleteProfile = async (id) => {
         throw error;
     }
 };
+
+export const unlinkRepo = async () => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/repository/unlink`);
+        return response.data;
+    } catch (error) {
+        console.error('Error unlinking repository:', error);
+        throw error;
+    }
+};
