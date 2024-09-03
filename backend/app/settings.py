@@ -295,11 +295,6 @@ class SettingsManager:
                 logger.error("Invalid Git token provided")
                 return False, "Invalid Git token. Please check your credentials and try again."
 
-            default_branch = self.get_default_branch()
-            if not default_branch:
-                logger.error("Unable to determine the default branch")
-                return False, "Unable to determine the default branch."
-
             temp_dir = f"{self.repo_path}_temp"
             backup_dir = f"{self.repo_path}_backup"
             
@@ -307,10 +302,22 @@ class SettingsManager:
             auth_repo_url = self.repo_url.replace('https://', f'https://{self.settings["gitToken"]}:x-oauth-basic@')
             
             try:
-                git.Repo.clone_from(auth_repo_url, temp_dir, branch=default_branch, single_branch=True)
+                repo = git.Repo.clone_from(auth_repo_url, temp_dir)
+                logger.info("Repository cloned successfully")
             except GitCommandError as e:
-                logger.error(f"Git clone failed: {str(e)}")
-                return False, f"Failed to clone repository: {str(e)}"
+                if "remote: Repository not found" in str(e):
+                    logger.info("Repository not found. Creating a new empty repository.")
+                    repo = git.Repo.init(temp_dir)
+                    repo.create_remote('origin', self.repo_url)
+                else:
+                    logger.error(f"Git clone failed: {str(e)}")
+                    return False, f"Failed to clone repository: {str(e)}"
+
+            try:
+                repo.head.reference
+            except ValueError:
+                logger.info("Repository is empty. Initializing with basic structure.")
+                self._initialize_empty_repo(repo)
 
             if os.path.exists(self.repo_path):
                 logger.info(f"Backing up existing repo to {backup_dir}")
@@ -327,11 +334,9 @@ class SettingsManager:
                     logger.info(f"Creating missing folder: {folder_name}")
                     os.makedirs(folder_path)
 
-                # Collect IDs from the cloned files
                 cloned_files = [f for f in os.listdir(folder_path) if f.endswith('.yml')]
                 cloned_ids = set(int(f.split('.')[0]) for f in cloned_files)
 
-                # Handle local files from the backup directory
                 if os.path.exists(backup_folder_path):
                     local_files = [f for f in os.listdir(backup_folder_path) if f.endswith('.yml')]
                     for file_name in local_files:
@@ -339,11 +344,10 @@ class SettingsManager:
                         with open(old_file_path, 'r') as file:
                             data = yaml.safe_load(file)
 
-                        # Increment the ID only if it's already in the cloned set
                         while data['id'] in cloned_ids:
                             data['id'] += 1
 
-                        cloned_ids.add(data['id'])  # Add to the set to track used IDs
+                        cloned_ids.add(data['id'])
 
                         new_file_name = f"{data['id']}_{data['name'].replace(' ', '_').lower()}.yml"
                         new_file_path = os.path.join(folder_path, new_file_name)
@@ -364,8 +368,27 @@ class SettingsManager:
             if os.path.exists(backup_dir):
                 shutil.move(backup_dir, self.repo_path)
             return False, f"Unexpected error: {str(e)}"
-    
+        
+    def _initialize_empty_repo(self, repo, default_branch):
+        # Create basic folder structure
+        os.makedirs(os.path.join(repo.working_tree_dir, 'regex_patterns'), exist_ok=True)
+        os.makedirs(os.path.join(repo.working_tree_dir, 'custom_formats'), exist_ok=True)
+        os.makedirs(os.path.join(repo.working_tree_dir, 'quality_profiles'), exist_ok=True)
 
+        # Create a README file
+        with open(os.path.join(repo.working_tree_dir, 'README.md'), 'w') as f:
+            f.write("# Profilarr Repository\n\nThis repository contains regex patterns, custom formats and quality profiles.")
+
+        repo.git.add(A=True)
+        repo.index.commit("Initial commit: Basic repository structure")
+        repo.create_head('main')
+        repo.heads.main.checkout()
+        origin = repo.remote(name='origin')
+        origin.push('main')
+        origin.push('main:main')
+
+        logger.info(f"Initialized empty repository with basic structure and pushed to {default_branch}")
+    
     def get_git_status(self):
         try:
             logger.debug(f"Attempting to get status for repo at {self.repo_path}")
