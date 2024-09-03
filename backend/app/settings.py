@@ -15,6 +15,7 @@ from .git.authenticate import validate_git_token
 from .git.status.status import get_git_status
 from .git.status.diff import get_diff
 from .git.branches.branches import Branch_Manager
+from .git.operations.operations import GitOperations
 from .settings_utils import load_settings, save_settings
 
 logging.basicConfig(level=logging.DEBUG)
@@ -35,6 +36,7 @@ class SettingsManager:
         self.repo_url = self.settings.get('gitRepo') if self.settings else None
         self.repo_path = DB_DIR
         self.branch_manager = Branch_Manager(self.repo_path)
+        self.git_operations = GitOperations(self.repo_path)
 
     def clone_repository(self):
         return clone_repository(self.repo_url, self.repo_path, self.settings["gitToken"])
@@ -58,32 +60,22 @@ class SettingsManager:
         return self.branch_manager.get_current()
         
     def stage_files(self, files):
-        try:
-            repo = git.Repo(self.repo_path)
-            for file_path in files:
-                repo.index.add([file_path])
-            return True, "Successfully staged files."
-        except Exception as e:
-            logger.error(f"Error staging files: {str(e)}", exc_info=True)
-            return False, f"Error staging files: {str(e)}"
+        return self.git_operations.stage(files)
 
     def push_files(self, files, commit_message):
-        try:
-            repo = git.Repo(self.repo_path)
-            # Stage the files
-            self.stage_files(files)
+        return self.git_operations.push(files, commit_message)
 
-            # Commit the staged files
-            repo.index.commit(commit_message)
+    def revert_file(self, file_path):
+        return self.git_operations.revert(file_path)
 
-            # Push the commit to the remote repository
-            origin = repo.remote(name='origin')
-            origin.push()
+    def revert_all(self):
+        return self.git_operations.revert_all()
 
-            return True, "Successfully committed and pushed files."
-        except Exception as e:
-            logger.error(f"Error pushing files: {str(e)}", exc_info=True)
-            return False, f"Error pushing files: {str(e)}"
+    def delete_file(self, file_path):
+        return self.git_operations.delete(file_path)
+
+    def pull_branch(self, branch_name):
+        return self.git_operations.pull(branch_name)
 
         
 settings_manager = SettingsManager()
@@ -198,27 +190,16 @@ def get_current_branch():
     else:
         return jsonify({'success': False, 'error': 'Failed to get current branch'}), 400
 
+
 @bp.route('/stage', methods=['POST'])
 def stage_files():
     files = request.json.get('files', [])
-    
-    try:
-        repo = git.Repo(settings_manager.repo_path)
-        
-        if not files:  # If no files are specified, stage all changes
-            repo.git.add(A=True)  # This adds all changes to staging, including deletions
-            message = "All changes have been staged."
-        else:
-            for file_path in files:
-                # Staging a deleted file requires just adding the file path.
-                repo.git.add(file_path)
-            message = "Specified files have been staged."
-        
+    success, message = settings_manager.stage_files(files)
+    if success:
         return jsonify({'success': True, 'message': message}), 200
-    
-    except Exception as e:
-        logger.error(f"Error staging files: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': f"Error staging files: {str(e)}"}), 400
+    else:
+        logger.error(f"Error staging files: {message}")
+        return jsonify({'success': False, 'error': message}), 400
 
 
 def generate_commit_message(user_message, files):
@@ -239,111 +220,59 @@ def push_files():
     files = request.json.get('files', [])
     user_commit_message = request.json.get('commit_message', "Commit and push staged files")
     logger.debug(f"Received request to push files: {files}")
-    
-    try:
-        repo = git.Repo(settings_manager.repo_path)
-        
-        # Instead of restaging the files, we directly commit the staged changes
-        staged_files = repo.index.diff("HEAD")  # Get the list of staged files
-        if not staged_files:
-            return jsonify({'success': False, 'error': "No staged changes to commit."}), 400
-        
-        # Generate the structured commit message
-        commit_message = generate_commit_message(user_commit_message, files)
-        
-        # Commit the staged changes
-        repo.index.commit(commit_message)
-
-        # Push the commit to the remote repository
-        origin = repo.remote(name='origin')
-        origin.push()
-
+    commit_message = generate_commit_message(user_commit_message, files)
+    success, message = settings_manager.push_files(files, commit_message)
+    if success:
         logger.debug("Successfully committed and pushed files")
-        return jsonify({'success': True, 'message': "Successfully committed and pushed files."}), 200
-    
-    except Exception as e:
-        logger.error(f"Error pushing files: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': f"Error pushing files: {str(e)}"}), 400
+        return jsonify({'success': True, 'message': message}), 200
+    else:
+        logger.error(f"Error pushing files: {message}")
+        return jsonify({'success': False, 'error': message}), 400
 
 @bp.route('/revert', methods=['POST'])
 def revert_file():
     file_path = request.json.get('file_path')
-    
     if not file_path:
         return jsonify({'success': False, 'error': "File path is required."}), 400
-    
-    try:
-        repo = git.Repo(settings_manager.repo_path)
-        
-        # Check if the file is staged for deletion
-        staged_deletions = repo.index.diff("HEAD", R=True)
-        is_staged_for_deletion = any(d.a_path == file_path for d in staged_deletions)
-        
-        if is_staged_for_deletion:
-            # If the file is staged for deletion, we need to unstage it and restore it
-            repo.git.reset("--", file_path)  # Unstage the deletion
-            repo.git.checkout('HEAD', "--", file_path)  # Restore the file from HEAD
-            message = f"File {file_path} has been restored and unstaged from deletion."
-        else:
-            # For other changes, use the existing revert logic
-            repo.git.restore("--", file_path)
-            repo.git.restore('--staged', "--", file_path)
-            message = f"File {file_path} has been reverted."
-        
+    success, message = settings_manager.revert_file(file_path)
+    if success:
         return jsonify({'success': True, 'message': message}), 200
-    
-    except Exception as e:
-        logger.error(f"Error reverting file: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': f"Error reverting file: {str(e)}"}), 400
+    else:
+        logger.error(f"Error reverting file: {message}")
+        return jsonify({'success': False, 'error': message}), 400
 
 
 @bp.route('/revert-all', methods=['POST'])
 def revert_all():
-    try:
-        repo = git.Repo(settings_manager.repo_path)
-        
-        # Revert all files to the state of the last commit
-        repo.git.restore('--staged', '.')
-        repo.git.restore('.')
-        
-        return jsonify({'success': True, 'message': "All changes have been reverted to the last commit."}), 200
-    
-    except Exception as e:
-        logger.error(f"Error reverting all changes: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': f"Error reverting all changes: {str(e)}"}), 400
+    success, message = settings_manager.revert_all()
+    if success:
+        return jsonify({'success': True, 'message': message}), 200
+    else:
+        logger.error(f"Error reverting all changes: {message}")
+        return jsonify({'success': False, 'error': message}), 400
 
 
 @bp.route('/file', methods=['DELETE'])
 def delete_file():
     file_path = request.json.get('file_path')
-
     if not file_path:
         return jsonify({'success': False, 'error': "File path is required."}), 400
-
-    try:
-        full_file_path = os.path.join(settings_manager.repo_path, file_path)
-        
-        if os.path.exists(full_file_path):
-            os.remove(full_file_path)
-            message = f"File {file_path} has been deleted."
-            return jsonify({'success': True, 'message': message}), 200
-        else:
-            return jsonify({'success': False, 'error': "File does not exist."}), 404
-    
-    except Exception as e:
-        logger.error(f"Error deleting file: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': f"Error deleting file: {str(e)}"}), 400
+    success, message = settings_manager.delete_file(file_path)
+    if success:
+        return jsonify({'success': True, 'message': message}), 200
+    else:
+        logger.error(f"Error deleting file: {message}")
+        return jsonify({'success': False, 'error': message}), 400
     
 @bp.route('/pull', methods=['POST'])
 def pull_branch():
     branch_name = request.json.get('branch')
-    try:
-        repo = git.Repo(settings_manager.repo_path)
-        repo.git.pull('origin', branch_name)
-        return jsonify({'success': True, 'message': f'Successfully pulled changes for branch {branch_name}.'}), 200
-    except Exception as e:
-        logger.error(f"Error pulling branch: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': f"Error pulling branch: {str(e)}"}), 400
+    success, message = settings_manager.pull_branch(branch_name)
+    if success:
+        return jsonify({'success': True, 'message': message}), 200
+    else:
+        logger.error(f"Error pulling branch: {message}")
+        return jsonify({'success': False, 'error': message}), 400
 
 @bp.route('/diff', methods=['POST'])
 def diff_file():
