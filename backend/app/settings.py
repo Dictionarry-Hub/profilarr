@@ -10,6 +10,7 @@ from datetime import datetime
 import json
 import requests
 from .git.unlink_repo import repo_bp, unlink_repository
+from .settings_utils import load_settings, save_settings
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('git').setLevel(logging.WARNING)
@@ -19,28 +20,9 @@ bp = Blueprint('settings', __name__, url_prefix='/settings')
 
 DATA_DIR = '/app/data'
 DB_DIR = os.path.join(DATA_DIR, 'db')
+SETTINGS_FILE = os.path.join(DATA_DIR, 'config', 'settings.yml')
 REGEX_DIR = os.path.join(DB_DIR, 'regex_patterns')
 FORMAT_DIR = os.path.join(DB_DIR, 'custom_formats')
-SETTINGS_FILE = os.path.join(DATA_DIR, 'config', 'settings.yml')
-
-def load_settings():
-    try:
-        if not os.path.exists(SETTINGS_FILE):
-            return None  # Indicate that the settings file does not exist
-
-        with open(SETTINGS_FILE, 'r') as file:
-            settings = yaml.safe_load(file)
-            return settings if settings else None
-    except Exception as e:
-        return None
-
-def save_settings(settings):
-    try:
-        os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
-        with open(SETTINGS_FILE, 'w') as file:
-            yaml.dump(settings, file)
-    except Exception as e:
-        pass
 
 def validate_git_token(repo_url, git_token):
     try:
