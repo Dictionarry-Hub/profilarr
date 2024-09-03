@@ -8,6 +8,7 @@ import {
   revertFile,
   pullBranch,
   getDiff,
+  unlinkRepo,
 } from "../../api/api";
 import SettingsModal from "./SettingsModal";
 import SettingsBranchModal from "./SettingsBranchModal";
@@ -28,6 +29,7 @@ import {
   CheckCircle,
   File,
   Settings,
+  Unlink,
 } from "lucide-react";
 import Alert from "../ui/Alert";
 import CommitSection from "./CommitSection";
@@ -502,6 +504,27 @@ const SettingsPage = () => {
     }
   };
 
+  const handleUnlinkRepo = async () => {
+    if (window.confirm("Are you sure you want to unlink this repository? This action cannot be undone.")) {
+      setLoadingAction("unlink_repo");
+      try {
+        const response = await unlinkRepo();
+        if (response.success) {
+          setSettings(null);
+          setStatus(null);
+          Alert.success("Repository unlinked successfully");
+        } else {
+          Alert.error(response.error || "Failed to unlink repository");
+        }
+      } catch (error) {
+        Alert.error("An unexpected error occurred while unlinking the repository");
+        console.error("Error unlinking repository:", error);
+      } finally {
+        setLoadingAction("");
+      }
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-lg">
       <h2 className="text-xl font-bold mb-4 text-gray-100">
@@ -513,14 +536,30 @@ const SettingsPage = () => {
             <h3 className="text-sm font-semibold text-gray-100 mb-2">
               Connected Repository
             </h3>
-            <a
-              href={settings.gitRepo}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
-            >
-              {settings.gitRepo}
-            </a>
+            <div className="flex items-center justify-between">
+              <a
+                href={settings.gitRepo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+              >
+                {settings.gitRepo}
+              </a>
+              <Tooltip content="Unlink Repository">
+                <button
+                  onClick={handleUnlinkRepo}
+                  className="flex items-center px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 ease-in-out text-xs"
+                  disabled={loadingAction === "unlink_repo"}
+                >
+                  {loadingAction === "unlink_repo" ? (
+                    <Loader size={14} className="animate-spin" />
+                  ) : (
+                    <Unlink size={14} className="mr-2" />
+                  )}
+                  Unlink
+                </button>
+              </Tooltip>
+            </div>
           </div>
 
           <div className="bg-gray-700 p-4 rounded-md">
