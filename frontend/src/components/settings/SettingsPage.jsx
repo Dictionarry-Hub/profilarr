@@ -10,6 +10,7 @@ import {
   unlinkRepo,
 } from "../../api/api";
 import ApiKeyModal from "./ApiKeyModal";
+import UnlinkModal from "./UnlinkModal";
 import SettingsBranchModal from "./SettingsBranchModal";
 import {
   FileText,
@@ -43,6 +44,7 @@ const SettingsPage = () => {
   const [loadingAction, setLoadingAction] = useState("");
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [commitMessage, setCommitMessage] = useState("");
+  const [showUnlinkModal, setShowUnlinkModal] = useState(false);
   const [selectedIncomingChanges, setSelectedIncomingChanges] = useState([]);
   const [selectedOutgoingChanges, setSelectedOutgoingChanges] = useState([]);
   const [showDiffModal, setShowDiffModal] = useState(false);
@@ -487,26 +489,25 @@ const SettingsPage = () => {
   };
   
 
-  const handleUnlinkRepo = async () => {
-    if (window.confirm("Are you sure you want to unlink this repository? This action cannot be undone.")) {
-      setLoadingAction("unlink_repo");
-      try {
-        const response = await unlinkRepo();
+  const handleUnlinkRepo = async (removeFiles) => {
+    setLoadingAction("unlink_repo");
+    try {
+        const response = await unlinkRepo(removeFiles);
         if (response.success) {
-          setSettings(null);
-          setStatus(null);
-          Alert.success("Repository unlinked successfully");
+            setSettings(null);
+            setStatus(null);
+            Alert.success("Repository unlinked successfully");
+            setShowUnlinkModal(false); // Close the modal after unlinking
         } else {
-          Alert.error(response.error || "Failed to unlink repository");
+            Alert.error(response.error || "Failed to unlink repository");
         }
-      } catch (error) {
+    } catch (error) {
         Alert.error("An unexpected error occurred while unlinking the repository");
         console.error("Error unlinking repository:", error);
-      } finally {
+    } finally {
         setLoadingAction("");
-      }
     }
-  };
+}; 
 
   return (
     <div className="max-w-4xl mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-lg">
@@ -538,7 +539,7 @@ const SettingsPage = () => {
               </a>
               <Tooltip content="Unlink Repository">
                 <button
-                  onClick={handleUnlinkRepo}
+                  onClick={() => setShowUnlinkModal(true)} // Change this line to open the modal
                   className="flex items-center px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 ease-in-out text-xs"
                   disabled={loadingAction === "unlink_repo"}
                 >
@@ -712,6 +713,11 @@ const SettingsPage = () => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSubmit={handleLinkRepo}
+      />
+      <UnlinkModal
+        isOpen={showUnlinkModal}
+        onClose={() => setShowUnlinkModal(false)}
+        onSubmit={handleUnlinkRepo}
       />
     </div>
   );

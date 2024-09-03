@@ -287,12 +287,13 @@ export const deleteProfile = async (id) => {
     }
 };
 
-export const unlinkRepo = async () => {
+export const unlinkRepo = async (removeFiles = false) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/unlink`);
+        const response = await axios.post(`${API_BASE_URL}/git/unlink`, { removeFiles });
         return response.data;
     } catch (error) {
         console.error('Error unlinking repository:', error);
         throw error;
     }
 };
+

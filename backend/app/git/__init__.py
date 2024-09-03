@@ -190,7 +190,9 @@ def handle_stage_files():
 
 @bp.route('/unlink', methods=['POST'])
 def unlink_repo():
-    success, message = unlink_repository(REPO_PATH)
+    data = request.get_json()
+    remove_files = data.get('removeFiles', False)
+    success, message = unlink_repository(REPO_PATH, remove_files)
     if success:
         return jsonify({'success': True, 'message': message}), 200
     else:
