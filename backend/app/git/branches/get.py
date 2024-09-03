@@ -2,6 +2,7 @@
 
 import git
 import logging
+from flask import Blueprint, jsonify
 
 logger = logging.getLogger(__name__)
 

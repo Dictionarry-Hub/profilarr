@@ -122,7 +122,7 @@ export const saveSettings = async (settings) => {
 
 export const getGitStatus = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/settings/status`);
+        const response = await axios.get(`${API_BASE_URL}/git/status`);
         return response.data;
     } catch (error) {
         console.error('Error fetching Git status:', error);
@@ -132,7 +132,7 @@ export const getGitStatus = async () => {
 
 export const getBranches = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/settings/branches`);
+        const response = await axios.get(`${API_BASE_URL}/git/branches`);
         return response.data;
     } catch (error) {
         console.error('Error fetching branches:', error);
@@ -142,7 +142,7 @@ export const getBranches = async () => {
 
 export const checkoutBranch = async (branchName) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/settings/checkout`, { branch: branchName });
+        const response = await axios.post(`${API_BASE_URL}/git/checkout`, { branch: branchName });
         return response.data;
     } catch (error) {
         console.error('Error checking out branch:', error);
@@ -152,7 +152,7 @@ export const checkoutBranch = async (branchName) => {
 
 export const createBranch = async (branchName, baseBranch) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/settings/branch`, { name: branchName, base: baseBranch });
+        const response = await axios.post(`${API_BASE_URL}/git/branch`, { name: branchName, base: baseBranch });
         return response.data;
     } catch (error) {
         console.error('Error creating branch:', error);
@@ -162,7 +162,7 @@ export const createBranch = async (branchName, baseBranch) => {
 
 export const deleteBranch = async (branchName) => {
     try {
-        const response = await axios.delete(`${API_BASE_URL}/settings/branch/${branchName}`);
+        const response = await axios.delete(`${API_BASE_URL}/git/branch/${branchName}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting branch:', error);
@@ -172,7 +172,7 @@ export const deleteBranch = async (branchName) => {
 
 export const addFiles = async (files) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/settings/stage`, { files });
+        const response = await axios.post(`${API_BASE_URL}/git/stage`, { files });
         return response.data;
     } catch (error) {
         console.error('Error staging files:', error);
@@ -182,7 +182,7 @@ export const addFiles = async (files) => {
 
 export const pushFiles = async (files, commitMessage) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/settings/push`, {
+        const response = await axios.post(`${API_BASE_URL}/git/push`, {
             files,
             commit_message: commitMessage
         });
@@ -195,10 +195,9 @@ export const pushFiles = async (files, commitMessage) => {
 
 export const revertFile = async (filePath) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/settings/revert`, {
+        const response = await axios.post(`${API_BASE_URL}/git/revert`, {
             file_path: filePath
         });
-
         return response.data;
     } catch (error) {
         console.error('Error reverting file:', error);
@@ -208,8 +207,7 @@ export const revertFile = async (filePath) => {
 
 export const revertAll = async () => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/settings/revert-all`);
-
+        const response = await axios.post(`${API_BASE_URL}/git/revert-all`);
         return response.data;
     } catch (error) {
         console.error('Error reverting all changes:', error);
@@ -219,7 +217,7 @@ export const revertAll = async () => {
 
 export const deleteFile = async (filePath) => {
     try {
-        const response = await axios.delete(`${API_BASE_URL}/settings/file`, {
+        const response = await axios.delete(`${API_BASE_URL}/git/file`, {
             data: { file_path: filePath },
         });
         return response.data;
@@ -231,7 +229,7 @@ export const deleteFile = async (filePath) => {
 
 export const pullBranch = async (branchName) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/settings/pull`, { branch: branchName });
+        const response = await axios.post(`${API_BASE_URL}/git/pull`, { branch: branchName });
         return response.data;
     } catch (error) {
         console.error('Error pulling branch:', error);
@@ -241,7 +239,7 @@ export const pullBranch = async (branchName) => {
 
 export const getDiff = async (filePath) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/settings/diff`, { file_path: filePath });
+        const response = await axios.post(`${API_BASE_URL}/git/diff`, { file_path: filePath });
         return response.data;
     } catch (error) {
         console.error('Error fetching diff:', error);
@@ -291,7 +289,7 @@ export const deleteProfile = async (id) => {
 
 export const unlinkRepo = async () => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/repository/unlink`);
+        const response = await axios.post(`${API_BASE_URL}/git/unlink`);
         return response.data;
     } catch (error) {
         console.error('Error unlinking repository:', error);

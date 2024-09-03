@@ -39,8 +39,10 @@ def handle_format(id):
         saved_data = save_format(data)
         return jsonify(saved_data)
     elif request.method == 'DELETE':
+        logger.info("Received request to delete format with ID: %d", id)
         result = delete_format(id)
         if "error" in result:
+            logger.error("Error deleting format: %s", result['error'])
             return jsonify(result), 400
         return jsonify(result), 200
 

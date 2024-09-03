@@ -25,11 +25,3 @@ def unlink_repository(settings_manager):
     except Exception as e:
         logger.error(f"Error unlinking repository: {str(e)}", exc_info=True)
         return False, f"Error unlinking repository: {str(e)}"
-
-@repo_bp.route('/unlink', methods=['POST'])
-def unlink_repo():
-    success, message = unlink_repository(repo_bp.settings_manager)
-    if success:
-        return jsonify({'success': True, 'message': message}), 200
-    else:
-        return jsonify({'success': False, 'error': message}), 400
