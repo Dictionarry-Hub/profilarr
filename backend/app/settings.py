@@ -9,6 +9,7 @@ import logging
 from datetime import datetime
 import json
 import requests
+from .git.unlink_repo import repo_bp, unlink_repository
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('git').setLevel(logging.WARNING)
@@ -572,6 +573,7 @@ class SettingsManager:
 
         
 settings_manager = SettingsManager()
+repo_bp.settings_manager = settings_manager
 
 @bp.route('', methods=['GET'])
 def handle_settings():
