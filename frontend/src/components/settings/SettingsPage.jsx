@@ -664,6 +664,24 @@ const SettingsPage = () => {
                         </button>
                       </Tooltip>
                     )}
+                    {/* Conditionally render Pull button */}
+                    {selectedIncomingChanges.length > 0 && (
+                      <Tooltip content="Pull selected changes">
+                        <button
+                          onClick={handlePullSelectedChanges}
+                          className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors duration-200 ease-in-out text-xs"
+                          disabled={loadingAction === "pull_changes"}
+                        >
+                          {loadingAction === "pull_changes" ? (
+                            <Loader size={12} className="animate-spin" />
+                          ) : (
+                            <Download className="mr-1" size={12} />
+                          )}
+                          Pull Selected
+                        </button>
+                      </Tooltip>
+                    )}
+
                   </div>
                 </>
               )
