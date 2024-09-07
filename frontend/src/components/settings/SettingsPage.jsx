@@ -872,6 +872,7 @@ const SettingsPage = () => {
                     type={currentChange.type}
                     name={currentChange.name}
                     commitMessage={currentChange.commit_message}
+                    isDevMode={isDevMode}
                 />
             )}
             <LinkRepoModal
