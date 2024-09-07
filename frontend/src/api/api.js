@@ -297,3 +297,12 @@ export const unlinkRepo = async (removeFiles = false) => {
     }
 };
 
+export const pushBranchToRemote = async (branchName) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/git/branch/push`, { branch: branchName });
+        return response.data;
+    } catch (error) {
+        console.error('Error pushing branch to remote:', error);
+        throw error;
+    }
+};

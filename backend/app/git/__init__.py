@@ -10,6 +10,7 @@ from ..settings_utils import save_settings
 import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 bp = Blueprint('git', __name__, url_prefix='/git')
 
@@ -109,6 +110,20 @@ def delete_branch(branch_name):
     else:
         logger.error(f"Failed to delete branch: {result}")
         return jsonify({'success': False, 'error': result}), 400
+    
+@bp.route('/branch/push', methods=['POST'])
+def push_branch():
+    data = request.json
+    logger.debug(f"Received request to push branch: {data}")
+    branch_name = data.get('branch')
+    if not branch_name:
+        return jsonify({"success": False, "error": "Branch name is required"}), 400
+    
+    success, result = branch_manager.push(branch_name)
+    if success:
+        return jsonify({"success": True, "data": result}), 200
+    else:
+        return jsonify({"success": False, "error": result["error"]}), 500
 
 @bp.route('/push', methods=['POST'])
 def push_files():

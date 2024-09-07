@@ -5,6 +5,7 @@ import {
   checkoutBranch,
   createBranch,
   deleteBranch,
+  pushBranchToRemote,
 } from "../../api/api";
 import {
   ExternalLink,
@@ -12,6 +13,7 @@ import {
   GitBranchPlus,
   ArrowRightCircle,
   Loader,
+  CloudUpload,
 } from "lucide-react";
 import Tooltip from "../ui/Tooltip";
 import Alert from "../ui/Alert";
@@ -58,33 +60,23 @@ const SettingsBranchModal = ({
     setLoadingAction("");
   };
 
-  const handleCheckout = async (branchName, isNewBranch = false) => {
+  const handleCheckout = async (branchName) => {
     setLoadingAction(`checkout-${branchName}`);
     try {
       const response = await checkoutBranch(branchName);
       if (response.success) {
-        // Refresh branches after successful checkout
         await fetchBranches();
-        // Notify parent component to update the status
-        onBranchChange(); // <-- Call the callback to update status in the parent component
-        if (!isNewBranch) {
-          Alert.success("Branch checked out successfully");
-        }
-        onClose(); // Close the modal
+        onBranchChange();
+        Alert.success("Branch checked out successfully");
+        onClose();
       } else {
-        Alert.error(response.error); // Use the Alert component for error
+        Alert.error(response.error);
       }
     } catch (error) {
-      if (
-        error.response &&
-        error.response.status === 400 &&
-        error.response.data.error
-      ) {
-        Alert.error(error.response.data.error); // Show alert with specific backend error message
+      if (error.response && error.response.status === 400 && error.response.data.error) {
+        Alert.error(error.response.data.error);
       } else {
-        Alert.error(
-          "An unexpected error occurred while checking out the branch."
-        );
+        Alert.error("An unexpected error occurred while checking out the branch.");
         console.error("Error checking out branch:", error);
       }
     } finally {
@@ -98,24 +90,19 @@ const SettingsBranchModal = ({
       try {
         const response = await createBranch(newBranchName, branchOffMode);
         if (response.success) {
-          // Checkout the new branch without showing the checkout alert
-          await handleCheckout(newBranchName, true);
-          Alert.success("Branch created and checked out successfully");
+          await fetchBranches();
+          onBranchChange();
+          Alert.success("Branch created successfully");
+          resetForm();
         } else {
-          Alert.error(response.error); // Handle known errors from the backend
+          Alert.error(response.error);
         }
       } catch (error) {
-        if (
-          error.response &&
-          error.response.status === 400 &&
-          error.response.data.error
-        ) {
-          Alert.error(error.response.data.error); // Specific error from the backend
+        if (error.response && error.response.status === 400 && error.response.data.error) {
+          Alert.error(error.response.data.error);
         } else {
-          console.error("Error branching off:", error); // Log unexpected errors
-          Alert.error(
-            "An unexpected error occurred while creating the branch. Please try again."
-          );
+          console.error("Error branching off:", error);
+          Alert.error("An unexpected error occurred while creating the branch. Please try again.");
         }
       } finally {
         setLoadingAction("");
@@ -155,16 +142,34 @@ const SettingsBranchModal = ({
     try {
       const response = await deleteBranch(branchToDelete);
       if (response.success) {
-        onBranchChange(); // <-- Call the callback to update status in the parent component
-        await fetchBranches(); // Refresh the list after deletion
+        onBranchChange();
+        await fetchBranches();
         Alert.success(`Branch '${branchToDelete}' deleted successfully`);
         setBranchToDelete(null);
       } else {
-        Alert.error(response.error); // Use the Alert component for error
+        Alert.error(response.error);
       }
     } catch (error) {
       Alert.error("An unexpected error occurred while deleting the branch.");
       console.error("Error deleting branch:", error);
+    } finally {
+      setLoadingAction("");
+    }
+  };
+
+  const handlePushToRemote = async (branchName) => {
+    setLoadingAction(`push-${branchName}`);
+    try {
+      const response = await pushBranchToRemote(branchName);
+      if (response.success) {
+        Alert.success(`Branch '${branchName}' pushed to remote successfully`);
+        await fetchBranches();
+      } else {
+        Alert.error(response.error);
+      }
+    } catch (error) {
+      Alert.error("An unexpected error occurred while pushing the branch to remote.");
+      console.error("Error pushing branch to remote:", error);
     } finally {
       setLoadingAction("");
     }
@@ -204,6 +209,13 @@ const SettingsBranchModal = ({
                   >
                     {branch.name || "Unknown Branch"}
                   </span>
+                  <span className="text-xs text-gray-400">
+                    {branch.isLocal && !branch.isRemote
+                      ? "(Local)"
+                      : !branch.isLocal && branch.isRemote
+                      ? "(Remote)"
+                      : "(Local & Remote)"}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   {branch.name !== currentBranch && (
@@ -234,22 +246,36 @@ const SettingsBranchModal = ({
                       )}
                     </button>
                   </Tooltip>
-                  {branch.name !== currentBranch &&
-                    branch.name.toLowerCase() !== "main" && (
-                      <Tooltip content="Delete">
-                        <button
-                          onClick={() => confirmDeleteBranch(branch.name)}
-                          className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 hover:scale-105 transition-all duration-200 shadow-sm"
-                          disabled={loadingAction === `delete-${branch.name}`}
-                        >
-                          {loadingAction === `delete-${branch.name}` ? (
-                            <Loader size={16} className="animate-spin" />
-                          ) : (
-                            <Trash2 size={16} />
-                          )}
-                        </button>
-                      </Tooltip>
-                    )}
+                  {branch.isLocal && !branch.isRemote && (
+                    <Tooltip content="Push to Remote">
+                      <button
+                        onClick={() => handlePushToRemote(branch.name)}
+                        className="p-1.5 bg-purple-500 text-white rounded-md hover:bg-purple-600 hover:scale-105 transition-all duration-200 shadow-sm"
+                        disabled={loadingAction === `push-${branch.name}`}
+                      >
+                        {loadingAction === `push-${branch.name}` ? (
+                          <Loader size={16} className="animate-spin" />
+                        ) : (
+                          <CloudUpload size={16} />
+                        )}
+                      </button>
+                    </Tooltip>
+                  )}
+                  {branch.isLocal && branch.name !== currentBranch && branch.name.toLowerCase() !== "main" && (
+                    <Tooltip content="Delete">
+                      <button
+                        onClick={() => confirmDeleteBranch(branch.name)}
+                        className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 hover:scale-105 transition-all duration-200 shadow-sm"
+                        disabled={loadingAction === `delete-${branch.name}`}
+                      >
+                        {loadingAction === `delete-${branch.name}` ? (
+                          <Loader size={16} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={16} />
+                        )}
+                      </button>
+                    </Tooltip>
+                  )}
                   <Tooltip content="View on GitHub">
                     <button
                       onClick={() => handleOpenInGitHub(branch.name)}
