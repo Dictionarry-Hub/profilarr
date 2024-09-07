@@ -5,6 +5,7 @@ from .branches.manager import Branch_Manager
 from .operations.manager import GitOperations
 from .repo.unlink import unlink_repository
 from .repo.clone import clone_repository
+from .auth.authenticate import check_dev_mode
 from ..settings_utils import save_settings
 import logging
 
@@ -249,3 +250,9 @@ def generate_commit_message(user_message, files):
 
     commit_message = f"{user_message}\n\nChanges:\n" + "\n".join(file_changes)
     return commit_message
+
+
+@bp.route('/dev', methods=['GET'])
+def dev_mode():
+    is_dev_mode = check_dev_mode()
+    return jsonify({'devMode': is_dev_mode}), 200

@@ -20,5 +20,7 @@ services:
             - backend_data:/app/data
         environment:
             - FLASK_ENV=development
+        env_file:
+            - .env
 volumes:
     backend_data:
