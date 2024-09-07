@@ -43,6 +43,7 @@ const SettingsPage = () => {
     const [showBranchModal, setShowBranchModal] = useState(false);
     const [loadingAction, setLoadingAction] = useState('');
     const [loadingStatus, setLoadingStatus] = useState(true);
+    const [loadingMessage, setLoadingMessage] = useState('');
     const [commitMessage, setCommitMessage] = useState('');
     const [showUnlinkModal, setShowUnlinkModal] = useState(false);
     const [selectedIncomingChanges, setSelectedIncomingChanges] = useState([]);
@@ -52,6 +53,7 @@ const SettingsPage = () => {
     const [currentChange, setCurrentChange] = useState(null);
     const [loadingDiff, setLoadingDiff] = useState(false);
     const [selectionType, setSelectionType] = useState(null);
+    const [funMessage, setFunMessage] = useState('');
     const [sortConfig, setSortConfig] = useState({
         key: 'type',
         direction: 'descending'
@@ -116,6 +118,8 @@ const SettingsPage = () => {
 
     const fetchGitStatus = async () => {
         setLoadingStatus(true);
+        setLoadingMessage(getRandomLoadingMessage());
+        setFunMessage(getRandomFunMessage());
         try {
             const result = await getGitStatus();
             console.log(
@@ -147,6 +151,22 @@ const SettingsPage = () => {
         } finally {
             setLoadingStatus(false);
         }
+    };
+
+    const getRandomFunMessage = () => {
+        const funMessages = [
+            'No changes detected. Your regex is so precise, it could find a needle in a haystack... made of needles. 🧵🔍',
+            'All quiet on the commit front. Your custom formats are so perfect, even perfectionists are jealous. 🏆',
+            "No updates needed. Your media automation is running so smoothly, it's making butter jealous. 🧈",
+            'Zero modifications. Your torrent setup is seeding so efficiently, farmers are asking for advice. 🌾',
+            "No edits required. Your regex fu is so strong, it's bench-pressing parentheses for fun. 💪()",
+            'Unchanged status. Your Plex library is so well-organized, librarians are taking notes. 📚🤓',
+            "No alterations found. Your file naming scheme is so consistent, it's bringing tears to OCD eyes. 😢👀",
+            "All systems nominal. Your download queue is so orderly, it's making Marie Kondo question her career. 🧹✨",
+            "No revisions necessary. Your automation scripts are so smart, they're solving captchas for fun. 🤖🧩",
+            'Steady as she goes. Your media collection is so complete, Netflix is asking you for recommendations. 🎬👑'
+        ];
+        return funMessages[Math.floor(Math.random() * funMessages.length)];
     };
 
     const renderChangeTable = (changes, title, icon, isIncoming) => (
@@ -606,7 +626,7 @@ const SettingsPage = () => {
                                     className='animate-spin text-gray-300'
                                 />
                                 <span className='ml-2 text-gray-300 text-sm'>
-                                    {getRandomLoadingMessage()}
+                                    {loadingMessage}
                                 </span>
                             </div>
                         ) : (
@@ -661,6 +681,7 @@ const SettingsPage = () => {
                                         hasIncomingChanges={
                                             status.incoming_changes.length > 0
                                         }
+                                        funMessage={funMessage}
                                     />
 
                                     {/* Buttons Below Commit Section */}
