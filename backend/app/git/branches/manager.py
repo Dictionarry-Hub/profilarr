@@ -5,6 +5,7 @@ from .create import create_branch
 from .checkout import checkout_branch
 from .delete import delete_branch
 from .get import get_branches, get_current_branch
+from .push import push_branch_to_remote
 
 class Branch_Manager:
     def __init__(self, repo_path):
@@ -24,3 +25,6 @@ class Branch_Manager:
 
     def get_current(self):
         return get_current_branch(self.repo_path)
+    
+    def push(self, branch_name):
+        return push_branch_to_remote(self.repo_path, branch_name)
