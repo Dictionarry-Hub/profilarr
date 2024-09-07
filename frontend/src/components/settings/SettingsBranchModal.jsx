@@ -346,7 +346,7 @@ const SettingsBranchModal = ({
                                                 </Tooltip>
                                             )}
                                         {(branch.isLocal ||
-                                            (branch.isRemote && isDevMode)) &&
+                                            (!branch.isRemote && isDevMode)) &&
                                             branch.name !== currentBranch &&
                                             branch.name.toLowerCase() !==
                                                 'stable' && (

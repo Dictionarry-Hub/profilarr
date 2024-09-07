@@ -34,16 +34,7 @@ def delete_branch(repo_path, branch_name):
         # Check if remote branch exists
         remote_branch = f"origin/{branch_name}"
         if remote_branch in repo.refs:
-            logger.debug(f"Attempting to delete remote branch: {branch_name}")
-            try:
-                repo.git.push('origin', '--delete', branch_name)
-                logger.debug(
-                    f"Successfully deleted remote branch: {branch_name}")
-            except GitCommandError as e:
-                logger.error(
-                    f"Failed to delete remote branch: {branch_name}. Error: {str(e)}"
-                )
-                return False, f"Failed to delete remote branch: {branch_name}. There might be permission issues."
+            pass
 
         return True, {
             "message": f"Deleted branch: {branch_name}",
