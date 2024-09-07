@@ -5,7 +5,6 @@ from .branches.manager import Branch_Manager
 from .operations.manager import GitOperations
 from .repo.unlink import unlink_repository
 from .repo.clone import clone_repository
-from .auth.authenticate import validate_git_token
 from ..settings_utils import save_settings
 import logging
 
@@ -18,6 +17,7 @@ REPO_PATH = '/app/data/db'
 branch_manager = Branch_Manager(REPO_PATH)
 git_operations = GitOperations(REPO_PATH)
 
+
 @bp.route('/clone', methods=['POST'])
 def handle_clone_repository():
     try:
@@ -25,25 +25,21 @@ def handle_clone_repository():
         logger.info(f"Received new settings: {new_settings}")
 
         # Validate required fields
-        required_fields = ['gitRepo', 'gitToken']
-        for field in required_fields:
-            if field not in new_settings:
-                logger.error(f"Missing required field: {field}")
-                return jsonify({"error": f"Missing required field: {field}"}), 400
-
-        # Validate Git token
-        if not validate_git_token(new_settings['gitRepo'], new_settings['gitToken']):
-            logger.warning("Invalid Git token provided")
-            return jsonify({"error": "Invalid Git token. Please check your credentials and try again."}), 401
+        if 'gitRepo' not in new_settings:
+            logger.error("Missing required field: gitRepo")
+            return jsonify({"error": "Missing required field: gitRepo"}), 400
 
         # Attempt to clone the repository
-        success, message = clone_repository(new_settings['gitRepo'], REPO_PATH, new_settings['gitToken'])
+        success, message = clone_repository(new_settings['gitRepo'], REPO_PATH)
 
         if success:
-            # Only save the settings if the clone was successful
-            save_settings(new_settings)
+            # Only save the repository URL if the clone was successful
+            save_settings({'gitRepo': new_settings['gitRepo']})
             logger.info("Settings updated and repository cloned successfully")
-            return jsonify({"message": "Repository cloned and settings updated successfully"}), 200
+            return jsonify({
+                "message":
+                "Repository cloned and settings updated successfully"
+            }), 200
         else:
             logger.error(f"Failed to clone repository: {message}")
             return jsonify({"error": message}), 400
@@ -64,11 +60,13 @@ def get_status():
         logger.error(f"Failed to retrieve git status: {message}")
         return jsonify({'success': False, 'error': message}), 400
 
+
 @bp.route('/branch', methods=['POST'])
 def create_branch():
     branch_name = request.json.get('name')
     base_branch = request.json.get('base', 'main')
-    logger.debug(f"Received request to create branch {branch_name} from {base_branch}")
+    logger.debug(
+        f"Received request to create branch {branch_name} from {base_branch}")
     success, result = branch_manager.create(branch_name, base_branch)
     if success:
         logger.debug(f"Successfully created branch: {branch_name}")
@@ -76,6 +74,7 @@ def create_branch():
     else:
         logger.error(f"Failed to create branch: {result}")
         return jsonify({'success': False, 'error': result}), 400
+
 
 @bp.route('/branches', methods=['GET'])
 def get_branches():
@@ -87,6 +86,7 @@ def get_branches():
     else:
         logger.error(f"Failed to retrieve branches: {result}")
         return jsonify({'success': False, 'error': result}), 400
+
 
 @bp.route('/checkout', methods=['POST'])
 def checkout_branch():
@@ -100,6 +100,7 @@ def checkout_branch():
         logger.error(f"Failed to checkout branch: {result}")
         return jsonify({'success': False, 'error': result}), 400
 
+
 @bp.route('/branch/<branch_name>', methods=['DELETE'])
 def delete_branch(branch_name):
     logger.debug(f"Received request to delete branch: {branch_name}")
@@ -110,25 +111,31 @@ def delete_branch(branch_name):
     else:
         logger.error(f"Failed to delete branch: {result}")
         return jsonify({'success': False, 'error': result}), 400
-    
+
+
 @bp.route('/branch/push', methods=['POST'])
 def push_branch():
     data = request.json
     logger.debug(f"Received request to push branch: {data}")
     branch_name = data.get('branch')
     if not branch_name:
-        return jsonify({"success": False, "error": "Branch name is required"}), 400
-    
+        return jsonify({
+            "success": False,
+            "error": "Branch name is required"
+        }), 400
+
     success, result = branch_manager.push(branch_name)
     if success:
         return jsonify({"success": True, "data": result}), 200
     else:
         return jsonify({"success": False, "error": result["error"]}), 500
 
+
 @bp.route('/push', methods=['POST'])
 def push_files():
     files = request.json.get('files', [])
-    user_commit_message = request.json.get('commit_message', "Commit and push staged files")
+    user_commit_message = request.json.get('commit_message',
+                                           "Commit and push staged files")
     logger.debug(f"Received request to push files: {files}")
     commit_message = generate_commit_message(user_commit_message, files)
     success, message = git_operations.push(files, commit_message)
@@ -139,17 +146,22 @@ def push_files():
         logger.error(f"Error pushing files: {message}")
         return jsonify({'success': False, 'error': message}), 400
 
+
 @bp.route('/revert', methods=['POST'])
 def revert_file():
     file_path = request.json.get('file_path')
     if not file_path:
-        return jsonify({'success': False, 'error': "File path is required."}), 400
+        return jsonify({
+            'success': False,
+            'error': "File path is required."
+        }), 400
     success, message = git_operations.revert(file_path)
     if success:
         return jsonify({'success': True, 'message': message}), 200
     else:
         logger.error(f"Error reverting file: {message}")
         return jsonify({'success': False, 'error': message}), 400
+
 
 @bp.route('/revert-all', methods=['POST'])
 def revert_all():
@@ -160,17 +172,22 @@ def revert_all():
         logger.error(f"Error reverting all changes: {message}")
         return jsonify({'success': False, 'error': message}), 400
 
+
 @bp.route('/file', methods=['DELETE'])
 def delete_file():
     file_path = request.json.get('file_path')
     if not file_path:
-        return jsonify({'success': False, 'error': "File path is required."}), 400
+        return jsonify({
+            'success': False,
+            'error': "File path is required."
+        }), 400
     success, message = git_operations.delete(file_path)
     if success:
         return jsonify({'success': True, 'message': message}), 200
     else:
         logger.error(f"Error deleting file: {message}")
         return jsonify({'success': False, 'error': message}), 400
+
 
 @bp.route('/pull', methods=['POST'])
 def pull_branch():
@@ -182,6 +199,7 @@ def pull_branch():
         logger.error(f"Error pulling branch: {message}")
         return jsonify({'success': False, 'error': message}), 400
 
+
 @bp.route('/diff', methods=['POST'])
 def diff_file():
     file_path = request.json.get('file_path')
@@ -190,8 +208,13 @@ def diff_file():
         logger.debug(f"Diff for file {file_path}: {diff}")
         return jsonify({'success': True, 'diff': diff if diff else ""}), 200
     except Exception as e:
-        logger.error(f"Error getting diff for file {file_path}: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': f"Error getting diff for file: {str(e)}"}), 400
+        logger.error(f"Error getting diff for file {file_path}: {str(e)}",
+                     exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f"Error getting diff for file: {str(e)}"
+        }), 400
+
 
 @bp.route('/stage', methods=['POST'])
 def handle_stage_files():
@@ -202,6 +225,7 @@ def handle_stage_files():
     else:
         return jsonify({'success': False, 'error': message}), 400
 
+
 @bp.route('/unlink', methods=['POST'])
 def unlink():
     data = request.get_json()
@@ -211,6 +235,7 @@ def unlink():
         return jsonify({'success': True, 'message': message}), 200
     else:
         return jsonify({'success': False, 'error': message}), 400
+
 
 def generate_commit_message(user_message, files):
     file_changes = []

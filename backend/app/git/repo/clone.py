@@ -10,24 +10,21 @@ from ..auth.authenticate import validate_git_token
 
 logger = logging.getLogger(__name__)
 
-def clone_repository(repo_url, repo_path, git_token):
-    try:
-        if not validate_git_token(repo_url, git_token):
-            logger.error("Invalid Git token provided")
-            return False, "Invalid Git token. Please check your credentials and try again."
 
+def clone_repository(repo_url, repo_path):
+    try:
         temp_dir = f"{repo_path}_temp"
         backup_dir = f"{repo_path}_backup"
-        
+
         logger.info(f"Cloning repository from {repo_url} to {temp_dir}")
-        auth_repo_url = repo_url.replace('https://', f'https://{git_token}:x-oauth-basic@')
-        
+
         try:
-            repo = git.Repo.clone_from(auth_repo_url, temp_dir)
+            repo = git.Repo.clone_from(repo_url, temp_dir)
             logger.info("Repository cloned successfully")
         except GitCommandError as e:
             if "remote: Repository not found" in str(e):
-                logger.info("Repository not found. Creating a new empty repository.")
+                logger.info(
+                    "Repository not found. Creating a new empty repository.")
                 repo = git.Repo.init(temp_dir)
                 repo.create_remote('origin', repo_url)
             else:
@@ -37,7 +34,8 @@ def clone_repository(repo_url, repo_path, git_token):
         try:
             repo.head.reference
         except ValueError:
-            logger.info("Repository is empty. Initializing with basic structure.")
+            logger.info(
+                "Repository is empty. Initializing with basic structure.")
             _initialize_empty_repo(repo)
 
         if os.path.exists(repo_path):
@@ -55,11 +53,16 @@ def clone_repository(repo_url, repo_path, git_token):
                 logger.info(f"Creating missing folder: {folder_name}")
                 os.makedirs(folder_path)
 
-            cloned_files = [f for f in os.listdir(folder_path) if f.endswith('.yml')]
+            cloned_files = [
+                f for f in os.listdir(folder_path) if f.endswith('.yml')
+            ]
             cloned_ids = set(int(f.split('.')[0]) for f in cloned_files)
 
             if os.path.exists(backup_folder_path):
-                local_files = [f for f in os.listdir(backup_folder_path) if f.endswith('.yml')]
+                local_files = [
+                    f for f in os.listdir(backup_folder_path)
+                    if f.endswith('.yml')
+                ]
                 for file_name in local_files:
                     old_file_path = os.path.join(backup_folder_path, file_name)
                     with open(old_file_path, 'r') as file:
@@ -90,15 +93,21 @@ def clone_repository(repo_url, repo_path, git_token):
             shutil.move(backup_dir, repo_path)
         return False, f"Unexpected error: {str(e)}"
 
+
 def _initialize_empty_repo(repo):
     # Create basic folder structure
-    os.makedirs(os.path.join(repo.working_tree_dir, 'regex_patterns'), exist_ok=True)
-    os.makedirs(os.path.join(repo.working_tree_dir, 'custom_formats'), exist_ok=True)
-    os.makedirs(os.path.join(repo.working_tree_dir, 'quality_profiles'), exist_ok=True)
+    os.makedirs(os.path.join(repo.working_tree_dir, 'regex_patterns'),
+                exist_ok=True)
+    os.makedirs(os.path.join(repo.working_tree_dir, 'custom_formats'),
+                exist_ok=True)
+    os.makedirs(os.path.join(repo.working_tree_dir, 'quality_profiles'),
+                exist_ok=True)
 
     # Create a README file
     with open(os.path.join(repo.working_tree_dir, 'README.md'), 'w') as f:
-        f.write("# Profilarr Repository\n\nThis repository contains regex patterns, custom formats and quality profiles.")
+        f.write(
+            "# Profilarr Repository\n\nThis repository contains regex patterns, custom formats and quality profiles."
+        )
 
     repo.git.add(A=True)
     repo.index.commit("Initial commit: Basic repository structure")
@@ -108,4 +117,6 @@ def _initialize_empty_repo(repo):
     origin.push('main')
     origin.push('main:main')
 
-    logger.info(f"Initialized empty repository with basic structure and pushed to main")
+    logger.info(
+        f"Initialized empty repository with basic structure and pushed to main"
+    )
