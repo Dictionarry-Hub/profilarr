@@ -1,23 +1,24 @@
 version: '3.8'
 services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - VITE_API_URL=http://192.168.1.111:5000  # Replace with your host machine's IP
-      - CHOKIDAR_USEPOLLING=true
+    frontend:
+        build: ./frontend
+        ports:
+            - '3000:3000'
+        volumes:
+            - ./frontend:/app
+            - /app/node_modules
+        environment:
+            - VITE_API_URL=http://192.168.1.111:5000 # Replace with your host machine's IP
+            - CHOKIDAR_USEPOLLING=true
 
-  backend:
-    build: ./backend
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./backend:/app
-      - backend_data:/app/data
-
+    backend:
+        build: ./backend
+        ports:
+            - '5000:5000'
+        volumes:
+            - ./backend:/app
+            - backend_data:/app/data
+        environment:
+            - FLASK_ENV=development
 volumes:
-  backend_data:
+    backend_data:

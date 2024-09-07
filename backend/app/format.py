@@ -16,6 +16,7 @@ os.makedirs(FORMAT_DIR, exist_ok=True)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @bp.route('', methods=['GET', 'POST'])
 def handle_formats():
     if request.method == 'POST':
@@ -25,6 +26,7 @@ def handle_formats():
     else:
         formats = load_all_formats()
         return jsonify(formats)
+
 
 @bp.route('/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_format(id):
@@ -46,13 +48,16 @@ def handle_format(id):
             return jsonify(result), 400
         return jsonify(result), 200
 
+
 def is_format_used_in_profile(format_id):
     profiles = load_all_profiles()
     for profile in profiles:
         for custom_format in profile.get('custom_formats', []):
-            if custom_format.get('id') == format_id and custom_format.get('score', 0) != 0:
+            if custom_format.get('id') == format_id and custom_format.get(
+                    'score', 0) != 0:
                 return True
     return False
+
 
 def save_format(data):
     logger.info("Received data for saving format: %s", data)
@@ -71,9 +76,11 @@ def save_format(data):
         existing_filename = os.path.join(FORMAT_DIR, f"{format_id}.yml")
         if os.path.exists(existing_filename):
             existing_data = load_format(format_id)
-            date_created = existing_data.get('date_created', get_current_timestamp())
+            date_created = existing_data.get('date_created',
+                                             get_current_timestamp())
         else:
-            raise FileNotFoundError(f"No existing file found for ID: {format_id}")
+            raise FileNotFoundError(
+                f"No existing file found for ID: {format_id}")
 
     date_modified = get_current_timestamp()
 
@@ -81,12 +88,11 @@ def save_format(data):
     conditions = []
     for condition in data.get('conditions', []):
         logger.info("Processing condition: %s", condition)
-        cond_dict = OrderedDict([
-            ('type', condition['type']),
-            ('name', sanitize_input(condition['name'])),
-            ('negate', condition.get('negate', False)),
-            ('required', condition.get('required', False))
-        ])
+        cond_dict = OrderedDict([('type', condition['type']),
+                                 ('name', sanitize_input(condition['name'])),
+                                 ('negate', condition.get('negate', False)),
+                                 ('required', condition.get('required',
+                                                            False))])
         if condition['type'] == 'regex':
             cond_dict['regex_id'] = condition['regex_id']
         elif condition['type'] == 'size':
@@ -100,24 +106,24 @@ def save_format(data):
     tags = [sanitize_input(tag) for tag in data.get('tags', [])]
 
     # Construct the ordered data
-    ordered_data = OrderedDict([
-        ('id', format_id),
-        ('name', name),
-        ('description', description),
-        ('date_created', str(date_created)),
-        ('date_modified', str(date_modified)),
-        ('conditions', conditions),
-        ('tags', tags)
-    ])
+    ordered_data = OrderedDict([('id', format_id), ('name', name),
+                                ('description', description),
+                                ('date_created', str(date_created)),
+                                ('date_modified', str(date_modified)),
+                                ('conditions', conditions), ('tags', tags)])
 
     # Generate the filename using only the ID
     filename = os.path.join(FORMAT_DIR, f"{format_id}.yml")
-    
+
     # Write to the file
     with open(filename, 'w') as file:
-        yaml.dump(ordered_data, file, default_flow_style=False, Dumper=yaml.SafeDumper)
-    
+        yaml.dump(ordered_data,
+                  file,
+                  default_flow_style=False,
+                  Dumper=yaml.SafeDumper)
+
     return ordered_data
+
 
 def load_format(id):
     filename = os.path.join(FORMAT_DIR, f"{id}.yml")
@@ -127,10 +133,14 @@ def load_format(id):
             return data
     return None
 
+
 def delete_format(id):
     if is_format_used_in_profile(id):
-        return {"error": "Format in use", "message": "This format is being used in one or more profiles."}
-    
+        return {
+            "error": "Format in use",
+            "message": "This format is being used in one or more profiles."
+        }
+
     filename = os.path.join(FORMAT_DIR, f"{id}.yml")
     if os.path.exists(filename):
         os.remove(filename)
