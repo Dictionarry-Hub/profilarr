@@ -593,7 +593,11 @@ const SettingsPage = () => {
         <div className='max-w-4xl mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-lg'>
             <h2 className='text-xl font-bold mb-4 text-gray-100'>
                 Git Repository Settings
+                <span className='ml-4 text-sm text-gray-300 mb-4'>
+                    {isDevMode ? 'Dev Mode: Enabled' : 'Dev Mode: Disabled'}
+                </span>
             </h2>
+
             {!settings && (
                 <button
                     onClick={() => setShowLinkModal(true)}
@@ -862,6 +866,7 @@ const SettingsPage = () => {
                     repoUrl={settings.gitRepo}
                     currentBranch={status.branch}
                     onBranchChange={fetchGitStatus}
+                    isDevMode={isDevMode}
                 />
             )}
             {showDiffModal && currentChange && (
