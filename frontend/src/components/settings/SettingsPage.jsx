@@ -36,18 +36,18 @@ import CommitSection from './CommitSection';
 import Tooltip from '../ui/Tooltip';
 import DiffModal from './DiffModal';
 import LinkRepoModal from './LinkRepoModal';
+import ArrContainer from './arrs/ArrContainer';
+import RepoContainer from './git/RepoContainer';
 
 const SettingsPage = () => {
     const [settings, setSettings] = useState(null);
     const [status, setStatus] = useState(null);
     const [isDevMode, setIsDevMode] = useState(false);
-    const [showModal, setShowModal] = useState(false);
     const [showBranchModal, setShowBranchModal] = useState(false);
     const [loadingAction, setLoadingAction] = useState('');
     const [loadingStatus, setLoadingStatus] = useState(true);
     const [loadingMessage, setLoadingMessage] = useState('');
     const [commitMessage, setCommitMessage] = useState('');
-    const [showUnlinkModal, setShowUnlinkModal] = useState(false);
     const [selectedIncomingChanges, setSelectedIncomingChanges] = useState([]);
     const [selectedOutgoingChanges, setSelectedOutgoingChanges] = useState([]);
     const [showDiffModal, setShowDiffModal] = useState(false);
@@ -57,6 +57,7 @@ const SettingsPage = () => {
     const [selectionType, setSelectionType] = useState(null);
     const [funMessage, setFunMessage] = useState('');
     const [showLinkModal, setShowLinkModal] = useState(false);
+    const [showUnlinkModal, setShowUnlinkModal] = useState(false);
     const [sortConfig, setSortConfig] = useState({
         key: 'type',
         direction: 'descending'
@@ -590,7 +591,7 @@ const SettingsPage = () => {
     };
 
     return (
-        <div className='max-w-4xl mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-lg'>
+        <div>
             <h2 className='text-xl font-bold mb-4 text-gray-100'>
                 Git Repository Settings
                 <span className='ml-4 text-sm text-gray-300 mb-4'>
@@ -598,53 +599,15 @@ const SettingsPage = () => {
                 </span>
             </h2>
 
-            {!settings && (
-                <button
-                    onClick={() => setShowLinkModal(true)}
-                    className='flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 ease-in-out text-xs'>
-                    Link Repository
-                </button>
-            )}
+            <RepoContainer
+                settings={settings}
+                loadingAction={loadingAction}
+                onLinkRepo={handleLinkRepo}
+                onUnlinkRepo={handleUnlinkRepo}
+            />
+
             {settings && (
                 <div className='space-y-4'>
-                    <div className='bg-gray-700 p-4 rounded-md'>
-                        <h3 className='text-sm font-semibold text-gray-100 mb-2'>
-                            Connected Repository
-                        </h3>
-                        <div className='flex items-center justify-between'>
-                            <a
-                                href={settings.gitRepo}
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                className='text-blue-400 hover:text-blue-300 transition-colors text-sm'>
-                                {settings.gitRepo}
-                            </a>
-                            <div className='flex space-x-2'>
-                                <Tooltip content='Unlink Repository'>
-                                    <button
-                                        onClick={() => setShowUnlinkModal(true)}
-                                        className='flex items-center px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 ease-in-out text-xs'
-                                        disabled={
-                                            loadingAction === 'unlink_repo'
-                                        }>
-                                        {loadingAction === 'unlink_repo' ? (
-                                            <Loader
-                                                size={14}
-                                                className='animate-spin'
-                                            />
-                                        ) : (
-                                            <Unlink
-                                                size={14}
-                                                className='mr-2'
-                                            />
-                                        )}
-                                        Unlink
-                                    </button>
-                                </Tooltip>
-                            </div>
-                        </div>
-                    </div>
-
                     <div className='bg-gray-700 p-4 rounded-md'>
                         <h3 className='text-sm font-semibold text-gray-100 mb-2'>
                             Git Status
@@ -859,6 +822,10 @@ const SettingsPage = () => {
                     </div>
                 </div>
             )}
+            <h2 className='text-xl font-bold mb-4 text-gray-100 mt-3'>
+                Arr Management
+            </h2>
+            <ArrContainer />
             {settings && status && (
                 <SettingsBranchModal
                     isOpen={showBranchModal}
