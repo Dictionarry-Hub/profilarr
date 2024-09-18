@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     getSettings,
     getGitStatus,
@@ -27,6 +27,8 @@ const SettingsPage = () => {
     const [statusLoading, setStatusLoading] = useState(true);
     const [statusLoadingMessage, setStatusLoadingMessage] = useState('');
     const [noChangesMessage, setNoChangesMessage] = useState('');
+    const [activeTab, setActiveTab] = useState('git');  // New state for tab navigation
+    const tabsRef = useRef({});  // Ref for tabs
 
     useEffect(() => {
         fetchSettings();
@@ -80,134 +82,88 @@ const SettingsPage = () => {
         }
     };
 
-    const handleStageSelectedChanges = async (selectedChanges) => {
-        setLoadingAction('stage_selected');
-        try {
-            const response = await addFiles(selectedChanges);
-            if (response.success) {
-                await fetchGitStatus();
-                Alert.success(response.message);
-            } else {
-                Alert.error(response.error);
-            }
-        } catch (error) {
-            Alert.error('An unexpected error occurred while staging changes.');
-            console.error('Error staging changes:', error);
-        } finally {
-            setLoadingAction('');
-        }
-    };
-
-    const handleCommitSelectedChanges = async (selectedChanges, commitMessage) => {
-        setLoadingAction('commit_selected');
-        try {
-            const response = await pushFiles(selectedChanges, commitMessage);
-            if (response.success) {
-                await fetchGitStatus();
-                Alert.success(response.message);
-            } else {
-                Alert.error(response.error);
-            }
-        } catch (error) {
-            Alert.error('An unexpected error occurred while committing changes.');
-            console.error('Error committing changes:', error);
-        } finally {
-            setLoadingAction('');
-        }
-    };
-
-    const handleRevertSelectedChanges = async (selectedChanges) => {
-        setLoadingAction('revert_selected');
-        try {
-            const response = await Promise.all(selectedChanges.map(filePath => revertFile(filePath)));
-            const allSuccessful = response.every(res => res.success);
-            if (allSuccessful) {
-                await fetchGitStatus();
-                Alert.success('Selected changes have been reverted successfully.');
-            } else {
-                Alert.error('Some changes could not be reverted. Please try again.');
-            }
-        } catch (error) {
-            Alert.error('An unexpected error occurred while reverting changes.');
-            console.error('Error reverting changes:', error);
-        } finally {
-            setLoadingAction('');
-        }
-    };
-
-    const handlePullSelectedChanges = async (selectedChanges) => {
-        setLoadingAction('pull_changes');
-        try {
-            const response = await pullBranch(changes.branch, selectedChanges);
-            if (response.success) {
-                await fetchGitStatus();
-                Alert.success(response.message);
-            } else {
-                Alert.error(response.error);
-            }
-        } catch (error) {
-            Alert.error('An unexpected error occurred while pulling changes.');
-            console.error('Error pulling changes:', error);
-        } finally {
-            setLoadingAction('');
-        }
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
     };
 
     return (
         <div>
-            <h2 className="text-xl font-bold mb-4 text-gray-100">
-                Git Settings
-                <span className="ml-4 text-sm text-gray-300 mb-4">
-                    {isDevMode ? 'Dev Mode: Enabled' : 'Dev Mode: Disabled'}
-                </span>
-            </h2>
+            <nav className="flex space-x-4">
+                <div
+                    onClick={() => handleTabChange('git')}
+                    ref={(el) => (tabsRef.current['git'] = el)}
+                    className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium mb-4 ${
+                        activeTab === 'git' ? 'text-white dark:bg-gray-600 border border-gray-200 dark:border-gray-600' : 'text-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                    }`}
+                >
+                    Git Settings
+                </div>
+                <div
+                    onClick={() => handleTabChange('app')}
+                    ref={(el) => (tabsRef.current['app'] = el)}
+                    className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium mb-4 ${
+                        activeTab === 'app' ? 'text-white dark:bg-gray-600 border border-gray-200 dark:border-gray-600' : 'text-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                    }`}
+                >
+                    App Settings
+                </div>
+            </nav>
 
-            <RepoContainer
-                settings={settings}
-                setSettings={setSettings}
-                fetchGitStatus={fetchGitStatus}
-            />
+            {activeTab === 'git' && (
+                <>
 
-            {settings && (
-                <div className="space-y-4">
-                    {statusLoading ? (
-                        <div className="flex items-left justify-left dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700 text-sm">
-                            <Loader className="animate-spin mr-2" size={16} />
-                            <span className="text-gray-300">{statusLoadingMessage}</span>
-                        </div>
-                    ) : changes && (changes.incoming_changes.length > 0 || changes.outgoing_changes.length > 0) ? (
-                        <StatusContainer
-                            status={changes}
-                            isDevMode={isDevMode}
-                            onViewBranches={() => setShowBranchModal(true)}
-                            onStageSelected={handleStageSelectedChanges}
-                            onCommitSelected={handleCommitSelectedChanges}
-                            onRevertSelected={handleRevertSelectedChanges}
-                            onPullSelected={handlePullSelectedChanges}
-                            loadingAction={loadingAction}
-                        />
-                    ) : (
-                        <div className="dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-md text-gray-300 text-left text-sm">
-                            {noChangesMessage}
+                    <RepoContainer
+                        settings={settings}
+                        setSettings={setSettings}
+                        fetchGitStatus={fetchGitStatus}
+                    />
+
+                    {settings && (
+                        <div className="space-y-4">
+                            {statusLoading ? (
+                                <div className="flex items-left justify-left dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700 text-sm">
+                                    <Loader className="animate-spin mr-2" size={16} />
+                                    <span className="text-gray-300">{statusLoadingMessage}</span>
+                                </div>
+                            ) : changes && (changes.incoming_changes.length > 0 || changes.outgoing_changes.length > 0) ? (
+                                <StatusContainer
+                                    status={changes}
+                                    isDevMode={isDevMode}
+                                    onViewBranches={() => setShowBranchModal(true)}
+                                    onStageSelected={handleStageSelectedChanges}
+                                    onCommitSelected={handleCommitSelectedChanges}
+                                    onRevertSelected={handleRevertSelectedChanges}
+                                    onPullSelected={handlePullSelectedChanges}
+                                    loadingAction={loadingAction}
+                                />
+                            ) : (
+                                <div className="dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-md text-gray-300 text-left text-sm">
+                                    {noChangesMessage}
+                                </div>
+                            )}
                         </div>
                     )}
-                </div>
+
+                    {settings && changes && (
+                        <ViewBranches
+                            isOpen={showBranchModal}
+                            onClose={() => setShowBranchModal(false)}
+                            repoUrl={settings.gitRepo}
+                            currentBranch={changes.branch}
+                            onBranchChange={fetchGitStatus}
+                            isDevMode={isDevMode}
+                        />
+                    )}
+                </>
             )}
 
-            <h2 className="text-xl font-bold mb-4 text-gray-100 mt-3">
-                Arr Management
-            </h2>
-            <ArrContainer />
-
-            {settings && changes && (
-                <ViewBranches
-                    isOpen={showBranchModal}
-                    onClose={() => setShowBranchModal(false)}
-                    repoUrl={settings.gitRepo}
-                    currentBranch={changes.branch}
-                    onBranchChange={fetchGitStatus}
-                    isDevMode={isDevMode}
-                />
+            {activeTab === 'app' && (
+                <>
+                    <h2 className="text-xl font-bold mb-4 text-gray-100 mt-3">
+                        App Settings
+                    </h2>
+                    <ArrContainer />
+                </>
             )}
         </div>
     );
