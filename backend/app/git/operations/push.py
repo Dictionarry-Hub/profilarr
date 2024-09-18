@@ -29,15 +29,22 @@ def push_changes(repo_path, files, message):
         if not commit_success:
             return False, commit_message
 
-        # Authenticate and push changes
-        with repo.git.custom_environment(GIT_ASKPASS='echo',
-                                         GIT_USERNAME=github_token):
-            origin = repo.remote(name='origin')
-            push_info = origin.push()
+        # Modify the remote URL to include the token
+        origin = repo.remote(name='origin')
+        auth_repo_url = origin.url.replace('https://',
+                                           f'https://{github_token}@')
+        origin.set_url(auth_repo_url)
 
-            # Check if the push was successful
-            if push_info[0].flags & push_info[0].ERROR:
-                raise git.GitCommandError("git push", push_info[0].summary)
+        # Push changes
+        push_info = origin.push()
+
+        # Restore the original remote URL (without the token)
+        origin.set_url(
+            origin.url.replace(f'https://{github_token}@', 'https://'))
+
+        # Check if the push was successful
+        if push_info and push_info[0].flags & push_info[0].ERROR:
+            raise git.GitCommandError("git push", push_info[0].summary)
 
         return True, "Successfully pushed changes."
 
