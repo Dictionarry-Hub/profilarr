@@ -198,7 +198,7 @@ const SettingsPage = () => {
                                     <Loader className="animate-spin mr-2" size={16} />
                                     <span className="text-gray-300">{statusLoadingMessage}</span>
                                 </div>
-                            ) : changes && (changes.incoming_changes.length > 0 || changes.outgoing_changes.length > 0) ? (
+                            ) :  (
                                 <StatusContainer
                                     status={changes}
                                     isDevMode={isDevMode}
@@ -209,10 +209,6 @@ const SettingsPage = () => {
                                     onPullSelected={handlePullSelectedChanges}
                                     loadingAction={loadingAction}
                                 />
-                            ) : (
-                                <div className="dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-md text-gray-300 text-left text-sm">
-                                    {noChangesMessage}
-                                </div>
                             )}
                         </div>
                     )}

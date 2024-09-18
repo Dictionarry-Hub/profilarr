@@ -31,23 +31,19 @@ const LinkRepo = ({isOpen, onClose, onSubmit}) => {
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title='Link Git Repository'>
+        <Modal isOpen={isOpen} onClose={onClose} title='Link Git Repository' width='2xl' >
             <div className='space-y-4'>
-                <div>
-                    <label className='block text-sm font-medium text-gray-300 mb-2'>
-                        Git Repository URL:
-                    </label>
+                <div className='flex items-center'>
+
                     <input
                         type='text'
                         value={gitRepo}
                         onChange={e => setGitRepo(e.target.value)}
-                        className='w-full p-2 border rounded bg-gray-900 text-gray-100 border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        className='flex-1 p-2 border rounded bg-gray-900 text-gray-100 border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm'
                         placeholder='https://github.com/your-repo.git'
                     />
-                </div>
-                <div className='mt-6 flex justify-end'>
                     <button
-                        className='bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center'
+                        className='ml-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center text-sm'
                         disabled={loading}
                         onClick={handleSubmit}>
                         {loading ? (
