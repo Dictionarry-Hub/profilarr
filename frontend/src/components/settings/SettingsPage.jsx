@@ -11,7 +11,7 @@ import {
 import {
     Loader,
 } from 'lucide-react';
-import SettingsBranchModal from './SettingsBranchModal';
+import ViewBranches from './git/modal/ViewBranches';
 import Alert from '../ui/Alert';
 import ArrContainer from './arrs/ArrContainer';
 import RepoContainer from './git/RepoContainer';
@@ -200,7 +200,7 @@ const SettingsPage = () => {
             <ArrContainer />
 
             {settings && changes && (
-                <SettingsBranchModal
+                <ViewBranches
                     isOpen={showBranchModal}
                     onClose={() => setShowBranchModal(false)}
                     repoUrl={settings.gitRepo}

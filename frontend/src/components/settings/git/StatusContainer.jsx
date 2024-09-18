@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import ChangeTable from './ChangeTable';
 import Tooltip from '../../ui/Tooltip';
-import CommitSection from '../CommitSection';
+import CommitSection from './CommitMessage';
 
 const StatusContainer = ({
     status,

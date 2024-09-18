@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import Modal from '../ui/Modal';
+import Modal from '../../../ui/Modal';
 import {
     getBranches,
     checkoutBranch,
     createBranch,
     deleteBranch,
     pushBranchToRemote
-} from '../../api/api';
+} from '../../../../api/api';
 import {
     ExternalLink,
     Trash2,
@@ -16,8 +16,8 @@ import {
     CloudUpload,
     Search
 } from 'lucide-react';
-import Tooltip from '../ui/Tooltip';
-import Alert from '../ui/Alert';
+import Tooltip from '../../../ui/Tooltip';
+import Alert from '../../../ui/Alert';
 
 const SettingsBranchModal = ({
     isOpen,
@@ -259,9 +259,9 @@ const SettingsBranchModal = ({
                                             {branch.isLocal && !branch.isRemote
                                                 ? '(Local)'
                                                 : !branch.isLocal &&
-                                                    branch.isRemote
-                                                  ? '(Remote)'
-                                                  : '(Local & Remote)'}
+                                                  branch.isRemote
+                                                ? '(Remote)'
+                                                : '(Local & Remote)'}
                                         </span>
                                     </div>
                                     <div className='flex items-center space-x-2'>

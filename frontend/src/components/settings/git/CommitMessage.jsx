@@ -1,5 +1,5 @@
 import React from 'react';
-import Textarea from '../ui/TextArea';
+import Textarea from '../../ui/TextArea';
 
 const CommitSection = ({
     status,
