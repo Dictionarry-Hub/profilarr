@@ -222,6 +222,13 @@ const SettingsBranchModal = ({
         }
     };
 
+    const buttonStyle = `
+    p-2 relative transition-transform duration-200 ease-in-out
+    hover:scale-110
+  `;
+
+    const iconStyle = ``;
+
     return (
         <Modal
             isOpen={isOpen}
@@ -245,7 +252,7 @@ const SettingsBranchModal = ({
                         {filteredBranches.map((branch, index) => (
                             <li
                                 key={index}
-                                className={`flex items-center justify-between px-4 rounded-lg transition-colors ${
+                                className={`flex items-center justify-between px-4 py-2 rounded-lg transition-colors ${
                                     branch.name === currentBranch
                                         ? 'bg-blue-100 dark:bg-blue-900/50'
                                         : 'hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -287,7 +294,7 @@ const SettingsBranchModal = ({
                                                 onClick={() =>
                                                     handleCheckout(branch.name)
                                                 }
-                                                className='p-3 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full transition-colors'
+                                                className={`${buttonStyle} text-blue-600 dark:text-blue-400`}
                                                 disabled={
                                                     loadingAction ===
                                                     `checkout-${branch.name}`
@@ -295,15 +302,19 @@ const SettingsBranchModal = ({
                                                 {loadingAction ===
                                                 `checkout-${branch.name}` ? (
                                                     <Loader
-                                                        size={20}
+                                                        size={18}
                                                         className='animate-spin'
                                                     />
                                                 ) : confirmAction ===
                                                   `checkout-${branch.name}` ? (
-                                                    <Check size={20} />
+                                                    <Check
+                                                        size={18}
+                                                        className={iconStyle}
+                                                    />
                                                 ) : (
                                                     <ArrowRightCircle
-                                                        size={20}
+                                                        size={18}
+                                                        className={iconStyle}
                                                     />
                                                 )}
                                             </button>
@@ -316,17 +327,20 @@ const SettingsBranchModal = ({
                                                     branch.name
                                                 )
                                             }
-                                            className='p-3 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800 rounded-full transition-colors'
+                                            className={`${buttonStyle} text-green-600 dark:text-green-400`}
                                             disabled={
                                                 loadingAction === 'branchOff'
                                             }>
                                             {loadingAction === 'branchOff' ? (
                                                 <Loader
-                                                    size={20}
+                                                    size={18}
                                                     className='animate-spin'
                                                 />
                                             ) : (
-                                                <GitBranchPlus size={20} />
+                                                <GitBranchPlus
+                                                    size={18}
+                                                    className={iconStyle}
+                                                />
                                             )}
                                         </button>
                                     </Tooltip>
@@ -346,7 +360,7 @@ const SettingsBranchModal = ({
                                                             branch.name
                                                         )
                                                     }
-                                                    className='p-3 text-purple-600 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-800 rounded-full transition-colors'
+                                                    className={`${buttonStyle} text-purple-600 dark:text-purple-400`}
                                                     disabled={
                                                         loadingAction ===
                                                         `push-${branch.name}`
@@ -354,15 +368,23 @@ const SettingsBranchModal = ({
                                                     {loadingAction ===
                                                     `push-${branch.name}` ? (
                                                         <Loader
-                                                            size={20}
+                                                            size={18}
                                                             className='animate-spin'
                                                         />
                                                     ) : confirmAction ===
                                                       `push-${branch.name}` ? (
-                                                        <Check size={20} />
+                                                        <Check
+                                                            size={18}
+                                                            className={
+                                                                iconStyle
+                                                            }
+                                                        />
                                                     ) : (
                                                         <CloudUpload
-                                                            size={20}
+                                                            size={18}
+                                                            className={
+                                                                iconStyle
+                                                            }
                                                         />
                                                     )}
                                                 </button>
@@ -386,7 +408,7 @@ const SettingsBranchModal = ({
                                                             branch.name
                                                         )
                                                     }
-                                                    className='p-3 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800 rounded-full transition-colors'
+                                                    className={`${buttonStyle} text-red-600 dark:text-red-400`}
                                                     disabled={
                                                         loadingAction ===
                                                         `delete-${branch.name}`
@@ -394,14 +416,24 @@ const SettingsBranchModal = ({
                                                     {loadingAction ===
                                                     `delete-${branch.name}` ? (
                                                         <Loader
-                                                            size={20}
+                                                            size={18}
                                                             className='animate-spin'
                                                         />
                                                     ) : confirmAction ===
                                                       `delete-${branch.name}` ? (
-                                                        <Check size={20} />
+                                                        <Check
+                                                            size={18}
+                                                            className={
+                                                                iconStyle
+                                                            }
+                                                        />
                                                     ) : (
-                                                        <Trash2 size={20} />
+                                                        <Trash2
+                                                            size={18}
+                                                            className={
+                                                                iconStyle
+                                                            }
+                                                        />
                                                     )}
                                                 </button>
                                             </Tooltip>
@@ -414,8 +446,11 @@ const SettingsBranchModal = ({
                                                         branch.name
                                                     )
                                                 }
-                                                className='p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors'>
-                                                <ExternalLink size={20} />
+                                                className={`${buttonStyle} text-gray-600 dark:text-gray-400`}>
+                                                <ExternalLink
+                                                    size={18}
+                                                    className={iconStyle}
+                                                />
                                             </button>
                                         </Tooltip>
                                     )}
@@ -426,10 +461,7 @@ const SettingsBranchModal = ({
                 </div>
 
                 {branchOffMode && (
-                    <div className='bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-md'>
-                        <h4 className='text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200'>
-                            Create New Branch
-                        </h4>
+                    <div className='bg-gray-100 dark:bg-gray-800 p-4 rounded-lg !mt-1'>
                         <div className='flex items-center space-x-2'>
                             <input
                                 type='text'
@@ -438,7 +470,7 @@ const SettingsBranchModal = ({
                                     validateBranchName(e.target.value)
                                 }
                                 placeholder={`New branch from ${branchOffMode}`}
-                                className={`flex-grow p-2 rounded-lg border ${
+                                className={`flex-grow p-2 h-9 rounded-lg border text-sm ${
                                     !validBranchName
                                         ? 'border-red-500 dark:border-red-400'
                                         : 'border-gray-300 dark:border-gray-600'
@@ -451,7 +483,7 @@ const SettingsBranchModal = ({
                                     !validBranchName ||
                                     loadingAction === 'branchOff'
                                 }
-                                className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium shadow-sm disabled:opacity-50'>
+                                className='px-4 h-9 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium shadow-sm disabled:opacity-50'>
                                 {loadingAction === 'branchOff'
                                     ? 'Creating...'
                                     : 'Create'}
