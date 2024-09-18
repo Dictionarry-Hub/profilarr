@@ -86,6 +86,79 @@ const SettingsPage = () => {
         setActiveTab(tab);
     };
 
+    const handleStageSelectedChanges = async (selectedChanges) => {
+        setLoadingAction('stage_selected');
+        try {
+            const response = await addFiles(selectedChanges);
+            if (response.success) {
+                await fetchGitStatus();
+                Alert.success(response.message);
+            } else {
+                Alert.error(response.error);
+            }
+        } catch (error) {
+            Alert.error('An unexpected error occurred while staging changes.');
+            console.error('Error staging changes:', error);
+        } finally {
+            setLoadingAction('');
+        }
+    };
+
+    const handleCommitSelectedChanges = async (selectedChanges, commitMessage) => {
+        setLoadingAction('commit_selected');
+        try {
+            const response = await pushFiles(selectedChanges, commitMessage);
+            if (response.success) {
+                await fetchGitStatus();
+                Alert.success(response.message);
+            } else {
+                Alert.error(response.error);
+            }
+        } catch (error) {
+            Alert.error('An unexpected error occurred while committing changes.');
+            console.error('Error committing changes:', error);
+        } finally {
+            setLoadingAction('');
+        }
+    };
+
+    const handleRevertSelectedChanges = async (selectedChanges) => {
+        setLoadingAction('revert_selected');
+        try {
+            const response = await Promise.all(selectedChanges.map(filePath => revertFile(filePath)));
+            const allSuccessful = response.every(res => res.success);
+            if (allSuccessful) {
+                await fetchGitStatus();
+                Alert.success('Selected changes have been reverted successfully.');
+            } else {
+                Alert.error('Some changes could not be reverted. Please try again.');
+            }
+        } catch (error) {
+            Alert.error('An unexpected error occurred while reverting changes.');
+            console.error('Error reverting changes:', error);
+        } finally {
+            setLoadingAction('');
+        }
+    };
+
+    const handlePullSelectedChanges = async (selectedChanges) => {
+        setLoadingAction('pull_changes');
+        try {
+            const response = await pullBranch(changes.branch, selectedChanges);
+            if (response.success) {
+                await fetchGitStatus();
+                Alert.success(response.message);
+            } else {
+                Alert.error(response.error);
+            }
+        } catch (error) {
+            Alert.error('An unexpected error occurred while pulling changes.');
+            console.error('Error pulling changes:', error);
+        } finally {
+            setLoadingAction('');
+        }
+    };
+
     return (
         <div>
             <nav className="flex space-x-4">
