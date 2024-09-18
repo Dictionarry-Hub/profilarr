@@ -14,7 +14,8 @@ import {
     ArrowRightCircle,
     Loader,
     CloudUpload,
-    Search
+    Search,
+    Check
 } from 'lucide-react';
 import Tooltip from '../../../ui/Tooltip';
 import Alert from '../../../ui/Alert';
@@ -33,8 +34,8 @@ const SettingsBranchModal = ({
     const [branchOffMode, setBranchOffMode] = useState(null);
     const [newBranchName, setNewBranchName] = useState('');
     const [validBranchName, setValidBranchName] = useState(true);
-    const [branchToDelete, setBranchToDelete] = useState(null);
     const [loadingAction, setLoadingAction] = useState('');
+    const [confirmAction, setConfirmAction] = useState(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -68,39 +69,9 @@ const SettingsBranchModal = ({
         setBranchOffMode(null);
         setNewBranchName('');
         setValidBranchName(true);
-        setBranchToDelete(null);
         setLoadingAction('');
         setSearchTerm('');
-    };
-
-    const handleCheckout = async branchName => {
-        setLoadingAction(`checkout-${branchName}`);
-        try {
-            const response = await checkoutBranch(branchName);
-            if (response.success) {
-                await fetchBranches();
-                onBranchChange();
-                Alert.success('Branch checked out successfully');
-                onClose();
-            } else {
-                Alert.error(response.error);
-            }
-        } catch (error) {
-            if (
-                error.response &&
-                error.response.status === 400 &&
-                error.response.data.error
-            ) {
-                Alert.error(error.response.data.error);
-            } else {
-                Alert.error(
-                    'An unexpected error occurred while checking out the branch.'
-                );
-                console.error('Error checking out branch:', error);
-            }
-        } finally {
-            setLoadingAction('');
-        }
+        setConfirmAction(null);
     };
 
     const handleBranchOff = async () => {
@@ -157,57 +128,97 @@ const SettingsBranchModal = ({
         window.open(branchUrl, '_blank');
     };
 
-    const confirmDeleteBranch = branchName => {
-        setBranchToDelete(branchName);
+    const handleCheckout = async branchName => {
+        if (confirmAction === `checkout-${branchName}`) {
+            setLoadingAction(`checkout-${branchName}`);
+            try {
+                const response = await checkoutBranch(branchName);
+                if (response.success) {
+                    await fetchBranches();
+                    onBranchChange();
+                    Alert.success('Branch checked out successfully');
+                    onClose();
+                } else {
+                    Alert.error(response.error);
+                }
+            } catch (error) {
+                if (
+                    error.response &&
+                    error.response.status === 400 &&
+                    error.response.data.error
+                ) {
+                    Alert.error(error.response.data.error);
+                } else {
+                    Alert.error(
+                        'An unexpected error occurred while checking out the branch.'
+                    );
+                    console.error('Error checking out branch:', error);
+                }
+            } finally {
+                setLoadingAction('');
+                setConfirmAction(null);
+            }
+        } else {
+            setConfirmAction(`checkout-${branchName}`);
+        }
     };
 
-    const handleDeleteBranch = async () => {
-        if (branchToDelete && branchToDelete.toLowerCase() === 'main') {
+    const handleDeleteBranch = async branchName => {
+        if (branchName.toLowerCase() === 'main') {
             Alert.warning("The 'main' branch cannot be deleted.");
             return;
         }
-        setLoadingAction(`delete-${branchToDelete}`);
-        try {
-            const response = await deleteBranch(branchToDelete);
-            if (response.success) {
-                onBranchChange();
-                await fetchBranches();
-                Alert.success(
-                    `Branch '${branchToDelete}' deleted successfully`
+        if (confirmAction === `delete-${branchName}`) {
+            setLoadingAction(`delete-${branchName}`);
+            try {
+                const response = await deleteBranch(branchName);
+                if (response.success) {
+                    onBranchChange();
+                    await fetchBranches();
+                    Alert.success(
+                        `Branch '${branchName}' deleted successfully`
+                    );
+                } else {
+                    Alert.error(response.error);
+                }
+            } catch (error) {
+                Alert.error(
+                    'An unexpected error occurred while deleting the branch.'
                 );
-                setBranchToDelete(null);
-            } else {
-                Alert.error(response.error);
+                console.error('Error deleting branch:', error);
+            } finally {
+                setLoadingAction('');
+                setConfirmAction(null);
             }
-        } catch (error) {
-            Alert.error(
-                'An unexpected error occurred while deleting the branch.'
-            );
-            console.error('Error deleting branch:', error);
-        } finally {
-            setLoadingAction('');
+        } else {
+            setConfirmAction(`delete-${branchName}`);
         }
     };
 
     const handlePushToRemote = async branchName => {
-        setLoadingAction(`push-${branchName}`);
-        try {
-            const response = await pushBranchToRemote(branchName);
-            if (response.success) {
-                Alert.success(
-                    `Branch '${branchName}' pushed to remote successfully`
+        if (confirmAction === `push-${branchName}`) {
+            setLoadingAction(`push-${branchName}`);
+            try {
+                const response = await pushBranchToRemote(branchName);
+                if (response.success) {
+                    Alert.success(
+                        `Branch '${branchName}' pushed to remote successfully`
+                    );
+                    await fetchBranches();
+                } else {
+                    Alert.error(response.error);
+                }
+            } catch (error) {
+                Alert.error(
+                    'An unexpected error occurred while pushing the branch to remote.'
                 );
-                await fetchBranches();
-            } else {
-                Alert.error(response.error);
+                console.error('Error pushing branch to remote:', error);
+            } finally {
+                setLoadingAction('');
+                setConfirmAction(null);
             }
-        } catch (error) {
-            Alert.error(
-                'An unexpected error occurred while pushing the branch to remote.'
-            );
-            console.error('Error pushing branch to remote:', error);
-        } finally {
-            setLoadingAction('');
+        } else {
+            setConfirmAction(`push-${branchName}`);
         }
     };
 
@@ -265,7 +276,13 @@ const SettingsBranchModal = ({
                                 <div className='flex items-center space-x-2'>
                                     {/* Keep existing buttons with updated styles */}
                                     {branch.name !== currentBranch && (
-                                        <Tooltip content='Checkout'>
+                                        <Tooltip
+                                            content={
+                                                confirmAction ===
+                                                `checkout-${branch.name}`
+                                                    ? 'Confirm Checkout'
+                                                    : 'Checkout'
+                                            }>
                                             <button
                                                 onClick={() =>
                                                     handleCheckout(branch.name)
@@ -281,6 +298,9 @@ const SettingsBranchModal = ({
                                                         size={20}
                                                         className='animate-spin'
                                                     />
+                                                ) : confirmAction ===
+                                                  `checkout-${branch.name}` ? (
+                                                    <Check size={20} />
                                                 ) : (
                                                     <ArrowRightCircle
                                                         size={20}
@@ -313,7 +333,13 @@ const SettingsBranchModal = ({
                                     {branch.isLocal &&
                                         !branch.isRemote &&
                                         isDevMode && (
-                                            <Tooltip content='Push to Remote'>
+                                            <Tooltip
+                                                content={
+                                                    confirmAction ===
+                                                    `push-${branch.name}`
+                                                        ? 'Confirm Push'
+                                                        : 'Push to Remote'
+                                                }>
                                                 <button
                                                     onClick={() =>
                                                         handlePushToRemote(
@@ -331,6 +357,9 @@ const SettingsBranchModal = ({
                                                             size={20}
                                                             className='animate-spin'
                                                         />
+                                                    ) : confirmAction ===
+                                                      `push-${branch.name}` ? (
+                                                        <Check size={20} />
                                                     ) : (
                                                         <CloudUpload
                                                             size={20}
@@ -344,10 +373,16 @@ const SettingsBranchModal = ({
                                         branch.name !== currentBranch &&
                                         branch.name.toLowerCase() !==
                                             'stable' && (
-                                            <Tooltip content='Delete'>
+                                            <Tooltip
+                                                content={
+                                                    confirmAction ===
+                                                    `delete-${branch.name}`
+                                                        ? 'Confirm Delete'
+                                                        : 'Delete'
+                                                }>
                                                 <button
                                                     onClick={() =>
-                                                        confirmDeleteBranch(
+                                                        handleDeleteBranch(
                                                             branch.name
                                                         )
                                                     }
@@ -362,6 +397,9 @@ const SettingsBranchModal = ({
                                                             size={20}
                                                             className='animate-spin'
                                                         />
+                                                    ) : confirmAction ===
+                                                      `delete-${branch.name}` ? (
+                                                        <Check size={20} />
                                                     ) : (
                                                         <Trash2 size={20} />
                                                     )}
@@ -417,33 +455,6 @@ const SettingsBranchModal = ({
                                 {loadingAction === 'branchOff'
                                     ? 'Creating...'
                                     : 'Create'}
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {branchToDelete && (
-                    <div className='bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg p-4 text-sm text-red-800 dark:text-red-200'>
-                        <p className='mb-3'>
-                            Are you sure you want to delete the branch{' '}
-                            <strong>{branchToDelete}</strong>? This action
-                            cannot be undone.
-                        </p>
-                        <div className='flex space-x-4'>
-                            <button
-                                onClick={handleDeleteBranch}
-                                disabled={
-                                    loadingAction === `delete-${branchToDelete}`
-                                }
-                                className='px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium shadow-sm disabled:opacity-50'>
-                                {loadingAction === `delete-${branchToDelete}`
-                                    ? 'Deleting...'
-                                    : 'Confirm Delete'}
-                            </button>
-                            <button
-                                onClick={() => setBranchToDelete(null)}
-                                className='px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors text-sm font-medium shadow-sm'>
-                                Cancel
                             </button>
                         </div>
                     </div>
