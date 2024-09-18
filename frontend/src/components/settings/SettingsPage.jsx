@@ -189,7 +189,7 @@ const SettingsPage = () => {
                             ? 'text-white dark:bg-gray-600 border border-gray-200 dark:border-gray-600'
                             : 'text-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                     }`}>
-                    Git Settings
+                    Sync Settings
                 </div>
                 <div
                     onClick={() => handleTabChange('app')}

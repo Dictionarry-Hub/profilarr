@@ -3,9 +3,9 @@ import {
     Loader,
     Unlink,
     Link,
-    GitBranch,
+    Github,
     Eye,
-    GitFork,
+    GitBranch,
     GitCommit
 } from 'lucide-react';
 import Tooltip from '../../ui/Tooltip';
@@ -81,7 +81,7 @@ const RepoContainer = ({
                 <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0'>
                     <div className='flex flex-col sm:flex-row sm:items-center'>
                         <div className='flex items-center'>
-                            <GitFork className='mr-2 text-blue-400' size={14} />
+                            <Github className='mr-2 text-blue-400' size={14} />
                             <h3 className='text-m font-semibold text-gray-100 mr-2 mb-1 sm:mb-0'>
                                 {settings
                                     ? 'Connected Repository:'
@@ -130,8 +130,8 @@ const RepoContainer = ({
                 {settings && (
                     <div className='flex items-center justify-between mt-4'>
                         <div className='flex items-center'>
-                            <GitCommit
-                                className='mr-2 text-green-400'
+                            <GitBranch
+                                className='mr-2 text-blue-400'
                                 size={14}
                             />
                             <h3 className='text-m font-semibold text-gray-100 mr-2'>

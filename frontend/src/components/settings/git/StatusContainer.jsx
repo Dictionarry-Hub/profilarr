@@ -1,6 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     GitBranch,
+    GitMerge,
     Loader,
     RotateCcw,
     Download,
@@ -10,6 +11,7 @@ import {
 import ChangeTable from './ChangeTable';
 import Tooltip from '../../ui/Tooltip';
 import CommitSection from './CommitMessage';
+import {getRandomMessage, noChangesMessages} from '../../../utils/messages';
 
 const StatusContainer = ({
     status,
@@ -28,6 +30,7 @@ const StatusContainer = ({
     const [selectedOutgoingChanges, setSelectedOutgoingChanges] = useState([]);
     const [commitMessage, setCommitMessage] = useState('');
     const [selectionType, setSelectionType] = useState(null);
+    const [noChangesMessage, setNoChangesMessage] = useState('');
 
     const requestSort = key => {
         let direction = 'ascending';
@@ -105,11 +108,33 @@ const StatusContainer = ({
         return 'Revert selected files';
     };
 
+    useEffect(() => {
+        if (
+            status.incoming_changes.length === 0 &&
+            status.outgoing_changes.length === 0
+        ) {
+            setNoChangesMessage(getRandomMessage(noChangesMessages));
+        }
+    }, [status]);
+
     return (
         <div className='dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-md'>
-            <h3 className='text-sm font-semibold text-gray-100 mb-2'>
-                Git Status
-            </h3>
+            <div className='flex items-center'>
+                <GitMerge className='mr-2 text-green-400' size={14} />
+                <h3 className='text-m font-semibold text-gray-100 mr-2'>
+                    Sync Status:
+                </h3>
+                {status.incoming_changes.length === 0 &&
+                status.outgoing_changes.length === 0 ? (
+                    <span className='text-m font-medium'>
+                        {noChangesMessage}
+                    </span>
+                ) : (
+                    <span className='text-gray-400 text-m flex items-center'>
+                        Out of Date!
+                    </span>
+                )}
+            </div>
 
             {status.incoming_changes.length > 0 && (
                 <ChangeTable
