@@ -10,7 +10,6 @@ import {
     unlinkRepo,
     checkDevMode
 } from '../../api/api';
-import UnlinkModal from './UnlinkModal';
 import SettingsBranchModal from './SettingsBranchModal';
 import {
     FileText,
@@ -35,7 +34,6 @@ import Alert from '../ui/Alert';
 import CommitSection from './CommitSection';
 import Tooltip from '../ui/Tooltip';
 import DiffModal from './DiffModal';
-import LinkRepoModal from './LinkRepoModal';
 import ArrContainer from './arrs/ArrContainer';
 import RepoContainer from './git/RepoContainer';
 
@@ -56,8 +54,6 @@ const SettingsPage = () => {
     const [loadingDiff, setLoadingDiff] = useState(false);
     const [selectionType, setSelectionType] = useState(null);
     const [funMessage, setFunMessage] = useState('');
-    const [showLinkModal, setShowLinkModal] = useState(false);
-    const [showUnlinkModal, setShowUnlinkModal] = useState(false);
     const [sortConfig, setSortConfig] = useState({
         key: 'type',
         direction: 'descending'
@@ -562,34 +558,6 @@ const SettingsPage = () => {
         }
     };
 
-    const handleLinkRepo = async () => {
-        setLoadingAction('');
-        setShowLinkModal(false);
-        await fetchSettings();
-    };
-
-    const handleUnlinkRepo = async removeFiles => {
-        setLoadingAction('unlink_repo');
-        try {
-            const response = await unlinkRepo(removeFiles);
-            if (response.success) {
-                setSettings(null);
-                setStatus(null);
-                Alert.success('Repository unlinked successfully');
-                setShowUnlinkModal(false); // Close the modal after unlinking
-            } else {
-                Alert.error(response.error || 'Failed to unlink repository');
-            }
-        } catch (error) {
-            Alert.error(
-                'An unexpected error occurred while unlinking the repository'
-            );
-            console.error('Error unlinking repository:', error);
-        } finally {
-            setLoadingAction('');
-        }
-    };
-
     return (
         <div>
             <h2 className='text-xl font-bold mb-4 text-gray-100'>
@@ -601,9 +569,8 @@ const SettingsPage = () => {
 
             <RepoContainer
                 settings={settings}
-                loadingAction={loadingAction}
-                onLinkRepo={handleLinkRepo}
-                onUnlinkRepo={handleUnlinkRepo}
+                setSettings={setSettings}
+                fetchGitStatus={fetchGitStatus}
             />
 
             {settings && (
@@ -847,16 +814,6 @@ const SettingsPage = () => {
                     isDevMode={isDevMode}
                 />
             )}
-            <LinkRepoModal
-                isOpen={showLinkModal}
-                onClose={() => setShowLinkModal(false)}
-                onSubmit={handleLinkRepo}
-            />
-            <UnlinkModal
-                isOpen={showUnlinkModal}
-                onClose={() => setShowUnlinkModal(false)}
-                onSubmit={handleUnlinkRepo}
-            />
         </div>
     );
 };
