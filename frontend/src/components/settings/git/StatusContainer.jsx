@@ -5,8 +5,7 @@ import {
     RotateCcw,
     Download,
     CheckCircle,
-    Plus,
-    Eye
+    Plus
 } from 'lucide-react';
 import ChangeTable from './ChangeTable';
 import Tooltip from '../../ui/Tooltip';
@@ -15,7 +14,6 @@ import CommitSection from './CommitMessage';
 const StatusContainer = ({
     status,
     isDevMode,
-    onViewBranches,
     onStageSelected,
     onCommitSelected,
     onRevertSelected,
@@ -112,20 +110,6 @@ const StatusContainer = ({
             <h3 className='text-sm font-semibold text-gray-100 mb-2'>
                 Git Status
             </h3>
-            <div className='flex items-center justify-between mb-4'>
-                <div className='flex items-center'>
-                    <GitBranch className='mr-2 text-green-400' size={14} />
-                    <span className='text-gray-200 text-sm'>
-                        Current Branch: {status.branch}
-                    </span>
-                </div>
-                <button
-                    onClick={onViewBranches}
-                    className='flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 ease-in-out text-xs'>
-                    <Eye size={14} className='mr-2' />
-                    View Branches
-                </button>
-            </div>
 
             {status.incoming_changes.length > 0 && (
                 <ChangeTable
