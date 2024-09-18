@@ -45,7 +45,8 @@ def push_branch_to_remote(repo_path, branch_name):
         # Get the remote URL and inject the GitHub token
         origin = repo.remote(name='origin')
         url = list(urlparse(next(origin.urls)))
-        url[1] = f"{github_token}@{url[1]}"  # Inject GitHub token into the URL
+        if '@' not in url[1]:  # Only add the token if it's not already there
+            url[1] = f"{github_token}@{url[1]}"  # Inject GitHub token into the URL
         auth_url = urlunparse(url)
 
         # Set the new URL with the GitHub token
