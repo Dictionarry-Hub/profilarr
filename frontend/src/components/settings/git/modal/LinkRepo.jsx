@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
-import Modal from '../../ui/Modal';
+import Modal from '../../../ui/Modal';
 import {Loader} from 'lucide-react';
-import {cloneRepo} from '../../../api/api';
-import Alert from '../../ui/Alert';
+import {cloneRepo} from '../../../../api/api';
+import Alert from '../../../ui/Alert';
 
 const LinkRepo = ({isOpen, onClose, onSubmit}) => {
     const [gitRepo, setGitRepo] = useState('');

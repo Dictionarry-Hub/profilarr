@@ -38,12 +38,6 @@ const CommitSection = ({
                                     />
                                 </>
                             )}
-                            {hasUnstagedChanges && !hasStagedChanges && (
-                                <p className='text-yellow-400 text-sm mb-2'>
-                                    You have unstaged changes. Stage your
-                                    changes before committing.
-                                </p>
-                            )}
                         </>
                     ) : (
                         <div className='text-gray-300 text-sm italic'>
