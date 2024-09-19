@@ -117,6 +117,7 @@ const ChangeRow = ({
                 name={change.name}
                 commitMessage={change.commit_message}
                 isDevMode={isDevMode}
+                isIncoming={isIncoming}
             />
         </>
     );

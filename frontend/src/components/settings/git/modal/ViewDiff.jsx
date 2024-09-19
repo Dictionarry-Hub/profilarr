@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Modal from '../../../ui/Modal';
+import {Code, FileText, Settings, File} from 'lucide-react';
+import DiffCommit from './DiffCommit';
 
 const ViewDiff = ({
     isOpen,
@@ -9,11 +11,14 @@ const ViewDiff = ({
     type,
     name,
     commitMessage,
-    title = 'View Diff'
+    isIncoming
 }) => {
     const formatDiffContent = content => {
         if (!content) return [];
-        return content.split('\n').map((line, index) => {
+        const lines = content.split('\n');
+        // Remove the first 5 lines (git diff header)
+        const contentWithoutHeader = lines.slice(5);
+        return contentWithoutHeader.map((line, index) => {
             let lineClass = 'py-1 pl-4 border-l-2 ';
             if (line.startsWith('+')) {
                 lineClass += 'bg-green-900/30 text-green-400 border-green-500';
@@ -35,29 +40,44 @@ const ViewDiff = ({
         });
     };
 
+    const getTypeIcon = () => {
+        switch (type) {
+            case 'Regex Pattern':
+                return <Code className='text-blue-400' size={20} />;
+            case 'Custom Format':
+                return <FileText className='text-green-400' size={20} />;
+            case 'Quality Profile':
+                return <Settings className='text-purple-400' size={20} />;
+            default:
+                return <File className='text-gray-400' size={20} />;
+        }
+    };
+
     const formattedContent = formatDiffContent(diffContent);
 
+    const titleContent = (
+        <div className='flex items-center space-x-2'>
+            {getTypeIcon()}
+            <span>{`${type}: ${name}`}</span>
+            <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                    isIncoming
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                        : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                }`}>
+                {isIncoming ? 'Incoming' : 'Outgoing'}
+            </span>
+        </div>
+    );
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={title} size='4xl'>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={titleContent}
+            size='4xl'>
             <div className='space-y-4'>
-                <div className='bg-gray-100 dark:bg-gray-700 p-4 rounded-lg space-y-2 text-sm'>
-                    <div className='flex justify-between items-center'>
-                        <span className='font-medium text-gray-600 dark:text-gray-300'>
-                            Type:
-                        </span>
-                        <span className='bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded'>
-                            {type}
-                        </span>
-                    </div>
-                    <div className='flex justify-between items-center'>
-                        <span className='font-medium text-gray-600 dark:text-gray-300'>
-                            Name:
-                        </span>
-                        <span className='bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-2 py-1 rounded'>
-                            {name === 'Deleted File' ? 'Deleted File' : name}
-                        </span>
-                    </div>
-                </div>
+                <DiffCommit commitMessage={commitMessage} />
                 <div className='border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden'>
                     <div className='bg-gray-50 dark:bg-gray-800 p-2 text-sm font-medium text-gray-600 dark:text-gray-300 border-b border-gray-300 dark:border-gray-600'>
                         Diff Content
@@ -84,7 +104,7 @@ ViewDiff.propTypes = {
     type: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     commitMessage: PropTypes.string,
-    title: PropTypes.string
+    isIncoming: PropTypes.bool.isRequired
 };
 
 export default ViewDiff;
