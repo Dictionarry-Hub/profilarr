@@ -15,7 +15,6 @@ const ChangeTable = ({
 }) => {
     const sortedChanges = changesArray => {
         if (!sortConfig.key) return changesArray;
-
         return [...changesArray].sort((a, b) => {
             if (a[sortConfig.key] < b[sortConfig.key]) {
                 return sortConfig.direction === 'ascending' ? -1 : 1;
@@ -27,11 +26,11 @@ const ChangeTable = ({
         });
     };
 
-    const SortableHeader = ({children, sortKey}) => {
+    const SortableHeader = ({children, sortKey, className}) => {
         const isSorted = sortConfig.key === sortKey;
         return (
             <th
-                className='px-4 py-2 text-left text-gray-300 cursor-pointer hover:bg-gray-500'
+                className={`px-4 py-2 text-left text-gray-300 cursor-pointer hover:bg-gray-500 ${className}`}
                 onClick={() => onRequestSort(sortKey)}>
                 <div className='flex items-center'>
                     {children}
@@ -48,7 +47,7 @@ const ChangeTable = ({
 
     return (
         <div className='mb-4'>
-            <h4 className='text-sm font-medium text-gray-200 mb-4 flex items-center mt-3 '>
+            <h4 className='text-sm font-medium text-gray-200 mb-4 flex items-center mt-3'>
                 {icon}
                 <span>
                     {isIncoming
@@ -63,15 +62,19 @@ const ChangeTable = ({
                 <table className='w-full text-sm'>
                     <thead className='bg-gray-600'>
                         <tr>
-                            <SortableHeader sortKey='status'>
+                            <SortableHeader sortKey='status' className='w-1/6'>
                                 Status
                             </SortableHeader>
-                            <SortableHeader sortKey='type'>Type</SortableHeader>
-                            <SortableHeader sortKey='name'>Name</SortableHeader>
-                            <th className='px-4 py-2 text-left text-gray-300 w-1/5'>
+                            <SortableHeader sortKey='type' className='w-1/6'>
+                                Type
+                            </SortableHeader>
+                            <SortableHeader sortKey='name' className='w-2/6'>
+                                Name
+                            </SortableHeader>
+                            <th className='px-4 py-2 text-left text-gray-300 w-1/6'>
                                 Actions
                             </th>
-                            <th className='px-4 py-2 text-right text-gray-300 w-1/10'>
+                            <th className='px-4 py-2 text-right text-gray-300 w-1/12'>
                                 Select
                             </th>
                         </tr>
