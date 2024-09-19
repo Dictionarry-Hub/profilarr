@@ -27,10 +27,11 @@ const SettingsPage = () => {
     const [showBranchModal, setShowBranchModal] = useState(false);
     const [loadingAction, setLoadingAction] = useState('');
     const [statusLoading, setStatusLoading] = useState(true);
+    const [devModeLoading, setDevModeLoading] = useState(true);
     const [statusLoadingMessage, setStatusLoadingMessage] = useState('');
     const [noChangesMessage, setNoChangesMessage] = useState('');
-    const [activeTab, setActiveTab] = useState('git'); // New state for tab navigation
-    const tabsRef = useRef({}); // Ref for tabs
+    const [activeTab, setActiveTab] = useState('git');
+    const tabsRef = useRef({});
 
     useEffect(() => {
         fetchSettings();
@@ -38,12 +39,15 @@ const SettingsPage = () => {
     }, []);
 
     const checkDevModeStatus = async () => {
+        setDevModeLoading(true);
         try {
             const response = await checkDevMode();
             setIsDevMode(response.devMode);
         } catch (error) {
             console.error('Error checking dev mode:', error);
             setIsDevMode(false);
+        } finally {
+            setDevModeLoading(false);
         }
     };
 
@@ -215,14 +219,16 @@ const SettingsPage = () => {
 
                     {settings && (
                         <div className='space-y-4'>
-                            {statusLoading ? (
+                            {statusLoading || devModeLoading ? (
                                 <div className='flex items-left justify-left dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700 text-sm'>
                                     <Loader
                                         className='animate-spin mr-2'
                                         size={16}
                                     />
                                     <span className='text-gray-300'>
-                                        {statusLoadingMessage}
+                                        {statusLoading
+                                            ? statusLoadingMessage
+                                            : 'Checking development mode...'}
                                     </span>
                                 </div>
                             ) : (
