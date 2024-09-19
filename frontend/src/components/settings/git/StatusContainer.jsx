@@ -34,6 +34,9 @@ const StatusContainer = ({
 
     const handleSelectChange = (filePath, isIncoming) => {
         if (isIncoming) {
+            if (selectedOutgoingChanges.length > 0) {
+                setSelectedOutgoingChanges([]);
+            }
             setSelectedIncomingChanges(prevSelected => {
                 if (prevSelected.includes(filePath)) {
                     return prevSelected.filter(path => path !== filePath);
@@ -42,6 +45,9 @@ const StatusContainer = ({
                 }
             });
         } else {
+            if (selectedIncomingChanges.length > 0) {
+                setSelectedIncomingChanges([]);
+            }
             const change = status.outgoing_changes.find(
                 c => c.file_path === filePath
             );

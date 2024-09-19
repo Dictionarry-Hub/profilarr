@@ -71,7 +71,7 @@ const ChangeTable = ({
                             <SortableHeader sortKey='name' className='w-2/6'>
                                 Name
                             </SortableHeader>
-                            <th className='px-4 py-2 text-left text-gray-300 w-1/6'>
+                            <th className='px-4 py-2 text-left text-gray-300 w-1/12'>
                                 Actions
                             </th>
                             <th className='px-4 py-2 text-right text-gray-300 w-1/12'>
