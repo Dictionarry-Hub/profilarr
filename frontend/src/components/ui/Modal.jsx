@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import PropTypes from 'prop-types';
 
 function Modal({
@@ -13,25 +13,6 @@ function Modal({
     height = 'auto'
 }) {
     const modalRef = useRef();
-    const [isAnimating, setIsAnimating] = useState(false);
-    const [shouldRender, setShouldRender] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
-
-    useEffect(() => {
-        if (isOpen) {
-            setIsClosing(false);
-            setShouldRender(true);
-            setTimeout(() => setIsAnimating(true), 10);
-        } else {
-            setIsClosing(true);
-            setIsAnimating(false);
-            const timer = setTimeout(() => {
-                setShouldRender(false);
-                setIsClosing(false);
-            }, 300);
-            return () => clearTimeout(timer);
-        }
-    }, [isOpen]);
 
     useEffect(() => {
         if (isOpen && !disableCloseOnEscape) {
@@ -46,8 +27,6 @@ function Modal({
             };
         }
     }, [isOpen, onClose, disableCloseOnEscape]);
-
-    if (!shouldRender && !isClosing) return null;
 
     const handleClickOutside = e => {
         if (
@@ -95,13 +74,15 @@ function Modal({
 
     return (
         <div
-            className={`fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center transition-opacity duration-300 ease-in-out ${
-                isAnimating ? 'opacity-100' : 'opacity-0'
+            className={`fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center transition-opacity duration-300 ease-out ${
+                isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
             style={{zIndex: 1000 + level * 10}}
-            onClickCapture={handleClickOutside}>
+            onClick={handleClickOutside}>
             <div
-                className='fixed inset-0 bg-black bg-opacity-50'
+                className={`fixed inset-0 bg-black transition-opacity duration-300 ease-out ${
+                    isOpen ? 'bg-opacity-50' : 'bg-opacity-0'
+                }`}
                 style={{zIndex: 1000 + level * 10}}></div>
             <div
                 ref={modalRef}
@@ -109,10 +90,8 @@ function Modal({
                     widthClasses[width]
                 } ${
                     heightClasses[height]
-                } transform transition-all duration-300 ease-in-out ${
-                    isAnimating
-                        ? 'translate-y-0 opacity-100'
-                        : 'translate-y-10 opacity-0'
+                } transition-all duration-300 ease-out transform ${
+                    isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
                 }`}
                 style={{
                     zIndex: 1001 + level * 10,
