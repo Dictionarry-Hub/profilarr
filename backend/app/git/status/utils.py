@@ -67,7 +67,7 @@ def parse_commit_message(commit_message):
         'scope': 'Unknown Scope',
         'subject': 'No subject provided',
         'body': 'No body provided',
-        'footer': 'No footer provided'
+        'footer': ''
     }
 
     # Mapping of commit types and scopes to canonical forms
