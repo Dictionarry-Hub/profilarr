@@ -4,6 +4,7 @@ import ChangeTable from './ChangeTable';
 import CommitSection from './CommitMessage';
 import {getRandomMessage, noChangesMessages} from '../../../utils/messages';
 import ActionButtons from './ActionButtons';
+import {getDiff} from '../../../api/api';
 
 const StatusContainer = ({
     status,
@@ -23,6 +24,7 @@ const StatusContainer = ({
     const [commitMessage, setCommitMessage] = useState('');
     const [selectionType, setSelectionType] = useState(null);
     const [noChangesMessage, setNoChangesMessage] = useState('');
+    const [diffContents, setDiffContents] = useState({});
 
     const requestSort = key => {
         let direction = 'ascending';
@@ -107,6 +109,28 @@ const StatusContainer = ({
     };
 
     useEffect(() => {
+        const fetchDiffs = async () => {
+            const allChanges = [
+                ...status.incoming_changes,
+                ...status.outgoing_changes
+            ];
+            const diffPromises = allChanges.map(change =>
+                getDiff(change.file_path)
+            );
+            const diffs = await Promise.all(diffPromises);
+
+            const newDiffContents = {};
+            allChanges.forEach((change, index) => {
+                if (diffs[index].success) {
+                    newDiffContents[change.file_path] = diffs[index].diff;
+                }
+            });
+
+            setDiffContents(newDiffContents);
+        };
+
+        fetchDiffs();
+
         if (
             status.incoming_changes.length === 0 &&
             status.outgoing_changes.length === 0
@@ -174,6 +198,7 @@ const StatusContainer = ({
                     sortConfig={sortConfig}
                     onRequestSort={requestSort}
                     isDevMode={isDevMode}
+                    diffContents={diffContents}
                 />
             )}
 
@@ -193,6 +218,7 @@ const StatusContainer = ({
                     sortConfig={sortConfig}
                     onRequestSort={requestSort}
                     isDevMode={isDevMode}
+                    diffContents={diffContents}
                 />
             )}
 

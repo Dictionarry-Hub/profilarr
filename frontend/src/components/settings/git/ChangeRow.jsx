@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
     Eye,
-    Loader,
     Plus,
     MinusCircle,
     Edit,
@@ -13,14 +12,17 @@ import {
     File
 } from 'lucide-react';
 import Tooltip from '../../ui/Tooltip';
-import {getDiff} from '../../../api/api';
-import Alert from '../../ui/Alert';
-import Diff from './modal/ViewDiff';
+import ViewDiff from './modal/ViewDiff';
 
-const ChangeRow = ({change, isSelected, onSelect, isIncoming, isDevMode}) => {
-    const [loadingDiff, setLoadingDiff] = useState(false);
+const ChangeRow = ({
+    change,
+    isSelected,
+    onSelect,
+    isIncoming,
+    isDevMode,
+    diffContent
+}) => {
     const [showDiff, setShowDiff] = useState(false);
-    const [diffContent, setDiffContent] = useState('');
 
     const getStatusIcon = status => {
         switch (status) {
@@ -55,24 +57,9 @@ const ChangeRow = ({change, isSelected, onSelect, isIncoming, isDevMode}) => {
         }
     };
 
-    const handleViewDiff = async () => {
-        setLoadingDiff(true);
-        try {
-            const response = await getDiff(change.file_path);
-            if (response.success) {
-                setDiffContent(response.diff);
-                setShowDiff(true);
-            } else {
-                Alert.error(response.error);
-            }
-        } catch (error) {
-            Alert.error(
-                'An unexpected error occurred while fetching the diff.'
-            );
-            console.error('Error fetching diff:', error);
-        } finally {
-            setLoadingDiff(false);
-        }
+    const handleViewDiff = e => {
+        e.stopPropagation();
+        setShowDiff(true);
     };
 
     return (
@@ -104,20 +91,11 @@ const ChangeRow = ({change, isSelected, onSelect, isIncoming, isDevMode}) => {
                 <td className='px-4 py-2 text-left align-middle'>
                     <Tooltip content='View differences'>
                         <button
-                            onClick={e => {
-                                e.stopPropagation();
-                                handleViewDiff();
-                            }}
+                            onClick={handleViewDiff}
                             className='flex items-center justify-center px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-xs'
                             style={{width: '100%'}}>
-                            {loadingDiff ? (
-                                <Loader size={12} className='animate-spin' />
-                            ) : (
-                                <>
-                                    <Eye size={12} className='mr-1' />
-                                    View Diff
-                                </>
-                            )}
+                            <Eye size={12} className='mr-1' />
+                            View Diff
                         </button>
                     </Tooltip>
                 </td>
@@ -130,17 +108,16 @@ const ChangeRow = ({change, isSelected, onSelect, isIncoming, isDevMode}) => {
                     />
                 </td>
             </tr>
-            {showDiff && (
-                <Diff
-                    isOpen={showDiff}
-                    onClose={() => setShowDiff(false)}
-                    diffContent={diffContent}
-                    type={change.type}
-                    name={change.name}
-                    commitMessage={change.commit_message}
-                    isDevMode={isDevMode}
-                />
-            )}
+            <ViewDiff
+                key={`${change.file_path}-diff`}
+                isOpen={showDiff}
+                onClose={() => setShowDiff(false)}
+                diffContent={diffContent}
+                type={change.type}
+                name={change.name}
+                commitMessage={change.commit_message}
+                isDevMode={isDevMode}
+            />
         </>
     );
 };

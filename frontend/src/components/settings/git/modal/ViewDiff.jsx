@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Modal from '../../../ui/Modal';
 
-const Diff = ({
+const ViewDiff = ({
     isOpen,
     onClose,
     diffContent,
@@ -57,16 +57,6 @@ const Diff = ({
                             {name === 'Deleted File' ? 'Deleted File' : name}
                         </span>
                     </div>
-                    {commitMessage && (
-                        <div className='flex flex-col'>
-                            <span className='font-medium text-gray-600 dark:text-gray-300 mb-1'>
-                                Commit Message:
-                            </span>
-                            <p className='bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 p-2 rounded'>
-                                {commitMessage}
-                            </p>
-                        </div>
-                    )}
                 </div>
                 <div className='border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden'>
                     <div className='bg-gray-50 dark:bg-gray-800 p-2 text-sm font-medium text-gray-600 dark:text-gray-300 border-b border-gray-300 dark:border-gray-600'>
@@ -87,7 +77,7 @@ const Diff = ({
     );
 };
 
-Diff.propTypes = {
+ViewDiff.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     diffContent: PropTypes.string,
@@ -97,4 +87,4 @@ Diff.propTypes = {
     title: PropTypes.string
 };
 
-export default Diff;
+export default ViewDiff;

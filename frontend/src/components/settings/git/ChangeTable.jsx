@@ -11,7 +11,8 @@ const ChangeTable = ({
     onSelectChange,
     sortConfig,
     onRequestSort,
-    isDevMode
+    isDevMode,
+    diffContents
 }) => {
     const sortedChanges = changesArray => {
         if (!sortConfig.key) return changesArray;
@@ -94,6 +95,7 @@ const ChangeTable = ({
                                 }
                                 isIncoming={isIncoming}
                                 isDevMode={isDevMode}
+                                diffContent={diffContents[change.file_path]}
                             />
                         ))}
                     </tbody>
