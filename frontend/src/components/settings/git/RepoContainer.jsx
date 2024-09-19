@@ -138,7 +138,7 @@ const RepoContainer = ({
                                 Current Branch:
                             </h3>
                             {status ? (
-                                <span className='text-blue-400 hover:text-blue-300 transition-colors text-m font-medium'>
+                                <span className='text-m font-medium'>
                                     {status.branch}
                                 </span>
                             ) : (
