@@ -109,22 +109,46 @@ const StatusContainer = ({
         }
     }, [status]);
 
+    const hasChanges =
+        status.incoming_changes.length > 0 ||
+        status.outgoing_changes.length > 0;
+
     return (
         <div className='dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-md'>
-            <div className='flex items-center'>
-                <GitMerge className='mr-2 text-green-400' size={14} />
-                <h3 className='text-m font-semibold text-gray-100 mr-2'>
-                    Sync Status:
-                </h3>
-                {status.incoming_changes.length === 0 &&
-                status.outgoing_changes.length === 0 ? (
-                    <span className='text-m font-medium'>
-                        {noChangesMessage}
-                    </span>
-                ) : (
-                    <span className='text-gray-400 text-m flex items-center'>
-                        Out of Date!
-                    </span>
+            <div className='flex items-center justify-between'>
+                <div className='flex items-center'>
+                    <GitMerge className='mr-2 text-green-400' size={14} />
+                    <h3 className='text-m font-semibold text-gray-100 mr-2'>
+                        Sync Status:
+                    </h3>
+                    {!hasChanges ? (
+                        <span className='text-m font-medium'>
+                            {noChangesMessage}
+                        </span>
+                    ) : (
+                        <span className='text-gray-400 text-m flex items-center'>
+                            Out of Date!
+                        </span>
+                    )}
+                </div>
+                {!hasChanges && (
+                    <div className='flex-shrink-0'>
+                        <ActionButtons
+                            isDevMode={isDevMode}
+                            selectedOutgoingChanges={selectedOutgoingChanges}
+                            selectedIncomingChanges={selectedIncomingChanges}
+                            selectionType={selectionType}
+                            commitMessage={commitMessage}
+                            loadingAction={loadingAction}
+                            onStageSelected={onStageSelected}
+                            onCommitSelected={onCommitSelected}
+                            onRevertSelected={onRevertSelected}
+                            onPullSelected={onPullSelected}
+                            getStageButtonTooltip={getStageButtonTooltip}
+                            getCommitButtonTooltip={getCommitButtonTooltip}
+                            getRevertButtonTooltip={getRevertButtonTooltip}
+                        />
+                    </div>
                 )}
             </div>
 
@@ -160,30 +184,36 @@ const StatusContainer = ({
                 />
             )}
 
-            <CommitSection
-                status={status}
-                commitMessage={commitMessage}
-                setCommitMessage={setCommitMessage}
-                loadingAction={loadingAction}
-                hasIncomingChanges={status.incoming_changes.length > 0}
-                isDevMode={isDevMode}
-            />
+            {hasChanges && (
+                <>
+                    <CommitSection
+                        status={status}
+                        commitMessage={commitMessage}
+                        setCommitMessage={setCommitMessage}
+                        loadingAction={loadingAction}
+                        hasIncomingChanges={status.incoming_changes.length > 0}
+                        isDevMode={isDevMode}
+                    />
 
-            <ActionButtons
-                isDevMode={isDevMode}
-                selectedOutgoingChanges={selectedOutgoingChanges}
-                selectedIncomingChanges={selectedIncomingChanges}
-                selectionType={selectionType}
-                commitMessage={commitMessage}
-                loadingAction={loadingAction}
-                onStageSelected={onStageSelected}
-                onCommitSelected={onCommitSelected}
-                onRevertSelected={onRevertSelected}
-                onPullSelected={onPullSelected}
-                getStageButtonTooltip={getStageButtonTooltip}
-                getCommitButtonTooltip={getCommitButtonTooltip}
-                getRevertButtonTooltip={getRevertButtonTooltip}
-            />
+                    <div className='mt-4 flex justify-end'>
+                        <ActionButtons
+                            isDevMode={isDevMode}
+                            selectedOutgoingChanges={selectedOutgoingChanges}
+                            selectedIncomingChanges={selectedIncomingChanges}
+                            selectionType={selectionType}
+                            commitMessage={commitMessage}
+                            loadingAction={loadingAction}
+                            onStageSelected={onStageSelected}
+                            onCommitSelected={onCommitSelected}
+                            onRevertSelected={onRevertSelected}
+                            onPullSelected={onPullSelected}
+                            getStageButtonTooltip={getStageButtonTooltip}
+                            getCommitButtonTooltip={getCommitButtonTooltip}
+                            getRevertButtonTooltip={getRevertButtonTooltip}
+                        />
+                    </div>
+                </>
+            )}
         </div>
     );
 };

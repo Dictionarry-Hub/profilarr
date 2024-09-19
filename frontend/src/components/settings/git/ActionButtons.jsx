@@ -2,6 +2,37 @@ import React from 'react';
 import {Loader, RotateCcw, Download, CheckCircle, Plus} from 'lucide-react';
 import Tooltip from '../../ui/Tooltip';
 
+const ActionButton = ({
+    onClick,
+    disabled,
+    loading,
+    icon,
+    text,
+    className,
+    disabledTooltip
+}) => {
+    const baseClassName =
+        'flex items-center px-4 py-2 text-white rounded-md transition-all duration-200 ease-in-out text-xs';
+    const enabledClassName = `${baseClassName} ${className} hover:opacity-80`;
+    const disabledClassName = `${baseClassName} ${className} opacity-50 cursor-not-allowed`;
+
+    return (
+        <Tooltip content={disabled ? disabledTooltip : text}>
+            <button
+                onClick={onClick}
+                className={disabled ? disabledClassName : enabledClassName}
+                disabled={disabled || loading}>
+                {loading ? (
+                    <Loader size={12} className='animate-spin mr-1' />
+                ) : (
+                    React.cloneElement(icon, {className: 'mr-1', size: 12})
+                )}
+                {text}
+            </button>
+        </Tooltip>
+    );
+};
+
 const ActionButtons = ({
     isDevMode,
     selectedOutgoingChanges,
@@ -12,106 +43,67 @@ const ActionButtons = ({
     onStageSelected,
     onCommitSelected,
     onRevertSelected,
-    onPullSelected,
-    getStageButtonTooltip,
-    getCommitButtonTooltip,
-    getRevertButtonTooltip
+    onPullSelected
 }) => {
+    const canStage =
+        isDevMode &&
+        selectedOutgoingChanges.length > 0 &&
+        selectionType !== 'staged';
+    const canCommit =
+        isDevMode &&
+        selectedOutgoingChanges.length > 0 &&
+        commitMessage.trim() &&
+        selectionType !== 'unstaged';
+    const canRevert = selectedOutgoingChanges.length > 0;
+    const canPull = selectedIncomingChanges.length > 0;
+
     return (
-        <div className='mt-4 flex justify-end space-x-2'>
+        <div className='mt-4 flex justify-start space-x-2'>
             {isDevMode && (
                 <>
-                    {/* Stage */}
-                    {selectedOutgoingChanges.length > 0 &&
-                        selectionType !== 'staged' && (
-                            <Tooltip content={getStageButtonTooltip()}>
-                                <button
-                                    onClick={() =>
-                                        onStageSelected(selectedOutgoingChanges)
-                                    }
-                                    className='flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 ease-in-out text-xs'
-                                    disabled={
-                                        loadingAction === 'stage_selected'
-                                    }>
-                                    {loadingAction === 'stage_selected' ? (
-                                        <Loader
-                                            size={12}
-                                            className='animate-spin'
-                                        />
-                                    ) : (
-                                        <Plus className='mr-1' size={12} />
-                                    )}
-                                    Stage Selected
-                                </button>
-                            </Tooltip>
-                        )}
-                    {/* Commit */}
-                    {selectedOutgoingChanges.length > 0 &&
-                        commitMessage.trim() &&
-                        selectionType !== 'unstaged' && (
-                            <Tooltip content={getCommitButtonTooltip()}>
-                                <button
-                                    onClick={() =>
-                                        onCommitSelected(
-                                            selectedOutgoingChanges,
-                                            commitMessage
-                                        )
-                                    }
-                                    className='flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 ease-in-out text-xs'
-                                    disabled={
-                                        loadingAction === 'commit_selected'
-                                    }>
-                                    {loadingAction === 'commit_selected' ? (
-                                        <Loader
-                                            size={12}
-                                            className='animate-spin'
-                                        />
-                                    ) : (
-                                        <CheckCircle
-                                            className='mr-1'
-                                            size={12}
-                                        />
-                                    )}
-                                    Commit Selected
-                                </button>
-                            </Tooltip>
-                        )}
+                    <ActionButton
+                        onClick={() => onStageSelected(selectedOutgoingChanges)}
+                        disabled={!canStage}
+                        loading={loadingAction === 'stage_selected'}
+                        icon={<Plus />}
+                        text='Stage'
+                        className='bg-green-600'
+                        disabledTooltip='Select unstaged files to enable staging'
+                    />
+                    <ActionButton
+                        onClick={() =>
+                            onCommitSelected(
+                                selectedOutgoingChanges,
+                                commitMessage
+                            )
+                        }
+                        disabled={!canCommit}
+                        loading={loadingAction === 'commit_selected'}
+                        icon={<CheckCircle />}
+                        text='Commit'
+                        className='bg-blue-600'
+                        disabledTooltip='Select staged files and enter a commit message to enable committing'
+                    />
                 </>
             )}
-            {/* Revert */}
-            {selectedOutgoingChanges.length > 0 && (
-                <Tooltip content={getRevertButtonTooltip()}>
-                    <button
-                        onClick={() =>
-                            onRevertSelected(selectedOutgoingChanges)
-                        }
-                        className='flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 ease-in-out text-xs'
-                        disabled={loadingAction === 'revert_selected'}>
-                        {loadingAction === 'revert_selected' ? (
-                            <Loader size={12} className='animate-spin' />
-                        ) : (
-                            <RotateCcw className='mr-1' size={12} />
-                        )}
-                        Revert Selected
-                    </button>
-                </Tooltip>
-            )}
-            {/* Pull */}
-            {selectedIncomingChanges.length > 0 && (
-                <Tooltip content='Pull selected changes'>
-                    <button
-                        onClick={() => onPullSelected(selectedIncomingChanges)}
-                        className='flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors duration-200 ease-in-out text-xs'
-                        disabled={loadingAction === 'pull_changes'}>
-                        {loadingAction === 'pull_changes' ? (
-                            <Loader size={12} className='animate-spin' />
-                        ) : (
-                            <Download className='mr-1' size={12} />
-                        )}
-                        Pull Selected
-                    </button>
-                </Tooltip>
-            )}
+            <ActionButton
+                onClick={() => onRevertSelected(selectedOutgoingChanges)}
+                disabled={!canRevert}
+                loading={loadingAction === 'revert_selected'}
+                icon={<RotateCcw />}
+                text='Revert'
+                className='bg-red-600'
+                disabledTooltip='Select files to revert'
+            />
+            <ActionButton
+                onClick={() => onPullSelected(selectedIncomingChanges)}
+                disabled={!canPull}
+                loading={loadingAction === 'pull_changes'}
+                icon={<Download />}
+                text='Pull'
+                className='bg-yellow-600'
+                disabledTooltip='Select incoming changes to pull'
+            />
         </div>
     );
 };
