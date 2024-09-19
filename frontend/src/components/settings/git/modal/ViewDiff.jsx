@@ -19,20 +19,35 @@ const ViewDiff = ({
         const contentWithoutHeader = lines.slice(5);
         return contentWithoutHeader.map((line, index) => {
             let lineClass = 'py-1 pl-4 border-l-2 ';
+            let displayLine = line;
+
             if (line.startsWith('+')) {
-                lineClass += 'bg-green-900/30 text-green-400 border-green-500';
+                if (isIncoming) {
+                    lineClass += 'bg-red-900/30 text-red-400 border-red-500';
+                    displayLine = '-' + line.slice(1);
+                } else {
+                    lineClass +=
+                        'bg-green-900/30 text-green-400 border-green-500';
+                }
             } else if (line.startsWith('-')) {
-                lineClass += 'bg-red-900/30 text-red-400 border-red-500';
+                if (isIncoming) {
+                    lineClass +=
+                        'bg-green-900/30 text-green-400 border-green-500';
+                    displayLine = '+' + line.slice(1);
+                } else {
+                    lineClass += 'bg-red-900/30 text-red-400 border-red-500';
+                }
             } else {
                 lineClass += 'border-transparent';
             }
+
             return (
                 <div key={index} className={`flex ${lineClass}`}>
                     <span className='w-12 text-gray-500 select-none text-right pr-4 border-r border-gray-700'>
                         {index + 1}
                     </span>
                     <code className='flex-1 pl-4 font-mono text-sm'>
-                        {line}
+                        {displayLine}
                     </code>
                 </div>
             );
