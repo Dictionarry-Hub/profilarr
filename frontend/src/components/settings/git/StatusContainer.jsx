@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {GitBranch, GitMerge, Download} from 'lucide-react';
+import {GitMerge, ArrowUpFromLine, ArrowDownToLine} from 'lucide-react';
 import ChangeTable from './ChangeTable';
 import CommitSection from './CommitMessage';
 import {getRandomMessage, noChangesMessages} from '../../../utils/messages';
@@ -157,7 +157,10 @@ const StatusContainer = ({
                     changes={status.incoming_changes}
                     title='Incoming Changes'
                     icon={
-                        <Download className='text-yellow-400 mr-2' size={16} />
+                        <ArrowDownToLine
+                            className='text-blue-400 mr-2'
+                            size={16}
+                        />
                     }
                     isIncoming={true}
                     selectedChanges={selectedIncomingChanges}
@@ -173,7 +176,10 @@ const StatusContainer = ({
                     changes={status.outgoing_changes}
                     title='Outgoing Changes'
                     icon={
-                        <GitBranch className='text-blue-400 mr-2' size={16} />
+                        <ArrowUpFromLine
+                            className='text-blue-400 mr-2'
+                            size={16}
+                        />
                     }
                     isIncoming={false}
                     selectedChanges={selectedOutgoingChanges}

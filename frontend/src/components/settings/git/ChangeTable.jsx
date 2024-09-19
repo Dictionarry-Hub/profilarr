@@ -48,7 +48,7 @@ const ChangeTable = ({
 
     return (
         <div className='mb-4'>
-            <h4 className='text-sm font-medium text-gray-200 mb-2 flex items-center'>
+            <h4 className='text-sm font-medium text-gray-200 mb-4 flex items-center mt-3 '>
                 {icon}
                 <span>
                     {isIncoming
