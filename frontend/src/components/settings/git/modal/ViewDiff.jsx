@@ -77,7 +77,8 @@ const ViewDiff = ({
             title={titleContent}
             size='4xl'>
             <div className='space-y-4'>
-                <DiffCommit commitMessage={commitMessage} />
+                <DiffCommit commitMessage={commitMessage} />{' '}
+                {/* Passing the commitMessage object */}
                 <div className='border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden'>
                     <div className='bg-gray-50 dark:bg-gray-800 p-2 text-sm font-medium text-gray-600 dark:text-gray-300 border-b border-gray-300 dark:border-gray-600'>
                         Diff Content
@@ -103,7 +104,13 @@ ViewDiff.propTypes = {
     diffContent: PropTypes.string,
     type: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    commitMessage: PropTypes.string,
+    commitMessage: PropTypes.shape({
+        type: PropTypes.string,
+        scope: PropTypes.string,
+        subject: PropTypes.string,
+        body: PropTypes.string,
+        footer: PropTypes.string
+    }),
     isIncoming: PropTypes.bool.isRequired
 };
 

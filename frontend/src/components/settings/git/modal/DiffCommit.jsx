@@ -5,8 +5,7 @@ import {GitCommit} from 'lucide-react';
 const DiffCommit = ({commitMessage}) => {
     if (!commitMessage) return null;
 
-    const [firstLine, ...restLines] = commitMessage.split('\n');
-    const [commitType, commitSummary] = firstLine.split(': ');
+    const {type, scope, subject, body, footer} = commitMessage;
 
     return (
         <div className='bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-sm'>
@@ -21,15 +20,15 @@ const DiffCommit = ({commitMessage}) => {
                     </h4>
                     <div className='mb-2'>
                         <span className='inline-block px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 mr-2'>
-                            {commitType}
+                            {type}
                         </span>
                         <span className='text-sm font-semibold text-gray-700 dark:text-gray-300'>
-                            {commitSummary}
+                            {`${scope ? `(${scope})` : ''} ${subject}`}
                         </span>
                     </div>
-                    {restLines.length > 0 && (
+                    {body && (
                         <ul className='list-disc pl-5 space-y-1'>
-                            {restLines.map((line, index) => (
+                            {body.split('\n').map((line, index) => (
                                 <li
                                     key={index}
                                     className='text-sm text-gray-600 dark:text-gray-400'>
@@ -38,6 +37,11 @@ const DiffCommit = ({commitMessage}) => {
                             ))}
                         </ul>
                     )}
+                    {footer && (
+                        <div className='mt-2 text-sm text-gray-600 dark:text-gray-400'>
+                            {footer}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -45,7 +49,13 @@ const DiffCommit = ({commitMessage}) => {
 };
 
 DiffCommit.propTypes = {
-    commitMessage: PropTypes.string
+    commitMessage: PropTypes.shape({
+        type: PropTypes.string.isRequired,
+        scope: PropTypes.string,
+        subject: PropTypes.string.isRequired,
+        body: PropTypes.string,
+        footer: PropTypes.string
+    })
 };
 
 export default DiffCommit;

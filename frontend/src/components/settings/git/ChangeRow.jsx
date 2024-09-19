@@ -59,6 +59,7 @@ const ChangeRow = ({
 
     const handleViewDiff = e => {
         e.stopPropagation();
+        console.log('Change Object: ', JSON.stringify(change, null, 2));
         setShowDiff(true);
     };
 
