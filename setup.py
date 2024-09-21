@@ -1,11 +1,16 @@
+import os
+master_radarr_base_url = os.environ.get("MASTER_RADAR_BASEURL", "http://localhost:7878")
+master_radarr_apikey = os.environ.get("MASTER_RADAR_APIKEY", "API_KEY")
+dev_radarr_base_url = os.environ.get("DEV_RADAR_BASEURL", "http://localhost:7887")
+dev_radarr_apikey = os.environ.get("DEV_RADAR_APIKEY", "API_KEY")
 config_content = """
 instances:
   radarr:
     - name: "Master"
-      base_url: "http://localhost:7878"
+      base_url: master_radarr_base_url
       api_key: "API_KEY"
     - name: "DEV"
-      base_url: "http://localhost:7887"
+      base_url: dev_radarr_base_url
       api_key: "API_KEY"
   sonarr:
     - name: "Master"
