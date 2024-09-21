@@ -3,14 +3,14 @@ master_radarr_base_url = os.environ.get("MASTER_RADAR_BASEURL", "http://localhos
 master_radarr_apikey = os.environ.get("MASTER_RADAR_APIKEY", "API_KEY")
 dev_radarr_base_url = os.environ.get("DEV_RADAR_BASEURL", "http://localhost:7887")
 dev_radarr_apikey = os.environ.get("DEV_RADAR_APIKEY", "API_KEY")
-config_content = """
+config_content = f"""
 instances:
   radarr:
     - name: "Master"
-      base_url: master_radarr_base_url
+      base_url: "{master_radarr_base_url}"
       api_key: "API_KEY"
     - name: "DEV"
-      base_url: dev_radarr_base_url
+      base_url: "{dev_radarr_base_url}"
       api_key: "API_KEY"
   sonarr:
     - name: "Master"
