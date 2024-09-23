@@ -13648,7 +13648,7 @@
             {
                 "name": "jennaortegaUHD",
                 "implementation": "ReleaseGroupSpecification",
-                "implementationName": "Release Group",
+                "implementationName": "Release Title",
                 "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats-2",
                 "negate": false,
                 "required": true,
