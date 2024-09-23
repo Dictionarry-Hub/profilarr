@@ -1,6 +1,6 @@
 services:
   profilarr:
-      image: python:3.12-slim-bullseye  # Replace with the actual image for Profilarr
+      image: python:3.12-slim-bullseye
       container_name: profilarr
       command: >
             bash -c "
@@ -8,23 +8,26 @@ services:
             apt-get -y install git &&
             mkdir /app &&
             cd /app &&
-            git clone https://github.com/ric866/Profilarr.git /app &&
+            echo cloning repo - $${GIT_REPO} int /app &&
+            git clone $${GIT_REPO} /app &&
+            echo Installing PIP &&
             pip install -r /app/requirements.txt &&
-            python setup.py &&
+            sleep 10 &&
+            echo Running Setup &&
+            python /app/setup.py &&
+            echo Done - Ready to interact. &&
             tail -f /dev/null"   
       environment:
-        - MASTER_RADARR_BASEURL :"http://localhost:7878" #replace with your actual servername
-        - MASTER_RADARR_APIKEY :"ABCEasdffgsrtye54y45y54" #replace with your actual API Key
-        - MASTER_SONARR_BASEURL :"http://localhost:7878" #replace with your actual servername
-        - MASTER_SONARR_APIKEY :"ABCEasdffgsrtye54y45y54" #replace with your actual API Key
+        - GIT_REPO=https://github.com/santiagosayshey/Profilarr.git
+        - MASTER_RADARR_BASEURL=http://hostname:7878 #replace with your actual servername
+        - MASTER_RADARR_APIKEY=ABCEasdffgsrtye54y45y54 #replace with your actual API Key
+        - MASTER_SONARR_BASEURL=http://hostname:8989 #replace with your actual servername
+        - MASTER_SONARR_APIKEY=ABCEasdffgsrtye54y45y54 #replace with your actual API Key
         - PUID=1000
         - PGID=1000
         - TZ=Etc/UTC
-      volumes:
-        - profilarr_config:/config
+      networks:
+        - backend
       restart: no
       stdin_open: true 
       tty: true
-volumes:
-  profilarr_config:
-  
