@@ -16,6 +16,16 @@
       },
       {
         "quality": {
+          "id": 22,
+          "name": "Bluray-576p",
+          "source": "bluray",
+          "resolution": 576
+        },
+        "items": [],
+        "allowed": false
+      },
+      {
+        "quality": {
           "id": 13,
           "name": "Bluray-480p",
           "source": "bluray",
