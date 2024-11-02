@@ -20,7 +20,7 @@ Come join us at https://discord.gg/ZxywYBGRB9 if you need any help or want to ta
 ### Prerequisites
 
 - Python 3.x installed. You can download it from [python.org](https://www.python.org/downloads/).
-- Radarr / Sonarr
+- Radarr / Sonarr [Latest Stable]
 
 ### Initial Setup
 
