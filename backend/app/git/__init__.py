@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from .status.status import get_git_status
-from .status.diff import get_diff
 from .branches.manager import Branch_Manager
 from .operations.manager import GitOperations
 from .repo.unlink import unlink_repository
@@ -74,6 +73,8 @@ def create_branch():
         return jsonify({'success': True, **result}), 200
     else:
         logger.error(f"Failed to create branch: {result}")
+        if 'merging' in result.get('error', '').lower():
+            return jsonify({'success': False, 'error': result}), 409
         return jsonify({'success': False, 'error': result}), 400
 
 
@@ -99,6 +100,8 @@ def checkout_branch():
         return jsonify({'success': True, **result}), 200
     else:
         logger.error(f"Failed to checkout branch: {result}")
+        if 'merging' in result.get('error', '').lower():
+            return jsonify({'success': False, 'error': result}), 409
         return jsonify({'success': False, 'error': result}), 400
 
 
@@ -111,6 +114,8 @@ def delete_branch(branch_name):
         return jsonify({'success': True, **result}), 200
     else:
         logger.error(f"Failed to delete branch: {result}")
+        if 'merging' in result.get('error', '').lower():
+            return jsonify({'success': False, 'error': result}), 409
         return jsonify({'success': False, 'error': result}), 400
 
 
@@ -129,23 +134,43 @@ def push_branch():
     if success:
         return jsonify({"success": True, "data": result}), 200
     else:
-        return jsonify({"success": False, "error": result["error"]}), 500
+        if 'merging' in result.get('error', '').lower():
+            return jsonify({'success': False, 'error': result}), 409
+        return jsonify({'success': False, 'error': result["error"]}), 500
+
+
+@bp.route('/commit', methods=['POST'])
+def commit_files():
+    files = request.json.get('files', [])
+    user_commit_message = request.json.get('commit_message', "Commit changes")
+    logger.debug(f"Received request to commit files: {files}")
+
+    commit_message = generate_commit_message(user_commit_message, files)
+    success, message = git_operations.commit(files, commit_message)
+
+    if success:
+        logger.debug("Successfully committed files")
+        return jsonify({'success': True, 'message': message}), 200
+    else:
+        logger.error(f"Error committing files: {message}")
+        return jsonify({'success': False, 'error': message}), 400
 
 
 @bp.route('/push', methods=['POST'])
 def push_files():
-    files = request.json.get('files', [])
-    user_commit_message = request.json.get('commit_message',
-                                           "Commit and push staged files")
-    logger.debug(f"Received request to push files: {files}")
-    commit_message = generate_commit_message(user_commit_message, files)
-    success, message = git_operations.push(files, commit_message)
+    logger.debug("Received request to push changes")
+    success, message = git_operations.push()
+
     if success:
-        logger.debug("Successfully committed and pushed files")
+        logger.debug("Successfully pushed changes")
         return jsonify({'success': True, 'message': message}), 200
     else:
-        logger.error(f"Error pushing files: {message}")
-        return jsonify({'success': False, 'error': message}), 400
+        logger.error(f"Error pushing changes: {message}")
+        # If message is a dict, it's a structured error
+        if isinstance(message, dict):
+            return jsonify({'success': False, 'error': message}), 400
+        # Otherwise it's a string error
+        return jsonify({'success': False, 'error': str(message)}), 400
 
 
 @bp.route('/revert', methods=['POST'])
@@ -193,34 +218,65 @@ def delete_file():
 @bp.route('/pull', methods=['POST'])
 def pull_branch():
     branch_name = request.json.get('branch')
-    success, message = git_operations.pull(branch_name)
+    success, response = git_operations.pull(branch_name)
+
+    # Handle different response types
+    if isinstance(response, dict):
+        if response.get('state') == 'resolve':
+            # Merge conflict is now a success case with state='resolve'
+            return jsonify({
+                'success': True,
+                'state': 'resolve',
+                'message': response['message'],
+                'details': response['details']
+            }), 200
+        elif response.get('state') == 'error':
+            # Handle error states
+            return jsonify({
+                'success': False,
+                'state': 'error',
+                'message': response['message'],
+                'details': response.get('details', {})
+            }), 409 if response.get('type') in [
+                'merge_conflict', 'uncommitted_changes'
+            ] else 400
+        elif response.get('state') == 'complete':
+            # Normal success case
+            return jsonify({
+                'success': True,
+                'state': 'complete',
+                'message': response['message'],
+                'details': response.get('details', {})
+            }), 200
+
+    # Fallback for string responses or unexpected formats
     if success:
-        return jsonify({'success': True, 'message': message}), 200
-    else:
-        logger.error(f"Error pulling branch: {message}")
-        return jsonify({'success': False, 'error': message}), 400
-
-
-@bp.route('/diff', methods=['POST'])
-def diff_file():
-    file_path = request.json.get('file_path')
-    try:
-        diff = get_diff(REPO_PATH, file_path)
-        logger.debug(f"Diff for file {file_path}: {diff}")
-        return jsonify({'success': True, 'diff': diff if diff else ""}), 200
-    except Exception as e:
-        logger.error(f"Error getting diff for file {file_path}: {str(e)}",
-                     exc_info=True)
         return jsonify({
-            'success': False,
-            'error': f"Error getting diff for file: {str(e)}"
-        }), 400
+            'success': True,
+            'state': 'complete',
+            'message': response
+        }), 200
+    return jsonify({
+        'success': False,
+        'state': 'error',
+        'message': str(response)
+    }), 400
 
 
 @bp.route('/stage', methods=['POST'])
 def handle_stage_files():
     files = request.json.get('files', [])
     success, message = git_operations.stage(files)
+    if success:
+        return jsonify({'success': True, 'message': message}), 200
+    else:
+        return jsonify({'success': False, 'error': message}), 400
+
+
+@bp.route('/unstage', methods=['POST'])
+def handle_unstage_files():
+    files = request.json.get('files', [])
+    success, message = git_operations.unstage(files)
     if success:
         return jsonify({'success': True, 'message': message}), 200
     else:
@@ -239,20 +295,67 @@ def unlink():
 
 
 def generate_commit_message(user_message, files):
-    file_changes = []
-    for file in files:
-        if 'regex_patterns' in file:
-            file_changes.append(f"Update regex pattern: {file.split('/')[-1]}")
-        elif 'custom_formats' in file:
-            file_changes.append(f"Update custom format: {file.split('/')[-1]}")
-        else:
-            file_changes.append(f"Update: {file}")
-
-    commit_message = f"{user_message}\n\nChanges:\n" + "\n".join(file_changes)
-    return commit_message
+    return user_message
 
 
 @bp.route('/dev', methods=['GET'])
 def dev_mode():
     is_dev_mode = check_dev_mode()
     return jsonify({'devMode': is_dev_mode}), 200
+
+
+@bp.route('/resolve', methods=['POST'])
+def resolve_conflicts():
+    logger.debug("Received request to resolve conflicts")
+    resolutions = request.json.get('resolutions')
+
+    if not resolutions:
+        return jsonify({
+            'success': False,
+            'error': "Resolutions are required"
+        }), 400
+
+    result = git_operations.resolve(resolutions)
+
+    if result.get('success'):
+        logger.debug("Successfully resolved conflicts")
+        return jsonify(result), 200
+    else:
+        logger.error(f"Error resolving conflicts: {result.get('error')}")
+        return jsonify(result), 400
+
+
+@bp.route('/merge/finalize', methods=['POST'])
+def finalize_merge():
+    """
+    Route to finalize a merge after all conflicts have been resolved.
+    Expected to be called only after all conflicts are resolved and changes are staged.
+    """
+    logger.debug("Received request to finalize merge")
+
+    result = git_operations.finalize_merge()
+
+    if result.get('success'):
+        logger.debug(
+            f"Successfully finalized merge with files: {result.get('committed_files', [])}"
+        )
+        return jsonify({
+            'success': True,
+            'message': result.get('message'),
+            'committed_files': result.get('committed_files', [])
+        }), 200
+    else:
+        logger.error(f"Error finalizing merge: {result.get('error')}")
+        return jsonify({'success': False, 'error': result.get('error')}), 400
+
+
+@bp.route('/merge/abort', methods=['POST'])
+def abort_merge():
+    logger.debug("Received request to abort merge")
+    success, message = git_operations.abort_merge()
+    if success:
+        logger.debug("Successfully aborted merge")
+        return jsonify({'success': True, 'message': message}), 200
+    else:
+        logger.error(f"Error aborting merge: {message}")
+        return jsonify({'success': False, 'error': message}), 400

@@ -88,14 +88,14 @@ const SettingsBranchModal = ({
                     Alert.success('Branch created successfully');
                     resetForm();
                 } else {
-                    Alert.error(response.error);
+                    Alert.error(response.error.error || response.error);
                 }
             } catch (error) {
-                if (
-                    error.response &&
-                    error.response.status === 400 &&
-                    error.response.data.error
-                ) {
+                if (error.response?.status === 409) {
+                    Alert.error(
+                        'Cannot perform operation - merge in progress. Please resolve conflicts first.'
+                    );
+                } else if (error.response?.status === 400) {
                     Alert.error(error.response.data.error);
                 } else {
                     console.error('Error branching off:', error);
@@ -139,14 +139,15 @@ const SettingsBranchModal = ({
                     Alert.success('Branch checked out successfully');
                     onClose();
                 } else {
-                    Alert.error(response.error);
+                    // The error is nested inside result.error from the backend
+                    Alert.error(response.error.error || response.error);
                 }
             } catch (error) {
-                if (
-                    error.response &&
-                    error.response.status === 400 &&
-                    error.response.data.error
-                ) {
+                if (error.response?.status === 409) {
+                    Alert.error(
+                        'Cannot perform operation - merge in progress. Please resolve conflicts first.'
+                    );
+                } else if (error.response?.status === 400) {
                     Alert.error(error.response.data.error);
                 } else {
                     Alert.error(
@@ -179,13 +180,19 @@ const SettingsBranchModal = ({
                         `Branch '${branchName}' deleted successfully`
                     );
                 } else {
-                    Alert.error(response.error);
+                    Alert.error(response.error.error || response.error);
                 }
             } catch (error) {
-                Alert.error(
-                    'An unexpected error occurred while deleting the branch.'
-                );
-                console.error('Error deleting branch:', error);
+                if (error.response?.status === 409) {
+                    Alert.error(
+                        'Cannot perform operation - merge in progress. Please resolve conflicts first.'
+                    );
+                } else {
+                    Alert.error(
+                        'An unexpected error occurred while deleting the branch.'
+                    );
+                    console.error('Error deleting branch:', error);
+                }
             } finally {
                 setLoadingAction('');
                 setConfirmAction(null);
@@ -194,7 +201,6 @@ const SettingsBranchModal = ({
             setConfirmAction(`delete-${branchName}`);
         }
     };
-
     const handlePushToRemote = async branchName => {
         if (confirmAction === `push-${branchName}`) {
             setLoadingAction(`push-${branchName}`);
@@ -206,13 +212,19 @@ const SettingsBranchModal = ({
                     );
                     await fetchBranches();
                 } else {
-                    Alert.error(response.error);
+                    Alert.error(response.error.error || response.error);
                 }
             } catch (error) {
-                Alert.error(
-                    'An unexpected error occurred while pushing the branch to remote.'
-                );
-                console.error('Error pushing branch to remote:', error);
+                if (error.response?.status === 409) {
+                    Alert.error(
+                        'Cannot perform operation - merge in progress. Please resolve conflicts first.'
+                    );
+                } else {
+                    Alert.error(
+                        'An unexpected error occurred while pushing the branch to remote.'
+                    );
+                    console.error('Error pushing branch to remote:', error);
+                }
             } finally {
                 setLoadingAction('');
                 setConfirmAction(null);

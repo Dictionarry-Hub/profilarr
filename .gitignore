@@ -8,6 +8,8 @@ __pycache__/
 
 # Environment variables
 .env
+.env.1
+.env.2
 
 # OS files
 .DS_Store

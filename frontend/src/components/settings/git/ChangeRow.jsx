@@ -5,24 +5,17 @@ import {
     MinusCircle,
     Edit,
     GitBranch,
-    AlertCircle,
+    AlertTriangle,
     Code,
     FileText,
     Settings,
     File
 } from 'lucide-react';
 import Tooltip from '../../ui/Tooltip';
-import ViewDiff from './modal/ViewDiff';
+import ViewChanges from './modal/ViewChanges';
 
-const ChangeRow = ({
-    change,
-    isSelected,
-    onSelect,
-    isIncoming,
-    isDevMode,
-    diffContent
-}) => {
-    const [showDiff, setShowDiff] = useState(false);
+const ChangeRow = ({change, isSelected, onSelect, isIncoming, isDevMode}) => {
+    const [showChanges, setShowChanges] = useState(false);
 
     const getStatusIcon = status => {
         switch (status) {
@@ -40,7 +33,7 @@ const ChangeRow = ({
             case 'Renamed':
                 return <GitBranch className='text-purple-400' size={16} />;
             default:
-                return <AlertCircle className='text-gray-400' size={16} />;
+                return <AlertTriangle className='text-gray-400' size={16} />;
         }
     };
 
@@ -57,27 +50,49 @@ const ChangeRow = ({
         }
     };
 
-    const handleViewDiff = e => {
+    const handleViewChanges = e => {
         e.stopPropagation();
-        console.log('Change Object: ', JSON.stringify(change, null, 2));
-        setShowDiff(true);
+        setShowChanges(true);
     };
+
+    const handleRowClick = () => {
+        if (!isIncoming && onSelect) {
+            onSelect(change.file_path);
+        }
+    };
+
+    // Determine row classes based on whether it's incoming or selected
+    const rowClasses = `border-t border-gray-600 ${
+        isIncoming
+            ? 'cursor-default'
+            : `cursor-pointer ${
+                  isSelected ? 'bg-blue-700 bg-opacity-30' : 'hover:bg-gray-700'
+              }`
+    }`;
 
     return (
         <>
-            <tr
-                className={`border-t border-gray-600 cursor-pointer hover:bg-gray-700 ${
-                    isSelected ? 'bg-gray-700' : ''
-                }`}
-                onClick={() => onSelect(change.file_path)}>
+            <tr className={rowClasses} onClick={handleRowClick}>
                 <td className='px-4 py-2 text-gray-300'>
-                    <div className='flex items-center'>
+                    <div className='flex items-center relative'>
                         {getStatusIcon(change.status)}
                         <span className='ml-2'>
                             {change.staged
                                 ? `${change.status} (Staged)`
                                 : change.status}
                         </span>
+                        {isIncoming && change.will_conflict && (
+                            <span
+                                className='inline-block relative'
+                                style={{zIndex: 1}}>
+                                <Tooltip content='Potential Merge Conflict Detected'>
+                                    <AlertTriangle
+                                        className='text-yellow-400 ml-2'
+                                        size={16}
+                                    />
+                                </Tooltip>
+                            </span>
+                        )}
                     </div>
                 </td>
                 <td className='px-4 py-2 text-gray-300'>
@@ -87,38 +102,59 @@ const ChangeRow = ({
                     </div>
                 </td>
                 <td className='px-4 py-2 text-gray-300'>
-                    {change.name || 'Unnamed'}
+                    {isIncoming ? (
+                        change.incoming_name &&
+                        change.incoming_name !== change.local_name ? (
+                            <>
+                                <span className='mr-3'>
+                                    <strong>Local:</strong>{' '}
+                                    {change.local_name || 'Unnamed'}
+                                </span>
+                                <span>
+                                    <strong>Incoming:</strong>{' '}
+                                    {change.incoming_name || 'Unnamed'}
+                                </span>
+                            </>
+                        ) : (
+                            change.local_name ||
+                            change.incoming_name ||
+                            'Unnamed'
+                        )
+                    ) : change.outgoing_name &&
+                      change.outgoing_name !== change.prior_name ? (
+                        <>
+                            <span className='mr-3'>
+                                <strong>Prior:</strong>{' '}
+                                {change.prior_name || 'Unnamed'}
+                            </span>
+                            <span>
+                                <strong>Outgoing:</strong>{' '}
+                                {change.outgoing_name || 'Unnamed'}
+                            </span>
+                        </>
+                    ) : (
+                        change.outgoing_name || change.prior_name || 'Unnamed'
+                    )}
                 </td>
                 <td className='px-4 py-2 text-left align-middle'>
-                    <Tooltip content='View differences'>
+                    <Tooltip content='View changes'>
                         <button
-                            onClick={handleViewDiff}
+                            onClick={handleViewChanges}
                             className='flex items-center justify-center px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-xs'
                             style={{width: '100%'}}>
                             <Eye size={12} className='mr-1' />
-                            View Diff
+                            Changes
                         </button>
                     </Tooltip>
                 </td>
-                <td className='px-4 py-2 text-right text-gray-300 align-middle'>
-                    <input
-                        type='checkbox'
-                        checked={isSelected}
-                        onChange={e => e.stopPropagation()}
-                        disabled={!isIncoming && change.staged}
-                    />
-                </td>
             </tr>
-            <ViewDiff
-                key={`${change.file_path}-diff`}
-                isOpen={showDiff}
-                onClose={() => setShowDiff(false)}
-                diffContent={diffContent}
-                type={change.type}
-                name={change.name}
-                commitMessage={change.commit_message}
-                isDevMode={isDevMode}
+            <ViewChanges
+                key={`${change.file_path}-changes`}
+                isOpen={showChanges}
+                onClose={() => setShowChanges(false)}
+                change={change}
                 isIncoming={isIncoming}
+                isDevMode={isDevMode}
             />
         </>
     );

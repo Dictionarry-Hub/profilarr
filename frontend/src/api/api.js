@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const getRegexes = async () => {
     try {
@@ -133,7 +133,15 @@ export const getSettings = async () => {
 export const getGitStatus = async () => {
     try {
         const response = await axios.get(`${API_BASE_URL}/git/status`);
-        return response.data;
+        // Ensure has_unpushed_commits is included in the response
+        return {
+            ...response.data,
+            data: {
+                ...response.data.data,
+                has_unpushed_commits:
+                    response.data.data.has_unpushed_commits || false
+            }
+        };
     } catch (error) {
         console.error('Error fetching Git status:', error);
         throw error;
@@ -152,9 +160,21 @@ export const getBranches = async () => {
 
 export const checkoutBranch = async branchName => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/checkout`, {
-            branch: branchName
-        });
+        const response = await axios.post(
+            `${API_BASE_URL}/git/checkout`,
+            {
+                branch: branchName
+            },
+            {
+                validateStatus: status => {
+                    return (
+                        (status >= 200 && status < 300) ||
+                        status === 400 ||
+                        status === 409
+                    );
+                }
+            }
+        );
         return response.data;
     } catch (error) {
         console.error('Error checking out branch:', error);
@@ -164,10 +184,22 @@ export const checkoutBranch = async branchName => {
 
 export const createBranch = async (branchName, baseBranch) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/branch`, {
-            name: branchName,
-            base: baseBranch
-        });
+        const response = await axios.post(
+            `${API_BASE_URL}/git/branch`,
+            {
+                name: branchName,
+                base: baseBranch
+            },
+            {
+                validateStatus: status => {
+                    return (
+                        (status >= 200 && status < 300) ||
+                        status === 400 ||
+                        status === 409
+                    );
+                }
+            }
+        );
         return response.data;
     } catch (error) {
         console.error('Error creating branch:', error);
@@ -178,11 +210,44 @@ export const createBranch = async (branchName, baseBranch) => {
 export const deleteBranch = async branchName => {
     try {
         const response = await axios.delete(
-            `${API_BASE_URL}/git/branch/${branchName}`
+            `${API_BASE_URL}/git/branch/${branchName}`,
+            {
+                validateStatus: status => {
+                    return (
+                        (status >= 200 && status < 300) ||
+                        status === 400 ||
+                        status === 409
+                    );
+                }
+            }
         );
         return response.data;
     } catch (error) {
         console.error('Error deleting branch:', error);
+        throw error;
+    }
+};
+
+export const pushBranchToRemote = async branchName => {
+    try {
+        const response = await axios.post(
+            `${API_BASE_URL}/git/branch/push`,
+            {
+                branch: branchName
+            },
+            {
+                validateStatus: status => {
+                    return (
+                        (status >= 200 && status < 300) ||
+                        status === 400 ||
+                        status === 409
+                    );
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error pushing branch to remote:', error);
         throw error;
     }
 };
@@ -197,19 +262,49 @@ export const addFiles = async files => {
     }
 };
 
-export const pushFiles = async (files, commitMessage) => {
+export const unstageFiles = async files => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/push`, {
+        const response = await axios.post(`${API_BASE_URL}/git/unstage`, {
+            files
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error unstaging files:', error);
+        throw error;
+    }
+};
+
+export const commitFiles = async (files, commitMessage) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/git/commit`, {
             files,
             commit_message: commitMessage
         });
         return response.data;
     } catch (error) {
-        console.error('Error pushing files:', error);
+        console.error('Error committing files:', error);
         throw error;
     }
 };
 
+export const pushFiles = async () => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/git/push`);
+        return response.data;
+    } catch (error) {
+        // Pass through the structured error from the backend
+        if (error.response?.data) {
+            return {
+                success: false,
+                error: error.response.data.error
+            };
+        }
+        return {
+            success: false,
+            error: 'Failed to push changes'
+        };
+    }
+};
 export const revertFile = async filePath => {
     try {
         const response = await axios.post(`${API_BASE_URL}/git/revert`, {
@@ -251,20 +346,19 @@ export const pullBranch = async branchName => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error pulling branch:', error);
-        throw error;
-    }
-};
-
-export const getDiff = async filePath => {
-    try {
-        const response = await axios.post(`${API_BASE_URL}/git/diff`, {
-            file_path: filePath
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching diff:', error);
-        throw error;
+        if (error.response?.data) {
+            return {
+                success: false,
+                state: error.response.data.state || 'error',
+                message: error.response.data.message,
+                details: error.response.data.details
+            };
+        }
+        return {
+            success: false,
+            state: 'error',
+            message: 'Failed to pull changes'
+        };
     }
 };
 
@@ -335,24 +429,53 @@ export const unlinkRepo = async (removeFiles = false) => {
     }
 };
 
-export const pushBranchToRemote = async branchName => {
-    try {
-        const response = await axios.post(`${API_BASE_URL}/git/branch/push`, {
-            branch: branchName
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error pushing branch to remote:', error);
-        throw error;
-    }
-};
-
 export const checkDevMode = async () => {
     try {
         const response = await axios.get(`${API_BASE_URL}/git/dev`);
         return response.data;
     } catch (error) {
         console.error('Error checking dev mode:', error);
+        throw error;
+    }
+};
+
+export const resolveConflict = async resolutions => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/git/resolve`, {
+            resolutions
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error resolving conflicts:', error);
+        throw error;
+    }
+};
+
+export const finalizeMerge = async () => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/git/merge/finalize`);
+        return response.data;
+    } catch (error) {
+        console.error('Error finalizing merge:', error);
+        if (error.response?.data) {
+            return {
+                success: false,
+                error: error.response.data.error
+            };
+        }
+        return {
+            success: false,
+            error: 'Failed to finalize merge'
+        };
+    }
+};
+
+export const abortMerge = async () => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/git/merge/abort`);
+        return response.data;
+    } catch (error) {
+        console.error('Error aborting merge:', error);
         throw error;
     }
 };

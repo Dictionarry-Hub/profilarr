@@ -1,9 +1,9 @@
 # git/operations/commit.py
-
 import git
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 def commit_changes(repo_path, files, message):
     try:

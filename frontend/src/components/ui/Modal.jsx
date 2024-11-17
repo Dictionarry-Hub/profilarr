@@ -9,8 +9,9 @@ function Modal({
     level = 0,
     disableCloseOnOutsideClick = false,
     disableCloseOnEscape = false,
-    width = 'lg',
-    height = 'auto'
+    width = 'auto',
+    height = 'auto',
+    maxHeight = '80vh'
 }) {
     const modalRef = useRef();
 
@@ -39,6 +40,7 @@ function Modal({
     };
 
     const widthClasses = {
+        auto: 'w-auto max-w-[60%]',
         sm: 'max-w-sm',
         md: 'max-w-md',
         lg: 'max-w-lg',
@@ -74,7 +76,7 @@ function Modal({
 
     return (
         <div
-            className={`fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center transition-opacity duration-300 ease-out ${
+            className={`fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center transition-opacity duration-300 ease-out scrollable ${
                 isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
             style={{zIndex: 1000 + level * 10}}
@@ -86,7 +88,7 @@ function Modal({
                 style={{zIndex: 1000 + level * 10}}></div>
             <div
                 ref={modalRef}
-                className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full shadow-md ${
+                className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl ${
                     widthClasses[width]
                 } ${
                     heightClasses[height]
@@ -95,7 +97,8 @@ function Modal({
                 }`}
                 style={{
                     zIndex: 1001 + level * 10,
-                    overflowY: 'auto'
+                    overflowY: 'auto',
+                    maxHeight: maxHeight
                 }}
                 onClick={e => e.stopPropagation()}>
                 <div className='flex justify-between items-center px-6 py-4 pb-3 border-b border-gray-300 dark:border-gray-700'>
@@ -134,6 +137,7 @@ Modal.propTypes = {
     disableCloseOnOutsideClick: PropTypes.bool,
     disableCloseOnEscape: PropTypes.bool,
     width: PropTypes.oneOf([
+        'auto',
         'sm',
         'md',
         'lg',
@@ -164,7 +168,8 @@ Modal.propTypes = {
         '5xl',
         '6xl',
         'full'
-    ])
+    ]),
+    maxHeight: PropTypes.string
 };
 
 export default Modal;

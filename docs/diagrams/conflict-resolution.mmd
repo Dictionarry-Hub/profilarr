@@ -1,0 +1,41 @@
+stateDiagram-v2
+    [*] --> CheckingForUpdates: User Initiates Pull
+    
+    CheckingForUpdates --> NormalPull: No Conflicts Detected
+    CheckingForUpdates --> ConflictDetected: Conflicts Found
+    
+    NormalPull --> [*]: Pull Complete
+    
+    ConflictDetected --> ResolutionState: Enter Resolution Mode
+    note right of ResolutionState
+        System returns conflict object
+        containing all conflicted files
+    end note
+    
+    state ResolutionState {
+        [*] --> FileSelection
+        
+        FileSelection --> FileResolution: Select Unresolved File
+        
+        FileResolution --> ConflictChoice
+        
+        state ConflictChoice {
+            [*] --> DecisionMaking
+            DecisionMaking --> KeepLocal: User Keeps Local
+            DecisionMaking --> AcceptIncoming: User Accepts Incoming
+            DecisionMaking --> CustomMerge: User Combines/Modifies
+            
+            KeepLocal --> MarkResolved
+            AcceptIncoming --> MarkResolved
+            CustomMerge --> MarkResolved
+        }
+        
+        ConflictChoice --> AddFile: File Resolved
+        
+        AddFile --> FileSelection: More Files\nto Resolve
+        AddFile --> AllFilesResolved: No More\nConflicts
+    }
+    
+    ResolutionState --> CommitChanges: All Files Resolved
+    
+    CommitChanges --> [*]: Resolution Complete

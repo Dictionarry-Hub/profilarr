@@ -1,21 +1,23 @@
 import React from 'react';
 import {ArrowDown, ArrowUp} from 'lucide-react';
 import ChangeRow from './ChangeRow';
+import ConflictRow from './ConflictRow';
 
 const ChangeTable = ({
     changes,
-    title,
-    icon,
     isIncoming,
+    isMergeConflict,
     selectedChanges,
     onSelectChange,
     sortConfig,
     onRequestSort,
     isDevMode,
-    diffContents
+    fetchGitStatus
 }) => {
     const sortedChanges = changesArray => {
-        if (!sortConfig.key) return changesArray;
+        // Don't sort if we're showing merge conflicts or if no sort config
+        if (isMergeConflict || !sortConfig?.key) return changesArray;
+
         return [...changesArray].sort((a, b) => {
             if (a[sortConfig.key] < b[sortConfig.key]) {
                 return sortConfig.direction === 'ascending' ? -1 : 1;
@@ -47,61 +49,49 @@ const ChangeTable = ({
     };
 
     return (
-        <div className='mb-4'>
-            <h4 className='text-sm font-medium text-gray-200 mb-4 flex items-center mt-3'>
-                {icon}
-                <span>
-                    {isIncoming
-                        ? title
-                        : isDevMode
-                        ? 'Outgoing Changes'
-                        : 'Local Changes'}{' '}
-                    ({changes.length})
-                </span>
-            </h4>
-            <div className='border border-gray-600 rounded-md overflow-hidden'>
-                <table className='w-full text-sm'>
-                    <thead className='bg-gray-600'>
-                        <tr>
-                            <SortableHeader sortKey='status' className='w-1/6'>
-                                Status
-                            </SortableHeader>
-                            <SortableHeader sortKey='type' className='w-1/6'>
-                                Type
-                            </SortableHeader>
-                            <SortableHeader sortKey='name' className='w-2/6'>
-                                Name
-                            </SortableHeader>
-                            <th className='px-4 py-2 text-left text-gray-300 w-1/12'>
-                                Actions
-                            </th>
-                            <th className='px-4 py-2 text-right text-gray-300 w-1/12'>
-                                Select
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sortedChanges(changes).map((change, index) => (
-                            <ChangeRow
-                                key={`${
-                                    isIncoming ? 'incoming' : 'outgoing'
-                                }-${index}`}
-                                change={change}
-                                isSelected={selectedChanges.includes(
-                                    change.file_path
-                                )}
-                                onSelect={filePath =>
-                                    onSelectChange(filePath, isIncoming)
-                                }
-                                isIncoming={isIncoming}
-                                isDevMode={isDevMode}
-                                diffContent={diffContents[change.file_path]}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <table className='w-full text-sm'>
+            <thead className='bg-gray-600'>
+                <tr>
+                    <SortableHeader sortKey='status' className='w-1/5'>
+                        Status
+                    </SortableHeader>
+                    <SortableHeader sortKey='type' className='w-1/5'>
+                        Type
+                    </SortableHeader>
+                    <SortableHeader sortKey='name' className='w-1/2'>
+                        Name
+                    </SortableHeader>
+                    <th className='px-4 py-2 text-left text-gray-300 w-1/5'>
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {sortedChanges(changes).map((change, index) =>
+                    isMergeConflict ? (
+                        <ConflictRow
+                            key={`merge-conflict-${index}`}
+                            change={change}
+                            isDevMode={isDevMode}
+                            fetchGitStatus={fetchGitStatus}
+                        />
+                    ) : (
+                        <ChangeRow
+                            key={`${
+                                isIncoming ? 'incoming' : 'outgoing'
+                            }-${index}`}
+                            change={change}
+                            isSelected={selectedChanges?.includes(
+                                change.file_path
+                            )}
+                            onSelect={!isIncoming ? onSelectChange : null}
+                            isIncoming={isIncoming}
+                            isDevMode={isDevMode}
+                        />
+                    )
+                )}
+            </tbody>
+        </table>
     );
 };
 

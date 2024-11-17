@@ -8,6 +8,11 @@ const DiffCommit = ({commitMessage}) => {
 
     return (
         <div className='bg-gray-100 dark:bg-gray-800 p-4 rounded-lg'>
+            <div className='mb-2'>
+                <span className='text-xl font-semibold text-gray-700 dark:text-gray-300 mr-3'>
+                    Details
+                </span>
+            </div>
             <div className='flex items-start space-x-3'>
                 <div className='flex-1'>
                     <div className='mb-2'>

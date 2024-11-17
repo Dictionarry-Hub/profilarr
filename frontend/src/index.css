@@ -1,17 +1,70 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html {
-  font-family: "Schibsted Grotesk", sans-serif;
+    font-family: 'Schibsted Grotesk', sans-serif;
 }
 
 code,
 pre,
 .font-mono {
-  font-family: "Fira Code", monospace;
+    font-family: 'Fira Code', monospace;
+}
+
+/* Custom Scrollbar for Light Mode */
+.scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1;
+    border-radius: 4px;
+    border: 2px solid #f1f1f1;
+    transition: background-color 0.3s ease;
+}
+
+.scrollable::-webkit-scrollbar-thumb:hover {
+    background-color: #a1a1a1;
+}
+
+/* Custom Scrollbar for Dark Mode */
+.dark .scrollable::-webkit-scrollbar-track {
+    background: #1e293b; /* dark-100 */
+}
+
+.dark .scrollable::-webkit-scrollbar-thumb {
+    background-color: #334155; /* dark-200 */
+    border: 2px solid #1e293b; /* dark-100 */
+    transition: background-color 0.3s ease;
+}
+
+.dark .scrollable::-webkit-scrollbar-thumb:hover {
+    background-color: #475569; /* dark-300 */
+}
+
+/* For Firefox */
+.scrollable {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+.scrollable:hover {
+    scrollbar-color: #a1a1a1 #f1f1f1;
+}
+
+.dark .scrollable {
+    scrollbar-color: #334155 #1e293b; /* dark-200 and dark-100 */
+}
+
+.dark .scrollable:hover {
+    scrollbar-color: #475569 #1e293b; /* dark-300 and dark-100 */
 }

@@ -3,6 +3,8 @@ import {
     getSettings,
     getGitStatus,
     addFiles,
+    unstageFiles,
+    commitFiles,
     pushFiles,
     revertFile,
     pullBranch,
@@ -32,6 +34,7 @@ const SettingsPage = () => {
     const [noChangesMessage, setNoChangesMessage] = useState('');
     const [activeTab, setActiveTab] = useState('git');
     const tabsRef = useRef({});
+    const [mergeConflicts, setMergeConflicts] = useState([]);
 
     useEffect(() => {
         fetchSettings();
@@ -67,10 +70,11 @@ const SettingsPage = () => {
         setStatusLoading(true);
         setStatusLoadingMessage(getRandomMessage(statusLoadingMessages));
         setNoChangesMessage(getRandomMessage(noChangesMessages));
+
         try {
             const result = await getGitStatus();
             if (result.success) {
-                setChanges({
+                const gitStatus = {
                     ...result.data,
                     outgoing_changes: Array.isArray(
                         result.data.outgoing_changes
@@ -81,8 +85,16 @@ const SettingsPage = () => {
                         result.data.incoming_changes
                     )
                         ? result.data.incoming_changes
+                        : [],
+                    merge_conflicts: Array.isArray(result.data.merge_conflicts)
+                        ? result.data.merge_conflicts
                         : []
-                });
+                };
+
+                setChanges(gitStatus);
+                setMergeConflicts(gitStatus.merge_conflicts);
+
+                console.log('Git Status:', JSON.stringify(gitStatus, null, 2));
             }
         } catch (error) {
             console.error('Error fetching Git status:', error);
@@ -114,13 +126,33 @@ const SettingsPage = () => {
         }
     };
 
+    const handleUnstageSelectedChanges = async selectedChanges => {
+        setLoadingAction('unstage_selected');
+        try {
+            const response = await unstageFiles(selectedChanges);
+            if (response.success) {
+                await fetchGitStatus();
+                Alert.success(response.message);
+            } else {
+                Alert.error(response.error);
+            }
+        } catch (error) {
+            Alert.error(
+                'An unexpected error occurred while unstaging changes.'
+            );
+            console.error('Error unstaging changes:', error);
+        } finally {
+            setLoadingAction('');
+        }
+    };
+
     const handleCommitSelectedChanges = async (
         selectedChanges,
         commitMessage
     ) => {
         setLoadingAction('commit_selected');
         try {
-            const response = await pushFiles(selectedChanges, commitMessage);
+            const response = await commitFiles(selectedChanges, commitMessage);
             if (response.success) {
                 await fetchGitStatus();
                 Alert.success(response.message);
@@ -132,6 +164,64 @@ const SettingsPage = () => {
                 'An unexpected error occurred while committing changes.'
             );
             console.error('Error committing changes:', error);
+        } finally {
+            setLoadingAction('');
+        }
+    };
+
+    const handlePushChanges = async () => {
+        setLoadingAction('push_changes');
+        try {
+            const response = await pushFiles();
+
+            if (response.success) {
+                await fetchGitStatus();
+                Alert.success(response.message);
+            } else {
+                if (typeof response.error === 'object' && response.error.type) {
+                    // Handle structured errors
+                    Alert.error(response.error.message);
+                } else {
+                    // Handle string errors
+                    Alert.error(response.error);
+                }
+            }
+        } catch (error) {
+            console.error('Error in handlePushChanges:', error);
+            Alert.error('An unexpected error occurred while pushing changes.');
+        } finally {
+            setLoadingAction('');
+        }
+    };
+    const handlePullSelectedChanges = async () => {
+        setLoadingAction('pull_changes');
+        try {
+            const response = await pullBranch(changes.branch);
+
+            // First update status regardless of what happened
+            await fetchGitStatus();
+
+            if (response.success) {
+                if (response.state === 'resolve') {
+                    Alert.info(
+                        response.message ||
+                            'Repository is now in conflict resolution state. Please resolve conflicts to continue. ',
+                        {
+                            autoClose: true,
+                            closeOnClick: true
+                        }
+                    );
+                } else {
+                    Alert.success(
+                        response.message || 'Successfully pulled changes'
+                    );
+                }
+            } else {
+                Alert.error(response.message || 'Failed to pull changes');
+            }
+        } catch (error) {
+            console.error('Error in pullBranch:', error);
+            Alert.error('Failed to pull changes');
         } finally {
             setLoadingAction('');
         }
@@ -159,24 +249,6 @@ const SettingsPage = () => {
                 'An unexpected error occurred while reverting changes.'
             );
             console.error('Error reverting changes:', error);
-        } finally {
-            setLoadingAction('');
-        }
-    };
-
-    const handlePullSelectedChanges = async selectedChanges => {
-        setLoadingAction('pull_changes');
-        try {
-            const response = await pullBranch(changes.branch, selectedChanges);
-            if (response.success) {
-                await fetchGitStatus();
-                Alert.success(response.message);
-            } else {
-                Alert.error(response.error);
-            }
-        } catch (error) {
-            Alert.error('An unexpected error occurred while pulling changes.');
-            console.error('Error pulling changes:', error);
         } finally {
             setLoadingAction('');
         }
@@ -236,13 +308,18 @@ const SettingsPage = () => {
                                     status={changes}
                                     isDevMode={isDevMode}
                                     onStageSelected={handleStageSelectedChanges}
+                                    onUnstageSelected={
+                                        handleUnstageSelectedChanges
+                                    }
                                     onCommitSelected={
                                         handleCommitSelectedChanges
                                     }
+                                    onPushSelected={handlePushChanges}
                                     onRevertSelected={
                                         handleRevertSelectedChanges
                                     }
                                     onPullSelected={handlePullSelectedChanges}
+                                    fetchGitStatus={fetchGitStatus}
                                     loadingAction={loadingAction}
                                 />
                             )}

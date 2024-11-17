@@ -8,7 +8,7 @@ services:
             - ./frontend:/app
             - /app/node_modules
         environment:
-            - VITE_API_URL=http://192.168.1.111:5000 # Replace with your host machine's IP
+            - VITE_API_URL=http://localhost:5000
             - CHOKIDAR_USEPOLLING=true
 
     backend:
@@ -21,6 +21,6 @@ services:
         environment:
             - FLASK_ENV=development
         env_file:
-            - .env
+            - .env.1
 volumes:
     backend_data:

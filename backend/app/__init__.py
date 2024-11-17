@@ -1,5 +1,3 @@
-# app/__init__.py
-
 import os
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -12,15 +10,17 @@ from .settings_utils import create_empty_settings_if_not_exists, load_settings
 REGEX_DIR = os.path.join('data', 'db', 'regex_patterns')
 FORMAT_DIR = os.path.join('data', 'db', 'custom_formats')
 PROFILE_DIR = os.path.join('data', 'db', 'profiles')
+DATA_DIR = '/app/data'
+
 
 def create_app():
     app = Flask(__name__)
     CORS(app, resources={r"/*": {"origins": "*"}})
-    
+
     # Initialize directories and create empty settings file if it doesn't exist
     initialize_directories()
     create_empty_settings_if_not_exists()
-    
+
     # Register Blueprints
     app.register_blueprint(regex_bp)
     app.register_blueprint(format_bp)
@@ -35,7 +35,9 @@ def create_app():
 
     return app
 
+
 def initialize_directories():
     os.makedirs(REGEX_DIR, exist_ok=True)
     os.makedirs(FORMAT_DIR, exist_ok=True)
     os.makedirs(PROFILE_DIR, exist_ok=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
