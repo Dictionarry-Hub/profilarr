@@ -399,10 +399,14 @@ const ResolveConflicts = ({
 
         try {
             const result = await resolveConflict(resolutions);
-            Alert.success('Successfully resolved conflicts');
             if (result.error) {
                 Alert.warning(result.error);
+                return;
             }
+
+            Alert.success('Successfully resolved conflicts');
+            await fetchGitStatus(); // Add this to refresh the status
+            onClose(); // Close the modal after successful resolution
         } catch (error) {
             Alert.error(error.message || 'Failed to resolve conflicts');
         }
