@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from .status.status import get_git_status
+from .status.commit_history import get_git_commit_history
 from .branches.manager import Branch_Manager
 from .operations.manager import GitOperations
 from .repo.unlink import unlink_repository
@@ -359,3 +360,17 @@ def abort_merge():
     else:
         logger.error(f"Error aborting merge: {message}")
         return jsonify({'success': False, 'error': message}), 400
+
+
+@bp.route('/commits', methods=['GET'])
+def get_commit_history():
+    logger.debug("Received request for commit history")
+    branch = request.args.get('branch')  # Optional branch parameter
+    success, result = get_git_commit_history(REPO_PATH, branch)
+
+    if success:
+        logger.debug("Successfully retrieved commit history")
+        return jsonify({'success': True, 'data': result}), 200
+    else:
+        logger.error(f"Failed to retrieve commit history: {result}")
+        return jsonify({'success': False, 'error': result}), 400

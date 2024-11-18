@@ -278,8 +278,61 @@ const ResolveConflicts = ({
         );
     };
 
+    const renderModifyDeleteConflict = () => {
+        if (change.status !== 'MODIFY_DELETE') return null;
+
+        return renderTable(
+            'File Status Conflict',
+            [
+                {label: 'Status', width: 'w-1/4'},
+                {label: 'Local Version', width: 'w-1/4'},
+                {label: 'Remote Version', width: 'w-1/4'},
+                {label: 'Resolution', width: 'w-1/4'}
+            ],
+            [change.conflict_details.conflicting_parameters[0]], // There's only one parameter for modify/delete
+            ({parameter, local_value, incoming_value}) => (
+                <tr key={parameter} className='border-t border-gray-600'>
+                    <td className='px-4 py-2.5 text-gray-300'>File</td>
+                    <td className='px-4 py-2.5 text-gray-300'>
+                        {local_value === 'deleted' ? 'Deleted' : 'Present'}
+                    </td>
+                    <td className='px-4 py-2.5 text-gray-300'>
+                        {incoming_value === 'deleted' ? 'Deleted' : 'Present'}
+                    </td>
+                    <td className='px-4 py-2.5'>
+                        <select
+                            value={conflictResolutions['file'] || ''}
+                            onChange={e =>
+                                handleResolutionChange('file', e.target.value)
+                            }
+                            className='w-full p-2 bg-gray-700 text-gray-200 rounded'>
+                            <option value='' disabled>
+                                Select
+                            </option>
+                            <option value='local'>
+                                {change.deleted_in_head
+                                    ? 'Keep Deleted'
+                                    : 'Keep File'}
+                            </option>
+                            <option value='incoming'>
+                                {change.deleted_in_head
+                                    ? 'Restore File'
+                                    : 'Delete File'}
+                            </option>
+                        </select>
+                    </td>
+                </tr>
+            )
+        );
+    };
+
     const areAllConflictsResolved = () => {
         if (!isMergeConflict) return true;
+
+        // For modify/delete conflicts, only need to resolve the file status
+        if (change.status === 'MODIFY_DELETE') {
+            return !!conflictResolutions['file'];
+        }
 
         const requiredResolutions = [];
 
@@ -385,9 +438,17 @@ const ResolveConflicts = ({
             title={titleContent}
             width='5xl'>
             <div className='space-y-4'>
-                {renderBasicFields()}
-                {renderCustomFormatConflicts()}
-                {renderTagConflicts()}
+                {change.status === 'MODIFY_DELETE' ? (
+                    // For modify/delete conflicts, only show the file status
+                    renderModifyDeleteConflict()
+                ) : (
+                    // For regular conflicts, show all the existing sections
+                    <>
+                        {renderBasicFields()}
+                        {renderCustomFormatConflicts()}
+                        {renderTagConflicts()}
+                    </>
+                )}
 
                 {isMergeConflict && (
                     <div className='flex justify-end'>

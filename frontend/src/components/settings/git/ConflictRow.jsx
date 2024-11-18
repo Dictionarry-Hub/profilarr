@@ -1,9 +1,11 @@
+// ConflictRow.jsx
 import React, {useState} from 'react';
 import {AlertTriangle, GitMerge, Check, Edit2} from 'lucide-react';
 import Tooltip from '../../ui/Tooltip';
 import ResolveConflicts from './modal/ResolveConflicts';
 
 const ConflictRow = ({change, isDevMode, fetchGitStatus}) => {
+    console.log('ConflictRow change:', JSON.stringify(change, null, 2));
     const [showChanges, setShowChanges] = useState(false);
 
     const handleResolveConflicts = e => {
@@ -21,6 +23,15 @@ const ConflictRow = ({change, isDevMode, fetchGitStatus}) => {
     const displayIncomingName = nameConflict?.incoming_value || 'Unnamed';
 
     const isResolved = change.status === 'RESOLVED';
+
+    // Check if this is a modify/delete conflict
+    const fileConflict = change.conflict_details?.conflicting_parameters?.find(
+        param => param.parameter === 'file'
+    );
+    const isModifyDelete = !!fileConflict;
+
+    // Determine if button should be disabled
+    const isButtonDisabled = isModifyDelete && isResolved;
 
     return (
         <>
@@ -58,12 +69,23 @@ const ConflictRow = ({change, isDevMode, fetchGitStatus}) => {
                 <td className='px-4 py-2 text-left align-middle'>
                     <Tooltip
                         content={
-                            isResolved ? 'Edit resolution' : 'Resolve conflicts'
+                            isButtonDisabled
+                                ? 'Abort to try again'
+                                : isResolved
+                                ? 'Edit resolution'
+                                : 'Resolve conflicts'
                         }>
                         <button
-                            onClick={handleResolveConflicts}
-                            className={`flex items-center justify-center px-2 py-1 rounded hover:bg-gray-700 transition-colors text-xs w-full ${
-                                isResolved
+                            onClick={
+                                isButtonDisabled
+                                    ? undefined
+                                    : handleResolveConflicts
+                            }
+                            disabled={isButtonDisabled}
+                            className={`flex items-center justify-center px-2 py-1 rounded transition-colors text-xs w-full ${
+                                isButtonDisabled
+                                    ? 'bg-gray-500 text-gray-400 cursor-not-allowed'
+                                    : isResolved
                                     ? 'bg-green-600 hover:bg-green-700'
                                     : 'bg-gray-600 hover:bg-gray-700'
                             }`}>
@@ -82,18 +104,19 @@ const ConflictRow = ({change, isDevMode, fetchGitStatus}) => {
                     </Tooltip>
                 </td>
             </tr>
-            <ResolveConflicts
-                key={`${change.file_path}-changes`}
-                isOpen={showChanges}
-                onClose={() => setShowChanges(false)}
-                change={change}
-                isIncoming={false}
-                isMergeConflict={true}
-                fetchGitStatus={fetchGitStatus}
-                isDevMode={isDevMode}
-            />
+            {!isButtonDisabled && (
+                <ResolveConflicts
+                    key={`${change.file_path}-changes`}
+                    isOpen={showChanges}
+                    onClose={() => setShowChanges(false)}
+                    change={change}
+                    isIncoming={false}
+                    isMergeConflict={true}
+                    fetchGitStatus={fetchGitStatus}
+                    isDevMode={isDevMode}
+                />
+            )}
         </>
     );
 };
-
 export default ConflictRow;

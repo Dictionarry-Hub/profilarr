@@ -93,6 +93,28 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
         );
     };
 
+    const formatValue = value => {
+        if (value === null || value === undefined) return '-';
+        if (Array.isArray(value)) {
+            return value
+                .map(item => {
+                    if (
+                        typeof item === 'object' &&
+                        item.id !== undefined &&
+                        item.score !== undefined
+                    ) {
+                        return `Format ${item.id}: ${item.score}`;
+                    }
+                    return String(item);
+                })
+                .join(', ');
+        }
+        if (typeof value === 'object') {
+            return JSON.stringify(value);
+        }
+        return String(value);
+    };
+
     const renderChanges = () => {
         const isNewFile = change.status === 'New';
 
@@ -157,15 +179,15 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
                         </td>
                         {isNewFile ? (
                             <td className='px-4 py-2.5 text-gray-300'>
-                                {to ?? value ?? '-'}
+                                {formatValue(value)}
                             </td>
                         ) : (
                             <>
                                 <td className='px-4 py-2.5 text-gray-300'>
-                                    {from ?? '-'}
+                                    {formatValue(from)}
                                 </td>
                                 <td className='px-4 py-2.5 text-gray-300'>
-                                    {to ?? value ?? '-'}
+                                    {formatValue(to ?? value)}
                                 </td>
                             </>
                         )}

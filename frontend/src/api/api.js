@@ -479,3 +479,32 @@ export const abortMerge = async () => {
         throw error;
     }
 };
+
+export const getCommitHistory = async (branch = null) => {
+    try {
+        const url = new URL(`${API_BASE_URL}/git/commits`);
+        if (branch) {
+            url.searchParams.append('branch', branch);
+        }
+
+        const response = await axios.get(url.toString(), {
+            validateStatus: status => {
+                return (status >= 200 && status < 300) || status === 400;
+            }
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching commit history:', error);
+        if (error.response?.data) {
+            return {
+                success: false,
+                error: error.response.data.error
+            };
+        }
+        return {
+            success: false,
+            error: 'Failed to fetch commit history'
+        };
+    }
+};
