@@ -5,7 +5,9 @@ from .regex import bp as regex_bp
 from .format import bp as format_bp
 from .profile import bp as profile_bp
 from .git import bp as git_bp
+from .arr import bp as arr_bp
 from .settings_utils import create_empty_settings_if_not_exists, load_settings
+from .db import init_db
 
 REGEX_DIR = os.path.join('data', 'db', 'regex_patterns')
 FORMAT_DIR = os.path.join('data', 'db', 'custom_formats')
@@ -21,11 +23,14 @@ def create_app():
     initialize_directories()
     create_empty_settings_if_not_exists()
 
+    init_db()
+
     # Register Blueprints
     app.register_blueprint(regex_bp)
     app.register_blueprint(format_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(git_bp)
+    app.register_blueprint(arr_bp)
 
     # Add settings route
     @app.route('/settings', methods=['GET'])

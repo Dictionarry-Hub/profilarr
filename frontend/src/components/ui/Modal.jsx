@@ -41,37 +41,36 @@ function Modal({
 
     const widthClasses = {
         auto: 'w-auto max-w-[60%]',
-        sm: 'max-w-sm',
-        md: 'max-w-md',
-        lg: 'max-w-lg',
-        xl: 'max-w-xl',
-        '2xl': 'max-w-2xl',
-        '3xl': 'max-w-3xl',
-        '4xl': 'max-w-4xl',
-        '5xl': 'max-w-5xl',
-        '6xl': 'max-w-6xl',
-        '7xl': 'max-w-7xl',
-        full: 'max-w-full',
-        screen: 'max-w-screen',
-        'screen-sm': 'max-w-screen-sm',
-        'screen-md': 'max-w-screen-md',
-        'screen-lg': 'max-w-screen-lg',
-        'screen-xl': 'max-w-screen-xl',
-        'screen-2xl': 'max-w-screen-2xl'
+        sm: 'w-[384px]', // 24rem
+        md: 'w-[448px]', // 28rem
+        lg: 'w-[512px]', // 32rem
+        xl: 'w-[576px]', // 36rem
+        '2xl': 'w-[672px]', // 42rem
+        '3xl': 'w-[768px]', // 48rem
+        '4xl': 'w-[896px]', // 56rem
+        '5xl': 'w-[1024px]', // 64rem
+        '6xl': 'w-[1152px]', // 72rem
+        '7xl': 'w-[1280px]', // 80rem
+        full: 'w-full',
+        'screen-sm': 'w-screen-sm',
+        'screen-md': 'w-screen-md',
+        'screen-lg': 'w-screen-lg',
+        'screen-xl': 'w-screen-xl',
+        'screen-2xl': 'w-screen-2xl'
     };
 
     const heightClasses = {
-        auto: 'max-h-screen',
-        sm: 'max-h-64',
-        md: 'max-h-96',
-        lg: 'max-h-128',
-        xl: 'max-h-160',
-        '2xl': 'max-h-192',
-        '3xl': 'max-h-224',
-        '4xl': 'max-h-256',
-        '5xl': 'max-h-288',
-        '6xl': 'max-h-320',
-        full: 'max-h-full'
+        auto: 'h-auto',
+        sm: 'h-[384px]', // 24rem
+        md: 'h-[448px]', // 28rem
+        lg: 'h-[512px]', // 32rem
+        xl: 'h-[576px]', // 36rem
+        '2xl': 'h-[672px]', // 42rem
+        '3xl': 'h-[768px]', // 48rem
+        '4xl': 'h-[896px]', // 56rem
+        '5xl': 'h-[1024px]', // 64rem
+        '6xl': 'h-[1152px]', // 72rem
+        full: 'h-full'
     };
 
     return (
@@ -88,17 +87,16 @@ function Modal({
                 style={{zIndex: 1000 + level * 10}}></div>
             <div
                 ref={modalRef}
-                className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl ${
-                    widthClasses[width]
-                } ${
+                className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl 
+                min-w-[320px] min-h-[200px] ${widthClasses[width]} ${
                     heightClasses[height]
-                } transition-all duration-300 ease-out transform ${
-                    isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-                }`}
+                } 
+                transition-all duration-300 ease-out transform 
+                ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} 
+                overflow-visible`}
                 style={{
                     zIndex: 1001 + level * 10,
-                    overflowY: 'auto',
-                    maxHeight: maxHeight
+                    maxHeight: maxHeight || '80vh'
                 }}
                 onClick={e => e.stopPropagation()}>
                 <div className='flex justify-between items-center px-6 py-4 pb-3 border-b border-gray-300 dark:border-gray-700'>

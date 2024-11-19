@@ -246,7 +246,8 @@ const SettingsBranchModal = ({
             isOpen={isOpen}
             onClose={onClose}
             title='Manage Git Branches'
-            size='4xl'>
+            width='xl'
+            height='auto'>
             <div className='space-y-6'>
                 <div className='relative mb-4'>
                     <input

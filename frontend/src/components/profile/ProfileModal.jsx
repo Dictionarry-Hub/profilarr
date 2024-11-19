@@ -265,7 +265,12 @@ function ProfileModal({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={modalTitle}
+            height='4xl'
+            width='6xl'>
             {loading ? (
                 <div className='flex justify-center items-center'>
                     <Loader size={24} className='animate-spin text-gray-300' />
