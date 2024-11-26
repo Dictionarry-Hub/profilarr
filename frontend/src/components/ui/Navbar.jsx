@@ -78,7 +78,7 @@ function Navbar({darkMode, setDarkMode}) {
 
     return (
         <nav className='bg-gray-800 shadow-md'>
-            <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative'>
+            <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative'>
                 <div className='flex items-center justify-between h-16'>
                     <div className='flex items-center space-x-8'>
                         <h1 className='text-2xl font-bold text-white'>

@@ -25,12 +25,36 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
     }, []);
 
     const parseKey = param => {
+        // If the key contains colons, handle as a structured key
+        if (param.includes(':')) {
+            return param; // Already formatted from backend
+        }
+
+        // For single term keys, handle compound terms specially
+        const specialTerms = {
+            minimumcustomformatscore: 'Minimum Custom Format Score',
+            minscoreincrement: 'Minimum Score Increment',
+            upgradeuntilscore: 'Upgrade Until Score',
+            upgradesallowed: 'Upgrades Allowed',
+            customformat: 'Custom Format',
+            qualitygroup: 'Quality Group'
+        };
+
+        // Check if it's a special term
+        const lowerKey = param.toLowerCase();
+        if (specialTerms[lowerKey]) {
+            return specialTerms[lowerKey];
+        }
+
+        // If the key already has spaces, preserve existing capitalization
+        if (param.includes(' ')) {
+            return param;
+        }
+
+        // Default handling for simple keys - preserve original capitalization
         return param
             .split('_')
-            .map(
-                word =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            )
+            .map(word => word) // Keep original capitalization
             .join(' ');
     };
 
@@ -208,7 +232,7 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
             isOpen={isOpen}
             onClose={onClose}
             title={titleContent}
-            width='5xl'>
+            width='7xl'>
             <div className='space-y-4'>
                 {change.commit_message && (
                     <DiffCommit commitMessage={change.commit_message} />

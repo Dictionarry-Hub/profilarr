@@ -1,10 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
 export const getRegexes = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/regex`);
+        const response = await axios.get(`/api/regex`);
         return response.data;
     } catch (error) {
         console.error('Error fetching regexes:', error);
@@ -14,7 +12,7 @@ export const getRegexes = async () => {
 
 export const saveRegex = async regex => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/regex`, regex);
+        const response = await axios.post(`/api/regex`, regex);
         return response.data;
     } catch (error) {
         console.error('Error saving regex:', error);
@@ -24,7 +22,7 @@ export const saveRegex = async regex => {
 
 export const updateRegex = async (id, regex) => {
     try {
-        const response = await axios.put(`${API_BASE_URL}/regex/${id}`, regex);
+        const response = await axios.put(`/api/regex/${id}`, regex);
         return response.data;
     } catch (error) {
         console.error('Error updating regex:', error);
@@ -35,7 +33,7 @@ export const updateRegex = async (id, regex) => {
 export const deleteRegex = async (id, force = false) => {
     try {
         const response = await axios.delete(
-            `${API_BASE_URL}/regex/${id}${force ? '?force=true' : ''}`,
+            `/api/regex/${id}${force ? '?force=true' : ''}`,
             {
                 validateStatus: status => {
                     return (
@@ -55,7 +53,7 @@ export const deleteRegex = async (id, force = false) => {
 
 export const getFormats = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/format`);
+        const response = await axios.get(`/api/format`);
         return response.data;
     } catch (error) {
         console.error('Error fetching formats:', error);
@@ -65,7 +63,7 @@ export const getFormats = async () => {
 
 export const saveFormat = async format => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/format`, format);
+        const response = await axios.post(`/api/format`, format);
         return response.data;
     } catch (error) {
         console.error('Error saving format:', error);
@@ -75,10 +73,7 @@ export const saveFormat = async format => {
 
 export const updateFormat = async (id, format) => {
     try {
-        const response = await axios.put(
-            `${API_BASE_URL}/format/${id}`,
-            format
-        );
+        const response = await axios.put(`/api/format/${id}`, format);
         return response.data;
     } catch (error) {
         console.error('Error updating format:', error);
@@ -89,7 +84,7 @@ export const updateFormat = async (id, format) => {
 export const deleteFormat = async (id, force = false) => {
     try {
         const response = await axios.delete(
-            `${API_BASE_URL}/format/${id}${force ? '?force=true' : ''}`,
+            `/api/format/${id}${force ? '?force=true' : ''}`,
             {
                 validateStatus: status => {
                     return (
@@ -109,10 +104,7 @@ export const deleteFormat = async (id, force = false) => {
 
 export const createRegex101Link = async regexData => {
     try {
-        const response = await axios.post(
-            `${API_BASE_URL}/regex/regex101`,
-            regexData
-        );
+        const response = await axios.post(`/api/regex/regex101`, regexData);
         return response.data;
     } catch (error) {
         console.error('Error creating regex101 link:', error);
@@ -122,7 +114,7 @@ export const createRegex101Link = async regexData => {
 
 export const getSettings = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/settings`);
+        const response = await axios.get(`/api/settings`);
         return response.data;
     } catch (error) {
         console.error('Error fetching settings:', error);
@@ -132,7 +124,7 @@ export const getSettings = async () => {
 
 export const getGitStatus = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/git/status`);
+        const response = await axios.get(`/api/git/status`);
         // Ensure has_unpushed_commits is included in the response
         return {
             ...response.data,
@@ -150,7 +142,7 @@ export const getGitStatus = async () => {
 
 export const getBranches = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/git/branches`);
+        const response = await axios.get(`/api/git/branches`);
         return response.data;
     } catch (error) {
         console.error('Error fetching branches:', error);
@@ -161,7 +153,7 @@ export const getBranches = async () => {
 export const checkoutBranch = async branchName => {
     try {
         const response = await axios.post(
-            `${API_BASE_URL}/git/checkout`,
+            `/api/git/checkout`,
             {
                 branch: branchName
             },
@@ -185,7 +177,7 @@ export const checkoutBranch = async branchName => {
 export const createBranch = async (branchName, baseBranch) => {
     try {
         const response = await axios.post(
-            `${API_BASE_URL}/git/branch`,
+            `/api/git/branch`,
             {
                 name: branchName,
                 base: baseBranch
@@ -209,18 +201,15 @@ export const createBranch = async (branchName, baseBranch) => {
 
 export const deleteBranch = async branchName => {
     try {
-        const response = await axios.delete(
-            `${API_BASE_URL}/git/branch/${branchName}`,
-            {
-                validateStatus: status => {
-                    return (
-                        (status >= 200 && status < 300) ||
-                        status === 400 ||
-                        status === 409
-                    );
-                }
+        const response = await axios.delete(`/api/git/branch/${branchName}`, {
+            validateStatus: status => {
+                return (
+                    (status >= 200 && status < 300) ||
+                    status === 400 ||
+                    status === 409
+                );
             }
-        );
+        });
         return response.data;
     } catch (error) {
         console.error('Error deleting branch:', error);
@@ -231,7 +220,7 @@ export const deleteBranch = async branchName => {
 export const pushBranchToRemote = async branchName => {
     try {
         const response = await axios.post(
-            `${API_BASE_URL}/git/branch/push`,
+            `/api/git/branch/push`,
             {
                 branch: branchName
             },
@@ -254,7 +243,7 @@ export const pushBranchToRemote = async branchName => {
 
 export const addFiles = async files => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/stage`, {files});
+        const response = await axios.post(`/api/git/stage`, {files});
         return response.data;
     } catch (error) {
         console.error('Error staging files:', error);
@@ -264,7 +253,7 @@ export const addFiles = async files => {
 
 export const unstageFiles = async files => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/unstage`, {
+        const response = await axios.post(`/api/git/unstage`, {
             files
         });
         return response.data;
@@ -276,7 +265,7 @@ export const unstageFiles = async files => {
 
 export const commitFiles = async (files, commitMessage) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/commit`, {
+        const response = await axios.post(`/api/git/commit`, {
             files,
             commit_message: commitMessage
         });
@@ -289,7 +278,7 @@ export const commitFiles = async (files, commitMessage) => {
 
 export const pushFiles = async () => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/push`);
+        const response = await axios.post(`/api/git/push`);
         return response.data;
     } catch (error) {
         // Pass through the structured error from the backend
@@ -307,7 +296,7 @@ export const pushFiles = async () => {
 };
 export const revertFile = async filePath => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/revert`, {
+        const response = await axios.post(`/api/git/revert`, {
             file_path: filePath
         });
         return response.data;
@@ -319,7 +308,7 @@ export const revertFile = async filePath => {
 
 export const revertAll = async () => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/revert-all`);
+        const response = await axios.post(`/api/git/revert-all`);
         return response.data;
     } catch (error) {
         console.error('Error reverting all changes:', error);
@@ -329,7 +318,7 @@ export const revertAll = async () => {
 
 export const deleteFile = async filePath => {
     try {
-        const response = await axios.delete(`${API_BASE_URL}/git/file`, {
+        const response = await axios.delete(`/api/git/file`, {
             data: {file_path: filePath}
         });
         return response.data;
@@ -341,7 +330,7 @@ export const deleteFile = async filePath => {
 
 export const pullBranch = async branchName => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/pull`, {
+        const response = await axios.post(`/api/git/pull`, {
             branch: branchName
         });
         return response.data;
@@ -364,7 +353,7 @@ export const pullBranch = async branchName => {
 
 export const cloneRepo = async gitRepo => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/clone`, {
+        const response = await axios.post(`/api/git/clone`, {
             gitRepo
         });
         return response.data;
@@ -376,7 +365,7 @@ export const cloneRepo = async gitRepo => {
 
 export const getProfiles = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/profile`);
+        const response = await axios.get(`/api/profile`);
         return response.data;
     } catch (error) {
         console.error('Error fetching profiles:', error);
@@ -386,7 +375,7 @@ export const getProfiles = async () => {
 
 export const saveProfile = async profile => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/profile`, profile);
+        const response = await axios.post(`/api/profile`, profile);
         return response.data;
     } catch (error) {
         console.error('Error saving profile:', error);
@@ -396,10 +385,7 @@ export const saveProfile = async profile => {
 
 export const updateProfile = async (id, profile) => {
     try {
-        const response = await axios.put(
-            `${API_BASE_URL}/profile/${id}`,
-            profile
-        );
+        const response = await axios.put(`/api/profile/${id}`, profile);
         return response.data;
     } catch (error) {
         console.error('Error updating profile:', error);
@@ -409,7 +395,7 @@ export const updateProfile = async (id, profile) => {
 
 export const deleteProfile = async id => {
     try {
-        const response = await axios.delete(`${API_BASE_URL}/profile/${id}`);
+        const response = await axios.delete(`/api/profile/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting profile:', error);
@@ -419,7 +405,7 @@ export const deleteProfile = async id => {
 
 export const unlinkRepo = async (removeFiles = false) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/unlink`, {
+        const response = await axios.post(`/api/git/unlink`, {
             removeFiles
         });
         return response.data;
@@ -431,7 +417,7 @@ export const unlinkRepo = async (removeFiles = false) => {
 
 export const checkDevMode = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/git/dev`);
+        const response = await axios.get(`/api/git/dev`);
         return response.data;
     } catch (error) {
         console.error('Error checking dev mode:', error);
@@ -441,7 +427,7 @@ export const checkDevMode = async () => {
 
 export const resolveConflict = async resolutions => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/resolve`, {
+        const response = await axios.post(`/api/git/resolve`, {
             resolutions
         });
         return response.data;
@@ -453,7 +439,7 @@ export const resolveConflict = async resolutions => {
 
 export const finalizeMerge = async () => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/merge/finalize`);
+        const response = await axios.post(`/api/git/merge/finalize`);
         return response.data;
     } catch (error) {
         console.error('Error finalizing merge:', error);
@@ -472,7 +458,7 @@ export const finalizeMerge = async () => {
 
 export const abortMerge = async () => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/git/merge/abort`);
+        const response = await axios.post(`/api/git/merge/abort`);
         return response.data;
     } catch (error) {
         console.error('Error aborting merge:', error);
@@ -480,19 +466,13 @@ export const abortMerge = async () => {
     }
 };
 
-export const getCommitHistory = async (branch = null) => {
+export const getCommitHistory = async () => {
     try {
-        const url = new URL(`${API_BASE_URL}/git/commits`);
-        if (branch) {
-            url.searchParams.append('branch', branch);
-        }
-
-        const response = await axios.get(url.toString(), {
+        const response = await axios.get('/api/git/commits', {
             validateStatus: status => {
                 return (status >= 200 && status < 300) || status === 400;
             }
         });
-
         return response.data;
     } catch (error) {
         console.error('Error fetching commit history:', error);

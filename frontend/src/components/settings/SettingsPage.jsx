@@ -20,7 +20,7 @@ import {
     statusLoadingMessages,
     noChangesMessages,
     getRandomMessage
-} from '../../utils/messages';
+} from '../../constants/messages';
 
 const SettingsPage = () => {
     const [settings, setSettings] = useState(null);

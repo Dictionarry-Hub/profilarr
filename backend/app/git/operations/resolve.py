@@ -1,13 +1,22 @@
-# git/operations/resolve.py
-
 import yaml
 from git import GitCommandError
 import logging
 from typing import Dict, Any
 import os
 from copy import deepcopy
+from ...data.utils import CATEGORY_MAP
 
 logger = logging.getLogger(__name__)
+
+
+def determine_type(file_path):
+    if 'regex_patterns' in file_path:
+        return 'Regex Pattern'
+    elif 'custom_formats' in file_path:
+        return 'Custom Format'
+    elif 'profiles' in file_path:
+        return 'Quality Profile'
+    return 'Unknown'
 
 
 def get_version_data(repo, ref, file_path):
@@ -158,20 +167,16 @@ def resolve_conflicts(
                 # Handle each resolution field
                 for field, choice in field_resolutions.items():
                     if field.startswith('custom_format_'):
-                        try:
-                            cf_id = int(field.split('_')[-1])
-                        except ValueError:
-                            raise Exception(
-                                f"Invalid custom_format ID in field: {field}")
+                        format_name = field[len('custom_format_'):]
 
                         ours_cf = next(
                             (item
                              for item in ours_data.get('custom_formats', [])
-                             if item['id'] == cf_id), None)
+                             if item['name'] == format_name), None)
                         theirs_cf = next(
                             (item
                              for item in theirs_data.get('custom_formats', [])
-                             if item['id'] == cf_id), None)
+                             if item['name'] == format_name), None)
 
                         if choice == 'local' and ours_cf:
                             resolved_cf = ours_cf
@@ -183,13 +188,13 @@ def resolve_conflicts(
                             discarded_values[field] = ours_cf
                         else:
                             raise Exception(
-                                f"Invalid choice or missing custom_format ID {cf_id}"
+                                f"Invalid choice or missing custom format {format_name}"
                             )
 
                         resolved_cf_list = resolved_data.get(
                             'custom_formats', [])
                         for idx, item in enumerate(resolved_cf_list):
-                            if item['id'] == cf_id:
+                            if item['name'] == format_name:
                                 resolved_cf_list[idx] = resolved_cf
                                 break
                         else:
@@ -240,6 +245,22 @@ def resolve_conflicts(
                         else:
                             raise Exception(
                                 f"Invalid choice for field: {field}")
+
+                # Get file type and apply appropriate field ordering
+                file_type = determine_type(file_path)
+                if file_type == 'Quality Profile':
+                    _, fields = CATEGORY_MAP['profile']
+                elif file_type == 'Custom Format':
+                    _, fields = CATEGORY_MAP['custom_format']
+                elif file_type == 'Regex Pattern':
+                    _, fields = CATEGORY_MAP['regex_pattern']
+
+                # Order the fields according to the category's field order
+                ordered_data = {
+                    field: resolved_data.get(field)
+                    for field in fields if field in resolved_data
+                }
+                resolved_data = ordered_data
 
                 # Write resolved version
                 full_path = os.path.join(repo.working_dir, file_path)

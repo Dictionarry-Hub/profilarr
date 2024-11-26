@@ -281,13 +281,9 @@ const ViewCommits = ({isOpen, onClose, repoUrl, currentBranch}) => {
                     )}
                 </div>
             }
-            width='screen-xl'
-            height='lg'>
-            <div className='space-y-4'>
-                <div className='overflow-y-auto max-h-[60vh]'>
-                    {renderContent()}
-                </div>
-            </div>
+            width='4xl'
+            height='6xl'>
+            {renderContent()}
         </Modal>
     );
 };

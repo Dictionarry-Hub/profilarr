@@ -17,7 +17,7 @@ import ConflictTable from './ConflictTable';
 import CommitSection from './CommitMessage';
 import Modal from '../../ui/Modal';
 import Tooltip from '../../ui/Tooltip';
-import {getRandomMessage, noChangesMessages} from '../../../utils/messages';
+import {getRandomMessage, noChangesMessages} from '../../../constants/messages';
 import IconButton from '../../ui/IconButton';
 import {abortMerge, finalizeMerge} from '../../../api/api';
 import Alert from '../../ui/Alert';

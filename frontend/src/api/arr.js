@@ -1,11 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
 export const pingService = async (url, apiKey, type) => {
     try {
         const response = await axios.post(
-            `${API_BASE_URL}/arr/ping`,
+            `/api/arr/ping`,
             {
                 url,
                 apiKey,
@@ -35,7 +33,7 @@ export const pingService = async (url, apiKey, type) => {
 
 export const saveArrConfig = async config => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/arr/config`, config);
+        const response = await axios.post(`/api/arr/config`, config);
         return response.data;
     } catch (error) {
         console.error('Error saving arr config:', error);
@@ -45,7 +43,7 @@ export const saveArrConfig = async config => {
 
 export const getArrConfigs = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/arr/config`);
+        const response = await axios.get(`/api/arr/config`);
         console.log('Raw axios response:', response);
         console.log('Response data:', response.data);
         return response.data; // This is correct - don't change this
@@ -57,10 +55,7 @@ export const getArrConfigs = async () => {
 
 export const updateArrConfig = async (id, config) => {
     try {
-        const response = await axios.put(
-            `${API_BASE_URL}/arr/config/${id}`,
-            config
-        );
+        const response = await axios.put(`/api/arr/config/${id}`, config);
         return response.data;
     } catch (error) {
         console.error('Error updating arr config:', error);
@@ -70,7 +65,7 @@ export const updateArrConfig = async (id, config) => {
 
 export const deleteArrConfig = async id => {
     try {
-        const response = await axios.delete(`${API_BASE_URL}/arr/config/${id}`);
+        const response = await axios.delete(`/api/arr/config/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting arr config:', error);

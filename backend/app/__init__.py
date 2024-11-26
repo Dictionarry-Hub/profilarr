@@ -6,6 +6,7 @@ from .format import bp as format_bp
 from .profile import bp as profile_bp
 from .git import bp as git_bp
 from .arr import bp as arr_bp
+from .data import bp as data_bp
 from .settings_utils import create_empty_settings_if_not_exists, load_settings
 from .db import init_db
 
@@ -30,6 +31,7 @@ def create_app():
     app.register_blueprint(format_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(git_bp)
+    app.register_blueprint(data_bp)
     app.register_blueprint(arr_bp)
 
     # Add settings route

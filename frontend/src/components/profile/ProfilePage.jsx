@@ -3,7 +3,8 @@ import {useNavigate} from 'react-router-dom';
 import ProfileCard from './ProfileCard';
 import ProfileModal from './ProfileModal';
 import AddNewCard from '../ui/AddNewCard';
-import {getProfiles, getFormats, getGitStatus} from '../../api/api';
+import {getGitStatus} from '../../api/api';
+import {Profiles, CustomFormats} from '@api/data';
 import FilterMenu from '../ui/FilterMenu';
 import SortMenu from '../ui/SortMenu';
 import {Loader} from 'lucide-react';
@@ -35,32 +36,6 @@ function ProfilePage() {
         fetchGitStatus();
     }, []);
 
-    const fetchProfiles = async () => {
-        try {
-            const fetchedProfiles = await getProfiles();
-            setProfiles(fetchedProfiles);
-            const tags = [
-                ...new Set(
-                    fetchedProfiles.flatMap(profile => profile.tags || [])
-                )
-            ];
-            setAllTags(tags);
-        } catch (error) {
-            console.error('Error fetching profiles:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const fetchFormats = async () => {
-        try {
-            const fetchedFormats = await getFormats();
-            setFormats(fetchedFormats);
-        } catch (error) {
-            console.error('Error fetching formats:', error);
-        }
-    };
-
     const fetchGitStatus = async () => {
         try {
             const result = await getGitStatus();
@@ -76,6 +51,47 @@ function ProfilePage() {
         } catch (error) {
             console.error('Error fetching Git status:', error);
             setIsLoading(false);
+        }
+    };
+
+    const fetchProfiles = async () => {
+        try {
+            const response = await Profiles.getAll();
+            const profilesData = response.map(item => ({
+                file_name: item.file_name,
+                modified_date: item.modified_date,
+                created_date: item.created_date,
+                content: {
+                    ...item.content,
+                    name: item.file_name.replace('.yml', '')
+                }
+            }));
+            setProfiles(profilesData);
+            const tags = [
+                ...new Set(
+                    profilesData.flatMap(profile => profile.content.tags || [])
+                )
+            ];
+            setAllTags(tags);
+        } catch (error) {
+            console.error('Error fetching profiles:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const fetchFormats = async () => {
+        try {
+            const response = await CustomFormats.getAll();
+            const formatsData = response.map(item => ({
+                id: item.content.name, // Use name as ID
+                name: item.content.name,
+                description: item.content.description || '',
+                tags: item.content.tags || []
+            }));
+            setFormats(formatsData);
+        } catch (error) {
+            console.error('Error fetching formats:', error);
         }
     };
 
@@ -195,15 +211,15 @@ function ProfilePage() {
                     allTags={allTags}
                 />
             </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4'>
                 {sortedAndFilteredProfiles.map(profile => (
                     <ProfileCard
-                        key={profile.id}
+                        key={profile.file_name}
                         profile={profile}
                         onEdit={() => handleOpenModal(profile)}
                         onClone={handleCloneProfile}
-                        showDate={sortBy !== 'name'}
                         formatDate={formatDate}
+                        sortBy={sortBy}
                     />
                 ))}
                 <AddNewCard onAdd={() => handleOpenModal()} />

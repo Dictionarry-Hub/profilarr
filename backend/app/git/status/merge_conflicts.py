@@ -99,7 +99,7 @@ def process_modify_delete_conflict(repo, file_path, deleted_in_head):
         conflict_details = {
             'conflicting_parameters': [{
                 'parameter':
-                'file',
+                'File',
                 'local_value':
                 'deleted' if deleted_in_head else existing_data,
                 'incoming_value':
@@ -142,26 +142,16 @@ def process_conflict_file(repo, file_path):
 
         conflict_details = {'conflicting_parameters': []}
 
-        # Find conflicting fields
-        for key in set(ours_data.keys()) | set(theirs_data.keys()):
-            if key == 'date_modified':
-                continue
-
-            ours_value = ours_data.get(key)
-            theirs_value = theirs_data.get(key)
-
-            if ours_value != theirs_value:
-                logger.debug(
-                    f"Found conflict in {key} - Local: {ours_value}, Incoming: {theirs_value}"
-                )
-                conflict_details['conflicting_parameters'].append({
-                    'parameter':
-                    key,
-                    'local_value':
-                    ours_value,
-                    'incoming_value':
-                    theirs_value
-                })
+        # Process based on file type
+        if file_path.startswith('profiles/'):
+            detailed_conflicts = compare_quality_profile(
+                ours_data, theirs_data)
+            conflict_details['conflicting_parameters'].extend(
+                detailed_conflicts)
+        else:
+            detailed_conflicts = compare_generic(ours_data, theirs_data)
+            conflict_details['conflicting_parameters'].extend(
+                detailed_conflicts)
 
         # Check if file still has unmerged status
         status_output = repo.git.status('--porcelain', file_path)
@@ -183,6 +173,251 @@ def process_conflict_file(repo, file_path):
         logger.error(f"Error processing conflict file {file_path}: {str(e)}",
                      exc_info=True)
         return None
+
+
+def compare_quality_profile(ours_data, theirs_data):
+    """Compare quality profile fields for conflicts"""
+    conflicts = []
+
+    # Simple fields with consistent capitalization
+    simple_fields = {
+        'name': 'Name',
+        'description': 'Description',
+        'language': 'Language',
+        'minCustomFormatScore': 'Minimum Custom Format Score',
+        'minScoreIncrement': 'Minimum Score Increment',
+        'upgradeUntilScore': 'Upgrade Until Score',
+        'upgradesAllowed': 'Upgrades Allowed'
+    }
+
+    for field, display_name in simple_fields.items():
+        ours_value = ours_data.get(field)
+        theirs_value = theirs_data.get(field)
+        if ours_value != theirs_value:
+            conflicts.append({
+                'parameter': display_name,
+                'local_value': ours_value,
+                'incoming_value': theirs_value
+            })
+
+    # Compare qualities
+    ours_qualities = ours_data.get('qualities', [])
+    theirs_qualities = theirs_data.get('qualities', [])
+    if ours_qualities != theirs_qualities:
+        conflicts.extend(compare_qualities(ours_qualities, theirs_qualities))
+
+    # Compare custom formats
+    ours_formats = ours_data.get('custom_formats', [])
+    theirs_formats = theirs_data.get('custom_formats', [])
+    if ours_formats != theirs_formats:
+        conflicts.extend(compare_custom_formats(ours_formats, theirs_formats))
+
+    # Compare tags
+    ours_tags = ours_data.get('tags', [])
+    theirs_tags = theirs_data.get('tags', [])
+    if ours_tags != theirs_tags:
+        conflicts.extend(compare_tags(ours_tags, theirs_tags))
+
+    # Compare upgrade_until
+    ours_upgrade = ours_data.get('upgrade_until', {})
+    theirs_upgrade = theirs_data.get('upgrade_until', {})
+    if ours_upgrade != theirs_upgrade:
+        conflicts.extend(compare_upgrade_until(ours_upgrade, theirs_upgrade))
+
+    return conflicts
+
+
+def compare_qualities(ours_qualities, theirs_qualities):
+    """Compare quality groups for conflicts"""
+    conflicts = []
+
+    # Create lookup dictionaries
+    ours_dict = {quality.get('name'): quality for quality in ours_qualities}
+    theirs_dict = {
+        quality.get('name'): quality
+        for quality in theirs_qualities
+    }
+
+    # Find added/removed qualities
+    ours_names = set(ours_dict.keys())
+    theirs_names = set(theirs_dict.keys())
+
+    # Track additions
+    for name in (theirs_names - ours_names):
+        conflicts.append({
+            'parameter': 'Quality Group',
+            'local_value': None,
+            'incoming_value': name
+        })
+
+    # Track removals
+    for name in (ours_names - theirs_names):
+        conflicts.append({
+            'parameter': 'Quality Group',
+            'local_value': name,
+            'incoming_value': None
+        })
+
+    # Compare common qualities
+    for name in (ours_names & theirs_names):
+        ours_quality = ours_dict[name]
+        theirs_quality = theirs_dict[name]
+
+        # Compare description
+        if ours_quality.get('description') != theirs_quality.get(
+                'description'):
+            conflicts.append({
+                'parameter':
+                f'Quality Group: {name}: Description',
+                'local_value':
+                ours_quality.get('description'),
+                'incoming_value':
+                theirs_quality.get('description')
+            })
+
+        # Compare nested qualities
+        ours_nested = {
+            q.get('name'): q
+            for q in ours_quality.get('qualities', [])
+        }
+        theirs_nested = {
+            q.get('name'): q
+            for q in theirs_quality.get('qualities', [])
+        }
+
+        nested_ours = set(ours_nested.keys())
+        nested_theirs = set(theirs_nested.keys())
+
+        for nested_name in (nested_theirs - nested_ours):
+            conflicts.append({
+                'parameter': f'Quality Group: {name}: Quality',
+                'local_value': None,
+                'incoming_value': nested_name
+            })
+
+        for nested_name in (nested_ours - nested_theirs):
+            conflicts.append({
+                'parameter': f'Quality Group: {name}: Quality',
+                'local_value': nested_name,
+                'incoming_value': None
+            })
+
+    return conflicts
+
+
+def compare_custom_formats(ours_formats, theirs_formats):
+    """Compare custom formats for conflicts"""
+    conflicts = []
+
+    # Create lookup dictionaries
+    ours_dict = {fmt.get('name'): fmt.get('score') for fmt in ours_formats}
+    theirs_dict = {fmt.get('name'): fmt.get('score') for fmt in theirs_formats}
+
+    ours_names = set(ours_dict.keys())
+    theirs_names = set(theirs_dict.keys())
+
+    # Track additions
+    for name in (theirs_names - ours_names):
+        conflicts.append({
+            'parameter': 'Custom Format',
+            'local_value': None,
+            'incoming_value': {
+                'name': name,
+                'score': theirs_dict[name]
+            }
+        })
+
+    # Track removals
+    for name in (ours_names - theirs_names):
+        conflicts.append({
+            'parameter': 'Custom Format',
+            'local_value': {
+                'name': name,
+                'score': ours_dict[name]
+            },
+            'incoming_value': None
+        })
+
+    # Compare scores for existing formats
+    for name in (ours_names & theirs_names):
+        if ours_dict[name] != theirs_dict[name]:
+            conflicts.append({
+                'parameter': f'Custom Format: {name}: Score',
+                'local_value': ours_dict[name],
+                'incoming_value': theirs_dict[name]
+            })
+
+    return conflicts
+
+
+def compare_tags(ours_tags, theirs_tags):
+    """Compare tags for conflicts"""
+    conflicts = []
+    ours_set = set(ours_tags or [])
+    theirs_set = set(theirs_tags or [])
+
+    if added := (theirs_set - ours_set):
+        for tag in sorted(added):
+            conflicts.append({
+                'parameter': f'Tags: {tag}',
+                'local_value': False,
+                'incoming_value': True
+            })
+
+    if removed := (ours_set - theirs_set):
+        for tag in sorted(removed):
+            conflicts.append({
+                'parameter': f'Tags: {tag}',
+                'local_value': True,
+                'incoming_value': False
+            })
+
+    return conflicts
+
+
+def compare_upgrade_until(ours_upgrade, theirs_upgrade):
+    """Compare upgrade_until objects for conflicts"""
+    conflicts = []
+
+    # Compare name
+    if ours_upgrade.get('name') != theirs_upgrade.get('name'):
+        conflicts.append({
+            'parameter': 'Upgrade Until: Name',
+            'local_value': ours_upgrade.get('name'),
+            'incoming_value': theirs_upgrade.get('name')
+        })
+
+    # Compare description
+    if ours_upgrade.get('description') != theirs_upgrade.get('description'):
+        conflicts.append({
+            'parameter': 'Upgrade Until: Description',
+            'local_value': ours_upgrade.get('description'),
+            'incoming_value': theirs_upgrade.get('description')
+        })
+
+    return conflicts
+
+
+def compare_generic(ours_data, theirs_data):
+    """Compare generic files for conflicts"""
+    conflicts = []
+    all_keys = set(ours_data.keys()).union(set(theirs_data.keys()))
+
+    for key in all_keys:
+        if key == 'date_modified':
+            continue
+
+        ours_value = ours_data.get(key)
+        theirs_value = theirs_data.get(key)
+
+        if ours_value != theirs_value:
+            conflicts.append({
+                'parameter': key.title(),
+                'local_value': ours_value,
+                'incoming_value': theirs_value
+            })
+
+    return conflicts
 
 
 def get_version_data(repo, ref, file_path):

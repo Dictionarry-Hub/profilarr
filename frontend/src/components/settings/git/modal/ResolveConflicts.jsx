@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import Modal from '../../../ui/Modal';
-import DiffCommit from './DiffCommit';
 import Tooltip from '../../../ui/Tooltip';
 import Alert from '../../../ui/Alert';
 import {getFormats, resolveConflict} from '../../../../api/api';
@@ -47,21 +46,6 @@ const ResolveConflicts = ({
         }));
     };
 
-    const parseKey = param => {
-        return param
-            .split('_')
-            .map(
-                word =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            )
-            .join(' ');
-    };
-
-    const formatDate = dateString => {
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    };
-
     const renderTable = (title, headers, data, renderRow) => {
         if (!data || data.length === 0) return null;
 
@@ -93,7 +77,14 @@ const ResolveConflicts = ({
     };
 
     const renderBasicFields = () => {
-        const basicFields = ['name', 'description'];
+        const basicFields = [
+            'Description',
+            'Language',
+            'Minimum Custom Format Score',
+            'Minimum Score Increment',
+            'Upgrade Until Score',
+            'Upgrades Allowed'
+        ];
         const conflicts = change.conflict_details.conflicting_parameters.filter(
             param => basicFields.includes(param.parameter)
         );
@@ -111,19 +102,20 @@ const ResolveConflicts = ({
             conflicts,
             ({parameter, local_value, incoming_value}) => (
                 <tr key={parameter} className='border-t border-gray-600'>
-                    <td className='px-4 py-2.5 text-gray-300'>
-                        {parseKey(parameter)}
-                    </td>
+                    <td className='px-4 py-2.5 text-gray-300'>{parameter}</td>
                     <td className='px-4 py-2.5 text-gray-300'>{local_value}</td>
                     <td className='px-4 py-2.5 text-gray-300'>
                         {incoming_value}
                     </td>
                     <td className='px-4 py-2.5'>
                         <select
-                            value={conflictResolutions[parameter] || ''}
+                            value={
+                                conflictResolutions[parameter.toLowerCase()] ||
+                                ''
+                            }
                             onChange={e =>
                                 handleResolutionChange(
-                                    parameter,
+                                    parameter.toLowerCase(),
                                     e.target.value
                                 )
                             }
@@ -143,35 +135,12 @@ const ResolveConflicts = ({
     const renderCustomFormatConflicts = () => {
         if (change.type !== 'Quality Profile') return null;
 
-        const formatConflict =
-            change.conflict_details.conflicting_parameters.find(
-                param => param.parameter === 'custom_formats'
+        const formatConflicts =
+            change.conflict_details.conflicting_parameters.filter(param =>
+                param.parameter.startsWith('Custom Format:')
             );
 
-        if (!formatConflict) return null;
-
-        const changedFormats = [];
-        const localFormats = formatConflict.local_value;
-        const incomingFormats = formatConflict.incoming_value;
-
-        // Compare and find changed scores
-        localFormats.forEach(localFormat => {
-            const incomingFormat = incomingFormats.find(
-                f => f.id === localFormat.id
-            );
-            if (incomingFormat && incomingFormat.score !== localFormat.score) {
-                changedFormats.push({
-                    id: localFormat.id,
-                    name:
-                        formatNames[localFormat.id] ||
-                        `Format ${localFormat.id}`,
-                    local_score: localFormat.score,
-                    incoming_score: incomingFormat.score
-                });
-            }
-        });
-
-        if (changedFormats.length === 0) return null;
+        if (formatConflicts.length === 0) return null;
 
         return renderTable(
             'Custom Format Conflicts',
@@ -181,60 +150,54 @@ const ResolveConflicts = ({
                 {label: 'Incoming Score', width: 'w-1/4'},
                 {label: 'Resolution', width: 'w-1/4'}
             ],
-            changedFormats,
-            ({id, name, local_score, incoming_score}) => (
-                <tr key={id} className='border-t border-gray-600'>
-                    <td className='px-4 py-2.5 text-gray-300'>{name}</td>
-                    <td className='px-4 py-2.5 text-gray-300'>{local_score}</td>
-                    <td className='px-4 py-2.5 text-gray-300'>
-                        {incoming_score}
-                    </td>
-                    <td className='px-4 py-2.5'>
-                        <select
-                            value={
-                                conflictResolutions[`custom_format_${id}`] || ''
-                            }
-                            onChange={e =>
-                                handleResolutionChange(
-                                    `custom_format_${id}`,
-                                    e.target.value
-                                )
-                            }
-                            className='w-full p-2 bg-gray-700 text-gray-200 rounded'>
-                            <option value='' disabled>
-                                Select
-                            </option>
-                            <option value='local'>Keep Local Score</option>
-                            <option value='incoming'>
-                                Accept Incoming Score
-                            </option>
-                        </select>
-                    </td>
-                </tr>
-            )
+            formatConflicts,
+            ({parameter, local_value, incoming_value}) => {
+                const formatName = parameter.split(':')[1].trim();
+                const resolutionKey = `custom_format_${formatName}`;
+
+                return (
+                    <tr key={parameter} className='border-t border-gray-600'>
+                        <td className='px-4 py-2.5 text-gray-300'>
+                            {formatName}
+                        </td>
+                        <td className='px-4 py-2.5 text-gray-300'>
+                            {local_value}
+                        </td>
+                        <td className='px-4 py-2.5 text-gray-300'>
+                            {incoming_value}
+                        </td>
+                        <td className='px-4 py-2.5'>
+                            <select
+                                value={conflictResolutions[resolutionKey] || ''}
+                                onChange={e =>
+                                    handleResolutionChange(
+                                        resolutionKey,
+                                        e.target.value
+                                    )
+                                }
+                                className='w-full p-2 bg-gray-700 text-gray-200 rounded'>
+                                <option value='' disabled>
+                                    Select
+                                </option>
+                                <option value='local'>Keep Local Score</option>
+                                <option value='incoming'>
+                                    Accept Incoming Score
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                );
+            }
         );
     };
 
     const renderTagConflicts = () => {
-        const tagConflict = change.conflict_details.conflicting_parameters.find(
-            param => param.parameter === 'tags'
-        );
+        const tagConflicts =
+            change.conflict_details.conflicting_parameters.filter(param =>
+                param.parameter.startsWith('Tags:')
+            );
 
-        if (!tagConflict) return null;
-
-        const localTags = new Set(tagConflict.local_value);
-        const incomingTags = new Set(tagConflict.incoming_value);
-        const allTags = [...new Set([...localTags, ...incomingTags])];
-
-        const tagDiffs = allTags
-            .filter(tag => localTags.has(tag) !== incomingTags.has(tag))
-            .map(tag => ({
-                tag,
-                local_status: localTags.has(tag) ? 'present' : 'absent',
-                incoming_status: incomingTags.has(tag) ? 'present' : 'absent'
-            }));
-
-        if (tagDiffs.length === 0) return null;
+        if (tagConflicts.length === 0) return null;
 
         return renderTable(
             'Tag Conflicts',
@@ -244,37 +207,42 @@ const ResolveConflicts = ({
                 {label: 'Incoming Status', width: 'w-1/4'},
                 {label: 'Resolution', width: 'w-1/4'}
             ],
-            tagDiffs,
-            ({tag, local_status, incoming_status}) => (
-                <tr key={tag} className='border-t border-gray-600'>
-                    <td className='px-4 py-2.5 text-gray-300'>{tag}</td>
-                    <td className='px-4 py-2.5 text-gray-300'>
-                        {local_status}
-                    </td>
-                    <td className='px-4 py-2.5 text-gray-300'>
-                        {incoming_status}
-                    </td>
-                    <td className='px-4 py-2.5'>
-                        <select
-                            value={conflictResolutions[`tag_${tag}`] || ''}
-                            onChange={e =>
-                                handleResolutionChange(
-                                    `tag_${tag}`,
-                                    e.target.value
-                                )
-                            }
-                            className='w-full p-2 bg-gray-700 text-gray-200 rounded'>
-                            <option value='' disabled>
-                                Select
-                            </option>
-                            <option value='local'>Keep Local Status</option>
-                            <option value='incoming'>
-                                Accept Incoming Status
-                            </option>
-                        </select>
-                    </td>
-                </tr>
-            )
+            tagConflicts,
+            ({parameter, local_value, incoming_value}) => {
+                const tagName = parameter.split(':')[1].trim();
+                const resolutionKey = `tag_${tagName}`;
+
+                return (
+                    <tr key={parameter} className='border-t border-gray-600'>
+                        <td className='px-4 py-2.5 text-gray-300'>{tagName}</td>
+                        <td className='px-4 py-2.5 text-gray-300'>
+                            {local_value.toString()}
+                        </td>
+                        <td className='px-4 py-2.5 text-gray-300'>
+                            {incoming_value.toString()}
+                        </td>
+                        <td className='px-4 py-2.5'>
+                            <select
+                                value={conflictResolutions[resolutionKey] || ''}
+                                onChange={e =>
+                                    handleResolutionChange(
+                                        resolutionKey,
+                                        e.target.value
+                                    )
+                                }
+                                className='w-full p-2 bg-gray-700 text-gray-200 rounded'>
+                                <option value='' disabled>
+                                    Select
+                                </option>
+                                <option value='local'>Keep Local Status</option>
+                                <option value='incoming'>
+                                    Accept Incoming Status
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                );
+            }
         );
     };
 
@@ -289,7 +257,7 @@ const ResolveConflicts = ({
                 {label: 'Remote Version', width: 'w-1/4'},
                 {label: 'Resolution', width: 'w-1/4'}
             ],
-            [change.conflict_details.conflicting_parameters[0]], // There's only one parameter for modify/delete
+            [change.conflict_details.conflicting_parameters[0]],
             ({parameter, local_value, incoming_value}) => (
                 <tr key={parameter} className='border-t border-gray-600'>
                     <td className='px-4 py-2.5 text-gray-300'>File</td>
@@ -334,70 +302,37 @@ const ResolveConflicts = ({
             return !!conflictResolutions['file'];
         }
 
-        const requiredResolutions = [];
+        // For all other conflicts, every parameter needs a resolution
+        return change.conflict_details.conflicting_parameters.every(
+            ({parameter}) => {
+                // Convert backend parameter name to resolution key format
+                let resolutionKey = parameter;
 
-        // Basic fields
-        change.conflict_details.conflicting_parameters
-            .filter(param => ['name', 'description'].includes(param.parameter))
-            .forEach(param => requiredResolutions.push(param.parameter));
-
-        // Custom formats (only for Quality Profiles)
-        if (change.type === 'Quality Profile') {
-            const formatConflict =
-                change.conflict_details.conflicting_parameters.find(
-                    param => param.parameter === 'custom_formats'
-                );
-
-            if (formatConflict) {
-                const localFormats = formatConflict.local_value;
-                const incomingFormats = formatConflict.incoming_value;
-
-                localFormats.forEach(localFormat => {
-                    const incomingFormat = incomingFormats.find(
-                        f => f.id === localFormat.id
-                    );
-                    if (
-                        incomingFormat &&
-                        incomingFormat.score !== localFormat.score
-                    ) {
-                        requiredResolutions.push(
-                            `custom_format_${localFormat.id}`
-                        );
-                    }
-                });
-            }
-        }
-
-        // Tags
-        const tagConflict = change.conflict_details.conflicting_parameters.find(
-            param => param.parameter === 'tags'
-        );
-
-        if (tagConflict) {
-            const localTags = new Set(tagConflict.local_value);
-            const incomingTags = new Set(tagConflict.incoming_value);
-            const allTags = [...new Set([...localTags, ...incomingTags])];
-
-            allTags.forEach(tag => {
-                if (localTags.has(tag) !== incomingTags.has(tag)) {
-                    requiredResolutions.push(`tag_${tag}`);
+                // Check for known prefixes and convert appropriately
+                if (parameter.startsWith('Custom Format: ')) {
+                    // Extract the format ID from something like "Custom Format: 123: Score"
+                    const formatId = parameter.split(': ')[1].split(':')[0];
+                    resolutionKey = `custom_format_${formatId}`;
+                } else if (parameter.startsWith('Tags: ')) {
+                    // Extract just the tag name from "Tags: tagname"
+                    const tagName = parameter.split(': ')[1];
+                    resolutionKey = `tag_${tagName}`;
+                } else {
+                    // Convert other parameters to lowercase for basic fields
+                    resolutionKey = parameter.toLowerCase();
                 }
-            });
-        }
 
-        return requiredResolutions.every(key => conflictResolutions[key]);
+                return !!conflictResolutions[resolutionKey];
+            }
+        );
     };
 
     const handleResolveConflicts = async () => {
-        console.log('File path:', change.file_path);
-
-        const resolutions = {
-            [change.file_path]: conflictResolutions
-        };
-
-        console.log('Sending resolutions:', resolutions);
-
         try {
+            const resolutions = {
+                [change.file_path]: conflictResolutions
+            };
+
             const result = await resolveConflict(resolutions);
             if (result.error) {
                 Alert.warning(result.error);
@@ -405,14 +340,13 @@ const ResolveConflicts = ({
             }
 
             Alert.success('Successfully resolved conflicts');
-            await fetchGitStatus(); // Add this to refresh the status
-            onClose(); // Close the modal after successful resolution
+            await fetchGitStatus();
+            onClose();
         } catch (error) {
             Alert.error(error.message || 'Failed to resolve conflicts');
         }
     };
 
-    // Title with status indicator
     const titleContent = (
         <div className='flex items-center space-x-2'>
             <span className='text-lg font-bold'>
@@ -443,10 +377,8 @@ const ResolveConflicts = ({
             width='5xl'>
             <div className='space-y-4'>
                 {change.status === 'MODIFY_DELETE' ? (
-                    // For modify/delete conflicts, only show the file status
                     renderModifyDeleteConflict()
                 ) : (
-                    // For regular conflicts, show all the existing sections
                     <>
                         {renderBasicFields()}
                         {renderCustomFormatConflicts()}

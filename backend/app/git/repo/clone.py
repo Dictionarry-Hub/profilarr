@@ -53,31 +53,39 @@ def clone_repository(repo_url, repo_path):
                 logger.info(f"Creating missing folder: {folder_name}")
                 os.makedirs(folder_path)
 
-            cloned_files = [
-                f for f in os.listdir(folder_path) if f.endswith('.yml')
-            ]
-            cloned_ids = set(int(f.split('.')[0]) for f in cloned_files)
+            # Get existing files from cloned repo
+            cloned_files = set(
+                f.replace('.yml', '') for f in os.listdir(folder_path)
+                if f.endswith('.yml'))
 
             if os.path.exists(backup_folder_path):
                 local_files = [
                     f for f in os.listdir(backup_folder_path)
                     if f.endswith('.yml')
                 ]
+
                 for file_name in local_files:
                     old_file_path = os.path.join(backup_folder_path, file_name)
                     with open(old_file_path, 'r') as file:
                         data = yaml.safe_load(file)
 
-                    while data['id'] in cloned_ids:
-                        data['id'] += 1
+                    # Use name as the identifier
+                    base_name = data['name']
+                    new_name = base_name
+                    counter = 1
 
-                    cloned_ids.add(data['id'])
+                    # If name exists, append a number
+                    while new_name in cloned_files:
+                        new_name = f"{base_name} ({counter})"
+                        counter += 1
 
-                    new_file_name = f"{data['id']}_{data['name'].replace(' ', '_').lower()}.yml"
-                    new_file_path = os.path.join(folder_path, new_file_name)
+                    cloned_files.add(new_name)
+
+                    new_file_path = os.path.join(folder_path,
+                                                 f"{new_name}.yml")
                     with open(new_file_path, 'w') as file:
                         yaml.dump(data, file)
-                    logger.info(f"Merged local file: {new_file_name}")
+                    logger.info(f"Merged local file: {new_name}.yml")
 
         if os.path.exists(backup_dir):
             logger.info(f"Removing backup directory: {backup_dir}")

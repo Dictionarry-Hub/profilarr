@@ -1,11 +1,17 @@
 import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
-import {saveProfile, deleteProfile} from '../../api/api';
+import {Profiles} from '@api/data';
 import Modal from '../ui/Modal';
-import Alert from '../ui/Alert';
-import {Loader, ArrowUp, ArrowDown} from 'lucide-react';
+import Alert from '@ui/Alert';
+import {Loader} from 'lucide-react';
+import ProfileGeneralTab from './ProfileGeneralTab';
+import ProfileScoringTab from './ProfileScoringTab';
+import ProfileQualitiesTab from './ProfileQualitiesTab';
+import ProfileLanguagesTab from './ProfileLangaugesTab';
+import QUALITIES from '../../constants/qualities';
 
 function unsanitize(text) {
+    if (!text) return '';
     return text.replace(/\\:/g, ':').replace(/\\n/g, '\n');
 }
 
@@ -17,23 +23,50 @@ function ProfileModal({
     formats,
     isCloning = false
 }) {
+    // General state
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [tags, setTags] = useState([]);
-    const [newTag, setNewTag] = useState('');
-    const [customFormats, setCustomFormats] = useState([]);
-    const [formatTags, setFormatTags] = useState([]);
-    const [tagScores, setTagScores] = useState({});
-    const [tagFilter, setTagFilter] = useState('');
-    const [formatFilter, setFormatFilter] = useState('');
     const [error, setError] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [modalTitle, setModalTitle] = useState('');
+
+    // Tags state
+    const [tags, setTags] = useState([]);
+
+    // Format scoring state
+    const [customFormats, setCustomFormats] = useState([]);
+    const [formatTags, setFormatTags] = useState([]);
+    const [formatFilter, setFormatFilter] = useState('');
     const [formatSortKey, setFormatSortKey] = useState('score');
     const [formatSortDirection, setFormatSortDirection] = useState('desc');
+
+    // Tag scoring state
+    const [tagScores, setTagScores] = useState({});
+    const [tagFilter, setTagFilter] = useState('');
     const [tagSortKey, setTagSortKey] = useState('name');
     const [tagSortDirection, setTagSortDirection] = useState('desc');
+
+    // Upgrade state
+    const [upgradesAllowed, setUpgradesAllowed] = useState(false);
+    const [minCustomFormatScore, setMinCustomFormatScore] = useState(0);
+    const [upgradeUntilScore, setUpgradeUntilScore] = useState(0);
+    const [minScoreIncrement, setMinScoreIncrement] = useState(0);
+
+    // Quality state
+    const [enabledQualities, setEnabledQualities] = useState([]);
+    const [selectedUpgradeQuality, setSelectedUpgradeQuality] = useState(null);
+    const [sortedQualities, setSortedQualities] = useState([]);
+
+    // Language state
+    const [selectedLanguage, setSelectedLanguage] = useState('any');
+
+    const tabs = [
+        {id: 'general', label: 'General'},
+        {id: 'scoring', label: 'Scoring'},
+        {id: 'qualities', label: 'Qualities'},
+        {id: 'languages', label: 'Languages'}
+    ];
 
     useEffect(() => {
         if (isOpen) {
@@ -42,84 +75,328 @@ function ProfileModal({
             setModalTitle(
                 isCloning
                     ? 'Clone Profile'
-                    : initialProfile && initialProfile.id !== 0
+                    : initialProfile
                     ? 'Edit Profile'
                     : 'Add Profile'
             );
 
-            setName(unsanitize(initialProfile?.name || ''));
-            setDescription(unsanitize(initialProfile?.description || ''));
-            setTags(
-                initialProfile?.tags ? initialProfile.tags.map(unsanitize) : []
-            );
+            if (initialProfile?.content) {
+                const content = initialProfile.content;
+                // Basic info
+                setName(unsanitize(content.name || ''));
+                setDescription(unsanitize(content.description || ''));
+                setTags(content.tags?.map(unsanitize) || []);
 
-            const initialCustomFormats = initialProfile?.custom_formats || [];
-            const safeCustomFormats = formats.map(format => {
-                const existingFormat = initialCustomFormats.find(
-                    cf => cf.id === format.id
+                // Upgrade settings
+                setUpgradesAllowed(content.upgradesAllowed || false);
+                setMinCustomFormatScore(
+                    Number(content.minCustomFormatScore || 0)
                 );
-                return {
-                    id: format.id,
+                setUpgradeUntilScore(Number(content.upgradeUntilScore || 0));
+                setMinScoreIncrement(Number(content.minScoreIncrement || 0));
+
+                // Custom formats setup
+                const initialCustomFormats = content.custom_formats || [];
+                const safeCustomFormats = formats.map(format => ({
+                    id: format.name,
                     name: format.name,
-                    score: existingFormat ? existingFormat.score : 0,
-                    tags: format.tags || [],
-                    date_created: format.date_created,
-                    date_modified: format.date_modified
-                };
-            });
-            setCustomFormats(safeCustomFormats);
+                    score:
+                        initialCustomFormats.find(cf => cf.name === format.name)
+                            ?.score || 0,
+                    tags: format.tags || []
+                }));
+                setCustomFormats(safeCustomFormats);
 
-            const allTags = [
-                ...new Set(safeCustomFormats.flatMap(format => format.tags))
-            ];
-            setFormatTags(allTags);
+                // Format tags
+                const allTags = [
+                    ...new Set(
+                        safeCustomFormats.flatMap(format => format.tags || [])
+                    )
+                ];
+                setFormatTags(allTags);
 
-            const initialTagScores = {};
-            allTags.forEach(tag => {
-                initialTagScores[tag] = 0;
-            });
-            setTagScores(initialTagScores);
+                // Tag scores
+                const initialTagScores = {};
+                allTags.forEach(tag => {
+                    initialTagScores[tag] = 0;
+                });
+                setTagScores(initialTagScores);
 
-            setError('');
-            setNewTag('');
+                // Qualities setup - include all qualities, set enabled status
+                const allQualitiesMap = {}; // Map of all qualities by id
+                QUALITIES.forEach(quality => {
+                    allQualitiesMap[quality.id] = {...quality, enabled: false};
+                });
+
+                let newSortedQualities = [];
+
+                if (content.qualities && content.qualities.length > 0) {
+                    // Process the qualities from content.qualities
+                    content.qualities.forEach(q => {
+                        if (q.qualities) {
+                            // It's a group
+                            const groupQualities = q.qualities
+                                .map(subQ => {
+                                    const quality = allQualitiesMap[subQ.id];
+                                    if (quality) {
+                                        quality.enabled = true;
+                                        return quality;
+                                    }
+                                    return null;
+                                })
+                                .filter(Boolean);
+
+                            newSortedQualities.push({
+                                id: q.id,
+                                name: q.name,
+                                description: q.description, // Changed: removed || '' to preserve null/undefined
+                                qualities: groupQualities,
+                                enabled: true
+                            });
+
+                            // Remove sub qualities from allQualitiesMap
+                            q.qualities.forEach(subQ => {
+                                delete allQualitiesMap[subQ.id];
+                            });
+                        } else {
+                            // It's a single quality
+                            const quality = allQualitiesMap[q.id];
+                            if (quality) {
+                                quality.enabled = true;
+                                newSortedQualities.push(quality);
+                                delete allQualitiesMap[q.id];
+                            }
+                        }
+                    });
+                }
+
+                // Now, add the remaining qualities from allQualitiesMap
+                newSortedQualities = newSortedQualities.concat(
+                    Object.values(allQualitiesMap)
+                );
+                setSortedQualities(newSortedQualities);
+
+                // Now, set enabledQualities
+                const enabledQualities = [];
+                newSortedQualities.forEach(q => {
+                    if (q.enabled) {
+                        if ('qualities' in q) {
+                            enabledQualities.push(...q.qualities);
+                        } else {
+                            enabledQualities.push(q);
+                        }
+                    }
+                });
+                setEnabledQualities(enabledQualities);
+
+                // Set selected upgrade quality
+                if (content.upgrade_until) {
+                    // Find existing quality or group that matches the upgrade_until
+                    let foundQuality = null;
+
+                    // Search through sorted qualities
+                    for (const quality of newSortedQualities) {
+                        if (quality.id === content.upgrade_until.id) {
+                            // Direct match
+                            foundQuality = quality;
+                            break;
+                        } else if ('qualities' in quality) {
+                            // Check if any quality in the group matches
+                            for (const groupQuality of quality.qualities) {
+                                if (
+                                    groupQuality.id === content.upgrade_until.id
+                                ) {
+                                    foundQuality = quality; // Use the group
+                                    break;
+                                }
+                            }
+                            if (foundQuality) break;
+                        }
+                    }
+
+                    setSelectedUpgradeQuality(foundQuality);
+                }
+
+                // Language
+                setSelectedLanguage(content.language || 'any');
+
+                setError('');
+            } else {
+                // New profile setup
+                const safeCustomFormats = formats.map(format => ({
+                    id: format.name,
+                    name: format.name,
+                    score: 0,
+                    tags: format.tags || []
+                }));
+                setCustomFormats(safeCustomFormats);
+
+                // Format tags
+                const allTags = [
+                    ...new Set(
+                        safeCustomFormats.flatMap(format => format.tags || [])
+                    )
+                ];
+                setFormatTags(allTags);
+
+                // Tag scores
+                const initialTagScores = {};
+                allTags.forEach(tag => {
+                    initialTagScores[tag] = 0;
+                });
+                setTagScores(initialTagScores);
+
+                // New profile - set default quality
+                const defaultQuality = QUALITIES.find(
+                    q => q.name === 'Bluray-1080p'
+                );
+                setSortedQualities(
+                    QUALITIES.map(quality => ({
+                        ...quality,
+                        enabled: quality.id === defaultQuality.id
+                    }))
+                );
+                setEnabledQualities([
+                    {
+                        id: defaultQuality.id,
+                        name: defaultQuality.name
+                    }
+                ]);
+                setSelectedUpgradeQuality({
+                    id: defaultQuality.id,
+                    name: defaultQuality.name
+                });
+            }
+
             setLoading(false);
         }
     }, [initialProfile, isOpen, formats, isCloning]);
 
+    const resetState = () => {
+        setName('');
+        setDescription('');
+        setTags([]);
+        setUpgradesAllowed(false);
+        setMinCustomFormatScore(0);
+        setUpgradeUntilScore(0);
+        setMinScoreIncrement(0);
+        setCustomFormats(
+            formats.map((format, index) => ({
+                id: index, // Assign a unique id if not present
+                name: format.name,
+                score: 0,
+                tags: format.tags || []
+            }))
+        );
+        setFormatTags([]);
+        setTagScores({});
+        setEnabledQualities([]);
+        setSelectedUpgradeQuality(null);
+        setSelectedLanguage('any');
+    };
+
     const handleSave = async () => {
         if (!name.trim()) {
             setError('Name is required.');
+            Alert.error('Please enter a profile name');
             return;
         }
+
         try {
-            await saveProfile({
-                id: initialProfile ? initialProfile.id : 0,
+            const profileData = {
                 name,
                 description,
                 tags,
+                upgradesAllowed,
+                minCustomFormatScore,
+                upgradeUntilScore,
+                minScoreIncrement,
                 custom_formats: customFormats
-            });
+                    .filter(format => format.score !== 0)
+                    .map(format => ({
+                        name: format.name,
+                        score: format.score
+                    })),
+                qualities: sortedQualities
+                    .filter(q => q.enabled)
+                    .map(q => {
+                        if ('qualities' in q) {
+                            return {
+                                id: q.id,
+                                name: q.name,
+                                description: q.description || '',
+                                qualities: q.qualities.map(subQ => ({
+                                    id: subQ.id,
+                                    name: subQ.name
+                                }))
+                            };
+                        } else {
+                            return {
+                                id: q.id,
+                                name: q.name
+                            };
+                        }
+                    }),
+                upgrade_until: selectedUpgradeQuality
+                    ? {
+                          id: selectedUpgradeQuality.id,
+                          name: selectedUpgradeQuality.name,
+                          ...(selectedUpgradeQuality.description && {
+                              description: selectedUpgradeQuality.description
+                          })
+                      }
+                    : null,
+                language: selectedLanguage
+            };
+
+            if (isCloning || !initialProfile) {
+                // Creating new profile
+                const result = await Profiles.create(profileData);
+                if (result.success === false) {
+                    Alert.error(result.message);
+                    setError(result.message);
+                    return;
+                }
+                Alert.success('Profile created successfully');
+            } else {
+                // Updating existing profile
+                const originalName = initialProfile.content.name;
+                const isNameChanged = originalName !== name;
+
+                const result = await Profiles.update(
+                    initialProfile.file_name.replace('.yml', ''),
+                    profileData,
+                    isNameChanged ? name : undefined
+                );
+
+                if (result.success === false) {
+                    Alert.error(result.message);
+                    setError(result.message);
+                    return;
+                }
+                Alert.success('Profile updated successfully');
+            }
+
             onSave();
             onClose();
         } catch (error) {
             console.error('Error saving profile:', error);
-            setError('Failed to save profile. Please try again.');
+            Alert.error('An unexpected error occurred');
+            setError('An unexpected error occurred');
         }
     };
 
     const handleDelete = async () => {
+        if (!initialProfile) return;
+
         if (isDeleting) {
             try {
-                const response = await deleteProfile(initialProfile.id);
-                if (response.error) {
-                    Alert.error(
-                        `Failed to delete profile: ${response.message}`
-                    );
-                } else {
-                    Alert.success('Profile deleted successfully');
-                    onSave();
-                    onClose();
-                }
+                await Profiles.delete(
+                    initialProfile.file_name.replace('.yml', '')
+                );
+                Alert.success('Profile deleted successfully');
+                onSave();
+                onClose();
             } catch (error) {
                 console.error('Error deleting profile:', error);
                 Alert.error('Failed to delete profile. Please try again.');
@@ -131,137 +408,15 @@ function ProfileModal({
         }
     };
 
-    const handleAddTag = () => {
-        if (newTag.trim() && !tags.includes(newTag.trim())) {
-            setTags([...tags, newTag.trim()]);
-            setNewTag('');
-        }
+    // Define the missing functions
+    const onFormatSort = (key, direction) => {
+        setFormatSortKey(key);
+        setFormatSortDirection(direction);
     };
 
-    const handleRemoveTag = tagToRemove => {
-        setTags(tags.filter(tag => tag !== tagToRemove));
-    };
-
-    const handleScoreChange = (formatId, score) => {
-        setCustomFormats(
-            customFormats.map(format =>
-                format.id === formatId
-                    ? {...format, score: Math.max(parseInt(score) || 0, 0)}
-                    : format
-            )
-        );
-    };
-
-    const handleTagScoreChange = (tag, score) => {
-        setTagScores({...tagScores, [tag]: Math.max(parseInt(score) || 0, 0)});
-
-        // Update scores for all custom formats with this tag
-        setCustomFormats(
-            customFormats.map(format => {
-                if (format.tags.includes(tag)) {
-                    return {
-                        ...format,
-                        score: Math.max(parseInt(score) || 0, 0)
-                    };
-                }
-                return format;
-            })
-        );
-    };
-
-    const filteredTags = formatTags.filter(tag =>
-        tag.toLowerCase().includes(tagFilter.toLowerCase())
-    );
-
-    const filteredFormats = customFormats.filter(format =>
-        format.name.toLowerCase().includes(formatFilter.toLowerCase())
-    );
-
-    const handleInputFocus = event => {
-        event.target.select();
-    };
-
-    const sortedFormats = [...filteredFormats].sort((a, b) => {
-        if (formatSortKey === 'name') {
-            return formatSortDirection === 'asc'
-                ? a.name.localeCompare(b.name)
-                : b.name.localeCompare(a.name);
-        } else if (formatSortKey === 'score') {
-            return formatSortDirection === 'asc'
-                ? a.score - b.score
-                : b.score - a.score;
-        } else if (formatSortKey === 'dateCreated') {
-            return formatSortDirection === 'asc'
-                ? new Date(a.date_created) - new Date(b.date_created)
-                : new Date(b.date_created) - new Date(a.date_created);
-        } else if (formatSortKey === 'dateModified') {
-            return formatSortDirection === 'asc'
-                ? new Date(a.date_modified) - new Date(b.date_modified)
-                : new Date(b.date_modified) - new Date(a.date_modified);
-        }
-        return 0;
-    });
-
-    const sortedTags = [...filteredTags].sort((a, b) => {
-        if (tagSortKey === 'name') {
-            return tagSortDirection === 'asc'
-                ? a.localeCompare(b)
-                : b.localeCompare(a);
-        } else if (tagSortKey === 'score') {
-            return tagSortDirection === 'asc'
-                ? tagScores[a] - tagScores[b]
-                : tagScores[b] - tagScores[a];
-        } else if (tagSortKey === 'dateCreated') {
-            return tagSortDirection === 'asc'
-                ? new Date(a.date_created) - new Date(b.date_created)
-                : new Date(b.date_created) - new Date(a.date_created);
-        } else if (tagSortKey === 'dateModified') {
-            return tagSortDirection === 'asc'
-                ? new Date(a.date_modified) - new Date(b.date_modified)
-                : new Date(b.date_modified) - new Date(a.date_modified);
-        }
-        return 0;
-    });
-
-    const SortDropdown = ({options, currentKey, currentDirection, onSort}) => {
-        const [isOpen, setIsOpen] = useState(false);
-
-        const handleSort = key => {
-            if (key === currentKey) {
-                onSort(key, currentDirection === 'asc' ? 'desc' : 'asc');
-            } else {
-                onSort(key, 'desc');
-            }
-            setIsOpen(false);
-        };
-
-        return (
-            <div className='relative'>
-                <button
-                    onClick={() => setIsOpen(!isOpen)}
-                    className='flex items-center space-x-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors'>
-                    <span>Sort</span>
-                    <ArrowDown size={14} />
-                </button>
-                {isOpen && (
-                    <div className='absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg z-10'>
-                        {options.map(option => (
-                            <button
-                                key={option.key}
-                                onClick={() => handleSort(option.key)}
-                                className='block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'>
-                                {option.label}
-                                {currentKey === option.key && (
-                                    <span className='float-right'>
-                                        {currentDirection === 'asc' ? '↑' : '↓'}
-                                    </span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                )}
-            </div>
-        );
+    const onTagSort = (key, direction) => {
+        setTagSortKey(key);
+        setTagSortDirection(direction);
     };
 
     return (
@@ -269,225 +424,132 @@ function ProfileModal({
             isOpen={isOpen}
             onClose={onClose}
             title={modalTitle}
-            height='4xl'
-            width='6xl'>
-            {loading ? (
-                <div className='flex justify-center items-center'>
-                    <Loader size={24} className='animate-spin text-gray-300' />
-                </div>
-            ) : (
-                <>
-                    {error && <div className='text-red-500 mb-4'>{error}</div>}
-                    <div className='grid grid-cols-3 gap-4'>
-                        <div>
-                            <div className='flex justify-between items-center mb-2'>
-                                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                                    Profile Name
-                                </label>
-                                <div
-                                    style={{
-                                        visibility: 'hidden',
-                                        pointerEvents: 'none'
-                                    }}>
-                                    <SortDropdown />
-                                </div>
-                            </div>
-                            <div className='flex justify-between items-center mb-4'>
-                                <input
-                                    type='text'
-                                    value={name}
-                                    onChange={e => setName(e.target.value)}
-                                    placeholder='Enter profile name'
-                                    className='w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600'
-                                />
-                            </div>
-
-                            <div className='mb-4'>
-                                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                                    Description
-                                </label>
-                                <textarea
-                                    value={description}
-                                    onChange={e =>
-                                        setDescription(e.target.value)
-                                    }
-                                    placeholder='Enter description'
-                                    className='w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 resize-none'
-                                    rows='5'
-                                />
-                            </div>
-                            <div className='mb-4'>
-                                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                                    Tags
-                                </label>
-                                <div className='flex flex-wrap mb-2'>
-                                    {tags.map(tag => (
-                                        <span
-                                            key={tag}
-                                            className='bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300'>
-                                            {tag}
-                                            <button
-                                                onClick={() =>
-                                                    handleRemoveTag(tag)
-                                                }
-                                                className='ml-1 text-xs'>
-                                                &times;
-                                            </button>
-                                        </span>
-                                    ))}
-                                </div>
-                                <div className='flex'>
-                                    <input
-                                        type='text'
-                                        value={newTag}
-                                        onChange={e =>
-                                            setNewTag(e.target.value)
-                                        }
-                                        placeholder='Add a tag'
-                                        className='flex-grow p-2 border rounded-l dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600'
-                                    />
-                                    <button
-                                        onClick={handleAddTag}
-                                        className='bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600 transition-colors'>
-                                        Add
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <div className='mb-4'>
-                                <div className='flex justify-between items-center mb-2'>
-                                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                                        Custom Formats
-                                    </label>
-                                    <SortDropdown
-                                        options={[
-                                            {key: 'name', label: 'Name'},
-                                            {key: 'score', label: 'Score'},
-                                            {
-                                                key: 'dateCreated',
-                                                label: 'Date Created'
-                                            },
-                                            {
-                                                key: 'dateModified',
-                                                label: 'Date Modified'
-                                            }
-                                        ]}
-                                        currentKey={formatSortKey}
-                                        currentDirection={formatSortDirection}
-                                        onSort={(key, direction) => {
-                                            setFormatSortKey(key);
-                                            setFormatSortDirection(direction);
-                                        }}
-                                    />
-                                </div>
-                                <input
-                                    onClick={handleInputFocus}
-                                    type='text'
-                                    value={formatFilter}
-                                    onChange={e =>
-                                        setFormatFilter(e.target.value)
-                                    }
-                                    placeholder='Filter formats'
-                                    className='w-full p-2 border rounded mb-2 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600'
-                                />
-                                <div className='max-h-96 overflow-y-auto'>
-                                    {sortedFormats.map(format => (
-                                        <div
-                                            key={format.id}
-                                            className='flex items-center space-x-2 mb-2 p-2 border rounded dark:border-gray-600 dark:bg-gray-700'>
-                                            <span className='flex-grow whitespace-nowrap overflow-hidden text-ellipsis'>
-                                                {format.name}
-                                            </span>
-                                            <input
-                                                onClick={handleInputFocus}
-                                                type='number'
-                                                value={format.score}
-                                                onChange={e =>
-                                                    handleScoreChange(
-                                                        format.id,
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className='w-20 p-1 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600'
-                                                min='0'
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <div className='mb-4'>
-                                <div className='flex justify-between items-center mb-2'>
-                                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                                        Tag-based Scoring
-                                    </label>
-                                    <SortDropdown
-                                        options={[
-                                            {key: 'name', label: 'Name'},
-                                            {key: 'score', label: 'Score'}
-                                        ]}
-                                        currentKey={tagSortKey}
-                                        currentDirection={tagSortDirection}
-                                        onSort={(key, direction) => {
-                                            setTagSortKey(key);
-                                            setTagSortDirection(direction);
-                                        }}
-                                    />
-                                </div>
-                                <input
-                                    onClick={handleInputFocus}
-                                    type='text'
-                                    value={tagFilter}
-                                    onChange={e => setTagFilter(e.target.value)}
-                                    placeholder='Filter tags'
-                                    className='w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:bg-gray-800'
-                                />
-                                <div className='max-h-96 overflow-y-auto'>
-                                    {sortedTags.map(tag => (
-                                        <div
-                                            key={tag}
-                                            className='flex items-center space-x-2 mb-2 p-2 border rounded dark:border-gray-600 dark:bg-gray-700'>
-                                            <span className='flex-grow whitespace-nowrap overflow-hidden text-ellipsis'>
-                                                {tag}
-                                            </span>
-                                            <input
-                                                onClick={handleInputFocus}
-                                                type='number'
-                                                value={tagScores[tag]}
-                                                onChange={e =>
-                                                    handleTagScoreChange(
-                                                        tag,
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className='w-20 p-1 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600'
-                                                min='0'
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex justify-between mt-4'>
-                        {initialProfile && (
-                            <button
-                                onClick={handleDelete}
-                                className={`bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ${
-                                    isDeleting ? 'bg-red-600' : ''
-                                }`}>
-                                {isDeleting ? 'Confirm Delete' : 'Delete'}
-                            </button>
-                        )}
+            height='6xl'
+            width='4xl'
+            tabs={tabs}
+            footer={
+                <div className='flex justify-between'>
+                    {initialProfile && (
                         <button
-                            onClick={handleSave}
-                            className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors'>
-                            Save
+                            onClick={handleDelete}
+                            className={`bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ${
+                                isDeleting ? 'bg-red-600' : ''
+                            }`}>
+                            {isDeleting ? 'Confirm Delete' : 'Delete'}
                         </button>
-                    </div>
-                </>
+                    )}
+                    <button
+                        onClick={handleSave}
+                        className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors'>
+                        Save
+                    </button>
+                </div>
+            }>
+            {activeTab => (
+                <div className='h-full'>
+                    {loading ? (
+                        <div className='flex justify-center items-center'>
+                            <Loader
+                                size={24}
+                                className='animate-spin text-gray-300'
+                            />
+                        </div>
+                    ) : (
+                        <div className='h-full'>
+                            {activeTab === 'general' && (
+                                <ProfileGeneralTab
+                                    name={name}
+                                    description={description}
+                                    upgradesAllowed={upgradesAllowed}
+                                    onNameChange={setName}
+                                    onDescriptionChange={setDescription}
+                                    onUpgradesAllowedChange={setUpgradesAllowed}
+                                    error={error}
+                                    tags={tags}
+                                    onAddTag={tag => setTags([...tags, tag])}
+                                    onRemoveTag={tag =>
+                                        setTags(tags.filter(t => t !== tag))
+                                    }
+                                />
+                            )}
+                            {activeTab === 'scoring' && (
+                                <ProfileScoringTab
+                                    formats={customFormats}
+                                    formatFilter={formatFilter}
+                                    onFormatFilterChange={setFormatFilter}
+                                    onScoreChange={(id, score) => {
+                                        setCustomFormats(prev =>
+                                            prev.map(f =>
+                                                f.id === id ? {...f, score} : f
+                                            )
+                                        );
+                                    }}
+                                    formatSortKey={formatSortKey}
+                                    formatSortDirection={formatSortDirection}
+                                    onFormatSort={onFormatSort}
+                                    tags={formatTags}
+                                    tagFilter={tagFilter}
+                                    onTagFilterChange={setTagFilter}
+                                    tagScores={tagScores}
+                                    onTagScoreChange={(tag, score) => {
+                                        // Update the tag score
+                                        setTagScores(prev => ({
+                                            ...prev,
+                                            [tag]: score
+                                        }));
+
+                                        // Update scores of all formats that have this tag
+                                        setCustomFormats(prev =>
+                                            prev.map(format => {
+                                                if (
+                                                    format.tags?.includes(tag)
+                                                ) {
+                                                    return {
+                                                        ...format,
+                                                        score
+                                                    };
+                                                }
+                                                return format;
+                                            })
+                                        );
+                                    }}
+                                    tagSortKey={tagSortKey}
+                                    tagSortDirection={tagSortDirection}
+                                    onTagSort={onTagSort}
+                                    minCustomFormatScore={minCustomFormatScore}
+                                    upgradeUntilScore={upgradeUntilScore}
+                                    minScoreIncrement={minScoreIncrement}
+                                    onMinScoreChange={setMinCustomFormatScore}
+                                    onUpgradeUntilScoreChange={
+                                        setUpgradeUntilScore
+                                    }
+                                    onMinIncrementChange={setMinScoreIncrement}
+                                />
+                            )}
+                            {activeTab === 'qualities' && (
+                                <ProfileQualitiesTab
+                                    enabledQualities={enabledQualities}
+                                    onQualitiesChange={setEnabledQualities}
+                                    upgradesAllowed={upgradesAllowed}
+                                    selectedUpgradeQuality={
+                                        selectedUpgradeQuality
+                                    }
+                                    onSelectedUpgradeQualityChange={
+                                        setSelectedUpgradeQuality
+                                    }
+                                    sortedQualities={sortedQualities}
+                                    onSortedQualitiesChange={setSortedQualities}
+                                />
+                            )}
+                            {activeTab === 'languages' && (
+                                <ProfileLanguagesTab
+                                    selectedLanguage={selectedLanguage}
+                                    onLanguageChange={setSelectedLanguage}
+                                />
+                            )}
+                        </div>
+                    )}
+                </div>
             )}
         </Modal>
     );
@@ -495,25 +557,47 @@ function ProfileModal({
 
 ProfileModal.propTypes = {
     profile: PropTypes.shape({
-        id: PropTypes.number,
-        name: PropTypes.string,
-        description: PropTypes.string,
-        tags: PropTypes.arrayOf(PropTypes.string),
-        custom_formats: PropTypes.arrayOf(
-            PropTypes.shape({
+        file_name: PropTypes.string,
+        created_date: PropTypes.string,
+        modified_date: PropTypes.string,
+        content: PropTypes.shape({
+            name: PropTypes.string,
+            description: PropTypes.string,
+            tags: PropTypes.arrayOf(PropTypes.string),
+            upgradesAllowed: PropTypes.bool,
+            minCustomFormatScore: PropTypes.number,
+            upgradeUntilScore: PropTypes.number,
+            minScoreIncrement: PropTypes.number,
+            custom_formats: PropTypes.arrayOf(
+                PropTypes.shape({
+                    name: PropTypes.string,
+                    score: PropTypes.number
+                })
+            ),
+            qualities: PropTypes.arrayOf(
+                PropTypes.shape({
+                    id: PropTypes.number.isRequired,
+                    name: PropTypes.string.isRequired,
+                    qualities: PropTypes.arrayOf(
+                        PropTypes.shape({
+                            id: PropTypes.number.isRequired,
+                            name: PropTypes.string.isRequired
+                        })
+                    )
+                })
+            ),
+            upgrade_until: PropTypes.shape({
                 id: PropTypes.number.isRequired,
-                name: PropTypes.string,
-                score: PropTypes.number,
-                tags: PropTypes.arrayOf(PropTypes.string)
-            })
-        )
+                name: PropTypes.string.isRequired
+            }),
+            language: PropTypes.string
+        })
     }),
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     onSave: PropTypes.func.isRequired,
     formats: PropTypes.arrayOf(
         PropTypes.shape({
-            id: PropTypes.number.isRequired,
             name: PropTypes.string.isRequired,
             tags: PropTypes.arrayOf(PropTypes.string)
         })
