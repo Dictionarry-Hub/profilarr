@@ -9,6 +9,7 @@ from .arr import bp as arr_bp
 from .data import bp as data_bp
 from .settings_utils import create_empty_settings_if_not_exists, load_settings
 from .db import init_db
+import logging
 
 REGEX_DIR = os.path.join('data', 'db', 'regex_patterns')
 FORMAT_DIR = os.path.join('data', 'db', 'custom_formats')
@@ -19,6 +20,11 @@ DATA_DIR = '/app/data'
 def create_app():
     app = Flask(__name__)
     CORS(app, resources={r"/*": {"origins": "*"}})
+
+    # Set up logging
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     # Initialize directories and create empty settings file if it doesn't exist
     initialize_directories()

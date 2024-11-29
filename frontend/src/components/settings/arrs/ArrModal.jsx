@@ -37,7 +37,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
         } else {
             setFormData({
                 name: '',
-                type: '',
+                type: 'radarr', // Keep the default value
                 tags: [],
                 profilarrServer: '',
                 arrServer: '',
@@ -89,12 +89,19 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                 const result = await pingService(
                     formData.arrServer,
                     formData.apiKey,
-                    formData.type // Add type
+                    formData.type
                 );
                 if (result.success) {
                     Alert.success('Connection successful!');
                 } else {
-                    Alert.error(`Connection failed: ${result.message}`);
+                    // Check if the error is version related
+                    if (result.message.includes('version')) {
+                        Alert.error(
+                            `Unsupported ${formData.type} version. ${result.message}`
+                        );
+                    } else {
+                        Alert.error(`Connection failed: ${result.message}`);
+                    }
                 }
             } catch (error) {
                 Alert.error('An error occurred while testing the connection.');
@@ -123,9 +130,16 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                 );
 
                 if (!testResult.success) {
-                    Alert.error(
-                        `Connection test failed: ${testResult.message}`
-                    );
+                    // Check if the error is version related
+                    if (testResult.message.includes('version')) {
+                        Alert.error(
+                            `Unsupported ${formData.type} version. ${testResult.message}`
+                        );
+                    } else {
+                        Alert.error(
+                            `Connection test failed: ${testResult.message}`
+                        );
+                    }
                     setSaveConfirm(false);
                     return;
                 }

@@ -6,7 +6,7 @@ from .manager import (save_arr_config, get_all_arr_configs, get_arr_config,
                       update_arr_config, delete_arr_config)
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 bp = Blueprint('arr', __name__, url_prefix='/arr')
 
@@ -16,7 +16,6 @@ bp = Blueprint('arr', __name__, url_prefix='/arr')
 def ping():
     if request.method == 'OPTIONS':
         return jsonify({}), 200
-
     data = request.get_json()
     url = data.get('url')
     api_key = data.get('apiKey')
@@ -28,9 +27,9 @@ def ping():
             'error': 'URL, API key, and type are required'
         }), 400
 
-    logger.debug(f"Attempting to ping URL: {url} of type: {arr_type}")
+    logger.error(f"Attempting to ping URL: {url} of type: {arr_type}")
     success, message = ping_service(url, api_key, arr_type)
-    logger.debug(f"Ping result - Success: {success}, Message: {message}")
+    logger.error(f"Ping result - Success: {success}, Message: {message}")
 
     return jsonify({
         'success': success,
