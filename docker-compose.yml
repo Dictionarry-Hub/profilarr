@@ -19,8 +19,10 @@ services:
             - backend_data:/app/data
         environment:
             - FLASK_ENV=development
+            - TZ=Australia/Adelaide # Add this line
         env_file:
             - .env.1
         restart: always
+
 volumes:
     backend_data:

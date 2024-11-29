@@ -399,7 +399,6 @@ def compare_upgrade_until(ours_upgrade, theirs_upgrade):
 
 
 def compare_generic(ours_data, theirs_data):
-    """Compare generic files for conflicts"""
     conflicts = []
     all_keys = set(ours_data.keys()).union(set(theirs_data.keys()))
 
@@ -411,11 +410,63 @@ def compare_generic(ours_data, theirs_data):
         theirs_value = theirs_data.get(key)
 
         if ours_value != theirs_value:
-            conflicts.append({
-                'parameter': key.title(),
-                'local_value': ours_value,
-                'incoming_value': theirs_value
-            })
+            if key == 'tests':
+                ours_tests = {t['id']: t for t in ours_value or []}
+                theirs_tests = {t['id']: t for t in theirs_value or []}
+
+                # Handle deleted tests
+                for test_id in set(ours_tests) - set(theirs_tests):
+                    conflicts.append({
+                        'parameter': f'Test {test_id}',
+                        'local_value': {
+                            'input': ours_tests[test_id]['input'],
+                            'expected': ours_tests[test_id]['expected']
+                        },
+                        'incoming_value': None
+                    })
+
+                # Handle added tests
+                for test_id in set(theirs_tests) - set(ours_tests):
+                    conflicts.append({
+                        'parameter': f'Test {test_id}',
+                        'local_value': None,
+                        'incoming_value': {
+                            'input': theirs_tests[test_id]['input'],
+                            'expected': theirs_tests[test_id]['expected']
+                        }
+                    })
+
+                # Handle modified tests
+                for test_id in set(ours_tests) & set(theirs_tests):
+                    if ours_tests[test_id] != theirs_tests[test_id]:
+                        ours_test = ours_tests[test_id]
+                        theirs_test = theirs_tests[test_id]
+
+                        if ours_test['input'] != theirs_test['input']:
+                            conflicts.append({
+                                'parameter':
+                                f'Test {test_id} Input',
+                                'local_value':
+                                ours_test['input'],
+                                'incoming_value':
+                                theirs_test['input']
+                            })
+
+                        if ours_test['expected'] != theirs_test['expected']:
+                            conflicts.append({
+                                'parameter':
+                                f'Test {test_id} Expected',
+                                'local_value':
+                                ours_test['expected'],
+                                'incoming_value':
+                                theirs_test['expected']
+                            })
+            else:
+                conflicts.append({
+                    'parameter': key.title(),
+                    'local_value': ours_value,
+                    'incoming_value': theirs_value
+                })
 
     return conflicts
 

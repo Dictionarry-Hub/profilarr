@@ -4,7 +4,7 @@ import os
 import yaml
 from .utils import (get_category_directory, load_yaml_file, validate,
                     save_yaml_file, update_yaml_file, get_file_created_date,
-                    get_file_modified_date)
+                    get_file_modified_date, test_regex_pattern)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -129,3 +129,48 @@ def handle_item(category, name):
     except Exception as e:
         logger.exception("Unexpected error occurred")
         return jsonify({"error": "An unexpected error occurred"}), 500
+
+
+@bp.route('/<string:category>/test', methods=['POST'])
+def run_tests(category):
+    logger.info(f"Received regex test request for category: {category}")
+
+    if category != 'regex_pattern':
+        logger.warning(f"Rejected test request - invalid category: {category}")
+        return jsonify({"error":
+                        "Testing only supported for regex patterns"}), 400
+
+    try:
+        data = request.get_json()
+        if not data:
+            logger.warning("Rejected test request - no JSON data provided")
+            return jsonify({"error": "No JSON data provided"}), 400
+
+        pattern = data.get('pattern')
+        tests = data.get('tests', [])
+
+        logger.info(f"Processing test request - Pattern: {pattern}")
+        logger.info(f"Number of test cases: {len(tests)}")
+
+        if not pattern:
+            logger.warning("Rejected test request - missing pattern")
+            return jsonify({"error": "Pattern is required"}), 400
+
+        if not tests:
+            logger.warning("Rejected test request - no test cases provided")
+            return jsonify({"error":
+                            "At least one test case is required"}), 400
+
+        success, message, updated_tests = test_regex_pattern(pattern, tests)
+        logger.info(f"Test execution completed - Success: {success}")
+
+        if not success:
+            logger.warning(f"Test execution failed - {message}")
+            return jsonify({"success": False, "message": message}), 400
+
+        return jsonify({"success": True, "tests": updated_tests}), 200
+
+    except Exception as e:
+        logger.warning(f"Unexpected error in test endpoint: {str(e)}",
+                       exc_info=True)
+        return jsonify({"success": False, "message": str(e)}), 500

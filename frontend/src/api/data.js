@@ -4,16 +4,9 @@ const BASE_URL = '/api/data';
 
 const handleError = (error, operation) => {
     console.error(`Error ${operation}:`, error);
-    if (error.response?.data) {
-        return {
-            success: false,
-            message: error.response.data.error
-        };
-    }
-    return {
-        success: false,
-        message: `Failed to ${operation}`
-    };
+    const errorMessage =
+        error.response?.data?.error || `Failed to ${operation}`;
+    throw new Error(errorMessage); // Throw instead of returning an error object
 };
 
 // Get all items for a category
@@ -92,6 +85,22 @@ export const RegexPatterns = {
     getAll: () => getAllItems('regex_pattern'),
     get: name => getItem('regex_pattern', name),
     create: data => createItem('regex_pattern', data),
-    update: (name, data) => updateItem('regex_pattern', name, data),
-    delete: name => deleteItem('regex_pattern', name)
+    update: (name, data, newName) =>
+        updateItem('regex_pattern', name, data, newName),
+    delete: name => deleteItem('regex_pattern', name),
+    // Add this new method
+    runTests: async (pattern, tests) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/regex_pattern/test`,
+                {
+                    pattern,
+                    tests
+                }
+            );
+            return response.data;
+        } catch (error) {
+            return handleError(error, 'run tests');
+        }
+    }
 };

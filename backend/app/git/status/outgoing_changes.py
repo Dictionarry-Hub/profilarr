@@ -418,10 +418,8 @@ def compare_upgrade_until(old_upgrade, new_upgrade):
 
 
 def process_generic(old_data, new_data):
-    """Process changes for non-profile files"""
     if old_data is None and new_data is not None:
         return [{'key': 'File', 'change': 'added'}]
-
     if old_data is not None and new_data is None:
         return [{'key': 'File', 'change': 'deleted'}]
 
@@ -433,11 +431,70 @@ def process_generic(old_data, new_data):
         new_value = new_data.get(key)
 
         if old_value != new_value:
-            changes.append({
-                'key': key.title(),  # Capitalize generic keys
-                'change': 'modified',
-                'from': old_value,
-                'to': new_value
-            })
+            if key == 'tests':
+                old_tests = {t['id']: t for t in old_value or []}
+                new_tests = {t['id']: t for t in new_value or []}
+
+                # Handle deleted tests
+                for test_id in set(old_tests) - set(new_tests):
+                    test = old_tests[test_id]
+                    changes.append({
+                        'key': 'Test',
+                        'change': 'deleted',
+                        'from':
+                        f'#{test_id}: "{test["input"]}" (Expected: {test["expected"]})',
+                        'to': None
+                    })
+
+                # Handle added tests
+                for test_id in set(new_tests) - set(old_tests):
+                    test = new_tests[test_id]
+                    changes.append({
+                        'key':
+                        'Test',
+                        'change':
+                        'added',
+                        'from':
+                        None,
+                        'to':
+                        f'#{test_id}: "{test["input"]}" (Expected: {test["expected"]})'
+                    })
+
+                # Handle modified tests
+                for test_id in set(old_tests) & set(new_tests):
+                    if old_tests[test_id] != new_tests[test_id]:
+                        old_test = old_tests[test_id]
+                        new_test = new_tests[test_id]
+
+                        if old_test['input'] != new_test['input']:
+                            changes.append({
+                                'key':
+                                f'Test #{test_id}',
+                                'change':
+                                'modified',
+                                'from':
+                                f'Input: "{old_test["input"]}"',
+                                'to':
+                                f'Input: "{new_test["input"]}"'
+                            })
+
+                        if old_test['expected'] != new_test['expected']:
+                            changes.append({
+                                'key':
+                                f'Test #{test_id}',
+                                'change':
+                                'modified',
+                                'from':
+                                f'Expected: {old_test["expected"]}',
+                                'to':
+                                f'Expected: {new_test["expected"]}'
+                            })
+            else:
+                changes.append({
+                    'key': key.title(),
+                    'change': 'modified',
+                    'from': old_value,
+                    'to': new_value
+                })
 
     return changes

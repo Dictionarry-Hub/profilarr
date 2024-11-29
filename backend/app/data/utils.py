@@ -2,9 +2,10 @@ import os
 import yaml
 import shutil
 import logging
-from typing import Dict, Any, Tuple
 from datetime import datetime
+from typing import Dict, List, Any, Tuple, Union
 import git
+import regex
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ FORMAT_DIR = '/app/data/db/custom_formats'
 PROFILE_DIR = '/app/data/db/profiles'
 
 # Expected fields for each category
-REGEX_FIELDS = ["name", "pattern", "flags"]
+REGEX_FIELDS = ["name", "pattern", "description", "tags", "tests"]
 FORMAT_FIELDS = ["name", "format", "description"]
 PROFILE_FIELDS = [
     "name",
@@ -138,17 +139,29 @@ def update_yaml_file(file_path: str, data: Dict[str, Any],
             # First save the updated content to the current file
             save_yaml_file(file_path, data_to_save, category)
 
-            # Then use git mv for the rename
+            # Check if file is being tracked by git
             repo = git.Repo(REPO_PATH)
-            # Convert to relative paths for git
             rel_old_path = os.path.relpath(file_path, REPO_PATH)
             rel_new_path = os.path.relpath(new_file_path, REPO_PATH)
 
             try:
-                repo.git.mv(rel_old_path, rel_new_path)
+                # Check if file is tracked by git
+                tracked_files = repo.git.ls_files().splitlines()
+                is_tracked = rel_old_path in tracked_files
+
+                if is_tracked:
+                    # Use git mv for tracked files
+                    repo.git.mv(rel_old_path, rel_new_path)
+                else:
+                    # For untracked files, manually move
+                    os.rename(file_path, new_file_path)
+
             except git.GitCommandError as e:
-                logger.error(f"Git mv failed: {e}")
-                raise Exception("Failed to rename file using git mv")
+                logger.error(f"Git operation failed: {e}")
+                raise Exception("Failed to rename file")
+            except OSError as e:
+                logger.error(f"File operation failed: {e}")
+                raise Exception("Failed to rename file")
 
         else:
             # Normal update without rename
@@ -163,3 +176,74 @@ def update_yaml_file(file_path: str, data: Dict[str, Any],
 
     except Exception as e:
         raise
+
+
+def test_regex_pattern(
+        pattern: str,
+        tests: List[Dict[str, Any]]) -> Tuple[bool, str, List[Dict[str, Any]]]:
+    """
+    Test a regex pattern against a list of test cases using PCRE2 compatible engine.
+    
+    Args:
+        pattern: The regex pattern to test
+        tests: List of test dictionaries with 'input', 'expected', 'id', and 'passes' fields
+        
+    Returns:
+        Tuple of (success, message, updated_tests)
+    """
+    logger.info(f"Starting regex pattern test - Pattern: {pattern}")
+
+    try:
+        # Try to compile the regex with PCRE2 compatibility
+        try:
+            compiled_pattern = regex.compile(pattern, regex.V1)
+            logger.info(
+                "Pattern compiled successfully with PCRE2 compatibility")
+        except regex.error as e:
+            logger.warning(f"Invalid regex pattern: {str(e)}")
+            return False, f"Invalid regex pattern: {str(e)}", tests
+
+        current_time = datetime.now().isoformat()
+        logger.info(f"Processing {len(tests)} test cases")
+
+        # Run each test
+        for test in tests:
+            test_id = test.get('id', 'unknown')
+            test_input = test.get('input', '')
+            expected = test.get('expected', False)
+
+            logger.info(
+                f"Running test {test_id} - Input: {test_input}, Expected: {expected}"
+            )
+
+            try:
+                # Test if pattern matches input
+                matches = bool(compiled_pattern.search(test_input))
+                # Update test result
+                test['passes'] = matches == expected
+                test['lastRun'] = current_time
+
+                if test['passes']:
+                    logger.info(
+                        f"Test {test_id} passed - Match result: {matches}")
+                else:
+                    logger.warning(
+                        f"Test {test_id} failed - Expected {expected}, got {matches}"
+                    )
+
+            except Exception as e:
+                logger.warning(f"Error running test {test_id}: {str(e)}")
+                test['passes'] = False
+                test['lastRun'] = current_time
+
+        # Log overall results
+        passed_tests = sum(1 for test in tests if test.get('passes', False))
+        logger.info(
+            f"Test execution complete - {passed_tests}/{len(tests)} tests passed"
+        )
+
+        return True, "", tests
+    except Exception as e:
+        logger.warning(f"Unexpected error in test_regex_pattern: {str(e)}",
+                       exc_info=True)
+        return False, str(e), tests

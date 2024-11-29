@@ -18,7 +18,6 @@ const Modal = ({
 }) => {
     const modalRef = useRef();
     const [activeTab, setActiveTab] = useState(tabs?.[0]?.id);
-
     useEffect(() => {
         if (isOpen && !disableCloseOnEscape) {
             const handleEscape = event => {
@@ -34,10 +33,15 @@ const Modal = ({
     }, [isOpen, onClose, disableCloseOnEscape]);
 
     const handleClickOutside = e => {
+        // Get the current selection
+        const selection = window.getSelection();
+        const hasSelection = selection && selection.toString().length > 0;
+
         if (
             modalRef.current &&
             !modalRef.current.contains(e.target) &&
-            !disableCloseOnOutsideClick
+            !disableCloseOnOutsideClick &&
+            !hasSelection // Don't close if there's text selected
         ) {
             onClose();
         }
