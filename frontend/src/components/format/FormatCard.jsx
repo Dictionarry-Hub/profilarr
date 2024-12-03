@@ -1,78 +1,148 @@
+import React from 'react';
 import PropTypes from 'prop-types';
+import {Copy} from 'lucide-react';
 
-function FormatCard({ format, onEdit, onClone, showDate, formatDate }) {
-  return (
-    <div
-      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500 transition-shadow"
-      onClick={() => onEdit(format)}
-    >
-      <div className="flex justify-between items-center">
-        <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
-          {format.name}
-        </h3>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onClone(format);
-          }}
-          className="relative group"
-        >
-          <img 
-            src="/clone.svg" 
-            alt="Clone" 
-            className="w-5 h-5 transition-transform transform group-hover:scale-125 group-hover:rotate-12 group-hover:-translate-y-1 group-hover:translate-x-1"
-          />
-          <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
-        </button>
-      </div>
-      <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{format.description}</p>
-      {showDate && (
-        <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">
-          Modified: {formatDate(format.date_modified)}
-        </p>
-      )}
-      <div className="flex flex-wrap -m-1 mt-4">
-        {format.conditions.map((condition, index) => (
-          <span
-            key={index}
-            className={`text-xs font-medium inline-block py-1 px-2 rounded m-1 ${
-              condition.negate ? 'bg-red-500 text-white' :
-              condition.required ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'
-            }`}
-            style={{ minHeight: '0.6rem', lineHeight: '0.6rem' }}
-          >
-            {condition.name}
-          </span>
-        ))}
-      </div>
-      <div className="flex flex-wrap mt-2">
-        {format.tags && format.tags.map(tag => (
-          <span key={tag} className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 mb-1 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
-            {tag}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
+function FormatCard({format, onEdit, onClone, sortBy}) {
+    const {content} = format;
+    const totalTests = content.tests?.length || 0;
+    const passedTests = content.tests?.filter(t => t.passes)?.length || 0;
+    const passRate = Math.round((passedTests / totalTests) * 100) || 0;
+
+    const getConditionStyle = condition => {
+        if (condition.required && condition.negate) {
+            return 'bg-orange-100 border-orange-200 text-orange-700 dark:bg-orange-900/30 dark:border-orange-700 dark:text-orange-300';
+        }
+        if (condition.required) {
+            return 'bg-green-100 border-green-200 text-green-700 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300';
+        }
+        if (condition.negate) {
+            return 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300';
+        }
+        return 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300';
+    };
+
+    return (
+        <div
+            className='w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-pointer max-h-96'
+            onClick={() => onEdit(format)}>
+            <div className='flex flex-col p-6 gap-3'>
+                {/* Header Section */}
+                <div className='flex justify-between items-start gap-4'>
+                    <div className='flex-1'>
+                        <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100 truncate'>
+                            {content.name}
+                        </h3>
+                        {(sortBy === 'dateModified' ||
+                            sortBy === 'dateCreated') && (
+                            <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                                {sortBy === 'dateModified'
+                                    ? 'Modified'
+                                    : 'Created'}
+                                :{' '}
+                                {new Date(
+                                    sortBy === 'dateModified'
+                                        ? format.modified_date
+                                        : format.created_date
+                                ).toLocaleString()}
+                            </p>
+                        )}
+                    </div>
+                    <button
+                        className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors'
+                        onClick={e => {
+                            e.stopPropagation();
+                            onClone(format);
+                        }}>
+                        <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
+                    </button>
+                </div>
+
+                {/* Rest of the component remains the same */}
+                {content.description && (
+                    <p className='text-gray-600 dark:text-gray-300 text-sm line-clamp-2'>
+                        {content.description}
+                    </p>
+                )}
+
+                <div className='flex justify-between items-start gap-4'>
+                    <div className='flex flex-wrap gap-2 flex-1'>
+                        {content.conditions?.map((condition, index) => (
+                            <span
+                                key={index}
+                                className={`px-2 py-1 rounded text-xs font-medium ${getConditionStyle(
+                                    condition
+                                )}`}>
+                                {condition.name}
+                            </span>
+                        ))}
+                    </div>
+
+                    {totalTests > 0 && (
+                        <div className='flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded shrink-0'>
+                            <span
+                                className={`text-sm font-medium ${
+                                    passRate === 100
+                                        ? 'text-green-600 dark:text-green-400'
+                                        : passRate >= 80
+                                        ? 'text-yellow-600 dark:text-yellow-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                }`}>
+                                {passRate}% Pass Rate
+                            </span>
+                            <span className='text-gray-500 dark:text-gray-400 text-xs'>
+                                ({passedTests}/{totalTests})
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {content.tags?.length > 0 && (
+                    <div className='flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-gray-700'>
+                        {content.tags.map(tag => (
+                            <span
+                                key={tag}
+                                className='bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-1 rounded text-xs'>
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 }
 
 FormatCard.propTypes = {
-  format: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
-    description: PropTypes.string,
-    conditions: PropTypes.arrayOf(PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      negate: PropTypes.bool,
-      required: PropTypes.bool,
-    })),
-    date_modified: PropTypes.string.isRequired,
-    tags: PropTypes.arrayOf(PropTypes.string),
-  }).isRequired,
-  onEdit: PropTypes.func.isRequired,
-  onClone: PropTypes.func.isRequired,
-  showDate: PropTypes.bool.isRequired,
-  formatDate: PropTypes.func.isRequired,
+    format: PropTypes.shape({
+        file_name: PropTypes.string.isRequired,
+        modified_date: PropTypes.string.isRequired,
+        created_date: PropTypes.string.isRequired,
+        content: PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            description: PropTypes.string,
+            conditions: PropTypes.arrayOf(
+                PropTypes.shape({
+                    name: PropTypes.string.isRequired,
+                    type: PropTypes.string.isRequired,
+                    pattern: PropTypes.string,
+                    required: PropTypes.bool,
+                    negate: PropTypes.bool
+                })
+            ),
+            tags: PropTypes.arrayOf(PropTypes.string),
+            tests: PropTypes.arrayOf(
+                PropTypes.shape({
+                    id: PropTypes.number.isRequired,
+                    input: PropTypes.string.isRequired,
+                    expected: PropTypes.bool.isRequired,
+                    passes: PropTypes.bool.isRequired
+                })
+            )
+        }).isRequired
+    }).isRequired,
+    onEdit: PropTypes.func.isRequired,
+    onClone: PropTypes.func.isRequired,
+    sortBy: PropTypes.string.isRequired
 };
 
 export default FormatCard;

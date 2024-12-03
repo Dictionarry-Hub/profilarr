@@ -125,7 +125,6 @@ function RegexPage() {
 
     return (
         <div>
-            <h2 className='text-2xl font-bold mb-4'>Manage Regex Patterns</h2>
             <div className='mb-4 flex items-center space-x-4'>
                 <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
                 <FilterMenu

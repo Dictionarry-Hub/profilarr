@@ -77,8 +77,23 @@ export const CustomFormats = {
     getAll: () => getAllItems('custom_format'),
     get: name => getItem('custom_format', name),
     create: data => createItem('custom_format', data),
-    update: (name, data) => updateItem('custom_format', name, data),
-    delete: name => deleteItem('custom_format', name)
+    update: (name, data, newName) =>
+        updateItem('custom_format', name, data, newName),
+    delete: name => deleteItem('custom_format', name),
+    runTests: async ({conditions, tests}) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/custom_format/test`,
+                {
+                    conditions,
+                    tests
+                }
+            );
+            return response.data;
+        } catch (error) {
+            return handleError(error, 'run tests');
+        }
+    }
 };
 
 export const RegexPatterns = {
@@ -88,7 +103,6 @@ export const RegexPatterns = {
     update: (name, data, newName) =>
         updateItem('regex_pattern', name, data, newName),
     delete: name => deleteItem('regex_pattern', name),
-    // Add this new method
     runTests: async (pattern, tests) => {
         try {
             const response = await axios.post(

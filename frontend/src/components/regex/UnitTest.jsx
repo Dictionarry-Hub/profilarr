@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {Trash2, Pencil} from 'lucide-react';
-import DeleteConfirmationModal from './DeleteConfirmationModal';
+import DeleteConfirmationModal from '@ui/DeleteConfirmationModal';
 
 const MatchHighlight = ({input, pattern, test}) => {
     if (!pattern) return <span className='font-mono'>{input}</span>;

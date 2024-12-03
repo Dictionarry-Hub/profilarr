@@ -4,7 +4,8 @@ import RegexPage from './components/regex/RegexPage';
 import FormatPage from './components/format/FormatPage';
 import ProfilePage from './components/profile/ProfilePage';
 import SettingsPage from './components/settings/SettingsPage';
-import Navbar from './components/ui/Navbar';
+import Navbar from '@ui/Navbar';
+import Footer from '@ui/Footer';
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -21,9 +22,9 @@ function App() {
 
     return (
         <Router>
-            <div className='min-h-screen bg-gray-900 text-gray-100'>
+            <div className='min-h-screen flex flex-col bg-gray-900 text-gray-100'>
                 <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-                <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-6'>
+                <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 flex-grow flex-1 w-full'>
                     <Routes>
                         <Route path='/regex' element={<RegexPage />} />
                         <Route path='/format' element={<FormatPage />} />
@@ -32,6 +33,7 @@ function App() {
                         <Route path='/' element={<SettingsPage />} />
                     </Routes>
                 </div>
+                <Footer />
             </div>
             <ToastContainer
                 position='top-right'

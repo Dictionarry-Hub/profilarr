@@ -17,7 +17,7 @@ PROFILE_DIR = '/app/data/db/profiles'
 
 # Expected fields for each category
 REGEX_FIELDS = ["name", "pattern", "description", "tags", "tests"]
-FORMAT_FIELDS = ["name", "format", "description"]
+FORMAT_FIELDS = ["name", "description", "tags", "conditions", "tests"]
 PROFILE_FIELDS = [
     "name",
     "description",
@@ -196,7 +196,8 @@ def test_regex_pattern(
     try:
         # Try to compile the regex with PCRE2 compatibility
         try:
-            compiled_pattern = regex.compile(pattern, regex.V1)
+            compiled_pattern = regex.compile(pattern,
+                                             regex.V1 | regex.IGNORECASE)
             logger.info(
                 "Pattern compiled successfully with PCRE2 compatibility")
         except regex.error as e:
@@ -246,4 +247,179 @@ def test_regex_pattern(
     except Exception as e:
         logger.warning(f"Unexpected error in test_regex_pattern: {str(e)}",
                        exc_info=True)
+        return False, str(e), tests
+
+
+def test_format_conditions(conditions: List[Dict],
+                           tests: List[Dict]) -> Tuple[bool, str, List[Dict]]:
+    """
+    Test a set of format conditions against a list of test cases.
+    Tests only pattern-based conditions (release_title, release_group, edition).
+    """
+    logger.info(
+        f"Starting format condition test - {len(conditions)} conditions")
+    logger.error(f"Received conditions: {conditions}")
+    logger.error(f"Received tests: {tests}")
+
+    try:
+        # First, load all regex patterns from the patterns directory
+        patterns_dir = os.path.join(REPO_PATH, 'regex_patterns')
+        pattern_map = {}
+
+        logger.error(f"Loading patterns from directory: {patterns_dir}")
+        if not os.path.exists(patterns_dir):
+            logger.error(f"Patterns directory not found: {patterns_dir}")
+            return False, "Patterns directory not found", tests
+
+        for pattern_file in os.listdir(patterns_dir):
+            if pattern_file.endswith('.yml'):
+                pattern_path = os.path.join(patterns_dir, pattern_file)
+                try:
+                    with open(pattern_path, 'r') as f:
+                        pattern_data = yaml.safe_load(f)
+                        if pattern_data and 'name' in pattern_data and 'pattern' in pattern_data:
+                            pattern_map[
+                                pattern_data['name']] = pattern_data['pattern']
+                            logger.error(
+                                f"Loaded pattern: {pattern_data['name']} = {pattern_data['pattern']}"
+                            )
+                except Exception as e:
+                    logger.error(
+                        f"Error loading pattern file {pattern_file}: {e}")
+                    continue
+
+        logger.error(f"Total patterns loaded: {len(pattern_map)}")
+
+        # Compile all regex patterns first
+        compiled_patterns = {}
+        for condition in conditions:
+            if condition['type'] in [
+                    'release_title', 'release_group', 'edition'
+            ]:
+                logger.error(f"Processing condition: {condition}")
+                try:
+                    pattern_name = condition.get('pattern', '')
+                    if pattern_name:
+                        # Look up the actual pattern using the pattern name
+                        actual_pattern = pattern_map.get(pattern_name)
+                        if actual_pattern:
+                            compiled_patterns[
+                                condition['name']] = regex.compile(
+                                    actual_pattern,
+                                    regex.V1 | regex.IGNORECASE)
+                            logger.error(
+                                f"Successfully compiled pattern for {condition['name']}: {actual_pattern}"
+                            )
+                        else:
+                            logger.error(
+                                f"Pattern not found for name: {pattern_name}")
+                            return False, f"Pattern not found: {pattern_name}", tests
+                except regex.error as e:
+                    logger.error(
+                        f"Invalid regex pattern in condition {condition['name']}: {str(e)}"
+                    )
+                    return False, f"Invalid regex pattern in condition {condition['name']}: {str(e)}", tests
+
+        logger.error(f"Total patterns compiled: {len(compiled_patterns)}")
+        current_time = datetime.now().isoformat()
+
+        # Process each test
+        for test in tests:
+            test_input = test.get('input', '')
+            expected = test.get('expected', False)
+            condition_results = []
+            logger.error(
+                f"Processing test input: {test_input}, expected: {expected}")
+
+            # Check each condition
+            for condition in conditions:
+                if condition['type'] not in [
+                        'release_title', 'release_group', 'edition'
+                ]:
+                    logger.error(
+                        f"Skipping non-pattern condition: {condition['type']}")
+                    continue
+
+                pattern = compiled_patterns.get(condition['name'])
+                if not pattern:
+                    logger.error(
+                        f"No compiled pattern found for condition: {condition['name']}"
+                    )
+                    continue
+
+                # Test if pattern matches input
+                matches = bool(pattern.search(test_input))
+                logger.error(
+                    f"Condition {condition['name']} match result: {matches}")
+
+                # Add result
+                condition_results.append({
+                    'name':
+                    condition['name'],
+                    'type':
+                    condition['type'],
+                    'pattern':
+                    condition.get('pattern', ''),
+                    'required':
+                    condition.get('required', False),
+                    'negate':
+                    condition.get('negate', False),
+                    'matches':
+                    matches
+                })
+
+            # Determine if format applies
+            format_applies = True
+
+            # Check required conditions
+            for result in condition_results:
+                if result['required']:
+                    logger.error(
+                        f"Checking required condition: {result['name']}, negate: {result['negate']}, matches: {result['matches']}"
+                    )
+                    if result['negate']:
+                        if result['matches']:
+                            format_applies = False
+                            logger.error(
+                                f"Required negated condition {result['name']} matched - format does not apply"
+                            )
+                            break
+                    else:
+                        if not result['matches']:
+                            format_applies = False
+                            logger.error(
+                                f"Required condition {result['name']} did not match - format does not apply"
+                            )
+                            break
+
+            # Check non-required conditions
+            if format_applies:
+                for result in condition_results:
+                    if not result['required'] and result['negate'] and result[
+                            'matches']:
+                        format_applies = False
+                        logger.error(
+                            f"Non-required negated condition {result['name']} matched - format does not apply"
+                        )
+                        break
+
+            test['passes'] = format_applies == expected
+            test['lastRun'] = current_time
+            test['conditionResults'] = condition_results
+
+            logger.error(
+                f"Test result - format_applies: {format_applies}, expected: {expected}, passes: {test['passes']}"
+            )
+
+        # Log final results
+        passed_tests = sum(1 for test in tests if test.get('passes', False))
+        logger.error(
+            f"Final test results - {passed_tests}/{len(tests)} tests passed")
+        logger.error(f"Updated tests: {tests}")
+
+        return True, "", tests
+
+    except Exception as e:
+        logger.error(f"Unexpected error in test_format_conditions: {str(e)}",
+                     exc_info=True)
         return False, str(e), tests

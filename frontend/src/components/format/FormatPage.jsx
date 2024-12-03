@@ -3,12 +3,16 @@ import {useNavigate} from 'react-router-dom';
 import FormatCard from './FormatCard';
 import FormatModal from './FormatModal';
 import AddNewCard from '../ui/AddNewCard';
-import {getFormats, getGitStatus} from '../../api/api';
+import {getGitStatus} from '../../api/api';
+import {CustomFormats} from '@api/data';
 import FilterMenu from '../ui/FilterMenu';
 import SortMenu from '../ui/SortMenu';
 import {Loader} from 'lucide-react';
+import Alert from '@ui/Alert';
+import {useFormatModal} from '@hooks/useFormatModal';
 
 function FormatPage() {
+    // Basic state management
     const [formats, setFormats] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedFormat, setSelectedFormat] = useState(null);
@@ -22,32 +26,44 @@ function FormatPage() {
 
     const navigate = useNavigate();
 
+    // Format modal hook integration
+    const {
+        name,
+        description,
+        tags,
+        conditions,
+        tests,
+        error,
+        activeTab,
+        isDeleting,
+        isRunningTests,
+        setName,
+        setDescription,
+        setTags,
+        setConditions,
+        setTests,
+        setActiveTab,
+        setIsDeleting,
+        initializeForm,
+        handleSave,
+        handleRunTests,
+        handleDelete // Added this
+    } = useFormatModal(selectedFormat, () => {
+        fetchFormats();
+        handleCloseModal();
+    });
+
     const loadingMessages = [
-        'Decoding the custom format matrix...',
-        'Parsing the digital alphabet soup...',
-        'Untangling the format spaghetti...',
-        'Calibrating the format-o-meter...',
-        'Indexing your media DNA...'
+        'Loading custom formats...',
+        'Analyzing format conditions...',
+        'Preparing format library...',
+        'Syncing format database...',
+        'Organizing media formats...'
     ];
 
     useEffect(() => {
         fetchGitStatus();
     }, []);
-
-    const fetchFormats = async () => {
-        try {
-            const fetchedFormats = await getFormats();
-            setFormats(fetchedFormats);
-            const tags = [
-                ...new Set(fetchedFormats.flatMap(format => format.tags || []))
-            ];
-            setAllTags(tags);
-        } catch (error) {
-            console.error('Error fetching formats:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const fetchGitStatus = async () => {
         try {
@@ -62,6 +78,34 @@ function FormatPage() {
             }
         } catch (error) {
             console.error('Error fetching Git status:', error);
+            Alert.error('Failed to check repository status');
+            setIsLoading(false);
+        }
+    };
+
+    const fetchFormats = async () => {
+        try {
+            const response = await CustomFormats.getAll();
+            const formatsData = response.map(item => ({
+                file_name: item.file_name,
+                modified_date: item.modified_date,
+                created_date: item.created_date,
+                content: {
+                    ...item.content,
+                    name: item.file_name.replace('.yml', '')
+                }
+            }));
+            setFormats(formatsData);
+
+            // Extract all unique tags
+            const tags = new Set(
+                formatsData.flatMap(format => format.content.tags || [])
+            );
+            setAllTags(Array.from(tags));
+        } catch (error) {
+            console.error('Error fetching formats:', error);
+            Alert.error('Failed to load custom formats');
+        } finally {
             setIsLoading(false);
         }
     };
@@ -70,6 +114,7 @@ function FormatPage() {
         setSelectedFormat(format);
         setIsModalOpen(true);
         setIsCloning(false);
+        initializeForm(format?.content, false);
     };
 
     const handleCloseModal = () => {
@@ -81,50 +126,57 @@ function FormatPage() {
     const handleCloneFormat = format => {
         const clonedFormat = {
             ...format,
-            id: 0,
-            name: `${format.name} [COPY]`
+            content: {
+                ...format.content,
+                name: `${format.content.name} [COPY]`
+            }
         };
         setSelectedFormat(clonedFormat);
         setIsModalOpen(true);
         setIsCloning(true);
-    };
-
-    const handleSaveFormat = () => {
-        fetchFormats();
-        handleCloseModal();
+        initializeForm(clonedFormat.content, true);
     };
 
     const formatDate = dateString => {
         return new Date(dateString).toLocaleString();
     };
 
-    const sortedAndFilteredFormats = formats
-        .filter(format => {
-            if (filterType === 'tag') {
-                return format.tags && format.tags.includes(filterValue);
-            }
-            if (filterType === 'date') {
-                const formatDate = new Date(format.date_modified);
-                const filterDate = new Date(filterValue);
-                return formatDate.toDateString() === filterDate.toDateString();
-            }
-            return true;
-        })
-        .sort((a, b) => {
-            if (sortBy === 'title') return a.name.localeCompare(b.name);
-            if (sortBy === 'dateCreated')
-                return new Date(b.date_created) - new Date(a.date_created);
-            if (sortBy === 'dateModified')
-                return new Date(b.date_modified) - new Date(a.date_modified);
-            return 0;
-        });
+    const getFilteredAndSortedFormats = () => {
+        let filtered = [...formats];
 
-    const hasConflicts = mergeConflicts.length > 0;
+        // Apply filters
+        if (filterType === 'tag' && filterValue) {
+            filtered = filtered.filter(format =>
+                format.content.tags?.includes(filterValue)
+            );
+        } else if (filterType === 'name' && filterValue) {
+            filtered = filtered.filter(format =>
+                format.content.name
+                    .toLowerCase()
+                    .includes(filterValue.toLowerCase())
+            );
+        }
+
+        // Apply sorting
+        return filtered.sort((a, b) => {
+            switch (sortBy) {
+                case 'dateModified':
+                    return (
+                        new Date(b.modified_date) - new Date(a.modified_date)
+                    );
+                case 'dateCreated':
+                    return new Date(b.created_date) - new Date(a.created_date);
+                case 'name':
+                default:
+                    return a.content.name.localeCompare(b.content.name);
+            }
+        });
+    };
 
     if (isLoading) {
         return (
-            <div className='flex flex-col items-center justify-center h-screen'>
-                <Loader size={48} className='animate-spin text-blue-500 mb-4' />
+            <div className='flex flex-col items-center justify-center h-64'>
+                <Loader className='w-8 h-8 animate-spin text-blue-500 mb-4' />
                 <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>
                     {
                         loadingMessages[
@@ -136,9 +188,11 @@ function FormatPage() {
         );
     }
 
+    const hasConflicts = mergeConflicts.length > 0;
+
     if (hasConflicts) {
         return (
-            <div className='bg-gray-900 text-white'>
+            <div className='text-gray-900 dark:text-white'>
                 <div className='mt-8 flex justify-between items-center'>
                     <h4 className='text-xl font-extrabold'>
                         Merge Conflicts Detected
@@ -150,9 +204,9 @@ function FormatPage() {
                     </button>
                 </div>
 
-                <div className='mt-6 p-4 bg-gray-800 rounded-lg shadow-md'>
+                <div className='mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md'>
                     <h3 className='text-xl font-semibold'>What Happened?</h3>
-                    <p className='mt-2 text-gray-300'>
+                    <p className='mt-2 text-gray-600 dark:text-gray-300'>
                         This page is locked because there are unresolved merge
                         conflicts. You need to address these conflicts in the
                         settings page before continuing.
@@ -164,9 +218,16 @@ function FormatPage() {
 
     return (
         <div>
-            <h2 className='text-2xl font-bold mb-4'>Manage Custom Formats</h2>
             <div className='mb-4 flex items-center space-x-4'>
-                <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
+                <SortMenu
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    options={[
+                        {key: 'name', label: 'Name'},
+                        {key: 'dateModified', label: 'Date Modified'},
+                        {key: 'dateCreated', label: 'Date Created'}
+                    ]}
+                />
                 <FilterMenu
                     filterType={filterType}
                     setFilterType={setFilterType}
@@ -175,15 +236,15 @@ function FormatPage() {
                     allTags={allTags}
                 />
             </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4'>
-                {sortedAndFilteredFormats.map(format => (
+
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>
+                {getFilteredAndSortedFormats().map(format => (
                     <FormatCard
-                        key={format.id}
+                        key={format.file_name}
                         format={format}
                         onEdit={() => handleOpenModal(format)}
                         onClone={handleCloneFormat}
-                        showDate={sortBy !== 'title'}
-                        formatDate={formatDate}
+                        sortBy={sortBy}
                     />
                 ))}
                 <AddNewCard onAdd={() => handleOpenModal()} />
@@ -192,9 +253,26 @@ function FormatPage() {
                 format={selectedFormat}
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                onSave={handleSaveFormat}
-                allTags={allTags}
                 isCloning={isCloning}
+                name={name}
+                description={description}
+                tags={tags}
+                conditions={conditions}
+                tests={tests}
+                error={error}
+                activeTab={activeTab}
+                isDeleting={isDeleting}
+                isRunningTests={isRunningTests}
+                onNameChange={setName}
+                onDescriptionChange={setDescription}
+                onTagsChange={setTags}
+                onConditionsChange={setConditions}
+                onTestsChange={setTests}
+                onActiveTabChange={setActiveTab}
+                onDeletingChange={setIsDeleting}
+                onRunTests={handleRunTests}
+                onSave={handleSave}
+                onDelete={handleDelete}
             />
         </div>
     );

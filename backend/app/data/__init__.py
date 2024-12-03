@@ -4,7 +4,8 @@ import os
 import yaml
 from .utils import (get_category_directory, load_yaml_file, validate,
                     save_yaml_file, update_yaml_file, get_file_created_date,
-                    get_file_modified_date, test_regex_pattern)
+                    get_file_modified_date, test_regex_pattern,
+                    test_format_conditions)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -133,12 +134,7 @@ def handle_item(category, name):
 
 @bp.route('/<string:category>/test', methods=['POST'])
 def run_tests(category):
-    logger.info(f"Received regex test request for category: {category}")
-
-    if category != 'regex_pattern':
-        logger.warning(f"Rejected test request - invalid category: {category}")
-        return jsonify({"error":
-                        "Testing only supported for regex patterns"}), 400
+    logger.info(f"Received test request for category: {category}")
 
     try:
         data = request.get_json()
@@ -146,22 +142,44 @@ def run_tests(category):
             logger.warning("Rejected test request - no JSON data provided")
             return jsonify({"error": "No JSON data provided"}), 400
 
-        pattern = data.get('pattern')
         tests = data.get('tests', [])
-
-        logger.info(f"Processing test request - Pattern: {pattern}")
-        logger.info(f"Number of test cases: {len(tests)}")
-
-        if not pattern:
-            logger.warning("Rejected test request - missing pattern")
-            return jsonify({"error": "Pattern is required"}), 400
-
         if not tests:
             logger.warning("Rejected test request - no test cases provided")
             return jsonify({"error":
                             "At least one test case is required"}), 400
 
-        success, message, updated_tests = test_regex_pattern(pattern, tests)
+        if category == 'regex_pattern':
+            pattern = data.get('pattern')
+            logger.info(f"Processing regex test request - Pattern: {pattern}")
+
+            if not pattern:
+                logger.warning("Rejected test request - missing pattern")
+                return jsonify({"error": "Pattern is required"}), 400
+
+            success, message, updated_tests = test_regex_pattern(
+                pattern, tests)
+
+        elif category == 'custom_format':
+            conditions = data.get('conditions', [])
+            logger.info(
+                f"Processing format test request - Conditions: {len(conditions)}"
+            )
+
+            if not conditions:
+                logger.warning(
+                    "Rejected test request - no conditions provided")
+                return jsonify({"error":
+                                "At least one condition is required"}), 400
+
+            success, message, updated_tests = test_format_conditions(
+                conditions, tests)
+
+        else:
+            logger.warning(
+                f"Rejected test request - invalid category: {category}")
+            return jsonify(
+                {"error": "Testing not supported for this category"}), 400
+
         logger.info(f"Test execution completed - Success: {success}")
 
         if not success:

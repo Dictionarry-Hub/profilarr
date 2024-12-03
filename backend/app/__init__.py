@@ -1,9 +1,6 @@
 import os
 from flask import Flask, jsonify
 from flask_cors import CORS
-from .regex import bp as regex_bp
-from .format import bp as format_bp
-from .profile import bp as profile_bp
 from .git import bp as git_bp
 from .arr import bp as arr_bp
 from .data import bp as data_bp
@@ -33,9 +30,6 @@ def create_app():
     init_db()
 
     # Register Blueprints
-    app.register_blueprint(regex_bp)
-    app.register_blueprint(format_bp)
-    app.register_blueprint(profile_bp)
     app.register_blueprint(git_bp)
     app.register_blueprint(data_bp)
     app.register_blueprint(arr_bp)
