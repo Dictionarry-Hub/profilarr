@@ -184,18 +184,11 @@ def test_regex_pattern(
         tests: List[Dict[str, Any]]) -> Tuple[bool, str, List[Dict[str, Any]]]:
     """
     Test a regex pattern against a list of test cases using PCRE2 compatible engine.
-    
-    Args:
-        pattern: The regex pattern to test
-        tests: List of test dictionaries with 'input', 'expected', 'id', and 'passes' fields
-        
-    Returns:
-        Tuple of (success, message, updated_tests)
+    Returns match information along with test results.
     """
     logger.info(f"Starting regex pattern test - Pattern: {pattern}")
 
     try:
-        # Try to compile the regex with PCRE2 compatibility
         try:
             compiled_pattern = regex.compile(pattern,
                                              regex.V1 | regex.IGNORECASE)
@@ -208,35 +201,45 @@ def test_regex_pattern(
         current_time = datetime.now().isoformat()
         logger.info(f"Processing {len(tests)} test cases")
 
-        # Run each test
         for test in tests:
             test_id = test.get('id', 'unknown')
             test_input = test.get('input', '')
             expected = test.get('expected', False)
 
-            logger.info(
-                f"Running test {test_id} - Input: {test_input}, Expected: {expected}"
-            )
-
             try:
-                # Test if pattern matches input
-                matches = bool(compiled_pattern.search(test_input))
-                # Update test result
+                match = compiled_pattern.search(test_input)
+                matches = bool(match)
+
+                # Update test result with basic fields
                 test['passes'] = matches == expected
                 test['lastRun'] = current_time
 
-                if test['passes']:
-                    logger.info(
-                        f"Test {test_id} passed - Match result: {matches}")
+                # Add match information
+                if match:
+                    test['matchedContent'] = match.group(0)
+                    test['matchSpan'] = {
+                        'start': match.start(),
+                        'end': match.end()
+                    }
+                    # Get all capture groups if they exist
+                    test['matchedGroups'] = [g for g in match.groups()
+                                             ] if match.groups() else []
                 else:
-                    logger.warning(
-                        f"Test {test_id} failed - Expected {expected}, got {matches}"
-                    )
+                    test['matchedContent'] = None
+                    test['matchSpan'] = None
+                    test['matchedGroups'] = []
+
+                logger.info(
+                    f"Test {test_id} {'passed' if test['passes'] else 'failed'} - Match: {matches}, Expected: {expected}"
+                )
 
             except Exception as e:
-                logger.warning(f"Error running test {test_id}: {str(e)}")
+                logger.error(f"Error running test {test_id}: {str(e)}")
                 test['passes'] = False
                 test['lastRun'] = current_time
+                test['matchedContent'] = None
+                test['matchSpan'] = None
+                test['matchedGroups'] = []
 
         # Log overall results
         passed_tests = sum(1 for test in tests if test.get('passes', False))
@@ -245,9 +248,10 @@ def test_regex_pattern(
         )
 
         return True, "", tests
+
     except Exception as e:
-        logger.warning(f"Unexpected error in test_regex_pattern: {str(e)}",
-                       exc_info=True)
+        logger.error(f"Unexpected error in test_regex_pattern: {str(e)}",
+                     exc_info=True)
         return False, str(e), tests
 
 

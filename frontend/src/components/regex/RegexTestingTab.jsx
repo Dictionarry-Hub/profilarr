@@ -1,27 +1,8 @@
-// RegexTestingTab.jsx
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import {Plus, Loader, Play} from 'lucide-react';
 import UnitTest from './UnitTest';
 import AddUnitTestModal from './AddUnitTestModal';
-
-const formatTestDate = dateString => {
-    if (!dateString) return null;
-
-    try {
-        return new Date(dateString).toLocaleString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return dateString;
-    }
-};
 
 const RegexTestingTab = ({
     pattern,
@@ -33,17 +14,45 @@ const RegexTestingTab = ({
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTest, setEditingTest] = useState(null);
 
+    useEffect(() => {
+        const needsAutoRun =
+            tests?.length > 0 &&
+            pattern &&
+            tests.some(test => test.passes !== undefined && !test.matchSpan);
+
+        if (needsAutoRun && !isRunningTests) {
+            onRunTests(pattern, tests);
+        }
+    }, []);
+
     const handleAddOrUpdateTest = useCallback(
         testData => {
             let updatedTests;
             if (editingTest) {
-                // Update existing test
                 updatedTests = tests.map(test =>
-                    test.id === testData.id ? testData : test
+                    test.id === testData.id
+                        ? {
+                              ...testData,
+                              passes: false,
+                              lastRun: null,
+                              matchedContent: null,
+                              matchSpan: null,
+                              matchedGroups: []
+                          }
+                        : test
                 );
             } else {
-                // Add new test
-                updatedTests = [...tests, testData];
+                updatedTests = [
+                    ...tests,
+                    {
+                        ...testData,
+                        passes: false,
+                        lastRun: null,
+                        matchedContent: null,
+                        matchSpan: null,
+                        matchedGroups: []
+                    }
+                ];
             }
             onTestsChange(updatedTests);
             onRunTests(pattern, updatedTests);
@@ -70,13 +79,12 @@ const RegexTestingTab = ({
         setEditingTest(null);
     }, []);
 
-    // Calculate test statistics
     const totalTests = tests?.length || 0;
     const passedTests = tests?.filter(test => test.passes)?.length || 0;
 
     return (
         <div className='flex flex-col h-full'>
-            {/* Header Section with Progress Bar */}
+            {/* Header with Progress Bar */}
             <div className='flex items-center justify-between pb-4 pr-2'>
                 <div>
                     <h2 className='text-xl font-semibold text-gray-900 dark:text-white mb-3'>
@@ -132,10 +140,7 @@ const RegexTestingTab = ({
                         {tests.map(test => (
                             <UnitTest
                                 key={test.id}
-                                test={{
-                                    ...test,
-                                    lastRun: formatTestDate(test.lastRun)
-                                }}
+                                test={test}
                                 pattern={pattern}
                                 onDelete={() => handleDeleteTest(test.id)}
                                 onEdit={() => handleEditTest(test)}
@@ -170,7 +175,13 @@ RegexTestingTab.propTypes = {
             input: PropTypes.string.isRequired,
             expected: PropTypes.bool.isRequired,
             passes: PropTypes.bool.isRequired,
-            lastRun: PropTypes.string
+            lastRun: PropTypes.string,
+            matchedContent: PropTypes.string,
+            matchedGroups: PropTypes.arrayOf(PropTypes.string),
+            matchSpan: PropTypes.shape({
+                start: PropTypes.number,
+                end: PropTypes.number
+            })
         })
     ),
     onTestsChange: PropTypes.func.isRequired,
