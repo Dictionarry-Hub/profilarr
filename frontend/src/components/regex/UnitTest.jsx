@@ -40,12 +40,7 @@ const UnitTest = ({test, pattern, onDelete, onEdit}) => {
         <>
             <div
                 className={`
-                relative rounded-lg border group
-                ${
-                    test.passes
-                        ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20'
-                        : 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20'
-                }
+                relative rounded-lg border group border border-gray-200 dark:border-gray-700
             `}>
                 {/* Header */}
                 <div className='px-4 py-2 pr-2 flex items-center justify-between border-b border-inherit'>
