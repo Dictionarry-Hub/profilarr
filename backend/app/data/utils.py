@@ -29,7 +29,8 @@ PROFILE_FIELDS = [
     "custom_formats",  # Array of {name, score} objects
     "qualities",  # Array of strings
     "upgrade_until",
-    "language"
+    "language",
+    "tweaks"
 ]
 
 # Category mappings

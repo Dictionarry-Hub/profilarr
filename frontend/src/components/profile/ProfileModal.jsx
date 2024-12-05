@@ -8,7 +8,17 @@ import ProfileGeneralTab from './ProfileGeneralTab';
 import ProfileScoringTab from './ProfileScoringTab';
 import ProfileQualitiesTab from './ProfileQualitiesTab';
 import ProfileLanguagesTab from './ProfileLangaugesTab';
+import ProfileTweaksTab from './ProfileTweaksTab';
 import QUALITIES from '../../constants/qualities';
+
+const DEFAULT_TWEAKS = {
+    preferFreeleech: true,
+    allowLosslessAudio: true,
+    allowDVNoFallback: false,
+    allowBleedingEdgeCodecs: false,
+    allowPrereleases: false,
+    languageStrictness: 'disabled'
+};
 
 function unsanitize(text) {
     if (!text) return '';
@@ -61,11 +71,15 @@ function ProfileModal({
     // Language state
     const [selectedLanguage, setSelectedLanguage] = useState('any');
 
+    // Tweaks state
+    const [tweaks, setTweaks] = useState({});
+
     const tabs = [
         {id: 'general', label: 'General'},
         {id: 'scoring', label: 'Scoring'},
         {id: 'qualities', label: 'Qualities'},
-        {id: 'languages', label: 'Languages'}
+        {id: 'languages', label: 'Languages'},
+        {id: 'tweaks', label: 'Tweaks'}
     ];
 
     useEffect(() => {
@@ -122,6 +136,12 @@ function ProfileModal({
                 });
                 setTagScores(initialTagScores);
 
+                // Tweaks
+                setTweaks({
+                    ...DEFAULT_TWEAKS,
+                    ...(content.tweaks || {})
+                });
+
                 // Qualities setup - include all qualities, set enabled status
                 const allQualitiesMap = {}; // Map of all qualities by id
                 QUALITIES.forEach(quality => {
@@ -149,7 +169,7 @@ function ProfileModal({
                             newSortedQualities.push({
                                 id: q.id,
                                 name: q.name,
-                                description: q.description, // Changed: removed || '' to preserve null/undefined
+                                description: q.description,
                                 qualities: groupQualities,
                                 enabled: true
                             });
@@ -266,6 +286,9 @@ function ProfileModal({
                     id: defaultQuality.id,
                     name: defaultQuality.name
                 });
+
+                // Initialize empty tweaks
+                setTweaks(DEFAULT_TWEAKS);
             }
 
             setLoading(false);
@@ -346,7 +369,8 @@ function ProfileModal({
                           })
                       }
                     : null,
-                language: selectedLanguage
+                language: selectedLanguage,
+                tweaks
             };
 
             if (isCloning || !initialProfile) {
@@ -385,7 +409,6 @@ function ProfileModal({
             setError('An unexpected error occurred');
         }
     };
-
     const handleDelete = async () => {
         if (!initialProfile) return;
 
@@ -545,6 +568,12 @@ function ProfileModal({
                                 <ProfileLanguagesTab
                                     selectedLanguage={selectedLanguage}
                                     onLanguageChange={setSelectedLanguage}
+                                />
+                            )}
+                            {activeTab === 'tweaks' && (
+                                <ProfileTweaksTab
+                                    tweaks={tweaks}
+                                    onTweaksChange={setTweaks}
                                 />
                             )}
                         </div>
