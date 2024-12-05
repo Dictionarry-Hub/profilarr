@@ -21,6 +21,31 @@ function FormatCard({format, onEdit, onClone, sortBy}) {
         return 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300';
     };
 
+    const getDisplayConditions = conditions => {
+        if (!conditions?.length) return [];
+
+        // Sort conditions: required first, then non-required
+        const sortedConditions = [...conditions].sort((a, b) => {
+            if (a.required && !b.required) return -1;
+            if (!a.required && b.required) return 1;
+            return 0;
+        });
+
+        if (sortedConditions.length <= 5) return sortedConditions;
+
+        // Take first 4 conditions and add a count of remaining ones
+        const displayConditions = sortedConditions.slice(0, 4);
+        const remainingCount = sortedConditions.length - 4;
+
+        // Add a virtual condition for the count
+        displayConditions.push({
+            name: `+${remainingCount} more...`,
+            isCounter: true
+        });
+
+        return displayConditions;
+    };
+
     return (
         <div
             className='w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-pointer max-h-96'
@@ -57,7 +82,6 @@ function FormatCard({format, onEdit, onClone, sortBy}) {
                     </button>
                 </div>
 
-                {/* Rest of the component remains the same */}
                 {content.description && (
                     <p className='text-gray-600 dark:text-gray-300 text-sm line-clamp-2'>
                         {content.description}
@@ -66,15 +90,19 @@ function FormatCard({format, onEdit, onClone, sortBy}) {
 
                 <div className='flex justify-between items-start gap-4'>
                     <div className='flex flex-wrap gap-2 flex-1'>
-                        {content.conditions?.map((condition, index) => (
-                            <span
-                                key={index}
-                                className={`px-2 py-1 rounded text-xs font-medium ${getConditionStyle(
-                                    condition
-                                )}`}>
-                                {condition.name}
-                            </span>
-                        ))}
+                        {getDisplayConditions(content.conditions)?.map(
+                            (condition, index) => (
+                                <span
+                                    key={index}
+                                    className={`px-2 py-1 rounded text-xs font-medium ${
+                                        condition.isCounter
+                                            ? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                                            : getConditionStyle(condition)
+                                    }`}>
+                                    {condition.name}
+                                </span>
+                            )
+                        )}
                     </div>
 
                     {totalTests > 0 && (
