@@ -7,6 +7,7 @@ import FilterMenu from '../ui/FilterMenu';
 import SortMenu from '../ui/SortMenu';
 import {Loader} from 'lucide-react';
 import Alert from '@ui/Alert';
+import SearchBar from '@ui/SearchBar';
 
 function RegexPage() {
     const [patterns, setPatterns] = useState([]);
@@ -18,6 +19,7 @@ function RegexPage() {
     const [allTags, setAllTags] = useState([]);
     const [isCloning, setIsCloning] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Load initial data
     useEffect(() => {
@@ -84,18 +86,27 @@ function RegexPage() {
     const getFilteredAndSortedPatterns = () => {
         let filtered = [...patterns];
 
-        // Apply filters
+        // Apply search filter
+        if (searchQuery) {
+            filtered = filtered.filter(
+                pattern =>
+                    pattern.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
+                    pattern.tags?.some(tag =>
+                        tag.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+            );
+        }
+
+        // Apply existing filters
         if (filterType === 'tag' && filterValue) {
             filtered = filtered.filter(pattern =>
                 pattern.tags?.includes(filterValue)
             );
-        } else if (filterType === 'name' && filterValue) {
-            filtered = filtered.filter(pattern =>
-                pattern.name.toLowerCase().includes(filterValue.toLowerCase())
-            );
         }
 
-        // Apply sorting
+        // Rest of the sorting logic remains the same...
         return filtered.sort((a, b) => {
             switch (sortBy) {
                 case 'dateModified':
@@ -125,15 +136,23 @@ function RegexPage() {
 
     return (
         <div>
-            <div className='mb-4 flex items-center space-x-4'>
-                <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
-                <FilterMenu
-                    filterType={filterType}
-                    setFilterType={setFilterType}
-                    filterValue={filterValue}
-                    setFilterValue={setFilterValue}
-                    allTags={allTags}
+            <div className='mb-4 flex items-center gap-4'>
+                <SearchBar
+                    onSearch={setSearchQuery}
+                    placeholder='Search by name or tag...'
                 />
+                <div className='flex-none'>
+                    <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
+                </div>
+                <div className='flex-none'>
+                    <FilterMenu
+                        filterType={filterType}
+                        setFilterType={setFilterType}
+                        filterValue={filterValue}
+                        setFilterValue={setFilterValue}
+                        allTags={allTags}
+                    />
+                </div>
             </div>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>
                 {getFilteredAndSortedPatterns().map(pattern => (

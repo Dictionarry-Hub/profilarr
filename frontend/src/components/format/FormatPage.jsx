@@ -9,6 +9,7 @@ import FilterMenu from '../ui/FilterMenu';
 import SortMenu from '../ui/SortMenu';
 import {Loader} from 'lucide-react';
 import Alert from '@ui/Alert';
+import SearchBar from '@ui/SearchBar';
 import {useFormatModal} from '@hooks/useFormatModal';
 
 function FormatPage() {
@@ -23,6 +24,7 @@ function FormatPage() {
     const [isCloning, setIsCloning] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [mergeConflicts, setMergeConflicts] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const navigate = useNavigate();
 
@@ -144,20 +146,27 @@ function FormatPage() {
     const getFilteredAndSortedFormats = () => {
         let filtered = [...formats];
 
-        // Apply filters
+        // Apply search filter
+        if (searchQuery) {
+            filtered = filtered.filter(
+                format =>
+                    format.content.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
+                    format.content.tags?.some(tag =>
+                        tag.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+            );
+        }
+
+        // Apply existing filters
         if (filterType === 'tag' && filterValue) {
             filtered = filtered.filter(format =>
                 format.content.tags?.includes(filterValue)
             );
-        } else if (filterType === 'name' && filterValue) {
-            filtered = filtered.filter(format =>
-                format.content.name
-                    .toLowerCase()
-                    .includes(filterValue.toLowerCase())
-            );
         }
 
-        // Apply sorting
+        // Rest of the sorting logic remains the same...
         return filtered.sort((a, b) => {
             switch (sortBy) {
                 case 'dateModified':
@@ -172,7 +181,6 @@ function FormatPage() {
             }
         });
     };
-
     if (isLoading) {
         return (
             <div className='flex flex-col items-center justify-center h-64'>
@@ -218,23 +226,23 @@ function FormatPage() {
 
     return (
         <div>
-            <div className='mb-4 flex items-center space-x-4'>
-                <SortMenu
-                    sortBy={sortBy}
-                    setSortBy={setSortBy}
-                    options={[
-                        {key: 'name', label: 'Name'},
-                        {key: 'dateModified', label: 'Date Modified'},
-                        {key: 'dateCreated', label: 'Date Created'}
-                    ]}
+            <div className='mb-4 flex items-center gap-4'>
+                <SearchBar
+                    onSearch={setSearchQuery}
+                    placeholder='Search by name or tag...'
                 />
-                <FilterMenu
-                    filterType={filterType}
-                    setFilterType={setFilterType}
-                    filterValue={filterValue}
-                    setFilterValue={setFilterValue}
-                    allTags={allTags}
-                />
+                <div className='flex-none'>
+                    <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
+                </div>
+                <div className='flex-none'>
+                    <FilterMenu
+                        filterType={filterType}
+                        setFilterType={setFilterType}
+                        filterValue={filterValue}
+                        setFilterValue={setFilterValue}
+                        allTags={allTags}
+                    />
+                </div>
             </div>
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>

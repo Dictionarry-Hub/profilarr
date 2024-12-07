@@ -8,6 +8,7 @@ import {Profiles, CustomFormats} from '@api/data';
 import FilterMenu from '../ui/FilterMenu';
 import SortMenu from '../ui/SortMenu';
 import {Loader} from 'lucide-react';
+import SearchBar from '@ui/SearchBar';
 
 function ProfilePage() {
     const [profiles, setProfiles] = useState([]);
@@ -21,6 +22,7 @@ function ProfilePage() {
     const [isCloning, setIsCloning] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [mergeConflicts, setMergeConflicts] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const navigate = useNavigate();
 
@@ -136,22 +138,44 @@ function ProfilePage() {
 
     const sortedAndFilteredProfiles = profiles
         .filter(profile => {
+            // Apply search filter
+            if (searchQuery) {
+                return (
+                    profile.content.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
+                    profile.content.tags?.some(
+                        (
+                            tag // Changed from profile.tags
+                        ) =>
+                            tag
+                                .toLowerCase()
+                                .includes(searchQuery.toLowerCase())
+                    )
+                );
+            }
+
+            // Apply existing filters
             if (filterType === 'tag') {
-                return profile.tags && profile.tags.includes(filterValue);
+                return (
+                    profile.content.tags &&
+                    profile.content.tags.includes(filterValue)
+                ); // Changed from profile.tags
             }
             if (filterType === 'date') {
-                const profileDate = new Date(profile.date_modified);
+                const profileDate = new Date(profile.modified_date); // This looks correct already
                 const filterDate = new Date(filterValue);
                 return profileDate.toDateString() === filterDate.toDateString();
             }
             return true;
         })
         .sort((a, b) => {
-            if (sortBy === 'name') return a.name.localeCompare(b.name);
+            if (sortBy === 'name')
+                return a.content.name.localeCompare(b.content.name); // Changed from a.name
             if (sortBy === 'dateCreated')
-                return new Date(b.date_created) - new Date(a.date_created);
+                return new Date(b.created_date) - new Date(a.created_date);
             if (sortBy === 'dateModified')
-                return new Date(b.date_modified) - new Date(a.date_modified);
+                return new Date(b.modified_date) - new Date(a.modified_date);
             return 0;
         });
 
@@ -200,15 +224,23 @@ function ProfilePage() {
 
     return (
         <div>
-            <div className='mb-4 flex items-center space-x-4'>
-                <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
-                <FilterMenu
-                    filterType={filterType}
-                    setFilterType={setFilterType}
-                    filterValue={filterValue}
-                    setFilterValue={setFilterValue}
-                    allTags={allTags}
+            <div className='mb-4 flex items-center gap-4'>
+                <SearchBar
+                    onSearch={setSearchQuery}
+                    placeholder='Search by name or tag...'
                 />
+                <div className='flex-none'>
+                    <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
+                </div>
+                <div className='flex-none'>
+                    <FilterMenu
+                        filterType={filterType}
+                        setFilterType={setFilterType}
+                        filterValue={filterValue}
+                        setFilterValue={setFilterValue}
+                        allTags={allTags}
+                    />
+                </div>
             </div>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4'>
                 {sortedAndFilteredProfiles.map(profile => (
