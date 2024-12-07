@@ -160,8 +160,11 @@ def handle_modification(repo, file_path, is_staged):
         # Only set outgoing_name if it changed
         outgoing_name = current_name if current_name != prior_name else None
 
-        # Process changes based on file type
-        if file_path.startswith('profiles/'):
+        # Process changes based on file type and status
+        if status == 'New':
+            # For new files, create changes entries for all fields
+            detailed_changes = process_new_file(new_data)
+        elif file_path.startswith('profiles/'):
             detailed_changes = process_quality_profile(old_data, new_data)
         else:
             detailed_changes = process_generic(old_data, new_data)
@@ -181,6 +184,58 @@ def handle_modification(repo, file_path, is_staged):
     except Exception as e:
         logger.error(f"Error processing modified file {file_path}: {str(e)}")
         raise
+
+
+def process_new_file(new_data):
+    """Process all fields in a new file"""
+    if not new_data:
+        return [{'key': 'File', 'change': 'added'}]
+
+    changes = [{'key': 'File', 'change': 'added'}]
+
+    def process_value(key, value, parent_key=None):
+        # Generate the display key
+        display_key = f"{parent_key}: {key}" if parent_key else key.title()
+
+        if isinstance(value, dict):
+            # Handle nested dictionaries
+            for k, v in value.items():
+                process_value(k, v, display_key)
+        elif isinstance(value, list):
+            # Handle lists
+            if value and isinstance(value[0], dict):
+                # Handle list of dictionaries (e.g., qualities, custom_formats)
+                for item in value:
+                    if 'name' in item:
+                        item_name = item['name']
+                        for k, v in item.items():
+                            if k != 'name':
+                                changes.append({
+                                    'key':
+                                    f"{display_key}: {item_name}: {k.title()}",
+                                    'change': 'added',
+                                    'value': v
+                                })
+            else:
+                # Handle simple lists
+                changes.append({
+                    'key': display_key,
+                    'change': 'added',
+                    'value': value
+                })
+        else:
+            # Handle simple values
+            changes.append({
+                'key': display_key,
+                'change': 'added',
+                'value': value
+            })
+
+    # Process each top-level field
+    for key, value in new_data.items():
+        process_value(key, value)
+
+    return changes
 
 
 def process_quality_profile(old_data, new_data):
