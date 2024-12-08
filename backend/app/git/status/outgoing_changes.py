@@ -189,49 +189,53 @@ def handle_modification(repo, file_path, is_staged):
 def process_new_file(new_data):
     """Process all fields in a new file"""
     if not new_data:
-        return [{'key': 'File', 'change': 'added'}]
+        return []
 
-    changes = [{'key': 'File', 'change': 'added'}]
+    changes = []
 
     def process_value(key, value, parent_key=None):
-        # Generate the display key
-        display_key = f"{parent_key}: {key}" if parent_key else key.title()
+        if key == 'conditions' and isinstance(value, list):
+            # Handle conditions specially
+            for condition in value:
+                condition_name = condition.get('name', '')
+                condition_type = condition.get('type', '').title()
 
-        if isinstance(value, dict):
+                # Build the condition description based on type
+                if condition_type == 'Source':
+                    condition_value = condition.get('source', '')
+                elif condition_type == 'Release_Title':
+                    condition_value = condition.get('pattern', '')
+                # Add other condition types as needed
+
+                changes.append({
+                    'key':
+                    'Condition',
+                    'change':
+                    'added',
+                    'value':
+                    f"{condition_type}: {condition_name or condition_value}"
+                })
+        elif isinstance(value, dict):
             # Handle nested dictionaries
             for k, v in value.items():
-                process_value(k, v, display_key)
+                process_value(k, v, key)
         elif isinstance(value, list):
-            # Handle lists
-            if value and isinstance(value[0], dict):
-                # Handle list of dictionaries (e.g., qualities, custom_formats)
-                for item in value:
-                    if 'name' in item:
-                        item_name = item['name']
-                        for k, v in item.items():
-                            if k != 'name':
-                                changes.append({
-                                    'key':
-                                    f"{display_key}: {item_name}: {k.title()}",
-                                    'change': 'added',
-                                    'value': v
-                                })
-            else:
-                # Handle simple lists
+            # Handle simple lists (like tags)
+            if key.lower() == 'tags':
                 changes.append({
-                    'key': display_key,
+                    'key': key.title(),
                     'change': 'added',
                     'value': value
                 })
         else:
-            # Handle simple values
-            changes.append({
-                'key': display_key,
-                'change': 'added',
-                'value': value
-            })
+            # Handle simple key-value pairs
+            if not parent_key and key.lower() not in ['type', 'conditions']:
+                changes.append({
+                    'key': key.title(),
+                    'change': 'added',
+                    'value': value
+                })
 
-    # Process each top-level field
     for key, value in new_data.items():
         process_value(key, value)
 
