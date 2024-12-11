@@ -198,7 +198,7 @@ const ProfileScoringTab = ({
                                                     )
                                                 }
                                                 onKeyDown={handleKeyDown}
-                                                className='w-16 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
+                                                className='w-20 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
                                             />
                                         </div>
                                     ))
@@ -265,7 +265,7 @@ const ProfileScoringTab = ({
                                                     handleTagBlur(tag)
                                                 }
                                                 onKeyDown={handleKeyDown}
-                                                className='w-16 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
+                                                className='w-20 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
                                             />
                                         </div>
                                     ))
@@ -298,7 +298,7 @@ const ProfileScoringTab = ({
                                                 Number(e.target.value)
                                             )
                                         }
-                                        className='w-16 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
+                                        className='w-20 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
                                     />
                                 </div>
                             </div>
@@ -325,7 +325,7 @@ const ProfileScoringTab = ({
                                                 Number(e.target.value)
                                             )
                                         }
-                                        className='w-16 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
+                                        className='w-20 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
                                     />
                                 </div>
                             </div>
@@ -353,7 +353,7 @@ const ProfileScoringTab = ({
                                                 Number(e.target.value)
                                             )
                                         }
-                                        className='w-16 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
+                                        className='w-20 px-3 py-1 text-sm rounded border border-gray-700 dark:bg-gray-800 dark:text-gray-100 bg-gray-800 text-gray-100 [appearance:textfield]'
                                     />
                                 </div>
                             </div>
