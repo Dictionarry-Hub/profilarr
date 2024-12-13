@@ -336,6 +336,14 @@ function ProfileModal({
                 minScoreIncrement,
                 custom_formats: customFormats
                     .filter(format => format.score !== 0)
+                    .sort((a, b) => {
+                        // First sort by score (descending)
+                        if (b.score !== a.score) {
+                            return b.score - a.score;
+                        }
+                        // Then alphabetically for equal scores
+                        return a.name.localeCompare(b.name);
+                    })
                     .map(format => ({
                         name: format.name,
                         score: format.score
