@@ -13,22 +13,20 @@ const CreateGroupModal = ({
     const [selectedQualities, setSelectedQualities] = useState([]);
     const [groupName, setGroupName] = useState('');
     const [description, setDescription] = useState('');
+    const [nextId, setNextId] = useState(-1);
 
     useEffect(() => {
         if (isOpen && editingGroup) {
             setGroupName(editingGroup.name);
             setDescription(editingGroup.description || '');
 
-            // Set selected qualities from the editing group
             const existingQualities = editingGroup.qualities.map(quality => {
-                // Find the quality in availableQualities to get the most up-to-date version
                 return (
                     availableQualities.find(q => q.id === quality.id) || quality
                 );
             });
             setSelectedQualities(existingQualities);
         } else if (!isOpen) {
-            // Reset state when modal closes
             setGroupName('');
             setDescription('');
             setSelectedQualities([]);
@@ -45,19 +43,18 @@ const CreateGroupModal = ({
     const handleSave = () => {
         if (groupName && selectedQualities.length > 0) {
             const groupData = {
-                // If editing, keep the same ID; otherwise generate new one
-                id: editingGroup ? editingGroup.id : Date.now(),
+                id: editingGroup ? editingGroup.id : nextId,
                 name: groupName,
                 description,
                 qualities: selectedQualities,
-                // Preserve enabled state if editing, default to true for new groups
                 enabled: editingGroup ? editingGroup.enabled : true,
-                // Preserve radarr/sonarr settings if editing
                 radarr: editingGroup?.radarr,
                 sonarr: editingGroup?.sonarr
             };
 
             onCreateGroup(groupData);
+            // Decrement the ID counter for next time
+            setNextId(prev => prev - 1);
         }
     };
 
