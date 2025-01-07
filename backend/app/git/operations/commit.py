@@ -2,6 +2,7 @@
 import git
 import os
 import logging
+from ..status.status import GitStatusManager
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,10 @@ def commit_changes(repo_path, files, message):
         # If no specific files provided, commit all staged changes
         if not files:
             commit = repo.index.commit(message)
+            # Update remote status after commit
+            status_manager = GitStatusManager.get_instance(repo_path)
+            if status_manager:
+                status_manager.update_remote_status()
             return True, "Successfully committed all staged changes."
 
         # Get current status of the repository
@@ -91,6 +96,11 @@ def commit_changes(repo_path, files, message):
 
         # Commit the changes
         commit = repo.index.commit(message)
+
+        # Update remote status after commit
+        status_manager = GitStatusManager.get_instance(repo_path)
+        if status_manager:
+            status_manager.update_remote_status()
 
         # Build detailed success message
         staged_counts = {

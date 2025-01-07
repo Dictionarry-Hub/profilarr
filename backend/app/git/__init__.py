@@ -1,3 +1,4 @@
+# git/__init__.py
 from flask import Blueprint, request, jsonify
 from .status.status import get_git_status
 from .status.commit_history import get_git_commit_history
@@ -5,8 +6,8 @@ from .branches.manager import Branch_Manager
 from .operations.manager import GitOperations
 from .repo.unlink import unlink_repository
 from .repo.clone import clone_repository
-from .auth.authenticate import check_dev_mode
-from ..settings_utils import save_settings
+from ..db import save_settings, get_settings
+from ..config.config import config
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ logger.setLevel(logging.DEBUG)
 
 bp = Blueprint('git', __name__, url_prefix='/git')
 
-REPO_PATH = '/app/data/db'
+REPO_PATH = config.DB_DIR
 branch_manager = Branch_Manager(REPO_PATH)
 git_operations = GitOperations(REPO_PATH)
 
@@ -25,16 +26,14 @@ def handle_clone_repository():
         new_settings = request.json
         logger.info(f"Received new settings: {new_settings}")
 
-        # Validate required fields
         if 'gitRepo' not in new_settings:
             logger.error("Missing required field: gitRepo")
             return jsonify({"error": "Missing required field: gitRepo"}), 400
 
-        # Attempt to clone the repository
         success, message = clone_repository(new_settings['gitRepo'], REPO_PATH)
 
         if success:
-            # Only save the repository URL if the clone was successful
+            # Store repository URL in database
             save_settings({'gitRepo': new_settings['gitRepo']})
             logger.info("Settings updated and repository cloned successfully")
             return jsonify({
@@ -54,6 +53,10 @@ def handle_clone_repository():
 def get_status():
     logger.debug("Received request for git status")
     success, message = get_git_status(REPO_PATH)
+
+    if isinstance(message, str) and "No git repository" in message:
+        return jsonify({'success': True, 'data': None}), 200
+
     if success:
         logger.debug("Successfully retrieved git status")
         return jsonify({'success': True, 'data': message}), 200
@@ -133,11 +136,14 @@ def push_branch():
 
     success, result = branch_manager.push(branch_name)
     if success:
-        return jsonify({"success": True, "data": result}), 200
+        return jsonify({"success": True, "message": result}), 200
     else:
-        if 'merging' in result.get('error', '').lower():
-            return jsonify({'success': False, 'error': result}), 409
-        return jsonify({'success': False, 'error': result["error"]}), 500
+        if isinstance(result, str):
+            return jsonify({"success": False, "error": result}), 400
+        return jsonify({
+            "success": False,
+            "error": result.get('error', 'Unknown error occurred')
+        }), 400
 
 
 @bp.route('/commit', methods=['POST'])
@@ -167,11 +173,7 @@ def push_files():
         return jsonify({'success': True, 'message': message}), 200
     else:
         logger.error(f"Error pushing changes: {message}")
-        # If message is a dict, it's a structured error
-        if isinstance(message, dict):
-            return jsonify({'success': False, 'error': message}), 400
-        # Otherwise it's a string error
-        return jsonify({'success': False, 'error': str(message)}), 400
+        return jsonify({'success': False, 'error': message}), 400
 
 
 @bp.route('/revert', methods=['POST'])
@@ -299,12 +301,6 @@ def generate_commit_message(user_message, files):
     return user_message
 
 
-@bp.route('/dev', methods=['GET'])
-def dev_mode():
-    is_dev_mode = check_dev_mode()
-    return jsonify({'devMode': is_dev_mode}), 200
-
-
 @bp.route('/resolve', methods=['POST'])
 def resolve_conflicts():
     logger.debug("Received request to resolve conflicts")
@@ -374,3 +370,34 @@ def get_commit_history():
     else:
         logger.error(f"Failed to retrieve commit history: {result}")
         return jsonify({'success': False, 'error': result}), 400
+
+
+@bp.route('/autopull', methods=['GET', 'POST'])
+def handle_auto_pull():
+    try:
+        if request.method == 'GET':
+            settings = get_settings()
+            return jsonify({
+                'success':
+                True,
+                'enabled':
+                bool(int(settings.get('auto_pull_enabled', 0)))
+            }), 200
+
+        # POST handling
+        data = request.json
+        enabled = data.get('enabled')
+        if enabled is None:
+            return jsonify({
+                'success': False,
+                'error': 'enabled field is required'
+            }), 400
+
+        save_settings({'auto_pull_enabled': 1 if enabled else 0})
+        logger.info(
+            f"Auto-pull has been {'enabled' if enabled else 'disabled'}")
+        return jsonify({'success': True}), 200
+
+    except Exception as e:
+        logger.error(f"Error handling auto pull setting: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500

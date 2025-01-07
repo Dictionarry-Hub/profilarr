@@ -18,6 +18,7 @@ const Modal = ({
 }) => {
     const modalRef = useRef();
     const [activeTab, setActiveTab] = useState(tabs?.[0]?.id);
+
     useEffect(() => {
         if (isOpen && !disableCloseOnEscape) {
             const handleEscape = event => {
@@ -96,7 +97,8 @@ const Modal = ({
             />
             <div
                 ref={modalRef}
-                className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl 
+                className={`relative bg-gradient-to-br from-gray-50 to-gray-100 
+                    dark:from-gray-800 dark:to-gray-900 rounded-lg shadow-xl 
                     min-w-[320px] min-h-[200px] ${widthClasses[width]} ${
                     heightClasses[height]
                 } 
@@ -110,7 +112,7 @@ const Modal = ({
                 onClick={e => e.stopPropagation()}>
                 {/* Header */}
                 <div className='flex items-center px-6 py-4 pb-3 border-b border-gray-300 dark:border-gray-700'>
-                    <h3 className='text-xl font-semibold dark:text-gray-200'>
+                    <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-200'>
                         {title}
                     </h3>
                     {tabs && (
@@ -141,7 +143,7 @@ const Modal = ({
                 </div>
 
                 {/* Content */}
-                <div className='flex-1 overflow-y-auto p-6 py-4'>
+                <div className='flex-1 overflow-y-auto p-6 py-4 text-gray-900 dark:text-gray-200'>
                     {typeof children === 'function'
                         ? children(activeTab)
                         : children}

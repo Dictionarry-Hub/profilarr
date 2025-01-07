@@ -2,13 +2,19 @@ import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import ProfileCard from './ProfileCard';
 import ProfileModal from './ProfileModal';
-import AddNewCard from '../ui/AddNewCard';
-import {getGitStatus} from '../../api/api';
+import AddButton from '@ui/AddButton';
+import {getGitStatus} from '@api/api';
 import {Profiles, CustomFormats} from '@api/data';
-import FilterMenu from '../ui/FilterMenu';
-import SortMenu from '../ui/SortMenu';
-import {Loader} from 'lucide-react';
+import FilterMenu from '@ui/FilterMenu';
+import SortMenu from '@ui/SortMenu';
+import {Loader, CheckSquare} from 'lucide-react';
 import SearchBar from '@ui/SearchBar';
+import {useMassSelection} from '@hooks/useMassSelection';
+import {useKeyboardShortcut} from '@hooks/useKeyboardShortcut';
+import MassActionsBar from '@ui/MassActionsBar';
+import ImportModal from '@ui/ImportModal';
+import {importProfiles} from '@api/import';
+import Alert from '@ui/Alert';
 
 function ProfilePage() {
     const [profiles, setProfiles] = useState([]);
@@ -23,8 +29,21 @@ function ProfilePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [mergeConflicts, setMergeConflicts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const navigate = useNavigate();
+
+    // Mass selection state
+    const {
+        selectedItems,
+        isSelectionMode,
+        toggleSelectionMode,
+        handleSelect,
+        clearSelection
+    } = useMassSelection();
+
+    // Setup keyboard shortcut for selection mode (Ctrl+A)
+    useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
 
     const loadingMessages = [
         'Profiling your media collection...',
@@ -52,6 +71,7 @@ function ProfilePage() {
             }
         } catch (error) {
             console.error('Error fetching Git status:', error);
+            Alert.error('Failed to check repository status');
             setIsLoading(false);
         }
     };
@@ -77,6 +97,7 @@ function ProfilePage() {
             setAllTags(tags);
         } catch (error) {
             console.error('Error fetching profiles:', error);
+            Alert.error('Failed to load profiles');
         } finally {
             setIsLoading(false);
         }
@@ -94,10 +115,12 @@ function ProfilePage() {
             setFormats(formatsData);
         } catch (error) {
             console.error('Error fetching formats:', error);
+            Alert.error('Failed to load formats');
         }
     };
 
     const handleOpenModal = (profile = null) => {
+        if (isSelectionMode) return;
         const safeProfile = profile
             ? {
                   ...profile,
@@ -116,6 +139,7 @@ function ProfilePage() {
     };
 
     const handleCloneProfile = profile => {
+        if (isSelectionMode) return;
         const clonedProfile = {
             ...profile,
             id: 0,
@@ -132,6 +156,43 @@ function ProfilePage() {
         handleCloseModal();
     };
 
+    const handleMassDelete = async () => {
+        try {
+            const selectedProfiles = Array.from(selectedItems).map(
+                index => profiles[index]
+            );
+            for (const profile of selectedProfiles) {
+                await Profiles.delete(profile.file_name.replace('.yml', ''));
+            }
+            Alert.success('Selected profiles deleted successfully');
+            fetchProfiles();
+            toggleSelectionMode();
+        } catch (error) {
+            console.error('Error deleting profiles:', error);
+            Alert.error('Failed to delete selected profiles');
+        }
+    };
+
+    const handleMassImport = async arr => {
+        try {
+            // Use the identifier to find the correct profile
+            const selectedProfiles = Array.from(selectedItems).map(identifier =>
+                profiles.find(p => p.content.name === identifier)
+            );
+
+            await importProfiles(
+                arr,
+                selectedProfiles.map(p => p.file_name)
+            );
+            Alert.success('Profiles imported successfully');
+            toggleSelectionMode();
+        } catch (error) {
+            console.error('Error importing profiles:', error);
+            Alert.error('Failed to import profiles');
+            throw error;
+        }
+    };
+
     const formatDate = dateString => {
         return new Date(dateString).toLocaleString();
     };
@@ -144,13 +205,8 @@ function ProfilePage() {
                     profile.content.name
                         .toLowerCase()
                         .includes(searchQuery.toLowerCase()) ||
-                    profile.content.tags?.some(
-                        (
-                            tag // Changed from profile.tags
-                        ) =>
-                            tag
-                                .toLowerCase()
-                                .includes(searchQuery.toLowerCase())
+                    profile.content.tags?.some(tag =>
+                        tag.toLowerCase().includes(searchQuery.toLowerCase())
                     )
                 );
             }
@@ -160,10 +216,10 @@ function ProfilePage() {
                 return (
                     profile.content.tags &&
                     profile.content.tags.includes(filterValue)
-                ); // Changed from profile.tags
+                );
             }
             if (filterType === 'date') {
-                const profileDate = new Date(profile.modified_date); // This looks correct already
+                const profileDate = new Date(profile.modified_date);
                 const filterDate = new Date(filterValue);
                 return profileDate.toDateString() === filterDate.toDateString();
             }
@@ -171,15 +227,13 @@ function ProfilePage() {
         })
         .sort((a, b) => {
             if (sortBy === 'name')
-                return a.content.name.localeCompare(b.content.name); // Changed from a.name
+                return a.content.name.localeCompare(b.content.name);
             if (sortBy === 'dateCreated')
                 return new Date(b.created_date) - new Date(a.created_date);
             if (sortBy === 'dateModified')
                 return new Date(b.modified_date) - new Date(a.modified_date);
             return 0;
         });
-
-    const hasConflicts = mergeConflicts.length > 0;
 
     if (isLoading) {
         return (
@@ -195,6 +249,8 @@ function ProfilePage() {
             </div>
         );
     }
+
+    const hasConflicts = mergeConflicts.length > 0;
 
     if (hasConflicts) {
         return (
@@ -241,9 +297,23 @@ function ProfilePage() {
                         allTags={allTags}
                     />
                 </div>
+                <div className='flex-none'>
+                    <button
+                        onClick={toggleSelectionMode}
+                        className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
+                            isSelectionMode
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        }`}
+                        title='Toggle selection mode (Ctrl+A)'>
+                        <CheckSquare className='w-4 h-4' />
+                        <span className='text-sm'>Select</span>
+                    </button>
+                </div>
             </div>
+
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4'>
-                {sortedAndFilteredProfiles.map(profile => (
+                {sortedAndFilteredProfiles.map((profile, index) => (
                     <ProfileCard
                         key={profile.file_name}
                         profile={profile}
@@ -251,10 +321,38 @@ function ProfilePage() {
                         onClone={handleCloneProfile}
                         formatDate={formatDate}
                         sortBy={sortBy}
+                        isSelectionMode={isSelectionMode}
+                        isSelected={selectedItems.has(index)}
+                        onSelect={e =>
+                            handleSelect(
+                                profile.content.name,
+                                index,
+                                e,
+                                sortedAndFilteredProfiles
+                            )
+                        }
                     />
                 ))}
-                <AddNewCard onAdd={() => handleOpenModal()} />
             </div>
+
+            {!isSelectionMode && (
+                <AddButton
+                    onClick={() => handleOpenModal()}
+                    label='Add New Profile'
+                    top='5vh'
+                    left='75vw'
+                />
+            )}
+
+            {isSelectionMode && (
+                <MassActionsBar
+                    selectedCount={selectedItems.size}
+                    onCancel={toggleSelectionMode}
+                    onDelete={handleMassDelete}
+                    onImport={() => setIsImportModalOpen(true)}
+                />
+            )}
+
             <ProfileModal
                 profile={selectedProfile}
                 isOpen={isModalOpen}
@@ -262,6 +360,13 @@ function ProfilePage() {
                 onSave={handleSaveProfile}
                 formats={formats}
                 isCloning={isCloning}
+            />
+
+            <ImportModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                onImport={handleMassImport}
+                type='Profiles'
             />
         </div>
     );

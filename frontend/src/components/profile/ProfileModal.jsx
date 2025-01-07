@@ -7,7 +7,7 @@ import {Loader} from 'lucide-react';
 import ProfileGeneralTab from './ProfileGeneralTab';
 import ProfileScoringTab from './ProfileScoringTab';
 import ProfileQualitiesTab from './ProfileQualitiesTab';
-import ProfileLanguagesTab from './ProfileLangaugesTab';
+import ProfileLangaugesTab from './ProfileLangaugesTab';
 import ProfileTweaksTab from './ProfileTweaksTab';
 import QUALITIES from '../../constants/qualities';
 
@@ -16,8 +16,7 @@ const DEFAULT_TWEAKS = {
     allowLosslessAudio: true,
     allowDVNoFallback: false,
     allowBleedingEdgeCodecs: false,
-    allowPrereleases: false,
-    languageStrictness: 'disabled'
+    allowPrereleases: false
 };
 
 function unsanitize(text) {
@@ -69,10 +68,10 @@ function ProfileModal({
     const [sortedQualities, setSortedQualities] = useState([]);
 
     // Language state
-    const [selectedLanguage, setSelectedLanguage] = useState('any');
+    const [language, setLanguage] = useState('must_english');
 
     // Tweaks state
-    const [tweaks, setTweaks] = useState({});
+    const [tweaks, setTweaks] = useState(DEFAULT_TWEAKS);
 
     const tabs = [
         {id: 'general', label: 'General'},
@@ -81,6 +80,52 @@ function ProfileModal({
         {id: 'languages', label: 'Languages'},
         {id: 'tweaks', label: 'Tweaks'}
     ];
+
+    const resetState = () => {
+        // General state
+        setName('');
+        setDescription('');
+        setError('');
+        setTags([]);
+
+        // Format scoring state
+        const safeCustomFormats = formats.map(format => ({
+            id: format.name,
+            name: format.name,
+            score: 0,
+            tags: format.tags || []
+        }));
+        setCustomFormats(safeCustomFormats);
+
+        // Reset all other states to defaults
+        setUpgradesAllowed(false);
+        setMinCustomFormatScore(0);
+        setUpgradeUntilScore(0);
+        setMinScoreIncrement(0);
+
+        // Set default quality
+        const defaultQuality = QUALITIES.find(q => q.name === 'Bluray-1080p');
+        setSortedQualities(
+            QUALITIES.map(quality => ({
+                ...quality,
+                enabled: quality.id === defaultQuality.id
+            }))
+        );
+        setEnabledQualities([
+            {
+                id: defaultQuality.id,
+                name: defaultQuality.name
+            }
+        ]);
+        setSelectedUpgradeQuality({
+            id: defaultQuality.id,
+            name: defaultQuality.name
+        });
+
+        // Reset other states
+        setLanguage('must_english');
+        setTweaks(DEFAULT_TWEAKS);
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -93,13 +138,17 @@ function ProfileModal({
                     ? 'Edit Profile'
                     : 'Add Profile'
             );
-
-            if (initialProfile?.content) {
+            if (!initialProfile && !isCloning) {
+                resetState();
+            } else if (initialProfile?.content) {
                 const content = initialProfile.content;
                 // Basic info
                 setName(unsanitize(content.name || ''));
                 setDescription(unsanitize(content.description || ''));
                 setTags(content.tags?.map(unsanitize) || []);
+
+                // Language
+                setLanguage(content.language || 'must_english');
 
                 // Upgrade settings
                 setUpgradesAllowed(content.upgradesAllowed || false);
@@ -237,9 +286,6 @@ function ProfileModal({
                     setSelectedUpgradeQuality(foundQuality);
                 }
 
-                // Language
-                setSelectedLanguage(content.language || 'any');
-
                 setError('');
             } else {
                 // New profile setup
@@ -287,36 +333,14 @@ function ProfileModal({
                     name: defaultQuality.name
                 });
 
-                // Initialize empty tweaks
+                // Initialize with defaults
+                setLanguage('must_english');
                 setTweaks(DEFAULT_TWEAKS);
             }
 
             setLoading(false);
         }
     }, [initialProfile, isOpen, formats, isCloning]);
-
-    const resetState = () => {
-        setName('');
-        setDescription('');
-        setTags([]);
-        setUpgradesAllowed(false);
-        setMinCustomFormatScore(0);
-        setUpgradeUntilScore(0);
-        setMinScoreIncrement(0);
-        setCustomFormats(
-            formats.map((format, index) => ({
-                id: index, // Assign a unique id if not present
-                name: format.name,
-                score: 0,
-                tags: format.tags || []
-            }))
-        );
-        setFormatTags([]);
-        setTagScores({});
-        setEnabledQualities([]);
-        setSelectedUpgradeQuality(null);
-        setSelectedLanguage('any');
-    };
 
     const handleSave = async () => {
         if (!name.trim()) {
@@ -377,7 +401,7 @@ function ProfileModal({
                           })
                       }
                     : null,
-                language: selectedLanguage,
+                language,
                 tweaks
             };
 
@@ -417,6 +441,7 @@ function ProfileModal({
             setError('An unexpected error occurred');
         }
     };
+
     const handleDelete = async () => {
         if (!initialProfile) return;
 
@@ -439,7 +464,6 @@ function ProfileModal({
         }
     };
 
-    // Define the missing functions
     const onFormatSort = (key, direction) => {
         setFormatSortKey(key);
         setFormatSortDirection(direction);
@@ -523,13 +547,11 @@ function ProfileModal({
                                     onTagFilterChange={setTagFilter}
                                     tagScores={tagScores}
                                     onTagScoreChange={(tag, score) => {
-                                        // Update the tag score
                                         setTagScores(prev => ({
                                             ...prev,
                                             [tag]: score
                                         }));
 
-                                        // Update scores of all formats that have this tag
                                         setCustomFormats(prev =>
                                             prev.map(format => {
                                                 if (
@@ -573,9 +595,9 @@ function ProfileModal({
                                 />
                             )}
                             {activeTab === 'languages' && (
-                                <ProfileLanguagesTab
-                                    selectedLanguage={selectedLanguage}
-                                    onLanguageChange={setSelectedLanguage}
+                                <ProfileLangaugesTab
+                                    language={language}
+                                    onLanguageChange={setLanguage}
                                 />
                             )}
                             {activeTab === 'tweaks' && (
@@ -627,7 +649,8 @@ ProfileModal.propTypes = {
                 id: PropTypes.number.isRequired,
                 name: PropTypes.string.isRequired
             }),
-            language: PropTypes.string
+            language: PropTypes.string,
+            tweaks: PropTypes.object
         })
     }),
     isOpen: PropTypes.bool.isRequired,

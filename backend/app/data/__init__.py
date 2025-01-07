@@ -5,7 +5,8 @@ import yaml
 from .utils import (get_category_directory, load_yaml_file, validate,
                     save_yaml_file, update_yaml_file, get_file_created_date,
                     get_file_modified_date, test_regex_pattern,
-                    test_format_conditions)
+                    test_format_conditions, check_delete_constraints,
+                    filename_to_display)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -17,15 +18,15 @@ def retrieve_all(category):
     try:
         directory = get_category_directory(category)
         files = [f for f in os.listdir(directory) if f.endswith('.yml')]
-        logger.info(f"Files found: {files}")
+        logger.debug(f"Found {len(files)} files in {category}")
 
         if not files:
             return jsonify([]), 200
 
         result = []
+        errors = 0
         for file_name in files:
             file_path = os.path.join(directory, file_name)
-            logger.info(f"Processing file: {file_path}")
             try:
                 content = load_yaml_file(file_path)
                 result.append({
@@ -39,11 +40,14 @@ def retrieve_all(category):
                     get_file_modified_date(file_path)
                 })
             except yaml.YAMLError:
+                errors += 1
                 result.append({
                     "file_name": file_name,
                     "error": "Failed to parse YAML"
                 })
 
+        logger.info(
+            f"Processed {len(files)} {category} files ({errors} errors)")
         return jsonify(result), 200
 
     except ValueError as ve:
@@ -87,6 +91,16 @@ def handle_item(category, name):
         elif request.method == 'DELETE':
             if not os.path.exists(file_path):
                 return jsonify({"error": f"File {file_name} not found"}), 404
+
+            # Check for references before deleting
+            can_delete, error_message = check_delete_constraints(
+                category, filename_to_display(name))
+            if not can_delete:
+                logger.error(
+                    f"Delete constraint check failed for {name}: {error_message}"
+                )
+                return jsonify({"error": error_message}), 409
+
             try:
                 os.remove(file_path)
                 return jsonify(

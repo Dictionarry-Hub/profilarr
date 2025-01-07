@@ -1,20 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {InfoIcon, AlertTriangle} from 'lucide-react';
-import {LANGUAGES} from '@constants/languages';
 
 const ProfileTweaksTab = ({tweaks, onTweaksChange}) => {
     const handleTweakChange = key => {
         onTweaksChange({
             ...tweaks,
             [key]: !tweaks[key]
-        });
-    };
-
-    const handleLanguageStrictness = value => {
-        onTweaksChange({
-            ...tweaks,
-            languageStrictness: value
         });
     };
 
@@ -171,52 +163,6 @@ const ProfileTweaksTab = ({tweaks, onTweaksChange}) => {
                                 Prioritize releases tagged as freeleech when
                                 choosing between different indexers' releases.
                             </p>
-                        </div>
-                    </div>
-
-                    {/* Language Strictness */}
-                    <div className='p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
-                        <div className='space-y-3'>
-                            <div className='space-y-1'>
-                                <h3 className='text-sm font-medium text-gray-900 dark:text-gray-100'>
-                                    Language Strictness
-                                </h3>
-                                <p className='text-xs text-gray-500 dark:text-gray-400'>
-                                    Set strict language requirements for
-                                    releases. Select 'Disabled' to use normal
-                                    language preferences.
-                                </p>
-                            </div>
-                            <select
-                                value={tweaks.languageStrictness || 'disabled'}
-                                onChange={e =>
-                                    handleLanguageStrictness(e.target.value)
-                                }
-                                className='mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400'>
-                                <option value='disabled'>Disabled</option>
-                                <optgroup label='Must Include'>
-                                    {LANGUAGES.filter(
-                                        lang => !lang.isSpecial
-                                    ).map(language => (
-                                        <option
-                                            key={`must_${language.id}`}
-                                            value={`must_${language.id}`}>
-                                            Must Include {language.name}
-                                        </option>
-                                    ))}
-                                </optgroup>
-                                <optgroup label='Must Not Include'>
-                                    {LANGUAGES.filter(
-                                        lang => !lang.isSpecial
-                                    ).map(language => (
-                                        <option
-                                            key={`mustnot_${language.id}`}
-                                            value={`mustnot_${language.id}`}>
-                                            Must Not Include {language.name}
-                                        </option>
-                                    ))}
-                                </optgroup>
-                            </select>
                         </div>
                     </div>
                 </div>

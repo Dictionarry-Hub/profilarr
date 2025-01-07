@@ -2,7 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Copy} from 'lucide-react';
 
-function FormatCard({format, onEdit, onClone, sortBy}) {
+function FormatCard({
+    format,
+    onEdit,
+    onClone,
+    sortBy,
+    isSelectionMode,
+    isSelected,
+    onSelect
+}) {
     const {content} = format;
     const totalTests = content.tests?.length || 0;
     const passedTests = content.tests?.filter(t => t.passes)?.length || 0;
@@ -46,10 +54,35 @@ function FormatCard({format, onEdit, onClone, sortBy}) {
         return displayConditions;
     };
 
+    const handleClick = e => {
+        if (isSelectionMode) {
+            onSelect(e);
+        } else {
+            onEdit();
+        }
+    };
+
+    const handleCloneClick = e => {
+        e.stopPropagation();
+        if (!isSelectionMode) {
+            onClone(format);
+        }
+    };
+
     return (
         <div
-            className='w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-pointer max-h-96'
-            onClick={() => onEdit(format)}>
+            className={`w-full bg-white dark:bg-gray-800 border ${
+                isSelected
+                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/20'
+                    : 'border-gray-200 dark:border-gray-700'
+            } rounded-lg shadow hover:shadow-lg ${
+                isSelectionMode
+                    ? isSelected
+                        ? 'hover:border-blue-500'
+                        : 'hover:border-gray-400'
+                    : 'hover:border-blue-400'
+            } dark:hover:border-blue-500 transition-all cursor-pointer max-h-96`}
+            onClick={handleClick}>
             <div className='flex flex-col p-6 gap-3'>
                 {/* Header Section */}
                 <div className='flex justify-between items-start gap-4'>
@@ -73,11 +106,13 @@ function FormatCard({format, onEdit, onClone, sortBy}) {
                         )}
                     </div>
                     <button
-                        className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors'
-                        onClick={e => {
-                            e.stopPropagation();
-                            onClone(format);
-                        }}>
+                        className={`p-2 rounded-full transition-colors ${
+                            isSelectionMode
+                                ? 'opacity-50 cursor-not-allowed'
+                                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
+                        onClick={handleCloneClick}
+                        disabled={isSelectionMode}>
                         <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
                     </button>
                 </div>
@@ -170,7 +205,10 @@ FormatCard.propTypes = {
     }).isRequired,
     onEdit: PropTypes.func.isRequired,
     onClone: PropTypes.func.isRequired,
-    sortBy: PropTypes.string.isRequired
+    sortBy: PropTypes.string.isRequired,
+    isSelectionMode: PropTypes.bool.isRequired,
+    isSelected: PropTypes.bool.isRequired,
+    onSelect: PropTypes.func.isRequired
 };
 
 export default FormatCard;

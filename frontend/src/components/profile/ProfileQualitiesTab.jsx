@@ -252,17 +252,20 @@ const ProfileQualitiesTab = ({
 
             onQualitiesChange(allEnabledQualities);
 
+            // Only update the upgrade quality if we're disabling the current upgrade quality
             if (
                 selectedUpgradeQuality &&
-                !allEnabledQualities.find(
-                    q => q.id === selectedUpgradeQuality.id
-                )
+                quality.enabled === false && // We're disabling a quality
+                (quality.id === selectedUpgradeQuality.id || // Direct match
+                    ('qualities' in quality && // Group match
+                        quality.qualities.some(
+                            q => q.id === selectedUpgradeQuality.id
+                        )))
             ) {
                 const nearestQuality = findNearestEnabledQuality(
                     newQualities,
                     quality.id
                 );
-
                 onSelectedUpgradeQualityChange?.(nearestQuality);
             }
         }

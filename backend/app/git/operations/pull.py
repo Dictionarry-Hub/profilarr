@@ -1,7 +1,7 @@
 import git
 import logging
 from git import GitCommandError
-from ..status.status import get_git_status
+from ..status.status import GitStatusManager
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,13 @@ def pull_branch(repo_path, branch_name):
             try:
                 # Try to pull with explicit merge strategy
                 repo.git.pull('origin', branch_name, '--no-rebase')
-                return True, "Successfully pulled changes for branch {branch_name}"
+
+                # Update remote status immediately after pull
+                status_manager = GitStatusManager.get_instance(repo_path)
+                if status_manager:
+                    status_manager.update_remote_status()
+
+                return True, f"Successfully pulled changes for branch {branch_name}"
             except GitCommandError as e:
                 if "CONFLICT" in str(e):
                     # Don't reset - let Git stay in merge conflict state

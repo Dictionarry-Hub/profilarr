@@ -2,15 +2,20 @@ import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import FormatCard from './FormatCard';
 import FormatModal from './FormatModal';
-import AddNewCard from '../ui/AddNewCard';
-import {getGitStatus} from '../../api/api';
+import AddButton from '@ui/AddButton';
+import {getGitStatus} from '@api/api';
 import {CustomFormats} from '@api/data';
-import FilterMenu from '../ui/FilterMenu';
-import SortMenu from '../ui/SortMenu';
-import {Loader} from 'lucide-react';
+import FilterMenu from '@ui/FilterMenu';
+import SortMenu from '@ui/SortMenu';
+import {Loader, CheckSquare} from 'lucide-react';
 import Alert from '@ui/Alert';
 import SearchBar from '@ui/SearchBar';
 import {useFormatModal} from '@hooks/useFormatModal';
+import {useMassSelection} from '@hooks/useMassSelection';
+import {useKeyboardShortcut} from '@hooks/useKeyboardShortcut';
+import MassActionsBar from '@ui/MassActionsBar';
+import ImportModal from '@ui/ImportModal';
+import {importFormats} from '@api/import';
 
 function FormatPage() {
     // Basic state management
@@ -25,8 +30,21 @@ function FormatPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [mergeConflicts, setMergeConflicts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const navigate = useNavigate();
+
+    // Mass selection state
+    const {
+        selectedItems,
+        isSelectionMode,
+        toggleSelectionMode,
+        handleSelect,
+        clearSelection
+    } = useMassSelection();
+
+    // Setup keyboard shortcut for selection mode (Ctrl+A)
+    useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
 
     // Format modal hook integration
     const {
@@ -49,7 +67,7 @@ function FormatPage() {
         initializeForm,
         handleSave,
         handleRunTests,
-        handleDelete // Added this
+        handleDelete
     } = useFormatModal(selectedFormat, () => {
         fetchFormats();
         handleCloseModal();
@@ -93,8 +111,7 @@ function FormatPage() {
                 modified_date: item.modified_date,
                 created_date: item.created_date,
                 content: {
-                    ...item.content,
-                    name: item.file_name.replace('.yml', '')
+                    ...item.content
                 }
             }));
             setFormats(formatsData);
@@ -113,6 +130,7 @@ function FormatPage() {
     };
 
     const handleOpenModal = (format = null) => {
+        if (isSelectionMode) return;
         setSelectedFormat(format);
         setIsModalOpen(true);
         setIsCloning(false);
@@ -126,6 +144,7 @@ function FormatPage() {
     };
 
     const handleCloneFormat = format => {
+        if (isSelectionMode) return;
         const clonedFormat = {
             ...format,
             content: {
@@ -139,8 +158,36 @@ function FormatPage() {
         initializeForm(clonedFormat.content, true);
     };
 
-    const formatDate = dateString => {
-        return new Date(dateString).toLocaleString();
+    const handleMassDelete = async () => {
+        try {
+            const selectedFormats = Array.from(selectedItems).map(
+                index => formats[index]
+            );
+            for (const format of selectedFormats) {
+                await CustomFormats.delete(
+                    format.file_name.replace('.yml', '')
+                );
+            }
+            Alert.success('Selected formats deleted successfully');
+            fetchFormats();
+            toggleSelectionMode();
+        } catch (error) {
+            console.error('Error deleting formats:', error);
+            Alert.error('Failed to delete selected formats');
+        }
+    };
+
+    const handleMassImport = async arr => {
+        try {
+            const formatNames = Array.from(selectedItems);
+            await importFormats(arr, formatNames);
+            Alert.success('Formats imported successfully');
+            toggleSelectionMode();
+        } catch (error) {
+            console.error('Error importing formats:', error);
+            Alert.error('Failed to import formats');
+            throw error;
+        }
     };
 
     const getFilteredAndSortedFormats = () => {
@@ -181,6 +228,7 @@ function FormatPage() {
             }
         });
     };
+
     if (isLoading) {
         return (
             <div className='flex flex-col items-center justify-center h-64'>
@@ -224,6 +272,8 @@ function FormatPage() {
         );
     }
 
+    const filteredFormats = getFilteredAndSortedFormats();
+
     return (
         <div>
             <div className='mb-4 flex items-center gap-4'>
@@ -243,20 +293,61 @@ function FormatPage() {
                         allTags={allTags}
                     />
                 </div>
+                <div className='flex-none'>
+                    <button
+                        onClick={toggleSelectionMode}
+                        className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
+                            isSelectionMode
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        }`}
+                        title='Toggle selection mode (Ctrl+A)'>
+                        <CheckSquare className='w-4 h-4' />
+                        <span className='text-sm'>Select</span>
+                    </button>
+                </div>
             </div>
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>
-                {getFilteredAndSortedFormats().map(format => (
+                {filteredFormats.map((format, index) => (
                     <FormatCard
                         key={format.file_name}
                         format={format}
                         onEdit={() => handleOpenModal(format)}
                         onClone={handleCloneFormat}
                         sortBy={sortBy}
+                        isSelectionMode={isSelectionMode}
+                        isSelected={selectedItems.has(format.content.name)}
+                        onSelect={e =>
+                            handleSelect(
+                                format.content.name,
+                                index,
+                                e,
+                                filteredFormats
+                            )
+                        }
                     />
                 ))}
-                <AddNewCard onAdd={() => handleOpenModal()} />
             </div>
+
+            {!isSelectionMode && (
+                <AddButton
+                    onClick={() => handleOpenModal()}
+                    label='Add New Format'
+                    top='5vh'
+                    left='75vw'
+                />
+            )}
+
+            {isSelectionMode && (
+                <MassActionsBar
+                    selectedCount={selectedItems.size}
+                    onCancel={toggleSelectionMode}
+                    onDelete={handleMassDelete}
+                    onImport={() => setIsImportModalOpen(true)}
+                />
+            )}
+
             <FormatModal
                 format={selectedFormat}
                 isOpen={isModalOpen}
@@ -281,6 +372,13 @@ function FormatPage() {
                 onRunTests={handleRunTests}
                 onSave={handleSave}
                 onDelete={handleDelete}
+            />
+
+            <ImportModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                onImport={handleMassImport}
+                type='Formats'
             />
         </div>
     );

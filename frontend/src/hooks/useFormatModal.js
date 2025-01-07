@@ -80,16 +80,23 @@ export const useFormatModal = (initialFormat, onSuccess) => {
     const handleDelete = async () => {
         if (!initialFormat) return;
 
-        try {
-            await CustomFormats.delete(
-                initialFormat.file_name.replace('.yml', '')
-            );
-            Alert.success('Format deleted successfully');
-            onSuccess();
-        } catch (error) {
-            console.error('Error deleting format:', error);
-            Alert.error('Failed to delete format');
-            throw error;
+        if (isDeleting) {
+            try {
+                await CustomFormats.delete(
+                    initialFormat.file_name.replace('.yml', '')
+                );
+                Alert.success('Format deleted successfully');
+                onSuccess();
+            } catch (error) {
+                console.error('Error deleting format:', error);
+                Alert.error(
+                    error.message ||
+                        'Failed to delete format. Please try again.'
+                );
+                setIsDeleting(false); // Reset delete state on error
+            }
+        } else {
+            setIsDeleting(true);
         }
     };
 

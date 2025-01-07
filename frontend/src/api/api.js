@@ -1,117 +1,5 @@
 import axios from 'axios';
 
-export const getRegexes = async () => {
-    try {
-        const response = await axios.get(`/api/regex`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching regexes:', error);
-        throw error;
-    }
-};
-
-export const saveRegex = async regex => {
-    try {
-        const response = await axios.post(`/api/regex`, regex);
-        return response.data;
-    } catch (error) {
-        console.error('Error saving regex:', error);
-        throw error;
-    }
-};
-
-export const updateRegex = async (id, regex) => {
-    try {
-        const response = await axios.put(`/api/regex/${id}`, regex);
-        return response.data;
-    } catch (error) {
-        console.error('Error updating regex:', error);
-        throw error;
-    }
-};
-
-export const deleteRegex = async (id, force = false) => {
-    try {
-        const response = await axios.delete(
-            `/api/regex/${id}${force ? '?force=true' : ''}`,
-            {
-                validateStatus: status => {
-                    return (
-                        (status >= 200 && status < 300) ||
-                        status === 400 ||
-                        status === 409
-                    );
-                }
-            }
-        );
-        return response.data;
-    } catch (error) {
-        console.error('Error deleting regex:', error);
-        throw error;
-    }
-};
-
-export const getFormats = async () => {
-    try {
-        const response = await axios.get(`/api/format`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching formats:', error);
-        throw error;
-    }
-};
-
-export const saveFormat = async format => {
-    try {
-        const response = await axios.post(`/api/format`, format);
-        return response.data;
-    } catch (error) {
-        console.error('Error saving format:', error);
-        throw error;
-    }
-};
-
-export const updateFormat = async (id, format) => {
-    try {
-        const response = await axios.put(`/api/format/${id}`, format);
-        return response.data;
-    } catch (error) {
-        console.error('Error updating format:', error);
-        throw error;
-    }
-};
-
-export const deleteFormat = async (id, force = false) => {
-    try {
-        const response = await axios.delete(
-            `/api/format/${id}${force ? '?force=true' : ''}`,
-            {
-                validateStatus: status => {
-                    return (
-                        (status >= 200 && status < 300) ||
-                        status === 400 ||
-                        status === 409
-                    );
-                }
-            }
-        );
-        return response.data;
-    } catch (error) {
-        console.error('Error deleting format:', error);
-        throw error;
-    }
-};
-
-export const createRegex101Link = async regexData => {
-    try {
-        const response = await axios.post(`/api/regex/regex101`, regexData);
-        return response.data;
-    } catch (error) {
-        console.error('Error creating regex101 link:', error);
-        throw error;
-    }
-};
-
 export const getSettings = async () => {
     try {
         const response = await axios.get(`/api/settings`);
@@ -237,7 +125,11 @@ export const pushBranchToRemote = async branchName => {
         return response.data;
     } catch (error) {
         console.error('Error pushing branch to remote:', error);
-        throw error;
+        return {
+            success: false,
+            error:
+                error.response?.data?.error || 'Failed to push branch to remote'
+        };
     }
 };
 
@@ -281,19 +173,22 @@ export const pushFiles = async () => {
         const response = await axios.post(`/api/git/push`);
         return response.data;
     } catch (error) {
-        // Pass through the structured error from the backend
-        if (error.response?.data) {
-            return {
-                success: false,
-                error: error.response.data.error
-            };
+        console.log(
+            'Push error full structure:',
+            JSON.stringify(error.response?.data, null, 2)
+        );
+
+        if (error.response?.data?.error) {
+            return error.response.data;
         }
+
         return {
             success: false,
-            error: 'Failed to push changes'
+            error: error.message || 'Failed to push changes'
         };
     }
 };
+
 export const revertFile = async filePath => {
     try {
         const response = await axios.post(`/api/git/revert`, {
@@ -486,5 +381,27 @@ export const getCommitHistory = async () => {
             success: false,
             error: 'Failed to fetch commit history'
         };
+    }
+};
+
+export const getAutoPullStatus = async () => {
+    try {
+        const response = await axios.get('/api/git/autopull');
+        return response.data;
+    } catch (error) {
+        console.error('Error getting auto pull status:', error);
+        throw error;
+    }
+};
+
+export const setAutoPullStatus = async enabled => {
+    try {
+        const response = await axios.post('/api/git/autopull', {
+            enabled
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error setting auto pull status:', error);
+        throw error;
     }
 };

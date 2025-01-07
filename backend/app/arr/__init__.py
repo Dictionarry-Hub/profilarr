@@ -45,9 +45,10 @@ def add_config():
 
     try:
         config = request.json
-        id = save_arr_config(config)
-        logger.debug(f"Saved new arr config with ID: {id}")
-        return jsonify({'success': True, 'id': id}), 200
+        result = save_arr_config(config)
+        if not result['success']:
+            return jsonify(result), 400
+        return jsonify(result), 200
     except Exception as e:
         logger.error(f"Error saving arr config: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 400

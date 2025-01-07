@@ -58,7 +58,6 @@ const RegexModal = ({
 
     const handleDelete = async () => {
         if (!initialPattern) return;
-
         if (isDeleting) {
             try {
                 await RegexPatterns.delete(
@@ -68,7 +67,10 @@ const RegexModal = ({
                 onClose();
             } catch (error) {
                 console.error('Error deleting pattern:', error);
-                Alert.error('Failed to delete pattern. Please try again.');
+                Alert.error(
+                    error.message ||
+                        'Failed to delete pattern. Please try again.'
+                );
             } finally {
                 setIsDeleting(false);
             }

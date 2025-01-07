@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import {useState, useEffect, useRef, useLayoutEffect} from 'react';
 import {Link, useLocation} from 'react-router-dom';
+import Logo from '@ui/Logo';
 
 function ToggleSwitch({checked, onChange}) {
     return (
@@ -62,12 +63,10 @@ function Navbar({darkMode, setDarkMode}) {
         }
     };
 
-    // Use useLayoutEffect for initial position
     useLayoutEffect(() => {
         updateTabPosition();
     }, [activeTab]);
 
-    // Use ResizeObserver to handle window resizing
     useEffect(() => {
         const resizeObserver = new ResizeObserver(updateTabPosition);
         if (tabsRef.current[activeTab]) {
@@ -81,9 +80,12 @@ function Navbar({darkMode, setDarkMode}) {
             <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative'>
                 <div className='flex items-center justify-between h-16'>
                     <div className='flex items-center space-x-8'>
-                        <h1 className='text-2xl font-bold text-white'>
-                            Profilarr
-                        </h1>
+                        <div className='flex items-center gap-3'>
+                            <Logo className='h-10 w-10' />
+                            <h1 className='text-2xl font-bold text-white'>
+                                Profilarr
+                            </h1>
+                        </div>
                         <div className='relative flex space-x-2'>
                             {isInitialized && (
                                 <div

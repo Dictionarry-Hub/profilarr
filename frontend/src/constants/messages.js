@@ -14,16 +14,15 @@ export const statusLoadingMessages = [
 ];
 
 export const noChangesMessages = [
-    'All synced up! Smooth sailing ahead.',
-    "No changes detected. We're all good here.",
-    "Everything's in order. Carry on!",
-    'Up to date and ready to go.',
-    'All quiet on the regex front!',
-    'Perfectly synced! Nice work.',
-    "No updates needed. You're all set.",
-    "Everything's hunky-dory in your repository.",
-    'All good in the code neighborhood.',
-    'Sync complete! Ship-Shape.'
+    'No changes found. The regex gods nod in approval.',
+    'Your repo is so calm, it might as well be meditating.',
+    'Nothing to sync. It’s as if time stood still.',
+    'All quiet on the version control front. Too quiet…',
+    'Zero changes detected. A true masterpiece in stasis.',
+    'No updates needed. Your repo just passed the vibe check.',
+    'Your repository is the epitome of order. No changes here.',
+    'The sync fairy confirms: no updates required.',
+    'Everything’s stable. Your repo deserves a standing ovation.'
 ];
 
 export const getRandomMessage = messages => {

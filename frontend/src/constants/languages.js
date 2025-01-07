@@ -1,7 +1,8 @@
 // src/constants/languages.js
 export const LANGUAGES = [
-    {id: 'any', name: 'Any', isSpecial: true},
     {id: 'original', name: 'Original', isSpecial: true},
+    {id: 'afrikaans', name: 'Afrikaans'},
+    {id: 'albanian', name: 'Albanian'},
     {id: 'arabic', name: 'Arabic'},
     {id: 'bengali', name: 'Bengali'},
     {id: 'bosnian', name: 'Bosnian'},

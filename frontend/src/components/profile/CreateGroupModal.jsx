@@ -13,7 +13,6 @@ const CreateGroupModal = ({
     const [selectedQualities, setSelectedQualities] = useState([]);
     const [groupName, setGroupName] = useState('');
     const [description, setDescription] = useState('');
-    const [nextId, setNextId] = useState(-1);
 
     useEffect(() => {
         if (isOpen && editingGroup) {
@@ -33,6 +32,19 @@ const CreateGroupModal = ({
         }
     }, [isOpen, editingGroup, availableQualities]);
 
+    const findNextSafeGroupId = () => {
+        // Get all existing group IDs (negative numbers)
+        const existingGroupIds = availableQualities
+            .filter(q => 'qualities' in q)
+            .map(q => q.id);
+
+        // If no groups exist, start with -1
+        if (existingGroupIds.length === 0) return -1;
+
+        // Find the lowest (most negative) ID and subtract 1
+        return Math.min(...existingGroupIds) - 1;
+    };
+
     const getValidationMessage = () => {
         if (!groupName) return 'Please enter a group name';
         if (selectedQualities.length === 0)
@@ -43,7 +55,7 @@ const CreateGroupModal = ({
     const handleSave = () => {
         if (groupName && selectedQualities.length > 0) {
             const groupData = {
-                id: editingGroup ? editingGroup.id : nextId,
+                id: editingGroup ? editingGroup.id : findNextSafeGroupId(),
                 name: groupName,
                 description,
                 qualities: selectedQualities,
@@ -53,8 +65,6 @@ const CreateGroupModal = ({
             };
 
             onCreateGroup(groupData);
-            // Decrement the ID counter for next time
-            setNextId(prev => prev - 1);
         }
     };
 

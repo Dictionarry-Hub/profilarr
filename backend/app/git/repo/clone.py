@@ -6,54 +6,56 @@ import logging
 import yaml
 from git.exc import GitCommandError
 import git
-from ..auth.authenticate import validate_git_token
 
 logger = logging.getLogger(__name__)
 
 
 def clone_repository(repo_url, repo_path):
+    temp_dir = f"{repo_path}_temp"
+    backup_dir = f"{repo_path}_backup"
+    logger = logging.getLogger(__name__)
+
     try:
-        temp_dir = f"{repo_path}_temp"
-        backup_dir = f"{repo_path}_backup"
-
-        logger.info(f"Cloning repository from {repo_url} to {temp_dir}")
-
+        # Initial clone attempt
+        logger.info(f"Starting clone operation for {repo_url}")
         try:
             repo = git.Repo.clone_from(repo_url, temp_dir)
-            logger.info("Repository cloned successfully")
+            logger.info("Repository clone successful")
         except GitCommandError as e:
             if "remote: Repository not found" in str(e):
-                logger.info(
-                    "Repository not found. Creating a new empty repository.")
+                logger.info("Creating new repository - remote not found")
                 repo = git.Repo.init(temp_dir)
                 repo.create_remote('origin', repo_url)
             else:
-                logger.error(f"Git clone failed: {str(e)}")
+                logger.error(f"Clone failed: {str(e)}")
                 return False, f"Failed to clone repository: {str(e)}"
 
+        # Check if repo is empty
         try:
             repo.head.reference
         except ValueError:
-            logger.info(
-                "Repository is empty. Initializing with basic structure.")
+            logger.info("Initializing empty repository with default structure")
             _initialize_empty_repo(repo)
 
+        # Backup handling
         if os.path.exists(repo_path):
-            logger.info(f"Backing up existing repo to {backup_dir}")
+            logger.info("Creating backup of existing repository")
             shutil.move(repo_path, backup_dir)
 
-        logger.info(f"Moving cloned repo from {temp_dir} to {repo_path}")
+        # Move repo to final location
+        logger.info("Moving repository to final location")
         shutil.move(temp_dir, repo_path)
 
+        # Process folders
         for folder_name in ['regex_patterns', 'custom_formats', 'profiles']:
             folder_path = os.path.join(repo_path, folder_name)
             backup_folder_path = os.path.join(backup_dir, folder_name)
 
             if not os.path.exists(folder_path):
-                logger.info(f"Creating missing folder: {folder_name}")
+                logger.debug(f"Creating folder: {folder_name}")
                 os.makedirs(folder_path)
 
-            # Get existing files from cloned repo
+            # File merging process
             cloned_files = set(
                 f.replace('.yml', '') for f in os.listdir(folder_path)
                 if f.endswith('.yml'))
@@ -64,42 +66,46 @@ def clone_repository(repo_url, repo_path):
                     if f.endswith('.yml')
                 ]
 
+                if local_files:
+                    logger.info(
+                        f"Merging {len(local_files)} files in {folder_name}")
+
                 for file_name in local_files:
                     old_file_path = os.path.join(backup_folder_path, file_name)
                     with open(old_file_path, 'r') as file:
                         data = yaml.safe_load(file)
 
-                    # Use name as the identifier
                     base_name = data['name']
                     new_name = base_name
                     counter = 1
 
-                    # If name exists, append a number
                     while new_name in cloned_files:
                         new_name = f"{base_name} ({counter})"
                         counter += 1
 
                     cloned_files.add(new_name)
-
                     new_file_path = os.path.join(folder_path,
                                                  f"{new_name}.yml")
+
                     with open(new_file_path, 'w') as file:
                         yaml.dump(data, file)
-                    logger.info(f"Merged local file: {new_name}.yml")
+                    logger.debug(f"Merged file: {file_name} → {new_name}.yml")
 
+        # Cleanup
         if os.path.exists(backup_dir):
-            logger.info(f"Removing backup directory: {backup_dir}")
+            logger.info("Removing backup directory")
             shutil.rmtree(backup_dir)
 
-        logger.info("Repository cloned and set up successfully")
-        return True, "Repository cloned successfully and local files updated"
+        logger.info("Clone operation completed successfully")
+        return True, "Repository cloned and local files merged successfully"
+
     except Exception as e:
-        logger.exception("Unexpected error during repository cloning")
+        logger.exception("Critical error during clone operation")
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
         if os.path.exists(backup_dir):
             shutil.move(backup_dir, repo_path)
-        return False, f"Unexpected error: {str(e)}"
+        return False, f"Critical error: {str(e)}"
 
 
 def _initialize_empty_repo(repo):

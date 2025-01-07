@@ -2,8 +2,8 @@
 import git
 import logging
 import os
-from typing import Dict, Any, Tuple
-from .commit import commit_changes
+from typing import Dict, Any
+from ..status.status import GitStatusManager
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +53,13 @@ def finalize_merge(repo) -> Dict[str, Any]:
         try:
             repo.git.commit('-m', commit_message)
             logger.info("Successfully finalized merge")
+
+            # Update remote status after merge
+            repo_path = repo.working_dir
+            status_manager = GitStatusManager.get_instance(repo_path)
+            if status_manager:
+                status_manager.update_remote_status()
+
             return {'success': True, 'message': 'Merge completed successfully'}
         except git.GitCommandError as e:
             logger.error(f"Git command error during commit: {str(e)}")

@@ -4,8 +4,7 @@ import Modal from '@ui/Modal';
 import FormatGeneralTab from './FormatGeneralTab';
 import FormatConditionsTab from './FormatConditionsTab';
 import FormatTestingTab from './FormatTestingTab';
-import Alert from '@ui/Alert';
-import {Loader} from 'lucide-react';
+import {Loader, Play} from 'lucide-react';
 
 const FormatModal = ({
     isOpen,
@@ -28,7 +27,6 @@ const FormatModal = ({
     onConditionsChange,
     onTestsChange,
     onActiveTabChange,
-    onDeletingChange,
     onRunTests
 }) => {
     const tabs = [
@@ -36,20 +34,6 @@ const FormatModal = ({
         {id: 'conditions', label: 'Conditions'},
         {id: 'testing', label: 'Testing'}
     ];
-
-    const handleDelete = async () => {
-        if (isDeleting) {
-            try {
-                await onDelete();
-                onClose();
-            } catch (error) {
-                console.error('Error deleting format:', error);
-                Alert.error('Failed to delete format. Please try again.');
-            }
-        } else {
-            onDeletingChange(true);
-        }
-    };
 
     const modalTitle = isCloning
         ? 'Clone Format'
@@ -71,7 +55,7 @@ const FormatModal = ({
                 <div className='flex justify-between'>
                     {name && !isCloning && (
                         <button
-                            onClick={handleDelete}
+                            onClick={onDelete}
                             className={`px-4 py-2 text-white rounded transition-colors ${
                                 isDeleting
                                     ? 'bg-red-600 hover:bg-red-700'
@@ -161,7 +145,6 @@ FormatModal.propTypes = {
     onConditionsChange: PropTypes.func.isRequired,
     onTestsChange: PropTypes.func.isRequired,
     onActiveTabChange: PropTypes.func.isRequired,
-    onDeletingChange: PropTypes.func.isRequired,
     onRunTests: PropTypes.func.isRequired
 };
 

@@ -1,40 +1,31 @@
+# git/branches/push.py
 import git
 import logging
-import os
-from git import RemoteProgress
-from urllib.parse import urlparse, urlunparse
-from ..auth.authenticate import get_github_token, check_dev_mode
+from ..auth.authenticate import GitHubAuth
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class CredentialedRemoteProgress(RemoteProgress):
-
-    def __init__(self, github_token):
-        super().__init__()
-        self.github_token = github_token
-
-    def update(self, op_code, cur_count, max_count=None, message=''):
-        if op_code & RemoteProgress.AUTHENTICATING:
-            # This is where we would inject the GitHub token if needed
-            pass
+def _handle_git_error(error):
+    """Helper function to process git errors and return user-friendly messages"""
+    error_msg = str(error)
+    if "403" in error_msg:
+        return "Authentication failed: The provided PAT doesn't have sufficient permissions or is invalid."
+    elif "401" in error_msg:
+        return "Authentication failed: No PAT provided or the token is invalid."
+    elif "non-fast-forward" in error_msg:
+        return "Push rejected: Remote contains work that you do not have locally. Please pull the latest changes first."
+    return f"Git error: {error_msg}"
 
 
 def push_branch_to_remote(repo_path, branch_name):
     try:
         logger.debug(f"Attempting to push branch {branch_name} to remote")
 
-        # Check if we're in dev mode
-        if not check_dev_mode():
-            logger.warning("Not in dev mode. Push operation not allowed.")
-            return False, "Push operation not allowed in production mode."
-
-        # Get the GitHub token
-        github_token = get_github_token()
-        if not github_token:
-            logger.error("GitHub token not available")
-            return False, "GitHub token not available"
+        # Verify token before attempting push
+        if not GitHubAuth.verify_token():
+            return False, "Push operation requires GitHub authentication. Please configure PAT."
 
         repo = git.Repo(repo_path)
 
@@ -42,35 +33,27 @@ def push_branch_to_remote(repo_path, branch_name):
         if branch_name not in repo.heads:
             return False, f"Branch '{branch_name}' does not exist locally."
 
-        # Get the remote URL and inject the GitHub token
         origin = repo.remote(name='origin')
-        url = list(urlparse(next(origin.urls)))
-        if '@' not in url[1]:  # Only add the token if it's not already there
-            url[1] = f"{github_token}@{url[1]}"  # Inject GitHub token into the URL
-        auth_url = urlunparse(url)
+        original_url = origin.url
 
-        # Set the new URL with the GitHub token
-        origin.set_url(auth_url)
+        try:
+            # Set authenticated URL
+            auth_url = GitHubAuth.get_authenticated_url(original_url)
+            origin.set_url(auth_url)
 
-        # Push the branch to remote and set the upstream branch
-        progress = CredentialedRemoteProgress(github_token)
-        origin.push(refspec=f"{branch_name}:{branch_name}",
-                    set_upstream=True,
-                    progress=progress)
+            # Push the branch to remote and set the upstream branch
+            origin.push(refspec=f"{branch_name}:{branch_name}",
+                        set_upstream=True)
+            return True, f"Pushed branch to remote: {branch_name}"
 
-        logger.debug(f"Successfully pushed branch to remote: {branch_name}")
-        return True, {"message": f"Pushed branch to remote: {branch_name}"}
+        except git.GitCommandError as e:
+            return False, _handle_git_error(e)
 
-    except git.GitCommandError as e:
-        logger.error(f"Git command error pushing branch to remote: {str(e)}",
-                     exc_info=True)
-        return False, {"error": f"Error pushing branch to remote: {str(e)}"}
+        finally:
+            # Always restore original URL
+            origin.set_url(original_url)
 
     except Exception as e:
         logger.error(f"Error pushing branch to remote: {str(e)}",
                      exc_info=True)
-        return False, {"error": f"Error pushing branch to remote: {str(e)}"}
-
-    finally:
-        # Reset the URL to remove the GitHub token
-        origin.set_url(next(origin.urls))
+        return False, str(e)

@@ -1,55 +1,59 @@
 # git/operations/push.py
 import git
 import logging
-from ..auth.authenticate import check_dev_mode, get_github_token
+from ..auth.authenticate import GitHubAuth
+from ..status.status import GitStatusManager
 
 logger = logging.getLogger(__name__)
 
 
+def _handle_git_error(error):
+    """Helper function to process git errors and return user-friendly messages"""
+    error_msg = str(error)
+    if "403" in error_msg:
+        return "Authentication failed: The provided PAT doesn't have sufficient permissions or is invalid."
+    elif "401" in error_msg:
+        return "Authentication failed: No PAT provided or the token is invalid."
+    elif "non-fast-forward" in error_msg:
+        return "Push rejected: Remote contains work that you do not have locally. Please pull the latest changes first."
+    return f"Git error: {error_msg}"
+
+
 def push_changes(repo_path):
     try:
-        # Check if we're in dev mode - keep this check for push operations
-        if not check_dev_mode():
-            logger.warning("Not in dev mode. Push operation not allowed.")
-            return False, "Push operation not allowed in production mode."
-
-        # Get the GitHub token
-        github_token = get_github_token()
-        if not github_token:
-            logger.error("GitHub token not available")
-            return False, "GitHub token not available"
+        # Verify token before attempting push
+        if not GitHubAuth.verify_token():
+            return False, "Push operation requires GitHub authentication. Please configure PAT."
 
         repo = git.Repo(repo_path)
         origin = repo.remote(name='origin')
-        auth_repo_url = origin.url.replace('https://',
-                                           f'https://{github_token}@')
-        origin.set_url(auth_repo_url)
+        original_url = origin.url
 
         try:
+            # Set authenticated URL
+            auth_url = GitHubAuth.get_authenticated_url(original_url)
+            origin.set_url(auth_url)
+
             # Push changes
             push_info = origin.push()
+
             if push_info and push_info[0].flags & push_info[0].ERROR:
                 raise git.GitCommandError("git push", push_info[0].summary)
+
+            # Update remote status after successful push
+            status_manager = GitStatusManager.get_instance(repo_path)
+            if status_manager:
+                status_manager.update_remote_status()
+
             return True, "Successfully pushed changes."
-        except git.GitCommandError as e:
-            error_msg = str(e)
-            if "non-fast-forward" in error_msg:
-                return False, {
-                    "type":
-                    "non_fast_forward",
-                    "message":
-                    "Push rejected: Remote contains work that you do not have locally. Please pull the latest changes first."
-                }
-            raise e
+
         finally:
-            # Always restore the original URL (without token)
-            origin.set_url(
-                origin.url.replace(f'https://{github_token}@', 'https://'))
+            # Always restore original URL
+            origin.set_url(original_url)
 
     except git.GitCommandError as e:
-        logger.error(f"Git command error pushing changes: {str(e)}",
-                     exc_info=True)
-        return False, str(e)
+        logger.error(f"Git command error during push: {str(e)}")
+        return False, _handle_git_error(e)
     except Exception as e:
         logger.error(f"Error pushing changes: {str(e)}", exc_info=True)
-        return False, f"Error pushing changes: {str(e)}"
+        return False, str(e)

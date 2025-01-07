@@ -1,113 +1,136 @@
-import React, {useState, useEffect} from 'react';
-import {Film, Tv, Headphones, Clock, Database, CheckCircle} from 'lucide-react';
-import {pingService} from '../../../api/arr';
+import React from 'react';
+import {Film, Tv, Clock, ArrowUpDown, Timer, BarChart} from 'lucide-react';
 
-const ArrCard = ({title, type, serverUrl, apiKey, tags = [], onClick}) => {
-    const [status, setStatus] = useState('unknown');
-    const [isChecking, setIsChecking] = useState(false);
-
-    const sampleData = {
-        lastSync: new Date(Date.now() - 1000 * 60 * 30),
-        syncStatus: {
-            available: 1250,
-            imported: 1250,
-            percentage: 12
-        }
+const ArrCard = ({
+    title,
+    type,
+    sync_percentage = 0,
+    last_sync_time,
+    sync_method,
+    sync_interval,
+    tags = [],
+    data_to_sync = {},
+    import_as_unique,
+    onClick
+}) => {
+    // Format last sync time
+    const formatLastSync = timestamp => {
+        if (!timestamp) return 'Never';
+        const date = new Date(timestamp);
+        return date.toLocaleString();
     };
 
-    const checkStatus = async () => {
-        setIsChecking(true);
-        try {
-            const result = await pingService(serverUrl, apiKey, type);
-            setStatus(result.success ? 'online' : 'offline');
-        } catch {
-            setStatus('offline');
-        } finally {
-            setIsChecking(false);
-        }
-    };
+    // Get appropriate icon based on type
+    const TypeIcon = type === 'radarr' ? Film : Tv;
 
-    useEffect(() => {
-        checkStatus();
-        const interval = setInterval(checkStatus, 60000);
-        return () => clearInterval(interval);
-    }, [serverUrl, apiKey]);
-
-    const getIcon = () => {
-        const lowerName = title.toLowerCase();
-        if (lowerName.includes('radarr')) return Film;
-        if (lowerName.includes('sonarr')) return Tv;
-        if (lowerName.includes('lidarr')) return Headphones;
-        return Film;
-    };
-
-    const Icon = getIcon();
-
-    const getStatusColor = () => {
-        if (isChecking) return 'bg-yellow-400';
-        switch (status) {
-            case 'online':
-                return 'bg-emerald-400';
-            case 'offline':
-                return 'bg-red-400';
+    // Get sync method display
+    const getSyncMethodDisplay = () => {
+        switch (sync_method) {
+            case 'pull':
+                return 'On Pull';
+            case 'schedule':
+                return `Scheduled (${sync_interval}m)`;
+            case 'manual':
+                return 'Manual';
             default:
-                return 'bg-gray-400';
+                return 'Unknown';
         }
     };
 
-    const formatTimeAgo = date => {
-        const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
-        if (minutes < 60) return `${minutes}m`;
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}h`;
-        return `${Math.floor(hours / 24)}d`;
-    };
+    const syncMethodDisplay = getSyncMethodDisplay();
 
     return (
         <div
             onClick={onClick}
-            className='group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 cursor-pointer p-3 h-24'>
-            {/* Main Content */}
-            <div className='flex flex-col h-full justify-between'>
-                {/* Header */}
-                <div className='flex items-center justify-between'>
-                    <div className='flex items-center space-x-2'>
-                        <Icon size={16} className='text-blue-500' />
-                        <span className='font-medium text-sm text-gray-900 dark:text-gray-100'>
-                            {title}
-                        </span>
-                        <div
-                            className={`w-1.5 h-1.5 rounded-full ${getStatusColor()} ${
-                                isChecking ? 'animate-pulse' : ''
-                            }`}
-                        />
+            className='bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 
+                 shadow-xl hover:shadow-2xl hover:border-blue-500/50 transition-all duration-200 
+                 cursor-pointer overflow-hidden group'>
+            <div className='p-4 space-y-4'>
+                {/* Header with Icon, Title, and Tags */}
+                <div className='flex items-start justify-between'>
+                    <div className='flex items-center space-x-3'>
+                        <div className='p-2 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors'>
+                            <TypeIcon className='w-5 h-5 text-blue-400' />
+                        </div>
+                        <div>
+                            <h3 className='font-medium text-gray-100'>
+                                {title}
+                            </h3>
+                            <div className='flex items-center mt-1 text-sm text-gray-400'>
+                                <ArrowUpDown className='w-3.5 h-3.5 mr-1.5' />
+                                {syncMethodDisplay}
+                            </div>
+                        </div>
                     </div>
-                    <div className='flex gap-1'>
-                        {tags.map(tag => (
+                    <div className='flex flex-wrap gap-1 justify-end'>
+                        {tags.map((tag, index) => (
                             <span
-                                key={tag}
-                                className='bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-[8px] px-1.5 rounded-full'>
+                                key={index}
+                                className='px-2 py-0.5 text-xs font-medium rounded-full
+                         bg-blue-500/20 text-blue-300 border border-blue-500/20'>
                                 {tag}
                             </span>
                         ))}
                     </div>
                 </div>
 
-                {/* Footer Stats */}
-                <div className='flex items-center justify-between text-xs text-gray-500 dark:text-gray-400'>
-                    <div className='flex items-center space-x-1'>
-                        <Database size={12} />
-                        <span>{sampleData.syncStatus.percentage}%</span>
-                        {sampleData.syncStatus.percentage === 100 && (
-                            <CheckCircle size={12} className='text-green-500' />
-                        )}
-                    </div>
-                    <div className='flex items-center space-x-1'>
-                        <Clock size={12} />
-                        <span>
-                            Last Synced: {formatTimeAgo(sampleData.lastSync)}
+                {/* Sync Progress */}
+                <div className='space-y-2'>
+                    <div className='flex items-center justify-between text-sm'>
+                        <span className='text-gray-400 flex items-center'>
+                            <BarChart className='w-3.5 h-3.5 mr-1.5' />
+                            Sync Progress
+                        </span>
+                        <span className='font-medium text-gray-300'>
+                            {sync_percentage}%
                         </span>
                     </div>
+                    <div className='w-full bg-gray-700/50 rounded-full h-1.5'>
+                        <div
+                            className='bg-blue-500 h-1.5 rounded-full transition-all duration-300'
+                            style={{
+                                width: `${Math.max(
+                                    0,
+                                    Math.min(100, sync_percentage)
+                                )}%`
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* Sync Details */}
+                <div className='grid grid-cols-2 gap-3 pt-2 border-t border-gray-700/50'>
+                    <div className='text-sm'>
+                        <div className='flex items-center text-gray-400 mb-1'>
+                            <Clock className='w-3.5 h-3.5 mr-1.5' />
+                            Last Sync
+                        </div>
+                        <div className='text-gray-300'>
+                            {formatLastSync(last_sync_time)}
+                        </div>
+                    </div>
+
+                    {/* Profiles Section */}
+                    {data_to_sync?.profiles &&
+                        data_to_sync.profiles.length > 0 && (
+                            <div className='text-sm'>
+                                <div className='text-gray-400 mb-1'>
+                                    Profiles
+                                </div>
+                                <div className='flex flex-wrap gap-1'>
+                                    {data_to_sync.profiles.map(
+                                        (profile, index) => (
+                                            <span
+                                                key={index}
+                                                className='px-1.5 py-0.5 text-xs rounded
+                             bg-gray-700/50 text-gray-300'>
+                                                {profile}
+                                            </span>
+                                        )
+                                    )}
+                                </div>
+                            </div>
+                        )}
                 </div>
             </div>
         </div>

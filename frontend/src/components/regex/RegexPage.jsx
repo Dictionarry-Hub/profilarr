@@ -5,9 +5,13 @@ import AddNewCard from '../ui/AddNewCard';
 import {RegexPatterns} from '@api/data';
 import FilterMenu from '../ui/FilterMenu';
 import SortMenu from '../ui/SortMenu';
-import {Loader} from 'lucide-react';
+import {Loader, CheckSquare} from 'lucide-react';
 import Alert from '@ui/Alert';
 import SearchBar from '@ui/SearchBar';
+import AddButton from '@ui/AddButton';
+import {useMassSelection} from '@hooks/useMassSelection';
+import {useKeyboardShortcut} from '@hooks/useKeyboardShortcut';
+import MassActionsBar from '@ui/MassActionsBar';
 
 function RegexPage() {
     const [patterns, setPatterns] = useState([]);
@@ -20,6 +24,18 @@ function RegexPage() {
     const [isCloning, setIsCloning] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Mass selection state
+    const {
+        selectedItems,
+        isSelectionMode,
+        toggleSelectionMode,
+        handleSelect,
+        clearSelection
+    } = useMassSelection();
+
+    // Setup keyboard shortcut for selection mode (Ctrl+A)
+    useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
 
     // Load initial data
     useEffect(() => {
@@ -57,6 +73,7 @@ function RegexPage() {
     };
 
     const handleOpenModal = (pattern = null) => {
+        if (isSelectionMode) return;
         setSelectedPattern(pattern);
         setIsModalOpen(true);
         setIsCloning(false);
@@ -69,6 +86,7 @@ function RegexPage() {
     };
 
     const handleClonePattern = pattern => {
+        if (isSelectionMode) return;
         const clonedPattern = {
             ...pattern,
             name: `${pattern.name} [COPY]`
@@ -81,6 +99,25 @@ function RegexPage() {
     const handleSavePattern = async () => {
         await loadPatterns();
         handleCloseModal();
+    };
+
+    const handleMassDelete = async () => {
+        try {
+            const selectedPatterns = Array.from(selectedItems).map(
+                index => patterns[index]
+            );
+            for (const pattern of selectedPatterns) {
+                await RegexPatterns.delete(
+                    pattern.file_name.replace('.yml', '')
+                );
+            }
+            Alert.success('Selected patterns deleted successfully');
+            loadPatterns();
+            toggleSelectionMode();
+        } catch (error) {
+            console.error('Error deleting patterns:', error);
+            Alert.error('Failed to delete selected patterns');
+        }
     };
 
     const getFilteredAndSortedPatterns = () => {
@@ -153,9 +190,23 @@ function RegexPage() {
                         allTags={allTags}
                     />
                 </div>
+                <div className='flex-none'>
+                    <button
+                        onClick={toggleSelectionMode}
+                        className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
+                            isSelectionMode
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        }`}
+                        title='Toggle selection mode (Ctrl+A)'>
+                        <CheckSquare className='w-4 h-4' />
+                        <span className='text-sm'>Select</span>
+                    </button>
+                </div>
             </div>
+
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>
-                {getFilteredAndSortedPatterns().map(pattern => (
+                {getFilteredAndSortedPatterns().map((pattern, index) => (
                     <RegexCard
                         key={pattern.name}
                         pattern={pattern}
@@ -163,10 +214,32 @@ function RegexPage() {
                         onClone={handleClonePattern}
                         formatDate={formatDate}
                         sortBy={sortBy}
+                        isSelectionMode={isSelectionMode}
+                        isSelected={selectedItems.has(index)}
+                        onSelect={e =>
+                            handleSelect(pattern.file_name, index, e)
+                        }
                     />
                 ))}
-                <AddNewCard onAdd={() => handleOpenModal()} />
+                {!isSelectionMode && (
+                    <AddButton
+                        onClick={() => handleOpenModal()}
+                        label='Add New Pattern'
+                        top='5vh'
+                        left='75vw'
+                    />
+                )}
             </div>
+
+            {isSelectionMode && (
+                <MassActionsBar
+                    selectedCount={selectedItems.size}
+                    onCancel={toggleSelectionMode}
+                    onDelete={handleMassDelete}
+                    showImport={false}
+                />
+            )}
+
             <RegexModal
                 pattern={selectedPattern}
                 isOpen={isModalOpen}

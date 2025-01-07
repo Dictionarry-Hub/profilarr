@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
     frontend:
         build: ./frontend
@@ -16,13 +17,11 @@ services:
             - '5000:5000'
         volumes:
             - ./backend:/app
-            - backend_data:/app/data
-        environment:
-            - FLASK_ENV=development
-            - TZ=Australia/Adelaide # Add this line
+            - config_data:/config
         env_file:
-            - .env.1
+            - .env
         restart: always
 
 volumes:
-    backend_data:
+    config_data:
+        name: regexerr_config

@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from 'react';
-import {Loader, Plus} from 'lucide-react';
+import {Loader} from 'lucide-react';
 import ArrModal from './ArrModal';
 import ArrCard from './ArrCard';
-import {getArrConfigs} from '../../../api/arr';
+import AddButton from '@ui/AddButton';
+import {getArrConfigs} from '@api/arr';
 
 const ArrContainer = () => {
     const [showModal, setShowModal] = useState(false);
@@ -78,22 +79,24 @@ const ArrContainer = () => {
                         key={arrConfig.id}
                         title={arrConfig.name}
                         type={arrConfig.type}
-                        serverUrl={arrConfig.arrServer}
-                        apiKey={arrConfig.apiKey}
+                        sync_method={arrConfig.sync_method}
+                        sync_interval={arrConfig.sync_interval}
+                        sync_percentage={arrConfig.sync_percentage}
+                        last_sync_time={arrConfig.last_sync_time}
                         tags={arrConfig.tags}
+                        data_to_sync={arrConfig.data_to_sync}
+                        import_as_unique={arrConfig.import_as_unique}
                         onClick={() => handleEditArr(arrConfig)}
                     />
                 ))}
-                {/* Add New Card */}
-                <div
-                    onClick={handleAddArr}
-                    className='bg-white dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 cursor-pointer h-24 flex items-center justify-center'>
-                    <div className='flex items-center space-x-2 text-gray-500 dark:text-gray-400'>
-                        <Plus size={16} />
-                        <span className='text-sm font-medium'>Add New App</span>
-                    </div>
-                </div>
             </div>
+
+            <AddButton
+                onClick={handleAddArr}
+                label='Add New App'
+                top='5vh'
+                left='75vw'
+            />
 
             <ArrModal
                 isOpen={showModal}

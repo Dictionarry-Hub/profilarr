@@ -68,3 +68,46 @@ pre,
 .dark .scrollable:hover {
     scrollbar-color: #475569 #1e293b; /* dark-300 and dark-100 */
 }
+
+/* Custom Animation for Add Button */
+.labelWrapper {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.container:hover .labelWrapper {
+    width: 200px;
+}
+
+.label {
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.container:hover .label {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.add-button-label-wrapper {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.add-button-container:hover .add-button-label-wrapper {
+    width: 180px;
+}
+
+.add-button-label {
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.add-button-container:hover .add-button-label {
+    opacity: 1;
+    transform: translateX(0);
+}

@@ -6,14 +6,18 @@ from datetime import datetime
 from typing import Dict, List, Any, Tuple, Union
 import git
 import regex
+import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+from ..config.config import config
 
 # Directory constants
-REPO_PATH = '/app/data/db'
-REGEX_DIR = '/app/data/db/regex_patterns'
-FORMAT_DIR = '/app/data/db/custom_formats'
-PROFILE_DIR = '/app/data/db/profiles'
+REPO_PATH = config.DB_DIR
+REGEX_DIR = config.REGEX_DIR
+FORMAT_DIR = config.FORMAT_DIR
+PROFILE_DIR = config.PROFILE_DIR
 
 # Expected fields for each category
 REGEX_FIELDS = ["name", "pattern", "description", "tags", "tests"]
@@ -39,6 +43,17 @@ CATEGORY_MAP = {
     "regex_pattern": (REGEX_DIR, REGEX_FIELDS),
     "profile": (PROFILE_DIR, PROFILE_FIELDS)
 }
+
+
+def display_to_filename(name: str) -> str:
+    """Convert display name (with []) to filename (with ())"""
+    return f"{name.replace('[', '(').replace(']', ')')}.yml"
+
+
+def filename_to_display(filename: str) -> str:
+    """Convert filename (with ()) back to display name (with [])"""
+    name = filename[:-4] if filename.endswith('.yml') else filename
+    return name.replace('(', '[').replace(')', ']')
 
 
 def _setup_yaml_quotes():
@@ -111,17 +126,35 @@ def validate(data: Dict[str, Any], category: str) -> bool:
     return all(field in data for field in fields)
 
 
-def save_yaml_file(file_path: str, data: Dict[str, Any],
-                   category: str) -> None:
+def save_yaml_file(file_path: str,
+                   data: Dict[str, Any],
+                   category: str,
+                   use_data_name: bool = True) -> None:
+    """
+    Save YAML data to a file
+    Args:
+        file_path: The path where the file should be saved
+        data: The data to save
+        category: The category of data
+        use_data_name: If True, use the name from data to create filename. If False, use the provided file_path as is.
+    """
     if not validate(data, category):
         raise ValueError("Invalid data format")
+
+    directory = os.path.dirname(file_path)
+
+    if use_data_name:
+        filename = display_to_filename(data['name'])
+        safe_file_path = os.path.join(directory, filename)
+    else:
+        safe_file_path = file_path
 
     _, fields = CATEGORY_MAP[category]
     ordered_data = {field: data[field] for field in fields}
 
-    _setup_yaml_quotes()  # Configure YAML for quoted strings
+    _setup_yaml_quotes()
 
-    with open(file_path, 'w') as f:
+    with open(safe_file_path, 'w') as f:
         yaml.safe_dump(ordered_data, f, sort_keys=False)
 
 
@@ -132,13 +165,17 @@ def update_yaml_file(file_path: str, data: Dict[str, Any],
         if 'rename' in data:
             new_name = data['rename']
             directory = os.path.dirname(file_path)
-            new_file_path = os.path.join(directory, f"{new_name}.yml")
+            new_file_path = os.path.join(directory,
+                                         display_to_filename(new_name))
 
             # Remove rename field before saving
             data_to_save = {k: v for k, v in data.items() if k != 'rename'}
 
-            # First save the updated content to the current file
-            save_yaml_file(file_path, data_to_save, category)
+            # First save the updated content to the CURRENT file location
+            save_yaml_file(file_path,
+                           data_to_save,
+                           category,
+                           use_data_name=False)
 
             # Check if file is being tracked by git
             repo = git.Repo(REPO_PATH)
@@ -159,10 +196,10 @@ def update_yaml_file(file_path: str, data: Dict[str, Any],
 
             except git.GitCommandError as e:
                 logger.error(f"Git operation failed: {e}")
-                raise Exception("Failed to rename file")
+                raise Exception(f"Failed to rename file: {str(e)}")
             except OSError as e:
                 logger.error(f"File operation failed: {e}")
-                raise Exception("Failed to rename file")
+                raise Exception(f"Failed to rename file: {str(e)}")
 
         else:
             # Normal update without rename
@@ -177,6 +214,95 @@ def update_yaml_file(file_path: str, data: Dict[str, Any],
 
     except Exception as e:
         raise
+
+
+def check_delete_constraints(category: str, name: str) -> Tuple[bool, str]:
+    """
+    Check if deleting an item would break any references.
+    Returns (can_delete, error_message) tuple.
+    """
+    try:
+        # Protected custom formats that cannot be deleted
+        PROTECTED_FORMATS = [
+            "Not English", "Not Only English", "Not Only English (Missing)"
+        ]
+
+        # Convert the input name to use parentheses for comparison
+        check_name = name.replace('[', '(').replace(']', ')')
+        logger.debug(
+            f"Checking constraints for {category}: {name} (normalized as {check_name})"
+        )
+
+        # Check protected formats first
+        if category == 'custom_format' and check_name in [
+                f.replace('[', '(').replace(']', ')')
+                for f in PROTECTED_FORMATS
+        ]:
+            return False, "This format cannot be deleted as it's required for language processing functionality"
+
+        references = []
+
+        if category == 'regex_pattern':
+            # Check all custom formats for references to this pattern
+            format_dir = get_category_directory('custom_format')
+            for format_file in os.listdir(format_dir):
+                if not format_file.endswith('.yml'):
+                    continue
+
+                format_path = os.path.join(format_dir, format_file)
+                try:
+                    format_data = load_yaml_file(format_path)
+                    # Check each condition in the format
+                    for condition in format_data.get('conditions', []):
+                        if (condition['type'] in [
+                                'release_title', 'release_group', 'edition'
+                        ] and condition.get('pattern') == check_name):
+                            references.append(
+                                f"custom format: {format_data['name']}")
+                except Exception as e:
+                    logger.error(
+                        f"Error checking format file {format_file}: {e}")
+                    continue
+
+        elif category == 'custom_format':
+            # Check all quality profiles for references to this format
+            profile_dir = get_category_directory('profile')
+            for profile_file in os.listdir(profile_dir):
+                if not profile_file.endswith('.yml'):
+                    continue
+
+                profile_path = os.path.join(profile_dir, profile_file)
+                try:
+                    profile_data = load_yaml_file(profile_path)
+                    # Check custom_formats array in profile
+                    for format_ref in profile_data.get('custom_formats', []):
+                        format_name = format_ref.get('name', '')
+                        # Convert format name to use parentheses for comparison
+                        format_name = format_name.replace('[', '(').replace(
+                            ']', ')')
+                        logger.debug(
+                            f"Comparing '{format_name}' with '{check_name}'")
+
+                        if format_name == check_name:
+                            references.append(
+                                f"quality profile: {profile_data['name']}")
+                except Exception as e:
+                    logger.error(
+                        f"Error checking profile file {profile_file}: {e}")
+                    continue
+
+        if references:
+            error_msg = f"Cannot delete - item is referenced in:\n" + "\n".join(
+                f"- {ref}" for ref in references)
+            logger.info(f"Found references for {name}: {error_msg}")
+            return False, error_msg
+
+        logger.info(f"No references found for {name}")
+        return True, ""
+
+    except Exception as e:
+        logger.error(f"Error checking delete constraints: {e}")
+        return False, f"Error checking references: {str(e)}"
 
 
 def test_regex_pattern(
