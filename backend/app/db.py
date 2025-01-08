@@ -38,6 +38,7 @@ def init_db():
             sync_method TEXT DEFAULT 'manual',
             sync_interval INTEGER DEFAULT 0,
             import_as_unique BOOLEAN DEFAULT 0,
+            import_task_id INTEGER DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -80,6 +81,7 @@ def init_db():
         )
         ''')
 
+        # Insert or ignore example
         conn.execute('''
             INSERT OR IGNORE INTO settings (key, value, updated_at)
             VALUES ('auto_pull_enabled', 0, CURRENT_TIMESTAMP)
@@ -95,7 +97,6 @@ def init_db():
                 updated_at = CURRENT_TIMESTAMP
             ''', (str(bool(profilarr_pat)).lower(), str(
                 bool(profilarr_pat)).lower()))
-
         conn.commit()
 
         secret_key = conn.execute(
@@ -117,6 +118,7 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+
         conn.execute('''
             CREATE TABLE IF NOT EXISTS failed_attempts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
