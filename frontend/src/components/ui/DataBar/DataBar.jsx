@@ -5,6 +5,17 @@ import {SortDropdown} from './SortDropdown';
 import ToggleSelectButton from './ToggleSelectButton';
 import AddButton from './AddButton';
 
+const FloatingBar = ({children}) => (
+    <>
+        <div className='fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-gray-800 to-gray-900 border-b border-gray-700 shadow-xl backdrop-blur-sm'>
+            <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8'>
+                <div className='flex items-center gap-4 h-16'>{children}</div>
+            </div>
+        </div>
+        <div className='h-16' />
+    </>
+);
+
 const DataBar = ({
     onSearch,
     searchPlaceholder = 'Search by name or tag...',
@@ -19,82 +30,67 @@ const DataBar = ({
     toggleSelectionMode,
     onAdd,
     addButtonLabel = 'Add New',
-    showAddButton = true
+    showAddButton = true,
+    className
 }) => {
     const [isFloating, setIsFloating] = useState(false);
-    const [isVisible, setIsVisible] = useState(true);
-    const [lastScrollY, setLastScrollY] = useState(0);
 
     useEffect(() => {
         const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-
-            // Show/hide based on scroll direction
-            setIsVisible(currentScrollY <= 0 || currentScrollY < lastScrollY);
-
-            // Start floating once we scroll past the initial position
-            setIsFloating(currentScrollY > 64); // Approximately the height of the bar
-
-            setLastScrollY(currentScrollY);
+            setIsFloating(window.scrollY > 64);
         };
 
         window.addEventListener('scroll', handleScroll, {passive: true});
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [lastScrollY]);
+    }, []);
 
-    return (
-        <div
-            className={`transition-all duration-300 ${
-                isFloating
-                    ? 'fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-md'
-                    : 'relative w-full mb-4'
-            } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-            <div className='flex items-center gap-4'>
-                <SearchBar
-                    onSearch={onSearch}
-                    placeholder={searchPlaceholder}
-                    className='flex-1'
+    const controls = (
+        <>
+            <SearchBar
+                onSearch={onSearch}
+                placeholder={searchPlaceholder}
+                className='flex-1'
+            />
+
+            <div className='flex items-center gap-3'>
+                <SortDropdown
+                    options={[
+                        {key: 'name', label: 'Sort by Name'},
+                        {key: 'dateCreated', label: 'Sort by Date Created'},
+                        {key: 'dateModified', label: 'Sort by Date Modified'}
+                    ]}
+                    currentKey={sortBy}
+                    currentDirection='desc'
+                    onSort={key => setSortBy(key)}
                 />
 
-                <div className='flex-none'>
-                    <SortDropdown
-                        options={[
-                            {key: 'name', label: 'Sort by Name'},
-                            {key: 'dateCreated', label: 'Sort by Date Created'},
-                            {
-                                key: 'dateModified',
-                                label: 'Sort by Date Modified'
-                            }
-                        ]}
-                        currentKey={sortBy}
-                        currentDirection='desc'
-                        onSort={key => setSortBy(key)}
-                    />
-                </div>
+                <FilterMenu
+                    filterType={filterType}
+                    setFilterType={setFilterType}
+                    filterValue={filterValue}
+                    setFilterValue={setFilterValue}
+                    allTags={allTags}
+                />
 
-                <div className='flex-none'>
-                    <FilterMenu
-                        filterType={filterType}
-                        setFilterType={setFilterType}
-                        filterValue={filterValue}
-                        setFilterValue={setFilterValue}
-                        allTags={allTags}
-                    />
-                </div>
-
-                <div className='flex-none'>
-                    <ToggleSelectButton
-                        isSelectionMode={isSelectionMode}
-                        onClick={toggleSelectionMode}
-                    />
-                </div>
+                <ToggleSelectButton
+                    isSelectionMode={isSelectionMode}
+                    onClick={toggleSelectionMode}
+                />
 
                 {showAddButton && !isSelectionMode && (
-                    <div className='flex-none'>
-                        <AddButton onClick={onAdd} label={addButtonLabel} />
-                    </div>
+                    <AddButton onClick={onAdd} label={addButtonLabel} />
                 )}
             </div>
+        </>
+    );
+
+    if (isFloating) {
+        return <FloatingBar>{controls}</FloatingBar>;
+    }
+
+    return (
+        <div className={className}>
+            <div className='flex items-center h-16 gap-4'>{controls}</div>
         </div>
     );
 };
