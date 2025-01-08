@@ -162,7 +162,8 @@ def import_profiles():
         result = import_profiles_to_arr(profile_names=profile_names,
                                         base_url=arr_data['arrServer'],
                                         api_key=arr_data['apiKey'],
-                                        arr_type=arr_data['type'])
+                                        arr_type=arr_data['type'],
+                                        arr_id=arr_id)
 
         return jsonify(result), 200 if result['success'] else 400
 
