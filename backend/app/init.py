@@ -44,6 +44,16 @@ def setup_logging():
                 'filename': config.IMPORTARR_LOG_FILE,
                 'maxBytes': 1048576,
                 'backupCount': 20
+            },
+
+            # hash_file handler
+            'hash_file': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'level': 'INFO',
+                'formatter': 'detailed',
+                'filename': config.HASH_LOG_FILE,
+                'maxBytes': 1048576,  # 1MB
+                'backupCount': 20
             }
         },
         'root': {

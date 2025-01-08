@@ -16,6 +16,7 @@ class Config:
     LOG_DIR = os.path.join(CONFIG_DIR, 'log')
     GENERAL_LOG_FILE = os.path.join(LOG_DIR, 'profilarr.log')
     IMPORTARR_LOG_FILE = os.path.join(LOG_DIR, 'importarr.log')
+    HASH_LOG_FILE = os.path.join(LOG_DIR, 'hash.log')
 
     # Flask Configuration
     FLASK_ENV = os.getenv('FLASK_ENV', 'production')
