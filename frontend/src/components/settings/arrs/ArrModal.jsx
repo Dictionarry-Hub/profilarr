@@ -299,6 +299,31 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     </select>
                 </div>
 
+                <div className='mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-2 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg'>
+                    {formData.sync_method === 'manual' && (
+                        <p>
+                            Manual sync allows you to selectively import data
+                            when changes occur in the source instance. You'll
+                            need to manually select and import the data you want
+                            to sync.
+                        </p>
+                    )}
+                    {formData.sync_method === 'pull' && (
+                        <p>
+                            On Pull automatically syncs data whenever the
+                            database pulls in new changes. This is a "set and
+                            forget" option - perfect for maintaining consistency
+                            across instances without manual intervention.
+                        </p>
+                    )}
+                    {formData.sync_method === 'schedule' && (
+                        <p>
+                            Scheduled sync runs at fixed intervals, ensuring
+                            your instances stay in sync at regular times.
+                        </p>
+                    )}
+                </div>
+
                 {/* Conditional Fields for Sync Method */}
                 {formData.sync_method === 'schedule' && (
                     <div className='space-y-1.5'>
