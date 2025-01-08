@@ -34,6 +34,8 @@ const DataBar = ({
     className
 }) => {
     const [isFloating, setIsFloating] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeSearch, setActiveSearch] = useState('');
 
     useEffect(() => {
         const handleScroll = () => {
@@ -44,12 +46,22 @@ const DataBar = ({
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    const handleSearch = term => {
+        setActiveSearch(term);
+        onSearch(term);
+    };
+
     const controls = (
         <>
             <SearchBar
-                onSearch={onSearch}
+                onSearch={handleSearch}
                 placeholder={searchPlaceholder}
                 className='flex-1'
+                requireEnter
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                activeSearch={activeSearch}
+                setActiveSearch={setActiveSearch}
             />
 
             <div className='flex items-center gap-3'>

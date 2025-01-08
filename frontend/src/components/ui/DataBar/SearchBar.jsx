@@ -4,14 +4,14 @@ import {Search, X} from 'lucide-react';
 const SearchBar = ({
     onSearch,
     placeholder = 'Search...',
-    value = '',
-    className = ''
+    className = '',
+    requireEnter = false,
+    searchTerm,
+    setSearchTerm,
+    activeSearch,
+    setActiveSearch
 }) => {
-    const [searchTerm, setSearchTerm] = useState(value);
-
-    useEffect(() => {
-        setSearchTerm(value);
-    }, [value]);
+    const [isFocused, setIsFocused] = useState(false);
 
     useEffect(() => {
         const handleKeyDown = e => {
@@ -31,32 +31,72 @@ const SearchBar = ({
     const handleChange = e => {
         const newValue = e.target.value;
         setSearchTerm(newValue);
-        onSearch(newValue);
+        if (!requireEnter) {
+            onSearch(newValue);
+            setActiveSearch(newValue);
+        }
+    };
+
+    const handleKeyPress = e => {
+        if (requireEnter && e.key === 'Enter' && searchTerm.trim()) {
+            onSearch(searchTerm);
+            setActiveSearch(searchTerm);
+            setSearchTerm('');
+        }
     };
 
     const clearSearch = () => {
         setSearchTerm('');
+        setActiveSearch('');
         onSearch('');
     };
 
     return (
         <div className={`relative flex-1 min-w-0 ${className}`}>
             <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400' />
-            <input
-                type='text'
-                value={searchTerm}
-                onChange={handleChange}
-                placeholder={placeholder}
-                className='w-full h-10 pl-9 pr-8 rounded-md border border-gray-300
-          bg-white dark:bg-gray-800 dark:border-gray-700
-          text-gray-900 dark:text-gray-100
-          placeholder:text-gray-500 dark:placeholder:text-gray-400
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-          transition-colors'
-            />
-            {searchTerm && (
+
+            <div
+                className={`
+        w-full h-10 pl-9 pr-8 rounded-md border 
+        ${
+            isFocused
+                ? 'ring-2 ring-blue-500 border-transparent'
+                : 'border-gray-300 dark:border-gray-700'
+        }
+        bg-white dark:bg-gray-800 
+        flex items-center
+        transition-colors
+      `}>
+                {activeSearch ? (
+                    <div className='flex items-center gap-1.5 px-2 py-0.5 bg-blue-500/10 text-blue-500 dark:bg-blue-500/20 dark:text-blue-400 rounded'>
+                        <span className='text-sm font-medium leading-none'>
+                            {activeSearch}
+                        </span>
+                        <button
+                            onClick={clearSearch}
+                            className='p-0.5 hover:bg-blue-500/20 rounded'>
+                            <X className='h-3 w-3' />
+                        </button>
+                    </div>
+                ) : (
+                    <input
+                        type='text'
+                        value={searchTerm}
+                        onChange={handleChange}
+                        onKeyPress={handleKeyPress}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        placeholder={placeholder}
+                        className='w-full bg-transparent text-gray-900 dark:text-gray-100 
+              placeholder:text-gray-500 dark:placeholder:text-gray-400 
+              focus:outline-none'
+                    />
+                )}
+            </div>
+
+            {searchTerm && !activeSearch && (
                 <button
-                    onClick={clearSearch}
+                    onClick={() => setSearchTerm('')}
                     className='absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700'>
                     <X className='h-4 w-4 text-gray-400' />
                 </button>
