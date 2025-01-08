@@ -67,16 +67,6 @@ def _setup_yaml_quotes():
     yaml.add_representer(str, str_presenter)
 
 
-def get_file_created_date(file_path: str) -> str:
-    """Get file creation date in ISO format"""
-    try:
-        stats = os.stat(file_path)
-        return datetime.fromtimestamp(stats.st_ctime).isoformat()
-    except Exception as e:
-        logger.error(f"Error getting creation date for {file_path}: {e}")
-        return None
-
-
 def get_file_modified_date(file_path: str) -> str:
     """Get file last modified date in ISO format"""
     try:

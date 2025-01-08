@@ -3,10 +3,9 @@ import logging
 import os
 import yaml
 from .utils import (get_category_directory, load_yaml_file, validate,
-                    save_yaml_file, update_yaml_file, get_file_created_date,
-                    get_file_modified_date, test_regex_pattern,
-                    test_format_conditions, check_delete_constraints,
-                    filename_to_display)
+                    save_yaml_file, update_yaml_file, get_file_modified_date,
+                    test_regex_pattern, test_format_conditions,
+                    check_delete_constraints, filename_to_display)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -34,8 +33,6 @@ def retrieve_all(category):
                     file_name,
                     "content":
                     content,
-                    "created_date":
-                    get_file_created_date(file_path),
                     "modified_date":
                     get_file_modified_date(file_path)
                 })
@@ -77,8 +74,6 @@ def handle_item(category, name):
                     file_name,
                     "content":
                     content,
-                    "created_date":
-                    get_file_created_date(file_path),
                     "modified_date":
                     get_file_modified_date(file_path)
                 }), 200
