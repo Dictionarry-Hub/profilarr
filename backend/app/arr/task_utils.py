@@ -52,31 +52,48 @@ def update_import_task_for_arr_config(config_id, config_name, sync_method,
                                       sync_interval, existing_task_id):
     """
     Update the existing scheduled task for the given ARR config (if needed).
-    If the sync_method changes from 'pull' to 'schedule' or vice versa, you might prefer to delete + recreate.
+    If the sync_method changes from 'pull' or 'manual' to 'schedule', we create or update.
+    If it changes from 'schedule' to 'pull' (or 'manual'), we delete the old scheduled row.
     """
+
     with get_db() as conn:
         cursor = conn.cursor()
 
-        if sync_method == 'manual':
-            # If user changed to manual, remove the old task
-            cursor.execute('DELETE FROM scheduled_tasks WHERE id = ?',
-                           (existing_task_id, ))
-            deleted_count = cursor.rowcount
-            conn.commit()
-            if deleted_count:
+        # If user changed to manual or pull => remove the old row (if any)
+        if sync_method in ['manual', 'pull']:
+            if existing_task_id:
                 logger.debug(
-                    f"[ARR Tasks] Deleted import task {existing_task_id} because config changed to manual"
+                    f"[update_import_task_for_arr_config] Removing old task {existing_task_id} because sync_method={sync_method}"
                 )
+                cursor.execute('DELETE FROM scheduled_tasks WHERE id = ?',
+                               (existing_task_id, ))
+                deleted_count = cursor.rowcount
+                conn.commit()
+                if deleted_count:
+                    logger.info(
+                        f"[update_import_task_for_arr_config] Deleted old task {existing_task_id} for ARR #{config_id}"
+                    )
+            # For 'pull' or 'manual', we do NOT create a new row in `scheduled_tasks`
             return None
 
-        # Otherwise update existing
-        if sync_method == 'pull':
-            task_type = 'ImportPull'
-            interval_minutes = 0
-        else:  # 'schedule'
-            task_type = 'ImportSchedule'
-            interval_minutes = sync_interval or 0
+        # Otherwise, sync_method='schedule' => create or update
+        # (We keep the same logic as before if user wants a scheduled import)
+        task_type = 'ImportSchedule'
+        interval_minutes = sync_interval or 0
 
+        # If there's NO existing task, create a new one
+        if not existing_task_id:
+            logger.debug(
+                f"[update_import_task_for_arr_config] No existing task for ARR #{config_id}; creating new schedule."
+            )
+            return create_import_task_for_arr_config(config_id, config_name,
+                                                     sync_method,
+                                                     sync_interval)
+
+        # If we DO have an existing scheduled task => update it
+        logger.debug(
+            f"[update_import_task_for_arr_config] Updating existing task {existing_task_id} for ARR #{config_id}, interval={interval_minutes}"
+        )
         cursor.execute(
             '''
             UPDATE scheduled_tasks
@@ -92,15 +109,15 @@ def update_import_task_for_arr_config(config_id, config_name, sync_method,
         conn.commit()
 
         if updated_count == 0:
-            logger.debug(
-                f"[ARR Tasks] No existing task found (ID={existing_task_id}) for ARR config {config_id}; creating new one."
+            logger.warning(
+                f"[update_import_task_for_arr_config] Could not find scheduled task {existing_task_id} for ARR #{config_id}, creating new."
             )
             return create_import_task_for_arr_config(config_id, config_name,
                                                      sync_method,
                                                      sync_interval)
 
         logger.debug(
-            f"[ARR Tasks] Updated existing import task {existing_task_id} for ARR config {config_id}"
+            f"[update_import_task_for_arr_config] Successfully updated scheduled task {existing_task_id} for ARR #{config_id}"
         )
         return existing_task_id
 
