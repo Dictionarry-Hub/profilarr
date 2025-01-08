@@ -68,6 +68,13 @@ def setup_logging():
                 'propagate': False
             },
 
+            # The 'hash' logger uses all three handlers
+            'hash': {
+                'level': 'INFO',
+                'handlers': ['console', 'file', 'hash_file'],
+                'propagate': False
+            },
+
             # Example: Keep these if you want separate loggers
             'werkzeug': {
                 'level': 'INFO',
