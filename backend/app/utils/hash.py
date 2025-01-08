@@ -1,7 +1,7 @@
 # app/utils/hash.py
 
 import hashlib
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 
 def generate_format_hash(format_name: str, profile_name: str,
@@ -15,16 +15,23 @@ def generate_format_hash(format_name: str, profile_name: str,
     return hashlib.sha256(hash_input).hexdigest()[:8]
 
 
-def process_format_name(format_name: str, profile_name: str,
+def process_format_name(format_name: str, profile_name: Optional[str],
                         arr_config: Dict[str, Any]) -> str:
     """
-    Process a format name and generate a unique hashed version if needed.
+    Process a format name and generate a unique version if needed.
+    If profile_name is None, appends [Profilarr] tag instead of hash.
     """
     if not arr_config.get('import_as_unique', False):
         return format_name
 
-    hash_value = generate_format_hash(format_name, profile_name, arr_config)
-    return f"{format_name} [{hash_value}]"
+    if profile_name:
+        # Format is part of a profile - use hash
+        hash_value = generate_format_hash(format_name, profile_name,
+                                          arr_config)
+        return f"{format_name} [{hash_value}]"
+    else:
+        # Standalone format - use Profilarr tag
+        return f"{format_name} [Profilarr]"
 
 
 def generate_profile_hash(profile_data: Dict[str, Any],
