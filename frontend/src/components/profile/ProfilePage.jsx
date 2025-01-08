@@ -2,26 +2,23 @@ import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import ProfileCard from './ProfileCard';
 import ProfileModal from './ProfileModal';
-import AddButton from '@ui/AddButton';
 import {getGitStatus} from '@api/api';
 import {Profiles, CustomFormats} from '@api/data';
-import FilterMenu from '@ui/FilterMenu';
-import SortMenu from '@ui/SortMenu';
-import {Loader, CheckSquare} from 'lucide-react';
-import SearchBar from '@ui/SearchBar';
+import {Loader} from 'lucide-react';
+import Alert from '@ui/Alert';
 import {useMassSelection} from '@hooks/useMassSelection';
 import {useKeyboardShortcut} from '@hooks/useKeyboardShortcut';
 import MassActionsBar from '@ui/MassActionsBar';
 import ImportModal from '@ui/ImportModal';
 import {importProfiles} from '@api/import';
-import Alert from '@ui/Alert';
+import DataBar from '@ui/DataBar/DataBar';
 
 function ProfilePage() {
     const [profiles, setProfiles] = useState([]);
     const [formats, setFormats] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProfile, setSelectedProfile] = useState(null);
-    const [sortBy, setSortBy] = useState('title');
+    const [sortBy, setSortBy] = useState('name');
     const [filterType, setFilterType] = useState('none');
     const [filterValue, setFilterValue] = useState('');
     const [allTags, setAllTags] = useState([]);
@@ -107,7 +104,7 @@ function ProfilePage() {
         try {
             const response = await CustomFormats.getAll();
             const formatsData = response.map(item => ({
-                id: item.content.name, // Use name as ID
+                id: item.content.name,
                 name: item.content.name,
                 description: item.content.description || '',
                 tags: item.content.tags || []
@@ -175,7 +172,6 @@ function ProfilePage() {
 
     const handleMassImport = async arr => {
         try {
-            // Use the identifier to find the correct profile
             const selectedProfiles = Array.from(selectedItems).map(identifier =>
                 profiles.find(p => p.content.name === identifier)
             );
@@ -193,47 +189,60 @@ function ProfilePage() {
         }
     };
 
+    const getFilteredAndSortedProfiles = () => {
+        return profiles
+            .filter(profile => {
+                // Apply search filter
+                if (searchQuery) {
+                    return (
+                        profile.content.name
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase()) ||
+                        profile.content.tags?.some(tag =>
+                            tag
+                                .toLowerCase()
+                                .includes(searchQuery.toLowerCase())
+                        )
+                    );
+                }
+
+                // Apply existing filters
+                if (filterType === 'tag') {
+                    return (
+                        profile.content.tags &&
+                        profile.content.tags.includes(filterValue)
+                    );
+                }
+                if (filterType === 'date') {
+                    const profileDate = new Date(profile.modified_date);
+                    const filterDate = new Date(filterValue);
+                    return (
+                        profileDate.toDateString() === filterDate.toDateString()
+                    );
+                }
+                return true;
+            })
+            .sort((a, b) => {
+                switch (sortBy) {
+                    case 'dateModified':
+                        return (
+                            new Date(b.modified_date) -
+                            new Date(a.modified_date)
+                        );
+                    case 'dateCreated':
+                        return (
+                            new Date(b.created_date) - new Date(a.created_date)
+                        );
+                    case 'name':
+                    default:
+                        return a.content.name.localeCompare(b.content.name);
+                }
+            });
+    };
+
     const formatDate = dateString => {
         return new Date(dateString).toLocaleString();
     };
-
-    const sortedAndFilteredProfiles = profiles
-        .filter(profile => {
-            // Apply search filter
-            if (searchQuery) {
-                return (
-                    profile.content.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                    profile.content.tags?.some(tag =>
-                        tag.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                );
-            }
-
-            // Apply existing filters
-            if (filterType === 'tag') {
-                return (
-                    profile.content.tags &&
-                    profile.content.tags.includes(filterValue)
-                );
-            }
-            if (filterType === 'date') {
-                const profileDate = new Date(profile.modified_date);
-                const filterDate = new Date(filterValue);
-                return profileDate.toDateString() === filterDate.toDateString();
-            }
-            return true;
-        })
-        .sort((a, b) => {
-            if (sortBy === 'name')
-                return a.content.name.localeCompare(b.content.name);
-            if (sortBy === 'dateCreated')
-                return new Date(b.created_date) - new Date(a.created_date);
-            if (sortBy === 'dateModified')
-                return new Date(b.modified_date) - new Date(a.modified_date);
-            return 0;
-        });
 
     if (isLoading) {
         return (
@@ -278,42 +287,28 @@ function ProfilePage() {
         );
     }
 
+    const filteredProfiles = getFilteredAndSortedProfiles();
+
     return (
         <div>
-            <div className='mb-4 flex items-center gap-4'>
-                <SearchBar
-                    onSearch={setSearchQuery}
-                    placeholder='Search by name or tag...'
-                />
-                <div className='flex-none'>
-                    <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
-                </div>
-                <div className='flex-none'>
-                    <FilterMenu
-                        filterType={filterType}
-                        setFilterType={setFilterType}
-                        filterValue={filterValue}
-                        setFilterValue={setFilterValue}
-                        allTags={allTags}
-                    />
-                </div>
-                <div className='flex-none'>
-                    <button
-                        onClick={toggleSelectionMode}
-                        className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
-                            isSelectionMode
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }`}
-                        title='Toggle selection mode (Ctrl+A)'>
-                        <CheckSquare className='w-4 h-4' />
-                        <span className='text-sm'>Select</span>
-                    </button>
-                </div>
-            </div>
+            <DataBar
+                onSearch={setSearchQuery}
+                searchPlaceholder='Search by name or tag...'
+                filterType={filterType}
+                setFilterType={setFilterType}
+                filterValue={filterValue}
+                setFilterValue={setFilterValue}
+                allTags={allTags}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                isSelectionMode={isSelectionMode}
+                toggleSelectionMode={toggleSelectionMode}
+                onAdd={() => handleOpenModal()}
+                addButtonLabel='Add New Profile'
+            />
 
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4'>
-                {sortedAndFilteredProfiles.map((profile, index) => (
+                {filteredProfiles.map((profile, index) => (
                     <ProfileCard
                         key={profile.file_name}
                         profile={profile}
@@ -328,21 +323,12 @@ function ProfilePage() {
                                 profile.content.name,
                                 index,
                                 e,
-                                sortedAndFilteredProfiles
+                                filteredProfiles
                             )
                         }
                     />
                 ))}
             </div>
-
-            {!isSelectionMode && (
-                <AddButton
-                    onClick={() => handleOpenModal()}
-                    label='Add New Profile'
-                    top='5vh'
-                    left='75vw'
-                />
-            )}
 
             {isSelectionMode && (
                 <MassActionsBar

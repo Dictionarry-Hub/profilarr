@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {Search} from 'lucide-react';
-import {SortDropdown} from '../ui/SortDropdown';
+import {SortDropdown} from '../ui/DataBar/SortDropdown';
 import TabViewer from '../ui/TabViewer';
 
 const ProfileScoringTab = ({

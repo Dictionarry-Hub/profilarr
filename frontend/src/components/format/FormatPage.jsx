@@ -2,27 +2,24 @@ import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import FormatCard from './FormatCard';
 import FormatModal from './FormatModal';
-import AddButton from '@ui/AddButton';
 import {getGitStatus} from '@api/api';
 import {CustomFormats} from '@api/data';
-import FilterMenu from '@ui/FilterMenu';
-import SortMenu from '@ui/SortMenu';
-import {Loader, CheckSquare} from 'lucide-react';
+import {Loader} from 'lucide-react';
 import Alert from '@ui/Alert';
-import SearchBar from '@ui/SearchBar';
 import {useFormatModal} from '@hooks/useFormatModal';
 import {useMassSelection} from '@hooks/useMassSelection';
 import {useKeyboardShortcut} from '@hooks/useKeyboardShortcut';
 import MassActionsBar from '@ui/MassActionsBar';
 import ImportModal from '@ui/ImportModal';
 import {importFormats} from '@api/import';
+import DataBar from '@ui/DataBar/DataBar';
 
 function FormatPage() {
     // Basic state management
     const [formats, setFormats] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedFormat, setSelectedFormat] = useState(null);
-    const [sortBy, setSortBy] = useState('title');
+    const [sortBy, setSortBy] = useState('name');
     const [filterType, setFilterType] = useState('none');
     const [filterValue, setFilterValue] = useState('');
     const [allTags, setAllTags] = useState([]);
@@ -213,7 +210,6 @@ function FormatPage() {
             );
         }
 
-        // Rest of the sorting logic remains the same...
         return filtered.sort((a, b) => {
             switch (sortBy) {
                 case 'dateModified':
@@ -276,37 +272,21 @@ function FormatPage() {
 
     return (
         <div>
-            <div className='mb-4 flex items-center gap-4'>
-                <SearchBar
-                    onSearch={setSearchQuery}
-                    placeholder='Search by name or tag...'
-                />
-                <div className='flex-none'>
-                    <SortMenu sortBy={sortBy} setSortBy={setSortBy} />
-                </div>
-                <div className='flex-none'>
-                    <FilterMenu
-                        filterType={filterType}
-                        setFilterType={setFilterType}
-                        filterValue={filterValue}
-                        setFilterValue={setFilterValue}
-                        allTags={allTags}
-                    />
-                </div>
-                <div className='flex-none'>
-                    <button
-                        onClick={toggleSelectionMode}
-                        className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
-                            isSelectionMode
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }`}
-                        title='Toggle selection mode (Ctrl+A)'>
-                        <CheckSquare className='w-4 h-4' />
-                        <span className='text-sm'>Select</span>
-                    </button>
-                </div>
-            </div>
+            <DataBar
+                onSearch={setSearchQuery}
+                searchPlaceholder='Search by name or tag...'
+                filterType={filterType}
+                setFilterType={setFilterType}
+                filterValue={filterValue}
+                setFilterValue={setFilterValue}
+                allTags={allTags}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                isSelectionMode={isSelectionMode}
+                toggleSelectionMode={toggleSelectionMode}
+                onAdd={() => handleOpenModal()}
+                addButtonLabel='Add New Format'
+            />
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>
                 {filteredFormats.map((format, index) => (
@@ -329,15 +309,6 @@ function FormatPage() {
                     />
                 ))}
             </div>
-
-            {!isSelectionMode && (
-                <AddButton
-                    onClick={() => handleOpenModal()}
-                    label='Add New Format'
-                    top='5vh'
-                    left='75vw'
-                />
-            )}
 
             {isSelectionMode && (
                 <MassActionsBar

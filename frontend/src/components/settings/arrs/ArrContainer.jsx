@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {Loader} from 'lucide-react';
 import ArrModal from './ArrModal';
 import ArrCard from './ArrCard';
-import AddButton from '@ui/AddButton';
+import AddButton from '@ui/DataBar/AddButton';
 import {getArrConfigs} from '@api/arr';
 
 const ArrContainer = () => {
