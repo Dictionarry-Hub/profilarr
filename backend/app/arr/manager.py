@@ -1,4 +1,5 @@
 # arr/manager.py
+
 from ..db import get_db
 import json
 import logging
@@ -7,6 +8,8 @@ import logging
 from .task_utils import (create_import_task_for_arr_config,
                          update_import_task_for_arr_config,
                          delete_import_task_for_arr_config)
+
+from ..task.tasks import TaskScheduler
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -34,13 +37,17 @@ def save_arr_config(config):
                     import_task_id
                 )
                 VALUES (?, ?, ?, ?, ?, ?, NULL, 0, ?, ?, ?, NULL)
-                ''',
-                (config['name'], config['type'],
-                 json.dumps(config.get('tags', [])), config['arrServer'],
-                 config['apiKey'], json.dumps(config.get(
-                     'data_to_sync', {})), config.get('sync_method', 'manual'),
-                 config.get('sync_interval',
-                            0), config.get('import_as_unique', False)))
+                ''', (
+                    config['name'],
+                    config['type'],
+                    json.dumps(config.get('tags', [])),
+                    config['arrServer'],
+                    config['apiKey'],
+                    json.dumps(config.get('data_to_sync', {})),
+                    config.get('sync_method', 'manual'),
+                    config.get('sync_interval', 0),
+                    config.get('import_as_unique', False),
+                ))
             conn.commit()
 
             new_config_id = cursor.lastrowid
@@ -66,6 +73,11 @@ def save_arr_config(config):
                     'UPDATE arr_config SET import_task_id = ? WHERE id = ?',
                     (task_id, new_config_id))
                 conn.commit()
+
+            scheduler = TaskScheduler.get_instance()
+            if scheduler:
+                logger.debug("[save_arr_config] Reloading tasks from DB...")
+                scheduler.load_tasks_from_db()
 
             return {'success': True, 'id': new_config_id}
 
@@ -144,6 +156,11 @@ def update_arr_config(id, config):
                 (new_task_id, id))
             conn.commit()
 
+            scheduler = TaskScheduler.get_instance()
+            if scheduler:
+                logger.debug("[update_arr_config] Reloading tasks from DB...")
+                scheduler.load_tasks_from_db()
+
             return {'success': True}
 
         except Exception as e:
@@ -186,6 +203,11 @@ def delete_arr_config(id):
             if existing_task_id:
                 delete_import_task_for_arr_config(existing_task_id,
                                                   config_id=id)
+
+            scheduler = TaskScheduler.get_instance()
+            if scheduler:
+                logger.debug("[delete_arr_config] Reloading tasks from DB...")
+                scheduler.load_tasks_from_db()
 
             return {'success': True}
 
