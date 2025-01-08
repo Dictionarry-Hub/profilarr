@@ -74,7 +74,7 @@ const LogViewer = ({
                 </div>
             </div>
             <div
-                className='h-[calc(100vh-28rem)] overflow-y-auto p-4'
+                className='h-[calc(100vh-28rem)] overflow-y-auto p-4 scrollable'
                 style={{fontSize: `${zoom}rem`}}>
                 {loading && (
                     <div className='flex items-center justify-center p-4 text-gray-400'>

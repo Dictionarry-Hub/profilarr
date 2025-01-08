@@ -4,15 +4,10 @@ import {Logs} from '@api/logs';
 import LogMenu from './LogMenu';
 import LogViewer from './LogViewer';
 
-const guessLogType = filename => {
-    if (filename.startsWith('importarr')) return 'Importarr';
-    if (filename.startsWith('profilarr')) return 'General';
-    return 'Other';
-};
-
 const LogContainer = () => {
     const [allLogFiles, setAllLogFiles] = useState([]);
-    const [logType, setLogType] = useState('General');
+    const [logTypes, setLogTypes] = useState(new Set());
+    const [selectedType, setSelectedType] = useState('');
     const [filteredFiles, setFilteredFiles] = useState([]);
     const [selectedFile, setSelectedFile] = useState('');
     const [filters, setFilters] = useState({lines: '', level: '', search: ''});
@@ -26,17 +21,43 @@ const LogContainer = () => {
     }, []);
 
     useEffect(() => {
-        const matched = allLogFiles
-            .filter(f => guessLogType(f.filename) === logType)
-            .sort((a, b) => b.last_modified - a.last_modified);
-        setFilteredFiles(matched);
-        if (matched.length) {
-            setSelectedFile(matched[0].filename);
-        } else {
-            setSelectedFile('');
-            setLogContent([]);
+        if (allLogFiles.length > 0) {
+            // Extract unique log types from filenames
+            const types = new Set(
+                allLogFiles.map(f => {
+                    const match = f.filename.match(/^([a-zA-Z]+)/);
+                    return match ? match[1].toLowerCase() : 'other';
+                })
+            );
+            setLogTypes(types);
+
+            // Set initial type if not already set
+            if (!selectedType && types.size > 0) {
+                setSelectedType(Array.from(types)[0]);
+            }
         }
-    }, [logType, allLogFiles]);
+    }, [allLogFiles]);
+
+    useEffect(() => {
+        if (selectedType) {
+            const matched = allLogFiles
+                .filter(f => {
+                    const fileType =
+                        f.filename.match(/^([a-zA-Z]+)/)?.[1].toLowerCase() ||
+                        'other';
+                    return fileType === selectedType;
+                })
+                .sort((a, b) => b.last_modified - a.last_modified);
+
+            setFilteredFiles(matched);
+            if (matched.length) {
+                setSelectedFile(matched[0].filename);
+            } else {
+                setSelectedFile('');
+                setLogContent([]);
+            }
+        }
+    }, [selectedType, allLogFiles]);
 
     useEffect(() => {
         if (selectedFile) {
@@ -95,8 +116,9 @@ const LogContainer = () => {
     return (
         <div className='h-full flex flex-col space-y-4'>
             <LogMenu
-                logType={logType}
-                setLogType={setLogType}
+                logTypes={Array.from(logTypes)}
+                selectedType={selectedType}
+                setSelectedType={setSelectedType}
                 selectedFile={selectedFile}
                 setSelectedFile={setSelectedFile}
                 filteredFiles={filteredFiles}

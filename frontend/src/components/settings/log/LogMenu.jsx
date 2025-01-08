@@ -1,9 +1,11 @@
+// LogMenu.jsx
 import React from 'react';
 import {Search} from 'lucide-react';
 
 const LogMenu = ({
-    logType,
-    setLogType,
+    logTypes,
+    selectedType,
+    setSelectedType,
     selectedFile,
     setSelectedFile,
     filteredFiles,
@@ -13,20 +15,25 @@ const LogMenu = ({
     const selectStyles =
         'bg-gray-900 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
 
+    const formatLogType = type => {
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    };
+
     return (
         <div className='bg-gray-800 rounded-lg border border-gray-700 shadow-xl p-4'>
             <div className='space-y-4'>
-                {/* Top Row Filters */}
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
                     {/* Log Type Selection */}
                     <div className='relative'>
                         <select
                             className={`w-full px-3 py-1.5 rounded-md appearance-none cursor-pointer ${selectStyles}`}
-                            value={logType}
-                            onChange={e => setLogType(e.target.value)}>
-                            <option value='General'>Type: General</option>
-                            <option value='Importarr'>Type: Importarr</option>
-                            <option value='Other'>Type: Other</option>
+                            value={selectedType}
+                            onChange={e => setSelectedType(e.target.value)}>
+                            {logTypes.map(type => (
+                                <option key={type} value={type}>
+                                    Type: {formatLogType(type)}
+                                </option>
+                            ))}
                         </select>
                         <div className='absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none'>
                             <svg
@@ -38,7 +45,6 @@ const LogMenu = ({
                         </div>
                     </div>
 
-                    {/* Log File Selection */}
                     <div className='relative'>
                         <select
                             className={`w-full px-3 py-1.5 rounded-md appearance-none cursor-pointer ${selectStyles}`}
@@ -60,7 +66,6 @@ const LogMenu = ({
                         </div>
                     </div>
 
-                    {/* Lines Filter */}
                     <input
                         type='number'
                         className={`w-full px-3 py-1.5 rounded-md ${selectStyles}`}
@@ -69,7 +74,6 @@ const LogMenu = ({
                         placeholder='Lines: last N lines...'
                     />
 
-                    {/* Log Level Filter */}
                     <div className='relative'>
                         <select
                             className={`w-full px-3 py-1.5 rounded-md appearance-none cursor-pointer ${selectStyles}`}
@@ -94,7 +98,6 @@ const LogMenu = ({
                     </div>
                 </div>
 
-                {/* Search Bar - Full Width */}
                 <div className='relative'>
                     <div className='absolute inset-y-0 left-3 flex items-center pointer-events-none'>
                         <Search size={16} className='text-gray-400' />
