@@ -97,10 +97,12 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
 
     const validateForm = () => {
         const newErrors = {};
+
         if (formData.arrServer && !validateUrl(formData.arrServer)) {
             newErrors.arrServer =
                 'Please enter a valid URL (e.g., http://localhost:7878)';
         }
+
         if (
             formData.sync_method === 'schedule' &&
             (!formData.sync_interval || formData.sync_interval < 1)
@@ -108,14 +110,18 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
             newErrors.sync_interval =
                 'Please enter a valid interval (minimum 1 minute)';
         }
-        if (
-            formData.sync_method !== 'manual' &&
-            !formData.data_to_sync.profiles.length &&
-            !formData.data_to_sync.customFormats.length
-        ) {
-            newErrors.data_to_sync =
-                'Please select at least one profile or custom format to sync';
+
+        // Safely check data_to_sync structure
+        if (formData.sync_method !== 'manual') {
+            const profiles = formData.data_to_sync?.profiles || [];
+            const customFormats = formData.data_to_sync?.customFormats || [];
+
+            if (profiles.length === 0 && customFormats.length === 0) {
+                newErrors.data_to_sync =
+                    'Please select at least one profile or custom format to sync';
+            }
         }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -240,28 +246,54 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
 
     const handleInputChange = e => {
         const {id, value} = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [id]: id === 'sync_interval' ? parseInt(value) || 0 : value,
-            ...(id === 'sync_method' && value === 'manual'
-                ? {data_to_sync: {profiles: [], customFormats: []}}
-                : {})
-        }));
+        setFormData(prev => {
+            // Handle sync method changes
+            if (id === 'sync_method') {
+                return {
+                    ...prev,
+                    [id]: value,
+                    data_to_sync:
+                        value === 'manual'
+                            ? {profiles: [], customFormats: []}
+                            : prev.data_to_sync || {
+                                  profiles: [],
+                                  customFormats: []
+                              }
+                };
+            }
+
+            // Handle other input changes
+            return {
+                ...prev,
+                [id]: id === 'sync_interval' ? parseInt(value) || 0 : value
+            };
+        });
+
         if (errors[id]) {
             setErrors(prev => ({...prev, [id]: ''}));
         }
     };
 
     const handleDataToggle = (type, name) => {
-        setFormData(prev => ({
-            ...prev,
-            data_to_sync: {
-                ...prev.data_to_sync,
-                [type]: prev.data_to_sync[type].includes(name)
-                    ? prev.data_to_sync[type].filter(item => item !== name)
-                    : [...prev.data_to_sync[type], name]
-            }
-        }));
+        setFormData(prev => {
+            // Ensure data_to_sync exists with proper structure
+            const currentData = prev.data_to_sync || {
+                profiles: [],
+                customFormats: []
+            };
+            const currentArray = currentData[type] || [];
+
+            return {
+                ...prev,
+                data_to_sync: {
+                    ...currentData,
+                    [type]: currentArray.includes(name)
+                        ? currentArray.filter(item => item !== name)
+                        : [...currentArray, name]
+                }
+            };
+        });
+
         if (errors.data_to_sync) {
             setErrors(prev => ({...prev, data_to_sync: ''}));
         }

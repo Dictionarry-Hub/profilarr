@@ -39,6 +39,33 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
         {value: 'schedule', label: 'Scheduled'}
     ];
 
+    // Ensure data_to_sync always has the required structure
+    const safeSelectedData = {
+        profiles: formData.data_to_sync?.profiles || [],
+        customFormats: formData.data_to_sync?.customFormats || []
+    };
+
+    // Handle sync method change
+    const handleSyncMethodChange = e => {
+        const newMethod = e.target.value;
+        handleInputChange({
+            target: {
+                id: 'sync_method',
+                value: newMethod
+            }
+        });
+
+        // Reset data_to_sync when switching to manual
+        if (newMethod === 'manual') {
+            handleInputChange({
+                target: {
+                    id: 'data_to_sync',
+                    value: {profiles: [], customFormats: []}
+                }
+            });
+        }
+    };
+
     const inputClasses = errorKey =>
         `w-full px-3 py-2 text-sm rounded-lg border ${
             errors[errorKey]
@@ -261,7 +288,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     <select
                         id='sync_method'
                         value={formData.sync_method}
-                        onChange={handleInputChange}
+                        onChange={handleSyncMethodChange}
                         className={inputClasses('sync_method')}
                         required>
                         {syncMethods.map(m => (
@@ -305,35 +332,35 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                             type='button'
                             onClick={() => setIsDataDrawerOpen(true)}
                             className='w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 
-             bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700
-             rounded-lg transition-colors
-             border border-gray-200 dark:border-gray-700'>
+                                    bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700
+                                    rounded-lg transition-colors
+                                    border border-gray-200 dark:border-gray-700'>
                             <div className='flex flex-col space-y-2'>
                                 <div className='flex items-center justify-between'>
                                     <span>Select Data to Sync</span>
                                 </div>
-                                {(formData.data_to_sync.profiles.length > 0 ||
-                                    formData.data_to_sync.customFormats.length >
+                                {(safeSelectedData.profiles.length > 0 ||
+                                    safeSelectedData.customFormats.length >
                                         0) && (
                                     <div className='flex flex-wrap gap-2'>
-                                        {formData.data_to_sync.profiles.map(
+                                        {safeSelectedData.profiles.map(
                                             profile => (
                                                 <span
                                                     key={profile}
                                                     className='inline-flex items-center bg-blue-100 text-blue-800 
-                                 dark:bg-blue-900 dark:text-blue-300 
-                                 text-xs rounded px-2 py-1'>
+                                                        dark:bg-blue-900 dark:text-blue-300 
+                                                        text-xs rounded px-2 py-1'>
                                                     {profile}
                                                 </span>
                                             )
                                         )}
-                                        {formData.data_to_sync.customFormats.map(
+                                        {safeSelectedData.customFormats.map(
                                             format => (
                                                 <span
                                                     key={format}
                                                     className='inline-flex items-center bg-green-100 text-green-800 
-                                 dark:bg-green-900 dark:text-green-300 
-                                 text-xs rounded px-2 py-1'>
+                                                        dark:bg-green-900 dark:text-green-300 
+                                                        text-xs rounded px-2 py-1'>
                                                     {format}
                                                 </span>
                                             )
@@ -388,7 +415,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     onClose={() => setIsDataDrawerOpen(false)}
                     isLoading={isLoading}
                     availableData={availableData}
-                    selectedData={formData.data_to_sync}
+                    selectedData={safeSelectedData}
                     onDataToggle={handleDataToggle}
                     error={errors.data_to_sync}
                 />
