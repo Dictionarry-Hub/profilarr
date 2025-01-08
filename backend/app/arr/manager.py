@@ -237,9 +237,8 @@ def get_all_arr_configs():
                     row['arr_server'],
                     'apiKey':
                     row['api_key'],
-                    'data_to_sync':
-                    json.loads(row['data_to_sync'])
-                    if row['data_to_sync'] else {},
+                    'data_to_sync': (json.loads(row['data_to_sync'])
+                                     if row['data_to_sync'] else {}),
                     'last_sync_time':
                     row['last_sync_time'],
                     'sync_percentage':
@@ -268,20 +267,34 @@ def get_arr_config(id):
                 return {
                     'success': True,
                     'data': {
-                        'id': row['id'],
-                        'name': row['name'],
-                        'type': row['type'],
-                        'tags': json.loads(row['tags']) if row['tags'] else [],
-                        'arrServer': row['arr_server'],
-                        'apiKey': row['api_key'],
-                        'data_to_sync': json.loads(row['data_to_sync'])
-                        if row['data_to_sync'] else {},
-                        'last_sync_time': row['last_sync_time'],
-                        'sync_percentage': row['sync_percentage'],
-                        'sync_method': row['sync_method'],
-                        'sync_interval': row['sync_interval'],
-                        'import_as_unique': bool(row['import_as_unique']),
-                        'import_task_id': row['import_task_id']
+                        'id':
+                        row['id'],
+                        'name':
+                        row['name'],
+                        'type':
+                        row['type'],
+                        'tags':
+                        json.loads(row['tags']) if row['tags'] else [],
+                        'arrServer':
+                        row['arr_server'],
+                        'apiKey':
+                        row['api_key'],
+                        'data_to_sync': (json.loads(row['data_to_sync'])
+                                         if row['data_to_sync'] else {}),
+                        'last_sync_time':
+                        row['last_sync_time'],
+                        'sync_percentage':
+                        row['sync_percentage'],
+
+                        # Keep these as-is
+                        'sync_method':
+                        row['sync_method'],
+                        'sync_interval':
+                        row['sync_interval'],
+                        'import_as_unique':
+                        bool(row['import_as_unique']),
+                        'import_task_id':
+                        row['import_task_id']
                     }
                 }
             logger.debug(
@@ -317,14 +330,41 @@ def get_scheduled_configs():
 
 
 def get_pull_configs():
-    """
-    Return all arr_config rows whose sync_method='pull'.
-    (Used after git pull to automatically run imports.)
-    """
     with get_db() as conn:
         rows = conn.execute(
             'SELECT * FROM arr_config WHERE sync_method = "pull"').fetchall()
-        return rows
+
+        results = []
+        for row in rows:
+            results.append({
+                'id':
+                row['id'],
+                'name':
+                row['name'],
+                'type':
+                row['type'],
+                'tags':
+                json.loads(row['tags']) if row['tags'] else [],
+                'arrServer':
+                row['arr_server'],
+                'apiKey':
+                row['api_key'],
+                'data_to_sync': (json.loads(row['data_to_sync'])
+                                 if row['data_to_sync'] else {}),
+                'last_sync_time':
+                row['last_sync_time'],
+                'sync_percentage':
+                row['sync_percentage'],
+                'sync_method':
+                row['sync_method'],
+                'sync_interval':
+                row['sync_interval'],
+                'import_as_unique':
+                bool(row['import_as_unique']),
+                'import_task_id':
+                row['import_task_id']
+            })
+        return results
 
 
 def run_import_for_config(config_row):
