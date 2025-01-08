@@ -132,7 +132,7 @@ function App() {
             <Router>
                 <div className='min-h-screen flex flex-col bg-gray-900 text-gray-100'>
                     <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-                    <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 flex-grow flex-1 w-full'>
+                    <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-2 flex-grow flex-1 w-full'>
                         <Routes>
                             <Route path='/regex' element={<RegexPage />} />
                             <Route path='/format' element={<FormatPage />} />
