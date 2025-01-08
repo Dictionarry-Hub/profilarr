@@ -1,7 +1,10 @@
+# git/operations/pull.py
+
 import git
 import logging
 from git import GitCommandError
 from ..status.status import GitStatusManager
+from ...arr.manager import get_pull_configs, run_import_for_config
 
 logger = logging.getLogger(__name__)
 
@@ -19,36 +22,42 @@ def pull_branch(repo_path, branch_name):
                 'details': 'Please commit or stash your changes before pulling'
             }
 
+        # Fetch first to get remote changes
+        repo.remotes.origin.fetch()
+
         try:
-            # Fetch first to get remote changes
-            repo.remotes.origin.fetch()
+            # Pull with explicit merge strategy
+            repo.git.pull('origin', branch_name, '--no-rebase')
 
-            try:
-                # Try to pull with explicit merge strategy
-                repo.git.pull('origin', branch_name, '--no-rebase')
+            # Update remote status
+            status_manager = GitStatusManager.get_instance(repo_path)
+            if status_manager:
+                status_manager.update_remote_status()
 
-                # Update remote status immediately after pull
-                status_manager = GitStatusManager.get_instance(repo_path)
-                if status_manager:
-                    status_manager.update_remote_status()
+            # -------------------------------
+            # *** "On pull" ARR import logic:
+            # 1) Query all ARR configs that have sync_method="pull"
+            # 2) For each, run the import
+            # -------------------------------
+            pull_configs = get_pull_configs()
+            logger.info(
+                f"[Pull] Found {len(pull_configs)} ARR configs to import (sync_method='pull')"
+            )
+            for cfg in pull_configs:
+                run_import_for_config(cfg)
 
-                return True, f"Successfully pulled changes for branch {branch_name}"
-            except GitCommandError as e:
-                if "CONFLICT" in str(e):
-                    # Don't reset - let Git stay in merge conflict state
-                    return True, {
-                        'state': 'resolve',
-                        'type': 'merge_conflict',
-                        'message':
-                        'Repository is now in conflict resolution state. Please resolve conflicts to continue merge.',
-                        'details': 'Please resolve conflicts to continue merge'
-                    }
-                raise e
+            return True, f"Successfully pulled changes for branch {branch_name}"
 
         except GitCommandError as e:
-            logger.error(f"Git command error pulling branch: {str(e)}",
-                         exc_info=True)
-            return False, f"Error pulling branch: {str(e)}"
+            if "CONFLICT" in str(e):
+                return True, {
+                    'state': 'resolve',
+                    'type': 'merge_conflict',
+                    'message':
+                    'Repository is now in conflict resolution state. Please resolve conflicts to continue merge.',
+                    'details': 'Please resolve conflicts to continue merge'
+                }
+            raise e
 
     except Exception as e:
         logger.error(f"Error pulling branch: {str(e)}", exc_info=True)
