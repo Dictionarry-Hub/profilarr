@@ -6,7 +6,6 @@ import logging
 import re
 
 from ..db import get_db
-from ..arr.manager import get_arr_config, run_import_for_config
 
 task_logger = logging.getLogger('task_system')
 task_logger.setLevel(logging.DEBUG)
@@ -158,6 +157,9 @@ class ImportScheduleTask(Task):
     """
 
     def run_job(self):
+
+        from ..arr.manager import get_arr_config, run_import_for_config
+
         # 1) Attempt to parse the config ID from the self.name
         match = re.search(r"#(\d+)", self.name)
         if not match:
