@@ -45,6 +45,11 @@ def import_profiles_to_arr(profile_names: List[str], base_url: str,
                 'error': 'Failed to get existing profiles'
             }
 
+        # First section - processing existing profiles
+        logger.info(
+            "[hash_utility] Processing existing profiles with unique import setting: %s",
+            arr_config['import_as_unique'])
+
         # Create mapping for existing profiles, with hashing if enabled
         existing_profile_map = {}
         original_name_map = {}  # Store original names for logging
@@ -54,20 +59,23 @@ def import_profiles_to_arr(profile_names: List[str], base_url: str,
                 # Strip any existing hash if present
                 if '[' in original_name:
                     original_name = original_name.split('[')[0].strip()
+                    logger.info(
+                        "[hash_utility] Stripped hash from '%s' to '%s'",
+                        profile['name'], original_name)
 
                 # Generate hash using same method we'll use for new profiles
                 profile_data = {'name': original_name}
                 name_key = process_profile_name(profile_data, arr_config)
                 existing_profile_map[name_key] = profile['id']
                 original_name_map[name_key] = profile['name']
-                logger.debug(
-                    f"Mapped existing profile '{profile['name']}' to hashed name '{name_key}'"
-                )
+                logger.info("[hash_utility] Mapped '%s' to '%s'",
+                            profile['name'], name_key)
             else:
                 existing_profile_map[original_name] = profile['id']
                 original_name_map[original_name] = original_name
 
-        logger.debug(f"Found {len(existing_profile_map)} existing profiles")
+        logger.info("[hash_utility] Processed %d profiles",
+                    len(existing_profile_map))
 
         target_app = TargetApp.RADARR if arr_type.lower(
         ) == 'radarr' else TargetApp.SONARR
@@ -134,9 +142,8 @@ def import_profiles_to_arr(profile_names: List[str], base_url: str,
                     original_name = profile_data['name']
                     profile_data['name'] = process_profile_name(
                         profile_data, arr_config)
-                    logger.info(
-                        f"Hashed profile name '{original_name}' to '{profile_data['name']}'"
-                    )
+                    logger.info("[hash_utility] Generated hash: '%s' -> '%s'",
+                                original_name, profile_data['name'])
 
                 logger.info("Compiled to:\n" +
                             json.dumps(profile_data, indent=2))
