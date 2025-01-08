@@ -1,5 +1,7 @@
 import React from 'react';
-import {Film, Tv, Clock, ArrowUpDown, Timer, BarChart} from 'lucide-react';
+import {Clock, ArrowUpDown, BarChart} from 'lucide-react';
+import RadarrLogo from '@logo/Radarr.svg';
+import SonarrLogo from '@logo/Sonarr.svg';
 
 const ArrCard = ({
     title,
@@ -19,9 +21,6 @@ const ArrCard = ({
         const date = new Date(timestamp);
         return date.toLocaleString();
     };
-
-    // Get appropriate icon based on type
-    const TypeIcon = type === 'radarr' ? Film : Tv;
 
     // Get sync method display
     const getSyncMethodDisplay = () => {
@@ -46,11 +45,17 @@ const ArrCard = ({
                  shadow-xl hover:shadow-2xl hover:border-blue-500/50 transition-all duration-200 
                  cursor-pointer overflow-hidden group'>
             <div className='p-4 space-y-4'>
-                {/* Header with Icon, Title, and Tags */}
+                {/* Header with Logo, Title, and Tags */}
                 <div className='flex items-start justify-between'>
                     <div className='flex items-center space-x-3'>
                         <div className='p-2 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors'>
-                            <TypeIcon className='w-5 h-5 text-blue-400' />
+                            <img
+                                src={
+                                    type === 'radarr' ? RadarrLogo : SonarrLogo
+                                }
+                                className='w-5 h-5'
+                                alt={type === 'radarr' ? 'Radarr' : 'Sonarr'}
+                            />
                         </div>
                         <div>
                             <h3 className='font-medium text-gray-100'>
