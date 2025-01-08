@@ -3,7 +3,10 @@ from abc import ABC, abstractmethod
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import logging
+import re
+
 from ..db import get_db
+from ..arr.manager import get_arr_config, run_import_for_config
 
 task_logger = logging.getLogger('task_system')
 task_logger.setLevel(logging.DEBUG)
@@ -31,7 +34,7 @@ class Task(ABC):
                 UPDATE scheduled_tasks
                 SET status = ?, last_run = ?
                 WHERE id = ?
-            ''', (status, datetime.now(), self.id))
+                ''', (status, datetime.now(), self.id))
             conn.commit()
 
 
@@ -97,6 +100,7 @@ class TaskScheduler:
         task_classes = {
             'Sync': SyncTask,
             'Backup': BackupTask,
+            'ImportSchedule': ImportScheduleTask,
         }
         return task_classes.get(task_type)
 
@@ -143,3 +147,44 @@ class BackupTask(Task):
         else:
             logger.error(f"Backup failed: {backup_name}"
                          )  # backup_name contains error message in this case
+
+
+class ImportScheduleTask(Task):
+    """
+    A scheduled task that runs the "run_import_for_config" logic for a specific ARR config
+    (inferred by parsing the config ID from the task's 'name').
+    For example, if the scheduled_tasks.name is 'Import for ARR #1 - radarr',
+    we parse '1' out of that string to know which arr_config to import.
+    """
+
+    def run_job(self):
+        # 1) Attempt to parse the config ID from the self.name
+        match = re.search(r"#(\d+)", self.name)
+        if not match:
+            task_logger.error(
+                f"[ImportScheduleTask] Could not parse config ID from task name '{self.name}'. Skipping."
+            )
+            return
+
+        config_id = match.group(1)
+        task_logger.info(
+            f"[ImportScheduleTask] Found config_id={config_id} from task '{self.name}'"
+        )
+
+        # 2) Get the corresponding arr_config
+        arr_config_response = get_arr_config(config_id)
+        if not arr_config_response.get('success'):
+            task_logger.error(
+                f"[ImportScheduleTask] arr_config id={config_id} not found. Skipping."
+            )
+            return
+
+        config_data = arr_config_response['data']
+
+        # 3) Call run_import_for_config
+        task_logger.info(
+            f"[ImportScheduleTask] Running run_import_for_config for arr_config #{config_id}"
+        )
+        run_import_for_config(config_data)
+        task_logger.info(
+            f"[ImportScheduleTask] Done importing for arr_config #{config_id}")
