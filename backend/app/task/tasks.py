@@ -50,15 +50,23 @@ class TaskScheduler:
         return cls._instance
 
     def load_tasks_from_db(self):
+        """
+        Reload tasks from the DB, removing all old jobs first
+        so we don't collide with existing job IDs.
+        """
+        self.logger.debug(
+            "[TaskScheduler] remove_all_jobs to avoid duplicates")
+        self.scheduler.remove_all_jobs()
+
         with get_db() as conn:
-            tasks = conn.execute('SELECT * FROM scheduled_tasks').fetchall()
-            for task_data in tasks:
-                task_class = self.get_task_class(task_data['type'])
+            task_rows = conn.execute(
+                'SELECT * FROM scheduled_tasks').fetchall()
+            for row in task_rows:
+                task_class = self.get_task_class(row['type'])
                 if task_class:
-                    task = task_class(
-                        id=task_data['id'],
-                        name=task_data['name'],
-                        interval_minutes=task_data['interval_minutes'])
+                    task = task_class(id=row['id'],
+                                      name=row['name'],
+                                      interval_minutes=row['interval_minutes'])
                     self.schedule_task(task)
 
     def schedule_task(self, task):
