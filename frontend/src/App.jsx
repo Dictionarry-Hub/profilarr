@@ -26,6 +26,22 @@ function App() {
         error: null
     });
 
+    // Prevent layout shifts from scrollbar
+    useEffect(() => {
+        document.body.style.overflowY = 'scroll';
+        return () => {
+            document.body.style.overflowY = '';
+        };
+    }, []);
+
+    useEffect(() => {
+        if (darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [darkMode]);
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -39,6 +55,8 @@ function App() {
             } catch (error) {
                 setAuthState({
                     checking: false,
+                    needsSetup: false,
+                    needsLogin: false,
                     error: 'Unable to connect to server'
                 });
             }
@@ -46,14 +64,6 @@ function App() {
 
         checkAuth();
     }, []);
-
-    useEffect(() => {
-        if (darkMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }, [darkMode]);
 
     if (authState.checking) {
         return (
@@ -141,7 +151,10 @@ function App() {
                                 path='/settings'
                                 element={<SettingsPage />}
                             />
-                            <Route path='/' element={<SettingsPage />} />
+                            <Route
+                                path='/'
+                                element={<Navigate to='/settings' />}
+                            />
                         </Routes>
                     </div>
                     <Footer />
@@ -162,4 +175,5 @@ function App() {
         </>
     );
 }
+
 export default App;
