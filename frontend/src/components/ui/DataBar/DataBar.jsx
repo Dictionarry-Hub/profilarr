@@ -75,7 +75,6 @@ const DataBar = ({
                 <SortDropdown
                     options={[
                         {key: 'name', label: 'Sort by Name'},
-                        {key: 'dateCreated', label: 'Sort by Date Created'},
                         {key: 'dateModified', label: 'Sort by Date Modified'}
                     ]}
                     currentKey={sortBy}
