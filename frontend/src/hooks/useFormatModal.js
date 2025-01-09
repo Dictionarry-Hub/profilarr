@@ -13,13 +13,58 @@ export const useFormatModal = (initialFormat, onSuccess) => {
     const [tests, setTests] = useState([]);
     const [isCloning, setIsCloning] = useState(false);
 
-    // UI state
-    const [error, setError] = useState('');
+    // Enhanced UI state with field-specific errors
+    const [formErrors, setFormErrors] = useState({
+        name: '',
+        conditions: '',
+        tests: '',
+        general: ''
+    });
     const [activeTab, setActiveTab] = useState('general');
     const [isDeleting, setIsDeleting] = useState(false);
 
     // Initialize testing functionality
     const {isRunningTests, runTests} = useFormatTesting();
+
+    const validateForm = () => {
+        const errors = {
+            name: '',
+            conditions: '',
+            tests: '',
+            general: ''
+        };
+
+        // Name validation
+        if (!name.trim()) {
+            errors.name = 'Name is required';
+        } else if (name.length > 64) {
+            errors.name = 'Name must be less than 64 characters';
+        }
+
+        // Conditions validation
+        if (!conditions.length) {
+            errors.conditions = 'At least one condition is required';
+        } else {
+            const invalidConditions = conditions.filter(condition => {
+                return !condition.field || !condition.operator;
+            });
+            if (invalidConditions.length > 0) {
+                errors.conditions =
+                    'All conditions must have a field and operator';
+            }
+        }
+
+        // Test validation
+        if (tests.length > 0) {
+            const invalidTests = tests.filter(test => !test.input);
+            if (invalidTests.length > 0) {
+                errors.tests = 'All tests must have input values';
+            }
+        }
+
+        setFormErrors(errors);
+        return !Object.values(errors).some(error => error);
+    };
 
     const initializeForm = useCallback((format, cloning) => {
         setIsCloning(cloning || false);
@@ -39,12 +84,78 @@ export const useFormatModal = (initialFormat, onSuccess) => {
             setConditions([]);
             setTests([]);
         }
-        setError('');
+        setFormErrors({name: '', conditions: '', tests: '', general: ''});
         setIsDeleting(false);
     }, []);
 
     const handleSave = async () => {
         try {
+            // Validate form directly without state updates
+            const errors = {
+                name: '',
+                conditions: '',
+                tests: '',
+                general: ''
+            };
+
+            // Name validation
+            if (!name.trim()) {
+                errors.name = 'Name is required';
+                Alert.error('Name is required');
+                setFormErrors(errors);
+                return;
+            }
+
+            // Conditions validation
+            if (!conditions.length) {
+                errors.conditions = 'At least one condition is required';
+                Alert.error('At least one condition is required');
+                setFormErrors(errors);
+                return;
+            }
+
+            const invalidConditions = conditions.filter(condition => {
+                // Each condition must have a type
+                if (!condition.type) return true;
+
+                // Validation based on condition type
+                switch (condition.type) {
+                    case 'release_title':
+                    case 'release_group':
+                    case 'edition':
+                        return !condition.pattern;
+                    case 'language':
+                        return !condition.language;
+                    case 'indexer_flag':
+                        return !condition.flag;
+                    case 'source':
+                        return !condition.source;
+                    case 'resolution':
+                        return !condition.resolution;
+                    case 'quality_modifier':
+                        return !condition.qualityModifier;
+                    case 'size':
+                        return !condition.minSize && !condition.maxSize;
+                    case 'release_type':
+                        return !condition.releaseType;
+                    case 'year':
+                        return !condition.minYear && !condition.maxYear;
+                    default:
+                        return true;
+                }
+            });
+
+            if (invalidConditions.length > 0) {
+                errors.conditions =
+                    'All conditions must have required fields filled out';
+                Alert.error(
+                    'All conditions must have required fields filled out'
+                );
+                setFormErrors(errors);
+                return;
+            }
+
+            // If we get here, form is valid
             const data = {
                 name,
                 description,
@@ -52,11 +163,6 @@ export const useFormatModal = (initialFormat, onSuccess) => {
                 conditions,
                 tests
             };
-
-            if (!name.trim()) {
-                Alert.error('Name is required');
-                return;
-            }
 
             if (initialFormat && !isCloning) {
                 const hasNameChanged = name !== originalName;
@@ -70,10 +176,38 @@ export const useFormatModal = (initialFormat, onSuccess) => {
                 await CustomFormats.create(data);
                 Alert.success('Format created successfully');
             }
+
             onSuccess();
         } catch (error) {
             console.error('Error saving format:', error);
-            Alert.error('Failed to save format. Please try again.');
+
+            // Handle different types of errors
+            if (error.message.includes('reserved word')) {
+                setFormErrors(prev => ({...prev, name: error.message}));
+                Alert.error(error.message);
+            } else if (error.message.includes('invalid characters')) {
+                setFormErrors(prev => ({...prev, name: error.message}));
+                Alert.error(error.message);
+            } else if (error.message.includes('already exists')) {
+                setFormErrors(prev => ({...prev, name: error.message}));
+                Alert.error(error.message);
+            } else if (error.message.includes('condition')) {
+                setFormErrors(prev => ({...prev, conditions: error.message}));
+                Alert.error(error.message);
+            } else if (error.message.includes('test')) {
+                setFormErrors(prev => ({...prev, tests: error.message}));
+                Alert.error(error.message);
+            } else {
+                setFormErrors(prev => ({
+                    ...prev,
+                    general:
+                        error.message ||
+                        'Failed to save format. Please try again.'
+                }));
+                Alert.error(
+                    error.message || 'Failed to save format. Please try again.'
+                );
+            }
         }
     };
 
@@ -102,9 +236,22 @@ export const useFormatModal = (initialFormat, onSuccess) => {
 
     const handleRunTests = useCallback(
         async (conditions, tests) => {
-            const updatedTests = await runTests(conditions, tests);
-            if (updatedTests) {
-                setTests(updatedTests);
+            try {
+                const updatedTests = await runTests(conditions, tests);
+                if (updatedTests) {
+                    setTests(updatedTests);
+                }
+            } catch (error) {
+                console.error('Error running tests:', error);
+                setFormErrors(prev => ({
+                    ...prev,
+                    tests:
+                        error.message ||
+                        'Failed to run tests. Please try again.'
+                }));
+                Alert.error(
+                    error.message || 'Failed to run tests. Please try again.'
+                );
             }
         },
         [runTests]
@@ -118,7 +265,7 @@ export const useFormatModal = (initialFormat, onSuccess) => {
         conditions,
         tests,
         // UI state
-        error,
+        formErrors,
         activeTab,
         isDeleting,
         isRunningTests,
@@ -135,6 +282,8 @@ export const useFormatModal = (initialFormat, onSuccess) => {
         initializeForm,
         handleSave,
         handleDelete,
-        handleRunTests
+        handleRunTests,
+        // Validation
+        validateForm
     };
 };
