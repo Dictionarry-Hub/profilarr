@@ -214,13 +214,19 @@ function ProfilePage() {
 
     const handleMassImport = async arr => {
         try {
-            const selectedProfiles = Array.from(selectedItems).map(identifier =>
-                profiles.find(p => p.content.name === identifier)
-            );
+            // Get array of indexes from selectedItems
+            const selectedProfilesList = Array.from(selectedItems)
+                .map(index => profiles[index])
+                .filter(profile => profile); // Filter out any undefined entries
+
+            if (selectedProfilesList.length === 0) {
+                Alert.error('No valid profiles selected for import');
+                return;
+            }
 
             await importProfiles(
                 arr,
-                selectedProfiles.map(p => p.file_name)
+                selectedProfilesList.map(p => p.file_name)
             );
             Alert.success('Profiles imported successfully');
             toggleSelectionMode();
