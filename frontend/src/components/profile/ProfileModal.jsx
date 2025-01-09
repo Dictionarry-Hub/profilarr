@@ -407,29 +407,17 @@ function ProfileModal({
 
             if (isCloning || !initialProfile) {
                 // Creating new profile
-                const result = await Profiles.create(profileData);
-                if (result.success === false) {
-                    Alert.error(result.message);
-                    setError(result.message);
-                    return;
-                }
+                await Profiles.create(profileData);
                 Alert.success('Profile created successfully');
             } else {
                 // Updating existing profile
                 const originalName = initialProfile.content.name;
                 const isNameChanged = originalName !== name;
-
-                const result = await Profiles.update(
+                await Profiles.update(
                     initialProfile.file_name.replace('.yml', ''),
                     profileData,
                     isNameChanged ? name : undefined
                 );
-
-                if (result.success === false) {
-                    Alert.error(result.message);
-                    setError(result.message);
-                    return;
-                }
                 Alert.success('Profile updated successfully');
             }
 
@@ -437,8 +425,10 @@ function ProfileModal({
             onClose();
         } catch (error) {
             console.error('Error saving profile:', error);
-            Alert.error('An unexpected error occurred');
-            setError('An unexpected error occurred');
+            const errorMessage =
+                error.message || 'An unexpected error occurred';
+            Alert.error(errorMessage);
+            setError(errorMessage);
         }
     };
 
