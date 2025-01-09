@@ -76,7 +76,7 @@ function Navbar({darkMode, setDarkMode}) {
     }, [activeTab]);
 
     return (
-        <nav className='bg-gray-800 shadow-md'>
+        <nav className='bg-gradient-to-br from-gray-800 to-gray-900 border-b border-gray-700 shadow-xl backdrop-blur-sm'>
             <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative'>
                 <div className='flex items-center justify-between h-16'>
                     <div className='flex items-center space-x-8'>
