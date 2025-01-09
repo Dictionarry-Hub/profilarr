@@ -207,7 +207,16 @@ function FormatPage() {
 
     const handleMassImport = async arr => {
         try {
-            const formatNames = Array.from(selectedItems);
+            // Get the filtered and sorted formats that were displayed during selection
+            const filteredFormats = getFilteredAndSortedFormats();
+
+            // Convert selected indexes to format file names using the filtered list
+            const selectedFormats = Array.from(selectedItems).map(
+                index => filteredFormats[index]
+            );
+
+            const formatNames = selectedFormats.map(format => format.file_name);
+
             await importFormats(arr, formatNames);
             Alert.success('Formats imported successfully');
             toggleSelectionMode();
