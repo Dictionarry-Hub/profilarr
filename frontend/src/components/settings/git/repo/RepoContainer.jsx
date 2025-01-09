@@ -140,12 +140,26 @@ const RepoContainer = ({settings, setSettings, fetchGitStatus, status}) => {
                 Alert.success('Repository unlinked successfully');
                 setShowUnlinkModal(false);
             } else {
-                Alert.error(response.error || 'Failed to unlink repository');
+                // Check if the error is a structured object
+                if (
+                    typeof response.error === 'object' &&
+                    response.error.error
+                ) {
+                    Alert.error(response.error.error);
+                } else if (typeof response.error === 'string') {
+                    Alert.error(response.error);
+                } else {
+                    Alert.error('Failed to unlink repository');
+                }
             }
         } catch (error) {
-            Alert.error(
-                'An unexpected error occurred while unlinking the repository'
-            );
+            if (error.response?.data?.error) {
+                Alert.error(error.response.data.error);
+            } else {
+                Alert.error(
+                    'An unexpected error occurred while unlinking the repository'
+                );
+            }
             console.error('Error unlinking repository:', error);
         } finally {
             setLoadingAction('');

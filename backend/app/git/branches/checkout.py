@@ -2,12 +2,30 @@
 
 import git
 import logging
+from ...arr.manager import check_active_sync_configs
 
 logger = logging.getLogger(__name__)
 
 
 def checkout_branch(repo_path, branch_name):
     try:
+        # Check for active sync configurations first
+        has_active_configs, configs = check_active_sync_configs()
+        if has_active_configs:
+            error_msg = (
+                "Cannot checkout branch while automatic sync configurations are active.\n"
+                "The following configurations must be set to manual sync first:\n"
+            )
+            for config in configs:
+                error_msg += f"- {config['name']} (ID: {config['id']}, {config['sync_method']} sync)\n"
+
+            logger.error(error_msg)
+            return False, {
+                "error": error_msg,
+                "code": "ACTIVE_SYNC_CONFIGS",
+                "configs": configs
+            }
+
         logger.debug(f"Attempting to checkout branch: {branch_name}")
         repo = git.Repo(repo_path)
 

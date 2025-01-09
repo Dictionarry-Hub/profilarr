@@ -529,3 +529,35 @@ def run_import_for_config(config_row):
         'total_successful': total_successful,
         'sync_percentage': sync_percentage
     }
+
+
+def check_active_sync_configs():
+    """
+    Check if there are any ARR configurations with non-manual sync methods.
+    Returns (has_active_configs, details) tuple.
+    """
+    with get_db() as conn:
+        cursor = conn.execute('''
+            SELECT id, name, sync_method, data_to_sync 
+            FROM arr_config 
+            WHERE sync_method != 'manual'
+        ''')
+        active_configs = cursor.fetchall()
+
+        if not active_configs:
+            return False, None
+
+        details = []
+        for config in active_configs:
+            data_to_sync = json.loads(
+                config['data_to_sync'] if config['data_to_sync'] else '{}')
+            if data_to_sync.get('profiles') or data_to_sync.get(
+                    'customFormats'):
+                details.append({
+                    'id': config['id'],
+                    'name': config['name'],
+                    'sync_method': config['sync_method'],
+                    'data': data_to_sync
+                })
+
+        return bool(details), details

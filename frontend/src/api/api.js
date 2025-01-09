@@ -305,7 +305,10 @@ export const unlinkRepo = async (removeFiles = false) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error unlinking repository:', error);
+        if (error.response?.data) {
+            // Return the error response directly
+            return error.response.data;
+        }
         throw error;
     }
 };
