@@ -41,6 +41,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
     const [isDataDrawerOpen, setIsDataDrawerOpen] = useState(false);
     const [showSyncConfirm, setShowSyncConfirm] = useState(false);
     const [isInitialSyncing, setIsInitialSyncing] = useState(false);
+    const [syncConfigId, setSyncConfigId] = useState(null);
 
     useEffect(() => {
         if (editingArr) {
@@ -74,6 +75,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
         setSaveConfirm(false);
         setTestConfirm(false);
         setIsDataDrawerOpen(false);
+        setSyncConfigId(null);
     }, [editingArr]);
 
     // Close drawer when switching to manual sync
@@ -207,13 +209,12 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
                             : formData.data_to_sync
                 };
 
-                const result = editingArr
+                const saveResult = editingArr
                     ? await updateArrConfig(editingArr.id, configToSave)
                     : await saveArrConfig(configToSave);
 
-                // Handle the name conflict error specifically
-                if (!result.success) {
-                    Alert.error(result.error);
+                if (!saveResult.success) {
+                    Alert.error(saveResult.error);
                     setSaveConfirm(false);
                     return;
                 }
@@ -226,6 +227,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
 
                 // If it's not a manual sync method, show the sync confirmation
                 if (formData.sync_method !== 'manual') {
+                    setSyncConfigId(editingArr ? editingArr.id : saveResult.id);
                     setShowSyncConfirm(true);
                 } else {
                     onSubmit();
@@ -244,7 +246,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
     const handleManualSync = async () => {
         setIsInitialSyncing(true);
         try {
-            const configId = editingArr ? editingArr.id : result.id;
+            const configId = editingArr ? editingArr.id : syncConfigId;
             const syncResult = await triggerSync(configId);
 
             if (syncResult.success) {
