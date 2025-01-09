@@ -3,6 +3,7 @@ import {Plus, TestTube, Loader, Save, X, Trash, Check} from 'lucide-react';
 import Modal from '@ui/Modal';
 import {useArrModal} from '@hooks/useArrModal';
 import DataSelectorModal from './DataSelectorModal';
+import SyncModal from './SyncModal';
 
 const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
     const {
@@ -28,7 +29,8 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
         handleDelete,
         showSyncConfirm,
         setShowSyncConfirm,
-        handleManualSync
+        handleManualSync,
+        isInitialSyncing
     } = useArrModal({isOpen, onSubmit, editingArr});
 
     const arrTypes = [
@@ -448,41 +450,19 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     error={errors.data_to_sync}
                 />
                 {showSyncConfirm && (
-                    <Modal
+                    <SyncModal
                         isOpen={showSyncConfirm}
                         onClose={() => {
                             setShowSyncConfirm(false);
                             onSubmit();
                         }}
-                        title='Run Initial Sync'
-                        width='md'>
-                        <div className='space-y-4'>
-                            <p className='text-gray-700 dark:text-gray-300'>
-                                Would you like to run an initial sync now to get
-                                started?
-                            </p>
-                            <div className='flex justify-end space-x-3'>
-                                <button
-                                    type='button'
-                                    onClick={() => {
-                                        setShowSyncConfirm(false);
-                                        onSubmit();
-                                    }}
-                                    className='px-3 py-2 text-sm rounded-lg bg-gray-200 hover:bg-gray-300 
-                             dark:bg-gray-700 dark:hover:bg-gray-600 
-                             text-gray-700 dark:text-gray-200 font-medium transition-colors'>
-                                    Skip
-                                </button>
-                                <button
-                                    type='button'
-                                    onClick={handleManualSync}
-                                    className='px-3 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 
-                             text-white font-medium transition-colors'>
-                                    Start Sync
-                                </button>
-                            </div>
-                        </div>
-                    </Modal>
+                        onSkip={() => {
+                            setShowSyncConfirm(false);
+                            onSubmit();
+                        }}
+                        onSync={handleManualSync}
+                        isSyncing={isInitialSyncing}
+                    />
                 )}
             </form>
         </Modal>

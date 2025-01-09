@@ -40,6 +40,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
     const [testConfirm, setTestConfirm] = useState(false);
     const [isDataDrawerOpen, setIsDataDrawerOpen] = useState(false);
     const [showSyncConfirm, setShowSyncConfirm] = useState(false);
+    const [isInitialSyncing, setIsInitialSyncing] = useState(false);
 
     useEffect(() => {
         if (editingArr) {
@@ -236,6 +237,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
     };
 
     const handleManualSync = async () => {
+        setIsInitialSyncing(true);
         try {
             const configId = editingArr ? editingArr.id : result.id;
             const syncResult = await triggerSync(configId);
@@ -248,6 +250,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
         } catch (error) {
             Alert.error('Failed to start manual sync');
         } finally {
+            setIsInitialSyncing(false);
             setShowSyncConfirm(false);
             onSubmit();
         }
@@ -376,6 +379,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
         handleDelete,
         showSyncConfirm,
         setShowSyncConfirm,
-        handleManualSync
+        handleManualSync,
+        isInitialSyncing
     };
 };
