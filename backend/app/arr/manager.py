@@ -431,7 +431,6 @@ def run_import_for_config(config_row):
                 arr_type=arr_type)
 
             if format_result.get('success'):
-                # Count successful imports
                 total_successful += (format_result.get('added', 0) +
                                      format_result.get('updated', 0))
             else:
@@ -491,8 +490,7 @@ def run_import_for_config(config_row):
                                               arr_type=arr_type)
 
             if cf_result.get('success'):
-                total_successful += (cf_result.get('added', 0) +
-                                     cf_result.get('updated', 0))
+                total_successful += len(referenced_cf_names)
             else:
                 logger.warning(
                     f"[Pull Import] Importing referenced CFs had errors: {cf_result}"
@@ -528,8 +526,11 @@ def run_import_for_config(config_row):
                 import_as_unique=import_as_unique)
 
             if profile_result.get('success'):
-                total_successful += (profile_result.get('added', 0) +
-                                     profile_result.get('updated', 0))
+                # Count both the profile and all its formats as successes
+                profile_successful = (profile_result.get('added', 0) +
+                                      profile_result.get('updated', 0))
+                total_successful += profile_successful + len(
+                    referenced_cf_names)
             else:
                 logger.warning(
                     f"[Pull Import] Importing profiles had errors: {profile_result}"
