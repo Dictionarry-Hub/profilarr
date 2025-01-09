@@ -4,7 +4,8 @@ import {
     pingService,
     saveArrConfig,
     updateArrConfig,
-    deleteArrConfig
+    deleteArrConfig,
+    triggerSync
 } from '@api/arr';
 import {Profiles, CustomFormats} from '@api/data';
 import Alert from '@ui/Alert';
@@ -38,6 +39,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
     const [saveConfirm, setSaveConfirm] = useState(false);
     const [testConfirm, setTestConfirm] = useState(false);
     const [isDataDrawerOpen, setIsDataDrawerOpen] = useState(false);
+    const [showSyncConfirm, setShowSyncConfirm] = useState(false);
 
     useEffect(() => {
         if (editingArr) {
@@ -214,15 +216,40 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
                             editingArr ? 'updated' : 'saved'
                         } successfully`
                     );
-                    onSubmit();
+
+                    // If it's not a manual sync method, show the sync confirmation
+                    if (formData.sync_method !== 'manual') {
+                        setShowSyncConfirm(true);
+                    } else {
+                        onSubmit();
+                    }
                 }
             } catch (error) {
                 Alert.error('Failed to save configuration');
+                onSubmit();
             }
             setSaveConfirm(false);
         } else {
             setSaveConfirm(true);
             setTimeout(() => setSaveConfirm(false), 3000);
+        }
+    };
+
+    const handleManualSync = async () => {
+        try {
+            const configId = editingArr ? editingArr.id : result.id;
+            const syncResult = await triggerSync(configId);
+
+            if (syncResult.success) {
+                Alert.success('Manual sync complete!');
+            } else {
+                Alert.error(syncResult.error || 'Failed to start manual sync');
+            }
+        } catch (error) {
+            Alert.error('Failed to start manual sync');
+        } finally {
+            setShowSyncConfirm(false);
+            onSubmit();
         }
     };
 
@@ -346,6 +373,9 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
         handleTagInputKeyDown,
         handleTestConnection,
         handleSubmit,
-        handleDelete
+        handleDelete,
+        showSyncConfirm,
+        setShowSyncConfirm,
+        handleManualSync
     };
 };

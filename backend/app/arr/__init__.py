@@ -112,3 +112,39 @@ def handle_config(id):
     except Exception as e:
         logger.error(f"Error handling arr config {id}: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@bp.route('/config/<int:id>/sync', methods=['POST', 'OPTIONS'])
+@cross_origin()
+def trigger_sync(id):
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+
+    try:
+        # Get the config first
+        config_result = get_arr_config(id)
+        if not config_result.get('success'):
+            logger.error(f"Config not found for sync: {id}")
+            return jsonify({
+                'success': False,
+                'error': 'Configuration not found'
+            }), 404
+
+        config_data = config_result.get('data')
+        if not config_data:
+            logger.error(f"Invalid config data for sync: {id}")
+            return jsonify({
+                'success': False,
+                'error': 'Invalid configuration data'
+            }), 400
+
+        # Run the import
+        from .manager import run_import_for_config
+        run_import_for_config(config_data)
+
+        logger.debug(f"Manual sync triggered for arr config: {id}")
+        return jsonify({'success': True}), 200
+
+    except Exception as e:
+        logger.error(f"Error triggering sync for arr config {id}: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 400

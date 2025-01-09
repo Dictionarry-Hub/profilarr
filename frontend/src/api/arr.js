@@ -72,3 +72,18 @@ export const deleteArrConfig = async id => {
         throw error;
     }
 };
+
+export const triggerSync = async configId => {
+    try {
+        const response = await fetch(`/api/arr/config/${configId}/sync`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error triggering sync:', error);
+        return {success: false, error: error.message};
+    }
+};
