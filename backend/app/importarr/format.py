@@ -10,7 +10,8 @@ from ..compile import CustomFormat, FormatConverter, TargetApp
 logger = logging.getLogger('importarr')
 
 
-def import_formats_to_arr(format_names, base_url, api_key, arr_type):
+def import_formats_to_arr(format_names, base_url, api_key, arr_type,
+                          original_names):
     logger.info(
         f"Received {len(format_names)} formats to import for {arr_type}")
     results = {
@@ -47,9 +48,11 @@ def import_formats_to_arr(format_names, base_url, api_key, arr_type):
         target_app = TargetApp.RADARR if arr_type.lower(
         ) == 'radarr' else TargetApp.SONARR
 
-        for format_name in format_names:
+        for i, format_name in enumerate(format_names):
             try:
-                format_file = f"{get_category_directory('custom_format')}/{format_name}.yml"
+                # Use original name for file lookup
+                original_name = original_names[i]
+                format_file = f"{get_category_directory('custom_format')}/{original_name}.yml"
                 format_data = load_yaml_file(format_file)
                 logger.info("Received format:\n" +
                             yaml.dump(format_data, sort_keys=False))
@@ -60,9 +63,10 @@ def import_formats_to_arr(format_names, base_url, api_key, arr_type):
                 if not converted_format:
                     raise ValueError("Format conversion failed")
 
+                # Use the potentially modified name (with [Dictionarry]) for arr
                 compiled_data = {
                     'name':
-                    converted_format.name,
+                    format_name,  # Use the possibly modified name
                     'specifications':
                     [vars(spec) for spec in converted_format.specifications]
                 }

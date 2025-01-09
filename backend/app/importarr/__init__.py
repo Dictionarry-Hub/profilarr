@@ -7,6 +7,7 @@ from ..arr.manager import get_arr_config
 from ..data.utils import get_category_directory, load_yaml_file
 from .format import import_formats_to_arr
 from .profile import import_profiles_to_arr
+from ..db import get_unique_arrs
 
 logger = logging.getLogger('importarr')
 
@@ -39,6 +40,23 @@ def import_formats():
                 'Either formatNames or all=true is required'
             }), 400
 
+        # Get import_as_unique setting using the new function
+        import_settings = get_unique_arrs([arr_id])
+        arr_settings = import_settings.get(arr_id, {
+            'import_as_unique': False,
+            'name': 'Unknown'
+        })
+        import_as_unique = arr_settings['import_as_unique']
+
+        if import_as_unique:
+            logger.info(
+                f"Unique imports for {arr_settings['name']} are on, adjusting names for custom formats"
+            )
+        else:
+            logger.info(
+                f"Unique imports for {arr_settings['name']} is off, using original names"
+            )
+
         # Get arr configuration
         arr_config = get_arr_config(arr_id)
         if not arr_config['success']:
@@ -69,8 +87,18 @@ def import_formats():
                     'Failed to read custom formats directory'
                 }), 500
 
-        # Import formats with arr type from config
+        # Store original names for file lookups
+        original_names = format_names.copy()
+
+        # Modify format names if import_as_unique is true
+        if import_as_unique:
+            format_names = [f"{name} [Dictionarry]" for name in format_names]
+            logger.info(
+                f"Modified format names for unique import: {format_names}")
+
+        # Import formats with arr type from config, but use original names for file lookups
         result = import_formats_to_arr(format_names=format_names,
+                                       original_names=original_names,
                                        base_url=arr_data['arrServer'],
                                        api_key=arr_data['apiKey'],
                                        arr_type=arr_data['type'])
@@ -107,6 +135,22 @@ def import_profiles():
                 'error':
                 'Either profileNames or all=true is required'
             }), 400
+
+        import_settings = get_unique_arrs([arr_id])
+        arr_settings = import_settings.get(arr_id, {
+            'import_as_unique': False,
+            'name': 'Unknown'
+        })
+        import_as_unique = arr_settings['import_as_unique']
+
+        if import_as_unique:
+            logger.info(
+                f"Unique imports for {arr_settings['name']} are on, adjusting names for quality profiles"
+            )
+        else:
+            logger.info(
+                f"Unique imports for {arr_settings['name']} is off, using original names"
+            )
 
         # Get arr configuration
         arr_config = get_arr_config(arr_id)
