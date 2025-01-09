@@ -72,10 +72,18 @@ const ArrCard = ({
                             <span
                                 key={index}
                                 className='px-2 py-0.5 text-xs font-medium rounded-full
-                         bg-blue-500/20 text-blue-300 border border-blue-500/20'>
+                                     bg-blue-500/20 text-blue-300 border border-blue-500/20'>
                                 {tag}
                             </span>
                         ))}
+                        {import_as_unique && (
+                            <span
+                                className='px-2 py-0.5 text-xs font-medium rounded-full
+                                     bg-green-500/20 text-green-300 border border-green-500/20
+                                     flex items-center'>
+                                Unique
+                            </span>
+                        )}
                     </div>
                 </div>
 
