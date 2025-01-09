@@ -34,11 +34,13 @@ class ProfileConverter:
                  target_app: TargetApp,
                  base_url: str = None,
                  api_key: str = None,
-                 format_importer: Callable = None):
+                 format_importer: Callable = None,
+                 import_as_unique: bool = False):
         self.target_app = target_app
         self.base_url = base_url
         self.api_key = api_key
         self.format_importer = format_importer
+        self.import_as_unique = import_as_unique
         self.quality_mappings = ValueResolver.get_qualities(target_app)
 
     def _convert_group_id(self, group_id: int) -> int:
@@ -60,8 +62,11 @@ class ProfileConverter:
                 })
         return qualities
 
-    def _process_language_formats(self, behaviour: str,
-                                  language: str) -> List[Dict]:
+    def _process_language_formats(
+            self,
+            behaviour: str,
+            language: str,
+            import_as_unique: bool = False) -> List[Dict]:
         if not self.base_url or not self.api_key or not self.format_importer:
             logger.error("Missing required credentials or format importer")
             raise ValueError(
@@ -80,7 +85,8 @@ class ProfileConverter:
                                                        for_profile=False)
 
             modified_format = base_format.copy()
-            modified_format['name'] = f"Not {language_data['name']}"
+            base_name = f"Not {language_data['name']}"
+            modified_format['name'] = base_name
 
             for condition in modified_format['conditions']:
                 if condition.get('type') == 'language':
@@ -113,17 +119,24 @@ class ProfileConverter:
             arr_type = 'radarr' if self.target_app == TargetApp.RADARR else 'sonarr'
             for format_data in formats_to_import:
                 try:
-                    result = import_format_from_memory(format_data,
-                                                       self.base_url,
-                                                       self.api_key, arr_type)
+                    result = import_format_from_memory(
+                        format_data,
+                        self.base_url,
+                        self.api_key,
+                        arr_type,
+                        import_as_unique=self.import_as_unique)
                     if not result.get('success', False):
                         logger.error(
                             f"Format import failed for: {format_data['name']}")
                         raise Exception(
                             f"Failed to import format {format_data['name']}")
 
+                    format_name = format_data['name']
+                    if import_as_unique:
+                        format_name = f"{format_name} [Dictionarry]"
+
                     format_configs.append({
-                        'name': format_data['name'],
+                        'name': format_name,
                         'score': -9999
                     })
 
@@ -305,9 +318,13 @@ def compile_quality_profile(profile_data: Dict,
                             target_app: TargetApp,
                             base_url: str = None,
                             api_key: str = None,
-                            format_importer: Callable = None) -> List[Dict]:
-    converter = ProfileConverter(target_app, base_url, api_key,
-                                 format_importer)
+                            format_importer: Callable = None,
+                            import_as_unique: bool = False) -> List[Dict]:
+    converter = ProfileConverter(target_app,
+                                 base_url,
+                                 api_key,
+                                 format_importer,
+                                 import_as_unique=import_as_unique)
     converted = converter.convert_profile(profile_data)
 
     output = {

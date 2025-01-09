@@ -81,8 +81,11 @@ def add_format(base_url: str, api_key: str, format_data: Dict) -> bool:
         return False
 
 
-def import_format_from_memory(format_data: Dict, base_url: str, api_key: str,
-                              arr_type: str) -> Dict:
+def import_format_from_memory(format_data: Dict,
+                              base_url: str,
+                              api_key: str,
+                              arr_type: str,
+                              import_as_unique: bool = False) -> Dict:
     """
     Import a format directly from memory without requiring file loading.
     
@@ -91,6 +94,7 @@ def import_format_from_memory(format_data: Dict, base_url: str, api_key: str,
         base_url: Arr instance base URL
         api_key: API key for arr instance
         arr_type: Type of arr instance (radarr/sonarr)
+        import_as_unique: Whether to append [Dictionarry] to format names
         
     Returns:
         Dict containing import results
@@ -104,6 +108,14 @@ def import_format_from_memory(format_data: Dict, base_url: str, api_key: str,
     }
 
     try:
+        # Modify format name if import_as_unique is true
+        original_name = format_data['name']
+        if import_as_unique:
+            format_data['name'] = f"{original_name} [Dictionarry]"
+            logger.info(
+                f"Modified format name for unique import: {format_data['name']}"
+            )
+
         # Log the received memory-based format data
         logger.info("Received memory-based format:\n" +
                     json.dumps(format_data, indent=2))

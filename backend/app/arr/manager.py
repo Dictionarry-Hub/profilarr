@@ -382,6 +382,7 @@ def run_import_for_config(config_row):
     arr_type = config_row['type']
     arr_server = config_row['arrServer']
     api_key = config_row['apiKey']
+    import_as_unique = config_row.get('import_as_unique', False)
 
     logger.info(
         f"[Pull Import] Running import for ARR config #{arr_id} ({arr_name})")
@@ -396,6 +397,13 @@ def run_import_for_config(config_row):
     total_attempted = 0
     total_successful = 0
 
+    # Log import_as_unique setting
+    if import_as_unique:
+        logger.info(f"Unique imports for {arr_name} are on, adjusting names")
+    else:
+        logger.info(
+            f"Unique imports for {arr_name} are off, using original names")
+
     # 1) Import user-selected custom formats
     if selected_formats:
         total_attempted += len(selected_formats)
@@ -404,8 +412,20 @@ def run_import_for_config(config_row):
         )
         try:
             from ..importarr.format import import_formats_to_arr
+            format_names = selected_formats
+            original_names = format_names.copy()
+
+            # Modify format names if import_as_unique is true
+            if import_as_unique:
+                format_names = [
+                    f"{name} [Dictionarry]" for name in format_names
+                ]
+                logger.info(
+                    f"Modified format names for unique import: {format_names}")
+
             format_result = import_formats_to_arr(
-                format_names=selected_formats,
+                format_names=format_names,
+                original_names=original_names,
                 base_url=arr_server,
                 api_key=api_key,
                 arr_type=arr_type)
@@ -453,11 +473,22 @@ def run_import_for_config(config_row):
         total_attempted += len(referenced_cf_names)
         try:
             from ..importarr.format import import_formats_to_arr
-            cf_result = import_formats_to_arr(
-                format_names=list(referenced_cf_names),
-                base_url=arr_server,
-                api_key=api_key,
-                arr_type=arr_type)
+            format_names = list(referenced_cf_names)
+            original_names = format_names.copy()
+
+            # Modify format names if import_as_unique is true
+            if import_as_unique:
+                format_names = [
+                    f"{name} [Dictionarry]" for name in format_names
+                ]
+                logger.info(
+                    f"Modified format names for unique import: {format_names}")
+
+            cf_result = import_formats_to_arr(format_names=format_names,
+                                              original_names=original_names,
+                                              base_url=arr_server,
+                                              api_key=api_key,
+                                              arr_type=arr_type)
 
             if cf_result.get('success'):
                 total_successful += (cf_result.get('added', 0) +
@@ -475,12 +506,26 @@ def run_import_for_config(config_row):
         total_attempted += len(selected_profiles)
         try:
             from ..importarr.profile import import_profiles_to_arr
+            profile_names = selected_profiles
+            original_names = profile_names.copy()
+
+            # Modify profile names if import_as_unique is true
+            if import_as_unique:
+                profile_names = [
+                    f"{name} [Dictionarry]" for name in profile_names
+                ]
+                logger.info(
+                    f"Modified profile names for unique import: {profile_names}"
+                )
+
             profile_result = import_profiles_to_arr(
-                profile_names=selected_profiles,
+                profile_names=profile_names,
+                original_names=original_names,
                 base_url=arr_server,
                 api_key=api_key,
                 arr_type=arr_type,
-                arr_id=arr_id)
+                arr_id=arr_id,
+                import_as_unique=import_as_unique)
 
             if profile_result.get('success'):
                 total_successful += (profile_result.get('added', 0) +
