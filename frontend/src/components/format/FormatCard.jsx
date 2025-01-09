@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Copy} from 'lucide-react';
+import {Copy, Check} from 'lucide-react';
+import Tooltip from '@ui/Tooltip';
 
 function FormatCard({
     format,
@@ -9,6 +10,7 @@ function FormatCard({
     sortBy,
     isSelectionMode,
     isSelected,
+    willBeSelected,
     onSelect
 }) {
     const {content} = format;
@@ -64,65 +66,91 @@ function FormatCard({
 
     const handleCloneClick = e => {
         e.stopPropagation();
-        if (!isSelectionMode) {
-            onClone(format);
+        onClone(format);
+    };
+
+    const handleMouseDown = e => {
+        // Prevent text selection when shift-clicking
+        if (e.shiftKey) {
+            e.preventDefault();
         }
     };
 
     return (
         <div
-            className={`w-full bg-white dark:bg-gray-800 border ${
+            className={`h-full w-full bg-white dark:bg-gray-800 border ${
                 isSelected
-                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/20'
+                    ? 'border-blue-500 dark:border-blue-400'
+                    : willBeSelected
+                    ? 'border-blue-300 dark:border-blue-600'
                     : 'border-gray-200 dark:border-gray-700'
             } rounded-lg shadow hover:shadow-lg ${
                 isSelectionMode
                     ? isSelected
-                        ? 'hover:border-blue-500'
+                        ? 'hover:border-blue-400'
                         : 'hover:border-gray-400'
                     : 'hover:border-blue-400'
-            } dark:hover:border-blue-500 transition-all cursor-pointer max-h-96`}
-            onClick={handleClick}>
-            <div className='flex flex-col p-6 gap-3'>
+            } dark:hover:border-blue-500 transition-all cursor-pointer`}
+            onClick={handleClick}
+            onMouseDown={handleMouseDown}>
+            <div className='flex flex-col p-6 gap-3 h-full'>
                 {/* Header Section */}
                 <div className='flex justify-between items-start gap-4'>
                     <div className='flex-1'>
                         <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100 truncate'>
                             {content.name}
                         </h3>
-                        {(sortBy === 'dateModified' ||
-                            sortBy === 'dateCreated') && (
+                        {sortBy === 'dateModified' && format.modified_date && (
                             <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-                                {sortBy === 'dateModified'
-                                    ? 'Modified'
-                                    : 'Created'}
-                                :{' '}
+                                Modified:{' '}
                                 {new Date(
-                                    sortBy === 'dateModified'
-                                        ? format.modified_date
-                                        : format.created_date
+                                    format.modified_date
                                 ).toLocaleString()}
                             </p>
                         )}
                     </div>
-                    <button
-                        className={`p-2 rounded-full transition-colors ${
-                            isSelectionMode
-                                ? 'opacity-50 cursor-not-allowed'
-                                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                        onClick={handleCloneClick}
-                        disabled={isSelectionMode}>
-                        <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
-                    </button>
+                    {isSelectionMode ? (
+                        <Tooltip
+                            content={
+                                isSelected
+                                    ? 'Selected'
+                                    : willBeSelected
+                                    ? 'Will be selected'
+                                    : 'Select'
+                            }>
+                            <div
+                                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                    isSelected
+                                        ? 'bg-blue-500'
+                                        : willBeSelected
+                                        ? 'bg-blue-200 dark:bg-blue-800'
+                                        : 'bg-gray-200 dark:bg-gray-700'
+                                } transition-colors hover:bg-blue-600`}>
+                                {isSelected && (
+                                    <Check size={16} className='text-white' />
+                                )}
+                                {willBeSelected && !isSelected && (
+                                    <div className='w-2 h-2 rounded-full bg-blue-400' />
+                                )}
+                            </div>
+                        </Tooltip>
+                    ) : (
+                        <button
+                            onClick={handleCloneClick}
+                            className='p-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700'>
+                            <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
+                        </button>
+                    )}
                 </div>
 
+                {/* Description */}
                 {content.description && (
                     <p className='text-gray-600 dark:text-gray-300 text-sm line-clamp-2'>
                         {content.description}
                     </p>
                 )}
 
+                {/* Conditions and Test Results */}
                 <div className='flex justify-between items-start gap-4'>
                     <div className='flex flex-wrap gap-2 flex-1'>
                         {getDisplayConditions(content.conditions)?.map(
@@ -159,8 +187,9 @@ function FormatCard({
                     )}
                 </div>
 
+                {/* Tags */}
                 {content.tags?.length > 0 && (
-                    <div className='flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-gray-700'>
+                    <div className='flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-gray-700 mt-auto'>
                         {content.tags.map(tag => (
                             <span
                                 key={tag}
@@ -179,7 +208,6 @@ FormatCard.propTypes = {
     format: PropTypes.shape({
         file_name: PropTypes.string.isRequired,
         modified_date: PropTypes.string.isRequired,
-        created_date: PropTypes.string.isRequired,
         content: PropTypes.shape({
             name: PropTypes.string.isRequired,
             description: PropTypes.string,
@@ -208,6 +236,7 @@ FormatCard.propTypes = {
     sortBy: PropTypes.string.isRequired,
     isSelectionMode: PropTypes.bool.isRequired,
     isSelected: PropTypes.bool.isRequired,
+    willBeSelected: PropTypes.bool,
     onSelect: PropTypes.func.isRequired
 };
 

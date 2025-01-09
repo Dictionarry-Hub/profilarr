@@ -27,16 +27,18 @@ function ProfilePage() {
     const [mergeConflicts, setMergeConflicts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [willBeSelected, setWillBeSelected] = useState([]);
 
     const navigate = useNavigate();
 
-    // Mass selection state
+    // Mass selection hook
     const {
         selectedItems,
         isSelectionMode,
         toggleSelectionMode,
         handleSelect,
-        clearSelection
+        clearSelection,
+        lastSelectedIndex
     } = useMassSelection();
 
     // Setup keyboard shortcut for selection mode (Ctrl+A)
@@ -53,6 +55,46 @@ function ProfilePage() {
     useEffect(() => {
         fetchGitStatus();
     }, []);
+
+    // Add shift-key selection handling
+    useEffect(() => {
+        const handleKeyDown = e => {
+            if (e.key === 'Shift' && lastSelectedIndex !== null) {
+                const element = document.elementFromPoint(
+                    window.mouseX,
+                    window.mouseY
+                );
+                if (element) {
+                    const card = element.closest('[data-profile-index]');
+                    if (card) {
+                        const index = parseInt(card.dataset.profileIndex);
+                        handleMouseEnter(index, true);
+                    }
+                }
+            }
+        };
+
+        const handleKeyUp = e => {
+            if (e.key === 'Shift') {
+                setWillBeSelected([]);
+            }
+        };
+
+        const handleMouseMove = e => {
+            window.mouseX = e.clientX;
+            window.mouseY = e.clientY;
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        window.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, [lastSelectedIndex]);
 
     const fetchGitStatus = async () => {
         try {
@@ -189,6 +231,27 @@ function ProfilePage() {
         }
     };
 
+    const handleProfileSelect = (profileName, index, e) => {
+        if (e.shiftKey) {
+            // Immediately show selection preview
+            handleMouseEnter(index, true);
+        }
+        handleSelect(profileName, index, e, getFilteredAndSortedProfiles());
+    };
+
+    const handleMouseEnter = (index, isShiftKey) => {
+        if (isShiftKey && lastSelectedIndex !== null) {
+            const start = Math.min(lastSelectedIndex, index);
+            const end = Math.max(lastSelectedIndex, index);
+
+            const potentialSelection = getFilteredAndSortedProfiles()
+                .slice(start, end + 1)
+                .map((profile, idx) => idx + start);
+
+            setWillBeSelected(potentialSelection);
+        }
+    };
+
     const getFilteredAndSortedProfiles = () => {
         return profiles
             .filter(profile => {
@@ -307,26 +370,34 @@ function ProfilePage() {
                 addButtonLabel='Add New Profile'
             />
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 h-full'>
                 {filteredProfiles.map((profile, index) => (
-                    <ProfileCard
+                    <div
                         key={profile.file_name}
-                        profile={profile}
-                        onEdit={() => handleOpenModal(profile)}
-                        onClone={handleCloneProfile}
-                        formatDate={formatDate}
-                        sortBy={sortBy}
-                        isSelectionMode={isSelectionMode}
-                        isSelected={selectedItems.has(index)}
-                        onSelect={e =>
-                            handleSelect(
-                                profile.content.name,
-                                index,
-                                e,
-                                filteredProfiles
-                            )
+                        data-profile-index={index}
+                        className='h-full'
+                        onMouseEnter={() =>
+                            handleMouseEnter(index, window.event?.shiftKey)
                         }
-                    />
+                        onMouseLeave={() => setWillBeSelected([])}>
+                        <ProfileCard
+                            profile={profile}
+                            onEdit={() => handleOpenModal(profile)}
+                            onClone={handleCloneProfile}
+                            formatDate={formatDate}
+                            sortBy={sortBy}
+                            isSelectionMode={isSelectionMode}
+                            isSelected={selectedItems.has(index)}
+                            willBeSelected={willBeSelected.includes(index)}
+                            onSelect={e =>
+                                handleProfileSelect(
+                                    profile.content.name,
+                                    index,
+                                    e
+                                )
+                            }
+                        />
+                    </div>
                 ))}
             </div>
 

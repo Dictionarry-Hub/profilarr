@@ -15,7 +15,6 @@ import {importFormats} from '@api/import';
 import DataBar from '@ui/DataBar/DataBar';
 
 function FormatPage() {
-    // Basic state management
     const [formats, setFormats] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedFormat, setSelectedFormat] = useState(null);
@@ -28,16 +27,18 @@ function FormatPage() {
     const [mergeConflicts, setMergeConflicts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [willBeSelected, setWillBeSelected] = useState([]);
 
     const navigate = useNavigate();
 
-    // Mass selection state
+    // Mass selection hook
     const {
         selectedItems,
         isSelectionMode,
         toggleSelectionMode,
         handleSelect,
-        clearSelection
+        clearSelection,
+        lastSelectedIndex
     } = useMassSelection();
 
     // Setup keyboard shortcut for selection mode (Ctrl+A)
@@ -70,17 +71,48 @@ function FormatPage() {
         handleCloseModal();
     });
 
-    const loadingMessages = [
-        'Loading custom formats...',
-        'Analyzing format conditions...',
-        'Preparing format library...',
-        'Syncing format database...',
-        'Organizing media formats...'
-    ];
-
     useEffect(() => {
         fetchGitStatus();
     }, []);
+
+    useEffect(() => {
+        const handleKeyDown = e => {
+            if (e.key === 'Shift' && lastSelectedIndex !== null) {
+                const element = document.elementFromPoint(
+                    window.mouseX,
+                    window.mouseY
+                );
+                if (element) {
+                    const card = element.closest('[data-format-index]');
+                    if (card) {
+                        const index = parseInt(card.dataset.formatIndex);
+                        handleMouseEnter(index, true);
+                    }
+                }
+            }
+        };
+
+        const handleKeyUp = e => {
+            if (e.key === 'Shift') {
+                setWillBeSelected([]);
+            }
+        };
+
+        const handleMouseMove = e => {
+            window.mouseX = e.clientX;
+            window.mouseY = e.clientY;
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        window.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, [lastSelectedIndex]);
 
     const fetchGitStatus = async () => {
         try {
@@ -106,7 +138,6 @@ function FormatPage() {
             const formatsData = response.map(item => ({
                 file_name: item.file_name,
                 modified_date: item.modified_date,
-                created_date: item.created_date,
                 content: {
                     ...item.content
                 }
@@ -187,10 +218,30 @@ function FormatPage() {
         }
     };
 
+    const handleFormatSelect = (formatName, index, e) => {
+        if (e.shiftKey) {
+            // Immediately show selection preview
+            handleMouseEnter(index, true);
+        }
+        handleSelect(formatName, index, e, getFilteredAndSortedFormats());
+    };
+
+    const handleMouseEnter = (index, isShiftKey) => {
+        if (isShiftKey && lastSelectedIndex !== null) {
+            const start = Math.min(lastSelectedIndex, index);
+            const end = Math.max(lastSelectedIndex, index);
+
+            const potentialSelection = getFilteredAndSortedFormats()
+                .slice(start, end + 1)
+                .map((format, idx) => idx + start);
+
+            setWillBeSelected(potentialSelection);
+        }
+    };
+
     const getFilteredAndSortedFormats = () => {
         let filtered = [...formats];
 
-        // Apply search filter
         if (searchQuery) {
             filtered = filtered.filter(
                 format =>
@@ -203,7 +254,6 @@ function FormatPage() {
             );
         }
 
-        // Apply existing filters
         if (filterType === 'tag' && filterValue) {
             filtered = filtered.filter(format =>
                 format.content.tags?.includes(filterValue)
@@ -216,8 +266,6 @@ function FormatPage() {
                     return (
                         new Date(b.modified_date) - new Date(a.modified_date)
                     );
-                case 'dateCreated':
-                    return new Date(b.created_date) - new Date(a.created_date);
                 case 'name':
                 default:
                     return a.content.name.localeCompare(b.content.name);
@@ -230,11 +278,7 @@ function FormatPage() {
             <div className='flex flex-col items-center justify-center h-64'>
                 <Loader className='w-8 h-8 animate-spin text-blue-500 mb-4' />
                 <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>
-                    {
-                        loadingMessages[
-                            Math.floor(Math.random() * loadingMessages.length)
-                        ]
-                    }
+                    Loading custom formats...
                 </p>
             </div>
         );
@@ -268,8 +312,6 @@ function FormatPage() {
         );
     }
 
-    const filteredFormats = getFilteredAndSortedFormats();
-
     return (
         <div>
             <DataBar
@@ -288,32 +330,42 @@ function FormatPage() {
                 addButtonLabel='Add New Format'
             />
 
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>
-                {filteredFormats.map((format, index) => (
-                    <FormatCard
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 h-full'>
+                {getFilteredAndSortedFormats().map((format, index) => (
+                    <div
                         key={format.file_name}
-                        format={format}
-                        onEdit={() => handleOpenModal(format)}
-                        onClone={handleCloneFormat}
-                        sortBy={sortBy}
-                        isSelectionMode={isSelectionMode}
-                        isSelected={selectedItems.has(format.content.name)}
-                        onSelect={e =>
-                            handleSelect(
-                                format.content.name,
-                                index,
-                                e,
-                                filteredFormats
-                            )
+                        data-format-index={index}
+                        onMouseEnter={() =>
+                            handleMouseEnter(index, window.event?.shiftKey)
                         }
-                    />
+                        onMouseLeave={() => setWillBeSelected([])}>
+                        <FormatCard
+                            format={format}
+                            onEdit={() => handleOpenModal(format)}
+                            onClone={handleCloneFormat}
+                            sortBy={sortBy}
+                            isSelectionMode={isSelectionMode}
+                            isSelected={selectedItems.has(index)}
+                            willBeSelected={willBeSelected.includes(index)}
+                            onSelect={e =>
+                                handleFormatSelect(
+                                    format.content.name,
+                                    index,
+                                    e
+                                )
+                            }
+                        />
+                    </div>
                 ))}
             </div>
 
             {isSelectionMode && (
                 <MassActionsBar
                     selectedCount={selectedItems.size}
-                    onCancel={toggleSelectionMode}
+                    onCancel={() => {
+                        toggleSelectionMode();
+                        clearSelection();
+                    }}
                     onDelete={handleMassDelete}
                     onImport={() => setIsImportModalOpen(true)}
                 />

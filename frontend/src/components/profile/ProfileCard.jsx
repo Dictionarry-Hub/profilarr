@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Copy, Globe2, Settings2, ArrowUpCircle} from 'lucide-react';
+import {Copy, Globe2, Settings2, ArrowUpCircle, Check} from 'lucide-react';
+import Tooltip from '@ui/Tooltip';
 
 function unsanitize(text) {
     if (!text) return '';
     return text.replace(/\\:/g, ':').replace(/\\n/g, '\n');
 }
 
-const MAX_DESCRIPTION_LENGTH = 1000; // Show only first 150 characters
+const MAX_DESCRIPTION_LENGTH = 1000;
 
 const ProfileCard = ({
     profile,
@@ -17,6 +18,7 @@ const ProfileCard = ({
     formatDate,
     isSelectionMode,
     isSelected,
+    willBeSelected,
     onSelect
 }) => {
     if (!profile || !profile.content) return null;
@@ -41,6 +43,13 @@ const ProfileCard = ({
         }
     };
 
+    const handleMouseDown = e => {
+        // Prevent text selection when shift-clicking
+        if (e.shiftKey) {
+            e.preventDefault();
+        }
+    };
+
     const truncateDescription = text => {
         if (!text) return '';
         if (text.length <= MAX_DESCRIPTION_LENGTH) return text;
@@ -49,9 +58,11 @@ const ProfileCard = ({
 
     return (
         <div
-            className={`w-full bg-white dark:bg-gray-800 border ${
+            className={`w-full h-full bg-white dark:bg-gray-800 border ${
                 isSelected
                     ? 'border-blue-500 dark:border-blue-400'
+                    : willBeSelected
+                    ? 'border-blue-300 dark:border-blue-600'
                     : 'border-gray-200 dark:border-gray-700'
             } rounded-lg shadow hover:shadow-lg ${
                 isSelectionMode
@@ -60,7 +71,8 @@ const ProfileCard = ({
                         : 'hover:border-gray-400'
                     : 'hover:border-blue-400'
             } dark:hover:border-blue-500 transition-all cursor-pointer`}
-            onClick={handleClick}>
+            onClick={handleClick}
+            onMouseDown={handleMouseDown}>
             <div className='flex flex-col p-6 gap-3'>
                 {/* Header Section */}
                 <div className='flex justify-between items-center gap-4'>
@@ -82,16 +94,41 @@ const ProfileCard = ({
                                 )}
                             </span>
                         )}
-                        <button
-                            onClick={handleCloneClick}
-                            className={`p-2 rounded-full transition-colors shrink-0 ${
-                                isSelectionMode
-                                    ? 'opacity-50 cursor-not-allowed'
-                                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                            disabled={isSelectionMode}>
-                            <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
-                        </button>
+                        {isSelectionMode ? (
+                            <Tooltip
+                                content={
+                                    isSelected
+                                        ? 'Selected'
+                                        : willBeSelected
+                                        ? 'Will be selected'
+                                        : 'Select'
+                                }>
+                                <div
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                        isSelected
+                                            ? 'bg-blue-500'
+                                            : willBeSelected
+                                            ? 'bg-blue-200 dark:bg-blue-800'
+                                            : 'bg-gray-200 dark:bg-gray-700'
+                                    } transition-colors hover:bg-blue-600`}>
+                                    {isSelected && (
+                                        <Check
+                                            size={16}
+                                            className='text-white'
+                                        />
+                                    )}
+                                    {willBeSelected && !isSelected && (
+                                        <div className='w-2 h-2 rounded-full bg-blue-400' />
+                                    )}
+                                </div>
+                            </Tooltip>
+                        ) : (
+                            <button
+                                onClick={handleCloneClick}
+                                className='p-2 rounded-full transition-colors shrink-0 hover:bg-gray-100 dark:hover:bg-gray-700'>
+                                <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -173,6 +210,7 @@ ProfileCard.propTypes = {
     formatDate: PropTypes.func.isRequired,
     isSelectionMode: PropTypes.bool.isRequired,
     isSelected: PropTypes.bool.isRequired,
+    willBeSelected: PropTypes.bool,
     onSelect: PropTypes.func.isRequired
 };
 
