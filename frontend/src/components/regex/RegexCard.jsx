@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Copy} from 'lucide-react';
+import {Copy, Check} from 'lucide-react';
+import Tooltip from '@ui/Tooltip';
 
 const RegexCard = ({
     pattern,
@@ -10,11 +11,13 @@ const RegexCard = ({
     sortBy,
     isSelectionMode,
     isSelected,
+    willBeSelected,
     onSelect
 }) => {
-    const totalTests = pattern.tests.length;
-    const passedTests = pattern.tests.filter(t => t.passes).length;
-    const passRate = Math.round((passedTests / totalTests) * 100);
+    const totalTests = pattern.tests?.length || 0;
+    const passedTests = pattern.tests?.filter(t => t.passes)?.length || 0;
+    const passRate =
+        totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0;
 
     const handleClick = e => {
         if (isSelectionMode) {
@@ -26,16 +29,23 @@ const RegexCard = ({
 
     const handleCloneClick = e => {
         e.stopPropagation();
-        if (!isSelectionMode) {
-            onClone(pattern);
+        onClone(pattern);
+    };
+
+    const handleMouseDown = e => {
+        // Prevent text selection when shift-clicking
+        if (e.shiftKey) {
+            e.preventDefault();
         }
     };
 
     return (
         <div
-            className={`w-full bg-white dark:bg-gray-800 border ${
+            className={`h-full w-full bg-white dark:bg-gray-800 border ${
                 isSelected
                     ? 'border-blue-500 dark:border-blue-400'
+                    : willBeSelected
+                    ? 'border-blue-300 dark:border-blue-600'
                     : 'border-gray-200 dark:border-gray-700'
             } rounded-lg shadow hover:shadow-lg ${
                 isSelectionMode
@@ -43,34 +53,57 @@ const RegexCard = ({
                         ? 'hover:border-blue-400'
                         : 'hover:border-gray-400'
                     : 'hover:border-blue-400'
-            } dark:hover:border-blue-500 transition-all cursor-pointer max-h-96`}
-            onClick={handleClick}>
-            <div className='flex flex-col p-6 gap-3'>
+            } dark:hover:border-blue-500 transition-all cursor-pointer`}
+            onClick={handleClick}
+            onMouseDown={handleMouseDown}>
+            <div className='flex flex-col p-6 gap-3 h-full'>
                 {/* Header Section */}
                 <div className='flex justify-between items-center gap-4'>
                     <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100 truncate'>
                         {pattern.name}
                     </h3>
-                    <button
-                        onClick={handleCloneClick}
-                        className={`p-2 rounded-full transition-colors shrink-0 ${
-                            isSelectionMode
-                                ? 'opacity-50 cursor-not-allowed'
-                                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                        disabled={isSelectionMode}>
-                        <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
-                    </button>
+                    {isSelectionMode ? (
+                        <Tooltip
+                            content={
+                                isSelected
+                                    ? 'Selected'
+                                    : willBeSelected
+                                    ? 'Will be selected'
+                                    : 'Select'
+                            }>
+                            <div
+                                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                    isSelected
+                                        ? 'bg-blue-500'
+                                        : willBeSelected
+                                        ? 'bg-blue-200 dark:bg-blue-800'
+                                        : 'bg-gray-200 dark:bg-gray-700'
+                                } transition-colors hover:bg-blue-600`}>
+                                {isSelected && (
+                                    <Check size={16} className='text-white' />
+                                )}
+                                {willBeSelected && !isSelected && (
+                                    <div className='w-2 h-2 rounded-full bg-blue-400' />
+                                )}
+                            </div>
+                        </Tooltip>
+                    ) : (
+                        <button
+                            onClick={handleCloneClick}
+                            className='p-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700'>
+                            <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
+                        </button>
+                    )}
                 </div>
 
-                {/* Pattern Display with line clamp */}
+                {/* Pattern Display */}
                 <div className='bg-gray-50 dark:bg-gray-900/50 rounded-md p-3 font-mono text-sm'>
                     <code className='text-gray-800 dark:text-gray-200 break-all line-clamp-3'>
                         {pattern.pattern}
                     </code>
                 </div>
 
-                {/* Description if exists - with line clamp */}
+                {/* Description */}
                 {pattern.description && (
                     <p className='text-gray-600 dark:text-gray-300 text-sm line-clamp-2'>
                         {pattern.description}
@@ -78,7 +111,7 @@ const RegexCard = ({
                 )}
 
                 {/* Bottom Metadata */}
-                <div className='flex flex-wrap items-center gap-4 text-sm'>
+                <div className='flex flex-wrap items-center gap-4 text-sm mt-auto'>
                     {/* Test Results */}
                     <div className='flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md'>
                         {totalTests > 0 ? (
@@ -117,17 +150,10 @@ const RegexCard = ({
                         </div>
                     )}
 
-                    {/* Date Modified/Created */}
-                    {(sortBy === 'dateModified' ||
-                        sortBy === 'dateCreated') && (
+                    {/* Modified Date */}
+                    {sortBy === 'dateModified' && pattern.modified_date && (
                         <span className='text-xs text-gray-500 dark:text-gray-400 text-left'>
-                            {sortBy === 'dateModified' ? 'Modified' : 'Created'}
-                            :{' '}
-                            {formatDate(
-                                sortBy === 'dateModified'
-                                    ? pattern.modified_date
-                                    : pattern.created_date
-                            )}
+                            Modified: {formatDate(pattern.modified_date)}
                         </span>
                     )}
                 </div>
@@ -148,9 +174,8 @@ RegexCard.propTypes = {
                 expected: PropTypes.bool.isRequired,
                 passes: PropTypes.bool.isRequired
             })
-        ).isRequired,
-        created_date: PropTypes.string.isRequired,
-        modified_date: PropTypes.string.isRequired
+        ),
+        modified_date: PropTypes.string
     }).isRequired,
     onEdit: PropTypes.func.isRequired,
     onClone: PropTypes.func.isRequired,
@@ -158,6 +183,7 @@ RegexCard.propTypes = {
     sortBy: PropTypes.string.isRequired,
     isSelectionMode: PropTypes.bool.isRequired,
     isSelected: PropTypes.bool.isRequired,
+    willBeSelected: PropTypes.bool,
     onSelect: PropTypes.func.isRequired
 };
 

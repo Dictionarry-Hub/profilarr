@@ -20,22 +20,63 @@ function RegexPage() {
     const [isCloning, setIsCloning] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [willBeSelected, setWillBeSelected] = useState([]);
 
-    // Mass selection state
+    // Mass selection hook
     const {
         selectedItems,
         isSelectionMode,
         toggleSelectionMode,
         handleSelect,
-        clearSelection
+        clearSelection,
+        lastSelectedIndex
     } = useMassSelection();
 
-    // Setup keyboard shortcut for selection mode (Ctrl+A)
+    // Keyboard shortcut for selection mode
     useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
 
     useEffect(() => {
         loadPatterns();
     }, []);
+
+    useEffect(() => {
+        const handleKeyDown = e => {
+            if (e.key === 'Shift' && lastSelectedIndex !== null) {
+                const element = document.elementFromPoint(
+                    window.mouseX,
+                    window.mouseY
+                );
+                if (element) {
+                    const card = element.closest('[data-pattern-index]');
+                    if (card) {
+                        const index = parseInt(card.dataset.patternIndex);
+                        handleMouseEnter(index, true);
+                    }
+                }
+            }
+        };
+
+        const handleKeyUp = e => {
+            if (e.key === 'Shift') {
+                setWillBeSelected([]);
+            }
+        };
+
+        const handleMouseMove = e => {
+            window.mouseX = e.clientX;
+            window.mouseY = e.clientY;
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        window.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, [lastSelectedIndex]);
 
     const loadPatterns = async () => {
         setIsLoading(true);
@@ -45,7 +86,6 @@ function RegexPage() {
                 const patternsData = response.map(item => ({
                     ...item.content,
                     file_name: item.file_name,
-                    created_date: item.created_date,
                     modified_date: item.modified_date
                 }));
                 setPatterns(patternsData);
@@ -115,10 +155,30 @@ function RegexPage() {
         }
     };
 
+    const handlePatternSelect = (patternName, index, e) => {
+        if (e.shiftKey) {
+            // Immediately show selection preview
+            handleMouseEnter(index, true);
+        }
+        handleSelect(patternName, index, e, getFilteredAndSortedPatterns());
+    };
+
+    const handleMouseEnter = (index, isShiftKey) => {
+        if (isShiftKey && lastSelectedIndex !== null) {
+            const start = Math.min(lastSelectedIndex, index);
+            const end = Math.max(lastSelectedIndex, index);
+
+            const potentialSelection = getFilteredAndSortedPatterns()
+                .slice(start, end + 1)
+                .map((pattern, idx) => idx + start);
+
+            setWillBeSelected(potentialSelection);
+        }
+    };
+
     const getFilteredAndSortedPatterns = () => {
         let filtered = [...patterns];
 
-        // Apply search filter
         if (searchQuery) {
             filtered = filtered.filter(
                 pattern =>
@@ -131,7 +191,6 @@ function RegexPage() {
             );
         }
 
-        // Apply existing filters
         if (filterType === 'tag' && filterValue) {
             filtered = filtered.filter(pattern =>
                 pattern.tags?.includes(filterValue)
@@ -144,8 +203,6 @@ function RegexPage() {
                     return (
                         new Date(b.modified_date) - new Date(a.modified_date)
                     );
-                case 'dateCreated':
-                    return new Date(b.created_date) - new Date(a.created_date);
                 case 'name':
                 default:
                     return a.name.localeCompare(b.name);
@@ -183,29 +240,41 @@ function RegexPage() {
                 addButtonLabel='Add New Pattern'
             />
 
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 h-full'>
                 {getFilteredAndSortedPatterns().map((pattern, index) => (
-                    <RegexCard
+                    <div
                         key={pattern.name}
-                        pattern={pattern}
-                        onEdit={() => handleOpenModal(pattern)}
-                        onClone={handleClonePattern}
-                        formatDate={formatDate}
-                        sortBy={sortBy}
-                        isSelectionMode={isSelectionMode}
-                        isSelected={selectedItems.has(index)}
-                        onSelect={e =>
-                            handleSelect(pattern.file_name, index, e)
+                        data-pattern-index={index}
+                        onMouseEnter={() =>
+                            handleMouseEnter(index, window.event?.shiftKey)
                         }
-                    />
+                        onMouseLeave={() => setWillBeSelected([])}>
+                        <RegexCard
+                            pattern={pattern}
+                            onEdit={() => handleOpenModal(pattern)}
+                            onClone={handleClonePattern}
+                            formatDate={formatDate}
+                            sortBy={sortBy}
+                            isSelectionMode={isSelectionMode}
+                            isSelected={selectedItems.has(index)}
+                            willBeSelected={willBeSelected.includes(index)}
+                            onSelect={e =>
+                                handlePatternSelect(pattern.name, index, e)
+                            }
+                        />
+                    </div>
                 ))}
             </div>
 
             {isSelectionMode && (
                 <MassActionsBar
                     selectedCount={selectedItems.size}
-                    onCancel={toggleSelectionMode}
+                    onCancel={() => {
+                        toggleSelectionMode();
+                        clearSelection();
+                    }}
                     onDelete={handleMassDelete}
+                    onImport={() => {}}
                     showImport={false}
                 />
             )}
