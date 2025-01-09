@@ -10,7 +10,6 @@ from ..data.utils import load_yaml_file, get_category_directory
 from ..compile.profile_compiler import compile_quality_profile
 from ..compile.mappings import TargetApp
 from .format import import_formats_to_arr
-from ..utils.hash import process_profile_name
 from ..arr.manager import get_arr_config
 
 logger = logging.getLogger('importarr')
@@ -45,37 +44,10 @@ def import_profiles_to_arr(profile_names: List[str], base_url: str,
                 'error': 'Failed to get existing profiles'
             }
 
-        # First section - processing existing profiles
-        logger.info(
-            "[hash_utility] Processing existing profiles with unique import setting: %s",
-            arr_config['import_as_unique'])
-
-        # Create mapping for existing profiles, with hashing if enabled
+        # Create mapping for existing profiles
         existing_profile_map = {}
-        original_name_map = {}  # Store original names for logging
         for profile in existing_profiles:
-            original_name = profile['name']
-            if arr_config['import_as_unique']:
-                # Strip any existing hash if present
-                if '[' in original_name:
-                    original_name = original_name.split('[')[0].strip()
-                    logger.info(
-                        "[hash_utility] Stripped hash from '%s' to '%s'",
-                        profile['name'], original_name)
-
-                # Generate hash using same method we'll use for new profiles
-                profile_data = {'name': original_name}
-                name_key = process_profile_name(profile_data, arr_config)
-                existing_profile_map[name_key] = profile['id']
-                original_name_map[name_key] = profile['name']
-                logger.info("[hash_utility] Mapped '%s' to '%s'",
-                            profile['name'], name_key)
-            else:
-                existing_profile_map[original_name] = profile['id']
-                original_name_map[original_name] = original_name
-
-        logger.info("[hash_utility] Processed %d profiles",
-                    len(existing_profile_map))
+            existing_profile_map[profile['name']] = profile['id']
 
         target_app = TargetApp.RADARR if arr_type.lower(
         ) == 'radarr' else TargetApp.SONARR
@@ -111,7 +83,6 @@ def import_profiles_to_arr(profile_names: List[str], base_url: str,
                 if not compiled_profiles:
                     raise ValueError("Profile compilation returned no data")
 
-                # We'll assume the compile function returns a list, and we take the first
                 profile_data = compiled_profiles[0]
 
                 logger.info(
@@ -138,19 +109,11 @@ def import_profiles_to_arr(profile_names: List[str], base_url: str,
                         f"  {item['name']} => Score: {item.get('score', 0)}, "
                         f"Format ID: {item.get('format', 'missing')}")
 
-                if arr_config['import_as_unique']:
-                    original_name = profile_data['name']
-                    profile_data['name'] = process_profile_name(
-                        profile_data, arr_config)
-                    logger.info("[hash_utility] Generated hash: '%s' -> '%s'",
-                                original_name, profile_data['name'])
-
                 logger.info("Compiled to:\n" +
                             json.dumps(profile_data, indent=2))
 
                 result = process_profile(profile_data=profile_data,
                                          existing_names=existing_profile_map,
-                                         original_names=original_name_map,
                                          base_url=base_url,
                                          api_key=api_key)
 
@@ -324,14 +287,12 @@ def _import_and_score_formats(formats: List[str], scores: List[Dict[str, Any]],
 
 
 def process_profile(profile_data: Dict, existing_names: Dict[str, int],
-                    original_names: Dict[str, str], base_url: str,
-                    api_key: str) -> Dict:
+                    base_url: str, api_key: str) -> Dict:
     profile_name = profile_data['name']
 
     if profile_name in existing_names:
         profile_data['id'] = existing_names[profile_name]
-        original_name = original_names.get(profile_name, profile_name)
-        logger.info(f"Found existing profile '{original_name}'. Updating...")
+        logger.info(f"Found existing profile '{profile_name}'. Updating...")
         success = update_profile(base_url, api_key, profile_data)
         return {
             'success': success,
