@@ -83,7 +83,7 @@ function Navbar({darkMode, setDarkMode}) {
                         <div className='flex items-center gap-3'>
                             <Logo className='h-10 w-10' />
                             <h1 className='text-2xl font-bold text-white'>
-                                Profilarr
+                                profilarr
                             </h1>
                         </div>
                         <div className='relative flex space-x-2'>
