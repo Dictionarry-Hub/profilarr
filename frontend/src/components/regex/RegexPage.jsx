@@ -9,11 +9,24 @@ import {useKeyboardShortcut} from '@hooks/useKeyboardShortcut';
 import MassActionsBar from '@ui/MassActionsBar';
 import DataBar from '@ui/DataBar/DataBar';
 
+const loadingMessages = [
+    'Matching all the patterns...',
+    'Capturing your groups...',
+    'Escaping special characters...',
+    'Untangling regular expressions...',
+    'Looking behind and ahead...',
+    'Validating the validators...'
+];
+
 const LoadingState = () => (
     <div className='w-full min-h-[70vh] flex flex-col items-center justify-center'>
         <Loader className='w-8 h-8 animate-spin text-blue-500 mb-4' />
         <p className='text-lg font-medium text-gray-300'>
-            Loading regex patterns...
+            {
+                loadingMessages[
+                    Math.floor(Math.random() * loadingMessages.length)
+                ]
+            }
         </p>
     </div>
 );

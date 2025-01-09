@@ -14,11 +14,24 @@ import ImportModal from '@ui/ImportModal';
 import {importFormats} from '@api/import';
 import DataBar from '@ui/DataBar/DataBar';
 
+const loadingMessages = [
+    'Formatting the formatters...',
+    'Teaching formats to behave...',
+    'Convincing formats to follow rules...',
+    'Organizing chaos into patterns...',
+    'Making formats look pretty...',
+    'Polishing the quality filters...'
+];
+
 const LoadingState = () => (
     <div className='w-full min-h-[70vh] flex flex-col items-center justify-center'>
         <Loader className='w-8 h-8 animate-spin text-blue-500 mb-4' />
         <p className='text-lg font-medium text-gray-300'>
-            Loading custom formats...
+            {
+                loadingMessages[
+                    Math.floor(Math.random() * loadingMessages.length)
+                ]
+            }
         </p>
     </div>
 );
