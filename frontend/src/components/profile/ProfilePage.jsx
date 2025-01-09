@@ -13,6 +13,45 @@ import ImportModal from '@ui/ImportModal';
 import {importProfiles} from '@api/import';
 import DataBar from '@ui/DataBar/DataBar';
 
+const LoadingState = () => (
+    <div className='w-full min-h-[70vh] flex flex-col items-center justify-center'>
+        <Loader size={48} className='animate-spin text-blue-500 mb-4' />
+        <p className='text-lg font-medium text-gray-300'>
+            {
+                [
+                    'Profiling your media collection...',
+                    'Organizing your digital hoard...',
+                    'Calibrating the flux capacitor...',
+                    'Synchronizing with the movie matrix...',
+                    'Optimizing your binge-watching potential...'
+                ][Math.floor(Math.random() * 5)]
+            }
+        </p>
+    </div>
+);
+
+const ConflictState = ({onNavigateSettings}) => (
+    <div className='w-full'>
+        <div className='mt-8 flex justify-between items-center'>
+            <h4 className='text-xl font-extrabold'>Merge Conflicts Detected</h4>
+            <button
+                onClick={onNavigateSettings}
+                className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition'>
+                Resolve Conflicts
+            </button>
+        </div>
+
+        <div className='mt-6 p-4 bg-gray-800 rounded-lg shadow-md'>
+            <h3 className='text-xl font-semibold'>What Happened?</h3>
+            <p className='mt-2 text-gray-300'>
+                This page is locked because there are unresolved merge
+                conflicts. You need to address these conflicts in the settings
+                page before continuing.
+            </p>
+        </div>
+    </div>
+);
+
 function ProfilePage() {
     const [profiles, setProfiles] = useState([]);
     const [formats, setFormats] = useState([]);
@@ -31,7 +70,6 @@ function ProfilePage() {
 
     const navigate = useNavigate();
 
-    // Mass selection hook
     const {
         selectedItems,
         isSelectionMode,
@@ -41,22 +79,12 @@ function ProfilePage() {
         lastSelectedIndex
     } = useMassSelection();
 
-    // Setup keyboard shortcut for selection mode (Ctrl+A)
     useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
-
-    const loadingMessages = [
-        'Profiling your media collection...',
-        'Organizing your digital hoard...',
-        'Calibrating the flux capacitor...',
-        'Synchronizing with the movie matrix...',
-        'Optimizing your binge-watching potential...'
-    ];
 
     useEffect(() => {
         fetchGitStatus();
     }, []);
 
-    // Add shift-key selection handling
     useEffect(() => {
         const handleKeyDown = e => {
             if (e.key === 'Shift' && lastSelectedIndex !== null) {
@@ -128,6 +156,7 @@ function ProfilePage() {
                 }
             }));
             setProfiles(profilesData);
+
             const tags = [
                 ...new Set(
                     profilesData.flatMap(profile => profile.content.tags || [])
@@ -214,10 +243,9 @@ function ProfilePage() {
 
     const handleMassImport = async arr => {
         try {
-            // Get array of indexes from selectedItems
             const selectedProfilesList = Array.from(selectedItems)
                 .map(index => profiles[index])
-                .filter(profile => profile); // Filter out any undefined entries
+                .filter(profile => profile);
 
             if (selectedProfilesList.length === 0) {
                 Alert.error('No valid profiles selected for import');
@@ -239,7 +267,6 @@ function ProfilePage() {
 
     const handleProfileSelect = (profileName, index, e) => {
         if (e.shiftKey) {
-            // Immediately show selection preview
             handleMouseEnter(index, true);
         }
         handleSelect(profileName, index, e, getFilteredAndSortedProfiles());
@@ -261,7 +288,6 @@ function ProfilePage() {
     const getFilteredAndSortedProfiles = () => {
         return profiles
             .filter(profile => {
-                // Apply search filter
                 if (searchQuery) {
                     return (
                         profile.content.name
@@ -275,13 +301,10 @@ function ProfilePage() {
                     );
                 }
 
-                // Apply existing filters
                 if (filterType === 'tag') {
-                    return (
-                        profile.content.tags &&
-                        profile.content.tags.includes(filterValue)
-                    );
+                    return profile.content.tags?.includes(filterValue);
                 }
+
                 if (filterType === 'date') {
                     const profileDate = new Date(profile.modified_date);
                     const filterDate = new Date(filterValue);
@@ -289,6 +312,7 @@ function ProfilePage() {
                         profileDate.toDateString() === filterDate.toDateString()
                     );
                 }
+
                 return true;
             })
             .sort((a, b) => {
@@ -314,52 +338,19 @@ function ProfilePage() {
     };
 
     if (isLoading) {
-        return (
-            <div className='flex flex-col items-center justify-center h-screen'>
-                <Loader size={48} className='animate-spin text-blue-500 mb-4' />
-                <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>
-                    {
-                        loadingMessages[
-                            Math.floor(Math.random() * loadingMessages.length)
-                        ]
-                    }
-                </p>
-            </div>
-        );
+        return <LoadingState />;
     }
 
-    const hasConflicts = mergeConflicts.length > 0;
-
-    if (hasConflicts) {
+    if (mergeConflicts.length > 0) {
         return (
-            <div className='bg-gray-900 text-white'>
-                <div className='mt-8 flex justify-between items-center'>
-                    <h4 className='text-xl font-extrabold'>
-                        Merge Conflicts Detected
-                    </h4>
-                    <button
-                        onClick={() => navigate('/settings')}
-                        className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition'>
-                        Resolve Conflicts
-                    </button>
-                </div>
-
-                <div className='mt-6 p-4 bg-gray-800 rounded-lg shadow-md'>
-                    <h3 className='text-xl font-semibold'>What Happened?</h3>
-                    <p className='mt-2 text-gray-300'>
-                        This page is locked because there are unresolved merge
-                        conflicts. You need to address these conflicts in the
-                        settings page before continuing.
-                    </p>
-                </div>
-            </div>
+            <ConflictState onNavigateSettings={() => navigate('/settings')} />
         );
     }
 
     const filteredProfiles = getFilteredAndSortedProfiles();
 
     return (
-        <div>
+        <div className='w-full space-y-2'>
             <DataBar
                 onSearch={setSearchQuery}
                 searchPlaceholder='Search by name or tag...'
@@ -376,7 +367,7 @@ function ProfilePage() {
                 addButtonLabel='Add New Profile'
             />
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 h-full'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 {filteredProfiles.map((profile, index) => (
                     <div
                         key={profile.file_name}

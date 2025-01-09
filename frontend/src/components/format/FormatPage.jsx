@@ -14,6 +14,37 @@ import ImportModal from '@ui/ImportModal';
 import {importFormats} from '@api/import';
 import DataBar from '@ui/DataBar/DataBar';
 
+const LoadingState = () => (
+    <div className='w-full min-h-[70vh] flex flex-col items-center justify-center'>
+        <Loader className='w-8 h-8 animate-spin text-blue-500 mb-4' />
+        <p className='text-lg font-medium text-gray-300'>
+            Loading custom formats...
+        </p>
+    </div>
+);
+
+const ConflictState = ({onNavigateSettings}) => (
+    <div className='w-full'>
+        <div className='mt-8 flex justify-between items-center'>
+            <h4 className='text-xl font-extrabold'>Merge Conflicts Detected</h4>
+            <button
+                onClick={onNavigateSettings}
+                className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition'>
+                Resolve Conflicts
+            </button>
+        </div>
+
+        <div className='mt-6 p-4 bg-gray-800 rounded-lg shadow-md'>
+            <h3 className='text-xl font-semibold'>What Happened?</h3>
+            <p className='mt-2 text-gray-300'>
+                This page is locked because there are unresolved merge
+                conflicts. You need to address these conflicts in the settings
+                page before continuing.
+            </p>
+        </div>
+    </div>
+);
+
 function FormatPage() {
     const [formats, setFormats] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,7 +62,6 @@ function FormatPage() {
 
     const navigate = useNavigate();
 
-    // Mass selection hook
     const {
         selectedItems,
         isSelectionMode,
@@ -41,10 +71,8 @@ function FormatPage() {
         lastSelectedIndex
     } = useMassSelection();
 
-    // Setup keyboard shortcut for selection mode (Ctrl+A)
     useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
 
-    // Format modal hook integration
     const {
         name,
         description,
@@ -144,7 +172,6 @@ function FormatPage() {
             }));
             setFormats(formatsData);
 
-            // Extract all unique tags
             const tags = new Set(
                 formatsData.flatMap(format => format.content.tags || [])
             );
@@ -207,14 +234,10 @@ function FormatPage() {
 
     const handleMassImport = async arr => {
         try {
-            // Get the filtered and sorted formats that were displayed during selection
             const filteredFormats = getFilteredAndSortedFormats();
-
-            // Convert selected indexes to format file names using the filtered list
             const selectedFormats = Array.from(selectedItems).map(
                 index => filteredFormats[index]
             );
-
             const formatNames = selectedFormats.map(format => format.file_name);
 
             await importFormats(arr, formatNames);
@@ -229,7 +252,6 @@ function FormatPage() {
 
     const handleFormatSelect = (formatName, index, e) => {
         if (e.shiftKey) {
-            // Immediately show selection preview
             handleMouseEnter(index, true);
         }
         handleSelect(formatName, index, e, getFilteredAndSortedFormats());
@@ -283,46 +305,17 @@ function FormatPage() {
     };
 
     if (isLoading) {
-        return (
-            <div className='flex flex-col items-center justify-center h-64'>
-                <Loader className='w-8 h-8 animate-spin text-blue-500 mb-4' />
-                <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>
-                    Loading custom formats...
-                </p>
-            </div>
-        );
+        return <LoadingState />;
     }
 
-    const hasConflicts = mergeConflicts.length > 0;
-
-    if (hasConflicts) {
+    if (mergeConflicts.length > 0) {
         return (
-            <div className='text-gray-900 dark:text-white'>
-                <div className='mt-8 flex justify-between items-center'>
-                    <h4 className='text-xl font-extrabold'>
-                        Merge Conflicts Detected
-                    </h4>
-                    <button
-                        onClick={() => navigate('/settings')}
-                        className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition'>
-                        Resolve Conflicts
-                    </button>
-                </div>
-
-                <div className='mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md'>
-                    <h3 className='text-xl font-semibold'>What Happened?</h3>
-                    <p className='mt-2 text-gray-600 dark:text-gray-300'>
-                        This page is locked because there are unresolved merge
-                        conflicts. You need to address these conflicts in the
-                        settings page before continuing.
-                    </p>
-                </div>
-            </div>
+            <ConflictState onNavigateSettings={() => navigate('/settings')} />
         );
     }
 
     return (
-        <div>
+        <div className='w-full min-h-[70vh] space-y-2 flex flex-col'>
             <DataBar
                 onSearch={setSearchQuery}
                 searchPlaceholder='Search by name or tag...'
@@ -339,7 +332,7 @@ function FormatPage() {
                 addButtonLabel='Add New Format'
             />
 
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 h-full'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-grow'>
                 {getFilteredAndSortedFormats().map((format, index) => (
                     <div
                         key={format.file_name}

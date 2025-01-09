@@ -9,6 +9,15 @@ import {useKeyboardShortcut} from '@hooks/useKeyboardShortcut';
 import MassActionsBar from '@ui/MassActionsBar';
 import DataBar from '@ui/DataBar/DataBar';
 
+const LoadingState = () => (
+    <div className='w-full min-h-[70vh] flex flex-col items-center justify-center'>
+        <Loader className='w-8 h-8 animate-spin text-blue-500 mb-4' />
+        <p className='text-lg font-medium text-gray-300'>
+            Loading regex patterns...
+        </p>
+    </div>
+);
+
 function RegexPage() {
     const [patterns, setPatterns] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,7 +31,6 @@ function RegexPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [willBeSelected, setWillBeSelected] = useState([]);
 
-    // Mass selection hook
     const {
         selectedItems,
         isSelectionMode,
@@ -32,7 +40,6 @@ function RegexPage() {
         lastSelectedIndex
     } = useMassSelection();
 
-    // Keyboard shortcut for selection mode
     useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
 
     useEffect(() => {
@@ -90,7 +97,6 @@ function RegexPage() {
                 }));
                 setPatterns(patternsData);
 
-                // Extract all unique tags
                 const tags = new Set();
                 patternsData.forEach(pattern => {
                     pattern.tags?.forEach(tag => tags.add(tag));
@@ -157,7 +163,6 @@ function RegexPage() {
 
     const handlePatternSelect = (patternName, index, e) => {
         if (e.shiftKey) {
-            // Immediately show selection preview
             handleMouseEnter(index, true);
         }
         handleSelect(patternName, index, e, getFilteredAndSortedPatterns());
@@ -215,15 +220,11 @@ function RegexPage() {
     };
 
     if (isLoading) {
-        return (
-            <div className='flex justify-center items-center h-64'>
-                <Loader className='w-8 h-8 animate-spin text-blue-500' />
-            </div>
-        );
+        return <LoadingState />;
     }
 
     return (
-        <div>
+        <div className='w-full space-y-2'>
             <DataBar
                 onSearch={setSearchQuery}
                 searchPlaceholder='Search by name or tag...'
@@ -240,7 +241,7 @@ function RegexPage() {
                 addButtonLabel='Add New Pattern'
             />
 
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 h-full'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {getFilteredAndSortedPatterns().map((pattern, index) => (
                     <div
                         key={pattern.name}
