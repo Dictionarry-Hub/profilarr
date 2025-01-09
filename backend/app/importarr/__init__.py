@@ -136,6 +136,7 @@ def import_profiles():
                 'Either profileNames or all=true is required'
             }), 400
 
+        # Get import_as_unique setting
         import_settings = get_unique_arrs([arr_id])
         arr_settings = import_settings.get(arr_id, {
             'import_as_unique': False,
@@ -179,13 +180,22 @@ def import_profiles():
                     'error': 'Failed to read profiles directory'
                 }), 500
 
+        # Store original names for file lookups
+        original_names = profile_names.copy()
+
+        # Modify profile names if import_as_unique is true
+        if import_as_unique:
+            profile_names = [f"{name} [Dictionarry]" for name in profile_names]
+            logger.info(
+                f"Modified profile names for unique import: {profile_names}")
+
         logger.debug(
             f"Attempting to import profiles: {profile_names} for {arr_data['type']}: {arr_data['name']}"
         )
 
         # Get any custom formats referenced in these profiles
         format_names = set()
-        for profile_name in profile_names:
+        for profile_name in original_names:  # Use original names for file lookup
             try:
                 profile_file = f"{get_category_directory('profile')}/{profile_name}.yml"
                 format_data = load_yaml_file(profile_file)
@@ -195,19 +205,33 @@ def import_profiles():
                 logger.error(f"Error loading profile {profile_name}: {str(e)}")
                 continue
 
-        # Import/Update formats first - regardless of reported success since 202s are good
+        # Import/Update formats first
         if format_names:
-            import_formats_to_arr(format_names=list(format_names),
-                                  base_url=arr_data['arrServer'],
-                                  api_key=arr_data['apiKey'],
-                                  arr_type=arr_data['type'])
+            format_names_list = list(format_names)
+            if import_as_unique:
+                modified_format_names = [
+                    f"{name} [Dictionarry]" for name in format_names_list
+                ]
+                import_formats_to_arr(format_names=modified_format_names,
+                                      original_names=format_names_list,
+                                      base_url=arr_data['arrServer'],
+                                      api_key=arr_data['apiKey'],
+                                      arr_type=arr_data['type'])
+            else:
+                import_formats_to_arr(format_names=format_names_list,
+                                      original_names=format_names_list,
+                                      base_url=arr_data['arrServer'],
+                                      api_key=arr_data['apiKey'],
+                                      arr_type=arr_data['type'])
 
         # Import profiles
         result = import_profiles_to_arr(profile_names=profile_names,
+                                        original_names=original_names,
                                         base_url=arr_data['arrServer'],
                                         api_key=arr_data['apiKey'],
                                         arr_type=arr_data['type'],
-                                        arr_id=arr_id)
+                                        arr_id=arr_id,
+                                        import_as_unique=import_as_unique)
 
         return jsonify(result), 200 if result['success'] else 400
 

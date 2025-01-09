@@ -15,8 +15,9 @@ from ..arr.manager import get_arr_config
 logger = logging.getLogger('importarr')
 
 
-def import_profiles_to_arr(profile_names: List[str], base_url: str,
-                           api_key: str, arr_type: str, arr_id: str) -> Dict:
+def import_profiles_to_arr(profile_names: List[str], original_names: List[str],
+                           base_url: str, api_key: str, arr_type: str,
+                           arr_id: str, import_as_unique: bool) -> Dict:
     logger.info(
         f"Received {len(profile_names)} profiles to import for {arr_type}")
     results = {
@@ -52,14 +53,24 @@ def import_profiles_to_arr(profile_names: List[str], base_url: str,
         target_app = TargetApp.RADARR if arr_type.lower(
         ) == 'radarr' else TargetApp.SONARR
 
-        for profile_name in profile_names:
+        for i, profile_name in enumerate(profile_names):
             try:
-                profile_file = f"{get_category_directory('profile')}/{profile_name}.yml"
+                # Use original name for file lookup
+                original_name = original_names[i]
+                profile_file = f"{get_category_directory('profile')}/{original_name}.yml"
                 profile_data = load_yaml_file(profile_file)
+
+                # Set the potentially modified profile name
+                profile_data['name'] = profile_name
+
+                # Modify custom format names if import_as_unique is true
+                if import_as_unique and 'custom_formats' in profile_data:
+                    for cf in profile_data['custom_formats']:
+                        cf['name'] = f"{cf['name']} [Dictionarry]"
+
                 logger.info("Received profile:\n" +
                             yaml.dump(profile_data, sort_keys=False))
 
-                # Log the language setting (if any)
                 profile_language = profile_data.get('language', 'any')
                 if profile_language != 'any':
                     logger.info(
