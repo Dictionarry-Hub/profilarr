@@ -48,7 +48,7 @@ const ArrCard = ({
                 {/* Header with Logo, Title, and Tags */}
                 <div className='flex items-start justify-between'>
                     <div className='flex items-center space-x-3'>
-                        <div className='p-2 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors'>
+                        <div className='p-2 rounded-lg group-hover:bg-blue-500/20 transition-colors'>
                             <img
                                 src={
                                     type === 'radarr' ? RadarrLogo : SonarrLogo
