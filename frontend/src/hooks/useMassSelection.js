@@ -15,36 +15,33 @@ export const useMassSelection = () => {
     }, [isSelectionMode]);
 
     const handleSelect = useCallback(
-        (id, index, event, items) => {
-            // Add items parameter to access the data array
+        (id, index, e) => {
             if (!isSelectionMode) return;
 
             setSelectedItems(prev => {
                 const newSelection = new Set(prev);
 
-                if (event.shiftKey && lastSelectedIndex !== null) {
+                if (e.shiftKey && lastSelectedIndex !== null) {
                     // Handle shift+click for range selection
                     const start = Math.min(lastSelectedIndex, index);
                     const end = Math.max(lastSelectedIndex, index);
 
-                    // Get all items in range using their unique identifiers
+                    // Toggle the range based on whether the last clicked item is selected
+                    const shouldSelect = !prev.has(index);
+
                     for (let i = start; i <= end; i++) {
-                        const item = items[i];
-                        if (item) {
-                            // For formats: item.content.name
-                            // For profiles: item.file_name
-                            const identifier =
-                                item.content?.name ||
-                                item.file_name.replace('.yml', '');
-                            newSelection.add(identifier);
+                        if (shouldSelect) {
+                            newSelection.add(i);
+                        } else {
+                            newSelection.delete(i);
                         }
                     }
                 } else {
-                    // Toggle single selection using identifier
-                    if (newSelection.has(id)) {
-                        newSelection.delete(id);
+                    // Toggle single selection
+                    if (newSelection.has(index)) {
+                        newSelection.delete(index);
                     } else {
-                        newSelection.add(id);
+                        newSelection.add(index);
                     }
                     setLastSelectedIndex(index);
                 }
@@ -63,6 +60,7 @@ export const useMassSelection = () => {
     return {
         selectedItems,
         isSelectionMode,
+        lastSelectedIndex,
         toggleSelectionMode,
         handleSelect,
         clearSelection
