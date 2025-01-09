@@ -11,8 +11,11 @@ const ImportModal = ({isOpen, onClose, onImport, type}) => {
     const [isImporting, setIsImporting] = useState(false);
 
     useEffect(() => {
-        // Fetch available arrs when modal opens
+        // Reset state when modal opens and fetch arr instances
         if (isOpen) {
+            setSelectedArr('');
+            setError('');
+            setIsImporting(false);
             fetchArrs();
         }
     }, [isOpen]);
