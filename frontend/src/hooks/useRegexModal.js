@@ -13,9 +13,12 @@ export const useRegexModal = (initialPattern, onSave) => {
     const [tests, setTests] = useState([]);
     const [isCloning, setIsCloning] = useState(false);
 
-    // UI state
-    const [error, setError] = useState('');
-    const [patternError, setPatternError] = useState('');
+    // UI state with more specific error handling
+    const [formErrors, setFormErrors] = useState({
+        name: '',
+        pattern: '',
+        general: ''
+    });
     const [activeTab, setActiveTab] = useState('general');
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -40,12 +43,36 @@ export const useRegexModal = (initialPattern, onSave) => {
             setTags([]);
             setTests([]);
         }
-        setError('');
-        setPatternError('');
+        setFormErrors({name: '', pattern: '', general: ''});
         setIsDeleting(false);
     }, []);
 
     const handleSave = async () => {
+        // Name validation
+        if (!name.trim()) {
+            Alert.error('Name is required');
+            return;
+        }
+
+        if (name.length > 64) {
+            Alert.error('Name must be less than 64 characters');
+            return;
+        }
+
+        // Pattern validation
+        if (!patternValue.trim()) {
+            Alert.error('Pattern is required');
+            return;
+        }
+
+        // Validate regex pattern
+        try {
+            new RegExp(patternValue);
+        } catch (e) {
+            Alert.error('Invalid regular expression: ' + e.message);
+            return;
+        }
+
         try {
             const data = {
                 name,
@@ -55,23 +82,12 @@ export const useRegexModal = (initialPattern, onSave) => {
                 tests
             };
 
-            // Validation checks
-            if (!name.trim()) {
-                Alert.error('Name is required');
-                return;
-            }
-            if (!patternValue.trim()) {
-                Alert.error('Pattern is required');
-                return;
-            }
-
             if (initialPattern && !isCloning) {
-                // Check if name has changed
                 const hasNameChanged = name !== originalName;
                 await RegexPatterns.update(
                     initialPattern.file_name.replace('.yml', ''),
                     data,
-                    hasNameChanged ? name : undefined // Only pass new name if it changed
+                    hasNameChanged ? name : undefined
                 );
                 Alert.success('Pattern updated successfully');
             } else {
@@ -81,15 +97,24 @@ export const useRegexModal = (initialPattern, onSave) => {
             onSave();
         } catch (error) {
             console.error('Error saving pattern:', error);
-            Alert.error('Failed to save pattern. Please try again.');
+            Alert.error(
+                error.message || 'Failed to save pattern. Please try again.'
+            );
         }
     };
 
     const handleRunTests = useCallback(
         async (pattern, tests) => {
-            const updatedTests = await runTests(pattern, tests);
-            if (updatedTests) {
-                setTests(updatedTests);
+            try {
+                const updatedTests = await runTests(pattern, tests);
+                if (updatedTests) {
+                    setTests(updatedTests);
+                }
+            } catch (error) {
+                console.error('Error running tests:', error);
+                Alert.error(
+                    error.message || 'Failed to run tests. Please try again.'
+                );
             }
         },
         [runTests]
@@ -102,13 +127,14 @@ export const useRegexModal = (initialPattern, onSave) => {
         patternValue,
         tags,
         tests,
+
         // UI state
-        error,
-        patternError,
+        formErrors,
         activeTab,
         isDeleting,
         isRunningTests,
         isCloning,
+
         // Actions
         setName,
         setDescription,
@@ -117,6 +143,7 @@ export const useRegexModal = (initialPattern, onSave) => {
         setTests,
         setActiveTab,
         setIsDeleting,
+
         // Main handlers
         initializeForm,
         handleSave,
