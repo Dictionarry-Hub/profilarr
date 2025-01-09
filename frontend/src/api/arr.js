@@ -33,10 +33,42 @@ export const pingService = async (url, apiKey, type) => {
 
 export const saveArrConfig = async config => {
     try {
-        const response = await axios.post(`/api/arr/config`, config);
+        const response = await axios.post(`/api/arr/config`, config, {
+            validateStatus: status => {
+                return (status >= 200 && status < 300) || status === 409;
+            }
+        });
+
+        if (response.status === 409) {
+            return {
+                success: false,
+                error: 'Configuration with this name already exists'
+            };
+        }
         return response.data;
     } catch (error) {
         console.error('Error saving arr config:', error);
+        throw error;
+    }
+};
+
+export const updateArrConfig = async (id, config) => {
+    try {
+        const response = await axios.put(`/api/arr/config/${id}`, config, {
+            validateStatus: status => {
+                return (status >= 200 && status < 300) || status === 409;
+            }
+        });
+
+        if (response.status === 409) {
+            return {
+                success: false,
+                error: 'Configuration with this name already exists'
+            };
+        }
+        return response.data;
+    } catch (error) {
+        console.error('Error updating arr config:', error);
         throw error;
     }
 };
@@ -46,19 +78,9 @@ export const getArrConfigs = async () => {
         const response = await axios.get(`/api/arr/config`);
         console.log('Raw axios response:', response);
         console.log('Response data:', response.data);
-        return response.data; // This is correct - don't change this
-    } catch (error) {
-        console.error('Error fetching arr configs:', error);
-        throw error;
-    }
-};
-
-export const updateArrConfig = async (id, config) => {
-    try {
-        const response = await axios.put(`/api/arr/config/${id}`, config);
         return response.data;
     } catch (error) {
-        console.error('Error updating arr config:', error);
+        console.error('Error fetching arr configs:', error);
         throw error;
     }
 };

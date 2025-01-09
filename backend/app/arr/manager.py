@@ -23,6 +23,21 @@ def save_arr_config(config):
     with get_db() as conn:
         cursor = conn.cursor()
         try:
+            # Check if name already exists
+            existing = cursor.execute(
+                'SELECT id FROM arr_config WHERE name = ?',
+                (config['name'], )).fetchone()
+
+            if existing:
+                logger.warning(
+                    f"[save_arr_config] Attempted to create duplicate config name: {config['name']}"
+                )
+                return {
+                    'success': False,
+                    'error': 'Configuration with this name already exists',
+                    'status_code': 409
+                }
+
             # 1) Insert the arr_config row
             logger.debug(
                 f"[save_arr_config] Attempting to create new arr_config with name={config['name']} sync_method={config.get('sync_method')}"
@@ -94,6 +109,21 @@ def update_arr_config(id, config):
     with get_db() as conn:
         cursor = conn.cursor()
         try:
+            # Check if name already exists (excluding current config)
+            existing = cursor.execute(
+                'SELECT id FROM arr_config WHERE name = ? AND id != ?',
+                (config['name'], id)).fetchone()
+
+            if existing:
+                logger.warning(
+                    f"[update_arr_config] Attempted to update config #{id} to duplicate name: {config['name']}"
+                )
+                return {
+                    'success': False,
+                    'error': 'Configuration with this name already exists',
+                    'status_code': 409
+                }
+
             # 1) Grab existing row so we know the existing import_task_id
             existing_row = cursor.execute(
                 'SELECT * FROM arr_config WHERE id = ?', (id, )).fetchone()

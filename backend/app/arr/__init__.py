@@ -46,8 +46,15 @@ def add_config():
     try:
         config = request.json
         result = save_arr_config(config)
+
+        # Handle the conflict case first
+        if not result['success'] and result.get('status_code') == 409:
+            return jsonify({'success': False, 'error': result['error']}), 409
+
+        # Handle other failure cases
         if not result['success']:
             return jsonify(result), 400
+
         return jsonify(result), 200
     except Exception as e:
         logger.error(f"Error saving arr config: {str(e)}")
@@ -88,15 +95,25 @@ def handle_config(id):
             }), 404
 
         elif request.method == 'PUT':
-            success = update_arr_config(id, request.json)
-            if success:
-                logger.debug(f"Updated arr config: {id}")
-                return jsonify({'success': True}), 200
-            logger.debug(f"Arr config not found for update: {id}")
-            return jsonify({
-                'success': False,
-                'error': 'Config not found'
-            }), 404
+            result = update_arr_config(id, request.json)
+
+            # Handle the conflict case first
+            if not result['success'] and result.get('status_code') == 409:
+                return jsonify({
+                    'success': False,
+                    'error': result['error']
+                }), 409
+
+            # Handle other failure cases
+            if not result['success']:
+                logger.debug(f"Arr config not found for update: {id}")
+                return jsonify({
+                    'success': False,
+                    'error': 'Config not found'
+                }), 404
+
+            logger.debug(f"Updated arr config: {id}")
+            return jsonify({'success': True}), 200
 
         elif request.method == 'DELETE':
             success = delete_arr_config(id)

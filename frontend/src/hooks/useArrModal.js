@@ -211,19 +211,24 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
                     ? await updateArrConfig(editingArr.id, configToSave)
                     : await saveArrConfig(configToSave);
 
-                if (result.success) {
-                    Alert.success(
-                        `Configuration ${
-                            editingArr ? 'updated' : 'saved'
-                        } successfully`
-                    );
+                // Handle the name conflict error specifically
+                if (!result.success) {
+                    Alert.error(result.error);
+                    setSaveConfirm(false);
+                    return;
+                }
 
-                    // If it's not a manual sync method, show the sync confirmation
-                    if (formData.sync_method !== 'manual') {
-                        setShowSyncConfirm(true);
-                    } else {
-                        onSubmit();
-                    }
+                Alert.success(
+                    `Configuration ${
+                        editingArr ? 'updated' : 'saved'
+                    } successfully`
+                );
+
+                // If it's not a manual sync method, show the sync confirmation
+                if (formData.sync_method !== 'manual') {
+                    setShowSyncConfirm(true);
+                } else {
+                    onSubmit();
                 }
             } catch (error) {
                 Alert.error('Failed to save configuration');
