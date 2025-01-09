@@ -52,29 +52,47 @@ const SearchBar = ({
     };
 
     return (
-        <div className={`relative flex-1 min-w-0 ${className}`}>
-            <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400' />
+        <div className={`relative flex-1 min-w-0 group ${className}`}>
+            <Search
+                className={`
+          absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 
+          transition-colors duration-200
+          ${
+              isFocused
+                  ? 'text-blue-500'
+                  : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'
+          }
+        `}
+            />
 
             <div
                 className={`
-        w-full h-10 pl-9 pr-8 rounded-md border 
+        w-full h-10 pl-9 pr-8 rounded-md
+        transition-all duration-200 ease-in-out
+        border shadow-sm
         ${
             isFocused
-                ? 'ring-2 ring-blue-500 border-transparent'
-                : 'border-gray-300 dark:border-gray-700'
+                ? 'border-blue-500 ring-2 ring-blue-500/20 bg-white/5'
+                : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'
         }
-        bg-white dark:bg-gray-800 
+        bg-white dark:bg-gray-800
         flex items-center
-        transition-colors
       `}>
                 {activeSearch ? (
-                    <div className='flex items-center gap-1.5 px-2 py-0.5 bg-blue-500/10 text-blue-500 dark:bg-blue-500/20 dark:text-blue-400 rounded'>
+                    <div
+                        className='flex items-center gap-1.5 px-2 py-1 
+            bg-blue-500/10 dark:bg-blue-500/20 
+            border border-blue-500/20 dark:border-blue-400/20
+            text-blue-600 dark:text-blue-400 
+            rounded-md shadow-sm
+            transition-all duration-200'>
                         <span className='text-sm font-medium leading-none'>
                             {activeSearch}
                         </span>
                         <button
                             onClick={clearSearch}
-                            className='p-0.5 hover:bg-blue-500/20 rounded'>
+                            className='p-0.5 hover:bg-blue-500/20 rounded-sm transition-colors'
+                            aria-label='Clear search'>
                             <X className='h-3 w-3' />
                         </button>
                     </div>
@@ -87,8 +105,9 @@ const SearchBar = ({
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
                         placeholder={placeholder}
-                        className='w-full bg-transparent text-gray-900 dark:text-gray-100 
-              placeholder:text-gray-500 dark:placeholder:text-gray-400 
+                        className='w-full bg-transparent 
+              text-gray-900 dark:text-gray-100
+              placeholder:text-gray-500 dark:placeholder:text-gray-400
               focus:outline-none'
                     />
                 )}
@@ -97,8 +116,13 @@ const SearchBar = ({
             {searchTerm && !activeSearch && (
                 <button
                     onClick={() => setSearchTerm('')}
-                    className='absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700'>
-                    <X className='h-4 w-4 text-gray-400' />
+                    className='absolute right-3 top-1/2 -translate-y-1/2 
+            p-1.5 rounded-full 
+            text-gray-400 hover:text-gray-600
+            hover:bg-gray-100 dark:hover:bg-gray-700
+            transition-all duration-200'
+                    aria-label='Clear search input'>
+                    <X className='h-4 w-4' />
                 </button>
             )}
         </div>

@@ -91,14 +91,14 @@ const DataBar = ({
                     allTags={allTags}
                 />
 
+                {showAddButton && !isSelectionMode && (
+                    <AddButton onClick={onAdd} label={addButtonLabel} />
+                )}
+
                 <ToggleSelectButton
                     isSelectionMode={isSelectionMode}
                     onClick={toggleSelectionMode}
                 />
-
-                {showAddButton && !isSelectionMode && (
-                    <AddButton onClick={onAdd} label={addButtonLabel} />
-                )}
             </div>
         </>
     );

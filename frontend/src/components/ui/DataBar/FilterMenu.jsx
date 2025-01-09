@@ -1,97 +1,142 @@
-// FilterMenu.jsx
-import { useState, useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, {useRef, useEffect} from 'react';
+import {Filter} from 'lucide-react';
 
-function FilterMenu({ filterType, setFilterType, filterValue, setFilterValue, allTags }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+function FilterMenu({
+    filterType,
+    setFilterType,
+    filterValue,
+    setFilterValue,
+    allTags
+}) {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const dropdownRef = useRef(null);
 
-  const options = [
-    { value: 'none', label: 'No Filter' },
-    { value: 'tag', label: 'Filter by Tag' },
-    { value: 'date', label: 'Filter by Date' },
-  ];
+    const options = [
+        {value: 'none', label: 'No Filter'},
+        {value: 'tag', label: 'Filter by Tag'},
+        {value: 'date', label: 'Filter by Date'}
+    ];
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () =>
+            document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
-  return (
-    <div className="flex items-center space-x-2">
-      <div className="relative inline-block text-left" ref={dropdownRef}>
-        <div>
-          <button
-            type="button"
-            className="inline-flex justify-between items-center w-full rounded-md border border-gray-600 shadow-sm px-4 py-2 bg-gray-700 text-sm font-medium text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {options.find(option => option.value === filterType)?.label}
-            <svg className="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
+    const hasActiveFilter = filterType !== 'none' && filterValue;
+
+    return (
+        <div className='relative' ref={dropdownRef}>
+            <button
+                type='button'
+                className={`
+          flex items-center gap-2 px-3 py-2 rounded-md
+          border border-gray-200 dark:border-gray-700
+          transition-all duration-150 ease-in-out
+          group
+          ${
+              hasActiveFilter
+                  ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'
+                  : 'bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-blue-500/50 hover:text-blue-500 dark:hover:border-blue-500/50 dark:hover:text-blue-400'
+          }
+        `}
+                onClick={() => setIsOpen(!isOpen)}>
+                <Filter
+                    className={`w-4 h-4 transition-colors duration-200
+          ${
+              hasActiveFilter
+                  ? ''
+                  : 'group-hover:text-blue-500 dark:group-hover:text-blue-400 group-hover:animate-[wiggle_0.3s_ease-in-out]'
+          }
+        `}
+                    style={{
+                        '@keyframes wiggle': {
+                            '0%': {transform: 'rotate(0deg)'},
+                            '25%': {transform: 'rotate(-20deg)'},
+                            '75%': {transform: 'rotate(20deg)'},
+                            '100%': {transform: 'rotate(0deg)'}
+                        }
+                    }}
+                />
+                <span className='text-sm font-medium'>
+                    {filterType === 'none'
+                        ? 'Filter'
+                        : options.find(option => option.value === filterType)
+                              ?.label}
+                </span>
+            </button>
+
+            {isOpen && (
+                <div className='absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-10'>
+                    <div className='py-1' role='menu'>
+                        {options.map(option => (
+                            <button
+                                key={option.value}
+                                onClick={() => {
+                                    setFilterType(option.value);
+                                    setFilterValue('');
+                                    setIsOpen(false);
+                                }}
+                                className={`
+                  block w-full text-left px-4 py-2 text-sm
+                  ${
+                      filterType === option.value
+                          ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  }
+                `}
+                                role='menuitem'>
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {filterType === 'tag' && (
+                        <div className='border-t border-gray-200 dark:border-gray-700 p-2'>
+                            <select
+                                value={filterValue}
+                                onChange={e => setFilterValue(e.target.value)}
+                                className='w-full px-2 py-1.5 text-sm rounded-md
+                  bg-gray-50 dark:bg-gray-700
+                  text-gray-700 dark:text-gray-300
+                  border border-gray-200 dark:border-gray-600
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
+                                <option value=''>Select a tag</option>
+                                {allTags.map(tag => (
+                                    <option key={tag} value={tag}>
+                                        {tag}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {filterType === 'date' && (
+                        <div className='border-t border-gray-200 dark:border-gray-700 p-2'>
+                            <input
+                                type='date'
+                                value={filterValue}
+                                onChange={e => setFilterValue(e.target.value)}
+                                className='w-full px-2 py-1.5 text-sm rounded-md
+                  bg-gray-50 dark:bg-gray-700
+                  text-gray-700 dark:text-gray-300
+                  border border-gray-200 dark:border-gray-600
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
-
-        {isOpen && (
-          <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-50">
-            <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-              {options.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    setFilterType(option.value);
-                    setFilterValue('');
-                    setIsOpen(false);
-                  }}
-                  className={`${
-                    filterType === option.value ? 'bg-gray-600 text-white' : 'text-gray-200'
-                  } block w-full text-left px-4 py-2 text-sm hover:bg-gray-600 hover:text-white`}
-                  role="menuitem"
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {filterType === 'tag' && (
-        <select
-          value={filterValue}
-          onChange={(e) => setFilterValue(e.target.value)}
-          className="appearance-none bg-gray-700 text-white py-2 px-4 pr-8 rounded-md border border-gray-600 leading-tight focus:outline-none focus:bg-gray-600 focus:border-white cursor-pointer"
-        >
-          <option value="">Select a tag</option>
-          {allTags.map(tag => (
-            <option key={tag} value={tag}>{tag}</option>
-          ))}
-        </select>
-      )}
-      {filterType === 'date' && (
-        <input
-          type="date"
-          value={filterValue}
-          onChange={(e) => setFilterValue(e.target.value)}
-          className="bg-gray-700 text-white py-2 px-4 rounded-md border border-gray-600 leading-tight focus:outline-none focus:bg-gray-600 focus:border-white cursor-pointer"
-        />
-      )}
-    </div>
-  );
+    );
 }
-
-FilterMenu.propTypes = {
-  filterType: PropTypes.string.isRequired,
-  setFilterType: PropTypes.func.isRequired,
-  filterValue: PropTypes.string.isRequired,
-  setFilterValue: PropTypes.func.isRequired,
-  allTags: PropTypes.arrayOf(PropTypes.string).isRequired,
-};
 
 export default FilterMenu;
