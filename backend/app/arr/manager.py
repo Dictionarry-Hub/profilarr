@@ -372,10 +372,8 @@ def run_import_for_config(config_row):
     Perform the same import logic as the /import endpoints, but automatically
     for a "pull-based" or "schedule-based" ARR config.
 
-    We'll calculate a 'real' percentage based on how many items
-    (formats + profiles) we attempted to import.
+    We'll calculate a 'real' percentage based on successful imports only.
     """
-
     from datetime import datetime
     from ..db import get_db
 
@@ -394,20 +392,13 @@ def run_import_for_config(config_row):
     selected_profiles = data_to_sync.get('profiles', [])
     selected_formats = data_to_sync.get('customFormats', [])
 
-    # We'll count how many 'items' total we plan to import
-    # (each selected format + each referenced format + each selected profile).
-    # Then after each step, we'll increment done_steps by however many items we actually imported.
-    total_steps = 0
-    total_steps += len(selected_formats)
-    referenced_cf_names = set()
-    total_steps += len(selected_profiles)  # profiles themselves
-
-    # We'll discover referenced formats in a moment; we don't know how many yet,
-    # so we'll add them to total_steps once we parse them.
+    # Track successful imports separately from attempts
+    total_attempted = 0
+    total_successful = 0
 
     # 1) Import user-selected custom formats
-    done_steps = 0
     if selected_formats:
+        total_attempted += len(selected_formats)
         logger.info(
             f"[Pull Import] Importing {len(selected_formats)} user-selected CFs for ARR #{arr_id}"
         )
@@ -418,7 +409,12 @@ def run_import_for_config(config_row):
                 base_url=arr_server,
                 api_key=api_key,
                 arr_type=arr_type)
-            if not format_result.get('success'):
+
+            if format_result.get('success'):
+                # Count successful imports
+                total_successful += (format_result.get('added', 0) +
+                                     format_result.get('updated', 0))
+            else:
                 logger.warning(
                     f"[Pull Import] Importing user-selected CFs for ARR #{arr_id} had errors: {format_result}"
                 )
@@ -426,10 +422,9 @@ def run_import_for_config(config_row):
             logger.exception(
                 f"[Pull Import] Failed importing user-selected CFs for ARR #{arr_id}: {str(e)}"
             )
-        # Assume all selected formats were "attempted" => add them to done_steps
-        done_steps += len(selected_formats)
 
     # 2) For user-selected profiles, gather any referenced CFs
+    referenced_cf_names = set()
     if selected_profiles:
         from pathlib import Path
         from ..data.utils import get_category_directory, load_yaml_file
@@ -439,7 +434,7 @@ def run_import_for_config(config_row):
                 profile_file = Path(
                     get_category_directory('profile')) / f"{profile_name}.yml"
                 if not profile_file.exists():
-                    logger.warning(
+                    logger.error(
                         f"[Pull Import] Profile file not found: {profile_file}"
                     )
                     continue
@@ -452,16 +447,10 @@ def run_import_for_config(config_row):
                 logger.error(
                     f"[Pull Import] Error loading profile {profile_name}: {str(e)}"
                 )
-                continue
 
-    # Add the discovered referenced custom formats to total_steps
-    total_steps += len(referenced_cf_names)
-
-    # 2b) Import CFs referenced by profiles (safe even if some are duplicates of user-selected)
+    # 2b) Import CFs referenced by profiles
     if referenced_cf_names:
-        logger.info(
-            f"[Pull Import] Importing {len(referenced_cf_names)} CFs referenced by profiles for ARR #{arr_id}"
-        )
+        total_attempted += len(referenced_cf_names)
         try:
             from ..importarr.format import import_formats_to_arr
             cf_result = import_formats_to_arr(
@@ -469,21 +458,21 @@ def run_import_for_config(config_row):
                 base_url=arr_server,
                 api_key=api_key,
                 arr_type=arr_type)
-            if not cf_result.get('success'):
+
+            if cf_result.get('success'):
+                total_successful += (cf_result.get('added', 0) +
+                                     cf_result.get('updated', 0))
+            else:
                 logger.warning(
-                    f"[Pull Import] Importing CFs referenced by profiles for ARR #{arr_id} had errors: {cf_result}"
+                    f"[Pull Import] Importing referenced CFs had errors: {cf_result}"
                 )
         except Exception as e:
             logger.exception(
-                f"[Pull Import] Failed importing referenced CFs for ARR #{arr_id}: {str(e)}"
-            )
-        done_steps += len(referenced_cf_names)
+                f"[Pull Import] Failed importing referenced CFs: {str(e)}")
 
     # 3) Import the profiles themselves
     if selected_profiles:
-        logger.info(
-            f"[Pull Import] Importing {len(selected_profiles)} profiles for ARR #{arr_id}"
-        )
+        total_attempted += len(selected_profiles)
         try:
             from ..importarr.profile import import_profiles_to_arr
             profile_result = import_profiles_to_arr(
@@ -492,28 +481,31 @@ def run_import_for_config(config_row):
                 api_key=api_key,
                 arr_type=arr_type,
                 arr_id=arr_id)
-            if not profile_result.get('success'):
+
+            if profile_result.get('success'):
+                total_successful += (profile_result.get('added', 0) +
+                                     profile_result.get('updated', 0))
+            else:
                 logger.warning(
-                    f"[Pull Import] Importing profiles for ARR #{arr_id} had errors: {profile_result}"
+                    f"[Pull Import] Importing profiles had errors: {profile_result}"
                 )
         except Exception as e:
             logger.exception(
-                f"[Pull Import] Failed importing profiles for ARR #{arr_id}: {str(e)}"
-            )
-        done_steps += len(selected_profiles)
+                f"[Pull Import] Failed importing profiles: {str(e)}")
 
-    # 4) Calculate real percentage
-    if total_steps > 0:
-        sync_percentage = int((done_steps / total_steps) * 100)
+    # Calculate percentage based on successful imports vs attempted
+    if total_attempted > 0:
+        sync_percentage = int((total_successful / total_attempted) * 100)
     else:
-        # If no items were selected at all, consider it "fully synced"
-        sync_percentage = 100
+        # If nothing was attempted, show 0% instead of 100%
+        sync_percentage = 0
 
     logger.info(
         f"[Pull Import] Done importing for ARR config #{arr_id} ({arr_name}). "
-        f"Progress: {done_steps}/{total_steps} => {sync_percentage}%")
+        f"Success rate: {total_successful}/{total_attempted} => {sync_percentage}%"
+    )
 
-    # 5) Update arr_config with last_sync_time + final sync_percentage
+    # Update arr_config with results
     now = datetime.now()
     with get_db() as conn:
         cursor = conn.cursor()
@@ -530,3 +522,10 @@ def run_import_for_config(config_row):
     logger.info(
         f"[Pull Import] Updated ARR config #{arr_id} last_sync_time={now} & sync_percentage={sync_percentage}."
     )
+
+    return {
+        'success': True if total_successful > 0 else False,
+        'total_attempted': total_attempted,
+        'total_successful': total_successful,
+        'sync_percentage': sync_percentage
+    }
