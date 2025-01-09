@@ -15,7 +15,7 @@ const SettingsPage = () => {
 
     return (
         <div>
-            <nav className='flex space-x-4 mb-4'>
+            <nav className='flex space-x-4 my-4'>
                 <div
                     onClick={() => handleTabChange('git')}
                     ref={el => (tabsRef.current['git'] = el)}
