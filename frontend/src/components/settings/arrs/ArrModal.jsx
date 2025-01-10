@@ -119,7 +119,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                             !formData.apiKey
                         }
                         className='flex items-center px-3 py-2 text-sm rounded-lg bg-emerald-600 hover:bg-emerald-700 
-                                 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors'>
+                                     disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors'>
                         {isTestingConnection ? (
                             <>
                                 <Loader className='w-3.5 h-3.5 mr-2 animate-spin' />
@@ -142,7 +142,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                         type='submit'
                         form='arrForm'
                         className='flex items-center px-3 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 
-                                 text-white font-medium transition-colors'>
+                                     text-white font-medium transition-colors'>
                         {saveConfirm ? (
                             <>
                                 <Check className='w-3.5 h-3.5 mr-2' />
@@ -236,8 +236,8 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                             type='button'
                             onClick={handleAddTag}
                             className='px-3 py-2 text-sm rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200
-                                     dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800
-                                     font-medium transition-colors'>
+                                         dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800
+                                         font-medium transition-colors'>
                             Add
                         </button>
                     </div>
@@ -329,6 +329,35 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     )}
                 </div>
 
+                {/* Import as Unique - Now always visible */}
+                <div className='space-y-1.5'>
+                    <div className='flex items-center justify-between'>
+                        <label className='flex items-center space-x-2'>
+                            <input
+                                type='checkbox'
+                                checked={formData.import_as_unique || false}
+                                onChange={e =>
+                                    handleInputChange({
+                                        target: {
+                                            id: 'import_as_unique',
+                                            value: e.target.checked
+                                        }
+                                    })
+                                }
+                                className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                            />
+                            <span className='text-sm text-gray-700 dark:text-gray-300'>
+                                Import as Unique
+                            </span>
+                        </label>
+                        <span className='text-xs text-gray-500 dark:text-gray-400 max-w-sm text-right'>
+                            Creates a unique hash from the data and target
+                            instance name, allowing the same profile/format to
+                            be imported multiple times
+                        </span>
+                    </div>
+                </div>
+
                 {/* Conditional Fields for Sync Method */}
                 {formData.sync_method === 'schedule' && (
                     <div className='space-y-1.5'>
@@ -362,9 +391,9 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                             type='button'
                             onClick={() => setIsDataDrawerOpen(true)}
                             className='w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 
-                                    bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700
-                                    rounded-lg transition-colors
-                                    border border-gray-200 dark:border-gray-700'>
+                                        bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700
+                                        rounded-lg transition-colors
+                                        border border-gray-200 dark:border-gray-700'>
                             <div className='flex flex-col space-y-2'>
                                 <div className='flex items-center justify-between'>
                                     <span>Select Data to Sync</span>
@@ -399,36 +428,6 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                                 )}
                             </div>
                         </button>
-
-                        <div className='space-y-1.5'>
-                            <div className='flex items-center justify-between'>
-                                <label className='flex items-center space-x-2'>
-                                    <input
-                                        type='checkbox'
-                                        checked={
-                                            formData.import_as_unique || false
-                                        }
-                                        onChange={e =>
-                                            handleInputChange({
-                                                target: {
-                                                    id: 'import_as_unique',
-                                                    value: e.target.checked
-                                                }
-                                            })
-                                        }
-                                        className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                                    />
-                                    <span className='text-sm text-gray-700 dark:text-gray-300'>
-                                        Import as Unique
-                                    </span>
-                                </label>
-                                <span className='text-xs text-gray-500 dark:text-gray-400 max-w-sm text-right'>
-                                    Creates a unique hash from the data and
-                                    target instance name, allowing the same
-                                    profile/format to be imported multiple times
-                                </span>
-                            </div>
-                        </div>
 
                         {errors.data_to_sync && (
                             <p className='text-xs text-red-500 mt-1'>
