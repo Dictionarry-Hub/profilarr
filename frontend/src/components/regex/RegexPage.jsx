@@ -43,6 +43,7 @@ function RegexPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [willBeSelected, setWillBeSelected] = useState([]);
+    const [originalIndices, setOriginalIndices] = useState(new Map());
 
     const {
         selectedItems,
@@ -157,9 +158,11 @@ function RegexPage() {
 
     const handleMassDelete = async () => {
         try {
+            const filteredPatterns = getFilteredAndSortedPatterns();
             const selectedPatterns = Array.from(selectedItems).map(
-                index => patterns[index]
+                index => filteredPatterns[index]
             );
+
             for (const pattern of selectedPatterns) {
                 await RegexPatterns.delete(
                     pattern.file_name.replace('.yml', '')
@@ -195,7 +198,10 @@ function RegexPage() {
     };
 
     const getFilteredAndSortedPatterns = () => {
-        let filtered = [...patterns];
+        let filtered = patterns.map((pattern, index) => ({
+            ...pattern,
+            originalIndex: index
+        }));
 
         if (searchQuery) {
             filtered = filtered.filter(
