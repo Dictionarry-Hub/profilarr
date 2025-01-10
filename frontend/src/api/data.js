@@ -265,6 +265,7 @@ const createSpecialEndpoint = (category, endpoint) => async data => {
     try {
         validateResourceName('category', category);
         validatePath([category, endpoint]);
+        console.log(`Sending data to ${endpoint}:`, data);
         const response = await axios.post(
             `${BASE_URL}/${category}/${endpoint}`,
             data

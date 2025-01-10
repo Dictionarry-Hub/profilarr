@@ -224,10 +224,10 @@ export const useFormatModal = (initialFormat, onSuccess) => {
             } catch (error) {
                 console.error('Error deleting format:', error);
                 Alert.error(
-                    error.message ||
+                    error.response?.data?.error ||
                         'Failed to delete format. Please try again.'
                 );
-                setIsDeleting(false); // Reset delete state on error
+                setIsDeleting(false);
             }
         } else {
             setIsDeleting(true);

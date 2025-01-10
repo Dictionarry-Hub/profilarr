@@ -19,14 +19,11 @@ function FormatCard({
     const passRate = Math.round((passedTests / totalTests) * 100) || 0;
 
     const getConditionStyle = condition => {
-        if (condition.required && condition.negate) {
-            return 'bg-orange-100 border-orange-200 text-orange-700 dark:bg-orange-900/30 dark:border-orange-700 dark:text-orange-300';
+        if (condition.negate) {
+            return 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300';
         }
         if (condition.required) {
             return 'bg-green-100 border-green-200 text-green-700 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300';
-        }
-        if (condition.negate) {
-            return 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300';
         }
         return 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300';
     };
@@ -43,9 +40,9 @@ function FormatCard({
 
         if (sortedConditions.length <= 5) return sortedConditions;
 
-        // Take first 4 conditions and add a count of remaining ones
-        const displayConditions = sortedConditions.slice(0, 4);
-        const remainingCount = sortedConditions.length - 4;
+        // Take first 6 conditions and add a count of remaining ones
+        const displayConditions = sortedConditions.slice(0, 6);
+        const remainingCount = sortedConditions.length - 6;
 
         // Add a virtual condition for the count
         displayConditions.push({

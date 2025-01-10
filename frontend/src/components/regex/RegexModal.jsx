@@ -68,7 +68,7 @@ const RegexModal = ({
             } catch (error) {
                 console.error('Error deleting pattern:', error);
                 Alert.error(
-                    error.message ||
+                    error.response?.data?.error ||
                         'Failed to delete pattern. Please try again.'
                 );
             } finally {
