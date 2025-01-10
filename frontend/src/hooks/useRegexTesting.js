@@ -11,10 +11,13 @@ export const useRegexTesting = onUpdateTests => {
             if (!pattern?.trim() || !tests?.length) {
                 return tests;
             }
-
             setIsRunningTests(true);
             try {
-                const result = await RegexPatterns.runTests(pattern, tests);
+                // Format the data properly as a single object
+                const result = await RegexPatterns.runTests({
+                    pattern: pattern,
+                    tests: tests
+                });
                 if (result.success) {
                     // Calculate test statistics
                     const totalTests = result.tests.length;
