@@ -1,55 +1,5 @@
 import React, {useState, useEffect} from 'react';
-
-const COMMIT_TYPES = [
-    {value: 'feat', label: 'Feature', description: 'A new feature'},
-    {value: 'fix', label: 'Bug Fix', description: 'A bug fix'},
-    {
-        value: 'docs',
-        label: 'Documentation',
-        description: 'Documentation only changes'
-    },
-    {
-        value: 'style',
-        label: 'Style',
-        description: 'Changes that do not affect code meaning'
-    },
-    {
-        value: 'refactor',
-        label: 'Refactor',
-        description: 'Code change that neither fixes a bug nor adds a feature'
-    },
-    {
-        value: 'perf',
-        label: 'Performance',
-        description: 'A code change that improves performance'
-    },
-    {value: 'test', label: 'Test', description: 'Adding or correcting tests'},
-    {
-        value: 'chore',
-        label: 'Chore',
-        description: "Other changes that don't modify src or test files"
-    },
-    {value: 'custom', label: 'Custom', description: 'Custom type'}
-];
-
-const SCOPES = [
-    {
-        value: 'regex',
-        label: 'Regex',
-        description: 'Changes related to regex patterns'
-    },
-    {
-        value: 'format',
-        label: 'Format',
-        description: 'Changes related to custom formats'
-    },
-    {
-        value: 'profile',
-        label: 'Profile',
-        description: 'Changes related to quality profiles'
-    },
-    {value: 'custom', label: 'Custom', description: 'Custom scope'}
-];
+import {COMMIT_TYPES, COMMIT_SCOPES} from '@constants/commits';
 
 const formatBodyLines = text => {
     if (!text) return '';
@@ -69,21 +19,14 @@ const formatBodyLines = text => {
 
 const CommitSection = ({commitMessage, setCommitMessage}) => {
     const [type, setType] = useState('');
-    const [customType, setCustomType] = useState('');
     const [scope, setScope] = useState('');
-    const [customScope, setCustomScope] = useState('');
     const [subject, setSubject] = useState('');
     const [body, setBody] = useState('');
     const [footer, setFooter] = useState('');
 
     useEffect(() => {
-        const effectiveType = type === 'custom' ? customType : type;
-        const effectiveScope = scope === 'custom' ? customScope : scope;
-
-        if (effectiveType && subject) {
-            let message = `${effectiveType}${
-                effectiveScope ? `(${effectiveScope})` : ''
-            }: ${subject}`;
+        if (type && subject) {
+            let message = `${type}${scope ? `(${scope})` : ''}: ${subject}`;
 
             if (body) {
                 message += `\n\n${formatBodyLines(body)}`;
@@ -97,16 +40,7 @@ const CommitSection = ({commitMessage, setCommitMessage}) => {
         } else {
             setCommitMessage('');
         }
-    }, [
-        type,
-        customType,
-        scope,
-        customScope,
-        subject,
-        body,
-        footer,
-        setCommitMessage
-    ]);
+    }, [type, scope, subject, body, footer, setCommitMessage]);
 
     const selectStyles =
         'bg-gray-900 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
@@ -145,17 +79,6 @@ const CommitSection = ({commitMessage, setCommitMessage}) => {
                                     </svg>
                                 </div>
                             </div>
-                            {type === 'custom' && (
-                                <input
-                                    type='text'
-                                    value={customType}
-                                    onChange={e =>
-                                        setCustomType(e.target.value)
-                                    }
-                                    placeholder='Enter custom type'
-                                    className={`w-full px-3 py-2 mt-2 rounded-md ${inputStyles}`}
-                                />
-                            )}
                         </div>
                         <div className='flex-1'>
                             <label className='block text-sm font-medium text-gray-400 mb-1'>
@@ -167,7 +90,7 @@ const CommitSection = ({commitMessage, setCommitMessage}) => {
                                     onChange={e => setScope(e.target.value)}
                                     className={`w-full px-3 py-2 rounded-md appearance-none cursor-pointer ${selectStyles}`}>
                                     <option value=''>No Scope</option>
-                                    {SCOPES.map(({value, label}) => (
+                                    {COMMIT_SCOPES.map(({value, label}) => (
                                         <option key={value} value={value}>
                                             {label}
                                         </option>
@@ -182,17 +105,6 @@ const CommitSection = ({commitMessage, setCommitMessage}) => {
                                     </svg>
                                 </div>
                             </div>
-                            {scope === 'custom' && (
-                                <input
-                                    type='text'
-                                    value={customScope}
-                                    onChange={e =>
-                                        setCustomScope(e.target.value)
-                                    }
-                                    placeholder='Enter custom scope'
-                                    className={`w-full px-3 py-2 mt-2 rounded-md ${inputStyles}`}
-                                />
-                            )}
                         </div>
                     </div>
 
