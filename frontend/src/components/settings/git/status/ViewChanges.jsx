@@ -25,7 +25,7 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
             isOpen={isOpen}
             onClose={onClose}
             title={titleContent}
-            width='7xl'>
+            width='10xl'>
             <div className='space-y-4'>
                 {/* If there's a commit message, show it */}
                 {change.commit_message && (
@@ -36,10 +36,10 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
                     <table className='min-w-full'>
                         <thead className='bg-gray-800 border-b border-gray-700'>
                             <tr>
-                                <th className='py-3 px-4 text-left text-gray-400 font-medium w-1/6'>
+                                <th className='py-3 px-4 text-left text-gray-400 font-medium w-1/8'>
                                     Change
                                 </th>
-                                <th className='py-3 px-4 text-left text-gray-400 font-medium w-1/6'>
+                                <th className='py-3 px-4 text-left text-gray-400 font-medium w-2/8'>
                                     Key
                                 </th>
                                 <th className='py-3 px-4 text-left text-gray-400 font-medium w-2/6'>
