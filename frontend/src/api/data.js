@@ -32,94 +32,139 @@ const SPECIAL_ENDPOINTS = [
     'check'
 ];
 
-// Define characters and patterns that could cause routing issues
+// Define characters and patterns that could cause routing issues with descriptive messages
 const UNSAFE_PATTERNS = [
-    /[\/\\]/, // No slashes (forward or backward)
-    /[\s]/, // No whitespace
-    /[<>:"|?*]/, // No special characters that might be interpreted by the system
-    /^\.+/, // No dots at start (prevent relative paths)
-    /\.+$/, // No dots at end
-    /^-/, // No dash at start
-    /-$/, // No dash at end
-    /--|__|\.\./ // No double separators
+    {pattern: /[\/\\]/, message: 'Cannot contain forward or backward slashes'},
+    {
+        pattern: /[<>:"|?*]/,
+        message: 'Cannot contain special characters (<, >, :, ", |, ?, *)'
+    },
+    {
+        pattern: /^\.+/,
+        message: 'Cannot start with dots (prevents relative paths)'
+    },
+    {pattern: /\.+$/, message: 'Cannot end with dots'},
+    {pattern: /^-/, message: 'Cannot start with a dash'},
+    {pattern: /-$/, message: 'Cannot end with a dash'},
+    {
+        pattern: /--|__|\.\./,
+        message: 'Cannot contain consecutive dashes, underscores, or dots'
+    }
 ];
 
-// Comprehensive name validation
+// Comprehensive name validation with specific error messages
 const validateResourceName = (category, name) => {
-    // Basic checks
-    if (!name || typeof name !== 'string') {
-        throw new Error('Resource name must be a non-empty string');
+    // Basic type check
+    if (!name) {
+        throw new Error(`${category} name cannot be empty`);
+    }
+
+    if (typeof name !== 'string') {
+        throw new Error(
+            `${category} name must be a string, received ${typeof name}`
+        );
     }
 
     // Length check
-    if (name.length < 1 || name.length > 64) {
-        throw new Error('Resource name must be between 1 and 64 characters');
+    if (name.length < 1) {
+        throw new Error(`${category} name must be at least 1 character long`);
+    }
+
+    if (name.length > 64) {
+        throw new Error(
+            `${category} name cannot exceed 64 characters (current length: ${name.length})`
+        );
     }
 
     // Check for special endpoints
     if (SPECIAL_ENDPOINTS.includes(name.toLowerCase())) {
         throw new Error(
-            `'${name}' is a reserved word and cannot be used as a resource name`
+            `'${name}' is a reserved word and cannot be used as a ${category} name. Reserved words: ${SPECIAL_ENDPOINTS.join(
+                ', '
+            )}`
         );
     }
 
-    // Check for unsafe patterns
-    for (const pattern of UNSAFE_PATTERNS) {
+    // Check for unsafe patterns with specific messages
+    for (const {pattern, message} of UNSAFE_PATTERNS) {
         if (pattern.test(name)) {
-            throw new Error(
-                'Resource name contains invalid characters or patterns'
-            );
+            throw new Error(`Invalid ${category} name '${name}': ${message}`);
         }
-    }
-
-    // Only allow alphanumeric characters, single hyphens, and underscores
-    const validNamePattern = /^[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)*$/;
-    if (!validNamePattern.test(name)) {
-        throw new Error(
-            'Resource name must contain only letters, numbers, hyphens, and underscores, and cannot have consecutive separators'
-        );
     }
 
     return true;
 };
 
-// Validate entire path to protect against path traversal
+// Validate entire path with specific error messages
 const validatePath = parts => {
     if (!Array.isArray(parts)) {
-        throw new Error('Path must be an array of segments');
+        throw new Error(
+            `Path must be an array of segments, received ${typeof parts}`
+        );
+    }
+
+    if (parts.length === 0) {
+        throw new Error('Path cannot be empty');
     }
 
     const joinedPath = parts.join('/');
 
-    // Prevent any path traversal attempts
-    if (
-        joinedPath.includes('..') ||
-        joinedPath.includes('./') ||
-        joinedPath.includes('/.')
-    ) {
-        throw new Error('Invalid path detected');
+    // Check for path traversal attempts
+    if (joinedPath.includes('..')) {
+        throw new Error(
+            'Invalid path: Contains parent directory reference (..)'
+        );
     }
 
-    // Ensure path doesn't start or end with separators
-    if (joinedPath.startsWith('/') || joinedPath.endsWith('/')) {
-        throw new Error('Path cannot start or end with separators');
+    if (joinedPath.includes('./')) {
+        throw new Error(
+            'Invalid path: Contains current directory reference (./)'
+        );
     }
+
+    if (joinedPath.includes('/.')) {
+        throw new Error(
+            'Invalid path: Contains hidden directory reference (/.)'
+        );
+    }
+
+    // Check for invalid start/end
+    if (joinedPath.startsWith('/')) {
+        throw new Error('Invalid path: Cannot start with a separator (/)');
+    }
+
+    if (joinedPath.endsWith('/')) {
+        throw new Error('Invalid path: Cannot end with a separator (/)');
+    }
+
+    // Validate each path segment
+    parts.forEach((segment, index) => {
+        if (typeof segment !== 'string') {
+            throw new Error(
+                `Path segment at position ${index} must be a string, received ${typeof segment}`
+            );
+        }
+
+        if (segment.length === 0) {
+            throw new Error(
+                `Path segment at position ${index} cannot be empty`
+            );
+        }
+    });
 
     return true;
 };
 
+// Enhanced error handler with more specific messages
 const handleError = (error, operation) => {
-    console.error(`Error ${operation}:`, error);
+    console.error(`Error during ${operation}:`, error);
 
-    // If it's already an Error object with a message, throw it directly
     if (error instanceof Error) {
         throw error;
     }
 
-    // If it's an axios error with a response
     if (error.response?.data) {
         const errorData = error.response.data;
-        // Handle various error response formats
         const message =
             errorData.error ||
             errorData.message ||
@@ -127,12 +172,18 @@ const handleError = (error, operation) => {
             (typeof errorData === 'string' ? errorData : null);
 
         if (message) {
-            throw new Error(message);
+            throw new Error(`${operation} failed: ${message}`);
         }
     }
 
-    // Fallback generic error
-    throw new Error(`Failed to ${operation}`);
+    // Include HTTP status in generic error if available
+    if (error.response?.status) {
+        throw new Error(
+            `Failed to ${operation} (HTTP ${error.response.status})`
+        );
+    }
+
+    throw new Error(`Failed to ${operation}: Unknown error occurred`);
 };
 
 // Get all items for a category
