@@ -10,24 +10,14 @@ function toTitleCase(str) {
 }
 
 function formatSegment(segment) {
-    // Replace underscores with spaces
     let newSegment = segment.replace(/_/g, ' ');
-
-    // Handle the bracket content first
     newSegment = newSegment.replace(/\[(.*?)\]/g, (match, group) => {
         return `[${toTitleCase(group.trim())}]`;
     });
-
-    // Transform to title case
     newSegment = toTitleCase(newSegment);
-
-    // Final cleanup: ensure proper bracket spacing
     newSegment = newSegment
-        // First remove any spaces after [
         .replace(/\[\s+/g, '[')
-        // Then ensure one space before [
         .replace(/([^\s])\[/g, '$1 [');
-
     return newSegment;
 }
 
@@ -37,20 +27,68 @@ function formatKey(rawKey) {
     return formattedSegments.join(': ');
 }
 
-export default function useChangeParser(changes) {
-    const parseValue = value => {
-        if (value === null || value === undefined || value === '~') {
-            return '-';
-        }
-        if (Array.isArray(value)) {
-            return value.length === 0 ? '[]' : value.join(', ');
-        }
-        if (typeof value === 'object') {
-            return JSON.stringify(value, null, 2);
-        }
-        return String(value);
-    };
+function parseValue(value) {
+    if (value === null || value === undefined || value === '~') {
+        return '-';
+    }
 
+    if (Array.isArray(value)) {
+        if (value.length === 0) return '[]';
+
+        // Special handling for conditions array
+        if (value[0]?.name && value[0]?.pattern) {
+            const formattedConditions = value.map(condition => {
+                const parts = [];
+                // Add name
+                parts.push(condition.name);
+
+                // Add important attributes
+                const attributes = [];
+                if (condition.required) attributes.push('Required');
+                if (condition.negate) attributes.push('Negated');
+
+                // Add pattern if different from name
+                if (condition.pattern && condition.pattern !== condition.name) {
+                    attributes.push(`Pattern: ${condition.pattern}`);
+                }
+
+                // Add any additional properties worth showing
+                if (condition.type) attributes.push(`Type: ${condition.type}`);
+
+                // Combine all parts
+                if (attributes.length > 0) {
+                    parts.push(`(${attributes.join(', ')})`);
+                }
+
+                return parts.join(' ');
+            });
+
+            return formattedConditions.join('\n');
+        }
+
+        // Handle other arrays of objects
+        return value
+            .map(item => {
+                if (typeof item === 'object' && item !== null) {
+                    return Object.entries(item)
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join(', ');
+                }
+                return String(item);
+            })
+            .join(', ');
+    }
+
+    if (typeof value === 'object' && value !== null) {
+        return Object.entries(value)
+            .map(([k, v]) => `${k}: ${parseValue(v)}`)
+            .join(', ');
+    }
+
+    return String(value);
+}
+
+export default function useChangeParser(changes) {
     const parsedChanges = useMemo(() => {
         if (!Array.isArray(changes)) return [];
 
