@@ -1,74 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Modal from '../../../ui/Modal';
+import Modal from '@ui/Modal';
 import DiffCommit from './DiffCommit';
 import {FileText} from 'lucide-react';
+import useChangeParser from '@hooks/useChangeParser';
 
 const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
-    const parseKey = key => {
-        // Handle custom formats
-        if (key.startsWith('custom_formats[')) {
-            const formatName = key.match(/\[(.*?)\]/)?.[1] || '';
-            return `Custom Format: ${formatName}`;
-        }
-
-        // Handle nested keys
-        const parts = key.split('.');
-        if (parts.length > 1) {
-            return parts
-                .map(part =>
-                    part
-                        .split(/[\[\]_]/)
-                        .map(
-                            word =>
-                                word.charAt(0).toUpperCase() +
-                                word.slice(1).toLowerCase()
-                        )
-                        .join(' ')
-                )
-                .join(': ');
-        }
-
-        // Handle special cases
-        const specialTerms = {
-            minimumcustomformatscore: 'Minimum Custom Format Score',
-            minscoreincrement: 'Minimum Score Increment',
-            upgradeuntilscore: 'Upgrade Until Score',
-            upgradesallowed: 'Upgrades Allowed',
-            customformat: 'Custom Format',
-            qualitygroup: 'Quality Group'
-        };
-
-        const lowerKey = key.toLowerCase();
-        if (specialTerms[lowerKey]) {
-            return specialTerms[lowerKey];
-        }
-
-        // General formatting
-        return key
-            .split(/[\[\]_]/)
-            .map(
-                word =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            )
-            .join(' ')
-            .trim();
-    };
-
-    const formatValue = value => {
-        if (value === null || value === undefined || value === '~') return '-';
-
-        if (Array.isArray(value)) {
-            return value.length === 0 ? '[]' : value.join(', ');
-        }
-
-        if (typeof value === 'object') {
-            return JSON.stringify(value, null, 2);
-        }
-
-        return String(value);
-    };
-
+    // Parse the array of changes
+    const parsedChanges = useChangeParser(change.changes || []);
     const titleContent = (
         <div className='flex items-center space-x-4'>
             <div className='flex items-center space-x-2'>
@@ -88,6 +27,7 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
             title={titleContent}
             width='7xl'>
             <div className='space-y-4'>
+                {/* If there's a commit message, show it */}
                 {change.commit_message && (
                     <DiffCommit commitMessage={change.commit_message} />
                 )}
@@ -111,27 +51,26 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {change.changes.map((item, index) => (
+                            {parsedChanges.map(item => (
                                 <tr
-                                    key={index}
+                                    key={item.id}
                                     className='bg-gray-900 border-b border-gray-700'>
                                     <td className='py-4 px-4 text-gray-300'>
-                                        {item.change.charAt(0).toUpperCase() +
-                                            item.change.slice(1).toLowerCase()}
+                                        {item.changeType}
                                     </td>
                                     <td className='py-4 px-4'>
                                         <span className='font-medium text-gray-100'>
-                                            {parseKey(item.key)}
+                                            {item.key}
                                         </span>
                                     </td>
                                     <td className='py-4 px-4 font-mono text-sm text-gray-300'>
                                         <div className='whitespace-pre-wrap'>
-                                            {formatValue(item.from)}
+                                            {item.from}
                                         </div>
                                     </td>
                                     <td className='py-4 px-4 font-mono text-sm text-gray-300'>
                                         <div className='whitespace-pre-wrap'>
-                                            {formatValue(item.to || item.value)}
+                                            {item.to}
                                         </div>
                                     </td>
                                 </tr>
