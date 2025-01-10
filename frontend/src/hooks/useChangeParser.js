@@ -1,56 +1,42 @@
 import {useMemo} from 'react';
 
-/**
- * Make the first character uppercase and
- * insert spaces before capital letters: "preferFreeleech" -> "Prefer Freeleech"
- */
 function toTitleCase(str) {
-    return (
-        str
-            // Insert space before any capital letters (i.e., from "preferFreeleech" -> "prefer Freeleech")
-            .replace(/([A-Z])/g, ' $1')
-            // Trim out extra spaces in case we introduced any, then uppercase first letter
-            .trim()
-            .replace(/^./, char => char.toUpperCase())
-    );
+    return str
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z])([a-z])/g, ' $1$2')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/^./, char => char.toUpperCase());
 }
 
-/**
- * Transform a single segment of the key, e.g.:
- * "tweaks" => "Tweaks"
- * "custom_formats[test]" => "Custom Formats [Test]"
- */
 function formatSegment(segment) {
     // Replace underscores with spaces
     let newSegment = segment.replace(/_/g, ' ');
 
-    // If there's bracket notation: e.g. [test], transform "test" -> "Test"
+    // Handle the bracket content first
     newSegment = newSegment.replace(/\[(.*?)\]/g, (match, group) => {
-        return `[${toTitleCase(group)}]`;
+        return `[${toTitleCase(group.trim())}]`;
     });
 
-    // Finally, transform the segment itself into title case
-    // e.g. "custom formats" => "Custom Formats"
+    // Transform to title case
     newSegment = toTitleCase(newSegment);
+
+    // Final cleanup: ensure proper bracket spacing
+    newSegment = newSegment
+        // First remove any spaces after [
+        .replace(/\[\s+/g, '[')
+        // Then ensure one space before [
+        .replace(/([^\s])\[/g, '$1 [');
 
     return newSegment;
 }
 
-/**
- * Example:
- * "tweaks.preferFreeleech" => ["tweaks", "preferFreeleech"] => "Tweaks: Prefer Freeleech"
- * "custom_formats[test].score" => ["custom_formats[test]", "score"] => "Custom Formats [Test]: Score"
- */
 function formatKey(rawKey) {
-    // If there's no dot, it’s just one segment
     const segments = rawKey.split('.');
     const formattedSegments = segments.map(segment => formatSegment(segment));
     return formattedSegments.join(': ');
 }
 
-/**
- * Hook to parse the raw changes from the backend into a more display-friendly format.
- */
 export default function useChangeParser(changes) {
     const parseValue = value => {
         if (value === null || value === undefined || value === '~') {
@@ -76,7 +62,7 @@ export default function useChangeParser(changes) {
             return {
                 id: `${item.key}-${index}-${item.change}`,
                 changeType,
-                key: formatKey(item.key), // <--- Use our new formatter here
+                key: formatKey(item.key),
                 from: parseValue(item.from),
                 to: parseValue(item.to ?? item.value)
             };
