@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {COMMIT_TYPES, COMMIT_SCOPES} from '@constants/commits';
+import {Info} from 'lucide-react';
 
 const formatBodyLines = text => {
     if (!text) return '';
@@ -51,6 +52,19 @@ const CommitSection = ({commitMessage, setCommitMessage}) => {
         <div className='mt-4 space-y-4'>
             <div className='bg-gray-800 rounded-lg overflow-hidden border border-gray-700 shadow-xl'>
                 <div className='p-4 space-y-4'>
+                    <div className='flex justify-between items-center mb-4'>
+                        <h2 className='text-lg font-semibold text-gray-200'>
+                            Commit Message
+                        </h2>
+                        <a
+                            href='https://github.com/Dictionarry-Hub/database/blob/stable/CONTRIBUTING.md'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-gray-400 hover:text-gray-200'
+                            title='View commit guidelines'>
+                            <Info className='w-5 h-5' />
+                        </a>
+                    </div>
                     <div className='flex space-x-4'>
                         <div className='flex-1'>
                             <label className='block text-sm font-medium text-gray-400 mb-1'>
