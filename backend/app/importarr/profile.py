@@ -189,29 +189,33 @@ def sync_format_ids(profile_data: Dict, format_id_map: Dict[str, int]) -> Dict:
     if 'formatItems' not in profile_data:
         profile_data['formatItems'] = []
 
-    existing_format_names = {
-        item['name']
-        for item in profile_data['formatItems']
-    }
+    # Create a set to track format names we've already processed
+    processed_formats = set()
     synced_items = []
 
-    for item in profile_data['formatItems']:
-        if item['name'] in format_id_map:
-            synced_items.append({
-                'format': format_id_map[item['name']],
-                'name': item['name'],
-                'score': item['score']
-            })
-        else:
-            logger.warning(f"Custom format not found in arr: {item['name']}")
+    # First process existing items
+    for item in profile_data.get('formatItems', []):
+        if item['name'] not in processed_formats:
+            if item['name'] in format_id_map:
+                synced_items.append({
+                    'format': format_id_map[item['name']],
+                    'name': item['name'],
+                    'score': item['score']
+                })
+                processed_formats.add(item['name'])
+            else:
+                logger.warning(
+                    f"Custom format not found in arr: {item['name']}")
 
+    # Only add formats that haven't been processed yet
     for format_name, format_id in format_id_map.items():
-        if format_name not in existing_format_names:
+        if format_name not in processed_formats:
             synced_items.append({
                 'format': format_id,
                 'name': format_name,
-                'score': 0
+                'score': 0  # Default score for new formats
             })
+            processed_formats.add(format_name)
 
     profile_data['formatItems'] = synced_items
     return profile_data
@@ -326,15 +330,12 @@ def _import_and_score_formats(formats: List[str],
             score_copy['name'] = format_names[i]
             modified_scores.append(score_copy)
 
+        # Only append once with the modified scores
         profile_data['custom_formats'].extend(modified_scores)
 
     except Exception as e:
         logger.error(f"Error importing {feature_name} formats: {str(e)}")
         return
-
-    if 'custom_formats' not in profile_data:
-        profile_data['custom_formats'] = []
-    profile_data['custom_formats'].extend(scores)
 
 
 def process_profile(profile_data: Dict, existing_names: Dict[str, int],
