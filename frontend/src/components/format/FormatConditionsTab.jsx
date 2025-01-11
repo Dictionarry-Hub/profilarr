@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Plus, InfoIcon} from 'lucide-react';
+import {InfoIcon} from 'lucide-react';
 import {usePatterns} from '@hooks/usePatterns';
 import {createCondition} from './conditions/conditionTypes';
 import ConditionCard from './conditions/ConditionCard';
+import AddButton from '@ui/DataBar/AddButton';
 
 const FormatConditionsTab = ({conditions, onConditionsChange}) => {
     const {patterns, isLoading, error} = usePatterns();
@@ -45,38 +46,50 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
     };
 
     if (isLoading) {
-        return <div>Loading patterns...</div>;
+        return (
+            <div className='flex items-center justify-center h-full'>
+                <div className='text-gray-500 dark:text-gray-400'>
+                    Loading patterns...
+                </div>
+            </div>
+        );
     }
 
     if (error) {
-        return <div>Error loading patterns: {error}</div>;
+        return (
+            <div className='flex items-center justify-center h-full'>
+                <div className='text-red-500 dark:text-red-400'>
+                    Error loading patterns: {error}
+                </div>
+            </div>
+        );
     }
 
     return (
         <div className='h-full flex flex-col space-y-4'>
-            {/* Header with Info and Add Button */}
-            <div className='flex gap-4 items-stretch'>
-                <div className='flex-1 flex gap-2 p-3 text-xs bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg'>
+            {/* Header Section */}
+            <div className='flex items-center gap-4 h-16'>
+                {/* Info Alert */}
+                <div
+                    className='flex-1 flex items-center gap-2 px-3 py-2 
+                    bg-blue-50 dark:bg-blue-900/20 
+                    border border-blue-200 dark:border-blue-800 
+                    rounded-md'>
                     <InfoIcon className='h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0' />
-                    <p className='text-blue-700 dark:text-blue-300'>
-                        Conditions define how this format matches media
-                        releases. Each condition can be marked as required or
-                        negated. Required conditions must match for the format
-                        to apply, while negated conditions must not match. Use
-                        patterns to match against release titles and groups.
+                    <p className='text-sm text-blue-700 dark:text-blue-300'>
+                        Define matching rules using required and negated
+                        conditions to control how formats are applied to media
+                        releases.
                     </p>
                 </div>
-                <button
-                    onClick={handleAddCondition}
-                    className='flex items-center justify-center gap-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg'>
-                    <Plus className='w-5 h-5' />
-                    <span className='text-sm font-medium'>Add</span>
-                </button>
+
+                {/* Add Button */}
+                <AddButton onClick={handleAddCondition} label='Add Condition' />
             </div>
 
             {/* Scrollable Conditions List */}
-            <div className='flex-1 overflow-y-auto min-h-0'>
-                <div className='space-y-3'>
+            <div className='flex-1 overflow-y-auto min-h-0 scrollable pr-2'>
+                <div className='space-y-3 pb-4'>
                     {conditions.map((condition, index) => (
                         <ConditionCard
                             key={index}
