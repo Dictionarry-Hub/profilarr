@@ -9,7 +9,7 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
     const {patterns, isLoading, error} = usePatterns();
 
     const handleAddCondition = () => {
-        onConditionsChange([...conditions, createCondition()]);
+        onConditionsChange([createCondition(), ...conditions]);
     };
 
     const handleConditionChange = (index, updatedCondition) => {
@@ -53,47 +53,45 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
     }
 
     return (
-        <div className='h-full flex flex-col space-y-2'>
-            {/* Info Box */}
-            <div className='flex gap-2 p-3 text-xs bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg'>
-                <InfoIcon className='h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0' />
-                <p className='text-blue-700 dark:text-blue-300'>
-                    Conditions define how this format matches media releases.
-                    Each condition can be marked as required or negated.
-                    Required conditions must match for the format to apply,
-                    while negated conditions must not match. Use patterns to
-                    match against release titles and groups.
-                </p>
+        <div className='h-full flex flex-col space-y-4'>
+            {/* Header with Info and Add Button */}
+            <div className='flex gap-4 items-stretch'>
+                <div className='flex-1 flex gap-2 p-3 text-xs bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg'>
+                    <InfoIcon className='h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0' />
+                    <p className='text-blue-700 dark:text-blue-300'>
+                        Conditions define how this format matches media
+                        releases. Each condition can be marked as required or
+                        negated. Required conditions must match for the format
+                        to apply, while negated conditions must not match. Use
+                        patterns to match against release titles and groups.
+                    </p>
+                </div>
+                <button
+                    onClick={handleAddCondition}
+                    className='flex items-center justify-center gap-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded-lg'>
+                    <Plus className='w-5 h-5' />
+                    <span className='text-sm font-medium'>Add</span>
+                </button>
             </div>
 
-            {/* Existing Conditions */}
-            <div className='space-y-3'>
-                {conditions.map((condition, index) => (
-                    <ConditionCard
-                        key={index}
-                        condition={condition}
-                        onChange={updatedCondition =>
-                            handleConditionChange(index, updatedCondition)
-                        }
-                        onDelete={() => handleConditionDelete(index)}
-                        patterns={patterns}
-                        onMoveUp={() => handleMoveUp(index)}
-                        onMoveDown={() => handleMoveDown(index)}
-                        isFirst={index === 0}
-                        isLast={index === conditions.length - 1}
-                    />
-                ))}
-            </div>
-
-            {/* Add New Condition Card */}
-            <div
-                onClick={handleAddCondition}
-                className='bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors cursor-pointer'>
-                <div className='flex items-center justify-center h-[38px]'>
-                    <Plus className='w-5 h-5 text-gray-400 dark:text-gray-500 mr-2' />
-                    <span className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-                        Add New Condition
-                    </span>
+            {/* Scrollable Conditions List */}
+            <div className='flex-1 overflow-y-auto min-h-0'>
+                <div className='space-y-3'>
+                    {conditions.map((condition, index) => (
+                        <ConditionCard
+                            key={index}
+                            condition={condition}
+                            onChange={updatedCondition =>
+                                handleConditionChange(index, updatedCondition)
+                            }
+                            onDelete={() => handleConditionDelete(index)}
+                            patterns={patterns}
+                            onMoveUp={() => handleMoveUp(index)}
+                            onMoveDown={() => handleMoveDown(index)}
+                            isFirst={index === 0}
+                            isLast={index === conditions.length - 1}
+                        />
+                    ))}
                 </div>
             </div>
         </div>
