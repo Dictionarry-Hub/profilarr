@@ -13,6 +13,7 @@ import MassActionsBar from '@ui/MassActionsBar';
 import ImportModal from '@ui/ImportModal';
 import {importFormats} from '@api/import';
 import DataBar from '@ui/DataBar/DataBar';
+import useSearch from '@hooks/useSearch';
 
 const loadingMessages = [
     'Formatting the formatters...',
@@ -62,18 +63,39 @@ function FormatPage() {
     const [formats, setFormats] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedFormat, setSelectedFormat] = useState(null);
-    const [sortBy, setSortBy] = useState('name');
-    const [filterType, setFilterType] = useState('none');
-    const [filterValue, setFilterValue] = useState('');
     const [allTags, setAllTags] = useState([]);
     const [isCloning, setIsCloning] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [mergeConflicts, setMergeConflicts] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [willBeSelected, setWillBeSelected] = useState([]);
 
     const navigate = useNavigate();
+
+    // Initialize useSearch hook
+    const {
+        searchTerms,
+        currentInput,
+        setCurrentInput,
+        addSearchTerm,
+        removeSearchTerm,
+        clearSearchTerms,
+        filterType,
+        setFilterType,
+        filterValue,
+        setFilterValue,
+        sortBy,
+        setSortBy,
+        items: filteredFormats
+    } = useSearch(formats, {
+        searchableFields: ['content.name', 'content.tags'],
+        initialSortBy: 'name',
+        sortOptions: {
+            name: (a, b) => a.content.name.localeCompare(b.content.name),
+            dateModified: (a, b) =>
+                new Date(b.modified_date) - new Date(a.modified_date)
+        }
+    });
 
     const {
         selectedItems,
@@ -228,7 +250,6 @@ function FormatPage() {
 
     const handleMassDelete = async () => {
         try {
-            const filteredFormats = getFilteredAndSortedFormats();
             const selectedFormats = Array.from(selectedItems).map(
                 index => filteredFormats[index]
             );
@@ -246,7 +267,6 @@ function FormatPage() {
                     'Failed to delete selected formats'
             );
         } finally {
-            // Always reload data and reset selection state, regardless of success/failure
             fetchFormats();
             toggleSelectionMode();
             clearSelection();
@@ -255,7 +275,6 @@ function FormatPage() {
 
     const handleMassImport = async arr => {
         try {
-            const filteredFormats = getFilteredAndSortedFormats();
             const selectedFormats = Array.from(selectedItems).map(
                 index => filteredFormats[index]
             );
@@ -275,7 +294,7 @@ function FormatPage() {
         if (e.shiftKey) {
             handleMouseEnter(index, true);
         }
-        handleSelect(formatName, index, e, getFilteredAndSortedFormats());
+        handleSelect(formatName, index, e, filteredFormats);
     };
 
     const handleMouseEnter = (index, isShiftKey) => {
@@ -283,46 +302,12 @@ function FormatPage() {
             const start = Math.min(lastSelectedIndex, index);
             const end = Math.max(lastSelectedIndex, index);
 
-            const potentialSelection = getFilteredAndSortedFormats()
+            const potentialSelection = filteredFormats
                 .slice(start, end + 1)
                 .map((format, idx) => idx + start);
 
             setWillBeSelected(potentialSelection);
         }
-    };
-
-    const getFilteredAndSortedFormats = () => {
-        let filtered = [...formats];
-
-        if (searchQuery) {
-            filtered = filtered.filter(
-                format =>
-                    format.content.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                    format.content.tags?.some(tag =>
-                        tag.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-            );
-        }
-
-        if (filterType === 'tag' && filterValue) {
-            filtered = filtered.filter(format =>
-                format.content.tags?.includes(filterValue)
-            );
-        }
-
-        return filtered.sort((a, b) => {
-            switch (sortBy) {
-                case 'dateModified':
-                    return (
-                        new Date(b.modified_date) - new Date(a.modified_date)
-                    );
-                case 'name':
-                default:
-                    return a.content.name.localeCompare(b.content.name);
-            }
-        });
     };
 
     if (isLoading) {
@@ -338,7 +323,12 @@ function FormatPage() {
     return (
         <div className='w-full min-h-[70vh] space-y-2 flex flex-col'>
             <DataBar
-                onSearch={setSearchQuery}
+                searchTerms={searchTerms}
+                currentInput={currentInput}
+                onInputChange={setCurrentInput}
+                onAddTerm={addSearchTerm}
+                onRemoveTerm={removeSearchTerm}
+                onClearTerms={clearSearchTerms}
                 searchPlaceholder='Search by name or tag...'
                 filterType={filterType}
                 setFilterType={setFilterType}
@@ -354,7 +344,7 @@ function FormatPage() {
             />
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-grow'>
-                {getFilteredAndSortedFormats().map((format, index) => (
+                {filteredFormats.map((format, index) => (
                     <div
                         key={format.file_name}
                         data-format-index={index}

@@ -12,6 +12,7 @@ import MassActionsBar from '@ui/MassActionsBar';
 import ImportModal from '@ui/ImportModal';
 import {importProfiles} from '@api/import';
 import DataBar from '@ui/DataBar/DataBar';
+import useSearch from '@hooks/useSearch';
 
 const LoadingState = () => (
     <div className='w-full min-h-[70vh] flex flex-col items-center justify-center'>
@@ -57,18 +58,49 @@ function ProfilePage() {
     const [formats, setFormats] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProfile, setSelectedProfile] = useState(null);
-    const [sortBy, setSortBy] = useState('name');
-    const [filterType, setFilterType] = useState('none');
-    const [filterValue, setFilterValue] = useState('');
     const [allTags, setAllTags] = useState([]);
     const [isCloning, setIsCloning] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [mergeConflicts, setMergeConflicts] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [willBeSelected, setWillBeSelected] = useState([]);
 
     const navigate = useNavigate();
+
+    // Initialize useSearch hook with profile-specific configuration
+    const {
+        searchTerms,
+        currentInput,
+        setCurrentInput,
+        addSearchTerm,
+        removeSearchTerm,
+        clearSearchTerms,
+        filterType,
+        setFilterType,
+        filterValue,
+        setFilterValue,
+        sortBy,
+        setSortBy,
+        items: filteredProfiles
+    } = useSearch(profiles, {
+        searchableFields: ['content.name', 'content.tags'],
+        initialSortBy: 'name',
+        sortOptions: {
+            name: (a, b) => a.content.name.localeCompare(b.content.name),
+            dateModified: (a, b) =>
+                new Date(b.modified_date) - new Date(a.modified_date),
+            dateCreated: (a, b) =>
+                new Date(b.created_date) - new Date(a.created_date)
+        },
+        customFilters: {
+            date: (item, value) => {
+                if (!value) return true;
+                const itemDate = new Date(item.modified_date);
+                const filterDate = new Date(value);
+                return itemDate.toDateString() === filterDate.toDateString();
+            }
+        }
+    });
 
     const {
         selectedItems,
@@ -227,7 +259,7 @@ function ProfilePage() {
     const handleMassDelete = async () => {
         try {
             const selectedProfiles = Array.from(selectedItems).map(
-                index => profiles[index]
+                index => filteredProfiles[index]
             );
             for (const profile of selectedProfiles) {
                 await Profiles.delete(profile.file_name.replace('.yml', ''));
@@ -244,7 +276,7 @@ function ProfilePage() {
     const handleMassImport = async arr => {
         try {
             const selectedProfilesList = Array.from(selectedItems)
-                .map(index => profiles[index])
+                .map(index => filteredProfiles[index])
                 .filter(profile => profile);
 
             if (selectedProfilesList.length === 0) {
@@ -269,7 +301,7 @@ function ProfilePage() {
         if (e.shiftKey) {
             handleMouseEnter(index, true);
         }
-        handleSelect(profileName, index, e, getFilteredAndSortedProfiles());
+        handleSelect(profileName, index, e, filteredProfiles);
     };
 
     const handleMouseEnter = (index, isShiftKey) => {
@@ -277,60 +309,12 @@ function ProfilePage() {
             const start = Math.min(lastSelectedIndex, index);
             const end = Math.max(lastSelectedIndex, index);
 
-            const potentialSelection = getFilteredAndSortedProfiles()
+            const potentialSelection = filteredProfiles
                 .slice(start, end + 1)
                 .map((profile, idx) => idx + start);
 
             setWillBeSelected(potentialSelection);
         }
-    };
-
-    const getFilteredAndSortedProfiles = () => {
-        return profiles
-            .filter(profile => {
-                if (searchQuery) {
-                    return (
-                        profile.content.name
-                            .toLowerCase()
-                            .includes(searchQuery.toLowerCase()) ||
-                        profile.content.tags?.some(tag =>
-                            tag
-                                .toLowerCase()
-                                .includes(searchQuery.toLowerCase())
-                        )
-                    );
-                }
-
-                if (filterType === 'tag') {
-                    return profile.content.tags?.includes(filterValue);
-                }
-
-                if (filterType === 'date') {
-                    const profileDate = new Date(profile.modified_date);
-                    const filterDate = new Date(filterValue);
-                    return (
-                        profileDate.toDateString() === filterDate.toDateString()
-                    );
-                }
-
-                return true;
-            })
-            .sort((a, b) => {
-                switch (sortBy) {
-                    case 'dateModified':
-                        return (
-                            new Date(b.modified_date) -
-                            new Date(a.modified_date)
-                        );
-                    case 'dateCreated':
-                        return (
-                            new Date(b.created_date) - new Date(a.created_date)
-                        );
-                    case 'name':
-                    default:
-                        return a.content.name.localeCompare(b.content.name);
-                }
-            });
     };
 
     const formatDate = dateString => {
@@ -347,12 +331,15 @@ function ProfilePage() {
         );
     }
 
-    const filteredProfiles = getFilteredAndSortedProfiles();
-
     return (
         <div className='w-full space-y-2'>
             <DataBar
-                onSearch={setSearchQuery}
+                searchTerms={searchTerms}
+                currentInput={currentInput}
+                onInputChange={setCurrentInput}
+                onAddTerm={addSearchTerm}
+                onRemoveTerm={removeSearchTerm}
+                onClearTerms={clearSearchTerms}
                 searchPlaceholder='Search by name or tag...'
                 filterType={filterType}
                 setFilterType={setFilterType}

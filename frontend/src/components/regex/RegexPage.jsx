@@ -8,6 +8,7 @@ import {useMassSelection} from '@hooks/useMassSelection';
 import {useKeyboardShortcut} from '@hooks/useKeyboardShortcut';
 import MassActionsBar from '@ui/MassActionsBar';
 import DataBar from '@ui/DataBar/DataBar';
+import useSearch from '@hooks/useSearch';
 
 const loadingMessages = [
     'Matching all the patterns...',
@@ -32,19 +33,41 @@ const LoadingState = () => (
 );
 
 function RegexPage() {
+    // Basic state
     const [patterns, setPatterns] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPattern, setSelectedPattern] = useState(null);
-    const [sortBy, setSortBy] = useState('name');
-    const [filterType, setFilterType] = useState('none');
-    const [filterValue, setFilterValue] = useState('');
     const [allTags, setAllTags] = useState([]);
     const [isCloning, setIsCloning] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
     const [willBeSelected, setWillBeSelected] = useState([]);
-    const [originalIndices, setOriginalIndices] = useState(new Map());
 
+    // Initialize useSearch hook
+    const {
+        searchTerms,
+        currentInput,
+        setCurrentInput,
+        addSearchTerm,
+        removeSearchTerm,
+        clearSearchTerms,
+        filterType,
+        setFilterType,
+        filterValue,
+        setFilterValue,
+        sortBy,
+        setSortBy,
+        items: filteredPatterns
+    } = useSearch(patterns, {
+        searchableFields: ['name', 'tags'],
+        initialSortBy: 'name',
+        sortOptions: {
+            name: (a, b) => a.name.localeCompare(b.name),
+            dateModified: (a, b) =>
+                new Date(b.modified_date) - new Date(a.modified_date)
+        }
+    });
+
+    // Mass selection functionality
     const {
         selectedItems,
         isSelectionMode,
@@ -54,12 +77,10 @@ function RegexPage() {
         lastSelectedIndex
     } = useMassSelection();
 
+    // Keyboard shortcuts
     useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
 
-    useEffect(() => {
-        loadPatterns();
-    }, []);
-
+    // Mouse position tracking for shift-select
     useEffect(() => {
         const handleKeyDown = e => {
             if (e.key === 'Shift' && lastSelectedIndex !== null) {
@@ -98,6 +119,11 @@ function RegexPage() {
             window.removeEventListener('mousemove', handleMouseMove);
         };
     }, [lastSelectedIndex]);
+
+    // Initial load
+    useEffect(() => {
+        loadPatterns();
+    }, []);
 
     const loadPatterns = async () => {
         setIsLoading(true);
@@ -158,7 +184,6 @@ function RegexPage() {
 
     const handleMassDelete = async () => {
         try {
-            const filteredPatterns = getFilteredAndSortedPatterns();
             const selectedPatterns = Array.from(selectedItems).map(
                 index => filteredPatterns[index]
             );
@@ -173,7 +198,6 @@ function RegexPage() {
             console.error('Error deleting patterns:', error);
             Alert.error('Failed to delete selected patterns');
         } finally {
-            // Always reload data and reset selection state, regardless of success/failure
             loadPatterns();
             toggleSelectionMode();
             clearSelection();
@@ -184,57 +208,18 @@ function RegexPage() {
         if (e.shiftKey) {
             handleMouseEnter(index, true);
         }
-        handleSelect(patternName, index, e, getFilteredAndSortedPatterns());
+        handleSelect(patternName, index, e, filteredPatterns);
     };
 
     const handleMouseEnter = (index, isShiftKey) => {
         if (isShiftKey && lastSelectedIndex !== null) {
             const start = Math.min(lastSelectedIndex, index);
             const end = Math.max(lastSelectedIndex, index);
-
-            const potentialSelection = getFilteredAndSortedPatterns()
+            const potentialSelection = filteredPatterns
                 .slice(start, end + 1)
                 .map((pattern, idx) => idx + start);
-
             setWillBeSelected(potentialSelection);
         }
-    };
-
-    const getFilteredAndSortedPatterns = () => {
-        let filtered = patterns.map((pattern, index) => ({
-            ...pattern,
-            originalIndex: index
-        }));
-
-        if (searchQuery) {
-            filtered = filtered.filter(
-                pattern =>
-                    pattern.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                    pattern.tags?.some(tag =>
-                        tag.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-            );
-        }
-
-        if (filterType === 'tag' && filterValue) {
-            filtered = filtered.filter(pattern =>
-                pattern.tags?.includes(filterValue)
-            );
-        }
-
-        return filtered.sort((a, b) => {
-            switch (sortBy) {
-                case 'dateModified':
-                    return (
-                        new Date(b.modified_date) - new Date(a.modified_date)
-                    );
-                case 'name':
-                default:
-                    return a.name.localeCompare(b.name);
-            }
-        });
     };
 
     const formatDate = dateString => {
@@ -248,8 +233,12 @@ function RegexPage() {
     return (
         <div className='w-full space-y-2'>
             <DataBar
-                onSearch={setSearchQuery}
-                searchPlaceholder='Search by name or tag...'
+                searchTerms={searchTerms}
+                currentInput={currentInput}
+                onInputChange={setCurrentInput}
+                onAddTerm={addSearchTerm}
+                onRemoveTerm={removeSearchTerm}
+                onClearTerms={clearSearchTerms}
                 filterType={filterType}
                 setFilterType={setFilterType}
                 filterValue={filterValue}
@@ -264,7 +253,7 @@ function RegexPage() {
             />
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                {getFilteredAndSortedPatterns().map((pattern, index) => (
+                {filteredPatterns.map((pattern, index) => (
                     <div
                         key={pattern.name}
                         data-pattern-index={index}
