@@ -15,6 +15,11 @@ export const COMMIT_TYPES = [
         description: 'Fine-tuning and adjustments to existing components'
     },
     {
+        value: 'remove',
+        label: 'Remove',
+        description: 'Removing components or features from the system'
+    },
+    {
         value: 'fix',
         label: 'Fix',
         description: 'Corrections and bug fixes'
