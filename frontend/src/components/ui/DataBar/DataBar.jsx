@@ -17,8 +17,13 @@ const FloatingBar = ({children}) => (
 );
 
 const DataBar = ({
-    onSearch,
     searchPlaceholder = 'Search by name or tag...',
+    searchTerms,
+    currentInput,
+    onInputChange,
+    onAddTerm,
+    onRemoveTerm,
+    onClearTerms,
     filterType,
     setFilterType,
     filterValue,
@@ -34,43 +39,28 @@ const DataBar = ({
     className
 }) => {
     const [isFloating, setIsFloating] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [activeSearch, setActiveSearch] = useState('');
 
     useEffect(() => {
         const handleScroll = () => {
             setIsFloating(window.scrollY > 64);
         };
-
         window.addEventListener('scroll', handleScroll, {passive: true});
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const handleSearch = term => {
-        // First set the search term and trigger the search
-        setActiveSearch(term);
-        onSearch(term);
-
-        // Then smoothly scroll to top
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    };
-
     const controls = (
         <>
             <SearchBar
-                onSearch={handleSearch}
+                searchTerms={searchTerms}
+                currentInput={currentInput}
+                onInputChange={onInputChange}
+                onAddTerm={onAddTerm}
+                onRemoveTerm={onRemoveTerm}
+                onClearTerms={onClearTerms}
                 placeholder={searchPlaceholder}
                 className='flex-1'
                 requireEnter
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                activeSearch={activeSearch}
-                setActiveSearch={setActiveSearch}
             />
-
             <div className='flex items-center gap-3'>
                 <SortDropdown
                     options={[
@@ -81,7 +71,6 @@ const DataBar = ({
                     currentDirection='desc'
                     onSort={key => setSortBy(key)}
                 />
-
                 <FilterMenu
                     filterType={filterType}
                     setFilterType={setFilterType}
@@ -89,11 +78,9 @@ const DataBar = ({
                     setFilterValue={setFilterValue}
                     allTags={allTags}
                 />
-
                 {showAddButton && !isSelectionMode && (
                     <AddButton onClick={onAdd} label={addButtonLabel} />
                 )}
-
                 <ToggleSelectButton
                     isSelectionMode={isSelectionMode}
                     onClick={toggleSelectionMode}
