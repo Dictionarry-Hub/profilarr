@@ -169,11 +169,14 @@ function RegexPage() {
                 );
             }
             Alert.success('Selected patterns deleted successfully');
-            loadPatterns();
-            toggleSelectionMode();
         } catch (error) {
             console.error('Error deleting patterns:', error);
             Alert.error('Failed to delete selected patterns');
+        } finally {
+            // Always reload data and reset selection state, regardless of success/failure
+            loadPatterns();
+            toggleSelectionMode();
+            clearSelection();
         }
     };
 

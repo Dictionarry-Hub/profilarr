@@ -228,20 +228,28 @@ function FormatPage() {
 
     const handleMassDelete = async () => {
         try {
+            const filteredFormats = getFilteredAndSortedFormats();
             const selectedFormats = Array.from(selectedItems).map(
-                index => formats[index]
+                index => filteredFormats[index]
             );
+
             for (const format of selectedFormats) {
                 await CustomFormats.delete(
                     format.file_name.replace('.yml', '')
                 );
             }
             Alert.success('Selected formats deleted successfully');
-            fetchFormats();
-            toggleSelectionMode();
         } catch (error) {
             console.error('Error deleting formats:', error);
-            Alert.error('Failed to delete selected formats');
+            Alert.error(
+                error.response?.data?.error ||
+                    'Failed to delete selected formats'
+            );
+        } finally {
+            // Always reload data and reset selection state, regardless of success/failure
+            fetchFormats();
+            toggleSelectionMode();
+            clearSelection();
         }
     };
 
