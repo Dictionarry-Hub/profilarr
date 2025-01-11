@@ -22,6 +22,28 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
         onConditionsChange(conditions.filter((_, i) => i !== index));
     };
 
+    const handleMoveUp = index => {
+        if (index > 0) {
+            const newConditions = [...conditions];
+            [newConditions[index - 1], newConditions[index]] = [
+                newConditions[index],
+                newConditions[index - 1]
+            ];
+            onConditionsChange(newConditions);
+        }
+    };
+
+    const handleMoveDown = index => {
+        if (index < conditions.length - 1) {
+            const newConditions = [...conditions];
+            [newConditions[index], newConditions[index + 1]] = [
+                newConditions[index + 1],
+                newConditions[index]
+            ];
+            onConditionsChange(newConditions);
+        }
+    };
+
     if (isLoading) {
         return <div>Loading patterns...</div>;
     }
@@ -55,6 +77,10 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
                         }
                         onDelete={() => handleConditionDelete(index)}
                         patterns={patterns}
+                        onMoveUp={() => handleMoveUp(index)}
+                        onMoveDown={() => handleMoveDown(index)}
+                        isFirst={index === 0}
+                        isLast={index === conditions.length - 1}
                     />
                 ))}
             </div>
@@ -62,9 +88,7 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
             {/* Add New Condition Card */}
             <div
                 onClick={handleAddCondition}
-                className='bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-700 
-                         rounded-lg p-4 hover:border-blue-500 dark:hover:border-blue-400 
-                         hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors cursor-pointer'>
+                className='bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors cursor-pointer'>
                 <div className='flex items-center justify-center h-[38px]'>
                     <Plus className='w-5 h-5 text-gray-400 dark:text-gray-500 mr-2' />
                     <span className='text-sm font-medium text-gray-600 dark:text-gray-400'>
