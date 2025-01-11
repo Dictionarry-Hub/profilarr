@@ -106,38 +106,43 @@ function FormatCard({
                             </p>
                         )}
                     </div>
-                    {isSelectionMode ? (
-                        <Tooltip
-                            content={
-                                isSelected
-                                    ? 'Selected'
-                                    : willBeSelected
-                                    ? 'Will be selected'
-                                    : 'Select'
-                            }>
-                            <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    <div className='w-8 h-8 flex items-center justify-center'>
+                        {isSelectionMode ? (
+                            <Tooltip
+                                content={
                                     isSelected
-                                        ? 'bg-blue-500'
+                                        ? 'Selected'
                                         : willBeSelected
-                                        ? 'bg-blue-200 dark:bg-blue-800'
-                                        : 'bg-gray-200 dark:bg-gray-700'
-                                } transition-colors hover:bg-blue-600`}>
-                                {isSelected && (
-                                    <Check size={16} className='text-white' />
-                                )}
-                                {willBeSelected && !isSelected && (
-                                    <div className='w-2 h-2 rounded-full bg-blue-400' />
-                                )}
-                            </div>
-                        </Tooltip>
-                    ) : (
-                        <button
-                            onClick={handleCloneClick}
-                            className='p-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700'>
-                            <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
-                        </button>
-                    )}
+                                        ? 'Will be selected'
+                                        : 'Select'
+                                }>
+                                <div
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                        isSelected
+                                            ? 'bg-blue-500'
+                                            : willBeSelected
+                                            ? 'bg-blue-200 dark:bg-blue-800'
+                                            : 'bg-gray-200 dark:bg-gray-700'
+                                    } transition-colors hover:bg-blue-600`}>
+                                    {isSelected && (
+                                        <Check
+                                            size={14}
+                                            className='text-white'
+                                        />
+                                    )}
+                                    {willBeSelected && !isSelected && (
+                                        <div className='w-1.5 h-1.5 rounded-full bg-blue-400' />
+                                    )}
+                                </div>
+                            </Tooltip>
+                        ) : (
+                            <button
+                                onClick={handleCloneClick}
+                                className='w-8 h-8 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center'>
+                                <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Description */}
