@@ -1,20 +1,17 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
-import {Search} from 'lucide-react';
-import {SortDropdown} from '../ui/DataBar/SortDropdown';
-import TabViewer from '../ui/TabViewer';
+import {SortDropdown} from '@ui/DataBar/SortDropdown';
+import TabViewer from '@ui/TabViewer';
+import SearchBar from '@ui/DataBar/SearchBar';
+import useSearch from '@hooks/useSearch';
 
 const ProfileScoringTab = ({
     formats,
-    formatFilter,
-    onFormatFilterChange,
     onScoreChange,
     formatSortKey,
     formatSortDirection,
     onFormatSort,
     tags,
-    tagFilter,
-    onTagFilterChange,
     tagScores,
     onTagScoreChange,
     tagSortKey,
@@ -31,21 +28,40 @@ const ProfileScoringTab = ({
     const [localFormatScores, setLocalFormatScores] = useState({});
     const [localTagScores, setLocalTagScores] = useState({});
 
+    const {
+        searchTerms: formatSearchTerms,
+        currentInput: formatSearchInput,
+        setCurrentInput: setFormatSearchInput,
+        addSearchTerm: addFormatSearchTerm,
+        removeSearchTerm: removeFormatSearchTerm,
+        clearSearchTerms: clearFormatSearchTerms,
+        items: filteredFormats
+    } = useSearch(formats, {
+        searchableFields: ['name', 'tags'],
+        initialSortBy: formatSortKey
+    });
+
+    const tagObjects = tags.map(tag => ({name: tag}));
+
+    const {
+        searchTerms: tagSearchTerms,
+        currentInput: tagSearchInput,
+        setCurrentInput: setTagSearchInput,
+        addSearchTerm: addTagSearchTerm,
+        removeSearchTerm: removeTagSearchTerm,
+        clearSearchTerms: clearTagSearchTerms,
+        items: filteredTagObjects
+    } = useSearch(tagObjects, {
+        searchableFields: ['name']
+    });
+
+    const filteredTags = filteredTagObjects.map(t => t.name);
+
     const tabs = [
         {id: 'formats', label: 'Format Scoring'},
         {id: 'tags', label: 'Tag Scoring'},
         {id: 'upgrades', label: 'Upgrades'}
     ];
-
-    // Filter formats based on search
-    const filteredFormats = formats.filter(format =>
-        format.name.toLowerCase().includes(formatFilter.toLowerCase())
-    );
-
-    // Filter tags based on search
-    const filteredTags = tags.filter(tag =>
-        tag.toLowerCase().includes(tagFilter.toLowerCase())
-    );
 
     // Handle local score changes
     const handleFormatScoreChange = (id, value) => {
@@ -74,7 +90,7 @@ const ProfileScoringTab = ({
     const handleTagBlur = tag => {
         const localValue = localTagScores[tag];
         if (localValue === undefined) return;
-        const currentScore = tagScores[tag] ?? 0; // Use nullish coalescing
+        const currentScore = tagScores[tag] ?? 0;
         const numValue = localValue === '' ? 0 : parseInt(localValue);
         if (numValue !== currentScore) {
             onTagScoreChange(tag, numValue);
@@ -127,18 +143,16 @@ const ProfileScoringTab = ({
                 return (
                     <>
                         <div className='flex items-center gap-2'>
-                            <div className='flex-1 relative'>
-                                <Search className='absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400' />
-                                <input
-                                    type='text'
-                                    value={formatFilter}
-                                    onChange={e =>
-                                        onFormatFilterChange(e.target.value)
-                                    }
-                                    placeholder='Search formats...'
-                                    className='w-full pl-8 pr-3 py-1.5 text-xs rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-                                />
-                            </div>
+                            <SearchBar
+                                placeholder='Search formats...'
+                                className='flex-1'
+                                searchTerms={formatSearchTerms}
+                                currentInput={formatSearchInput}
+                                onInputChange={setFormatSearchInput}
+                                onAddTerm={addFormatSearchTerm}
+                                onRemoveTerm={removeFormatSearchTerm}
+                                onClearTerms={clearFormatSearchTerms}
+                            />
                             <SortDropdown
                                 options={[
                                     {key: 'name', label: 'Name'},
@@ -211,18 +225,16 @@ const ProfileScoringTab = ({
                 return (
                     <>
                         <div className='flex items-center gap-2'>
-                            <div className='flex-1 relative'>
-                                <Search className='absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400' />
-                                <input
-                                    type='text'
-                                    value={tagFilter}
-                                    onChange={e =>
-                                        onTagFilterChange(e.target.value)
-                                    }
-                                    placeholder='Search tags...'
-                                    className='w-full pl-8 pr-3 py-1.5 text-xs rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-                                />
-                            </div>
+                            <SearchBar
+                                placeholder='Search tags...'
+                                className='flex-1'
+                                searchTerms={tagSearchTerms}
+                                currentInput={tagSearchInput}
+                                onInputChange={setTagSearchInput}
+                                onAddTerm={addTagSearchTerm}
+                                onRemoveTerm={removeTagSearchTerm}
+                                onClearTerms={clearTagSearchTerms}
+                            />
                             <SortDropdown
                                 options={[
                                     {key: 'name', label: 'Name'},
@@ -367,7 +379,6 @@ const ProfileScoringTab = ({
 
     return (
         <div className='w-full space-y-4'>
-            {/* Tab Navigation */}
             <div className='flex items-center'>
                 <TabViewer
                     tabs={tabs}
@@ -375,8 +386,6 @@ const ProfileScoringTab = ({
                     onTabChange={setActiveTab}
                 />
             </div>
-
-            {/* Content Area */}
             {renderContent()}
         </div>
     );
@@ -385,7 +394,7 @@ const ProfileScoringTab = ({
 ProfileScoringTab.propTypes = {
     formats: PropTypes.arrayOf(
         PropTypes.shape({
-            id: PropTypes.string.isRequired, // Ensure id is required
+            id: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
             score: PropTypes.number.isRequired,
             tags: PropTypes.arrayOf(PropTypes.string)
