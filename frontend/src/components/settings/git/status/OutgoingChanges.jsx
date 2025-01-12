@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import IconButton from '@ui/IconButton';
 import ChangeTable from './ChangeTable';
+import PushTable from './PushTable';
 
 const OutgoingChanges = ({
     changes,
@@ -37,15 +38,45 @@ const OutgoingChanges = ({
     const totalOutgoingChanges = changes.length;
     const totalUnpushedCommits = unpushedFiles?.length || 0;
 
+    // If we only have committed changes waiting to be pushed
+    if (totalOutgoingChanges === 0 && hasUnpushedCommits) {
+        console.log('Unpushed Files:', unpushedFiles);
+
+        return (
+            <div className='mb-4'>
+                <div className='flex items-center justify-between mb-2'>
+                    <h4 className='text-sm font-medium text-gray-200 flex items-center'>
+                        <ArrowUpFromLine
+                            className='text-blue-400 mr-2'
+                            size={16}
+                        />
+                        <span>Ready to Push ({totalUnpushedCommits})</span>
+                    </h4>
+                    <div className='space-x-2 flex'>
+                        <IconButton
+                            onClick={onPushSelected}
+                            disabled={false}
+                            loading={loadingAction === 'push_changes'}
+                            icon={<Upload />}
+                            tooltip='Push Changes'
+                            className='bg-gray-700'
+                        />
+                    </div>
+                </div>
+                <div className='overflow-hidden'>
+                    <PushTable changes={unpushedFiles} />
+                </div>
+            </div>
+        );
+    }
+
+    // Regular view for uncommitted changes
     return (
         <div className='mb-4'>
             <div className='flex items-center justify-between mb-2'>
                 <h4 className='text-sm font-medium text-gray-200 flex items-center'>
                     <ArrowUpFromLine className='text-blue-400 mr-2' size={16} />
-                    <span>
-                        Outgoing Changes (
-                        {totalOutgoingChanges + totalUnpushedCommits})
-                    </span>
+                    <span>Outgoing Changes ({totalOutgoingChanges})</span>
                 </h4>
                 <div className='space-x-2 flex'>
                     <IconButton
@@ -83,33 +114,6 @@ const OutgoingChanges = ({
                         className='bg-gray-700'
                         disabledTooltip={getButtonTooltips.commit()}
                     />
-                    {hasUnpushedCommits && (
-                        <IconButton
-                            onClick={onPushSelected}
-                            disabled={!hasUnpushedCommits}
-                            loading={loadingAction === 'push_changes'}
-                            icon={<Upload />}
-                            tooltip={
-                                <div>
-                                    <div>Push Changes</div>
-                                    {unpushedFiles?.length > 0 && (
-                                        <div className='mt-1 text-xs'>
-                                            {unpushedFiles.map(
-                                                (file, index) => (
-                                                    <div key={index}>
-                                                        • {file.type}:{' '}
-                                                        {file.name}
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            }
-                            className='bg-gray-700'
-                            disabledTooltip='No changes to push'
-                        />
-                    )}
                     <IconButton
                         onClick={() => onRevertSelected(selectedChanges)}
                         disabled={selectedChanges.length === 0}
