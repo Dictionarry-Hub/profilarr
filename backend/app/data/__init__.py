@@ -105,12 +105,17 @@ def handle_item(category, name):
                 return jsonify({"error": f"Failed to delete {file_name}"}), 500
 
         elif request.method == 'POST':
+            # If a file already exists with that name, conflict
             if os.path.exists(file_path):
                 return jsonify({"error":
                                 f"File {file_name} already exists"}), 409
 
             try:
                 data = request.get_json()
+
+                if data and 'name' in data:
+                    data['name'] = data['name'].strip()
+
                 if validate(data, category):
                     save_yaml_file(file_path, data, category)
                     return jsonify(
@@ -126,6 +131,12 @@ def handle_item(category, name):
 
             try:
                 data = request.get_json()
+
+                if data and 'name' in data:
+                    data['name'] = data['name'].strip()
+                if data and 'rename' in data:
+                    data['rename'] = data['rename'].strip()
+
                 update_yaml_file(file_path, data, category)
                 return jsonify(
                     {"message": f"Successfully updated {file_name}"}), 200
