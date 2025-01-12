@@ -29,6 +29,14 @@ const SearchBar = ({
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [onClearTerms]);
 
+    const handleKeyDown = e => {
+        // Handle backspace when input is empty and there are search terms
+        if (e.key === 'Backspace' && !currentInput && searchTerms.length > 0) {
+            e.preventDefault();
+            onRemoveTerm(searchTerms[searchTerms.length - 1]);
+        }
+    };
+
     const handleKeyPress = e => {
         if (requireEnter && e.key === 'Enter' && currentInput.trim()) {
             onAddTerm(currentInput);
@@ -91,6 +99,7 @@ const SearchBar = ({
                     value={currentInput}
                     onChange={e => onInputChange(e.target.value)}
                     onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyDown}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     placeholder={
