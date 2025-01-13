@@ -86,6 +86,18 @@ class FormatConverter:
                 condition['qualityModifier'])
             fields = [{'name': 'value', 'value': value}]
 
+        elif condition_type == 'size':
+            implementation = 'SizeSpecification'
+            min_size = condition.get('minSize')
+            max_size = condition.get('maxSize')
+            fields = [{
+                'name': 'min',
+                'value': min_size
+            }, {
+                'name': 'max',
+                'value': max_size
+            }]
+
         elif condition_type == 'language':
             implementation = 'LanguageSpecification'
             language_name = condition['language'].lower()
@@ -103,7 +115,7 @@ class FormatConverter:
             except Exception:
                 return None
 
-        # still need to do size, year, release type
+        # still need to do year, release type
         else:
             return None
 
