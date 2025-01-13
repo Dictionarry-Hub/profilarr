@@ -66,6 +66,18 @@ class Sources:
     }
 
 
+class Quality_Modifiers:
+    """Quality modifier mappings for Radarr ONLY"""
+    RADARR = {
+        'none': 0,
+        'regional': 1,
+        'screener': 2,
+        'rawhd': 3,
+        'brdisk': 4,
+        'remux': 5,
+    }
+
+
 class Qualities:
     """Quality mappings for both applications"""
     COMMON_RESOLUTIONS = {
@@ -926,6 +938,10 @@ class ValueResolver:
     def get_quality_name(cls, name: str, target_app: TargetApp) -> str:
         """Maps quality names between different formats based on target app"""
         return QualityNameMapper.map_quality_name(name, target_app)
+
+    @classmethod
+    def get_quality_modifier(cls, quality_modifier: str) -> int:
+        return Quality_Modifiers.RADARR.get(quality_modifier.lower(), 0)
 
     @classmethod
     def get_language(cls,
