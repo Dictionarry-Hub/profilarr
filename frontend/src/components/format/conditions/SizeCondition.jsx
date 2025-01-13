@@ -1,10 +1,6 @@
 import React from 'react';
 
-const UNITS = [
-    {value: 'MB', label: 'MB'},
-    {value: 'GB', label: 'GB'},
-    {value: 'TB', label: 'TB'}
-];
+const UNITS = [{value: 'GB', label: 'GB'}];
 
 const SizeCondition = ({condition, onChange}) => {
     const handleSizeChange = (key, value) => {
