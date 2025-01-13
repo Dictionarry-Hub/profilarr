@@ -51,14 +51,15 @@ class FormatConverter:
             target_app: TargetApp) -> Optional[Specification]:
         condition_type = condition['type']
 
-        if condition_type in ['release_title', 'release_group']:
+        if condition_type in ['release_title', 'release_group', 'edition']:
             pattern_name = condition['pattern']
             pattern = self.patterns.get(pattern_name)
             if not pattern:
                 return None
             implementation = ('ReleaseTitleSpecification'
                               if condition_type == 'release_title' else
-                              'ReleaseGroupSpecification')
+                              'ReleaseGroupSpecification' if condition_type
+                              == 'release_group' else 'EditionSpecification')
             fields = [{'name': 'value', 'value': pattern}]
 
         elif condition_type == 'source':
@@ -75,6 +76,14 @@ class FormatConverter:
             implementation = 'IndexerFlagSpecification'
             value = ValueResolver.get_indexer_flag(condition.get('flag', ''),
                                                    target_app)
+            fields = [{'name': 'value', 'value': value}]
+
+        elif condition_type == 'quality_modifier':
+            if target_app == TargetApp.SONARR:
+                return None
+            implementation = 'QualityModifierSpecification'
+            value = ValueResolver.get_quality_modifier(
+                condition['qualityModifier'])
             fields = [{'name': 'value', 'value': value}]
 
         elif condition_type == 'language':
@@ -94,6 +103,7 @@ class FormatConverter:
             except Exception:
                 return None
 
+        # still need to do size, year, release type
         else:
             return None
 
