@@ -110,6 +110,13 @@ class FormatConverter:
                 'value': max_year
             }]
 
+        elif condition_type == 'release_type':
+            if target_app == TargetApp.RADARR:
+                return None
+            implementation = 'ReleaseTypeSpecification'
+            value = ValueResolver.get_release_type(condition['releaseType'])
+            fields = [{'name': 'value', 'value': value}]
+
         elif condition_type == 'language':
             implementation = 'LanguageSpecification'
             language_name = condition['language'].lower()
@@ -127,7 +134,6 @@ class FormatConverter:
             except Exception:
                 return None
 
-        # still need to do release type
         else:
             return None
 
