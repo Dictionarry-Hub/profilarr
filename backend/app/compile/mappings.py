@@ -78,6 +78,16 @@ class Quality_Modifiers:
     }
 
 
+class Release_Types:
+    """Release type mappings for Sonarr ONLY"""
+    SONARR = {
+        'none': 0,
+        'single_episode': 1,
+        'multi_episode': 2,
+        'season_pack': 3,
+    }
+
+
 class Qualities:
     """Quality mappings for both applications"""
     COMMON_RESOLUTIONS = {
@@ -942,6 +952,10 @@ class ValueResolver:
     @classmethod
     def get_quality_modifier(cls, quality_modifier: str) -> int:
         return Quality_Modifiers.RADARR.get(quality_modifier.lower(), 0)
+
+    @classmethod
+    def get_release_type(cls, release_type: str) -> int:
+        return Release_Types.SONARR.get(release_type.lower(), 0)
 
     @classmethod
     def get_language(cls,
