@@ -52,16 +52,6 @@ const OutgoingChanges = ({
                         />
                         <span>Ready to Push ({totalUnpushedCommits})</span>
                     </h4>
-                    <div className='space-x-2 flex'>
-                        <IconButton
-                            onClick={onPushSelected}
-                            disabled={false}
-                            loading={loadingAction === 'push_changes'}
-                            icon={<Upload />}
-                            tooltip='Push Changes'
-                            className='bg-gray-700'
-                        />
-                    </div>
                 </div>
                 <div className='overflow-hidden'>
                     <PushTable changes={unpushedFiles} />
@@ -123,6 +113,33 @@ const OutgoingChanges = ({
                         className='bg-gray-700'
                         disabledTooltip={getButtonTooltips.revert()}
                     />
+                    {hasUnpushedCommits && (
+                        <IconButton
+                            onClick={onPushSelected}
+                            disabled={!hasUnpushedCommits}
+                            loading={loadingAction === 'push_changes'}
+                            icon={<Upload />}
+                            tooltip={
+                                <div>
+                                    <div>Push Changes</div>
+                                    {unpushedFiles?.length > 0 && (
+                                        <div className='mt-1 text-xs'>
+                                            {unpushedFiles.map(
+                                                (file, index) => (
+                                                    <div key={index}>
+                                                        • {file.type}:{' '}
+                                                        {file.name}
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            }
+                            className='bg-gray-700'
+                            disabledTooltip='No changes to push'
+                        />
+                    )}
                 </div>
             </div>
             {changes.length > 0 && (
