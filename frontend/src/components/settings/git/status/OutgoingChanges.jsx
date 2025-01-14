@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useRef, useState, useEffect} from 'react';
+import ReactDOM from 'react-dom';
 import {
     ArrowUpFromLine,
     Plus,
@@ -38,6 +39,56 @@ const OutgoingChanges = ({
     const totalOutgoingChanges = changes.length;
     const totalUnpushedCommits = unpushedFiles?.length || 0;
 
+    const PushButton = () => {
+        const [showTooltip, setShowTooltip] = useState(false);
+        const buttonRef = useRef(null);
+
+        return (
+            <>
+                <div
+                    ref={buttonRef}
+                    onMouseEnter={() => setShowTooltip(true)}
+                    onMouseLeave={() => setShowTooltip(false)}>
+                    <IconButton
+                        onClick={onPushSelected}
+                        disabled={!hasUnpushedCommits}
+                        loading={loadingAction === 'push_changes'}
+                        icon={<Upload />}
+                        className='bg-gray-700'
+                    />
+                </div>
+                {showTooltip &&
+                    buttonRef.current &&
+                    ReactDOM.createPortal(
+                        <div
+                            className='fixed bg-gray-900 text-white p-2 rounded shadow-lg text-xs'
+                            style={{
+                                left:
+                                    buttonRef.current.getBoundingClientRect()
+                                        .left +
+                                    buttonRef.current.getBoundingClientRect()
+                                        .width /
+                                        2,
+                                top:
+                                    buttonRef.current.getBoundingClientRect()
+                                        .top - 10,
+                                transform: 'translate(-50%, -100%)'
+                            }}>
+                            {unpushedFiles?.length > 0 && (
+                                <div className='mt-1'>
+                                    {unpushedFiles.map((file, index) => (
+                                        <div key={index}>
+                                            • {file.type}: {file.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>,
+                        document.body
+                    )}
+            </>
+        );
+    };
     // If we only have committed changes waiting to be pushed
     if (totalOutgoingChanges === 0 && hasUnpushedCommits) {
         console.log('Unpushed Files:', unpushedFiles);
@@ -52,6 +103,9 @@ const OutgoingChanges = ({
                         />
                         <span>Ready to Push ({totalUnpushedCommits})</span>
                     </h4>
+                    <div className='space-x-2 flex'>
+                        <PushButton />
+                    </div>
                 </div>
                 <div className='overflow-hidden'>
                     <PushTable changes={unpushedFiles} />
@@ -113,33 +167,7 @@ const OutgoingChanges = ({
                         className='bg-gray-700'
                         disabledTooltip={getButtonTooltips.revert()}
                     />
-                    {hasUnpushedCommits && (
-                        <IconButton
-                            onClick={onPushSelected}
-                            disabled={!hasUnpushedCommits}
-                            loading={loadingAction === 'push_changes'}
-                            icon={<Upload />}
-                            tooltip={
-                                <div>
-                                    <div>Push Changes</div>
-                                    {unpushedFiles?.length > 0 && (
-                                        <div className='mt-1 text-xs'>
-                                            {unpushedFiles.map(
-                                                (file, index) => (
-                                                    <div key={index}>
-                                                        • {file.type}:{' '}
-                                                        {file.name}
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            }
-                            className='bg-gray-700'
-                            disabledTooltip='No changes to push'
-                        />
-                    )}
+                    <PushButton />
                 </div>
             </div>
             {changes.length > 0 && (
