@@ -92,6 +92,8 @@ def get_category_directory(category: str) -> str:
 
 
 def load_yaml_file(file_path: str) -> Dict[str, Any]:
+    file_path = file_path.replace('[', '(').replace(']', ')')
+
     if not os.path.exists(file_path):
         logger.error(f"File not found: {file_path}")
         raise FileNotFoundError(f"File not found: {file_path}")
@@ -100,9 +102,11 @@ def load_yaml_file(file_path: str) -> Dict[str, Any]:
         with open(file_path, 'r') as f:
             content = yaml.safe_load(f)
             return content
+
     except yaml.YAMLError as e:
         logger.error(f"Error parsing YAML file {file_path}: {e}")
         raise
+
     except Exception as e:
         logger.error(f"Unexpected error reading file {file_path}: {e}")
         raise
