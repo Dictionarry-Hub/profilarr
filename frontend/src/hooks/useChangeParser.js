@@ -22,6 +22,12 @@ function formatSegment(segment) {
 }
 
 function formatKey(rawKey) {
+    // Add type checking
+    if (typeof rawKey !== 'string') {
+        console.warn('Expected string for key, received:', rawKey);
+        return String(rawKey || ''); // Convert to string or use empty string as fallback
+    }
+
     const segments = rawKey.split('.');
     const formattedSegments = segments.map(segment => formatSegment(segment));
     return formattedSegments.join(': ');
