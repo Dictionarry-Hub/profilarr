@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
-import Textarea from '../ui/TextArea';
+import MarkdownEditor from '@ui/MarkdownEditor';
 
 const ProfileGeneralTab = ({
     name,
@@ -39,7 +39,7 @@ const ProfileGeneralTab = ({
                     </p>
                 </div>
             )}
-            <div className='space-y-6'>
+            <div className='space-y-8'>
                 <div className='space-y-2'>
                     <div className='flex items-center justify-between'>
                         <div className='space-y-1'>
@@ -94,20 +94,14 @@ const ProfileGeneralTab = ({
                         </label>
                         <p className='text-xs text-gray-500 dark:text-gray-400'>
                             Add any notes or details about this profile's
-                            purpose and configuration
+                            purpose and configuration. Use markdown to format
+                            your description.
                         </p>
                     </div>
-                    <Textarea
+                    <MarkdownEditor
                         value={description}
                         onChange={e => onDescriptionChange(e.target.value)}
                         placeholder='Enter a description for this profile'
-                        rows={4}
-                        className='w-full rounded-md border border-gray-300 dark:border-gray-600
-                        bg-white dark:bg-gray-700
-                        text-gray-900 dark:text-gray-100
-                        placeholder-gray-500 dark:placeholder-gray-400
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                        transition-colors duration-200'
                     />
                 </div>
 
@@ -142,7 +136,7 @@ const ProfileGeneralTab = ({
                         </button>
                     </div>
                     {tags.length > 0 ? (
-                        <div className='flex flex-wrap gap-2 rounded-md '>
+                        <div className='flex flex-wrap gap-2 rounded-md'>
                             {tags.map(tag => (
                                 <span
                                     key={tag}
