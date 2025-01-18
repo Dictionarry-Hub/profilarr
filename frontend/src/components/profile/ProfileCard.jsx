@@ -9,6 +9,7 @@ import {
     ChevronRight
 } from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
+import ReactMarkdown from 'react-markdown';
 
 function unsanitize(text) {
     if (!text) return '';
@@ -119,21 +120,7 @@ const ProfileCard = ({
                         )}
                     </div>
 
-                    <div className='flex items-center gap-3'>
-                        {(sortBy === 'dateModified' ||
-                            sortBy === 'dateCreated') && (
-                            <span className='text-xs text-gray-400 shrink-0'>
-                                {sortBy === 'dateModified'
-                                    ? 'Modified'
-                                    : 'Created'}
-                                :{' '}
-                                {formatDate(
-                                    sortBy === 'dateModified'
-                                        ? profile.modified_date
-                                        : profile.created_date
-                                )}
-                            </span>
-                        )}
+                    <div className='flex items-center'>
                         <div className='w-8 h-8 flex items-center justify-center'>
                             {isSelectionMode ? (
                                 <Tooltip
@@ -194,37 +181,52 @@ const ProfileCard = ({
 
                 {/* Description */}
                 {content.description && (
-                    <div className='prose prose-invert max-w-none'>
-                        <p className='text-gray-300 text-base leading-relaxed'>
+                    <div className='prose prose-invert prose-pre:bg-gray-800 prose-pre:border prose-pre:border-gray-700 max-w-none'>
+                        <ReactMarkdown>
                             {truncateDescription(
                                 unsanitize(content.description)
                             )}
-                        </p>
+                        </ReactMarkdown>
                     </div>
                 )}
 
                 <hr className='border-gray-700 my-6' />
 
                 {/* Metadata Row */}
-                <div className='flex flex-wrap items-center gap-4 text-sm text-gray-300'>
-                    <div className='flex items-center gap-2'>
-                        <Settings2 className='w-4 h-4 text-blue-400' />
-                        <span>
-                            {activeCustomFormats} format
-                            {activeCustomFormats !== 1 ? 's' : ''}
-                        </span>
-                    </div>
-
-                    <div className='flex items-center gap-2'>
-                        <Globe2 className='w-4 h-4 text-blue-400' />
-                        <span>{parseLanguage(content.language)}</span>
-                    </div>
-
-                    {content.upgradesAllowed && (
+                <div className='flex flex-wrap items-center justify-between text-sm text-gray-300'>
+                    <div className='flex items-center gap-4'>
                         <div className='flex items-center gap-2'>
-                            <ArrowUpCircle className='w-4 h-4 text-blue-400' />
-                            <span>Upgrades Allowed</span>
+                            <Settings2 className='w-4 h-4 text-blue-400' />
+                            <span>
+                                {activeCustomFormats} format
+                                {activeCustomFormats !== 1 ? 's' : ''}
+                            </span>
                         </div>
+
+                        <div className='flex items-center gap-2'>
+                            <Globe2 className='w-4 h-4 text-blue-400' />
+                            <span>{parseLanguage(content.language)}</span>
+                        </div>
+
+                        {content.upgradesAllowed && (
+                            <div className='flex items-center gap-2'>
+                                <ArrowUpCircle className='w-4 h-4 text-blue-400' />
+                                <span>Upgrades Allowed</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {(sortBy === 'dateModified' ||
+                        sortBy === 'dateCreated') && (
+                        <span className='text-xs text-gray-400 shrink-0'>
+                            {sortBy === 'dateModified' ? 'Modified' : 'Created'}
+                            :{' '}
+                            {formatDate(
+                                sortBy === 'dateModified'
+                                    ? profile.modified_date
+                                    : profile.created_date
+                            )}
+                        </span>
                     )}
                 </div>
             </div>
