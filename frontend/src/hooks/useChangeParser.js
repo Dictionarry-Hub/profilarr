@@ -98,19 +98,30 @@ export default function useChangeParser(changes) {
     const parsedChanges = useMemo(() => {
         if (!Array.isArray(changes)) return [];
 
-        return changes.map((item, index) => {
-            const changeType =
-                item.change.charAt(0).toUpperCase() +
-                item.change.slice(1).toLowerCase();
+        // Filter out entries without a valid change property before mapping
+        return changes
+            .filter(
+                item =>
+                    item &&
+                    typeof item.change === 'string' &&
+                    item.change.length > 0
+            )
+            .map((item, index) => {
+                const changeType =
+                    item.change.charAt(0).toUpperCase() +
+                    item.change.slice(1).toLowerCase();
 
-            return {
-                id: `${item.key}-${index}-${item.change}`,
-                changeType,
-                key: formatKey(item.key),
-                from: parseValue(item.from),
-                to: parseValue(item.to ?? item.value)
-            };
-        });
+                return {
+                    id: `${item.key}-${index}-${item.change}`,
+                    changeType,
+                    key:
+                        typeof item.key === 'string'
+                            ? formatKey(item.key)
+                            : String(item.key || ''),
+                    from: parseValue(item.from),
+                    to: parseValue(item.to ?? item.value)
+                };
+            });
     }, [changes]);
 
     return parsedChanges;

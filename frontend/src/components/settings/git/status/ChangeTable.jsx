@@ -17,8 +17,15 @@ const ChangeTable = ({
     fetchGitStatus
 }) => {
     const sortedChanges = changesArray => {
-        if (isMergeConflict || !sortConfig?.key) return changesArray;
-        return [...changesArray].sort((a, b) => {
+        // Filter out items with unknown status/type
+        const validChanges = changesArray.filter(
+            change =>
+                change && change.type && change.type.toLowerCase() !== 'unknown'
+        );
+
+        if (isMergeConflict || !sortConfig?.key) return validChanges;
+
+        return [...validChanges].sort((a, b) => {
             if (a[sortConfig.key] < b[sortConfig.key]) {
                 return sortConfig.direction === 'ascending' ? -1 : 1;
             }
