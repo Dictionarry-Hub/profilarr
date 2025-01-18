@@ -33,8 +33,6 @@ function parseLanguage(languageStr) {
     }
 }
 
-const MAX_DESCRIPTION_LENGTH = 1000;
-
 const ProfileCard = ({
     profile,
     onEdit,
@@ -74,18 +72,12 @@ const ProfileCard = ({
         }
     };
 
-    const truncateDescription = text => {
-        if (!text) return '';
-        if (text.length <= MAX_DESCRIPTION_LENGTH) return text;
-        return text.substring(0, MAX_DESCRIPTION_LENGTH) + '...';
-    };
-
     // Get quality preferences as an array
     const qualityPreferences = content.qualities?.map(q => q.name) || [];
 
     return (
         <div
-            className={`w-full bg-gradient-to-br from-gray-800/95 to-gray-900 border ${
+            className={`w-full h-[24rem] bg-gradient-to-br from-gray-800/95 to-gray-900 border ${
                 isSelected
                     ? 'border-blue-500'
                     : willBeSelected
@@ -97,137 +89,144 @@ const ProfileCard = ({
                         ? 'hover:border-blue-400'
                         : 'hover:border-gray-400'
                     : 'hover:border-blue-400'
-            } transition-all cursor-pointer overflow-hidden`}
+            } transition-all cursor-pointer overflow-hidden flex flex-col`}
             onClick={handleClick}
             onMouseDown={handleMouseDown}>
-            <div className='p-6 relative'>
-                {/* Header Section */}
-                <div className='flex justify-between items-start'>
-                    <div className='flex items-center gap-3 flex-wrap'>
-                        <h3 className='text-xl font-bold text-gray-100'>
-                            {unsanitize(content.name)}
-                        </h3>
-                        {content.tags && content.tags.length > 0 && (
-                            <div className='flex flex-wrap gap-2'>
-                                {content.tags.map(tag => (
-                                    <span
-                                        key={`${profile.file_name}-${tag}`}
-                                        className='bg-blue-600/20 text-blue-400 px-2 py-1 rounded-full text-xs font-semibold shadow-sm'>
-                                        {unsanitize(tag)}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className='flex items-center'>
-                        <div className='w-8 h-8 flex items-center justify-center'>
-                            {isSelectionMode ? (
-                                <Tooltip
-                                    content={
-                                        isSelected
-                                            ? 'Selected'
-                                            : willBeSelected
-                                            ? 'Will be selected'
-                                            : 'Select'
-                                    }>
-                                    <div
-                                        className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                            isSelected
-                                                ? 'bg-blue-500'
-                                                : willBeSelected
-                                                ? 'bg-blue-200/20'
-                                                : 'bg-gray-200/20'
-                                        } transition-colors hover:bg-blue-600`}>
-                                        {isSelected && (
-                                            <Check
-                                                size={14}
-                                                className='text-white'
-                                            />
-                                        )}
-                                        {willBeSelected && !isSelected && (
-                                            <div className='w-1.5 h-1.5 rounded-full bg-blue-400' />
-                                        )}
-                                    </div>
-                                </Tooltip>
-                            ) : (
-                                <button
-                                    onClick={handleCloneClick}
-                                    className='text-gray-400 hover:text-white transition-colors'>
-                                    <Copy className='w-5 h-5' />
-                                </button>
+            <div className='p-6 flex flex-col h-full'>
+                {/* Header Section - Fixed Height */}
+                <div className='flex-none'>
+                    <div className='flex justify-between items-start'>
+                        <div className='flex items-center gap-3 flex-wrap'>
+                            <h3 className='text-xl font-bold text-gray-100'>
+                                {unsanitize(content.name)}
+                            </h3>
+                            {content.tags && content.tags.length > 0 && (
+                                <div className='flex flex-wrap gap-2'>
+                                    {content.tags.map(tag => (
+                                        <span
+                                            key={`${profile.file_name}-${tag}`}
+                                            className='bg-blue-600/20 text-blue-400 px-2 py-1 rounded-full text-xs font-semibold shadow-sm'>
+                                            {unsanitize(tag)}
+                                        </span>
+                                    ))}
+                                </div>
                             )}
                         </div>
+
+                        <div className='flex items-center'>
+                            <div className='w-8 h-8 flex items-center justify-center'>
+                                {isSelectionMode ? (
+                                    <Tooltip
+                                        content={
+                                            isSelected
+                                                ? 'Selected'
+                                                : willBeSelected
+                                                ? 'Will be selected'
+                                                : 'Select'
+                                        }>
+                                        <div
+                                            className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                                isSelected
+                                                    ? 'bg-blue-500'
+                                                    : willBeSelected
+                                                    ? 'bg-blue-200/20'
+                                                    : 'bg-gray-200/20'
+                                            } transition-colors hover:bg-blue-600`}>
+                                            {isSelected && (
+                                                <Check
+                                                    size={14}
+                                                    className='text-white'
+                                                />
+                                            )}
+                                            {willBeSelected && !isSelected && (
+                                                <div className='w-1.5 h-1.5 rounded-full bg-blue-400' />
+                                            )}
+                                        </div>
+                                    </Tooltip>
+                                ) : (
+                                    <button
+                                        onClick={handleCloneClick}
+                                        className='text-gray-400 hover:text-white transition-colors'>
+                                        <Copy className='w-5 h-5' />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Quality Preferences */}
+                    {qualityPreferences.length > 0 && (
+                        <div className='mt-6 flex items-center space-x-2 text-sm text-gray-300 overflow-x-auto pb-2'>
+                            {qualityPreferences.map((pref, index) => (
+                                <React.Fragment key={index}>
+                                    <span className='whitespace-nowrap'>
+                                        {pref}
+                                    </span>
+                                    {index < qualityPreferences.length - 1 && (
+                                        <ChevronRight className='w-4 h-4 text-blue-400 flex-shrink-0' />
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                {/* Quality Preferences */}
-                {qualityPreferences.length > 0 && (
-                    <div className='mt-6 flex items-center space-x-2 text-sm text-gray-300 overflow-x-auto pb-2'>
-                        {qualityPreferences.map((pref, index) => (
-                            <React.Fragment key={index}>
-                                <span className='whitespace-nowrap'>
-                                    {pref}
-                                </span>
-                                {index < qualityPreferences.length - 1 && (
-                                    <ChevronRight className='w-4 h-4 text-blue-400 flex-shrink-0' />
-                                )}
-                            </React.Fragment>
-                        ))}
-                    </div>
-                )}
-
                 <hr className='border-gray-700 my-6' />
 
-                {/* Description */}
-                {content.description && (
-                    <div className='prose prose-invert prose-pre:bg-gray-800 prose-pre:border prose-pre:border-gray-700 max-w-none'>
-                        <ReactMarkdown>
-                            {truncateDescription(
-                                unsanitize(content.description)
-                            )}
-                        </ReactMarkdown>
-                    </div>
-                )}
-
-                <hr className='border-gray-700 my-6' />
-
-                {/* Metadata Row */}
-                <div className='flex flex-wrap items-center justify-between text-sm text-gray-300'>
-                    <div className='flex items-center gap-4'>
-                        <div className='flex items-center gap-2'>
-                            <Settings2 className='w-4 h-4 text-blue-400' />
-                            <span>
-                                {activeCustomFormats} format
-                                {activeCustomFormats !== 1 ? 's' : ''}
-                            </span>
+                {/* Description - Fixed Height with Scroll */}
+                <div className='flex-1 overflow-hidden'>
+                    {content.description && (
+                        <div className='h-full overflow-y-auto prose prose-invert prose-pre:bg-gray-800 prose-pre:border prose-pre:border-gray-700 max-w-none'>
+                            <ReactMarkdown>
+                                {unsanitize(content.description)}
+                            </ReactMarkdown>
                         </div>
+                    )}
+                </div>
 
-                        <div className='flex items-center gap-2'>
-                            <Globe2 className='w-4 h-4 text-blue-400' />
-                            <span>{parseLanguage(content.language)}</span>
-                        </div>
+                {/* Footer Section - Fixed Height */}
+                <div className='flex-none'>
+                    <hr className='border-gray-700 my-6' />
 
-                        {content.upgradesAllowed && (
+                    {/* Metadata Row */}
+                    <div className='flex flex-wrap items-center justify-between text-sm text-gray-300'>
+                        <div className='flex items-center gap-4'>
                             <div className='flex items-center gap-2'>
-                                <ArrowUpCircle className='w-4 h-4 text-blue-400' />
-                                <span>Upgrades Allowed</span>
+                                <Settings2 className='w-4 h-4 text-blue-400' />
+                                <span>
+                                    {activeCustomFormats} format
+                                    {activeCustomFormats !== 1 ? 's' : ''}
+                                </span>
                             </div>
+
+                            <div className='flex items-center gap-2'>
+                                <Globe2 className='w-4 h-4 text-blue-400' />
+                                <span>{parseLanguage(content.language)}</span>
+                            </div>
+
+                            {content.upgradesAllowed && (
+                                <div className='flex items-center gap-2'>
+                                    <ArrowUpCircle className='w-4 h-4 text-blue-400' />
+                                    <span>Upgrades Allowed</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {(sortBy === 'dateModified' ||
+                            sortBy === 'dateCreated') && (
+                            <span className='text-xs text-gray-400 shrink-0'>
+                                {sortBy === 'dateModified'
+                                    ? 'Modified'
+                                    : 'Created'}
+                                :{' '}
+                                {formatDate(
+                                    sortBy === 'dateModified'
+                                        ? profile.modified_date
+                                        : profile.created_date
+                                )}
+                            </span>
                         )}
                     </div>
-
-                    {(sortBy === 'dateModified' ||
-                        sortBy === 'dateCreated') && (
-                        <span className='text-xs text-gray-400 shrink-0'>
-                            {sortBy === 'dateModified' ? 'Modified' : 'Created'}
-                            :{' '}
-                            {formatDate(
-                                sortBy === 'dateModified'
-                                    ? profile.modified_date
-                                    : profile.created_date
-                            )}
-                        </span>
-                    )}
                 </div>
             </div>
         </div>
