@@ -16,7 +16,7 @@ import Footer from '@ui/Footer';
 import {ToastContainer} from 'react-toastify';
 import {checkSetupStatus} from '@api/auth';
 import 'react-toastify/dist/ReactToastify.css';
-
+import ErrorBoundary from '@ui/ErrorBoundary';
 function App() {
     const [darkMode, setDarkMode] = useState(true);
     const [authState, setAuthState] = useState({
@@ -140,25 +140,33 @@ function App() {
     return (
         <>
             <Router>
-                <div className='min-h-screen flex flex-col bg-gray-900 text-gray-100'>
-                    <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-                    <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-2 flex-grow flex-1 w-full'>
-                        <Routes>
-                            <Route path='/regex' element={<RegexPage />} />
-                            <Route path='/format' element={<FormatPage />} />
-                            <Route path='/profile' element={<ProfilePage />} />
-                            <Route
-                                path='/settings'
-                                element={<SettingsPage />}
-                            />
-                            <Route
-                                path='/'
-                                element={<Navigate to='/settings' />}
-                            />
-                        </Routes>
+                <ErrorBoundary>
+                    <div className='min-h-screen flex flex-col bg-gray-900 text-gray-100'>
+                        <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+                        <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-2 flex-grow flex-1 w-full'>
+                            <Routes>
+                                <Route path='/regex' element={<RegexPage />} />
+                                <Route
+                                    path='/format'
+                                    element={<FormatPage />}
+                                />
+                                <Route
+                                    path='/profile'
+                                    element={<ProfilePage />}
+                                />
+                                <Route
+                                    path='/settings'
+                                    element={<SettingsPage />}
+                                />
+                                <Route
+                                    path='/'
+                                    element={<Navigate to='/settings' />}
+                                />
+                            </Routes>
+                        </div>
+                        <Footer />
                     </div>
-                    <Footer />
-                </div>
+                </ErrorBoundary>
             </Router>
             <ToastContainer
                 position='top-right'
@@ -175,5 +183,4 @@ function App() {
         </>
     );
 }
-
 export default App;
