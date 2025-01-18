@@ -105,7 +105,7 @@ const ProfileCard = ({
                                     {content.tags.map(tag => (
                                         <span
                                             key={`${profile.file_name}-${tag}`}
-                                            className='bg-blue-600/20 text-blue-400 px-2 py-1 rounded-full text-xs font-semibold shadow-sm'>
+                                            className='bg-blue-600/20 text-blue-400 px-2 py-1 rounded-md text-xs font-semibold shadow-sm'>
                                             {unsanitize(tag)}
                                         </span>
                                     ))}
@@ -171,12 +171,16 @@ const ProfileCard = ({
                     )}
                 </div>
 
-                <hr className='border-gray-700 my-6' />
+                <hr className='border-gray-700 my-3' />
 
                 {/* Description - Fixed Height with Scroll */}
-                <div className='flex-1 overflow-hidden'>
+                <div className='flex-1 overflow-hidden text-sm'>
                     {content.description && (
-                        <div className='h-full overflow-y-auto prose prose-invert prose-pre:bg-gray-800 prose-pre:border prose-pre:border-gray-700 max-w-none'>
+                        <div
+                            className='h-full overflow-y-auto prose prose-invert prose-gray max-w-none
+    [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mt-2 [&>ul]:mb-4
+    [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mt-2 [&>ol]:mb-4
+    [&>ul>li]:mt-0.5 [&>ol>li]:mt-0.5'>
                             <ReactMarkdown>
                                 {unsanitize(content.description)}
                             </ReactMarkdown>

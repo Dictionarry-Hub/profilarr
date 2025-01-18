@@ -139,7 +139,13 @@ const MarkdownEditor = ({value, onChange, placeholder}) => {
             {/* Editor/Preview Area */}
             <div>
                 {isPreview ? (
-                    <div className='px-4 py-3 min-h-[300px] h-full prose prose-sm dark:prose-invert max-w-none bg-white dark:bg-gray-700'>
+                    <div
+                        className='text-sm px-4 py-3 min-h-[300px] h-full prose prose-sm max-w-none bg-white dark:bg-gray-800 dark:prose-invert
+    [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mt-2 [&>ul]:mb-4
+    [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mt-2 [&>ol]:mb-4
+    [&>ul>li]:mt-0.5 [&>ol>li]:mt-0.5
+    [&>ul>li]:text-gray-700 [&>ol>li]:text-gray-700
+    dark:[&>ul>li]:text-gray-300 dark:[&>ol>li]:text-gray-300'>
                         {value ? (
                             <ReactMarkdown>{value}</ReactMarkdown>
                         ) : (
