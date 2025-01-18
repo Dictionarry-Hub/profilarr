@@ -1,11 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Copy, Globe2, Settings2, ArrowUpCircle, Check} from 'lucide-react';
+import {
+    Copy,
+    Globe2,
+    Settings2,
+    ArrowUpCircle,
+    Check,
+    ChevronRight
+} from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
 
 function unsanitize(text) {
     if (!text) return '';
     return text.replace(/\\:/g, ':').replace(/\\n/g, '\n');
+}
+
+function parseLanguage(languageStr) {
+    if (!languageStr || languageStr === 'any') return 'Any';
+
+    const [type, language] = languageStr.split('_');
+    const capitalizedLanguage =
+        language.charAt(0).toUpperCase() + language.slice(1);
+
+    switch (type) {
+        case 'only':
+            return `Must Only Be: ${capitalizedLanguage}`;
+        case 'must':
+            return `Must Include: ${capitalizedLanguage}`;
+        default:
+            return capitalizedLanguage;
+    }
 }
 
 const MAX_DESCRIPTION_LENGTH = 1000;
@@ -44,7 +68,6 @@ const ProfileCard = ({
     };
 
     const handleMouseDown = e => {
-        // Prevent text selection when shift-clicking
         if (e.shiftKey) {
             e.preventDefault();
         }
@@ -56,33 +79,50 @@ const ProfileCard = ({
         return text.substring(0, MAX_DESCRIPTION_LENGTH) + '...';
     };
 
+    // Get quality preferences as an array
+    const qualityPreferences = content.qualities?.map(q => q.name) || [];
+
     return (
         <div
-            className={`w-full h-full bg-white dark:bg-gray-800 border ${
+            className={`w-full bg-gradient-to-br from-gray-800/95 to-gray-900 border ${
                 isSelected
-                    ? 'border-blue-500 dark:border-blue-400'
+                    ? 'border-blue-500'
                     : willBeSelected
-                    ? 'border-blue-300 dark:border-blue-600'
-                    : 'border-gray-200 dark:border-gray-700'
-            } rounded-lg shadow hover:shadow-lg ${
+                    ? 'border-blue-300'
+                    : 'border-gray-700'
+            } rounded-lg shadow-lg hover:shadow-xl ${
                 isSelectionMode
                     ? isSelected
                         ? 'hover:border-blue-400'
                         : 'hover:border-gray-400'
                     : 'hover:border-blue-400'
-            } dark:hover:border-blue-500 transition-all cursor-pointer`}
+            } transition-all cursor-pointer overflow-hidden`}
             onClick={handleClick}
             onMouseDown={handleMouseDown}>
-            <div className='flex flex-col p-6 gap-3'>
+            <div className='p-6 relative'>
                 {/* Header Section */}
-                <div className='flex justify-between items-center gap-4'>
-                    <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100 truncate'>
-                        {unsanitize(content.name)}
-                    </h3>
+                <div className='flex justify-between items-start'>
+                    <div className='flex items-center gap-3 flex-wrap'>
+                        <h3 className='text-xl font-bold text-gray-100'>
+                            {unsanitize(content.name)}
+                        </h3>
+                        {content.tags && content.tags.length > 0 && (
+                            <div className='flex flex-wrap gap-2'>
+                                {content.tags.map(tag => (
+                                    <span
+                                        key={`${profile.file_name}-${tag}`}
+                                        className='bg-blue-600/20 text-blue-400 px-2 py-1 rounded-full text-xs font-semibold shadow-sm'>
+                                        {unsanitize(tag)}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     <div className='flex items-center gap-3'>
                         {(sortBy === 'dateModified' ||
                             sortBy === 'dateCreated') && (
-                            <span className='text-xs text-gray-500 dark:text-gray-400 shrink-0'>
+                            <span className='text-xs text-gray-400 shrink-0'>
                                 {sortBy === 'dateModified'
                                     ? 'Modified'
                                     : 'Created'}
@@ -109,8 +149,8 @@ const ProfileCard = ({
                                             isSelected
                                                 ? 'bg-blue-500'
                                                 : willBeSelected
-                                                ? 'bg-blue-200 dark:bg-blue-800'
-                                                : 'bg-gray-200 dark:bg-gray-700'
+                                                ? 'bg-blue-200/20'
+                                                : 'bg-gray-200/20'
                                         } transition-colors hover:bg-blue-600`}>
                                         {isSelected && (
                                             <Check
@@ -126,61 +166,66 @@ const ProfileCard = ({
                             ) : (
                                 <button
                                     onClick={handleCloneClick}
-                                    className='w-8 h-8 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center'>
-                                    <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
+                                    className='text-gray-400 hover:text-white transition-colors'>
+                                    <Copy className='w-5 h-5' />
                                 </button>
                             )}
                         </div>
                     </div>
                 </div>
 
-                {/* Main Content */}
-                <div className='flex-1'>
-                    {/* Description */}
-                    {content.description && (
-                        <p className='text-gray-600 dark:text-gray-300 text-base leading-relaxed mb-4'>
+                {/* Quality Preferences */}
+                {qualityPreferences.length > 0 && (
+                    <div className='mt-6 flex items-center space-x-2 text-sm text-gray-300 overflow-x-auto pb-2'>
+                        {qualityPreferences.map((pref, index) => (
+                            <React.Fragment key={index}>
+                                <span className='whitespace-nowrap'>
+                                    {pref}
+                                </span>
+                                {index < qualityPreferences.length - 1 && (
+                                    <ChevronRight className='w-4 h-4 text-blue-400 flex-shrink-0' />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </div>
+                )}
+
+                <hr className='border-gray-700 my-6' />
+
+                {/* Description */}
+                {content.description && (
+                    <div className='prose prose-invert max-w-none'>
+                        <p className='text-gray-300 text-base leading-relaxed'>
                             {truncateDescription(
                                 unsanitize(content.description)
                             )}
                         </p>
-                    )}
-
-                    {/* Metadata Row */}
-                    <div className='flex flex-wrap items-center gap-4 text-sm'>
-                        <div className='flex items-center gap-2'>
-                            <Settings2 className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-                            <span className='text-gray-600 dark:text-gray-300'>
-                                {activeCustomFormats} format
-                                {activeCustomFormats !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-
-                        <div className='flex items-center gap-2'>
-                            <Globe2 className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-                            <span className='text-gray-600 dark:text-gray-300 capitalize'>
-                                {content.language || 'any'}
-                            </span>
-                        </div>
-
-                        {content.upgradesAllowed && (
-                            <span className='inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs border border-blue-200 dark:border-blue-800'>
-                                <ArrowUpCircle className='w-3.5 h-3.5' />
-                                Upgrades allowed
-                            </span>
-                        )}
-
-                        {content.tags && content.tags.length > 0 && (
-                            <div className='flex flex-wrap gap-2'>
-                                {content.tags.map(tag => (
-                                    <span
-                                        key={`${profile.file_name}-${tag}`}
-                                        className='bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2.5 py-0.5 rounded text-sm'>
-                                        {unsanitize(tag)}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
                     </div>
+                )}
+
+                <hr className='border-gray-700 my-6' />
+
+                {/* Metadata Row */}
+                <div className='flex flex-wrap items-center gap-4 text-sm text-gray-300'>
+                    <div className='flex items-center gap-2'>
+                        <Settings2 className='w-4 h-4 text-blue-400' />
+                        <span>
+                            {activeCustomFormats} format
+                            {activeCustomFormats !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+
+                    <div className='flex items-center gap-2'>
+                        <Globe2 className='w-4 h-4 text-blue-400' />
+                        <span>{parseLanguage(content.language)}</span>
+                    </div>
+
+                    {content.upgradesAllowed && (
+                        <div className='flex items-center gap-2'>
+                            <ArrowUpCircle className='w-4 h-4 text-blue-400' />
+                            <span>Upgrades Allowed</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -203,7 +248,13 @@ ProfileCard.propTypes = {
                 })
             ),
             language: PropTypes.string,
-            upgradesAllowed: PropTypes.bool
+            upgradesAllowed: PropTypes.bool,
+            qualities: PropTypes.arrayOf(
+                PropTypes.shape({
+                    id: PropTypes.number,
+                    name: PropTypes.string
+                })
+            )
         }).isRequired
     }).isRequired,
     onEdit: PropTypes.func.isRequired,
