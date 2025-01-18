@@ -36,6 +36,10 @@ module.exports = {
                     '0%, 100%': {transform: 'scale(1) rotate(0deg)'},
                     '30%': {transform: 'scale(1.15) rotate(-10deg)'},
                     '60%': {transform: 'scale(0.9) rotate(5deg)'}
+                },
+                'eye-blink': {
+                    '0%, 100%': {transform: 'scale(1)', opacity: 1},
+                    '50%': {transform: 'scale(1.2)', opacity: 0.8}
                 }
             },
             animation: {
@@ -43,7 +47,8 @@ module.exports = {
                 'fade-in': 'fade-in 0.5s ease-in-out forwards',
                 'slide-down': 'slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                 wiggle: 'wiggle 0.3s ease-in-out',
-                'check-bounce': 'check-bounce 0.3s ease-in-out'
+                'check-bounce': 'check-bounce 0.3s ease-in-out',
+                'eye-blink': 'eye-blink 0.5s ease-in-out'
             },
             colors: {
                 'dark-bg': '#1a1c23',

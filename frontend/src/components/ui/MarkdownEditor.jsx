@@ -86,9 +86,7 @@ const MarkdownEditor = ({value, onChange, placeholder}) => {
                 {isPreview ? (
                     <div className='flex items-center gap-2 text-gray-700 dark:text-gray-300 ml-2'>
                         <Eye className='w-4 h-4' />
-                        <span className='text-sm font-medium'>
-                            Preview Mode
-                        </span>
+                        <span className='text-sm font-medium'>Preview</span>
                     </div>
                 ) : (
                     controls.map(control => (
@@ -106,18 +104,34 @@ const MarkdownEditor = ({value, onChange, placeholder}) => {
                 <div className='ml-auto'>
                     <button
                         onClick={() => setIsPreview(!isPreview)}
-                        className='flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors'>
+                        className='flex items-center gap-2 px-3 py-2 rounded-md
+        bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 
+        hover:bg-gray-50 dark:hover:bg-gray-750
+        hover:border-blue-500/50 hover:text-blue-500
+        dark:hover:border-blue-500/50 dark:hover:text-blue-400
+        transition-all duration-150 ease-in-out
+        group'
+                        title={
+                            isPreview
+                                ? 'Switch to Edit Mode'
+                                : 'Switch to Preview Mode'
+                        }>
                         {isPreview ? (
-                            <>
-                                <Edit2 className='w-4 h-4' />
-                                Edit
-                            </>
+                            <Edit2
+                                className='w-4 h-4 transition-transform duration-300 ease-out
+                group-hover:rotate-12 group-hover:scale-110 
+                group-hover:text-blue-500 dark:group-hover:text-blue-400'
+                            />
                         ) : (
-                            <>
-                                <Eye className='w-4 h-4' />
-                                Preview
-                            </>
+                            <Eye
+                                className='w-4 h-4 transition-transform duration-300 ease-out
+                group-hover:animate-eye-blink 
+                group-hover:text-blue-500 dark:group-hover:text-blue-400'
+                            />
                         )}
+                        <span className='text-sm font-medium'>
+                            {isPreview ? 'Edit' : 'Preview'}
+                        </span>
                     </button>
                 </div>
             </div>
