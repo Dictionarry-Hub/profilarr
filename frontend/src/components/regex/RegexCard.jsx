@@ -68,7 +68,7 @@ const RegexCard = ({
                 <div className='flex-none'>
                     <div className='flex justify-between items-start'>
                         <div className='flex items-center gap-3 flex-wrap'>
-                            <h3 className='text-lg font-bold text-gray-100'>
+                            <h3 className='text-base font-bold text-gray-100'>
                                 {pattern.name}
                             </h3>
                             {pattern.tags && pattern.tags.length > 0 && (

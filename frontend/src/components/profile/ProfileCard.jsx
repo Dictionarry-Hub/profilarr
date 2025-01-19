@@ -97,7 +97,7 @@ const ProfileCard = ({
                 <div className='flex-none'>
                     <div className='flex justify-between items-start'>
                         <div className='flex items-center gap-3 flex-wrap'>
-                            <h3 className='text-xl font-bold text-gray-100'>
+                            <h3 className='text-lg font-bold text-gray-100'>
                                 {unsanitize(content.name)}
                             </h3>
                             {content.tags && content.tags.length > 0 && (
