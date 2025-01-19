@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
-import {Copy, Check} from 'lucide-react';
+import {Copy, Check, FlaskConical, FileText, ListFilter} from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
+import ReactMarkdown from 'react-markdown';
 
 function FormatCard({
     format,
@@ -13,6 +14,7 @@ function FormatCard({
     willBeSelected,
     onSelect
 }) {
+    const [showDescription, setShowDescription] = useState(true);
     const {content} = format;
     const totalTests = content.tests?.length || 0;
     const passedTests = content.tests?.filter(t => t.passes)?.length || 0;
@@ -20,37 +22,12 @@ function FormatCard({
 
     const getConditionStyle = condition => {
         if (condition.negate) {
-            return 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300';
+            return 'bg-red-500/20 text-red-400 border border-red-500/20';
         }
         if (condition.required) {
-            return 'bg-green-100 border-green-200 text-green-700 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300';
+            return 'bg-green-500/20 text-green-400 border border-green-500/20';
         }
-        return 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300';
-    };
-
-    const getDisplayConditions = conditions => {
-        if (!conditions?.length) return [];
-
-        // Sort conditions: required first, then non-required
-        const sortedConditions = [...conditions].sort((a, b) => {
-            if (a.required && !b.required) return -1;
-            if (!a.required && b.required) return 1;
-            return 0;
-        });
-
-        if (sortedConditions.length <= 5) return sortedConditions;
-
-        // Take first 6 conditions and add a count of remaining ones
-        const displayConditions = sortedConditions.slice(0, 6);
-        const remainingCount = sortedConditions.length - 6;
-
-        // Add a virtual condition for the count
-        displayConditions.push({
-            name: `+${remainingCount} more...`,
-            isCounter: true
-        });
-
-        return displayConditions;
+        return 'bg-blue-500/20 text-blue-400 border border-blue-500/20';
     };
 
     const handleClick = e => {
@@ -66,8 +43,12 @@ function FormatCard({
         onClone(format);
     };
 
+    const handleViewToggle = e => {
+        e.stopPropagation();
+        setShowDescription(!showDescription);
+    };
+
     const handleMouseDown = e => {
-        // Prevent text selection when shift-clicking
         if (e.shiftKey) {
             e.preventDefault();
         }
@@ -75,39 +56,66 @@ function FormatCard({
 
     return (
         <div
-            className={`h-full w-full bg-white dark:bg-gray-800 border ${
+            className={`w-full h-[12rem] bg-gradient-to-br from-gray-800/95 to-gray-900 border ${
                 isSelected
-                    ? 'border-blue-500 dark:border-blue-400'
+                    ? 'border-blue-500'
                     : willBeSelected
-                    ? 'border-blue-300 dark:border-blue-600'
-                    : 'border-gray-200 dark:border-gray-700'
-            } rounded-lg shadow hover:shadow-lg ${
+                    ? 'border-blue-300'
+                    : 'border-gray-700'
+            } rounded-lg shadow-lg hover:shadow-xl ${
                 isSelectionMode
                     ? isSelected
                         ? 'hover:border-blue-400'
                         : 'hover:border-gray-400'
                     : 'hover:border-blue-400'
-            } dark:hover:border-blue-500 transition-all cursor-pointer`}
+            } transition-all cursor-pointer relative`}
             onClick={handleClick}
             onMouseDown={handleMouseDown}>
-            <div className='flex flex-col p-6 gap-3 h-full'>
+            <div className='p-4 flex flex-col h-full'>
                 {/* Header Section */}
-                <div className='flex justify-between items-start gap-4'>
-                    <div className='flex-1'>
-                        <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100 truncate'>
+                <div className='flex justify-between items-start'>
+                    <div className='flex flex-col min-w-0 flex-1'>
+                        <h3 className='text-base font-bold text-gray-100 truncate mb-1.5'>
                             {content.name}
                         </h3>
-                        {sortBy === 'dateModified' && format.modified_date && (
-                            <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-                                Modified:{' '}
-                                {new Date(
-                                    format.modified_date
-                                ).toLocaleString()}
-                            </p>
-                        )}
+                        <div className='flex-1 overflow-x-auto scrollbar-none'>
+                            <div className='flex items-center gap-2 text-xs'>
+                                {content.tags?.map(tag => (
+                                    <span
+                                        key={tag}
+                                        className='bg-blue-600/20 text-blue-400 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap'>
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                     </div>
-                    <div className='w-8 h-8 flex items-center justify-center'>
-                        {isSelectionMode ? (
+
+                    <div className='flex items-center gap-2 shrink-0 ml-4'>
+                        <Tooltip
+                            content={
+                                showDescription
+                                    ? 'Show Conditions'
+                                    : 'Show Description'
+                            }>
+                            <button
+                                onClick={handleViewToggle}
+                                className='w-7 h-7 flex items-center justify-center rounded hover:bg-gray-700/50 transition-colors text-gray-400 hover:text-white relative'>
+                                {showDescription ? (
+                                    <ListFilter className='w-4 h-4' />
+                                ) : (
+                                    <FileText className='w-4 h-4' />
+                                )}
+                            </button>
+                        </Tooltip>
+                        {!isSelectionMode && (
+                            <button
+                                onClick={handleCloneClick}
+                                className='text-gray-400 hover:text-white transition-colors w-7 h-7 flex items-center justify-center rounded hover:bg-gray-700/50 relative'>
+                                <Copy className='w-4 h-4' />
+                            </button>
+                        )}
+                        {isSelectionMode && (
                             <Tooltip
                                 content={
                                     isSelected
@@ -117,12 +125,12 @@ function FormatCard({
                                         : 'Select'
                                 }>
                                 <div
-                                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center relative ${
                                         isSelected
                                             ? 'bg-blue-500'
                                             : willBeSelected
-                                            ? 'bg-blue-200 dark:bg-blue-800'
-                                            : 'bg-gray-200 dark:bg-gray-700'
+                                            ? 'bg-blue-200/20'
+                                            : 'bg-gray-200/20'
                                     } transition-colors hover:bg-blue-600`}>
                                     {isSelected && (
                                         <Check
@@ -135,72 +143,89 @@ function FormatCard({
                                     )}
                                 </div>
                             </Tooltip>
-                        ) : (
-                            <button
-                                onClick={handleCloneClick}
-                                className='w-8 h-8 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center'>
-                                <Copy className='w-5 h-5 text-gray-500 dark:text-gray-400' />
-                            </button>
                         )}
                     </div>
                 </div>
 
-                {/* Description */}
-                {content.description && (
-                    <p className='text-gray-600 dark:text-gray-300 text-sm line-clamp-2'>
-                        {content.description}
-                    </p>
-                )}
+                <hr className='border-gray-700 my-2' />
 
-                {/* Conditions and Test Results */}
-                <div className='flex justify-between items-start gap-4'>
-                    <div className='flex flex-wrap gap-2 flex-1'>
-                        {getDisplayConditions(content.conditions)?.map(
-                            (condition, index) => (
-                                <span
-                                    key={index}
-                                    className={`px-2 py-1 rounded text-xs font-medium ${
-                                        condition.isCounter
-                                            ? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-                                            : getConditionStyle(condition)
-                                    }`}>
-                                    {condition.name}
-                                </span>
-                            )
-                        )}
+                {/* Content Area with Slide Animation */}
+                <div className='relative flex-1 overflow-hidden'>
+                    <div
+                        className={`absolute inset-0 w-full h-full transition-transform duration-300 ease-in-out flex ${
+                            showDescription
+                                ? '-translate-x-full'
+                                : 'translate-x-0'
+                        }`}>
+                        {/* Conditions */}
+                        <div className='w-full flex-shrink-0 overflow-y-auto'>
+                            <div className='flex flex-wrap gap-1.5 content-start'>
+                                {content.conditions?.map((condition, index) => (
+                                    <span
+                                        key={index}
+                                        className={`px-1.5 py-0.5 rounded text-xs font-medium ${getConditionStyle(
+                                            condition
+                                        )}`}>
+                                        {condition.name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                     </div>
+                    <div
+                        className={`absolute inset-0 w-full h-full transition-transform duration-300 ease-in-out ${
+                            showDescription
+                                ? 'translate-x-0'
+                                : 'translate-x-full'
+                        }`}>
+                        {/* Description */}
+                        <div className='w-full h-full overflow-y-auto'>
+                            {content.description ? (
+                                <div className='text-gray-300 text-xs prose prose-invert prose-gray max-w-none'>
+                                    <ReactMarkdown>
+                                        {content.description}
+                                    </ReactMarkdown>
+                                </div>
+                            ) : (
+                                <span className='text-gray-500 text-xs italic'>
+                                    No description provided
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
 
-                    {totalTests > 0 && (
-                        <div className='flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded shrink-0'>
-                            <span
-                                className={`text-sm font-medium ${
-                                    passRate === 100
-                                        ? 'text-green-600 dark:text-green-400'
-                                        : passRate >= 80
-                                        ? 'text-yellow-600 dark:text-yellow-400'
-                                        : 'text-red-600 dark:text-red-400'
-                                }`}>
-                                {passRate}% Pass Rate
-                            </span>
-                            <span className='text-gray-500 dark:text-gray-400 text-xs'>
-                                ({passedTests}/{totalTests})
+                <hr className='border-gray-700 my-2' />
+
+                {/* Footer - Tests */}
+                <div className='flex items-center justify-between text-xs'>
+                    {totalTests > 0 ? (
+                        <div
+                            className={`px-2.5 py-1 rounded-md flex items-center gap-1.5 ${
+                                passRate === 100
+                                    ? 'bg-green-500/10 text-green-400'
+                                    : passRate >= 80
+                                    ? 'bg-yellow-500/10 text-yellow-400'
+                                    : 'bg-red-500/10 text-red-400'
+                            }`}>
+                            <FlaskConical className='w-3.5 h-3.5' />
+                            <span className='font-medium'>
+                                {passedTests}/{totalTests} passing
                             </span>
                         </div>
+                    ) : (
+                        <div className='px-2.5 py-1 rounded-md bg-gray-500/10 text-gray-400 flex items-center gap-1.5'>
+                            <FlaskConical className='w-3.5 h-3.5' />
+                            <span className='font-medium'>No tests</span>
+                        </div>
+                    )}
+                    {sortBy === 'dateModified' && format.modified_date && (
+                        <span className='text-gray-400'>
+                            Modified:{' '}
+                            {new Date(format.modified_date).toLocaleString()}
+                        </span>
                     )}
                 </div>
-
-                {/* Tags */}
-                {content.tags?.length > 0 && (
-                    <div className='flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-gray-700 mt-auto'>
-                        {content.tags.map(tag => (
-                            <span
-                                key={tag}
-                                className='bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-1 rounded text-xs'>
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-                )}
             </div>
         </div>
     );
