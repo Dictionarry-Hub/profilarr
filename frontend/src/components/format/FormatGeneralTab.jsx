@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
-import TextArea from '../ui/TextArea';
+import MarkdownEditor from '@ui/MarkdownEditor';
+import AddButton from '@ui/DataBar/AddButton';
 
 const FormatGeneralTab = ({
     name,
@@ -37,19 +38,24 @@ const FormatGeneralTab = ({
                     </p>
                 </div>
             )}
-            <div className='space-y-6'>
+            <div className='space-y-8'>
                 {/* Name Input */}
                 <div className='space-y-2'>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                        Format Name
-                    </label>
+                    <div className='space-y-1'>
+                        <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            Format Name
+                        </label>
+                        <p className='text-xs text-gray-500 dark:text-gray-400'>
+                            Give your format a descriptive name
+                        </p>
+                    </div>
                     <input
                         type='text'
                         value={name}
                         onChange={e => onNameChange(e.target.value)}
                         placeholder='Enter format name'
                         className='w-full rounded-md border border-gray-300 dark:border-gray-600
-                        bg-white dark:bg-gray-700 px-3 py-2 text-sm
+                        bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm
                         text-gray-900 dark:text-gray-100
                         placeholder-gray-500 dark:placeholder-gray-400
                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
@@ -59,28 +65,32 @@ const FormatGeneralTab = ({
 
                 {/* Description */}
                 <div className='space-y-2'>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                        Description
-                    </label>
-                    <TextArea
+                    <div className='space-y-1'>
+                        <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            Description
+                        </label>
+                        <p className='text-xs text-gray-500 dark:text-gray-400'>
+                            Describe the purpose of this format. Use markdown to
+                            format your description.
+                        </p>
+                    </div>
+                    <MarkdownEditor
                         value={description}
                         onChange={e => onDescriptionChange(e.target.value)}
                         placeholder='Describe the purpose of this format...'
-                        rows={3}
-                        className='w-full rounded-md border border-gray-300 dark:border-gray-600
-                        bg-white dark:bg-gray-700
-                        text-gray-900 dark:text-gray-100
-                        placeholder-gray-500 dark:placeholder-gray-400
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                        transition-colors duration-200'
                     />
                 </div>
 
                 {/* Tags */}
                 <div className='space-y-4'>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                        Tags
-                    </label>
+                    <div className='space-y-1'>
+                        <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            Tags
+                        </label>
+                        <p className='text-xs text-gray-500 dark:text-gray-400'>
+                            Add tags to organize and categorize this format
+                        </p>
+                    </div>
                     <div className='flex space-x-2'>
                         <input
                             type='text'
@@ -89,35 +99,38 @@ const FormatGeneralTab = ({
                             onKeyPress={handleKeyPress}
                             placeholder='Add a tag'
                             className='w-full rounded-md border border-gray-300 dark:border-gray-600
-                            bg-white dark:bg-gray-700 px-3 py-2 text-sm
+                            bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm
                             text-gray-900 dark:text-gray-100
                             placeholder-gray-500 dark:placeholder-gray-400
                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                             transition-colors duration-200'
                         />
-                        <button
+                        <AddButton
                             onClick={handleAddTag}
                             disabled={!newTag.trim()}
-                            className='px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 
-                            text-white rounded-md text-sm font-medium transition-colors duration-200 
-                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 
-                            dark:focus:ring-offset-gray-800'>
-                            Add
-                        </button>
+                            label='Add'
+                        />
                     </div>
                     {tags.length > 0 ? (
-                        <div className='flex flex-wrap gap-2'>
+                        <div className='flex flex-wrap gap-2 rounded-md'>
                             {tags.map(tag => (
                                 <span
                                     key={tag}
-                                    className='inline-flex items-center p-1.5 rounded-md text-xs 
-                                    bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 group'>
+                                    className='inline-flex items-center px-2.5 py-1 rounded-md
+                                    text-xs font-semibold
+                                    bg-blue-600/20 text-blue-400
+                                    group'>
                                     {tag}
                                     <button
                                         onClick={() => onRemoveTag(tag)}
-                                        className='ml-1.5 hover:text-blue-900 dark:hover:text-blue-200 focus:outline-none'>
+                                        className='ml-1.5 p-0.5 rounded-md
+                                        hover:bg-blue-500/20
+                                        focus:outline-none focus:ring-2
+                                        focus:ring-blue-500 focus:ring-offset-1
+                                        transition-colors duration-200'>
                                         <svg
-                                            className='w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity'
+                                            className='w-3.5 h-3.5 text-blue-400
+                                            opacity-60 group-hover:opacity-100 transition-opacity'
                                             fill='none'
                                             stroke='currentColor'
                                             viewBox='0 0 24 24'>
@@ -134,9 +147,11 @@ const FormatGeneralTab = ({
                         </div>
                     ) : (
                         <div
-                            className='flex items-center justify-center h-[2.5rem] text-sm 
-                        text-gray-500 dark:text-gray-400 rounded-md border border-dashed 
-                        border-gray-300 dark:border-gray-600'>
+                            className='flex items-center justify-center h-12 
+                            text-sm text-gray-500 dark:text-gray-400 
+                            rounded-md border border-dashed 
+                            border-gray-300 dark:border-gray-700
+                            bg-gray-50 dark:bg-gray-800/50'>
                             No tags added yet
                         </div>
                     )}

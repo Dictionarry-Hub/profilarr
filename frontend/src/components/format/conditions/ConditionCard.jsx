@@ -32,9 +32,9 @@ const ConditionCard = ({
     };
 
     return (
-        <div className='relative bg-gray-800 rounded-lg border border-gray-700 shadow-xl'>
+        <div className='relative bg-gradient-to-br from-gray-800/95 to-gray-900 rounded-lg border border-gray-700 shadow-lg hover:shadow-xl transition-shadow'>
             {/* Main content */}
-            <div className='p-4 pr-14 space-y-4  '>
+            <div className='p-4 pr-14 space-y-4'>
                 {/* Custom Name Input */}
                 <div className='mb-4'>
                     <input
@@ -48,11 +48,12 @@ const ConditionCard = ({
                         className='w-full px-3 py-2 text-sm rounded-md
                             bg-gray-700 border border-gray-700
                             text-gray-200 placeholder:text-gray-400
-                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                            transition-colors'
                     />
                 </div>
 
-                <div className='flex items-center gap-4 '>
+                <div className='flex items-center gap-4'>
                     {/* Type Selection */}
                     <BrowserSelect
                         value={condition.type || ''}
@@ -86,10 +87,11 @@ const ConditionCard = ({
                                         required: e.target.checked
                                     })
                                 }
-                                className='rounded border-gray-700 bg-gray-900
-                                    text-blue-500 focus:ring-blue-500'
+                                className='rounded border-gray-700 bg-gray-800/50
+                                    text-blue-500 focus:ring-blue-500
+                                    transition-colors'
                             />
-                            <span className='text-sm font-medium text-gray-400'>
+                            <span className='text-sm font-medium text-gray-300'>
                                 Required
                             </span>
                         </label>
@@ -105,10 +107,11 @@ const ConditionCard = ({
                                         negate: e.target.checked
                                     })
                                 }
-                                className='rounded border-gray-700 bg-gray-900
-                                    text-blue-500 focus:ring-blue-500'
+                                className='rounded border-gray-700 bg-gray-800/50
+                                    text-blue-500 focus:ring-blue-500
+                                    transition-colors'
                             />
-                            <span className='text-sm font-medium text-gray-400'>
+                            <span className='text-sm font-medium text-gray-300'>
                                 Negate
                             </span>
                         </label>
@@ -119,12 +122,12 @@ const ConditionCard = ({
             {/* Control Buttons */}
             <div
                 className='absolute right-0 top-0 bottom-0 flex flex-col 
-                divide-y divide-gray-700 border-l border-gray-700'>
+                divide-y divide-gray-700/50 border-l border-gray-700/50 bg-gray-800/30'>
                 <button
                     onClick={onMoveUp}
                     disabled={isFirst}
                     className='flex items-center justify-center w-10 flex-1
-                        text-gray-400 hover:text-gray-200 hover:bg-gray-700
+                        text-gray-400 hover:text-gray-200 hover:bg-gray-700/50
                         disabled:opacity-50 disabled:pointer-events-none
                         transition-colors'>
                     <ArrowUp className='w-4 h-4' />
@@ -133,7 +136,7 @@ const ConditionCard = ({
                     onClick={onMoveDown}
                     disabled={isLast}
                     className='flex items-center justify-center w-10 flex-1
-                        text-gray-400 hover:text-gray-200 hover:bg-gray-700
+                        text-gray-400 hover:text-gray-200 hover:bg-gray-700/50
                         disabled:opacity-50 disabled:pointer-events-none
                         transition-colors'>
                     <ArrowDown className='w-4 h-4' />
