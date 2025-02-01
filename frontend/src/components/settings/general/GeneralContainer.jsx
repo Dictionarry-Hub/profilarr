@@ -6,13 +6,19 @@ const GeneralContainer = () => {
     const [loading, setLoading] = useState(true);
     const [showApiKey, setShowApiKey] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showUsernameCurrentPassword, setShowUsernameCurrentPassword] =
+        useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [formData, setFormData] = useState({
         apiKey: '',
         username: '',
+        usernameCurrentPassword: '',
         password: '',
-        currentUsername: '',
-        currentPassword: ''
+        confirmPassword: '',
+        currentPassword: '',
+        currentUsername: ''
     });
 
     useEffect(() => {
@@ -26,9 +32,11 @@ const GeneralContainer = () => {
             setFormData({
                 apiKey: 'sk-1234567890abcdef',
                 username: 'admin',
-                password: 'currentpassword',
-                currentUsername: 'admin',
-                currentPassword: 'currentpassword'
+                usernameCurrentPassword: '',
+                password: '',
+                confirmPassword: '',
+                currentPassword: '',
+                currentUsername: 'admin'
             });
         } catch (error) {
             console.error('Error fetching settings:', error);
@@ -49,7 +57,6 @@ const GeneralContainer = () => {
         );
         if (confirmed) {
             console.log('Will reset API key');
-            // Here you would call your API endpoint to reset the key
         }
     };
 
@@ -60,31 +67,60 @@ const GeneralContainer = () => {
         }));
     };
 
-    const handlePasswordChange = e => {
+    const handleUsernameCurrentPasswordChange = e => {
         setFormData(prev => ({
             ...prev,
-            password: e.target.value
+            usernameCurrentPassword: e.target.value
+        }));
+    };
+
+    const handlePasswordChange = e => {
+        const newPassword = e.target.value;
+        setFormData(prev => ({
+            ...prev,
+            password: newPassword
+        }));
+    };
+
+    const handleConfirmPasswordChange = e => {
+        setFormData(prev => ({
+            ...prev,
+            confirmPassword: e.target.value
+        }));
+    };
+
+    const handleCurrentPasswordChange = e => {
+        setFormData(prev => ({
+            ...prev,
+            currentPassword: e.target.value
         }));
     };
 
     const handleSaveUsername = () => {
-        console.log('Will save username:', formData.username);
+        console.log('Will save username:', {
+            newUsername: formData.username,
+            currentPassword: formData.usernameCurrentPassword
+        });
         setFormData(prev => ({
             ...prev,
-            currentUsername: formData.username
+            currentUsername: formData.username,
+            usernameCurrentPassword: ''
         }));
     };
 
     const handleSavePassword = () => {
+        if (formData.password !== formData.confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
         const confirmed = window.confirm(
             'Are you sure you want to change your password?'
         );
         if (confirmed) {
-            console.log('Will save password:', formData.password);
-            setFormData(prev => ({
-                ...prev,
-                currentPassword: formData.password
-            }));
+            console.log('Will save password with verification', {
+                newPassword: formData.password,
+                currentPassword: formData.currentPassword
+            });
         }
     };
 
@@ -97,7 +133,6 @@ const GeneralContainer = () => {
     }
 
     const hasUsernameChanges = formData.username !== formData.currentUsername;
-    const hasPasswordChanges = formData.password !== formData.currentPassword;
 
     return (
         <div className='space-y-6'>
@@ -156,28 +191,67 @@ const GeneralContainer = () => {
                         <label className='text-sm font-medium text-gray-300'>
                             Username
                         </label>
-                        <div className='flex space-x-2'>
-                            <input
-                                type='text'
-                                value={formData.username}
-                                onChange={handleUsernameChange}
-                                className='flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100'
-                            />
-                            <button
-                                onClick={handleSaveUsername}
-                                disabled={!hasUsernameChanges}
-                                title={
-                                    hasUsernameChanges
-                                        ? 'Save changes'
-                                        : 'No changes to save'
-                                }
-                                className={`px-4 h-10 bg-gray-800 border rounded-lg flex items-center justify-center ${
-                                    hasUsernameChanges
-                                        ? 'border-gray-600 hover:bg-gray-600 cursor-pointer'
-                                        : 'border-gray-700 text-gray-500 cursor-not-allowed'
-                                }`}>
-                                Save
-                            </button>
+                        <div className='space-y-2'>
+                            <div className='flex space-x-2'>
+                                <input
+                                    type='text'
+                                    value={formData.username}
+                                    onChange={handleUsernameChange}
+                                    className='flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100'
+                                />
+                            </div>
+
+                            {hasUsernameChanges && (
+                                <div className='flex gap-2'>
+                                    <div className='relative flex-1'>
+                                        <input
+                                            type={
+                                                showUsernameCurrentPassword
+                                                    ? 'text'
+                                                    : 'password'
+                                            }
+                                            value={
+                                                formData.usernameCurrentPassword
+                                            }
+                                            onChange={
+                                                handleUsernameCurrentPasswordChange
+                                            }
+                                            placeholder='Enter current password'
+                                            className='w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100'
+                                        />
+                                        <button
+                                            onClick={() =>
+                                                setShowUsernameCurrentPassword(
+                                                    !showUsernameCurrentPassword
+                                                )
+                                            }
+                                            className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 w-6 h-6 flex items-center justify-center'>
+                                            {showUsernameCurrentPassword ? (
+                                                <EyeOff size={18} />
+                                            ) : (
+                                                <Eye size={18} />
+                                            )}
+                                        </button>
+                                    </div>
+                                    <button
+                                        onClick={handleSaveUsername}
+                                        disabled={
+                                            !formData.usernameCurrentPassword
+                                        }
+                                        title={
+                                            !formData.usernameCurrentPassword
+                                                ? 'Enter current password'
+                                                : 'Save changes'
+                                        }
+                                        className={`px-4 h-10 bg-gray-800 border rounded-lg flex items-center justify-center ${
+                                            formData.usernameCurrentPassword
+                                                ? 'border-gray-600 hover:bg-gray-600 cursor-pointer'
+                                                : 'border-gray-700 text-gray-500 cursor-not-allowed'
+                                        }`}>
+                                        Save
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -185,12 +259,13 @@ const GeneralContainer = () => {
                         <label className='text-sm font-medium text-gray-300'>
                             Password
                         </label>
-                        <div className='flex space-x-2'>
+                        <div className='space-y-2'>
                             <div className='relative flex-1'>
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     value={formData.password}
                                     onChange={handlePasswordChange}
+                                    placeholder='Enter new password'
                                     className='w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100'
                                 />
                                 <button
@@ -205,21 +280,102 @@ const GeneralContainer = () => {
                                     )}
                                 </button>
                             </div>
-                            <button
-                                onClick={handleSavePassword}
-                                disabled={!hasPasswordChanges}
-                                title={
-                                    hasPasswordChanges
-                                        ? 'Save changes'
-                                        : 'No changes to save'
-                                }
-                                className={`px-4 h-10 bg-gray-800 border rounded-lg flex items-center justify-center ${
-                                    hasPasswordChanges
-                                        ? 'border-gray-600 hover:bg-gray-600 cursor-pointer'
-                                        : 'border-gray-700 text-gray-500 cursor-not-allowed'
-                                }`}>
-                                Save
-                            </button>
+
+                            {formData.password && (
+                                <>
+                                    <div className='relative flex-1'>
+                                        <input
+                                            type={
+                                                showConfirmPassword
+                                                    ? 'text'
+                                                    : 'password'
+                                            }
+                                            value={formData.confirmPassword}
+                                            onChange={
+                                                handleConfirmPasswordChange
+                                            }
+                                            placeholder='Confirm new password'
+                                            className='w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100'
+                                        />
+                                        <button
+                                            onClick={() =>
+                                                setShowConfirmPassword(
+                                                    !showConfirmPassword
+                                                )
+                                            }
+                                            className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 w-6 h-6 flex items-center justify-center'>
+                                            {showConfirmPassword ? (
+                                                <EyeOff size={18} />
+                                            ) : (
+                                                <Eye size={18} />
+                                            )}
+                                        </button>
+                                    </div>
+
+                                    <div className='flex gap-2'>
+                                        <div className='relative flex-1'>
+                                            <input
+                                                type={
+                                                    showCurrentPassword
+                                                        ? 'text'
+                                                        : 'password'
+                                                }
+                                                value={formData.currentPassword}
+                                                onChange={
+                                                    handleCurrentPasswordChange
+                                                }
+                                                placeholder='Enter current password'
+                                                className='w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100'
+                                            />
+                                            <button
+                                                onClick={() =>
+                                                    setShowCurrentPassword(
+                                                        !showCurrentPassword
+                                                    )
+                                                }
+                                                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 w-6 h-6 flex items-center justify-center'>
+                                                {showCurrentPassword ? (
+                                                    <EyeOff size={18} />
+                                                ) : (
+                                                    <Eye size={18} />
+                                                )}
+                                            </button>
+                                        </div>
+                                        <button
+                                            onClick={handleSavePassword}
+                                            disabled={
+                                                !formData.password ||
+                                                !formData.confirmPassword ||
+                                                !formData.currentPassword ||
+                                                formData.password !==
+                                                    formData.confirmPassword
+                                            }
+                                            title={
+                                                !formData.password
+                                                    ? 'Enter a new password'
+                                                    : !formData.confirmPassword
+                                                    ? 'Confirm your new password'
+                                                    : !formData.currentPassword
+                                                    ? 'Enter your current password'
+                                                    : formData.password !==
+                                                      formData.confirmPassword
+                                                    ? 'Passwords do not match'
+                                                    : 'Save new password'
+                                            }
+                                            className={`px-4 h-10 bg-gray-800 border rounded-lg flex items-center justify-center ${
+                                                formData.password &&
+                                                formData.confirmPassword &&
+                                                formData.currentPassword &&
+                                                formData.password ===
+                                                    formData.confirmPassword
+                                                    ? 'border-gray-600 hover:bg-gray-600 cursor-pointer'
+                                                    : 'border-gray-700 text-gray-500 cursor-not-allowed'
+                                            }`}>
+                                            Save
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
