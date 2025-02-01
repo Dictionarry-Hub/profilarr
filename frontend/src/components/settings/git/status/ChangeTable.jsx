@@ -17,15 +17,27 @@ const ChangeTable = ({
     fetchGitStatus
 }) => {
     const sortedChanges = changesArray => {
-        // Filter out items with unknown status/type
-        const validChanges = changesArray.filter(
-            change =>
-                change && change.type && change.type.toLowerCase() !== 'unknown'
-        );
+        // Process changes to extract type from path for unknown types
+        const processedChanges = changesArray.map(change => {
+            if (!change) return change;
 
-        if (isMergeConflict || !sortConfig?.key) return validChanges;
+            // Only process items with unknown type
+            if (change.type?.toLowerCase() === 'unknown' && change.file_path) {
+                // Extract type from file path (assuming format: "type/name")
+                const pathParts = change.file_path.split('/');
+                if (pathParts.length > 1) {
+                    return {
+                        ...change,
+                        type: pathParts[0]
+                    };
+                }
+            }
+            return change;
+        });
 
-        return [...validChanges].sort((a, b) => {
+        if (isMergeConflict || !sortConfig?.key) return processedChanges;
+
+        return [...processedChanges].sort((a, b) => {
             if (a[sortConfig.key] < b[sortConfig.key]) {
                 return sortConfig.direction === 'ascending' ? -1 : 1;
             }

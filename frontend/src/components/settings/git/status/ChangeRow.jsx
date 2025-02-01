@@ -60,7 +60,6 @@ const ChangeRow = ({
                 return <File className='text-gray-400' size={16} />;
         }
     };
-
     const handleViewChanges = e => {
         e.stopPropagation();
         setShowChanges(true);
@@ -124,32 +123,46 @@ const ChangeRow = ({
                             <>
                                 <span className='mr-3'>
                                     <strong>Local:</strong>{' '}
-                                    {change.local_name || 'Unnamed'}
+                                    {change.local_name ||
+                                        change.name ||
+                                        'Unnamed'}
                                 </span>
                                 <span>
                                     <strong>Incoming:</strong>{' '}
-                                    {change.incoming_name || 'Unnamed'}
+                                    {change.incoming_name ||
+                                        change.name ||
+                                        'Unnamed'}
                                 </span>
                             </>
                         ) : (
                             change.local_name ||
                             change.incoming_name ||
-                            'Unnamed'
+                            change.name ||
+                            (change.file_path
+                                ? change.file_path.split('/').pop()
+                                : 'Unnamed')
                         )
                     ) : change.outgoing_name &&
                       change.outgoing_name !== change.prior_name ? (
                         <>
                             <span className='mr-3'>
                                 <strong>Prior:</strong>{' '}
-                                {change.prior_name || 'Unnamed'}
+                                {change.prior_name || change.name || 'Unnamed'}
                             </span>
                             <span>
                                 <strong>Outgoing:</strong>{' '}
-                                {change.outgoing_name || 'Unnamed'}
+                                {change.outgoing_name ||
+                                    change.name ||
+                                    'Unnamed'}
                             </span>
                         </>
                     ) : (
-                        change.outgoing_name || change.prior_name || 'Unnamed'
+                        change.outgoing_name ||
+                        change.prior_name ||
+                        change.name ||
+                        (change.file_path
+                            ? change.file_path.split('/').pop()
+                            : 'Unnamed')
                     )}
                 </td>
                 <td className='py-2 px-4'>
