@@ -1,3 +1,5 @@
+# backend/app/main.py
+
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .config import config
@@ -9,6 +11,7 @@ from .task import bp as tasks_bp, TaskScheduler
 from .backup import bp as backup_bp
 from .db import run_migrations, get_settings
 from .auth import bp as auth_bp
+from .settings import bp as settings_bp
 from .logs import bp as logs_bp
 from .middleware import init_middleware
 from .init import setup_logging, init_app_config, init_git_user
@@ -49,6 +52,7 @@ def create_app():
     # Register all blueprints
     logger.info("Registering blueprints")
     app.register_blueprint(auth_bp)
+    app.register_blueprint(settings_bp)
     app.register_blueprint(backup_bp)
     app.register_blueprint(logs_bp)
     app.register_blueprint(git_bp)
