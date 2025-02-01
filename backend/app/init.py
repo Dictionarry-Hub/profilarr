@@ -101,18 +101,6 @@ def setup_logging():
 
     return logger
 
-    # Ensure log directory exists
-    os.makedirs(os.path.dirname(config.GENERAL_LOG_FILE), exist_ok=True)
-
-    # Apply the configuration
-    logging.config.dictConfig(log_config)
-
-    # Create a logger for this module
-    logger = logging.getLogger(__name__)
-    logger.info("Logging system initialized")
-
-    return logger
-
 
 def init_git_user():
     """Initialize Git user configuration globally."""
