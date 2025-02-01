@@ -7,7 +7,7 @@ from .data import bp as data_bp
 from .importarr import bp as importarr_bp
 from .task import bp as tasks_bp, TaskScheduler
 from .backup import bp as backup_bp
-from .db import init_db, get_settings
+from .db import run_migrations, get_settings
 from .auth import bp as auth_bp
 from .logs import bp as logs_bp
 from .middleware import init_middleware
@@ -27,7 +27,7 @@ def create_app():
     config.ensure_directories()
 
     logger.info("Initializing database")
-    init_db()
+    run_migrations()
 
     # Initialize Git user configuration
     logger.info("Initializing Git user")
