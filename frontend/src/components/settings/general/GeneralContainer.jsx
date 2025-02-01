@@ -1,6 +1,13 @@
 // settings/general/GeneralContainer.jsx
 import React, {useState, useEffect} from 'react';
 import {Eye, EyeOff, Copy, RefreshCw, Check} from 'lucide-react';
+import {
+    fetchGeneralSettings,
+    updateUsername,
+    updatePassword,
+    resetApiKey
+} from '@api/settings';
+import Alert from '@ui/Alert';
 
 const GeneralContainer = () => {
     const [loading, setLoading] = useState(true);
@@ -28,16 +35,17 @@ const GeneralContainer = () => {
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            console.log('Fetching general settings');
-            setFormData({
-                apiKey: 'sk-1234567890abcdef',
-                username: 'admin',
+            const {username, api_key} = await fetchGeneralSettings();
+            setFormData(prev => ({
+                ...prev,
+                apiKey: api_key,
+                username: username,
+                currentUsername: username,
                 usernameCurrentPassword: '',
                 password: '',
                 confirmPassword: '',
-                currentPassword: '',
-                currentUsername: 'admin'
-            });
+                currentPassword: ''
+            }));
         } catch (error) {
             console.error('Error fetching settings:', error);
         } finally {
@@ -51,12 +59,21 @@ const GeneralContainer = () => {
         setTimeout(() => setCopySuccess(false), 1000);
     };
 
-    const handleResetApiKey = () => {
+    const handleResetApiKey = async () => {
         const confirmed = window.confirm(
             'Are you sure you want to reset your API key? This action cannot be undone and your current key will stop working immediately.'
         );
+
         if (confirmed) {
-            console.log('Will reset API key');
+            try {
+                const response = await resetApiKey(formData.currentPassword);
+                setFormData(prev => ({
+                    ...prev,
+                    apiKey: response.api_key
+                }));
+            } catch (error) {
+                console.error('Error resetting API key:', error);
+            }
         }
     };
 
@@ -96,31 +113,45 @@ const GeneralContainer = () => {
         }));
     };
 
-    const handleSaveUsername = () => {
-        console.log('Will save username:', {
-            newUsername: formData.username,
-            currentPassword: formData.usernameCurrentPassword
-        });
-        setFormData(prev => ({
-            ...prev,
-            currentUsername: formData.username,
-            usernameCurrentPassword: ''
-        }));
+    const handleSaveUsername = async () => {
+        try {
+            await updateUsername(
+                formData.username,
+                formData.usernameCurrentPassword
+            );
+            setFormData(prev => ({
+                ...prev,
+                currentUsername: formData.username,
+                usernameCurrentPassword: ''
+            }));
+        } catch (error) {
+            console.error('Error updating username:', error);
+        }
     };
 
-    const handleSavePassword = () => {
+    const handleSavePassword = async () => {
         if (formData.password !== formData.confirmPassword) {
-            alert('Passwords do not match');
+            Alert.error('Passwords do not match');
             return;
         }
+
         const confirmed = window.confirm(
-            'Are you sure you want to change your password?'
+            'Are you sure you want to change your password? You will need to log in again.'
         );
+
         if (confirmed) {
-            console.log('Will save password with verification', {
-                newPassword: formData.password,
-                currentPassword: formData.currentPassword
-            });
+            try {
+                const response = await updatePassword(
+                    formData.currentPassword,
+                    formData.password
+                );
+
+                if (response.requireRelogin) {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Error updating password:', error);
+            }
         }
     };
 
