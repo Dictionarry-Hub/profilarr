@@ -17,6 +17,8 @@ const GeneralContainer = () => {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showUsernameCurrentPassword, setShowUsernameCurrentPassword] =
         useState(false);
+    const [showApiKeyCurrentPassword, setShowApiKeyCurrentPassword] =
+        useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [formData, setFormData] = useState({
         apiKey: '',
@@ -25,7 +27,8 @@ const GeneralContainer = () => {
         password: '',
         confirmPassword: '',
         currentPassword: '',
-        currentUsername: ''
+        currentUsername: '',
+        apiKeyCurrentPassword: ''
     });
 
     useEffect(() => {
@@ -44,7 +47,8 @@ const GeneralContainer = () => {
                 usernameCurrentPassword: '',
                 password: '',
                 confirmPassword: '',
-                currentPassword: ''
+                currentPassword: '',
+                apiKeyCurrentPassword: ''
             }));
         } catch (error) {
             console.error('Error fetching settings:', error);
@@ -60,16 +64,26 @@ const GeneralContainer = () => {
     };
 
     const handleResetApiKey = async () => {
+        if (!formData.apiKeyCurrentPassword) {
+            Alert.error(
+                'Please enter your current password to reset the API key.'
+            );
+            return;
+        }
+
         const confirmed = window.confirm(
             'Are you sure you want to reset your API key? This action cannot be undone and your current key will stop working immediately.'
         );
 
         if (confirmed) {
             try {
-                const response = await resetApiKey(formData.currentPassword);
+                const response = await resetApiKey(
+                    formData.apiKeyCurrentPassword
+                );
                 setFormData(prev => ({
                     ...prev,
-                    apiKey: response.api_key
+                    apiKey: response.api_key,
+                    apiKeyCurrentPassword: ''
                 }));
             } catch (error) {
                 console.error('Error resetting API key:', error);
@@ -110,6 +124,13 @@ const GeneralContainer = () => {
         setFormData(prev => ({
             ...prev,
             currentPassword: e.target.value
+        }));
+    };
+
+    const handleApiKeyCurrentPasswordChange = e => {
+        setFormData(prev => ({
+            ...prev,
+            apiKeyCurrentPassword: e.target.value
         }));
     };
 
@@ -208,6 +229,31 @@ const GeneralContainer = () => {
                             className='w-10 h-10 bg-gray-800 border border-gray-600 rounded-lg hover:bg-gray-600 flex items-center justify-center'
                             title='Reset API key - this will invalidate your current key'>
                             <RefreshCw size={18} />
+                        </button>
+                    </div>
+
+                    <div className='relative flex-1'>
+                        <input
+                            type={
+                                showApiKeyCurrentPassword ? 'text' : 'password'
+                            }
+                            value={formData.apiKeyCurrentPassword}
+                            onChange={handleApiKeyCurrentPasswordChange}
+                            placeholder='Enter current password to reset API key'
+                            className='w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100'
+                        />
+                        <button
+                            onClick={() =>
+                                setShowApiKeyCurrentPassword(
+                                    !showApiKeyCurrentPassword
+                                )
+                            }
+                            className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 w-6 h-6 flex items-center justify-center'>
+                            {showApiKeyCurrentPassword ? (
+                                <EyeOff size={18} />
+                            ) : (
+                                <Eye size={18} />
+                            )}
                         </button>
                     </div>
                 </div>
