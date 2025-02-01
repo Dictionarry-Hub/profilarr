@@ -1,5 +1,6 @@
 import React, {useState, useRef} from 'react';
 import ArrContainer from './arrs/ArrContainer';
+import GeneralContainer from './general/GeneralContainer';
 import TaskContainer from './tasks/TaskContainer';
 import GitContainer from './git/GitContainer';
 import BackupContainer from './backup/BackupContainer';
@@ -25,6 +26,16 @@ const SettingsPage = () => {
                             : 'bg-gray-800 border border-gray-700 text-white'
                     }`}>
                     Database
+                </div>
+                <div
+                    onClick={() => handleTabChange('general')}
+                    ref={el => (tabsRef.current['git'] = el)}
+                    className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium ${
+                        activeTab === 'general'
+                            ? 'bg-gray-600 border border-gray-600 text-white'
+                            : 'bg-gray-800 border border-gray-700 text-white'
+                    }`}>
+                    General
                 </div>
                 <div
                     onClick={() => handleTabChange('app')}
@@ -69,6 +80,7 @@ const SettingsPage = () => {
             </nav>
 
             {activeTab === 'git' && <GitContainer />}
+            {activeTab === 'general' && <GeneralContainer />}
             {activeTab === 'app' && <ArrContainer />}
             {activeTab === 'tasks' && <TaskContainer />}
             {activeTab === 'backup' && <BackupContainer />}
