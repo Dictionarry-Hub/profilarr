@@ -1,3 +1,5 @@
+# backend/app/auth/__init__.py
+
 from flask import Blueprint, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
@@ -19,7 +21,6 @@ def setup():
         return jsonify({'needs_setup': True}), 200
 
     # Handle POST request for actual setup
-    # Check if auth already exists
     if db.execute('SELECT 1 FROM auth').fetchone():
         logger.warning('Failed setup attempt - auth already configured')
         return jsonify({'error': 'Auth already configured'}), 400
@@ -34,16 +35,18 @@ def setup():
 
     api_key = secrets.token_urlsafe(32)
     password_hash = generate_password_hash(password)
+    session_id = secrets.token_urlsafe(32)  # Generate a new session ID
 
     try:
         db.execute(
-            'INSERT INTO auth (username, password_hash, api_key) VALUES (?, ?, ?)',
-            (username, password_hash, api_key))
+            'INSERT INTO auth (username, password_hash, api_key, session_id) VALUES (?, ?, ?, ?)',
+            (username, password_hash, api_key, session_id))
         db.commit()
         logger.info('Initial auth setup completed successfully')
 
         # Set up session after successful creation
         session['authenticated'] = True
+        session['session_id'] = session_id
         session.permanent = True
 
         return jsonify({
@@ -86,12 +89,23 @@ def authenticate():
                       (username, )).fetchone()
 
     if user and check_password_hash(user['password_hash'], password):
+        # Generate a new session ID
+        new_session_id = secrets.token_urlsafe(32)
+        db.execute('UPDATE auth SET session_id = ? WHERE username = ?',
+                   (new_session_id, username))
+        db.commit()
+
+        # Set up session
         session['authenticated'] = True
+        session[
+            'session_id'] = new_session_id  # Store session ID in the session
         session.permanent = True
+
         # Clear failed attempts on success
         db.execute('DELETE FROM failed_attempts WHERE ip_address = ?',
                    (ip_address, ))
         db.commit()
+
         logger.info(f'Successful authentication for user: {username}')
         return jsonify({'authenticated': True})
 

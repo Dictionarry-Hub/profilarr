@@ -70,6 +70,7 @@ def up():
             username TEXT NOT NULL,
             password_hash TEXT NOT NULL,
             api_key TEXT,
+            session_id TEXT, 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         ''')

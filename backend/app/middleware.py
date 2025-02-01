@@ -1,3 +1,5 @@
+# backend/app/middleware.py
+
 from functools import wraps
 from flask import request, session, jsonify, current_app
 from .db import get_db
@@ -27,7 +29,10 @@ def init_middleware(app):
 
         # Check session authentication (for web users)
         if session.get('authenticated'):
-            return
+            db = get_db()
+            user = db.execute('SELECT session_id FROM auth').fetchone()
+            if user and session.get('session_id') == user['session_id']:
+                return
 
         # Check API key authentication (for API users)
         api_key = request.headers.get('X-Api-Key')
