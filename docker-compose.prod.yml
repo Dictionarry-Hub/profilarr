@@ -1,0 +1,21 @@
+# docker-compose.prod.yml
+version: '3.8'
+services:
+    backend:
+        build:
+            context: .
+            dockerfile: backend/Dockerfile.prod
+        ports:
+            - '5000:5000'
+        volumes:
+            - profilarr_data:/config
+        environment:
+            - FLASK_ENV=production
+            - TZ=Australia/Adelaide
+        env_file:
+            - .env.prod
+        restart: always
+
+volumes:
+    profilarr_data:
+        name: profilarr_data

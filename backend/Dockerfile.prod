@@ -1,0 +1,17 @@
+# backend/Dockerfile.prod
+# Build frontend
+FROM node:18 AS frontend-builder
+WORKDIR /frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
+
+# Backend
+FROM python:3.9
+WORKDIR /app
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/ .
+COPY --from=frontend-builder /frontend/dist ./app/static
+CMD ["python", "-m", "app.main"]

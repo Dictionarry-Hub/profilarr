@@ -23,8 +23,18 @@ def create_app():
     logger = setup_logging()
 
     logger.info("Creating Flask application")
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static')
     CORS(app, resources={r"/*": {"origins": "*"}})
+
+    # Serve static files
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def serve_static(path):
+        if path.startswith('api/'):
+            return  # Let API routes handle these
+        if path and os.path.exists(os.path.join(app.static_folder, path)):
+            return send_from_directory(app.static_folder, path)
+        return send_from_directory(app.static_folder, 'index.html')
 
     # Initialize directories and database
     logger.info("Ensuring required directories exist")
@@ -58,7 +68,7 @@ def create_app():
     app.register_blueprint(logs_bp, url_prefix='/api/logs')
     app.register_blueprint(git_bp, url_prefix='/api/git')
     app.register_blueprint(data_bp, url_prefix='/api/data')
-    app.register_blueprint(importarr_bp, url_prefix='/api/importarr')
+    app.register_blueprint(importarr_bp, url_prefix='/api/import')
     app.register_blueprint(arr_bp, url_prefix='/api/arr')
     app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
 
@@ -67,7 +77,7 @@ def create_app():
     init_middleware(app)
 
     # Add settings route
-    @app.route('/settings', methods=['GET'])
+    @app.route('/api/settings', methods=['GET'])
     def handle_settings():
         settings = get_settings()
         return jsonify(settings), 200
