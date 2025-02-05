@@ -3,7 +3,6 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/santiagosayshey/profilarr)](https://hub.docker.com/r/santiagosayshey/profilarr)
 [![Docker Stars](https://img.shields.io/docker/stars/santiagosayshey/profilarr)](https://hub.docker.com/r/santiagosayshey/profilarr)
 [![GitHub issues](https://img.shields.io/github/issues/Dictionarry-Hub/profilarr)](https://github.com/Dictionarry-Hub/profilarr/issues)
-[![GitHub Build Status](https://github.com/Dictionarry-Hub/profilarr/workflows/Build%20and%20Publish%20Docker%20Image/badge.svg)](https://github.com/Dictionarry-Hub/profilarr/actions)
 
 Configuration management tool for Radarr/Sonarr that automates importing and version control of custom formats and quality profiles.
 
