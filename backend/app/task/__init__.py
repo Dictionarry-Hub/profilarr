@@ -4,7 +4,7 @@ import logging
 from ..db import get_db
 from .tasks import TaskScheduler
 
-bp = Blueprint('tasks', __name__, url_prefix='/tasks')
+bp = Blueprint('tasks', __name__)
 logger = logging.getLogger(__name__)
 
 

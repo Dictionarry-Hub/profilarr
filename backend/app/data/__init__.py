@@ -9,7 +9,7 @@ from .utils import (get_category_directory, load_yaml_file, validate,
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-bp = Blueprint('data', __name__, url_prefix='/data')
+bp = Blueprint('data', __name__)
 
 
 @bp.route('/<string:category>', methods=['GET'])

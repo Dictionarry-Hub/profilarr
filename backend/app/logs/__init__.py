@@ -3,7 +3,7 @@ import os
 from ..config import config
 import logging
 
-bp = Blueprint('logs', __name__, url_prefix='/logs')
+bp = Blueprint('logs', __name__)
 logger = logging.getLogger(__name__)
 
 

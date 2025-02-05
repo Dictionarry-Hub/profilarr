@@ -8,7 +8,7 @@ from .manager import (save_arr_config, get_all_arr_configs, get_arr_config,
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-bp = Blueprint('arr', __name__, url_prefix='/arr')
+bp = Blueprint('arr', __name__)
 
 
 @bp.route('/ping', methods=['POST', 'OPTIONS'])

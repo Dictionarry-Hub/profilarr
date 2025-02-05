@@ -7,7 +7,7 @@ import logging
 from ..db import get_db
 
 logger = logging.getLogger(__name__)
-bp = Blueprint('auth', __name__, url_prefix='/auth')
+bp = Blueprint('auth', __name__)
 
 
 @bp.route('/setup', methods=['GET', 'POST'])

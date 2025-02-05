@@ -9,7 +9,7 @@ import tempfile
 import zipfile
 
 logger = logging.getLogger(__name__)
-bp = Blueprint('backup', __name__, url_prefix='/backup')
+bp = Blueprint('backup', __name__)
 
 
 @bp.route('', methods=['GET'])

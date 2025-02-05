@@ -7,7 +7,7 @@ from ..db import get_db
 import logging
 
 logger = logging.getLogger(__name__)
-bp = Blueprint('settings', __name__, url_prefix='/settings')
+bp = Blueprint('settings', __name__)
 
 
 @bp.route('/general', methods=['GET'])

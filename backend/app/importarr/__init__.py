@@ -11,7 +11,7 @@ from ..db import get_unique_arrs
 
 logger = logging.getLogger('importarr')
 
-bp = Blueprint('import', __name__, url_prefix='/import')
+bp = Blueprint('import', __name__)
 
 
 @bp.route('/format', methods=['POST', 'OPTIONS'])

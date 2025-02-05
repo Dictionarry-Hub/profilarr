@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-bp = Blueprint('git', __name__, url_prefix='/git')
+bp = Blueprint('git', __name__)
 
 REPO_PATH = config.DB_DIR
 branch_manager = Branch_Manager(REPO_PATH)
