@@ -1,6 +1,7 @@
 # backend/app/main.py
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
+import os
 from flask_cors import CORS
 from .config import config
 from .git import bp as git_bp
@@ -51,15 +52,15 @@ def create_app():
 
     # Register all blueprints
     logger.info("Registering blueprints")
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(settings_bp)
-    app.register_blueprint(backup_bp)
-    app.register_blueprint(logs_bp)
-    app.register_blueprint(git_bp)
-    app.register_blueprint(data_bp)
-    app.register_blueprint(importarr_bp)
-    app.register_blueprint(arr_bp)
-    app.register_blueprint(tasks_bp)
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(settings_bp, url_prefix='/api/settings')
+    app.register_blueprint(backup_bp, url_prefix='/api/backup')
+    app.register_blueprint(logs_bp, url_prefix='/api/logs')
+    app.register_blueprint(git_bp, url_prefix='/api/git')
+    app.register_blueprint(data_bp, url_prefix='/api/data')
+    app.register_blueprint(importarr_bp, url_prefix='/api/importarr')
+    app.register_blueprint(arr_bp, url_prefix='/api/arr')
+    app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
 
     # Initialize middleware
     logger.info("Initializing middleware")
