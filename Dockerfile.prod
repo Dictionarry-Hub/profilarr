@@ -2,6 +2,7 @@
 FROM python:3.9
 WORKDIR /app
 
+# Copy pre-built files from dist directory
 COPY dist/backend/* .
 COPY dist/static ./app/static
 COPY dist/requirements.txt .
