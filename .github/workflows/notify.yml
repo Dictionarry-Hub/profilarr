@@ -1,0 +1,10 @@
+name: Notify
+on:
+    push:
+        branches:
+            - 'v2-beta'
+jobs:
+    notify:
+        uses: Dictionarry-Hub/parrot/.github/workflows/notify.yml@main
+        secrets:
+            WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
