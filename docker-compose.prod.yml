@@ -1,20 +1,18 @@
-# docker-compose.prod.yml
+# docker-compose.yml
 version: '3.8'
 services:
-    backend:
-        build:
-            context: .
-            dockerfile: backend/Dockerfile.prod
+    profilarr:
+        image: yourusername/profilarr:latest # For Docker Hub
+        container_name: profilarr
         ports:
-            - '5000:5000'
+            - 6868:6868
         volumes:
             - profilarr_data:/config
         environment:
-            - FLASK_ENV=production
             - TZ=Australia/Adelaide
         env_file:
-            - .env.prod
-        restart: always
+            - .env
+        restart: unless-stopped
 
 volumes:
     profilarr_data:

@@ -1,17 +1,18 @@
-# backend/Dockerfile.prod
-# Build frontend
-FROM node:18 AS frontend-builder
-WORKDIR /frontend
-COPY frontend/package*.json ./
-RUN npm install
-COPY frontend/ ./
-RUN npm run build
-
-# Backend
+# Dockerfile
 FROM python:3.9
 WORKDIR /app
-COPY backend/requirements.txt .
+
+COPY dist/backend/* .
+COPY dist/static ./app/static
+COPY dist/requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
-COPY backend/ .
-COPY --from=frontend-builder /frontend/dist ./app/static
-CMD ["python", "-m", "app.main"]
+
+# Add labels for Docker Hub
+LABEL org.opencontainers.image.authors="Dictionarry dictionarry@pm.me"
+LABEL org.opencontainers.image.description="Profilarr - Profile manager for *arr apps"
+LABEL org.opencontainers.image.source="https://github.com/Dictionarry-Hub/profilarr"
+LABEL org.opencontainers.image.title="Profilarr"
+LABEL org.opencontainers.image.version="beta"
+
+CMD ["gunicorn", "--bind", "0.0.0.0:6868", "app.main:create_app()"]
