@@ -1,5 +1,5 @@
 # Dockerfile
-FROM python:3.9
+FROM python:3.9-slim
 WORKDIR /app
 
 # Copy pre-built files from dist directory
