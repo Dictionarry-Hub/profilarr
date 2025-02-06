@@ -65,14 +65,6 @@ export const useRegexModal = (initialPattern, onSave) => {
             return;
         }
 
-        // Validate regex pattern
-        try {
-            new RegExp(patternValue);
-        } catch (e) {
-            Alert.error('Invalid regular expression: ' + e.message);
-            return;
-        }
-
         try {
             const data = {
                 name,
