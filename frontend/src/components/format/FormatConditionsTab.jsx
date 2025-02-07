@@ -45,6 +45,24 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
         }
     };
 
+    const handleMoveToTop = index => {
+        if (index > 0) {
+            const newConditions = [...conditions];
+            const [movedCondition] = newConditions.splice(index, 1);
+            newConditions.unshift(movedCondition);
+            onConditionsChange(newConditions);
+        }
+    };
+
+    const handleMoveToBottom = index => {
+        if (index < conditions.length - 1) {
+            const newConditions = [...conditions];
+            const [movedCondition] = newConditions.splice(index, 1);
+            newConditions.push(movedCondition);
+            onConditionsChange(newConditions);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className='flex items-center justify-center h-full'>
@@ -101,6 +119,8 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
                             patterns={patterns}
                             onMoveUp={() => handleMoveUp(index)}
                             onMoveDown={() => handleMoveDown(index)}
+                            onMoveToTop={() => handleMoveToTop(index)}
+                            onMoveToBottom={() => handleMoveToBottom(index)}
                             isFirst={index === 0}
                             isLast={index === conditions.length - 1}
                         />

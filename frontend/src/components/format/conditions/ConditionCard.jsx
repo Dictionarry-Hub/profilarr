@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {CONDITION_TYPES, createCondition} from './conditionTypes';
-import {ArrowUp, ArrowDown, X} from 'lucide-react';
+import {ArrowUp, ArrowDown, X, ChevronsUp, ChevronsDown} from 'lucide-react';
 import BrowserSelect from '@ui/BrowserSelect';
 
 const ConditionCard = ({
@@ -11,6 +11,8 @@ const ConditionCard = ({
     patterns,
     onMoveUp,
     onMoveDown,
+    onMoveToTop,
+    onMoveToBottom,
     isFirst,
     isLast
 }) => {
@@ -124,6 +126,15 @@ const ConditionCard = ({
                 className='absolute right-0 top-0 bottom-0 flex flex-col 
                 divide-y divide-gray-700/50 border-l border-gray-700/50 bg-gray-800/30'>
                 <button
+                    onClick={onMoveToTop}
+                    disabled={isFirst}
+                    className='flex items-center justify-center w-10 flex-1
+                        text-gray-400 hover:text-gray-200 hover:bg-gray-700/50
+                        disabled:opacity-50 disabled:pointer-events-none
+                        transition-colors'>
+                    <ChevronsUp className='w-4 h-4' />
+                </button>
+                <button
                     onClick={onMoveUp}
                     disabled={isFirst}
                     className='flex items-center justify-center w-10 flex-1
@@ -140,6 +151,15 @@ const ConditionCard = ({
                         disabled:opacity-50 disabled:pointer-events-none
                         transition-colors'>
                     <ArrowDown className='w-4 h-4' />
+                </button>
+                <button
+                    onClick={onMoveToBottom}
+                    disabled={isLast}
+                    className='flex items-center justify-center w-10 flex-1
+                        text-gray-400 hover:text-gray-200 hover:bg-gray-700/50
+                        disabled:opacity-50 disabled:pointer-events-none
+                        transition-colors'>
+                    <ChevronsDown className='w-4 h-4' />
                 </button>
                 <button
                     onClick={onDelete}
@@ -170,6 +190,8 @@ ConditionCard.propTypes = {
     ).isRequired,
     onMoveUp: PropTypes.func.isRequired,
     onMoveDown: PropTypes.func.isRequired,
+    onMoveToTop: PropTypes.func.isRequired,
+    onMoveToBottom: PropTypes.func.isRequired,
     isFirst: PropTypes.bool.isRequired,
     isLast: PropTypes.bool.isRequired
 };
