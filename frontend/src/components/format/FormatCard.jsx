@@ -14,7 +14,10 @@ function FormatCard({
     willBeSelected,
     onSelect
 }) {
-    const [showDescription, setShowDescription] = useState(true);
+    const [showDescription, setShowDescription] = useState(() => {
+        const saved = localStorage.getItem(`format-view-${format.file_name}`);
+        return saved !== null ? JSON.parse(saved) : true;
+    });
     const {content} = format;
     const totalTests = content.tests?.length || 0;
     const passedTests = content.tests?.filter(t => t.passes)?.length || 0;
@@ -45,7 +48,14 @@ function FormatCard({
 
     const handleViewToggle = e => {
         e.stopPropagation();
-        setShowDescription(!showDescription);
+        setShowDescription(prev => {
+            const newState = !prev;
+            localStorage.setItem(
+                `format-view-${format.file_name}`,
+                JSON.stringify(newState)
+            );
+            return newState;
+        });
     };
 
     const handleMouseDown = e => {
