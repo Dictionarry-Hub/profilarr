@@ -402,7 +402,9 @@ def run_import_for_config(config_row):
     Perform the same import logic as the /import endpoints, but automatically
     for a "pull-based" or "schedule-based" ARR config.
 
-    We'll calculate a 'real' percentage based on successful imports only.
+    Calculates sync percentage based on explicitly selected items only:
+    - Each selected profile counts as 1
+    - Each selected custom format counts as 1
     """
     from datetime import datetime
     from ..db import get_db
@@ -423,10 +425,6 @@ def run_import_for_config(config_row):
     selected_profiles = data_to_sync.get('profiles', [])
     selected_formats = data_to_sync.get('customFormats', [])
 
-    # Track successful imports separately from attempts
-    total_attempted = 0
-    total_successful = 0
-
     # Log import_as_unique setting
     if import_as_unique:
         logger.info(f"Unique imports for {arr_name} are on, adjusting names")
@@ -434,9 +432,12 @@ def run_import_for_config(config_row):
         logger.info(
             f"Unique imports for {arr_name} are off, using original names")
 
-    # 1) Import user-selected custom formats
+    # Calculate total_attempted based on explicitly selected items only
+    total_attempted = len(selected_formats) + len(selected_profiles)
+    total_successful = 0
+
+    # 1) Import user-selected custom formats (counting these in percentage)
     if selected_formats:
-        total_attempted += len(selected_formats)
         logger.info(
             f"[Pull Import] Importing {len(selected_formats)} user-selected CFs for ARR #{arr_id}"
         )
@@ -497,9 +498,8 @@ def run_import_for_config(config_row):
                     f"[Pull Import] Error loading profile {profile_name}: {str(e)}"
                 )
 
-    # 2b) Import CFs referenced by profiles
+    # Import referenced CFs
     if referenced_cf_names:
-        total_attempted += len(referenced_cf_names)
         try:
             from ..importarr.format import import_formats_to_arr
             format_names = list(referenced_cf_names)
@@ -519,9 +519,7 @@ def run_import_for_config(config_row):
                                               api_key=api_key,
                                               arr_type=arr_type)
 
-            if cf_result.get('success'):
-                total_successful += len(referenced_cf_names)
-            else:
+            if not cf_result.get('success'):
                 logger.warning(
                     f"[Pull Import] Importing referenced CFs had errors: {cf_result}"
                 )
@@ -531,7 +529,6 @@ def run_import_for_config(config_row):
 
     # 3) Import the profiles themselves
     if selected_profiles:
-        total_attempted += len(selected_profiles)
         try:
             from ..importarr.profile import import_profiles_to_arr
             profile_names = selected_profiles
@@ -556,11 +553,9 @@ def run_import_for_config(config_row):
                 import_as_unique=import_as_unique)
 
             if profile_result.get('success'):
-                # Count both the profile and all its formats as successes
-                profile_successful = (profile_result.get('added', 0) +
-                                      profile_result.get('updated', 0))
-                total_successful += profile_successful + len(
-                    referenced_cf_names)
+                # Count successful profile imports in total
+                total_successful += (profile_result.get('added', 0) +
+                                     profile_result.get('updated', 0))
             else:
                 logger.warning(
                     f"[Pull Import] Importing profiles had errors: {profile_result}"
@@ -570,11 +565,8 @@ def run_import_for_config(config_row):
                 f"[Pull Import] Failed importing profiles: {str(e)}")
 
     # Calculate percentage based on successful imports vs attempted
-    if total_attempted > 0:
-        sync_percentage = int((total_successful / total_attempted) * 100)
-    else:
-        # If nothing was attempted, show 0% instead of 100%
-        sync_percentage = 0
+    sync_percentage = int((total_successful / total_attempted *
+                           100) if total_attempted > 0 else 0)
 
     logger.info(
         f"[Pull Import] Done importing for ARR config #{arr_id} ({arr_name}). "
