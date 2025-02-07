@@ -2,6 +2,12 @@ import React, {useState, useEffect} from 'react';
 import {COMMIT_TYPES, COMMIT_SCOPES} from '@constants/commits';
 import {Info} from 'lucide-react';
 
+const sanitizeInput = text => {
+    if (!text) return '';
+    // Replace double quotes with single quotes
+    return text.replace(/"/g, "'");
+};
+
 const formatBodyLines = text => {
     if (!text) return '';
     return text
@@ -10,8 +16,8 @@ const formatBodyLines = text => {
             const trimmedLine = line.trim();
             if (!trimmedLine) return '';
             const cleanLine = trimmedLine.startsWith('- ')
-                ? trimmedLine.substring(2).trim()
-                : trimmedLine;
+                ? sanitizeInput(trimmedLine.substring(2).trim())
+                : sanitizeInput(trimmedLine);
             return cleanLine ? `- ${cleanLine}` : '';
         })
         .filter(Boolean)
@@ -129,7 +135,9 @@ const CommitSection = ({commitMessage, setCommitMessage}) => {
                         <input
                             type='text'
                             value={subject}
-                            onChange={e => setSubject(e.target.value)}
+                            onChange={e =>
+                                setSubject(sanitizeInput(e.target.value))
+                            }
                             placeholder='Brief description of the changes'
                             maxLength={50}
                             className={`w-full px-3 py-2 rounded-md ${inputStyles}`}
@@ -142,7 +150,9 @@ const CommitSection = ({commitMessage, setCommitMessage}) => {
                         </label>
                         <textarea
                             value={body}
-                            onChange={e => setBody(e.target.value)}
+                            onChange={e =>
+                                setBody(sanitizeInput(e.target.value))
+                            }
                             placeholder='Detailed description of changes'
                             className={`w-full px-3 py-2 rounded-md resize-none h-32 ${inputStyles}`}
                         />
@@ -155,7 +165,9 @@ const CommitSection = ({commitMessage, setCommitMessage}) => {
                         <input
                             type='text'
                             value={footer}
-                            onChange={e => setFooter(e.target.value)}
+                            onChange={e =>
+                                setFooter(sanitizeInput(e.target.value))
+                            }
                             placeholder='References to issues, PRs (optional)'
                             className={`w-full px-3 py-2 rounded-md ${inputStyles}`}
                         />
