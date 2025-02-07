@@ -67,25 +67,30 @@ export const useFormatModal = (initialFormat, onSuccess) => {
     };
 
     const initializeForm = useCallback((format, cloning) => {
-        setIsCloning(cloning || false);
-        if (format) {
-            const initialName = cloning ? `${format.name}` : format.name;
-            setName(initialName);
-            setOriginalName(cloning ? '' : format.name);
-            setDescription(format.description || '');
-            setTags(format.tags || []);
-            setConditions(format.conditions || []);
-            setTests(format.tests || []);
-        } else {
-            setName('');
-            setOriginalName('');
-            setDescription('');
-            setTags([]);
-            setConditions([]);
-            setTests([]);
-        }
+        // First, reset all state
+        setName('');
+        setOriginalName('');
+        setDescription('');
+        setTags([]);
+        setConditions([]);
+        setTests([]);
         setFormErrors({name: '', conditions: '', tests: '', general: ''});
         setIsDeleting(false);
+        setIsCloning(false);
+
+        // Then set new values in a separate tick
+        if (format) {
+            setTimeout(() => {
+                const initialName = cloning ? `${format.name}` : format.name;
+                setName(initialName);
+                setOriginalName(cloning ? '' : format.name);
+                setDescription(format.description || '');
+                setTags(format.tags || []);
+                setConditions(format.conditions || []);
+                setTests(format.tests || []);
+                setIsCloning(cloning || false);
+            }, 0);
+        }
     }, []);
 
     const handleSave = async () => {
