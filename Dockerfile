@@ -18,4 +18,6 @@ LABEL org.opencontainers.image.source="https://github.com/Dictionarry-Hub/profil
 LABEL org.opencontainers.image.title="Profilarr"
 LABEL org.opencontainers.image.version="beta"
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8888", "app.main:create_app()"]
+EXPOSE 6868
+
+CMD ["gunicorn", "--bind", "0.0.0.0:6868", "app.main:create_app()"]

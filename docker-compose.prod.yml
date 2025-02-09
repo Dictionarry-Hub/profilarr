@@ -5,7 +5,7 @@ services:
         image: santiagosayshey/profilarr:beta
         container_name: profilarr
         ports:
-            - 8888:8888
+            - 6868:6868
         volumes:
             - profilarr_data:/config
         environment:
