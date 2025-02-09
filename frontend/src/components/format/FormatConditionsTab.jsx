@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useRef, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import {InfoIcon} from 'lucide-react';
 import {usePatterns} from '@hooks/usePatterns';
@@ -8,60 +8,113 @@ import AddButton from '@ui/DataBar/AddButton';
 
 const FormatConditionsTab = ({conditions, onConditionsChange}) => {
     const {patterns, isLoading, error} = usePatterns();
+    const scrollContainerRef = useRef(null);
+    const previousConditionsLength = useRef(conditions.length);
 
-    const handleAddCondition = () => {
-        onConditionsChange([createCondition(), ...conditions]);
-    };
-
-    const handleConditionChange = (index, updatedCondition) => {
-        const newConditions = [...conditions];
-        newConditions[index] = updatedCondition;
-        onConditionsChange(newConditions);
-    };
-
-    const handleConditionDelete = index => {
-        onConditionsChange(conditions.filter((_, i) => i !== index));
-    };
-
-    const handleMoveUp = index => {
-        if (index > 0) {
-            const newConditions = [...conditions];
-            [newConditions[index - 1], newConditions[index]] = [
-                newConditions[index],
-                newConditions[index - 1]
-            ];
-            onConditionsChange(newConditions);
+    // Effect to handle scrolling when conditions are added
+    useEffect(() => {
+        if (conditions.length > previousConditionsLength.current) {
+            // Scroll to bottom with smooth animation
+            scrollContainerRef.current?.scrollTo({
+                top: scrollContainerRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
         }
-    };
+        previousConditionsLength.current = conditions.length;
+    }, [conditions.length]);
 
-    const handleMoveDown = index => {
-        if (index < conditions.length - 1) {
-            const newConditions = [...conditions];
-            [newConditions[index], newConditions[index + 1]] = [
-                newConditions[index + 1],
-                newConditions[index]
-            ];
-            onConditionsChange(newConditions);
-        }
-    };
+    // Memoized handler for adding conditions
+    const handleAddCondition = useCallback(() => {
+        const newCondition = createCondition();
+        // Append to end and create a new array reference
+        onConditionsChange(currentConditions => [
+            ...currentConditions,
+            newCondition
+        ]);
+    }, [onConditionsChange]);
 
-    const handleMoveToTop = index => {
-        if (index > 0) {
-            const newConditions = [...conditions];
-            const [movedCondition] = newConditions.splice(index, 1);
-            newConditions.unshift(movedCondition);
-            onConditionsChange(newConditions);
-        }
-    };
+    // Memoized handler for condition updates
+    const handleConditionChange = useCallback(
+        (index, updatedCondition) => {
+            onConditionsChange(currentConditions => {
+                const newConditions = [...currentConditions];
+                newConditions[index] = {...updatedCondition}; // Create new reference
+                return newConditions;
+            });
+        },
+        [onConditionsChange]
+    );
 
-    const handleMoveToBottom = index => {
-        if (index < conditions.length - 1) {
-            const newConditions = [...conditions];
-            const [movedCondition] = newConditions.splice(index, 1);
-            newConditions.push(movedCondition);
-            onConditionsChange(newConditions);
-        }
-    };
+    // Memoized handler for condition deletion
+    const handleConditionDelete = useCallback(
+        index => {
+            onConditionsChange(currentConditions =>
+                currentConditions.filter((_, i) => i !== index)
+            );
+        },
+        [onConditionsChange]
+    );
+
+    // Memoized movement handlers
+    const handleMoveUp = useCallback(
+        index => {
+            if (index > 0) {
+                onConditionsChange(currentConditions => {
+                    const newConditions = [...currentConditions];
+                    [newConditions[index - 1], newConditions[index]] = [
+                        {...newConditions[index]},
+                        {...newConditions[index - 1]}
+                    ];
+                    return newConditions;
+                });
+            }
+        },
+        [onConditionsChange]
+    );
+
+    const handleMoveDown = useCallback(
+        index => {
+            onConditionsChange(currentConditions => {
+                if (index < currentConditions.length - 1) {
+                    const newConditions = [...currentConditions];
+                    [newConditions[index], newConditions[index + 1]] = [
+                        {...newConditions[index + 1]},
+                        {...newConditions[index]}
+                    ];
+                    return newConditions;
+                }
+                return currentConditions;
+            });
+        },
+        [onConditionsChange]
+    );
+
+    const handleMoveToTop = useCallback(
+        index => {
+            if (index > 0) {
+                onConditionsChange(currentConditions => {
+                    const newConditions = [...currentConditions];
+                    const [movedCondition] = newConditions.splice(index, 1);
+                    return [{...movedCondition}, ...newConditions];
+                });
+            }
+        },
+        [onConditionsChange]
+    );
+
+    const handleMoveToBottom = useCallback(
+        index => {
+            onConditionsChange(currentConditions => {
+                if (index < currentConditions.length - 1) {
+                    const newConditions = [...currentConditions];
+                    const [movedCondition] = newConditions.splice(index, 1);
+                    return [...newConditions, {...movedCondition}];
+                }
+                return currentConditions;
+            });
+        },
+        [onConditionsChange]
+    );
 
     if (isLoading) {
         return (
@@ -85,14 +138,8 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
 
     return (
         <div className='h-full flex flex-col space-y-4'>
-            {/* Header Section */}
             <div className='flex items-center gap-4 h-16'>
-                {/* Info Alert */}
-                <div
-                    className='flex-1 flex items-center gap-2 px-3 py-2 
-                    bg-blue-50 dark:bg-blue-900/20 
-                    border border-blue-200 dark:border-blue-800 
-                    rounded-md'>
+                <div className='flex-1 flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md'>
                     <InfoIcon className='h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0' />
                     <p className='text-sm text-blue-700 dark:text-blue-300'>
                         Define matching rules using required and negated
@@ -100,17 +147,16 @@ const FormatConditionsTab = ({conditions, onConditionsChange}) => {
                         releases.
                     </p>
                 </div>
-
-                {/* Add Button */}
                 <AddButton onClick={handleAddCondition} label='Add Condition' />
             </div>
 
-            {/* Scrollable Conditions List */}
-            <div className='flex-1 overflow-y-auto min-h-0 scrollable pr-2'>
+            <div
+                ref={scrollContainerRef}
+                className='flex-1 overflow-y-auto min-h-0 scrollable pr-2'>
                 <div className='space-y-3 pb-4'>
                     {conditions.map((condition, index) => (
                         <ConditionCard
-                            key={index}
+                            key={`condition-${index}`}
                             condition={condition}
                             onChange={updatedCondition =>
                                 handleConditionChange(index, updatedCondition)
