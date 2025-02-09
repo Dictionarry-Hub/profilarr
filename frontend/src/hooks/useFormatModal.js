@@ -46,11 +46,15 @@ export const useFormatModal = (initialFormat, onSuccess) => {
             errors.conditions = 'At least one condition is required';
         } else {
             const invalidConditions = conditions.filter(condition => {
+                // Check for missing condition name
+                if (!condition.name?.trim()) {
+                    return true;
+                }
                 return !condition.field || !condition.operator;
             });
             if (invalidConditions.length > 0) {
                 errors.conditions =
-                    'All conditions must have a field and operator';
+                    'All conditions must have a name, field, and operator';
             }
         }
 
@@ -115,6 +119,17 @@ export const useFormatModal = (initialFormat, onSuccess) => {
             if (!conditions.length) {
                 errors.conditions = 'At least one condition is required';
                 Alert.error('At least one condition is required');
+                setFormErrors(errors);
+                return;
+            }
+
+            // Validate condition names
+            const unnamedConditions = conditions.filter(
+                condition => !condition.name?.trim()
+            );
+            if (unnamedConditions.length > 0) {
+                errors.conditions = 'All conditions must have a name';
+                Alert.error('All conditions must have a name');
                 setFormErrors(errors);
                 return;
             }
