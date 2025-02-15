@@ -505,10 +505,8 @@ function ProfileModal({
                                 <ProfileGeneralTab
                                     name={name}
                                     description={description}
-                                    upgradesAllowed={upgradesAllowed}
                                     onNameChange={setName}
                                     onDescriptionChange={setDescription}
-                                    onUpgradesAllowedChange={setUpgradesAllowed}
                                     error={error}
                                     tags={tags}
                                     onAddTag={tag => setTags([...tags, tag])}
@@ -541,7 +539,6 @@ function ProfileModal({
                                             ...prev,
                                             [tag]: score
                                         }));
-
                                         setCustomFormats(prev =>
                                             prev.map(format => {
                                                 if (
@@ -567,6 +564,8 @@ function ProfileModal({
                                         setUpgradeUntilScore
                                     }
                                     onMinIncrementChange={setMinScoreIncrement}
+                                    upgradesAllowed={upgradesAllowed}
+                                    onUpgradesAllowedChange={setUpgradesAllowed}
                                 />
                             )}
                             {activeTab === 'qualities' && (

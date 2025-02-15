@@ -7,10 +7,8 @@ const ProfileGeneralTab = ({
     name,
     description,
     tags,
-    upgradesAllowed,
     onNameChange,
     onDescriptionChange,
-    onUpgradesAllowedChange,
     onAddTag,
     onRemoveTag,
     error
@@ -42,37 +40,13 @@ const ProfileGeneralTab = ({
             )}
             <div className='space-y-8'>
                 <div className='space-y-2'>
-                    <div className='flex items-center justify-between'>
-                        <div className='space-y-1'>
-                            <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                                Profile Name
-                            </label>
-                            <p className='text-xs text-gray-500 dark:text-gray-400'>
-                                Name of this profile. Import will use the same
-                                name
-                            </p>
-                        </div>
-                        <div className='flex flex-col items-end space-y-1'>
-                            <label className='flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer'>
-                                <input
-                                    type='checkbox'
-                                    checked={upgradesAllowed}
-                                    onChange={e =>
-                                        onUpgradesAllowedChange(
-                                            e.target.checked
-                                        )
-                                    }
-                                    className='rounded border-gray-300 dark:border-gray-600 
-                                    text-blue-500 focus:ring-blue-500 
-                                    h-4 w-4 cursor-pointer
-                                    transition-colors duration-200'
-                                />
-                                <span>Upgrades Allowed</span>
-                            </label>
-                            <p className='text-xs text-gray-500 dark:text-gray-400'>
-                                Allow automatic upgrades for this profile
-                            </p>
-                        </div>
+                    <div className='space-y-1'>
+                        <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            Profile Name
+                        </label>
+                        <p className='text-xs text-gray-500 dark:text-gray-400'>
+                            Name of this profile. Import will use the same name
+                        </p>
                     </div>
                     <input
                         type='text'
@@ -141,20 +115,20 @@ const ProfileGeneralTab = ({
                                 <span
                                     key={tag}
                                     className='inline-flex items-center px-2.5 py-1 rounded-md
-                          text-xs font-semibold
-                          bg-blue-600/20 text-blue-400
-                          group'>
+                                    text-xs font-semibold
+                                    bg-blue-600/20 text-blue-400
+                                    group'>
                                     {tag}
                                     <button
                                         onClick={() => onRemoveTag(tag)}
                                         className='ml-1.5 p-0.5 rounded-md
-                              hover:bg-blue-500/20
-                              focus:outline-none focus:ring-2
-                              focus:ring-blue-500 focus:ring-offset-1
-                              transition-colors duration-200'>
+                                        hover:bg-blue-500/20
+                                        focus:outline-none focus:ring-2
+                                        focus:ring-blue-500 focus:ring-offset-1
+                                        transition-colors duration-200'>
                                         <svg
                                             className='w-3.5 h-3.5 text-blue-400
-                                 opacity-60 group-hover:opacity-100 transition-opacity'
+                                            opacity-60 group-hover:opacity-100 transition-opacity'
                                             fill='none'
                                             stroke='currentColor'
                                             viewBox='0 0 24 24'>
@@ -172,10 +146,10 @@ const ProfileGeneralTab = ({
                     ) : (
                         <div
                             className='flex items-center justify-center h-12 
-                    text-sm text-gray-500 dark:text-gray-400 
-                    rounded-md border border-dashed 
-                    border-gray-300 dark:border-gray-700
-                    bg-gray-50 dark:bg-gray-800/50'>
+                            text-sm text-gray-500 dark:text-gray-400 
+                            rounded-md border border-dashed 
+                            border-gray-300 dark:border-gray-700
+                            bg-gray-50 dark:bg-gray-800/50'>
                             No tags added yet
                         </div>
                     )}
@@ -189,10 +163,8 @@ ProfileGeneralTab.propTypes = {
     name: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-    upgradesAllowed: PropTypes.bool.isRequired,
     onNameChange: PropTypes.func.isRequired,
     onDescriptionChange: PropTypes.func.isRequired,
-    onUpgradesAllowedChange: PropTypes.func.isRequired,
     onAddTag: PropTypes.func.isRequired,
     onRemoveTag: PropTypes.func.isRequired,
     error: PropTypes.string
