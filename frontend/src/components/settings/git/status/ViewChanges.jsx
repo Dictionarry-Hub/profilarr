@@ -4,19 +4,55 @@ import Modal from '@ui/Modal';
 import DiffCommit from './DiffCommit';
 import {FileText} from 'lucide-react';
 import useChangeParser from '@hooks/useChangeParser';
+import {COMMIT_TYPES, FILE_TYPES, COMMIT_SCOPES} from '@constants/commits';
+import Tooltip from '@ui/Tooltip';
+
+const Badge = ({icon: Icon, label, className, tooltipContent}) => (
+    <Tooltip content={tooltipContent}>
+        <div
+            className={`px-2.5 py-1 rounded-md flex items-center gap-2 ${className}`}>
+            <Icon className='w-3.5 h-3.5' />
+            <span className='text-xs font-medium'>{label}</span>
+        </div>
+    </Tooltip>
+);
 
 const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
-    // Parse the array of changes
     const parsedChanges = useChangeParser(change.changes || []);
+    const typeInfo = FILE_TYPES[change.type] || {
+        bg: 'bg-gray-500/10',
+        text: 'text-gray-400',
+        icon: FileText
+    };
+
+    const commitType = COMMIT_TYPES.find(
+        t => t.value === change.commit_message?.type
+    );
+
     const titleContent = (
-        <div className='flex items-center space-x-4'>
-            <div className='flex items-center space-x-2'>
-                <FileText className='w-5 h-5 text-gray-400' />
-                <span className='text-lg font-bold'>{change.name}</span>
-            </div>
-            <span className='px-2 py-0.5 bg-gray-700 rounded-full text-sm text-gray-300'>
-                {change.type}
+        <div className='flex items-center justify-between w-full mr-4'>
+            <span className='text-lg font-bold text-gray-200'>
+                {change.name}
             </span>
+            <div className='flex items-center gap-3'>
+                {commitType && (
+                    <Badge
+                        icon={commitType.icon}
+                        label={commitType.label}
+                        className={`${commitType.bg} ${commitType.text}`}
+                        tooltipContent={commitType.description}
+                    />
+                )}
+                <Badge
+                    icon={typeInfo.icon}
+                    label={change.type}
+                    className={`${typeInfo.bg} ${typeInfo.text}`}
+                    tooltipContent={
+                        COMMIT_SCOPES.find(s => s.label === change.type)
+                            ?.description
+                    }
+                />
+            </div>
         </div>
     );
 
@@ -27,7 +63,6 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
             title={titleContent}
             width='10xl'>
             <div className='space-y-4'>
-                {/* If there's a commit message, show it */}
                 {change.commit_message && (
                     <DiffCommit commitMessage={change.commit_message} />
                 )}
