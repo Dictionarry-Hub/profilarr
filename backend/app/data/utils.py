@@ -158,26 +158,39 @@ def update_yaml_file(file_path: str, data: Dict[str, Any],
         # Check if this is a rename operation
         if 'rename' in data:
             new_name = data['rename']
+            old_name = filename_to_display(os.path.basename(file_path)[:-4])
+
             directory = os.path.dirname(file_path)
             new_file_path = os.path.join(directory,
                                          display_to_filename(new_name))
 
-            # Remove rename field before saving
+            # Update references before performing the rename
+            try:
+                updated_files = update_references(category, old_name, new_name)
+                logger.info(f"Updated references in: {updated_files}")
+            except Exception as e:
+                logger.error(f"Failed to update references: {e}")
+                raise Exception(f"Failed to update references: {str(e)}")
+
+            # Remove rename field and update the name field in the data
             data_to_save = {k: v for k, v in data.items() if k != 'rename'}
+            data_to_save['name'] = new_name
 
-            # First save the updated content to the CURRENT file location
-            save_yaml_file(file_path,
-                           data_to_save,
-                           category,
-                           use_data_name=False)
-
-            # Check if file is being tracked by git
             repo = git.Repo(REPO_PATH)
             rel_old_path = os.path.relpath(file_path, REPO_PATH)
             rel_new_path = os.path.relpath(new_file_path, REPO_PATH)
 
             try:
-                # Check if file is tracked by git
+                # First, save the content changes to the current file
+                save_yaml_file(file_path,
+                               data_to_save,
+                               category,
+                               use_data_name=False)
+
+                # Stage the content changes first
+                repo.index.add([rel_old_path])
+
+                # Then perform the rename
                 tracked_files = repo.git.ls_files().splitlines()
                 is_tracked = rel_old_path in tracked_files
 
@@ -187,6 +200,8 @@ def update_yaml_file(file_path: str, data: Dict[str, Any],
                 else:
                     # For untracked files, manually move
                     os.rename(file_path, new_file_path)
+                    # Stage the new file
+                    repo.index.add([rel_new_path])
 
             except git.GitCommandError as e:
                 logger.error(f"Git operation failed: {e}")
@@ -297,6 +312,95 @@ def check_delete_constraints(category: str, name: str) -> Tuple[bool, str]:
     except Exception as e:
         logger.error(f"Error checking delete constraints: {e}")
         return False, f"Error checking references: {str(e)}"
+
+
+def update_references(category: str, old_name: str,
+                      new_name: str) -> List[str]:
+    """
+    Update references to a renamed item across all relevant files.
+    Returns a list of files that were updated.
+    """
+    updated_files = []
+
+    try:
+        # Convert names to use parentheses for comparison
+        old_check_name = old_name.replace('[', '(').replace(']', ')')
+        new_check_name = new_name.replace('[', '(').replace(']', ')')
+
+        if category == 'regex_pattern':
+            # Update references in custom formats
+            format_dir = get_category_directory('custom_format')
+            for format_file in os.listdir(format_dir):
+                if not format_file.endswith('.yml'):
+                    continue
+
+                format_path = os.path.join(format_dir, format_file)
+                try:
+                    format_data = load_yaml_file(format_path)
+                    updated = False
+
+                    # Check and update each condition in the format
+                    for condition in format_data.get('conditions', []):
+                        if (condition['type'] in [
+                                'release_title', 'release_group', 'edition'
+                        ] and condition.get('pattern') == old_check_name):
+                            condition['pattern'] = new_check_name
+                            updated = True
+
+                    if updated:
+                        save_yaml_file(format_path,
+                                       format_data,
+                                       'custom_format',
+                                       use_data_name=False)
+                        updated_files.append(
+                            f"custom format: {format_data['name']}")
+
+                except Exception as e:
+                    logger.error(
+                        f"Error updating format file {format_file}: {e}")
+                    continue
+
+        elif category == 'custom_format':
+            # Update references in quality profiles
+            profile_dir = get_category_directory('profile')
+            for profile_file in os.listdir(profile_dir):
+                if not profile_file.endswith('.yml'):
+                    continue
+
+                profile_path = os.path.join(profile_dir, profile_file)
+                try:
+                    profile_data = load_yaml_file(profile_path)
+                    updated = False
+
+                    # Update custom_formats array in profile
+                    for format_ref in profile_data.get('custom_formats', []):
+                        format_name = format_ref.get('name', '')
+                        # Convert format name to use parentheses for comparison
+                        format_name = format_name.replace('[', '(').replace(
+                            ']', ')')
+
+                        if format_name == old_check_name:
+                            format_ref['name'] = new_name
+                            updated = True
+
+                    if updated:
+                        save_yaml_file(profile_path,
+                                       profile_data,
+                                       'profile',
+                                       use_data_name=False)
+                        updated_files.append(
+                            f"quality profile: {profile_data['name']}")
+
+                except Exception as e:
+                    logger.error(
+                        f"Error updating profile file {profile_file}: {e}")
+                    continue
+
+        return updated_files
+
+    except Exception as e:
+        logger.error(f"Error updating references: {e}")
+        raise
 
 
 def test_regex_pattern(
