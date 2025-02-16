@@ -10,6 +10,7 @@ import os
 import yaml
 import threading
 from datetime import datetime
+import json
 from ...db import get_settings
 
 logger = logging.getLogger(__name__)
@@ -217,37 +218,85 @@ class GitStatusManager:
             return self.status.copy()
 
 
+def format_git_status(status):
+    """Format git status for logging with truncation and pretty printing.
+    
+    Args:
+        status (dict): The git status dictionary to format
+    
+    Returns:
+        str: Formatted status string
+    """
+
+    def truncate_list(lst, max_items=3):
+        """Truncate a list and add count of remaining items."""
+        if len(lst) <= max_items:
+            return lst
+        return lst[:max_items] + [f"... and {len(lst) - max_items} more items"]
+
+    def truncate_string(s, max_length=50):
+        """Truncate a string if it's too long."""
+        if not s or len(s) <= max_length:
+            return s
+        return s[:max_length] + "..."
+
+    # Create a copy to modify
+    formatted_status = status.copy()
+
+    # Truncate lists
+    for key in [
+            'outgoing_changes', 'merge_conflicts', 'incoming_changes',
+            'unpushed_files'
+    ]:
+        if key in formatted_status and isinstance(formatted_status[key], list):
+            formatted_status[key] = truncate_list(formatted_status[key])
+
+    # Format any nested dictionaries in the lists
+    for key in formatted_status:
+        if isinstance(formatted_status[key], list):
+            formatted_status[key] = [{
+                k: truncate_string(str(v))
+                for k, v in item.items()
+            } if isinstance(item, dict) else item
+                                     for item in formatted_status[key]]
+
+    # Convert to JSON with nice formatting
+    formatted_json = json.dumps(formatted_status, indent=2, default=str)
+
+    # Add a timestamp header
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return f"=== Git Status at {timestamp} ===\n{formatted_json}"
+
+
 def get_git_status(repo_path):
     try:
         status_manager = GitStatusManager.get_instance(repo_path)
         status_manager.update_local_status()
-        return True, status_manager.get_status()
+        success, status = True, status_manager.get_status()
+
+        # Log the formatted status
+        logger.info("\n" + format_git_status(status))
+
+        return success, status
     except git.exc.InvalidGitRepositoryError:
         logger.info(f"No git repository found at {repo_path}")
-        # Return a valid status object indicating no repo
-        return True, {
-            # Local status - empty/false everything
+        empty_status = {
             "branch": "",
             "outgoing_changes": [],
             "is_merging": False,
             "merge_conflicts": [],
             "has_conflicts": False,
-
-            # Remote status - explicitly show no repo/remote
             "remote_branch_exists": False,
             "commits_behind": 0,
             "commits_ahead": 0,
             "incoming_changes": [],
             "has_unpushed_commits": False,
             "unpushed_files": [],
-
-            # Metadata
             "last_local_update": None,
             "last_remote_update": None,
-
-            # New flag to explicitly indicate no repo
             "has_repo": False
         }
+        return True, empty_status
     except Exception as e:
         logger.error(f"Error in get_git_status: {str(e)}", exc_info=True)
         return False, str(e)

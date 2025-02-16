@@ -8,10 +8,19 @@ from .utils import determine_type
 logger = logging.getLogger(__name__)
 
 
+def extract_name(file_path):
+    """Extract name from file path by removing type prefix and extension"""
+    # Remove the file extension
+    name = os.path.splitext(file_path)[0]
+    # Remove the type prefix (everything before the first '/')
+    if '/' in name:
+        name = name.split('/', 1)[1]
+    return name
+
+
 def get_outgoing_changes(repo):
     """Get list of changes in working directory"""
     try:
-        # Get status of working directory
         status = repo.git.status('--porcelain', '-z').split('\0')
         logger.info(f"Processing {len(status)} changes from git status")
 
@@ -37,49 +46,67 @@ def get_outgoing_changes(repo):
                 i += 1
                 continue
 
-            is_staged = x != ' ' and x != '?'
+            # Handle renamed files
+            if x == 'R' or y == 'R':
+                if i + 1 < len(status) and status[i + 1]:
+                    outgoing_name = extract_name(file_path)
+                    prior_name = extract_name(status[i + 1])
+                    original_path = status[i + 1]  # Path for old content
+                    new_path = file_path  # Path for new content
+                    is_staged = x == 'R'
+                    status_value = 'Renamed'
+                    i += 2
+                else:
+                    i += 1
+            else:
+                name = extract_name(file_path)
+                prior_name = name
+                outgoing_name = name
+                original_path = file_path
+                new_path = file_path
+                is_staged = x != ' ' and x != '?'
+                status_value = None
+                i += 1
 
             try:
                 # Get old content (from HEAD)
                 try:
-                    old_content = repo.git.show(f'HEAD:{file_path}')
+                    old_content = repo.git.show(f'HEAD:{original_path}')
                     old_data = yaml.safe_load(old_content)
                 except GitCommandError:
                     old_data = None
                 except yaml.YAMLError as e:
                     logger.warning(
-                        f"Failed to parse old YAML for {file_path}: {str(e)}")
+                        f"Failed to parse old YAML for {original_path}: {str(e)}"
+                    )
                     old_data = None
 
                 # Get new content (from working directory)
                 try:
-                    full_path = os.path.join(repo.working_dir, file_path)
+                    full_path = os.path.join(repo.working_dir, new_path)
                     with open(full_path, 'r') as f:
                         new_data = yaml.safe_load(f.read())
                 except (IOError, yaml.YAMLError) as e:
                     logger.warning(
-                        f"Failed to read/parse current file {file_path}: {str(e)}"
+                        f"Failed to read/parse current file {new_path}: {str(e)}"
                     )
                     new_data = None
 
                 # Generate change summary
-                change = create_change_summary(old_data, new_data, file_path)
-                change['type'] = determine_type(file_path)
+                change = create_change_summary(old_data, new_data, new_path)
+                change['type'] = determine_type(new_path)
                 change['staged'] = is_staged
+                change['prior_name'] = prior_name
+                change['outgoing_name'] = outgoing_name
+
+                if status_value:
+                    change['status'] = status_value
+
                 changes.append(change)
 
             except Exception as e:
                 logger.error(f"Failed to process {file_path}: {str(e)}",
                              exc_info=True)
-
-            i += 1
-
-            # Handle renamed files
-            if x == 'R' or y == 'R':
-                if i + 1 < len(status) and status[i + 1]:
-                    i += 2  # Skip the old filename entry
-                else:
-                    i += 1
 
         return changes
 

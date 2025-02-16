@@ -176,11 +176,7 @@ const ProfileCard = ({
                 {/* Description - Fixed Height with Scroll */}
                 <div className='flex-1 overflow-hidden text-sm'>
                     {content.description && (
-                        <div
-                            className='h-full overflow-y-auto prose prose-invert prose-gray max-w-none
-    [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mt-2 [&>ul]:mb-4
-    [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mt-2 [&>ol]:mb-4
-    [&>ul>li]:mt-0.5 [&>ol>li]:mt-0.5'>
+                        <div className='h-full overflow-y-auto prose prose-invert prose-gray max-w-none [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mt-2 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mt-2 [&>ol]:mb-4 [&>ul>li]:mt-0.5 [&>ol>li]:mt-0.5 scrollable'>
                             <ReactMarkdown>
                                 {unsanitize(content.description)}
                             </ReactMarkdown>
