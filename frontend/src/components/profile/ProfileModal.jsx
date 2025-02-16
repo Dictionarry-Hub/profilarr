@@ -5,7 +5,7 @@ import Modal from '../ui/Modal';
 import Alert from '@ui/Alert';
 import {Loader} from 'lucide-react';
 import ProfileGeneralTab from './ProfileGeneralTab';
-import ProfileScoringTab from './ProfileScoringTab';
+import ProfileScoringTab from './scoring/ProfileScoringTab';
 import ProfileQualitiesTab from './ProfileQualitiesTab';
 import ProfileLangaugesTab from './ProfileLangaugesTab';
 import ProfileTweaksTab from './ProfileTweaksTab';

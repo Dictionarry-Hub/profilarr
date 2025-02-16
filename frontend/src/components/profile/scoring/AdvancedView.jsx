@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import NumberInput from '@ui/NumberInput';
 import {useSorting} from '@hooks/useSorting';
 import SortDropdown from '@ui/SortDropdown';
-import SearchBar from '@ui/DataBar/SearchBar';
-import useSearch from '@hooks/useSearch';
 import {
     Music,
     Tv,
@@ -20,26 +18,14 @@ import {
     Package
 } from 'lucide-react';
 
-const FormatSettings = ({formats, onScoreChange}) => {
+const AdvancedView = ({formats, onScoreChange}) => {
     const sortOptions = [
         {label: 'Name', value: 'name'},
         {label: 'Score', value: 'score'}
     ];
 
-    const {
-        searchTerms,
-        currentInput,
-        setCurrentInput,
-        addSearchTerm,
-        removeSearchTerm,
-        clearSearchTerms,
-        items: filteredFormats
-    } = useSearch(formats, {
-        searchableFields: ['name']
-    });
-
     // Group formats by their tags
-    const groupedFormats = filteredFormats.reduce((acc, format) => {
+    const groupedFormats = formats.reduce((acc, format) => {
         // Check if format has any tags that match our known categories
         const hasKnownTag = format.tags?.some(
             tag =>
@@ -127,7 +113,7 @@ const FormatSettings = ({formats, onScoreChange}) => {
     // Create sort instances for each group
     const groupSorts = Object.entries(formatGroups).reduce(
         (acc, [groupName, formats]) => {
-            const defaultSort = {field: 'name', direction: 'desc'};
+            const defaultSort = {field: 'name', direction: 'asc'};
             const {sortConfig, updateSort, sortData} = useSorting(defaultSort);
 
             acc[groupName] = {
@@ -141,79 +127,65 @@ const FormatSettings = ({formats, onScoreChange}) => {
     );
 
     return (
-        <div className='space-y-3'>
-            <SearchBar
-                placeholder='Search formats...'
-                searchTerms={searchTerms}
-                currentInput={currentInput}
-                onInputChange={setCurrentInput}
-                onAddTerm={addSearchTerm}
-                onRemoveTerm={removeSearchTerm}
-                onClearTerms={clearSearchTerms}
-            />
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+            {Object.entries(formatGroups)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([groupName, formats]) => {
+                    const {sortedData, sortConfig, updateSort} =
+                        groupSorts[groupName];
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                {Object.entries(formatGroups)
-                    .sort(([a], [b]) => a.localeCompare(b))
-                    .map(([groupName, formats]) => {
-                        const {sortedData, sortConfig, updateSort} =
-                            groupSorts[groupName];
-
-                        return (
-                            <div
-                                key={groupName}
-                                className='bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden'>
-                                <div className='px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center'>
-                                    <h3 className='text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center'>
-                                        {getGroupIcon(groupName)}
-                                        <span className='ml-2'>
-                                            {groupName}
-                                        </span>
-                                    </h3>
-                                    <SortDropdown
-                                        sortOptions={sortOptions}
-                                        currentSort={sortConfig}
-                                        onSortChange={updateSort}
-                                    />
-                                </div>
-
-                                <div className='divide-y divide-gray-200 dark:divide-gray-700'>
-                                    {sortedData.length > 0 ? (
-                                        sortedData.map(format => (
-                                            <div
-                                                key={format.id}
-                                                className='flex items-center justify-between px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 group'>
-                                                <div className='flex-1 min-w-0 mr-4'>
-                                                    <p className='text-sm text-gray-900 dark:text-gray-100 truncate'>
-                                                        {format.name}
-                                                    </p>
-                                                </div>
-                                                <NumberInput
-                                                    value={format.score}
-                                                    onChange={value =>
-                                                        onScoreChange(
-                                                            format.id,
-                                                            value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className='px-4 py-3 text-sm text-gray-500 dark:text-gray-400'>
-                                            No formats found
-                                        </div>
-                                    )}
-                                </div>
+                    return (
+                        <div
+                            key={groupName}
+                            className='bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden'>
+                            <div className='px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center'>
+                                <h3 className='text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center'>
+                                    {getGroupIcon(groupName)}
+                                    <span className='ml-2'>{groupName}</span>
+                                </h3>
+                                <SortDropdown
+                                    sortOptions={sortOptions}
+                                    currentSort={sortConfig}
+                                    onSortChange={updateSort}
+                                />
                             </div>
-                        );
-                    })}
-            </div>
+
+                            <div className='divide-y divide-gray-200 dark:divide-gray-700'>
+                                {sortedData.length > 0 ? (
+                                    sortedData.map(format => (
+                                        <div
+                                            key={format.id}
+                                            className='flex items-center justify-between px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 group'>
+                                            <div className='flex-1 min-w-0 mr-4'>
+                                                <p className='text-sm text-gray-900 dark:text-gray-100 truncate'>
+                                                    {format.name}
+                                                </p>
+                                            </div>
+                                            <NumberInput
+                                                value={format.score}
+                                                onChange={value =>
+                                                    onScoreChange(
+                                                        format.id,
+                                                        value
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className='px-4 py-3 text-sm text-gray-500 dark:text-gray-400'>
+                                        No formats found
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
         </div>
     );
 };
 
-FormatSettings.propTypes = {
+AdvancedView.propTypes = {
     formats: PropTypes.arrayOf(
         PropTypes.shape({
             id: PropTypes.string.isRequired,
@@ -225,4 +197,4 @@ FormatSettings.propTypes = {
     onScoreChange: PropTypes.func.isRequired
 };
 
-export default FormatSettings;
+export default AdvancedView;

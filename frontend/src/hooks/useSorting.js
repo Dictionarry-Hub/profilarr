@@ -1,9 +1,7 @@
 // hooks/useSorting.js
 import {useState, useCallback} from 'react';
 
-export const useSorting = (
-    initialSortConfig = {field: '', direction: 'asc'}
-) => {
+export const useSorting = initialSortConfig => {
     const [sortConfig, setSortConfig] = useState(initialSortConfig);
 
     const sortData = useCallback(
@@ -16,6 +14,11 @@ export const useSorting = (
 
                 if (aValue === null || aValue === undefined) return 1;
                 if (bValue === null || bValue === undefined) return -1;
+
+                // If we're sorting numbers and they're equal, sort by name
+                if (typeof aValue === 'number' && aValue === bValue) {
+                    return a.name.localeCompare(b.name);
+                }
 
                 const comparison =
                     aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
@@ -35,7 +38,7 @@ export const useSorting = (
                     ? prevConfig.direction === 'asc'
                         ? 'desc'
                         : 'asc'
-                    : 'asc'
+                    : prevConfig.direction
         }));
     }, []);
 
