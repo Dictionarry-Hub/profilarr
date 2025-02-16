@@ -59,13 +59,82 @@ def get_commit_message(repo, branch, file_path):
         raw_message = repo.git.show(f'HEAD...origin/{branch}', '--format=%B',
                                     '-s', '--', file_path).strip()
         return parse_commit_message(raw_message)
-    except GitCommandError:
+    except GitCommandError as e:
+        logger.error(
+            f"Git command error getting commit message for {file_path}: {str(e)}"
+        )
         return {
             "body": "",
             "footer": "",
             "scope": "",
-            "subject": "Unable to retrieve commit message",
+            "subject": f"Error retrieving commit message: {str(e)}",
             "type": ""
+        }
+
+
+def parse_commit_message(message):
+    """Parse a commit message into its components"""
+    try:
+        # Default structure
+        parsed = {
+            "type": "Unknown Type",
+            "scope": "Unknown Scope",
+            "subject": "",
+            "body": "",
+            "footer": ""
+        }
+
+        if not message:
+            return parsed
+
+        # Split message into lines
+        lines = message.strip().split('\n')
+
+        # Parse first line (header)
+        if lines:
+            header = lines[0]
+
+            # Try to parse conventional commit format: type(scope): subject
+            import re
+            conventional_format = re.match(r'^(\w+)(?:\(([^)]+)\))?: (.+)$',
+                                           header)
+
+            if conventional_format:
+                groups = conventional_format.groups()
+                parsed.update({
+                    "type": groups[0] or "Unknown Type",
+                    "scope": groups[1] or "Unknown Scope",
+                    "subject": groups[2]
+                })
+            else:
+                parsed["subject"] = header
+
+        # Parse body and footer
+        if len(lines) > 1:
+            # Find the divider between body and footer (if any)
+            footer_start = -1
+            for i, line in enumerate(lines[1:], 1):
+                if re.match(r'^[A-Z_-]+:', line):
+                    footer_start = i
+                    break
+
+            # Extract body and footer
+            if footer_start != -1:
+                parsed["body"] = '\n'.join(lines[1:footer_start]).strip()
+                parsed["footer"] = '\n'.join(lines[footer_start:]).strip()
+            else:
+                parsed["body"] = '\n'.join(lines[1:]).strip()
+
+        return parsed
+
+    except Exception as e:
+        logger.error(f"Error parsing commit message: {str(e)}")
+        return {
+            "type": "Unknown Type",
+            "scope": "Unknown Scope",
+            "subject": "Error parsing commit message",
+            "body": "",
+            "footer": ""
         }
 
 
