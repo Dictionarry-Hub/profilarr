@@ -1,10 +1,27 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {GitCommit, Info} from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
 
 const DiffCommit = ({commitMessage}) => {
     const {subject, body} = commitMessage;
+
+    const renderLine = (line, index) => {
+        // Just handle basic bullet points (* or -)
+        if (line.startsWith('* ') || line.startsWith('- ')) {
+            return (
+                <div key={index} className='flex items-center py-0.5'>
+                    <span className='mr-2 h-1 w-1 flex-shrink-0 rounded-full bg-gray-400' />
+                    <span>{line.slice(2)}</span>
+                </div>
+            );
+        }
+
+        return (
+            <div key={index} className='py-0.5'>
+                {line}
+            </div>
+        );
+    };
 
     return (
         <div className='overflow-hidden rounded-lg border border-gray-700'>
@@ -31,18 +48,12 @@ const DiffCommit = ({commitMessage}) => {
                     {body && (
                         <tr className='bg-gray-900'>
                             <td className='py-3 px-4'>
-                                <div className='text-gray-300 text-sm whitespace-pre-wrap'>
-                                    {body.split('\n').map((line, index) => (
-                                        <div
-                                            key={index}
-                                            className={`${
-                                                line.startsWith('- ')
-                                                    ? 'ml-4'
-                                                    : ''
-                                            }`}>
-                                            {line}
-                                        </div>
-                                    ))}
+                                <div className='text-gray-300 text-sm'>
+                                    {body
+                                        .split('\n')
+                                        .map((line, index) =>
+                                            renderLine(line, index)
+                                        )}
                                 </div>
                             </td>
                         </tr>
@@ -51,13 +62,6 @@ const DiffCommit = ({commitMessage}) => {
             </table>
         </div>
     );
-};
-
-DiffCommit.propTypes = {
-    commitMessage: PropTypes.shape({
-        subject: PropTypes.string.isRequired,
-        body: PropTypes.string
-    })
 };
 
 export default DiffCommit;
