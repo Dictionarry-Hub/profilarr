@@ -6,6 +6,7 @@ from pathlib import Path
 from ..data.utils import (load_yaml_file, get_category_directory, REGEX_DIR,
                           FORMAT_DIR)
 from ..compile import CustomFormat, FormatConverter, TargetApp
+from ..db.queries.format_renames import is_format_in_renames
 
 logger = logging.getLogger('importarr')
 
@@ -63,13 +64,21 @@ def import_formats_to_arr(format_names, base_url, api_key, arr_type,
                 if not converted_format:
                     raise ValueError("Format conversion failed")
 
-                # Use the potentially modified name (with [Dictionarry]) for arr
-                compiled_data = {
-                    'name':
-                    format_name,  # Use the possibly modified name
-                    'specifications':
-                    [vars(spec) for spec in converted_format.specifications]
-                }
+                # Create base compiled data with ordered fields
+                compiled_data = {'name': format_name}  # Start with name
+
+                # Check rename status and add field right after name if true
+                if is_format_in_renames(original_name):
+                    compiled_data['includeCustomFormatWhenRenaming'] = True
+                    logger.info(
+                        f"Format {original_name} has renames enabled, including field"
+                    )
+
+                # Add specifications last
+                compiled_data['specifications'] = [
+                    vars(spec) for spec in converted_format.specifications
+                ]
+
                 logger.info("Compiled to:\n" +
                             json.dumps([compiled_data], indent=2))
 
