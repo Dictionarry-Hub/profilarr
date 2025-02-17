@@ -6,6 +6,7 @@ from .utils import (get_category_directory, load_yaml_file, validate,
                     save_yaml_file, update_yaml_file, get_file_modified_date,
                     test_regex_pattern, test_format_conditions,
                     check_delete_constraints, filename_to_display)
+from ..db import add_format_to_renames, remove_format_from_renames, is_format_in_renames
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -28,6 +29,12 @@ def retrieve_all(category):
             file_path = os.path.join(directory, file_name)
             try:
                 content = load_yaml_file(file_path)
+                # Add metadata for custom formats
+                if category == 'custom_format':
+                    content['metadata'] = {
+                        'includeInRename':
+                        is_format_in_renames(content['name'])
+                    }
                 result.append({
                     "file_name":
                     file_name,
@@ -69,6 +76,12 @@ def handle_item(category, name):
         if request.method == 'GET':
             try:
                 content = load_yaml_file(file_path)
+                # Add metadata for custom formats
+                if category == 'custom_format':
+                    content['metadata'] = {
+                        'includeInRename':
+                        is_format_in_renames(content['name'])
+                    }
                 return jsonify({
                     "file_name":
                     file_name,
@@ -97,6 +110,22 @@ def handle_item(category, name):
                 return jsonify({"error": error_message}), 409
 
             try:
+                # If it's a custom format, remove from renames table first
+                if category == 'custom_format':
+                    # Get the format name from the file before deleting it
+                    content = load_yaml_file(file_path)
+                    format_name = content.get('name')
+                    if format_name:
+                        # Check if it exists in renames before trying to remove
+                        if is_format_in_renames(format_name):
+                            remove_format_from_renames(format_name)
+                            logger.info(
+                                f"Removed {format_name} from renames table")
+                        else:
+                            logger.info(
+                                f"{format_name} was not in renames table")
+
+                # Then delete the file
                 os.remove(file_path)
                 return jsonify(
                     {"message": f"Successfully deleted {file_name}"}), 200
@@ -116,11 +145,27 @@ def handle_item(category, name):
                 if data and 'name' in data:
                     data['name'] = data['name'].strip()
 
+                # Handle rename inclusion for custom formats
+                if category == 'custom_format':
+                    include_in_rename = data.get('metadata', {}).get(
+                        'includeInRename', False)
+                    # Remove metadata before saving YAML
+                    if 'metadata' in data:
+                        del data['metadata']
+
                 if validate(data, category):
+                    # Save YAML
                     save_yaml_file(file_path, data, category)
+
+                    # If custom format, handle rename table
+                    if category == 'custom_format' and include_in_rename:
+                        add_format_to_renames(data['name'])
+
                     return jsonify(
                         {"message": f"Successfully created {file_name}"}), 201
+
                 return jsonify({"error": "Validation failed"}), 400
+
             except Exception as e:
                 logger.error(f"Error creating file: {e}")
                 return jsonify({"error": str(e)}), 500
@@ -131,15 +176,44 @@ def handle_item(category, name):
 
             try:
                 data = request.get_json()
+                logger.info(f"Received PUT data for {name}: {data}")
 
                 if data and 'name' in data:
                     data['name'] = data['name'].strip()
                 if data and 'rename' in data:
                     data['rename'] = data['rename'].strip()
 
+                # Handle rename inclusion for custom formats
+                if category == 'custom_format':
+                    include_in_rename = data.get('metadata', {}).get(
+                        'includeInRename', False)
+
+                    # Get current content to check for rename
+                    current_content = load_yaml_file(file_path)
+                    old_name = current_content.get('name')
+                    new_name = data['name']
+
+                    # Handle renames and toggles
+                    if old_name != new_name and include_in_rename:
+                        # Handle rename while keeping in table
+                        remove_format_from_renames(old_name)
+                        add_format_to_renames(new_name)
+                    elif include_in_rename:
+                        # Just turning it on
+                        add_format_to_renames(new_name)
+                    else:
+                        # Turning it off
+                        remove_format_from_renames(data['name'])
+
+                    # Remove metadata before saving YAML
+                    if 'metadata' in data:
+                        del data['metadata']
+
+                # Save YAML
                 update_yaml_file(file_path, data, category)
                 return jsonify(
                     {"message": f"Successfully updated {file_name}"}), 200
+
             except Exception as e:
                 logger.error(f"Error updating file: {e}")
                 return jsonify({"error": str(e)}), 500
