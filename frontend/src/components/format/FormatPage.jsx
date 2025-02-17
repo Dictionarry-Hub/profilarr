@@ -118,6 +118,7 @@ function FormatPage() {
         activeTab,
         isDeleting,
         isRunningTests,
+        includeInRename,
         setName,
         setDescription,
         setTags,
@@ -125,6 +126,7 @@ function FormatPage() {
         setTests,
         setActiveTab,
         setIsDeleting,
+        setIncludeInRename,
         initializeForm,
         handleSave,
         handleRunTests,
@@ -408,6 +410,8 @@ function FormatPage() {
                 onRunTests={handleRunTests}
                 onSave={handleSave}
                 onDelete={handleDelete}
+                includeInRename={includeInRename}
+                onIncludeInRenameChange={setIncludeInRename}
             />
 
             <ImportModal
