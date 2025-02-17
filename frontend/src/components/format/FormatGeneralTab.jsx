@@ -8,10 +8,12 @@ const FormatGeneralTab = ({
     description,
     tags,
     error,
+    includeInRename,
     onNameChange,
     onDescriptionChange,
     onAddTag,
-    onRemoveTag
+    onRemoveTag,
+    onIncludeInRenameChange
 }) => {
     const [newTag, setNewTag] = useState('');
 
@@ -41,13 +43,36 @@ const FormatGeneralTab = ({
             <div className='space-y-8'>
                 {/* Name Input */}
                 <div className='space-y-2'>
-                    <div className='space-y-1'>
-                        <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                            Format Name
-                        </label>
-                        <p className='text-xs text-gray-500 dark:text-gray-400'>
-                            Give your format a descriptive name
-                        </p>
+                    <div className='flex justify-between items-start'>
+                        <div className='space-y-1'>
+                            <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                                Format Name
+                            </label>
+                            <p className='text-xs text-gray-500 dark:text-gray-400'>
+                                Give your format a descriptive name
+                            </p>
+                        </div>
+                        <div className='flex flex-col items-end space-y-1'>
+                            <label className='flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer'>
+                                <input
+                                    type='checkbox'
+                                    checked={includeInRename}
+                                    onChange={e =>
+                                        onIncludeInRenameChange(
+                                            e.target.checked
+                                        )
+                                    }
+                                    className='rounded border-gray-300 dark:border-gray-600 
+                text-blue-500 focus:ring-blue-500 
+                h-4 w-4 cursor-pointer
+                transition-colors duration-200'
+                                />
+                                <span>Include Custom Format When Renaming</span>
+                            </label>
+                            <p className='text-xs text-gray-500 dark:text-gray-400'>
+                                Include this format's name in renamed files
+                            </p>
+                        </div>
                     </div>
                     <input
                         type='text'
@@ -166,10 +191,12 @@ FormatGeneralTab.propTypes = {
     description: PropTypes.string.isRequired,
     tags: PropTypes.arrayOf(PropTypes.string).isRequired,
     error: PropTypes.string,
+    includeInRename: PropTypes.bool.isRequired,
     onNameChange: PropTypes.func.isRequired,
     onDescriptionChange: PropTypes.func.isRequired,
     onAddTag: PropTypes.func.isRequired,
-    onRemoveTag: PropTypes.func.isRequired
+    onRemoveTag: PropTypes.func.isRequired,
+    onIncludeInRenameChange: PropTypes.func.isRequired
 };
 
 export default FormatGeneralTab;
