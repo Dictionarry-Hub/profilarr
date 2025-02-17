@@ -27,7 +27,9 @@ const FormatModal = ({
     onConditionsChange,
     onTestsChange,
     onActiveTabChange,
-    onRunTests
+    onRunTests,
+    includeInRename,
+    onIncludeInRenameChange
 }) => {
     const tabs = [
         {id: 'general', label: 'General'},
@@ -95,12 +97,14 @@ const FormatModal = ({
                             description={description}
                             tags={tags}
                             error={error}
+                            includeInRename={includeInRename}
                             onNameChange={onNameChange}
                             onDescriptionChange={onDescriptionChange}
                             onAddTag={tag => onTagsChange([...tags, tag])}
                             onRemoveTag={tag =>
                                 onTagsChange(tags.filter(t => t !== tag))
                             }
+                            onIncludeInRenameChange={onIncludeInRenameChange}
                         />
                     )}
                     {activeTab === 'conditions' && (
@@ -145,7 +149,9 @@ FormatModal.propTypes = {
     onConditionsChange: PropTypes.func.isRequired,
     onTestsChange: PropTypes.func.isRequired,
     onActiveTabChange: PropTypes.func.isRequired,
-    onRunTests: PropTypes.func.isRequired
+    onRunTests: PropTypes.func.isRequired,
+    includeInRename: PropTypes.bool.isRequired,
+    onIncludeInRenameChange: PropTypes.func.isRequired
 };
 
 export default FormatModal;

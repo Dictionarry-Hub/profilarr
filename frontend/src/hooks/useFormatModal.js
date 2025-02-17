@@ -12,6 +12,7 @@ export const useFormatModal = (initialFormat, onSuccess) => {
     const [conditions, setConditions] = useState([]);
     const [tests, setTests] = useState([]);
     const [isCloning, setIsCloning] = useState(false);
+    const [includeInRename, setIncludeInRename] = useState(false);
 
     // Enhanced UI state with field-specific errors
     const [formErrors, setFormErrors] = useState({
@@ -78,6 +79,7 @@ export const useFormatModal = (initialFormat, onSuccess) => {
         setTags([]);
         setConditions([]);
         setTests([]);
+        setIncludeInRename(false);
         setFormErrors({name: '', conditions: '', tests: '', general: ''});
         setIsDeleting(false);
         setIsCloning(false);
@@ -92,6 +94,7 @@ export const useFormatModal = (initialFormat, onSuccess) => {
                 setTags(format.tags || []);
                 setConditions(format.conditions || []);
                 setTests(format.tests || []);
+                setIncludeInRename(format.metadata?.includeInRename || false);
                 setIsCloning(cloning || false);
             }, 0);
         }
@@ -181,7 +184,10 @@ export const useFormatModal = (initialFormat, onSuccess) => {
                 description,
                 tags,
                 conditions,
-                tests
+                tests,
+                metadata: {
+                    includeInRename
+                }
             };
 
             if (initialFormat && !isCloning) {
@@ -284,6 +290,7 @@ export const useFormatModal = (initialFormat, onSuccess) => {
         tags,
         conditions,
         tests,
+        includeInRename,
         // UI state
         formErrors,
         activeTab,
@@ -298,6 +305,7 @@ export const useFormatModal = (initialFormat, onSuccess) => {
         setTests,
         setActiveTab,
         setIsDeleting,
+        setIncludeInRename,
         // Main handlers
         initializeForm,
         handleSave,
