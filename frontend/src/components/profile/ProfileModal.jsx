@@ -8,16 +8,7 @@ import ProfileGeneralTab from './ProfileGeneralTab';
 import ProfileScoringTab from './scoring/ProfileScoringTab';
 import ProfileQualitiesTab from './ProfileQualitiesTab';
 import ProfileLangaugesTab from './ProfileLangaugesTab';
-import ProfileTweaksTab from './ProfileTweaksTab';
 import QUALITIES from '../../constants/qualities';
-
-const DEFAULT_TWEAKS = {
-    preferFreeleech: true,
-    allowLosslessAudio: true,
-    allowDVNoFallback: false,
-    allowBleedingEdgeCodecs: false,
-    allowPrereleases: false
-};
 
 function unsanitize(text) {
     if (!text) return '';
@@ -70,15 +61,11 @@ function ProfileModal({
     // Language state
     const [language, setLanguage] = useState('must_english');
 
-    // Tweaks state
-    const [tweaks, setTweaks] = useState(DEFAULT_TWEAKS);
-
     const tabs = [
         {id: 'general', label: 'General'},
         {id: 'scoring', label: 'Scoring'},
         {id: 'qualities', label: 'Qualities'},
-        {id: 'languages', label: 'Languages'},
-        {id: 'tweaks', label: 'Tweaks'}
+        {id: 'languages', label: 'Languages'}
     ];
 
     const resetState = () => {
@@ -124,7 +111,6 @@ function ProfileModal({
 
         // Reset other states
         setLanguage('must_english');
-        setTweaks(DEFAULT_TWEAKS);
     };
 
     useEffect(() => {
@@ -184,12 +170,6 @@ function ProfileModal({
                     initialTagScores[tag] = 0;
                 });
                 setTagScores(initialTagScores);
-
-                // Tweaks
-                setTweaks({
-                    ...DEFAULT_TWEAKS,
-                    ...(content.tweaks || {})
-                });
 
                 // Qualities setup - include all qualities, set enabled status
                 const allQualitiesMap = {}; // Map of all qualities by id
@@ -335,7 +315,6 @@ function ProfileModal({
 
                 // Initialize with defaults
                 setLanguage('must_english');
-                setTweaks(DEFAULT_TWEAKS);
             }
 
             setLoading(false);
@@ -401,8 +380,7 @@ function ProfileModal({
                           })
                       }
                     : null,
-                language,
-                tweaks
+                language
             };
 
             if (isCloning || !initialProfile) {
@@ -589,12 +567,6 @@ function ProfileModal({
                                     onLanguageChange={setLanguage}
                                 />
                             )}
-                            {activeTab === 'tweaks' && (
-                                <ProfileTweaksTab
-                                    tweaks={tweaks}
-                                    onTweaksChange={setTweaks}
-                                />
-                            )}
                         </div>
                     )}
                 </div>
@@ -638,8 +610,7 @@ ProfileModal.propTypes = {
                 id: PropTypes.number.isRequired,
                 name: PropTypes.string.isRequired
             }),
-            language: PropTypes.string,
-            tweaks: PropTypes.object
+            language: PropTypes.string
         })
     }),
     isOpen: PropTypes.bool.isRequired,

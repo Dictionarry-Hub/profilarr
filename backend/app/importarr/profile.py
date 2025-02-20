@@ -77,12 +77,6 @@ def import_profiles_to_arr(profile_names: List[str], original_names: List[str],
                         f"Profile '{profile_name}' has language override: {profile_language}"
                     )
 
-                logger.info(
-                    f"Processing tweaks and importing formats for profile '{profile_name}'"
-                )
-                profile_data = process_tweaks(profile_data, base_url, api_key,
-                                              arr_type, import_as_unique)
-
                 logger.info("Compiling quality profile...")
                 compiled_profiles = compile_quality_profile(
                     profile_data=profile_data,
@@ -219,123 +213,6 @@ def sync_format_ids(profile_data: Dict, format_id_map: Dict[str, int]) -> Dict:
 
     profile_data['formatItems'] = synced_items
     return profile_data
-
-
-def process_tweaks(profile_data: Dict,
-                   base_url: str,
-                   api_key: str,
-                   arr_type: str,
-                   import_as_unique: bool = False) -> Dict:
-    logger.debug(f"Processing tweaks for profile: {profile_data.get('name')}")
-    tweaks = profile_data.get('tweaks', {})
-
-    if tweaks.get('preferFreeleech', False):
-        freeleech_formats = ["Free25", "Free50", "Free75", "Free100"]
-        freeleech_scores = [{
-            "name": n,
-            "score": s
-        } for n, s in zip(freeleech_formats, range(1, 5))]
-        _import_and_score_formats(formats=freeleech_formats,
-                                  scores=freeleech_scores,
-                                  profile_data=profile_data,
-                                  base_url=base_url,
-                                  api_key=api_key,
-                                  arr_type=arr_type,
-                                  feature_name="freeleech",
-                                  import_as_unique=import_as_unique)
-
-    lossless_formats = [
-        "FLAC", "DTS-X", "DTS-HD MA", "TrueHD", "TrueHD (Missing)"
-    ]
-    default_score = 0 if tweaks.get('allowLosslessAudio', False) else -9999
-    lossless_scores = [{
-        "name": f,
-        "score": default_score
-    } for f in lossless_formats]
-    _import_and_score_formats(formats=lossless_formats,
-                              scores=lossless_scores,
-                              profile_data=profile_data,
-                              base_url=base_url,
-                              api_key=api_key,
-                              arr_type=arr_type,
-                              feature_name="lossless audio",
-                              import_as_unique=import_as_unique)
-
-    dv_formats = ["Dolby Vision (Without Fallback)"]
-    dv_score = 0 if tweaks.get('allowDVNoFallback', False) else -9999
-    dv_scores = [{"name": n, "score": dv_score} for n in dv_formats]
-    _import_and_score_formats(formats=dv_formats,
-                              scores=dv_scores,
-                              profile_data=profile_data,
-                              base_url=base_url,
-                              api_key=api_key,
-                              arr_type=arr_type,
-                              feature_name="Dolby Vision no fallback",
-                              import_as_unique=import_as_unique)
-
-    codec_formats = ["AV1", "VVC"]
-    codec_score = 0 if tweaks.get('allowBleedingEdgeCodecs', False) else -9999
-    codec_scores = [{"name": f, "score": codec_score} for f in codec_formats]
-    _import_and_score_formats(formats=codec_formats,
-                              scores=codec_scores,
-                              profile_data=profile_data,
-                              base_url=base_url,
-                              api_key=api_key,
-                              arr_type=arr_type,
-                              feature_name="bleeding edge codecs",
-                              import_as_unique=import_as_unique)
-
-    return profile_data
-
-
-def _import_and_score_formats(formats: List[str],
-                              scores: List[Dict[str, Any]],
-                              profile_data: Dict,
-                              base_url: str,
-                              api_key: str,
-                              arr_type: str,
-                              feature_name: str,
-                              import_as_unique: bool = False) -> None:
-    logger.info(
-        f"Processing {feature_name} formats for profile '{profile_data.get('name')}'"
-    )
-    try:
-        # Create modified format names if import_as_unique is true
-        format_names = [
-            f"{name} [Dictionarry]" if import_as_unique else name
-            for name in formats
-        ]
-
-        result = import_formats_to_arr(
-            format_names=format_names,  # Use modified names for import
-            original_names=formats,  # Original names for file lookup
-            base_url=base_url,
-            api_key=api_key,
-            arr_type=arr_type)
-
-        if not result.get('success', False):
-            logger.warning(
-                f"Failed to import {feature_name} formats for '{profile_data.get('name')}'"
-            )
-            return
-
-        if 'custom_formats' not in profile_data:
-            profile_data['custom_formats'] = []
-
-        # Use the modified format names in the profile's format list
-        modified_scores = []
-        for i, score in enumerate(scores):
-            score_copy = score.copy()
-            # Use the same modified name that was used for import
-            score_copy['name'] = format_names[i]
-            modified_scores.append(score_copy)
-
-        # Only append once with the modified scores
-        profile_data['custom_formats'].extend(modified_scores)
-
-    except Exception as e:
-        logger.error(f"Error importing {feature_name} formats: {str(e)}")
-        return
 
 
 def process_profile(profile_data: Dict, existing_names: Dict[str, int],
