@@ -201,15 +201,10 @@ class ProfileConverter:
             language=selected_language)
 
         used_qualities = set()
-        tweaks = profile.get('tweaks', {})
-        allow_prereleases = tweaks.get('allowPrereleases', False)
 
         for quality_entry in profile.get("qualities", []):
             if quality_entry.get("id", 0) < 0:
                 converted_group = self.convert_quality_group(quality_entry)
-                if (quality_entry.get("name") == "Prereleases"
-                        and not allow_prereleases):
-                    converted_group["allowed"] = False
                 if converted_group["items"]:
                     converted_profile.items.append(converted_group)
                     for q in quality_entry.get("qualities", []):
@@ -246,7 +241,6 @@ class ProfileConverter:
             if cutoff_id < 0:
                 converted_profile.cutoff = self._convert_group_id(cutoff_id)
             else:
-                # And use mapped_cutoff_name here instead of cutoff_name
                 converted_profile.cutoff = self.quality_mappings[
                     mapped_cutoff_name]["id"]
 
