@@ -71,8 +71,8 @@ const ProfileScoringTab = ({
                     </h2>
                     <p className='text-xs text-gray-500 dark:text-gray-400'>
                         Assign scores to different formats to control download
-                        preferences. View formats in the arr style, or in
-                        filtered A/V grids.
+                        preferences. View formats in the traditional arr style,
+                        or in filtered A/V grids.
                     </p>
                 </div>
 
