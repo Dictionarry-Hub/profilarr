@@ -7,6 +7,7 @@ from typing import Dict, List, Any, Tuple, Union
 import git
 import regex
 import logging
+from ..db.queries.arr import update_arr_config_on_rename, update_arr_config_on_delete
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -165,8 +166,20 @@ def update_yaml_file(file_path: str, data: Dict[str, Any],
 
             # Update references before performing the rename
             try:
+                # Update regular references
                 updated_files = update_references(category, old_name, new_name)
                 logger.info(f"Updated references in: {updated_files}")
+
+                # Update arr configs if this is a format or profile
+                if category in ['custom_format', 'profile']:
+                    arr_category = 'customFormats' if category == 'custom_format' else 'profiles'
+                    updated_configs = update_arr_config_on_rename(
+                        arr_category, old_name, new_name)
+                    if updated_configs:
+                        logger.info(
+                            f"Updated arr configs for {category} rename: {updated_configs}"
+                        )
+
             except Exception as e:
                 logger.error(f"Failed to update references: {e}")
                 raise Exception(f"Failed to update references: {str(e)}")
@@ -262,9 +275,9 @@ def check_delete_constraints(category: str, name: str) -> Tuple[bool, str]:
                     format_data = load_yaml_file(format_path)
                     # Check each condition in the format
                     for condition in format_data.get('conditions', []):
-                        if (condition['type'] in [
+                        if condition['type'] in [
                                 'release_title', 'release_group', 'edition'
-                        ] and condition.get('pattern') == check_name):
+                        ] and condition.get('pattern') == check_name:
                             references.append(
                                 f"custom format: {format_data['name']}")
                 except Exception as e:
@@ -298,6 +311,14 @@ def check_delete_constraints(category: str, name: str) -> Tuple[bool, str]:
                     logger.error(
                         f"Error checking profile file {profile_file}: {e}")
                     continue
+
+        # Update arr configs for formats and profiles
+        if category in ['custom_format', 'profile']:
+            arr_category = 'customFormats' if category == 'custom_format' else 'profiles'
+            updated_configs = update_arr_config_on_delete(arr_category, name)
+            if updated_configs:
+                logger.info(
+                    f"Removed {name} from arr configs: {updated_configs}")
 
         if references:
             error_msg = f"Cannot delete - item is referenced in:\n" + "\n".join(
