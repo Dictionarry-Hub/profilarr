@@ -2,8 +2,6 @@ import React from 'react';
 import {GitCommit, Code, FileText, Settings, File} from 'lucide-react';
 
 const PushRow = ({change}) => {
-    console.log('Push Row Change:', change);
-
     const getTypeIcon = type => {
         switch (type) {
             case 'Regex Pattern':
