@@ -1,9 +1,9 @@
-// DataSelector.jsx
-
 import React from 'react';
 import {Loader, AlertTriangle} from 'lucide-react';
 import useSearch from '@hooks/useSearch';
+import {useSorting} from '@hooks/useSorting';
 import SearchBar from '@ui/DataBar/SearchBar';
+import SortDropdown from '@ui/SortDropdown';
 
 const DataSelector = ({
     isLoading,
@@ -69,6 +69,23 @@ const DataSelector = ({
         searchableFields: ['name']
     });
 
+    const {
+        sortConfig: profilesSortConfig,
+        updateSort: updateProfilesSort,
+        sortData: sortProfiles
+    } = useSorting({field: 'name', direction: 'asc'});
+
+    const {
+        sortConfig: formatsSortConfig,
+        updateSort: updateFormatsSort,
+        sortData: sortFormats
+    } = useSorting({field: 'name', direction: 'asc'});
+
+    const sortedProfiles = sortProfiles(filteredProfiles);
+    const sortedFormats = sortFormats(filteredFormats);
+
+    const sortOptions = [{label: 'Name', value: 'name'}];
+
     const renderItem = (item, type) => (
         <label
             key={item.name}
@@ -130,24 +147,34 @@ const DataSelector = ({
                                 </span>
                             </div>
                         </div>
-
-                        <SearchBar
-                            placeholder='Search profiles...'
-                            requireEnter={true}
-                            searchTerms={searchTermsProfiles}
-                            currentInput={currentInputProfiles}
-                            onInputChange={setCurrentInputProfiles}
-                            onAddTerm={addSearchTermProfiles}
-                            onRemoveTerm={removeSearchTermProfiles}
-                            onClearTerms={() => {
-                                clearSearchTermsProfiles();
-                                setCurrentInputProfiles('');
-                            }}
-                            className='mb-2'
-                        />
-
-                        <div className='grid grid-cols-2 gap-2'>
-                            {filteredProfiles.map(item =>
+                        <div className='flex items-center gap-2 mb-2'>
+                            <SearchBar
+                                placeholder='Search profiles...'
+                                requireEnter={true}
+                                searchTerms={searchTermsProfiles}
+                                currentInput={currentInputProfiles}
+                                onInputChange={setCurrentInputProfiles}
+                                onAddTerm={addSearchTermProfiles}
+                                onRemoveTerm={removeSearchTermProfiles}
+                                onClearTerms={() => {
+                                    clearSearchTermsProfiles();
+                                    setCurrentInputProfiles('');
+                                }}
+                                className='flex-1'
+                            />
+                            <div
+                                onClick={e => {
+                                    e.stopPropagation();
+                                }}>
+                                <SortDropdown
+                                    sortOptions={sortOptions}
+                                    currentSort={profilesSortConfig}
+                                    onSortChange={updateProfilesSort}
+                                />
+                            </div>
+                        </div>
+                        <div className='grid grid-cols-1 gap-2'>
+                            {sortedProfiles.map(item =>
                                 renderItem(item, 'profiles')
                             )}
                         </div>
@@ -176,24 +203,34 @@ const DataSelector = ({
                                 need to be selected here.
                             </p>
                         </div>
-
-                        <SearchBar
-                            placeholder='Search custom formats...'
-                            requireEnter={true}
-                            searchTerms={searchTermsFormats}
-                            currentInput={currentInputFormats}
-                            onInputChange={setCurrentInputFormats}
-                            onAddTerm={addSearchTermFormats}
-                            onRemoveTerm={removeSearchTermFormats}
-                            onClearTerms={() => {
-                                clearSearchTermsFormats();
-                                setCurrentInputFormats('');
-                            }}
-                            className='mb-2'
-                        />
-
-                        <div className='grid grid-cols-2 gap-2'>
-                            {filteredFormats.map(item =>
+                        <div className='flex items-center gap-2 mb-2'>
+                            <SearchBar
+                                placeholder='Search custom formats...'
+                                requireEnter={true}
+                                searchTerms={searchTermsFormats}
+                                currentInput={currentInputFormats}
+                                onInputChange={setCurrentInputFormats}
+                                onAddTerm={addSearchTermFormats}
+                                onRemoveTerm={removeSearchTermFormats}
+                                onClearTerms={() => {
+                                    clearSearchTermsFormats();
+                                    setCurrentInputFormats('');
+                                }}
+                                className='flex-1'
+                            />
+                            <div
+                                onClick={e => {
+                                    e.stopPropagation();
+                                }}>
+                                <SortDropdown
+                                    sortOptions={sortOptions}
+                                    currentSort={formatsSortConfig}
+                                    onSortChange={updateFormatsSort}
+                                />
+                            </div>
+                        </div>
+                        <div className='grid grid-cols-1 gap-2'>
+                            {sortedFormats.map(item =>
                                 renderItem(item, 'customFormats')
                             )}
                         </div>
