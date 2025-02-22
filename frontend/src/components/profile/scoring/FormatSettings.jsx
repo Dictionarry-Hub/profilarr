@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import SearchBar from '@ui/DataBar/SearchBar';
 import useSearch from '@hooks/useSearch';
@@ -7,8 +7,20 @@ import BasicView from './BasicView';
 import {ChevronDown, Settings, List} from 'lucide-react';
 
 const FormatSettings = ({formats, onScoreChange}) => {
-    const [isAdvancedView, setIsAdvancedView] = useState(false);
+    // Initialize state from localStorage, falling back to true if no value is stored
+    const [isAdvancedView, setIsAdvancedView] = useState(() => {
+        const stored = localStorage.getItem('formatSettingsView');
+        return stored === null ? true : JSON.parse(stored);
+    });
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    // Save to localStorage whenever isAdvancedView changes
+    useEffect(() => {
+        localStorage.setItem(
+            'formatSettingsView',
+            JSON.stringify(isAdvancedView)
+        );
+    }, [isAdvancedView]);
 
     const {
         searchTerms,
