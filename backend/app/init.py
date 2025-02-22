@@ -4,7 +4,7 @@ import subprocess
 import logging
 import logging.config
 from .config import config
-from .db import get_secret_key
+from .db import get_secret_key, update_pat_status
 
 
 def setup_logging():
@@ -103,7 +103,7 @@ def setup_logging():
 
 
 def init_git_user():
-    """Initialize Git user configuration globally."""
+    """Initialize Git user configuration globally and update PAT status."""
     logger = logging.getLogger(__name__)
     logger.info("Starting Git user configuration")
 
@@ -123,6 +123,9 @@ def init_git_user():
                        check=True)
         subprocess.run(['git', 'config', '--global', 'user.email', git_email],
                        check=True)
+
+        # Update PAT status in database
+        update_pat_status()
 
         # Verify configuration
         configured_name = subprocess.run(
