@@ -67,7 +67,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
         errors[errorKey]
             ? 'border-red-500'
             : 'border-gray-300 dark:border-gray-600'
-    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 ${
+    } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 ${
         errors[errorKey]
             ? 'focus:ring-red-500 focus:border-red-500'
             : 'focus:ring-blue-500 focus:border-blue-500'
