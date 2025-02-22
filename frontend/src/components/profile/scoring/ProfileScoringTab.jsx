@@ -25,8 +25,8 @@ const ProfileScoringTab = ({
                             Upgrade Settings
                         </h2>
                         <p className='text-xs text-gray-500 dark:text-gray-400'>
-                            Assign scores to different formats to control
-                            download preferences
+                            Configure when upgrades should be downloaded and
+                            what scores are required
                         </p>
                     </div>
                     <div className='flex flex-col items-end space-y-1'>
@@ -70,8 +70,9 @@ const ProfileScoringTab = ({
                         Format Settings
                     </h2>
                     <p className='text-xs text-gray-500 dark:text-gray-400'>
-                        Configure when upgrades should be downloaded and what
-                        scores are required
+                        Assign scores to different formats to control download
+                        preferences. View formats in the arr style, or in
+                        filtered A/V grids.
                     </p>
                 </div>
 
