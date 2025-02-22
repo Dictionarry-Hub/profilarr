@@ -1,5 +1,9 @@
+// DataSelector.jsx
+
 import React from 'react';
 import {Loader, AlertTriangle} from 'lucide-react';
+import useSearch from '@hooks/useSearch';
+import SearchBar from '@ui/DataBar/SearchBar';
 
 const DataSelector = ({
     isLoading,
@@ -25,14 +29,54 @@ const DataSelector = ({
         name => !availableFormatNames.has(name)
     );
 
-    const renderItem = (name, type, isMissing) => (
+    const combinedProfiles = [
+        ...missingProfiles.map(name => ({name, isMissing: true})),
+        ...availableData.profiles.map(profile => ({
+            name: profile.content.name,
+            isMissing: false
+        }))
+    ];
+
+    const combinedFormats = [
+        ...missingFormats.map(name => ({name, isMissing: true})),
+        ...availableData.customFormats.map(format => ({
+            name: format.content.name,
+            isMissing: false
+        }))
+    ];
+
+    const {
+        items: filteredProfiles,
+        searchTerms: searchTermsProfiles,
+        currentInput: currentInputProfiles,
+        setCurrentInput: setCurrentInputProfiles,
+        addSearchTerm: addSearchTermProfiles,
+        removeSearchTerm: removeSearchTermProfiles,
+        clearSearchTerms: clearSearchTermsProfiles
+    } = useSearch(combinedProfiles, {
+        searchableFields: ['name']
+    });
+
+    const {
+        items: filteredFormats,
+        searchTerms: searchTermsFormats,
+        currentInput: currentInputFormats,
+        setCurrentInput: setCurrentInputFormats,
+        addSearchTerm: addSearchTermFormats,
+        removeSearchTerm: removeSearchTermFormats,
+        clearSearchTerms: clearSearchTermsFormats
+    } = useSearch(combinedFormats, {
+        searchableFields: ['name']
+    });
+
+    const renderItem = (item, type) => (
         <label
-            key={name}
+            key={item.name}
             className={`flex items-center p-2 bg-white dark:bg-gray-800 
         hover:bg-gray-50 dark:hover:bg-gray-700 
         rounded-lg cursor-pointer group transition-colors
         border ${
-            isMissing
+            item.isMissing
                 ? 'border-amber-500/50 dark:border-amber-500/30'
                 : 'border-gray-200 dark:border-gray-700'
         }`}>
@@ -41,18 +85,18 @@ const DataSelector = ({
                     type='checkbox'
                     checked={
                         type === 'profiles'
-                            ? profiles.includes(name)
-                            : customFormats.includes(name)
+                            ? profiles.includes(item.name)
+                            : customFormats.includes(item.name)
                     }
-                    onChange={() => onDataToggle(type, name)}
+                    onChange={() => onDataToggle(type, item.name)}
                     className='rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0'
                 />
                 <span
                     className='ml-3 text-sm text-gray-700 dark:text-gray-300 
             group-hover:text-gray-900 dark:group-hover:text-gray-100 flex-1'>
-                    {name}
+                    {item.name}
                 </span>
-                {isMissing && (
+                {item.isMissing && (
                     <div className='flex items-center text-amber-500 dark:text-amber-400'>
                         <AlertTriangle className='w-4 h-4 mr-1' />
                         <span className='text-xs'>File not found</span>
@@ -70,7 +114,6 @@ const DataSelector = ({
                 </div>
             ) : (
                 <>
-                    {/* Quality Profiles Section */}
                     <div className='space-y-3'>
                         <div className='flex items-center justify-between'>
                             <h4 className='text-sm font-medium'>
@@ -87,21 +130,29 @@ const DataSelector = ({
                                 </span>
                             </div>
                         </div>
+
+                        <SearchBar
+                            placeholder='Search profiles...'
+                            requireEnter={true}
+                            searchTerms={searchTermsProfiles}
+                            currentInput={currentInputProfiles}
+                            onInputChange={setCurrentInputProfiles}
+                            onAddTerm={addSearchTermProfiles}
+                            onRemoveTerm={removeSearchTermProfiles}
+                            onClearTerms={() => {
+                                clearSearchTermsProfiles();
+                                setCurrentInputProfiles('');
+                            }}
+                            className='mb-2'
+                        />
+
                         <div className='grid grid-cols-2 gap-2'>
-                            {missingProfiles.map(name =>
-                                renderItem(name, 'profiles', true)
-                            )}
-                            {availableData.profiles.map(profile =>
-                                renderItem(
-                                    profile.content.name,
-                                    'profiles',
-                                    false
-                                )
+                            {filteredProfiles.map(item =>
+                                renderItem(item, 'profiles')
                             )}
                         </div>
                     </div>
 
-                    {/* Custom Formats Section */}
                     <div className='space-y-3'>
                         <div className='space-y-1'>
                             <div className='flex items-center justify-between'>
@@ -125,16 +176,25 @@ const DataSelector = ({
                                 need to be selected here.
                             </p>
                         </div>
+
+                        <SearchBar
+                            placeholder='Search custom formats...'
+                            requireEnter={true}
+                            searchTerms={searchTermsFormats}
+                            currentInput={currentInputFormats}
+                            onInputChange={setCurrentInputFormats}
+                            onAddTerm={addSearchTermFormats}
+                            onRemoveTerm={removeSearchTermFormats}
+                            onClearTerms={() => {
+                                clearSearchTermsFormats();
+                                setCurrentInputFormats('');
+                            }}
+                            className='mb-2'
+                        />
+
                         <div className='grid grid-cols-2 gap-2'>
-                            {missingFormats.map(name =>
-                                renderItem(name, 'customFormats', true)
-                            )}
-                            {availableData.customFormats.map(format =>
-                                renderItem(
-                                    format.content.name,
-                                    'customFormats',
-                                    false
-                                )
+                            {filteredFormats.map(item =>
+                                renderItem(item, 'customFormats')
                             )}
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 // ArrModal.jsx
+
 import React from 'react';
 import {Plus, TestTube, Loader, Save, X, Trash, Check} from 'lucide-react';
 import Modal from '@ui/Modal';
@@ -164,6 +165,12 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
             <form
                 id='arrForm'
                 onSubmit={handleFormSubmit}
+                onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }}
                 className='space-y-4'>
                 <div className='space-y-1.5'>
                     <label
@@ -307,7 +314,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     {formData.sync_method === 'manual' && (
                         <p>
                             Manual sync allows you to selectively import data
-                            when changes occur.
+                            when changes occur in the source instance.
                         </p>
                     )}
                     {formData.sync_method === 'pull' && (
