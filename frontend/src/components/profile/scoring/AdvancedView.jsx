@@ -15,7 +15,8 @@ import {
     Video,
     Flag,
     Zap,
-    Package
+    Package,
+    List
 } from 'lucide-react';
 
 const AdvancedView = ({formats, onScoreChange}) => {
@@ -35,7 +36,8 @@ const AdvancedView = ({formats, onScoreChange}) => {
                 tag.includes('HDR') ||
                 tag.includes('Flag') ||
                 tag.includes('Language') ||
-                tag.includes('Release Group') ||
+                (tag.includes('Release Group') && !tag.includes('Tier')) ||
+                tag.includes('Release Group Tier') ||
                 tag.includes('Resolution') ||
                 tag.includes('Source') ||
                 tag.includes('Storage') ||
@@ -75,7 +77,13 @@ const AdvancedView = ({formats, onScoreChange}) => {
             .filter(([tag]) => tag.includes('Language'))
             .flatMap(([_, formats]) => formats),
         'Release Groups': Object.entries(groupedFormats)
-            .filter(([tag]) => tag.includes('Release Group'))
+            .filter(
+                ([tag]) =>
+                    tag.includes('Release Group') && !tag.includes('Tier')
+            )
+            .flatMap(([_, formats]) => formats),
+        'Group Tier Lists': Object.entries(groupedFormats)
+            .filter(([tag]) => tag.includes('Release Group Tier'))
             .flatMap(([_, formats]) => formats),
         Resolution: Object.entries(groupedFormats)
             .filter(([tag]) => tag.includes('Resolution'))
@@ -97,6 +105,7 @@ const AdvancedView = ({formats, onScoreChange}) => {
             Audio: <Music size={16} />,
             HDR: <Tv size={16} />,
             'Release Groups': <Users size={16} />,
+            'Group Tier Lists': <List size={16} />,
             'Streaming Services': <Cloud size={16} />,
             Codecs: <Film size={16} />,
             Storage: <HardDrive size={16} />,
@@ -111,8 +120,9 @@ const AdvancedView = ({formats, onScoreChange}) => {
     };
 
     // Create sort instances for each group
-    const groupSorts = Object.entries(formatGroups).reduce(
-        (acc, [groupName, formats]) => {
+    const groupSorts = Object.entries(formatGroups)
+        .filter(([_, formats]) => formats.length > 0) // Only create sorts for non-empty groups
+        .reduce((acc, [groupName, formats]) => {
             const defaultSort = {field: 'name', direction: 'asc'};
             const {sortConfig, updateSort, sortData} = useSorting(defaultSort);
 
@@ -122,13 +132,12 @@ const AdvancedView = ({formats, onScoreChange}) => {
                 updateSort
             };
             return acc;
-        },
-        {}
-    );
+        }, {});
 
     return (
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
             {Object.entries(formatGroups)
+                .filter(([_, formats]) => formats.length > 0) // Only render non-empty groups
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([groupName, formats]) => {
                     const {sortedData, sortConfig, updateSort} =
@@ -151,32 +160,23 @@ const AdvancedView = ({formats, onScoreChange}) => {
                             </div>
 
                             <div className='divide-y divide-gray-200 dark:divide-gray-700'>
-                                {sortedData.length > 0 ? (
-                                    sortedData.map(format => (
-                                        <div
-                                            key={format.id}
-                                            className='flex items-center justify-between px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 group'>
-                                            <div className='flex-1 min-w-0 mr-4'>
-                                                <p className='text-sm text-gray-900 dark:text-gray-100 truncate'>
-                                                    {format.name}
-                                                </p>
-                                            </div>
-                                            <NumberInput
-                                                value={format.score}
-                                                onChange={value =>
-                                                    onScoreChange(
-                                                        format.id,
-                                                        value
-                                                    )
-                                                }
-                                            />
+                                {sortedData.map(format => (
+                                    <div
+                                        key={format.id}
+                                        className='flex items-center justify-between px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 group'>
+                                        <div className='flex-1 min-w-0 mr-4'>
+                                            <p className='text-sm text-gray-900 dark:text-gray-100 truncate'>
+                                                {format.name}
+                                            </p>
                                         </div>
-                                    ))
-                                ) : (
-                                    <div className='px-4 py-3 text-sm text-gray-500 dark:text-gray-400'>
-                                        No formats found
+                                        <NumberInput
+                                            value={format.score}
+                                            onChange={value =>
+                                                onScoreChange(format.id, value)
+                                            }
+                                        />
                                     </div>
-                                )}
+                                ))}
                             </div>
                         </div>
                     );
