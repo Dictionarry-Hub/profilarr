@@ -12,7 +12,11 @@ const SearchBar = ({
     onInputChange,
     onAddTerm,
     onRemoveTerm,
-    onClearTerms
+    onClearTerms,
+    textSize = 'text-sm', // Default text size
+    badgeTextSize = 'text-sm', // Default badge text size
+    iconSize = 'h-4 w-4', // Default icon size
+    minHeight = 'min-h-10' // Default min height
 }) => {
     const [isFocused, setIsFocused] = useState(false);
 
@@ -47,7 +51,7 @@ const SearchBar = ({
         <div className={`relative flex-1 min-w-0 group ${className}`}>
             <Search
                 className={`
-          absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4
+          absolute left-3 top-1/2 -translate-y-1/2 ${iconSize}
           transition-colors duration-200
           ${
               isFocused
@@ -58,9 +62,14 @@ const SearchBar = ({
             />
             <div
                 className={`
-          w-full min-h-10 pl-9 pr-8 rounded-md
+          w-full ${minHeight} pl-9 pr-8 rounded-md
           transition-all duration-200 ease-in-out
-          border shadow-sm flex items-center flex-wrap gap-2 p-2
+          border shadow-sm flex items-center gap-2 p-2
+          ${
+              minHeight && minHeight.startsWith('h-')
+                  ? 'overflow-x-auto overflow-y-hidden whitespace-nowrap'
+                  : ''
+          }
           ${
               isFocused
                   ? 'border-blue-500 ring-2 ring-blue-500/20 bg-white/5'
@@ -71,17 +80,24 @@ const SearchBar = ({
                 {searchTerms.map((term, index) => (
                     <div
                         key={index}
-                        className='flex items-center gap-1.5 px-2 py-1 
-              bg-blue-500/10 dark:bg-blue-500/20 
-              border border-blue-500/20 dark:border-blue-400/20
-              text-blue-600 dark:text-blue-400 
-              rounded-md shadow-sm
-              hover:bg-blue-500/15 dark:hover:bg-blue-500/25
-              hover:border-blue-500/30 dark:hover:border-blue-400/30
-              group/badge
-              transition-all duration-200
-            '>
-                        <span className='text-sm font-medium leading-none'>
+                        className={`
+                            flex items-center gap-1.5 px-2 
+                            ${
+                                minHeight && minHeight.startsWith('h-')
+                                    ? 'py-0.5'
+                                    : 'py-1'
+                            }
+                            bg-blue-500/10 dark:bg-blue-500/20 
+                            border border-blue-500/20 dark:border-blue-400/20
+                            text-blue-600 dark:text-blue-400 
+                            rounded-md shadow-sm
+                            hover:bg-blue-500/15 dark:hover:bg-blue-500/25
+                            hover:border-blue-500/30 dark:hover:border-blue-400/30
+                            group/badge flex-shrink-0
+                            transition-all duration-200
+                        `}>
+                        <span
+                            className={`${badgeTextSize} font-medium leading-none`}>
                             {term}
                         </span>
                         <button
@@ -106,10 +122,10 @@ const SearchBar = ({
                             ? 'Add another filter...'
                             : placeholder
                     }
-                    className='flex-1 min-w-[200px] bg-transparent 
-            text-gray-900 dark:text-gray-100
+                    className={`flex-1 min-w-[200px] bg-transparent 
+            ${textSize} text-gray-900 dark:text-gray-100
             placeholder:text-gray-500 dark:placeholder:text-gray-400
-            focus:outline-none'
+            focus:outline-none`}
                 />
             </div>
 
@@ -122,7 +138,7 @@ const SearchBar = ({
             hover:bg-gray-100 dark:hover:bg-gray-700
             transition-all duration-200
             group/clear'>
-                    <X className='h-4 w-4' />
+                    <X className={iconSize} />
                 </button>
             )}
         </div>
