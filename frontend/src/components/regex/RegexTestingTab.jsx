@@ -148,7 +148,7 @@ const RegexTestingTab = ({
                         ))}
                     </div>
                 ) : (
-                    <div className='text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg'>
+                    <div className='text-center py-12 rounded-lg'>
                         <p className='text-gray-500 dark:text-gray-400'>
                             No tests added yet
                         </p>

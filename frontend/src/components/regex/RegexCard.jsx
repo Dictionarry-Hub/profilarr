@@ -142,7 +142,7 @@ const RegexCard = ({
                             [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mt-2 [&>ul]:mb-4
                             [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mt-2 [&>ol]:mb-4
                             [&>ul>li]:mt-0.5 [&>ol>li]:mt-0.5
-                            [&_code]:bg-gray-900/50 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-blue-300 [&_code]:border [&_code]:border-gray-700/50'>
+                            [&_code]:bg-gray-900/50 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-blue-300 [&_code]:border [&_code]:border-gray-700/50 scrollable'>
                             <ReactMarkdown>{pattern.description}</ReactMarkdown>
                         </div>
                     )}
