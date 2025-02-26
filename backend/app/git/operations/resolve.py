@@ -30,10 +30,12 @@ def get_version_data(repo, ref, file_path):
 
 def resolve_conflicts(
         repo, resolutions: Dict[str, Dict[str, str]]) -> Dict[str, Any]:
-    logger.debug(f"Received resolutions for files: {list(resolutions.keys())}")
     """
     Resolve merge conflicts based on provided resolutions.
     """
+    logger.debug(f"Received resolutions for files: {list(resolutions.keys())}")
+    logger.debug(f"Full resolutions data: {resolutions}")
+    
     try:
         status = repo.git.status('--porcelain', '-z').split('\0')
         conflicts = []
@@ -82,6 +84,7 @@ def resolve_conflicts(
             if modify_delete_conflicts[file_path]:
                 logger.debug(
                     f"Handling modify/delete conflict for {file_path}")
+                logger.debug(f"Field resolutions for modify/delete: {field_resolutions}")
 
                 # Get the existing version (either from HEAD or MERGE_HEAD)
                 head_data = get_version_data(repo, 'HEAD', file_path)
@@ -92,9 +95,17 @@ def resolve_conflicts(
                 is_deleted_in_head = head_data is None
                 existing_data = merge_head_data if is_deleted_in_head else head_data
                 logger.debug(f"Existing version data: {existing_data}")
+                logger.debug(f"is_deleted_in_head: {is_deleted_in_head}")
+                logger.debug(f"head_data: {head_data}")
+                logger.debug(f"merge_head_data: {merge_head_data}")
 
-                choice = field_resolutions.get('file')
+                # Try both lowercase and capitalized versions of 'file'
+                choice = field_resolutions.get('file') or field_resolutions.get('File')
+                logger.debug(f"Resolution choice for file: {choice}")
+                
                 if not choice:
+                    logger.error("No 'file' or 'File' resolution found in field_resolutions!")
+                    logger.error(f"Available keys: {list(field_resolutions.keys())}")
                     raise Exception(
                         "No resolution provided for modify/delete conflict")
 
@@ -153,9 +164,23 @@ def resolve_conflicts(
                 ours_data = get_version_data(repo, 'HEAD', file_path)
                 theirs_data = get_version_data(repo, 'MERGE_HEAD', file_path)
 
+                # For files that were previously involved in modify/delete conflicts
+                # we may not be able to get all versions
                 if not base_data or not ours_data or not theirs_data:
-                    raise Exception(
-                        f"Couldn't get all versions of {file_path}")
+                    logger.warning(f"Couldn't get all versions of {file_path} - may have been previously resolved as a modify/delete conflict")
+                    logger.warning(f"base_data: {base_data}, ours_data: {ours_data}, theirs_data: {theirs_data}")
+                    
+                    # If it was previously resolved as "incoming" but ours_data is missing, use theirs_data
+                    if not ours_data and theirs_data:
+                        logger.info(f"Using incoming version for {file_path} as base for resolution")
+                        ours_data = theirs_data
+                    # If it was previously resolved as "local" but theirs_data is missing, use ours_data
+                    elif ours_data and not theirs_data:
+                        logger.info(f"Using local version for {file_path} as base for resolution")
+                        theirs_data = ours_data
+                    # If we can't recover either version, we can't proceed
+                    else:
+                        raise Exception(f"Couldn't get required versions of {file_path}")
 
                 # Start with a deep copy of ours_data to preserve all fields
                 resolved_data = deepcopy(ours_data)

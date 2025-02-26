@@ -31,20 +31,46 @@ def process_modify_delete_conflict(repo, file_path, deleted_in_head):
         else:
             status = MODIFY_DELETE
 
-        # Get the surviving version
+        # For delete conflicts, we need to extract the name for display purposes
+        # This will be the name of the actual file before it was deleted
+        basename = os.path.basename(file_path)
+        filename = os.path.splitext(basename)[0]  # Strip extension
+        
+        # Get metadata from existing version to extract name if possible
         if file_exists:
-            with open(os.path.join(repo.working_dir, file_path), 'r') as f:
-                existing_data = yaml.safe_load(f.read())
+            # File exists locally, read it
+            try:
+                with open(os.path.join(repo.working_dir, file_path), 'r') as f:
+                    existing_data = yaml.safe_load(f.read())
+            except Exception as read_error:
+                logger.warning(f"Could not read existing file {file_path}: {str(read_error)}")
+                existing_data = {'name': filename}
         else:
-            existing_data = get_version_data(repo, 'MERGE_HEAD', file_path)
+            # File was deleted locally, try to get from merge head
+            try:
+                existing_data = get_version_data(repo, 'MERGE_HEAD', file_path)
+            except Exception as merge_error:
+                logger.warning(f"Could not get merge head for {file_path}: {str(merge_error)}")
+                existing_data = {'name': filename}
 
-        if not existing_data:
-            return None
+        # Simplified placeholder data for deleted version
+        if deleted_in_head:
+            # File was deleted in HEAD (local) but exists in MERGE_HEAD (incoming)
+            local_data = None  # This indicates deleted
+            try:
+                # Try to get name from incoming
+                incoming_data = existing_data if existing_data else {'name': filename}
+            except Exception:
+                incoming_data = {'name': filename}
+        else:
+            # File exists in HEAD (local) but deleted in MERGE_HEAD (incoming)
+            try:
+                local_data = existing_data if existing_data else {'name': filename}
+            except Exception:
+                local_data = {'name': filename}
+            incoming_data = None  # This indicates deleted
 
-        # Create summary with the appropriate sides marked as deleted
-        return create_conflict_summary(
-            file_path, None if deleted_in_head else existing_data,
-            existing_data if deleted_in_head else None, status)
+        return create_conflict_summary(file_path, local_data, incoming_data, status)
 
     except Exception as e:
         logger.error(
