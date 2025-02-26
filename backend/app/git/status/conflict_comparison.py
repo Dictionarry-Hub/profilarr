@@ -29,16 +29,20 @@ def compare_conflict_yaml(ours_data: Any,
     if ours_data is None and theirs_data is None:
         return conflicts
     if ours_data is None:
+        # Local version deleted
+        param_name = path or 'File'
         return [{
-            'parameter': path or 'File',
-            'local_value': 'deleted',
-            'incoming_value': theirs_data
+            'parameter': param_name,
+            'local_value': '🗑️ File deleted in local version',
+            'incoming_value': '📄 File exists in incoming version'
         }]
     if theirs_data is None:
+        # Incoming version deleted
+        param_name = path or 'File'
         return [{
-            'parameter': path or 'File',
-            'local_value': ours_data,
-            'incoming_value': 'deleted'
+            'parameter': param_name,
+            'local_value': '📄 File exists in local version',
+            'incoming_value': '🗑️ File deleted in incoming version'
         }]
 
     # Handle different types as conflicts
@@ -197,6 +201,7 @@ def create_conflict_summary(file_path: str,
         - file_path: Path to the conflicted file
         - type: Type of item
         - name: Name from our version or filename
+        - incoming_name: Name from their version (if available)
         - status: Current conflict status
         - conflict_details: List of specific conflicts
     """
@@ -209,17 +214,36 @@ def create_conflict_summary(file_path: str,
             compare_conflict_yaml(ours_data, theirs_data)
         }
 
-        # Get name from our version or fallback to filename
-        name = ours_data.get('name') if ours_data else os.path.basename(
-            file_path)
+        # Get local name
+        local_name = None
+        if ours_data and isinstance(ours_data, dict) and 'name' in ours_data:
+            local_name = ours_data.get('name')
+        
+        if not local_name:
+            # Strip the extension to get a cleaner name
+            basename = os.path.basename(file_path)
+            local_name = os.path.splitext(basename)[0]
+            
+        # Get incoming name
+        incoming_name = None
+        if theirs_data and isinstance(theirs_data, dict) and 'name' in theirs_data:
+            incoming_name = theirs_data.get('name')
+        
+        if not incoming_name:
+            # Strip the extension to get a cleaner name
+            basename = os.path.basename(file_path)
+            incoming_name = os.path.splitext(basename)[0]
 
-        return {
+        result = {
             'file_path': file_path,
             'type': determine_type(file_path),
-            'name': name,
+            'name': local_name,
+            'incoming_name': incoming_name,
             'status': status,
             'conflict_details': conflict_details
         }
+        
+        return result
 
     except Exception as e:
         logger.error(
