@@ -337,20 +337,74 @@ function ProfileModal({
                 minCustomFormatScore,
                 upgradeUntilScore,
                 minScoreIncrement,
-                custom_formats: customFormats
-                    .filter(format => format.score !== 0)
-                    .sort((a, b) => {
-                        // First sort by score (descending)
-                        if (b.score !== a.score) {
-                            return b.score - a.score;
+                custom_formats: (() => {
+                    // Check if selective mode is enabled
+                    const selectiveMode = localStorage.getItem('formatSettingsSelectiveMode');
+                    const useSelectiveMode = selectiveMode !== null && JSON.parse(selectiveMode);
+                    
+                    if (useSelectiveMode) {
+                        // In selective mode, save both:
+                        // 1. Formats with non-zero scores as usual 
+                        // 2. Formats with zero score that have been explicitly selected in selectedFormatIds
+                        
+                        try {
+                            // Get the list of explicitly selected format IDs
+                            const selectedFormatIdsStr = localStorage.getItem('selectedFormatIds');
+                            const selectedFormatIds = selectedFormatIdsStr ? JSON.parse(selectedFormatIdsStr) : [];
+                            
+                            // Get formats with non-zero scores
+                            const nonZeroFormats = customFormats.filter(format => format.score !== 0);
+                            
+                            // Get formats with zero scores that are explicitly selected
+                            const explicitlySelectedZeroFormats = customFormats.filter(format => 
+                                format.score === 0 && selectedFormatIds.includes(format.id)
+                            );
+                            
+                            // Combine both lists
+                            return [...nonZeroFormats, ...explicitlySelectedZeroFormats]
+                                .sort((a, b) => {
+                                    // First sort by score (descending)
+                                    if (b.score !== a.score) {
+                                        return b.score - a.score;
+                                    }
+                                    // Then alphabetically for equal scores
+                                    return a.name.localeCompare(b.name);
+                                })
+                                .map(format => ({
+                                    name: format.name,
+                                    score: format.score
+                                }));
+                        } catch (e) {
+                            // If there's any error parsing the selectedFormatIds, fall back to just non-zero scores
+                            return customFormats
+                                .filter(format => format.score !== 0)
+                                .sort((a, b) => {
+                                    if (b.score !== a.score) return b.score - a.score;
+                                    return a.name.localeCompare(b.name);
+                                })
+                                .map(format => ({
+                                    name: format.name,
+                                    score: format.score
+                                }));
                         }
-                        // Then alphabetically for equal scores
-                        return a.name.localeCompare(b.name);
-                    })
-                    .map(format => ({
-                        name: format.name,
-                        score: format.score
-                    })),
+                    } else {
+                        // Standard behavior - only include formats with non-zero scores
+                        return customFormats
+                            .filter(format => format.score !== 0)
+                            .sort((a, b) => {
+                                // First sort by score (descending)
+                                if (b.score !== a.score) {
+                                    return b.score - a.score;
+                                }
+                                // Then alphabetically for equal scores
+                                return a.name.localeCompare(b.name);
+                            })
+                            .map(format => ({
+                                name: format.name,
+                                score: format.score
+                            }));
+                    }
+                })(),
                 qualities: sortedQualities
                     .filter(q => q.enabled)
                     .map(q => {
