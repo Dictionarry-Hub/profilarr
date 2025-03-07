@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {Profiles} from '@api/data';
 import Modal from '../ui/Modal';
 import Alert from '@ui/Alert';
-import {Loader} from 'lucide-react';
+import {Loader, Save, Trash2, Check} from 'lucide-react';
 import ProfileGeneralTab from './ProfileGeneralTab';
 import ProfileScoringTab from './scoring/ProfileScoringTab';
 import ProfileQualitiesTab from './quality/ProfileQualitiesTab';
@@ -28,6 +28,7 @@ function ProfileModal({
     const [description, setDescription] = useState('');
     const [error, setError] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [loading, setLoading] = useState(true);
     const [modalTitle, setModalTitle] = useState('');
 
@@ -116,6 +117,8 @@ function ProfileModal({
     useEffect(() => {
         if (isOpen) {
             setLoading(true);
+            setIsDeleting(false);
+            setIsSaving(false);
 
             setModalTitle(
                 isCloning
@@ -322,60 +325,93 @@ function ProfileModal({
     }, [initialProfile, isOpen, formats, isCloning]);
 
     const handleSave = async () => {
-        if (!name.trim()) {
-            setError('Name is required.');
-            Alert.error('Please enter a profile name');
-            return;
-        }
+        if (isSaving) {
+            // This is the confirmation click
+            if (!name.trim()) {
+                setError('Name is required.');
+                Alert.error('Please enter a profile name');
+                setIsSaving(false);
+                return;
+            }
 
-        try {
-            const profileData = {
-                name,
-                description,
-                tags,
-                upgradesAllowed,
-                minCustomFormatScore,
-                upgradeUntilScore,
-                minScoreIncrement,
-                custom_formats: (() => {
-                    // Check if selective mode is enabled
-                    const selectiveMode = localStorage.getItem(
-                        'formatSettingsSelectiveMode'
-                    );
-                    const useSelectiveMode =
-                        selectiveMode !== null && JSON.parse(selectiveMode);
+            try {
+                const profileData = {
+                    name,
+                    description,
+                    tags,
+                    upgradesAllowed,
+                    minCustomFormatScore,
+                    upgradeUntilScore,
+                    minScoreIncrement,
+                    custom_formats: (() => {
+                        // Check if selective mode is enabled
+                        const selectiveMode = localStorage.getItem(
+                            'formatSettingsSelectiveMode'
+                        );
+                        const useSelectiveMode =
+                            selectiveMode !== null && JSON.parse(selectiveMode);
 
-                    if (useSelectiveMode) {
-                        // In selective mode, save both:
-                        // 1. Formats with non-zero scores as usual
-                        // 2. Formats with zero score that have been explicitly selected in selectedFormatIds
+                        if (useSelectiveMode) {
+                            // In selective mode, save both:
+                            // 1. Formats with non-zero scores as usual
+                            // 2. Formats with zero score that have been explicitly selected in selectedFormatIds
 
-                        try {
-                            // Get the list of explicitly selected format IDs
-                            const selectedFormatIdsStr =
-                                localStorage.getItem('selectedFormatIds');
-                            const selectedFormatIds = selectedFormatIdsStr
-                                ? JSON.parse(selectedFormatIdsStr)
-                                : [];
+                            try {
+                                // Get the list of explicitly selected format IDs
+                                const selectedFormatIdsStr =
+                                    localStorage.getItem('selectedFormatIds');
+                                const selectedFormatIds = selectedFormatIdsStr
+                                    ? JSON.parse(selectedFormatIdsStr)
+                                    : [];
 
-                            // Get formats with non-zero scores
-                            const nonZeroFormats = customFormats.filter(
-                                format => format.score !== 0
-                            );
-
-                            // Get formats with zero scores that are explicitly selected
-                            const explicitlySelectedZeroFormats =
-                                customFormats.filter(
-                                    format =>
-                                        format.score === 0 &&
-                                        selectedFormatIds.includes(format.id)
+                                // Get formats with non-zero scores
+                                const nonZeroFormats = customFormats.filter(
+                                    format => format.score !== 0
                                 );
 
-                            // Combine both lists
-                            return [
-                                ...nonZeroFormats,
-                                ...explicitlySelectedZeroFormats
-                            ]
+                                // Get formats with zero scores that are explicitly selected
+                                const explicitlySelectedZeroFormats =
+                                    customFormats.filter(
+                                        format =>
+                                            format.score === 0 &&
+                                            selectedFormatIds.includes(format.id)
+                                    );
+
+                                // Combine both lists
+                                return [
+                                    ...nonZeroFormats,
+                                    ...explicitlySelectedZeroFormats
+                                ]
+                                    .sort((a, b) => {
+                                        // First sort by score (descending)
+                                        if (b.score !== a.score) {
+                                            return b.score - a.score;
+                                        }
+                                        // Then alphabetically for equal scores
+                                        return a.name.localeCompare(b.name);
+                                    })
+                                    .map(format => ({
+                                        name: format.name,
+                                        score: format.score
+                                    }));
+                            } catch (e) {
+                                // If there's any error parsing the selectedFormatIds, fall back to just non-zero scores
+                                return customFormats
+                                    .filter(format => format.score !== 0)
+                                    .sort((a, b) => {
+                                        if (b.score !== a.score)
+                                            return b.score - a.score;
+                                        return a.name.localeCompare(b.name);
+                                    })
+                                    .map(format => ({
+                                        name: format.name,
+                                        score: format.score
+                                    }));
+                            }
+                        } else {
+                            // Standard behavior - only include formats with non-zero scores
+                            return customFormats
+                                .filter(format => format.score !== 0)
                                 .sort((a, b) => {
                                     // First sort by score (descending)
                                     if (b.score !== a.score) {
@@ -388,94 +424,69 @@ function ProfileModal({
                                     name: format.name,
                                     score: format.score
                                 }));
-                        } catch (e) {
-                            // If there's any error parsing the selectedFormatIds, fall back to just non-zero scores
-                            return customFormats
-                                .filter(format => format.score !== 0)
-                                .sort((a, b) => {
-                                    if (b.score !== a.score)
-                                        return b.score - a.score;
-                                    return a.name.localeCompare(b.name);
-                                })
-                                .map(format => ({
-                                    name: format.name,
-                                    score: format.score
-                                }));
                         }
-                    } else {
-                        // Standard behavior - only include formats with non-zero scores
-                        return customFormats
-                            .filter(format => format.score !== 0)
-                            .sort((a, b) => {
-                                // First sort by score (descending)
-                                if (b.score !== a.score) {
-                                    return b.score - a.score;
-                                }
-                                // Then alphabetically for equal scores
-                                return a.name.localeCompare(b.name);
-                            })
-                            .map(format => ({
-                                name: format.name,
-                                score: format.score
-                            }));
-                    }
-                })(),
-                qualities: sortedQualities
-                    .filter(q => q.enabled)
-                    .map(q => {
-                        if ('qualities' in q) {
-                            return {
-                                id: q.id,
-                                name: q.name,
-                                description: q.description || '',
-                                qualities: q.qualities.map(subQ => ({
-                                    id: subQ.id,
-                                    name: subQ.name
-                                }))
-                            };
-                        } else {
-                            return {
-                                id: q.id,
-                                name: q.name
-                            };
-                        }
-                    }),
-                upgrade_until: selectedUpgradeQuality
-                    ? {
-                          id: selectedUpgradeQuality.id,
-                          name: selectedUpgradeQuality.name,
-                          ...(selectedUpgradeQuality.description && {
-                              description: selectedUpgradeQuality.description
-                          })
-                      }
-                    : null,
-                language
-            };
+                    })(),
+                    qualities: sortedQualities
+                        .filter(q => q.enabled)
+                        .map(q => {
+                            if ('qualities' in q) {
+                                return {
+                                    id: q.id,
+                                    name: q.name,
+                                    description: q.description || '',
+                                    qualities: q.qualities.map(subQ => ({
+                                        id: subQ.id,
+                                        name: subQ.name
+                                    }))
+                                };
+                            } else {
+                                return {
+                                    id: q.id,
+                                    name: q.name
+                                };
+                            }
+                        }),
+                    upgrade_until: selectedUpgradeQuality
+                        ? {
+                              id: selectedUpgradeQuality.id,
+                              name: selectedUpgradeQuality.name,
+                              ...(selectedUpgradeQuality.description && {
+                                  description: selectedUpgradeQuality.description
+                              })
+                          }
+                        : null,
+                    language
+                };
 
-            if (isCloning || !initialProfile) {
-                // Creating new profile
-                await Profiles.create(profileData);
-                Alert.success('Profile created successfully');
-            } else {
-                // Updating existing profile
-                const originalName = initialProfile.content.name;
-                const isNameChanged = originalName !== name;
-                await Profiles.update(
-                    initialProfile.file_name.replace('.yml', ''),
-                    profileData,
-                    isNameChanged ? name : undefined
-                );
-                Alert.success('Profile updated successfully');
+                if (isCloning || !initialProfile) {
+                    // Creating new profile
+                    await Profiles.create(profileData);
+                    Alert.success('Profile created successfully');
+                } else {
+                    // Updating existing profile
+                    const originalName = initialProfile.content.name;
+                    const isNameChanged = originalName !== name;
+                    await Profiles.update(
+                        initialProfile.file_name.replace('.yml', ''),
+                        profileData,
+                        isNameChanged ? name : undefined
+                    );
+                    Alert.success('Profile updated successfully');
+                }
+
+                onSave();
+                onClose();
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                const errorMessage =
+                    error.message || 'An unexpected error occurred';
+                Alert.error(errorMessage);
+                setError(errorMessage);
+                setIsSaving(false);
             }
-
-            onSave();
-            onClose();
-        } catch (error) {
-            console.error('Error saving profile:', error);
-            const errorMessage =
-                error.message || 'An unexpected error occurred';
-            Alert.error(errorMessage);
-            setError(errorMessage);
+        } else {
+            // First click - show confirmation
+            setIsSaving(true);
         }
     };
 
@@ -524,16 +535,24 @@ function ProfileModal({
                     {initialProfile && (
                         <button
                             onClick={handleDelete}
-                            className={`bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ${
-                                isDeleting ? 'bg-red-600' : ''
-                            }`}>
-                            {isDeleting ? 'Confirm Delete' : 'Delete'}
+                            className='inline-flex items-center gap-2 px-4 py-2 rounded bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-700 transition-colors'>
+                            {isDeleting ? (
+                                <Check className="w-4 h-4 text-green-500" />
+                            ) : (
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                            )}
+                            <span>Delete</span>
                         </button>
                     )}
                     <button
                         onClick={handleSave}
-                        className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors'>
-                        Save
+                        className='inline-flex items-center gap-2 px-4 py-2 rounded bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-700 transition-colors'>
+                        {isSaving ? (
+                            <Check className="w-4 h-4 text-green-500" />
+                        ) : (
+                            <Save className="w-4 h-4 text-blue-500" />
+                        )}
+                        <span>Save</span>
                     </button>
                 </div>
             }>
