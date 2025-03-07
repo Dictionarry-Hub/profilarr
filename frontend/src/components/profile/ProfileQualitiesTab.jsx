@@ -20,54 +20,22 @@ import {
     restrictToVerticalAxis,
     restrictToParentElement
 } from '@dnd-kit/modifiers';
-import {InfoIcon} from 'lucide-react';
+import {InfoIcon, ArrowUp} from 'lucide-react';
 import Modal from '../ui/Modal';
 import CreateGroupModal from './CreateGroupModal';
 import QualityItem from './quality/QualityItem';
 import QUALITIES from '../../constants/qualities';
 import Alert from '@ui/Alert';
+import Tooltip from '@ui/Tooltip';
 
-const UpgradeSection = ({
-    enabledQualities,
-    selectedUpgradeQuality,
-    onUpgradeQualityChange
+const SortableItem = ({
+    quality, 
+    onToggle, 
+    onDelete, 
+    onEdit,
+    isUpgradeUntil,
+    onUpgradeUntilClick
 }) => {
-    if (enabledQualities.length === 0) {
-        return null;
-    }
-
-    return (
-        <div className='bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 mb-4'>
-            <div className='grid grid-cols-[auto_1fr_auto] gap-4 items-center'>
-                <h3 className='text-base font-semibold text-gray-900 dark:text-gray-100'>
-                    Upgrade Until
-                </h3>
-                <p className='text-xs text-gray-600 dark:text-gray-400'>
-                    Downloads will be upgraded until this quality is reached.
-                    Lower qualities will be upgraded, while higher qualities
-                    will be left unchanged.
-                </p>
-                <select
-                    className='w-48 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm'
-                    value={selectedUpgradeQuality?.id || ''}
-                    onChange={e => {
-                        const quality = enabledQualities.find(
-                            q => q.id === parseInt(e.target.value)
-                        );
-                        onUpgradeQualityChange(quality);
-                    }}>
-                    {enabledQualities.map(quality => (
-                        <option key={quality.id} value={quality.id}>
-                            {quality.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-        </div>
-    );
-};
-
-const SortableItem = ({quality, onToggle, onDelete, onEdit}) => {
     const {
         attributes,
         listeners,
@@ -99,6 +67,8 @@ const SortableItem = ({quality, onToggle, onDelete, onEdit}) => {
                 style={style}
                 onEdit={'qualities' in quality ? onEdit : undefined}
                 onDelete={'qualities' in quality ? onDelete : undefined}
+                isUpgradeUntil={isUpgradeUntil}
+                onUpgradeUntilClick={quality.enabled ? onUpgradeUntilClick : undefined}
             />
         </div>
     );
@@ -217,6 +187,12 @@ const ProfileQualitiesTab = ({
 
     const handleQualityToggle = quality => {
         if (!activeId) {
+            // Prevent disabling a quality that's set as the upgrade until quality
+            if (quality.enabled && upgradesAllowed && selectedUpgradeQuality && isUpgradeUntilQuality(quality)) {
+                Alert.error("You can't disable a quality that's set as 'upgrade until'. Please set another quality as 'upgrade until' first.");
+                return;
+            }
+            
             const currentEnabledCount = sortedQualities.filter(
                 q => q.enabled
             ).length;
@@ -252,34 +228,65 @@ const ProfileQualitiesTab = ({
 
             onQualitiesChange(allEnabledQualities);
 
-            // Only update the upgrade quality if we're disabling the current upgrade quality
+            // We shouldn't reach this point for the upgrade until quality,
+            // but keeping as a safety measure
             if (
+                upgradesAllowed &&
                 selectedUpgradeQuality &&
                 quality.enabled === false && // We're disabling a quality
-                (quality.id === selectedUpgradeQuality.id || // Direct match
-                    ('qualities' in quality && // Group match
-                        quality.qualities.some(
-                            q => q.id === selectedUpgradeQuality.id
-                        )))
+                (quality.id === selectedUpgradeQuality.id || // Direct match (group or quality)
+                    ('qualities' in quality && // Quality is in a group that's being disabled
+                        !('qualities' in selectedUpgradeQuality) && 
+                        quality.qualities.some(q => q.id === selectedUpgradeQuality.id)))
             ) {
+                // Find another enabled quality to set as upgrade until
                 const nearestQuality = findNearestEnabledQuality(
                     newQualities,
                     quality.id
                 );
-                onSelectedUpgradeQualityChange?.(nearestQuality);
+                
+                if (nearestQuality) {
+                    onSelectedUpgradeQualityChange?.(nearestQuality);
+                    Alert.info(`Upgrade until quality changed to ${nearestQuality.name}`);
+                }
             }
         }
     };
 
+    const handleUpgradeUntilClick = quality => {
+        // Make sure we're setting the quality object properly
+        if (quality) {
+            // For single qualities, pass as is
+            // For groups, we pass the group itself to maintain the group ID in the selection
+            onSelectedUpgradeQualityChange?.(quality);
+            
+            // Provide user feedback
+            Alert.success(`${quality.name} set as upgrade until quality`);
+        }
+    };
+
     const handleCreateOrUpdateGroup = groupData => {
-        if (
-            selectedUpgradeQuality &&
-            !('qualities' in selectedUpgradeQuality)
-        ) {
-            const qualityMovingToGroup = groupData.qualities.some(
-                q => q.id === selectedUpgradeQuality.id
-            );
-            if (qualityMovingToGroup) {
+        // Check if the currently selected upgrade quality is being moved into this group
+        if (selectedUpgradeQuality) {
+            // If the selected upgrade quality is a single quality (not a group itself)
+            if (!('qualities' in selectedUpgradeQuality)) {
+                const qualityMovingToGroup = groupData.qualities.some(
+                    q => q.id === selectedUpgradeQuality.id
+                );
+                
+                // If the current upgrade quality is being moved into this group
+                // Update the upgrade quality to be the group instead
+                if (qualityMovingToGroup) {
+                    onSelectedUpgradeQualityChange({
+                        id: groupData.id,
+                        name: groupData.name,
+                        description: groupData.description
+                    });
+                }
+            } 
+            // If the selected upgrade quality is the group we're editing
+            else if (selectedUpgradeQuality.id === editingGroup?.id) {
+                // Update the upgrade quality to reflect the new group data
                 onSelectedUpgradeQualityChange({
                     id: groupData.id,
                     name: groupData.name,
@@ -371,15 +378,33 @@ const ProfileQualitiesTab = ({
     const handleDeleteGroup = group => {
         // Check if we're deleting the currently selected upgrade group
         if (selectedUpgradeQuality && selectedUpgradeQuality.id === group.id) {
-            const firstQualityFromGroup = group.qualities[0];
-            onSelectedUpgradeQualityChange(firstQualityFromGroup);
+            // Find the first quality from the group and set it as the upgrade until quality
+            if (group.qualities && group.qualities.length > 0) {
+                const firstQualityFromGroup = group.qualities[0];
+                onSelectedUpgradeQualityChange(firstQualityFromGroup);
+                Alert.info(`Upgrade until quality changed to ${firstQualityFromGroup.name}`);
+            } else {
+                // If somehow the group has no qualities, find the first enabled quality
+                const firstEnabledQuality = sortedQualities.find(q => q.enabled && q.id !== group.id);
+                if (firstEnabledQuality) {
+                    onSelectedUpgradeQualityChange(firstEnabledQuality);
+                    Alert.info(`Upgrade until quality changed to ${firstEnabledQuality.name}`);
+                }
+            }
         }
 
         onSortedQualitiesChange(prev => {
             const index = prev.findIndex(q => q.id === group.id);
             if (index === -1) return prev;
             const newQualities = [...prev];
-            newQualities.splice(index, 1, ...group.qualities);
+            
+            // Make sure all qualities from the group are set as enabled
+            const enabledGroupQualities = group.qualities.map(q => ({
+                ...q,
+                enabled: true
+            }));
+            
+            newQualities.splice(index, 1, ...enabledGroupQualities);
             return newQualities;
         });
     };
@@ -410,19 +435,41 @@ const ProfileQualitiesTab = ({
         setActiveId(null);
     };
 
+    const isUpgradeUntilQuality = (quality) => {
+        if (!selectedUpgradeQuality) return false;
+        
+        // Direct ID match (works for both individual qualities and groups)
+        if (quality.id === selectedUpgradeQuality.id) {
+            return true;
+        }
+        
+        // Check if the selected upgrade quality is a member of this group
+        if ('qualities' in quality && 
+            !('qualities' in selectedUpgradeQuality) && 
+            quality.qualities.some(q => q.id === selectedUpgradeQuality.id)) {
+            return true;
+        }
+        
+        return false;
+    };
+
     return (
         <div className='h-full flex flex-col'>
-            <div className='bg-white dark:bg-gray-800 pb-4'>
+            <div className='pb-4 pr-4'>
                 <div className='grid grid-cols-[auto_1fr_auto] gap-4 items-center'>
                     <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100 leading-tight'>
                         Quality Rankings
                     </h2>
 
-                    <p className='text-xs text-gray-600 dark:text-gray-400 leading-relaxed'>
-                        Qualities higher in the list are more preferred even if
-                        not checked. Qualities within the same group are equal.
-                        Only checked qualities are wanted.
-                    </p>
+                    <div className='flex items-center'>
+                        <p className='text-xs text-gray-600 dark:text-gray-400 leading-relaxed'>
+                            Qualities higher in the list are more preferred even if
+                            not checked. Qualities within the same group are equal.
+                            Only checked qualities are wanted.
+                        </p>
+
+                        {/* Only show upgrade hint if upgrades are allowed */}
+                    </div>
 
                     <button
                         onClick={() => setIsCreateGroupModalOpen(true)}
@@ -433,15 +480,7 @@ const ProfileQualitiesTab = ({
                 </div>
             </div>
 
-            {upgradesAllowed && (
-                <UpgradeSection
-                    enabledQualities={sortedQualities.filter(q => q.enabled)}
-                    selectedUpgradeQuality={selectedUpgradeQuality}
-                    onUpgradeQualityChange={onSelectedUpgradeQualityChange}
-                />
-            )}
-
-            <div className='flex-1 overflow-auto'>
+            <div className='flex-1 overflow-auto scrollable pr-4'>
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -451,7 +490,7 @@ const ProfileQualitiesTab = ({
                         restrictToVerticalAxis,
                         restrictToParentElement
                     ]}>
-                    <div className=''>
+                    <div className='py-4'>
                         <div className='space-y-2'>
                             <SortableContext
                                 items={sortedQualities.map(q => q.id)}
@@ -471,6 +510,8 @@ const ProfileQualitiesTab = ({
                                                 ? handleEditClick
                                                 : undefined
                                         }
+                                        isUpgradeUntil={isUpgradeUntilQuality(quality)}
+                                        onUpgradeUntilClick={upgradesAllowed ? handleUpgradeUntilClick : undefined}
                                     />
                                 ))}
                             </SortableContext>

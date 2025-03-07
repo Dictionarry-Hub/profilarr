@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Info } from 'lucide-react';
+import {Check, Info, ArrowUp} from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
 import RadarrLogo from '@logo/Radarr.svg';
 import SonarrLogo from '@logo/Sonarr.svg';
@@ -12,33 +12,40 @@ const QualityItemSingle = ({
     style,
     onMouseEnter,
     onMouseLeave,
-    willBeSelected
+    willBeSelected,
+    isUpgradeUntil,
+    onUpgradeUntilClick
 }) => {
     // Create tooltip content with just icons and text
     const AppTooltipContent = () => (
-        <div className="flex items-center gap-3">
+        <div className='flex items-center gap-3'>
             {quality.radarr && (
-                <div className="flex items-center text-white">
+                <div className='flex items-center text-white'>
                     <img
                         src={RadarrLogo}
-                        className="w-3.5 h-3.5 mr-1.5"
-                        alt="Radarr"
+                        className='w-3.5 h-3.5 mr-1.5'
+                        alt='Radarr'
                     />
-                    <span className="text-xs">Radarr</span>
+                    <span className='text-xs'>Radarr</span>
                 </div>
             )}
             {quality.sonarr && (
-                <div className="flex items-center text-white">
+                <div className='flex items-center text-white'>
                     <img
                         src={SonarrLogo}
-                        className="w-3.5 h-3.5 mr-1.5"
-                        alt="Sonarr"
+                        className='w-3.5 h-3.5 mr-1.5'
+                        alt='Sonarr'
                     />
-                    <span className="text-xs">Sonarr</span>
+                    <span className='text-xs'>Sonarr</span>
                 </div>
             )}
         </div>
     );
+
+    const handleUpgradeClick = e => {
+        e.stopPropagation();
+        onUpgradeUntilClick?.(quality);
+    };
 
     return (
         <div
@@ -66,7 +73,7 @@ const QualityItemSingle = ({
                             {quality.name}
                         </h3>
                     </div>
-                    
+
                     {/* Description Row */}
                     {quality.description && (
                         <p className='mt-1.5 text-xs text-gray-600 dark:text-gray-400'>
@@ -75,7 +82,7 @@ const QualityItemSingle = ({
                     )}
                 </div>
 
-                {/* Right Section - Info Icon and Selection indicator */}
+                {/* Right Section - Info Icon and Selection indicators */}
                 <div className='flex items-center gap-2'>
                     {/* Info Badge with Tooltip */}
                     {(quality.radarr || quality.sonarr) && (
@@ -85,7 +92,30 @@ const QualityItemSingle = ({
                             </div>
                         </Tooltip>
                     )}
-                    
+
+                    {/* Upgrade Until button - only shown when enabled and upgrade is allowed */}
+                    {quality.enabled && onUpgradeUntilClick && (
+                        <Tooltip
+                            content={
+                                isUpgradeUntil
+                                    ? 'This quality is set as upgrade until'
+                                    : 'Set as upgrade until quality'
+                            }>
+                            <button
+                                onClick={handleUpgradeClick}
+                                className={`
+                                    w-5 h-5 rounded-full flex items-center justify-center
+                                    ${
+                                        isUpgradeUntil
+                                            ? 'bg-green-500 dark:bg-green-600 text-white'
+                                            : 'border border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/10'
+                                    }
+                                `}>
+                                <ArrowUp size={12} />
+                            </button>
+                        </Tooltip>
+                    )}
+
                     {/* Selection indicator */}
                     <div
                         className={`
