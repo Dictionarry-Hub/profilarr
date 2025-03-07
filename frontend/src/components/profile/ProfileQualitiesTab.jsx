@@ -23,7 +23,7 @@ import {
 import {InfoIcon} from 'lucide-react';
 import Modal from '../ui/Modal';
 import CreateGroupModal from './CreateGroupModal';
-import QualityItem from './QualityItem';
+import QualityItem from './quality/QualityItem';
 import QUALITIES from '../../constants/qualities';
 import Alert from '@ui/Alert';
 
