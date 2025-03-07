@@ -29,9 +29,9 @@ import Alert from '@ui/Alert';
 import Tooltip from '@ui/Tooltip';
 
 const SortableItem = ({
-    quality, 
-    onToggle, 
-    onDelete, 
+    quality,
+    onToggle,
+    onDelete,
     onEdit,
     isUpgradeUntil,
     onUpgradeUntilClick
@@ -68,7 +68,9 @@ const SortableItem = ({
                 onEdit={'qualities' in quality ? onEdit : undefined}
                 onDelete={'qualities' in quality ? onDelete : undefined}
                 isUpgradeUntil={isUpgradeUntil}
-                onUpgradeUntilClick={quality.enabled ? onUpgradeUntilClick : undefined}
+                onUpgradeUntilClick={
+                    quality.enabled ? onUpgradeUntilClick : undefined
+                }
             />
         </div>
     );
@@ -188,11 +190,18 @@ const ProfileQualitiesTab = ({
     const handleQualityToggle = quality => {
         if (!activeId) {
             // Prevent disabling a quality that's set as the upgrade until quality
-            if (quality.enabled && upgradesAllowed && selectedUpgradeQuality && isUpgradeUntilQuality(quality)) {
-                Alert.error("You can't disable a quality that's set as 'upgrade until'. Please set another quality as 'upgrade until' first.");
+            if (
+                quality.enabled &&
+                upgradesAllowed &&
+                selectedUpgradeQuality &&
+                isUpgradeUntilQuality(quality)
+            ) {
+                Alert.error(
+                    "You can't disable a quality that's set as 'upgrade until'. Please set another quality as 'upgrade until' first."
+                );
                 return;
             }
-            
+
             const currentEnabledCount = sortedQualities.filter(
                 q => q.enabled
             ).length;
@@ -236,18 +245,22 @@ const ProfileQualitiesTab = ({
                 quality.enabled === false && // We're disabling a quality
                 (quality.id === selectedUpgradeQuality.id || // Direct match (group or quality)
                     ('qualities' in quality && // Quality is in a group that's being disabled
-                        !('qualities' in selectedUpgradeQuality) && 
-                        quality.qualities.some(q => q.id === selectedUpgradeQuality.id)))
+                        !('qualities' in selectedUpgradeQuality) &&
+                        quality.qualities.some(
+                            q => q.id === selectedUpgradeQuality.id
+                        )))
             ) {
                 // Find another enabled quality to set as upgrade until
                 const nearestQuality = findNearestEnabledQuality(
                     newQualities,
                     quality.id
                 );
-                
+
                 if (nearestQuality) {
                     onSelectedUpgradeQualityChange?.(nearestQuality);
-                    Alert.info(`Upgrade until quality changed to ${nearestQuality.name}`);
+                    Alert.info(
+                        `Upgrade until quality changed to ${nearestQuality.name}`
+                    );
                 }
             }
         }
@@ -259,7 +272,7 @@ const ProfileQualitiesTab = ({
             // For single qualities, pass as is
             // For groups, we pass the group itself to maintain the group ID in the selection
             onSelectedUpgradeQualityChange?.(quality);
-            
+
             // Provide user feedback
             Alert.success(`${quality.name} set as upgrade until quality`);
         }
@@ -273,7 +286,7 @@ const ProfileQualitiesTab = ({
                 const qualityMovingToGroup = groupData.qualities.some(
                     q => q.id === selectedUpgradeQuality.id
                 );
-                
+
                 // If the current upgrade quality is being moved into this group
                 // Update the upgrade quality to be the group instead
                 if (qualityMovingToGroup) {
@@ -283,7 +296,7 @@ const ProfileQualitiesTab = ({
                         description: groupData.description
                     });
                 }
-            } 
+            }
             // If the selected upgrade quality is the group we're editing
             else if (selectedUpgradeQuality.id === editingGroup?.id) {
                 // Update the upgrade quality to reflect the new group data
@@ -382,13 +395,19 @@ const ProfileQualitiesTab = ({
             if (group.qualities && group.qualities.length > 0) {
                 const firstQualityFromGroup = group.qualities[0];
                 onSelectedUpgradeQualityChange(firstQualityFromGroup);
-                Alert.info(`Upgrade until quality changed to ${firstQualityFromGroup.name}`);
+                Alert.info(
+                    `Upgrade until quality changed to ${firstQualityFromGroup.name}`
+                );
             } else {
                 // If somehow the group has no qualities, find the first enabled quality
-                const firstEnabledQuality = sortedQualities.find(q => q.enabled && q.id !== group.id);
+                const firstEnabledQuality = sortedQualities.find(
+                    q => q.enabled && q.id !== group.id
+                );
                 if (firstEnabledQuality) {
                     onSelectedUpgradeQualityChange(firstEnabledQuality);
-                    Alert.info(`Upgrade until quality changed to ${firstEnabledQuality.name}`);
+                    Alert.info(
+                        `Upgrade until quality changed to ${firstEnabledQuality.name}`
+                    );
                 }
             }
         }
@@ -397,13 +416,13 @@ const ProfileQualitiesTab = ({
             const index = prev.findIndex(q => q.id === group.id);
             if (index === -1) return prev;
             const newQualities = [...prev];
-            
+
             // Make sure all qualities from the group are set as enabled
             const enabledGroupQualities = group.qualities.map(q => ({
                 ...q,
                 enabled: true
             }));
-            
+
             newQualities.splice(index, 1, ...enabledGroupQualities);
             return newQualities;
         });
@@ -435,21 +454,23 @@ const ProfileQualitiesTab = ({
         setActiveId(null);
     };
 
-    const isUpgradeUntilQuality = (quality) => {
+    const isUpgradeUntilQuality = quality => {
         if (!selectedUpgradeQuality) return false;
-        
+
         // Direct ID match (works for both individual qualities and groups)
         if (quality.id === selectedUpgradeQuality.id) {
             return true;
         }
-        
+
         // Check if the selected upgrade quality is a member of this group
-        if ('qualities' in quality && 
-            !('qualities' in selectedUpgradeQuality) && 
-            quality.qualities.some(q => q.id === selectedUpgradeQuality.id)) {
+        if (
+            'qualities' in quality &&
+            !('qualities' in selectedUpgradeQuality) &&
+            quality.qualities.some(q => q.id === selectedUpgradeQuality.id)
+        ) {
             return true;
         }
-        
+
         return false;
     };
 
@@ -457,20 +478,38 @@ const ProfileQualitiesTab = ({
         <div className='h-full flex flex-col'>
             <div className='mb-4 flex justify-between items-center'>
                 <div className='flex items-center'>
-                    <h2 className='font-medium text-gray-900 dark:text-gray-100 mr-4'>
+                    <h2 className='text-sm font-medium text-gray-700 dark:text-gray-300 mr-4'>
                         Quality Rankings
                     </h2>
                     <div className='text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-2'>
                         <span className='inline-flex items-center'>
-                            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4" />
+                            <svg
+                                className='h-3 w-3 mr-1'
+                                fill='none'
+                                viewBox='0 0 24 24'
+                                stroke='currentColor'>
+                                <path
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    strokeWidth='2'
+                                    d='M7 16V4m0 0L3 8m4-4l4 4'
+                                />
                             </svg>
                             Drag to reorder
                         </span>
                         <span>•</span>
                         <span className='inline-flex items-center'>
-                            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            <svg
+                                className='h-3 w-3 mr-1'
+                                fill='none'
+                                viewBox='0 0 24 24'
+                                stroke='currentColor'>
+                                <path
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    strokeWidth='2'
+                                    d='M5 13l4 4L19 7'
+                                />
                             </svg>
                             Click to toggle
                         </span>
@@ -478,8 +517,17 @@ const ProfileQualitiesTab = ({
                             <>
                                 <span>•</span>
                                 <span className='inline-flex items-center'>
-                                    <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    <svg
+                                        className='h-3 w-3 mr-1'
+                                        fill='none'
+                                        viewBox='0 0 24 24'
+                                        stroke='currentColor'
+                                        strokeWidth='2'>
+                                        <path
+                                            strokeLinecap='round'
+                                            strokeLinejoin='round'
+                                            d='M5 10l7-7m0 0l7 7m-7-7v18'
+                                        />
                                     </svg>
                                     Set upgrade target
                                 </span>
@@ -490,8 +538,16 @@ const ProfileQualitiesTab = ({
                 <button
                     onClick={() => setIsCreateGroupModalOpen(true)}
                     className='h-8 flex items-center space-x-1 text-sm font-medium bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 rounded-md'>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 5v14M5 12h14" />
+                    <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        className='h-4 w-4'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'>
+                        <path d='M12 5v14M5 12h14' />
                     </svg>
                     <span>Create Group</span>
                 </button>
@@ -502,10 +558,7 @@ const ProfileQualitiesTab = ({
                 collisionDetection={closestCenter}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
-                modifiers={[
-                    restrictToVerticalAxis,
-                    restrictToParentElement
-                ]}>
+                modifiers={[restrictToVerticalAxis, restrictToParentElement]}>
                 <div>
                     <div className='space-y-2'>
                         <SortableContext
@@ -526,8 +579,14 @@ const ProfileQualitiesTab = ({
                                             ? handleEditClick
                                             : undefined
                                     }
-                                    isUpgradeUntil={isUpgradeUntilQuality(quality)}
-                                    onUpgradeUntilClick={upgradesAllowed ? handleUpgradeUntilClick : undefined}
+                                    isUpgradeUntil={isUpgradeUntilQuality(
+                                        quality
+                                    )}
+                                    onUpgradeUntilClick={
+                                        upgradesAllowed
+                                            ? handleUpgradeUntilClick
+                                            : undefined
+                                    }
                                 />
                             ))}
                         </SortableContext>
