@@ -73,8 +73,28 @@ const SearchDropdown = ({
 
     // Apply final sorting to the filtered results
     const sortedOptions = useCallback(() => {
-        return sortData(filteredOptions);
-    }, [sortData, filteredOptions]);
+        // Separate special and regular items
+        const specialItems = filteredOptions.filter(item => item.isSpecial);
+        const regularItems = filteredOptions.filter(item => !item.isSpecial);
+        
+        // Sort each group separately
+        const sortedSpecialItems = [...specialItems].sort((a, b) => 
+            sortConfig.direction === 'asc'
+                ? a[sortConfig.field].localeCompare(b[sortConfig.field])
+                : b[sortConfig.field].localeCompare(a[sortConfig.field])
+        );
+        
+        const sortedRegularItems = [...regularItems].sort((a, b) => 
+            sortConfig.direction === 'asc'
+                ? a[sortConfig.field].localeCompare(b[sortConfig.field])
+                : b[sortConfig.field].localeCompare(a[sortConfig.field])
+        );
+        
+        // We're adding a divider dynamically in the render based on the transition from special to regular items
+        
+        // Combine the two sorted arrays
+        return [...sortedSpecialItems, ...sortedRegularItems];
+    }, [filteredOptions, sortConfig]);
 
     // Handle selection
     const handleSelect = useCallback(
@@ -156,17 +176,27 @@ const SearchDropdown = ({
                     <div className='flex-1 p-2 pt-3 overflow-auto'>
                         {sortedOptions().length > 0 ? (
                             <div className='flex flex-col'>
-                                {sortedOptions().map(option => (
-                                    <div
-                                        key={option[valueKey]}
-                                        onClick={() => handleSelect(option)}
-                                        className={`px-2.5 py-1.5 text-xs cursor-pointer rounded 
-                                            ${
-                                                selectedOption?.[valueKey] ===
-                                                option[valueKey]
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'text-gray-100 hover:bg-gray-700'
-                                            }`}>
+                                {sortedOptions().map((option, index, array) => (
+                                    <React.Fragment key={option[valueKey]}>
+                                        {/* Add a divider after the last special item */}
+                                        {index > 0 && 
+                                         !option.isSpecial && 
+                                         array[index-1].isSpecial && (
+                                            <div className="h-px bg-gray-600/80 mx-2 my-2"></div>
+                                        )}
+                                    
+                                        <div
+                                            onClick={() => handleSelect(option)}
+                                            className={`px-2.5 py-1.5 text-xs cursor-pointer rounded 
+                                                ${
+                                                    selectedOption?.[valueKey] ===
+                                                    option[valueKey]
+                                                        ? 'bg-blue-600 text-white'
+                                                        : option.isSpecial
+                                                        ? 'text-blue-300 hover:bg-gray-700/70 font-medium'
+                                                        : 'text-gray-100 hover:bg-gray-700'
+                                                }
+                                                `}>
                                         <div className='flex items-center'>
                                             <div className='flex-grow truncate'>
                                                 {option[labelKey]}
@@ -177,6 +207,7 @@ const SearchDropdown = ({
                                             )}
                                         </div>
                                     </div>
+                                    </React.Fragment>
                                 ))}
                             </div>
                         ) : (
