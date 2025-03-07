@@ -6,8 +6,7 @@ import {
     KeyboardSensor,
     PointerSensor,
     useSensor,
-    useSensors,
-    DragOverlay
+    useSensors
 } from '@dnd-kit/core';
 import {
     arrayMove,
@@ -20,13 +19,11 @@ import {
     restrictToVerticalAxis,
     restrictToParentElement
 } from '@dnd-kit/modifiers';
-import {InfoIcon, ArrowUp} from 'lucide-react';
-import Modal from '../ui/Modal';
+import Modal from '@ui/Modal';
 import CreateGroupModal from './CreateGroupModal';
-import QualityItem from './quality/QualityItem';
-import QUALITIES from '../../constants/qualities';
+import QualityItem from './QualityItem';
+import QUALITIES from '@constants/qualities';
 import Alert from '@ui/Alert';
-import Tooltip from '@ui/Tooltip';
 
 const SortableItem = ({
     quality,

@@ -6,7 +6,7 @@ import Alert from '@ui/Alert';
 import {Loader} from 'lucide-react';
 import ProfileGeneralTab from './ProfileGeneralTab';
 import ProfileScoringTab from './scoring/ProfileScoringTab';
-import ProfileQualitiesTab from './ProfileQualitiesTab';
+import ProfileQualitiesTab from './quality/ProfileQualitiesTab';
 import ProfileLangaugesTab from './ProfileLangaugesTab';
 import QUALITIES from '../../constants/qualities';
 
@@ -339,29 +339,43 @@ function ProfileModal({
                 minScoreIncrement,
                 custom_formats: (() => {
                     // Check if selective mode is enabled
-                    const selectiveMode = localStorage.getItem('formatSettingsSelectiveMode');
-                    const useSelectiveMode = selectiveMode !== null && JSON.parse(selectiveMode);
-                    
+                    const selectiveMode = localStorage.getItem(
+                        'formatSettingsSelectiveMode'
+                    );
+                    const useSelectiveMode =
+                        selectiveMode !== null && JSON.parse(selectiveMode);
+
                     if (useSelectiveMode) {
                         // In selective mode, save both:
-                        // 1. Formats with non-zero scores as usual 
+                        // 1. Formats with non-zero scores as usual
                         // 2. Formats with zero score that have been explicitly selected in selectedFormatIds
-                        
+
                         try {
                             // Get the list of explicitly selected format IDs
-                            const selectedFormatIdsStr = localStorage.getItem('selectedFormatIds');
-                            const selectedFormatIds = selectedFormatIdsStr ? JSON.parse(selectedFormatIdsStr) : [];
-                            
+                            const selectedFormatIdsStr =
+                                localStorage.getItem('selectedFormatIds');
+                            const selectedFormatIds = selectedFormatIdsStr
+                                ? JSON.parse(selectedFormatIdsStr)
+                                : [];
+
                             // Get formats with non-zero scores
-                            const nonZeroFormats = customFormats.filter(format => format.score !== 0);
-                            
-                            // Get formats with zero scores that are explicitly selected
-                            const explicitlySelectedZeroFormats = customFormats.filter(format => 
-                                format.score === 0 && selectedFormatIds.includes(format.id)
+                            const nonZeroFormats = customFormats.filter(
+                                format => format.score !== 0
                             );
-                            
+
+                            // Get formats with zero scores that are explicitly selected
+                            const explicitlySelectedZeroFormats =
+                                customFormats.filter(
+                                    format =>
+                                        format.score === 0 &&
+                                        selectedFormatIds.includes(format.id)
+                                );
+
                             // Combine both lists
-                            return [...nonZeroFormats, ...explicitlySelectedZeroFormats]
+                            return [
+                                ...nonZeroFormats,
+                                ...explicitlySelectedZeroFormats
+                            ]
                                 .sort((a, b) => {
                                     // First sort by score (descending)
                                     if (b.score !== a.score) {
@@ -379,7 +393,8 @@ function ProfileModal({
                             return customFormats
                                 .filter(format => format.score !== 0)
                                 .sort((a, b) => {
-                                    if (b.score !== a.score) return b.score - a.score;
+                                    if (b.score !== a.score)
+                                        return b.score - a.score;
                                     return a.name.localeCompare(b.name);
                                 })
                                 .map(format => ({

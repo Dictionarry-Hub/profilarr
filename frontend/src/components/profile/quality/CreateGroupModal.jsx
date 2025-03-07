@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import Modal from '../ui/Modal';
+import Modal from '@ui/Modal';
 import Tooltip from '@ui/Tooltip';
 import {InfoIcon} from 'lucide-react';
 
