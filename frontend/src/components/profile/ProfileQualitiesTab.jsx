@@ -455,29 +455,46 @@ const ProfileQualitiesTab = ({
 
     return (
         <div className='h-full flex flex-col'>
-            <div className='mb-4'>
-                <div className='grid grid-cols-[auto_1fr_auto] gap-4 items-center'>
-                    <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100 leading-tight'>
+            <div className='mb-4 flex justify-between items-center'>
+                <div className='flex items-center'>
+                    <h2 className='font-medium text-gray-900 dark:text-gray-100 mr-4'>
                         Quality Rankings
                     </h2>
-
-                    <div className='flex items-center'>
-                        <p className='text-xs text-gray-600 dark:text-gray-400 leading-relaxed'>
-                            Qualities higher in the list are more preferred even if
-                            not checked. Qualities within the same group are equal.
-                            Only checked qualities are wanted.
-                        </p>
-
-                        {/* Only show upgrade hint if upgrades are allowed */}
+                    <div className='text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-2'>
+                        <span className='inline-flex items-center'>
+                            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4" />
+                            </svg>
+                            Drag to reorder
+                        </span>
+                        <span>•</span>
+                        <span className='inline-flex items-center'>
+                            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Click to toggle
+                        </span>
+                        {upgradesAllowed && (
+                            <>
+                                <span>•</span>
+                                <span className='inline-flex items-center'>
+                                    <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    </svg>
+                                    Set upgrade target
+                                </span>
+                            </>
+                        )}
                     </div>
-
-                    <button
-                        onClick={() => setIsCreateGroupModalOpen(true)}
-                        className='h-10 px-6 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center gap-2'>
-                        <InfoIcon className='w-4 h-4' />
-                        Create Group
-                    </button>
                 </div>
+                <button
+                    onClick={() => setIsCreateGroupModalOpen(true)}
+                    className='h-8 flex items-center space-x-1 text-sm font-medium bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 rounded-md'>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    <span>Create Group</span>
+                </button>
             </div>
 
             <DndContext
