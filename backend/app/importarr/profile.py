@@ -73,9 +73,19 @@ def import_profiles_to_arr(profile_names: List[str], original_names: List[str],
 
                 profile_language = profile_data.get('language', 'any')
                 if profile_language != 'any':
-                    logger.info(
-                        f"Profile '{profile_name}' has language override: {profile_language}"
-                    )
+                    # Detect if we're using simple or advanced mode
+                    is_simple_mode = '_' not in profile_language
+                    if is_simple_mode:
+                        logger.info(
+                            f"Profile '{profile_name}' has simple mode language: {profile_language}"
+                        )
+                        logger.info(
+                            f"Simple mode will set language filter to: {profile_language}"
+                        )
+                    else:
+                        logger.info(
+                            f"Profile '{profile_name}' has advanced mode language: {profile_language}"
+                        )
 
                 logger.info("Compiling quality profile...")
                 compiled_profiles = compile_quality_profile(

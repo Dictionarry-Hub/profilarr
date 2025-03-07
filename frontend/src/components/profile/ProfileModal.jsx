@@ -7,7 +7,7 @@ import {Loader} from 'lucide-react';
 import ProfileGeneralTab from './ProfileGeneralTab';
 import ProfileScoringTab from './scoring/ProfileScoringTab';
 import ProfileQualitiesTab from './quality/ProfileQualitiesTab';
-import ProfileLangaugesTab from './ProfileLangaugesTab';
+import ProfileLangaugesTab from './language/ProfileLangaugesTab';
 import QUALITIES from '../../constants/qualities';
 
 function unsanitize(text) {
