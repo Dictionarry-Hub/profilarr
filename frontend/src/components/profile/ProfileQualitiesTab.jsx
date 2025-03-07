@@ -455,7 +455,7 @@ const ProfileQualitiesTab = ({
 
     return (
         <div className='h-full flex flex-col'>
-            <div className='pb-4 pr-4'>
+            <div className='mb-4'>
                 <div className='grid grid-cols-[auto_1fr_auto] gap-4 items-center'>
                     <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100 leading-tight'>
                         Quality Rankings
@@ -480,45 +480,43 @@ const ProfileQualitiesTab = ({
                 </div>
             </div>
 
-            <div className='flex-1 overflow-auto scrollable pr-4'>
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
-                    modifiers={[
-                        restrictToVerticalAxis,
-                        restrictToParentElement
-                    ]}>
-                    <div className='py-4'>
-                        <div className='space-y-2'>
-                            <SortableContext
-                                items={sortedQualities.map(q => q.id)}
-                                strategy={verticalListSortingStrategy}>
-                                {sortedQualities.map(quality => (
-                                    <SortableItem
-                                        key={quality.id}
-                                        quality={quality}
-                                        onToggle={handleQualityToggle}
-                                        onDelete={
-                                            'qualities' in quality
-                                                ? handleDeleteClick
-                                                : undefined
-                                        }
-                                        onEdit={
-                                            'qualities' in quality
-                                                ? handleEditClick
-                                                : undefined
-                                        }
-                                        isUpgradeUntil={isUpgradeUntilQuality(quality)}
-                                        onUpgradeUntilClick={upgradesAllowed ? handleUpgradeUntilClick : undefined}
-                                    />
-                                ))}
-                            </SortableContext>
-                        </div>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                modifiers={[
+                    restrictToVerticalAxis,
+                    restrictToParentElement
+                ]}>
+                <div>
+                    <div className='space-y-2'>
+                        <SortableContext
+                            items={sortedQualities.map(q => q.id)}
+                            strategy={verticalListSortingStrategy}>
+                            {sortedQualities.map(quality => (
+                                <SortableItem
+                                    key={quality.id}
+                                    quality={quality}
+                                    onToggle={handleQualityToggle}
+                                    onDelete={
+                                        'qualities' in quality
+                                            ? handleDeleteClick
+                                            : undefined
+                                    }
+                                    onEdit={
+                                        'qualities' in quality
+                                            ? handleEditClick
+                                            : undefined
+                                    }
+                                    isUpgradeUntil={isUpgradeUntilQuality(quality)}
+                                    onUpgradeUntilClick={upgradesAllowed ? handleUpgradeUntilClick : undefined}
+                                />
+                            ))}
+                        </SortableContext>
                     </div>
-                </DndContext>
-            </div>
+                </div>
+            </DndContext>
 
             <CreateGroupModal
                 isOpen={isCreateGroupModalOpen}
