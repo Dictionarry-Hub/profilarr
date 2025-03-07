@@ -557,7 +557,7 @@ const ProfileQualitiesTab = ({
                 onDragEnd={handleDragEnd}
                 modifiers={[restrictToVerticalAxis, restrictToParentElement]}>
                 <div>
-                    <div className='space-y-2'>
+                    <div className='space-y-2 mb-4'>
                         <SortableContext
                             items={sortedQualities.map(q => q.id)}
                             strategy={verticalListSortingStrategy}>
