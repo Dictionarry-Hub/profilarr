@@ -78,7 +78,7 @@ function RegexPage() {
     } = useMassSelection();
 
     // Keyboard shortcuts
-    useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
+    useKeyboardShortcut('m', toggleSelectionMode, {ctrl: true});
 
     // Mouse position tracking for shift-select
     useEffect(() => {

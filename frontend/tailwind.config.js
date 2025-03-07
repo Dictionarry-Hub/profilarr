@@ -20,11 +20,21 @@ module.exports = {
                 'slide-down': {
                     '0%': {
                         opacity: '0',
-                        transform: 'translate3d(0, -100%, 0)'
+                        transform: 'translateY(-80px)'
                     },
                     '100%': {
                         opacity: '1',
-                        transform: 'translate3d(0, 0, 0)'
+                        transform: 'translateY(0)'
+                    }
+                },
+                'slide-up': {
+                    '0%': {
+                        opacity: '1',
+                        transform: 'translateY(0)'
+                    },
+                    '100%': {
+                        opacity: '0',
+                        transform: 'translateY(80px)'
                     }
                 },
                 wiggle: {
@@ -40,15 +50,42 @@ module.exports = {
                 'eye-blink': {
                     '0%, 100%': {transform: 'scale(1)', opacity: 1},
                     '50%': {transform: 'scale(1.2)', opacity: 0.8}
+                },
+                'modal-in': {
+                    '0%': { 
+                        opacity: '0',
+                        transform: 'translateY(20px) scale(0.97)'
+                    },
+                    '60%': {
+                        opacity: '1',
+                        transform: 'translateY(-3px) scale(1.01)'
+                    },
+                    '100%': {
+                        opacity: '1',
+                        transform: 'translateY(0) scale(1)'
+                    }
+                },
+                'modal-out': {
+                    '0%': {
+                        opacity: '1',
+                        transform: 'translateY(0) scale(1)'
+                    },
+                    '100%': {
+                        opacity: '0',
+                        transform: 'translateY(20px) scale(0.97)'
+                    }
                 }
             },
             animation: {
                 'modal-open': 'modal-open 0.3s ease-out forwards',
                 'fade-in': 'fade-in 0.5s ease-in-out forwards',
-                'slide-down': 'slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                'slide-down': 'slide-down 0.2s ease-out',
+                'slide-up': 'slide-up 0.2s ease-in forwards',
                 wiggle: 'wiggle 0.3s ease-in-out',
                 'check-bounce': 'check-bounce 0.3s ease-in-out',
-                'eye-blink': 'eye-blink 0.5s ease-in-out'
+                'eye-blink': 'eye-blink 0.5s ease-in-out',
+                'modal-in': 'modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                'modal-out': 'modal-out 0.15s ease-in-out forwards'
             },
             colors: {
                 'dark-bg': '#1a1c23',

@@ -172,22 +172,39 @@ class ProfileConverter:
         return converted_group
 
     def convert_profile(self, profile: Dict) -> ConvertedProfile:
-        language = profile.get('language')
-        if language != 'any':
+        language = profile.get('language', 'any')
+
+        # Handle language processing for advanced mode (with behavior_language format)
+        if language != 'any' and '_' in language:
             language_parts = language.split('_', 1)
-            behaviour, language = language_parts
+            behaviour, language_code = language_parts
             try:
                 language_formats = self._process_language_formats(
-                    behaviour, language)
+                    behaviour, language_code)
                 if 'custom_formats' not in profile:
                     profile['custom_formats'] = []
                 profile['custom_formats'].extend(language_formats)
             except Exception as e:
                 logger.error(f"Failed to process language formats: {e}")
 
-        selected_language = ValueResolver.get_language('any',
-                                                       self.target_app,
-                                                       for_profile=True)
+        # Simple mode: just use the language directly without custom formats
+        # This lets the Arr application's built-in language filter handle it
+
+        # Get the appropriate language data for the profile
+        if language != 'any' and '_' not in language:
+            # Simple mode - use the language directly
+            selected_language = ValueResolver.get_language(language,
+                                                           self.target_app,
+                                                           for_profile=True)
+            logger.info(f"Using simple language mode: {language}")
+            logger.info(f"Selected language data: {selected_language}")
+        else:
+            # Advanced mode or 'any' - set language to 'any' as filtering is done via formats
+            selected_language = ValueResolver.get_language('any',
+                                                           self.target_app,
+                                                           for_profile=True)
+            logger.info(
+                f"Using advanced mode or 'any', setting language to 'any'")
 
         converted_profile = ConvertedProfile(
             name=profile["name"],

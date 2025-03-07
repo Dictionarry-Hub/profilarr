@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
 import ReactMarkdown from 'react-markdown';
+import { LANGUAGES } from '@constants/languages';
 
 function unsanitize(text) {
     if (!text) return '';
@@ -17,19 +18,38 @@ function unsanitize(text) {
 }
 
 function parseLanguage(languageStr) {
-    if (!languageStr || languageStr === 'any') return 'Any';
-
+    // Handle empty or "any" case
+    if (!languageStr || languageStr === 'any') return 'Any Language';
+    
+    // Handle "original" language case
+    if (languageStr === 'original') return 'Original';
+    
+    // Check if this is a simple language choice (not in format of type_language)
+    const matchedLanguage = LANGUAGES.find(lang => lang.id === languageStr);
+    if (matchedLanguage) {
+        return matchedLanguage.name;
+    }
+    
+    // If we get here, it's an advanced language setting with type_language format
     const [type, language] = languageStr.split('_');
-    const capitalizedLanguage =
-        language.charAt(0).toUpperCase() + language.slice(1);
+    
+    // If language part is missing, just return the type
+    if (!language) return type;
+    
+    // Find language name from constants
+    const langObj = LANGUAGES.find(lang => lang.id === language);
+    const languageName = langObj ? langObj.name : language.charAt(0).toUpperCase() + language.slice(1);
 
+    // Format based on type
     switch (type) {
         case 'only':
-            return `Must Only Be: ${capitalizedLanguage}`;
+            return `Must Only Be: ${languageName}`;
         case 'must':
-            return `Must Include: ${capitalizedLanguage}`;
+            return `Must Include: ${languageName}`;
+        case 'mustnot':
+            return `Must Not Include: ${languageName}`;
         default:
-            return capitalizedLanguage;
+            return languageName;
     }
 }
 

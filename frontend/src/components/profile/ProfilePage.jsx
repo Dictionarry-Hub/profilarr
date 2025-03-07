@@ -111,7 +111,7 @@ function ProfilePage() {
         lastSelectedIndex
     } = useMassSelection();
 
-    useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
+    useKeyboardShortcut('m', toggleSelectionMode, {ctrl: true});
 
     useEffect(() => {
         fetchGitStatus();
@@ -242,9 +242,10 @@ function ProfilePage() {
         if (isSelectionMode) return;
         const clonedProfile = {
             ...profile,
-            id: 0,
-            name: `${profile.name} [COPY]`,
-            custom_formats: profile.custom_formats || []
+            content: {
+                ...profile.content,
+                name: `${profile.content.name} [COPY]`
+            }
         };
         setSelectedProfile(clonedProfile);
         setIsModalOpen(true);
