@@ -1,11 +1,11 @@
-name: Notify
+name: Release Notification
+
 on:
-    push:
-        tags:
-            - 'v*'
+    release:
+        types: [published]
 
 jobs:
-    notify:
-        uses: Dictionarry-Hub/parrot/.github/workflows/notify.yml@main
+    call-notify-release:
+        uses: Dictionarry-Hub/parrot/.github/workflows/notify-release.yml@v1
         secrets:
-            WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+            PARROT_URL: ${{ secrets.PARROT_URL }}
