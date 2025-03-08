@@ -70,4 +70,12 @@ Detailed contributing guidelines will be available soon. Join our Discord to dis
 
 ## Status
 
-Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub) project to simplify media automation.
+Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub) project to simplify media automation. 
+
+### Known Issues
+- Light Mode is not working
+- Renaming / Deleting files can be a little wonky - if you expect to stay connected with a database, try to limit deleting / renaming files.
+
+### Development
+- Currently focused on fixing bugs found in open beta
+- 1.1 will focus on improving the 'setup' side of profilarr - adding media management / quality settings syncs
