@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {CONDITION_TYPES, createCondition} from './conditionTypes';
 import {ArrowUp, ArrowDown, X, ChevronsUp, ChevronsDown} from 'lucide-react';
-import BrowserSelect from '@ui/BrowserSelect';
+import SearchDropdown from '@ui/SearchDropdown';
 
 const ConditionCard = ({
     condition,
@@ -21,7 +21,8 @@ const ConditionCard = ({
 
     const typeOptions = Object.values(CONDITION_TYPES).map(type => ({
         value: type.id,
-        label: type.name
+        label: type.name,
+        description: type.description || ''
     }));
 
     const handleTypeChange = e => {
@@ -57,14 +58,13 @@ const ConditionCard = ({
 
                 <div className='flex items-center gap-4'>
                     {/* Type Selection */}
-                    <BrowserSelect
+                    <SearchDropdown
                         value={condition.type || ''}
                         onChange={handleTypeChange}
                         options={typeOptions}
                         placeholder='Select type...'
-                        className='min-w-[140px] px-3 py-2 text-sm rounded-md
-                            bg-gray-700 border border-gray-700
-                            text-gray-200'
+                        className='min-w-[200px] condition-type-dropdown'
+                        width='w-auto'
                     />
 
                     {/* Render the specific condition component */}

@@ -76,8 +76,6 @@ export const updateArrConfig = async (id, config) => {
 export const getArrConfigs = async () => {
     try {
         const response = await axios.get(`/api/arr/config`);
-        console.log('Raw axios response:', response);
-        console.log('Response data:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching arr configs:', error);

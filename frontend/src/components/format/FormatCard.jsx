@@ -168,7 +168,7 @@ function FormatCard({
                                 : 'translate-x-0'
                         }`}>
                         {/* Conditions */}
-                        <div className='w-full flex-shrink-0 overflow-y-auto'>
+                        <div className='w-full flex-shrink-0 overflow-y-auto scrollable'>
                             <div className='flex flex-wrap gap-1.5 content-start'>
                                 {content.conditions?.map((condition, index) => (
                                     <span
@@ -189,7 +189,7 @@ function FormatCard({
                                 : 'translate-x-full'
                         }`}>
                         {/* Description */}
-                        <div className='w-full h-full overflow-y-auto'>
+                        <div className='w-full h-full overflow-y-auto scrollable'>
                             {content.description ? (
                                 <div className='text-gray-300 text-xs prose prose-invert prose-gray max-w-none'>
                                     <ReactMarkdown>

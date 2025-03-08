@@ -1,13 +1,12 @@
-# .github/workflows/docker-build.yml
-name: Build and Publish Docker Image
+name: Build Beta Docker Image
 
 on:
     push:
         branches:
-            - v2-beta
+            - dev
     pull_request:
         branches:
-            - v2-beta
+            - dev
 
 jobs:
     build:
@@ -38,6 +37,7 @@ jobs:
               uses: docker/setup-buildx-action@v3
 
             - name: Login to Docker Hub
+              if: github.event_name != 'pull_request'
               uses: docker/login-action@v3
               with:
                   username: ${{ secrets.DOCKERHUB_USERNAME }}

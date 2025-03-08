@@ -15,9 +15,10 @@ const ConflictRow = ({change, fetchGitStatus}) => {
         param => param.parameter === 'name'
     );
 
+    // Check for name in conflicting parameters or directly in change object
     const displayLocalName =
         nameConflict?.local_value || change.name || 'Unnamed';
-    const displayIncomingName = nameConflict?.incoming_value || 'Unnamed';
+    const displayIncomingName = nameConflict?.incoming_value || change?.incoming_name || 'Unnamed';
 
     const isResolved = change.status === 'RESOLVED';
 

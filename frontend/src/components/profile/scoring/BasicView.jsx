@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import NumberInput from '@ui/NumberInput';
 import {useSorting} from '@hooks/useSorting';
 import SortDropdown from '@ui/SortDropdown';
+import { X } from 'lucide-react';
 
-const BasicView = ({formats, onScoreChange}) => {
+const BasicView = ({formats, onScoreChange, onFormatRemove, showRemoveButton}) => {
     const sortOptions = [
         {label: 'Score', value: 'score'},
         {label: 'Name', value: 'name'}
@@ -48,12 +49,23 @@ const BasicView = ({formats, onScoreChange}) => {
                                     )}
                                 </div>
                             </div>
-                            <NumberInput
-                                value={format.score}
-                                onChange={value =>
-                                    onScoreChange(format.id, value)
-                                }
-                            />
+                            <div className='flex items-center gap-2'>
+                                <NumberInput
+                                    value={format.score}
+                                    onChange={value =>
+                                        onScoreChange(format.id, value)
+                                    }
+                                />
+                                {showRemoveButton && (
+                                    <button
+                                        onClick={() => onFormatRemove(format.id)}
+                                        className="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 p-1"
+                                        title="Remove format"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     ))
                 ) : (
@@ -75,7 +87,14 @@ BasicView.propTypes = {
             tags: PropTypes.arrayOf(PropTypes.string)
         })
     ).isRequired,
-    onScoreChange: PropTypes.func.isRequired
+    onScoreChange: PropTypes.func.isRequired,
+    onFormatRemove: PropTypes.func,
+    showRemoveButton: PropTypes.bool
+};
+
+BasicView.defaultProps = {
+    onFormatRemove: () => {},
+    showRemoveButton: false
 };
 
 export default BasicView;

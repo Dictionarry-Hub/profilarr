@@ -1,23 +1,33 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import SearchDropdown from '@ui/SearchDropdown';
 
 const ReleaseGroupCondition = ({condition, onChange, patterns}) => {
-    const sortedPatterns = [...patterns].sort((a, b) =>
-        a.name.localeCompare(b.name)
-    );
+    // Format patterns for the dropdown with descriptions if available
+    const patternOptions = patterns.map(pattern => ({
+        value: pattern.name,
+        label: pattern.name,
+        description: pattern.description || 'No description available',
+        priority: pattern.priority
+    }));
+
+    const handlePatternChange = e => {
+        onChange({...condition, pattern: e.target.value});
+    };
 
     return (
-        <select
-            className='flex-1 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700'
-            value={condition.pattern || ''}
-            onChange={e => onChange({...condition, pattern: e.target.value})}>
-            <option value=''>Select release group pattern...</option>
-            {sortedPatterns.map(pattern => (
-                <option key={pattern.name} value={pattern.name}>
-                    {pattern.name}
-                </option>
-            ))}
-        </select>
+        <div className="flex-1">
+            <SearchDropdown
+                value={condition.pattern || ''}
+                onChange={handlePatternChange}
+                options={patternOptions}
+                placeholder='Select release group pattern...'
+                searchableFields={['label', 'description']}
+                className='min-w-[200px]'
+                width='w-auto'
+                dropdownWidth='100%'
+            />
+        </div>
     );
 };
 

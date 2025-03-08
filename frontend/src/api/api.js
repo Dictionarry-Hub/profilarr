@@ -173,11 +173,6 @@ export const pushFiles = async () => {
         const response = await axios.post(`/api/git/push`);
         return response.data;
     } catch (error) {
-        console.log(
-            'Push error full structure:',
-            JSON.stringify(error.response?.data, null, 2)
-        );
-
         if (error.response?.data?.error) {
             return error.response.data;
         }

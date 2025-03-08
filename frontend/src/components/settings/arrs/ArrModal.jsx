@@ -1,8 +1,10 @@
+// ArrModal.jsx
+
 import React from 'react';
 import {Plus, TestTube, Loader, Save, X, Trash, Check} from 'lucide-react';
 import Modal from '@ui/Modal';
 import {useArrModal} from '@hooks/useArrModal';
-import DataSelectorModal from './DataSelectorModal';
+import DataSelector from './DataSelector';
 import SyncModal from './SyncModal';
 
 const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
@@ -44,43 +46,34 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
         {value: 'schedule', label: 'Scheduled'}
     ];
 
-    // Ensure data_to_sync always has the required structure
     const safeSelectedData = {
         profiles: formData.data_to_sync?.profiles || [],
         customFormats: formData.data_to_sync?.customFormats || []
     };
 
-    // Handle sync method change
-    const handleSyncMethodChange = e => {
-        const newMethod = e.target.value;
-        handleInputChange({
-            target: {
-                id: 'sync_method',
-                value: newMethod
-            }
-        });
-
-        // Reset data_to_sync when switching to manual
-        if (newMethod === 'manual') {
-            handleInputChange({
-                target: {
-                    id: 'data_to_sync',
-                    value: {profiles: [], customFormats: []}
-                }
-            });
-        }
+    const handleFormSubmit = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleSubmit(e);
     };
 
-    const inputClasses = errorKey =>
-        `w-full px-3 py-2 text-sm rounded-lg border ${
-            errors[errorKey]
-                ? 'border-red-500'
-                : 'border-gray-300 dark:border-gray-600'
-        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 ${
-            errors[errorKey]
-                ? 'focus:ring-red-500 focus:border-red-500'
-                : 'focus:ring-blue-500 focus:border-blue-500'
-        } placeholder-gray-400 dark:placeholder-gray-500 transition-all`;
+    const inputClasses = errorKey => `
+    w-full px-3 py-2 text-sm rounded-lg border ${
+        errors[errorKey]
+            ? 'border-red-500'
+            : 'border-gray-300 dark:border-gray-600'
+    } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 ${
+        errors[errorKey]
+            ? 'focus:ring-red-500 focus:border-red-500'
+            : 'focus:ring-blue-500 focus:border-blue-500'
+    } placeholder-gray-400 dark:placeholder-gray-500 transition-all
+  `;
+
+    const handleSyncMethodChange = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleInputChange(e);
+    };
 
     return (
         <Modal
@@ -119,7 +112,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                             !formData.apiKey
                         }
                         className='flex items-center px-3 py-2 text-sm rounded-lg bg-emerald-600 hover:bg-emerald-700 
-                                     disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors'>
+                            disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors'>
                         {isTestingConnection ? (
                             <>
                                 <Loader className='w-3.5 h-3.5 mr-2 animate-spin' />
@@ -142,7 +135,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                         type='submit'
                         form='arrForm'
                         className='flex items-center px-3 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 
-                                     text-white font-medium transition-colors'>
+                            text-white font-medium transition-colors'>
                         {saveConfirm ? (
                             <>
                                 <Check className='w-3.5 h-3.5 mr-2' />
@@ -162,8 +155,16 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     </button>
                 </div>
             }>
-            <form id='arrForm' onSubmit={handleSubmit} className='space-y-4'>
-                {/* Name Field */}
+            <form
+                id='arrForm'
+                onSubmit={handleFormSubmit}
+                onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }}
+                className='space-y-4'>
                 <div className='space-y-1.5'>
                     <label
                         htmlFor='name'
@@ -180,7 +181,6 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     />
                 </div>
 
-                {/* Type Field */}
                 <div className='space-y-1.5'>
                     <label
                         htmlFor='type'
@@ -201,7 +201,6 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     </select>
                 </div>
 
-                {/* Tags Field */}
                 <div className='space-y-1.5'>
                     <label
                         htmlFor='tags'
@@ -216,7 +215,10 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                                 {tag}
                                 <button
                                     type='button'
-                                    onClick={() => handleRemoveTag(tag)}
+                                    onClick={e => {
+                                        e.preventDefault();
+                                        handleRemoveTag(tag);
+                                    }}
                                     className='ml-1 hover:text-blue-900 dark:hover:text-blue-200'>
                                     <X size={12} />
                                 </button>
@@ -236,14 +238,13 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                             type='button'
                             onClick={handleAddTag}
                             className='px-3 py-2 text-sm rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200
-                                         dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800
-                                         font-medium transition-colors'>
+                                dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800
+                                font-medium transition-colors'>
                             Add
                         </button>
                     </div>
                 </div>
 
-                {/* Server URL Field */}
                 <div className='space-y-1.5'>
                     <label
                         htmlFor='arrServer'
@@ -265,7 +266,6 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     )}
                 </div>
 
-                {/* API Key Field */}
                 <div className='space-y-1.5'>
                     <label
                         htmlFor='apiKey'
@@ -283,7 +283,6 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     />
                 </div>
 
-                {/* Sync Method Field */}
                 <div className='space-y-1.5'>
                     <label
                         htmlFor='sync_method'
@@ -308,28 +307,23 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     {formData.sync_method === 'manual' && (
                         <p>
                             Manual sync allows you to selectively import data
-                            when changes occur in the source instance. You'll
-                            need to manually select and import the data you want
-                            to sync.
+                            when changes occur in the source instance.
                         </p>
                     )}
                     {formData.sync_method === 'pull' && (
                         <p>
                             On Pull automatically syncs data whenever the
-                            database pulls in new changes. This is a "set and
-                            forget" option - perfect for maintaining consistency
-                            across instances without manual intervention.
+                            database pulls in new changes.
                         </p>
                     )}
                     {formData.sync_method === 'schedule' && (
                         <p>
                             Scheduled sync runs at fixed intervals, ensuring
-                            your instances stay in sync at regular times.
+                            your instances stay in sync.
                         </p>
                     )}
                 </div>
 
-                {/* Import as Unique - Now always visible */}
                 <div className='space-y-1.5'>
                     <div className='flex items-center justify-between'>
                         <label className='flex items-center space-x-2'>
@@ -352,13 +346,11 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                         </label>
                         <span className='text-xs text-gray-500 dark:text-gray-400 max-w-sm text-right'>
                             Creates a unique hash from the data and target
-                            instance name, allowing the same profile/format to
-                            be imported multiple times
+                            instance name
                         </span>
                     </div>
                 </div>
 
-                {/* Conditional Fields for Sync Method */}
                 {formData.sync_method === 'schedule' && (
                     <div className='space-y-1.5'>
                         <label
@@ -384,51 +376,20 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     </div>
                 )}
 
-                {/* Sync Options */}
                 {formData.sync_method !== 'manual' && (
                     <>
-                        <button
-                            type='button'
-                            onClick={() => setIsDataDrawerOpen(true)}
-                            className='w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 
-                                        bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700
-                                        rounded-lg transition-colors
-                                        border border-gray-200 dark:border-gray-700'>
-                            <div className='flex flex-col space-y-2'>
-                                <div className='flex items-center justify-between'>
-                                    <span>Select Data to Sync</span>
-                                </div>
-                                {(safeSelectedData.profiles.length > 0 ||
-                                    safeSelectedData.customFormats.length >
-                                        0) && (
-                                    <div className='flex flex-wrap gap-2'>
-                                        {safeSelectedData.profiles.map(
-                                            profile => (
-                                                <span
-                                                    key={profile}
-                                                    className='inline-flex items-center bg-blue-100 text-blue-800 
-                                                        dark:bg-blue-900 dark:text-blue-300 
-                                                        text-xs rounded px-2 py-1'>
-                                                    {profile}
-                                                </span>
-                                            )
-                                        )}
-                                        {safeSelectedData.customFormats.map(
-                                            format => (
-                                                <span
-                                                    key={format}
-                                                    className='inline-flex items-center bg-green-100 text-green-800 
-                                                        dark:bg-green-900 dark:text-green-300 
-                                                        text-xs rounded px-2 py-1'>
-                                                    {format}
-                                                </span>
-                                            )
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </button>
-
+                        <div className='border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800'>
+                            <h3 className='text-sm font-medium mb-4'>
+                                Select Data to Sync
+                            </h3>
+                            <DataSelector
+                                isLoading={isLoading}
+                                availableData={availableData}
+                                selectedData={safeSelectedData}
+                                onDataToggle={handleDataToggle}
+                                error={errors.data_to_sync}
+                            />
+                        </div>
                         {errors.data_to_sync && (
                             <p className='text-xs text-red-500 mt-1'>
                                 {errors.data_to_sync}
@@ -436,34 +397,23 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                         )}
                     </>
                 )}
-
-                <DataSelectorModal
-                    isOpen={
-                        formData.sync_method !== 'manual' && isDataDrawerOpen
-                    }
-                    onClose={() => setIsDataDrawerOpen(false)}
-                    isLoading={isLoading}
-                    availableData={availableData}
-                    selectedData={safeSelectedData}
-                    onDataToggle={handleDataToggle}
-                    error={errors.data_to_sync}
-                />
-                {showSyncConfirm && (
-                    <SyncModal
-                        isOpen={showSyncConfirm}
-                        onClose={() => {
-                            setShowSyncConfirm(false);
-                            onSubmit();
-                        }}
-                        onSkip={() => {
-                            setShowSyncConfirm(false);
-                            onSubmit();
-                        }}
-                        onSync={handleManualSync}
-                        isSyncing={isInitialSyncing}
-                    />
-                )}
             </form>
+
+            {showSyncConfirm && (
+                <SyncModal
+                    isOpen={showSyncConfirm}
+                    onClose={() => {
+                        setShowSyncConfirm(false);
+                        onSubmit();
+                    }}
+                    onSkip={() => {
+                        setShowSyncConfirm(false);
+                        onSubmit();
+                    }}
+                    onSync={handleManualSync}
+                    isSyncing={isInitialSyncing}
+                />
+            )}
         </Modal>
     );
 };

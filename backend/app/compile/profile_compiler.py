@@ -172,22 +172,39 @@ class ProfileConverter:
         return converted_group
 
     def convert_profile(self, profile: Dict) -> ConvertedProfile:
-        language = profile.get('language')
-        if language != 'any':
+        language = profile.get('language', 'any')
+
+        # Handle language processing for advanced mode (with behavior_language format)
+        if language != 'any' and '_' in language:
             language_parts = language.split('_', 1)
-            behaviour, language = language_parts
+            behaviour, language_code = language_parts
             try:
                 language_formats = self._process_language_formats(
-                    behaviour, language)
+                    behaviour, language_code)
                 if 'custom_formats' not in profile:
                     profile['custom_formats'] = []
                 profile['custom_formats'].extend(language_formats)
             except Exception as e:
                 logger.error(f"Failed to process language formats: {e}")
 
-        selected_language = ValueResolver.get_language('any',
-                                                       self.target_app,
-                                                       for_profile=True)
+        # Simple mode: just use the language directly without custom formats
+        # This lets the Arr application's built-in language filter handle it
+
+        # Get the appropriate language data for the profile
+        if language != 'any' and '_' not in language:
+            # Simple mode - use the language directly
+            selected_language = ValueResolver.get_language(language,
+                                                           self.target_app,
+                                                           for_profile=True)
+            logger.info(f"Using simple language mode: {language}")
+            logger.info(f"Selected language data: {selected_language}")
+        else:
+            # Advanced mode or 'any' - set language to 'any' as filtering is done via formats
+            selected_language = ValueResolver.get_language('any',
+                                                           self.target_app,
+                                                           for_profile=True)
+            logger.info(
+                f"Using advanced mode or 'any', setting language to 'any'")
 
         converted_profile = ConvertedProfile(
             name=profile["name"],
@@ -201,15 +218,10 @@ class ProfileConverter:
             language=selected_language)
 
         used_qualities = set()
-        tweaks = profile.get('tweaks', {})
-        allow_prereleases = tweaks.get('allowPrereleases', False)
 
         for quality_entry in profile.get("qualities", []):
             if quality_entry.get("id", 0) < 0:
                 converted_group = self.convert_quality_group(quality_entry)
-                if (quality_entry.get("name") == "Prereleases"
-                        and not allow_prereleases):
-                    converted_group["allowed"] = False
                 if converted_group["items"]:
                     converted_profile.items.append(converted_group)
                     for q in quality_entry.get("qualities", []):
@@ -246,7 +258,6 @@ class ProfileConverter:
             if cutoff_id < 0:
                 converted_profile.cutoff = self._convert_group_id(cutoff_id)
             else:
-                # And use mapped_cutoff_name here instead of cutoff_name
                 converted_profile.cutoff = self.quality_mappings[
                     mapped_cutoff_name]["id"]
 

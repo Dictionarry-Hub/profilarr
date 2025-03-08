@@ -18,12 +18,27 @@ const Modal = ({
 }) => {
     const modalRef = useRef();
     const [activeTab, setActiveTab] = useState(tabs?.[0]?.id);
+    const [isClosing, setIsClosing] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setIsClosing(false);
+        }
+    }, [isOpen]);
+
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            onClose();
+            setIsClosing(false);
+        }, 200); // Match animation duration
+    };
 
     useEffect(() => {
         if (isOpen && !disableCloseOnEscape) {
             const handleEscape = event => {
                 if (event.key === 'Escape') {
-                    onClose();
+                    handleClose();
                 }
             };
             document.addEventListener('keydown', handleEscape);
@@ -31,7 +46,7 @@ const Modal = ({
                 document.removeEventListener('keydown', handleEscape);
             };
         }
-    }, [isOpen, onClose, disableCloseOnEscape]);
+    }, [isOpen, disableCloseOnEscape]);
 
     const handleClickOutside = e => {
         // Get the current selection
@@ -42,9 +57,10 @@ const Modal = ({
             modalRef.current &&
             !modalRef.current.contains(e.target) &&
             !disableCloseOnOutsideClick &&
-            !hasSelection // Don't close if there's text selected
+            !hasSelection && // Don't close if there's text selected
+            !isClosing
         ) {
-            onClose();
+            handleClose();
         }
     };
 
@@ -87,13 +103,13 @@ const Modal = ({
 
     return (
         <div
-            className={`fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center transition-opacity duration-300 ease-out scrollable ${
+            className={`fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center transition-opacity duration-200 scrollable ${
                 isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
             style={{zIndex: 1000 + level * 10}}
             onClick={handleClickOutside}>
             <div
-                className={`fixed inset-0 bg-black transition-opacity duration-300 ease-out ${
+                className={`fixed inset-0 bg-black transition-opacity duration-200 ${
                     isOpen ? 'bg-opacity-50' : 'bg-opacity-0'
                 }`}
                 style={{zIndex: 1000 + level * 10}}
@@ -105,14 +121,19 @@ const Modal = ({
                     min-w-[320px] min-h-[200px] ${widthClasses[width]} ${
                     heightClasses[height]
                 } 
-                    transition-all duration-300 ease-out transform 
-                    ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} 
+                    ${isClosing
+                        ? 'animate-slide-up'
+                        : isOpen
+                            ? 'animate-slide-down' 
+                            : 'opacity-0'
+                    } 
                     flex flex-col overflow-hidden`}
                 style={{
                     zIndex: 1001 + level * 10,
-                    maxHeight: maxHeight || '80vh'
+                    maxHeight: maxHeight || '80vh',
                 }}
                 onClick={e => e.stopPropagation()}>
+                
                 {/* Header */}
                 <div className='flex items-center px-6 py-4 pb-3 border-b border-gray-300 dark:border-gray-700'>
                     <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-200'>
@@ -128,7 +149,7 @@ const Modal = ({
                         </div>
                     )}
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className='ml-auto text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors'>
                         <svg
                             className='w-6 h-6'

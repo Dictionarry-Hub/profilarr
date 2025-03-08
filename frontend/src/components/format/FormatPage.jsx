@@ -106,7 +106,7 @@ function FormatPage() {
         lastSelectedIndex
     } = useMassSelection();
 
-    useKeyboardShortcut('a', toggleSelectionMode, {ctrl: true});
+    useKeyboardShortcut('m', toggleSelectionMode, {ctrl: true});
 
     const {
         name,
