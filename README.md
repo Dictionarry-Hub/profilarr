@@ -75,6 +75,7 @@ Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub)
 ### Known Issues
 - Light Mode is not working
 - Renaming / Deleting files can be a little wonky - if you expect to stay connected with a database, try to limit deleting / renaming files.
+- State management for custom format conditions is also a little wonky on chromium based browsers
 
 ### Development
 - Currently focused on fixing bugs found in open beta
