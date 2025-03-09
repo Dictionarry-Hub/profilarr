@@ -22,7 +22,7 @@ Configuration management tool for Radarr/Sonarr that automates importing and ver
 
 ## Getting Started
 
-### Quick Installation
+### Quick Installation (Docker Compose)
 
 ```yaml
 services:
