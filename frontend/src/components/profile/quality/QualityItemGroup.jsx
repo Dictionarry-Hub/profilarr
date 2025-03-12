@@ -26,12 +26,14 @@ const QualityItemGroup = ({
     return (
         <div
             className={`
-                relative p-2.5 rounded-lg select-none cursor-grab active:cursor-grabbing
-                border border-gray-200 dark:border-gray-700
+                relative p-2.5 rounded-md select-none cursor-grab active:cursor-grabbing
+                border ${quality.enabled ? 'border-blue-200 dark:border-blue-700' : 'border-gray-200 dark:border-gray-700'}
                 transition-colors duration-200
-                bg-white dark:bg-gray-800
-                hover:border-gray-300 dark:hover:border-gray-600
                 ${isDragging ? 'opacity-50' : ''}
+                ${quality.enabled 
+                    ? 'bg-blue-50/30 dark:bg-blue-900/15' 
+                    : 'bg-white dark:bg-gray-800'}
+                hover:border-gray-300 dark:hover:border-gray-600
                 group
             `}
             style={style}
