@@ -77,8 +77,7 @@ def import_formats_to_arr(format_names, base_url, api_key, arr_type,
                 original_name = original_names[i]
                 format_file = f"{get_category_directory('custom_format')}/{original_name}.yml"
                 format_data = load_yaml_file(format_file)
-                logger.debug(f"Received format: {format_data['name']}")
-
+                
                 custom_format = CustomFormat(**format_data)
                 converted_format = converter.convert_format(
                     custom_format, target_app)
@@ -99,8 +98,6 @@ def import_formats_to_arr(format_names, base_url, api_key, arr_type,
                 compiled_data['specifications'] = [
                     vars(spec) for spec in converted_format.specifications
                 ]
-
-                logger.debug(f"Compiled format: {compiled_data['name']}")
 
                 result = process_format(compiled_data, existing_names,
                                         base_url, api_key)
@@ -190,8 +187,7 @@ async def async_import_formats_to_arr(format_names: List[str],
                 original_name = original_names[i]
                 format_file = f"{get_category_directory('custom_format')}/{original_name}.yml"
                 format_data = load_yaml_file(format_file)
-                logger.debug(f"Received format: {format_data['name']} (async)")
-
+                
                 custom_format = CustomFormat(**format_data)
                 converted_format = converter.convert_format(custom_format, target_app)
                 if not converted_format:
@@ -211,8 +207,6 @@ async def async_import_formats_to_arr(format_names: List[str],
                 compiled_data['specifications'] = [
                     vars(spec) for spec in converted_format.specifications
                 ]
-
-                logger.debug(f"Compiled format: {compiled_data['name']} (async)")
                 compiled_formats.append((format_name, compiled_data))
                 
             except Exception as e:
@@ -304,15 +298,12 @@ def process_format(format_data, existing_names, base_url, api_key):
     format_name = format_data['name']
     if format_name in existing_names:
         format_data['id'] = existing_names[format_name]
-        logger.info(f"Found existing format '{format_name}'. Updating...")
         success = update_format(base_url, api_key, format_data)
         action = 'updated'
     else:
-        logger.info(f"Format '{format_name}' not found. Adding...")
         success = add_format(base_url, api_key, format_data)
         action = 'added'
 
-    logger.info(f"Format '{format_name}' import success: {success}")
     return {
         'success': success,
         'action': action if success else 'failed',
@@ -330,15 +321,12 @@ async def async_process_format(format_data: Dict, existing_names: Dict[str, int]
     format_name = format_data['name']
     if format_name in existing_names:
         format_data['id'] = existing_names[format_name]
-        logger.info(f"Found existing format '{format_name}'. Updating...")
         success = await async_update_format(base_url, api_key, format_data)
         action = 'updated'
     else:
-        logger.info(f"Format '{format_name}' not found. Adding...")
         success = await async_add_format(base_url, api_key, format_data)
         action = 'added'
 
-    logger.info(f"Format '{format_name}' import success: {success}")
     return {
         'success': success,
         'action': action if success else 'failed',
@@ -353,11 +341,10 @@ async def async_process_format(format_data: Dict, existing_names: Dict[str, int]
 def update_format(base_url, api_key, format_data):
     try:
         url = f"{base_url.rstrip('/')}/api/v3/customformat/{format_data['id']}"
-        logger.info(f"Updating format at URL: {url}")
         response = requests.put(url,
                                 headers={'X-Api-Key': api_key},
                                 json=format_data)
-        logger.info(f"Response status: {response.status_code}")
+        logger.info(f"Update format '{format_data['name']}' response: {response.status_code}")
         return response.status_code in [200, 201, 202, 204]
     except Exception as e:
         logger.error(f"Error updating format: {str(e)}")
@@ -368,14 +355,13 @@ async def async_update_format(base_url: str, api_key: str, format_data: Dict) ->
     """Async version of update_format"""
     try:
         url = f"{base_url.rstrip('/')}/api/v3/customformat/{format_data['id']}"
-        logger.info(f"Updating format at URL: {url} (async)")
         async with aiohttp.ClientSession() as session:
             async with session.put(
                 url,
                 headers={'X-Api-Key': api_key},
                 json=format_data
             ) as response:
-                logger.info(f"Response status: {response.status} (async)")
+                logger.info(f"Update format '{format_data['name']}' response: {response.status} (async)")
                 return response.status in [200, 201, 202, 204]
     except Exception as e:
         logger.error(f"Error updating format (async): {str(e)}")
@@ -385,11 +371,10 @@ async def async_update_format(base_url: str, api_key: str, format_data: Dict) ->
 def add_format(base_url, api_key, format_data):
     try:
         url = f"{base_url.rstrip('/')}/api/v3/customformat"
-        logger.info(f"Adding format at URL: {url}")
         response = requests.post(url,
                                  headers={'X-Api-Key': api_key},
                                  json=format_data)
-        logger.info(f"Response status: {response.status_code}")
+        logger.info(f"Add format '{format_data['name']}' response: {response.status_code}")
         return response.status_code in [200, 201, 202, 204]
     except Exception as e:
         logger.error(f"Error adding format: {str(e)}")
@@ -400,14 +385,13 @@ async def async_add_format(base_url: str, api_key: str, format_data: Dict) -> bo
     """Async version of add_format"""
     try:
         url = f"{base_url.rstrip('/')}/api/v3/customformat"
-        logger.info(f"Adding format at URL: {url} (async)")
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url,
                 headers={'X-Api-Key': api_key},
                 json=format_data
             ) as response:
-                logger.info(f"Response status: {response.status} (async)")
+                logger.info(f"Add format '{format_data['name']}' response: {response.status} (async)")
                 return response.status in [200, 201, 202, 204]
     except Exception as e:
         logger.error(f"Error adding format (async): {str(e)}")

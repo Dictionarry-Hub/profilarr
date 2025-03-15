@@ -89,7 +89,7 @@ def import_profiles_to_arr(profile_names: List[str], original_names: List[str],
                     for cf in profile_data['custom_formats']:
                         cf['name'] = f"{cf['name']} [Dictionarry]"
 
-                logger.debug(f"Received profile: {profile_data['name']}")
+                # Profile loaded
 
                 profile_language = profile_data.get('language', 'any')
                 if profile_language != 'any':
@@ -107,7 +107,6 @@ def import_profiles_to_arr(profile_names: List[str], original_names: List[str],
                             f"Profile '{profile_name}' has advanced mode language: {profile_language}"
                         )
 
-                logger.info("Compiling quality profile...")
                 compiled_profiles = compile_quality_profile(
                     profile_data=profile_data,
                     target_app=target_app,
@@ -135,8 +134,6 @@ def import_profiles_to_arr(profile_names: List[str], original_names: List[str],
                 logger.debug(
                     f"Found {len(format_id_map)} existing custom formats")
 
-                logger.info(
-                    f"Synchronizing format IDs in profile '{profile_name}'")
                 profile_data = sync_format_ids(profile_data, format_id_map)
 
                 logger.debug("Format items after sync:")
@@ -145,7 +142,7 @@ def import_profiles_to_arr(profile_names: List[str], original_names: List[str],
                         f"  {item['name']} => Score: {item.get('score', 0)}, "
                         f"Format ID: {item.get('format', 'missing')}")
 
-                logger.debug(f"Compiled profile: {profile_data['name']}")
+                # Profile compiled successfully
 
                 result = process_profile(profile_data=profile_data,
                                          existing_names=existing_profile_map,
@@ -229,6 +226,17 @@ async def async_import_profiles_to_arr(profile_names: List[str],
         target_app = TargetApp.RADARR if arr_type.lower(
         ) == 'radarr' else TargetApp.SONARR
 
+        # Fetch all existing formats once upfront
+        logger.info("Pre-fetching existing custom formats for all profiles...")
+        existing_formats = await async_get_existing_formats(base_url, api_key)
+        if existing_formats is None:
+            return {
+                'success': False,
+                'error': 'Failed to get existing custom formats'
+            }
+        format_id_map = {fmt['name']: fmt['id'] for fmt in existing_formats}
+        logger.info(f"Successfully pre-fetched {len(format_id_map)} existing custom formats")
+
         # Pre-scan all profiles to identify and cache language formats
         needed_language_formats = set()
         initial_profiles_data = []
@@ -249,7 +257,7 @@ async def async_import_profiles_to_arr(profile_names: List[str],
                 if profile_language != 'any' and '_' in profile_language:
                     # This is an advanced mode language that needs special format handling
                     needed_language_formats.add(profile_language)
-                    logger.debug(f"Identified language format need: {profile_language}")
+                    # Language format identified
             except Exception as e:
                 logger.error(f"Error pre-scanning profile {profile_name}: {str(e)}")
                 results['failed'] += 1
@@ -288,20 +296,13 @@ async def async_import_profiles_to_arr(profile_names: List[str],
                     for cf in profile_data['custom_formats']:
                         cf['name'] = f"{cf['name']} [Dictionarry]"
 
-                logger.debug(f"Received profile: {profile_data['name']} (async)")
+                # Profile loaded
 
                 profile_language = profile_data.get('language', 'any')
                 if profile_language != 'any':
                     # Detect if we're using simple or advanced mode
                     is_simple_mode = '_' not in profile_language
-                    if is_simple_mode:
-                        logger.info(
-                            f"Profile '{profile_name}' has simple mode language: {profile_language} (async)"
-                        )
-                    else:
-                        logger.info(
-                            f"Profile '{profile_name}' has advanced mode language: {profile_language} (async)"
-                        )
+                    # Language mode detected
                 
                 # Setup the profile compilation with the cached language formats
                 
@@ -313,12 +314,12 @@ async def async_import_profiles_to_arr(profile_names: List[str],
                     language_format_configs = language_format_cache.get(profile_language, [])
                     
                     if language_format_configs:
-                        logger.info(f"Using {len(language_format_configs)} cached language formats for {profile_name}")
+                        # Using cached language formats
                         
                         # Define a special function that will be detected by the profile compiler
                         # The function name is checked in _process_language_formats
                         def cached_format_importer(*args, **kwargs):
-                            logger.info(f"Using cached language formats for {profile_name}")
+                            # Using cached formats from importer
                             return {
                                 'success': True,
                                 'added': 0,
@@ -343,7 +344,6 @@ async def async_import_profiles_to_arr(profile_names: List[str],
                     # Add the cached formats - these are already imported, we just need to reference them
                     profile_data['custom_formats'].extend(language_format_cache[profile_language])
 
-                logger.info(f"Compiling quality profile: {profile_name} (async)...")
                 compiled_profiles = compile_quality_profile(
                     profile_data=profile_data,
                     target_app=target_app,
@@ -358,12 +358,14 @@ async def async_import_profiles_to_arr(profile_names: List[str],
 
                 compiled_profile = compiled_profiles[0]
                 
-                # Create a task for getting formats and processing this profile
+                # Sync format IDs upfront using the cached format_id_map
+                synced_profile = sync_format_ids(compiled_profile, format_id_map)
+                
+                # Create a task for processing this profile (without fetching formats again)
                 task = asyncio.create_task(
-                    async_process_profile_with_formats(
-                        profile_name=profile_name,
-                        profile_data=compiled_profile,
-                        existing_profile_map=existing_profile_map,
+                    async_process_profile(
+                        profile_data=synced_profile,
+                        existing_names=existing_profile_map,
                         base_url=base_url,
                         api_key=api_key
                     )
@@ -689,6 +691,8 @@ def sync_format_ids(profile_data: Dict, format_id_map: Dict[str, int]) -> Dict:
     return profile_data
 
 
+# This function is now deprecated and replaced by direct use of sync_format_ids and async_process_profile
+# We're keeping the signature for backward compatibility but not using it in the optimized code path
 async def async_process_profile_with_formats(profile_name: str,
                                              profile_data: Dict,
                                              existing_profile_map: Dict[str,
@@ -698,6 +702,9 @@ async def async_process_profile_with_formats(profile_name: str,
     """
     Asynchronous function that handles getting formats and processing a profile in one go.
     This allows for concurrent profile processing.
+    
+    Note: This function is deprecated and should not be used in new code.
+    It's better to fetch formats once upfront for all profiles.
     """
     try:
         # Get formats for profile synchronization
@@ -713,8 +720,6 @@ async def async_process_profile_with_formats(profile_name: str,
             f"Found {len(format_id_map)} existing custom formats (async)")
 
         # Sync format IDs in the profile
-        logger.info(
-            f"Synchronizing format IDs in profile '{profile_name}' (async)")
         synced_profile = sync_format_ids(profile_data, format_id_map)
 
         # Process the profile (add or update)
@@ -744,7 +749,6 @@ def process_profile(profile_data: Dict, existing_names: Dict[str, int],
 
     if profile_name in existing_names:
         profile_data['id'] = existing_names[profile_name]
-        logger.info(f"Found existing profile '{profile_name}'. Updating...")
         success = update_profile(base_url, api_key, profile_data)
         return {
             'success': success,
@@ -756,7 +760,6 @@ def process_profile(profile_data: Dict, existing_names: Dict[str, int],
             }
         }
     else:
-        logger.info(f"Profile '{profile_name}' not found. Adding...")
         success = add_profile(base_url, api_key, profile_data)
         return {
             'success': success,
@@ -777,8 +780,6 @@ async def async_process_profile(profile_data: Dict, existing_names: Dict[str,
 
     if profile_name in existing_names:
         profile_data['id'] = existing_names[profile_name]
-        logger.info(
-            f"Found existing profile '{profile_name}'. Updating (async)...")
         success = await async_update_profile(base_url, api_key, profile_data)
         return {
             'success': success,
@@ -790,7 +791,6 @@ async def async_process_profile(profile_data: Dict, existing_names: Dict[str,
             }
         }
     else:
-        logger.info(f"Profile '{profile_name}' not found. Adding (async)...")
         success = await async_add_profile(base_url, api_key, profile_data)
         return {
             'success': success,
@@ -806,11 +806,10 @@ async def async_process_profile(profile_data: Dict, existing_names: Dict[str,
 def update_profile(base_url: str, api_key: str, profile_data: Dict) -> bool:
     try:
         url = f"{base_url.rstrip('/')}/api/v3/qualityprofile/{profile_data['id']}"
-        logger.info(f"Updating profile at URL: {url}")
         response = requests.put(url,
                                 headers={'X-Api-Key': api_key},
                                 json=profile_data)
-        logger.info(f"Update response status: {response.status_code}")
+        logger.info(f"Update profile '{profile_data['name']}' response: {response.status_code}")
         return response.status_code in [200, 201, 202, 204]
     except Exception as e:
         logger.error(f"Error updating profile: {str(e)}")
@@ -822,13 +821,11 @@ async def async_update_profile(base_url: str, api_key: str,
     """Async version of update_profile"""
     try:
         url = f"{base_url.rstrip('/')}/api/v3/qualityprofile/{profile_data['id']}"
-        logger.info(f"Updating profile at URL: {url} (async)")
         async with aiohttp.ClientSession() as session:
             async with session.put(url,
                                    headers={'X-Api-Key': api_key},
                                    json=profile_data) as response:
-                logger.info(
-                    f"Update response status: {response.status} (async)")
+                logger.info(f"Update profile '{profile_data['name']}' response: {response.status} (async)")
                 return response.status in [200, 201, 202, 204]
     except Exception as e:
         logger.error(f"Error updating profile (async): {str(e)}")
@@ -838,11 +835,10 @@ async def async_update_profile(base_url: str, api_key: str,
 def add_profile(base_url: str, api_key: str, profile_data: Dict) -> bool:
     try:
         url = f"{base_url.rstrip('/')}/api/v3/qualityprofile"
-        logger.info(f"Adding profile at URL: {url}")
         response = requests.post(url,
                                  headers={'X-Api-Key': api_key},
                                  json=profile_data)
-        logger.info(f"Add response status: {response.status_code}")
+        logger.info(f"Add profile '{profile_data['name']}' response: {response.status_code}")
         return response.status_code in [200, 201, 202, 204]
     except Exception as e:
         logger.error(f"Error adding profile: {str(e)}")
@@ -854,12 +850,11 @@ async def async_add_profile(base_url: str, api_key: str,
     """Async version of add_profile"""
     try:
         url = f"{base_url.rstrip('/')}/api/v3/qualityprofile"
-        logger.info(f"Adding profile at URL: {url} (async)")
         async with aiohttp.ClientSession() as session:
             async with session.post(url,
                                     headers={'X-Api-Key': api_key},
                                     json=profile_data) as response:
-                logger.info(f"Add response status: {response.status} (async)")
+                logger.info(f"Add profile '{profile_data['name']}' response: {response.status} (async)")
                 return response.status in [200, 201, 202, 204]
     except Exception as e:
         logger.error(f"Error adding profile (async): {str(e)}")

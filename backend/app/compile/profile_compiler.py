@@ -319,7 +319,7 @@ class ProfileConverter:
             if self.format_importer and hasattr(self.format_importer, '__name__') and self.format_importer.__name__ == 'cached_format_importer':
                 # If we're using the cached importer, skip processing
                 # The formats were already added directly to the profile
-                logger.info(f"Using pre-added language formats for {language}")
+                pass  # Using pre-added language formats
             else:
                 # Normal processing path
                 try:
@@ -340,15 +340,13 @@ class ProfileConverter:
             selected_language = ValueResolver.get_language(language,
                                                            self.target_app,
                                                            for_profile=True)
-            logger.info(f"Using simple language mode: {language}")
-            logger.info(f"Selected language data: {selected_language}")
+            # Using simple language mode
         else:
             # Advanced mode or 'any' - set language to 'any' as filtering is done via formats
             selected_language = ValueResolver.get_language('any',
                                                            self.target_app,
                                                            for_profile=True)
-            logger.info(
-                f"Using advanced mode or 'any', setting language to 'any'")
+            # Using advanced mode, setting language to 'any'
 
         converted_profile = ConvertedProfile(
             name=profile["name"],
