@@ -55,5 +55,5 @@ jobs:
                   platforms: linux/amd64,linux/arm64/v8
                   push: true
                   tags: |
-                      123marvin123/profilarr:latest
-                      123marvin123/profilarr:${{ steps.tag.outputs.tag }}
+                      santiagosayshey/profilarr:latest
+                      santiagosayshey/profilarr:${{ steps.tag.outputs.tag }}
