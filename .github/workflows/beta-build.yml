@@ -54,4 +54,4 @@ jobs:
                   platforms: linux/amd64,linux/arm64/v8
                   context: .
                   push: ${{ github.event_name != 'pull_request' }}
-                  tags: 123marvin123/profilarr:beta
+                  tags: santiagosayshey/profilarr:beta
