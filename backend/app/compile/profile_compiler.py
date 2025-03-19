@@ -295,8 +295,19 @@ class ProfileConverter:
         allowed_qualities = []
         for q_item in group.get("qualities", []):
             input_name = q_item.get("name", "")
+
+            # First map the quality name to handle remux qualities properly
+            mapped_name = ValueResolver.get_quality_name(
+                input_name, self.target_app)
+
+            # Create a case-insensitive lookup map
             quality_map = {k.lower(): k for k in self.quality_mappings}
-            if input_name.lower() in quality_map:
+
+            # Try to find the mapped name in quality mappings
+            if mapped_name.lower() in quality_map:
+                allowed_qualities.append(quality_map[mapped_name.lower()])
+            # Fallback to the original name
+            elif input_name.lower() in quality_map:
                 allowed_qualities.append(quality_map[input_name.lower()])
 
         converted_group = {
@@ -360,30 +371,41 @@ class ProfileConverter:
             language=selected_language)
 
         used_qualities = set()
-
+        quality_ids_in_groups = set()
+        
+        # First pass: Gather all quality IDs in groups to avoid duplicates
         for quality_entry in profile.get("qualities", []):
-            if quality_entry.get("id", 0) < 0:
+            if quality_entry.get("id", 0) < 0:  # It's a group
+                # Process this group to collect quality IDs
+                converted_group = self.convert_quality_group(quality_entry)
+                for item in converted_group["items"]:
+                    if "quality" in item and "id" in item["quality"]:
+                        quality_ids_in_groups.add(item["quality"]["id"])
+
+        # Second pass: Add groups and individual qualities to the profile
+        for quality_entry in profile.get("qualities", []):
+            if quality_entry.get("id", 0) < 0:  # It's a group
                 converted_group = self.convert_quality_group(quality_entry)
                 if converted_group["items"]:
                     converted_profile.items.append(converted_group)
                     for q in quality_entry.get("qualities", []):
                         used_qualities.add(q.get("name", "").upper())
-            else:
+            else:  # It's a single quality
                 quality_name = quality_entry.get("name")
                 mapped_name = ValueResolver.get_quality_name(
                     quality_name, self.target_app)
                 if mapped_name in self.quality_mappings:
                     converted_profile.items.append({
-                        "quality":
-                        self.quality_mappings[mapped_name],
+                        "quality": self.quality_mappings[mapped_name],
                         "items": [],
-                        "allowed":
-                        True
+                        "allowed": True
                     })
                     used_qualities.add(mapped_name.upper())
 
+        # Add all unused qualities as disabled, but skip those already in groups
         for quality_name, quality_data in self.quality_mappings.items():
-            if quality_name.upper() not in used_qualities:
+            if (quality_name.upper() not in used_qualities and 
+                quality_data["id"] not in quality_ids_in_groups):
                 converted_profile.items.append({
                     "quality": quality_data,
                     "items": [],
