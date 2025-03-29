@@ -15,12 +15,24 @@ class GitHubAuth:
     def get_authenticated_url(https_url):
         """
         Convert an HTTPS URL to include authentication via PAT.
+        Ensures the token is not duplicated in the URL.
         """
         token = os.getenv("PROFILARR_PAT")
         if not token:
             raise ValueError(
                 "PROFILARR_PAT is not set in environment variables")
-
+                
+        # Check if the URL already contains authentication
+        if "@" in https_url:
+            # Already has some form of authentication, remove it to add our token
+            # This handles URLs that might have a token already
+            protocol_part, rest = https_url.split("://", 1)
+            if "@" in rest:
+                # Remove any existing authentication
+                _, server_part = rest.split("@", 1)
+                https_url = f"{protocol_part}://{server_part}"
+                
+        # Now add our token
         authenticated_url = https_url.replace("https://", f"https://{token}@")
         return authenticated_url
 
