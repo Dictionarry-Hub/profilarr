@@ -20,23 +20,35 @@ def clone_repository(repo_url, repo_path):
         # Initial clone attempt
         logger.info(f"Starting clone operation for {repo_url}")
         try:
-            # Verify token before attempting clone
-            if not GitHubAuth.verify_token():
-                logger.error("Clone operation requires GitHub authentication. Please configure PAT.")
-                return False, "Clone operation requires GitHub authentication. Please configure PROFILARR_PAT environment variable."
-            
-            # Get authenticated URL for private repositories
-            authenticated_url = GitHubAuth.get_authenticated_url(repo_url)
-            repo = git.Repo.clone_from(authenticated_url, temp_dir)
+            # First try without authentication (for public repos)
+            repo = git.Repo.clone_from(repo_url, temp_dir)
             logger.info("Repository clone successful")
         except GitCommandError as e:
-            if "remote: Repository not found" in str(e):
+            error_str = str(e)
+            # If authentication error, try with token
+            if "could not read Username" in error_str or "Authentication failed" in error_str:
+                logger.info("Initial clone failed due to authentication. Trying with token...")
+                try:
+                    # Verify token availability
+                    if not GitHubAuth.verify_token():
+                        logger.error("Private repository requires GitHub authentication. Please configure PAT.")
+                        return False, "This appears to be a private repository. Please configure PROFILARR_PAT environment variable."
+                    
+                    # Get authenticated URL for private repositories
+                    authenticated_url = GitHubAuth.get_authenticated_url(repo_url)
+                    repo = git.Repo.clone_from(authenticated_url, temp_dir)
+                    logger.info("Repository clone with authentication successful")
+                except GitCommandError as auth_e:
+                    logger.error(f"Clone with authentication failed: {str(auth_e)}")
+                    return False, f"Failed to clone repository: {str(auth_e)}"
+            # If repository not found, create new one
+            elif "remote: Repository not found" in error_str:
                 logger.info("Creating new repository - remote not found")
                 repo = git.Repo.init(temp_dir)
                 repo.create_remote('origin', repo_url)
             else:
-                logger.error(f"Clone failed: {str(e)}")
-                return False, f"Failed to clone repository: {str(e)}"
+                logger.error(f"Clone failed: {error_str}")
+                return False, f"Failed to clone repository: {error_str}"
 
         # Check if repo is empty
         try:
