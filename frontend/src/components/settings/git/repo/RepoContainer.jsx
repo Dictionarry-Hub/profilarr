@@ -84,42 +84,94 @@ const RepoContainer = ({settings, setSettings, fetchGitStatus, status}) => {
             }
 
             try {
-                const [avatarResponse, repoResponse] = await Promise.all([
-                    !isAvatarValid &&
-                        fetch(`https://api.github.com/users/${owner}`),
-                    !isStatsValid &&
-                        fetch(`https://api.github.com/repos/${owner}/${repo}`)
-                ]);
-
-                if (!isAvatarValid && avatarResponse.ok) {
-                    const userData = await avatarResponse.json();
-                    localStorage.setItem(avatarCacheKey, userData.avatar_url);
-                    localStorage.setItem(
-                        `${avatarCacheKey}-timestamp`,
-                        Date.now().toString()
-                    );
-                    setAvatarUrl(userData.avatar_url);
+                // Try to fetch the avatar if needed
+                if (!isAvatarValid) {
+                    try {
+                        const avatarResponse = await fetch(`https://api.github.com/users/${owner}`);
+                        
+                        if (avatarResponse.ok) {
+                            const userData = await avatarResponse.json();
+                            localStorage.setItem(avatarCacheKey, userData.avatar_url);
+                            localStorage.setItem(
+                                `${avatarCacheKey}-timestamp`,
+                                Date.now().toString()
+                            );
+                            setAvatarUrl(userData.avatar_url);
+                        } else if (avatarResponse.status === 404) {
+                            // User not found - use first letter avatar
+                            setAvatarUrl(null);
+                        }
+                    } catch (avatarError) {
+                        console.warn('Could not fetch avatar:', avatarError);
+                        // Keep using cached avatar if available
+                        if (cachedAvatar) setAvatarUrl(cachedAvatar);
+                    }
                 }
-
-                if (!isStatsValid && repoResponse.ok) {
-                    const repoData = await repoResponse.json();
-                    const stats = {
-                        stars: repoData.stargazers_count,
-                        forks: repoData.forks_count,
-                        issues: repoData.open_issues_count
-                    };
-                    localStorage.setItem(statsCacheKey, JSON.stringify(stats));
-                    localStorage.setItem(
-                        `${statsCacheKey}-timestamp`,
-                        Date.now().toString()
-                    );
-                    setRepoStats(stats);
+                
+                // Try to fetch repo stats if needed
+                if (!isStatsValid) {
+                    try {
+                        const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+                        
+                        if (repoResponse.ok) {
+                            const repoData = await repoResponse.json();
+                            const stats = {
+                                stars: repoData.stargazers_count,
+                                forks: repoData.forks_count,
+                                issues: repoData.open_issues_count
+                            };
+                            localStorage.setItem(statsCacheKey, JSON.stringify(stats));
+                            localStorage.setItem(
+                                `${statsCacheKey}-timestamp`,
+                                Date.now().toString()
+                            );
+                            setRepoStats(stats);
+                        } else if (repoResponse.status === 404 || repoResponse.status === 403) {
+                            // Repository not found or private - set empty stats
+                            const privateRepoStats = {
+                                stars: '-',
+                                forks: '-',
+                                issues: '-',
+                                isPrivate: true
+                            };
+                            setRepoStats(privateRepoStats);
+                            localStorage.setItem(statsCacheKey, JSON.stringify(privateRepoStats));
+                            localStorage.setItem(
+                                `${statsCacheKey}-timestamp`,
+                                Date.now().toString()
+                            );
+                        }
+                    } catch (statsError) {
+                        console.warn('Could not fetch repo stats:', statsError);
+                        // Use cached stats or create private repo placeholder
+                        if (cachedStats) {
+                            setRepoStats(JSON.parse(cachedStats));
+                        } else {
+                            const privateRepoStats = {
+                                stars: '-',
+                                forks: '-',
+                                issues: '-',
+                                isPrivate: true
+                            };
+                            setRepoStats(privateRepoStats);
+                        }
+                    }
                 }
             } catch (error) {
-                console.error('Error fetching GitHub data:', error);
+                console.error('Error in fetchAvatarAndStats:', error);
+                // Use cached values if available
                 if (cachedAvatar && !isAvatarValid) setAvatarUrl(cachedAvatar);
-                if (cachedStats && !isStatsValid)
+                if (cachedStats && !isStatsValid) {
                     setRepoStats(JSON.parse(cachedStats));
+                } else {
+                    // Provide default stats for private repos
+                    setRepoStats({
+                        stars: '-',
+                        forks: '-',
+                        issues: '-',
+                        isPrivate: true
+                    });
+                }
             }
         };
 

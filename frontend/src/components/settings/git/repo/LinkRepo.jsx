@@ -21,9 +21,56 @@ const LinkRepo = ({isOpen, onClose, onSubmit}) => {
             );
             onSubmit();
         } catch (error) {
-            Alert.error(
-                'An unexpected error occurred while linking the repository.'
-            );
+            // Check for specific error cases
+            if (error.response) {
+                const { status, data } = error.response;
+                
+                if (data && data.error) {
+                    // Authentication errors for private repos
+                    if (data.error.includes("could not read Username") || 
+                        data.error.includes("Authentication failed") ||
+                        data.error.includes("authentication") ||
+                        data.error.includes("PROFILARR_PAT")) {
+                        Alert.error(
+                            'Authentication failed. Please ensure you have configured a valid GitHub Personal Access Token in your .env file (PROFILARR_PAT).'
+                        );
+                    } 
+                    // Repository not found
+                    else if (data.error.includes("not found") || status === 404) {
+                        Alert.error(
+                            'Repository not found. Please check the URL and ensure you have access to this repository.'
+                        );
+                    }
+                    // Permission issues (general 403)
+                    else if (data.error.includes("permission") || 
+                             data.error.includes("error: 403") || 
+                             status === 403) {
+                        Alert.error(
+                            'Permission denied. Your GitHub token may not have sufficient permissions to access this repository. Ensure it has "Contents: Read & write" permission.'
+                        );
+                    }
+                    // Write access issues - specifically check for this common error
+                    else if (data.error.includes("remote: Write access to repository not granted")) {
+                        Alert.error(
+                            'Your GitHub token does not have write access to this repository. Please update your token with the "Contents: Read & write" permission.'
+                        );
+                    }
+                    // Any other error - use a generic message rather than showing the raw error
+                    else {
+                        Alert.error(
+                            'Failed to link repository. Please check the URL and your GitHub token permissions.'
+                        );
+                    }
+                } else {
+                    // HTTP error without specific message
+                    Alert.error(`Failed to link repository (Error ${status})`);
+                }
+            } else {
+                // Network or other errors
+                Alert.error(
+                    'Failed to connect to the server. Please check your network connection.'
+                );
+            }
             console.error('Error linking repository:', error);
         } finally {
             setLoading(false);

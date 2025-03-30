@@ -85,6 +85,11 @@ def setup_logging():
                 'level': 'INFO',
                 'handlers': ['console', 'file'],
                 'propagate': False
+            },
+            'git': {
+                'level': 'ERROR',
+                'handlers': ['console', 'file'],
+                'propagate': False
             }
         }
     }
