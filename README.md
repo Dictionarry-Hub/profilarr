@@ -22,6 +22,13 @@ Configuration management tool for Radarr/Sonarr that automates importing and ver
 
 ## Getting Started
 
+### Compatibility
+
+| Architecture                   | Support      |
+| ------------------------------ | ------------ |
+| amd64 (x86_64)                 | ✅ Supported |
+| arm64 (Apple Silicon, RPi 4/5) | ✅ Supported |
+
 ### Quick Installation (Docker Compose)
 
 ```yaml
@@ -70,13 +77,15 @@ Detailed contributing guidelines will be available soon. Join our Discord to dis
 
 ## Status
 
-Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub) project to simplify media automation. 
+Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub) project to simplify media automation.
 
 ### Known Issues
-- Light Mode is not working
-- Renaming / Deleting files can be a little wonky - if you expect to stay connected with a database, try to limit deleting / renaming files.
-- State management for custom format conditions is also a little wonky on chromium based browsers
+
+-   Light Mode is not working
+-   Renaming / Deleting files can be a little wonky - if you expect to stay connected with a database, try to limit deleting / renaming files.
+-   State management for custom format conditions is also a little wonky on chromium based browsers
 
 ### Development
-- Currently focused on fixing bugs found in open beta
-- 1.1 will focus on improving the 'setup' side of profilarr - adding media management / quality settings syncs
+
+-   Currently focused on fixing bugs found in open beta
+-   1.1 will focus on improving the 'setup' side of profilarr - adding media management / quality settings syncs
