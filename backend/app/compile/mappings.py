@@ -57,12 +57,12 @@ class Sources:
 
     SONARR = {
         'television': 1,
-        'televisionraw': 2,
+        'television_raw': 2,
         'web_dl': 3,
         'webrip': 4,
         'dvd': 5,
         'bluray': 6,
-        'blurayraw': 7
+        'bluray_raw': 7
     }
 
 
