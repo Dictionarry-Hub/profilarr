@@ -11,6 +11,7 @@ class Config:
     REGEX_DIR = os.path.join(DB_DIR, 'regex_patterns')
     FORMAT_DIR = os.path.join(DB_DIR, 'custom_formats')
     PROFILE_DIR = os.path.join(DB_DIR, 'profiles')
+    MEDIA_MANAGEMENT_DIR = os.path.join(DB_DIR, 'media_management')
 
     # Logging
     LOG_DIR = os.path.join(CONFIG_DIR, 'log')
@@ -40,7 +41,7 @@ class Config:
         """Create all required directories if they don't exist."""
         directories = [
             Config.CONFIG_DIR, Config.DB_DIR, Config.REGEX_DIR,
-            Config.FORMAT_DIR, Config.PROFILE_DIR, Config.LOG_DIR
+            Config.FORMAT_DIR, Config.PROFILE_DIR, Config.MEDIA_MANAGEMENT_DIR, Config.LOG_DIR
         ]
         logger = logging.getLogger(__name__)
         for directory in directories:
