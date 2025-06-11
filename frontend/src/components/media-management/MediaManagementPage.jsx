@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { MediaManagement } from '@api/mediaManagement';
 import Alert from '@ui/Alert';
-import { Loader } from 'lucide-react';
+import { Loader, RefreshCw } from 'lucide-react';
 import MiscSettings from './MiscSettings';
 import NamingSettings from './NamingSettings';
 import QualityDefinitions from './QualityDefinitions';
+import SyncModal from './SyncModal';
 
 const loadingMessages = [
     'Configuring media management...',
@@ -37,6 +38,10 @@ const MediaManagementPage = () => {
         misc: false,
         naming: false,
         quality_definitions: false
+    });
+    const [syncModal, setSyncModal] = useState({
+        isOpen: false,
+        category: null
     });
 
     useEffect(() => {
@@ -106,33 +111,57 @@ const MediaManagementPage = () => {
     };
 
     const handleSync = (category) => {
-        console.log(`Syncing ${activeTab} ${category} from arr instance`);
-        // TODO: Implement actual sync logic
-        Alert.info('Sync functionality coming soon');
+        setSyncModal({
+            isOpen: true,
+            category: category
+        });
+    };
+
+    const handleSyncAll = () => {
+        setSyncModal({
+            isOpen: true,
+            category: null // null means sync all categories
+        });
+    };
+
+    const closeSyncModal = () => {
+        setSyncModal({
+            isOpen: false,
+            category: null
+        });
     };
 
     return (
         <div>
             {/* Tab Navigation */}
-            <nav className='flex space-x-4 my-4'>
-                <div
-                    onClick={() => handleTabChange('radarr')}
-                    className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium ${
-                        activeTab === 'radarr'
-                            ? 'bg-gray-600 border border-gray-600 text-white'
-                            : 'bg-gray-800 border border-gray-700 text-white'
-                    }`}>
-                    Radarr
+            <nav className='flex justify-between items-center my-4'>
+                <div className='flex space-x-4'>
+                    <div
+                        onClick={() => handleTabChange('radarr')}
+                        className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium ${
+                            activeTab === 'radarr'
+                                ? 'bg-gray-600 border border-gray-600 text-white'
+                                : 'bg-gray-800 border border-gray-700 text-white'
+                        }`}>
+                        Radarr
+                    </div>
+                    <div
+                        onClick={() => handleTabChange('sonarr')}
+                        className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium ${
+                            activeTab === 'sonarr'
+                                ? 'bg-gray-600 border border-gray-600 text-white'
+                                : 'bg-gray-800 border border-gray-700 text-white'
+                        }`}>
+                        Sonarr
+                    </div>
                 </div>
-                <div
-                    onClick={() => handleTabChange('sonarr')}
-                    className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium ${
-                        activeTab === 'sonarr'
-                            ? 'bg-gray-600 border border-gray-600 text-white'
-                            : 'bg-gray-800 border border-gray-700 text-white'
-                    }`}>
-                    Sonarr
-                </div>
+                <button
+                    onClick={handleSyncAll}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-gray-700/50 border border-gray-700 text-gray-200 hover:bg-gray-700 transition-colors text-sm"
+                >
+                    <RefreshCw className="w-4 h-4 text-blue-500" />
+                    <span>Sync All</span>
+                </button>
             </nav>
 
             {/* Loading State */}
@@ -170,6 +199,14 @@ const MediaManagementPage = () => {
                     />
                 </div>
             )}
+
+            {/* Sync Modal */}
+            <SyncModal
+                isOpen={syncModal.isOpen}
+                onClose={closeSyncModal}
+                arrType={activeTab}
+                category={syncModal.category}
+            />
         </div>
     );
 };

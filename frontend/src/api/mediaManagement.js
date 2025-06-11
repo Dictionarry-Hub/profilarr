@@ -47,6 +47,25 @@ export const updateMediaManagementCategory = async (category, data) => {
     }
 };
 
+/**
+ * Sync media management data to arr instance
+ * @param {number} arrId - The arr instance ID to sync to
+ * @param {string[]} categories - Array of categories to sync
+ * @returns {Promise<Object>} Sync results
+ */
+export const syncMediaManagement = async (arrId, categories) => {
+    try {
+        const response = await axios.post(`${BASE_URL}/sync`, {
+            arr_id: arrId,
+            categories: categories
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error syncing media management:', error);
+        throw error;
+    }
+};
+
 // Organized export pattern for convenience
 export const MediaManagement = {
     // Main operations
@@ -61,5 +80,8 @@ export const MediaManagement = {
     
     updateMisc: (data) => updateMediaManagementCategory('misc', data),
     updateNaming: (data) => updateMediaManagementCategory('naming', data),
-    updateQualityDefinitions: (data) => updateMediaManagementCategory('quality_definitions', data)
+    updateQualityDefinitions: (data) => updateMediaManagementCategory('quality_definitions', data),
+    
+    // Sync functionality
+    sync: syncMediaManagement
 };

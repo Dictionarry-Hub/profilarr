@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import CategoryContainer from './CategoryContainer';
 import QualityGroup from './QualityGroup';
 import QualityItem from './QualityItem';
+import { Info } from 'lucide-react';
 
 const QualityDefinitions = ({ data, arrType, onSave, onSync, isSaving }) => {
     const [expandedGroups, setExpandedGroups] = useState({});
@@ -85,6 +86,7 @@ const QualityDefinitions = ({ data, arrType, onSave, onSync, isSaving }) => {
                                 key={qualityName}
                                 name={qualityName}
                                 settings={settings}
+                                arrType={arrType}
                                 onChange={(newSettings) => handleQualityChange(qualityName, newSettings)}
                             />
                         ))}
@@ -92,9 +94,13 @@ const QualityDefinitions = ({ data, arrType, onSave, onSync, isSaving }) => {
                 ))}
             </div>
 
-            <div className="mt-4 text-xs text-gray-400 dark:text-gray-400">
-                <p>Quality size limits help manage storage space and bandwidth usage.</p>
-                <p className="mt-1">Files outside these limits may be rejected or upgraded based on your settings.</p>
+            {/* Disclaimer */}
+            <div className="flex items-start space-x-2 mt-6 pt-4 border-t border-gray-700">
+                <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-gray-400">
+                    <p>Preferred size is rarely used when combining quality profiles with custom formats.</p>
+                    <p className="mt-1">Min/max values are useful for setting absolute limits on what can be grabbed.</p>
+                </div>
             </div>
         </CategoryContainer>
     );

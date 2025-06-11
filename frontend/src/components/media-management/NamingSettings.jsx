@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import CategoryContainer from './CategoryContainer';
 import MonospaceInput from '../ui/MonospaceInput';
 import Dropdown from '../ui/Dropdown';
+import { Info } from 'lucide-react';
 
 const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
     const [localData, setLocalData] = useState({});
@@ -170,7 +171,7 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                         Colon Replacement
                     </label>
                     <Dropdown
-                        value={localData.colonReplacementFormat || (arrType === 'radarr' ? 'smart' : 4)}
+                        value={localData.colonReplacementFormat ?? (arrType === 'radarr' ? 'smart' : 0)}
                         onChange={(e) => handleChange('colonReplacementFormat', arrType === 'sonarr' ? parseInt(e.target.value) : e.target.value)}
                         options={colonReplacementOptions}
                         disabled={!localData.replaceIllegalCharacters}
@@ -198,7 +199,7 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                             Multi-Episode Style
                         </label>
                         <Dropdown
-                            value={localData.multiEpisodeStyle || 5}
+                            value={localData.multiEpisodeStyle ?? 0}
                             onChange={(e) => handleChange('multiEpisodeStyle', parseInt(e.target.value))}
                             options={[
                                 { value: 0, label: 'Extend' },
@@ -212,6 +213,15 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                         />
                     </div>
                 )}
+
+                {/* Disclaimer */}
+                <div className="flex items-start space-x-2 mt-6 pt-4 border-t border-gray-700">
+                    <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-gray-400">
+                        Please ensure all formats follow {arrType === 'radarr' ? 'Radarr' : 'Sonarr'}'s naming requirements. 
+                        Profilarr does not validate formats before syncing.
+                    </p>
+                </div>
             </div>
         </CategoryContainer>
     );

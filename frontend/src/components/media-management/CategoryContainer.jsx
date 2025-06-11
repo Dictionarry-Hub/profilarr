@@ -28,8 +28,8 @@ const CategoryContainer = ({
                         <h1 className="text-base font-semibold text-gray-100">
                             {title}
                         </h1>
-                        {expanded ? 
-                            <ChevronDown size={16} className="text-gray-400" /> : 
+                        {expanded ?
+                            <ChevronDown size={16} className="text-gray-400" /> :
                             <ChevronRight size={16} className="text-gray-400" />
                         }
                     </div>
