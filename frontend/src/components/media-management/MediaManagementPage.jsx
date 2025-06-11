@@ -50,6 +50,17 @@ const MediaManagementPage = () => {
                 setLoading(true);
                 const data = await MediaManagement.getAll();
                 setMediaData(data);
+                
+                // Set activeTab to first available arr type if current one has no data
+                if (data) {
+                    if ((!data[activeTab] || Object.keys(data[activeTab]).length === 0)) {
+                        if (data.radarr && Object.keys(data.radarr).length > 0) {
+                            setActiveTab('radarr');
+                        } else if (data.sonarr && Object.keys(data.sonarr).length > 0) {
+                            setActiveTab('sonarr');
+                        }
+                    }
+                }
             } catch (err) {
                 setError(err.message);
                 console.error('Error fetching media management data:', err);
@@ -69,14 +80,14 @@ const MediaManagementPage = () => {
         // Transform the data back to the format expected by the backend
         if (category === 'misc' || category === 'naming') {
             return {
-                radarr: activeTab === 'radarr' ? data : mediaData.radarr[category],
-                sonarr: activeTab === 'sonarr' ? data : mediaData.sonarr[category]
+                radarr: activeTab === 'radarr' ? data : (mediaData.radarr?.[category] || {}),
+                sonarr: activeTab === 'sonarr' ? data : (mediaData.sonarr?.[category] || {})
             };
         } else if (category === 'quality_definitions') {
             return {
                 qualityDefinitions: {
-                    radarr: activeTab === 'radarr' ? data : mediaData.radarr.quality_definitions,
-                    sonarr: activeTab === 'sonarr' ? data : mediaData.sonarr.quality_definitions
+                    radarr: activeTab === 'radarr' ? data : (mediaData.radarr?.quality_definitions || {}),
+                    sonarr: activeTab === 'sonarr' ? data : (mediaData.sonarr?.quality_definitions || {})
                 }
             };
         }
@@ -131,38 +142,50 @@ const MediaManagementPage = () => {
         });
     };
 
+    // Check if there's any data at all
+    const hasData = mediaData && (
+        (mediaData.radarr && Object.keys(mediaData.radarr).length > 0) ||
+        (mediaData.sonarr && Object.keys(mediaData.sonarr).length > 0)
+    );
+
     return (
         <div>
-            {/* Tab Navigation */}
-            <nav className='flex justify-between items-center my-4'>
-                <div className='flex space-x-4'>
-                    <div
-                        onClick={() => handleTabChange('radarr')}
-                        className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium ${
-                            activeTab === 'radarr'
-                                ? 'bg-gray-600 border border-gray-600 text-white'
-                                : 'bg-gray-800 border border-gray-700 text-white'
-                        }`}>
-                        Radarr
+            {/* Tab Navigation - only show if there's data */}
+            {hasData && (
+                <nav className='flex justify-between items-center my-4'>
+                    <div className='flex space-x-4'>
+                        {mediaData.radarr && Object.keys(mediaData.radarr).length > 0 && (
+                            <div
+                                onClick={() => handleTabChange('radarr')}
+                                className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium ${
+                                    activeTab === 'radarr'
+                                        ? 'bg-gray-600 border border-gray-600 text-white'
+                                        : 'bg-gray-800 border border-gray-700 text-white'
+                                }`}>
+                                Radarr
+                            </div>
+                        )}
+                        {mediaData.sonarr && Object.keys(mediaData.sonarr).length > 0 && (
+                            <div
+                                onClick={() => handleTabChange('sonarr')}
+                                className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium ${
+                                    activeTab === 'sonarr'
+                                        ? 'bg-gray-600 border border-gray-600 text-white'
+                                        : 'bg-gray-800 border border-gray-700 text-white'
+                                }`}>
+                                Sonarr
+                            </div>
+                        )}
                     </div>
-                    <div
-                        onClick={() => handleTabChange('sonarr')}
-                        className={`cursor-pointer px-3 py-2 rounded-md text-sm font-medium ${
-                            activeTab === 'sonarr'
-                                ? 'bg-gray-600 border border-gray-600 text-white'
-                                : 'bg-gray-800 border border-gray-700 text-white'
-                        }`}>
-                        Sonarr
-                    </div>
-                </div>
-                <button
-                    onClick={handleSyncAll}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-gray-700/50 border border-gray-700 text-gray-200 hover:bg-gray-700 transition-colors text-sm"
-                >
-                    <RefreshCw className="w-4 h-4 text-blue-500" />
-                    <span>Sync All</span>
-                </button>
-            </nav>
+                    <button
+                        onClick={handleSyncAll}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-gray-700/50 border border-gray-700 text-gray-200 hover:bg-gray-700 transition-colors text-sm"
+                    >
+                        <RefreshCw className="w-4 h-4 text-blue-500" />
+                        <span>Sync All</span>
+                    </button>
+                </nav>
+            )}
 
             {/* Loading State */}
             {loading && <LoadingState />}
@@ -174,29 +197,51 @@ const MediaManagementPage = () => {
             )}
 
             {/* Content */}
-            {!loading && !error && mediaData && (
+            {!loading && !error && (
                 <div className="space-y-6">
-                    <NamingSettings
-                        data={mediaData[activeTab]?.naming}
-                        arrType={activeTab}
-                        onSave={(data) => handleSave('naming', data)}
-                        onSync={() => handleSync('naming')}
-                        isSaving={savingStates.naming}
-                    />
-                    <MiscSettings
-                        data={mediaData[activeTab]?.misc}
-                        arrType={activeTab}
-                        onSave={(data) => handleSave('misc', data)}
-                        onSync={() => handleSync('misc')}
-                        isSaving={savingStates.misc}
-                    />
-                    <QualityDefinitions
-                        data={mediaData[activeTab]?.quality_definitions}
-                        arrType={activeTab}
-                        onSave={(data) => handleSave('quality_definitions', data)}
-                        onSync={() => handleSync('quality_definitions')}
-                        isSaving={savingStates.quality_definitions}
-                    />
+                    {/* Check if no data exists at all */}
+                    {!hasData ? (
+                        <div className="bg-gray-800/50 rounded-lg p-8 text-center mt-6">
+                            <p className="text-gray-400 mb-2">No media management settings found.</p>
+                            <p className="text-sm text-gray-500">Connect to a database to sync media management settings.</p>
+                        </div>
+                    ) : (!mediaData[activeTab] || Object.keys(mediaData[activeTab]).length === 0) ? (
+                        <div className="bg-gray-800/50 rounded-lg p-8 text-center mt-6">
+                            <p className="text-gray-400 mb-2">No media management settings found.</p>
+                            <p className="text-sm text-gray-500">Connect to a database to sync {activeTab} media management settings.</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Only show categories that have data */}
+                            {mediaData[activeTab]?.naming && Object.keys(mediaData[activeTab].naming).length > 0 && (
+                                <NamingSettings
+                                    data={mediaData[activeTab].naming}
+                                    arrType={activeTab}
+                                    onSave={(data) => handleSave('naming', data)}
+                                    onSync={() => handleSync('naming')}
+                                    isSaving={savingStates.naming}
+                                />
+                            )}
+                            {mediaData[activeTab]?.misc && Object.keys(mediaData[activeTab].misc).length > 0 && (
+                                <MiscSettings
+                                    data={mediaData[activeTab].misc}
+                                    arrType={activeTab}
+                                    onSave={(data) => handleSave('misc', data)}
+                                    onSync={() => handleSync('misc')}
+                                    isSaving={savingStates.misc}
+                                />
+                            )}
+                            {mediaData[activeTab]?.quality_definitions && Object.keys(mediaData[activeTab].quality_definitions).length > 0 && (
+                                <QualityDefinitions
+                                    data={mediaData[activeTab].quality_definitions}
+                                    arrType={activeTab}
+                                    onSave={(data) => handleSave('quality_definitions', data)}
+                                    onSync={() => handleSync('quality_definitions')}
+                                    isSaving={savingStates.quality_definitions}
+                                />
+                            )}
+                        </>
+                    )}
                 </div>
             )}
 
