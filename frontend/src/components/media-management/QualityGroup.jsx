@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
-const QualityGroup = ({ title, children, isExpanded = false, onToggle }) => {
+const QualityGroup = ({ title, children, isExpanded = false, onToggle, unitLabel }) => {
     return (
         <div className="border border-gray-700 dark:border-gray-700 rounded-lg overflow-hidden mb-4">
             {/* Header Section */}
@@ -28,7 +28,7 @@ const QualityGroup = ({ title, children, isExpanded = false, onToggle }) => {
                         <thead>
                             <tr>
                                 <th className="text-left pl-6 px-4 pt-4 pb-2 text-xs font-medium text-gray-300 w-32">Quality</th>
-                                <th className="text-left px-2 pt-4 pb-2 text-xs font-medium text-gray-300">Range</th>
+                                <th className="text-left px-2 pt-4 pb-2 text-xs font-medium text-gray-300">Range <span className="text-gray-400 font-normal">({unitLabel})</span></th>
                                 <th className="text-center px-1 pt-4 pb-2 text-xs font-medium text-gray-300 w-16">Min</th>
                                 <th className="text-center px-1 pt-4 pb-2 text-xs font-medium text-gray-300 w-20">Preferred</th>
                                 <th className="text-center px-1 pt-4 pb-2 text-xs font-medium text-gray-300 w-16">Max</th>
@@ -48,7 +48,8 @@ QualityGroup.propTypes = {
     title: PropTypes.string.isRequired,
     children: PropTypes.node.isRequired,
     isExpanded: PropTypes.bool,
-    onToggle: PropTypes.func.isRequired
+    onToggle: PropTypes.func.isRequired,
+    unitLabel: PropTypes.string.isRequired
 };
 
 export default QualityGroup;

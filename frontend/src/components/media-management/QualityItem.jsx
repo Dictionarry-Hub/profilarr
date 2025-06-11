@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 import NumberInput from '../ui/NumberInput';
 import Slider from '../ui/Slider';
 
-const QualityItem = ({ name, settings, arrType, onChange, disabled = false }) => {
+const QualityItem = ({ name, settings, arrType, viewMode, convertValue, convertBack, onChange, disabled = false }) => {
     const handleInputChange = (field, value) => {
-        let numValue = parseInt(value) || 0;
+        // Convert display value back to MB/min
+        let numValue = convertBack(value);
         
         // Validate and clamp values based on field
         if (field === 'min') {
@@ -77,6 +78,12 @@ const QualityItem = ({ name, settings, arrType, onChange, disabled = false }) =>
 
     // Set max value based on arr type
     const maxValue = arrType === 'sonarr' ? 1000 : 2000;
+    
+    // Convert values for display
+    const displayMin = convertValue(settings.min || 0);
+    const displayPreferred = convertValue(settings.preferred || 0);
+    const displayMax = convertValue(settings.max || 0);
+    const displayMaxLimit = convertValue(maxValue);
 
     return (
         <tr className="border-b border-gray-700/50 last:border-b-0 hover:bg-gray-800/20 transition-colors">
@@ -106,33 +113,36 @@ const QualityItem = ({ name, settings, arrType, onChange, disabled = false }) =>
             {/* Min Input */}
             <td className="px-2 py-3">
                 <NumberInput
-                    value={settings.min || 0}
+                    value={displayMin}
                     onChange={(value) => handleInputChange('min', value)}
                     min={0}
-                    max={maxValue}
+                    max={displayMaxLimit}
                     disabled={disabled}
+                    step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
                 />
             </td>
 
             {/* Preferred Input */}
             <td className="px-2 py-3">
                 <NumberInput
-                    value={settings.preferred || 0}
+                    value={displayPreferred}
                     onChange={(value) => handleInputChange('preferred', value)}
                     min={0}
-                    max={maxValue}
+                    max={displayMaxLimit}
                     disabled={disabled}
+                    step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
                 />
             </td>
 
             {/* Max Input */}
             <td className="px-2 py-3">
                 <NumberInput
-                    value={settings.max || 0}
+                    value={displayMax}
                     onChange={(value) => handleInputChange('max', value)}
                     min={0}
-                    max={maxValue}
+                    max={displayMaxLimit}
                     disabled={disabled}
+                    step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
                 />
             </td>
         </tr>
@@ -147,6 +157,9 @@ QualityItem.propTypes = {
         max: PropTypes.number
     }).isRequired,
     arrType: PropTypes.oneOf(['radarr', 'sonarr']).isRequired,
+    viewMode: PropTypes.string.isRequired,
+    convertValue: PropTypes.func.isRequired,
+    convertBack: PropTypes.func.isRequired,
     onChange: PropTypes.func.isRequired,
     disabled: PropTypes.bool
 };
