@@ -1,9 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { MediaManagement } from '@api/mediaManagement';
-import { toast } from 'react-toastify';
+import Alert from '@ui/Alert';
+import { Loader } from 'lucide-react';
 import MiscSettings from './MiscSettings';
 import NamingSettings from './NamingSettings';
 import QualityDefinitions from './QualityDefinitions';
+
+const loadingMessages = [
+    'Configuring media management...',
+    'Organizing file naming rules...',
+    'Setting up quality definitions...',
+    'Preparing media settings...',
+    'Loading configuration options...',
+    'Initializing management tools...'
+];
+
+const LoadingState = () => (
+    <div className='w-full min-h-[70vh] flex flex-col items-center justify-center'>
+        <Loader className='w-8 h-8 animate-spin text-blue-500 mb-4' />
+        <p className='text-lg font-medium text-gray-300'>
+            {
+                loadingMessages[
+                    Math.floor(Math.random() * loadingMessages.length)
+                ]
+            }
+        </p>
+    </div>
+);
 
 const MediaManagementPage = () => {
     const [activeTab, setActiveTab] = useState('radarr');
@@ -73,10 +96,10 @@ const MediaManagementPage = () => {
                 }
             }));
             
-            toast.success(`${category.replace('_', ' ')} settings saved successfully`);
+            Alert.success(`${category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} settings saved successfully`);
         } catch (err) {
             console.error(`Error saving ${category}:`, err);
-            toast.error(`Failed to save ${category.replace('_', ' ')} settings`);
+            Alert.error(`Failed to save ${category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} settings`);
         } finally {
             setSavingStates(prev => ({ ...prev, [category]: false }));
         }
@@ -85,7 +108,7 @@ const MediaManagementPage = () => {
     const handleSync = (category) => {
         console.log(`Syncing ${activeTab} ${category} from arr instance`);
         // TODO: Implement actual sync logic
-        toast.info('Sync functionality coming soon');
+        Alert.info('Sync functionality coming soon');
     };
 
     return (
@@ -112,13 +135,8 @@ const MediaManagementPage = () => {
                 </div>
             </nav>
 
-            {/* Loading and Error States */}
-            {loading && (
-                <div className="text-center py-8">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                    <p className="mt-2 text-gray-400 dark:text-gray-400">Loading media management settings...</p>
-                </div>
-            )}
+            {/* Loading State */}
+            {loading && <LoadingState />}
 
             {error && (
                 <div className="bg-red-900/20 border border-red-600 rounded-lg p-4 mb-6">

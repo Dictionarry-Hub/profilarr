@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Modal from '@ui/Modal';
 import DiffCommit from './DiffCommit';
-import {FileText} from 'lucide-react';
+import {FileText, Info} from 'lucide-react';
 import useChangeParser from '@hooks/useChangeParser';
 import {COMMIT_TYPES, FILE_TYPES, COMMIT_SCOPES} from '@constants/commits';
 import Tooltip from '@ui/Tooltip';
@@ -67,52 +67,65 @@ const ViewChanges = ({isOpen, onClose, change, isIncoming}) => {
                     <DiffCommit commitMessage={change.commit_message} />
                 )}
 
-                <div className='overflow-x-auto rounded-lg border border-gray-700'>
-                    <table className='min-w-full'>
-                        <thead className='bg-gray-800 border-b border-gray-700'>
-                            <tr>
-                                <th className='py-3 px-4 text-left text-gray-400 font-medium w-1/8'>
-                                    Change
-                                </th>
-                                <th className='py-3 px-4 text-left text-gray-400 font-medium w-2/8'>
-                                    Key
-                                </th>
-                                <th className='py-3 px-4 text-left text-gray-400 font-medium w-2/6'>
-                                    Previous
-                                </th>
-                                <th className='py-3 px-4 text-left text-gray-400 font-medium w-2/6'>
-                                    Current
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {parsedChanges.map(item => (
-                                <tr
-                                    key={item.id}
-                                    className='bg-gray-900 border-b border-gray-700'>
-                                    <td className='py-4 px-4 text-gray-300'>
-                                        {item.changeType}
-                                    </td>
-                                    <td className='py-4 px-4'>
-                                        <span className='font-medium text-gray-100'>
-                                            {item.key}
-                                        </span>
-                                    </td>
-                                    <td className='py-4 px-4 font-mono text-sm text-gray-300'>
-                                        <div className='whitespace-pre-wrap'>
-                                            {item.from}
-                                        </div>
-                                    </td>
-                                    <td className='py-4 px-4 font-mono text-sm text-gray-300'>
-                                        <div className='whitespace-pre-wrap'>
-                                            {item.to}
-                                        </div>
-                                    </td>
+                {parsedChanges.length > 0 ? (
+                    <div className='overflow-x-auto rounded-lg border border-gray-700'>
+                        <table className='min-w-full'>
+                            <thead className='bg-gray-800 border-b border-gray-700'>
+                                <tr>
+                                    <th className='py-3 px-4 text-left text-gray-400 font-medium w-1/8'>
+                                        Change
+                                    </th>
+                                    <th className='py-3 px-4 text-left text-gray-400 font-medium w-2/8'>
+                                        Key
+                                    </th>
+                                    <th className='py-3 px-4 text-left text-gray-400 font-medium w-2/6'>
+                                        Previous
+                                    </th>
+                                    <th className='py-3 px-4 text-left text-gray-400 font-medium w-2/6'>
+                                        Current
+                                    </th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {parsedChanges.map(item => (
+                                    <tr
+                                        key={item.id}
+                                        className='bg-gray-900 border-b border-gray-700'>
+                                        <td className='py-4 px-4 text-gray-300'>
+                                            {item.changeType}
+                                        </td>
+                                        <td className='py-4 px-4'>
+                                            <span className='font-medium text-gray-100'>
+                                                {item.key}
+                                            </span>
+                                        </td>
+                                        <td className='py-4 px-4 font-mono text-sm text-gray-300'>
+                                            <div className='whitespace-pre-wrap'>
+                                                {item.from}
+                                            </div>
+                                        </td>
+                                        <td className='py-4 px-4 font-mono text-sm text-gray-300'>
+                                            <div className='whitespace-pre-wrap'>
+                                                {item.to}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className='bg-gray-900 rounded-lg border border-gray-700 p-6'>
+                        <div className='flex items-center space-x-3 text-blue-400'>
+                            <Info size={20} />
+                            <span className='font-medium'>Formatting Changes Only</span>
+                            <span className='text-gray-400'>—</span>
+                            <span className='text-sm text-gray-400'>
+                                Only whitespace, indentation, or syntax changes detected. No content values were changed.
+                            </span>
+                        </div>
+                    </div>
+                )}
             </div>
         </Modal>
     );

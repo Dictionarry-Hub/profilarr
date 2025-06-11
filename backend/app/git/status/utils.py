@@ -38,7 +38,34 @@ def determine_type(file_path):
         return 'Custom Format'
     elif 'profiles' in file_path:
         return 'Quality Profile'
+    elif 'media_management' in file_path:
+        return 'Media Management'
     return 'Unknown'
+
+
+def format_media_management_name(name):
+    """Format media management category names for display"""
+    name_mapping = {
+        'misc': 'Miscellaneous',
+        'naming': 'Naming',
+        'quality_definitions': 'Quality Definitions'
+    }
+    return name_mapping.get(name, name)
+
+
+def extract_name_from_path(file_path):
+    """Extract and format name from file path"""
+    # Remove the file extension
+    name = os.path.splitext(file_path)[0]
+    # Remove the type prefix (everything before the first '/')
+    if '/' in name:
+        name = name.split('/', 1)[1]
+    
+    # Format media management names
+    if 'media_management' in file_path:
+        return format_media_management_name(name)
+    
+    return name
 
 
 def interpret_git_status(x, y):

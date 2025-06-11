@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import CategoryContainer from './CategoryContainer';
+import MonospaceInput from '../ui/MonospaceInput';
+import Dropdown from '../ui/Dropdown';
 
 const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
     const [localData, setLocalData] = useState({});
@@ -26,7 +28,7 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
         onSync && onSync();
     };
 
-    const colonReplacementOptions = arrType === 'radarr' 
+    const colonReplacementOptions = arrType === 'radarr'
         ? [
             { value: 'delete', label: 'Delete' },
             { value: 'dash', label: 'Replace with Dash' },
@@ -45,7 +47,7 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
 
     return (
         <CategoryContainer
-            title="Naming Settings"
+            title="Naming"
             onSync={handleSync}
             onSave={handleSave}
             isSaving={isSaving}
@@ -68,13 +70,13 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                 {arrType === 'radarr' ? (
                     <>
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                            <label className={`block text-sm font-medium mb-2 ${!localData.rename ? 'text-gray-500' : 'text-gray-300 dark:text-gray-300'}`}>
                                 Movie Format
                             </label>
-                            <textarea
+                            <MonospaceInput
                                 value={localData.movieFormat || ''}
                                 onChange={(e) => handleChange('movieFormat', e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                                disabled={!localData.rename}
                                 rows={2}
                             />
                         </div>
@@ -83,48 +85,46 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                             <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                                 Movie Folder Format
                             </label>
-                            <input
-                                type="text"
+                            <MonospaceInput
                                 value={localData.movieFolderFormat || ''}
                                 onChange={(e) => handleChange('movieFolderFormat', e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                             />
                         </div>
                     </>
                 ) : (
                     <>
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                            <label className={`block text-sm font-medium mb-2 ${!localData.rename ? 'text-gray-500' : 'text-gray-300 dark:text-gray-300'}`}>
                                 Standard Episode Format
                             </label>
-                            <textarea
+                            <MonospaceInput
                                 value={localData.standardEpisodeFormat || ''}
                                 onChange={(e) => handleChange('standardEpisodeFormat', e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                                disabled={!localData.rename}
                                 rows={2}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                            <label className={`block text-sm font-medium mb-2 ${!localData.rename ? 'text-gray-500' : 'text-gray-300 dark:text-gray-300'}`}>
                                 Daily Episode Format
                             </label>
-                            <textarea
+                            <MonospaceInput
                                 value={localData.dailyEpisodeFormat || ''}
                                 onChange={(e) => handleChange('dailyEpisodeFormat', e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                                disabled={!localData.rename}
                                 rows={2}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                            <label className={`block text-sm font-medium mb-2 ${!localData.rename ? 'text-gray-500' : 'text-gray-300 dark:text-gray-300'}`}>
                                 Anime Episode Format
                             </label>
-                            <textarea
+                            <MonospaceInput
                                 value={localData.animeEpisodeFormat || ''}
                                 onChange={(e) => handleChange('animeEpisodeFormat', e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                                disabled={!localData.rename}
                                 rows={2}
                             />
                         </div>
@@ -133,11 +133,9 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                             <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                                 Series Folder Format
                             </label>
-                            <input
-                                type="text"
+                            <MonospaceInput
                                 value={localData.seriesFolderFormat || ''}
                                 onChange={(e) => handleChange('seriesFolderFormat', e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                             />
                         </div>
 
@@ -145,11 +143,9 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                             <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                                 Season Folder Format
                             </label>
-                            <input
-                                type="text"
+                            <MonospaceInput
                                 value={localData.seasonFolderFormat || ''}
                                 onChange={(e) => handleChange('seasonFolderFormat', e.target.value)}
-                                className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                             />
                         </div>
                     </>
@@ -170,33 +166,28 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${!localData.replaceIllegalCharacters ? 'text-gray-500' : 'text-gray-300 dark:text-gray-300'}`}>
                         Colon Replacement
                     </label>
-                    <select
+                    <Dropdown
                         value={localData.colonReplacementFormat || (arrType === 'radarr' ? 'smart' : 4)}
                         onChange={(e) => handleChange('colonReplacementFormat', arrType === 'sonarr' ? parseInt(e.target.value) : e.target.value)}
-                        className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        {colonReplacementOptions.map(option => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        options={colonReplacementOptions}
+                        disabled={!localData.replaceIllegalCharacters}
+                        placeholder="Select replacement"
+                    />
                 </div>
 
                 {arrType === 'sonarr' && localData.colonReplacementFormat === 5 && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                        <label className={`block text-sm font-medium mb-2 ${!localData.replaceIllegalCharacters ? 'text-gray-500' : 'text-gray-300 dark:text-gray-300'}`}>
                             Custom Colon Replacement
                         </label>
-                        <input
-                            type="text"
+                        <MonospaceInput
                             value={localData.customColonReplacementFormat || ''}
                             onChange={(e) => handleChange('customColonReplacementFormat', e.target.value)}
-                            className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter custom replacement"
+                            disabled={!localData.replaceIllegalCharacters}
                         />
                     </div>
                 )}
@@ -206,18 +197,19 @@ const NamingSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                         <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                             Multi-Episode Style
                         </label>
-                        <select
+                        <Dropdown
                             value={localData.multiEpisodeStyle || 5}
                             onChange={(e) => handleChange('multiEpisodeStyle', parseInt(e.target.value))}
-                            className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value={0}>Extend</option>
-                            <option value={1}>Duplicate</option>
-                            <option value={2}>Repeat</option>
-                            <option value={3}>Scene</option>
-                            <option value={4}>Range</option>
-                            <option value={5}>Prefixed Range</option>
-                        </select>
+                            options={[
+                                { value: 0, label: 'Extend' },
+                                { value: 1, label: 'Duplicate' },
+                                { value: 2, label: 'Repeat' },
+                                { value: 3, label: 'Scene' },
+                                { value: 4, label: 'Range' },
+                                { value: 5, label: 'Prefixed Range' }
+                            ]}
+                            placeholder="Select style"
+                        />
                     </div>
                 )}
             </div>

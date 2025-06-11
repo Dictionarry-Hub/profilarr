@@ -17,11 +17,8 @@ services:
             - '5000:5000'
         volumes:
             - ./backend:/app
-            - config_data:/config
+            - ./config:/config
         env_file:
             - .env
         restart: always
 
-volumes:
-    config_data:
-        name: regexerr_config

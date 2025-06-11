@@ -109,12 +109,67 @@ DEFAULT_VALUES = {
 }
 
 
-def _setup_yaml_quotes():
-    """Configure YAML to quote string values"""
-    def str_presenter(dumper, data):
-        return dumper.represent_scalar('tag:yaml.org,2002:str', data, style="'")
+
+
+def _preserve_order(data: Dict[str, Any], category: str) -> Dict[str, Any]:
+    """Preserve the desired key order based on category"""
+    if category == "misc":
+        # Order: radarr, sonarr
+        ordered = {}
+        for arr_type in ["radarr", "sonarr"]:
+            if arr_type in data:
+                arr_data = data[arr_type]
+                # Order within each: propersRepacks, enableMediaInfo  
+                ordered_arr = {}
+                for key in ["propersRepacks", "enableMediaInfo"]:
+                    if key in arr_data:
+                        ordered_arr[key] = arr_data[key]
+                # Add any remaining keys
+                for key, value in arr_data.items():
+                    if key not in ordered_arr:
+                        ordered_arr[key] = value
+                ordered[arr_type] = ordered_arr
+        # Add any remaining top-level keys
+        for key, value in data.items():
+            if key not in ordered:
+                ordered[key] = value
+        return ordered
+                
+    elif category == "naming":
+        # Order: radarr, sonarr
+        ordered = {}
+        for arr_type in ["radarr", "sonarr"]:
+            if arr_type in data:
+                arr_data = data[arr_type]
+                ordered_arr = {}
+                
+                if arr_type == "radarr":
+                    # Radarr order: rename, movieFormat, movieFolderFormat, replaceIllegalCharacters, colonReplacementFormat
+                    for key in ["rename", "movieFormat", "movieFolderFormat", "replaceIllegalCharacters", "colonReplacementFormat"]:
+                        if key in arr_data:
+                            ordered_arr[key] = arr_data[key]
+                elif arr_type == "sonarr":
+                    # Sonarr order: rename, standardEpisodeFormat, dailyEpisodeFormat, animeEpisodeFormat, seriesFolderFormat, seasonFolderFormat, replaceIllegalCharacters, colonReplacementFormat, customColonReplacementFormat, multiEpisodeStyle
+                    for key in ["rename", "standardEpisodeFormat", "dailyEpisodeFormat", "animeEpisodeFormat", "seriesFolderFormat", "seasonFolderFormat", "replaceIllegalCharacters", "colonReplacementFormat", "customColonReplacementFormat", "multiEpisodeStyle"]:
+                        if key in arr_data:
+                            ordered_arr[key] = arr_data[key]
+                
+                # Add any remaining keys
+                for key, value in arr_data.items():
+                    if key not in ordered_arr:
+                        ordered_arr[key] = value
+                ordered[arr_type] = ordered_arr
+        # Add any remaining top-level keys
+        for key, value in data.items():
+            if key not in ordered:
+                ordered[key] = value
+        return ordered
+        
+    elif category == "quality_definitions":
+        # For quality_definitions, preserve the structure: qualityDefinitions -> radarr/sonarr -> qualities
+        return data
     
-    yaml.add_representer(str, str_presenter)
+    return data
 
 
 def _get_file_path(category: str) -> str:
@@ -136,12 +191,22 @@ def _load_yaml_file(file_path: str) -> Dict[str, Any]:
         raise
 
 
-def _save_yaml_file(file_path: str, data: Dict[str, Any]) -> None:
+def _save_yaml_file(file_path: str, data: Dict[str, Any], category: str = None) -> None:
     """Save data to YAML file"""
-    _setup_yaml_quotes()
     try:
+        # Preserve key order if category is specified
+        if category:
+            data = _preserve_order(data, category)
+            
         with open(file_path, 'w') as f:
-            yaml.safe_dump(data, f, sort_keys=False)
+            yaml.safe_dump(
+                data, 
+                f, 
+                sort_keys=False,
+                default_flow_style=False,
+                width=1000,  # Prevent line wrapping
+                allow_unicode=True
+            )
     except Exception as e:
         logger.error(f"Error saving {file_path}: {e}")
         raise
@@ -176,7 +241,7 @@ def save_media_management_data(category: str, data: Dict[str, Any]) -> Dict[str,
     file_path = _get_file_path(category)
     
     try:
-        _save_yaml_file(file_path, data)
+        _save_yaml_file(file_path, data, category)
         logger.info(f"Saved {category} data")
         return get_media_management_data(category)
     except Exception as e:

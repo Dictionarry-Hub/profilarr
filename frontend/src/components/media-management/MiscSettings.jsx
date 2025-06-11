@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import CategoryContainer from './CategoryContainer';
+import Dropdown from '../ui/Dropdown';
 
 const MiscSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
     const [localData, setLocalData] = useState({
@@ -31,7 +32,7 @@ const MiscSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
 
     return (
         <CategoryContainer
-            title="Miscellaneous Settings"
+            title="Miscellaneous"
             onSync={handleSync}
             onSave={handleSave}
             isSaving={isSaving}
@@ -41,17 +42,18 @@ const MiscSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                     <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                         Propers and Repacks
                     </label>
-                    <select
+                    <Dropdown
                         value={localData.propersRepacks}
-                        className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-700 border border-gray-600 dark:border-gray-600 rounded-md text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onChange={(e) => handleChange('propersRepacks', e.target.value)}
-                    >
-                        <option value="preferAndUpgrade">Prefer and Upgrade</option>
-                        <option value="doNotUpgrade">Do Not Upgrade</option>
-                        <option value="doNotPrefer">Do Not Prefer</option>
-                    </select>
-                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-400">
-                        Choose how to handle proper and repack releases
+                        options={[
+                            { value: 'preferAndUpgrade', label: 'Prefer and Upgrade' },
+                            { value: 'doNotUpgrade', label: 'Do Not Upgrade' },
+                            { value: 'doNotPrefer', label: 'Do Not Prefer' }
+                        ]}
+                        placeholder="Select option"
+                    />
+                    <p className="mt-2 text-xs text-gray-400 dark:text-gray-400">
+                        Choose how to handle proper and repack releases. <span className="font-semibold text-gray-300">Do Not Prefer</span> is needed to allow custom formats to work properly.
                     </p>
                 </div>
 
@@ -61,14 +63,14 @@ const MiscSettings = ({ data, arrType, onSave, onSync, isSaving }) => {
                             type="checkbox"
                             checked={localData.enableMediaInfo}
                             onChange={(e) => handleChange('enableMediaInfo', e.target.checked)}
-                            className="w-4 h-4 text-blue-600 bg-gray-700 dark:bg-gray-700 border-gray-600 dark:border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                            className="w-4 h-4 text-blue-400 bg-gray-900/50 border border-gray-700/50 rounded focus:ring-blue-400 focus:ring-1 transition-all duration-200"
                         />
                         <span className="text-sm font-medium text-gray-100 dark:text-gray-100">
-                            Enable MediaInfo
+                            Analyze video files
                         </span>
                     </label>
-                    <p className="ml-7 mt-1 text-xs text-gray-400 dark:text-gray-400">
-                        Extract and display media file information
+                    <p className="mt-2 text-xs text-gray-400 dark:text-gray-400">
+                        Extract video information such as resolution, runtime and codec information from files.
                     </p>
                 </div>
             </div>
