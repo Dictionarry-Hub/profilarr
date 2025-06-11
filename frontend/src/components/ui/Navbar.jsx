@@ -46,6 +46,7 @@ function Navbar({darkMode, setDarkMode}) {
         if (pathname.startsWith('/regex')) return 'regex';
         if (pathname.startsWith('/format')) return 'format';
         if (pathname.startsWith('/profile')) return 'profile';
+        if (pathname.startsWith('/media-management')) return 'media-management';
         if (pathname.startsWith('/settings')) return 'settings';
         return 'settings';
     };
@@ -124,6 +125,16 @@ function Navbar({darkMode, setDarkMode}) {
                                         : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                                 }`}>
                                 Quality Profiles
+                            </Link>
+                            <Link
+                                to='/media-management'
+                                ref={el => (tabsRef.current['media-management'] = el)}
+                                className={`px-3 py-2 rounded-md text-sm font-medium relative z-10 ${
+                                    activeTab === 'media-management'
+                                        ? 'text-white'
+                                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                }`}>
+                                Media Management
                             </Link>
                             <Link
                                 to='/settings'
