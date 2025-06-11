@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { MediaManagement } from '@api/mediaManagement';
+import { toast } from 'react-toastify';
+import MiscSettings from './MiscSettings';
+import NamingSettings from './NamingSettings';
+import QualityDefinitions from './QualityDefinitions';
 
 const MediaManagementPage = () => {
     const [activeTab, setActiveTab] = useState('radarr');
     const [mediaData, setMediaData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [savingStates, setSavingStates] = useState({
+        misc: false,
+        naming: false,
+        quality_definitions: false
+    });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,10 +37,59 @@ const MediaManagementPage = () => {
         setActiveTab(tab);
     };
 
-    return (
-        <div className="container mx-auto px-4 py-6">
-            <h1 className="text-3xl font-bold text-gray-100 mb-6">Media Management</h1>
+    const transformDataForSave = (category, data) => {
+        // Transform the data back to the format expected by the backend
+        if (category === 'misc' || category === 'naming') {
+            return {
+                radarr: activeTab === 'radarr' ? data : mediaData.radarr[category],
+                sonarr: activeTab === 'sonarr' ? data : mediaData.sonarr[category]
+            };
+        } else if (category === 'quality_definitions') {
+            return {
+                qualityDefinitions: {
+                    radarr: activeTab === 'radarr' ? data : mediaData.radarr.quality_definitions,
+                    sonarr: activeTab === 'sonarr' ? data : mediaData.sonarr.quality_definitions
+                }
+            };
+        }
+        return data;
+    };
+
+    const handleSave = async (category, data) => {
+        setSavingStates(prev => ({ ...prev, [category]: true }));
+        
+        try {
+            // Transform data to match backend expectations
+            const transformedData = transformDataForSave(category, data);
             
+            await MediaManagement.updateCategory(category, transformedData);
+            
+            // Update local state with new data
+            setMediaData(prev => ({
+                ...prev,
+                [activeTab]: {
+                    ...prev[activeTab],
+                    [category]: data
+                }
+            }));
+            
+            toast.success(`${category.replace('_', ' ')} settings saved successfully`);
+        } catch (err) {
+            console.error(`Error saving ${category}:`, err);
+            toast.error(`Failed to save ${category.replace('_', ' ')} settings`);
+        } finally {
+            setSavingStates(prev => ({ ...prev, [category]: false }));
+        }
+    };
+
+    const handleSync = (category) => {
+        console.log(`Syncing ${activeTab} ${category} from arr instance`);
+        // TODO: Implement actual sync logic
+        toast.info('Sync functionality coming soon');
+    };
+
+    return (
+        <div>
             {/* Tab Navigation */}
             <nav className='flex space-x-4 my-4'>
                 <div
@@ -54,66 +112,45 @@ const MediaManagementPage = () => {
                 </div>
             </nav>
 
-            {/* Tab Content */}
-            {loading && <div>Loading...</div>}
-            {error && <div>Error: {error}</div>}
-            
+            {/* Loading and Error States */}
+            {loading && (
+                <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <p className="mt-2 text-gray-400 dark:text-gray-400">Loading media management settings...</p>
+                </div>
+            )}
+
+            {error && (
+                <div className="bg-red-900/20 border border-red-600 rounded-lg p-4 mb-6">
+                    <p className="text-red-400">Error loading settings: {error}</p>
+                </div>
+            )}
+
+            {/* Content */}
             {!loading && !error && mediaData && (
-                <>
-                    {activeTab === 'radarr' && (
-                        <div>
-                            <h2 className="text-xl font-bold mb-4">Radarr Settings</h2>
-                            
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold mb-2">Misc</h3>
-                                <pre className="bg-gray-800 p-4 rounded">
-                                    {JSON.stringify(mediaData.radarr?.misc, null, 2)}
-                                </pre>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold mb-2">Naming</h3>
-                                <pre className="bg-gray-800 p-4 rounded">
-                                    {JSON.stringify(mediaData.radarr?.naming, null, 2)}
-                                </pre>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold mb-2">Quality Definitions</h3>
-                                <pre className="bg-gray-800 p-4 rounded">
-                                    {JSON.stringify(mediaData.radarr?.quality_definitions, null, 2)}
-                                </pre>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'sonarr' && (
-                        <div>
-                            <h2 className="text-xl font-bold mb-4">Sonarr Settings</h2>
-                            
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold mb-2">Misc</h3>
-                                <pre className="bg-gray-800 p-4 rounded">
-                                    {JSON.stringify(mediaData.sonarr?.misc, null, 2)}
-                                </pre>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold mb-2">Naming</h3>
-                                <pre className="bg-gray-800 p-4 rounded">
-                                    {JSON.stringify(mediaData.sonarr?.naming, null, 2)}
-                                </pre>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold mb-2">Quality Definitions</h3>
-                                <pre className="bg-gray-800 p-4 rounded">
-                                    {JSON.stringify(mediaData.sonarr?.quality_definitions, null, 2)}
-                                </pre>
-                            </div>
-                        </div>
-                    )}
-                </>
+                <div className="space-y-6">
+                    <NamingSettings
+                        data={mediaData[activeTab]?.naming}
+                        arrType={activeTab}
+                        onSave={(data) => handleSave('naming', data)}
+                        onSync={() => handleSync('naming')}
+                        isSaving={savingStates.naming}
+                    />
+                    <MiscSettings
+                        data={mediaData[activeTab]?.misc}
+                        arrType={activeTab}
+                        onSave={(data) => handleSave('misc', data)}
+                        onSync={() => handleSync('misc')}
+                        isSaving={savingStates.misc}
+                    />
+                    <QualityDefinitions
+                        data={mediaData[activeTab]?.quality_definitions}
+                        arrType={activeTab}
+                        onSave={(data) => handleSave('quality_definitions', data)}
+                        onSync={() => handleSync('quality_definitions')}
+                        isSaving={savingStates.quality_definitions}
+                    />
+                </div>
             )}
         </div>
     );
