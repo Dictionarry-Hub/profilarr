@@ -173,15 +173,15 @@ const QualityDefinitions = ({ data, arrType, onSave, onSync, isSaving }) => {
             isSaving={isSaving}
         >
             {/* View Mode Selector and Disclaimer */}
-            <div className="mb-6 flex items-start justify-between">
-                <div className="flex items-start space-x-2 flex-1 mr-4">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex items-start space-x-2 flex-1">
                     <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
                     <div className="text-xs text-gray-400">
                         <p>Preferred size is rarely used when combining quality profiles with custom formats.</p>
                         <p className="mt-1">Min/max values are useful for setting absolute limits on what can be grabbed.</p>
                     </div>
                 </div>
-                <div className="w-56">
+                <div className="w-full sm:w-56">
                     <Dropdown
                         value={viewMode}
                         onChange={(e) => setViewMode(e.target.value)}

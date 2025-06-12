@@ -85,6 +85,90 @@ const QualityItem = ({ name, settings, arrType, viewMode, convertValue, convertB
     const displayMax = convertValue(settings.max || 0);
     const displayMaxLimit = convertValue(maxValue);
 
+    // Mobile layout
+    const [isMobile, setIsMobile] = React.useState(false);
+    
+    React.useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    if (isMobile) {
+        return (
+            <tr className="border-b border-gray-700/50 last:border-b-0">
+                <td colSpan="5" className="px-4 py-3">
+                    <div className="space-y-2">
+                        {/* Quality name */}
+                        <div>
+                            <span 
+                                className="inline-block px-2 py-1 bg-gray-800/60 border border-gray-700/50 rounded-full text-xs font-medium text-gray-200 font-mono"
+                                style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}
+                            >
+                                {name}
+                            </span>
+                        </div>
+                        
+                        {/* Slider */}
+                        <div className="w-full">
+                            <Slider
+                                min={0}
+                                max={maxValue}
+                                minValue={settings.min || 0}
+                                preferredValue={settings.preferred || 0}
+                                maxValue={settings.max || 0}
+                                onChange={handleSliderChange}
+                                disabled={disabled}
+                            />
+                        </div>
+                        
+                        {/* Number inputs row */}
+                        <div className="grid grid-cols-3 gap-2">
+                            <div>
+                                <label className="text-xs text-gray-400 block mb-1">Min</label>
+                                <NumberInput
+                                    value={displayMin}
+                                    onChange={(value) => handleInputChange('min', value)}
+                                    min={0}
+                                    max={displayMaxLimit}
+                                    disabled={disabled}
+                                    step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
+                                    className="text-xs"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-400 block mb-1">Preferred</label>
+                                <NumberInput
+                                    value={displayPreferred}
+                                    onChange={(value) => handleInputChange('preferred', value)}
+                                    min={0}
+                                    max={displayMaxLimit}
+                                    disabled={disabled}
+                                    step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
+                                    className="text-xs"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-400 block mb-1">Max</label>
+                                <NumberInput
+                                    value={displayMax}
+                                    onChange={(value) => handleInputChange('max', value)}
+                                    min={0}
+                                    max={displayMaxLimit}
+                                    disabled={disabled}
+                                    step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
+                                    className="text-xs"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        );
+    }
+
+    // Desktop layout
     return (
         <tr className="border-b border-gray-700/50 last:border-b-0 hover:bg-gray-800/20 transition-colors">
             {/* Quality Name */}
@@ -112,38 +196,44 @@ const QualityItem = ({ name, settings, arrType, viewMode, convertValue, convertB
 
             {/* Min Input */}
             <td className="px-2 py-3">
-                <NumberInput
-                    value={displayMin}
-                    onChange={(value) => handleInputChange('min', value)}
-                    min={0}
-                    max={displayMaxLimit}
-                    disabled={disabled}
-                    step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
-                />
+                <div className="w-20">
+                    <NumberInput
+                        value={displayMin}
+                        onChange={(value) => handleInputChange('min', value)}
+                        min={0}
+                        max={displayMaxLimit}
+                        disabled={disabled}
+                        step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
+                    />
+                </div>
             </td>
 
             {/* Preferred Input */}
             <td className="px-2 py-3">
-                <NumberInput
-                    value={displayPreferred}
-                    onChange={(value) => handleInputChange('preferred', value)}
-                    min={0}
-                    max={displayMaxLimit}
-                    disabled={disabled}
-                    step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
-                />
+                <div className="w-20">
+                    <NumberInput
+                        value={displayPreferred}
+                        onChange={(value) => handleInputChange('preferred', value)}
+                        min={0}
+                        max={displayMaxLimit}
+                        disabled={disabled}
+                        step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
+                    />
+                </div>
             </td>
 
             {/* Max Input */}
             <td className="px-2 py-3">
-                <NumberInput
-                    value={displayMax}
-                    onChange={(value) => handleInputChange('max', value)}
-                    min={0}
-                    max={displayMaxLimit}
-                    disabled={disabled}
-                    step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
-                />
+                <div className="w-20">
+                    <NumberInput
+                        value={displayMax}
+                        onChange={(value) => handleInputChange('max', value)}
+                        min={0}
+                        max={displayMaxLimit}
+                        disabled={disabled}
+                        step={viewMode === 'mbps' ? 0.1 : (viewMode === 'mbPerMin' ? 1 : 0.01)}
+                    />
+                </div>
             </td>
         </tr>
     );

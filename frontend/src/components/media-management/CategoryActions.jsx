@@ -15,7 +15,7 @@ const CategoryActions = ({ onSync, onSave, isSaving = false, isSyncing = false }
                 ) : (
                     <RefreshCw className="w-4 h-4 text-blue-500" />
                 )}
-                <span>Sync</span>
+                <span className="hidden sm:inline">Sync</span>
             </button>
             <button
                 onClick={onSave}
@@ -27,7 +27,7 @@ const CategoryActions = ({ onSync, onSave, isSaving = false, isSyncing = false }
                 ) : (
                     <Save className="w-4 h-4 text-blue-500" />
                 )}
-                <span>Save</span>
+                <span className="hidden sm:inline">Save</span>
             </button>
         </div>
     );

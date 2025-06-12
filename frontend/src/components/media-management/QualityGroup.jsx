@@ -25,9 +25,9 @@ const QualityGroup = ({ title, children, isExpanded = false, onToggle, unitLabel
             {isExpanded && (
                 <div className="overflow-hidden">
                     <table className="w-full">
-                        <thead>
+                        <thead className="hidden sm:table-header-group">
                             <tr>
-                                <th className="text-left pl-6 px-4 pt-4 pb-2 text-xs font-medium text-gray-300 w-32">Quality</th>
+                                <th className="text-left pl-6 px-4 pt-4 pb-2 text-xs font-medium text-gray-300 w-40">Quality</th>
                                 <th className="text-left px-2 pt-4 pb-2 text-xs font-medium text-gray-300">Range <span className="text-gray-400 font-normal">({unitLabel})</span></th>
                                 <th className="text-center px-1 pt-4 pb-2 text-xs font-medium text-gray-300 w-16">Min</th>
                                 <th className="text-center px-1 pt-4 pb-2 text-xs font-medium text-gray-300 w-20">Preferred</th>

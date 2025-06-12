@@ -25,7 +25,7 @@ const CategoryContainer = ({
             >
                 <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-3">
-                        <h1 className="text-base font-semibold text-gray-100">
+                        <h1 className="text-sm sm:text-base font-semibold text-gray-100">
                             {title}
                         </h1>
                         {expanded ?

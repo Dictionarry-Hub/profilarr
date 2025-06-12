@@ -153,7 +153,7 @@ const MediaManagementPage = () => {
             {/* Tab Navigation - only show if there's data */}
             {hasData && (
                 <nav className='flex justify-between items-center my-4'>
-                    <div className='flex space-x-4'>
+                    <div className='flex space-x-2'>
                         {mediaData.radarr && Object.keys(mediaData.radarr).length > 0 && (
                             <div
                                 onClick={() => handleTabChange('radarr')}
