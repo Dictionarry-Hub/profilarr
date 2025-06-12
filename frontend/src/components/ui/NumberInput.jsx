@@ -71,13 +71,12 @@ const NumberInput = ({
     };
 
     const inputClasses = [
-        'w-20 h-8 px-2 py-1 text-sm border border-gray-700',
+        'w-full h-8 px-2 py-1 text-sm border border-gray-700',
         'rounded-l focus:outline-none text-left',
         'bg-gray-800',
         isFocused ? 'text-blue-400' : 'text-gray-300',
         '[appearance:textfield]',
-        disabled && 'opacity-50 cursor-not-allowed',
-        className
+        disabled && 'opacity-50 cursor-not-allowed'
     ]
         .filter(Boolean)
         .join(' ');

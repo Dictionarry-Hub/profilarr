@@ -140,7 +140,7 @@ const Modal = ({
                         {title}
                     </h3>
                     {tabs && (
-                        <div className='ml-3'>
+                        <div className='ml-auto mr-3'>
                             <TabViewer
                                 tabs={tabs}
                                 activeTab={activeTab}
@@ -150,7 +150,7 @@ const Modal = ({
                     )}
                     <button
                         onClick={handleClose}
-                        className='ml-auto text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors'>
+                        className={`${tabs ? '' : 'ml-auto'} text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors`}>
                         <svg
                             className='w-6 h-6'
                             fill='none'

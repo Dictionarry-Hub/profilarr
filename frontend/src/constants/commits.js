@@ -6,7 +6,8 @@ import {
     Bug, // for fix
     Code, // for regex
     FileJson, // for format
-    Settings // for profile
+    Settings, // for profile
+    Cog // for media management
 } from 'lucide-react';
 
 export const COMMIT_TYPES = [
@@ -67,6 +68,11 @@ export const FILE_TYPES = {
         bg: 'bg-amber-500/10',
         text: 'text-amber-400',
         icon: Settings
+    },
+    'Media Management': {
+        bg: 'bg-orange-500/10',
+        text: 'text-orange-400',
+        icon: Cog
     }
 };
 
@@ -85,5 +91,10 @@ export const COMMIT_SCOPES = [
         value: 'profile',
         label: 'Quality Profile',
         description: 'Changes related to quality profiles'
+    },
+    {
+        value: 'media',
+        label: 'Media Management',
+        description: 'Changes related to media management settings'
     }
 ];

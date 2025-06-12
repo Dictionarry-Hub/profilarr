@@ -10,7 +10,8 @@ import {
     FileText,
     Settings,
     File,
-    Check
+    Check,
+    Cog
 } from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
 import ViewChanges from './ViewChanges';
@@ -56,6 +57,8 @@ const ChangeRow = ({
                 return <FileText className='text-green-400' size={16} />;
             case 'Quality Profile':
                 return <Settings className='text-purple-400' size={16} />;
+            case 'Media Management':
+                return <Cog className='text-orange-400' size={16} />;
             default:
                 return <File className='text-gray-400' size={16} />;
         }

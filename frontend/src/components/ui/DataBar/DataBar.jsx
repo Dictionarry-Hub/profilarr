@@ -9,7 +9,7 @@ const FloatingBar = ({children}) => (
     <>
         <div className='fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-gray-800 to-gray-900 border-b border-gray-700 shadow-xl backdrop-blur-sm'>
             <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8'>
-                <div className='flex items-center gap-4 h-16'>{children}</div>
+                <div className='flex items-center gap-1 sm:gap-4 h-16'>{children}</div>
             </div>
         </div>
         <div className='h-16' />
@@ -39,13 +39,30 @@ const DataBar = ({
     className
 }) => {
     const [isFloating, setIsFloating] = useState(false);
+    const [isMobile, setIsMobile] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return window.innerWidth < 768;
+        }
+        return false;
+    });
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
             setIsFloating(window.scrollY > 64);
         };
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        
+        handleResize();
         window.addEventListener('scroll', handleScroll, {passive: true});
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('resize', handleResize);
+        
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleResize);
+        };
     }, []);
 
     const controls = (
@@ -57,11 +74,14 @@ const DataBar = ({
                 onAddTerm={onAddTerm}
                 onRemoveTerm={onRemoveTerm}
                 onClearTerms={onClearTerms}
-                placeholder={searchPlaceholder}
-                className='flex-1'
+                placeholder={isMobile ? 'Search' : searchPlaceholder}
+                className={`${isMobile && isSearchFocused ? 'w-full' : 'flex-1'}`}
                 requireEnter
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
             />
-            <div className='flex items-center gap-3'>
+            {(!isMobile || !isSearchFocused) && (
+                <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-3'} ${isMobile && isSearchFocused ? 'opacity-0' : 'opacity-100'}`}>
                 <SortDropdown
                     options={[
                         {key: 'name', label: 'Sort by Name'},
@@ -86,6 +106,7 @@ const DataBar = ({
                     onClick={toggleSelectionMode}
                 />
             </div>
+            )}
         </>
     );
 
@@ -95,7 +116,7 @@ const DataBar = ({
 
     return (
         <div className={className}>
-            <div className='flex items-center h-16 gap-4'>{controls}</div>
+            <div className={`flex items-center h-16 ${isMobile ? 'gap-1' : 'gap-4'}`}>{controls}</div>
         </div>
     );
 };
