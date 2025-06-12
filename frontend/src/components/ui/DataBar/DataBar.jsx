@@ -39,7 +39,12 @@ const DataBar = ({
     className
 }) => {
     const [isFloating, setIsFloating] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
+    const [isMobile, setIsMobile] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return window.innerWidth < 768;
+        }
+        return false;
+    });
     const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     useEffect(() => {
@@ -70,13 +75,13 @@ const DataBar = ({
                 onRemoveTerm={onRemoveTerm}
                 onClearTerms={onClearTerms}
                 placeholder={isMobile ? 'Search' : searchPlaceholder}
-                className={`${isMobile && isSearchFocused ? 'w-full' : 'flex-1'} transition-all duration-700 ease-out`}
+                className={`${isMobile && isSearchFocused ? 'w-full' : 'flex-1'}`}
                 requireEnter
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
             />
             {(!isMobile || !isSearchFocused) && (
-                <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-3'} transition-all duration-500 ${isMobile && isSearchFocused ? 'opacity-0 translate-x-4 scale-95' : 'opacity-100 translate-x-0 scale-100'}`}>
+                <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-3'} ${isMobile && isSearchFocused ? 'opacity-0' : 'opacity-100'}`}>
                 <SortDropdown
                     options={[
                         {key: 'name', label: 'Sort by Name'},
