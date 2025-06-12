@@ -82,7 +82,7 @@ function Navbar({darkMode, setDarkMode}) {
     }, [location]);
 
     return (
-        <nav className='bg-gradient-to-br from-gray-800 to-gray-900 border-b border-gray-700 shadow-xl backdrop-blur-sm'>
+        <nav className='bg-gradient-to-br from-gray-800 to-gray-900 border-b border-gray-700 shadow-xl backdrop-blur-sm relative z-[60]'>
             <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative'>
                 <div className='flex items-center justify-between h-16'>
                     <div className='flex items-center flex-1'>
@@ -175,7 +175,7 @@ function Navbar({darkMode, setDarkMode}) {
                     </button>
                 </div>
                 {isMobileMenuOpen && (
-                    <div className='lg:hidden absolute top-16 left-0 right-0 bg-gray-800 border-b border-gray-700 shadow-lg z-50'>
+                    <div className='lg:hidden absolute top-16 left-0 right-0 bg-gray-800 border-b border-gray-700 shadow-lg z-[60]'>
                         <div className='px-2 pt-2 pb-3 space-y-1'>
                             <Link
                                 to='/regex'

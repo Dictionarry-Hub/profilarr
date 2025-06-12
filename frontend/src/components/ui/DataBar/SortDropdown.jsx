@@ -22,7 +22,7 @@ export const SortDropdown = ({
         <div className='relative'>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className='flex items-center gap-2 px-3 py-2 rounded-md
+                className='flex items-center gap-2 px-3 py-2 min-h-10 rounded-md
           border border-gray-200 dark:border-gray-700
           bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 
           hover:bg-gray-50 dark:hover:bg-gray-750
@@ -36,7 +36,7 @@ export const SortDropdown = ({
           group-hover:[transform:rotateX(180deg)]
           group-hover:text-blue-500 dark:group-hover:text-blue-400'
                 />
-                <span className='text-sm font-medium'>Sort</span>
+                <span className='text-sm font-medium hidden sm:inline'>Sort</span>
             </button>
 
             {isOpen && (
