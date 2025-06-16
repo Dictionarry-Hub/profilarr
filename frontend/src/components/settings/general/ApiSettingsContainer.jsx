@@ -69,14 +69,14 @@ const ApiSettingsContainer = ({apiKey, onApiKeyUpdate}) => {
                             {copySuccess ? (
                                 <Check size={18} className='text-green-500' />
                             ) : (
-                                <Copy size={18} className='text-blue-500' />
+                                <Copy size={18} className='text-white' />
                             )}
                         </button>
                         <button
                             onClick={handleResetApiKey}
                             className='px-3 py-2.5 bg-gray-700/50 border border-gray-700 rounded-lg hover:bg-gray-700 text-gray-200 flex items-center justify-center transition-colors'
                             title='Reset API key - this will invalidate your current key'>
-                            <RefreshCw size={18} className='text-blue-500' />
+                            <RefreshCw size={18} className='text-white' />
                         </button>
                     </div>
 
