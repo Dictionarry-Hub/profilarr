@@ -20,7 +20,7 @@ const CategoryContainer = ({
             <button
                 onClick={() => setExpanded(!expanded)}
                 className={`w-full bg-gray-800/50 px-6 py-3.5 hover:bg-gray-700/50 transition-[background-color] ${
-                    expanded ? 'border-b border-gray-700' : ''
+                    expanded ? 'border-b border-gray-700 rounded-t-lg' : 'rounded-lg'
                 }`}
             >
                 <div className="flex justify-between items-center">
