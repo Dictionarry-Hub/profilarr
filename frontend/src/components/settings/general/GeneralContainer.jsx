@@ -4,6 +4,7 @@ import {RefreshCw} from 'lucide-react';
 import {fetchGeneralSettings} from '@api/settings';
 import ApiSettingsContainer from './ApiSettingsContainer';
 import UserSettingsContainer from './UserSettingsContainer';
+import ImportSettingsContainer from './ImportSettingsContainer';
 
 const GeneralContainer = () => {
     const [loading, setLoading] = useState(true);
@@ -63,6 +64,7 @@ const GeneralContainer = () => {
                 username={settings.username}
                 onUsernameUpdate={handleUsernameUpdate}
             />
+            <ImportSettingsContainer />
         </div>
     );
 };

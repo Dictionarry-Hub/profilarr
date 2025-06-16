@@ -63,3 +63,49 @@ def update_pat_status():
                 f"PAT status updated from {current[0]} to {pat_exists}")
         else:
             logger.debug("PAT status unchanged")
+
+
+def get_language_import_score():
+    """Get the current language import score."""
+    with get_db() as conn:
+        result = conn.execute(
+            'SELECT score FROM language_import_config ORDER BY id DESC LIMIT 1'
+        ).fetchone()
+        return result['score'] if result else -99999
+
+
+def update_language_import_score(score):
+    """Update the language import score."""
+    with get_db() as conn:
+        # Get current score first
+        current = conn.execute(
+            'SELECT score FROM language_import_config ORDER BY id DESC LIMIT 1'
+        ).fetchone()
+        current_score = current['score'] if current else None
+        
+        # Check if record exists
+        existing = conn.execute(
+            'SELECT id FROM language_import_config ORDER BY id DESC LIMIT 1'
+        ).fetchone()
+        
+        if existing:
+            # Update existing record
+            conn.execute(
+                '''
+                UPDATE language_import_config 
+                SET score = ?, updated_at = CURRENT_TIMESTAMP 
+                WHERE id = ?
+                ''', (score, existing['id']))
+        else:
+            # Insert new record
+            conn.execute(
+                '''
+                INSERT INTO language_import_config (score, updated_at)
+                VALUES (?, CURRENT_TIMESTAMP)
+                ''', (score,))
+        
+        conn.commit()
+        if current_score is not None:
+            logger.info(f"Language import score updated from {current_score} to {score}")
+        else:
+            logger.info(f"Language import score set to: {score}")
