@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from ..db import get_db
+from ..db.queries.settings import get_language_import_score, update_language_import_score
 import logging
 
 logger = logging.getLogger(__name__)
@@ -124,3 +125,34 @@ def reset_api_key():
     except Exception as e:
         logger.error(f'Failed to reset API key: {str(e)}')
         return jsonify({'error': 'Failed to reset API key'}), 500
+
+
+@bp.route('/language-import-score', methods=['GET'])
+def get_language_import_score_route():
+    try:
+        score = get_language_import_score()
+        return jsonify({'score': score})
+    except Exception as e:
+        logger.error(f'Failed to get language import score: {str(e)}')
+        return jsonify({'error': 'Failed to get language import score'}), 500
+
+
+@bp.route('/language-import-score', methods=['PUT'])
+def update_language_import_score_route():
+    data = request.get_json()
+    score = data.get('score')
+
+    if score is None:
+        return jsonify({'error': 'Score is required'}), 400
+
+    try:
+        score = int(score)
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Score must be an integer'}), 400
+
+    try:
+        update_language_import_score(score)
+        return jsonify({'message': 'Language import score updated successfully'})
+    except Exception as e:
+        logger.error(f'Failed to update language import score: {str(e)}')
+        return jsonify({'error': 'Failed to update language import score'}), 500

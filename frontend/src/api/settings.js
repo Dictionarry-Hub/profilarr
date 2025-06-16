@@ -135,3 +135,51 @@ export const resetApiKey = async currentPassword => {
         throw error;
     }
 };
+
+export const fetchLanguageImportScore = async () => {
+    try {
+        const response = await fetch(`${API_PREFIX}/settings/language-import-score`, {
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            const errorMessage = data.error || 'Failed to fetch language import score';
+            Alert.error(errorMessage);
+            throw createHandledError(errorMessage);
+        }
+        return data;
+    } catch (error) {
+        if (!error.isHandled) {
+            Alert.error(error.message || 'Failed to fetch language import score');
+        }
+        throw error;
+    }
+};
+
+export const updateLanguageImportScore = async (score) => {
+    try {
+        const response = await fetch(`${API_PREFIX}/settings/language-import-score`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({score})
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            const errorMessage = data.error || 'Failed to update language import score';
+            Alert.error(errorMessage);
+            throw createHandledError(errorMessage);
+        }
+        Alert.success('Language import score updated successfully');
+        return data;
+    } catch (error) {
+        if (!error.isHandled) {
+            Alert.error(error.message || 'Failed to update language import score');
+        }
+        throw error;
+    }
+};

@@ -11,6 +11,7 @@ import aiohttp
 from .mappings import TargetApp, ValueResolver
 from ..data.utils import load_yaml_file, get_category_directory
 from ..importarr.format_memory import import_format_from_memory, async_import_format_from_memory
+from ..db.queries.settings import get_language_import_score
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +163,7 @@ class ProfileConverter:
                     
                     format_configs.append({
                         'name': format_name,
-                        'score': -9999
+                        'score': get_language_import_score()
                     })
                 
                 return format_configs
@@ -182,7 +183,7 @@ class ProfileConverter:
                     
                     format_configs.append({
                         'name': format_name,
-                        'score': -9999
+                        'score': get_language_import_score()
                     })
                 
                 return format_configs
@@ -226,7 +227,7 @@ class ProfileConverter:
 
                     format_configs.append({
                         'name': format_name,
-                        'score': -9999
+                        'score': get_language_import_score()
                     })
 
                 except Exception as e:
@@ -280,7 +281,7 @@ class ProfileConverter:
 
                 format_configs.append({
                     'name': display_name,
-                    'score': -9999
+                    'score': get_language_import_score()
                 })
             except Exception as e:
                 logger.error(f"Error importing format {format_name}: {str(e)} (async)")
