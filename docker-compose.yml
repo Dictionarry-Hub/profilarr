@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
     frontend:
         build: ./frontend
@@ -22,3 +21,34 @@ services:
             - .env
         restart: always
 
+    radarr:
+        container_name: radarr-profilarr
+        image: ghcr.io/hotio/radarr:latest
+        restart: unless-stopped
+        ports:
+            - '7880:7878'
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=Australia/Adelaide
+        volumes:
+            - ./radarr-config:/config
+            - ./test-data:/data
+        depends_on:
+            - backend
+
+    sonarr:
+        container_name: sonarr-profilarr
+        image: ghcr.io/hotio/sonarr:latest
+        restart: unless-stopped
+        ports:
+            - '8991:8989'
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=Australia/Adelaide
+        volumes:
+            - ./sonarr-config:/config
+            - ./test-data:/data
+        depends_on:
+            - backend

@@ -35,8 +35,12 @@ function ProfileModal({
     // Tags state
     const [tags, setTags] = useState([]);
 
-    // Format scoring state
-    const [customFormats, setCustomFormats] = useState([]);
+    // Format scoring state - now app-specific
+    const [customFormats, setCustomFormats] = useState({
+        both: [],
+        radarr: [],
+        sonarr: []
+    });
     const [formatTags, setFormatTags] = useState([]);
     const [formatFilter, setFormatFilter] = useState('');
     const [formatSortKey, setFormatSortKey] = useState('score');
@@ -76,14 +80,18 @@ function ProfileModal({
         setError('');
         setTags([]);
 
-        // Format scoring state
+        // Format scoring state - initialize all apps with all formats at score 0
         const safeCustomFormats = formats.map(format => ({
             id: format.name,
             name: format.name,
             score: 0,
             tags: format.tags || []
         }));
-        setCustomFormats(safeCustomFormats);
+        setCustomFormats({
+            both: [...safeCustomFormats],
+            radarr: [...safeCustomFormats],
+            sonarr: [...safeCustomFormats]
+        });
 
         // Reset all other states to defaults
         setUpgradesAllowed(false);
@@ -147,22 +155,36 @@ function ProfileModal({
                 setUpgradeUntilScore(Number(content.upgradeUntilScore || 0));
                 setMinScoreIncrement(Number(content.minScoreIncrement || 0));
 
-                // Custom formats setup
+                // Custom formats setup - handle backwards compatible format
                 const initialCustomFormats = content.custom_formats || [];
-                const safeCustomFormats = formats.map(format => ({
-                    id: format.name,
-                    name: format.name,
-                    score:
-                        initialCustomFormats.find(cf => cf.name === format.name)
-                            ?.score || 0,
-                    tags: format.tags || []
-                }));
-                setCustomFormats(safeCustomFormats);
+                const initialCustomFormatsRadarr = content.custom_formats_radarr || [];
+                const initialCustomFormatsSonarr = content.custom_formats_sonarr || [];
+                
+                setCustomFormats({
+                    both: formats.map(format => ({
+                        id: format.name,
+                        name: format.name,
+                        score: initialCustomFormats.find(cf => cf.name === format.name)?.score || 0,
+                        tags: format.tags || []
+                    })),
+                    radarr: formats.map(format => ({
+                        id: format.name,
+                        name: format.name,
+                        score: initialCustomFormatsRadarr.find(cf => cf.name === format.name)?.score || 0,
+                        tags: format.tags || []
+                    })),
+                    sonarr: formats.map(format => ({
+                        id: format.name,
+                        name: format.name,
+                        score: initialCustomFormatsSonarr.find(cf => cf.name === format.name)?.score || 0,
+                        tags: format.tags || []
+                    }))
+                });
 
                 // Format tags
                 const allTags = [
                     ...new Set(
-                        safeCustomFormats.flatMap(format => format.tags || [])
+                        formats.flatMap(format => format.tags || [])
                     )
                 ];
                 setFormatTags(allTags);
@@ -278,12 +300,16 @@ function ProfileModal({
                     score: 0,
                     tags: format.tags || []
                 }));
-                setCustomFormats(safeCustomFormats);
+                setCustomFormats({
+                    both: [...safeCustomFormats],
+                    radarr: [...safeCustomFormats],
+                    sonarr: [...safeCustomFormats]
+                });
 
                 // Format tags
                 const allTags = [
                     ...new Set(
-                        safeCustomFormats.flatMap(format => format.tags || [])
+                        formats.flatMap(format => format.tags || [])
                     )
                 ];
                 setFormatTags(allTags);
@@ -345,62 +371,54 @@ function ProfileModal({
                     minScoreIncrement,
                     custom_formats: (() => {
                         // Check if selective mode is enabled
-                        const selectiveMode = localStorage.getItem(
-                            'formatSettingsSelectiveMode'
-                        );
-                        const useSelectiveMode =
-                            selectiveMode !== null && JSON.parse(selectiveMode);
+                        const selectiveMode = localStorage.getItem('formatSettingsSelectiveMode');
+                        const useSelectiveMode = selectiveMode !== null && JSON.parse(selectiveMode);
+                        
+                        // Helper function to process formats for an app type
+                        const processFormats = (appFormats, appType) => {
+                            if (useSelectiveMode) {
+                                try {
+                                    // Get the list of explicitly selected format IDs for this app
+                                    const selectedFormatIdsStr = localStorage.getItem(`selectedFormatIds_${appType}`);
+                                    const selectedFormatIds = selectedFormatIdsStr ? JSON.parse(selectedFormatIdsStr) : [];
 
-                        if (useSelectiveMode) {
-                            // In selective mode, save both:
-                            // 1. Formats with non-zero scores as usual
-                            // 2. Formats with zero score that have been explicitly selected in selectedFormatIds
+                                    // Get formats with non-zero scores
+                                    const nonZeroFormats = appFormats.filter(format => format.score !== 0);
 
-                            try {
-                                // Get the list of explicitly selected format IDs
-                                const selectedFormatIdsStr =
-                                    localStorage.getItem('selectedFormatIds');
-                                const selectedFormatIds = selectedFormatIdsStr
-                                    ? JSON.parse(selectedFormatIdsStr)
-                                    : [];
-
-                                // Get formats with non-zero scores
-                                const nonZeroFormats = customFormats.filter(
-                                    format => format.score !== 0
-                                );
-
-                                // Get formats with zero scores that are explicitly selected
-                                const explicitlySelectedZeroFormats =
-                                    customFormats.filter(
-                                        format =>
-                                            format.score === 0 &&
-                                            selectedFormatIds.includes(format.id)
+                                    // Get formats with zero scores that are explicitly selected
+                                    const explicitlySelectedZeroFormats = appFormats.filter(
+                                        format => format.score === 0 && selectedFormatIds.includes(format.id)
                                     );
 
-                                // Combine both lists
-                                return [
-                                    ...nonZeroFormats,
-                                    ...explicitlySelectedZeroFormats
-                                ]
-                                    .sort((a, b) => {
-                                        // First sort by score (descending)
-                                        if (b.score !== a.score) {
-                                            return b.score - a.score;
-                                        }
-                                        // Then alphabetically for equal scores
-                                        return a.name.localeCompare(b.name);
-                                    })
-                                    .map(format => ({
-                                        name: format.name,
-                                        score: format.score
-                                    }));
-                            } catch (e) {
-                                // If there's any error parsing the selectedFormatIds, fall back to just non-zero scores
-                                return customFormats
+                                    // Combine both lists
+                                    return [...nonZeroFormats, ...explicitlySelectedZeroFormats]
+                                        .sort((a, b) => {
+                                            if (b.score !== a.score) return b.score - a.score;
+                                            return a.name.localeCompare(b.name);
+                                        })
+                                        .map(format => ({
+                                            name: format.name,
+                                            score: format.score
+                                        }));
+                                } catch (e) {
+                                    // Fallback to just non-zero scores
+                                    return appFormats
+                                        .filter(format => format.score !== 0)
+                                        .sort((a, b) => {
+                                            if (b.score !== a.score) return b.score - a.score;
+                                            return a.name.localeCompare(b.name);
+                                        })
+                                        .map(format => ({
+                                            name: format.name,
+                                            score: format.score
+                                        }));
+                                }
+                            } else {
+                                // Standard behavior - only include formats with non-zero scores
+                                return appFormats
                                     .filter(format => format.score !== 0)
                                     .sort((a, b) => {
-                                        if (b.score !== a.score)
-                                            return b.score - a.score;
+                                        if (b.score !== a.score) return b.score - a.score;
                                         return a.name.localeCompare(b.name);
                                     })
                                     .map(format => ({
@@ -408,24 +426,79 @@ function ProfileModal({
                                         score: format.score
                                     }));
                             }
-                        } else {
-                            // Standard behavior - only include formats with non-zero scores
-                            return customFormats
-                                .filter(format => format.score !== 0)
-                                .sort((a, b) => {
-                                    // First sort by score (descending)
-                                    if (b.score !== a.score) {
-                                        return b.score - a.score;
-                                    }
-                                    // Then alphabetically for equal scores
-                                    return a.name.localeCompare(b.name);
-                                })
-                                .map(format => ({
-                                    name: format.name,
-                                    score: format.score
-                                }));
-                        }
+                        };
+
+                        // Always save "both" formats as the main custom_formats field for backwards compatibility
+                        return processFormats(customFormats.both || [], 'both');
                     })(),
+                    ...((() => {
+                        // Check if selective mode is enabled
+                        const selectiveMode = localStorage.getItem('formatSettingsSelectiveMode');
+                        const useSelectiveMode = selectiveMode !== null && JSON.parse(selectiveMode);
+                        
+                        // Helper function to process formats for an app type
+                        const processFormats = (appFormats, appType) => {
+                            if (useSelectiveMode) {
+                                try {
+                                    // Get the list of explicitly selected format IDs for this app
+                                    const selectedFormatIdsStr = localStorage.getItem(`selectedFormatIds_${appType}`);
+                                    const selectedFormatIds = selectedFormatIdsStr ? JSON.parse(selectedFormatIdsStr) : [];
+
+                                    // Get formats with non-zero scores
+                                    const nonZeroFormats = appFormats.filter(format => format.score !== 0);
+
+                                    // Get formats with zero scores that are explicitly selected
+                                    const explicitlySelectedZeroFormats = appFormats.filter(
+                                        format => format.score === 0 && selectedFormatIds.includes(format.id)
+                                    );
+
+                                    // Combine both lists
+                                    return [...nonZeroFormats, ...explicitlySelectedZeroFormats]
+                                        .sort((a, b) => {
+                                            if (b.score !== a.score) return b.score - a.score;
+                                            return a.name.localeCompare(b.name);
+                                        })
+                                        .map(format => ({
+                                            name: format.name,
+                                            score: format.score
+                                        }));
+                                } catch (e) {
+                                    // Fallback to just non-zero scores
+                                    return appFormats
+                                        .filter(format => format.score !== 0)
+                                        .sort((a, b) => {
+                                            if (b.score !== a.score) return b.score - a.score;
+                                            return a.name.localeCompare(b.name);
+                                        })
+                                        .map(format => ({
+                                            name: format.name,
+                                            score: format.score
+                                        }));
+                                }
+                            } else {
+                                // Standard behavior - only include formats with non-zero scores
+                                return appFormats
+                                    .filter(format => format.score !== 0)
+                                    .sort((a, b) => {
+                                        if (b.score !== a.score) return b.score - a.score;
+                                        return a.name.localeCompare(b.name);
+                                    })
+                                    .map(format => ({
+                                        name: format.name,
+                                        score: format.score
+                                    }));
+                            }
+                        };
+
+                        // Always include app-specific formats as separate fields (empty arrays if no scores)
+                        const radarrFormats = processFormats(customFormats.radarr || [], 'radarr');
+                        const sonarrFormats = processFormats(customFormats.sonarr || [], 'sonarr');
+                        
+                        return {
+                            custom_formats_radarr: radarrFormats,
+                            custom_formats_sonarr: sonarrFormats
+                        };
+                    })()),
                     qualities: sortedQualities
                         .filter(q => q.enabled)
                         .map(q => {
@@ -583,15 +656,38 @@ function ProfileModal({
                             )}
                             {activeTab === 'scoring' && (
                                 <ProfileScoringTab
-                                    formats={customFormats}
+                                    customFormats={customFormats}
                                     formatFilter={formatFilter}
                                     onFormatFilterChange={setFormatFilter}
-                                    onScoreChange={(id, score) => {
-                                        setCustomFormats(prev =>
-                                            prev.map(f =>
+                                    onScoreChange={(appType, id, score) => {
+                                        setCustomFormats(prev => {
+                                            const newFormats = {...prev};
+                                            
+                                            // If setting a non-zero score, handle conflicts
+                                            if (score !== 0) {
+                                                if (appType === 'both') {
+                                                    // Setting in "both" clears radarr AND sonarr
+                                                    newFormats.radarr = newFormats.radarr.map(f =>
+                                                        f.id === id ? {...f, score: 0} : f
+                                                    );
+                                                    newFormats.sonarr = newFormats.sonarr.map(f =>
+                                                        f.id === id ? {...f, score: 0} : f
+                                                    );
+                                                } else {
+                                                    // Setting in radarr/sonarr only clears "both"
+                                                    newFormats.both = newFormats.both.map(f =>
+                                                        f.id === id ? {...f, score: 0} : f
+                                                    );
+                                                }
+                                            }
+                                            
+                                            // Update the target app type
+                                            newFormats[appType] = newFormats[appType].map(f =>
                                                 f.id === id ? {...f, score} : f
-                                            )
-                                        );
+                                            );
+                                            
+                                            return newFormats;
+                                        });
                                     }}
                                     formatSortKey={formatSortKey}
                                     formatSortDirection={formatSortDirection}
@@ -600,24 +696,51 @@ function ProfileModal({
                                     tagFilter={tagFilter}
                                     onTagFilterChange={setTagFilter}
                                     tagScores={tagScores}
-                                    onTagScoreChange={(tag, score) => {
+                                    onTagScoreChange={(appType, tag, score) => {
                                         setTagScores(prev => ({
                                             ...prev,
                                             [tag]: score
                                         }));
-                                        setCustomFormats(prev =>
-                                            prev.map(format => {
-                                                if (
-                                                    format.tags?.includes(tag)
-                                                ) {
-                                                    return {
-                                                        ...format,
-                                                        score
-                                                    };
+                                        setCustomFormats(prev => {
+                                            const newFormats = {...prev};
+                                            
+                                            // If setting a non-zero score, handle conflicts for all formats with this tag
+                                            if (score !== 0) {
+                                                if (appType === 'both') {
+                                                    // Setting in "both" clears radarr AND sonarr for formats with this tag
+                                                    newFormats.radarr = newFormats.radarr.map(format => {
+                                                        if (format.tags?.includes(tag)) {
+                                                            return {...format, score: 0};
+                                                        }
+                                                        return format;
+                                                    });
+                                                    newFormats.sonarr = newFormats.sonarr.map(format => {
+                                                        if (format.tags?.includes(tag)) {
+                                                            return {...format, score: 0};
+                                                        }
+                                                        return format;
+                                                    });
+                                                } else {
+                                                    // Setting in radarr/sonarr only clears "both" for formats with this tag
+                                                    newFormats.both = newFormats.both.map(format => {
+                                                        if (format.tags?.includes(tag)) {
+                                                            return {...format, score: 0};
+                                                        }
+                                                        return format;
+                                                    });
+                                                }
+                                            }
+                                            
+                                            // Update the target app type
+                                            newFormats[appType] = newFormats[appType].map(format => {
+                                                if (format.tags?.includes(tag)) {
+                                                    return {...format, score};
                                                 }
                                                 return format;
-                                            })
-                                        );
+                                            });
+                                            
+                                            return newFormats;
+                                        });
                                     }}
                                     tagSortKey={tagSortKey}
                                     tagSortDirection={tagSortDirection}

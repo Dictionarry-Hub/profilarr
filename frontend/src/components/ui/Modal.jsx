@@ -150,7 +150,7 @@ const Modal = ({
                     )}
                     <button
                         onClick={handleClose}
-                        className='text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors'>
+                        className={`text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors ${!tabs ? 'ml-auto' : ''}`}>
                         <svg
                             className='w-6 h-6'
                             fill='none'

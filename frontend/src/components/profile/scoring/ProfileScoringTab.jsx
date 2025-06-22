@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import FormatSettings from './FormatSettings';
 import UpgradeSettings from './UpgradeSettings';
 
 const ProfileScoringTab = ({
-    formats,
+    customFormats,
     onScoreChange,
     minCustomFormatScore,
     upgradeUntilScore,
@@ -15,6 +15,7 @@ const ProfileScoringTab = ({
     upgradesAllowed,
     onUpgradesAllowedChange
 }) => {
+    const [activeApp, setActiveApp] = useState('both');
     return (
         <div className='w-full space-y-6'>
             {/* Upgrade Settings Section */}
@@ -78,8 +79,11 @@ const ProfileScoringTab = ({
                 </div>
 
                 <FormatSettings
-                    formats={formats}
-                    onScoreChange={onScoreChange}
+                    formats={customFormats[activeApp] || []}
+                    onScoreChange={(id, score) => onScoreChange(activeApp, id, score)}
+                    appType={activeApp}
+                    activeApp={activeApp}
+                    onAppChange={setActiveApp}
                 />
             </div>
         </div>
@@ -87,14 +91,32 @@ const ProfileScoringTab = ({
 };
 
 ProfileScoringTab.propTypes = {
-    formats: PropTypes.arrayOf(
-        PropTypes.shape({
-            id: PropTypes.string.isRequired,
-            name: PropTypes.string.isRequired,
-            score: PropTypes.number.isRequired,
-            tags: PropTypes.arrayOf(PropTypes.string)
-        })
-    ).isRequired,
+    customFormats: PropTypes.shape({
+        both: PropTypes.arrayOf(
+            PropTypes.shape({
+                id: PropTypes.string.isRequired,
+                name: PropTypes.string.isRequired,
+                score: PropTypes.number.isRequired,
+                tags: PropTypes.arrayOf(PropTypes.string)
+            })
+        ),
+        radarr: PropTypes.arrayOf(
+            PropTypes.shape({
+                id: PropTypes.string.isRequired,
+                name: PropTypes.string.isRequired,
+                score: PropTypes.number.isRequired,
+                tags: PropTypes.arrayOf(PropTypes.string)
+            })
+        ),
+        sonarr: PropTypes.arrayOf(
+            PropTypes.shape({
+                id: PropTypes.string.isRequired,
+                name: PropTypes.string.isRequired,
+                score: PropTypes.number.isRequired,
+                tags: PropTypes.arrayOf(PropTypes.string)
+            })
+        )
+    }).isRequired,
     onScoreChange: PropTypes.func.isRequired,
     minCustomFormatScore: PropTypes.number.isRequired,
     upgradeUntilScore: PropTypes.number.isRequired,

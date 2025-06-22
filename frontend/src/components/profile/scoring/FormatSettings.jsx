@@ -5,27 +5,27 @@ import useSearch from '@hooks/useSearch';
 import AdvancedView from './AdvancedView';
 import BasicView from './BasicView';
 import FormatSelectorModal from './FormatSelectorModal';
-import {ChevronDown, Settings, List, CheckSquare, Plus} from 'lucide-react';
+import FormatSettingsModal from './FormatSettingsModal';
+import {Settings, Plus, CheckSquare} from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
 
-const FormatSettings = ({formats, onScoreChange}) => {
+const FormatSettings = ({formats, onScoreChange, appType = 'both', activeApp, onAppChange}) => {
     // Initialize state from localStorage, falling back to true if no value is stored
     const [isAdvancedView, setIsAdvancedView] = useState(() => {
         const stored = localStorage.getItem('formatSettingsView');
         return stored === null ? true : JSON.parse(stored);
     });
 
-    // Initialize selectiveMode from localStorage
+    // Initialize selectiveMode from localStorage (app-specific)
     const [showSelectiveMode, setShowSelectiveMode] = useState(() => {
-        const stored = localStorage.getItem('formatSettingsSelectiveMode');
+        const stored = localStorage.getItem(`formatSettingsSelectiveMode_${appType}`);
         return stored === null ? false : JSON.parse(stored);
     });
     
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [availableFormats, setAvailableFormats] = useState([]);
     const [selectedFormatIds, setSelectedFormatIds] = useState(() => {
         try {
-            const stored = localStorage.getItem('selectedFormatIds');
+            const stored = localStorage.getItem(`selectedFormatIds_${appType}`);
             return stored ? JSON.parse(stored) : [];
         } catch {
             return [];
@@ -34,6 +34,9 @@ const FormatSettings = ({formats, onScoreChange}) => {
     
     // Format selector modal state
     const [isSelectorModalOpen, setIsSelectorModalOpen] = useState(false);
+    
+    // Settings modal state
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     
     // Calculate which formats to display
     const displayFormats = useMemo(() => {
@@ -59,13 +62,13 @@ const FormatSettings = ({formats, onScoreChange}) => {
     }, [isAdvancedView]);
 
     useEffect(() => {
-        localStorage.setItem('formatSettingsSelectiveMode', JSON.stringify(showSelectiveMode));
-    }, [showSelectiveMode]);
+        localStorage.setItem(`formatSettingsSelectiveMode_${appType}`, JSON.stringify(showSelectiveMode));
+    }, [showSelectiveMode, appType]);
     
     // Save selected format IDs to localStorage
     useEffect(() => {
-        localStorage.setItem('selectedFormatIds', JSON.stringify(selectedFormatIds));
-    }, [selectedFormatIds]);
+        localStorage.setItem(`selectedFormatIds_${appType}`, JSON.stringify(selectedFormatIds));
+    }, [selectedFormatIds, appType]);
 
     // Calculate available formats for selection (not already in use)
     useEffect(() => {
@@ -138,10 +141,6 @@ const FormatSettings = ({formats, onScoreChange}) => {
         }
     };
 
-    // Toggle selective mode on/off
-    const toggleSelectiveMode = () => {
-        setShowSelectiveMode(prev => !prev);
-    };
     
     // Open the format selector modal
     const openFormatSelector = () => {
@@ -163,130 +162,43 @@ const FormatSettings = ({formats, onScoreChange}) => {
                 />
 
                 <div className='flex gap-2'>
-                    {/* View Mode Dropdown */}
-                    <div className='relative flex'>
+                    {/* Settings Button */}
+                    <Tooltip content="Format settings" position="bottom">
                         <button
-                            onClick={() => setIsDropdownOpen(prev => !prev)}
-                            className='inline-flex items-center justify-between w-36 px-3 py-2 rounded-md border border-gray-300 bg-white hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600'
-                            aria-expanded={isDropdownOpen}
-                            aria-haspopup='true'
+                            onClick={() => setIsSettingsModalOpen(true)}
+                            className='px-3 py-2 rounded-md border border-gray-300 bg-white hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600 flex items-center gap-2'
                         >
-                            <span className='flex items-center gap-2'>
-                                {isAdvancedView ? (
-                                    <>
-                                        <Settings
-                                            size={16}
-                                            className='text-gray-500 dark:text-gray-400'
-                                        />
-                                        <span className='text-sm font-medium'>
-                                            Advanced
-                                        </span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <List
-                                            size={16}
-                                            className='text-gray-500 dark:text-gray-400'
-                                        />
-                                        <span className='text-sm font-medium'>
-                                            Basic
-                                        </span>
-                                    </>
-                                )}
-                            </span>
-                            <ChevronDown
-                                size={16}
-                                className={`text-gray-500 dark:text-gray-400 transition-transform ${
-                                    isDropdownOpen ? 'transform rotate-180' : ''
-                                }`}
-                            />
+                            <Settings size={16} className='text-gray-500 dark:text-gray-400' />
+                            <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>Settings</span>
                         </button>
-                        {isDropdownOpen && (
-                            <>
-                                <div
-                                    className='fixed inset-0'
-                                    onClick={() => setIsDropdownOpen(false)}
-                                />
-                                <div className='absolute right-0 mt-12 w-36 rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-10'>
-                                    <div>
-                                        <button
-                                            onClick={() => {
-                                                setIsAdvancedView(false);
-                                                setIsDropdownOpen(false);
-                                            }}
-                                            className={`w-full text-left px-4 py-2 text-sm ${
-                                                !isAdvancedView
-                                                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200'
-                                                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                            }`}>
-                                            <div className='flex items-center gap-2'>
-                                                <List size={16} />
-                                                <span>Basic</span>
-                                            </div>
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setIsAdvancedView(true);
-                                                setIsDropdownOpen(false);
-                                            }}
-                                            className={`w-full text-left px-4 py-2 text-sm ${
-                                                isAdvancedView
-                                                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200'
-                                                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                            }`}>
-                                            <div className='flex items-center gap-2'>
-                                                <Settings size={16} />
-                                                <span>Advanced</span>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
+                    </Tooltip>
                     
-                    {/* Selective Mode with Format Selector */}
-                    <div className="flex">
-                        <button
-                            onClick={toggleSelectiveMode}
-                            className={`px-3 py-2 rounded-l-md border transition-colors flex items-center gap-1 ${
-                                showSelectiveMode
-                                    ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300'
-                                    : 'border-gray-300 bg-white hover:border-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600'
-                            }`}
-                            title={showSelectiveMode ? 'Hide unused formats' : 'Show all formats'}
-                        >
-                            <CheckSquare size={16} />
-                            <span className='text-sm font-medium'>Selective</span>
-                        </button>
-                        
-                        {showSelectiveMode && (
-                            <Tooltip
-                                content="Select formats to include in your profile"
-                                position="bottom"
+                    {/* Selective Mode Toggle */}
+                    <button
+                        onClick={() => setShowSelectiveMode(prev => !prev)}
+                        className={`px-3 py-2 rounded-md border transition-colors flex items-center gap-2 ${
+                            showSelectiveMode
+                                ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300'
+                                : 'border-gray-300 bg-white hover:border-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600'
+                        }`}
+                        title={showSelectiveMode ? 'Hide unused formats' : 'Show all formats'}
+                    >
+                        <CheckSquare size={16} />
+                        <span className='text-sm font-medium'>Selective</span>
+                    </button>
+                    
+                    {/* Add Format Button (only show in selective mode) */}
+                    {showSelectiveMode && (
+                        <Tooltip content="Add formats to profile" position="bottom">
+                            <button
+                                onClick={openFormatSelector}
+                                className="px-3 py-2 border rounded-md border-gray-300 bg-white hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600 flex items-center gap-2"
                             >
-                                <button
-                                    onClick={openFormatSelector}
-                                    className="px-3 py-2 border rounded-r-md border-gray-300 bg-white hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600 flex items-center gap-1 h-full -ml-[1px]"
-                                >
-                                    <Plus size={16} />
-                                    <span className="text-sm font-medium">Add</span>
-                                </button>
-                            </Tooltip>
-                        )}
-                        
-                        {!showSelectiveMode && (
-                            <Tooltip
-                                content="Enable selective mode to add formats"
-                                position="bottom"
-                            >
-                                <div className="px-3 py-2 border rounded-r-md bg-gray-100 border-gray-300 text-gray-400 dark:bg-gray-700 dark:border-gray-700 dark:text-gray-500 flex items-center gap-1 cursor-not-allowed h-full -ml-[1px]">
-                                    <Plus size={16} />
-                                    <span className="text-sm font-medium">Add</span>
-                                </div>
-                            </Tooltip>
-                        )}
-                    </div>
+                                <Plus size={16} className='text-gray-500 dark:text-gray-400' />
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Add</span>
+                            </button>
+                        </Tooltip>
+                    )}
                 </div>
             </div>
 
@@ -298,6 +210,16 @@ const FormatSettings = ({formats, onScoreChange}) => {
                 selectedFormatIds={selectedFormatIds}
                 allFormats={formats}
                 onFormatToggle={handleFormatToggle}
+            />
+
+            {/* Settings Modal */}
+            <FormatSettingsModal
+                isOpen={isSettingsModalOpen}
+                onClose={() => setIsSettingsModalOpen(false)}
+                activeApp={activeApp}
+                onAppChange={onAppChange}
+                isAdvancedView={isAdvancedView}
+                onViewChange={setIsAdvancedView}
             />
 
             {/* Format Display */}
@@ -329,7 +251,10 @@ FormatSettings.propTypes = {
             tags: PropTypes.arrayOf(PropTypes.string)
         })
     ).isRequired,
-    onScoreChange: PropTypes.func.isRequired
+    onScoreChange: PropTypes.func.isRequired,
+    appType: PropTypes.oneOf(['both', 'radarr', 'sonarr']),
+    activeApp: PropTypes.oneOf(['both', 'radarr', 'sonarr']).isRequired,
+    onAppChange: PropTypes.func.isRequired
 };
 
 export default FormatSettings;
