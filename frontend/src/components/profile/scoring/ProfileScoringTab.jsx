@@ -72,8 +72,7 @@ const ProfileScoringTab = ({
                     </h2>
                     <p className='text-xs text-gray-500 dark:text-gray-400'>
                         Customize format scoring to prioritize your preferred downloads. 
-                        Use Basic mode for a simple list view with sliders, Advanced mode for 
-                        detailed A/V category grids, and Selective mode to display and manage 
+                        Selective mode allows you to display and manage
                         only formats you care about instead of all available formats.
                     </p>
                 </div>

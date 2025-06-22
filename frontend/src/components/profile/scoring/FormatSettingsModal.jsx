@@ -32,9 +32,9 @@ const FormatSettingsModal = ({
         >
             <div className="space-y-6">
                 <div>
-                    <h3 className="text-sm font-medium text-gray-200 mb-2">Application Target</h3>
+                    <h3 className="text-sm font-medium text-gray-200 mb-2">Instance Scoring</h3>
                     <p className="text-xs text-gray-400 mb-3">
-                        Choose which application(s) these format scores will apply to. Setting scores in one category automatically clears them from conflicting categories.
+                        Set scores for both apps by default, or override with app-specific scores. App-specific scores take precedence over default scores.
                     </p>
                     <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
                         {[
@@ -62,7 +62,7 @@ const FormatSettingsModal = ({
                 <div>
                     <h3 className="text-sm font-medium text-gray-200 mb-2">Display Mode</h3>
                     <p className="text-xs text-gray-400 mb-3">
-                        Choose how format scores are displayed and edited.
+                        Choose how format scores are displayed and edited. Use Basic mode for a simple list view with sliders, Advanced mode for detailed A/V category grids.
                     </p>
                     <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
                         {[
