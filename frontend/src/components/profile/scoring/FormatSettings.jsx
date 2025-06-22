@@ -16,9 +16,9 @@ const FormatSettings = ({formats, onScoreChange, appType = 'both', activeApp, on
         return stored === null ? true : JSON.parse(stored);
     });
 
-    // Initialize selectiveMode from localStorage (app-specific)
+    // Initialize selectiveMode from localStorage (global setting)
     const [showSelectiveMode, setShowSelectiveMode] = useState(() => {
-        const stored = localStorage.getItem(`formatSettingsSelectiveMode_${appType}`);
+        const stored = localStorage.getItem('formatSettingsSelectiveMode');
         return stored === null ? false : JSON.parse(stored);
     });
     
@@ -62,8 +62,8 @@ const FormatSettings = ({formats, onScoreChange, appType = 'both', activeApp, on
     }, [isAdvancedView]);
 
     useEffect(() => {
-        localStorage.setItem(`formatSettingsSelectiveMode_${appType}`, JSON.stringify(showSelectiveMode));
-    }, [showSelectiveMode, appType]);
+        localStorage.setItem('formatSettingsSelectiveMode', JSON.stringify(showSelectiveMode));
+    }, [showSelectiveMode]);
     
     // Save selected format IDs to localStorage
     useEffect(() => {
@@ -129,14 +129,24 @@ const FormatSettings = ({formats, onScoreChange, appType = 'both', activeApp, on
         // Pass the score change to parent
         onScoreChange(formatId, score);
         
-        // If the score is changing from 0 to non-zero, we no longer need to track it
-        // as an explicitly selected format (it's tracked by virtue of its non-zero score)
+        const format = formats.find(f => f.id === formatId);
+        if (!format) return;
+        
         if (score !== 0) {
-            const format = formats.find(f => f.id === formatId);
-            if (format && format.score === 0 && selectedFormatIds.includes(formatId)) {
+            // If the score is changing from 0 to non-zero, we no longer need to track it
+            // as an explicitly selected format (it's tracked by virtue of its non-zero score)
+            if (format.score === 0 && selectedFormatIds.includes(formatId)) {
                 // Format was previously explicitly selected with zero score, but now has a non-zero score
                 // We can remove it from our explicit selection tracking
                 setSelectedFormatIds(prev => prev.filter(id => id !== formatId));
+            }
+        } else {
+            // If the score is changing to 0, we need to track it as explicitly selected
+            // so it remains visible in selective mode
+            if (format.score !== 0 && !selectedFormatIds.includes(formatId)) {
+                // Format was previously non-zero, but now is 0
+                // Add it to our explicit selection tracking
+                setSelectedFormatIds(prev => [...prev, formatId]);
             }
         }
     };
