@@ -200,7 +200,15 @@ def import_profiles():
             try:
                 profile_file = f"{get_category_directory('profile')}/{profile_name}.yml"
                 format_data = load_yaml_file(profile_file)
+                
+                # Extract from main custom_formats
                 for cf in format_data.get('custom_formats', []):
+                    format_names.add(cf['name'])
+                
+                # Extract from app-specific custom_formats
+                for cf in format_data.get('custom_formats_radarr', []):
+                    format_names.add(cf['name'])
+                for cf in format_data.get('custom_formats_sonarr', []):
                     format_names.add(cf['name'])
             except Exception as e:
                 logger.error(f"Error loading profile {profile_name}: {str(e)}")

@@ -430,6 +430,22 @@ class ProfileConverter:
             format_item = {"name": cf["name"], "score": cf["score"]}
             converted_profile.format_items.append(format_item)
 
+        # Process app-specific custom formats based on target app
+        app_specific_field = None
+        if self.target_app == TargetApp.RADARR:
+            app_specific_field = "custom_formats_radarr"
+        elif self.target_app == TargetApp.SONARR:
+            app_specific_field = "custom_formats_sonarr"
+            
+        if app_specific_field and app_specific_field in profile:
+            for cf in profile[app_specific_field]:
+                format_name = cf["name"]
+                # Apply [Dictionarry] suffix if import_as_unique is enabled
+                if self.import_as_unique:
+                    format_name = f"{format_name} [Dictionarry]"
+                format_item = {"name": format_name, "score": cf["score"]}
+                converted_profile.format_items.append(format_item)
+
         converted_profile.items.reverse()
 
         return converted_profile

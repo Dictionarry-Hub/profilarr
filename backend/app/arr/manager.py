@@ -490,7 +490,17 @@ def run_import_for_config(config_row):
                     continue
 
                 profile_data = load_yaml_file(str(profile_file))
+                
+                # Extract from main custom_formats
                 for cf in profile_data.get('custom_formats', []):
+                    if 'name' in cf:
+                        referenced_cf_names.add(cf['name'])
+                
+                # Extract from app-specific custom_formats
+                for cf in profile_data.get('custom_formats_radarr', []):
+                    if 'name' in cf:
+                        referenced_cf_names.add(cf['name'])
+                for cf in profile_data.get('custom_formats_sonarr', []):
                     if 'name' in cf:
                         referenced_cf_names.add(cf['name'])
             except Exception as e:
