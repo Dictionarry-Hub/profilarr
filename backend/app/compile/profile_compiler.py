@@ -116,7 +116,7 @@ class ProfileConverter:
                                 c['name'] = f"Includes {language_data['name']}"
                     formats_to_import.append(format_data)
 
-            arr_type = 'radarr' if self.target_app == TargetApp.RADARR else 'sonarr'
+            arr_type = 'radarr' if self.target_app == TargetApp.RADARR else 'sonarr' if self.target_app == TargetApp.SONARR else 'readarr'
             for format_data in formats_to_import:
                 try:
                     result = import_format_from_memory(
@@ -230,7 +230,7 @@ class ProfileConverter:
 
         used_qualities = set()
         quality_ids_in_groups = set()
-        
+
         # First pass: Gather all quality IDs in groups to avoid duplicates
         for quality_entry in profile.get("qualities", []):
             if quality_entry.get("id", 0) < 0:  # It's a group
@@ -262,7 +262,7 @@ class ProfileConverter:
 
         # Add all unused qualities as disabled, but skip those already in groups
         for quality_name, quality_data in self.quality_mappings.items():
-            if (quality_name.upper() not in used_qualities and 
+            if (quality_name.upper() not in used_qualities and
                 quality_data["id"] not in quality_ids_in_groups):
                 converted_profile.items.append({
                     "quality": quality_data,

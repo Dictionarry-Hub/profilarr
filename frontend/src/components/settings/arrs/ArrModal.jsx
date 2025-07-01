@@ -37,7 +37,8 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
 
     const arrTypes = [
         {value: 'radarr', label: 'Radarr'},
-        {value: 'sonarr', label: 'Sonarr'}
+        {value: 'sonarr', label: 'Sonarr'},
+        {value: 'readarr', label: 'Readarr'}
     ];
 
     const syncMethods = [
@@ -111,7 +112,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                             !formData.arrServer ||
                             !formData.apiKey
                         }
-                        className='flex items-center px-3 py-2 text-sm rounded-lg bg-emerald-600 hover:bg-emerald-700 
+                        className='flex items-center px-3 py-2 text-sm rounded-lg bg-emerald-600 hover:bg-emerald-700
                             disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors'>
                         {isTestingConnection ? (
                             <>
@@ -134,7 +135,7 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                     <button
                         type='submit'
                         form='arrForm'
-                        className='flex items-center px-3 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 
+                        className='flex items-center px-3 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700
                             text-white font-medium transition-colors'>
                         {saveConfirm ? (
                             <>

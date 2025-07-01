@@ -8,14 +8,14 @@
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-blue?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/santiagosayshey)
 [![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Support-blue?logo=github-sponsors)](https://github.com/sponsors/Dictionarry-Hub)
 
-Configuration management tool for Radarr/Sonarr that automates importing and version control of custom formats and quality profiles.
+Configuration management tool for Radarr/Sonarr/Readarr that automates importing and version control of custom formats and quality profiles.
 
 ![Profilarr Preview](.github/images/preview.png)
 
 ## Features
 
 -   🔄 Automatic synchronization with remote configuration databases
--   🎯 Direct import to Radarr/Sonarr instances
+-   🎯 Direct import to Radarr/Sonarr/Readarr instances
 -   🔧 Git-based version control of your configurations
 -   ⚡ Preserve local customizations during updates
 -   🛠️ Built-in conflict resolution
@@ -70,7 +70,7 @@ Detailed contributing guidelines will be available soon. Join our Discord to dis
 
 ## Status
 
-Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub) project to simplify media automation. 
+Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub) project to simplify media automation.
 
 ### Known Issues
 - https://github.com/Dictionarry-Hub/profilarr/issues
@@ -80,4 +80,4 @@ Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub)
 - 1.1 will focus on improving the 'setup' side of profilarr - adding media management / quality settings syncs
 
 ### Personal Note
-Profilarr is maintained by a single CS student with no formal development experience, in their spare time. Development happens when time allows, which may affect response times for fixes and new features. The project is continuously improving, and your patience, understanding, and contributions are greatly appreciated as Profilarr grows and matures. 
+Profilarr is maintained by a single CS student with no formal development experience, in their spare time. Development happens when time allows, which may affect response times for fixes and new features. The project is continuously improving, and your patience, understanding, and contributions are greatly appreciated as Profilarr grows and matures.

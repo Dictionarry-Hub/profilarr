@@ -47,7 +47,8 @@ def import_formats_to_arr(format_names, base_url, api_key, arr_type,
 
         converter = FormatConverter(patterns)
         target_app = TargetApp.RADARR if arr_type.lower(
-        ) == 'radarr' else TargetApp.SONARR
+        ) == 'radarr' else TargetApp.SONARR if arr_type.lower(
+        ) == 'sonarr' else TargetApp.READARR
 
         for i, format_name in enumerate(format_names):
             try:

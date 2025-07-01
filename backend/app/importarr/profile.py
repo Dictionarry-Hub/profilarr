@@ -51,7 +51,8 @@ def import_profiles_to_arr(profile_names: List[str], original_names: List[str],
             existing_profile_map[profile['name']] = profile['id']
 
         target_app = TargetApp.RADARR if arr_type.lower(
-        ) == 'radarr' else TargetApp.SONARR
+        ) == 'radarr' else TargetApp.SONARR if arr_type.lower(
+        ) == 'sonarr' else TargetApp.READARR
 
         for i, profile_name in enumerate(profile_names):
             try:

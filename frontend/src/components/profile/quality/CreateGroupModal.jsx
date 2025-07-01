@@ -61,7 +61,8 @@ const CreateGroupModal = ({
                 qualities: selectedQualities,
                 enabled: editingGroup ? editingGroup.enabled : true,
                 radarr: editingGroup?.radarr,
-                sonarr: editingGroup?.sonarr
+                sonarr: editingGroup?.sonarr,
+                readarr: editingGroup?.readarr
             };
 
             onCreateGroup(groupData);
