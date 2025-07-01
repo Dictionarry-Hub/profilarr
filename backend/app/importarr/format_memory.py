@@ -88,14 +88,14 @@ def import_format_from_memory(format_data: Dict,
                               import_as_unique: bool = False) -> Dict:
     """
     Import a format directly from memory without requiring file loading.
-    
+
     Args:
         format_data: Dictionary containing the format specification
         base_url: Arr instance base URL
         api_key: API key for arr instance
         arr_type: Type of arr instance (radarr/sonarr)
         import_as_unique: Whether to append [Dictionarry] to format names
-        
+
     Returns:
         Dict containing import results
     """
@@ -149,7 +149,8 @@ def import_format_from_memory(format_data: Dict,
                 continue
 
         target_app = TargetApp.RADARR if arr_type.lower(
-        ) == 'radarr' else TargetApp.SONARR
+        ) == 'radarr' else TargetApp.SONARR if arr_type.lower(
+        ) == 'sonarr' else TargetApp.READARR
         converter = FormatConverter(patterns)
         converted_format = converter.convert_format(custom_format, target_app)
 

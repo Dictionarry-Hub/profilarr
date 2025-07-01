@@ -12,6 +12,7 @@ class TargetApp(Enum):
     """Enum for target application types"""
     RADARR = auto()
     SONARR = auto()
+    READARR = auto()
 
 
 class IndexerFlags:
@@ -30,6 +31,17 @@ class IndexerFlags:
     }
 
     SONARR = {
+        'freeleech': 1,
+        'halfleech': 2,
+        'double_upload': 4,
+        'internal': 8,
+        'scene': 16,
+        'freeleech_75': 32,
+        'freeleech_25': 64,
+        'nuked': 128
+    }
+
+    READARR = {
         'freeleech': 1,
         'halfleech': 2,
         'double_upload': 4,
@@ -927,7 +939,7 @@ class ValueResolver:
 
     @classmethod
     def get_indexer_flag(cls, flag: str, target_app: TargetApp) -> int:
-        flags = IndexerFlags.RADARR if target_app == TargetApp.RADARR else IndexerFlags.SONARR
+        flags = IndexerFlags.RADARR if (target_app == TargetApp.RADARR) else IndexerFlags.SONARR if (target_app == TargetApp.SONARR) else IndexerFlags.READARR
         return flags.get(flag.lower(), 0)
 
     @classmethod
@@ -964,7 +976,7 @@ class ValueResolver:
                      for_profile: bool = True) -> Dict[str, Any]:
         """
         Get language mapping based on target app and context
-        
+
         Args:
             language_name: Name of the language to look up
             target_app: Target application (RADARR or SONARR)

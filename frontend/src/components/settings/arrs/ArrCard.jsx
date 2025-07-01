@@ -2,6 +2,7 @@ import React from 'react';
 import {Clock, ArrowUpDown, BarChart} from 'lucide-react';
 import RadarrLogo from '@logo/Radarr.svg';
 import SonarrLogo from '@logo/Sonarr.svg';
+import ReadarrLogo from '@logo/Readarr.svg';
 
 const ArrCard = ({
     title,
@@ -41,8 +42,8 @@ const ArrCard = ({
     return (
         <div
             onClick={onClick}
-            className='bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 
-                 shadow-xl hover:shadow-2xl hover:border-blue-500/50 transition-all duration-200 
+            className='bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700
+                 shadow-xl hover:shadow-2xl hover:border-blue-500/50 transition-all duration-200
                  cursor-pointer overflow-hidden group'>
             <div className='p-4 space-y-4'>
                 {/* Header with Logo, Title, and Tags */}

@@ -3,6 +3,7 @@ import {Check, Info, ArrowUp} from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
 import RadarrLogo from '@logo/Radarr.svg';
 import SonarrLogo from '@logo/Sonarr.svg';
+import ReadarrLogo from '@logo/Redarr.svg';
 
 const QualityItemSingle = ({
     quality,
@@ -37,6 +38,16 @@ const QualityItemSingle = ({
                         alt='Sonarr'
                     />
                     <span className='text-xs'>Sonarr</span>
+                </div>
+            )}
+            {quality.readarr && (
+                <div className='flex items-center text-white'>
+                    <img
+                        src={ReadarrLogo}
+                        className='w-3.5 h-3.5 mr-1.5'
+                        alt='Readarr'
+                    />
+                    <span className='text-xs'>Readarr</span>
                 </div>
             )}
         </div>
@@ -119,7 +130,7 @@ const QualityItemSingle = ({
                     {/* Selection indicator */}
                     <div
                         className={`
-                        w-5 h-5 rounded-full flex items-center justify-center 
+                        w-5 h-5 rounded-full flex items-center justify-center
                         ${
                             quality.enabled
                                 ? 'bg-blue-500 dark:bg-blue-600'

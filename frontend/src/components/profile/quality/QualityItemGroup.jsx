@@ -1,6 +1,7 @@
 import React from 'react';
 import RadarrLogo from '@logo/Radarr.svg';
 import SonarrLogo from '@logo/Sonarr.svg';
+import ReadarrLogo from '@logo/Readarr.svg';
 import {Pencil, Trash2, Check, ArrowUp} from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
 
@@ -91,6 +92,18 @@ const QualityItemGroup = ({
                                 />
                                 <span className='text-[10px] font-medium'>
                                     Sonarr
+                                </span>
+                            </div>
+                        )}
+                        {quality.readarr && (
+                            <div className='flex items-center bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 rounded px-1.5 py-0.5'>
+                                <img
+                                    src={ReadarrLogo}
+                                    className='w-3 h-3 mr-1'
+                                    alt='Readarr'
+                                />
+                                <span className='text-[10px] font-medium'>
+                                    Readarr
                                 </span>
                             </div>
                         )}
