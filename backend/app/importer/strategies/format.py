@@ -4,6 +4,7 @@ from typing import Dict, List, Any
 from .base import ImportStrategy
 from ..utils import load_yaml
 from ..compiler import compile_format_to_api_structure
+from ..logger import get_import_logger
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +24,12 @@ class FormatStrategy(ImportStrategy):
         """
         formats = []
         failed = []
+        import_logger = get_import_logger()
         
-        logger.info(f"Compiling {len(filenames)} custom formats")
+        # Don't try to predict - we'll count as we go
+        import_logger.start(0, 0)  # Will update counts as we compile
         
-        for i, filename in enumerate(filenames, 1):
-            logger.debug(f"[COMPILE] Compiling format {filename} ({i}/{len(filenames)})")
+        for filename in filenames:
             try:
                 # Load YAML
                 format_yaml = load_yaml(f"custom_format/{filename}.yml")
@@ -40,16 +42,17 @@ class FormatStrategy(ImportStrategy):
                     compiled['name'] = self.add_unique_suffix(compiled['name'])
                 
                 formats.append(compiled)
+                import_logger.update_compilation(filename)
                 
             except Exception as e:
-                logger.error(f"Failed to compile format {filename}: {e}")
+                import_logger.error(f"{e}", filename, 'compilation')
                 failed.append(filename)
-                # Continue with other formats
+                # Don't count failed compilations
         
-        # Log summary
-        logger.info(f"Compilation complete: {len(formats)} formats compiled")
-        if failed:
-            logger.warning(f"Failed to compile {len(failed)} formats: {', '.join(failed)}")
+        # Set final compilation count
+        import_logger.total_compilation = len(formats)
+        import_logger.current_compilation = len(formats)
+        import_logger.compilation_complete()
         
         return {'formats': formats}
     
@@ -75,11 +78,11 @@ class FormatStrategy(ImportStrategy):
             'details': []
         }
         
-        added_names = []
-        updated_names = []
-        failed_names = []
+        import_logger = get_import_logger()
         
-        logger.info(f"Importing {len(compiled_data['formats'])} formats to {self.arr_type}")
+        # Set import count
+        import_logger.total_import = len(compiled_data['formats'])
+        import_logger._import_shown = False  # Reset import shown flag
         
         for format_data in compiled_data['formats']:
             format_name = format_data['name']
@@ -87,17 +90,14 @@ class FormatStrategy(ImportStrategy):
             try:
                 if format_name in existing_map:
                     # Update existing
-                    if dry_run:
-                        logger.debug(f"[DRY RUN] Would update format: {format_name}")
-                    else:
+                    if not dry_run:
                         format_data['id'] = existing_map[format_name]
                         self.arr.put(
                             f"/api/v3/customformat/{existing_map[format_name]}",
                             format_data
                         )
-                        logger.debug(f"Updated format: {format_name}")
-                        updated_names.append(format_name)
                     
+                    import_logger.update_import(format_name, "updated")
                     results['updated'] += 1
                     results['details'].append({
                         'name': format_name,
@@ -105,13 +105,10 @@ class FormatStrategy(ImportStrategy):
                     })
                 else:
                     # Add new
-                    if dry_run:
-                        logger.debug(f"[DRY RUN] Would add format: {format_name}")
-                    else:
+                    if not dry_run:
                         self.arr.post("/api/v3/customformat", format_data)
-                        logger.debug(f"Added format: {format_name}")
-                        added_names.append(format_name)
                     
+                    import_logger.update_import(format_name, "added")
                     results['added'] += 1
                     results['details'].append({
                         'name': format_name,
@@ -119,21 +116,17 @@ class FormatStrategy(ImportStrategy):
                     })
                     
             except Exception as e:
+                import_logger.update_import(format_name, "failed")
+                import_logger.error(f"Failed to import format {format_name}: {e}", format_name)
                 results['failed'] += 1
                 results['details'].append({
                     'name': format_name,
                     'action': 'failed',
                     'error': str(e)
                 })
-                logger.error(f"Failed to import format {format_name}: {e}")
-                failed_names.append(format_name)
         
-        # Log summary
-        if added_names:
-            logger.info(f"Added {len(added_names)} formats: {', '.join(added_names[:5])}{'...' if len(added_names) > 5 else ''}")
-        if updated_names:
-            logger.info(f"Updated {len(updated_names)} formats: {', '.join(updated_names[:5])}{'...' if len(updated_names) > 5 else ''}")
-        if failed_names:
-            logger.warning(f"Failed {len(failed_names)} formats: {', '.join(failed_names)}")
+        # Show import summary
+        import_logger.import_complete()
+        import_logger._import_shown = True
         
         return results

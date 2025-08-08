@@ -1,7 +1,9 @@
 """Main import module entry point."""
+import sys
 import logging
 from typing import Dict, Any, List
 from .strategies import FormatStrategy, ProfileStrategy
+from .logger import reset_import_logger
 
 logger = logging.getLogger(__name__)
 
@@ -60,11 +62,13 @@ def handle_import_request(request: Dict[str, Any]) -> Dict[str, Any]:
         strategy_class = strategy_map[strategy_type]
         strategy = strategy_class(arr_config)
 
-        # Execute import
-        logger.info(
-            f"Processing {strategy_type} import for arr_config #{arr_id} ({arr_config['name']}): "
-            f"{len(filenames)} items" + (" [DRY RUN]" if dry_run else ""))
-
+        # Execute import with new logger
+        import_logger = reset_import_logger()
+        
+        # Show start message
+        dry_run_text = " [DRY RUN]" if dry_run else ""
+        print(f"Starting {strategy_type} import for {arr_config['name']} ({arr_config['type']}): {len(filenames)} items{dry_run_text}", file=sys.stderr)
+        
         result = strategy.execute(filenames, dry_run=dry_run)
 
         added = result.get('added', 0)
@@ -87,9 +91,8 @@ def handle_import_request(request: Dict[str, Any]) -> Dict[str, Any]:
         result['arr_config_name'] = arr_config['name']
         result['strategy'] = strategy_type
 
-        logger.info(f"Import complete - Added: {added}, "
-                    f"Updated: {updated}, "
-                    f"Failed: {failed}")
+        # Complete logging
+        import_logger.complete()
 
         return result
 

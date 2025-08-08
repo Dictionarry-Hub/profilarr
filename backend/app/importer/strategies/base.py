@@ -3,6 +3,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any
 from ..arr_handler import ArrHandler
+from ..logger import get_import_logger
 
 logger = logging.getLogger(__name__)
 
@@ -70,11 +71,9 @@ class ImportStrategy(ABC):
         """
         try:
             # Compile
-            logger.info(f"Compiling {len(filenames)} items using {self.__class__.__name__}")
             compiled = self.compile(filenames)
             
             # Import
-            logger.info("Importing compiled data" + (" [DRY RUN]" if dry_run else ""))
             results = self.import_data(compiled, dry_run=dry_run)
             
             # Add dry_run flag and compiled data to results
@@ -85,7 +84,8 @@ class ImportStrategy(ABC):
             return results
             
         except Exception as e:
-            logger.exception(f"Import failed: {e}")
+            import_logger = get_import_logger()
+            import_logger.error(f"Strategy execution failed: {e}", phase='import')
             return {
                 'added': 0,
                 'updated': 0,

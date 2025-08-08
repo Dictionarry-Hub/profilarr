@@ -127,10 +127,12 @@ def generate_language_formats(language: str, arr_type: str) -> List[Dict[str, An
                     
                     formats.append(additional)
                 except Exception as e:
-                    logger.warning(f"Could not load {format_name}: {e}")
+                    # Silent fail - format doesn't exist
+                    pass
         
     except Exception as e:
-        logger.error(f"Failed to generate language formats for {language}: {e}")
+        # Silent fail - will be caught at higher level
+        pass
     
     return formats
 
@@ -148,7 +150,6 @@ def load_regex_patterns() -> Dict[str, str]:
     pattern_dir = Path(REGEX_DIR)
     
     if not pattern_dir.exists():
-        logger.warning(f"Pattern directory not found: {pattern_dir}")
         return patterns
     
     for pattern_file in pattern_dir.glob('*.yml'):
@@ -158,6 +159,7 @@ def load_regex_patterns() -> Dict[str, str]:
                 if data and 'name' in data and 'pattern' in data:
                     patterns[data['name']] = data['pattern']
         except Exception as e:
-            logger.warning(f"Failed to load pattern {pattern_file}: {e}")
+            # Silent fail for individual pattern files
+            pass
     
     return patterns

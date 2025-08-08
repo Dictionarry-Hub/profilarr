@@ -4,6 +4,7 @@ from typing import Dict, List, Any, Optional
 from .mappings import TargetApp, ValueResolver
 from .utils import load_regex_patterns
 from ..db.queries.format_renames import is_format_in_renames
+from .logger import get_import_logger
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,6 @@ def get_cached_patterns():
     global _CACHED_PATTERNS
     if _CACHED_PATTERNS is None:
         _CACHED_PATTERNS = load_regex_patterns()
-        logger.debug(f"Loaded and cached {len(_CACHED_PATTERNS)} regex patterns")
     return _CACHED_PATTERNS
 
 
@@ -74,7 +74,8 @@ def _compile_condition(
         pattern_name = condition.get('pattern')
         pattern = patterns.get(pattern_name)
         if not pattern:
-            logger.warning(f"Pattern not found: {pattern_name}")
+            import_logger = get_import_logger()
+            import_logger.warning(f"Pattern not found: {pattern_name}")
             return None
         
         spec['implementation'] = {
@@ -120,7 +121,8 @@ def _compile_condition(
             language_data = ValueResolver.get_language(language_name, target_app, for_profile=False)
             spec['fields'] = [{'name': 'value', 'value': language_data['id']}]
         except Exception:
-            logger.warning(f"Language not found: {language_name}")
+            import_logger = get_import_logger()
+            import_logger.warning(f"Language not found: {language_name}")
             return None
             
     elif condition_type == 'release_type':
@@ -139,7 +141,8 @@ def _compile_condition(
         ]
         
     else:
-        logger.warning(f"Unknown condition type: {condition_type}")
+        import_logger = get_import_logger()
+        import_logger.warning(f"Unknown condition type: {condition_type}")
         return None
     
     return spec
