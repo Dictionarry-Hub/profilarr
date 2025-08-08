@@ -156,8 +156,8 @@ def trigger_sync(id):
             }), 400
 
         # Run the import
-        from .manager import run_import_for_config
-        run_import_for_config(config_data)
+        from ..importer import handle_pull_import
+        handle_pull_import(id)
 
         logger.debug(f"Manual sync triggered for arr config: {id}")
         return jsonify({'success': True}), 200

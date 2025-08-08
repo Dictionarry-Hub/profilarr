@@ -21,16 +21,16 @@ def create_import_task_for_arr_config(config_id, config_name, sync_method,
     with get_db() as conn:
         cursor = conn.cursor()
 
-        # 'pull' tasks can be represented with interval 0 or a special type
-        # 'schedule' tasks can be represented with the normal interval
-
+        # pull: not scheduled; on-demand during git pull
         if sync_method == 'pull':
-            # You could store a special type for pull-based tasks
-            task_type = 'ImportPull'
-            interval_minutes = 0
-        else:  # 'schedule'
-            task_type = 'ImportSchedule'
-            interval_minutes = sync_interval or 0
+            logger.debug(
+                f"[ARR Tasks] No scheduled task created for {config_name} because sync_method=pull (runs on git pull)"
+            )
+            return None
+
+        # schedule: create an interval-based task
+        task_type = 'ImportSchedule'
+        interval_minutes = sync_interval or 0
 
         # Insert into scheduled_tasks table
         cursor.execute(
