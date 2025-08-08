@@ -79,16 +79,30 @@ def handle_import_request(request: Dict[str, Any]) -> Dict[str, Any]:
         
         result = strategy.execute(filenames, dry_run=dry_run)
         
-        # Add success flag
-        result['success'] = result.get('failed', 0) == 0
+        added = result.get('added', 0)
+        updated = result.get('updated', 0)
+        failed = result.get('failed', 0)
+
+        # Determine status
+        is_partial = failed > 0 and (added > 0 or updated > 0)
+        is_success = failed == 0
+
+        result['success'] = is_success or is_partial
+        if is_partial:
+            result['status'] = "partial"
+        elif is_success:
+            result['status'] = "success"
+        else:
+            result['status'] = "failed"
+        
         result['arr_config_id'] = arr_id
         result['arr_config_name'] = arr_config['name']
         result['strategy'] = strategy_type
         
         logger.info(
-            f"Import complete - Added: {result.get('added', 0)}, "
-            f"Updated: {result.get('updated', 0)}, "
-            f"Failed: {result.get('failed', 0)}"
+            f"Import complete - Added: {added}, "
+            f"Updated: {updated}, "
+            f"Failed: {failed}"
         )
         
         return result
@@ -168,8 +182,18 @@ def handle_scheduled_import(task_id: int) -> Dict[str, Any]:
         total_updated = sum(r.get('updated', 0) for r in results)
         total_failed = sum(r.get('failed', 0) for r in results)
         
+        is_partial = total_failed > 0 and (total_added > 0 or total_updated > 0)
+        is_success = total_failed == 0
+
+        status = "failed"
+        if is_partial:
+            status = "partial"
+        elif is_success:
+            status = "success"
+
         combined_result = {
-            'success': total_failed == 0,
+            'success': is_success or is_partial,
+            'status': status,
             'task_id': task_id,
             'arr_config_id': arr_config['id'],
             'arr_config_name': arr_config['name'],

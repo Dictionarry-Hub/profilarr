@@ -21,7 +21,7 @@ const Alert = {
         toast.error(message, {
             ...baseStyles,
             className: `${baseStyles.className} bg-red-600 text-white`,
-            progressClassName: `${baseStyles.progressClassName} bg-red-300`,
+            progressClassName: `${base_styles.progressClassName} bg-red-300`,
             ...options
         });
     },
@@ -38,6 +38,14 @@ const Alert = {
             ...baseStyles,
             className: `${baseStyles.className} bg-blue-600 text-white`,
             progressClassName: `${baseStyles.progressClassName} bg-blue-300`,
+            ...options
+        });
+    },
+    partial: (message, options = {}) => {
+        toast.warn(message, { // Using warn icon for partial success
+            ...baseStyles,
+            className: `${baseStyles.className} bg-yellow-500 text-white`,
+            progressClassName: `${baseStyles.progressClassName} bg-yellow-200`,
             ...options
         });
     }

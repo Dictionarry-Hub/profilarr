@@ -40,13 +40,16 @@ def import_items():
         result = handle_import_request(data)
         
         # Return appropriate status code
-        if result.get('success'):
-            return jsonify(result), 200
-        else:
-            # Check for specific error codes
+        status_code = 200
+        if result.get('status') == 'partial':
+            status_code = 207
+        elif not result.get('success'):
             if 'not found' in result.get('error', '').lower():
-                return jsonify(result), 404
-            return jsonify(result), 400
+                status_code = 404
+            else:
+                status_code = 400
+
+        return jsonify(result), status_code
             
     except Exception as e:
         logger.error(f"Error handling import request: {str(e)}")

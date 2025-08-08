@@ -275,15 +275,24 @@ function FormatPage() {
         }
     };
 
-    const handleMassImport = async arr => {
+    const handleMassImport = async arrID => {
         try {
             const selectedFormats = Array.from(selectedItems).map(
                 index => filteredFormats[index]
             );
             const formatNames = selectedFormats.map(format => format.file_name);
 
-            await importFormats(arr, formatNames);
-            Alert.success('Formats imported successfully');
+            const result = await importFormats(arrID, formatNames);
+
+            if (result.status === 'partial') {
+                const { added, updated, failed } = result;
+                Alert.partial(
+                    `Import partially successful:\n- ${added} added\n- ${updated} updated\n- ${failed} failed`
+                );
+            } else {
+                Alert.success('Formats imported successfully');
+            }
+
             toggleSelectionMode();
         } catch (error) {
             console.error('Error importing formats:', error);
