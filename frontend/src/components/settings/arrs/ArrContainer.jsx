@@ -1,9 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {Loader} from 'lucide-react';
 import ArrModal from './ArrModal';
-import ArrCard from './ArrCard';
-import AddButton from '@ui/DataBar/AddButton';
-import {getArrConfigs} from '@api/arr';
+import ArrTable from './ArrTable';
+import {getArrConfigs, deleteArrConfig} from '@api/arr';
+import {toast} from 'react-toastify';
 
 const ArrContainer = () => {
     const [showModal, setShowModal] = useState(false);
@@ -73,29 +73,10 @@ const ArrContainer = () => {
                     {error}
                 </div>
             )}
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3'>
-                {arrs.map(arrConfig => (
-                    <ArrCard
-                        key={arrConfig.id}
-                        title={arrConfig.name}
-                        type={arrConfig.type}
-                        sync_method={arrConfig.sync_method}
-                        sync_interval={arrConfig.sync_interval}
-                        sync_percentage={arrConfig.sync_percentage}
-                        last_sync_time={arrConfig.last_sync_time}
-                        tags={arrConfig.tags}
-                        data_to_sync={arrConfig.data_to_sync}
-                        import_as_unique={arrConfig.import_as_unique}
-                        onClick={() => handleEditArr(arrConfig)}
-                    />
-                ))}
-            </div>
-
-            <AddButton
-                onClick={handleAddArr}
-                label='Add New App'
-                top='5vh'
-                left='75vw'
+            <ArrTable
+                arrs={arrs}
+                onAddArr={handleAddArr}
+                onEditArr={handleEditArr}
             />
 
             <ArrModal
