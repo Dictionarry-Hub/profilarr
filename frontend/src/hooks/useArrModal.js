@@ -110,10 +110,10 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
 
         if (
             formData.sync_method === 'schedule' &&
-            (!formData.sync_interval || formData.sync_interval < 1)
+            (!formData.sync_interval || formData.sync_interval < 60 || formData.sync_interval > 43200)
         ) {
             newErrors.sync_interval =
-                'Please enter a valid interval (minimum 1 minute)';
+                'Sync interval must be between 60 minutes (1 hour) and 43200 minutes (1 month)';
         }
 
         // Safely check data_to_sync structure
@@ -302,7 +302,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
             // Handle other input changes
             return {
                 ...prev,
-                [id]: id === 'sync_interval' ? parseInt(value) || 0 : value
+                [id]: id === 'sync_interval' ? (value === '' ? '' : parseInt(value) || 0) : value
             };
         });
 
@@ -363,6 +363,26 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
         }
     };
 
+    const handleSyncIntervalBlur = () => {
+        setFormData(prev => {
+            if (prev.sync_method === 'schedule') {
+                let interval = prev.sync_interval === '' ? 0 : parseInt(prev.sync_interval) || 0;
+                // Auto-correct to min/max if out of range
+                if (interval < 60) {
+                    interval = 60;
+                } else if (interval > 43200) {
+                    interval = 43200;
+                }
+                // Always set to a number on blur
+                return {
+                    ...prev,
+                    sync_interval: interval
+                };
+            }
+            return prev;
+        });
+    };
+
     return {
         formData,
         availableData,
@@ -387,6 +407,7 @@ export const useArrModal = ({isOpen, onSubmit, editingArr}) => {
         showSyncConfirm,
         setShowSyncConfirm,
         handleManualSync,
-        isInitialSyncing
+        isInitialSyncing,
+        handleSyncIntervalBlur
     };
 };

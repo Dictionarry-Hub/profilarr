@@ -45,6 +45,16 @@ def add_config():
 
     try:
         config = request.json
+        
+        # Validate sync_interval if schedule method
+        if config.get('sync_method') == 'schedule':
+            sync_interval = config.get('sync_interval', 0)
+            if sync_interval < 60 or sync_interval > 43200:
+                return jsonify({
+                    'success': False,
+                    'error': 'Sync interval must be between 60 minutes (1 hour) and 43200 minutes (1 month)'
+                }), 400
+        
         result = save_arr_config(config)
 
         # Handle the conflict case first
@@ -95,7 +105,18 @@ def handle_config(id):
             }), 404
 
         elif request.method == 'PUT':
-            result = update_arr_config(id, request.json)
+            config = request.json
+            
+            # Validate sync_interval if schedule method
+            if config.get('sync_method') == 'schedule':
+                sync_interval = config.get('sync_interval', 0)
+                if sync_interval < 60 or sync_interval > 43200:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Sync interval must be between 60 minutes (1 hour) and 43200 minutes (1 month)'
+                    }), 400
+            
+            result = update_arr_config(id, config)
 
             # Handle the conflict case first
             if not result['success'] and result.get('status_code') == 409:

@@ -32,7 +32,8 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
         showSyncConfirm,
         setShowSyncConfirm,
         handleManualSync,
-        isInitialSyncing
+        isInitialSyncing,
+        handleSyncIntervalBlur
     } = useArrModal({isOpen, onSubmit, editingArr});
 
     const arrTypes = [
@@ -363,11 +364,16 @@ const ArrModal = ({isOpen, onClose, onSubmit, editingArr}) => {
                             id='sync_interval'
                             value={formData.sync_interval}
                             onChange={handleInputChange}
+                            onBlur={handleSyncIntervalBlur}
                             className={inputClasses('sync_interval')}
-                            placeholder='Enter interval in minutes'
-                            min='1'
+                            placeholder='Enter interval in minutes (60-43200)'
+                            min='60'
+                            max='43200'
                             required
                         />
+                        <p className='text-xs text-gray-500 dark:text-gray-400'>
+                            Minimum: 1 hour (60 minutes), Maximum: 1 month (43200 minutes)
+                        </p>
                         {errors.sync_interval && (
                             <p className='text-xs text-red-500 mt-1'>
                                 {errors.sync_interval}
