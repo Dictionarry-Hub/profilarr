@@ -21,7 +21,7 @@ const Alert = {
         toast.error(message, {
             ...baseStyles,
             className: `${baseStyles.className} bg-red-600 text-white`,
-            progressClassName: `${base_styles.progressClassName} bg-red-300`,
+            progressClassName: `${baseStyles.progressClassName} bg-red-300`,
             ...options
         });
     },
