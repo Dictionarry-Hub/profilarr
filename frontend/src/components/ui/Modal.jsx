@@ -118,7 +118,7 @@ const Modal = ({
                 ref={modalRef}
                 className={`relative bg-gradient-to-br from-gray-50 to-gray-100 
                     dark:from-gray-800 dark:to-gray-900 rounded-lg shadow-xl 
-                    min-w-[320px] min-h-[200px] ${widthClasses[width]} ${
+                    min-w-[320px] ${widthClasses[width]} ${
                     heightClasses[height]
                 } 
                     ${isClosing
@@ -150,7 +150,7 @@ const Modal = ({
                     )}
                     <button
                         onClick={handleClose}
-                        className='text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors'>
+                        className={`text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors ${!tabs ? 'ml-auto' : ''}`}>
                         <svg
                             className='w-6 h-6'
                             fill='none'
@@ -167,7 +167,7 @@ const Modal = ({
                 </div>
 
                 {/* Content */}
-                <div className='flex-1 overflow-y-auto p-6 py-4 text-gray-900 dark:text-gray-200'>
+                <div className={`flex-1 overflow-y-auto px-6 py-4 text-gray-900 dark:text-gray-200`}>
                     {typeof children === 'function'
                         ? children(activeTab)
                         : children}

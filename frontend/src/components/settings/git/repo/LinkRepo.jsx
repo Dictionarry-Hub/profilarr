@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import Modal from '@ui/Modal';
-import {Loader} from 'lucide-react';
+import {Loader, GitBranch, Link} from 'lucide-react';
 import {cloneRepo} from '@api/api';
 import Alert from '@ui/Alert';
 
@@ -82,40 +82,34 @@ const LinkRepo = ({isOpen, onClose, onSubmit}) => {
             isOpen={isOpen}
             onClose={onClose}
             title='Link Git Repository'
-            width='2xl'
-            footer={
-                <div className='flex justify-end'>
-                    <button
-                        className='bg-blue-600 text-white px-4 py-2 rounded border border-blue-600 hover:bg-blue-700 transition-colors flex items-center text-sm'
-                        disabled={loading}
-                        onClick={handleSubmit}>
-                        {loading ? (
-                            <>
-                                <Loader
-                                    size={16}
-                                    className='animate-spin mr-2'
-                                />
-                                Linking...
-                            </>
-                        ) : (
-                            'Link'
-                        )}
-                    </button>
+            width='2xl'>
+            <div className='flex items-center py-2'>
+                <div className='relative flex-1'>
+                    <input
+                        type='text'
+                        value={gitRepo}
+                        onChange={e => setGitRepo(e.target.value)}
+                        className='w-full pl-10 pr-3 py-2 text-sm rounded-l-lg rounded-r-none
+                            border border-r-0 border-gray-300 dark:border-gray-600
+                            bg-white dark:bg-gray-700 
+                            text-gray-900 dark:text-white
+                            focus:outline-none focus:border-gray-400 dark:focus:border-gray-500
+                            placeholder-gray-400 dark:placeholder-gray-500 transition-colors'
+                        placeholder='https://github.com/your-repo'
+                    />
+                    <GitBranch className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500' size={18} />
                 </div>
-            }>
-            <div className='space-y-2'>
-                <input
-                    type='text'
-                    value={gitRepo}
-                    onChange={e => setGitRepo(e.target.value)}
-                    className='w-full px-3 py-2 text-sm rounded
-                        border border-gray-300 dark:border-gray-600
-                        bg-white dark:bg-gray-700 
-                        text-gray-900 dark:text-white
-                        focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                        placeholder-gray-400 dark:placeholder-gray-500'
-                    placeholder='https://github.com/your-repo'
-                />
+                <button
+                    className='inline-flex items-center gap-2 px-4 py-2 text-sm rounded-l-none rounded-r-lg bg-gray-800 border border-gray-700 text-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group'
+                    disabled={loading}
+                    onClick={handleSubmit}>
+                    {loading ? (
+                        <Loader className="w-4 h-4 animate-spin" />
+                    ) : (
+                        <Link className="w-4 h-4 text-blue-500 group-hover:scale-110 transition-transform" />
+                    )}
+                    <span>{loading ? 'Linking...' : 'Link'}</span>
+                </button>
             </div>
         </Modal>
     );

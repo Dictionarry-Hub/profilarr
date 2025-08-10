@@ -67,9 +67,23 @@ const ProfileCard = ({
     if (!profile || !profile.content) return null;
 
     const {content} = profile;
-    const activeCustomFormats = (content.custom_formats || []).filter(
-        format => format.score !== 0
-    ).length;
+    const activeCustomFormats = (() => {
+        const customFormats = content.custom_formats || [];
+        
+        // Handle old format (array)
+        if (Array.isArray(customFormats)) {
+            return customFormats.filter(format => format.score !== 0).length;
+        }
+        
+        // Handle new format (object with both/radarr/sonarr)
+        let totalActive = 0;
+        ['both', 'radarr', 'sonarr'].forEach(appType => {
+            const appFormats = customFormats[appType] || [];
+            totalActive += appFormats.filter(format => format.score !== 0).length;
+        });
+        
+        return totalActive;
+    })();
 
     const handleClick = e => {
         if (isSelectionMode) {
@@ -262,12 +276,36 @@ ProfileCard.propTypes = {
             name: PropTypes.string.isRequired,
             description: PropTypes.string,
             tags: PropTypes.arrayOf(PropTypes.string),
-            custom_formats: PropTypes.arrayOf(
+            custom_formats: PropTypes.oneOfType([
+                // Old format: array
+                PropTypes.arrayOf(
+                    PropTypes.shape({
+                        name: PropTypes.string,
+                        score: PropTypes.number
+                    })
+                ),
+                // New format: object with app-specific arrays
                 PropTypes.shape({
-                    name: PropTypes.string,
-                    score: PropTypes.number
+                    both: PropTypes.arrayOf(
+                        PropTypes.shape({
+                            name: PropTypes.string,
+                            score: PropTypes.number
+                        })
+                    ),
+                    radarr: PropTypes.arrayOf(
+                        PropTypes.shape({
+                            name: PropTypes.string,
+                            score: PropTypes.number
+                        })
+                    ),
+                    sonarr: PropTypes.arrayOf(
+                        PropTypes.shape({
+                            name: PropTypes.string,
+                            score: PropTypes.number
+                        })
+                    )
                 })
-            ),
+            ]),
             language: PropTypes.string,
             upgradesAllowed: PropTypes.bool,
             qualities: PropTypes.arrayOf(

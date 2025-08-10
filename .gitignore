@@ -20,3 +20,6 @@ backend/app/static/
 
 # Config data
 config/
+radarr-config/
+sonarr-config/
+test-data/

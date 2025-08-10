@@ -47,9 +47,8 @@ const Tooltip = ({content, children}) => {
                             zIndex: 99999
                         }}
                         className='pointer-events-none'>
-                        <div className='bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap'>
+                        <div className='bg-gray-700 border border-gray-500 text-white text-xs rounded py-1 px-2 whitespace-nowrap shadow-lg'>
                             {content}
-                            <div className='absolute w-2.5 h-2.5 bg-gray-900 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2' />
                         </div>
                     </div>,
                     document.body

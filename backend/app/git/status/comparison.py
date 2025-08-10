@@ -111,14 +111,14 @@ def compare_yaml(old_data: Any,
                 changes.append({
                     "key": path,
                     "change": "added",
-                    "value": sorted(list(added))
+                    "value": sorted([x for x in added if x is not None])
                 })
             if removed := old_set - new_set:
                 logger.debug(f"Removed values at {path}: {removed}")
                 changes.append({
                     "key": path,
                     "change": "removed",
-                    "value": sorted(list(removed))
+                    "value": sorted([x for x in removed if x is not None])
                 })
 
     elif isinstance(old_data, dict):

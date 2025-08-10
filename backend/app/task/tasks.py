@@ -165,36 +165,17 @@ class ImportScheduleTask(Task):
     """
 
     def run_job(self):
+        from ..importer import handle_scheduled_import
 
-        from ..arr.manager import get_arr_config, run_import_for_config
-
-        # 1) Attempt to parse the config ID from the self.name
-        match = re.search(r"#(\d+)", self.name)
-        if not match:
-            task_logger.error(
-                f"[ImportScheduleTask] Could not parse config ID from task name '{self.name}'. Skipping."
-            )
-            return
-
-        config_id = match.group(1)
         task_logger.info(
-            f"[ImportScheduleTask] Found config_id={config_id} from task '{self.name}'"
+            f"[ImportScheduleTask] Running scheduled import for task_id={self.id} ({self.name})"
         )
-
-        # 2) Get the corresponding arr_config
-        arr_config_response = get_arr_config(config_id)
-        if not arr_config_response.get('success'):
+        result = handle_scheduled_import(self.id)
+        if not result.get('success'):
             task_logger.error(
-                f"[ImportScheduleTask] arr_config id={config_id} not found. Skipping."
+                f"[ImportScheduleTask] Scheduled import failed for task_id={self.id}: {result}"
             )
-            return
-
-        config_data = arr_config_response['data']
-
-        # 3) Call run_import_for_config
-        task_logger.info(
-            f"[ImportScheduleTask] Running run_import_for_config for arr_config #{config_id}"
-        )
-        run_import_for_config(config_data)
-        task_logger.info(
-            f"[ImportScheduleTask] Done importing for arr_config #{config_id}")
+        else:
+            task_logger.info(
+                f"[ImportScheduleTask] Scheduled import completed for task_id={self.id}: added={result.get('added', 0)}, updated={result.get('updated', 0)}, failed={result.get('failed', 0)}"
+            )
