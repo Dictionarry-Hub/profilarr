@@ -144,10 +144,10 @@ const FormatSettings = ({ formats, onScoreChange, onFormatToggle, activeApp }) =
             'Audio': (tag) => /audio|atmos|dts|truehd|flac|aac/i.test(tag),
             'HDR': (tag) => /hdr|dv|dolby|vision/i.test(tag),
             'Release Groups': (tag) => /group/i.test(tag) && !/tier/i.test(tag),
-            'Streaming Services': (tag) => /streaming|web|netflix|amazon/i.test(tag),
+            'Streaming Services': (tag) => /streaming|netflix|amazon|hulu|disney|apple|peacock|hbo|paramount/i.test(tag),
             'Codecs': (tag) => /codec|x264|x265|h264|h265|av1/i.test(tag),
-            'Resolution': (tag) => /resolution|1080|2160|720|4k/i.test(tag),
-            'Source': (tag) => /source|bluray|remux|web/i.test(tag),
+            'Resolution': (tag) => /resolution/i.test(tag),
+            'Source': (tag) => /source/i.test(tag),
             'Storage': (tag) => /storage|size/i.test(tag),
             'Release Group Tiers': (tag) => /tier/i.test(tag),
             'Indexer Flags': (tag) => /indexer|flag/i.test(tag)
