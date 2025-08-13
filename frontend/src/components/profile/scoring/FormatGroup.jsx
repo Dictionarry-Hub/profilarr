@@ -1,12 +1,14 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { ChevronDown, Volume2, Monitor, Users, Tv, Code, HardDrive, Tag, Square, Layers, Database, Folder } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronsUpDown, Volume2, Monitor, Users, Tv, Code, HardDrive, Tag, Square, Layers, Database, Folder } from 'lucide-react';
 import NumberInput from '@ui/NumberInput';
 import Tooltip from '@ui/Tooltip';
 import { Copy } from 'lucide-react';
 
 const FormatGroup = memo(({ groupName, formats, onScoreChange, onFormatToggle, icon }) => {
     const [isExpanded, setIsExpanded] = useState(true);
+    const [sortColumn, setSortColumn] = useState('radarr');
+    const [sortDirection, setSortDirection] = useState('desc');
     
     // Map group names to icons
     const groupIcons = {
@@ -45,6 +47,60 @@ const FormatGroup = memo(({ groupName, formats, onScoreChange, onFormatToggle, i
         }
     }, [formats, onScoreChange]);
     
+    const handleSort = useCallback((column) => {
+        if (sortColumn === column) {
+            setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortColumn(column);
+            setSortDirection('asc');
+        }
+    }, [sortColumn]);
+    
+    // Sort formats based on current sort settings
+    const sortedFormats = useMemo(() => {
+        const sorted = [...formats].sort((a, b) => {
+            let aValue, bValue;
+            
+            switch (sortColumn) {
+                case 'name':
+                    aValue = a.name.toLowerCase();
+                    bValue = b.name.toLowerCase();
+                    break;
+                case 'radarr':
+                    // Sort by enabled status first, then by score
+                    if (a.radarr && !b.radarr) return -1;
+                    if (!a.radarr && b.radarr) return 1;
+                    aValue = a.radarrScore ?? a.score ?? 0;
+                    bValue = b.radarrScore ?? b.score ?? 0;
+                    break;
+                case 'sonarr':
+                    // Sort by enabled status first, then by score
+                    if (a.sonarr && !b.sonarr) return -1;
+                    if (!a.sonarr && b.sonarr) return 1;
+                    aValue = a.sonarrScore ?? a.score ?? 0;
+                    bValue = b.sonarrScore ?? b.score ?? 0;
+                    break;
+                default:
+                    return 0;
+            }
+            
+            if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+            if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+        
+        return sorted;
+    }, [formats, sortColumn, sortDirection]);
+    
+    const SortIcon = ({ column }) => {
+        if (sortColumn !== column) {
+            return <ChevronsUpDown className="w-3 h-3 text-gray-400" />;
+        }
+        return sortDirection === 'asc' 
+            ? <ChevronUp className="w-3 h-3 text-gray-600 dark:text-gray-300" />
+            : <ChevronDown className="w-3 h-3 text-gray-600 dark:text-gray-300" />;
+    };
+    
     return (
         <div className="mb-6">
             {/* Group Header */}
@@ -70,19 +126,37 @@ const FormatGroup = memo(({ groupName, formats, onScoreChange, onFormatToggle, i
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-gray-200 dark:border-gray-700">
-                                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/2">
-                                    Format
+                                <th 
+                                    className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                    onClick={() => handleSort('name')}
+                                >
+                                    <div className="flex items-center gap-1">
+                                        <span>Format</span>
+                                        <SortIcon column="name" />
+                                    </div>
                                 </th>
-                                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Radarr
+                                <th 
+                                    className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                    onClick={() => handleSort('radarr')}
+                                >
+                                    <div className="flex items-center gap-1">
+                                        <span>Radarr</span>
+                                        <SortIcon column="radarr" />
+                                    </div>
                                 </th>
-                                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Sonarr
+                                <th 
+                                    className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                    onClick={() => handleSort('sonarr')}
+                                >
+                                    <div className="flex items-center gap-1">
+                                        <span>Sonarr</span>
+                                        <SortIcon column="sonarr" />
+                                    </div>
                                 </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {formats.map((format) => {
+                            {sortedFormats.map((format) => {
                                 const isActive = Boolean(format.radarr) || Boolean(format.sonarr);
                                 const radarrScore = format.radarrScore ?? format.score ?? 0;
                                 const sonarrScore = format.sonarrScore ?? format.score ?? 0;

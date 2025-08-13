@@ -205,31 +205,81 @@ const FormatSettings = ({ formats, onScoreChange, onFormatToggle, activeApp }) =
         }
     });
     
-    // Filter grouped formats based on search
+    // Filter grouped formats based on search and special filters
     const filteredGroupedFormats = useMemo(() => {
-        if (searchTerms.length === 0 && !currentInput) {
+        // Only use committed search terms, not currentInput
+        if (searchTerms.length === 0) {
             return groupedFormats;
         }
         
+        // Separate special filters from regular search terms
+        const specialFilters = {};
+        const regularTerms = [];
+        
+        searchTerms.forEach(term => {
+            if (!term) return;
+            const match = term.match(/^(enabled|radarr|sonarr):(true|false)$/i);
+            if (match) {
+                const [, filterType, filterValue] = match;
+                specialFilters[filterType.toLowerCase()] = filterValue.toLowerCase() === 'true';
+            } else {
+                regularTerms.push(term);
+            }
+        });
+        
+        // Start with all formats
+        let filtered = allGroupedFormats;
+        
+        // Apply special filters
+        if (Object.keys(specialFilters).length > 0) {
+            filtered = filtered.filter(format => {
+                // Check enabled filter
+                if ('enabled' in specialFilters) {
+                    const isEnabled = format.radarr || format.sonarr;
+                    if (specialFilters.enabled !== isEnabled) return false;
+                }
+                // Check radarr filter
+                if ('radarr' in specialFilters) {
+                    if (specialFilters.radarr !== Boolean(format.radarr)) return false;
+                }
+                // Check sonarr filter
+                if ('sonarr' in specialFilters) {
+                    if (specialFilters.sonarr !== Boolean(format.sonarr)) return false;
+                }
+                return true;
+            });
+        }
+        
+        // Apply regular text search
+        if (regularTerms.length > 0) {
+            filtered = filtered.filter(format => {
+                const searchableText = format.name.toLowerCase();
+                return regularTerms.every(term => 
+                    searchableText.includes(term.toLowerCase())
+                );
+            });
+        }
+        
+        // Rebuild groups with filtered formats
         const filteredGroups = {};
-        const searchIds = new Set(searchFilteredFormats.map(f => f.id));
+        const filteredIds = new Set(filtered.map(f => f.id));
         
         Object.entries(groupedFormats).forEach(([groupName, formats]) => {
-            const filteredFormats = formats.filter(f => searchIds.has(f.id));
-            if (filteredFormats.length > 0) {
-                filteredGroups[groupName] = filteredFormats;
+            const groupFiltered = formats.filter(f => filteredIds.has(f.id));
+            if (groupFiltered.length > 0) {
+                filteredGroups[groupName] = groupFiltered;
             }
         });
         
         return filteredGroups;
-    }, [groupedFormats, searchFilteredFormats, searchTerms, currentInput]);
+    }, [groupedFormats, allGroupedFormats, searchTerms]);
 
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-2">
                 <SearchBar
                     className="flex-1"
-                    placeholder="Search formats..."
+                    placeholder="Search formats... (try: enabled:true, radarr:true, sonarr:false)"
                     searchTerms={searchTerms}
                     currentInput={currentInput}
                     onInputChange={setCurrentInput}
