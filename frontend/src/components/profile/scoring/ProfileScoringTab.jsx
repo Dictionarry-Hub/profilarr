@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import FormatSettings from './FormatSettings';
 import UpgradeSettings from './UpgradeSettings';
@@ -6,6 +6,7 @@ import UpgradeSettings from './UpgradeSettings';
 const ProfileScoringTab = ({
     customFormats,
     onScoreChange,
+    onFormatToggle,
     minCustomFormatScore,
     upgradeUntilScore,
     minScoreIncrement,
@@ -15,7 +16,6 @@ const ProfileScoringTab = ({
     upgradesAllowed,
     onUpgradesAllowedChange
 }) => {
-    const [activeApp, setActiveApp] = useState('both');
     return (
         <div className='w-full space-y-6'>
             {/* Upgrade Settings Section */}
@@ -71,18 +71,15 @@ const ProfileScoringTab = ({
                         Format Settings
                     </h2>
                     <p className='text-xs text-gray-500 dark:text-gray-400'>
-                        Customize format scoring to prioritize your preferred downloads. 
-                        Selective mode allows you to display and manage
-                        only formats you care about instead of all available formats.
+                        Customize format scoring to prioritize your preferred downloads.
+                        Toggle formats for Radarr and/or Sonarr independently.
                     </p>
                 </div>
 
                 <FormatSettings
-                    formats={customFormats[activeApp] || []}
-                    onScoreChange={(id, score) => onScoreChange(activeApp, id, score)}
-                    appType={activeApp}
-                    activeApp={activeApp}
-                    onAppChange={setActiveApp}
+                    formats={customFormats || []}
+                    onScoreChange={onScoreChange}
+                    onFormatToggle={onFormatToggle}
                 />
             </div>
         </div>
@@ -90,33 +87,18 @@ const ProfileScoringTab = ({
 };
 
 ProfileScoringTab.propTypes = {
-    customFormats: PropTypes.shape({
-        both: PropTypes.arrayOf(
-            PropTypes.shape({
-                id: PropTypes.string.isRequired,
-                name: PropTypes.string.isRequired,
-                score: PropTypes.number.isRequired,
-                tags: PropTypes.arrayOf(PropTypes.string)
-            })
-        ),
-        radarr: PropTypes.arrayOf(
-            PropTypes.shape({
-                id: PropTypes.string.isRequired,
-                name: PropTypes.string.isRequired,
-                score: PropTypes.number.isRequired,
-                tags: PropTypes.arrayOf(PropTypes.string)
-            })
-        ),
-        sonarr: PropTypes.arrayOf(
-            PropTypes.shape({
-                id: PropTypes.string.isRequired,
-                name: PropTypes.string.isRequired,
-                score: PropTypes.number.isRequired,
-                tags: PropTypes.arrayOf(PropTypes.string)
-            })
-        )
-    }).isRequired,
+    customFormats: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
+            score: PropTypes.number,
+            radarr: PropTypes.bool,
+            sonarr: PropTypes.bool,
+            tags: PropTypes.arrayOf(PropTypes.string)
+        })
+    ).isRequired,
     onScoreChange: PropTypes.func.isRequired,
+    onFormatToggle: PropTypes.func.isRequired,
     minCustomFormatScore: PropTypes.number.isRequired,
     upgradeUntilScore: PropTypes.number.isRequired,
     minScoreIncrement: PropTypes.number.isRequired,

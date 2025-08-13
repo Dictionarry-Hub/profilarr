@@ -35,12 +35,8 @@ function ProfileModal({
     // Tags state
     const [tags, setTags] = useState([]);
 
-    // Format scoring state - now app-specific
-    const [customFormats, setCustomFormats] = useState({
-        both: [],
-        radarr: [],
-        sonarr: []
-    });
+    // Format scoring state - single array with radarr/sonarr flags and separate scores
+    const [customFormats, setCustomFormats] = useState([]);
     const [formatTags, setFormatTags] = useState([]);
     const [formatFilter, setFormatFilter] = useState('');
     const [formatSortKey, setFormatSortKey] = useState('score');
@@ -80,18 +76,17 @@ function ProfileModal({
         setError('');
         setTags([]);
 
-        // Format scoring state - initialize all apps with all formats at score 0
+        // Format scoring state - initialize all formats with score 0 and both apps disabled
         const safeCustomFormats = formats.map(format => ({
             id: format.name,
             name: format.name,
-            score: 0,
+            radarrScore: 0,
+            sonarrScore: 0,
+            radarr: false,
+            sonarr: false,
             tags: format.tags || []
         }));
-        setCustomFormats({
-            both: [...safeCustomFormats],
-            radarr: [...safeCustomFormats],
-            sonarr: [...safeCustomFormats]
-        });
+        setCustomFormats(safeCustomFormats);
 
         // Reset all other states to defaults
         setUpgradesAllowed(false);
@@ -155,31 +150,73 @@ function ProfileModal({
                 setUpgradeUntilScore(Number(content.upgradeUntilScore || 0));
                 setMinScoreIncrement(Number(content.minScoreIncrement || 0));
 
-                // Custom formats setup - handle backwards compatible format
-                const initialCustomFormats = content.custom_formats || [];
-                const initialCustomFormatsRadarr = content.custom_formats_radarr || [];
-                const initialCustomFormatsSonarr = content.custom_formats_sonarr || [];
+                // Custom formats setup - merge data from all sources
+                const bothFormats = content.custom_formats || [];  // Formats for both with same score
+                const radarrFormats = content.custom_formats_radarr || [];
+                const sonarrFormats = content.custom_formats_sonarr || [];
                 
-                setCustomFormats({
-                    both: formats.map(format => ({
-                        id: format.name,
-                        name: format.name,
-                        score: initialCustomFormats.find(cf => cf.name === format.name)?.score || 0,
-                        tags: format.tags || []
-                    })),
-                    radarr: formats.map(format => ({
-                        id: format.name,
-                        name: format.name,
-                        score: initialCustomFormatsRadarr.find(cf => cf.name === format.name)?.score || 0,
-                        tags: format.tags || []
-                    })),
-                    sonarr: formats.map(format => ({
-                        id: format.name,
-                        name: format.name,
-                        score: initialCustomFormatsSonarr.find(cf => cf.name === format.name)?.score || 0,
-                        tags: format.tags || []
-                    }))
+                // Create a map to track which formats are enabled for which apps and their scores
+                const formatMap = new Map();
+                
+                // Process formats that apply to both with same score
+                bothFormats.forEach(cf => {
+                    formatMap.set(cf.name, {
+                        radarrScore: cf.score || 0,
+                        sonarrScore: cf.score || 0,
+                        radarr: true,
+                        sonarr: true
+                    });
                 });
+                
+                // Process radarr-specific formats
+                radarrFormats.forEach(cf => {
+                    if (!formatMap.has(cf.name)) {
+                        formatMap.set(cf.name, {
+                            radarrScore: cf.score || 0,
+                            sonarrScore: 0,
+                            radarr: true,
+                            sonarr: false
+                        });
+                    } else {
+                        // Format exists (from both), update radarr score
+                        const existing = formatMap.get(cf.name);
+                        existing.radarr = true;
+                        existing.radarrScore = cf.score || 0;
+                    }
+                });
+                
+                // Process sonarr-specific formats
+                sonarrFormats.forEach(cf => {
+                    if (!formatMap.has(cf.name)) {
+                        formatMap.set(cf.name, {
+                            radarrScore: 0,
+                            sonarrScore: cf.score || 0,
+                            radarr: false,
+                            sonarr: true
+                        });
+                    } else {
+                        // Format exists (from both or radarr), update sonarr score
+                        const existing = formatMap.get(cf.name);
+                        existing.sonarr = true;
+                        existing.sonarrScore = cf.score || 0;
+                    }
+                });
+                
+                // Build the final formats array
+                const newFormats = formats.map(format => {
+                    const savedData = formatMap.get(format.name);
+                    return {
+                        id: format.name,
+                        name: format.name,
+                        radarrScore: savedData?.radarrScore || 0,
+                        sonarrScore: savedData?.sonarrScore || 0,
+                        radarr: Boolean(savedData?.radarr),
+                        sonarr: Boolean(savedData?.sonarr),
+                        tags: format.tags || []
+                    };
+                });
+                
+                setCustomFormats(newFormats);
 
                 // Format tags
                 const allTags = [
@@ -297,14 +334,13 @@ function ProfileModal({
                 const safeCustomFormats = formats.map(format => ({
                     id: format.name,
                     name: format.name,
-                    score: 0,
+                    radarrScore: 0,
+                    sonarrScore: 0,
+                    radarr: false,
+                    sonarr: false,
                     tags: format.tags || []
                 }));
-                setCustomFormats({
-                    both: [...safeCustomFormats],
-                    radarr: [...safeCustomFormats],
-                    sonarr: [...safeCustomFormats]
-                });
+                setCustomFormats(safeCustomFormats);
 
                 // Format tags
                 const allTags = [
@@ -369,136 +405,59 @@ function ProfileModal({
                     minCustomFormatScore,
                     upgradeUntilScore,
                     minScoreIncrement,
-                    custom_formats: (() => {
-                        // Check if selective mode is enabled
-                        const selectiveMode = localStorage.getItem('formatSettingsSelectiveMode');
-                        const useSelectiveMode = selectiveMode !== null && JSON.parse(selectiveMode);
-                        
-                        // Helper function to process formats for an app type
-                        const processFormats = (appFormats, appType) => {
-                            if (useSelectiveMode) {
-                                try {
-                                    // Get the list of explicitly selected format IDs for this app
-                                    const selectedFormatIdsStr = localStorage.getItem(`selectedFormatIds_${appType}`);
-                                    const selectedFormatIds = selectedFormatIdsStr ? JSON.parse(selectedFormatIdsStr) : [];
-
-                                    // Get formats with non-zero scores
-                                    const nonZeroFormats = appFormats.filter(format => format.score !== 0);
-
-                                    // Get formats with zero scores that are explicitly selected
-                                    const explicitlySelectedZeroFormats = appFormats.filter(
-                                        format => format.score === 0 && selectedFormatIds.includes(format.id)
-                                    );
-
-                                    // Combine both lists
-                                    return [...nonZeroFormats, ...explicitlySelectedZeroFormats]
-                                        .sort((a, b) => {
-                                            if (b.score !== a.score) return b.score - a.score;
-                                            return a.name.localeCompare(b.name);
-                                        })
-                                        .map(format => ({
-                                            name: format.name,
-                                            score: format.score
-                                        }));
-                                } catch (e) {
-                                    // Fallback to just non-zero scores
-                                    return appFormats
-                                        .filter(format => format.score !== 0)
-                                        .sort((a, b) => {
-                                            if (b.score !== a.score) return b.score - a.score;
-                                            return a.name.localeCompare(b.name);
-                                        })
-                                        .map(format => ({
-                                            name: format.name,
-                                            score: format.score
-                                        }));
-                                }
-                            } else {
-                                // Standard behavior - only include formats with non-zero scores
-                                return appFormats
-                                    .filter(format => format.score !== 0)
-                                    .sort((a, b) => {
-                                        if (b.score !== a.score) return b.score - a.score;
-                                        return a.name.localeCompare(b.name);
-                                    })
-                                    .map(format => ({
-                                        name: format.name,
-                                        score: format.score
-                                    }));
-                            }
-                        };
-
-                        // Always save "both" formats as the main custom_formats field for backwards compatibility
-                        return processFormats(customFormats.both || [], 'both');
-                    })(),
-                    ...((() => {
-                        // Check if selective mode is enabled
-                        const selectiveMode = localStorage.getItem('formatSettingsSelectiveMode');
-                        const useSelectiveMode = selectiveMode !== null && JSON.parse(selectiveMode);
-                        
-                        // Helper function to process formats for an app type
-                        const processFormats = (appFormats, appType) => {
-                            if (useSelectiveMode) {
-                                try {
-                                    // Get the list of explicitly selected format IDs for this app
-                                    const selectedFormatIdsStr = localStorage.getItem(`selectedFormatIds_${appType}`);
-                                    const selectedFormatIds = selectedFormatIdsStr ? JSON.parse(selectedFormatIdsStr) : [];
-
-                                    // Get formats with non-zero scores
-                                    const nonZeroFormats = appFormats.filter(format => format.score !== 0);
-
-                                    // Get formats with zero scores that are explicitly selected
-                                    const explicitlySelectedZeroFormats = appFormats.filter(
-                                        format => format.score === 0 && selectedFormatIds.includes(format.id)
-                                    );
-
-                                    // Combine both lists
-                                    return [...nonZeroFormats, ...explicitlySelectedZeroFormats]
-                                        .sort((a, b) => {
-                                            if (b.score !== a.score) return b.score - a.score;
-                                            return a.name.localeCompare(b.name);
-                                        })
-                                        .map(format => ({
-                                            name: format.name,
-                                            score: format.score
-                                        }));
-                                } catch (e) {
-                                    // Fallback to just non-zero scores
-                                    return appFormats
-                                        .filter(format => format.score !== 0)
-                                        .sort((a, b) => {
-                                            if (b.score !== a.score) return b.score - a.score;
-                                            return a.name.localeCompare(b.name);
-                                        })
-                                        .map(format => ({
-                                            name: format.name,
-                                            score: format.score
-                                        }));
-                                }
-                            } else {
-                                // Standard behavior - only include formats with non-zero scores
-                                return appFormats
-                                    .filter(format => format.score !== 0)
-                                    .sort((a, b) => {
-                                        if (b.score !== a.score) return b.score - a.score;
-                                        return a.name.localeCompare(b.name);
-                                    })
-                                    .map(format => ({
-                                        name: format.name,
-                                        score: format.score
-                                    }));
-                            }
-                        };
-
-                        // Always include app-specific formats as separate fields (empty arrays if no scores)
-                        const radarrFormats = processFormats(customFormats.radarr || [], 'radarr');
-                        const sonarrFormats = processFormats(customFormats.sonarr || [], 'sonarr');
-                        
-                        return {
-                            custom_formats_radarr: radarrFormats,
-                            custom_formats_sonarr: sonarrFormats
-                        };
-                    })()),
+                    // Intelligently split formats based on enabled apps and scores
+                    // If both apps enabled with same score -> goes to custom_formats
+                    // Otherwise -> goes to app-specific arrays
+                    custom_formats: customFormats
+                        .filter(format => {
+                            const radarrScore = format.radarrScore ?? 0;
+                            const sonarrScore = format.sonarrScore ?? 0;
+                            return format.radarr && format.sonarr && radarrScore === sonarrScore;
+                        })
+                        .sort((a, b) => {
+                            const aScore = a.radarrScore ?? 0;
+                            const bScore = b.radarrScore ?? 0;
+                            if (bScore !== aScore) return bScore - aScore;
+                            return a.name.localeCompare(b.name);
+                        })
+                        .map(format => ({
+                            name: format.name,
+                            score: format.radarrScore ?? 0
+                        })),
+                    custom_formats_radarr: customFormats
+                        .filter(format => {
+                            const radarrScore = format.radarrScore ?? 0;
+                            const sonarrScore = format.sonarrScore ?? 0;
+                            // Include if: radarr-only OR both enabled but different scores
+                            return format.radarr && (!format.sonarr || radarrScore !== sonarrScore);
+                        })
+                        .sort((a, b) => {
+                            const aScore = a.radarrScore ?? 0;
+                            const bScore = b.radarrScore ?? 0;
+                            if (bScore !== aScore) return bScore - aScore;
+                            return a.name.localeCompare(b.name);
+                        })
+                        .map(format => ({
+                            name: format.name,
+                            score: format.radarrScore ?? 0
+                        })),
+                    custom_formats_sonarr: customFormats
+                        .filter(format => {
+                            const radarrScore = format.radarrScore ?? 0;
+                            const sonarrScore = format.sonarrScore ?? 0;
+                            // Include if: sonarr-only OR both enabled but different scores
+                            return format.sonarr && (!format.radarr || radarrScore !== sonarrScore);
+                        })
+                        .sort((a, b) => {
+                            const aScore = a.sonarrScore ?? 0;
+                            const bScore = b.sonarrScore ?? 0;
+                            if (bScore !== aScore) return bScore - aScore;
+                            return a.name.localeCompare(b.name);
+                        })
+                        .map(format => ({
+                            name: format.name,
+                            score: format.sonarrScore ?? 0
+                        })),
                     qualities: sortedQualities
                         .filter(q => q.enabled)
                         .map(q => {
@@ -585,6 +544,37 @@ function ProfileModal({
         }
     };
 
+    const handleScoreChange = (formatId, app, score) => {
+        setCustomFormats(prev => 
+            prev.map(format => {
+                if (format.id === formatId) {
+                    if (app === 'radarr') {
+                        return {...format, radarrScore: score};
+                    } else if (app === 'sonarr') {
+                        return {...format, sonarrScore: score};
+                    }
+                }
+                return format;
+            })
+        );
+    };
+
+    const handleFormatToggle = (formatId, app, enabled) => {
+        setCustomFormats(prev => 
+            prev.map(format => {
+                if (format.id === formatId) {
+                    // If explicitly passing enabled state
+                    if (enabled !== undefined) {
+                        return {...format, [app]: enabled};
+                    }
+                    // Otherwise toggle
+                    return {...format, [app]: !format[app]};
+                }
+                return format;
+            })
+        );
+    };
+
     const onFormatSort = (key, direction) => {
         setFormatSortKey(key);
         setFormatSortDirection(direction);
@@ -657,101 +647,13 @@ function ProfileModal({
                             {activeTab === 'scoring' && (
                                 <ProfileScoringTab
                                     customFormats={customFormats}
-                                    formatFilter={formatFilter}
-                                    onFormatFilterChange={setFormatFilter}
-                                    onScoreChange={(appType, id, score) => {
-                                        setCustomFormats(prev => {
-                                            const newFormats = {...prev};
-                                            
-                                            // If setting a non-zero score, handle conflicts
-                                            if (score !== 0) {
-                                                if (appType === 'both') {
-                                                    // Setting in "both" clears radarr AND sonarr
-                                                    newFormats.radarr = newFormats.radarr.map(f =>
-                                                        f.id === id ? {...f, score: 0} : f
-                                                    );
-                                                    newFormats.sonarr = newFormats.sonarr.map(f =>
-                                                        f.id === id ? {...f, score: 0} : f
-                                                    );
-                                                } else {
-                                                    // Setting in radarr/sonarr only clears "both"
-                                                    newFormats.both = newFormats.both.map(f =>
-                                                        f.id === id ? {...f, score: 0} : f
-                                                    );
-                                                }
-                                            }
-                                            
-                                            // Update the target app type
-                                            newFormats[appType] = newFormats[appType].map(f =>
-                                                f.id === id ? {...f, score} : f
-                                            );
-                                            
-                                            return newFormats;
-                                        });
-                                    }}
-                                    formatSortKey={formatSortKey}
-                                    formatSortDirection={formatSortDirection}
-                                    onFormatSort={onFormatSort}
-                                    tags={formatTags}
-                                    tagFilter={tagFilter}
-                                    onTagFilterChange={setTagFilter}
-                                    tagScores={tagScores}
-                                    onTagScoreChange={(appType, tag, score) => {
-                                        setTagScores(prev => ({
-                                            ...prev,
-                                            [tag]: score
-                                        }));
-                                        setCustomFormats(prev => {
-                                            const newFormats = {...prev};
-                                            
-                                            // If setting a non-zero score, handle conflicts for all formats with this tag
-                                            if (score !== 0) {
-                                                if (appType === 'both') {
-                                                    // Setting in "both" clears radarr AND sonarr for formats with this tag
-                                                    newFormats.radarr = newFormats.radarr.map(format => {
-                                                        if (format.tags?.includes(tag)) {
-                                                            return {...format, score: 0};
-                                                        }
-                                                        return format;
-                                                    });
-                                                    newFormats.sonarr = newFormats.sonarr.map(format => {
-                                                        if (format.tags?.includes(tag)) {
-                                                            return {...format, score: 0};
-                                                        }
-                                                        return format;
-                                                    });
-                                                } else {
-                                                    // Setting in radarr/sonarr only clears "both" for formats with this tag
-                                                    newFormats.both = newFormats.both.map(format => {
-                                                        if (format.tags?.includes(tag)) {
-                                                            return {...format, score: 0};
-                                                        }
-                                                        return format;
-                                                    });
-                                                }
-                                            }
-                                            
-                                            // Update the target app type
-                                            newFormats[appType] = newFormats[appType].map(format => {
-                                                if (format.tags?.includes(tag)) {
-                                                    return {...format, score};
-                                                }
-                                                return format;
-                                            });
-                                            
-                                            return newFormats;
-                                        });
-                                    }}
-                                    tagSortKey={tagSortKey}
-                                    tagSortDirection={tagSortDirection}
-                                    onTagSort={onTagSort}
+                                    onScoreChange={handleScoreChange}
+                                    onFormatToggle={handleFormatToggle}
                                     minCustomFormatScore={minCustomFormatScore}
                                     upgradeUntilScore={upgradeUntilScore}
                                     minScoreIncrement={minScoreIncrement}
                                     onMinScoreChange={setMinCustomFormatScore}
-                                    onUpgradeUntilScoreChange={
-                                        setUpgradeUntilScore
-                                    }
+                                    onUpgradeUntilScoreChange={setUpgradeUntilScore}
                                     onMinIncrementChange={setMinScoreIncrement}
                                     upgradesAllowed={upgradesAllowed}
                                     onUpgradesAllowedChange={setUpgradesAllowed}

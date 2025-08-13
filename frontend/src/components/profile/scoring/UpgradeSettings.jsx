@@ -27,7 +27,7 @@ const UpgradeSettings = ({
                     <NumberInput
                         value={minCustomFormatScore}
                         onChange={onMinScoreChange}
-                        className="w-20"
+                        className="w-24"
                     />
                 </div>
 
@@ -50,7 +50,7 @@ const UpgradeSettings = ({
                                 value={upgradeUntilScore}
                                 onChange={onUpgradeUntilScoreChange}
                                 min={0}
-                                className="w-20"
+                                className="w-24"
                             />
                         </div>
 
@@ -70,7 +70,7 @@ const UpgradeSettings = ({
                                 value={minScoreIncrement}
                                 onChange={onMinIncrementChange}
                                 min={0}
-                                className="w-20"
+                                className="w-24"
                             />
                         </div>
                     </>

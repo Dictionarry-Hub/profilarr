@@ -1,90 +1,170 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import SearchBar from '@ui/DataBar/SearchBar';
 import useSearch from '@hooks/useSearch';
-import AdvancedView from './AdvancedView';
-import BasicView from './BasicView';
-import FormatSelectorModal from './FormatSelectorModal';
-import FormatSettingsModal from './FormatSettingsModal';
-import {Settings, Plus, CheckSquare} from 'lucide-react';
-import Tooltip from '@ui/Tooltip';
+import GroupFilter from './GroupFilter';
+import FormatGroup from './FormatGroup';
+import { Layers } from 'lucide-react';
 
-const FormatSettings = ({formats, onScoreChange, appType = 'both', activeApp, onAppChange}) => {
-    // Initialize state from localStorage, falling back to true if no value is stored
-    const [isAdvancedView, setIsAdvancedView] = useState(() => {
-        const stored = localStorage.getItem('formatSettingsView');
-        return stored === null ? true : JSON.parse(stored);
-    });
-
-    // Initialize selectiveMode from localStorage (global setting)
-    const [showSelectiveMode, setShowSelectiveMode] = useState(() => {
-        const stored = localStorage.getItem('formatSettingsSelectiveMode');
-        return stored === null ? false : JSON.parse(stored);
-    });
+const FormatSettings = ({ formats, onScoreChange, onFormatToggle, activeApp }) => {
+    // Track the initial formats to detect profile changes
+    const initialFormatsRef = useRef(null);
+    const sortOrderRef = useRef([]);
+    const [groupFilter, setGroupFilter] = useState({ selectedGroups: ['All Groups'], customTags: [] });
+    const [isProcessing, setIsProcessing] = useState(true);
+    const [sortedFormats, setSortedFormats] = useState([]);
     
-    const [availableFormats, setAvailableFormats] = useState([]);
-    const [selectedFormatIds, setSelectedFormatIds] = useState(() => {
-        try {
-            const stored = localStorage.getItem(`selectedFormatIds_${appType}`);
-            return stored ? JSON.parse(stored) : [];
-        } catch {
-            return [];
-        }
-    });
+    const handleGroupChange = useCallback((filter) => {
+        setGroupFilter(filter);
+    }, []);
     
-    // Format selector modal state
-    const [isSelectorModalOpen, setIsSelectorModalOpen] = useState(false);
-    
-    // Settings modal state
-    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-    
-    // Calculate which formats to display
-    const displayFormats = useMemo(() => {
-        if (showSelectiveMode) {
-            // In selective mode:
-            // 1. Display all formats with non-zero scores
-            // 2. Also display formats with zero scores that are explicitly selected
-            const nonZeroFormats = formats.filter(f => f.score !== 0);
-            const selectedZeroFormats = formats.filter(f => 
-                f.score === 0 && selectedFormatIds.includes(f.id)
-            );
+    const processSortedFormats = useCallback(() => {
+        // Create a unique key for the current format set
+        const currentFormatKey = formats.map(f => f.id).sort().join(',');
+        const previousFormatKey = initialFormatsRef.current?.key;
+        
+        // Check if this is a new profile (different format set)
+        const isNewProfile = !previousFormatKey || currentFormatKey !== previousFormatKey;
+        
+        let sorted = formats;
+        
+        if (isNewProfile && formats.length > 0) {
+            // New profile - create fresh sort and clear old sort order
+            sortOrderRef.current = [];
+            initialFormatsRef.current = { 
+                key: currentFormatKey,
+                ids: formats.map(f => f.id)
+            };
             
-            return [...nonZeroFormats, ...selectedZeroFormats];
-        } else {
-            // In regular mode, display all formats as usual
-            return formats;
+            // Pre-calculate scores and active status for efficiency
+            const formatsWithMeta = formats.map(format => {
+                const isActive = Boolean(format.radarr) || Boolean(format.sonarr);
+                let maxScore = 0;
+                
+                if (isActive) {
+                    const scores = [];
+                    if (format.radarr) scores.push(format.radarrScore ?? format.score ?? 0);
+                    if (format.sonarr) scores.push(format.sonarrScore ?? format.score ?? 0);
+                    maxScore = scores.length > 0 ? Math.max(...scores) : 0;
+                }
+                
+                return {
+                    format,
+                    isActive,
+                    maxScore,
+                    nameLower: format.name.toLowerCase()
+                };
+            });
+            
+            // Sort using pre-calculated values
+            formatsWithMeta.sort((a, b) => {
+                // Active formats first
+                if (a.isActive !== b.isActive) {
+                    return a.isActive ? -1 : 1;
+                }
+                
+                // If both active, sort by score
+                if (a.isActive && a.maxScore !== b.maxScore) {
+                    return b.maxScore - a.maxScore;
+                }
+                
+                // Same score or both inactive - sort alphabetically
+                return a.nameLower.localeCompare(b.nameLower);
+            });
+            
+            sorted = formatsWithMeta.map(item => item.format);
+            
+            // Store the sort order
+            sortOrderRef.current = sorted.map(f => f.id);
+        } else if (sortOrderRef.current.length > 0) {
+            // Same profile - maintain existing order
+            const idToFormat = new Map(formats.map(f => [f.id, f]));
+            sorted = sortOrderRef.current
+                .map(id => idToFormat.get(id))
+                .filter(Boolean);
         }
-    }, [formats, showSelectiveMode, selectedFormatIds]);
-
-    // Save to localStorage whenever view preferences change
-    useEffect(() => {
-        localStorage.setItem('formatSettingsView', JSON.stringify(isAdvancedView));
-    }, [isAdvancedView]);
-
-    useEffect(() => {
-        localStorage.setItem('formatSettingsSelectiveMode', JSON.stringify(showSelectiveMode));
-    }, [showSelectiveMode]);
+        
+        setSortedFormats(sorted);
+        setIsProcessing(false);
+    }, [formats]);
     
-    // Save selected format IDs to localStorage
+    // Process formats asynchronously to avoid blocking the UI
     useEffect(() => {
-        localStorage.setItem(`selectedFormatIds_${appType}`, JSON.stringify(selectedFormatIds));
-    }, [selectedFormatIds, appType]);
-
-    // Calculate available formats for selection (not already in use)
-    useEffect(() => {
-        // To be "available", a format must have zero score and not be in selectedFormatIds
-        const usedFormatIds = formats.filter(f => f.score !== 0).map(f => f.id);
-        const allUnavailableIds = [...usedFormatIds, ...selectedFormatIds];
+        setIsProcessing(true);
+        setSortedFormats([]); // Clear previous sorted formats immediately
         
-        // Available formats are those not already used or selected
-        const available = formats.filter(format => 
-            !allUnavailableIds.includes(format.id)
-        );
+        // Use requestIdleCallback for better performance, fallback to setTimeout
+        if ('requestIdleCallback' in window) {
+            const id = requestIdleCallback(() => {
+                processSortedFormats();
+            }, { timeout: 100 });
+            
+            return () => cancelIdleCallback(id);
+        } else {
+            const timeoutId = setTimeout(() => {
+                processSortedFormats();
+            }, 10);
+            
+            return () => clearTimeout(timeoutId);
+        }
+    }, [formats, processSortedFormats]);
+    
+    // Group formats based on selected groups
+    const groupedFormats = useMemo(() => {
+        if (groupFilter.selectedGroups.includes('All Groups')) {
+            // When "All Groups" is selected, show all formats in a single group
+            return { 'Custom Formats': sortedFormats };
+        }
         
-        setAvailableFormats(available);
-    }, [formats, selectedFormatIds]);
-
-    // Search hook for filtering formats
+        const groups = {};
+        const selectedGroupsSet = new Set(groupFilter.selectedGroups);
+        
+        // Pre-compile matching patterns for better performance
+        const matchers = {
+            'Audio': (tag) => /audio|atmos|dts|truehd|flac|aac/i.test(tag),
+            'HDR': (tag) => /hdr|dv|dolby|vision/i.test(tag),
+            'Release Groups': (tag) => /group/i.test(tag) && !/tier/i.test(tag),
+            'Streaming Services': (tag) => /streaming|web|netflix|amazon/i.test(tag),
+            'Codecs': (tag) => /codec|x264|x265|h264|h265|av1/i.test(tag),
+            'Resolution': (tag) => /resolution|1080|2160|720|4k/i.test(tag),
+            'Source': (tag) => /source|bluray|remux|web/i.test(tag),
+            'Storage': (tag) => /storage|size/i.test(tag),
+            'Release Group Tiers': (tag) => /tier/i.test(tag),
+            'Indexer Flags': (tag) => /indexer|flag/i.test(tag)
+        };
+        
+        // Group formats by matching tags
+        for (const format of sortedFormats) {
+            if (!format.tags || format.tags.length === 0) continue;
+            
+            // Check each selected group
+            for (const groupName of selectedGroupsSet) {
+                const matcher = matchers[groupName];
+                const hasMatchingTag = matcher 
+                    ? format.tags.some(tag => matcher(tag))
+                    : format.tags.some(tag => {
+                        const tagLower = tag.toLowerCase();
+                        const groupLower = groupName.toLowerCase();
+                        return tagLower.includes(groupLower) || groupLower.includes(tagLower);
+                    });
+                
+                if (hasMatchingTag) {
+                    if (!groups[groupName]) {
+                        groups[groupName] = [];
+                    }
+                    groups[groupName].push(format);
+                }
+            }
+        }
+        
+        return groups;
+    }, [sortedFormats, groupFilter.selectedGroups]);
+    
+    // Flatten grouped formats for search
+    const allGroupedFormats = useMemo(() => {
+        return Object.values(groupedFormats).flat();
+    }, [groupedFormats]);
+    
     const {
         searchTerms,
         currentInput,
@@ -92,77 +172,44 @@ const FormatSettings = ({formats, onScoreChange, appType = 'both', activeApp, on
         addSearchTerm,
         removeSearchTerm,
         clearSearchTerms,
-        items: filteredFormats
-    } = useSearch(displayFormats, {
-        searchableFields: ['name']
+        items: searchFilteredFormats
+    } = useSearch(allGroupedFormats, {
+        searchableFields: ['name'],
+        initialSortBy: 'custom',
+        sortOptions: {
+            custom: (a, b) => {
+                // Maintain our custom sort order (already sorted in sortedFormats)
+                // Just return 0 to keep the existing order
+                return 0;
+            }
+        }
     });
-
-    // Handle format toggle (add/remove)
-    const handleFormatToggle = (formatId) => {
-        const format = formats.find(f => f.id === formatId);
-        
-        if (!format) return;
-        
-        // Check if this format is already selected (either has a non-zero score or is in selectedFormatIds)
-        const isSelected = format.score !== 0 || selectedFormatIds.includes(formatId);
-        
-        if (isSelected) {
-            // Remove format
-            if (format.score !== 0) {
-                // If format has a non-zero score, set it to 0 (don't remove it completely)
-                onScoreChange(formatId, 0);
-            }
-            // If format was explicitly selected, remove from the selection list
-            setSelectedFormatIds(prev => prev.filter(id => id !== formatId));
-        } else {
-            // Add format
-            // Set the format score to 0 initially, just to mark it as "selected"
-            onScoreChange(formatId, 0);
-            
-            // Add to our list of explicitly selected format IDs
-            setSelectedFormatIds(prev => [...prev, formatId]);
-        }
-    };
-
-    // When a format score changes, we need to update our tracking
-    const handleScoreChange = (formatId, score) => {
-        // Pass the score change to parent
-        onScoreChange(formatId, score);
-        
-        const format = formats.find(f => f.id === formatId);
-        if (!format) return;
-        
-        if (score !== 0) {
-            // If the score is changing from 0 to non-zero, we no longer need to track it
-            // as an explicitly selected format (it's tracked by virtue of its non-zero score)
-            if (format.score === 0 && selectedFormatIds.includes(formatId)) {
-                // Format was previously explicitly selected with zero score, but now has a non-zero score
-                // We can remove it from our explicit selection tracking
-                setSelectedFormatIds(prev => prev.filter(id => id !== formatId));
-            }
-        } else {
-            // If the score is changing to 0, we need to track it as explicitly selected
-            // so it remains visible in selective mode
-            if (format.score !== 0 && !selectedFormatIds.includes(formatId)) {
-                // Format was previously non-zero, but now is 0
-                // Add it to our explicit selection tracking
-                setSelectedFormatIds(prev => [...prev, formatId]);
-            }
-        }
-    };
-
     
-    // Open the format selector modal
-    const openFormatSelector = () => {
-        setIsSelectorModalOpen(true);
-    };
+    // Filter grouped formats based on search
+    const filteredGroupedFormats = useMemo(() => {
+        if (searchTerms.length === 0 && !currentInput) {
+            return groupedFormats;
+        }
+        
+        const filteredGroups = {};
+        const searchIds = new Set(searchFilteredFormats.map(f => f.id));
+        
+        Object.entries(groupedFormats).forEach(([groupName, formats]) => {
+            const filteredFormats = formats.filter(f => searchIds.has(f.id));
+            if (filteredFormats.length > 0) {
+                filteredGroups[groupName] = filteredFormats;
+            }
+        });
+        
+        return filteredGroups;
+    }, [groupedFormats, searchFilteredFormats, searchTerms, currentInput]);
 
     return (
-        <div className='space-y-4'>
-            <div className='flex gap-3'>
+        <div className="space-y-4">
+            <div className="flex items-center gap-2">
                 <SearchBar
-                    className='flex-1'
-                    placeholder='Search formats...'
+                    className="flex-1"
+                    placeholder="Search formats..."
                     searchTerms={searchTerms}
                     currentInput={currentInput}
                     onInputChange={setCurrentInput}
@@ -170,84 +217,47 @@ const FormatSettings = ({formats, onScoreChange, appType = 'both', activeApp, on
                     onRemoveTerm={removeSearchTerm}
                     onClearTerms={clearSearchTerms}
                 />
-
-                <div className='flex gap-2'>
-                    {/* Settings Button */}
-                    <Tooltip content="Format settings" position="bottom">
-                        <button
-                            onClick={() => setIsSettingsModalOpen(true)}
-                            className='px-3 py-2 rounded-md border border-gray-300 bg-white hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600 flex items-center gap-2'
-                        >
-                            <Settings size={16} className='text-gray-500 dark:text-gray-400' />
-                            <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>Settings</span>
-                        </button>
-                    </Tooltip>
-                    
-                    {/* Selective Mode Toggle */}
-                    <button
-                        onClick={() => setShowSelectiveMode(prev => !prev)}
-                        className={`px-3 py-2 rounded-md border transition-colors flex items-center gap-2 ${
-                            showSelectiveMode
-                                ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300'
-                                : 'border-gray-300 bg-white hover:border-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600'
-                        }`}
-                        title={showSelectiveMode ? 'Hide unused formats' : 'Show all formats'}
-                    >
-                        <CheckSquare size={16} />
-                        <span className='text-sm font-medium'>Selective</span>
-                    </button>
-                    
-                    {/* Add Format Button (only show in selective mode) */}
-                    {showSelectiveMode && (
-                        <Tooltip content="Add formats to profile" position="bottom">
-                            <button
-                                onClick={openFormatSelector}
-                                className="px-3 py-2 border rounded-md border-gray-300 bg-white hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600 flex items-center gap-2"
-                            >
-                                <Plus size={16} className='text-gray-500 dark:text-gray-400' />
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Add</span>
-                            </button>
-                        </Tooltip>
-                    )}
-                </div>
+                <GroupFilter onGroupChange={handleGroupChange} />
             </div>
 
-            {/* Format Selector Modal */}
-            <FormatSelectorModal
-                isOpen={isSelectorModalOpen}
-                onClose={() => setIsSelectorModalOpen(false)}
-                availableFormats={availableFormats}
-                selectedFormatIds={selectedFormatIds}
-                allFormats={formats}
-                onFormatToggle={handleFormatToggle}
-            />
-
-            {/* Settings Modal */}
-            <FormatSettingsModal
-                isOpen={isSettingsModalOpen}
-                onClose={() => setIsSettingsModalOpen(false)}
-                activeApp={activeApp}
-                onAppChange={onAppChange}
-                isAdvancedView={isAdvancedView}
-                onViewChange={setIsAdvancedView}
-            />
-
-            {/* Format Display */}
-            {isAdvancedView ? (
-                <AdvancedView
-                    formats={filteredFormats}
-                    onScoreChange={handleScoreChange}
-                    onFormatRemove={formatId => handleFormatToggle(formatId)}
-                    showRemoveButton={showSelectiveMode}
-                />
-            ) : (
-                <BasicView
-                    formats={filteredFormats}
-                    onScoreChange={handleScoreChange}
-                    onFormatRemove={formatId => handleFormatToggle(formatId)}
-                    showRemoveButton={showSelectiveMode}
-                />
-            )}
+            <div className="mt-4">
+                {isProcessing ? (
+                    <div className="space-y-4">
+                        {/* Loading skeleton */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                            <div className="animate-pulse">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                        <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                    </div>
+                                    <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded"></div>
+                                    <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded"></div>
+                                    <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : Object.keys(filteredGroupedFormats).length === 0 ? (
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+                        <p className="text-gray-500 dark:text-gray-400">No formats match your current filters</p>
+                    </div>
+                ) : (
+                    Object.entries(filteredGroupedFormats).map(([groupName, groupFormats]) => (
+                        <FormatGroup
+                            key={groupName}
+                            groupName={groupName}
+                            formats={groupFormats}
+                            onScoreChange={onScoreChange}
+                            onFormatToggle={onFormatToggle}
+                            icon={groupName === 'Custom Formats' ? Layers : null}
+                        />
+                    ))
+                )}
+            </div>
         </div>
     );
 };
@@ -257,14 +267,17 @@ FormatSettings.propTypes = {
         PropTypes.shape({
             id: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
-            score: PropTypes.number.isRequired,
+            score: PropTypes.number,
+            radarrScore: PropTypes.number,
+            sonarrScore: PropTypes.number,
+            radarr: PropTypes.bool,
+            sonarr: PropTypes.bool,
             tags: PropTypes.arrayOf(PropTypes.string)
         })
     ).isRequired,
     onScoreChange: PropTypes.func.isRequired,
-    appType: PropTypes.oneOf(['both', 'radarr', 'sonarr']),
-    activeApp: PropTypes.oneOf(['both', 'radarr', 'sonarr']).isRequired,
-    onAppChange: PropTypes.func.isRequired
+    onFormatToggle: PropTypes.func.isRequired,
+    activeApp: PropTypes.oneOf(['both', 'radarr', 'sonarr'])
 };
 
 export default FormatSettings;

@@ -31,6 +31,10 @@ const Modal = ({
         setTimeout(() => {
             onClose();
             setIsClosing(false);
+            // Reset to first tab after modal closes
+            if (tabs && tabs.length > 0) {
+                setActiveTab(tabs[0].id);
+            }
         }, 200); // Match animation duration
     };
 

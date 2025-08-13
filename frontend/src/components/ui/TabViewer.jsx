@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect, useLayoutEffect} from 'react';
+import React, {useRef, useState, useEffect, useLayoutEffect, useCallback} from 'react';
 
 const TabViewer = ({tabs, activeTab, onTabChange}) => {
     const [tabOffset, setTabOffset] = useState(0);
@@ -13,20 +13,24 @@ const TabViewer = ({tabs, activeTab, onTabChange}) => {
     });
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    const updateTabPosition = () => {
+    const updateTabPosition = useCallback(() => {
         if (tabsRef.current[activeTab]) {
             const tab = tabsRef.current[activeTab];
-            setTabOffset(tab.offsetLeft);
-            setTabWidth(tab.offsetWidth);
-            if (!isInitialized) {
-                setIsInitialized(true);
-            }
+            // Use requestAnimationFrame to ensure smooth animation
+            requestAnimationFrame(() => {
+                setTabOffset(tab.offsetLeft);
+                setTabWidth(tab.offsetWidth);
+                if (!isInitialized) {
+                    setIsInitialized(true);
+                }
+            });
         }
-    };
+    }, [activeTab, isInitialized]);
 
     useLayoutEffect(() => {
+        // Immediate update for position
         updateTabPosition();
-    }, [activeTab]);
+    }, [activeTab, updateTabPosition]);
 
     useEffect(() => {
         const resizeObserver = new ResizeObserver(updateTabPosition);
@@ -34,7 +38,7 @@ const TabViewer = ({tabs, activeTab, onTabChange}) => {
             resizeObserver.observe(tabsRef.current[activeTab]);
         }
         return () => resizeObserver.disconnect();
-    }, [activeTab]);
+    }, [activeTab, updateTabPosition]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -92,9 +96,9 @@ const TabViewer = ({tabs, activeTab, onTabChange}) => {
         <div className='relative flex items-center'>
             {isInitialized && (
                 <div
-                    className='absolute top-0 bottom-0 bg-gray-900 dark:bg-gray-900 rounded-md transition-all duration-300'
+                    className='absolute top-0 bottom-0 bg-gray-900 dark:bg-gray-900 rounded-md transition-all duration-300 ease-out will-change-transform'
                     style={{
-                        left: `${tabOffset}px`,
+                        transform: `translateX(${tabOffset}px)`,
                         width: `${tabWidth}px`
                     }}
                 />
