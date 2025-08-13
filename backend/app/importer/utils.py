@@ -77,7 +77,7 @@ def generate_language_formats(language: str, arr_type: str) -> List[Dict[str, An
     Generate language-specific format configurations.
     
     Args:
-        language: Language string (e.g., 'must_english', 'prefer_french')
+        language: Language string (e.g., 'must_english', 'only_french')
         arr_type: 'radarr' or 'sonarr'
         
     Returns:
@@ -89,50 +89,54 @@ def generate_language_formats(language: str, arr_type: str) -> List[Dict[str, An
     behavior, language_code = language.split('_', 1)
     formats = []
     
-    # Load base "Not English" format as template
-    try:
-        base_format = load_yaml('custom_format/Not English.yml')
-        
-        # Create "Not [Language]" format
-        not_format = base_format.copy()
-        lang_display = language_code.capitalize()
-        not_format['name'] = f"Not {lang_display}"
-        
-        # Update conditions for the specific language
-        for condition in not_format.get('conditions', []):
-            if condition.get('type') == 'language':
-                condition['language'] = language_code
-                if 'name' in condition:
-                    condition['name'] = condition['name'].replace('English', lang_display)
-        
-        formats.append(not_format)
-        
-        # For 'only' behavior, add additional formats
-        if behavior == 'only':
-            additional_format_names = [
-                "Not Only English",
-                "Not Only English (Missing)"
-            ]
+    # Handle behaviors: 'must' and 'only' (matching old working logic)
+    if behavior in ['must', 'only']:
+        # Load base "Not English" format as template
+        try:
+            base_format = load_yaml('custom_format/Not English.yml')
             
-            for format_name in additional_format_names:
-                try:
-                    additional = load_yaml(f'custom_format/{format_name}.yml')
-                    additional['name'] = additional['name'].replace('English', lang_display)
-                    
-                    for condition in additional.get('conditions', []):
-                        if condition.get('type') == 'language':
-                            condition['language'] = language_code
-                            if 'name' in condition:
-                                condition['name'] = condition['name'].replace('English', lang_display)
-                    
-                    formats.append(additional)
-                except Exception as e:
-                    # Silent fail - format doesn't exist
-                    pass
+            # Create "Not [Language]" format
+            not_format = base_format.copy()
+            lang_display = language_code.capitalize()
+            not_format['name'] = f"Not {lang_display}"
+            
+            # Update conditions for the specific language
+            for condition in not_format.get('conditions', []):
+                if condition.get('type') == 'language':
+                    condition['language'] = language_code
+                    if 'name' in condition:
+                        condition['name'] = condition['name'].replace('English', lang_display)
+                    # Note: exceptLanguage field is preserved from the base format
+            
+            formats.append(not_format)
+            
+            # For 'only' behavior, add additional formats
+            if behavior == 'only':
+                additional_format_names = [
+                    "Not Only English",
+                    "Not Only English (Missing)"
+                ]
+                
+                for format_name in additional_format_names:
+                    try:
+                        additional = load_yaml(f'custom_format/{format_name}.yml')
+                        additional['name'] = additional['name'].replace('English', lang_display)
+                        
+                        for condition in additional.get('conditions', []):
+                            if condition.get('type') == 'language':
+                                condition['language'] = language_code
+                                if 'name' in condition:
+                                    condition['name'] = condition['name'].replace('English', lang_display)
+                                # Note: exceptLanguage field is preserved from the base format
+                        
+                        formats.append(additional)
+                    except Exception as e:
+                        # Silent fail - format doesn't exist
+                        pass
         
-    except Exception as e:
-        # Silent fail - will be caught at higher level
-        pass
+        except Exception as e:
+            # Silent fail - will be caught at higher level
+            pass
     
     return formats
 

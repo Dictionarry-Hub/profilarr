@@ -4,6 +4,7 @@ from typing import Dict, List, Any, Optional
 from .mappings import TargetApp, ValueResolver
 from .utils import load_regex_patterns
 from ..db.queries.format_renames import is_format_in_renames
+from ..db.queries.settings import get_language_import_score
 from .logger import get_import_logger
 
 logger = logging.getLogger(__name__)
@@ -119,7 +120,17 @@ def _compile_condition(
         language_name = condition.get('language', '').lower()
         try:
             language_data = ValueResolver.get_language(language_name, target_app, for_profile=False)
-            spec['fields'] = [{'name': 'value', 'value': language_data['id']}]
+            fields = [{'name': 'value', 'value': language_data['id']}]
+            
+            # Handle exceptLanguage field if present
+            if 'exceptLanguage' in condition:
+                except_value = condition['exceptLanguage']
+                fields.append({
+                    'name': 'exceptLanguage',
+                    'value': except_value
+                })
+            
+            spec['fields'] = fields
         except Exception:
             import_logger = get_import_logger()
             import_logger.warning(f"Language not found: {language_name}")
@@ -281,25 +292,31 @@ def compile_profile_to_api_structure(
     if language != 'any' and '_' in language:
         behavior, language_code = language.split('_', 1)
         
-        # Add "Not [Language]" format with appropriate score
+        # Get the score from database instead of hardcoding
+        language_score = get_language_import_score()
+        
         # Use proper capitalization for the language name
         lang_display = language_code.capitalize()
-        not_language_name = f"Not {lang_display}"
-        format_items.append({
-            'name': not_language_name,
-            'score': -9999  # Standard score for language exclusion
-        })
         
-        # For 'only' behavior, add additional formats
-        if behavior == 'only':
+        # Handle behaviors: 'must' and 'only' (matching old working logic)
+        if behavior in ['must', 'only']:
+            # Add "Not [Language]" format with score from database
+            not_language_name = f"Not {lang_display}"
             format_items.append({
-                'name': f"Not Only {lang_display}",
-                'score': -9999
+                'name': not_language_name,
+                'score': language_score
             })
-            format_items.append({
-                'name': f"Not Only {lang_display} (Missing)",
-                'score': -9999
-            })
+            
+            # For 'only' behavior, add additional formats
+            if behavior == 'only':
+                format_items.append({
+                    'name': f"Not Only {lang_display}",
+                    'score': language_score
+                })
+                format_items.append({
+                    'name': f"Not Only {lang_display} (Missing)",
+                    'score': language_score
+                })
     
     # Main custom formats
     for cf in profile_yaml.get('custom_formats', []):
