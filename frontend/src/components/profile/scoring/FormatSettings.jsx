@@ -18,7 +18,7 @@ const FormatSettings = ({ formats, onScoreChange, onFormatToggle, activeApp }) =
         setGroupFilter(filter);
     }, []);
     
-    const processSortedFormats = useCallback(() => {
+    const processSortedFormats = () => {
         // Create a unique key for the current format set
         const currentFormatKey = formats.map(f => f.id).sort().join(',');
         const previousFormatKey = initialFormatsRef.current?.key;
@@ -86,28 +86,48 @@ const FormatSettings = ({ formats, onScoreChange, onFormatToggle, activeApp }) =
         
         setSortedFormats(sorted);
         setIsProcessing(false);
-    }, [formats]);
+    };
     
-    // Process formats asynchronously to avoid blocking the UI
+    // Only process formats when the profile actually changes (not on every score/toggle change)
     useEffect(() => {
-        setIsProcessing(true);
-        setSortedFormats([]); // Clear previous sorted formats immediately
+        // Create a unique key for the current format set
+        const currentFormatKey = formats.map(f => f.id).sort().join(',');
+        const previousFormatKey = initialFormatsRef.current?.key;
         
-        // Use requestIdleCallback for better performance, fallback to setTimeout
-        if ('requestIdleCallback' in window) {
-            const id = requestIdleCallback(() => {
-                processSortedFormats();
-            }, { timeout: 100 });
+        // Only process if it's actually a different profile
+        if (!previousFormatKey || currentFormatKey !== previousFormatKey) {
+            setIsProcessing(true);
+            setSortedFormats([]); // Clear previous sorted formats immediately
             
-            return () => cancelIdleCallback(id);
+            // Use requestIdleCallback for better performance, fallback to setTimeout
+            if ('requestIdleCallback' in window) {
+                const id = requestIdleCallback(() => {
+                    processSortedFormats();
+                }, { timeout: 100 });
+                
+                return () => cancelIdleCallback(id);
+            } else {
+                const timeoutId = setTimeout(() => {
+                    processSortedFormats();
+                }, 10);
+                
+                return () => clearTimeout(timeoutId);
+            }
         } else {
-            const timeoutId = setTimeout(() => {
-                processSortedFormats();
-            }, 10);
-            
-            return () => clearTimeout(timeoutId);
+            // Same profile - just update the existing sorted formats with new values
+            setSortedFormats(prevSorted => {
+                if (!prevSorted.length) return formats;
+                
+                // Create a map for quick lookup
+                const formatMap = new Map(formats.map(f => [f.id, f]));
+                
+                // Update the sorted formats with new values while maintaining order
+                return prevSorted.map(sortedFormat => 
+                    formatMap.get(sortedFormat.id) || sortedFormat
+                ).filter(f => formatMap.has(f.id));
+            });
         }
-    }, [formats, processSortedFormats]);
+    }, [formats]);
     
     // Group formats based on selected groups
     const groupedFormats = useMemo(() => {
