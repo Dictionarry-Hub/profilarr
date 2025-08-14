@@ -141,14 +141,14 @@ const FormatSettings = ({ formats, onScoreChange, onFormatToggle, activeApp }) =
         
         // Pre-compile matching patterns for better performance
         const matchers = {
-            'Audio': (tag) => /audio|atmos|dts|truehd|flac|aac/i.test(tag),
-            'HDR': (tag) => /hdr|dv|dolby|vision/i.test(tag),
+            'Audio': (tag) => /audio/i.test(tag),
+            'HDR': (tag) => /hdr/i.test(tag),
             'Release Groups': (tag) => /group/i.test(tag) && !/tier/i.test(tag),
-            'Streaming Services': (tag) => /streaming|netflix|amazon|hulu|disney|apple|peacock|hbo|paramount/i.test(tag),
-            'Codecs': (tag) => /codec|x264|x265|h264|h265|av1/i.test(tag),
+            'Streaming Services': (tag) => /streaming/i.test(tag),
+            'Codecs': (tag) => /codec/i.test(tag),
             'Resolution': (tag) => /resolution/i.test(tag),
             'Source': (tag) => /source/i.test(tag),
-            'Storage': (tag) => /storage|size/i.test(tag),
+            'Storage': (tag) => /storage/i.test(tag),
             'Release Group Tiers': (tag) => /tier/i.test(tag),
             'Indexer Flags': (tag) => /indexer|flag/i.test(tag)
         };

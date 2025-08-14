@@ -3,10 +3,8 @@ import PropTypes from 'prop-types';
 import { Check, Plus, X, Volume2, Monitor, Users, Tv, Code, HardDrive, Tag, Square, Layers, Database } from 'lucide-react';
 
 const GroupFilter = memo(({ onGroupChange }) => {
-    const [isOpen, setIsOpen] = useState(false);
     const [newTagInput, setNewTagInput] = useState('');
     const dropdownRef = useRef(null);
-    const buttonRef = useRef(null);
     
     // Initialize from localStorage immediately
     const [selectedGroups, setSelectedGroups] = useState(() => {
@@ -35,20 +33,6 @@ const GroupFilter = memo(({ onGroupChange }) => {
     ];
 
 
-    // Handle click outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
-                buttonRef.current && !buttonRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-            return () => document.removeEventListener('mousedown', handleClickOutside);
-        }
-    }, [isOpen]);
 
     // Dispatch changes
     useEffect(() => {
@@ -122,8 +106,6 @@ const GroupFilter = memo(({ onGroupChange }) => {
     return (
         <div className="relative group/dropdown">
             <button
-                ref={buttonRef}
-                onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center justify-center px-3 py-2 h-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative"
             >
                 <Layers className="w-4 h-4" />
@@ -137,14 +119,12 @@ const GroupFilter = memo(({ onGroupChange }) => {
             </button>
 
             {/* Invisible bridge to maintain hover connection */}
-            <div className={`absolute top-full left-0 right-0 h-2 ${
-                isOpen ? '' : 'group-hover/dropdown:block hidden'
-            }`} />
+            <div className="absolute top-full left-0 right-0 h-2 hidden group-hover/dropdown:block" />
             
-            {/* Dropdown - Uses CSS hover instead of JS events */}
-            <div className={`absolute z-20 top-full mt-2 right-0 w-64 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden transition-all duration-200 ${
-                isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-[-10px] pointer-events-none group-hover/dropdown:opacity-100 group-hover/dropdown:visible group-hover/dropdown:translate-y-0 group-hover/dropdown:pointer-events-auto'
-            }`}>
+            {/* Dropdown - Pure CSS hover */}
+            <div 
+                ref={dropdownRef}
+                className="absolute z-20 top-full mt-2 right-0 w-64 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden transition-all duration-200 opacity-0 invisible translate-y-[-10px] pointer-events-none group-hover/dropdown:opacity-100 group-hover/dropdown:visible group-hover/dropdown:translate-y-0 group-hover/dropdown:pointer-events-auto">
                 {/* Extended invisible bridge inside dropdown */}
                 <div className="absolute -top-2 -left-4 -right-4 h-3" />
                 <div className="overflow-y-auto">
