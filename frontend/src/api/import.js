@@ -1,77 +1,40 @@
 import axios from 'axios';
 
-const IMPORT_BASE_URL = '/api/import';
+const API_URL = '/api/v2/import';
 
 /**
- * Import multiple formats to a specified arr instance
- * @param {string|number} arr - The arr ID to import to
- * @param {string[]} formatNames - Array of format file names to import
- * @param {boolean} [all] - Whether to import all formats
- * @returns {Promise<void>}
+ * Import formats or profiles to a specified arr instance
+ * @param {string|number} arrID - The arr config ID to import to
+ * @param {string} strategy - Either 'format' or 'profile'
+ * @param {string[]} filenames - Array of file names to import
+ * @returns {Promise<Object>} Import results
  */
-export const importFormats = async (arr, formatNames, all = false) => {
+export const importData = async (arrID, strategy, filenames) => {
     try {
-        // Clean up format names by removing .yml if present
-        const cleanFormatNames = formatNames.map(name =>
-            name.endsWith('.yml') ? name.slice(0, -4) : name
+        // Clean filenames - remove .yml extension if present
+        const cleanFilenames = filenames.map(name => 
+            name.replace('.yml', '')
         );
 
-        const response = await axios.post(`${IMPORT_BASE_URL}/format`, {
-            arrId: parseInt(arr, 10),
-            formatNames: cleanFormatNames,
-            all
+        const response = await axios.post(API_URL, {
+            arrID: parseInt(arrID, 10),
+            strategy: strategy,
+            filenames: cleanFilenames
         });
 
         if (!response.data.success) {
-            throw new Error(
-                response.data.message || 'Failed to import formats'
-            );
+            throw new Error(response.data.error || 'Import failed');
         }
 
         return response.data;
     } catch (error) {
-        console.error('Error importing formats:', error);
-        throw (
-            error.response?.data?.message ||
-            error.message ||
-            'Failed to import formats'
-        );
+        console.error('Import error:', error);
+        throw error.response?.data?.error || error.message || 'Failed to import';
     }
 };
 
-/**
- * Import multiple profiles to a specified arr instance
- * @param {string|number} arr - The arr ID to import to
- * @param {string[]} profileNames - Array of profile file names to import
- * @param {boolean} [all] - Whether to import all profiles
- * @returns {Promise<void>}
- */
-export const importProfiles = async (arr, profileNames, all = false) => {
-    try {
-        // Clean up profile names by removing .yml if present
-        const cleanProfileNames = profileNames.map(name =>
-            name.endsWith('.yml') ? name.slice(0, -4) : name
-        );
+export const importFormats = (arrID, formatNames) => 
+    importData(arrID, 'format', formatNames);
 
-        const response = await axios.post(`${IMPORT_BASE_URL}/profile`, {
-            arrId: parseInt(arr, 10),
-            profileNames: cleanProfileNames,
-            all
-        });
-
-        if (!response.data.success) {
-            throw new Error(
-                response.data.message || 'Failed to import profiles'
-            );
-        }
-
-        return response.data;
-    } catch (error) {
-        console.error('Error importing profiles:', error);
-        throw (
-            error.response?.data?.message ||
-            error.message ||
-            'Failed to import profiles'
-        );
-    }
-};
+export const importProfiles = (arrID, profileNames) => 
+    importData(arrID, 'profile', profileNames);

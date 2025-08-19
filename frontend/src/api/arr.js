@@ -33,7 +33,17 @@ export const pingService = async (url, apiKey, type) => {
 
 export const saveArrConfig = async config => {
     try {
-        const response = await axios.post(`/api/arr/config`, config, {
+        // Validate and auto-correct sync_interval if schedule method
+        const validatedConfig = {...config};
+        if (validatedConfig.sync_method === 'schedule' && validatedConfig.sync_interval) {
+            if (validatedConfig.sync_interval < 60) {
+                validatedConfig.sync_interval = 60;
+            } else if (validatedConfig.sync_interval > 43200) {
+                validatedConfig.sync_interval = 43200;
+            }
+        }
+
+        const response = await axios.post(`/api/arr/config`, validatedConfig, {
             validateStatus: status => {
                 return (status >= 200 && status < 300) || status === 409;
             }
@@ -54,7 +64,17 @@ export const saveArrConfig = async config => {
 
 export const updateArrConfig = async (id, config) => {
     try {
-        const response = await axios.put(`/api/arr/config/${id}`, config, {
+        // Validate and auto-correct sync_interval if schedule method
+        const validatedConfig = {...config};
+        if (validatedConfig.sync_method === 'schedule' && validatedConfig.sync_interval) {
+            if (validatedConfig.sync_interval < 60) {
+                validatedConfig.sync_interval = 60;
+            } else if (validatedConfig.sync_interval > 43200) {
+                validatedConfig.sync_interval = 43200;
+            }
+        }
+
+        const response = await axios.put(`/api/arr/config/${id}`, validatedConfig, {
             validateStatus: status => {
                 return (status >= 200 && status < 300) || status === 409;
             }

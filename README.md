@@ -22,6 +22,13 @@ Configuration management tool for Radarr/Sonarr that automates importing and ver
 
 ## Getting Started
 
+### Compatibility
+
+| Architecture                   | Support      |
+| ------------------------------ | ------------ |
+| amd64 (x86_64)                 | ✅ Supported |
+| arm64 (Apple Silicon, RPi 4/5) | ✅ Supported |
+
 ### Quick Installation (Docker Compose)
 
 ```yaml
@@ -70,14 +77,17 @@ Detailed contributing guidelines will be available soon. Join our Discord to dis
 
 ## Status
 
-Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub) project to simplify media automation. 
+Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub) project to simplify media automation.
 
 ### Known Issues
-- https://github.com/Dictionarry-Hub/profilarr/issues
+
+-   https://github.com/Dictionarry-Hub/profilarr/issues
 
 ### Development
-- Currently focused on fixing bugs found in open beta
-- 1.1 will focus on improving the 'setup' side of profilarr - adding media management / quality settings syncs
+
+-   Currently focused on fixing bugs found in open beta
+-   1.1 will focus on improving the 'setup' side of profilarr - adding media management / quality settings syncs
 
 ### Personal Note
-Profilarr is maintained by a single CS student with no formal development experience, in their spare time. Development happens when time allows, which may affect response times for fixes and new features. The project is continuously improving, and your patience, understanding, and contributions are greatly appreciated as Profilarr grows and matures. 
+
+Profilarr is maintained by a single CS student with no formal development experience, in their spare time. Development happens when time allows, which may affect response times for fixes and new features. The project is continuously improving, and your patience, understanding, and contributions are greatly appreciated as Profilarr grows and matures.

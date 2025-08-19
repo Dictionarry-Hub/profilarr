@@ -67,6 +67,12 @@ def setup_logging():
                 'handlers': ['console', 'file', 'importarr_file'],
                 'propagate': False
             },
+            # The 'importer' logger (new import module) - reduce verbosity
+            'importer': {
+                'level': 'WARNING',
+                'handlers': ['file'],
+                'propagate': False
+            },
 
             # The 'hash' logger uses all three handlers
             'hash': {
@@ -83,6 +89,21 @@ def setup_logging():
             },
             'flask': {
                 'level': 'INFO',
+                'handlers': ['console', 'file'],
+                'propagate': False
+            },
+            'git': {
+                'level': 'ERROR',
+                'handlers': ['console', 'file'],
+                'propagate': False
+            },
+            'urllib3': {
+                'level': 'WARNING',
+                'handlers': ['console', 'file'],
+                'propagate': False
+            },
+            'urllib3.connectionpool': {
+                'level': 'WARNING',
                 'handlers': ['console', 'file'],
                 'propagate': False
             }

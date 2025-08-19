@@ -17,3 +17,9 @@ __pycache__/
 
 # build files
 backend/app/static/
+
+# Config data
+config/
+radarr-config/
+sonarr-config/
+test-data/

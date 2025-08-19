@@ -55,6 +55,7 @@ const BasicView = ({formats, onScoreChange, onFormatRemove, showRemoveButton}) =
                                     onChange={value =>
                                         onScoreChange(format.id, value)
                                     }
+                                    className="w-24"
                                 />
                                 {showRemoveButton && (
                                     <button

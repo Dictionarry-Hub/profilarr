@@ -3,19 +3,13 @@ import yaml
 import logging
 from git import GitCommandError
 from .comparison import create_change_summary
-from .utils import determine_type, parse_commit_message
+from .utils import determine_type, parse_commit_message, extract_name_from_path
 
 logger = logging.getLogger(__name__)
 
 
-def extract_name(file_path):
-    """Extract name from file path by removing type prefix and extension"""
-    # Remove the file extension
-    name = os.path.splitext(file_path)[0]
-    # Remove the type prefix (everything before the first '/')
-    if '/' in name:
-        name = name.split('/', 1)[1]
-    return name
+# Use the centralized extract_name_from_path function from utils
+extract_name = extract_name_from_path
 
 
 def check_merge_conflict(repo, branch, file_path):

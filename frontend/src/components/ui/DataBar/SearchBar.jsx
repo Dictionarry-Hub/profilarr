@@ -13,6 +13,8 @@ const SearchBar = ({
     onAddTerm,
     onRemoveTerm,
     onClearTerms,
+    onFocus,
+    onBlur,
     textSize = 'text-sm', // Default text size
     badgeTextSize = 'text-sm', // Default badge text size
     iconSize = 'h-4 w-4', // Default icon size
@@ -113,8 +115,14 @@ const SearchBar = ({
                 <input
                     type='text'
                     value={currentInput}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
+                    onFocus={() => {
+                        setIsFocused(true);
+                        onFocus && onFocus();
+                    }}
+                    onBlur={() => {
+                        setIsFocused(false);
+                        onBlur && onBlur();
+                    }}
                     onChange={e => onInputChange(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={

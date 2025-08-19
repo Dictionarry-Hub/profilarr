@@ -274,7 +274,7 @@ function ProfilePage() {
         }
     };
 
-    const handleMassImport = async arr => {
+    const handleMassImport = async arrID => {
         try {
             const selectedProfilesList = Array.from(selectedItems)
                 .map(index => filteredProfiles[index])
@@ -285,11 +285,20 @@ function ProfilePage() {
                 return;
             }
 
-            await importProfiles(
-                arr,
+            const result = await importProfiles(
+                arrID,
                 selectedProfilesList.map(p => p.file_name)
             );
-            Alert.success('Profiles imported successfully');
+
+            if (result.status === 'partial') {
+                const { added, updated, failed } = result;
+                Alert.partial(
+                    `Import partially successful:\n- ${added} added\n- ${updated} updated\n- ${failed} failed`
+                );
+            } else {
+                Alert.success('Profiles imported successfully');
+            }
+
             toggleSelectionMode();
         } catch (error) {
             console.error('Error importing profiles:', error);

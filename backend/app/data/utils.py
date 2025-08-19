@@ -31,7 +31,9 @@ PROFILE_FIELDS = [
     "minCustomFormatScore",
     "upgradeUntilScore",
     "minScoreIncrement",
-    "custom_formats",  # Array of {name, score} objects
+    "custom_formats",  # Array of {name, score} objects (backwards compatible)
+    "custom_formats_radarr",  # Array of {name, score} objects for radarr-specific scores
+    "custom_formats_sonarr",  # Array of {name, score} objects for sonarr-specific scores
     "qualities",  # Array of strings
     "upgrade_until",
     "language"
@@ -295,21 +297,45 @@ def check_delete_constraints(category: str, name: str) -> Tuple[bool, str]:
                 profile_path = os.path.join(profile_dir, profile_file)
                 try:
                     profile_data = load_yaml_file(profile_path)
-                    # Check custom_formats array in profile
-                    for format_ref in profile_data.get('custom_formats', []):
-                        format_name = format_ref.get('name', '')
-                        # Convert format name to use parentheses for comparison
-                        format_name = format_name.replace('[', '(').replace(
-                            ']', ')')
-                        logger.debug(
-                            f"Comparing '{format_name}' with '{check_name}'")
+                    
+                    # Check custom_formats (both/backwards compatible)
+                    custom_formats = profile_data.get('custom_formats', [])
+                    if isinstance(custom_formats, list):
+                        for format_ref in custom_formats:
+                            format_name = format_ref.get('name', '')
+                            # Convert format name to use parentheses for comparison
+                            format_name = format_name.replace('[', '(').replace(']', ')')
+                            logger.debug(f"Comparing '{format_name}' with '{check_name}' in both")
 
-                        if format_name == check_name:
-                            references.append(
-                                f"quality profile: {profile_data['name']}")
+                            if format_name == check_name:
+                                references.append(f"quality profile: {profile_data['name']} (both)")
+                    
+                    # Check custom_formats_radarr
+                    custom_formats_radarr = profile_data.get('custom_formats_radarr', [])
+                    if isinstance(custom_formats_radarr, list):
+                        for format_ref in custom_formats_radarr:
+                            format_name = format_ref.get('name', '')
+                            # Convert format name to use parentheses for comparison
+                            format_name = format_name.replace('[', '(').replace(']', ')')
+                            logger.debug(f"Comparing '{format_name}' with '{check_name}' in radarr")
+
+                            if format_name == check_name:
+                                references.append(f"quality profile: {profile_data['name']} (radarr)")
+                    
+                    # Check custom_formats_sonarr
+                    custom_formats_sonarr = profile_data.get('custom_formats_sonarr', [])
+                    if isinstance(custom_formats_sonarr, list):
+                        for format_ref in custom_formats_sonarr:
+                            format_name = format_ref.get('name', '')
+                            # Convert format name to use parentheses for comparison
+                            format_name = format_name.replace('[', '(').replace(']', ')')
+                            logger.debug(f"Comparing '{format_name}' with '{check_name}' in sonarr")
+
+                            if format_name == check_name:
+                                references.append(f"quality profile: {profile_data['name']} (sonarr)")
+                                
                 except Exception as e:
-                    logger.error(
-                        f"Error checking profile file {profile_file}: {e}")
+                    logger.error(f"Error checking profile file {profile_file}: {e}")
                     continue
 
         # Update arr configs for formats and profiles
@@ -392,16 +418,41 @@ def update_references(category: str, old_name: str,
                     profile_data = load_yaml_file(profile_path)
                     updated = False
 
-                    # Update custom_formats array in profile
-                    for format_ref in profile_data.get('custom_formats', []):
-                        format_name = format_ref.get('name', '')
-                        # Convert format name to use parentheses for comparison
-                        format_name = format_name.replace('[', '(').replace(
-                            ']', ')')
+                    # Update custom_formats (both/backwards compatible)
+                    custom_formats = profile_data.get('custom_formats', [])
+                    if isinstance(custom_formats, list):
+                        for format_ref in custom_formats:
+                            format_name = format_ref.get('name', '')
+                            # Convert format name to use parentheses for comparison
+                            format_name = format_name.replace('[', '(').replace(']', ')')
 
-                        if format_name == old_check_name:
-                            format_ref['name'] = new_name
-                            updated = True
+                            if format_name == old_check_name:
+                                format_ref['name'] = new_name
+                                updated = True
+                    
+                    # Update custom_formats_radarr
+                    custom_formats_radarr = profile_data.get('custom_formats_radarr', [])
+                    if isinstance(custom_formats_radarr, list):
+                        for format_ref in custom_formats_radarr:
+                            format_name = format_ref.get('name', '')
+                            # Convert format name to use parentheses for comparison
+                            format_name = format_name.replace('[', '(').replace(']', ')')
+
+                            if format_name == old_check_name:
+                                format_ref['name'] = new_name
+                                updated = True
+                    
+                    # Update custom_formats_sonarr
+                    custom_formats_sonarr = profile_data.get('custom_formats_sonarr', [])
+                    if isinstance(custom_formats_sonarr, list):
+                        for format_ref in custom_formats_sonarr:
+                            format_name = format_ref.get('name', '')
+                            # Convert format name to use parentheses for comparison
+                            format_name = format_name.replace('[', '(').replace(']', ')')
+
+                            if format_name == old_check_name:
+                                format_ref['name'] = new_name
+                                updated = True
 
                     if updated:
                         save_yaml_file(profile_path,

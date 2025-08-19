@@ -1,5 +1,5 @@
 import React from 'react';
-import {GitCommit, Code, FileText, Settings, File} from 'lucide-react';
+import {GitCommit, Code, FileText, Settings, File, Cog} from 'lucide-react';
 
 const PushRow = ({change}) => {
     const getTypeIcon = type => {
@@ -10,6 +10,8 @@ const PushRow = ({change}) => {
                 return <FileText className='text-green-400' size={16} />;
             case 'Quality Profile':
                 return <Settings className='text-purple-400' size={16} />;
+            case 'Media Management':
+                return <Cog className='text-orange-400' size={16} />;
             default:
                 return <File className='text-gray-400' size={16} />;
         }

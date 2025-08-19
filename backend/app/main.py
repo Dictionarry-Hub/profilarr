@@ -8,12 +8,14 @@ from .git import bp as git_bp
 from .arr import bp as arr_bp
 from .data import bp as data_bp
 from .importarr import bp as importarr_bp
+from .importer.routes import bp as new_import_bp
 from .task import bp as tasks_bp, TaskScheduler
 from .backup import bp as backup_bp
 from .db import run_migrations, get_settings
 from .auth import bp as auth_bp
 from .settings import bp as settings_bp
 from .logs import bp as logs_bp
+from .media_management import media_management_bp
 from .middleware import init_middleware
 from .init import setup_logging, init_app_config, init_git_user
 
@@ -69,8 +71,10 @@ def create_app():
     app.register_blueprint(git_bp, url_prefix='/api/git')
     app.register_blueprint(data_bp, url_prefix='/api/data')
     app.register_blueprint(importarr_bp, url_prefix='/api/import')
+    app.register_blueprint(new_import_bp, url_prefix='/api/v2/import')
     app.register_blueprint(arr_bp, url_prefix='/api/arr')
     app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
+    app.register_blueprint(media_management_bp)
 
     # Initialize middleware
     logger.info("Initializing middleware")

@@ -2,7 +2,7 @@
 version: '3.8'
 services:
     profilarr:
-        image: santiagosayshey/profilarr:latest
+        image: santiagosayshey/profilarr:beta
         container_name: profilarr
         ports:
             - 6868:6868

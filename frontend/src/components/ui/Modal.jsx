@@ -31,6 +31,10 @@ const Modal = ({
         setTimeout(() => {
             onClose();
             setIsClosing(false);
+            // Reset to first tab after modal closes
+            if (tabs && tabs.length > 0) {
+                setActiveTab(tabs[0].id);
+            }
         }, 200); // Match animation duration
     };
 
@@ -118,7 +122,7 @@ const Modal = ({
                 ref={modalRef}
                 className={`relative bg-gradient-to-br from-gray-50 to-gray-100 
                     dark:from-gray-800 dark:to-gray-900 rounded-lg shadow-xl 
-                    min-w-[320px] min-h-[200px] ${widthClasses[width]} ${
+                    min-w-[320px] ${widthClasses[width]} ${
                     heightClasses[height]
                 } 
                     ${isClosing
@@ -140,7 +144,7 @@ const Modal = ({
                         {title}
                     </h3>
                     {tabs && (
-                        <div className='ml-3'>
+                        <div className='ml-auto mr-3 md:ml-4 md:mr-auto'>
                             <TabViewer
                                 tabs={tabs}
                                 activeTab={activeTab}
@@ -150,7 +154,7 @@ const Modal = ({
                     )}
                     <button
                         onClick={handleClose}
-                        className='ml-auto text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors'>
+                        className={`text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors ${!tabs ? 'ml-auto' : ''}`}>
                         <svg
                             className='w-6 h-6'
                             fill='none'
@@ -167,7 +171,7 @@ const Modal = ({
                 </div>
 
                 {/* Content */}
-                <div className='flex-1 overflow-y-auto p-6 py-4 text-gray-900 dark:text-gray-200'>
+                <div className={`flex-1 overflow-y-auto px-6 py-4 text-gray-900 dark:text-gray-200`}>
                     {typeof children === 'function'
                         ? children(activeTab)
                         : children}

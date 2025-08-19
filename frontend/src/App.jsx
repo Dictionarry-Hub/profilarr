@@ -9,6 +9,7 @@ import RegexPage from './components/regex/RegexPage';
 import FormatPage from './components/format/FormatPage';
 import ProfilePage from './components/profile/ProfilePage';
 import SettingsPage from './components/settings/SettingsPage';
+import MediaManagementPage from './components/media-management/MediaManagementPage';
 import SetupPage from './components/auth/SetupPage';
 import LoginPage from './components/auth/LoginPage';
 import Navbar from '@ui/Navbar';
@@ -153,6 +154,10 @@ function App() {
                                 <Route
                                     path='/profile'
                                     element={<ProfilePage />}
+                                />
+                                <Route
+                                    path='/media-management'
+                                    element={<MediaManagementPage />}
                                 />
                                 <Route
                                     path='/settings'

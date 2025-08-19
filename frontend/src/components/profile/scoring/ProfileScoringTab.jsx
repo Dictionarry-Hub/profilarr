@@ -4,8 +4,9 @@ import FormatSettings from './FormatSettings';
 import UpgradeSettings from './UpgradeSettings';
 
 const ProfileScoringTab = ({
-    formats,
+    customFormats,
     onScoreChange,
+    onFormatToggle,
     minCustomFormatScore,
     upgradeUntilScore,
     minScoreIncrement,
@@ -70,16 +71,15 @@ const ProfileScoringTab = ({
                         Format Settings
                     </h2>
                     <p className='text-xs text-gray-500 dark:text-gray-400'>
-                        Customize format scoring to prioritize your preferred downloads. 
-                        Use Basic mode for a simple list view with sliders, Advanced mode for 
-                        detailed A/V category grids, and Selective mode to display and manage 
-                        only formats you care about instead of all available formats.
+                        Customize format scoring to prioritize your preferred downloads.
+                        Toggle formats for Radarr and/or Sonarr independently.
                     </p>
                 </div>
 
                 <FormatSettings
-                    formats={formats}
+                    formats={customFormats || []}
                     onScoreChange={onScoreChange}
+                    onFormatToggle={onFormatToggle}
                 />
             </div>
         </div>
@@ -87,15 +87,18 @@ const ProfileScoringTab = ({
 };
 
 ProfileScoringTab.propTypes = {
-    formats: PropTypes.arrayOf(
+    customFormats: PropTypes.arrayOf(
         PropTypes.shape({
             id: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
-            score: PropTypes.number.isRequired,
+            score: PropTypes.number,
+            radarr: PropTypes.bool,
+            sonarr: PropTypes.bool,
             tags: PropTypes.arrayOf(PropTypes.string)
         })
     ).isRequired,
     onScoreChange: PropTypes.func.isRequired,
+    onFormatToggle: PropTypes.func.isRequired,
     minCustomFormatScore: PropTypes.number.isRequired,
     upgradeUntilScore: PropTypes.number.isRequired,
     minScoreIncrement: PropTypes.number.isRequired,

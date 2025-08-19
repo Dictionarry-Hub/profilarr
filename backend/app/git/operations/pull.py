@@ -4,7 +4,8 @@ import git
 import logging
 from git import GitCommandError
 from ..status.status import GitStatusManager
-from ...arr.manager import get_pull_configs, run_import_for_config
+from ...arr.manager import get_pull_configs
+from ...importer import handle_pull_import
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +36,16 @@ def pull_branch(repo_path, branch_name):
                 status_manager.update_remote_status()
 
             # -------------------------------
-            # *** "On pull" ARR import logic:
+            # *** "On pull" ARR import logic using new importer:
             # 1) Query all ARR configs that have sync_method="pull"
-            # 2) For each, run the import
+            # 2) For each, run the importer pull handler
             # -------------------------------
             pull_configs = get_pull_configs()
             logger.info(
                 f"[Pull] Found {len(pull_configs)} ARR configs to import (sync_method='pull')"
             )
             for cfg in pull_configs:
-                run_import_for_config(cfg)
+                handle_pull_import(cfg['id'])
 
             return True, f"Successfully pulled changes for branch {branch_name}"
 

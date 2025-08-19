@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
     frontend:
         build: ./frontend
@@ -17,11 +16,9 @@ services:
             - '5000:5000'
         volumes:
             - ./backend:/app
-            - config_data:/config
+            - ./config:/config
+        environment:
+            - TZ=Australia/Adelaide
         env_file:
             - .env
         restart: always
-
-volumes:
-    config_data:
-        name: regexerr_config

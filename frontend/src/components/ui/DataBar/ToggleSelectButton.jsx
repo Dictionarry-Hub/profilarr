@@ -6,7 +6,7 @@ const ToggleSelectButton = ({isSelectionMode, onClick, shortcutKey = 'A'}) => {
         <button
             onClick={onClick}
             className={`
-        flex items-center gap-2 px-3 py-2 rounded-md
+        flex items-center gap-2 px-3 py-2 min-h-10 rounded-md
         border border-gray-200 dark:border-gray-700
         transition-all duration-150 ease-in-out
         group
@@ -26,7 +26,7 @@ const ToggleSelectButton = ({isSelectionMode, onClick, shortcutKey = 'A'}) => {
         }
       `}
             />
-            <span className='text-sm font-medium'>Select</span>
+            <span className='text-sm font-medium hidden sm:inline'>Select</span>
         </button>
     );
 };

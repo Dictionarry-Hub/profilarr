@@ -38,7 +38,7 @@ function FilterMenu({
             <button
                 type='button'
                 className={`
-          flex items-center gap-2 px-3 py-2 rounded-md
+          flex items-center gap-2 px-3 py-2 min-h-10 rounded-md
           border border-gray-200 dark:border-gray-700
           transition-all duration-150 ease-in-out
           group
@@ -66,7 +66,7 @@ function FilterMenu({
                         }
                     }}
                 />
-                <span className='text-sm font-medium'>
+                <span className='text-sm font-medium hidden sm:inline'>
                     {filterType === 'none'
                         ? 'Filter'
                         : options.find(option => option.value === filterType)

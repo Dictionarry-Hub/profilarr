@@ -1,7 +1,6 @@
 import React from 'react';
 import {Link, Loader} from 'lucide-react';
 import GithubIcon from '@logo/GitHub.svg';
-import Tooltip from '@ui/Tooltip';
 
 const EmptyRepo = ({onLinkRepo, loadingAction}) => {
     return (
@@ -28,21 +27,17 @@ const EmptyRepo = ({onLinkRepo, loadingAction}) => {
                     or any external database to get started.
                 </p>
             </div>
-            <Tooltip content='Link Repository'>
-                <button
-                    onClick={onLinkRepo}
-                    className={`flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 ease-in-out text-sm font-medium ${
-                        loadingAction ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                    disabled={loadingAction !== ''}>
-                    {loadingAction === 'link_repo' ? (
-                        <Loader size={16} className='animate-spin mr-2' />
-                    ) : (
-                        <Link size={16} className='mr-2' />
-                    )}
-                    Link Repository
-                </button>
-            </Tooltip>
+            <button
+                onClick={onLinkRepo}
+                className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium'
+                disabled={loadingAction !== ''}>
+                {loadingAction === 'link_repo' ? (
+                    <Loader className="w-4 h-4 animate-spin" />
+                ) : (
+                    <Link className="w-4 h-4 text-blue-500" />
+                )}
+                <span>Link Repository</span>
+            </button>
         </div>
     );
 };

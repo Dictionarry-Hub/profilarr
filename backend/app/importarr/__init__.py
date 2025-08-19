@@ -2,11 +2,12 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 import logging
+import asyncio
 from pathlib import Path
 from ..arr.manager import get_arr_config
 from ..data.utils import get_category_directory, load_yaml_file
-from .format import import_formats_to_arr
-from .profile import import_profiles_to_arr
+from .format import import_formats_to_arr, async_import_formats_to_arr
+from .profile import import_profiles_to_arr, async_import_profiles_to_arr
 from ..db import get_unique_arrs
 
 logger = logging.getLogger('importarr')
@@ -199,30 +200,48 @@ def import_profiles():
             try:
                 profile_file = f"{get_category_directory('profile')}/{profile_name}.yml"
                 format_data = load_yaml_file(profile_file)
+                
+                # Extract from main custom_formats
                 for cf in format_data.get('custom_formats', []):
+                    format_names.add(cf['name'])
+                
+                # Extract from app-specific custom_formats
+                for cf in format_data.get('custom_formats_radarr', []):
+                    format_names.add(cf['name'])
+                for cf in format_data.get('custom_formats_sonarr', []):
                     format_names.add(cf['name'])
             except Exception as e:
                 logger.error(f"Error loading profile {profile_name}: {str(e)}")
                 continue
 
-        # Import/Update formats first
+        # Import/Update formats first - use async version for larger batch sizes
         if format_names:
             format_names_list = list(format_names)
+            # When we have more than a few formats, use the async import path
+            # which will parallelize the requests
             if import_as_unique:
                 modified_format_names = [
                     f"{name} [Dictionarry]" for name in format_names_list
                 ]
-                import_formats_to_arr(format_names=modified_format_names,
-                                      original_names=format_names_list,
-                                      base_url=arr_data['arrServer'],
-                                      api_key=arr_data['apiKey'],
-                                      arr_type=arr_data['type'])
+                # Use the regular import function which will detect large batches
+                # and automatically use async when appropriate
+                import_formats_to_arr(
+                    format_names=modified_format_names,
+                    original_names=format_names_list,
+                    base_url=arr_data['arrServer'],
+                    api_key=arr_data['apiKey'],
+                    arr_type=arr_data['type']
+                )
             else:
-                import_formats_to_arr(format_names=format_names_list,
-                                      original_names=format_names_list,
-                                      base_url=arr_data['arrServer'],
-                                      api_key=arr_data['apiKey'],
-                                      arr_type=arr_data['type'])
+                # Use the regular import function which will detect large batches
+                # and automatically use async when appropriate
+                import_formats_to_arr(
+                    format_names=format_names_list,
+                    original_names=format_names_list,
+                    base_url=arr_data['arrServer'],
+                    api_key=arr_data['apiKey'],
+                    arr_type=arr_data['type']
+                )
 
         # Import profiles
         result = import_profiles_to_arr(profile_names=profile_names,

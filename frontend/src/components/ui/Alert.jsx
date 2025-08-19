@@ -40,6 +40,14 @@ const Alert = {
             progressClassName: `${baseStyles.progressClassName} bg-blue-300`,
             ...options
         });
+    },
+    partial: (message, options = {}) => {
+        toast.warn(message, { // Using warn icon for partial success
+            ...baseStyles,
+            className: `${baseStyles.className} bg-yellow-500 text-white`,
+            progressClassName: `${baseStyles.progressClassName} bg-yellow-200`,
+            ...options
+        });
     }
 };
 
