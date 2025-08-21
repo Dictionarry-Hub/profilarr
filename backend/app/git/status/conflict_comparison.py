@@ -153,6 +153,30 @@ def compare_primitive_arrays(ours_data: List, theirs_data: List,
     return conflicts
 
 
+def format_array_for_display(data):
+    """Format array data for display in conflict resolution"""
+    if isinstance(data, list):
+        if not data:
+            return "[] (empty array)"
+        elif all(isinstance(x, dict) and 'name' in x for x in data):
+            # Array of objects with names - show the names
+            names = [x['name'] for x in data]
+            if len(names) <= 5:
+                return f"[{', '.join(names)}]"
+            else:
+                return f"[{', '.join(names[:5])}, ... and {len(names) - 5} more]"
+        elif all(not isinstance(x, (dict, list)) for x in data):
+            # Array of primitives
+            if len(data) <= 5:
+                return f"[{', '.join(str(x) for x in data)}]"
+            else:
+                return f"[{', '.join(str(x) for x in data[:5])}, ... and {len(data) - 5} more]"
+        else:
+            # Mixed or complex array
+            return f"Array with {len(data)} items"
+    return data
+
+
 def compare_dicts(ours_data: Dict, theirs_data: Dict, path: str) -> List[Dict]:
     """Compare dictionaries recursively"""
     conflicts = []
@@ -164,15 +188,23 @@ def compare_dicts(ours_data: Dict, theirs_data: Dict, path: str) -> List[Dict]:
         new_path = f"{path}.{key}" if path else key
 
         if key not in ours_data:
+            # Format arrays for better display when field is missing locally
+            incoming_val = theirs_data[key]
+            if isinstance(incoming_val, list):
+                incoming_val = format_array_for_display(incoming_val)
             conflicts.append({
                 'parameter': new_path,
                 'local_value': None,
-                'incoming_value': theirs_data[key]
+                'incoming_value': incoming_val
             })
         elif key not in theirs_data:
+            # Format arrays for better display when field is missing remotely
+            local_val = ours_data[key]
+            if isinstance(local_val, list):
+                local_val = format_array_for_display(local_val)
             conflicts.append({
                 'parameter': new_path,
-                'local_value': ours_data[key],
+                'local_value': local_val,
                 'incoming_value': None
             })
         elif ours_data[key] != theirs_data[key]:
