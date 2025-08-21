@@ -158,6 +158,16 @@ def compare_yaml(old_data: Any,
     return changes
 
 
+def normalize_yaml_keys(data):
+    """Convert boolean keys to strings in YAML data to avoid JSON serialization issues"""
+    if isinstance(data, dict):
+        return {str(k): normalize_yaml_keys(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [normalize_yaml_keys(item) for item in data]
+    else:
+        return data
+
+
 def create_change_summary(old_data: Optional[Dict], new_data: Optional[Dict],
                           file_path: str) -> Dict[str, Any]:
     """
@@ -180,6 +190,9 @@ def create_change_summary(old_data: Optional[Dict], new_data: Optional[Dict],
         - changes: Detailed changes from compare_yaml
     """
     try:
+        # Normalize keys to avoid JSON serialization issues with boolean keys
+        old_data = normalize_yaml_keys(old_data) if old_data else None
+        new_data = normalize_yaml_keys(new_data) if new_data else None
         filename = os.path.basename(file_path)
         new_name = new_data.get("name") if new_data else None
         old_name = old_data.get("name") if old_data else None
