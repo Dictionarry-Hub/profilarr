@@ -1,6 +1,6 @@
 import logging
-import requests
 from typing import Dict, Any, Tuple
+from ..importer.arr_handler import ArrHandler, ArrApiError
 
 logger = logging.getLogger(__name__)
 
@@ -18,22 +18,14 @@ def sync_naming_config(base_url: str, api_key: str, arr_type: str, naming_data: 
     Returns:
         Tuple of (success, message)
     """
+    arr = None
     try:
-        # Construct the endpoint URL
-        endpoint = f"{base_url}/api/v3/config/naming"
-        headers = {
-            "X-Api-Key": api_key,
-            "Content-Type": "application/json"
-        }
+        # Initialize ArrHandler
+        arr = ArrHandler(base_url, api_key)
+        logger.info(f"Syncing naming config to {arr_type}")
         
-        # GET current naming config
-        logger.info(f"Fetching current naming config from {arr_type} at {base_url}")
-        response = requests.get(endpoint, headers=headers, timeout=10)
-        response.raise_for_status()
-        
-        current_config = response.json()
-        logger.info(f"Current naming config for {arr_type}:")
-        logger.info(current_config)
+        # GET current naming config using ArrHandler
+        current_config = arr.get("/api/v3/config/naming")
         
         # Update current_config with fields from naming_data
         if arr_type == 'radarr':
@@ -73,24 +65,22 @@ def sync_naming_config(base_url: str, api_key: str, arr_type: str, naming_data: 
             if 'specialsFolderFormat' in naming_data:
                 current_config['specialsFolderFormat'] = naming_data['specialsFolderFormat']
         
-        # PUT the updated config back
-        logger.info(f"Updating naming config for {arr_type}")
-        logger.info(f"Request body for naming sync:")
-        logger.info(current_config)
-        put_response = requests.put(endpoint, json=current_config, headers=headers, timeout=10)
-        put_response.raise_for_status()
-        
-        logger.info(f"Successfully synced naming config for {arr_type}")
+        # PUT the updated config back using ArrHandler
+        arr.put("/api/v3/config/naming", current_config)
+        logger.info(f"Successfully synced naming config to {arr_type}")
         return True, "Naming config sync successful"
         
-    except requests.exceptions.RequestException as e:
+    except ArrApiError as e:
         error_msg = f"Failed to sync naming config: {str(e)}"
         logger.error(error_msg)
         return False, error_msg
     except Exception as e:
-        error_msg = f"Unexpected error syncing naming config: {str(e)}"
+        error_msg = f"Failed to sync naming config: {str(e)}"
         logger.error(error_msg)
         return False, error_msg
+    finally:
+        if arr:
+            arr.close()
 
 
 def sync_media_management_config(base_url: str, api_key: str, arr_type: str, misc_data: Dict[str, Any]) -> Tuple[bool, str]:
@@ -107,48 +97,37 @@ def sync_media_management_config(base_url: str, api_key: str, arr_type: str, mis
     Returns:
         Tuple of (success, message)
     """
+    arr = None
     try:
-        # Construct the endpoint URL
-        endpoint = f"{base_url}/api/v3/config/mediamanagement"
-        headers = {
-            "X-Api-Key": api_key,
-            "Content-Type": "application/json"
-        }
+        # Initialize ArrHandler
+        arr = ArrHandler(base_url, api_key)
+        logger.info(f"Syncing media management config to {arr_type}")
         
-        # GET current media management config
-        logger.info(f"Fetching current media management config from {arr_type} at {base_url}")
-        response = requests.get(endpoint, headers=headers, timeout=10)
-        response.raise_for_status()
-        
-        current_config = response.json()
-        logger.info(f"Current media management config for {arr_type}:")
-        logger.info(current_config)
+        # GET current media management config using ArrHandler
+        current_config = arr.get("/api/v3/config/mediamanagement")
         
         # Update current_config with fields from misc_data
-        # We only manage two fields: propersRepacks and enableMediaInfo
         if 'propersRepacks' in misc_data:
             current_config['downloadPropersAndRepacks'] = misc_data['propersRepacks']
         if 'enableMediaInfo' in misc_data:
             current_config['enableMediaInfo'] = misc_data['enableMediaInfo']
         
-        # PUT the updated config back
-        logger.info(f"Updating media management config for {arr_type}")
-        logger.info(f"Request body for media management sync:")
-        logger.info(current_config)
-        put_response = requests.put(endpoint, json=current_config, headers=headers, timeout=10)
-        put_response.raise_for_status()
-        
-        logger.info(f"Successfully synced media management config for {arr_type}")
+        # PUT the updated config back using ArrHandler
+        arr.put("/api/v3/config/mediamanagement", current_config)
+        logger.info(f"Successfully synced media management config to {arr_type}")
         return True, "Media management config sync successful"
         
-    except requests.exceptions.RequestException as e:
+    except ArrApiError as e:
         error_msg = f"Failed to sync media management config: {str(e)}"
         logger.error(error_msg)
         return False, error_msg
     except Exception as e:
-        error_msg = f"Unexpected error syncing media management config: {str(e)}"
+        error_msg = f"Failed to sync media management config: {str(e)}"
         logger.error(error_msg)
         return False, error_msg
+    finally:
+        if arr:
+            arr.close()
 
 
 def sync_quality_definitions(base_url: str, api_key: str, arr_type: str, quality_data: Dict[str, Any]) -> Tuple[bool, str]:
@@ -165,94 +144,43 @@ def sync_quality_definitions(base_url: str, api_key: str, arr_type: str, quality
     Returns:
         Tuple of (success, message)
     """
+    arr = None
     try:
-        # Construct the endpoint URL
-        endpoint = f"{base_url}/api/v3/qualitydefinition"
-        headers = {
-            "X-Api-Key": api_key,
-            "Content-Type": "application/json"
-        }
+        # Initialize ArrHandler
+        arr = ArrHandler(base_url, api_key)
+        logger.info(f"Syncing quality definitions to {arr_type}")
         
-        # GET current quality definitions (for logging/comparison)
-        logger.info(f"Fetching current quality definitions from {arr_type} at {base_url}")
-        response = requests.get(endpoint, headers=headers, timeout=10)
-        response.raise_for_status()
+        # GET current quality definitions using ArrHandler
+        current_definitions = arr.get("/api/v3/qualitydefinition")
         
-        current_definitions = response.json()
-        logger.info(f"Current quality definitions for {arr_type}:")
-        logger.info(current_definitions)
+        # Create a mapping of quality names to current definitions for easier lookup
+        quality_map = {def_['quality']['name']: def_ for def_ in current_definitions}
         
-        if arr_type == 'sonarr':
-            # Log the quality data we received from YML
-            logger.info(f"Quality data from YML:")
-            logger.info(quality_data)
-            
-            # Create a mapping of quality names to current definitions for easier lookup
-            quality_map = {def_['quality']['name']: def_ for def_ in current_definitions}
-            
-            # Update each quality definition with our values
-            for quality_name, settings in quality_data.items():
-                if quality_name in quality_map:
-                    definition = quality_map[quality_name]
-                    # Update size limits from our YML data
-                    if 'min' in settings:
-                        definition['minSize'] = settings['min']
-                    if 'preferred' in settings:
-                        definition['preferredSize'] = settings['preferred']
-                    if 'max' in settings:
-                        definition['maxSize'] = settings['max']
-            
-            # PUT the updated definitions back
-            logger.info(f"Updating quality definitions for {arr_type}")
-            logger.info(f"Request body for quality definitions sync:")
-            logger.info(current_definitions)
-            
-            # Sonarr expects the full array of definitions at the update endpoint
-            update_endpoint = f"{base_url}/api/v3/qualitydefinition/update"
-            put_response = requests.put(update_endpoint, json=current_definitions, headers=headers, timeout=10)
-            put_response.raise_for_status()
-            
-            logger.info(f"Successfully synced quality definitions for {arr_type}")
-            return True, "Quality definitions sync successful"
+        # Update each quality definition with our values
+        for quality_name, settings in quality_data.items():
+            if quality_name in quality_map:
+                definition = quality_map[quality_name]
+                # Update size limits from our YML data
+                if 'min' in settings:
+                    definition['minSize'] = settings['min']
+                if 'preferred' in settings:
+                    definition['preferredSize'] = settings['preferred']
+                if 'max' in settings:
+                    definition['maxSize'] = settings['max']
         
-        else:  # radarr
-            # Log the quality data we received from YML
-            logger.info(f"Quality data from YML:")
-            logger.info(quality_data)
-            
-            # Create a mapping of quality names to current definitions for easier lookup
-            quality_map = {def_['quality']['name']: def_ for def_ in current_definitions}
-            
-            # Update each quality definition with our values
-            for quality_name, settings in quality_data.items():
-                if quality_name in quality_map:
-                    definition = quality_map[quality_name]
-                    # Update size limits from our YML data
-                    if 'min' in settings:
-                        definition['minSize'] = settings['min']
-                    if 'preferred' in settings:
-                        definition['preferredSize'] = settings['preferred']
-                    if 'max' in settings:
-                        definition['maxSize'] = settings['max']
-            
-            # PUT the updated definitions back
-            logger.info(f"Updating quality definitions for {arr_type}")
-            logger.info(f"Request body for quality definitions sync:")
-            logger.info(current_definitions)
-            
-            # Radarr expects the full array of definitions at the update endpoint
-            update_endpoint = f"{base_url}/api/v3/qualitydefinition/update"
-            put_response = requests.put(update_endpoint, json=current_definitions, headers=headers, timeout=10)
-            put_response.raise_for_status()
-            
-            logger.info(f"Successfully synced quality definitions for {arr_type}")
-            return True, "Quality definitions sync successful"
+        # PUT the updated definitions back using ArrHandler
+        arr.put("/api/v3/qualitydefinition/update", current_definitions)
+        logger.info(f"Successfully synced quality definitions to {arr_type}")
+        return True, "Quality definitions sync successful"
         
-    except requests.exceptions.RequestException as e:
+    except ArrApiError as e:
         error_msg = f"Failed to sync quality definitions: {str(e)}"
         logger.error(error_msg)
         return False, error_msg
     except Exception as e:
-        error_msg = f"Unexpected error syncing quality definitions: {str(e)}"
+        error_msg = f"Failed to sync quality definitions: {str(e)}"
         logger.error(error_msg)
         return False, error_msg
+    finally:
+        if arr:
+            arr.close()
