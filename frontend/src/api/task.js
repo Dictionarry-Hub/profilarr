@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Alert from '@ui/Alert';
 
 export const getAllTasks = async () => {
     try {
@@ -34,6 +35,26 @@ export const triggerTask = async taskId => {
         return {
             success: false,
             message: error.response?.data?.error || 'Failed to trigger task'
+        };
+    }
+};
+
+export const updateTaskInterval = async (taskId, intervalMinutes) => {
+    try {
+        const response = await axios.put(`/api/tasks/${taskId}`, {
+            interval_minutes: intervalMinutes
+        });
+        Alert.success(response.data.message || 'Task interval updated successfully');
+        return {
+            success: true,
+            data: response.data
+        };
+    } catch (error) {
+        const errorMessage = error.response?.data?.error || 'Failed to update task interval';
+        Alert.error(errorMessage);
+        return {
+            success: false,
+            error: errorMessage
         };
     }
 };

@@ -77,12 +77,14 @@ const TaskContainer = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {tasks.map(task => (
+                        {tasks.map((task, index) => (
                             <TaskCard
                                 key={task.id}
                                 task={task}
                                 onTrigger={handleTriggerTask}
                                 isTriggering={triggeringTask === task.id}
+                                isLast={index === tasks.length - 1}
+                                onIntervalUpdate={fetchTasks}
                             />
                         ))}
                     </tbody>
