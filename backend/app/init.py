@@ -124,11 +124,14 @@ def setup_logging():
 
 
 def init_git_user():
-    """Initialize Git user configuration globally and update PAT status."""
+    """Initialize Git user configuration for the repository and update PAT status."""
     logger = logging.getLogger(__name__)
     logger.info("Starting Git user configuration")
 
     try:
+        from .config import config
+        repo_path = config.DB_DIR
+        
         git_name = os.environ.get('GIT_USER_NAME', 'Profilarr')
         git_email = os.environ.get('GIT_USER_EMAIL',
                                    'profilarr@dictionarry.com')
@@ -139,30 +142,38 @@ def init_git_user():
         if git_name == 'Profilarr' or git_email == 'profilarr@dictionarry.com':
             logger.info("Using default Git user configuration")
 
-        # Set global Git configuration
-        subprocess.run(['git', 'config', '--global', 'user.name', git_name],
-                       check=True)
-        subprocess.run(['git', 'config', '--global', 'user.email', git_email],
-                       check=True)
+        # Set repository-level Git configuration if repo exists
+        if os.path.exists(os.path.join(repo_path, '.git')):
+            logger.info(f"Setting git config for repository at {repo_path}")
+            subprocess.run(['git', '-C', repo_path, 'config', '--local', 'user.name', git_name],
+                           check=True)
+            subprocess.run(['git', '-C', repo_path, 'config', '--local', 'user.email', git_email],
+                           check=True)
+            # Add safe.directory to prevent ownership issues
+            subprocess.run(['git', '-C', repo_path, 'config', '--local', '--add', 'safe.directory', repo_path],
+                           check=True)
+        else:
+            logger.warning(f"No git repository found at {repo_path}, skipping git config")
 
         # Update PAT status in database
         update_pat_status()
 
-        # Verify configuration
-        configured_name = subprocess.run(
-            ['git', 'config', '--global', 'user.name'],
-            capture_output=True,
-            text=True,
-            check=True).stdout.strip()
-        configured_email = subprocess.run(
-            ['git', 'config', '--global', 'user.email'],
-            capture_output=True,
-            text=True,
-            check=True).stdout.strip()
+        # Verify configuration if repository exists
+        if os.path.exists(os.path.join(repo_path, '.git')):
+            configured_name = subprocess.run(
+                ['git', '-C', repo_path, 'config', '--local', 'user.name'],
+                capture_output=True,
+                text=True,
+                check=True).stdout.strip()
+            configured_email = subprocess.run(
+                ['git', '-C', repo_path, 'config', '--local', 'user.email'],
+                capture_output=True,
+                text=True,
+                check=True).stdout.strip()
 
-        if configured_name != git_name or configured_email != git_email:
-            logger.error("Git configuration verification failed")
-            return False, "Git configuration verification failed"
+            if configured_name != git_name or configured_email != git_email:
+                logger.error("Git configuration verification failed")
+                return False, "Git configuration verification failed"
 
         logger.info("Git user configuration completed successfully")
         return True, "Git configuration successful"

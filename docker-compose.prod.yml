@@ -1,19 +1,16 @@
-# docker-compose.yml
-version: '3.8'
 services:
     profilarr:
-        image: santiagosayshey/profilarr:beta
+        build:
+            context: .
+            dockerfile: Dockerfile
         container_name: profilarr
         ports:
-            - 6868:6868
+            - 6870:6868
         volumes:
-            - profilarr_data:/config
+            - ./config-test:/config
         environment:
+            - PUID=1000
+            - PGID=1000
+            - UMASK=002
             - TZ=Australia/Adelaide
-        env_file:
-            - .env
         restart: unless-stopped
-
-volumes:
-    profilarr_data:
-        name: profilarr_data
