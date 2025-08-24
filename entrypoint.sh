@@ -9,7 +9,6 @@ UMASK=${UMASK:-022}
 
 echo "Starting with UID: $PUID, GID: $PGID, UMASK: $UMASK"
 
-# Set umask
 umask "$UMASK"
 
 # Create group with specified GID
@@ -30,6 +29,6 @@ if [ -d "/config" ]; then
     chown -R "$PUID:$PGID" /config
 fi
 
-# Execute the main command as the specified user with umask
-echo "Starting application as user $PUID:$PGID with umask $UMASK"
-exec gosu "$PUID:$PGID" /bin/bash -c "umask $UMASK && exec $(printf '%q ' "$@")"
+# Execute the main command as the specified user
+echo "Starting application as user $PUID:$PGID"
+exec gosu "$PUID:$PGID" "$@"
