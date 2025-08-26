@@ -7,6 +7,8 @@ from typing import Dict, List, Any, Tuple, Union
 import git
 import regex
 import logging
+import subprocess
+import json
 from ..db.queries.arr import update_arr_config_on_rename, update_arr_config_on_delete
 
 logger = logging.getLogger(__name__)
@@ -358,6 +360,68 @@ def check_delete_constraints(category: str, name: str) -> Tuple[bool, str]:
     except Exception as e:
         logger.error(f"Error checking delete constraints: {e}")
         return False, f"Error checking references: {str(e)}"
+
+
+def verify_dotnet_regex(pattern: str) -> Tuple[bool, str]:
+    """
+    Verify a regex pattern using .NET regex engine via PowerShell.
+    Returns (success, message) tuple.
+    """
+    try:
+        # Get the path to the validate.ps1 script
+        # In Docker, the structure is /app/app/data/utils.py and script is at /app/scripts/validate.ps1
+        script_path = os.path.join('/app', 'scripts', 'validate.ps1')
+        if not os.path.exists(script_path):
+            # Fallback for local development
+            script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'scripts', 'validate.ps1')
+        
+        # Run PowerShell script, passing pattern via stdin to avoid shell escaping issues
+        result = subprocess.run(
+            ['pwsh', '-File', script_path],
+            input=pattern,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        
+        if result.returncode != 0 and not result.stdout:
+            logger.error(f"PowerShell script failed: {result.stderr}")
+            return False, "Failed to validate pattern"
+        
+        # Log the raw output for debugging
+        logger.debug(f"PowerShell output: {result.stdout}")
+        
+        # Parse JSON output
+        try:
+            output = json.loads(result.stdout.strip())
+        except json.JSONDecodeError:
+            # Try to find JSON in the output
+            lines = result.stdout.strip().split('\n')
+            for line in reversed(lines):
+                if line.strip():
+                    try:
+                        output = json.loads(line)
+                        break
+                    except json.JSONDecodeError:
+                        continue
+            else:
+                logger.error(f"No valid JSON found in output: {result.stdout}")
+                return False, "Failed to parse validation result"
+        
+        if output.get('valid'):
+            return True, output.get('message', 'Pattern is valid')
+        else:
+            return False, output.get('error', 'Invalid pattern')
+            
+    except subprocess.TimeoutExpired:
+        logger.error("Pattern validation timed out")
+        return False, "Pattern validation timed out"
+    except FileNotFoundError:
+        logger.error("PowerShell (pwsh) not found")
+        return False, "PowerShell is not available"
+    except Exception as e:
+        logger.error(f"Error validating pattern: {e}")
+        return False, f"Validation error: {str(e)}"
 
 
 def update_references(category: str, old_name: str,

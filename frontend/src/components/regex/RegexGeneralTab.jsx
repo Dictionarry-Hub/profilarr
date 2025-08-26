@@ -2,7 +2,9 @@ import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import MarkdownEditor from '@ui/MarkdownEditor';
 import AddButton from '@ui/DataBar/AddButton';
-import {InfoIcon} from 'lucide-react';
+import {Regex, Loader} from 'lucide-react';
+import {RegexPatterns} from '@api/data';
+import Alert from '@ui/Alert';
 
 const RegexGeneralTab = ({
     name,
@@ -18,6 +20,7 @@ const RegexGeneralTab = ({
     patternError
 }) => {
     const [newTag, setNewTag] = useState('');
+    const [validating, setValidating] = useState(false);
 
     const handleAddTag = () => {
         if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -30,6 +33,30 @@ const RegexGeneralTab = ({
         if (e.key === 'Enter') {
             e.preventDefault();
             handleAddTag();
+        }
+    };
+
+    const handleValidatePattern = async () => {
+        if (!pattern?.trim()) {
+            Alert.warning('Please enter a pattern to validate');
+            return;
+        }
+
+        setValidating(true);
+        
+        try {
+            const result = await RegexPatterns.verify(pattern);
+            
+            if (result.valid) {
+                Alert.success('Pattern is valid .NET regex');
+            } else {
+                Alert.error(result.error || 'Invalid pattern');
+            }
+        } catch (error) {
+            console.error('Validation error:', error);
+            Alert.error('Failed to validate pattern');
+        } finally {
+            setValidating(false);
         }
     };
 
@@ -89,17 +116,28 @@ const RegexGeneralTab = ({
                 <div className='space-y-2'>
                     <div className='space-y-1'>
                         <div className='flex items-center justify-between'>
-                            <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                                Pattern
-                            </label>
-                            <div className='flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400'>
-                                <InfoIcon className='h-4 w-4' />
-                                <span>Case insensitive PCRE2</span>
+                            <div>
+                                <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                                    Pattern
+                                </label>
+                                <p className='text-xs text-gray-500 dark:text-gray-400'>
+                                    Enter your regular expression pattern (case-insensitive .NET)
+                                </p>
                             </div>
+                            <button
+                                onClick={handleValidatePattern}
+                                disabled={validating || !pattern?.trim()}
+                                className='inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md 
+                                bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white
+                                transition-colors duration-200'>
+                                {validating ? (
+                                    <Loader className='w-4 h-4 mr-2 animate-spin' />
+                                ) : (
+                                    <Regex className='w-4 h-4 mr-2' />
+                                )}
+                                Validate
+                            </button>
                         </div>
-                        <p className='text-xs text-gray-500 dark:text-gray-400'>
-                            Enter your regular expression pattern
-                        </p>
                     </div>
                     {patternError && (
                         <p className='text-sm text-red-600 dark:text-red-400'>

@@ -301,5 +301,15 @@ export const RegexPatterns = {
     update: (name, data, newName) =>
         updateItem('regex_pattern', name, data, newName),
     delete: name => deleteItem('regex_pattern', name),
-    runTests: createSpecialEndpoint('regex_pattern', 'test')
+    runTests: createSpecialEndpoint('regex_pattern', 'test'),
+    verify: async pattern => {
+        try {
+            const response = await axios.post(`${BASE_URL}/regex/verify`, {
+                pattern
+            });
+            return response.data;
+        } catch (error) {
+            throw handleError(error, 'verify regex pattern');
+        }
+    }
 };

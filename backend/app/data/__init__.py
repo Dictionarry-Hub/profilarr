@@ -226,6 +226,32 @@ def handle_item(category, name):
         return jsonify({"error": "An unexpected error occurred"}), 500
 
 
+@bp.route('/regex/verify', methods=['POST'])
+def verify_regex():
+    """Verify a regex pattern using .NET regex engine via PowerShell"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        pattern = data.get('pattern')
+        if not pattern:
+            return jsonify({"error": "Pattern is required"}), 400
+        
+        from .utils import verify_dotnet_regex
+        
+        success, message = verify_dotnet_regex(pattern)
+        
+        if success:
+            return jsonify({"valid": True, "message": "Pattern is valid"}), 200
+        else:
+            return jsonify({"valid": False, "error": message}), 200
+    
+    except Exception as e:
+        logger.exception("Error verifying regex pattern")
+        return jsonify({"valid": False, "error": str(e)}), 500
+
+
 @bp.route('/<string:category>/test', methods=['POST'])
 def run_tests(category):
     logger.info(f"Received test request for category: {category}")

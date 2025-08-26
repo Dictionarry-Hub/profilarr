@@ -65,6 +65,19 @@ export const useRegexModal = (initialPattern, onSave) => {
             return;
         }
 
+        // Validate pattern with .NET regex engine
+        try {
+            const validationResult = await RegexPatterns.verify(patternValue);
+            if (!validationResult.valid) {
+                Alert.error(`Invalid regex pattern: ${validationResult.error || 'Pattern validation failed'}`);
+                return;
+            }
+        } catch (error) {
+            console.error('Pattern validation error:', error);
+            Alert.error('Failed to validate pattern. Please check the pattern and try again.');
+            return;
+        }
+
         try {
             const data = {
                 name,
