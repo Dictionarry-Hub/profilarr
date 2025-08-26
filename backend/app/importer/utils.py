@@ -46,12 +46,14 @@ def load_yaml(file_path: str) -> Dict[str, Any]:
         return yaml.safe_load(f)
 
 
-def extract_format_names(profile_data: Dict[str, Any]) -> Set[str]:
+def extract_format_names(profile_data: Dict[str, Any], arr_type: str = None) -> Set[str]:
     """
     Extract all custom format names referenced in a profile.
     
     Args:
         profile_data: Profile YAML data
+        arr_type: Target arr type ('radarr' or 'sonarr'). If provided, only extracts
+                  formats for that specific arr type.
         
     Returns:
         Set of unique format names
@@ -64,10 +66,18 @@ def extract_format_names(profile_data: Dict[str, Any]) -> Set[str]:
             format_names.add(cf['name'])
     
     # Extract from app-specific custom_formats
-    for key in ['custom_formats_radarr', 'custom_formats_sonarr']:
-        for cf in profile_data.get(key, []):
+    if arr_type:
+        # Only extract formats for the specific arr type
+        app_key = f'custom_formats_{arr_type.lower()}'
+        for cf in profile_data.get(app_key, []):
             if isinstance(cf, dict) and 'name' in cf:
                 format_names.add(cf['name'])
+    else:
+        # Extract from all app-specific sections (backwards compatibility)
+        for key in ['custom_formats_radarr', 'custom_formats_sonarr']:
+            for cf in profile_data.get(key, []):
+                if isinstance(cf, dict) and 'name' in cf:
+                    format_names.add(cf['name'])
     
     return format_names
 

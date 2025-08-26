@@ -38,8 +38,8 @@ class ProfileStrategy(ImportStrategy):
                 # Load profile YAML
                 profile_yaml = load_yaml(f"profile/{filename}.yml")
                 
-                # Extract referenced custom formats
-                format_names = extract_format_names(profile_yaml)
+                # Extract referenced custom formats (only for the target arr type)
+                format_names = extract_format_names(profile_yaml, self.arr_type)
                 
                 for format_name in format_names:
                     # Skip if already processed

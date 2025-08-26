@@ -5,6 +5,8 @@ import {ChevronUp, ChevronDown} from 'lucide-react';
 const NumberInput = ({
     value,
     onChange,
+    onBlur = () => {},
+    onFocus = () => {},
     className = '',
     step = 1,
     disabled = false,
@@ -24,26 +26,26 @@ const NumberInput = ({
         }
     };
 
-    const handleBlur = () => {
+    const handleBlur = (e) => {
         setIsFocused(false);
         const numValue =
             localValue === '' || localValue === '-' ? 0 : parseInt(localValue);
 
         if (min !== undefined && numValue < min) {
             onChange(min);
-            return;
-        }
-        if (max !== undefined && numValue > max) {
+        } else if (max !== undefined && numValue > max) {
             onChange(max);
-            return;
+        } else {
+            onChange(numValue);
         }
-
-        onChange(numValue);
+        
+        onBlur(e);
     };
 
-    const handleFocus = () => {
+    const handleFocus = (e) => {
         setIsFocused(true);
         setLocalValue(value.toString());
+        onFocus(e);
     };
 
     const increment = () => {

@@ -1,5 +1,5 @@
 # app/task/__init__.py
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 import logging
 from ..db import get_db
 from .tasks import TaskScheduler
@@ -76,6 +76,63 @@ def get_task(task_id):
     except Exception as e:
         logger.exception("Unexpected error occurred")
         return jsonify({"error": "An unexpected error occurred"}), 500
+
+
+@bp.route('/<int:task_id>', methods=['PUT'])
+def update_task(task_id):
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        interval_minutes = data.get('interval_minutes')
+        if interval_minutes is None:
+            return jsonify({"error": "interval_minutes is required"}), 400
+        
+        if not isinstance(interval_minutes, int) or interval_minutes < 1:
+            return jsonify({"error": "interval_minutes must be a positive integer"}), 400
+        
+        with get_db() as conn:
+            # Check if task exists
+            task = conn.execute('SELECT * FROM scheduled_tasks WHERE id = ?',
+                                (task_id, )).fetchone()
+            
+            if not task:
+                return jsonify({"error": "Task not found"}), 404
+            
+            # Update the interval in database
+            conn.execute(
+                'UPDATE scheduled_tasks SET interval_minutes = ? WHERE id = ?',
+                (interval_minutes, task_id)
+            )
+            conn.commit()
+            
+            # Update the scheduler
+            scheduler_instance = TaskScheduler.get_instance()
+            if scheduler_instance and interval_minutes > 0:
+                # Remove old job
+                scheduler_instance.scheduler.remove_job(str(task_id))
+                
+                # Create new task instance with updated interval
+                task_class = TaskScheduler.get_task_class(task['type'])
+                if task_class:
+                    new_task = task_class(
+                        id=task_id,
+                        name=task['name'],
+                        interval_minutes=interval_minutes
+                    )
+                    scheduler_instance.schedule_task(new_task)
+            
+            logger.info(f"Updated task {task_id} interval to {interval_minutes} minutes")
+            
+            return jsonify({
+                "success": True,
+                "message": f"Task interval updated to {interval_minutes} minutes"
+            }), 200
+    
+    except Exception as e:
+        logger.exception(f"Failed to update task {task_id}")
+        return jsonify({"error": f"Failed to update task: {str(e)}"}), 500
 
 
 @bp.route('/<int:task_id>/run', methods=['POST'])

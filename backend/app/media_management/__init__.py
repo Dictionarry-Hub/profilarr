@@ -101,13 +101,12 @@ def sync_media_management():
             try:
                 # Get the current media management data for this category
                 category_data = get_media_management_data(category)
-                logger.info(f"Raw category_data for {category}: {category_data}")
-                arr_type_data = category_data.get(arr_type, {})
-                logger.info(f"Extracted arr_type_data for {arr_type}: {arr_type_data}")
                 
                 if category == 'naming':
+                    arr_type_data = category_data.get(arr_type, {})
                     success, message = sync_naming_config(base_url, api_key, arr_type, arr_type_data)
                 elif category == 'misc':
+                    arr_type_data = category_data.get(arr_type, {})
                     success, message = sync_media_management_config(base_url, api_key, arr_type, arr_type_data)
                 elif category == 'quality_definitions':
                     # Quality definitions has a nested structure: qualityDefinitions -> arr_type -> qualities
