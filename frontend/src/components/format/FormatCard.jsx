@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import PropTypes from 'prop-types';
 import {Copy, Check, FlaskConical, FileText, ListFilter} from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
@@ -14,6 +14,8 @@ function FormatCard({
     willBeSelected,
     onSelect
 }) {
+    const [isVisible, setIsVisible] = useState(false);
+    const cardRef = useRef(null);
     const [showDescription, setShowDescription] = useState(() => {
         const saved = localStorage.getItem(`format-view-${format.file_name}`);
         return saved !== null ? JSON.parse(saved) : true;
@@ -64,8 +66,27 @@ function FormatCard({
         }
     };
 
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsVisible(entry.isIntersecting);
+            },
+            { 
+                threshold: 0,
+                rootMargin: '100px' // Keep cards rendered 100px outside viewport
+            }
+        );
+
+        if (cardRef.current) {
+            observer.observe(cardRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <div
+            ref={cardRef}
             className={`w-full h-[12rem] bg-gradient-to-br from-gray-800/95 to-gray-900 border ${
                 isSelected
                     ? 'border-blue-500'
@@ -81,7 +102,8 @@ function FormatCard({
             } transition-all cursor-pointer relative`}
             onClick={handleClick}
             onMouseDown={handleMouseDown}>
-            <div className='p-4 flex flex-col h-full'>
+            {isVisible ? (
+                <div className='p-4 flex flex-col h-full'>
                 {/* Header Section */}
                 <div className='flex justify-between items-start'>
                     <div className='flex flex-col min-w-0 flex-1'>
@@ -237,6 +259,15 @@ function FormatCard({
                     )}
                 </div>
             </div>
+            ) : (
+                <div className='p-4 flex items-center justify-center h-full'>
+                    <div className='w-full space-y-2'>
+                        <div className='h-5 bg-gray-700/50 rounded animate-pulse'/>
+                        <div className='h-3 bg-gray-700/50 rounded animate-pulse w-3/4'/>
+                        <div className='h-3 bg-gray-700/50 rounded animate-pulse w-1/2'/>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

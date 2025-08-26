@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import PropTypes from 'prop-types';
 import {Copy, Check, FlaskConical} from 'lucide-react';
 import Tooltip from '@ui/Tooltip';
@@ -15,6 +15,9 @@ const RegexCard = ({
     willBeSelected,
     onSelect
 }) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const cardRef = useRef(null);
+    
     const totalTests = pattern.tests?.length || 0;
     const passedTests = pattern.tests?.filter(t => t.passes)?.length || 0;
     const passRate =
@@ -46,8 +49,27 @@ const RegexCard = ({
         return 'text-red-400';
     };
 
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsVisible(entry.isIntersecting);
+            },
+            { 
+                threshold: 0,
+                rootMargin: '100px' // Keep cards rendered 100px outside viewport
+            }
+        );
+
+        if (cardRef.current) {
+            observer.observe(cardRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <div
+            ref={cardRef}
             className={`w-full h-[20rem] bg-gradient-to-br from-gray-800/95 to-gray-900 border ${
                 isSelected
                     ? 'border-blue-500'
@@ -63,7 +85,8 @@ const RegexCard = ({
             } transition-all cursor-pointer overflow-hidden`}
             onClick={handleClick}
             onMouseDown={handleMouseDown}>
-            <div className='p-6 flex flex-col h-full'>
+            {isVisible ? (
+                <div className='p-6 flex flex-col h-full'>
                 {/* Header Section */}
                 <div className='flex-none'>
                     <div className='flex justify-between items-start'>
@@ -183,6 +206,15 @@ const RegexCard = ({
                     )}
                 </div>
             </div>
+            ) : (
+                <div className='p-6 flex items-center justify-center h-full'>
+                    <div className='w-full space-y-3'>
+                        <div className='h-6 bg-gray-700/50 rounded animate-pulse'/>
+                        <div className='h-20 bg-gray-700/50 rounded animate-pulse'/>
+                        <div className='h-4 bg-gray-700/50 rounded animate-pulse w-3/4'/>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
