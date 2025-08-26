@@ -6,7 +6,7 @@ import RegexTestingTab from './RegexTestingTab';
 import {useRegexModal} from '@hooks/useRegexModal';
 import {RegexPatterns} from '@api/data';
 import Alert from '@ui/Alert';
-import {Loader, Play} from 'lucide-react';
+import {Loader, Play, Save, Trash2, Check} from 'lucide-react';
 
 const RegexModal = ({
     pattern: initialPattern,
@@ -84,12 +84,13 @@ const RegexModal = ({
             {initialPattern && !isCloning && (
                 <button
                     onClick={handleDelete}
-                    className={`px-4 py-2 text-white rounded transition-colors ${
-                        isDeleting
-                            ? 'bg-red-600 hover:bg-red-700'
-                            : 'bg-red-500 hover:bg-red-600'
-                    }`}>
-                    {isDeleting ? 'Confirm Delete' : 'Delete'}
+                    className='inline-flex items-center gap-2 px-4 py-2 rounded bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-700 transition-colors'>
+                    {isDeleting ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                    ) : (
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                    )}
+                    <span>Delete</span>
                 </button>
             )}
             <div className='flex gap-2'>
@@ -97,20 +98,20 @@ const RegexModal = ({
                     <button
                         onClick={() => handleRunTests(patternValue, tests)}
                         disabled={isRunningTests}
-                        className='inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 
-                        disabled:bg-green-600/50 text-white rounded transition-colors'>
+                        className='inline-flex items-center gap-2 px-4 py-2 rounded bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-700 disabled:opacity-50 transition-colors'>
                         {isRunningTests ? (
-                            <Loader className='w-4 h-4 mr-2 animate-spin' />
+                            <Loader className="w-4 h-4 text-yellow-500 animate-spin" />
                         ) : (
-                            <Play className='w-4 h-4 mr-2' />
+                            <Play className="w-4 h-4 text-green-500" />
                         )}
-                        Run Tests
+                        <span>Run Tests</span>
                     </button>
                 )}
                 <button
                     onClick={handleSave}
-                    className='bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors'>
-                    Save
+                    className='inline-flex items-center gap-2 px-4 py-2 rounded bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-700 transition-colors'>
+                    <Save className="w-4 h-4 text-blue-500" />
+                    <span>Save</span>
                 </button>
             </div>
         </div>

@@ -79,12 +79,19 @@ export const useRegexModal = (initialPattern, onSave) => {
         }
 
         try {
+            // Clean tests to only include saved data
+            const cleanTests = tests.map((test, index) => ({
+                id: test.id || index + 1,
+                input: test.input,
+                expected: test.expected
+            }));
+            
             const data = {
                 name,
                 pattern: patternValue,
                 description,
                 tags,
-                tests
+                tests: cleanTests
             };
 
             if (initialPattern && !isCloning) {
@@ -111,15 +118,16 @@ export const useRegexModal = (initialPattern, onSave) => {
     const handleRunTests = useCallback(
         async (pattern, tests) => {
             try {
-                const updatedTests = await runTests(pattern, tests);
-                if (updatedTests) {
-                    setTests(updatedTests);
-                }
+                const testResults = await runTests(pattern, tests);
+                // We don't update the tests state with results
+                // Results are only used for display, not saved
+                return testResults;
             } catch (error) {
                 console.error('Error running tests:', error);
                 Alert.error(
                     error.message || 'Failed to run tests. Please try again.'
                 );
+                return null;
             }
         },
         [runTests]

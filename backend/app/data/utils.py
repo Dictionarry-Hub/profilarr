@@ -542,76 +542,67 @@ def test_regex_pattern(
         pattern: str,
         tests: List[Dict[str, Any]]) -> Tuple[bool, str, List[Dict[str, Any]]]:
     """
-    Test a regex pattern against a list of test cases using PCRE2 compatible engine.
+    Test a regex pattern against a list of test cases using .NET regex engine via PowerShell.
     Returns match information along with test results.
     """
-    logger.info(f"Starting regex pattern test - Pattern: {pattern}")
 
     try:
-        try:
-            compiled_pattern = regex.compile(pattern,
-                                             regex.V1 | regex.IGNORECASE)
-            logger.info(
-                "Pattern compiled successfully with PCRE2 compatibility")
-        except regex.error as e:
-            logger.warning(f"Invalid regex pattern: {str(e)}")
-            return False, f"Invalid regex pattern: {str(e)}", tests
-
-        current_time = datetime.now().isoformat()
-        logger.info(f"Processing {len(tests)} test cases")
-
-        for test in tests:
-            test_id = test.get('id', 'unknown')
-            test_input = test.get('input', '')
-            expected = test.get('expected', False)
-
-            try:
-                match = compiled_pattern.search(test_input)
-                matches = bool(match)
-
-                # Update test result with basic fields
-                test['passes'] = matches == expected
-                test['lastRun'] = current_time
-
-                # Add match information
-                if match:
-                    test['matchedContent'] = match.group(0)
-                    test['matchSpan'] = {
-                        'start': match.start(),
-                        'end': match.end()
-                    }
-                    # Get all capture groups if they exist
-                    test['matchedGroups'] = [g for g in match.groups()
-                                             ] if match.groups() else []
-                else:
-                    test['matchedContent'] = None
-                    test['matchSpan'] = None
-                    test['matchedGroups'] = []
-
-                logger.info(
-                    f"Test {test_id} {'passed' if test['passes'] else 'failed'} - Match: {matches}, Expected: {expected}"
-                )
-
-            except Exception as e:
-                logger.error(f"Error running test {test_id}: {str(e)}")
-                test['passes'] = False
-                test['lastRun'] = current_time
-                test['matchedContent'] = None
-                test['matchSpan'] = None
-                test['matchedGroups'] = []
-
-        # Log overall results
-        passed_tests = sum(1 for test in tests if test.get('passes', False))
-        logger.info(
-            f"Test execution complete - {passed_tests}/{len(tests)} tests passed"
+        # Get the path to the test.ps1 script
+        script_path = os.path.join('/app', 'scripts', 'test.ps1')
+        if not os.path.exists(script_path):
+            # Fallback for local development
+            script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'scripts', 'test.ps1')
+        
+        # Prepare the input data
+        input_data = {
+            'pattern': pattern,
+            'tests': tests
+        }
+        
+        # Run PowerShell script
+        result = subprocess.run(
+            ['pwsh', '-File', script_path],
+            input=json.dumps(input_data),
+            capture_output=True,
+            text=True,
+            timeout=10
         )
-
-        return True, "", tests
-
+        
+        if result.returncode != 0 and not result.stdout:
+            logger.error(f"PowerShell script failed: {result.stderr}")
+            return False, "Failed to run tests", tests
+        
+        # Parse JSON output
+        try:
+            output = json.loads(result.stdout.strip())
+        except json.JSONDecodeError:
+            # Try to find JSON in the output
+            lines = result.stdout.strip().split('\n')
+            for line in reversed(lines):
+                if line.strip():
+                    try:
+                        output = json.loads(line)
+                        break
+                    except json.JSONDecodeError:
+                        continue
+            else:
+                logger.error(f"No valid JSON found in output: {result.stdout}")
+                return False, "Failed to parse test results", tests
+        
+        if output.get('success'):
+            return True, "Tests completed successfully", output.get('tests', tests)
+        else:
+            return False, output.get('message', 'Tests failed'), tests
+            
+    except subprocess.TimeoutExpired:
+        logger.error("Test execution timed out")
+        return False, "Test execution timed out", tests
+    except FileNotFoundError:
+        logger.error("PowerShell (pwsh) not found")
+        return False, "PowerShell is not available", tests
     except Exception as e:
-        logger.error(f"Unexpected error in test_regex_pattern: {str(e)}",
-                     exc_info=True)
-        return False, str(e), tests
+        logger.error(f"Error running tests: {e}")
+        return False, f"Test error: {str(e)}", tests
 
 
 def test_format_conditions(conditions: List[Dict],

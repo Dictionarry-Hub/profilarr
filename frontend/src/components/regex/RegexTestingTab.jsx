@@ -13,52 +13,47 @@ const RegexTestingTab = ({
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTest, setEditingTest] = useState(null);
+    const [testResults, setTestResults] = useState({});
+
+    // Wrapped run tests function that stores results
+    const handleRunTests = useCallback(async (testPattern, testData) => {
+        const results = await onRunTests(testPattern, testData);
+        if (results && Array.isArray(results)) {
+            // Store results by test ID
+            const resultsMap = {};
+            results.forEach(result => {
+                resultsMap[result.id] = result;
+            });
+            setTestResults(resultsMap);
+        }
+        return results;
+    }, [onRunTests]);
 
     useEffect(() => {
-        const needsAutoRun =
-            tests?.length > 0 &&
-            pattern &&
-            tests.some(test => test.passes !== undefined && !test.matchSpan);
-
-        if (needsAutoRun && !isRunningTests) {
-            onRunTests(pattern, tests);
+        // Run tests when pattern or tests change
+        if (tests?.length > 0 && pattern && !isRunningTests) {
+            handleRunTests(pattern, tests);
         }
-    }, []);
+    }, [pattern]); // Only re-run when pattern changes
 
     const handleAddOrUpdateTest = useCallback(
         testData => {
             let updatedTests;
             if (editingTest) {
                 updatedTests = tests.map(test =>
-                    test.id === testData.id
-                        ? {
-                              ...testData,
-                              passes: false,
-                              lastRun: null,
-                              matchedContent: null,
-                              matchSpan: null,
-                              matchedGroups: []
-                          }
-                        : test
+                    test.id === testData.id ? testData : test
                 );
             } else {
-                updatedTests = [
-                    ...tests,
-                    {
-                        ...testData,
-                        passes: false,
-                        lastRun: null,
-                        matchedContent: null,
-                        matchSpan: null,
-                        matchedGroups: []
-                    }
-                ];
+                updatedTests = [...tests, testData];
             }
             onTestsChange(updatedTests);
-            onRunTests(pattern, updatedTests);
+            // Run tests automatically after adding/updating
+            if (pattern) {
+                handleRunTests(pattern, updatedTests);
+            }
             setEditingTest(null);
         },
-        [tests, onTestsChange, onRunTests, pattern, editingTest]
+        [tests, onTestsChange, handleRunTests, pattern, editingTest]
     );
 
     const handleEditTest = useCallback(test => {
@@ -80,72 +75,81 @@ const RegexTestingTab = ({
     }, []);
 
     const totalTests = tests?.length || 0;
-    const passedTests = tests?.filter(test => test.passes)?.length || 0;
+    const passedTests = tests?.filter(test => {
+        const result = testResults[test.id];
+        return result?.passes;
+    })?.length || 0;
 
     return (
         <div className='flex flex-col h-full'>
-            {/* Header with Progress Bar */}
-            <div className='flex items-center justify-between pb-4 pr-2'>
+            {/* Header */}
+            <div className='flex items-center justify-between pb-4'>
                 <div>
-                    <h2 className='text-xl font-semibold text-gray-900 dark:text-white mb-3'>
+                    <h2 className='text-xl font-semibold text-gray-900 dark:text-white mb-1'>
                         Unit Tests
                     </h2>
-                    <div className='flex items-center gap-3'>
-                        <div className='h-1.5 w-32 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
-                            <div
-                                className='h-full bg-emerald-500 rounded-full transition-all duration-300'
-                                style={{
-                                    width: `${
-                                        totalTests
-                                            ? (passedTests / totalTests) * 100
-                                            : 0
-                                    }%`
-                                }}
-                            />
-                        </div>
-                        <span className='text-sm text-gray-600 dark:text-gray-300'>
-                            {totalTests > 0
-                                ? `${passedTests}/${totalTests} tests passing`
-                                : 'No tests added yet'}
-                        </span>
-                    </div>
+                    {totalTests > 0 && (
+                        <p className='text-sm text-gray-600 dark:text-gray-400'>
+                            {passedTests} of {totalTests} tests passing
+                            {totalTests > 0 && ` (${Math.round((passedTests / totalTests) * 100)}%)`}
+                        </p>
+                    )}
                 </div>
                 <div className='flex items-center gap-2'>
                     {tests?.length > 0 && (
                         <button
-                            onClick={() => onRunTests(pattern, tests)}
+                            onClick={() => handleRunTests(pattern, tests)}
                             disabled={isRunningTests}
-                            className='inline-flex items-center px-3 py-2 text-sm font-medium rounded-md bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 text-white'>
+                            className='inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-700 disabled:opacity-50 transition-colors'>
                             {isRunningTests ? (
-                                <Loader className='w-4 h-4 mr-2 animate-spin' />
+                                <Loader className='w-3.5 h-3.5 text-yellow-500 animate-spin' />
                             ) : (
-                                <Play className='w-4 h-4 mr-2' />
+                                <Play className='w-3.5 h-3.5 text-green-500' />
                             )}
-                            Run Tests
+                            <span>Run Tests</span>
                         </button>
                     )}
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className='inline-flex items-center px-3 py-2 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white'>
-                        <Plus className='w-4 h-4 mr-2' />
-                        Add Test
+                        className='inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-700 transition-colors'>
+                        <Plus className='w-3.5 h-3.5 text-blue-500' />
+                        <span>Add Test</span>
                     </button>
                 </div>
             </div>
+            
+            {/* Progress Bar */}
+            {totalTests > 0 && (
+                <div className='mb-4'>
+                    <div className='h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
+                        <div 
+                            className='h-full bg-emerald-500 transition-all duration-500 ease-out'
+                            style={{width: `${(passedTests / totalTests) * 100}%`}}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Test List */}
             <div className='flex-1 overflow-y-auto pr-2'>
                 {tests?.length > 0 ? (
                     <div className='space-y-3'>
-                        {tests.map(test => (
-                            <UnitTest
-                                key={test.id}
-                                test={test}
-                                pattern={pattern}
-                                onDelete={() => handleDeleteTest(test.id)}
-                                onEdit={() => handleEditTest(test)}
-                            />
-                        ))}
+                        {tests.map(test => {
+                            // Merge saved test with runtime results
+                            const testWithResults = {
+                                ...test,
+                                ...testResults[test.id]
+                            };
+                            return (
+                                <UnitTest
+                                    key={test.id}
+                                    test={testWithResults}
+                                    pattern={pattern}
+                                    onDelete={() => handleDeleteTest(test.id)}
+                                    onEdit={() => handleEditTest(test)}
+                                />
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className='text-center py-12 rounded-lg'>
@@ -173,15 +177,7 @@ RegexTestingTab.propTypes = {
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             input: PropTypes.string.isRequired,
-            expected: PropTypes.bool.isRequired,
-            passes: PropTypes.bool.isRequired,
-            lastRun: PropTypes.string,
-            matchedContent: PropTypes.string,
-            matchedGroups: PropTypes.arrayOf(PropTypes.string),
-            matchSpan: PropTypes.shape({
-                start: PropTypes.number,
-                end: PropTypes.number
-            })
+            expected: PropTypes.bool.isRequired
         })
     ),
     onTestsChange: PropTypes.func.isRequired,

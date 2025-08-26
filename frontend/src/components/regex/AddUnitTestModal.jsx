@@ -23,15 +23,13 @@ const AddUnitTestModal = ({isOpen, onClose, onAdd, tests, editTest = null}) => {
     const handleSubmit = () => {
         const getNextTestId = testArray => {
             if (!testArray || testArray.length === 0) return 1;
-            return Math.max(...testArray.map(test => test.id)) + 1;
+            return Math.max(...testArray.map(test => test.id || 0)) + 1;
         };
 
         const testData = {
             id: editTest ? editTest.id : getNextTestId(tests),
             input,
-            expected: shouldMatch,
-            passes: false,
-            lastRun: null
+            expected: shouldMatch
         };
 
         onAdd(testData);

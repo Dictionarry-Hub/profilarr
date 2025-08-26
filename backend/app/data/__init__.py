@@ -259,25 +259,29 @@ def run_tests(category):
     try:
         data = request.get_json()
         if not data:
-            logger.warning("Rejected test request - no JSON data provided")
+            logger.warning("Test request rejected: no JSON data")
             return jsonify({"error": "No JSON data provided"}), 400
 
         tests = data.get('tests', [])
         if not tests:
-            logger.warning("Rejected test request - no test cases provided")
+            logger.warning("Test request rejected: no tests provided")
             return jsonify({"error":
                             "At least one test case is required"}), 400
 
         if category == 'regex_pattern':
             pattern = data.get('pattern')
-            logger.info(f"Processing regex test request - Pattern: {pattern}")
 
             if not pattern:
-                logger.warning("Rejected test request - missing pattern")
+                logger.warning("Test request rejected: missing pattern")
                 return jsonify({"error": "Pattern is required"}), 400
 
             success, message, updated_tests = test_regex_pattern(
                 pattern, tests)
+            
+            if success and updated_tests:
+                passed = sum(1 for t in updated_tests if t.get('passes'))
+                total = len(updated_tests)
+                logger.info(f"Tests completed: {passed}/{total} passed")
 
         elif category == 'custom_format':
             conditions = data.get('conditions', [])
@@ -300,10 +304,8 @@ def run_tests(category):
             return jsonify(
                 {"error": "Testing not supported for this category"}), 400
 
-        logger.info(f"Test execution completed - Success: {success}")
-
         if not success:
-            logger.warning(f"Test execution failed - {message}")
+            logger.error(f"Test execution failed: {message}")
             return jsonify({"success": False, "message": message}), 400
 
         return jsonify({"success": True, "tests": updated_tests}), 200

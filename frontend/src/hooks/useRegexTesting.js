@@ -34,14 +34,12 @@ export const useRegexTesting = onUpdateTests => {
                         }
                     );
 
-                    // Update tests through the callback
-                    if (onUpdateTests) {
-                        onUpdateTests(result.tests);
-                    }
+                    // Return the test results (with match information)
+                    // Don't save these results, just return them for display
                     return result.tests;
                 } else {
                     Alert.error(result.message || 'Failed to run tests');
-                    return tests;
+                    return null;
                 }
             } catch (error) {
                 console.error('Error running tests:', error);

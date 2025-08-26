@@ -68,11 +68,7 @@ const UnitTest = ({test, pattern, onDelete, onEdit}) => {
                                 : 'Should Not Match'}
                         </span>
                     </div>
-                    <div className='flex items-center gap-2'>
-                        <span className='text-xs text-gray-500 dark:text-gray-400'>
-                            Last run: {test.lastRun}
-                        </span>
-                        <div className='flex gap-2'>
+                    <div className='flex gap-2'>
                             <button
                                 onClick={onEdit}
                                 className='p-1 rounded shrink-0 transition-transform transform hover:scale-110'>
@@ -83,7 +79,6 @@ const UnitTest = ({test, pattern, onDelete, onEdit}) => {
                                 className='p-1 rounded shrink-0 transition-transform transform hover:scale-110'>
                                 <Trash2 className='w-4 h-4 text-gray-500 dark:text-gray-400' />
                             </button>
-                        </div>
                     </div>
                 </div>
 
@@ -112,7 +107,6 @@ UnitTest.propTypes = {
         input: PropTypes.string.isRequired,
         expected: PropTypes.bool.isRequired,
         passes: PropTypes.bool.isRequired,
-        lastRun: PropTypes.string,
         matchedContent: PropTypes.string,
         matchedGroups: PropTypes.arrayOf(PropTypes.string),
         matchSpan: PropTypes.shape({
