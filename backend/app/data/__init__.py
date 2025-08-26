@@ -7,6 +7,7 @@ from .utils import (get_category_directory, load_yaml_file, validate,
                     test_regex_pattern, test_format_conditions,
                     check_delete_constraints, filename_to_display)
 from ..db import add_format_to_renames, remove_format_from_renames, is_format_in_renames
+from .cache import data_cache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -16,43 +17,19 @@ bp = Blueprint('data', __name__)
 @bp.route('/<string:category>', methods=['GET'])
 def retrieve_all(category):
     try:
-        directory = get_category_directory(category)
-        files = [f for f in os.listdir(directory) if f.endswith('.yml')]
-        logger.debug(f"Found {len(files)} files in {category}")
-
-        if not files:
-            return jsonify([]), 200
-
-        result = []
-        errors = 0
-        for file_name in files:
-            file_path = os.path.join(directory, file_name)
-            try:
-                content = load_yaml_file(file_path)
-                # Add metadata for custom formats
-                if category == 'custom_format':
-                    content['metadata'] = {
-                        'includeInRename':
-                        is_format_in_renames(content['name'])
+        # Use cache instead of reading from disk
+        items = data_cache.get_all(category)
+        
+        # Add metadata for custom formats
+        if category == 'custom_format':
+            for item in items:
+                if 'content' in item and 'name' in item['content']:
+                    item['content']['metadata'] = {
+                        'includeInRename': is_format_in_renames(item['content']['name'])
                     }
-                result.append({
-                    "file_name":
-                    file_name,
-                    "content":
-                    content,
-                    "modified_date":
-                    get_file_modified_date(file_path)
-                })
-            except yaml.YAMLError:
-                errors += 1
-                result.append({
-                    "file_name": file_name,
-                    "error": "Failed to parse YAML"
-                })
-
-        logger.info(
-            f"Processed {len(files)} {category} files ({errors} errors)")
-        return jsonify(result), 200
+        
+        logger.info(f"Retrieved {len(items)} {category} items from cache")
+        return jsonify(items), 200
 
     except ValueError as ve:
         logger.error(ve)
@@ -127,6 +104,10 @@ def handle_item(category, name):
 
                 # Then delete the file
                 os.remove(file_path)
+                
+                # Update cache
+                data_cache.remove_item(category, file_name)
+                
                 return jsonify(
                     {"message": f"Successfully deleted {file_name}"}), 200
             except OSError as e:

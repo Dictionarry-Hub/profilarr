@@ -154,6 +154,11 @@ def save_yaml_file(file_path: str,
 
     with open(safe_file_path, 'w') as f:
         yaml.safe_dump(ordered_data, f, sort_keys=False)
+    
+    # Update cache
+    from .cache import data_cache
+    filename = os.path.basename(safe_file_path)
+    data_cache.update_item(category, filename, ordered_data)
 
 
 def update_yaml_file(file_path: str, data: Dict[str, Any],
@@ -218,6 +223,12 @@ def update_yaml_file(file_path: str, data: Dict[str, Any],
                     os.rename(file_path, new_file_path)
                     # Stage the new file
                     repo.index.add([rel_new_path])
+                
+                # Update cache for rename
+                from .cache import data_cache
+                old_filename = os.path.basename(file_path)
+                new_filename = os.path.basename(new_file_path)
+                data_cache.rename_item(category, old_filename, new_filename)
 
             except git.GitCommandError as e:
                 logger.error(f"Git operation failed: {e}")

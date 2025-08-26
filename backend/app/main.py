@@ -18,6 +18,7 @@ from .logs import bp as logs_bp
 from .media_management import media_management_bp
 from .middleware import init_middleware
 from .init import setup_logging, init_app_config, init_git_user
+from .data.cache import data_cache
 
 
 def create_app():
@@ -48,6 +49,10 @@ def create_app():
     # Initialize Git user configuration
     logger.info("Initializing Git user")
     success, message = init_git_user()
+    
+    # Initialize data cache
+    logger.info("Initializing data cache")
+    data_cache.initialize()
     if not success:
         logger.warning(f"Git user initialization issue: {message}")
     else:
