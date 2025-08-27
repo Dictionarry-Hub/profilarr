@@ -4,7 +4,7 @@ import logging
 
 class Config:
     # Base Paths
-    CONFIG_DIR = '/config'
+    CONFIG_DIR = os.getenv('CONFIG_DIR', '/config')
     DB_PATH = os.path.join(CONFIG_DIR, 'profilarr.db')
     DB_DIR = os.path.join(CONFIG_DIR, 'db')
 
