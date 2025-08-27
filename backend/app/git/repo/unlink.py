@@ -68,6 +68,12 @@ def unlink_repository(repo_path, remove_files=False):
         save_settings({'gitRepo': None})
         logger.info("Updated settings to remove git information")
 
+        # Reload cache if files were removed
+        if remove_files:
+            from ...data.cache import data_cache
+            logger.info("Reloading data cache after removing repository files")
+            data_cache.initialize()
+
         return True, "Repository successfully unlinked"
     except Exception as e:
         logger.error(f"Error unlinking repository: {str(e)}", exc_info=True)

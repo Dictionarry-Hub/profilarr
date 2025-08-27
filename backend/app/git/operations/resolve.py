@@ -310,6 +310,11 @@ def resolve_conflicts(
                 logger.debug(f"File status: {item}")
         logger.debug("=======================================")
 
+        # Reload cache after conflict resolution
+        from ...data.cache import data_cache
+        logger.info("Reloading data cache after conflict resolution")
+        data_cache.initialize()
+
         return {'success': True, 'results': results}
 
     except Exception as e:

@@ -35,6 +35,11 @@ def pull_branch(repo_path, branch_name):
             if status_manager:
                 status_manager.update_remote_status()
 
+            # Reload cache for updated data files
+            from ...data.cache import data_cache
+            logger.info("Reloading data cache after pull")
+            data_cache.initialize()  # This will reload all data
+
             # -------------------------------
             # *** "On pull" ARR import logic using new importer:
             # 1) Query all ARR configs that have sync_method="pull"

@@ -44,6 +44,12 @@ def checkout_branch(repo_path, branch_name):
                 return False, f"Branch '{branch_name}' does not exist locally or in any remote."
 
         logger.debug(f"Successfully checked out branch: {branch_name}")
+        
+        # Reload cache after branch checkout since files may have changed
+        from ...data.cache import data_cache
+        logger.info("Reloading data cache after branch checkout")
+        data_cache.initialize()
+        
         return True, {
             "message": f"Checked out branch: {branch_name}",
             "current_branch": branch_name

@@ -51,6 +51,10 @@ def revert_file(repo_path, file_path):
             repo.git.restore('--staged', "--", file_path)
             message = f"File {file_path} has been reverted."
 
+        # Reload cache after revert
+        from ...data.cache import data_cache
+        data_cache.initialize()
+
         return True, message
 
     except git.exc.GitCommandError as e:
@@ -97,6 +101,10 @@ def revert_all(repo_path):
         if untracked_files:
             message += f" and {len(untracked_files)} new file(s) have been removed"
         message += "."
+
+        # Reload cache after reverting all
+        from ...data.cache import data_cache
+        data_cache.initialize()
 
         return True, message
 

@@ -116,6 +116,11 @@ def clone_repository(repo_url, repo_path):
             logger.info("Removing backup directory")
             shutil.rmtree(backup_dir)
 
+        # Reload cache after clone operation
+        from ...data.cache import data_cache
+        logger.info("Reloading data cache after clone")
+        data_cache.initialize()
+
         logger.info("Clone operation completed successfully")
         return True, "Repository cloned and local files merged successfully"
 

@@ -60,6 +60,11 @@ def finalize_merge(repo) -> Dict[str, Any]:
             if status_manager:
                 status_manager.update_remote_status()
 
+            # Reload cache for modified data files
+            from ...data.cache import data_cache
+            logger.info("Reloading data cache after merge completion")
+            data_cache.initialize()  # This will reload all data
+
             return {'success': True, 'message': 'Merge completed successfully'}
         except git.GitCommandError as e:
             logger.error(f"Git command error during commit: {str(e)}")
