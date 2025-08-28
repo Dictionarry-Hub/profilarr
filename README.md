@@ -54,26 +54,7 @@ After deployment, access the web UI at `http://[address]:6868` to begin setup.
 
 ### Complete Documentation
 
-Visit our comprehensive documentation at [dictionarry.dev/wiki/profilarr-setup](https://dictionarry.dev/wiki/profilarr-setup) for detailed installation instructions and usage guides.
-
-## Support
-
-### Need Help?
-
--   **Bug Reports & Issues**: Submit technical issues via our [GitHub Issues tracker](https://github.com/Dictionarry-Hub/profilarr/issues)
--   **Community Support**: Join our [Discord community](https://discord.com/invite/Y9TYP6jeYZ) for help from developers and other users
--   **Database Issues**: Please direct database-specific issues to their respective repositories, as this repository focuses exclusively on Profilarr development
-
-## Contributing
-
-We welcome contributions from the community! Here's how you can help improve Profilarr:
-
--   **Pull Requests**: Feel free to submit PRs for bug fixes or new features
--   **Feature Suggestions**: Share your ideas through GitHub issues
--   **Documentation**: Help improve our guides and documentation
--   **Testing**: Try new features and report any issues
-
-Detailed contributing guidelines will be available soon. Join our Discord to discuss potential contributions with the development team.
+Visit our comprehensive documentation at [dictionarry.dev](https://dictionarry.dev/profilarr-setup/installation) for detailed installation instructions and usage guides.
 
 ## Status
 
@@ -82,11 +63,6 @@ Currently in beta. Part of the [Dictionarry](https://github.com/Dictionarry-Hub)
 ### Known Issues
 
 -   https://github.com/Dictionarry-Hub/profilarr/issues
-
-### Development
-
--   Currently focused on fixing bugs found in open beta
--   1.1 will focus on improving the 'setup' side of profilarr - adding media management / quality settings syncs
 
 ### Personal Note
 
