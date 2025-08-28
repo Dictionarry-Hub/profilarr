@@ -14,7 +14,7 @@ def delete_file(repo_path, file_path):
             
             # Reload cache after file deletion
             from ...data.cache import data_cache
-            data_cache.initialize()
+            data_cache.initialize(force_reload=True)
             
             message = f"File {file_path} has been deleted."
             return True, message

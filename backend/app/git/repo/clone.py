@@ -119,7 +119,7 @@ def clone_repository(repo_url, repo_path):
         # Reload cache after clone operation
         from ...data.cache import data_cache
         logger.info("Reloading data cache after clone")
-        data_cache.initialize()
+        data_cache.initialize(force_reload=True)
 
         logger.info("Clone operation completed successfully")
         return True, "Repository cloned and local files merged successfully"

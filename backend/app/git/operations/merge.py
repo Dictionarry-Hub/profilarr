@@ -63,7 +63,7 @@ def finalize_merge(repo) -> Dict[str, Any]:
             # Reload cache for modified data files
             from ...data.cache import data_cache
             logger.info("Reloading data cache after merge completion")
-            data_cache.initialize()  # This will reload all data
+            data_cache.initialize(force_reload=True)  # This will reload all data
 
             return {'success': True, 'message': 'Merge completed successfully'}
         except git.GitCommandError as e:

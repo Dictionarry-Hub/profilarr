@@ -53,7 +53,7 @@ def revert_file(repo_path, file_path):
 
         # Reload cache after revert
         from ...data.cache import data_cache
-        data_cache.initialize()
+        data_cache.initialize(force_reload=True)
 
         return True, message
 
@@ -104,7 +104,7 @@ def revert_all(repo_path):
 
         # Reload cache after reverting all
         from ...data.cache import data_cache
-        data_cache.initialize()
+        data_cache.initialize(force_reload=True)
 
         return True, message
 

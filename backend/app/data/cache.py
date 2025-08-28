@@ -20,18 +20,22 @@ class DataCache:
         self._lock = threading.RLock()
         self._initialized = False
     
-    def initialize(self):
-        """Load all data into memory on startup"""
+    def initialize(self, force_reload=False):
+        """Load all data into memory on startup
+        
+        Args:
+            force_reload: If True, force a reload even if already initialized
+        """
         with self._lock:
-            if self._initialized:
+            if self._initialized and not force_reload:
                 return
             
-            logger.info("Initializing data cache...")
+            logger.info("Initializing data cache..." if not force_reload else "Reloading data cache...")
             for category in self._cache.keys():
                 self._load_category(category)
             
             self._initialized = True
-            logger.info("Data cache initialized successfully")
+            logger.info("Data cache initialized successfully" if not force_reload else "Data cache reloaded successfully")
     
     def _load_category(self, category: str):
         """Load all items from a category into cache"""

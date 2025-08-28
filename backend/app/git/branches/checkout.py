@@ -48,7 +48,7 @@ def checkout_branch(repo_path, branch_name):
         # Reload cache after branch checkout since files may have changed
         from ...data.cache import data_cache
         logger.info("Reloading data cache after branch checkout")
-        data_cache.initialize()
+        data_cache.initialize(force_reload=True)
         
         return True, {
             "message": f"Checked out branch: {branch_name}",

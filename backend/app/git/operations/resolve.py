@@ -313,7 +313,7 @@ def resolve_conflicts(
         # Reload cache after conflict resolution
         from ...data.cache import data_cache
         logger.info("Reloading data cache after conflict resolution")
-        data_cache.initialize()
+        data_cache.initialize(force_reload=True)
 
         return {'success': True, 'results': results}
 

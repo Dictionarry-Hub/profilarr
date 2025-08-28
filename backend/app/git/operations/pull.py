@@ -38,7 +38,7 @@ def pull_branch(repo_path, branch_name):
             # Reload cache for updated data files
             from ...data.cache import data_cache
             logger.info("Reloading data cache after pull")
-            data_cache.initialize()  # This will reload all data
+            data_cache.initialize(force_reload=True)  # This will reload all data
 
             # -------------------------------
             # *** "On pull" ARR import logic using new importer:
