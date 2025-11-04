@@ -14,6 +14,8 @@ logger.setLevel(logging.INFO)
 
 from ..config.config import config
 
+_YAML_LOADER = getattr(yaml, 'CSafeLoader', yaml.SafeLoader)
+
 # Directory constants
 REPO_PATH = config.DB_DIR
 REGEX_DIR = config.REGEX_DIR
@@ -102,7 +104,7 @@ def load_yaml_file(file_path: str) -> Dict[str, Any]:
 
     try:
         with open(file_path, 'r') as f:
-            content = yaml.safe_load(f)
+            content = yaml.load(f, Loader=_YAML_LOADER)
             return content
 
     except yaml.YAMLError as e:
