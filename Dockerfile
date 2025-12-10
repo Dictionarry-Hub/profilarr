@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y git gosu && rm -rf /var/lib/apt/lists/*
 COPY dist/backend/app ./app
 COPY dist/static ./app/static
 COPY dist/requirements.txt .
+COPY gunicorn.conf.py .
 RUN pip install --no-cache-dir -r requirements.txt
 # Copy and setup entrypoint script
 COPY entrypoint.sh /entrypoint.sh
@@ -18,4 +19,4 @@ LABEL org.opencontainers.image.title="Profilarr"
 LABEL org.opencontainers.image.version="beta"
 EXPOSE 6868
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:6868", "--timeout", "600", "app.main:create_app()"]
+CMD ["gunicorn", "--config", "gunicorn.conf.py", --timeout", "600", "app.main:create_app()"]
