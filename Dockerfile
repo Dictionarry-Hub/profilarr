@@ -19,4 +19,4 @@ LABEL org.opencontainers.image.title="Profilarr"
 LABEL org.opencontainers.image.version="beta"
 EXPOSE 6868
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "--config", "gunicorn.conf.py", --timeout", "600", "app.main:create_app()"]
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "--timeout", "600", "app.main:create_app()"]
