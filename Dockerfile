@@ -17,5 +17,6 @@ LABEL org.opencontainers.image.source="https://github.com/Dictionarry-Hub/profil
 LABEL org.opencontainers.image.title="Profilarr"
 LABEL org.opencontainers.image.version="beta"
 EXPOSE 6868
+HEALTHCHECK --interval=15s --timeout=1s --start-period=5s CMD ["/usr/bin/bash", "-c", "exec 5<>/dev/tcp/localhost/6868"]
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:6868", "--timeout", "600", "app.main:create_app()"]
