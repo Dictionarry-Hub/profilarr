@@ -1,13 +1,17 @@
 # Dockerfile
-FROM python:3.9-slim
+FROM python:3.9-alpine3.22
 WORKDIR /app
 # Install git (for app) and gosu for user switching (in entrypoint)
-RUN apt-get update && apt-get install -y git gosu && rm -rf /var/lib/apt/lists/*
+RUN apk add -U --update --no-cache \
+    git \
+    gosu
 # Copy pre-built files from dist directory
 COPY dist/backend/app ./app
 COPY dist/static ./app/static
 COPY dist/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -U --no-cache-dir -r requirements.txt \
+    # add --no-build-isolation, because PyYaml always fail building without it. Remove with >6.0.1
+    --no-build-isolation
 # Copy and setup entrypoint script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
