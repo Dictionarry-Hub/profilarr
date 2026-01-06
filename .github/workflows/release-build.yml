@@ -8,13 +8,19 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            include:
+              - dockerfile: Dockerfile
+                suffix:
+                use_latest: true
+              - dockerfile: Dockerfile.alpine
+                suffix: -alpine
+                use_latest: false
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-
-            - name: Get tag
-              id: tag
-              run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
             - name: Set up QEMU
               uses: docker/setup-qemu-action@v3
@@ -48,12 +54,29 @@ jobs:
                   username: ${{ secrets.DOCKERHUB_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+            - name: Extract metadata (tags, labels) for Docker
+              id: meta
+              uses: docker/metadata-action@v5.10.0
+              with:
+                images: santiagosayshey/profillar
+                flavor: |
+                  latest=${{ matrix.use_latest }}
+                  suffix=${{ matrix.suffix }}
+                tags: |
+                  type=ref,event=tag
+                  type=raw,value=alpine,suffix=,enable=${{ matrix.suffix == '-alpine' }}
+
             - name: Build and push
               uses: docker/build-push-action@v5
               with:
                   context: .
                   platforms: linux/amd64,linux/arm64/v8
+                  file: ${{ matrix.dockerfile }}
                   push: true
-                  tags: |
-                      santiagosayshey/profilarr:latest
-                      santiagosayshey/profilarr:${{ steps.tag.outputs.tag }}
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: |
+                      ${{ steps.meta.outputs.labels }}
+                      org.opencontainers.image.authors="Dictionarry dictionarry@pm.me"
+                      org.opencontainers.image.description="Profilarr - Profile manager for *arr apps"
+                      org.opencontainers.image.source="https://github.com/Dictionarry-Hub/profilarr"
+                      org.opencontainers.image.title="Profilarr"
