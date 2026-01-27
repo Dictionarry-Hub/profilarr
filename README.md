@@ -32,7 +32,7 @@
 **Core**
 
 - **Link** - Connect to configuration databases like the
-  [Dictionarry database](https://github.com/Dictionarry-Hub/db) or any Profilarr
+  [Dictionarry database](https://github.com/Dictionarry-Hub/database) or any Profilarr
   Compliant Database (PCD)
 - **Bridge** - Add your Radarr and Sonarr instances by URL and API key
 - **Sync** - Push configurations to your instances. Profilarr compiles
