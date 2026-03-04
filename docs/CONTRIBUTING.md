@@ -364,8 +364,8 @@ git commit -m "fix: show success message after saving settings"
 git push
 ```
 
-`:develop` rebuilds. The tester confirms the fix. No other issues come up.
-Two testers and the maintainer sign off. You tag it:
+`:develop` rebuilds. The tester confirms the fix. No other issues come up. Two
+testers and the maintainer sign off. You tag it:
 
 ```bash
 git tag v2.4.0
@@ -533,11 +533,7 @@ git rebase upstream/develop
 Git pauses on a conflict in `src/lib/client/ui/SyncStatus.svelte`:
 
 ```
-<<<<<<< HEAD
-  const status = getSyncStatus(profile);
-=======
-  const status = fetchSyncState(profile);
->>>>>>> fix: update sync status display
+const status = getSyncStatus(profile);
 ```
 
 The contributor resolves it, keeping the correct version:
