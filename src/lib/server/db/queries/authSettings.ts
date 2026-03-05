@@ -99,6 +99,13 @@ export const authSettingsQueries = {
 	 */
 	validateApiKey(key: string): boolean {
 		const settings = this.get();
-		return settings.api_key !== null && settings.api_key === key;
+		if (settings.api_key === null) return false;
+
+		const encoder = new TextEncoder();
+		const a = encoder.encode(key);
+		const b = encoder.encode(settings.api_key);
+		if (a.byteLength !== b.byteLength) return false;
+
+		return crypto.subtle.timingSafeEqual(a, b);
 	}
 };
