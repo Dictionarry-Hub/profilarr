@@ -10,6 +10,7 @@ import { sessionsQueries, type Session } from '$db/queries/sessions.ts';
 import { authSettingsQueries } from '$db/queries/authSettings.ts';
 import { isLocalAddress, getClientIp } from './network.ts';
 import { logger } from '$logger/logger.ts';
+export { isPublicPath } from './publicPaths.ts';
 
 /**
  * Auth state returned by getAuthState
@@ -19,18 +20,6 @@ export interface AuthState {
 	user: User | null;
 	session: Session | null;
 	skipAuth: boolean; // true when AUTH=off or AUTH=local+local IP
-}
-
-/**
- * Paths that don't require authentication
- */
-const PUBLIC_PATHS = ['/auth/login', '/auth/setup', '/auth/oidc', '/api/v1/health'];
-
-/**
- * Check if a path is public (doesn't require auth)
- */
-export function isPublicPath(pathname: string): boolean {
-	return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
 }
 
 /**
@@ -80,8 +69,7 @@ export function getAuthState(event: RequestEvent): AuthState {
 	// AUTH=on (default) - full username/password auth
 
 	// Check API key (header or query param)
-	const apiKey =
-		event.request.headers.get('X-Api-Key') || event.url.searchParams.get('apikey');
+	const apiKey = event.request.headers.get('X-Api-Key');
 	if (apiKey) {
 		const ip = getClientIp(event);
 		const endpoint = event.url.pathname;
