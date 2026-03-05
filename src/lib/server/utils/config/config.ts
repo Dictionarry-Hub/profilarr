@@ -10,6 +10,7 @@ class Config {
 	public readonly parserUrl: string;
 	public readonly port: number;
 	public readonly host: string;
+	public readonly origin: string;
 	public readonly authMode: AuthMode;
 	public readonly oidc: {
 		discoveryUrl: string | null;
@@ -44,6 +45,10 @@ class Config {
 		// Server bind configuration
 		this.port = parseInt(Deno.env.get('PORT') || '6868', 10);
 		this.host = Deno.env.get('HOST') || '0.0.0.0';
+
+		// External origin (scheme + host) for OIDC redirects and cookie security.
+		// Falls back to the local server URL when unset.
+		this.origin = Deno.env.get('ORIGIN') || this.serverUrl;
 
 		// Auth mode: 'on' (default), 'local', 'off', 'oidc'
 		const auth = (Deno.env.get('AUTH') || 'on').toLowerCase();

@@ -69,7 +69,7 @@
 - `AUTH=oidc` - SSO via OpenID Connect provider
 - `AUTH=off` - No authentication (use with external auth like Authentik/Authelia)
 
-API access via `X-Api-Key` header or `?apikey=` query param. See
+API access via `X-Api-Key` header. See
 [auth docs](src/lib/server/utils/auth/README.md) for details.
 
 ## Discord
@@ -149,6 +149,10 @@ This runs the parser service and Vite dev server concurrently. See
 | `HOST`          | `0.0.0.0`   | Bind address                            |
 | `APP_BASE_PATH` | `/config`   | Base path for data, logs, backups       |
 | `AUTH`          | `on`        | Auth mode: `on`, `local`, `off`, `oidc` |
+| `ORIGIN`        | —           | External URL for reverse proxy setups (e.g., `https://profilarr.example.com`) |
+| `OIDC_DISCOVERY_URL` | —      | OIDC discovery endpoint (only when `AUTH=oidc`) |
+| `OIDC_CLIENT_ID`     | —      | OIDC client ID (only when `AUTH=oidc`) |
+| `OIDC_CLIENT_SECRET` | —      | OIDC client secret (only when `AUTH=oidc`) |
 | `PARSER_HOST`   | `localhost` | Parser service host                     |
 | `PARSER_PORT`   | `5000`      | Parser service port                     |
 

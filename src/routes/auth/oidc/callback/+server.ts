@@ -55,7 +55,7 @@ export const GET: RequestHandler = async (event) => {
 		tokens = await exchangeCode(discovery.token_endpoint, code, {
 			clientId: config.oidc.clientId,
 			clientSecret: config.oidc.clientSecret,
-			redirectUri: `${config.serverUrl}/auth/oidc/callback`
+			redirectUri: `${config.origin}/auth/oidc/callback`
 		});
 	} catch (err) {
 		await logger.warn('OIDC token exchange failed', {
@@ -110,7 +110,7 @@ export const GET: RequestHandler = async (event) => {
 		path: '/',
 		httpOnly: true,
 		sameSite: 'lax',
-		secure: false,
+		secure: config.origin.startsWith('https://'),
 		expires
 	});
 

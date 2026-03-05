@@ -44,14 +44,14 @@ export const GET: RequestHandler = async (event) => {
 		path: '/',
 		httpOnly: true,
 		sameSite: 'lax',
-		secure: false,
+		secure: config.origin.startsWith('https://'),
 		maxAge: 60 * 10
 	});
 
 	// Build authorization URL and redirect
 	const authUrl = buildAuthorizationUrl(discovery.authorization_endpoint, {
 		clientId: config.oidc.clientId,
-		redirectUri: `${config.serverUrl}/auth/oidc/callback`,
+		redirectUri: `${config.origin}/auth/oidc/callback`,
 		state
 	});
 

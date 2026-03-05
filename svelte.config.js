@@ -6,9 +6,6 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		csrf: {
-			checkOrigin: false
-		},
 		adapter: adapter({
 			usage: 'deno-compile',
 			out: 'dist/build'

@@ -90,7 +90,7 @@ export const actions: Actions = {
 			path: '/',
 			httpOnly: true,
 			sameSite: 'lax',
-			secure: false,
+			secure: config.origin.startsWith('https://'),
 			expires
 		});
 

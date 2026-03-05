@@ -1,5 +1,6 @@
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
+import { config } from '$config';
 import { usersQueries } from '$db/queries/users.ts';
 import { sessionsQueries } from '$db/queries/sessions.ts';
 import { authSettingsQueries } from '$db/queries/authSettings.ts';
@@ -88,7 +89,7 @@ export const actions: Actions = {
 				path: '/',
 				httpOnly: true,
 				sameSite: 'lax',
-				secure: false,
+				secure: config.origin.startsWith('https://'),
 				expires
 			});
 
