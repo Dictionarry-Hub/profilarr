@@ -21,7 +21,8 @@ const aliases: Record<string, string> = {
 	upgrades: 'src/tests/upgrades',
 	jobs: 'src/tests/jobs',
 	logger: 'src/tests/logger',
-	rename: 'src/tests/rename'
+	rename: 'src/tests/rename',
+	auth: 'src/tests/auth'
 };
 
 // Get the test target from args
