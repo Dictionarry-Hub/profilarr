@@ -1,0 +1,16 @@
+/**
+ * Public path definitions for auth
+ * Extracted to avoid pulling in DB dependencies for consumers that only need path checks
+ */
+
+/**
+ * Paths that don't require authentication
+ */
+const PUBLIC_PATHS = ['/auth/login', '/auth/setup', '/auth/oidc', '/api/v1/health'];
+
+/**
+ * Check if a path is public (doesn't require auth)
+ */
+export function isPublicPath(pathname: string): boolean {
+	return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+}
