@@ -1,5 +1,6 @@
 import { db } from '../db.ts';
 import { generateApiKey } from '$auth/apiKey.ts';
+import { timingSafeEqual } from 'node:crypto';
 
 /**
  * Types for auth_settings table
@@ -125,6 +126,6 @@ export const authSettingsQueries = {
 		const b = encoder.encode(settings.api_key);
 		if (a.byteLength !== b.byteLength) return false;
 
-		return crypto.subtle.timingSafeEqual(a, b);
+		return timingSafeEqual(a, b);
 	}
 };
