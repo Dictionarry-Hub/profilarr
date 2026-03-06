@@ -1093,15 +1093,10 @@ Project scripts live under `scripts/` and are run via `deno task` or directly.
 - `scripts/generate-pcd-types.ts` pulls the schema SQL (GitHub or local) and
   generates `src/lib/shared/pcd/types.ts` via SQLite introspection.
 
-### 22.3 Validation Utilities
+### 22.3 Tests
 
-- `scripts/validate-condition-values.ts` validates condition values in SQL
-  against the enum sets in `shared/pcd`.
-
-### 22.4 Tests
-
-- `scripts/test.ts` is a test runner wrapper with alias support (filters,
-  upgrades, jobs, logger).
+- `tests/runner.ts` is the unified test runner. Handles unit, integration, and
+  E2E tests via subcommands. Run `deno task test --help` for usage.
 
 ### 22.5 Codebase Stats
 
