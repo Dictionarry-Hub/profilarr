@@ -4,15 +4,15 @@
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
-	import type { ArrInstance } from '$db/queries/arrInstances.ts';
+	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
 	import { createEventDispatcher } from 'svelte';
 
-	export let instances: ArrInstance[];
+	export let instances: ArrInstancePublic[];
 
 	const dispatch = createEventDispatcher<{
-		delete: ArrInstance;
+		delete: ArrInstancePublic;
 	}>();
 
 	// Logo lookup by type
@@ -39,19 +39,19 @@
 		return type.charAt(0).toUpperCase() + type.slice(1);
 	}
 
-	function getRowHref(instance: ArrInstance): string {
+	function getRowHref(instance: ArrInstancePublic): string {
 		return `/arr/${instance.id}`;
 	}
 
 	// Handle delete click
-	function handleDeleteClick(e: Event, instance: ArrInstance) {
+	function handleDeleteClick(e: Event, instance: ArrInstancePublic) {
 		e.stopPropagation();
 		e.preventDefault();
 		dispatch('delete', instance);
 	}
 
 	// Define table columns
-	const columns: Column<ArrInstance>[] = [
+	const columns: Column<ArrInstancePublic>[] = [
 		{ key: 'name', header: 'Name', align: 'left' },
 		{ key: 'url', header: 'URL', align: 'left' },
 		{ key: 'enabled', header: 'Enabled', align: 'center', width: 'w-24' }

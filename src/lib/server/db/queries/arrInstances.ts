@@ -17,6 +17,8 @@ export interface ArrInstance {
 	updated_at: string;
 }
 
+export type ArrInstancePublic = Omit<ArrInstance, 'api_key'>;
+
 export interface CreateArrInstanceInput {
 	name: string;
 	type: string;

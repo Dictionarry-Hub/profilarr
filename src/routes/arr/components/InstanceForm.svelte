@@ -6,7 +6,7 @@
 	import CleanupModal from './CleanupModal.svelte';
 	import { alertStore } from '$alerts/store';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
-	import type { ArrInstance } from '$db/queries/arrInstances.ts';
+	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
 	import type { CleanupSettings } from '$db/queries/arrCleanupSettings.ts';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
@@ -20,7 +20,7 @@
 
 	// Props
 	export let mode: 'create' | 'edit';
-	export let instance: ArrInstance | undefined = undefined;
+	export let instance: ArrInstancePublic | undefined = undefined;
 	export let initialType: string = '';
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let form: any = undefined;

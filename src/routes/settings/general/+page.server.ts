@@ -33,7 +33,7 @@ export const load = () => {
 	}
 
 	// AI settings are feature-flagged
-	let aiSettings = { enabled: false, api_url: '', api_key: '', model: '' };
+	let aiSettings = { enabled: false, api_url: '', hasApiKey: false, model: '' };
 	if (FEATURES.ai) {
 		const aiSetting = aiSettingsQueries.get();
 		if (!aiSetting) {
@@ -42,7 +42,7 @@ export const load = () => {
 		aiSettings = {
 			enabled: aiSetting.enabled === 1,
 			api_url: aiSetting.api_url,
-			api_key: aiSetting.api_key,
+			hasApiKey: !!aiSetting.api_key,
 			model: aiSetting.model
 		};
 	}
@@ -63,7 +63,7 @@ export const load = () => {
 		},
 		aiSettings,
 		tmdbSettings: {
-			api_key: tmdbSetting.api_key
+			hasApiKey: !!tmdbSetting.api_key
 		},
 		generalSettings: {
 			apply_default_delay_profiles: generalSetting.apply_default_delay_profiles === 1
@@ -112,7 +112,8 @@ export const actions: Actions = {
 		if (FEATURES.ai) {
 			aiEnabled = formData.get('ai_enabled') === 'on';
 			aiApiUrl = formData.get('ai_api_url') as string;
-			aiApiKey = formData.get('ai_api_key') as string;
+			const aiApiKeyInput = formData.get('ai_api_key') as string;
+			aiApiKey = aiApiKeyInput || aiSettingsQueries.get()?.api_key || '';
 			aiModel = formData.get('ai_model') as string;
 
 			if (aiEnabled && !aiApiUrl) {
@@ -124,8 +125,9 @@ export const actions: Actions = {
 			}
 		}
 
-		// --- TMDB settings ---
-		const tmdbApiKey = formData.get('tmdb_api_key') as string;
+		// --- TMDB settings (preserve existing key if empty) ---
+		const tmdbApiKeyInput = formData.get('tmdb_api_key') as string;
+		const tmdbApiKey = tmdbApiKeyInput || tmdbSettingsQueries.get()?.api_key || '';
 
 		// --- Arr defaults ---
 		const arrApplyDefaultDelayProfiles =

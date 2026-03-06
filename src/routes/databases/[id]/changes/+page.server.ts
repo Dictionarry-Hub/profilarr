@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 	const { database } = await parent();
 
 	return {
-		isDeveloper: !!database.personal_access_token
+		isDeveloper: database.hasPat
 	};
 };
 

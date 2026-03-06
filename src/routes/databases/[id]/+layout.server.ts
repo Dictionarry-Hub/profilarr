@@ -15,7 +15,9 @@ export const load: LayoutServerLoad = ({ params }) => {
 		error(404, 'Database not found');
 	}
 
+	const { personal_access_token, ...safe } = database;
+
 	return {
-		database
+		database: { ...safe, hasPat: personal_access_token !== null }
 	};
 };

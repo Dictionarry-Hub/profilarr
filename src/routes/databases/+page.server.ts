@@ -4,7 +4,7 @@ import { pcdManager } from '$pcd/index.ts';
 import { logger } from '$logger/logger.ts';
 
 export const load: ServerLoad = () => {
-	const databases = pcdManager.getAll();
+	const databases = pcdManager.getAllPublic();
 
 	return {
 		databases

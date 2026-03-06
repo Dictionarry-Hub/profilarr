@@ -14,12 +14,12 @@
 	} from 'lucide-svelte';
 	import { invalidateAll } from '$app/navigation';
 	import type { GitStatus, RepoInfo } from '$utils/git/types';
-	import type { DatabaseInstance } from '$db/queries/databaseInstances.ts';
+	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
 
 	export let status: GitStatus;
 	export let repoInfo: RepoInfo | null;
 	export let branches: string[];
-	export let database: DatabaseInstance;
+	export let database: DatabaseInstancePublic;
 	export let onSync: (() => Promise<void>) | undefined = undefined;
 
 	let branchDropdownOpen = false;

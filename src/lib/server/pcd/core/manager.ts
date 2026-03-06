@@ -12,7 +12,7 @@ import {
 	type UpdateInfo
 } from '$utils/git/index.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import type { DatabaseInstance } from '$db/queries/databaseInstances.ts';
+import type { DatabaseInstance, DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
 import { loadManifest, type Manifest } from '../manifest/manifest.ts';
 import { getPCDPath } from '../utils/operations.ts';
 import { processDependencies, syncDependencies, validateDependencies } from '../git/dependencies.ts';
@@ -288,10 +288,30 @@ class PCDManager {
 	}
 
 	/**
+	 * Get all PCDs with secrets stripped (for frontend use)
+	 */
+	getAllPublic(): DatabaseInstancePublic[] {
+		return databaseInstancesQueries.getAll().map(({ personal_access_token, ...safe }) => ({
+			...safe,
+			hasPat: personal_access_token !== null
+		}));
+	}
+
+	/**
 	 * Get PCD by ID
 	 */
 	getById(id: number): DatabaseInstance | undefined {
 		return databaseInstancesQueries.getById(id);
+	}
+
+	/**
+	 * Get PCD by ID with secrets stripped (for frontend use)
+	 */
+	getByIdPublic(id: number): DatabaseInstancePublic | undefined {
+		const instance = databaseInstancesQueries.getById(id);
+		if (!instance) return undefined;
+		const { personal_access_token, ...safe } = instance;
+		return { ...safe, hasPat: personal_access_token !== null };
 	}
 
 	/**

@@ -1,9 +1,11 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { TMDBClient } from '$lib/server/utils/tmdb/client.ts';
+import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
 
 export const POST: RequestHandler = async ({ request }) => {
-	const { apiKey } = await request.json();
+	const { apiKey: providedKey } = await request.json();
+	const apiKey = providedKey || tmdbSettingsQueries.get()?.api_key;
 
 	if (!apiKey) {
 		return json({ success: false, error: 'API key is required' }, { status: 400 });

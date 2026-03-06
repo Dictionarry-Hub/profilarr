@@ -6,6 +6,6 @@ export const load: ServerLoad = ({ cookies }) => {
 	redirectToLastDatabase(cookies, 'last_db_re', '/regular-expressions');
 
 	return {
-		databases: pcdManager.getAll()
+		databases: pcdManager.getAllPublic()
 	};
 };

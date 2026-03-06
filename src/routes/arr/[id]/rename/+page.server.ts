@@ -25,8 +25,10 @@ export const load: ServerLoad = ({ params }) => {
 	const settings = arrRenameSettingsQueries.getByInstanceId(id);
 	const renameRuns = renameRunsQueries.getByInstanceId(id);
 
+	const { api_key: _, ...safeInstance } = instance;
+
 	return {
-		instance,
+		instance: safeInstance,
 		settings: settings ?? null,
 		renameRuns
 	};

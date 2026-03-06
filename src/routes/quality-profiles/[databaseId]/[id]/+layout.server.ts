@@ -11,7 +11,7 @@ export const load: LayoutServerLoad = async ({ params }) => {
 		error(400, 'Invalid parameters');
 	}
 
-	const database = pcdManager.getById(databaseId);
+	const database = pcdManager.getByIdPublic(databaseId);
 	if (!database) error(404, 'Database not found');
 
 	const cache = pcdManager.getCache(databaseId);

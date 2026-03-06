@@ -6,6 +6,6 @@ export const load: ServerLoad = ({ cookies }) => {
 	redirectToLastDatabase(cookies, 'last_db_et', '/quality-profiles/entity-testing');
 
 	return {
-		databases: pcdManager.getAll()
+		databases: pcdManager.getAllPublic()
 	};
 };

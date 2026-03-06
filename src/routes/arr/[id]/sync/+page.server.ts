@@ -28,7 +28,7 @@ export const load: ServerLoad = async ({ params }) => {
 	}
 
 	// Get all databases
-	const databases = pcdManager.getAll();
+	const databases = pcdManager.getAllPublic();
 	const arrType = instance.type as 'radarr' | 'sonarr';
 
 	// Fetch profiles and configs from each database
@@ -81,8 +81,10 @@ export const load: ServerLoad = async ({ params }) => {
 	// Load existing sync data
 	const syncData = arrSyncQueries.getFullSyncData(id);
 
+	const { api_key: _, ...safeInstance } = instance;
+
 	return {
-		instance,
+		instance: safeInstance,
 		databases: databasesWithProfiles,
 		syncData
 	};

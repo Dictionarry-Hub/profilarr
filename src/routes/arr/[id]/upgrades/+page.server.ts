@@ -35,8 +35,10 @@ export const load: ServerLoad = ({ params }) => {
 	// Load upgrade runs from database
 	const upgradeRuns = upgradeRunsQueries.getByInstanceId(id);
 
+	const { api_key: _, ...safeInstance } = instance;
+
 	return {
-		instance,
+		instance: safeInstance,
 		config: config ?? null,
 		upgradeRuns
 	};

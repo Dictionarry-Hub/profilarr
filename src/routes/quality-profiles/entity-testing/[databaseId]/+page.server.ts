@@ -18,7 +18,7 @@ export const load: ServerLoad = async ({ params, cookies }) => {
 	}
 
 	// Get all databases for tabs
-	const databases = pcdManager.getAll();
+	const databases = pcdManager.getAllPublic();
 
 	// Parse and validate the database ID
 	const currentDatabaseId = parseInt(databaseId, 10);

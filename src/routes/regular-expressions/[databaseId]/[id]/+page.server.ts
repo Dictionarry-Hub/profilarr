@@ -22,7 +22,7 @@ export const load: ServerLoad = async ({ params }) => {
 		throw error(400, 'Invalid parameters');
 	}
 
-	const currentDatabase = pcdManager.getById(currentDatabaseId);
+	const currentDatabase = pcdManager.getByIdPublic(currentDatabaseId);
 	if (!currentDatabase) {
 		throw error(404, 'Database not found');
 	}

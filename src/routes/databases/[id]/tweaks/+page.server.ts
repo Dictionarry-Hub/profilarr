@@ -15,7 +15,9 @@ export const load: ServerLoad = ({ params }) => {
 		error(404, 'Database not found');
 	}
 
+	const { personal_access_token: _, ...safe } = database;
+
 	return {
-		database
+		database: safe
 	};
 };

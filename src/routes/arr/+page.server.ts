@@ -8,7 +8,7 @@ export const load: ServerLoad = () => {
 	const instances = arrInstancesQueries.getAll();
 
 	return {
-		instances
+		instances: instances.map(({ api_key, ...safe }) => safe)
 	};
 };
 

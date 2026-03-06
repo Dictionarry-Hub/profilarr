@@ -33,8 +33,10 @@ export const load: ServerLoad = async ({ params, url }) => {
 			level: level as 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal' | undefined
 		});
 
+		const { api_key: _, ...safeInstance } = instance;
+
 		return {
-			instance,
+			instance: safeInstance,
 			logs,
 			filters: {
 				page,

@@ -56,11 +56,11 @@
 	// AI (feature-flagged)
 	let aiEnabled = data.aiSettings.enabled;
 	let aiApiUrl = data.aiSettings.api_url;
-	let aiApiKey = data.aiSettings.api_key;
+	let aiApiKey = '';
 	let aiModel = data.aiSettings.model;
 
 	// TMDB
-	let tmdbApiKey = data.tmdbSettings.api_key;
+	let tmdbApiKey = '';
 	let tmdbShowKey = false;
 	let tmdbTesting = false;
 
@@ -204,7 +204,7 @@
 	// --- TMDB test ---
 
 	async function testTMDBConnection() {
-		if (!tmdbApiKey) {
+		if (!tmdbApiKey && !data.tmdbSettings.hasApiKey) {
 			alertStore.add('error', 'Please enter an API key first');
 			return;
 		}
@@ -614,7 +614,10 @@
 								value={tmdbApiKey}
 								type={tmdbShowKey ? 'text' : 'password'}
 								mono
-								description="Use the API Read Access Token (not API Key) from themoviedb.org"
+								placeholder={data.tmdbSettings.hasApiKey ? '••••••••••••••••' : ''}
+								description={data.tmdbSettings.hasApiKey
+									? 'Leave blank to keep existing key'
+									: 'Use the API Read Access Token (not API Key) from themoviedb.org'}
 								on:input={(e) => {
 									tmdbApiKey = e.detail;
 									update('tmdb_api_key', e.detail);
@@ -686,7 +689,10 @@
 									value={aiApiKey}
 									type={aiShowKey ? 'text' : 'password'}
 									mono
-									description="Required for cloud providers. Leave empty for local APIs."
+									placeholder={data.aiSettings.hasApiKey ? '••••••••••••••••' : ''}
+									description={data.aiSettings.hasApiKey
+										? 'Leave blank to keep existing key'
+										: 'Required for cloud providers. Leave empty for local APIs.'}
 									on:input={(e) => {
 										aiApiKey = e.detail;
 										update('ai_api_key', e.detail);

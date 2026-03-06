@@ -29,7 +29,7 @@ export const load: ServerLoad = async ({ params }) => {
 	}
 
 	// Get current database
-	const currentDatabase = pcdManager.getById(currentDatabaseId);
+	const currentDatabase = pcdManager.getByIdPublic(currentDatabaseId);
 	if (!currentDatabase) {
 		throw error(404, 'Database not found');
 	}

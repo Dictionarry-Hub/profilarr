@@ -15,7 +15,9 @@ export const load: LayoutServerLoad = ({ params }) => {
 		error(404, `Instance not found: ${id}`);
 	}
 
+	const { api_key, ...safe } = instance;
+
 	return {
-		instance
+		instance: safe
 	};
 };

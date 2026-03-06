@@ -16,7 +16,7 @@ import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 export const load: PageServerLoad = async ({ parent }) => {
 	const { database } = await parent();
 
-	if (!database.personal_access_token) {
+	if (!database.hasPat) {
 		error(403, 'Config page requires a personal access token');
 	}
 

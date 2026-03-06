@@ -4,15 +4,15 @@
 	import Card from '$ui/card/Card.svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Label from '$ui/label/Label.svelte';
-	import type { ArrInstance } from '$db/queries/arrInstances.ts';
+	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
 	import { createEventDispatcher } from 'svelte';
 
-	export let instances: ArrInstance[];
+	export let instances: ArrInstancePublic[];
 
 	const dispatch = createEventDispatcher<{
-		delete: ArrInstance;
+		delete: ArrInstancePublic;
 	}>();
 
 	// Logo lookup by type
@@ -35,7 +35,7 @@
 	}
 
 	// Handle delete click
-	function handleDeleteClick(e: MouseEvent, instance: ArrInstance) {
+	function handleDeleteClick(e: MouseEvent, instance: ArrInstancePublic) {
 		e.stopPropagation();
 		e.preventDefault();
 		dispatch('delete', instance);

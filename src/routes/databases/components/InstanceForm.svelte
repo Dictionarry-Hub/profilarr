@@ -4,7 +4,7 @@
 	import { Save, Trash2 } from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
-	import type { DatabaseInstance } from '$db/queries/databaseInstances.ts';
+	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -14,7 +14,7 @@
 
 	// Props
 	export let mode: 'create' | 'edit';
-	export let instance: DatabaseInstance | undefined = undefined;
+	export let instance: DatabaseInstancePublic | undefined = undefined;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let form: any = undefined;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +62,7 @@
 	$: conflictStrategy = ($current.conflictStrategy ?? 'override') as string;
 	$: syncStrategy = ($current.syncStrategy ?? '60') as string;
 	$: autoPull = ($current.autoPull ?? 'true') as string;
-	$: showGitIdentity = !!personalAccessToken || (mode === 'edit' && !!instance?.personal_access_token);
+	$: showGitIdentity = !!personalAccessToken || (mode === 'edit' && !!instance?.hasPat);
 	$: requiresGitIdentity = !!personalAccessToken;
 
 	// UI state

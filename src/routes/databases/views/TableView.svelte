@@ -4,15 +4,15 @@
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
-	import type { DatabaseInstance } from '$db/queries/databaseInstances.ts';
+	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
 	import { parseUTC } from '$shared/utils/dates';
 	import { createEventDispatcher } from 'svelte';
 	import DatabaseAvatar from '../components/DatabaseAvatar.svelte';
 
-	export let databases: DatabaseInstance[];
+	export let databases: DatabaseInstancePublic[];
 
 	const dispatch = createEventDispatcher<{
-		unlink: DatabaseInstance;
+		unlink: DatabaseInstancePublic;
 	}>();
 
 	// Avatar handled by DatabaseAvatar component
@@ -38,19 +38,19 @@
 		});
 	}
 
-	function getRowHref(database: DatabaseInstance): string {
+	function getRowHref(database: DatabaseInstancePublic): string {
 		return `/databases/${database.id}`;
 	}
 
 	// Handle unlink click
-	function handleUnlinkClick(e: Event, database: DatabaseInstance) {
+	function handleUnlinkClick(e: Event, database: DatabaseInstancePublic) {
 		e.stopPropagation();
 		e.preventDefault();
 		dispatch('unlink', database);
 	}
 
 	// Define table columns
-	const columns: Column<DatabaseInstance>[] = [
+	const columns: Column<DatabaseInstancePublic>[] = [
 		{ key: 'name', header: 'Name', align: 'left' },
 		{ key: 'repository_url', header: 'Repository', align: 'left' },
 		{ key: 'sync_strategy', header: 'Sync', align: 'left', width: 'w-32' },
@@ -73,7 +73,7 @@
 							Private
 						</Label>
 					{/if}
-					{#if row.personal_access_token}
+					{#if row.hasPat}
 						<Label variant="info" size="sm" rounded="md" mono>
 							<Code size={12} />
 							Dev

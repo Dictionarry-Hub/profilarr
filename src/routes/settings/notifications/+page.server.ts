@@ -17,8 +17,18 @@ export const load = () => {
 	// Get stats for each service
 	const servicesWithStats: NotificationServiceWithStats[] = services.map((service) => {
 		const stats = notificationHistoryQueries.getStats(service.id);
+		// Strip webhook_url from config JSON before sending to frontend
+		let safeConfig = service.config;
+		try {
+			const parsed = JSON.parse(service.config);
+			const { webhook_url: _, ...rest } = parsed;
+			safeConfig = JSON.stringify(rest);
+		} catch {
+			// If config isn't valid JSON, send as-is (no secret to strip)
+		}
 		return {
 			...service,
+			config: safeConfig,
 			successCount: stats.success,
 			failedCount: stats.failed,
 			successRate: stats.successRate

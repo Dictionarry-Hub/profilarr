@@ -14,7 +14,7 @@
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 	import { alertStore } from '$alerts/store';
 	import type { PageData } from './$types';
-	import type { ArrInstance } from '$db/queries/arrInstances.ts';
+	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
 
 	export let data: PageData;
 
@@ -30,11 +30,11 @@
 	// Modal state
 	let showDeleteModal = false;
 	let showInfoModal = false;
-	let selectedInstance: ArrInstance | null = null;
+	let selectedInstance: ArrInstancePublic | null = null;
 	let deleteFormElement: HTMLFormElement;
 
 	// Handle delete from view components
-	function handleDelete(event: CustomEvent<ArrInstance>) {
+	function handleDelete(event: CustomEvent<ArrInstancePublic>) {
 		selectedInstance = event.detail;
 		showDeleteModal = true;
 	}

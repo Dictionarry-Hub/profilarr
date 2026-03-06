@@ -32,7 +32,7 @@
 					icon: Wrench,
 					active: currentPath.includes('/tweaks')
 				},
-				...(database.personal_access_token
+				...(database.hasPat
 					? [
 							{
 								label: 'Config',

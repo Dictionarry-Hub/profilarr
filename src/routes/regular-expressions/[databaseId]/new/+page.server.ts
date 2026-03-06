@@ -19,7 +19,7 @@ export const load: ServerLoad = ({ params, url }) => {
 		throw error(400, 'Invalid database ID');
 	}
 
-	const currentDatabase = pcdManager.getById(currentDatabaseId);
+	const currentDatabase = pcdManager.getByIdPublic(currentDatabaseId);
 	if (!currentDatabase) {
 		throw error(404, 'Database not found');
 	}

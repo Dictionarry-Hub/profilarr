@@ -4,15 +4,15 @@
 	import Card from '$ui/card/Card.svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Label from '$ui/label/Label.svelte';
-	import type { DatabaseInstance } from '$db/queries/databaseInstances.ts';
+	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
 	import { parseUTC } from '$shared/utils/dates';
 	import { createEventDispatcher } from 'svelte';
 	import DatabaseAvatar from '../components/DatabaseAvatar.svelte';
 
-	export let databases: DatabaseInstance[];
+	export let databases: DatabaseInstancePublic[];
 
 	const dispatch = createEventDispatcher<{
-		unlink: DatabaseInstance;
+		unlink: DatabaseInstancePublic;
 	}>();
 
 	// Avatar handled by DatabaseAvatar component
@@ -39,7 +39,7 @@
 	}
 
 	// Handle unlink click
-	function handleUnlinkClick(e: MouseEvent, database: DatabaseInstance) {
+	function handleUnlinkClick(e: MouseEvent, database: DatabaseInstancePublic) {
 		e.stopPropagation();
 		e.preventDefault();
 		dispatch('unlink', database);
@@ -69,7 +69,7 @@
 								Private
 							</Label>
 						{/if}
-						{#if database.personal_access_token}
+						{#if database.hasPat}
 							<Label variant="info" size="sm" rounded="md" mono>
 								<Code size={12} />
 								Dev

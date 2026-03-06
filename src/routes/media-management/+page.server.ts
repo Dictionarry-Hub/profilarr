@@ -17,6 +17,6 @@ export const load: ServerLoad = ({ cookies, url }) => {
 	});
 
 	return {
-		databases: pcdManager.getAll()
+		databases: pcdManager.getAllPublic()
 	};
 };

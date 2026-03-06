@@ -25,6 +25,10 @@ export interface DatabaseInstance {
 	updated_at: string;
 }
 
+export type DatabaseInstancePublic = Omit<DatabaseInstance, 'personal_access_token'> & {
+	hasPat: boolean;
+};
+
 export interface CreateDatabaseInstanceInput {
 	uuid: string;
 	name: string;

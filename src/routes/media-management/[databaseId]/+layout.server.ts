@@ -12,7 +12,7 @@ export const load: LayoutServerLoad = async ({ params, cookies, url }) => {
 		throw error(400, 'Missing database ID');
 	}
 
-	const databases = pcdManager.getAll();
+	const databases = pcdManager.getAllPublic();
 	const currentDatabaseId = parseInt(databaseId, 10);
 
 	if (isNaN(currentDatabaseId)) {
