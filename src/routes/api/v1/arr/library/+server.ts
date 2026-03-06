@@ -5,7 +5,10 @@ import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { cache } from '$cache/cache.ts';
 import { RadarrClient } from '$utils/arr/clients/radarr.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import { getProfilarrProfileNames, getProfilesByDatabase } from '$lib/server/sync/libraryHelpers.ts';
+import {
+	getProfilarrProfileNames,
+	getProfilesByDatabase
+} from '$lib/server/sync/libraryHelpers.ts';
 import { logger } from '$logger/logger.ts';
 
 type LibraryResponse = components['schemas']['LibraryResponse'];

@@ -60,10 +60,7 @@ function levenshteinDistance(a: string, b: string): number {
  * Find a similar username from the list of existing usernames
  * Returns the similar username if found (within 2 edits), null otherwise
  */
-export function findSimilarUsername(
-	attempted: string,
-	existingUsernames: string[]
-): string | null {
+export function findSimilarUsername(attempted: string, existingUsernames: string[]): string | null {
 	const attemptedLower = attempted.toLowerCase();
 
 	for (const existing of existingUsernames) {

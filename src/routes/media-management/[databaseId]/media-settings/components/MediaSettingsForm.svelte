@@ -70,7 +70,8 @@
 	$: databaseId = parseInt($page.params.databaseId ?? '0', 10);
 
 	$: arrLabel = arrType === 'radarr' ? 'Radarr' : 'Sonarr';
-	$: title = mode === 'create' ? `New ${arrLabel} Media Settings` : `Edit ${arrLabel} Media Settings`;
+	$: title =
+		mode === 'create' ? `New ${arrLabel} Media Settings` : `Edit ${arrLabel} Media Settings`;
 	$: description =
 		mode === 'create'
 			? `Create a new ${arrLabel} media settings configuration for ${databaseName}`
@@ -101,7 +102,6 @@
 	function handleDeleteCancel() {
 		showDeleteModal = false;
 	}
-
 </script>
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
@@ -150,7 +150,9 @@
 
 		<!-- Propers and Repacks -->
 		<div class="space-y-4">
-			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Propers and Repacks</h2>
+			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+				Propers and Repacks
+			</h2>
 			<DropdownSelect
 				value={formData.propersRepacks}
 				options={PROPERS_REPACKS_OPTIONS}
@@ -195,7 +197,11 @@
 			if (result.type === 'failure' && result.data) {
 				alertStore.add('error', (result.data as { error?: string }).error || 'Operation failed');
 			} else if (result.type === 'success' && result.data) {
-				const data = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+				const data = result.data as {
+					success?: boolean;
+					redirectTo?: string;
+					affectedArrs?: AffectedArr[];
+				};
 				if (data.success) {
 					alertStore.add(
 						'success',
@@ -242,10 +248,7 @@
 			deleting = true;
 			return async ({ result, update: formUpdate }) => {
 				if (result.type === 'failure' && result.data) {
-					alertStore.add(
-						'error',
-						(result.data as { error?: string }).error || 'Failed to delete'
-					);
+					alertStore.add('error', (result.data as { error?: string }).error || 'Failed to delete');
 				} else if (result.type === 'redirect') {
 					alertStore.add('success', 'Media settings deleted');
 				}

@@ -87,14 +87,12 @@
 	}
 
 	// Field accessors for text search
-	const fieldAccessors: Record<
-		string,
-		(item: QualityProfileTableRow) => string | string[] | null
-	> = {
-		name: (item) => item.name,
-		tags: (item) => item.tags.map((t) => t.name),
-		description: (item) => item.description ?? null
-	};
+	const fieldAccessors: Record<string, (item: QualityProfileTableRow) => string | string[] | null> =
+		{
+			name: (item) => item.name,
+			tags: (item) => item.tags.map((t) => t.name),
+			description: (item) => item.description ?? null
+		};
 
 	// Initialize data page store (we use search and view, but do our own filtering)
 	const { search, view, setItems } = createDataPageStore(data.qualityProfiles, {
@@ -111,15 +109,9 @@
 	// Filtering based on active search field
 	$: filtered = (() => {
 		if (isTagMode) {
-			return filterByTags(
-				data.qualityProfiles,
-				searchTags,
-				(item) => item.tags.map((t) => t.name)
-			);
+			return filterByTags(data.qualityProfiles, searchTags, (item) => item.tags.map((t) => t.name));
 		}
-		return filterByText(data.qualityProfiles, $debouncedQuery, fieldAccessors, [
-			activeSearchField
-		]);
+		return filterByText(data.qualityProfiles, $debouncedQuery, fieldAccessors, [activeSearchField]);
 	})();
 
 	// Map databases to tabs
@@ -128,7 +120,6 @@
 		href: `/quality-profiles/${db.id}`,
 		active: db.id === data.currentDatabase.id
 	}));
-
 </script>
 
 <svelte:head>
@@ -156,7 +147,13 @@
 				/>
 			</div>
 		{:else}
-			<SearchAction searchStore={search} placeholder="Search {searchFields.find(f => f.value === activeSearchField)?.label.toLowerCase() ?? ''}..." responsive />
+			<SearchAction
+				searchStore={search}
+				placeholder="Search {searchFields
+					.find((f) => f.value === activeSearchField)
+					?.label.toLowerCase() ?? ''}..."
+				responsive
+			/>
 		{/if}
 		<ActionButton
 			icon={Plus}

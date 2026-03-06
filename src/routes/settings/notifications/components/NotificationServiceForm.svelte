@@ -10,7 +10,6 @@
 	import Button from '$ui/button/Button.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 
-
 	export let mode: 'create' | 'edit' = 'create';
 	export let initialData: {
 		name?: string;
@@ -88,11 +87,7 @@
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
-				<Button
-					text="Cancel"
-					variant="secondary"
-					href="/settings/notifications"
-				/>
+				<Button text="Cancel" variant="secondary" href="/settings/notifications" />
 				<Button
 					text={saving ? 'Saving...' : submitText}
 					icon={mode === 'create' ? Plus : Save}
@@ -157,7 +152,9 @@
 
 			{#each Object.entries(groupedTypes) as [category, types]}
 				<div>
-					<h4 class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+					<h4
+						class="mb-2 text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
+					>
 						{category}
 					</h4>
 					<div class="space-y-2">

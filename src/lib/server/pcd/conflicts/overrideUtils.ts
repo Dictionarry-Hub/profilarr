@@ -105,12 +105,7 @@ export function followRenameChain(
 			const ds = parseJson<StoredDesiredState>(op.desired_state);
 			if (!ds) continue;
 			const nameField = ds.name;
-			if (
-				nameField &&
-				typeof nameField === 'object' &&
-				'from' in nameField &&
-				'to' in nameField
-			) {
+			if (nameField && typeof nameField === 'object' && 'from' in nameField && 'to' in nameField) {
 				const from = (nameField as { from: unknown }).from;
 				const to = (nameField as { to: unknown }).to;
 				if (typeof from === 'string' && typeof to === 'string' && from !== to) {
@@ -221,9 +216,7 @@ export function normalizeOrderedItems(items: unknown): Array<{
 			};
 			const members = Array.isArray(typed.members)
 				? typed.members
-						.map((member) =>
-							typeof member === 'string' ? member : (member?.name ?? '')
-						)
+						.map((member) => (typeof member === 'string' ? member : (member?.name ?? '')))
 						.filter(Boolean)
 						.sort()
 				: [];

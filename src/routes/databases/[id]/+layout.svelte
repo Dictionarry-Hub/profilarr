@@ -1,6 +1,13 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import { GitBranch, History, GitPullRequestClosed, Wrench, Settings, FileCog } from 'lucide-svelte';
+	import {
+		GitBranch,
+		History,
+		GitPullRequestClosed,
+		Wrench,
+		Settings,
+		FileCog
+	} from 'lucide-svelte';
 	import { page } from '$app/stores';
 
 	$: database = $page.data.database;

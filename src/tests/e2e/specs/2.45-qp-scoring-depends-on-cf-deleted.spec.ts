@@ -76,11 +76,7 @@ async function expectScoringRowAbsent(page: Page, formatName: string): Promise<v
 }
 
 /** Delete a custom format via the UI. */
-async function deleteCustomFormat(
-	page: Page,
-	databaseId: number,
-	name: string
-): Promise<void> {
+async function deleteCustomFormat(page: Page, databaseId: number, name: string): Promise<void> {
 	await goToCustomFormat(page, databaseId, name);
 	await page.getByRole('button', { name: 'Delete' }).first().click();
 	await page.getByRole('button', { name: 'Delete' }).last().click();

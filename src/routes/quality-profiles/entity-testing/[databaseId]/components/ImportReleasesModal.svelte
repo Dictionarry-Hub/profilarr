@@ -143,9 +143,7 @@
 					year: item.year,
 					tmdbId: item.tmdbId,
 					tvdbId: item.tvdbId,
-					seasons: item.seasons?.map((s: any) =>
-						typeof s === 'number' ? s : s.seasonNumber
-					)
+					seasons: item.seasons?.map((s: any) => (typeof s === 'number' ? s : s.seasonNumber))
 				}));
 			}
 		} catch (err) {
@@ -442,7 +440,9 @@
 						</div>
 					{:else if libraryItems.length === 0}
 						<Card padding="lg">
-							<p class="text-center text-neutral-500 dark:text-neutral-400">No items found in library.</p>
+							<p class="text-center text-neutral-500 dark:text-neutral-400">
+								No items found in library.
+							</p>
 						</Card>
 					{:else}
 						<!-- Potential Matches -->
@@ -452,30 +452,30 @@
 									Suggested Match
 								</p>
 								<Card padding="none">
-								<div class="divide-y divide-neutral-200 dark:divide-neutral-700/60">
-									{#each potentialMatches as item}
-										<button
-											type="button"
-											class="flex w-full cursor-pointer items-center justify-between gap-3 p-3 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/80"
-											on:click={() => (selectedItem = selectedItem?.id === item.id ? null : item)}
-										>
-											<div class="min-w-0 flex-1">
-												<p
-													class="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100"
-												>
-													{item.title}
-												</p>
-												{#if item.year}
-													<p class="text-xs text-neutral-500 dark:text-neutral-400">
-														{item.year}
+									<div class="divide-y divide-neutral-200 dark:divide-neutral-700/60">
+										{#each potentialMatches as item}
+											<button
+												type="button"
+												class="flex w-full cursor-pointer items-center justify-between gap-3 p-3 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/80"
+												on:click={() => (selectedItem = selectedItem?.id === item.id ? null : item)}
+											>
+												<div class="min-w-0 flex-1">
+													<p
+														class="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100"
+													>
+														{item.title}
 													</p>
-												{/if}
-											</div>
-											<IconCheckbox checked={selectedItem?.id === item.id} icon={Check} />
-										</button>
-									{/each}
-								</div>
-							</Card>
+													{#if item.year}
+														<p class="text-xs text-neutral-500 dark:text-neutral-400">
+															{item.year}
+														</p>
+													{/if}
+												</div>
+												<IconCheckbox checked={selectedItem?.id === item.id} icon={Check} />
+											</button>
+										{/each}
+									</div>
+								</Card>
 							</div>
 						{:else}
 							<p class="text-xs text-neutral-500 italic dark:text-neutral-400">

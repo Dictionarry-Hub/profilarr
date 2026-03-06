@@ -165,8 +165,9 @@ export class TestClient {
 		// But Set-Cookie headers with dates have commas too, so use getSetCookie if available
 		if (headers.length === 0) {
 			// Fallback: try accessing raw headers
-			const raw = (response.headers as unknown as { getSetCookie?: () => string[] })
-				.getSetCookie?.();
+			const raw = (
+				response.headers as unknown as { getSetCookie?: () => string[] }
+			).getSetCookie?.();
 			if (raw) return raw;
 		}
 
@@ -194,8 +195,7 @@ export class TestClient {
 	private parseSetCookies(response: Response): void {
 		// Use getSetCookie() if available (Deno supports this)
 		const setCookies =
-			(response.headers as unknown as { getSetCookie?: () => string[] }).getSetCookie?.() ??
-			[];
+			(response.headers as unknown as { getSetCookie?: () => string[] }).getSetCookie?.() ?? [];
 
 		for (const header of setCookies) {
 			const cookie = parseSetCookieHeader(header);

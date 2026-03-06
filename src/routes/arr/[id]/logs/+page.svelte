@@ -256,7 +256,14 @@
 	</div>
 
 	<!-- Log Table -->
-	<Table data={filteredLogs} {columns} emptyMessage="No logs found" hoverable={true} compact={true} responsive>
+	<Table
+		data={filteredLogs}
+		{columns}
+		emptyMessage="No logs found"
+		hoverable={true}
+		compact={true}
+		responsive
+	>
 		<svelte:fragment slot="actions" let:row>
 			<div class="flex items-center justify-end gap-1">
 				<Button

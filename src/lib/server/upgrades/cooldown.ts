@@ -28,11 +28,7 @@ export function isFilterTag(label: string): boolean {
 /**
  * Check if an item has a specific tag by label
  */
-export function hasFilterTag(
-	itemTagIds: number[],
-	allTags: ArrTag[],
-	tagLabel: string
-): boolean {
+export function hasFilterTag(itemTagIds: number[], allTags: ArrTag[], tagLabel: string): boolean {
 	const tagMap = new Map(allTags.map((t) => [t.id, t.label]));
 
 	for (const tagId of itemTagIds) {
@@ -152,7 +148,6 @@ export async function resetFilterCooldown(
 	client: RadarrClient | SonarrClient,
 	tagLabel: string
 ): Promise<{ reset: number; failed: number; errors: string[] }> {
-
 	// Find the tag ID
 	const tags = await client.getTags();
 	const filterTag = tags.find((t) => t.label.toLowerCase() === tagLabel.toLowerCase());
@@ -207,7 +202,9 @@ export async function resetFilterCooldown(
 			return {
 				reset: 0,
 				failed: taggedSeries.length,
-				errors: [`Failed to bulk untag series: ${error instanceof Error ? error.message : String(error)}`]
+				errors: [
+					`Failed to bulk untag series: ${error instanceof Error ? error.message : String(error)}`
+				]
 			};
 		}
 	}
@@ -240,7 +237,9 @@ export async function applyFilterTagToSeries(
 		return {
 			success: 0,
 			failed: seriesList.length,
-			errors: [`Failed to bulk tag series: ${error instanceof Error ? error.message : String(error)}`]
+			errors: [
+				`Failed to bulk tag series: ${error instanceof Error ? error.message : String(error)}`
+			]
 		};
 	}
 }

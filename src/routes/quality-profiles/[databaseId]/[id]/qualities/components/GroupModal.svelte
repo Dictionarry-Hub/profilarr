@@ -5,11 +5,11 @@
 	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
 	import FormInput from '$lib/client/ui/form/FormInput.svelte';
 
-type GroupModalItem = {
-	name: string;
-	enabled: boolean;
-	upgradeUntil: boolean;
-};
+	type GroupModalItem = {
+		name: string;
+		enabled: boolean;
+		upgradeUntil: boolean;
+	};
 
 	export let open = false;
 	export let title = 'Create Group';

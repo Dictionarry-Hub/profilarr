@@ -145,7 +145,9 @@
 			{@const isLocked = lockedFirst && index === 0}
 			{@const [vMajor, vMinor, vPatch] = parseVersion(entry.value)}
 			<!-- Mobile: stacked layout -->
-			<div class="space-y-2 rounded-lg border border-neutral-200 p-3 md:hidden dark:border-neutral-700">
+			<div
+				class="space-y-2 rounded-lg border border-neutral-200 p-3 md:hidden dark:border-neutral-700"
+			>
 				<div class="flex items-center justify-between">
 					<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400">{keyLabel}</span>
 					<button

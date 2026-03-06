@@ -22,8 +22,7 @@
 			'border-red-200 bg-red-50 text-red-800 dark:border-red-800/60 dark:bg-red-950/50 dark:text-red-200',
 		warning:
 			'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-200',
-		info:
-			'border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/50 dark:text-sky-200'
+		info: 'border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/50 dark:text-sky-200'
 	};
 
 	const iconColors = {
@@ -52,7 +51,9 @@
 			dismiss();
 		}
 	}}
-	class="flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs font-semibold {styles[type]}"
+	class="flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs font-semibold {styles[
+		type
+	]}"
 >
 	<Icon size={14} class="flex-shrink-0 {iconColors[type]}" />
 	<span class="min-w-0 truncate">{message}</span>

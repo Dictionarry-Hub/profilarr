@@ -66,9 +66,7 @@ try {
 	} else {
 		// Multiple specs — run in parallel, collect output
 		console.log(`Running ${specFiles.length} specs in parallel...\n`);
-		const results = await Promise.all(
-			specFiles.map((f) => runSpec(f, 'piped'))
-		);
+		const results = await Promise.all(specFiles.map((f) => runSpec(f, 'piped')));
 
 		exitCode = 0;
 		for (let i = 0; i < specFiles.length; i++) {

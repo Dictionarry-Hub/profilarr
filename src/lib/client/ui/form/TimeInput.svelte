@@ -71,10 +71,7 @@
 
 <div class={`${containerClass} inline-flex flex-col`}>
 	{#if !hideLabel}
-		<label
-			for={name}
-			class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
-		>
+		<label for={name} class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
 			{label}{#if required}<span class="text-red-500">*</span>{/if}
 		</label>
 	{/if}
@@ -93,7 +90,7 @@
 				label="Hour"
 				hideLabel
 				name={`${name}-hour`}
-				size={size}
+				{size}
 				disabled={disabled || readonly}
 				fullWidth
 				on:change={(event) => onHourChange(event.detail)}
@@ -107,7 +104,7 @@
 				label="Minute"
 				hideLabel
 				name={`${name}-minute`}
-				size={size}
+				{size}
 				disabled={disabled || readonly}
 				fullWidth
 				on:change={(event) => onMinuteChange(event.detail)}

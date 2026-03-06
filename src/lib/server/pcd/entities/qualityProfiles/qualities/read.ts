@@ -17,7 +17,11 @@ export async function qualities(
 	const db = cache.kb;
 
 	// 1. Get all qualities
-	const allQualities = await db.selectFrom('qualities').select(['name']).orderBy(sql`name COLLATE NOCASE`).execute();
+	const allQualities = await db
+		.selectFrom('qualities')
+		.select(['name'])
+		.orderBy(sql`name COLLATE NOCASE`)
+		.execute();
 
 	// 2. Get all groups for this profile
 	const groups = await db

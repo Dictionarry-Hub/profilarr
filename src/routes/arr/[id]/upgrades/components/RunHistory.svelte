@@ -1,7 +1,26 @@
 <script lang="ts">
-	import { AlertTriangle, X, Search, Calendar, Filter, CircleDot, Check, FlaskConical, Play } from 'lucide-svelte';
-	import type { UpgradeJobLog, UpgradeSelectionItem, UpgradeOriginalEpisode, UpgradeNewRelease } from '$lib/server/upgrades/types.ts';
-	import { createSearchStore, getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
+	import {
+		AlertTriangle,
+		X,
+		Search,
+		Calendar,
+		Filter,
+		CircleDot,
+		Check,
+		FlaskConical,
+		Play
+	} from 'lucide-svelte';
+	import type {
+		UpgradeJobLog,
+		UpgradeSelectionItem,
+		UpgradeOriginalEpisode,
+		UpgradeNewRelease
+	} from '$lib/server/upgrades/types.ts';
+	import {
+		createSearchStore,
+		getPersistentSearchStore,
+		type SearchStore
+	} from '$lib/client/stores/search';
 	import type { Readable } from 'svelte/store';
 	import { page } from '$app/stores';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
@@ -445,7 +464,9 @@
 									{#if item.original.type === 'movie'}
 										<Badge variant="neutral" mono>{item.original.score.toLocaleString()}</Badge>
 									{:else}
-										<span class="text-xs text-neutral-500">{item.original.episodes?.length ?? 0} episodes</span>
+										<span class="text-xs text-neutral-500"
+											>{item.original.episodes?.length ?? 0} episodes</span
+										>
 									{/if}
 								{:else if column.key === 'upgrade'}
 									{#if item.upgrades.length > 0}
@@ -464,7 +485,9 @@
 											{delta >= 0 ? '+' : ''}{delta.toLocaleString()}
 										</Badge>
 									{:else if item.upgrades.length > 0}
-										<Badge variant="success" mono>{item.upgrades.length} grab{item.upgrades.length > 1 ? 's' : ''}</Badge>
+										<Badge variant="success" mono
+											>{item.upgrades.length} grab{item.upgrades.length > 1 ? 's' : ''}</Badge
+										>
 									{:else}
 										<span class="text-neutral-400">—</span>
 									{/if}
@@ -507,9 +530,12 @@
 												Episodes on disk ({item.original.episodes?.length ?? 0}):
 											</span>
 											<div class="mt-1 space-y-0.5">
-												{#each (item.original.episodes ?? []) as ep}
+												{#each item.original.episodes ?? [] as ep}
 													<div class="flex items-center gap-2">
-														<span class="truncate font-mono text-xs text-neutral-700 dark:text-neutral-300" title={ep.fileName}>
+														<span
+															class="truncate font-mono text-xs text-neutral-700 dark:text-neutral-300"
+															title={ep.fileName}
+														>
 															{ep.fileName}
 														</span>
 														<Badge variant="neutral" size="sm" mono>{ep.score}</Badge>

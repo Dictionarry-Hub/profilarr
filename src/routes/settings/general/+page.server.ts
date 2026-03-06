@@ -130,8 +130,7 @@ export const actions: Actions = {
 		const tmdbApiKey = tmdbApiKeyInput || tmdbSettingsQueries.get()?.api_key || '';
 
 		// --- Arr defaults ---
-		const arrApplyDefaultDelayProfiles =
-			formData.get('arr_apply_default_delay_profiles') === 'on';
+		const arrApplyDefaultDelayProfiles = formData.get('arr_apply_default_delay_profiles') === 'on';
 
 		// --- Persist all settings ---
 		const logUpdated = logSettingsQueries.update({

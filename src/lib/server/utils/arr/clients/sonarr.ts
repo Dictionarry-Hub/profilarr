@@ -52,9 +52,7 @@ export class SonarrClient extends BaseArrClient {
 	 * Get all episodes for a series
 	 */
 	getEpisodes(seriesId: number): Promise<SonarrEpisode[]> {
-		return this.get<SonarrEpisode[]>(
-			`/api/${this.apiVersion}/episode?seriesId=${seriesId}`
-		);
+		return this.get<SonarrEpisode[]>(`/api/${this.apiVersion}/episode?seriesId=${seriesId}`);
 	}
 
 	/**

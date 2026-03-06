@@ -69,23 +69,24 @@ export async function overrideGeneral(
 
 	const formatRow = formatName
 		? await cache.kb
-		.selectFrom('custom_formats')
-		.select(['id', 'name'])
-		.where('name', '=', formatName)
-		.executeTakeFirst()
+				.selectFrom('custom_formats')
+				.select(['id', 'name'])
+				.where('name', '=', formatName)
+				.executeTakeFirst()
 		: undefined;
 
 	const desiredNameRaw =
 		getDesiredTo<string>(desiredState.name) ??
 		(typeof desiredState.name === 'string'
 			? desiredState.name
-			: formatName ?? fallbackName ?? '');
+			: (formatName ?? fallbackName ?? ''));
 	const desiredDescriptionRaw =
 		getDesiredTo<string | null>(desiredState.description) ??
 		(typeof desiredState.description === 'string' || desiredState.description === null
 			? (desiredState.description as string | null)
 			: undefined);
-	const desiredIncludeRaw = getDesiredTo(desiredState.include_in_rename) ?? desiredState.include_in_rename;
+	const desiredIncludeRaw =
+		getDesiredTo(desiredState.include_in_rename) ?? desiredState.include_in_rename;
 	const desiredTags = resolveTags([], desiredState);
 
 	if (!formatRow) {
@@ -117,9 +118,7 @@ export async function overrideGeneral(
 	const currentTags = current.tags.map((tag) => tag.name);
 	const resolvedTags = resolveTags(currentTags, desiredState);
 
-	const hasDesiredName =
-		desiredNameRaw !== undefined ||
-		typeof desiredState.name === 'string';
+	const hasDesiredName = desiredNameRaw !== undefined || typeof desiredState.name === 'string';
 	const desiredName = hasDesiredName ? (desiredNameRaw as string) : current.name;
 
 	const hasDesiredDescription =
@@ -128,7 +127,7 @@ export async function overrideGeneral(
 		desiredState.description === null;
 	const desiredDescription = hasDesiredDescription
 		? (desiredDescriptionRaw as string | null)
-		: current.description ?? null;
+		: (current.description ?? null);
 
 	const hasDesiredInclude =
 		desiredIncludeRaw !== undefined ||

@@ -5,7 +5,10 @@ import { canWriteToBase } from '$pcd/index.ts';
 import type { OperationLayer } from '$pcd/index.ts';
 import type { ArrType } from '$shared/pcd/types.ts';
 import type { PropersRepacks } from '$shared/pcd/mediaManagement.ts';
-import { createRadarrMediaSettings, createSonarrMediaSettings } from '$pcd/entities/mediaManagement/media-settings/index.ts';
+import {
+	createRadarrMediaSettings,
+	createSonarrMediaSettings
+} from '$pcd/entities/mediaManagement/media-settings/index.ts';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const parentData = await parent();

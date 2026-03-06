@@ -33,7 +33,12 @@
 
 <CardGrid columns={1} flush>
 	{#each configs as config}
-		<Card href="/media-management/{databaseId}/quality-definitions/{config.arr_type}/{encodeURIComponent(config.name)}" hoverable>
+		<Card
+			href="/media-management/{databaseId}/quality-definitions/{config.arr_type}/{encodeURIComponent(
+				config.name
+			)}"
+			hoverable
+		>
 			<div class="flex items-center gap-4">
 				<!-- Logo + Name -->
 				<div class="flex min-w-0 flex-1 items-center gap-3">
@@ -57,7 +62,9 @@
 							{config.name}
 						</h3>
 						<div class="mt-1">
-							<Label variant="secondary" size="sm" rounded="md">{config.quality_count} qualities</Label>
+							<Label variant="secondary" size="sm" rounded="md"
+								>{config.quality_count} qualities</Label
+							>
 						</div>
 					</div>
 				</div>

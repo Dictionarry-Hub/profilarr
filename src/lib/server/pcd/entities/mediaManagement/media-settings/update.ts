@@ -55,11 +55,7 @@ export async function updateRadarrMediaSettings(options: UpdateMediaSettingsOpti
 		updateQuery = updateQuery.where('propers_repacks', '=', current.propers_repacks);
 	}
 	if (current.enable_media_info !== input.enableMediaInfo) {
-		updateQuery = updateQuery.where(
-			'enable_media_info',
-			'=',
-			current.enable_media_info ? 1 : 0
-		);
+		updateQuery = updateQuery.where('enable_media_info', '=', current.enable_media_info ? 1 : 0);
 	}
 
 	if (Object.keys(setValues).length === 0) {
@@ -155,11 +151,7 @@ export async function updateSonarrMediaSettings(options: UpdateSonarrMediaSettin
 		updateQuery = updateQuery.where('propers_repacks', '=', current.propers_repacks);
 	}
 	if (current.enable_media_info !== input.enableMediaInfo) {
-		updateQuery = updateQuery.where(
-			'enable_media_info',
-			'=',
-			current.enable_media_info ? 1 : 0
-		);
+		updateQuery = updateQuery.where('enable_media_info', '=', current.enable_media_info ? 1 : 0);
 	}
 
 	if (Object.keys(setValues).length === 0) {

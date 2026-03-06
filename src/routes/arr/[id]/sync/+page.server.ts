@@ -47,7 +47,13 @@ export const load: ServerLoad = async ({ params }) => {
 				};
 			}
 
-			const [qualityProfiles, delayProfiles, allNamingConfigs, allQualityDefinitionsConfigs, allMediaSettingsConfigs] = await Promise.all([
+			const [
+				qualityProfiles,
+				delayProfiles,
+				allNamingConfigs,
+				allQualityDefinitionsConfigs,
+				allMediaSettingsConfigs
+			] = await Promise.all([
 				qualityProfileQueries.list(cache),
 				delayProfileQueries.list(cache),
 				namingQueries.list(cache),
@@ -57,14 +63,14 @@ export const load: ServerLoad = async ({ params }) => {
 
 			// Filter configs by arr type - only show configs for the instance's arr type
 			const namingConfigs = allNamingConfigs
-				.filter(c => c.arr_type === arrType)
-				.map(c => ({ name: c.name }));
+				.filter((c) => c.arr_type === arrType)
+				.map((c) => ({ name: c.name }));
 			const qualityDefinitionsConfigs = allQualityDefinitionsConfigs
-				.filter(c => c.arr_type === arrType)
-				.map(c => ({ name: c.name }));
+				.filter((c) => c.arr_type === arrType)
+				.map((c) => ({ name: c.name }));
 			const mediaSettingsConfigs = allMediaSettingsConfigs
-				.filter(c => c.arr_type === arrType)
-				.map(c => ({ name: c.name }));
+				.filter((c) => c.arr_type === arrType)
+				.map((c) => ({ name: c.name }));
 
 			return {
 				id: db.id,
@@ -184,7 +190,9 @@ export const actions: Actions = {
 		const qualityDefinitionsDatabaseId = formData.get('qualityDefinitionsDatabaseId') as
 			| string
 			| null;
-		const qualityDefinitionsConfigName = formData.get('qualityDefinitionsConfigName') as string | null;
+		const qualityDefinitionsConfigName = formData.get('qualityDefinitionsConfigName') as
+			| string
+			| null;
 		const mediaSettingsDatabaseId = formData.get('mediaSettingsDatabaseId') as string | null;
 		const mediaSettingsConfigName = formData.get('mediaSettingsConfigName') as string | null;
 		const trigger = formData.get('trigger') as SyncTrigger;
@@ -243,7 +251,10 @@ export const actions: Actions = {
 		}
 
 		const status = arrSyncQueries.getSyncConfigStatus(id);
-		if (status.delayProfiles.syncStatus === 'pending' || status.delayProfiles.syncStatus === 'in_progress') {
+		if (
+			status.delayProfiles.syncStatus === 'pending' ||
+			status.delayProfiles.syncStatus === 'in_progress'
+		) {
 			return fail(409, { error: 'Sync already in progress' });
 		}
 
@@ -294,7 +305,10 @@ export const actions: Actions = {
 		}
 
 		const status = arrSyncQueries.getSyncConfigStatus(id);
-		if (status.qualityProfiles.syncStatus === 'pending' || status.qualityProfiles.syncStatus === 'in_progress') {
+		if (
+			status.qualityProfiles.syncStatus === 'pending' ||
+			status.qualityProfiles.syncStatus === 'in_progress'
+		) {
 			return fail(409, { error: 'Sync already in progress' });
 		}
 
@@ -340,12 +354,19 @@ export const actions: Actions = {
 		}
 
 		const mmSync = arrSyncQueries.getMediaManagementSync(id);
-		if (!mmSync.namingDatabaseId && !mmSync.qualityDefinitionsDatabaseId && !mmSync.mediaSettingsDatabaseId) {
+		if (
+			!mmSync.namingDatabaseId &&
+			!mmSync.qualityDefinitionsDatabaseId &&
+			!mmSync.mediaSettingsDatabaseId
+		) {
 			return fail(400, { error: 'No media management configured' });
 		}
 
 		const status = arrSyncQueries.getSyncConfigStatus(id);
-		if (status.mediaManagement.syncStatus === 'pending' || status.mediaManagement.syncStatus === 'in_progress') {
+		if (
+			status.mediaManagement.syncStatus === 'pending' ||
+			status.mediaManagement.syncStatus === 'in_progress'
+		) {
 			return fail(409, { error: 'Sync already in progress' });
 		}
 

@@ -192,11 +192,7 @@ test('backup DB does not contain arr API keys', () => {
 	try {
 		const rows = db.prepare('SELECT api_key FROM arr_instances').all() as { api_key: string }[];
 		for (const row of rows) {
-			assertEquals(
-				row.api_key === ARR_API_KEY,
-				false,
-				'Backup DB contains plaintext arr API key'
-			);
+			assertEquals(row.api_key === ARR_API_KEY, false, 'Backup DB contains plaintext arr API key');
 		}
 	} finally {
 		db.close();
@@ -206,9 +202,9 @@ test('backup DB does not contain arr API keys', () => {
 test('backup DB does not contain database PATs', () => {
 	const db = new Database(backupDbPath);
 	try {
-		const rows = db
-			.prepare('SELECT personal_access_token FROM database_instances')
-			.all() as { personal_access_token: string | null }[];
+		const rows = db.prepare('SELECT personal_access_token FROM database_instances').all() as {
+			personal_access_token: string | null;
+		}[];
 		for (const row of rows) {
 			assertEquals(
 				row.personal_access_token === DB_PAT,
@@ -236,15 +232,13 @@ test('backup DB does not contain Profilarr API key', () => {
 test('backup DB does not contain AI API key', () => {
 	const db = new Database(backupDbPath);
 	try {
-		const row = db.prepare('SELECT api_key FROM ai_settings WHERE id = 1').get() as {
-			api_key: string | null;
-		} | undefined;
+		const row = db.prepare('SELECT api_key FROM ai_settings WHERE id = 1').get() as
+			| {
+					api_key: string | null;
+			  }
+			| undefined;
 		if (row) {
-			assertEquals(
-				row.api_key === AI_API_KEY,
-				false,
-				'Backup DB contains plaintext AI API key'
-			);
+			assertEquals(row.api_key === AI_API_KEY, false, 'Backup DB contains plaintext AI API key');
 		}
 	} finally {
 		db.close();
@@ -257,11 +251,7 @@ test('backup DB does not contain TMDB API key', () => {
 		const row = db.prepare('SELECT api_key FROM tmdb_settings WHERE id = 1').get() as {
 			api_key: string;
 		};
-		assertEquals(
-			row.api_key === TMDB_API_KEY,
-			false,
-			'Backup DB contains plaintext TMDB API key'
-		);
+		assertEquals(row.api_key === TMDB_API_KEY, false, 'Backup DB contains plaintext TMDB API key');
 	} finally {
 		db.close();
 	}

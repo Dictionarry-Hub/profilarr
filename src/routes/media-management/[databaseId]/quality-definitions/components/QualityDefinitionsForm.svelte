@@ -73,7 +73,10 @@
 	const baseScaleMax = arrType === 'radarr' ? 2000 : 1000;
 
 	// Normalize entries: API uses 0 for "unlimited", but we work with baseScaleMax internally
-	function normalizeEntries(raw: QualityDefinitionEntry[], scaleMax: number): QualityDefinitionEntry[] {
+	function normalizeEntries(
+		raw: QualityDefinitionEntry[],
+		scaleMax: number
+	): QualityDefinitionEntry[] {
 		return raw.map((e) => ({
 			...e,
 			preferred_size: e.preferred_size === 0 ? scaleMax : e.preferred_size,
@@ -83,11 +86,14 @@
 
 	// Form state
 	let configName = initialData?.name ?? '';
-	let entries: QualityDefinitionEntry[] = normalizeEntries(initialData?.entries ?? [], baseScaleMax);
+	let entries: QualityDefinitionEntry[] = normalizeEntries(
+		initialData?.entries ?? [],
+		baseScaleMax
+	);
 
 	// Initialize entries for create mode
 	$: if (mode === 'create' && entries.length === 0 && availableQualities.length > 0) {
-		entries = availableQualities.map(quality_name => ({
+		entries = availableQualities.map((quality_name) => ({
 			quality_name,
 			min_size: 0,
 			max_size: baseScaleMax,
@@ -127,13 +133,16 @@
 	let selectedLayer: 'user' | 'base' = canWriteToBase ? 'base' : 'user';
 
 	$: databaseId = parseInt($page.params.databaseId ?? '0', 10);
-	
+
 	let expandedRows: Set<string | number> = new Set();
 	let mainFormElement: HTMLFormElement;
 	let deleteFormElement: HTMLFormElement;
 
 	$: arrLabel = arrType === 'radarr' ? 'Radarr' : 'Sonarr';
-	$: title = mode === 'create' ? `New ${arrLabel} Quality Definitions` : `Edit ${arrLabel} Quality Definitions`;
+	$: title =
+		mode === 'create'
+			? `New ${arrLabel} Quality Definitions`
+			: `Edit ${arrLabel} Quality Definitions`;
 	$: description =
 		mode === 'create'
 			? `Create a new ${arrLabel} quality definitions configuration for ${databaseName}`
@@ -231,8 +240,18 @@
 		const scaleMax = baseScaleMax;
 		return [
 			{ id: 'min', label: 'Min', color: 'blue', value: entry.min_size },
-			{ id: 'preferred', label: 'Preferred', color: 'green', value: entry.preferred_size === 0 ? scaleMax : entry.preferred_size },
-			{ id: 'max', label: 'Max', color: 'orange', value: entry.max_size === 0 ? scaleMax : entry.max_size }
+			{
+				id: 'preferred',
+				label: 'Preferred',
+				color: 'green',
+				value: entry.preferred_size === 0 ? scaleMax : entry.preferred_size
+			},
+			{
+				id: 'max',
+				label: 'Max',
+				color: 'orange',
+				value: entry.max_size === 0 ? scaleMax : entry.max_size
+			}
 		];
 	}
 
@@ -290,7 +309,6 @@
 	function handleDeleteCancel() {
 		showDeleteModal = false;
 	}
-
 </script>
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
@@ -399,9 +417,13 @@
 				<div class="divide-y divide-neutral-200 dark:divide-neutral-700">
 					{#each row.entries as entry (entry.quality_name)}
 						{@const markers = markersMap[entry.quality_name] || createMarkers(entry)}
-						<div class="flex flex-col gap-3 bg-white px-4 py-4 qd:flex-row qd:items-center qd:gap-3 qd:pt-5 qd:pr-4 qd:pb-8 qd:pl-8 dark:bg-neutral-900">
+						<div
+							class="flex flex-col gap-3 bg-white px-4 py-4 qd:flex-row qd:items-center qd:gap-3 qd:pt-5 qd:pr-4 qd:pb-8 qd:pl-8 dark:bg-neutral-900"
+						>
 							<!-- Quality Name -->
-							<div class="text-sm font-medium text-neutral-900 qd:w-32 qd:shrink-0 dark:text-neutral-100">
+							<div
+								class="text-sm font-medium text-neutral-900 qd:w-32 qd:shrink-0 dark:text-neutral-100"
+							>
 								{entry.quality_name}
 							</div>
 
@@ -425,7 +447,9 @@
 							<!-- Number Inputs -->
 							<div class="flex gap-2 qd:contents">
 								<div class="flex-1 qd:w-24 qd:flex-none qd:shrink-0">
-									<div class="mb-1 flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+									<div
+										class="mb-1 flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400"
+									>
 										Min <span class="text-neutral-400 dark:text-neutral-500">(MB/m)</span>
 									</div>
 									<NumberInput
@@ -441,7 +465,9 @@
 								</div>
 
 								<div class="flex-1 qd:w-24 qd:flex-none qd:shrink-0">
-									<div class="mb-1 flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
+									<div
+										class="mb-1 flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400"
+									>
 										Pref <span class="text-neutral-400 dark:text-neutral-500">(MB/m)</span>
 									</div>
 									<NumberInput
@@ -457,7 +483,9 @@
 								</div>
 
 								<div class="flex-1 qd:w-24 qd:flex-none qd:shrink-0">
-									<div class="mb-1 flex items-center gap-1 text-xs font-medium text-orange-600 dark:text-orange-400">
+									<div
+										class="mb-1 flex items-center gap-1 text-xs font-medium text-orange-600 dark:text-orange-400"
+									>
 										Max <span class="text-neutral-400 dark:text-neutral-500">(MB/m)</span>
 									</div>
 									<NumberInput
@@ -492,7 +520,11 @@
 			if (result.type === 'failure' && result.data) {
 				alertStore.add('error', (result.data as { error?: string }).error || 'Operation failed');
 			} else if (result.type === 'success' && result.data) {
-				const data = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+				const data = result.data as {
+					success?: boolean;
+					redirectTo?: string;
+					affectedArrs?: AffectedArr[];
+				};
 				if (data.success) {
 					alertStore.add(
 						'success',
@@ -538,10 +570,7 @@
 			deleting = true;
 			return async ({ result, update: formUpdate }) => {
 				if (result.type === 'failure' && result.data) {
-					alertStore.add(
-						'error',
-						(result.data as { error?: string }).error || 'Failed to delete'
-					);
+					alertStore.add('error', (result.data as { error?: string }).error || 'Failed to delete');
 				} else if (result.type === 'redirect') {
 					alertStore.add('success', 'Quality definitions deleted');
 				}
@@ -581,15 +610,26 @@
 <InfoModal bind:open={showInfoModal} header="Quality Definitions">
 	<div class="space-y-3 text-sm text-neutral-700 dark:text-neutral-300">
 		<p>
-			Quality definitions control the acceptable file size range for each quality level. All values are stored in <strong>MB per minute</strong> of runtime.
+			Quality definitions control the acceptable file size range for each quality level. All values
+			are stored in <strong>MB per minute</strong> of runtime.
 		</p>
 		<div class="space-y-1">
-			<p><span class="font-medium text-blue-600 dark:text-blue-400">Min</span> — reject files smaller than this.</p>
-			<p><span class="font-medium text-green-600 dark:text-green-400">Preferred</span> — ideal target size. Files closest to this are prioritized.</p>
-			<p><span class="font-medium text-orange-600 dark:text-orange-400">Max</span> — reject files larger than this.</p>
+			<p>
+				<span class="font-medium text-blue-600 dark:text-blue-400">Min</span> — reject files smaller
+				than this.
+			</p>
+			<p>
+				<span class="font-medium text-green-600 dark:text-green-400">Preferred</span> — ideal target
+				size. Files closest to this are prioritized.
+			</p>
+			<p>
+				<span class="font-medium text-orange-600 dark:text-orange-400">Max</span> — reject files larger
+				than this.
+			</p>
 		</div>
 		<p>
-			The valid range is <strong>0–{baseScaleMax}</strong> MB/min for {arrLabel}. Setting preferred or max to {baseScaleMax} means <strong>unlimited</strong> — no upper bound is enforced.
+			The valid range is <strong>0–{baseScaleMax}</strong> MB/min for {arrLabel}. Setting preferred
+			or max to {baseScaleMax} means <strong>unlimited</strong> — no upper bound is enforced.
 		</p>
 	</div>
 </InfoModal>

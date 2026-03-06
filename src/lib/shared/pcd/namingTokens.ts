@@ -187,7 +187,7 @@ const RADARR_RELEASE_TOKENS: NamingToken[] = [
 	},
 	{
 		token: '{Edition Tags}',
-		description: 'Edition information (e.g. IMAX, Director\'s Cut)',
+		description: "Edition information (e.g. IMAX, Director's Cut)",
 		example: 'IMAX'
 	}
 ];
@@ -587,10 +587,7 @@ const SONARR_SAMPLE_VALUES: Record<string, string> = {
  * - Conditional prefix/suffix: {[Quality Full]} → "[Bluray-1080p Proper]" or "" if empty
  * - Conditional dash: {-Release Group} → "-EVOLVE" or "" if empty
  */
-export function resolveFormat(
-	format: string,
-	sampleValues: Record<string, string>
-): string {
+export function resolveFormat(format: string, sampleValues: Record<string, string>): string {
 	if (!format) return '';
 
 	// Build case-insensitive lookup map
@@ -600,24 +597,28 @@ export function resolveFormat(
 	}
 
 	// Match tokens: {prefix token suffix} where prefix/suffix are optional [ ] - _ . space chars
-	const tokenRegex = /\{(?<prefix>[-\[( ._]*)(?<token>[A-Za-z][A-Za-z0-9 :+-]*)(?<suffix>[-\]) ._]*)\}/g;
+	const tokenRegex =
+		/\{(?<prefix>[-\[( ._]*)(?<token>[A-Za-z][A-Za-z0-9 :+-]*)(?<suffix>[-\]) ._]*)\}/g;
 
-	const resolved = format.replace(tokenRegex, (_match, prefix: string, token: string, suffix: string) => {
-		const trimmedToken = token.trim();
-		const value = lowerMap.get(trimmedToken.toLowerCase());
+	const resolved = format.replace(
+		tokenRegex,
+		(_match, prefix: string, token: string, suffix: string) => {
+			const trimmedToken = token.trim();
+			const value = lowerMap.get(trimmedToken.toLowerCase());
 
-		if (value === undefined) {
-			// Unknown token — leave as-is
-			return _match;
+			if (value === undefined) {
+				// Unknown token — leave as-is
+				return _match;
+			}
+
+			if (value === '') {
+				// Empty value — strip the whole token including prefix/suffix
+				return '';
+			}
+
+			return prefix + value + suffix;
 		}
-
-		if (value === '') {
-			// Empty value — strip the whole token including prefix/suffix
-			return '';
-		}
-
-		return prefix + value + suffix;
-	});
+	);
 
 	// Clean up double spaces
 	return resolved.replace(/  +/g, ' ').trim();
@@ -637,8 +638,7 @@ export function resolveSonarrFormat(format: string): string {
 
 /** Build a Set of valid token names (without braces) for an arr type. */
 function getValidTokenNames(arrType: 'radarr' | 'sonarr'): Set<string> {
-	const categories =
-		arrType === 'radarr' ? getRadarrTokenCategories() : getSonarrTokenCategories();
+	const categories = arrType === 'radarr' ? getRadarrTokenCategories() : getSonarrTokenCategories();
 	const names = new Set<string>();
 	for (const category of categories) {
 		for (const t of category.tokens) {

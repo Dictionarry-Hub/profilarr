@@ -146,7 +146,7 @@
 	}
 
 	$: sortedData = sortKey ? sortData(data) : data;
-	$: (sortKey, sortDirection, (sortedData = sortData(data)));
+	$: sortKey, sortDirection, (sortedData = sortData(data));
 
 	// Progressive loading
 	const progressive = pageSize ? createProgressiveList({ pageSize }) : null;
@@ -169,11 +169,18 @@
 			{#each displayData as row, rowIndex}
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div
-					class="group/row relative overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50 {onRowClick || rowHref ? 'cursor-pointer' : ''}"
+					class="group/row relative overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50 {onRowClick ||
+					rowHref
+						? 'cursor-pointer'
+						: ''}"
 					on:click={() => onRowClick && onRowClick(row)}
 				>
 					{#if rowHref}
-						<a href={rowHref(row)} class="absolute inset-0 z-10" aria-label="Open {columns[0]?.header || 'item'}"></a>
+						<a
+							href={rowHref(row)}
+							class="absolute inset-0 z-10"
+							aria-label="Open {columns[0]?.header || 'item'}"
+						></a>
 					{/if}
 					<!-- Primary row: first column as title + actions -->
 					<div class="flex items-center justify-between gap-3 px-4 py-3">
@@ -205,7 +212,9 @@
 						<div class="space-y-2 border-t border-neutral-200 px-4 py-3 dark:border-neutral-700/60">
 							{#each columns.slice(1) as column, colIndex}
 								<div class="flex items-center justify-between gap-4 text-sm">
-									<span class="shrink-0 text-neutral-500 dark:text-neutral-400">{column.header}</span>
+									<span class="shrink-0 text-neutral-500 dark:text-neutral-400"
+										>{column.header}</span
+									>
 									<span class="min-w-0 text-right text-neutral-700 dark:text-neutral-300">
 										{#if column.cell}
 											{@const rendered = column.cell(row)}
@@ -304,7 +313,9 @@
 			</thead>
 
 			<!-- Body -->
-			<tbody class="divide-y divide-neutral-200 bg-white dark:divide-neutral-700/40 dark:bg-neutral-900/50">
+			<tbody
+				class="divide-y divide-neutral-200 bg-white dark:divide-neutral-700/40 dark:bg-neutral-900/50"
+			>
 				{#if displayData.length === 0}
 					<tr>
 						<td

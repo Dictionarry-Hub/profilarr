@@ -39,7 +39,9 @@
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-end justify-between gap-2">
-					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{profile.name}</h3>
+					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						{profile.name}
+					</h3>
 					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>
 						{#if FEATURES.importExport}
 							<Button
@@ -86,8 +88,8 @@
 							variant={quality.is_upgrade_until ? 'success' : 'secondary'}
 							size="sm"
 							rounded="md"
-							mono
-						>{quality.name}</Label>
+							mono>{quality.name}</Label
+						>
 					{/each}
 					{#if hiddenCount > 0}
 						<span class="text-xs text-neutral-400">›</span>
@@ -100,15 +102,21 @@
 				<div class="flex items-center gap-3 text-xs">
 					<div class="flex items-center gap-1">
 						<BookOpenText size={12} class="text-neutral-400" />
-						<Label variant="secondary" size="sm" rounded="md" mono>{profile.custom_formats.total}</Label>
+						<Label variant="secondary" size="sm" rounded="md" mono
+							>{profile.custom_formats.total}</Label
+						>
 					</div>
 					<div class="flex items-center gap-1">
 						<Gauge size={12} class="text-neutral-400" />
-						<Label variant="secondary" size="sm" rounded="md" mono>{profile.minimum_custom_format_score}</Label>
+						<Label variant="secondary" size="sm" rounded="md" mono
+							>{profile.minimum_custom_format_score}</Label
+						>
 					</div>
 					<div class="flex items-center gap-1">
 						<Earth size={12} class="text-neutral-400" />
-						<Label variant="secondary" size="sm" rounded="md">{profile.language ? profile.language.name : 'Any'}</Label>
+						<Label variant="secondary" size="sm" rounded="md"
+							>{profile.language ? profile.language.name : 'Any'}</Label
+						>
 					</div>
 				</div>
 			</svelte:fragment>
@@ -141,5 +149,4 @@
 	.description :global(strong) {
 		font-weight: 600;
 	}
-
 </style>

@@ -136,8 +136,7 @@
 		formData.pattern.trim() !== '' &&
 		patternValidationState !== 'invalid';
 
-	$: saveTooltip =
-		patternValidationState === 'invalid' ? 'Pattern is not a valid .NET regex' : '';
+	$: saveTooltip = patternValidationState === 'invalid' ? 'Pattern is not a valid .NET regex' : '';
 
 	async function handleSaveClick() {
 		selectedLayer = canWriteToBase ? 'base' : 'user';
@@ -155,7 +154,6 @@
 		await tick();
 		deleteFormElement?.requestSubmit();
 	}
-
 </script>
 
 <div class="space-y-6">
@@ -202,7 +200,11 @@
 				if (result.type === 'failure' && result.data) {
 					alertStore.add('error', (result.data as { error?: string }).error || 'Operation failed');
 				} else if (result.type === 'success' && result.data) {
-					const data = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+					const data = result.data as {
+						success?: boolean;
+						redirectTo?: string;
+						affectedArrs?: AffectedArr[];
+					};
 					if (data.success) {
 						alertStore.add(
 							'success',
@@ -286,7 +288,7 @@
 
 	<!-- Unit Tests (outside form to avoid button submission issues) -->
 	{#if formData.regex101Id}
-		<div class="md:px-4 pb-12">
+		<div class="pb-12 md:px-4">
 			<h4 class="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
 				Unit Tests
 				{#if !unitTestsLoading && unitTests.length > 0}

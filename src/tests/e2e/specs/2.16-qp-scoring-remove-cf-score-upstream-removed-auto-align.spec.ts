@@ -169,4 +169,3 @@ test.describe('2.16 QP scoring remove CF score row with upstream already removed
 		expect((await final.enabledCheckbox.getAttribute('aria-checked')) === 'true').toBe(false);
 	});
 });
-

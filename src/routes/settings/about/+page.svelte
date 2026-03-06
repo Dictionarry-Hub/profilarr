@@ -112,7 +112,6 @@
 		{ key: 'published_at', header: 'Published', width: 'w-32' },
 		{ key: 'prerelease', header: 'Type', width: 'w-24' }
 	];
-
 </script>
 
 <div class="p-4 md:p-8">
@@ -153,7 +152,8 @@
 						{:else if row.type === 'link'}
 							<Label
 								variant="link"
-								size="md" rounded="md"
+								size="md"
+								rounded="md"
 								mono
 								href={row.href}
 								target="_blank"
@@ -173,9 +173,14 @@
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
 					{#if section.icon}
-						<svelte:component this={section.icon} class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+						<svelte:component
+							this={section.icon}
+							class="h-4 w-4 text-neutral-600 dark:text-neutral-400"
+						/>
 					{/if}
-					<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">{section.title}</h2>
+					<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
+						{section.title}
+					</h2>
 				</div>
 				<Table columns={infoColumns} data={section.rows} responsive>
 					<svelte:fragment slot="cell" let:row let:column>
@@ -191,7 +196,8 @@
 							{:else if row.type === 'link'}
 								<Label
 									variant="link"
-									size="md" rounded="md"
+									size="md"
+									rounded="md"
 									mono
 									href={row.href}
 									target="_blank"
@@ -210,7 +216,8 @@
 
 		<!-- Database (special case with custom content) -->
 		{#if data.migration.applied.length > 0}
-			{@const currentMigration = data.migration.applied.find((m) => m.latest) ?? data.migration.applied[0]}
+			{@const currentMigration =
+				data.migration.applied.find((m) => m.latest) ?? data.migration.applied[0]}
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
 					<Database class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
@@ -233,7 +240,8 @@
 								</Label>
 								{#if row.latest}
 									<Label
-										size="md" rounded="md"
+										size="md"
+										rounded="md"
 										customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
 									>
 										Latest
@@ -250,11 +258,7 @@
 					</svelte:fragment>
 					<svelte:fragment slot="expanded">
 						<div class="p-3">
-							<Table
-								columns={migrationColumns}
-								data={data.migration.applied}
-								responsive
-							>
+							<Table columns={migrationColumns} data={data.migration.applied} responsive>
 								<svelte:fragment slot="cell" let:row let:column>
 									{#if column.key === 'version'}
 										<div class="flex items-center gap-2">
@@ -263,7 +267,8 @@
 											</Label>
 											{#if row.latest}
 												<Label
-													size="md" rounded="md"
+													size="md"
+													rounded="md"
 													customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
 												>
 													Latest
@@ -324,7 +329,8 @@
 								<div class="flex items-center gap-2">
 									<Label
 										variant="link"
-										size="md" rounded="md"
+										size="md"
+										rounded="md"
 										mono
 										href={row.html_url}
 										target="_blank"
@@ -334,7 +340,8 @@
 									</Label>
 									{#if index === 0}
 										<Label
-											size="md" rounded="md"
+											size="md"
+											rounded="md"
 											customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
 										>
 											Latest
@@ -361,7 +368,8 @@
 											<div class="flex items-center gap-2">
 												<Label
 													variant="link"
-													size="md" rounded="md"
+													size="md"
+													rounded="md"
 													mono
 													href={row.html_url}
 													target="_blank"
@@ -371,7 +379,8 @@
 												</Label>
 												{#if rowIndex === 0}
 													<Label
-														size="md" rounded="md"
+														size="md"
+														rounded="md"
 														customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
 													>
 														Latest
@@ -399,6 +408,5 @@
 		{:catch}
 			<!-- Silently handle errors - don't show releases section if fetch fails -->
 		{/await}
-
 	</div>
 </div>

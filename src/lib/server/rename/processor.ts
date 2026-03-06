@@ -55,7 +55,10 @@ const SOURCE = 'RenameProcessor';
  * Looks for any new command with id > maxIdBefore.
  */
 async function waitForSpawnedCommand(
-	client: { getCommands(): Promise<{ id: number; status: string }[]>; waitForCommand(id: number): Promise<unknown> },
+	client: {
+		getCommands(): Promise<{ id: number; status: string }[]>;
+		waitForCommand(id: number): Promise<unknown>;
+	},
 	maxIdBefore: number,
 	label: string
 ): Promise<void> {
@@ -78,9 +81,7 @@ async function waitForSpawnedCommand(
 		}
 
 		// Check if a new command already completed
-		const completed = commands.find(
-			(c) => c.id > maxIdBefore && c.status === 'completed'
-		);
+		const completed = commands.find((c) => c.id > maxIdBefore && c.status === 'completed');
 		if (completed) {
 			await logger.debug(`Spawned command ${completed.id} for ${label} already completed`, {
 				source: SOURCE,
@@ -122,7 +123,11 @@ function createRadarrAdapter(client: RadarrClient): RenameAdapter {
 
 				await client.renameMovieFolders(batch, rootFolderPath);
 
-				await waitForSpawnedCommand(client, maxId, `Radarr folder rename batch ${Math.floor(i / BATCH_SIZE) + 1}`);
+				await waitForSpawnedCommand(
+					client,
+					maxId,
+					`Radarr folder rename batch ${Math.floor(i / BATCH_SIZE) + 1}`
+				);
 			}
 		},
 		waitForCommand: (id) => client.waitForCommand(id),
@@ -173,7 +178,11 @@ function createSonarrAdapter(client: SonarrClient): RenameAdapter {
 
 				await client.renameSeriesFolders(batch, rootFolderPath);
 
-				await waitForSpawnedCommand(client, maxId, `Sonarr folder rename batch ${Math.floor(i / BATCH_SIZE) + 1}`);
+				await waitForSpawnedCommand(
+					client,
+					maxId,
+					`Sonarr folder rename batch ${Math.floor(i / BATCH_SIZE) + 1}`
+				);
 			}
 		},
 		waitForCommand: (id) => client.waitForCommand(id),
@@ -215,9 +224,7 @@ async function sendRenameNotification(
 	log: RenameJobLog,
 	summaryNotifications: boolean
 ): Promise<void> {
-	const { DiscordNotifier } = await import(
-		'$lib/server/notifications/notifiers/discord/index.ts'
-	);
+	const { DiscordNotifier } = await import('$lib/server/notifications/notifiers/discord/index.ts');
 
 	const services = notificationServicesQueries.getAllEnabled();
 	const notificationType = `rename.${log.status}`;
@@ -233,9 +240,7 @@ async function sendRenameNotification(
 
 			if (service.service_type === 'discord') {
 				const notifier = new DiscordNotifier(config);
-				const notification = notifications
-					.rename({ log, config, summaryNotifications })
-					.build();
+				const notification = notifications.rename({ log, config, summaryNotifications }).build();
 				await notifier.notify(notification);
 			}
 		} catch {
@@ -286,26 +291,39 @@ export async function processRenameConfig(
 		log.library.fetchDurationMs = Date.now() - fetchStart;
 		log.library.totalItems = items.length;
 
-		await logger.debug(`Fetched library: ${items.length} items in ${log.library.fetchDurationMs}ms`, {
-			source: SOURCE,
-			meta: { instanceId: instance.id, totalItems: items.length, fetchDurationMs: log.library.fetchDurationMs }
-		});
+		await logger.debug(
+			`Fetched library: ${items.length} items in ${log.library.fetchDurationMs}ms`,
+			{
+				source: SOURCE,
+				meta: {
+					instanceId: instance.id,
+					totalItems: items.length,
+					fetchDurationMs: log.library.fetchDurationMs
+				}
+			}
+		);
 
 		// Filter by ignore tag
 		let filteredItems = items;
 		if (settings.ignoreTag) {
-			const tag = tags.find(
-				(t) => t.label.toLowerCase() === settings.ignoreTag!.toLowerCase()
-			);
+			const tag = tags.find((t) => t.label.toLowerCase() === settings.ignoreTag!.toLowerCase());
 			if (tag) {
 				filteredItems = items.filter((item) => !item.tags.includes(tag.id));
 				log.filtering.skippedByTag = items.length - filteredItems.length;
 			}
 
-			await logger.debug(`Filtered by tag "${settings.ignoreTag}": ${filteredItems.length} remaining, ${log.filtering.skippedByTag} skipped`, {
-				source: SOURCE,
-				meta: { instanceId: instance.id, ignoreTag: settings.ignoreTag, remaining: filteredItems.length, skipped: log.filtering.skippedByTag }
-			});
+			await logger.debug(
+				`Filtered by tag "${settings.ignoreTag}": ${filteredItems.length} remaining, ${log.filtering.skippedByTag} skipped`,
+				{
+					source: SOURCE,
+					meta: {
+						instanceId: instance.id,
+						ignoreTag: settings.ignoreTag,
+						remaining: filteredItems.length,
+						skipped: log.filtering.skippedByTag
+					}
+				}
+			);
 		}
 		log.filtering.afterIgnoreTag = filteredItems.length;
 
@@ -326,10 +344,17 @@ export async function processRenameConfig(
 
 			await processDryRun(adapter, filteredItems, log);
 
-			await logger.debug(`Dry run complete: ${log.results.filesNeedingRename} files need renaming across ${log.renamedItems.length} items`, {
-				source: SOURCE,
-				meta: { instanceId: instance.id, filesNeedingRename: log.results.filesNeedingRename, itemsWithRenames: log.renamedItems.length }
-			});
+			await logger.debug(
+				`Dry run complete: ${log.results.filesNeedingRename} files need renaming across ${log.renamedItems.length} items`,
+				{
+					source: SOURCE,
+					meta: {
+						instanceId: instance.id,
+						filesNeedingRename: log.results.filesNeedingRename,
+						itemsWithRenames: log.renamedItems.length
+					}
+				}
+			);
 		} else {
 			const filteredIds = filteredItems.map((i) => i.id);
 			const batchSize = instance.type === 'sonarr' ? 10 : 50;
@@ -337,10 +362,17 @@ export async function processRenameConfig(
 			// Step 1: Preview-filter to find items that actually need file renames
 			const itemsNeedingRename = await getItemsNeedingFileRename(adapter, filteredItems, log);
 
-			await logger.debug(`Preview filter: ${itemsNeedingRename.length}/${filteredItems.length} items need file renames`, {
-				source: SOURCE,
-				meta: { instanceId: instance.id, needingRename: itemsNeedingRename.length, total: filteredItems.length }
-			});
+			await logger.debug(
+				`Preview filter: ${itemsNeedingRename.length}/${filteredItems.length} items need file renames`,
+				{
+					source: SOURCE,
+					meta: {
+						instanceId: instance.id,
+						needingRename: itemsNeedingRename.length,
+						total: filteredItems.length
+					}
+				}
+			);
 
 			// Step 2: Snapshot before (all items — folders still need full diff)
 			const beforeSnapshot = await adapter.getSnapshot(filteredIds);
@@ -386,18 +418,24 @@ export async function processRenameConfig(
 			log.results.filesNeedingRename = totalFilesRenamed;
 			log.results.foldersRenamed = totalFoldersRenamed;
 
-			await logger.debug(`Diff: ${totalFilesRenamed} files, ${totalFoldersRenamed} folders across ${diff.length} entities`, {
-				source: SOURCE,
-				meta: { instanceId: instance.id, filesRenamed: totalFilesRenamed, foldersRenamed: totalFoldersRenamed, entitiesChanged: diff.length }
-			});
+			await logger.debug(
+				`Diff: ${totalFilesRenamed} files, ${totalFoldersRenamed} folders across ${diff.length} entities`,
+				{
+					source: SOURCE,
+					meta: {
+						instanceId: instance.id,
+						filesRenamed: totalFilesRenamed,
+						foldersRenamed: totalFoldersRenamed,
+						entitiesChanged: diff.length
+					}
+				}
+			);
 		}
 
 		// Determine final status
 		if (log.results.errors.length > 0) {
 			log.status =
-				log.results.filesRenamed > 0 || log.results.foldersRenamed > 0
-					? 'partial'
-					: 'failed';
+				log.results.filesRenamed > 0 || log.results.foldersRenamed > 0 ? 'partial' : 'failed';
 
 			for (const error of log.results.errors) {
 				await logger.warn(`Rename error: ${error}`, {

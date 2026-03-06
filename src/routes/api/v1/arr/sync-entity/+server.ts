@@ -3,7 +3,15 @@ import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { syncQualityProfile, syncCustomFormat, syncRegularExpression, syncDelayProfile, syncNaming, syncQualityDefinitions, syncMediaSettings } from '$lib/server/sync/entitySync.ts';
+import {
+	syncQualityProfile,
+	syncCustomFormat,
+	syncRegularExpression,
+	syncDelayProfile,
+	syncNaming,
+	syncQualityDefinitions,
+	syncMediaSettings
+} from '$lib/server/sync/entitySync.ts';
 import { logger } from '$logger/logger.ts';
 
 type SyncEntityRequest = components['schemas']['SyncEntityRequest'];
@@ -41,7 +49,10 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	if (!entityType || !ENTITY_TYPE_TO_SECTION[entityType]) {
-		return json({ error: `entityType must be one of: ${Object.keys(ENTITY_TYPE_TO_SECTION).join(', ')}` }, { status: 400 });
+		return json(
+			{ error: `entityType must be one of: ${Object.keys(ENTITY_TYPE_TO_SECTION).join(', ')}` },
+			{ status: 400 }
+		);
 	}
 
 	if (!databaseId || typeof databaseId !== 'number') {

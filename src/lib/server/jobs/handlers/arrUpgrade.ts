@@ -32,7 +32,7 @@ const upgradeRunHandler: JobHandler = async (job) => {
 		return {
 			status: 'skipped',
 			output: 'No enabled upgrade filters',
-			rescheduleAt: job.source === 'schedule' ? nextRunAt ?? undefined : undefined
+			rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
 		};
 	}
 
@@ -55,7 +55,7 @@ const upgradeRunHandler: JobHandler = async (job) => {
 			return {
 				status: 'failure',
 				error: log.results.errors.join('; '),
-				rescheduleAt: job.source === 'schedule' ? nextRunAt ?? undefined : undefined
+				rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
 			};
 		}
 
@@ -63,14 +63,14 @@ const upgradeRunHandler: JobHandler = async (job) => {
 			return {
 				status: 'skipped',
 				output,
-				rescheduleAt: job.source === 'schedule' ? nextRunAt ?? undefined : undefined
+				rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
 			};
 		}
 
 		return {
 			status: 'success',
 			output,
-			rescheduleAt: job.source === 'schedule' ? nextRunAt ?? undefined : undefined
+			rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
 		};
 	} catch (error) {
 		await logger.error('Upgrade job failed', {

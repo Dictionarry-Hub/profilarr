@@ -113,7 +113,7 @@ export const pcdOpHistoryQueries = {
 			`INSERT INTO pcd_op_history (
 				op_id, database_id, batch_id, status,
 				rowcount, conflict_reason, error, details
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)` ,
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 			input.opId,
 			input.databaseId,
 			input.batchId,

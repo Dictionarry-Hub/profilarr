@@ -15,7 +15,7 @@
  */
 
 /** Bundled OpenAPI 3.1 specification with all $refs resolved. */
-export { default as spec } from "./openapi.json" with { type: "json" };
+export { default as spec } from './openapi.json' with { type: 'json' };
 
 /** TypeScript types generated from the OpenAPI specification. */
-export type * from "./types.ts";
+export type * from './types.ts';

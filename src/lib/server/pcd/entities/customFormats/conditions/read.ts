@@ -4,7 +4,11 @@
 
 import { sql } from 'kysely';
 import type { PCDCache } from '$pcd/index.ts';
-import type { ConditionData, ConditionListItem, CustomFormatWithConditions } from '$shared/pcd/display.ts';
+import type {
+	ConditionData,
+	ConditionListItem,
+	CustomFormatWithConditions
+} from '$shared/pcd/display.ts';
 
 /**
  * Get all conditions for a custom format with full data for evaluation

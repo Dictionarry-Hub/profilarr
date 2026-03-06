@@ -205,7 +205,14 @@ function isBooleanColumn(columnName: string, columnType: string): boolean {
 	}
 
 	// Exact matches
-	const booleanExactNames = ['negate', 'required', 'enabled', 'rename', 'should_match', 'upgrades_allowed'];
+	const booleanExactNames = [
+		'negate',
+		'required',
+		'enabled',
+		'rename',
+		'should_match',
+		'upgrades_allowed'
+	];
 	if (booleanExactNames.includes(name)) {
 		return true;
 	}
@@ -518,11 +525,26 @@ import type { Generated } from 'kysely';
 		});
 	};
 
-	categorized.set('QUALITY PROFILES', sortByOrder(categorized.get('QUALITY PROFILES')!, qualityProfileTables));
-	categorized.set('CUSTOM FORMATS', sortByOrder(categorized.get('CUSTOM FORMATS')!, customFormatTables));
-	categorized.set('REGULAR EXPRESSIONS', sortByOrder(categorized.get('REGULAR EXPRESSIONS')!, regexTables));
-	categorized.set('DELAY PROFILES', sortByOrder(categorized.get('DELAY PROFILES')!, delayProfileTables));
-	categorized.set('MEDIA MANAGEMENT', sortByOrder(categorized.get('MEDIA MANAGEMENT')!, mediaManagementTables));
+	categorized.set(
+		'QUALITY PROFILES',
+		sortByOrder(categorized.get('QUALITY PROFILES')!, qualityProfileTables)
+	);
+	categorized.set(
+		'CUSTOM FORMATS',
+		sortByOrder(categorized.get('CUSTOM FORMATS')!, customFormatTables)
+	);
+	categorized.set(
+		'REGULAR EXPRESSIONS',
+		sortByOrder(categorized.get('REGULAR EXPRESSIONS')!, regexTables)
+	);
+	categorized.set(
+		'DELAY PROFILES',
+		sortByOrder(categorized.get('DELAY PROFILES')!, delayProfileTables)
+	);
+	categorized.set(
+		'MEDIA MANAGEMENT',
+		sortByOrder(categorized.get('MEDIA MANAGEMENT')!, mediaManagementTables)
+	);
 	categorized.set('CORE', sortByOrder(categorized.get('CORE')!, coreTables));
 
 	// Generate Kysely table interfaces

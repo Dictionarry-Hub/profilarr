@@ -23,10 +23,7 @@ import {
 	overrideConflict,
 	alignConflict
 } from '../helpers/conflicts';
-import {
-	openFirstQualityProfileGeneral,
-	goToQualityProfileQualities
-} from '../helpers/entity';
+import { openFirstQualityProfileGeneral, goToQualityProfileQualities } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
 const LOCAL_DB_NAME = 'E2E Local';
@@ -48,7 +45,10 @@ async function getQualityOrder(page: import('@playwright/test').Page): Promise<s
 }
 
 /** Click the move-down button on a quality row (mobile view). */
-async function moveQualityDown(page: import('@playwright/test').Page, index: number): Promise<void> {
+async function moveQualityDown(
+	page: import('@playwright/test').Page,
+	index: number
+): Promise<void> {
 	const row = page.locator('div.space-y-4 > div[role="button"]').nth(index);
 	const mobileButtons = row.locator('.md\\:hidden button');
 	await mobileButtons.last().click();
@@ -99,11 +99,16 @@ async function createGroupFromFirstTwo(page: import('@playwright/test').Page): P
 }
 
 /** Collapse (ungroup) a quality group by clicking the desktop X button on its row. */
-async function collapseGroup(page: import('@playwright/test').Page, groupName: string): Promise<void> {
+async function collapseGroup(
+	page: import('@playwright/test').Page,
+	groupName: string
+): Promise<void> {
 	const rows = page.locator('div.space-y-4 > div[role="button"]');
 	const groupRow = rows.filter({ hasText: groupName }).first();
 	// Two collapse buttons exist (mobile + desktop); target the desktop one
-	const desktopCollapse = groupRow.locator('span.hidden.md\\:inline-flex button[title="Collapse group into individual qualities"]');
+	const desktopCollapse = groupRow.locator(
+		'span.hidden.md\\:inline-flex button[title="Collapse group into individual qualities"]'
+	);
 	await desktopCollapse.click();
 	await page.waitForTimeout(300);
 }

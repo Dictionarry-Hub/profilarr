@@ -85,4 +85,4 @@ body:
     id: related
     attributes:
       label: Related issues
-      placeholder: "#123, #456"
+      placeholder: '#123, #456'

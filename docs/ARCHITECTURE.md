@@ -262,20 +262,20 @@ Example:
 
 ```json
 {
-  "name": "db",
-  "version": "2.1.35",
-  "description": "Seraphys' OCD Playground",
-  "arr_types": ["radarr", "sonarr", "whisparr"],
-  "dependencies": { "schema": "^1.1.0" },
-  "authors": [{ "name": "Dictionarry Team", "email": "team@dictionarry.dev" }],
-  "license": "MIT",
-  "repository": "https://github.com/dictionarry-hub/database",
-  "tags": ["4k", "hdr", "remux", "quality", "archival"],
-  "links": {
-    "homepage": "https://dictionarry.dev",
-    "issues": "https://github.com/dictionarry-hub/db/issues"
-  },
-  "profilarr": { "minimum_version": "2.0.0" }
+	"name": "db",
+	"version": "2.1.35",
+	"description": "Seraphys' OCD Playground",
+	"arr_types": ["radarr", "sonarr", "whisparr"],
+	"dependencies": { "schema": "^1.1.0" },
+	"authors": [{ "name": "Dictionarry Team", "email": "team@dictionarry.dev" }],
+	"license": "MIT",
+	"repository": "https://github.com/dictionarry-hub/database",
+	"tags": ["4k", "hdr", "remux", "quality", "archival"],
+	"links": {
+		"homepage": "https://dictionarry.dev",
+		"issues": "https://github.com/dictionarry-hub/db/issues"
+	},
+	"profilarr": { "minimum_version": "2.0.0" }
 }
 ```
 

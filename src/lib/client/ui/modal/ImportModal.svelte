@@ -378,9 +378,7 @@
 								</div>
 
 								<div class="flex gap-3 text-sm">
-									<label
-										class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300"
-									>
+									<label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300">
 										<input
 											type="radio"
 											checked={resolution?.action === 'skip'}
@@ -388,14 +386,11 @@
 										/>
 										Use existing
 									</label>
-									<label
-										class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300"
-									>
+									<label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300">
 										<input
 											type="radio"
 											checked={resolution?.action === 'rename'}
-											on:change={() =>
-												setResolution(key, 'rename', `${conflict.name} (imported)`)}
+											on:change={() => setResolution(key, 'rename', `${conflict.name} (imported)`)}
 										/>
 										Rename and import
 									</label>

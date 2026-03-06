@@ -25,8 +25,9 @@ const jobTypeToSection = new Map<JobType, SectionType>([
 function parseLegacySections(payload: Record<string, unknown>): SectionType[] | null {
 	const raw = payload.sections ?? payload.section;
 	if (Array.isArray(raw)) {
-		const sections = raw.filter((value): value is SectionType =>
-			value === 'qualityProfiles' || value === 'delayProfiles' || value === 'mediaManagement'
+		const sections = raw.filter(
+			(value): value is SectionType =>
+				value === 'qualityProfiles' || value === 'delayProfiles' || value === 'mediaManagement'
 		);
 		return sections.length > 0 ? sections : null;
 	}

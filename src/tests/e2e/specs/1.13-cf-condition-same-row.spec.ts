@@ -14,16 +14,16 @@ import { linkPcd } from '../helpers/linkPcd';
 import { unlinkPcdByName } from '../helpers/unlinkPcd';
 import { pullChanges, exportAndPush } from '../helpers/sync';
 import {
-  goToConflicts,
-  expectConflict,
-  overrideConflict,
-  alignConflict
+	goToConflicts,
+	expectConflict,
+	overrideConflict,
+	alignConflict
 } from '../helpers/conflicts';
 import {
-  goToCustomFormatConditions,
-  updateConditionValueByName,
-  getConditionValueByName,
-  saveConditionChanges
+	goToCustomFormatConditions,
+	updateConditionValueByName,
+	getConditionValueByName,
+	saveConditionChanges
 } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
@@ -35,113 +35,113 @@ const LOCAL_RESOLUTION = '1080p';
 const DEV_RESOLUTION = '720p';
 
 test.describe('1.13 CF condition same row conflict', () => {
-  let localId: number;
-  let devId: number;
-  let devHead: string;
+	let localId: number;
+	let devId: number;
+	let devHead: string;
 
-  test.beforeEach(async ({ browser }) => {
-    const page = await browser.newPage();
+	test.beforeEach(async ({ browser }) => {
+		const page = await browser.newPage();
 
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
 
-    devId = await linkPcd(page, {
-      name: DEV_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL
-    });
+		devId = await linkPcd(page, {
+			name: DEV_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL
+		});
 
-    devHead = getHead(devId);
+		devHead = getHead(devId);
 
-    localId = await linkPcd(page, {
-      name: LOCAL_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL,
-      syncStrategy: 'Manual (no auto-sync)',
-      autoPull: false,
-      localOpsEnabled: true,
-      conflictStrategy: 'Ask every time'
-    });
+		localId = await linkPcd(page, {
+			name: LOCAL_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL,
+			syncStrategy: 'Manual (no auto-sync)',
+			autoPull: false,
+			localOpsEnabled: true,
+			conflictStrategy: 'Ask every time'
+		});
 
-    await page.close();
-  });
+		await page.close();
+	});
 
-  test.afterEach(async ({ browser }) => {
-    if (devId && devHead) {
-      try {
-        resetToCommit(devId, devHead, true);
-      } catch {
-        // Best-effort reset
-      }
-    }
+	test.afterEach(async ({ browser }) => {
+		if (devId && devHead) {
+			try {
+				resetToCommit(devId, devHead, true);
+			} catch {
+				// Best-effort reset
+			}
+		}
 
-    const page = await browser.newPage();
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
-    await page.close();
-  });
+		const page = await browser.newPage();
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
+		await page.close();
+	});
 
-  test('a) override — condition uses user value', async ({ page }) => {
-    // Local edits condition value
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    await updateConditionValueByName(page, CONDITION_NAME, LOCAL_RESOLUTION);
-    await saveConditionChanges(page);
+	test('a) override — condition uses user value', async ({ page }) => {
+		// Local edits condition value
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		await updateConditionValueByName(page, CONDITION_NAME, LOCAL_RESOLUTION);
+		await saveConditionChanges(page);
 
-    // Dev edits same condition differently
-    await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-    await updateConditionValueByName(page, CONDITION_NAME, DEV_RESOLUTION);
-    await saveConditionChanges(page);
+		// Dev edits same condition differently
+		await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+		await updateConditionValueByName(page, CONDITION_NAME, DEV_RESOLUTION);
+		await saveConditionChanges(page);
 
-    // Dev exports and pushes
-    await exportAndPush(page, devId, 'e2e: 1.13 condition same row conflict');
+		// Dev exports and pushes
+		await exportAndPush(page, devId, 'e2e: 1.13 condition same row conflict');
 
-    // Local pulls → conflict
-    await pullChanges(page, localId);
+		// Local pulls → conflict
+		await pullChanges(page, localId);
 
-    // Verify conflict exists
-    await goToConflicts(page, localId);
-    await expectConflict(page, TEST_CF_NAME);
+		// Verify conflict exists
+		await goToConflicts(page, localId);
+		await expectConflict(page, TEST_CF_NAME);
 
-    // Override
-    await overrideConflict(page, TEST_CF_NAME);
+		// Override
+		await overrideConflict(page, TEST_CF_NAME);
 
-    // Verify condition uses user's value
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    const value = await getConditionValueByName(page, CONDITION_NAME);
-    expect(value).toBe(LOCAL_RESOLUTION);
-  });
+		// Verify condition uses user's value
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		const value = await getConditionValueByName(page, CONDITION_NAME);
+		expect(value).toBe(LOCAL_RESOLUTION);
+	});
 
-  test('b) align — condition uses upstream value', async ({ page }) => {
-    // Local edits condition value
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    await updateConditionValueByName(page, CONDITION_NAME, LOCAL_RESOLUTION);
-    await saveConditionChanges(page);
+	test('b) align — condition uses upstream value', async ({ page }) => {
+		// Local edits condition value
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		await updateConditionValueByName(page, CONDITION_NAME, LOCAL_RESOLUTION);
+		await saveConditionChanges(page);
 
-    // Dev edits same condition differently
-    await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-    await updateConditionValueByName(page, CONDITION_NAME, DEV_RESOLUTION);
-    await saveConditionChanges(page);
+		// Dev edits same condition differently
+		await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+		await updateConditionValueByName(page, CONDITION_NAME, DEV_RESOLUTION);
+		await saveConditionChanges(page);
 
-    // Dev exports and pushes
-    await exportAndPush(page, devId, 'e2e: 1.13 condition same row conflict');
+		// Dev exports and pushes
+		await exportAndPush(page, devId, 'e2e: 1.13 condition same row conflict');
 
-    // Local pulls → conflict
-    await pullChanges(page, localId);
+		// Local pulls → conflict
+		await pullChanges(page, localId);
 
-    // Verify conflict exists
-    await goToConflicts(page, localId);
-    await expectConflict(page, TEST_CF_NAME);
+		// Verify conflict exists
+		await goToConflicts(page, localId);
+		await expectConflict(page, TEST_CF_NAME);
 
-    // Align
-    await alignConflict(page, TEST_CF_NAME);
+		// Align
+		await alignConflict(page, TEST_CF_NAME);
 
-    // Verify condition uses upstream value
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    const value = await getConditionValueByName(page, CONDITION_NAME);
-    expect(value).toBe(DEV_RESOLUTION);
-  });
+		// Verify condition uses upstream value
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		const value = await getConditionValueByName(page, CONDITION_NAME);
+		expect(value).toBe(DEV_RESOLUTION);
+	});
 });

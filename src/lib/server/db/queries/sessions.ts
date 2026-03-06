@@ -103,11 +103,7 @@ export const sessionsQueries = {
 	 * Delete all sessions except one (logout other devices)
 	 */
 	deleteOthersByUserId(userId: number, keepSessionId: string): number {
-		return db.execute(
-			'DELETE FROM sessions WHERE user_id = ? AND id != ?',
-			userId,
-			keepSessionId
-		);
+		return db.execute('DELETE FROM sessions WHERE user_id = ? AND id != ?', userId, keepSessionId);
 	},
 
 	/**

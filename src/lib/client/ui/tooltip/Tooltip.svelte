@@ -53,11 +53,23 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class={fullWidth ? 'flex w-full' : 'inline-flex'} bind:this={wrapperEl} on:mouseenter={show} on:mouseleave={hide}>
+<div
+	class={fullWidth ? 'flex w-full' : 'inline-flex'}
+	bind:this={wrapperEl}
+	on:mouseenter={show}
+	on:mouseleave={hide}
+>
 	<slot />
 	{#if text && visible}
-		<div bind:this={tooltipEl} class="pointer-events-none fixed z-50" style="{style};border-radius:0.75rem !important">
-			<div class="whitespace-nowrap border border-neutral-300 bg-white px-2 py-1 text-xs font-medium text-neutral-900 shadow-lg dark:border-neutral-700/60 dark:bg-neutral-800 dark:text-neutral-50" style="border-radius:0.75rem !important">
+		<div
+			bind:this={tooltipEl}
+			class="pointer-events-none fixed z-50"
+			style="{style};border-radius:0.75rem !important"
+		>
+			<div
+				class="border border-neutral-300 bg-white px-2 py-1 text-xs font-medium whitespace-nowrap text-neutral-900 shadow-lg dark:border-neutral-700/60 dark:bg-neutral-800 dark:text-neutral-50"
+				style="border-radius:0.75rem !important"
+			>
 				{text}
 			</div>
 		</div>

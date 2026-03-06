@@ -35,7 +35,7 @@ export async function createRadarrQualityDefinitions(options: CreateQualityDefin
 		throw new Error(`A radarr quality definitions config with name "${input.name}" already exists`);
 	}
 
-	const queries = input.entries.map(entry =>
+	const queries = input.entries.map((entry) =>
 		db
 			.insertInto('radarr_quality_definitions')
 			.values({
@@ -85,7 +85,7 @@ export async function createSonarrQualityDefinitions(options: CreateQualityDefin
 		throw new Error(`A sonarr quality definitions config with name "${input.name}" already exists`);
 	}
 
-	const queries = input.entries.map(entry =>
+	const queries = input.entries.map((entry) =>
 		db
 			.insertInto('sonarr_quality_definitions')
 			.values({

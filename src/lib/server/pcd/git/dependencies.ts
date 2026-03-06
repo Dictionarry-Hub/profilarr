@@ -126,7 +126,10 @@ export async function processDependencies(
  * Sync dependencies - update any that have changed versions
  * Uses fetch + checkout instead of re-cloning
  */
-export async function syncDependencies(pcdPath: string, personalAccessToken?: string): Promise<void> {
+export async function syncDependencies(
+	pcdPath: string,
+	personalAccessToken?: string
+): Promise<void> {
 	const manifest = await loadManifest(pcdPath);
 
 	if (!manifest.dependencies || Object.keys(manifest.dependencies).length === 0) {
@@ -152,10 +155,13 @@ export async function syncDependencies(pcdPath: string, personalAccessToken?: st
 		if (hasGitFolder) {
 			// Fetch tags and checkout new version
 			await updateDependency(depPath, requiredVersion);
-			await logger.info(`Updated dependency ${repoName}: ${installedVersion} -> ${requiredVersion}`, {
-				source: 'PCDDependencies',
-				meta: { pcdPath, repoName, from: installedVersion, to: requiredVersion }
-			});
+			await logger.info(
+				`Updated dependency ${repoName}: ${installedVersion} -> ${requiredVersion}`,
+				{
+					source: 'PCDDependencies',
+					meta: { pcdPath, repoName, from: installedVersion, to: requiredVersion }
+				}
+			);
 		} else {
 			// No .git folder (legacy or corrupted) - re-clone
 			try {
@@ -209,10 +215,13 @@ export async function validateDependencies(
 			// Check version
 			const installedVersion = await getInstalledVersion(pcdPath, repoName);
 			if (installedVersion !== requiredVersion) {
-				await logger.warn(`Dependency ${repoName} version mismatch: ${installedVersion} != ${requiredVersion}`, {
-					source: 'PCDDependencies',
-					meta: { pcdPath, repoName, installed: installedVersion, required: requiredVersion }
-				});
+				await logger.warn(
+					`Dependency ${repoName} version mismatch: ${installedVersion} != ${requiredVersion}`,
+					{
+						source: 'PCDDependencies',
+						meta: { pcdPath, repoName, installed: installedVersion, required: requiredVersion }
+					}
+				);
 				allValid = false;
 			}
 

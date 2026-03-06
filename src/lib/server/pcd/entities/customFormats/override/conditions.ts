@@ -15,13 +15,17 @@ function toConditionData(entry: Record<string, unknown>): ConditionData | null {
 	if (!name) return null;
 
 	// "updated" entries have {from, to} for base and values
-	const base = (entry.base && typeof entry.base === 'object' && 'to' in entry.base
-		? (entry.base as { to: Record<string, unknown> }).to
-		: entry.base) as Record<string, unknown> | undefined;
+	const base = (
+		entry.base && typeof entry.base === 'object' && 'to' in entry.base
+			? (entry.base as { to: Record<string, unknown> }).to
+			: entry.base
+	) as Record<string, unknown> | undefined;
 
-	const values = (entry.values && typeof entry.values === 'object' && 'to' in entry.values
-		? (entry.values as { to: Record<string, unknown> }).to
-		: entry.values) as Record<string, unknown> | undefined;
+	const values = (
+		entry.values && typeof entry.values === 'object' && 'to' in entry.values
+			? (entry.values as { to: Record<string, unknown> }).to
+			: entry.values
+	) as Record<string, unknown> | undefined;
 
 	return {
 		name,
@@ -69,18 +73,22 @@ export async function overrideConditions(
 	const currentConditions = await getConditionsForEvaluation(cache, formatName);
 
 	// Parse the desired diff
-	const conditionsDiff = desiredState.conditions as {
-		added?: Record<string, unknown>[];
-		removed?: Record<string, unknown>[];
-		updated?: Record<string, unknown>[];
-	} | undefined;
+	const conditionsDiff = desiredState.conditions as
+		| {
+				added?: Record<string, unknown>[];
+				removed?: Record<string, unknown>[];
+				updated?: Record<string, unknown>[];
+		  }
+		| undefined;
 
 	if (!conditionsDiff) {
 		// No conditions diff — nothing to do
 		return { success: true };
 	}
 
-	const added = (conditionsDiff.added ?? []).map(toConditionData).filter((c): c is ConditionData => c !== null);
+	const added = (conditionsDiff.added ?? [])
+		.map(toConditionData)
+		.filter((c): c is ConditionData => c !== null);
 	const removedNames = new Set(
 		(conditionsDiff.removed ?? []).map((e) => e.name as string).filter(Boolean)
 	);

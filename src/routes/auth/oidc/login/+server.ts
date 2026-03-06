@@ -25,7 +25,10 @@ export const GET: RequestHandler = async (event) => {
 			source: 'Auth:OIDC',
 			meta: { missing }
 		});
-		throw error(500, 'OIDC is not configured. Set OIDC_DISCOVERY_URL, OIDC_CLIENT_ID, and OIDC_CLIENT_SECRET');
+		throw error(
+			500,
+			'OIDC is not configured. Set OIDC_DISCOVERY_URL, OIDC_CLIENT_ID, and OIDC_CLIENT_SECRET'
+		);
 	}
 
 	await logger.debug('OIDC flow started', {

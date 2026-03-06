@@ -109,7 +109,9 @@
 			<StickyCard position="top">
 				<svelte:fragment slot="left">
 					<h1 class="text-neutral-900 dark:text-neutral-50">Config</h1>
-					<p class="text-neutral-600 dark:text-neutral-400">Edit the database manifest and README</p>
+					<p class="text-neutral-600 dark:text-neutral-400">
+						Edit the database manifest and README
+					</p>
 				</svelte:fragment>
 				<svelte:fragment slot="right">
 					<Button
@@ -333,7 +335,9 @@
 
 				<!-- README -->
 				<div class="space-y-1">
-					<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">README</span>
+					<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+						>README</span
+					>
 					<p class="text-xs text-neutral-500 dark:text-neutral-400">
 						Documentation for your database
 					</p>

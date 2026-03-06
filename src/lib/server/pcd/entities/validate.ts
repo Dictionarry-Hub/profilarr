@@ -199,7 +199,10 @@ function validateSonarrNaming(data: Record<string, unknown>): string | null {
 	if (!VALID_COLON_FORMATS.has(data.colonReplacementFormat as string)) {
 		return `data.colonReplacementFormat must be one of: ${[...VALID_COLON_FORMATS].join(', ')}`;
 	}
-	if (data.customColonReplacementFormat !== null && typeof data.customColonReplacementFormat !== 'string') {
+	if (
+		data.customColonReplacementFormat !== null &&
+		typeof data.customColonReplacementFormat !== 'string'
+	) {
 		return 'data.customColonReplacementFormat must be a string or null';
 	}
 	if (!VALID_MULTI_EPISODE_STYLES.has(data.multiEpisodeStyle as string)) {

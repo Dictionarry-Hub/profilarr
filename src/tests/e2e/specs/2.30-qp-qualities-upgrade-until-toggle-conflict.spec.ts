@@ -20,10 +20,7 @@ import {
 	overrideConflict,
 	alignConflict
 } from '../helpers/conflicts';
-import {
-	openFirstQualityProfileGeneral,
-	goToQualityProfileQualities
-} from '../helpers/entity';
+import { openFirstQualityProfileGeneral, goToQualityProfileQualities } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
 const LOCAL_DB_NAME = 'E2E Local';
@@ -63,7 +60,10 @@ async function getUpgradeUntilName(page: import('@playwright/test').Page): Promi
  * Click the upgrade-until checkbox on the quality at the given index.
  * The first role="checkbox" in each row is the upgrade-until toggle.
  */
-async function clickUpgradeUntil(page: import('@playwright/test').Page, index: number): Promise<void> {
+async function clickUpgradeUntil(
+	page: import('@playwright/test').Page,
+	index: number
+): Promise<void> {
 	const row = page.locator('div.space-y-4 > div[role="button"]').nth(index);
 	await row.locator('[role="checkbox"]').first().click();
 	await page.waitForTimeout(200);

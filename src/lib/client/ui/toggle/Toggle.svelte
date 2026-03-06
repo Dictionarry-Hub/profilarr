@@ -28,11 +28,7 @@
 	const dispatch = createEventDispatcher<{ change: boolean; checked: boolean }>();
 
 	$: resolvedLabel = label || ariaLabel;
-	$: resolvedCheckboxColor = checkboxColor
-		? checkboxColor
-		: color === 'amber'
-			? '#F59E0B'
-			: color;
+	$: resolvedCheckboxColor = checkboxColor ? checkboxColor : color === 'amber' ? '#F59E0B' : color;
 
 	function handleToggle() {
 		if (disabled) return;
@@ -64,7 +60,7 @@
 		<span class="truncate">{label}</span>
 	{/if}
 	<IconCheckbox
-		checked={checked}
+		{checked}
 		{icon}
 		color={resolvedCheckboxColor || 'accent'}
 		{shape}

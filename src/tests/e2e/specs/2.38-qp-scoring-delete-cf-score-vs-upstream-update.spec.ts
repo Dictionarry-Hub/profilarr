@@ -22,10 +22,7 @@ import {
 	overrideConflict,
 	alignConflict
 } from '../helpers/conflicts';
-import {
-	openFirstQualityProfileGeneral,
-	goToQualityProfileScoring
-} from '../helpers/entity';
+import { openFirstQualityProfileGeneral, goToQualityProfileScoring } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
 const LOCAL_DB_NAME = 'E2E Local';

@@ -19,17 +19,17 @@ import { linkPcd } from '../helpers/linkPcd';
 import { unlinkPcdByName } from '../helpers/unlinkPcd';
 import { pullChanges, exportAndPush } from '../helpers/sync';
 import {
-  goToConflicts,
-  expectConflict,
-  overrideConflict,
-  alignConflict
+	goToConflicts,
+	expectConflict,
+	overrideConflict,
+	alignConflict
 } from '../helpers/conflicts';
 import {
-  goToCustomFormatConditions,
-  addEnumCondition,
-  updateConditionValueByName,
-  getConditionValueByName,
-  saveConditionChanges
+	goToCustomFormatConditions,
+	addEnumCondition,
+	updateConditionValueByName,
+	getConditionValueByName,
+	saveConditionChanges
 } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
@@ -51,131 +51,131 @@ const DEV_B_VALUE = 'WEBRip';
 const DEV_C_VALUE = '720p';
 
 async function seedConditions(page: Page, devId: number, localId: number) {
-  await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-  await addEnumCondition(page, {
-    name: CONDITION_A,
-    typeLabel: 'Source',
-    valueLabel: CONDITION_A_INITIAL
-  });
-  await addEnumCondition(page, {
-    name: CONDITION_B,
-    typeLabel: 'Source',
-    valueLabel: CONDITION_B_INITIAL
-  });
-  await saveConditionChanges(page);
+	await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+	await addEnumCondition(page, {
+		name: CONDITION_A,
+		typeLabel: 'Source',
+		valueLabel: CONDITION_A_INITIAL
+	});
+	await addEnumCondition(page, {
+		name: CONDITION_B,
+		typeLabel: 'Source',
+		valueLabel: CONDITION_B_INITIAL
+	});
+	await saveConditionChanges(page);
 
-  await exportAndPush(page, devId, 'e2e: 1.15 seed conditions');
-  await pullChanges(page, localId);
+	await exportAndPush(page, devId, 'e2e: 1.15 seed conditions');
+	await pullChanges(page, localId);
 }
 
 test.describe('1.15 CF conditions multiple upstream changes', () => {
-  test.describe.configure({ timeout: 120_000 });
+	test.describe.configure({ timeout: 120_000 });
 
-  let localId: number;
-  let devId: number;
-  let devHead: string;
+	let localId: number;
+	let devId: number;
+	let devHead: string;
 
-  test.beforeEach(async ({ browser }) => {
-    const page = await browser.newPage();
+	test.beforeEach(async ({ browser }) => {
+		const page = await browser.newPage();
 
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
 
-    devId = await linkPcd(page, {
-      name: DEV_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL
-    });
+		devId = await linkPcd(page, {
+			name: DEV_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL
+		});
 
-    devHead = getHead(devId);
+		devHead = getHead(devId);
 
-    localId = await linkPcd(page, {
-      name: LOCAL_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL,
-      syncStrategy: 'Manual (no auto-sync)',
-      autoPull: false,
-      localOpsEnabled: true,
-      conflictStrategy: 'Ask every time'
-    });
+		localId = await linkPcd(page, {
+			name: LOCAL_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL,
+			syncStrategy: 'Manual (no auto-sync)',
+			autoPull: false,
+			localOpsEnabled: true,
+			conflictStrategy: 'Ask every time'
+		});
 
-    await page.close();
-  });
+		await page.close();
+	});
 
-  test.afterEach(async ({ browser }) => {
-    if (devId && devHead) {
-      try {
-        resetToCommit(devId, devHead, true);
-      } catch {
-        // Best-effort reset
-      }
-    }
+	test.afterEach(async ({ browser }) => {
+		if (devId && devHead) {
+			try {
+				resetToCommit(devId, devHead, true);
+			} catch {
+				// Best-effort reset
+			}
+		}
 
-    const page = await browser.newPage();
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
-    await page.close();
-  });
+		const page = await browser.newPage();
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
+		await page.close();
+	});
 
-  test('a) override — keep local A/B, upstream C', async ({ page }) => {
-    await seedConditions(page, devId, localId);
+	test('a) override — keep local A/B, upstream C', async ({ page }) => {
+		await seedConditions(page, devId, localId);
 
-    // Local edits A + B
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    await updateConditionValueByName(page, CONDITION_A, LOCAL_A_VALUE);
-    await updateConditionValueByName(page, CONDITION_B, LOCAL_B_VALUE);
-    await saveConditionChanges(page);
+		// Local edits A + B
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		await updateConditionValueByName(page, CONDITION_A, LOCAL_A_VALUE);
+		await updateConditionValueByName(page, CONDITION_B, LOCAL_B_VALUE);
+		await saveConditionChanges(page);
 
-    // Dev edits overlapping B + separate C
-    await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-    await updateConditionValueByName(page, CONDITION_B, DEV_B_VALUE);
-    await updateConditionValueByName(page, CONDITION_C, DEV_C_VALUE);
-    await saveConditionChanges(page);
+		// Dev edits overlapping B + separate C
+		await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+		await updateConditionValueByName(page, CONDITION_B, DEV_B_VALUE);
+		await updateConditionValueByName(page, CONDITION_C, DEV_C_VALUE);
+		await saveConditionChanges(page);
 
-    await exportAndPush(page, devId, 'e2e: 1.15 multi-upstream conflict');
-    await pullChanges(page, localId);
+		await exportAndPush(page, devId, 'e2e: 1.15 multi-upstream conflict');
+		await pullChanges(page, localId);
 
-    await goToConflicts(page, localId);
-    await expectConflict(page, TEST_CF_NAME);
+		await goToConflicts(page, localId);
+		await expectConflict(page, TEST_CF_NAME);
 
-    await overrideConflict(page, TEST_CF_NAME);
+		await overrideConflict(page, TEST_CF_NAME);
 
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    expect(await getConditionValueByName(page, CONDITION_A)).toBe(LOCAL_A_VALUE);
-    expect(await getConditionValueByName(page, CONDITION_B)).toBe(LOCAL_B_VALUE);
-    expect(await getConditionValueByName(page, CONDITION_C)).toBe(DEV_C_VALUE);
-  });
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		expect(await getConditionValueByName(page, CONDITION_A)).toBe(LOCAL_A_VALUE);
+		expect(await getConditionValueByName(page, CONDITION_B)).toBe(LOCAL_B_VALUE);
+		expect(await getConditionValueByName(page, CONDITION_C)).toBe(DEV_C_VALUE);
+	});
 
-  test('b) align — keep local A, upstream B/C', async ({ page }) => {
-    await seedConditions(page, devId, localId);
+	test('b) align — keep local A, upstream B/C', async ({ page }) => {
+		await seedConditions(page, devId, localId);
 
-    // Local edits A + B
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    await updateConditionValueByName(page, CONDITION_A, LOCAL_A_VALUE);
-    await updateConditionValueByName(page, CONDITION_B, LOCAL_B_VALUE);
-    await saveConditionChanges(page);
+		// Local edits A + B
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		await updateConditionValueByName(page, CONDITION_A, LOCAL_A_VALUE);
+		await updateConditionValueByName(page, CONDITION_B, LOCAL_B_VALUE);
+		await saveConditionChanges(page);
 
-    // Dev edits overlapping B + separate C
-    await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-    await updateConditionValueByName(page, CONDITION_B, DEV_B_VALUE);
-    await updateConditionValueByName(page, CONDITION_C, DEV_C_VALUE);
-    await saveConditionChanges(page);
+		// Dev edits overlapping B + separate C
+		await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+		await updateConditionValueByName(page, CONDITION_B, DEV_B_VALUE);
+		await updateConditionValueByName(page, CONDITION_C, DEV_C_VALUE);
+		await saveConditionChanges(page);
 
-    await exportAndPush(page, devId, 'e2e: 1.15 multi-upstream conflict');
-    await pullChanges(page, localId);
+		await exportAndPush(page, devId, 'e2e: 1.15 multi-upstream conflict');
+		await pullChanges(page, localId);
 
-    await goToConflicts(page, localId);
-    await expectConflict(page, TEST_CF_NAME);
+		await goToConflicts(page, localId);
+		await expectConflict(page, TEST_CF_NAME);
 
-    await alignConflict(page, TEST_CF_NAME);
+		await alignConflict(page, TEST_CF_NAME);
 
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    expect(await getConditionValueByName(page, CONDITION_A)).toBe(LOCAL_A_VALUE);
-    expect(await getConditionValueByName(page, CONDITION_B)).toBe(DEV_B_VALUE);
-    expect(await getConditionValueByName(page, CONDITION_C)).toBe(DEV_C_VALUE);
-  });
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		expect(await getConditionValueByName(page, CONDITION_A)).toBe(LOCAL_A_VALUE);
+		expect(await getConditionValueByName(page, CONDITION_B)).toBe(DEV_B_VALUE);
+		expect(await getConditionValueByName(page, CONDITION_C)).toBe(DEV_C_VALUE);
+	});
 });

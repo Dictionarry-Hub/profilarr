@@ -211,9 +211,10 @@
 
 	// Display text based on mode
 	$: title = mode === 'create' ? 'Add Instance' : 'Settings';
-	$: description = mode === 'create'
-		? 'Configure a new Radarr or Sonarr instance.'
-		: `Configure connection and sync settings for ${instance?.name || 'this instance'}.`;
+	$: description =
+		mode === 'create'
+			? 'Configure a new Radarr or Sonarr instance.'
+			: `Configure connection and sync settings for ${instance?.name || 'this instance'}.`;
 
 	// Save cleanup settings alongside the main save
 	async function saveCleanupSettings() {
@@ -389,16 +390,11 @@
 		</div>
 		<!-- Tags Row -->
 		<div class="space-y-2">
-			<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-				Tags
-			</span>
+			<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"> Tags </span>
 			<p class="text-xs text-neutral-500 dark:text-neutral-400">
 				Press Enter to add a tag, Backspace to remove
 			</p>
-			<TagInput
-				{tags}
-				on:change={(e) => update('tags', JSON.stringify(e.detail))}
-			/>
+			<TagInput {tags} on:change={(e) => update('tags', JSON.stringify(e.detail))} />
 		</div>
 		<!-- Library Refresh (edit mode only) -->
 		{#if mode === 'edit' && instance}
@@ -424,9 +420,12 @@
 					Cleanup
 				</span>
 				<p class="text-xs text-neutral-500 dark:text-neutral-400">
-					Remove unused quality profiles, custom formats, and media flagged as removed from TMDB/TVDB
+					Remove unused quality profiles, custom formats, and media flagged as removed from
+					TMDB/TVDB
 				</p>
-				<div class="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 md:flex md:flex-wrap md:gap-x-6">
+				<div
+					class="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 md:flex md:flex-wrap md:gap-x-6"
+				>
 					<div class="md:flex md:items-center md:gap-2">
 						<Toggle
 							checked={cleanupEnabled}
@@ -440,14 +439,22 @@
 						<!-- Schedule -->
 						<span class="text-sm text-neutral-500 md:hidden dark:text-neutral-400">Schedule</span>
 						<div class="md:flex md:items-center md:gap-2">
-							<span class="hidden text-sm text-neutral-500 md:inline dark:text-neutral-400">Schedule:</span>
-							<CronInput bind:value={cronInputValue} minIntervalMinutes={60} onWarning={(msg) => alertStore.add('warning', msg)} />
+							<span class="hidden text-sm text-neutral-500 md:inline dark:text-neutral-400"
+								>Schedule:</span
+							>
+							<CronInput
+								bind:value={cronInputValue}
+								minIntervalMinutes={60}
+								onWarning={(msg) => alertStore.add('warning', msg)}
+							/>
 						</div>
 
 						<!-- Run status + Run Now (right-aligned together) -->
 						<div class="col-span-2 flex flex-wrap items-center gap-3 md:ml-auto">
 							{#if cleanupSettings?.lastRunAt}
-								<div class="flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-3 text-xs text-neutral-500 md:border-0 md:pt-0 dark:border-neutral-700 dark:text-neutral-400">
+								<div
+									class="flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-3 text-xs text-neutral-500 md:border-0 md:pt-0 dark:border-neutral-700 dark:text-neutral-400"
+								>
 									{#if cleanupTimeUntilNext !== null && cleanupTimeUntilNext <= 0}
 										<span
 											class="rounded bg-green-100 px-1.5 py-0.5 font-medium text-green-700 dark:bg-green-900/50 dark:text-green-400"
@@ -495,7 +502,10 @@
 			if (result.type === 'redirect') {
 				// For create mode, clear dirty state before redirect
 				clear();
-				alertStore.add('success', 'Arr instance configured! Visit the Settings tab to adjust library refresh intervals, cleanup, and more.');
+				alertStore.add(
+					'success',
+					'Arr instance configured! Visit the Settings tab to adjust library refresh intervals, cleanup, and more.'
+				);
 			}
 			await formUpdate({ reset: false });
 			saving = false;

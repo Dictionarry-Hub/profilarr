@@ -3,14 +3,24 @@
  */
 
 import type { PCDCache } from '$pcd/index.ts';
-import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow, MediaSettingsListItem } from '$shared/pcd/display.ts';
+import type {
+	RadarrMediaSettingsRow,
+	SonarrMediaSettingsRow,
+	MediaSettingsListItem
+} from '$shared/pcd/display.ts';
 
 export async function list(cache: PCDCache): Promise<MediaSettingsListItem[]> {
 	const db = cache.kb;
 
 	const [radarrRows, sonarrRows] = await Promise.all([
-		db.selectFrom('radarr_media_settings').select(['name', 'propers_repacks', 'enable_media_info', 'updated_at']).execute(),
-		db.selectFrom('sonarr_media_settings').select(['name', 'propers_repacks', 'enable_media_info', 'updated_at']).execute()
+		db
+			.selectFrom('radarr_media_settings')
+			.select(['name', 'propers_repacks', 'enable_media_info', 'updated_at'])
+			.execute(),
+		db
+			.selectFrom('sonarr_media_settings')
+			.select(['name', 'propers_repacks', 'enable_media_info', 'updated_at'])
+			.execute()
 	]);
 
 	const items: MediaSettingsListItem[] = [];

@@ -2,7 +2,20 @@
 	import Group from './group.svelte';
 	import GroupItem from './groupItem.svelte';
 	import Version from './version.svelte';
-	import { FolderTree, Link, Sliders, Palette, Microscope, Tag, Clock, Settings, X, Wrench, Film, Tv } from 'lucide-svelte';
+	import {
+		FolderTree,
+		Link,
+		Sliders,
+		Palette,
+		Microscope,
+		Tag,
+		Clock,
+		Settings,
+		X,
+		Wrench,
+		Film,
+		Tv
+	} from 'lucide-svelte';
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import { page } from '$app/stores';
 	import logo from '$assets/logo-512.png';
@@ -40,7 +53,9 @@
 		md:top-16 md:h-[calc(100vh-4rem)] md:w-80 md:translate-x-0 md:border-t"
 >
 	<!-- Mobile header with logo and close button -->
-	<div class="flex items-center justify-between border-b border-neutral-200 py-4 pl-8 pr-4 md:hidden dark:border-neutral-800">
+	<div
+		class="flex items-center justify-between border-b border-neutral-200 py-4 pr-4 pl-8 md:hidden dark:border-neutral-800"
+	>
 		<div class="flex items-center gap-2">
 			<img src={logo} alt="Profilarr logo" class="h-5 w-5" />
 			<span class="text-xl font-bold text-neutral-900 dark:text-neutral-100">profilarr</span>
@@ -57,14 +72,7 @@
 
 	<div class="flex-1 overflow-y-auto p-4">
 		{#if import.meta.env.DEV}
-			<Group
-				label="Dev"
-				emoji="🛠️"
-				href="/dev"
-				icon={Wrench}
-				initialOpen={true}
-				hasItems={true}
-			>
+			<Group label="Dev" emoji="🛠️" href="/dev" icon={Wrench} initialOpen={true} hasItems={true}>
 				<GroupItem label="Components" href="/dev/components" />
 			</Group>
 		{/if}
@@ -137,9 +145,21 @@
 			initialOpen={true}
 			hasItems={true}
 		>
-			<GroupItem label="Naming Settings" href="/media-management?section=naming" activePattern="/naming" />
-			<GroupItem label="Quality Definitions" href="/media-management?section=quality-definitions" activePattern="/quality-definitions" />
-			<GroupItem label="Media Settings" href="/media-management?section=media-settings" activePattern="/media-settings" />
+			<GroupItem
+				label="Naming Settings"
+				href="/media-management?section=naming"
+				activePattern="/naming"
+			/>
+			<GroupItem
+				label="Quality Definitions"
+				href="/media-management?section=quality-definitions"
+				activePattern="/quality-definitions"
+			/>
+			<GroupItem
+				label="Media Settings"
+				href="/media-management?section=media-settings"
+				activePattern="/media-settings"
+			/>
 		</Group>
 
 		<Group

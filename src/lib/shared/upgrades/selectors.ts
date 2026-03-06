@@ -83,7 +83,9 @@ export const selectors: Selector[] = [
 		label: 'A-Z',
 		description: 'Select items alphabetically by title (A to Z)',
 		select: (items, count) => {
-			const sorted = [...items].sort((a, b) => sortTitle(a.title).localeCompare(sortTitle(b.title)));
+			const sorted = [...items].sort((a, b) =>
+				sortTitle(a.title).localeCompare(sortTitle(b.title))
+			);
 			return sorted.slice(0, count);
 		}
 	},
@@ -92,7 +94,9 @@ export const selectors: Selector[] = [
 		label: 'Z-A',
 		description: 'Select items alphabetically by title (Z to A)',
 		select: (items, count) => {
-			const sorted = [...items].sort((a, b) => sortTitle(b.title).localeCompare(sortTitle(a.title)));
+			const sorted = [...items].sort((a, b) =>
+				sortTitle(b.title).localeCompare(sortTitle(a.title))
+			);
 			return sorted.slice(0, count);
 		}
 	}

@@ -43,13 +43,10 @@
 
 	$: effectiveMinYear = Math.min(minYear ?? defaultMinYear, maxYear ?? defaultMaxYear);
 	$: effectiveMaxYear = Math.max(maxYear ?? defaultMaxYear, minYear ?? defaultMinYear);
-	$: yearOptions = Array.from(
-		{ length: effectiveMaxYear - effectiveMinYear + 1 },
-		(_, idx) => {
-			const nextYear = effectiveMinYear + idx;
-			return { value: String(nextYear), label: String(nextYear) };
-		}
-	);
+	$: yearOptions = Array.from({ length: effectiveMaxYear - effectiveMinYear + 1 }, (_, idx) => {
+		const nextYear = effectiveMinYear + idx;
+		return { value: String(nextYear), label: String(nextYear) };
+	});
 
 	function daysInMonth(yearNumber: number, monthNumber: number): number {
 		if (!Number.isFinite(yearNumber) || !Number.isFinite(monthNumber)) return 31;
@@ -122,10 +119,7 @@
 
 <div class={containerClass}>
 	{#if !hideLabel}
-		<label
-			for={name}
-			class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
-		>
+		<label for={name} class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
 			{label}{#if required}<span class="text-red-500">*</span>{/if}
 		</label>
 	{/if}
@@ -143,7 +137,7 @@
 			label="Month"
 			hideLabel
 			name={`${name}-month`}
-			size={size}
+			{size}
 			disabled={effectiveDisabled}
 			fullWidth={false}
 			on:change={(event) => onMonthChange(event.detail)}
@@ -154,7 +148,7 @@
 			label="Day"
 			hideLabel
 			name={`${name}-day`}
-			size={size}
+			{size}
 			disabled={effectiveDisabled}
 			fullWidth={false}
 			on:change={(event) => onDayChange(event.detail)}
@@ -165,7 +159,7 @@
 			label="Year"
 			hideLabel
 			name={`${name}-year`}
-			size={size}
+			{size}
 			disabled={effectiveDisabled}
 			fullWidth={false}
 			on:change={(event) => onYearChange(event.detail)}

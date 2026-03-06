@@ -14,8 +14,7 @@
 
 const COMPOSE_FILE = 'src/tests/integration/docker-compose.yml';
 const BINARY = './dist/build/profilarr';
-const MOCK_OIDC_URL =
-	'http://localhost:9090/default/.well-known/openid-configuration';
+const MOCK_OIDC_URL = 'http://localhost:9090/default/.well-known/openid-configuration';
 
 const DIRECT_PORT = 7006;
 const PROXY_PORT = 7009;
@@ -54,9 +53,7 @@ try {
 	try {
 		await Deno.stat(BINARY);
 	} catch {
-		console.error(
-			`Build not found at ${BINARY}. Run "deno task build" first.`
-		);
+		console.error(`Build not found at ${BINARY}. Run "deno task build" first.`);
 		Deno.exit(1);
 	}
 
@@ -78,13 +75,7 @@ try {
 	// 4. Run Playwright
 	console.log('\nRunning Playwright tests...\n');
 	const cmd = new Deno.Command('npx', {
-		args: [
-			'playwright',
-			'test',
-			'--config',
-			'playwright.oidc.config.ts',
-			...playwrightArgs
-		],
+		args: ['playwright', 'test', '--config', 'playwright.oidc.config.ts', ...playwrightArgs],
 		env: {
 			...Deno.env.toObject(),
 			OIDC_DIRECT_URL: `http://localhost:${DIRECT_PORT}`,
@@ -122,10 +113,7 @@ try {
 
 Deno.exit(exitCode);
 
-async function startServer(
-	port: number,
-	envOverrides: Record<string, string>
-): Promise<void> {
+async function startServer(port: number, envOverrides: Record<string, string>): Promise<void> {
 	const basePath = `./dist/e2e-oidc-${port}`;
 
 	console.log(`Starting server on port ${port}...`);
@@ -180,9 +168,7 @@ async function waitForReady(url: string, timeoutMs: number): Promise<void> {
 		await new Promise((r) => setTimeout(r, 500));
 	}
 
-	throw new Error(
-		`Server at ${url} did not become ready within ${timeoutMs}ms`
-	);
+	throw new Error(`Server at ${url} did not become ready within ${timeoutMs}ms`);
 }
 
 function drainStream(stream: ReadableStream<Uint8Array>): void {

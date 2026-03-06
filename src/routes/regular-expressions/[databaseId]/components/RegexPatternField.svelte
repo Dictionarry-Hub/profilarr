@@ -80,10 +80,7 @@
 <div class="space-y-4">
 	<!-- Regex Pattern -->
 	<div class="space-y-2">
-		<label
-			for="pattern"
-			class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
-		>
+		<label for="pattern" class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
 			Regular Expression<span class="text-red-500">*</span>
 		</label>
 		<div class="flex items-center justify-between gap-2">
@@ -129,13 +126,18 @@
 
 	<!-- Regex101 ID -->
 	<div>
-		<label for="regex101Id" class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+		<label
+			for="regex101Id"
+			class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+		>
 			Regex101 ID
 		</label>
 		<p class="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
 			Link to regex101.com for testing (include version, e.g., ABC123/1)
 		</p>
-		<div class="mt-2 flex h-10 items-center overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50">
+		<div
+			class="mt-2 flex h-10 items-center overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50"
+		>
 			<input
 				type="text"
 				id="regex101Id"
@@ -158,5 +160,4 @@
 			{/if}
 		</div>
 	</div>
-
 </div>

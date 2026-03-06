@@ -142,7 +142,7 @@
 	$: visibleColumns = columns.filter((column) => !column.hideOnMobile);
 	$: mobilePrimaryColumn =
 		primaryColumnKey != null
-			? visibleColumns.find((column) => column.key === primaryColumnKey) ?? visibleColumns[0]
+			? (visibleColumns.find((column) => column.key === primaryColumnKey) ?? visibleColumns[0])
 			: visibleColumns[0];
 	$: mobileSecondaryColumns = visibleColumns.filter((column) => column !== mobilePrimaryColumn);
 
@@ -197,7 +197,9 @@
 					>
 						<!-- Primary row: first column as title + actions + chevron -->
 						<div class="flex items-start justify-between gap-3 px-4 py-3">
-							<div class="min-w-0 flex-1 break-all font-medium text-neutral-900 dark:text-neutral-100">
+							<div
+								class="min-w-0 flex-1 font-medium break-all text-neutral-900 dark:text-neutral-100"
+							>
 								<slot
 									name="cell"
 									{row}
@@ -231,12 +233,22 @@
 
 						<!-- Secondary columns as label-value pairs -->
 						{#if mobileSecondaryColumns.length > 0}
-							<div class="space-y-2 border-t border-neutral-200 px-4 py-3 dark:border-neutral-700/60">
+							<div
+								class="space-y-2 border-t border-neutral-200 px-4 py-3 dark:border-neutral-700/60"
+							>
 								{#each mobileSecondaryColumns as column, colIndex}
 									<div class="flex items-center justify-between gap-4 text-sm">
-										<span class="shrink-0 text-neutral-500 dark:text-neutral-400">{column.header}</span>
+										<span class="shrink-0 text-neutral-500 dark:text-neutral-400"
+											>{column.header}</span
+										>
 										<span class="min-w-0 text-right text-neutral-700 dark:text-neutral-300">
-											<slot name="cell" {row} {column} index={colIndex + 1} expanded={expandedRows.has(rowId)}>
+											<slot
+												name="cell"
+												{row}
+												{column}
+												index={colIndex + 1}
+												expanded={expandedRows.has(rowId)}
+											>
 												{getCellValue(row, column.key)}
 											</slot>
 										</span>
@@ -248,7 +260,9 @@
 
 					<!-- Expanded Content -->
 					{#if !shouldDisableExpand(row) && expandedRows.has(rowId)}
-						<div class="border-t border-neutral-200 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-900">
+						<div
+							class="border-t border-neutral-200 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-900"
+						>
 							<slot name="expanded" {row}>
 								<div class="p-4 text-sm text-neutral-500 dark:text-neutral-400">
 									No additional details
@@ -327,7 +341,9 @@
 					{/if}
 				</tr>
 			</thead>
-			<tbody class="divide-y divide-neutral-200 bg-white dark:divide-neutral-700/40 dark:bg-neutral-900/50">
+			<tbody
+				class="divide-y divide-neutral-200 bg-white dark:divide-neutral-700/40 dark:bg-neutral-900/50"
+			>
 				{#if displayData.length === 0}
 					<tr>
 						<td

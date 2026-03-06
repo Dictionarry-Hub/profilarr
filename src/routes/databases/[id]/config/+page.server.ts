@@ -66,10 +66,7 @@ export const actions: Actions = {
 			await writeReadme(database.local_path, readme);
 
 			try {
-				await syncDependencies(
-					database.local_path,
-					database.personal_access_token ?? undefined
-				);
+				await syncDependencies(database.local_path, database.personal_access_token ?? undefined);
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
 				return fail(500, { error: `Failed to sync dependencies: ${message}` });

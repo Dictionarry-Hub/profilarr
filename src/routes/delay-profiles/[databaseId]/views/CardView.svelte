@@ -51,7 +51,9 @@
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-center justify-between">
-					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{profile.name}</h3>
+					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						{profile.name}
+					</h3>
 					<div class="flex items-center gap-0.5" on:click|stopPropagation|preventDefault>
 						{#if FEATURES.importExport}
 							<Button
@@ -85,7 +87,9 @@
 							<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
 								<Clock size={11} />Usenet
 							</span>
-							<span class="font-mono text-neutral-900 dark:text-neutral-100">{formatDelay(profile.usenet_delay)}</span>
+							<span class="font-mono text-neutral-900 dark:text-neutral-100"
+								>{formatDelay(profile.usenet_delay)}</span
+							>
 						</div>
 					{/if}
 					{#if profile.torrent_delay !== null}
@@ -93,7 +97,9 @@
 							<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
 								<Clock size={11} />Torrent
 							</span>
-							<span class="font-mono text-neutral-900 dark:text-neutral-100">{formatDelay(profile.torrent_delay)}</span>
+							<span class="font-mono text-neutral-900 dark:text-neutral-100"
+								>{formatDelay(profile.torrent_delay)}</span
+							>
 						</div>
 					{/if}
 				</div>
@@ -101,13 +107,17 @@
 				{#if profile.bypass_if_highest_quality || profile.bypass_if_above_custom_format_score}
 					<div class="space-y-1 border-t border-neutral-200 pt-2.5 dark:border-neutral-700/60">
 						{#if profile.bypass_if_highest_quality}
-							<div class="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400">
+							<div
+								class="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400"
+							>
 								<Shield size={11} />
 								<span>Highest Quality</span>
 							</div>
 						{/if}
 						{#if profile.bypass_if_above_custom_format_score && profile.minimum_custom_format_score !== null}
-							<div class="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400">
+							<div
+								class="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400"
+							>
 								<Shield size={11} />
 								<span>CF ≥ {profile.minimum_custom_format_score}</span>
 							</div>

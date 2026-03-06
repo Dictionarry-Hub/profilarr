@@ -48,11 +48,7 @@ export function checkRateLimit(ip: string, endpoint: string): RateLimitResult {
 /**
  * Record a failed login attempt
  */
-export function recordFailedAttempt(
-	ip: string,
-	endpoint: string,
-	category: AttemptCategory
-): void {
+export function recordFailedAttempt(ip: string, endpoint: string, category: AttemptCategory): void {
 	loginAttemptsQueries.recordFailure(ip, endpoint, category);
 }
 

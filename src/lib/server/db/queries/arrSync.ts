@@ -259,10 +259,7 @@ export const arrSyncQueries = {
 	 * Remove orphaned profile references when a profile is deleted
 	 */
 	removeQualityProfileReference(profileName: string): number {
-		return db.execute(
-			'DELETE FROM arr_sync_quality_profiles WHERE profile_name = ?',
-			profileName
-		);
+		return db.execute('DELETE FROM arr_sync_quality_profiles WHERE profile_name = ?', profileName);
 	},
 
 	updateQualityProfileName(oldName: string, newName: string): number {
@@ -765,7 +762,12 @@ export const arrSyncQueries = {
 	getInstancesForQualityProfile(
 		databaseId: number,
 		profileName: string
-	): { instance_id: number; instance_name: string; sync_status: string; last_synced_at: string | null }[] {
+	): {
+		instance_id: number;
+		instance_name: string;
+		sync_status: string;
+		last_synced_at: string | null;
+	}[] {
 		return db.query<{
 			instance_id: number;
 			instance_name: string;
@@ -789,7 +791,12 @@ export const arrSyncQueries = {
 	getInstancesForNaming(
 		databaseId: number,
 		configName: string
-	): { instance_id: number; instance_name: string; sync_status: string; last_synced_at: string | null }[] {
+	): {
+		instance_id: number;
+		instance_name: string;
+		sync_status: string;
+		last_synced_at: string | null;
+	}[] {
 		return db.query<{
 			instance_id: number;
 			instance_name: string;
@@ -812,7 +819,12 @@ export const arrSyncQueries = {
 	getInstancesForDelayProfile(
 		databaseId: number,
 		profileName: string
-	): { instance_id: number; instance_name: string; sync_status: string; last_synced_at: string | null }[] {
+	): {
+		instance_id: number;
+		instance_name: string;
+		sync_status: string;
+		last_synced_at: string | null;
+	}[] {
 		return db.query<{
 			instance_id: number;
 			instance_name: string;
@@ -835,7 +847,12 @@ export const arrSyncQueries = {
 	getInstancesForMediaSettings(
 		databaseId: number,
 		configName: string
-	): { instance_id: number; instance_name: string; sync_status: string; last_synced_at: string | null }[] {
+	): {
+		instance_id: number;
+		instance_name: string;
+		sync_status: string;
+		last_synced_at: string | null;
+	}[] {
 		return db.query<{
 			instance_id: number;
 			instance_name: string;
@@ -858,7 +875,12 @@ export const arrSyncQueries = {
 	getInstancesForQualityDefinitions(
 		databaseId: number,
 		configName: string
-	): { instance_id: number; instance_name: string; sync_status: string; last_synced_at: string | null }[] {
+	): {
+		instance_id: number;
+		instance_name: string;
+		sync_status: string;
+		last_synced_at: string | null;
+	}[] {
 		return db.query<{
 			instance_id: number;
 			instance_name: string;

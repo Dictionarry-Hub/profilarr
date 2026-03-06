@@ -42,7 +42,11 @@ const cleanupHandler: JobHandler = async (job) => {
 
 		// Entity cleanup (removed from TMDB/TVDB)
 		const entityScan = await scanForRemovedEntities(client, instanceType);
-		const entityDelete = await deleteRemovedEntities(client, instanceType, entityScan.removedEntities);
+		const entityDelete = await deleteRemovedEntities(
+			client,
+			instanceType,
+			entityScan.removedEntities
+		);
 
 		await logger.info('Cleanup complete', {
 			source: 'Cleanup',
@@ -74,7 +78,7 @@ const cleanupHandler: JobHandler = async (job) => {
 		return {
 			status: total === 0 ? 'skipped' : 'success',
 			output,
-			rescheduleAt: job.source === 'schedule' ? nextRunAt ?? undefined : undefined
+			rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
 		};
 	} catch (error) {
 		await logger.error('Cleanup job failed', {

@@ -54,11 +54,9 @@ test('spoofed X-Forwarded-For is recorded as session IP', async () => {
 	const sessionId = client.getCookie('session');
 	assertNotEquals(sessionId, undefined);
 
-	const rows = queryDb(
-		getDbPath(PORT),
-		'SELECT ip_address FROM sessions WHERE id = ?',
-		[sessionId!]
-	) as { ip_address: string | null }[];
+	const rows = queryDb(getDbPath(PORT), 'SELECT ip_address FROM sessions WHERE id = ?', [
+		sessionId!
+	]) as { ip_address: string | null }[];
 
 	assertEquals(rows.length, 1);
 	// The spoofed IP IS recorded — this is the vulnerability

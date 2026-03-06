@@ -44,7 +44,9 @@ function resolveOrderedItemsPatch(desiredState: StoredDesiredState): OrderedItem
 		return null;
 	}
 
-	const from = Array.isArray(record.from) ? ((record.from[0] as OrderedItem | undefined) ?? null) : null;
+	const from = Array.isArray(record.from)
+		? ((record.from[0] as OrderedItem | undefined) ?? null)
+		: null;
 	const to = Array.isArray(record.to) ? ((record.to[0] as OrderedItem | undefined) ?? null) : null;
 	const key = typeof record.key === 'string' ? record.key : null;
 

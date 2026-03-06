@@ -21,7 +21,11 @@ const logsCleanupHandler: JobHandler = async (job) => {
 		const nextRun = calculateNextRunFromSchedule('daily');
 
 		if (result.errorCount > 0 && result.deletedCount === 0) {
-			return { status: 'failure', error: message, rescheduleAt: job.source === 'schedule' ? nextRun : undefined };
+			return {
+				status: 'failure',
+				error: message,
+				rescheduleAt: job.source === 'schedule' ? nextRun : undefined
+			};
 		}
 
 		if (result.deletedCount === 0) {

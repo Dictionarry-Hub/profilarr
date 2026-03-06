@@ -13,7 +13,12 @@ import { ChaptarrClient } from './clients/chaptarr.ts';
  * @param options - Optional client options (timeout, etc.)
  * @returns Arr client instance
  */
-export function createArrClient(type: ArrType, url: string, apiKey: string, options?: ArrClientOptions): BaseArrClient {
+export function createArrClient(
+	type: ArrType,
+	url: string,
+	apiKey: string,
+	options?: ArrClientOptions
+): BaseArrClient {
 	switch (type) {
 		case 'radarr':
 			return new RadarrClient(url, apiKey, options);

@@ -85,7 +85,10 @@
 			<div class="flex items-center gap-2">
 				<div class="h-2 flex-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
 					<div
-						class="h-full rounded-full transition-all {getProgressColor(row.progress, row.cutoffMet)}"
+						class="h-full rounded-full transition-all {getProgressColor(
+							row.progress,
+							row.cutoffMet
+						)}"
 						style="width: {Math.min(row.progress * 100, 100)}%"
 					></div>
 				</div>
@@ -115,9 +118,7 @@
 					{/each}
 				</div>
 			{:else}
-				<div class="text-xs text-neutral-500 dark:text-neutral-400">
-					No custom formats matched
-				</div>
+				<div class="text-xs text-neutral-500 dark:text-neutral-400">No custom formats matched</div>
 			{/if}
 		</div>
 	</svelte:fragment>

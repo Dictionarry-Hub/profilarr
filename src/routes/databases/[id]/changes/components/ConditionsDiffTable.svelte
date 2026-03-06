@@ -89,14 +89,20 @@
 		return String(after ?? before);
 	}
 
-	function getSnapshot(row: ConditionDiff, which: 'before' | 'after'): ConditionSnapshot | undefined {
+	function getSnapshot(
+		row: ConditionDiff,
+		which: 'before' | 'after'
+	): ConditionSnapshot | undefined {
 		return which === 'before' ? row.before : row.after;
 	}
 
 	function getConditionField(
 		row: ConditionDiff,
 		field: keyof ConditionSnapshot
-	): { before?: ConditionSnapshot[keyof ConditionSnapshot]; after?: ConditionSnapshot[keyof ConditionSnapshot] } {
+	): {
+		before?: ConditionSnapshot[keyof ConditionSnapshot];
+		after?: ConditionSnapshot[keyof ConditionSnapshot];
+	} {
 		return {
 			before: row.before?.[field],
 			after: row.after?.[field]
@@ -225,10 +231,7 @@
 					</Badge>
 				</div>
 			{:else}
-				<Badge
-					variant={(change.after ?? change.before) ? 'success' : 'neutral'}
-					size="sm"
-				>
+				<Badge variant={(change.after ?? change.before) ? 'success' : 'neutral'} size="sm">
 					{formatBoolean((change.after ?? change.before) as boolean | undefined)}
 				</Badge>
 			{/if}
@@ -245,10 +248,7 @@
 					</Badge>
 				</div>
 			{:else}
-				<Badge
-					variant={(change.after ?? change.before) ? 'success' : 'neutral'}
-					size="sm"
-				>
+				<Badge variant={(change.after ?? change.before) ? 'success' : 'neutral'} size="sm">
 					{formatBoolean((change.after ?? change.before) as boolean | undefined)}
 				</Badge>
 			{/if}

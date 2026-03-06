@@ -23,7 +23,7 @@ export async function getAvailableQualities(cache: PCDCache, arrType: ArrType): 
 		.orderBy(sql`quality_name COLLATE NOCASE`)
 		.execute();
 
-	return rows.map(row => row.quality_name);
+	return rows.map((row) => row.quality_name);
 }
 
 /**
@@ -78,7 +78,10 @@ export async function list(cache: PCDCache): Promise<QualityDefinitionListItem[]
 /**
  * Get a Radarr quality definitions config by name
  */
-export async function getRadarrByName(cache: PCDCache, name: string): Promise<QualityDefinitionsConfig | null> {
+export async function getRadarrByName(
+	cache: PCDCache,
+	name: string
+): Promise<QualityDefinitionsConfig | null> {
 	const rows = await cache.kb
 		.selectFrom('radarr_quality_definitions')
 		.where('name', '=', name)
@@ -89,7 +92,7 @@ export async function getRadarrByName(cache: PCDCache, name: string): Promise<Qu
 		return null;
 	}
 
-	const entries: QualityDefinitionEntry[] = rows.map(row => ({
+	const entries: QualityDefinitionEntry[] = rows.map((row) => ({
 		quality_name: row.quality_name,
 		min_size: row.min_size,
 		max_size: row.max_size,
@@ -105,7 +108,10 @@ export async function getRadarrByName(cache: PCDCache, name: string): Promise<Qu
 /**
  * Get a Sonarr quality definitions config by name
  */
-export async function getSonarrByName(cache: PCDCache, name: string): Promise<QualityDefinitionsConfig | null> {
+export async function getSonarrByName(
+	cache: PCDCache,
+	name: string
+): Promise<QualityDefinitionsConfig | null> {
 	const rows = await cache.kb
 		.selectFrom('sonarr_quality_definitions')
 		.where('name', '=', name)
@@ -116,7 +122,7 @@ export async function getSonarrByName(cache: PCDCache, name: string): Promise<Qu
 		return null;
 	}
 
-	const entries: QualityDefinitionEntry[] = rows.map(row => ({
+	const entries: QualityDefinitionEntry[] = rows.map((row) => ({
 		quality_name: row.quality_name,
 		min_size: row.min_size,
 		max_size: row.max_size,

@@ -177,7 +177,7 @@
 		<div
 			bind:this={listboxElement}
 			role="listbox"
-			class="absolute top-full z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-xl border border-neutral-300 bg-white p-1 shadow-sm dark:border-neutral-700/60 dark:bg-neutral-800"
+			class="absolute top-full z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-neutral-300 bg-white p-1 shadow-sm dark:border-neutral-700/60 dark:bg-neutral-800"
 		>
 			{#each filteredTokens as token, index}
 				<button
@@ -191,9 +191,11 @@
 						: 'hover:bg-neutral-50 dark:hover:bg-neutral-700/30'}"
 				>
 					<div class="flex items-center justify-between">
-						<span class="font-mono text-sm {highlightedIndex === index
-							? 'text-neutral-900 dark:text-neutral-50'
-							: 'text-neutral-700 dark:text-neutral-200'}">{token.token}</span>
+						<span
+							class="font-mono text-sm {highlightedIndex === index
+								? 'text-neutral-900 dark:text-neutral-50'
+								: 'text-neutral-700 dark:text-neutral-200'}">{token.token}</span
+						>
 						<span class="text-xs text-neutral-400 dark:text-neutral-500">{token.category}</span>
 					</div>
 					<p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{token.description}</p>

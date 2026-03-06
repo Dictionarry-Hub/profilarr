@@ -424,7 +424,7 @@ class FilterEvaluationTest extends BaseTest {
 			assertEquals(evaluateRule(item, rule), false);
 		});
 
-		this.test('ordinal: lte (hasn\'t passed) matches same stage', () => {
+		this.test("ordinal: lte (hasn't passed) matches same stage", () => {
 			const item = { minimum_availability: 'inCinemas' };
 			const rule: FilterRule = {
 				type: 'rule',
@@ -435,7 +435,7 @@ class FilterEvaluationTest extends BaseTest {
 			assertEquals(evaluateRule(item, rule), true);
 		});
 
-		this.test('ordinal: lte (hasn\'t passed) matches earlier stage', () => {
+		this.test("ordinal: lte (hasn't passed) matches earlier stage", () => {
 			const item = { minimum_availability: 'announced' };
 			const rule: FilterRule = {
 				type: 'rule',
@@ -446,7 +446,7 @@ class FilterEvaluationTest extends BaseTest {
 			assertEquals(evaluateRule(item, rule), true);
 		});
 
-		this.test('ordinal: lte (hasn\'t passed) rejects later stage', () => {
+		this.test("ordinal: lte (hasn't passed) rejects later stage", () => {
 			const item = { minimum_availability: 'released' };
 			const rule: FilterRule = {
 				type: 'rule',

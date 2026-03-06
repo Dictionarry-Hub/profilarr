@@ -109,7 +109,10 @@
 			return;
 		}
 		if (requiresGitIdentity && (!gitUserName || !gitUserEmail)) {
-			alertStore.add('error', 'Git author name and email are required when a personal access token is set.');
+			alertStore.add(
+				'error',
+				'Git author name and email are required when a personal access token is set.'
+			);
 			return;
 		}
 

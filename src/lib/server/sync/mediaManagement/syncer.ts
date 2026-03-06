@@ -17,10 +17,24 @@
 import { BaseSyncer, type SyncResult } from '../base.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { getCache, type PCDCache } from '$pcd/index.ts';
-import { getRadarrByName as getRadarrMediaSettings, getSonarrByName as getSonarrMediaSettings } from '$pcd/entities/mediaManagement/media-settings/read.ts';
-import { getRadarrByName as getRadarrNaming, getSonarrByName as getSonarrNaming } from '$pcd/entities/mediaManagement/naming/read.ts';
-import { getRadarrByName as getRadarrQualityDefs, getSonarrByName as getSonarrQualityDefs } from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
-import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow, RadarrNamingRow, SonarrNamingRow } from '$shared/pcd/display.ts';
+import {
+	getRadarrByName as getRadarrMediaSettings,
+	getSonarrByName as getSonarrMediaSettings
+} from '$pcd/entities/mediaManagement/media-settings/read.ts';
+import {
+	getRadarrByName as getRadarrNaming,
+	getSonarrByName as getSonarrNaming
+} from '$pcd/entities/mediaManagement/naming/read.ts';
+import {
+	getRadarrByName as getRadarrQualityDefs,
+	getSonarrByName as getSonarrQualityDefs
+} from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
+import type {
+	RadarrMediaSettingsRow,
+	SonarrMediaSettingsRow,
+	RadarrNamingRow,
+	SonarrNamingRow
+} from '$shared/pcd/display.ts';
 import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
 import type {
 	ArrType,
@@ -59,9 +73,11 @@ export class MediaManagementSyncer extends BaseSyncer {
 			source: 'Sync:MediaManagement',
 			meta: {
 				instanceId: this.instanceId,
-				hasMediaSettings: !!syncConfig.mediaSettingsDatabaseId && !!syncConfig.mediaSettingsConfigName,
+				hasMediaSettings:
+					!!syncConfig.mediaSettingsDatabaseId && !!syncConfig.mediaSettingsConfigName,
 				hasNaming: !!syncConfig.namingDatabaseId && !!syncConfig.namingConfigName,
-				hasQualityDefs: !!syncConfig.qualityDefinitionsDatabaseId && !!syncConfig.qualityDefinitionsConfigName
+				hasQualityDefs:
+					!!syncConfig.qualityDefinitionsDatabaseId && !!syncConfig.qualityDefinitionsConfigName
 			}
 		});
 
@@ -224,10 +240,7 @@ export class MediaManagementSyncer extends BaseSyncer {
 		return false;
 	}
 
-	private async syncRadarrNaming(
-		cache: PCDCache,
-		configName: string
-	): Promise<boolean> {
+	private async syncRadarrNaming(cache: PCDCache, configName: string): Promise<boolean> {
 		const naming = await getRadarrNaming(cache, configName);
 		if (!naming) {
 			await logger.debug(`Radarr naming config "${configName}" not found in PCD`, {
@@ -264,10 +277,7 @@ export class MediaManagementSyncer extends BaseSyncer {
 		return true;
 	}
 
-	private async syncSonarrNaming(
-		cache: PCDCache,
-		configName: string
-	): Promise<boolean> {
+	private async syncSonarrNaming(cache: PCDCache, configName: string): Promise<boolean> {
 		const naming = await getSonarrNaming(cache, configName);
 		if (!naming) {
 			await logger.debug(`Sonarr naming config "${configName}" not found in PCD`, {

@@ -9,8 +9,19 @@ import type { ArrInstance } from '$lib/server/db/queries/arrInstances.ts';
 import type { UpgradeConfig, FilterConfig } from '$shared/upgrades/filters.ts';
 import { evaluateGroup } from '$shared/upgrades/filters.ts';
 import { getSelector } from '$shared/upgrades/selectors.ts';
-import type { UpgradeItem, UpgradeJobLog, UpgradeSelectionItem, UpgradeOriginal, UpgradeOriginalEpisode } from './types.ts';
-import type { RadarrMovie, RadarrMovieFile, SonarrSeries, ArrTag } from '$lib/server/utils/arr/types.ts';
+import type {
+	UpgradeItem,
+	UpgradeJobLog,
+	UpgradeSelectionItem,
+	UpgradeOriginal,
+	UpgradeOriginalEpisode
+} from './types.ts';
+import type {
+	RadarrMovie,
+	RadarrMovieFile,
+	SonarrSeries,
+	ArrTag
+} from '$lib/server/utils/arr/types.ts';
 import { normalizeRadarrItems, normalizeSonarrItems } from './normalize.ts';
 import {
 	filterByFilterTag,
@@ -276,7 +287,13 @@ export async function processUpgradeConfig(
 			tags = await radarr.getTags();
 			const tagMap = new Map(tags.map((t) => [t.id, t.label]));
 
-			normalizedItems = normalizeRadarrItems(movies, movieFileMap, profileMap, filter.cutoff, tagMap);
+			normalizedItems = normalizeRadarrItems(
+				movies,
+				movieFileMap,
+				profileMap,
+				filter.cutoff,
+				tagMap
+			);
 			totalItems = movies.length;
 
 			const mfMap = movieFileMap;
@@ -326,14 +343,19 @@ export async function processUpgradeConfig(
 		const tagLabel = resolveTagLabel(filter);
 
 		if (isFilterExhausted(matchedItems, tags, tagLabel)) {
-			const resetResult = await resetFilterCooldown(client as RadarrClient & SonarrClient, tagLabel);
+			const resetResult = await resetFilterCooldown(
+				client as RadarrClient & SonarrClient,
+				tagLabel
+			);
 			if (resetResult.reset > 0) {
 				const updatedTags = await client.getTags();
 				tags.length = 0;
 				tags.push(...updatedTags);
 
 				// Also strip the tag from local items so filterByFilterTag sees them as available
-				const filterTagId = updatedTags.find((t) => t.label.toLowerCase() === tagLabel.toLowerCase())?.id;
+				const filterTagId = updatedTags.find(
+					(t) => t.label.toLowerCase() === tagLabel.toLowerCase()
+				)?.id;
 				if (filterTagId !== undefined) {
 					for (const item of matchedItems) {
 						item._tags = item._tags.filter((id) => id !== filterTagId);
@@ -402,7 +424,9 @@ export async function processUpgradeConfig(
 				for (const item of selectedItems) {
 					const original = getOriginalFile(item);
 					try {
-						let bestRelease: { title: string; customFormats: { name: string }[]; customFormatScore: number } | undefined;
+						let bestRelease:
+							| { title: string; customFormats: { name: string }[]; customFormatScore: number }
+							| undefined;
 						let searchedSeason: number | undefined;
 
 						if (isRadarr) {
@@ -420,12 +444,14 @@ export async function processUpgradeConfig(
 								id: item.id,
 								title: item.title,
 								original,
-								upgrades: [{
-									release: bestRelease.title,
-									formats: bestRelease.customFormats.map((cf) => cf.name),
-									score: bestRelease.customFormatScore,
-									...(searchedSeason != null ? { seasonNumber: searchedSeason } : {})
-								}]
+								upgrades: [
+									{
+										release: bestRelease.title,
+										formats: bestRelease.customFormats.map((cf) => cf.name),
+										score: bestRelease.customFormatScore,
+										...(searchedSeason != null ? { seasonNumber: searchedSeason } : {})
+									}
+								]
 							});
 							successful++;
 						} else {
@@ -474,11 +500,13 @@ export async function processUpgradeConfig(
 									id: item.id,
 									title: item.title,
 									original,
-									upgrades: [{
-										release: grabbed.title,
-										formats: grabbed.customFormats.map((cf) => cf.name),
-										score: grabbed.customFormatScore
-									}]
+									upgrades: [
+										{
+											release: grabbed.title,
+											formats: grabbed.customFormats.map((cf) => cf.name),
+											score: grabbed.customFormatScore
+										}
+									]
 								});
 								successful++;
 							} else {

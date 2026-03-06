@@ -14,16 +14,16 @@ import { linkPcd } from '../helpers/linkPcd';
 import { unlinkPcdByName } from '../helpers/unlinkPcd';
 import { pullChanges, exportAndPush } from '../helpers/sync';
 import {
-  goToConflicts,
-  expectConflict,
-  overrideConflict,
-  alignConflict
+	goToConflicts,
+	expectConflict,
+	overrideConflict,
+	alignConflict
 } from '../helpers/conflicts';
 import {
-  goToCustomFormatGeneral,
-  updateCfDescription,
-  addCfTag,
-  getCfIncludeInRename
+	goToCustomFormatGeneral,
+	updateCfDescription,
+	addCfTag,
+	getCfIncludeInRename
 } from '../helpers/entity';
 import { fillMarkdownInput } from '../helpers/markdown';
 import { setIconCheckboxByLabel } from '../helpers/checkbox';
@@ -37,132 +37,130 @@ const DEV_DESCRIPTION = 'Dev description 1.12';
 const DEV_TAG = 'DevTag-1-12';
 
 async function applyUpstreamGeneralChanges(
-  page: Page,
-  devId: number
+	page: Page,
+	devId: number
 ): Promise<{ includeInRename: boolean }> {
-  await goToCustomFormatGeneral(page, devId, TEST_CF_NAME);
+	await goToCustomFormatGeneral(page, devId, TEST_CF_NAME);
 
-  const includeNext = !(await getCfIncludeInRename(page));
+	const includeNext = !(await getCfIncludeInRename(page));
 
-  await fillMarkdownInput(page, 'description', DEV_DESCRIPTION);
-  await setIconCheckboxByLabel(page, 'Include In Rename', includeNext);
-  await addCfTag(page, DEV_TAG);
+	await fillMarkdownInput(page, 'description', DEV_DESCRIPTION);
+	await setIconCheckboxByLabel(page, 'Include In Rename', includeNext);
+	await addCfTag(page, DEV_TAG);
 
-  await page.getByRole('button', { name: 'Save Changes' }).click();
-  await page.waitForLoadState('networkidle');
+	await page.getByRole('button', { name: 'Save Changes' }).click();
+	await page.waitForLoadState('networkidle');
 
-  return { includeInRename: includeNext };
+	return { includeInRename: includeNext };
 }
 
 test.describe('1.12 CF general multi-field conflict', () => {
-  let localId: number;
-  let devId: number;
-  let devHead: string;
+	let localId: number;
+	let devId: number;
+	let devHead: string;
 
-  test.beforeEach(async ({ browser }) => {
-    const page = await browser.newPage();
+	test.beforeEach(async ({ browser }) => {
+		const page = await browser.newPage();
 
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
 
-    devId = await linkPcd(page, {
-      name: DEV_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL
-    });
+		devId = await linkPcd(page, {
+			name: DEV_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL
+		});
 
-    devHead = getHead(devId);
+		devHead = getHead(devId);
 
-    localId = await linkPcd(page, {
-      name: LOCAL_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL,
-      syncStrategy: 'Manual (no auto-sync)',
-      autoPull: false,
-      localOpsEnabled: true,
-      conflictStrategy: 'Ask every time'
-    });
+		localId = await linkPcd(page, {
+			name: LOCAL_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL,
+			syncStrategy: 'Manual (no auto-sync)',
+			autoPull: false,
+			localOpsEnabled: true,
+			conflictStrategy: 'Ask every time'
+		});
 
-    await page.close();
-  });
+		await page.close();
+	});
 
-  test.afterEach(async ({ browser }) => {
-    if (devId && devHead) {
-      try {
-        resetToCommit(devId, devHead, true);
-      } catch {
-        // Best-effort reset
-      }
-    }
+	test.afterEach(async ({ browser }) => {
+		if (devId && devHead) {
+			try {
+				resetToCommit(devId, devHead, true);
+			} catch {
+				// Best-effort reset
+			}
+		}
 
-    const page = await browser.newPage();
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
-    await page.close();
-  });
+		const page = await browser.newPage();
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
+		await page.close();
+	});
 
-  test('a) override — keep local description, upstream include/tags', async ({
-    page
-  }) => {
-    // Local edits description only
-    await goToCustomFormatGeneral(page, localId, TEST_CF_NAME);
-    await updateCfDescription(page, LOCAL_DESCRIPTION);
+	test('a) override — keep local description, upstream include/tags', async ({ page }) => {
+		// Local edits description only
+		await goToCustomFormatGeneral(page, localId, TEST_CF_NAME);
+		await updateCfDescription(page, LOCAL_DESCRIPTION);
 
-    // Dev edits description + include + tags
-    const { includeInRename } = await applyUpstreamGeneralChanges(page, devId);
+		// Dev edits description + include + tags
+		const { includeInRename } = await applyUpstreamGeneralChanges(page, devId);
 
-    // Dev exports and pushes
-    await exportAndPush(page, devId, 'e2e: 1.12 general multi-field conflict');
+		// Dev exports and pushes
+		await exportAndPush(page, devId, 'e2e: 1.12 general multi-field conflict');
 
-    // Local pulls → conflict
-    await pullChanges(page, localId);
+		// Local pulls → conflict
+		await pullChanges(page, localId);
 
-    // Verify conflict exists
-    await goToConflicts(page, localId);
-    await expectConflict(page, TEST_CF_NAME);
+		// Verify conflict exists
+		await goToConflicts(page, localId);
+		await expectConflict(page, TEST_CF_NAME);
 
-    // Override
-    await overrideConflict(page, TEST_CF_NAME);
+		// Override
+		await overrideConflict(page, TEST_CF_NAME);
 
-    // Verify local description + upstream include/tags
-    await goToCustomFormatGeneral(page, localId, TEST_CF_NAME);
-    const descriptionText = await page.locator('#description').inputValue();
-    expect(descriptionText).toContain(LOCAL_DESCRIPTION);
-    expect(await getCfIncludeInRename(page)).toBe(includeInRename);
-    await expect(page.getByText(DEV_TAG)).toBeVisible();
-  });
+		// Verify local description + upstream include/tags
+		await goToCustomFormatGeneral(page, localId, TEST_CF_NAME);
+		const descriptionText = await page.locator('#description').inputValue();
+		expect(descriptionText).toContain(LOCAL_DESCRIPTION);
+		expect(await getCfIncludeInRename(page)).toBe(includeInRename);
+		await expect(page.getByText(DEV_TAG)).toBeVisible();
+	});
 
-  test('b) align — keep upstream description/include/tags', async ({ page }) => {
-    // Local edits description only
-    await goToCustomFormatGeneral(page, localId, TEST_CF_NAME);
-    await updateCfDescription(page, LOCAL_DESCRIPTION);
+	test('b) align — keep upstream description/include/tags', async ({ page }) => {
+		// Local edits description only
+		await goToCustomFormatGeneral(page, localId, TEST_CF_NAME);
+		await updateCfDescription(page, LOCAL_DESCRIPTION);
 
-    // Dev edits description + include + tags
-    const { includeInRename } = await applyUpstreamGeneralChanges(page, devId);
+		// Dev edits description + include + tags
+		const { includeInRename } = await applyUpstreamGeneralChanges(page, devId);
 
-    // Dev exports and pushes
-    await exportAndPush(page, devId, 'e2e: 1.12 general multi-field conflict');
+		// Dev exports and pushes
+		await exportAndPush(page, devId, 'e2e: 1.12 general multi-field conflict');
 
-    // Local pulls → conflict
-    await pullChanges(page, localId);
+		// Local pulls → conflict
+		await pullChanges(page, localId);
 
-    // Verify conflict exists
-    await goToConflicts(page, localId);
-    await expectConflict(page, TEST_CF_NAME);
+		// Verify conflict exists
+		await goToConflicts(page, localId);
+		await expectConflict(page, TEST_CF_NAME);
 
-    // Align
-    await alignConflict(page, TEST_CF_NAME);
+		// Align
+		await alignConflict(page, TEST_CF_NAME);
 
-    // Verify upstream description + include/tags
-    await goToCustomFormatGeneral(page, localId, TEST_CF_NAME);
-    const descriptionText = await page.locator('#description').inputValue();
-    expect(descriptionText).toContain(DEV_DESCRIPTION);
-    expect(descriptionText).not.toContain(LOCAL_DESCRIPTION);
-    expect(await getCfIncludeInRename(page)).toBe(includeInRename);
-    await expect(page.getByText(DEV_TAG)).toBeVisible();
-  });
+		// Verify upstream description + include/tags
+		await goToCustomFormatGeneral(page, localId, TEST_CF_NAME);
+		const descriptionText = await page.locator('#description').inputValue();
+		expect(descriptionText).toContain(DEV_DESCRIPTION);
+		expect(descriptionText).not.toContain(LOCAL_DESCRIPTION);
+		expect(await getCfIncludeInRename(page)).toBe(includeInRename);
+		await expect(page.getByText(DEV_TAG)).toBeVisible();
+	});
 });

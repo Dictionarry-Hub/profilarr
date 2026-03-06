@@ -497,9 +497,9 @@ _tabs:_
 - `--border` — button border (`border-neutral-300` / `dark:border-neutral-700`)
 - `--foreground` — neutral icon (`text-neutral-700` / `dark:text-neutral-300`)
 - `--destructive` — danger hover (`hover:border-red-300 hover:bg-red-50
-  hover:text-red-600` / dark equivalents)
+hover:text-red-600` / dark equivalents)
 - `--primary` — accent hover (`hover:border-accent-300 hover:bg-accent-50
-  hover:text-accent-600` / dark equivalents)
+hover:text-accent-600` / dark equivalents)
 
 ## toggle/
 
@@ -513,5 +513,5 @@ _tabs:_
 - `--destructive` — red active (`bg-red-500`)
 - `--warning` — amber active (`bg-amber-500`)
 - Inactive side: `bg-neutral-500 text-white` / `dark:bg-neutral-400
-  dark:text-neutral-900`
+dark:text-neutral-900`
 - Inactive icon: `text-neutral-400` / `dark:text-neutral-500`

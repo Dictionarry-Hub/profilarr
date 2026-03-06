@@ -54,11 +54,7 @@
 			<span class="font-medium">{row.name}</span>
 		{:else if column.key === 'arr_type'}
 			<div class="flex items-center gap-2">
-				<img
-					src={logos[row.arr_type]}
-					alt={row.arr_type}
-					class="h-5 w-5"
-				/>
+				<img src={logos[row.arr_type]} alt={row.arr_type} class="h-5 w-5" />
 			</div>
 		{:else if column.key === 'rename'}
 			{#if row.rename}

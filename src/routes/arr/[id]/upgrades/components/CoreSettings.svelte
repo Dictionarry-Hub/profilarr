@@ -104,7 +104,7 @@
 		<!-- Schedule -->
 		<div>
 			<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Schedule</span>
-			<CronInput bind:value={cronValue} {minIntervalMinutes} onWarning={onWarning} />
+			<CronInput bind:value={cronValue} {minIntervalMinutes} {onWarning} />
 		</div>
 
 		<!-- Filter Mode -->
@@ -120,7 +120,9 @@
 
 		<!-- Run status -->
 		{#if lastRunAt}
-			<div class="flex w-full flex-wrap items-center gap-3 border-t border-neutral-200 pt-3 text-xs text-neutral-500 md:ml-auto md:w-auto md:border-0 md:pt-0 dark:border-neutral-700 dark:text-neutral-400">
+			<div
+				class="flex w-full flex-wrap items-center gap-3 border-t border-neutral-200 pt-3 text-xs text-neutral-500 md:ml-auto md:w-auto md:border-0 md:pt-0 dark:border-neutral-700 dark:text-neutral-400"
+			>
 				{#if !enabled}
 					<span
 						class="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-700 dark:bg-amber-900/50 dark:text-amber-400"

@@ -59,7 +59,10 @@ async function evaluateScheduledSyncs(): Promise<void> {
 	let marked = 0;
 
 	// Gather all scheduled configs
-	const scheduledBySection = new Map<SectionType, ReturnType<SectionHandler['getScheduledConfigs']>>();
+	const scheduledBySection = new Map<
+		SectionType,
+		ReturnType<SectionHandler['getScheduledConfigs']>
+	>();
 	for (const handler of sections) {
 		const configs = handler.getScheduledConfigs();
 		scheduledBySection.set(handler.type, configs);

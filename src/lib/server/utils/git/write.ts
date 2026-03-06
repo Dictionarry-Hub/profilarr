@@ -49,9 +49,7 @@ async function parseGitHubErrorResponse(response: Response): Promise<{
 		message: apiMessage,
 		rateLimited,
 		retryAfterSeconds:
-			retryAfterSeconds !== null && Number.isFinite(retryAfterSeconds)
-				? retryAfterSeconds
-				: null,
+			retryAfterSeconds !== null && Number.isFinite(retryAfterSeconds) ? retryAfterSeconds : null,
 		resetAtEpoch: resetAtEpoch !== null && Number.isFinite(resetAtEpoch) ? resetAtEpoch : null
 	};
 }

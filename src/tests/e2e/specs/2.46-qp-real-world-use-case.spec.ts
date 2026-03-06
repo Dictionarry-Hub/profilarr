@@ -202,11 +202,7 @@ async function readDescription(page: Page): Promise<string> {
 }
 
 /** Move a quality item to a target index via mobile viewport buttons. */
-async function moveQualityToIndex(
-	page: Page,
-	itemName: string,
-	targetIdx: number
-): Promise<void> {
+async function moveQualityToIndex(page: Page, itemName: string, targetIdx: number): Promise<void> {
 	const order = await getQualityOrder(page);
 	let idx = order.indexOf(itemName);
 	while (idx > targetIdx) {
@@ -277,9 +273,7 @@ async function setupDatabasesAndSync(
 	await localMinInput.fill('0');
 
 	// upgradeScoreIncrement = 10000
-	const localIncrInput = page.locator(
-		'input[name="upgradeScoreIncrement"]:not([type="hidden"])'
-	);
+	const localIncrInput = page.locator('input[name="upgradeScoreIncrement"]:not([type="hidden"])');
 	await expect(localIncrInput).toBeVisible({ timeout: 10_000 });
 	await localIncrInput.fill('10000');
 
@@ -355,9 +349,7 @@ async function setupDatabasesAndSync(
 	await devMinInput.fill('10000');
 
 	// upgradeUntilScore = 50000 (non-conflicting — local didn't touch this)
-	const devUntilInput = page.locator(
-		'input[name="upgradeUntilScore"]:not([type="hidden"])'
-	);
+	const devUntilInput = page.locator('input[name="upgradeUntilScore"]:not([type="hidden"])');
 	await expect(devUntilInput).toBeVisible({ timeout: 10_000 });
 	await devUntilInput.fill('50000');
 
@@ -481,9 +473,7 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 		// Scoring: upgradeUntilScore, NF, ATVP from dev should be in base
 		await goToQualityProfileScoring(page, localId, PROFILE_NAME);
 
-		const finalUntilInput = page.locator(
-			'input[name="upgradeUntilScore"]:not([type="hidden"])'
-		);
+		const finalUntilInput = page.locator('input[name="upgradeUntilScore"]:not([type="hidden"])');
 		expect(Number(await finalUntilInput.inputValue())).toBe(50000);
 
 		const finalNf = await findScoringCellByFormat(page, 'NF', 1);
@@ -497,9 +487,7 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 		const tagContainer = page
 			.locator('#tags-input')
 			.locator('xpath=ancestor::div[contains(@class,"flex")]');
-		await expect(
-			tagContainer.locator('span', { hasText: 'Recommended' }).first()
-		).toBeVisible();
+		await expect(tagContainer.locator('span', { hasText: 'Recommended' }).first()).toBeVisible();
 	});
 
 	test('b) override strategy — conflicts auto-resolve, local wins', async ({ page }) => {
@@ -557,10 +545,7 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 		await page.waitForTimeout(300);
 		const rows = page.locator('div.space-y-4 > div[role="button"]');
 		const groupRow = rows.filter({ hasText: PROFILE_NAME }).first();
-		const memberText = await groupRow
-			.locator('div.text-sm.text-neutral-900')
-			.first()
-			.innerText();
+		const memberText = await groupRow.locator('div.text-sm.text-neutral-900').first().innerText();
 		expect(memberText).toContain('HDTV-1080p');
 		await page.setViewportSize(DESKTOP_VIEWPORT);
 
@@ -568,15 +553,11 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 
 		// Scoring: upgradeScoreIncrement = 10000 (local, non-conflicting)
 		await goToQualityProfileScoring(page, localId, PROFILE_NAME);
-		const incrInput = page.locator(
-			'input[name="upgradeScoreIncrement"]:not([type="hidden"])'
-		);
+		const incrInput = page.locator('input[name="upgradeScoreIncrement"]:not([type="hidden"])');
 		expect(Number(await incrInput.inputValue())).toBe(10000);
 
 		// Scoring: upgradeUntilScore = 50000 (dev, non-conflicting)
-		const untilInput = page.locator(
-			'input[name="upgradeUntilScore"]:not([type="hidden"])'
-		);
+		const untilInput = page.locator('input[name="upgradeUntilScore"]:not([type="hidden"])');
 		expect(Number(await untilInput.inputValue())).toBe(50000);
 
 		// Scoring: NF radarr = 500 (dev, non-conflicting)
@@ -595,9 +576,7 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 		await expect(
 			tagContainer.locator('span', { hasText: 'Streaming Optimised' }).first()
 		).toBeVisible();
-		await expect(
-			tagContainer.locator('span', { hasText: 'Recommended' }).first()
-		).toBeVisible();
+		await expect(tagContainer.locator('span', { hasText: 'Recommended' }).first()).toBeVisible();
 	});
 
 	test('c) align strategy — conflicts auto-resolve, upstream wins', async ({ page }) => {
@@ -639,10 +618,7 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 		await page.waitForTimeout(300);
 		const rows = page.locator('div.space-y-4 > div[role="button"]');
 		const groupRow = rows.filter({ hasText: PROFILE_NAME }).first();
-		const memberText = await groupRow
-			.locator('div.text-sm.text-neutral-900')
-			.first()
-			.innerText();
+		const memberText = await groupRow.locator('div.text-sm.text-neutral-900').first().innerText();
 		expect(memberText).not.toContain('HDTV-1080p');
 		await page.setViewportSize(DESKTOP_VIEWPORT);
 
@@ -650,15 +626,11 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 
 		// Scoring: upgradeScoreIncrement = 10000 (local, non-conflicting)
 		await goToQualityProfileScoring(page, localId, PROFILE_NAME);
-		const incrInput = page.locator(
-			'input[name="upgradeScoreIncrement"]:not([type="hidden"])'
-		);
+		const incrInput = page.locator('input[name="upgradeScoreIncrement"]:not([type="hidden"])');
 		expect(Number(await incrInput.inputValue())).toBe(10000);
 
 		// Scoring: upgradeUntilScore = 50000 (dev, non-conflicting)
-		const untilInput = page.locator(
-			'input[name="upgradeUntilScore"]:not([type="hidden"])'
-		);
+		const untilInput = page.locator('input[name="upgradeUntilScore"]:not([type="hidden"])');
 		expect(Number(await untilInput.inputValue())).toBe(50000);
 
 		// Scoring: NF radarr = 500 (dev, non-conflicting)
@@ -677,9 +649,7 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 		await expect(
 			tagContainer.locator('span', { hasText: 'Streaming Optimised' }).first()
 		).toBeVisible();
-		await expect(
-			tagContainer.locator('span', { hasText: 'Recommended' }).first()
-		).toBeVisible();
+		await expect(tagContainer.locator('span', { hasText: 'Recommended' }).first()).toBeVisible();
 
 		// General: language = Chinese (local, non-conflicting — dev didn't change language)
 		const lang = await page.locator('input[name="language"]').inputValue();

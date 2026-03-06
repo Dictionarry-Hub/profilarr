@@ -14,7 +14,10 @@ export const GET: RequestHandler = async ({ url }) => {
 	const name = url.searchParams.get('name');
 
 	if (!databaseIdParam || !entityType || !name) {
-		return json({ error: 'Missing required parameters: databaseId, entityType, name' }, { status: 400 });
+		return json(
+			{ error: 'Missing required parameters: databaseId, entityType, name' },
+			{ status: 400 }
+		);
 	}
 
 	const databaseId = parseInt(databaseIdParam, 10);

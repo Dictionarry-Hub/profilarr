@@ -45,7 +45,9 @@ export class RadarrClient extends BaseArrClient {
 		const fetchBatch = async (ids: number[]): Promise<RadarrMovieFile[]> => {
 			const queryString = ids.map((id) => `movieId=${id}`).join('&');
 			try {
-				return await this.get<RadarrMovieFile[]>(`/api/${this.apiVersion}/moviefile?${queryString}`);
+				return await this.get<RadarrMovieFile[]>(
+					`/api/${this.apiVersion}/moviefile?${queryString}`
+				);
 			} catch (error) {
 				// If URL still exceeds upstream limits, split and retry recursively.
 				if (error instanceof HttpError && error.status === 414 && ids.length > 1) {

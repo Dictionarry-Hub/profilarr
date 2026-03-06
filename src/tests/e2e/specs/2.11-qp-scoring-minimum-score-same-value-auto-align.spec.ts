@@ -103,4 +103,3 @@ test.describe('2.11 QP scoring minimum score desired already matches upstream', 
 		expect(Number(await finalInput.inputValue())).toBe(desiredMinimumScore);
 	});
 });
-

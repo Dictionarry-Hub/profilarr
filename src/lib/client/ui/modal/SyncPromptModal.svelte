@@ -11,7 +11,14 @@
 	export let affectedArrs: AffectedArr[];
 	export let databaseId: number;
 	export let entityName: string;
-	export let entityType: 'qualityProfile' | 'customFormat' | 'regularExpression' | 'delayProfile' | 'naming' | 'qualityDefinitions' | 'mediaSettings' = 'qualityProfile';
+	export let entityType:
+		| 'qualityProfile'
+		| 'customFormat'
+		| 'regularExpression'
+		| 'delayProfile'
+		| 'naming'
+		| 'qualityDefinitions'
+		| 'mediaSettings' = 'qualityProfile';
 
 	type InstanceState = 'idle' | 'syncing' | 'done' | 'failed' | 'cooldown';
 
@@ -25,10 +32,12 @@
 		instanceRetry = new Map();
 	}
 
-	$: allDone = affectedArrs.length > 0 && affectedArrs.every((a) => {
-		const state = instanceStates.get(a.instanceId);
-		return state === 'done' || state === 'failed' || state === 'cooldown';
-	});
+	$: allDone =
+		affectedArrs.length > 0 &&
+		affectedArrs.every((a) => {
+			const state = instanceStates.get(a.instanceId);
+			return state === 'done' || state === 'failed' || state === 'cooldown';
+		});
 
 	$: anySyncing = affectedArrs.some((a) => instanceStates.get(a.instanceId) === 'syncing');
 
@@ -91,23 +100,31 @@
 
 	function getStateVariant(state: InstanceState): 'secondary' | 'success' | 'danger' | 'warning' {
 		switch (state) {
-			case 'done': return 'success';
-			case 'failed': return 'danger';
-			case 'cooldown': return 'warning';
-			default: return 'secondary';
+			case 'done':
+				return 'success';
+			case 'failed':
+				return 'danger';
+			case 'cooldown':
+				return 'warning';
+			default:
+				return 'secondary';
 		}
 	}
 
 	function getStateLabel(state: InstanceState, instanceId: number): string {
 		switch (state) {
-			case 'syncing': return 'Syncing...';
-			case 'done': return 'Synced';
-			case 'failed': return instanceErrors.get(instanceId) || 'Failed';
+			case 'syncing':
+				return 'Syncing...';
+			case 'done':
+				return 'Synced';
+			case 'failed':
+				return instanceErrors.get(instanceId) || 'Failed';
 			case 'cooldown': {
 				const retry = instanceRetry.get(instanceId);
 				return retry ? `Wait ${retry}s` : instanceErrors.get(instanceId) || 'Cooldown';
 			}
-			default: return 'Pending';
+			default:
+				return 'Pending';
 		}
 	}
 </script>
@@ -154,20 +171,18 @@
 									{:else if state === 'done'}
 										<Check size={16} class="text-green-500" />
 									{/if}
-								{:else}
-									{#if state === 'syncing'}
-										<Loader2 size={16} class="animate-spin text-neutral-400" />
-									{:else if state === 'done'}
-										<Check size={16} class="text-green-500" />
-									{:else if state === 'failed' || state === 'cooldown'}
-										<Button
-											text="Retry"
-											icon={RefreshCw}
-											size="xs"
-											variant="primary"
-											on:click={() => syncInstance(arr.instanceId)}
-										/>
-									{/if}
+								{:else if state === 'syncing'}
+									<Loader2 size={16} class="animate-spin text-neutral-400" />
+								{:else if state === 'done'}
+									<Check size={16} class="text-green-500" />
+								{:else if state === 'failed' || state === 'cooldown'}
+									<Button
+										text="Retry"
+										icon={RefreshCw}
+										size="xs"
+										variant="primary"
+										on:click={() => syncInstance(arr.instanceId)}
+									/>
 								{/if}
 							</div>
 						</div>
@@ -178,19 +193,9 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="footer">
-		<Button
-			text="Skip"
-			icon={X}
-			disabled={anySyncing}
-			on:click={skip}
-		/>
+		<Button text="Skip" icon={X} disabled={anySyncing} on:click={skip} />
 		{#if allDone}
-			<Button
-				text="Done"
-				icon={Check}
-				variant="primary"
-				on:click={done}
-			/>
+			<Button text="Done" icon={Check} variant="primary" on:click={done} />
 		{:else}
 			<Button
 				text="Sync All"

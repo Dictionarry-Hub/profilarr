@@ -11,19 +11,26 @@ function hasGeneralChanges(metadata: StoredOpMetadata | null): boolean {
 	return metadata.changed_fields.some((f) => GENERAL_FIELDS.has(f));
 }
 
-function hasQualitiesChanges(metadata: StoredOpMetadata | null, desiredState: StoredDesiredState | null): boolean {
+function hasQualitiesChanges(
+	metadata: StoredOpMetadata | null,
+	desiredState: StoredDesiredState | null
+): boolean {
 	if (metadata?.changed_fields?.includes('qualities')) return true;
 	if (metadata?.changed_fields?.some((field) => field.startsWith('quality_item:'))) return true;
 	if (desiredState?.ordered_items) return true;
 	return false;
 }
 
-function hasScoringChanges(metadata: StoredOpMetadata | null, desiredState: StoredDesiredState | null): boolean {
+function hasScoringChanges(
+	metadata: StoredOpMetadata | null,
+	desiredState: StoredDesiredState | null
+): boolean {
 	if (metadata?.changed_fields?.includes('minimum_custom_format_score')) return true;
 	if (metadata?.changed_fields?.includes('upgrade_until_score')) return true;
 	if (metadata?.changed_fields?.includes('upgrade_score_increment')) return true;
 	if (metadata?.changed_fields?.includes('custom_format_scores')) return true;
-	if (metadata?.changed_fields?.some((field) => field.startsWith('custom_format_score:'))) return true;
+	if (metadata?.changed_fields?.some((field) => field.startsWith('custom_format_score:')))
+		return true;
 	if (desiredState?.custom_format_scores) return true;
 	if (desiredState?.minimum_custom_format_score) return true;
 	if (desiredState?.upgrade_until_score) return true;

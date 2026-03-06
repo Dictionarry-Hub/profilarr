@@ -22,7 +22,6 @@
 	$: setTotalCount(expressions.length);
 	$: expressions, reset();
 	$: visibleExpressions = expressions.slice(0, $visibleCount);
-
 </script>
 
 <CardGrid flush>
@@ -39,10 +38,7 @@
 							<Label variant="info" size="sm" rounded="md">{tag.name}</Label>
 						{/each}
 					</div>
-					<div
-						class="flex shrink-0 items-center gap-0.5"
-						on:click|stopPropagation|preventDefault
-					>
+					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>
 						{#if expression.regex101_id}
 							<Button
 								icon={ExternalLink}
@@ -50,10 +46,7 @@
 								variant="ghost"
 								tooltip="View on regex101"
 								on:click={() =>
-									window.open(
-										`https://regex101.com/r/${expression.regex101_id}`,
-										'_blank'
-									)}
+									window.open(`https://regex101.com/r/${expression.regex101_id}`, '_blank')}
 							/>
 						{/if}
 						{#if FEATURES.importExport}

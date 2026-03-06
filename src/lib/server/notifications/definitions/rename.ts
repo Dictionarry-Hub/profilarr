@@ -61,7 +61,10 @@ function formatFolderEntry(folder: { existingPath: string; newPath: string }): s
  */
 function buildItemFields(
 	title: string,
-	item: { folder?: { existingPath: string; newPath: string }; files: { existingPath: string; newPath: string }[] },
+	item: {
+		folder?: { existingPath: string; newPath: string };
+		files: { existingPath: string; newPath: string }[];
+	},
 	isSonarr: boolean
 ): { name: string; value: string }[] {
 	const fields: { name: string; value: string }[] = [];

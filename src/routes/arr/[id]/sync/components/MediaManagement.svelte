@@ -81,7 +81,10 @@
 	$: qualityDefinitionsOptions = getQualityDefinitionsOptions();
 	$: mediaSettingsOptions = getMediaSettingsOptions();
 
-	function parseSelectionValue(value: string): { databaseId: number | null; configName: string | null } {
+	function parseSelectionValue(value: string): {
+		databaseId: number | null;
+		configName: string | null;
+	} {
 		if (!value) return { databaseId: null, configName: null };
 		try {
 			const parsed = JSON.parse(value);
@@ -274,7 +277,9 @@
 		{saving}
 		{syncing}
 		{isDirty}
-		hasConfig={state.namingDatabaseId !== null || state.qualityDefinitionsDatabaseId !== null || state.mediaSettingsDatabaseId !== null}
+		hasConfig={state.namingDatabaseId !== null ||
+			state.qualityDefinitionsDatabaseId !== null ||
+			state.mediaSettingsDatabaseId !== null}
 		onWarning={(msg) => alertStore.add('warning', msg)}
 		on:save={handleSave}
 		on:sync={handleSync}

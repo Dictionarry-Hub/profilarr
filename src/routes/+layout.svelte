@@ -20,11 +20,16 @@
 
 {#if !isAuthPage}
 	<Navbar />
-	<PageNav version={data.version} arrInstances={data.arrInstances} databases={data.databases} parserAvailable={data.parserAvailable} />
+	<PageNav
+		version={data.version}
+		arrInstances={data.arrInstances}
+		databases={data.databases}
+		parserAvailable={data.parserAvailable}
+	/>
 	<BottomNav />
 {/if}
 <AlertContainer />
 
-<main class={isAuthPage ? '' : 'pt-16 pb-16 md:pb-0 md:pt-0 md:pl-80'}>
+<main class={isAuthPage ? '' : 'pt-16 pb-16 md:pt-0 md:pb-0 md:pl-80'}>
 	<slot />
 </main>

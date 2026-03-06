@@ -21,10 +21,7 @@ import {
 	overrideConflict,
 	alignConflict
 } from '../helpers/conflicts';
-import {
-	openFirstQualityProfileGeneral,
-	goToQualityProfileGeneral
-} from '../helpers/entity';
+import { openFirstQualityProfileGeneral, goToQualityProfileGeneral } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
 const LOCAL_DB_NAME = 'E2E Local';
@@ -33,7 +30,10 @@ const LOCAL_LANGUAGE = 'French';
 const DEV_LANGUAGE = 'German';
 
 /** Select a language from the QP general form dropdown. */
-async function setQpLanguage(page: import('@playwright/test').Page, language: string): Promise<void> {
+async function setQpLanguage(
+	page: import('@playwright/test').Page,
+	language: string
+): Promise<void> {
 	const input = page.locator('input[name="language-search"]');
 	await input.fill(language);
 	await page.locator('button', { hasText: language }).first().click();

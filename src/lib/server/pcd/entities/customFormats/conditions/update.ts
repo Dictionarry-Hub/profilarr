@@ -8,7 +8,12 @@
  */
 
 import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, recompileCache, type OperationLayer, type WriteResult } from '$pcd/index.ts';
+import {
+	writeOperation,
+	recompileCache,
+	type OperationLayer,
+	type WriteResult
+} from '$pcd/index.ts';
 import type { ConditionData } from '$shared/pcd/display.ts';
 import { uuid } from '$shared/utils/uuid.ts';
 import { logger } from '$logger/logger.ts';
@@ -157,10 +162,7 @@ export async function updateConditions(options: UpdateConditionsOptions) {
 		throw new Error('Condition names must be unique');
 	}
 
-	const typeFieldMap: Record<
-		string,
-		{ field: keyof ConditionData; label: string } | null
-	> = {
+	const typeFieldMap: Record<string, { field: keyof ConditionData; label: string } | null> = {
 		release_title: { field: 'patterns', label: 'pattern' },
 		release_group: { field: 'patterns', label: 'pattern' },
 		edition: { field: 'patterns', label: 'pattern' },
@@ -681,9 +683,7 @@ function getConditionValues(condition: ConditionData): unknown {
 }
 
 function getRegexDependencies(condition: ConditionData): string[] {
-	return (condition.patterns ?? [])
-		.map((pattern) => pattern.name.trim())
-		.filter(Boolean);
+	return (condition.patterns ?? []).map((pattern) => pattern.name.trim()).filter(Boolean);
 }
 
 function getConditionFingerprint(condition: ConditionData): string {

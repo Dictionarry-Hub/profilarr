@@ -16,7 +16,12 @@
 	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
 	import type { SonarrNamingRow } from '$shared/pcd/display.ts';
 	import type { AffectedArr } from '$shared/sync/types.ts';
-	import { SONARR_COLON_REPLACEMENT_OPTIONS, MULTI_EPISODE_STYLE_OPTIONS, type SonarrColonReplacementFormat, type MultiEpisodeStyle } from '$shared/pcd/mediaManagement.ts';
+	import {
+		SONARR_COLON_REPLACEMENT_OPTIONS,
+		MULTI_EPISODE_STYLE_OPTIONS,
+		type SonarrColonReplacementFormat,
+		type MultiEpisodeStyle
+	} from '$shared/pcd/mediaManagement.ts';
 	import { resolveSonarrFormat, getSonarrTokenCategories } from '$shared/pcd/namingTokens.ts';
 	import NamingPreview from './NamingPreview.svelte';
 
@@ -48,9 +53,11 @@
 	const defaults: SonarrNamingFormData = {
 		name: '',
 		rename: true,
-		standardEpisodeFormat: '{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}',
+		standardEpisodeFormat:
+			'{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}',
 		dailyEpisodeFormat: '{Series Title} - {Air-Date} - {Episode Title} {Quality Full}',
-		animeEpisodeFormat: '{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}',
+		animeEpisodeFormat:
+			'{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}',
 		seriesFolderFormat: '{Series Title}',
 		seasonFolderFormat: 'Season {season}',
 		replaceIllegalCharacters: true,
@@ -134,7 +141,6 @@
 	function handleDeleteCancel() {
 		showDeleteModal = false;
 	}
-
 </script>
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
@@ -203,7 +209,9 @@
 
 			<!-- Episode Formats -->
 			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Episode Formats</h2>
+				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+					Episode Formats
+				</h2>
 				<div>
 					<TokenAutocomplete
 						label="Standard Episode Format"
@@ -245,7 +253,9 @@
 
 			<!-- Folder Formats -->
 			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Folder Formats</h2>
+				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+					Folder Formats
+				</h2>
 				<div>
 					<TokenAutocomplete
 						label="Series Folder Format"
@@ -275,7 +285,9 @@
 
 			<!-- Multi-Episode Style -->
 			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Multi-Episode Style</h2>
+				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+					Multi-Episode Style
+				</h2>
 				<DropdownSelect
 					value={formData.multiEpisodeStyle}
 					options={MULTI_EPISODE_STYLE_OPTIONS}
@@ -287,7 +299,9 @@
 
 			<!-- Character Replacement -->
 			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Character Replacement</h2>
+				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+					Character Replacement
+				</h2>
 
 				<div class="space-y-2">
 					<Toggle
@@ -322,7 +336,6 @@
 				{/if}
 			</div>
 		{/if}
-
 	</div>
 </div>
 
@@ -338,7 +351,11 @@
 			if (result.type === 'failure' && result.data) {
 				alertStore.add('error', (result.data as { error?: string }).error || 'Operation failed');
 			} else if (result.type === 'success' && result.data) {
-				const data = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+				const data = result.data as {
+					success?: boolean;
+					redirectTo?: string;
+					affectedArrs?: AffectedArr[];
+				};
 				if (data.success) {
 					alertStore.add(
 						'success',
@@ -377,7 +394,11 @@
 	<input type="hidden" name="seasonFolderFormat" value={formData.seasonFolderFormat} />
 	<input type="hidden" name="replaceIllegalCharacters" value={formData.replaceIllegalCharacters} />
 	<input type="hidden" name="colonReplacementFormat" value={formData.colonReplacementFormat} />
-	<input type="hidden" name="customColonReplacementFormat" value={formData.customColonReplacementFormat} />
+	<input
+		type="hidden"
+		name="customColonReplacementFormat"
+		value={formData.customColonReplacementFormat}
+	/>
 	<input type="hidden" name="multiEpisodeStyle" value={formData.multiEpisodeStyle} />
 	<input type="hidden" name="layer" value={selectedLayer} />
 </form>
@@ -393,10 +414,7 @@
 			deleting = true;
 			return async ({ result, update: formUpdate }) => {
 				if (result.type === 'failure' && result.data) {
-					alertStore.add(
-						'error',
-						(result.data as { error?: string }).error || 'Failed to delete'
-					);
+					alertStore.add('error', (result.data as { error?: string }).error || 'Failed to delete');
 				} else if (result.type === 'redirect') {
 					alertStore.add('success', 'Naming config deleted');
 				}
@@ -428,35 +446,45 @@
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Format Strings</div>
 			<p class="mt-1">
 				Format strings control how Sonarr names episode files and folders. Use tokens like
-				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800">{'{Series Title}'}</code>
+				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+					>{'{Series Title}'}</code
+				>
 				and
-				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800">{'{Episode Title}'}</code>
+				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+					>{'{Episode Title}'}</code
+				>
 				to build your naming pattern. Sonarr has separate formats for standard, daily, and anime episodes.
 			</p>
 		</div>
 		<div>
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Token Autocomplete</div>
 			<p class="mt-1">
-				Type <code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800">{'{'}</code> in
-				any format field to open the token picker. Filter by typing, then use arrow keys and Enter or click to insert.
+				Type <code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+					>{'{'}</code
+				> in any format field to open the token picker. Filter by typing, then use arrow keys and Enter
+				or click to insert.
 			</p>
 		</div>
 		<div>
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Live Preview</div>
 			<p class="mt-1">
-				A preview line below each format field shows how your pattern resolves with sample data, so you can see the result as you type.
+				A preview line below each format field shows how your pattern resolves with sample data, so
+				you can see the result as you type.
 			</p>
 		</div>
 		<div>
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Multi-Episode Style</div>
 			<p class="mt-1">
-				Controls how multi-episode files are named. "Extend" appends additional episode numbers (S01E01-E02), while other styles use different separator patterns.
+				Controls how multi-episode files are named. "Extend" appends additional episode numbers
+				(S01E01-E02), while other styles use different separator patterns.
 			</p>
 		</div>
 		<div>
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Character Replacement</div>
 			<p class="mt-1">
-				When enabled, illegal filesystem characters are replaced automatically. The colon replacement option controls how colons specifically are handled. Sonarr also supports a custom replacement string.
+				When enabled, illegal filesystem characters are replaced automatically. The colon
+				replacement option controls how colons specifically are handled. Sonarr also supports a
+				custom replacement string.
 			</p>
 		</div>
 	</div>

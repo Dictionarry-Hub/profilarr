@@ -12,7 +12,10 @@ import { parseUTC } from '$shared/utils/dates.ts';
  *
  * Returns error string or null if valid.
  */
-export function validateCronExpression(cronExpr: string, minIntervalMinutes: number = 0): string | null {
+export function validateCronExpression(
+	cronExpr: string,
+	minIntervalMinutes: number = 0
+): string | null {
 	try {
 		new Cron(cronExpr);
 	} catch {
@@ -69,7 +72,10 @@ export function calculateNextRun(cronExpr: string | null): string | null {
 	}
 }
 
-export function calculateNextRunFromMinutes(lastRunAt: string | null, scheduleMinutes: number): string {
+export function calculateNextRunFromMinutes(
+	lastRunAt: string | null,
+	scheduleMinutes: number
+): string {
 	if (!lastRunAt) {
 		return new Date().toISOString();
 	}
@@ -82,7 +88,10 @@ export function calculateNextRunFromMinutes(lastRunAt: string | null, scheduleMi
 	return next.toISOString();
 }
 
-export function calculateCooldownUntil(lastRunAt: string | null, scheduleMinutes: number): string | null {
+export function calculateCooldownUntil(
+	lastRunAt: string | null,
+	scheduleMinutes: number
+): string | null {
 	if (!lastRunAt) return null;
 	const base = parseUTC(lastRunAt);
 	if (!base) return null;

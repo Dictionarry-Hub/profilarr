@@ -7,7 +7,11 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import type { Column, SortState } from '$ui/table/types';
 	import type { PageData } from './$types';
-	import type { RadarrLibraryItem, SonarrLibraryItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
+	import type {
+		RadarrLibraryItem,
+		SonarrLibraryItem,
+		SonarrEpisodeItem
+	} from '$utils/arr/types.ts';
 	import { getPersistentSearchStore, type SearchStore } from '$stores/search';
 	import { libraryCache } from '$stores/libraryCache';
 	import { sortTitle } from '$shared/utils/sort.ts';
@@ -34,11 +38,16 @@
 	// Search mode (Radarr supports title + CF search, Sonarr title only)
 	const librarySearchState = createSearchFieldState(
 		`arrLibrarySearchField:${data.instance.id}`,
-		[{ value: 'title', label: 'Title' }, { value: 'customFormats', label: 'Custom Formats' }],
+		[
+			{ value: 'title', label: 'Title' },
+			{ value: 'customFormats', label: 'Custom Formats' }
+		],
 		'title'
 	);
 
-	let searchMode: 'title' | 'customFormats' = librarySearchState.initialField as 'title' | 'customFormats';
+	let searchMode: 'title' | 'customFormats' = librarySearchState.initialField as
+		| 'title'
+		| 'customFormats';
 	let cfSearchTags: string[] = librarySearchState.initialTags;
 
 	function handleSearchModeChange(mode: 'title' | 'customFormats') {
@@ -357,9 +366,7 @@
 
 		// Title search (only in title mode)
 		if (searchMode === 'title' && debouncedQuery) {
-			result = result.filter((m) =>
-				m.title.toLowerCase().includes(debouncedQuery.toLowerCase())
-			);
+			result = result.filter((m) => m.title.toLowerCase().includes(debouncedQuery.toLowerCase()));
 		}
 
 		// CF tag filter (only in CF mode)
@@ -374,7 +381,13 @@
 	})();
 
 	const allRadarrColumns: Column<RadarrLibraryItem>[] = [
-		{ key: 'title', header: 'Title', align: 'left', sortable: true, sortAccessor: (row) => sortTitle(row.title) },
+		{
+			key: 'title',
+			header: 'Title',
+			align: 'left',
+			sortable: true,
+			sortAccessor: (row) => sortTitle(row.title)
+		},
 		{ key: 'qualityProfileName', header: 'Profile', align: 'left', width: 'w-40', sortable: true },
 		{ key: 'qualityName', header: 'Quality', align: 'left', width: 'w-32', sortable: true },
 		{
@@ -457,7 +470,13 @@
 	})();
 
 	const allSonarrColumns: Column<SonarrLibraryItem>[] = [
-		{ key: 'title', header: 'Title', align: 'left', sortable: true, sortAccessor: (row) => sortTitle(row.title) },
+		{
+			key: 'title',
+			header: 'Title',
+			align: 'left',
+			sortable: true,
+			sortAccessor: (row) => sortTitle(row.title)
+		},
 		{ key: 'qualityProfileName', header: 'Profile', align: 'left', width: 'w-40', sortable: true },
 		{
 			key: 'episodes',
@@ -622,7 +641,10 @@
 			{searchMode}
 			onSearchModeChange={handleSearchModeChange}
 			cfTags={cfSearchTags}
-			onCfTagsChange={(tags) => { cfSearchTags = tags; librarySearchState.saveTags(tags); }}
+			onCfTagsChange={(tags) => {
+				cfSearchTags = tags;
+				librarySearchState.saveTags(tags);
+			}}
 		/>
 
 		{#if isRadarr}
@@ -738,7 +760,10 @@
 								icon={ExternalLink}
 								size="xs"
 								variant="secondary"
-								href="{baseUrl}/series/{row.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}"
+								href="{baseUrl}/series/{row.title
+									.toLowerCase()
+									.replace(/[^a-z0-9]+/g, '-')
+									.replace(/^-+|-+$/g, '')}"
 								target="_blank"
 								rel="noopener noreferrer"
 								tooltip="Open in Sonarr"
@@ -754,16 +779,17 @@
 							{@const episodesBySeasonNumber = episodesBySeriesAndSeason.get(seriesId) ?? new Map()}
 
 							{#if isEpisodeLoading}
-								<div class="flex items-center gap-2 p-4 text-sm text-neutral-500 dark:text-neutral-400">
-									<div class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"></div>
+								<div
+									class="flex items-center gap-2 p-4 text-sm text-neutral-500 dark:text-neutral-400"
+								>
+									<div
+										class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
+									></div>
 									Loading episodes...
 								</div>
 							{:else}
 								<div class="p-4">
-									<SeasonTable
-										seasons={row.seasons}
-										{episodesBySeasonNumber}
-									/>
+									<SeasonTable seasons={row.seasons} {episodesBySeasonNumber} />
 								</div>
 							{/if}
 						{/if}

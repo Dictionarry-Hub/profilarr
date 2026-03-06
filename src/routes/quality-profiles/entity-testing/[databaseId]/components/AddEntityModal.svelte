@@ -310,97 +310,102 @@
 				<div
 					class="overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50"
 				>
-				<div class="max-h-96 overflow-y-auto">
-					{#if isSearching}
-						<div class="flex items-center justify-center p-8">
-							<Loader2 size={24} class="animate-spin text-neutral-400" />
-						</div>
-					{:else if results.length === 0}
-						<div class="p-8 text-center text-neutral-500 dark:text-neutral-400">
-							No results found
-						</div>
-					{:else}
-						<div class="divide-y divide-neutral-200 dark:divide-neutral-700/60">
-							{#each sortedResults as item}
-								{@const alreadyAdded = isAlreadyAdded(item)}
-								<button
-									type="button"
-									class="flex w-full gap-3 p-3 text-left transition-colors {alreadyAdded
-										? 'cursor-not-allowed opacity-50'
-										: 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800/80'}"
-									on:click={() => !alreadyAdded && toggleItem(item)}
-									disabled={alreadyAdded}
-								>
-									<!-- Poster -->
-									<div
-										class="h-24 w-16 flex-shrink-0 overflow-hidden rounded bg-neutral-200 dark:bg-neutral-700"
+					<div class="max-h-96 overflow-y-auto">
+						{#if isSearching}
+							<div class="flex items-center justify-center p-8">
+								<Loader2 size={24} class="animate-spin text-neutral-400" />
+							</div>
+						{:else if results.length === 0}
+							<div class="p-8 text-center text-neutral-500 dark:text-neutral-400">
+								No results found
+							</div>
+						{:else}
+							<div class="divide-y divide-neutral-200 dark:divide-neutral-700/60">
+								{#each sortedResults as item}
+									{@const alreadyAdded = isAlreadyAdded(item)}
+									<button
+										type="button"
+										class="flex w-full gap-3 p-3 text-left transition-colors {alreadyAdded
+											? 'cursor-not-allowed opacity-50'
+											: 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800/80'}"
+										on:click={() => !alreadyAdded && toggleItem(item)}
+										disabled={alreadyAdded}
 									>
-										{#if item.posterPath}
-											<img
-												src={getPosterUrl(item.posterPath)}
-												alt={item.title}
-												class="h-full w-full object-cover"
-											/>
-										{:else}
-											<div class="flex h-full w-full items-center justify-center">
-												{#if item.type === 'movie'}
-													<Film size={24} class="text-neutral-400" />
-												{:else}
-													<Tv size={24} class="text-neutral-400" />
-												{/if}
-											</div>
-										{/if}
-									</div>
+										<!-- Poster -->
+										<div
+											class="h-24 w-16 flex-shrink-0 overflow-hidden rounded bg-neutral-200 dark:bg-neutral-700"
+										>
+											{#if item.posterPath}
+												<img
+													src={getPosterUrl(item.posterPath)}
+													alt={item.title}
+													class="h-full w-full object-cover"
+												/>
+											{:else}
+												<div class="flex h-full w-full items-center justify-center">
+													{#if item.type === 'movie'}
+														<Film size={24} class="text-neutral-400" />
+													{:else}
+														<Tv size={24} class="text-neutral-400" />
+													{/if}
+												</div>
+											{/if}
+										</div>
 
-									<!-- Info -->
-									<div class="flex min-w-0 flex-1 flex-col">
-										<div class="flex items-start justify-between gap-2">
-											<div class="min-w-0">
-												<h4 class="truncate font-medium text-neutral-900 dark:text-neutral-100">
-													{item.title}
-												</h4>
-												<div
-													class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400"
-												>
-													<span class="flex items-center gap-1">
-														{#if item.type === 'movie'}
-															<Film size={12} />
-															Movie
-														{:else}
-															<Tv size={12} />
-															TV Series
+										<!-- Info -->
+										<div class="flex min-w-0 flex-1 flex-col">
+											<div class="flex items-start justify-between gap-2">
+												<div class="min-w-0">
+													<h4 class="truncate font-medium text-neutral-900 dark:text-neutral-100">
+														{item.title}
+													</h4>
+													<div
+														class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400"
+													>
+														<span class="flex items-center gap-1">
+															{#if item.type === 'movie'}
+																<Film size={12} />
+																Movie
+															{:else}
+																<Tv size={12} />
+																TV Series
+															{/if}
+														</span>
+														{#if getYear(item.releaseDate)}
+															<span>•</span>
+															<span>{getYear(item.releaseDate)}</span>
 														{/if}
-													</span>
-													{#if getYear(item.releaseDate)}
-														<span>•</span>
-														<span>{getYear(item.releaseDate)}</span>
+													</div>
+												</div>
+												<div class="flex items-center gap-2">
+													{#if item.voteAverage > 0}
+														<Badge variant="accent" size="sm" icon={Star}>
+															{item.voteAverage.toFixed(1)}
+														</Badge>
+													{/if}
+													{#if alreadyAdded}
+														<span
+															class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
+														>
+															Added
+														</span>
+													{:else}
+														<IconCheckbox
+															checked={selectedKeys.has(getItemKey(item))}
+															icon={Check}
+														/>
 													{/if}
 												</div>
 											</div>
-											<div class="flex items-center gap-2">
-												{#if item.voteAverage > 0}
-													<Badge variant="accent" size="sm" icon={Star}>
-														{item.voteAverage.toFixed(1)}
-													</Badge>
-												{/if}
-												{#if alreadyAdded}
-													<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-														Added
-													</span>
-												{:else}
-													<IconCheckbox checked={selectedKeys.has(getItemKey(item))} icon={Check} />
-												{/if}
-											</div>
+											<p class="mt-1 line-clamp-2 text-xs text-neutral-600 dark:text-neutral-400">
+												{item.overview || 'No description available'}
+											</p>
 										</div>
-										<p class="mt-1 line-clamp-2 text-xs text-neutral-600 dark:text-neutral-400">
-											{item.overview || 'No description available'}
-										</p>
-									</div>
-								</button>
-							{/each}
-						</div>
-					{/if}
-				</div>
+									</button>
+								{/each}
+							</div>
+						{/if}
+					</div>
 				</div>
 			{/if}
 

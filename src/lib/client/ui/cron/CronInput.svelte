@@ -247,7 +247,7 @@
 	<DropdownSelect
 		value={scheduleType}
 		options={scheduleOptions}
-		disabled={disabled}
+		{disabled}
 		buttonSize="sm"
 		width="w-24"
 		justify="center"
@@ -296,15 +296,15 @@
 		</div>
 		<span class="text-sm text-neutral-500 dark:text-neutral-400">min</span>
 	{:else if scheduleType === 'daily'}
-			<TimeInput
-				label="Time"
-				hideLabel
-				name="cron-daily-time"
-				fieldWidthRem={5}
-				value={dailyTime}
-				{disabled}
-				on:input={(event) => {
-					dailyTime = event.detail;
+		<TimeInput
+			label="Time"
+			hideLabel
+			name="cron-daily-time"
+			fieldWidthRem={5}
+			value={dailyTime}
+			{disabled}
+			on:input={(event) => {
+				dailyTime = event.detail;
 				updateCron();
 			}}
 		/>
@@ -312,7 +312,7 @@
 		<DropdownSelect
 			value={String(weeklyDay)}
 			options={weekdayOptions}
-			disabled={disabled}
+			{disabled}
 			buttonSize="sm"
 			width="w-20"
 			justify="center"
@@ -321,15 +321,15 @@
 				updateCron();
 			}}
 		/>
-			<TimeInput
-				label="Time"
-				hideLabel
-				name="cron-weekly-time"
-				fieldWidthRem={5}
-				value={weeklyTime}
-				{disabled}
-				on:input={(event) => {
-					weeklyTime = event.detail;
+		<TimeInput
+			label="Time"
+			hideLabel
+			name="cron-weekly-time"
+			fieldWidthRem={5}
+			value={weeklyTime}
+			{disabled}
+			on:input={(event) => {
+				weeklyTime = event.detail;
 				updateCron();
 			}}
 		/>

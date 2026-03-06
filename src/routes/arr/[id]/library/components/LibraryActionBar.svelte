@@ -217,7 +217,11 @@
 		</svelte:fragment>
 	</ActionButton>
 	<Tooltip text={refreshTooltip}>
-		<ActionButton icon={RefreshCw} iconClass={refreshing ? 'animate-spin' : ''} on:click={onRefresh} />
+		<ActionButton
+			icon={RefreshCw}
+			iconClass={refreshing ? 'animate-spin' : ''}
+			on:click={onRefresh}
+		/>
 	</Tooltip>
 	<Tooltip text={openLabel}>
 		<ActionButton icon={ExternalLink} on:click={onOpen} />

@@ -93,7 +93,11 @@
 		!!previewData?.commitMessage &&
 		commitMessage.trim() !== previewData.commitMessage;
 	$: previewConfirmDisabled =
-		previewing || committing || !previewData?.ok || previewSelectionMismatch || previewMessageMismatch;
+		previewing ||
+		committing ||
+		!previewData?.ok ||
+		previewSelectionMismatch ||
+		previewMessageMismatch;
 	$: previewOpCount = previewData?.opCount ?? previewData?.opIds?.length ?? 0;
 	$: selectedOpCount = collectOpIds().length;
 
@@ -165,7 +169,7 @@
 			const expanded = expandSelection(newSelected);
 			const primaryAdded = new Set(groupKeys);
 			const autoAdded = Array.from(expanded).filter(
-				expandedKey => !selected.has(expandedKey) && !primaryAdded.has(expandedKey)
+				(expandedKey) => !selected.has(expandedKey) && !primaryAdded.has(expandedKey)
 			);
 			const autoAddedDetails = autoAdded
 				.map((depKey) => changeByKey.get(depKey))
@@ -176,10 +180,7 @@
 					.map((dep) => `${formatEntity(dep.entity)} "${dep.name}"`)
 					.join(', ');
 				const noun = autoAddedDetails.length === 1 ? 'dependency' : 'dependencies';
-				alertStore.add(
-					'info',
-					`Auto-selected ${autoAddedDetails.length} ${noun}: ${label}`
-				);
+				alertStore.add('info', `Auto-selected ${autoAddedDetails.length} ${noun}: ${label}`);
 			}
 		}
 
@@ -404,9 +405,7 @@
 
 			const isSuccess =
 				response.ok &&
-				(result?.type === 'success' ||
-					result?.type === 'redirect' ||
-					result?.data?.success);
+				(result?.type === 'success' || result?.type === 'redirect' || result?.data?.success);
 			const errorMessage = result?.data?.error || result?.error;
 
 			if (isSuccess) {
@@ -484,9 +483,7 @@
 
 			const isSuccess =
 				response.ok &&
-				(result?.type === 'success' ||
-					result?.type === 'redirect' ||
-					result?.data?.success);
+				(result?.type === 'success' || result?.type === 'redirect' || result?.data?.success);
 			const droppedCount =
 				typeof result?.data?.dropped === 'number'
 					? result.data.dropped
@@ -499,9 +496,7 @@
 				alertStore.add('success', `Dropped ${droppedCount} ops`);
 				await fetchChanges();
 			} else {
-				const detail =
-					errorMessage ||
-					`HTTP ${response.status}`;
+				const detail = errorMessage || `HTTP ${response.status}`;
 				alertStore.add('error', `Drop failed: ${detail}`);
 			}
 		} finally {
@@ -831,7 +826,9 @@
 								<input
 									type="text"
 									bind:value={commitMessage}
-									placeholder={hasIncomingChanges ? 'Pull incoming changes first...' : 'Commit message...'}
+									placeholder={hasIncomingChanges
+										? 'Pull incoming changes first...'
+										: 'Commit message...'}
 									disabled={hasIncomingChanges}
 									class="h-full w-full bg-transparent font-mono text-sm text-neutral-700 placeholder-neutral-400 outline-none disabled:cursor-not-allowed dark:text-neutral-300 dark:placeholder-neutral-500"
 								/>
@@ -843,11 +840,7 @@
 								icon={previewing ? Loader2 : Upload}
 								iconClass={previewing ? 'animate-spin' : ''}
 								title={previewing ? 'Preparing preview' : 'Preview export'}
-								disabled={
-									hasIncomingChanges ||
-									previewing ||
-									committing
-								}
+								disabled={hasIncomingChanges || previewing || committing}
 								on:click={handlePreview}
 							/>
 						</div>
@@ -982,7 +975,9 @@
 									<span class="text-xs text-neutral-500 dark:text-neutral-400">
 										Requires:{' '}
 										{row.requires
-											.map((requirement) => `${formatEntity(requirement.entity)} "${requirement.name}"`)
+											.map(
+												(requirement) => `${formatEntity(requirement.entity)} "${requirement.name}"`
+											)
 											.join(', ')}
 									</span>
 								{/if}
@@ -1036,7 +1031,9 @@
 	<svelte:fragment slot="body">
 		{#if previewing}
 			<div class="flex items-center gap-3 text-sm text-neutral-600 dark:text-neutral-400">
-				<div class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent"></div>
+				<div
+					class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent"
+				></div>
 				Preparing preview...
 			</div>
 		{:else if previewError}
@@ -1045,7 +1042,9 @@
 			<div class="space-y-4">
 				<div class="space-y-1 text-sm text-neutral-600 dark:text-neutral-400">
 					<span class="font-medium text-neutral-900 dark:text-neutral-100">Commit message</span>
-					<code class="block rounded bg-neutral-100 px-3 py-2 font-mono text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+					<code
+						class="block rounded bg-neutral-100 px-3 py-2 font-mono text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+					>
 						{commitMessage.trim()}
 					</code>
 				</div>
@@ -1053,7 +1052,7 @@
 				<div class="flex flex-wrap gap-2 text-sm text-neutral-600 dark:text-neutral-400">
 					{#if previewOpCount > 0 || selectedOpCount > 0}
 						<Badge variant="neutral" size="md" mono>
-							SQL: {previewData.ok ? previewData.filepath ?? 'ops/unknown.sql' : '-'}
+							SQL: {previewData.ok ? (previewData.filepath ?? 'ops/unknown.sql') : '-'}
 						</Badge>
 					{/if}
 					<Badge variant="neutral" size="md" mono>
@@ -1068,15 +1067,20 @@
 						Exported: {formatExportedAt(previewData.exportedAt)}
 					</Badge>
 					<Badge variant="neutral" size="md">
-						Identity: {previewData.gitIdentity?.name ?? '-'} ({previewData.gitIdentity?.email ?? '-'})
+						Identity: {previewData.gitIdentity?.name ?? '-'} ({previewData.gitIdentity?.email ??
+							'-'})
 					</Badge>
 				</div>
 
-				<div class="rounded-lg border border-neutral-200 bg-white p-3 text-sm dark:border-neutral-800 dark:bg-neutral-900">
-					<div class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+				<div
+					class="rounded-lg border border-neutral-200 bg-white p-3 text-sm dark:border-neutral-800 dark:bg-neutral-900"
+				>
+					<div
+						class="mb-2 text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
+					>
 						Preflight
 					</div>
-					<div class="grid gap-2 text-xs text-neutral-600 dark:text-neutral-400 md:grid-cols-2">
+					<div class="grid gap-2 text-xs text-neutral-600 md:grid-cols-2 dark:text-neutral-400">
 						<div class="flex items-center justify-between">
 							<span>Repo clean</span>
 							<Badge variant={previewData.checks.clean ? 'success' : 'danger'} size="sm">
@@ -1118,7 +1122,9 @@
 					</div>
 
 					{#if previewData.errors.length > 0}
-						<div class="mt-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200">
+						<div
+							class="mt-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200"
+						>
 							{#each previewData.errors as error}
 								<div>{error}</div>
 							{/each}
@@ -1126,13 +1132,17 @@
 					{/if}
 
 					{#if previewSelectionMismatch}
-						<div class="mt-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200">
+						<div
+							class="mt-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200"
+						>
 							Selection changed since preview. Preview again before exporting.
 						</div>
 					{/if}
 
 					{#if previewMessageMismatch}
-						<div class="mt-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200">
+						<div
+							class="mt-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200"
+						>
 							Commit message changed since preview. Preview again before exporting.
 						</div>
 					{/if}
@@ -1145,7 +1155,9 @@
 						</svelte:fragment>
 					</CodeBlock>
 				{:else if previewData.ok && (previewData.filePaths?.length ?? 0) > 0}
-					<div class="rounded border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
+					<div
+						class="rounded border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
+					>
 						<div class="mb-1 font-semibold">Files to commit:</div>
 						{#each previewData.filePaths ?? [] as fp}
 							<code class="block font-mono">{fp}</code>
@@ -1158,9 +1170,7 @@
 				{/if}
 			</div>
 		{:else}
-			<p class="text-sm text-neutral-600 dark:text-neutral-400">
-				No preview data returned.
-			</p>
+			<p class="text-sm text-neutral-600 dark:text-neutral-400">No preview data returned.</p>
 		{/if}
 	</svelte:fragment>
 </Modal>

@@ -3,7 +3,11 @@ import type { PageServerLoad, Actions } from './$types';
 import { pcdManager } from '$pcd/index.ts';
 import { canWriteToBase } from '$pcd/index.ts';
 import type { OperationLayer } from '$pcd/index.ts';
-import { getSonarrByName, updateSonarrNaming, removeSonarrNaming } from '$pcd/entities/mediaManagement/naming/index.ts';
+import {
+	getSonarrByName,
+	updateSonarrNaming,
+	removeSonarrNaming
+} from '$pcd/entities/mediaManagement/naming/index.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
 import type { SonarrNamingRow } from '$shared/pcd/display.ts';
@@ -84,9 +88,13 @@ export const actions: Actions = {
 		const seriesFolderFormat = formData.get('seriesFolderFormat') as string;
 		const seasonFolderFormat = formData.get('seasonFolderFormat') as string;
 		const replaceIllegalCharacters = formData.get('replaceIllegalCharacters') === 'true';
-		const colonReplacementFormat = formData.get('colonReplacementFormat') as SonarrNamingRow['colon_replacement_format'];
+		const colonReplacementFormat = formData.get(
+			'colonReplacementFormat'
+		) as SonarrNamingRow['colon_replacement_format'];
 		const customColonReplacementFormat = formData.get('customColonReplacementFormat') as string;
-		const multiEpisodeStyle = formData.get('multiEpisodeStyle') as SonarrNamingRow['multi_episode_style'];
+		const multiEpisodeStyle = formData.get(
+			'multiEpisodeStyle'
+		) as SonarrNamingRow['multi_episode_style'];
 
 		const formatFields = [
 			{ name: 'Standard episode format', value: standardEpisodeFormat },

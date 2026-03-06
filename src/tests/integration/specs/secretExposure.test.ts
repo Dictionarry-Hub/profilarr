@@ -76,7 +76,9 @@ async function seedSecrets(dbPath: string) {
 			 VALUES ('Test Sonarr', 'sonarr', 'http://localhost:8989', ?, 1)`,
 			[ARR_API_KEY]
 		);
-		const arrRow = db.prepare('SELECT id FROM arr_instances WHERE name = ?').get('Test Sonarr') as { id: number };
+		const arrRow = db.prepare('SELECT id FROM arr_instances WHERE name = ?').get('Test Sonarr') as {
+			id: number;
+		};
 		arrInstanceId = arrRow.id;
 
 		// Database instance with known PAT
@@ -86,14 +88,18 @@ async function seedSecrets(dbPath: string) {
 			 VALUES (?, 'Test DB', 'https://github.com/test/repo', ?, ?, 1)`,
 			[uuid, DB_PAT, `./data/databases/${uuid}`]
 		);
-		const dbRow = db.prepare('SELECT id FROM database_instances WHERE name = ?').get('Test DB') as { id: number };
+		const dbRow = db.prepare('SELECT id FROM database_instances WHERE name = ?').get('Test DB') as {
+			id: number;
+		};
 		databaseId = dbRow.id;
 
 		// TMDB API key
 		db.exec('UPDATE tmdb_settings SET api_key = ? WHERE id = 1', [TMDB_API_KEY]);
 
 		// AI API key (may not exist if feature disabled)
-		const aiRow = db.prepare('SELECT COUNT(*) as count FROM ai_settings').get() as { count: number };
+		const aiRow = db.prepare('SELECT COUNT(*) as count FROM ai_settings').get() as {
+			count: number;
+		};
 		if (aiRow.count > 0) {
 			db.exec('UPDATE ai_settings SET api_key = ? WHERE id = 1', [AI_API_KEY]);
 		}
@@ -104,10 +110,15 @@ async function seedSecrets(dbPath: string) {
 
 		// Set PAT on auto-linked Dictionarry database so entity pages return 200
 		// (the server auto-links this PCD on first startup, giving it a compiled cache)
-		const autoLinked = db.prepare("SELECT id FROM database_instances WHERE name = 'Dictionarry'").get() as { id: number } | undefined;
+		const autoLinked = db
+			.prepare("SELECT id FROM database_instances WHERE name = 'Dictionarry'")
+			.get() as { id: number } | undefined;
 		if (autoLinked) {
 			pcdDatabaseId = autoLinked.id;
-			db.exec('UPDATE database_instances SET personal_access_token = ? WHERE id = ?', [DB_PAT, pcdDatabaseId]);
+			db.exec('UPDATE database_instances SET personal_access_token = ? WHERE id = ?', [
+				DB_PAT,
+				pcdDatabaseId
+			]);
 		} else {
 			// Fallback to seeded database if auto-link didn't happen (no network)
 			pcdDatabaseId = databaseId;
@@ -134,11 +145,7 @@ async function fetchPage(path: string): Promise<string> {
 }
 
 function assertNotExposed(body: string, secret: string, label: string) {
-	assertEquals(
-		body.includes(secret),
-		false,
-		`Response body contains ${label}: ${secret}`
-	);
+	assertEquals(body.includes(secret), false, `Response body contains ${label}: ${secret}`);
 }
 
 setup(async () => {

@@ -64,7 +64,9 @@
 >
 	{#each tags as tag, index (tag)}
 		<span class="inline-flex items-center gap-1">
-			<Label variant={isNegated(tag) ? 'danger' : 'info'} size="md" rounded="md">{displayName(tag)}</Label>
+			<Label variant={isNegated(tag) ? 'danger' : 'info'} size="md" rounded="md"
+				>{displayName(tag)}</Label
+			>
 			<button
 				type="button"
 				on:click={() => removeTag(index)}

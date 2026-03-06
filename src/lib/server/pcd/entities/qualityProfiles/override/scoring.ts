@@ -58,12 +58,14 @@ export async function overrideScoring(
 	const currentScoring = await readScoring(cache, databaseId, profileName);
 
 	// Resolve desired profile-level settings
-	const desiredMinimum = getDesiredTo<number>(desiredState.minimum_custom_format_score)
-		?? currentScoring.minimum_custom_format_score;
-	const desiredUpgradeUntil = getDesiredTo<number>(desiredState.upgrade_until_score)
-		?? currentScoring.upgrade_until_score;
-	const desiredIncrement = getDesiredTo<number>(desiredState.upgrade_score_increment)
-		?? currentScoring.upgrade_score_increment;
+	const desiredMinimum =
+		getDesiredTo<number>(desiredState.minimum_custom_format_score) ??
+		currentScoring.minimum_custom_format_score;
+	const desiredUpgradeUntil =
+		getDesiredTo<number>(desiredState.upgrade_until_score) ?? currentScoring.upgrade_until_score;
+	const desiredIncrement =
+		getDesiredTo<number>(desiredState.upgrade_score_increment) ??
+		currentScoring.upgrade_score_increment;
 
 	// Build the full CF scores list: start with current, apply desired changes
 	const currentScoreMap = new Map<string, number | null>();
@@ -99,7 +101,11 @@ export async function overrideScoring(
 	}
 
 	// Build the full scores array for updateScoring
-	const customFormatScores: Array<{ customFormatName: string; arrType: string; score: number | null }> = [];
+	const customFormatScores: Array<{
+		customFormatName: string;
+		arrType: string;
+		score: number | null;
+	}> = [];
 	for (const [key, score] of currentScoreMap) {
 		const [customFormatName, arrType] = key.split('::');
 		customFormatScores.push({ customFormatName, arrType, score });

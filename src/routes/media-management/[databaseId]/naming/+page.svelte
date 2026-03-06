@@ -84,9 +84,19 @@
 			<p class="text-neutral-600 dark:text-neutral-400">No naming configs match your search</p>
 		</div>
 	{:else if $view === 'table'}
-		<TableView configs={$filtered} databaseId={data.currentDatabase.id} on:clone={handleClone} on:export={handleExport} />
+		<TableView
+			configs={$filtered}
+			databaseId={data.currentDatabase.id}
+			on:clone={handleClone}
+			on:export={handleExport}
+		/>
 	{:else}
-		<CardView configs={$filtered} databaseId={data.currentDatabase.id} on:clone={handleClone} on:export={handleExport} />
+		<CardView
+			configs={$filtered}
+			databaseId={data.currentDatabase.id}
+			on:clone={handleClone}
+			on:export={handleExport}
+		/>
 	{/if}
 </div>
 

@@ -64,11 +64,7 @@ export const usersQueries = {
 	 * Create a new user (should only be called once during setup)
 	 */
 	create(username: string, passwordHash: string): number {
-		db.execute(
-			'INSERT INTO users (username, password_hash) VALUES (?, ?)',
-			username,
-			passwordHash
-		);
+		db.execute('INSERT INTO users (username, password_hash) VALUES (?, ?)', username, passwordHash);
 
 		const result = db.queryFirst<{ id: number }>('SELECT last_insert_rowid() as id');
 		return result?.id ?? 0;

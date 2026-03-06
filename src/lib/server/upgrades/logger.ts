@@ -37,9 +37,14 @@ export async function logUpgradeRun(log: UpgradeJobLog): Promise<void> {
 
 	// Format items with score comparisons
 	const formattedItems = log.selection.items.map((item) => {
-		const original = item.original.type === 'movie'
-			? { fileName: item.original.fileName, formats: item.original.formats, score: item.original.score }
-			: { title: item.original.title, episodes: item.original.episodes };
+		const original =
+			item.original.type === 'movie'
+				? {
+						fileName: item.original.fileName,
+						formats: item.original.formats,
+						score: item.original.score
+					}
+				: { title: item.original.title, episodes: item.original.episodes };
 
 		return {
 			title: item.title,

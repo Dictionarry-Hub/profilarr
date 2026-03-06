@@ -79,7 +79,7 @@ export async function overrideGeneral(
 		getDesiredTo<string>(desiredState.name) ??
 		(typeof desiredState.name === 'string'
 			? desiredState.name
-			: profileName ?? fallbackName ?? '');
+			: (profileName ?? fallbackName ?? ''));
 	const desiredDescriptionRaw =
 		getDesiredTo<string | null>(desiredState.description) ??
 		(typeof desiredState.description === 'string' || desiredState.description === null

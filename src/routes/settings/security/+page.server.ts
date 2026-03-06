@@ -19,7 +19,7 @@ export const load: ServerLoad = async ({ cookies }) => {
 	const localBypassEnabled = authSettingsQueries.isLocalBypassEnabled();
 
 	return {
-		sessions: sessions.map(s => ({
+		sessions: sessions.map((s) => ({
 			id: s.id,
 			created_at: s.created_at,
 			expires_at: s.expires_at,

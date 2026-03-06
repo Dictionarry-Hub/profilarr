@@ -299,7 +299,8 @@ async function supersedePriorUserOps(
  * For user layer: inserts a published user op (origin=user, state=published)
  */
 export async function writeOperation(options: WriteOptions): Promise<WriteResult> {
-	const { databaseId, layer, description, queries, metadata, desiredState, skipRecompile } = options;
+	const { databaseId, layer, description, queries, metadata, desiredState, skipRecompile } =
+		options;
 
 	try {
 		const instance = databaseInstancesQueries.getById(databaseId);
@@ -382,7 +383,11 @@ export async function writeOperation(options: WriteOptions): Promise<WriteResult
 			});
 		}
 
-		if (origin === 'user' && metadata && (metadata.operation === 'update' || metadata.operation === 'delete')) {
+		if (
+			origin === 'user' &&
+			metadata &&
+			(metadata.operation === 'update' || metadata.operation === 'delete')
+		) {
 			await supersedePriorUserOps(databaseId, opId, metadata);
 		}
 

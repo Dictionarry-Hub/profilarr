@@ -4,7 +4,7 @@ services:
     container_name: profilarr
     restart: unless-stopped
     ports:
-      - "6869:6868"
+      - '6869:6868'
     volumes:
       - ./config:/config
     environment:
@@ -26,4 +26,4 @@ services:
     container_name: profilarr-parser
     restart: unless-stopped
     expose:
-      - "5000"
+      - '5000'

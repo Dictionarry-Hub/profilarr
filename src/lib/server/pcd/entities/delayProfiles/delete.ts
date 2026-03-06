@@ -28,11 +28,7 @@ export async function remove(options: DeleteDelayProfileOptions) {
 		// Value guard - ensure this is the profile we expect
 		.where('name', '=', current.name)
 		.where('preferred_protocol', '=', current.preferred_protocol)
-		.where(
-			'bypass_if_highest_quality',
-			'=',
-			current.bypass_if_highest_quality ? 1 : 0
-		)
+		.where('bypass_if_highest_quality', '=', current.bypass_if_highest_quality ? 1 : 0)
 		.where(
 			'bypass_if_above_custom_format_score',
 			'=',

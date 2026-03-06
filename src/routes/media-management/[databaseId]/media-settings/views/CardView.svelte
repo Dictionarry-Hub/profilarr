@@ -46,7 +46,12 @@
 			variant: 'secondary',
 			label: config.propers_repacks
 		}}
-		<Card href="/media-management/{databaseId}/media-settings/{config.arr_type}/{encodeURIComponent(config.name)}" hoverable>
+		<Card
+			href="/media-management/{databaseId}/media-settings/{config.arr_type}/{encodeURIComponent(
+				config.name
+			)}"
+			hoverable
+		>
 			<div class="flex items-center gap-4">
 				<!-- Logo + Name -->
 				<div class="flex min-w-0 flex-1 items-center gap-3">

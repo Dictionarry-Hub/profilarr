@@ -97,10 +97,7 @@
 	}
 
 	// Field accessors for text search
-	const fieldAccessors: Record<
-		string,
-		(item: CustomFormatTableRow) => string | string[] | null
-	> = {
+	const fieldAccessors: Record<string, (item: CustomFormatTableRow) => string | string[] | null> = {
 		name: (item) => item.name,
 		tags: (item) => item.tags.map((t) => t.name),
 		description: (item) => item.description ?? null,
@@ -122,14 +119,13 @@
 	// Filtering based on active search field
 	$: filtered = (() => {
 		if (isTagMode) {
-			const getItemTags = activeSearchField === 'conditions'
-				? (item: CustomFormatTableRow) => item.conditions.map((c) => c.name)
-				: (item: CustomFormatTableRow) => item.tags.map((t) => t.name);
+			const getItemTags =
+				activeSearchField === 'conditions'
+					? (item: CustomFormatTableRow) => item.conditions.map((c) => c.name)
+					: (item: CustomFormatTableRow) => item.tags.map((t) => t.name);
 			return filterByTags(data.customFormats, searchTags, getItemTags);
 		}
-		return filterByText(data.customFormats, $debouncedQuery, fieldAccessors, [
-			activeSearchField
-		]);
+		return filterByText(data.customFormats, $debouncedQuery, fieldAccessors, [activeSearchField]);
 	})();
 
 	// Map databases to tabs
@@ -138,7 +134,6 @@
 		href: `/custom-formats/${db.id}`,
 		active: db.id === data.currentDatabase.id
 	}));
-
 </script>
 
 <svelte:head>
@@ -161,12 +156,20 @@
 			<div class="flex-1">
 				<TagInput
 					tags={searchTags}
-					placeholder="Type a {activeSearchField === 'conditions' ? 'condition' : 'tag'} name and press Enter... (prefix NOT: to exclude)"
+					placeholder="Type a {activeSearchField === 'conditions'
+						? 'condition'
+						: 'tag'} name and press Enter... (prefix NOT: to exclude)"
 					onchange={handleTagsChange}
 				/>
 			</div>
 		{:else}
-			<SearchAction searchStore={search} placeholder="Search {searchFields.find(f => f.value === activeSearchField)?.label.toLowerCase() ?? ''}..." responsive />
+			<SearchAction
+				searchStore={search}
+				placeholder="Search {searchFields
+					.find((f) => f.value === activeSearchField)
+					?.label.toLowerCase() ?? ''}..."
+				responsive
+			/>
 		{/if}
 		<ActionButton
 			icon={Plus}
@@ -218,8 +221,8 @@
 			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Conditions</h3>
 			<p>
 				Each custom format has one or more conditions grouped by type (Release Title, Release Group,
-				Source, Resolution, etc.). Conditions use AND logic between types and OR logic within a type,
-				with <strong>Required</strong> and <strong>Negate</strong> modifiers to change this behavior.
+				Source, Resolution, etc.). Conditions use AND logic between types and OR logic within a
+				type, with <strong>Required</strong> and <strong>Negate</strong> modifiers to change this behavior.
 				Each condition type is explained in detail on the conditions tab when editing a format.
 			</p>
 		</section>
@@ -230,9 +233,9 @@
 			</h3>
 			<p>
 				Release Title conditions use regular expressions (regex) to match patterns in release names.
-				In Profilarr, regex patterns are managed as their own reusable entity &mdash; a single pattern
-				can be shared across multiple custom formats. When a pattern is updated, every format using it
-				gets the change automatically.
+				In Profilarr, regex patterns are managed as their own reusable entity &mdash; a single
+				pattern can be shared across multiple custom formats. When a pattern is updated, every
+				format using it gets the change automatically.
 			</p>
 			<p class="mt-2">
 				You can browse and manage patterns on the

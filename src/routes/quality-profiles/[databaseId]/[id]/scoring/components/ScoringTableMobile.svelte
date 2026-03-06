@@ -91,9 +91,7 @@
 									shape="circle"
 									on:click={() => handleToggleEnabled(format.name, arrType)}
 								/>
-								<span
-									class="text-xs font-medium capitalize text-neutral-600 dark:text-neutral-400"
-								>
+								<span class="text-xs font-medium text-neutral-600 capitalize dark:text-neutral-400">
 									{arrType}
 								</span>
 							</div>
@@ -102,8 +100,7 @@
 									<NumberInput
 										name="score-{format.name}-{arrType}"
 										value={customFormatScores[format.name][arrType] ?? 0}
-										onchange={(newValue) =>
-											handleScoreChange(format.name, arrType, newValue)}
+										onchange={(newValue) => handleScoreChange(format.name, arrType, newValue)}
 										step={1}
 										disabled={!customFormatEnabled[format.name]?.[arrType]}
 										responsive={true}

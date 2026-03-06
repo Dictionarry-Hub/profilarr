@@ -89,7 +89,11 @@
 				</div>
 
 				<!-- Body -->
-				<div class="flex-1 px-6 py-4 {bodyOverflow === 'visible' ? 'overflow-visible' : 'overflow-auto'}">
+				<div
+					class="flex-1 px-6 py-4 {bodyOverflow === 'visible'
+						? 'overflow-visible'
+						: 'overflow-auto'}"
+				>
 					<slot name="body">
 						<p class="text-sm text-neutral-600 dark:text-neutral-400">{bodyMessage}</p>
 					</slot>
@@ -100,12 +104,7 @@
 					class="flex flex-shrink-0 justify-between border-t border-neutral-300 px-6 py-4 dark:border-neutral-700/60"
 				>
 					<slot name="footer">
-						<Button
-							text={cancelText}
-							icon={X}
-							disabled={loading}
-							on:click={handleCancel}
-						/>
+						<Button text={cancelText} icon={X} disabled={loading} on:click={handleCancel} />
 						<Button
 							text={confirmText}
 							icon={loading ? Loader2 : Check}

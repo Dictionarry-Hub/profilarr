@@ -12,11 +12,7 @@ import { linkPcd } from '../helpers/linkPcd';
 import { unlinkPcdByName } from '../helpers/unlinkPcd';
 import { pullChanges, exportAndPush } from '../helpers/sync';
 import { goToConflicts, expectNoConflict } from '../helpers/conflicts';
-import {
-  goToCustomFormat,
-  updateCfName,
-  getCfFieldValue
-} from '../helpers/entity';
+import { goToCustomFormat, updateCfName, getCfFieldValue } from '../helpers/entity';
 import { fillMarkdownInput } from '../helpers/markdown';
 import { getHead, resetToCommit } from '../helpers/reset';
 
@@ -26,141 +22,141 @@ const SEED_CF_NAME = 'E2E Delete Target';
 const RENAMED_CF_NAME = 'E2E Delete Target Renamed';
 
 async function createCustomFormat(
-  page: import('@playwright/test').Page,
-  databaseId: number,
-  name: string,
-  description: string
+	page: import('@playwright/test').Page,
+	databaseId: number,
+	name: string,
+	description: string
 ): Promise<void> {
-  await page.goto(`/custom-formats/${databaseId}/new`);
-  await page.waitForLoadState('networkidle');
-  await page.locator('#name').fill(name);
-  await fillMarkdownInput(page, 'description', description);
-  await page.getByRole('button', { name: 'Create' }).click();
-  await page.waitForURL(new RegExp(`/custom-formats/${databaseId}/\\d+/conditions`), {
-    timeout: 15_000
-  });
-  await page.waitForLoadState('networkidle');
+	await page.goto(`/custom-formats/${databaseId}/new`);
+	await page.waitForLoadState('networkidle');
+	await page.locator('#name').fill(name);
+	await fillMarkdownInput(page, 'description', description);
+	await page.getByRole('button', { name: 'Create' }).click();
+	await page.waitForURL(new RegExp(`/custom-formats/${databaseId}/\\d+/conditions`), {
+		timeout: 15_000
+	});
+	await page.waitForLoadState('networkidle');
 }
 
 async function goToCustomFormatGeneral(
-  page: import('@playwright/test').Page,
-  databaseId: number,
-  name: string
+	page: import('@playwright/test').Page,
+	databaseId: number,
+	name: string
 ): Promise<void> {
-  await goToCustomFormat(page, databaseId, name);
-  if (!/\/custom-formats\/\d+\/\d+/.test(page.url())) {
-    await page.waitForURL(/\/custom-formats\/\d+\/\d+/, { timeout: 15_000 });
-  }
-  const match = page.url().match(/\/custom-formats\/(\d+)\/(\d+)/);
-  if (!match) {
-    throw new Error(`Unexpected custom format URL: ${page.url()}`);
-  }
-  const generalUrl = `/custom-formats/${match[1]}/${match[2]}/general`;
-  await page.goto(generalUrl);
-  await page.waitForLoadState('networkidle');
+	await goToCustomFormat(page, databaseId, name);
+	if (!/\/custom-formats\/\d+\/\d+/.test(page.url())) {
+		await page.waitForURL(/\/custom-formats\/\d+\/\d+/, { timeout: 15_000 });
+	}
+	const match = page.url().match(/\/custom-formats\/(\d+)\/(\d+)/);
+	if (!match) {
+		throw new Error(`Unexpected custom format URL: ${page.url()}`);
+	}
+	const generalUrl = `/custom-formats/${match[1]}/${match[2]}/general`;
+	await page.goto(generalUrl);
+	await page.waitForLoadState('networkidle');
 }
 
 async function deleteCustomFormat(
-  page: import('@playwright/test').Page,
-  databaseId: number,
-  name: string
+	page: import('@playwright/test').Page,
+	databaseId: number,
+	name: string
 ): Promise<void> {
-  await goToCustomFormatGeneral(page, databaseId, name);
-  await page.getByRole('button', { name: 'Delete' }).first().click();
-  await page.getByRole('button', { name: 'Delete' }).last().click();
-  await page.waitForURL(new RegExp(`/custom-formats/${databaseId}$`), {
-    timeout: 15_000
-  });
-  await page.waitForLoadState('networkidle');
+	await goToCustomFormatGeneral(page, databaseId, name);
+	await page.getByRole('button', { name: 'Delete' }).first().click();
+	await page.getByRole('button', { name: 'Delete' }).last().click();
+	await page.waitForURL(new RegExp(`/custom-formats/${databaseId}$`), {
+		timeout: 15_000
+	});
+	await page.waitForLoadState('networkidle');
 }
 
 async function assertCustomFormatName(
-  page: import('@playwright/test').Page,
-  databaseId: number,
-  expectedName: string
+	page: import('@playwright/test').Page,
+	databaseId: number,
+	expectedName: string
 ): Promise<void> {
-  await goToCustomFormatGeneral(page, databaseId, expectedName);
-  const nameValue = await getCfFieldValue(page, 'name');
-  expect(nameValue).toBe(expectedName);
+	await goToCustomFormatGeneral(page, databaseId, expectedName);
+	const nameValue = await getCfFieldValue(page, 'name');
+	expect(nameValue).toBe(expectedName);
 }
 
 test.describe('1.10 CF delete renamed conflict', () => {
-  let localId: number;
-  let devId: number;
-  let devHead: string;
+	let localId: number;
+	let devId: number;
+	let devHead: string;
 
-  test.beforeEach(async ({ browser }) => {
-    const page = await browser.newPage();
+	test.beforeEach(async ({ browser }) => {
+		const page = await browser.newPage();
 
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
 
-    devId = await linkPcd(page, {
-      name: DEV_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL
-    });
+		devId = await linkPcd(page, {
+			name: DEV_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL
+		});
 
-    devHead = getHead(devId);
+		devHead = getHead(devId);
 
-    localId = await linkPcd(page, {
-      name: LOCAL_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL,
-      syncStrategy: 'Manual (no auto-sync)',
-      autoPull: false,
-      localOpsEnabled: true,
-      conflictStrategy: 'Ask every time'
-    });
+		localId = await linkPcd(page, {
+			name: LOCAL_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL,
+			syncStrategy: 'Manual (no auto-sync)',
+			autoPull: false,
+			localOpsEnabled: true,
+			conflictStrategy: 'Ask every time'
+		});
 
-    await page.close();
-  });
+		await page.close();
+	});
 
-  test.afterEach(async ({ browser }) => {
-    if (devId && devHead) {
-      try {
-        resetToCommit(devId, devHead, true);
-      } catch {
-        // Best-effort reset
-      }
-    }
+	test.afterEach(async ({ browser }) => {
+		if (devId && devHead) {
+			try {
+				resetToCommit(devId, devHead, true);
+			} catch {
+				// Best-effort reset
+			}
+		}
 
-    const page = await browser.newPage();
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
-    await page.close();
-  });
+		const page = await browser.newPage();
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
+		await page.close();
+	});
 
-  test('auto-align — delete op dropped, CF renamed', async ({ page }) => {
-    // Dev creates CF and pushes
-    await createCustomFormat(page, devId, SEED_CF_NAME, 'Seed description');
-    await exportAndPush(page, devId, 'e2e: 1.10 seed CF');
+	test('auto-align — delete op dropped, CF renamed', async ({ page }) => {
+		// Dev creates CF and pushes
+		await createCustomFormat(page, devId, SEED_CF_NAME, 'Seed description');
+		await exportAndPush(page, devId, 'e2e: 1.10 seed CF');
 
-    // Local pulls seed CF
-    await pullChanges(page, localId);
+		// Local pulls seed CF
+		await pullChanges(page, localId);
 
-    // Local deletes CF
-    await deleteCustomFormat(page, localId, SEED_CF_NAME);
+		// Local deletes CF
+		await deleteCustomFormat(page, localId, SEED_CF_NAME);
 
-    // Dev renames CF
-    await goToCustomFormatGeneral(page, devId, SEED_CF_NAME);
-    await updateCfName(page, RENAMED_CF_NAME);
+		// Dev renames CF
+		await goToCustomFormatGeneral(page, devId, SEED_CF_NAME);
+		await updateCfName(page, RENAMED_CF_NAME);
 
-    // Dev exports and pushes
-    await exportAndPush(page, devId, 'e2e: 1.10 rename CF');
+		// Dev exports and pushes
+		await exportAndPush(page, devId, 'e2e: 1.10 rename CF');
 
-    // Local pulls → auto-align (no conflict)
-    await pullChanges(page, localId);
+		// Local pulls → auto-align (no conflict)
+		await pullChanges(page, localId);
 
-    // Verify no conflict exists
-    await goToConflicts(page, localId);
-    await expectNoConflict(page, SEED_CF_NAME);
+		// Verify no conflict exists
+		await goToConflicts(page, localId);
+		await expectNoConflict(page, SEED_CF_NAME);
 
-    // Verify CF remains with new name
-    await assertCustomFormatName(page, localId, RENAMED_CF_NAME);
-  });
+		// Verify CF remains with new name
+		await assertCustomFormatName(page, localId, RENAMED_CF_NAME);
+	});
 });

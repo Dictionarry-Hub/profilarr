@@ -25,7 +25,10 @@ const REGEX_NAME = '3D';
 const LOCAL_DESC = 'Local description for 3.4';
 const DEV_DESC = 'Dev description for 3.4';
 
-async function updateDescription(page: import('@playwright/test').Page, desc: string): Promise<void> {
+async function updateDescription(
+	page: import('@playwright/test').Page,
+	desc: string
+): Promise<void> {
 	const textarea = page.locator('#description');
 	await textarea.scrollIntoViewIfNeeded();
 	await textarea.fill(desc);

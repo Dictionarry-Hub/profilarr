@@ -14,7 +14,10 @@
 			: 'naming';
 
 	// Check if we're on a nested page (new/edit)
-	$: isNestedPage = currentPath.includes('/new') || currentPath.includes('/radarr/') || currentPath.includes('/sonarr/');
+	$: isNestedPage =
+		currentPath.includes('/new') ||
+		currentPath.includes('/radarr/') ||
+		currentPath.includes('/sonarr/');
 
 	// Map databases to tabs - preserve current config type when switching databases
 	$: databaseTabs = data.databases.map((db) => ({

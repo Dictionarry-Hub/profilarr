@@ -15,73 +15,72 @@ const TEST_CF_NAME = 'x265';
 const READ_ONLY_MESSAGE = 'Entity tests are read-only for this database';
 
 function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function getAlertByType(page: import('@playwright/test').Page, type: 'Info' | 'Error') {
-  const escaped = escapeRegex(READ_ONLY_MESSAGE);
-  return page.getByRole('button', {
-    name: new RegExp(`^${type}\\s+${escaped}\\.?$`)
-  });
+	const escaped = escapeRegex(READ_ONLY_MESSAGE);
+	return page.getByRole('button', {
+		name: new RegExp(`^${type}\\s+${escaped}\\.?$`)
+	});
 }
 
 test.describe('1.8 CF tests read-only', () => {
-  let localId: number;
+	let localId: number;
 
-  test.beforeEach(async ({ browser }) => {
-    const page = await browser.newPage();
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
+	test.beforeEach(async ({ browser }) => {
+		const page = await browser.newPage();
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
 
-    localId = await linkPcd(page, {
-      name: LOCAL_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      syncStrategy: 'Manual (no auto-sync)',
-      autoPull: false
-    });
+		localId = await linkPcd(page, {
+			name: LOCAL_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			syncStrategy: 'Manual (no auto-sync)',
+			autoPull: false
+		});
 
-    await page.close();
-  });
+		await page.close();
+	});
 
-  test.afterEach(async ({ browser }) => {
-    const page = await browser.newPage();
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await page.close();
-  });
+	test.afterEach(async ({ browser }) => {
+		const page = await browser.newPage();
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await page.close();
+	});
 
-  test('read-only blocks add and create', async ({ page }) => {
-    await goToCustomFormat(page, localId, TEST_CF_NAME);
+	test('read-only blocks add and create', async ({ page }) => {
+		await goToCustomFormat(page, localId, TEST_CF_NAME);
 
-    const match = page.url().match(/\/custom-formats\/(\d+)\/(\d+)/);
-    if (!match) {
-      throw new Error(`Unexpected custom format URL: ${page.url()}`);
-    }
+		const match = page.url().match(/\/custom-formats\/(\d+)\/(\d+)/);
+		if (!match) {
+			throw new Error(`Unexpected custom format URL: ${page.url()}`);
+		}
 
-    const testingUrl = `/custom-formats/${match[1]}/${match[2]}/testing`;
-    await page.goto(testingUrl);
-    await page.waitForLoadState('networkidle');
+		const testingUrl = `/custom-formats/${match[1]}/${match[2]}/testing`;
+		await page.goto(testingUrl);
+		await page.waitForLoadState('networkidle');
 
-    await page.getByRole('button', { name: 'Add Test' }).click();
-    const infoAlert = getAlertByType(page, 'Info');
-    await expect(infoAlert).toBeVisible();
-    await expect(page).toHaveURL(testingUrl);
-    await infoAlert.click();
-    await expect(infoAlert).toBeHidden();
+		await page.getByRole('button', { name: 'Add Test' }).click();
+		const infoAlert = getAlertByType(page, 'Info');
+		await expect(infoAlert).toBeVisible();
+		await expect(page).toHaveURL(testingUrl);
+		await infoAlert.click();
+		await expect(infoAlert).toBeHidden();
 
-    const newUrl = `/custom-formats/${match[1]}/${match[2]}/testing/new`;
-    await page.goto(newUrl);
-    await page.waitForLoadState('networkidle');
+		const newUrl = `/custom-formats/${match[1]}/${match[2]}/testing/new`;
+		await page.goto(newUrl);
+		await page.waitForLoadState('networkidle');
 
-    await page.locator('#title').fill('Read-only test');
-    const createResponse = page.waitForResponse(
-      (response) =>
-        response.request().method() === 'POST' &&
-        response.url().includes('/testing/new')
-    );
-    await page.getByRole('button', { name: 'Create' }).click();
-    await createResponse;
+		await page.locator('#title').fill('Read-only test');
+		const createResponse = page.waitForResponse(
+			(response) =>
+				response.request().method() === 'POST' && response.url().includes('/testing/new')
+		);
+		await page.getByRole('button', { name: 'Create' }).click();
+		await createResponse;
 
-    const errorAlert = getAlertByType(page, 'Error');
-    await expect(errorAlert).toBeVisible();
-    await expect(page).toHaveURL(newUrl);
-  });
+		const errorAlert = getAlertByType(page, 'Error');
+		await expect(errorAlert).toBeVisible();
+		await expect(page).toHaveURL(newUrl);
+	});
 });

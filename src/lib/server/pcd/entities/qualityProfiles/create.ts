@@ -235,9 +235,7 @@ export async function create(options: CreateQualityProfileOptions) {
 		position += 1;
 	}
 
-	const groupNames = orderedItems
-		.filter((item) => item.type === 'group')
-		.map((item) => item.name);
+	const groupNames = orderedItems.filter((item) => item.type === 'group').map((item) => item.name);
 
 	for (const groupName of groupNames) {
 		const group = groupMap.get(groupName);

@@ -23,12 +23,7 @@
 import { assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '../harness/client.ts';
 import { startServer, stopServer, getDbPath } from '../harness/server.ts';
-import {
-	createUser,
-	login,
-	clearLoginAttempts,
-	insertExpiredAttempts
-} from '../harness/setup.ts';
+import { createUser, login, clearLoginAttempts, insertExpiredAttempts } from '../harness/setup.ts';
 import { setup, teardown, test, run } from '../harness/runner.ts';
 
 const PORT = 7007;
@@ -61,18 +56,10 @@ teardown(async () => {
 /**
  * Helper: attempt login N times with given credentials.
  */
-async function attemptLogins(
-	username: string,
-	password: string,
-	count: number
-): Promise<void> {
+async function attemptLogins(username: string, password: string, count: number): Promise<void> {
 	for (let i = 0; i < count; i++) {
 		const client = new TestClient(ORIGIN);
-		await client.postForm(
-			'/auth/login',
-			{ username, password },
-			{ headers: { Origin: ORIGIN } }
-		);
+		await client.postForm('/auth/login', { username, password }, { headers: { Origin: ORIGIN } });
 	}
 }
 

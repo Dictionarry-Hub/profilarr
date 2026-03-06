@@ -6,7 +6,7 @@
 </script>
 
 {#if preview}
-	<p class="mt-2 break-all font-mono text-xs text-neutral-500 dark:text-neutral-400">
+	<p class="mt-2 font-mono text-xs break-all text-neutral-500 dark:text-neutral-400">
 		{preview}
 	</p>
 {/if}

@@ -1,7 +1,20 @@
 <script lang="ts">
-	import { AlertTriangle, X, FileText, Calendar, CircleDot, Check, FlaskConical, Play } from 'lucide-svelte';
+	import {
+		AlertTriangle,
+		X,
+		FileText,
+		Calendar,
+		CircleDot,
+		Check,
+		FlaskConical,
+		Play
+	} from 'lucide-svelte';
 	import type { RenameJobLog } from '$lib/server/rename/types.ts';
-	import { createSearchStore, getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
+	import {
+		createSearchStore,
+		getPersistentSearchStore,
+		type SearchStore
+	} from '$lib/client/stores/search';
 	import type { Readable } from 'svelte/store';
 	import { page } from '$app/stores';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
@@ -223,11 +236,18 @@
 						<span class="font-mono">{row.results.filesNeedingRename}</span> would rename
 					{:else}
 						{#if row.results.filesRenamed > 0}
-							<span class="font-mono">{row.results.filesRenamed}</span> file{row.results.filesRenamed !== 1 ? 's' : ''}
+							<span class="font-mono">{row.results.filesRenamed}</span> file{row.results
+								.filesRenamed !== 1
+								? 's'
+								: ''}
 						{/if}
 						{#if row.results.foldersRenamed > 0}
-							{#if row.results.filesRenamed > 0}, {/if}
-							<span class="font-mono">{row.results.foldersRenamed}</span> folder{row.results.foldersRenamed !== 1 ? 's' : ''}
+							{#if row.results.filesRenamed > 0},
+							{/if}
+							<span class="font-mono">{row.results.foldersRenamed}</span> folder{row.results
+								.foldersRenamed !== 1
+								? 's'
+								: ''}
 						{/if}
 						{#if row.results.filesRenamed > 0 || row.results.foldersRenamed > 0}
 							renamed
@@ -290,9 +310,15 @@
 						{#if row.config.dryRun}
 							<span class="font-mono">{row.results.filesNeedingRename}</span> files would be renamed
 						{:else}
-							<span class="font-mono">{row.results.filesRenamed}</span> file{row.results.filesRenamed !== 1 ? 's' : ''} renamed
+							<span class="font-mono">{row.results.filesRenamed}</span> file{row.results
+								.filesRenamed !== 1
+								? 's'
+								: ''} renamed
 							{#if row.results.foldersRenamed > 0}
-								, <span class="font-mono">{row.results.foldersRenamed}</span> folder{row.results.foldersRenamed !== 1 ? 's' : ''} renamed
+								, <span class="font-mono">{row.results.foldersRenamed}</span> folder{row.results
+									.foldersRenamed !== 1
+									? 's'
+									: ''} renamed
 							{/if}
 						{/if}
 						{#if row.results.commandsFailed > 0}
@@ -347,7 +373,9 @@
 											<Badge variant="info" mono>Folder</Badge>
 										{/if}
 										{#if item.files.length > 0}
-											<Badge variant="neutral" mono>{item.files.length} file{item.files.length !== 1 ? 's' : ''}</Badge>
+											<Badge variant="neutral" mono
+												>{item.files.length} file{item.files.length !== 1 ? 's' : ''}</Badge
+											>
 										{/if}
 									</div>
 								{/if}
@@ -366,7 +394,7 @@
 													>From:</span
 												>
 												<span
-													class="break-all font-mono text-xs text-neutral-700 dark:text-neutral-300"
+													class="font-mono text-xs break-all text-neutral-700 dark:text-neutral-300"
 												>
 													{item.folder.existingPath}
 												</span>
@@ -377,7 +405,7 @@
 													>To:</span
 												>
 												<span
-													class="break-all font-mono text-xs text-neutral-700 dark:text-neutral-300"
+													class="font-mono text-xs break-all text-neutral-700 dark:text-neutral-300"
 												>
 													{item.folder.newPath}
 												</span>
@@ -392,7 +420,7 @@
 													>From:</span
 												>
 												<span
-													class="break-all font-mono text-xs text-neutral-700 dark:text-neutral-300"
+													class="font-mono text-xs break-all text-neutral-700 dark:text-neutral-300"
 												>
 													{getFileName(file.existingPath)}
 												</span>
@@ -403,7 +431,7 @@
 													>To:</span
 												>
 												<span
-													class="break-all font-mono text-xs text-neutral-700 dark:text-neutral-300"
+													class="font-mono text-xs break-all text-neutral-700 dark:text-neutral-300"
 												>
 													{getFileName(file.newPath)}
 												</span>

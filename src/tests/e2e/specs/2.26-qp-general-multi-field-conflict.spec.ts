@@ -131,7 +131,12 @@ test.describe('2.26 QP general multi-field conflict', () => {
 
 		const tagBadges = page.locator('span.inline-flex');
 		const allText = await tagBadges.allInnerTexts();
-		const tagNames = allText.map((t) => t.replace(/\s*×?\s*$/, '').trim().toLowerCase());
+		const tagNames = allText.map((t) =>
+			t
+				.replace(/\s*×?\s*$/, '')
+				.trim()
+				.toLowerCase()
+		);
 		expect(tagNames).toContain(LOCAL_TAG);
 	});
 
@@ -164,7 +169,12 @@ test.describe('2.26 QP general multi-field conflict', () => {
 
 		const tagBadges = page.locator('span.inline-flex');
 		const allText = await tagBadges.allInnerTexts();
-		const tagNames = allText.map((t) => t.replace(/\s*×?\s*$/, '').trim().toLowerCase());
+		const tagNames = allText.map((t) =>
+			t
+				.replace(/\s*×?\s*$/, '')
+				.trim()
+				.toLowerCase()
+		);
 		expect(tagNames).toContain(LOCAL_TAG);
 	});
 });

@@ -34,7 +34,9 @@ export async function updateRadarrQualityDefinitions(options: UpdateQualityDefin
 			.executeTakeFirst();
 
 		if (existing) {
-			throw new Error(`A radarr quality definitions config with name "${input.name}" already exists`);
+			throw new Error(
+				`A radarr quality definitions config with name "${input.name}" already exists`
+			);
 		}
 	}
 
@@ -117,7 +119,9 @@ export async function updateSonarrQualityDefinitions(options: UpdateQualityDefin
 			.executeTakeFirst();
 
 		if (existing) {
-			throw new Error(`A sonarr quality definitions config with name "${input.name}" already exists`);
+			throw new Error(
+				`A sonarr quality definitions config with name "${input.name}" already exists`
+			);
 		}
 	}
 
@@ -185,10 +189,7 @@ export async function updateSonarrQualityDefinitions(options: UpdateQualityDefin
 	});
 }
 
-function isSameEntries(
-	current: QualityDefinitionEntry[],
-	next: QualityDefinitionEntry[]
-): boolean {
+function isSameEntries(current: QualityDefinitionEntry[], next: QualityDefinitionEntry[]): boolean {
 	const normalize = (entries: QualityDefinitionEntry[]) =>
 		entries
 			.map((entry) => ({

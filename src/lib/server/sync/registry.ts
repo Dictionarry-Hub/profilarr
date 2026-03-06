@@ -3,11 +3,7 @@
  * Reduces code duplication by providing a generic interface for all sync section types
  */
 
-import type {
-	SectionType,
-	SectionHandler,
-	ScheduledConfig
-} from './types.ts';
+import type { SectionType, SectionHandler, ScheduledConfig } from './types.ts';
 
 export type { SectionType, SectionHandler, ScheduledConfig };
 

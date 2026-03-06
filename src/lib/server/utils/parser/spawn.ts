@@ -94,8 +94,7 @@ async function streamOutput(reader: ReadableStreamDefaultReader<Uint8Array>) {
 
 // — Main ————————————————————————————————————————————————————————
 
-const shouldSpawn =
-	!isDocker() && !Deno.env.get('PARSER_HOST') && findParserBinary() !== null;
+const shouldSpawn = !isDocker() && !Deno.env.get('PARSER_HOST') && findParserBinary() !== null;
 
 if (shouldSpawn) {
 	const binaryPath = findParserBinary()!;
@@ -154,9 +153,7 @@ if (shouldSpawn) {
 	// Watch for unexpected death
 	process.status.then((status) => {
 		if (status.code !== 0) {
-			console.error(
-				`\x1b[31m[parser]\x1b[0m Process exited unexpectedly (code ${status.code})`
-			);
+			console.error(`\x1b[31m[parser]\x1b[0m Process exited unexpectedly (code ${status.code})`);
 		}
 	});
 }

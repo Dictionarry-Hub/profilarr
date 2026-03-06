@@ -69,10 +69,7 @@ test('POST with correct origin does not return 403', async () => {
 
 test('POST with no origin header returns 403', async () => {
 	const client = new TestClient(ORIGIN);
-	const res = await client.postForm(
-		'/auth/login',
-		{ username: 'admin', password: 'password123' }
-	);
+	const res = await client.postForm('/auth/login', { username: 'admin', password: 'password123' });
 	assertEquals(res.status, 403);
 });
 

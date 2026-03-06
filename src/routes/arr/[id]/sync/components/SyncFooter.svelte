@@ -47,33 +47,33 @@
 			<div>
 				<span class="mb-1 block text-xs text-transparent select-none">&nbsp;</span>
 				<div class="flex items-center gap-3">
-				{#if warning}
-					<div class="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
-						<AlertTriangle size={14} class="flex-shrink-0" />
-						<span>{warning}</span>
-					</div>
-				{/if}
-				<Button
-					text="Sync Now"
-					variant="secondary"
-					disabled={syncDisabled}
-					icon={syncing ? Loader2 : RefreshCw}
-					iconColor={syncing
-						? 'text-blue-600 dark:text-blue-400 animate-spin'
-						: 'text-blue-600 dark:text-blue-400'}
-					title={isDirty ? 'Save changes before syncing' : ''}
-					on:click={() => dispatch('sync')}
-				/>
-				<Button
-					text="Save"
-					variant="secondary"
-					disabled={saveDisabled}
-					icon={saving ? Loader2 : Save}
-					iconColor={saving
-						? 'text-green-600 dark:text-green-400 animate-spin'
-						: 'text-green-600 dark:text-green-400'}
-					on:click={() => dispatch('save')}
-				/>
+					{#if warning}
+						<div class="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+							<AlertTriangle size={14} class="flex-shrink-0" />
+							<span>{warning}</span>
+						</div>
+					{/if}
+					<Button
+						text="Sync Now"
+						variant="secondary"
+						disabled={syncDisabled}
+						icon={syncing ? Loader2 : RefreshCw}
+						iconColor={syncing
+							? 'text-blue-600 dark:text-blue-400 animate-spin'
+							: 'text-blue-600 dark:text-blue-400'}
+						title={isDirty ? 'Save changes before syncing' : ''}
+						on:click={() => dispatch('sync')}
+					/>
+					<Button
+						text="Save"
+						variant="secondary"
+						disabled={saveDisabled}
+						icon={saving ? Loader2 : Save}
+						iconColor={saving
+							? 'text-green-600 dark:text-green-400 animate-spin'
+							: 'text-green-600 dark:text-green-400'}
+						on:click={() => dispatch('save')}
+					/>
 				</div>
 			</div>
 		</div>
@@ -82,7 +82,12 @@
 		{#if syncTrigger === 'schedule'}
 			<div class="border-t border-neutral-200 pt-3 dark:border-neutral-800">
 				<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Schedule</span>
-				<CronInput bind:value={cronExpression} disabled={saving} minIntervalMinutes={10} {onWarning} />
+				<CronInput
+					bind:value={cronExpression}
+					disabled={saving}
+					minIntervalMinutes={10}
+					{onWarning}
+				/>
 			</div>
 		{/if}
 	</div>

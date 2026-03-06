@@ -143,7 +143,11 @@
 				if (result.type === 'failure' && result.data) {
 					alertStore.add('error', (result.data as { error?: string }).error || 'Operation failed');
 				} else if (result.type === 'success' && result.data) {
-					const data = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+					const data = result.data as {
+						success?: boolean;
+						redirectTo?: string;
+						affectedArrs?: AffectedArr[];
+					};
 					if (data.success) {
 						alertStore.add(
 							'success',

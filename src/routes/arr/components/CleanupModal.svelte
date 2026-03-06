@@ -50,11 +50,7 @@
 
 	$: allEmpty = configEmpty && entityEmpty;
 
-	$: hasAnythingToClean =
-		phase === 'preview' &&
-		!allEmpty &&
-		!configError &&
-		!entityError;
+	$: hasAnythingToClean = phase === 'preview' && !allEmpty && !configError && !entityError;
 
 	$: confirmText = (() => {
 		if (phase === 'scanning') return 'Scanning...';
@@ -187,8 +183,10 @@
 		reset();
 	}
 
-	$: entityLabel = instanceType === 'radarr' ? 'movies' : instanceType === 'sonarr' ? 'series' : 'items';
-	$: externalDb = instanceType === 'radarr' ? 'TMDB' : instanceType === 'sonarr' ? 'TVDB' : 'external DB';
+	$: entityLabel =
+		instanceType === 'radarr' ? 'movies' : instanceType === 'sonarr' ? 'series' : 'items';
+	$: externalDb =
+		instanceType === 'radarr' ? 'TMDB' : instanceType === 'sonarr' ? 'TVDB' : 'external DB';
 </script>
 
 <Modal
@@ -205,26 +203,30 @@
 		{#if phase === 'scanning'}
 			<div class="flex flex-col items-center gap-3 py-8">
 				<Loader2 size={32} class="animate-spin text-neutral-400" />
-				<p class="text-sm text-neutral-500 dark:text-neutral-400">Scanning for stale configs and removed media...</p>
+				<p class="text-sm text-neutral-500 dark:text-neutral-400">
+					Scanning for stale configs and removed media...
+				</p>
 			</div>
-
 		{:else if phase === 'executing'}
 			<div class="flex flex-col items-center gap-3 py-8">
 				<Loader2 size={32} class="animate-spin text-neutral-400" />
 				<p class="text-sm text-neutral-500 dark:text-neutral-400">Cleaning up...</p>
 			</div>
-
 		{:else if phase === 'preview'}
 			{#if allEmpty && !configError && !entityError}
 				<div class="flex flex-col items-center gap-3 py-8">
 					<Check size={32} class="text-emerald-500" />
-					<p class="text-sm text-neutral-600 dark:text-neutral-400">Nothing to clean up. Everything looks good.</p>
+					<p class="text-sm text-neutral-600 dark:text-neutral-400">
+						Nothing to clean up. Everything looks good.
+					</p>
 				</div>
 			{:else}
 				<div class="space-y-4">
 					<!-- Config cleanup preview -->
 					{#if configError}
-						<div class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950">
+						<div
+							class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950"
+						>
 							<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-red-500" />
 							<div>
 								<p class="text-sm font-medium text-red-800 dark:text-red-200">Config scan failed</p>
@@ -233,16 +235,22 @@
 						</div>
 					{:else if !configEmpty && configScan}
 						<div class="space-y-2">
-							<p class="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Stale Configs</p>
+							<p
+								class="text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
+							>
+								Stale Configs
+							</p>
 							<div class="space-y-1">
 								{#if configScan.staleCustomFormats.length > 0}
 									<p class="text-sm text-neutral-700 dark:text-neutral-300">
-										<span class="font-medium">{configScan.staleCustomFormats.length}</span> custom format{configScan.staleCustomFormats.length === 1 ? '' : 's'}
+										<span class="font-medium">{configScan.staleCustomFormats.length}</span> custom
+										format{configScan.staleCustomFormats.length === 1 ? '' : 's'}
 									</p>
 								{/if}
 								{#if configScan.staleQualityProfiles.length > 0}
 									<p class="text-sm text-neutral-700 dark:text-neutral-300">
-										<span class="font-medium">{configScan.staleQualityProfiles.length}</span> quality profile{configScan.staleQualityProfiles.length === 1 ? '' : 's'}
+										<span class="font-medium">{configScan.staleQualityProfiles.length}</span>
+										quality profile{configScan.staleQualityProfiles.length === 1 ? '' : 's'}
 									</p>
 								{/if}
 							</div>
@@ -251,7 +259,9 @@
 
 					<!-- Entity cleanup preview -->
 					{#if entityError}
-						<div class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950">
+						<div
+							class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950"
+						>
 							<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-red-500" />
 							<div>
 								<p class="text-sm font-medium text-red-800 dark:text-red-200">Entity scan failed</p>
@@ -260,9 +270,14 @@
 						</div>
 					{:else if !entityEmpty && entityScan}
 						<div class="space-y-2">
-							<p class="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Removed Media</p>
+							<p
+								class="text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
+							>
+								Removed Media
+							</p>
 							<p class="text-sm text-neutral-700 dark:text-neutral-300">
-								<span class="font-medium">{entityScan.removedEntities.length}</span> {entityLabel} removed from {externalDb}
+								<span class="font-medium">{entityScan.removedEntities.length}</span>
+								{entityLabel} removed from {externalDb}
 							</p>
 							<div class="max-h-40 overflow-y-auto">
 								{#each entityScan.removedEntities as entity}
@@ -273,7 +288,6 @@
 					{/if}
 				</div>
 			{/if}
-
 		{:else if phase === 'results'}
 			<div class="space-y-4">
 				<!-- Config cleanup results -->
@@ -284,7 +298,10 @@
 								<div class="flex items-center gap-2">
 									<Check size={16} class="flex-shrink-0 text-emerald-500" />
 									<p class="text-sm text-neutral-700 dark:text-neutral-300">
-										Deleted <span class="font-medium">{configResult.deletedCustomFormats.length}</span> custom format{configResult.deletedCustomFormats.length === 1 ? '' : 's'}
+										Deleted <span class="font-medium"
+											>{configResult.deletedCustomFormats.length}</span
+										>
+										custom format{configResult.deletedCustomFormats.length === 1 ? '' : 's'}
 									</p>
 								</div>
 							{/if}
@@ -292,7 +309,10 @@
 								<div class="flex items-center gap-2">
 									<Check size={16} class="flex-shrink-0 text-emerald-500" />
 									<p class="text-sm text-neutral-700 dark:text-neutral-300">
-										Deleted <span class="font-medium">{configResult.deletedQualityProfiles.length}</span> quality profile{configResult.deletedQualityProfiles.length === 1 ? '' : 's'}
+										Deleted <span class="font-medium"
+											>{configResult.deletedQualityProfiles.length}</span
+										>
+										quality profile{configResult.deletedQualityProfiles.length === 1 ? '' : 's'}
 									</p>
 								</div>
 							{/if}
@@ -304,21 +324,30 @@
 							<div class="flex items-center gap-2">
 								<AlertTriangle size={16} class="flex-shrink-0 text-amber-500" />
 								<p class="text-sm text-neutral-700 dark:text-neutral-300">
-									Skipped {configResult.skippedQualityProfiles.length} profile{configResult.skippedQualityProfiles.length === 1 ? '' : 's'} assigned to media
+									Skipped {configResult.skippedQualityProfiles.length} profile{configResult
+										.skippedQualityProfiles.length === 1
+										? ''
+										: 's'} assigned to media
 								</p>
 							</div>
 							{#each configResult.skippedQualityProfiles as skipped}
-								<p class="pl-6 text-sm text-neutral-500 dark:text-neutral-400">{skipped.item.name}</p>
+								<p class="pl-6 text-sm text-neutral-500 dark:text-neutral-400">
+									{skipped.item.name}
+								</p>
 							{/each}
 						</div>
 					{/if}
 				{/if}
 
 				{#if configError && phase === 'results'}
-					<div class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950">
+					<div
+						class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950"
+					>
 						<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-red-500" />
 						<div>
-							<p class="text-sm font-medium text-red-800 dark:text-red-200">Config cleanup failed</p>
+							<p class="text-sm font-medium text-red-800 dark:text-red-200">
+								Config cleanup failed
+							</p>
 							<p class="mt-0.5 text-xs text-red-600 dark:text-red-400">{configError}</p>
 						</div>
 					</div>
@@ -330,7 +359,8 @@
 						<div class="flex items-center gap-2">
 							<Check size={16} class="flex-shrink-0 text-emerald-500" />
 							<p class="text-sm text-neutral-700 dark:text-neutral-300">
-								Deleted <span class="font-medium">{entityResult.deletedEntities.length}</span> {entityLabel} removed from {externalDb}
+								Deleted <span class="font-medium">{entityResult.deletedEntities.length}</span>
+								{entityLabel} removed from {externalDb}
 							</p>
 						</div>
 					{/if}
@@ -340,21 +370,28 @@
 							<div class="flex items-center gap-2">
 								<AlertTriangle size={16} class="flex-shrink-0 text-amber-500" />
 								<p class="text-sm text-neutral-700 dark:text-neutral-300">
-									Failed to delete {entityResult.failedEntities.length} {entityLabel}
+									Failed to delete {entityResult.failedEntities.length}
+									{entityLabel}
 								</p>
 							</div>
 							{#each entityResult.failedEntities as failed}
-								<p class="pl-6 text-sm text-neutral-500 dark:text-neutral-400">{failed.entity.title}</p>
+								<p class="pl-6 text-sm text-neutral-500 dark:text-neutral-400">
+									{failed.entity.title}
+								</p>
 							{/each}
 						</div>
 					{/if}
 				{/if}
 
 				{#if entityError && phase === 'results'}
-					<div class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950">
+					<div
+						class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950"
+					>
 						<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-red-500" />
 						<div>
-							<p class="text-sm font-medium text-red-800 dark:text-red-200">Entity cleanup failed</p>
+							<p class="text-sm font-medium text-red-800 dark:text-red-200">
+								Entity cleanup failed
+							</p>
 							<p class="mt-0.5 text-xs text-red-600 dark:text-red-400">{entityError}</p>
 						</div>
 					</div>

@@ -22,10 +22,7 @@ import {
 	overrideConflict,
 	alignConflict
 } from '../helpers/conflicts';
-import {
-	openFirstQualityProfileGeneral,
-	goToQualityProfileQualities
-} from '../helpers/entity';
+import { openFirstQualityProfileGeneral, goToQualityProfileQualities } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
 const LOCAL_DB_NAME = 'E2E Local';
@@ -47,7 +44,10 @@ async function getQualityOrder(page: import('@playwright/test').Page): Promise<s
 }
 
 /** Click the move-down button on a quality row (mobile view). */
-async function moveQualityDown(page: import('@playwright/test').Page, index: number): Promise<void> {
+async function moveQualityDown(
+	page: import('@playwright/test').Page,
+	index: number
+): Promise<void> {
 	const row = page.locator('div.space-y-4 > div[role="button"]').nth(index);
 	const mobileButtons = row.locator('.md\\:hidden button');
 	await mobileButtons.last().click();

@@ -15,7 +15,11 @@ import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import type { DatabaseInstance, DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
 import { loadManifest, type Manifest } from '../manifest/manifest.ts';
 import { getPCDPath } from '../utils/operations.ts';
-import { processDependencies, syncDependencies, validateDependencies } from '../git/dependencies.ts';
+import {
+	processDependencies,
+	syncDependencies,
+	validateDependencies
+} from '../git/dependencies.ts';
 import { compile, invalidate } from '../database/compiler.ts';
 import { getCache } from '../database/registry.ts';
 import { logger } from '$logger/logger.ts';
@@ -336,7 +340,10 @@ class PCDManager {
 		// Validate dependencies for all instances first
 		for (const instance of enabledInstances) {
 			try {
-				await validateDependencies(instance.local_path, instance.personal_access_token ?? undefined);
+				await validateDependencies(
+					instance.local_path,
+					instance.personal_access_token ?? undefined
+				);
 			} catch (error) {
 				await logger.error(`Failed to validate dependencies for "${instance.name}"`, {
 					source: 'PCDManager',

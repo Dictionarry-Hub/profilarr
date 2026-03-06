@@ -1,17 +1,20 @@
 <script lang="ts">
+	import { Plus, Power, Copy, ClipboardCopy, ClipboardPaste, Trash2, Pencil } from 'lucide-svelte';
 	import {
-		Plus,
-		Power,
-		Copy,
-		ClipboardCopy,
-		ClipboardPaste,
-		Trash2,
-		Pencil
-	} from 'lucide-svelte';
-	import { createEmptyFilterConfig, calculateMaxCount, searchRateLimits, resolveTagLabel, type FilterConfig, type UpgradeAppType } from '$shared/upgrades/filters';
+		createEmptyFilterConfig,
+		calculateMaxCount,
+		searchRateLimits,
+		resolveTagLabel,
+		type FilterConfig,
+		type UpgradeAppType
+	} from '$shared/upgrades/filters';
 	import { uuid } from '$shared/utils/uuid';
 	import { selectors } from '$shared/upgrades/selectors';
-	import { createSearchStore, getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
+	import {
+		createSearchStore,
+		getPersistentSearchStore,
+		type SearchStore
+	} from '$lib/client/stores/search';
 	import type { Readable } from 'svelte/store';
 	import { page } from '$app/stores';
 	import FilterGroupComponent from './FilterGroup.svelte';
@@ -40,7 +43,9 @@
 	export let runsPerHour: number = 1;
 	export let onFiltersChange: ((filters: FilterConfig[]) => void) | undefined = undefined;
 
-	$: resolvedAppType = (appType === 'radarr' || appType === 'sonarr' ? appType : 'radarr') as UpgradeAppType;
+	$: resolvedAppType = (
+		appType === 'radarr' || appType === 'sonarr' ? appType : 'radarr'
+	) as UpgradeAppType;
 	$: countMax = calculateMaxCount(resolvedAppType, runsPerHour);
 
 	// Auto-clamp filter counts when max decreases
@@ -289,9 +294,9 @@
 							</div>
 						{:else}
 							<span
-								class="{row.enabled
+								class={row.enabled
 									? 'text-neutral-900 dark:text-neutral-100'
-									: 'text-neutral-400 dark:text-neutral-500'}"
+									: 'text-neutral-400 dark:text-neutral-500'}
 							>
 								{row.name}
 							</span>
@@ -387,7 +392,11 @@
 
 		<svelte:fragment slot="expanded" let:row>
 			<div class="space-y-4 p-6">
-				<FilterGroupComponent group={row.group} appType={resolvedAppType} on:change={handleChange} />
+				<FilterGroupComponent
+					group={row.group}
+					appType={resolvedAppType}
+					on:change={handleChange}
+				/>
 
 				<!-- Selection Settings -->
 				<Card flush padding="md">
@@ -418,27 +427,27 @@
 						<div>
 							<label
 								for="selector-{row.id}"
-								class="block mb-1 text-sm font-medium text-neutral-600 dark:text-neutral-400"
+								class="mb-1 block text-sm font-medium text-neutral-600 dark:text-neutral-400"
 							>
 								Method
 							</label>
 							<div class="mt-1">
-							<DropdownSelect
-								value={row.selector}
-								options={selectors.map((s) => ({
-									value: s.id,
-									label: `${s.label} - ${s.description}`,
-									shortLabel: s.label
-								}))}
-								minWidth="14rem"
-								compactDropdownThreshold={7}
-								fullWidth
-								fixed
-								on:change={(e) => {
-									row.selector = e.detail;
-									handleChange();
-								}}
-							/>
+								<DropdownSelect
+									value={row.selector}
+									options={selectors.map((s) => ({
+										value: s.id,
+										label: `${s.label} - ${s.description}`,
+										shortLabel: s.label
+									}))}
+									minWidth="14rem"
+									compactDropdownThreshold={7}
+									fullWidth
+									fixed
+									on:change={(e) => {
+										row.selector = e.detail;
+										handleChange();
+									}}
+								/>
 							</div>
 						</div>
 						<div>
@@ -487,7 +496,8 @@
 								</p>
 							{:else}
 								<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-									Tag applied in your arr instance for cooldown tracking. Avoid reusing tags you use elsewhere.
+									Tag applied in your arr instance for cooldown tracking. Avoid reusing tags you use
+									elsewhere.
 								</p>
 							{/if}
 						</div>

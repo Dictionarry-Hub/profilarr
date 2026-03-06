@@ -244,17 +244,25 @@
 			}
 		});
 	}
-
 </script>
 
-<div class="relative flex flex-col gap-3 px-3 py-3 {rightPaddingClass} wide:flex-row wide:items-center">
+<div
+	class="relative flex flex-col gap-3 px-3 py-3 {rightPaddingClass} wide:flex-row wide:items-center"
+>
 	<!-- Identity -->
-	<div class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 dark:border-neutral-800 dark:bg-neutral-900/40 wide:contents wide:border-0 wide:bg-transparent wide:p-0">
-		<div class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400 wide:hidden">
+	<div
+		class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0 dark:border-neutral-800 dark:bg-neutral-900/40"
+	>
+		<div
+			class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase wide:hidden dark:text-neutral-400"
+		>
 			Identity
 		</div>
 		<div class="grid gap-2 wide:contents">
-			<div class="w-full min-w-0 shrink-0 wide:w-48" title={nameConflict ? 'Duplicate condition name' : ''}>
+			<div
+				class="w-full min-w-0 shrink-0 wide:w-48"
+				title={nameConflict ? 'Duplicate condition name' : ''}
+			>
 				<FormInput
 					label="Name"
 					hideLabel
@@ -278,8 +286,12 @@
 	</div>
 
 	<!-- Value -->
-	<div class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 dark:border-neutral-800 dark:bg-neutral-900/40 wide:contents wide:border-0 wide:bg-transparent wide:p-0">
-		<div class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400 wide:hidden">
+	<div
+		class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0 dark:border-neutral-800 dark:bg-neutral-900/40"
+	>
+		<div
+			class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase wide:hidden dark:text-neutral-400"
+		>
 			Value
 		</div>
 		<div class="min-w-0 wide:flex-1">
@@ -394,11 +406,17 @@
 	</div>
 
 	<!-- Flags -->
-	<div class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 dark:border-neutral-800 dark:bg-neutral-900/40 wide:contents wide:border-0 wide:bg-transparent wide:p-0">
-		<div class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400 wide:hidden">
+	<div
+		class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0 dark:border-neutral-800 dark:bg-neutral-900/40"
+	>
+		<div
+			class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase wide:hidden dark:text-neutral-400"
+		>
 			Flags
 		</div>
-		<div class="grid grid-cols-2 gap-2 md:grid-cols-4 wide:ml-auto wide:flex wide:flex-wrap wide:items-center wide:gap-2 wide:shrink-0">
+		<div
+			class="grid grid-cols-2 gap-2 wide:ml-auto wide:flex wide:shrink-0 wide:flex-wrap wide:items-center wide:gap-2 md:grid-cols-4"
+		>
 			<Toggle
 				checked={condition.negate}
 				ariaLabel="Negate"
@@ -431,8 +449,12 @@
 	</div>
 
 	<!-- Actions -->
-	<div class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 dark:border-neutral-800 dark:bg-neutral-900/40 wide:contents wide:border-0 wide:bg-transparent wide:p-0">
-		<div class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400 wide:hidden">
+	<div
+		class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0 dark:border-neutral-800 dark:bg-neutral-900/40"
+	>
+		<div
+			class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase wide:hidden dark:text-neutral-400"
+		>
 			Actions
 		</div>
 		{#if isDraft}

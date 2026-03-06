@@ -21,7 +21,10 @@
 
 	function getPositionOffset(items: OrderedItem[]): number {
 		if (!items || items.length === 0) return 0;
-		const minPosition = items.reduce((min, item) => Math.min(min, item.position), items[0].position);
+		const minPosition = items.reduce(
+			(min, item) => Math.min(min, item.position),
+			items[0].position
+		);
 		return minPosition === 0 ? 1 : 0;
 	}
 
@@ -44,7 +47,7 @@
 					</Badge>
 				{:else if column.key === 'name'}
 					<div class="flex flex-wrap items-center gap-2">
-						<span class="font-medium text-sm text-neutral-700 dark:text-neutral-200">
+						<span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
 							{row.name}
 						</span>
 						<div class="flex flex-wrap gap-1">
@@ -77,7 +80,7 @@
 					</Badge>
 				{:else if column.key === 'name'}
 					<div class="flex flex-wrap items-center gap-2">
-						<span class="font-medium text-sm text-neutral-700 dark:text-neutral-200">
+						<span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
 							{row.name}
 						</span>
 						<div class="flex flex-wrap gap-1">
@@ -111,7 +114,7 @@
 						</Badge>
 					{:else if column.key === 'name'}
 						<div class="flex flex-wrap items-center gap-2">
-							<span class="font-medium text-sm text-neutral-700 dark:text-neutral-200">
+							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
 								{row.name}
 							</span>
 							<div class="flex flex-wrap gap-1">
@@ -143,7 +146,7 @@
 						</Badge>
 					{:else if column.key === 'name'}
 						<div class="flex flex-wrap items-center gap-2">
-							<span class="font-medium text-sm text-neutral-700 dark:text-neutral-200">
+							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
 								{row.name}
 							</span>
 							<div class="flex flex-wrap gap-1">

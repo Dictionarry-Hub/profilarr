@@ -5,7 +5,12 @@
 // Auto-detect platform from Deno.build
 function getPlatform(): string {
 	const os = Deno.build.os === 'darwin' ? 'darwin' : Deno.build.os;
-	const arch = Deno.build.arch === 'x86_64' ? 'amd64' : Deno.build.arch === 'aarch64' ? 'arm64' : Deno.build.arch;
+	const arch =
+		Deno.build.arch === 'x86_64'
+			? 'amd64'
+			: Deno.build.arch === 'aarch64'
+				? 'arm64'
+				: Deno.build.arch;
 	return `${os}/${arch}`;
 }
 

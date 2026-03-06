@@ -3,7 +3,12 @@
  */
 
 import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, recompileCache, type OperationLayer, type WriteResult } from '$pcd/index.ts';
+import {
+	writeOperation,
+	recompileCache,
+	type OperationLayer,
+	type WriteResult
+} from '$pcd/index.ts';
 import { logger } from '$logger/logger.ts';
 import type { CompiledQuery } from 'kysely';
 
@@ -59,11 +64,7 @@ export async function updateScoring(options: UpdateScoringOptions) {
 
 	const currentProfile = await db
 		.selectFrom('quality_profiles')
-		.select([
-			'minimum_custom_format_score',
-			'upgrade_until_score',
-			'upgrade_score_increment'
-		])
+		.select(['minimum_custom_format_score', 'upgrade_until_score', 'upgrade_score_increment'])
 		.where('name', '=', profileName)
 		.executeTakeFirst();
 
@@ -149,9 +150,7 @@ WHERE NOT EXISTS (
 					changedFields: [`custom_format_score:${cfName}:${arrType}`],
 					summary: `Expand shared score to ${arrType}`,
 					title: `Expand shared score for "${cfName}" to ${arrType} on "${profileName}"`,
-					dependsOn: [
-						{ entity: 'custom_format', key: 'custom_format_name', value: cfName }
-					]
+					dependsOn: [{ entity: 'custom_format', key: 'custom_format_name', value: cfName }]
 				});
 
 				currentScoreMap.set(key, allScore);
@@ -184,9 +183,7 @@ WHERE quality_profile_name = '${esc(profileName)}'
 			changedFields: [`custom_format_score:${cfName}:all`],
 			summary: `Remove shared score after expansion`,
 			title: `Remove shared score for "${cfName}" on "${profileName}"`,
-			dependsOn: [
-				{ entity: 'custom_format', key: 'custom_format_name', value: cfName }
-			]
+			dependsOn: [{ entity: 'custom_format', key: 'custom_format_name', value: cfName }]
 		});
 
 		currentScoreMap.delete(allKey);

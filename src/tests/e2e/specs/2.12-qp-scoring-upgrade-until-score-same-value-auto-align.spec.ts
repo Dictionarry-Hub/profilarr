@@ -103,4 +103,3 @@ test.describe('2.12 QP scoring upgrade-until score desired already matches upstr
 		expect(Number(await finalInput.inputValue())).toBe(desiredUpgradeUntilScore);
 	});
 });
-

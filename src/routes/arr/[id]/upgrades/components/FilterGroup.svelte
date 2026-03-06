@@ -146,7 +146,9 @@
 									compactDropdownThreshold={7}
 									fixed
 									on:change={(e) => {
-										const originalValue = field.values?.find((v) => String(v.value) === e.detail)?.value;
+										const originalValue = field.values?.find(
+											(v) => String(v.value) === e.detail
+										)?.value;
 										child.value = originalValue ?? e.detail;
 										notifyChange();
 									}}

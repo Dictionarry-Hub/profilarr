@@ -134,10 +134,10 @@ export function setSessionExpiry(dbPath: string, sessionId: string, minutesFromN
 	log.setup(`Setting session ${sessionId.slice(0, 8)}... to expire in ${minutesFromNow}m`);
 	const db = new Database(dbPath);
 	try {
-		db.exec(
-			"UPDATE sessions SET expires_at = datetime('now', ? || ' minutes') WHERE id = ?",
-			[String(minutesFromNow), sessionId]
-		);
+		db.exec("UPDATE sessions SET expires_at = datetime('now', ? || ' minutes') WHERE id = ?", [
+			String(minutesFromNow),
+			sessionId
+		]);
 	} finally {
 		db.close();
 	}

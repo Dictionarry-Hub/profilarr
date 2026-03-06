@@ -40,7 +40,9 @@ export const log = {
 	request(method: string, path: string, status: number, detail?: string) {
 		const sc = statusColor(status);
 		const extra = detail ? ` | ${detail}` : '';
-		console.log(`${timestamp()} | ${tag('client', c.green)} | ${c.bold}${method}${c.reset} ${path} → ${sc}${status}${c.reset}${extra}`);
+		console.log(
+			`${timestamp()} | ${tag('client', c.green)} | ${c.bold}${method}${c.reset} ${path} → ${sc}${status}${c.reset}${extra}`
+		);
 	},
 
 	setup(msg: string) {

@@ -11,7 +11,12 @@
 
 	let selectedArrType: Exclude<ArrType, 'all'> | null = null;
 
-	const arrTypeOptions: { value: Exclude<ArrType, 'all'>; label: string; description: string; icon: string }[] = [
+	const arrTypeOptions: {
+		value: Exclude<ArrType, 'all'>;
+		label: string;
+		description: string;
+		icon: string;
+	}[] = [
 		{
 			value: 'radarr',
 			label: 'Radarr',

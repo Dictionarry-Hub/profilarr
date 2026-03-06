@@ -106,7 +106,9 @@
 	<div class="mb-8">
 		<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 			<div>
-				<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">Notifications</h1>
+				<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">
+					Notifications
+				</h1>
 				<p class="mt-2 text-base text-neutral-600 md:mt-3 md:text-lg dark:text-neutral-400">
 					Manage notification services and delivery settings
 				</p>

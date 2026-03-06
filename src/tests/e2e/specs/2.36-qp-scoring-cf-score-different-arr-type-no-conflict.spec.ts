@@ -17,10 +17,7 @@ import { linkPcd } from '../helpers/linkPcd';
 import { unlinkPcdByName } from '../helpers/unlinkPcd';
 import { pullChanges, exportAndPush } from '../helpers/sync';
 import { goToConflicts, getConflictCount } from '../helpers/conflicts';
-import {
-	openFirstQualityProfileGeneral,
-	goToQualityProfileScoring
-} from '../helpers/entity';
+import { openFirstQualityProfileGeneral, goToQualityProfileScoring } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
 const LOCAL_DB_NAME = 'E2E Local';
@@ -52,9 +49,7 @@ function getScoreCellLocators(
  * Find two different enabled scoring rows — one with column 1 enabled,
  * one with column 2 enabled. Returns their format names.
  */
-async function findTwoEnabledRows(
-	page: Page
-): Promise<{ format1: string; format2: string }> {
+async function findTwoEnabledRows(page: Page): Promise<{ format1: string; format2: string }> {
 	const rows = page.locator('table tbody tr');
 	await expect(rows.first()).toBeVisible({ timeout: 15_000 });
 

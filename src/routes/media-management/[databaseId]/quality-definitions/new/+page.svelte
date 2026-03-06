@@ -25,7 +25,8 @@
 		}
 	];
 
-	$: availableQualities = selectedArrType === 'radarr' ? data.radarrQualities : data.sonarrQualities;
+	$: availableQualities =
+		selectedArrType === 'radarr' ? data.radarrQualities : data.sonarrQualities;
 </script>
 
 {#if !selectedArrType}

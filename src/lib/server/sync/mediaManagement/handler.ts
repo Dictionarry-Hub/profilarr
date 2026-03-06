@@ -45,12 +45,7 @@ export const mediaManagementHandler: SectionHandler = {
 	},
 
 	createSyncer(client: BaseArrClient, instance: ArrInstance) {
-		return new MediaManagementSyncer(
-			client,
-			instance.id,
-			instance.name,
-			instance.type as ArrType
-		);
+		return new MediaManagementSyncer(client, instance.id, instance.name, instance.type as ArrType);
 	},
 
 	hasConfig(instanceId: number): boolean {

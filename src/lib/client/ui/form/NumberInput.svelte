@@ -171,7 +171,7 @@
 
 	<!-- Custom increment/decrement buttons (hidden on mobile when responsive) -->
 	{#if !hideButtons}
-		<div class="absolute right-0 top-0 bottom-0 flex flex-col">
+		<div class="absolute top-0 right-0 bottom-0 flex flex-col">
 			<button
 				type="button"
 				on:click={increment}

@@ -1,21 +1,21 @@
 {
-  "interactiveLogin": true,
-  "tokenCallbacks": [
-    {
-      "issuerId": "default",
-      "tokenExpiry": 3600,
-      "requestMappings": [
-        {
-          "requestParam": "scope",
-          "match": "openid",
-          "claims": {
-            "sub": "test-user-sub",
-            "email": "test@example.com",
-            "name": "Test User",
-            "preferred_username": "test"
-          }
-        }
-      ]
-    }
-  ]
+	"interactiveLogin": true,
+	"tokenCallbacks": [
+		{
+			"issuerId": "default",
+			"tokenExpiry": 3600,
+			"requestMappings": [
+				{
+					"requestParam": "scope",
+					"match": "openid",
+					"claims": {
+						"sub": "test-user-sub",
+						"email": "test@example.com",
+						"name": "Test User",
+						"preferred_username": "test"
+					}
+				}
+			]
+		}
+	]
 }

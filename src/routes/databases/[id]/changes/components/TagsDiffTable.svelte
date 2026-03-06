@@ -10,7 +10,9 @@
 
 	$: columns = getColumns(operation);
 
-	function getColumns(nextOperation: OperationType): Column<{ removed: string[]; added: string[] }>[] {
+	function getColumns(
+		nextOperation: OperationType
+	): Column<{ removed: string[]; added: string[] }>[] {
 		switch (nextOperation) {
 			case 'create':
 				return [{ key: 'added', header: 'Value' }];

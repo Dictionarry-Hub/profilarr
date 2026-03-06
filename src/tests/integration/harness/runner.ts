@@ -91,7 +91,9 @@ export async function run(): Promise<void> {
 			console.log(`    ${f.error}\n`);
 		}
 	}
-	console.log(`${passed > 0 ? c.green : ''}${passed} passed${c.reset}, ${failed > 0 ? c.red : c.grey}${failed} failed${c.reset}`);
+	console.log(
+		`${passed > 0 ? c.green : ''}${passed} passed${c.reset}, ${failed > 0 ? c.red : c.grey}${failed} failed${c.reset}`
+	);
 
 	if (failed > 0) Deno.exit(1);
 }

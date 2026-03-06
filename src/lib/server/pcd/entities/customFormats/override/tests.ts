@@ -29,10 +29,12 @@ function resolveTestValues(desiredState: StoredDesiredState): {
 	const type = rawType === 'series' ? 'series' : 'movie';
 
 	const rawMatch = getDesiredTo(desiredState.should_match) ?? desiredState.test_should_match;
-	const should_match = typeof rawMatch === 'boolean' ? rawMatch : rawMatch === 1 || rawMatch === true;
+	const should_match =
+		typeof rawMatch === 'boolean' ? rawMatch : rawMatch === 1 || rawMatch === true;
 
-	const rawDesc = getDesiredTo<string | null>(desiredState.description) ?? desiredState.test_description;
-	const description = typeof rawDesc === 'string' ? (rawDesc.trim() || null) : null;
+	const rawDesc =
+		getDesiredTo<string | null>(desiredState.description) ?? desiredState.test_description;
+	const description = typeof rawDesc === 'string' ? rawDesc.trim() || null : null;
 
 	return { title, type, should_match, description };
 }
@@ -119,7 +121,8 @@ export async function overrideTests(
 	if (existingWithDesiredKey) {
 		const matches =
 			existingWithDesiredKey.should_match === desired.should_match &&
-			normalizeText(existingWithDesiredKey.description) === normalizeText(desired.description ?? '');
+			normalizeText(existingWithDesiredKey.description) ===
+				normalizeText(desired.description ?? '');
 
 		if (matches) {
 			return { success: true };

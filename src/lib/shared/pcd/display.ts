@@ -98,7 +98,13 @@ import type { TestEntitiesRow, TestReleasesRow } from './types.ts';
 /** Test release with parsed arrays (JSON strings → string[]) */
 export type TestRelease = Omit<
 	TestReleasesRow,
-	'entity_type' | 'entity_tmdb_id' | 'languages' | 'indexers' | 'flags' | 'created_at' | 'updated_at'
+	| 'entity_type'
+	| 'entity_tmdb_id'
+	| 'languages'
+	| 'indexers'
+	| 'flags'
+	| 'created_at'
+	| 'updated_at'
 > & {
 	languages: string[];
 	indexers: string[];
@@ -114,11 +120,7 @@ export type TestEntity = Omit<TestEntitiesRow, 'created_at' | 'updated_at'> & {
 // CUSTOM FORMATS
 // ============================================================================
 
-import type {
-	CustomFormatsRow,
-	CustomFormatConditionsRow,
-	CustomFormatTestsRow
-} from './types.ts';
+import type { CustomFormatsRow, CustomFormatConditionsRow, CustomFormatTestsRow } from './types.ts';
 
 /** Condition reference for display (minimal info) */
 export type ConditionRef = Pick<CustomFormatConditionsRow, 'name' | 'type' | 'required' | 'negate'>;
@@ -133,14 +135,20 @@ export type CustomFormatBasic = Omit<CustomFormatsRow, 'created_at' | 'updated_a
 export type CustomFormatTest = Omit<CustomFormatTestsRow, 'id' | 'created_at'>;
 
 /** Custom format data for table/card views (with JOINed data) */
-export type CustomFormatTableRow = Omit<CustomFormatsRow, 'include_in_rename' | 'created_at' | 'updated_at'> & {
+export type CustomFormatTableRow = Omit<
+	CustomFormatsRow,
+	'include_in_rename' | 'created_at' | 'updated_at'
+> & {
 	tags: Tag[];
 	conditions: ConditionRef[];
 	testCount: number;
 };
 
 /** Custom format general information (for general tab) */
-export type CustomFormatGeneral = Omit<CustomFormatsRow, 'description' | 'created_at' | 'updated_at'> & {
+export type CustomFormatGeneral = Omit<
+	CustomFormatsRow,
+	'description' | 'created_at' | 'updated_at'
+> & {
 	description: string; // non-nullable for form
 	tags: Tag[];
 };

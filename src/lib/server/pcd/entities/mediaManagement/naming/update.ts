@@ -55,10 +55,7 @@ export async function updateRadarrNaming(options: UpdateRadarrNamingOptions) {
 		setValues.colon_replacement_format = input.colonReplacementFormat;
 	}
 
-	let updateQuery = db
-		.updateTable('radarr_naming')
-		.set(setValues)
-		.where('name', '=', current.name);
+	let updateQuery = db.updateTable('radarr_naming').set(setValues).where('name', '=', current.name);
 
 	if (current.rename !== input.rename) {
 		updateQuery = updateQuery.where('rename', '=', current.rename ? 1 : 0);
@@ -235,10 +232,7 @@ export async function updateSonarrNaming(options: UpdateSonarrNamingOptions) {
 		setValues.multi_episode_style = nextMultiEpisode;
 	}
 
-	let updateQuery = db
-		.updateTable('sonarr_naming')
-		.set(setValues)
-		.where('name', '=', current.name);
+	let updateQuery = db.updateTable('sonarr_naming').set(setValues).where('name', '=', current.name);
 
 	if (current.rename !== input.rename) {
 		updateQuery = updateQuery.where('rename', '=', current.rename ? 1 : 0);

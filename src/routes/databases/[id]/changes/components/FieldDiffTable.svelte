@@ -193,7 +193,7 @@
 					{beforeValue ? 'Yes' : 'No'}
 				</Badge>
 			{:else if isMarkdownField(row.field) && typeof beforeValue === 'string'}
-				<div class="prose prose-sm text-sm prose-neutral dark:prose-invert">
+				<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
 					{@html parseMarkdown(beforeValue)}
 				</div>
 			{:else if typeof beforeValue === 'number'}
@@ -247,7 +247,7 @@
 					{afterValue ? 'Yes' : 'No'}
 				</Badge>
 			{:else if isMarkdownField(row.field) && typeof afterValue === 'string'}
-				<div class="prose prose-sm text-sm prose-neutral dark:prose-invert">
+				<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
 					{@html parseMarkdown(afterValue)}
 				</div>
 			{:else if typeof afterValue === 'number'}

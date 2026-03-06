@@ -13,10 +13,7 @@ import { linkPcd } from '../helpers/linkPcd';
 import { unlinkPcdByName } from '../helpers/unlinkPcd';
 import { pullChanges, exportAndPush } from '../helpers/sync';
 import { getConflictCount, goToConflicts } from '../helpers/conflicts';
-import {
-	openFirstQualityProfileGeneral,
-	goToQualityProfileGeneral
-} from '../helpers/entity';
+import { openFirstQualityProfileGeneral, goToQualityProfileGeneral } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
 const LOCAL_DB_NAME = 'E2E Local';
@@ -110,7 +107,12 @@ test.describe('2.25 QP tags overlap merge (no conflict)', () => {
 		await goToQualityProfileGeneral(page, localId, profileName);
 		const tagBadges = page.locator('span.inline-flex');
 		const allText = await tagBadges.allInnerTexts();
-		const tagNames = allText.map((t) => t.replace(/\s*×?\s*$/, '').trim().toLowerCase());
+		const tagNames = allText.map((t) =>
+			t
+				.replace(/\s*×?\s*$/, '')
+				.trim()
+				.toLowerCase()
+		);
 		expect(tagNames).toContain(LOCAL_TAG);
 		expect(tagNames).toContain(DEV_TAG);
 	});

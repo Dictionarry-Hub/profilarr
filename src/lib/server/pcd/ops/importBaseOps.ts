@@ -48,7 +48,10 @@ export interface ImportBaseOpsResult {
 	orphaned: number;
 }
 
-export async function importBaseOps(databaseId: number, pcdPath: string): Promise<ImportBaseOpsResult> {
+export async function importBaseOps(
+	databaseId: number,
+	pcdPath: string
+): Promise<ImportBaseOpsResult> {
 	const basePath = getBaseOpsPath(pcdPath);
 	if (!(await pathExists(basePath))) {
 		return { created: 0, updated: 0, orphaned: 0 };
@@ -73,8 +76,7 @@ export async function importBaseOps(databaseId: number, pcdPath: string): Promis
 
 	for (const entry of entries) {
 		const opNumber = entry.order === Infinity ? null : entry.order;
-		const sequence =
-			opNumber === null ? UNPREFIXED_SEQUENCE_BASE + unprefixedIndex++ : opNumber;
+		const sequence = opNumber === null ? UNPREFIXED_SEQUENCE_BASE + unprefixedIndex++ : opNumber;
 		const rawSql = await Deno.readTextFile(entry.filepath);
 		const { metadataJson, cleanedSql } = parseMetadata(rawSql);
 		const contentHash = await hashContent(cleanedSql, metadataJson);

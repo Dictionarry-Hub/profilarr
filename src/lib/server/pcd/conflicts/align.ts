@@ -37,7 +37,7 @@ export async function alignConflict(input: {
 	}
 
 	if (op.origin !== 'user' || op.state !== 'published') {
-	return { success: false, error: 'Only published user operations can be aligned' };
+		return { success: false, error: 'Only published user operations can be aligned' };
 	}
 
 	const groupId = getGroupId(op);

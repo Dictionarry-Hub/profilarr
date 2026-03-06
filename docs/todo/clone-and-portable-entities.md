@@ -14,22 +14,22 @@ clone = serialize → swap name → deserialize
 
 ### New files
 
-| File | Purpose |
-|------|---------|
-| `src/lib/shared/pcd/portable.ts` | Portable type definitions (shared client+server) |
-| `src/lib/server/pcd/entities/serialize.ts` | All serialize functions (cache → portable) |
-| `src/lib/server/pcd/entities/deserialize.ts` | All deserialize functions (portable → PCD ops) |
-| `src/lib/server/pcd/entities/clone.ts` | Clone orchestrator (serialize → rename → deserialize) |
-| `src/lib/client/ui/modal/CloneModal.svelte` | Reusable clone name prompt modal |
+| File                                         | Purpose                                               |
+| -------------------------------------------- | ----------------------------------------------------- |
+| `src/lib/shared/pcd/portable.ts`             | Portable type definitions (shared client+server)      |
+| `src/lib/server/pcd/entities/serialize.ts`   | All serialize functions (cache → portable)            |
+| `src/lib/server/pcd/entities/deserialize.ts` | All deserialize functions (portable → PCD ops)        |
+| `src/lib/server/pcd/entities/clone.ts`       | Clone orchestrator (serialize → rename → deserialize) |
+| `src/lib/client/ui/modal/CloneModal.svelte`  | Reusable clone name prompt modal                      |
 
 ### Modified files (per entity type)
 
-| File | Change |
-|------|--------|
-| `src/routes/[entity]/[databaseId]/+page.server.ts` | Add `canWriteToBase` to load, add `clone` form action |
-| `src/routes/[entity]/[databaseId]/+page.svelte` | Add clone state + CloneModal |
-| `src/routes/[entity]/[databaseId]/views/CardView.svelte` | Add clone button (Copy icon in card footer) |
-| `src/routes/[entity]/[databaseId]/views/TableView.svelte` | Add clone button via Table `actions` slot |
+| File                                                      | Change                                                |
+| --------------------------------------------------------- | ----------------------------------------------------- |
+| `src/routes/[entity]/[databaseId]/+page.server.ts`        | Add `canWriteToBase` to load, add `clone` form action |
+| `src/routes/[entity]/[databaseId]/+page.svelte`           | Add clone state + CloneModal                          |
+| `src/routes/[entity]/[databaseId]/views/CardView.svelte`  | Add clone button (Copy icon in card footer)           |
+| `src/routes/[entity]/[databaseId]/views/TableView.svelte` | Add clone button via Table `actions` slot             |
 
 ---
 
@@ -48,6 +48,7 @@ clone = serialize → swap name → deserialize
 Define all portable types upfront. These strip `id`, `created_at`, `updated_at` and use camelCase to match existing create input interfaces. Reuse `ConditionData` and `OrderedItem` from `display.ts` directly — they're already JSON-friendly.
 
 Types to define:
+
 - `PortableDelayProfile` — flat fields matching `CreateDelayProfileInput`
 - `PortableRegularExpression` — flat fields + `tags: string[]`
 - `PortableCustomFormat` — flat fields + `tags: string[]` + `conditions: ConditionData[]` + `tests: PortableCustomFormatTest[]`
@@ -67,18 +68,18 @@ Types to define:
 
 Each function reads from cache using existing read functions, strips DB fields, maps to portable format.
 
-| Function | Reads from | Lookup |
-|----------|-----------|--------|
-| `serializeDelayProfile` | `delayProfileQueries.getByName(cache, name)` | name |
-| `serializeRegularExpression` | `regexQueries.get(cache, id)` | id |
-| `serializeCustomFormat` | `cfQueries.general(cache, id)` + `cfQueries.getConditionsForEvaluation(cache, name)` + `cfQueries.listTests(cache, name)` | id → name for sub-entities |
-| `serializeQualityProfile` | `qpQueries.general(cache, id)` + `qpQueries.qualities(cache, dbId, name)` + `qpQueries.scoring(cache, dbId, name)` | id → name for sub-entities |
-| `serializeRadarrNaming` | `namingQueries.getRadarrByName(cache, name)` | name |
-| `serializeSonarrNaming` | `namingQueries.getSonarrByName(cache, name)` | name |
-| `serializeRadarrMediaSettings` | `mediaSettingsQueries.getRadarrByName(cache, name)` | name |
-| `serializeSonarrMediaSettings` | `mediaSettingsQueries.getSonarrByName(cache, name)` | name |
-| `serializeRadarrQualityDefinitions` | `qualityDefsQueries.getRadarrByName(cache, name)` | name |
-| `serializeSonarrQualityDefinitions` | `qualityDefsQueries.getSonarrByName(cache, name)` | name |
+| Function                            | Reads from                                                                                                                | Lookup                     |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `serializeDelayProfile`             | `delayProfileQueries.getByName(cache, name)`                                                                              | name                       |
+| `serializeRegularExpression`        | `regexQueries.get(cache, id)`                                                                                             | id                         |
+| `serializeCustomFormat`             | `cfQueries.general(cache, id)` + `cfQueries.getConditionsForEvaluation(cache, name)` + `cfQueries.listTests(cache, name)` | id → name for sub-entities |
+| `serializeQualityProfile`           | `qpQueries.general(cache, id)` + `qpQueries.qualities(cache, dbId, name)` + `qpQueries.scoring(cache, dbId, name)`        | id → name for sub-entities |
+| `serializeRadarrNaming`             | `namingQueries.getRadarrByName(cache, name)`                                                                              | name                       |
+| `serializeSonarrNaming`             | `namingQueries.getSonarrByName(cache, name)`                                                                              | name                       |
+| `serializeRadarrMediaSettings`      | `mediaSettingsQueries.getRadarrByName(cache, name)`                                                                       | name                       |
+| `serializeSonarrMediaSettings`      | `mediaSettingsQueries.getSonarrByName(cache, name)`                                                                       | name                       |
+| `serializeRadarrQualityDefinitions` | `qualityDefsQueries.getRadarrByName(cache, name)`                                                                         | name                       |
+| `serializeSonarrQualityDefinitions` | `qualityDefsQueries.getSonarrByName(cache, name)`                                                                         | name                       |
 
 **Scoring serialization detail**: The `scoring()` read returns `QualityProfileScoring` where `customFormats` is an array of `{ name, tags, scores: Record<arrType, number|null> }`. We flatten this to `PortableCustomFormatScore[]` by only including non-null scores.
 
@@ -91,14 +92,18 @@ Each function reads from cache using existing read functions, strips DB fields, 
 Each function accepts `{ databaseId, cache, layer, portable }` and calls existing create/update functions.
 
 ### Simple entities
+
 Call existing `create()` directly — the portable type fields already match create input shapes:
+
 - `deserializeDelayProfile` → `delayProfileQueries.create()`
 - `deserializeRegularExpression` → `regexQueries.create()`
 - `deserializeRadarrNaming` → `namingQueries.createRadarrNaming()`
 - (etc. for all media management entities)
 
 ### Compound: Custom Formats
+
 Sequential steps (cache recompiles after each `writeOperation`):
+
 1. `cfQueries.create({ ..., input: { name, description, includeInRename, tags } })`
 2. `cfQueries.updateConditions({ ..., formatName, originalConditions: [], conditions })` — empty `originalConditions` means all conditions are "additions"
 3. For each test: `cfQueries.createTest({ ..., formatName, input: test })`
@@ -106,7 +111,9 @@ Sequential steps (cache recompiles after each `writeOperation`):
 Refresh cache between steps via `pcdManager.getCache(databaseId)`.
 
 ### Compound: Quality Profiles
+
 Sequential steps:
+
 1. `qpQueries.create({ ..., input: { name, description, tags, language } })` — this seeds default qualities
 2. `qpQueries.updateQualities({ ..., profileName, input: { orderedItems } })` — replaces defaults with source qualities
 3. `qpQueries.updateScoring({ ..., profileName, input: { minimumScore, upgradeUntilScore, upgradeScoreIncrement, customFormatScores } })`
@@ -121,14 +128,14 @@ Refresh cache between steps. The create→updateQualities sequence generates ext
 
 ```typescript
 interface CloneOptions {
-  databaseId: number;
-  layer: OperationLayer;
-  entityType: EntityType;
-  sourceName: string;
-  newName: string;
+	databaseId: number;
+	layer: OperationLayer;
+	entityType: EntityType;
+	sourceName: string;
+	newName: string;
 }
 
-async function clone(options: CloneOptions): Promise<void>
+async function clone(options: CloneOptions): Promise<void>;
 ```
 
 Switches on `entityType`, calls the matching serialize → sets `portable.name = newName` → deserialize. The existing create functions validate name uniqueness (case-insensitive), so duplicate name errors propagate naturally.
@@ -140,6 +147,7 @@ Switches on `entityType`, calls the matching serialize → sets `portable.name =
 ### 5a. CloneModal (`src/lib/client/ui/modal/CloneModal.svelte`) (done)
 
 Built on existing `Modal.svelte`. Contains:
+
 - Hidden `<form method="POST" action="?/clone" use:enhance>` with `sourceName` and `layer`
 - `FormInput` for new name (pre-populated with `"{source} (Copy)"`)
 - Client-side duplicate name detection via `existingNames` prop
@@ -158,11 +166,13 @@ Use the Table's existing `actions` slot (first entity to use it). Render a `Tabl
 ### 5d. List page wiring
 
 Each `+page.svelte` adds:
+
 - Clone state (`cloneModalOpen`, `cloneSourceName`)
 - `handleClone` event handler from CardView/TableView
 - `CloneModal` component
 
 Each `+page.server.ts` adds:
+
 - `canWriteToBase` to load return
 - `clone` named form action calling `clone()` from `clone.ts`
 
@@ -171,6 +181,7 @@ Each `+page.server.ts` adds:
 ## Implementation Order
 
 ### Batch 1: Foundation + Delay Profiles (vertical slice) — DONE
+
 1. `src/lib/shared/pcd/portable.ts` — all portable types
 2. `src/lib/server/pcd/entities/serialize.ts` — `serializeDelayProfile`
 3. `src/lib/server/pcd/entities/deserialize.ts` — `deserializeDelayProfile`
@@ -182,11 +193,13 @@ Each `+page.server.ts` adds:
 9. `src/routes/delay-profiles/[databaseId]/views/TableView.svelte` — clone button
 
 ### Batch 2: Simple + Tagged entities
+
 - Regular expressions, naming, media settings, quality definitions
 - Add serialize/deserialize per entity, add cases to `clone.ts`
 - Wire up each entity's list page (server + client + views)
 
 ### Batch 3: Compound entities
+
 - Custom formats (create + conditions + tests)
 - Quality profiles (create + qualities + scoring)
 - Most complex due to sequential multi-step deserialization

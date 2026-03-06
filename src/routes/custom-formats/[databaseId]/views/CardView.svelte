@@ -99,7 +99,9 @@
 				{#if format.conditions.length > 0}
 					<div class="flex flex-wrap gap-1">
 						{#each sortConditions(format.conditions) as condition}
-							<Label variant={getConditionVariant(condition)} size="sm" rounded="md" mono>{condition.name}</Label>
+							<Label variant={getConditionVariant(condition)} size="sm" rounded="md" mono
+								>{condition.name}</Label
+							>
 						{/each}
 					</div>
 				{:else}

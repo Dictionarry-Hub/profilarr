@@ -100,7 +100,6 @@
 					An entity with this name already exists.
 				</p>
 			{/if}
-
 		</div>
 	</div>
 </Modal>

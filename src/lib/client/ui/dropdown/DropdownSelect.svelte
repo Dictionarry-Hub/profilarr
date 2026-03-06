@@ -104,7 +104,14 @@
 			on:click={() => !disabled && (open = !open)}
 		/>
 		{#if open}
-			<Dropdown {position} {mobilePosition} {minWidth} compact={isCompactDropdown} {fixed} {triggerEl}>
+			<Dropdown
+				{position}
+				{mobilePosition}
+				{minWidth}
+				compact={isCompactDropdown}
+				{fixed}
+				{triggerEl}
+			>
 				{#each options as option}
 					<DropdownItem
 						label={option.label}

@@ -33,9 +33,10 @@ async function resolveName(
 		if (row) return row.name;
 	}
 
-	const entityType = table === 'radarr_quality_definitions'
-		? 'radarr_quality_definitions'
-		: 'sonarr_quality_definitions';
+	const entityType =
+		table === 'radarr_quality_definitions'
+			? 'radarr_quality_definitions'
+			: 'sonarr_quality_definitions';
 	const resolved = followRenameChain(databaseId, entityType, candidates[0]);
 	if (resolved !== candidates[0]) {
 		const row = await cache.kb
@@ -85,7 +86,10 @@ async function overrideRadarr(
 	desiredState: StoredDesiredState | null
 ): Promise<WriteResult> {
 	if (!desiredState) {
-		return { success: false, error: 'Missing desired state for radarr quality definitions override' };
+		return {
+			success: false,
+			error: 'Missing desired state for radarr quality definitions override'
+		};
 	}
 
 	const cache = getCache(databaseId);
@@ -93,7 +97,13 @@ async function overrideRadarr(
 		return { success: false, error: 'Cache not available' };
 	}
 
-	const name = await resolveName(cache, databaseId, 'radarr_quality_definitions', metadata, desiredState);
+	const name = await resolveName(
+		cache,
+		databaseId,
+		'radarr_quality_definitions',
+		metadata,
+		desiredState
+	);
 	if (!name) {
 		return { success: false, error: 'Radarr quality definitions not found for override' };
 	}
@@ -130,7 +140,10 @@ async function overrideSonarr(
 	desiredState: StoredDesiredState | null
 ): Promise<WriteResult> {
 	if (!desiredState) {
-		return { success: false, error: 'Missing desired state for sonarr quality definitions override' };
+		return {
+			success: false,
+			error: 'Missing desired state for sonarr quality definitions override'
+		};
 	}
 
 	const cache = getCache(databaseId);
@@ -138,7 +151,13 @@ async function overrideSonarr(
 		return { success: false, error: 'Cache not available' };
 	}
 
-	const name = await resolveName(cache, databaseId, 'sonarr_quality_definitions', metadata, desiredState);
+	const name = await resolveName(
+		cache,
+		databaseId,
+		'sonarr_quality_definitions',
+		metadata,
+		desiredState
+	);
 	if (!name) {
 		return { success: false, error: 'Sonarr quality definitions not found for override' };
 	}

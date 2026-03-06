@@ -130,10 +130,10 @@ test('OIDC user created in DB with correct sub', async () => {
 	await completeOidcLogin(client, ORIGIN);
 
 	// Mock server uses the form username ("test") as the sub claim
-	const rows = queryDb(
-		getDbPath(PORT),
-		"SELECT * FROM users WHERE username = 'oidc:test'"
-	) as { id: number; username: string }[];
+	const rows = queryDb(getDbPath(PORT), "SELECT * FROM users WHERE username = 'oidc:test'") as {
+		id: number;
+		username: string;
+	}[];
 
 	assertEquals(rows.length, 1, 'User oidc:test should exist in DB');
 	assertEquals(rows[0].username, 'oidc:test');

@@ -97,7 +97,11 @@ const numberOperators: FilterOperator[] = [
 	{ id: 'eq', label: 'equals', description: 'Exactly equals the value' },
 	{ id: 'neq', label: 'does not equal', description: 'Does not equal the value' },
 	{ id: 'gt', label: 'is greater than', description: 'Greater than the value' },
-	{ id: 'gte', label: 'is greater than or equal', description: 'Greater than or equal to the value' },
+	{
+		id: 'gte',
+		label: 'is greater than or equal',
+		description: 'Greater than or equal to the value'
+	},
 	{ id: 'lt', label: 'is less than', description: 'Less than the value' },
 	{ id: 'lte', label: 'is less than or equal', description: 'Less than or equal to the value' }
 ];
@@ -121,8 +125,16 @@ const dateOperators: FilterOperator[] = [
 const ordinalOperators: FilterOperator[] = [
 	{ id: 'eq', label: 'is exactly', description: 'Exactly matches the status' },
 	{ id: 'neq', label: 'is not', description: 'Does not match the status' },
-	{ id: 'gte', label: 'has reached', description: 'Has reached this status or further in the progression' },
-	{ id: 'lte', label: "hasn't passed", description: 'Has not passed this status in the progression' },
+	{
+		id: 'gte',
+		label: 'has reached',
+		description: 'Has reached this status or further in the progression'
+	},
+	{
+		id: 'lte',
+		label: "hasn't passed",
+		description: 'Has not passed this status in the progression'
+	},
 	{ id: 'gt', label: 'is past', description: 'Is past this status (further along)' },
 	{ id: 'lt', label: 'is before', description: 'Is before this status (not yet reached)' }
 ];
@@ -269,7 +281,8 @@ const radarrFilterFields: FilterField[] = [
 	{
 		id: 'status',
 		label: 'Status',
-		description: 'The actual release status of the movie. Progresses: TBA → Announced → In Cinemas → Released',
+		description:
+			'The actual release status of the movie. Progresses: TBA → Announced → In Cinemas → Released',
 		operators: ordinalOperators,
 		valueType: 'select',
 		values: [
@@ -282,7 +295,8 @@ const radarrFilterFields: FilterField[] = [
 	{
 		id: 'minimum_availability',
 		label: 'Minimum Availability',
-		description: 'The configured minimum availability setting. Progresses: TBA → Announced → In Cinemas → Released',
+		description:
+			'The configured minimum availability setting. Progresses: TBA → Announced → In Cinemas → Released',
 		operators: ordinalOperators,
 		valueType: 'select',
 		values: [
@@ -489,7 +503,9 @@ export function getFilterField(id: string, appType?: UpgradeAppType): FilterFiel
 	if (appType) {
 		return getFilterFields(appType).find((f) => f.id === id);
 	}
-	return [...sharedFilterFields, ...radarrFilterFields, ...sonarrFilterFields].find((f) => f.id === id);
+	return [...sharedFilterFields, ...radarrFilterFields, ...sonarrFilterFields].find(
+		(f) => f.id === id
+	);
 }
 
 /**
@@ -565,7 +581,10 @@ export function createDefaultGroup(appType: UpgradeAppType = 'radarr'): FilterGr
 /**
  * Create a filter config with sensible defaults
  */
-export function createEmptyFilterConfig(name: string = 'New Filter', appType: UpgradeAppType = 'radarr'): FilterConfig {
+export function createEmptyFilterConfig(
+	name: string = 'New Filter',
+	appType: UpgradeAppType = 'radarr'
+): FilterConfig {
 	return {
 		id: uuid(),
 		name,
@@ -788,10 +807,11 @@ export function evaluateGroup(item: Record<string, unknown>, group: FilterGroup)
 /**
  * Search rate limits by app type
  */
-export const searchRateLimits: Record<string, { maxPerHour: number; minIntervalMinutes: number }> = {
-	radarr: { maxPerHour: 10, minIntervalMinutes: 10 },
-	sonarr: { maxPerHour: 1, minIntervalMinutes: 60 }
-};
+export const searchRateLimits: Record<string, { maxPerHour: number; minIntervalMinutes: number }> =
+	{
+		radarr: { maxPerHour: 10, minIntervalMinutes: 10 },
+		sonarr: { maxPerHour: 1, minIntervalMinutes: 60 }
+	};
 
 /**
  * Calculate max searches per run that stays within the hourly rate limit.

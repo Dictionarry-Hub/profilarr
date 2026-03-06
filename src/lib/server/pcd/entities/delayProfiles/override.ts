@@ -108,12 +108,24 @@ async function overrideDelay(
 	const desiredName =
 		getDesiredTo<string>(desiredState.name) ??
 		(typeof desiredState.name === 'string' ? (desiredState.name as string) : current.name);
-	const desiredProtocol = resolveProtocol(desiredState.preferred_protocol, current.preferred_protocol);
+	const desiredProtocol = resolveProtocol(
+		desiredState.preferred_protocol,
+		current.preferred_protocol
+	);
 	const desiredUsenetDelay = resolveNumber(desiredState.usenet_delay, current.usenet_delay);
 	const desiredTorrentDelay = resolveNumber(desiredState.torrent_delay, current.torrent_delay);
-	const desiredBypassHighest = resolveBoolean(desiredState.bypass_if_highest_quality, current.bypass_if_highest_quality);
-	const desiredBypassCf = resolveBoolean(desiredState.bypass_if_above_custom_format_score, current.bypass_if_above_custom_format_score);
-	const desiredMinCfScore = resolveNullableNumber(desiredState.minimum_custom_format_score, current.minimum_custom_format_score);
+	const desiredBypassHighest = resolveBoolean(
+		desiredState.bypass_if_highest_quality,
+		current.bypass_if_highest_quality
+	);
+	const desiredBypassCf = resolveBoolean(
+		desiredState.bypass_if_above_custom_format_score,
+		current.bypass_if_above_custom_format_score
+	);
+	const desiredMinCfScore = resolveNullableNumber(
+		desiredState.minimum_custom_format_score,
+		current.minimum_custom_format_score
+	);
 
 	const matches =
 		current.name === desiredName &&

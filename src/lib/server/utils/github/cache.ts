@@ -194,10 +194,7 @@ export async function getCachedAvatar(owner: string): Promise<string | null> {
 /**
  * Get cached releases or fetch from GitHub API
  */
-export async function getCachedReleases(
-	owner: string,
-	repo: string
-): Promise<GitHubRelease[]> {
+export async function getCachedReleases(owner: string, repo: string): Promise<GitHubRelease[]> {
 	const cacheKey = `releases:${owner}/${repo}`;
 
 	// Check cache
@@ -223,15 +220,13 @@ export async function getCachedReleases(
 		}
 
 		const data = await response.json();
-		const releases: GitHubRelease[] = data.map(
-			(release: Record<string, unknown>) => ({
-				tag_name: release.tag_name,
-				name: release.name,
-				published_at: release.published_at,
-				html_url: release.html_url,
-				prerelease: release.prerelease
-			})
-		);
+		const releases: GitHubRelease[] = data.map((release: Record<string, unknown>) => ({
+			tag_name: release.tag_name,
+			name: release.name,
+			published_at: release.published_at,
+			html_url: release.html_url,
+			prerelease: release.prerelease
+		}));
 
 		// Cache the result
 		githubCacheQueries.set(cacheKey, 'releases', JSON.stringify(releases), TTL.RELEASES);

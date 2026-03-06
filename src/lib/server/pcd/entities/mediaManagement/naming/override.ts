@@ -98,9 +98,18 @@ async function overrideRadarr(
 	const desiredName = resolveString(desiredState.name, current.name);
 	const desiredRename = resolveBoolean(desiredState.rename, current.rename);
 	const desiredMovieFormat = resolveString(desiredState.movie_format, current.movie_format);
-	const desiredMovieFolderFormat = resolveString(desiredState.movie_folder_format, current.movie_folder_format);
-	const desiredReplaceIllegal = resolveBoolean(desiredState.replace_illegal_characters, current.replace_illegal_characters);
-	const desiredColonFormat = resolveString(desiredState.colon_replacement_format, current.colon_replacement_format) as RadarrNamingRow['colon_replacement_format'];
+	const desiredMovieFolderFormat = resolveString(
+		desiredState.movie_folder_format,
+		current.movie_folder_format
+	);
+	const desiredReplaceIllegal = resolveBoolean(
+		desiredState.replace_illegal_characters,
+		current.replace_illegal_characters
+	);
+	const desiredColonFormat = resolveString(
+		desiredState.colon_replacement_format,
+		current.colon_replacement_format
+	) as RadarrNamingRow['colon_replacement_format'];
 
 	const matches =
 		current.name === desiredName &&
@@ -158,15 +167,42 @@ async function overrideSonarr(
 
 	const desiredName = resolveString(desiredState.name, current.name);
 	const desiredRename = resolveBoolean(desiredState.rename, current.rename);
-	const desiredStandard = resolveString(desiredState.standard_episode_format, current.standard_episode_format);
-	const desiredDaily = resolveString(desiredState.daily_episode_format, current.daily_episode_format);
-	const desiredAnime = resolveString(desiredState.anime_episode_format, current.anime_episode_format);
-	const desiredSeriesFolder = resolveString(desiredState.series_folder_format, current.series_folder_format);
-	const desiredSeasonFolder = resolveString(desiredState.season_folder_format, current.season_folder_format);
-	const desiredReplaceIllegal = resolveBoolean(desiredState.replace_illegal_characters, current.replace_illegal_characters);
-	const desiredColonFormat = resolveString(desiredState.colon_replacement_format, current.colon_replacement_format) as SonarrNamingRow['colon_replacement_format'];
-	const desiredCustomColon = resolveNullableString(desiredState.custom_colon_replacement_format, current.custom_colon_replacement_format);
-	const desiredMultiEpisode = resolveString(desiredState.multi_episode_style, current.multi_episode_style) as SonarrNamingRow['multi_episode_style'];
+	const desiredStandard = resolveString(
+		desiredState.standard_episode_format,
+		current.standard_episode_format
+	);
+	const desiredDaily = resolveString(
+		desiredState.daily_episode_format,
+		current.daily_episode_format
+	);
+	const desiredAnime = resolveString(
+		desiredState.anime_episode_format,
+		current.anime_episode_format
+	);
+	const desiredSeriesFolder = resolveString(
+		desiredState.series_folder_format,
+		current.series_folder_format
+	);
+	const desiredSeasonFolder = resolveString(
+		desiredState.season_folder_format,
+		current.season_folder_format
+	);
+	const desiredReplaceIllegal = resolveBoolean(
+		desiredState.replace_illegal_characters,
+		current.replace_illegal_characters
+	);
+	const desiredColonFormat = resolveString(
+		desiredState.colon_replacement_format,
+		current.colon_replacement_format
+	) as SonarrNamingRow['colon_replacement_format'];
+	const desiredCustomColon = resolveNullableString(
+		desiredState.custom_colon_replacement_format,
+		current.custom_colon_replacement_format
+	);
+	const desiredMultiEpisode = resolveString(
+		desiredState.multi_episode_style,
+		current.multi_episode_style
+	) as SonarrNamingRow['multi_episode_style'];
 
 	const matches =
 		current.name === desiredName &&

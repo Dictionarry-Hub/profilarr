@@ -356,7 +356,10 @@
 	<!-- Actions Bar -->
 	<ActionsBar className="w-full justify-center md:w-full md:mx-auto">
 		<SearchAction searchStore={search} placeholder={searchPlaceholder} responsive />
-		<ActionButton icon={Plus} on:click={() => (data.canWriteToBase ? (showAddModal = true) : notifyReadOnly())} />
+		<ActionButton
+			icon={Plus}
+			on:click={() => (data.canWriteToBase ? (showAddModal = true) : notifyReadOnly())}
+		/>
 		<ActionButton
 			icon={Sliders}
 			hasDropdown={true}

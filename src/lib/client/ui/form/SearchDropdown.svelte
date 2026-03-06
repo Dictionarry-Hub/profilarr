@@ -41,9 +41,7 @@
 		opt.label.toLowerCase().includes(searchQuery.toLowerCase())
 	);
 	$: onlySelectedShown =
-		filteredOptions.length === 1 &&
-		filteredOptions[0].value === value &&
-		options.length > 1;
+		filteredOptions.length === 1 && filteredOptions[0].value === value && options.length > 1;
 	$: hasClear = value != null && value !== '';
 	$: if (open) {
 		if (filteredOptions.length === 0) {
@@ -164,7 +162,13 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="relative" use:clickOutside={close} class:w-full={fullWidth} on:keydown={handleKeyDown} bind:this={containerEl}>
+<div
+	class="relative"
+	use:clickOutside={close}
+	class:w-full={fullWidth}
+	on:keydown={handleKeyDown}
+	bind:this={containerEl}
+>
 	<FormInput
 		{label}
 		{description}
@@ -207,9 +211,7 @@
 			role="listbox"
 			class="z-50 overflow-y-auto rounded-xl border border-neutral-300 bg-white p-1 shadow-lg dark:border-neutral-700/60 dark:bg-neutral-800 {constrainMenuHeight
 				? 'max-h-60'
-				: ''} {fixed
-				? 'fixed'
-				: 'absolute top-full mt-1 w-full'}"
+				: ''} {fixed ? 'fixed' : 'absolute top-full mt-1 w-full'}"
 			style={fixed ? fixedStyle : ''}
 		>
 			{#each filteredOptions as option, index}
@@ -222,8 +224,8 @@
 					on:mouseenter={() => (highlightedIndex = index)}
 					on:mousedown={() => selectOption(option)}
 					class="w-full rounded-xl px-3 py-2 text-left text-sm transition-colors {isHighlighted
-					? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-700/40 dark:text-neutral-100'
-					: 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-800'} {isSelected
+						? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-700/40 dark:text-neutral-100'
+						: 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-800'} {isSelected
 						? 'font-medium'
 						: ''}"
 				>
@@ -237,9 +239,7 @@
 					Clear selection to browse all options
 				</p>
 			{:else if filteredOptions.length === 0}
-				<p class="px-3 py-2 text-xs text-neutral-400 dark:text-neutral-500">
-					No matches found
-				</p>
+				<p class="px-3 py-2 text-xs text-neutral-400 dark:text-neutral-500">No matches found</p>
 			{/if}
 		</div>
 	{/if}

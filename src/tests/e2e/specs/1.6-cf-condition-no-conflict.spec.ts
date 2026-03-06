@@ -11,11 +11,11 @@ import { unlinkPcdByName } from '../helpers/unlinkPcd';
 import { pullChanges, exportAndPush } from '../helpers/sync';
 import { goToConflicts, getConflictCount } from '../helpers/conflicts';
 import {
-  addEnumCondition,
-  goToCustomFormatConditions,
-  updateConditionValueByName,
-  getConditionValueByName,
-  saveConditionChanges
+	addEnumCondition,
+	goToCustomFormatConditions,
+	updateConditionValueByName,
+	getConditionValueByName,
+	saveConditionChanges
 } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
@@ -28,88 +28,88 @@ const NEW_CONDITION_NAME = 'E2E Added Resolution';
 const NEW_CONDITION_VALUE = '720p';
 
 test.describe('1.6 CF condition no-conflict', () => {
-  let localId: number;
-  let devId: number;
-  let devHead: string;
+	let localId: number;
+	let devId: number;
+	let devHead: string;
 
-  test.beforeEach(async ({ browser }) => {
-    const page = await browser.newPage();
+	test.beforeEach(async ({ browser }) => {
+		const page = await browser.newPage();
 
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
 
-    devId = await linkPcd(page, {
-      name: DEV_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL
-    });
+		devId = await linkPcd(page, {
+			name: DEV_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL
+		});
 
-    devHead = getHead(devId);
+		devHead = getHead(devId);
 
-    localId = await linkPcd(page, {
-      name: LOCAL_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL,
-      syncStrategy: 'Manual (no auto-sync)',
-      autoPull: false,
-      localOpsEnabled: true,
-      conflictStrategy: 'Ask every time'
-    });
+		localId = await linkPcd(page, {
+			name: LOCAL_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL,
+			syncStrategy: 'Manual (no auto-sync)',
+			autoPull: false,
+			localOpsEnabled: true,
+			conflictStrategy: 'Ask every time'
+		});
 
-    await page.close();
-  });
+		await page.close();
+	});
 
-  test.afterEach(async ({ browser }) => {
-    if (devId && devHead) {
-      try {
-        resetToCommit(devId, devHead, true);
-      } catch {
-        // Best-effort reset
-      }
-    }
+	test.afterEach(async ({ browser }) => {
+		if (devId && devHead) {
+			try {
+				resetToCommit(devId, devHead, true);
+			} catch {
+				// Best-effort reset
+			}
+		}
 
-    const page = await browser.newPage();
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
-    await page.close();
-  });
+		const page = await browser.newPage();
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
+		await page.close();
+	});
 
-  test('no conflict when upstream adds new condition', async ({ page }) => {
-    // Local modifies existing condition
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    await updateConditionValueByName(page, EXISTING_CONDITION, LOCAL_RESOLUTION);
-    await saveConditionChanges(page);
+	test('no conflict when upstream adds new condition', async ({ page }) => {
+		// Local modifies existing condition
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		await updateConditionValueByName(page, EXISTING_CONDITION, LOCAL_RESOLUTION);
+		await saveConditionChanges(page);
 
-    // Dev adds a new condition
-    await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-    await addEnumCondition(page, {
-      name: NEW_CONDITION_NAME,
-      typeLabel: 'Resolution',
-      valueLabel: NEW_CONDITION_VALUE
-    });
-    await saveConditionChanges(page);
+		// Dev adds a new condition
+		await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+		await addEnumCondition(page, {
+			name: NEW_CONDITION_NAME,
+			typeLabel: 'Resolution',
+			valueLabel: NEW_CONDITION_VALUE
+		});
+		await saveConditionChanges(page);
 
-    // Dev exports and pushes
-    await exportAndPush(page, devId, 'e2e: 1.6 condition no-conflict');
+		// Dev exports and pushes
+		await exportAndPush(page, devId, 'e2e: 1.6 condition no-conflict');
 
-    // Local pulls → no conflict expected
-    await pullChanges(page, localId);
+		// Local pulls → no conflict expected
+		await pullChanges(page, localId);
 
-    await goToConflicts(page, localId);
-    const conflictCount = await getConflictCount(page);
-    expect(conflictCount).toBe(0);
+		await goToConflicts(page, localId);
+		const conflictCount = await getConflictCount(page);
+		expect(conflictCount).toBe(0);
 
-    // Verify user's change remains
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    const value = await getConditionValueByName(page, EXISTING_CONDITION);
-    expect(value).toBe(LOCAL_RESOLUTION);
+		// Verify user's change remains
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		const value = await getConditionValueByName(page, EXISTING_CONDITION);
+		expect(value).toBe(LOCAL_RESOLUTION);
 
-    // Verify new condition exists with upstream value
-    const newValue = await getConditionValueByName(page, NEW_CONDITION_NAME);
-    expect(newValue).toBe(NEW_CONDITION_VALUE);
-  });
+		// Verify new condition exists with upstream value
+		const newValue = await getConditionValueByName(page, NEW_CONDITION_NAME);
+		expect(newValue).toBe(NEW_CONDITION_VALUE);
+	});
 });

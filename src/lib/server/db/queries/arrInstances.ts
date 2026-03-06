@@ -90,7 +90,9 @@ export const arrInstancesQueries = {
 	 * Get enabled arr instances
 	 */
 	getEnabled(): ArrInstance[] {
-		return db.query<ArrInstance>('SELECT * FROM arr_instances WHERE enabled = 1 ORDER BY type, name');
+		return db.query<ArrInstance>(
+			'SELECT * FROM arr_instances WHERE enabled = 1 ORDER BY type, name'
+		);
 	},
 
 	/**

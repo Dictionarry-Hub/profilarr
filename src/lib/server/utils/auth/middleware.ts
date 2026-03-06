@@ -81,8 +81,8 @@ export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 	// AUTH=oidc - uses sessions but no local user/password
 	if (config.authMode === 'oidc') {
 		const sessionId = event.cookies.get('session');
-		const session = sessionId ? sessionsQueries.getValidById(sessionId) ?? null : null;
-		const user = session ? usersQueries.getById(session.user_id) ?? null : null;
+		const session = sessionId ? (sessionsQueries.getValidById(sessionId) ?? null) : null;
+		const user = session ? (usersQueries.getById(session.user_id) ?? null) : null;
 
 		return {
 			needsSetup: false,
@@ -94,8 +94,8 @@ export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 
 	// AUTH=on (default) - check session cookie
 	const sessionId = event.cookies.get('session');
-	const session = sessionId ? sessionsQueries.getValidById(sessionId) ?? null : null;
-	const user = session ? usersQueries.getById(session.user_id) ?? null : null;
+	const session = sessionId ? (sessionsQueries.getValidById(sessionId) ?? null) : null;
+	const user = session ? (usersQueries.getById(session.user_id) ?? null) : null;
 
 	return {
 		needsSetup: !hasLocalUsers,

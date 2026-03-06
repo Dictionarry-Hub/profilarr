@@ -37,7 +37,9 @@ export const load = () => {
 
 	const recentRuns = jobRunHistoryQueries.getRecent(50);
 	const queueIds = Array.from(
-		new Set(recentRuns.map((run) => run.queueId).filter((id): id is number => typeof id === 'number'))
+		new Set(
+			recentRuns.map((run) => run.queueId).filter((id): id is number => typeof id === 'number')
+		)
 	);
 	const queueById = new Map<number, JobQueueRecord>();
 	for (const queueId of queueIds) {

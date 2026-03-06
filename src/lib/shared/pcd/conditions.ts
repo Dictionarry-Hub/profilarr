@@ -34,9 +34,9 @@ function getStatusPriority(required: boolean, negate: boolean): number {
 /**
  * Sort conditions by: required/negated/optional, then type order, then alphabetical
  */
-export function sortConditions<T extends { required: boolean; negate: boolean; type: string; name: string }>(
-	conditions: T[]
-): T[] {
+export function sortConditions<
+	T extends { required: boolean; negate: boolean; type: string; name: string }
+>(conditions: T[]): T[] {
 	return [...conditions].sort((a, b) => {
 		// Primary: status (required -> negated -> optional)
 		const statusA = getStatusPriority(a.required, a.negate);

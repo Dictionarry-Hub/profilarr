@@ -27,7 +27,14 @@ export { writeOperation, recompileCache, canWriteToBase } from './ops/writer.ts'
 // MANIFEST
 // ============================================================================
 
-export { loadManifest, readManifest, validateManifest, writeManifest, readReadme, writeReadme } from './manifest/manifest.ts';
+export {
+	loadManifest,
+	readManifest,
+	validateManifest,
+	writeManifest,
+	readReadme,
+	writeReadme
+} from './manifest/manifest.ts';
 export type { Manifest } from './manifest/manifest.ts';
 
 // ============================================================================

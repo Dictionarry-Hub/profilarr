@@ -49,7 +49,7 @@ const renameRunHandler: JobHandler = async (job) => {
 		return {
 			status,
 			output,
-			rescheduleAt: job.source === 'schedule' ? nextRunAt ?? undefined : undefined
+			rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
 		};
 	} catch (error) {
 		await logger.error('Rename job failed', {

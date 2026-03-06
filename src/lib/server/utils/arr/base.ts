@@ -285,10 +285,7 @@ export class BaseArrClient extends BaseHttpClient {
 	/**
 	 * Update an existing quality profile
 	 */
-	updateQualityProfile(
-		id: number,
-		profile: ArrQualityProfilePayload
-	): Promise<ArrQualityProfile> {
+	updateQualityProfile(id: number, profile: ArrQualityProfilePayload): Promise<ArrQualityProfile> {
 		return this.put<ArrQualityProfile>(`/api/${this.apiVersion}/qualityprofile/${id}`, profile);
 	}
 
@@ -352,16 +349,22 @@ export class BaseArrClient extends BaseHttpClient {
 				lastStatusChangeTime = Date.now();
 			}
 
-			await logger.debug(`Polling command ${commandId}: status=${command.status} (poll #${pollCount}, ${elapsed}ms elapsed)`, {
-				source: 'BaseArrClient',
-				meta: { commandId, status: command.status, pollCount, elapsedMs: elapsed }
-			});
+			await logger.debug(
+				`Polling command ${commandId}: status=${command.status} (poll #${pollCount}, ${elapsed}ms elapsed)`,
+				{
+					source: 'BaseArrClient',
+					meta: { commandId, status: command.status, pollCount, elapsedMs: elapsed }
+				}
+			);
 
 			if (command.status === 'completed') {
-				await logger.debug(`Command ${commandId} completed after ${pollCount} polls (${elapsed}ms)`, {
-					source: 'BaseArrClient',
-					meta: { commandId, pollCount, elapsedMs: elapsed, message: command.message }
-				});
+				await logger.debug(
+					`Command ${commandId} completed after ${pollCount} polls (${elapsed}ms)`,
+					{
+						source: 'BaseArrClient',
+						meta: { commandId, pollCount, elapsedMs: elapsed, message: command.message }
+					}
+				);
 				return command;
 			}
 
@@ -372,10 +375,17 @@ export class BaseArrClient extends BaseHttpClient {
 			// Warn if status hasn't changed in a while
 			const staleDuration = Date.now() - lastStatusChangeTime;
 			if (staleDuration >= STALE_WARN_MS && staleDuration % STALE_WARN_MS < currentInterval) {
-				await logger.warn(`Command ${commandId} has been "${command.status}" for ${Math.floor(staleDuration / 60000)} minutes`, {
-					source: 'BaseArrClient',
-					meta: { commandId, status: command.status, staleMinutes: Math.floor(staleDuration / 60000) }
-				});
+				await logger.warn(
+					`Command ${commandId} has been "${command.status}" for ${Math.floor(staleDuration / 60000)} minutes`,
+					{
+						source: 'BaseArrClient',
+						meta: {
+							commandId,
+							status: command.status,
+							staleMinutes: Math.floor(staleDuration / 60000)
+						}
+					}
+				);
 			}
 
 			// Hard ceiling

@@ -57,7 +57,11 @@ const backupCleanupHandler: JobHandler = async (job) => {
 	const nextRun = calculateNextRunFromSchedule('daily');
 
 	if (errorCount > 0 && deletedCount === 0) {
-		return { status: 'failure', error: message, rescheduleAt: job.source === 'schedule' ? nextRun : undefined };
+		return {
+			status: 'failure',
+			error: message,
+			rescheduleAt: job.source === 'schedule' ? nextRun : undefined
+		};
 	}
 
 	if (deletedCount === 0) {

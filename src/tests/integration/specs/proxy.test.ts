@@ -87,11 +87,9 @@ test('X-Forwarded-For recorded as session IP through proxy', async () => {
 	assertNotEquals(sessionId, undefined);
 
 	// Check the DB — an IP should be recorded (not null)
-	const rows = queryDb(
-		getDbPath(PORT),
-		'SELECT ip_address FROM sessions WHERE id = ?',
-		[sessionId!]
-	) as { ip_address: string | null }[];
+	const rows = queryDb(getDbPath(PORT), 'SELECT ip_address FROM sessions WHERE id = ?', [
+		sessionId!
+	]) as { ip_address: string | null }[];
 
 	assertEquals(rows.length, 1);
 	assertNotEquals(rows[0].ip_address, null);

@@ -73,7 +73,7 @@ export const pcdOpsQueries = {
 				sql, metadata, desired_state,
 				content_hash, last_seen_in_repo_at,
 				superseded_by_op_id, pushed_at, pushed_commit
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			input.databaseId,
 			input.origin,
 			input.state,

@@ -4,7 +4,11 @@
 
 import { sql } from 'kysely';
 import type { PCDCache } from '$pcd/index.ts';
-import type { QualityProfileScoring, ProfileCfScores, AllCfScoresResult } from '$shared/pcd/display.ts';
+import type {
+	QualityProfileScoring,
+	ProfileCfScores,
+	AllCfScoresResult
+} from '$shared/pcd/display.ts';
 
 /**
  * Get quality profile scoring data

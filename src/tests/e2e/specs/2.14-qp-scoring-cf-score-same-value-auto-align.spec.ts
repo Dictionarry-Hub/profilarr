@@ -12,10 +12,7 @@ import { linkPcd } from '../helpers/linkPcd';
 import { unlinkPcdByName } from '../helpers/unlinkPcd';
 import { pullChanges, exportAndPush } from '../helpers/sync';
 import { goToConflicts, getConflictCount } from '../helpers/conflicts';
-import {
-	openFirstQualityProfileGeneral,
-	goToQualityProfileScoring
-} from '../helpers/entity';
+import { openFirstQualityProfileGeneral, goToQualityProfileScoring } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
 const LOCAL_DB_NAME = 'E2E Local';
@@ -180,4 +177,3 @@ test.describe('2.14 QP scoring CF row desired already matches upstream', () => {
 		expect(Number(await final.scoreInput.inputValue())).toBe(desiredScore);
 	});
 });
-

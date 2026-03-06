@@ -108,7 +108,13 @@ export const POST: RequestHandler = async ({ request }) => {
 				continue;
 			}
 
-			const result = evaluateCustomFormat(cf.conditions, parsed, release.title, patternMatches, release.languages);
+			const result = evaluateCustomFormat(
+				cf.conditions,
+				parsed,
+				release.title,
+				patternMatches,
+				release.languages
+			);
 			cfMatches[cf.name] = result.matches;
 		}
 

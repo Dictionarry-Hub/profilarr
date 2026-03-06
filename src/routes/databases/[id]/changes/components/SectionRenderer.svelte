@@ -19,10 +19,7 @@
 		rows: DraftEntitySectionRow[],
 		kind: T
 	): Extract<DraftEntitySectionRow, { kind: T }>[] {
-		return rows.filter((row) => row.kind === kind) as Extract<
-			DraftEntitySectionRow,
-			{ kind: T }
-		>[];
+		return rows.filter((row) => row.kind === kind) as Extract<DraftEntitySectionRow, { kind: T }>[];
 	}
 
 	function getNonTagFieldRows(rows: DraftEntitySectionRow[]): FieldRow[] {
@@ -49,9 +46,7 @@
 				{/if}
 				{#if tagsRow}
 					<div class="space-y-2">
-						<div class="text-sm font-medium text-neutral-600 dark:text-neutral-300">
-							Tags
-						</div>
+						<div class="text-sm font-medium text-neutral-600 dark:text-neutral-300">Tags</div>
 						<TagsDiffTable
 							removed={(tagsRow.remove ?? []).map((tag) => String(tag))}
 							added={(tagsRow.add ?? []).map((tag) => String(tag))}

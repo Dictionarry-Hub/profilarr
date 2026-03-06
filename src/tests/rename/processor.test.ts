@@ -76,60 +76,48 @@ const SONARR_PREVIEW: RenamePreviewItem[] = [
 		seasonNumber: 1,
 		episodeNumbers: [1],
 		episodeFileId: 1001,
-		existingPath:
-			'Season 01/A Knight of the Seven Kingdoms - S01E01 - The Hedge Knight.mkv',
-		newPath:
-			'Season 01a/A Knight of the Seven Kingdomsa - S01E01 - The Hedge Knight.mkv'
+		existingPath: 'Season 01/A Knight of the Seven Kingdoms - S01E01 - The Hedge Knight.mkv',
+		newPath: 'Season 01a/A Knight of the Seven Kingdomsa - S01E01 - The Hedge Knight.mkv'
 	},
 	{
 		seriesId: 77,
 		seasonNumber: 1,
 		episodeNumbers: [2],
 		episodeFileId: 1002,
-		existingPath:
-			'Season 01/A Knight of the Seven Kingdoms - S01E02 - The Plea.mkv',
-		newPath:
-			'Season 01a/A Knight of the Seven Kingdomsa - S01E02 - The Plea.mkv'
+		existingPath: 'Season 01/A Knight of the Seven Kingdoms - S01E02 - The Plea.mkv',
+		newPath: 'Season 01a/A Knight of the Seven Kingdomsa - S01E02 - The Plea.mkv'
 	},
 	{
 		seriesId: 77,
 		seasonNumber: 1,
 		episodeNumbers: [3],
 		episodeFileId: 1003,
-		existingPath:
-			'Season 01/A Knight of the Seven Kingdoms - S01E03 - The Pupil.mkv',
-		newPath:
-			'Season 01a/A Knight of the Seven Kingdomsa - S01E03 - The Pupil.mkv'
+		existingPath: 'Season 01/A Knight of the Seven Kingdoms - S01E03 - The Pupil.mkv',
+		newPath: 'Season 01a/A Knight of the Seven Kingdomsa - S01E03 - The Pupil.mkv'
 	},
 	{
 		seriesId: 77,
 		seasonNumber: 1,
 		episodeNumbers: [4],
 		episodeFileId: 1004,
-		existingPath:
-			'Season 01/A Knight of the Seven Kingdoms - S01E04 - The Trial.mkv',
-		newPath:
-			'Season 01a/A Knight of the Seven Kingdomsa - S01E04 - The Trial.mkv'
+		existingPath: 'Season 01/A Knight of the Seven Kingdoms - S01E04 - The Trial.mkv',
+		newPath: 'Season 01a/A Knight of the Seven Kingdomsa - S01E04 - The Trial.mkv'
 	},
 	{
 		seriesId: 77,
 		seasonNumber: 1,
 		episodeNumbers: [5],
 		episodeFileId: 1005,
-		existingPath:
-			'Season 01/A Knight of the Seven Kingdoms - S01E05 - The Tourney.mkv',
-		newPath:
-			'Season 01a/A Knight of the Seven Kingdomsa - S01E05 - The Tourney.mkv'
+		existingPath: 'Season 01/A Knight of the Seven Kingdoms - S01E05 - The Tourney.mkv',
+		newPath: 'Season 01a/A Knight of the Seven Kingdomsa - S01E05 - The Tourney.mkv'
 	},
 	{
 		seriesId: 77,
 		seasonNumber: 1,
 		episodeNumbers: [6],
 		episodeFileId: 1006,
-		existingPath:
-			'Season 01/A Knight of the Seven Kingdoms - S01E06 - The Mystery Knight.mkv',
-		newPath:
-			'Season 01a/A Knight of the Seven Kingdomsa - S01E06 - The Mystery Knight.mkv'
+		existingPath: 'Season 01/A Knight of the Seven Kingdoms - S01E06 - The Mystery Knight.mkv',
+		newPath: 'Season 01a/A Knight of the Seven Kingdomsa - S01E06 - The Mystery Knight.mkv'
 	}
 ];
 
@@ -454,7 +442,12 @@ class RenameProcessorTest extends BaseTest {
 	testFileRenameRadarr(): void {
 		this.test('file rename: Radarr renames 1 file', async () => {
 			const adapter = createMockAdapter({
-				renameResult: { id: 12345, name: 'RenameMovie', commandName: 'RenameMovie', status: 'queued' },
+				renameResult: {
+					id: 12345,
+					name: 'RenameMovie',
+					commandName: 'RenameMovie',
+					status: 'queued'
+				},
 				waitResult: RADARR_COMMAND_RESULT
 			});
 			const log = createLog(makeInstance(), makeSettings(), false, false);
@@ -476,7 +469,12 @@ class RenameProcessorTest extends BaseTest {
 	testFileRenameSonarr(): void {
 		this.test('file rename: Sonarr renames 6 episode files', async () => {
 			const adapter = createMockAdapter({
-				renameResult: { id: 67890, name: 'RenameSeries', commandName: 'RenameSeries', status: 'queued' },
+				renameResult: {
+					id: 67890,
+					name: 'RenameSeries',
+					commandName: 'RenameSeries',
+					status: 'queued'
+				},
 				waitResult: SONARR_COMMAND_RESULT
 			});
 			const instance = makeInstance({ name: 'Test Sonarr', type: 'sonarr' });
@@ -497,7 +495,12 @@ class RenameProcessorTest extends BaseTest {
 	testFileRenameNoop(): void {
 		this.test('file rename: no-op when files already match naming', async () => {
 			const adapter = createMockAdapter({
-				renameResult: { id: 11111, name: 'RenameMovie', commandName: 'RenameMovie', status: 'queued' },
+				renameResult: {
+					id: 11111,
+					name: 'RenameMovie',
+					commandName: 'RenameMovie',
+					status: 'queued'
+				},
 				waitResult: NOOP_COMMAND_RESULT
 			});
 			const log = createLog(makeInstance(), makeSettings(), false, false);
@@ -603,12 +606,15 @@ class RenameProcessorTest extends BaseTest {
 	testDiffSnapshotsNoChanges(): void {
 		this.test('diffSnapshots: no changes returns empty array', () => {
 			const snapshot: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Later (2025)',
-					files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Later (2025)',
+						files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
+					}
+				]
 			]);
 
 			const diff = diffSnapshots(snapshot, snapshot);
@@ -619,21 +625,27 @@ class RenameProcessorTest extends BaseTest {
 	testDiffSnapshotsFileRename(): void {
 		this.test('diffSnapshots: detects file rename', () => {
 			const before: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Later (2025)',
-					files: [{ id: 1399, relativePath: '28 Years Latera (2025).mkv' }]
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Later (2025)',
+						files: [{ id: 1399, relativePath: '28 Years Latera (2025).mkv' }]
+					}
+				]
 			]);
 
 			const after: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Later (2025)',
-					files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Later (2025)',
+						files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
+					}
+				]
 			]);
 
 			const diff = diffSnapshots(before, after);
@@ -649,21 +661,27 @@ class RenameProcessorTest extends BaseTest {
 	testDiffSnapshotsFolderRename(): void {
 		this.test('diffSnapshots: detects folder rename', () => {
 			const before: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Latera (2025)',
-					files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Latera (2025)',
+						files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
+					}
+				]
 			]);
 
 			const after: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Later (2025)',
-					files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Later (2025)',
+						files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
+					}
+				]
 			]);
 
 			const diff = diffSnapshots(before, after);
@@ -677,21 +695,27 @@ class RenameProcessorTest extends BaseTest {
 	testDiffSnapshotsBothFileAndFolder(): void {
 		this.test('diffSnapshots: detects both file and folder rename', () => {
 			const before: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Latera (2025)',
-					files: [{ id: 1399, relativePath: '28 Years Latera (2025).mkv' }]
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Latera (2025)',
+						files: [{ id: 1399, relativePath: '28 Years Latera (2025).mkv' }]
+					}
+				]
 			]);
 
 			const after: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Later (2025)',
-					files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Later (2025)',
+						files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
+					}
+				]
 			]);
 
 			const diff = diffSnapshots(before, after);
@@ -704,33 +728,45 @@ class RenameProcessorTest extends BaseTest {
 	testDiffSnapshotsMixedChangedUnchanged(): void {
 		this.test('diffSnapshots: ignores unchanged entities', () => {
 			const before: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Latera (2025)',
-					files: [{ id: 1399, relativePath: '28 Years Latera (2025).mkv' }]
-				}],
-				[500, {
-					id: 500,
-					title: 'Alt Root Movie',
-					folderPath: '/data/media/movies-4k/Alt Root Movie (2024)',
-					files: [{ id: 501, relativePath: 'Alt Root Movie (2024).mkv' }]
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Latera (2025)',
+						files: [{ id: 1399, relativePath: '28 Years Latera (2025).mkv' }]
+					}
+				],
+				[
+					500,
+					{
+						id: 500,
+						title: 'Alt Root Movie',
+						folderPath: '/data/media/movies-4k/Alt Root Movie (2024)',
+						files: [{ id: 501, relativePath: 'Alt Root Movie (2024).mkv' }]
+					}
+				]
 			]);
 
 			const after: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Later (2025)',
-					files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
-				}],
-				[500, {
-					id: 500,
-					title: 'Alt Root Movie',
-					folderPath: '/data/media/movies-4k/Alt Root Movie (2024)',
-					files: [{ id: 501, relativePath: 'Alt Root Movie (2024).mkv' }]
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Later (2025)',
+						files: [{ id: 1399, relativePath: '28 Years Later (2025).mkv' }]
+					}
+				],
+				[
+					500,
+					{
+						id: 500,
+						title: 'Alt Root Movie',
+						folderPath: '/data/media/movies-4k/Alt Root Movie (2024)',
+						files: [{ id: 501, relativePath: 'Alt Root Movie (2024).mkv' }]
+					}
+				]
 			]);
 
 			const diff = diffSnapshots(before, after);
@@ -742,21 +778,27 @@ class RenameProcessorTest extends BaseTest {
 	testDiffSnapshotsEntityNoFiles(): void {
 		this.test('diffSnapshots: handles entity with no files (folder only)', () => {
 			const before: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Latera (2025)',
-					files: []
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Latera (2025)',
+						files: []
+					}
+				]
 			]);
 
 			const after: LibrarySnapshot = new Map([
-				[1422, {
-					id: 1422,
-					title: '28 Years Later',
-					folderPath: '/data/media/movies/28 Years Later (2025)',
-					files: []
-				}]
+				[
+					1422,
+					{
+						id: 1422,
+						title: '28 Years Later',
+						folderPath: '/data/media/movies/28 Years Later (2025)',
+						files: []
+					}
+				]
 			]);
 
 			const diff = diffSnapshots(before, after);
@@ -769,35 +811,41 @@ class RenameProcessorTest extends BaseTest {
 	testDiffSnapshotsSonarrMultipleFiles(): void {
 		this.test('diffSnapshots: Sonarr series with 6 episode file renames', () => {
 			const before: LibrarySnapshot = new Map([
-				[77, {
-					id: 77,
-					title: 'A Knight of the Seven Kingdoms',
-					folderPath: '/data/media/tv/A Knight of the Seven Kingdoms',
-					files: [
-						{ id: 1001, relativePath: 'Season 01/S01E01 - The Hedge Knight.mkv' },
-						{ id: 1002, relativePath: 'Season 01/S01E02 - The Plea.mkv' },
-						{ id: 1003, relativePath: 'Season 01/S01E03 - The Pupil.mkv' },
-						{ id: 1004, relativePath: 'Season 01/S01E04 - The Trial.mkv' },
-						{ id: 1005, relativePath: 'Season 01/S01E05 - The Tourney.mkv' },
-						{ id: 1006, relativePath: 'Season 01/S01E06 - The Mystery Knight.mkv' }
-					]
-				}]
+				[
+					77,
+					{
+						id: 77,
+						title: 'A Knight of the Seven Kingdoms',
+						folderPath: '/data/media/tv/A Knight of the Seven Kingdoms',
+						files: [
+							{ id: 1001, relativePath: 'Season 01/S01E01 - The Hedge Knight.mkv' },
+							{ id: 1002, relativePath: 'Season 01/S01E02 - The Plea.mkv' },
+							{ id: 1003, relativePath: 'Season 01/S01E03 - The Pupil.mkv' },
+							{ id: 1004, relativePath: 'Season 01/S01E04 - The Trial.mkv' },
+							{ id: 1005, relativePath: 'Season 01/S01E05 - The Tourney.mkv' },
+							{ id: 1006, relativePath: 'Season 01/S01E06 - The Mystery Knight.mkv' }
+						]
+					}
+				]
 			]);
 
 			const after: LibrarySnapshot = new Map([
-				[77, {
-					id: 77,
-					title: 'A Knight of the Seven Kingdoms',
-					folderPath: '/data/media/tv/A Knight of the Seven Kingdoms',
-					files: [
-						{ id: 1001, relativePath: 'Season 01a/S01E01 - The Hedge Knighta.mkv' },
-						{ id: 1002, relativePath: 'Season 01a/S01E02 - The Pleaa.mkv' },
-						{ id: 1003, relativePath: 'Season 01a/S01E03 - The Pupila.mkv' },
-						{ id: 1004, relativePath: 'Season 01a/S01E04 - The Triala.mkv' },
-						{ id: 1005, relativePath: 'Season 01a/S01E05 - The Tourneya.mkv' },
-						{ id: 1006, relativePath: 'Season 01a/S01E06 - The Mystery Knighta.mkv' }
-					]
-				}]
+				[
+					77,
+					{
+						id: 77,
+						title: 'A Knight of the Seven Kingdoms',
+						folderPath: '/data/media/tv/A Knight of the Seven Kingdoms',
+						files: [
+							{ id: 1001, relativePath: 'Season 01a/S01E01 - The Hedge Knighta.mkv' },
+							{ id: 1002, relativePath: 'Season 01a/S01E02 - The Pleaa.mkv' },
+							{ id: 1003, relativePath: 'Season 01a/S01E03 - The Pupila.mkv' },
+							{ id: 1004, relativePath: 'Season 01a/S01E04 - The Triala.mkv' },
+							{ id: 1005, relativePath: 'Season 01a/S01E05 - The Tourneya.mkv' },
+							{ id: 1006, relativePath: 'Season 01a/S01E06 - The Mystery Knighta.mkv' }
+						]
+					}
+				]
 			]);
 
 			const diff = diffSnapshots(before, after);
@@ -815,7 +863,12 @@ class RenameProcessorTest extends BaseTest {
 	testCombinedFileAndFolderRename(): void {
 		this.test('combined: file rename then folder rename', async () => {
 			const adapter = createMockAdapter({
-				renameResult: { id: 12345, name: 'RenameMovie', commandName: 'RenameMovie', status: 'queued' },
+				renameResult: {
+					id: 12345,
+					name: 'RenameMovie',
+					commandName: 'RenameMovie',
+					status: 'queued'
+				},
 				waitResult: RADARR_COMMAND_RESULT
 			});
 			const log = createLog(makeInstance(), makeSettings(), false, false);

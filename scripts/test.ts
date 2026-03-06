@@ -28,7 +28,7 @@ const aliases: Record<string, string> = {
 
 // Get the test target from args
 const target = Deno.args[0];
-const testPath = target ? aliases[target] ?? target : 'src/tests';
+const testPath = target ? (aliases[target] ?? target) : 'src/tests';
 
 // Check if it's a valid path
 if (target && !aliases[target]) {

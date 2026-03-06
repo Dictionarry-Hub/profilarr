@@ -33,7 +33,8 @@ async function resolveName(
 		if (row) return row.name!;
 	}
 
-	const entityType = table === 'radarr_media_settings' ? 'radarr_media_settings' : 'sonarr_media_settings';
+	const entityType =
+		table === 'radarr_media_settings' ? 'radarr_media_settings' : 'sonarr_media_settings';
 	const resolved = followRenameChain(databaseId, entityType, candidates[0]);
 	if (resolved !== candidates[0]) {
 		const row = await cache.kb
@@ -79,7 +80,13 @@ async function overrideRadarr(
 		return { success: false, error: 'Cache not available' };
 	}
 
-	const name = await resolveName(cache, databaseId, 'radarr_media_settings', metadata, desiredState);
+	const name = await resolveName(
+		cache,
+		databaseId,
+		'radarr_media_settings',
+		metadata,
+		desiredState
+	);
 	if (!name) {
 		return { success: false, error: 'Radarr media settings not found for override' };
 	}
@@ -90,8 +97,14 @@ async function overrideRadarr(
 	}
 
 	const desiredName = resolveString(desiredState.name, current.name);
-	const desiredPropersRepacks = resolveString(desiredState.propers_repacks, current.propers_repacks) as RadarrMediaSettingsRow['propers_repacks'];
-	const desiredEnableMediaInfo = resolveBoolean(desiredState.enable_media_info, current.enable_media_info);
+	const desiredPropersRepacks = resolveString(
+		desiredState.propers_repacks,
+		current.propers_repacks
+	) as RadarrMediaSettingsRow['propers_repacks'];
+	const desiredEnableMediaInfo = resolveBoolean(
+		desiredState.enable_media_info,
+		current.enable_media_info
+	);
 
 	const matches =
 		current.name === desiredName &&
@@ -129,7 +142,13 @@ async function overrideSonarr(
 		return { success: false, error: 'Cache not available' };
 	}
 
-	const name = await resolveName(cache, databaseId, 'sonarr_media_settings', metadata, desiredState);
+	const name = await resolveName(
+		cache,
+		databaseId,
+		'sonarr_media_settings',
+		metadata,
+		desiredState
+	);
 	if (!name) {
 		return { success: false, error: 'Sonarr media settings not found for override' };
 	}
@@ -140,8 +159,14 @@ async function overrideSonarr(
 	}
 
 	const desiredName = resolveString(desiredState.name, current.name);
-	const desiredPropersRepacks = resolveString(desiredState.propers_repacks, current.propers_repacks) as RadarrMediaSettingsRow['propers_repacks'];
-	const desiredEnableMediaInfo = resolveBoolean(desiredState.enable_media_info, current.enable_media_info);
+	const desiredPropersRepacks = resolveString(
+		desiredState.propers_repacks,
+		current.propers_repacks
+	) as RadarrMediaSettingsRow['propers_repacks'];
+	const desiredEnableMediaInfo = resolveBoolean(
+		desiredState.enable_media_info,
+		current.enable_media_info
+	);
 
 	const matches =
 		current.name === desiredName &&

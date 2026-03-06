@@ -34,7 +34,9 @@
 		actionUrl="?/update"
 		{initialData}
 		onCancel={handleCancel}
-		breadcrumbItems={[{ label: data.currentDatabase.name, href: `/delay-profiles/${data.currentDatabase.id}` }]}
+		breadcrumbItems={[
+			{ label: data.currentDatabase.name, href: `/delay-profiles/${data.currentDatabase.id}` }
+		]}
 		breadcrumbCurrent={data.delayProfile.name}
 	/>
 </div>

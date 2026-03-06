@@ -13,17 +13,17 @@ import { linkPcd } from '../helpers/linkPcd';
 import { unlinkPcdByName } from '../helpers/unlinkPcd';
 import { pullChanges, exportAndPush } from '../helpers/sync';
 import {
-  goToConflicts,
-  expectConflict,
-  overrideConflict,
-  alignConflict
+	goToConflicts,
+	expectConflict,
+	overrideConflict,
+	alignConflict
 } from '../helpers/conflicts';
 import {
-  goToCustomFormatConditions,
-  addLanguageCondition,
-  updateConditionLanguageByName,
-  getConditionLanguageByName,
-  saveConditionChanges
+	goToCustomFormatConditions,
+	addLanguageCondition,
+	updateConditionLanguageByName,
+	getConditionLanguageByName,
+	saveConditionChanges
 } from '../helpers/entity';
 import { getHead, resetToCommit } from '../helpers/reset';
 
@@ -37,127 +37,123 @@ const LOCAL_LANGUAGE = 'French';
 const DEV_LANGUAGE = 'Spanish';
 
 test.describe('1.20 CF condition language conflict', () => {
-  let localId: number;
-  let devId: number;
-  let devHead: string;
+	let localId: number;
+	let devId: number;
+	let devHead: string;
 
-  test.beforeEach(async ({ browser }) => {
-    const page = await browser.newPage();
+	test.beforeEach(async ({ browser }) => {
+		const page = await browser.newPage();
 
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
 
-    devId = await linkPcd(page, {
-      name: DEV_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL
-    });
+		devId = await linkPcd(page, {
+			name: DEV_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL
+		});
 
-    devHead = getHead(devId);
+		devHead = getHead(devId);
 
-    localId = await linkPcd(page, {
-      name: LOCAL_DB_NAME,
-      repoUrl: TEST_REPO_URL,
-      pat: TEST_PAT,
-      gitName: TEST_GIT_NAME,
-      gitEmail: TEST_GIT_EMAIL,
-      syncStrategy: 'Manual (no auto-sync)',
-      autoPull: false,
-      localOpsEnabled: true,
-      conflictStrategy: 'Ask every time'
-    });
+		localId = await linkPcd(page, {
+			name: LOCAL_DB_NAME,
+			repoUrl: TEST_REPO_URL,
+			pat: TEST_PAT,
+			gitName: TEST_GIT_NAME,
+			gitEmail: TEST_GIT_EMAIL,
+			syncStrategy: 'Manual (no auto-sync)',
+			autoPull: false,
+			localOpsEnabled: true,
+			conflictStrategy: 'Ask every time'
+		});
 
-    await page.close();
-  });
+		await page.close();
+	});
 
-  test.afterEach(async ({ browser }) => {
-    if (devId && devHead) {
-      try {
-        resetToCommit(devId, devHead, true);
-      } catch {
-        // Best-effort reset
-      }
-    }
+	test.afterEach(async ({ browser }) => {
+		if (devId && devHead) {
+			try {
+				resetToCommit(devId, devHead, true);
+			} catch {
+				// Best-effort reset
+			}
+		}
 
-    const page = await browser.newPage();
-    await unlinkPcdByName(page, LOCAL_DB_NAME);
-    await unlinkPcdByName(page, DEV_DB_NAME);
-    await page.close();
-  });
+		const page = await browser.newPage();
+		await unlinkPcdByName(page, LOCAL_DB_NAME);
+		await unlinkPcdByName(page, DEV_DB_NAME);
+		await page.close();
+	});
 
-  test('a) override — language uses user value', async ({ page }) => {
-    // Dev adds language condition
-    await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-    await addLanguageCondition(page, {
-      name: CONDITION_NAME,
-      languageLabel: BASE_LANGUAGE
-    });
-    await saveConditionChanges(page);
-    await exportAndPush(page, devId, 'e2e: 1.20 seed language condition');
+	test('a) override — language uses user value', async ({ page }) => {
+		// Dev adds language condition
+		await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+		await addLanguageCondition(page, {
+			name: CONDITION_NAME,
+			languageLabel: BASE_LANGUAGE
+		});
+		await saveConditionChanges(page);
+		await exportAndPush(page, devId, 'e2e: 1.20 seed language condition');
 
-    // Local pulls condition
-    await pullChanges(page, localId);
+		// Local pulls condition
+		await pullChanges(page, localId);
 
-    // Local changes language
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    await updateConditionLanguageByName(page, CONDITION_NAME, LOCAL_LANGUAGE);
-    await saveConditionChanges(page);
+		// Local changes language
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		await updateConditionLanguageByName(page, CONDITION_NAME, LOCAL_LANGUAGE);
+		await saveConditionChanges(page);
 
-    // Dev changes language differently
-    await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-    await updateConditionLanguageByName(page, CONDITION_NAME, DEV_LANGUAGE);
-    await saveConditionChanges(page);
-    await exportAndPush(page, devId, 'e2e: 1.20 language conflict');
+		// Dev changes language differently
+		await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+		await updateConditionLanguageByName(page, CONDITION_NAME, DEV_LANGUAGE);
+		await saveConditionChanges(page);
+		await exportAndPush(page, devId, 'e2e: 1.20 language conflict');
 
-    // Local pulls → conflict
-    await pullChanges(page, localId);
-    await goToConflicts(page, localId);
-    await expectConflict(page, TEST_CF_NAME);
+		// Local pulls → conflict
+		await pullChanges(page, localId);
+		await goToConflicts(page, localId);
+		await expectConflict(page, TEST_CF_NAME);
 
-    await overrideConflict(page, TEST_CF_NAME);
+		await overrideConflict(page, TEST_CF_NAME);
 
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    expect(await getConditionLanguageByName(page, CONDITION_NAME)).toBe(
-      LOCAL_LANGUAGE
-    );
-  });
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		expect(await getConditionLanguageByName(page, CONDITION_NAME)).toBe(LOCAL_LANGUAGE);
+	});
 
-  test('b) align — language uses upstream value', async ({ page }) => {
-    // Dev adds language condition
-    await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-    await addLanguageCondition(page, {
-      name: CONDITION_NAME,
-      languageLabel: BASE_LANGUAGE
-    });
-    await saveConditionChanges(page);
-    await exportAndPush(page, devId, 'e2e: 1.20 seed language condition');
+	test('b) align — language uses upstream value', async ({ page }) => {
+		// Dev adds language condition
+		await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+		await addLanguageCondition(page, {
+			name: CONDITION_NAME,
+			languageLabel: BASE_LANGUAGE
+		});
+		await saveConditionChanges(page);
+		await exportAndPush(page, devId, 'e2e: 1.20 seed language condition');
 
-    // Local pulls condition
-    await pullChanges(page, localId);
+		// Local pulls condition
+		await pullChanges(page, localId);
 
-    // Local changes language
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    await updateConditionLanguageByName(page, CONDITION_NAME, LOCAL_LANGUAGE);
-    await saveConditionChanges(page);
+		// Local changes language
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		await updateConditionLanguageByName(page, CONDITION_NAME, LOCAL_LANGUAGE);
+		await saveConditionChanges(page);
 
-    // Dev changes language differently
-    await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
-    await updateConditionLanguageByName(page, CONDITION_NAME, DEV_LANGUAGE);
-    await saveConditionChanges(page);
-    await exportAndPush(page, devId, 'e2e: 1.20 language conflict');
+		// Dev changes language differently
+		await goToCustomFormatConditions(page, devId, TEST_CF_NAME);
+		await updateConditionLanguageByName(page, CONDITION_NAME, DEV_LANGUAGE);
+		await saveConditionChanges(page);
+		await exportAndPush(page, devId, 'e2e: 1.20 language conflict');
 
-    // Local pulls → conflict
-    await pullChanges(page, localId);
-    await goToConflicts(page, localId);
-    await expectConflict(page, TEST_CF_NAME);
+		// Local pulls → conflict
+		await pullChanges(page, localId);
+		await goToConflicts(page, localId);
+		await expectConflict(page, TEST_CF_NAME);
 
-    await alignConflict(page, TEST_CF_NAME);
+		await alignConflict(page, TEST_CF_NAME);
 
-    await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
-    expect(await getConditionLanguageByName(page, CONDITION_NAME)).toBe(
-      DEV_LANGUAGE
-    );
-  });
+		await goToCustomFormatConditions(page, localId, TEST_CF_NAME);
+		expect(await getConditionLanguageByName(page, CONDITION_NAME)).toBe(DEV_LANGUAGE);
+	});
 });

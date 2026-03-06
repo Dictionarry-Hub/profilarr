@@ -18,11 +18,25 @@ import {
 	transformQualityProfile
 } from './qualityProfiles/transformer.ts';
 import { getCustomFormatsForProfile, getCustomFormatsForRegex } from '$pcd/references.ts';
-import { fetchCustomFormatFromPcd, transformCustomFormat, syncCustomFormats, type PcdCustomFormat } from './customFormats/index.ts';
+import {
+	fetchCustomFormatFromPcd,
+	transformCustomFormat,
+	syncCustomFormats,
+	type PcdCustomFormat
+} from './customFormats/index.ts';
 import { getByName as getDelayProfileByName } from '$pcd/entities/delayProfiles/index.ts';
-import { getRadarrByName as getRadarrNaming, getSonarrByName as getSonarrNaming } from '$pcd/entities/mediaManagement/naming/read.ts';
-import { getRadarrByName as getRadarrQualityDefs, getSonarrByName as getSonarrQualityDefs } from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
-import { getRadarrByName as getRadarrMediaSettings, getSonarrByName as getSonarrMediaSettings } from '$pcd/entities/mediaManagement/media-settings/read.ts';
+import {
+	getRadarrByName as getRadarrNaming,
+	getSonarrByName as getSonarrNaming
+} from '$pcd/entities/mediaManagement/naming/read.ts';
+import {
+	getRadarrByName as getRadarrQualityDefs,
+	getSonarrByName as getSonarrQualityDefs
+} from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
+import {
+	getRadarrByName as getRadarrMediaSettings,
+	getSonarrByName as getSonarrMediaSettings
+} from '$pcd/entities/mediaManagement/media-settings/read.ts';
 import type { ArrPropersAndRepacks } from '$arr/types.ts';
 import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
 import type { DelayProfilesRow } from '$shared/pcd/display.ts';
@@ -84,7 +98,12 @@ export async function syncQualityProfile(
 		const qualityMappings = await getQualityApiMappings(cache, instanceType);
 
 		// Transform
-		const arrProfile = transformQualityProfile(pcdProfile, instanceType, qualityMappings, formatIdMap);
+		const arrProfile = transformQualityProfile(
+			pcdProfile,
+			instanceType,
+			qualityMappings,
+			formatIdMap
+		);
 		arrProfile.name = profileName;
 
 		// Push
@@ -426,7 +445,10 @@ export async function syncQualityDefinitions(
 		const qualityDefsConfig = await getByName(cache, configName);
 
 		if (!qualityDefsConfig) {
-			return { success: false, error: `Quality definitions config "${configName}" not found in PCD` };
+			return {
+				success: false,
+				error: `Quality definitions config "${configName}" not found in PCD`
+			};
 		}
 
 		if (qualityDefsConfig.entries.length === 0) {
@@ -470,10 +492,13 @@ export async function syncQualityDefinitions(
 		// PUT the full array back
 		await client.updateQualityDefinitions(arrDefinitions);
 
-		await logger.info(`Entity sync: updated ${updatedCount} quality definitions for "${configName}"`, {
-			source: 'EntitySync:QualityDefinitions',
-			meta: { instanceId, databaseId, configName, updatedCount }
-		});
+		await logger.info(
+			`Entity sync: updated ${updatedCount} quality definitions for "${configName}"`,
+			{
+				source: 'EntitySync:QualityDefinitions',
+				meta: { instanceId, databaseId, configName, updatedCount }
+			}
+		);
 
 		arrSyncQueries.touchSectionLastSynced(instanceId, 'mediaManagement');
 

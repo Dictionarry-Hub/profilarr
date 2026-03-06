@@ -43,7 +43,7 @@
 				html: row.operators
 					.map((op) => `<span class="${badgeBase} ${badgeNeutral}">${op.label}</span>`)
 					.join(' ')
-				})
+			})
 		}
 	];
 
@@ -73,7 +73,7 @@
 			name: 'Selectors',
 			summary: 'How to prioritize from filtered results',
 			details:
-				"After filtering narrows the pool, the selector picks which items actually get searched. Random spreads searches evenly over time. Oldest/Newest prioritizes by when items were added. Lowest Score targets items most in need of upgrades. Most/Least Popular lets you prioritize based on TMDb popularity."
+				'After filtering narrows the pool, the selector picks which items actually get searched. Random spreads searches evenly over time. Oldest/Newest prioritizes by when items were added. Lowest Score targets items most in need of upgrades. Most/Least Popular lets you prioritize based on TMDb popularity.'
 		},
 		{
 			id: 'count-cooldown',
@@ -139,8 +139,8 @@
 					>Filter</span
 				>
 				your library,
-				<span class="font-medium text-neutral-700 dark:text-neutral-300">Select</span> items to search,
-				then
+				<span class="font-medium text-neutral-700 dark:text-neutral-300">Select</span> items to
+				search, then
 				<span class="font-medium text-neutral-700 dark:text-neutral-300">Search</span> for better releases.
 			</p>
 		</div>
@@ -172,7 +172,9 @@
 
 		<!-- Filter Modes Reference -->
 		<section>
-			<h2 class="mb-3 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Filter Modes</h2>
+			<h2 class="mb-3 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+				Filter Modes
+			</h2>
 			<Table columns={modeColumns} data={filterModes} emptyMessage="No modes" />
 		</section>
 

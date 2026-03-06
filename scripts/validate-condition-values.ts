@@ -80,7 +80,6 @@ interface ConditionDataMismatch {
 }
 
 async function validateSqlContent(content: string) {
-
 	const mismatches: Mismatch[] = [];
 	const typeMismatches: TypeMismatch[] = [];
 	const patternMismatches: PatternMismatch[] = [];
@@ -104,12 +103,24 @@ async function validateSqlContent(content: string) {
 	const definedTags = new Set<string>();
 
 	// Track references for validation
-	const referencedPatterns: { formatName: string; conditionName: string; patternName: string; line: number }[] = [];
-	const referencedLanguages: { formatName: string; conditionName: string; languageName: string; line: number }[] = [];
+	const referencedPatterns: {
+		formatName: string;
+		conditionName: string;
+		patternName: string;
+		line: number;
+	}[] = [];
+	const referencedLanguages: {
+		formatName: string;
+		conditionName: string;
+		languageName: string;
+		line: number;
+	}[] = [];
 
 	// Track conditions and their types for data integrity check
-	const conditionDefinitions: Map<string, { formatName: string; conditionName: string; type: string; line: number }> =
-		new Map();
+	const conditionDefinitions: Map<
+		string,
+		{ formatName: string; conditionName: string; type: string; line: number }
+	> = new Map();
 	const conditionDataEntries: Set<string> = new Set(); // "formatName|conditionName" for conditions that have data
 
 	// Condition type to table mapping
@@ -143,7 +154,8 @@ async function validateSqlContent(content: string) {
 	// Patterns to match INSERT...VALUES statements (now on same line after joining)
 	// Format: INSERT INTO condition_sources VALUES ('format', 'condition', 'value');
 	const patterns: Record<string, RegExp> = {
-		condition_sources: /INSERT INTO condition_sources VALUES\s*\('[^']+',\s*'[^']+',\s*'([^']+)'\)/i,
+		condition_sources:
+			/INSERT INTO condition_sources VALUES\s*\('[^']+',\s*'[^']+',\s*'([^']+)'\)/i,
 		condition_resolutions:
 			/INSERT INTO condition_resolutions VALUES\s*\('[^']+',\s*'[^']+',\s*'([^']+)'\)/i,
 		condition_quality_modifiers:
@@ -202,15 +214,18 @@ async function validateSqlContent(content: string) {
 		condition_resolutions: /INSERT INTO condition_resolutions VALUES\s*\('([^']+)',\s*'([^']+)'/i,
 		condition_quality_modifiers:
 			/INSERT INTO condition_quality_modifiers VALUES\s*\('([^']+)',\s*'([^']+)'/i,
-		condition_release_types: /INSERT INTO condition_release_types VALUES\s*\('([^']+)',\s*'([^']+)'/i,
-		condition_indexer_flags: /INSERT INTO condition_indexer_flags VALUES\s*\('([^']+)',\s*'([^']+)'/i,
+		condition_release_types:
+			/INSERT INTO condition_release_types VALUES\s*\('([^']+)',\s*'([^']+)'/i,
+		condition_indexer_flags:
+			/INSERT INTO condition_indexer_flags VALUES\s*\('([^']+)',\s*'([^']+)'/i,
 		condition_sizes: /INSERT INTO condition_sizes VALUES\s*\('([^']+)',\s*'([^']+)'/i,
 		condition_years: /INSERT INTO condition_years VALUES\s*\('([^']+)',\s*'([^']+)'/i
 	};
 
 	let currentConditionPatternContext: { formatName: string; conditionName: string } | null = null;
 	let currentConditionLanguageContext: { formatName: string; conditionName: string } | null = null;
-	let currentConditionDefContext: { conditionName: string; type: string; line: number } | null = null;
+	let currentConditionDefContext: { conditionName: string; type: string; line: number } | null =
+		null;
 	let inLanguagesInsert = false;
 
 	for (let i = 0; i < joinedLines.length; i++) {
@@ -235,7 +250,10 @@ async function validateSqlContent(content: string) {
 				definedLanguages.add(languageMatch[1]);
 			}
 			// End of INSERT block (line ends with semicolon or next INSERT starts)
-			if (line.includes(';') || (line.match(/^INSERT/i) && !line.match(languageInsertStartPattern))) {
+			if (
+				line.includes(';') ||
+				(line.match(/^INSERT/i) && !line.match(languageInsertStartPattern))
+			) {
 				inLanguagesInsert = false;
 			}
 		}
@@ -479,7 +497,7 @@ async function main() {
 			// Concatenate all SQL content
 			let combinedContent = '';
 			for (const f of allFiles) {
-				combinedContent += await Deno.readTextFile(f) + '\n';
+				combinedContent += (await Deno.readTextFile(f)) + '\n';
 			}
 
 			const {
@@ -557,7 +575,9 @@ async function main() {
 			console.log('\n--- Summary ---');
 			console.log(`Custom formats: ${definedCustomFormats.size}`);
 			console.log(`Conditions: ${conditionDefinitions.size}`);
-			console.log(`Patterns: ${definedPatterns.size} defined, ${referencedPatterns.length} referenced`);
+			console.log(
+				`Patterns: ${definedPatterns.size} defined, ${referencedPatterns.length} referenced`
+			);
 			console.log(`Languages: ${definedLanguages.size}`);
 			console.log(`Condition types: ${Array.from(foundConditionTypes).sort().join(', ')}`);
 

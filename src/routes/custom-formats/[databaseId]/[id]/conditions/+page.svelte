@@ -220,7 +220,6 @@
 		await tick();
 		mainFormElement?.requestSubmit();
 	}
-
 </script>
 
 <svelte:head>
@@ -237,7 +236,11 @@
 			if (result.type === 'failure' && result.data) {
 				alertStore.add('error', (result.data as { error?: string }).error || 'Operation failed');
 			} else if (result.type === 'success' && result.data) {
-				const resData = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+				const resData = result.data as {
+					success?: boolean;
+					redirectTo?: string;
+					affectedArrs?: AffectedArr[];
+				};
 				if (resData.success) {
 					alertStore.add('success', 'Conditions updated!');
 					initEdit($current);
@@ -308,10 +311,12 @@
 					<span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">Drafts</span>
 					<Badge variant="neutral" size="sm">{draftConditions.length}</Badge>
 				</div>
-				<div class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-neutral-200 wide:dark:divide-neutral-800">
+				<div
+					class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-neutral-200 wide:dark:divide-neutral-800"
+				>
 					{#each draftConditions as draft (draft._key)}
 						<div
-							class="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 dark:border-neutral-800 dark:bg-neutral-900 wide:rounded-none wide:border-0 wide:bg-transparent wide:px-0 wide:py-0"
+							class="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 wide:rounded-none wide:border-0 wide:bg-transparent wide:px-0 wide:py-0 dark:border-neutral-800 dark:bg-neutral-900"
 						>
 							<ConditionCard
 								mode="draft"
@@ -337,10 +342,12 @@
 					<span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">Conditions</span>
 					<Badge variant="neutral" size="sm">{conditions.length}</Badge>
 				</div>
-				<div class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-neutral-200 wide:dark:divide-neutral-800">
+				<div
+					class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-neutral-200 wide:dark:divide-neutral-800"
+				>
 					{#each sortedConditions as condition (condition._key)}
 						<div
-							class="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 dark:border-neutral-800 dark:bg-neutral-900 wide:rounded-none wide:border-0 wide:bg-transparent wide:px-0 wide:py-0"
+							class="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 wide:rounded-none wide:border-0 wide:bg-transparent wide:px-0 wide:py-0 dark:border-neutral-800 dark:bg-neutral-900"
 						>
 							<ConditionCard
 								{condition}
@@ -369,12 +376,11 @@
 			</p>
 			<ul class="mt-2 list-inside list-disc space-y-1">
 				<li>
-					<strong>Required</strong> &mdash; Changes the type's logic from OR to AND. All required
-					conditions in that type must match.
+					<strong>Required</strong> &mdash; Changes the type's logic from OR to AND. All required conditions
+					in that type must match.
 				</li>
 				<li>
-					<strong>Negate</strong> &mdash; Inverts the condition so it matches when the pattern is
-					absent.
+					<strong>Negate</strong> &mdash; Inverts the condition so it matches when the pattern is absent.
 				</li>
 			</ul>
 		</section>
@@ -392,15 +398,15 @@
 				<div>
 					<div class="font-medium text-neutral-800 dark:text-neutral-200">Release Group</div>
 					<p class="mt-0.5">
-						Matches regex patterns against the release group name (the tag after the final dash, e.g.
-						FraMeSToR).
+						Matches regex patterns against the release group name (the tag after the final dash,
+						e.g. FraMeSToR).
 					</p>
 				</div>
 				<div>
 					<div class="font-medium text-neutral-800 dark:text-neutral-200">Edition</div>
 					<p class="mt-0.5">
-						Matches regex patterns against the edition field (Director's Cut, Extended, etc.). Radarr
-						only.
+						Matches regex patterns against the edition field (Director's Cut, Extended, etc.).
+						Radarr only.
 					</p>
 				</div>
 				<div>
@@ -446,9 +452,7 @@
 				</div>
 				<div>
 					<div class="font-medium text-neutral-800 dark:text-neutral-200">Year</div>
-					<p class="mt-0.5">
-						Matches the release year. Set a minimum, maximum, or both.
-					</p>
+					<p class="mt-0.5">Matches the release year. Set a minimum, maximum, or both.</p>
 				</div>
 			</div>
 		</div>

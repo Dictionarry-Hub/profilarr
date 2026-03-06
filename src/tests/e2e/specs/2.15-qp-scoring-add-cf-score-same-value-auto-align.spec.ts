@@ -176,4 +176,3 @@ test.describe('2.15 QP scoring add CF score row desired already matches upstream
 		expect(Number(await final.scoreInput.inputValue())).toBe(desiredScore);
 	});
 });
-

@@ -179,7 +179,12 @@
 			tags: ['enhancement', 'enhancements'],
 			custom: false
 		},
-		{ name: 'Languages', key: 'languages' as const, tags: ['language', 'languages', 'asl'], custom: false }
+		{
+			name: 'Languages',
+			key: 'languages' as const,
+			tags: ['language', 'languages', 'asl'],
+			custom: false
+		}
 	];
 
 	// Custom groups from localStorage
@@ -438,7 +443,11 @@
 			return true;
 		}) || [];
 
-	$: sortedCustomFormats = sortFormats(filteredCustomFormats, initialData.customFormatScores, sortState);
+	$: sortedCustomFormats = sortFormats(
+		filteredCustomFormats,
+		initialData.customFormatScores,
+		sortState
+	);
 	$: groupedFormats = groupFormats(sortedCustomFormats, selectedGroups);
 
 	// Apply default sort
@@ -623,7 +632,11 @@
 			return async ({ result, update: formUpdate }) => {
 				isSaving = false;
 				if (result.type === 'success' && result.data) {
-					const resData = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+					const resData = result.data as {
+						success?: boolean;
+						redirectTo?: string;
+						affectedArrs?: AffectedArr[];
+					};
 					if (resData.success) {
 						alertStore.add('success', 'Scoring saved!');
 						initEdit($current);
@@ -1097,9 +1110,9 @@
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Grouping</div>
 			<div class="mt-1">
 				Organize custom formats into separate tables based on their tags. You can select multiple
-				groups at once. Available groups include Audio, HDR, Release Group, Codec,
-				Resolution, and more. Formats that don't match any selected group appear in the "Other"
-				table. If a format matches multiple groups, it appears in the first matching group only.
+				groups at once. Available groups include Audio, HDR, Release Group, Codec, Resolution, and
+				more. Formats that don't match any selected group appear in the "Other" table. If a format
+				matches multiple groups, it appears in the first matching group only.
 			</div>
 		</div>
 

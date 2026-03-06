@@ -317,8 +317,7 @@ function evaluateLanguage(
 	}
 
 	// Prefer indexer languages when available
-	const effectiveLangs =
-		indexerLangs && indexerLangs.length > 0 ? indexerLangs : parsed.languages;
+	const effectiveLangs = indexerLangs && indexerLangs.length > 0 ? indexerLangs : parsed.languages;
 
 	const langNames = effectiveLangs.map((l) => languageNames[l] || 'Unknown');
 	const actual = langNames.length > 0 ? langNames.join(', ') : 'None detected';

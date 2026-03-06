@@ -73,9 +73,7 @@ export async function deserializeRegularExpression(
 // CUSTOM FORMATS
 // ============================================================================
 
-export async function deserializeCustomFormat(
-	options: DeserializeOptions<PortableCustomFormat>
-) {
+export async function deserializeCustomFormat(options: DeserializeOptions<PortableCustomFormat>) {
 	const { databaseId, cache, layer, portable } = options;
 
 	// 1. Create the format
@@ -187,9 +185,7 @@ export async function deserializeQualityProfile(
 // NAMING
 // ============================================================================
 
-export async function deserializeRadarrNaming(
-	options: DeserializeOptions<PortableRadarrNaming>
-) {
+export async function deserializeRadarrNaming(options: DeserializeOptions<PortableRadarrNaming>) {
 	const { databaseId, cache, layer, portable } = options;
 
 	return namingQueries.createRadarrNaming({
@@ -200,9 +196,7 @@ export async function deserializeRadarrNaming(
 	});
 }
 
-export async function deserializeSonarrNaming(
-	options: DeserializeOptions<PortableSonarrNaming>
-) {
+export async function deserializeSonarrNaming(options: DeserializeOptions<PortableSonarrNaming>) {
 	const { databaseId, cache, layer, portable } = options;
 
 	return namingQueries.createSonarrNaming({

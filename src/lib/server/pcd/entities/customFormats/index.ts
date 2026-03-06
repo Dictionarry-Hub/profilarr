@@ -9,7 +9,11 @@ export { general } from './general/index.ts';
 export { updateGeneral } from './general/index.ts';
 
 // Condition queries/mutations
-export { getConditionsForEvaluation, getAllConditionsForEvaluation, listConditions } from './conditions/index.ts';
+export {
+	getConditionsForEvaluation,
+	getAllConditionsForEvaluation,
+	listConditions
+} from './conditions/index.ts';
 export { updateConditions } from './conditions/index.ts';
 
 // Test queries/mutations

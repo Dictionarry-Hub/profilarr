@@ -454,9 +454,7 @@
 	}
 
 	function createGroup() {
-		const selectedItems = groupModalItems.filter((item) =>
-			selectedGroupNames.has(item.name)
-		);
+		const selectedItems = groupModalItems.filter((item) => selectedGroupNames.has(item.name));
 		if (selectedItems.length < 2) return;
 
 		const insertIndex = mainBucket.findIndex(
@@ -495,9 +493,7 @@
 		const group = mainBucket[editingGroupIndex];
 		if (!group || group.type !== 'group') return;
 
-		const selectedItems = groupModalItems.filter((item) =>
-			selectedGroupNames.has(item.name)
-		);
+		const selectedItems = groupModalItems.filter((item) => selectedGroupNames.has(item.name));
 		if (selectedItems.length < 2) return;
 
 		const groupName = groupNameInput.trim();
@@ -550,7 +546,6 @@
 		await tick();
 		formElement?.requestSubmit();
 	}
-
 </script>
 
 <svelte:head>
@@ -600,7 +595,11 @@
 		return async ({ result, update: formUpdate }) => {
 			isSaving = false;
 			if (result.type === 'success' && result.data) {
-				const resData = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+				const resData = result.data as {
+					success?: boolean;
+					redirectTo?: string;
+					affectedArrs?: AffectedArr[];
+				};
 				if (resData.success) {
 					alertStore.add('success', 'Qualities saved!');
 					initEdit($current);
@@ -638,9 +637,9 @@
 						toggleEnabled(index);
 					}
 				}}
-				class="relative select-none rounded-xl border border-neutral-300 bg-white p-3 dark:border-neutral-700/60 dark:bg-neutral-800/50 {isMobile ? '' : 'cursor-grab'} {draggedQualityFromMain?.index === index
-					? 'scale-95 opacity-50'
-					: ''}"
+				class="relative rounded-xl border border-neutral-300 bg-white p-3 select-none dark:border-neutral-700/60 dark:bg-neutral-800/50 {isMobile
+					? ''
+					: 'cursor-grab'} {draggedQualityFromMain?.index === index ? 'scale-95 opacity-50' : ''}"
 				style="transition: opacity 100ms, transform 100ms;"
 				role="button"
 				tabindex="0"
@@ -655,111 +654,109 @@
 						class="pointer-events-none absolute inset-0 rounded-lg border-2 border-dashed border-accent-500 bg-accent-50/30 dark:border-accent-400 dark:bg-accent-950/30"
 					></div>
 				{/if}
-					<div class="relative flex items-center justify-between">
-						<div class="flex-1">
-							<div class="font-medium text-neutral-900 dark:text-neutral-100">
-								{#if item.type === 'group'}
-									<span
-										class="cursor-pointer hover:text-accent-600 dark:hover:text-accent-400"
-										on:click|stopPropagation={() => openEditGroupModal(item, index)}
-										on:keydown={(e) => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												e.preventDefault();
-												e.stopPropagation();
-												openEditGroupModal(item, index);
-											}
-										}}
-										role="button"
-										tabindex="0"
-									>
-										{item.name}
-									</span>
-								{:else}
-									{item.name}
-								{/if}
-							</div>
-							{#if item.type === 'group' && item.members}
-								<div class="mt-1 hidden flex-wrap gap-1 md:flex">
-									{#each item.members as member}
-										<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
-									{/each}
-								</div>
-							{/if}
-						</div>
-						<div class="flex items-center gap-3">
-							<div class="flex items-center gap-1 md:hidden">
-								{#if item.type === 'group'}
-									<Button
-										icon={X}
-										size="xs"
-										title="Collapse group into individual qualities"
-										on:click={(e) => {
-											e.stopPropagation();
-											collapseGroup(item);
-										}}
-									/>
-									<Button
-										icon={Pencil}
-										size="xs"
-										title="Edit group"
-										on:click={(e) => {
+				<div class="relative flex items-center justify-between">
+					<div class="flex-1">
+						<div class="font-medium text-neutral-900 dark:text-neutral-100">
+							{#if item.type === 'group'}
+								<span
+									class="cursor-pointer hover:text-accent-600 dark:hover:text-accent-400"
+									on:click|stopPropagation={() => openEditGroupModal(item, index)}
+									on:keydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
 											e.stopPropagation();
 											openEditGroupModal(item, index);
-										}}
-									/>
-								{/if}
+										}
+									}}
+									role="button"
+									tabindex="0"
+								>
+									{item.name}
+								</span>
+							{:else}
+								{item.name}
+							{/if}
+						</div>
+						{#if item.type === 'group' && item.members}
+							<div class="mt-1 hidden flex-wrap gap-1 md:flex">
+								{#each item.members as member}
+									<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
+								{/each}
+							</div>
+						{/if}
+					</div>
+					<div class="flex items-center gap-3">
+						<div class="flex items-center gap-1 md:hidden">
+							{#if item.type === 'group'}
 								<Button
-									icon={ChevronUp}
+									icon={X}
 									size="xs"
-									disabled={index === 0}
+									title="Collapse group into individual qualities"
 									on:click={(e) => {
 										e.stopPropagation();
-										moveItem(index, 'up');
+										collapseGroup(item);
 									}}
 								/>
 								<Button
-									icon={ChevronDown}
+									icon={Pencil}
 									size="xs"
-									disabled={index === mainBucket.length - 1}
+									title="Edit group"
 									on:click={(e) => {
 										e.stopPropagation();
-										moveItem(index, 'down');
+										openEditGroupModal(item, index);
 									}}
 								/>
+							{/if}
+							<Button
+								icon={ChevronUp}
+								size="xs"
+								disabled={index === 0}
+								on:click={(e) => {
+									e.stopPropagation();
+									moveItem(index, 'up');
+								}}
+							/>
+							<Button
+								icon={ChevronDown}
+								size="xs"
+								disabled={index === mainBucket.length - 1}
+								on:click={(e) => {
+									e.stopPropagation();
+									moveItem(index, 'down');
+								}}
+							/>
 						</div>
 						{#if hoverTargetIndex === index && willCreateGroup}
-							<div class="text-xs font-medium text-green-600 dark:text-green-400">
-								Create Group
-							</div>
+							<div class="text-xs font-medium text-green-600 dark:text-green-400">Create Group</div>
 						{:else if hoverTargetIndex === index && willAddToGroup}
 							<div class="text-xs font-medium text-accent-600 dark:text-accent-400">
 								Add to Group
 							</div>
 						{/if}
-							{#if item.type === 'group'}
-								<span class="hidden md:inline-flex">
-									<Button
-										icon={X}
-										size="xs"
-										title="Collapse group into individual qualities"
-										on:click={(e) => {
-											e.stopPropagation();
-											collapseGroup(item);
-										}}
-									/>
-								</span>
-								<span class="hidden md:inline-flex">
-									<Button
-										icon={Pencil}
-										size="xs"
-										title="Edit group"
-										on:click={(e) => {
-											e.stopPropagation();
-											openEditGroupModal(item, index);
-										}}
-									/>
-								</span>
-							{/if}
+						{#if item.type === 'group'}
+							<span class="hidden md:inline-flex">
+								<Button
+									icon={X}
+									size="xs"
+									title="Collapse group into individual qualities"
+									on:click={(e) => {
+										e.stopPropagation();
+										collapseGroup(item);
+									}}
+								/>
+							</span>
+							<span class="hidden md:inline-flex">
+								<Button
+									icon={Pencil}
+									size="xs"
+									title="Edit group"
+									on:click={(e) => {
+										e.stopPropagation();
+										openEditGroupModal(item, index);
+									}}
+								/>
+							</span>
+						{/if}
 						<IconCheckbox
 							checked={item.upgradeUntil}
 							icon={ArrowUp}
@@ -779,9 +776,7 @@
 					</div>
 				</div>
 				{#if item.type === 'group' && item.members}
-					<div
-						class="mt-3 flex flex-wrap gap-1 border-t border-neutral-200 pt-3 md:hidden"
-					>
+					<div class="mt-3 flex flex-wrap gap-1 border-t border-neutral-200 pt-3 md:hidden">
 						{#each item.members as member}
 							<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
 						{/each}
@@ -817,10 +812,10 @@
 		<div>
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Creating Groups</div>
 			<div class="mt-1">
-				On desktop, hold Ctrl (or Cmd on Mac) while dragging a quality onto another quality to create
-				a group. Groups allow multiple qualities to be treated as equal priority. You can also drag
-				a quality onto an existing group to add it to that group. On mobile, use the Create Group
-				button in the header.
+				On desktop, hold Ctrl (or Cmd on Mac) while dragging a quality onto another quality to
+				create a group. Groups allow multiple qualities to be treated as equal priority. You can
+				also drag a quality onto an existing group to add it to that group. On mobile, use the
+				Create Group button in the header.
 			</div>
 		</div>
 
@@ -857,7 +852,6 @@
 				looking for upgrades. This quality must be enabled.
 			</div>
 		</div>
-
 	</div>
 </InfoModal>
 
@@ -889,4 +883,3 @@
 		cursor: grabbing !important;
 	}
 </style>
-

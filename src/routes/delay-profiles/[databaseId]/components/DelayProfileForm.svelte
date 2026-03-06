@@ -132,7 +132,6 @@
 	function handleDeleteCancel() {
 		showDeleteModal = false;
 	}
-
 </script>
 
 <div class="space-y-6">
@@ -177,7 +176,11 @@
 				if (result.type === 'failure' && result.data) {
 					alertStore.add('error', (result.data as { error?: string }).error || 'Operation failed');
 				} else if (result.type === 'success' && result.data) {
-					const data = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+					const data = result.data as {
+						success?: boolean;
+						redirectTo?: string;
+						affectedArrs?: AffectedArr[];
+					};
 					if (data.success) {
 						alertStore.add(
 							'success',
@@ -217,126 +220,126 @@
 
 		<Card flush padding="lg">
 			<div class="space-y-6">
-			<!-- Name -->
-			<FormInput
-				label="Name"
-				name="name"
-				placeholder="e.g., Standard Delay"
-				required
-				value={formData.name}
-				on:input={(e) => update('name', e.detail)}
-			/>
-
-			<!-- Protocol Preference -->
-			<div class="space-y-2">
-				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-					Protocol Preference
-				</h3>
-				<DropdownSelect
-					value={formData.preferredProtocol}
-					options={protocolOptions}
-					fullWidth
-					on:change={(e) => update('preferredProtocol', e.detail)}
+				<!-- Name -->
+				<FormInput
+					label="Name"
+					name="name"
+					placeholder="e.g., Standard Delay"
+					required
+					value={formData.name}
+					on:input={(e) => update('name', e.detail)}
 				/>
-				{#if protocolDescription}
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
-						{protocolDescription}
+
+				<!-- Protocol Preference -->
+				<div class="space-y-2">
+					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						Protocol Preference
+					</h3>
+					<DropdownSelect
+						value={formData.preferredProtocol}
+						options={protocolOptions}
+						fullWidth
+						on:change={(e) => update('preferredProtocol', e.detail)}
+					/>
+					{#if protocolDescription}
+						<p class="text-xs text-neutral-500 dark:text-neutral-400">
+							{protocolDescription}
+						</p>
+					{/if}
+				</div>
+
+				<!-- Delays -->
+				<div>
+					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Delays</h3>
+					<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+						Time to wait before downloading from each source. Set to 0 for no delay.
 					</p>
-				{/if}
-			</div>
-
-			<!-- Delays -->
-			<div>
-				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Delays</h3>
-				<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-					Time to wait before downloading from each source. Set to 0 for no delay.
-				</p>
-				<div class="mt-3 grid gap-4 sm:grid-cols-2">
-					<div>
-						<label
-							for="usenet-delay"
-							class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-						>
-							Usenet Delay (minutes)
-						</label>
-						<div class="mt-1">
-							<NumberInput
-								name="usenet-delay"
-								id="usenet-delay"
-								value={formData.usenetDelay}
-								onchange={(v) => update('usenetDelay', v)}
-								min={0}
-								font="mono"
-								disabled={!usenetEnabled}
-							/>
+					<div class="mt-3 grid gap-4 sm:grid-cols-2">
+						<div>
+							<label
+								for="usenet-delay"
+								class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+							>
+								Usenet Delay (minutes)
+							</label>
+							<div class="mt-1">
+								<NumberInput
+									name="usenet-delay"
+									id="usenet-delay"
+									value={formData.usenetDelay}
+									onchange={(v) => update('usenetDelay', v)}
+									min={0}
+									font="mono"
+									disabled={!usenetEnabled}
+								/>
+							</div>
 						</div>
-					</div>
 
-					<div>
-						<label
-							for="torrent-delay"
-							class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-						>
-							Torrent Delay (minutes)
-						</label>
-						<div class="mt-1">
-							<NumberInput
-								name="torrent-delay"
-								id="torrent-delay"
-								value={formData.torrentDelay}
-								onchange={(v) => update('torrentDelay', v)}
-								min={0}
-								font="mono"
-								disabled={!torrentEnabled}
-							/>
+						<div>
+							<label
+								for="torrent-delay"
+								class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+							>
+								Torrent Delay (minutes)
+							</label>
+							<div class="mt-1">
+								<NumberInput
+									name="torrent-delay"
+									id="torrent-delay"
+									value={formData.torrentDelay}
+									onchange={(v) => update('torrentDelay', v)}
+									min={0}
+									font="mono"
+									disabled={!torrentEnabled}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 
-			<!-- Bypass Conditions -->
-			<div>
-				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-					Bypass Conditions
-				</h3>
-				<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-					Skip the delay when these conditions are met.
-				</p>
-				<div class="mt-3 space-y-3">
-					<div>
-						<Toggle
-							label="Bypass if Highest Quality"
-							checked={formData.bypassIfHighestQuality}
-							on:change={() => update('bypassIfHighestQuality', !formData.bypassIfHighestQuality)}
-						/>
-						<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
-							Skip delay when release is already the highest quality in profile
-						</p>
-					</div>
-
-					<div>
-						<div class="grid grid-cols-1 items-center gap-3 sm:grid-cols-2">
+				<!-- Bypass Conditions -->
+				<div>
+					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						Bypass Conditions
+					</h3>
+					<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+						Skip the delay when these conditions are met.
+					</p>
+					<div class="mt-3 space-y-3">
+						<div>
 							<Toggle
-								label="Bypass if Above Custom Format Score"
-								checked={formData.bypassIfAboveCfScore}
-								on:change={() => update('bypassIfAboveCfScore', !formData.bypassIfAboveCfScore)}
+								label="Bypass if Highest Quality"
+								checked={formData.bypassIfHighestQuality}
+								on:change={() => update('bypassIfHighestQuality', !formData.bypassIfHighestQuality)}
 							/>
-							<NumberInput
-								name="min-cf-score"
-								id="min-cf-score"
-								value={formData.minimumCfScore}
-								onchange={(v) => update('minimumCfScore', v)}
-								disabled={!formData.bypassIfAboveCfScore}
-								font="mono"
-							/>
+							<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
+								Skip delay when release is already the highest quality in profile
+							</p>
 						</div>
-						<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
-							Skip delay when release exceeds minimum score
-						</p>
+
+						<div>
+							<div class="grid grid-cols-1 items-center gap-3 sm:grid-cols-2">
+								<Toggle
+									label="Bypass if Above Custom Format Score"
+									checked={formData.bypassIfAboveCfScore}
+									on:change={() => update('bypassIfAboveCfScore', !formData.bypassIfAboveCfScore)}
+								/>
+								<NumberInput
+									name="min-cf-score"
+									id="min-cf-score"
+									value={formData.minimumCfScore}
+									onchange={(v) => update('minimumCfScore', v)}
+									disabled={!formData.bypassIfAboveCfScore}
+									font="mono"
+								/>
+							</div>
+							<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
+								Skip delay when release exceeds minimum score
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
 		</Card>
 	</form>
 

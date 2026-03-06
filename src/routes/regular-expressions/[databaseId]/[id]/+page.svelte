@@ -32,7 +32,9 @@
 		actionUrl="?/update"
 		{initialData}
 		onCancel={handleCancel}
-		breadcrumbItems={[{ label: data.currentDatabase.name, href: `/regular-expressions/${data.currentDatabase.id}` }]}
+		breadcrumbItems={[
+			{ label: data.currentDatabase.name, href: `/regular-expressions/${data.currentDatabase.id}` }
+		]}
 		breadcrumbCurrent={data.regularExpression.name}
 	/>
 </div>

@@ -84,7 +84,6 @@
 		deleteFormElement?.requestSubmit();
 	}
 
-
 	// Options
 	const typeOptions = [
 		{ value: 'movie' as const, label: 'Movie', description: 'Parse as a movie release' },
@@ -233,7 +232,6 @@
 					rows={2}
 				/>
 			</div>
-
 		</div>
 	</form>
 

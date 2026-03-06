@@ -112,8 +112,7 @@ test.describe('2.20 QP upstream rename + local qualities conflict', () => {
 
 		targetQualityName = (await targetRow.locator('div.font-medium').first().innerText()).trim();
 		originalEnabled =
-			(await targetRow.locator('[role="checkbox"]').last().getAttribute('aria-checked')) ===
-			'true';
+			(await targetRow.locator('[role="checkbox"]').last().getAttribute('aria-checked')) === 'true';
 		localEnabled = !originalEnabled;
 
 		await targetRow.click();
@@ -150,8 +149,7 @@ test.describe('2.20 QP upstream rename + local qualities conflict', () => {
 			.first();
 		await expect(finalRow).toBeVisible();
 		const finalEnabled =
-			(await finalRow.locator('[role="checkbox"]').last().getAttribute('aria-checked')) ===
-			'true';
+			(await finalRow.locator('[role="checkbox"]').last().getAttribute('aria-checked')) === 'true';
 		expect(finalEnabled).toBe(localEnabled);
 	});
 
@@ -179,8 +177,7 @@ test.describe('2.20 QP upstream rename + local qualities conflict', () => {
 
 		targetQualityName = (await targetRow.locator('div.font-medium').first().innerText()).trim();
 		originalEnabled =
-			(await targetRow.locator('[role="checkbox"]').last().getAttribute('aria-checked')) ===
-			'true';
+			(await targetRow.locator('[role="checkbox"]').last().getAttribute('aria-checked')) === 'true';
 
 		await targetRow.click();
 		await page.getByRole('button', { name: 'Save' }).click();
@@ -216,8 +213,7 @@ test.describe('2.20 QP upstream rename + local qualities conflict', () => {
 			.first();
 		await expect(finalRow).toBeVisible();
 		const finalEnabled =
-			(await finalRow.locator('[role="checkbox"]').last().getAttribute('aria-checked')) ===
-			'true';
+			(await finalRow.locator('[role="checkbox"]').last().getAttribute('aria-checked')) === 'true';
 		expect(finalEnabled).toBe(originalEnabled);
 	});
 });

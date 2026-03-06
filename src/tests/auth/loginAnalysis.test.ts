@@ -105,7 +105,11 @@ Deno.test('formatLoginFailure: invalid password', () => {
 
 Deno.test('formatLoginFailure: similar user', () => {
 	assertEquals(
-		formatLoginFailure({ reason: 'user_not_found', similarUser: 'santiago', isCommonAttack: false }),
+		formatLoginFailure({
+			reason: 'user_not_found',
+			similarUser: 'santiago',
+			isCommonAttack: false
+		}),
 		"unknown user (similar to 'santiago')"
 	);
 });
@@ -135,7 +139,11 @@ Deno.test('getAttemptCategory: invalid password is typo', () => {
 
 Deno.test('getAttemptCategory: similar username is typo', () => {
 	assertEquals(
-		getAttemptCategory({ reason: 'user_not_found', similarUser: 'santiago', isCommonAttack: false }),
+		getAttemptCategory({
+			reason: 'user_not_found',
+			similarUser: 'santiago',
+			isCommonAttack: false
+		}),
 		'typo'
 	);
 });

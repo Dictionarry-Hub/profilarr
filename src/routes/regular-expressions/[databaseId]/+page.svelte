@@ -122,10 +122,8 @@
 	// Filtering based on active search field
 	$: filtered = (() => {
 		if (isTagMode) {
-			return filterByTags(
-				data.regularExpressions,
-				searchTags,
-				(item) => item.tags.map((t) => t.name)
+			return filterByTags(data.regularExpressions, searchTags, (item) =>
+				item.tags.map((t) => t.name)
 			);
 		}
 		return filterByText(data.regularExpressions, $debouncedQuery, fieldAccessors, [
@@ -139,7 +137,6 @@
 		href: `/regular-expressions/${db.id}`,
 		active: db.id === data.currentDatabase.id
 	}));
-
 </script>
 
 <svelte:head>
@@ -167,7 +164,13 @@
 				/>
 			</div>
 		{:else}
-			<SearchAction searchStore={search} placeholder="Search {searchFields.find(f => f.value === activeSearchField)?.label.toLowerCase() ?? ''}..." responsive />
+			<SearchAction
+				searchStore={search}
+				placeholder="Search {searchFields
+					.find((f) => f.value === activeSearchField)
+					?.label.toLowerCase() ?? ''}..."
+				responsive
+			/>
 		{/if}
 		<ActionButton icon={Plus} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown">

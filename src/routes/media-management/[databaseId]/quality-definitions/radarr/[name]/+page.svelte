@@ -14,9 +14,13 @@
 	actionUrl="?/update"
 	availableQualities={data.availableQualities}
 	initialData={data.qualityDefinitionsConfig}
-	breadcrumbItems={[{ label: data.currentDatabase.name, href: `/media-management/${data.currentDatabase.id}/quality-definitions` }]}
+	breadcrumbItems={[
+		{
+			label: data.currentDatabase.name,
+			href: `/media-management/${data.currentDatabase.id}/quality-definitions`
+		}
+	]}
 	breadcrumbCurrent={data.qualityDefinitionsConfig.name}
-
 />
 
 <DirtyModal />

@@ -17,9 +17,4 @@
 	<title>{data.format.name} - General - Profilarr</title>
 </svelte:head>
 
-<GeneralForm
-	mode="edit"
-	canWriteToBase={data.canWriteToBase}
-	actionUrl="?/update"
-	{initialData}
-/>
+<GeneralForm mode="edit" canWriteToBase={data.canWriteToBase} actionUrl="?/update" {initialData} />

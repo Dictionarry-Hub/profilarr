@@ -2,14 +2,15 @@ services:
   mock-oauth2:
     image: ghcr.io/navikt/mock-oauth2-server:3.0.1
     ports:
-      - "9090:9090"
+      - '9090:9090'
     environment:
-      SERVER_PORT: "9090"
+      SERVER_PORT: '9090'
       JSON_CONFIG_PATH: /config/mock-oauth2-config.json
     volumes:
       - ./mock-oauth2-config.json:/config/mock-oauth2-config.json:ro
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/isalive"]
+      test:
+        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:9090/isalive']
       start_period: 5s
       interval: 2s
       timeout: 5s
@@ -18,10 +19,10 @@ services:
   caddy:
     image: caddy:2-alpine
     ports:
-      - "7443:7443"
-      - "7444:7444"
-      - "7445:7445"
+      - '7443:7443'
+      - '7444:7444'
+      - '7445:7445'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'

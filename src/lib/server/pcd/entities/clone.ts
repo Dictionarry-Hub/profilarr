@@ -77,13 +77,23 @@ export async function clone(options: CloneOptions) {
 		case 'radarr_quality_definitions': {
 			const portable = await serialize.serializeRadarrQualityDefinitions(cache, sourceName);
 			portable.name = newName;
-			return deserialize.deserializeRadarrQualityDefinitions({ databaseId, cache, layer, portable });
+			return deserialize.deserializeRadarrQualityDefinitions({
+				databaseId,
+				cache,
+				layer,
+				portable
+			});
 		}
 
 		case 'sonarr_quality_definitions': {
 			const portable = await serialize.serializeSonarrQualityDefinitions(cache, sourceName);
 			portable.name = newName;
-			return deserialize.deserializeSonarrQualityDefinitions({ databaseId, cache, layer, portable });
+			return deserialize.deserializeSonarrQualityDefinitions({
+				databaseId,
+				cache,
+				layer,
+				portable
+			});
 		}
 	}
 }

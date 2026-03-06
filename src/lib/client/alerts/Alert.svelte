@@ -22,8 +22,7 @@
 			'border-red-200 bg-red-50 text-red-900 hover:bg-red-100/80 dark:border-red-800/60 dark:bg-red-950/50 dark:text-red-100 dark:hover:bg-red-950/70',
 		warning:
 			'border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100/80 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-100 dark:hover:bg-amber-950/70',
-		info:
-			'border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100/80 dark:border-sky-800/60 dark:bg-sky-950/50 dark:text-sky-100 dark:hover:bg-sky-950/70'
+		info: 'border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100/80 dark:border-sky-800/60 dark:bg-sky-950/50 dark:text-sky-100 dark:hover:bg-sky-950/70'
 	};
 
 	const iconColors = {
@@ -52,7 +51,9 @@
 			dismiss();
 		}
 	}}
-	class="flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 shadow-lg shadow-black/5 backdrop-blur-sm transition-colors {styles[type]}"
+	class="flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 shadow-lg shadow-black/5 backdrop-blur-sm transition-colors {styles[
+		type
+	]}"
 >
 	<Icon size={18} class="flex-shrink-0 {iconColors[type]}" />
 	<p class="text-sm font-medium">{message}</p>

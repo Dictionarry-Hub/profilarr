@@ -19,10 +19,7 @@ import {
 	overrideConflict,
 	alignConflict
 } from '../helpers/conflicts';
-import {
-	goToQualityProfileGeneral,
-	updateQpDescription
-} from '../helpers/entity';
+import { goToQualityProfileGeneral, updateQpDescription } from '../helpers/entity';
 import { fillMarkdownInput } from '../helpers/markdown';
 import { getHead, resetToCommit } from '../helpers/reset';
 

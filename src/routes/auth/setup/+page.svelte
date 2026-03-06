@@ -32,7 +32,9 @@
 			<div class="flex items-center gap-4">
 				<img src={logo} alt="Profilarr logo" class="h-12 w-12" />
 				<div>
-					<h1 class="text-xl font-bold text-neutral-900 dark:text-neutral-50">Welcome to Profilarr</h1>
+					<h1 class="text-xl font-bold text-neutral-900 dark:text-neutral-50">
+						Welcome to Profilarr
+					</h1>
 					<p class="text-sm text-neutral-600 dark:text-neutral-400">
 						Create your admin account to get started.
 					</p>
@@ -40,9 +42,13 @@
 			</div>
 
 			<!-- Auth info - visible on desktop, hidden on mobile (shown below form) -->
-			<div class="hidden rounded-xl border border-neutral-200/60 bg-white/50 p-5 shadow-sm backdrop-blur-sm md:block dark:border-neutral-700/60 dark:bg-neutral-800/50">
+			<div
+				class="hidden rounded-xl border border-neutral-200/60 bg-white/50 p-5 shadow-sm backdrop-blur-sm md:block dark:border-neutral-700/60 dark:bg-neutral-800/50"
+			>
 				<p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-					Configure authentication via the <code class="rounded bg-neutral-200 px-1 py-0.5 text-[11px] dark:bg-neutral-700">AUTH</code> environment variable:
+					Configure authentication via the <code
+						class="rounded bg-neutral-200 px-1 py-0.5 text-[11px] dark:bg-neutral-700">AUTH</code
+					> environment variable:
 				</p>
 				<ul class="mt-3 space-y-2 text-xs text-neutral-600 dark:text-neutral-400">
 					<li class="flex items-center gap-2">
@@ -134,14 +140,13 @@
 					class="flex w-full items-center justify-between rounded-lg border border-neutral-200/60 bg-white/50 px-4 py-3 text-left text-sm font-medium text-neutral-700 shadow-sm backdrop-blur-sm dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300"
 				>
 					<span>Auth configuration options</span>
-					<ChevronDown
-						size={16}
-						class="transition-transform {authInfoOpen ? 'rotate-180' : ''}"
-					/>
+					<ChevronDown size={16} class="transition-transform {authInfoOpen ? 'rotate-180' : ''}" />
 				</button>
 
 				{#if authInfoOpen}
-					<div class="mt-2 rounded-lg border border-neutral-200/60 bg-white/50 p-4 shadow-sm backdrop-blur-sm dark:border-neutral-700/60 dark:bg-neutral-800/50">
+					<div
+						class="mt-2 rounded-lg border border-neutral-200/60 bg-white/50 p-4 shadow-sm backdrop-blur-sm dark:border-neutral-700/60 dark:bg-neutral-800/50"
+					>
 						<ul class="space-y-2 text-xs text-neutral-600 dark:text-neutral-400">
 							<li class="flex items-center gap-2">
 								<Shield size={12} class="text-neutral-400" />

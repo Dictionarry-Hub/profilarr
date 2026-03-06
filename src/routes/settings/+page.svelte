@@ -56,10 +56,10 @@
 
 <div class="px-4 pt-4 pb-8 md:px-8">
 	<div class="mb-8">
-		<h1 class="text-2xl font-semibold text-neutral-900 dark:text-neutral-50 md:text-3xl">
+		<h1 class="text-2xl font-semibold text-neutral-900 md:text-3xl dark:text-neutral-50">
 			Settings
 		</h1>
-		<p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400 md:text-base">
+		<p class="mt-2 text-sm text-neutral-600 md:text-base dark:text-neutral-400">
 			Configure and manage your Profilarr application
 		</p>
 	</div>

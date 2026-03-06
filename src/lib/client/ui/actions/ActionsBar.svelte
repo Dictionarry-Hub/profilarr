@@ -2,7 +2,7 @@
 	export let className: string = '';
 </script>
 
-<div class="actions-bar flex w-full justify-center mx-auto md:w-auto md:mx-0 {className}">
+<div class="actions-bar mx-auto flex w-full justify-center md:mx-0 md:w-auto {className}">
 	<slot />
 </div>
 

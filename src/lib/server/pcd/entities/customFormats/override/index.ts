@@ -11,13 +11,19 @@ function hasGeneralChanges(metadata: StoredOpMetadata | null): boolean {
 	return metadata.changed_fields.some((f) => GENERAL_FIELDS.has(f));
 }
 
-function hasConditionChanges(metadata: StoredOpMetadata | null, desiredState: StoredDesiredState | null): boolean {
+function hasConditionChanges(
+	metadata: StoredOpMetadata | null,
+	desiredState: StoredDesiredState | null
+): boolean {
 	if (metadata?.changed_fields?.includes('conditions')) return true;
 	if (desiredState?.conditions) return true;
 	return false;
 }
 
-function hasTestChanges(metadata: StoredOpMetadata | null, desiredState: StoredDesiredState | null): boolean {
+function hasTestChanges(
+	metadata: StoredOpMetadata | null,
+	desiredState: StoredDesiredState | null
+): boolean {
 	if (metadata?.summary?.toLowerCase().includes('test')) return true;
 	if (metadata?.title?.toLowerCase().includes('test')) return true;
 	if (desiredState?.test_title) return true;

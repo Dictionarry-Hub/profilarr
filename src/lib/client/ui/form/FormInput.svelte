@@ -28,9 +28,10 @@
 
 	$: fontClass = mono ? 'font-mono' : '';
 	$: pickerClass = type === 'time' || type === 'date' ? 'dark:[color-scheme:dark]' : '';
-	$: stateClass = readonly || disabled
-		? 'bg-neutral-100 text-neutral-500 cursor-not-allowed dark:bg-neutral-800/40 dark:text-neutral-500'
-		: 'bg-white focus:border-neutral-400 dark:bg-neutral-800/50 dark:focus:border-neutral-600';
+	$: stateClass =
+		readonly || disabled
+			? 'bg-neutral-100 text-neutral-500 cursor-not-allowed dark:bg-neutral-800/40 dark:text-neutral-500'
+			: 'bg-white focus:border-neutral-400 dark:bg-neutral-800/50 dark:focus:border-neutral-600';
 	$: containerClass = hideLabel && !description ? 'space-y-0' : 'space-y-2';
 	$: hasSuffix = !!$$slots.suffix;
 
@@ -101,7 +102,7 @@
 				{placeholder}
 				{required}
 				{disabled}
-				readonly={readonly}
+				{readonly}
 				{rows}
 				bind:this={inputElement}
 				oninput={handleInput}
@@ -112,7 +113,7 @@
 					: ''}"
 			></textarea>
 			{#if hasSuffix}
-				<div class="absolute right-3 top-3">
+				<div class="absolute top-3 right-3">
 					<slot name="suffix" />
 				</div>
 			{/if}
@@ -127,22 +128,24 @@
 				{placeholder}
 				{required}
 				{disabled}
-				readonly={readonly}
+				{readonly}
 				bind:this={inputElement}
 				oninput={handleInput}
 				onfocus={handleFocus}
 				onblur={handleBlur}
-				autocomplete={autocomplete ? (autocomplete as typeof HTMLInputElement.prototype.autocomplete) : undefined}
+				autocomplete={autocomplete
+					? (autocomplete as typeof HTMLInputElement.prototype.autocomplete)
+					: undefined}
 				class="block w-full border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {privatePaddingClass}"
 			/>
 			{#if hasSuffix}
-				<div class="absolute right-10 top-1/2 -translate-y-1/2">
+				<div class="absolute top-1/2 right-10 -translate-y-1/2">
 					<slot name="suffix" />
 				</div>
 			{/if}
 			<button
 				type="button"
-				class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
+				class="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
 				onclick={() => (showPassword = !showPassword)}
 			>
 				{#if showPassword}
@@ -161,7 +164,7 @@
 				{placeholder}
 				{required}
 				{disabled}
-				readonly={readonly}
+				{readonly}
 				rows={1}
 				bind:this={inputElement}
 				oninput={handleInput}
@@ -173,7 +176,7 @@
 				use:autoResize={value}
 			></textarea>
 			{#if hasSuffix}
-				<div class="absolute right-3 top-3">
+				<div class="absolute top-3 right-3">
 					<slot name="suffix" />
 				</div>
 			{/if}
@@ -188,18 +191,20 @@
 				{placeholder}
 				{required}
 				{disabled}
-				readonly={readonly}
+				{readonly}
 				bind:this={inputElement}
 				oninput={handleInput}
 				onfocus={handleFocus}
 				onblur={handleBlur}
-				autocomplete={autocomplete ? (autocomplete as typeof HTMLInputElement.prototype.autocomplete) : undefined}
+				autocomplete={autocomplete
+					? (autocomplete as typeof HTMLInputElement.prototype.autocomplete)
+					: undefined}
 				class="block w-full border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {hasSuffix
 					? 'pr-10'
 					: ''}"
 			/>
 			{#if hasSuffix}
-				<div class="absolute right-3 top-1/2 -translate-y-1/2">
+				<div class="absolute top-1/2 right-3 -translate-y-1/2">
 					<slot name="suffix" />
 				</div>
 			{/if}

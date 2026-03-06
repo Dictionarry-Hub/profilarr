@@ -5,7 +5,7 @@
 	import ExpandableTable from '$lib/client/ui/table/ExpandableTable.svelte';
 	import Badge from '$lib/client/ui/badge/Badge.svelte';
 	import JobHistory from './components/JobHistory.svelte';
-import { CheckCircle, XCircle, AlertCircle, MinusCircle } from 'lucide-svelte';
+	import { CheckCircle, XCircle, AlertCircle, MinusCircle } from 'lucide-svelte';
 
 	export let data: PageData;
 
@@ -78,7 +78,9 @@ import { CheckCircle, XCircle, AlertCircle, MinusCircle } from 'lucide-svelte';
 <div class="p-4 md:p-8">
 	<!-- Header -->
 	<div class="mb-8">
-		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">Background Jobs</h1>
+		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">
+			Background Jobs
+		</h1>
 		<p class="mt-3 text-base text-neutral-600 md:text-lg dark:text-neutral-400">
 			Manage scheduled tasks and automation workflows
 		</p>

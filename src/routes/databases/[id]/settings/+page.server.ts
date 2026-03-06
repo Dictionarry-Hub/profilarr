@@ -52,7 +52,10 @@ export const actions: Actions = {
 			? (conflictStrategyRaw as ConflictStrategy)
 			: instance.conflict_strategy;
 
-		if (conflictStrategyRaw && !validConflictStrategies.includes(conflictStrategyRaw as ConflictStrategy)) {
+		if (
+			conflictStrategyRaw &&
+			!validConflictStrategies.includes(conflictStrategyRaw as ConflictStrategy)
+		) {
 			await logger.warn('Attempted to update database with invalid conflict strategy', {
 				source: 'databases/[id]/settings',
 				meta: { id, conflictStrategy: conflictStrategyRaw }

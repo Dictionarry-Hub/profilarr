@@ -24,7 +24,10 @@
 	};
 
 	// Map propers_repacks values to badge variants and labels
-	const propersRepacksConfig: Record<string, { variant: 'neutral' | 'success' | 'warning'; label: string }> = {
+	const propersRepacksConfig: Record<
+		string,
+		{ variant: 'neutral' | 'success' | 'warning'; label: string }
+	> = {
 		doNotPrefer: { variant: 'neutral', label: 'Do Not Prefer' },
 		preferAndUpgrade: { variant: 'success', label: 'Prefer & Upgrade' },
 		doNotUpgradeAutomatically: { variant: 'warning', label: 'No Auto Upgrade' }
@@ -66,14 +69,13 @@
 			<span class="font-medium">{row.name}</span>
 		{:else if column.key === 'arr_type'}
 			<div class="flex items-center gap-2">
-				<img
-					src={logos[row.arr_type]}
-					alt={row.arr_type}
-					class="h-5 w-5"
-				/>
+				<img src={logos[row.arr_type]} alt={row.arr_type} class="h-5 w-5" />
 			</div>
 		{:else if column.key === 'propers_repacks'}
-			{@const config = propersRepacksConfig[row.propers_repacks] || { variant: 'neutral', label: row.propers_repacks }}
+			{@const config = propersRepacksConfig[row.propers_repacks] || {
+				variant: 'neutral',
+				label: row.propers_repacks
+			}}
 			<Badge variant={config.variant}>{config.label}</Badge>
 		{:else if column.key === 'enable_media_info'}
 			{#if row.enable_media_info}

@@ -98,10 +98,7 @@ export async function remove(options: RemoveQualityProfileOptions) {
 	queries.push(deleteQualityGroups);
 
 	// Delete the quality profile itself
-	const deleteProfile = db
-		.deleteFrom('quality_profiles')
-		.where('name', '=', profileName)
-		.compile();
+	const deleteProfile = db.deleteFrom('quality_profiles').where('name', '=', profileName).compile();
 
 	queries.push(deleteProfile);
 

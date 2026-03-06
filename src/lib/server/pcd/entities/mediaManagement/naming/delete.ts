@@ -24,11 +24,7 @@ export async function removeRadarrNaming(options: RemoveRadarrNamingOptions) {
 		.where('rename', '=', current.rename ? 1 : 0)
 		.where('movie_format', '=', current.movie_format)
 		.where('movie_folder_format', '=', current.movie_folder_format)
-		.where(
-			'replace_illegal_characters',
-			'=',
-			current.replace_illegal_characters ? 1 : 0
-		)
+		.where('replace_illegal_characters', '=', current.replace_illegal_characters ? 1 : 0)
 		.where('colon_replacement_format', '=', current.colon_replacement_format)
 		.compile();
 
@@ -81,11 +77,7 @@ export async function removeSonarrNaming(options: RemoveSonarrNamingOptions) {
 		.where('anime_episode_format', '=', current.anime_episode_format)
 		.where('series_folder_format', '=', current.series_folder_format)
 		.where('season_folder_format', '=', current.season_folder_format)
-		.where(
-			'replace_illegal_characters',
-			'=',
-			current.replace_illegal_characters ? 1 : 0
-		)
+		.where('replace_illegal_characters', '=', current.replace_illegal_characters ? 1 : 0)
 		.where('colon_replacement_format', '=', currentColonReplacement)
 		.where('multi_episode_style', '=', currentMultiEpisode);
 

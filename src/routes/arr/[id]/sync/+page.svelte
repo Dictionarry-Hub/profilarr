@@ -32,14 +32,17 @@
 
 	let qualityProfileState = buildProfileState(data.syncData.qualityProfiles.selections);
 	let qualityProfileTrigger: SyncTrigger = data.syncData.qualityProfiles.config.trigger;
-	let qualityProfileCron: string = (qualityProfileTrigger === 'schedule' && data.syncData.qualityProfiles.config.cron) || '0 0 * * *';
+	let qualityProfileCron: string =
+		(qualityProfileTrigger === 'schedule' && data.syncData.qualityProfiles.config.cron) ||
+		'0 0 * * *';
 
 	let delayProfileState = {
 		databaseId: data.syncData.delayProfiles.databaseId,
 		profileName: data.syncData.delayProfiles.profileName
 	};
 	let delayProfileTrigger: SyncTrigger = data.syncData.delayProfiles.trigger;
-	let delayProfileCron: string = (delayProfileTrigger === 'schedule' && data.syncData.delayProfiles.cron) || '0 0 * * 0';
+	let delayProfileCron: string =
+		(delayProfileTrigger === 'schedule' && data.syncData.delayProfiles.cron) || '0 0 * * 0';
 
 	let mediaManagementState = {
 		namingDatabaseId: data.syncData.mediaManagement.namingDatabaseId,
@@ -50,7 +53,8 @@
 		mediaSettingsConfigName: data.syncData.mediaManagement.mediaSettingsConfigName
 	};
 	let mediaManagementTrigger: SyncTrigger = data.syncData.mediaManagement.trigger;
-	let mediaManagementCron: string = (mediaManagementTrigger === 'schedule' && data.syncData.mediaManagement.cron) || '0 0 * * 0';
+	let mediaManagementCron: string =
+		(mediaManagementTrigger === 'schedule' && data.syncData.mediaManagement.cron) || '0 0 * * 0';
 
 	// Track dirty state from each component
 	let qualityProfilesDirty = false;
@@ -125,11 +129,7 @@
 			</p>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
-			<Button
-				text="How it works"
-				icon={Info}
-				on:click={() => (showInfoModal = true)}
-			/>
+			<Button text="How it works" icon={Info} on:click={() => (showInfoModal = true)} />
 		</svelte:fragment>
 	</StickyCard>
 
@@ -169,11 +169,13 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">One Database Per Instance</div>
+			<div class="font-medium text-neutral-900 dark:text-neutral-100">
+				One Database Per Instance
+			</div>
 			<p class="mt-1">
 				Each Arr instance syncs from a single database. Quality profiles and their custom formats
-				all come from the same database. If you want to use profiles from a different database,
-				sync it to a separate Arr instance.
+				all come from the same database. If you want to use profiles from a different database, sync
+				it to a separate Arr instance.
 			</p>
 		</div>
 

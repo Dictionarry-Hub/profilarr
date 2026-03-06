@@ -7,7 +7,14 @@ import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { getCache } from '$pcd/index.ts';
 import type { AffectedArr } from '$shared/sync/types.ts';
 
-type EntityType = 'qualityProfile' | 'customFormat' | 'regularExpression' | 'delayProfile' | 'naming' | 'qualityDefinitions' | 'mediaSettings';
+type EntityType =
+	| 'qualityProfile'
+	| 'customFormat'
+	| 'regularExpression'
+	| 'delayProfile'
+	| 'naming'
+	| 'qualityDefinitions'
+	| 'mediaSettings';
 
 /**
  * Find all arr instances affected by an entity change
@@ -45,10 +52,7 @@ export function getAffectedArrs({
 	}
 }
 
-function getAffectedArrsForQualityProfile(
-	databaseId: number,
-	profileName: string
-): AffectedArr[] {
+function getAffectedArrsForQualityProfile(databaseId: number, profileName: string): AffectedArr[] {
 	const rows = arrSyncQueries.getInstancesForQualityProfile(databaseId, profileName);
 
 	return rows.map((row) => ({
@@ -64,10 +68,7 @@ function getAffectedArrsForQualityProfile(
 	}));
 }
 
-function getAffectedArrsForCustomFormat(
-	databaseId: number,
-	cfName: string
-): AffectedArr[] {
+function getAffectedArrsForCustomFormat(databaseId: number, cfName: string): AffectedArr[] {
 	const cache = getCache(databaseId);
 	if (!cache) return [];
 
@@ -79,13 +80,13 @@ function getAffectedArrsForCustomFormat(
 
 	if (profileRows.length === 0) return [];
 
-	return collectInstancesForProfiles(databaseId, profileRows.map((r) => r.quality_profile_name));
+	return collectInstancesForProfiles(
+		databaseId,
+		profileRows.map((r) => r.quality_profile_name)
+	);
 }
 
-function getAffectedArrsForRegularExpression(
-	databaseId: number,
-	regexName: string
-): AffectedArr[] {
+function getAffectedArrsForRegularExpression(databaseId: number, regexName: string): AffectedArr[] {
 	const cache = getCache(databaseId);
 	if (!cache) return [];
 
@@ -112,10 +113,7 @@ function getAffectedArrsForRegularExpression(
 	return collectInstancesForProfiles(databaseId, [...profileNames]);
 }
 
-function getAffectedArrsForNaming(
-	databaseId: number,
-	configName: string
-): AffectedArr[] {
+function getAffectedArrsForNaming(databaseId: number, configName: string): AffectedArr[] {
 	const rows = arrSyncQueries.getInstancesForNaming(databaseId, configName);
 
 	return rows.map((row) => ({
@@ -131,10 +129,7 @@ function getAffectedArrsForNaming(
 	}));
 }
 
-function getAffectedArrsForDelayProfile(
-	databaseId: number,
-	profileName: string
-): AffectedArr[] {
+function getAffectedArrsForDelayProfile(databaseId: number, profileName: string): AffectedArr[] {
 	const rows = arrSyncQueries.getInstancesForDelayProfile(databaseId, profileName);
 
 	return rows.map((row) => ({
@@ -150,10 +145,7 @@ function getAffectedArrsForDelayProfile(
 	}));
 }
 
-function getAffectedArrsForMediaSettings(
-	databaseId: number,
-	configName: string
-): AffectedArr[] {
+function getAffectedArrsForMediaSettings(databaseId: number, configName: string): AffectedArr[] {
 	const rows = arrSyncQueries.getInstancesForMediaSettings(databaseId, configName);
 
 	return rows.map((row) => ({
@@ -191,10 +183,7 @@ function getAffectedArrsForQualityDefinitions(
 /**
  * Given profile names, find all arr instances that sync them (deduplicated)
  */
-function collectInstancesForProfiles(
-	databaseId: number,
-	profileNames: string[]
-): AffectedArr[] {
+function collectInstancesForProfiles(databaseId: number, profileNames: string[]): AffectedArr[] {
 	const instanceMap = new Map<number, AffectedArr>();
 
 	for (const profileName of profileNames) {

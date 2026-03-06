@@ -339,8 +339,10 @@ export async function getConditionArrTypeByName(
 	conditionName: string
 ): Promise<string> {
 	const card = await findConditionCardByName(page, conditionName);
-	const radarrEnabled = (await card.getByRole('switch', { name: 'Radarr' }).getAttribute('aria-checked')) === 'true';
-	const sonarrEnabled = (await card.getByRole('switch', { name: 'Sonarr' }).getAttribute('aria-checked')) === 'true';
+	const radarrEnabled =
+		(await card.getByRole('switch', { name: 'Radarr' }).getAttribute('aria-checked')) === 'true';
+	const sonarrEnabled =
+		(await card.getByRole('switch', { name: 'Sonarr' }).getAttribute('aria-checked')) === 'true';
 
 	if (radarrEnabled && sonarrEnabled) return 'all';
 	if (radarrEnabled) return 'radarr';

@@ -70,7 +70,6 @@ type TestDiff = {
 	after?: TestSnapshot;
 };
 
-
 export type DraftEntitySectionRow =
 	| {
 			kind: 'field';
@@ -359,9 +358,7 @@ function extractChangeValue<T>(
 }
 
 function mergeTests(target: FieldAggregate, value: Record<string, unknown>) {
-	const rowsMap = new Map<string, TestDiff>(
-		(target.tests ?? []).map((row) => [row.name, row])
-	);
+	const rowsMap = new Map<string, TestDiff>((target.tests ?? []).map((row) => [row.name, row]));
 
 	const mode: 'added' | 'removed' | 'updated' = value.deleted
 		? 'removed'
@@ -370,8 +367,9 @@ function mergeTests(target: FieldAggregate, value: Record<string, unknown>) {
 						entry &&
 						typeof entry === 'object' &&
 						!Array.isArray(entry) &&
-						('from' in (entry as Record<string, unknown>) || 'to' in (entry as Record<string, unknown>))
-				)
+						('from' in (entry as Record<string, unknown>) ||
+							'to' in (entry as Record<string, unknown>))
+			  )
 			? 'updated'
 			: 'added';
 
@@ -470,7 +468,9 @@ function mergeConditions(target: FieldAggregate, value: unknown) {
 			type: (base?.from as Record<string, unknown> | undefined)?.type as string | undefined,
 			arrType: (base?.from as Record<string, unknown> | undefined)?.arrType as string | undefined,
 			negate: (base?.from as Record<string, unknown> | undefined)?.negate as boolean | undefined,
-			required: (base?.from as Record<string, unknown> | undefined)?.required as boolean | undefined,
+			required: (base?.from as Record<string, unknown> | undefined)?.required as
+				| boolean
+				| undefined,
 			values: (values?.from as Record<string, unknown>) ?? null
 		};
 		const after: ConditionSnapshot = {
@@ -486,7 +486,10 @@ function mergeConditions(target: FieldAggregate, value: unknown) {
 	target.conditions = Array.from(rowsMap.values());
 }
 
-function buildSections(entity: string, aggregates: Map<string, FieldAggregate>): DraftEntitySection[] {
+function buildSections(
+	entity: string,
+	aggregates: Map<string, FieldAggregate>
+): DraftEntitySection[] {
 	if (aggregates.size === 0) return [];
 
 	if (entity === 'quality_profile') {
@@ -558,13 +561,16 @@ function buildSections(entity: string, aggregates: Map<string, FieldAggregate>):
 		};
 
 		const generalRows = buildSectionRows(generalFields);
-		if (generalRows.length > 0) sections.push({ id: 'general', title: 'General', rows: generalRows });
+		if (generalRows.length > 0)
+			sections.push({ id: 'general', title: 'General', rows: generalRows });
 
 		const scoringRows = buildSectionRows(scoringFields);
-		if (scoringRows.length > 0) sections.push({ id: 'scoring', title: 'Scoring', rows: scoringRows });
+		if (scoringRows.length > 0)
+			sections.push({ id: 'scoring', title: 'Scoring', rows: scoringRows });
 
 		const qualitiesRows = buildSectionRows(qualitiesFields);
-		if (qualitiesRows.length > 0) sections.push({ id: 'qualities', title: 'Qualities', rows: qualitiesRows });
+		if (qualitiesRows.length > 0)
+			sections.push({ id: 'qualities', title: 'Qualities', rows: qualitiesRows });
 
 		return sections;
 	}
@@ -591,7 +597,8 @@ function buildSections(entity: string, aggregates: Map<string, FieldAggregate>):
 		};
 
 		const generalRows = buildSectionRows(generalFields);
-		if (generalRows.length > 0) sections.push({ id: 'general', title: 'General', rows: generalRows });
+		if (generalRows.length > 0)
+			sections.push({ id: 'general', title: 'General', rows: generalRows });
 
 		const conditionsAggregate = aggregates.get('conditions');
 		if (conditionsAggregate?.conditions && conditionsAggregate.conditions.length > 0) {
@@ -752,8 +759,7 @@ export function listDraftEntityChanges(databaseId: number): DraftEntityChange[] 
 			const depSet = dependencies.get(groupKey) ?? new Set<string>();
 			for (const dependency of metadata.depends_on) {
 				const depEntity =
-					dependency.entity ??
-					(dependency.key ? ENTITY_BY_STABLE_KEY[dependency.key] : undefined);
+					dependency.entity ?? (dependency.key ? ENTITY_BY_STABLE_KEY[dependency.key] : undefined);
 				const depValue = dependency.value;
 				if (!depEntity || !depValue) continue;
 				const depKey = `${depEntity}:${resolveAlias(depEntity, depValue)}`;
@@ -765,16 +771,11 @@ export function listDraftEntityChanges(databaseId: number): DraftEntityChange[] 
 			}
 		}
 
-		const hasNameField =
-			desiredState && Object.prototype.hasOwnProperty.call(desiredState, 'name');
+		const hasNameField = desiredState && Object.prototype.hasOwnProperty.call(desiredState, 'name');
 		if (metadata.operation === 'create' && hasNameField) {
 			entityCreates.set(groupKey, true);
 		}
-		if (
-			metadata.operation === 'delete' &&
-			hasNameField &&
-			desiredState?.deleted === true
-		) {
+		if (metadata.operation === 'delete' && hasNameField && desiredState?.deleted === true) {
 			entityDeletes.set(groupKey, true);
 		}
 

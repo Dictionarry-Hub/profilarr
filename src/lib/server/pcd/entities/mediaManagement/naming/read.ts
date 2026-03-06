@@ -60,7 +60,8 @@ export async function getRadarrByName(
 		movie_format: row.movie_format,
 		movie_folder_format: row.movie_folder_format,
 		replace_illegal_characters: row.replace_illegal_characters === 1,
-		colon_replacement_format: row.colon_replacement_format as RadarrNamingRow['colon_replacement_format'],
+		colon_replacement_format:
+			row.colon_replacement_format as RadarrNamingRow['colon_replacement_format'],
 		created_at: row.created_at,
 		updated_at: row.updated_at
 	};

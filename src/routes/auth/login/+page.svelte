@@ -30,9 +30,7 @@
 			<img src={logo} alt="Profilarr logo" class="h-12 w-12" />
 			<div>
 				<h1 class="text-xl font-bold text-neutral-900 dark:text-neutral-50">Welcome back</h1>
-				<p class="text-sm text-neutral-600 dark:text-neutral-400">
-					Sign in to continue.
-				</p>
+				<p class="text-sm text-neutral-600 dark:text-neutral-400">Sign in to continue.</p>
 			</div>
 		</div>
 

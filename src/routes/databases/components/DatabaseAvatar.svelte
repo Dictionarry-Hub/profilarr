@@ -73,7 +73,9 @@
 	{/if}
 	{#if failed}
 		<div
-			class="flex {sizeClasses[size]} items-center justify-center rounded-lg bg-neutral-200 text-xs font-semibold text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
+			class="flex {sizeClasses[
+				size
+			]} items-center justify-center rounded-lg bg-neutral-200 text-xs font-semibold text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
 		>
 			{name?.slice(0, 1) ?? '?'}
 		</div>

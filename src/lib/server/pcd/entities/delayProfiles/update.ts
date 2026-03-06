@@ -134,8 +134,7 @@ export async function update(options: UpdateDelayProfileOptions) {
 		}
 	}
 
-	const updateProfileQuery =
-		Object.keys(setValues).length > 0 ? updateProfile.compile() : null;
+	const updateProfileQuery = Object.keys(setValues).length > 0 ? updateProfile.compile() : null;
 
 	// Log what's being changed
 	const changes: Record<string, { from: unknown; to: unknown }> = {};

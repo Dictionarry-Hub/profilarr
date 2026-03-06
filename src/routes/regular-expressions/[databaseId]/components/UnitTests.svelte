@@ -39,7 +39,6 @@
 	$: shouldMatchCount = unitTests.filter((t) => t.criteria === 'DOES_MATCH').length;
 	$: shouldNotMatchCount = unitTests.filter((t) => t.criteria === 'DOES_NOT_MATCH').length;
 
-
 	function applyFilters(tests: Regex101UnitTest[]): Regex101UnitTest[] {
 		return tests.filter((test) => {
 			if (!showPassed && test.passed === true) return false;
@@ -58,11 +57,16 @@
 	let passLeaveTimer: ReturnType<typeof setTimeout> | null = null;
 
 	function passEnter() {
-		if (passLeaveTimer) { clearTimeout(passLeaveTimer); passLeaveTimer = null; }
+		if (passLeaveTimer) {
+			clearTimeout(passLeaveTimer);
+			passLeaveTimer = null;
+		}
 		passHovered = true;
 	}
 	function passLeave() {
-		passLeaveTimer = setTimeout(() => { passHovered = false; }, 100);
+		passLeaveTimer = setTimeout(() => {
+			passHovered = false;
+		}, 100);
 	}
 
 	// Match filter hover
@@ -70,11 +74,16 @@
 	let matchLeaveTimer: ReturnType<typeof setTimeout> | null = null;
 
 	function matchEnter() {
-		if (matchLeaveTimer) { clearTimeout(matchLeaveTimer); matchLeaveTimer = null; }
+		if (matchLeaveTimer) {
+			clearTimeout(matchLeaveTimer);
+			matchLeaveTimer = null;
+		}
 		matchHovered = true;
 	}
 	function matchLeave() {
-		matchLeaveTimer = setTimeout(() => { matchHovered = false; }, 100);
+		matchLeaveTimer = setTimeout(() => {
+			matchHovered = false;
+		}, 100);
 	}
 
 	const columns: Column<Regex101UnitTest>[] = [
@@ -132,9 +141,7 @@
 	</div>
 {:else if unitTests.length === 0}
 	<!-- No Tests -->
-	<p class="text-sm text-neutral-500 dark:text-neutral-400">
-		No unit tests found for this regex.
-	</p>
+	<p class="text-sm text-neutral-500 dark:text-neutral-400">No unit tests found for this regex.</p>
 {:else}
 	<!-- Actions Bar -->
 	<ActionsBar>
@@ -325,7 +332,10 @@
 						<div class="hidden space-y-2 md:block">
 							<div class="flex items-start gap-2">
 								<div class="min-w-0 flex-1">
-									<span class="inline-flex flex-wrap items-center gap-1 rounded-md bg-neutral-100 px-2.5 py-1 text-xs font-medium font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 break-all">{test.testString}</span>
+									<span
+										class="inline-flex flex-wrap items-center gap-1 rounded-md bg-neutral-100 px-2.5 py-1 font-mono text-xs font-medium break-all text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+										>{test.testString}</span
+									>
 								</div>
 								<div class="shrink-0">
 									<Label
@@ -363,7 +373,10 @@
 
 						<!-- Mobile: stacked -->
 						<div class="space-y-2 md:hidden">
-							<span class="inline-flex flex-wrap items-center gap-1 rounded-md bg-neutral-100 px-2.5 py-1 text-xs font-medium font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 break-all">{test.testString}</span>
+							<span
+								class="inline-flex flex-wrap items-center gap-1 rounded-md bg-neutral-100 px-2.5 py-1 font-mono text-xs font-medium break-all text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+								>{test.testString}</span
+							>
 							{#if test.description}
 								<p class="text-xs text-neutral-500 dark:text-neutral-400">{test.description}</p>
 							{/if}

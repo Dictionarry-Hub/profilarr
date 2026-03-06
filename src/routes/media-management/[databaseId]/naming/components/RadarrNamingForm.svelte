@@ -16,7 +16,10 @@
 	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
 	import type { RadarrNamingRow } from '$shared/pcd/display.ts';
 	import type { AffectedArr } from '$shared/sync/types.ts';
-	import { RADARR_COLON_REPLACEMENT_OPTIONS, type RadarrColonReplacementFormat } from '$shared/pcd/mediaManagement.ts';
+	import {
+		RADARR_COLON_REPLACEMENT_OPTIONS,
+		type RadarrColonReplacementFormat
+	} from '$shared/pcd/mediaManagement.ts';
 	import { resolveRadarrFormat, getRadarrTokenCategories } from '$shared/pcd/namingTokens.ts';
 	import NamingPreview from './NamingPreview.svelte';
 
@@ -115,7 +118,6 @@
 	function handleDeleteCancel() {
 		showDeleteModal = false;
 	}
-
 </script>
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
@@ -184,7 +186,9 @@
 
 			<!-- Naming Formats -->
 			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Naming Formats</h2>
+				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+					Naming Formats
+				</h2>
 				<div>
 					<TokenAutocomplete
 						label="Movie Format"
@@ -216,7 +220,9 @@
 
 			<!-- Character Replacement -->
 			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Character Replacement</h2>
+				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+					Character Replacement
+				</h2>
 
 				<div class="space-y-2">
 					<Toggle
@@ -241,7 +247,6 @@
 				{/if}
 			</div>
 		{/if}
-
 	</div>
 </div>
 
@@ -257,7 +262,11 @@
 			if (result.type === 'failure' && result.data) {
 				alertStore.add('error', (result.data as { error?: string }).error || 'Operation failed');
 			} else if (result.type === 'success' && result.data) {
-				const data = result.data as { success?: boolean; redirectTo?: string; affectedArrs?: AffectedArr[] };
+				const data = result.data as {
+					success?: boolean;
+					redirectTo?: string;
+					affectedArrs?: AffectedArr[];
+				};
 				if (data.success) {
 					alertStore.add(
 						'success',
@@ -307,10 +316,7 @@
 			deleting = true;
 			return async ({ result, update: formUpdate }) => {
 				if (result.type === 'failure' && result.data) {
-					alertStore.add(
-						'error',
-						(result.data as { error?: string }).error || 'Failed to delete'
-					);
+					alertStore.add('error', (result.data as { error?: string }).error || 'Failed to delete');
 				} else if (result.type === 'redirect') {
 					alertStore.add('success', 'Naming config deleted');
 				}
@@ -342,29 +348,38 @@
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Format Strings</div>
 			<p class="mt-1">
 				Format strings control how Radarr names movie files and folders. Use tokens like
-				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800">{'{Movie Title}'}</code>
+				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+					>{'{Movie Title}'}</code
+				>
 				and
-				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800">{'{Release Year}'}</code>
+				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+					>{'{Release Year}'}</code
+				>
 				to build your naming pattern.
 			</p>
 		</div>
 		<div>
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Token Autocomplete</div>
 			<p class="mt-1">
-				Type <code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800">{'{'}</code> in
-				any format field to open the token picker. Filter by typing, then use arrow keys and Enter or click to insert.
+				Type <code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+					>{'{'}</code
+				> in any format field to open the token picker. Filter by typing, then use arrow keys and Enter
+				or click to insert.
 			</p>
 		</div>
 		<div>
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Live Preview</div>
 			<p class="mt-1">
-				A preview line below each format field shows how your pattern resolves with sample data, so you can see the result as you type.
+				A preview line below each format field shows how your pattern resolves with sample data, so
+				you can see the result as you type.
 			</p>
 		</div>
 		<div>
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Character Replacement</div>
 			<p class="mt-1">
-				When enabled, illegal filesystem characters are replaced automatically. The colon replacement option controls how colons specifically are handled (deleted, replaced with a dash, space, etc.).
+				When enabled, illegal filesystem characters are replaced automatically. The colon
+				replacement option controls how colons specifically are handled (deleted, replaced with a
+				dash, space, etc.).
 			</p>
 		</div>
 	</div>

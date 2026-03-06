@@ -73,45 +73,51 @@
 	<!-- Mobile: Custom dropdown with icons -->
 	<div class="border-b border-neutral-200 py-3 dark:border-neutral-800">
 		<div class="flex items-center gap-2">
-			<div class="relative flex-1" bind:this={triggerEl} use:clickOutside={() => (dropdownOpen = false)}>
+			<div
+				class="relative flex-1"
+				bind:this={triggerEl}
+				use:clickOutside={() => (dropdownOpen = false)}
+			>
 				<button
 					type="button"
 					on:click={() => (dropdownOpen = !dropdownOpen)}
 					class="flex w-full items-center justify-between gap-2 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-100 dark:hover:bg-neutral-700"
 				>
-				<span class="flex items-center gap-1.5 overflow-hidden">
-					{#if breadcrumb}
-						{#each breadcrumb.items as item}
-							<span class="shrink-0 text-neutral-500 dark:text-neutral-400">{item.label}</span>
+					<span class="flex items-center gap-1.5 overflow-hidden">
+						{#if breadcrumb}
+							{#each breadcrumb.items as item}
+								<span class="shrink-0 text-neutral-500 dark:text-neutral-400">{item.label}</span>
+								<ChevronRight size={12} class="shrink-0 text-neutral-400 dark:text-neutral-600" />
+							{/each}
+							<span class="shrink-0 text-neutral-500 dark:text-neutral-400"
+								>{breadcrumb.current}</span
+							>
 							<ChevronRight size={12} class="shrink-0 text-neutral-400 dark:text-neutral-600" />
-						{/each}
-						<span class="shrink-0 text-neutral-500 dark:text-neutral-400">{breadcrumb.current}</span>
-						<ChevronRight size={12} class="shrink-0 text-neutral-400 dark:text-neutral-600" />
-					{/if}
-					{#if activeTab?.icon && !breadcrumb}
-						<svelte:component this={activeTab.icon} size={16} class="shrink-0 text-accent-500" />
-					{/if}
-					<span class="truncate">{activeTab?.label ?? 'Select...'}</span>
-				</span>
-				<ChevronDown
-					size={16}
-					class="text-neutral-400 transition-transform {dropdownOpen ? 'rotate-180' : ''}"
-				/>
-			</button>
+						{/if}
+						{#if activeTab?.icon && !breadcrumb}
+							<svelte:component this={activeTab.icon} size={16} class="shrink-0 text-accent-500" />
+						{/if}
+						<span class="truncate">{activeTab?.label ?? 'Select...'}</span>
+					</span>
+					<ChevronDown
+						size={16}
+						class="text-neutral-400 transition-transform {dropdownOpen ? 'rotate-180' : ''}"
+					/>
+				</button>
 
-			{#if dropdownOpen}
-				<Dropdown position="left" minWidth="100%" {triggerEl}>
-					{#each tabs as tab}
-						<DropdownItem
-							icon={tab.icon}
-							label={tab.label}
-							selected={tab.active}
-							on:click={() => handleTabSelect(tab.href)}
-						/>
-					{/each}
-				</Dropdown>
-			{/if}
-		</div>
+				{#if dropdownOpen}
+					<Dropdown position="left" minWidth="100%" {triggerEl}>
+						{#each tabs as tab}
+							<DropdownItem
+								icon={tab.icon}
+								label={tab.label}
+								selected={tab.active}
+								on:click={() => handleTabSelect(tab.href)}
+							/>
+						{/each}
+					</Dropdown>
+				{/if}
+			</div>
 			{#if backButton}
 				<button
 					type="button"

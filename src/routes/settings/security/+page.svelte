@@ -2,7 +2,17 @@
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import { Copy, RefreshCw, LogOut, Check, Globe, Monitor, Smartphone, Network, Clock } from 'lucide-svelte';
+	import {
+		Copy,
+		RefreshCw,
+		LogOut,
+		Check,
+		Globe,
+		Monitor,
+		Smartphone,
+		Network,
+		Clock
+	} from 'lucide-svelte';
 	import { parseUTC } from '$shared/utils/dates';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
@@ -142,9 +152,13 @@
 
 	<div class="space-y-8">
 		<!-- Change Password -->
-		<div class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+		<div
+			class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+		>
 			<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">Change Password</h2>
+				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">
+					Change Password
+				</h2>
 				<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
 					Update your account password
 				</p>
@@ -205,9 +219,13 @@
 		</div>
 
 		<!-- Local Bypass -->
-		<div class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+		<div
+			class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+		>
 			<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">Local Bypass</h2>
+				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">
+					Local Bypass
+				</h2>
 				<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
 					Skip authentication for requests from local network addresses
 				</p>
@@ -236,11 +254,17 @@
 		</div>
 
 		<!-- API Key -->
-		<div class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+		<div
+			class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+		>
 			<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">API Key</h2>
+				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">
+					API Key
+				</h2>
 				<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-					Authenticate API requests via <code class="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-neutral-800">X-Api-Key</code> header
+					Authenticate API requests via <code
+						class="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-neutral-800">X-Api-Key</code
+					> header
 				</p>
 			</div>
 			<div class="p-6">
@@ -249,13 +273,7 @@
 					<div class="space-y-3">
 						<div class="flex items-center gap-2">
 							<div class="flex-1">
-								<FormInput
-									name="apiKey"
-									label=""
-									type="text"
-									value={apiKey}
-									readonly
-								/>
+								<FormInput name="apiKey" label="" type="text" value={apiKey} readonly />
 							</div>
 							<button
 								type="button"
@@ -269,13 +287,17 @@
 						<p class="text-sm text-amber-600 dark:text-amber-400">
 							This key is shown only once — copy it now.
 						</p>
-						<form method="POST" action="?/regenerateApiKey" use:enhance={() => {
-							regeneratingKey = true;
-							return async ({ update }) => {
-								await update();
-								regeneratingKey = false;
-							};
-						}}>
+						<form
+							method="POST"
+							action="?/regenerateApiKey"
+							use:enhance={() => {
+								regeneratingKey = true;
+								return async ({ update }) => {
+									await update();
+									regeneratingKey = false;
+								};
+							}}
+						>
 							<Button
 								type="submit"
 								variant="secondary"
@@ -289,14 +311,21 @@
 				{:else if data.hasApiKey}
 					<!-- Key exists but can't be displayed -->
 					<div class="flex items-center justify-between gap-4">
-						<p class="text-sm text-neutral-500 dark:text-neutral-400">An API key is configured. The stored key cannot be retrieved. Regenerating will invalidate the current key and create a new one.</p>
-						<form method="POST" action="?/regenerateApiKey" use:enhance={() => {
-							regeneratingKey = true;
-							return async ({ update }) => {
-								await update();
-								regeneratingKey = false;
-							};
-						}}>
+						<p class="text-sm text-neutral-500 dark:text-neutral-400">
+							An API key is configured. The stored key cannot be retrieved. Regenerating will
+							invalidate the current key and create a new one.
+						</p>
+						<form
+							method="POST"
+							action="?/regenerateApiKey"
+							use:enhance={() => {
+								regeneratingKey = true;
+								return async ({ update }) => {
+									await update();
+									regeneratingKey = false;
+								};
+							}}
+						>
 							<Button
 								type="submit"
 								variant="secondary"
@@ -321,21 +350,31 @@
 		</div>
 
 		<!-- Active Sessions -->
-		<div class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-			<div class="flex flex-col gap-3 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between dark:border-neutral-800">
+		<div
+			class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+		>
+			<div
+				class="flex flex-col gap-3 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between dark:border-neutral-800"
+			>
 				<div>
-					<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">Active Sessions</h2>
+					<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">
+						Active Sessions
+					</h2>
 					<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
 						Manage your logged-in sessions across devices
 					</p>
 				</div>
 				{#if data.sessions.length > 1}
-					<form method="POST" action="?/revokeOtherSessions" use:enhance={() => {
-						return async ({ update }) => {
-							await update();
-							await invalidateAll();
-						};
-					}}>
+					<form
+						method="POST"
+						action="?/revokeOtherSessions"
+						use:enhance={() => {
+							return async ({ update }) => {
+								await update();
+								await invalidateAll();
+							};
+						}}
+					>
 						<Button
 							type="submit"
 							variant="secondary"
@@ -358,14 +397,21 @@
 					>
 						<svelte:fragment slot="actions" let:row>
 							{#if row.isCurrent}
-								<span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Current</span>
+								<span
+									class="inline-flex items-center rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+									>Current</span
+								>
 							{:else}
-								<form method="POST" action="?/revokeSession" use:enhance={() => {
-									return async ({ update }) => {
-										await update();
-										await invalidateAll();
-									};
-								}}>
+								<form
+									method="POST"
+									action="?/revokeSession"
+									use:enhance={() => {
+										return async ({ update }) => {
+											await update();
+											await invalidateAll();
+										};
+									}}
+								>
 									<input type="hidden" name="sessionId" value={row.id} />
 									<Button
 										icon={LogOut}

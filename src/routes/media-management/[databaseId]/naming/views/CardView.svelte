@@ -33,7 +33,12 @@
 
 <CardGrid columns={1} flush>
 	{#each configs as config}
-		<Card href="/media-management/{databaseId}/naming/{config.arr_type}/{encodeURIComponent(config.name)}" hoverable>
+		<Card
+			href="/media-management/{databaseId}/naming/{config.arr_type}/{encodeURIComponent(
+				config.name
+			)}"
+			hoverable
+		>
 			<div class="flex items-center gap-4">
 				<!-- Logo + Name -->
 				<div class="flex min-w-0 flex-1 items-center gap-3">

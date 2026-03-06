@@ -7,7 +7,11 @@ import { authSettingsQueries } from '$db/queries/authSettings.ts';
 import { verifyPassword } from '$auth/password.ts';
 import { getClientIp } from '$auth/network.ts';
 import { parseUserAgent } from '$auth/userAgent.ts';
-import { analyzeLoginFailure, formatLoginFailure, getAttemptCategory } from '$auth/loginAnalysis.ts';
+import {
+	analyzeLoginFailure,
+	formatLoginFailure,
+	getAttemptCategory
+} from '$auth/loginAnalysis.ts';
 import { checkRateLimit, recordFailedAttempt, clearAttempts } from '$auth/rateLimit.ts';
 import { logger } from '$logger/logger.ts';
 

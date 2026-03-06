@@ -62,7 +62,6 @@
 		href: `/delay-profiles/${db.id}`,
 		active: db.id === data.currentDatabase.id
 	}));
-
 </script>
 
 <svelte:head>
