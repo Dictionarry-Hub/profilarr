@@ -7,7 +7,8 @@ import { authSettingsQueries } from '$db/queries/authSettings.ts';
 import { verifyPassword } from '$auth/password.ts';
 import { getClientIp } from '$auth/network.ts';
 import { parseUserAgent } from '$auth/userAgent.ts';
-import { analyzeLoginFailure, formatLoginFailure } from '$auth/loginAnalysis.ts';
+import { analyzeLoginFailure, formatLoginFailure, getAttemptCategory } from '$auth/loginAnalysis.ts';
+import { checkRateLimit, recordFailedAttempt, clearAttempts } from '$auth/rateLimit.ts';
 import { logger } from '$logger/logger.ts';
 
 export const load: ServerLoad = () => {
@@ -28,6 +29,14 @@ export const load: ServerLoad = () => {
 export const actions: Actions = {
 	default: async (event) => {
 		const { request, cookies } = event;
+		const ip = getClientIp(event);
+
+		// Rate limit check
+		const rateLimit = checkRateLimit(ip, '/auth/login');
+		if (rateLimit.blocked) {
+			return fail(429, { error: 'Too many login attempts. Please try again later.' });
+		}
+
 		const formData = await request.formData();
 		const username = (formData.get('username') as string)?.trim();
 		const password = formData.get('password') as string;
@@ -40,13 +49,14 @@ export const actions: Actions = {
 		// Find user
 		const user = usersQueries.getByUsername(username);
 		if (!user) {
-			const ip = getClientIp(event);
 			const allUsernames = usersQueries.getAllUsernames();
 			const analysis = analyzeLoginFailure(username, allUsernames, false);
+			const category = getAttemptCategory(analysis);
+			recordFailedAttempt(ip, '/auth/login', category);
 
 			await logger.warn(`Login failed for '${username}': ${formatLoginFailure(analysis)}`, {
 				source: 'Auth:Login',
-				meta: { username, ip, ...analysis }
+				meta: { username, ip, category, ...analysis }
 			});
 			return fail(400, { error: 'Invalid username or password', username });
 		}
@@ -54,25 +64,28 @@ export const actions: Actions = {
 		// Verify password
 		const valid = await verifyPassword(password, user.password_hash);
 		if (!valid) {
-			const ip = getClientIp(event);
 			const analysis = analyzeLoginFailure(username, [], true);
+			const category = getAttemptCategory(analysis);
+			recordFailedAttempt(ip, '/auth/login', category);
 
 			await logger.warn(`Login failed for '${username}': ${formatLoginFailure(analysis)}`, {
 				source: 'Auth:Login',
-				meta: { username, ip, ...analysis }
+				meta: { username, ip, category, ...analysis }
 			});
 			return fail(400, { error: 'Invalid username or password', username });
 		}
 
+		// Success — clear rate limit history for this IP
+		clearAttempts(ip);
+
 		// Capture session metadata
-		const ipAddress = getClientIp(event);
 		const userAgent = request.headers.get('user-agent') ?? '';
 		const parsed = parseUserAgent(userAgent);
 
 		// Create session with metadata
 		const durationHours = authSettingsQueries.getSessionDurationHours();
 		const sessionId = sessionsQueries.create(user.id, durationHours, {
-			ipAddress,
+			ipAddress: ip,
 			userAgent,
 			browser: parsed.browser,
 			os: parsed.os,
@@ -81,7 +94,7 @@ export const actions: Actions = {
 
 		await logger.info(`Login successful for '${username}'`, {
 			source: 'Auth:Login',
-			meta: { username, ip: ipAddress, browser: parsed.browser, device: parsed.deviceType }
+			meta: { username, ip, browser: parsed.browser, device: parsed.deviceType }
 		});
 
 		// Set session cookie

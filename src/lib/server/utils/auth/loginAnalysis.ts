@@ -77,10 +77,25 @@ export function findSimilarUsername(
 	return null;
 }
 
+export type AttemptCategory = 'typo' | 'suspicious' | 'unknown';
+
 export interface LoginFailureAnalysis {
 	reason: 'user_not_found' | 'invalid_password';
 	similarUser: string | null;
 	isCommonAttack: boolean;
+}
+
+/**
+ * Derive a rate-limit category from a login failure analysis
+ */
+export function getAttemptCategory(analysis: LoginFailureAnalysis): AttemptCategory {
+	if (analysis.reason === 'invalid_password' || analysis.similarUser) {
+		return 'typo';
+	}
+	if (analysis.isCommonAttack) {
+		return 'suspicious';
+	}
+	return 'unknown';
 }
 
 /**
