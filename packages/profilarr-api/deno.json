@@ -1,6 +1,0 @@
-{
-	"name": "@dictionarry/profilarr-api",
-	"version": "0.3.0",
-	"description": "OpenAPI spec and TypeScript types for the Profilarr API",
-	"exports": "./mod.ts"
-}
