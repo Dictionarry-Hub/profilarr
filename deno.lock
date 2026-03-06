@@ -1,9 +1,12 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@db/sqlite@0.12": "0.12.0",
+    "jsr:@denosaurs/plug@1": "1.1.0",
     "jsr:@denosaurs/plug@^1.1.0": "1.1.0",
     "jsr:@felix/bcrypt@^1.0.8": "1.0.8",
     "jsr:@soapbox/kysely-deno-sqlite@^2.2.0": "2.2.0",
+    "jsr:@std/assert@0.217": "0.217.0",
     "jsr:@std/assert@1": "1.0.15",
     "jsr:@std/cli@^1.0.23": "1.0.23",
     "jsr:@std/encoding@1": "1.0.10",
@@ -19,6 +22,7 @@
     "jsr:@std/internal@^1.0.9": "1.0.12",
     "jsr:@std/media-types@^1.1.0": "1.1.0",
     "jsr:@std/net@^1.0.6": "1.0.6",
+    "jsr:@std/path@0.217": "0.217.0",
     "jsr:@std/path@1": "1.1.2",
     "jsr:@std/path@^1.1.1": "1.1.2",
     "jsr:@std/path@^1.1.2": "1.1.2",
@@ -55,7 +59,6 @@
     "npm:simple-icons@^15.17.0": "15.22.0",
     "npm:svelte-check@^4.3.2": "4.3.5_svelte@5.48.0__acorn@8.15.0_typescript@5.9.3",
     "npm:svelte@^5.39.5": "5.48.0_acorn@8.15.0",
-    "npm:sveltekit-adapter-deno@~0.16.1": "0.16.1_@sveltejs+kit@2.50.0__@sveltejs+vite-plugin-svelte@6.2.4___svelte@5.48.0____acorn@8.15.0___vite@7.3.1____@types+node@22.19.7____yaml@2.8.2____picomatch@4.0.3___@types+node@22.19.7___yaml@2.8.2__svelte@5.48.0___acorn@8.15.0__typescript@5.9.3__vite@7.3.1___@types+node@22.19.7___yaml@2.8.2___picomatch@4.0.3__acorn@8.15.0__@types+node@22.19.7__yaml@2.8.2_@sveltejs+vite-plugin-svelte@6.2.4__svelte@5.48.0___acorn@8.15.0__vite@7.3.1___@types+node@22.19.7___yaml@2.8.2___picomatch@4.0.3__@types+node@22.19.7__yaml@2.8.2_svelte@5.48.0__acorn@8.15.0_typescript@5.9.3_vite@7.3.1__@types+node@22.19.7__yaml@2.8.2__picomatch@4.0.3_@types+node@22.19.7_yaml@2.8.2",
     "npm:tailwindcss@^4.1.13": "4.1.18",
     "npm:typescript-eslint@^8.44.1": "8.53.1_eslint@9.39.2_typescript@5.9.3_@typescript-eslint+parser@8.53.1__eslint@9.39.2__typescript@5.9.3",
     "npm:typescript@^5.9.2": "5.9.3",
@@ -63,6 +66,13 @@
     "npm:yaml@^2.8.2": "2.8.2"
   },
   "jsr": {
+    "@db/sqlite@0.12.0": {
+      "integrity": "dd1ef7f621ad50fc1e073a1c3609c4470bd51edc0994139c5bf9851de7a6d85f",
+      "dependencies": [
+        "jsr:@denosaurs/plug@1",
+        "jsr:@std/path@0.217"
+      ]
+    },
     "@denosaurs/plug@1.1.0": {
       "integrity": "eb2f0b7546c7bca2000d8b0282c54d50d91cf6d75cb26a80df25a6de8c4bc044",
       "dependencies": [
@@ -75,7 +85,7 @@
     "@felix/bcrypt@1.0.8": {
       "integrity": "59c41160fc027882479c512db5d53792c4d91aadcd49467c85caa2f1679046f2",
       "dependencies": [
-        "jsr:@denosaurs/plug"
+        "jsr:@denosaurs/plug@^1.1.0"
       ]
     },
     "@soapbox/kysely-deno-sqlite@2.2.0": {
@@ -83,6 +93,9 @@
       "dependencies": [
         "npm:kysely@~0.27.2"
       ]
+    },
+    "@std/assert@0.217.0": {
+      "integrity": "c98e279362ca6982d5285c3b89517b757c1e3477ee9f14eb2fdf80a45aaa9642"
     },
     "@std/assert@1.0.15": {
       "integrity": "d64018e951dbdfab9777335ecdb000c0b4e3df036984083be219ce5941e4703b",
@@ -131,6 +144,12 @@
     },
     "@std/net@1.0.6": {
       "integrity": "110735f93e95bb9feb95790a8b1d1bf69ec0dc74f3f97a00a76ea5efea25500c"
+    },
+    "@std/path@0.217.0": {
+      "integrity": "1217cc25534bca9a2f672d7fe7c6f356e4027df400c0e85c0ef3e4343bc67d11",
+      "dependencies": [
+        "jsr:@std/assert@0.217"
+      ]
     },
     "@std/path@1.1.2": {
       "integrity": "c0b13b97dfe06546d5e16bf3966b1cadf92e1cc83e56ba5476ad8b498d9e3038",
@@ -2297,6 +2316,7 @@
         "npm:@types/node@22",
         "npm:better-sqlite3@^12.6.2",
         "npm:croner@^9.1.0",
+        "npm:esbuild@0.24",
         "npm:eslint-config-prettier@^10.1.8",
         "npm:eslint-plugin-svelte@^3.12.4",
         "npm:eslint@^9.36.0",
@@ -2313,7 +2333,6 @@
         "npm:simple-icons@^15.17.0",
         "npm:svelte-check@^4.3.2",
         "npm:svelte@^5.39.5",
-        "npm:sveltekit-adapter-deno@~0.16.1",
         "npm:tailwindcss@^4.1.13",
         "npm:typescript-eslint@^8.44.1",
         "npm:typescript@^5.9.2",

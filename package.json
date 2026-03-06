@@ -14,7 +14,7 @@
 		"lucide-svelte": "^0.546.0",
 		"marked": "^15.0.6",
 		"simple-icons": "^15.17.0",
-		"sveltekit-adapter-deno": "^0.16.1",
+		"esbuild": "^0.24.0",
 		"yaml": "^2.8.2"
 	},
 	"devDependencies": {

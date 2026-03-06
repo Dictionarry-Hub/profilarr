@@ -15,7 +15,7 @@
 		"allowImportingTsExtensions": true,
 		"noEmit": true
 	},
-	"exclude": ["src/tests/**"]
+	"exclude": ["src/tests/**", "src/adapter/**"]
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
 	//
