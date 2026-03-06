@@ -1,0 +1,17 @@
+# HTTPS termination for cookie security tests (server on port 7003)
+localhost:7443 {
+	tls internal
+	reverse_proxy host.docker.internal:7003
+}
+
+# HTTPS termination for reverse proxy tests (server on port 7008)
+localhost:7444 {
+	tls internal
+	reverse_proxy host.docker.internal:7008
+}
+
+# HTTPS termination for OIDC proxy tests (server on port 7009)
+localhost:7445 {
+	tls internal
+	reverse_proxy host.docker.internal:7009
+}
