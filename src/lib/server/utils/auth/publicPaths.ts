@@ -4,13 +4,20 @@
  */
 
 /**
- * Paths that don't require authentication
+ * Paths that don't require authentication (prefix match — path and all subpaths)
  */
-const PUBLIC_PATHS = ['/auth/login', '/auth/setup', '/auth/oidc', '/api/v1/health'];
+const PUBLIC_PREFIX_PATHS = ['/auth/login', '/auth/setup', '/auth/oidc'];
+
+/**
+ * Paths that don't require authentication (exact match only)
+ * /api/v1/health is public but /api/v1/health/diagnostics requires auth
+ */
+const PUBLIC_EXACT_PATHS = ['/api/v1/health'];
 
 /**
  * Check if a path is public (doesn't require auth)
  */
 export function isPublicPath(pathname: string): boolean {
-	return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+	if (PUBLIC_EXACT_PATHS.includes(pathname)) return true;
+	return PUBLIC_PREFIX_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
 }

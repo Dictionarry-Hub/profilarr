@@ -1,32 +1,75 @@
 health:
   get:
     operationId: getHealth
-    summary: Health check
+    summary: Health check (public)
     description: |
-      Returns the health status of the application and its components.
+      Public endpoint for uptime monitors. Returns only the overall status and
+      timestamp — no version, uptime, or component details.
 
       Status values:
       - `healthy`: All components functioning normally
       - `degraded`: Core functionality works but some components have issues
       - `unhealthy`: Core functionality is broken
+    tags:
+      - System
+    security: []
+    responses:
+      '200':
+        description: Service is healthy or degraded
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/health.yaml#/HealthCheckResponse'
+      '503':
+        description: Service is unhealthy
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/health.yaml#/HealthCheckResponse'
 
-      Use `?verbose=true` for detailed component information.
+health_diagnostics:
+  get:
+    operationId: getHealthDiagnostics
+    summary: Health diagnostics (authenticated)
+    description: |
+      Detailed health diagnostics including version, uptime, and per-component
+      status. Requires authentication (session or API key).
+
+      Use `?verbose=true` for additional counts, sizes, and timestamps.
     tags:
       - System
     parameters:
       - name: verbose
         in: query
-        description: Include detailed component information
+        description: Include extra detail per component (counts, sizes, timestamps)
         schema:
           type: boolean
           default: false
     responses:
       '200':
-        description: Health check response
+        description: Diagnostics response (healthy or degraded)
         content:
           application/json:
             schema:
-              $ref: '../schemas/health.yaml#/HealthResponse'
+              $ref: '../schemas/health.yaml#/HealthDiagnosticsResponse'
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - error
+              properties:
+                error:
+                  type: string
+                  example: Unauthorized
+      '503':
+        description: Service is unhealthy
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/health.yaml#/HealthDiagnosticsResponse'
 
 openapi:
   get:

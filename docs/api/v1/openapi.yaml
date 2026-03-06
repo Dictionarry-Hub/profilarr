@@ -26,6 +26,8 @@ tags:
 paths:
   /health:
     $ref: './paths/system.yaml#/health'
+  /health/diagnostics:
+    $ref: './paths/system.yaml#/health_diagnostics'
   /openapi.json:
     $ref: './paths/system.yaml#/openapi'
   /entity-testing/evaluate:
@@ -55,8 +57,10 @@ components:
     HealthStatus:
       $ref: './schemas/common.yaml#/HealthStatus'
     # Health
-    HealthResponse:
-      $ref: './schemas/health.yaml#/HealthResponse'
+    HealthCheckResponse:
+      $ref: './schemas/health.yaml#/HealthCheckResponse'
+    HealthDiagnosticsResponse:
+      $ref: './schemas/health.yaml#/HealthDiagnosticsResponse'
     # Entity Testing
     MediaType:
       $ref: './schemas/entity-testing.yaml#/MediaType'

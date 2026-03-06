@@ -12,17 +12,39 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Health check
-         * @description Returns the health status of the application and its components.
+         * Health check (public)
+         * @description Public endpoint for uptime monitors. Returns only the overall status and
+         *     timestamp — no version, uptime, or component details.
          *
          *     Status values:
          *     - `healthy`: All components functioning normally
          *     - `degraded`: Core functionality works but some components have issues
          *     - `unhealthy`: Core functionality is broken
-         *
-         *     Use `?verbose=true` for detailed component information.
          */
         get: operations["getHealth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health/diagnostics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Health diagnostics (authenticated)
+         * @description Detailed health diagnostics including version, uptime, and per-component
+         *     status. Requires authentication (session or API key).
+         *
+         *     Use `?verbose=true` for additional counts, sizes, and timestamps.
+         */
+        get: operations["getHealthDiagnostics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -305,7 +327,15 @@ export interface components {
          * @enum {string}
          */
         HealthStatus: "healthy" | "degraded" | "unhealthy";
-        HealthResponse: {
+        HealthCheckResponse: {
+            status: components["schemas"]["HealthStatus"];
+            /**
+             * Format: date-time
+             * @description Current server time
+             */
+            timestamp: string;
+        };
+        HealthDiagnosticsResponse: {
             status: components["schemas"]["HealthStatus"];
             /**
              * Format: date-time
@@ -735,10 +765,11 @@ export interface components {
             status: components["schemas"]["ComponentStatus"];
             /** @description Additional status information */
             message?: string;
-            /** @description Last run time for each job (verbose only) */
-            lastRun?: {
-                [key: string]: string | null;
-            };
+            /**
+             * Format: date-time
+             * @description Oldest queued job run_at timestamp (verbose only)
+             */
+            oldestQueued?: string | null;
         };
         BackupsHealth: {
             status: components["schemas"]["ComponentStatus"];
@@ -883,8 +914,37 @@ export type $defs = Record<string, never>;
 export interface operations {
     getHealth: {
         parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Service is healthy or degraded */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthCheckResponse"];
+                };
+            };
+            /** @description Service is unhealthy */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthCheckResponse"];
+                };
+            };
+        };
+    };
+    getHealthDiagnostics: {
+        parameters: {
             query?: {
-                /** @description Include detailed component information */
+                /** @description Include extra detail per component (counts, sizes, timestamps) */
                 verbose?: boolean;
             };
             header?: never;
@@ -893,13 +953,34 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Health check response */
+            /** @description Diagnostics response (healthy or degraded) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HealthResponse"];
+                    "application/json": components["schemas"]["HealthDiagnosticsResponse"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthorized */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Service is unhealthy */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthDiagnosticsResponse"];
                 };
             };
         };
