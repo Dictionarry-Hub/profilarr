@@ -358,7 +358,7 @@ Secrets are stripped at two levels:
 
 ## Test Coverage
 
-### Unit Tests (`src/tests/auth/`)
+### Unit Tests (`tests/unit/auth/`)
 
 Pure function tests for the core auth utilities - IP classification, path
 allowlisting, and login failure analysis. No server instances or network calls
@@ -370,12 +370,12 @@ needed.
 | `publicPaths.test.ts`   | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
 | `loginAnalysis.test.ts` | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
 
-### Integration Tests (`src/tests/integration/specs/`)
+### Integration Tests (`tests/integration/auth/specs/`)
 
 Each spec boots an isolated server instance and tests a specific auth behaviour
 end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
 `ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
-and run in parallel via `scripts/integration.ts`.
+and run in parallel via `deno task test integration`.
 
 | File                     | Port             | Tests                                                                          |
 | ------------------------ | ---------------- | ------------------------------------------------------------------------------ |
@@ -391,10 +391,10 @@ and run in parallel via `scripts/integration.ts`.
 | `secretExposure.test.ts` | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session) |
 | `backupSecrets.test.ts`  | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied        |
 
-### E2E Tests (`src/tests/e2e/specs/auth/`)
+### E2E Tests (`tests/e2e/auth/`)
 
 Browser-level Playwright tests that drive the real user experience. Uses
-`scripts/e2e-oidc.ts` with Docker Compose (mock-oauth2-server + Caddy).
+`deno task test e2e auth` with Docker Compose (mock-oauth2-server + Caddy).
 
 | File           | Tests                                                          |
 | -------------- | -------------------------------------------------------------- |
@@ -406,5 +406,5 @@ Browser-level Playwright tests that drive the real user experience. Uses
   for isolated instances
 - **Docker Compose**: mock-oauth2-server (port 9090) + Caddy (TLS termination)
   for OIDC and proxy tests
-- **Scripts**: `scripts/integration.ts` (auto-discovers specs, parallel
-  execution), `scripts/e2e-oidc.ts` (Playwright + Docker)
+- **Runner**: `tests/runner.ts` — unified CLI (`deno task test`) handles unit,
+  integration, and e2e with subcommands

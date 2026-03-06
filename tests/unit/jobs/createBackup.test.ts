@@ -4,7 +4,7 @@
  */
 
 import { BaseTest } from '../base/BaseTest.ts';
-import { createBackup } from '../../lib/server/jobs/logic/createBackup.ts';
+import { createBackup } from '../../../src/lib/server/jobs/logic/createBackup.ts';
 import { assertEquals } from '@std/assert';
 
 class CreateBackupTest extends BaseTest {

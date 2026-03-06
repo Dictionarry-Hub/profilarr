@@ -15,9 +15,9 @@ import {
 	applyFilterTagToMovies,
 	resetFilterCooldown,
 	resolveTagLabel
-} from '../../lib/server/upgrades/cooldown.ts';
-import type { ArrTag, RadarrMovie } from '../../lib/server/utils/arr/types.ts';
-import type { RadarrClient } from '../../lib/server/utils/arr/clients/radarr.ts';
+} from '../../../src/lib/server/upgrades/cooldown.ts';
+import type { ArrTag, RadarrMovie } from '../../../src/lib/server/utils/arr/types.ts';
+import type { RadarrClient } from '../../../src/lib/server/utils/arr/clients/radarr.ts';
 
 /**
  * Mock RadarrClient for testing

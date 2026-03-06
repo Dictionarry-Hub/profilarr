@@ -1,0 +1,24 @@
+# OIDC Testing - Keycloak
+# DO NOT COMMIT - This is for local testing only
+#
+# Usage:
+#   cd tests/e2e/auth
+#   docker compose up
+#
+# Then run: deno task dev:oidc
+#
+# Test user:
+#   username: test
+#   password: test
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro

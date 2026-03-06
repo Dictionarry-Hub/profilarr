@@ -50,13 +50,13 @@ obj/
 bruno/environments/
 
 # OIDC testing (local Keycloak config)
-src/tests/oidc/
+tests/e2e/auth/realm-export.json
 
 # Playwright
 test-results/
 playwright-report/
-src/tests/e2e/test-results/
-src/tests/e2e/playwright-report/
+tests/e2e/*/test-results/
+tests/e2e/*/playwright-report/
 
 # Research repos
 research/

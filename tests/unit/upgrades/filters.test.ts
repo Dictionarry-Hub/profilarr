@@ -10,7 +10,7 @@ import {
 	evaluateGroup,
 	type FilterRule,
 	type FilterGroup
-} from '../../lib/shared/upgrades/filters.ts';
+} from '../../../src/lib/shared/upgrades/filters.ts';
 
 class FilterEvaluationTest extends BaseTest {
 	runTests(): void {
