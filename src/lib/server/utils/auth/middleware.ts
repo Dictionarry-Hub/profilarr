@@ -26,7 +26,7 @@ export interface AuthState {
  * Get auth state from request
  * Checks auth mode, API key, and session cookie
  */
-export function getAuthState(event: RequestEvent): AuthState {
+export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 	const hasLocalUsers = usersQueries.existsLocal();
 
 	// AUTH=off - skip all auth (trust external proxy like Authelia/Authentik)
@@ -45,7 +45,7 @@ export function getAuthState(event: RequestEvent): AuthState {
 		const ip = getClientIp(event);
 		const endpoint = event.url.pathname;
 
-		if (authSettingsQueries.validateApiKey(apiKey)) {
+		if (await authSettingsQueries.validateApiKey(apiKey)) {
 			void logger.debug('API key authenticated', {
 				source: 'Auth:APIKey',
 				meta: { ip, endpoint }

@@ -109,7 +109,7 @@ if (!isReload) {
  * Handles authentication, authorization, and session management
  */
 export const handle: Handle = async ({ event, resolve }) => {
-	const auth = getAuthState(event);
+	const auth = await getAuthState(event);
 
 	// First-run setup flow (applies to all auth modes except AUTH=off)
 	if (auth.needsSetup) {

@@ -19,7 +19,6 @@
 	let newPassword = '';
 	let confirmPassword = '';
 
-	let showApiKey = false;
 	let regeneratingKey = false;
 	let togglingBypass = false;
 	let bypassForm: HTMLFormElement;
@@ -50,8 +49,7 @@
 		alertStore.add('success', `Local bypass ${form.localBypassEnabled ? 'enabled' : 'disabled'}`);
 	}
 
-	// Get API key from form response or data
-	$: apiKey = form?.apiKey ?? data.apiKey;
+	$: apiKey = form?.apiKey ?? null;
 
 	function copyApiKey() {
 		if (apiKey) {
@@ -247,25 +245,30 @@
 			</div>
 			<div class="p-6">
 				{#if apiKey}
-					<div class="flex items-center gap-2">
-						<div class="flex-1">
-							<FormInput
-								name="apiKey"
-								label=""
-								type="password"
-								value={apiKey}
-								readonly
-								private_
-							/>
+					<!-- Just generated — show key once -->
+					<div class="space-y-3">
+						<div class="flex items-center gap-2">
+							<div class="flex-1">
+								<FormInput
+									name="apiKey"
+									label=""
+									type="text"
+									value={apiKey}
+									readonly
+								/>
+							</div>
+							<button
+								type="button"
+								class="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+								title="Copy"
+								onclick={copyApiKey}
+							>
+								<Copy size={18} />
+							</button>
 						</div>
-						<button
-							type="button"
-							class="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
-							title="Copy"
-							onclick={copyApiKey}
-						>
-							<Copy size={18} />
-						</button>
+						<p class="text-sm text-amber-600 dark:text-amber-400">
+							This key is shown only once — copy it now.
+						</p>
 						<form method="POST" action="?/regenerateApiKey" use:enhance={() => {
 							regeneratingKey = true;
 							return async ({ update }) => {
@@ -273,17 +276,40 @@
 								regeneratingKey = false;
 							};
 						}}>
-							<button
+							<Button
 								type="submit"
-								class="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
-								title="Regenerate"
+								variant="secondary"
+								size="sm"
+								icon={RefreshCw}
+								text={regeneratingKey ? 'Regenerating...' : 'Regenerate'}
 								disabled={regeneratingKey}
-							>
-								<RefreshCw size={18} class={regeneratingKey ? 'animate-spin' : ''} />
-							</button>
+							/>
+						</form>
+					</div>
+				{:else if data.hasApiKey}
+					<!-- Key exists but can't be displayed -->
+					<div class="flex items-center justify-between gap-4">
+						<p class="text-sm text-neutral-500 dark:text-neutral-400">An API key is configured. The stored key cannot be retrieved. Regenerating will invalidate the current key and create a new one.</p>
+						<form method="POST" action="?/regenerateApiKey" use:enhance={() => {
+							regeneratingKey = true;
+							return async ({ update }) => {
+								await update();
+								regeneratingKey = false;
+							};
+						}}>
+							<Button
+								type="submit"
+								variant="secondary"
+								size="sm"
+								icon={RefreshCw}
+								iconColor="text-emerald-500"
+								text={regeneratingKey ? 'Regenerating...' : 'Regenerate'}
+								disabled={regeneratingKey}
+							/>
 						</form>
 					</div>
 				{:else}
+					<!-- No key configured -->
 					<div class="flex items-center gap-4">
 						<p class="text-sm text-neutral-500 dark:text-neutral-400">No API key configured</p>
 						<form method="POST" action="?/regenerateApiKey" use:enhance>

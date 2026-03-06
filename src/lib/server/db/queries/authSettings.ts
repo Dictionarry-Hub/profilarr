@@ -1,6 +1,6 @@
 import { db } from '../db.ts';
 import { generateApiKey } from '$auth/apiKey.ts';
-import { timingSafeEqual } from 'node:crypto';
+import { hash, verify } from '@felix/bcrypt';
 
 /**
  * Types for auth_settings table
@@ -43,10 +43,10 @@ export const authSettingsQueries = {
 	},
 
 	/**
-	 * Get API key (may be null)
+	 * Check whether an API key is configured
 	 */
-	getApiKey(): string | null {
-		return this.get().api_key;
+	hasApiKey(): boolean {
+		return this.get().api_key !== null;
 	},
 
 	/**
@@ -99,12 +99,13 @@ export const authSettingsQueries = {
 	},
 
 	/**
-	 * Regenerate API key and return the new key
+	 * Regenerate API key — returns the plaintext key (stored as bcrypt hash)
 	 */
-	regenerateApiKey(): string {
-		const newKey = generateApiKey();
-		this.update({ apiKey: newKey });
-		return newKey;
+	async regenerateApiKey(): Promise<string> {
+		const plaintext = generateApiKey();
+		const hashed = await hash(plaintext);
+		this.update({ apiKey: hashed });
+		return plaintext;
 	},
 
 	/**
@@ -115,17 +116,12 @@ export const authSettingsQueries = {
 	},
 
 	/**
-	 * Validate an API key
+	 * Validate an API key against the stored bcrypt hash
 	 */
-	validateApiKey(key: string): boolean {
+	async validateApiKey(key: string): Promise<boolean> {
 		const settings = this.get();
 		if (settings.api_key === null) return false;
 
-		const encoder = new TextEncoder();
-		const a = encoder.encode(key);
-		const b = encoder.encode(settings.api_key);
-		if (a.byteLength !== b.byteLength) return false;
-
-		return timingSafeEqual(a, b);
+		return verify(key, settings.api_key);
 	}
 };

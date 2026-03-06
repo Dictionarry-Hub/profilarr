@@ -11,11 +11,11 @@ export const load: ServerLoad = async ({ cookies }) => {
 	const user = usersQueries.getByUsername('admin') ?? usersQueries.getById(1);
 
 	if (!user) {
-		return { sessions: [], apiKey: null, currentSessionId: null };
+		return { sessions: [], hasApiKey: false, currentSessionId: null };
 	}
 
 	const sessions = sessionsQueries.getByUserId(user.id);
-	const apiKey = authSettingsQueries.getApiKey();
+	const hasApiKey = authSettingsQueries.hasApiKey();
 	const localBypassEnabled = authSettingsQueries.isLocalBypassEnabled();
 
 	return {
@@ -30,7 +30,7 @@ export const load: ServerLoad = async ({ cookies }) => {
 			device_type: s.device_type,
 			isCurrent: s.id === currentSessionId
 		})),
-		apiKey,
+		hasApiKey,
 		currentSessionId,
 		localBypassEnabled
 	};
@@ -90,7 +90,7 @@ export const actions: Actions = {
 	},
 
 	regenerateApiKey: async () => {
-		const newKey = authSettingsQueries.regenerateApiKey();
+		const newKey = await authSettingsQueries.regenerateApiKey();
 
 		await logger.info('API key regenerated', {
 			source: 'Auth:APIKey'

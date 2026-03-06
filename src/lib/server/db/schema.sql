@@ -865,7 +865,7 @@ CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
 CREATE TABLE auth_settings (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     session_duration_hours INTEGER NOT NULL DEFAULT 168,  -- 7 days
-    api_key TEXT,                           -- For programmatic access
+    api_key TEXT,                           -- Bcrypt-hashed API key for programmatic access
     local_bypass_enabled INTEGER NOT NULL DEFAULT 0, -- Skip auth for local IPs (Migration 056)
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
