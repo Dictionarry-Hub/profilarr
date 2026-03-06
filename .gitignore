@@ -18,6 +18,9 @@ AGENTS.md
 /temp
 /config
 
+# Editor
+.vscode/
+
 # OS
 .DS_Store
 Thumbs.db
