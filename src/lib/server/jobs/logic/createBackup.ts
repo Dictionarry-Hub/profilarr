@@ -3,12 +3,30 @@
  * Separated from job definition to avoid database/config dependencies for testing
  */
 
+import { Database } from '@jsr/db__sqlite';
+
 export interface CreateBackupResult {
 	success: boolean;
 	filename?: string;
 	sizeBytes?: number;
 	error?: string;
 }
+
+/**
+ * SQL statements to strip secrets from a backup database copy.
+ * The production database is never modified — these run against a temp copy only.
+ */
+const SANITIZE_SQL = [
+	"UPDATE arr_instances SET api_key = ''",
+	'UPDATE database_instances SET personal_access_token = NULL',
+	'UPDATE auth_settings SET api_key = NULL',
+	"UPDATE ai_settings SET api_key = ''",
+	"UPDATE tmdb_settings SET api_key = ''",
+	"UPDATE notification_services SET config = '{}'",
+	'DELETE FROM users',
+	'DELETE FROM sessions',
+	'DELETE FROM login_attempts'
+];
 
 /**
  * Core backup logic - creates a tar.gz archive of a directory
@@ -24,6 +42,8 @@ export async function createBackup(
 	backupDir: string,
 	timestamp?: Date
 ): Promise<CreateBackupResult> {
+	let tmpDir: string | null = null;
+
 	try {
 		// Generate backup filename with timestamp
 		const now = timestamp ?? new Date();
@@ -58,17 +78,45 @@ export async function createBackup(
 			};
 		}
 
-		// Get parent directory and directory name for tar command
-		const isAbsolute = sourceDir.startsWith('/');
-		const sourcePathParts = sourceDir.split('/').filter((p) => p);
-		const dirName = sourcePathParts[sourcePathParts.length - 1];
-		const parentDirParts = sourcePathParts.slice(0, -1);
-		const parentDir =
-			parentDirParts.length > 0 ? (isAbsolute ? '/' : '') + parentDirParts.join('/') : '/';
+		// Copy source to a temp directory and sanitize the DB copy
+		tmpDir = await Deno.makeTempDir({ prefix: 'profilarr-backup-' });
+		const tmpDataDir = `${tmpDir}/data`;
 
-		// Create tar.gz archive
+		const cp = new Deno.Command('cp', {
+			args: ['-a', sourceDir, tmpDataDir],
+			stdout: 'piped',
+			stderr: 'piped'
+		});
+		const cpResult = await cp.output();
+		if (cpResult.code !== 0) {
+			const errorMessage = new TextDecoder().decode(cpResult.stderr);
+			return {
+				success: false,
+				error: `Failed to copy source directory: ${errorMessage}`
+			};
+		}
+
+		// Sanitize the database copy
+		const dbPath = `${tmpDataDir}/profilarr.db`;
+		try {
+			const db = new Database(dbPath);
+			try {
+				for (const sql of SANITIZE_SQL) {
+					db.exec(sql);
+				}
+			} finally {
+				db.close();
+			}
+		} catch (error) {
+			return {
+				success: false,
+				error: `Failed to sanitize backup database: ${error instanceof Error ? error.message : String(error)}`
+			};
+		}
+
+		// Create tar.gz archive from the sanitized temp copy
 		const command = new Deno.Command('tar', {
-			args: ['-czf', backupPath, '-C', parentDir, dirName],
+			args: ['-czf', backupPath, '-C', tmpDir, 'data'],
 			stdout: 'piped',
 			stderr: 'piped'
 		});
@@ -96,5 +144,14 @@ export async function createBackup(
 			success: false,
 			error: error instanceof Error ? error.message : String(error)
 		};
+	} finally {
+		// Clean up temp directory
+		if (tmpDir) {
+			try {
+				await Deno.remove(tmpDir, { recursive: true });
+			} catch {
+				// Best-effort cleanup
+			}
+		}
 	}
 }
