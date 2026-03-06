@@ -1,6 +1,6 @@
 /**
  * Network utilities for detecting local/private IP addresses
- * Used for AUTH=local mode to bypass auth for local network requests
+ * Used for local bypass to skip auth for local network requests
  *
  * Based on Sonarr's implementation:
  * https://github.com/Sonarr/Sonarr/blob/develop/src/NzbDrone.Common/Extensions/IpAddressExtensions.cs

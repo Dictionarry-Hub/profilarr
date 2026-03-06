@@ -847,17 +847,18 @@ primary flow is enforced in `src/hooks.server.ts` via the auth middleware.
 Controlled by `AUTH` env:
 
 - `on` (default): username/password login + sessions
-- `local`: skip auth for local IPs
 - `off`: trust external proxy (no auth checks)
 - `oidc`: OIDC login (no local password required)
 
-Details and flow diagrams live in `src/lib/server/utils/auth/README.md`.
+Local bypass is a separate DB-backed toggle (Settings > Security), not an auth mode.
+
+Details and flow diagrams live in `docs/architecture/auth.md`.
 
 ### 19.2 Session & API Key
 
 - **Session cookie:** `session` (httpOnly, sameSite=lax).
 - **Sliding expiration:** sessions extend when past halfway.
-- **API key:** `X-Api-Key` header or `apikey` query param.
+- **API key:** `X-Api-Key` header only (bcrypt-hashed in DB).
 
 Session and API key settings are stored in `auth_settings` and `sessions`
 tables, managed via `authSettingsQueries` and `sessionsQueries`.

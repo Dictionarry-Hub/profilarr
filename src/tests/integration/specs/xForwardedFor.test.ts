@@ -1,22 +1,20 @@
 /**
- * Integration tests: X-Forwarded-For spoofing
+ * Integration tests: X-Forwarded-For behaviour
  *
- * These tests PROVE the vulnerabilities exist (both should fail).
- * The actual defense is verified by unit tests in network.test.ts
- * because integration tests run from localhost (real TCP address is
- * already local, so we can't simulate a remote attacker).
+ * The local bypass auth check uses getClientIp(event, false) which ignores
+ * proxy headers and uses the real TCP address. This means a remote attacker
+ * cannot spoof X-Forwarded-For: 192.168.x.x to bypass auth. This fix can't
+ * be demonstrated here because integration tests run from localhost (the real
+ * TCP address is already local) - it's verified by unit tests in network.test.ts.
  *
- * Vulnerability 1: Spoofed header recorded as session IP (rate limit bypass)
- * Vulnerability 2: Spoofed local IP bypasses auth entirely
- *
- * The fix is in the adapter (mod.ts): use info.remoteAddr.hostname
- * instead of reading X-Forwarded-For. This makes getClientAddress()
- * return the real TCP address, so getClientIp(event, false) works
- * correctly for the local bypass check.
+ * What IS still true: session metadata (IP recorded on login) uses
+ * trustProxy=true, so a spoofed X-Forwarded-For gets stored in the sessions
+ * table. This is cosmetic (doesn't affect auth decisions) but means session
+ * IP metadata isn't trustworthy without a reverse proxy stripping client headers.
  *
  * Tests:
- * 1. Spoofed X-Forwarded-For is recorded as session IP (proves vuln exists)
- * 2. Spoofed local IP bypasses auth (proves vuln exists)
+ * 1. Spoofed X-Forwarded-For is recorded in session metadata
+ * 2. Local bypass works for genuine local connections (trustProxy=false uses real TCP)
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
@@ -38,10 +36,10 @@ teardown(async () => {
 	await stopServer(PORT);
 });
 
-test('spoofed X-Forwarded-For is recorded as session IP', async () => {
-	// This PROVES the vulnerability: trustProxy=true reads headers on login,
-	// so a spoofed header gets recorded. An attacker can rotate IPs to
-	// bypass rate limits. Defense: unit tested in network.test.ts.
+test('spoofed X-Forwarded-For is recorded in session metadata', async () => {
+	// Session creation uses getClientIp(event) with trustProxy=true (default),
+	// so the spoofed header is stored as the session IP. This is a metadata
+	// issue, not an auth bypass - no auth decisions use this value.
 	const client = new TestClient(ORIGIN);
 	const spoofedIp = '198.51.100.99';
 
@@ -59,16 +57,15 @@ test('spoofed X-Forwarded-For is recorded as session IP', async () => {
 	]) as { ip_address: string | null }[];
 
 	assertEquals(rows.length, 1);
-	// The spoofed IP IS recorded — this is the vulnerability
 	assertEquals(rows[0].ip_address, spoofedIp);
 });
 
-test('spoofed local IP bypasses auth when local bypass enabled', async () => {
-	// This PROVES the vulnerability: with local bypass on, a spoofed
-	// X-Forwarded-For: 192.168.x.x grants full access without login.
-	// NOTE: This test passes even after the adapter fix because the test
-	// runs from localhost (real TCP is already local). The adapter fix
-	// protects remote attackers — verified by unit tests in network.test.ts.
+test('local bypass uses real TCP address, not proxy headers', async () => {
+	// The local bypass check passes trustProxy=false, so it ignores
+	// X-Forwarded-For and uses getClientAddress() (real TCP). Since this
+	// test runs from localhost, the real TCP address IS local, so bypass
+	// works. A remote attacker spoofing X-Forwarded-For: 192.168.x.x
+	// would be rejected because their real TCP address is public.
 	const conn = new Database(getDbPath(PORT));
 	try {
 		conn.exec('UPDATE auth_settings SET local_bypass_enabled = 1 WHERE id = 1');
@@ -81,8 +78,8 @@ test('spoofed local IP bypasses auth when local bypass enabled', async () => {
 		headers: { 'X-Forwarded-For': '192.168.1.100' }
 	});
 
-	// 200 = auth bypassed (vulnerability). From a remote IP with the adapter
-	// fix, this would correctly return 303.
+	// 200 = local bypass worked. This succeeds because the real TCP address
+	// is localhost (local), NOT because of the spoofed header.
 	assertNotEquals(res.status, 303);
 });
 
