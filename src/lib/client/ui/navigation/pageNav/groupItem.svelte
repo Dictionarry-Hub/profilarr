@@ -41,7 +41,8 @@
 		<span class="nav-icon-emoji"><img src={iconSrc} alt="" class="h-3.5 w-3.5" /></span>
 	{/if}
 	{#if icon}
-		<span class="nav-icon-lucide"><svelte:component this={icon} size={14} /></span>
+		{@const Icon = icon}
+		<span class="nav-icon-lucide"><Icon size={14} /></span>
 	{/if}
 	{label}
 </a>

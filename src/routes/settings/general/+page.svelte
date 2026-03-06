@@ -303,9 +303,9 @@
 
 						<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<div>
-								<label class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 									Alert Position
-								</label>
+								</span>
 								<DropdownSelect
 									value={uiAlertPosition}
 									options={alertPositionOptions}
@@ -438,9 +438,9 @@
 						{#if backupEnabled}
 							<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 								<div>
-									<label class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+									<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 										Schedule
-									</label>
+									</span>
 									<DropdownSelect
 										value={backupSchedule}
 										options={backupScheduleOptions}
@@ -532,9 +532,9 @@
 
 							<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 								<div>
-									<label class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+									<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 										Minimum Level
-									</label>
+									</span>
 									<DropdownSelect
 										value={logMinLevel}
 										options={logLevelOptions}
