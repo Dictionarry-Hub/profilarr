@@ -34,7 +34,7 @@ export const actions: Actions = {
 		// Rate limit check
 		const rateLimit = checkRateLimit(ip, '/auth/login');
 		if (rateLimit.blocked) {
-			return fail(429, { error: 'Too many login attempts. Please try again later.' });
+			return fail(429, { error: 'Too many login attempts. Please try again later.', username: '' });
 		}
 
 		const formData = await request.formData();

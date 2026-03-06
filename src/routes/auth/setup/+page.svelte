@@ -85,7 +85,9 @@
 			>
 				<FormInput
 					name="username"
-						type="text"
+					label="Username"
+					hideLabel
+					type="text"
 					placeholder="admin"
 					autocomplete="username"
 					bind:value={username}
@@ -93,6 +95,8 @@
 
 				<FormInput
 					name="password"
+					label="Password"
+					hideLabel
 					type="password"
 					placeholder="Minimum 8 characters"
 					autocomplete="new-password"
@@ -102,6 +106,8 @@
 
 				<FormInput
 					name="confirmPassword"
+					label="Confirm Password"
+					hideLabel
 					type="password"
 					placeholder="Re-enter your password"
 					autocomplete="new-password"

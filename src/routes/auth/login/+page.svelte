@@ -61,7 +61,9 @@
 			>
 				<FormInput
 					name="username"
-						type="text"
+					label="Username"
+					hideLabel
+					type="text"
 					placeholder="Username"
 					autocomplete="username"
 					bind:value={username}
@@ -69,7 +71,9 @@
 
 				<FormInput
 					name="password"
-						type="password"
+					label="Password"
+					hideLabel
+					type="password"
 					placeholder="Password"
 					autocomplete="current-password"
 					private_
