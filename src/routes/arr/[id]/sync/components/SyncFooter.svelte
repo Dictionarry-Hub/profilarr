@@ -40,7 +40,7 @@
 					buttonSize="sm"
 					width="w-28"
 					justify="center"
-					on:change={(e) => (syncTrigger = e.detail)}
+					on:change={(e) => (syncTrigger = e.detail as typeof syncTrigger)}
 				/>
 			</div>
 
