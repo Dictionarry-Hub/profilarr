@@ -1,9 +1,9 @@
 /**
  * OIDC (OpenID Connect) utilities
- * Handles discovery, token exchange, and ID token parsing
- *
- * No external dependencies - just native fetch and crypto
+ * Handles discovery, token exchange, and ID token verification
  */
+
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 export interface DiscoveryDocument {
 	issuer: string;
@@ -26,6 +26,7 @@ export interface IdTokenClaims {
 	email?: string;
 	name?: string;
 	preferred_username?: string;
+	nonce?: string;
 	iss: string;
 	aud: string | string[];
 	exp: number;
@@ -84,6 +85,7 @@ export function buildAuthorizationUrl(
 		clientId: string;
 		redirectUri: string;
 		state: string;
+		nonce: string;
 		scope?: string;
 	}
 ): string {
@@ -92,7 +94,8 @@ export function buildAuthorizationUrl(
 		redirect_uri: opts.redirectUri,
 		response_type: 'code',
 		scope: opts.scope || 'openid email profile',
-		state: opts.state
+		state: opts.state,
+		nonce: opts.nonce
 	});
 
 	return `${authorizationEndpoint}?${params.toString()}`;
@@ -139,51 +142,23 @@ export async function exchangeCode(
 }
 
 /**
- * Decode a JWT and extract claims (no signature verification)
- *
- * Note: We trust the token because it came from a server-to-server
- * exchange using our client secret. The provider validated everything.
+ * Verify ID token signature, issuer, audience, and expiry via JWKS
+ * Returns the verified claims
  */
-export function decodeIdToken(idToken: string): IdTokenClaims {
-	const parts = idToken.split('.');
-	if (parts.length !== 3) {
-		throw new Error('Invalid JWT format');
-	}
-
-	// Base64URL decode the payload
-	const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-	const decoded = atob(payload);
-	const claims = JSON.parse(decoded) as IdTokenClaims;
-
-	return claims;
-}
-
-/**
- * Verify basic claims on the ID token
- */
-export function verifyIdToken(
-	claims: IdTokenClaims,
+export async function verifyAndDecodeIdToken(
+	idToken: string,
+	jwksUri: string,
 	opts: {
 		clientId: string;
 		issuer: string;
 	}
-): void {
-	// Verify issuer
-	if (claims.iss !== opts.issuer) {
-		throw new Error(`Invalid issuer: expected ${opts.issuer}, got ${claims.iss}`);
-	}
-
-	// Verify audience
-	const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-	if (!audiences.includes(opts.clientId)) {
-		throw new Error(`Invalid audience: token not issued for ${opts.clientId}`);
-	}
-
-	// Verify expiration
-	const now = Math.floor(Date.now() / 1000);
-	if (claims.exp && claims.exp < now) {
-		throw new Error('ID token has expired');
-	}
+): Promise<IdTokenClaims> {
+	const jwks = createRemoteJWKSet(new URL(jwksUri));
+	const { payload } = await jwtVerify(idToken, jwks, {
+		issuer: opts.issuer,
+		audience: opts.clientId
+	});
+	return payload as unknown as IdTokenClaims;
 }
 
 /**

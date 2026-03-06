@@ -1,7 +1,7 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { config } from '$config';
-import { getDiscoveryDocument, exchangeCode, decodeIdToken, verifyIdToken } from '$auth/oidc.ts';
+import { getDiscoveryDocument, exchangeCode, verifyAndDecodeIdToken } from '$auth/oidc.ts';
 import { usersQueries } from '$db/queries/users.ts';
 import { sessionsQueries } from '$db/queries/sessions.ts';
 import { authSettingsQueries } from '$db/queries/authSettings.ts';
@@ -33,7 +33,9 @@ export const GET: RequestHandler = async (event) => {
 		});
 		throw error(400, 'Invalid state parameter');
 	}
+	const savedNonce = cookies.get('oidc_nonce');
 	cookies.delete('oidc_state', { path: '/' });
+	cookies.delete('oidc_nonce', { path: '/' });
 
 	// Verify we have a code
 	if (!code) {
@@ -65,11 +67,10 @@ export const GET: RequestHandler = async (event) => {
 		throw error(500, 'Failed to exchange authorization code');
 	}
 
-	// Decode and verify ID token
+	// Verify signature and decode ID token
 	let claims;
 	try {
-		claims = decodeIdToken(tokens.id_token);
-		verifyIdToken(claims, {
+		claims = await verifyAndDecodeIdToken(tokens.id_token, discovery.jwks_uri, {
 			clientId: config.oidc.clientId,
 			issuer: discovery.issuer
 		});
@@ -79,6 +80,15 @@ export const GET: RequestHandler = async (event) => {
 			meta: { ip, error: err instanceof Error ? err.message : String(err) }
 		});
 		throw error(500, 'Failed to verify ID token');
+	}
+
+	// Verify nonce (token replay protection)
+	if (!savedNonce || claims.nonce !== savedNonce) {
+		await logger.warn('OIDC nonce mismatch (possible token replay)', {
+			source: 'Auth:OIDC',
+			meta: { ip }
+		});
+		throw error(400, 'Invalid nonce parameter');
 	}
 
 	// Get or create OIDC user (using 'sub' as unique identifier)

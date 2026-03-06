@@ -9,6 +9,7 @@
 		"@jsr/db__sqlite": "^0.12.0",
 		"croner": "^9.1.0",
 		"highlight.js": "^11.11.1",
+		"jose": "^6.2.0",
 		"kysely": "0.27.6",
 		"lucide-svelte": "^0.546.0",
 		"marked": "^15.0.6",
