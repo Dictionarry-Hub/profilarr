@@ -10,6 +10,11 @@ import { parseUserAgent } from '$auth/userAgent.ts';
 import { logger } from '$logger/logger.ts';
 
 export const load: ServerLoad = () => {
+	// AUTH=off — no local auth, setup has no purpose
+	if (config.authMode === 'off') {
+		throw redirect(303, '/');
+	}
+
 	// If local users already exist, redirect to home
 	// (OIDC users don't count - they need to create a local account to use password auth)
 	if (usersQueries.existsLocal()) {
@@ -23,8 +28,17 @@ export const actions: Actions = {
 	default: async (event) => {
 		const { request, cookies } = event;
 
+		// AUTH=off — setup not allowed
+		if (config.authMode === 'off') {
+			throw redirect(303, '/');
+		}
+
 		// Double-check no local users exist (race condition protection)
 		if (usersQueries.existsLocal()) {
+			void logger.warn('Setup attempt after user already exists', {
+				source: 'Auth:Setup',
+				meta: { ip: getClientIp(event) }
+			});
 			throw redirect(303, '/');
 		}
 
