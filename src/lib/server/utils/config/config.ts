@@ -2,7 +2,7 @@
  * Application configuration singleton
  */
 
-export type AuthMode = 'on' | 'local' | 'off' | 'oidc';
+export type AuthMode = 'on' | 'off' | 'oidc';
 
 class Config {
 	private basePath: string;
@@ -50,9 +50,10 @@ class Config {
 		// Falls back to the local server URL when unset.
 		this.origin = Deno.env.get('ORIGIN') || this.serverUrl;
 
-		// Auth mode: 'on' (default), 'local', 'off', 'oidc'
+		// Auth mode: 'on' (default), 'off', 'oidc'
+		// Note: AUTH=local is no longer an env var — use the local bypass toggle in Settings > Security
 		const auth = (Deno.env.get('AUTH') || 'on').toLowerCase();
-		this.authMode = ['on', 'local', 'off', 'oidc'].includes(auth)
+		this.authMode = ['on', 'off', 'oidc'].includes(auth)
 			? (auth as AuthMode)
 			: 'on';
 

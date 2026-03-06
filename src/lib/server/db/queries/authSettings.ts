@@ -8,6 +8,7 @@ export interface AuthSettings {
 	id: number;
 	session_duration_hours: number;
 	api_key: string | null;
+	local_bypass_enabled: number;
 	created_at: string;
 	updated_at: string;
 }
@@ -45,6 +46,24 @@ export const authSettingsQueries = {
 	 */
 	getApiKey(): string | null {
 		return this.get().api_key;
+	},
+
+	/**
+	 * Check if local bypass is enabled (skip auth for local IPs)
+	 */
+	isLocalBypassEnabled(): boolean {
+		return this.get().local_bypass_enabled === 1;
+	},
+
+	/**
+	 * Set local bypass toggle
+	 */
+	setLocalBypass(enabled: boolean): boolean {
+		const affected = db.execute(
+			'UPDATE auth_settings SET local_bypass_enabled = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1',
+			enabled ? 1 : 0
+		);
+		return affected > 0;
 	},
 
 	/**

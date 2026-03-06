@@ -19,7 +19,7 @@ export interface AuthState {
 	needsSetup: boolean;
 	user: User | null;
 	session: Session | null;
-	skipAuth: boolean; // true when AUTH=off or AUTH=local+local IP
+	skipAuth: boolean; // true when AUTH=off or local bypass+local IP
 }
 
 /**
@@ -39,8 +39,34 @@ export function getAuthState(event: RequestEvent): AuthState {
 		};
 	}
 
-	// AUTH=local - skip auth for local IPs
-	if (config.authMode === 'local') {
+	// Check API key — works for all modes except AUTH=off
+	const apiKey = event.request.headers.get('X-Api-Key');
+	if (apiKey) {
+		const ip = getClientIp(event);
+		const endpoint = event.url.pathname;
+
+		if (authSettingsQueries.validateApiKey(apiKey)) {
+			void logger.debug('API key authenticated', {
+				source: 'Auth:APIKey',
+				meta: { ip, endpoint }
+			});
+			return {
+				needsSetup: false,
+				user: { id: 0, username: 'api' } as User,
+				session: null,
+				skipAuth: false
+			};
+		} else {
+			const maskedKey = apiKey.length > 4 ? `****${apiKey.slice(-4)}` : '****';
+			void logger.warn('Invalid API key', {
+				source: 'Auth:APIKey',
+				meta: { ip, endpoint, key: maskedKey }
+			});
+		}
+	}
+
+	// Local bypass - skip auth for local IPs (DB-backed toggle)
+	if (authSettingsQueries.isLocalBypassEnabled()) {
 		const clientIp = getClientIp(event, false);
 		if (isLocalAddress(clientIp)) {
 			return {
@@ -59,43 +85,14 @@ export function getAuthState(event: RequestEvent): AuthState {
 		const user = session ? usersQueries.getById(session.user_id) ?? null : null;
 
 		return {
-			needsSetup: false, // No setup needed for OIDC
+			needsSetup: false,
 			user,
 			session,
 			skipAuth: false
 		};
 	}
 
-	// AUTH=on (default) - full username/password auth
-
-	// Check API key (header or query param)
-	const apiKey = event.request.headers.get('X-Api-Key');
-	if (apiKey) {
-		const ip = getClientIp(event);
-		const endpoint = event.url.pathname;
-
-		if (authSettingsQueries.validateApiKey(apiKey)) {
-			void logger.info('API key authenticated', {
-				source: 'Auth:APIKey',
-				meta: { ip, endpoint }
-			});
-			return {
-				needsSetup: false,
-				user: { id: 0, username: 'api' } as User,
-				session: null,
-				skipAuth: false
-			};
-		} else {
-			// Mask API key - only show last 4 chars
-			const maskedKey = apiKey.length > 4 ? `****${apiKey.slice(-4)}` : '****';
-			void logger.warn('Invalid API key', {
-				source: 'Auth:APIKey',
-				meta: { ip, endpoint, key: maskedKey }
-			});
-		}
-	}
-
-	// Check session cookie
+	// AUTH=on (default) - check session cookie
 	const sessionId = event.cookies.get('session');
 	const session = sessionId ? sessionsQueries.getValidById(sessionId) ?? null : null;
 	const user = session ? usersQueries.getById(session.user_id) ?? null : null;

@@ -56,6 +56,8 @@ import { migration as migration051 } from './migrations/051_cron_scheduling.ts';
 import { migration as migration052 } from './migrations/052_create_arr_cleanup_settings.ts';
 import { migration as migration053 } from './migrations/053_add_library_refresh_to_arr_instances.ts';
 import { migration as migration054 } from './migrations/054_remove_namespaces.ts';
+import { migration as migration055 } from './migrations/055_create_login_attempts.ts';
+import { migration as migration056 } from './migrations/056_add_local_bypass.ts';
 
 export interface Migration {
 	version: number;
@@ -330,7 +332,9 @@ export function loadMigrations(): Migration[] {
 		migration051,
 		migration052,
 		migration053,
-		migration054
+		migration054,
+		migration055,
+		migration056
 	];
 
 	// Sort by version number

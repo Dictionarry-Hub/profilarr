@@ -859,13 +859,14 @@ CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
 -- ==============================================================================
 -- TABLE: auth_settings
 -- Purpose: Store auth configuration (singleton pattern with id=1)
--- Migration: 036_create_auth_tables.ts
+-- Migration: 036_create_auth_tables.ts, 056_add_local_bypass.ts
 -- ==============================================================================
 
 CREATE TABLE auth_settings (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     session_duration_hours INTEGER NOT NULL DEFAULT 168,  -- 7 days
     api_key TEXT,                           -- For programmatic access
+    local_bypass_enabled INTEGER NOT NULL DEFAULT 0, -- Skip auth for local IPs (Migration 056)
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -882,3 +883,18 @@ CREATE TABLE setup_state (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ==============================================================================
+-- TABLE: login_attempts
+-- Purpose: Track failed login attempts for rate limiting
+-- Migration: 055_create_login_attempts.ts
+-- ==============================================================================
+
+CREATE TABLE login_attempts (
+    ip TEXT NOT NULL,
+    endpoint TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'unknown',
+    failed_at DATETIME NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX idx_login_attempts_lookup ON login_attempts(ip, endpoint, failed_at);

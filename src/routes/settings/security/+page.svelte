@@ -6,6 +6,7 @@
 	import { parseUTC } from '$shared/utils/dates';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
+	import Toggle from '$ui/toggle/Toggle.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import { alertStore } from '$alerts/store';
 	import type { Column } from '$ui/table/types';
@@ -20,6 +21,8 @@
 
 	let showApiKey = false;
 	let regeneratingKey = false;
+	let togglingBypass = false;
+	let bypassForm: HTMLFormElement;
 
 	// Handle form responses
 	$: if (form?.passwordSuccess) {
@@ -42,6 +45,9 @@
 	}
 	$: if (form?.sessionError) {
 		alertStore.add('error', form.sessionError);
+	}
+	$: if (form?.localBypassToggled) {
+		alertStore.add('success', `Local bypass ${form.localBypassEnabled ? 'enabled' : 'disabled'}`);
 	}
 
 	// Get API key from form response or data
@@ -196,6 +202,37 @@
 							disabled={changingPassword}
 						/>
 					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Local Bypass -->
+		<div class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+			<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
+				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">Local Bypass</h2>
+				<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+					Skip authentication for requests from local network addresses
+				</p>
+			</div>
+			<div class="p-6">
+				<form
+					bind:this={bypassForm}
+					method="POST"
+					action="?/toggleLocalBypass"
+					use:enhance={() => {
+						togglingBypass = true;
+						return async ({ update }) => {
+							await update();
+							togglingBypass = false;
+						};
+					}}
+				>
+					<Toggle
+						label="Allow unauthenticated access from local IPs"
+						checked={data.localBypassEnabled}
+						disabled={togglingBypass}
+						on:change={() => bypassForm.requestSubmit()}
+					/>
 				</form>
 			</div>
 		</div>

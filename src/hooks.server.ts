@@ -24,7 +24,7 @@ import {
 	maybeExtendSession,
 	cleanupExpiredSessions
 } from '$auth/middleware.ts';
-import { getClientIp } from '$auth/network.ts';
+import { cleanupExpiredAttempts } from '$auth/rateLimit.ts';
 import { setupStateQueries } from '$db/queries/setupState.ts';
 
 if (!isReload) {
@@ -81,7 +81,8 @@ if (!isReload) {
 	// Recover any syncs that were interrupted by a restart
 	await recoverInterruptedSyncs();
 
-	// Clean expired sessions on startup
+	// Clean expired sessions and login attempts on startup
+	cleanupExpiredAttempts();
 	const expiredCount = cleanupExpiredSessions();
 	if (expiredCount > 0) {
 		await logger.info(
@@ -118,7 +119,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		throw redirect(303, '/auth/setup');
 	}
 
-	// AUTH=off or AUTH=local with local IP - skip auth after setup
+	// AUTH=off or local bypass with local IP - skip auth after setup
 	if (auth.skipAuth) {
 		return resolve(event);
 	}
@@ -136,11 +137,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Not authenticated - redirect or return 401
 	if (!auth.user) {
 		if (event.url.pathname.startsWith('/api')) {
-			const ip = getClientIp(event);
-			void logger.warn('Unauthorized API access', {
-				source: 'Auth',
-				meta: { ip, endpoint: event.url.pathname, method: event.request.method }
-			});
 			return new Response(JSON.stringify({ error: 'Unauthorized' }), {
 				status: 401,
 				headers: { 'Content-Type': 'application/json' }
