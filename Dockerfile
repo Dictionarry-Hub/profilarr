@@ -112,4 +112,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 VOLUME /config
 
 # Entrypoint handles PUID/PGID/UMASK then runs the app
+# Starts as root for chown/useradd, drops to PUID via gosu before exec
+# nosemgrep: dockerfile.security.missing-user-entrypoint.missing-user-entrypoint
 ENTRYPOINT ["/entrypoint.sh"]

@@ -22,6 +22,9 @@ bruno/environments/
 # Editor
 .vscode/
 
+# Scripts (utility/dev scripts)
+scripts/
+
 # Documentation (no executable code)
 docs/
 
@@ -33,3 +36,4 @@ src/lib/api/v1.d.ts
 
 # Static assets
 static/
+src/lib/client/assets/
