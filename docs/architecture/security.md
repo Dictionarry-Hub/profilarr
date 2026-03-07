@@ -18,16 +18,18 @@
   - [Secret Stripping](#secret-stripping)
   - [XSS via Markdown / {@html}](#xss-via-markdown--html)
   - [Path Traversal](#path-traversal)
-  - [Static Analysis (Semgrep)](#static-analysis-semgrep)
 - [Test Coverage](#test-coverage)
   - [Unit Tests](#unit-tests-srctestsauth)
   - [Integration Tests](#integration-tests-srctestsintegrationspecs)
   - [E2E Tests](#e2e-tests-srctestse2especsauth)
+  - [Security Scans](#security-scans)
+    - [SAST - Semgrep](#sast--semgrep)
+    - [DAST - OWASP ZAP](#dast--owasp-zap)
   - [Infrastructure](#infrastructure)
 
 ## Overview
 
-### Why auth matters
+### Why security matters
 
 Profilarr stores credentials for connected services: arr API keys, GitHub PATs,
 AI API keys, TMDB keys, and notification webhooks.
@@ -161,9 +163,10 @@ session checks in the request flow.
 - Header: `X-Api-Key`
 - Scoped to `/api/` paths only. Browser pages and SvelteKit form actions require
   a real session. Requests with a valid API key to non-API paths get 403. This
-  prevents the API key from being used as a second admin login (e.g. regenerating
-  its own key or toggling local bypass via settings form actions). When
-  `/api/internal/` routes exist, API key auth will be excluded from those too.
+  prevents the API key from being used as a second admin login (e.g.
+  regenerating its own key or toggling local bypass via settings form actions).
+  When `/api/internal/` routes exist, API key auth will be excluded from those
+  too.
 - Key is bcrypt-hashed in the database - never stored as plaintext
 - `regenerateApiKey()` returns the plaintext key once for the user to copy; only
   the hash is persisted
@@ -283,11 +286,12 @@ accumulated attempts are never lost.
 Attempts are cleared on successful login and expired attempts are cleaned up on
 startup.
 
-Rate limiting uses the real TCP connection address (`getClientIp(event, false)`),
-not proxy headers. This prevents an attacker from bypassing the rate limit by
-rotating `X-Forwarded-For` values with each request. Session metadata (the IP
-shown in the active sessions list) still uses proxy headers so users behind a
-reverse proxy see the correct client IP for display purposes.
+Rate limiting uses the real TCP connection address
+(`getClientIp(event, false)`), not proxy headers. This prevents an attacker from
+bypassing the rate limit by rotating `X-Forwarded-For` values with each request.
+Session metadata (the IP shown in the active sessions list) still uses proxy
+headers so users behind a reverse proxy see the correct client IP for display
+purposes.
 
 ### CSRF & Reverse Proxies
 
@@ -395,20 +399,20 @@ to authenticate.
 passes all `marked.parse()` output through `sanitizeHtml()` from
 `$shared/utils/sanitize.ts` before rendering with `{@html}`. The sanitizer
 strips `<script>` tags, event handlers (`onerror`, `onclick`, etc.), and any
-tags/attributes not on an explicit allowlist. URL attributes (`href`, `src`)
-are decoded (HTML entities, whitespace) and validated against a protocol
-allowlist (`http:`, `https:`, `mailto:`) before being emitted, which prevents
+tags/attributes not on an explicit allowlist. URL attributes (`href`, `src`) are
+decoded (HTML entities, whitespace) and validated against a protocol allowlist
+(`http:`, `https:`, `mailto:`) before being emitted, which prevents
 entity-encoded (`jav&#x61;script:`) and whitespace-obfuscated (`java\nscript:`)
 bypass variants.
 
 The same `sanitizeHtml()` function is used server-side in
 `$utils/markdown/markdown.ts` for any markdown rendered in load functions.
 
-**Semgrep enforcement**: Custom rules in `.semgrep/xss.yml` flag any use of
-`marked.parse()` in Svelte files and any raw variable in `{@html}`, ensuring new
-code is reviewed for sanitisation. Because Semgrep uses regex matching for
-Svelte (no AST support), it cannot verify that sanitisation wraps the call -
-verified-safe instances use `nosemgrep` comments with justification.
+**Semgrep enforcement**: Custom rules in `tests/scan/semgrep/xss.yml` flag any
+use of `marked.parse()` in Svelte files and any raw variable in `{@html}`,
+ensuring new code is reviewed for sanitisation. Because Semgrep uses regex
+matching for Svelte (no AST support), it cannot verify that sanitisation wraps
+the call - verified-safe instances use `nosemgrep` comments with justification.
 
 ### Path Traversal
 
@@ -422,13 +426,13 @@ to escape the repository boundary and read or copy arbitrary files.
 `{ "files": ["../../etc/passwd"] }`. The server resolves this relative to the
 database's `local_path`, reads the file content via `Deno.readTextFile`, and
 sends it to the configured AI provider. The attacker exfiltrates arbitrary
-server files through the AI proxy. The commit and preview endpoints have
-similar vectors via `Deno.copyFile` and `getDiff()`.
+server files through the AI proxy. The commit and preview endpoints have similar
+vectors via `Deno.copyFile` and `getDiff()`.
 
 A subtler variant uses symlinks. A malicious PCD database maintainer commits a
 symlink (`evil -> /etc`) into their repo. Git tracks symlinks as blob entries,
-so it survives clone. A path like `evil/passwd` passes a naive lexical check
-(it resolves inside the repo directory) but follows the symlink to `/etc/passwd`
+so it survives clone. A path like `evil/passwd` passes a naive lexical check (it
+resolves inside the repo directory) but follows the symlink to `/etc/passwd`
 when the filesystem actually reads it.
 
 **Mitigation**: `validateFilePaths()` in `$utils/paths.ts` checks every
@@ -446,26 +450,81 @@ backslash-separated paths from `resolve()` on Windows.
 
 Validation is applied at three layers:
 
-- **Route handlers** (`+server.ts`, `+page.server.ts`) - early reject with
-  HTTP 400 before any work begins
+- **Route handlers** (`+server.ts`, `+page.server.ts`) - early reject with HTTP
+  400 before any work begins
 - **Exporter functions** (`previewDraftOps`, `exportDraftOps`) - defense in
   depth before clone/copy operations
 - **`getDiff()`** - defense in depth so any future callers are also protected
 
-### Static Analysis (Semgrep)
+## Test Coverage
 
-Semgrep runs as a blocking scan across the full codebase. The goal is zero
-findings. Any unresolved finding is either a real bug to fix or a false positive
-to suppress with a justification comment.
+### Unit Tests (`tests/unit/auth/`)
 
-**Running it**:
+Pure function tests for the core auth utilities - IP classification, path
+allowlisting, and login failure analysis. No server instances or network calls
+needed.
+
+| File                    | Tests                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------- |
+| `network.test.ts`       | IPv4/IPv6 local classification, boundary addresses, `getClientIp` with trustProxy on/off |
+| `publicPaths.test.ts`   | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
+| `loginAnalysis.test.ts` | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
+
+**Sanitize tests** (`tests/unit/sanitize/`):
+
+| File               | Tests                                                                                        |
+| ------------------ | -------------------------------------------------------------------------------------------- |
+| `sanitize.test.ts` | Entity-encoded/case-varied/whitespace-obfuscated javascript: bypass, allowed/disallowed tags |
+
+### Integration Tests (`tests/integration/auth/specs/`)
+
+Each spec boots an isolated server instance and tests a specific auth behaviour
+end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
+`ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
+and run in parallel via `deno task test integration`.
+
+| File                     | Port             | Tests                                                                                          |
+| ------------------------ | ---------------- | ---------------------------------------------------------------------------------------------- |
+| `health.test.ts`         | 7001             | Public health vs authenticated diagnostics, no info disclosure                                 |
+| `csrf.test.ts`           | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                   |
+| `cookie.test.ts`         | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                              |
+| `apiKey.test.ts`         | 7004             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths                          |
+| `session.test.ts`        | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection |
+| `oidc.test.ts`           | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, AUTH=on rejection, proxy flow                           |
+| `rateLimit.test.ts`      | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                             |
+| `proxy.test.ts`          | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                     |
+| `xForwardedFor.test.ts`  | 7015             | Spoofed header limited to session metadata; local bypass and login throttling use real TCP     |
+| `secretExposure.test.ts` | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                 |
+| `backupSecrets.test.ts`  | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                        |
+| `pathTraversal.test.ts`  | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints               |
+
+### E2E Tests (`tests/e2e/auth/`)
+
+Browser-level Playwright tests that drive the real user experience. Uses
+`deno task test e2e auth` with Docker Compose (mock-oauth2-server + Caddy).
+
+| File           | Tests                                                          |
+| -------------- | -------------------------------------------------------------- |
+| `oidc.spec.ts` | Full OIDC login flow in browser, both direct and through proxy |
+
+### Security Scans (`tests/scan/`)
+
+Security scans run via the test runner. Semgrep is intended to run in CI/CD as a
+blocking check. ZAP is manual-only, run periodically for spot checks.
+
+#### SAST - Semgrep
+
+Static Application Security Testing. Scans source code for vulnerabilities
+without running the application.
 
 ```bash
-deno task semgrep        # full scan: custom rules + community rulesets
-deno task semgrep:quick  # custom rules only (faster, for iteration)
+deno task test semgrep          # full scan: custom rules + community rulesets
+deno task test semgrep --quick  # custom rules only (faster, for iteration)
 ```
 
-The full scan uses `--error` so it exits non-zero on any finding.
+The full scan uses `--error` so it exits non-zero on any finding. The goal is
+zero findings - any unresolved finding is either a real bug to fix or a false
+positive to suppress with a justification comment.
 
 **Community rulesets** (from Semgrep Registry):
 
@@ -473,7 +532,7 @@ The full scan uses `--error` so it exits non-zero on any finding.
 - `p/typescript`, `p/javascript`, `p/nodejs` (language-specific)
 - `p/csharp` (for the C# parser service)
 
-**Custom rulesets** (`.semgrep/`):
+**Custom rulesets** (`tests/scan/semgrep/`):
 
 | File          | What it catches                                                                   |
 | ------------- | --------------------------------------------------------------------------------- |
@@ -506,56 +565,28 @@ same line as the `{@html}`:
   through function calls, so sanitised-but-flagged code needs `nosemgrep`
 - No dependency vulnerability scanning (Semgrep Supply Chain requires login)
 
-## Test Coverage
+#### DAST - OWASP ZAP
 
-### Unit Tests (`tests/unit/auth/`)
+Dynamic Application Security Testing. Runs a live scan against compiled
+Profilarr instances to find runtime vulnerabilities (missing headers, cookie
+issues, information disclosure, etc.). Requires `deno task build` and Docker.
 
-Pure function tests for the core auth utilities - IP classification, path
-allowlisting, and login failure analysis. No server instances or network calls
-needed.
+```bash
+deno task test zap --baseline  # passive scan (spider + check responses)
+deno task test zap --full      # passive + active attacks (SQLi, XSS, etc.)
+deno task test zap --api       # API scan against OpenAPI spec (not yet implemented)
+```
 
-| File                    | Tests                                                                                    |
-| ----------------------- | ---------------------------------------------------------------------------------------- |
-| `network.test.ts`       | IPv4/IPv6 local classification, boundary addresses, `getClientIp` with trustProxy on/off |
-| `publicPaths.test.ts`   | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
-| `loginAnalysis.test.ts` | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
+Each mode starts two servers and runs ZAP against both:
 
-**Sanitize tests** (`tests/unit/sanitize/`):
+| Port | Config   | Purpose                                       |
+| ---- | -------- | --------------------------------------------- |
+| 7090 | AUTH=on  | Unauthenticated - tests what an outsider sees |
+| 7091 | AUTH=off | Full crawl - ZAP can reach all routes         |
 
-| File               | Tests                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| `sanitize.test.ts` | Entity-encoded/case-varied/whitespace-obfuscated javascript: bypass, allowed/disallowed tags |
-
-### Integration Tests (`tests/integration/auth/specs/`)
-
-Each spec boots an isolated server instance and tests a specific auth behaviour
-end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
-`ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
-and run in parallel via `deno task test integration`.
-
-| File                     | Port             | Tests                                                                          |
-| ------------------------ | ---------------- | ------------------------------------------------------------------------------ |
-| `health.test.ts`         | 7001             | Public health vs authenticated diagnostics, no info disclosure                 |
-| `csrf.test.ts`           | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite   |
-| `cookie.test.ts`         | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration              |
-| `apiKey.test.ts`         | 7004             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths          |
-| `session.test.ts`        | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection |
-| `oidc.test.ts`           | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, AUTH=on rejection, proxy flow           |
-| `rateLimit.test.ts`      | 7007             | Suspicious/typo thresholds, successful login clears, window expiry             |
-| `proxy.test.ts`          | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy     |
-| `xForwardedFor.test.ts`  | 7015             | Spoofed header limited to session metadata; local bypass and login throttling use real TCP |
-| `secretExposure.test.ts` | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session) |
-| `backupSecrets.test.ts`  | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied        |
-| `pathTraversal.test.ts`  | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints  |
-
-### E2E Tests (`tests/e2e/auth/`)
-
-Browser-level Playwright tests that drive the real user experience. Uses
-`deno task test e2e auth` with Docker Compose (mock-oauth2-server + Caddy).
-
-| File           | Tests                                                          |
-| -------------- | -------------------------------------------------------------- |
-| `oidc.spec.ts` | Full OIDC login flow in browser, both direct and through proxy |
+The `--api` mode will scan the OpenAPI spec once the API overhaul lands (see
+`docs/todo/api-overhaul.md`). Uses the `-I` flag so warnings don't fail the
+scan - only errors do.
 
 ### Infrastructure
 
@@ -564,4 +595,4 @@ Browser-level Playwright tests that drive the real user experience. Uses
 - **Docker Compose**: mock-oauth2-server (port 9090) + Caddy (TLS termination)
   for OIDC and proxy tests
 - **Runner**: `tests/runner.ts` - unified CLI (`deno task test`) handles unit,
-  integration, and e2e with subcommands
+  integration, e2e, and security scans with subcommands

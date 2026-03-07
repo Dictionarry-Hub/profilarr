@@ -70,7 +70,7 @@
 - Optional local bypass toggle for LAN access without login
 
 API access via `X-Api-Key` header (bcrypt-hashed in DB). See
-[auth docs](docs/architecture/auth.md) for details.
+[security docs](docs/architecture/security.md) for details.
 
 ## Discord
 

@@ -20,7 +20,7 @@ docs/architecture/
 ├── rename.md           — rename processor, logging, settings
 ├── upgrades.md         — upgrade processor, filters, cooldown, dry-run
 ├── notifications.md    — notification manager, notifiers, definitions
-├── auth.md             — auth modes, sessions, OIDC, API keys
+├── security.md         — auth modes, sessions, OIDC, API keys, security scans
 ├── database.md         — app DB, migrations, queries
 ├── frontend.md         — UI components, stores, alerts, theme
 ├── utils.md            — HTTP client, arr clients, git, TMDB, AI, logger, config
@@ -49,7 +49,7 @@ docs/architecture/
 - [ ] rename.md
 - [ ] upgrades.md
 - [ ] notifications.md
-- [ ] auth.md
+- [ ] security.md
 - [ ] database.md
 - [ ] frontend.md
 - [ ] utils.md

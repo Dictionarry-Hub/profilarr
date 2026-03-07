@@ -852,7 +852,7 @@ Controlled by `AUTH` env:
 
 Local bypass is a separate DB-backed toggle (Settings > Security), not an auth mode.
 
-Details and flow diagrams live in `docs/architecture/auth.md`.
+Details and flow diagrams live in `docs/architecture/security.md`.
 
 ### 19.2 Session & API Key
 
