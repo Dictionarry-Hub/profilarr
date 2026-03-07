@@ -8,6 +8,8 @@
  *   unit            Run Deno unit tests (default when no command given)
  *   integration     Run auth integration specs (Docker + isolated servers)
  *   e2e             Run Playwright E2E tests
+ *   zap             Run OWASP ZAP security scan (requires build + Docker)
+ *   semgrep         Run Semgrep static analysis scan
  *
  * ─── Unit Tests ──────────────────────────────────────────────────────────
  *
@@ -48,6 +50,14 @@
  *   deno task test e2e auth                 OIDC flow tests (headless)
  *   deno task test e2e auth --headed        Headed
  *   deno task test e2e auth --debug         Debug
+ *
+ * ─── Scans ──────────────────────────────────────────────────────────────
+ *
+ *   deno task test zap --baseline          OWASP ZAP passive scan (build + Docker)
+ *   deno task test zap --full             OWASP ZAP passive + active scan
+ *   deno task test zap --api              API scan against OpenAPI spec (not yet implemented)
+ *   deno task test semgrep                Full semgrep scan (local + community rules)
+ *   deno task test semgrep --quick        Local rules only (tests/scan/semgrep/)
  *
  * ─── Flags ───────────────────────────────────────────────────────────────
  *
@@ -92,7 +102,7 @@ const UNIT_ALIASES: Record<string, string> = {
 
 // ─── Arg Parsing ─────────────────────────────────────────────────────────────
 
-const COMMANDS = new Set(['unit', 'integration', 'e2e']);
+const COMMANDS = new Set(['unit', 'integration', 'e2e', 'zap', 'semgrep']);
 const args = [...Deno.args];
 
 // Check for help flag anywhere
@@ -138,6 +148,10 @@ switch (command) {
 		Deno.exit(await runIntegration(remaining[0]));
 	case 'e2e':
 		Deno.exit(await runE2E(remaining, flags));
+	case 'zap':
+		Deno.exit(await runScan('tests/scan/zap/scan.ts', flags));
+	case 'semgrep':
+		Deno.exit(await runScan('tests/scan/semgrep/scan.ts', flags));
 }
 
 // ─── Unit Tests ──────────────────────────────────────────────────────────────
@@ -519,6 +533,19 @@ async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
 	return exitCode;
 }
 
+// ─── Scans ───────────────────────────────────────────────────────────────────
+
+async function runScan(script: string, passFlags: string[] = []): Promise<number> {
+	const cmd = new Deno.Command('deno', {
+		args: ['run', '--allow-all', '--no-check', script, ...passFlags],
+		stdout: 'inherit',
+		stderr: 'inherit'
+	});
+
+	const { code } = await cmd.output();
+	return code;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 async function exec(cmd: string, args: string[]): Promise<void> {
@@ -603,6 +630,8 @@ function printHelp(): void {
 		'  unit            Deno unit tests (default)',
 		'  integration     Auth integration specs',
 		'  e2e             Playwright E2E tests',
+		'  zap             OWASP ZAP security scan (build + Docker)',
+		'  semgrep         Semgrep static analysis scan',
 		'',
 		'Unit targets:',
 		'  (none)          All unit tests',
@@ -632,6 +661,13 @@ function printHelp(): void {
 		'  1.12            Single spec',
 		'  1-2             Range of major groups',
 		'  1.12,1.15       Comma-separated',
+		'',
+		'Scans:',
+		'  zap --baseline  Passive scan (spider + check responses)',
+		'  zap --full      Passive + active attacks (SQLi, XSS, etc.)',
+		'  zap --api       API scan against OpenAPI spec (not yet implemented)',
+		'  semgrep         Full scan with community rules (semgrep CLI required)',
+		'  semgrep --quick Local rules only (tests/scan/semgrep/)',
 		'',
 		'E2E flags:',
 		'  --headed        Show browser window',

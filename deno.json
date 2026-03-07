@@ -44,8 +44,6 @@
 		"test": "deno run -A tests/runner.ts",
 		"generate:api-types": "npx openapi-typescript docs/api/v1/openapi.yaml -o src/lib/api/v1.d.ts",
 		"generate:pcd-types": "deno run -A scripts/generate-pcd-types.ts",
-		"semgrep": "semgrep scan --config .semgrep/ --config p/default --config p/typescript --config p/javascript --config p/owasp-top-ten --config p/nodejs --config p/security-audit --config p/csharp --error --verbose",
-		"semgrep:quick": "semgrep scan --config .semgrep/ --error --verbose",
 		"stats": "bash scripts/stats.sh"
 	},
 	"compilerOptions": {
