@@ -18,6 +18,9 @@ export default defineConfig(
 	prettier,
 	...svelte.configs.prettier,
 	{
+		ignores: ['tests/']
+	},
+	{
 		languageOptions: {
 			globals: { ...globals.browser, ...globals.node }
 		},

@@ -1,0 +1,92 @@
+rules:
+  # Deno.Command with template literal command path
+  - id: profilarr.deno.command-template-args
+    patterns:
+      - pattern-regex: 'new Deno\.Command\(\s*`'
+    message: >
+      Deno.Command called with a template literal as the command path.
+      Command paths should be static strings. If dynamic, ensure the
+      path is validated and does not come from user input.
+    languages: [generic]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      cwe:
+        - "CWE-78: Improper Neutralization of Special Elements used in an OS Command"
+
+  # eval() or Function() constructor
+  - id: profilarr.deno.no-eval
+    patterns:
+      - pattern-either:
+          - pattern: "eval(...)"
+          - pattern: "new Function(...)"
+    message: >
+      eval() or new Function() is prohibited. These allow arbitrary
+      code execution.
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      cwe:
+        - "CWE-94: Improper Control of Generation of Code"
+
+  # File I/O with path from request/params in route handlers
+  - id: profilarr.deno.path-traversal
+    patterns:
+      - pattern-either:
+          - pattern: "Deno.readFile($PATH)"
+          - pattern: "Deno.readTextFile($PATH)"
+          - pattern: "Deno.writeFile($PATH, ...)"
+          - pattern: "Deno.writeTextFile($PATH, ...)"
+          - pattern: "Deno.remove($PATH, ...)"
+          - pattern: "Deno.mkdir($PATH, ...)"
+      - metavariable-pattern:
+          metavariable: $PATH
+          patterns:
+            - pattern-either:
+                - pattern: "params. ..."
+                - pattern: "url. ..."
+                - pattern: "request. ..."
+                - pattern: "event. ..."
+    paths:
+      include:
+        - "/src/routes/**"
+    message: >
+      File system operation using a path derived from request
+      parameters. Ensure path traversal is prevented by validating
+      the path stays within expected directories.
+    languages: [typescript]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      cwe:
+        - "CWE-22: Improper Limitation of a Pathname to a Restricted Directory"
+
+  # Logging environment variable values
+  - id: profilarr.deno.no-env-log
+    patterns:
+      - pattern-regex: 'console\.(log|info|debug|warn|error)\(.*Deno\.env\.get\('
+    paths:
+      include:
+        - "/src/**"
+    message: >
+      Environment variable value may be logged to console. Env vars
+      often contain secrets. Avoid logging their values directly.
+    languages: [generic]
+    severity: WARNING
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: LOW
+      cwe:
+        - "CWE-532: Insertion of Sensitive Information into Log File"

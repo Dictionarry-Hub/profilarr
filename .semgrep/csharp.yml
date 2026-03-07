@@ -1,0 +1,70 @@
+rules:
+  # SQL usage in parser service (architectural guardrail)
+  - id: profilarr.csharp.no-sql
+    patterns:
+      - pattern-regex: '(?i)(SqlConnection|SqlCommand|ExecuteNonQuery|ExecuteReader|SELECT\s+.*FROM|INSERT\s+INTO|UPDATE\s+.*SET|DELETE\s+FROM)'
+    paths:
+      include:
+        - "/src/services/parser/**/*.cs"
+    message: >
+      SQL detected in parser service. The parser should be stateless
+      and not access any database. SQL belongs in the TypeScript
+      server layer.
+    languages: [generic]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: HIGH
+
+  # Process.Start or command execution
+  - id: profilarr.csharp.no-process-start
+    patterns:
+      - pattern-either:
+          - pattern: "Process.Start(...)"
+          - pattern: "new ProcessStartInfo(...)"
+          - pattern: "new Process()"
+    message: >
+      Process execution in the parser service. The parser should not
+      spawn external processes. Command execution belongs in the Deno
+      server layer.
+    languages: [csharp]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      cwe:
+        - "CWE-78: Improper Neutralization of Special Elements used in an OS Command"
+
+  # File I/O in parser (review needed)
+  - id: profilarr.csharp.file-io-review
+    patterns:
+      - pattern-either:
+          - pattern: "File.ReadAllText(...)"
+          - pattern: "File.WriteAllText(...)"
+          - pattern: "File.ReadAllBytes(...)"
+          - pattern: "File.WriteAllBytes(...)"
+          - pattern: "File.Open(...)"
+          - pattern: "File.Create(...)"
+          - pattern: "File.Delete(...)"
+          - pattern: "File.Move(...)"
+          - pattern: "File.Copy(...)"
+    paths:
+      include:
+        - "/src/services/parser/**/*.cs"
+    message: >
+      File I/O in parser service. Ensure paths are validated and
+      restricted to expected directories. The parser receives input
+      via HTTP, not from the filesystem.
+    languages: [csharp]
+    severity: WARNING
+    metadata:
+      category: security
+      subcategory:
+        - audit
+      confidence: MEDIUM
+      cwe:
+        - "CWE-22: Improper Limitation of a Pathname to a Restricted Directory"

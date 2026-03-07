@@ -1,0 +1,88 @@
+rules:
+  # Flag ALL {@html} usage for awareness
+  - id: profilarr.xss.at-html-usage
+    patterns:
+      - pattern-regex: '\{@html\s+'
+    paths:
+      include:
+        - "*.svelte"
+    message: >
+      {@html} renders unescaped HTML. Ensure the content is sanitized
+      (highlight.js output is safe; marked.parse() output is NOT safe
+      without a sanitizer). If reviewed and safe, add
+      `// nosemgrep: profilarr.xss.at-html-usage` above this line.
+    languages: [generic]
+    severity: WARNING
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: LOW
+      cwe:
+        - "CWE-79: Improper Neutralization of Input During Web Page Generation"
+
+  # marked.parse() output in Svelte without sanitizer
+  - id: profilarr.xss.marked-unsanitized
+    patterns:
+      - pattern-regex: 'marked\.parse(?:Inline)?\('
+    paths:
+      include:
+        - "*.svelte"
+    message: >
+      marked.parse() or marked.parseInline() in a Svelte component.
+      If this flows to {@html}, it MUST be sanitized first. The
+      server-side sanitizeHtml() in $utils/markdown/markdown.ts is
+      NOT available client-side.
+    languages: [generic]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      cwe:
+        - "CWE-79: Improper Neutralization of Input During Web Page Generation"
+
+  # Raw variable in {@html} without any function call
+  # Catches: {@html profile.description} but NOT {@html parseMarkdown(x)}
+  - id: profilarr.xss.raw-variable-in-html
+    patterns:
+      - pattern-regex: '\{@html\s+[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*\s*\}'
+    paths:
+      include:
+        - "*.svelte"
+    message: >
+      Raw variable passed directly to {@html} without any sanitization
+      or processing function. This is almost certainly an XSS risk
+      unless the variable contains only safe HTML (e.g. highlight.js
+      output).
+    languages: [generic]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      cwe:
+        - "CWE-79: Improper Neutralization of Input During Web Page Generation"
+
+  # Table cell HTML template literal without escapeHtml
+  - id: profilarr.xss.table-cell-html-unescaped
+    patterns:
+      - pattern-regex: 'html:\s*`[^`]*\$\{(?!.*escapeHtml)[^}]+\}[^`]*`'
+    paths:
+      include:
+        - "*.svelte"
+    message: >
+      Table cell returning HTML with interpolated variable not wrapped
+      in escapeHtml(). Could allow XSS if the variable contains
+      user-controlled or PCD-sourced content.
+    languages: [generic]
+    severity: WARNING
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      cwe:
+        - "CWE-79: Improper Neutralization of Input During Web Page Generation"

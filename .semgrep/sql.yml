@@ -1,0 +1,56 @@
+rules:
+  # Template literal with variable interpolation in SQL
+  # Excludes known-safe patterns: updates.join (column SET clauses),
+  # this.migrationsTable (hardcoded private field)
+  - id: profilarr.sql.template-literal-interpolation
+    patterns:
+      - pattern-regex: 'db\.(exec|execute|query|queryFirst|prepare)\(\s*`[^`]*\$\{(?!updates\.join|this\.migrationsTable)[^}]+\}'
+    paths:
+      include:
+        - "/src/lib/server/**"
+    message: >
+      SQL statement uses template literal with variable interpolation.
+      Only static strings and known-safe patterns (updates.join for
+      SET clauses, this.migrationsTable) are acceptable. All dynamic
+      values MUST use parameterized queries (? placeholders).
+    languages: [generic]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: MEDIUM
+      cwe:
+        - "CWE-89: Improper Neutralization of Special Elements used in an SQL Command"
+
+  # db.exec() with non-literal argument
+  # Excludes migrations (execute SQL from migration objects) and
+  # PCD cache (SQL-as-configuration by design)
+  - id: profilarr.sql.exec-with-variable
+    patterns:
+      - pattern: "db.exec($ARG)"
+      - metavariable-pattern:
+          metavariable: $ARG
+          patterns:
+            - pattern-not: "\"...\""
+            - pattern-not: "'...'"
+            - pattern-not: "`...`"
+    paths:
+      include:
+        - "/src/lib/server/**"
+      exclude:
+        - "/src/lib/server/db/migrations/**"
+        - "/src/lib/server/pcd/database/cache.ts"
+    message: >
+      db.exec() called with a variable argument. db.exec() does not
+      support parameterized queries, so any dynamic content is an
+      injection risk. Use db.prepare() + bind parameters instead.
+    languages: [typescript]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory:
+        - vuln
+      confidence: HIGH
+      cwe:
+        - "CWE-89: Improper Neutralization of Special Elements used in an SQL Command"

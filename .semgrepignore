@@ -1,0 +1,35 @@
+# Build outputs
+dist/
+.svelte-kit/
+
+# Dependencies
+node_modules/
+deno.lock
+package-lock.json
+
+# .NET build artifacts
+src/services/parser/bin/
+src/services/parser/obj/
+
+# Tests
+tests/
+test-results/
+playwright-report/
+
+# Environments (may contain keys)
+bruno/environments/
+
+# Editor
+.vscode/
+
+# Documentation (no executable code)
+docs/
+
+# Research repos
+research/
+
+# Generated types
+src/lib/api/v1.d.ts
+
+# Static assets
+static/
