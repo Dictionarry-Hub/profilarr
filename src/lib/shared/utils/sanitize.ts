@@ -1,4 +1,16 @@
 /**
+ * Escape HTML special characters to prevent XSS in template literals.
+ */
+export function escapeHtml(text: string): string {
+	return text
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#039;');
+}
+
+/**
  * Simple HTML sanitizer — works in both server and client contexts.
  * Strips disallowed tags, attributes, event handlers, and javascript: URLs.
  */

@@ -6,7 +6,7 @@
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import { Tag, FileText, Layers, BookOpenText, Gauge, Earth, Copy, Download } from 'lucide-svelte';
 	import { page } from '$app/stores';
-	import { sanitizeHtml } from '$shared/utils/sanitize';
+	import { sanitizeHtml, escapeHtml } from '$shared/utils/sanitize.ts';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let profiles: QualityProfileTableRow[];
@@ -37,9 +37,10 @@
 			align: 'left',
 			sortable: true,
 			cell: (row: QualityProfileTableRow) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — all values use escapeHtml()
 				html: `
 					<div>
-						<div class="font-medium">${row.name}</div>
+						<div class="font-medium">${escapeHtml(row.name)}</div>
 						${
 							row.tags.length > 0
 								? `
@@ -48,7 +49,7 @@
 									.map(
 										(tag) => `
 									<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200">
-										${tag.name}
+										${escapeHtml(tag.name)}
 									</span>
 								`
 									)
@@ -80,12 +81,13 @@
 			width: 'w-48',
 			cell: (row: QualityProfileTableRow) => {
 				return {
+					// nosemgrep: profilarr.xss.table-cell-html-unescaped — all values use escapeHtml()
 					html: `
 						<div class="flex flex-wrap gap-1 py-1">
 							${row.qualities
 								.map(
 									(q) => `
-								<span class="${q.is_upgrade_until ? qualitySuccess : qualitySecondary}">${q.name}</span>
+								<span class="${q.is_upgrade_until ? qualitySuccess : qualitySecondary}">${escapeHtml(q.name)}</span>
 							`
 								)
 								.join('')}
@@ -101,6 +103,7 @@
 			align: 'left',
 			width: 'w-48',
 			cell: (row: QualityProfileTableRow) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — numeric counts only
 				html: `
 					<div class="text-xs space-y-1">
 						<div class="flex items-center gap-1.5">All: <span class="${labelSecondary}">${row.custom_formats.all}</span></div>
@@ -117,6 +120,7 @@
 			align: 'left',
 			width: 'w-52',
 			cell: (row: QualityProfileTableRow) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — numeric scores only
 				html: `
 					<div class="text-xs space-y-1">
 						<div class="flex items-center gap-1.5">Minimum: <span class="${labelSecondary}">${row.minimum_custom_format_score}</span></div>
@@ -142,7 +146,7 @@
 			width: 'w-40',
 			cell: (row: QualityProfileTableRow) => {
 				return {
-					html: `<span class="${labelSecondaryNoMono}">${row.language ? (row.language.name === 'Original' ? 'Any' : row.language.name) : 'Any'}</span>`
+					html: `<span class="${labelSecondaryNoMono}">${row.language ? (row.language.name === 'Original' ? 'Any' : escapeHtml(row.language.name)) : 'Any'}</span>`
 				};
 			}
 		}

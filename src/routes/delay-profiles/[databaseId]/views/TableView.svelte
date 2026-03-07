@@ -5,6 +5,7 @@
 	import type { Column } from '$ui/table/types';
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
 	import { Tag, Clock, Zap, Shield, Copy, Download } from 'lucide-svelte';
+	import { escapeHtml } from '$shared/utils/sanitize.ts';
 	import { page } from '$app/stores';
 	import { FEATURES } from '$shared/features.ts';
 
@@ -50,7 +51,7 @@
 			align: 'left',
 			sortable: true,
 			cell: (row: DelayProfilesRow) => ({
-				html: `<div class="font-medium">${row.name}</div>`
+				html: `<div class="font-medium">${escapeHtml(row.name)}</div>`
 			})
 		},
 		{
@@ -60,6 +61,7 @@
 			align: 'left',
 			width: 'w-44',
 			cell: (row: DelayProfilesRow) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — formatProtocol returns hardcoded string
 				html: `<span class="font-mono text-xs bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded">${formatProtocol(row.preferred_protocol)}</span>`
 			})
 		},
@@ -70,6 +72,7 @@
 			align: 'left',
 			width: 'w-48',
 			cell: (row: DelayProfilesRow) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — formatDelay returns hardcoded string
 				html: `
 					<div class="text-xs space-y-0.5">
 						${row.usenet_delay !== null ? `<div>Usenet: <span class="font-mono text-[10px] bg-neutral-100 dark:bg-neutral-800 px-1 rounded">${formatDelay(row.usenet_delay)}</span></div>` : ''}
@@ -98,6 +101,7 @@
 				}
 
 				return {
+					// nosemgrep: profilarr.xss.table-cell-html-unescaped — bypasses built from hardcoded strings
 					html: `
 						<div class="text-xs space-y-0.5">
 							${bypasses.map((b) => `<div class="font-mono text-[10px] bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-1.5 py-0.5 rounded inline-block">${b}</div>`).join('')}

@@ -128,6 +128,7 @@
 			header: 'IP',
 			headerIcon: Network,
 			cell: (row) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — IP from session DB, not user content
 				html: `<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">${row.ip_address ?? 'Unknown'}</span>`
 			})
 		},
@@ -136,6 +137,7 @@
 			header: 'Last Active',
 			headerIcon: Clock,
 			cell: (row) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — formatted timestamp
 				html: `<span class="text-xs text-neutral-500 dark:text-neutral-400">${formatRelativeTime(row.last_active_at)}</span>`
 			})
 		}

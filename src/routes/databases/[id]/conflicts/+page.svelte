@@ -167,6 +167,7 @@
 			header: 'Op #',
 			width: '90px',
 			cell: (row) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — internal numeric operation ID
 				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${row.opId}</span>`
 			})
 		},

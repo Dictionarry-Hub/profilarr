@@ -154,6 +154,7 @@ class PCDManager {
 			await Deno.remove(instance.local_path, { recursive: true });
 		} catch (error) {
 			// Log but don't throw - database entry is already deleted
+			// nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring — JS template literals don't interpret format specifiers
 			console.error(`Failed to remove PCD directory ${instance.local_path}:`, error);
 		}
 	}

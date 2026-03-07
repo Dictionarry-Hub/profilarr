@@ -162,7 +162,7 @@ export const load: ServerLoad = async ({ params }) => {
 					conditions: evaluation.conditions
 				};
 			} catch (e) {
-				console.error(`Failed to evaluate test "${test.title}":`, e);
+				console.error(`Failed to evaluate test "${test.title}":`, e); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
 				return {
 					...test,
 					actual_match: null,

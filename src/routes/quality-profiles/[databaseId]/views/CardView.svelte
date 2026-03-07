@@ -75,7 +75,7 @@
 
 				{#if profile.description}
 					<div class="description text-xs text-neutral-600 dark:text-neutral-400">
-						{@html sanitizeHtml(profile.description)}
+						{@html sanitizeHtml(profile.description)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 					</div>
 				{/if}
 

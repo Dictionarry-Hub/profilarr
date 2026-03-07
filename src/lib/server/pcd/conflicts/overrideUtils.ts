@@ -149,6 +149,7 @@ function extractRenamesFromSql(
 	// Regex: UPDATE "tableName" SET "name" = 'newName' WHERE "name" = 'oldName'
 	// SQL single-quote escaping: '' represents a literal '
 	const escaped = tableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	// nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp — tableName is from hardcoded callers and regex-escaped
 	const pattern = new RegExp(
 		`update\\s+"${escaped}"\\s+set\\s+"name"\\s*=\\s*'((?:[^']|'')*)'\\s+where\\s+"name"\\s*=\\s*'((?:[^']|'')*)'`,
 		'gi'

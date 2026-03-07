@@ -26,7 +26,7 @@
 
 	function parseMarkdown(text: string | null): string {
 		if (!text) return '';
-		return sanitizeHtml(marked.parseInline(text) as string);
+		return sanitizeHtml(marked.parseInline(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
 	}
 
 	function getConditionVariant(
@@ -90,7 +90,7 @@
 				<!-- Description -->
 				{#if format.description}
 					<div class="prose-inline line-clamp-2 text-xs text-neutral-600 dark:text-neutral-400">
-						{@html parseMarkdown(format.description)}
+						{@html parseMarkdown(format.description)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 					</div>
 				{:else}
 					<div class="text-xs text-neutral-400 italic dark:text-neutral-500">No description</div>

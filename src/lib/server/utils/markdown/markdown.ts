@@ -3,7 +3,7 @@
  */
 
 import { marked } from 'marked';
-import { sanitizeHtml } from '$shared/utils/sanitize';
+import { sanitizeHtml } from '$shared/utils/sanitize.ts';
 
 /**
  * Parse markdown to sanitized HTML

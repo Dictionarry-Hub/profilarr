@@ -31,7 +31,7 @@
 
 	function parseMarkdown(text: string | null): string {
 		if (!text) return '';
-		return sanitizeHtml(marked.parseInline(text) as string);
+		return sanitizeHtml(marked.parseInline(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
 	}
 
 	const columns: Column<RegularExpressionWithTags>[] = [
@@ -43,6 +43,7 @@
 			sortable: true,
 			width: 'w-48',
 			cell: (row: RegularExpressionWithTags) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — all values use escapeHtml()
 				html: `
 					<div>
 						<div class="font-medium">${escapeHtml(row.name)}</div>

@@ -17,7 +17,7 @@ public static class Startup
         // Check for docker in cgroup (fallback)
         try
         {
-            var cgroup = File.ReadAllText("/proc/1/cgroup");
+            var cgroup = File.ReadAllText("/proc/1/cgroup"); // nosemgrep: profilarr.csharp.file-io-review — hardcoded system path for Docker detection
             return cgroup.Contains("docker");
         }
         catch

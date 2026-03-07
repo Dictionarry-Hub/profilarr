@@ -31,6 +31,7 @@
 			header: 'Type',
 			sortable: false,
 			cell: (row) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — hardcoded labels, not user content
 				html: `<span class="${badgeBase} ${badgeAccent}">${typeLabels[row.valueType] || row.valueType}</span>`
 			})
 		},
@@ -40,6 +41,7 @@
 			header: 'Operators',
 			sortable: false,
 			cell: (row) => ({
+				// nosemgrep: profilarr.xss.table-cell-html-unescaped — hardcoded labels, not user content
 				html: row.operators
 					.map((op) => `<span class="${badgeBase} ${badgeNeutral}">${op.label}</span>`)
 					.join(' ')
