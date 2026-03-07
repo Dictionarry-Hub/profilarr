@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { getDiff } from '$utils/git/index.ts';
+import { validateFilePaths } from '$utils/paths.ts';
 import { isAIEnabled, generateCommitMessage } from '$utils/ai/client.ts';
 
 export const POST: RequestHandler = async ({ params, request }) => {
@@ -18,6 +19,14 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
 	const body = await request.json();
 	const files = body.files as string[] | undefined;
+
+	if (files && files.length > 0) {
+		try {
+			validateFilePaths(database.local_path, files);
+		} catch {
+			error(400, 'Invalid file path');
+		}
+	}
 
 	const diff = await getDiff(database.local_path, files);
 

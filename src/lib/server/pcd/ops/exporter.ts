@@ -10,6 +10,7 @@ import { syncDependencies } from '../git/dependencies.ts';
 import { canWriteToBase } from './writer.ts';
 import { listDraftEntityChanges } from './draftChanges.ts';
 import { uuid } from '$shared/utils/uuid.ts';
+import { validateFilePaths } from '$utils/paths.ts';
 import { getMaxOpNumber } from '$pcd/utils/git.ts';
 import { loadManifest } from '$pcd/manifest/manifest.ts';
 
@@ -442,6 +443,14 @@ export async function previewDraftOps(
 		return { success: false, error: 'No changes selected' };
 	}
 
+	if (filePaths.length > 0) {
+		try {
+			validateFilePaths(database.local_path, filePaths);
+		} catch {
+			return { success: false, error: 'Invalid file path' };
+		}
+	}
+
 	const trimmedMessage = message.trim();
 	if (!trimmedMessage) {
 		return { success: false, error: 'Commit message is required' };
@@ -522,6 +531,14 @@ export async function exportDraftOps(
 
 	if (opIds.length === 0 && filePaths.length === 0) {
 		return { success: false, error: 'No changes selected' };
+	}
+
+	if (filePaths.length > 0) {
+		try {
+			validateFilePaths(database.local_path, filePaths);
+		} catch {
+			return { success: false, error: 'Invalid file path' };
+		}
 	}
 
 	const preflight = await runPreflight(databaseId);

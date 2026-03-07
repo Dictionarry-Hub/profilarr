@@ -4,6 +4,7 @@
 
 import { execGit, execGitSafe } from './exec.ts';
 import { fetch } from './write.ts';
+import { validateFilePaths } from '../paths.ts';
 import type { GitStatus, UpdateInfo, Commit, IncomingChanges } from './types.ts';
 
 function normalizeAuthorName(name: string): string {
@@ -155,6 +156,7 @@ export async function getDiff(repoPath: string, filepaths?: string[]): Promise<s
 	const diffs: string[] = [];
 
 	if (filepaths && filepaths.length > 0) {
+		validateFilePaths(repoPath, filepaths);
 		for (const filepath of filepaths) {
 			const relativePath = filepath.startsWith(repoPath + '/')
 				? filepath.slice(repoPath.length + 1)

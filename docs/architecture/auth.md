@@ -17,11 +17,12 @@
   - [Protected Paths](#protected-paths)
   - [Secret Stripping](#secret-stripping)
   - [XSS via Markdown / {@html}](#xss-via-markdown--html)
+  - [Path Traversal](#path-traversal)
   - [Static Analysis (Semgrep)](#static-analysis-semgrep)
 - [Test Coverage](#test-coverage)
   - [Unit Tests](#unit-tests-srctestsauth)
   - [Integration Tests](#integration-tests-srctestsintegrationspecs)
-  - [E2E Tests](#e2e-tests-srctestse2especsauth)B
+  - [E2E Tests](#e2e-tests-srctestse2especsauth)
   - [Infrastructure](#infrastructure)
 
 ## Overview
@@ -394,6 +395,48 @@ code is reviewed for sanitisation. Because Semgrep uses regex matching for
 Svelte (no AST support), it cannot verify that sanitisation wraps the call -
 verified-safe instances use `nosemgrep` comments with justification.
 
+### Path Traversal
+
+Several endpoints accept client-supplied file paths (for selective commits,
+previews, and AI commit message generation). Without validation, an attacker
+with a valid session or API key could use `../../` sequences or absolute paths
+to escape the repository boundary and read or copy arbitrary files.
+
+**The attack**: An authenticated user sends a POST to
+`/api/databases/[id]/generate-commit-message` with
+`{ "files": ["../../etc/passwd"] }`. The server resolves this relative to the
+database's `local_path`, reads the file content via `Deno.readTextFile`, and
+sends it to the configured AI provider. The attacker exfiltrates arbitrary
+server files through the AI proxy. The commit and preview endpoints have
+similar vectors via `Deno.copyFile` and `getDiff()`.
+
+A subtler variant uses symlinks. A malicious PCD database maintainer commits a
+symlink (`evil -> /etc`) into their repo. Git tracks symlinks as blob entries,
+so it survives clone. A path like `evil/passwd` passes a naive lexical check
+(it resolves inside the repo directory) but follows the symlink to `/etc/passwd`
+when the filesystem actually reads it.
+
+**Mitigation**: `validateFilePaths()` in `$utils/paths.ts` checks every
+client-supplied path before any filesystem operation:
+
+1. Rejects absolute paths (`/etc/passwd`)
+2. Resolves relative paths against the repo root and verifies the result stays
+   within the boundary (lexical `startsWith` check)
+3. Follows symlinks via `Deno.realPathSync()` and verifies the real path is
+   still within the boundary (catches symlink escapes)
+
+**Known limitation**: The boundary check uses POSIX path separators (`/`). If
+Windows becomes a supported deployment target, this will need to handle
+backslash-separated paths from `resolve()` on Windows.
+
+Validation is applied at three layers:
+
+- **Route handlers** (`+server.ts`, `+page.server.ts`) - early reject with
+  HTTP 400 before any work begins
+- **Exporter functions** (`previewDraftOps`, `exportDraftOps`) - defense in
+  depth before clone/copy operations
+- **`getDiff()`** - defense in depth so any future callers are also protected
+
 ### Static Analysis (Semgrep)
 
 Semgrep runs as a blocking scan across the full codebase. The goal is zero
@@ -482,6 +525,7 @@ and run in parallel via `deno task test integration`.
 | `xForwardedFor.test.ts`  | 7015             | Spoofed header in session metadata, local bypass uses real TCP not headers     |
 | `secretExposure.test.ts` | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session) |
 | `backupSecrets.test.ts`  | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied        |
+| `pathTraversal.test.ts`  | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints  |
 
 ### E2E Tests (`tests/e2e/auth/`)
 
