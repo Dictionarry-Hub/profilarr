@@ -278,6 +278,12 @@ accumulated attempts are never lost.
 Attempts are cleared on successful login and expired attempts are cleaned up on
 startup.
 
+Rate limiting uses the real TCP connection address (`getClientIp(event, false)`),
+not proxy headers. This prevents an attacker from bypassing the rate limit by
+rotating `X-Forwarded-For` values with each request. Session metadata (the IP
+shown in the active sessions list) still uses proxy headers so users behind a
+reverse proxy see the correct client IP for display purposes.
+
 ### CSRF & Reverse Proxies
 
 SvelteKit's CSRF check compares the `Origin` request header against
@@ -522,7 +528,7 @@ and run in parallel via `deno task test integration`.
 | `oidc.test.ts`           | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, AUTH=on rejection, proxy flow           |
 | `rateLimit.test.ts`      | 7007             | Suspicious/typo thresholds, successful login clears, window expiry             |
 | `proxy.test.ts`          | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy     |
-| `xForwardedFor.test.ts`  | 7015             | Spoofed header in session metadata, local bypass uses real TCP not headers     |
+| `xForwardedFor.test.ts`  | 7015             | Spoofed header limited to session metadata; local bypass and login throttling use real TCP |
 | `secretExposure.test.ts` | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session) |
 | `backupSecrets.test.ts`  | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied        |
 | `pathTraversal.test.ts`  | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints  |

@@ -33,7 +33,8 @@ export const load: ServerLoad = () => {
 export const actions: Actions = {
 	default: async (event) => {
 		const { request, cookies } = event;
-		const ip = getClientIp(event);
+		const ip = getClientIp(event, false);
+		const displayIp = getClientIp(event);
 
 		// Rate limit check
 		const rateLimit = checkRateLimit(ip, '/auth/login');
@@ -93,7 +94,7 @@ export const actions: Actions = {
 		// Create session with metadata
 		const durationHours = authSettingsQueries.getSessionDurationHours();
 		const sessionId = sessionsQueries.create(user.id, durationHours, {
-			ipAddress: ip,
+			ipAddress: displayIp,
 			userAgent,
 			browser: parsed.browser,
 			os: parsed.os,

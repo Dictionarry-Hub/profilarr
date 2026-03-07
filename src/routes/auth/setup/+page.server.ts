@@ -37,7 +37,7 @@ export const actions: Actions = {
 		if (usersQueries.existsLocal()) {
 			void logger.warn('Setup attempt after user already exists', {
 				source: 'Auth:Setup',
-				meta: { ip: getClientIp(event) }
+				meta: { ip: getClientIp(event, false) }
 			});
 			throw redirect(303, '/');
 		}

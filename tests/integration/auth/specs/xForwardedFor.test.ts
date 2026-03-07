@@ -15,12 +15,14 @@
  * Tests:
  * 1. Spoofed X-Forwarded-For is recorded in session metadata
  * 2. Local bypass works for genuine local connections (trustProxy=false uses real TCP)
+ * 3. Rate limit not bypassed by rotating X-Forwarded-For
+ * 4. Failed login attempts recorded under real IP, not spoofed header
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '../harness/client.ts';
 import { startServer, stopServer, getDbPath } from '../harness/server.ts';
-import { createUserDirect, queryDb } from '../harness/setup.ts';
+import { createUserDirect, clearLoginAttempts, queryDb } from '../harness/setup.ts';
 import { setup, teardown, test, run } from '../harness/runner.ts';
 import { Database } from 'jsr:@db/sqlite@0.12';
 
@@ -81,6 +83,65 @@ test('local bypass uses real TCP address, not proxy headers', async () => {
 	// 200 = local bypass worked. This succeeds because the real TCP address
 	// is localhost (local), NOT because of the spoofed header.
 	assertNotEquals(res.status, 303);
+});
+
+test('rate limit not bypassed by rotating X-Forwarded-For', async () => {
+	// Each attempt uses a different spoofed IP. If the server trusts these
+	// headers for rate limiting, each attempt lands under a different counter
+	// and the threshold is never reached. The fix: rate limiting should use
+	// the real TCP address, so all attempts count against 127.0.0.1.
+	clearLoginAttempts(getDbPath(PORT));
+
+	// "root" is a suspicious attack username that doesn't exist — threshold is 3
+	for (let i = 0; i < 3; i++) {
+		const client = new TestClient(ORIGIN);
+		await client.postForm(
+			'/auth/login',
+			{ username: 'root', password: 'wrong' },
+			{ headers: { Origin: ORIGIN, 'X-Forwarded-For': `198.51.100.${i + 1}` } }
+		);
+	}
+
+	// 4th attempt with yet another spoofed IP — should still be blocked
+	const client = new TestClient(ORIGIN);
+	const res = await client.postForm(
+		'/auth/login',
+		{ username: 'root', password: 'wrong' },
+		{ headers: { Origin: ORIGIN, 'X-Forwarded-For': '198.51.100.99' } }
+	);
+	const body = await res.text();
+	try {
+		const parsed = JSON.parse(body);
+		assertEquals(
+			parsed.status,
+			429,
+			`Expected rate limit 429 despite rotating X-Forwarded-For, got ${parsed.status}`
+		);
+	} catch {
+		assertEquals(res.status, 429, `Expected 429, got ${res.status}`);
+	}
+});
+
+test('failed login attempts recorded under real IP, not spoofed header', async () => {
+	clearLoginAttempts(getDbPath(PORT));
+
+	const client = new TestClient(ORIGIN);
+	await client.postForm(
+		'/auth/login',
+		{ username: 'root', password: 'wrong' },
+		{ headers: { Origin: ORIGIN, 'X-Forwarded-For': '198.51.100.1' } }
+	);
+
+	const rows = queryDb(getDbPath(PORT), 'SELECT ip FROM login_attempts ORDER BY rowid DESC LIMIT 1') as {
+		ip: string;
+	}[];
+	assertEquals(rows.length, 1);
+	// Should be the real TCP address (127.0.0.1), not the spoofed header
+	assertNotEquals(
+		rows[0].ip,
+		'198.51.100.1',
+		'login_attempts should record real TCP IP, not spoofed X-Forwarded-For'
+	);
 });
 
 await run();

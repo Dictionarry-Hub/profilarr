@@ -26,7 +26,7 @@ export const GET: RequestHandler = async (event) => {
 	// Verify state (CSRF protection)
 	const savedState = cookies.get('oidc_state');
 	if (!state || state !== savedState) {
-		const ip = getClientIp(event);
+		const ip = getClientIp(event, false);
 		await logger.warn('OIDC state mismatch (possible CSRF attempt)', {
 			source: 'Auth:OIDC',
 			meta: { ip }
@@ -51,7 +51,7 @@ export const GET: RequestHandler = async (event) => {
 	const discovery = await getDiscoveryDocument(config.oidc.discoveryUrl);
 
 	// Exchange code for tokens
-	const ip = getClientIp(event);
+	const ip = getClientIp(event, false);
 	let tokens;
 	try {
 		tokens = await exchangeCode(discovery.token_endpoint, code, {

@@ -7,7 +7,7 @@ import { logger } from '$logger/logger.ts';
 
 export const GET: RequestHandler = async (event) => {
 	const { cookies } = event;
-	const ip = getClientIp(event);
+	const ip = getClientIp(event, false);
 
 	// Validate OIDC configuration
 	if (config.authMode !== 'oidc') {

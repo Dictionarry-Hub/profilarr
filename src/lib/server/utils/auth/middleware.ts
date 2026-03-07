@@ -42,7 +42,7 @@ export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 	// Check API key — works for all modes except AUTH=off
 	const apiKey = event.request.headers.get('X-Api-Key');
 	if (apiKey) {
-		const ip = getClientIp(event);
+		const ip = getClientIp(event, false);
 		const endpoint = event.url.pathname;
 
 		if (await authSettingsQueries.validateApiKey(apiKey)) {
