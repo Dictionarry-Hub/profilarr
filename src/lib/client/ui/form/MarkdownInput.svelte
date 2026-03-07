@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Bold, Italic, List, ListOrdered, Link, Code, Eye, Edit3 } from 'lucide-svelte';
 	import { marked } from 'marked';
+	import { sanitizeHtml } from '$shared/utils/sanitize';
 
 	// Props
 	export let value: string = '';
@@ -113,7 +114,7 @@
 	function renderMarkdown(text: string): string {
 		if (!text)
 			return '<p class="text-neutral-400 dark:text-neutral-500 italic">Nothing to preview</p>';
-		return marked.parse(text) as string;
+		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
 	}
 
 	const toolbarButtons = [
@@ -205,7 +206,7 @@
 			<div
 				class="prose prose-sm max-w-none rounded-b-xl border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-100"
 			>
-				{@html renderMarkdown(value)}
+				{@html renderMarkdown(value)} <!-- nosemgrep: profilarr.xss.at-html-usage — renderMarkdown applies sanitizeHtml -->
 			</div>
 			{#if name}
 				<input type="hidden" {name} {value} />

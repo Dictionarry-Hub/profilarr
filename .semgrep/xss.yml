@@ -5,7 +5,7 @@ rules:
       - pattern-regex: '\{@html\s+'
     paths:
       include:
-        - "*.svelte"
+        - "**/*.svelte"
     message: >
       {@html} renders unescaped HTML. Ensure the content is sanitized
       (highlight.js output is safe; marked.parse() output is NOT safe
@@ -27,7 +27,7 @@ rules:
       - pattern-regex: 'marked\.parse(?:Inline)?\('
     paths:
       include:
-        - "*.svelte"
+        - "**/*.svelte"
     message: >
       marked.parse() or marked.parseInline() in a Svelte component.
       If this flows to {@html}, it MUST be sanitized first. The
@@ -50,7 +50,7 @@ rules:
       - pattern-regex: '\{@html\s+[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*\s*\}'
     paths:
       include:
-        - "*.svelte"
+        - "**/*.svelte"
     message: >
       Raw variable passed directly to {@html} without any sanitization
       or processing function. This is almost certainly an XSS risk
@@ -72,7 +72,7 @@ rules:
       - pattern-regex: 'html:\s*`[^`]*\$\{(?!.*escapeHtml)[^}]+\}[^`]*`'
     paths:
       include:
-        - "*.svelte"
+        - "**/*.svelte"
     message: >
       Table cell returning HTML with interpolated variable not wrapped
       in escapeHtml(). Could allow XSS if the variable contains

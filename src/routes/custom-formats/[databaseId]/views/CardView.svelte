@@ -3,6 +3,7 @@
 	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
 	import { FlaskConical, Copy, Download } from 'lucide-svelte';
 	import { marked } from 'marked';
+	import { sanitizeHtml } from '$shared/utils/sanitize';
 	import { page } from '$app/stores';
 	import { sortConditions } from '$shared/pcd/conditions';
 	import CardGrid from '$ui/card/CardGrid.svelte';
@@ -25,7 +26,7 @@
 
 	function parseMarkdown(text: string | null): string {
 		if (!text) return '';
-		return marked.parseInline(text) as string;
+		return sanitizeHtml(marked.parseInline(text) as string);
 	}
 
 	function getConditionVariant(

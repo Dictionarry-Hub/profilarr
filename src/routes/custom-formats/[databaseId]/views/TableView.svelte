@@ -6,6 +6,7 @@
 	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
 	import { Tag, FileText, Layers, FlaskConical, Copy, Download } from 'lucide-svelte';
 	import { marked } from 'marked';
+	import { sanitizeHtml } from '$shared/utils/sanitize';
 	import { page } from '$app/stores';
 	import { sortConditions } from '$shared/pcd/conditions';
 	import { FEATURES } from '$shared/features.ts';
@@ -31,7 +32,7 @@
 
 	function parseMarkdown(text: string | null): string {
 		if (!text) return '';
-		return marked.parseInline(text) as string;
+		return sanitizeHtml(marked.parseInline(text) as string);
 	}
 
 	const columns: Column<CustomFormatTableRow>[] = [

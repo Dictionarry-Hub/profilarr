@@ -8,6 +8,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
+	import { sanitizeHtml } from '$shared/utils/sanitize';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let profiles: QualityProfileTableRow[];
@@ -74,7 +75,7 @@
 
 				{#if profile.description}
 					<div class="description text-xs text-neutral-600 dark:text-neutral-400">
-						{@html profile.description}
+						{@html sanitizeHtml(profile.description)}
 					</div>
 				{/if}
 

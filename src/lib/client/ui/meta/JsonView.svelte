@@ -36,7 +36,7 @@
 <div class="json-view space-y-4">
 	<!-- JSON metadata -->
 	<pre class="!m-0 !bg-transparent !p-0 font-mono whitespace-pre-wrap"><code class="hljs font-mono"
-			>{@html highlightedJson}</code
+			>{@html highlightedJson}</code <!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — highlight.js HTML-encodes output -->
 		></pre>
 
 	<!-- SQL Queries -->
@@ -53,7 +53,7 @@
 						class="rounded border border-neutral-200 bg-neutral-100 p-3 dark:border-neutral-600 dark:bg-neutral-900"
 					>
 						<pre class="!m-0 !bg-transparent !p-0 font-mono text-xs whitespace-pre-wrap"><code
-								class="hljs font-mono">{@html highlightSql(query)}</code
+								class="hljs font-mono">{@html highlightSql(query)}</code <!-- nosemgrep: profilarr.xss.at-html-usage — highlight.js HTML-encodes output -->
 							></pre>
 					</div>
 				{/each}

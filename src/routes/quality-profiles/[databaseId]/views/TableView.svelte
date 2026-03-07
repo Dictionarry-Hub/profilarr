@@ -6,6 +6,7 @@
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import { Tag, FileText, Layers, BookOpenText, Gauge, Earth, Copy, Download } from 'lucide-svelte';
 	import { page } from '$app/stores';
+	import { sanitizeHtml } from '$shared/utils/sanitize';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let profiles: QualityProfileTableRow[];
@@ -66,7 +67,9 @@
 			headerIcon: FileText,
 			align: 'left',
 			cell: (row: QualityProfileTableRow) => ({
-				html: row.description || '<span class="text-neutral-400">No description</span>'
+				html: row.description
+					? sanitizeHtml(row.description)
+					: '<span class="text-neutral-400">No description</span>'
 			})
 		},
 		{
