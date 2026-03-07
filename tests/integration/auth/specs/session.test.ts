@@ -10,6 +10,8 @@
  * 3. Expired session → 303 redirect to /auth/login
  * 4. Unauthenticated API route → 401 JSON (not redirect)
  * 5. Sliding expiration — session past halfway gets extended
+ * 6. GET /auth/logout → 405 (must be POST to prevent CSRF)
+ * 7. POST /auth/logout without Origin → 403 (SvelteKit CSRF)
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
@@ -89,6 +91,23 @@ test('sliding expiration — session past halfway gets extended', async () => {
 
 	const expiryAfter = getSessionExpiry(dbPath, sessionId)!;
 	assertNotEquals(expiryBefore, expiryAfter);
+});
+
+// --- Logout CSRF protection (SA-07) ---
+
+test('GET /auth/logout — 405 method not allowed', async () => {
+	const client = new TestClient(ORIGIN);
+	await login(client, 'admin', 'password123', ORIGIN);
+	const res = await client.get('/auth/logout');
+	assertEquals(res.status, 405, `Expected 405 for GET logout, got ${res.status}`);
+});
+
+test('POST /auth/logout without Origin — blocked by CSRF', async () => {
+	const client = new TestClient(ORIGIN);
+	await login(client, 'admin', 'password123', ORIGIN);
+	// No Origin header = SvelteKit CSRF rejection
+	const res = await client.postForm('/auth/logout', {});
+	assertEquals(res.status, 403, `Expected 403 for POST without Origin, got ${res.status}`);
 });
 
 await run();

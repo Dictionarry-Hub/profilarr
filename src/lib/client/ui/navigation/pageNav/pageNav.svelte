@@ -185,7 +185,16 @@
 			<GroupItem label="Notifications" href="/settings/notifications" />
 			<GroupItem label="Security" href="/settings/security" />
 			<GroupItem label="About" href="/settings/about" />
-			<GroupItem label="Log Out" href="/auth/logout" />
+			<GroupItem
+				label="Log Out"
+				href="/auth/logout"
+				onclick={(e) => {
+					e.preventDefault();
+					fetch('/auth/logout', { method: 'POST' }).then(() => {
+						window.location.href = '/auth/login';
+					});
+				}}
+			/>
 		</Group>
 
 		<!-- Version scrolls with content on mobile -->

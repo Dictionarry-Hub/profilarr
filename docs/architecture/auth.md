@@ -393,9 +393,13 @@ to authenticate.
 
 **Mitigation**: The `Markdown.svelte` component (the primary markdown renderer)
 passes all `marked.parse()` output through `sanitizeHtml()` from
-`$shared/utils/sanitize.ts` before rendering with `{@html}`. The sanitiser
-strips `<script>` tags, event handlers (`onerror`, `onclick`, etc.),
-`javascript:` URLs, and any tags/attributes not on an explicit allowlist.
+`$shared/utils/sanitize.ts` before rendering with `{@html}`. The sanitizer
+strips `<script>` tags, event handlers (`onerror`, `onclick`, etc.), and any
+tags/attributes not on an explicit allowlist. URL attributes (`href`, `src`)
+are decoded (HTML entities, whitespace) and validated against a protocol
+allowlist (`http:`, `https:`, `mailto:`) before being emitted, which prevents
+entity-encoded (`jav&#x61;script:`) and whitespace-obfuscated (`java\nscript:`)
+bypass variants.
 
 The same `sanitizeHtml()` function is used server-side in
 `$utils/markdown/markdown.ts` for any markdown rendered in load functions.
@@ -516,6 +520,12 @@ needed.
 | `publicPaths.test.ts`   | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
 | `loginAnalysis.test.ts` | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
 
+**Sanitize tests** (`tests/unit/sanitize/`):
+
+| File               | Tests                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| `sanitize.test.ts` | Entity-encoded/case-varied/whitespace-obfuscated javascript: bypass, allowed/disallowed tags |
+
 ### Integration Tests (`tests/integration/auth/specs/`)
 
 Each spec boots an isolated server instance and tests a specific auth behaviour
@@ -529,7 +539,7 @@ and run in parallel via `deno task test integration`.
 | `csrf.test.ts`           | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite   |
 | `cookie.test.ts`         | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration              |
 | `apiKey.test.ts`         | 7004             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths          |
-| `session.test.ts`        | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON         |
+| `session.test.ts`        | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection |
 | `oidc.test.ts`           | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, AUTH=on rejection, proxy flow           |
 | `rateLimit.test.ts`      | 7007             | Suspicious/typo thresholds, successful login clears, window expiry             |
 | `proxy.test.ts`          | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy     |

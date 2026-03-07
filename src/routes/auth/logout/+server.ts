@@ -4,7 +4,7 @@ import { sessionsQueries } from '$db/queries/sessions.ts';
 import { usersQueries } from '$db/queries/users.ts';
 import { logger } from '$logger/logger.ts';
 
-export const GET: RequestHandler = async ({ cookies }) => {
+export const POST: RequestHandler = async ({ cookies }) => {
 	const sessionId = cookies.get('session');
 
 	if (sessionId) {

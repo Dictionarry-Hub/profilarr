@@ -11,9 +11,11 @@
 		icon?: ComponentType;
 		/** Optional SVG image source URL */
 		iconSrc?: string;
+		/** Optional click handler (use e.preventDefault() to override navigation) */
+		onclick?: (e: MouseEvent) => void;
 	}
 
-	let { label, href, activePattern, icon, iconSrc }: Props = $props();
+	let { label, href, activePattern, icon, iconSrc, onclick }: Props = $props();
 
 	const isActive = $derived.by(() => {
 		const pathname = $page.url.pathname;
@@ -33,6 +35,7 @@
 
 <a
 	{href}
+	{onclick}
 	class="flex items-center gap-2 rounded-lg py-1.5 pr-2 pl-3 font-sans text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 {isActive
 		? 'bg-neutral-200 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
 		: ''}"
