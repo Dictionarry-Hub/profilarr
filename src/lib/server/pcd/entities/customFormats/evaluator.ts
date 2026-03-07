@@ -20,26 +20,54 @@ import type {
 } from '$shared/pcd/display.ts';
 
 /**
- * Extract all unique regex patterns from custom format conditions
- * These are patterns that need to be matched against release titles
+ * Patterns grouped by condition type — each type matches against different text
  */
-export function extractAllPatterns(customFormats: CustomFormatWithConditions[]): string[] {
-	const patterns = new Set<string>();
+export interface PatternsByType {
+	title: string[];
+	edition: string[];
+	releaseGroup: string[];
+}
+
+/**
+ * Pre-computed pattern match results from the C# parser, keyed by pattern string
+ */
+export interface PatternMatchMaps {
+	title: Map<string, boolean>;
+	edition: Map<string, boolean>;
+	releaseGroup: Map<string, boolean>;
+}
+
+/**
+ * Extract unique regex patterns from custom format conditions, grouped by type.
+ * Each type's patterns need to be matched against different text:
+ * - title patterns → full release title
+ * - edition patterns → parsed edition string
+ * - releaseGroup patterns → parsed release group string
+ */
+export function extractPatternsByType(customFormats: CustomFormatWithConditions[]): PatternsByType {
+	const title = new Set<string>();
+	const edition = new Set<string>();
+	const releaseGroup = new Set<string>();
 
 	for (const cf of customFormats) {
 		for (const condition of cf.conditions) {
-			// Pattern-based conditions: release_title, edition, release_group
-			if (condition.patterns) {
-				for (const p of condition.patterns) {
-					if (p.pattern) {
-						patterns.add(p.pattern);
-					}
-				}
+			if (!condition.patterns) continue;
+			const target =
+				condition.type === 'release_title'
+					? title
+					: condition.type === 'edition'
+						? edition
+						: condition.type === 'release_group'
+							? releaseGroup
+							: null;
+			if (!target) continue;
+			for (const p of condition.patterns) {
+				if (p.pattern) target.add(p.pattern);
 			}
 		}
 	}
 
-	return Array.from(patterns);
+	return { title: [...title], edition: [...edition], releaseGroup: [...releaseGroup] };
 }
 
 /**
@@ -225,12 +253,12 @@ function evaluateCondition(
 	condition: ConditionData,
 	parsed: ParseResult,
 	title: string,
-	patternMatches?: Map<string, boolean>,
+	patternMatchMaps: PatternMatchMaps | null,
 	indexerLangs?: Language[]
 ): ConditionEvalResult {
 	switch (condition.type) {
 		case 'release_title':
-			return evaluatePattern(condition, title, patternMatches);
+			return evaluatePattern(condition, title, patternMatchMaps?.title ?? null);
 
 		case 'language':
 			return evaluateLanguage(condition, parsed, indexerLangs);
@@ -251,10 +279,10 @@ function evaluateCondition(
 			return evaluateYear(condition, parsed);
 
 		case 'edition':
-			return evaluateEdition(condition, parsed);
+			return evaluateEdition(condition, parsed, patternMatchMaps?.edition ?? null);
 
 		case 'release_group':
-			return evaluateReleaseGroup(condition, parsed);
+			return evaluateReleaseGroup(condition, parsed, patternMatchMaps?.releaseGroup ?? null);
 
 		// These require additional data we don't have
 		case 'indexer_flag':
@@ -268,12 +296,12 @@ function evaluateCondition(
 }
 
 /**
- * Evaluate regex pattern against title using pre-computed pattern matches
+ * Evaluate regex pattern against title using pre-computed pattern matches from C# parser
  */
 function evaluatePattern(
 	condition: ConditionData,
 	title: string,
-	patternMatches?: Map<string, boolean>
+	patternMatches: Map<string, boolean> | null
 ): ConditionEvalResult {
 	if (!condition.patterns || condition.patterns.length === 0) {
 		return { matched: false, expected: 'No patterns defined', actual: title };
@@ -282,23 +310,13 @@ function evaluatePattern(
 	const patternStrs = condition.patterns.map((p) => p.pattern);
 	const expected = patternStrs.join(' OR ');
 
+	if (!patternMatches) {
+		return { matched: false, expected, actual: 'Parser unavailable' };
+	}
+
 	for (const pattern of condition.patterns) {
-		// Use pre-computed pattern matches if available
-		if (patternMatches) {
-			const matched = patternMatches.get(pattern.pattern);
-			if (matched) {
-				return { matched: true, expected, actual: `Matched: ${pattern.pattern}` };
-			}
-		} else {
-			// Fallback to JS regex (may not work for .NET-specific patterns)
-			try {
-				const regex = new RegExp(pattern.pattern, 'i');
-				if (regex.test(title)) {
-					return { matched: true, expected, actual: `Matched: ${pattern.pattern}` };
-				}
-			} catch {
-				// Invalid JS regex - skip this pattern
-			}
+		if (patternMatches.get(pattern.pattern)) {
+			return { matched: true, expected, actual: `Matched: ${pattern.pattern}` };
 		}
 	}
 	return { matched: false, expected, actual: 'No match' };
@@ -447,10 +465,13 @@ function evaluateYear(condition: ConditionData, parsed: ParseResult): ConditionE
 }
 
 /**
- * Evaluate edition condition
- * Matches patterns against the PARSED edition only (not full title)
+ * Evaluate edition condition using pre-computed pattern matches from C# parser
  */
-function evaluateEdition(condition: ConditionData, parsed: ParseResult): ConditionEvalResult {
+function evaluateEdition(
+	condition: ConditionData,
+	parsed: ParseResult,
+	patternMatches: Map<string, boolean> | null
+): ConditionEvalResult {
 	if (!condition.patterns || condition.patterns.length === 0) {
 		return { matched: false, expected: 'No patterns defined', actual: 'N/A' };
 	}
@@ -459,30 +480,30 @@ function evaluateEdition(condition: ConditionData, parsed: ParseResult): Conditi
 	const patternStrs = condition.patterns.map((p) => p.pattern);
 	const expected = patternStrs.join(' OR ');
 
-	// If no edition was parsed, can't match
 	if (!parsed.edition) {
 		return { matched: false, expected, actual };
 	}
 
-	// Match patterns against parsed edition only
+	if (!patternMatches) {
+		return { matched: false, expected, actual: 'Parser unavailable' };
+	}
+
 	for (const pattern of condition.patterns) {
-		try {
-			const regex = new RegExp(pattern.pattern, 'i');
-			if (regex.test(parsed.edition)) {
-				return { matched: true, expected, actual };
-			}
-		} catch {
-			// Invalid regex - skip
+		if (patternMatches.get(pattern.pattern)) {
+			return { matched: true, expected, actual };
 		}
 	}
 	return { matched: false, expected, actual };
 }
 
 /**
- * Evaluate release group condition
- * Matches patterns against the PARSED release group only (not full title)
+ * Evaluate release group condition using pre-computed pattern matches from C# parser
  */
-function evaluateReleaseGroup(condition: ConditionData, parsed: ParseResult): ConditionEvalResult {
+function evaluateReleaseGroup(
+	condition: ConditionData,
+	parsed: ParseResult,
+	patternMatches: Map<string, boolean> | null
+): ConditionEvalResult {
 	if (!condition.patterns || condition.patterns.length === 0) {
 		return { matched: false, expected: 'No patterns defined', actual: 'N/A' };
 	}
@@ -491,20 +512,17 @@ function evaluateReleaseGroup(condition: ConditionData, parsed: ParseResult): Co
 	const patternStrs = condition.patterns.map((p) => p.pattern);
 	const expected = patternStrs.join(' OR ');
 
-	// If no release group was parsed, can't match
 	if (!parsed.releaseGroup) {
 		return { matched: false, expected, actual };
 	}
 
-	// Match patterns against parsed release group only
+	if (!patternMatches) {
+		return { matched: false, expected, actual: 'Parser unavailable' };
+	}
+
 	for (const pattern of condition.patterns) {
-		try {
-			const regex = new RegExp(pattern.pattern, 'i');
-			if (regex.test(parsed.releaseGroup)) {
-				return { matched: true, expected, actual };
-			}
-		} catch {
-			// Invalid regex - skip
+		if (patternMatches.get(pattern.pattern)) {
+			return { matched: true, expected, actual };
 		}
 	}
 	return { matched: false, expected, actual };
@@ -523,13 +541,13 @@ function evaluateReleaseGroup(condition: ConditionData, parsed: ParseResult): Co
  * @param conditions - The conditions to evaluate
  * @param parsed - The parsed release result
  * @param title - The release title
- * @param patternMatches - Pre-computed pattern matches from .NET regex (optional)
+ * @param patternMatchMaps - Pre-computed pattern matches from C# parser (null if parser unavailable)
  */
 export function evaluateCustomFormat(
 	conditions: ConditionData[],
 	parsed: ParseResult,
 	title: string,
-	patternMatches?: Map<string, boolean>,
+	patternMatchMaps: PatternMatchMaps | null,
 	indexerLangNames?: string[]
 ): EvaluationResult {
 	// Convert indexer language names to enum values once
@@ -541,7 +559,7 @@ export function evaluateCustomFormat(
 	const results: ConditionResult[] = [];
 
 	for (const condition of conditions) {
-		const evalResult = evaluateCondition(condition, parsed, title, patternMatches, indexerLangs);
+		const evalResult = evaluateCondition(condition, parsed, title, patternMatchMaps, indexerLangs);
 		const passes = condition.negate ? !evalResult.matched : evalResult.matched;
 
 		results.push({

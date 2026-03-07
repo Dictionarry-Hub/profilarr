@@ -15,8 +15,9 @@ import {
 	getAllConditionsForEvaluation,
 	evaluateCustomFormat,
 	getParsedInfo,
-	extractAllPatterns
+	extractPatternsByType
 } from '$pcd/entities/customFormats/index.ts';
+import type { PatternMatchMaps } from '$pcd/entities/customFormats/index.ts';
 import type { components } from '$api/v1.d.ts';
 
 type EvaluateRequest = components['schemas']['EvaluateRequest'];
@@ -78,10 +79,34 @@ export const POST: RequestHandler = async ({ request }) => {
 	// Get all custom formats with conditions
 	const customFormats = await getAllConditionsForEvaluation(cache);
 
-	// Extract all unique patterns and match them against all release titles (with caching)
-	const allPatterns = extractAllPatterns(customFormats);
+	// Extract patterns grouped by condition type
+	const patternsByType = extractPatternsByType(customFormats);
 	const releaseTitles = releases.map((r) => r.title);
-	const patternMatchResults = await matchPatternsBatch(releaseTitles, allPatterns);
+
+	// Collect unique edition and releaseGroup values from parsed results
+	const editionTexts = new Set<string>();
+	const releaseGroupTexts = new Set<string>();
+	for (const release of releases) {
+		const parsed = parseResults.get(`${release.title}:${release.type}`);
+		if (parsed?.edition) editionTexts.add(parsed.edition);
+		if (parsed?.releaseGroup) releaseGroupTexts.add(parsed.releaseGroup);
+	}
+
+	// Match patterns against their respective texts in parallel via C# parser
+	const [titleMatches, editionMatches, rgMatches] = await Promise.all([
+		patternsByType.title.length > 0
+			? matchPatternsBatch(releaseTitles, patternsByType.title)
+			: Promise.resolve(new Map<string, Map<string, boolean>>()),
+		patternsByType.edition.length > 0 && editionTexts.size > 0
+			? matchPatternsBatch([...editionTexts], patternsByType.edition)
+			: Promise.resolve(new Map<string, Map<string, boolean>>()),
+		patternsByType.releaseGroup.length > 0 && releaseGroupTexts.size > 0
+			? matchPatternsBatch([...releaseGroupTexts], patternsByType.releaseGroup)
+			: Promise.resolve(new Map<string, Map<string, boolean>>())
+	]);
+
+	const parserFailed =
+		titleMatches === null || editionMatches === null || rgMatches === null;
 
 	// Evaluate each release against all custom formats
 	const evaluations: ReleaseEvaluation[] = releases.map((release) => {
@@ -96,14 +121,23 @@ export const POST: RequestHandler = async ({ request }) => {
 			};
 		}
 
-		// Get pattern matches for this release title
-		const patternMatches = patternMatchResults?.get(release.title);
+		// Build pattern match maps for this release
+		const patternMatchMaps: PatternMatchMaps | null = parserFailed
+			? null
+			: {
+					title: titleMatches?.get(release.title) ?? new Map(),
+					edition: parsed.edition
+						? (editionMatches?.get(parsed.edition) ?? new Map())
+						: new Map(),
+					releaseGroup: parsed.releaseGroup
+						? (rgMatches?.get(parsed.releaseGroup) ?? new Map())
+						: new Map()
+				};
 
 		// Evaluate against all custom formats
 		const cfMatches: Record<string, boolean> = {};
 		for (const cf of customFormats) {
 			if (cf.conditions.length === 0) {
-				// No conditions = doesn't match
 				cfMatches[cf.name] = false;
 				continue;
 			}
@@ -112,7 +146,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				cf.conditions,
 				parsed,
 				release.title,
-				patternMatches,
+				patternMatchMaps,
 				release.languages
 			);
 			cfMatches[cf.name] = result.matches;

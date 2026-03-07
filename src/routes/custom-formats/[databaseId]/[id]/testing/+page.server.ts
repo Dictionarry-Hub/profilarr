@@ -4,8 +4,9 @@ import { pcdManager } from '$pcd/index.ts';
 import { canWriteToBase, type OperationLayer } from '$pcd/index.ts';
 import * as customFormatQueries from '$pcd/entities/customFormats/index.ts';
 import type { ConditionResult, ParsedInfo } from '$shared/pcd/display.ts';
-import { parse, isParserHealthy } from '$lib/server/utils/arr/parser/client.ts';
+import { parse, isParserHealthy, matchPatterns } from '$lib/server/utils/arr/parser/client.ts';
 import type { MediaType } from '$lib/server/utils/arr/parser/types.ts';
+import type { PatternMatchMaps } from '$pcd/entities/customFormats/index.ts';
 
 export type TestResult = 'pass' | 'fail' | 'unknown';
 
@@ -84,6 +85,29 @@ export const load: ServerLoad = async ({ params }) => {
 	// Get conditions for evaluation
 	const conditions = await customFormatQueries.getConditionsForEvaluation(cache, format.name);
 
+	// Extract patterns by type from this format's conditions
+	const titlePatterns = new Set<string>();
+	const editionPatterns = new Set<string>();
+	const rgPatterns = new Set<string>();
+	for (const cond of conditions) {
+		if (!cond.patterns) continue;
+		const target =
+			cond.type === 'release_title'
+				? titlePatterns
+				: cond.type === 'edition'
+					? editionPatterns
+					: cond.type === 'release_group'
+						? rgPatterns
+						: null;
+		if (!target) continue;
+		for (const p of cond.patterns) {
+			if (p.pattern) target.add(p.pattern);
+		}
+	}
+	const uniqueTitle = [...titlePatterns];
+	const uniqueEdition = [...editionPatterns];
+	const uniqueRg = [...rgPatterns];
+
 	// Evaluate each test
 	const testsWithResults: TestWithResult[] = await Promise.all(
 		tests.map(async (test) => {
@@ -94,11 +118,36 @@ export const load: ServerLoad = async ({ params }) => {
 				// Get serializable parsed info
 				const parsed = customFormatQueries.getParsedInfo(parsedResult);
 
+				// Match patterns via C# parser
+				const [titleMatch, editionMatch, rgMatch] = await Promise.all([
+					uniqueTitle.length > 0
+						? matchPatterns(test.title, uniqueTitle)
+						: Promise.resolve(new Map<string, boolean>()),
+					uniqueEdition.length > 0 && parsedResult.edition
+						? matchPatterns(parsedResult.edition, uniqueEdition)
+						: Promise.resolve(new Map<string, boolean>()),
+					uniqueRg.length > 0 && parsedResult.releaseGroup
+						? matchPatterns(parsedResult.releaseGroup, uniqueRg)
+						: Promise.resolve(new Map<string, boolean>())
+				]);
+
+				const parserFailed =
+					titleMatch === null || editionMatch === null || rgMatch === null;
+
+				const patternMatchMaps: PatternMatchMaps | null = parserFailed
+					? null
+					: {
+							title: titleMatch ?? new Map(),
+							edition: editionMatch ?? new Map(),
+							releaseGroup: rgMatch ?? new Map()
+						};
+
 				// Evaluate the custom format conditions
 				const evaluation = customFormatQueries.evaluateCustomFormat(
 					conditions,
 					parsedResult,
-					test.title
+					test.title,
+					patternMatchMaps
 				);
 
 				// Determine if test passes (actual matches expected)
