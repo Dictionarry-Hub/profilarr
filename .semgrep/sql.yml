@@ -1,10 +1,11 @@
 rules:
   # Template literal with variable interpolation in SQL
   # Excludes known-safe patterns: updates.join (column SET clauses),
-  # this.migrationsTable (hardcoded private field)
+  # this.migrationsTable (hardcoded private field),
+  # placeholders (generated '?,?,?' for IN clauses)
   - id: profilarr.sql.template-literal-interpolation
     patterns:
-      - pattern-regex: 'db\.(exec|execute|query|queryFirst|prepare)\(\s*`[^`]*\$\{(?!updates\.join|this\.migrationsTable)[^}]+\}'
+      - pattern-regex: 'db\.(exec|execute|query|queryFirst|prepare)\(\s*`[^`]*\$\{(?!updates\.join|this\.migrationsTable|placeholders)[^}]+\}'
     paths:
       include:
         - "/src/lib/server/**"

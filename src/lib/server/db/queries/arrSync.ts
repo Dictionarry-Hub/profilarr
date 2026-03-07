@@ -730,6 +730,7 @@ export const arrSyncQueries = {
 			mediaManagement: 'arr_sync_media_management'
 		}[section];
 
+		// nosemgrep: profilarr.sql.template-literal-interpolation — table name from hardcoded lookup
 		db.execute(
 			`UPDATE ${table} SET last_synced_at = ? WHERE instance_id = ?`,
 			new Date().toISOString(),

@@ -37,6 +37,7 @@ export function fetchRow(
 	keyValue: string
 ): Record<string, unknown> | null {
 	try {
+		// nosemgrep: profilarr.sql.template-literal-interpolation — table/column from hardcoded callers, can't parameterize
 		const row = db.prepare(`SELECT * FROM ${table} WHERE ${keyColumn} = ? LIMIT 1`).get(keyValue);
 		return (row as Record<string, unknown> | undefined) ?? null;
 	} catch {

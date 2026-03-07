@@ -252,7 +252,7 @@ export const jobQueueQueries = {
 	deleteByIds(ids: number[]): number {
 		if (ids.length === 0) return 0;
 		const placeholders = ids.map(() => '?').join(', ');
-		return db.execute(`DELETE FROM job_queue WHERE id IN (${placeholders})`, ...ids);
+		return db.execute(`DELETE FROM job_queue WHERE id IN (${placeholders})`, ...ids); // nosemgrep: profilarr.sql.template-literal-interpolation — placeholders is just '?,?,?'
 	},
 
 	unscheduleByDedupeKey(dedupeKey: string): void {

@@ -105,7 +105,7 @@ class DatabaseManager {
 	 */
 	exec(sql: string): void {
 		const db = this.getDatabase();
-		db.exec(sql);
+		db.exec(sql); // nosemgrep: profilarr.sql.exec-with-variable — internal API, callers are trusted
 	}
 
 	/**

@@ -85,7 +85,7 @@ class MigrationRunner {
 				applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
 			)
 		`;
-		db.exec(sql);
+		db.exec(sql); // nosemgrep: profilarr.sql.exec-with-variable — migrationsTable is a hardcoded field
 	}
 
 	/**
@@ -116,7 +116,7 @@ class MigrationRunner {
 		try {
 			await db.transaction(async () => {
 				// Execute the migration
-				db.exec(migration.up);
+				db.exec(migration.up); // nosemgrep: profilarr.sql.exec-with-variable — migration SQL from trusted files
 
 				// Record the migration
 				db.execute(
@@ -150,7 +150,7 @@ class MigrationRunner {
 		try {
 			await db.transaction(async () => {
 				// Execute the rollback
-				db.exec(migration.down!);
+				db.exec(migration.down!); // nosemgrep: profilarr.sql.exec-with-variable — migration SQL from trusted files
 
 				// Remove the migration record
 				db.execute(`DELETE FROM ${this.migrationsTable} WHERE version = ?`, migration.version);

@@ -102,7 +102,7 @@ export async function createBackup(
 			const db = new Database(dbPath);
 			try {
 				for (const sql of SANITIZE_SQL) {
-					db.exec(sql);
+					db.exec(sql); // nosemgrep: profilarr.sql.exec-with-variable — SANITIZE_SQL is a hardcoded constant
 				}
 			} finally {
 				db.close();

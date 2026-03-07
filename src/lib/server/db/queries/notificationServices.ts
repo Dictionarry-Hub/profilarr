@@ -88,7 +88,7 @@ export const notificationServicesQueries = {
 			input.name,
 			input.serviceType,
 			input.enabled ? 1 : 0,
-			JSON.stringify(input.config),
+			JSON.stringify(input.config), // nosemgrep: profilarr.secrets.json-stringify-config — storing to DB, not logging
 			JSON.stringify(input.enabledTypes)
 		);
 
@@ -112,7 +112,7 @@ export const notificationServicesQueries = {
 		}
 		if (input.config !== undefined) {
 			updates.push('config = ?');
-			params.push(JSON.stringify(input.config));
+			params.push(JSON.stringify(input.config)); // nosemgrep: profilarr.secrets.json-stringify-config — storing to DB, not logging
 		}
 		if (input.enabledTypes !== undefined) {
 			updates.push('enabled_types = ?');
