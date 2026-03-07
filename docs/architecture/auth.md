@@ -393,9 +393,14 @@ to authenticate.
 
 **Mitigation**: The `Markdown.svelte` component (the primary markdown renderer)
 passes all `marked.parse()` output through `sanitizeHtml()` from
-`$shared/utils/sanitize.ts` before rendering with `{@html}`. The sanitiser
+`$shared/utils/sanitize.ts` before rendering with `{@html}`. The sanitizer
+uses DOMPurify (cure53) with jsdom as the server-side DOM implementation. It
 strips `<script>` tags, event handlers (`onerror`, `onclick`, etc.),
-`javascript:` URLs, and any tags/attributes not on an explicit allowlist.
+`javascript:` URLs (including entity-encoded and whitespace-obfuscated
+variants), and any tags/attributes not on an explicit allowlist. DOMPurify is
+DOM-based rather than regex-based, so it correctly handles entity decoding,
+case normalization, and other HTML parsing edge cases that bypass string
+matching.
 
 The same `sanitizeHtml()` function is used server-side in
 `$utils/markdown/markdown.ts` for any markdown rendered in load functions.
@@ -515,6 +520,12 @@ needed.
 | `network.test.ts`       | IPv4/IPv6 local classification, boundary addresses, `getClientIp` with trustProxy on/off |
 | `publicPaths.test.ts`   | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
 | `loginAnalysis.test.ts` | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
+
+**Sanitize tests** (`tests/unit/sanitize/`):
+
+| File               | Tests                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| `sanitize.test.ts` | Entity-encoded/case-varied/whitespace-obfuscated javascript: bypass, allowed/disallowed tags |
 
 ### Integration Tests (`tests/integration/auth/specs/`)
 

@@ -27,7 +27,9 @@
 		"highlight.js": "npm:highlight.js@^11.11.1",
 		"croner": "npm:croner@^9.1.0",
 		"@std/yaml": "jsr:@std/yaml@^1.0.10",
-		"@felix/bcrypt": "jsr:@felix/bcrypt@^1.0.8"
+		"@felix/bcrypt": "jsr:@felix/bcrypt@^1.0.8",
+		"dompurify": "npm:dompurify@^3",
+		"jsdom": "npm:jsdom@^26"
 	},
 	"tasks": {
 		"dev": "deno run -A scripts/dev.ts",
