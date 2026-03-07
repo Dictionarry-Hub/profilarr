@@ -159,6 +159,11 @@ Available in all modes except `AUTH=off`. Checked before local bypass and
 session checks in the request flow.
 
 - Header: `X-Api-Key`
+- Scoped to `/api/` paths only. Browser pages and SvelteKit form actions require
+  a real session. Requests with a valid API key to non-API paths get 403. This
+  prevents the API key from being used as a second admin login (e.g. regenerating
+  its own key or toggling local bypass via settings form actions). When
+  `/api/internal/` routes exist, API key auth will be excluded from those too.
 - Key is bcrypt-hashed in the database - never stored as plaintext
 - `regenerateApiKey()` returns the plaintext key once for the user to copy; only
   the hash is persisted
@@ -523,7 +528,7 @@ and run in parallel via `deno task test integration`.
 | `health.test.ts`         | 7001             | Public health vs authenticated diagnostics, no info disclosure                 |
 | `csrf.test.ts`           | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite   |
 | `cookie.test.ts`         | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration              |
-| `apiKey.test.ts`         | 7004             | Valid/invalid key, header-only (query param rejected), 401 on missing          |
+| `apiKey.test.ts`         | 7004             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths          |
 | `session.test.ts`        | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON         |
 | `oidc.test.ts`           | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, AUTH=on rejection, proxy flow           |
 | `rateLimit.test.ts`      | 7007             | Suspicious/typo thresholds, successful login clears, window expiry             |

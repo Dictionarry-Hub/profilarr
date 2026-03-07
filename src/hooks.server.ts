@@ -134,6 +134,17 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
+	// API key auth is scoped to /api/ paths only (excluding /api/internal/ when it exists).
+	// Browser pages and form actions require a real session.
+	if (auth.user && !auth.session && auth.user.username === 'api') {
+		if (!event.url.pathname.startsWith('/api/') || event.url.pathname.startsWith('/api/internal/')) {
+			return new Response(JSON.stringify({ error: 'API key auth is not accepted for this path' }), {
+				status: 403,
+				headers: { 'Content-Type': 'application/json' }
+			});
+		}
+	}
+
 	// Not authenticated - redirect or return 401
 	if (!auth.user) {
 		if (event.url.pathname.startsWith('/api')) {
