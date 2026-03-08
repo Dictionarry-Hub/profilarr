@@ -44,6 +44,7 @@ bin/
 obj/
 *.user
 *.suo
+*.sln
 .vs/
 
 # Bruno environments (contain API keys)
