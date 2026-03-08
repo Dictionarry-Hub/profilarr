@@ -7,17 +7,16 @@ updates:
       day: monday
     groups:
       eslint:
-        patterns: ["eslint*", "@eslint/*", "typescript-eslint"]
+        patterns: ['eslint*', '@eslint/*', 'typescript-eslint']
       tailwind:
-        patterns: ["tailwindcss", "@tailwindcss/*"]
+        patterns: ['tailwindcss', '@tailwindcss/*']
       prettier:
-        patterns: ["prettier", "prettier-plugin-*"]
+        patterns: ['prettier', 'prettier-plugin-*']
       svelte:
-        patterns: ["svelte", "svelte-check", "@sveltejs/*"]
+        patterns: ['svelte', 'svelte-check', '@sveltejs/*']
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
-yes 

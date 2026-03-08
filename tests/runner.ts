@@ -176,7 +176,15 @@ async function runUnit(target?: string): Promise<number> {
 	console.log(`Running unit tests: ${testPath}\n`);
 
 	const cmd = new Deno.Command('deno', {
-		args: ['test', testPath, '--allow-read', '--allow-write', '--allow-env', '--allow-run', '--allow-ffi'],
+		args: [
+			'test',
+			testPath,
+			'--allow-read',
+			'--allow-write',
+			'--allow-env',
+			'--allow-run',
+			'--allow-ffi'
+		],
 		env: { ...Deno.env.toObject(), APP_BASE_PATH: './dist/test' },
 		stdout: 'inherit',
 		stderr: 'inherit'
