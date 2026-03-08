@@ -323,8 +323,6 @@ export async function parseWithCacheBatch(
 		}
 	}
 
-	const cacheHits = items.length - uncached.length;
-
 	// Parse uncached items in parallel
 	if (uncached.length > 0) {
 		const parsePromises = uncached.map(async (item) => {

@@ -1,6 +1,6 @@
 import { getCache } from '$pcd/index.ts';
 import type { WriteResult } from '$pcd/index.ts';
-import { listTests, getTest } from '../tests/read.ts';
+import { getTest } from '../tests/read.ts';
 import { createTest } from '../tests/create.ts';
 import { updateTest } from '../tests/update.ts';
 import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';

@@ -40,6 +40,7 @@ function decodeEntities(str: string): string {
  */
 function isSafeUrl(raw: string): boolean {
 	const decoded = decodeEntities(raw)
+		// deno-lint-ignore no-control-regex
 		.replace(/[\s\x00-\x1f]+/g, '')
 		.toLowerCase();
 	// Relative URLs and fragment-only URLs are safe
@@ -113,7 +114,7 @@ export function sanitizeHtml(html: string): string {
 
 		const filteredAttrs = attrs.replace(
 			/([a-z][a-z0-9-]*)\s*=\s*["']([^"']*)["']/gi,
-			(attrMatch: string, attrName: string, attrValue: string) => {
+			(_attrMatch: string, attrName: string, attrValue: string) => {
 				const lowerAttr = attrName.toLowerCase();
 				if (!allowedForTag.has(lowerAttr)) return '';
 				if ((lowerAttr === 'href' || lowerAttr === 'src') && !isSafeUrl(attrValue)) return '';

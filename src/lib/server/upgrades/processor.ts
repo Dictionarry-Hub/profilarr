@@ -489,7 +489,7 @@ export async function processUpgradeConfig(
 						searchesTriggered = itemIds.length;
 
 						// Poll queue until results stabilize
-						let queue = await pollQueue(() => radarr.getQueue(itemIds));
+						const queue = await pollQueue(() => radarr.getQueue(itemIds));
 						const queueMap = new Map(queue.map((q) => [q.movieId, q]));
 
 						for (const item of selectedItems) {

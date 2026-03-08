@@ -240,9 +240,6 @@ export async function getAllConditionsForEvaluation(
 		return formats.map((f) => ({ name: f.name, conditions: [] }));
 	}
 
-	// Build composite keys for condition lookups
-	const conditionKeys = conditions.map((c) => `${c.custom_format_name}|${c.name}`);
-
 	// Get all related data in parallel
 	const [
 		patterns,

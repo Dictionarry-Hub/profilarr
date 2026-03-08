@@ -29,12 +29,7 @@ import {
 	getRadarrByName as getRadarrQualityDefs,
 	getSonarrByName as getSonarrQualityDefs
 } from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
-import type {
-	RadarrMediaSettingsRow,
-	SonarrMediaSettingsRow,
-	RadarrNamingRow,
-	SonarrNamingRow
-} from '$shared/pcd/display.ts';
+import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '$shared/pcd/display.ts';
 import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
 import type {
 	ArrType,

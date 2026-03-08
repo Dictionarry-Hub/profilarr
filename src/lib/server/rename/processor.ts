@@ -25,8 +25,7 @@ import {
 	processDryRun,
 	processFileRename,
 	processFolderRename,
-	diffSnapshots,
-	groupByRootFolder
+	diffSnapshots
 } from './core.ts';
 import type { RenameAdapter } from './core.ts';
 

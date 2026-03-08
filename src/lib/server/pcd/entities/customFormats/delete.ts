@@ -17,13 +17,6 @@ interface DeleteCustomFormatOptions {
 }
 
 /**
- * Escape a string for SQL
- */
-function esc(value: string): string {
-	return value.replace(/'/g, "''");
-}
-
-/**
  * Delete a custom format by writing an operation to the specified layer
  * Cascading deletes handle conditions, tests, and tag links
  */

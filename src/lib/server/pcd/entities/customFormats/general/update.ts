@@ -91,7 +91,7 @@ export async function updateGeneral(options: UpdateGeneralOptions) {
 	const includeChanged = current.include_in_rename !== input.includeInRename;
 	const includeQueries: CompiledQuery[] = [];
 	if (includeChanged) {
-		let updateInclude = db
+		const updateInclude = db
 			.updateTable('custom_formats')
 			.set({ include_in_rename: input.includeInRename ? 1 : 0 })
 			.where('name', '=', current.name)

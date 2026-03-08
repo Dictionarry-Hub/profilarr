@@ -256,9 +256,7 @@ export async function fetchQualityProfileFromPcd(
 
 	if (!profile) return null;
 
-	// Get all qualities in one query (for reference)
 	const allQualities = await db.selectFrom('qualities').select(['id', 'name']).execute();
-	const qualityNameMap = new Map(allQualities.map((q) => [q.id, q.name]));
 
 	// Get quality groups for this profile
 	const groups = await db

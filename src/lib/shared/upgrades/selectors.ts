@@ -5,6 +5,7 @@
 
 import { sortTitle } from '$shared/utils/sort.ts';
 
+// deno-lint-ignore no-explicit-any
 export interface Selector<T = any> {
 	id: string;
 	label: string;

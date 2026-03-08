@@ -110,7 +110,9 @@ export function createSearchFieldState(
 		try {
 			const stored = localStorage.getItem(tagsKey);
 			if (stored) return JSON.parse(stored);
-		} catch {}
+		} catch {
+			/* localStorage may be unavailable */
+		}
 		return [];
 	}
 

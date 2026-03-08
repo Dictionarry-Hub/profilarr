@@ -138,7 +138,7 @@ export function normalizeRadarrItems(
 export function normalizeSonarrItem(
 	series: SonarrSeries,
 	profile: ArrQualityProfile | undefined,
-	cutoffPercent: number,
+	_cutoffPercent: number,
 	tagMap?: Map<number, string>
 ): UpgradeItem {
 	// Score: 0 for now (series-level score requires fetching all episode files)

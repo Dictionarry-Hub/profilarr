@@ -6,7 +6,6 @@ import { stage, commit, configureIdentity } from '$utils/git/write.ts';
 import { execGit } from '$utils/git/exec.ts';
 import { getBranch, getStatus } from '$utils/git/read.ts';
 import { compile } from '../database/compiler.ts';
-import { syncDependencies } from '../git/dependencies.ts';
 import { canWriteToBase } from './writer.ts';
 import { listDraftEntityChanges } from './draftChanges.ts';
 import { uuid } from '$shared/utils/uuid.ts';
@@ -282,7 +281,7 @@ async function runPreflight(databaseId: number): Promise<ExportPreflight> {
 				errors.push(`Repository has ${ahead} unpushed commit${ahead === 1 ? '' : 's'}.`);
 			}
 		}
-	} catch (error) {
+	} catch {
 		errors.push('Failed to reach remote repository.');
 	}
 

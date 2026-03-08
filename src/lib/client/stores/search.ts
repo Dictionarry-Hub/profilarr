@@ -7,7 +7,7 @@ import { browser } from '$app/environment';
 
 export interface SearchState {
 	query: string;
-	filters: Record<string, any>;
+	filters: Record<string, unknown>;
 	isActive: boolean;
 }
 
@@ -45,7 +45,7 @@ export function createSearchStore(config: SearchStoreConfig = {}) {
 		}, debounceMs);
 	}
 
-	function setFilter(key: string, value: any) {
+	function setFilter(key: string, value: unknown) {
 		state.update((s) => ({
 			...s,
 			filters: { ...s.filters, [key]: value },
@@ -88,7 +88,7 @@ export function createSearchStore(config: SearchStoreConfig = {}) {
 	function filterItems<T>(
 		items: T[],
 		searchFields: (keyof T)[],
-		additionalFilter?: (item: T, filters: Record<string, any>) => boolean
+		additionalFilter?: (item: T, filters: Record<string, unknown>) => boolean
 	): T[] {
 		const currentState = get(state);
 		const query = get(debouncedQuery);
