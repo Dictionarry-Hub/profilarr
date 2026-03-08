@@ -158,6 +158,7 @@
 				window.removeEventListener('resize', updateFixedPosition);
 			};
 		}
+		return;
 	});
 </script>
 

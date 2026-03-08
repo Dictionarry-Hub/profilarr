@@ -56,6 +56,9 @@
 		"useTabs": false
 	},
 	"lint": {
-		"exclude": ["dist/", "node_modules/", "tests/"]
+		"exclude": ["dist/", "node_modules/", "tests/", ".svelte-kit/"],
+		"rules": {
+			"include": ["eqeqeq", "no-eval", "no-throw-literal"]
+		}
 	}
 }

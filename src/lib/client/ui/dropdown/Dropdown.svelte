@@ -60,7 +60,6 @@
 	onMount(() => {
 		if (fixed && triggerEl) {
 			updateFixedPosition();
-			// Update position on scroll/resize
 			window.addEventListener('scroll', updateFixedPosition, true);
 			window.addEventListener('resize', updateFixedPosition);
 			return () => {
@@ -68,6 +67,7 @@
 				window.removeEventListener('resize', updateFixedPosition);
 			};
 		}
+		return;
 	});
 
 	$: if (fixed && triggerEl && dropdownEl) {
