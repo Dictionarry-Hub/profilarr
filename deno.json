@@ -36,7 +36,7 @@
 		"preview": "PORT=6869 HOST=0.0.0.0 APP_BASE_PATH=./dist/dev PARSER_HOST=localhost PARSER_PORT=5000 ./dist/build/profilarr",
 		"clean:dev": "rm -rf dist/dev",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint .",
+		"lint": "prettier --check . && deno lint",
 		"check": "deno task check:server && deno task check:client",
 		"check:server": "deno check --quiet src/lib/server/**/*.ts",
 		"check:client": "npx svelte-check --tsconfig ./tsconfig.json",
@@ -56,6 +56,6 @@
 		"useTabs": false
 	},
 	"lint": {
-		"exclude": ["dist/", "node_modules/"]
+		"exclude": ["dist/", "node_modules/", "tests/"]
 	}
 }

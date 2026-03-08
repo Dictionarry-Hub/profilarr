@@ -17,8 +17,6 @@
 	},
 	"devDependencies": {
 		"@deno/vite-plugin": "^1.0.5",
-		"@eslint/compat": "^1.4.0",
-		"@eslint/js": "^9.36.0",
 		"@playwright/test": "^1.58.1",
 		"@sveltejs/kit": "^2.43.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.0",
@@ -28,10 +26,6 @@
 		"@types/deno": "^2.5.0",
 		"@types/node": "^22",
 		"better-sqlite3": "^12.6.2",
-		"eslint": "^9.36.0",
-		"eslint-config-prettier": "^10.1.8",
-		"eslint-plugin-svelte": "^3.12.4",
-		"globals": "^16.4.0",
 		"openapi-typescript": "^7.0.0",
 		"prettier": "3.5.3",
 		"prettier-plugin-svelte": "^3.5.1",
@@ -40,7 +34,6 @@
 		"svelte-check": "^4.3.2",
 		"tailwindcss": "^4.1.13",
 		"typescript": "^5.9.2",
-		"typescript-eslint": "^8.44.1",
 		"vite": "^7.1.7"
 	}
 }
