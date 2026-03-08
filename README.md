@@ -91,7 +91,7 @@ usage, and API documenation.
 ```yaml
 services:
   profilarr:
-    image: ghcr.io/dictionarry-hub/profilarr:latest
+    image: santiagosayshey/profilarr:latest
     container_name: profilarr
     ports:
       - '6868:6868'
