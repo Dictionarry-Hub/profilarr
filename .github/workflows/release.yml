@@ -1,0 +1,157 @@
+name: Release
+
+on:
+  push:
+    branches: [develop, 'hotfix/*']
+    tags: ['v*']
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BASE: ghcr.io/dictionarry-hub
+
+permissions:
+  contents: read
+
+jobs:
+  # ─── Build per-arch Docker images ──────────────────────────────────────
+
+  docker:
+    name: Docker (${{ matrix.image }} / ${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: profilarr
+            dockerfile: Dockerfile
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - image: profilarr
+            dockerfile: Dockerfile
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+          - image: profilarr-parser
+            dockerfile: Dockerfile.parser
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - image: profilarr-parser
+            dockerfile: Dockerfile.parser
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine channel
+        id: channel
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "value=stable" >> $GITHUB_OUTPUT
+          else
+            echo "value=develop" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_BASE }}/${{ matrix.image }}
+          labels: |
+            org.opencontainers.image.licenses=AGPL-3.0
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: ${{ matrix.platform }}
+          build-args: |
+            VITE_CHANNEL=${{ steps.channel.outputs.value }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.IMAGE_BASE }}/${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=registry,ref=${{ env.IMAGE_BASE }}/${{ matrix.image }}:buildcache-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
+          cache-to: type=registry,ref=${{ env.IMAGE_BASE }}/${{ matrix.image }}:buildcache-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }},mode=max
+
+      - name: Export digest
+        id: digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          echo "hash=${digest#sha256:}" >> "$GITHUB_OUTPUT"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-${{ matrix.image }}-${{ steps.digest.outputs.hash }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  # ─── Merge into multi-arch manifest ────────────────────────────────────
+
+  manifest:
+    name: Manifest (${{ matrix.image }})
+    needs: [docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        image: [profilarr, profilarr-parser]
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digest-${{ matrix.image }}-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_BASE }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.IMAGE_BASE }}/${{ matrix.image }}@sha256:%s ' *)
+
+      - name: Inspect manifest
+        run: |
+          docker buildx imagetools inspect ${{ env.IMAGE_BASE }}/${{ matrix.image }}:${{ steps.meta.outputs.version }}

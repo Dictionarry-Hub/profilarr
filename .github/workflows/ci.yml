@@ -1,0 +1,250 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, 'hotfix/*']
+    tags: ['v*']
+    paths-ignore: ['docs/**', '*.md', '!SECURITY.md', '.github/ISSUE_TEMPLATE/**']
+  pull_request:
+    branches: [develop]
+    paths-ignore: ['docs/**', '*.md', '!SECURITY.md', '.github/ISSUE_TEMPLATE/**']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ─── Build ──────────────────────────────────────────────────────────────
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno
+            node_modules
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
+
+      - run: deno install --node-modules-dir
+
+      - name: Build
+        run: deno task build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: profilarr-build
+          path: |
+            dist/build/profilarr
+            dist/build/server.js
+            dist/build/static/
+          retention-days: 1
+
+  # ─── Quality gates (all run in parallel with build) ─────────────────────
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno
+            node_modules
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
+
+      - run: deno install --node-modules-dir
+
+      - name: Lint
+        run: deno task lint
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno
+            node_modules
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
+
+      - run: deno install --node-modules-dir
+
+      - name: Type check
+        run: deno task check
+
+  unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno
+            node_modules
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
+
+      - run: deno install --node-modules-dir
+
+      - name: Run unit tests
+        run: deno task test
+
+  semgrep:
+    name: SAST Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: |
+          semgrep scan \
+            --config tests/scan/semgrep/ \
+            --config p/default \
+            --config p/typescript \
+            --config p/javascript \
+            --config p/owasp-top-ten \
+            --config p/nodejs \
+            --config p/security-audit \
+            --config p/csharp \
+            --error \
+            --sarif \
+            --output semgrep-results.sarif
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-results.sarif
+          category: semgrep
+
+  # ─── Tests that need the binary ─────────────────────────────────────────
+
+  integration:
+    name: Integration Tests
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno
+            node_modules
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
+
+      - run: deno install --node-modules-dir
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: profilarr-build
+          path: dist/build
+
+      - name: Make binary executable
+        run: chmod +x dist/build/profilarr
+
+      - name: Run integration tests
+        run: deno task test integration
+
+  e2e-auth:
+    name: E2E Auth
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno
+            node_modules
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
+
+      - run: deno install --node-modules-dir
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: profilarr-build
+          path: dist/build
+
+      - name: Make binary executable
+        run: chmod +x dist/build/profilarr
+
+      - name: Run E2E auth tests
+        run: deno task test e2e auth
