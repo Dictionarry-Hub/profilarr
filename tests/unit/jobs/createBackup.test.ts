@@ -145,7 +145,7 @@ class CreateBackupTest extends BaseTest {
 			assertEquals(code, 0);
 
 			// Verify extracted files exist and have correct content
-			const extractedSourceDir = `${extractDir}/source`;
+			const extractedSourceDir = `${extractDir}/data`;
 			await this.assertFileExists(`${extractedSourceDir}/file1.txt`);
 			await this.assertFileExists(`${extractedSourceDir}/file2.txt`);
 			await this.assertFileExists(`${extractedSourceDir}/data.json`);
@@ -259,7 +259,7 @@ class CreateBackupTest extends BaseTest {
 			assertEquals(code, 0);
 
 			// Verify extracted directory exists and is empty
-			const extractedSourceDir = `${extractDir}/empty-source`;
+			const extractedSourceDir = `${extractDir}/data`;
 			await this.assertFileExists(extractedSourceDir);
 
 			// Read directory to verify it's empty

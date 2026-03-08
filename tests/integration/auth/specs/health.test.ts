@@ -20,7 +20,7 @@ const API_KEY = 'test-api-key-health-12345';
 let client: TestClient;
 
 setup(async () => {
-	await startServer(PORT, { AUTH: 'on', ORIGIN });
+	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	client = new TestClient(ORIGIN);
 	await createUser(client, 'admin', 'password123', ORIGIN);
 	await setApiKey(getDbPath(PORT), API_KEY);

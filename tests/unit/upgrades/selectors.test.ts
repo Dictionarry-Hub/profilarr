@@ -93,13 +93,15 @@ class SelectorsTest extends BaseTest {
 
 		this.test('getAllSelectorIds returns all selector ids', () => {
 			const ids = getAllSelectorIds();
-			assertEquals(ids.length, 6);
+			assertEquals(ids.length, 8);
 			assert(ids.includes('random'));
 			assert(ids.includes('oldest'));
 			assert(ids.includes('newest'));
 			assert(ids.includes('lowest_score'));
 			assert(ids.includes('most_popular'));
 			assert(ids.includes('least_popular'));
+			assert(ids.includes('alphabetical_asc'));
+			assert(ids.includes('alphabetical_desc'));
 		});
 
 		// =====================

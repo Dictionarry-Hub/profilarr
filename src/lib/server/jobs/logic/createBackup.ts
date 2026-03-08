@@ -96,22 +96,29 @@ export async function createBackup(
 			};
 		}
 
-		// Sanitize the database copy
+		// Sanitize the database copy (skip if no DB in source)
 		const dbPath = `${tmpDataDir}/profilarr.db`;
 		try {
-			const db = new Database(dbPath);
-			try {
-				for (const sql of SANITIZE_SQL) {
-					db.exec(sql); // nosemgrep: profilarr.sql.exec-with-variable — SANITIZE_SQL is a hardcoded constant
+			const dbStat = await Deno.stat(dbPath);
+			if (dbStat.isFile) {
+				const db = new Database(dbPath);
+				try {
+					for (const sql of SANITIZE_SQL) {
+						db.exec(sql); // nosemgrep: profilarr.sql.exec-with-variable — SANITIZE_SQL is a hardcoded constant
+					}
+				} finally {
+					db.close();
 				}
-			} finally {
-				db.close();
 			}
 		} catch (error) {
-			return {
-				success: false,
-				error: `Failed to sanitize backup database: ${error instanceof Error ? error.message : String(error)}`
-			};
+			if (error instanceof Deno.errors.NotFound) {
+				// No database to sanitize — that's fine
+			} else {
+				return {
+					success: false,
+					error: `Failed to sanitize backup database: ${error instanceof Error ? error.message : String(error)}`
+				};
+			}
 		}
 
 		// Create tar.gz archive from the sanitized temp copy
