@@ -26,7 +26,6 @@
 		"simple-icons": "npm:simple-icons@^15.17.0",
 		"highlight.js": "npm:highlight.js@^11.11.1",
 		"croner": "npm:croner@^9.1.0",
-		"@std/yaml": "jsr:@std/yaml@^1.0.10",
 		"@felix/bcrypt": "jsr:@felix/bcrypt@^1.0.8"
 	},
 	"tasks": {
