@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      eslint:
+        patterns: ["eslint*", "@eslint/*", "typescript-eslint"]
+      tailwind:
+        patterns: ["tailwindcss", "@tailwindcss/*"]
+      prettier:
+        patterns: ["prettier", "prettier-plugin-*"]
+      svelte:
+        patterns: ["svelte", "svelte-check", "@sveltejs/*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+yes 
