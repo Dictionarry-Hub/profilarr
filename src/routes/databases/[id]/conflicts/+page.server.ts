@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
-import type { OperationMetadata } from '$pcd/index.ts';
+import type { OperationMetadata } from '$pcd/core/types.ts';
 import { alignConflict, overrideConflict } from '$pcd/conflicts/index.ts';
 
 type ConflictRow = {

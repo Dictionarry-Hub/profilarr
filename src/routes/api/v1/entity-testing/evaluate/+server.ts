@@ -5,7 +5,7 @@
 
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { pcdManager } from '$pcd/index.ts';
+import { pcdManager } from '$pcd/core/manager.ts';
 import {
 	parseWithCacheBatch,
 	isParserHealthy,

@@ -17,7 +17,7 @@ import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { jobQueueQueries } from '$db/queries/jobQueue.ts';
 import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
 import { appInfoQueries } from '$db/queries/appInfo.ts';
-import { getCache } from '$pcd/index.ts';
+import { getCache } from '$pcd/database/registry.ts';
 import { config } from '$config';
 
 type HealthDiagnosticsResponse = components['schemas']['HealthDiagnosticsResponse'];

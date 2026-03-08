@@ -7,7 +7,7 @@
 
 import { redirect } from '@sveltejs/kit';
 import type { Cookies } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/index.ts';
+import { pcdManager } from '$pcd/core/manager.ts';
 
 const COOKIE_OPTIONS = {
 	path: '/',

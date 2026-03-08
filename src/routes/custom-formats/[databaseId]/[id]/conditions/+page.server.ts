@@ -1,11 +1,11 @@
 import { error, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/index.ts';
-import { canWriteToBase } from '$pcd/index.ts';
+import { pcdManager } from '$pcd/core/manager.ts';
+import { canWriteToBase } from '$pcd/ops/writer.ts';
 import * as customFormatQueries from '$pcd/entities/customFormats/index.ts';
 import * as regularExpressionQueries from '$pcd/entities/regularExpressions/index.ts';
 import { getLanguagesWithSupport } from '$lib/server/sync/mappings.ts';
-import type { OperationLayer } from '$pcd/index.ts';
+import type { OperationLayer } from '$pcd/core/types.ts';
 import type { ConditionData } from '$shared/pcd/display.ts';
 import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
 

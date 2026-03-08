@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { pcdManager, canWriteToBase } from '$pcd/index.ts';
+import { pcdManager } from '$pcd/core/manager.ts';
+import { canWriteToBase } from '$pcd/ops/writer.ts';
 import { setLastDatabase, setLastSection } from '$utils/redirect/lastDatabase.ts';
 
 const ALLOWED_SECTIONS = new Set(['naming', 'media-settings', 'quality-definitions']);

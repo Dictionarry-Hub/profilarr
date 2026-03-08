@@ -1,7 +1,8 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/index.ts';
-import { canWriteToBase, type OperationLayer } from '$pcd/index.ts';
+import { pcdManager } from '$pcd/core/manager.ts';
+import type { OperationLayer } from '$pcd/core/types.ts';
+import { canWriteToBase } from '$pcd/ops/writer.ts';
 import * as customFormatQueries from '$pcd/entities/customFormats/index.ts';
 
 export const load: ServerLoad = async ({ params, url }) => {

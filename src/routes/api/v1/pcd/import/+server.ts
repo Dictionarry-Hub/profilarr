@@ -1,7 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { pcdManager, canWriteToBase } from '$pcd/index.ts';
-import type { PCDCache, OperationLayer } from '$pcd/index.ts';
+import { pcdManager } from '$pcd/core/manager.ts';
+import { canWriteToBase } from '$pcd/ops/writer.ts';
+import type { OperationLayer } from '$pcd/core/types.ts';
+import type { PCDCache } from '$pcd/database/cache.ts';
 import { ENTITY_TYPES } from '$shared/pcd/portable.ts';
 import type {
 	EntityType,

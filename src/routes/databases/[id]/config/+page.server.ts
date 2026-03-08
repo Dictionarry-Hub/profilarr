@@ -1,15 +1,15 @@
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+import { compile } from '$pcd/database/compiler.ts';
+import { syncDependencies } from '$pcd/git/dependencies.ts';
 import {
 	readManifest,
 	writeManifest,
 	validateManifest,
 	readReadme,
 	writeReadme,
-	type Manifest,
-	syncDependencies,
-	compile
-} from '$pcd/index.ts';
+	type Manifest
+} from '$pcd/manifest/manifest.ts';
 import { parseMarkdown } from '$utils/markdown/markdown.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 

@@ -1,7 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/index.ts';
-import { canWriteToBase } from '$pcd/index.ts';
+import { pcdManager } from '$pcd/core/manager.ts';
+import { canWriteToBase } from '$pcd/ops/writer.ts';
 import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import * as entityTestQueries from '$pcd/entities/qualityProfiles/entityTests/index.ts';

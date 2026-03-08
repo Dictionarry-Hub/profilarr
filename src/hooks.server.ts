@@ -17,7 +17,7 @@ import { db } from '$db/db.ts';
 import { runMigrations } from '$db/migrations.ts';
 import { initializeJobs } from '$jobs/init.ts';
 import { recoverInterruptedSyncs } from '$lib/server/sync/utils.ts';
-import { pcdManager } from '$pcd/index.ts';
+import { pcdManager } from '$pcd/core/manager.ts';
 import {
 	getAuthState,
 	isPublicPath,

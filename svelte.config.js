@@ -8,7 +8,12 @@ const config = {
 	kit: {
 		adapter: adapter({
 			usage: 'deno-compile',
-			out: 'dist/build'
+			out: 'dist/build',
+			buildOptions: {
+				logOverride: {
+					'ignored-bare-import': 'silent'
+				}
+			}
 		}),
 		alias: {
 			$api: './src/lib/api',

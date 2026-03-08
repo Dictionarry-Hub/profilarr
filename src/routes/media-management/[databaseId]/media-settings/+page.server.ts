@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { pcdManager } from '$pcd/index.ts';
+import { pcdManager } from '$pcd/core/manager.ts';
 import { list } from '$pcd/entities/mediaManagement/media-settings/read.ts';
 
 export const load: PageServerLoad = async ({ params }) => {
