@@ -139,7 +139,7 @@ jobs:
         run: deno task test
 
   semgrep:
-    name: SAST Scan
+    name: Semgrep
     runs-on: ubuntu-latest
     container:
       image: semgrep/semgrep
@@ -200,7 +200,7 @@ jobs:
         run: deno task test integration
 
   e2e-auth:
-    name: E2E Auth
+    name: E2E Tests
     needs: [build]
     runs-on: ubuntu-latest
     steps:

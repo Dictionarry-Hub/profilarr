@@ -18,7 +18,7 @@ AGENTS.md
 /temp
 /config
 
-# Editor
+# Editor — track shared settings, ignore personal files
 .vscode/
 
 # OS

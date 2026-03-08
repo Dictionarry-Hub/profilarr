@@ -22,8 +22,8 @@
 			? `display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: ${maxLines}; overflow: hidden;`
 			: ''}
 	>
+		<!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html -->
 		{@html html}
-		<!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — sanitized via sanitizeHtml() -->
 	</span>
 {/if}
 
