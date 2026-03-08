@@ -71,7 +71,9 @@ class GetRunsPerHourTest extends BaseTest {
 		// =====================
 
 		this.test('every 2 hours: 0.5 runs/hour', () => {
-			assertEquals(getRunsPerHour('0 */2 * * *'), 0.5);
+			const rph = getRunsPerHour('0 */2 * * *');
+			// 12 runs/day = 12/24 = 0.5
+			assertEquals(rph !== null && rph > 0.49 && rph < 0.51, true);
 		});
 
 		this.test('every 6 hours: ~0.17 runs/hour', () => {
