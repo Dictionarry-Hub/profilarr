@@ -108,6 +108,9 @@ jobs:
 
       - run: deno install --node-modules-dir
 
+      - name: Sync SvelteKit types
+        run: npx svelte-kit sync
+
       - name: Type check
         run: deno task check
 
