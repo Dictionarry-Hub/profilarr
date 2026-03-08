@@ -132,7 +132,10 @@ test('failed login attempts recorded under real IP, not spoofed header', async (
 		{ headers: { Origin: ORIGIN, 'X-Forwarded-For': '198.51.100.1' } }
 	);
 
-	const rows = queryDb(getDbPath(PORT), 'SELECT ip FROM login_attempts ORDER BY rowid DESC LIMIT 1') as {
+	const rows = queryDb(
+		getDbPath(PORT),
+		'SELECT ip FROM login_attempts ORDER BY rowid DESC LIMIT 1'
+	) as {
 		ip: string;
 	}[];
 	assertEquals(rows.length, 1);

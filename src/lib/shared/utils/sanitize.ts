@@ -27,12 +27,11 @@ function decodeEntities(str: string): string {
 		'&nbsp;': ' ',
 		'&tab;': '\t'
 	};
-	return str
-		.replace(/&(?:#x([0-9a-f]+)|#(\d+)|[a-z]+);/gi, (m, hex, dec) => {
-			if (hex) return String.fromCodePoint(parseInt(hex, 16));
-			if (dec) return String.fromCodePoint(parseInt(dec, 10));
-			return named[m.toLowerCase()] ?? m;
-		});
+	return str.replace(/&(?:#x([0-9a-f]+)|#(\d+)|[a-z]+);/gi, (m, hex, dec) => {
+		if (hex) return String.fromCodePoint(parseInt(hex, 16));
+		if (dec) return String.fromCodePoint(parseInt(dec, 10));
+		return named[m.toLowerCase()] ?? m;
+	});
 }
 
 /**
@@ -40,7 +39,9 @@ function decodeEntities(str: string): string {
  * Rejects javascript:, vbscript:, data:, and any other non-allowlisted scheme.
  */
 function isSafeUrl(raw: string): boolean {
-	const decoded = decodeEntities(raw).replace(/[\s\x00-\x1f]+/g, '').toLowerCase();
+	const decoded = decodeEntities(raw)
+		.replace(/[\s\x00-\x1f]+/g, '')
+		.toLowerCase();
 	// Relative URLs and fragment-only URLs are safe
 	if (!decoded.includes(':')) return true;
 	return SAFE_URL_SCHEMES.has(decoded.slice(0, decoded.indexOf(':') + 1));

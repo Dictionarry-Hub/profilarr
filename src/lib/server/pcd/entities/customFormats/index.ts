@@ -26,9 +26,5 @@ export { deleteTest } from './tests/index.ts';
 export { list } from './list.ts';
 export { create } from './create.ts';
 export { remove } from './delete.ts';
-export {
-	evaluateCustomFormat,
-	getParsedInfo,
-	extractPatternsByType
-} from './evaluator.ts';
+export { evaluateCustomFormat, getParsedInfo, extractPatternsByType } from './evaluator.ts';
 export type { PatternsByType, PatternMatchMaps } from './evaluator.ts';

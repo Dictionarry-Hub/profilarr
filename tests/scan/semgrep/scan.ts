@@ -38,19 +38,12 @@ if (checkCode !== 0) {
 	Deno.exit(1);
 }
 
-const configs = quick
-	? [LOCAL_CONFIG]
-	: [LOCAL_CONFIG, ...COMMUNITY_CONFIGS];
+const configs = quick ? [LOCAL_CONFIG] : [LOCAL_CONFIG, ...COMMUNITY_CONFIGS];
 
 const mode = quick ? 'quick (local rules only)' : 'full (local + community rules)';
 console.log(`Running semgrep scan: ${mode}\n`);
 
-const args = [
-	'scan',
-	...configs.flatMap((c) => ['--config', c]),
-	'--error',
-	'--verbose'
-];
+const args = ['scan', ...configs.flatMap((c) => ['--config', c]), '--error', '--verbose'];
 
 const cmd = new Deno.Command('semgrep', {
 	args,

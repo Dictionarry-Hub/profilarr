@@ -206,7 +206,8 @@
 			<div
 				class="prose prose-sm max-w-none rounded-b-xl border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-100"
 			>
-				{@html renderMarkdown(value)} <!-- nosemgrep: profilarr.xss.at-html-usage — renderMarkdown applies sanitizeHtml -->
+				{@html renderMarkdown(value)}
+				<!-- nosemgrep: profilarr.xss.at-html-usage — renderMarkdown applies sanitizeHtml -->
 			</div>
 			{#if name}
 				<input type="hidden" {name} {value} />

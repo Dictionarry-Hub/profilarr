@@ -5,7 +5,7 @@ rules:
       - pattern-regex: '\{@html\s+'
     paths:
       include:
-        - "**/*.svelte"
+        - '**/*.svelte'
     message: >
       {@html} renders unescaped HTML. Ensure the content is sanitized
       (highlight.js output is safe; marked.parse() output is NOT safe
@@ -19,7 +19,7 @@ rules:
         - vuln
       confidence: LOW
       cwe:
-        - "CWE-79: Improper Neutralization of Input During Web Page Generation"
+        - 'CWE-79: Improper Neutralization of Input During Web Page Generation'
 
   # marked.parse() output in Svelte without sanitizer
   - id: profilarr.xss.marked-unsanitized
@@ -27,7 +27,7 @@ rules:
       - pattern-regex: 'marked\.parse(?:Inline)?\('
     paths:
       include:
-        - "**/*.svelte"
+        - '**/*.svelte'
     message: >
       marked.parse() or marked.parseInline() in a Svelte component.
       If this flows to {@html}, it MUST be sanitized first. The
@@ -41,7 +41,7 @@ rules:
         - vuln
       confidence: HIGH
       cwe:
-        - "CWE-79: Improper Neutralization of Input During Web Page Generation"
+        - 'CWE-79: Improper Neutralization of Input During Web Page Generation'
 
   # Raw variable in {@html} without any function call
   # Catches: {@html profile.description} but NOT {@html parseMarkdown(x)}
@@ -50,7 +50,7 @@ rules:
       - pattern-regex: '\{@html\s+[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*\s*\}'
     paths:
       include:
-        - "**/*.svelte"
+        - '**/*.svelte'
     message: >
       Raw variable passed directly to {@html} without any sanitization
       or processing function. This is almost certainly an XSS risk
@@ -64,7 +64,7 @@ rules:
         - vuln
       confidence: HIGH
       cwe:
-        - "CWE-79: Improper Neutralization of Input During Web Page Generation"
+        - 'CWE-79: Improper Neutralization of Input During Web Page Generation'
 
   # Table cell HTML template literal without escapeHtml
   - id: profilarr.xss.table-cell-html-unescaped
@@ -72,7 +72,7 @@ rules:
       - pattern-regex: 'html:\s*`[^`]*\$\{(?!.*escapeHtml)[^}]+\}[^`]*`'
     paths:
       include:
-        - "**/*.svelte"
+        - '**/*.svelte'
     message: >
       Table cell returning HTML with interpolated variable not wrapped
       in escapeHtml(). Could allow XSS if the variable contains
@@ -85,4 +85,4 @@ rules:
         - vuln
       confidence: MEDIUM
       cwe:
-        - "CWE-79: Improper Neutralization of Input During Web Page Generation"
+        - 'CWE-79: Improper Neutralization of Input During Web Page Generation'

@@ -19,6 +19,6 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports:
-      - "8080:8080"
+      - '8080:8080'
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro

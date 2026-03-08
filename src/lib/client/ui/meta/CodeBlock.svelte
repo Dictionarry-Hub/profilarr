@@ -30,7 +30,8 @@
 	{/if}
 	<pre
 		class="rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-xs break-words whitespace-pre-wrap text-neutral-800 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-200">
-<code class="hljs font-mono">{@html highlighted}</code></pre> <!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — highlight.js HTML-encodes output -->
+<code class="hljs font-mono">{@html highlighted}</code></pre>
+	<!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — highlight.js HTML-encodes output -->
 </div>
 
 <style>

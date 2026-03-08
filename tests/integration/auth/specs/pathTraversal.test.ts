@@ -182,7 +182,11 @@ test('commit action rejects symlink escape', async () => {
 		{ headers: { Origin: ORIGIN } }
 	);
 	const body = await res.json();
-	assertEquals(body.status, 400, `Expected inner status 400 for symlink escape, got ${body.status}`);
+	assertEquals(
+		body.status,
+		400,
+		`Expected inner status 400 for symlink escape, got ${body.status}`
+	);
 });
 
 test('preview action rejects symlink escape', async () => {
@@ -192,7 +196,11 @@ test('preview action rejects symlink escape', async () => {
 		{ headers: { Origin: ORIGIN } }
 	);
 	const body = await res.json();
-	assertEquals(body.status, 400, `Expected inner status 400 for symlink escape, got ${body.status}`);
+	assertEquals(
+		body.status,
+		400,
+		`Expected inner status 400 for symlink escape, got ${body.status}`
+	);
 });
 
 await run();

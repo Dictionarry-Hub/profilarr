@@ -15,14 +15,14 @@ rules:
         - vuln
       confidence: HIGH
       cwe:
-        - "CWE-78: Improper Neutralization of Special Elements used in an OS Command"
+        - 'CWE-78: Improper Neutralization of Special Elements used in an OS Command'
 
   # eval() or Function() constructor
   - id: profilarr.deno.no-eval
     patterns:
       - pattern-either:
-          - pattern: "eval(...)"
-          - pattern: "new Function(...)"
+          - pattern: 'eval(...)'
+          - pattern: 'new Function(...)'
     message: >
       eval() or new Function() is prohibited. These allow arbitrary
       code execution.
@@ -34,29 +34,29 @@ rules:
         - vuln
       confidence: HIGH
       cwe:
-        - "CWE-94: Improper Control of Generation of Code"
+        - 'CWE-94: Improper Control of Generation of Code'
 
   # File I/O with path from request/params in route handlers
   - id: profilarr.deno.path-traversal
     patterns:
       - pattern-either:
-          - pattern: "Deno.readFile($PATH)"
-          - pattern: "Deno.readTextFile($PATH)"
-          - pattern: "Deno.writeFile($PATH, ...)"
-          - pattern: "Deno.writeTextFile($PATH, ...)"
-          - pattern: "Deno.remove($PATH, ...)"
-          - pattern: "Deno.mkdir($PATH, ...)"
+          - pattern: 'Deno.readFile($PATH)'
+          - pattern: 'Deno.readTextFile($PATH)'
+          - pattern: 'Deno.writeFile($PATH, ...)'
+          - pattern: 'Deno.writeTextFile($PATH, ...)'
+          - pattern: 'Deno.remove($PATH, ...)'
+          - pattern: 'Deno.mkdir($PATH, ...)'
       - metavariable-pattern:
           metavariable: $PATH
           patterns:
             - pattern-either:
-                - pattern: "params. ..."
-                - pattern: "url. ..."
-                - pattern: "request. ..."
-                - pattern: "event. ..."
+                - pattern: 'params. ...'
+                - pattern: 'url. ...'
+                - pattern: 'request. ...'
+                - pattern: 'event. ...'
     paths:
       include:
-        - "/src/routes/**"
+        - '/src/routes/**'
     message: >
       File system operation using a path derived from request
       parameters. Ensure path traversal is prevented by validating
@@ -69,7 +69,7 @@ rules:
         - vuln
       confidence: MEDIUM
       cwe:
-        - "CWE-22: Improper Limitation of a Pathname to a Restricted Directory"
+        - 'CWE-22: Improper Limitation of a Pathname to a Restricted Directory'
 
   # Logging environment variable values
   - id: profilarr.deno.no-env-log
@@ -77,7 +77,7 @@ rules:
       - pattern-regex: 'console\.(log|info|debug|warn|error)\(.*Deno\.env\.get\('
     paths:
       include:
-        - "/src/**"
+        - '/src/**'
     message: >
       Environment variable value may be logged to console. Env vars
       often contain secrets. Avoid logging their values directly.
@@ -89,4 +89,4 @@ rules:
         - audit
       confidence: LOW
       cwe:
-        - "CWE-532: Insertion of Sensitive Information into Log File"
+        - 'CWE-532: Insertion of Sensitive Information into Log File'

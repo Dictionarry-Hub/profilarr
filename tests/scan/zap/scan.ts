@@ -63,10 +63,7 @@ async function checkPrereqs(): Promise<void> {
 	}
 }
 
-async function startServer(
-	port: number,
-	envOverrides: Record<string, string>
-): Promise<void> {
+async function startServer(port: number, envOverrides: Record<string, string>): Promise<void> {
 	const basePath = `./dist/zap-${port}`;
 
 	await Deno.mkdir(`${basePath}/data/databases`, { recursive: true });
@@ -153,11 +150,16 @@ async function runZap(target: string, label: string, mode: ScanMode): Promise<nu
 
 	const cmd = new Deno.Command('docker', {
 		args: [
-			'run', '--rm', '--network', 'host',
-			'-v', `${wrkDir}:/zap/wrk:rw`,
+			'run',
+			'--rm',
+			'--network',
+			'host',
+			'-v',
+			`${wrkDir}:/zap/wrk:rw`,
 			ZAP_IMAGE,
 			getZapCommand(mode),
-			'-t', target,
+			'-t',
+			target,
 			'-I' // don't fail on warnings, only on errors
 		],
 		stdout: 'inherit',

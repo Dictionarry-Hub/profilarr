@@ -448,10 +448,7 @@ async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
 		console.log('Docker infrastructure ready.\n');
 
 		// 3. Start preview servers
-		async function startServer(
-			port: number,
-			envOverrides: Record<string, string>
-		): Promise<void> {
+		async function startServer(port: number, envOverrides: Record<string, string>): Promise<void> {
 			const basePath = `./dist/e2e-oidc-${port}`;
 			console.log(`Starting server on port ${port}...`);
 

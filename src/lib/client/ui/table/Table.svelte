@@ -190,7 +190,8 @@
 								{#if typeof rendered === 'string'}
 									{rendered}
 								{:else if typeof rendered === 'object' && 'html' in rendered}
-									{@html rendered.html} <!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — generic cell renderer; callers must sanitize -->
+									{@html rendered.html}
+									<!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — generic cell renderer; callers must sanitize -->
 								{:else}
 									<svelte:component this={rendered} {row} />
 								{/if}
@@ -221,7 +222,8 @@
 											{#if typeof rendered === 'string'}
 												{rendered}
 											{:else if typeof rendered === 'object' && 'html' in rendered}
-												{@html rendered.html} <!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — generic cell renderer; callers must sanitize -->
+												{@html rendered.html}
+												<!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — generic cell renderer; callers must sanitize -->
 											{:else}
 												<svelte:component this={rendered} {row} />
 											{/if}
@@ -345,7 +347,8 @@
 										{#if typeof rendered === 'string'}
 											{rendered}
 										{:else if typeof rendered === 'object' && 'html' in rendered}
-											{@html rendered.html} <!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — generic cell renderer; callers must sanitize -->
+											{@html rendered.html}
+											<!-- nosemgrep: profilarr.xss.at-html-usage, profilarr.xss.raw-variable-in-html — generic cell renderer; callers must sanitize -->
 										{:else}
 											<svelte:component this={rendered} {row} />
 										{/if}

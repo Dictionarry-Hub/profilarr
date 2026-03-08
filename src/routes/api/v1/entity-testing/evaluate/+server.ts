@@ -105,8 +105,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			: Promise.resolve(new Map<string, Map<string, boolean>>())
 	]);
 
-	const parserFailed =
-		titleMatches === null || editionMatches === null || rgMatches === null;
+	const parserFailed = titleMatches === null || editionMatches === null || rgMatches === null;
 
 	// Evaluate each release against all custom formats
 	const evaluations: ReleaseEvaluation[] = releases.map((release) => {
@@ -126,9 +125,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			? null
 			: {
 					title: titleMatches?.get(release.title) ?? new Map(),
-					edition: parsed.edition
-						? (editionMatches?.get(parsed.edition) ?? new Map())
-						: new Map(),
+					edition: parsed.edition ? (editionMatches?.get(parsed.edition) ?? new Map()) : new Map(),
 					releaseGroup: parsed.releaseGroup
 						? (rgMatches?.get(parsed.releaseGroup) ?? new Map())
 						: new Map()

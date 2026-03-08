@@ -5,7 +5,7 @@ rules:
       - pattern-regex: '(?i)(SqlConnection|SqlCommand|ExecuteNonQuery|ExecuteReader|SELECT\s+.*FROM|INSERT\s+INTO|UPDATE\s+.*SET|DELETE\s+FROM)'
     paths:
       include:
-        - "/src/services/parser/**/*.cs"
+        - '/src/services/parser/**/*.cs'
     message: >
       SQL detected in parser service. The parser should be stateless
       and not access any database. SQL belongs in the TypeScript
@@ -22,9 +22,9 @@ rules:
   - id: profilarr.csharp.no-process-start
     patterns:
       - pattern-either:
-          - pattern: "Process.Start(...)"
-          - pattern: "new ProcessStartInfo(...)"
-          - pattern: "new Process()"
+          - pattern: 'Process.Start(...)'
+          - pattern: 'new ProcessStartInfo(...)'
+          - pattern: 'new Process()'
     message: >
       Process execution in the parser service. The parser should not
       spawn external processes. Command execution belongs in the Deno
@@ -37,24 +37,24 @@ rules:
         - vuln
       confidence: HIGH
       cwe:
-        - "CWE-78: Improper Neutralization of Special Elements used in an OS Command"
+        - 'CWE-78: Improper Neutralization of Special Elements used in an OS Command'
 
   # File I/O in parser (review needed)
   - id: profilarr.csharp.file-io-review
     patterns:
       - pattern-either:
-          - pattern: "File.ReadAllText(...)"
-          - pattern: "File.WriteAllText(...)"
-          - pattern: "File.ReadAllBytes(...)"
-          - pattern: "File.WriteAllBytes(...)"
-          - pattern: "File.Open(...)"
-          - pattern: "File.Create(...)"
-          - pattern: "File.Delete(...)"
-          - pattern: "File.Move(...)"
-          - pattern: "File.Copy(...)"
+          - pattern: 'File.ReadAllText(...)'
+          - pattern: 'File.WriteAllText(...)'
+          - pattern: 'File.ReadAllBytes(...)'
+          - pattern: 'File.WriteAllBytes(...)'
+          - pattern: 'File.Open(...)'
+          - pattern: 'File.Create(...)'
+          - pattern: 'File.Delete(...)'
+          - pattern: 'File.Move(...)'
+          - pattern: 'File.Copy(...)'
     paths:
       include:
-        - "/src/services/parser/**/*.cs"
+        - '/src/services/parser/**/*.cs'
     message: >
       File I/O in parser service. Ensure paths are validated and
       restricted to expected directories. The parser receives input
@@ -67,4 +67,4 @@ rules:
         - audit
       confidence: MEDIUM
       cwe:
-        - "CWE-22: Improper Limitation of a Pathname to a Restricted Directory"
+        - 'CWE-22: Improper Limitation of a Pathname to a Restricted Directory'

@@ -8,7 +8,7 @@ rules:
       - pattern-regex: 'db\.(exec|execute|query|queryFirst|prepare)\(\s*`[^`]*\$\{(?!updates\.join|this\.migrationsTable|placeholders)[^}]+\}'
     paths:
       include:
-        - "/src/lib/server/**"
+        - '/src/lib/server/**'
     message: >
       SQL statement uses template literal with variable interpolation.
       Only static strings and known-safe patterns (updates.join for
@@ -22,26 +22,26 @@ rules:
         - vuln
       confidence: MEDIUM
       cwe:
-        - "CWE-89: Improper Neutralization of Special Elements used in an SQL Command"
+        - 'CWE-89: Improper Neutralization of Special Elements used in an SQL Command'
 
   # db.exec() with non-literal argument
   # Excludes migrations (execute SQL from migration objects) and
   # PCD cache (SQL-as-configuration by design)
   - id: profilarr.sql.exec-with-variable
     patterns:
-      - pattern: "db.exec($ARG)"
+      - pattern: 'db.exec($ARG)'
       - metavariable-pattern:
           metavariable: $ARG
           patterns:
-            - pattern-not: "\"...\""
+            - pattern-not: '"..."'
             - pattern-not: "'...'"
-            - pattern-not: "`...`"
+            - pattern-not: '`...`'
     paths:
       include:
-        - "/src/lib/server/**"
+        - '/src/lib/server/**'
       exclude:
-        - "/src/lib/server/db/migrations/**"
-        - "/src/lib/server/pcd/database/cache.ts"
+        - '/src/lib/server/db/migrations/**'
+        - '/src/lib/server/pcd/database/cache.ts'
     message: >
       db.exec() called with a variable argument. db.exec() does not
       support parameterized queries, so any dynamic content is an
@@ -54,4 +54,4 @@ rules:
         - vuln
       confidence: HIGH
       cwe:
-        - "CWE-89: Improper Neutralization of Special Elements used in an SQL Command"
+        - 'CWE-89: Improper Neutralization of Special Elements used in an SQL Command'

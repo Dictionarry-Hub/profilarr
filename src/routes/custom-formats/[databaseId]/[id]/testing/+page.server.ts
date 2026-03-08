@@ -131,8 +131,7 @@ export const load: ServerLoad = async ({ params }) => {
 						: Promise.resolve(new Map<string, boolean>())
 				]);
 
-				const parserFailed =
-					titleMatch === null || editionMatch === null || rgMatch === null;
+				const parserFailed = titleMatch === null || editionMatch === null || rgMatch === null;
 
 				const patternMatchMaps: PatternMatchMaps | null = parserFailed
 					? null

@@ -319,10 +319,10 @@ is set, matching `adapter-node` behaviour:
 
 ```ts
 let req = request;
-const origin = Deno.env.get("ORIGIN");
+const origin = Deno.env.get('ORIGIN');
 if (origin) {
-  const url = new URL(request.url);
-  req = new Request(`${origin}${url.pathname}${url.search}`, request);
+	const url = new URL(request.url);
+	req = new Request(`${origin}${url.pathname}${url.search}`, request);
 }
 return server.respond(req, { getClientAddress: () => clientAddress });
 ```

@@ -110,19 +110,25 @@
 					<div>
 						<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Before</div>
 						<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
-							{@html parseMarkdown(String(change.before ?? ''))}<!-- nosemgrep: profilarr.xss.at-html-usage -->
+							{@html parseMarkdown(
+								String(change.before ?? '')
+							)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 						</div>
 					</div>
 					<div>
 						<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">After</div>
 						<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
-							{@html parseMarkdown(String(change.after ?? ''))}<!-- nosemgrep: profilarr.xss.at-html-usage -->
+							{@html parseMarkdown(
+								String(change.after ?? '')
+							)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 						</div>
 					</div>
 				</div>
 			{:else if change.after !== undefined || change.before !== undefined}
 				<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
-					{@html parseMarkdown(String(change.after ?? change.before ?? ''))}<!-- nosemgrep: profilarr.xss.at-html-usage -->
+					{@html parseMarkdown(
+						String(change.after ?? change.before ?? '')
+					)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 				</div>
 			{:else}
 				<span class="text-sm text-neutral-400">—</span>

@@ -5,7 +5,10 @@
 
 import { BaseTest } from '../base/BaseTest.ts';
 import { assertEquals, assertAlmostEquals } from '@std/assert';
-import { normalizeRadarrItem, normalizeRadarrItems } from '../../../src/lib/server/upgrades/normalize.ts';
+import {
+	normalizeRadarrItem,
+	normalizeRadarrItems
+} from '../../../src/lib/server/upgrades/normalize.ts';
 import type {
 	RadarrMovie,
 	RadarrMovieFile,

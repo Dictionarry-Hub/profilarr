@@ -44,7 +44,11 @@ Deno.test('sanitizeHtml: strips script tags', () => {
 	const input = '<p>hello</p><script>alert(1)</script>';
 	const result = sanitizeHtml(input);
 	assertEquals(result.includes('<script'), false, `Output still contains script tag -- ${result}`);
-	assertEquals(result.includes('alert(1)'), false, `Output still contains script body -- ${result}`);
+	assertEquals(
+		result.includes('alert(1)'),
+		false,
+		`Output still contains script body -- ${result}`
+	);
 });
 
 Deno.test('sanitizeHtml: strips onerror event handler', () => {
