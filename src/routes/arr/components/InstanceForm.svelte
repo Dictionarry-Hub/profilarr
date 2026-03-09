@@ -122,7 +122,7 @@
 
 		testing = true;
 		try {
-			const response = await fetch('/arr/test', {
+			const response = await fetch('/api/internal/arr/connection', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ type, url, apiKey })
@@ -159,7 +159,7 @@
 
 			// Only test connection if API key was provided
 			if (apiKey) {
-				const response = await fetch('/arr/test', {
+				const response = await fetch('/api/internal/arr/connection', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ type, url, apiKey })
