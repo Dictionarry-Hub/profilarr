@@ -13,3 +13,13 @@ HealthStatus:
     - degraded
     - unhealthy
   description: Overall health status
+
+ErrorResponse:
+  type: object
+  required:
+    - error
+  properties:
+    error:
+      type: string
+      description: Error message
+      example: Unauthorized

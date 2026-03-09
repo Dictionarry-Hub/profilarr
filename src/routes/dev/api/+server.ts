@@ -42,9 +42,10 @@ export const GET: RequestHandler = async ({ url }) => {
 			Scalar.createApiReference('#app', {
 				url: '${escapeHtml(specUrl.toString())}',
 				layout: 'modern',
-				theme: 'alternate',
+				theme: 'default',
 				hideDownloadButton: false,
-				darkMode: true
+				darkMode: true,
+				operationTitleSource: 'path'
 			});
 		</script>
 	</body>

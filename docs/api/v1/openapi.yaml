@@ -1,11 +1,16 @@
 openapi: 3.1.0
 info:
   title: Profilarr API
-  description: API for Profilarr - Profile management and sync for *arr applications
   version: 1.0.0
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
+  contact:
+    name: Profilarr
+    url: https://github.com/Dictionarry-Hub/profilarr
+  description: |
+    Profilarr manages configuration for Radarr and Sonarr by syncing
+    curated configuration databases into Arr instances.
 
 servers:
   - url: /api/v1
@@ -13,7 +18,7 @@ servers:
 
 tags:
   - name: System
-    description: System health and status endpoints
+    description: Health checks, diagnostics, and API metadata.
   - name: Entity Testing
     description: Release parsing and custom format evaluation
   - name: Arr
@@ -24,6 +29,10 @@ tags:
     description: Linked database instance management
   - name: Regex
     description: Regex pattern validation
+
+security:
+  - apiKey: []
+  - session: []
 
 paths:
   /arr:
@@ -56,12 +65,26 @@ paths:
     $ref: './paths/regex.yaml#/validate'
 
 components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: API key for programmatic access. Generate in Settings > Security.
+    session:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Session cookie set after browser login.
+
   schemas:
     # Common
     ComponentStatus:
       $ref: './schemas/common.yaml#/ComponentStatus'
     HealthStatus:
       $ref: './schemas/common.yaml#/HealthStatus'
+    ErrorResponse:
+      $ref: './schemas/common.yaml#/ErrorResponse'
     # Health
     HealthCheckResponse:
       $ref: './schemas/health.yaml#/HealthCheckResponse'
@@ -89,8 +112,6 @@ components:
       $ref: './schemas/arr.yaml#/ScoreBreakdownItem'
     ProfileByDatabase:
       $ref: './schemas/arr.yaml#/ProfileByDatabase'
-    ErrorResponse:
-      $ref: './schemas/arr.yaml#/ErrorResponse'
     # Arr - Library
     RadarrLibraryItem:
       $ref: './schemas/arr.yaml#/RadarrLibraryItem'

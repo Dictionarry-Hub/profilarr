@@ -1,41 +1,57 @@
 health:
   get:
     operationId: getHealth
-    summary: Health check (public)
+    summary: Health Check
     description: |
-      Public endpoint for uptime monitors. Returns only the overall status and
-      timestamp — no version, uptime, or component details.
+      Returns system status for uptime monitors.
 
-      Status values:
-      - `healthy`: All components functioning normally
-      - `degraded`: Core functionality works but some components have issues
-      - `unhealthy`: Core functionality is broken
+      This endpoint is public and returns no sensitive information, just a
+      status and timestamp. This allows external monitoring tools to check
+      availability without credentials. For detailed component health, use
+      `/health/diagnostics` (requires authentication).
+
+      **Use cases:**
+      - Uptime monitoring (Uptime Kuma, Healthchecks.io)
+      - Container orchestration probes (Kubernetes, Docker)
+
+      **Behavior:**
+      - Returns 200 for `healthy` or `degraded` (service can handle requests)
+      - Returns 503 for `unhealthy` (do not route traffic)
+      - The `status` field distinguishes the three states
     tags:
       - System
     security: []
     responses:
       '200':
-        description: Service is healthy or degraded
+        description: System is healthy or degraded (status field indicates which)
         content:
           application/json:
             schema:
               $ref: '../schemas/health.yaml#/HealthCheckResponse'
+            example:
+              status: healthy
+              timestamp: '2026-03-09T12:00:00.000Z'
       '503':
-        description: Service is unhealthy
+        description: System is unhealthy (status field will be "unhealthy")
         content:
           application/json:
             schema:
               $ref: '../schemas/health.yaml#/HealthCheckResponse'
+            example:
+              status: unhealthy
+              timestamp: '2026-03-09T12:00:00.000Z'
 
 health_diagnostics:
   get:
     operationId: getHealthDiagnostics
-    summary: Health diagnostics (authenticated)
+    summary: Health Diagnostics
     description: |
-      Detailed health diagnostics including version, uptime, and per-component
-      status. Requires authentication (session or API key).
+      Returns detailed system health including version, uptime, and per-component status.
 
-      Use `?verbose=true` for additional counts, sizes, and timestamps.
+      **Use cases:**
+      - Debugging issues with the Profilarr instance
+      - Monitoring dashboards that need component-level detail
+      - Support requests (share diagnostics output)
     tags:
       - System
     parameters:
@@ -47,35 +63,74 @@ health_diagnostics:
           default: false
     responses:
       '200':
-        description: Diagnostics response (healthy or degraded)
+        description: System is healthy or degraded (status field indicates which)
         content:
           application/json:
             schema:
               $ref: '../schemas/health.yaml#/HealthDiagnosticsResponse'
+            example:
+              status: healthy
+              timestamp: '2026-03-09T12:00:00.000Z'
+              version: '2.5.0'
+              uptime: 86400
+              components:
+                sqlite:
+                  status: healthy
+                  responseTimeMs: 1.2
+                  migration: 57
+                repos:
+                  status: healthy
+                jobs:
+                  status: healthy
+                backups:
+                  status: healthy
+                  enabled: true
+                logs:
+                  status: healthy
       '401':
         description: Not authenticated
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - error
-              properties:
-                error:
-                  type: string
-                  example: Unauthorized
+              $ref: '../schemas/common.yaml#/ErrorResponse'
       '503':
-        description: Service is unhealthy
+        description: System is unhealthy (status field will be "unhealthy")
         content:
           application/json:
             schema:
               $ref: '../schemas/health.yaml#/HealthDiagnosticsResponse'
+            example:
+              status: unhealthy
+              timestamp: '2026-03-09T12:00:00.000Z'
+              version: '2.5.0'
+              uptime: 86400
+              components:
+                sqlite:
+                  status: unhealthy
+                  responseTimeMs: 0
+                  migration: 57
+                  message: Database connection failed
+                repos:
+                  status: healthy
+                jobs:
+                  status: healthy
+                backups:
+                  status: healthy
+                  enabled: true
+                logs:
+                  status: healthy
 
 openapi:
   get:
     operationId: getOpenApiSpec
-    summary: OpenAPI specification
-    description: Returns the OpenAPI specification for this API
+    summary: OpenAPI Specification
+    description: |
+      Returns the OpenAPI 3.1 specification for this API.
+
+      **Use cases:**
+      - Client SDK generation (openapi-generator, openapi-typescript)
+      - API discovery and introspection
+      - Documentation tools
     tags:
       - System
     responses:
