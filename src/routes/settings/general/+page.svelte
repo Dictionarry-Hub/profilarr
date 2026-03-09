@@ -218,7 +218,7 @@
 
 		tmdbTesting = true;
 		try {
-			const response = await fetch('/api/tmdb/test', {
+			const response = await fetch('/tmdb/validate', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ apiKey: tmdbApiKey })
