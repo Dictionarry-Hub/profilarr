@@ -14,7 +14,6 @@ in with public endpoints.
 
 | Method | Route                 | Purpose                      |
 | ------ | --------------------- | ---------------------------- |
-| POST   | `/arr/test`           | Test arr instance connection |
 | GET    | `/auth/logout`        | Destroy session + redirect   |
 | GET    | `/auth/oidc/login`    | Start OIDC flow              |
 | GET    | `/auth/oidc/callback` | OIDC callback                |
