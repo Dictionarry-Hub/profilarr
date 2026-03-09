@@ -10,14 +10,6 @@ in with public endpoints.
 
 ## Current Structure
 
-### Legacy (outside `/api/`)
-
-| Method | Route                 | Purpose                      |
-| ------ | --------------------- | ---------------------------- |
-| GET    | `/auth/logout`        | Destroy session + redirect   |
-| GET    | `/auth/oidc/login`    | Start OIDC flow              |
-| GET    | `/auth/oidc/callback` | OIDC callback                |
-
 ### Unversioned `/api/`
 
 | Method | Route                              | Purpose                        |

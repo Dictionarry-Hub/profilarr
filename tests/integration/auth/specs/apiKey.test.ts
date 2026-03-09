@@ -62,7 +62,6 @@ test('API key in query param returns 401', async () => {
 });
 
 // --- API key scoping: only /api/ paths, not browser pages or form actions ---
-// When /api/internal/ routes exist, add a test here proving API key is rejected for those too.
 
 test('API key rejected for browser pages', async () => {
 	// API key auth is scoped to /api/ paths only.
