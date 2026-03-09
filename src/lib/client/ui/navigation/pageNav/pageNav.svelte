@@ -78,6 +78,7 @@
 		{#if import.meta.env.DEV}
 			<Group label="Dev" emoji="🛠️" href="/dev" icon={Wrench} initialOpen={true} hasItems={true}>
 				<GroupItem label="Components" href="/dev/components" />
+				<GroupItem label="API Docs" href="/dev/api" />
 			</Group>
 		{/if}
 
