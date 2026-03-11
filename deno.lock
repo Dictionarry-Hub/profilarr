@@ -39,7 +39,6 @@
     "npm:better-sqlite3@^12.6.2": "12.6.2",
     "npm:croner@^9.1.0": "9.1.0",
     "npm:esbuild@0.24": "0.24.2",
-    "npm:highlight.js@^11.11.1": "11.11.1",
     "npm:jose@^6.2.0": "6.2.0",
     "npm:kysely@0.27.6": "0.27.6",
     "npm:kysely@~0.27.2": "0.27.6",
@@ -1086,9 +1085,6 @@
     "graceful-fs@4.2.11": {
       "integrity": "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ=="
     },
-    "highlight.js@11.11.1": {
-      "integrity": "sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w=="
-    },
     "https-proxy-agent@7.0.6": {
       "integrity": "sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==",
       "dependencies": [
@@ -1633,7 +1629,6 @@
       "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
       "jsr:@std/assert@1",
       "npm:croner@^9.1.0",
-      "npm:highlight.js@^11.11.1",
       "npm:marked@^15.0.6",
       "npm:simple-icons@^15.17.0"
     ],
@@ -1651,7 +1646,6 @@
         "npm:better-sqlite3@^12.6.2",
         "npm:croner@^9.1.0",
         "npm:esbuild@0.24",
-        "npm:highlight.js@^11.11.1",
         "npm:jose@^6.2.0",
         "npm:kysely@0.27.6",
         "npm:lucide-svelte@0.546",

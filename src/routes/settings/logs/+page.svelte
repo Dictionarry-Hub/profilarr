@@ -3,7 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
 	import Modal from '$ui/modal/Modal.svelte';
-	import JsonView from '$ui/meta/JsonView.svelte';
+	import CodeBlock from '$ui/code/CodeBlock.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
@@ -444,10 +444,7 @@
 	on:confirm={closeMetaModal}
 	on:cancel={closeMetaModal}
 >
-	<div
-		slot="body"
-		class="max-h-[70vh] overflow-auto rounded-lg bg-neutral-50 p-4 font-mono text-sm dark:bg-neutral-800"
-	>
-		<JsonView data={selectedMeta} />
+	<div slot="body" class="space-y-3">
+		<CodeBlock code={JSON.stringify(selectedMeta, null, 2)} language="json" />
 	</div>
 </Modal>

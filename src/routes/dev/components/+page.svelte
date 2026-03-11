@@ -23,8 +23,7 @@
 	import RangeScale from '$ui/form/RangeScale.svelte';
 	import type { Marker } from '$ui/form/RangeScale.svelte';
 	import KeyValueList from '$ui/form/KeyValueList.svelte';
-	import CodeBlock from '$ui/meta/CodeBlock.svelte';
-	import JsonView from '$ui/meta/JsonView.svelte';
+	import CodeBlock from '$ui/code/CodeBlock.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
@@ -1027,9 +1026,9 @@
 	<!-- Meta -->
 	{#if visibleIds.has('meta')}
 		<ComponentCard
-			name="Meta"
-			paths={['meta/CodeBlock', 'meta/JsonView']}
-			description="CodeBlock renders syntax-highlighted code (SQL, JSON, plaintext) via highlight.js with an optional label and icon slot. JsonView renders a JSON object with highlight.js and auto-extracts SQL queries into separate highlighted blocks."
+			name="Code"
+			paths={['code/CodeBlock', 'code/InlineCode']}
+			description="CodeBlock renders syntax-highlighted code (SQL, JSON, plaintext) with a themed code area, header slot, and copy button. InlineCode renders inline code snippets with optional icon."
 		>
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
@@ -1038,7 +1037,6 @@
 				<CodeBlock
 					code="SELECT * FROM profiles\nWHERE name = 'HD-1080p'\nORDER BY id;"
 					language="sql"
-					label="Query"
 				/>
 			</div>
 
@@ -1050,27 +1048,6 @@
 					code={'{\n  "name": "HD-1080p",\n  "cutoff": 7,\n  "items": [4, 7, 3]\n}'}
 					language="json"
 				/>
-			</div>
-
-			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					JsonView (with queries)
-				</p>
-				<div
-					class="rounded-lg border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-950"
-				>
-					<JsonView
-						data={{
-							name: 'HD-1080p',
-							cutoff: 7,
-							upgradesAllowed: true,
-							queries: [
-								"INSERT INTO profiles (name) VALUES ('HD-1080p');",
-								"UPDATE profiles SET cutoff = 7 WHERE name = 'HD-1080p';"
-							]
-						}}
-					/>
-				</div>
 			</div>
 		</ComponentCard>
 	{/if}

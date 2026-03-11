@@ -24,7 +24,6 @@
 		"@std/assert": "jsr:@std/assert@^1.0.0",
 		"marked": "npm:marked@^15.0.6",
 		"simple-icons": "npm:simple-icons@^15.17.0",
-		"highlight.js": "npm:highlight.js@^11.11.1",
 		"croner": "npm:croner@^9.1.0",
 		"@felix/bcrypt": "jsr:@felix/bcrypt@^1.0.8"
 	},

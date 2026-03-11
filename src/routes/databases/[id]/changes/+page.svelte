@@ -6,9 +6,11 @@
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import CodeBlock from '$ui/meta/CodeBlock.svelte';
-	import { Check, ArrowDown, ExternalLink, FileText, Loader2, Upload, Trash2 } from 'lucide-svelte';
+	import CodeBlock from '$ui/code/CodeBlock.svelte';
+	import InlineCode from '$ui/code/InlineCode.svelte';
+	import Label from '$ui/label/Label.svelte';
+	import { Check, ArrowDown, ExternalLink, FileText, Loader2, Upload, Trash2, FileCode, Layers, Files, Clock, User, CheckCircle, XCircle, GitBranch, Globe, FileCheck, UserCheck, GitCommit, X } from 'lucide-svelte';
+	import Button from '$ui/button/Button.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { deserialize } from '$app/forms';
@@ -1024,10 +1026,34 @@
 	confirmDisabled={previewConfirmDisabled}
 	loading={committing}
 	size="2xl"
-	height="lg"
 	on:confirm={handleExportConfirm}
 	on:cancel={handlePreviewCancel}
 >
+	<svelte:fragment slot="header-extra">
+		{#if previewData}
+			{#if !previewData.checks.clean}
+				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Dirty</Label>
+			{/if}
+			{#if !previewData.checks.upToDate}
+				<Label variant="warning" size="sm" rounded="md" mono>
+					<GitBranch size={11} /> A{previewData.checks.ahead}/B{previewData.checks.behind}
+				</Label>
+			{/if}
+			{#if !previewData.checks.remoteReachable}
+				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Remote failed</Label>
+			{/if}
+			{#if !previewData.checks.manifestValid}
+				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Manifest invalid</Label>
+			{/if}
+			{#if !previewData.checks.identitySet}
+				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Identity missing</Label>
+			{/if}
+			{#if !previewData.checks.canWriteToBase}
+				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Publish blocked</Label>
+			{/if}
+		{/if}
+	</svelte:fragment>
+
 	<svelte:fragment slot="body">
 		{#if previewing}
 			<div class="flex items-center gap-3 text-sm text-neutral-600 dark:text-neutral-400">
@@ -1040,118 +1066,62 @@
 			<p class="text-sm text-red-600 dark:text-red-400">Preview failed: {previewError}</p>
 		{:else if previewData}
 			<div class="space-y-4">
-				<div class="space-y-1 text-sm text-neutral-600 dark:text-neutral-400">
-					<span class="font-medium text-neutral-900 dark:text-neutral-100">Commit message</span>
-					<code
-						class="block rounded bg-neutral-100 px-3 py-2 font-mono text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-					>
-						{commitMessage.trim()}
-					</code>
-				</div>
+				<!-- Commit message -->
+				<InlineCode text={commitMessage.trim()} icon={GitCommit} rounded="md" />
 
-				<div class="flex flex-wrap gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-					{#if previewOpCount > 0 || selectedOpCount > 0}
-						<Badge variant="neutral" size="md" mono>
-							SQL: {previewData.ok ? (previewData.filepath ?? 'ops/unknown.sql') : '-'}
-						</Badge>
-					{/if}
-					<Badge variant="neutral" size="md" mono>
-						Ops: {previewData.ok ? previewOpCount : selectedOpCount}
-					</Badge>
-					{#if (previewData.filePaths?.length ?? 0) > 0}
-						<Badge variant="neutral" size="md" mono>
-							Files: {previewData.filePaths?.length}
-						</Badge>
-					{/if}
-					<Badge variant="neutral" size="md">
-						Exported: {formatExportedAt(previewData.exportedAt)}
-					</Badge>
-					<Badge variant="neutral" size="md">
-						Identity: {previewData.gitIdentity?.name ?? '-'} ({previewData.gitIdentity?.email ??
-							'-'})
-					</Badge>
-				</div>
-
-				<div
-					class="rounded-lg border border-neutral-200 bg-white p-3 text-sm dark:border-neutral-800 dark:bg-neutral-900"
-				>
+				{#if previewData.errors.length > 0}
 					<div
-						class="mb-2 text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
+						class="rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200"
 					>
-						Preflight
+						{#each previewData.errors as error}
+							<div>{error}</div>
+						{/each}
 					</div>
-					<div class="grid gap-2 text-xs text-neutral-600 md:grid-cols-2 dark:text-neutral-400">
-						<div class="flex items-center justify-between">
-							<span>Repo clean</span>
-							<Badge variant={previewData.checks.clean ? 'success' : 'danger'} size="sm">
-								{previewData.checks.clean ? 'OK' : 'Dirty'}
-							</Badge>
-						</div>
-						<div class="flex items-center justify-between">
-							<span>Up to date</span>
-							<Badge variant={previewData.checks.upToDate ? 'success' : 'warning'} size="sm" mono>
-								{previewData.checks.upToDate
-									? 'OK'
-									: `A${previewData.checks.ahead}/B${previewData.checks.behind}`}
-							</Badge>
-						</div>
-						<div class="flex items-center justify-between">
-							<span>Remote reachable</span>
-							<Badge variant={previewData.checks.remoteReachable ? 'success' : 'danger'} size="sm">
-								{previewData.checks.remoteReachable ? 'OK' : 'Failed'}
-							</Badge>
-						</div>
-						<div class="flex items-center justify-between">
-							<span>Manifest valid</span>
-							<Badge variant={previewData.checks.manifestValid ? 'success' : 'danger'} size="sm">
-								{previewData.checks.manifestValid ? 'OK' : 'Invalid'}
-							</Badge>
-						</div>
-						<div class="flex items-center justify-between">
-							<span>Identity set</span>
-							<Badge variant={previewData.checks.identitySet ? 'success' : 'danger'} size="sm">
-								{previewData.checks.identitySet ? 'OK' : 'Missing'}
-							</Badge>
-						</div>
-						<div class="flex items-center justify-between">
-							<span>Can publish</span>
-							<Badge variant={previewData.checks.canWriteToBase ? 'success' : 'danger'} size="sm">
-								{previewData.checks.canWriteToBase ? 'OK' : 'Blocked'}
-							</Badge>
-						</div>
+				{/if}
+
+				{#if previewSelectionMismatch}
+					<div
+						class="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200"
+					>
+						Selection changed since preview. Preview again before exporting.
 					</div>
+				{/if}
 
-					{#if previewData.errors.length > 0}
-						<div
-							class="mt-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200"
-						>
-							{#each previewData.errors as error}
-								<div>{error}</div>
-							{/each}
-						</div>
-					{/if}
-
-					{#if previewSelectionMismatch}
-						<div
-							class="mt-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200"
-						>
-							Selection changed since preview. Preview again before exporting.
-						</div>
-					{/if}
-
-					{#if previewMessageMismatch}
-						<div
-							class="mt-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200"
-						>
-							Commit message changed since preview. Preview again before exporting.
-						</div>
-					{/if}
-				</div>
+				{#if previewMessageMismatch}
+					<div
+						class="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200"
+					>
+						Commit message changed since preview. Preview again before exporting.
+					</div>
+				{/if}
 
 				{#if previewData.ok && previewData.content}
-					<CodeBlock code={previewData.content} language="sql" label="Exported SQL">
-						<svelte:fragment slot="icon">
-							<FileText size={14} />
+					<CodeBlock code={previewData.content} language="sql">
+						<svelte:fragment slot="header">
+							{#if previewOpCount > 0 || selectedOpCount > 0}
+								<Label variant="secondary" size="sm" rounded="md" mono>
+									<FileCode size={11} />
+									{previewData.ok ? (previewData.filepath ?? 'ops/unknown.sql') : '-'}
+								</Label>
+							{/if}
+							<Label variant="secondary" size="sm" rounded="md" mono>
+								<Layers size={11} />
+								{previewData.ok ? previewOpCount : selectedOpCount} ops
+							</Label>
+							{#if (previewData.filePaths?.length ?? 0) > 0}
+								<Label variant="secondary" size="sm" rounded="md" mono>
+									<Files size={11} />
+									{previewData.filePaths?.length} files
+								</Label>
+							{/if}
+							<Label variant="secondary" size="sm" rounded="md">
+								<Clock size={11} />
+								{formatExportedAt(previewData.exportedAt)}
+							</Label>
+							<Label variant="secondary" size="sm" rounded="md">
+								<User size={11} />
+								{previewData.gitIdentity?.name ?? '-'} &lt;{previewData.gitIdentity?.email ?? '-'}&gt;
+							</Label>
 						</svelte:fragment>
 					</CodeBlock>
 				{:else if previewData.ok && (previewData.filePaths?.length ?? 0) > 0}
@@ -1172,5 +1142,23 @@
 		{:else}
 			<p class="text-sm text-neutral-600 dark:text-neutral-400">No preview data returned.</p>
 		{/if}
+	</svelte:fragment>
+
+	<svelte:fragment slot="footer">
+		<Button
+			text="Close"
+			icon={X}
+			iconColor="text-red-500"
+			disabled={committing}
+			on:click={handlePreviewCancel}
+		/>
+		<Button
+			text="Approve & Export"
+			icon={committing ? Loader2 : Check}
+			iconColor={committing ? '' : 'text-blue-500'}
+			disabled={previewConfirmDisabled || committing}
+			loading={committing}
+			on:click={handleExportConfirm}
+		/>
 	</svelte:fragment>
 </Modal>
