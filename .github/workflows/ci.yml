@@ -30,7 +30,7 @@ jobs:
           deno-version: v2.x
 
       - name: Cache deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/deno
@@ -66,7 +66,7 @@ jobs:
           deno-version: v2.x
 
       - name: Cache deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/deno
@@ -94,7 +94,7 @@ jobs:
           node-version: 22
 
       - name: Cache deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/deno
@@ -121,7 +121,7 @@ jobs:
           deno-version: v2.x
 
       - name: Cache deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/deno
@@ -176,7 +176,7 @@ jobs:
           node-version: 22
 
       - name: Cache deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/deno
@@ -223,7 +223,7 @@ jobs:
           node-version: 22
 
       - name: Cache deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/deno
