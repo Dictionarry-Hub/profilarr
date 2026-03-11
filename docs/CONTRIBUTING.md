@@ -80,8 +80,10 @@ image.
 issues. It won't have major breaking changes, but things may not work perfectly.
 Don't run it on a setup you depend on.
 
-Bugs found during testing are fixed directly on `develop`. Active feature
-branches rebase onto `develop` to pick up these fixes.
+**Nothing is committed directly to `develop`.** Bug fixes found during testing
+go through the same feature branch → PR → squash merge flow as everything else.
+This ensures all changes run through CI before landing. Active feature branches
+rebase onto `develop` to pick up these fixes.
 
 ### Stable
 
@@ -350,24 +352,30 @@ feature branch.
 The settings page feature is on `develop`. A beta tester reports that saving
 settings clears the form instead of showing a success message.
 
-You're already on `develop` (or switch to it):
+Create a fix branch, just like any other change:
 
 ```bash
 git checkout develop
 git pull
+git checkout -b fix/settings-save-message
 ```
 
-You fix the bug and push:
+Fix the bug, commit, and push:
 
 ```bash
 git commit -m "fix: show success message after saving settings"
-git push
+git push origin fix/settings-save-message
 ```
 
-`:develop` rebuilds. The tester confirms the fix. No other issues come up. Two
-testers and the maintainer sign off. You tag it:
+Open a PR targeting `develop` with the title
+`fix: show success message after saving settings`. CI runs. Once it passes,
+squash merge the PR. `:develop` rebuilds. The tester confirms the fix.
+
+No other issues come up. Two testers and the maintainer sign off. You tag it:
 
 ```bash
+git checkout develop
+git pull
 git tag v2.4.0
 git push --tags
 ```

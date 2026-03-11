@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [develop, 'hotfix/*']
+    branches: [develop]
     tags: ['v*']
 
 env:
