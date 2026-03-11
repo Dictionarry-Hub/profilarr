@@ -12,7 +12,8 @@ AGENTS.md
 .netlify
 .wrangler
 /dist
-/static
+/static/*
+!/static/fonts/
 
 # Application
 /temp

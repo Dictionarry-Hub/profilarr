@@ -1,6 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
 @import 'tailwindcss';
+
+@font-face {
+	font-family: 'DM Sans';
+	font-style: normal;
+	font-weight: 100 1000;
+	font-display: swap;
+	src: url('/fonts/DMSans-Latin.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Geist Mono';
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url('/fonts/GeistMono-Latin.woff2') format('woff2');
+}
 
 @font-face {
 	font-family: 'JetBrains Mono';
