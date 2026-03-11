@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { SvelteComponent } from 'svelte';
+	import type { ComponentType } from 'svelte';
 
 	export let text: string;
-	export let icon: typeof SvelteComponent | null = null;
+	export let icon: ComponentType | null = null;
 	export let rounded: 'sm' | 'md' | 'lg' | 'xl' | 'full' = 'full';
 
 	const roundedClasses = {
@@ -15,11 +15,17 @@
 </script>
 
 <code
-	class="inline-flex items-center gap-1.5 {roundedClasses[rounded]} bg-neutral-100 px-1.5 py-0.5 text-[0.85em] text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+	class="inline-flex items-center gap-1.5 {roundedClasses[
+		rounded
+	]} bg-neutral-100 px-1.5 py-0.5 text-[0.85em] text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
 	style="font-family: var(--font-code)"
 >
 	{#if icon}
-		<svelte:component this={icon} size={12} class="shrink-0 text-neutral-400 dark:text-neutral-500" />
+		<svelte:component
+			this={icon}
+			size={12}
+			class="shrink-0 text-neutral-400 dark:text-neutral-500"
+		/>
 	{/if}
 	{text}
 </code>

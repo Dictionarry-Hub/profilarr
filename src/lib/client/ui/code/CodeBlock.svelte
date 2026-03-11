@@ -19,14 +19,14 @@
 	$: variant = $themeStore === 'dark' ? theme.dark : theme.light;
 	$: tokens = tokenize(code, language);
 	$: langLabel = language === 'sql' ? 'SQL' : language === 'json' ? 'JSON' : language;
-	$: langVariant = language === 'sql' ? 'info' : 'secondary';
+	$: langVariant = language === 'sql' ? ('info' as const) : ('secondary' as const);
 	$: langCustomVariant =
 		language === 'json'
 			? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
 			: '';
 
 	function tokenColor(type: string, v: ThemeVariant): string | undefined {
-		return (v as Record<string, string>)[type] ?? undefined;
+		return (v as unknown as Record<string, string>)[type] ?? undefined;
 	}
 
 	function selectTheme(name: string) {
@@ -54,7 +54,9 @@
 	<div
 		class="flex flex-wrap items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-3 py-2 dark:border-neutral-700/60 dark:bg-neutral-900"
 	>
-		<Label variant={langVariant} customVariant={langCustomVariant} size="sm" rounded="md" mono>{langLabel}</Label>
+		<Label variant={langVariant} customVariant={langCustomVariant} size="sm" rounded="md" mono
+			>{langLabel}</Label
+		>
 		<slot name="header" />
 		<div class="ml-auto flex items-center gap-2">
 			{#if themes.length > 1}
@@ -89,9 +91,13 @@
 
 	<div style="background-color: {variant.bg}">
 		<pre
-			class="overflow-x-auto whitespace-pre p-3 text-xs leading-5"
-			style="color: {variant.text}"><code>{#each tokens as t}<span
-					style={tokenColor(t.type, variant) ? `color: ${tokenColor(t.type, variant)}` : ''}>{t.text}</span>{/each}</code></pre>
+			class="overflow-x-auto p-3 text-xs leading-5 whitespace-pre"
+			style="color: {variant.text}"><code
+				>{#each tokens as t}<span
+						style={tokenColor(t.type, variant) ? `color: ${tokenColor(t.type, variant)}` : ''}
+						>{t.text}</span
+					>{/each}</code
+			></pre>
 	</div>
 </div>
 
