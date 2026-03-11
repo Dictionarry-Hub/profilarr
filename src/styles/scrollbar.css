@@ -1,0 +1,36 @@
+/* Overlay scrollbars - style scrollbars without forcing overflow */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(163, 163, 163, 0.5) transparent;
+}
+
+.dark * {
+	scrollbar-color: rgba(82, 82, 82, 0.6) transparent;
+}
+
+/* Webkit (Chrome/Safari) */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: rgba(163, 163, 163, 0.5);
+	border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(163, 163, 163, 0.8);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+	background-color: rgba(82, 82, 82, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(82, 82, 82, 0.9);
+}
