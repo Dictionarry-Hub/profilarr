@@ -172,13 +172,12 @@
 			{#if mode === 'edit'}
 				<div class="flex items-center gap-3">
 					{#if repoInfo}
-						<img
-							src={repoInfo.ownerAvatarUrl}
-							alt={repoInfo.owner}
-							class="h-8 w-8 rounded-lg"
-						/>
+						<img src={repoInfo.ownerAvatarUrl} alt={repoInfo.owner} class="h-8 w-8 rounded-lg" />
 						<div class="flex flex-col gap-1">
-							<code class="text-sm text-neutral-700 dark:text-neutral-300" style="font-family: var(--font-code)">
+							<code
+								class="text-sm text-neutral-700 dark:text-neutral-300"
+								style="font-family: var(--font-code)"
+							>
 								{repoInfo.owner}/{repoInfo.repo}
 							</code>
 							<div class="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
@@ -190,20 +189,28 @@
 								{/if}
 								<span class="flex items-center gap-1">
 									<Star size={12} />
-									<code style="font-family: var(--font-code)">{repoInfo.stars.toLocaleString()}</code>
+									<code style="font-family: var(--font-code)"
+										>{repoInfo.stars.toLocaleString()}</code
+									>
 								</span>
 								<span class="flex items-center gap-1">
 									<GitFork size={12} />
-									<code style="font-family: var(--font-code)">{repoInfo.forks.toLocaleString()}</code>
+									<code style="font-family: var(--font-code)"
+										>{repoInfo.forks.toLocaleString()}</code
+									>
 								</span>
 								<span class="flex items-center gap-1">
 									<CircleDot size={12} />
-									<code style="font-family: var(--font-code)">{repoInfo.openIssues.toLocaleString()}</code>
+									<code style="font-family: var(--font-code)"
+										>{repoInfo.openIssues.toLocaleString()}</code
+									>
 								</span>
 							</div>
 						</div>
 					{:else}
-						<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-700">
+						<div
+							class="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-700"
+						>
 							<Database size={16} class="text-neutral-500 dark:text-neutral-400" />
 						</div>
 						<div class="flex flex-col gap-1">

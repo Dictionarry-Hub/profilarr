@@ -84,7 +84,9 @@
 				out:scale={{ duration: 120, start: 0.97, opacity: 0.5, easing: cubicIn }}
 			>
 				<!-- Header -->
-				<div class="flex flex-shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-neutral-300 px-6 py-4 dark:border-neutral-700/60">
+				<div
+					class="flex flex-shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-neutral-300 px-6 py-4 dark:border-neutral-700/60"
+				>
 					<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{header}</h2>
 					<slot name="header-extra" />
 				</div>

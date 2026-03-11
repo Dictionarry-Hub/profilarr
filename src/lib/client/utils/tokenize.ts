@@ -135,4 +135,3 @@ export function tokenize(code: string, language: string): Token[] {
 			return [{ type: 'text', text: code }];
 	}
 }
-

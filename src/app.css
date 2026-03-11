@@ -25,8 +25,8 @@ html {
 @theme {
 	--font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'Geist Mono', ui-monospace, monospace;
-	--font-code: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas,
-		monospace;
+	--font-code:
+		'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
 
 	/* Custom breakpoint for condition card layout */
 	--breakpoint-wide: 1600px;

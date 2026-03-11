@@ -11,5 +11,11 @@
 </svelte:head>
 
 <div class="mt-6">
-	<InstanceForm mode="edit" {form} instance={data.database} repoInfo={data.repoInfo} currentBranch={data.currentBranch} />
+	<InstanceForm
+		mode="edit"
+		{form}
+		instance={data.database}
+		repoInfo={data.repoInfo}
+		currentBranch={data.currentBranch}
+	/>
 </div>
