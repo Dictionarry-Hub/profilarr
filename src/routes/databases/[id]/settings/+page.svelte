@@ -10,4 +10,6 @@
 	<title>{data.database.name} - Settings - Profilarr</title>
 </svelte:head>
 
-<InstanceForm mode="edit" {form} instance={data.database} repoInfo={data.repoInfo} currentBranch={data.currentBranch} />
+<div class="mt-6">
+	<InstanceForm mode="edit" {form} instance={data.database} repoInfo={data.repoInfo} currentBranch={data.currentBranch} />
+</div>

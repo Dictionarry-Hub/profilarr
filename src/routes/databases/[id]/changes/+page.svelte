@@ -8,7 +8,8 @@
 	import CodeBlock from '$ui/code/CodeBlock.svelte';
 	import InlineCode from '$ui/code/InlineCode.svelte';
 	import Label from '$ui/label/Label.svelte';
-	import { Check, ArrowDown, ExternalLink, FileText, Loader2, Upload, Trash2, FileCode, Layers, Files, Clock, User, CheckCircle, XCircle, GitBranch, Globe, FileCheck, UserCheck, GitCommit, X } from 'lucide-svelte';
+	import { Check, Send, Download, ExternalLink, FileText, Loader2, Upload, Trash2, FileCode, Layers, Files, Clock, User, CheckCircle, XCircle, GitBranch, Globe, FileCheck, UserCheck, GitCommit, X } from 'lucide-svelte';
+	import goOnGit from '$assets/goOnGit.gif';
 	import Button from '$ui/button/Button.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import { afterNavigate } from '$app/navigation';
@@ -99,6 +100,8 @@
 		previewMessageMismatch;
 	$: previewOpCount = previewData?.opCount ?? previewData?.opIds?.length ?? 0;
 	$: selectedOpCount = collectOpIds().length;
+
+	$: allQuiet = !loading && draftChanges.length === 0 && !hasIncomingChanges;
 
 	$: changeByKey = new Map(draftChanges.map((change) => [change.key, change]));
 	$: groupMap = buildGroupMap(draftChanges);
@@ -640,134 +643,29 @@
 	<title>Changes - {data.database.name} - Profilarr</title>
 </svelte:head>
 
-<div class="space-y-6">
-	<!-- Incoming Changes Section -->
-	<section>
-		<div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-			<h2
-				class="flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-			>
-				<ArrowDown size={20} />
-				Incoming Changes
-			</h2>
-			{#if incomingChanges?.hasUpdates}
-				<button
-					type="button"
-					on:click={handlePull}
-					disabled={pulling}
-					class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-				>
-					{#if pulling}
-						<div
-							class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
-						></div>
-						Pulling...
-					{:else}
-						Pull {incomingChanges.commitsBehind} commit{incomingChanges.commitsBehind === 1
-							? ''
-							: 's'}
-					{/if}
-				</button>
-			{/if}
-		</div>
-
-		{#if loading}
-			<div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
-				<div class="animate-pulse p-8">
-					<div class="h-4 w-48 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-				</div>
-			</div>
-		{:else if !incomingChanges?.hasUpdates}
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-			>
-				<p class="text-neutral-600 dark:text-neutral-400">
-					{#if data.database.auto_pull}
-						Up to date — updates are pulled automatically
-					{:else}
-						Up to date
-					{/if}
-				</p>
-			</div>
-		{:else}
-			<ExpandableTable
-				columns={incomingColumns}
-				data={incomingChanges.commits}
-				getRowId={(row) => row.hash}
-				emptyMessage="No incoming changes"
-				responsive
-			>
-				<svelte:fragment slot="cell" let:row let:column>
-					{#if column.key === 'shortHash'}
-						<a
-							href={getCommitUrl(row.hash)}
-							target="_blank"
-							rel="noopener noreferrer"
-							on:click|stopPropagation
-							class="inline-flex items-center gap-1.5 font-mono text-xs text-accent-600 hover:underline dark:text-accent-400"
-						>
-							{row.shortHash}
-							<ExternalLink size={12} />
-						</a>
-					{:else if column.key === 'message'}
-						<span class="line-clamp-1 text-sm text-neutral-900 dark:text-neutral-100">
-							{row.message}
-						</span>
-					{:else if column.key === 'author'}
-						<span class="text-sm text-neutral-600 dark:text-neutral-400">
-							{row.author}
-						</span>
-					{:else if column.key === 'date'}
-						<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
-							{formatDate(row.date)}
-						</span>
-					{/if}
-				</svelte:fragment>
-
-				<svelte:fragment slot="expanded" let:row>
-					<div class="space-y-2">
-						<div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-							<FileText size={14} />
-							<span>{row.files.length} file{row.files.length !== 1 ? 's' : ''} changed</span>
-						</div>
-						{#if row.files.length > 0}
-							<div class="grid gap-1">
-								{#each row.files as file}
-									<code
-										class="block rounded bg-neutral-100 px-2 py-1 font-mono text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-									>
-										{file}
-									</code>
-								{/each}
-							</div>
-						{/if}
-					</div>
-				</svelte:fragment>
-			</ExpandableTable>
-		{/if}
-	</section>
-
+{#if allQuiet}
+	<div class="mt-6 flex h-[calc(100vh-12rem)] flex-col items-center justify-center text-center">
+		<img src={goOnGit} alt="Go on, git!" class="mb-4 w-64 rounded-lg" />
+		<p class="text-sm text-neutral-400 dark:text-neutral-500">
+			No changes to pull or publish right now.
+		</p>
+	</div>
+{:else}
+<div class="mt-6 space-y-6">
 	<!-- Outgoing Changes Section (Developers Only) -->
 	{#if isDeveloper}
 		<section>
-			<h2
-				class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"
-					></polyline></svg
+			<div class="mb-3 flex items-center gap-2">
+				<h2
+					class="flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
 				>
-				Outgoing Changes
-			</h2>
+					<Send size={20} />
+					Outgoing Changes
+				</h2>
+				{#if draftChanges.length > 0}
+					<Label variant="info" size="sm">{draftChanges.length}</Label>
+				{/if}
+			</div>
 
 			<!-- Actions Bar -->
 			{#if loading}
@@ -780,7 +678,7 @@
 						<div class="h-9 w-24 rounded-md bg-neutral-200 dark:bg-neutral-700"></div>
 					</div>
 				</div>
-			{:else}
+			{:else if draftChanges.length > 0}
 				<div class="mb-4">
 					<ActionsBar className="w-full">
 						<div>
@@ -888,11 +786,9 @@
 					</table>
 				</div>
 			{:else if draftChanges.length === 0}
-				<div
-					class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-				>
-					<p class="text-neutral-600 dark:text-neutral-400">No unpublished changes</p>
-				</div>
+				<p class="text-sm text-neutral-400 dark:text-neutral-500">
+					Nothing to ship — go break something, then come back.
+				</p>
 			{:else}
 				<ExpandableTable
 					columns={outgoingColumns}
@@ -977,7 +873,119 @@
 			{/if}
 		</section>
 	{/if}
+
+	<!-- Incoming Changes Section -->
+	<section>
+		<div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+			<div class="flex items-center gap-2">
+				<h2
+					class="flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
+				>
+					<Download size={20} />
+					Incoming Changes
+				</h2>
+				{#if incomingChanges?.hasUpdates && incomingChanges.commitsBehind > 0}
+					<Label variant="warning" size="sm">{incomingChanges.commitsBehind}</Label>
+				{/if}
+			</div>
+			{#if incomingChanges?.hasUpdates}
+				<button
+					type="button"
+					on:click={handlePull}
+					disabled={pulling}
+					class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+				>
+					{#if pulling}
+						<div
+							class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+						></div>
+						Pulling...
+					{:else}
+						Pull {incomingChanges.commitsBehind} commit{incomingChanges.commitsBehind === 1
+							? ''
+							: 's'}
+					{/if}
+				</button>
+			{/if}
+		</div>
+
+		{#if loading}
+			<div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
+				<div class="animate-pulse p-8">
+					<div class="h-4 w-48 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+				</div>
+			</div>
+		{:else if !incomingChanges?.hasUpdates}
+			<div
+				class="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900"
+			>
+				<p class="text-sm text-neutral-500 dark:text-neutral-400">
+					{#if data.database.auto_pull}
+						All caught up. Auto-pull will grab updates for you.
+					{:else}
+						All caught up. Nothing new from the remote.
+					{/if}
+				</p>
+			</div>
+		{:else}
+			<ExpandableTable
+				columns={incomingColumns}
+				data={incomingChanges.commits}
+				getRowId={(row) => row.hash}
+				emptyMessage="No incoming changes"
+				responsive
+			>
+				<svelte:fragment slot="cell" let:row let:column>
+					{#if column.key === 'shortHash'}
+						<a
+							href={getCommitUrl(row.hash)}
+							target="_blank"
+							rel="noopener noreferrer"
+							on:click|stopPropagation
+							class="inline-flex items-center gap-1.5 font-mono text-xs text-accent-600 hover:underline dark:text-accent-400"
+						>
+							{row.shortHash}
+							<ExternalLink size={12} />
+						</a>
+					{:else if column.key === 'message'}
+						<span class="line-clamp-1 text-sm text-neutral-900 dark:text-neutral-100">
+							{row.message}
+						</span>
+					{:else if column.key === 'author'}
+						<span class="text-sm text-neutral-600 dark:text-neutral-400">
+							{row.author}
+						</span>
+					{:else if column.key === 'date'}
+						<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+							{formatDate(row.date)}
+						</span>
+					{/if}
+				</svelte:fragment>
+
+				<svelte:fragment slot="expanded" let:row>
+					<div class="space-y-2">
+						<div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+							<FileText size={14} />
+							<span>{row.files.length} file{row.files.length !== 1 ? 's' : ''} changed</span>
+						</div>
+						{#if row.files.length > 0}
+							<div class="grid gap-1">
+								{#each row.files as file}
+									<code
+										class="block rounded bg-neutral-100 px-2 py-1 font-mono text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+									>
+										{file}
+									</code>
+								{/each}
+							</div>
+						{/if}
+					</div>
+				</svelte:fragment>
+			</ExpandableTable>
+		{/if}
+	</section>
 </div>
+{/if}
 
 <Modal
 	open={showDropModal}
