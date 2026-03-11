@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { Save, Trash2 } from 'lucide-svelte';
+	import { Save, Trash2, Star, GitFork, CircleDot, Database, GitBranch } from 'lucide-svelte';
+	import { siGithub } from 'simple-icons';
 	import { alertStore } from '$alerts/store';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
 	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
+	import type { RepoInfo } from '$utils/git/types';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -15,6 +17,8 @@
 	// Props
 	export let mode: 'create' | 'edit';
 	export let instance: DatabaseInstancePublic | undefined = undefined;
+	export let repoInfo: RepoInfo | null = null;
+	export let currentBranch: string = '';
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let form: any = undefined;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -165,8 +169,59 @@
 	<!-- Header -->
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
-			<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
-			<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
+			{#if mode === 'edit'}
+				<div class="flex items-center gap-3">
+					{#if repoInfo}
+						<img
+							src={repoInfo.ownerAvatarUrl}
+							alt={repoInfo.owner}
+							class="h-8 w-8 rounded-lg"
+						/>
+						<div class="flex flex-col gap-1">
+							<code class="text-sm text-neutral-700 dark:text-neutral-300" style="font-family: var(--font-code)">
+								{repoInfo.owner}/{repoInfo.repo}
+							</code>
+							<div class="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
+								{#if currentBranch}
+									<span class="flex items-center gap-1">
+										<GitBranch size={12} />
+										<code style="font-family: var(--font-code)">{currentBranch}</code>
+									</span>
+								{/if}
+								<span class="flex items-center gap-1">
+									<Star size={12} />
+									<code style="font-family: var(--font-code)">{repoInfo.stars.toLocaleString()}</code>
+								</span>
+								<span class="flex items-center gap-1">
+									<GitFork size={12} />
+									<code style="font-family: var(--font-code)">{repoInfo.forks.toLocaleString()}</code>
+								</span>
+								<span class="flex items-center gap-1">
+									<CircleDot size={12} />
+									<code style="font-family: var(--font-code)">{repoInfo.openIssues.toLocaleString()}</code>
+								</span>
+							</div>
+						</div>
+					{:else}
+						<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-700">
+							<Database size={16} class="text-neutral-500 dark:text-neutral-400" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+								{instance?.name ?? 'Database'}
+							</span>
+							{#if instance?.repository_url}
+								<code class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+									{instance.repository_url.replace('https://github.com/', '')}
+								</code>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
+				<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
+			{/if}
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			{#if mode === 'edit'}
@@ -185,6 +240,24 @@
 				disabled={saving || !canSubmit}
 				on:click={handleSave}
 			/>
+			{#if mode === 'edit'}
+				<Button
+					href={repoInfo?.htmlUrl ?? instance?.repository_url}
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="14"
+						height="14"
+						viewBox="0 0 24 24"
+						fill="currentColor"
+					>
+						<path d={siGithub.path} />
+					</svg>
+					GitHub
+				</Button>
+			{/if}
 		</svelte:fragment>
 	</StickyCard>
 
@@ -224,7 +297,7 @@
 				name="branch"
 				value={branch}
 				placeholder="main"
-				description="Branch to checkout on link. Leave empty for the default branch."
+				description="Branch to checkout on link. Cannot be changed after linking. Leave empty for the default branch."
 				on:input={(e) => update('branch', e.detail)}
 			/>
 		{/if}

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import StatusCard from './components/StatusCard.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import QualityProfileDiff from './components/QualityProfileDiff.svelte';
 	import SectionRenderer from './components/SectionRenderer.svelte';
@@ -16,7 +15,7 @@
 	import { deserialize } from '$app/forms';
 	import { alertStore } from '$alerts/store';
 	import type { PageData } from './$types';
-	import type { GitStatus, RepoInfo, IncomingChanges, Commit } from '$utils/git/types';
+	import type { GitStatus, IncomingChanges, Commit } from '$utils/git/types';
 	import type { Column } from '$ui/table/types';
 	import type { DraftEntityChange } from './components/types';
 	import { parseUTC } from '$shared/utils/dates';
@@ -58,8 +57,6 @@
 	let status: GitStatus | null = null;
 	let incomingChanges: IncomingChanges | null = null;
 	let draftChanges: DraftEntityChange[] = [];
-	let branches: string[] = [];
-	let repoInfo: RepoInfo | null = null;
 	let primarySelected = new Set<string>();
 	let selected = new Set<string>();
 	let commitMessage = '';
@@ -118,8 +115,6 @@
 				status = result.status;
 				incomingChanges = result.incomingChanges;
 				draftChanges = result.draftChanges || [];
-				branches = result.branches;
-				repoInfo = result.repoInfo;
 			}
 		} finally {
 			loading = false;
@@ -646,28 +641,6 @@
 </svelte:head>
 
 <div class="space-y-6">
-	<!-- Status Card -->
-	{#if loading || !status}
-		<div
-			class="mt-6 animate-pulse rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800"
-		>
-			<div class="flex items-center justify-between">
-				<div class="flex items-center gap-4">
-					<div class="h-8 w-8 rounded-lg bg-neutral-200 dark:bg-neutral-700"></div>
-					<div class="flex flex-col gap-2">
-						<div class="h-4 w-32 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-						<div class="h-3 w-24 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-					</div>
-				</div>
-				<div class="flex items-center gap-4">
-					<div class="h-8 w-24 rounded-md bg-neutral-200 dark:bg-neutral-700"></div>
-				</div>
-			</div>
-		</div>
-	{:else}
-		<StatusCard {status} {repoInfo} {branches} database={data.database} onSync={fetchChanges} />
-	{/if}
-
 	<!-- Incoming Changes Section -->
 	<section>
 		<div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
