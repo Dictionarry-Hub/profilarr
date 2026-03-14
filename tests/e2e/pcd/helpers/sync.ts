@@ -33,7 +33,9 @@ export async function pullChanges(page: Page, databaseId: number): Promise<void>
 		await expect
 			.poll(
 				async () =>
-					(await allCaughtUp.isVisible()) || (await quietState.isVisible()) || !(await pullButton.isVisible()),
+					(await allCaughtUp.isVisible()) ||
+					(await quietState.isVisible()) ||
+					!(await pullButton.isVisible()),
 				{ timeout: 30_000 }
 			)
 			.toBe(true);

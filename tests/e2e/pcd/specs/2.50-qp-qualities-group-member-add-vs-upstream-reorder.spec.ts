@@ -170,9 +170,7 @@ async function reorderGroupMembers(
 }
 
 async function getFirstUnselectedMember(modal: Locator): Promise<string> {
-	const row = modal
-		.locator('[data-group-modal-index][data-group-modal-selected="false"]')
-		.first();
+	const row = modal.locator('[data-group-modal-index][data-group-modal-selected="false"]').first();
 	const name = await row.getAttribute('data-group-modal-name');
 	if (!name) throw new Error('No unselected member found in group modal');
 	return name;
@@ -295,13 +293,7 @@ test.describe('2.50 QP group member add vs upstream reorder conflict', () => {
 		const members = await setupBaseGroup(page, localId, devId, profileName);
 		const fourthMember = await discoverUnselectedMember(page, localId, profileName, GROUP_NAME);
 
-		const localOrder = await addMemberToGroup(
-			page,
-			localId,
-			profileName,
-			GROUP_NAME,
-			fourthMember
-		);
+		const localOrder = await addMemberToGroup(page, localId, profileName, GROUP_NAME, fourthMember);
 
 		await reorderGroupMembers(page, devId, profileName, GROUP_NAME, [
 			members[2],

@@ -16,7 +16,10 @@ type OrderedItem = {
 	members?: Array<{ name: string }>;
 };
 
-function hasBlockedGroupMembershipChanges(currentItems: OrderedItem[], nextItems: OrderedItem[]): boolean {
+function hasBlockedGroupMembershipChanges(
+	currentItems: OrderedItem[],
+	nextItems: OrderedItem[]
+): boolean {
 	const currentGroups = new Map(
 		currentItems
 			.filter((item) => item.type === 'group')
@@ -156,7 +159,12 @@ export const actions: Actions = {
 				currentDatabaseId,
 				profile.name
 			);
-			if (hasBlockedGroupMembershipChanges(currentQualities.orderedItems as OrderedItem[], orderedItems)) {
+			if (
+				hasBlockedGroupMembershipChanges(
+					currentQualities.orderedItems as OrderedItem[],
+					orderedItems
+				)
+			) {
 				return fail(400, {
 					error:
 						'This database uses an older schema. Update the schema dependency before editing quality group members.'

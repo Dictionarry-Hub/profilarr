@@ -171,9 +171,7 @@ async function reorderGroupMembers(
 
 /** Return the name of the first unselected quality in the edit group modal. */
 async function getFirstUnselectedMember(modal: Locator): Promise<string> {
-	const row = modal
-		.locator('[data-group-modal-index][data-group-modal-selected="false"]')
-		.first();
+	const row = modal.locator('[data-group-modal-index][data-group-modal-selected="false"]').first();
 	const name = await row.getAttribute('data-group-modal-name');
 	if (!name) throw new Error('No unselected member found in group modal');
 	return name;

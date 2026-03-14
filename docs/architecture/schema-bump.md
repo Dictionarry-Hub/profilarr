@@ -59,7 +59,7 @@ For any additive change with a default value:
 | New schema + old Profilarr | Column exists with default, old code ignores it, compiles fine             |
 | New schema + new Profilarr | Profilarr reads and writes the new column, everything works                |
 | Old schema + new Profilarr | Column doesn't exist, new code must fall back gracefully (e.g. sort alpha) |
-| Old schema + old Profilarr | Nothing changed, nothing broke                                            |
+| Old schema + old Profilarr | Nothing changed, nothing broke                                             |
 
 ## Walkthrough
 
@@ -84,9 +84,9 @@ order.
 
 Update `version` in the schema repo's `pcd.json`. Follow semver:
 
-| Change type                                    | Bump  | Example            |
-| ---------------------------------------------- | ----- | ------------------ |
-| Additive column/table with default (compatible) | Minor | `1.0.0` → `1.1.0` |
+| Change type                                         | Bump  | Example           |
+| --------------------------------------------------- | ----- | ----------------- |
+| Additive column/table with default (compatible)     | Minor | `1.0.0` → `1.1.0` |
 | Breaking change (rename, drop, NOT NULL no default) | Major | `1.0.0` → `2.0.0` |
 
 Breaking changes should be avoided. If one is truly necessary, coordinate with

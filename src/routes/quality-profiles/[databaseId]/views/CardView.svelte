@@ -1,4 +1,4 @@
-	<script lang="ts">
+<script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import { BookOpenText, Gauge, Earth, Copy, Download } from 'lucide-svelte';

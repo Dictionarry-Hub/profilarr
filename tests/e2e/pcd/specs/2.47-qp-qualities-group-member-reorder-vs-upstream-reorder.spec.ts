@@ -62,7 +62,9 @@ async function createGroupFromFirstThree(page: Page): Promise<string[]> {
 
 async function openEditGroupModal(page: Page, groupName: string): Promise<Locator> {
 	const rows = page.locator('div.space-y-4 > div[role="button"]');
-	const groupRow = rows.filter({ hasText: new RegExp(`^${escapeRegex(groupName)}$|${escapeRegex(groupName)}`) }).first();
+	const groupRow = rows
+		.filter({ hasText: new RegExp(`^${escapeRegex(groupName)}$|${escapeRegex(groupName)}`) })
+		.first();
 	await groupRow.getByRole('button', { name: groupName, exact: true }).click();
 
 	const modal = page.getByRole('dialog');
@@ -71,9 +73,11 @@ async function openEditGroupModal(page: Page, groupName: string): Promise<Locato
 }
 
 async function getSelectedMemberOrder(modal: Locator): Promise<string[]> {
-	return modal.locator('[data-group-modal-index][data-group-modal-selected="true"]').evaluateAll((rows) =>
-		rows.map((row) => row.getAttribute('data-group-modal-name') ?? '').filter(Boolean)
-	);
+	return modal
+		.locator('[data-group-modal-index][data-group-modal-selected="true"]')
+		.evaluateAll((rows) =>
+			rows.map((row) => row.getAttribute('data-group-modal-name') ?? '').filter(Boolean)
+		);
 }
 
 async function moveMemberToward(
@@ -127,7 +131,12 @@ async function saveGroupAndPage(page: Page, modal: Locator): Promise<void> {
 	await page.waitForLoadState('networkidle');
 }
 
-async function setupBaseGroup(page: Page, localId: number, devId: number, profileName: string): Promise<string[]> {
+async function setupBaseGroup(
+	page: Page,
+	localId: number,
+	devId: number,
+	profileName: string
+): Promise<string[]> {
 	await goToQualityProfileQualities(page, devId, profileName);
 	const members = await createGroupFromFirstThree(page);
 	await page.getByRole('button', { name: 'Save' }).click();
@@ -215,8 +224,16 @@ test.describe('2.47 QP group member reorder vs upstream reorder conflict', () =>
 	test('a) ask — conflict appears on pull', async ({ page }) => {
 		const members = await setupBaseGroup(page, localId, devId, profileName);
 
-		await reorderGroupMembers(page, localId, profileName, GROUP_NAME, [members[2], members[0], members[1]]);
-		await reorderGroupMembers(page, devId, profileName, GROUP_NAME, [members[1], members[2], members[0]]);
+		await reorderGroupMembers(page, localId, profileName, GROUP_NAME, [
+			members[2],
+			members[0],
+			members[1]
+		]);
+		await reorderGroupMembers(page, devId, profileName, GROUP_NAME, [
+			members[1],
+			members[2],
+			members[0]
+		]);
 
 		await exportAndPush(page, devId, 'e2e: 2.47 group member reorder vs reorder');
 		await pullChanges(page, localId);

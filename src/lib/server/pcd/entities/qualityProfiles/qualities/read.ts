@@ -41,7 +41,9 @@ export async function qualities(
 	if (hasGroupMemberPosition) {
 		groupMembersQuery = groupMembersQuery.orderBy('quality_group_members.position');
 	}
-	const groupMembers = await groupMembersQuery.orderBy('quality_group_members.quality_name').execute();
+	const groupMembers = await groupMembersQuery
+		.orderBy('quality_group_members.quality_name')
+		.execute();
 
 	// Build groups with members
 	const groupsMap = new Map<string, QualitiesGroup>();

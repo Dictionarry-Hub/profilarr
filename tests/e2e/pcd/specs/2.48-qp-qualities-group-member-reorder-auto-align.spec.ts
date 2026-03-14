@@ -56,9 +56,7 @@ async function openEditGroupModal(page: Page, groupName: string): Promise<Locato
 	const rows = page.locator('div.space-y-4 > div[role="button"]');
 	const groupRow = rows
 		.filter({
-			hasText: new RegExp(
-				`^${escapeRegex(groupName)}$|${escapeRegex(groupName)}`
-			)
+			hasText: new RegExp(`^${escapeRegex(groupName)}$|${escapeRegex(groupName)}`)
 		})
 		.first();
 	await groupRow.getByRole('button', { name: groupName, exact: true }).click();
@@ -72,9 +70,7 @@ async function getSelectedMemberOrder(modal: Locator): Promise<string[]> {
 	return modal
 		.locator('[data-group-modal-index][data-group-modal-selected="true"]')
 		.evaluateAll((rows) =>
-			rows
-				.map((row) => row.getAttribute('data-group-modal-name') ?? '')
-				.filter(Boolean)
+			rows.map((row) => row.getAttribute('data-group-modal-name') ?? '').filter(Boolean)
 		);
 }
 
@@ -96,11 +92,7 @@ async function moveMemberToward(
 	await page.waitForTimeout(200);
 }
 
-async function reorderMembersTo(
-	page: Page,
-	modal: Locator,
-	desiredOrder: string[]
-): Promise<void> {
+async function reorderMembersTo(page: Page, modal: Locator, desiredOrder: string[]): Promise<void> {
 	for (let guard = 0; guard < 12; guard++) {
 		const currentOrder = await getSelectedMemberOrder(modal);
 		if (JSON.stringify(currentOrder) === JSON.stringify(desiredOrder)) {
@@ -113,9 +105,7 @@ async function reorderMembersTo(
 			const sourceName = desiredOrder[i];
 			const currentIndex = currentOrder.indexOf(sourceName);
 			if (currentIndex === -1) {
-				throw new Error(
-					`Member "${sourceName}" not found in modal order`
-				);
+				throw new Error(`Member "${sourceName}" not found in modal order`);
 			}
 			while (currentIndex > i) {
 				await moveMemberToward(page, modal, sourceName, 'up');
@@ -127,9 +117,7 @@ async function reorderMembersTo(
 		if (!moved) break;
 	}
 
-	throw new Error(
-		`Failed to reorder members to ${desiredOrder.join(', ')}`
-	);
+	throw new Error(`Failed to reorder members to ${desiredOrder.join(', ')}`);
 }
 
 async function saveGroupAndPage(page: Page, modal: Locator): Promise<void> {
@@ -229,34 +217,16 @@ test.describe('2.48 QP group member reorder auto-align', () => {
 		await page.close();
 	});
 
-	test('auto-align — no conflict when both sides reorder identically', async ({
-		page
-	}) => {
+	test('auto-align — no conflict when both sides reorder identically', async ({ page }) => {
 		const members = await setupBaseGroup(page, localId, devId, profileName);
 
 		// Both sides reorder to the same order: [C, A, B]
 		const sharedOrder = [members[2], members[0], members[1]];
 
-		await reorderGroupMembers(
-			page,
-			localId,
-			profileName,
-			GROUP_NAME,
-			sharedOrder
-		);
-		await reorderGroupMembers(
-			page,
-			devId,
-			profileName,
-			GROUP_NAME,
-			sharedOrder
-		);
+		await reorderGroupMembers(page, localId, profileName, GROUP_NAME, sharedOrder);
+		await reorderGroupMembers(page, devId, profileName, GROUP_NAME, sharedOrder);
 
-		await exportAndPush(
-			page,
-			devId,
-			'e2e: 2.48 group member reorder auto-align'
-		);
+		await exportAndPush(page, devId, 'e2e: 2.48 group member reorder auto-align');
 		await pullChanges(page, localId);
 
 		// Auto-align: no conflict remains.
@@ -270,12 +240,8 @@ test.describe('2.48 QP group member reorder auto-align', () => {
 		await expect
 			.poll(
 				async () =>
-					(await page
-						.getByText('No changes to pull or publish right now.')
-						.isVisible()) ||
-					(await page
-						.getByText('No unpublished changes')
-						.isVisible()),
+					(await page.getByText('No changes to pull or publish right now.').isVisible()) ||
+					(await page.getByText('No unpublished changes').isVisible()),
 				{ timeout: 15_000 }
 			)
 			.toBe(true);

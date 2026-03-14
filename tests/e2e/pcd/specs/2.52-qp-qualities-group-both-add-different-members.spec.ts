@@ -108,9 +108,7 @@ async function setupBaseGroup(
 
 /** Return the name of the first unselected quality in the edit group modal. */
 async function getFirstUnselectedMember(modal: Locator): Promise<string> {
-	const row = modal
-		.locator('[data-group-modal-index][data-group-modal-selected="false"]')
-		.first();
+	const row = modal.locator('[data-group-modal-index][data-group-modal-selected="false"]').first();
 	const name = await row.getAttribute('data-group-modal-name');
 	if (!name) throw new Error('No unselected member found in group modal');
 	return name;
@@ -118,9 +116,7 @@ async function getFirstUnselectedMember(modal: Locator): Promise<string> {
 
 /** Return the name of the second unselected quality in the edit group modal. */
 async function getSecondUnselectedMember(modal: Locator): Promise<string> {
-	const row = modal
-		.locator('[data-group-modal-index][data-group-modal-selected="false"]')
-		.nth(1);
+	const row = modal.locator('[data-group-modal-index][data-group-modal-selected="false"]').nth(1);
 	const name = await row.getAttribute('data-group-modal-name');
 	if (!name) throw new Error('No second unselected member found in group modal');
 	return name;
@@ -260,13 +256,7 @@ test.describe('2.52 QP group both sides add different members conflict', () => {
 			GROUP_NAME
 		);
 
-		const localOrder = await addMemberToGroup(
-			page,
-			localId,
-			profileName,
-			GROUP_NAME,
-			memberC
-		);
+		const localOrder = await addMemberToGroup(page, localId, profileName, GROUP_NAME, memberC);
 
 		await addMemberToGroup(page, devId, profileName, GROUP_NAME, memberD);
 
@@ -300,13 +290,7 @@ test.describe('2.52 QP group both sides add different members conflict', () => {
 
 		await addMemberToGroup(page, localId, profileName, GROUP_NAME, memberC);
 
-		const devOrder = await addMemberToGroup(
-			page,
-			devId,
-			profileName,
-			GROUP_NAME,
-			memberD
-		);
+		const devOrder = await addMemberToGroup(page, devId, profileName, GROUP_NAME, memberD);
 
 		await exportAndPush(page, devId, 'e2e: 2.52 both add different members');
 		await pullChanges(page, localId);

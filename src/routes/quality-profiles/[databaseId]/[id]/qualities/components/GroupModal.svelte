@@ -83,7 +83,10 @@
 		isMobile = e.matches;
 	}
 
-	function getTargetFromPoint(x: number, y: number): { item: GroupModalItem; index: number } | null {
+	function getTargetFromPoint(
+		x: number,
+		y: number
+	): { item: GroupModalItem; index: number } | null {
 		const el = document.elementFromPoint(x, y);
 		const card = el?.closest('[data-group-modal-index]') as HTMLElement | null;
 		if (!card) return null;
@@ -215,7 +218,7 @@
 							<div class="flex items-center justify-between gap-2.5">
 								<button
 									type="button"
-									class="hidden shrink-0 text-neutral-400 dark:text-neutral-500 md:block {draggedItem?.index ===
+									class="hidden shrink-0 text-neutral-400 md:block dark:text-neutral-500 {draggedItem?.index ===
 									index
 										? 'cursor-grabbing'
 										: isMobile
@@ -228,12 +231,15 @@
 								</button>
 								<div class="flex min-w-0 flex-1 items-center justify-between gap-2.5">
 									<div class="min-w-0 flex-1 text-left">
-										<div class="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
+										<div
+											class="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100"
+										>
 											{item.name}
 										</div>
 									</div>
 									<div class="flex items-center gap-2">
 										{#if isMobile}
+											<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 											<div class="flex items-center gap-1" on:click|stopPropagation>
 												<Button
 													icon={ChevronUp}
@@ -241,7 +247,6 @@
 													disabled={index === 0}
 													title="Move member up"
 													ariaLabel="Move member up"
-													data-move-direction="up"
 													on:click={() => moveItem(index, 'up')}
 												/>
 												<Button
@@ -250,7 +255,6 @@
 													disabled={index === items.length - 1}
 													title="Move member down"
 													ariaLabel="Move member down"
-													data-move-direction="down"
 													on:click={() => moveItem(index, 'down')}
 												/>
 											</div>
