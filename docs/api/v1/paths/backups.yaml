@@ -1,0 +1,322 @@
+backups:
+  get:
+    operationId: listBackups
+    summary: List Backups
+    description: |
+      Returns all backup archives on disk, sorted newest first.
+
+      **Use cases:**
+      - Displaying available backups in a UI or script
+      - Checking if recent backups exist before maintenance
+
+      **Behavior:**
+      - Scans the backups directory for files matching `backup-*.tar.gz`
+      - Returns an empty array if no backups exist
+      - Sorted by file modification time, newest first
+    tags:
+      - Backups
+    responses:
+      '200':
+        description: List of backup files
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/backups.yaml#/BackupFile'
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+  post:
+    operationId: createBackup
+    summary: Create Backup
+    description: |
+      Enqueues a backup creation job. Returns immediately with a job ID.
+
+      **Use cases:**
+      - Triggering a backup before maintenance or upgrades
+      - Automated backup scripts
+
+      **Behavior:**
+      - Enqueues a `backup.create` job and returns 202 with the job ID
+      - Poll `GET /api/v1/jobs/{jobId}` to check completion
+      - The backup includes a sanitized copy of the database (secrets stripped)
+    tags:
+      - Backups
+    responses:
+      '202':
+        description: Backup job enqueued
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/backups.yaml#/BackupCreateResponse'
+            example:
+              jobId: 42
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+
+backup_file:
+  get:
+    operationId: downloadBackup
+    summary: Download Backup
+    description: |
+      Downloads a backup archive by filename.
+
+      **Use cases:**
+      - Downloading backups for offsite storage
+      - Transferring backups between instances
+
+      **Behavior:**
+      - Returns the raw `.tar.gz` file with appropriate headers
+      - Filename must match the `backup-*.tar.gz` pattern
+      - Path traversal attempts are rejected with 400
+    tags:
+      - Backups
+    parameters:
+      - name: filename
+        in: path
+        required: true
+        description: Backup filename (must start with `backup-` and end with `.tar.gz`)
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Backup file download
+        headers:
+          Content-Disposition:
+            schema:
+              type: string
+            example: attachment; filename="backup-2026-03-15-100005.tar.gz"
+        content:
+          application/gzip:
+            schema:
+              type: string
+              format: binary
+      '400':
+        description: Invalid filename or path traversal attempt
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Invalid filename
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+      '404':
+        description: Backup file not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Backup file not found
+  delete:
+    operationId: deleteBackup
+    summary: Delete Backup
+    description: |
+      Deletes a backup archive by filename.
+
+      **Use cases:**
+      - Freeing disk space by removing old backups
+      - Cleanup scripts
+
+      **Behavior:**
+      - Permanently removes the file from disk
+      - Path traversal attempts are rejected with 400
+    tags:
+      - Backups
+    parameters:
+      - name: filename
+        in: path
+        required: true
+        description: Backup filename
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Backup deleted
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/backups.yaml#/SuccessResponse'
+      '400':
+        description: Invalid filename or path traversal attempt
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Invalid filename
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+      '404':
+        description: Backup file not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Backup file not found
+
+upload:
+  post:
+    operationId: uploadBackup
+    summary: Upload Backup
+    description: |
+      Upload a backup archive. Validates the file and scans for path traversal
+      entries (zip slip protection) before storing.
+
+      **Use cases:**
+      - Restoring from an offsite backup
+      - Migrating backups between instances
+
+      **Behavior:**
+      - Accepts `multipart/form-data` with a `file` field
+      - Only `.tar.gz` files are accepted, max 1GB
+      - Archive contents are scanned for path traversal entries
+      - Duplicate filenames are rejected
+      - Files without a `backup-` prefix get renamed to `backup-uploaded-{timestamp}.tar.gz`
+    tags:
+      - Backups
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - file
+            properties:
+              file:
+                type: string
+                format: binary
+                description: The `.tar.gz` backup archive to upload
+    responses:
+      '201':
+        description: Backup uploaded
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/backups.yaml#/BackupUploadResponse'
+            example:
+              filename: backup-uploaded-1710504000000.tar.gz
+              size: 12345678
+              sizeFormatted: 11.77 MB
+      '400':
+        description: Invalid file (wrong type, too large, zip slip, or duplicate)
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: 'Invalid file type. Only .tar.gz files are allowed.'
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+
+settings:
+  get:
+    operationId: getBackupSettings
+    summary: Get Backup Settings
+    description: |
+      Returns the current backup configuration.
+
+      **Use cases:**
+      - Displaying current settings in a UI
+      - Auditing backup configuration via scripts
+    tags:
+      - Backups
+    responses:
+      '200':
+        description: Current backup settings
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/backups.yaml#/BackupSettings'
+            example:
+              schedule: daily
+              retentionDays: 30
+              enabled: true
+              includeDatabase: true
+              compressionEnabled: true
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+  patch:
+    operationId: updateBackupSettings
+    summary: Update Backup Settings
+    description: |
+      Updates backup configuration. Only provided fields are changed.
+
+      **Use cases:**
+      - Changing backup schedule or retention
+      - Enabling or disabling automatic backups
+
+      **Behavior:**
+      - Partial update: only fields present in the body are changed
+      - After update, backup jobs are rescheduled to match new settings
+      - Returns the full updated settings object
+    tags:
+      - Backups
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/backups.yaml#/BackupSettingsUpdate'
+    responses:
+      '200':
+        description: Updated backup settings
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/backups.yaml#/BackupSettings'
+      '400':
+        description: Invalid input (bad schedule, retention out of range, empty body)
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: 'retentionDays must be between 1 and 365'
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized

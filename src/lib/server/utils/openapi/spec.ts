@@ -56,10 +56,10 @@ async function resolveNode(
 	}
 
 	const resolvedEntries = await Promise.all(
-		Object.entries(node).map(async ([key, value]) => [
-			key,
-			await resolveNode(value, currentFileUrl, resolutionStack)
-		] as const)
+		Object.entries(node).map(
+			async ([key, value]) =>
+				[key, await resolveNode(value, currentFileUrl, resolutionStack)] as const
+		)
 	);
 
 	return Object.fromEntries(resolvedEntries);
