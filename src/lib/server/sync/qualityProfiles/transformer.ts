@@ -4,16 +4,17 @@
  */
 
 import type { PCDCache } from '$pcd/index.ts';
+import { hasQualityGroupMembersPositionInCache } from '$pcd/entities/qualityProfiles/qualities/groupMembersSchema.ts';
 import type {
 	ArrQualityProfileItem,
 	ArrQualityProfilePayload,
 	QualityProfileFormatItem
 } from '$arr/types.ts';
 import {
-	type SyncArrType,
 	getAllQualities,
 	getLanguageForProfile,
-	mapQualityName
+	mapQualityName,
+	type SyncArrType
 } from '../mappings.ts';
 
 // =============================================================================
@@ -266,18 +267,24 @@ export async function fetchQualityProfileFromPcd(
 		.execute();
 
 	// Get group members
+	const hasGroupMemberPosition = hasQualityGroupMembersPositionInCache(cache);
 	const groupMembers =
 		groups.length > 0
-			? await db
-					.selectFrom('quality_group_members')
-					.innerJoin('qualities', 'qualities.name', 'quality_group_members.quality_name')
-					.select([
-						'quality_group_members.quality_group_name',
-						'qualities.id as quality_id',
-						'qualities.name as quality_name'
-					])
-					.where('quality_group_members.quality_profile_name', '=', profile.name)
-					.execute()
+			? await (() => {
+					let query = db
+						.selectFrom('quality_group_members')
+						.innerJoin('qualities', 'qualities.name', 'quality_group_members.quality_name')
+						.select([
+							'quality_group_members.quality_group_name',
+							'qualities.id as quality_id',
+							'qualities.name as quality_name'
+						])
+						.where('quality_group_members.quality_profile_name', '=', profile.name);
+					if (hasGroupMemberPosition) {
+						query = query.orderBy('quality_group_members.position');
+					}
+					return query.orderBy('quality_group_members.quality_name').execute();
+				})()
 			: [];
 
 	// Build groups map
@@ -290,6 +297,9 @@ export async function fetchQualityProfileFromPcd(
 		if (group) {
 			group.members.push({ id: member.quality_id, name: member.quality_name });
 		}
+	}
+	for (const group of groupsMap.values()) {
+		group.members.reverse();
 	}
 
 	// Get ordered quality items

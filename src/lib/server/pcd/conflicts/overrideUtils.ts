@@ -219,7 +219,6 @@ export function normalizeOrderedItems(items: unknown): Array<{
 				? typed.members
 						.map((member) => (typeof member === 'string' ? member : (member?.name ?? '')))
 						.filter(Boolean)
-						.sort()
 				: [];
 			return {
 				type: typed.type,

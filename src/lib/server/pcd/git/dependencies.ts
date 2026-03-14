@@ -7,6 +7,11 @@ import { checkout, clone, fetchTags } from '$utils/git/index.ts';
 import { loadManifest } from '../manifest/manifest.ts';
 import { logger } from '$logger/logger.ts';
 
+export interface DependencySyncResult {
+	changed: boolean;
+	repositories: string[];
+}
+
 /**
  * Extract repository name from GitHub URL
  * https://github.com/Dictionarry-Hub/schema -> schema
@@ -129,15 +134,16 @@ export async function processDependencies(
 export async function syncDependencies(
 	pcdPath: string,
 	personalAccessToken?: string
-): Promise<void> {
+): Promise<DependencySyncResult> {
 	const manifest = await loadManifest(pcdPath);
 
 	if (!manifest.dependencies || Object.keys(manifest.dependencies).length === 0) {
-		return;
+		return { changed: false, repositories: [] };
 	}
 
 	const depsDir = `${pcdPath}/deps`;
 	await Deno.mkdir(depsDir, { recursive: true });
+	const changedRepositories: string[] = [];
 
 	for (const [repoUrl, requiredVersion] of Object.entries(manifest.dependencies)) {
 		const repoName = getRepoName(repoUrl);
@@ -162,6 +168,7 @@ export async function syncDependencies(
 					meta: { pcdPath, repoName, from: installedVersion, to: requiredVersion }
 				}
 			);
+			changedRepositories.push(repoName);
 		} else {
 			// No .git folder (legacy or corrupted) - re-clone
 			try {
@@ -174,11 +181,17 @@ export async function syncDependencies(
 				source: 'PCDDependencies',
 				meta: { pcdPath, repoName, version: requiredVersion }
 			});
+			changedRepositories.push(repoName);
 		}
 
 		// Validate the dependency's manifest
 		await loadManifest(depPath);
 	}
+
+	return {
+		changed: changedRepositories.length > 0,
+		repositories: changedRepositories
+	};
 }
 
 /**

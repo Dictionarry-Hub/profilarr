@@ -5,6 +5,41 @@ import { canWriteToBase } from '$pcd/ops/writer.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
 import type { OperationLayer } from '$pcd/core/types.ts';
 import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import { hasQualityGroupMembersPositionInCache } from '$pcd/entities/qualityProfiles/qualities/groupMembersSchema.ts';
+
+type OrderedItem = {
+	type: 'quality' | 'group';
+	name: string;
+	position: number;
+	enabled: boolean;
+	upgradeUntil: boolean;
+	members?: Array<{ name: string }>;
+};
+
+function hasBlockedGroupMembershipChanges(
+	currentItems: OrderedItem[],
+	nextItems: OrderedItem[]
+): boolean {
+	const currentGroups = new Map(
+		currentItems
+			.filter((item) => item.type === 'group')
+			.map((item) => [item.name, (item.members ?? []).map((member) => member.name)])
+	);
+	const nextGroups = new Map(
+		nextItems
+			.filter((item) => item.type === 'group')
+			.map((item) => [item.name, (item.members ?? []).map((member) => member.name)])
+	);
+
+	for (const [name, nextMembers] of nextGroups) {
+		const currentMembers = currentGroups.get(name);
+		if (!currentMembers) return true;
+		if (currentMembers.length !== nextMembers.length) return true;
+		if (currentMembers.some((member, index) => member !== nextMembers[index])) return true;
+	}
+
+	return false;
+}
 
 export const load: ServerLoad = async ({ params }) => {
 	const { databaseId, id } = params;
@@ -49,10 +84,13 @@ export const load: ServerLoad = async ({ params }) => {
 		profile.name
 	);
 
+	const canEditGroupMembers = hasQualityGroupMembersPositionInCache(cache);
+
 	return {
 		qualities: qualitiesData,
 		profileName: profile.name,
-		canWriteToBase: canWriteToBase(currentDatabaseId)
+		canWriteToBase: canWriteToBase(currentDatabaseId),
+		canEditGroupMembers
 	};
 };
 
@@ -91,14 +129,7 @@ export const actions: Actions = {
 		}
 
 		// Parse ordered items
-		let orderedItems: Array<{
-			type: 'quality' | 'group';
-			name: string;
-			position: number;
-			enabled: boolean;
-			upgradeUntil: boolean;
-			members?: Array<{ name: string }>;
-		}> = [];
+		let orderedItems: OrderedItem[] = [];
 		try {
 			orderedItems = JSON.parse(orderedItemsJson || '[]');
 		} catch {
@@ -120,6 +151,25 @@ export const actions: Actions = {
 
 		if (!profile) {
 			return fail(404, { error: 'Quality profile not found' });
+		}
+
+		if (!hasQualityGroupMembersPositionInCache(cache)) {
+			const currentQualities = await qualityProfileQueries.qualities(
+				cache,
+				currentDatabaseId,
+				profile.name
+			);
+			if (
+				hasBlockedGroupMembershipChanges(
+					currentQualities.orderedItems as OrderedItem[],
+					orderedItems
+				)
+			) {
+				return fail(400, {
+					error:
+						'This database uses an older schema. Update the schema dependency before editing quality group members.'
+				});
+			}
 		}
 
 		// Update the qualities

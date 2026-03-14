@@ -28,6 +28,10 @@ async function findFirstEnabledScoringCell(page: Page): Promise<{
 	enabledCheckbox: Locator;
 	scoreInput: Locator;
 }> {
+	const searchInput = page.getByPlaceholder(/search custom formats/i);
+	await searchInput.fill('');
+	await page.waitForTimeout(500);
+
 	const rows = page.locator('table tbody tr');
 	await expect(rows.first()).toBeVisible({ timeout: 15_000 });
 
@@ -63,6 +67,10 @@ async function findScoringCell(
 	formatName: string,
 	scoreColumnIndex: number
 ): Promise<{ enabledCheckbox: Locator; scoreInput: Locator }> {
+	const searchInput = page.getByPlaceholder(/search custom formats/i);
+	await searchInput.fill('');
+	await page.waitForTimeout(500);
+
 	const exact = new RegExp(`^${escapeRegex(formatName)}$`);
 	const row = page
 		.locator('table tbody tr')
@@ -162,7 +170,14 @@ test.describe('2.16 QP scoring remove CF score row with upstream already removed
 
 		await page.goto(`/databases/${localId}/changes`);
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByText('No unpublished changes')).toBeVisible({ timeout: 15_000 });
+		await expect
+			.poll(
+				async () =>
+					(await page.getByText('No changes to pull or publish right now.').isVisible()) ||
+					(await page.getByText('No unpublished changes').isVisible()),
+				{ timeout: 15_000 }
+			)
+			.toBe(true);
 
 		await goToQualityProfileScoring(page, localId, profileName);
 		const final = await findScoringCell(page, targetFormatName, targetScoreColumnIndex);

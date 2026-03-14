@@ -24,7 +24,7 @@ function listPublishedUserConflicts(databaseInstanceId: number): number[] {
 		opIds.push(conflict.op.id);
 	}
 
-	return opIds;
+	return opIds.sort((a, b) => a - b);
 }
 
 async function autoResolveOverrideConflicts(databaseInstanceId: number): Promise<void> {

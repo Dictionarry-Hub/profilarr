@@ -3,10 +3,10 @@
  *
  * AUTO-GENERATED - DO NOT EDIT MANUALLY
  *
- * Generated from: https://github.com/Dictionarry-Hub/schema/blob/1.0.0/ops/0.schema.sql
- * Generated at: 2026-01-27T13:04:08.653Z
+ * Generated from: https://github.com/Dictionarry-Hub/schema/blob/local/ops/0.schema.sql
+ * Generated at: 2026-03-11T23:10:47.284Z
  *
- * To regenerate: deno task generate:pcd-types --version=1.0.0
+ * To regenerate: deno task generate:pcd-types --version=local
  */
 
 import type { Generated } from 'kysely';
@@ -47,6 +47,7 @@ export interface QualityGroupMembersTable {
 	quality_profile_name: string;
 	quality_group_name: string;
 	quality_name: string;
+	position: Generated<number>;
 }
 
 export interface QualityProfileQualitiesTable {
@@ -395,6 +396,7 @@ export interface QualityGroupMembersRow {
 	quality_profile_name: string;
 	quality_group_name: string;
 	quality_name: string;
+	position: number;
 }
 
 export interface QualityProfileQualitiesRow {

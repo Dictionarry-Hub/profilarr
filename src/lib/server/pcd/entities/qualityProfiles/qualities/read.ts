@@ -5,6 +5,7 @@
 import { sql } from 'kysely';
 import type { PCDCache } from '$pcd/index.ts';
 import type { QualitiesPageData, OrderedItem, QualitiesGroup } from '$shared/pcd/display.ts';
+import { hasQualityGroupMembersPositionInCache } from './groupMembersSchema.ts';
 
 /**
  * Get quality profile qualities data
@@ -31,11 +32,17 @@ export async function qualities(
 		.execute();
 
 	// 3. Get group members
-	const groupMembers = await db
+	const hasGroupMemberPosition = hasQualityGroupMembersPositionInCache(cache);
+	let groupMembersQuery = db
 		.selectFrom('quality_group_members')
 		.innerJoin('qualities', 'qualities.name', 'quality_group_members.quality_name')
 		.where('quality_group_members.quality_profile_name', '=', profileName)
-		.select(['quality_group_members.quality_group_name', 'qualities.name as quality_name'])
+		.select(['quality_group_members.quality_group_name', 'qualities.name as quality_name']);
+	if (hasGroupMemberPosition) {
+		groupMembersQuery = groupMembersQuery.orderBy('quality_group_members.position');
+	}
+	const groupMembers = await groupMembersQuery
+		.orderBy('quality_group_members.quality_name')
 		.execute();
 
 	// Build groups with members

@@ -12,15 +12,33 @@ export async function pullChanges(page: Page, databaseId: number): Promise<void>
 	await page.goto(`/databases/${databaseId}/changes`);
 	await page.waitForLoadState('networkidle');
 
-	// Wait for the page to finish loading (skeleton disappears)
-	await expect(page.getByText('Incoming Changes')).toBeVisible();
+	const incomingHeading = page.getByRole('heading', { name: 'Incoming Changes' });
+	const quietState = page.getByText('No changes to pull or publish right now.').first();
+	const allCaughtUp = page.getByText(/All caught up\./).first();
 
-	const upToDate = page.getByText('Up to date').first();
-
-	// Click the Pull button (text is "Pull X commit(s)")
 	const pullButton = page.getByRole('button', { name: /^Pull \d+ commit/ });
+	if (!(await incomingHeading.isVisible()) && !(await quietState.isVisible())) {
+		await expect
+			.poll(async () => (await incomingHeading.isVisible()) || (await quietState.isVisible()), {
+				timeout: 30_000
+			})
+			.toBe(true);
+	}
+
+	if (await quietState.isVisible()) {
+		return;
+	}
+
 	if (!(await pullButton.isVisible())) {
-		await expect(upToDate).toBeVisible({ timeout: 30_000 });
+		await expect
+			.poll(
+				async () =>
+					(await allCaughtUp.isVisible()) ||
+					(await quietState.isVisible()) ||
+					!(await pullButton.isVisible()),
+				{ timeout: 30_000 }
+			)
+			.toBe(true);
 		return;
 	}
 
@@ -47,7 +65,11 @@ export async function pullChanges(page: Page, databaseId: number): Promise<void>
 					outcome = 'error';
 					return outcome;
 				}
-				if (await upToDate.isVisible()) {
+				if (
+					(await allCaughtUp.isVisible()) ||
+					(await quietState.isVisible()) ||
+					!(await pullButton.isVisible())
+				) {
 					outcome = 'success';
 					return outcome;
 				}
@@ -76,8 +98,7 @@ export async function exportAndPush(
 	await page.goto(`/databases/${databaseId}/changes`);
 	await page.waitForLoadState('networkidle');
 
-	// Wait for outgoing changes table to load
-	await expect(page.getByText('Outgoing Changes')).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Outgoing Changes' })).toBeVisible();
 
 	const noChanges = page.getByText('No unpublished changes');
 	const selectAllButton = page.getByRole('button', { name: /Select all/ });

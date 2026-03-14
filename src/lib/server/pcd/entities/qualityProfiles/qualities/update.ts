@@ -3,7 +3,7 @@
  */
 
 import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
+import { type OperationLayer, writeOperation } from '$pcd/index.ts';
 import type { OrderedItem } from '$shared/pcd/display.ts';
 import { logger } from '$logger/logger.ts';
 import { qualities as readQualities } from './read.ts';
@@ -68,7 +68,7 @@ function cloneItem(item: OrderedItem): OrderedItem {
 		upgradeUntil: item.upgradeUntil
 	};
 	if (item.type === 'group') {
-		cloned.members = getMembers(item).map((name) => ({ name }));
+		cloned.members = (item.members ?? []).map((m) => ({ name: m.name }));
 	}
 	return cloned;
 }
@@ -88,10 +88,55 @@ function sameRow(current: OrderedItem, next: OrderedItem): boolean {
 		return true;
 	}
 
-	const currentMembers = getMembers(current);
-	const nextMembers = getMembers(next);
+	const currentMembers = (current.members ?? []).map((m) => m.name).filter(Boolean);
+	const nextMembers = (next.members ?? []).map((m) => m.name).filter(Boolean);
 	if (currentMembers.length !== nextMembers.length) return false;
 	return currentMembers.every((member, index) => member === nextMembers[index]);
+}
+
+function buildGroupMembersGuard(profileName: string, groupName: string, members: string[]): string {
+	const baseWhere = `quality_profile_name = '${esc(profileName)}'
+  AND quality_group_name = '${esc(groupName)}'`;
+
+	if (members.length === 0) {
+		return `(SELECT COUNT(*)
+FROM quality_group_members
+WHERE ${baseWhere}) = 0`;
+	}
+
+	const expectedMembers = members.map((member) => `'${esc(member)}'`).join(', ');
+	const positionChecks = members.map(
+		(member, index) =>
+			`(quality_name = '${esc(member)}'
+        AND position = ${index})`
+	).join(`
+      OR `);
+
+	return `(SELECT COUNT(*)
+FROM quality_group_members
+WHERE ${baseWhere}) = ${members.length}
+  AND NOT EXISTS (
+    SELECT 1
+    FROM quality_group_members
+    WHERE ${baseWhere}
+      AND quality_name NOT IN (${expectedMembers})
+  )
+  AND (
+    NOT EXISTS (
+      SELECT 1
+      FROM quality_group_members
+      WHERE ${baseWhere}
+        AND NOT (
+          ${positionChecks}
+        )
+    )
+    OR NOT EXISTS (
+      SELECT 1
+      FROM quality_group_members
+      WHERE ${baseWhere}
+        AND position != 0
+    )
+  )`;
 }
 
 function buildDeleteQueries(profileName: string, item: OrderedItem): CompiledQuery[] {
@@ -164,15 +209,16 @@ WHERE NOT EXISTS (
 			query: {} as never
 		});
 
-		for (const member of getMembers(item)) {
+		const members = Array.from(new Set((item.members ?? []).map((m) => m.name).filter(Boolean)));
+		for (let i = 0; i < members.length; i++) {
 			queries.push({
-				sql: `INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name)
-SELECT '${esc(profileName)}', '${esc(item.name)}', '${esc(member)}'
+				sql: `INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name, position)
+SELECT '${esc(profileName)}', '${esc(item.name)}', '${esc(members[i])}', ${i}
 WHERE NOT EXISTS (
   SELECT 1 FROM quality_group_members
   WHERE quality_profile_name = '${esc(profileName)}'
     AND quality_group_name = '${esc(item.name)}'
-    AND quality_name = '${esc(member)}'
+    AND quality_name = '${esc(members[i])}'
 )`,
 				parameters: [],
 				query: {} as never
@@ -181,7 +227,9 @@ WHERE NOT EXISTS (
 
 		queries.push({
 			sql: `INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, quality_group_name, position, enabled, upgrade_until)
-SELECT '${esc(profileName)}', NULL, '${esc(item.name)}', ${item.position}, ${enabled}, ${upgradeUntil}
+SELECT '${esc(profileName)}', NULL, '${esc(
+				item.name
+			)}', ${item.position}, ${enabled}, ${upgradeUntil}
 WHERE NOT EXISTS (
   SELECT 1 FROM quality_profile_qualities
   WHERE quality_profile_name = '${esc(profileName)}'
@@ -197,7 +245,9 @@ WHERE NOT EXISTS (
 
 	queries.push({
 		sql: `INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, quality_group_name, position, enabled, upgrade_until)
-SELECT '${esc(profileName)}', '${esc(item.name)}', NULL, ${item.position}, ${enabled}, ${upgradeUntil}
+SELECT '${esc(profileName)}', '${esc(
+			item.name
+		)}', NULL, ${item.position}, ${enabled}, ${upgradeUntil}
 WHERE NOT EXISTS (
   SELECT 1 FROM quality_profile_qualities
   WHERE quality_profile_name = '${esc(profileName)}'
@@ -260,35 +310,59 @@ WHERE quality_profile_name = '${esc(profileName)}'
 	}
 
 	if (current.type === 'group') {
-		const currentMembers = getMembers(current);
-		const nextMembers = getMembers(next);
-		const toRemove = currentMembers.filter((member) => !nextMembers.includes(member));
-		const toAdd = nextMembers.filter((member) => !currentMembers.includes(member));
+		const currentMembers = (current.members ?? []).map((m) => m.name).filter(Boolean);
+		const nextMembers = (next.members ?? []).map((m) => m.name).filter(Boolean);
+		const membersChanged =
+			currentMembers.length !== nextMembers.length ||
+			currentMembers.some((m, i) => m !== nextMembers[i]);
 
-		for (const member of toRemove) {
+		if (membersChanged) {
+			const membersGuard = buildGroupMembersGuard(profileName, current.name, currentMembers);
+
 			queries.push({
 				sql: `DELETE FROM quality_group_members
 WHERE quality_profile_name = '${esc(profileName)}'
   AND quality_group_name = '${esc(current.name)}'
-  AND quality_name = '${esc(member)}'`,
+  AND ${membersGuard}`,
 				parameters: [],
 				query: {} as never
 			});
-		}
 
-		for (const member of toAdd) {
-			queries.push({
-				sql: `INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name)
-SELECT '${esc(profileName)}', '${esc(current.name)}', '${esc(member)}'
-WHERE NOT EXISTS (
-  SELECT 1 FROM quality_group_members
-  WHERE quality_profile_name = '${esc(profileName)}'
-    AND quality_group_name = '${esc(current.name)}'
-    AND quality_name = '${esc(member)}'
-)`,
-				parameters: [],
-				query: {} as never
-			});
+			if (nextMembers.length > 0) {
+				const insertRows = nextMembers.map(
+					(member, index) =>
+						`SELECT '${esc(profileName)}' AS quality_profile_name, '${esc(
+							current.name
+						)}' AS quality_group_name, '${esc(member)}' AS quality_name, ${index} AS position`
+				).join(`
+UNION ALL
+`);
+
+				queries.push({
+					sql: `INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name, position)
+WITH can_insert AS (
+  SELECT (
+    SELECT COUNT(*)
+    FROM quality_group_members
+    WHERE quality_profile_name = '${esc(profileName)}'
+      AND quality_group_name = '${esc(current.name)}'
+  ) = 0 AS ok
+),
+new_rows AS (
+${insertRows}
+)
+SELECT
+  new_rows.quality_profile_name,
+  new_rows.quality_group_name,
+  new_rows.quality_name,
+  new_rows.position
+FROM new_rows
+CROSS JOIN can_insert
+WHERE ok`,
+					parameters: [],
+					query: {} as never
+				});
+			}
 		}
 	}
 

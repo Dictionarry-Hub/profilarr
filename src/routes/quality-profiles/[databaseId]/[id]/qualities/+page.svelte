@@ -5,12 +5,14 @@
 		Check,
 		ArrowUp,
 		Info,
+		AlertTriangle,
 		Save,
 		Loader2,
 		Layers,
 		ChevronUp,
 		ChevronDown,
-		Pencil
+		Pencil,
+		Grip
 	} from 'lucide-svelte';
 	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
 	import Label from '$ui/label/Label.svelte';
@@ -124,7 +126,7 @@
 		upgradeUntil: boolean;
 	};
 
-	$: groupModalItems = buildGroupModalItems(mainBucket, groupModalMode, editingGroupIndex);
+	let groupModalItems: GroupModalItem[] = [];
 	$: groupNameValid = groupNameInput.trim().length > 0;
 	$: canSaveGroup = selectedGroupNames.size >= 2 && groupNameValid;
 	$: groupModalTitle = groupModalMode === 'edit' ? 'Edit Group' : 'Create Group';
@@ -133,6 +135,31 @@
 		groupModalMode === 'edit'
 			? 'Select at least two qualities for this group. Groups share the same priority.'
 			: 'Select at least two qualities to combine into a group. Groups share the same priority.';
+	let lastRouteStateKey = '';
+
+	$: {
+		const routeStateKey = `${$page.url.pathname}:${data.canEditGroupMembers ? 1 : 0}`;
+		if (routeStateKey !== lastRouteStateKey) {
+			lastRouteStateKey = routeStateKey;
+			if (draggedQualityFromMain) {
+				resetDragState();
+			}
+			showGroupModal = false;
+			groupModalMode = 'create';
+			editingGroupIndex = null;
+			groupNameInput = '';
+			selectedGroupNames = new Set();
+			groupModalItems = [];
+			hoverTargetIndex = null;
+			willCreateGroup = false;
+			willAddToGroup = false;
+			groupingMode = false;
+		}
+	}
+
+	$: if (!data.canEditGroupMembers && showGroupModal) {
+		closeGroupModal();
+	}
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
@@ -172,10 +199,6 @@
 
 	function handlePointerDown(e: PointerEvent, item: OrderedItem, index: number) {
 		if (isMobile) return;
-		// Ignore clicks on interactive children (buttons, checkboxes, inputs)
-		const target = e.target as HTMLElement;
-		if (target.closest('button, [role="checkbox"], input, a')) return;
-
 		e.preventDefault();
 		document.body.classList.add('dragging');
 		draggedQualityFromMain = { item, index };
@@ -198,7 +221,7 @@
 		}
 
 		const draggedItem = draggedQualityFromMain.item;
-		const isGroupingMode = e.ctrlKey || e.metaKey || groupingMode;
+		const isGroupingMode = data.canEditGroupMembers && (e.ctrlKey || e.metaKey || groupingMode);
 
 		hoverTargetIndex = target.index;
 
@@ -244,7 +267,7 @@
 		if (target && target.index !== draggedQualityFromMain.index) {
 			const draggedItem = draggedQualityFromMain.item;
 			const sourceIndex = draggedQualityFromMain.index;
-			const isGroupingMode = e.ctrlKey || e.metaKey || groupingMode;
+			const isGroupingMode = data.canEditGroupMembers && (e.ctrlKey || e.metaKey || groupingMode);
 
 			if (isGroupingMode && draggedItem.type === 'quality') {
 				if (target.item.type === 'quality') {
@@ -411,19 +434,35 @@
 	}
 
 	function openCreateGroupModal() {
+		if (!data.canEditGroupMembers) {
+			alertStore.add(
+				'warning',
+				'Update the linked schema dependency before creating or editing quality groups.'
+			);
+			return;
+		}
 		groupModalMode = 'create';
 		editingGroupIndex = null;
 		groupNameInput = '';
 		selectedGroupNames = new Set();
+		groupModalItems = buildGroupModalItems(mainBucket, groupModalMode, editingGroupIndex);
 		showGroupModal = true;
 	}
 
 	function openEditGroupModal(item: OrderedItem, index: number) {
+		if (!data.canEditGroupMembers) {
+			alertStore.add(
+				'warning',
+				'Update the linked schema dependency before creating or editing quality groups.'
+			);
+			return;
+		}
 		if (item.type !== 'group') return;
 		groupModalMode = 'edit';
 		editingGroupIndex = index;
 		groupNameInput = item.name;
 		selectedGroupNames = new Set(item.members?.map((member) => member.name) ?? []);
+		groupModalItems = buildGroupModalItems(mainBucket, groupModalMode, editingGroupIndex);
 		showGroupModal = true;
 	}
 
@@ -433,6 +472,7 @@
 		editingGroupIndex = null;
 		groupNameInput = '';
 		selectedGroupNames = new Set();
+		groupModalItems = [];
 	}
 
 	function toggleGroupSelection(name: string) {
@@ -442,6 +482,10 @@
 			selectedGroupNames.add(name);
 		}
 		selectedGroupNames = selectedGroupNames;
+	}
+
+	function handleGroupModalReorder(items: GroupModalItem[]) {
+		groupModalItems = items;
 	}
 
 	function handleGroupModalConfirm() {
@@ -552,330 +596,366 @@
 	<title>Qualities - Profilarr</title>
 </svelte:head>
 
-<StickyCard position="top">
-	<svelte:fragment slot="left">
-		<h1 class="text-neutral-900 dark:text-neutral-50">Qualities</h1>
-		<p class="text-neutral-600 dark:text-neutral-400">
-			Configure ordering, grouping, and upgrade behavior.
-		</p>
-	</svelte:fragment>
-	<svelte:fragment slot="right">
-		<div class="flex items-center gap-2">
-			<Button
-				text="Info"
-				icon={Info}
-				iconColor="text-blue-600 dark:text-blue-400"
-				on:click={() => (showInfoModal = true)}
-			/>
-			<Button
-				text="Create Group"
-				icon={Layers}
-				iconColor="text-accent-600 dark:text-accent-400"
-				on:click={openCreateGroupModal}
-			/>
-			<Button
-				disabled={isSaving || !$isDirty || !hasEnabledItems}
-				icon={isSaving ? Loader2 : Save}
-				iconColor="text-blue-600 dark:text-blue-400"
-				text={isSaving ? 'Saving...' : 'Save'}
-				on:click={handleSaveClick}
-			/>
+{#key `${$page.url.pathname}:${data.canEditGroupMembers ? 1 : 0}`}
+	<StickyCard position="top">
+		<svelte:fragment slot="left">
+			<h1 class="text-neutral-900 dark:text-neutral-50">Qualities</h1>
+			<p class="text-neutral-600 dark:text-neutral-400">
+				Configure ordering, grouping, and upgrade behavior.
+			</p>
+		</svelte:fragment>
+		<svelte:fragment slot="right">
+			<div class="flex items-center gap-2">
+				<Button
+					text="Info"
+					icon={Info}
+					iconColor="text-blue-600 dark:text-blue-400"
+					on:click={() => (showInfoModal = true)}
+				/>
+				<Button
+					text="Create Group"
+					icon={Layers}
+					iconColor="text-accent-600 dark:text-accent-400"
+					disabled={!data.canEditGroupMembers}
+					tooltip={!data.canEditGroupMembers
+						? 'Update the linked schema dependency to edit quality group members.'
+						: ''}
+					on:click={openCreateGroupModal}
+				/>
+				<Button
+					disabled={isSaving || !$isDirty || !hasEnabledItems}
+					icon={isSaving ? Loader2 : Save}
+					iconColor="text-blue-600 dark:text-blue-400"
+					text={isSaving ? 'Saving...' : 'Save'}
+					on:click={handleSaveClick}
+				/>
+			</div>
+		</svelte:fragment>
+	</StickyCard>
+
+	{#if !data.canEditGroupMembers}
+		<div class="mt-4 px-4 text-sm text-amber-700 dark:text-amber-300">
+			<div class="flex items-start gap-2">
+				<AlertTriangle size={16} class="mt-0.5 shrink-0" />
+				<p>
+					This database uses an older schema. Quality group members can be viewed, but creating or
+					editing groups is disabled until the schema dependency is updated.
+				</p>
+			</div>
 		</div>
-	</svelte:fragment>
-</StickyCard>
+	{/if}
 
-<!-- Hidden form for submission -->
-<form
-	bind:this={formElement}
-	method="POST"
-	action="?/update"
-	class="hidden"
-	use:enhance={() => {
-		isSaving = true;
-		return async ({ result, update: formUpdate }) => {
-			isSaving = false;
-			if (result.type === 'success' && result.data) {
-				const resData = result.data as {
-					success?: boolean;
-					redirectTo?: string;
-					affectedArrs?: AffectedArr[];
-				};
-				if (resData.success) {
-					alertStore.add('success', 'Qualities saved!');
-					initEdit($current);
-					if (resData.affectedArrs && resData.affectedArrs.length > 0) {
-						pendingRedirectTo = resData.redirectTo || '';
-						pendingAffectedArrs = resData.affectedArrs;
-						showSyncModal = true;
-					} else {
-						await formUpdate();
+	<!-- Hidden form for submission -->
+	<form
+		bind:this={formElement}
+		method="POST"
+		action="?/update"
+		class="hidden"
+		use:enhance={() => {
+			isSaving = true;
+			return async ({ result, update: formUpdate }) => {
+				isSaving = false;
+				if (result.type === 'success' && result.data) {
+					const resData = result.data as {
+						success?: boolean;
+						redirectTo?: string;
+						affectedArrs?: AffectedArr[];
+					};
+					if (resData.success) {
+						alertStore.add('success', 'Qualities saved!');
+						initEdit($current);
+						if (resData.affectedArrs && resData.affectedArrs.length > 0) {
+							pendingRedirectTo = resData.redirectTo || '';
+							pendingAffectedArrs = resData.affectedArrs;
+							showSyncModal = true;
+						} else {
+							await formUpdate();
+						}
+						return;
 					}
-					return;
+				} else if (result.type === 'failure') {
+					const message = (result.data as { error?: string })?.error || 'Failed to save';
+					alertStore.add('error', message);
 				}
-			} else if (result.type === 'failure') {
-				const message = (result.data as { error?: string })?.error || 'Failed to save';
-				alertStore.add('error', message);
-			}
-			await formUpdate();
-		};
-	}}
->
-	<input type="hidden" name="orderedItems" value={JSON.stringify(mainBucket)} />
-	<input type="hidden" name="layer" value={selectedLayer} />
-</form>
+				await formUpdate();
+			};
+		}}
+	>
+		<input type="hidden" name="orderedItems" value={JSON.stringify(mainBucket)} />
+		<input type="hidden" name="layer" value={selectedLayer} />
+	</form>
 
-<div class="mt-6 space-y-6 md:px-4">
-	<div class="space-y-4">
-		{#each mainBucket as item, index (item.type === 'quality' ? `quality-${item.name}-${index}` : `group-${item.name}-${index}`)}
-			<div
-				data-quality-index={index}
-				on:pointerdown={(e) => handlePointerDown(e, item, index)}
-				on:click={() => toggleEnabled(index)}
-				on:keydown={(e) => {
-					if (e.key === 'Enter' || e.key === ' ') {
-						e.preventDefault();
-						toggleEnabled(index);
-					}
-				}}
-				class="relative rounded-xl border border-neutral-300 bg-white p-3 select-none dark:border-neutral-700/60 dark:bg-neutral-800/50 {isMobile
-					? ''
-					: 'cursor-grab'} {draggedQualityFromMain?.index === index ? 'scale-95 opacity-50' : ''}"
-				style="transition: opacity 100ms, transform 100ms;"
-				role="button"
-				tabindex="0"
-			>
-				{#if hoverTargetIndex === index && willCreateGroup}
-					<div
-						class="pointer-events-none absolute inset-0 rounded-lg border-2 border-dashed border-green-500 bg-green-50/30 dark:border-green-400 dark:bg-green-950/30"
-					></div>
-				{/if}
-				{#if hoverTargetIndex === index && willAddToGroup}
-					<div
-						class="pointer-events-none absolute inset-0 rounded-lg border-2 border-dashed border-accent-500 bg-accent-50/30 dark:border-accent-400 dark:bg-accent-950/30"
-					></div>
-				{/if}
-				<div class="relative flex items-center justify-between">
-					<div class="flex-1">
-						<div class="font-medium text-neutral-900 dark:text-neutral-100">
-							{#if item.type === 'group'}
-								<span
-									class="cursor-pointer hover:text-accent-600 dark:hover:text-accent-400"
-									on:click|stopPropagation={() => openEditGroupModal(item, index)}
-									on:keydown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
+	<div class="mt-6 space-y-6 md:px-4">
+		<div class="space-y-4">
+			{#each mainBucket as item, index (item.type === 'quality' ? `quality-${item.name}-${index}` : `group-${item.name}-${index}`)}
+				<div
+					data-quality-index={index}
+					on:click={() => toggleEnabled(index)}
+					on:keydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							toggleEnabled(index);
+						}
+					}}
+					class="relative cursor-pointer rounded-xl border border-neutral-300 bg-white p-3 select-none dark:border-neutral-700/60 dark:bg-neutral-800/50 {draggedQualityFromMain?.index ===
+					index
+						? 'scale-[0.98] opacity-50'
+						: ''}"
+					style="transition: opacity 100ms, transform 100ms;"
+					role="button"
+					tabindex="0"
+				>
+					{#if hoverTargetIndex === index && willCreateGroup}
+						<div
+							class="pointer-events-none absolute inset-0 rounded-lg border-2 border-dashed border-green-500 bg-green-50/30 dark:border-green-400 dark:bg-green-950/30"
+						></div>
+					{/if}
+					{#if hoverTargetIndex === index && willAddToGroup}
+						<div
+							class="pointer-events-none absolute inset-0 rounded-lg border-2 border-dashed border-accent-500 bg-accent-50/30 dark:border-accent-400 dark:bg-accent-950/30"
+						></div>
+					{/if}
+					<div class="relative flex items-center justify-between">
+						<button
+							type="button"
+							class="mr-2 hidden shrink-0 text-neutral-400 md:block dark:text-neutral-500 {draggedQualityFromMain?.index ===
+							index
+								? 'cursor-grabbing'
+								: 'cursor-grab'}"
+							on:pointerdown={(e) => handlePointerDown(e, item, index)}
+							on:click|stopPropagation|preventDefault
+						>
+							<Grip size={16} />
+						</button>
+						<div class="flex-1">
+							<div class="font-medium text-neutral-900 dark:text-neutral-100">
+								{#if item.type === 'group'}
+									{#if data.canEditGroupMembers}
+										<button
+											type="button"
+											class="cursor-pointer hover:text-accent-600 dark:hover:text-accent-400"
+											on:click|stopPropagation={() => openEditGroupModal(item, index)}
+										>
+											{item.name}
+										</button>
+									{:else}
+										<span>{item.name}</span>
+									{/if}
+								{:else}
+									{item.name}
+								{/if}
+							</div>
+							{#if item.type === 'group' && item.members}
+								<div class="mt-1 hidden flex-wrap gap-1 md:flex">
+									{#each item.members as member}
+										<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
+									{/each}
+								</div>
+							{/if}
+						</div>
+						<div class="flex items-center gap-3">
+							<div class="flex items-center gap-1 md:hidden">
+								{#if item.type === 'group'}
+									<Button
+										icon={X}
+										size="xs"
+										title="Collapse group into individual qualities"
+										on:click={(e) => {
+											e.stopPropagation();
+											collapseGroup(item);
+										}}
+									/>
+									<Button
+										icon={Pencil}
+										size="xs"
+										disabled={!data.canEditGroupMembers}
+										tooltip={!data.canEditGroupMembers
+											? 'Update the linked schema dependency to edit quality group members.'
+											: ''}
+										title="Edit group"
+										on:click={(e) => {
 											e.stopPropagation();
 											openEditGroupModal(item, index);
-										}
+										}}
+									/>
+								{/if}
+								<Button
+									icon={ChevronUp}
+									size="xs"
+									disabled={index === 0}
+									on:click={(e) => {
+										e.stopPropagation();
+										moveItem(index, 'up');
 									}}
-									role="button"
-									tabindex="0"
-								>
-									{item.name}
-								</span>
-							{:else}
-								{item.name}
-							{/if}
-						</div>
-						{#if item.type === 'group' && item.members}
-							<div class="mt-1 hidden flex-wrap gap-1 md:flex">
-								{#each item.members as member}
-									<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
-								{/each}
+								/>
+								<Button
+									icon={ChevronDown}
+									size="xs"
+									disabled={index === mainBucket.length - 1}
+									on:click={(e) => {
+										e.stopPropagation();
+										moveItem(index, 'down');
+									}}
+								/>
 							</div>
-						{/if}
-					</div>
-					<div class="flex items-center gap-3">
-						<div class="flex items-center gap-1 md:hidden">
+							{#if hoverTargetIndex === index && willCreateGroup}
+								<div class="text-xs font-medium text-green-600 dark:text-green-400">
+									Create Group
+								</div>
+							{:else if hoverTargetIndex === index && willAddToGroup}
+								<div class="text-xs font-medium text-accent-600 dark:text-accent-400">
+									Add to Group
+								</div>
+							{/if}
 							{#if item.type === 'group'}
-								<Button
-									icon={X}
-									size="xs"
-									title="Collapse group into individual qualities"
-									on:click={(e) => {
-										e.stopPropagation();
-										collapseGroup(item);
-									}}
-								/>
-								<Button
-									icon={Pencil}
-									size="xs"
-									title="Edit group"
-									on:click={(e) => {
-										e.stopPropagation();
-										openEditGroupModal(item, index);
-									}}
-								/>
+								<span class="hidden md:inline-flex">
+									<Button
+										icon={X}
+										size="xs"
+										title="Collapse group into individual qualities"
+										on:click={(e) => {
+											e.stopPropagation();
+											collapseGroup(item);
+										}}
+									/>
+								</span>
+								<span class="hidden md:inline-flex">
+									<Button
+										icon={Pencil}
+										size="xs"
+										disabled={!data.canEditGroupMembers}
+										tooltip={!data.canEditGroupMembers
+											? 'Update the linked schema dependency to edit quality group members.'
+											: ''}
+										title="Edit group"
+										on:click={(e) => {
+											e.stopPropagation();
+											openEditGroupModal(item, index);
+										}}
+									/>
+								</span>
 							{/if}
-							<Button
-								icon={ChevronUp}
-								size="xs"
-								disabled={index === 0}
-								on:click={(e) => {
-									e.stopPropagation();
-									moveItem(index, 'up');
-								}}
+							<IconCheckbox
+								checked={item.upgradeUntil}
+								icon={ArrowUp}
+								color="#07CA07"
+								shape="circle"
+								stopPropagation
+								on:click={() => toggleUpgradeUntil(index)}
 							/>
-							<Button
-								icon={ChevronDown}
-								size="xs"
-								disabled={index === mainBucket.length - 1}
-								on:click={(e) => {
-									e.stopPropagation();
-									moveItem(index, 'down');
-								}}
+							<IconCheckbox
+								checked={item.enabled}
+								icon={Check}
+								color="blue"
+								shape="circle"
+								stopPropagation
+								on:click={() => toggleEnabled(index)}
 							/>
 						</div>
-						{#if hoverTargetIndex === index && willCreateGroup}
-							<div class="text-xs font-medium text-green-600 dark:text-green-400">Create Group</div>
-						{:else if hoverTargetIndex === index && willAddToGroup}
-							<div class="text-xs font-medium text-accent-600 dark:text-accent-400">
-								Add to Group
-							</div>
-						{/if}
-						{#if item.type === 'group'}
-							<span class="hidden md:inline-flex">
-								<Button
-									icon={X}
-									size="xs"
-									title="Collapse group into individual qualities"
-									on:click={(e) => {
-										e.stopPropagation();
-										collapseGroup(item);
-									}}
-								/>
-							</span>
-							<span class="hidden md:inline-flex">
-								<Button
-									icon={Pencil}
-									size="xs"
-									title="Edit group"
-									on:click={(e) => {
-										e.stopPropagation();
-										openEditGroupModal(item, index);
-									}}
-								/>
-							</span>
-						{/if}
-						<IconCheckbox
-							checked={item.upgradeUntil}
-							icon={ArrowUp}
-							color="#07CA07"
-							shape="circle"
-							stopPropagation
-							on:click={() => toggleUpgradeUntil(index)}
-						/>
-						<IconCheckbox
-							checked={item.enabled}
-							icon={Check}
-							color="blue"
-							shape="circle"
-							stopPropagation
-							on:click={() => toggleEnabled(index)}
-						/>
 					</div>
+					{#if item.type === 'group' && item.members}
+						<div class="mt-3 flex flex-wrap gap-1 md:hidden">
+							{#each item.members as member}
+								<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
+							{/each}
+						</div>
+					{/if}
 				</div>
-				{#if item.type === 'group' && item.members}
-					<div class="mt-3 flex flex-wrap gap-1 border-t border-neutral-200 pt-3 md:hidden">
-						{#each item.members as member}
-							<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
-						{/each}
-					</div>
-				{/if}
-			</div>
-		{/each}
-		<div class="h-[30px]"></div>
-	</div>
-</div>
-
-<InfoModal bind:open={showInfoModal} header="Qualities">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
-		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Qualities</div>
-			<div class="mt-1">
-				Define the order, grouping, and configuration of qualities. In previous versions, only
-				enabled qualities were tracked. The new system stores all qualities (enabled and disabled)
-				to maintain proper ordering across your entire quality profile. Missing qualities are
-				automatically appended as disabled.
-			</div>
-		</div>
-
-		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Reordering</div>
-			<div class="mt-1">
-				Drag and drop qualities to change their priority. Higher positions indicate higher
-				preference. The order determines which quality will be selected when multiple options are
-				available.
-			</div>
-		</div>
-
-		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Creating Groups</div>
-			<div class="mt-1">
-				On desktop, hold Ctrl (or Cmd on Mac) while dragging a quality onto another quality to
-				create a group. Groups allow multiple qualities to be treated as equal priority. You can
-				also drag a quality onto an existing group to add it to that group. On mobile, use the
-				Create Group button in the header.
-			</div>
-		</div>
-
-		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Group Names</div>
-			<div class="mt-1">
-				Click on a group name to edit it. Groups automatically get a default name when created, but
-				you can customize this to better describe the qualities it contains.
-			</div>
-		</div>
-
-		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Collapsing Groups</div>
-			<div class="mt-1">
-				Click the X button on a group to break it apart into individual qualities. The qualities
-				will maintain their enabled state and position.
-			</div>
-		</div>
-
-		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Enabled/Disabled</div>
-			<div class="mt-1">
-				The blue checkbox indicates whether a quality is enabled. Click anywhere on the quality row
-				or the checkbox itself to toggle. Disabled qualities are still tracked for ordering purposes
-				but won't be used for downloads.
-			</div>
-		</div>
-
-		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Upgrade Until</div>
-			<div class="mt-1">
-				The green arrow checkbox marks a quality as the "upgrade until" threshold. Only one quality
-				can have this flag at a time. When a file reaches this quality level, the system will stop
-				looking for upgrades. This quality must be enabled.
-			</div>
+			{/each}
+			<div class="h-[30px]"></div>
 		</div>
 	</div>
-</InfoModal>
 
-<GroupModal
-	open={showGroupModal}
-	title={groupModalTitle}
-	confirmText={groupModalConfirmText}
-	confirmDisabled={!canSaveGroup}
-	description={groupModalDescription}
-	items={groupModalItems}
-	selectedNames={selectedGroupNames}
-	bind:groupName={groupNameInput}
-	on:confirm={handleGroupModalConfirm}
-	on:cancel={closeGroupModal}
-	on:toggle={(event) => toggleGroupSelection(event.detail.name)}
-/>
+	<InfoModal bind:open={showInfoModal} header="Qualities">
+		<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+			<div>
+				<div class="font-medium text-neutral-900 dark:text-neutral-100">Qualities</div>
+				<div class="mt-1">
+					Define the order, grouping, and configuration of qualities. In previous versions, only
+					enabled qualities were tracked. The new system stores all qualities (enabled and disabled)
+					to maintain proper ordering across your entire quality profile. Missing qualities are
+					automatically appended as disabled.
+				</div>
+			</div>
 
-<SyncPromptModal
-	bind:open={showSyncModal}
-	redirectTo={pendingRedirectTo}
-	affectedArrs={pendingAffectedArrs}
-	{databaseId}
-	entityName={data.profileName}
-/>
+			<div>
+				<div class="font-medium text-neutral-900 dark:text-neutral-100">Reordering</div>
+				<div class="mt-1">
+					Drag and drop qualities to change their priority. Higher positions indicate higher
+					preference. The order determines which quality will be selected when multiple options are
+					available.
+				</div>
+			</div>
+
+			<div>
+				<div class="font-medium text-neutral-900 dark:text-neutral-100">Creating Groups</div>
+				<div class="mt-1">
+					On desktop, hold Ctrl (or Cmd on Mac) while dragging a quality onto another quality to
+					create a group. Groups allow multiple qualities to be treated as equal priority. You can
+					also drag a quality onto an existing group to add it to that group. On mobile, use the
+					Create Group button in the header.
+				</div>
+			</div>
+
+			<div>
+				<div class="font-medium text-neutral-900 dark:text-neutral-100">Group Names</div>
+				<div class="mt-1">
+					Click on a group name to edit it. Groups automatically get a default name when created,
+					but you can customize this to better describe the qualities it contains.
+				</div>
+			</div>
+
+			<div>
+				<div class="font-medium text-neutral-900 dark:text-neutral-100">Collapsing Groups</div>
+				<div class="mt-1">
+					Click the X button on a group to break it apart into individual qualities. The qualities
+					will maintain their enabled state and position.
+				</div>
+			</div>
+
+			<div>
+				<div class="font-medium text-neutral-900 dark:text-neutral-100">Enabled/Disabled</div>
+				<div class="mt-1">
+					The blue checkbox indicates whether a quality is enabled. Click anywhere on the quality
+					row or the checkbox itself to toggle. Disabled qualities are still tracked for ordering
+					purposes but won't be used for downloads.
+				</div>
+			</div>
+
+			<div>
+				<div class="font-medium text-neutral-900 dark:text-neutral-100">Upgrade Until</div>
+				<div class="mt-1">
+					The green arrow checkbox marks a quality as the "upgrade until" threshold. Only one
+					quality can have this flag at a time. When a file reaches this quality level, the system
+					will stop looking for upgrades. This quality must be enabled.
+				</div>
+			</div>
+		</div>
+	</InfoModal>
+
+	<GroupModal
+		open={showGroupModal}
+		title={groupModalTitle}
+		confirmText={groupModalConfirmText}
+		confirmDisabled={!canSaveGroup}
+		description={groupModalDescription}
+		items={groupModalItems}
+		selectedNames={selectedGroupNames}
+		bind:groupName={groupNameInput}
+		on:confirm={handleGroupModalConfirm}
+		on:cancel={closeGroupModal}
+		on:toggle={(event) => toggleGroupSelection(event.detail.name)}
+		on:reorder={(event) => handleGroupModalReorder(event.detail.items)}
+	/>
+
+	<SyncPromptModal
+		bind:open={showSyncModal}
+		redirectTo={pendingRedirectTo}
+		affectedArrs={pendingAffectedArrs}
+		{databaseId}
+		entityName={data.profileName}
+	/>
+{/key}
 
 <style>
 	:global(body.dragging),

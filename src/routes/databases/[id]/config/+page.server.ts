@@ -1,6 +1,6 @@
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { compile } from '$pcd/database/compiler.ts';
+import { compile, invalidate } from '$pcd/database/compiler.ts';
 import { syncDependencies } from '$pcd/git/dependencies.ts';
 import {
 	readManifest,
@@ -12,6 +12,7 @@ import {
 } from '$pcd/manifest/manifest.ts';
 import { parseMarkdown } from '$utils/markdown/markdown.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
+import { logger } from '$logger/logger.ts';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { database } = await parent();
@@ -65,16 +66,41 @@ export const actions: Actions = {
 			await writeManifest(database.local_path, manifest);
 			await writeReadme(database.local_path, readme);
 
+			let dependencySync;
 			try {
-				await syncDependencies(database.local_path, database.personal_access_token ?? undefined);
+				dependencySync = await syncDependencies(
+					database.local_path,
+					database.personal_access_token ?? undefined
+				);
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
 				return fail(500, { error: `Failed to sync dependencies: ${message}` });
 			}
 
+			if (dependencySync.changed) {
+				await logger.info('Dependencies changed, invalidating cache before rebuild', {
+					source: 'DatabaseConfig',
+					meta: {
+						databaseId: id,
+						databaseName: database.name,
+						repositories: dependencySync.repositories
+					}
+				});
+				invalidate(id);
+			}
+
 			if (database.enabled) {
 				try {
 					await compile(database.local_path, id);
+					await logger.info('Rebuilt cache after config dependency sync', {
+						source: 'DatabaseConfig',
+						meta: {
+							databaseId: id,
+							databaseName: database.name,
+							dependenciesChanged: dependencySync.changed,
+							repositories: dependencySync.repositories
+						}
+					});
 				} catch (error) {
 					const message = error instanceof Error ? error.message : String(error);
 					return fail(500, { error: `Failed to rebuild cache: ${message}` });

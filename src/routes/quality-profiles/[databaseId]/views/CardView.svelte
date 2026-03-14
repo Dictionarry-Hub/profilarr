@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
-	import { page } from '$app/stores';
 	import { BookOpenText, Gauge, Earth, Copy, Download } from 'lucide-svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';
@@ -12,6 +11,7 @@
 	import { FEATURES } from '$shared/features.ts';
 
 	export let profiles: QualityProfileTableRow[];
+	export let databaseId: number;
 
 	let isMobile = false;
 	$: qualityLimit = isMobile ? 3 : 5;
@@ -23,8 +23,6 @@
 	});
 
 	const dispatch = createEventDispatcher<{ clone: { name: string }; export: { name: string } }>();
-
-	$: databaseId = $page.params.databaseId;
 
 	const { visibleCount, sentinel, reset, setTotalCount } = createProgressiveList({ pageSize: 30 });
 	$: setTotalCount(profiles.length);

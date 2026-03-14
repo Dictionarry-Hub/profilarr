@@ -34,8 +34,15 @@ export async function goToCustomFormat(
 	await page.getByPlaceholder(/search/i).fill(name);
 	await page.waitForTimeout(500); // debounce
 
-	// Click the table row containing the name (rows are <tr> with onRowClick, not links)
-	await page.locator('table tbody tr', { hasText: name }).first().click();
+	const tableRow = page.locator('table tbody tr', { hasText: name }).first();
+	if (await tableRow.isVisible()) {
+		await tableRow.click();
+	} else {
+		await page
+			.locator(`a[href^="/custom-formats/${databaseId}/"]`, { hasText: name })
+			.first()
+			.click();
+	}
 	await page.waitForURL(/\/custom-formats\/\d+\/\d+/, { timeout: 15_000 });
 	await page.waitForLoadState('networkidle');
 }
@@ -686,6 +693,28 @@ export async function goToDelayProfile(
 // Quality Profiles
 // ---------------------------------------------------------------------------
 
+async function clickQualityProfileListItem(
+	page: Page,
+	databaseId: number,
+	name?: string
+): Promise<void> {
+	const tableRow = name
+		? page.locator('table tbody tr', { hasText: name }).first()
+		: page.locator('table tbody tr').first();
+	const cardLink = name
+		? page.locator(`a[href^="/quality-profiles/${databaseId}/"]`, { hasText: name }).first()
+		: page.locator(`a[href^="/quality-profiles/${databaseId}/"]`).first();
+
+	if (await tableRow.count()) {
+		await expect(tableRow).toBeVisible();
+		await tableRow.click();
+		return;
+	}
+
+	await expect(cardLink).toBeVisible();
+	await cardLink.click();
+}
+
 /**
  * Navigate to a quality profile's general page by searching for it.
  */
@@ -700,7 +729,7 @@ export async function goToQualityProfile(
 	await page.getByPlaceholder(/search/i).fill(name);
 	await page.waitForTimeout(500);
 
-	await page.locator('table tbody tr', { hasText: name }).first().click();
+	await clickQualityProfileListItem(page, databaseId, name);
 	await page.waitForURL(/\/quality-profiles\/\d+\/\d+\/general/, { timeout: 15_000 });
 	await page.waitForLoadState('networkidle');
 }
@@ -772,9 +801,7 @@ export async function openFirstQualityProfileGeneral(
 	await page.goto(`/quality-profiles/${databaseId}`);
 	await page.waitForLoadState('networkidle');
 
-	const firstRow = page.locator('table tbody tr').first();
-	await expect(firstRow).toBeVisible();
-	await firstRow.click();
+	await clickQualityProfileListItem(page, databaseId);
 	await page.waitForURL(/\/quality-profiles\/\d+\/\d+\/general/, { timeout: 15_000 });
 	await page.waitForLoadState('networkidle');
 

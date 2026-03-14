@@ -185,7 +185,10 @@ class PCDManager {
 			await pull(instance.local_path);
 
 			// Sync dependencies (schema, etc.) if versions changed
-			await syncDependencies(instance.local_path, instance.personal_access_token ?? undefined);
+			const dependencySync = await syncDependencies(
+				instance.local_path,
+				instance.personal_access_token ?? undefined
+			);
 
 			try {
 				await importBaseOps(id, instance.local_path);
@@ -200,9 +203,30 @@ class PCDManager {
 			databaseInstancesQueries.updateSyncedAt(id);
 
 			// Recompile cache (only if enabled)
+			if (dependencySync.changed) {
+				await logger.info('Dependencies changed during sync, invalidating cache before rebuild', {
+					source: 'PCDManager',
+					meta: {
+						databaseId: id,
+						databaseName: instance.name,
+						repositories: dependencySync.repositories
+					}
+				});
+				invalidate(id);
+			}
+
 			if (instance.enabled) {
 				try {
 					await compile(instance.local_path, id);
+					await logger.info('Rebuilt cache after dependency sync', {
+						source: 'PCDManager',
+						meta: {
+							databaseId: id,
+							databaseName: instance.name,
+							dependenciesChanged: dependencySync.changed,
+							repositories: dependencySync.repositories
+						}
+					});
 				} catch (error) {
 					await logger.error('Failed to recompile PCD cache after sync', {
 						source: 'PCDManager',

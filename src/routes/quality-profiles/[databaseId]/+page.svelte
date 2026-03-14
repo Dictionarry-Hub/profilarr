@@ -179,9 +179,19 @@
 				<p class="text-neutral-600 dark:text-neutral-400">No quality profiles match your search</p>
 			</div>
 		{:else if $view === 'table'}
-			<TableView profiles={filtered} on:clone={handleClone} on:export={handleExport} />
+			<TableView
+				profiles={filtered}
+				databaseId={data.currentDatabase.id}
+				on:clone={handleClone}
+				on:export={handleExport}
+			/>
 		{:else}
-			<CardView profiles={filtered} on:clone={handleClone} on:export={handleExport} />
+			<CardView
+				profiles={filtered}
+				databaseId={data.currentDatabase.id}
+				on:clone={handleClone}
+				on:export={handleExport}
+			/>
 		{/if}
 	</div>
 </div>

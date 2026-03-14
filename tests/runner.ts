@@ -79,6 +79,7 @@ const E2E_PCD_SPEC_DIR = 'tests/e2e/pcd/specs';
 const E2E_AUTH_CONFIG = 'tests/e2e/auth/playwright.config.ts';
 const E2E_AUTH_COMPOSE = 'tests/integration/auth/docker-compose.yml';
 const E2E_AUTH_BINARY = './dist/build/profilarr';
+const PLAYWRIGHT_CLI = './node_modules/playwright/cli.js';
 
 // Integration specs that require Docker infrastructure
 const INTEGRATION_NEEDS_DOCKER = new Set([
@@ -472,8 +473,13 @@ async function runE2EPCD(selectors: string[], playwrightFlags: string[]): Promis
 		}
 	}
 
-	const cmd = new Deno.Command('npx', {
-		args: ['playwright', 'test', '--config', E2E_PCD_CONFIG, ...playwrightFlags, ...testTargets],
+	const nodeBinary = await resolvePlaywrightNodeBinary();
+	if (!nodeBinary) {
+		return 1;
+	}
+
+	const cmd = new Deno.Command(nodeBinary, {
+		args: [PLAYWRIGHT_CLI, 'test', '--config', E2E_PCD_CONFIG, ...playwrightFlags, ...testTargets],
 		stdout: 'inherit',
 		stderr: 'inherit'
 	});
@@ -561,8 +567,13 @@ async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
 
 		// 4. Run Playwright
 		console.log('\nRunning Playwright tests...\n');
-		const cmd = new Deno.Command('npx', {
-			args: ['playwright', 'test', '--config', E2E_AUTH_CONFIG, ...playwrightFlags],
+		const nodeBinary = await resolvePlaywrightNodeBinary();
+		if (!nodeBinary) {
+			return 1;
+		}
+
+		const cmd = new Deno.Command(nodeBinary, {
+			args: [PLAYWRIGHT_CLI, 'test', '--config', E2E_AUTH_CONFIG, ...playwrightFlags],
 			env: {
 				...Deno.env.toObject(),
 				OIDC_DIRECT_URL: `http://localhost:${DIRECT_PORT}`,
@@ -625,6 +636,78 @@ async function exec(cmd: string, args: string[]): Promise<void> {
 	const { code } = await command.output();
 	if (code !== 0) {
 		throw new Error(`Command failed: ${cmd} ${args.join(' ')}`);
+	}
+}
+
+async function resolvePlaywrightNodeBinary(): Promise<string | null> {
+	const envOverride = Deno.env.get('PLAYWRIGHT_NODE_BINARY');
+	const candidates = [
+		...(envOverride ? [envOverride] : []),
+		'node',
+		...(await listNvmNodeCandidates())
+	];
+
+	const seen = new Set<string>();
+	for (const candidate of candidates) {
+		if (seen.has(candidate)) continue;
+		seen.add(candidate);
+
+		const major = await getNodeMajorVersion(candidate);
+		if (major !== null && major >= 18 && major <= 24) {
+			return candidate;
+		}
+	}
+
+	const currentVersion = await getNodeMajorVersion('node');
+	const currentLabel = currentVersion === null ? 'unknown' : `v${currentVersion}`;
+	console.error(
+		`Playwright E2E requires a supported Node runtime (18-24). Current runner node is ${currentLabel}.`
+	);
+	console.error(
+		'Install Node 20/22/24 and either make it the active `node` or set `PLAYWRIGHT_NODE_BINARY`.'
+	);
+	return null;
+}
+
+async function listNvmNodeCandidates(): Promise<string[]> {
+	const home = Deno.env.get('HOME');
+	if (!home) return [];
+
+	const versionsDir = `${home}/.nvm/versions/node`;
+	const candidates: string[] = [];
+
+	try {
+		const entries: string[] = [];
+		for await (const entry of Deno.readDir(versionsDir)) {
+			if (entry.isDirectory) {
+				entries.push(entry.name);
+			}
+		}
+
+		entries.sort().reverse();
+		for (const entry of entries) {
+			candidates.push(`${versionsDir}/${entry}/bin/node`);
+		}
+	} catch {
+		// nvm not installed or unreadable
+	}
+
+	return candidates;
+}
+
+async function getNodeMajorVersion(nodeBinary: string): Promise<number | null> {
+	try {
+		const result = await new Deno.Command(nodeBinary, {
+			args: ['-p', 'process.versions.node.split(".")[0]'],
+			stdout: 'piped',
+			stderr: 'null'
+		}).output();
+		if (result.code !== 0) return null;
+		const raw = new TextDecoder().decode(result.stdout).trim();
+		const major = parseInt(raw, 10);
+		return Number.isNaN(major) ? null : major;
+	} catch {
+		return null;
 	}
 }
 

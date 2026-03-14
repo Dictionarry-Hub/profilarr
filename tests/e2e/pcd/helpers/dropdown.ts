@@ -10,12 +10,12 @@ import type { Page, Locator } from '@playwright/test';
  * @param optionLabel - The visible label of the option to select
  */
 export async function selectDropdownOption(scope: Locator, optionLabel: string): Promise<void> {
-	// Click the trigger button within this scope
-	await scope.getByRole('button').first().click();
+	await scope.scrollIntoViewIfNeeded();
 
-	// Click the option — use last() because the trigger button may also match the text
-	// but the dropdown option always appears after it in DOM order
-	await scope.getByRole('button', { name: optionLabel, exact: true }).last().click();
+	// DropdownSelect wraps the actual button inside Tooltip, so the trigger is a descendant.
+	const trigger = scope.locator('div.relative').getByRole('button').first();
+	await trigger.waitFor({ state: 'visible', timeout: 10_000 });
+	await trigger.click({ force: true });
 }
 
 /**
@@ -27,8 +27,17 @@ export async function selectDropdownByLabel(
 	sectionLabel: string,
 	optionLabel: string
 ): Promise<void> {
-	const section = page.locator('.space-y-2', { hasText: sectionLabel }).first();
+	const exactLabel = new RegExp(`^\\s*${sectionLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`);
+	const label = page.locator('span.block.text-sm.font-medium', { hasText: exactLabel }).first();
+	const section = label.locator(
+		'xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " space-y-2 ")][1]'
+	);
 	await selectDropdownOption(section, optionLabel);
+
+	// Dropdown options may render outside the local field block. Pick the visible one globally.
+	const option = page.getByRole('button', { name: optionLabel, exact: true }).last();
+	await option.waitFor({ state: 'visible', timeout: 10_000 });
+	await option.click({ force: true });
 }
 
 /**

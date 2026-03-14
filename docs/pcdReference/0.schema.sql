@@ -163,6 +163,7 @@ CREATE TABLE quality_group_members (
     quality_profile_name VARCHAR(100) NOT NULL,
     quality_group_name VARCHAR(100) NOT NULL,
     quality_name VARCHAR(100) NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (quality_profile_name, quality_group_name, quality_name),
     FOREIGN KEY (quality_profile_name, quality_group_name) REFERENCES quality_groups(quality_profile_name, name) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (quality_name) REFERENCES qualities(name) ON DELETE CASCADE ON UPDATE CASCADE

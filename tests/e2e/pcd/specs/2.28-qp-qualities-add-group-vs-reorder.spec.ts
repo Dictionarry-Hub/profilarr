@@ -75,8 +75,10 @@ async function restoreDesktop(page: import('@playwright/test').Page): Promise<vo
  * qualities in the list. Returns the member names.
  */
 async function createGroupFromFirstTwo(page: import('@playwright/test').Page): Promise<string[]> {
-	// Open "Create Group" modal via the page header button
-	await page.getByRole('button', { name: 'Create Group' }).click();
+	const createGroupButton = page.getByRole('button', { name: 'Create Group' });
+	await expect(createGroupButton).toBeVisible();
+	await expect(createGroupButton).toBeEnabled();
+	await createGroupButton.click();
 
 	// Wait for the modal dialog to appear
 	const modal = page.getByRole('dialog');
@@ -85,18 +87,13 @@ async function createGroupFromFirstTwo(page: import('@playwright/test').Page): P
 	// Fill group name
 	await modal.getByRole('textbox', { name: 'Group Name' }).fill(GROUP_NAME);
 
-	// Read the first two available quality names from the modal's quality list.
-	// Each quality button contains a checkbox — use that to distinguish from
-	// the Cancel/Create Group footer buttons.
-	const qualityButtons = modal.locator('button').filter({
-		has: page.locator('[role="checkbox"]')
-	});
-	const first = (await qualityButtons.nth(0).innerText()).trim();
-	const second = (await qualityButtons.nth(1).innerText()).trim();
+	const qualityRows = modal.locator('[data-group-modal-index][role="button"]');
+	const first = (await qualityRows.nth(0).innerText()).trim();
+	const second = (await qualityRows.nth(1).innerText()).trim();
 
 	// Select them
-	await qualityButtons.nth(0).click();
-	await qualityButtons.nth(1).click();
+	await qualityRows.nth(0).click();
+	await qualityRows.nth(1).click();
 
 	// Confirm — the "Create Group" button inside the modal footer
 	await modal.getByRole('button', { name: 'Create Group' }).click();
@@ -212,15 +209,15 @@ test.describe('2.28 QP qualities add group vs upstream reorder conflict', () => 
 		// List length should match local (group merged two items)
 		expect(finalOrder.length).toBe(localOrder.length);
 
-		// Verify group has members by switching to mobile and checking member text
+		// Verify group has members by switching to mobile and checking member chips
 		await page.setViewportSize(MOBILE_VIEWPORT);
 		await page.waitForTimeout(300);
 		const rows = page.locator('div.space-y-4 > div[role="button"]');
 		const groupRow = rows.filter({ hasText: GROUP_NAME }).first();
-		const memberText = groupRow.locator('div.text-sm.text-neutral-900').first();
-		const members = await memberText.innerText();
-		expect(members).toContain(member1);
-		expect(members).toContain(member2);
+		const members = await groupRow.locator('span').allInnerTexts();
+		const memberText = members.join(' ');
+		expect(memberText).toContain(member1);
+		expect(memberText).toContain(member2);
 		await restoreDesktop(page);
 	});
 
