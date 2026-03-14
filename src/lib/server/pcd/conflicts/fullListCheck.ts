@@ -13,6 +13,7 @@
 import type { Database } from '@jsr/db__sqlite';
 import type { ParsedOpMetadata } from './autoAlign/types.ts';
 import { orderedItemsEqual } from './overrideUtils.ts';
+import { hasQualityGroupMembersPositionInDb } from '$pcd/entities/qualityProfiles/qualities/groupMembersSchema.ts';
 
 /**
  * Check if a user op with a full-list desiredState actually achieved its
@@ -71,7 +72,7 @@ ORDER BY position`
 			`SELECT quality_group_name, quality_name
 FROM quality_group_members
 WHERE quality_profile_name = ?
-ORDER BY quality_group_name, quality_name`
+ORDER BY quality_group_name, ${hasQualityGroupMembersPositionInDb(db) ? 'position, ' : ''}quality_name`
 		)
 		.all(profileName) as Array<{
 		quality_group_name: string;

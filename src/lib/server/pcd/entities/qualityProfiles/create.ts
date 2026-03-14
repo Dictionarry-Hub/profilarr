@@ -247,9 +247,10 @@ export async function create(options: CreateQualityProfileOptions) {
 		};
 		queries.push(insertGroup);
 
-		for (const memberName of group.members) {
+		for (let i = 0; i < group.members.length; i++) {
+			const memberName = group.members[i];
 			const insertMember = {
-				sql: `INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('${esc(input.name)}', '${esc(groupName)}', '${esc(memberName)}')`,
+				sql: `INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name, position) VALUES ('${esc(input.name)}', '${esc(groupName)}', '${esc(memberName)}', ${i})`,
 				parameters: [],
 				query: {} as never
 			};

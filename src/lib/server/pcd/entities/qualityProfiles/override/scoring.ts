@@ -1,7 +1,6 @@
-import { getCache } from '$pcd/index.ts';
+import { getCache, writeOperation } from '$pcd/index.ts';
 import type { WriteResult } from '$pcd/index.ts';
 import { scoring as readScoring } from '../scoring/read.ts';
-import { updateScoring } from '../scoring/update.ts';
 import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
 import { getDesiredTo, valuesEqual, followRenameChain } from '$pcd/conflicts/overrideUtils.ts';
 import { resolveProfileName } from './resolve.ts';
@@ -56,71 +55,164 @@ export async function overrideScoring(
 	}
 
 	const currentScoring = await readScoring(cache, databaseId, profileName);
+	const queries: Array<{ sql: string; parameters: unknown[]; query: never }> = [];
+	const nextDesiredState: StoredDesiredState = {};
+	const changedFields: string[] = [];
 
-	// Resolve desired profile-level settings
-	const desiredMinimum =
-		getDesiredTo<number>(desiredState.minimum_custom_format_score) ??
-		currentScoring.minimum_custom_format_score;
-	const desiredUpgradeUntil =
-		getDesiredTo<number>(desiredState.upgrade_until_score) ?? currentScoring.upgrade_until_score;
-	const desiredIncrement =
-		getDesiredTo<number>(desiredState.upgrade_score_increment) ??
-		currentScoring.upgrade_score_increment;
-
-	// Build the full CF scores list: start with current, apply desired changes
-	const currentScoreMap = new Map<string, number | null>();
-	for (const cf of currentScoring.customFormats) {
-		for (const [arrType, score] of Object.entries(cf.scores)) {
-			currentScoreMap.set(`${cf.name}::${arrType}`, score);
-		}
+	const desiredMinimum = getDesiredTo<number>(desiredState.minimum_custom_format_score);
+	if (
+		desiredMinimum !== undefined &&
+		!valuesEqual(desiredMinimum, currentScoring.minimum_custom_format_score)
+	) {
+		queries.push({
+			sql: `UPDATE quality_profiles
+SET minimum_custom_format_score = ${desiredMinimum}
+WHERE name = '${esc(profileName)}'
+  AND minimum_custom_format_score = ${currentScoring.minimum_custom_format_score}`,
+			parameters: [],
+			query: {} as never
+		});
+		nextDesiredState.minimum_custom_format_score = {
+			from: currentScoring.minimum_custom_format_score,
+			to: desiredMinimum
+		};
+		changedFields.push('minimum_custom_format_score');
 	}
 
-	// Apply desired score changes on top, resolving CF renames
+	const desiredUpgradeUntil = getDesiredTo<number>(desiredState.upgrade_until_score);
+	if (
+		desiredUpgradeUntil !== undefined &&
+		!valuesEqual(desiredUpgradeUntil, currentScoring.upgrade_until_score)
+	) {
+		queries.push({
+			sql: `UPDATE quality_profiles
+SET upgrade_until_score = ${desiredUpgradeUntil}
+WHERE name = '${esc(profileName)}'
+  AND upgrade_until_score = ${currentScoring.upgrade_until_score}`,
+			parameters: [],
+			query: {} as never
+		});
+		nextDesiredState.upgrade_until_score = {
+			from: currentScoring.upgrade_until_score,
+			to: desiredUpgradeUntil
+		};
+		changedFields.push('upgrade_until_score');
+	}
+
+	const desiredIncrement = getDesiredTo<number>(desiredState.upgrade_score_increment);
+	if (
+		desiredIncrement !== undefined &&
+		!valuesEqual(desiredIncrement, currentScoring.upgrade_score_increment)
+	) {
+		queries.push({
+			sql: `UPDATE quality_profiles
+SET upgrade_score_increment = ${desiredIncrement}
+WHERE name = '${esc(profileName)}'
+  AND upgrade_score_increment = ${currentScoring.upgrade_score_increment}`,
+			parameters: [],
+			query: {} as never
+		});
+		nextDesiredState.upgrade_score_increment = {
+			from: currentScoring.upgrade_score_increment,
+			to: desiredIncrement
+		};
+		changedFields.push('upgrade_score_increment');
+	}
+
 	const scoreChanges = resolveScoreChanges(desiredState);
+	const desiredScoreStates: Array<{
+		custom_format_name: string;
+		arr_type: string;
+		from: number | null;
+		to: number | null;
+	}> = [];
+
 	for (const change of scoreChanges) {
 		const resolvedName = followRenameChain(databaseId, 'custom_format', change.customFormatName);
-		currentScoreMap.set(`${resolvedName}::${change.arrType}`, change.score);
+		const currentRow = await cache.kb
+			.selectFrom('quality_profile_custom_formats')
+			.select(['score'])
+			.where('quality_profile_name', '=', profileName)
+			.where('custom_format_name', '=', resolvedName)
+			.where('arr_type', '=', change.arrType)
+			.executeTakeFirst();
+		const currentScore = currentRow?.score ?? null;
+
+		if (valuesEqual(change.score, currentScore)) {
+			continue;
+		}
+
+		if (currentRow && change.score === null) {
+			queries.push({
+				sql: `DELETE FROM quality_profile_custom_formats
+WHERE quality_profile_name = '${esc(profileName)}'
+  AND custom_format_name = '${esc(resolvedName)}'
+  AND arr_type = '${esc(change.arrType)}'
+  AND score = ${currentRow.score}`,
+				parameters: [],
+				query: {} as never
+			});
+		} else if (currentRow) {
+			queries.push({
+				sql: `UPDATE quality_profile_custom_formats
+SET score = ${change.score}
+WHERE quality_profile_name = '${esc(profileName)}'
+  AND custom_format_name = '${esc(resolvedName)}'
+  AND arr_type = '${esc(change.arrType)}'
+  AND score = ${currentRow.score}`,
+				parameters: [],
+				query: {} as never
+			});
+		} else if (change.score !== null) {
+			queries.push({
+				sql: `INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
+SELECT '${esc(profileName)}', '${esc(resolvedName)}', '${esc(change.arrType)}', ${change.score}
+WHERE NOT EXISTS (
+  SELECT 1 FROM quality_profile_custom_formats
+  WHERE quality_profile_name = '${esc(profileName)}'
+    AND custom_format_name = '${esc(resolvedName)}'
+    AND arr_type = '${esc(change.arrType)}'
+)`,
+				parameters: [],
+				query: {} as never
+			});
+		}
+
+		desiredScoreStates.push({
+			custom_format_name: resolvedName,
+			arr_type: change.arrType,
+			from: currentScore,
+			to: change.score
+		});
+		changedFields.push(`custom_format_score:${resolvedName}:${change.arrType}`);
 	}
 
-	// Check if anything actually changed
-	const profileMatches =
-		valuesEqual(desiredMinimum, currentScoring.minimum_custom_format_score) &&
-		valuesEqual(desiredUpgradeUntil, currentScoring.upgrade_until_score) &&
-		valuesEqual(desiredIncrement, currentScoring.upgrade_score_increment);
+	if (desiredScoreStates.length > 0) {
+		nextDesiredState.custom_format_scores = desiredScoreStates;
+	}
 
-	const scoresMatch = scoreChanges.every((change) => {
-		const resolvedName = followRenameChain(databaseId, 'custom_format', change.customFormatName);
-		const cf = currentScoring.customFormats.find((c) => c.name === resolvedName);
-		if (!cf) return change.score === null;
-		const currentScore = cf.scores[change.arrType] ?? null;
-		return valuesEqual(change.score, currentScore);
-	});
-
-	if (profileMatches && scoresMatch) {
+	if (queries.length === 0) {
 		return { success: true };
 	}
 
-	// Build the full scores array for updateScoring
-	const customFormatScores: Array<{
-		customFormatName: string;
-		arrType: string;
-		score: number | null;
-	}> = [];
-	for (const [key, score] of currentScoreMap) {
-		const [customFormatName, arrType] = key.split('::');
-		customFormatScores.push({ customFormatName, arrType, score });
-	}
-
-	return updateScoring({
+	return writeOperation({
 		databaseId,
-		cache,
 		layer: 'user',
-		profileName,
-		input: {
-			minimumScore: desiredMinimum,
-			upgradeUntilScore: desiredUpgradeUntil,
-			upgradeScoreIncrement: desiredIncrement,
-			customFormatScores
+		description: metadata?.summary ?? `override-quality-profile-scoring-${profileName}`,
+		queries,
+		desiredState: nextDesiredState,
+		metadata: {
+			operation: 'update',
+			entity: 'quality_profile',
+			name: profileName,
+			stableKey: { key: 'quality_profile_name', value: profileName },
+			changedFields,
+			summary: metadata?.summary ?? 'Override quality profile scoring conflict',
+			title: metadata?.title ?? `Override scoring for quality profile "${profileName}"`
 		}
 	});
+}
+
+function esc(value: string): string {
+	return value.replace(/'/g, "''");
 }

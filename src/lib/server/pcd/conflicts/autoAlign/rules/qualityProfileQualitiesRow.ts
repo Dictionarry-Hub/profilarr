@@ -2,6 +2,7 @@ import type { Database } from '@jsr/db__sqlite';
 import type { ParsedOpMetadata, UpdateRule } from '../types.ts';
 import { readCurrentOrderedItems } from '../../fullListCheck.ts';
 import { orderedItemsEqual } from '../../overrideUtils.ts';
+import { hasQualityGroupMembersPositionInDb } from '$pcd/entities/qualityProfiles/qualities/groupMembersSchema.ts';
 
 type NormalizedQualityRow = {
 	type: 'quality' | 'group';
@@ -46,7 +47,7 @@ function normalizeMembers(value: unknown): string[] {
 			return '';
 		})
 		.filter((name) => name.length > 0);
-	return Array.from(new Set(members)).sort();
+	return Array.from(new Set(members));
 }
 
 function parseQualityRow(value: unknown): NormalizedQualityRow | null {
@@ -132,13 +133,14 @@ LIMIT 1`
 
 	let members: string[] = [];
 	if (ref.type === 'group') {
+		const hasGroupMemberPosition = hasQualityGroupMembersPositionInDb(db);
 		const memberRows = db
 			.prepare(
 				`SELECT quality_name
 FROM quality_group_members
 WHERE quality_profile_name = ?
   AND quality_group_name = ?
-ORDER BY quality_name`
+ORDER BY ${hasGroupMemberPosition ? 'position, ' : ''}quality_name`
 			)
 			.all(profileName, ref.name) as Array<{ quality_name: string }>;
 		members = memberRows.map((row) => row.quality_name);
