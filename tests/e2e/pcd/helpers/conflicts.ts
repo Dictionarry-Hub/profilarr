@@ -45,17 +45,23 @@ async function submitConflictAction(
 export async function goToConflicts(page: Page, databaseId: number): Promise<void> {
 	await page.goto(`/databases/${databaseId}/conflicts`);
 	await page.waitForLoadState('networkidle');
+	await expect
+		.poll(
+			async () =>
+				(await page.getByText('No conflicts detected').first().isVisible()) ||
+				(await page.locator('table').first().isVisible()),
+			{ timeout: 15_000 }
+		)
+		.toBe(true);
 }
 
 /**
  * Get the number of conflict rows visible in the table.
  */
 export async function getConflictCount(page: Page): Promise<number> {
-	// If "No conflicts detected" is shown, count is 0
 	const empty = page.getByText('No conflicts detected');
 	if (await empty.isVisible()) return 0;
 
-	// Count data rows (exclude header row)
 	const rows = page.locator('table tbody tr');
 	return await rows.count();
 }

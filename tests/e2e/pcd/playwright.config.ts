@@ -1,7 +1,8 @@
 import { defineConfig } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
-	testDir: './specs',
+	testDir: fileURLToPath(new URL('./specs', import.meta.url)),
 	timeout: 60_000,
 	expect: { timeout: 10_000 },
 	fullyParallel: false,

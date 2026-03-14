@@ -132,15 +132,13 @@ async function createGroup(page: Page, name: string, memberNames: string[]): Pro
 
 	await modal.getByRole('textbox', { name: 'Group Name' }).fill(name);
 
-	const qualityButtons = modal.locator('button').filter({
-		has: page.locator('[role="checkbox"]')
-	});
-	const count = await qualityButtons.count();
+	const qualityRows = modal.locator('[data-group-modal-index][role="button"]');
+	const count = await qualityRows.count();
 	for (let i = 0; i < count; i++) {
-		const btn = qualityButtons.nth(i);
-		const text = (await btn.innerText()).trim();
+		const row = qualityRows.nth(i);
+		const text = (await row.innerText()).trim();
 		if (memberNames.includes(text)) {
-			await btn.click();
+			await row.click();
 		}
 	}
 
@@ -158,28 +156,26 @@ async function editGroupMembers(
 	groupName: string,
 	keepMembers: string[]
 ): Promise<void> {
-	// Click the group name span to open edit modal
+	// Click the group name button to open edit modal
 	const rows = page.locator('div.space-y-4 > div[role="button"]');
 	const groupRow = rows.filter({ hasText: groupName }).first();
-	await groupRow.locator('span.cursor-pointer').first().click();
+	await groupRow.getByRole('button', { name: groupName, exact: true }).click();
 
 	const modal = page.getByRole('dialog');
 	await modal.waitFor({ state: 'visible' });
 
-	const qualityButtons = modal.locator('button').filter({
-		has: page.locator('[role="checkbox"]')
-	});
-	const count = await qualityButtons.count();
+	const qualityRows = modal.locator('[data-group-modal-index][role="button"]');
+	const count = await qualityRows.count();
 	for (let i = 0; i < count; i++) {
-		const btn = qualityButtons.nth(i);
-		const text = (await btn.innerText()).trim();
-		const checkbox = btn.locator('[role="checkbox"]');
+		const row = qualityRows.nth(i);
+		const text = (await row.innerText()).trim();
+		const checkbox = row.locator('[role="checkbox"]');
 		const isChecked = (await checkbox.getAttribute('aria-checked')) === 'true';
 
 		if (keepMembers.includes(text)) {
-			if (!isChecked) await btn.click();
+			if (!isChecked) await row.click();
 		} else {
-			if (isChecked) await btn.click();
+			if (isChecked) await row.click();
 		}
 	}
 
@@ -545,7 +541,7 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 		await page.waitForTimeout(300);
 		const rows = page.locator('div.space-y-4 > div[role="button"]');
 		const groupRow = rows.filter({ hasText: PROFILE_NAME }).first();
-		const memberText = await groupRow.locator('div.text-sm.text-neutral-900').first().innerText();
+		const memberText = (await groupRow.locator('span').allInnerTexts()).join(' ');
 		expect(memberText).toContain('HDTV-1080p');
 		await page.setViewportSize(DESKTOP_VIEWPORT);
 
@@ -618,7 +614,7 @@ test.describe('2.46 QP real world use case — multi-surface conflict', () => {
 		await page.waitForTimeout(300);
 		const rows = page.locator('div.space-y-4 > div[role="button"]');
 		const groupRow = rows.filter({ hasText: PROFILE_NAME }).first();
-		const memberText = await groupRow.locator('div.text-sm.text-neutral-900').first().innerText();
+		const memberText = (await groupRow.locator('span').allInnerTexts()).join(' ');
 		expect(memberText).not.toContain('HDTV-1080p');
 		await page.setViewportSize(DESKTOP_VIEWPORT);
 

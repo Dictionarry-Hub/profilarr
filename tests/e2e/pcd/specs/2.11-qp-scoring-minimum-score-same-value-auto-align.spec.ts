@@ -96,7 +96,14 @@ test.describe('2.11 QP scoring minimum score desired already matches upstream', 
 
 		await page.goto(`/databases/${localId}/changes`);
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByText('No unpublished changes')).toBeVisible({ timeout: 15_000 });
+		await expect
+			.poll(
+				async () =>
+					(await page.getByText('No changes to pull or publish right now.').isVisible()) ||
+					(await page.getByText('No unpublished changes').isVisible()),
+				{ timeout: 15_000 }
+			)
+			.toBe(true);
 
 		await goToQualityProfileScoring(page, localId, profileName);
 		const finalInput = page.locator('input[name="minimumScore"]:not([type="hidden"])');
