@@ -135,7 +135,7 @@ async function downloadAndExtractBackup(client: TestClient): Promise<string> {
 	}
 
 	// Download the backup
-	const res = await client.get(`/api/backups/download/${backupFilename}`);
+	const res = await client.get(`/api/v1/backups/${backupFilename}`);
 	assertEquals(res.status, 200, 'Backup download should return 200');
 
 	// Write to a temp file
