@@ -144,8 +144,8 @@
 			<div class="font-medium text-neutral-900 dark:text-neutral-100">Private & Dev Badges</div>
 			<div class="mt-1">
 				<strong>Private</strong> indicates the repository requires authentication.
-				<strong>Dev</strong> means you have a personal access token configured, allowing you to push
-				changes back to the repository.
+				<strong>Dev</strong> means you have a personal access token configured, allowing you to push changes
+				back to the repository.
 			</div>
 		</div>
 

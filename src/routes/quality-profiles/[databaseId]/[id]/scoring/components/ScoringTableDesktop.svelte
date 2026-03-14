@@ -27,7 +27,7 @@
 	const { visibleCount, sentinel, reset, setTotalCount } = createProgressiveList({ pageSize: 50 });
 
 	$: setTotalCount(formats.length);
-	$: formats, reset();
+	$: (formats, reset());
 	$: displayFormats = formats.slice(0, $visibleCount);
 
 	function handleScoreChange(formatName: string, arrType: string, score: number | null) {

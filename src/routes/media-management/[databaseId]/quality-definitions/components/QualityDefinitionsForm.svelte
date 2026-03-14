@@ -615,12 +615,12 @@
 		</p>
 		<div class="space-y-1">
 			<p>
-				<span class="font-medium text-blue-600 dark:text-blue-400">Min</span> — reject files smaller
-				than this.
+				<span class="font-medium text-blue-600 dark:text-blue-400">Min</span> — reject files smaller than
+				this.
 			</p>
 			<p>
-				<span class="font-medium text-green-600 dark:text-green-400">Preferred</span> — ideal target
-				size. Files closest to this are prioritized.
+				<span class="font-medium text-green-600 dark:text-green-400">Preferred</span> — ideal target size.
+				Files closest to this are prioritized.
 			</p>
 			<p>
 				<span class="font-medium text-orange-600 dark:text-orange-400">Max</span> — reject files larger

@@ -5,16 +5,16 @@
 @import './styles/transitions.css';
 
 /* Exclude non-source directories from Tailwind scanning */
-@source not "../dist";
-@source not "../research";
-@source not "../config";
-@source not "../bruno";
-@source not "../docker";
-@source not "../scripts";
-@source not "../docs";
-@source not "../packages";
-@source not "../test-results";
-@source not "../node_modules";
+@source not '../dist';
+@source not '../research';
+@source not '../config';
+@source not '../bruno';
+@source not '../docker';
+@source not '../scripts';
+@source not '../docs';
+@source not '../packages';
+@source not '../test-results';
+@source not '../node_modules';
 
 html {
 	scrollbar-gutter: stable;

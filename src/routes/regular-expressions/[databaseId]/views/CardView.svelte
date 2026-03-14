@@ -20,7 +20,7 @@
 
 	const { visibleCount, sentinel, reset, setTotalCount } = createProgressiveList({ pageSize: 30 });
 	$: setTotalCount(expressions.length);
-	$: expressions, reset();
+	$: (expressions, reset());
 	$: visibleExpressions = expressions.slice(0, $visibleCount);
 </script>
 
