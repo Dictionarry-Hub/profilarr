@@ -115,9 +115,8 @@ async function pollQueue<T>(
 async function sendUpgradeNotification(log: UpgradeJobLog, manual: boolean): Promise<void> {
 	// Only notify if there were items searched
 	if (log.selection.actualCount > 0) {
-		const { DiscordNotifier } = await import(
-			'$lib/server/notifications/notifiers/discord/index.ts'
-		);
+		const { DiscordNotifier } =
+			await import('$lib/server/notifications/notifiers/discord/index.ts');
 
 		// Get all enabled services that have this notification type enabled
 		const services = notificationServicesQueries.getAllEnabled();

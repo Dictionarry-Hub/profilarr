@@ -17,7 +17,7 @@
 
 	const { visibleCount, sentinel, reset, setTotalCount } = createProgressiveList({ pageSize: 30 });
 	$: setTotalCount(profiles.length);
-	$: profiles, reset();
+	$: (profiles, reset());
 	$: visibleProfiles = profiles.slice(0, $visibleCount);
 
 	function formatProtocol(protocol: string): string {

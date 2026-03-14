@@ -146,13 +146,13 @@
 	}
 
 	$: sortedData = sortKey ? sortData(data) : data;
-	$: sortKey, sortDirection, (sortedData = sortData(data));
+	$: (sortKey, sortDirection, (sortedData = sortData(data)));
 
 	// Progressive loading
 	const progressive = pageSize ? createProgressiveList({ pageSize }) : null;
 	const progressiveCount = progressive?.visibleCount;
 	$: if (progressive) progressive.setTotalCount(sortedData.length);
-	$: if (progressive) sortedData, progressive.reset();
+	$: if (progressive) (sortedData, progressive.reset());
 	$: displayData = progressiveCount ? sortedData.slice(0, $progressiveCount) : sortedData;
 </script>
 

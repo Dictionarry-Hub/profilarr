@@ -50,7 +50,11 @@
 	}
 
 	// Recompute when data or filters change
-	$: showPassed, showFailed, showShouldMatch, showShouldNotMatch, setItems(applyFilters(unitTests));
+	$: (showPassed,
+		showFailed,
+		showShouldMatch,
+		showShouldNotMatch,
+		setItems(applyFilters(unitTests)));
 
 	// Pass filter hover
 	let passHovered = false;

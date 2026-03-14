@@ -28,7 +28,7 @@
 	export let parserAvailable: boolean = true;
 
 	// Close mobile nav when page changes
-	$: $page.url.pathname, mobileNavOpen.close();
+	$: ($page.url.pathname, mobileNavOpen.close());
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape' && $mobileNavOpen) mobileNavOpen.close();
