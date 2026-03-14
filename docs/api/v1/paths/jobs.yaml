@@ -1,0 +1,69 @@
+job:
+  get:
+    operationId: getJob
+    summary: Get Job Status
+    description: |
+      Returns the current status of a job queue entry.
+
+      **Use cases:**
+      - Polling for completion after creating a backup
+      - Checking if a scheduled job has run
+      - Inspecting job errors after failure
+
+      **Behavior:**
+      - Returns the job queue record with its current status
+      - If the job has executed, `result` includes the latest run history
+      - If the job is still queued or running, `result` is null
+    tags:
+      - Jobs
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Job queue ID (returned by endpoints that create jobs)
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Job found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/jobs.yaml#/JobResponse'
+            example:
+              id: 42
+              jobType: backup.create
+              status: success
+              source: manual
+              createdAt: '2026-03-15T10:00:00.000Z'
+              startedAt: '2026-03-15T10:00:01.000Z'
+              finishedAt: '2026-03-15T10:00:05.000Z'
+              result:
+                status: success
+                output: 'Backup created: backup-2026-03-15-100005.tar.gz (12.34 MB)'
+                error: null
+                durationMs: 4000
+      '400':
+        description: Invalid job ID (non-numeric or less than 1)
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Invalid job ID
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+      '404':
+        description: Job not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Job not found

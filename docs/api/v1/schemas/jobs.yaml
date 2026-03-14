@@ -1,0 +1,84 @@
+JobStatus:
+  type: string
+  enum:
+    - queued
+    - running
+    - success
+    - failed
+    - cancelled
+  description: Current state of the job in the queue
+
+JobSource:
+  type: string
+  enum:
+    - manual
+    - schedule
+    - system
+  description: How the job was triggered
+
+JobRunResult:
+  type: object
+  required:
+    - status
+    - output
+    - error
+    - durationMs
+  properties:
+    status:
+      type: string
+      enum:
+        - success
+        - failure
+        - skipped
+        - cancelled
+      description: Outcome of the job execution
+    output:
+      type: string
+      nullable: true
+      description: Human-readable output from the handler
+    error:
+      type: string
+      nullable: true
+      description: Error message if the job failed
+    durationMs:
+      type: integer
+      description: Execution time in milliseconds
+
+JobResponse:
+  type: object
+  required:
+    - id
+    - jobType
+    - status
+    - source
+    - createdAt
+    - startedAt
+    - finishedAt
+    - result
+  properties:
+    id:
+      type: integer
+      description: Job queue ID
+    jobType:
+      type: string
+      description: Job type identifier (e.g. backup.create, arr.sync)
+    status:
+      $ref: '#/JobStatus'
+    source:
+      $ref: '#/JobSource'
+    createdAt:
+      type: string
+      description: When the job was enqueued
+    startedAt:
+      type: string
+      nullable: true
+      description: When execution started (null if still queued)
+    finishedAt:
+      type: string
+      nullable: true
+      description: When execution finished (null if not yet complete)
+    result:
+      oneOf:
+        - $ref: '#/JobRunResult'
+        - type: 'null'
+      description: Latest run result, or null if the job has not executed yet
