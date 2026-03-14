@@ -5,12 +5,14 @@
 		Check,
 		ArrowUp,
 		Info,
+		AlertTriangle,
 		Save,
 		Loader2,
 		Layers,
 		ChevronUp,
 		ChevronDown,
-		Pencil
+		Pencil,
+		Grip
 	} from 'lucide-svelte';
 	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
 	import Label from '$ui/label/Label.svelte';
@@ -124,7 +126,7 @@
 		upgradeUntil: boolean;
 	};
 
-	$: groupModalItems = buildGroupModalItems(mainBucket, groupModalMode, editingGroupIndex);
+	let groupModalItems: GroupModalItem[] = [];
 	$: groupNameValid = groupNameInput.trim().length > 0;
 	$: canSaveGroup = selectedGroupNames.size >= 2 && groupNameValid;
 	$: groupModalTitle = groupModalMode === 'edit' ? 'Edit Group' : 'Create Group';
@@ -133,6 +135,31 @@
 		groupModalMode === 'edit'
 			? 'Select at least two qualities for this group. Groups share the same priority.'
 			: 'Select at least two qualities to combine into a group. Groups share the same priority.';
+	let lastRouteStateKey = '';
+
+	$: {
+		const routeStateKey = `${$page.url.pathname}:${data.canEditGroupMembers ? 1 : 0}`;
+		if (routeStateKey !== lastRouteStateKey) {
+			lastRouteStateKey = routeStateKey;
+			if (draggedQualityFromMain) {
+				resetDragState();
+			}
+			showGroupModal = false;
+			groupModalMode = 'create';
+			editingGroupIndex = null;
+			groupNameInput = '';
+			selectedGroupNames = new Set();
+			groupModalItems = [];
+			hoverTargetIndex = null;
+			willCreateGroup = false;
+			willAddToGroup = false;
+			groupingMode = false;
+		}
+	}
+
+	$: if (!data.canEditGroupMembers && showGroupModal) {
+		closeGroupModal();
+	}
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
@@ -172,10 +199,6 @@
 
 	function handlePointerDown(e: PointerEvent, item: OrderedItem, index: number) {
 		if (isMobile) return;
-		// Ignore clicks on interactive children (buttons, checkboxes, inputs)
-		const target = e.target as HTMLElement;
-		if (target.closest('button, [role="checkbox"], input, a')) return;
-
 		e.preventDefault();
 		document.body.classList.add('dragging');
 		draggedQualityFromMain = { item, index };
@@ -198,7 +221,8 @@
 		}
 
 		const draggedItem = draggedQualityFromMain.item;
-		const isGroupingMode = e.ctrlKey || e.metaKey || groupingMode;
+		const isGroupingMode =
+			data.canEditGroupMembers && (e.ctrlKey || e.metaKey || groupingMode);
 
 		hoverTargetIndex = target.index;
 
@@ -244,7 +268,8 @@
 		if (target && target.index !== draggedQualityFromMain.index) {
 			const draggedItem = draggedQualityFromMain.item;
 			const sourceIndex = draggedQualityFromMain.index;
-			const isGroupingMode = e.ctrlKey || e.metaKey || groupingMode;
+			const isGroupingMode =
+				data.canEditGroupMembers && (e.ctrlKey || e.metaKey || groupingMode);
 
 			if (isGroupingMode && draggedItem.type === 'quality') {
 				if (target.item.type === 'quality') {
@@ -411,19 +436,35 @@
 	}
 
 	function openCreateGroupModal() {
+		if (!data.canEditGroupMembers) {
+			alertStore.add(
+				'warning',
+				'Update the linked schema dependency before creating or editing quality groups.'
+			);
+			return;
+		}
 		groupModalMode = 'create';
 		editingGroupIndex = null;
 		groupNameInput = '';
 		selectedGroupNames = new Set();
+		groupModalItems = buildGroupModalItems(mainBucket, groupModalMode, editingGroupIndex);
 		showGroupModal = true;
 	}
 
 	function openEditGroupModal(item: OrderedItem, index: number) {
+		if (!data.canEditGroupMembers) {
+			alertStore.add(
+				'warning',
+				'Update the linked schema dependency before creating or editing quality groups.'
+			);
+			return;
+		}
 		if (item.type !== 'group') return;
 		groupModalMode = 'edit';
 		editingGroupIndex = index;
 		groupNameInput = item.name;
 		selectedGroupNames = new Set(item.members?.map((member) => member.name) ?? []);
+		groupModalItems = buildGroupModalItems(mainBucket, groupModalMode, editingGroupIndex);
 		showGroupModal = true;
 	}
 
@@ -433,6 +474,7 @@
 		editingGroupIndex = null;
 		groupNameInput = '';
 		selectedGroupNames = new Set();
+		groupModalItems = [];
 	}
 
 	function toggleGroupSelection(name: string) {
@@ -442,6 +484,10 @@
 			selectedGroupNames.add(name);
 		}
 		selectedGroupNames = selectedGroupNames;
+	}
+
+	function handleGroupModalReorder(items: GroupModalItem[]) {
+		groupModalItems = items;
 	}
 
 	function handleGroupModalConfirm() {
@@ -552,6 +598,7 @@
 	<title>Qualities - Profilarr</title>
 </svelte:head>
 
+{#key `${$page.url.pathname}:${data.canEditGroupMembers ? 1 : 0}`}
 <StickyCard position="top">
 	<svelte:fragment slot="left">
 		<h1 class="text-neutral-900 dark:text-neutral-50">Qualities</h1>
@@ -571,6 +618,10 @@
 				text="Create Group"
 				icon={Layers}
 				iconColor="text-accent-600 dark:text-accent-400"
+				disabled={!data.canEditGroupMembers}
+				tooltip={!data.canEditGroupMembers
+					? 'Update the linked schema dependency to edit quality group members.'
+					: ''}
 				on:click={openCreateGroupModal}
 			/>
 			<Button
@@ -583,6 +634,18 @@
 		</div>
 	</svelte:fragment>
 </StickyCard>
+
+{#if !data.canEditGroupMembers}
+	<div class="mt-4 px-4 text-sm text-amber-700 dark:text-amber-300">
+		<div class="flex items-start gap-2">
+			<AlertTriangle size={16} class="mt-0.5 shrink-0" />
+			<p>
+				This database uses an older schema. Quality group members can be viewed, but creating or
+				editing groups is disabled until the schema dependency is updated.
+			</p>
+		</div>
+	</div>
+{/if}
 
 <!-- Hidden form for submission -->
 <form
@@ -629,7 +692,6 @@
 		{#each mainBucket as item, index (item.type === 'quality' ? `quality-${item.name}-${index}` : `group-${item.name}-${index}`)}
 			<div
 				data-quality-index={index}
-				on:pointerdown={(e) => handlePointerDown(e, item, index)}
 				on:click={() => toggleEnabled(index)}
 				on:keydown={(e) => {
 					if (e.key === 'Enter' || e.key === ' ') {
@@ -637,9 +699,7 @@
 						toggleEnabled(index);
 					}
 				}}
-				class="relative rounded-xl border border-neutral-300 bg-white p-3 select-none dark:border-neutral-700/60 dark:bg-neutral-800/50 {isMobile
-					? ''
-					: 'cursor-grab'} {draggedQualityFromMain?.index === index ? 'scale-95 opacity-50' : ''}"
+				class="relative cursor-pointer rounded-xl border border-neutral-300 bg-white p-3 select-none dark:border-neutral-700/60 dark:bg-neutral-800/50 {draggedQualityFromMain?.index === index ? 'scale-[0.98] opacity-50' : ''}"
 				style="transition: opacity 100ms, transform 100ms;"
 				role="button"
 				tabindex="0"
@@ -655,28 +715,34 @@
 					></div>
 				{/if}
 				<div class="relative flex items-center justify-between">
+					<button
+						type="button"
+						class="mr-2 hidden shrink-0 text-neutral-400 dark:text-neutral-500 md:block {draggedQualityFromMain?.index === index
+							? 'cursor-grabbing'
+							: 'cursor-grab'}"
+						on:pointerdown={(e) => handlePointerDown(e, item, index)}
+						on:click|stopPropagation|preventDefault
+					>
+						<Grip size={16} />
+					</button>
 					<div class="flex-1">
-						<div class="font-medium text-neutral-900 dark:text-neutral-100">
-							{#if item.type === 'group'}
-								<span
-									class="cursor-pointer hover:text-accent-600 dark:hover:text-accent-400"
-									on:click|stopPropagation={() => openEditGroupModal(item, index)}
-									on:keydown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
-											e.stopPropagation();
-											openEditGroupModal(item, index);
-										}
-									}}
-									role="button"
-									tabindex="0"
-								>
+							<div class="font-medium text-neutral-900 dark:text-neutral-100">
+								{#if item.type === 'group'}
+									{#if data.canEditGroupMembers}
+										<button
+											type="button"
+											class="cursor-pointer hover:text-accent-600 dark:hover:text-accent-400"
+											on:click|stopPropagation={() => openEditGroupModal(item, index)}
+										>
+											{item.name}
+										</button>
+									{:else}
+										<span>{item.name}</span>
+									{/if}
+								{:else}
 									{item.name}
-								</span>
-							{:else}
-								{item.name}
-							{/if}
-						</div>
+								{/if}
+							</div>
 						{#if item.type === 'group' && item.members}
 							<div class="mt-1 hidden flex-wrap gap-1 md:flex">
 								{#each item.members as member}
@@ -697,12 +763,16 @@
 										collapseGroup(item);
 									}}
 								/>
-								<Button
-									icon={Pencil}
-									size="xs"
-									title="Edit group"
-									on:click={(e) => {
-										e.stopPropagation();
+									<Button
+										icon={Pencil}
+										size="xs"
+										disabled={!data.canEditGroupMembers}
+										tooltip={!data.canEditGroupMembers
+											? 'Update the linked schema dependency to edit quality group members.'
+											: ''}
+										title="Edit group"
+										on:click={(e) => {
+											e.stopPropagation();
 										openEditGroupModal(item, index);
 									}}
 								/>
@@ -746,12 +816,16 @@
 								/>
 							</span>
 							<span class="hidden md:inline-flex">
-								<Button
-									icon={Pencil}
-									size="xs"
-									title="Edit group"
-									on:click={(e) => {
-										e.stopPropagation();
+									<Button
+										icon={Pencil}
+										size="xs"
+										disabled={!data.canEditGroupMembers}
+										tooltip={!data.canEditGroupMembers
+											? 'Update the linked schema dependency to edit quality group members.'
+											: ''}
+										title="Edit group"
+										on:click={(e) => {
+											e.stopPropagation();
 										openEditGroupModal(item, index);
 									}}
 								/>
@@ -776,7 +850,7 @@
 					</div>
 				</div>
 				{#if item.type === 'group' && item.members}
-					<div class="mt-3 flex flex-wrap gap-1 border-t border-neutral-200 pt-3 md:hidden">
+					<div class="mt-3 flex flex-wrap gap-1 md:hidden">
 						{#each item.members as member}
 							<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
 						{/each}
@@ -867,6 +941,7 @@
 	on:confirm={handleGroupModalConfirm}
 	on:cancel={closeGroupModal}
 	on:toggle={(event) => toggleGroupSelection(event.detail.name)}
+	on:reorder={(event) => handleGroupModalReorder(event.detail.items)}
 />
 
 <SyncPromptModal
@@ -876,6 +951,7 @@
 	{databaseId}
 	entityName={data.profileName}
 />
+{/key}
 
 <style>
 	:global(body.dragging),

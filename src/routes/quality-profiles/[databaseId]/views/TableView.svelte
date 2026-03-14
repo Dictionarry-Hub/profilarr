@@ -5,15 +5,13 @@
 	import type { Column } from '$ui/table/types';
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import { Tag, FileText, Layers, BookOpenText, Gauge, Earth, Copy, Download } from 'lucide-svelte';
-	import { page } from '$app/stores';
 	import { sanitizeHtml, escapeHtml } from '$shared/utils/sanitize.ts';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let profiles: QualityProfileTableRow[];
+	export let databaseId: number;
 
 	const dispatch = createEventDispatcher<{ clone: { name: string }; export: { name: string } }>();
-
-	$: databaseId = $page.params.databaseId;
 
 	function getRowHref(row: QualityProfileTableRow): string {
 		return `/quality-profiles/${databaseId}/${row.id}/general`;

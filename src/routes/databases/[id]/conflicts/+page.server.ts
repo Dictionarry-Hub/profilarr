@@ -41,42 +41,15 @@ function formatTitle(metadata: OperationMetadata | null): string {
 	return `${operation} ${entity}${name}`;
 }
 
-function getGroupKey(metadata: OperationMetadata | null): string {
-	const entity = metadata?.entity ?? 'unknown';
-	const stableValue = metadata?.stableKey?.value ?? metadata?.name ?? '';
-	return `${entity}:${stableValue}`;
-}
-
 export const load: PageServerLoad = async ({ parent }) => {
 	const { database } = await parent();
 	const conflicts = pcdOpHistoryQueries.listLatestConflictsByDatabase(database.id);
 
-	// Group conflicts by entity + stableKey, show only the latest per group
-	const groups = new Map<string, { opIds: number[]; latest: (typeof conflicts)[0] }>();
-
-	for (const conflict of conflicts) {
-		const metadata = parseMetadata(conflict.op.metadata ?? null);
-		const key = getGroupKey(metadata);
-		const existing = groups.get(key);
-
-		if (!existing || conflict.op.id > existing.latest.op.id) {
-			groups.set(key, {
-				opIds: existing ? [...existing.opIds, conflict.op.id] : [conflict.op.id],
-				latest: conflict
-			});
-		} else {
-			existing.opIds.push(conflict.op.id);
-		}
-	}
-
-	const rows: ConflictRow[] = [];
-
-	for (const { opIds, latest } of groups.values()) {
-		const { history, op } = latest;
+	const rows: ConflictRow[] = conflicts.map(({ history, op }) => {
 		const metadata = parseMetadata(op.metadata ?? null);
 		const title = metadata?.title ?? metadata?.summary ?? formatTitle(metadata);
 
-		rows.push({
+		return {
 			opId: op.id,
 			status: history.status,
 			conflictReason: history.conflict_reason,
@@ -87,10 +60,10 @@ export const load: PageServerLoad = async ({ parent }) => {
 			title,
 			summary: metadata?.summary ?? null,
 			origin: op.origin,
-			groupOpIds: opIds.sort((a, b) => a - b),
-			collapsedCount: opIds.length - 1
-		});
-	}
+			groupOpIds: [op.id],
+			collapsedCount: 0
+		};
+	});
 
 	return {
 		conflictStrategy: database.conflict_strategy ?? 'override',
