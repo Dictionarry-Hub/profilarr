@@ -5,7 +5,7 @@
 	"license": "AGPL-3.0-only",
 	"type": "module",
 	"dependencies": {
-		"@jsr/db__sqlite": "^0.12.0",
+		"@jsr/db__sqlite": "^0.13.0",
 		"croner": "^10.0.1",
 		"jose": "^6.2.0",
 		"kysely": "0.27.6",
