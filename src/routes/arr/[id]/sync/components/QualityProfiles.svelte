@@ -131,9 +131,7 @@
 			});
 
 			const result = deserialize(await response.text());
-			if (result.type === 'success') {
-				alertStore.add('success', (result.data?.message as string) ?? 'Sync queued');
-			} else if (result.type === 'failure') {
+			if (result.type === 'failure') {
 				alertStore.add('warning', (result.data?.error as string) ?? 'Sync failed');
 			}
 		} catch {

@@ -4,6 +4,7 @@ import { buildJobDisplayName } from './display.ts';
 import { jobQueueRegistry } from './queueRegistry.ts';
 import type { JobHandlerResult, JobQueueRecord, JobStatus } from './queueTypes.ts';
 import { logger } from '$logger/logger.ts';
+import { jobEvents, getSyncRunningLabel, getSyncCompletedLabel } from './jobEvents.ts';
 import './handlers/index.ts';
 
 class JobDispatcher {
@@ -102,6 +103,13 @@ class JobDispatcher {
 			}
 		});
 
+		jobEvents.emit({
+			type: 'job.started',
+			jobId: job.id,
+			jobType: job.jobType,
+			displayLabel: getSyncRunningLabel(job.jobType)
+		});
+
 		let result: JobHandlerResult;
 		try {
 			result = await handler(job);
@@ -125,6 +133,15 @@ class JobDispatcher {
 			result.error,
 			result.output
 		);
+
+		jobEvents.emit({
+			type: 'job.finished',
+			jobId: job.id,
+			jobType: job.jobType,
+			displayLabel: getSyncCompletedLabel(job.jobType),
+			status: result.status,
+			durationMs
+		});
 
 		await logger.debug(`Job finished: ${job.jobType} (${result.status})`, {
 			source: 'JobDispatcher',

@@ -1645,7 +1645,7 @@
         "npm:@types/deno@^2.5.0",
         "npm:@types/node@22",
         "npm:better-sqlite3@^12.6.2",
-        "npm:croner@^9.1.0",
+        "npm:croner@^10.0.1",
         "npm:esbuild@0.24",
         "npm:jose@^6.2.0",
         "npm:kysely@0.27.6",

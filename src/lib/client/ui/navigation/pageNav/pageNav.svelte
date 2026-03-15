@@ -2,6 +2,9 @@
 	import Group from './group.svelte';
 	import GroupItem from './groupItem.svelte';
 	import Version from './version.svelte';
+	import JobStatus from './jobStatus.svelte';
+	import { jobStatus } from '$stores/jobStatus';
+	import { fade } from 'svelte/transition';
 	import {
 		FolderTree,
 		Link,
@@ -197,14 +200,19 @@
 			/>
 		</Group>
 
-		<!-- Version scrolls with content on mobile -->
+		<!-- Version scrolls with content on mobile (job status shown in bottom nav) -->
 		<div class="mt-2 md:hidden">
 			<Version {version} />
 		</div>
 	</div>
 
-	<!-- Version pinned to bottom on desktop only -->
+	<!-- Version + job status pinned to bottom on desktop only -->
 	<div class="hidden shrink-0 p-4 md:block">
+		{#if $jobStatus.state !== 'idle'}
+			<div transition:fade={{ duration: 150 }}>
+				<JobStatus />
+			</div>
+		{/if}
 		<Version {version} />
 	</div>
 </nav>

@@ -6,11 +6,21 @@
 	import BottomNav from '$ui/navigation/bottomNav/BottomNav.svelte';
 	import AlertContainer from '$alerts/AlertContainer.svelte';
 	import { page } from '$app/stores';
+	import { onMount, onDestroy } from 'svelte';
+	import { jobStatus } from '$stores/jobStatus';
 
 	export let data;
 
 	// Hide navigation on auth pages (login, setup, etc.)
 	$: isAuthPage = $page.url.pathname.startsWith('/auth/');
+
+	onMount(() => {
+		if (!isAuthPage) jobStatus.connect();
+	});
+
+	onDestroy(() => {
+		jobStatus.disconnect();
+	});
 </script>
 
 <svelte:head>
