@@ -24,7 +24,7 @@ export type JobStatusState =
 			displayLabel: string;
 			status: string;
 			durationMs: number;
-		};
+	  };
 
 const COMPLETED_DISPLAY_MS = 6_000;
 const COMPLETED_HOLDOFF_MS = 5_000;

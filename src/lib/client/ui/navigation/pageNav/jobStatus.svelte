@@ -21,10 +21,7 @@
 			</div>
 		{:else if $jobStatus.state === 'completed'}
 			{#if $jobStatus.status === 'success' || $jobStatus.status === 'skipped'}
-				<CheckCircle2
-					size={16}
-					class="flex-shrink-0 text-emerald-600 dark:text-emerald-400"
-				/>
+				<CheckCircle2 size={16} class="flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
 			{:else}
 				<XCircle size={16} class="flex-shrink-0 text-red-600 dark:text-red-400" />
 			{/if}

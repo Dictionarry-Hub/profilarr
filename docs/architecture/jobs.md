@@ -51,20 +51,20 @@ concurrency and makes the system deterministic.
 
 ## Job Types
 
-| Job Type | Purpose | Payload | Scheduled |
-|----------|---------|---------|-----------|
-| `arr.sync` | Combined sync (legacy) | `{ instanceId }` | Yes |
-| `arr.sync.qualityProfiles` | Sync quality profiles to Arr | `{ instanceId }` | Yes |
-| `arr.sync.delayProfiles` | Sync delay profiles to Arr | `{ instanceId }` | Yes |
-| `arr.sync.mediaManagement` | Sync media management to Arr | `{ instanceId }` | Yes |
-| `arr.upgrade` | Automated quality upgrades | `{ instanceId }` | Yes |
-| `arr.rename` | Bulk file/folder rename | `{ instanceId }` | Yes |
-| `arr.cleanup` | Remove stale configs from Arr | `{ instanceId }` | Yes |
-| `arr.library.refresh` | Refresh cached library data | `{ instanceId }` | Yes |
-| `pcd.sync` | Check/pull PCD database updates | `{ databaseId }` | Yes |
-| `backup.create` | Create backup archive | `{}` | Yes |
-| `backup.cleanup` | Delete old backups past retention | `{}` | Yes |
-| `logs.cleanup` | Delete old log files past retention | `{}` | Yes |
+| Job Type                   | Purpose                             | Payload          | Scheduled |
+| -------------------------- | ----------------------------------- | ---------------- | --------- |
+| `arr.sync`                 | Combined sync (legacy)              | `{ instanceId }` | Yes       |
+| `arr.sync.qualityProfiles` | Sync quality profiles to Arr        | `{ instanceId }` | Yes       |
+| `arr.sync.delayProfiles`   | Sync delay profiles to Arr          | `{ instanceId }` | Yes       |
+| `arr.sync.mediaManagement` | Sync media management to Arr        | `{ instanceId }` | Yes       |
+| `arr.upgrade`              | Automated quality upgrades          | `{ instanceId }` | Yes       |
+| `arr.rename`               | Bulk file/folder rename             | `{ instanceId }` | Yes       |
+| `arr.cleanup`              | Remove stale configs from Arr       | `{ instanceId }` | Yes       |
+| `arr.library.refresh`      | Refresh cached library data         | `{ instanceId }` | Yes       |
+| `pcd.sync`                 | Check/pull PCD database updates     | `{ databaseId }` | Yes       |
+| `backup.create`            | Create backup archive               | `{}`             | Yes       |
+| `backup.cleanup`           | Delete old backups past retention   | `{}`             | Yes       |
+| `logs.cleanup`             | Delete old log files past retention | `{}`             | Yes       |
 
 ## Lifecycle
 
@@ -118,12 +118,12 @@ The execution loop (`runDueJobs`) runs until no more due jobs remain:
 
 Handlers return one of four statuses:
 
-| Status | Meaning | Queue Status |
-|--------|---------|-------------|
-| `success` | Job completed normally | `success` |
-| `skipped` | Job had nothing to do (e.g. no old backups) | `success` |
-| `failure` | Job encountered an error | `failed` |
-| `cancelled` | Job was skipped due to config (e.g. backups disabled) | `cancelled` |
+| Status      | Meaning                                               | Queue Status |
+| ----------- | ----------------------------------------------------- | ------------ |
+| `success`   | Job completed normally                                | `success`    |
+| `skipped`   | Job had nothing to do (e.g. no old backups)           | `success`    |
+| `failure`   | Job encountered an error                              | `failed`     |
+| `cancelled` | Job was skipped due to config (e.g. backups disabled) | `cancelled`  |
 
 If the handler returns a `rescheduleAt` timestamp and the job source is
 `schedule`, the job is reset to `queued` with the new `run_at` instead of being
@@ -158,11 +158,11 @@ Used by backup and log cleanup jobs. The schedule is a keyword (`daily`,
 `hourly`, `weekly`, `monthly`) or a cron expression. Named schedules map to
 fixed times:
 
-| Schedule | Next Run |
-|----------|----------|
-| `daily` | Midnight tomorrow |
-| `hourly` | Next hour at :00 |
-| `weekly` | 7 days from now at midnight |
+| Schedule  | Next Run                      |
+| --------- | ----------------------------- |
+| `daily`   | Midnight tomorrow             |
+| `hourly`  | Next hour at :00              |
+| `weekly`  | 7 days from now at midnight   |
 | `monthly` | 1st of next month at midnight |
 
 ### Manual Triggers
@@ -230,19 +230,19 @@ that fail still reschedule their next occurrence.
 
 The source of truth for all jobs, both active and completed.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | INTEGER PK | Auto-increment ID |
-| `job_type` | TEXT | Job type identifier |
-| `status` | TEXT | `queued`, `running`, `success`, `failed`, `cancelled` |
-| `run_at` | TEXT | ISO timestamp when the job should execute |
-| `payload` | TEXT | JSON object with job-specific data |
-| `source` | TEXT | `schedule`, `manual`, or `system` |
-| `dedupe_key` | TEXT | Unique key for scheduled jobs (nullable) |
-| `cooldown_until` | TEXT | Reserved for future cooldown mechanism |
-| `attempts` | INTEGER | Incremented each time the job is claimed |
-| `started_at` | TEXT | Set when claimed by dispatcher |
-| `finished_at` | TEXT | Set when execution completes |
+| Column           | Type       | Description                                           |
+| ---------------- | ---------- | ----------------------------------------------------- |
+| `id`             | INTEGER PK | Auto-increment ID                                     |
+| `job_type`       | TEXT       | Job type identifier                                   |
+| `status`         | TEXT       | `queued`, `running`, `success`, `failed`, `cancelled` |
+| `run_at`         | TEXT       | ISO timestamp when the job should execute             |
+| `payload`        | TEXT       | JSON object with job-specific data                    |
+| `source`         | TEXT       | `schedule`, `manual`, or `system`                     |
+| `dedupe_key`     | TEXT       | Unique key for scheduled jobs (nullable)              |
+| `cooldown_until` | TEXT       | Reserved for future cooldown mechanism                |
+| `attempts`       | INTEGER    | Incremented each time the job is claimed              |
+| `started_at`     | TEXT       | Set when claimed by dispatcher                        |
+| `finished_at`    | TEXT       | Set when execution completes                          |
 
 Key indexes:
 
@@ -254,17 +254,17 @@ Key indexes:
 
 Immutable log of every job execution.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | INTEGER PK | Auto-increment ID |
-| `queue_id` | INTEGER | FK to job_queue (SET NULL on delete) |
-| `job_type` | TEXT | Job type (denormalized for orphan safety) |
-| `status` | TEXT | `success`, `failure`, `skipped`, `cancelled` |
-| `started_at` | TEXT | When execution began |
-| `finished_at` | TEXT | When execution ended |
-| `duration_ms` | INTEGER | Wall-clock execution time |
-| `error` | TEXT | Error message if failed |
-| `output` | TEXT | Handler's human-readable summary |
+| Column        | Type       | Description                                  |
+| ------------- | ---------- | -------------------------------------------- |
+| `id`          | INTEGER PK | Auto-increment ID                            |
+| `queue_id`    | INTEGER    | FK to job_queue (SET NULL on delete)         |
+| `job_type`    | TEXT       | Job type (denormalized for orphan safety)    |
+| `status`      | TEXT       | `success`, `failure`, `skipped`, `cancelled` |
+| `started_at`  | TEXT       | When execution began                         |
+| `finished_at` | TEXT       | When execution ended                         |
+| `duration_ms` | INTEGER    | Wall-clock execution time                    |
+| `error`       | TEXT       | Error message if failed                      |
+| `output`      | TEXT       | Handler's human-readable summary             |
 
 ## Real-Time Updates (SSE)
 
@@ -334,6 +334,7 @@ combined `arr.sync` type (legacy, runs all sections) and individual section
 types (`arr.sync.qualityProfiles`, etc.).
 
 Per section:
+
 1. Check if the section has config for this instance.
 2. Claim the sync lock (`pending` to `in_progress`).
 3. Create a syncer and execute.
@@ -416,4 +417,3 @@ dispatcher.
 **Job History** - a table of recent `job_run_history` entries showing job name,
 status, start time, duration, and output/error. Skipped runs are hidden by
 default.
-
