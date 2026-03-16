@@ -190,7 +190,7 @@ jobs:
       - run: deno install --node-modules-dir
 
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: profilarr-build
           path: dist/build
@@ -240,7 +240,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: profilarr-build
           path: dist/build
