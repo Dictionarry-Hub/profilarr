@@ -7,7 +7,7 @@
 	"dependencies": {
 		"@jsr/db__sqlite": "^0.12.0",
 		"croner": "^10.0.1",
-		"jose": "^6.2.0",
+		"jose": "^6.2.1",
 		"kysely": "0.27.6",
 		"lucide-svelte": "^0.546.0",
 		"marked": "^15.0.6",
@@ -16,7 +16,7 @@
 	},
 	"devDependencies": {
 		"@deno/vite-plugin": "^1.0.5",
-		"@playwright/test": "^1.58.1",
+		"@playwright/test": "^1.58.2",
 		"playwright": "^1.58.2",
 		"@sveltejs/kit": "^2.43.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.0",
