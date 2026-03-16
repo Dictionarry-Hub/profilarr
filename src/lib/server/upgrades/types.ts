@@ -102,6 +102,7 @@ export interface UpgradeSelectionItem {
 	title: string;
 	original: UpgradeOriginal;
 	upgrades: UpgradeNewRelease[];
+	imageUrl?: string;
 }
 
 /**

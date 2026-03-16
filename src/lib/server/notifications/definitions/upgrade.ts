@@ -40,14 +40,6 @@ function formatSelector(method: string): string {
 }
 
 /**
- * Format a score delta with sign
- */
-function formatScoreDelta(delta: number | null): string {
-	if (delta === null) return '';
-	return delta >= 0 ? `+${delta}` : `${delta}`;
-}
-
-/**
  * Flatten series items into per-season items.
  * Movies pass through unchanged. Series get one item per season.
  */
@@ -92,7 +84,8 @@ function flattenItems(items: UpgradeSelectionItem[]): UpgradeSelectionItem[] {
 					title: item.title,
 					episodes: seasonEpisodes.get(season) ?? []
 				},
-				upgrades: seasonUpgrades.get(season) ?? []
+				upgrades: seasonUpgrades.get(season) ?? [],
+				imageUrl: item.imageUrl
 			});
 		}
 	}
@@ -100,61 +93,56 @@ function flattenItems(items: UpgradeSelectionItem[]): UpgradeSelectionItem[] {
 }
 
 /**
- * Format a single item for detailed display
+ * Format item content as structured text blocks for Release, Score, and Formats.
+ * Each block is separated by a blank line and labeled.
  */
-function formatItemDetailed(item: UpgradeSelectionItem): string {
-	const lines: string[] = [];
+function formatItemContent(item: UpgradeSelectionItem): string {
+	if (item.upgrades.length === 0) return 'No upgrade available';
 
-	lines.push('[Current]');
+	const sections: string[] = [];
+
+	// Release
+	for (const upgrade of item.upgrades) {
+		sections.push(`Release\n${upgrade.release}`);
+	}
+
+	// Score
 	if (item.original.type === 'movie') {
-		lines.push(`File: ${item.original.fileName}`);
-		lines.push(`Score: ${item.original.score}`);
-		if (item.original.formats.length > 0) {
-			lines.push(`Formats: ${item.original.formats.join(', ')}`);
-		}
+		const currentScore = item.original.score;
+		const upgradeScore = item.upgrades[0]?.score ?? 0;
+		sections.push(`Score\nCurrent: ${currentScore}\nUpgrade: ${upgradeScore}`);
 	} else {
-		lines.push(`Series: ${item.original.title}`);
-		lines.push(`Episodes: ${item.original.episodes.length}`);
-		for (const ep of item.original.episodes.slice(0, 5)) {
-			lines.push(`  ${ep.fileName} (${ep.score})`);
-		}
-		if (item.original.episodes.length > 5) {
-			lines.push(`  ... and ${item.original.episodes.length - 5} more`);
-		}
-	}
-
-	lines.push('');
-
-	if (item.upgrades.length > 0) {
 		for (const upgrade of item.upgrades) {
-			lines.push('[Upgrade]');
-			lines.push(`Release: ${upgrade.release}`);
-			lines.push(`Score: ${upgrade.score}`);
-			if (upgrade.formats.length > 0) {
-				lines.push(`Formats: ${upgrade.formats.join(', ')}`);
-			}
-			lines.push('');
+			sections.push(`Score\nUpgrade: ${upgrade.score}`);
 		}
+	}
+
+	// Formats
+	if (item.original.type === 'movie') {
+		const currentFmts = item.original.formats;
+		const upgradeFmts = item.upgrades[0]?.formats ?? [];
+		const lines = ['Formats'];
+		if (currentFmts.length > 0) {
+			lines.push('Current:');
+			for (const f of currentFmts) lines.push(`  ${f}`);
+		}
+		if (upgradeFmts.length > 0) {
+			if (currentFmts.length > 0) lines.push('');
+			lines.push('Upgrade:');
+			for (const f of upgradeFmts) lines.push(`  ${f}`);
+		}
+		sections.push(lines.join('\n'));
 	} else {
-		lines.push('No upgrade available');
-	}
-
-	return lines.join('\n');
-}
-
-/**
- * Get field name for an item
- */
-function getItemFieldName(item: UpgradeSelectionItem): string {
-	if (item.upgrades.length > 0) {
-		const grabCount = item.upgrades.length;
-		if (item.original.type === 'movie') {
-			const delta = item.upgrades[0].score - item.original.score;
-			return `${item.title} (${formatScoreDelta(delta)})`;
+		for (const upgrade of item.upgrades) {
+			if (upgrade.formats.length > 0) {
+				const lines = ['Formats'];
+				for (const f of upgrade.formats) lines.push(`  ${f}`);
+				sections.push(lines.join('\n'));
+			}
 		}
-		return `${item.title} (${grabCount} grab${grabCount > 1 ? 's' : ''})`;
 	}
-	return `${item.title} (No Upgrade)`;
+
+	return sections.join('\n\n');
 }
 
 /**
@@ -250,13 +238,15 @@ export function upgrade({ log, manual = false }: UpgradeNotificationParams): Not
 	funnelText += ` -> ${log.selection.actualCount} selected`;
 	blocks.push({ kind: 'field', label: 'Funnel', value: funnelText });
 
-	// Per-item sections
+	// Per-item sections (one per item, with imageUrl for poster)
 	const displayItems = flattenItems(log.selection.items);
 	for (const item of displayItems) {
+		if (item.upgrades.length === 0) continue;
 		blocks.push({
 			kind: 'section',
-			title: getItemFieldName(item),
-			content: formatItemDetailed(item)
+			title: item.title,
+			content: formatItemContent(item),
+			imageUrl: item.imageUrl
 		});
 	}
 

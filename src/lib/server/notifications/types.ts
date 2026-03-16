@@ -50,6 +50,7 @@ export interface SectionBlock {
 	kind: 'section';
 	title: string;
 	content: string;
+	imageUrl?: string;
 }
 
 /**

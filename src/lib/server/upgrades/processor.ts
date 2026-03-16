@@ -44,6 +44,14 @@ const dryRunExclusions = new Map<number, { items: Set<number>; timestamp: number
 const DRY_RUN_EXCLUSION_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 /**
+ * Extract poster URL from arr API image data
+ */
+function getPosterUrl(raw: RadarrMovie | SonarrSeries): string | undefined {
+	const poster = raw.images?.find((img) => img.coverType === 'poster');
+	return poster?.remoteUrl || undefined;
+}
+
+/**
  * Get excluded item IDs for dry run, auto-clearing stale entries
  */
 function getDryRunExclusions(instanceId: number): Set<number> {
@@ -425,7 +433,8 @@ export async function processUpgradeConfig(
 										score: bestRelease.customFormatScore,
 										...(searchedSeason != null ? { seasonNumber: searchedSeason } : {})
 									}
-								]
+								],
+								imageUrl: getPosterUrl(item._raw)
 							});
 							successful++;
 						} else {
@@ -433,7 +442,8 @@ export async function processUpgradeConfig(
 								id: item.id,
 								title: item.title,
 								original,
-								upgrades: []
+								upgrades: [],
+								imageUrl: getPosterUrl(item._raw)
 							});
 						}
 						searchesTriggered++;
@@ -442,7 +452,8 @@ export async function processUpgradeConfig(
 							id: item.id,
 							title: item.title,
 							original,
-							upgrades: []
+							upgrades: [],
+							imageUrl: getPosterUrl(item._raw)
 						});
 						failed++;
 						errors.push(
@@ -480,7 +491,8 @@ export async function processUpgradeConfig(
 											formats: grabbed.customFormats.map((cf) => cf.name),
 											score: grabbed.customFormatScore
 										}
-									]
+									],
+									imageUrl: getPosterUrl(item._raw)
 								});
 								successful++;
 							} else {
@@ -488,7 +500,8 @@ export async function processUpgradeConfig(
 									id: item.id,
 									title: item.title,
 									original,
-									upgrades: []
+									upgrades: [],
+									imageUrl: getPosterUrl(item._raw)
 								});
 							}
 						}
@@ -537,7 +550,8 @@ export async function processUpgradeConfig(
 										formats: g.customFormats.map((cf) => cf.name),
 										score: g.customFormatScore,
 										seasonNumber: g.seasonNumber
-									}))
+									})),
+									imageUrl: getPosterUrl(item._raw)
 								});
 								successful++;
 							} else {
@@ -545,7 +559,8 @@ export async function processUpgradeConfig(
 									id: item.id,
 									title: item.title,
 									original,
-									upgrades: []
+									upgrades: [],
+									imageUrl: getPosterUrl(item._raw)
 								});
 							}
 						}
@@ -569,7 +584,8 @@ export async function processUpgradeConfig(
 							id: item.id,
 							title: item.title,
 							original: getOriginalFile(item),
-							upgrades: []
+							upgrades: [],
+							imageUrl: getPosterUrl(item._raw)
 						});
 					}
 				}

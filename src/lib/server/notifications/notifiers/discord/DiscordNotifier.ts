@@ -71,15 +71,64 @@ export class DiscordNotifier {
 
 		// No blocks: single embed with just title + message
 		if (blocks.length === 0) {
-			return [this.buildChrome(notification, color, 1, 1)];
+			return [this.buildChrome(notification, color)];
 		}
 
 		const embeds: DiscordEmbed[] = [];
-		let currentEmbed = this.buildChrome(notification, color, 0, 0);
+		let currentEmbed = this.buildChrome(notification, color);
 		let currentSize = getEmbedCharCount(currentEmbed);
 		let currentFieldCount = currentEmbed.fields?.length ?? 0;
 
 		for (const block of blocks) {
+			if (block.kind === 'section' && block.imageUrl) {
+				// Image section: finalize current embed, create dedicated embed with thumbnail
+				if (currentFieldCount > 0 || currentEmbed.title) {
+					embeds.push(currentEmbed);
+				}
+
+				const itemEmbed: DiscordEmbed = {
+					title: this.truncate(block.title, 256),
+					color,
+					thumbnail: { url: block.imageUrl },
+					timestamp: new Date().toISOString(),
+					author: {
+						name: this.config.username || 'Profilarr',
+						icon_url: this.config.avatar_url
+					},
+					footer: { text: `Type: ${notification.type}` },
+					fields: []
+				};
+
+				// Split content into separate code block fields by double newline
+				const contentSections = block.content.split('\n\n');
+				for (const section of contentSections) {
+					const lines = section.split('\n');
+					const heading = lines[0] ?? '';
+					const body = lines.slice(1).join('\n');
+					if (body) {
+						itemEmbed.fields!.push({
+							name: this.truncate(heading, MAX_FIELD_NAME),
+							value: '```\n' + this.truncate(body, MAX_FIELD_VALUE - 8) + '\n```',
+							inline: false
+						});
+					} else {
+						itemEmbed.fields!.push({
+							name: this.truncate(heading, MAX_FIELD_NAME),
+							value: '\u200b',
+							inline: false
+						});
+					}
+				}
+
+				embeds.push(itemEmbed);
+
+				// Start fresh for any following blocks
+				currentEmbed = this.buildContinuationChrome(notification, color);
+				currentSize = getEmbedCharCount(currentEmbed);
+				currentFieldCount = 0;
+				continue;
+			}
+
 			let fieldName: string;
 			let fieldValue: string;
 			let inline: boolean | undefined;
@@ -90,7 +139,7 @@ export class DiscordNotifier {
 				inline = block.inline;
 			} else {
 				fieldName = this.truncate(block.title, MAX_FIELD_NAME);
-				const codeBlockOverhead = 8; // ```\n and \n```
+				const codeBlockOverhead = 8;
 				const maxContent = MAX_FIELD_VALUE - codeBlockOverhead;
 				const content =
 					block.content.length > maxContent
@@ -102,15 +151,14 @@ export class DiscordNotifier {
 
 			const fieldChars = fieldName.length + fieldValue.length;
 
-			// Would this field push us over limits? Start a new embed.
 			if (
 				currentFieldCount >= MAX_FIELDS_PER_EMBED ||
 				currentSize + fieldChars > MAX_EMBED_SIZE
 			) {
 				embeds.push(currentEmbed);
-				currentEmbed = this.buildChrome(notification, color, 0, 0);
+				currentEmbed = this.buildContinuationChrome(notification, color);
 				currentSize = getEmbedCharCount(currentEmbed);
-				currentFieldCount = currentEmbed.fields?.length ?? 0;
+				currentFieldCount = 0;
 			}
 
 			if (!currentEmbed.fields) {
@@ -121,13 +169,17 @@ export class DiscordNotifier {
 			currentFieldCount++;
 		}
 
-		embeds.push(currentEmbed);
+		// Push final embed if it has content
+		if (currentFieldCount > 0) {
+			embeds.push(currentEmbed);
+		}
 
 		// Assign page numbers if multiple embeds
 		if (embeds.length > 1) {
 			for (let i = 0; i < embeds.length; i++) {
-				const footer = `Type: ${notification.type} | Page ${i + 1}/${embeds.length}`;
-				embeds[i].footer = { text: footer };
+				embeds[i].footer = {
+					text: `Type: ${notification.type} | Page ${i + 1}/${embeds.length}`
+				};
 			}
 		}
 
@@ -135,15 +187,10 @@ export class DiscordNotifier {
 	}
 
 	/**
-	 * Build the chrome (author, title, description, color, footer, timestamp) for an embed
+	 * Build a full embed with title, description, and chrome
 	 */
-	private buildChrome(
-		notification: Notification,
-		color: number,
-		_page: number,
-		_total: number
-	): DiscordEmbed {
-		const embed: DiscordEmbed = {
+	private buildChrome(notification: Notification, color: number): DiscordEmbed {
+		return {
 			title: notification.title,
 			description: notification.message,
 			color,
@@ -154,7 +201,21 @@ export class DiscordNotifier {
 			},
 			footer: { text: `Type: ${notification.type}` }
 		};
-		return embed;
+	}
+
+	/**
+	 * Build a chrome-only embed for continuation pages (no title/description)
+	 */
+	private buildContinuationChrome(notification: Notification, color: number): DiscordEmbed {
+		return {
+			color,
+			timestamp: new Date().toISOString(),
+			author: {
+				name: this.config.username || 'Profilarr',
+				icon_url: this.config.avatar_url
+			},
+			footer: { text: `Type: ${notification.type}` }
+		};
 	}
 
 	/**
