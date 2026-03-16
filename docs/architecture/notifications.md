@@ -28,6 +28,10 @@
   - [3. The Handler Sends It](#3-the-handler-sends-it)
   - [4. The Manager Routes It](#4-the-manager-routes-it)
   - [5. Each Notifier Renders It](#5-each-notifier-renders-it)
+- [Testing](#testing)
+  - [What We Test](#what-we-test)
+  - [Mock Webhook Server](#mock-webhook-server)
+  - [Real Webhooks](#real-webhooks)
 
 ## Overview
 
@@ -514,3 +518,149 @@ their platform:
 
 Same notification. Two completely different outputs. Neither notifier knows about
 the other, and the definition that produced the notification knows about neither.
+
+## Testing
+
+```
+tests/integration/notifications/
+```
+
+Notification tests import the manager and notifiers directly — no full Profilarr
+server, no real jobs. A local mock HTTP server captures what each notifier sends,
+and assertions run against the captured requests.
+
+This is fast (no server boot, no job orchestration) and tests exactly the right
+boundary: given a `Notification`, does the correct HTTP request come out the
+other end?
+
+### What We Test
+
+**Manager routing:**
+
+- Sends to services that subscribe to the notification's type
+- Skips services that don't subscribe
+- Skips disabled services
+- `sendToService()` bypasses the type filter
+- Records success in `notification_history`
+- Records failure (mock returns 500) in `notification_history` with error
+- One service failing doesn't block others
+
+**Per-notifier rendering:**
+
+- `severity` maps to the right platform concept (Discord colour, Ntfy priority)
+- `blocks` render in order — fields become the service's field format, sections
+  become the service's content format
+- `title` and `message` appear in the expected places
+- Empty `blocks` (just title + message) still produces valid output
+- Large payloads that exceed platform limits get paginated/chunked correctly
+  (Discord-specific)
+
+**Error handling:**
+
+- Unreachable URL doesn't throw (fire-and-forget)
+- Timeout doesn't throw
+- History records the failure with error message
+
+### Mock Webhook Server
+
+A `Deno.serve()` instance that captures every incoming request:
+
+```typescript
+interface CapturedRequest {
+  method: string;
+  path: string;
+  headers: Record<string, string>;
+  body: unknown;
+}
+
+const captured: CapturedRequest[] = [];
+
+const mock = Deno.serve({ port: MOCK_PORT }, async (req) => {
+  const url = new URL(req.url);
+  captured.push({
+    method: req.method,
+    path: url.pathname,
+    headers: Object.fromEntries(req.headers),
+    body: await req.json()
+  });
+  return new Response('ok');
+});
+```
+
+Tests seed `notification_services` in the database with webhook URLs pointing at
+`http://localhost:${MOCK_PORT}`, then call `notificationManager.notify()` and
+assert on `captured`:
+
+```typescript
+// Seed a Discord service pointing at the mock
+seedService(db, {
+  serviceType: 'discord',
+  config: { webhook_url: `http://localhost:${MOCK_PORT}/discord` },
+  enabledTypes: ['job.create_backup.success']
+});
+
+// Send a notification
+await notificationManager.notify({
+  type: 'job.create_backup.success',
+  severity: 'success',
+  title: 'Backup Complete',
+  message: 'Created backup.zip (4.2 MB)',
+  blocks: [
+    { kind: 'field', label: 'Size', value: '4.2 MB', inline: true }
+  ]
+});
+
+// Assert on what Discord received
+assertEquals(captured.length, 1);
+assertEquals(captured[0].path, '/discord');
+assertEquals(captured[0].body.embeds[0].title, 'Backup Complete');
+assertEquals(captured[0].body.embeds[0].color, 65280); // green
+assertEquals(captured[0].body.embeds[0].fields[0].name, 'Size');
+```
+
+The mock can also be configured to return errors for failure-path testing:
+
+```typescript
+const mock = Deno.serve({ port: MOCK_PORT }, () => {
+  return new Response('Internal Server Error', { status: 500 });
+});
+
+await notificationManager.notify(notification);
+
+// History should record the failure
+const history = notificationHistoryQueries.getRecent(1);
+assertEquals(history[0].status, 'failed');
+```
+
+### Real Webhooks
+
+For manual verification during development — "I just wrote the Ntfy notifier and
+want to see it on my phone." An optional env file with real endpoints:
+
+```
+tests/integration/notifications/.env.test    ← gitignored
+```
+
+```env
+TEST_DISCORD_WEBHOOK=https://discord.com/api/webhooks/...
+TEST_NTFY_URL=https://ntfy.sh
+TEST_NTFY_TOPIC=profilarr-test
+TEST_NTFY_TOKEN=tk_...
+```
+
+Tests check for the var and skip if absent:
+
+```typescript
+const webhook = Deno.env.get('TEST_DISCORD_WEBHOOK');
+if (!webhook) {
+  skip('TEST_DISCORD_WEBHOOK not set — skipping real webhook test');
+  return;
+}
+
+const notifier = new DiscordNotifier({ webhook_url: webhook });
+await notifier.notify(notification);
+// No assertion — just check your phone / Discord channel
+```
+
+These never run in CI. They exist so you can manually verify rendering looks
+right on the actual platform after writing a new notifier.
