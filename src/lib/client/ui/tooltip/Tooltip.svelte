@@ -4,6 +4,7 @@
 	export let text: string = '';
 	export let position: 'top' | 'bottom' = 'bottom';
 	export let fullWidth: boolean = false;
+	export let mono: boolean = false;
 
 	const PADDING = 8;
 
@@ -67,7 +68,7 @@
 			style="{style};border-radius:0.75rem !important"
 		>
 			<div
-				class="border border-neutral-300 bg-white px-2 py-1 text-xs font-medium whitespace-nowrap text-neutral-900 shadow-lg dark:border-neutral-700/60 dark:bg-neutral-800 dark:text-neutral-50"
+				class="border border-neutral-300 bg-white px-2 py-1 text-xs font-medium whitespace-pre-wrap text-neutral-900 shadow-lg dark:border-neutral-700/60 dark:bg-neutral-800 dark:text-neutral-50 {mono ? 'font-mono' : ''}"
 				style="border-radius:0.75rem !important"
 			>
 				{text}
