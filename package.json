@@ -7,7 +7,7 @@
 	"dependencies": {
 		"@jsr/db__sqlite": "^0.12.0",
 		"croner": "^10.0.1",
-		"jose": "^6.2.0",
+		"jose": "^6.2.1",
 		"kysely": "0.27.6",
 		"lucide-svelte": "^0.546.0",
 		"marked": "^15.0.6",
