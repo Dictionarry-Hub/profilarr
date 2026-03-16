@@ -38,18 +38,18 @@
 Profilarr's notification system sends alerts when jobs complete, databases sync,
 or things go wrong. Two design goals drive every decision:
 
-1. **Extensibility without coupling** — adding a new service (Ntfy, Slack,
-   Telegram) or a new event (backup failed, PCD update available) should be a
+1. **Extensibility without coupling.** Adding a new service (Ntfy, Slack,
+   Telegram) or a new event (backup failed, PCD update available) is a
    self-contained change that doesn't touch unrelated code.
-2. **Definitions don't know about services** — the code that decides *what to
+2. **Definitions don't know about services.** The code that decides *what to
    say* about a rename never imports Discord embeds, Ntfy priorities, or Slack
    blocks. It produces a structured, service-agnostic payload. Each notifier
    decides *how to render* that payload for its platform.
 
-Notifications are **fire-and-forget**. A failed webhook should never block a
-rename, upgrade, or sync. Errors are logged and recorded in history, but never
-propagated to the caller. We'd rather silently miss a notification than interrupt
-a job the user cares about more.
+Notifications are **fire-and-forget**. A failed webhook never blocks a rename,
+upgrade, or sync. Errors are logged and recorded in history, but never propagated
+to the caller. A silently missed notification is preferable to an interrupted
+job.
 
 ## Architecture
 
@@ -59,9 +59,9 @@ Three layers, each with a single job:
 
 | Layer          | Responsibility                                     | Knows about                     |
 | -------------- | -------------------------------------------------- | ------------------------------- |
-| **Definition** | Decides *what to say* — title, message, fields, sections, severity | Domain data (job logs, statuses) |
-| **Manager**    | Decides *who to tell* — queries services, filters by type, records history | Service configs, type subscriptions |
-| **Notifier**   | Decides *how to render* — maps the structured payload to a platform-specific format | Platform API (Discord embeds, Ntfy JSON, etc.) |
+| **Definition** | Decides *what to say*: title, message, blocks, severity | Domain data (job logs, statuses) |
+| **Manager**    | Decides *who to tell*: queries services, filters by type, records history | Service configs, type subscriptions |
+| **Notifier**   | Decides *how to render*: maps the structured payload to a platform-specific format | Platform API (Discord embeds, Ntfy JSON, etc.) |
 
 This means:
 
@@ -94,9 +94,10 @@ flowchart TD
     NM -->|record result| HISTORY[(notification_history)]
 ```
 
-Single send path: handler calls definition, definition returns a `Notification`,
-handler passes it to the manager via `send()`. The manager handles everything
-from there. No bypass path, no direct notifier instantiation from handlers.
+Single send path: the handler calls a definition, the definition returns a
+`Notification`, the handler passes it to the manager via `send()`. The manager
+handles everything from there. No bypass path, no direct notifier instantiation
+from handlers.
 
 The one exception is `sendToService(serviceId, notification)` on the manager,
 used for test notifications that target a specific service and bypass the
@@ -111,9 +112,9 @@ Every layer swallows errors:
   records failure in history
 - Job handlers wrap the `send()` call in try/catch
 
-This redundancy is intentional. Each layer should be independently safe. If
-someone refactors the middle layer and removes error handling, the outer layers
-still prevent job interruption.
+This redundancy is intentional. Each layer is independently safe. If the middle
+layer loses its error handling during a refactor, the outer layers still prevent
+job interruption.
 
 ## Notification Payload
 
@@ -154,44 +155,44 @@ output, but without dictating *how* it should look.
 
 This avoids two failure modes:
 
-1. **Too thin** — if the payload were just `{ title, message }`, services like
-   Discord would get a plain text blob while being capable of rich embeds. You'd
-   end up adding `discord?: DiscordEmbed[]` to the interface, coupling
-   definitions to Discord.
-2. **Too service-specific** — if the payload included Discord embed objects,
+1. **Too thin.** If the payload were just `{ title, message }`, services like
+   Discord would get a plain text blob while being capable of rich embeds. The
+   inevitable result is adding `discord?: DiscordEmbed[]` to the interface,
+   coupling definitions to Discord.
+2. **Too service-specific.** If the payload included Discord embed objects,
    every definition would import `EmbedBuilder` and every new service would have
    to either understand Discord embeds or settle for a thin fallback.
 
 The structured payload sits in the middle. Blocks carry enough information for
 Discord to build rich embeds, Ntfy to set priorities and format bodies, and a
-generic webhook to forward the raw object — all from the same payload.
+generic webhook to forward the raw object, all from the same payload.
 
 ### Severity
 
 `severity` replaces the old pattern of inferring colour from the type string
-(`type.includes('success')` → green). It's explicit, part of the payload, and
+(`type.includes('success')` -> green). It's explicit, part of the payload, and
 each notifier maps it to their platform's concept:
 
-| Notifier | success          | error           | warning          | info            |
-| -------- | ---------------- | --------------- | ---------------- | --------------- |
-| Discord  | Green embed      | Red embed       | Yellow embed     | Blue embed      |
-| Ntfy     | Priority 3 (default) | Priority 5 (urgent) | Priority 4 (high) | Priority 3 (default) |
-| Slack    | Green sidebar    | Red sidebar     | Yellow sidebar   | Blue sidebar    |
-| Webhook  | Passed through as-is in JSON | | | |
+| Notifier | success              | error               | warning              | info                |
+| -------- | -------------------- | ------------------- | -------------------- | ------------------- |
+| Discord  | Green embed          | Red embed           | Yellow embed         | Blue embed          |
+| Ntfy     | Priority 3 (default) | Priority 5 (urgent) | Priority 4 (high)    | Priority 3 (default)|
+| Slack    | Green sidebar        | Red sidebar         | Yellow sidebar       | Blue sidebar        |
+| Webhook  | Passed through as-is | Passed through as-is| Passed through as-is | Passed through as-is|
 
 ### Blocks
 
 `blocks` is a single ordered array of content. Each block is a discriminated
 union (`kind` field) with two variants:
 
-**FieldBlock** — key-value pairs for structured metadata. Stats, counts, modes.
+**FieldBlock** - key-value pairs for structured metadata. Stats, counts, modes.
 Small, often rendered inline:
 
 ```typescript
 { kind: 'field', label: 'Files', value: '5/5', inline: true }
 ```
 
-**SectionBlock** — larger content blocks. Renamed files, upgrade details, error
+**SectionBlock** - larger content blocks. Renamed files, upgrade details, error
 lists. Each has a title and a content string:
 
 ```typescript
@@ -217,13 +218,13 @@ forced to render with the other fields at the top, away from the content it
 relates to. A single array gives definitions full control over content order
 without knowing how it will be rendered.
 
-Notifiers walk the array in order: Discord adds fields and sections to the
+Notifiers walk the array in order. Discord adds fields and sections to the
 current embed, starting a new embed when limits are hit. Ntfy formats each block
 as text lines. Generic webhooks forward the array as-is.
 
-The union is extensible — if we ever need a third block type (image, divider,
-table), we add a variant without changing the `Notification` shape or any
-existing definitions.
+The union is extensible. Adding a third block type (image, divider, table) means
+adding a variant without changing the `Notification` shape or any existing
+definitions.
 
 ## Definitions
 
@@ -261,12 +262,12 @@ Definitions handle:
 
 ### What a Definition Doesn't Do
 
-- Import anything from `notifiers/` — no `EmbedBuilder`, no `Colors`, no
-  service-specific types
-- Decide how content is rendered — no code blocks, no colour codes, no field
-  truncation
-- Know which services exist — the same payload goes to Discord, Ntfy, or
-  anything else
+- Import anything from `notifiers/`. No `EmbedBuilder`, no `Colors`, no
+  service-specific types.
+- Decide how content is rendered. No code blocks, no colour codes, no field
+  truncation.
+- Know which services exist. The same payload goes to Discord, Ntfy, or anything
+  else.
 
 ## NotificationManager
 
@@ -308,12 +309,12 @@ import.
 ### Direct Send
 
 `sendToService(serviceId, notification)` sends to a specific service, bypassing
-the `enabled_types` filter. This exists for one case: test notifications from the
-UI, where the user clicks "Test" on a specific service and expects it to fire
-regardless of which types are enabled.
+the `enabled_types` filter. Used for test notifications from the UI, where the
+user clicks "Test" on a specific service and expects it to fire regardless of
+which types are enabled.
 
-This still goes through the manager (history recording, notifier creation) — it
-just skips the type filter.
+Still goes through the manager (history recording, notifier creation). Only the
+type filter is skipped.
 
 ### History Recording
 
@@ -361,12 +362,12 @@ Abstract base for webhook-based services. Provides:
 
 - **Rate limiting**: 1-second minimum between sends. If a burst of notifications
   arrives (e.g., multiple arr instances finishing sync simultaneously), later ones
-  are dropped with a warning log. This is crude but prevents webhook endpoint
-  abuse. Discord's rate limit is 30 requests per 60 seconds per webhook — our
-  1-second floor keeps us well under that.
+  are dropped with a warning log. This prevents webhook endpoint abuse. Discord's
+  rate limit is 30 requests per 60 seconds per webhook; the 1-second floor keeps
+  well under that.
 - **Shared HTTP client**: Uses `WebhookClient` (a `BaseHttpClient` with 10s
   timeout, no retries). Connection pooling is shared across all notifications.
-  No retries because webhooks should either work or not — retrying a malformed
+  No retries because webhooks should either work or not. Retrying a malformed
   payload or expired URL wastes time.
 
 Subclasses implement three methods:
@@ -388,15 +389,15 @@ structured `Notification`, the notifier decides:
 - How to handle content that exceeds platform limits (pagination, truncation)
 - What chrome to add (author lines, footers, timestamps, mentions)
 
-This keeps all platform-specific knowledge in one place per service. The rename
-definition doesn't need to know that Discord has a 6000-character embed limit or
+All platform-specific knowledge lives in one place per service. The rename
+definition does not need to know that Discord has a 6000-character embed limit or
 that Ntfy supports markdown in the message body.
 
 ## Example: End-to-End Flow
 
-A backup job completes successfully. The user has two notification services
-configured: a Discord webhook and an Ntfy topic. Both subscribe to
-`job.create_backup.success`. Here's what happens, layer by layer.
+A backup job completes successfully. Two notification services are configured: a
+Discord webhook and an Ntfy topic. Both subscribe to
+`job.create_backup.success`.
 
 ### 1. The Event Happens
 
@@ -415,7 +416,7 @@ const log = {
 ### 2. The Definition Structures It
 
 The handler calls the backup definition, which knows nothing about Discord or
-Ntfy — just how to turn a backup log into a `Notification`:
+Ntfy. It turns a backup log into a `Notification`:
 
 ```typescript
 // definitions/backup.ts
@@ -465,7 +466,7 @@ try {
 }
 ```
 
-The handler doesn't know or care which services are configured.
+The handler does not know or care which services are configured.
 
 ### 4. The Manager Routes It
 
@@ -516,7 +517,7 @@ their platform:
 }
 ```
 
-Same notification. Two completely different outputs. Neither notifier knows about
+Same notification, two completely different outputs. Neither notifier knows about
 the other, and the definition that produced the notification knows about neither.
 
 ## Testing
@@ -525,7 +526,7 @@ the other, and the definition that produced the notification knows about neither
 tests/integration/notifications/
 ```
 
-Notification tests import the manager and notifiers directly — no full Profilarr
+Notification tests import the manager and notifiers directly. No full Profilarr
 server, no real jobs. A local mock HTTP server captures what each notifier sends,
 and assertions run against the captured requests.
 
@@ -548,7 +549,7 @@ other end?
 **Per-notifier rendering:**
 
 - `severity` maps to the right platform concept (Discord colour, Ntfy priority)
-- `blocks` render in order — fields become the service's field format, sections
+- `blocks` render in order: fields become the service's field format, sections
   become the service's content format
 - `title` and `message` appear in the expected places
 - Empty `blocks` (just title + message) still produces valid output
@@ -618,7 +619,7 @@ assertEquals(captured[0].body.embeds[0].color, 65280); // green
 assertEquals(captured[0].body.embeds[0].fields[0].name, 'Size');
 ```
 
-The mock can also be configured to return errors for failure-path testing:
+The mock can also return errors for failure-path testing:
 
 ```typescript
 const mock = Deno.serve({ port: MOCK_PORT }, () => {
@@ -634,11 +635,11 @@ assertEquals(history[0].status, 'failed');
 
 ### Real Webhooks
 
-For manual verification during development — "I just wrote the Ntfy notifier and
-want to see it on my phone." An optional env file with real endpoints:
+For manual verification during development, an optional env file provides real
+endpoints:
 
 ```
-tests/integration/notifications/.env.test    ← gitignored
+tests/integration/notifications/.env.test    (gitignored)
 ```
 
 ```env
@@ -653,14 +654,14 @@ Tests check for the var and skip if absent:
 ```typescript
 const webhook = Deno.env.get('TEST_DISCORD_WEBHOOK');
 if (!webhook) {
-  skip('TEST_DISCORD_WEBHOOK not set — skipping real webhook test');
+  skip('TEST_DISCORD_WEBHOOK not set, skipping real webhook test');
   return;
 }
 
 const notifier = new DiscordNotifier({ webhook_url: webhook });
 await notifier.notify(notification);
-// No assertion — just check your phone / Discord channel
+// No assertion - visual verification on the target platform
 ```
 
-These never run in CI. They exist so you can manually verify rendering looks
-right on the actual platform after writing a new notifier.
+Real webhook tests are not part of CI. They are used to visually verify
+rendering on the actual platform after writing a new notifier.
