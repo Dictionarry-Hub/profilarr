@@ -1,13 +1,18 @@
 import { logger } from '$logger/logger.ts';
-import type { DiscordConfig, Notification } from '../../types.ts';
+import type { DiscordConfig, Notification, NotificationSeverity } from '../../types.ts';
 import { Colors, type DiscordEmbed } from './embed.ts';
 import { getWebhookClient } from '../../base/webhookClient.ts';
 
-const RATE_LIMIT_DELAY = 1000; // 1 second between messages
+const RATE_LIMIT_DELAY = 1000;
+
+// Discord limits
+const MAX_EMBED_SIZE = 5800; // Safety margin under 6000
+const MAX_FIELDS_PER_EMBED = 25;
+const MAX_FIELD_VALUE = 1024;
+const MAX_FIELD_NAME = 256;
 
 /**
  * Calculate Discord's character count for an embed
- * Only counts: title, description, author.name, footer.text, field names/values
  */
 function getEmbedCharCount(embed: DiscordEmbed): number {
 	let size = 0;
@@ -24,8 +29,8 @@ function getEmbedCharCount(embed: DiscordEmbed): number {
 }
 
 /**
- * Discord notification service implementation
- * Handles splitting large notifications across multiple messages
+ * Discord notification service implementation.
+ * Renders structured Notification payloads into Discord embeds.
  */
 export class DiscordNotifier {
 	constructor(private config: DiscordConfig) {}
@@ -35,14 +40,13 @@ export class DiscordNotifier {
 	}
 
 	/**
-	 * Send notification, splitting into multiple messages if needed
+	 * Render notification into embeds and send, splitting into multiple messages if needed
 	 */
 	async notify(notification: Notification): Promise<void> {
-		const allEmbeds = this.getEmbeds(notification);
-		const chunks = this.chunkEmbeds(allEmbeds);
+		const allEmbeds = this.renderEmbeds(notification);
+		const chunks = allEmbeds.map((embed) => [embed]);
 
 		for (let i = 0; i < chunks.length; i++) {
-			// Rate limit between messages
 			if (i > 0) {
 				await this.sleep(RATE_LIMIT_DELAY);
 			}
@@ -59,45 +63,124 @@ export class DiscordNotifier {
 	}
 
 	/**
-	 * Extract embeds from notification
+	 * Render a Notification into one or more Discord embeds
 	 */
-	private getEmbeds(notification: Notification): DiscordEmbed[] {
-		// Use Discord-specific embeds if provided
-		if (notification.discord?.embeds && notification.discord.embeds.length > 0) {
-			return notification.discord.embeds;
+	private renderEmbeds(notification: Notification): DiscordEmbed[] {
+		const color = this.getColorForSeverity(notification.severity);
+		const blocks = notification.blocks ?? [];
+
+		// No blocks: single embed with just title + message
+		if (blocks.length === 0) {
+			return [this.buildChrome(notification, color, 1, 1)];
 		}
 
-		// Fall back to generic content
-		if (notification.generic) {
-			const color = this.getColorForType(notification.type);
-			return [
-				{
-					title: notification.generic.title,
-					description: notification.generic.message,
-					color,
-					timestamp: new Date().toISOString(),
-					footer: { text: 'Profilarr' }
-				}
-			];
-		}
+		const embeds: DiscordEmbed[] = [];
+		let currentEmbed = this.buildChrome(notification, color, 0, 0);
+		let currentSize = getEmbedCharCount(currentEmbed);
+		let currentFieldCount = currentEmbed.fields?.length ?? 0;
 
-		// Empty notification
-		return [
-			{
-				title: 'Notification',
-				description: 'No content provided',
-				color: Colors.INFO,
-				timestamp: new Date().toISOString(),
-				footer: { text: 'Profilarr' }
+		for (const block of blocks) {
+			let fieldName: string;
+			let fieldValue: string;
+			let inline: boolean | undefined;
+
+			if (block.kind === 'field') {
+				fieldName = this.truncate(block.label, MAX_FIELD_NAME);
+				fieldValue = this.truncate(block.value, MAX_FIELD_VALUE);
+				inline = block.inline;
+			} else {
+				fieldName = this.truncate(block.title, MAX_FIELD_NAME);
+				const codeBlockOverhead = 8; // ```\n and \n```
+				const maxContent = MAX_FIELD_VALUE - codeBlockOverhead;
+				const content =
+					block.content.length > maxContent
+						? block.content.slice(0, maxContent - 15) + '\n...(truncated)'
+						: block.content;
+				fieldValue = '```\n' + content + '\n```';
+				inline = false;
 			}
-		];
+
+			const fieldChars = fieldName.length + fieldValue.length;
+
+			// Would this field push us over limits? Start a new embed.
+			if (
+				currentFieldCount >= MAX_FIELDS_PER_EMBED ||
+				currentSize + fieldChars > MAX_EMBED_SIZE
+			) {
+				embeds.push(currentEmbed);
+				currentEmbed = this.buildChrome(notification, color, 0, 0);
+				currentSize = getEmbedCharCount(currentEmbed);
+				currentFieldCount = currentEmbed.fields?.length ?? 0;
+			}
+
+			if (!currentEmbed.fields) {
+				currentEmbed.fields = [];
+			}
+			currentEmbed.fields.push({ name: fieldName, value: fieldValue, inline });
+			currentSize += fieldChars;
+			currentFieldCount++;
+		}
+
+		embeds.push(currentEmbed);
+
+		// Assign page numbers if multiple embeds
+		if (embeds.length > 1) {
+			for (let i = 0; i < embeds.length; i++) {
+				const footer = `Type: ${notification.type} | Page ${i + 1}/${embeds.length}`;
+				embeds[i].footer = { text: footer };
+			}
+		}
+
+		return embeds;
 	}
 
 	/**
-	 * Split embeds into 1 per message
+	 * Build the chrome (author, title, description, color, footer, timestamp) for an embed
 	 */
-	private chunkEmbeds(embeds: DiscordEmbed[]): DiscordEmbed[][] {
-		return embeds.map((embed) => [embed]);
+	private buildChrome(
+		notification: Notification,
+		color: number,
+		_page: number,
+		_total: number
+	): DiscordEmbed {
+		const embed: DiscordEmbed = {
+			title: notification.title,
+			description: notification.message,
+			color,
+			timestamp: new Date().toISOString(),
+			author: {
+				name: this.config.username || 'Profilarr',
+				icon_url: this.config.avatar_url
+			},
+			footer: { text: `Type: ${notification.type}` }
+		};
+		return embed;
+	}
+
+	/**
+	 * Map severity to embed color
+	 */
+	private getColorForSeverity(severity: NotificationSeverity): number {
+		switch (severity) {
+			case 'success':
+				return Colors.SUCCESS;
+			case 'error':
+				return Colors.ERROR;
+			case 'warning':
+				return Colors.WARNING;
+			case 'info':
+				return Colors.INFO;
+			default:
+				return Colors.INFO;
+		}
+	}
+
+	/**
+	 * Truncate a string to fit within a limit
+	 */
+	private truncate(text: string, limit: number): string {
+		if (text.length <= limit) return text;
+		return text.slice(0, limit - 3) + '...';
 	}
 
 	/**
@@ -122,29 +205,6 @@ export class DiscordNotifier {
 			});
 			throw error;
 		}
-	}
-
-	/**
-	 * Determine embed color based on notification type
-	 */
-	private getColorForType(type: string): number {
-		const lowerType = type.toLowerCase();
-
-		if (lowerType.includes('success')) {
-			return Colors.SUCCESS;
-		}
-		if (lowerType.includes('failed') || lowerType.includes('error')) {
-			return Colors.ERROR;
-		}
-		if (
-			lowerType.includes('warning') ||
-			lowerType.includes('warn') ||
-			lowerType.includes('partial')
-		) {
-			return Colors.WARNING;
-		}
-
-		return Colors.INFO;
 	}
 
 	private sleep(ms: number): Promise<void> {

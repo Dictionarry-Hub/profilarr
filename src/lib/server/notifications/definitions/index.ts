@@ -1,15 +1,12 @@
 /**
- * Pre-defined notifications
- * Import and call these instead of building notifications inline
+ * Notification definitions
+ *
+ * Each definition takes domain data and returns a structured Notification.
+ * Definitions are service-agnostic. Notifiers handle rendering.
  *
  * @example
  * import { notifications } from '$notifications/definitions/index.ts';
- *
- * // Via notification manager (normal flow)
- * await notifications.test(service).send();
- *
- * // Direct to notifier (bypass manager)
- * await notifier.notify(notifications.test(service).build());
+ * await notificationManager.notify(notifications.rename({ log, summaryNotifications }));
  */
 
 import { test } from './test.ts';

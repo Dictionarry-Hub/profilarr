@@ -2,8 +2,6 @@
  * Core notification types and interfaces
  */
 
-import type { DiscordEmbed } from './notifiers/discord/embed.ts';
-
 /**
  * Type-safe notification type constants
  */
@@ -31,29 +29,45 @@ export const NotificationTypes = {
 } as const;
 
 /**
- * Generic notification content (works for all services)
+ * Notification severity levels
  */
-export interface GenericNotification {
+export type NotificationSeverity = 'success' | 'error' | 'warning' | 'info';
+
+/**
+ * A key-value metadata block (stats, counts, modes)
+ */
+export interface FieldBlock {
+	kind: 'field';
+	label: string;
+	value: string;
+	inline?: boolean;
+}
+
+/**
+ * A larger content block (renamed files, upgrade details, error lists)
+ */
+export interface SectionBlock {
+	kind: 'section';
 	title: string;
-	message: string;
+	content: string;
 }
 
 /**
- * Discord-specific notification content
+ * Discriminated union of block types
  */
-export interface DiscordNotification {
-	embeds: DiscordEmbed[];
-}
+export type NotificationBlock = FieldBlock | SectionBlock;
 
 /**
- * Notification payload sent to services
+ * Notification payload sent to services.
+ * Service-agnostic structured document. Notifiers render this
+ * into their platform-specific format.
  */
 export interface Notification {
 	type: string;
-	/** Generic content - used by services without specific payload */
-	generic?: GenericNotification;
-	/** Discord-specific content - used if present, otherwise falls back to generic */
-	discord?: DiscordNotification;
+	severity: NotificationSeverity;
+	title: string;
+	message: string;
+	blocks?: NotificationBlock[];
 }
 
 /**

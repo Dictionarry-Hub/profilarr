@@ -11,19 +11,17 @@ import { DiscordNotifier } from './notifiers/discord/DiscordNotifier.ts';
  */
 export class NotificationManager {
 	/**
-	 * Send a notification to all enabled services that have this notification type enabled
-	 * Fire-and-forget: Does not throw errors, failures are logged
+	 * Send a notification to all enabled services that have this notification type enabled.
+	 * Fire-and-forget: does not throw errors, failures are logged.
 	 */
 	async notify(notification: Notification): Promise<void> {
 		try {
-			// Get all enabled services from database
 			const services = notificationServicesQueries.getAllEnabled();
 
 			if (services.length === 0) {
 				return;
 			}
 
-			// Filter services that have this notification type enabled
 			const relevantServices = services.filter((service) => {
 				try {
 					const enabledTypes = JSON.parse(service.enabled_types) as string[];
@@ -37,10 +35,14 @@ export class NotificationManager {
 				return;
 			}
 
-			// Send to each service in parallel (fire-and-forget)
 			await Promise.allSettled(
 				relevantServices.map((service) =>
-					this.sendToService(service.id, service.service_type, service.config, notification)
+					this.sendToServiceInternal(
+						service.id,
+						service.service_type,
+						service.config,
+						notification
+					)
 				)
 			);
 		} catch (error) {
@@ -55,9 +57,43 @@ export class NotificationManager {
 	}
 
 	/**
-	 * Send notification to a specific service
+	 * Send a notification to a specific service, bypassing the enabled_types filter.
+	 * Used for test notifications from the UI.
 	 */
-	private async sendToService(
+	async sendToService(serviceId: string, notification: Notification): Promise<void> {
+		try {
+			const service = notificationServicesQueries.getById(serviceId);
+
+			if (!service) {
+				await logger.error('Service not found for direct send', {
+					source: 'NotificationManager',
+					meta: { serviceId }
+				});
+				return;
+			}
+
+			await this.sendToServiceInternal(
+				service.id,
+				service.service_type,
+				service.config,
+				notification
+			);
+		} catch (error) {
+			await logger.error('Error in direct send', {
+				source: 'NotificationManager',
+				meta: {
+					serviceId,
+					error: error instanceof Error ? error.message : String(error),
+					type: notification.type
+				}
+			});
+		}
+	}
+
+	/**
+	 * Internal: send notification to a specific service and record history
+	 */
+	private async sendToServiceInternal(
 		serviceId: string,
 		serviceType: string,
 		configJson: string,
@@ -67,7 +103,6 @@ export class NotificationManager {
 		let errorMessage: string | undefined;
 
 		try {
-			// Create the appropriate notifier instance
 			const notifier = this.createNotifier(serviceType, configJson);
 
 			if (!notifier) {
@@ -79,7 +114,6 @@ export class NotificationManager {
 				return;
 			}
 
-			// Send the notification
 			await notifier.notify(notification);
 			success = true;
 		} catch (error) {
@@ -93,13 +127,12 @@ export class NotificationManager {
 				}
 			});
 		} finally {
-			// Record in history
 			try {
 				notificationHistoryQueries.create({
 					serviceId,
 					notificationType: notification.type,
-					title: notification.generic?.title ?? 'Notification',
-					message: notification.generic?.message ?? '',
+					title: notification.title,
+					message: notification.message,
 					status: success ? 'success' : 'failed',
 					error: errorMessage
 				});
@@ -125,11 +158,6 @@ export class NotificationManager {
 			switch (serviceType) {
 				case 'discord':
 					return new DiscordNotifier(config as DiscordConfig);
-				// Future services:
-				// case 'slack':
-				//   return new SlackNotifier(config as SlackConfig);
-				// case 'email':
-				//   return new EmailNotifier(config as EmailConfig);
 				default:
 					return null;
 			}

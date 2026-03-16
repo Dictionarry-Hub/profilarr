@@ -115,28 +115,10 @@ export const actions: Actions = {
 		}
 
 		try {
-			const service = notificationServicesQueries.getById(id);
+			const { notificationManager } = await import('$notifications/NotificationManager.ts');
+			const { test } = await import('$notifications/definitions/test.ts');
 
-			if (!service) {
-				return fail(404, { error: 'Service not found' });
-			}
-
-			// Send test notification directly (bypass enabled_types filter)
-			const { DiscordNotifier } = await import('$notifications/notifiers/discord/index.ts');
-			const { notifications } = await import('$notifications/definitions/index.ts');
-
-			const config = JSON.parse(service.config);
-
-			let notifier;
-			if (service.service_type === 'discord') {
-				notifier = new DiscordNotifier(config);
-			} else {
-				return fail(400, { error: 'Unknown service type' });
-			}
-
-			const notification = notifications.test({ config }).build();
-
-			await notifier.notify(notification);
+			await notificationManager.sendToService(id, test());
 
 			return { success: true };
 		} catch (err) {

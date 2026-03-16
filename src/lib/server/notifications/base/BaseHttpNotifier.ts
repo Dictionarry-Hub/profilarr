@@ -61,7 +61,7 @@ export abstract class BaseHttpNotifier implements Notifier {
 				source: this.getName(),
 				meta: {
 					type: notification.type,
-					title: notification.generic?.title,
+					title: notification.title,
 					error: error instanceof Error ? error.message : String(error)
 				}
 			});

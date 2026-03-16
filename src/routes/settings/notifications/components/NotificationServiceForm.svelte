@@ -157,7 +157,7 @@
 					>
 						{category}
 					</h4>
-					<div class="space-y-2">
+					<div class="flex flex-wrap gap-2">
 						{#each types as type}
 							<div>
 								<Toggle

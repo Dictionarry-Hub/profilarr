@@ -32,8 +32,8 @@ import {
 	resetFilterCooldown
 } from './cooldown.ts';
 import { logUpgradeRun, logUpgradeError, logUpgradeSkipped } from './logger.ts';
-import { notifications } from '$lib/server/notifications/definitions/index.ts';
-import { notificationServicesQueries } from '$lib/server/db/queries/notificationServices.ts';
+import { notifications } from '$notifications/definitions/index.ts';
+import { notificationManager } from '$notifications/NotificationManager.ts';
 
 /**
  * In-memory cache for dry run exclusions
@@ -113,33 +113,8 @@ async function pollQueue<T>(
  * Send upgrade notification
  */
 async function sendUpgradeNotification(log: UpgradeJobLog, manual: boolean): Promise<void> {
-	// Only notify if there were items searched
 	if (log.selection.actualCount > 0) {
-		const { DiscordNotifier } =
-			await import('$lib/server/notifications/notifiers/discord/index.ts');
-
-		// Get all enabled services that have this notification type enabled
-		const services = notificationServicesQueries.getAllEnabled();
-		const notificationType = `upgrade.${log.status}`;
-
-		for (const service of services) {
-			try {
-				const enabledTypes = JSON.parse(service.enabled_types) as string[];
-				if (!enabledTypes.includes(notificationType)) {
-					continue;
-				}
-
-				const config = JSON.parse(service.config);
-
-				if (service.service_type === 'discord') {
-					const notifier = new DiscordNotifier(config);
-					const notification = notifications.upgrade({ log, config, manual }).build();
-					await notifier.notify(notification);
-				}
-			} catch {
-				// Errors are logged by the notifier
-			}
-		}
+		await notificationManager.notify(notifications.upgrade({ log, manual }));
 	}
 }
 
