@@ -7,7 +7,7 @@
  * Discord embed color constants
  */
 export const Colors = {
-	SUCCESS: 0x00ff00,
+	SUCCESS: 0x4a90d9,
 	FAILED: 0xff0000,
 	ERROR: 0xff0000,
 	INFO: 0x0099ff,

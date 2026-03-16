@@ -108,12 +108,15 @@ function formatItemContent(item: UpgradeSelectionItem): string {
 
 	// Score
 	if (item.original.type === 'movie') {
-		const currentScore = item.original.score;
-		const upgradeScore = item.upgrades[0]?.score ?? 0;
-		sections.push(`Score\nCurrent: ${currentScore}\nUpgrade: ${upgradeScore}`);
+		sections.push(`Score\nCurrent: ${item.original.score}\nUpgrade: ${item.upgrades[0]?.score ?? 0}`);
 	} else {
+		// Series: show average episode score as current
+		const episodes = item.original.episodes ?? [];
+		const avgScore = episodes.length > 0
+			? Math.round(episodes.reduce((sum, ep) => sum + ep.score, 0) / episodes.length)
+			: 0;
 		for (const upgrade of item.upgrades) {
-			sections.push(`Score\nUpgrade: ${upgrade.score}`);
+			sections.push(`Score\nCurrent: ${avgScore} (avg)\nUpgrade: ${upgrade.score}`);
 		}
 	}
 
@@ -133,12 +136,24 @@ function formatItemContent(item: UpgradeSelectionItem): string {
 		}
 		sections.push(lines.join('\n'));
 	} else {
+		// Series: show episode formats as current, upgrade formats as upgrade
+		const episodes = item.original.episodes ?? [];
+		const currentFmtSet = new Set<string>();
+		for (const ep of episodes) {
+			for (const f of ep.formats) currentFmtSet.add(f);
+		}
 		for (const upgrade of item.upgrades) {
-			if (upgrade.formats.length > 0) {
-				const lines = ['Formats'];
-				for (const f of upgrade.formats) lines.push(`  ${f}`);
-				sections.push(lines.join('\n'));
+			const lines = ['Formats'];
+			if (currentFmtSet.size > 0) {
+				lines.push('Current:');
+				for (const f of currentFmtSet) lines.push(`  ${f}`);
 			}
+			if (upgrade.formats.length > 0) {
+				if (currentFmtSet.size > 0) lines.push('');
+				lines.push('Upgrade:');
+				for (const f of upgrade.formats) lines.push(`  ${f}`);
+			}
+			sections.push(lines.join('\n'));
 		}
 	}
 
@@ -204,39 +219,29 @@ export function upgrade({ log, manual = false }: UpgradeNotificationParams): Not
 
 	const blocks: NotificationBlock[] = [];
 
-	// Stats fields
-	blocks.push({
-		kind: 'field',
-		label: 'Filter',
-		value: log.filter.name || 'Unknown',
-		inline: true
-	});
-	blocks.push({
-		kind: 'field',
-		label: 'Selector',
-		value: formatSelector(log.selection.method),
-		inline: true
-	});
-	if (log.config.dryRun) {
-		blocks.push({ kind: 'field', label: 'Mode', value: 'Dry Run', inline: true });
-	}
-
+	// Stats as a single structured block
 	const upgradesFound = log.selection.items.filter((i) => i.upgrades.length > 0).length;
-	blocks.push({
-		kind: 'field',
-		label: 'Upgrades',
-		value: `${upgradesFound}/${log.selection.actualCount}`,
-		inline: true
-	});
 
-	// Funnel
 	let funnelText = `${log.library.totalItems} library -> ${log.filter.matchedCount} filtered -> ${log.filter.afterCooldown} after cooldown`;
 	if (log.filter.dryRunExcluded > 0) {
 		const afterCache = log.filter.afterCooldown - log.filter.dryRunExcluded;
 		funnelText += ` -> ${afterCache} after cache`;
 	}
 	funnelText += ` -> ${log.selection.actualCount} selected`;
-	blocks.push({ kind: 'field', label: 'Funnel', value: funnelText });
+
+	const statsLines = [
+		`Filter:    ${log.filter.name || 'Unknown'}`,
+		`Selector:  ${formatSelector(log.selection.method)}`,
+		`Upgrades:  ${upgradesFound}/${log.selection.actualCount}`,
+		...(log.config.dryRun ? ['Mode:      Dry Run'] : []),
+		`Funnel:    ${funnelText}`
+	];
+
+	blocks.push({
+		kind: 'section',
+		title: 'Stats',
+		content: statsLines.join('\n')
+	});
 
 	// Per-item sections (one per item, with imageUrl for poster)
 	const displayItems = flattenItems(log.selection.items);
