@@ -343,7 +343,7 @@
 					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
 					<span class="font-mono">{row.filter.afterCooldown}</span> after cooldown
 					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
-					<span class="font-mono">{row.selection.actualCount}</span> selected
+					<span class="font-mono {row.results.successful > 0 ? 'text-green-600 dark:text-green-400' : ''}">{row.results.successful}</span> upgraded
 				</span>
 			{/if}
 		</svelte:fragment>
