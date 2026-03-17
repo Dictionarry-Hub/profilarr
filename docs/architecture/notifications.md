@@ -587,8 +587,8 @@ responses. Configurable response status for error path testing.
 const { captured, server } = createMockServer(MOCK_PORT);
 
 const notifier = new DiscordNotifier({
-  webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
-  username: 'TestBot'
+	webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
+	username: 'TestBot'
 });
 await notifier.notify(notification);
 
