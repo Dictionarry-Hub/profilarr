@@ -18,11 +18,11 @@ Errors are logged and recorded in history, never propagated.
 
 Three layers:
 
-| Layer          | Responsibility                                            | Knows about                          |
-| -------------- | --------------------------------------------------------- | ------------------------------------ |
-| **Definition** | Decides _what to say_: title, message, blocks, severity   | Domain data (job logs, statuses)     |
-| **Manager**    | Decides _who to tell_: queries services, filters by type  | Service configs, type subscriptions  |
-| **Notifier**   | Decides _how to render_: maps payload to platform format  | Platform API (embeds, JSON, etc.)    |
+| Layer          | Responsibility                                           | Knows about                         |
+| -------------- | -------------------------------------------------------- | ----------------------------------- |
+| **Definition** | Decides _what to say_: title, message, blocks, severity  | Domain data (job logs, statuses)    |
+| **Manager**    | Decides _who to tell_: queries services, filters by type | Service configs, type subscriptions |
+| **Notifier**   | Decides _how to render_: maps payload to platform format | Platform API (embeds, JSON, etc.)   |
 
 Adding a new **service** never touches definitions. Adding a new **event** never
 touches notifiers.
@@ -87,10 +87,10 @@ is meaningful: stats first, then content, then errors.
 
 Each notifier maps severity to its platform's concept:
 
-| Notifier | success              | error                | warning              | info                 |
-| -------- | -------------------- | -------------------- | -------------------- | -------------------- |
-| Discord  | Green embed          | Red embed            | Yellow embed         | Blue embed           |
-| Ntfy     | Priority 3 (default) | Priority 5 (urgent)  | Priority 4 (high)    | Priority 3 (default) |
+| Notifier | success              | error               | warning           | info                 |
+| -------- | -------------------- | ------------------- | ----------------- | -------------------- |
+| Discord  | Green embed          | Red embed           | Yellow embed      | Blue embed           |
+| Ntfy     | Priority 3 (default) | Priority 5 (urgent) | Priority 4 (high) | Priority 3 (default) |
 
 ## Definitions
 
@@ -109,10 +109,7 @@ export function rename({ log }: RenameNotificationParams): Notification {
 		severity: log.status === 'failed' ? 'error' : 'success',
 		title: `Rename Complete - ${log.instanceName}`,
 		message: `Renamed ${log.results.filesRenamed} files`,
-		blocks: [
-			{ kind: 'field', label: 'Files', value: '5/5', inline: true },
-			...buildSections(log)
-		]
+		blocks: [{ kind: 'field', label: 'Files', value: '5/5', inline: true }, ...buildSections(log)]
 	};
 }
 ```
@@ -166,11 +163,11 @@ authenticated topics.
 Not every service renders the same content. The tier determines what the notifier
 includes from the structured payload.
 
-| Tier        | Renders                          | Drops                    | Example |
-| ----------- | -------------------------------- | ------------------------ | ------- |
-| Detail      | Everything: fields, sections, images | Nothing              | Discord |
-| Summary     | Title, message, field blocks     | Section blocks, images   | Ntfy    |
-| Passthrough | Raw `Notification` JSON          | Nothing (no rendering)   | Webhook |
+| Tier        | Renders                              | Drops                  | Example |
+| ----------- | ------------------------------------ | ---------------------- | ------- |
+| Detail      | Everything: fields, sections, images | Nothing                | Discord |
+| Summary     | Title, message, field blocks         | Section blocks, images | Ntfy    |
+| Passthrough | Raw `Notification` JSON              | Nothing (no rendering) | Webhook |
 
 The tier is a design-time decision baked into the renderer, not a runtime config.
 

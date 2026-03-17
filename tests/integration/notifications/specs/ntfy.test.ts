@@ -256,8 +256,7 @@ function makeUpgradeLog(): UpgradeJobLog {
 					},
 					upgrades: [
 						{
-							release:
-								'Interstellar.2014.2160p.UHD.BluRay.Remux.HDR.HEVC.Atmos-EPSiLON.mkv',
+							release: 'Interstellar.2014.2160p.UHD.BluRay.Remux.HDR.HEVC.Atmos-EPSiLON.mkv',
 							formats: ['Remux', 'x265', '2160p', 'HDR', 'Atmos'],
 							score: 145
 						}

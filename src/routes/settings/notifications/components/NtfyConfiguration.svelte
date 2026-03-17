@@ -9,9 +9,7 @@
 </script>
 
 <div class="space-y-4">
-	<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-		Ntfy Configuration
-	</h3>
+	<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Ntfy Configuration</h3>
 
 	<!-- Server URL -->
 	<FormInput
@@ -44,7 +42,7 @@
 		placeholder={mode === 'edit' ? '••••••••••••••••' : 'tk_...'}
 		description={mode === 'edit'
 			? 'Leave blank to keep existing token'
-			: 'Required if your ntfy server has access control enabled. Generate a token via your server\'s admin interface or ntfy token add'}
+			: "Required if your ntfy server has access control enabled. Generate a token via your server's admin interface or ntfy token add"}
 		private_
 		on:input={(e) => (accessToken = e.detail)}
 	/>
