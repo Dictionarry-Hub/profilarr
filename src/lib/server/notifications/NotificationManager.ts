@@ -37,12 +37,7 @@ export class NotificationManager {
 
 			await Promise.allSettled(
 				relevantServices.map((service) =>
-					this.sendToServiceInternal(
-						service.id,
-						service.service_type,
-						service.config,
-						notification
-					)
+					this.sendToServiceInternal(service.id, service.service_type, service.config, notification)
 				)
 			);
 		} catch (error) {

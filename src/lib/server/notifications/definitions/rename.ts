@@ -35,20 +35,6 @@ function parseSeasonNumber(filename: string): number | null {
 }
 
 /**
- * Format a single file entry
- */
-function formatFileEntry(file: { existingPath: string; newPath: string }): string {
-	return `Before: ${getFilename(file.existingPath)}\nAfter:  ${getFilename(file.newPath)}`;
-}
-
-/**
- * Format a folder change entry
- */
-function formatFolderEntry(folder: { existingPath: string; newPath: string }): string {
-	return `Before: ${folder.existingPath}\nAfter:  ${folder.newPath}`;
-}
-
-/**
  * Format item content as Before/After sections separated by double newlines.
  * For Sonarr, groups by season with separate Before/After per season.
  */
@@ -95,8 +81,12 @@ function formatItemContent(
 
 	for (const season of seasons) {
 		const seasonFiles = bySeasonMap.get(season)!;
-		sections.push(`Season ${season} (Before)\n${seasonFiles.map((f) => getFilename(f.existingPath)).join('\n')}`);
-		sections.push(`Season ${season} (After)\n${seasonFiles.map((f) => getFilename(f.newPath)).join('\n')}`);
+		sections.push(
+			`Season ${season} (Before)\n${seasonFiles.map((f) => getFilename(f.existingPath)).join('\n')}`
+		);
+		sections.push(
+			`Season ${season} (After)\n${seasonFiles.map((f) => getFilename(f.newPath)).join('\n')}`
+		);
 	}
 
 	if (noSeason.length > 0) {

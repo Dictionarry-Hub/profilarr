@@ -36,10 +36,10 @@ export function createMockServer(
 			body
 		});
 
-		return new Response(
-			JSON.stringify({ ok: responseStatus < 400 }),
-			{ status: responseStatus, headers: { 'Content-Type': 'application/json' } }
-		);
+		return new Response(JSON.stringify({ ok: responseStatus < 400 }), {
+			status: responseStatus,
+			headers: { 'Content-Type': 'application/json' }
+		});
 	});
 
 	return { captured, server };

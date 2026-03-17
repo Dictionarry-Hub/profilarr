@@ -340,25 +340,35 @@
 					{row.status.charAt(0).toUpperCase() + row.status.slice(1)}
 				</Label>
 			{:else if column.key === 'summary'}
-				{@const upgradedItems = row.selection.items.filter(i => i.upgrades.length > 0)}
-				{@const tooltipText = upgradedItems.length > 0
-					? upgradedItems.map(i => {
-						const lines = [i.title];
-						for (const u of i.upgrades) {
-							lines.push(`  ${u.release}`);
-							lines.push(`  CF Score: ${u.score}`);
-						}
-						return lines.join('\n');
-					}).join('\n\n')
-					: 'No upgrades'}
+				{@const upgradedItems = row.selection.items.filter((i) => i.upgrades.length > 0)}
+				{@const tooltipText =
+					upgradedItems.length > 0
+						? upgradedItems
+								.map((i) => {
+									const lines = [i.title];
+									for (const u of i.upgrades) {
+										lines.push(`  ${u.release}`);
+										lines.push(`  CF Score: ${u.score}`);
+									}
+									return lines.join('\n');
+								})
+								.join('\n\n')
+						: 'No upgrades'}
 				<span class="text-sm text-neutral-600 dark:text-neutral-400">
 					<span class="font-mono">{row.filter.matchedCount}</span> filtered
 					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
 					<span class="font-mono">{row.filter.afterCooldown}</span> after cooldown
 					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
 					<Tooltip text={tooltipText} mono>
-						<span class="inline-flex items-center gap-1 font-mono {row.results.successful > 0 ? 'cursor-help' : ''}"
-							><span class="{row.results.successful > 0 ? 'text-green-600 dark:text-green-400' : ''}">{row.results.successful}</span> upgraded {#if row.results.successful > 0}<Info size={12} />{/if}</span>
+						<span
+							class="inline-flex items-center gap-1 font-mono {row.results.successful > 0
+								? 'cursor-help'
+								: ''}"
+							><span class={row.results.successful > 0 ? 'text-green-600 dark:text-green-400' : ''}
+								>{row.results.successful}</span
+							>
+							upgraded {#if row.results.successful > 0}<Info size={12} />{/if}</span
+						>
 					</Tooltip>
 				</span>
 			{/if}

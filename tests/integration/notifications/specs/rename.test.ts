@@ -26,7 +26,9 @@ try {
 			REAL_WEBHOOK = trimmed.slice(eqIdx + 1);
 		}
 	}
-} catch { /* no .env */ }
+} catch {
+	/* no .env */
+}
 
 setup(() => {
 	const mock = createMockServer(MOCK_PORT);
@@ -80,19 +82,25 @@ function makeRadarrLog(overrides: Partial<RenameJobLog> = {}): RenameJobLog {
 					existingPath: '/movies/Interstellar (2014) [imdb-tt0816692]',
 					newPath: '/movies/Interstellar (2014) {imdb-tt0816692}'
 				},
-				files: [{
-					existingPath: '/movies/Interstellar/Interstellar.2014.2160p.UHD.BluRay.Remux.mkv',
-					newPath: '/movies/Interstellar/Interstellar (2014) Remux-2160p.mkv'
-				}],
+				files: [
+					{
+						existingPath: '/movies/Interstellar/Interstellar.2014.2160p.UHD.BluRay.Remux.mkv',
+						newPath: '/movies/Interstellar/Interstellar (2014) Remux-2160p.mkv'
+					}
+				],
 				imageUrl: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg'
 			},
 			{
 				id: 102,
 				title: 'The Grand Budapest Hotel',
-				files: [{
-					existingPath: '/movies/The Grand Budapest Hotel/The.Grand.Budapest.Hotel.2014.1080p.BluRay.mkv',
-					newPath: '/movies/The Grand Budapest Hotel/The Grand Budapest Hotel (2014) Bluray-1080p.mkv'
-				}],
+				files: [
+					{
+						existingPath:
+							'/movies/The Grand Budapest Hotel/The.Grand.Budapest.Hotel.2014.1080p.BluRay.mkv',
+						newPath:
+							'/movies/The Grand Budapest Hotel/The Grand Budapest Hotel (2014) Bluray-1080p.mkv'
+					}
+				],
 				imageUrl: 'https://image.tmdb.org/t/p/w1280/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg'
 			}
 		],
@@ -121,17 +129,34 @@ function makeSonarrLog(overrides: Partial<RenameJobLog> = {}): RenameJobLog {
 			commandsFailed: 0,
 			errors: []
 		},
-		renamedItems: [{
-			id: 201,
-			title: 'Breaking Bad',
-			files: [
-				{ existingPath: '/tv/Breaking Bad/Season 3/S03E01.mkv', newPath: '/tv/Breaking Bad/Season 3/Breaking Bad - S03E01 - No Mas [Bluray-1080p].mkv' },
-				{ existingPath: '/tv/Breaking Bad/Season 3/S03E02.mkv', newPath: '/tv/Breaking Bad/Season 3/Breaking Bad - S03E02 - Caballo Sin Nombre [Bluray-1080p].mkv' },
-				{ existingPath: '/tv/Breaking Bad/Season 4/S04E01.mkv', newPath: '/tv/Breaking Bad/Season 4/Breaking Bad - S04E01 - Box Cutter [Bluray-1080p].mkv' },
-				{ existingPath: '/tv/Breaking Bad/Season 4/S04E02.mkv', newPath: '/tv/Breaking Bad/Season 4/Breaking Bad - S04E02 - Thirty-Eight Snub [Bluray-1080p].mkv' }
-			],
-			imageUrl: 'https://image.tmdb.org/t/p/w1280/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg'
-		}],
+		renamedItems: [
+			{
+				id: 201,
+				title: 'Breaking Bad',
+				files: [
+					{
+						existingPath: '/tv/Breaking Bad/Season 3/S03E01.mkv',
+						newPath: '/tv/Breaking Bad/Season 3/Breaking Bad - S03E01 - No Mas [Bluray-1080p].mkv'
+					},
+					{
+						existingPath: '/tv/Breaking Bad/Season 3/S03E02.mkv',
+						newPath:
+							'/tv/Breaking Bad/Season 3/Breaking Bad - S03E02 - Caballo Sin Nombre [Bluray-1080p].mkv'
+					},
+					{
+						existingPath: '/tv/Breaking Bad/Season 4/S04E01.mkv',
+						newPath:
+							'/tv/Breaking Bad/Season 4/Breaking Bad - S04E01 - Box Cutter [Bluray-1080p].mkv'
+					},
+					{
+						existingPath: '/tv/Breaking Bad/Season 4/S04E02.mkv',
+						newPath:
+							'/tv/Breaking Bad/Season 4/Breaking Bad - S04E02 - Thirty-Eight Snub [Bluray-1080p].mkv'
+					}
+				],
+				imageUrl: 'https://image.tmdb.org/t/p/w1280/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg'
+			}
+		],
 		...overrides
 	};
 }
@@ -157,8 +182,16 @@ test('title includes instance name', () => {
 });
 
 test('manual flag changes title', () => {
-	const auto = rename({ log: makeRadarrLog({ config: { dryRun: false, renameFolders: false, ignoreTag: null, manual: false } }) });
-	const manual = rename({ log: makeRadarrLog({ config: { dryRun: false, renameFolders: false, ignoreTag: null, manual: true } }) });
+	const auto = rename({
+		log: makeRadarrLog({
+			config: { dryRun: false, renameFolders: false, ignoreTag: null, manual: false }
+		})
+	});
+	const manual = rename({
+		log: makeRadarrLog({
+			config: { dryRun: false, renameFolders: false, ignoreTag: null, manual: true }
+		})
+	});
 	assertEquals(auto.title.includes('Automatic'), true);
 	assertEquals(manual.title.includes('Manual'), true);
 });
@@ -175,7 +208,9 @@ test('stats section has file and folder counts', () => {
 });
 
 test('dry run shows in stats', () => {
-	const log = makeRadarrLog({ config: { dryRun: true, renameFolders: false, ignoreTag: null, manual: false } });
+	const log = makeRadarrLog({
+		config: { dryRun: true, renameFolders: false, ignoreTag: null, manual: false }
+	});
 	const stats = rename({ log }).blocks?.find((b) => b.kind === 'section' && b.title === 'Stats');
 	if (stats?.kind === 'section') assertEquals(stats.content.includes('Dry Run'), true);
 });
@@ -225,7 +260,12 @@ test('sonarr groups by season in content', () => {
 });
 
 test('no items produces status-only message', () => {
-	assertEquals(rename({ log: makeRadarrLog({ renamedItems: [] }) }).message.includes('No files needed renaming'), true);
+	assertEquals(
+		rename({ log: makeRadarrLog({ renamedItems: [] }) }).message.includes(
+			'No files needed renaming'
+		),
+		true
+	);
 });
 
 // =========================================================================
@@ -236,7 +276,8 @@ test('discord: radarr item embeds have poster thumbnails', async () => {
 	captured.length = 0;
 	const notifier = new DiscordNotifier({
 		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
-		username: 'Profilarr', enable_mentions: false
+		username: 'Profilarr',
+		enable_mentions: false
 	});
 	await notifier.notify(rename({ log: makeRadarrLog(), summaryNotifications: false }));
 
@@ -248,7 +289,8 @@ test('discord: sonarr embed has poster thumbnail', async () => {
 	captured.length = 0;
 	const notifier = new DiscordNotifier({
 		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
-		username: 'Profilarr', enable_mentions: false
+		username: 'Profilarr',
+		enable_mentions: false
 	});
 	await notifier.notify(rename({ log: makeSonarrLog(), summaryNotifications: false }));
 
@@ -260,7 +302,8 @@ test('discord: success uses correct color', async () => {
 	captured.length = 0;
 	const notifier = new DiscordNotifier({
 		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
-		username: 'Profilarr', enable_mentions: false
+		username: 'Profilarr',
+		enable_mentions: false
 	});
 	await notifier.notify(rename({ log: makeRadarrLog() }));
 

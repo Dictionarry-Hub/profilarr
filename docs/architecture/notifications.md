@@ -41,10 +41,10 @@ or things go wrong. Two design goals drive every decision:
 1. **Extensibility without coupling.** Adding a new service (Ntfy, Slack,
    Telegram) or a new event (backup failed, PCD update available) is a
    self-contained change that doesn't touch unrelated code.
-2. **Definitions don't know about services.** The code that decides *what to
-   say* about a rename never imports Discord embeds, Ntfy priorities, or Slack
+2. **Definitions don't know about services.** The code that decides _what to
+   say_ about a rename never imports Discord embeds, Ntfy priorities, or Slack
    blocks. It produces a structured, service-agnostic payload. Each notifier
-   decides *how to render* that payload for its platform.
+   decides _how to render_ that payload for its platform.
 
 Notifications are **fire-and-forget**. A failed webhook never blocks a rename,
 upgrade, or sync. Errors are logged and recorded in history, but never propagated
@@ -57,11 +57,11 @@ job.
 
 Three layers, each with a single job:
 
-| Layer          | Responsibility                                     | Knows about                     |
-| -------------- | -------------------------------------------------- | ------------------------------- |
-| **Definition** | Decides *what to say*: title, message, blocks, severity | Domain data (job logs, statuses) |
-| **Manager**    | Decides *who to tell*: queries services, filters by type, records history | Service configs, type subscriptions |
-| **Notifier**   | Decides *how to render*: maps the structured payload to a platform-specific format | Platform API (Discord embeds, Ntfy JSON, etc.) |
+| Layer          | Responsibility                                                                     | Knows about                                    |
+| -------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **Definition** | Decides _what to say_: title, message, blocks, severity                            | Domain data (job logs, statuses)               |
+| **Manager**    | Decides _who to tell_: queries services, filters by type, records history          | Service configs, type subscriptions            |
+| **Notifier**   | Decides _how to render_: maps the structured payload to a platform-specific format | Platform API (Discord embeds, Ntfy JSON, etc.) |
 
 This means:
 
@@ -124,34 +124,34 @@ src/lib/server/notifications/types.ts
 
 ```typescript
 interface Notification {
-  type: string;
-  severity: 'success' | 'error' | 'warning' | 'info';
-  title: string;
-  message: string;
-  blocks?: NotificationBlock[];
+	type: string;
+	severity: 'success' | 'error' | 'warning' | 'info';
+	title: string;
+	message: string;
+	blocks?: NotificationBlock[];
 }
 
 type NotificationBlock = FieldBlock | SectionBlock;
 
 interface FieldBlock {
-  kind: 'field';
-  label: string;
-  value: string;
-  inline?: boolean;
+	kind: 'field';
+	label: string;
+	value: string;
+	inline?: boolean;
 }
 
 interface SectionBlock {
-  kind: 'section';
-  title: string;
-  content: string;
+	kind: 'section';
+	title: string;
+	content: string;
 }
 ```
 
 ### Design Rationale
 
 The payload is a **structured document**, not a rendering instruction. It
-describes *what happened* with enough structure for any service to produce useful
-output, but without dictating *how* it should look.
+describes _what happened_ with enough structure for any service to produce useful
+output, but without dictating _how_ it should look.
 
 This avoids two failure modes:
 
@@ -173,12 +173,12 @@ generic webhook to forward the raw object, all from the same payload.
 (`type.includes('success')` -> green). It's explicit, part of the payload, and
 each notifier maps it to their platform's concept:
 
-| Notifier | success              | error               | warning              | info                |
-| -------- | -------------------- | ------------------- | -------------------- | ------------------- |
-| Discord  | Green embed          | Red embed           | Yellow embed         | Blue embed          |
-| Ntfy     | Priority 3 (default) | Priority 5 (urgent) | Priority 4 (high)    | Priority 3 (default)|
-| Slack    | Green sidebar        | Red sidebar         | Yellow sidebar       | Blue sidebar        |
-| Webhook  | Passed through as-is | Passed through as-is| Passed through as-is | Passed through as-is|
+| Notifier | success              | error                | warning              | info                 |
+| -------- | -------------------- | -------------------- | -------------------- | -------------------- |
+| Discord  | Green embed          | Red embed            | Yellow embed         | Blue embed           |
+| Ntfy     | Priority 3 (default) | Priority 5 (urgent)  | Priority 4 (high)    | Priority 3 (default) |
+| Slack    | Green sidebar        | Red sidebar          | Yellow sidebar       | Blue sidebar         |
+| Webhook  | Passed through as-is | Passed through as-is | Passed through as-is | Passed through as-is |
 
 ### Blocks
 
@@ -204,13 +204,13 @@ notification reads top-to-bottom:
 
 ```typescript
 blocks: [
-  { kind: 'field', label: 'Files', value: '5/5', inline: true },
-  { kind: 'field', label: 'Folders', value: '3', inline: true },
-  { kind: 'field', label: 'Mode', value: 'Live', inline: true },
-  { kind: 'section', title: 'Breaking Bad - Season 3', content: 'Before: ...\nAfter: ...' },
-  { kind: 'section', title: 'Breaking Bad - Season 4', content: 'Before: ...\nAfter: ...' },
-  { kind: 'field', label: 'Errors', value: 'Failed to rename 1 file' },
-]
+	{ kind: 'field', label: 'Files', value: '5/5', inline: true },
+	{ kind: 'field', label: 'Folders', value: '3', inline: true },
+	{ kind: 'field', label: 'Mode', value: 'Live', inline: true },
+	{ kind: 'section', title: 'Breaking Bad - Season 3', content: 'Before: ...\nAfter: ...' },
+	{ kind: 'section', title: 'Breaking Bad - Season 4', content: 'Before: ...\nAfter: ...' },
+	{ kind: 'field', label: 'Errors', value: 'Failed to rename 1 file' }
+];
 ```
 
 With separate `fields[]` and `sections[]` arrays, the "Errors" field would be
@@ -239,17 +239,17 @@ A definition takes domain data (a job log, an event payload) and returns a
 
 ```typescript
 export function rename(params: RenameNotificationParams): Notification {
-  return {
-    type: `rename.${log.status}`,
-    severity: log.status === 'failed' ? 'error' : log.status === 'partial' ? 'warning' : 'success',
-    title: `${prefix} Rename ${result} - ${log.instanceName}`,
-    message: `Renamed ${log.results.filesRenamed} files for ${log.instanceName}`,
-    blocks: [
-      { kind: 'field', label: 'Files', value: `${filesRenamed}/${filesNeeding}`, inline: true },
-      { kind: 'field', label: 'Mode', value: 'Live', inline: true },
-      ...buildSections(log), // Grouped by item/season
-    ]
-  };
+	return {
+		type: `rename.${log.status}`,
+		severity: log.status === 'failed' ? 'error' : log.status === 'partial' ? 'warning' : 'success',
+		title: `${prefix} Rename ${result} - ${log.instanceName}`,
+		message: `Renamed ${log.results.filesRenamed} files for ${log.instanceName}`,
+		blocks: [
+			{ kind: 'field', label: 'Files', value: `${filesRenamed}/${filesNeeding}`, inline: true },
+			{ kind: 'field', label: 'Mode', value: 'Live', inline: true },
+			...buildSections(log) // Grouped by item/season
+		]
+	};
 }
 ```
 
@@ -294,12 +294,12 @@ The `createNotifier` factory is a simple switch on `service_type`:
 
 ```typescript
 switch (serviceType) {
-  case 'discord':
-    return new DiscordNotifier(config);
-  case 'ntfy':
-    return new NtfyNotifier(config);
-  default:
-    return null;
+	case 'discord':
+		return new DiscordNotifier(config);
+	case 'ntfy':
+		return new NtfyNotifier(config);
+	default:
+		return null;
 }
 ```
 
@@ -343,8 +343,8 @@ Two methods, deliberately minimal:
 
 ```typescript
 interface Notifier {
-  notify(notification: Notification): Promise<void>;
-  getName(): string;
+	notify(notification: Notification): Promise<void>;
+	getName(): string;
 }
 ```
 
@@ -372,11 +372,11 @@ Abstract base for webhook-based services. Provides:
 
 Subclasses implement three methods:
 
-| Method             | Purpose                                            |
-| ------------------ | -------------------------------------------------- |
-| `getWebhookUrl()`  | Return the target URL from config                  |
-| `formatPayload()`  | Render `Notification` into service-specific JSON   |
-| `getName()`        | Service name for logging                           |
+| Method            | Purpose                                          |
+| ----------------- | ------------------------------------------------ |
+| `getWebhookUrl()` | Return the target URL from config                |
+| `formatPayload()` | Render `Notification` into service-specific JSON |
+| `getName()`       | Service name for logging                         |
 
 ### Rendering Responsibility
 
@@ -406,10 +406,10 @@ filename, size, and duration:
 
 ```typescript
 const log = {
-  status: 'success',
-  filename: 'profilarr-2026-03-17.zip',
-  sizeBytes: 4_200_000,
-  durationMs: 1200
+	status: 'success',
+	filename: 'profilarr-2026-03-17.zip',
+	sizeBytes: 4_200_000,
+	durationMs: 1200
 };
 ```
 
@@ -421,20 +421,20 @@ Ntfy. It turns a backup log into a `Notification`:
 ```typescript
 // definitions/backup.ts
 export function backup(log: BackupJobLog): Notification {
-  const sizeMb = (log.sizeBytes / 1_000_000).toFixed(1);
-  const durationSec = (log.durationMs / 1000).toFixed(1);
+	const sizeMb = (log.sizeBytes / 1_000_000).toFixed(1);
+	const durationSec = (log.durationMs / 1000).toFixed(1);
 
-  return {
-    type: `job.create_backup.${log.status}`,
-    severity: 'success',
-    title: 'Backup Complete',
-    message: `Created ${log.filename} (${sizeMb} MB)`,
-    blocks: [
-      { kind: 'field', label: 'Filename', value: log.filename, inline: true },
-      { kind: 'field', label: 'Size', value: `${sizeMb} MB`, inline: true },
-      { kind: 'field', label: 'Duration', value: `${durationSec}s`, inline: true },
-    ]
-  };
+	return {
+		type: `job.create_backup.${log.status}`,
+		severity: 'success',
+		title: 'Backup Complete',
+		message: `Created ${log.filename} (${sizeMb} MB)`,
+		blocks: [
+			{ kind: 'field', label: 'Filename', value: log.filename, inline: true },
+			{ kind: 'field', label: 'Size', value: `${sizeMb} MB`, inline: true },
+			{ kind: 'field', label: 'Duration', value: `${durationSec}s`, inline: true }
+		]
+	};
 }
 ```
 
@@ -460,9 +460,9 @@ The backup handler passes the notification to the manager. One line:
 
 ```typescript
 try {
-  await notificationManager.notify(notifications.backup(log));
+	await notificationManager.notify(notifications.backup(log));
 } catch {
-  // fire-and-forget
+	// fire-and-forget
 }
 ```
 
@@ -473,10 +473,10 @@ The handler does not know or care which services are configured.
 The manager queries the database and finds two enabled services that subscribe to
 `job.create_backup.success`:
 
-| Service          | Type    |
-| ---------------- | ------- |
-| Main Discord     | discord |
-| Phone Alerts     | ntfy    |
+| Service      | Type    |
+| ------------ | ------- |
+| Main Discord | discord |
+| Phone Alerts | ntfy    |
 
 It creates a `DiscordNotifier` and an `NtfyNotifier` from their respective
 configs, sends in parallel via `Promise.allSettled()`, and records both results
@@ -491,18 +491,20 @@ their platform:
 
 ```json
 {
-  "username": "Profilarr",
-  "embeds": [{
-    "title": "Backup Complete",
-    "color": 65280,
-    "fields": [
-      { "name": "Filename", "value": "profilarr-2026-03-17.zip", "inline": true },
-      { "name": "Size", "value": "4.2 MB", "inline": true },
-      { "name": "Duration", "value": "1.2s", "inline": true }
-    ],
-    "footer": { "text": "Type: job.create_backup.success" },
-    "timestamp": "2026-03-17T12:00:00.000Z"
-  }]
+	"username": "Profilarr",
+	"embeds": [
+		{
+			"title": "Backup Complete",
+			"color": 65280,
+			"fields": [
+				{ "name": "Filename", "value": "profilarr-2026-03-17.zip", "inline": true },
+				{ "name": "Size", "value": "4.2 MB", "inline": true },
+				{ "name": "Duration", "value": "1.2s", "inline": true }
+			],
+			"footer": { "text": "Type: job.create_backup.success" },
+			"timestamp": "2026-03-17T12:00:00.000Z"
+		}
+	]
 }
 ```
 
@@ -510,10 +512,10 @@ their platform:
 
 ```json
 {
-  "topic": "profilarr",
-  "title": "Backup Complete",
-  "message": "Created profilarr-2026-03-17.zip (4.2 MB)\n\nFilename: profilarr-2026-03-17.zip\nSize: 4.2 MB\nDuration: 1.2s",
-  "priority": 3
+	"topic": "profilarr",
+	"title": "Backup Complete",
+	"message": "Created profilarr-2026-03-17.zip (4.2 MB)\n\nFilename: profilarr-2026-03-17.zip\nSize: 4.2 MB\nDuration: 1.2s",
+	"priority": 3
 }
 ```
 
@@ -568,23 +570,23 @@ A `Deno.serve()` instance that captures every incoming request:
 
 ```typescript
 interface CapturedRequest {
-  method: string;
-  path: string;
-  headers: Record<string, string>;
-  body: unknown;
+	method: string;
+	path: string;
+	headers: Record<string, string>;
+	body: unknown;
 }
 
 const captured: CapturedRequest[] = [];
 
 const mock = Deno.serve({ port: MOCK_PORT }, async (req) => {
-  const url = new URL(req.url);
-  captured.push({
-    method: req.method,
-    path: url.pathname,
-    headers: Object.fromEntries(req.headers),
-    body: await req.json()
-  });
-  return new Response('ok');
+	const url = new URL(req.url);
+	captured.push({
+		method: req.method,
+		path: url.pathname,
+		headers: Object.fromEntries(req.headers),
+		body: await req.json()
+	});
+	return new Response('ok');
 });
 ```
 
@@ -595,20 +597,18 @@ assert on `captured`:
 ```typescript
 // Seed a Discord service pointing at the mock
 seedService(db, {
-  serviceType: 'discord',
-  config: { webhook_url: `http://localhost:${MOCK_PORT}/discord` },
-  enabledTypes: ['job.create_backup.success']
+	serviceType: 'discord',
+	config: { webhook_url: `http://localhost:${MOCK_PORT}/discord` },
+	enabledTypes: ['job.create_backup.success']
 });
 
 // Send a notification
 await notificationManager.notify({
-  type: 'job.create_backup.success',
-  severity: 'success',
-  title: 'Backup Complete',
-  message: 'Created backup.zip (4.2 MB)',
-  blocks: [
-    { kind: 'field', label: 'Size', value: '4.2 MB', inline: true }
-  ]
+	type: 'job.create_backup.success',
+	severity: 'success',
+	title: 'Backup Complete',
+	message: 'Created backup.zip (4.2 MB)',
+	blocks: [{ kind: 'field', label: 'Size', value: '4.2 MB', inline: true }]
 });
 
 // Assert on what Discord received
@@ -623,7 +623,7 @@ The mock can also return errors for failure-path testing:
 
 ```typescript
 const mock = Deno.serve({ port: MOCK_PORT }, () => {
-  return new Response('Internal Server Error', { status: 500 });
+	return new Response('Internal Server Error', { status: 500 });
 });
 
 await notificationManager.notify(notification);
@@ -654,8 +654,8 @@ Tests check for the var and skip if absent:
 ```typescript
 const webhook = Deno.env.get('TEST_DISCORD_WEBHOOK');
 if (!webhook) {
-  skip('TEST_DISCORD_WEBHOOK not set, skipping real webhook test');
-  return;
+	skip('TEST_DISCORD_WEBHOOK not set, skipping real webhook test');
+	return;
 }
 
 const notifier = new DiscordNotifier({ webhook_url: webhook });

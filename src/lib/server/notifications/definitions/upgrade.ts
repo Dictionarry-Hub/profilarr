@@ -108,13 +108,16 @@ function formatItemContent(item: UpgradeSelectionItem): string {
 
 	// Score
 	if (item.original.type === 'movie') {
-		sections.push(`Score\nCurrent: ${item.original.score}\nUpgrade: ${item.upgrades[0]?.score ?? 0}`);
+		sections.push(
+			`Score\nCurrent: ${item.original.score}\nUpgrade: ${item.upgrades[0]?.score ?? 0}`
+		);
 	} else {
 		// Series: show average episode score as current
 		const episodes = item.original.episodes ?? [];
-		const avgScore = episodes.length > 0
-			? Math.round(episodes.reduce((sum, ep) => sum + ep.score, 0) / episodes.length)
-			: 0;
+		const avgScore =
+			episodes.length > 0
+				? Math.round(episodes.reduce((sum, ep) => sum + ep.score, 0) / episodes.length)
+				: 0;
 		for (const upgrade of item.upgrades) {
 			sections.push(`Score\nCurrent: ${avgScore} (avg)\nUpgrade: ${upgrade.score}`);
 		}

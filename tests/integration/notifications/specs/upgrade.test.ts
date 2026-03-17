@@ -26,7 +26,9 @@ try {
 			REAL_WEBHOOK = trimmed.slice(eqIdx + 1);
 		}
 	}
-} catch { /* no .env */ }
+} catch {
+	/* no .env */
+}
 
 setup(() => {
 	const mock = createMockServer(MOCK_PORT);
@@ -89,11 +91,13 @@ function makeLog(overrides: Partial<UpgradeJobLog> = {}): UpgradeJobLog {
 						formats: ['Bluray', 'x264', '1080p'],
 						score: 72
 					},
-					upgrades: [{
-						release: 'Interstellar.2014.2160p.UHD.BluRay.Remux.HDR.HEVC.Atmos-EPSiLON.mkv',
-						formats: ['Remux', 'x265', '2160p', 'HDR', 'Atmos'],
-						score: 145
-					}],
+					upgrades: [
+						{
+							release: 'Interstellar.2014.2160p.UHD.BluRay.Remux.HDR.HEVC.Atmos-EPSiLON.mkv',
+							formats: ['Remux', 'x265', '2160p', 'HDR', 'Atmos'],
+							score: 145
+						}
+					],
 					imageUrl: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg'
 				},
 				{
@@ -105,11 +109,14 @@ function makeLog(overrides: Partial<UpgradeJobLog> = {}): UpgradeJobLog {
 						formats: ['Bluray', 'x264', '720p'],
 						score: 48
 					},
-					upgrades: [{
-						release: 'The.Grand.Budapest.Hotel.2014.1080p.BluRay.Remux.AVC.DTS-HD.MA.5.1-RARBG.mkv',
-						formats: ['Remux', 'AVC', '1080p', 'DTS-HD MA'],
-						score: 112
-					}],
+					upgrades: [
+						{
+							release:
+								'The.Grand.Budapest.Hotel.2014.1080p.BluRay.Remux.AVC.DTS-HD.MA.5.1-RARBG.mkv',
+							formats: ['Remux', 'AVC', '1080p', 'DTS-HD MA'],
+							score: 112
+						}
+					],
 					imageUrl: 'https://image.tmdb.org/t/p/w1280/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg'
 				},
 				{
@@ -167,9 +174,24 @@ function makeSonarrLog(overrides: Partial<UpgradeJobLog> = {}): UpgradeJobLog {
 						type: 'series',
 						title: 'Breaking Bad',
 						episodes: [
-							{ seasonNumber: 3, fileName: 'S03E01 - No Mas.mkv', formats: ['Bluray', 'x264'], score: 72 },
-							{ seasonNumber: 3, fileName: 'S03E02 - Caballo Sin Nombre.mkv', formats: ['Bluray', 'x264'], score: 72 },
-							{ seasonNumber: 4, fileName: 'S04E01 - Box Cutter.mkv', formats: ['Bluray', 'x264'], score: 72 }
+							{
+								seasonNumber: 3,
+								fileName: 'S03E01 - No Mas.mkv',
+								formats: ['Bluray', 'x264'],
+								score: 72
+							},
+							{
+								seasonNumber: 3,
+								fileName: 'S03E02 - Caballo Sin Nombre.mkv',
+								formats: ['Bluray', 'x264'],
+								score: 72
+							},
+							{
+								seasonNumber: 4,
+								fileName: 'S04E01 - Box Cutter.mkv',
+								formats: ['Bluray', 'x264'],
+								score: 72
+							}
 						]
 					},
 					upgrades: [
@@ -195,7 +217,12 @@ function makeSonarrLog(overrides: Partial<UpgradeJobLog> = {}): UpgradeJobLog {
 						type: 'series',
 						title: 'Better Call Saul',
 						episodes: [
-							{ seasonNumber: 1, fileName: 'S01E01 - Uno.mkv', formats: ['WEB-DL', 'x264'], score: 55 }
+							{
+								seasonNumber: 1,
+								fileName: 'S01E01 - Uno.mkv',
+								formats: ['WEB-DL', 'x264'],
+								score: 55
+							}
 						]
 					},
 					upgrades: [],
@@ -288,7 +315,9 @@ test('item content has release, scores, and formats', () => {
 });
 
 test('no items produces stats-only notification', () => {
-	const log = makeLog({ selection: { method: 'random', requestedCount: 5, actualCount: 0, items: [] } });
+	const log = makeLog({
+		selection: { method: 'random', requestedCount: 5, actualCount: 0, items: [] }
+	});
 	assertEquals(upgrade({ log }).message.includes('No items to search'), true);
 });
 
@@ -342,7 +371,8 @@ test('discord: summary embed has success color', async () => {
 	captured.length = 0;
 	const notifier = new DiscordNotifier({
 		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
-		username: 'Profilarr', enable_mentions: false
+		username: 'Profilarr',
+		enable_mentions: false
 	});
 	await notifier.notify(upgrade({ log: makeLog() }));
 
@@ -354,7 +384,8 @@ test('discord: item embeds have poster thumbnails', async () => {
 	captured.length = 0;
 	const notifier = new DiscordNotifier({
 		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
-		username: 'Profilarr', enable_mentions: false
+		username: 'Profilarr',
+		enable_mentions: false
 	});
 	await notifier.notify(upgrade({ log: makeLog() }));
 
@@ -367,7 +398,8 @@ test('discord: item embeds have titles matching movie names', async () => {
 	captured.length = 0;
 	const notifier = new DiscordNotifier({
 		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
-		username: 'Profilarr', enable_mentions: false
+		username: 'Profilarr',
+		enable_mentions: false
 	});
 	await notifier.notify(upgrade({ log: makeLog() }));
 
@@ -381,7 +413,8 @@ test('discord: failed status uses error color', async () => {
 	captured.length = 0;
 	const notifier = new DiscordNotifier({
 		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
-		username: 'Profilarr', enable_mentions: false
+		username: 'Profilarr',
+		enable_mentions: false
 	});
 	await notifier.notify(upgrade({ log: makeLog({ status: 'failed' }) }));
 

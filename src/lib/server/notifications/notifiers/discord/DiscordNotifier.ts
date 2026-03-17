@@ -151,10 +151,7 @@ export class DiscordNotifier {
 
 			const fieldChars = fieldName.length + fieldValue.length;
 
-			if (
-				currentFieldCount >= MAX_FIELDS_PER_EMBED ||
-				currentSize + fieldChars > MAX_EMBED_SIZE
-			) {
+			if (currentFieldCount >= MAX_FIELDS_PER_EMBED || currentSize + fieldChars > MAX_EMBED_SIZE) {
 				embeds.push(currentEmbed);
 				currentEmbed = this.buildContinuationChrome(notification, color);
 				currentSize = getEmbedCharCount(currentEmbed);

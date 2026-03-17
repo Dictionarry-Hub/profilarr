@@ -25,7 +25,9 @@ try {
 			REAL_WEBHOOK = trimmed.slice(eqIdx + 1);
 		}
 	}
-} catch { /* no .env */ }
+} catch {
+	/* no .env */
+}
 
 setup(() => {
 	const mock = createMockServer(MOCK_PORT);
