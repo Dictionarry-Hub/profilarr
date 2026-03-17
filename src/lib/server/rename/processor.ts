@@ -107,7 +107,8 @@ function createRadarrAdapter(client: RadarrClient): RenameAdapter {
 				id: m.id,
 				title: m.title,
 				tags: m.tags ?? [],
-				rootFolderPath: m.rootFolderPath ?? ''
+				rootFolderPath: m.rootFolderPath ?? '',
+				imageUrl: m.images?.find((img) => img.coverType === 'poster')?.remoteUrl
 			}));
 		},
 		getTags: () => client.getTags(),
@@ -162,7 +163,8 @@ function createSonarrAdapter(client: SonarrClient): RenameAdapter {
 				id: s.id,
 				title: s.title,
 				tags: s.tags ?? [],
-				rootFolderPath: s.rootFolderPath ?? ''
+				rootFolderPath: s.rootFolderPath ?? '',
+				imageUrl: s.images?.find((img) => img.coverType === 'poster')?.remoteUrl
 			}));
 		},
 		getTags: () => client.getTags(),
@@ -370,6 +372,9 @@ export async function processRenameConfig(
 			// Step 5: Diff snapshots to find actual changes
 			const diff = diffSnapshots(beforeSnapshot, afterSnapshot);
 
+			// Build imageUrl lookup from library items
+			const imageUrlMap = new Map(filteredItems.map((i) => [i.id, i.imageUrl]));
+
 			let totalFilesRenamed = 0;
 			let totalFoldersRenamed = 0;
 
@@ -386,7 +391,8 @@ export async function processRenameConfig(
 					files: entity.files.map((f) => ({
 						existingPath: f.oldPath,
 						newPath: f.newPath
-					}))
+					})),
+					imageUrl: imageUrlMap.get(entity.id)
 				});
 			}
 

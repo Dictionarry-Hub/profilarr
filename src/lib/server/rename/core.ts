@@ -19,6 +19,7 @@ export interface LibraryItem {
 	title: string;
 	tags: number[];
 	rootFolderPath: string;
+	imageUrl?: string;
 }
 
 export interface RenameAdapter {
@@ -118,7 +119,8 @@ export async function processDryRun(
 					files: previews.map((p) => ({
 						existingPath: p.existingPath,
 						newPath: p.newPath
-					}))
+					})),
+					imageUrl: item.imageUrl
 				});
 			}
 		} catch (err) {

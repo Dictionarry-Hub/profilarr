@@ -78,6 +78,7 @@ export interface RenameJobLog {
 		title: string;
 		folder?: { existingPath: string; newPath: string };
 		files: { existingPath: string; newPath: string }[];
+		imageUrl?: string;
 	}[];
 }
 

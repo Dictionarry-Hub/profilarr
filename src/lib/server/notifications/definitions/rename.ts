@@ -45,44 +45,37 @@ function formatFileEntry(file: { existingPath: string; newPath: string }): strin
  * Format a folder change entry
  */
 function formatFolderEntry(folder: { existingPath: string; newPath: string }): string {
-	return `Folder Before: ${folder.existingPath}\nFolder After:  ${folder.newPath}`;
+	return `Before: ${folder.existingPath}\nAfter:  ${folder.newPath}`;
 }
 
 /**
- * Build section blocks for an item, grouping by season for Sonarr
+ * Format item content as Before/After sections separated by double newlines.
+ * For Sonarr, groups by season with separate Before/After per season.
  */
-function buildItemSections(
-	title: string,
+function formatItemContent(
 	item: {
 		folder?: { existingPath: string; newPath: string };
 		files: { existingPath: string; newPath: string }[];
 	},
 	isSonarr: boolean
-): NotificationBlock[] {
-	const sections: NotificationBlock[] = [];
+): string {
+	const sections: string[] = [];
 
-	// Add folder change as a section if present
+	// Folder change
 	if (item.folder) {
-		sections.push({
-			kind: 'section',
-			title: `${title} (Folder)`,
-			content: formatFolderEntry(item.folder)
-		});
+		sections.push(`Folder (Before)\n${item.folder.existingPath}`);
+		sections.push(`Folder (After)\n${item.folder.newPath}`);
 	}
 
 	if (!isSonarr || item.files.length === 0) {
-		// For Radarr or empty, one section with all files
 		if (item.files.length > 0) {
-			sections.push({
-				kind: 'section',
-				title,
-				content: item.files.map(formatFileEntry).join('\n\n')
-			});
+			sections.push(`Before\n${item.files.map((f) => getFilename(f.existingPath)).join('\n')}`);
+			sections.push(`After\n${item.files.map((f) => getFilename(f.newPath)).join('\n')}`);
 		}
-		return sections;
+		return sections.join('\n\n');
 	}
 
-	// For Sonarr, group by season
+	// Sonarr: group by season
 	const bySeasonMap = new Map<number, { existingPath: string; newPath: string }[]>();
 	const noSeason: { existingPath: string; newPath: string }[] = [];
 
@@ -102,28 +95,25 @@ function buildItemSections(
 
 	for (const season of seasons) {
 		const seasonFiles = bySeasonMap.get(season)!;
-		sections.push({
-			kind: 'section',
-			title: `${title} - Season ${season}`,
-			content: seasonFiles.map(formatFileEntry).join('\n\n')
-		});
+		sections.push(`Season ${season} (Before)\n${seasonFiles.map((f) => getFilename(f.existingPath)).join('\n')}`);
+		sections.push(`Season ${season} (After)\n${seasonFiles.map((f) => getFilename(f.newPath)).join('\n')}`);
 	}
 
 	if (noSeason.length > 0) {
-		sections.push({
-			kind: 'section',
-			title,
-			content: noSeason.map(formatFileEntry).join('\n\n')
-		});
+		sections.push(`Before\n${noSeason.map((f) => getFilename(f.existingPath)).join('\n')}`);
+		sections.push(`After\n${noSeason.map((f) => getFilename(f.newPath)).join('\n')}`);
 	}
 
-	return sections;
+	return sections.join('\n\n');
 }
 
 /**
  * Notification for rename job completion
  */
-export function rename({ log, summaryNotifications = true }: RenameNotificationParams): Notification {
+export function rename({
+	log,
+	summaryNotifications = true
+}: RenameNotificationParams): Notification {
 	const severity =
 		log.status === 'failed' ? 'error' : log.status === 'partial' ? 'warning' : 'success';
 
@@ -143,31 +133,22 @@ export function rename({ log, summaryNotifications = true }: RenameNotificationP
 
 	const blocks: NotificationBlock[] = [];
 
-	// Stats fields
+	// Stats as a single structured block
+	const statsLines: string[] = [];
 	if (log.config.dryRun) {
-		blocks.push({ kind: 'field', label: 'Mode', value: 'Dry Run', inline: true });
-		blocks.push({
-			kind: 'field',
-			label: 'Files',
-			value: String(log.results.filesNeedingRename),
-			inline: true
-		});
+		statsLines.push(`Mode:     Dry Run`);
+		statsLines.push(`Files:    ${log.results.filesNeedingRename}`);
 	} else {
-		blocks.push({
-			kind: 'field',
-			label: 'Files',
-			value: `${log.results.filesRenamed}/${log.results.filesNeedingRename}`,
-			inline: true
-		});
+		statsLines.push(`Files:    ${log.results.filesRenamed}/${log.results.filesNeedingRename}`);
 		if (log.config.renameFolders) {
-			blocks.push({
-				kind: 'field',
-				label: 'Folders',
-				value: String(log.results.foldersRenamed),
-				inline: true
-			});
+			statsLines.push(`Folders:  ${log.results.foldersRenamed}`);
 		}
 	}
+	blocks.push({
+		kind: 'section',
+		title: 'Stats',
+		content: statsLines.join('\n')
+	});
 
 	// Summary mode: one sample + count of others
 	if (summaryNotifications) {
@@ -178,24 +159,35 @@ export function rename({ log, summaryNotifications = true }: RenameNotificationP
 
 		let sampleContent = '';
 		if (sample.folder) {
-			sampleContent += formatFolderEntry(sample.folder);
+			sampleContent += `Folder (Before)\n${sample.folder.existingPath}`;
+			sampleContent += `\n\nFolder (After)\n${sample.folder.newPath}`;
 		}
 		if (sample.files.length > 0) {
 			if (sampleContent) sampleContent += '\n\n';
-			sampleContent += formatFileEntry(sample.files[0]);
+			sampleContent += `Before\n${getFilename(sample.files[0].existingPath)}`;
+			sampleContent += `\n\nAfter\n${getFilename(sample.files[0].newPath)}`;
 		}
 
 		if (sampleContent) {
 			blocks.push({
 				kind: 'section',
-				title: `Sample: ${sample.title}${othersText}`,
-				content: sampleContent
+				title: `${sample.title}${othersText}`,
+				content: sampleContent,
+				imageUrl: sample.imageUrl
 			});
 		}
 	} else {
-		// Rich mode: section blocks per item
+		// Rich mode: one section per item with poster
 		for (const item of log.renamedItems) {
-			blocks.push(...buildItemSections(item.title, item, isSonarr));
+			const content = formatItemContent(item, isSonarr);
+			if (content) {
+				blocks.push({
+					kind: 'section',
+					title: item.title,
+					content,
+					imageUrl: item.imageUrl
+				});
+			}
 		}
 	}
 
