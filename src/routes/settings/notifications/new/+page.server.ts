@@ -39,11 +39,25 @@ export const actions: Actions = {
 				...(avatarUrl && { avatar_url: avatarUrl }),
 				enable_mentions: enableMentions
 			};
+		} else if (serviceType === 'ntfy') {
+			const serverUrl = formData.get('server_url') as string;
+			const topic = formData.get('topic') as string;
+			const accessToken = formData.get('access_token') as string;
 
-			// Get enabled notification types dynamically from all available types
-			const allTypeIds = getAllNotificationTypeIds();
-			enabledTypes = allTypeIds.filter((typeId) => formData.get(typeId) === 'on');
+			if (!serverUrl || !topic) {
+				return fail(400, { error: 'Server URL and topic are required for Ntfy' });
+			}
+
+			config = {
+				server_url: serverUrl,
+				topic,
+				...(accessToken && { access_token: accessToken })
+			};
 		}
+
+		// Get enabled notification types dynamically from all available types
+		const allTypeIds = getAllNotificationTypeIds();
+		enabledTypes = allTypeIds.filter((typeId) => formData.get(typeId) === 'on');
 
 		// Generate UUID for the service
 		const id = crypto.randomUUID();

@@ -21,8 +21,8 @@ export const load = ({ params }: { params: { id: string } }) => {
 	const config = JSON.parse(service.config);
 	const enabledTypes = JSON.parse(service.enabled_types);
 
-	// Remove webhook_url from config (security - don't expose secrets)
-	const { webhook_url: _webhook_url, ...configWithoutWebhook } = config;
+	// Strip secrets from config before sending to frontend
+	const { webhook_url: _webhookUrl, access_token: _accessToken, ...safeConfig } = config;
 
 	return {
 		service: {
@@ -30,7 +30,7 @@ export const load = ({ params }: { params: { id: string } }) => {
 			name: service.name,
 			serviceType: service.service_type,
 			enabled: service.enabled === 1,
-			config: configWithoutWebhook,
+			config: safeConfig,
 			enabledTypes
 		}
 	};
@@ -68,14 +68,13 @@ export const actions: Actions = {
 		let config: Record<string, unknown> = {};
 		let enabledTypes: string[] = [];
 
+		const existingConfig = JSON.parse(service.config);
+
 		if (service.service_type === 'discord') {
 			const webhookUrl = formData.get('webhook_url') as string;
 			const username = formData.get('username') as string;
 			const avatarUrl = formData.get('avatar_url') as string;
 			const enableMentions = formData.get('enable_mentions') === 'on';
-
-			// Parse existing config to preserve webhook if not provided
-			const existingConfig = JSON.parse(service.config);
 
 			config = {
 				// Keep existing webhook_url if new one not provided
@@ -84,11 +83,30 @@ export const actions: Actions = {
 				...(avatarUrl && { avatar_url: avatarUrl }),
 				enable_mentions: enableMentions
 			};
+		} else if (service.service_type === 'ntfy') {
+			const serverUrl = formData.get('server_url') as string;
+			const topic = formData.get('topic') as string;
+			const accessToken = formData.get('access_token') as string;
 
-			// Get enabled notification types dynamically from all available types
-			const allTypeIds = getAllNotificationTypeIds();
-			enabledTypes = allTypeIds.filter((typeId) => formData.get(typeId) === 'on');
+			if (!serverUrl || !topic) {
+				return fail(400, { error: 'Server URL and topic are required for Ntfy' });
+			}
+
+			config = {
+				server_url: serverUrl,
+				topic,
+				// Keep existing access_token if new one not provided
+				...(accessToken
+					? { access_token: accessToken }
+					: existingConfig.access_token
+						? { access_token: existingConfig.access_token }
+						: {})
+			};
 		}
+
+		// Get enabled notification types dynamically from all available types
+		const allTypeIds = getAllNotificationTypeIds();
+		enabledTypes = allTypeIds.filter((typeId) => formData.get(typeId) === 'on');
 
 		// Update the service
 		const success = notificationServicesQueries.update(id, {

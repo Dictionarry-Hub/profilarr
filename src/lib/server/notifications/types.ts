@@ -89,11 +89,20 @@ export interface DiscordConfig {
 	enable_mentions?: boolean;
 }
 /**
+ * Configuration for Ntfy notifications
+ */
+export interface NtfyConfig {
+	server_url: string;
+	topic: string;
+	access_token?: string;
+}
+
+/**
  * Union type for all notification service configs
  */
-export type NotificationServiceConfig = DiscordConfig;
+export type NotificationServiceConfig = DiscordConfig | NtfyConfig;
 
 /**
  * Service types supported
  */
-export type NotificationServiceType = 'discord';
+export type NotificationServiceType = 'discord' | 'ntfy';

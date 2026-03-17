@@ -33,6 +33,16 @@
   - [What Each Spec Covers](#what-each-spec-covers)
   - [Mock Webhook Server](#mock-webhook-server)
   - [Real Webhooks](#real-webhooks)
+- [Service Tiers](#service-tiers)
+  - [Detail](#detail)
+  - [Summary](#summary)
+  - [Passthrough](#passthrough)
+  - [Choosing a Tier](#choosing-a-tier)
+- [Adding a New Service](#adding-a-new-service)
+  - [1. Define the Scope](#1-define-the-scope)
+  - [2. Write the Tests](#2-write-the-tests)
+  - [3. Build the UI](#3-build-the-ui)
+  - [4. Implement the Backend](#4-implement-the-backend)
 
 ## Overview
 
@@ -607,3 +617,215 @@ TEST_DISCORD_WEBHOOK=https://discord.com/api/webhooks/...
 Real webhook tests check for the env var and skip if absent. They send actual
 notifications to Discord for visual verification after writing or modifying a
 notifier. Not part of CI.
+
+## Service Tiers
+
+Not every notification service serves the same purpose. A Discord webhook can
+display rich embeds with thumbnails, color-coded severity, inline fields, and
+paginated content. An ntfy push notification buzzes your phone with a title and
+a few lines of text. A generic webhook forwards raw data to an automation
+pipeline that has no concept of "rendering" at all.
+
+The structured `Notification` payload contains everything — stats, sections,
+images, content blocks. Each notifier decides how much of that to use based on
+the tier it belongs to. This is a deliberate design choice, not a limitation.
+Services at different tiers serve different user needs, and forcing the same
+level of detail onto every platform produces bad results everywhere.
+
+### Detail
+
+**Purpose:** Full notification dashboard. The user reads these instead of
+opening the app.
+
+**Renders:** Everything. Title, message, all field blocks, all section blocks,
+images, color-coded severity, timestamps, footers. Handles platform limits
+(embed size, field count) via pagination.
+
+**Example:** Discord. An upgrade notification shows per-movie embeds with poster
+thumbnails, score breakdowns, format comparisons, and a stats summary. A rename
+notification shows per-season file lists with before/after paths.
+
+**When to use this tier:** The platform supports rich layouts (embeds, cards,
+structured fields) and the user expects to consume notifications without
+switching to another tool.
+
+### Summary
+
+**Purpose:** Quick ping. The user's phone buzzes, they glance at it, they know
+what happened. For details, they check a detail-tier service or the app itself.
+
+**Renders:** Title, message, and field blocks only. Section blocks (per-item
+detail, file lists, format breakdowns) are omitted. The notification answers
+"what happened?" and "how much?", not "show me everything."
+
+**Example:** Ntfy. An upgrade notification shows the title, summary line, and
+key stats (filter, upgrade count). The per-movie breakdowns are dropped. A
+rename notification shows files renamed and error count, not the individual file
+paths.
+
+**When to use this tier:** The platform is text-only or has tight size limits,
+and the primary use case is mobile push notifications or quick status checks.
+
+### Passthrough
+
+**Purpose:** Machine consumption. The raw `Notification` object is forwarded
+as JSON for automation pipelines, logging systems, or custom integrations.
+
+**Renders:** Nothing. The structured payload is sent as-is. The consumer decides
+what to do with it.
+
+**Example:** Generic webhook. A monitoring system ingests the JSON and applies
+its own alerting rules. A custom script parses the blocks and posts to an
+internal chat system.
+
+**When to use this tier:** The consumer is code, not a human. No rendering
+decisions are needed — the structured data is the product.
+
+### Choosing a Tier
+
+When adding a new service, decide the tier first. This is the most important
+design decision because it determines what the notifier renders and what tests
+need to cover.
+
+| Question | Detail | Summary | Passthrough |
+| --- | --- | --- | --- |
+| Does the platform support rich layouts? | Yes (embeds, cards) | No (plain text) | N/A |
+| Will users read these as their primary view? | Yes | No, just a ping | No, it's for automation |
+| Should section blocks be rendered? | Yes, fully | No, omitted | Forwarded raw |
+| Should images be included? | Yes, as thumbnails | No | Forwarded as URL |
+
+The tier is documented in the notifier's test file and in this architecture doc
+when the service is added. It's not a runtime config — it's a design-time
+decision baked into the renderer.
+
+## Adding a New Service
+
+Adding a notification service follows a fixed order: scope, tests, UI, backend.
+Each step is completed before moving to the next. This prevents building a
+notifier that doesn't match the service's purpose, or a UI form that doesn't
+match the config shape.
+
+### 1. Define the Scope
+
+Before writing any code, answer these questions:
+
+- **What tier?** Detail, summary, or passthrough. This determines what the
+  renderer will and won't include.
+- **What's the API?** HTTP method, URL structure, payload format, auth
+  mechanism. Read the service's publish API docs.
+- **What's the config shape?** What does the user need to provide? URL, topic,
+  token, channel ID? Which fields are secrets?
+- **How does severity map?** What's the platform's equivalent of "this is
+  urgent" vs "this is informational"? Colors, priorities, emoji, labels?
+
+Document the answers. For ntfy, this looked like:
+
+> **Tier:** Summary. Phone pings with headline and key stats. Section blocks
+> omitted.
+>
+> **API:** POST JSON to `{server_url}/{topic}`. Fields: `title`, `message`,
+> `priority` (1-5), `tags` (emoji shortcodes). Optional `Authorization: Bearer`
+> header.
+>
+> **Config:** `server_url` (default `https://ntfy.sh`), `topic` (required),
+> `access_token` (optional secret).
+>
+> **Severity:** success/info → priority 3, warning → priority 4, error →
+> priority 5. Tags map to emoji: `white_check_mark`, `information_source`,
+> `warning`, `x`.
+
+This scoping doc lives in `docs/todo/` for planned work, or in the PR
+description for the implementation.
+
+### 2. Write the Tests
+
+Tests are written before the implementation. The test file is the contract —
+it defines exactly what the notifier must do.
+
+Create `tests/integration/notifications/specs/{service}.test.ts` following the
+existing pattern (one file per service, covering rendering + real webhook):
+
+**Mock tests** (always run):
+
+- Severity maps to the platform's equivalent (colors, priorities, labels)
+- Title and message appear in the payload
+- Field blocks render correctly for the tier
+- Section blocks are handled according to the tier (rendered or omitted)
+- Auth headers/tokens are sent when configured
+- Auth headers/tokens are absent when not configured
+- Platform-specific features work (emoji tags, markdown flags, etc.)
+
+**Real tests** (skipped without `.env`):
+
+- Send a representative notification to a real instance for visual verification
+- Cover at least two notification types (e.g., upgrade + rename)
+
+Update `.env.example` with the new service's test variables.
+
+Example test structure:
+
+```typescript
+// tests/integration/notifications/specs/ntfy.test.ts
+
+describe('NtfyNotifier', () => {
+	describe('rendering', () => {
+		// Mock server tests
+		it('maps success severity to priority 3');
+		it('maps error severity to priority 5');
+		it('includes title and message in payload');
+		it('renders field blocks as Label: Value lines');
+		it('omits section blocks (summary tier)');
+		it('sends auth header when access_token is configured');
+		it('sends no auth header when access_token is absent');
+		it('includes severity emoji tag');
+	});
+
+	describe('real webhook', () => {
+		// Skipped without TEST_NTFY_URL + TEST_NTFY_TOPIC
+		it('sends upgrade notification to real topic');
+		it('sends rename notification to real topic');
+	});
+});
+```
+
+### 3. Build the UI
+
+The config form and route-level parsing. This is mechanical — it follows the
+same pattern as existing services.
+
+**New file:** `src/routes/settings/notifications/components/{Service}Configuration.svelte`
+
+The form component with fields matching the config shape from step 1. Secret
+fields use the same masked-on-edit pattern as Discord's webhook URL.
+
+**Modified files:**
+
+- `NotificationServiceForm.svelte` — add the service to the type dropdown and
+  an `{:else if}` block for the config component
+- `new/+page.server.ts` — add config parsing in the create action
+- `edit/[id]/+page.server.ts` — add config parsing in the edit action, strip
+  secrets in load
+- `+page.server.ts` — strip secrets from config in list load
+
+### 4. Implement the Backend
+
+The notifier class and its integration into the manager.
+
+**New files:**
+
+- `src/lib/server/notifications/notifiers/{service}/` — notifier implementation
+  plus barrel export
+
+**Modified files:**
+
+- `types.ts` — add config interface, update `NotificationServiceConfig` union,
+  update `NotificationServiceType`
+- `NotificationManager.ts` — add case in `createNotifier()` factory
+
+The notifier extends `BaseHttpNotifier` and implements `getWebhookUrl()`,
+`formatPayload()`, and `getName()`. If the service needs custom headers (like
+ntfy's Bearer token), override `notify()` to handle the HTTP request directly
+while keeping rate limiting from the base class.
+
+Run the tests from step 2. They should pass without modification — the tests
+were the contract, and the implementation fulfills it.

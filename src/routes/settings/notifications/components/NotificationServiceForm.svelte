@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
 	import DiscordConfiguration from './DiscordConfiguration.svelte';
+	import NtfyConfiguration from './NtfyConfiguration.svelte';
 	import { groupNotificationTypesByCategory } from '$shared/notifications/types';
 	import { Plus, Save } from 'lucide-svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
@@ -18,8 +19,8 @@
 		enabledTypes?: string[];
 	} = {};
 
-	let selectedType: 'discord' | 'slack' | 'email' =
-		(initialData.serviceType as 'discord') || 'discord';
+	let selectedType: 'discord' | 'ntfy' =
+		(initialData.serviceType as 'discord' | 'ntfy') || 'discord';
 	let serviceName = initialData.name || '';
 
 	// Group notification types by category
@@ -39,7 +40,10 @@
 		}
 	}
 
-	const typeOptions = [{ value: 'discord', label: 'Discord' }];
+	const typeOptions = [
+		{ value: 'discord', label: 'Discord' },
+		{ value: 'ntfy', label: 'Ntfy' }
+	];
 
 	$: title = mode === 'create' ? 'New Notification Service' : 'Edit Notification Service';
 	$: description =
@@ -128,7 +132,7 @@
 			label="Service Name"
 			name="service_name"
 			value={serviceName}
-			placeholder="e.g., Main Discord Server"
+			placeholder={selectedType === 'ntfy' ? 'e.g., Phone Alerts' : 'e.g., Main Discord Server'}
 			description="A friendly name to identify this notification service"
 			required
 			on:input={(e) => (serviceName = e.detail)}
@@ -137,6 +141,8 @@
 		<!-- Service Configuration -->
 		{#if selectedType === 'discord'}
 			<DiscordConfiguration config={initialData.config} {mode} />
+		{:else if selectedType === 'ntfy'}
+			<NtfyConfiguration config={initialData.config} {mode} />
 		{/if}
 
 		<!-- Notification Types -->
