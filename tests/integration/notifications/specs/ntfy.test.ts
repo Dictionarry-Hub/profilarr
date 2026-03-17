@@ -13,7 +13,7 @@ import type { Notification } from '$notifications/types.ts';
 import type { UpgradeJobLog } from '$lib/server/upgrades/types.ts';
 import type { RenameJobLog } from '$lib/server/rename/types.ts';
 
-const MOCK_PORT = 7134;
+const MOCK_PORT = 7135;
 let captured: CapturedRequest[];
 let mockServer: Deno.HttpServer;
 
