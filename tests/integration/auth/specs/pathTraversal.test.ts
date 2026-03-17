@@ -19,10 +19,10 @@
  */
 
 import { assertEquals, assertStringIncludes } from '@std/assert';
-import { TestClient } from '../harness/client.ts';
-import { startServer, stopServer, getDbPath } from '../harness/server.ts';
+import { TestClient } from '$test-harness/client.ts';
+import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, setApiKey, login } from '../harness/setup.ts';
-import { setup, teardown, test, run } from '../harness/runner.ts';
+import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { Database } from 'jsr:@db/sqlite@0.12';
 
 const PORT = 7018;

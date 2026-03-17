@@ -3,7 +3,7 @@
  */
 
 import { Database } from 'jsr:@db/sqlite@0.12';
-import { log } from '../../auth/harness/log.ts';
+import { log } from '$test-harness/log.ts';
 
 // ─── Database Instance ─────────────────────────────────────────────────────────
 

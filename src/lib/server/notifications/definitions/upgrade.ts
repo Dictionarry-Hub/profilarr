@@ -130,7 +130,6 @@ function formatItemContent(item: UpgradeSelectionItem): string {
 			for (const f of currentFmts) lines.push(`  ${f}`);
 		}
 		if (upgradeFmts.length > 0) {
-			if (currentFmts.length > 0) lines.push('');
 			lines.push('Upgrade:');
 			for (const f of upgradeFmts) lines.push(`  ${f}`);
 		}
@@ -149,7 +148,6 @@ function formatItemContent(item: UpgradeSelectionItem): string {
 				for (const f of currentFmtSet) lines.push(`  ${f}`);
 			}
 			if (upgrade.formats.length > 0) {
-				if (currentFmtSet.size > 0) lines.push('');
 				lines.push('Upgrade:');
 				for (const f of upgrade.formats) lines.push(`  ${f}`);
 			}

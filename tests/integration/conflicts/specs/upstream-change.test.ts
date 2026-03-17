@@ -12,9 +12,9 @@
  */
 
 import { assertEquals, assertExists, assert } from '@std/assert';
-import { TestClient } from '../../auth/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '../../auth/harness/server.ts';
-import { setup, teardown, test, run } from '../../auth/harness/runner.ts';
+import { TestClient } from '$test-harness/client.ts';
+import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
+import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import {
 	createPcdRepo,
 	createDatabaseInstance,

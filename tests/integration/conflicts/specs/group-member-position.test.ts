@@ -8,9 +8,9 @@
  */
 
 import { assertEquals, assertExists } from '@std/assert';
-import { TestClient } from '../../auth/harness/client.ts';
-import { getDbPath, startServer, stopServer } from '../../auth/harness/server.ts';
-import { run, setup, teardown, test } from '../../auth/harness/runner.ts';
+import { TestClient } from '$test-harness/client.ts';
+import { getDbPath, startServer, stopServer } from '$test-harness/server.ts';
+import { run, setup, teardown, test } from '$test-harness/runner.ts';
 import {
 	createDatabaseInstance,
 	createPcdRepo,

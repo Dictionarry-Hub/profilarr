@@ -20,9 +20,9 @@
  * - nginx does not log "upstream sent too big header"
  */
 
-import { startServer, stopServer, getDbPath } from '../harness/server.ts';
+import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect } from '../harness/setup.ts';
-import { setup, teardown, test, run } from '../harness/runner.ts';
+import { setup, teardown, test, run } from '$test-harness/runner.ts';
 
 const PORT = 7019;
 const PROXY_ORIGIN = 'http://localhost:7446';

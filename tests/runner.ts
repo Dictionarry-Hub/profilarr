@@ -71,8 +71,9 @@
 const INTEGRATION_COMPOSE = 'tests/integration/auth/docker-compose.yml';
 const INTEGRATION_AUTH_SPEC_DIR = 'tests/integration/auth/specs';
 const INTEGRATION_CONFLICT_SPEC_DIR = 'tests/integration/conflicts/specs';
+const INTEGRATION_NOTIFICATION_SPEC_DIR = 'tests/integration/notifications/specs';
 const INTEGRATION_SPEC_DIR = INTEGRATION_AUTH_SPEC_DIR; // backward compat
-const INTEGRATION_SUITES = new Set(['auth', 'conflicts']);
+const INTEGRATION_SUITES = new Set(['auth', 'conflicts', 'notifications']);
 
 const E2E_PCD_CONFIG = 'tests/e2e/pcd/playwright.config.ts';
 const E2E_PCD_SPEC_DIR = 'tests/e2e/pcd/specs';
@@ -230,19 +231,9 @@ async function runIntegration(target?: string): Promise<number> {
 
 	// Resolve spec dirs and files
 	function getSpecDir(s: string): string {
-		return s === 'conflicts' ? INTEGRATION_CONFLICT_SPEC_DIR : INTEGRATION_AUTH_SPEC_DIR;
-	}
-
-	// Validate spec file if specified
-	if (specName && suite) {
-		const testPath = `${getSpecDir(suite)}/${specName}.test.ts`;
-		try {
-			await Deno.stat(testPath);
-		} catch {
-			console.error(`Unknown integration spec: "${specName}" in suite "${suite}"`);
-			console.error(`Expected file: ${testPath}`);
-			return 1;
-		}
+		if (s === 'conflicts') return INTEGRATION_CONFLICT_SPEC_DIR;
+		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
+		return INTEGRATION_AUTH_SPEC_DIR;
 	}
 
 	// Determine which suites to run
@@ -262,25 +253,49 @@ async function runIntegration(target?: string): Promise<number> {
 		}
 
 		// Collect spec files from all suites
+		// Recursively collect .test.ts files from a directory
+		async function collectSpecs(dir: string): Promise<string[]> {
+			const files: string[] = [];
+			try {
+				for await (const entry of Deno.readDir(dir)) {
+					if (entry.isDirectory) {
+						files.push(...(await collectSpecs(`${dir}/${entry.name}`)));
+					} else if (
+						entry.isFile &&
+						entry.name.endsWith('.test.ts') &&
+						!entry.name.endsWith('-manual.test.ts')
+					) {
+						files.push(`${dir}/${entry.name}`);
+					}
+				}
+			} catch {
+				// Directory may not exist yet
+			}
+			return files;
+		}
+
 		const specFiles: string[] = [];
 		for (const s of suitesToRun) {
 			const dir = getSpecDir(s);
 			if (specName && s === suite) {
-				specFiles.push(`${dir}/${specName}.test.ts`);
-			} else {
+				// Try direct path first, then search subdirectories
+				const directPath = `${dir}/${specName}.test.ts`;
 				try {
-					for await (const entry of Deno.readDir(dir)) {
-						if (
-							entry.isFile &&
-							entry.name.endsWith('.test.ts') &&
-							!entry.name.endsWith('-manual.test.ts')
-						) {
-							specFiles.push(`${dir}/${entry.name}`);
-						}
-					}
+					await Deno.stat(directPath);
+					specFiles.push(directPath);
 				} catch {
-					// Suite directory may not have specs yet
+					// Search subdirectories for the spec
+					const allSpecs = await collectSpecs(dir);
+					const match = allSpecs.find((f) => f.endsWith(`/${specName}.test.ts`));
+					if (match) {
+						specFiles.push(match);
+					} else {
+						console.error(`Unknown integration spec: "${specName}" in suite "${s}"`);
+						return 1;
+					}
 				}
+			} else {
+				specFiles.push(...(await collectSpecs(dir)));
 			}
 		}
 		specFiles.sort();
@@ -351,6 +366,7 @@ async function runIntegrationSpec(
 	const specName = specFile
 		.replace(`${INTEGRATION_AUTH_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_CONFLICT_SPEC_DIR}/`, '')
+		.replace(`${INTEGRATION_NOTIFICATION_SPEC_DIR}/`, '')
 		.replace('.test.ts', '');
 	const args = ['run', '--allow-all', '--no-check'];
 	if (INTEGRATION_NEEDS_TLS_INSECURE.has(specName)) {

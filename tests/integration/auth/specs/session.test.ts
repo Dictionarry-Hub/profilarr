@@ -15,8 +15,8 @@
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '../harness/client.ts';
-import { startServer, stopServer, getDbPath } from '../harness/server.ts';
+import { TestClient } from '$test-harness/client.ts';
+import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import {
 	createUser,
 	login,
@@ -24,7 +24,7 @@ import {
 	setSessionExpiry,
 	getSessionExpiry
 } from '../harness/setup.ts';
-import { setup, teardown, test, run } from '../harness/runner.ts';
+import { setup, teardown, test, run } from '$test-harness/runner.ts';
 
 const PORT = 7005;
 const ORIGIN = `http://localhost:${PORT}`;

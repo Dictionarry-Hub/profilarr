@@ -20,6 +20,7 @@
 		"$sync/": "./src/lib/server/sync/",
 		"$cache/": "./src/lib/server/utils/cache/",
 		"$auth/": "./src/lib/server/utils/auth/",
+		"$test-harness/": "./tests/integration/harness/",
 		"@soapbox/kysely-deno-sqlite": "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
 		"@std/assert": "jsr:@std/assert@^1.0.0",
 		"marked": "npm:marked@^15.0.6",
