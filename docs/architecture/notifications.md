@@ -1,5 +1,20 @@
 # Notification System
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Notification Payload](#notification-payload)
+  - [Severity](#severity)
+- [Definitions](#definitions)
+- [NotificationManager](#notificationmanager)
+- [Notifiers](#notifiers)
+  - [Discord (Detail Tier)](#discord-detail-tier)
+  - [Ntfy (Summary Tier)](#ntfy-summary-tier)
+- [Service Tiers](#service-tiers)
+- [Testing](#testing)
+- [Adding a New Service](#adding-a-new-service)
+
 ## Overview
 
 Profilarr's notification system sends alerts when jobs complete, databases sync,
