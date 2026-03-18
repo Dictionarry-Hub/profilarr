@@ -8,7 +8,15 @@
   </picture>
 </p>
 
-<h3 align="center">An integrated development environment for Radarr and Sonarr configurations</h3>
+<h3 align="center">Build, test, and deploy configurations across your media stack</h3>
+
+<p align="center">
+  <a href="https://github.com/Dictionarry-Hub/profilarr/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Dictionarry-Hub/profilarr/ci.yml?label=CI" alt="CI"></a>
+  <a href="https://github.com/Dictionarry-Hub/profilarr/releases"><img src="https://img.shields.io/github/v/release/Dictionarry-Hub/profilarr" alt="Release"></a>
+  <a href="https://github.com/Dictionarry-Hub/profilarr/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue" alt="License"></a>
+  <a href="https://discord.gg/2A89tXZMgA"><img src="https://img.shields.io/discord/1202375791556431892?color=5865F2&logo=discord&logoColor=white" alt="Discord"></a>
+  <a href="https://dictionarry.dev"><img src="https://img.shields.io/badge/Website-dictionarry.dev-blue" alt="Website"></a>
+</p>
 
 <p align="center">
   <picture>
@@ -18,83 +26,57 @@
   </picture>
 </p>
 
-> [!NOTE]
-> V2 is currently in closed beta. An open beta will follow, then a full release.
+> [!WARNING]
+> V2 is not yet ready for production use. It is currently in closed beta.
+> For production use, see [Profilarr V1](https://github.com/Dictionarry-Hub/profilarr/tree/v1).
 > Join our [Discord](https://discord.gg/2A89tXZMgA) if you'd like to beta test.
-> For production use, see
-> [Profilarr V1](https://github.com/Dictionarry-Hub/profilarr/tree/v1).
 
-## Why Profilarr
-
-Profilarr gives you a single place to build, test, and deploy configuration
-across all your Radarr and Sonarr instances. No more copy-pasting settings,
-cross-referencing forum posts, or hoping nothing drifts between instances.
+If you manage a media server, you've probably spent hours configuring quality
+profiles, piecing together custom formats from forum posts, and hoping nothing
+drifts between instances. Profilarr tries to make that easier.
 
 ## Features
 
 ### Build
 
-- Custom formats with reusable regex, language filters, and resolution checks
-- Quality profiles with upgrade rules and per-app CF scoring
-- Media management presets (naming, media settings, quality definitions)
-- Delay profiles with protocol preferences and CF score gates
-- Link curated [configuration databases](https://github.com/Dictionarry-Hub/database)
-  or build from scratch, with local tweaks that persist across updates
+- **Link configuration databases** - connect to curated databases like
+  [Dictionarry](https://github.com/Dictionarry-Hub/database),
+  [TRaSH Guides](https://github.com/Dictionarry-Hub/trash-pcd),
+  [Dumpstarr](https://github.com/Dumpstarr/Database),
+  or [build and share your own](https://github.com/Dictionarry-Hub/database-template)!
+- **Quality profiles** - order and group qualities, assign custom format scores
+  per app, and configure upgrade rules
+- **Custom formats** - define conditions to match releases by resolution, source,
+  release group, size, language, indexer flags, and more
+- **Regular expressions** - a reusable pattern library shared across custom
+  formats, with Regex101 integration
+- **Media management** - naming conventions, media settings, and quality
+  definitions for Radarr and Sonarr
+- **Delay profiles** - protocol preferences, delays, and custom format score
+  gates
+- **Local tweaks** - customize anything and your changes persist across upstream
+  updates with smart conflict handling
 
 ### Test
 
-- Score releases against quality profiles with full CF match visualization
-- Test release titles against custom format conditions
-- Validate regex patterns with Regex101 integration
+- **Regular expressions** - validate patterns with embedded [Regex101](https://regex101.com/) test cases
+- **Custom formats** - test release titles against custom format conditions with
+  a full breakdown of how each condition passes or fails, with custom format
+  match visualization. Powered by a C# parser that matches Radarr and Sonarr's
+  own parsing logic
+- **Quality profiles** - simulate how a profile scores and ranks releases for a
+  given movie or series
 
 ### Deploy
 
-- Sync to any number of Radarr and Sonarr instances
-- Automated upgrades with configurable filters and selectors
-- Bulk rename with dry-run previews
-- Scheduled jobs for sync, upgrades, renames, backups, and cleanup
-- Notifications via Discord, ntfy, and webhooks
-
-<details>
-<summary>Screenshots</summary>
-
-<!-- TODO: capture screenshots (dark + light variants via <picture>) -->
-<!-- Organize by Build / Test / Deploy -->
-
-<table>
-  <tr>
-    <td align="center">
-      <!-- <img src="docs/assets/screenshots/custom-formats.png" width="400"> -->
-      <br><b>Custom Formats</b>
-    </td>
-    <td align="center">
-      <!-- <img src="docs/assets/screenshots/quality-profiles.png" width="400"> -->
-      <br><b>Quality Profiles</b>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <!-- <img src="docs/assets/screenshots/entity-testing.png" width="400"> -->
-      <br><b>Entity Testing</b>
-    </td>
-    <td align="center">
-      <!-- <img src="docs/assets/screenshots/cf-testing.png" width="400"> -->
-      <br><b>Custom Format Testing</b>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <!-- <img src="docs/assets/screenshots/sync.png" width="400"> -->
-      <br><b>Sync</b>
-    </td>
-    <td align="center">
-      <!-- <img src="docs/assets/screenshots/jobs.png" width="400"> -->
-      <br><b>Jobs Dashboard</b>
-    </td>
-  </tr>
-</table>
-
-</details>
+- **Sync** - push configurations to any number of Arr instances
+- **Upgrades** - automated searches with configurable filters, selectors, and
+  cooldowns
+- **Rename** - bulk rename files and folders with dry-run previews
+- **Jobs** - scheduled automation for sync, upgrades, renames, backups, and
+  cleanup
+- **Notifications** - Discord, Telegram, Slack, ntfy, Pushover, Gotify, Apprise,
+  and generic webhooks
 
 ## Getting Started
 
@@ -132,18 +114,20 @@ services:
 > testing. Linking, syncing, and all other features work without it. Remove the
 > `parser` service and related environment variables if you don't need it.
 
-**Link a database**
+| Variable | Default | Description |
+| --- | --- | --- |
+| `PUID` | `1000` | User ID for file permissions |
+| `PGID` | `1000` | Group ID for file permissions |
+| `UMASK` | `022` | File creation mask |
+| `TZ` | `Etc/UTC` | Timezone for scheduling |
+| `PORT` | `6868` | Web UI port |
+| `HOST` | `0.0.0.0` | Bind address |
+| `AUTH` | `on` | Auth mode (`on`, `oidc`, `off`) |
+| `PARSER_HOST` | `localhost` | Parser service host |
+| `PARSER_PORT` | `5000` | Parser service port |
 
-Connect to a configuration database like the
-[Dictionarry database](https://github.com/Dictionarry-Hub/database), or any
-[Profilarr Compliant Database](https://github.com/Dictionarry-Hub/database-template). Browse available
-profiles, custom formats, and media settings, then make local tweaks as needed.
-
-**Add your instances and sync**
-
-Add your Radarr and Sonarr instances by URL and API key, configure which
-profiles and settings to sync, and deploy. Set up schedules to keep everything
-in sync automatically.
+See the [documentation](https://dictionarry.dev/) for full setup and
+configuration guides.
 
 ### Development
 
@@ -159,16 +143,12 @@ cd profilarr
 deno task dev
 ```
 
-This runs the parser service and Vite dev server concurrently. See
-[CONTRIBUTING.md](docs/CONTRIBUTING.md) for the full development workflow.
+This runs the parser service and Vite dev server concurrently.
 
-## Links
-
-| Link | Description |
-| --- | --- |
-| :book: [Documentation](https://dictionarry.dev/) | Installation, usage, API reference, and configuration guides |
-| :speech_balloon: [Discord](https://discord.gg/2A89tXZMgA) | Announcements, support, and community discussion |
-| :hammer_and_wrench: [Contributing](docs/CONTRIBUTING.md) | Development setup, branching model, and PR process |
+Contributions are welcome! For anything beyond small fixes, please open an
+issue or reach out on [Discord](https://discord.gg/2A89tXZMgA) first so we
+can discuss the approach. See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for the
+full development workflow.
 
 ## Support
 
