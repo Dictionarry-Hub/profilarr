@@ -31,54 +31,46 @@
 > For production use, see [Profilarr V1](https://github.com/Dictionarry-Hub/profilarr/tree/v1).
 > Join our [Discord](https://discord.gg/2A89tXZMgA) if you'd like to beta test.
 
+## 🌍 Overview
+
 If you manage a media server, you've probably spent hours configuring quality
 profiles, piecing together custom formats from forum posts, and hoping nothing
 drifts between instances. Profilarr tries to make that easier.
 
-## Features
+## ✨ Features
 
-### Build
+### 🔨 Build
 
-- **Link configuration databases** - connect to curated databases like
-  [Dictionarry](https://github.com/Dictionarry-Hub/database),
-  [TRaSH Guides](https://github.com/Dictionarry-Hub/trash-pcd),
-  [Dumpstarr](https://github.com/Dumpstarr/Database),
-  or [build and share your own](https://github.com/Dictionarry-Hub/database-template)!
-- **Quality profiles** - order and group qualities, assign custom format scores
-  per app, and configure upgrade rules
-- **Custom formats** - define conditions to match releases by resolution, source,
-  release group, size, language, indexer flags, and more
-- **Regular expressions** - a reusable pattern library shared across custom
-  formats, with Regex101 integration
-- **Media management** - naming conventions, media settings, and quality
-  definitions for Radarr and Sonarr
-- **Delay profiles** - protocol preferences, delays, and custom format score
-  gates
-- **Local tweaks** - customize anything and your changes persist across upstream
-  updates with smart conflict handling
+| Feature | Description |
+| --- | --- |
+| **Link databases** | Connect to curated databases like [Dictionarry](https://github.com/Dictionarry-Hub/database), [TRaSH Guides](https://github.com/Dictionarry-Hub/trash-pcd), or [Dumpstarr](https://github.com/Dumpstarr/Database) |
+| **Build your own** | Create and share your own database using the [PCD template](https://github.com/Dictionarry-Hub/database-template) |
+| **Quality profiles** | Group and order qualities, score custom formats per app |
+| **Custom formats** | Match releases by resolution, source, release group, size, language, and more |
+| **Regular expressions** | Reusable patterns shared across custom formats |
+| **Media management** | Naming conventions, media settings, and quality definitions |
+| **Delay profiles** | Protocol preferences, delays, and score gates |
+| **Local tweaks** | Your changes persist across upstream updates with smart conflict handling |
 
-### Test
+### 🧪 Test
 
-- **Regular expressions** - validate patterns with embedded [Regex101](https://regex101.com/) test cases
-- **Custom formats** - test release titles against custom format conditions with
-  a full breakdown of how each condition passes or fails, with custom format
-  match visualization. Powered by a C# parser that matches Radarr and Sonarr's
-  own parsing logic
-- **Quality profiles** - simulate how a profile scores and ranks releases for a
-  given movie or series
+| Feature | Description |
+| --- | --- |
+| **Regular expressions** | Validate patterns with embedded [Regex101](https://regex101.com/) test cases |
+| **Custom formats** | Test releases against conditions with a full breakdown of how each passes or fails, with match visualization. Powered by a C# parser that matches Radarr and Sonarr's own parsing logic |
+| **Quality profiles** | Simulate how a profile scores and ranks releases for a given movie or series |
 
-### Deploy
+### 🚀 Deploy
 
-- **Sync** - push configurations to any number of Arr instances
-- **Upgrades** - automated searches with configurable filters, selectors, and
-  cooldowns
-- **Rename** - bulk rename files and folders with dry-run previews
-- **Jobs** - scheduled automation for sync, upgrades, renames, backups, and
-  cleanup
-- **Notifications** - Discord, Telegram, Slack, ntfy, Pushover, Gotify, Apprise,
-  and generic webhooks
+| Feature | Description |
+| --- | --- |
+| **Sync** | Push configurations to any number of Arr instances |
+| **Upgrades** | Automated searches with configurable filters, selectors, and cooldowns |
+| **Rename** | Bulk rename files and folders with dry-run previews |
+| **Jobs** | Scheduled automation for sync, upgrades, renames, backups, and cleanup |
+| **Notifications** | Discord, Telegram, Slack, ntfy, Pushover, Gotify, Apprise, and generic webhooks |
 
-## Getting Started
+## 📦 Getting Started
 
 ### Production
 
@@ -150,16 +142,16 @@ issue or reach out on [Discord](https://discord.gg/2A89tXZMgA) first so we
 can discuss the approach. See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for the
 full development workflow.
 
-## Support
+## ❤️ Support
 
 Every feature in Profilarr is free for everyone, and development will continue
 with or without donations. If you'd like to show support, you can, but it's
 in no way necessary.
 
 - :coffee: [Buy Me A Coffee](https://www.buymeacoffee.com/santiagosayshey)
-- :heart: [GitHub Sponsors](https://github.com/sponsors/Dictionarry-Hub)
+- :cat: [GitHub Sponsors](https://github.com/sponsors/Dictionarry-Hub)
 
-## License
+## 🤝 License
 
 [AGPL-3.0](LICENSE)
 
