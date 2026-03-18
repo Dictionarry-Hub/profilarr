@@ -98,11 +98,19 @@ export interface NtfyConfig {
 }
 
 /**
+ * Configuration for Webhook notifications
+ */
+export interface WebhookConfig {
+	webhook_url: string;
+	auth_header?: string;
+}
+
+/**
  * Union type for all notification service configs
  */
-export type NotificationServiceConfig = DiscordConfig | NtfyConfig;
+export type NotificationServiceConfig = DiscordConfig | NtfyConfig | WebhookConfig;
 
 /**
  * Service types supported
  */
-export type NotificationServiceType = 'discord' | 'ntfy';
+export type NotificationServiceType = 'discord' | 'ntfy' | 'webhook';

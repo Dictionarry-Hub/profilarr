@@ -53,6 +53,18 @@ export const actions: Actions = {
 				topic,
 				...(accessToken && { access_token: accessToken })
 			};
+		} else if (serviceType === 'webhook') {
+			const webhookUrl = formData.get('webhook_url') as string;
+			const authHeader = formData.get('auth_header') as string;
+
+			if (!webhookUrl) {
+				return fail(400, { error: 'Webhook URL is required' });
+			}
+
+			config = {
+				webhook_url: webhookUrl,
+				...(authHeader && { auth_header: authHeader })
+			};
 		}
 
 		// Get enabled notification types dynamically from all available types

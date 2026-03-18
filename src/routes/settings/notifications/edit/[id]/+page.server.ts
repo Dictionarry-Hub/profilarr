@@ -22,7 +22,12 @@ export const load = ({ params }: { params: { id: string } }) => {
 	const enabledTypes = JSON.parse(service.enabled_types);
 
 	// Strip secrets from config before sending to frontend
-	const { webhook_url: _webhookUrl, access_token: _accessToken, ...safeConfig } = config;
+	const {
+		webhook_url: _webhookUrl,
+		access_token: _accessToken,
+		auth_header: _authHeader,
+		...safeConfig
+	} = config;
 
 	return {
 		service: {
@@ -100,6 +105,20 @@ export const actions: Actions = {
 					? { access_token: accessToken }
 					: existingConfig.access_token
 						? { access_token: existingConfig.access_token }
+						: {})
+			};
+		} else if (service.service_type === 'webhook') {
+			const webhookUrl = formData.get('webhook_url') as string;
+			const authHeader = formData.get('auth_header') as string;
+
+			config = {
+				// Keep existing webhook_url if new one not provided
+				webhook_url: webhookUrl || existingConfig.webhook_url,
+				// Keep existing auth_header if new one not provided
+				...(authHeader
+					? { auth_header: authHeader }
+					: existingConfig.auth_header
+						? { auth_header: existingConfig.auth_header }
 						: {})
 			};
 		}

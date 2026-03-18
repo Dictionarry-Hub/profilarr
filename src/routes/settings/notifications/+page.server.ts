@@ -21,7 +21,7 @@ export const load = () => {
 		let safeConfig = service.config;
 		try {
 			const parsed = JSON.parse(service.config);
-			const { webhook_url: _, access_token: __, ...rest } = parsed;
+			const { webhook_url: _, access_token: __, auth_header: ___, ...rest } = parsed;
 			safeConfig = JSON.stringify(rest);
 		} catch {
 			// If config isn't valid JSON, send as-is (no secret to strip)
