@@ -107,7 +107,7 @@
 		{
 			key: 'indexers',
 			header: 'Indexers',
-			width: 'w-32'
+			width: 'w-48'
 		},
 		{
 			key: 'languages',
