@@ -135,10 +135,10 @@
 			name="service_name"
 			value={serviceName}
 			placeholder={selectedType === 'ntfy'
-			? 'e.g., Phone Alerts'
-			: selectedType === 'webhook'
-				? 'e.g., Home Assistant'
-				: 'e.g., Main Discord Server'}
+				? 'e.g., Phone Alerts'
+				: selectedType === 'webhook'
+					? 'e.g., Home Assistant'
+					: 'e.g., Main Discord Server'}
 			description="A friendly name to identify this notification service"
 			required
 			on:input={(e) => (serviceName = e.detail)}

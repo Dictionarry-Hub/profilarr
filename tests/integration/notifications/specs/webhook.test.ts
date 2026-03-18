@@ -229,22 +229,19 @@ function makeUpgradeLog(): UpgradeJobLog {
 					},
 					upgrades: [
 						{
-							release:
-								'Interstellar.2014.2160p.UHD.BluRay.Remux.HDR.HEVC.Atmos-EPSiLON.mkv',
+							release: 'Interstellar.2014.2160p.UHD.BluRay.Remux.HDR.HEVC.Atmos-EPSiLON.mkv',
 							formats: ['Remux', 'x265', '2160p', 'HDR', 'Atmos'],
 							score: 145
 						}
 					],
-					imageUrl:
-						'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg'
+					imageUrl: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg'
 				},
 				{
 					id: 102,
 					title: 'The Grand Budapest Hotel',
 					original: {
 						type: 'movie',
-						fileName:
-							'The.Grand.Budapest.Hotel.2014.720p.BluRay.x264-SPARKS.mkv',
+						fileName: 'The.Grand.Budapest.Hotel.2014.720p.BluRay.x264-SPARKS.mkv',
 						formats: ['Bluray', 'x264', '720p'],
 						score: 48
 					},
@@ -256,8 +253,7 @@ function makeUpgradeLog(): UpgradeJobLog {
 							score: 112
 						}
 					],
-					imageUrl:
-						'https://image.tmdb.org/t/p/w1280/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg'
+					imageUrl: 'https://image.tmdb.org/t/p/w1280/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg'
 				}
 			]
 		},
@@ -296,14 +292,11 @@ function makeRenameLog(): RenameJobLog {
 				},
 				files: [
 					{
-						existingPath:
-							'/movies/Interstellar (2014)/Interstellar.2014.1080p.BluRay.mkv',
-						newPath:
-							'/movies/Interstellar (2014)/Interstellar (2014) [Bluray-1080p].mkv'
+						existingPath: '/movies/Interstellar (2014)/Interstellar.2014.1080p.BluRay.mkv',
+						newPath: '/movies/Interstellar (2014)/Interstellar (2014) [Bluray-1080p].mkv'
 					}
 				],
-				imageUrl:
-					'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg'
+				imageUrl: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg'
 			}
 		]
 	};
