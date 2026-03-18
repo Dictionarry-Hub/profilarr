@@ -1,4 +1,3 @@
-import { logger } from '$logger/logger.ts';
 import type { NtfyConfig, Notification, NotificationSeverity } from '../../types.ts';
 import { getWebhookClient } from '../../base/webhookClient.ts';
 
@@ -23,24 +22,7 @@ export class NtfyNotifier {
 			headers['Authorization'] = `Bearer ${this.config.access_token}`;
 		}
 
-		try {
-			await getWebhookClient().post(url, payload, { headers });
-
-			await logger.debug('Notification sent', {
-				source: this.getName(),
-				meta: { type: notification.type }
-			});
-		} catch (error) {
-			await logger.error('Failed to send notification', {
-				source: this.getName(),
-				meta: {
-					type: notification.type,
-					title: notification.title,
-					error: error instanceof Error ? error.message : String(error)
-				}
-			});
-			throw error;
-		}
+		await getWebhookClient().post(url, payload, { headers });
 	}
 
 	private formatPayload(notification: Notification): unknown {

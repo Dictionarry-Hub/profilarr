@@ -1,4 +1,3 @@
-import { logger } from '$logger/logger.ts';
 import type { DiscordConfig, Notification, NotificationSeverity } from '../../types.ts';
 import { Colors, type DiscordEmbed } from './embed.ts';
 import { getWebhookClient } from '../../base/webhookClient.ts';
@@ -245,24 +244,7 @@ export class DiscordNotifier {
 	 * Send a single webhook request
 	 */
 	private async sendWebhook(payload: unknown): Promise<void> {
-		const payloadObj = payload as { embeds?: unknown[] };
-
-		try {
-			await getWebhookClient().sendWebhook(this.config.webhook_url, payload);
-		} catch (error) {
-			const embedCharCounts =
-				payloadObj.embeds
-					?.map((e, i) => `${i}:${getEmbedCharCount(e as DiscordEmbed)}`)
-					.join(', ') || 'none';
-			await logger.error('Failed to send notification', {
-				source: this.getName(),
-				meta: {
-					error: error instanceof Error ? error.message : String(error),
-					embedCharCounts
-				}
-			});
-			throw error;
-		}
+		await getWebhookClient().sendWebhook(this.config.webhook_url, payload);
 	}
 
 	private sleep(ms: number): Promise<void> {
