@@ -11,6 +11,7 @@
 - [Notifiers](#notifiers)
   - [Discord (Detail Tier)](#discord-detail-tier)
   - [Ntfy (Summary Tier)](#ntfy-summary-tier)
+  - [Webhook (Passthrough Tier)](#webhook-passthrough-tier)
 - [Service Tiers](#service-tiers)
 - [Testing](#testing)
 - [Adding a New Service](#adding-a-new-service)
@@ -53,10 +54,12 @@ flowchart TD
 
     FACTORY -->|discord| DISCORD[DiscordNotifier]
     FACTORY -->|ntfy| NTFY[NtfyNotifier]
+    FACTORY -->|webhook| WEBHOOK[WebhookNotifier]
     FACTORY -->|future| OTHER[...]
 
     DISCORD -->|renders to embeds| WEBHOOK_D[Discord Webhook]
     NTFY -->|renders to ntfy JSON| WEBHOOK_N[Ntfy Server]
+    WEBHOOK -->|raw JSON| WEBHOOK_W[Webhook Endpoint]
     OTHER -->|renders| WEBHOOK_O[...]
 
     NM -->|record result| HISTORY[(notification_history)]
@@ -106,6 +109,7 @@ Each notifier maps severity to its platform's concept:
 | -------- | -------------------- | ------------------- | ----------------- | -------------------- |
 | Discord  | Green embed          | Red embed           | Yellow embed      | Blue embed           |
 | Ntfy     | Priority 3 (default) | Priority 5 (urgent) | Priority 4 (high) | Priority 3 (default) |
+| Webhook  | No mapping           | No mapping          | No mapping        | No mapping           |
 
 ## Definitions
 
@@ -173,6 +177,13 @@ POSTs JSON to the server root with `topic` in the payload. Maps severity to
 priority (3/4/5) and emoji tags. Optional `Authorization: Bearer` header for
 authenticated topics.
 
+### Webhook (Passthrough Tier)
+
+POSTs the raw `Notification` object as JSON to a user-configured URL. No
+rendering, no severity mapping, no block filtering — the payload is the
+notification. Optional `Authorization` header for authenticated endpoints
+(user provides the full header value, e.g. `Bearer token` or `Basic base64`).
+
 ## Service Tiers
 
 Not every service renders the same content. The tier determines what the notifier
@@ -197,6 +208,7 @@ tests/integration/notifications/
     upgrade.test.ts      - upgrade notification (definition + Discord + real webhook)
     rename.test.ts       - rename notification (definition + Discord + real webhook)
     ntfy.test.ts         - ntfy rendering + auth + real webhook
+    webhook.test.ts      - webhook passthrough + auth + real webhook
 ```
 
 Tests are organized by notification type. Each spec covers definition output,
@@ -205,6 +217,7 @@ notifier rendering via mock server, and optionally a real webhook send.
 ```bash
 deno task test integration notifications              # all
 deno task test integration notifications ntfy         # ntfy only
+deno task test integration notifications webhook      # webhook only
 deno task test integration notifications upgrade      # upgrade only
 ```
 
