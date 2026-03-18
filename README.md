@@ -41,34 +41,41 @@ drifts between instances. Profilarr tries to make that easier.
 
 ### 🔨 Build
 
-| Feature | Description |
-| --- | --- |
-| **Link databases** | Connect to curated databases like [Dictionarry](https://github.com/Dictionarry-Hub/database), [TRaSH Guides](https://github.com/Dictionarry-Hub/trash-pcd), or [Dumpstarr](https://github.com/Dumpstarr/Database) |
-| **Build your own** | Create and share your own database using the [PCD template](https://github.com/Dictionarry-Hub/database-template) |
-| **Quality profiles** | Group and order qualities, score custom formats per app |
-| **Custom formats** | Match releases by resolution, source, release group, size, language, and more |
-| **Regular expressions** | Reusable patterns shared across custom formats |
-| **Media management** | Naming conventions, media settings, and quality definitions |
-| **Delay profiles** | Protocol preferences, delays, and score gates |
-| **Local tweaks** | Your changes persist across upstream updates with smart conflict handling |
+- **Link databases** - connect to curated databases like
+  [Dictionarry](https://github.com/Dictionarry-Hub/database),
+  [TRaSH Guides](https://github.com/Dictionarry-Hub/trash-pcd),
+  or [Dumpstarr](https://github.com/Dumpstarr/Database)
+- **Build your own** - create and share your own database using the
+  [PCD template](https://github.com/Dictionarry-Hub/database-template)
+- **Quality profiles** - group and order qualities, score custom formats per app
+- **Custom formats** - match releases by resolution, source, release group,
+  size, language, and more
+- **Regular expressions** - reusable patterns shared across custom formats
+- **Media management** - naming conventions, media settings, and quality
+  definitions
+- **Delay profiles** - protocol preferences, delays, and score gates
+- **Local tweaks** - your changes persist across upstream updates with smart
+  conflict handling
 
 ### 🧪 Test
 
-| Feature | Description |
-| --- | --- |
-| **Regular expressions** | Validate patterns with embedded [Regex101](https://regex101.com/) test cases |
-| **Custom formats** | Test releases against conditions with a full breakdown of how each passes or fails, with match visualization. Powered by a C# parser that matches Radarr and Sonarr's own parsing logic |
-| **Quality profiles** | Simulate how a profile scores and ranks releases for a given movie or series |
+- **Regular expressions** - validate patterns with embedded [Regex101](https://regex101.com/) test cases
+- **Custom formats** - test releases against conditions with a full breakdown of
+  how each passes or fails, with match visualization. Powered by a C# parser
+  that matches Radarr and Sonarr's own parsing logic
+- **Quality profiles** - simulate how a profile scores and ranks releases for a
+  given movie or series
 
 ### 🚀 Deploy
 
-| Feature | Description |
-| --- | --- |
-| **Sync** | Push configurations to any number of Arr instances |
-| **Upgrades** | Automated searches with configurable filters, selectors, and cooldowns |
-| **Rename** | Bulk rename files and folders with dry-run previews |
-| **Jobs** | Scheduled automation for sync, upgrades, renames, backups, and cleanup |
-| **Notifications** | Discord, Telegram, Slack, ntfy, Pushover, Gotify, Apprise, and generic webhooks |
+- **Sync** - push configurations to any number of Arr instances
+- **Upgrades** - automated searches with configurable filters, selectors, and
+  cooldowns
+- **Rename** - bulk rename files and folders with dry-run previews
+- **Jobs** - scheduled automation for sync, upgrades, renames, backups, and
+  cleanup
+- **Notifications** - Discord, Telegram, Slack, ntfy, Pushover, Gotify, Apprise,
+  and generic webhooks
 
 ## 📦 Getting Started
 
