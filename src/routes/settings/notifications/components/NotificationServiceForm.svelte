@@ -3,6 +3,7 @@
 	import { alertStore } from '$alerts/store';
 	import DiscordConfiguration from './DiscordConfiguration.svelte';
 	import NtfyConfiguration from './NtfyConfiguration.svelte';
+	import WebhookConfiguration from './WebhookConfiguration.svelte';
 	import { groupNotificationTypesByCategory } from '$shared/notifications/types';
 	import { Plus, Save } from 'lucide-svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
@@ -19,8 +20,8 @@
 		enabledTypes?: string[];
 	} = {};
 
-	let selectedType: 'discord' | 'ntfy' =
-		(initialData.serviceType as 'discord' | 'ntfy') || 'discord';
+	let selectedType: 'discord' | 'ntfy' | 'webhook' =
+		(initialData.serviceType as 'discord' | 'ntfy' | 'webhook') || 'discord';
 	let serviceName = initialData.name || '';
 
 	// Group notification types by category
@@ -42,7 +43,8 @@
 
 	const typeOptions = [
 		{ value: 'discord', label: 'Discord' },
-		{ value: 'ntfy', label: 'Ntfy' }
+		{ value: 'ntfy', label: 'Ntfy' },
+		{ value: 'webhook', label: 'Webhook' }
 	];
 
 	$: title = mode === 'create' ? 'New Notification Service' : 'Edit Notification Service';
@@ -132,7 +134,11 @@
 			label="Service Name"
 			name="service_name"
 			value={serviceName}
-			placeholder={selectedType === 'ntfy' ? 'e.g., Phone Alerts' : 'e.g., Main Discord Server'}
+			placeholder={selectedType === 'ntfy'
+			? 'e.g., Phone Alerts'
+			: selectedType === 'webhook'
+				? 'e.g., Home Assistant'
+				: 'e.g., Main Discord Server'}
 			description="A friendly name to identify this notification service"
 			required
 			on:input={(e) => (serviceName = e.detail)}
@@ -143,6 +149,8 @@
 			<DiscordConfiguration config={initialData.config} {mode} />
 		{:else if selectedType === 'ntfy'}
 			<NtfyConfiguration config={initialData.config} {mode} />
+		{:else if selectedType === 'webhook'}
+			<WebhookConfiguration config={initialData.config} {mode} />
 		{/if}
 
 		<!-- Notification Types -->
