@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { ComponentType } from 'svelte';
+	import { Loader2 } from 'lucide-svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	export let text: string = '';
@@ -81,8 +82,9 @@
 	$: baseTextColor =
 		textColor || (variant === 'ghost' ? 'text-neutral-700 dark:text-neutral-300' : '');
 	$: baseIconColor =
-		(iconColor || (variant === 'ghost' ? 'text-neutral-500 dark:text-neutral-400' : '')) +
-		(loading ? ' animate-spin' : '');
+		iconColor || (variant === 'ghost' ? 'text-neutral-500 dark:text-neutral-400' : '');
+	$: effectiveIcon = loading ? Loader2 : icon;
+	$: effectiveIconColor = loading ? baseIconColor + ' animate-spin' : baseIconColor;
 	$: isIconOnly = icon && !text;
 	$: activeSizeClasses = isIconOnly ? iconOnlySizeClasses : sizeClasses;
 	$: classes = `group ${baseClasses} ${activeSizeClasses[effectiveSize]} ${variantClasses[variant]} ${widthClass}`;
@@ -100,15 +102,15 @@
 			class={classes}
 			on:click
 		>
-			{#if icon && iconPosition === 'left'}
-				<svelte:component this={icon} size={iconSize} class={baseIconColor} />
+			{#if effectiveIcon && iconPosition === 'left'}
+				<svelte:component this={effectiveIcon} size={iconSize} class={effectiveIconColor} />
 			{/if}
 			{#if text}
 				<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>
 			{/if}
 			<slot />
-			{#if icon && iconPosition === 'right'}
-				<svelte:component this={icon} size={iconSize} class={baseIconColor} />
+			{#if effectiveIcon && iconPosition === 'right'}
+				<svelte:component this={effectiveIcon} size={iconSize} class={effectiveIconColor} />
 			{/if}
 		</a>
 	{:else}
@@ -120,15 +122,15 @@
 			class={classes}
 			on:click
 		>
-			{#if icon && iconPosition === 'left'}
-				<svelte:component this={icon} size={iconSize} class={baseIconColor} />
+			{#if effectiveIcon && iconPosition === 'left'}
+				<svelte:component this={effectiveIcon} size={iconSize} class={effectiveIconColor} />
 			{/if}
 			{#if text}
 				<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>
 			{/if}
 			<slot />
-			{#if icon && iconPosition === 'right'}
-				<svelte:component this={icon} size={iconSize} class={baseIconColor} />
+			{#if effectiveIcon && iconPosition === 'right'}
+				<svelte:component this={effectiveIcon} size={iconSize} class={effectiveIconColor} />
 			{/if}
 		</button>
 	{/if}
