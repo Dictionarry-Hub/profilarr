@@ -1,11 +1,13 @@
 /**
- * Rename notification - definition + Discord rendering + real webhook.
+ * Rename notification - definition + Discord + Ntfy + Webhook.
  */
 
 import { assertEquals, assertExists } from '@std/assert';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { createMockServer, type CapturedRequest } from '../harness/mock-server.ts';
 import { DiscordNotifier } from '$notifications/notifiers/discord/DiscordNotifier.ts';
+import { NtfyNotifier } from '$notifications/notifiers/ntfy/NtfyNotifier.ts';
+import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifier.ts';
 import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { rename } from '$notifications/definitions/rename.ts';
 import type { RenameJobLog } from '$lib/server/rename/types.ts';
@@ -14,7 +16,10 @@ const MOCK_PORT = 7134;
 let captured: CapturedRequest[];
 let mockServer: Deno.HttpServer;
 
-let REAL_WEBHOOK: string | undefined;
+let REAL_DISCORD: string | undefined;
+let REAL_NTFY_URL: string | undefined;
+let REAL_NTFY_TOPIC: string | undefined;
+let REAL_WEBHOOK_URL: string | undefined;
 try {
 	const envPath = new URL('../.env', import.meta.url).pathname;
 	const content = await Deno.readTextFile(envPath);
@@ -22,8 +27,13 @@ try {
 		const trimmed = line.trim();
 		if (!trimmed || trimmed.startsWith('#')) continue;
 		const eqIdx = trimmed.indexOf('=');
-		if (eqIdx > 0 && trimmed.slice(0, eqIdx) === 'TEST_DISCORD_WEBHOOK') {
-			REAL_WEBHOOK = trimmed.slice(eqIdx + 1);
+		if (eqIdx > 0) {
+			const key = trimmed.slice(0, eqIdx);
+			const value = trimmed.slice(eqIdx + 1);
+			if (key === 'TEST_DISCORD_WEBHOOK') REAL_DISCORD = value;
+			if (key === 'TEST_NTFY_URL') REAL_NTFY_URL = value;
+			if (key === 'TEST_NTFY_TOPIC') REAL_NTFY_TOPIC = value;
+			if (key === 'TEST_WEBHOOK_URL') REAL_WEBHOOK_URL = value;
 		}
 	}
 } catch {
@@ -269,8 +279,20 @@ test('no items produces status-only message', () => {
 });
 
 // =========================================================================
-// Discord rendering
+// Discord
 // =========================================================================
+
+test('discord: success uses correct color', async () => {
+	captured.length = 0;
+	const notifier = new DiscordNotifier({
+		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
+		username: 'Profilarr',
+		enable_mentions: false
+	});
+	await notifier.notify(rename({ log: makeRadarrLog() }));
+
+	assertEquals(getAllEmbeds()[0]?.color, Colors.SUCCESS);
+});
 
 test('discord: radarr item embeds have poster thumbnails', async () => {
 	captured.length = 0;
@@ -298,41 +320,122 @@ test('discord: sonarr embed has poster thumbnail', async () => {
 	assertEquals(withThumbnails.length, 1);
 });
 
-test('discord: success uses correct color', async () => {
+// =========================================================================
+// Ntfy
+// =========================================================================
+
+test('ntfy: success maps to priority 3', async () => {
 	captured.length = 0;
-	const notifier = new DiscordNotifier({
-		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
-		username: 'Profilarr',
-		enable_mentions: false
+	const notifier = new NtfyNotifier({
+		server_url: `http://localhost:${MOCK_PORT}`,
+		topic: 'test-topic'
 	});
 	await notifier.notify(rename({ log: makeRadarrLog() }));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.SUCCESS);
+	const payload = captured[0]?.body as Record<string, unknown>;
+	assertEquals(payload?.priority, 3);
+	assertEquals(payload?.tags, ['white_check_mark']);
+});
+
+test('ntfy: failed maps to priority 5', async () => {
+	captured.length = 0;
+	const notifier = new NtfyNotifier({
+		server_url: `http://localhost:${MOCK_PORT}`,
+		topic: 'test-topic'
+	});
+	await notifier.notify(rename({ log: makeRadarrLog({ status: 'failed' }) }));
+
+	const payload = captured[0]?.body as Record<string, unknown>;
+	assertEquals(payload?.priority, 5);
+	assertEquals(payload?.tags, ['x']);
+});
+
+test('ntfy: message includes instance name', async () => {
+	captured.length = 0;
+	const notifier = new NtfyNotifier({
+		server_url: `http://localhost:${MOCK_PORT}`,
+		topic: 'test-topic'
+	});
+	await notifier.notify(rename({ log: makeRadarrLog() }));
+
+	const payload = captured[0]?.body as Record<string, unknown>;
+	assertEquals((payload?.title as string).includes('Movies'), true);
 });
 
 // =========================================================================
-// Real webhook (skipped without .env)
+// Webhook
 // =========================================================================
 
-test('real: sends radarr rename notification', async () => {
-	if (!REAL_WEBHOOK) return;
+test('webhook: sends full notification with blocks', async () => {
+	captured.length = 0;
+	const notifier = new WebhookNotifier({
+		webhook_url: `http://localhost:${MOCK_PORT}/webhook`
+	});
+	await notifier.notify(rename({ log: makeRadarrLog() }));
+
+	const payload = captured[0]?.body as Record<string, unknown>;
+	assertEquals(payload?.type, 'rename.success');
+	assertEquals(payload?.severity, 'success');
+	const blocks = payload?.blocks as unknown[];
+	assertExists(blocks);
+	assertEquals(blocks.length > 0, true);
+});
+
+test('webhook: includes section blocks with imageUrl', async () => {
+	captured.length = 0;
+	const notifier = new WebhookNotifier({
+		webhook_url: `http://localhost:${MOCK_PORT}/webhook`
+	});
+	await notifier.notify(rename({ log: makeRadarrLog(), summaryNotifications: false }));
+
+	const payload = captured[0]?.body as Record<string, unknown>;
+	const blocks = payload?.blocks as { kind: string; imageUrl?: string }[];
+	const sections = blocks.filter((b) => b.kind === 'section' && b.imageUrl);
+	assertEquals(sections.length, 2);
+});
+
+// =========================================================================
+// Real sends (skipped without .env)
+// =========================================================================
+
+test('real: sends radarr rename to Discord', async () => {
+	if (!REAL_DISCORD) return;
 	const notifier = new DiscordNotifier({
-		webhook_url: REAL_WEBHOOK,
+		webhook_url: REAL_DISCORD,
 		username: 'Profilarr Test',
 		enable_mentions: false
 	});
 	await notifier.notify(rename({ log: makeRadarrLog(), summaryNotifications: false }));
 });
 
-test('real: sends sonarr rename notification', async () => {
-	if (!REAL_WEBHOOK) return;
+test('real: sends sonarr rename to Discord', async () => {
+	if (!REAL_DISCORD) return;
 	await new Promise((r) => setTimeout(r, 2000));
 	const notifier = new DiscordNotifier({
-		webhook_url: REAL_WEBHOOK,
+		webhook_url: REAL_DISCORD,
 		username: 'Profilarr Test',
 		enable_mentions: false
 	});
 	await notifier.notify(rename({ log: makeSonarrLog(), summaryNotifications: false }));
+});
+
+test('real: sends rename to ntfy', async () => {
+	if (!REAL_NTFY_URL || !REAL_NTFY_TOPIC) return;
+	await new Promise((r) => setTimeout(r, 2000));
+	const notifier = new NtfyNotifier({
+		server_url: REAL_NTFY_URL,
+		topic: REAL_NTFY_TOPIC
+	});
+	await notifier.notify(rename({ log: makeRadarrLog() }));
+});
+
+test('real: sends rename to webhook', async () => {
+	if (!REAL_WEBHOOK_URL) return;
+	await new Promise((r) => setTimeout(r, 2000));
+	const notifier = new WebhookNotifier({
+		webhook_url: REAL_WEBHOOK_URL
+	});
+	await notifier.notify(rename({ log: makeRadarrLog() }));
 });
 
 await run();
