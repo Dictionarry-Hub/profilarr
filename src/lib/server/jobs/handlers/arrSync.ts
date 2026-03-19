@@ -8,6 +8,9 @@ import { calculateNextRun } from '$lib/server/sync/utils.ts';
 import type { SectionType } from '$lib/server/sync/types.ts';
 import { getSection } from '$lib/server/sync/registry.ts';
 import { logger } from '$logger/logger.ts';
+import { notifications } from '$notifications/definitions/index.ts';
+import { notificationManager } from '$notifications/NotificationManager.ts';
+import type { ArrSyncSectionResult } from '$notifications/definitions/arrSync.ts';
 
 // Register sync handlers
 import '$lib/server/sync/qualityProfiles/handler.ts';
@@ -68,6 +71,7 @@ const arrSyncHandler: JobHandler = async (job) => {
 
 	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
 	const results: string[] = [];
+	const sectionResults: ArrSyncSectionResult[] = [];
 	let failures = 0;
 	let ranSections = 0;
 	let rescheduleAt: string | null = null;
@@ -100,16 +104,19 @@ const arrSyncHandler: JobHandler = async (job) => {
 			if (result.success) {
 				handler.completeSync(instanceId);
 				results.push(`${section}: ${result.itemsSynced} item(s)`);
+				sectionResults.push({ section, success: true, items: result.items });
 			} else {
 				handler.failSync(instanceId, result.error ?? 'Unknown error');
 				results.push(`${section}: failed`);
 				failures++;
+				sectionResults.push({ section, success: false, error: result.error });
 			}
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			handler.failSync(instanceId, message);
 			results.push(`${section}: failed`);
 			failures++;
+			sectionResults.push({ section, success: false, error: message });
 			await logger.error('Arr sync failed', {
 				source: 'ArrSyncJob',
 				meta: { jobId: job.id, instanceId, instanceName: instance.name, section, error: message }
@@ -122,6 +129,23 @@ const arrSyncHandler: JobHandler = async (job) => {
 					rescheduleAt = nextRun ?? null;
 				}
 			}
+		}
+	}
+
+	if (ranSections > 0) {
+		try {
+			await notificationManager.notify(
+				notifications.arrSync({
+					instanceName: instance.name,
+					instanceType: instance.type,
+					sections: sectionResults
+				})
+			);
+		} catch (err) {
+			await logger.error('Failed to send arr sync notification', {
+				source: 'ArrSyncJob',
+				meta: { instanceId, error: err instanceof Error ? err.message : 'Unknown error' }
+			});
 		}
 	}
 

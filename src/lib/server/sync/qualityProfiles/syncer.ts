@@ -121,7 +121,11 @@ export class QualityProfileSyncer extends BaseSyncer {
 				}
 			});
 
-			return { success: true, itemsSynced: syncedProfiles.length };
+			return {
+				success: true,
+				itemsSynced: syncedProfiles.length,
+				items: syncedProfiles.map((p) => ({ name: p.name, action: p.action }))
+			};
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unknown error';
 

@@ -15,6 +15,7 @@
  */
 
 import { BaseSyncer, type SyncResult } from '../base.ts';
+import type { SyncedItem } from '../types.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { getCache, type PCDCache } from '$pcd/index.ts';
 import {
@@ -63,6 +64,7 @@ export class MediaManagementSyncer extends BaseSyncer {
 		const syncConfig = arrSyncQueries.getMediaManagementSync(this.instanceId);
 		let totalSynced = 0;
 		const errors: string[] = [];
+		const items: SyncedItem[] = [];
 
 		await logger.info(`Starting media management sync for "${this.instanceName}"`, {
 			source: 'Sync:MediaManagement',
@@ -83,7 +85,10 @@ export class MediaManagementSyncer extends BaseSyncer {
 					syncConfig.mediaSettingsDatabaseId,
 					syncConfig.mediaSettingsConfigName
 				);
-				if (synced) totalSynced++;
+				if (synced) {
+					totalSynced++;
+					items.push({ name: 'Media Settings', action: 'updated' });
+				}
 			} catch (error) {
 				const msg = error instanceof Error ? error.message : 'Unknown error';
 				errors.push(`Media settings: ${msg}`);
@@ -101,7 +106,10 @@ export class MediaManagementSyncer extends BaseSyncer {
 					syncConfig.namingDatabaseId,
 					syncConfig.namingConfigName
 				);
-				if (synced) totalSynced++;
+				if (synced) {
+					totalSynced++;
+					items.push({ name: 'Naming', action: 'updated' });
+				}
 			} catch (error) {
 				const msg = error instanceof Error ? error.message : 'Unknown error';
 				errors.push(`Naming: ${msg}`);
@@ -119,7 +127,10 @@ export class MediaManagementSyncer extends BaseSyncer {
 					syncConfig.qualityDefinitionsDatabaseId,
 					syncConfig.qualityDefinitionsConfigName
 				);
-				if (synced) totalSynced++;
+				if (synced) {
+					totalSynced++;
+					items.push({ name: 'Quality Definitions', action: 'updated' });
+				}
 			} catch (error) {
 				const msg = error instanceof Error ? error.message : 'Unknown error';
 				errors.push(`Quality definitions: ${msg}`);
@@ -134,7 +145,8 @@ export class MediaManagementSyncer extends BaseSyncer {
 		const result: SyncResult = {
 			success,
 			itemsSynced: totalSynced,
-			error: errors.length > 0 ? errors.join('; ') : undefined
+			error: errors.length > 0 ? errors.join('; ') : undefined,
+			items: items.length > 0 ? items : undefined
 		};
 
 		await logger.info(`Completed media management sync for "${this.instanceName}"`, {

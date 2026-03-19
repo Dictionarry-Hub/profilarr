@@ -25,7 +25,12 @@ export const NotificationTypes = {
 	// Renames
 	RENAME_SUCCESS: 'rename.success',
 	RENAME_PARTIAL: 'rename.partial',
-	RENAME_FAILED: 'rename.failed'
+	RENAME_FAILED: 'rename.failed',
+
+	// Arr Sync
+	ARR_SYNC_SUCCESS: 'arr.sync.success',
+	ARR_SYNC_PARTIAL: 'arr.sync.partial',
+	ARR_SYNC_FAILED: 'arr.sync.failed'
 } as const;
 
 /**
@@ -44,6 +49,14 @@ export interface FieldBlock {
 }
 
 /**
+ * A labeled group of items within a section (e.g. "created": ["HD Bluray", "UHD Bluray"])
+ */
+export interface SectionItem {
+	label: string;
+	items: string[];
+}
+
+/**
  * A larger content block (renamed files, upgrade details, error lists)
  */
 export interface SectionBlock {
@@ -51,6 +64,7 @@ export interface SectionBlock {
 	title: string;
 	content: string;
 	imageUrl?: string;
+	items?: SectionItem[];
 }
 
 /**

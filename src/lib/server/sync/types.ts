@@ -11,12 +11,21 @@ import type { ArrInstance } from '$db/queries/arrInstances.ts';
 // =============================================================================
 
 /**
+ * A single item that was synced (created or updated)
+ */
+export interface SyncedItem {
+	name: string;
+	action: 'created' | 'updated';
+}
+
+/**
  * Result of a single sync operation
  */
 export interface SyncResult {
 	success: boolean;
 	itemsSynced: number;
 	error?: string;
+	items?: SyncedItem[];
 }
 
 /**

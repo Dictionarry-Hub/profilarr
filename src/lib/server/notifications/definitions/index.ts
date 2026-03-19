@@ -12,9 +12,11 @@
 import { test } from './test.ts';
 import { rename } from './rename.ts';
 import { upgrade } from './upgrade.ts';
+import { arrSync } from './arrSync.ts';
 
 export const notifications = {
 	test,
 	rename,
-	upgrade
+	upgrade,
+	arrSync
 };

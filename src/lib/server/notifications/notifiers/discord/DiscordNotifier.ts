@@ -136,6 +136,25 @@ export class DiscordNotifier {
 				fieldName = this.truncate(block.label, MAX_FIELD_NAME);
 				fieldValue = this.truncate(block.value, MAX_FIELD_VALUE);
 				inline = block.inline;
+			} else if (block.items && block.items.length > 0) {
+				// Section with structured items: summary in title, items in code block
+				const lines: string[] = [];
+				const MAX_ITEMS_SHOWN = 15;
+
+				for (const group of block.items) {
+					const prefix = group.label === 'created' ? '🆕' : '✏️';
+					const shown = group.items.slice(0, MAX_ITEMS_SHOWN);
+					const remaining = group.items.length - shown.length;
+					let line = `${prefix} ${shown.join(', ')}`;
+					if (remaining > 0) line += `, +${remaining} more`;
+					lines.push(line);
+				}
+
+				fieldName = this.truncate(`${block.title} — ${block.content}`, MAX_FIELD_NAME);
+				const codeBlockOverhead = 8;
+				const inner = this.truncate(lines.join('\n\n'), MAX_FIELD_VALUE - codeBlockOverhead);
+				fieldValue = '```\n' + inner + '\n```';
+				inline = false;
 			} else {
 				fieldName = this.truncate(block.title, MAX_FIELD_NAME);
 				const codeBlockOverhead = 8;

@@ -86,6 +86,26 @@ export const notificationTypes: NotificationType[] = [
 		description: 'Notification when database sync fails'
 	},
 
+	// Arr Sync
+	{
+		id: 'arr.sync.success',
+		label: 'Arr Sync Completed (Success)',
+		category: 'Arr Sync',
+		description: 'Notification when all sections sync successfully to an Arr instance'
+	},
+	{
+		id: 'arr.sync.partial',
+		label: 'Arr Sync Completed (Partial)',
+		category: 'Arr Sync',
+		description: 'Notification when some sections fail to sync to an Arr instance'
+	},
+	{
+		id: 'arr.sync.failed',
+		label: 'Arr Sync Failed',
+		category: 'Arr Sync',
+		description: 'Notification when all sections fail to sync to an Arr instance'
+	},
+
 	// Upgrades
 	{
 		id: 'upgrade.success',

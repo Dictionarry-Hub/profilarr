@@ -63,7 +63,11 @@ export class DelayProfileSyncer extends BaseSyncer {
 			meta: { instanceId: this.instanceId }
 		});
 
-		return { success: true, itemsSynced: 1 };
+		return {
+			success: true,
+			itemsSynced: 1,
+			items: [{ name: profile.name, action: 'updated' as const }]
+		};
 	}
 
 	private transform(profile: DelayProfilesRow): ArrDelayProfile {
