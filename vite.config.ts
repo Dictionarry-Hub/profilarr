@@ -19,6 +19,7 @@ export default defineConfig({
 				'**/logs/**',
 				'**/backups/**',
 				'**/dist/**',
+				'**/.svelte-kit/**',
 				'**/*.db*',
 				'**/.git/**',
 				'**/node_modules/**',

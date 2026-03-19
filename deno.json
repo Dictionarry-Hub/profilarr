@@ -41,7 +41,7 @@
 		"lint": "prettier --check . && deno lint",
 		"check": "deno task check:server && deno task check:client",
 		"check:server": "deno check --quiet src/lib/server/**/*.ts",
-		"check:client": "npx svelte-check --tsconfig ./tsconfig.json",
+		"check:client": "NODE_ENV=development npx svelte-check --tsconfig ./tsconfig.json",
 		"test": "deno run -A tests/runner.ts",
 		"generate:api-types": "npx openapi-typescript docs/api/v1/openapi.yaml -o src/lib/api/v1.d.ts",
 		"generate:pcd-types": "deno run -A scripts/generate-pcd-types.ts",
