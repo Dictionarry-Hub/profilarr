@@ -45,7 +45,8 @@
 		"test": "deno run -A tests/runner.ts",
 		"generate:api-types": "npx openapi-typescript docs/api/v1/openapi.yaml -o src/lib/api/v1.d.ts",
 		"generate:pcd-types": "deno run -A scripts/generate-pcd-types.ts",
-		"stats": "bash scripts/stats.sh"
+		"stats": "bash scripts/stats.sh",
+		"webhook": "deno run --allow-net scripts/webhook-listener.ts"
 	},
 	"compilerOptions": {
 		"lib": ["deno.window", "dom"],
