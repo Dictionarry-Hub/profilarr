@@ -209,47 +209,33 @@ test('successful sections produce section blocks with items', () => {
 	}
 });
 
-test('content summarizes counts', () => {
+test('message summarizes counts per section', () => {
 	const notification = arrSync(makeSuccessParams());
-	const qpBlock = notification.blocks?.find(
-		(b) => b.kind === 'section' && b.title === 'Quality Profiles'
-	);
-	if (qpBlock?.kind === 'section') {
-		assertEquals(qpBlock.content.includes('15'), true);
-		assertEquals(qpBlock.content.includes('12 updated'), true);
-		assertEquals(qpBlock.content.includes('3 created'), true);
-	}
+	assertEquals(notification.message.includes('12 updated'), true);
+	assertEquals(notification.message.includes('3 created'), true);
+	assertEquals(notification.message.includes('Quality Profiles'), true);
 });
 
-test('failed sections produce section blocks with error, no items', () => {
+test('failed sections produce no blocks, errors in message', () => {
 	const notification = arrSync(makeFailedParams());
-	const qpBlock = notification.blocks?.find(
-		(b) => b.kind === 'section' && b.title === 'Quality Profiles'
-	);
-	assertExists(qpBlock);
-	if (qpBlock?.kind === 'section') {
-		assertEquals(qpBlock.content.includes('API returned 401'), true);
-		assertEquals(qpBlock.items, undefined);
-	}
+	const blocks = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
+	assertEquals(blocks.length, 0);
+	assertEquals(notification.message.includes('API returned 401'), true);
+	assertEquals(notification.message.includes('connection timeout'), true);
 });
 
-test('partial has both success and failed blocks', () => {
+test('partial: blocks for success sections, errors in message', () => {
 	const notification = arrSync(makePartialParams());
 	const blocks = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
-	assertEquals(blocks.length, 3);
+	assertEquals(blocks.length, 2);
 
 	const qpBlock = blocks.find((b) => b.kind === 'section' && b.title === 'Quality Profiles');
-	const mmBlock = blocks.find((b) => b.kind === 'section' && b.title === 'Media Management');
 	assertExists(qpBlock);
-	assertExists(mmBlock);
-
 	if (qpBlock?.kind === 'section') {
 		assertExists(qpBlock.items);
 	}
-	if (mmBlock?.kind === 'section') {
-		assertEquals(mmBlock.content.includes('connection timeout'), true);
-		assertEquals(mmBlock.items, undefined);
-	}
+
+	assertEquals(notification.message.includes('connection timeout'), true);
 });
 
 test('all sections have display names', () => {
@@ -337,7 +323,7 @@ test('discord: section items render in compact format', async () => {
 	assertEquals(qpField!.value.includes('✏️'), true);
 });
 
-test('discord: failed section renders with error content', async () => {
+test('discord: failed sections have no fields, errors in description', async () => {
 	captured.length = 0;
 	const notifier = new DiscordNotifier({
 		webhook_url: `http://localhost:${MOCK_PORT}/webhook`,
@@ -348,12 +334,11 @@ test('discord: failed section renders with error content', async () => {
 
 	const embeds = getAllEmbeds();
 	const allFields = embeds.flatMap((e) => (e.fields as { name: string; value: string }[]) ?? []);
+	assertEquals(allFields.length, 0);
 
-	const qpField = allFields.find((f) => f.name.startsWith('Quality Profiles'));
-	assertExists(qpField);
-	assertEquals(qpField!.value.includes('API returned 401'), true);
-	assertEquals(qpField!.value.includes('🆕'), false);
-	assertEquals(qpField!.value.includes('✏️'), false);
+	const description = embeds[0]?.description as string;
+	assertEquals(description.includes('API returned 401'), true);
+	assertEquals(description.includes('connection timeout'), true);
 });
 
 // =========================================================================
@@ -386,7 +371,7 @@ test('ntfy: failed maps to priority 5', async () => {
 	assertEquals(payload?.tags, ['x']);
 });
 
-test('ntfy: message includes title but omits section detail', async () => {
+test('ntfy: message includes per-section summaries but omits item names', async () => {
 	captured.length = 0;
 	const notifier = new NtfyNotifier({
 		server_url: `http://localhost:${MOCK_PORT}`,
@@ -396,7 +381,8 @@ test('ntfy: message includes title but omits section detail', async () => {
 
 	const payload = captured[0]?.body as Record<string, unknown>;
 	const message = payload?.message as string;
-	assertEquals(message.includes('Synced'), true);
+	assertEquals(message.includes('Quality Profiles'), true);
+	assertEquals(message.includes('12 updated'), true);
 	assertEquals(message.includes('HD Bluray'), false);
 });
 
