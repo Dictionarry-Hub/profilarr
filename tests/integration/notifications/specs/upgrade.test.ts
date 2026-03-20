@@ -408,7 +408,9 @@ test('discord: item embeds have titles matching movie names', async () => {
 	});
 	await notifier.notify(upgrade({ log: makeLog() }));
 
-	const titles = getAllEmbeds().map((e) => e.title).filter(Boolean);
+	const titles = getAllEmbeds()
+		.map((e) => e.title)
+		.filter(Boolean);
 	assertEquals(titles.includes('Interstellar'), true);
 	assertEquals(titles.includes('The Grand Budapest Hotel'), true);
 });

@@ -327,9 +327,7 @@ test('discord: section items render in compact format', async () => {
 	await notifier.notify(arrSync(makeSuccessParams()));
 
 	const embeds = getAllEmbeds();
-	const allFields = embeds.flatMap(
-		(e) => (e.fields as { name: string; value: string }[]) ?? []
-	);
+	const allFields = embeds.flatMap((e) => (e.fields as { name: string; value: string }[]) ?? []);
 
 	const qpField = allFields.find((f) => f.name.startsWith('Quality Profiles'));
 	assertExists(qpField);
@@ -349,9 +347,7 @@ test('discord: failed section renders with error content', async () => {
 	await notifier.notify(arrSync(makeFailedParams()));
 
 	const embeds = getAllEmbeds();
-	const allFields = embeds.flatMap(
-		(e) => (e.fields as { name: string; value: string }[]) ?? []
-	);
+	const allFields = embeds.flatMap((e) => (e.fields as { name: string; value: string }[]) ?? []);
 
 	const qpField = allFields.find((f) => f.name.startsWith('Quality Profiles'));
 	assertExists(qpField);
