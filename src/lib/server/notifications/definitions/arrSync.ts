@@ -37,20 +37,28 @@ function formatInstanceType(type: string): string {
 }
 
 /**
- * Build the content summary for a successful section.
- * e.g. "15 items (12 updated · 3 created)"
+ * Build a short per-section summary line for the message field.
+ * e.g. "Quality Profiles: 12 updated · 3 created"
  */
-function buildContentSummary(items: SyncedItem[]): string {
-	const total = items.length;
-	const created = items.filter((i) => i.action === 'created').length;
-	const updated = items.filter((i) => i.action === 'updated').length;
+function buildSectionSummaryLine(section: ArrSyncSectionResult): string {
+	const label = getSectionLabel(section.section);
+
+	if (!section.success) {
+		return `${label}: Failed – ${section.error ?? 'Unknown error'}`;
+	}
+
+	if (!section.items || section.items.length === 0) {
+		return `${label}: no changes`;
+	}
+
+	const created = section.items.filter((i) => i.action === 'created').length;
+	const updated = section.items.filter((i) => i.action === 'updated').length;
 
 	const parts: string[] = [];
-	if (created > 0) parts.push(`${created} created`);
 	if (updated > 0) parts.push(`${updated} updated`);
+	if (created > 0) parts.push(`${created} created`);
 
-	const itemWord = total === 1 ? 'item' : 'items';
-	return parts.length > 0 ? `${total} ${itemWord} (${parts.join(' · ')})` : `${total} ${itemWord}`;
+	return `${label}: ${parts.join(' · ')}`;
 }
 
 /**
@@ -98,38 +106,19 @@ export function arrSync(params: ArrSyncNotificationParams): Notification {
 
 	const title = `Sync ${titleStatus} – ${instanceLabel}`;
 
-	let message: string;
-	if (status === 'failed') {
-		message = `All sections failed for ${instanceLabel}`;
-	} else if (status === 'partial') {
-		message = `${successes} of ${total} sections synced to ${instanceLabel}`;
-	} else {
-		message = `Synced ${total} ${total === 1 ? 'section' : 'sections'} to ${instanceLabel}`;
-	}
+	const message = sections.map(buildSectionSummaryLine).join('\n');
 
 	const blocks: NotificationBlock[] = [];
 
 	for (const section of sections) {
-		const label = getSectionLabel(section.section);
-
+		// Only emit blocks for sections with actual items to list.
+		// "no changes" and "failed" sections are covered by the message.
 		if (section.success && section.items && section.items.length > 0) {
 			blocks.push({
 				kind: 'section',
-				title: label,
-				content: buildContentSummary(section.items),
+				title: getSectionLabel(section.section),
+				content: '',
 				items: groupByAction(section.items)
-			});
-		} else if (section.success) {
-			blocks.push({
-				kind: 'section',
-				title: label,
-				content: '0 changes'
-			});
-		} else {
-			blocks.push({
-				kind: 'section',
-				title: label,
-				content: `Failed – ${section.error ?? 'Unknown error'}`
 			});
 		}
 	}

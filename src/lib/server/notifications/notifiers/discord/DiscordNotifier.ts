@@ -150,7 +150,9 @@ export class DiscordNotifier {
 					lines.push(line);
 				}
 
-				fieldName = this.truncate(`${block.title} — ${block.content}`, MAX_FIELD_NAME);
+				fieldName = block.content
+					? this.truncate(`${block.title} — ${block.content}`, MAX_FIELD_NAME)
+					: this.truncate(block.title, MAX_FIELD_NAME);
 				const codeBlockOverhead = 8;
 				const inner = this.truncate(lines.join('\n\n'), MAX_FIELD_VALUE - codeBlockOverhead);
 				fieldValue = '```\n' + inner + '\n```';
