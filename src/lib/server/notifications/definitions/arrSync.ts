@@ -84,7 +84,6 @@ export function arrSync(params: ArrSyncNotificationParams): Notification {
 
 	const successes = sections.filter((s) => s.success).length;
 	const failures = sections.filter((s) => !s.success).length;
-	const total = sections.length;
 
 	let status: 'success' | 'partial' | 'failed';
 	let severity: 'success' | 'warning' | 'error';
