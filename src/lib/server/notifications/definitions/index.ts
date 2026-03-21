@@ -13,10 +13,14 @@ import { test } from './test.ts';
 import { rename } from './rename.ts';
 import { upgrade } from './upgrade.ts';
 import { arrSync } from './arrSync.ts';
+import { pcdUpdatesAvailable, pcdSyncSuccess, pcdSyncFailed } from './pcdSync.ts';
 
 export const notifications = {
 	test,
 	rename,
 	upgrade,
-	arrSync
+	arrSync,
+	pcdUpdatesAvailable,
+	pcdSyncSuccess,
+	pcdSyncFailed
 };

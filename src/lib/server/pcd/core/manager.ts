@@ -6,6 +6,7 @@ import {
 	checkForUpdates,
 	checkout,
 	clone,
+	getCommitMessagesBetween,
 	getStatus,
 	pull,
 	type GitStatus,
@@ -27,6 +28,18 @@ import { triggerSyncs } from '$sync/processor.ts';
 import type { LinkOptions, SyncResult } from './types.ts';
 import { importBaseOps } from '../ops/importBaseOps.ts';
 import { cleanupJobsForDatabase } from '$lib/server/jobs/cleanup.ts';
+import { notificationManager } from '$notifications/NotificationManager.ts';
+import { notifications } from '$notifications/definitions/index.ts';
+
+async function readSchemaVersion(pcdPath: string): Promise<string | null> {
+	try {
+		const content = await Deno.readTextFile(`${pcdPath}/deps/schema/pcd.json`);
+		const manifest = JSON.parse(content);
+		return manifest.version ?? null;
+	} catch {
+		return null;
+	}
+}
 
 /**
  * PCD Manager - Manages the lifecycle of Profilarr Compliant Databases
@@ -181,14 +194,30 @@ class PCDManager {
 				};
 			}
 
+			// Capture old HEAD for commit log
+			const oldHead = updateInfo.currentLocalCommit;
+
+			// Capture schema version before pull
+			const schemaVersionBefore = await readSchemaVersion(instance.local_path);
+
 			// Pull updates
 			await pull(instance.local_path);
+
+			// Get commit messages for the pulled commits
+			const commitMessages = await getCommitMessagesBetween(instance.local_path, oldHead, 'HEAD');
 
 			// Sync dependencies (schema, etc.) if versions changed
 			const dependencySync = await syncDependencies(
 				instance.local_path,
 				instance.personal_access_token ?? undefined
 			);
+
+			// Capture schema version after dependency sync
+			const schemaVersionAfter = await readSchemaVersion(instance.local_path);
+			const schemaUpdate =
+				schemaVersionBefore && schemaVersionAfter && schemaVersionBefore !== schemaVersionAfter
+					? { from: schemaVersionBefore, to: schemaVersionAfter }
+					: undefined;
 
 			try {
 				await importBaseOps(id, instance.local_path);
@@ -238,11 +267,37 @@ class PCDManager {
 			// Trigger arr syncs for configs with on_pull trigger
 			await triggerSyncs({ event: 'on_pull', databaseId: id });
 
+			// Send sync success notification
+			try {
+				await notificationManager.notify(
+					notifications.pcdSyncSuccess({
+						name: instance.name,
+						commitsPulled: updateInfo.commitsBehind,
+						commitMessages,
+						schemaUpdate
+					})
+				);
+			} catch {
+				// Notification failure should never block sync
+			}
+
 			return {
 				success: true,
 				commitsBehind: updateInfo.commitsBehind
 			};
 		} catch (error) {
+			// Send sync failed notification
+			try {
+				await notificationManager.notify(
+					notifications.pcdSyncFailed({
+						name: instance.name,
+						error: error instanceof Error ? error.message : 'Unknown error'
+					})
+				);
+			} catch {
+				// Notification failure should never block sync
+			}
+
 			return {
 				success: false,
 				commitsBehind: 0,

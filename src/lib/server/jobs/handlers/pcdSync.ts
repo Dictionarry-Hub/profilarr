@@ -4,6 +4,9 @@ import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { pcdManager } from '$pcd/index.ts';
 import { calculateNextRunFromMinutes } from '../scheduleUtils.ts';
 import { logger } from '$logger/logger.ts';
+import { getCommitMessagesBetween } from '$utils/git/index.ts';
+import { notificationManager } from '$notifications/NotificationManager.ts';
+import { notifications } from '$notifications/definitions/index.ts';
 
 const dbSyncHandler: JobHandler = async (job) => {
 	const databaseId = Number(job.payload.databaseId);
@@ -71,8 +74,26 @@ const dbSyncHandler: JobHandler = async (job) => {
 			};
 		}
 
-		// Auto-pull disabled: just update last_synced_at
+		// Auto-pull disabled: notify and update last_synced_at
 		databaseInstancesQueries.updateSyncedAt(databaseId);
+
+		try {
+			const commitMessages = await getCommitMessagesBetween(
+				instance.local_path,
+				updateInfo.currentLocalCommit,
+				updateInfo.latestRemoteCommit
+			);
+			await notificationManager.notify(
+				notifications.pcdUpdatesAvailable({
+					name: instance.name,
+					commitsBehind: updateInfo.commitsBehind,
+					commitMessages
+				})
+			);
+		} catch {
+			// Notification failure should never block the job
+		}
+
 		return {
 			status: 'success',
 			output: 'Updates available (auto-pull disabled)',

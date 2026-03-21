@@ -295,3 +295,16 @@ export async function getIncomingChanges(repoPath: string): Promise<IncomingChan
 
 	return { hasUpdates: true, commitsBehind, commits };
 }
+
+/**
+ * Get commit messages between two refs (e.g. oldHead..newHead)
+ */
+export async function getCommitMessagesBetween(
+	repoPath: string,
+	fromRef: string,
+	toRef: string
+): Promise<string[]> {
+	const output = await execGitSafe(['log', '--format=%s', `${fromRef}..${toRef}`], repoPath);
+	if (!output) return [];
+	return output.split('\n').filter((line) => line.trim());
+}
