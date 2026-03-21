@@ -1,5 +1,5 @@
 /**
- * Upgrade notification - definition + Discord + Ntfy + Webhook.
+ * Upgrade notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
 import { assertEquals, assertExists } from '@std/assert';
@@ -8,6 +8,7 @@ import { createMockServer, type CapturedRequest } from '../harness/mock-server.t
 import { DiscordNotifier } from '$notifications/notifiers/discord/DiscordNotifier.ts';
 import { NtfyNotifier } from '$notifications/notifiers/ntfy/NtfyNotifier.ts';
 import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifier.ts';
+import { TelegramNotifier } from '$notifications/notifiers/telegram/TelegramNotifier.ts';
 import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { upgrade } from '$notifications/definitions/upgrade.ts';
 import type { UpgradeJobLog } from '$lib/server/upgrades/types.ts';
@@ -20,6 +21,8 @@ let REAL_DISCORD: string | undefined;
 let REAL_NTFY_URL: string | undefined;
 let REAL_NTFY_TOPIC: string | undefined;
 let REAL_WEBHOOK_URL: string | undefined;
+let REAL_TELEGRAM_TOKEN: string | undefined;
+let REAL_TELEGRAM_CHAT_ID: string | undefined;
 try {
 	const envPath = new URL('../.env', import.meta.url).pathname;
 	const content = await Deno.readTextFile(envPath);
@@ -34,6 +37,8 @@ try {
 			if (key === 'TEST_NTFY_URL') REAL_NTFY_URL = value;
 			if (key === 'TEST_NTFY_TOPIC') REAL_NTFY_TOPIC = value;
 			if (key === 'TEST_WEBHOOK_URL') REAL_WEBHOOK_URL = value;
+			if (key === 'TEST_TELEGRAM_BOT_TOKEN') REAL_TELEGRAM_TOKEN = value;
+			if (key === 'TEST_TELEGRAM_CHAT_ID') REAL_TELEGRAM_CHAT_ID = value;
 		}
 	}
 } catch {
@@ -491,6 +496,53 @@ test('webhook: sends full notification with all blocks', async () => {
 });
 
 // =========================================================================
+// Telegram
+// =========================================================================
+
+const MOCK_TOKEN = 'test-token-123';
+
+test('telegram: success has ✅ prefix', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(upgrade({ log: makeLog() }));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.startsWith('\u2705'), true);
+});
+
+test('telegram: failed has ❌ prefix', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(upgrade({ log: makeLog({ status: 'failed' }) }));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.startsWith('\u274C'), true);
+});
+
+test('telegram: message includes title but omits section blocks', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(upgrade({ log: makeLog() }));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.includes('Movies'), true);
+	// Section content (release filenames) should not appear
+	assertEquals(text.includes('Interstellar.2014.2160p'), false);
+});
+
+// =========================================================================
 // Real sends (skipped without .env)
 // =========================================================================
 
@@ -530,6 +582,16 @@ test('real: sends upgrade to webhook', async () => {
 	await new Promise((r) => setTimeout(r, 2000));
 	const notifier = new WebhookNotifier({
 		webhook_url: REAL_WEBHOOK_URL
+	});
+	await notifier.notify(upgrade({ log: makeLog() }));
+});
+
+test('real: sends upgrade to Telegram', async () => {
+	if (!REAL_TELEGRAM_TOKEN || !REAL_TELEGRAM_CHAT_ID) return;
+	await new Promise((r) => setTimeout(r, 2000));
+	const notifier = new TelegramNotifier({
+		bot_token: REAL_TELEGRAM_TOKEN,
+		chat_id: REAL_TELEGRAM_CHAT_ID
 	});
 	await notifier.notify(upgrade({ log: makeLog() }));
 });

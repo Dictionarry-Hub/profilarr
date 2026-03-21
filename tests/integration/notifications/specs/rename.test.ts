@@ -1,5 +1,5 @@
 /**
- * Rename notification - definition + Discord + Ntfy + Webhook.
+ * Rename notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
 import { assertEquals, assertExists } from '@std/assert';
@@ -8,6 +8,7 @@ import { createMockServer, type CapturedRequest } from '../harness/mock-server.t
 import { DiscordNotifier } from '$notifications/notifiers/discord/DiscordNotifier.ts';
 import { NtfyNotifier } from '$notifications/notifiers/ntfy/NtfyNotifier.ts';
 import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifier.ts';
+import { TelegramNotifier } from '$notifications/notifiers/telegram/TelegramNotifier.ts';
 import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { rename } from '$notifications/definitions/rename.ts';
 import type { RenameJobLog } from '$lib/server/rename/types.ts';
@@ -20,6 +21,8 @@ let REAL_DISCORD: string | undefined;
 let REAL_NTFY_URL: string | undefined;
 let REAL_NTFY_TOPIC: string | undefined;
 let REAL_WEBHOOK_URL: string | undefined;
+let REAL_TELEGRAM_TOKEN: string | undefined;
+let REAL_TELEGRAM_CHAT_ID: string | undefined;
 try {
 	const envPath = new URL('../.env', import.meta.url).pathname;
 	const content = await Deno.readTextFile(envPath);
@@ -34,6 +37,8 @@ try {
 			if (key === 'TEST_NTFY_URL') REAL_NTFY_URL = value;
 			if (key === 'TEST_NTFY_TOPIC') REAL_NTFY_TOPIC = value;
 			if (key === 'TEST_WEBHOOK_URL') REAL_WEBHOOK_URL = value;
+			if (key === 'TEST_TELEGRAM_BOT_TOKEN') REAL_TELEGRAM_TOKEN = value;
+			if (key === 'TEST_TELEGRAM_CHAT_ID') REAL_TELEGRAM_CHAT_ID = value;
 		}
 	}
 } catch {
@@ -395,6 +400,65 @@ test('webhook: includes section blocks with imageUrl', async () => {
 });
 
 // =========================================================================
+// Telegram
+// =========================================================================
+
+const MOCK_TOKEN = 'test-token-123';
+
+test('telegram: success has ✅ prefix', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(rename({ log: makeRadarrLog() }));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.startsWith('\u2705'), true);
+});
+
+test('telegram: failed has ❌ prefix', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(rename({ log: makeRadarrLog({ status: 'failed' }) }));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.startsWith('\u274C'), true);
+});
+
+test('telegram: partial has ⚠️ prefix', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(rename({ log: makeRadarrLog({ status: 'partial' }) }));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.startsWith('\u26A0\uFE0F'), true);
+});
+
+test('telegram: includes field block content but omits section blocks', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(rename({ log: makeRadarrLog(), summaryNotifications: false }));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	// Should not contain section content (movie titles, file paths)
+	assertEquals(text.includes('Interstellar.2014.2160p'), false);
+});
+
+// =========================================================================
 // Real sends (skipped without .env)
 // =========================================================================
 
@@ -434,6 +498,16 @@ test('real: sends rename to webhook', async () => {
 	await new Promise((r) => setTimeout(r, 2000));
 	const notifier = new WebhookNotifier({
 		webhook_url: REAL_WEBHOOK_URL
+	});
+	await notifier.notify(rename({ log: makeRadarrLog() }));
+});
+
+test('real: sends rename to Telegram', async () => {
+	if (!REAL_TELEGRAM_TOKEN || !REAL_TELEGRAM_CHAT_ID) return;
+	await new Promise((r) => setTimeout(r, 2000));
+	const notifier = new TelegramNotifier({
+		bot_token: REAL_TELEGRAM_TOKEN,
+		chat_id: REAL_TELEGRAM_CHAT_ID
 	});
 	await notifier.notify(rename({ log: makeRadarrLog() }));
 });

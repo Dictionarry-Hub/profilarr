@@ -1,5 +1,5 @@
 /**
- * PCD sync notification - definition + Discord + Ntfy + Webhook.
+ * PCD sync notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
 import { assertEquals, assertExists } from '@std/assert';
@@ -8,6 +8,7 @@ import { createMockServer, type CapturedRequest } from '../harness/mock-server.t
 import { DiscordNotifier } from '$notifications/notifiers/discord/DiscordNotifier.ts';
 import { NtfyNotifier } from '$notifications/notifiers/ntfy/NtfyNotifier.ts';
 import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifier.ts';
+import { TelegramNotifier } from '$notifications/notifiers/telegram/TelegramNotifier.ts';
 import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import {
 	pcdUpdatesAvailable,
@@ -28,6 +29,8 @@ let REAL_DISCORD: string | undefined;
 let REAL_NTFY_URL: string | undefined;
 let REAL_NTFY_TOPIC: string | undefined;
 let REAL_WEBHOOK_URL: string | undefined;
+let REAL_TELEGRAM_TOKEN: string | undefined;
+let REAL_TELEGRAM_CHAT_ID: string | undefined;
 try {
 	const envPath = new URL('../.env', import.meta.url).pathname;
 	const content = await Deno.readTextFile(envPath);
@@ -42,6 +45,8 @@ try {
 			if (key === 'TEST_NTFY_URL') REAL_NTFY_URL = value;
 			if (key === 'TEST_NTFY_TOPIC') REAL_NTFY_TOPIC = value;
 			if (key === 'TEST_WEBHOOK_URL') REAL_WEBHOOK_URL = value;
+			if (key === 'TEST_TELEGRAM_BOT_TOKEN') REAL_TELEGRAM_TOKEN = value;
+			if (key === 'TEST_TELEGRAM_CHAT_ID') REAL_TELEGRAM_CHAT_ID = value;
 		}
 	}
 } catch {
@@ -394,6 +399,65 @@ test('webhook: sync_failed has empty blocks', async () => {
 });
 
 // =========================================================================
+// Telegram
+// =========================================================================
+
+const MOCK_TOKEN = 'test-token-123';
+
+test('telegram: updates_available has ℹ️ prefix', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(pcdUpdatesAvailable(makeUpdatesAvailableParams()));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.startsWith('\u2139\uFE0F'), true);
+});
+
+test('telegram: sync_success has ✅ prefix', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(pcdSyncSuccess(makeSyncSuccessParams()));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.startsWith('\u2705'), true);
+});
+
+test('telegram: sync_failed has ❌ prefix', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(pcdSyncFailed(makeSyncFailedParams()));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.startsWith('\u274C'), true);
+});
+
+test('telegram: omits section block content', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(pcdSyncSuccess(makeSyncSuccessParams()));
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	// Commit messages are in a section block — should be omitted
+	assertEquals(text.includes('add position to quality groups'), false);
+});
+
+// =========================================================================
 // Real sends (skipped without .env)
 // =========================================================================
 
@@ -486,6 +550,36 @@ test('real: sends sync_failed to webhook', async () => {
 	await new Promise((r) => setTimeout(r, 2000));
 	const notifier = new WebhookNotifier({
 		webhook_url: REAL_WEBHOOK_URL
+	});
+	await notifier.notify(pcdSyncFailed(makeSyncFailedParams()));
+});
+
+test('real: sends updates_available to Telegram', async () => {
+	if (!REAL_TELEGRAM_TOKEN || !REAL_TELEGRAM_CHAT_ID) return;
+	await new Promise((r) => setTimeout(r, 2000));
+	const notifier = new TelegramNotifier({
+		bot_token: REAL_TELEGRAM_TOKEN,
+		chat_id: REAL_TELEGRAM_CHAT_ID
+	});
+	await notifier.notify(pcdUpdatesAvailable(makeUpdatesAvailableParams()));
+});
+
+test('real: sends sync_success to Telegram', async () => {
+	if (!REAL_TELEGRAM_TOKEN || !REAL_TELEGRAM_CHAT_ID) return;
+	await new Promise((r) => setTimeout(r, 2000));
+	const notifier = new TelegramNotifier({
+		bot_token: REAL_TELEGRAM_TOKEN,
+		chat_id: REAL_TELEGRAM_CHAT_ID
+	});
+	await notifier.notify(pcdSyncSuccess(makeSyncSuccessParams()));
+});
+
+test('real: sends sync_failed to Telegram', async () => {
+	if (!REAL_TELEGRAM_TOKEN || !REAL_TELEGRAM_CHAT_ID) return;
+	await new Promise((r) => setTimeout(r, 2000));
+	const notifier = new TelegramNotifier({
+		bot_token: REAL_TELEGRAM_TOKEN,
+		chat_id: REAL_TELEGRAM_CHAT_ID
 	});
 	await notifier.notify(pcdSyncFailed(makeSyncFailedParams()));
 });

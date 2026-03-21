@@ -1,5 +1,5 @@
 /**
- * Test notification - definition + Discord + Ntfy + Webhook.
+ * Test notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
 import { assertEquals, assertExists } from '@std/assert';
@@ -8,6 +8,7 @@ import { createMockServer, type CapturedRequest } from '../harness/mock-server.t
 import { DiscordNotifier } from '$notifications/notifiers/discord/DiscordNotifier.ts';
 import { NtfyNotifier } from '$notifications/notifiers/ntfy/NtfyNotifier.ts';
 import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifier.ts';
+import { TelegramNotifier } from '$notifications/notifiers/telegram/TelegramNotifier.ts';
 import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { test as testDef } from '$notifications/definitions/test.ts';
 
@@ -19,6 +20,8 @@ let REAL_DISCORD: string | undefined;
 let REAL_NTFY_URL: string | undefined;
 let REAL_NTFY_TOPIC: string | undefined;
 let REAL_WEBHOOK_URL: string | undefined;
+let REAL_TELEGRAM_TOKEN: string | undefined;
+let REAL_TELEGRAM_CHAT_ID: string | undefined;
 try {
 	const envPath = new URL('../.env', import.meta.url).pathname;
 	const content = await Deno.readTextFile(envPath);
@@ -33,6 +36,8 @@ try {
 			if (key === 'TEST_NTFY_URL') REAL_NTFY_URL = value;
 			if (key === 'TEST_NTFY_TOPIC') REAL_NTFY_TOPIC = value;
 			if (key === 'TEST_WEBHOOK_URL') REAL_WEBHOOK_URL = value;
+			if (key === 'TEST_TELEGRAM_BOT_TOKEN') REAL_TELEGRAM_TOKEN = value;
+			if (key === 'TEST_TELEGRAM_CHAT_ID') REAL_TELEGRAM_CHAT_ID = value;
 		}
 	}
 } catch {
@@ -208,6 +213,67 @@ test('webhook: no Authorization header when auth_header absent', async () => {
 });
 
 // =========================================================================
+// Telegram
+// =========================================================================
+
+const MOCK_TOKEN = 'test-token-123';
+
+test('telegram: POSTs to /bot{token}/sendMessage', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(testDef());
+
+	assertEquals(captured.length, 1);
+	assertEquals(captured[0]?.method, 'POST');
+	assertEquals(captured[0]?.path, `/bot${MOCK_TOKEN}/sendMessage`);
+});
+
+test('telegram: payload has chat_id, text, and parse_mode HTML', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(testDef());
+
+	const payload = captured[0]?.body as Record<string, unknown>;
+	assertEquals(payload?.chat_id, '123456');
+	assertEquals(payload?.parse_mode, 'HTML');
+	assertEquals(typeof payload?.text, 'string');
+});
+
+test('telegram: info severity has emoji prefix', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(testDef());
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.startsWith('\u2139\uFE0F'), true);
+});
+
+test('telegram: renders title in bold HTML', async () => {
+	captured.length = 0;
+	const notifier = new TelegramNotifier({
+		bot_token: MOCK_TOKEN,
+		chat_id: '123456',
+		api_base_url: `http://localhost:${MOCK_PORT}`
+	});
+	await notifier.notify(testDef());
+
+	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
+	assertEquals(text.includes(`<b>${testDef().title}</b>`), true);
+});
+
+// =========================================================================
 // Real sends (skipped without .env)
 // =========================================================================
 
@@ -236,6 +302,16 @@ test('real: sends test notification to webhook', async () => {
 	await new Promise((r) => setTimeout(r, 2000));
 	const notifier = new WebhookNotifier({
 		webhook_url: REAL_WEBHOOK_URL
+	});
+	await notifier.notify(testDef());
+});
+
+test('real: sends test notification to Telegram', async () => {
+	if (!REAL_TELEGRAM_TOKEN || !REAL_TELEGRAM_CHAT_ID) return;
+	await new Promise((r) => setTimeout(r, 2000));
+	const notifier = new TelegramNotifier({
+		bot_token: REAL_TELEGRAM_TOKEN,
+		chat_id: REAL_TELEGRAM_CHAT_ID
 	});
 	await notifier.notify(testDef());
 });
