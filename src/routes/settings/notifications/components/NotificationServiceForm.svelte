@@ -71,8 +71,7 @@
 	function enableByStatus(status: 'all' | 'success' | 'failed') {
 		for (const types of Object.values(groupedTypes)) {
 			for (const type of types) {
-				enabledTypesState[type.id] =
-					status === 'all' ? true : getTypeStatus(type.id) === status;
+				enabledTypesState[type.id] = status === 'all' ? true : getTypeStatus(type.id) === status;
 			}
 		}
 		enabledTypesState = enabledTypesState;
@@ -259,8 +258,7 @@
 									label={type.label}
 									checked={enabledTypesState[type.id]}
 									fullWidth
-									on:change={() =>
-										(enabledTypesState[type.id] = !enabledTypesState[type.id])}
+									on:change={() => (enabledTypesState[type.id] = !enabledTypesState[type.id])}
 								/>
 								<input
 									type="hidden"
