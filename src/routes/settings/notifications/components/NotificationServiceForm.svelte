@@ -5,12 +5,14 @@
 	import NtfyConfiguration from './NtfyConfiguration.svelte';
 	import WebhookConfiguration from './WebhookConfiguration.svelte';
 	import { groupNotificationTypesByCategory } from '$shared/notifications/types';
-	import { Plus, Save } from 'lucide-svelte';
+	import { Plus, Save, ListChecks, CheckCircle, XCircle } from 'lucide-svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
+	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
+	import type { Column } from '$ui/table/types';
 
 	export let mode: 'create' | 'edit' = 'create';
 	export let initialData: {
@@ -39,6 +41,41 @@
 				}
 			}
 		}
+	}
+
+	// Category rows for expandable table
+	const categoryRows = Object.entries(groupedTypes).map(([category, types]) => ({
+		category,
+		types
+	}));
+
+	type CategoryRow = (typeof categoryRows)[number];
+
+	const typeColumns: Column<CategoryRow>[] = [{ key: 'category', header: 'Category' }];
+
+	// All categories expanded by default
+	let expandedCategories = new Set<string | number>(categoryRows.map((r) => r.category));
+
+	const gridColumns = 5;
+
+	function getTypeStatus(typeId: string): 'success' | 'failed' | 'other' {
+		if (typeId.endsWith('.success') || typeId.endsWith('_success') || typeId.endsWith('.partial')) {
+			return 'success';
+		}
+		if (typeId.endsWith('.failed') || typeId.endsWith('_failed')) {
+			return 'failed';
+		}
+		return 'other';
+	}
+
+	function enableByStatus(status: 'all' | 'success' | 'failed') {
+		for (const types of Object.values(groupedTypes)) {
+			for (const type of types) {
+				enabledTypesState[type.id] =
+					status === 'all' ? true : getTypeStatus(type.id) === status;
+			}
+		}
+		enabledTypesState = enabledTypesState;
 	}
 
 	const typeOptions = [
@@ -155,29 +192,75 @@
 
 		<!-- Notification Types -->
 		<div class="space-y-4">
-			<div>
-				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-					Notification Types
-				</h3>
-				<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-					Select which types of notifications should be sent to this service
-				</p>
+			<div class="flex items-start justify-between">
+				<div>
+					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						Notification Types
+					</h3>
+					<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+						Select which types of notifications should be sent to this service
+					</p>
+				</div>
+				<div class="flex items-center gap-1">
+					<Button
+						text="All"
+						icon={ListChecks}
+						iconColor="text-blue-500 dark:text-blue-400"
+						size="sm"
+						variant="secondary"
+						on:click={() => enableByStatus('all')}
+					/>
+					<Button
+						text="Success"
+						icon={CheckCircle}
+						iconColor="text-green-500 dark:text-green-400"
+						size="sm"
+						variant="secondary"
+						on:click={() => enableByStatus('success')}
+					/>
+					<Button
+						text="Failed"
+						icon={XCircle}
+						iconColor="text-red-500 dark:text-red-400"
+						size="sm"
+						variant="secondary"
+						on:click={() => enableByStatus('failed')}
+					/>
+				</div>
 			</div>
 
-			{#each Object.entries(groupedTypes) as [category, types]}
-				<div>
-					<h4
-						class="mb-2 text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
+			<ExpandableTable
+				columns={typeColumns}
+				data={categoryRows}
+				getRowId={(row) => row.category}
+				expandedRows={expandedCategories}
+				chevronPosition="right"
+				flushExpanded
+				compact
+			>
+				<svelte:fragment slot="cell" let:row let:column>
+					{#if column.key === 'category'}
+						<span
+							class="text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
+						>
+							{row.category}
+						</span>
+					{/if}
+				</svelte:fragment>
+
+				<svelte:fragment slot="expanded" let:row>
+					<div
+						class="grid gap-2 px-4 py-3"
+						style="grid-template-columns: repeat({gridColumns}, 1fr);"
 					>
-						{category}
-					</h4>
-					<div class="flex flex-wrap gap-2">
-						{#each types as type}
+						{#each row.types as type}
 							<div>
 								<Toggle
 									label={type.label}
 									checked={enabledTypesState[type.id]}
-									on:change={() => (enabledTypesState[type.id] = !enabledTypesState[type.id])}
+									fullWidth
+									on:change={() =>
+										(enabledTypesState[type.id] = !enabledTypesState[type.id])}
 								/>
 								<input
 									type="hidden"
@@ -187,8 +270,8 @@
 							</div>
 						{/each}
 					</div>
-				</div>
-			{/each}
+				</svelte:fragment>
+			</ExpandableTable>
 		</div>
 	</div>
 </form>
