@@ -65,6 +65,18 @@ export const actions: Actions = {
 				webhook_url: webhookUrl,
 				...(authHeader && { auth_header: authHeader })
 			};
+		} else if (serviceType === 'telegram') {
+			const botToken = formData.get('bot_token') as string;
+			const chatId = formData.get('chat_id') as string;
+
+			if (!botToken || !chatId) {
+				return fail(400, { error: 'Bot token and chat ID are required for Telegram' });
+			}
+
+			config = {
+				bot_token: botToken,
+				chat_id: chatId
+			};
 		}
 
 		// Get enabled notification types dynamically from all available types

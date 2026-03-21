@@ -26,6 +26,7 @@ export const load = ({ params }: { params: { id: string } }) => {
 		webhook_url: _webhookUrl,
 		access_token: _accessToken,
 		auth_header: _authHeader,
+		bot_token: _botToken,
 		...safeConfig
 	} = config;
 
@@ -120,6 +121,19 @@ export const actions: Actions = {
 					: existingConfig.auth_header
 						? { auth_header: existingConfig.auth_header }
 						: {})
+			};
+		} else if (service.service_type === 'telegram') {
+			const botToken = formData.get('bot_token') as string;
+			const chatId = formData.get('chat_id') as string;
+
+			if (!chatId) {
+				return fail(400, { error: 'Chat ID is required for Telegram' });
+			}
+
+			config = {
+				// Keep existing bot_token if new one not provided
+				bot_token: botToken || existingConfig.bot_token,
+				chat_id: chatId
 			};
 		}
 

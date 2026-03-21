@@ -4,8 +4,10 @@
 	import DiscordConfiguration from './DiscordConfiguration.svelte';
 	import NtfyConfiguration from './NtfyConfiguration.svelte';
 	import WebhookConfiguration from './WebhookConfiguration.svelte';
+	import TelegramConfiguration from './TelegramConfiguration.svelte';
 	import { groupNotificationTypesByCategory } from '$shared/notifications/types';
-	import { Plus, Save, ListChecks, CheckCircle, XCircle } from 'lucide-svelte';
+	import { Plus, Save, ListChecks, CheckCircle, XCircle, Rss } from 'lucide-svelte';
+	import { siDiscord, siNtfy, siTelegram } from 'simple-icons';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
@@ -22,8 +24,8 @@
 		enabledTypes?: string[];
 	} = {};
 
-	let selectedType: 'discord' | 'ntfy' | 'webhook' =
-		(initialData.serviceType as 'discord' | 'ntfy' | 'webhook') || 'discord';
+	let selectedType: 'discord' | 'ntfy' | 'webhook' | 'telegram' =
+		(initialData.serviceType as 'discord' | 'ntfy' | 'webhook' | 'telegram') || 'discord';
 	let serviceName = initialData.name || '';
 
 	// Group notification types by category
@@ -78,9 +80,10 @@
 	}
 
 	const typeOptions = [
-		{ value: 'discord', label: 'Discord' },
-		{ value: 'ntfy', label: 'Ntfy' },
-		{ value: 'webhook', label: 'Webhook' }
+		{ value: 'discord', label: 'Discord', icon: siDiscord },
+		{ value: 'ntfy', label: 'Ntfy', icon: siNtfy },
+		{ value: 'webhook', label: 'Webhook', icon: Rss },
+		{ value: 'telegram', label: 'Telegram', icon: siTelegram }
 	];
 
 	$: title = mode === 'create' ? 'New Notification Service' : 'Edit Notification Service';
@@ -146,39 +149,46 @@
 	<input type="hidden" name="name" value={serviceName} />
 
 	<div class="space-y-6 md:px-4">
-		<!-- Service Type -->
-		<div class="space-y-2">
-			<span class="block text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-				Service Type
-			</span>
-			{#if mode === 'edit'}
+		<!-- Service Type + Service Name -->
+		<div class="grid grid-cols-8 gap-4">
+			<div class="col-span-2 space-y-2">
+				<span class="block text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+					Service Type
+				</span>
 				<p class="text-xs text-neutral-500 dark:text-neutral-400">
-					Type cannot be changed after creation
+					{#if mode === 'edit'}
+						Type cannot be changed after creation
+					{:else}
+						The platform to send notifications to
+					{/if}
 				</p>
-			{/if}
-			<DropdownSelect
-				value={selectedType}
-				options={typeOptions}
-				disabled={mode === 'edit'}
-				fullWidth
-				on:change={(e) => (selectedType = e.detail as typeof selectedType)}
-			/>
-		</div>
+				<DropdownSelect
+					value={selectedType}
+					options={typeOptions}
+					disabled={mode === 'edit'}
+					fullWidth
+					on:change={(e) => (selectedType = e.detail as typeof selectedType)}
+				/>
+			</div>
 
-		<!-- Service Name -->
-		<FormInput
-			label="Service Name"
-			name="service_name"
-			value={serviceName}
-			placeholder={selectedType === 'ntfy'
-				? 'e.g., Phone Alerts'
-				: selectedType === 'webhook'
-					? 'e.g., Home Assistant'
-					: 'e.g., Main Discord Server'}
-			description="A friendly name to identify this notification service"
-			required
-			on:input={(e) => (serviceName = e.detail)}
-		/>
+			<div class="col-span-6">
+				<FormInput
+					label="Service Name"
+					name="service_name"
+					value={serviceName}
+					placeholder={selectedType === 'ntfy'
+						? 'e.g., Phone Alerts'
+						: selectedType === 'webhook'
+							? 'e.g., Home Assistant'
+							: selectedType === 'telegram'
+								? 'e.g., Personal Bot'
+								: 'e.g., Main Discord Server'}
+					description="A friendly name to identify this notification service"
+					required
+					on:input={(e) => (serviceName = e.detail)}
+				/>
+			</div>
+		</div>
 
 		<!-- Service Configuration -->
 		{#if selectedType === 'discord'}
@@ -187,6 +197,8 @@
 			<NtfyConfiguration config={initialData.config} {mode} />
 		{:else if selectedType === 'webhook'}
 			<WebhookConfiguration config={initialData.config} {mode} />
+		{:else if selectedType === 'telegram'}
+			<TelegramConfiguration config={initialData.config} {mode} />
 		{/if}
 
 		<!-- Notification Types -->
