@@ -134,7 +134,7 @@
 							class="h-4 w-4 text-neutral-600 dark:text-neutral-400"
 							fill="currentColor"
 						>
-							<path d={serviceInfo[row.service_type].icon.path} />
+							<path d={serviceInfo[row.service_type]!.icon!.path} />
 						</svg>
 					{:else}
 						<Rss size={16} class="text-neutral-600 dark:text-neutral-400" />

@@ -120,7 +120,7 @@
 							<path d={(leadingIcon as { path: string }).path} />
 						</svg>
 					{:else}
-						<svelte:component this={leadingIcon} size={iconSize} />
+						<svelte:component this={leadingIcon as ComponentType} size={iconSize} />
 					{/if}
 					{#if text}
 						<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>
@@ -159,7 +159,7 @@
 							<path d={(leadingIcon as { path: string }).path} />
 						</svg>
 					{:else}
-						<svelte:component this={leadingIcon} size={iconSize} />
+						<svelte:component this={leadingIcon as ComponentType} size={iconSize} />
 					{/if}
 					{#if text}
 						<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>

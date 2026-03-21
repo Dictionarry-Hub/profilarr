@@ -38,7 +38,7 @@
 				<path d={(icon as { path: string }).path} />
 			</svg>
 		{:else}
-			<svelte:component this={icon} size={iconSize} />
+			<svelte:component this={icon as ComponentType} size={iconSize} />
 		{/if}
 	{/if}
 	<span class="flex-1">{label}</span>
