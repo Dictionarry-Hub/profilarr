@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ComponentType } from 'svelte';
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
 	import { ChevronDown } from 'lucide-svelte';
@@ -8,7 +9,13 @@
 
 	export let label: string | undefined = undefined;
 	export let value: string;
-	export let options: { value: string; label: string; shortLabel?: string; description?: string }[];
+	export let options: {
+		value: string;
+		label: string;
+		shortLabel?: string;
+		description?: string;
+		icon?: ComponentType | { path: string };
+	}[];
 	export let placeholder: string = 'Select...';
 	export let minWidth: string = '8rem';
 	export let position: 'left' | 'right' | 'middle' = 'left';
@@ -59,6 +66,7 @@
 	}
 
 	$: matchedOption = options.find((o) => o.value === value);
+	$: currentIcon = matchedOption?.icon ?? null;
 	$: currentLabel = matchedOption?.shortLabel
 		? matchedOption.shortLabel
 		: matchedOption?.label || placeholder;
@@ -96,6 +104,7 @@
 			text={currentLabel}
 			icon={ChevronDown}
 			iconPosition="right"
+			leadingIcon={currentIcon}
 			size={resolvedButtonSize}
 			{fullWidth}
 			{disabled}
@@ -115,6 +124,7 @@
 				{#each options as option}
 					<DropdownItem
 						label={option.label}
+						icon={option.icon}
 						selected={value === option.value}
 						compact={isCompactDropdown}
 						on:click={() => select(option.value)}

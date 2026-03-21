@@ -9,6 +9,7 @@
 	export let size: 'xs' | 'sm' | 'md' = 'sm';
 	export let disabled: boolean = false;
 	export let icon: ComponentType | null = null;
+	export let leadingIcon: ComponentType | { path: string } | null = null;
 	export let iconColor: string = '';
 	export let textColor: string = '';
 	export let iconPosition: 'left' | 'right' = 'left';
@@ -85,7 +86,8 @@
 		iconColor || (variant === 'ghost' ? 'text-neutral-500 dark:text-neutral-400' : '');
 	$: effectiveIcon = loading ? Loader2 : icon;
 	$: effectiveIconColor = loading ? baseIconColor + ' animate-spin' : baseIconColor;
-	$: isIconOnly = icon && !text;
+	$: isLeadingSvg = leadingIcon && typeof leadingIcon === 'object' && 'path' in leadingIcon;
+	$: isIconOnly = icon && !text && !leadingIcon;
 	$: activeSizeClasses = isIconOnly ? iconOnlySizeClasses : sizeClasses;
 	$: classes = `group ${baseClasses} ${activeSizeClasses[effectiveSize]} ${variantClasses[variant]} ${widthClass}`;
 	$: iconSize = effectiveSize === 'xs' ? 12 : effectiveSize === 'sm' ? 14 : 16;
@@ -105,7 +107,26 @@
 			{#if effectiveIcon && iconPosition === 'left'}
 				<svelte:component this={effectiveIcon} size={iconSize} class={effectiveIconColor} />
 			{/if}
-			{#if text}
+			{#if leadingIcon}
+				<span class="inline-flex items-center gap-1.5">
+					{#if isLeadingSvg}
+						<svg
+							role="img"
+							viewBox="0 0 24 24"
+							fill="currentColor"
+							width={iconSize}
+							height={iconSize}
+						>
+							<path d={(leadingIcon as { path: string }).path} />
+						</svg>
+					{:else}
+						<svelte:component this={leadingIcon} size={iconSize} />
+					{/if}
+					{#if text}
+						<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>
+					{/if}
+				</span>
+			{:else if text}
 				<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>
 			{/if}
 			<slot />
@@ -125,7 +146,26 @@
 			{#if effectiveIcon && iconPosition === 'left'}
 				<svelte:component this={effectiveIcon} size={iconSize} class={effectiveIconColor} />
 			{/if}
-			{#if text}
+			{#if leadingIcon}
+				<span class="inline-flex items-center gap-1.5">
+					{#if isLeadingSvg}
+						<svg
+							role="img"
+							viewBox="0 0 24 24"
+							fill="currentColor"
+							width={iconSize}
+							height={iconSize}
+						>
+							<path d={(leadingIcon as { path: string }).path} />
+						</svg>
+					{:else}
+						<svelte:component this={leadingIcon} size={iconSize} />
+					{/if}
+					{#if text}
+						<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>
+					{/if}
+				</span>
+			{:else if text}
 				<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>
 			{/if}
 			<slot />

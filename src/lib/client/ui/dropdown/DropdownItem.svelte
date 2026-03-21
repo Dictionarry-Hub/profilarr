@@ -1,8 +1,11 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
 	import { Check } from 'lucide-svelte';
+	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 
-	export let icon: ComponentType | undefined = undefined;
+	export let icon: ComponentType | { path: string } | undefined = undefined;
+
+	$: isSvgIcon = icon && typeof icon === 'object' && 'path' in icon;
 	export let label: string;
 	export let disabled: boolean = false;
 	export let danger: boolean = false;
@@ -30,10 +33,14 @@
 	on:click
 >
 	{#if icon}
-		<svelte:component this={icon} size={iconSize} />
+		{#if isSvgIcon}
+			<svg role="img" viewBox="0 0 24 24" fill="currentColor" width={iconSize} height={iconSize}>
+				<path d={(icon as { path: string }).path} />
+			</svg>
+		{:else}
+			<svelte:component this={icon} size={iconSize} />
+		{/if}
 	{/if}
 	<span class="flex-1">{label}</span>
-	{#if selected}
-		<Check size={iconSize} class="text-accent-600 dark:text-accent-400" />
-	{/if}
+	<IconCheckbox icon={Check} checked={selected} shape="circle" color="accent" />
 </button>
