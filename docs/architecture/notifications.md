@@ -12,6 +12,7 @@
   - [Discord (Detail Tier)](#discord-detail-tier)
   - [Ntfy (Summary Tier)](#ntfy-summary-tier)
   - [Webhook (Passthrough Tier)](#webhook-passthrough-tier)
+  - [Telegram (Summary Tier)](#telegram-summary-tier)
 - [Service Tiers](#service-tiers)
 - [Testing](#testing)
 - [Adding a New Service](#adding-a-new-service)
@@ -55,11 +56,13 @@ flowchart TD
     FACTORY -->|discord| DISCORD[DiscordNotifier]
     FACTORY -->|ntfy| NTFY[NtfyNotifier]
     FACTORY -->|webhook| WEBHOOK[WebhookNotifier]
+    FACTORY -->|telegram| TELEGRAM[TelegramNotifier]
     FACTORY -->|future| OTHER[...]
 
     DISCORD -->|renders to embeds| WEBHOOK_D[Discord Webhook]
     NTFY -->|renders to ntfy JSON| WEBHOOK_N[Ntfy Server]
     WEBHOOK -->|raw JSON| WEBHOOK_W[Webhook Endpoint]
+    TELEGRAM -->|renders to HTML| WEBHOOK_T[Telegram Bot API]
     OTHER -->|renders| WEBHOOK_O[...]
 
     NM -->|record result| HISTORY[(notification_history)]
@@ -109,6 +112,7 @@ Each notifier maps severity to its platform's concept:
 | -------- | -------------------- | ------------------- | ----------------- | -------------------- |
 | Discord  | Green embed          | Red embed           | Yellow embed      | Blue embed           |
 | Ntfy     | Priority 3 (default) | Priority 5 (urgent) | Priority 4 (high) | Priority 3 (default) |
+| Telegram | ✅ prefix            | ❌ prefix           | ⚠️ prefix         | ℹ️ prefix            |
 | Webhook  | No mapping           | No mapping          | No mapping        | No mapping           |
 
 ## Definitions
@@ -184,16 +188,24 @@ rendering, no severity mapping, no block filtering — the payload is the
 notification. Optional `Authorization` header for authenticated endpoints
 (user provides the full header value, e.g. `Bearer token` or `Basic base64`).
 
+### Telegram (Summary Tier)
+
+Quick ping via the Telegram Bot API. Title, message, and field blocks only.
+Section blocks are omitted. POSTs to
+`https://api.telegram.org/bot{token}/sendMessage` with HTML parse mode. Severity
+mapped to emoji prefix (✅/❌/⚠️/ℹ️). Messages truncated at 4096 chars.
+Config: `bot_token` (secret), `chat_id`.
+
 ## Service Tiers
 
 Not every service renders the same content. The tier determines what the notifier
 includes from the structured payload.
 
-| Tier        | Renders                              | Drops                  | Example |
-| ----------- | ------------------------------------ | ---------------------- | ------- |
-| Detail      | Everything: fields, sections, images | Nothing                | Discord |
-| Summary     | Title, message, field blocks         | Section blocks, images | Ntfy    |
-| Passthrough | Raw `Notification` JSON              | Nothing (no rendering) | Webhook |
+| Tier        | Renders                              | Drops                  | Example        |
+| ----------- | ------------------------------------ | ---------------------- | -------------- |
+| Detail      | Everything: fields, sections, images | Nothing                | Discord        |
+| Summary     | Title, message, field blocks         | Section blocks, images | Ntfy, Telegram |
+| Passthrough | Raw `Notification` JSON              | Nothing (no rendering) | Webhook        |
 
 The tier is a design-time decision baked into the renderer, not a runtime config.
 
@@ -204,25 +216,27 @@ tests/integration/notifications/
   harness/
     mock-server.ts       - Deno.serve() that captures HTTP requests
   specs/
-    test.test.ts         - test notification (definition + Discord + real webhook)
-    upgrade.test.ts      - upgrade notification (definition + Discord + real webhook)
-    rename.test.ts       - rename notification (definition + Discord + real webhook)
-    ntfy.test.ts         - ntfy rendering + auth + real webhook
-    webhook.test.ts      - webhook passthrough + auth + real webhook
+    test.test.ts         - test notification (definition + all notifiers)
+    upgrade.test.ts      - upgrade notification (definition + all notifiers)
+    rename.test.ts       - rename notification (definition + all notifiers)
+    arrSync.test.ts      - arr sync notification (definition + all notifiers)
+    pcdSync.test.ts      - PCD sync notification (definition + all notifiers)
 ```
 
-Tests are organized by notification type. Each spec covers definition output,
-notifier rendering via mock server, and optionally a real webhook send.
+Tests are organized by event, not by notifier. Each spec covers definition
+output, rendering for all notifiers (Discord, Ntfy, Webhook, Telegram) via
+mock server, and optionally real sends.
 
 ```bash
 deno task test integration notifications              # all
-deno task test integration notifications ntfy         # ntfy only
-deno task test integration notifications webhook      # webhook only
+deno task test integration notifications test         # test event only
 deno task test integration notifications upgrade      # upgrade only
+deno task test integration notifications telegram     # (no standalone file — telegram tests are in each event spec)
 ```
 
-Real webhook tests are skipped without `.env`. Copy `.env.example` and fill in
-values for visual verification. Not part of CI.
+Real send tests are skipped without `.env`. Copy `.env.example` and fill in
+values for visual verification. Not part of CI. Telegram requires
+`TEST_TELEGRAM_BOT_TOKEN` and `TEST_TELEGRAM_CHAT_ID`.
 
 ## Adding a New Service
 
@@ -236,9 +250,10 @@ provide? Which fields are secrets? How does severity map? Document this in
 > **Config:** `server_url`, `topic`, `access_token` (secret).
 > **Severity:** success/info → priority 3, warning → 4, error → 5.
 
-**2. Write tests.** Create `specs/{service}.test.ts` with mock tests (severity
-mapping, payload structure, auth headers, block rendering per tier) and real
-webhook tests (skipped without `.env`). This is the contract.
+**2. Write tests.** Add a section for the new notifier to each existing event
+spec (`test.test.ts`, `rename.test.ts`, etc.) with mock tests (severity mapping,
+payload structure, block rendering per tier) and real send tests (skipped without
+`.env`). Tests are organized by event, not by notifier.
 
 **3. Build the UI.** Config form component, add to type dropdown in
 `NotificationServiceForm.svelte`, add config parsing in `new/` and `edit/` page
