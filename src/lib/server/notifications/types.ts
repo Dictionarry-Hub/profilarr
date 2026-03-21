@@ -120,11 +120,20 @@ export interface WebhookConfig {
 }
 
 /**
+ * Configuration for Telegram notifications
+ */
+export interface TelegramConfig {
+	bot_token: string;
+	chat_id: string;
+	api_base_url?: string;
+}
+
+/**
  * Union type for all notification service configs
  */
-export type NotificationServiceConfig = DiscordConfig | NtfyConfig | WebhookConfig;
+export type NotificationServiceConfig = DiscordConfig | NtfyConfig | WebhookConfig | TelegramConfig;
 
 /**
  * Service types supported
  */
-export type NotificationServiceType = 'discord' | 'ntfy' | 'webhook';
+export type NotificationServiceType = 'discord' | 'ntfy' | 'webhook' | 'telegram';

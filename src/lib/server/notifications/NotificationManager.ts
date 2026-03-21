@@ -2,10 +2,17 @@ import { logger } from '$logger/logger.ts';
 import { notificationServicesQueries } from '$db/queries/notificationServices.ts';
 import { notificationHistoryQueries } from '$db/queries/notificationHistory.ts';
 import type { Notifier } from './base/Notifier.ts';
-import type { Notification, DiscordConfig, NtfyConfig, WebhookConfig } from './types.ts';
+import type {
+	Notification,
+	DiscordConfig,
+	NtfyConfig,
+	WebhookConfig,
+	TelegramConfig
+} from './types.ts';
 import { DiscordNotifier } from './notifiers/discord/DiscordNotifier.ts';
 import { NtfyNotifier } from './notifiers/ntfy/NtfyNotifier.ts';
 import { WebhookNotifier } from './notifiers/webhook/WebhookNotifier.ts';
+import { TelegramNotifier } from './notifiers/telegram/TelegramNotifier.ts';
 
 /**
  * Central notification manager
@@ -159,6 +166,8 @@ export class NotificationManager {
 					return new NtfyNotifier(config as NtfyConfig);
 				case 'webhook':
 					return new WebhookNotifier(config as WebhookConfig);
+				case 'telegram':
+					return new TelegramNotifier(config as TelegramConfig);
 				default:
 					return null;
 			}
