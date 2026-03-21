@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
-	import { Plus, Trash2, Bell, BellOff, MessageSquare, Send, Pencil } from 'lucide-svelte';
+	import { Plus, Trash2, Bell, BellOff, Rss, Send, Pencil } from 'lucide-svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import NotificationHistory from './components/NotificationHistory.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import type { Column } from '$ui/table/types';
-	import { siDiscord } from 'simple-icons';
+	import { siDiscord, siNtfy, siTelegram } from 'simple-icons';
 	import Button from '$ui/button/Button.svelte';
 	import type { PageData } from './$types';
 
@@ -55,26 +55,15 @@
 		deleteFormRef = null;
 	}
 
-	function getServiceIcon(serviceType: string) {
-		switch (serviceType) {
-			case 'discord':
-				return MessageSquare;
-			default:
-				return Bell;
-		}
-	}
+	const serviceInfo: Record<string, { label: string; icon: { path: string } | null }> = {
+		discord: { label: 'Discord', icon: siDiscord },
+		ntfy: { label: 'Ntfy', icon: siNtfy },
+		webhook: { label: 'Webhook', icon: null },
+		telegram: { label: 'Telegram', icon: siTelegram }
+	};
 
 	function getServiceTypeName(serviceType: string): string {
-		switch (serviceType) {
-			case 'discord':
-				return 'Discord';
-			case 'slack':
-				return 'Slack';
-			case 'email':
-				return 'Email';
-			default:
-				return serviceType;
-		}
+		return serviceInfo[serviceType]?.label ?? serviceType;
 	}
 
 	function formatSuccessRate(rate: number): string {
@@ -138,21 +127,17 @@
 				<span class="font-medium">{row.name}</span>
 			{:else if column.key === 'service_type'}
 				<div class="flex items-center gap-2">
-					{#if row.service_type === 'discord'}
+					{#if serviceInfo[row.service_type]?.icon}
 						<svg
 							role="img"
 							viewBox="0 0 24 24"
 							class="h-4 w-4 text-neutral-600 dark:text-neutral-400"
 							fill="currentColor"
 						>
-							<path d={siDiscord.path} />
+							<path d={serviceInfo[row.service_type].icon.path} />
 						</svg>
 					{:else}
-						<svelte:component
-							this={getServiceIcon(row.service_type)}
-							size={16}
-							class="text-neutral-600 dark:text-neutral-400"
-						/>
+						<Rss size={16} class="text-neutral-600 dark:text-neutral-400" />
 					{/if}
 					<span>{getServiceTypeName(row.service_type)}</span>
 				</div>
