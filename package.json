@@ -9,7 +9,7 @@
 		"croner": "^10.0.1",
 		"jose": "^6.2.1",
 		"kysely": "0.27.6",
-		"lucide-svelte": "^0.546.0",
+		"lucide-svelte": "^0.577.0",
 		"marked": "^15.0.6",
 		"simple-icons": "^15.17.0",
 		"yaml": "^2.8.2"
