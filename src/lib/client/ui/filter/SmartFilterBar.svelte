@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { Filter } from 'lucide-svelte';
 	import FilterTagComponent from './FilterTag.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
@@ -279,6 +280,9 @@
 	<div
 		class="relative flex h-10 w-full items-center gap-1.5 overflow-x-auto rounded-xl border border-neutral-300 bg-white px-3 transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50"
 	>
+		<div class="pointer-events-none flex-shrink-0">
+			<Filter size={16} class="text-neutral-500 dark:text-neutral-400" />
+		</div>
 		{#each tags as tag, index (tag.id)}
 			<FilterTagComponent
 				{tag}

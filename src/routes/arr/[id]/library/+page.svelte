@@ -493,7 +493,7 @@
 		sentinel: cardSentinel,
 		reset: cardReset,
 		setTotalCount: cardSetTotalCount
-	} = createProgressiveList({ pageSize: 30 });
+	} = createProgressiveList({ pageSize: 60 });
 
 	$: if (isRadarr) {
 		cardSetTotalCount(sortedMovies.length);
