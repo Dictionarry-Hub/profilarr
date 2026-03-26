@@ -12,16 +12,25 @@
 		SonarrLibraryItem,
 		SonarrEpisodeItem
 	} from '$utils/arr/types.ts';
-	import { getPersistentSearchStore, type SearchStore } from '$stores/search';
 	import { libraryCache } from '$stores/libraryCache';
 	import { sortTitle } from '$shared/utils/sort.ts';
-	import { createSearchFieldState } from '$lib/client/utils/search';
+	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
+	import { applySmartFilters } from '$ui/filter/match';
+
+	import ViewToggle from '$ui/actions/ViewToggle.svelte';
+	import type { ViewMode } from '$lib/client/stores/dataPage';
+
+	import { createProgressiveList } from '$lib/client/utils/progressiveList';
 
 	import LibraryActionBar from './components/LibraryActionBar.svelte';
+	import InfoModal from '$ui/modal/InfoModal.svelte';
+	import LibraryCardGrid from './components/LibraryCardGrid.svelte';
 	import MovieRow from './components/MovieRow.svelte';
 	import MovieRowSkeleton from './components/MovieRowSkeleton.svelte';
+	import MovieCard from './components/MovieCard.svelte';
 	import SeriesRow from './components/SeriesRow.svelte';
 	import SeriesRowSkeleton from './components/SeriesRowSkeleton.svelte';
+	import SeriesCard from './components/SeriesCard.svelte';
 	import SeasonTable from './components/SeasonTable.svelte';
 
 	export let data: PageData;
@@ -30,37 +39,151 @@
 	$: isSonarr = data.instance.type === 'sonarr';
 	$: isSupported = isRadarr || isSonarr;
 
-	let searchStore: SearchStore;
-	$: searchStore = getPersistentSearchStore(`arrLibrarySearch:${data.instance.id}`, {
-		debounceMs: 150
-	});
+	// ==========================================================================
+	// Smart Filter
+	// ==========================================================================
 
-	// Search mode (Radarr supports title + CF search, Sonarr title only)
-	const librarySearchState = createSearchFieldState(
-		`arrLibrarySearchField:${data.instance.id}`,
-		[
-			{ value: 'title', label: 'Title' },
-			{ value: 'customFormats', label: 'Custom Formats' }
-		],
-		'title'
-	);
+	let filterTags: FilterTag[] = [];
+	let showFilterInfo = false;
 
-	let searchMode: 'title' | 'customFormats' = librarySearchState.initialField as
-		| 'title'
-		| 'customFormats';
-	let cfSearchTags: string[] = librarySearchState.initialTags;
-
-	function handleSearchModeChange(mode: 'title' | 'customFormats') {
-		if (mode === searchMode) return;
-		// Clear the other mode's state when switching
-		if (mode === 'title') {
-			cfSearchTags = [];
-			librarySearchState.clearTags();
-		} else {
-			searchStore.clear();
+	const radarrFields: FilterFieldDef<RadarrLibraryItem>[] = [
+		{
+			key: 'title',
+			label: 'Title',
+			type: 'text',
+			accessor: (m) => m.title,
+			isDefault: true,
+			suggestions: (items) => items.map((m) => m.title).sort()
+		},
+		{
+			key: 'quality',
+			label: 'Quality',
+			type: 'text',
+			accessor: (m) => m.qualityName ?? '',
+			suggestions: (items) =>
+				[...new Set(items.map((m) => m.qualityName).filter(Boolean) as string[])].sort()
+		},
+		{
+			key: 'profile',
+			label: 'Profile',
+			type: 'text',
+			accessor: (m) => m.qualityProfileName,
+			suggestions: (items) => [...new Set(items.map((m) => m.qualityProfileName))].sort()
+		},
+		{
+			key: 'format',
+			label: 'Format',
+			type: 'text',
+			accessor: (m) => m.scoreBreakdown.map((s) => s.name),
+			suggestions: (items) =>
+				[...new Set(items.flatMap((m) => m.scoreBreakdown.map((s) => s.name)))].sort()
+		},
+		{ key: 'score', label: 'Score', type: 'number', accessor: (m) => m.customFormatScore },
+		{ key: 'year', label: 'Year', type: 'number', accessor: (m) => m.year ?? 0 },
+		{
+			key: 'status',
+			label: 'Status',
+			type: 'text',
+			accessor: (m) => m.status ?? '',
+			suggestions: () => ['released', 'announced', 'inCinemas']
+		},
+		{
+			key: 'studio',
+			label: 'Studio',
+			type: 'text',
+			accessor: (m) => m.studio ?? '',
+			suggestions: (items) =>
+				[...new Set(items.map((m) => m.studio).filter(Boolean) as string[])].sort()
+		},
+		{
+			key: 'genre',
+			label: 'Genre',
+			type: 'text',
+			accessor: (m) => m.genres ?? [],
+			suggestions: (items) => [...new Set(items.flatMap((m) => m.genres ?? []))].sort()
 		}
-		searchMode = mode;
-		librarySearchState.saveField(mode);
+	];
+
+	const sonarrFields: FilterFieldDef<SonarrLibraryItem>[] = [
+		{
+			key: 'title',
+			label: 'Title',
+			type: 'text',
+			accessor: (s) => s.title,
+			isDefault: true,
+			suggestions: (items) => items.map((s) => s.title).sort()
+		},
+		{
+			key: 'profile',
+			label: 'Profile',
+			type: 'text',
+			accessor: (s) => s.qualityProfileName,
+			suggestions: (items) => [...new Set(items.map((s) => s.qualityProfileName))].sort()
+		},
+		{
+			key: 'network',
+			label: 'Network',
+			type: 'text',
+			accessor: (s) => s.network ?? '',
+			suggestions: (items) =>
+				[...new Set(items.map((s) => s.network).filter(Boolean) as string[])].sort()
+		},
+		{ key: 'year', label: 'Year', type: 'number', accessor: (s) => s.year ?? 0 },
+		{
+			key: 'status',
+			label: 'Status',
+			type: 'text',
+			accessor: (s) => s.status ?? '',
+			suggestions: () => ['continuing', 'ended', 'upcoming']
+		},
+		{
+			key: 'genre',
+			label: 'Genre',
+			type: 'text',
+			accessor: (s) => s.genres ?? [],
+			suggestions: (items) => [...new Set(items.flatMap((s) => s.genres ?? []))].sort()
+		}
+	];
+
+	$: activeFields = isRadarr ? radarrFields : sonarrFields;
+
+	// ==========================================================================
+	// View Mode
+	// ==========================================================================
+
+	const VIEW_STORAGE_KEY = 'profilarr-library-view';
+	const CARDS_PER_ROW_STORAGE_KEY = 'profilarr-library-cards-per-row';
+
+	function loadViewMode(): ViewMode {
+		if (!browser) return 'table';
+		try {
+			const stored = localStorage.getItem(VIEW_STORAGE_KEY);
+			if (stored === 'cards' || stored === 'table') return stored;
+		} catch {}
+		return window.innerWidth < 768 ? 'cards' : 'table';
+	}
+
+	function loadCardsPerRow(): number {
+		if (!browser) return 8;
+		try {
+			const stored = localStorage.getItem(CARDS_PER_ROW_STORAGE_KEY);
+			if (stored) {
+				const n = parseInt(stored, 10);
+				if (!isNaN(n) && n >= 2 && n <= 20) return n;
+			}
+		} catch {}
+		return 8;
+	}
+
+	let viewMode: ViewMode = loadViewMode();
+	let cardsPerRow: number = loadCardsPerRow();
+
+	$: if (browser) {
+		localStorage.setItem(VIEW_STORAGE_KEY, viewMode);
+	}
+
+	$: if (browser) {
+		localStorage.setItem(CARDS_PER_ROW_STORAGE_KEY, String(cardsPerRow));
 	}
 
 	// ==========================================================================
@@ -287,98 +410,14 @@
 	}
 
 	// ==========================================================================
-	// Filter System
-	// ==========================================================================
-
-	type FilterOperator = 'eq' | 'neq';
-	type FilterField = 'qualityName' | 'qualityProfileName';
-
-	interface ActiveFilter {
-		field: FilterField;
-		operator: FilterOperator;
-		value: string | number | boolean;
-		label: string;
-	}
-
-	let activeFilters: ActiveFilter[] = [];
-
-	// Radarr filters
-	$: radarrLibrary = library as RadarrLibraryItem[];
-	$: uniqueQualities = isRadarr
-		? [...new Set(radarrLibrary.filter((m) => m.qualityName).map((m) => m.qualityName!))].sort()
-		: [];
-	$: uniqueProfiles = [
-		...new Set((library as Array<{ qualityProfileName: string }>).map((m) => m.qualityProfileName))
-	].sort();
-	$: uniqueCustomFormats = isRadarr
-		? [...new Set(radarrLibrary.flatMap((m) => m.scoreBreakdown.map((s) => s.name)))].sort()
-		: [];
-
-	function toggleFilter(
-		field: FilterField,
-		operator: FilterOperator,
-		value: string | number | boolean,
-		label: string
-	) {
-		const existingIndex = activeFilters.findIndex((f) => f.field === field && f.value === value);
-		if (existingIndex >= 0) {
-			activeFilters = activeFilters.filter((_, i) => i !== existingIndex);
-		} else {
-			activeFilters = [...activeFilters, { field, operator, value, label }];
-		}
-	}
-
-	function applyFilters<T extends { [key: string]: any }>(items: T[]): T[] {
-		if (activeFilters.length === 0) return items;
-
-		const filtersByField = new Map<FilterField, ActiveFilter[]>();
-		for (const filter of activeFilters) {
-			const existing = filtersByField.get(filter.field) || [];
-			existing.push(filter);
-			filtersByField.set(filter.field, existing);
-		}
-
-		return items.filter((item) => {
-			return [...filtersByField.entries()].every(([field, filters]) => {
-				const itemValue = item[field];
-				return filters.some((filter) => {
-					if (filter.operator === 'eq') return itemValue === filter.value;
-					if (filter.operator === 'neq') return itemValue !== filter.value;
-					return true;
-				});
-			});
-		});
-	}
-
-	// ==========================================================================
 	// Radarr Data & Columns
 	// ==========================================================================
 
 	$: baseUrl = data.instance.url.replace(/\/$/, '');
-	$: debouncedQuery = $searchStore.query;
 
-	// Radarr
+	$: radarrLibrary = library as RadarrLibraryItem[];
 	$: allMoviesWithFiles = isRadarr ? radarrLibrary.filter((m) => m.hasFile) : [];
-
-	$: moviesWithFiles = (() => {
-		if (!isRadarr) return [];
-		let result = allMoviesWithFiles;
-
-		// Title search (only in title mode)
-		if (searchMode === 'title' && debouncedQuery) {
-			result = result.filter((m) => m.title.toLowerCase().includes(debouncedQuery.toLowerCase()));
-		}
-
-		// CF tag filter (only in CF mode)
-		if (searchMode === 'customFormats' && cfSearchTags.length > 0) {
-			result = result.filter((m) => {
-				const cfNames = new Set(m.scoreBreakdown.map((s) => s.name.toLowerCase()));
-				return cfSearchTags.every((tag) => cfNames.has(tag.toLowerCase()));
-			});
-		}
-
-		return applyFilters(result);
-	})();
+	$: moviesWithFiles = applySmartFilters(allMoviesWithFiles, filterTags, radarrFields);
 
 	const allRadarrColumns: Column<RadarrLibraryItem>[] = [
 		{
@@ -441,6 +480,7 @@
 		year: 0,
 		tmdbId: 0,
 		hasFile: true,
+		monitored: true,
 		qualityProfileId: 0,
 		qualityProfileName: '',
 		isProfilarrProfile: false,
@@ -460,14 +500,7 @@
 	// ==========================================================================
 
 	$: sonarrLibrary = library as SonarrLibraryItem[];
-
-	$: filteredSeries = (() => {
-		if (!isSonarr) return [];
-		let result = sonarrLibrary.filter(
-			(s) => !debouncedQuery || s.title.toLowerCase().includes(debouncedQuery.toLowerCase())
-		);
-		return applyFilters(result);
-	})();
+	$: filteredSeries = isSonarr ? applySmartFilters(sonarrLibrary, filterTags, sonarrFields) : [];
 
 	const allSonarrColumns: Column<SonarrLibraryItem>[] = [
 		{
@@ -533,6 +566,29 @@
 		seasons: [],
 		isProfilarrProfile: false
 	})) as unknown as SonarrLibraryItem[];
+
+	// ==========================================================================
+	// Card View Progressive Loading
+	// ==========================================================================
+
+	const {
+		visibleCount: cardVisibleCount,
+		sentinel: cardSentinel,
+		reset: cardReset,
+		setTotalCount: cardSetTotalCount
+	} = createProgressiveList({ pageSize: 30 });
+
+	$: if (isRadarr) {
+		cardSetTotalCount(moviesWithFiles.length);
+	} else if (isSonarr) {
+		cardSetTotalCount(filteredSeries.length);
+	}
+
+	// Reset progressive list when data changes
+	$: (moviesWithFiles, filteredSeries, cardReset());
+
+	$: visibleMovieCards = moviesWithFiles.slice(0, $cardVisibleCount);
+	$: visibleSeriesCards = filteredSeries.slice(0, $cardVisibleCount);
 
 	// ==========================================================================
 	// Sonarr Episode Lazy Loading
@@ -624,178 +680,271 @@
 		</div>
 	{:else}
 		<LibraryActionBar
-			{searchStore}
+			fields={activeFields}
+			items={isRadarr ? allMoviesWithFiles : sonarrLibrary}
+			bind:tags={filterTags}
+			filterStorageKey={`smartFilter:${data.instance.id}`}
 			visibleColumns={activeVisibleColumns}
 			toggleableColumns={activeToggleableColumns}
 			columnLabels={activeColumnLabels}
-			{activeFilters}
-			uniqueQualities={loading ? [] : uniqueQualities}
-			uniqueProfiles={loading ? [] : uniqueProfiles}
 			cacheAgeText={loading ? null : cacheAgeText}
 			{refreshing}
 			onToggleColumn={toggleColumn}
-			onToggleFilter={toggleFilter}
 			onRefresh={handleRefresh}
 			onOpen={handleOpen}
 			instanceType={data.instance.type}
-			{searchMode}
-			onSearchModeChange={handleSearchModeChange}
-			cfTags={cfSearchTags}
-			onCfTagsChange={(tags) => {
-				cfSearchTags = tags;
-				librarySearchState.saveTags(tags);
-			}}
+			bind:viewMode
+			bind:cardsPerRow
+			onFilterInfo={() => (showFilterInfo = true)}
 		/>
 
-		{#if isRadarr}
+		{#if viewMode === 'table'}
 			<!-- ============================================================ -->
-			<!-- Radarr Library -->
+			<!-- Table View -->
 			<!-- ============================================================ -->
-			{#if allMoviesWithFiles.length === 0 && !loading && !refreshing}
-				<div
-					class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
-				>
-					<div class="flex items-center gap-3">
-						<Film class="h-5 w-5 text-neutral-400" />
-						<div>
-							<h3 class="font-medium text-neutral-900 dark:text-neutral-50">
-								No movies with files
-							</h3>
-							<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-								This library has {library.length} movies but none have downloaded files yet.
-							</p>
-						</div>
-					</div>
-				</div>
-			{:else}
-				<ExpandableTable
-					columns={radarrColumns}
-					data={loading || refreshing ? radarrSkeletonData : moviesWithFiles}
-					getRowId={(row) => row.id}
-					compact={true}
-					defaultSort={radarrDefaultSort}
-					pageSize={25}
-					responsive
-					flushExpanded
-					emptyMessage={activeFilters.length > 0 || debouncedQuery || cfSearchTags.length > 0
-						? 'No movies match the current filters'
-						: 'No movies with files'}
-				>
-					<svelte:fragment slot="cell" let:row let:column>
-						{#if loading || refreshing}
-							<MovieRowSkeleton {column} />
-						{:else}
-							<MovieRow {row} {column} mode="cell" />
-						{/if}
-					</svelte:fragment>
-
-					<svelte:fragment slot="actions" let:row>
-						{#if !loading && !refreshing && row.tmdbId}
-							<Button
-								icon={ExternalLink}
-								size="xs"
-								variant="secondary"
-								href="{baseUrl}/movie/{row.tmdbId}"
-								target="_blank"
-								rel="noopener noreferrer"
-								tooltip="Open in Radarr"
-								on:click={(e) => e.stopPropagation()}
-							/>
-						{/if}
-					</svelte:fragment>
-
-					<svelte:fragment slot="expanded" let:row>
-						{#if !loading && !refreshing}
-							<div class="p-4">
-								<MovieRow {row} column={allRadarrColumns[0]} mode="expanded" />
+			{#if isRadarr}
+				{#if allMoviesWithFiles.length === 0 && !loading && !refreshing}
+					<div
+						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
+					>
+						<div class="flex items-center gap-3">
+							<Film class="h-5 w-5 text-neutral-400" />
+							<div>
+								<h3 class="font-medium text-neutral-900 dark:text-neutral-50">
+									No movies with files
+								</h3>
+								<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+									This library has {library.length} movies but none have downloaded files yet.
+								</p>
 							</div>
-						{/if}
-					</svelte:fragment>
-				</ExpandableTable>
-			{/if}
-		{:else if isSonarr}
-			<!-- ============================================================ -->
-			<!-- Sonarr Library -->
-			<!-- ============================================================ -->
-			{#if sonarrLibrary.length === 0 && !loading && !refreshing}
-				<div
-					class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
-				>
-					<div class="flex items-center gap-3">
-						<Film class="h-5 w-5 text-neutral-400" />
-						<div>
-							<h3 class="font-medium text-neutral-900 dark:text-neutral-50">No series found</h3>
-							<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-								This Sonarr instance has no series in its library.
-							</p>
 						</div>
 					</div>
-				</div>
-			{:else}
-				<ExpandableTable
-					columns={sonarrColumns}
-					data={loading || refreshing ? sonarrSkeletonData : filteredSeries}
-					getRowId={(row) => row.id}
-					compact={true}
-					defaultSort={sonarrDefaultSort}
-					pageSize={25}
-					responsive
-					flushExpanded
-					bind:expandedRows={sonarrExpandedRows}
-					emptyMessage={activeFilters.length > 0 || debouncedQuery
-						? 'No series match the current filters'
-						: 'No series found'}
-				>
-					<svelte:fragment slot="cell" let:row let:column>
-						{#if loading || refreshing}
-							<SeriesRowSkeleton {column} />
-						{:else}
-							<SeriesRow {row} {column} />
-						{/if}
-					</svelte:fragment>
-
-					<svelte:fragment slot="actions" let:row>
-						{#if !loading && !refreshing && row.tvdbId}
-							<Button
-								icon={ExternalLink}
-								size="xs"
-								variant="secondary"
-								href="{baseUrl}/series/{row.title
-									.toLowerCase()
-									.replace(/[^a-z0-9]+/g, '-')
-									.replace(/^-+|-+$/g, '')}"
-								target="_blank"
-								rel="noopener noreferrer"
-								tooltip="Open in Sonarr"
-								on:click={(e) => e.stopPropagation()}
-							/>
-						{/if}
-					</svelte:fragment>
-
-					<svelte:fragment slot="expanded" let:row>
-						{#if !loading && !refreshing}
-							{@const seriesId = row.id}
-							{@const isEpisodeLoading = episodeLoadingSet.has(seriesId)}
-							{@const episodesBySeasonNumber = episodesBySeriesAndSeason.get(seriesId) ?? new Map()}
-
-							{#if isEpisodeLoading}
-								<div
-									class="flex items-center gap-2 p-4 text-sm text-neutral-500 dark:text-neutral-400"
-								>
-									<div
-										class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
-									></div>
-									Loading episodes...
-								</div>
+				{:else}
+					<ExpandableTable
+						columns={radarrColumns}
+						data={loading || refreshing ? radarrSkeletonData : moviesWithFiles}
+						getRowId={(row) => row.id}
+						compact={true}
+						defaultSort={radarrDefaultSort}
+						pageSize={25}
+						responsive
+						flushExpanded
+						emptyMessage={filterTags.length > 0
+							? 'No movies match the current filters'
+							: 'No movies with files'}
+					>
+						<svelte:fragment slot="cell" let:row let:column>
+							{#if loading || refreshing}
+								<MovieRowSkeleton {column} />
 							{:else}
+								<MovieRow {row} {column} mode="cell" />
+							{/if}
+						</svelte:fragment>
+
+						<svelte:fragment slot="actions" let:row>
+							{#if !loading && !refreshing && row.tmdbId}
+								<Button
+									icon={ExternalLink}
+									size="xs"
+									variant="secondary"
+									href="{baseUrl}/movie/{row.tmdbId}"
+									target="_blank"
+									rel="noopener noreferrer"
+									tooltip="Open in Radarr"
+									on:click={(e) => e.stopPropagation()}
+								/>
+							{/if}
+						</svelte:fragment>
+
+						<svelte:fragment slot="expanded" let:row>
+							{#if !loading && !refreshing}
 								<div class="p-4">
-									<SeasonTable seasons={row.seasons} {episodesBySeasonNumber} />
+									<MovieRow {row} column={allRadarrColumns[0]} mode="expanded" />
 								</div>
 							{/if}
-						{/if}
-					</svelte:fragment>
-				</ExpandableTable>
+						</svelte:fragment>
+					</ExpandableTable>
+				{/if}
+			{:else if isSonarr}
+				<!-- ============================================================ -->
+				<!-- Sonarr Library -->
+				<!-- ============================================================ -->
+				{#if sonarrLibrary.length === 0 && !loading && !refreshing}
+					<div
+						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
+					>
+						<div class="flex items-center gap-3">
+							<Film class="h-5 w-5 text-neutral-400" />
+							<div>
+								<h3 class="font-medium text-neutral-900 dark:text-neutral-50">No series found</h3>
+								<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+									This Sonarr instance has no series in its library.
+								</p>
+							</div>
+						</div>
+					</div>
+				{:else}
+					<ExpandableTable
+						columns={sonarrColumns}
+						data={loading || refreshing ? sonarrSkeletonData : filteredSeries}
+						getRowId={(row) => row.id}
+						compact={true}
+						defaultSort={sonarrDefaultSort}
+						pageSize={25}
+						responsive
+						flushExpanded
+						bind:expandedRows={sonarrExpandedRows}
+						emptyMessage={filterTags.length > 0
+							? 'No series match the current filters'
+							: 'No series found'}
+					>
+						<svelte:fragment slot="cell" let:row let:column>
+							{#if loading || refreshing}
+								<SeriesRowSkeleton {column} />
+							{:else}
+								<SeriesRow {row} {column} />
+							{/if}
+						</svelte:fragment>
+
+						<svelte:fragment slot="actions" let:row>
+							{#if !loading && !refreshing && row.tvdbId}
+								<Button
+									icon={ExternalLink}
+									size="xs"
+									variant="secondary"
+									href="{baseUrl}/series/{row.title
+										.toLowerCase()
+										.replace(/[^a-z0-9]+/g, '-')
+										.replace(/^-+|-+$/g, '')}"
+									target="_blank"
+									rel="noopener noreferrer"
+									tooltip="Open in Sonarr"
+									on:click={(e) => e.stopPropagation()}
+								/>
+							{/if}
+						</svelte:fragment>
+
+						<svelte:fragment slot="expanded" let:row>
+							{#if !loading && !refreshing}
+								{@const seriesId = row.id}
+								{@const isEpisodeLoading = episodeLoadingSet.has(seriesId)}
+								{@const episodesBySeasonNumber =
+									episodesBySeriesAndSeason.get(seriesId) ?? new Map()}
+
+								{#if isEpisodeLoading}
+									<div
+										class="flex items-center gap-2 p-4 text-sm text-neutral-500 dark:text-neutral-400"
+									>
+										<div
+											class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
+										></div>
+										Loading episodes...
+									</div>
+								{:else}
+									<div class="p-4">
+										<SeasonTable seasons={row.seasons} {episodesBySeasonNumber} />
+									</div>
+								{/if}
+							{/if}
+						</svelte:fragment>
+					</ExpandableTable>
+				{/if}
+			{/if}
+		{:else}
+			<!-- ============================================================ -->
+			<!-- Card View -->
+			<!-- ============================================================ -->
+			{#if loading || refreshing}
+				<LibraryCardGrid columns={cardsPerRow}>
+					{#each Array(15) as _}
+						<div
+							class="animate-pulse overflow-hidden rounded-xl border border-neutral-300 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-900"
+						>
+							<div class="aspect-[2/3] w-full bg-neutral-200 dark:bg-neutral-800"></div>
+							<div class="space-y-2 p-3">
+								<div class="h-4 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+								<div class="h-3 w-1/4 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+								<div class="h-5 w-1/2 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+							</div>
+						</div>
+					{/each}
+				</LibraryCardGrid>
+			{:else if isRadarr}
+				{#if moviesWithFiles.length === 0}
+					<div
+						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
+					>
+						<p class="text-sm text-neutral-500 dark:text-neutral-400">
+							{filterTags.length > 0
+								? 'No movies match the current filters'
+								: 'No movies with files'}
+						</p>
+					</div>
+				{:else}
+					<LibraryCardGrid columns={cardsPerRow}>
+						{#each visibleMovieCards as movie (movie.id)}
+							<MovieCard {movie} {baseUrl} />
+						{/each}
+					</LibraryCardGrid>
+					<div use:cardSentinel></div>
+				{/if}
+			{:else if isSonarr}
+				{#if filteredSeries.length === 0}
+					<div
+						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
+					>
+						<p class="text-sm text-neutral-500 dark:text-neutral-400">
+							{filterTags.length > 0 ? 'No series match the current filters' : 'No series found'}
+						</p>
+					</div>
+				{:else}
+					<LibraryCardGrid columns={cardsPerRow}>
+						{#each visibleSeriesCards as series (series.id)}
+							<SeriesCard {series} {baseUrl} />
+						{/each}
+					</LibraryCardGrid>
+					<div use:cardSentinel></div>
+				{/if}
 			{/if}
 		{/if}
 	{/if}
 </div>
+
+<InfoModal bind:open={showFilterInfo} header="How Filters Work">
+	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+		<div>
+			<div class="font-medium text-neutral-900 dark:text-neutral-100">Quick Search</div>
+			<p class="mt-1">
+				Start typing and press Enter to search by title. No need to select a field first.
+			</p>
+		</div>
+		<div>
+			<div class="font-medium text-neutral-900 dark:text-neutral-100">Field Filters</div>
+			<p class="mt-1">
+				Click the input to see all available fields. Select one, then type or pick a value to create
+				a filter.
+			</p>
+		</div>
+		<div>
+			<div class="font-medium text-neutral-900 dark:text-neutral-100">Number Filters</div>
+			<p class="mt-1">
+				For numeric fields like Score or Year, use operators such as &gt;1000, &lt;500, &gt;=200, or
+				ranges like 2020-2025.
+			</p>
+		</div>
+		<div>
+			<div class="font-medium text-neutral-900 dark:text-neutral-100">Negation</div>
+			<p class="mt-1">
+				Click any filter tag to toggle it to NOT mode. Negated filters exclude matching items
+				instead of including them.
+			</p>
+		</div>
+		<div>
+			<div class="font-medium text-neutral-900 dark:text-neutral-100">Combining Filters</div>
+			<p class="mt-1">
+				Multiple filters use AND logic. All must match. Press Backspace on an empty input to remove
+				the last filter, or click the X on any tag.
+			</p>
+		</div>
+	</div>
+</InfoModal>
