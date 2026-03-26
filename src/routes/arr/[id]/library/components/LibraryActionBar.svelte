@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
 	import { Check, TableProperties, LayoutGrid, RefreshCw, ExternalLink, Info } from 'lucide-svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
@@ -8,14 +9,17 @@
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
+	import type { SearchStore } from '$stores/search';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
 
 	export let fields: FilterFieldDef[] = [];
 	export let items: any[] = [];
 	export let tags: FilterTag[] = [];
 	export let filterStorageKey: string = '';
+	export let searchStore: SearchStore;
 	export let visibleColumns: Set<string>;
 	export let toggleableColumns: readonly string[];
 	export let columnLabels: Record<string, string>;
@@ -36,19 +40,44 @@
 	$: filterPlaceholder = isRadarr ? 'Filter movies...' : 'Filter series...';
 	$: openLabel = isRadarr ? 'Open in Radarr' : 'Open in Sonarr';
 	$: refreshTooltip = cacheAgeText ? `Refresh · ${cacheAgeText}` : 'Refresh';
+
+	let isMobile = false;
+	let mediaQuery: MediaQueryList | null = null;
+
+	onMount(() => {
+		if (typeof window !== 'undefined') {
+			mediaQuery = window.matchMedia('(max-width: 767px)');
+			isMobile = mediaQuery.matches;
+			mediaQuery.addEventListener('change', handleMediaChange);
+		}
+	});
+
+	onDestroy(() => {
+		if (mediaQuery) {
+			mediaQuery.removeEventListener('change', handleMediaChange);
+		}
+	});
+
+	function handleMediaChange(e: MediaQueryListEvent) {
+		isMobile = e.matches;
+	}
 </script>
 
 <ActionsBar>
-	<SmartFilterBar
-		{fields}
-		{items}
-		bind:tags
-		storageKey={filterStorageKey}
-		placeholder={filterPlaceholder}
-	/>
-	<Tooltip text="Filter help">
-		<ActionButton icon={Info} on:click={onFilterInfo} />
-	</Tooltip>
+	{#if isMobile}
+		<SearchAction {searchStore} placeholder={filterPlaceholder} responsive />
+	{:else}
+		<SmartFilterBar
+			{fields}
+			{items}
+			bind:tags
+			storageKey={filterStorageKey}
+			placeholder={filterPlaceholder}
+		/>
+		<Tooltip text="Filter help">
+			<ActionButton icon={Info} on:click={onFilterInfo} />
+		</Tooltip>
+	{/if}
 	<Tooltip text={refreshTooltip}>
 		<ActionButton
 			icon={RefreshCw}

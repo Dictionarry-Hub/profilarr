@@ -275,7 +275,7 @@
 	});
 </script>
 
-<div class="smart-filter-bar relative flex flex-1" bind:this={containerEl}>
+<div class="smart-filter-bar relative flex min-w-0 flex-1" bind:this={containerEl}>
 	<div
 		class="relative flex h-10 w-full items-center gap-1.5 overflow-x-auto rounded-xl border border-neutral-300 bg-white px-3 transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50"
 	>
@@ -336,7 +336,6 @@
 </div>
 
 <style>
-	/* ActionsBar strips border-radius on all nested elements — restore it for the autocomplete dropdown */
 	.smart-filter-bar > :global(:nth-child(n + 2)) {
 		border-radius: 0.75rem !important;
 	}

@@ -2,7 +2,9 @@
 	export let columns: number = 8;
 	export let gap: 'sm' | 'md' | 'lg' = 'md';
 
-	$: desktopColumnCount = Math.max(1, Math.floor(columns));
+	// Derive a minimum card width from the desired column count.
+	// Cards will shrink to fewer columns naturally when the viewport is too narrow (e.g. zoom).
+	$: minCardWidth = Math.max(100, Math.floor(1200 / Math.max(1, Math.floor(columns))));
 
 	const gapClasses = {
 		sm: 'gap-2',
@@ -13,25 +15,13 @@
 
 <div
 	class="library-card-grid grid {gapClasses[gap]}"
-	style={`--library-card-grid-columns: ${desktopColumnCount};`}
+	style={`--library-card-min-width: ${minCardWidth}px;`}
 >
 	<slot />
 </div>
 
 <style>
 	.library-card-grid {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-
-	@media (min-width: 640px) {
-		.library-card-grid {
-			grid-template-columns: repeat(4, minmax(0, 1fr));
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.library-card-grid {
-			grid-template-columns: repeat(var(--library-card-grid-columns), minmax(0, 1fr));
-		}
+		grid-template-columns: repeat(auto-fill, minmax(var(--library-card-min-width), 1fr));
 	}
 </style>

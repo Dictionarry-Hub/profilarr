@@ -5,6 +5,7 @@
 	import type { PageData } from './$types';
 	import type { RadarrLibraryItem, SonarrLibraryItem } from '$utils/arr/types.ts';
 	import { libraryCache } from '$stores/libraryCache';
+	import { getPersistentSearchStore } from '$stores/search';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
@@ -30,6 +31,12 @@
 
 	let filterTags: FilterTag[] = [];
 	let showFilterInfo = false;
+
+	// Mobile simple search
+	$: mobileSearchStore = getPersistentSearchStore(`arrLibrarySearch:${data.instance.id}`, {
+		debounceMs: 150
+	});
+	$: mobileQuery = $mobileSearchStore.query;
 
 	const radarrFields: FilterFieldDef<RadarrLibraryItem>[] = [
 		{
@@ -399,14 +406,29 @@
 
 	$: radarrLibrary = library as RadarrLibraryItem[];
 	$: allMoviesWithFiles = isRadarr ? radarrLibrary.filter((m) => m.hasFile) : [];
-	$: moviesWithFiles = applySmartFilters(allMoviesWithFiles, filterTags, radarrFields);
+	$: moviesWithFiles = (() => {
+		let result = applySmartFilters(allMoviesWithFiles, filterTags, radarrFields);
+		if (mobileQuery) {
+			const q = mobileQuery.toLowerCase();
+			result = result.filter((m) => m.title.toLowerCase().includes(q));
+		}
+		return result;
+	})();
 
 	// ==========================================================================
 	// Sonarr Data
 	// ==========================================================================
 
 	$: sonarrLibrary = library as SonarrLibraryItem[];
-	$: filteredSeries = isSonarr ? applySmartFilters(sonarrLibrary, filterTags, sonarrFields) : [];
+	$: filteredSeries = (() => {
+		if (!isSonarr) return [];
+		let result = applySmartFilters(sonarrLibrary, filterTags, sonarrFields);
+		if (mobileQuery) {
+			const q = mobileQuery.toLowerCase();
+			result = result.filter((s) => s.title.toLowerCase().includes(q));
+		}
+		return result;
+	})();
 
 	let sonarrTableView: SonarrTableView;
 
@@ -473,6 +495,7 @@
 			items={isRadarr ? allMoviesWithFiles : sonarrLibrary}
 			bind:tags={filterTags}
 			filterStorageKey={`smartFilter:${data.instance.id}`}
+			searchStore={mobileSearchStore}
 			visibleColumns={activeVisibleColumns}
 			toggleableColumns={activeToggleableColumns}
 			columnLabels={activeColumnLabels}
