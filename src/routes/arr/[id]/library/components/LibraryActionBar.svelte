@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import {
-		Check,
 		TableProperties,
 		RefreshCw,
 		ExternalLink,
@@ -16,7 +15,6 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
@@ -133,34 +131,16 @@
 	{/if}
 	{#if viewMode === 'table'}
 		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
-			<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
+			<svelte:fragment slot="dropdown" let:dropdownPosition>
 				<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="14rem">
-					<div class="border-b border-neutral-100 px-4 py-3 dark:border-neutral-700">
-						<p class="text-xs text-neutral-500 dark:text-neutral-400">
-							Toggle visible table columns
-						</p>
-					</div>
-					<div class="py-1">
-						{#each toggleableColumns as colKey}
-							<button
-								type="button"
-								on:click={() => onToggleColumn(colKey)}
-								class="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700 {visibleColumns.has(
-									colKey
-								)
-									? 'bg-neutral-50 dark:bg-neutral-700'
-									: ''}"
-							>
-								<span class="text-neutral-700 dark:text-neutral-300">{columnLabels[colKey]}</span>
-								<IconCheckbox
-									checked={visibleColumns.has(colKey)}
-									icon={Check}
-									color="blue"
-									shape="circle"
-								/>
-							</button>
-						{/each}
-					</div>
+					<DropdownHeader label="Toggle columns" />
+					{#each toggleableColumns as colKey}
+						<DropdownItem
+							label={columnLabels[colKey]}
+							selected={visibleColumns.has(colKey)}
+							on:click={() => onToggleColumn(colKey)}
+						/>
+					{/each}
 				</Dropdown>
 			</svelte:fragment>
 		</ActionButton>

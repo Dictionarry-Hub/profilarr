@@ -6,6 +6,7 @@
 	import type { RadarrLibraryItem } from '$utils/arr/types.ts';
 	import { sortTitle } from '$shared/utils/sort.ts';
 
+	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import MovieRow from './MovieRow.svelte';
 	import MovieRowSkeleton from './MovieRowSkeleton.svelte';
 
@@ -17,8 +18,10 @@
 
 	const TOGGLEABLE_COLUMNS = [
 		'qualityName',
-		'customFormatScore',
-		'progress',
+		'score',
+		'releaseGroup',
+		'sizeOnDisk',
+		'status',
 		'popularity',
 		'dateAdded'
 	] as const;
@@ -32,23 +35,25 @@
 			sortable: true,
 			sortAccessor: (row) => sortTitle(row.title)
 		},
-		{ key: 'qualityProfileName', header: 'Profile', align: 'left', width: 'w-40', sortable: true },
+		{ key: 'status', header: 'Status', align: 'left', width: 'w-28', sortable: true },
 		{ key: 'qualityName', header: 'Quality', align: 'left', width: 'w-32', sortable: true },
+		{ key: 'qualityProfileName', header: 'Profile', align: 'left', width: 'w-40', sortable: true },
 		{
-			key: 'customFormatScore',
+			key: 'score',
 			header: 'Score',
 			align: 'right',
-			width: 'w-28',
+			width: 'w-48',
 			sortable: true,
+			sortAccessor: (row) => row.customFormatScore,
 			defaultSortDirection: 'desc'
 		},
 		{
-			key: 'progress',
-			header: 'Progress',
-			align: 'center',
-			width: 'w-40',
+			key: 'sizeOnDisk',
+			header: 'Size',
+			align: 'right',
+			width: 'w-24',
 			sortable: true,
-			sortAccessor: (row) => row.progress,
+			sortAccessor: (row) => row.sizeOnDisk ?? 0,
 			defaultSortDirection: 'desc'
 		},
 		{
@@ -67,7 +72,8 @@
 			sortable: true,
 			sortAccessor: (row) => (row.dateAdded ? new Date(row.dateAdded).getTime() : 0),
 			defaultSortDirection: 'desc'
-		}
+		},
+		{ key: 'releaseGroup', header: 'Group', align: 'left', width: 'w-28', sortable: true }
 	];
 
 	$: columns = allColumns.filter(
@@ -115,6 +121,13 @@
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if loading}
 			<MovieRowSkeleton {column} />
+		{:else if column.key === 'score'}
+			<ProgressIndicator
+				current={row.customFormatScore}
+				target={row.cutoffScore}
+				met={row.cutoffMet}
+				mode="compact"
+			/>
 		{:else}
 			<MovieRow {row} {column} mode="cell" />
 		{/if}

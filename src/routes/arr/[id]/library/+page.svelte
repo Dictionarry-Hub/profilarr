@@ -286,11 +286,13 @@
 
 	const RADARR_STORAGE_KEY = 'profilarr-library-columns';
 	const RADARR_TOGGLEABLE_COLUMNS = [
+		'status',
 		'qualityName',
-		'customFormatScore',
-		'progress',
+		'score',
+		'sizeOnDisk',
 		'popularity',
-		'dateAdded'
+		'dateAdded',
+		'releaseGroup'
 	] as const;
 	type RadarrToggleableColumn = (typeof RADARR_TOGGLEABLE_COLUMNS)[number];
 
@@ -326,8 +328,10 @@
 
 	const radarrColumnLabels: Record<RadarrToggleableColumn, string> = {
 		qualityName: 'Quality',
-		customFormatScore: 'Score',
-		progress: 'Progress',
+		score: 'Score',
+		releaseGroup: 'Group',
+		sizeOnDisk: 'Size',
+		status: 'Status',
 		popularity: 'Popularity',
 		dateAdded: 'Added'
 	};
@@ -337,7 +341,7 @@
 	// ==========================================================================
 
 	const SONARR_STORAGE_KEY = 'profilarr-library-sonarr-columns';
-	const SONARR_TOGGLEABLE_COLUMNS = ['episodes', 'sizeOnDisk', 'dateAdded'] as const;
+	const SONARR_TOGGLEABLE_COLUMNS = ['status', 'episodes', 'sizeOnDisk', 'dateAdded'] as const;
 	type SonarrToggleableColumn = (typeof SONARR_TOGGLEABLE_COLUMNS)[number];
 
 	function loadSonarrColumnVisibility(): Set<SonarrToggleableColumn> {
@@ -373,6 +377,7 @@
 	const sonarrColumnLabels: Record<SonarrToggleableColumn, string> = {
 		episodes: 'Episodes',
 		sizeOnDisk: 'Size',
+		status: 'Status',
 		dateAdded: 'Added'
 	};
 

@@ -6,6 +6,7 @@
 	import type { SonarrLibraryItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
 	import { sortTitle } from '$shared/utils/sort.ts';
 
+	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import SeriesRow from './SeriesRow.svelte';
 	import SeriesRowSkeleton from './SeriesRowSkeleton.svelte';
 	import SeasonTable from './SeasonTable.svelte';
@@ -17,7 +18,7 @@
 	export let emptyMessage = 'No series found';
 	export let visibleColumns: Set<string>;
 
-	const TOGGLEABLE_COLUMNS = ['episodes', 'sizeOnDisk', 'dateAdded'] as const;
+	const TOGGLEABLE_COLUMNS = ['episodes', 'sizeOnDisk', 'status', 'dateAdded'] as const;
 	type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
 
 	const allColumns: Column<SonarrLibraryItem>[] = [
@@ -28,12 +29,13 @@
 			sortable: true,
 			sortAccessor: (row) => sortTitle(row.title)
 		},
+		{ key: 'status', header: 'Status', align: 'left', width: 'w-28', sortable: true },
 		{ key: 'qualityProfileName', header: 'Profile', align: 'left', width: 'w-40', sortable: true },
 		{
 			key: 'episodes',
 			header: 'Episodes',
-			align: 'center',
-			width: 'w-28',
+			align: 'right',
+			width: 'w-36',
 			sortable: true,
 			sortAccessor: (row) => row.percentOfEpisodes,
 			defaultSortDirection: 'desc'
@@ -42,7 +44,7 @@
 			key: 'sizeOnDisk',
 			header: 'Size',
 			align: 'right',
-			width: 'w-24',
+			width: 'w-32',
 			sortable: true,
 			sortAccessor: (row) => row.sizeOnDisk,
 			defaultSortDirection: 'desc'
@@ -158,6 +160,13 @@
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if loading}
 			<SeriesRowSkeleton {column} />
+		{:else if column.key === 'episodes'}
+			<ProgressIndicator
+				current={row.episodeFileCount}
+				target={row.episodeCount}
+				met={row.episodeFileCount === row.episodeCount}
+				mode="compact"
+			/>
 		{:else}
 			<SeriesRow {row} {column} />
 		{/if}
