@@ -5,6 +5,33 @@
 export type ArrType = 'radarr' | 'sonarr' | 'lidarr' | 'chaptarr';
 
 // =============================================================================
+// Shared Types
+// =============================================================================
+
+/**
+ * Image reference from Arr API (poster, fanart, banner, clearlogo)
+ */
+export interface ArrImage {
+	coverType: string;
+	url: string;
+	remoteUrl?: string;
+}
+
+/**
+ * Slim media info extracted from movie/episode files
+ */
+export interface ArrMediaInfo {
+	audioCodec?: string;
+	audioChannels?: number;
+	videoCodec?: string;
+	videoBitDepth?: number;
+	videoDynamicRange?: string;
+	videoDynamicRangeType?: string;
+	resolution?: string;
+	subtitles?: string;
+}
+
+// =============================================================================
 // Radarr Types
 // =============================================================================
 
@@ -29,16 +56,18 @@ export interface RadarrMovie {
 	inCinemas?: string;
 	digitalRelease?: string;
 	physicalRelease?: string;
+	certification?: string;
 	ratings?: {
 		imdb?: { votes: number; value: number };
 		tmdb?: { votes: number; value: number };
+		metacritic?: { votes: number; value: number };
 		rottenTomatoes?: { votes: number; value: number };
 		trakt?: { votes: number; value: number };
 	};
 	genres?: string[];
 	keywords?: string[];
 	overview?: string;
-	images?: { coverType: string; url: string; remoteUrl?: string }[];
+	images?: ArrImage[];
 	path?: string;
 	studio?: string;
 	rootFolderPath?: string;
@@ -429,6 +458,26 @@ export interface SonarrEpisodeFile {
 	customFormats: CustomFormatRef[];
 	customFormatScore: number;
 	qualityCutoffNotMet: boolean;
+	releaseGroup?: string;
+	languages?: { id: number; name: string }[];
+	mediaInfo?: {
+		audioBitrate?: number;
+		audioChannels?: number;
+		audioCodec?: string;
+		audioLanguages?: string;
+		audioStreamCount?: number;
+		videoBitDepth?: number;
+		videoBitrate?: number;
+		videoCodec?: string;
+		videoFps?: number;
+		videoDynamicRange?: string;
+		videoDynamicRangeType?: string;
+		resolution?: string;
+		runTime?: string;
+		scanType?: string;
+		subtitles?: string;
+	};
+	releaseType?: string;
 }
 
 // =============================================================================
@@ -450,27 +499,49 @@ export interface RadarrLibraryItem {
 	// From /movie
 	id: number;
 	tmdbId?: number;
+	imdbId?: string;
 	title: string;
 	year?: number;
 	qualityProfileId: number;
 	qualityProfileName: string;
 	hasFile: boolean;
+	monitored: boolean;
+	status?: string;
 	dateAdded?: string;
 	popularity?: number;
+	sizeOnDisk?: number;
+	runtime?: number;
+	certification?: string;
+	genres?: string[];
+	studio?: string;
+	ratings?: {
+		imdb?: { votes: number; value: number };
+		tmdb?: { votes: number; value: number };
+		metacritic?: { votes: number; value: number };
+		rottenTomatoes?: { votes: number; value: number };
+		trakt?: { votes: number; value: number };
+	};
+	images?: ArrImage[];
+	collection?: { title?: string; tmdbId?: number };
+	originalLanguage?: { id: number; name: string };
 
 	// From /moviefile (only if hasFile)
 	customFormats: CustomFormatRef[];
 	customFormatScore: number;
 	qualityName?: string;
 	fileName?: string;
+	releaseGroup?: string;
+	edition?: string;
+	languages?: { id: number; name: string }[];
+	mediaInfo?: ArrMediaInfo;
 
 	// Computed
 	scoreBreakdown: ScoreBreakdownItem[];
 	cutoffScore: number;
 	minScore: number;
-	progress: number; // customFormatScore / cutoffFormatScore (0-1, can exceed 1)
+	progress: number;
 	cutoffMet: boolean;
-	isProfilarrProfile: boolean; // true if profile name matches a Profilarr database profile
+	isProfilarrProfile: boolean;
 }
 
 /**
@@ -492,6 +563,9 @@ export interface SonarrEpisodeItem {
 	cutoffScore: number;
 	progress: number;
 	cutoffMet: boolean;
+	releaseGroup?: string;
+	languages?: { id: number; name: string }[];
+	mediaInfo?: ArrMediaInfo;
 }
 
 /**
@@ -513,6 +587,7 @@ export interface SonarrSeasonItem {
 export interface SonarrLibraryItem {
 	id: number;
 	tvdbId?: number;
+	imdbId?: string;
 	title: string;
 	year?: number;
 	qualityProfileId: number;
@@ -528,6 +603,16 @@ export interface SonarrLibraryItem {
 	dateAdded?: string;
 	seasons: SonarrSeasonItem[];
 	isProfilarrProfile: boolean;
+	network?: string;
+	seriesType?: string;
+	certification?: string;
+	genres?: string[];
+	runtime?: number;
+	ratings?: { votes: number; value: number };
+	images?: ArrImage[];
+	originalLanguage?: { id: number; name: string };
+	firstAired?: string;
+	lastAired?: string;
 }
 
 // =============================================================================

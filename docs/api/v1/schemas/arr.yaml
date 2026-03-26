@@ -6,6 +6,39 @@ ArrType:
   description: Type of Arr instance
 
 # Shared types
+ArrImage:
+  type: object
+  properties:
+    coverType:
+      type: string
+      description: Image type (poster, fanart, banner, clearlogo)
+    url:
+      type: string
+      description: Local image URL (relative to Arr instance)
+    remoteUrl:
+      type: string
+      description: Remote CDN URL (TMDB/TVDB)
+
+ArrMediaInfo:
+  type: object
+  properties:
+    audioCodec:
+      type: string
+    audioChannels:
+      type: number
+    videoCodec:
+      type: string
+    videoBitDepth:
+      type: integer
+    videoDynamicRange:
+      type: string
+    videoDynamicRangeType:
+      type: string
+    resolution:
+      type: string
+    subtitles:
+      type: string
+
 CustomFormatRef:
   type: object
   required:
@@ -58,6 +91,7 @@ RadarrLibraryItem:
     - id
     - title
     - hasFile
+    - monitored
     - qualityProfileId
     - qualityProfileName
     - isProfilarrProfile
@@ -75,6 +109,9 @@ RadarrLibraryItem:
     tmdbId:
       type: integer
       description: TMDB ID
+    imdbId:
+      type: string
+      description: IMDB ID
     title:
       type: string
       description: Movie title
@@ -90,6 +127,12 @@ RadarrLibraryItem:
     hasFile:
       type: boolean
       description: Whether the movie has a downloaded file
+    monitored:
+      type: boolean
+      description: Whether the movie is monitored
+    status:
+      type: string
+      description: Movie status (released, announced, inCinemas)
     dateAdded:
       type: string
       format: date-time
@@ -97,6 +140,45 @@ RadarrLibraryItem:
     popularity:
       type: number
       description: TMDB popularity score
+    sizeOnDisk:
+      type: integer
+      description: File size in bytes
+    runtime:
+      type: integer
+      description: Runtime in minutes
+    certification:
+      type: string
+      description: Content rating (e.g. R, PG-13)
+    genres:
+      type: array
+      items:
+        type: string
+      description: Genre list
+    studio:
+      type: string
+      description: Production studio
+    ratings:
+      type: object
+      description: Ratings from various sources
+    images:
+      type: array
+      items:
+        $ref: '#/ArrImage'
+      description: Poster and fanart images
+    collection:
+      type: object
+      properties:
+        title:
+          type: string
+        tmdbId:
+          type: integer
+    originalLanguage:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
     qualityName:
       type: string
       nullable: true
@@ -105,6 +187,24 @@ RadarrLibraryItem:
       type: string
       nullable: true
       description: File name of the downloaded file (null if no file)
+    releaseGroup:
+      type: string
+      description: Release group name from the file
+    edition:
+      type: string
+      description: Edition name (e.g. Final Cut, Director's Cut)
+    languages:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+      description: Languages in the file
+    mediaInfo:
+      $ref: '#/ArrMediaInfo'
     customFormats:
       type: array
       items:
@@ -239,6 +339,53 @@ SonarrLibraryItem:
     isProfilarrProfile:
       type: boolean
       description: Whether the profile is managed by Profilarr
+    network:
+      type: string
+      description: TV network (e.g. HBO, CBS)
+    seriesType:
+      type: string
+      description: Series type (standard, daily, anime)
+    certification:
+      type: string
+      description: Content rating (e.g. TV-MA, TV-PG)
+    genres:
+      type: array
+      items:
+        type: string
+      description: Genre list
+    runtime:
+      type: integer
+      description: Episode runtime in minutes
+    ratings:
+      type: object
+      properties:
+        votes:
+          type: integer
+        value:
+          type: number
+    images:
+      type: array
+      items:
+        $ref: '#/ArrImage'
+      description: Poster, banner, fanart images
+    originalLanguage:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    firstAired:
+      type: string
+      format: date-time
+      description: First air date
+    lastAired:
+      type: string
+      format: date-time
+      description: Last air date
+    imdbId:
+      type: string
+      description: IMDB ID
 
 SonarrEpisodeItem:
   type: object
@@ -305,6 +452,21 @@ SonarrEpisodeItem:
     cutoffMet:
       type: boolean
       description: Whether the cutoff score has been met
+    releaseGroup:
+      type: string
+      description: Release group name from the file
+    languages:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+      description: Languages in the file
+    mediaInfo:
+      $ref: '#/ArrMediaInfo'
 
 # Library response wrappers
 LibraryRadarrResponse:
