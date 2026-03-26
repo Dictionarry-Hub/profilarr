@@ -11,6 +11,7 @@
 	export let danger: boolean = false;
 	export let selected: boolean = false;
 	export let compact: boolean = false;
+	export let checkIcon: ComponentType = Check;
 
 	$: sizeClasses = compact
 		? 'gap-2 px-2 py-1 text-xs first:rounded-t-lg last:rounded-b-lg'
@@ -42,5 +43,5 @@
 		{/if}
 	{/if}
 	<span class="flex-1">{label}</span>
-	<IconCheckbox icon={Check} checked={selected} shape="circle" color="accent" />
+	<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color="accent" />
 </button>

@@ -5,6 +5,7 @@
 	import type { PageData } from './$types';
 	import type { RadarrLibraryItem, SonarrLibraryItem } from '$utils/arr/types.ts';
 	import { libraryCache } from '$stores/libraryCache';
+	import { sortTitle } from '$shared/utils/sort.ts';
 	import { getPersistentSearchStore } from '$stores/search';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
@@ -428,6 +429,57 @@
 	let sonarrTableView: SonarrTableView;
 
 	// ==========================================================================
+	// Card Sort
+	// ==========================================================================
+
+	let cardSortKey = 'title';
+	let cardSortDirection: 'asc' | 'desc' = 'asc';
+
+	function handleCardSort(key: string, direction: 'asc' | 'desc') {
+		cardSortKey = key;
+		cardSortDirection = direction;
+	}
+
+	function sortItems<T>(items: T[], key: string, direction: 'asc' | 'desc'): T[] {
+		return [...items].sort((a: any, b: any) => {
+			let aVal: any;
+			let bVal: any;
+
+			switch (key) {
+				case 'title':
+					aVal = sortTitle(a.title);
+					bVal = sortTitle(b.title);
+					break;
+				case 'size':
+					aVal = a.sizeOnDisk ?? 0;
+					bVal = b.sizeOnDisk ?? 0;
+					break;
+				case 'dateAdded':
+					aVal = a.dateAdded ? new Date(a.dateAdded).getTime() : 0;
+					bVal = b.dateAdded ? new Date(b.dateAdded).getTime() : 0;
+					break;
+				case 'year':
+					aVal = a.year ?? 0;
+					bVal = b.year ?? 0;
+					break;
+				case 'score':
+					aVal = a.customFormatScore ?? a.percentOfEpisodes ?? 0;
+					bVal = b.customFormatScore ?? b.percentOfEpisodes ?? 0;
+					break;
+				default:
+					return 0;
+			}
+
+			if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+			if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+			return 0;
+		});
+	}
+
+	$: sortedMovies = sortItems(moviesWithFiles, cardSortKey, cardSortDirection);
+	$: sortedSeries = sortItems(filteredSeries, cardSortKey, cardSortDirection);
+
+	// ==========================================================================
 	// Card View Progressive Loading
 	// ==========================================================================
 
@@ -439,16 +491,16 @@
 	} = createProgressiveList({ pageSize: 30 });
 
 	$: if (isRadarr) {
-		cardSetTotalCount(moviesWithFiles.length);
+		cardSetTotalCount(sortedMovies.length);
 	} else if (isSonarr) {
-		cardSetTotalCount(filteredSeries.length);
+		cardSetTotalCount(sortedSeries.length);
 	}
 
 	// Reset progressive list when data changes
-	$: (moviesWithFiles, filteredSeries, cardReset());
+	$: (sortedMovies, sortedSeries, cardReset());
 
-	$: visibleMovieCards = moviesWithFiles.slice(0, $cardVisibleCount);
-	$: visibleSeriesCards = filteredSeries.slice(0, $cardVisibleCount);
+	$: visibleMovieCards = sortedMovies.slice(0, $cardVisibleCount);
+	$: visibleSeriesCards = sortedSeries.slice(0, $cardVisibleCount);
 </script>
 
 <svelte:head>
@@ -501,6 +553,9 @@
 			onOpen={handleOpen}
 			instanceType={data.instance.type}
 			bind:viewMode
+			sortKey={cardSortKey}
+			sortDirection={cardSortDirection}
+			onSort={handleCardSort}
 			onFilterInfo={() => (showFilterInfo = true)}
 		/>
 

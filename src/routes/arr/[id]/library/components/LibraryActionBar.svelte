@@ -1,10 +1,21 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { Check, TableProperties, RefreshCw, ExternalLink, Info } from 'lucide-svelte';
+	import {
+		Check,
+		TableProperties,
+		RefreshCw,
+		ExternalLink,
+		Info,
+		ArrowUpDown,
+		ArrowUp,
+		ArrowDown
+	} from 'lucide-svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
@@ -30,6 +41,26 @@
 	export let onOpen: () => void;
 	export let instanceType: string = 'radarr';
 	export let viewMode: ViewMode = 'table';
+	export let sortKey: string = 'title';
+	export let sortDirection: 'asc' | 'desc' = 'asc';
+	export let onSort: (key: string, direction: 'asc' | 'desc') => void = () => {};
+
+	const sortOptions = [
+		{ key: 'title', label: 'Title' },
+		{ key: 'size', label: 'Size' },
+		{ key: 'dateAdded', label: 'Date Added' },
+		{ key: 'year', label: 'Year' },
+		{ key: 'score', label: 'Score' }
+	];
+
+	function handleSortClick(key: string) {
+		if (sortKey === key) {
+			const newDir = sortDirection === 'asc' ? 'desc' : 'asc';
+			onSort(key, newDir);
+		} else {
+			onSort(key, 'desc');
+		}
+	}
 
 	$: isRadarr = instanceType === 'radarr';
 	$: filterPlaceholder = isRadarr ? 'Filter movies...' : 'Filter series...';
@@ -83,6 +114,23 @@
 	<Tooltip text={openLabel}>
 		<ActionButton icon={ExternalLink} on:click={onOpen} />
 	</Tooltip>
+	{#if viewMode === 'cards'}
+		<ActionButton icon={ArrowUpDown} hasDropdown={true} dropdownPosition="right">
+			<svelte:fragment slot="dropdown" let:dropdownPosition>
+				<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="12rem">
+					<DropdownHeader label="Sort by" />
+					{#each sortOptions as option}
+						<DropdownItem
+							label={option.label}
+							selected={sortKey === option.key}
+							checkIcon={sortDirection === 'asc' ? ArrowUp : ArrowDown}
+							on:click={() => handleSortClick(option.key)}
+						/>
+					{/each}
+				</Dropdown>
+			</svelte:fragment>
+		</ActionButton>
+	{/if}
 	{#if viewMode === 'table'}
 		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
