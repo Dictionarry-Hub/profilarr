@@ -44,19 +44,20 @@
 	</div>
 {:else}
 	<!-- Table view: horizontal inline -->
-	<div class="flex items-center gap-2">
-		<div class="h-1.5 w-16 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+	<div class="flex items-center gap-2 whitespace-nowrap">
+		<div
+			class="h-1.5 w-12 flex-shrink-0 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700"
+		>
 			<div
 				class="h-full rounded-full transition-all {barColor}"
 				style="width: {progressPercent}%"
 			></div>
 		</div>
+		<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+			{current.toLocaleString()} / {target.toLocaleString()}
+		</span>
 		{#if met}
-			<Check size={14} class="flex-shrink-0 text-green-600 dark:text-green-400" />
-		{:else}
-			<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
-				{current.toLocaleString()} / {target.toLocaleString()}
-			</span>
+			<Check size={12} class="flex-shrink-0 text-green-600 dark:text-green-400" />
 		{/if}
 	</div>
 {/if}

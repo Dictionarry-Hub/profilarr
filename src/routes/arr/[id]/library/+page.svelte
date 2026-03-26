@@ -612,7 +612,7 @@
 				{:else}
 					<LibraryCardGrid columns={6}>
 						{#each visibleSeriesCards as series (series.id)}
-							<SeriesCard {series} {baseUrl} />
+							<SeriesCard {series} {baseUrl} instanceId={data.instance.id} />
 						{/each}
 					</LibraryCardGrid>
 					<div use:cardSentinel></div>

@@ -73,15 +73,6 @@
 
 	<!-- Content -->
 	<div class="flex flex-1 flex-col gap-2 p-3">
-		<div class="min-w-0">
-			<h3
-				class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100"
-				title={movie.title}
-			>
-				{movie.title}
-			</h3>
-		</div>
-
 		<div class="flex items-center justify-between gap-1.5">
 			<Tooltip text={movie.isProfilarrProfile ? '' : 'Not managed by Profilarr'} position="top">
 				<Badge
