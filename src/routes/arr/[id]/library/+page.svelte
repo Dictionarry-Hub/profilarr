@@ -1,37 +1,22 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { AlertTriangle, Film, ExternalLink } from 'lucide-svelte';
-	import Button from '$ui/button/Button.svelte';
+	import { AlertTriangle, Film } from 'lucide-svelte';
 	import { browser } from '$app/environment';
-	import { goto, invalidateAll } from '$app/navigation';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import type { Column, SortState } from '$ui/table/types';
 	import type { PageData } from './$types';
-	import type {
-		RadarrLibraryItem,
-		SonarrLibraryItem,
-		SonarrEpisodeItem
-	} from '$utils/arr/types.ts';
+	import type { RadarrLibraryItem, SonarrLibraryItem } from '$utils/arr/types.ts';
 	import { libraryCache } from '$stores/libraryCache';
-	import { sortTitle } from '$shared/utils/sort.ts';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
-
-	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
-
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
+	import InfoModal from '$ui/modal/InfoModal.svelte';
 
 	import LibraryActionBar from './components/LibraryActionBar.svelte';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
+	import RadarrTableView from './components/RadarrTableView.svelte';
+	import SonarrTableView from './components/SonarrTableView.svelte';
 	import LibraryCardGrid from './components/LibraryCardGrid.svelte';
-	import MovieRow from './components/MovieRow.svelte';
-	import MovieRowSkeleton from './components/MovieRowSkeleton.svelte';
 	import MovieCard from './components/MovieCard.svelte';
-	import SeriesRow from './components/SeriesRow.svelte';
-	import SeriesRowSkeleton from './components/SeriesRowSkeleton.svelte';
 	import SeriesCard from './components/SeriesCard.svelte';
-	import SeasonTable from './components/SeasonTable.svelte';
 
 	export let data: PageData;
 
@@ -259,10 +244,8 @@
 	async function handleRefresh() {
 		refreshing = true;
 		libraryCache.invalidate(data.instance.id);
-		// Clear episode cache on refresh too
 		if (isSonarr) {
-			episodeCache = new Map();
-			episodeLoadingSet = new Set();
+			sonarrTableView?.resetEpisodeCache();
 		}
 		await fetchLibrary(true);
 	}
@@ -290,8 +273,7 @@
 	$: if (browser && data.instance.id && data.instance.id !== currentInstanceId) {
 		currentInstanceId = data.instance.id;
 		loading = true;
-		episodeCache = new Map();
-		episodeLoadingSet = new Set();
+		sonarrTableView?.resetEpisodeCache();
 		fetchLibrary();
 	}
 
@@ -419,153 +401,14 @@
 	$: allMoviesWithFiles = isRadarr ? radarrLibrary.filter((m) => m.hasFile) : [];
 	$: moviesWithFiles = applySmartFilters(allMoviesWithFiles, filterTags, radarrFields);
 
-	const allRadarrColumns: Column<RadarrLibraryItem>[] = [
-		{
-			key: 'title',
-			header: 'Title',
-			align: 'left',
-			sortable: true,
-			sortAccessor: (row) => sortTitle(row.title)
-		},
-		{ key: 'qualityProfileName', header: 'Profile', align: 'left', width: 'w-40', sortable: true },
-		{ key: 'qualityName', header: 'Quality', align: 'left', width: 'w-32', sortable: true },
-		{
-			key: 'customFormatScore',
-			header: 'Score',
-			align: 'right',
-			width: 'w-28',
-			sortable: true,
-			defaultSortDirection: 'desc'
-		},
-		{
-			key: 'progress',
-			header: 'Progress',
-			align: 'center',
-			width: 'w-40',
-			sortable: true,
-			sortAccessor: (row) => row.progress,
-			defaultSortDirection: 'desc'
-		},
-		{
-			key: 'popularity',
-			header: 'Popularity',
-			align: 'right',
-			width: 'w-24',
-			sortable: true,
-			defaultSortDirection: 'desc'
-		},
-		{
-			key: 'dateAdded',
-			header: 'Added',
-			align: 'right',
-			width: 'w-28',
-			sortable: true,
-			sortAccessor: (row) => (row.dateAdded ? new Date(row.dateAdded).getTime() : 0),
-			defaultSortDirection: 'desc'
-		}
-	];
-
-	$: radarrColumns = allRadarrColumns.filter(
-		(col) =>
-			col.key === 'title' ||
-			col.key === 'qualityProfileName' ||
-			radarrVisibleColumns.has(col.key as RadarrToggleableColumn)
-	);
-
-	const radarrDefaultSort: SortState = { key: 'title', direction: 'asc' };
-
-	const radarrSkeletonData: RadarrLibraryItem[] = Array.from({ length: 12 }, (_, i) => ({
-		id: `skeleton-${i}`,
-		title: '',
-		year: 0,
-		tmdbId: 0,
-		hasFile: true,
-		monitored: true,
-		qualityProfileId: 0,
-		qualityProfileName: '',
-		isProfilarrProfile: false,
-		qualityName: null,
-		customFormatScore: 0,
-		cutoffScore: 0,
-		cutoffMet: false,
-		progress: 0,
-		popularity: 0,
-		dateAdded: '',
-		fileName: null,
-		scoreBreakdown: []
-	})) as unknown as RadarrLibraryItem[];
-
 	// ==========================================================================
-	// Sonarr Data & Columns
+	// Sonarr Data
 	// ==========================================================================
 
 	$: sonarrLibrary = library as SonarrLibraryItem[];
 	$: filteredSeries = isSonarr ? applySmartFilters(sonarrLibrary, filterTags, sonarrFields) : [];
 
-	const allSonarrColumns: Column<SonarrLibraryItem>[] = [
-		{
-			key: 'title',
-			header: 'Title',
-			align: 'left',
-			sortable: true,
-			sortAccessor: (row) => sortTitle(row.title)
-		},
-		{ key: 'qualityProfileName', header: 'Profile', align: 'left', width: 'w-40', sortable: true },
-		{
-			key: 'episodes',
-			header: 'Episodes',
-			align: 'center',
-			width: 'w-28',
-			sortable: true,
-			sortAccessor: (row) => row.percentOfEpisodes,
-			defaultSortDirection: 'desc'
-		},
-		{
-			key: 'sizeOnDisk',
-			header: 'Size',
-			align: 'right',
-			width: 'w-24',
-			sortable: true,
-			sortAccessor: (row) => row.sizeOnDisk,
-			defaultSortDirection: 'desc'
-		},
-		{
-			key: 'dateAdded',
-			header: 'Added',
-			align: 'right',
-			width: 'w-28',
-			sortable: true,
-			sortAccessor: (row) => (row.dateAdded ? new Date(row.dateAdded).getTime() : 0),
-			defaultSortDirection: 'desc'
-		}
-	];
-
-	$: sonarrColumns = allSonarrColumns.filter(
-		(col) =>
-			col.key === 'title' ||
-			col.key === 'qualityProfileName' ||
-			sonarrVisibleColumns.has(col.key as SonarrToggleableColumn)
-	);
-
-	const sonarrDefaultSort: SortState = { key: 'title', direction: 'asc' };
-
-	const sonarrSkeletonData: SonarrLibraryItem[] = Array.from({ length: 12 }, (_, i) => ({
-		id: i,
-		title: '',
-		year: 0,
-		qualityProfileId: 0,
-		qualityProfileName: '',
-		monitored: true,
-		seasonCount: 0,
-		episodeCount: 0,
-		episodeFileCount: 0,
-		totalEpisodeCount: 0,
-		sizeOnDisk: 0,
-		percentOfEpisodes: 0,
-		dateAdded: '',
-		seasons: [],
-		isProfilarrProfile: false
-	})) as unknown as SonarrLibraryItem[];
+	let sonarrTableView: SonarrTableView;
 
 	// ==========================================================================
 	// Card View Progressive Loading
@@ -589,60 +432,6 @@
 
 	$: visibleMovieCards = moviesWithFiles.slice(0, $cardVisibleCount);
 	$: visibleSeriesCards = filteredSeries.slice(0, $cardVisibleCount);
-
-	// ==========================================================================
-	// Sonarr Episode Lazy Loading
-	// ==========================================================================
-
-	let episodeCache: Map<number, SonarrEpisodeItem[]> = new Map();
-	let episodeLoadingSet: Set<number> = new Set();
-
-	async function loadEpisodes(seriesId: number) {
-		if (episodeCache.has(seriesId) || episodeLoadingSet.has(seriesId)) return;
-
-		episodeLoadingSet.add(seriesId);
-		episodeLoadingSet = episodeLoadingSet;
-
-		try {
-			const response = await fetch(
-				`/api/v1/arr/library/episodes?instanceId=${data.instance.id}&seriesId=${seriesId}`
-			);
-			if (!response.ok) throw new Error('Failed to fetch episodes');
-			const result = await response.json();
-			episodeCache.set(seriesId, result.episodes);
-			episodeCache = episodeCache;
-		} catch (err) {
-			console.error(`Failed to load episodes for series ${seriesId}:`, err);
-		} finally {
-			episodeLoadingSet.delete(seriesId);
-			episodeLoadingSet = episodeLoadingSet;
-		}
-	}
-
-	// Reactive episode grouping - Svelte tracks episodeCache dependency
-	$: episodesBySeriesAndSeason = (() => {
-		const result = new Map<number, Map<number, SonarrEpisodeItem[]>>();
-		for (const [seriesId, episodes] of episodeCache) {
-			const seasonMap = new Map<number, SonarrEpisodeItem[]>();
-			for (const ep of episodes) {
-				const existing = seasonMap.get(ep.seasonNumber) ?? [];
-				existing.push(ep);
-				seasonMap.set(ep.seasonNumber, existing);
-			}
-			result.set(seriesId, seasonMap);
-		}
-		return result;
-	})();
-
-	let sonarrExpandedRows: Set<string | number> = new Set();
-
-	// Watch for expansion changes to trigger lazy loading
-	$: if (isSonarr && sonarrExpandedRows.size > 0) {
-		for (const id of sonarrExpandedRows) {
-			const numId = typeof id === 'string' ? parseInt(id) : id;
-			loadEpisodes(numId);
-		}
-	}
 </script>
 
 <svelte:head>
@@ -699,9 +488,6 @@
 		/>
 
 		{#if viewMode === 'table'}
-			<!-- ============================================================ -->
-			<!-- Table View -->
-			<!-- ============================================================ -->
 			{#if isRadarr}
 				{#if allMoviesWithFiles.length === 0 && !loading && !refreshing}
 					<div
@@ -720,55 +506,17 @@
 						</div>
 					</div>
 				{:else}
-					<ExpandableTable
-						columns={radarrColumns}
-						data={loading || refreshing ? radarrSkeletonData : moviesWithFiles}
-						getRowId={(row) => row.id}
-						compact={true}
-						defaultSort={radarrDefaultSort}
-						pageSize={25}
-						responsive
-						flushExpanded
+					<RadarrTableView
+						data={moviesWithFiles}
+						loading={loading || refreshing}
+						{baseUrl}
+						visibleColumns={activeVisibleColumns}
 						emptyMessage={filterTags.length > 0
 							? 'No movies match the current filters'
 							: 'No movies with files'}
-					>
-						<svelte:fragment slot="cell" let:row let:column>
-							{#if loading || refreshing}
-								<MovieRowSkeleton {column} />
-							{:else}
-								<MovieRow {row} {column} mode="cell" />
-							{/if}
-						</svelte:fragment>
-
-						<svelte:fragment slot="actions" let:row>
-							{#if !loading && !refreshing && row.tmdbId}
-								<Button
-									icon={ExternalLink}
-									size="xs"
-									variant="secondary"
-									href="{baseUrl}/movie/{row.tmdbId}"
-									target="_blank"
-									rel="noopener noreferrer"
-									tooltip="Open in Radarr"
-									on:click={(e) => e.stopPropagation()}
-								/>
-							{/if}
-						</svelte:fragment>
-
-						<svelte:fragment slot="expanded" let:row>
-							{#if !loading && !refreshing}
-								<div class="p-4">
-									<MovieRow {row} column={allRadarrColumns[0]} mode="expanded" />
-								</div>
-							{/if}
-						</svelte:fragment>
-					</ExpandableTable>
+					/>
 				{/if}
 			{:else if isSonarr}
-				<!-- ============================================================ -->
-				<!-- Sonarr Library -->
-				<!-- ============================================================ -->
 				{#if sonarrLibrary.length === 0 && !loading && !refreshing}
 					<div
 						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
@@ -784,70 +532,17 @@
 						</div>
 					</div>
 				{:else}
-					<ExpandableTable
-						columns={sonarrColumns}
-						data={loading || refreshing ? sonarrSkeletonData : filteredSeries}
-						getRowId={(row) => row.id}
-						compact={true}
-						defaultSort={sonarrDefaultSort}
-						pageSize={25}
-						responsive
-						flushExpanded
-						bind:expandedRows={sonarrExpandedRows}
+					<SonarrTableView
+						bind:this={sonarrTableView}
+						data={filteredSeries}
+						loading={loading || refreshing}
+						{baseUrl}
+						instanceId={data.instance.id}
+						visibleColumns={activeVisibleColumns}
 						emptyMessage={filterTags.length > 0
 							? 'No series match the current filters'
 							: 'No series found'}
-					>
-						<svelte:fragment slot="cell" let:row let:column>
-							{#if loading || refreshing}
-								<SeriesRowSkeleton {column} />
-							{:else}
-								<SeriesRow {row} {column} />
-							{/if}
-						</svelte:fragment>
-
-						<svelte:fragment slot="actions" let:row>
-							{#if !loading && !refreshing && row.tvdbId}
-								<Button
-									icon={ExternalLink}
-									size="xs"
-									variant="secondary"
-									href="{baseUrl}/series/{row.title
-										.toLowerCase()
-										.replace(/[^a-z0-9]+/g, '-')
-										.replace(/^-+|-+$/g, '')}"
-									target="_blank"
-									rel="noopener noreferrer"
-									tooltip="Open in Sonarr"
-									on:click={(e) => e.stopPropagation()}
-								/>
-							{/if}
-						</svelte:fragment>
-
-						<svelte:fragment slot="expanded" let:row>
-							{#if !loading && !refreshing}
-								{@const seriesId = row.id}
-								{@const isEpisodeLoading = episodeLoadingSet.has(seriesId)}
-								{@const episodesBySeasonNumber =
-									episodesBySeriesAndSeason.get(seriesId) ?? new Map()}
-
-								{#if isEpisodeLoading}
-									<div
-										class="flex items-center gap-2 p-4 text-sm text-neutral-500 dark:text-neutral-400"
-									>
-										<div
-											class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
-										></div>
-										Loading episodes...
-									</div>
-								{:else}
-									<div class="p-4">
-										<SeasonTable seasons={row.seasons} {episodesBySeasonNumber} />
-									</div>
-								{/if}
-							{/if}
-						</svelte:fragment>
-					</ExpandableTable>
+					/>
 				{/if}
 			{/if}
 		{:else}

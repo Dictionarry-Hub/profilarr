@@ -1,0 +1,145 @@
+<script lang="ts">
+	import { ExternalLink } from 'lucide-svelte';
+	import Button from '$ui/button/Button.svelte';
+	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
+	import type { Column, SortState } from '$ui/table/types';
+	import type { RadarrLibraryItem } from '$utils/arr/types.ts';
+	import { sortTitle } from '$shared/utils/sort.ts';
+
+	import MovieRow from './MovieRow.svelte';
+	import MovieRowSkeleton from './MovieRowSkeleton.svelte';
+
+	export let data: RadarrLibraryItem[];
+	export let loading = false;
+	export let baseUrl = '';
+	export let emptyMessage = 'No movies with files';
+	export let visibleColumns: Set<string>;
+
+	const TOGGLEABLE_COLUMNS = [
+		'qualityName',
+		'customFormatScore',
+		'progress',
+		'popularity',
+		'dateAdded'
+	] as const;
+	type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
+
+	const allColumns: Column<RadarrLibraryItem>[] = [
+		{
+			key: 'title',
+			header: 'Title',
+			align: 'left',
+			sortable: true,
+			sortAccessor: (row) => sortTitle(row.title)
+		},
+		{ key: 'qualityProfileName', header: 'Profile', align: 'left', width: 'w-40', sortable: true },
+		{ key: 'qualityName', header: 'Quality', align: 'left', width: 'w-32', sortable: true },
+		{
+			key: 'customFormatScore',
+			header: 'Score',
+			align: 'right',
+			width: 'w-28',
+			sortable: true,
+			defaultSortDirection: 'desc'
+		},
+		{
+			key: 'progress',
+			header: 'Progress',
+			align: 'center',
+			width: 'w-40',
+			sortable: true,
+			sortAccessor: (row) => row.progress,
+			defaultSortDirection: 'desc'
+		},
+		{
+			key: 'popularity',
+			header: 'Popularity',
+			align: 'right',
+			width: 'w-24',
+			sortable: true,
+			defaultSortDirection: 'desc'
+		},
+		{
+			key: 'dateAdded',
+			header: 'Added',
+			align: 'right',
+			width: 'w-28',
+			sortable: true,
+			sortAccessor: (row) => (row.dateAdded ? new Date(row.dateAdded).getTime() : 0),
+			defaultSortDirection: 'desc'
+		}
+	];
+
+	$: columns = allColumns.filter(
+		(col) =>
+			col.key === 'title' ||
+			col.key === 'qualityProfileName' ||
+			visibleColumns.has(col.key as ToggleableColumn)
+	);
+
+	const defaultSort: SortState = { key: 'title', direction: 'asc' };
+
+	const skeletonData: RadarrLibraryItem[] = Array.from({ length: 12 }, (_, i) => ({
+		id: `skeleton-${i}`,
+		title: '',
+		year: 0,
+		tmdbId: 0,
+		hasFile: true,
+		monitored: true,
+		qualityProfileId: 0,
+		qualityProfileName: '',
+		isProfilarrProfile: false,
+		qualityName: null,
+		customFormatScore: 0,
+		cutoffScore: 0,
+		cutoffMet: false,
+		progress: 0,
+		popularity: 0,
+		dateAdded: '',
+		fileName: null,
+		scoreBreakdown: []
+	})) as unknown as RadarrLibraryItem[];
+</script>
+
+<ExpandableTable
+	{columns}
+	data={loading ? skeletonData : data}
+	getRowId={(row) => row.id}
+	compact={true}
+	{defaultSort}
+	pageSize={25}
+	responsive
+	flushExpanded
+	{emptyMessage}
+>
+	<svelte:fragment slot="cell" let:row let:column>
+		{#if loading}
+			<MovieRowSkeleton {column} />
+		{:else}
+			<MovieRow {row} {column} mode="cell" />
+		{/if}
+	</svelte:fragment>
+
+	<svelte:fragment slot="actions" let:row>
+		{#if !loading && row.tmdbId}
+			<Button
+				icon={ExternalLink}
+				size="xs"
+				variant="secondary"
+				href="{baseUrl}/movie/{row.tmdbId}"
+				target="_blank"
+				rel="noopener noreferrer"
+				tooltip="Open in Radarr"
+				on:click={(e) => e.stopPropagation()}
+			/>
+		{/if}
+	</svelte:fragment>
+
+	<svelte:fragment slot="expanded" let:row>
+		{#if !loading}
+			<div class="p-4">
+				<MovieRow {row} column={allColumns[0]} mode="expanded" />
+			</div>
+		{/if}
+	</svelte:fragment>
+</ExpandableTable>
