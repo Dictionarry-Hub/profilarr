@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Film, Check, CircleAlert } from 'lucide-svelte';
+	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Score from '$ui/arr/Score.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
@@ -34,13 +35,14 @@
 			</div>
 		{/if}
 		<!-- Monitored indicator -->
-		{#if !movie.monitored}
-			<div
-				class="absolute top-2 left-2 rounded-full bg-neutral-900/70 px-2 py-0.5 text-xs text-neutral-300"
-			>
-				Unmonitored
-			</div>
-		{/if}
+		<div class="absolute top-2 left-2">
+			<IconCheckbox
+				checked={movie.monitored}
+				icon={Check}
+				color={movie.monitored ? 'green' : 'neutral'}
+				shape="circle"
+			/>
+		</div>
 	</div>
 
 	<!-- Content -->

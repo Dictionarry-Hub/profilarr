@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Tv, CircleAlert } from 'lucide-svelte';
+	import { Tv, CircleAlert, Check } from 'lucide-svelte';
+	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import type { SonarrLibraryItem } from '$utils/arr/types.ts';
@@ -8,6 +9,14 @@
 	export let baseUrl: string = '';
 
 	$: posterUrl = series.images?.find((i) => i.coverType === 'poster')?.remoteUrl;
+
+	$: monitoredState = (() => {
+		if (!series.monitored) return 'unmonitored';
+		const seasons = series.seasons ?? [];
+		if (seasons.length === 0) return 'monitored';
+		const allMonitored = seasons.every((s) => s.monitored);
+		return allMonitored ? 'monitored' : 'partial';
+	})();
 
 	$: slug = series.title
 		.toLowerCase()
@@ -39,13 +48,18 @@
 			</div>
 		{/if}
 		<!-- Monitored indicator -->
-		{#if !series.monitored}
-			<div
-				class="absolute top-2 left-2 rounded-full bg-neutral-900/70 px-2 py-0.5 text-xs text-neutral-300"
-			>
-				Unmonitored
-			</div>
-		{/if}
+		<div class="absolute top-2 left-2">
+			<IconCheckbox
+				checked={monitoredState !== 'unmonitored'}
+				icon={Check}
+				color={monitoredState === 'monitored'
+					? 'green'
+					: monitoredState === 'partial'
+						? '#EAB308'
+						: 'neutral'}
+				shape="circle"
+			/>
+		</div>
 		<!-- Episode count overlay -->
 		<div
 			class="absolute right-2 bottom-2 rounded-full px-2 py-0.5 text-xs font-medium {series.episodeFileCount ===

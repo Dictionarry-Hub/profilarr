@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { Check, TableProperties, LayoutGrid, RefreshCw, ExternalLink, Info } from 'lucide-svelte';
+	import { Check, TableProperties, RefreshCw, ExternalLink, Info } from 'lucide-svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
@@ -32,9 +30,6 @@
 	export let onOpen: () => void;
 	export let instanceType: string = 'radarr';
 	export let viewMode: ViewMode = 'table';
-	export let cardsPerRow: number = 10;
-
-	const CARDS_PER_ROW_OPTIONS = [4, 6, 8, 10, 12, 14, 16];
 
 	$: isRadarr = instanceType === 'radarr';
 	$: filterPlaceholder = isRadarr ? 'Filter movies...' : 'Filter series...';
@@ -88,20 +83,7 @@
 	<Tooltip text={openLabel}>
 		<ActionButton icon={ExternalLink} on:click={onOpen} />
 	</Tooltip>
-	{#if viewMode === 'cards'}
-		<ActionButton icon={LayoutGrid} hasDropdown={true} dropdownPosition="right">
-			<Dropdown slot="dropdown" position="right">
-				<DropdownHeader label="Cards per row" />
-				{#each CARDS_PER_ROW_OPTIONS as count}
-					<DropdownItem
-						label={String(count)}
-						selected={cardsPerRow === count}
-						on:click={() => (cardsPerRow = count)}
-					/>
-				{/each}
-			</Dropdown>
-		</ActionButton>
-	{:else}
+	{#if viewMode === 'table'}
 		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
 				<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="14rem">

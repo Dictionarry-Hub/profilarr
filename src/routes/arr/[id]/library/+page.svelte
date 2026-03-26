@@ -93,6 +93,13 @@
 			type: 'text',
 			accessor: (m) => m.genres ?? [],
 			suggestions: (items) => [...new Set(items.flatMap((m) => m.genres ?? []))].sort()
+		},
+		{
+			key: 'monitored',
+			label: 'Monitored',
+			type: 'text',
+			accessor: (m) => (m.monitored ? 'yes' : 'no'),
+			suggestions: () => ['yes', 'no']
 		}
 	];
 
@@ -134,6 +141,13 @@
 			type: 'text',
 			accessor: (s) => s.genres ?? [],
 			suggestions: (items) => [...new Set(items.flatMap((s) => s.genres ?? []))].sort()
+		},
+		{
+			key: 'monitored',
+			label: 'Monitored',
+			type: 'text',
+			accessor: (s) => (s.monitored ? 'yes' : 'no'),
+			suggestions: () => ['yes', 'no']
 		}
 	];
 
@@ -144,8 +158,6 @@
 	// ==========================================================================
 
 	const VIEW_STORAGE_KEY = 'profilarr-library-view';
-	const CARDS_PER_ROW_STORAGE_KEY = 'profilarr-library-cards-per-row';
-
 	function loadViewMode(): ViewMode {
 		if (!browser) return 'table';
 		try {
@@ -155,27 +167,10 @@
 		return window.innerWidth < 768 ? 'cards' : 'table';
 	}
 
-	function loadCardsPerRow(): number {
-		if (!browser) return 8;
-		try {
-			const stored = localStorage.getItem(CARDS_PER_ROW_STORAGE_KEY);
-			if (stored) {
-				const n = parseInt(stored, 10);
-				if (!isNaN(n) && n >= 2 && n <= 20) return n;
-			}
-		} catch {}
-		return 8;
-	}
-
 	let viewMode: ViewMode = loadViewMode();
-	let cardsPerRow: number = loadCardsPerRow();
 
 	$: if (browser) {
 		localStorage.setItem(VIEW_STORAGE_KEY, viewMode);
-	}
-
-	$: if (browser) {
-		localStorage.setItem(CARDS_PER_ROW_STORAGE_KEY, String(cardsPerRow));
 	}
 
 	// ==========================================================================
@@ -506,7 +501,6 @@
 			onOpen={handleOpen}
 			instanceType={data.instance.type}
 			bind:viewMode
-			bind:cardsPerRow
 			onFilterInfo={() => (showFilterInfo = true)}
 		/>
 
@@ -573,7 +567,7 @@
 			<!-- Card View -->
 			<!-- ============================================================ -->
 			{#if loading || refreshing}
-				<LibraryCardGrid columns={cardsPerRow}>
+				<LibraryCardGrid columns={6}>
 					{#each Array(15) as _}
 						<div
 							class="animate-pulse overflow-hidden rounded-xl border border-neutral-300 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-900"
@@ -599,7 +593,7 @@
 						</p>
 					</div>
 				{:else}
-					<LibraryCardGrid columns={cardsPerRow}>
+					<LibraryCardGrid columns={6}>
 						{#each visibleMovieCards as movie (movie.id)}
 							<MovieCard {movie} {baseUrl} />
 						{/each}
@@ -616,7 +610,7 @@
 						</p>
 					</div>
 				{:else}
-					<LibraryCardGrid columns={cardsPerRow}>
+					<LibraryCardGrid columns={6}>
 						{#each visibleSeriesCards as series (series.id)}
 							<SeriesCard {series} {baseUrl} />
 						{/each}
