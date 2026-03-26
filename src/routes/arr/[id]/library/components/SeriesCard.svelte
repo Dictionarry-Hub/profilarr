@@ -2,6 +2,7 @@
 	import { Tv, CircleAlert, Check } from 'lucide-svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
+	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import type { SonarrLibraryItem } from '$utils/arr/types.ts';
 
@@ -60,15 +61,6 @@
 				shape="circle"
 			/>
 		</div>
-		<!-- Episode count overlay -->
-		<div
-			class="absolute right-2 bottom-2 rounded-full px-2 py-0.5 text-xs font-medium {series.episodeFileCount ===
-			series.episodeCount
-				? 'bg-green-600/90 text-white'
-				: 'bg-neutral-900/70 text-neutral-200'}"
-		>
-			{series.episodeFileCount}/{series.episodeCount}
-		</div>
 	</div>
 
 	<!-- Content -->
@@ -103,11 +95,12 @@
 			</Badge>
 		</Tooltip>
 
-		<!-- Size -->
-		{#if series.sizeOnDisk}
-			<span class="text-xs text-neutral-500 dark:text-neutral-400">
-				{formatSize(series.sizeOnDisk)}
-			</span>
-		{/if}
+		<!-- Episodes progress -->
+		<ProgressIndicator
+			current={series.episodeFileCount}
+			target={series.episodeCount}
+			met={series.episodeFileCount === series.episodeCount}
+			mode="compact"
+		/>
 	</div>
 </a>
