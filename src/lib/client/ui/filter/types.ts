@@ -1,5 +1,6 @@
 export type FilterFieldType = 'text' | 'number';
 
+// deno-lint-ignore no-explicit-any
 export interface FilterFieldDef<T = any> {
 	key: string;
 	label: string;
