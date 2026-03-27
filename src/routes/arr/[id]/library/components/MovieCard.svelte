@@ -1,5 +1,19 @@
 <script lang="ts">
-	import { Film, Check, CircleAlert, Info } from 'lucide-svelte';
+	import {
+		Film,
+		Check,
+		CircleAlert,
+		Info,
+		CheckCircle,
+		Megaphone,
+		Clapperboard,
+		Flame,
+		Users,
+		Clock,
+		Calendar,
+		Star
+	} from 'lucide-svelte';
+	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
@@ -11,6 +25,7 @@
 
 	export let movie: RadarrLibraryItem;
 	export let baseUrl: string = '';
+	export let visibleFields: Set<string> = new Set();
 
 	$: posterUrl = movie.images?.find((i) => i.coverType === 'poster')?.remoteUrl;
 
@@ -73,30 +88,112 @@
 
 	<!-- Content -->
 	<div class="flex flex-1 flex-col gap-2 p-3">
-		<div class="flex items-center justify-between gap-1.5">
-			<Tooltip text={movie.isProfilarrProfile ? '' : 'Not managed by Profilarr'} position="top">
-				<Badge
-					variant={movie.isProfilarrProfile ? 'accent' : 'warning'}
-					icon={movie.isProfilarrProfile ? null : CircleAlert}
-					mono
-				>
-					{movie.qualityProfileName}
-				</Badge>
-			</Tooltip>
-			{#if movie.hasFile && movie.sizeOnDisk}
-				<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400"
-					>{formatSize(movie.sizeOnDisk)}</span
-				>
-			{/if}
-		</div>
+		{#if visibleFields.has('title')}
+			<h3
+				class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100"
+				title={movie.title}
+			>
+				{movie.title}
+			</h3>
+		{/if}
+		{#if visibleFields.has('year') && movie.year}
+			<span class="text-xs text-neutral-500 dark:text-neutral-400">{movie.year}</span>
+		{/if}
+		{#if visibleFields.has('profile') || visibleFields.has('size')}
+			<div class="flex items-center justify-between gap-1.5">
+				{#if visibleFields.has('profile')}
+					<Tooltip text={movie.isProfilarrProfile ? '' : 'Not managed by Profilarr'} position="top">
+						<Badge
+							variant={movie.isProfilarrProfile ? 'accent' : 'warning'}
+							icon={movie.isProfilarrProfile ? null : CircleAlert}
+							mono
+						>
+							{movie.qualityProfileName}
+						</Badge>
+					</Tooltip>
+				{/if}
+				{#if visibleFields.has('size') && movie.hasFile && movie.sizeOnDisk}
+					<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400"
+						>{formatSize(movie.sizeOnDisk)}</span
+					>
+				{/if}
+			</div>
+		{/if}
 
-		{#if movie.hasFile}
+		{#if visibleFields.has('status') && movie.status}
+			{#if movie.status === 'released'}
+				<Label variant="success" size="sm"
+					><svelte:component this={CheckCircle} size={12} /> Released</Label
+				>
+			{:else if movie.status === 'inCinemas'}
+				<Label variant="warning" size="sm"
+					><svelte:component this={Clapperboard} size={12} /> In Cinemas</Label
+				>
+			{:else if movie.status === 'announced'}
+				<Label variant="info" size="sm"
+					><svelte:component this={Megaphone} size={12} /> Announced</Label
+				>
+			{:else}
+				<Label variant="secondary" size="sm">{movie.status}</Label>
+			{/if}
+		{/if}
+		{#if visibleFields.has('quality') && movie.hasFile && movie.qualityName}
+			<Badge variant="neutral" mono>{movie.qualityName}</Badge>
+		{/if}
+
+		{#if visibleFields.has('releaseGroup') && movie.hasFile && movie.releaseGroup}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Users size={12} />
+				<span class="truncate font-mono">{movie.releaseGroup}</span>
+			</span>
+		{/if}
+		{#if visibleFields.has('score') && movie.hasFile}
 			<ProgressIndicator
 				current={movie.customFormatScore}
 				target={movie.cutoffScore}
 				met={movie.cutoffMet}
 				mode="compact"
 			/>
+		{/if}
+		{#if visibleFields.has('popularity') && movie.popularity}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Flame size={12} />
+				<span class="font-mono">{movie.popularity.toFixed(1)}</span>
+			</span>
+		{/if}
+		{#if visibleFields.has('runtime') && movie.runtime}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Clock size={12} />
+				{movie.runtime} min
+			</span>
+		{/if}
+		{#if visibleFields.has('rating') && movie.ratings}
+			<div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+				{#if movie.ratings.imdb}
+					<span class="flex items-center gap-1">
+						<Star size={12} class="text-yellow-500" />
+						<span class="font-mono">{movie.ratings.imdb.value}</span>
+					</span>
+				{/if}
+				{#if movie.ratings.tmdb}
+					<span class="flex items-center gap-1">
+						<Star size={12} class="text-blue-500" />
+						<span class="font-mono">{movie.ratings.tmdb.value}</span>
+					</span>
+				{/if}
+			</div>
+		{/if}
+		{#if visibleFields.has('dateAdded') && movie.dateAdded}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Calendar size={12} />
+				<span class="font-mono"
+					>{new Date(movie.dateAdded).toLocaleDateString('en-US', {
+						month: 'short',
+						day: 'numeric',
+						year: '2-digit'
+					})}</span
+				>
+			</span>
 		{/if}
 	</div>
 </div>

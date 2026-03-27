@@ -423,6 +423,110 @@
 	}
 
 	// ==========================================================================
+	// Card Field Visibility
+	// ==========================================================================
+
+	const RADARR_CARD_STORAGE_KEY = 'profilarr-library-card-fields';
+	const RADARR_CARD_FIELDS = [
+		'title',
+		'profile',
+		'size',
+		'score',
+		'quality',
+		'year',
+		'releaseGroup',
+		'status',
+		'popularity',
+		'runtime',
+		'rating',
+		'dateAdded'
+	] as const;
+	const RADARR_CARD_DEFAULTS: readonly string[] = ['profile', 'size', 'score'];
+	type RadarrCardField = (typeof RADARR_CARD_FIELDS)[number];
+
+	const radarrCardFieldLabels: Record<RadarrCardField, string> = {
+		title: 'Title',
+		profile: 'Profile',
+		size: 'Size',
+		score: 'Score',
+		quality: 'Quality',
+		year: 'Year',
+		releaseGroup: 'Release Group',
+		status: 'Status',
+		popularity: 'Popularity',
+		runtime: 'Runtime',
+		rating: 'Rating',
+		dateAdded: 'Date Added'
+	};
+
+	const SONARR_CARD_STORAGE_KEY = 'profilarr-library-card-fields-sonarr';
+	const SONARR_CARD_FIELDS = [
+		'title',
+		'profile',
+		'size',
+		'episodes',
+		'year',
+		'status',
+		'rating',
+		'dateAdded'
+	] as const;
+	const SONARR_CARD_DEFAULTS: readonly string[] = ['profile', 'size', 'episodes'];
+	type SonarrCardField = (typeof SONARR_CARD_FIELDS)[number];
+
+	const sonarrCardFieldLabels: Record<SonarrCardField, string> = {
+		title: 'Title',
+		profile: 'Profile',
+		size: 'Size',
+		episodes: 'Episodes',
+		year: 'Year',
+		status: 'Status',
+		rating: 'Rating',
+		dateAdded: 'Date Added'
+	};
+
+	function loadCardFields<T extends string>(key: string, defaults: readonly string[]): Set<T> {
+		if (!browser) return new Set(defaults as T[]);
+		try {
+			const stored = localStorage.getItem(key);
+			if (stored) return new Set(JSON.parse(stored) as T[]);
+		} catch {}
+		return new Set(defaults as T[]);
+	}
+
+	let radarrCardFields = loadCardFields<RadarrCardField>(
+		RADARR_CARD_STORAGE_KEY,
+		RADARR_CARD_DEFAULTS
+	);
+	let sonarrCardFields = loadCardFields<SonarrCardField>(
+		SONARR_CARD_STORAGE_KEY,
+		SONARR_CARD_DEFAULTS
+	);
+
+	function toggleCardField(key: string) {
+		if (isRadarr) {
+			const k = key as RadarrCardField;
+			if (radarrCardFields.has(k)) radarrCardFields.delete(k);
+			else radarrCardFields.add(k);
+			radarrCardFields = radarrCardFields;
+			if (browser)
+				localStorage.setItem(RADARR_CARD_STORAGE_KEY, JSON.stringify([...radarrCardFields]));
+		} else {
+			const k = key as SonarrCardField;
+			if (sonarrCardFields.has(k)) sonarrCardFields.delete(k);
+			else sonarrCardFields.add(k);
+			sonarrCardFields = sonarrCardFields;
+			if (browser)
+				localStorage.setItem(SONARR_CARD_STORAGE_KEY, JSON.stringify([...sonarrCardFields]));
+		}
+	}
+
+	$: activeCardFields = isRadarr ? RADARR_CARD_FIELDS : SONARR_CARD_FIELDS;
+	$: activeCardFieldLabels = isRadarr ? radarrCardFieldLabels : sonarrCardFieldLabels;
+	$: activeVisibleCardFields = isRadarr
+		? new Set([...radarrCardFields])
+		: new Set([...sonarrCardFields]);
+
+	// ==========================================================================
 	// Radarr Data & Columns
 	// ==========================================================================
 
@@ -586,6 +690,10 @@
 			sortKey={cardSortKey}
 			sortDirection={cardSortDirection}
 			onSort={handleCardSort}
+			visibleCardFields={activeVisibleCardFields}
+			toggleableCardFields={activeCardFields}
+			cardFieldLabels={activeCardFieldLabels}
+			onToggleCardField={toggleCardField}
 			onFilterInfo={() => (showFilterInfo = true)}
 		/>
 
@@ -682,7 +790,7 @@
 				{:else}
 					<LibraryCardGrid columns={6}>
 						{#each visibleMovieCards as movie (movie.id)}
-							<MovieCard {movie} {baseUrl} />
+							<MovieCard {movie} {baseUrl} visibleFields={activeVisibleCardFields} />
 						{/each}
 					</LibraryCardGrid>
 					<div use:cardSentinel></div>
@@ -699,7 +807,12 @@
 				{:else}
 					<LibraryCardGrid columns={6}>
 						{#each visibleSeriesCards as series (series.id)}
-							<SeriesCard {series} {baseUrl} instanceId={data.instance.id} />
+							<SeriesCard
+								{series}
+								{baseUrl}
+								instanceId={data.instance.id}
+								visibleFields={activeVisibleCardFields}
+							/>
 						{/each}
 					</LibraryCardGrid>
 					<div use:cardSentinel></div>

@@ -32,6 +32,10 @@
 	export let visibleColumns: Set<string>;
 	export let toggleableColumns: readonly string[];
 	export let columnLabels: Record<string, string>;
+	export let visibleCardFields: Set<string> = new Set();
+	export let toggleableCardFields: readonly string[] = [];
+	export let cardFieldLabels: Record<string, string> = {};
+	export let onToggleCardField: (key: string) => void = () => {};
 	export let cacheAgeText: string | null = null;
 	export let refreshing: boolean = false;
 
@@ -117,9 +121,23 @@
 		<ActionButton icon={ExternalLink} on:click={onOpen} />
 	</Tooltip>
 	{#if viewMode === 'cards'}
+		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
+			<svelte:fragment slot="dropdown" let:dropdownPosition>
+				<Dropdown position={dropdownPosition} minWidth="14rem">
+					<DropdownHeader label="Toggle fields" />
+					{#each toggleableCardFields as fieldKey}
+						<DropdownItem
+							label={cardFieldLabels[fieldKey]}
+							selected={visibleCardFields.has(fieldKey)}
+							on:click={() => onToggleCardField(fieldKey)}
+						/>
+					{/each}
+				</Dropdown>
+			</svelte:fragment>
+		</ActionButton>
 		<ActionButton icon={ArrowUpDown} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition>
-				<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="12rem">
+				<Dropdown position={dropdownPosition} minWidth="12rem">
 					<DropdownHeader label="Sort by" />
 					{#each sortOptions as option}
 						<DropdownItem
@@ -142,7 +160,7 @@
 		</Tooltip>
 		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition>
-				<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="14rem">
+				<Dropdown position={dropdownPosition} minWidth="14rem">
 					<DropdownHeader label="Toggle columns" />
 					{#each toggleableColumns as colKey}
 						<DropdownItem

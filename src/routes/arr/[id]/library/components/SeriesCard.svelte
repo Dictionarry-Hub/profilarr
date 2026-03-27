@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Tv, CircleAlert, Check, Info } from 'lucide-svelte';
+	import { Tv, CircleAlert, Check, Info, Play, Square, Clock, Star, Calendar } from 'lucide-svelte';
+	import Label from '$ui/label/Label.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -13,6 +14,7 @@
 	export let series: SonarrLibraryItem;
 	export let baseUrl: string = '';
 	export let instanceId: number;
+	export let visibleFields: Set<string> = new Set();
 
 	$: posterUrl = series.images?.find((i) => i.coverType === 'poster')?.remoteUrl;
 
@@ -148,31 +150,82 @@
 
 	<!-- Content -->
 	<div class="flex flex-1 flex-col gap-2 p-3">
-		<!-- Profile + Size -->
-		<div class="flex items-center justify-between gap-1.5">
-			<Tooltip text={series.isProfilarrProfile ? '' : 'Not managed by Profilarr'} position="top">
-				<Badge
-					variant={series.isProfilarrProfile ? 'accent' : 'warning'}
-					icon={series.isProfilarrProfile ? null : CircleAlert}
-					mono
+		{#if visibleFields.has('title')}
+			<h3
+				class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100"
+				title={series.title}
+			>
+				{series.title}
+			</h3>
+		{/if}
+		{#if visibleFields.has('year') && series.year}
+			<span class="text-xs text-neutral-500 dark:text-neutral-400">{series.year}</span>
+		{/if}
+		{#if visibleFields.has('status') && series.status}
+			{#if series.status === 'continuing'}
+				<Label variant="success" size="sm"
+					><svelte:component this={Play} size={12} /> Continuing</Label
 				>
-					{series.qualityProfileName}
-				</Badge>
-			</Tooltip>
-			{#if series.sizeOnDisk}
-				<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
-					{formatSize(series.sizeOnDisk)}
-				</span>
+			{:else if series.status === 'ended'}
+				<Label variant="secondary" size="sm"
+					><svelte:component this={Square} size={12} /> Ended</Label
+				>
+			{:else if series.status === 'upcoming'}
+				<Label variant="info" size="sm"><svelte:component this={Clock} size={12} /> Upcoming</Label>
+			{:else}
+				<Label variant="secondary" size="sm">{series.status}</Label>
 			{/if}
-		</div>
+		{/if}
+		{#if visibleFields.has('profile') || visibleFields.has('size')}
+			<div class="flex items-center justify-between gap-1.5">
+				{#if visibleFields.has('profile')}
+					<Tooltip
+						text={series.isProfilarrProfile ? '' : 'Not managed by Profilarr'}
+						position="top"
+					>
+						<Badge
+							variant={series.isProfilarrProfile ? 'accent' : 'warning'}
+							icon={series.isProfilarrProfile ? null : CircleAlert}
+							mono
+						>
+							{series.qualityProfileName}
+						</Badge>
+					</Tooltip>
+				{/if}
+				{#if visibleFields.has('size') && series.sizeOnDisk}
+					<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+						{formatSize(series.sizeOnDisk)}
+					</span>
+				{/if}
+			</div>
+		{/if}
 
-		<!-- Episodes progress -->
-		<ProgressIndicator
-			current={series.episodeFileCount}
-			target={series.episodeCount}
-			met={series.episodeFileCount === series.episodeCount}
-			mode="compact"
-		/>
+		{#if visibleFields.has('episodes')}
+			<ProgressIndicator
+				current={series.episodeFileCount}
+				target={series.episodeCount}
+				met={series.episodeFileCount === series.episodeCount}
+				mode="compact"
+			/>
+		{/if}
+		{#if visibleFields.has('rating') && series.ratings}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Star size={12} class="text-yellow-500" />
+				<span class="font-mono">{series.ratings.value}</span>
+			</span>
+		{/if}
+		{#if visibleFields.has('dateAdded') && series.dateAdded}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Calendar size={12} />
+				<span class="font-mono"
+					>{new Date(series.dateAdded).toLocaleDateString('en-US', {
+						month: 'short',
+						day: 'numeric',
+						year: '2-digit'
+					})}</span
+				>
+			</span>
+		{/if}
 	</div>
 </div>
 
