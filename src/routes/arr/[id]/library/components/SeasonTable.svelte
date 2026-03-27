@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
+	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { SonarrSeasonItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
 	import EpisodeTable from './EpisodeTable.svelte';
@@ -25,8 +25,8 @@
 		{
 			key: 'episodeFileCount',
 			header: 'Episodes',
-			align: 'center',
-			width: 'w-28',
+			align: 'right',
+			width: 'w-36',
 			sortable: true,
 			defaultSortDirection: 'desc'
 		},
@@ -63,11 +63,16 @@
 				{getSeasonLabel(row.seasonNumber)}
 			</span>
 		{:else if column.key === 'episodeFileCount'}
-			<Badge variant={row.episodeFileCount === row.episodeCount ? 'success' : 'neutral'} mono>
-				{row.episodeFileCount}/{row.episodeCount}
-			</Badge>
+			<ProgressIndicator
+				current={row.episodeFileCount}
+				target={row.episodeCount}
+				met={row.episodeFileCount === row.episodeCount}
+				mode="compact"
+			/>
 		{:else if column.key === 'sizeOnDisk'}
-			<Badge variant="neutral" mono>{formatSize(row.sizeOnDisk)}</Badge>
+			<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300"
+				>{formatSize(row.sizeOnDisk)}</span
+			>
 		{/if}
 	</svelte:fragment>
 
