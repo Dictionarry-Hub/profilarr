@@ -136,7 +136,7 @@ export async function deserializeQualityProfile(
 ) {
 	const { databaseId, cache, layer, portable } = options;
 
-	// 1. Create the profile (sets up default qualities)
+	// 1. Create the profile with the source qualities directly
 	const createResult = await qpQueries.create({
 		databaseId,
 		cache,
@@ -145,29 +145,22 @@ export async function deserializeQualityProfile(
 			name: portable.name,
 			description: portable.description,
 			tags: portable.tags,
-			language: portable.language
+			language: portable.language,
+			orderedItems: portable.orderedItems
 		}
 	});
 
-	// 2. Update qualities to match portable
+	if (!createResult.success) {
+		throw new Error(createResult.error ?? 'Failed to create quality profile');
+	}
+
+	// 2. Update scoring
 	const freshCache = getCache(databaseId);
 	if (!freshCache) throw new Error('Database cache not available');
 
-	await qpQueries.updateQualities({
-		databaseId,
-		cache: freshCache,
-		layer,
-		profileName: portable.name,
-		input: { orderedItems: portable.orderedItems }
-	});
-
-	// 3. Update scoring
-	const freshCache2 = getCache(databaseId);
-	if (!freshCache2) throw new Error('Database cache not available');
-
 	await qpQueries.updateScoring({
 		databaseId,
-		cache: freshCache2,
+		cache: freshCache,
 		layer,
 		profileName: portable.name,
 		input: {
