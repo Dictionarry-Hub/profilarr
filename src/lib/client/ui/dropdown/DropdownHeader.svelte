@@ -8,7 +8,7 @@
 </script>
 
 <div
-	class="flex w-full items-center border-b border-neutral-200 bg-white dark:border-neutral-700/60 dark:bg-neutral-800 {sizeClasses}"
+	class="flex w-full items-center border-b border-neutral-200/50 dark:border-neutral-700/40 {sizeClasses}"
 >
 	<span class="text-neutral-500 dark:text-neutral-400">{label}</span>
 </div>

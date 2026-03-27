@@ -23,13 +23,11 @@
 			? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900'
 			: 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700';
 
-	$: baseSurfaceClass = 'bg-white dark:bg-neutral-800';
-
 	$: iconSize = compact ? 12 : 16;
 </script>
 
 <button
-	class="flex w-full items-center border-b border-neutral-200 text-left transition-colors last:border-b-0 dark:border-neutral-700/60 {baseSurfaceClass} {sizeClasses} {stateClasses}"
+	class="flex w-full items-center border-b border-neutral-200/50 text-left transition-colors last:border-b-0 dark:border-neutral-700/40 {sizeClasses} {stateClasses}"
 	{disabled}
 	on:click
 >
