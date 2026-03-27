@@ -175,6 +175,29 @@
 	}
 
 	// ==========================================================================
+	// Expand All
+	// ==========================================================================
+
+	const EXPAND_ALL_STORAGE_KEY = 'profilarr-library-expand-all';
+
+	function loadExpandAll(): boolean {
+		if (!browser) return false;
+		try {
+			return localStorage.getItem(EXPAND_ALL_STORAGE_KEY) === 'true';
+		} catch {}
+		return false;
+	}
+
+	let expandAll = loadExpandAll();
+
+	function toggleExpandAll() {
+		expandAll = !expandAll;
+		if (browser) {
+			localStorage.setItem(EXPAND_ALL_STORAGE_KEY, String(expandAll));
+		}
+	}
+
+	// ==========================================================================
 	// Library Data State
 	// ==========================================================================
 
@@ -558,6 +581,8 @@
 			onOpen={handleOpen}
 			instanceType={data.instance.type}
 			bind:viewMode
+			{expandAll}
+			onToggleExpandAll={toggleExpandAll}
 			sortKey={cardSortKey}
 			sortDirection={cardSortDirection}
 			onSort={handleCardSort}
@@ -587,6 +612,7 @@
 						data={moviesWithFiles}
 						loading={loading || refreshing}
 						{baseUrl}
+						{expandAll}
 						visibleColumns={activeVisibleColumns}
 						emptyMessage={filterTags.length > 0
 							? 'No movies match the current filters'
@@ -614,6 +640,7 @@
 						data={filteredSeries}
 						loading={loading || refreshing}
 						{baseUrl}
+						{expandAll}
 						instanceId={data.instance.id}
 						visibleColumns={activeVisibleColumns}
 						emptyMessage={filterTags.length > 0

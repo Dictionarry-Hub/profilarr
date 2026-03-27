@@ -7,7 +7,9 @@
 		Info,
 		ArrowUpDown,
 		ArrowUp,
-		ArrowDown
+		ArrowDown,
+		ChevronsDownUp,
+		ChevronsUpDown
 	} from 'lucide-svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
@@ -39,6 +41,8 @@
 	export let onOpen: () => void;
 	export let instanceType: string = 'radarr';
 	export let viewMode: ViewMode = 'table';
+	export let expandAll: boolean = false;
+	export let onToggleExpandAll: () => void = () => {};
 	export let sortKey: string = 'title';
 	export let sortDirection: 'asc' | 'desc' = 'asc';
 	export let onSort: (key: string, direction: 'asc' | 'desc') => void = () => {};
@@ -130,6 +134,12 @@
 		</ActionButton>
 	{/if}
 	{#if viewMode === 'table'}
+		<Tooltip text={expandAll ? 'Collapse all rows' : 'Expand all rows'}>
+			<ActionButton
+				icon={expandAll ? ChevronsDownUp : ChevronsUpDown}
+				on:click={onToggleExpandAll}
+			/>
+		</Tooltip>
 		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition>
 				<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="14rem">

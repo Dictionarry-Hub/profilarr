@@ -13,8 +13,17 @@
 	export let data: RadarrLibraryItem[];
 	export let loading = false;
 	export let baseUrl = '';
+	export let expandAll = false;
 	export let emptyMessage = 'No movies with files';
 	export let visibleColumns: Set<string>;
+
+	let expandedRows: Set<string | number> = new Set();
+
+	$: if (expandAll) {
+		expandedRows = new Set(data.map((row) => row.id));
+	} else {
+		expandedRows = new Set();
+	}
 
 	const TOGGLEABLE_COLUMNS = [
 		'qualityName',
@@ -116,6 +125,7 @@
 	pageSize={25}
 	responsive
 	flushExpanded
+	bind:expandedRows
 	{emptyMessage}
 >
 	<svelte:fragment slot="cell" let:row let:column>

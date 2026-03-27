@@ -14,6 +14,7 @@
 	export let data: SonarrLibraryItem[];
 	export let loading = false;
 	export let baseUrl = '';
+	export let expandAll = false;
 	export let instanceId: number;
 	export let emptyMessage = 'No series found';
 	export let visibleColumns: Set<string>;
@@ -131,6 +132,12 @@
 	})();
 
 	let expandedRows: Set<string | number> = new Set();
+
+	$: if (expandAll) {
+		expandedRows = new Set(data.map((row) => row.id));
+	} else if (!expandAll && expandedRows.size === data.length) {
+		expandedRows = new Set();
+	}
 
 	$: if (expandedRows.size > 0) {
 		for (const id of expandedRows) {
