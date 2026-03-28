@@ -428,6 +428,7 @@
 
 	const RADARR_CARD_STORAGE_KEY = 'profilarr-library-card-fields';
 	const RADARR_CARD_FIELDS = [
+		'monitored',
 		'title',
 		'profile',
 		'size',
@@ -441,10 +442,11 @@
 		'rating',
 		'dateAdded'
 	] as const;
-	const RADARR_CARD_DEFAULTS: readonly string[] = ['profile', 'size', 'score'];
+	const RADARR_CARD_DEFAULTS: readonly string[] = ['monitored', 'profile', 'size', 'score'];
 	type RadarrCardField = (typeof RADARR_CARD_FIELDS)[number];
 
 	const radarrCardFieldLabels: Record<RadarrCardField, string> = {
+		monitored: 'Monitored',
 		title: 'Title',
 		profile: 'Profile',
 		size: 'Size',
@@ -461,6 +463,7 @@
 
 	const SONARR_CARD_STORAGE_KEY = 'profilarr-library-card-fields-sonarr';
 	const SONARR_CARD_FIELDS = [
+		'monitored',
 		'title',
 		'profile',
 		'size',
@@ -470,10 +473,11 @@
 		'rating',
 		'dateAdded'
 	] as const;
-	const SONARR_CARD_DEFAULTS: readonly string[] = ['profile', 'size', 'episodes'];
+	const SONARR_CARD_DEFAULTS: readonly string[] = ['monitored', 'profile', 'size', 'episodes'];
 	type SonarrCardField = (typeof SONARR_CARD_FIELDS)[number];
 
 	const sonarrCardFieldLabels: Record<SonarrCardField, string> = {
+		monitored: 'Monitored',
 		title: 'Title',
 		profile: 'Profile',
 		size: 'Size',
