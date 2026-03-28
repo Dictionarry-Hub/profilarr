@@ -97,6 +97,7 @@ export class SonarrClient extends BaseArrClient {
 				tvdbId: series.tvdbId,
 				imdbId: series.imdbId,
 				title: series.title,
+				titleSlug: series.titleSlug,
 				year: series.year,
 				qualityProfileId: series.qualityProfileId,
 				qualityProfileName: profileName,

@@ -335,6 +335,7 @@ export interface SonarrSeason {
 export interface SonarrSeries {
 	id: number;
 	title: string;
+	titleSlug?: string;
 	sortTitle?: string;
 	tvdbId?: number;
 	imdbId?: string;
@@ -589,6 +590,7 @@ export interface SonarrLibraryItem {
 	tvdbId?: number;
 	imdbId?: string;
 	title: string;
+	titleSlug?: string;
 	year?: number;
 	qualityProfileId: number;
 	qualityProfileName: string;

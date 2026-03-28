@@ -160,6 +160,17 @@ RadarrLibraryItem:
     ratings:
       type: object
       description: Ratings from various sources
+      properties:
+        imdb:
+          $ref: '#/RatingSource'
+        tmdb:
+          $ref: '#/RatingSource'
+        metacritic:
+          $ref: '#/RatingSource'
+        rottenTomatoes:
+          $ref: '#/RatingSource'
+        trakt:
+          $ref: '#/RatingSource'
     images:
       type: array
       items:
@@ -294,6 +305,9 @@ SonarrLibraryItem:
     title:
       type: string
       description: Series title
+    titleSlug:
+      type: string
+      description: URL-friendly slug from Sonarr (used for series page links)
     year:
       type: integer
       description: First air year
@@ -748,3 +762,11 @@ SyncEntityCooldownResponse:
     retryAfter:
       type: integer
       description: Seconds until cooldown expires
+
+RatingSource:
+  type: object
+  properties:
+    votes:
+      type: integer
+    value:
+      type: number

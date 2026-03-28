@@ -26,10 +26,12 @@
 		return allMonitored ? 'monitored' : 'partial';
 	})();
 
-	$: slug = series.title
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-+|-+$/g, '');
+	$: slug =
+		series.titleSlug ??
+		series.title
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-+|-+$/g, '');
 
 	function formatSize(bytes: number): string {
 		if (!bytes) return '-';
