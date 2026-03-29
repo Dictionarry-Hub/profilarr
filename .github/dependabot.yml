@@ -3,20 +3,33 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: daily
+    open-pull-requests-limit: 10
     groups:
-      eslint:
-        patterns: ['eslint*', '@eslint/*', 'typescript-eslint']
+      svelte:
+        patterns: ['svelte', 'svelte-check', '@sveltejs/kit']
+      vite:
+        patterns:
+          - 'vite'
+          - '@deno/vite-plugin'
+          - '@sveltejs/vite-plugin-svelte'
+          - 'esbuild'
       tailwind:
         patterns: ['tailwindcss', '@tailwindcss/*']
       prettier:
         patterns: ['prettier', 'prettier-plugin-*']
-      svelte:
-        patterns: ['svelte', 'svelte-check', '@sveltejs/*']
+      eslint:
+        patterns: ['eslint*', '@eslint/*', 'typescript-eslint']
+      playwright:
+        patterns: ['@playwright/test', 'playwright']
+      types:
+        patterns: ['@types/*']
+    ignore:
+      - dependency-name: '@sveltejs/vite-plugin-svelte'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: daily
+    open-pull-requests-limit: 10
