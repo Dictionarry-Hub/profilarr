@@ -793,6 +793,9 @@ CREATE TABLE general_settings (
     -- Default delay profile settings
     apply_default_delay_profiles INTEGER NOT NULL DEFAULT 1,  -- 1=apply defaults when adding arr, 0=don't
 
+    -- Onboarding
+    onboarding_shown INTEGER NOT NULL DEFAULT 0,  -- 1=first-run prompt has been shown, 0=not yet
+
     -- Metadata
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
