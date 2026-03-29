@@ -5,6 +5,7 @@
 	import PageNav from '$ui/navigation/pageNav/pageNav.svelte';
 	import BottomNav from '$ui/navigation/bottomNav/BottomNav.svelte';
 	import AlertContainer from '$alerts/AlertContainer.svelte';
+	import HelpButton from '$ui/help/HelpButton.svelte';
 	import { page } from '$app/stores';
 	import { onMount, onDestroy } from 'svelte';
 	import { jobStatus } from '$stores/jobStatus';
@@ -37,6 +38,7 @@
 		parserAvailable={data.parserAvailable}
 	/>
 	<BottomNav />
+	<HelpButton />
 {/if}
 <AlertContainer />
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AccentPicker from './accentPicker.svelte';
 	import ThemeToggle from './themeToggle.svelte';
+	import HelpButton from '$ui/help/HelpButton.svelte';
 	import { Menu } from 'lucide-svelte';
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import logo from '$assets/logo-512.png';
@@ -45,6 +46,7 @@
 		<div class="flex items-center justify-end gap-1">
 			<AccentPicker />
 			<ThemeToggle />
+			<HelpButton variant="navbar" />
 		</div>
 	</div>
 </nav>
