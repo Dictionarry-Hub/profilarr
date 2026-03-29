@@ -82,10 +82,12 @@
 
 <div
 	bind:this={dropdownEl}
-	class="z-50 overflow-hidden border border-neutral-300 bg-white shadow-lg dark:border-neutral-700/60 dark:bg-neutral-800 {roundedClass} {fixed
+	class="z-50 overflow-hidden border border-neutral-300 bg-neutral-100 shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900 dark:shadow-black/25 {roundedClass} {fixed
 		? 'fixed'
 		: 'absolute top-full ' + marginClass} {positionClass}"
 	style="min-width: {minWidth}; {fixed ? fixedStyle : ''}"
 >
-	<slot />
+	<div class="bg-white/80 dark:bg-neutral-800/50">
+		<slot />
+	</div>
 </div>

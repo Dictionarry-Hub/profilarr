@@ -132,7 +132,7 @@
 			transition:fade={{ duration: 150 }}
 		>
 			<div
-				class="w-full max-w-lg rounded-xl border border-neutral-300 bg-white shadow-xl dark:border-neutral-700/60 dark:bg-neutral-800/50"
+				class="search-action-modal w-full max-w-lg rounded-xl border border-neutral-300 bg-white shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900"
 				transition:fly={{ y: -20, duration: 200 }}
 			>
 				<div class="relative flex items-center p-3">
@@ -248,3 +248,9 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	.search-action-modal {
+		border-radius: 0.75rem !important;
+	}
+</style>

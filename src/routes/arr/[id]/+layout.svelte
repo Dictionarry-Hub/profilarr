@@ -9,13 +9,21 @@
 	$: instanceId = $page.params.id;
 	$: currentPath = $page.url.pathname;
 
-	$: tabs = [
-		{
-			label: 'Sync',
-			href: `/arr/${instanceId}/sync`,
-			active: currentPath.includes('/sync'),
-			icon: RefreshCw
-		},
+	$: libraryTab = {
+		label: 'Library',
+		href: `/arr/${instanceId}/library`,
+		active: currentPath.includes('/library'),
+		icon: Library
+	};
+
+	$: syncTab = {
+		label: 'Sync',
+		href: `/arr/${instanceId}/sync`,
+		active: currentPath.includes('/sync'),
+		icon: RefreshCw
+	};
+
+	$: otherTabs = [
 		{
 			label: 'Upgrades',
 			href: `/arr/${instanceId}/upgrades`,
@@ -27,12 +35,6 @@
 			href: `/arr/${instanceId}/rename`,
 			active: currentPath.includes('/rename'),
 			icon: FileEdit
-		},
-		{
-			label: 'Library',
-			href: `/arr/${instanceId}/library`,
-			active: currentPath.includes('/library'),
-			icon: Library
 		},
 		{
 			label: 'Logs',
@@ -48,13 +50,19 @@
 		}
 	];
 
+	$: tabs = data.hasSyncConfig
+		? [libraryTab, syncTab, ...otherTabs]
+		: [syncTab, libraryTab, ...otherTabs];
+
 	$: breadcrumb = {
 		items: [{ label: 'Arr Instances', href: '/arr' }],
 		current: data.instance.name
 	};
 </script>
 
-<div class="p-4 md:p-8">
+<div class="overflow-x-hidden p-4 md:p-8">
 	<Tabs {tabs} {breadcrumb} responsive />
-	<slot />
+	{#key data.instance.id}
+		<slot />
+	{/key}
 </div>

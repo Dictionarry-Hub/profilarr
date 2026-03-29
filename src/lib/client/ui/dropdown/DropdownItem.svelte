@@ -11,6 +11,7 @@
 	export let danger: boolean = false;
 	export let selected: boolean = false;
 	export let compact: boolean = false;
+	export let checkIcon: ComponentType = Check;
 
 	$: sizeClasses = compact
 		? 'gap-2 px-2 py-1 text-xs first:rounded-t-lg last:rounded-b-lg'
@@ -22,13 +23,11 @@
 			? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900'
 			: 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700';
 
-	$: baseSurfaceClass = 'bg-white dark:bg-neutral-800';
-
 	$: iconSize = compact ? 12 : 16;
 </script>
 
 <button
-	class="flex w-full items-center border-b border-neutral-200 text-left transition-colors last:border-b-0 dark:border-neutral-700/60 {baseSurfaceClass} {sizeClasses} {stateClasses}"
+	class="flex w-full items-center border-b border-neutral-200/50 text-left transition-colors last:border-b-0 dark:border-neutral-700/40 {sizeClasses} {stateClasses}"
 	{disabled}
 	on:click
 >
@@ -42,5 +41,5 @@
 		{/if}
 	{/if}
 	<span class="flex-1">{label}</span>
-	<IconCheckbox icon={Check} checked={selected} shape="circle" color="accent" />
+	<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color="accent" />
 </button>
