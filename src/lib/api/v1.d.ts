@@ -449,6 +449,8 @@ export interface components {
 			id: number;
 			/** @description TMDB ID */
 			tmdbId?: number;
+			/** @description IMDB ID */
+			imdbId?: string;
 			/** @description Movie title */
 			title: string;
 			/** @description Release year */
@@ -459,6 +461,10 @@ export interface components {
 			qualityProfileName: string;
 			/** @description Whether the movie has a downloaded file */
 			hasFile: boolean;
+			/** @description Whether the movie is monitored */
+			monitored: boolean;
+			/** @description Movie status (released, announced, inCinemas) */
+			status?: string;
 			/**
 			 * Format: date-time
 			 * @description When the movie was added
@@ -466,10 +472,48 @@ export interface components {
 			dateAdded?: string;
 			/** @description TMDB popularity score */
 			popularity?: number;
+			/** @description File size in bytes */
+			sizeOnDisk?: number;
+			/** @description Runtime in minutes */
+			runtime?: number;
+			/** @description Content rating (e.g. R, PG-13) */
+			certification?: string;
+			/** @description Genre list */
+			genres?: string[];
+			/** @description Production studio */
+			studio?: string;
+			/** @description Ratings from various sources */
+			ratings?: {
+				imdb?: components['schemas']['RatingSource'];
+				tmdb?: components['schemas']['RatingSource'];
+				metacritic?: components['schemas']['RatingSource'];
+				rottenTomatoes?: components['schemas']['RatingSource'];
+				trakt?: components['schemas']['RatingSource'];
+			};
+			/** @description Poster and fanart images */
+			images?: components['schemas']['ArrImage'][];
+			collection?: {
+				title?: string;
+				tmdbId?: number;
+			};
+			originalLanguage?: {
+				id?: number;
+				name?: string;
+			};
 			/** @description Quality of the downloaded file (null if no file) */
 			qualityName?: string | null;
 			/** @description File name of the downloaded file (null if no file) */
 			fileName?: string | null;
+			/** @description Release group name from the file */
+			releaseGroup?: string;
+			/** @description Edition name (e.g. Final Cut, Director's Cut) */
+			edition?: string;
+			/** @description Languages in the file */
+			languages?: {
+				id?: number;
+				name?: string;
+			}[];
+			mediaInfo?: components['schemas']['ArrMediaInfo'];
 			/** @description Custom formats matched on the file */
 			customFormats: components['schemas']['CustomFormatRef'][];
 			/** @description Total custom format score */
@@ -510,6 +554,8 @@ export interface components {
 			tvdbId?: number;
 			/** @description Series title */
 			title: string;
+			/** @description URL-friendly slug from Sonarr (used for series page links) */
+			titleSlug?: string;
 			/** @description First air year */
 			year?: number;
 			/** @description Assigned quality profile ID */
@@ -541,6 +587,38 @@ export interface components {
 			seasons: components['schemas']['SonarrSeasonItem'][];
 			/** @description Whether the profile is managed by Profilarr */
 			isProfilarrProfile: boolean;
+			/** @description TV network (e.g. HBO, CBS) */
+			network?: string;
+			/** @description Series type (standard, daily, anime) */
+			seriesType?: string;
+			/** @description Content rating (e.g. TV-MA, TV-PG) */
+			certification?: string;
+			/** @description Genre list */
+			genres?: string[];
+			/** @description Episode runtime in minutes */
+			runtime?: number;
+			ratings?: {
+				votes?: number;
+				value?: number;
+			};
+			/** @description Poster, banner, fanart images */
+			images?: components['schemas']['ArrImage'][];
+			originalLanguage?: {
+				id?: number;
+				name?: string;
+			};
+			/**
+			 * Format: date-time
+			 * @description First air date
+			 */
+			firstAired?: string;
+			/**
+			 * Format: date-time
+			 * @description Last air date
+			 */
+			lastAired?: string;
+			/** @description IMDB ID */
+			imdbId?: string;
 		};
 		SonarrEpisodeItem: {
 			/** @description Sonarr episode ID */
@@ -573,6 +651,14 @@ export interface components {
 			progress: number;
 			/** @description Whether the cutoff score has been met */
 			cutoffMet: boolean;
+			/** @description Release group name from the file */
+			releaseGroup?: string;
+			/** @description Languages in the file */
+			languages?: {
+				id?: number;
+				name?: string;
+			}[];
+			mediaInfo?: components['schemas']['ArrMediaInfo'];
 		};
 		/** @description Library response varies by instance type */
 		LibraryResponse:
@@ -842,6 +928,28 @@ export interface components {
 			 * @description Date of newest log file (verbose only)
 			 */
 			newestLog?: string | null;
+		};
+		RatingSource: {
+			votes?: number;
+			value?: number;
+		};
+		ArrImage: {
+			/** @description Image type (poster, fanart, banner, clearlogo) */
+			coverType?: string;
+			/** @description Local image URL (relative to Arr instance) */
+			url?: string;
+			/** @description Remote CDN URL (TMDB/TVDB) */
+			remoteUrl?: string;
+		};
+		ArrMediaInfo: {
+			audioCodec?: string;
+			audioChannels?: number;
+			videoCodec?: string;
+			videoBitDepth?: number;
+			videoDynamicRange?: string;
+			videoDynamicRangeType?: string;
+			resolution?: string;
+			subtitles?: string;
 		};
 		LibraryRadarrResponse: {
 			/** @enum {string} */

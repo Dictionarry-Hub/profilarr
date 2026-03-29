@@ -5,6 +5,15 @@
 
 	export let open = false;
 	export let header = 'Information';
+	export let size: 'sm' | 'md' | 'lg' | 'xl' | '2xl' = 'md';
+
+	const sizeClasses = {
+		sm: 'max-w-sm',
+		md: 'max-w-lg',
+		lg: 'max-w-2xl',
+		xl: 'max-w-4xl',
+		'2xl': 'max-w-6xl'
+	};
 
 	function handleClose() {
 		open = false;
@@ -44,13 +53,15 @@
 		>
 			<!-- Modal -->
 			<div
-				class="relative my-4 flex max-h-[calc(100svh-2rem)] w-full max-w-lg flex-col rounded-lg border border-neutral-200 bg-white shadow-xl sm:my-0 dark:border-neutral-700 dark:bg-neutral-900"
+				class="relative my-4 flex max-h-[calc(100svh-2rem)] w-full {sizeClasses[
+					size
+				]} flex-col rounded-xl border border-neutral-300 bg-white shadow-xl sm:my-0 dark:border-neutral-700/60 dark:bg-neutral-900"
 				in:scale={{ duration: 170, start: 0.97, opacity: 0.5, easing: cubicOut }}
 				out:scale={{ duration: 120, start: 0.97, opacity: 0.5, easing: cubicIn }}
 			>
 				<!-- Header -->
 				<div
-					class="flex flex-shrink-0 items-center justify-between border-b border-neutral-200 px-6 py-4 dark:border-neutral-800"
+					class="flex flex-shrink-0 items-center justify-between border-b border-neutral-300 px-6 py-4 dark:border-neutral-700/60"
 				>
 					<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{header}</h2>
 					<button

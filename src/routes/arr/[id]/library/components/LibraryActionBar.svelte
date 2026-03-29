@@ -1,221 +1,115 @@
 <script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
 	import {
-		Check,
-		SlidersHorizontal,
 		TableProperties,
 		RefreshCw,
 		ExternalLink,
-		Type,
-		Palette
+		Info,
+		ArrowUpDown,
+		ArrowUp,
+		ArrowDown,
+		ChevronsDownUp,
+		ChevronsUpDown
 	} from 'lucide-svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
+	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
-	import TagInput from '$ui/form/TagInput.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import { type SearchStore } from '$stores/search';
+	import SearchAction from '$ui/actions/SearchAction.svelte';
+	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
+	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
+	import type { SearchStore } from '$stores/search';
+	import type { ViewMode } from '$lib/client/stores/dataPage';
 
-	type FilterOperator = 'eq' | 'neq';
-	type FilterField = 'qualityName' | 'qualityProfileName';
-
-	interface ActiveFilter {
-		field: FilterField;
-		operator: FilterOperator;
-		value: string | number | boolean;
-		label: string;
-	}
-
+	export let fields: FilterFieldDef[] = [];
+	export let items: any[] = [];
+	export let tags: FilterTag[] = [];
+	export let filterStorageKey: string = '';
 	export let searchStore: SearchStore;
 	export let visibleColumns: Set<string>;
 	export let toggleableColumns: readonly string[];
 	export let columnLabels: Record<string, string>;
-	export let activeFilters: ActiveFilter[];
-	export let uniqueQualities: string[];
-	export let uniqueProfiles: string[];
+	export let visibleCardFields: Set<string> = new Set();
+	export let toggleableCardFields: readonly string[] = [];
+	export let cardFieldLabels: Record<string, string> = {};
+	export let onToggleCardField: (key: string) => void = () => {};
 	export let cacheAgeText: string | null = null;
 	export let refreshing: boolean = false;
 
 	export let onToggleColumn: (key: string) => void;
-	export let onToggleFilter: (
-		field: FilterField,
-		operator: FilterOperator,
-		value: string | number | boolean,
-		label: string
-	) => void;
+	export let onFilterInfo: () => void;
 	export let onRefresh: () => void;
 	export let onOpen: () => void;
 	export let instanceType: string = 'radarr';
+	export let viewMode: ViewMode = 'table';
+	export let expandAll: boolean = false;
+	export let onToggleExpandAll: () => void = () => {};
+	export let sortKey: string = 'title';
+	export let sortDirection: 'asc' | 'desc' = 'asc';
+	export let onSort: (key: string, direction: 'asc' | 'desc') => void = () => {};
 
-	// Search mode (Radarr only)
-	export let searchMode: 'title' | 'customFormats' = 'title';
-	export let onSearchModeChange: (mode: 'title' | 'customFormats') => void = () => {};
-	export let cfTags: string[] = [];
-	export let onCfTagsChange: (tags: string[]) => void = () => {};
-
-	$: isRadarr = instanceType === 'radarr';
-	$: searchPlaceholder = isRadarr ? 'Search movies...' : 'Search series...';
-	$: openLabel = isRadarr ? 'Open in Radarr' : 'Open in Sonarr';
-	$: refreshTooltip = cacheAgeText ? `Refresh: Last updated ${cacheAgeText}` : 'Refresh library';
-	$: filterDescription = isRadarr
-		? 'Filter movies by quality or profile'
-		: 'Filter series by profile';
-
-	const searchModes = [
-		{ value: 'title' as const, label: 'Title' },
-		{ value: 'customFormats' as const, label: 'Custom Formats' }
+	const sortOptions = [
+		{ key: 'title', label: 'Title' },
+		{ key: 'size', label: 'Size' },
+		{ key: 'dateAdded', label: 'Date Added' },
+		{ key: 'year', label: 'Year' },
+		{ key: 'score', label: 'Score' }
 	];
 
-	$: searchModeIcon = searchMode === 'title' ? Type : Palette;
+	function handleSortClick(key: string) {
+		if (sortKey === key) {
+			const newDir = sortDirection === 'asc' ? 'desc' : 'asc';
+			onSort(key, newDir);
+		} else {
+			onSort(key, 'desc');
+		}
+	}
+
+	$: isRadarr = instanceType === 'radarr';
+	$: filterPlaceholder = isRadarr ? 'Filter movies...' : 'Filter series...';
+	$: openLabel = isRadarr ? 'Open in Radarr' : 'Open in Sonarr';
+	$: refreshTooltip = cacheAgeText ? `Refresh · ${cacheAgeText}` : 'Refresh';
+
+	let isMobile = false;
+	let mediaQuery: MediaQueryList | null = null;
+
+	onMount(() => {
+		if (typeof window !== 'undefined') {
+			mediaQuery = window.matchMedia('(max-width: 767px)');
+			isMobile = mediaQuery.matches;
+			mediaQuery.addEventListener('change', handleMediaChange);
+		}
+	});
+
+	onDestroy(() => {
+		if (mediaQuery) {
+			mediaQuery.removeEventListener('change', handleMediaChange);
+		}
+	});
+
+	function handleMediaChange(e: MediaQueryListEvent) {
+		isMobile = e.matches;
+	}
 </script>
 
 <ActionsBar>
-	{#if isRadarr}
-		<ActionButton icon={searchModeIcon} hasDropdown={true} dropdownPosition="left">
-			<svelte:fragment slot="dropdown" let:dropdownPosition>
-				<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="12rem">
-					<div class="py-1">
-						{#each searchModes as mode}
-							<button
-								type="button"
-								on:click={() => onSearchModeChange(mode.value)}
-								class="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700 {searchMode ===
-								mode.value
-									? 'bg-neutral-50 dark:bg-neutral-700'
-									: ''}"
-							>
-								<span class="text-neutral-700 dark:text-neutral-300">{mode.label}</span>
-								<IconCheckbox
-									checked={searchMode === mode.value}
-									icon={Check}
-									color="blue"
-									shape="circle"
-								/>
-							</button>
-						{/each}
-					</div>
-				</Dropdown>
-			</svelte:fragment>
-		</ActionButton>
-	{/if}
-	{#if searchMode === 'title' || !isRadarr}
-		<SearchAction {searchStore} placeholder={searchPlaceholder} responsive />
+	{#if isMobile}
+		<SearchAction {searchStore} placeholder={filterPlaceholder} responsive />
 	{:else}
-		<div class="flex-1">
-			<TagInput
-				tags={cfTags}
-				placeholder="Type a custom format name and press Enter..."
-				onchange={onCfTagsChange}
-			/>
-		</div>
+		<SmartFilterBar
+			{fields}
+			{items}
+			bind:tags
+			storageKey={filterStorageKey}
+			placeholder={filterPlaceholder}
+		/>
+		<Tooltip text="Filter help">
+			<ActionButton icon={Info} on:click={onFilterInfo} />
+		</Tooltip>
 	{/if}
-	<ActionButton icon={SlidersHorizontal} hasDropdown={true} dropdownPosition="right">
-		<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
-			<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="16rem">
-				<div class="border-b border-neutral-100 px-4 py-3 dark:border-neutral-700">
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
-						{filterDescription}
-					</p>
-				</div>
-				<div class="max-h-96 overflow-y-auto">
-					<!-- Quality Filter (Radarr only) -->
-					{#if isRadarr && uniqueQualities.length > 0}
-						<div class="border-b border-neutral-100 dark:border-neutral-700">
-							<div class="bg-neutral-50 px-3 py-2 dark:bg-neutral-800">
-								<span
-									class="text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400"
-									>Quality</span
-								>
-							</div>
-							{#each uniqueQualities as quality}
-								<button
-									type="button"
-									on:click={() => onToggleFilter('qualityName', 'eq', quality, quality)}
-									class="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700 {activeFilters.find(
-										(f) => f.field === 'qualityName' && f.value === quality
-									)
-										? 'bg-neutral-50 dark:bg-neutral-700'
-										: ''}"
-								>
-									<span class="text-neutral-700 dark:text-neutral-300">{quality}</span>
-									<IconCheckbox
-										checked={!!activeFilters.find(
-											(f) => f.field === 'qualityName' && f.value === quality
-										)}
-										icon={Check}
-										color="blue"
-										shape="circle"
-									/>
-								</button>
-							{/each}
-						</div>
-					{/if}
-
-					<!-- Profile Filter -->
-					<div>
-						<div class="bg-neutral-50 px-3 py-2 dark:bg-neutral-800">
-							<span
-								class="text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400"
-								>Profile</span
-							>
-						</div>
-						{#each uniqueProfiles as profile}
-							<button
-								type="button"
-								on:click={() => onToggleFilter('qualityProfileName', 'eq', profile, profile)}
-								class="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700 {activeFilters.find(
-									(f) => f.field === 'qualityProfileName' && f.value === profile
-								)
-									? 'bg-neutral-50 dark:bg-neutral-700'
-									: ''}"
-							>
-								<span class="text-neutral-700 dark:text-neutral-300">{profile}</span>
-								<IconCheckbox
-									checked={!!activeFilters.find(
-										(f) => f.field === 'qualityProfileName' && f.value === profile
-									)}
-									icon={Check}
-									color="blue"
-									shape="circle"
-								/>
-							</button>
-						{/each}
-					</div>
-				</div>
-			</Dropdown>
-		</svelte:fragment>
-	</ActionButton>
-	<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
-		<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
-			<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="14rem">
-				<div class="border-b border-neutral-100 px-4 py-3 dark:border-neutral-700">
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">Toggle visible table columns</p>
-				</div>
-				<div class="py-1">
-					{#each toggleableColumns as colKey}
-						<button
-							type="button"
-							on:click={() => onToggleColumn(colKey)}
-							class="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700 {visibleColumns.has(
-								colKey
-							)
-								? 'bg-neutral-50 dark:bg-neutral-700'
-								: ''}"
-						>
-							<span class="text-neutral-700 dark:text-neutral-300">{columnLabels[colKey]}</span>
-							<IconCheckbox
-								checked={visibleColumns.has(colKey)}
-								icon={Check}
-								color="blue"
-								shape="circle"
-							/>
-						</button>
-					{/each}
-				</div>
-			</Dropdown>
-		</svelte:fragment>
-	</ActionButton>
 	<Tooltip text={refreshTooltip}>
 		<ActionButton
 			icon={RefreshCw}
@@ -226,4 +120,58 @@
 	<Tooltip text={openLabel}>
 		<ActionButton icon={ExternalLink} on:click={onOpen} />
 	</Tooltip>
+	{#if viewMode === 'cards'}
+		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
+			<svelte:fragment slot="dropdown" let:dropdownPosition>
+				<Dropdown position={dropdownPosition} minWidth="14rem">
+					<DropdownHeader label="Toggle fields" />
+					{#each toggleableCardFields as fieldKey}
+						<DropdownItem
+							label={cardFieldLabels[fieldKey]}
+							selected={visibleCardFields.has(fieldKey)}
+							on:click={() => onToggleCardField(fieldKey)}
+						/>
+					{/each}
+				</Dropdown>
+			</svelte:fragment>
+		</ActionButton>
+		<ActionButton icon={ArrowUpDown} hasDropdown={true} dropdownPosition="right">
+			<svelte:fragment slot="dropdown" let:dropdownPosition>
+				<Dropdown position={dropdownPosition} minWidth="12rem">
+					<DropdownHeader label="Sort by" />
+					{#each sortOptions as option}
+						<DropdownItem
+							label={option.label}
+							selected={sortKey === option.key}
+							checkIcon={sortDirection === 'asc' ? ArrowUp : ArrowDown}
+							on:click={() => handleSortClick(option.key)}
+						/>
+					{/each}
+				</Dropdown>
+			</svelte:fragment>
+		</ActionButton>
+	{/if}
+	{#if viewMode === 'table'}
+		<Tooltip text={expandAll ? 'Collapse all rows' : 'Expand all rows'}>
+			<ActionButton
+				icon={expandAll ? ChevronsDownUp : ChevronsUpDown}
+				on:click={onToggleExpandAll}
+			/>
+		</Tooltip>
+		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
+			<svelte:fragment slot="dropdown" let:dropdownPosition>
+				<Dropdown position={dropdownPosition} minWidth="14rem">
+					<DropdownHeader label="Toggle columns" />
+					{#each toggleableColumns as colKey}
+						<DropdownItem
+							label={columnLabels[colKey]}
+							selected={visibleColumns.has(colKey)}
+							on:click={() => onToggleColumn(colKey)}
+						/>
+					{/each}
+				</Dropdown>
+			</svelte:fragment>
+		</ActionButton>
+	{/if}
+	<ViewToggle bind:value={viewMode} />
 </ActionsBar>
