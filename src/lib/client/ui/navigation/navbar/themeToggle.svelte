@@ -6,6 +6,7 @@
 </script>
 
 <button
+	data-onboarding="theme-toggle"
 	on:click={() => themeStore.toggle()}
 	class="relative flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
 	aria-label="Toggle theme"

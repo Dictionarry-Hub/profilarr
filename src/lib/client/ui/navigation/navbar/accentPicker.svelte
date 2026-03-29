@@ -23,7 +23,7 @@
 
 <svelte:window on:click={handleClickOutside} />
 
-<div class="accent-picker relative">
+<div class="accent-picker relative" data-onboarding="accent-picker">
 	<button
 		bind:this={triggerEl}
 		on:click|stopPropagation={() => (open = !open)}

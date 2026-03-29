@@ -10,7 +10,15 @@ export interface Step {
 	target?: string;
 	title: string;
 	body: string;
-	position?: 'above' | 'below' | 'left' | 'right' | 'above-left' | 'above-right';
+	position?:
+		| 'above'
+		| 'below'
+		| 'left'
+		| 'right'
+		| 'above-left'
+		| 'above-right'
+		| 'below-left'
+		| 'below-right';
 	completion: Completion;
 }
 

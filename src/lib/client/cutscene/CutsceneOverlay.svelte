@@ -86,13 +86,24 @@
 
 	// Track step changes to avoid reactive loops
 	let lastStepId: string | null = null;
+	let cardReady = false;
 
 	$: if (step && step.id !== lastStepId && typeof window !== 'undefined') {
 		lastStepId = step.id;
+		cardReady = false;
 		teardownCompletion();
 		setupCompletion(step, () => cutscene.advance());
 		tick().then(() => {
-			requestAnimationFrame(findTarget);
+			requestAnimationFrame(() => {
+				findTarget();
+				// Brief delay so card appears after modal fades and spotlight settles
+				setTimeout(
+					() => {
+						cardReady = true;
+					},
+					animating ? 0 : 200
+				);
+			});
 		});
 	} else if (!step) {
 		lastStepId = null;
@@ -163,6 +174,10 @@
 				return `position: fixed; bottom: ${windowHeight - rect.top + gap + PAD}px; right: ${windowWidth - rect.right + gap + PAD}px;`;
 			case 'above-right':
 				return `position: fixed; bottom: ${windowHeight - rect.top + gap + PAD}px; left: ${rect.left - gap - PAD}px;`;
+			case 'below-left':
+				return `position: fixed; top: ${rect.bottom + gap + PAD}px; right: ${windowWidth - rect.right}px;`;
+			case 'below-right':
+				return `position: fixed; top: ${rect.bottom + gap + PAD}px; left: ${rect.right + gap}px;`;
 			default:
 				return `position: fixed; top: ${rect.bottom + gap + PAD}px; left: ${rect.left + rect.width / 2}px; transform: translateX(-50%);`;
 		}
@@ -217,11 +232,13 @@
 			/>
 		</svg>
 
-		<!-- Click-blocking overlay with hole for cutout -->
-		<div class="absolute inset-0" style="pointer-events: auto; clip-path: {clipPath};"></div>
+		<!-- Click-blocking overlay with hole for cutout (disabled for manual steps so users can interact freely) -->
+		{#if step.completion.type !== 'manual'}
+			<div class="absolute inset-0" style="pointer-events: auto; clip-path: {clipPath};"></div>
+		{/if}
 
 		<!-- Instruction card (waits for spotlight animation) -->
-		{#if !animating}
+		{#if !animating && cardReady}
 			<div
 				class="max-w-sm"
 				style="{cardStyle} pointer-events: auto; z-index: 1;"
