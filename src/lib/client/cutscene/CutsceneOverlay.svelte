@@ -233,7 +233,7 @@
 		</svg>
 
 		<!-- Click-blocking overlay with hole for cutout (disabled for manual steps so users can interact freely) -->
-		{#if step.completion.type !== 'manual'}
+		{#if !step.freeInteract}
 			<div class="absolute inset-0" style="pointer-events: auto; clip-path: {clipPath};"></div>
 		{/if}
 

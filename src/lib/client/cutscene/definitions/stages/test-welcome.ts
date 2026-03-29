@@ -27,6 +27,7 @@ export const testWelcomeStage: Stage = {
 			title: 'Accent Color',
 			body: 'Pick a color that suits you. Click to open the picker, then choose one you like.',
 			position: 'below-right',
+			freeInteract: true,
 			completion: { type: 'manual' }
 		},
 		{
