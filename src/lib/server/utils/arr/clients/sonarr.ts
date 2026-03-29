@@ -95,7 +95,9 @@ export class SonarrClient extends BaseArrClient {
 			return {
 				id: series.id,
 				tvdbId: series.tvdbId,
+				imdbId: series.imdbId,
 				title: series.title,
+				titleSlug: series.titleSlug,
 				year: series.year,
 				qualityProfileId: series.qualityProfileId,
 				qualityProfileName: profileName,
@@ -117,7 +119,17 @@ export class SonarrClient extends BaseArrClient {
 					sizeOnDisk: s.statistics.sizeOnDisk,
 					percentOfEpisodes: s.statistics.percentOfEpisodes
 				})),
-				isProfilarrProfile: profilarrProfileNames?.has(profileName) ?? false
+				isProfilarrProfile: profilarrProfileNames?.has(profileName) ?? false,
+				network: series.network,
+				seriesType: series.seriesType,
+				certification: series.certification,
+				genres: series.genres,
+				runtime: series.runtime,
+				ratings: series.ratings,
+				images: series.images,
+				originalLanguage: series.originalLanguage,
+				firstAired: series.firstAired,
+				lastAired: series.lastAired
 			};
 		});
 	}
@@ -167,7 +179,21 @@ export class SonarrClient extends BaseArrClient {
 				scoreBreakdown,
 				cutoffScore,
 				progress,
-				cutoffMet: file ? !file.qualityCutoffNotMet : false
+				cutoffMet: file ? !file.qualityCutoffNotMet : false,
+				releaseGroup: file?.releaseGroup,
+				languages: file?.languages,
+				mediaInfo: file?.mediaInfo
+					? {
+							audioCodec: file.mediaInfo.audioCodec,
+							audioChannels: file.mediaInfo.audioChannels,
+							videoCodec: file.mediaInfo.videoCodec,
+							videoBitDepth: file.mediaInfo.videoBitDepth,
+							videoDynamicRange: file.mediaInfo.videoDynamicRange,
+							videoDynamicRangeType: file.mediaInfo.videoDynamicRangeType,
+							resolution: file.mediaInfo.resolution,
+							subtitles: file.mediaInfo.subtitles
+						}
+					: undefined
 			};
 		});
 	}
