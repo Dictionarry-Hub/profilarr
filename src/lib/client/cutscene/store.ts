@@ -172,6 +172,15 @@ function createCutsceneStore() {
 		}
 	}
 
+	function cancel(): void {
+		const current = loadState();
+		clearState();
+		if (current.manualStart) {
+			justCompleted.set(true);
+		}
+		state.set(DEFAULT_STATE);
+	}
+
 	function reset(): void {
 		clearState();
 		state.set(DEFAULT_STATE);
@@ -192,6 +201,7 @@ function createCutsceneStore() {
 		startPipeline,
 		startStage,
 		advance,
+		cancel,
 		dismiss,
 		dismissCompleted,
 		reset

@@ -197,6 +197,17 @@
 		cutscene.advance();
 	}
 
+	function handleCancel(): void {
+		teardownCompletion();
+		cutscene.cancel();
+	}
+
+	function handleKeydown(e: KeyboardEvent): void {
+		if (e.key === 'Escape' && active) {
+			handleCancel();
+		}
+	}
+
 	onDestroy(() => {
 		teardownCompletion();
 		observer?.disconnect();
@@ -207,7 +218,11 @@
 	});
 </script>
 
-<svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
+<svelte:window
+	bind:innerWidth={windowWidth}
+	bind:innerHeight={windowHeight}
+	on:keydown={handleKeydown}
+/>
 
 {#if active && step}
 	<div
@@ -260,6 +275,7 @@
 					body={step.body}
 					showContinue={step.completion.type === 'manual'}
 					onContinue={handleContinue}
+					onCancel={handleCancel}
 				/>
 			</div>
 		{/if}
