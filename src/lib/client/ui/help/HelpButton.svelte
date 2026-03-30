@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { Bug, Bird, Lightbulb, RotateCcw } from 'lucide-svelte';
+	import { Bug, Bird, Lightbulb, GraduationCap } from 'lucide-svelte';
 	import { fly } from 'svelte/transition';
-	import { cutscene } from '$lib/client/cutscene/store';
 	import { FEATURES } from '$lib/shared/features';
 	import { dev } from '$app/environment';
 
@@ -102,17 +101,14 @@
 					<span>Request a Feature</span>
 				</a>
 				{#if cutsceneEnabled}
-					<button
+					<a
+						href="/onboarding"
 						class="flex w-full items-center gap-3 px-3 py-2 text-left text-neutral-700 transition-colors hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700"
-						on:click={() => {
-							close();
-							cutscene.reset();
-							cutscene.startPipeline('getting-started');
-						}}
+						on:click={close}
 					>
-						<RotateCcw size={16} />
-						<span>Restart Tour</span>
-					</button>
+						<GraduationCap size={16} />
+						<span>Onboarding</span>
+					</a>
 				{/if}
 				{#if isFab}
 					<div class="border-t border-neutral-200/50 px-3 py-2 dark:border-neutral-700/40">
@@ -133,12 +129,12 @@
 		{#if isFab}
 			<span class="nav-icon-emoji text-2xl select-none" class:squawk={open}>🦜</span>
 			<span class="nav-icon-lucide text-neutral-700 dark:text-neutral-200" class:squawk={open}>
-				<Bird size={24} />
+				<Bird size={24} class="-scale-x-100" />
 			</span>
 		{:else}
 			<span class="nav-icon-emoji text-lg" class:squawk={open}>🦜</span>
 			<span class="nav-icon-lucide" class:squawk={open}>
-				<Bird class="h-[18px] w-[18px] text-neutral-700 dark:text-neutral-300" />
+				<Bird class="h-[18px] w-[18px] -scale-x-100 text-neutral-700 dark:text-neutral-300" />
 			</span>
 		{/if}
 	</button>
