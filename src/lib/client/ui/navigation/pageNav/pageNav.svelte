@@ -102,6 +102,7 @@
 			icon={Link}
 			hasItems={arrInstances.length > 0}
 			initialOpen={true}
+			onboardingId="nav-arrs"
 		>
 			{#each arrInstances as instance (instance.id)}
 				<GroupItem
@@ -120,6 +121,7 @@
 			icon={Sliders}
 			initialOpen={true}
 			hasItems={parserAvailable}
+			onboardingId="nav-quality-profiles"
 		>
 			{#if parserAvailable}
 				<GroupItem label="Testing" href="/quality-profiles/entity-testing" />
@@ -132,6 +134,7 @@
 			href="/custom-formats"
 			icon={Palette}
 			initialOpen={false}
+			onboardingId="nav-custom-formats"
 		/>
 
 		<Group
@@ -140,6 +143,7 @@
 			href="/regular-expressions"
 			icon={Microscope}
 			initialOpen={false}
+			onboardingId="nav-regex"
 		/>
 
 		<Group
@@ -149,6 +153,7 @@
 			icon={Tag}
 			initialOpen={true}
 			hasItems={true}
+			onboardingId="nav-media-management"
 		>
 			<GroupItem
 				label="Naming Settings"
@@ -173,6 +178,7 @@
 			href="/delay-profiles"
 			icon={Clock}
 			initialOpen={false}
+			onboardingId="nav-delay-profiles"
 		/>
 
 		<Group
@@ -182,6 +188,7 @@
 			icon={Settings}
 			initialOpen={true}
 			hasItems={true}
+			onboardingId="nav-settings"
 		>
 			<GroupItem label="General" href="/settings/general" />
 			<GroupItem label="Jobs" href="/settings/jobs" />
