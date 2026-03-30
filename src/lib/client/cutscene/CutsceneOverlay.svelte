@@ -4,6 +4,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import { cutscene } from './store';
 	import { setupCompletion, teardownCompletion } from './completions.ts';
+	import { STAGES, PIPELINES } from './definitions/index.ts';
 	import CutsceneCard from './CutsceneCard.svelte';
 
 	let targetRect: DOMRect | null = null;
@@ -15,6 +16,32 @@
 	$: state = $cutscene;
 	$: step = $currentStep;
 	$: active = state.active;
+
+	// Compute overall progress across pipeline or single stage
+	$: progressInfo = (() => {
+		if (!state.active || !state.stageId) return { current: 0, total: 0 };
+
+		if (state.pipelineId) {
+			const pipeline = PIPELINES[state.pipelineId];
+			if (!pipeline) return { current: 0, total: 0 };
+
+			let total = 0;
+			let current = 0;
+			for (const sid of pipeline.stages) {
+				const s = STAGES[sid];
+				if (!s) continue;
+				if (sid === state.stageId) {
+					current = total + state.stepIndex;
+				}
+				total += s.steps.length;
+			}
+			return { current, total };
+		}
+
+		const stage = STAGES[state.stageId];
+		if (!stage) return { current: 0, total: 0 };
+		return { current: state.stepIndex, total: stage.steps.length };
+	})();
 
 	// Padding around the spotlight cutout
 	const PAD = 8;
@@ -149,7 +176,7 @@
 	// Use animated rect for visuals, real rect for card positioning
 	$: spotlightRect = animatedRect;
 
-	// Compute clip-path for click-blocking overlay
+	// Compute clip-path for click-blocking overlay (with rounded hole)
 	$: clipPath = computeClipPath(targetRect);
 
 	function computeClipPath(rect: DOMRect | null): string {
@@ -158,7 +185,11 @@
 		const t = rect.top - PAD;
 		const r = rect.right + PAD;
 		const b = rect.bottom + PAD;
-		return `polygon(0% 0%, 0% 100%, ${l}px 100%, ${l}px ${t}px, ${r}px ${t}px, ${r}px ${b}px, ${l}px ${b}px, ${l}px 100%, 100% 100%, 100% 0%)`;
+		const R = RADIUS;
+		// SVG path: outer rect (full viewport) + inner rounded rect (cutout, counter-clockwise for evenodd)
+		const outer = `M0,0 H${windowWidth} V${windowHeight} H0 Z`;
+		const inner = `M${l + R},${t} H${r - R} Q${r},${t} ${r},${t + R} V${b - R} Q${r},${b} ${r - R},${b} H${l + R} Q${l},${b} ${l},${b - R} V${t + R} Q${l},${t} ${l + R},${t} Z`;
+		return `path(evenodd, "${outer} ${inner}")`;
 	}
 
 	// Compute instruction card position
@@ -276,6 +307,8 @@
 					showContinue={step.completion.type === 'manual'}
 					onContinue={handleContinue}
 					onCancel={handleCancel}
+					currentStep={progressInfo.current}
+					totalSteps={progressInfo.total}
 				/>
 			</div>
 		{/if}
