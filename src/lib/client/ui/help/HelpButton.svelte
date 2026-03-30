@@ -100,7 +100,7 @@
 					<Lightbulb size={16} />
 					<span>Request a Feature</span>
 				</a>
-				{#if cutsceneEnabled}
+				{#if cutsceneEnabled && isFab}
 					<a
 						href="/onboarding"
 						class="flex w-full items-center gap-3 px-3 py-2 text-left text-neutral-700 transition-colors hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700"

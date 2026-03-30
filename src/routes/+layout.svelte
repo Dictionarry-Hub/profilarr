@@ -23,6 +23,9 @@
 
 	$: cutsceneEnabled = FEATURES.cutscene || dev;
 
+	let innerWidth = 0;
+	$: isDesktop = innerWidth >= 768;
+
 	onMount(() => {
 		if (!isAuthPage) jobStatus.connect();
 		if (!isAuthPage && cutsceneEnabled) cutscene.init(data.onboardingShown);
@@ -32,6 +35,8 @@
 		jobStatus.disconnect();
 	});
 </script>
+
+<svelte:window bind:innerWidth />
 
 <svelte:head>
 	<link rel="icon" href={logo} />
@@ -48,7 +53,7 @@
 	/>
 	<BottomNav />
 	<HelpButton />
-	{#if cutsceneEnabled}
+	{#if cutsceneEnabled && isDesktop}
 		<CutsceneOverlay />
 		<CutscenePrompt />
 		<CutsceneComplete />
