@@ -12,7 +12,7 @@
 
 	function start(): void {
 		cutscene.dismiss();
-		cutscene.startPipeline('getting-started');
+		cutscene.startPipeline('getting-started', false);
 	}
 
 	function skip(): void {

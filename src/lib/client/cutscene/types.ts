@@ -43,4 +43,5 @@ export interface CutsceneState {
 	stageId: string | null;
 	stepIndex: number;
 	completedStages: string[];
+	manualStart: boolean;
 }

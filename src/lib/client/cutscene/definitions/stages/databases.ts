@@ -1,18 +1,10 @@
 import type { Stage } from '../../types.ts';
 
-export const testWelcomeStage: Stage = {
-	id: 'test-welcome',
-	name: 'Welcome Tour',
-	description: 'A quick intro to the Profilarr interface',
+export const databasesStage: Stage = {
+	id: 'databases',
+	name: 'Databases',
+	description: 'Learn how to link a configuration database',
 	steps: [
-		{
-			id: 'sidebar-nav',
-			target: 'sidebar',
-			title: 'Navigation',
-			body: 'This is your main navigation. Use it to access different sections of the app.',
-			position: 'right',
-			completion: { type: 'manual' }
-		},
 		{
 			id: 'databases-explain',
 			target: 'nav-databases',
@@ -61,31 +53,6 @@ export const testWelcomeStage: Stage = {
 			body: 'This controls how often Profilarr checks the remote repository for new updates, and whether those updates should be pulled in automatically or just trigger a notification so you can review them first.',
 			position: 'above',
 			completion: { type: 'manual' }
-		},
-		{
-			id: 'theme-toggle',
-			target: 'theme-toggle',
-			title: 'Theme',
-			body: 'Click this to toggle between light and dark mode. Try it out, then continue.',
-			position: 'below',
-			completion: { type: 'manual' }
-		},
-		{
-			id: 'accent-picker',
-			target: 'accent-picker',
-			title: 'Accent Color',
-			body: 'Pick a color that suits you. Click to open the picker, then choose one you like.',
-			position: 'below-right',
-			freeInteract: true,
-			completion: { type: 'manual' }
-		},
-		{
-			id: 'help-button',
-			target: 'help-button',
-			title: 'Need Help?',
-			body: 'This is your help button. Click it now to try it out!',
-			position: 'above-left',
-			completion: { type: 'click' }
 		}
 	]
 };
