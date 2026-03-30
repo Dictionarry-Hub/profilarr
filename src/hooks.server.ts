@@ -109,19 +109,27 @@ if (!isReload) {
  * Handles authentication, authorization, and session management
  */
 export const handle: Handle = async ({ event, resolve }) => {
+	// Strip Link preload headers from all responses to keep response headers
+	// small enough for reverse proxies with default buffer sizes.
+	async function resolveAndStrip(): Promise<Response> {
+		const response = await resolve(event);
+		response.headers.delete('link');
+		return response;
+	}
+
 	const auth = await getAuthState(event);
 
 	// First-run setup flow (applies to all auth modes except AUTH=off)
 	if (auth.needsSetup) {
 		if (event.url.pathname === '/auth/setup') {
-			return resolve(event);
+			return resolveAndStrip();
 		}
 		throw redirect(303, '/auth/setup');
 	}
 
 	// AUTH=off or local bypass with local IP - skip auth after setup
 	if (auth.skipAuth) {
-		return resolve(event);
+		return resolveAndStrip();
 	}
 
 	// Block setup page after user exists
@@ -131,7 +139,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	// Public paths don't need auth
 	if (isPublicPath(event.url.pathname)) {
-		return resolve(event);
+		return resolveAndStrip();
 	}
 
 	// API key auth is scoped to /api/ paths only (excluding /api/internal/ when it exists).
@@ -168,7 +176,5 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.user = auth.user;
 	event.locals.session = auth.session;
 
-	const response = await resolve(event);
-	response.headers.delete('link');
-	return response;
+	return resolveAndStrip();
 };
