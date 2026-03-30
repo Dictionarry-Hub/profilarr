@@ -88,6 +88,7 @@
 			icon={FolderTree}
 			hasItems={databases.length > 0}
 			initialOpen={true}
+			onboardingId="nav-databases"
 		>
 			{#each databases as db (db.id)}
 				<GroupItem label={db.name} href="/databases/{db.id}" />

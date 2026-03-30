@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onDestroy, tick } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
 	import { cutscene } from './store';
 	import { setupCompletion, teardownCompletion } from './completions.ts';
@@ -93,18 +93,28 @@
 		cardReady = false;
 		teardownCompletion();
 		setupCompletion(step, () => cutscene.advance());
-		tick().then(() => {
-			requestAnimationFrame(() => {
-				findTarget();
-				// Brief delay so card appears after modal fades and spotlight settles
-				setTimeout(
-					() => {
-						cardReady = true;
-					},
-					animating ? 0 : 200
-				);
+
+		// Navigate if step requires a specific route
+		const needsNav = step.route && window.location.pathname !== step.route;
+		const afterNav = () => {
+			tick().then(() => {
+				requestAnimationFrame(() => {
+					findTarget();
+					setTimeout(
+						() => {
+							cardReady = true;
+						},
+						animating ? 0 : 200
+					);
+				});
 			});
-		});
+		};
+
+		if (needsNav) {
+			goto(step.route!).then(afterNav);
+		} else {
+			afterNav();
+		}
 	} else if (!step) {
 		lastStepId = null;
 	}

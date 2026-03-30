@@ -9,6 +9,7 @@
 	export let emoji: string | undefined = undefined;
 	export let initialOpen: boolean = true;
 	export let hasItems: boolean = false;
+	export let onboardingId: string | undefined = undefined;
 
 	let isOpen = initialOpen;
 
@@ -17,7 +18,7 @@
 	}
 </script>
 
-<div class="mb-4">
+<div class="mb-4" data-onboarding={onboardingId}>
 	<GroupHeader {label} {href} {icon} {emoji} {isOpen} {hasItems} onToggle={toggleOpen} />
 
 	{#if isOpen && hasItems}

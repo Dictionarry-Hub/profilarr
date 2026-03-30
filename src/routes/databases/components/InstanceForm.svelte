@@ -167,160 +167,164 @@
 
 <div class="space-y-6" class:mt-6={mode === 'edit'}>
 	<!-- Header -->
-	<StickyCard position="top">
-		<svelte:fragment slot="left">
-			{#if mode === 'edit'}
-				<div class="flex items-center gap-3">
-					{#if repoInfo}
-						<img src={repoInfo.ownerAvatarUrl} alt={repoInfo.owner} class="h-8 w-8 rounded-lg" />
-						<div class="flex flex-col gap-1">
-							<code
-								class="text-sm text-neutral-700 dark:text-neutral-300"
-								style="font-family: var(--font-code)"
-							>
-								{repoInfo.owner}/{repoInfo.repo}
-							</code>
-							<div class="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
-								{#if currentBranch}
-									<span class="flex items-center gap-1">
-										<GitBranch size={12} />
-										<code style="font-family: var(--font-code)">{currentBranch}</code>
-									</span>
-								{/if}
-								<span class="flex items-center gap-1">
-									<Star size={12} />
-									<code style="font-family: var(--font-code)"
-										>{repoInfo.stars.toLocaleString()}</code
-									>
-								</span>
-								<span class="flex items-center gap-1">
-									<GitFork size={12} />
-									<code style="font-family: var(--font-code)"
-										>{repoInfo.forks.toLocaleString()}</code
-									>
-								</span>
-								<span class="flex items-center gap-1">
-									<CircleDot size={12} />
-									<code style="font-family: var(--font-code)"
-										>{repoInfo.openIssues.toLocaleString()}</code
-									>
-								</span>
-							</div>
-						</div>
-					{:else}
-						<div
-							class="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-700"
-						>
-							<Database size={16} class="text-neutral-500 dark:text-neutral-400" />
-						</div>
-						<div class="flex flex-col gap-1">
-							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-								{instance?.name ?? 'Database'}
-							</span>
-							{#if instance?.repository_url}
-								<code class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
-									{instance.repository_url.replace('https://github.com/', '')}
+	<div data-onboarding="db-header">
+		<StickyCard position="top">
+			<svelte:fragment slot="left">
+				{#if mode === 'edit'}
+					<div class="flex items-center gap-3">
+						{#if repoInfo}
+							<img src={repoInfo.ownerAvatarUrl} alt={repoInfo.owner} class="h-8 w-8 rounded-lg" />
+							<div class="flex flex-col gap-1">
+								<code
+									class="text-sm text-neutral-700 dark:text-neutral-300"
+									style="font-family: var(--font-code)"
+								>
+									{repoInfo.owner}/{repoInfo.repo}
 								</code>
-							{/if}
-						</div>
-					{/if}
-				</div>
-			{:else}
-				<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
-				<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
-			{/if}
-		</svelte:fragment>
-		<svelte:fragment slot="right">
-			{#if mode === 'edit'}
+								<div class="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
+									{#if currentBranch}
+										<span class="flex items-center gap-1">
+											<GitBranch size={12} />
+											<code style="font-family: var(--font-code)">{currentBranch}</code>
+										</span>
+									{/if}
+									<span class="flex items-center gap-1">
+										<Star size={12} />
+										<code style="font-family: var(--font-code)"
+											>{repoInfo.stars.toLocaleString()}</code
+										>
+									</span>
+									<span class="flex items-center gap-1">
+										<GitFork size={12} />
+										<code style="font-family: var(--font-code)"
+											>{repoInfo.forks.toLocaleString()}</code
+										>
+									</span>
+									<span class="flex items-center gap-1">
+										<CircleDot size={12} />
+										<code style="font-family: var(--font-code)"
+											>{repoInfo.openIssues.toLocaleString()}</code
+										>
+									</span>
+								</div>
+							</div>
+						{:else}
+							<div
+								class="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-700"
+							>
+								<Database size={16} class="text-neutral-500 dark:text-neutral-400" />
+							</div>
+							<div class="flex flex-col gap-1">
+								<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+									{instance?.name ?? 'Database'}
+								</span>
+								{#if instance?.repository_url}
+									<code class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+										{instance.repository_url.replace('https://github.com/', '')}
+									</code>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				{:else}
+					<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
+					<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
+				{/if}
+			</svelte:fragment>
+			<svelte:fragment slot="right">
+				{#if mode === 'edit'}
+					<Button
+						text="Unlink"
+						icon={Trash2}
+						iconColor="text-red-600 dark:text-red-400"
+						disabled={saving || deleting}
+						on:click={() => (showDeleteModal = true)}
+					/>
+				{/if}
 				<Button
-					text="Unlink"
-					icon={Trash2}
-					iconColor="text-red-600 dark:text-red-400"
-					disabled={saving || deleting}
-					on:click={() => (showDeleteModal = true)}
+					text={saving ? 'Saving...' : 'Save'}
+					icon={Save}
+					iconColor="text-blue-600 dark:text-blue-400"
+					disabled={saving || !canSubmit}
+					on:click={handleSave}
 				/>
-			{/if}
-			<Button
-				text={saving ? 'Saving...' : 'Save'}
-				icon={Save}
-				iconColor="text-blue-600 dark:text-blue-400"
-				disabled={saving || !canSubmit}
-				on:click={handleSave}
-			/>
-			{#if mode === 'edit'}
-				<Button
-					href={repoInfo?.htmlUrl ?? instance?.repository_url}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="14"
-						height="14"
-						viewBox="0 0 24 24"
-						fill="currentColor"
+				{#if mode === 'edit'}
+					<Button
+						href={repoInfo?.htmlUrl ?? instance?.repository_url}
+						target="_blank"
+						rel="noopener noreferrer"
 					>
-						<path d={siGithub.path} />
-					</svg>
-					GitHub
-				</Button>
-			{/if}
-		</svelte:fragment>
-	</StickyCard>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="14"
+							height="14"
+							viewBox="0 0 24 24"
+							fill="currentColor"
+						>
+							<path d={siGithub.path} />
+						</svg>
+						GitHub
+					</Button>
+				{/if}
+			</svelte:fragment>
+		</StickyCard>
+	</div>
 
 	<div
 		class="space-y-4 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
 	>
-		<!-- Name Row -->
-		<FormInput
-			label="Name"
-			name="name"
-			value={name}
-			placeholder="e.g., Main Database, 4K Profiles"
-			description="A friendly name to identify this database"
-			required
-			on:input={(e) => update('name', e.detail)}
-		/>
-
-		<!-- Repository URL Row -->
-		<FormInput
-			label="Repository URL"
-			name="repository_url"
-			type="url"
-			value={repositoryUrl}
-			placeholder="https://github.com/username/database"
-			description={mode === 'edit'
-				? 'Repository URL cannot be changed after linking'
-				: 'Git repository URL containing the PCD manifest'}
-			required
-			readonly={mode === 'edit'}
-			on:input={(e) => update('repositoryUrl', e.detail)}
-		/>
-
-		<!-- Branch Row (create mode only) -->
-		{#if mode === 'create'}
+		<!-- Name, Repository URL, Branch -->
+		<div data-onboarding="db-name-repo-branch" class="space-y-4">
 			<FormInput
-				label="Branch"
-				name="branch"
-				value={branch}
-				placeholder="main"
-				description="Branch to checkout on link. Cannot be changed after linking. Leave empty for the default branch."
-				on:input={(e) => update('branch', e.detail)}
+				label="Name"
+				name="name"
+				value={name}
+				placeholder="e.g., Main Database, 4K Profiles"
+				description="A friendly name to identify this database"
+				required
+				on:input={(e) => update('name', e.detail)}
 			/>
-		{/if}
+
+			<FormInput
+				label="Repository URL"
+				name="repository_url"
+				type="url"
+				value={repositoryUrl}
+				placeholder="https://github.com/username/database"
+				description={mode === 'edit'
+					? 'Repository URL cannot be changed after linking'
+					: 'Git repository URL containing the PCD manifest'}
+				required
+				readonly={mode === 'edit'}
+				on:input={(e) => update('repositoryUrl', e.detail)}
+			/>
+
+			{#if mode === 'create'}
+				<FormInput
+					label="Branch"
+					name="branch"
+					value={branch}
+					placeholder="main"
+					description="Branch to checkout on link. Cannot be changed after linking. Leave empty for the default branch."
+					on:input={(e) => update('branch', e.detail)}
+				/>
+			{/if}
+		</div>
 
 		<!-- Personal Access Token Row -->
-		<FormInput
-			label="Personal Access Token"
-			name="personal_access_token"
-			value={personalAccessToken}
-			placeholder="ghp_..."
-			description={mode === 'edit'
-				? 'Re-enter to update. Required for private repos and to push changes.'
-				: 'Required for private repositories and to push changes back to GitHub.'}
-			private_
-			on:input={(e) => update('personalAccessToken', e.detail)}
-		/>
+		<div data-onboarding="db-pat">
+			<FormInput
+				label="Personal Access Token"
+				name="personal_access_token"
+				value={personalAccessToken}
+				placeholder="ghp_..."
+				description={mode === 'edit'
+					? 'Re-enter to update. Required for private repos and to push changes.'
+					: 'Required for private repositories and to push changes back to GitHub.'}
+				private_
+				on:input={(e) => update('personalAccessToken', e.detail)}
+			/>
+		</div>
 
 		<!-- Git Author Identity -->
 		{#if showGitIdentity}
@@ -365,7 +369,7 @@
 
 		<!-- Conflict Strategy Row -->
 		{#if !showGitIdentity || localOpsEnabled === 'true'}
-			<div class="space-y-2">
+			<div data-onboarding="db-conflict" class="space-y-2">
 				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
 					Conflict Strategy
 				</span>
@@ -395,42 +399,43 @@
 			</div>
 		{/if}
 
-		<!-- Sync Strategy Row -->
-		<div class="space-y-2">
-			<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-				Sync Strategy
-			</span>
-			<p class="text-xs text-neutral-500 dark:text-neutral-400">
-				How often to check for updates from the remote repository
-			</p>
-			<DropdownSelect
-				value={syncStrategy}
-				options={syncStrategyOptions}
-				fullWidth
-				on:change={(e) => update('syncStrategy', e.detail)}
-			/>
-		</div>
+		<!-- Sync Strategy & Auto Pull -->
+		<div data-onboarding="db-sync" class="space-y-4">
+			<div class="space-y-2">
+				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Sync Strategy
+				</span>
+				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+					How often to check for updates from the remote repository
+				</p>
+				<DropdownSelect
+					value={syncStrategy}
+					options={syncStrategyOptions}
+					fullWidth
+					on:change={(e) => update('syncStrategy', e.detail)}
+				/>
+			</div>
 
-		<!-- Auto Pull Row -->
-		<div class="space-y-2">
-			<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-				Auto Pull
-			</span>
-			<p class="text-xs text-neutral-500 dark:text-neutral-400">
-				Automatically pull updates when available, or just receive notifications
-			</p>
-			<DropdownSelect
-				value={autoPull}
-				options={autoPullOptions}
-				on:change={(e) => update('autoPull', e.detail)}
-			/>
+			<div class="space-y-2">
+				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Auto Pull
+				</span>
+				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+					Automatically pull updates when available, or just receive notifications
+				</p>
+				<DropdownSelect
+					value={autoPull}
+					options={autoPullOptions}
+					on:change={(e) => update('autoPull', e.detail)}
+				/>
+			</div>
+			{#if autoPull === 'false'}
+				<p class="text-xs text-amber-600 dark:text-amber-400">
+					You will receive notifications when updates are available but they won't be applied
+					automatically
+				</p>
+			{/if}
 		</div>
-		{#if autoPull === 'false'}
-			<p class="text-xs text-amber-600 dark:text-amber-400">
-				You will receive notifications when updates are available but they won't be applied
-				automatically
-			</p>
-		{/if}
 	</div>
 </div>
 
