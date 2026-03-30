@@ -4,6 +4,7 @@ export const helpStage: Stage = {
 	id: 'help',
 	name: 'Help',
 	description: 'Find the help button',
+	silent: true,
 	steps: [
 		{
 			id: 'help-button',

@@ -28,6 +28,7 @@ export interface Stage {
 	name: string;
 	description: string;
 	steps: Step[];
+	silent?: boolean;
 }
 
 export interface Pipeline {

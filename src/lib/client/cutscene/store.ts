@@ -148,7 +148,8 @@ function createCutsceneStore() {
 
 			// Done (single stage or pipeline complete)
 			clearState();
-			if (current.manualStart) {
+			const lastStage = current.stageId ? STAGES[current.stageId] : null;
+			if (current.manualStart && !lastStage?.silent) {
 				justCompleted.set(true);
 			}
 			return {
