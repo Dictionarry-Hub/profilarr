@@ -1,7 +1,17 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
-	import { Info, Clapperboard, Film, Tv, Plus, AlertTriangle, Sliders, Check } from 'lucide-svelte';
+	import {
+		Info,
+		Clapperboard,
+		Film,
+		Tv,
+		Plus,
+		AlertTriangle,
+		Sliders,
+		Check,
+		FlaskConical
+	} from 'lucide-svelte';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
@@ -13,6 +23,7 @@
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import AddEntityModal from './components/AddEntityModal.svelte';
+	import QuickParseModal from './components/QuickParseModal.svelte';
 	import ReleaseModal from './components/ReleaseModal.svelte';
 	import ImportReleasesModal from './components/ImportReleasesModal.svelte';
 	import EntityTable from './components/EntityTable.svelte';
@@ -175,6 +186,7 @@
 	// Modal state
 	let showInfoModal = false;
 	let showAddModal = false;
+	let showQuickParseModal = false;
 
 	// Entity delete modal state
 	let showDeleteModal = false;
@@ -394,6 +406,9 @@
 				{/each}
 			</Dropdown>
 		</ActionButton>
+		<Tooltip text="Quick Parse">
+			<ActionButton icon={FlaskConical} on:click={() => (showQuickParseModal = true)} />
+		</Tooltip>
 		<ActionButton icon={Clapperboard} hasDropdown={true} dropdownPosition="right">
 			<Dropdown slot="dropdown" position="right">
 				<DropdownHeader label="Entity Type" />
@@ -537,4 +552,12 @@
 	entity={importEntity}
 	arrInstances={data.arrInstances}
 	canWriteToBase={data.canWriteToBase}
+/>
+
+<QuickParseModal
+	bind:open={showQuickParseModal}
+	databaseId={data.currentDatabase.id}
+	qualityProfiles={data.qualityProfiles}
+	cfScoresData={data.cfScoresData}
+	parserAvailable={data.parserAvailable}
 />
