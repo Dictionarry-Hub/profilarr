@@ -107,6 +107,43 @@ function createCutsceneStore() {
 		saveState(newState);
 	}
 
+	function goBack(): void {
+		state.update((current) => {
+			if (!current.active || !current.stageId) return current;
+
+			// Can go back within current stage
+			if (current.stepIndex > 0) {
+				const updated = { ...current, stepIndex: current.stepIndex - 1 };
+				saveState(updated);
+				return updated;
+			}
+
+			// At step 0, try previous stage in pipeline
+			if (current.pipelineId) {
+				const pipeline = PIPELINES[current.pipelineId];
+				if (pipeline) {
+					const currentStageIndex = pipeline.stages.indexOf(current.stageId);
+					if (currentStageIndex > 0) {
+						const prevStageId = pipeline.stages[currentStageIndex - 1];
+						const prevStage = STAGES[prevStageId];
+						if (prevStage) {
+							const updated: CutsceneState = {
+								...current,
+								stageId: prevStageId,
+								stepIndex: prevStage.steps.length - 1
+							};
+							saveState(updated);
+							return updated;
+						}
+					}
+				}
+			}
+
+			// Already at the very beginning
+			return current;
+		});
+	}
+
 	function advance(): void {
 		state.update((current) => {
 			if (!current.active || !current.stageId) return current;
@@ -201,6 +238,7 @@ function createCutsceneStore() {
 		startPipeline,
 		startStage,
 		advance,
+		goBack,
 		cancel,
 		dismiss,
 		dismissCompleted,

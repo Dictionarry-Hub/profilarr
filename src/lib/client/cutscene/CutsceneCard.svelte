@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { ArrowRight, X } from 'lucide-svelte';
+	import { X } from 'lucide-svelte';
 	import Button from '$ui/button/Button.svelte';
+	import CutsceneProgress from './CutsceneProgress.svelte';
 
 	export let title: string;
 	export let body: string;
-	export let showContinue: boolean = false;
-	export let onContinue: (() => void) | undefined = undefined;
+	export let onBack: (() => void) | undefined = undefined;
+	export let onForward: (() => void) | undefined = undefined;
 	export let onCancel: (() => void) | undefined = undefined;
+	export let showBack: boolean = true;
 	export let currentStep: number = 0;
 	export let totalSteps: number = 0;
 
@@ -19,8 +21,6 @@
 	];
 
 	$: cancelTooltip = cancelQuips[Math.floor(Math.random() * cancelQuips.length)];
-	$: showProgress = totalSteps > 1;
-	$: progressPercent = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
 </script>
 
 <div
@@ -28,16 +28,9 @@
 >
 	<div>
 		<div class="flex items-start justify-between gap-2">
-			<div class="flex items-center gap-2">
-				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-					{title}
-				</h3>
-				{#if showProgress}
-					<span class="text-xs text-neutral-400 dark:text-neutral-500">
-						{currentStep + 1}/{totalSteps}
-					</span>
-				{/if}
-			</div>
+			<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+				{title}
+			</h3>
 			{#if onCancel}
 				<Button icon={X} variant="ghost" size="xs" title={cancelTooltip} on:click={onCancel} />
 			{/if}
@@ -46,24 +39,5 @@
 			{body}
 		</p>
 	</div>
-	{#if showProgress}
-		<div class="h-1 overflow-hidden rounded-full bg-neutral-300 dark:bg-neutral-700">
-			<div
-				class="h-full rounded-full bg-accent-500 transition-all duration-300"
-				style="width: {progressPercent}%"
-			></div>
-		</div>
-	{/if}
-	{#if showContinue && onContinue}
-		<div>
-			<Button
-				text="Continue"
-				icon={ArrowRight}
-				iconPosition="right"
-				variant="primary"
-				size="sm"
-				on:click={onContinue}
-			/>
-		</div>
-	{/if}
+	<CutsceneProgress {currentStep} {totalSteps} {onBack} {onForward} {showBack} />
 </div>

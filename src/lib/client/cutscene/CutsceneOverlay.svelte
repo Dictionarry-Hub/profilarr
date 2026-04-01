@@ -17,6 +17,16 @@
 	$: step = $currentStep;
 	$: active = state.active;
 
+	// Back is hidden on the very first step of the run
+	$: isFirstStep = (() => {
+		if (state.stepIndex > 0) return false;
+		if (state.pipelineId) {
+			const pipeline = PIPELINES[state.pipelineId];
+			return !pipeline || pipeline.stages[0] === state.stageId;
+		}
+		return true;
+	})();
+
 	// Compute overall progress across pipeline or single stage
 	$: progressInfo = (() => {
 		if (!state.active || !state.stageId) return { current: 0, total: 0 };
@@ -224,8 +234,12 @@
 		}
 	}
 
-	function handleContinue(): void {
+	function handleForward(): void {
 		cutscene.advance();
+	}
+
+	function handleBack(): void {
+		cutscene.goBack();
 	}
 
 	function handleCancel(): void {
@@ -304,9 +318,10 @@
 				<CutsceneCard
 					title={step.title}
 					body={step.body}
-					showContinue={step.completion.type === 'manual'}
-					onContinue={handleContinue}
+					onBack={handleBack}
+					onForward={handleForward}
 					onCancel={handleCancel}
+					showBack={!isFirstStep}
 					currentStep={progressInfo.current}
 					totalSteps={progressInfo.total}
 				/>

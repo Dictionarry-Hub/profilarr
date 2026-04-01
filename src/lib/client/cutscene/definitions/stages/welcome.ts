@@ -29,6 +29,15 @@ export const welcomeStage: Stage = {
 			completion: { type: 'manual' }
 		},
 		{
+			id: 'nav-arrs',
+			route: '/arr',
+			target: 'nav-arrs',
+			title: 'Arrs',
+			body: 'This is where you connect your Radarr and Sonarr instances. Once connected, you can deploy your configurations to them and keep everything in sync.',
+			position: 'right',
+			completion: { type: 'manual' }
+		},
+		{
 			id: 'nav-quality-profiles',
 			route: '/quality-profiles',
 			target: 'nav-quality-profiles',
@@ -70,15 +79,6 @@ export const welcomeStage: Stage = {
 			target: 'nav-delay-profiles',
 			title: 'Delay Profiles',
 			body: 'Delay profiles let you set protocol preferences and release delays. You can prioritize torrents over usenet or vice versa, and set minimum wait times before grabbing a release.',
-			position: 'right',
-			completion: { type: 'manual' }
-		},
-		{
-			id: 'nav-arrs',
-			route: '/arr',
-			target: 'nav-arrs',
-			title: 'Arrs',
-			body: 'This is where you connect your Radarr and Sonarr instances. Once connected, you can deploy your configurations to them and keep everything in sync.',
 			position: 'right',
 			completion: { type: 'manual' }
 		},
