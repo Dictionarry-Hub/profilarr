@@ -10,6 +10,8 @@
 	import Modal from '$ui/modal/Modal.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import AddEntityModal from './components/AddEntityModal.svelte';
 	import ReleaseModal from './components/ReleaseModal.svelte';
 	import ImportReleasesModal from './components/ImportReleasesModal.svelte';
@@ -355,11 +357,16 @@
 
 	<!-- Actions Bar -->
 	<ActionsBar className="w-full justify-center md:w-full md:mx-auto">
+		<Tooltip text="How It Works">
+			<ActionButton icon={Info} on:click={() => (showInfoModal = true)} />
+		</Tooltip>
 		<SearchAction searchStore={search} placeholder={searchPlaceholder} responsive />
-		<ActionButton
-			icon={Plus}
-			on:click={() => (data.canWriteToBase ? (showAddModal = true) : notifyReadOnly())}
-		/>
+		<Tooltip text="Add Entity">
+			<ActionButton
+				icon={Plus}
+				on:click={() => (data.canWriteToBase ? (showAddModal = true) : notifyReadOnly())}
+			/>
+		</Tooltip>
 		<ActionButton
 			icon={Sliders}
 			hasDropdown={true}
@@ -372,6 +379,7 @@
 				>
 			{/if}
 			<Dropdown slot="dropdown" position="right">
+				<DropdownHeader label="Quality Profile" />
 				<DropdownItem
 					label="No Profile"
 					selected={selectedProfileId === null}
@@ -388,6 +396,7 @@
 		</ActionButton>
 		<ActionButton icon={Clapperboard} hasDropdown={true} dropdownPosition="right">
 			<Dropdown slot="dropdown" position="right">
+				<DropdownHeader label="Entity Type" />
 				<DropdownItem
 					icon={Film}
 					label="Movies"
@@ -402,7 +411,6 @@
 				/>
 			</Dropdown>
 		</ActionButton>
-		<ActionButton icon={Info} on:click={() => (showInfoModal = true)} />
 	</ActionsBar>
 
 	<!-- Entity Testing Content -->
