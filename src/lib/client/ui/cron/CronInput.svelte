@@ -7,6 +7,7 @@
 
 	export let value: string = '0 * * * *';
 	export let disabled: boolean = false;
+	export let fixed: boolean = false;
 	export let minIntervalMinutes: number = 0;
 	export let onWarning: ((message: string) => void) | undefined = undefined;
 
@@ -244,13 +245,14 @@
 </script>
 
 <div
-	class="flex items-center gap-1.5"
+	class="flex items-center gap-1.5 md:flex-nowrap"
 	class:flex-wrap={scheduleType === 'weekly' || scheduleType === 'monthly'}
 >
 	<DropdownSelect
 		value={scheduleType}
 		options={scheduleOptions}
 		{disabled}
+		{fixed}
 		buttonSize="sm"
 		width="w-24"
 		justify="center"
@@ -312,11 +314,12 @@
 			}}
 		/>
 	{:else if scheduleType === 'weekly'}
-		<div class="basis-full"></div>
+		<div class="basis-full md:hidden"></div>
 		<DropdownSelect
 			value={String(weeklyDay)}
 			options={weekdayOptions}
 			{disabled}
+			{fixed}
 			buttonSize="sm"
 			width="w-20"
 			justify="center"
@@ -338,7 +341,7 @@
 			}}
 		/>
 	{:else if scheduleType === 'monthly'}
-		<div class="basis-full"></div>
+		<div class="basis-full md:hidden"></div>
 		<span class="text-sm text-neutral-500 dark:text-neutral-400">day</span>
 		<div class="w-24">
 			<NumberInput

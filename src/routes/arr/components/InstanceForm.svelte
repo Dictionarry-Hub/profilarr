@@ -437,13 +437,16 @@
 
 					{#if cleanupEnabled}
 						<!-- Schedule -->
-						<span class="text-sm text-neutral-500 md:hidden dark:text-neutral-400">Schedule</span>
-						<div class="md:flex md:items-center md:gap-2">
+						<div class="col-span-2 md:col-span-1 md:flex md:items-center md:gap-2">
+							<span class="mb-1 block text-sm text-neutral-500 md:hidden dark:text-neutral-400"
+								>Schedule</span
+							>
 							<span class="hidden text-sm text-neutral-500 md:inline dark:text-neutral-400"
 								>Schedule:</span
 							>
 							<CronInput
 								bind:value={cronInputValue}
+								fixed={true}
 								minIntervalMinutes={60}
 								onWarning={(msg) => alertStore.add('warning', msg)}
 							/>
