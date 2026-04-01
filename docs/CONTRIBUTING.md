@@ -9,11 +9,13 @@
   - [Starting Your Branch](#starting-your-branch)
   - [Staying Up to Date](#staying-up-to-date)
   - [Submitting a Pull Request](#submitting-a-pull-request)
+  - [PR Scope](#pr-scope)
 - [Guidelines](#guidelines)
   - [Naming](#naming)
   - [Code Conventions](#code-conventions)
   - [Off-Limits](#off-limits)
   - [Reporting Issues](#reporting-issues)
+  - [Closing Issues](#closing-issues)
 - [Examples](#examples)
   - [Adding a settings page](#adding-a-settings-page)
   - [Bug found during testing](#bug-found-during-testing)
@@ -243,6 +245,18 @@ the queue until `develop` is free, then get included in the next batch for
 testing. Community contributions are prioritised for testing over internal work
 where possible.
 
+### PR Scope
+
+One feature or fix per PR. If you spot something small while working (a typo,
+a missing null check, a wrong label) and it's in code you're already touching,
+it's fine to include it. If you'd describe the PR as doing two things, split it.
+
+The reason is squash merging: everything collapses into one commit. If a bundled
+change causes a regression, you can't revert just that part; you revert the
+whole PR. Keeping unrelated changes separate preserves that option.
+
+Doc-only changes (comments, wording, formatting) are always fine to bundle.
+
 ## Guidelines
 
 ### Naming
@@ -299,6 +313,17 @@ includes the op replay system, the compile pipeline, and the export flow. See
 Use the
 [GitHub issue templates](https://github.com/Dictionarry-Hub/profilarr/issues/new/choose).
 There are templates for bugs, feature requests, and general feedback.
+
+### Closing Issues
+
+Close an issue when the fixing PR merges into `develop`. There's no need to
+wait for a stable release. The work is done and in the pipeline. Leave a short
+comment so the reporter knows what to expect:
+
+> Fixed in `develop`, will ship with the next release.
+
+Duplicates, out-of-scope requests, and won't-fix decisions should be closed
+immediately with a brief explanation.
 
 ## Examples
 
