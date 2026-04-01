@@ -1,5 +1,6 @@
 import type { Stage, Pipeline } from '../types.ts';
 import { welcomeStage } from './stages/welcome.ts';
+import { navigationStage } from './stages/navigation.ts';
 import { personalizeStage } from './stages/personalize.ts';
 import { databasesStage } from './stages/databases.ts';
 import { helpStage } from './stages/help.ts';
@@ -7,6 +8,7 @@ import { gettingStartedPipeline } from './pipelines/getting-started.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
+	navigation: navigationStage,
 	personalize: personalizeStage,
 	databases: databasesStage,
 	help: helpStage

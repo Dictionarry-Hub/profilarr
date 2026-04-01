@@ -114,72 +114,74 @@
 			{/each}
 		</Group>
 
-		<Group
-			label="Quality Profiles"
-			emoji="⚡"
-			href="/quality-profiles"
-			icon={Sliders}
-			initialOpen={true}
-			hasItems={parserAvailable}
-			onboardingId="nav-quality-profiles"
-		>
-			{#if parserAvailable}
-				<GroupItem label="Testing" href="/quality-profiles/entity-testing" />
-			{/if}
-		</Group>
+		<div data-onboarding="nav-config-entities">
+			<Group
+				label="Quality Profiles"
+				emoji="⚡"
+				href="/quality-profiles"
+				icon={Sliders}
+				initialOpen={true}
+				hasItems={parserAvailable}
+				onboardingId="nav-quality-profiles"
+			>
+				{#if parserAvailable}
+					<GroupItem label="Testing" href="/quality-profiles/entity-testing" />
+				{/if}
+			</Group>
 
-		<Group
-			label="Custom Formats"
-			emoji="🎨"
-			href="/custom-formats"
-			icon={Palette}
-			initialOpen={false}
-			onboardingId="nav-custom-formats"
-		/>
-
-		<Group
-			label="Regular Expressions"
-			emoji="🔬"
-			href="/regular-expressions"
-			icon={Microscope}
-			initialOpen={false}
-			onboardingId="nav-regex"
-		/>
-
-		<Group
-			label="Media Management"
-			emoji="🏷️"
-			href="/media-management"
-			icon={Tag}
-			initialOpen={true}
-			hasItems={true}
-			onboardingId="nav-media-management"
-		>
-			<GroupItem
-				label="Naming Settings"
-				href="/media-management?section=naming"
-				activePattern="/naming"
+			<Group
+				label="Custom Formats"
+				emoji="🎨"
+				href="/custom-formats"
+				icon={Palette}
+				initialOpen={false}
+				onboardingId="nav-custom-formats"
 			/>
-			<GroupItem
-				label="Quality Definitions"
-				href="/media-management?section=quality-definitions"
-				activePattern="/quality-definitions"
-			/>
-			<GroupItem
-				label="Media Settings"
-				href="/media-management?section=media-settings"
-				activePattern="/media-settings"
-			/>
-		</Group>
 
-		<Group
-			label="Delay Profiles"
-			emoji="⏳"
-			href="/delay-profiles"
-			icon={Clock}
-			initialOpen={false}
-			onboardingId="nav-delay-profiles"
-		/>
+			<Group
+				label="Regular Expressions"
+				emoji="🔬"
+				href="/regular-expressions"
+				icon={Microscope}
+				initialOpen={false}
+				onboardingId="nav-regex"
+			/>
+
+			<Group
+				label="Media Management"
+				emoji="🏷️"
+				href="/media-management"
+				icon={Tag}
+				initialOpen={true}
+				hasItems={true}
+				onboardingId="nav-media-management"
+			>
+				<GroupItem
+					label="Naming Settings"
+					href="/media-management?section=naming"
+					activePattern="/naming"
+				/>
+				<GroupItem
+					label="Quality Definitions"
+					href="/media-management?section=quality-definitions"
+					activePattern="/quality-definitions"
+				/>
+				<GroupItem
+					label="Media Settings"
+					href="/media-management?section=media-settings"
+					activePattern="/media-settings"
+				/>
+			</Group>
+
+			<Group
+				label="Delay Profiles"
+				emoji="⏳"
+				href="/delay-profiles"
+				icon={Clock}
+				initialOpen={false}
+				onboardingId="nav-delay-profiles"
+			/>
+		</div>
 
 		<Group
 			label="Settings"
