@@ -1,7 +1,7 @@
 import type { Stage } from '../../types.ts';
 
 export const databasesStage: Stage = {
-	id: 'databases',
+	id: 'database-link',
 	name: 'Link a Database',
 	description: 'Learn how to link a configuration database',
 	steps: [
