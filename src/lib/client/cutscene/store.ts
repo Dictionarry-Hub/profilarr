@@ -2,6 +2,8 @@ import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { CutsceneState } from './types.ts';
 import { STAGES, PIPELINES } from './definitions/index.ts';
+import { checkPrerequisites } from './prerequisites.ts';
+import { alertStore } from '$lib/client/alerts/store';
 
 const STORAGE_KEY = 'cutscene-progress';
 
@@ -72,9 +74,15 @@ function createCutsceneStore() {
 		}
 	}
 
-	function startStage(stageId: string): void {
+	async function startStage(stageId: string): Promise<void> {
 		const stage = STAGES[stageId];
 		if (!stage || stage.steps.length === 0) return;
+
+		const result = await checkPrerequisites([stageId]);
+		if (!result.ok) {
+			alertStore.add('error', result.message);
+			return;
+		}
 
 		justCompleted.set(false);
 		const newState: CutsceneState = {
@@ -89,9 +97,15 @@ function createCutsceneStore() {
 		saveState(newState);
 	}
 
-	function startPipeline(pipelineId: string, manual = true): void {
+	async function startPipeline(pipelineId: string, manual = true): Promise<void> {
 		const pipeline = PIPELINES[pipelineId];
 		if (!pipeline || pipeline.stages.length === 0) return;
+
+		const result = await checkPrerequisites(pipeline.stages);
+		if (!result.ok) {
+			alertStore.add('error', result.message);
+			return;
+		}
 
 		justCompleted.set(false);
 		const firstStageId = pipeline.stages[0];

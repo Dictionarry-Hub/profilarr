@@ -23,12 +23,18 @@ export interface Step {
 	completion: Completion;
 }
 
+export interface Prerequisite {
+	check: string;
+	message: string;
+}
+
 export interface Stage {
 	id: string;
 	name: string;
 	description: string;
 	steps: Step[];
 	silent?: boolean;
+	prerequisites?: Prerequisite[];
 }
 
 export interface Pipeline {

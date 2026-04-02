@@ -12,12 +12,12 @@
 	import Label from '$ui/label/Label.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 
-	function handleStartPipeline(id: string): void {
-		cutscene.startPipeline(id);
+	async function handleStartPipeline(id: string): Promise<void> {
+		await cutscene.startPipeline(id);
 	}
 
-	function handleStartStage(id: string): void {
-		cutscene.startStage(id);
+	async function handleStartStage(id: string): Promise<void> {
+		await cutscene.startStage(id);
 	}
 
 	const pipelines = Object.values(PIPELINES).map((p) => ({

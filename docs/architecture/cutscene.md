@@ -6,6 +6,7 @@
 - [Steps](#steps)
   - [Completion Types](#completion-types)
 - [Stages](#stages)
+- [Prerequisites](#prerequisites)
 - [Pipelines](#pipelines)
 - [Adding Content](#adding-content)
 - [Overlay Engine](#overlay-engine)
@@ -91,20 +92,76 @@ interface Stage {
 	description: string;
 	steps: Step[];
 	silent?: boolean;
+	prerequisites?: Prerequisite[];
 }
 ```
 
 `silent` skips the completion modal when this stage finishes as the last stage in
 a run. Used for stages like Help where a "you're done" modal would be redundant.
 
+`prerequisites` gates the stage behind runtime conditions. See
+[Prerequisites](#prerequisites) below.
+
 ### Current Stages
 
-| ID            | Name        | Steps | Description                                                            |
-| ------------- | ----------- | ----- | ---------------------------------------------------------------------- |
-| `welcome`     | Welcome     | 10    | Sidebar walkthrough: what Profilarr is and what each section does      |
-| `personalize` | Personalize | 2     | Theme toggle and accent color picker                                   |
-| `databases`   | Databases   | 6     | Linking a database: form fields, PAT, conflict strategy, sync settings |
-| `help`        | Help        | 1     | Introduces the help button (silent)                                    |
+| ID            | Name        | Steps | Prerequisites | Description                                                            |
+| ------------- | ----------- | ----- | ------------- | ---------------------------------------------------------------------- |
+| `welcome`     | Welcome     | 10    |               | Sidebar walkthrough: what Profilarr is and what each section does      |
+| `personalize` | Personalize | 2     |               | Theme toggle and accent color picker                                   |
+| `databases`   | Databases   | 6     | `hasDatabase` | Linking a database: form fields, PAT, conflict strategy, sync settings |
+| `help`        | Help        | 1     |               | Introduces the help button (silent)                                    |
+
+## Prerequisites
+
+A prerequisite gates a stage behind a runtime condition. Before a stage or
+pipeline starts, all prerequisites are checked. If any check fails, the cutscene
+does not start and the user sees an error alert with the prerequisite's message.
+
+```ts
+interface Prerequisite {
+	check: string;
+	message: string;
+}
+```
+
+`check` references a named function in the `stateChecks` registry
+(`src/lib/client/cutscene/stateChecks.ts`). Each function is async and returns a
+boolean.
+
+`message` is shown via `alertStore` when the check returns false.
+
+### How checks run
+
+The prerequisite runner (`src/lib/client/cutscene/prerequisites.ts`) collects
+prerequisites from the requested stage IDs, runs each check in order, and
+returns on the first failure. For pipelines, all stages' prerequisites are
+collected and checked upfront before the pipeline starts. This avoids starting a
+multi-stage walkthrough only to hit a blocker partway through.
+
+### Adding a prerequisite
+
+1. Add a check function to `stateChecks.ts`:
+
+```ts
+export const stateChecks: Record<string, () => Promise<boolean>> = {
+	hasDatabase: async () => {
+		const res = await fetch('/api/v1/databases');
+		if (!res.ok) return false;
+		const data = await res.json();
+		return data.length > 0;
+	}
+};
+```
+
+2. Add the prerequisite to the stage definition:
+
+```ts
+prerequisites: [
+	{ check: 'hasDatabase', message: 'Link at least one database before starting this stage.' }
+];
+```
+
+The same check function can be referenced by multiple stages.
 
 ## Pipelines
 

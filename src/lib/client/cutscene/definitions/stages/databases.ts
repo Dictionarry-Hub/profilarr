@@ -4,6 +4,9 @@ export const databasesStage: Stage = {
 	id: 'databases',
 	name: 'Databases',
 	description: 'Learn how to link a configuration database',
+	prerequisites: [
+		{ check: 'hasDatabase', message: 'Link at least one database before starting this stage.' }
+	],
 	steps: [
 		{
 			id: 'databases-explain',
