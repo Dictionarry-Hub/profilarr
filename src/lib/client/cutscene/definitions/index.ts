@@ -4,6 +4,7 @@ import { navigationStage } from './stages/navigation.ts';
 import { personalizeStage } from './stages/personalize.ts';
 import { databaseLinkStage } from './stages/database-link.ts';
 import { databaseNavigationStage } from './stages/database-navigation.ts';
+import { databaseSummaryStage } from './stages/database-summary.ts';
 import { helpStage } from './stages/help.ts';
 import { gettingStartedPipeline } from './pipelines/getting-started.ts';
 import { databasesPipeline } from './pipelines/databases.ts';
@@ -14,6 +15,7 @@ export const STAGES: Record<string, Stage> = {
 	personalize: personalizeStage,
 	'database-link': databaseLinkStage,
 	'database-navigation': databaseNavigationStage,
+	'database-summary': databaseSummaryStage,
 	help: helpStage
 };
 
