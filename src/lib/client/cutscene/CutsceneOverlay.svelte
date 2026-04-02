@@ -5,6 +5,7 @@
 	import { cutscene } from './store';
 	import { setupCompletion, teardownCompletion } from './completions.ts';
 	import { STAGES, PIPELINES } from './definitions/index.ts';
+	import { routeResolvers } from './routeResolvers.ts';
 	import CutsceneCard from './CutsceneCard.svelte';
 
 	let targetRect: DOMRect | null = null;
@@ -125,14 +126,19 @@
 	let lastStepId: string | null = null;
 	let cardReady = false;
 
+	async function resolveRoute(route: string | { resolve: string }): Promise<string> {
+		if (typeof route === 'string') return route;
+		const resolver = routeResolvers[route.resolve];
+		if (!resolver) return '/';
+		return resolver();
+	}
+
 	$: if (step && step.id !== lastStepId && typeof window !== 'undefined') {
 		lastStepId = step.id;
 		cardReady = false;
 		teardownCompletion();
 		setupCompletion(step, () => cutscene.advance());
 
-		// Navigate if step requires a specific route
-		const needsNav = step.route && window.location.pathname !== step.route;
 		const afterNav = () => {
 			tick().then(() => {
 				requestAnimationFrame(() => {
@@ -147,8 +153,15 @@
 			});
 		};
 
-		if (needsNav) {
-			goto(step.route!).then(afterNav);
+		// Navigate if step requires a specific route
+		if (step.route) {
+			resolveRoute(step.route).then((resolved) => {
+				if (window.location.pathname !== resolved) {
+					goto(resolved).then(afterNav);
+				} else {
+					afterNav();
+				}
+			});
 		} else {
 			afterNav();
 		}

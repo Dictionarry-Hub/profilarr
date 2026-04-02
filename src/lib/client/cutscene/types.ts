@@ -6,7 +6,7 @@ export type Completion =
 
 export interface Step {
 	id: string;
-	route?: string;
+	route?: string | { resolve: string };
 	target?: string;
 	title: string;
 	body: string;
