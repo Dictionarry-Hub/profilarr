@@ -19,25 +19,29 @@
 					label: 'Changes',
 					href: `/databases/${database.id}/changes`,
 					icon: GitBranch,
-					active: currentPath.endsWith('/changes')
+					active: currentPath.endsWith('/changes'),
+					onboarding: 'db-tab-changes'
 				},
 				{
 					label: 'Commits',
 					href: `/databases/${database.id}/commits`,
 					icon: History,
-					active: currentPath.includes('/commits')
+					active: currentPath.includes('/commits'),
+					onboarding: 'db-tab-commits'
 				},
 				{
 					label: 'Conflicts',
 					href: `/databases/${database.id}/conflicts`,
 					icon: GitPullRequestClosed,
-					active: currentPath.includes('/conflicts')
+					active: currentPath.includes('/conflicts'),
+					onboarding: 'db-tab-conflicts'
 				},
 				{
 					label: 'Tweaks',
 					href: `/databases/${database.id}/tweaks`,
 					icon: Wrench,
-					active: currentPath.includes('/tweaks')
+					active: currentPath.includes('/tweaks'),
+					onboarding: 'db-tab-tweaks'
 				},
 				...(database.hasPat
 					? [
@@ -53,7 +57,8 @@
 					label: 'Settings',
 					href: `/databases/${database.id}/settings`,
 					icon: Settings,
-					active: currentPath.includes('/settings')
+					active: currentPath.includes('/settings'),
+					onboarding: 'db-tab-settings'
 				}
 			]
 		: [];
