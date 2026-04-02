@@ -27,17 +27,21 @@
 			class="relative flex min-w-[120px] flex-1 items-center overflow-hidden border-y border-neutral-300 bg-neutral-200/50 dark:border-neutral-700/60 dark:bg-neutral-800/30"
 			class:border-l={!showBack}
 			class:rounded-l-lg={!showBack}
+			class:border-r={!onForward}
+			class:rounded-r-lg={!onForward}
 		>
 			<div
 				class="absolute inset-y-0 left-0 bg-accent-500 transition-all duration-300"
 				style="width: {progressPercent}%"
 			></div>
 		</div>
-		<button
-			class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-r-lg border border-l-0 border-neutral-300 bg-white text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
-			on:click={onForward}
-		>
-			<ChevronRight size={14} />
-		</button>
+		{#if onForward}
+			<button
+				class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-r-lg border border-l-0 border-neutral-300 bg-white text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+				on:click={onForward}
+			>
+				<ChevronRight size={14} />
+			</button>
+		{/if}
 	</div>
 </div>

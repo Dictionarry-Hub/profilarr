@@ -332,7 +332,7 @@
 					title={step.title}
 					body={step.body}
 					onBack={handleBack}
-					onForward={handleForward}
+					onForward={step.completion.type === 'manual' ? handleForward : undefined}
 					onCancel={handleCancel}
 					showBack={!isFirstStep}
 					currentStep={progressInfo.current}
