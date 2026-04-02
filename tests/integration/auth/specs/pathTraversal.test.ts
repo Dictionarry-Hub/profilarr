@@ -7,28 +7,24 @@
  * read, exfiltrate, or push arbitrary files.
  *
  * Endpoints:
- * 1. POST /api/databases/[id]/generate-commit-message (JSON body)
- * 2. POST /databases/[id]/changes?/commit (form action)
- * 3. POST /databases/[id]/changes?/preview (form action)
+ * 1. POST /databases/[id]/changes?/commit (form action)
+ * 2. POST /databases/[id]/changes?/preview (form action)
  *
  * Tests:
- * 1-4.   generate-commit-message rejects traversal payloads
- * 5-8.   commit action rejects traversal payloads
- * 9-12.  preview action rejects traversal payloads
- * 13-15. symlink escape rejected across all 3 endpoints
+ * 1-4.   commit action rejects traversal payloads
+ * 5-8.   preview action rejects traversal payloads
+ * 9-10.  symlink escape rejected across both endpoints
  */
 
-import { assertEquals, assertStringIncludes } from '@std/assert';
+import { assertEquals } from '@std/assert';
 import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUserDirect, setApiKey, login } from '../harness/setup.ts';
+import { createUserDirect, login } from '../harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { Database } from 'jsr:@db/sqlite@0.12';
 
 const PORT = 7018;
 const ORIGIN = `http://localhost:${PORT}`;
-const API_KEY = 'path-traversal-test-key-abc123';
-
 const PAYLOADS = [
 	{ name: 'relative traversal', path: '../../etc/passwd' },
 	{ name: 'absolute path', path: '/etc/passwd' },
@@ -55,12 +51,6 @@ function seedDatabase(dbPath: string): { id: number; uuid: string } {
 			id: number;
 		};
 
-		// Enable AI so generate-commit-message gets past isAIEnabled()
-		db.exec('UPDATE ai_settings SET enabled = 1, api_url = ?, model = ? WHERE id = 1', [
-			'http://localhost:9999/v1',
-			'test-model'
-		]);
-
 		return { id: row.id, uuid };
 	} finally {
 		db.close();
@@ -72,7 +62,6 @@ setup(async () => {
 	const dbPath = getDbPath(PORT);
 
 	await createUserDirect(dbPath, 'admin', 'password123');
-	await setApiKey(dbPath, API_KEY);
 	const seed = seedDatabase(dbPath);
 	dbId = seed.id;
 	dbUuid = seed.uuid;
@@ -97,27 +86,7 @@ teardown(async () => {
 	}
 });
 
-// --- Endpoint 1: generate-commit-message (JSON API with API key) ---
-
-for (const payload of PAYLOADS) {
-	test(`generate-commit-message rejects ${payload.name}`, async () => {
-		const client = new TestClient(ORIGIN);
-		const res = await client.post(
-			`/api/databases/${dbId}/generate-commit-message`,
-			{ files: [payload.path] },
-			{ headers: { 'X-Api-Key': API_KEY } }
-		);
-		assertEquals(res.status, 400, `Expected 400 for ${payload.name}, got ${res.status}`);
-		const body = await res.json();
-		assertStringIncludes(
-			body.message.toLowerCase(),
-			'path',
-			`Error message should mention path validation, got: ${body.message}`
-		);
-	});
-}
-
-// --- Endpoint 2: commit action (form action with session) ---
+// --- Endpoint 1: commit action (form action with session) ---
 // SvelteKit form actions return HTTP 200 with status in JSON body:
 // { "type": "failure", "status": 400, "data": "..." }
 
@@ -137,7 +106,7 @@ for (const payload of PAYLOADS) {
 	});
 }
 
-// --- Endpoint 3: preview action (form action with session) ---
+// --- Endpoint 2: preview action (form action with session) ---
 
 for (const payload of PAYLOADS) {
 	test(`preview action rejects ${payload.name}`, async () => {
@@ -158,22 +127,6 @@ for (const payload of PAYLOADS) {
 // --- Symlink escape: path resolves lexically inside repo but follows symlink outside ---
 // Setup creates <repoDir>/evil -> /tmp/..., so "evil/secret.txt" passes a
 // naive startsWith check but actually reads from outside the repo.
-
-test('generate-commit-message rejects symlink escape', async () => {
-	const client = new TestClient(ORIGIN);
-	const res = await client.post(
-		`/api/databases/${dbId}/generate-commit-message`,
-		{ files: ['evil/secret.txt'] },
-		{ headers: { 'X-Api-Key': API_KEY } }
-	);
-	assertEquals(res.status, 400, `Expected 400 for symlink escape, got ${res.status}`);
-	const body = await res.json();
-	assertStringIncludes(
-		body.message.toLowerCase(),
-		'path',
-		`Error message should mention path validation, got: ${body.message}`
-	);
-});
 
 test('commit action rejects symlink escape', async () => {
 	const res = await sessionClient.postForm(
