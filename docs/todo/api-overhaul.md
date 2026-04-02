@@ -21,18 +21,14 @@ in with public endpoints.
 
 ### Unversioned `/api/`
 
-| Method | Route                                         | Purpose                        |
-| ------ | --------------------------------------------- | ------------------------------ |
-| GET    | `/api/ai/status`                              | Check if AI is configured      |
-| GET    | `/api/backups/download/[filename]`            | Download backup file           |
-| GET    | `/api/databases`                              | List all linked databases      |
-| GET    | `/api/databases/[id]/changes`                 | Git status + draft changes     |
-| GET    | `/api/databases/[id]/commits`                 | Commit history                 |
-| POST   | `/api/databases/[id]/generate-commit-message` | AI commit message from diff    |
-| GET    | `/api/github/avatar/[owner]`                  | Proxy + cache GitHub avatar    |
-| GET    | `/api/regex101/[id]`                          | Fetch regex101 pattern + tests |
-| GET    | `/api/tmdb/search`                            | Search TMDB                    |
-| POST   | `/api/tmdb/test`                              | Validate TMDB API key          |
+| Method | Route                              | Purpose                        |
+| ------ | ---------------------------------- | ------------------------------ |
+| GET    | `/api/ai/status`                   | Check if AI is configured      |
+| GET    | `/api/backups/download/[filename]` | Download backup file           |
+| GET    | `/api/github/avatar/[owner]`       | Proxy + cache GitHub avatar    |
+| GET    | `/api/regex101/[id]`               | Fetch regex101 pattern + tests |
+| GET    | `/api/tmdb/search`                 | Search TMDB                    |
+| POST   | `/api/tmdb/test`                   | Validate TMDB API key          |
 
 ### Versioned `/api/v1/`
 
