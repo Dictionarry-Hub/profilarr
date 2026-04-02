@@ -22,7 +22,7 @@
 import { assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUserDirect, clearLoginAttempts, queryDb } from '../harness/setup.ts';
+import { createUserDirect, clearLoginAttempts, queryDb } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { Database } from 'jsr:@db/sqlite@0.12';
 

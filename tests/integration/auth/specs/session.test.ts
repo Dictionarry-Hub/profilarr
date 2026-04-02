@@ -23,7 +23,7 @@ import {
 	expireSession,
 	setSessionExpiry,
 	getSessionExpiry
-} from '../harness/setup.ts';
+} from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 
 const PORT = 7005;
