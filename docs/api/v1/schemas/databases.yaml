@@ -1,0 +1,73 @@
+DatabaseInstance:
+  type: object
+  required:
+    - id
+    - uuid
+    - name
+    - repository_url
+    - sync_strategy
+    - auto_pull
+    - enabled
+    - is_private
+    - local_ops_enabled
+    - conflict_strategy
+    - hasPat
+    - created_at
+    - updated_at
+  properties:
+    id:
+      type: integer
+      description: Database instance ID
+    uuid:
+      type: string
+      format: uuid
+      description: Unique identifier
+    name:
+      type: string
+      description: Display name
+    repository_url:
+      type: string
+      description: GitHub repository URL
+    sync_strategy:
+      type: integer
+      description: Auto-sync interval in minutes (0 = manual only)
+    auto_pull:
+      type: integer
+      description: Whether to automatically pull updates (0 or 1)
+    enabled:
+      type: integer
+      description: Whether the database is active (0 or 1)
+    is_private:
+      type: integer
+      description: Whether the repository is private (0 or 1)
+    local_ops_enabled:
+      type: integer
+      description: Whether local ops editing is enabled (0 or 1)
+    git_user_name:
+      type: string
+      nullable: true
+      description: Git user name for commits
+    git_user_email:
+      type: string
+      nullable: true
+      description: Git user email for commits
+    conflict_strategy:
+      type: string
+      enum:
+        - override
+        - align
+        - ask
+      description: How to handle conflicts between local tweaks and upstream updates
+    last_synced_at:
+      type: string
+      nullable: true
+      description: Last successful sync timestamp
+    created_at:
+      type: string
+      description: Creation timestamp
+    updated_at:
+      type: string
+      description: Last update timestamp
+    hasPat:
+      type: boolean
+      description: Whether a personal access token is configured

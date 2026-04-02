@@ -20,10 +20,14 @@ tags:
     description: Arr instance library and release endpoints
   - name: PCD
     description: PCD entity export and portable format endpoints
+  - name: Databases
+    description: Linked database instance management
   - name: Regex
     description: Regex pattern validation
 
 paths:
+  /databases:
+    $ref: './paths/databases.yaml#/databases'
   /health:
     $ref: './paths/system.yaml#/health'
   /health/diagnostics:
@@ -140,6 +144,9 @@ components:
       $ref: './schemas/pcd.yaml#/ImportRequest'
     ImportResponse:
       $ref: './schemas/pcd.yaml#/ImportResponse'
+    # Databases
+    DatabaseInstance:
+      $ref: './schemas/databases.yaml#/DatabaseInstance'
     # Regex
     ValidateRegexRequest:
       $ref: './schemas/regex.yaml#/ValidateRegexRequest'
