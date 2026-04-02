@@ -37,6 +37,7 @@
 		"dev:parser": "cd src/services/parser && dotnet watch run --urls http://localhost:5000",
 		"build": "APP_BASE_PATH=./dist/build deno run -A npm:vite build && deno compile --no-check --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-run --allow-sys --target x86_64-unknown-linux-gnu --output dist/build/profilarr dist/build/mod.ts",
 		"preview": "PORT=6869 HOST=0.0.0.0 APP_BASE_PATH=./dist/dev PARSER_HOST=localhost PARSER_PORT=5000 ./dist/build/profilarr",
+		"reset:onboarding": "sqlite3 dist/dev/data/profilarr.db \"UPDATE general_settings SET onboarding_shown = 0\"",
 		"clean:dev": "rm -rf dist/dev",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && deno lint",
