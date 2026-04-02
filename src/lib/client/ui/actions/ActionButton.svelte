@@ -11,6 +11,7 @@
 	export let title: string = '';
 	export let type: 'button' | 'submit' = 'button';
 	export let variant: 'neutral' | 'danger' = 'neutral';
+	export let onboarding: string | undefined = undefined;
 
 	let isHovered = false;
 	let leaveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -46,6 +47,7 @@
 	on:mouseenter={handleMouseEnter}
 	on:mouseleave={handleMouseLeave}
 	role="group"
+	data-onboarding={onboarding}
 >
 	<button
 		{type}

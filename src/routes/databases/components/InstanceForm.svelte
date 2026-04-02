@@ -241,13 +241,15 @@
 						on:click={() => (showDeleteModal = true)}
 					/>
 				{/if}
-				<Button
-					text={saving ? 'Saving...' : 'Save'}
-					icon={Save}
-					iconColor="text-blue-600 dark:text-blue-400"
-					disabled={saving || !canSubmit}
-					on:click={handleSave}
-				/>
+				<div data-onboarding="db-save">
+					<Button
+						text={saving ? 'Saving...' : 'Save'}
+						icon={Save}
+						iconColor="text-blue-600 dark:text-blue-400"
+						disabled={saving || !canSubmit}
+						on:click={handleSave}
+					/>
+				</div>
 				{#if mode === 'edit'}
 					<Button
 						href={repoInfo?.htmlUrl ?? instance?.repository_url}
