@@ -3,5 +3,6 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { pcdManager } from '$pcd/core/manager.ts';
 
 export const GET: RequestHandler = async () => {
-	return json(pcdManager.getAllPublic());
+	const databases = pcdManager.getAllPublic().map(({ local_path, ...rest }) => rest);
+	return json(databases);
 };
