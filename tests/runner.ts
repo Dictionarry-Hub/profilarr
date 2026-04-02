@@ -70,10 +70,11 @@
 
 const INTEGRATION_COMPOSE = 'tests/integration/auth/docker-compose.yml';
 const INTEGRATION_AUTH_SPEC_DIR = 'tests/integration/auth/specs';
+const INTEGRATION_API_SPEC_DIR = 'tests/integration/api/specs';
 const INTEGRATION_CONFLICT_SPEC_DIR = 'tests/integration/conflicts/specs';
 const INTEGRATION_NOTIFICATION_SPEC_DIR = 'tests/integration/notifications/specs';
 const INTEGRATION_SPEC_DIR = INTEGRATION_AUTH_SPEC_DIR; // backward compat
-const INTEGRATION_SUITES = new Set(['auth', 'conflicts', 'notifications']);
+const INTEGRATION_SUITES = new Set(['auth', 'api', 'conflicts', 'notifications']);
 
 const E2E_PCD_CONFIG = 'tests/e2e/pcd/playwright.config.ts';
 const E2E_PCD_SPEC_DIR = 'tests/e2e/pcd/specs';
@@ -231,13 +232,14 @@ async function runIntegration(target?: string): Promise<number> {
 
 	// Resolve spec dirs and files
 	function getSpecDir(s: string): string {
+		if (s === 'api') return INTEGRATION_API_SPEC_DIR;
 		if (s === 'conflicts') return INTEGRATION_CONFLICT_SPEC_DIR;
 		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
 		return INTEGRATION_AUTH_SPEC_DIR;
 	}
 
 	// Determine which suites to run
-	const suitesToRun = suite ? [suite] : ['auth', 'conflicts', 'notifications'];
+	const suitesToRun = suite ? [suite] : ['auth', 'api', 'conflicts', 'notifications'];
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
@@ -365,6 +367,7 @@ async function runIntegrationSpec(
 ): Promise<{ code: number; stdout: string; stderr: string }> {
 	const specName = specFile
 		.replace(`${INTEGRATION_AUTH_SPEC_DIR}/`, '')
+		.replace(`${INTEGRATION_API_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_CONFLICT_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_NOTIFICATION_SPEC_DIR}/`, '')
 		.replace('.test.ts', '');
