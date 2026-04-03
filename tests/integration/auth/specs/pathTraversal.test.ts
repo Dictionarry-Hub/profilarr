@@ -21,7 +21,7 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { Database } from 'jsr:@db/sqlite@0.12';
+import { Database } from '@db/sqlite';
 
 const PORT = 7018;
 const ORIGIN = `http://localhost:${PORT}`;

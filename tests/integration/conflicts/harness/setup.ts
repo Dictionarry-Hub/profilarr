@@ -2,7 +2,7 @@
  * PCD conflict test helpers — create database instances, insert ops, query state.
  */
 
-import { Database } from 'jsr:@db/sqlite@0.12';
+import { Database } from '@db/sqlite';
 import { log } from '$test-harness/log.ts';
 
 // ─── Database Instance ─────────────────────────────────────────────────────────

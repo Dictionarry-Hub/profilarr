@@ -3,7 +3,7 @@
  */
 
 import { TestClient } from '$test-harness/client.ts';
-import { Database } from 'jsr:@db/sqlite@0.12';
+import { Database } from '@db/sqlite';
 import { hash } from '@felix/bcrypt';
 import { log } from '$test-harness/log.ts';
 
