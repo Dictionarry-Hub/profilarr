@@ -5,9 +5,10 @@
 - [Overview](#overview)
 - [Steps](#steps)
   - [Completion Types](#completion-types)
+  - [Dynamic Routes](#dynamic-routes)
 - [Stages](#stages)
 - [Prerequisites](#prerequisites)
-- [Pipelines](#pipelines)
+- [Groups](#groups)
 - [Adding Content](#adding-content)
 - [Overlay Engine](#overlay-engine)
 - [Store & Persistence](#store--persistence)
@@ -32,10 +33,11 @@ an instruction card. The user completes the step by satisfying a condition, and
 the overlay advances. The spotlight animates smoothly between targets, and
 navigation between pages is handled automatically.
 
-New users see a prompt on first load asking if they want a guided tour. This is
-driven by a database flag (`onboarding_shown` on `general_settings`) that's set
-whether the user accepts or dismisses. Users can replay any stage or pipeline
-later from the `/onboarding` page, accessible via the help button.
+New users see a prompt on first load asking if they want a guided tour. This
+starts the Welcome stage, which introduces Profilarr and ends at the onboarding
+page where users can run any stage at their own pace. The prompt is driven by a
+database flag (`onboarding_shown` on `general_settings`) that's set whether the
+user accepts or dismisses.
 
 ## Steps
 
@@ -45,7 +47,7 @@ the user to do something. Steps are the building blocks of everything else.
 ```ts
 interface Step {
 	id: string;
-	route?: string;
+	route?: string | { resolve: string };
 	target?: string;
 	title: string;
 	body: string;
@@ -58,8 +60,8 @@ interface Step {
 `target` matches a `data-onboarding` attribute in the DOM. If omitted, the
 instruction card appears centered with no spotlight.
 
-`route` auto-navigates when the step becomes active. If the user is already on
-that route, nothing happens.
+`route` auto-navigates when the step becomes active. Can be a static string or
+a dynamic resolver (see [Dynamic Routes](#dynamic-routes)).
 
 `position` controls where the instruction card sits relative to the target:
 `above`, `below`, `left`, `right`, `above-left`, `above-right`, `below-left`,
@@ -80,6 +82,34 @@ interacting beyond the spotlight target.
 | `state`  | Advances when a named async check function returns true. Functions are registered in `stateChecks.ts`.      |
 | `manual` | Shows a Continue button on the instruction card.                                                            |
 
+When the completion type is not `manual`, the forward button is hidden from the
+progress bar. The user must satisfy the completion condition to advance.
+
+### Dynamic Routes
+
+Steps can use dynamic route resolvers for pages that require runtime data (e.g.
+navigating to a specific database or Arr instance). Instead of a static route
+string, use an object referencing a named resolver:
+
+```ts
+route: {
+	resolve: 'firstDatabaseChanges';
+}
+```
+
+Resolvers are registered in `src/lib/client/cutscene/routeResolvers.ts`. Each
+resolver is an async function that returns a path string:
+
+```ts
+export const routeResolvers: Record<string, () => Promise<string>> = {
+	firstDatabaseChanges: async () => {
+		const res = await fetch('/api/v1/databases');
+		const dbs = await res.json();
+		return `/databases/${dbs[0].id}/changes`;
+	}
+};
+```
+
 ## Stages
 
 A stage groups steps into a self-contained lesson that teaches one thing. Stages
@@ -96,26 +126,30 @@ interface Stage {
 }
 ```
 
-`silent` skips the completion modal when this stage finishes as the last stage in
-a run. Used for stages like Help where a "you're done" modal would be redundant.
+`silent` skips the completion modal when this stage finishes. Used for stages
+like Help where a "you're done" modal would be redundant.
 
 `prerequisites` gates the stage behind runtime conditions. See
 [Prerequisites](#prerequisites) below.
 
 ### Current Stages
 
-| ID            | Name        | Steps | Prerequisites | Description                                                            |
-| ------------- | ----------- | ----- | ------------- | ---------------------------------------------------------------------- |
-| `welcome`     | Welcome     | 10    |               | Sidebar walkthrough: what Profilarr is and what each section does      |
-| `personalize` | Personalize | 2     |               | Theme toggle and accent color picker                                   |
-| `databases`   | Databases   | 6     | `hasDatabase` | Linking a database: form fields, PAT, conflict strategy, sync settings |
-| `help`        | Help        | 1     |               | Introduces the help button (silent)                                    |
+| ID                | Name                     | Steps | Prerequisites    | Description                                      |
+| ----------------- | ------------------------ | ----- | ---------------- | ------------------------------------------------ |
+| `welcome`         | Welcome                  | 2     |                  | Introduces Profilarr and the onboarding page     |
+| `navigation`      | Navigation               | 5     |                  | Sidebar walkthrough: what each section does      |
+| `personalize`     | Personalize              | 2     |                  | Theme toggle and accent color picker             |
+| `help`            | Help                     | 1     |                  | Introduces the help button (silent)              |
+| `database-link`   | Connect a Database       | 7     |                  | Walk through connecting a configuration database |
+| `database-manage` | Managing a Database      | 6     | `hasDatabase`    | Explore the tabs on a connected database         |
+| `arr-link`        | Connect an Arr Instance  | 5     |                  | Walk through connecting a Radarr/Sonarr instance |
+| `arr-manage`      | Managing an Arr Instance | 7     | `hasArrInstance` | Explore the tabs on a connected Arr instance     |
 
 ## Prerequisites
 
-A prerequisite gates a stage behind a runtime condition. Before a stage or
-pipeline starts, all prerequisites are checked. If any check fails, the cutscene
-does not start and the user sees an error alert with the prerequisite's message.
+A prerequisite gates a stage behind a runtime condition. Before a stage starts,
+its prerequisites are checked. If any check fails, the cutscene does not start
+and the user sees an error alert with the prerequisite's message.
 
 ```ts
 interface Prerequisite {
@@ -133,10 +167,8 @@ boolean.
 ### How checks run
 
 The prerequisite runner (`src/lib/client/cutscene/prerequisites.ts`) collects
-prerequisites from the requested stage IDs, runs each check in order, and
-returns on the first failure. For pipelines, all stages' prerequisites are
-collected and checked upfront before the pipeline starts. This avoids starting a
-multi-stage walkthrough only to hit a blocker partway through.
+prerequisites from the requested stage, runs each check in order, and returns on
+the first failure.
 
 ### Adding a prerequisite
 
@@ -156,34 +188,48 @@ export const stateChecks: Record<string, () => Promise<boolean>> = {
 2. Add the prerequisite to the stage definition:
 
 ```ts
-prerequisites: [
-	{ check: 'hasDatabase', message: 'Link at least one database before starting this stage.' }
-];
+prerequisites: [{ check: 'hasDatabase', message: 'You need at least one connected database.' }];
 ```
 
 The same check function can be referenced by multiple stages.
 
-## Pipelines
+## Groups
 
-A pipeline chains stages together in order. When one stage completes, the next
-begins automatically.
+Groups organize stages visually on the onboarding page. They have no runtime
+behavior; stages within a group run independently.
 
 ```ts
-interface Pipeline {
-	id: string;
+interface StageGroup {
 	name: string;
 	description: string;
 	stages: string[];
 }
 ```
 
-The `stages` array contains stage IDs referencing entries in the stage registry.
+Groups are defined in `definitions/index.ts`:
 
-### Current Pipelines
+```ts
+export const GROUPS: StageGroup[] = [
+	{
+		name: 'Getting Started',
+		description: 'Learn the basics of Profilarr',
+		stages: ['welcome', 'navigation', 'personalize', 'help']
+	},
+	{
+		name: 'Databases',
+		description: 'Connect and manage configuration databases',
+		stages: ['database-link', 'database-manage']
+	}
+];
+```
 
-| ID                | Name            | Stages                                   | Description                                  |
-| ----------------- | --------------- | ---------------------------------------- | -------------------------------------------- |
-| `getting-started` | Getting Started | Welcome → Personalize → Databases → Help | First-run onboarding covering the essentials |
+### Current Groups
+
+| Name            | Stages                                            |
+| --------------- | ------------------------------------------------- |
+| Getting Started | Welcome, Navigation, Personalize, Help            |
+| Databases       | Connect a Database, Managing a Database           |
+| Arr Instances   | Connect an Arr Instance, Managing an Arr Instance |
 
 ## Adding Content
 
@@ -195,16 +241,10 @@ array and tag the target element with `data-onboarding`:
 ```
 
 If the step uses `state` completion, register the check function in
-`src/lib/client/cutscene/stateChecks.ts`:
+`src/lib/client/cutscene/stateChecks.ts`.
 
-```ts
-export const stateChecks: Record<string, () => Promise<boolean>> = {
-	myCheck: async () => {
-		const res = await fetch('/api/v1/...');
-		return res.ok;
-	}
-};
-```
+If the step needs a dynamic route, register a resolver in
+`src/lib/client/cutscene/routeResolvers.ts`.
 
 **Adding a stage**: create a file in `src/lib/client/cutscene/definitions/stages/`
 and register it in `definitions/index.ts`:
@@ -240,22 +280,7 @@ export const STAGES: Record<string, Stage> = {
 };
 ```
 
-The stage automatically appears on the `/onboarding` page.
-
-**Adding a pipeline**: create a file in `definitions/pipelines/` and register it
-in `definitions/index.ts`:
-
-```ts
-// definitions/pipelines/my-pipeline.ts
-import type { Pipeline } from '../../types.ts';
-
-export const myPipeline: Pipeline = {
-	id: 'my-pipeline',
-	name: 'My Pipeline',
-	description: 'A guided experience',
-	stages: ['stage-one', 'stage-two', 'stage-three']
-};
-```
+Add the stage to a group in `GROUPS` so it appears on the onboarding page.
 
 ## Overlay Engine
 
@@ -275,9 +300,9 @@ recalculates on scroll, resize, and navigation.
 
 ## Store & Persistence
 
-Runtime state is managed by a Svelte writable store. Progress (active pipeline,
-current stage/step) is saved to localStorage on every state change, so
-refreshing mid-walkthrough picks up where the user left off.
+Runtime state is managed by a Svelte writable store. Progress (active stage and
+current step) is saved to localStorage on every state change, so refreshing
+mid-walkthrough picks up where the user left off.
 
 The only server-side persistence is the `onboarding_shown` flag on
 `general_settings` (migration 058). This controls whether the first-run prompt
@@ -290,9 +315,8 @@ this.
 
 ## Onboarding Page
 
-`/onboarding` lists all registered pipelines and stages. Users can start a full
-pipeline or replay an individual stage. The page supports table/card view toggle
-and search by name or description.
+`/onboarding` shows stages organized by group. Each group displays its name,
+description, and the stages within it. Users can start any individual stage.
 
 The help button (parrot) includes an "Onboarding" link to this page on desktop.
 
