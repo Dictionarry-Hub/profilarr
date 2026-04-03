@@ -3,11 +3,9 @@ import { welcomeStage } from './stages/welcome.ts';
 import { navigationStage } from './stages/navigation.ts';
 import { personalizeStage } from './stages/personalize.ts';
 import { databaseLinkStage } from './stages/database-link.ts';
-import { databaseNavigationStage } from './stages/database-navigation.ts';
-import { databaseSummaryStage } from './stages/database-summary.ts';
+import { databaseManageStage } from './stages/database-manage.ts';
 import { arrLinkStage } from './stages/arr-link.ts';
-import { arrNavigationStage } from './stages/arr-navigation.ts';
-import { arrSummaryStage } from './stages/arr-summary.ts';
+import { arrManageStage } from './stages/arr-manage.ts';
 import { helpStage } from './stages/help.ts';
 import { gettingStartedPipeline } from './pipelines/getting-started.ts';
 import { databasesPipeline } from './pipelines/databases.ts';
@@ -18,11 +16,9 @@ export const STAGES: Record<string, Stage> = {
 	navigation: navigationStage,
 	personalize: personalizeStage,
 	'database-link': databaseLinkStage,
-	'database-navigation': databaseNavigationStage,
-	'database-summary': databaseSummaryStage,
+	'database-manage': databaseManageStage,
 	'arr-link': arrLinkStage,
-	'arr-navigation': arrNavigationStage,
-	'arr-summary': arrSummaryStage,
+	'arr-manage': arrManageStage,
 	help: helpStage
 };
 

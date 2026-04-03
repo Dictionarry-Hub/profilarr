@@ -18,7 +18,7 @@ export const navigationStage: Stage = {
 			route: '/databases',
 			target: 'nav-databases',
 			title: 'Databases',
-			body: "Databases are where your configurations come from. Connect one and everything inside is ready to browse, customize, and deploy to your Arr instances. We'll walk through linking one later.",
+			body: "Databases are where your configurations come from. Connect one and everything inside is ready to browse, customize, and deploy to your Arr instances. We'll walk through connecting one later.",
 			position: 'right',
 			completion: { type: 'manual' }
 		},

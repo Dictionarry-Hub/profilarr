@@ -1,14 +1,14 @@
 import type { Stage } from '../../types.ts';
 
-export const arrNavigationStage: Stage = {
-	id: 'arr-navigation',
-	name: 'Arr Navigation',
-	description: 'Explore the tabs on a connected Arr instance',
+export const arrManageStage: Stage = {
+	id: 'arr-manage',
+	name: 'Managing an Arr Instance',
+	description: 'Explore the tabs and features of a connected Arr instance',
 	prerequisites: [
 		{
 			check: 'hasArrInstance',
 			message:
-				'You need at least one connected Arr instance to start this stage. Follow the "Connect an Arr Instance" stage from the onboarding page to add one.'
+				'You need at least one connected Arr instance to start this stage. Follow the "Connect an Arr Instance" stage from the onboarding page to connect one.'
 		}
 	],
 	steps: [
@@ -64,6 +64,12 @@ export const arrNavigationStage: Stage = {
 			title: 'Settings',
 			body: 'The Settings tab lets you update connection details, configure library refresh intervals, set up automatic cleanup of stale configurations, and remove the instance if needed.',
 			position: 'below',
+			completion: { type: 'manual' }
+		},
+		{
+			id: 'arr-summary',
+			title: "You're connected",
+			body: "You've learned how to connect an Arr instance and explored the tabs where you'll manage your setup. The next steps are configuring sync to push configurations to your instance, setting up automated upgrades to search for better releases, and configuring renames to keep your files organized. Each of these has a dedicated walkthrough you can run from the onboarding page.",
 			completion: { type: 'manual' }
 		}
 	]

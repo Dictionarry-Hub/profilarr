@@ -2,14 +2,14 @@ import type { Stage } from '../../types.ts';
 
 export const databaseLinkStage: Stage = {
 	id: 'database-link',
-	name: 'Link a Database',
-	description: 'Learn how to link a configuration database',
+	name: 'Connect a Database',
+	description: 'Learn how to connect a configuration database',
 	steps: [
 		{
 			id: 'databases-explain',
 			target: 'nav-databases',
 			title: 'Databases',
-			body: "Now let's set up a database. Remember, databases are git repositories containing pre-built custom formats, quality profiles, and more. Anyone can create a Profilarr-compliant database, and you can connect as many as you like. A default database has already been linked for you, but you're free to remove it and use your own. Click Databases to continue.",
+			body: "Now let's set up a database. Remember, databases are git repositories containing pre-built custom formats, quality profiles, and more. Anyone can create a Profilarr-compliant database, and you can connect as many as you like. A default database has already been connected for you, but you're free to remove it and use your own. Click Databases to continue.",
 			position: 'right',
 			completion: { type: 'click' }
 		},
@@ -17,8 +17,8 @@ export const databaseLinkStage: Stage = {
 			id: 'databases-add',
 			route: '/databases',
 			target: 'db-add',
-			title: 'Link a New Database',
-			body: 'Click here to start linking a new database.',
+			title: 'Connect a New Database',
+			body: 'Click here to start connecting a new database.',
 			position: 'below-left',
 			completion: { type: 'click' }
 		},
@@ -27,7 +27,7 @@ export const databaseLinkStage: Stage = {
 			route: '/databases/new',
 			target: 'db-name-repo-branch',
 			title: 'Name, Repository & Branch',
-			body: 'Start by giving your database a friendly name, then paste in a GitHub repository URL. You can also specify a branch if you need one other than the default. Only GitHub is supported at the moment. If you ever need the same database on a different branch, just link it again with a different branch selected.',
+			body: 'Start by giving your database a friendly name, then paste in a GitHub repository URL. You can also specify a branch if you need one other than the default. Only GitHub is supported at the moment. If you ever need the same database on a different branch, just connect it again with a different branch selected.',
 			position: 'below',
 			completion: { type: 'manual' }
 		},
@@ -59,7 +59,7 @@ export const databaseLinkStage: Stage = {
 			id: 'databases-save',
 			target: 'db-save',
 			title: 'Save',
-			body: "Once you're happy with your settings, hit Save to link the database. Profilarr will clone the repository and import all its configurations.",
+			body: "Once you're happy with your settings, hit Save to connect the database. Profilarr will clone the repository and import all its configurations.",
 			position: 'below-left',
 			completion: { type: 'manual' }
 		}

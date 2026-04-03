@@ -1,14 +1,14 @@
 import type { Stage } from '../../types.ts';
 
-export const databaseNavigationStage: Stage = {
-	id: 'database-navigation',
-	name: 'Database Navigation',
-	description: 'Explore the tabs on a linked database',
+export const databaseManageStage: Stage = {
+	id: 'database-manage',
+	name: 'Managing a Database',
+	description: 'Explore the tabs and features of a connected database',
 	prerequisites: [
 		{
 			check: 'hasDatabase',
 			message:
-				'You need at least one linked database to start this stage. Follow the "Link a Database" stage from the onboarding page to link one.'
+				'You need at least one connected database to start this stage. Follow the "Connect a Database" stage from the onboarding page to connect one.'
 		}
 	],
 	steps: [
@@ -53,8 +53,14 @@ export const databaseNavigationStage: Stage = {
 			route: { resolve: 'firstDatabaseSettings' },
 			target: 'db-tab-settings',
 			title: 'Settings',
-			body: "The Settings tab lets you configure this database's name, sync schedule, auto-pull behavior, and conflict resolution strategy. You can also unlink the database from here.",
+			body: "The Settings tab lets you configure this database's name, sync schedule, auto-pull behavior, and conflict resolution strategy. You can also disconnect the database from here.",
 			position: 'below',
+			completion: { type: 'manual' }
+		},
+		{
+			id: 'db-summary',
+			title: "You're set up with databases",
+			body: "You've learned how to connect a database and explored the tabs where you'll manage changes, review commits, resolve conflicts, and configure settings. Your databases will stay in sync automatically if auto-pull is enabled, and any conflicts between your local tweaks and upstream updates will surface in the Conflicts tab when they happen.",
 			completion: { type: 'manual' }
 		}
 	]
