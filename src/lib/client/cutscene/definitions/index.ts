@@ -5,9 +5,13 @@ import { personalizeStage } from './stages/personalize.ts';
 import { databaseLinkStage } from './stages/database-link.ts';
 import { databaseNavigationStage } from './stages/database-navigation.ts';
 import { databaseSummaryStage } from './stages/database-summary.ts';
+import { arrLinkStage } from './stages/arr-link.ts';
+import { arrNavigationStage } from './stages/arr-navigation.ts';
+import { arrSummaryStage } from './stages/arr-summary.ts';
 import { helpStage } from './stages/help.ts';
 import { gettingStartedPipeline } from './pipelines/getting-started.ts';
 import { databasesPipeline } from './pipelines/databases.ts';
+import { arrsPipeline } from './pipelines/arrs.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
@@ -16,10 +20,14 @@ export const STAGES: Record<string, Stage> = {
 	'database-link': databaseLinkStage,
 	'database-navigation': databaseNavigationStage,
 	'database-summary': databaseSummaryStage,
+	'arr-link': arrLinkStage,
+	'arr-navigation': arrNavigationStage,
+	'arr-summary': arrSummaryStage,
 	help: helpStage
 };
 
 export const PIPELINES: Record<string, Pipeline> = {
 	'getting-started': gettingStartedPipeline,
-	databases: databasesPipeline
+	databases: databasesPipeline,
+	arrs: arrsPipeline
 };
