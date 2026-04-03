@@ -299,13 +299,15 @@
 					on:click={() => (showDeleteModal = true)}
 				/>
 			{/if}
-			<Button
-				text={saving ? 'Saving...' : 'Save'}
-				icon={Save}
-				iconColor="text-blue-600 dark:text-blue-400"
-				disabled={saving || !canSubmit}
-				on:click={handleSave}
-			/>
+			<div data-onboarding="arr-save">
+				<Button
+					text={saving ? 'Saving...' : 'Save'}
+					icon={Save}
+					iconColor="text-blue-600 dark:text-blue-400"
+					disabled={saving || !canSubmit}
+					on:click={handleSave}
+				/>
+			</div>
 		</svelte:fragment>
 	</StickyCard>
 
@@ -313,7 +315,7 @@
 		class="space-y-4 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
 	>
 		<!-- Type Row -->
-		<div class="space-y-2">
+		<div class="space-y-2" data-onboarding="arr-type">
 			<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
 				Type{#if mode === 'create'}<span class="text-red-500">*</span>{/if}
 			</span>
@@ -330,63 +332,68 @@
 				on:change={(e) => update('type', e.detail)}
 			/>
 		</div>
-		<!-- Name + Status Row -->
-		<div class="flex flex-col gap-4 md:flex-row md:items-end">
-			<div class="flex-1">
-				<FormInput
-					label="Name"
-					name="name"
-					value={name}
-					placeholder="e.g., Main Radarr, 4K Sonarr"
-					required
-					on:input={(e) => update('name', e.detail)}
-				/>
+		<!-- Name, URL, API Key -->
+		<div data-onboarding="arr-connection" class="space-y-4">
+			<!-- Name + Status Row -->
+			<div class="flex flex-col gap-4 md:flex-row md:items-end">
+				<div class="flex-1">
+					<FormInput
+						label="Name"
+						name="name"
+						value={name}
+						placeholder="e.g., Main Radarr, 4K Sonarr"
+						required
+						on:input={(e) => update('name', e.detail)}
+					/>
+				</div>
+				<div class="space-y-1">
+					<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+						>Status</span
+					>
+					<DropdownSelect
+						value={enabled}
+						options={enabledOptions}
+						on:change={(e) => update('enabled', e.detail)}
+					/>
+				</div>
 			</div>
-			<div class="space-y-1">
-				<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Status</span>
-				<DropdownSelect
-					value={enabled}
-					options={enabledOptions}
-					on:change={(e) => update('enabled', e.detail)}
-				/>
-			</div>
-		</div>
-		{#if enabled === 'false'}
-			<p class="text-xs text-amber-600 dark:text-amber-400">
-				Disabled instances are excluded from sync operations
-			</p>
-		{/if}
-		<!-- URL Row -->
-		<FormInput
-			label="URL"
-			name="url"
-			type="url"
-			value={url}
-			placeholder="http://localhost:7878"
-			description="Use container name if on the same Docker network, e.g. http://radarr:7878"
-			required
-			on:input={(e) => update('url', e.detail)}
-		/>
-		<!-- API Key + Test Connection Row -->
-		<div class="flex flex-col gap-4 md:flex-row md:items-end">
-			<div class="flex-1">
-				<FormInput
-					label="API Key"
-					name="api_key"
-					value={apiKey}
-					placeholder={mode === 'edit' ? '••••••••••••••••' : 'Enter API key'}
-					description={mode === 'edit' ? 'Leave blank to keep existing key' : ''}
-					required
-					private_
-					on:input={(e) => update('apiKey', e.detail)}
-				/>
-			</div>
-			<Button
-				text={testing ? 'Testing...' : 'Test Connection'}
-				icon={testing ? Loader2 : Wifi}
-				disabled={testing || !apiKey || !url || (mode === 'create' && !type)}
-				on:click={testConnection}
+			{#if enabled === 'false'}
+				<p class="text-xs text-amber-600 dark:text-amber-400">
+					Disabled instances are excluded from sync operations
+				</p>
+			{/if}
+			<!-- URL Row -->
+			<FormInput
+				label="URL"
+				name="url"
+				type="url"
+				value={url}
+				placeholder="http://localhost:7878"
+				description="Use container name if on the same Docker network, e.g. http://radarr:7878"
+				required
+				on:input={(e) => update('url', e.detail)}
 			/>
+			<!-- API Key + Test Connection Row -->
+			<div class="flex flex-col gap-4 md:flex-row md:items-end">
+				<div class="flex-1">
+					<FormInput
+						label="API Key"
+						name="api_key"
+						value={apiKey}
+						placeholder={mode === 'edit' ? '••••••••••••••••' : 'Enter API key'}
+						description={mode === 'edit' ? 'Leave blank to keep existing key' : ''}
+						required
+						private_
+						on:input={(e) => update('apiKey', e.detail)}
+					/>
+				</div>
+				<Button
+					text={testing ? 'Testing...' : 'Test Connection'}
+					icon={testing ? Loader2 : Wifi}
+					disabled={testing || !apiKey || !url || (mode === 'create' && !type)}
+					on:click={testConnection}
+				/>
+			</div>
 		</div>
 		<!-- Tags Row -->
 		<div class="space-y-2">

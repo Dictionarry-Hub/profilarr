@@ -31,13 +31,13 @@
 		</p>
 
 		<!-- Action Button -->
-		<div data-onboarding={onboarding}>
+		<span data-onboarding={onboarding} class="inline-block">
 			<Button
 				text={buttonText}
 				href={buttonHref}
 				icon={buttonIcon}
 				iconColor="text-blue-600 dark:text-blue-400"
 			/>
-		</div>
+		</span>
 	</div>
 </div>
