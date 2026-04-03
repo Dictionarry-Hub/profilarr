@@ -4,7 +4,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import { cutscene } from './store';
 	import { setupCompletion, teardownCompletion } from './completions.ts';
-	import { STAGES, PIPELINES } from './definitions/index.ts';
+	import { STAGES } from './definitions/index.ts';
 	import { routeResolvers } from './routeResolvers.ts';
 	import CutsceneCard from './CutsceneCard.svelte';
 
@@ -18,37 +18,10 @@
 	$: step = $currentStep;
 	$: active = state.active;
 
-	// Back is hidden on the very first step of the run
-	$: isFirstStep = (() => {
-		if (state.stepIndex > 0) return false;
-		if (state.pipelineId) {
-			const pipeline = PIPELINES[state.pipelineId];
-			return !pipeline || pipeline.stages[0] === state.stageId;
-		}
-		return true;
-	})();
+	$: isFirstStep = state.stepIndex === 0;
 
-	// Compute overall progress across pipeline or single stage
 	$: progressInfo = (() => {
 		if (!state.active || !state.stageId) return { current: 0, total: 0 };
-
-		if (state.pipelineId) {
-			const pipeline = PIPELINES[state.pipelineId];
-			if (!pipeline) return { current: 0, total: 0 };
-
-			let total = 0;
-			let current = 0;
-			for (const sid of pipeline.stages) {
-				const s = STAGES[sid];
-				if (!s) continue;
-				if (sid === state.stageId) {
-					current = total + state.stepIndex;
-				}
-				total += s.steps.length;
-			}
-			return { current, total };
-		}
-
 		const stage = STAGES[state.stageId];
 		if (!stage) return { current: 0, total: 0 };
 		return { current: state.stepIndex, total: stage.steps.length };

@@ -37,8 +37,7 @@ export interface Stage {
 	prerequisites?: Prerequisite[];
 }
 
-export interface Pipeline {
-	id: string;
+export interface StageGroup {
 	name: string;
 	description: string;
 	stages: string[];
@@ -46,9 +45,7 @@ export interface Pipeline {
 
 export interface CutsceneState {
 	active: boolean;
-	pipelineId: string | null;
 	stageId: string | null;
 	stepIndex: number;
-	completedStages: string[];
 	manualStart: boolean;
 }

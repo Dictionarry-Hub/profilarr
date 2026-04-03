@@ -1,4 +1,4 @@
-import type { Stage, Pipeline } from '../types.ts';
+import type { Stage, StageGroup } from '../types.ts';
 import { welcomeStage } from './stages/welcome.ts';
 import { navigationStage } from './stages/navigation.ts';
 import { personalizeStage } from './stages/personalize.ts';
@@ -7,9 +7,6 @@ import { databaseManageStage } from './stages/database-manage.ts';
 import { arrLinkStage } from './stages/arr-link.ts';
 import { arrManageStage } from './stages/arr-manage.ts';
 import { helpStage } from './stages/help.ts';
-import { gettingStartedPipeline } from './pipelines/getting-started.ts';
-import { databasesPipeline } from './pipelines/databases.ts';
-import { arrsPipeline } from './pipelines/arrs.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
@@ -22,8 +19,20 @@ export const STAGES: Record<string, Stage> = {
 	help: helpStage
 };
 
-export const PIPELINES: Record<string, Pipeline> = {
-	'getting-started': gettingStartedPipeline,
-	databases: databasesPipeline,
-	arrs: arrsPipeline
-};
+export const GROUPS: StageGroup[] = [
+	{
+		name: 'Getting Started',
+		description: 'Learn the basics of Profilarr',
+		stages: ['welcome', 'navigation', 'personalize', 'help']
+	},
+	{
+		name: 'Databases',
+		description: 'Connect and manage configuration databases',
+		stages: ['database-link', 'database-manage']
+	},
+	{
+		name: 'Arr Instances',
+		description: 'Connect and manage Radarr/Sonarr instances',
+		stages: ['arr-link', 'arr-manage']
+	}
+];

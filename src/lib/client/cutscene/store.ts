@@ -1,7 +1,7 @@
 import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { CutsceneState } from './types.ts';
-import { STAGES, PIPELINES } from './definitions/index.ts';
+import { STAGES } from './definitions/index.ts';
 import { checkPrerequisites } from './prerequisites.ts';
 import { alertStore } from '$lib/client/alerts/store';
 
@@ -9,10 +9,8 @@ const STORAGE_KEY = 'cutscene-progress';
 
 const DEFAULT_STATE: CutsceneState = {
 	active: false,
-	pipelineId: null,
 	stageId: null,
 	stepIndex: 0,
-	completedStages: [],
 	manualStart: false
 };
 
@@ -54,11 +52,6 @@ function createCutsceneStore() {
 		return STAGES[$state.stageId] ?? null;
 	});
 
-	const currentPipeline = derived(state, ($state) => {
-		if (!$state.pipelineId) return null;
-		return PIPELINES[$state.pipelineId] ?? null;
-	});
-
 	function init(shown: boolean): void {
 		onboardingShown.set(shown);
 		if (!shown) {
@@ -74,11 +67,11 @@ function createCutsceneStore() {
 		}
 	}
 
-	async function startStage(stageId: string): Promise<void> {
+	async function startStage(stageId: string, manual = true): Promise<void> {
 		const stage = STAGES[stageId];
 		if (!stage || stage.steps.length === 0) return;
 
-		const result = await checkPrerequisites([stageId]);
+		const result = await checkPrerequisites(stageId);
 		if (!result.ok) {
 			alertStore.add('error', result.message);
 			return;
@@ -87,34 +80,8 @@ function createCutsceneStore() {
 		justCompleted.set(false);
 		const newState: CutsceneState = {
 			active: true,
-			pipelineId: null,
 			stageId,
 			stepIndex: 0,
-			completedStages: [],
-			manualStart: true
-		};
-		state.set(newState);
-		saveState(newState);
-	}
-
-	async function startPipeline(pipelineId: string, manual = true): Promise<void> {
-		const pipeline = PIPELINES[pipelineId];
-		if (!pipeline || pipeline.stages.length === 0) return;
-
-		const result = await checkPrerequisites(pipeline.stages);
-		if (!result.ok) {
-			alertStore.add('error', result.message);
-			return;
-		}
-
-		justCompleted.set(false);
-		const firstStageId = pipeline.stages[0];
-		const newState: CutsceneState = {
-			active: true,
-			pipelineId,
-			stageId: firstStageId,
-			stepIndex: 0,
-			completedStages: [],
 			manualStart: manual
 		};
 		state.set(newState);
@@ -125,35 +92,12 @@ function createCutsceneStore() {
 		state.update((current) => {
 			if (!current.active || !current.stageId) return current;
 
-			// Can go back within current stage
 			if (current.stepIndex > 0) {
 				const updated = { ...current, stepIndex: current.stepIndex - 1 };
 				saveState(updated);
 				return updated;
 			}
 
-			// At step 0, try previous stage in pipeline
-			if (current.pipelineId) {
-				const pipeline = PIPELINES[current.pipelineId];
-				if (pipeline) {
-					const currentStageIndex = pipeline.stages.indexOf(current.stageId);
-					if (currentStageIndex > 0) {
-						const prevStageId = pipeline.stages[currentStageIndex - 1];
-						const prevStage = STAGES[prevStageId];
-						if (prevStage) {
-							const updated: CutsceneState = {
-								...current,
-								stageId: prevStageId,
-								stepIndex: prevStage.steps.length - 1
-							};
-							saveState(updated);
-							return updated;
-						}
-					}
-				}
-			}
-
-			// Already at the very beginning
 			return current;
 		});
 	}
@@ -175,42 +119,12 @@ function createCutsceneStore() {
 			}
 
 			// Stage complete
-			const completedStages = [...current.completedStages, current.stageId];
-
-			// If running a pipeline, try next stage
-			if (current.pipelineId) {
-				const pipeline = PIPELINES[current.pipelineId];
-				if (pipeline) {
-					const currentStageIndex = pipeline.stages.indexOf(current.stageId);
-					const nextStageId = pipeline.stages[currentStageIndex + 1];
-
-					if (nextStageId) {
-						const updated: CutsceneState = {
-							...current,
-							stageId: nextStageId,
-							stepIndex: 0,
-							completedStages
-						};
-						saveState(updated);
-						return updated;
-					}
-				}
-			}
-
-			// Done (single stage or pipeline complete)
 			clearState();
-			const lastStage = current.stageId ? STAGES[current.stageId] : null;
+			const lastStage = STAGES[current.stageId];
 			if (current.manualStart && !lastStage?.silent) {
 				justCompleted.set(true);
 			}
-			return {
-				active: false,
-				pipelineId: null,
-				stageId: null,
-				stepIndex: 0,
-				completedStages: [],
-				manualStart: false
-			};
+			return DEFAULT_STATE;
 		});
 	}
 
@@ -245,11 +159,9 @@ function createCutsceneStore() {
 		subscribe: state.subscribe,
 		currentStep,
 		currentStage,
-		currentPipeline,
 		onboardingShown: { subscribe: onboardingShown.subscribe },
 		justCompleted: { subscribe: justCompleted.subscribe },
 		init,
-		startPipeline,
 		startStage,
 		advance,
 		goBack,

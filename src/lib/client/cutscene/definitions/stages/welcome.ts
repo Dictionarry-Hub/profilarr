@@ -10,6 +10,13 @@ export const welcomeStage: Stage = {
 			title: 'Welcome to Profilarr',
 			body: 'Profilarr helps you build, test, and deploy media server configurations. Instead of manually configuring Radarr and Sonarr, you connect to curated databases and sync everything across your instances, while keeping any local tweaks you make.',
 			completion: { type: 'manual' }
+		},
+		{
+			id: 'welcome-onboarding',
+			route: '/onboarding',
+			title: 'Learning Profilarr',
+			body: 'This is the onboarding page. You can come back here anytime from the help menu to run any of these walkthroughs at your own pace.',
+			completion: { type: 'manual' }
 		}
 	]
 };
