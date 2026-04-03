@@ -9,5 +9,11 @@ export const stateChecks: Record<string, () => Promise<boolean>> = {
 		if (!res.ok) return false;
 		const data = await res.json();
 		return data.length > 0;
+	},
+	hasArrInstance: async () => {
+		const res = await fetch('/api/v1/arr');
+		if (!res.ok) return false;
+		const data = await res.json();
+		return data.length > 0;
 	}
 };
