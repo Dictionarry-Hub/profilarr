@@ -53,6 +53,7 @@
 		buttonText="Link Database"
 		buttonHref="/databases/new"
 		buttonIcon={Plus}
+		onboarding="db-add"
 	/>
 {:else}
 	<div class="space-y-6 p-4 sm:p-8">

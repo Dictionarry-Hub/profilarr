@@ -52,13 +52,19 @@
 		buttonText="Add Instance"
 		buttonHref="/arr/new"
 		buttonIcon={Plus}
+		onboarding="arr-add"
 	/>
 {:else}
 	<div class="space-y-6 p-4 sm:p-8">
 		<!-- Actions Bar -->
 		<ActionsBar>
 			<SearchAction searchStore={search} placeholder="Search instances..." />
-			<ActionButton icon={Plus} title="Add Instance" on:click={() => goto('/arr/new')} />
+			<ActionButton
+				icon={Plus}
+				title="Add Instance"
+				on:click={() => goto('/arr/new')}
+				onboarding="arr-add"
+			/>
 			<ActionButton icon={Info} title="Info" on:click={() => (showInfoModal = true)} />
 			<ViewToggle bind:value={$view} />
 		</ActionsBar>
