@@ -17,7 +17,7 @@ tags:
   - name: Entity Testing
     description: Release parsing and custom format evaluation
   - name: Arr
-    description: Arr instance library and release endpoints
+    description: Arr instance management, library, and sync endpoints
   - name: PCD
     description: PCD entity export and portable format endpoints
   - name: Databases
@@ -26,6 +26,8 @@ tags:
     description: Regex pattern validation
 
 paths:
+  /arr:
+    $ref: './paths/arr.yaml#/instances'
   /databases:
     $ref: './paths/databases.yaml#/databases'
   /health:
@@ -144,6 +146,9 @@ components:
       $ref: './schemas/pcd.yaml#/ImportRequest'
     ImportResponse:
       $ref: './schemas/pcd.yaml#/ImportResponse'
+    # Arr
+    ArrInstance:
+      $ref: './schemas/arr.yaml#/ArrInstance'
     # Databases
     DatabaseInstance:
       $ref: './schemas/databases.yaml#/DatabaseInstance'
