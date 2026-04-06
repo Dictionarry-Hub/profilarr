@@ -239,9 +239,15 @@
 		}
 	}
 
+	// Lock page scroll while cutscene is active
+	$: if (typeof document !== 'undefined') {
+		document.body.style.overflow = active ? 'hidden' : '';
+	}
+
 	onDestroy(() => {
 		teardownCompletion();
 		observer?.disconnect();
+		if (typeof document !== 'undefined') document.body.style.overflow = '';
 		if (typeof window !== 'undefined') {
 			window.removeEventListener('scroll', onScroll, true);
 			window.removeEventListener('resize', updateDimensions);

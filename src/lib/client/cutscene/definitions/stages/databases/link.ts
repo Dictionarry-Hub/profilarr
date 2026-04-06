@@ -10,7 +10,7 @@ export const databaseLinkStage: Stage = {
 			target: 'nav-databases',
 			title: 'Databases',
 			body: "Now let's set up a database. Remember, databases are git repositories containing pre-built custom formats, quality profiles, and more. Anyone can create a Profilarr-compliant database, and you can connect as many as you like. A default database has already been connected for you, but you're free to remove it and use your own. Click Databases to continue.",
-			position: 'right',
+			position: 'below-right',
 			completion: { type: 'click' }
 		},
 		{
