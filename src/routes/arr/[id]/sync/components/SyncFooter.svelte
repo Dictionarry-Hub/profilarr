@@ -14,6 +14,7 @@
 	export let hasConfig: boolean = true;
 	export let warning: string | null = null;
 	export let onWarning: ((message: string) => void) | undefined = undefined;
+	export let onboardingId: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher<{ save: void; sync: void }>();
 
@@ -39,7 +40,7 @@
 
 		<!-- Row 1: Trigger + Warning + Buttons -->
 		<div class="flex items-center justify-between gap-2">
-			<div>
+			<div data-onboarding={onboardingId}>
 				<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Trigger</span>
 				<DropdownSelect
 					value={syncTrigger}

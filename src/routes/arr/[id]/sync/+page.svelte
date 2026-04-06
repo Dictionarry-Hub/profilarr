@@ -130,7 +130,9 @@
 				</p>
 			</svelte:fragment>
 			<svelte:fragment slot="right">
-				<Button text="How it works" icon={Info} on:click={() => (showInfoModal = true)} />
+				<span data-onboarding="sync-how-it-works">
+					<Button text="How it works" icon={Info} on:click={() => (showInfoModal = true)} />
+				</span>
 			</svelte:fragment>
 		</StickyCard>
 
