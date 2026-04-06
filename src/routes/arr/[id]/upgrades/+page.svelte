@@ -168,7 +168,7 @@
 			/>
 		</section>
 
-		<section>
+		<section data-onboarding="upgrades-filters">
 			<h2
 				class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
 			>

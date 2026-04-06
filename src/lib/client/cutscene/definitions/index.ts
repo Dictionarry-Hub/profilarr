@@ -7,6 +7,7 @@ import { databaseManageStage } from './stages/database-manage.ts';
 import { arrLinkStage } from './stages/arr-link.ts';
 import { arrManageStage } from './stages/arr-manage.ts';
 import { arrSyncStage } from './stages/arr-sync.ts';
+import { arrUpgradesStage } from './stages/arr-upgrades.ts';
 import { helpStage } from './stages/help.ts';
 
 export const STAGES: Record<string, Stage> = {
@@ -18,6 +19,7 @@ export const STAGES: Record<string, Stage> = {
 	'arr-link': arrLinkStage,
 	'arr-manage': arrManageStage,
 	'arr-sync': arrSyncStage,
+	'arr-upgrades': arrUpgradesStage,
 	help: helpStage
 };
 
@@ -35,6 +37,6 @@ export const GROUPS: StageGroup[] = [
 	{
 		name: 'Arr Instances',
 		description: 'Connect and manage Radarr/Sonarr instances',
-		stages: ['arr-link', 'arr-manage', 'arr-sync']
+		stages: ['arr-link', 'arr-manage', 'arr-sync', 'arr-upgrades']
 	}
 ];
