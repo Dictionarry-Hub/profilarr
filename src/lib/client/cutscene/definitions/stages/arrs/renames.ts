@@ -8,7 +8,7 @@ export const arrRenameStage: Stage = {
 		{
 			check: 'hasArrInstance',
 			message:
-				'You need at least one connected Arr instance to start this stage. Follow the "Connect an Arr Instance" stage from the onboarding page to connect one.'
+				'You need at least one connected Arr instance to start this stage. Follow the "Link" stage under Arr Instances from the onboarding page to connect one.'
 		}
 	],
 	steps: [

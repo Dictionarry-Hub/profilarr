@@ -8,7 +8,7 @@ export const databaseOverviewStage: Stage = {
 		{
 			check: 'hasDatabase',
 			message:
-				'You need at least one connected database to start this stage. Follow the "Connect a Database" stage from the onboarding page to connect one.'
+				'You need at least one connected database to start this stage. Follow the "Link" stage under Databases from the onboarding page to connect one.'
 		}
 	],
 	steps: [
