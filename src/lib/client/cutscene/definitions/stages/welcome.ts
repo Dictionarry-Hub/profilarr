@@ -12,10 +12,17 @@ export const welcomeStage: Stage = {
 			completion: { type: 'manual' }
 		},
 		{
-			id: 'welcome-onboarding',
-			route: '/onboarding',
+			id: 'nav-onboarding',
+			target: 'nav-onboarding',
 			title: 'Learning Profilarr',
-			body: 'This is the onboarding page. You can come back here anytime from the help menu to run any of these walkthroughs at your own pace.',
+			body: 'This is the onboarding page. It lives under Settings in the sidebar. Click it to get started.',
+			position: 'right',
+			completion: { type: 'click' }
+		},
+		{
+			id: 'welcome-onboarding',
+			title: 'The Onboarding Page',
+			body: 'Each walkthrough here teaches one part of Profilarr with guided, hands-on steps. You can come back here anytime from Settings in the sidebar.',
 			completion: { type: 'manual' }
 		}
 	]

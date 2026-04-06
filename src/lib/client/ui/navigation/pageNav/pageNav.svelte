@@ -198,7 +198,7 @@
 			<GroupItem label="Backups" href="/settings/backups" />
 			<GroupItem label="Notifications" href="/settings/notifications" />
 			<GroupItem label="Security" href="/settings/security" />
-			<GroupItem label="Onboarding" href="/onboarding" />
+			<GroupItem label="Onboarding" href="/onboarding" onboardingId="nav-onboarding" />
 			<GroupItem label="About" href="/settings/about" />
 			<GroupItem
 				label="Log Out"
