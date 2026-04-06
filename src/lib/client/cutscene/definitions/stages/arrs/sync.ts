@@ -48,7 +48,7 @@ export const arrSyncStage: Stage = {
 			target: 'sync-trigger',
 			title: 'Triggers',
 			body: 'Each section has its own trigger that controls when sync happens. Manual means you click sync yourself. On Pull syncs automatically when new changes arrive from a database. Schedule runs on a cron expression you define.',
-			position: 'above',
+			position: 'below-right',
 			freeInteract: true,
 			completion: { type: 'manual' }
 		},

@@ -61,6 +61,11 @@
 		requestAnimationFrame(frame);
 	}
 
+	function isInViewport(el: Element): boolean {
+		const rect = el.getBoundingClientRect();
+		return rect.top >= 0 && rect.bottom <= window.innerHeight;
+	}
+
 	function findTarget(): void {
 		if (!step?.target) {
 			targetRect = null;
@@ -68,6 +73,12 @@
 		}
 		const el = document.querySelector(`[data-onboarding="${step.target}"]`);
 		if (el) {
+			if (!isInViewport(el)) {
+				el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+				// Re-measure after scroll settles
+				setTimeout(() => findTarget(), 400);
+				return;
+			}
 			const rect = el.getBoundingClientRect();
 			const newRect = {
 				x: rect.left - PAD,
@@ -239,16 +250,26 @@
 		}
 	}
 
-	// Lock page scroll while cutscene is active
-	$: if (typeof document !== 'undefined') {
-		document.body.style.overflow = active ? 'hidden' : '';
+	// Prevent user scroll while cutscene is active (but allow programmatic scrollIntoView)
+	function preventScroll(e: Event): void {
+		e.preventDefault();
+	}
+	$: if (typeof window !== 'undefined') {
+		if (active) {
+			window.addEventListener('wheel', preventScroll, { passive: false });
+			window.addEventListener('touchmove', preventScroll, { passive: false });
+		} else {
+			window.removeEventListener('wheel', preventScroll);
+			window.removeEventListener('touchmove', preventScroll);
+		}
 	}
 
 	onDestroy(() => {
 		teardownCompletion();
 		observer?.disconnect();
-		if (typeof document !== 'undefined') document.body.style.overflow = '';
 		if (typeof window !== 'undefined') {
+			window.removeEventListener('wheel', preventScroll);
+			window.removeEventListener('touchmove', preventScroll);
 			window.removeEventListener('scroll', onScroll, true);
 			window.removeEventListener('resize', updateDimensions);
 		}
