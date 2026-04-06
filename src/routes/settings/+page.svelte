@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Sliders, ShieldCheck, Bell, Clock, FileText, Archive, Info } from 'lucide-svelte';
+	import {
+		Sliders,
+		ShieldCheck,
+		GraduationCap,
+		Bell,
+		Clock,
+		FileText,
+		Archive,
+		Info
+	} from 'lucide-svelte';
 
 	const settingsItems = [
 		{
@@ -15,6 +24,13 @@
 			description: 'Access control and sensitive operations',
 			icon: ShieldCheck,
 			iconClass: 'text-rose-600 dark:text-rose-400'
+		},
+		{
+			label: 'Onboarding',
+			href: '/onboarding',
+			description: 'Guided walkthroughs and interactive tutorials',
+			icon: GraduationCap,
+			iconClass: 'text-violet-600 dark:text-violet-400'
 		},
 		{
 			label: 'Notifications',
