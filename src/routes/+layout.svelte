@@ -7,7 +7,7 @@
 	import AlertContainer from '$alerts/AlertContainer.svelte';
 	import HelpButton from '$ui/help/HelpButton.svelte';
 	import CutsceneOverlay from '$lib/client/cutscene/CutsceneOverlay.svelte';
-	import CutscenePrompt from '$lib/client/cutscene/CutscenePrompt.svelte';
+
 	import CutsceneComplete from '$lib/client/cutscene/CutsceneComplete.svelte';
 	import { cutscene } from '$lib/client/cutscene/store';
 	import { FEATURES } from '$lib/shared/features';
@@ -55,7 +55,6 @@
 	<HelpButton />
 	{#if cutsceneEnabled && isDesktop}
 		<CutsceneOverlay />
-		<CutscenePrompt />
 		<CutsceneComplete />
 	{/if}
 {/if}
