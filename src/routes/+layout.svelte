@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import '$stores/font';
 	import logo from '$assets/logo-512.png';
 	import Navbar from '$ui/navigation/navbar/navbar.svelte';
 	import PageNav from '$ui/navigation/pageNav/pageNav.svelte';

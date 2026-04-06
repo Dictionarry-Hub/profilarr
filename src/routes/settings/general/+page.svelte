@@ -5,6 +5,13 @@
 	import { alertStore } from '$alerts/store';
 	import { navIconStore, type NavIconStyle } from '$stores/navIcons';
 	import { alertSettingsStore, type AlertPosition, DEFAULT_ALERT_SETTINGS } from '$alerts/settings';
+	import {
+		fontStore,
+		sansFontOptions,
+		monoFontOptions,
+		type SansFont,
+		type MonoFont
+	} from '$stores/font';
 	import { initEdit, update, isDirty, resetFromServer, clear } from '$stores/dirty';
 	import { FEATURES } from '$shared/features.ts';
 	import {
@@ -66,6 +73,8 @@
 	let uiAlertDurationSeconds: number | undefined = Math.round(
 		DEFAULT_ALERT_SETTINGS.durationMs / 1000
 	);
+	let uiFontSans: SansFont = 'dm-sans';
+	let uiFontMono: MonoFont = 'geist-mono';
 
 	// AI show/hide API key
 	let aiShowKey = false;
@@ -138,7 +147,9 @@
 			arr_apply_default_delay_profiles: arrApplyDefaultDelayProfiles,
 			ui_nav_icon_style: uiNavIconStyle,
 			ui_alert_position: uiAlertPosition,
-			ui_alert_duration_seconds: uiAlertDurationSeconds
+			ui_alert_duration_seconds: uiAlertDurationSeconds,
+			ui_font_sans: uiFontSans,
+			ui_font_mono: uiFontMono
 		};
 
 		if (FEATURES.ai) {
@@ -157,6 +168,9 @@
 		const alertSettings = get(alertSettingsStore);
 		uiAlertPosition = alertSettings.position;
 		uiAlertDurationSeconds = Math.round(alertSettings.durationMs / 1000);
+		const fontSettings = get(fontStore);
+		uiFontSans = fontSettings.sans;
+		uiFontMono = fontSettings.mono;
 
 		initEdit(buildSnapshot());
 
@@ -238,6 +252,7 @@
 				const durationMs = Math.max(0, Math.round((uiAlertDurationSeconds ?? 0) * 1000));
 				navIconStore.setStyle(uiNavIconStyle);
 				alertSettingsStore.setSettings({ position: uiAlertPosition, durationMs });
+				fontStore.setFonts({ sans: uiFontSans, mono: uiFontMono });
 
 				// Reset dirty tracking
 				resetFromServer(buildSnapshot());
@@ -353,6 +368,38 @@
 								onchange={(v) => {
 									uiAlertDurationSeconds = v;
 									update('ui_alert_duration_seconds', v);
+								}}
+							/>
+						</div>
+
+						<div>
+							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+								Sans Font
+							</span>
+							<DropdownSelect
+								value={uiFontSans}
+								options={sansFontOptions}
+								fullWidth
+								fixed
+								on:change={(e) => {
+									uiFontSans = e.detail as SansFont;
+									update('ui_font_sans', uiFontSans);
+								}}
+							/>
+						</div>
+
+						<div>
+							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+								Mono Font
+							</span>
+							<DropdownSelect
+								value={uiFontMono}
+								options={monoFontOptions}
+								fullWidth
+								fixed
+								on:change={(e) => {
+									uiFontMono = e.detail as MonoFont;
+									update('ui_font_mono', uiFontMono);
 								}}
 							/>
 						</div>

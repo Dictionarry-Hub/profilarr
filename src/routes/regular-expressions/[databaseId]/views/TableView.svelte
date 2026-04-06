@@ -144,7 +144,7 @@
 		padding: 0.125rem 0.25rem;
 		border-radius: 0.25rem;
 		font-size: 0.75rem;
-		font-family: ui-monospace, monospace;
+		font-family: var(--font-mono);
 	}
 
 	:global(.dark .prose-inline code) {
