@@ -8,6 +8,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
+	import { alertStore } from '$alerts/store';
 
 	interface StageItem {
 		id: string;
@@ -37,6 +38,13 @@
 	})).filter((group) => group.stages.length > 0);
 
 	async function handleStart(id: string): Promise<void> {
+		if (window.innerWidth < 768) {
+			alertStore.add(
+				'warning',
+				'Onboarding walkthroughs are only available on desktop. Move to a larger screen to continue.'
+			);
+			return;
+		}
 		await cutscene.startStage(id);
 	}
 </script>
