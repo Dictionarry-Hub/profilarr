@@ -83,13 +83,11 @@
 	<!-- Groups -->
 	{#each filteredGroups as group}
 		<div>
-			<div class="mb-3">
-				<h2
-					class="text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
-				>
+			<div class="mb-3 border-l-2 border-accent-500 py-1 pl-3">
+				<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 					{group.name}
 				</h2>
-				<p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-500">
+				<p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
 					{group.description}
 				</p>
 			</div>
