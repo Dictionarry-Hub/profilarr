@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Play, ChevronDown } from 'lucide-svelte';
+	import { Play } from 'lucide-svelte';
 	import { cutscene } from '$lib/client/cutscene/store';
 	import { STAGES, GROUPS } from '$lib/client/cutscene/definitions/index.ts';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
+	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
@@ -35,17 +36,6 @@
 		stages: group.stages.filter((id) => filteredIds.has(id))
 	})).filter((group) => group.stages.length > 0);
 
-	let collapsed: Set<string> = new Set();
-
-	function toggleGroup(name: string): void {
-		if (collapsed.has(name)) {
-			collapsed.delete(name);
-		} else {
-			collapsed.add(name);
-		}
-		collapsed = collapsed;
-	}
-
 	async function handleStart(id: string): Promise<void> {
 		await cutscene.startStage(id);
 	}
@@ -55,50 +45,25 @@
 	<title>Onboarding - Profilarr</title>
 </svelte:head>
 
-<div class="space-y-6 px-4 pt-8 pb-8 md:px-8 md:pt-12">
+<div class="p-4 md:p-8">
 	<!-- Header -->
-	<div>
-		<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Onboarding</h1>
-		<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="mb-8">
+		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">Onboarding</h1>
+		<p class="mt-2 text-base text-neutral-600 md:mt-3 md:text-lg dark:text-neutral-400">
 			Guided walkthroughs to help you get the most out of Profilarr. Run any stage at your own pace.
 		</p>
 	</div>
 
-	<!-- Actions Bar -->
-	<ActionsBar>
-		<SearchAction searchStore={search} placeholder="Search stages..." responsive />
-	</ActionsBar>
+	<div class="space-y-6">
+		<!-- Actions Bar -->
+		<ActionsBar>
+			<SearchAction searchStore={search} placeholder="Search stages..." responsive />
+		</ActionsBar>
 
-	<!-- Groups -->
-	{#each filteredGroups as group}
-		<div
-			class="overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
-		>
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<div
-				class="flex cursor-pointer items-center justify-between bg-neutral-50 px-6 py-4 dark:bg-neutral-800/50"
-				on:click={() => toggleGroup(group.name)}
-			>
-				<div>
-					<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
-						{group.name}
-					</h2>
-					<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-						{group.description}
-					</p>
-				</div>
-				<ChevronDown
-					size={18}
-					class="text-neutral-400 transition-transform duration-200 {collapsed.has(group.name)
-						? '-rotate-90'
-						: ''}"
-				/>
-			</div>
-			{#if !collapsed.has(group.name)}
-				<div
-					class="divide-y divide-neutral-200 border-t border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800"
-				>
+		<!-- Groups -->
+		{#each filteredGroups as group}
+			<ExpandableCard title={group.name} description={group.description}>
+				<div class="divide-y divide-neutral-200 dark:divide-neutral-700/60">
 					{#each group.stages as stageId}
 						{@const stage = STAGES[stageId]}
 						{#if stage}
@@ -128,7 +93,7 @@
 						{/if}
 					{/each}
 				</div>
-			{/if}
-		</div>
-	{/each}
+			</ExpandableCard>
+		{/each}
+	</div>
 </div>
