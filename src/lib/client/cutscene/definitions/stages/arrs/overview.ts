@@ -1,9 +1,9 @@
 import type { Stage } from '../../types.ts';
 
-export const arrManageStage: Stage = {
+export const arrOverviewStage: Stage = {
 	id: 'arr-manage',
-	name: 'Managing an Arr Instance',
-	description: 'Explore the tabs and features of a connected Arr instance',
+	name: 'Overview',
+	description: 'Tabs and features of a connected Arr instance',
 	prerequisites: [
 		{
 			check: 'hasArrInstance',

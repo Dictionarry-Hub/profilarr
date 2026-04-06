@@ -134,16 +134,19 @@ like Help where a "you're done" modal would be redundant.
 
 ### Current Stages
 
-| ID                | Name                     | Steps | Prerequisites    | Description                                      |
-| ----------------- | ------------------------ | ----- | ---------------- | ------------------------------------------------ |
-| `welcome`         | Welcome                  | 2     |                  | Introduces Profilarr and the onboarding page     |
-| `navigation`      | Navigation               | 5     |                  | Sidebar walkthrough: what each section does      |
-| `personalize`     | Personalize              | 2     |                  | Theme toggle and accent color picker             |
-| `help`            | Help                     | 1     |                  | Introduces the help button (silent)              |
-| `database-link`   | Connect a Database       | 7     |                  | Walk through connecting a configuration database |
-| `database-manage` | Managing a Database      | 6     | `hasDatabase`    | Explore the tabs on a connected database         |
-| `arr-link`        | Connect an Arr Instance  | 5     |                  | Walk through connecting a Radarr/Sonarr instance |
-| `arr-manage`      | Managing an Arr Instance | 7     | `hasArrInstance` | Explore the tabs on a connected Arr instance     |
+| ID                | Name        | Steps | Prerequisites    | Description                                     |
+| ----------------- | ----------- | ----- | ---------------- | ----------------------------------------------- |
+| `welcome`         | Welcome     | 3     |                  | What Profilarr is and how it works              |
+| `navigation`      | Navigation  | 5     |                  | The main sections of the app                    |
+| `personalize`     | Personalize | 2     |                  | Theme toggle and accent color picker            |
+| `help`            | Help        | 1     |                  | Introduces the help button (silent)             |
+| `database-link`   | Link        | 7     |                  | Connect a configuration database                |
+| `database-manage` | Overview    | 6     | `hasDatabase`    | Tabs and features of a connected database       |
+| `arr-link`        | Link        | 5     |                  | Connect a Radarr or Sonarr instance             |
+| `arr-manage`      | Overview    | 7     | `hasArrInstance` | Tabs and features of a connected Arr instance   |
+| `arr-sync`        | Sync        | 7     | `hasArrInstance` | Configure what gets synced and when             |
+| `arr-upgrades`    | Upgrades    | 11    | `hasArrInstance` | Automated searching for better quality releases |
+| `arr-renames`     | Rename      | 7     | `hasArrInstance` | Automated file and folder renaming              |
 
 ## Prerequisites
 

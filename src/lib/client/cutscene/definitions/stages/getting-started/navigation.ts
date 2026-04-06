@@ -3,7 +3,7 @@ import type { Stage } from '../../types.ts';
 export const navigationStage: Stage = {
 	id: 'navigation',
 	name: 'Navigation',
-	description: 'Walk through the main sections of the app',
+	description: 'The main sections of the app',
 	steps: [
 		{
 			id: 'sidebar-overview',

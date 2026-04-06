@@ -1,9 +1,9 @@
 import type { Stage } from '../../types.ts';
 
-export const arrRenamesStage: Stage = {
+export const arrRenameStage: Stage = {
 	id: 'arr-renames',
-	name: 'Renaming with an Arr Instance',
-	description: 'Learn how to configure automated file and folder renaming',
+	name: 'Rename',
+	description: 'Automated file and folder renaming',
 	prerequisites: [
 		{
 			check: 'hasArrInstance',

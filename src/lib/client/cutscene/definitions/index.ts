@@ -1,27 +1,27 @@
 import type { Stage, StageGroup } from '../types.ts';
-import { welcomeStage } from './stages/welcome.ts';
-import { navigationStage } from './stages/navigation.ts';
-import { personalizeStage } from './stages/personalize.ts';
-import { databaseLinkStage } from './stages/database-link.ts';
-import { databaseManageStage } from './stages/database-manage.ts';
-import { arrLinkStage } from './stages/arr-link.ts';
-import { arrManageStage } from './stages/arr-manage.ts';
-import { arrSyncStage } from './stages/arr-sync.ts';
-import { arrUpgradesStage } from './stages/arr-upgrades.ts';
-import { arrRenamesStage } from './stages/arr-renames.ts';
-import { helpStage } from './stages/help.ts';
+import { welcomeStage } from './stages/getting-started/welcome.ts';
+import { navigationStage } from './stages/getting-started/navigation.ts';
+import { personalizeStage } from './stages/getting-started/personalize.ts';
+import { helpStage } from './stages/getting-started/help.ts';
+import { databaseLinkStage } from './stages/databases/link.ts';
+import { databaseOverviewStage } from './stages/databases/overview.ts';
+import { arrLinkStage } from './stages/arrs/link.ts';
+import { arrOverviewStage } from './stages/arrs/overview.ts';
+import { arrSyncStage } from './stages/arrs/sync.ts';
+import { arrUpgradesStage } from './stages/arrs/upgrades.ts';
+import { arrRenameStage } from './stages/arrs/renames.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
 	navigation: navigationStage,
 	personalize: personalizeStage,
 	'database-link': databaseLinkStage,
-	'database-manage': databaseManageStage,
+	'database-manage': databaseOverviewStage,
 	'arr-link': arrLinkStage,
-	'arr-manage': arrManageStage,
+	'arr-manage': arrOverviewStage,
 	'arr-sync': arrSyncStage,
 	'arr-upgrades': arrUpgradesStage,
-	'arr-renames': arrRenamesStage,
+	'arr-renames': arrRenameStage,
 	help: helpStage
 };
 

@@ -2,8 +2,8 @@ import type { Stage } from '../../types.ts';
 
 export const arrUpgradesStage: Stage = {
 	id: 'arr-upgrades',
-	name: 'Upgrading with an Arr Instance',
-	description: 'Learn how to configure automated upgrade searches',
+	name: 'Upgrades',
+	description: 'Automated searching for better quality releases',
 	prerequisites: [
 		{
 			check: 'hasArrInstance',

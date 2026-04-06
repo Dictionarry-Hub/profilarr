@@ -3,7 +3,7 @@ import type { Stage } from '../../types.ts';
 export const welcomeStage: Stage = {
 	id: 'welcome',
 	name: 'Welcome',
-	description: 'Learn what Profilarr is and how it works',
+	description: 'What Profilarr is and how it works',
 	steps: [
 		{
 			id: 'what-is-profilarr',

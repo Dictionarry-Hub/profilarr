@@ -2,8 +2,8 @@ import type { Stage } from '../../types.ts';
 
 export const arrLinkStage: Stage = {
 	id: 'arr-link',
-	name: 'Connect an Arr Instance',
-	description: 'Learn how to connect a Radarr or Sonarr instance',
+	name: 'Link',
+	description: 'Connect a Radarr or Sonarr instance',
 	steps: [
 		{
 			id: 'arr-explain',

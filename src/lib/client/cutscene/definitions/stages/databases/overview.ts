@@ -1,9 +1,9 @@
 import type { Stage } from '../../types.ts';
 
-export const databaseManageStage: Stage = {
+export const databaseOverviewStage: Stage = {
 	id: 'database-manage',
-	name: 'Managing a Database',
-	description: 'Explore the tabs and features of a connected database',
+	name: 'Overview',
+	description: 'Tabs and features of a connected database',
 	prerequisites: [
 		{
 			check: 'hasDatabase',

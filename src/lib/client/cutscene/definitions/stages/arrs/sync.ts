@@ -2,8 +2,8 @@ import type { Stage } from '../../types.ts';
 
 export const arrSyncStage: Stage = {
 	id: 'arr-sync',
-	name: 'Syncing to an Arr Instance',
-	description: 'Learn how to configure and trigger sync for an Arr instance',
+	name: 'Sync',
+	description: 'Configure what gets synced and when',
 	prerequisites: [
 		{
 			check: 'hasArrInstance',
