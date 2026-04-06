@@ -19,9 +19,8 @@
 		AlertTriangle,
 		Info
 	} from 'lucide-svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import CardGrid from '$ui/card/CardGrid.svelte';
+	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
+	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
@@ -250,490 +249,446 @@
 	}}
 >
 	<div class="p-4 md:p-8">
-		<StickyCard position="top">
-			<div slot="left">
-				<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">
+		<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+			<div>
+				<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">
 					General Settings
 				</h1>
-				<p class="text-sm text-neutral-500 dark:text-neutral-400">
+				<p class="mt-2 text-base text-neutral-600 md:mt-3 md:text-lg dark:text-neutral-400">
 					Configure general application settings and preferences
 				</p>
 			</div>
-			<div slot="right">
-				<Button
-					text={saving ? 'Saving...' : 'Save'}
-					icon={saving ? Loader2 : Save}
-					iconColor="text-blue-600 dark:text-blue-400"
-					loading={saving}
-					disabled={saving || !$isDirty}
-					type="submit"
-				/>
-			</div>
-		</StickyCard>
+			<Button
+				text={saving ? 'Saving...' : 'Save'}
+				icon={saving ? Loader2 : Save}
+				iconColor="text-blue-600 dark:text-blue-400"
+				loading={saving}
+				disabled={saving || !$isDirty}
+				type="submit"
+			/>
+		</div>
 
-		<div class="mt-6">
-			<CardGrid columns={1} gap="md" flush>
-				<!-- ==================== Interface (UI) ==================== -->
-				<Card>
-					<svelte:fragment slot="header">
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">Interface</h2>
-						<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-							Customize the look and feel of the application
-						</p>
-					</svelte:fragment>
-
-					<div class="space-y-4">
-						<div class="grid grid-cols-1 gap-4 sm:grid-cols-5">
-							<div>
-								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-									Emoji Icons
-								</span>
-								<Toggle
-									label={uiNavIconStyle === 'emoji' ? 'Enabled' : 'Disabled'}
-									checked={uiNavIconStyle === 'emoji'}
-									fullWidth
-									on:change={(e) => {
-										uiNavIconStyle = e.detail ? 'emoji' : 'lucide';
-										update('ui_nav_icon_style', uiNavIconStyle);
-									}}
-								/>
-							</div>
-
-							<div class="sm:col-span-2">
-								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-									Alert Position
-								</span>
-								<DropdownSelect
-									value={uiAlertPosition}
-									options={alertPositionOptions}
-									fullWidth
-									fixed
-									on:change={(e) => {
-										uiAlertPosition = e.detail as AlertPosition;
-										update('ui_alert_position', uiAlertPosition);
-									}}
-								/>
-							</div>
-
-							<div class="sm:col-span-2">
-								<label
-									for="ui_alert_duration"
-									class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
-								>
-									Alert Duration (seconds)
-								</label>
-								<NumberInput
-									name="ui_alert_duration"
-									id="ui_alert_duration"
-									value={uiAlertDurationSeconds}
-									min={0}
-									step={1}
-									onchange={(v) => {
-										uiAlertDurationSeconds = v;
-										update('ui_alert_duration_seconds', v);
-									}}
-								/>
-							</div>
-						</div>
-
-						<!-- Test Alerts -->
-						<div
-							class="flex flex-wrap items-center gap-2 border-t border-neutral-200 pt-4 dark:border-neutral-700"
-						>
-							<span
-								class="text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
-							>
-								Test
-							</span>
-							<Button
-								text="Success"
-								icon={CheckCircle}
-								iconColor="text-green-600 dark:text-green-400"
-								size="sm"
-								on:click={() => alertStore.add('success', 'Success alert example.')}
-							/>
-							<Button
-								text="Error"
-								icon={XCircle}
-								iconColor="text-red-600 dark:text-red-400"
-								size="sm"
-								on:click={() => alertStore.add('error', 'Error alert example.')}
-							/>
-							<Button
-								text="Warning"
-								icon={AlertTriangle}
-								iconColor="text-yellow-500 dark:text-yellow-400"
-								size="sm"
-								on:click={() => alertStore.add('warning', 'Warning alert example.')}
-							/>
-							<Button
-								text="Info"
-								icon={Info}
-								iconColor="text-blue-600 dark:text-blue-400"
-								size="sm"
-								on:click={() => alertStore.add('info', 'Info alert example.')}
-							/>
-						</div>
-					</div>
-				</Card>
-
-				<!-- ==================== Arr Instance Defaults ==================== -->
-				<Card>
-					<svelte:fragment slot="header">
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
-							Arr Instance Defaults
-						</h2>
-						<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-							Configure default settings applied when adding new Radarr/Sonarr instances
-						</p>
-					</svelte:fragment>
-
-					<div class="space-y-4">
-						<Toggle
-							label="Apply Default Delay Profile"
-							checked={arrApplyDefaultDelayProfiles}
-							on:change={(e) => {
-								arrApplyDefaultDelayProfiles = e.detail;
-								update('arr_apply_default_delay_profiles', e.detail);
-							}}
+		<div class="space-y-6">
+			<!-- ==================== Interface (UI) ==================== -->
+			<ExpandableCard
+				title="Interface"
+				description="Customize the look and feel of the application"
+			>
+				<svelte:fragment slot="header-right">
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div class="flex items-center gap-1" on:click|stopPropagation>
+						<Button
+							icon={CheckCircle}
+							iconColor="text-green-600 dark:text-green-400"
+							size="xs"
+							on:click={() => alertStore.add('success', 'Success alert example.')}
 						/>
-						<input
-							type="hidden"
-							name="arr_apply_default_delay_profiles"
-							value={arrApplyDefaultDelayProfiles ? 'on' : ''}
+						<Button
+							icon={XCircle}
+							iconColor="text-red-600 dark:text-red-400"
+							size="xs"
+							on:click={() => alertStore.add('error', 'Error alert example.')}
+						/>
+						<Button
+							icon={AlertTriangle}
+							iconColor="text-yellow-500 dark:text-yellow-400"
+							size="xs"
+							on:click={() => alertStore.add('warning', 'Warning alert example.')}
+						/>
+						<Button
+							icon={Info}
+							iconColor="text-blue-600 dark:text-blue-400"
+							size="xs"
+							on:click={() => alertStore.add('info', 'Info alert example.')}
 						/>
 					</div>
-				</Card>
-
-				<!-- ==================== Backup Configuration ==================== -->
-				<Card>
-					<svelte:fragment slot="header">
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">Backups</h2>
-						<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-							Configure automatic backups, schedule, and retention policy
-						</p>
-					</svelte:fragment>
-
-					<div class="grid gap-4" class:sm:grid-cols-5={backupEnabled}>
+				</svelte:fragment>
+				<div class="px-6 py-4">
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-5">
 						<div>
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-								Automatic Backups
+								Emoji Icons
 							</span>
 							<Toggle
-								label={backupEnabled ? 'Enabled' : 'Disabled'}
-								checked={backupEnabled}
-								fullWidth={backupEnabled}
+								label={uiNavIconStyle === 'emoji' ? 'Enabled' : 'Disabled'}
+								checked={uiNavIconStyle === 'emoji'}
+								fullWidth
 								on:change={(e) => {
-									backupEnabled = e.detail;
-									update('backup_enabled', e.detail);
+									uiNavIconStyle = e.detail ? 'emoji' : 'lucide';
+									update('ui_nav_icon_style', uiNavIconStyle);
 								}}
 							/>
 						</div>
-						<input type="hidden" name="backup_enabled" value={backupEnabled ? 'on' : ''} />
 
-						{#if backupEnabled}
-							<div class="sm:col-span-2">
+						<div class="sm:col-span-2">
+							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+								Alert Position
+							</span>
+							<DropdownSelect
+								value={uiAlertPosition}
+								options={alertPositionOptions}
+								fullWidth
+								fixed
+								on:change={(e) => {
+									uiAlertPosition = e.detail as AlertPosition;
+									update('ui_alert_position', uiAlertPosition);
+								}}
+							/>
+						</div>
+
+						<div class="sm:col-span-2">
+							<label
+								for="ui_alert_duration"
+								class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
+							>
+								Alert Duration (seconds)
+							</label>
+							<NumberInput
+								name="ui_alert_duration"
+								id="ui_alert_duration"
+								value={uiAlertDurationSeconds}
+								min={0}
+								step={1}
+								onchange={(v) => {
+									uiAlertDurationSeconds = v;
+									update('ui_alert_duration_seconds', v);
+								}}
+							/>
+						</div>
+					</div>
+				</div>
+			</ExpandableCard>
+
+			<!-- ==================== Arr Instance Defaults ==================== -->
+			<ExpandableCard
+				title="Arr Instance Defaults"
+				description="Configure default settings applied when adding new Radarr/Sonarr instances"
+			>
+				<div class="px-6 py-4">
+					<Toggle
+						label="Apply Default Delay Profile"
+						checked={arrApplyDefaultDelayProfiles}
+						on:change={(e) => {
+							arrApplyDefaultDelayProfiles = e.detail;
+							update('arr_apply_default_delay_profiles', e.detail);
+						}}
+					/>
+					<input
+						type="hidden"
+						name="arr_apply_default_delay_profiles"
+						value={arrApplyDefaultDelayProfiles ? 'on' : ''}
+					/>
+				</div>
+			</ExpandableCard>
+
+			<!-- ==================== Backup Configuration ==================== -->
+			<ExpandableCard
+				title="Backups"
+				description="Configure automatic backups, schedule, and retention policy"
+			>
+				<div class="grid gap-4 px-6 py-4" class:sm:grid-cols-5={backupEnabled}>
+					<div>
+						<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+							Automatic Backups
+						</span>
+						<Toggle
+							label={backupEnabled ? 'Enabled' : 'Disabled'}
+							checked={backupEnabled}
+							fullWidth={backupEnabled}
+							on:change={(e) => {
+								backupEnabled = e.detail;
+								update('backup_enabled', e.detail);
+							}}
+						/>
+					</div>
+					<input type="hidden" name="backup_enabled" value={backupEnabled ? 'on' : ''} />
+
+					{#if backupEnabled}
+						<div class="sm:col-span-2">
+							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+								Schedule
+							</span>
+							<DropdownSelect
+								value={backupSchedule}
+								options={backupScheduleOptions}
+								fullWidth
+								fixed
+								on:change={(e) => {
+									backupSchedule = e.detail;
+									update('backup_schedule', e.detail);
+								}}
+							/>
+						</div>
+
+						<div class="sm:col-span-2">
+							<label
+								for="backup_retention_days"
+								class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
+							>
+								Retention Period (days)
+							</label>
+							<NumberInput
+								name="backup_retention_days"
+								id="backup_retention_days"
+								value={backupRetentionDays}
+								min={1}
+								max={365}
+								onchange={(v) => {
+									backupRetentionDays = v;
+									update('backup_retention_days', v);
+								}}
+							/>
+						</div>
+					{/if}
+					<input type="hidden" name="backup_schedule" value={backupSchedule} />
+				</div>
+			</ExpandableCard>
+
+			<!-- ==================== Logging Configuration ==================== -->
+			<ExpandableCard
+				title="Logging"
+				description="Configure application logs, rotation, and retention"
+			>
+				<svelte:fragment slot="header-right">
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div on:click|stopPropagation>
+						<Button text="Reset" icon={RotateCcw} size="xs" on:click={resetLoggingDefaults} />
+					</div>
+				</svelte:fragment>
+				<div class="space-y-4 px-6 py-4">
+					<div class="grid gap-4" class:sm:grid-cols-7={logEnabled}>
+						<div>
+							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+								Logging
+							</span>
+							<Toggle
+								label={logEnabled ? 'Enabled' : 'Disabled'}
+								checked={logEnabled}
+								fullWidth={logEnabled}
+								on:change={(e) => {
+									logEnabled = e.detail;
+									update('log_enabled', e.detail);
+								}}
+							/>
+						</div>
+						<input type="hidden" name="log_enabled" value={logEnabled ? 'on' : ''} />
+
+						{#if logEnabled}
+							<div>
 								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-									Schedule
+									File Logging
 								</span>
-								<DropdownSelect
-									value={backupSchedule}
-									options={backupScheduleOptions}
+								<Toggle
+									label={logFileLogging ? 'Enabled' : 'Disabled'}
+									checked={logFileLogging}
 									fullWidth
-									fixed
 									on:change={(e) => {
-										backupSchedule = e.detail;
-										update('backup_schedule', e.detail);
+										logFileLogging = e.detail;
+										update('log_file_logging', e.detail);
+									}}
+								/>
+							</div>
+
+							<div>
+								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+									Console Logging
+								</span>
+								<Toggle
+									label={logConsoleLogging ? 'Enabled' : 'Disabled'}
+									checked={logConsoleLogging}
+									fullWidth
+									on:change={(e) => {
+										logConsoleLogging = e.detail;
+										update('log_console_logging', e.detail);
 									}}
 								/>
 							</div>
 
 							<div class="sm:col-span-2">
+								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+									Minimum Level
+								</span>
+								<div class="font-mono">
+									<DropdownSelect
+										value={logMinLevel}
+										options={logLevelOptions}
+										fullWidth
+										fixed
+										on:change={(e) => {
+											logMinLevel = e.detail as 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
+											update('log_min_level', logMinLevel);
+										}}
+									/>
+								</div>
+							</div>
+
+							<div class="sm:col-span-2">
 								<label
-									for="backup_retention_days"
+									for="log_retention_days"
 									class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
 								>
 									Retention Period (days)
 								</label>
 								<NumberInput
-									name="backup_retention_days"
-									id="backup_retention_days"
-									value={backupRetentionDays}
+									name="log_retention_days"
+									id="log_retention_days"
+									value={logRetentionDays}
 									min={1}
 									max={365}
 									onchange={(v) => {
-										backupRetentionDays = v;
-										update('backup_retention_days', v);
+										logRetentionDays = v;
+										update('log_retention_days', v);
 									}}
 								/>
 							</div>
 						{/if}
-						<input type="hidden" name="backup_schedule" value={backupSchedule} />
 					</div>
-				</Card>
+					<input type="hidden" name="log_file_logging" value={logFileLogging ? 'on' : ''} />
+					<input type="hidden" name="log_console_logging" value={logConsoleLogging ? 'on' : ''} />
+					<input type="hidden" name="log_min_level" value={logMinLevel} />
+				</div>
+			</ExpandableCard>
 
-				<!-- ==================== Logging Configuration ==================== -->
-				<Card>
-					<svelte:fragment slot="header">
-						<div class="flex items-center justify-between">
-							<div>
-								<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">Logging</h2>
-								<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-									Configure application logs, rotation, and retention
-								</p>
-							</div>
-							<Button text="Reset" icon={RotateCcw} size="xs" on:click={resetLoggingDefaults} />
+			<!-- ==================== TMDB Configuration ==================== -->
+			<ExpandableCard
+				title="TMDB Configuration"
+				description="Configure TMDB API access for searching movies and TV series"
+			>
+				<svelte:fragment slot="header-right">
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div class="flex items-center gap-2" on:click|stopPropagation>
+						<Button
+							text="Test"
+							icon={tmdbTesting ? Loader2 : FlaskConical}
+							loading={tmdbTesting}
+							disabled={tmdbTesting}
+							size="xs"
+							on:click={testTMDBConnection}
+						/>
+						<Button text="Reset" icon={RotateCcw} size="xs" on:click={resetTMDBDefaults} />
+					</div>
+				</svelte:fragment>
+				<div class="space-y-4 px-6 py-4">
+					<div class="relative">
+						<FormInput
+							label="API Read Access Token"
+							name="tmdb_api_key"
+							value={tmdbApiKey}
+							type={tmdbShowKey ? 'text' : 'password'}
+							mono
+							placeholder={data.tmdbSettings.hasApiKey ? '••••••••••••••••' : ''}
+							description={data.tmdbSettings.hasApiKey
+								? 'Leave blank to keep existing key'
+								: 'Use the API Read Access Token (not API Key) from themoviedb.org'}
+							on:input={(e) => {
+								tmdbApiKey = e.detail;
+								update('tmdb_api_key', e.detail);
+							}}
+						>
+							<button
+								slot="suffix"
+								type="button"
+								on:click={() => (tmdbShowKey = !tmdbShowKey)}
+								class="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+							>
+								{#if tmdbShowKey}
+									<EyeOff size={16} />
+								{:else}
+									<Eye size={16} />
+								{/if}
+							</button>
+						</FormInput>
+					</div>
+				</div>
+			</ExpandableCard>
+
+			<!-- ==================== AI Configuration (feature-flagged) ==================== -->
+			{#if FEATURES.ai}
+				<ExpandableCard
+					title="AI Configuration"
+					description="Configure AI-powered features. Works with OpenAI, Ollama, LM Studio, or any OpenAI-compatible API."
+				>
+					<svelte:fragment slot="header-right">
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<div on:click|stopPropagation>
+							<Button text="Reset" icon={RotateCcw} size="xs" on:click={resetAIDefaults} />
 						</div>
 					</svelte:fragment>
+					<div class="space-y-4 px-6 py-4">
+						<Toggle
+							label="Enable AI Features"
+							checked={aiEnabled}
+							on:change={(e) => {
+								aiEnabled = e.detail;
+								update('ai_enabled', e.detail);
+							}}
+						/>
+						<input type="hidden" name="ai_enabled" value={aiEnabled ? 'on' : ''} />
 
-					<div class="space-y-4">
-						<div class="grid gap-4" class:sm:grid-cols-7={logEnabled}>
-							<div>
-								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-									Logging
-								</span>
-								<Toggle
-									label={logEnabled ? 'Enabled' : 'Disabled'}
-									checked={logEnabled}
-									fullWidth={logEnabled}
-									on:change={(e) => {
-										logEnabled = e.detail;
-										update('log_enabled', e.detail);
-									}}
-								/>
-							</div>
-							<input type="hidden" name="log_enabled" value={logEnabled ? 'on' : ''} />
-
-							{#if logEnabled}
-								<div>
-									<span
-										class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
-									>
-										File Logging
-									</span>
-									<Toggle
-										label={logFileLogging ? 'Enabled' : 'Disabled'}
-										checked={logFileLogging}
-										fullWidth
-										on:change={(e) => {
-											logFileLogging = e.detail;
-											update('log_file_logging', e.detail);
-										}}
-									/>
-								</div>
-
-								<div>
-									<span
-										class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
-									>
-										Console Logging
-									</span>
-									<Toggle
-										label={logConsoleLogging ? 'Enabled' : 'Disabled'}
-										checked={logConsoleLogging}
-										fullWidth
-										on:change={(e) => {
-											logConsoleLogging = e.detail;
-											update('log_console_logging', e.detail);
-										}}
-									/>
-								</div>
-
-								<div class="sm:col-span-2">
-									<span
-										class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
-									>
-										Minimum Level
-									</span>
-									<div class="font-mono">
-										<DropdownSelect
-											value={logMinLevel}
-											options={logLevelOptions}
-											fullWidth
-											fixed
-											on:change={(e) => {
-												logMinLevel = e.detail as 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
-												update('log_min_level', logMinLevel);
-											}}
-										/>
-									</div>
-								</div>
-
-								<div class="sm:col-span-2">
-									<label
-										for="log_retention_days"
-										class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
-									>
-										Retention Period (days)
-									</label>
-									<NumberInput
-										name="log_retention_days"
-										id="log_retention_days"
-										value={logRetentionDays}
-										min={1}
-										max={365}
-										onchange={(v) => {
-											logRetentionDays = v;
-											update('log_retention_days', v);
-										}}
-									/>
-								</div>
-							{/if}
-						</div>
-						<input type="hidden" name="log_file_logging" value={logFileLogging ? 'on' : ''} />
-						<input type="hidden" name="log_console_logging" value={logConsoleLogging ? 'on' : ''} />
-						<input type="hidden" name="log_min_level" value={logMinLevel} />
-					</div>
-				</Card>
-
-				<!-- ==================== TMDB Configuration ==================== -->
-				<Card>
-					<svelte:fragment slot="header">
-						<div class="flex items-center justify-between">
-							<div>
-								<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
-									TMDB Configuration
-								</h2>
-								<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-									Configure TMDB API access for searching movies and TV series
-								</p>
-							</div>
-							<div class="flex items-center gap-2">
-								<Button
-									text="Test"
-									icon={tmdbTesting ? Loader2 : FlaskConical}
-									loading={tmdbTesting}
-									disabled={tmdbTesting}
-									size="xs"
-									on:click={testTMDBConnection}
-								/>
-								<Button text="Reset" icon={RotateCcw} size="xs" on:click={resetTMDBDefaults} />
-							</div>
-						</div>
-					</svelte:fragment>
-
-					<div class="space-y-4">
-						<div class="relative">
+						{#if aiEnabled}
 							<FormInput
-								label="API Read Access Token"
-								name="tmdb_api_key"
-								value={tmdbApiKey}
-								type={tmdbShowKey ? 'text' : 'password'}
+								label="API URL"
+								name="ai_api_url"
+								value={aiApiUrl}
+								type="url"
 								mono
-								placeholder={data.tmdbSettings.hasApiKey ? '••••••••••••••••' : ''}
-								description={data.tmdbSettings.hasApiKey
-									? 'Leave blank to keep existing key'
-									: 'Use the API Read Access Token (not API Key) from themoviedb.org'}
+								description="OpenAI-compatible endpoint (e.g., Ollama: http://localhost:11434/v1)"
 								on:input={(e) => {
-									tmdbApiKey = e.detail;
-									update('tmdb_api_key', e.detail);
+									aiApiUrl = e.detail;
+									update('ai_api_url', e.detail);
+								}}
+							/>
+
+							<FormInput
+								label="API Key"
+								name="ai_api_key"
+								value={aiApiKey}
+								type={aiShowKey ? 'text' : 'password'}
+								mono
+								placeholder={data.aiSettings.hasApiKey ? '••••••••••••••••' : ''}
+								description={data.aiSettings.hasApiKey
+									? 'Leave blank to keep existing key'
+									: 'Required for cloud providers. Leave empty for local APIs.'}
+								on:input={(e) => {
+									aiApiKey = e.detail;
+									update('ai_api_key', e.detail);
 								}}
 							>
 								<button
 									slot="suffix"
 									type="button"
-									on:click={() => (tmdbShowKey = !tmdbShowKey)}
+									on:click={() => (aiShowKey = !aiShowKey)}
 									class="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
 								>
-									{#if tmdbShowKey}
+									{#if aiShowKey}
 										<EyeOff size={16} />
 									{:else}
 										<Eye size={16} />
 									{/if}
 								</button>
 							</FormInput>
-						</div>
-					</div>
-				</Card>
 
-				<!-- ==================== AI Configuration (feature-flagged) ==================== -->
-				{#if FEATURES.ai}
-					<Card>
-						<svelte:fragment slot="header">
-							<div class="flex items-center justify-between">
-								<div>
-									<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
-										AI Configuration
-									</h2>
-									<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-										Configure AI-powered features. Works with OpenAI, Ollama, LM Studio, or any
-										OpenAI-compatible API.
-									</p>
-								</div>
-								<Button text="Reset" icon={RotateCcw} size="xs" on:click={resetAIDefaults} />
-							</div>
-						</svelte:fragment>
-
-						<div class="space-y-4">
-							<Toggle
-								label="Enable AI Features"
-								checked={aiEnabled}
-								on:change={(e) => {
-									aiEnabled = e.detail;
-									update('ai_enabled', e.detail);
+							<FormInput
+								label="Model"
+								name="ai_model"
+								value={aiModel}
+								mono
+								description="e.g., gpt-4o-mini, llama3.2, claude-3-haiku"
+								on:input={(e) => {
+									aiModel = e.detail;
+									update('ai_model', e.detail);
 								}}
 							/>
-							<input type="hidden" name="ai_enabled" value={aiEnabled ? 'on' : ''} />
-
-							{#if aiEnabled}
-								<FormInput
-									label="API URL"
-									name="ai_api_url"
-									value={aiApiUrl}
-									type="url"
-									mono
-									description="OpenAI-compatible endpoint (e.g., Ollama: http://localhost:11434/v1)"
-									on:input={(e) => {
-										aiApiUrl = e.detail;
-										update('ai_api_url', e.detail);
-									}}
-								/>
-
-								<FormInput
-									label="API Key"
-									name="ai_api_key"
-									value={aiApiKey}
-									type={aiShowKey ? 'text' : 'password'}
-									mono
-									placeholder={data.aiSettings.hasApiKey ? '••••••••••••••••' : ''}
-									description={data.aiSettings.hasApiKey
-										? 'Leave blank to keep existing key'
-										: 'Required for cloud providers. Leave empty for local APIs.'}
-									on:input={(e) => {
-										aiApiKey = e.detail;
-										update('ai_api_key', e.detail);
-									}}
-								>
-									<button
-										slot="suffix"
-										type="button"
-										on:click={() => (aiShowKey = !aiShowKey)}
-										class="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
-									>
-										{#if aiShowKey}
-											<EyeOff size={16} />
-										{:else}
-											<Eye size={16} />
-										{/if}
-									</button>
-								</FormInput>
-
-								<FormInput
-									label="Model"
-									name="ai_model"
-									value={aiModel}
-									mono
-									description="e.g., gpt-4o-mini, llama3.2, claude-3-haiku"
-									on:input={(e) => {
-										aiModel = e.detail;
-										update('ai_model', e.detail);
-									}}
-								/>
-							{/if}
-						</div>
-					</Card>
-				{/if}
-			</CardGrid>
+						{/if}
+					</div>
+				</ExpandableCard>
+			{/if}
 		</div>
 	</div>
+
+	<DirtyModal />
 </form>
