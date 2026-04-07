@@ -235,24 +235,23 @@ async function runIntegration(target?: string): Promise<number> {
 	// Resolve spec dirs and files
 	function getSpecDir(s: string): string {
 		if (s === 'api') return INTEGRATION_API_SPEC_DIR;
-        if (s === 'conflicts') return INTEGRATION_CONFLICT_SPEC_DIR;
-        if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
-        if (s === 'backups') return INTEGRATION_BACKUP_SPEC_DIR;
-        return INTEGRATION_AUTH_SPEC_DIR;
+		if (s === 'conflicts') return INTEGRATION_CONFLICT_SPEC_DIR;
+		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
+		if (s === 'backups') return INTEGRATION_BACKUP_SPEC_DIR;
+		return INTEGRATION_AUTH_SPEC_DIR;
 	}
 
-    }
-    // Validate spec file if specified
-    if (specName && suite) {
-        const testPath = `${getSpecDir(suite)}/${specName}.test.ts`;
-        try {
-            await Deno.stat(testPath);
-        } catch {
-            console.error(`Unknown integration spec: "${specName}" in suite "${suite}"`);
-            console.error(`Expected file: ${testPath}`);
-            return 1;
-        }
-    }
+	// Validate spec file if specified
+	if (specName && suite) {
+		const testPath = `${getSpecDir(suite)}/${specName}.test.ts`;
+		try {
+			await Deno.stat(testPath);
+		} catch {
+			console.error(`Unknown integration spec: "${specName}" in suite "${suite}"`);
+			console.error(`Expected file: ${testPath}`);
+			return 1;
+		}
+	}
 
 	// Determine which suites to run
 	const suitesToRun = suite ? [suite] : ['auth', 'api', 'conflicts', 'notifications'];
