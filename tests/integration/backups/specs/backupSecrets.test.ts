@@ -5,8 +5,9 @@
  * contain any secrets. This prevents credential leakage if a backup
  * file is shared, stored insecurely, or downloaded by a compromised session.
  *
- * The test seeds known secrets into the live database, triggers a backup,
- * downloads it, extracts the tar.gz, and inspects the database copy inside.
+ * The test seeds known secrets into the live database, creates a backup via
+ * POST /api/v1/backups, polls the job until complete, downloads and extracts
+ * the tar.gz, and inspects the database copy inside.
  *
  * Secrets that must be stripped:
  * - arr_instances.api_key (Radarr/Sonarr API keys)
@@ -104,35 +105,32 @@ async function seedSecrets(dbPath: string) {
 }
 
 /**
- * Trigger backup, poll until a backup file appears, download and extract it.
- * Returns the path to the extracted profilarr.db.
+ * Trigger backup via the v1 API, poll the job until complete, download and
+ * extract the archive. Returns the path to the extracted profilarr.db.
  */
 async function downloadAndExtractBackup(client: TestClient): Promise<string> {
-	// Trigger backup creation
-	await client.postForm('/settings/backups?/createBackup', {}, { headers: { Origin: ORIGIN } });
+	// Trigger backup creation via API
+	const createRes = await client.post('/api/v1/backups', {});
+	assertEquals(createRes.status, 202, 'Backup creation should return 202');
+	const { jobId } = await createRes.json();
 
-	// Poll until a backup file appears (job queue processes it async)
-	let backupFilename = '';
+	// Poll job status until complete
 	for (let i = 0; i < 30; i++) {
 		await new Promise((r) => setTimeout(r, 1000));
-
-		const basePath = `./dist/integration-${PORT}/backups`;
-		try {
-			for await (const entry of Deno.readDir(basePath)) {
-				if (entry.name.startsWith('backup-') && entry.name.endsWith('.tar.gz')) {
-					backupFilename = entry.name;
-					break;
-				}
-			}
-		} catch {
-			// Directory may not exist yet
-		}
-		if (backupFilename) break;
+		const jobRes = await client.get(`/api/v1/jobs/${jobId}`);
+		const job = await jobRes.json();
+		if (job.status === 'success') break;
+		if (job.status === 'failure') throw new Error(`Backup job failed: ${job.result?.error}`);
 	}
 
-	if (!backupFilename) {
-		throw new Error('Backup file did not appear within 30 seconds');
+	// Get the backup filename from the list
+	const listRes = await client.get('/api/v1/backups');
+	assertEquals(listRes.status, 200, 'Backup list should return 200');
+	const backups = await listRes.json();
+	if (backups.length === 0) {
+		throw new Error('No backup files found after job completed');
 	}
+	const backupFilename = backups[0].filename;
 
 	// Download the backup
 	const res = await client.get(`/api/v1/backups/${backupFilename}`);
