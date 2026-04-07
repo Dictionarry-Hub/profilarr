@@ -1,5 +1,21 @@
 # API
 
+## Table of Contents
+
+- [Route Classification](#route-classification)
+  - [Public API](#public-api-apiv1)
+  - [Web App Routes](#web-app-routes-everything-else)
+- [Authentication](#authentication)
+- [Contract-First Workflow](#contract-first-workflow)
+  - [OpenAPI Spec Structure](#openapi-spec-structure)
+  - [Type Generation](#type-generation)
+  - [Endpoint Implementation](#endpoint-implementation)
+- [Writing Endpoint Descriptions](#writing-endpoint-descriptions)
+  - [What to Document](#what-to-document)
+  - [What to Skip](#what-to-skip)
+  - [Conventions](#conventions)
+- [Testing](#testing)
+
 ## Route Classification
 
 Profilarr has two types of server routes: the public API and web app routes.
@@ -28,7 +44,6 @@ These fall into two categories:
 **Page-local endpoints** are `+server.ts` files colocated with the pages that
 use them. They exist because the page needs to fetch data client-side (e.g.
 refreshing after a mutation) and form actions or server loads aren't practical.
-Examples: `/databases/[id]/changes/data`, `/databases/[id]/commits/data`.
 
 **Auth flows** handle login, logout, and OIDC callbacks under `/auth/*`.
 
@@ -52,6 +67,9 @@ The auth middleware (`src/lib/server/utils/auth/middleware.ts`) enforces this by
 path prefix. SvelteKit's built-in CSRF protection (Origin header check on
 mutations) ensures session requests came from the Profilarr UI.
 
+See `docs/architecture/security.md` for the full auth system, request flow,
+rate limiting, and secret stripping.
+
 ## Contract-First Workflow
 
 New endpoints follow a spec-first process:
@@ -64,23 +82,12 @@ New endpoints follow a spec-first process:
 
 ### OpenAPI Spec Structure
 
-```
-docs/api/v1/
-  openapi.yaml          # root spec, references paths and schemas
-  paths/
-    system.yaml         # /health, /health/diagnostics, /openapi.json
-    databases.yaml      # /databases
-    arr.yaml            # /arr/library, /arr/releases, etc.
-    ...
-  schemas/
-    common.yaml         # shared types (ErrorResponse, ComponentStatus)
-    health.yaml         # HealthCheckResponse, HealthDiagnosticsResponse
-    databases.yaml      # DatabaseInstance
-    ...
-```
-
-Paths and schemas are split into separate files by domain, referenced via
-`$ref`. This keeps the root spec concise.
+The spec lives under `docs/api/v1/` with `openapi.yaml` as the root file.
+Paths (endpoint definitions) and schemas (request/response types) are split
+into separate files by domain and referenced via `$ref`. A `paths/arr.yaml`
+defines the routes for arr endpoints, while `schemas/arr.yaml` defines the
+types those routes use. This keeps the root spec concise and lets each domain
+be edited independently.
 
 ### Type Generation
 
@@ -114,29 +121,34 @@ export const GET: RequestHandler = async () => {
 
 Use generated types from `$api/v1` to ensure responses match the spec.
 
-## Endpoint Documentation Rules
+## Writing Endpoint Descriptions
 
-Each endpoint description in the OpenAPI spec should answer:
+The route, method, parameters, and schema already communicate a lot. A
+description should only add what a caller can't figure out from those alone.
+`GET /databases` doesn't need a paragraph explaining that it returns databases.
 
-1. **Why** it exists
-2. **Who** calls it (uptime monitors, automation, web UI)
-3. **What** it returns and key behaviors
-4. **When** any timing, caching, or rate limiting applies
+### What to Document
+
+Write a description when the endpoint has behavior that would surprise a caller
+or that the contract alone doesn't capture:
 
 ### Conventions
 
-- Summaries: title case, 2-4 words, describe the action
-- No "(public)" or "(authenticated)" in summaries; use the `security` field
-- Tags group by domain (System, Databases, Arr, PCD), not by HTTP method
+- **Summaries:** title case, 2-4 words, describe the action
+  (`List Databases`, `Create Backup`, `Download Backup`)
+- **Tags** group by domain (System, Databases, Arr, Backups, Jobs, PCD),
+  not by HTTP method
+- Don't put "(public)" or "(authenticated)" in summaries; the `security`
+  field handles that
 - Document all status codes with clear triggers
-- Add explicit `example` values when the same schema serves multiple status
-  codes (e.g. 200 healthy vs 503 unhealthy)
 
-### Status Codes
+#### Status Codes
 
 | Code | When                                        |
 | ---- | ------------------------------------------- |
 | 200  | Success                                     |
+| 201  | Created (upload, new resource)              |
+| 202  | Accepted (async job enqueued)               |
 | 400  | Invalid input (missing or malformed params) |
 | 401  | No session or API key                       |
 | 403  | Valid auth but not permitted                |
@@ -146,7 +158,7 @@ Each endpoint description in the OpenAPI spec should answer:
 
 ## Testing
 
-Every v1 endpoint has integration tests that verify:
+Every v1 endpoint should have integration tests that verify:
 
 - Auth enforcement (401 without credentials, 200 with API key or session)
 - Response shape matches the contract (required fields present)
