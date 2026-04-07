@@ -5,10 +5,9 @@
 	import { Download, Trash2, RotateCcw, Upload, FolderArchive, BrushCleaning } from 'lucide-svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import type { PageData } from './$types';
-	import type { Column } from '$lib/client/ui/table/types';
-	import Table from '$lib/client/ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import Badge from '$lib/client/ui/badge/Badge.svelte';
+	import Table from '$ui/table/Table.svelte';
+	import type { Column } from '$ui/table/types';
 	import ActionsBar from '$lib/client/ui/actions/ActionsBar.svelte';
 	import ActionButton from '$lib/client/ui/actions/ActionButton.svelte';
 	import SearchAction from '$lib/client/ui/actions/SearchAction.svelte';
@@ -26,9 +25,9 @@
 	$: filteredBackups = searchStore.filterItems(data.backups, ['filename']);
 
 	const columns: Column<Backup>[] = [
+		{ key: 'created', header: 'Date', sortable: true },
 		{ key: 'filename', header: 'Filename', sortable: true },
-		{ key: 'created', header: 'Created', sortable: true },
-		{ key: 'sizeFormatted', header: 'Size', sortable: true, width: 'w-32' }
+		{ key: 'sizeFormatted', header: 'Size', sortable: true, width: 'w-28' }
 	];
 
 	// Modal state
@@ -204,7 +203,7 @@
 			<Tooltip text="Create Backup">
 				<ActionButton icon={FolderArchive} on:click={triggerCreateBackup} />
 			</Tooltip>
-			<Tooltip text="Run Backup Cleanup">
+			<Tooltip text="Cleanup">
 				<ActionButton icon={BrushCleaning} on:click={triggerCleanupBackups} />
 			</Tooltip>
 		</ActionsBar>
@@ -215,25 +214,25 @@
 		{columns}
 		data={filteredBackups}
 		emptyMessage="No backups found. Create your first backup to get started."
+		actionsHeaderAlign="center"
 		compact
 		responsive
 	>
 		<svelte:fragment slot="cell" let:row let:column>
-			{#if column.key === 'filename'}
-				<Badge variant="neutral" mono>{row.filename}</Badge>
-			{:else if column.key === 'created'}
-				<Badge variant="neutral" mono>{formatDateTime(row.created)}</Badge>
+			{#if column.key === 'created'}
+				<span class="font-medium">{formatDateTime(row.created)}</span>
+			{:else if column.key === 'filename'}
+				<span class="font-mono text-neutral-500 dark:text-neutral-400">{row.filename}</span>
 			{:else if column.key === 'sizeFormatted'}
-				<Badge variant="neutral" mono>{row.sizeFormatted}</Badge>
+				<span class="text-neutral-500 dark:text-neutral-400">{row.sizeFormatted}</span>
 			{/if}
 		</svelte:fragment>
 
 		<svelte:fragment slot="actions" let:row>
-			<div class="flex items-center justify-end gap-0.5">
+			<div class="flex items-center justify-center gap-1">
 				<Button
 					icon={Download}
 					size="xs"
-					variant="ghost"
 					tooltip="Download"
 					on:click={() => downloadBackup(row.filename)}
 				/>
@@ -262,7 +261,6 @@
 					<Button
 						icon={RotateCcw}
 						size="xs"
-						variant="ghost"
 						tooltip="Restore"
 						on:click={(e) => {
 							const form = (e.currentTarget as HTMLElement)?.closest('form');
@@ -274,7 +272,7 @@
 				<Button
 					icon={Trash2}
 					size="xs"
-					variant="ghost"
+					iconColor="text-red-600 dark:text-red-400"
 					tooltip="Delete"
 					on:click={() => openDeleteModal(row.filename)}
 				/>

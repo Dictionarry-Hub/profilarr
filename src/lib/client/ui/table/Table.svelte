@@ -16,6 +16,7 @@
 	export let initialSort: SortState | null = null;
 	export let onSortChange: ((sort: SortState | null) => void) | undefined = undefined;
 	export let actionsHeader: string = 'Actions';
+	export let actionsHeaderAlign: 'left' | 'center' | 'right' = 'right';
 	// Mobile responsive mode - switches to card layout on small screens
 	export let responsive: boolean = false;
 	// Progressive loading - render items in batches as user scrolls
@@ -306,7 +307,7 @@
 					<!-- Actions column slot -->
 					{#if $$slots.actions}
 						<th
-							class={`${compact ? 'px-4 py-2.5' : 'px-6 py-3'} text-right text-xs font-semibold text-neutral-500 dark:text-neutral-400`}
+							class={`${compact ? 'px-4 py-2.5' : 'px-6 py-3'} ${actionsHeaderAlign === 'left' ? 'text-left' : actionsHeaderAlign === 'center' ? 'text-center' : 'text-right'} text-xs font-semibold text-neutral-500 dark:text-neutral-400`}
 						>
 							{actionsHeader}
 						</th>
@@ -362,7 +363,9 @@
 
 							<!-- Actions slot -->
 							{#if $$slots.actions}
-								<td class={`${compact ? 'px-4 py-2' : 'px-6 py-4'} text-right text-sm`}>
+								<td
+									class={`${compact ? 'px-4 py-2' : 'px-6 py-4'} ${actionsHeaderAlign === 'left' ? 'text-left' : actionsHeaderAlign === 'center' ? 'text-center' : 'text-right'} text-sm`}
+								>
 									<slot name="actions" {row} {rowIndex} />
 								</td>
 							{/if}
