@@ -5,10 +5,10 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { setup, teardown, test, run } from '../../auth/harness/runner.ts';
-import { startServer, stopServer, getDbPath } from '../../auth/harness/server.ts';
-import { TestClient } from '../../auth/harness/client.ts';
-import { createUser, login, setApiKey } from '../../auth/harness/setup.ts';
+import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
+import { TestClient } from '$test-harness/client.ts';
+import { createUser, login, setApiKey } from '$test-harness/setup.ts';
 
 const PORT = 7034;
 const ORIGIN = `http://localhost:${PORT}`;
