@@ -3,21 +3,8 @@ health:
     operationId: getHealth
     summary: Health Check
     description: |
-      Returns system status for uptime monitors.
-
-      This endpoint is public and returns no sensitive information, just a
-      status and timestamp. This allows external monitoring tools to check
-      availability without credentials. For detailed component health, use
-      `/health/diagnostics` (requires authentication).
-
-      **Use cases:**
-      - Uptime monitoring (Uptime Kuma, Healthchecks.io)
-      - Container orchestration probes (Kubernetes, Docker)
-
-      **Behavior:**
-      - Returns 200 for `healthy` or `degraded` (service can handle requests)
-      - Returns 503 for `unhealthy` (do not route traffic)
-      - The `status` field distinguishes the three states
+      Returns 200 for healthy or degraded, 503 for unhealthy. Degraded means
+      the system can serve requests but a non-critical component needs attention.
     tags:
       - System
     security: []
