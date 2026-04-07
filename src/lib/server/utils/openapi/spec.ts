@@ -135,27 +135,29 @@ function getJsonPointerValue(document: unknown, pointer: string): unknown {
 		.slice(1)
 		.map((segment) => decodeJsonPointerSegment(segment));
 
-	let currentValue: unknown = document;
+	return resolvePointerSegments(document, segments);
+}
 
-	for (const segment of segments) {
-		if (Array.isArray(currentValue)) {
-			const index = Number(segment);
-			if (!Number.isInteger(index)) {
-				return undefined;
-			}
-
-			currentValue = currentValue[index];
-			continue;
-		}
-
-		if (!isRecord(currentValue)) {
-			return undefined;
-		}
-
-		currentValue = currentValue[segment];
+function resolvePointerSegments(value: unknown, segments: string[]): unknown {
+	if (segments.length === 0) {
+		return value;
 	}
 
-	return currentValue;
+	const [segment, ...rest] = segments;
+
+	if (Array.isArray(value)) {
+		const index = Number(segment);
+		if (!Number.isInteger(index) || index < 0 || index >= value.length) {
+			return undefined;
+		}
+		return resolvePointerSegments(value[index], rest);
+	}
+
+	if (!isRecord(value) || !Object.hasOwn(value, segment)) {
+		return undefined;
+	}
+
+	return resolvePointerSegments(value[segment], rest);
 }
 
 function decodeJsonPointerSegment(segment: string): string {

@@ -1,14 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-
-function escapeHtml(value: string): string {
-	return value
-		.replaceAll('&', '&amp;')
-		.replaceAll('<', '&lt;')
-		.replaceAll('>', '&gt;')
-		.replaceAll('"', '&quot;')
-		.replaceAll("'", '&#39;');
-}
+import { escapeHtml } from '$shared/utils/sanitize';
 
 export const GET: RequestHandler = async ({ url }) => {
 	if (import.meta.env.VITE_CHANNEL !== 'dev') {
