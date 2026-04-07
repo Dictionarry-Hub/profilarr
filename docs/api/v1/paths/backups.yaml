@@ -2,22 +2,11 @@ backups:
   get:
     operationId: listBackups
     summary: List Backups
-    description: |
-      Returns all backup archives on disk, sorted newest first.
-
-      **Use cases:**
-      - Displaying available backups in a UI or script
-      - Checking if recent backups exist before maintenance
-
-      **Behavior:**
-      - Scans the backups directory for files matching `backup-*.tar.gz`
-      - Returns an empty array if no backups exist
-      - Sorted by file modification time, newest first
     tags:
       - Backups
     responses:
       '200':
-        description: List of backup files
+        description: List of backup files, sorted newest first
         content:
           application/json:
             schema:
@@ -36,16 +25,9 @@ backups:
     operationId: createBackup
     summary: Create Backup
     description: |
-      Enqueues a backup creation job. Returns immediately with a job ID.
-
-      **Use cases:**
-      - Triggering a backup before maintenance or upgrades
-      - Automated backup scripts
-
-      **Behavior:**
-      - Enqueues a `backup.create` job and returns 202 with the job ID
-      - Poll `GET /api/v1/jobs/{jobId}` to check completion
-      - The backup includes a sanitized copy of the database (secrets stripped)
+      Async. Enqueues a `backup.create` job and returns 202 with the job ID.
+      Poll `GET /api/v1/jobs/{jobId}` for completion. The backup includes a
+      sanitized database copy with all secrets stripped.
     tags:
       - Backups
     responses:
@@ -70,24 +52,13 @@ backup_file:
   get:
     operationId: downloadBackup
     summary: Download Backup
-    description: |
-      Downloads a backup archive by filename.
-
-      **Use cases:**
-      - Downloading backups for offsite storage
-      - Transferring backups between instances
-
-      **Behavior:**
-      - Returns the raw `.tar.gz` file with appropriate headers
-      - Filename must match the `backup-*.tar.gz` pattern
-      - Path traversal attempts are rejected with 400
     tags:
       - Backups
     parameters:
       - name: filename
         in: path
         required: true
-        description: Backup filename (must start with `backup-` and end with `.tar.gz`)
+        description: Backup filename (must match `backup-*.tar.gz`)
         schema:
           type: string
     responses:
@@ -130,16 +101,6 @@ backup_file:
   delete:
     operationId: deleteBackup
     summary: Delete Backup
-    description: |
-      Deletes a backup archive by filename.
-
-      **Use cases:**
-      - Freeing disk space by removing old backups
-      - Cleanup scripts
-
-      **Behavior:**
-      - Permanently removes the file from disk
-      - Path traversal attempts are rejected with 400
     tags:
       - Backups
     parameters:
@@ -186,19 +147,9 @@ upload:
     operationId: uploadBackup
     summary: Upload Backup
     description: |
-      Upload a backup archive. Validates the file and scans for path traversal
-      entries (zip slip protection) before storing.
-
-      **Use cases:**
-      - Restoring from an offsite backup
-      - Migrating backups between instances
-
-      **Behavior:**
-      - Accepts `multipart/form-data` with a `file` field
-      - Only `.tar.gz` files are accepted, max 1GB
-      - Archive contents are scanned for path traversal entries
-      - Duplicate filenames are rejected
-      - Files without a `backup-` prefix get renamed to `backup-uploaded-{timestamp}.tar.gz`
+      Only `.tar.gz` files, max 1GB. Archive contents are scanned for path
+      traversal entries (zip slip protection). Files without a `backup-` prefix
+      are renamed to `backup-uploaded-{timestamp}.tar.gz`. Duplicates rejected.
     tags:
       - Backups
     requestBody:
@@ -246,12 +197,6 @@ settings:
   get:
     operationId: getBackupSettings
     summary: Get Backup Settings
-    description: |
-      Returns the current backup configuration.
-
-      **Use cases:**
-      - Displaying current settings in a UI
-      - Auditing backup configuration via scripts
     tags:
       - Backups
     responses:
@@ -279,16 +224,8 @@ settings:
     operationId: updateBackupSettings
     summary: Update Backup Settings
     description: |
-      Updates backup configuration. Only provided fields are changed.
-
-      **Use cases:**
-      - Changing backup schedule or retention
-      - Enabling or disabling automatic backups
-
-      **Behavior:**
-      - Partial update: only fields present in the body are changed
-      - After update, backup jobs are rescheduled to match new settings
-      - Returns the full updated settings object
+      Partial update. After saving, backup jobs are rescheduled to match the
+      new settings.
     tags:
       - Backups
     requestBody:
