@@ -17,7 +17,7 @@ export default defineConfig({
 			ignored: [
 				'**/data/**',
 				'**/logs/**',
-				'**/backups/**',
+				'**/data/backups/**',
 				'**/dist/**',
 				'**/.svelte-kit/**',
 				'**/*.db*',
