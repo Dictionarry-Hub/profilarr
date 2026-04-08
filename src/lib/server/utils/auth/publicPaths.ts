@@ -10,7 +10,7 @@ const PUBLIC_PREFIX_PATHS = ['/auth/login', '/auth/setup', '/auth/oidc'];
 
 /**
  * Paths that don't require authentication (exact match only)
- * /api/v1/health is public but /api/v1/health/diagnostics requires auth
+ * /api/v1/health is public; /api/v1/status requires auth
  */
 const PUBLIC_EXACT_PATHS = ['/api/v1/health'];
 

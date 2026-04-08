@@ -28,84 +28,65 @@ health:
               status: unhealthy
               timestamp: '2026-03-09T12:00:00.000Z'
 
-health_diagnostics:
+status:
   get:
-    operationId: getHealthDiagnostics
-    summary: Health Diagnostics
-    description: |
-      Returns detailed system health including version, uptime, and per-component status.
-
-      **Use cases:**
-      - Debugging issues with the Profilarr instance
-      - Monitoring dashboards that need component-level detail
-      - Support requests (share diagnostics output)
+    operationId: getStatus
+    summary: System Status
     tags:
       - System
-    parameters:
-      - name: verbose
-        in: query
-        description: Include extra detail per component (counts, sizes, timestamps)
-        schema:
-          type: boolean
-          default: false
     responses:
       '200':
-        description: System is healthy or degraded (status field indicates which)
+        description: System status
         content:
           application/json:
             schema:
-              $ref: '../schemas/health.yaml#/HealthDiagnosticsResponse'
+              $ref: '../schemas/status.yaml#/StatusResponse'
             example:
-              status: healthy
-              timestamp: '2026-03-09T12:00:00.000Z'
-              version: '2.5.0'
+              version: '2.0.0'
               uptime: 86400
-              components:
-                sqlite:
-                  status: healthy
-                  responseTimeMs: 1.2
-                  migration: 57
-                repos:
-                  status: healthy
-                jobs:
-                  status: healthy
-                backups:
-                  status: healthy
+              databases:
+                - id: 1
+                  name: Dictionarry
                   enabled: true
-                logs:
-                  status: healthy
+                  lastSyncedAt: '2026-04-09T12:00:00Z'
+                  syncStrategy: auto
+                  counts:
+                    customFormats: 52
+                    qualityProfiles: 3
+                    regularExpressions: 120
+                    delayProfiles: 1
+              arrs:
+                - id: 1
+                  name: Radarr
+                  type: radarr
+                  enabled: true
+                  sync:
+                    qualityProfiles:
+                      count: 2
+                      status: idle
+                      lastSyncedAt: '2026-04-09T12:00:00Z'
+                    delayProfiles:
+                      configured: true
+                      status: idle
+                      lastSyncedAt: '2026-04-09T12:00:00Z'
+                    mediaManagement:
+                      configured: true
+                      status: idle
+                      lastSyncedAt: '2026-04-09T12:00:00Z'
+                  drift: null
+              jobs:
+                active: 0
+                queued: 2
+                nextRunAt: '2026-04-09T13:00:00Z'
+              backups:
+                enabled: true
+                lastBackupAt: '2026-04-09T00:00:00Z'
       '401':
         description: Not authenticated
         content:
           application/json:
             schema:
               $ref: '../schemas/common.yaml#/ErrorResponse'
-      '503':
-        description: System is unhealthy (status field will be "unhealthy")
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/health.yaml#/HealthDiagnosticsResponse'
-            example:
-              status: unhealthy
-              timestamp: '2026-03-09T12:00:00.000Z'
-              version: '2.5.0'
-              uptime: 86400
-              components:
-                sqlite:
-                  status: unhealthy
-                  responseTimeMs: 0
-                  migration: 57
-                  message: Database connection failed
-                repos:
-                  status: healthy
-                jobs:
-                  status: healthy
-                backups:
-                  status: healthy
-                  enabled: true
-                logs:
-                  status: healthy
 
 openapi:
   get:

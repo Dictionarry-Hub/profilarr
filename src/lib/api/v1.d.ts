@@ -73,21 +73,8 @@ export interface paths {
 		};
 		/**
 		 * Health Check
-		 * @description Returns system status for uptime monitors.
-		 *
-		 *     This endpoint is public and returns no sensitive information, just a
-		 *     status and timestamp. This allows external monitoring tools to check
-		 *     availability without credentials. For detailed component health, use
-		 *     `/health/diagnostics` (requires authentication).
-		 *
-		 *     **Use cases:**
-		 *     - Uptime monitoring (Uptime Kuma, Healthchecks.io)
-		 *     - Container orchestration probes (Kubernetes, Docker)
-		 *
-		 *     **Behavior:**
-		 *     - Returns 200 for `healthy` or `degraded` (service can handle requests)
-		 *     - Returns 503 for `unhealthy` (do not route traffic)
-		 *     - The `status` field distinguishes the three states
+		 * @description Returns 200 for healthy or degraded, 503 for unhealthy. Degraded means
+		 *     the system can serve requests but a non-critical component needs attention.
 		 */
 		get: operations['getHealth'];
 		put?: never;
@@ -98,23 +85,15 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
-	'/health/diagnostics': {
+	'/status': {
 		parameters: {
 			query?: never;
 			header?: never;
 			path?: never;
 			cookie?: never;
 		};
-		/**
-		 * Health Diagnostics
-		 * @description Returns detailed system health including version, uptime, and per-component status.
-		 *
-		 *     **Use cases:**
-		 *     - Debugging issues with the Profilarr instance
-		 *     - Monitoring dashboards that need component-level detail
-		 *     - Support requests (share diagnostics output)
-		 */
-		get: operations['getHealthDiagnostics'];
+		/** System Status */
+		get: operations['getStatus'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -508,11 +487,6 @@ export type webhooks = Record<string, never>;
 export interface components {
 	schemas: {
 		/**
-		 * @description Individual component health status
-		 * @enum {string}
-		 */
-		ComponentStatus: 'healthy' | 'degraded' | 'unhealthy';
-		/**
 		 * @description Overall health status
 		 * @enum {string}
 		 */
@@ -532,24 +506,124 @@ export interface components {
 			 */
 			timestamp: string;
 		};
-		HealthDiagnosticsResponse: {
-			status: components['schemas']['HealthStatus'];
-			/**
-			 * Format: date-time
-			 * @description Current server time
-			 */
-			timestamp: string;
+		StatusResponse: {
 			/** @description Application version */
 			version: string;
 			/** @description Server uptime in seconds */
 			uptime: number;
-			components: {
-				sqlite: components['schemas']['SqliteHealth'];
-				repos: components['schemas']['ReposHealth'];
-				jobs: components['schemas']['JobsHealth'];
-				backups: components['schemas']['BackupsHealth'];
-				logs: components['schemas']['LogsHealth'];
+			databases: components['schemas']['StatusDatabase'][];
+			arrs: components['schemas']['StatusArr'][];
+			jobs: components['schemas']['StatusJobs'];
+			backups: components['schemas']['StatusBackups'];
+		};
+		StatusDatabase: {
+			/** @description Database instance ID */
+			id: number;
+			/** @description Display name */
+			name: string;
+			/** @description Whether the database is active */
+			enabled: boolean;
+			/**
+			 * Format: date-time
+			 * @description Last successful sync check timestamp
+			 */
+			lastSyncedAt: string | null;
+			/**
+			 * @description Sync strategy
+			 * @enum {string}
+			 */
+			syncStrategy: 'manual' | 'auto';
+			counts: components['schemas']['StatusDatabaseCounts'];
+		};
+		StatusDatabaseCounts: {
+			/** @description Number of custom formats */
+			customFormats: number;
+			/** @description Number of quality profiles */
+			qualityProfiles: number;
+			/** @description Number of regular expressions */
+			regularExpressions: number;
+			/** @description Number of delay profiles */
+			delayProfiles: number;
+		};
+		StatusArr: {
+			/** @description Arr instance ID */
+			id: number;
+			/** @description Display name */
+			name: string;
+			/**
+			 * @description Arr application type
+			 * @enum {string}
+			 */
+			type: 'radarr' | 'sonarr';
+			/** @description Whether the instance is active */
+			enabled: boolean;
+			sync: components['schemas']['StatusArrSync'];
+			/** @description Drift detection result (null until implemented) */
+			drift: components['schemas']['StatusArrDrift'] | null;
+		};
+		StatusArrSync: {
+			qualityProfiles: components['schemas']['StatusArrSyncQualityProfiles'];
+			delayProfiles: components['schemas']['StatusArrSyncSection'];
+			mediaManagement: components['schemas']['StatusArrSyncSection'];
+		};
+		StatusArrSyncQualityProfiles: {
+			/** @description Number of synced quality profiles */
+			count: number;
+			/** @description Sync status (idle, pending, in_progress, failed) */
+			status: string;
+			/**
+			 * Format: date-time
+			 * @description Last successful sync timestamp
+			 */
+			lastSyncedAt: string | null;
+		};
+		StatusArrSyncSection: {
+			/** @description Whether this sync section has been configured */
+			configured: boolean;
+			/** @description Sync status (idle, pending, in_progress, failed) */
+			status: string;
+			/**
+			 * Format: date-time
+			 * @description Last successful sync timestamp
+			 */
+			lastSyncedAt: string | null;
+		};
+		StatusArrDrift: {
+			/**
+			 * Format: date-time
+			 * @description When drift was last checked
+			 */
+			lastCheckedAt: string;
+			/** @description Whether any section has drifted */
+			drifted: boolean;
+			details: {
+				/** @description Number of drifted quality profiles */
+				qualityProfiles: number;
+				/** @description Number of drifted delay profiles */
+				delayProfiles: number;
+				/** @description Number of drifted media management configs */
+				mediaManagement: number;
 			};
+		};
+		StatusJobs: {
+			/** @description Number of currently running jobs */
+			active: number;
+			/** @description Number of queued jobs */
+			queued: number;
+			/**
+			 * Format: date-time
+			 * @description Earliest scheduled job run time
+			 */
+			nextRunAt: string | null;
+		};
+		StatusBackups: {
+			/** @description Whether automatic backups are enabled */
+			enabled: boolean;
+			/**
+			 * Format: date-time
+			 * @description Timestamp of last backup
+			 */
+			lastBackupAt: string | null;
 		};
 		/**
 		 * @description Type of media
@@ -1206,75 +1280,6 @@ export interface components {
 			retentionDays?: number;
 			enabled?: boolean;
 		};
-		SqliteHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Database query response time in milliseconds */
-			responseTimeMs: number;
-			/** @description Current migration version */
-			migration: number;
-			/** @description Error message if unhealthy */
-			message?: string;
-		};
-		ReposHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Additional status information */
-			message?: string;
-			/** @description Total number of PCD repos configured (verbose only) */
-			total?: number;
-			/** @description Number of enabled repos (verbose only) */
-			enabled?: number;
-			/** @description Number of repos with compiled cache (verbose only) */
-			cached?: number;
-			/** @description Number of disabled repos (verbose only) */
-			disabled?: number;
-		};
-		JobsHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Additional status information */
-			message?: string;
-			/**
-			 * Format: date-time
-			 * @description Oldest queued job run_at timestamp (verbose only)
-			 */
-			oldestQueued?: string | null;
-		};
-		BackupsHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Whether backups are enabled */
-			enabled: boolean;
-			/** @description Additional status information */
-			message?: string;
-			/**
-			 * Format: date-time
-			 * @description Timestamp of last backup (verbose only)
-			 */
-			lastBackup?: string | null;
-			/** @description Number of backup files (verbose only) */
-			count?: number;
-			/** @description Human-readable total size of all backups (verbose only) */
-			totalSize?: string;
-			/** @description Configured retention period in days (verbose only) */
-			retentionDays?: number;
-		};
-		LogsHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Additional status information */
-			message?: string;
-			/** @description Human-readable total size of log files (verbose only) */
-			totalSize?: string;
-			/** @description Number of log files (verbose only) */
-			fileCount?: number;
-			/**
-			 * Format: date
-			 * @description Date of oldest log file (verbose only)
-			 */
-			oldestLog?: string | null;
-			/**
-			 * Format: date
-			 * @description Date of newest log file (verbose only)
-			 */
-			newestLog?: string | null;
-		};
 		SuccessResponse: {
 			/** @example true */
 			success: boolean;
@@ -1504,19 +1509,16 @@ export interface operations {
 			};
 		};
 	};
-	getHealthDiagnostics: {
+	getStatus: {
 		parameters: {
-			query?: {
-				/** @description Include extra detail per component (counts, sizes, timestamps) */
-				verbose?: boolean;
-			};
+			query?: never;
 			header?: never;
 			path?: never;
 			cookie?: never;
 		};
 		requestBody?: never;
 		responses: {
-			/** @description System is healthy or degraded (status field indicates which) */
+			/** @description System status */
 			200: {
 				headers: {
 					[name: string]: unknown;
@@ -1524,33 +1526,61 @@ export interface operations {
 				content: {
 					/**
 					 * @example {
-					 *       "status": "healthy",
-					 *       "timestamp": "2026-03-09T12:00:00.000Z",
-					 *       "version": "2.5.0",
+					 *       "version": "2.0.0",
 					 *       "uptime": 86400,
-					 *       "components": {
-					 *         "sqlite": {
-					 *           "status": "healthy",
-					 *           "responseTimeMs": 1.2,
-					 *           "migration": 57
-					 *         },
-					 *         "repos": {
-					 *           "status": "healthy"
-					 *         },
-					 *         "jobs": {
-					 *           "status": "healthy"
-					 *         },
-					 *         "backups": {
-					 *           "status": "healthy",
-					 *           "enabled": true
-					 *         },
-					 *         "logs": {
-					 *           "status": "healthy"
+					 *       "databases": [
+					 *         {
+					 *           "id": 1,
+					 *           "name": "Dictionarry",
+					 *           "enabled": true,
+					 *           "lastSyncedAt": "2026-04-09T12:00:00Z",
+					 *           "syncStrategy": "auto",
+					 *           "counts": {
+					 *             "customFormats": 52,
+					 *             "qualityProfiles": 3,
+					 *             "regularExpressions": 120,
+					 *             "delayProfiles": 1
+					 *           }
 					 *         }
+					 *       ],
+					 *       "arrs": [
+					 *         {
+					 *           "id": 1,
+					 *           "name": "Radarr",
+					 *           "type": "radarr",
+					 *           "enabled": true,
+					 *           "sync": {
+					 *             "qualityProfiles": {
+					 *               "count": 2,
+					 *               "status": "idle",
+					 *               "lastSyncedAt": "2026-04-09T12:00:00Z"
+					 *             },
+					 *             "delayProfiles": {
+					 *               "configured": true,
+					 *               "status": "idle",
+					 *               "lastSyncedAt": "2026-04-09T12:00:00Z"
+					 *             },
+					 *             "mediaManagement": {
+					 *               "configured": true,
+					 *               "status": "idle",
+					 *               "lastSyncedAt": "2026-04-09T12:00:00Z"
+					 *             }
+					 *           },
+					 *           "drift": null
+					 *         }
+					 *       ],
+					 *       "jobs": {
+					 *         "active": 0,
+					 *         "queued": 2,
+					 *         "nextRunAt": "2026-04-09T13:00:00Z"
+					 *       },
+					 *       "backups": {
+					 *         "enabled": true,
+					 *         "lastBackupAt": "2026-04-09T00:00:00Z"
 					 *       }
 					 *     }
 					 */
-					'application/json': components['schemas']['HealthDiagnosticsResponse'];
+					'application/json': components['schemas']['StatusResponse'];
 				};
 			};
 			/** @description Not authenticated */
@@ -1560,44 +1590,6 @@ export interface operations {
 				};
 				content: {
 					'application/json': components['schemas']['ErrorResponse'];
-				};
-			};
-			/** @description System is unhealthy (status field will be "unhealthy") */
-			503: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					/**
-					 * @example {
-					 *       "status": "unhealthy",
-					 *       "timestamp": "2026-03-09T12:00:00.000Z",
-					 *       "version": "2.5.0",
-					 *       "uptime": 86400,
-					 *       "components": {
-					 *         "sqlite": {
-					 *           "status": "unhealthy",
-					 *           "responseTimeMs": 0,
-					 *           "migration": 57,
-					 *           "message": "Database connection failed"
-					 *         },
-					 *         "repos": {
-					 *           "status": "healthy"
-					 *         },
-					 *         "jobs": {
-					 *           "status": "healthy"
-					 *         },
-					 *         "backups": {
-					 *           "status": "healthy",
-					 *           "enabled": true
-					 *         },
-					 *         "logs": {
-					 *           "status": "healthy"
-					 *         }
-					 *       }
-					 *     }
-					 */
-					'application/json': components['schemas']['HealthDiagnosticsResponse'];
 				};
 			};
 		};

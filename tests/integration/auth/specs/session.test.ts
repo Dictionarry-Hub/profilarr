@@ -68,7 +68,7 @@ test('expired session — redirect to /auth/login', async () => {
 
 test('unauthenticated API route — 401 JSON', async () => {
 	const client = new TestClient(ORIGIN);
-	const res = await client.get('/api/v1/health/diagnostics');
+	const res = await client.get('/api/v1/status');
 	assertEquals(res.status, 401);
 	const body = await res.json();
 	assertEquals(body.error, 'Unauthorized');

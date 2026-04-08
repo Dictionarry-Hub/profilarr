@@ -2,7 +2,7 @@
  * GET /api/v1/health
  *
  * Public health check — returns only status and timestamp.
- * No version, uptime, or component details (those are in /health/diagnostics).
+ * No version, uptime, or component details (those are in /status).
  * Used by uptime monitors and load balancers.
  */
 

@@ -1,0 +1,232 @@
+StatusResponse:
+  type: object
+  required:
+    - version
+    - uptime
+    - databases
+    - arrs
+    - jobs
+    - backups
+  properties:
+    version:
+      type: string
+      description: Application version
+    uptime:
+      type: integer
+      description: Server uptime in seconds
+    databases:
+      type: array
+      items:
+        $ref: '#/StatusDatabase'
+    arrs:
+      type: array
+      items:
+        $ref: '#/StatusArr'
+    jobs:
+      $ref: '#/StatusJobs'
+    backups:
+      $ref: '#/StatusBackups'
+
+StatusDatabase:
+  type: object
+  required:
+    - id
+    - name
+    - enabled
+    - lastSyncedAt
+    - syncStrategy
+    - counts
+  properties:
+    id:
+      type: integer
+      description: Database instance ID
+    name:
+      type: string
+      description: Display name
+    enabled:
+      type: boolean
+      description: Whether the database is active
+    lastSyncedAt:
+      type: string
+      format: date-time
+      nullable: true
+      description: Last successful sync check timestamp
+    syncStrategy:
+      type: string
+      enum:
+        - manual
+        - auto
+      description: Sync strategy
+    counts:
+      $ref: '#/StatusDatabaseCounts'
+
+StatusDatabaseCounts:
+  type: object
+  required:
+    - customFormats
+    - qualityProfiles
+    - regularExpressions
+    - delayProfiles
+  properties:
+    customFormats:
+      type: integer
+      description: Number of custom formats
+    qualityProfiles:
+      type: integer
+      description: Number of quality profiles
+    regularExpressions:
+      type: integer
+      description: Number of regular expressions
+    delayProfiles:
+      type: integer
+      description: Number of delay profiles
+
+StatusArr:
+  type: object
+  required:
+    - id
+    - name
+    - type
+    - enabled
+    - sync
+    - drift
+  properties:
+    id:
+      type: integer
+      description: Arr instance ID
+    name:
+      type: string
+      description: Display name
+    type:
+      type: string
+      enum:
+        - radarr
+        - sonarr
+      description: Arr application type
+    enabled:
+      type: boolean
+      description: Whether the instance is active
+    sync:
+      $ref: '#/StatusArrSync'
+    drift:
+      oneOf:
+        - $ref: '#/StatusArrDrift'
+        - type: 'null'
+      description: Drift detection result (null until implemented)
+
+StatusArrSync:
+  type: object
+  required:
+    - qualityProfiles
+    - delayProfiles
+    - mediaManagement
+  properties:
+    qualityProfiles:
+      $ref: '#/StatusArrSyncQualityProfiles'
+    delayProfiles:
+      $ref: '#/StatusArrSyncSection'
+    mediaManagement:
+      $ref: '#/StatusArrSyncSection'
+
+StatusArrSyncQualityProfiles:
+  type: object
+  required:
+    - count
+    - status
+    - lastSyncedAt
+  properties:
+    count:
+      type: integer
+      description: Number of synced quality profiles
+    status:
+      type: string
+      description: Sync status (idle, pending, in_progress, failed)
+    lastSyncedAt:
+      type: string
+      format: date-time
+      nullable: true
+      description: Last successful sync timestamp
+
+StatusArrSyncSection:
+  type: object
+  required:
+    - configured
+    - status
+    - lastSyncedAt
+  properties:
+    configured:
+      type: boolean
+      description: Whether this sync section has been configured
+    status:
+      type: string
+      description: Sync status (idle, pending, in_progress, failed)
+    lastSyncedAt:
+      type: string
+      format: date-time
+      nullable: true
+      description: Last successful sync timestamp
+
+StatusArrDrift:
+  type: object
+  required:
+    - lastCheckedAt
+    - drifted
+    - details
+  properties:
+    lastCheckedAt:
+      type: string
+      format: date-time
+      description: When drift was last checked
+    drifted:
+      type: boolean
+      description: Whether any section has drifted
+    details:
+      type: object
+      required:
+        - qualityProfiles
+        - delayProfiles
+        - mediaManagement
+      properties:
+        qualityProfiles:
+          type: integer
+          description: Number of drifted quality profiles
+        delayProfiles:
+          type: integer
+          description: Number of drifted delay profiles
+        mediaManagement:
+          type: integer
+          description: Number of drifted media management configs
+
+StatusJobs:
+  type: object
+  required:
+    - active
+    - queued
+    - nextRunAt
+  properties:
+    active:
+      type: integer
+      description: Number of currently running jobs
+    queued:
+      type: integer
+      description: Number of queued jobs
+    nextRunAt:
+      type: string
+      format: date-time
+      nullable: true
+      description: Earliest scheduled job run time
+
+StatusBackups:
+  type: object
+  required:
+    - enabled
+    - lastBackupAt
+  properties:
+    enabled:
+      type: boolean
+      description: Whether automatic backups are enabled
+    lastBackupAt:
+      type: string
+      format: date-time
+      nullable: true
+      description: Timestamp of last backup

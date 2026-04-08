@@ -35,7 +35,7 @@ teardown(async () => {
 
 test('valid API key returns 200', async () => {
 	const c = new TestClient(ORIGIN);
-	const res = await c.get('/api/v1/health/diagnostics', {
+	const res = await c.get('/api/v1/status', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
 	assertEquals(res.status, 200);
@@ -43,7 +43,7 @@ test('valid API key returns 200', async () => {
 
 test('invalid API key returns 401', async () => {
 	const c = new TestClient(ORIGIN);
-	const res = await c.get('/api/v1/health/diagnostics', {
+	const res = await c.get('/api/v1/status', {
 		headers: { 'X-Api-Key': 'wrong-key' }
 	});
 	assertEquals(res.status, 401);
@@ -51,13 +51,13 @@ test('invalid API key returns 401', async () => {
 
 test('no auth returns 401', async () => {
 	const unauthClient = new TestClient(ORIGIN);
-	const res = await unauthClient.get('/api/v1/health/diagnostics');
+	const res = await unauthClient.get('/api/v1/status');
 	assertEquals(res.status, 401);
 });
 
 test('API key in query param returns 401', async () => {
 	const unauthClient = new TestClient(ORIGIN);
-	const res = await unauthClient.get(`/api/v1/health/diagnostics?apikey=${API_KEY}`);
+	const res = await unauthClient.get(`/api/v1/status?apikey=${API_KEY}`);
 	assertEquals(res.status, 401);
 });
 

@@ -1,11 +1,3 @@
-ComponentStatus:
-  type: string
-  enum:
-    - healthy
-    - degraded
-    - unhealthy
-  description: Individual component health status
-
 HealthStatus:
   type: string
   enum:

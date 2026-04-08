@@ -18,7 +18,7 @@ servers:
 
 tags:
   - name: System
-    description: Health checks, diagnostics, and API metadata.
+    description: Health checks, system status, and API metadata.
   - name: Jobs
     description: Job queue status and polling
   - name: Backups
@@ -45,8 +45,8 @@ paths:
     $ref: './paths/databases.yaml#/databases'
   /health:
     $ref: './paths/system.yaml#/health'
-  /health/diagnostics:
-    $ref: './paths/system.yaml#/health_diagnostics'
+  /status:
+    $ref: './paths/system.yaml#/status'
   /openapi.json:
     $ref: './paths/system.yaml#/openapi'
   /jobs/{id}:
@@ -93,8 +93,6 @@ components:
 
   schemas:
     # Common
-    ComponentStatus:
-      $ref: './schemas/common.yaml#/ComponentStatus'
     HealthStatus:
       $ref: './schemas/common.yaml#/HealthStatus'
     ErrorResponse:
@@ -102,8 +100,27 @@ components:
     # Health
     HealthCheckResponse:
       $ref: './schemas/health.yaml#/HealthCheckResponse'
-    HealthDiagnosticsResponse:
-      $ref: './schemas/health.yaml#/HealthDiagnosticsResponse'
+    # Status
+    StatusResponse:
+      $ref: './schemas/status.yaml#/StatusResponse'
+    StatusDatabase:
+      $ref: './schemas/status.yaml#/StatusDatabase'
+    StatusDatabaseCounts:
+      $ref: './schemas/status.yaml#/StatusDatabaseCounts'
+    StatusArr:
+      $ref: './schemas/status.yaml#/StatusArr'
+    StatusArrSync:
+      $ref: './schemas/status.yaml#/StatusArrSync'
+    StatusArrSyncQualityProfiles:
+      $ref: './schemas/status.yaml#/StatusArrSyncQualityProfiles'
+    StatusArrSyncSection:
+      $ref: './schemas/status.yaml#/StatusArrSyncSection'
+    StatusArrDrift:
+      $ref: './schemas/status.yaml#/StatusArrDrift'
+    StatusJobs:
+      $ref: './schemas/status.yaml#/StatusJobs'
+    StatusBackups:
+      $ref: './schemas/status.yaml#/StatusBackups'
     # Entity Testing
     MediaType:
       $ref: './schemas/entity-testing.yaml#/MediaType'
