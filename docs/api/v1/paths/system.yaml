@@ -32,6 +32,9 @@ status:
   get:
     operationId: getStatus
     summary: System Status
+    description: |
+      Single-call overview designed for dashboard integrations (e.g. Homepage).
+      The `drift` field on each arr is reserved for future use and always null.
     tags:
       - System
     responses:
