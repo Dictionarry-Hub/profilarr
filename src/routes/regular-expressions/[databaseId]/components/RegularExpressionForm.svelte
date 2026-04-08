@@ -17,7 +17,7 @@
 	import { Save, Trash2, Loader2 } from 'lucide-svelte';
 	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
 	import type { AffectedArr } from '$shared/sync/types.ts';
-	import type { Regex101UnitTest } from '../../../api/regex101/[id]/+server';
+	import type { Regex101UnitTest } from '../../regex101/types';
 
 	// Form data shape
 	interface RegularExpressionFormData {
@@ -113,7 +113,7 @@
 		unitTestsError = null;
 
 		try {
-			const response = await fetch(`/api/regex101/${encodeURIComponent(id)}`);
+			const response = await fetch(`/regular-expressions/regex101/${encodeURIComponent(id)}`);
 			if (!response.ok) {
 				const data = await response.json().catch(() => ({}));
 				throw new Error(data.message || `Failed to fetch: ${response.statusText}`);

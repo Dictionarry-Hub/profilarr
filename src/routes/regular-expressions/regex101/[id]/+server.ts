@@ -3,23 +3,7 @@ import type { RequestHandler } from './$types';
 import { logger } from '$logger/logger.ts';
 import { regex101CacheQueries } from '$db/queries/regex101Cache.ts';
 import { config } from '$config';
-
-export interface Regex101UnitTest {
-	description: string;
-	testString: string;
-	criteria: 'DOES_MATCH' | 'DOES_NOT_MATCH';
-	actual?: boolean;
-	passed?: boolean;
-}
-
-export interface Regex101Response {
-	permalinkFragment: string;
-	version: number;
-	regex: string;
-	flags: string;
-	flavor: string;
-	unitTests: Regex101UnitTest[];
-}
+import type { Regex101UnitTest, Regex101Response } from '../types';
 
 /**
  * Run regex tests using the parser service (.NET regex engine)
@@ -90,11 +74,6 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
 		return json(JSON.parse(cached.response));
 	}
 
-	await logger.debug('regex101 cache miss', {
-		source: 'Regex101API',
-		meta: { id }
-	});
-
 	// Handle ID with optional version (e.g., "ABC123" or "ABC123/1")
 	const [regexId, version] = id.split('/');
 
@@ -118,10 +97,6 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
 		}
 
 		const data = await response.json();
-		await logger.debug('regex101 API response', {
-			source: 'Regex101API',
-			meta: data
-		});
 
 		// Extract unit tests
 		const unitTests: Regex101UnitTest[] = (data.unitTests || []).map(
