@@ -1,7 +1,8 @@
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import type { LinkOptions } from './types.ts';
 
-type ValidatedLinkInput = Omit<LinkOptions, 'conflictStrategy'> & {
+type ValidatedLinkInput = Omit<LinkOptions, 'conflictStrategy' | 'syncStrategy'> & {
+	syncStrategy: number;
 	conflictStrategy: 'override' | 'align' | 'ask';
 };
 
