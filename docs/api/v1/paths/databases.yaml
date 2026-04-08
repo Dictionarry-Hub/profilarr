@@ -3,18 +3,8 @@ databases:
     operationId: listDatabases
     summary: List Databases
     description: |
-      Returns all linked database instances with secrets stripped.
-
-      **Use cases:**
-      - Dashboard widgets showing connected databases
-      - Automation scripts checking database state
-      - Prerequisite checks (e.g. cutscene onboarding)
-
-      **Behavior:**
-      - Returns an empty array if no databases are linked
-      - The `personal_access_token` field is never included; `hasPat` indicates
-        whether one is configured
-      - The `local_path` field is excluded (internal detail)
+      Secrets are stripped: `personal_access_token` is replaced by `hasPat` (boolean)
+      and `local_path` is excluded.
     tags:
       - Databases
     responses:
