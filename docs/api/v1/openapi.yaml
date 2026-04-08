@@ -204,6 +204,8 @@ components:
     # Databases
     DatabaseInstance:
       $ref: './schemas/databases.yaml#/DatabaseInstance'
+    CreateDatabaseInput:
+      $ref: './schemas/databases.yaml#/CreateDatabaseInput'
     # Regex
     ValidateRegexRequest:
       $ref: './schemas/regex.yaml#/ValidateRegexRequest'

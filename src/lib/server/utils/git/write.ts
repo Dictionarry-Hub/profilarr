@@ -212,24 +212,7 @@ export async function clone(
 
 	args.push(authUrl, targetPath);
 
-	const command = new Deno.Command('git', {
-		args,
-		stdout: 'piped',
-		stderr: 'piped',
-		env: {
-			GIT_TERMINAL_PROMPT: '0',
-			GIT_ASKPASS: 'echo',
-			GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
-			GIT_CONFIG_COUNT: '1',
-			GIT_CONFIG_KEY_0: 'credential.helper',
-			GIT_CONFIG_VALUE_0: ''
-		}
-	});
-
-	const { code, stderr } = await command.output();
-	if (code !== 0) {
-		throw new Error(`Git clone failed: ${new TextDecoder().decode(stderr)}`);
-	}
+	await execGit(args);
 
 	return isPrivate;
 }

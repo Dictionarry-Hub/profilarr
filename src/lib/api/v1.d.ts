@@ -42,22 +42,22 @@ export interface paths {
 		};
 		/**
 		 * List Databases
-		 * @description Returns all linked database instances with secrets stripped.
-		 *
-		 *     **Use cases:**
-		 *     - Dashboard widgets showing connected databases
-		 *     - Automation scripts checking database state
-		 *     - Prerequisite checks (e.g. cutscene onboarding)
-		 *
-		 *     **Behavior:**
-		 *     - Returns an empty array if no databases are linked
-		 *     - The `personal_access_token` field is never included; `hasPat` indicates
-		 *       whether one is configured
-		 *     - The `local_path` field is excluded (internal detail)
+		 * @description Secrets are stripped: `personal_access_token` is replaced by `hasPat` (boolean)
+		 *     and `local_path` is excluded.
 		 */
 		get: operations['listDatabases'];
 		put?: never;
-		post?: never;
+		/**
+		 * Link Database
+		 * @description Clones the repository, validates its PCD manifest, and processes dependencies.
+		 *     This is synchronous and may take several seconds for large repositories.
+		 *
+		 *     Field dependencies:
+		 *     - `personal_access_token` requires `git_user_name` and `git_user_email`
+		 *     - `local_ops_enabled` requires `personal_access_token`
+		 *     - `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`
+		 */
+		post: operations['createDatabase'];
 		delete?: never;
 		options?: never;
 		head?: never;
@@ -73,8 +73,8 @@ export interface paths {
 		};
 		/**
 		 * Health Check
-		 * @description Returns 200 for healthy or degraded, 503 for unhealthy. Degraded means
-		 *     the system can serve requests but a non-critical component needs attention.
+		 * @description Public endpoint, no authentication required. Use this for uptime monitors
+		 *     and load balancers. Returns 200 for healthy or degraded, 503 for unhealthy.
 		 */
 		get: operations['getHealth'];
 		put?: never;
@@ -92,7 +92,11 @@ export interface paths {
 			path?: never;
 			cookie?: never;
 		};
-		/** System Status */
+		/**
+		 * System Status
+		 * @description Single-call overview designed for dashboard integrations (e.g. Homepage).
+		 *     The `drift` field on each arr is reserved for future use and always null.
+		 */
 		get: operations['getStatus'];
 		put?: never;
 		post?: never;
@@ -111,12 +115,8 @@ export interface paths {
 		};
 		/**
 		 * OpenAPI Specification
-		 * @description Returns the OpenAPI 3.1 specification for this API.
-		 *
-		 *     **Use cases:**
-		 *     - Client SDK generation (openapi-generator, openapi-typescript)
-		 *     - API discovery and introspection
-		 *     - Documentation tools
+		 * @description Returns the resolved OpenAPI 3.1 spec as a single JSON document.
+		 *     Useful for generating client SDKs or feeding to documentation tools.
 		 */
 		get: operations['getOpenApiSpec'];
 		put?: never;
@@ -1176,6 +1176,41 @@ export interface components {
 			/** @description Whether a personal access token is configured */
 			hasPat: boolean;
 		};
+		CreateDatabaseInput: {
+			/** @description Display name (must be unique) */
+			name: string;
+			/** @description GitHub repository URL */
+			repository_url: string;
+			/** @description Git branch to clone (defaults to remote's default branch) */
+			branch?: string;
+			/** @description GitHub PAT for private repos and push access */
+			personal_access_token?: string;
+			/** @description Required when personal_access_token is set */
+			git_user_name?: string;
+			/** @description Required when personal_access_token is set */
+			git_user_email?: string;
+			/**
+			 * @description Auto-sync interval in minutes (0 = manual only)
+			 * @default 0
+			 */
+			sync_strategy: number;
+			/**
+			 * @description Whether to automatically pull updates
+			 * @default false
+			 */
+			auto_pull: boolean;
+			/**
+			 * @description Force writes to local user ops even with a PAT (requires personal_access_token)
+			 * @default false
+			 */
+			local_ops_enabled: boolean;
+			/**
+			 * @description How to handle conflicts (only valid without a PAT, or with PAT + local_ops_enabled)
+			 * @default override
+			 * @enum {string}
+			 */
+			conflict_strategy: 'override' | 'align' | 'ask';
+		};
 		ValidateRegexRequest: {
 			/** @description The .NET regex pattern to validate */
 			pattern: string;
@@ -1464,7 +1499,89 @@ export interface operations {
 				headers: {
 					[name: string]: unknown;
 				};
-				content?: never;
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	createDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateDatabaseInput'];
+			};
+		};
+		responses: {
+			/** @description Database linked */
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['DatabaseInstance'];
+				};
+			};
+			/** @description Validation error */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Name and repository URL are required"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description A database with this name already exists */
+			409: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "A database with this name already exists"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Link failed (invalid URL, clone failure, bad manifest) */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Repository not found or inaccessible"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
 			};
 		};
 	};

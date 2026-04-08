@@ -18,3 +18,65 @@ databases:
                 $ref: '../schemas/databases.yaml#/DatabaseInstance'
       '401':
         description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+  post:
+    operationId: createDatabase
+    summary: Link Database
+    description: |
+      Clones the repository, validates its PCD manifest, and processes dependencies.
+      This is synchronous and may take several seconds for large repositories.
+
+      Field dependencies:
+      - `personal_access_token` requires `git_user_name` and `git_user_email`
+      - `local_ops_enabled` requires `personal_access_token`
+      - `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`
+    tags:
+      - Databases
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/databases.yaml#/CreateDatabaseInput'
+    responses:
+      '201':
+        description: Database linked
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/databases.yaml#/DatabaseInstance'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Name and repository URL are required
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+      '409':
+        description: A database with this name already exists
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: A database with this name already exists
+      '422':
+        description: Link failed (invalid URL, clone failure, bad manifest)
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: 'Repository not found or inaccessible'

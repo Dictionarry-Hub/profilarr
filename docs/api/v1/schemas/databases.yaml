@@ -71,3 +71,48 @@ DatabaseInstance:
     hasPat:
       type: boolean
       description: Whether a personal access token is configured
+
+CreateDatabaseInput:
+  type: object
+  required:
+    - name
+    - repository_url
+  properties:
+    name:
+      type: string
+      description: Display name (must be unique)
+    repository_url:
+      type: string
+      description: GitHub repository URL
+    branch:
+      type: string
+      description: Git branch to clone (defaults to remote's default branch)
+    personal_access_token:
+      type: string
+      description: GitHub PAT for private repos and push access
+    git_user_name:
+      type: string
+      description: Required when personal_access_token is set
+    git_user_email:
+      type: string
+      description: Required when personal_access_token is set
+    sync_strategy:
+      type: integer
+      default: 0
+      description: Auto-sync interval in minutes (0 = manual only)
+    auto_pull:
+      type: boolean
+      default: false
+      description: Whether to automatically pull updates
+    local_ops_enabled:
+      type: boolean
+      default: false
+      description: Force writes to local user ops even with a PAT (requires personal_access_token)
+    conflict_strategy:
+      type: string
+      enum:
+        - override
+        - align
+        - ask
+      default: override
+      description: How to handle conflicts (only valid without a PAT, or with PAT + local_ops_enabled)
