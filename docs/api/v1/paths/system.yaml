@@ -3,8 +3,8 @@ health:
     operationId: getHealth
     summary: Health Check
     description: |
-      Returns 200 for healthy or degraded, 503 for unhealthy. Degraded means
-      the system can serve requests but a non-critical component needs attention.
+      Public endpoint, no authentication required. Use this for uptime monitors
+      and load balancers. Returns 200 for healthy or degraded, 503 for unhealthy.
     tags:
       - System
     security: []
@@ -96,12 +96,8 @@ openapi:
     operationId: getOpenApiSpec
     summary: OpenAPI Specification
     description: |
-      Returns the OpenAPI 3.1 specification for this API.
-
-      **Use cases:**
-      - Client SDK generation (openapi-generator, openapi-typescript)
-      - API discovery and introspection
-      - Documentation tools
+      Returns the resolved OpenAPI 3.1 spec as a single JSON document.
+      Useful for generating client SDKs or feeding to documentation tools.
     tags:
       - System
     responses:
