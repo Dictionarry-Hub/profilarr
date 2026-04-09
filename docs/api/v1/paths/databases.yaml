@@ -80,3 +80,178 @@ databases:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: 'Repository not found or inaccessible'
+
+database:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: Database instance ID
+      schema:
+        type: integer
+  get:
+    operationId: getDatabase
+    summary: Get Database
+    description: |
+      Secrets are stripped: `personal_access_token` is replaced by `hasPat` (boolean)
+      and `local_path` is excluded.
+    tags:
+      - Databases
+    responses:
+      '200':
+        description: Database detail
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/databases.yaml#/DatabaseInstance'
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+      '404':
+        description: Database not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Database not found
+  patch:
+    operationId: updateDatabase
+    summary: Update Database
+    description: |
+      Partial update. Only the provided fields are changed. Unknown fields
+      are silently ignored.
+
+      Field dependencies:
+      - `personal_access_token` requires `git_user_name` and `git_user_email`
+      - `local_ops_enabled` requires `personal_access_token`
+      - `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`
+    tags:
+      - Databases
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/databases.yaml#/UpdateDatabaseInput'
+    responses:
+      '200':
+        description: Database updated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/databases.yaml#/DatabaseInstance'
+      '400':
+        description: Validation error or empty body
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: No updatable fields provided
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+      '404':
+        description: Database not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Database not found
+      '409':
+        description: A database with this name already exists
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: A database with this name already exists
+  delete:
+    operationId: deleteDatabase
+    summary: Unlink Database
+    description: |
+      Removes the database row, deletes the cloned repository from disk,
+      and cancels any scheduled sync jobs.
+    tags:
+      - Databases
+    responses:
+      '204':
+        description: Database unlinked
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+      '404':
+        description: Database not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Database not found
+
+database_sync:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: Database instance ID
+      schema:
+        type: integer
+  post:
+    operationId: syncDatabase
+    summary: Trigger Sync
+    description: |
+      Async. Enqueues a `pcd.sync` job and returns 202 with the job ID.
+      Poll `GET /api/v1/jobs/{jobId}` for completion.
+    tags:
+      - Databases
+    responses:
+      '202':
+        description: Sync job enqueued
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/databases.yaml#/SyncTriggerResponse'
+            example:
+              jobId: 42
+      '400':
+        description: Database is disabled
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Database is disabled
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
+      '404':
+        description: Database not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Database not found

@@ -19,7 +19,7 @@ const dbSyncHandler: JobHandler = async (job) => {
 		return { status: 'cancelled', output: 'Database sync disabled' };
 	}
 
-	if (instance.sync_strategy <= 0) {
+	if (instance.sync_strategy <= 0 && job.source === 'schedule') {
 		return { status: 'cancelled', output: 'Auto-sync disabled' };
 	}
 

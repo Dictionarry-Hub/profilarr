@@ -64,6 +64,69 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/databases/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		/**
+		 * Get Database
+		 * @description Secrets are stripped: `personal_access_token` is replaced by `hasPat` (boolean)
+		 *     and `local_path` is excluded.
+		 */
+		get: operations['getDatabase'];
+		put?: never;
+		post?: never;
+		/**
+		 * Unlink Database
+		 * @description Removes the database row, deletes the cloned repository from disk,
+		 *     and cancels any scheduled sync jobs.
+		 */
+		delete: operations['deleteDatabase'];
+		options?: never;
+		head?: never;
+		/**
+		 * Update Database
+		 * @description Partial update. Only the provided fields are changed. Unknown fields
+		 *     are silently ignored.
+		 *
+		 *     Field dependencies:
+		 *     - `personal_access_token` requires `git_user_name` and `git_user_email`
+		 *     - `local_ops_enabled` requires `personal_access_token`
+		 *     - `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`
+		 */
+		patch: operations['updateDatabase'];
+		trace?: never;
+	};
+	'/databases/{id}/sync': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/**
+		 * Trigger Sync
+		 * @description Async. Enqueues a `pcd.sync` job and returns 202 with the job ID.
+		 *     Poll `GET /api/v1/jobs/{jobId}` for completion.
+		 */
+		post: operations['syncDatabase'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/health': {
 		parameters: {
 			query?: never;
@@ -1211,6 +1274,32 @@ export interface components {
 			 */
 			conflict_strategy: 'override' | 'align' | 'ask';
 		};
+		/** @description All fields are optional. Unknown fields are silently ignored. */
+		UpdateDatabaseInput: {
+			/** @description Display name (must be unique) */
+			name?: string;
+			/** @description GitHub PAT for private repos and push access */
+			personal_access_token?: string;
+			/** @description Required when personal_access_token is set */
+			git_user_name?: string;
+			/** @description Required when personal_access_token is set */
+			git_user_email?: string;
+			/** @description Auto-sync interval in minutes (0 = manual only) */
+			sync_strategy?: number;
+			/** @description Whether to automatically pull updates */
+			auto_pull?: boolean;
+			/** @description Force writes to local user ops even with a PAT (requires personal_access_token) */
+			local_ops_enabled?: boolean;
+			/**
+			 * @description How to handle conflicts (only valid without a PAT, or with PAT + local_ops_enabled)
+			 * @enum {string}
+			 */
+			conflict_strategy?: 'override' | 'align' | 'ask';
+		};
+		SyncTriggerResponse: {
+			/** @description Job queue ID to poll via GET /api/v1/jobs/{jobId} */
+			jobId: number;
+		};
 		ValidateRegexRequest: {
 			/** @description The .NET regex pattern to validate */
 			pattern: string;
@@ -1578,6 +1667,259 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Repository not found or inaccessible"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	getDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Database detail */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['DatabaseInstance'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	deleteDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Database unlinked */
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	updateDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateDatabaseInput'];
+			};
+		};
+		responses: {
+			/** @description Database updated */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['DatabaseInstance'];
+				};
+			};
+			/** @description Validation error or empty body */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "No updatable fields provided"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description A database with this name already exists */
+			409: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "A database with this name already exists"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	syncDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Sync job enqueued */
+			202: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "jobId": 42
+					 *     }
+					 */
+					'application/json': components['schemas']['SyncTriggerResponse'];
+				};
+			};
+			/** @description Database is disabled */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database is disabled"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database not found"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];

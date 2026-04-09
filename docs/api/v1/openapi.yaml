@@ -43,6 +43,10 @@ paths:
     $ref: './paths/arr.yaml#/instances'
   /databases:
     $ref: './paths/databases.yaml#/databases'
+  /databases/{id}:
+    $ref: './paths/databases.yaml#/database'
+  /databases/{id}/sync:
+    $ref: './paths/databases.yaml#/database_sync'
   /health:
     $ref: './paths/system.yaml#/health'
   /status:
@@ -206,6 +210,10 @@ components:
       $ref: './schemas/databases.yaml#/DatabaseInstance'
     CreateDatabaseInput:
       $ref: './schemas/databases.yaml#/CreateDatabaseInput'
+    UpdateDatabaseInput:
+      $ref: './schemas/databases.yaml#/UpdateDatabaseInput'
+    SyncTriggerResponse:
+      $ref: './schemas/databases.yaml#/SyncTriggerResponse'
     # Regex
     ValidateRegexRequest:
       $ref: './schemas/regex.yaml#/ValidateRegexRequest'
