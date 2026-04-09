@@ -7,7 +7,7 @@
 	"dependencies": {
 		"@jsr/db__sqlite": "^0.12.0",
 		"croner": "^10.0.1",
-		"jose": "^6.2.1",
+		"jose": "^6.2.2",
 		"kysely": "0.27.6",
 		"lucide-svelte": "^0.577.0",
 		"marked": "^15.0.6",
@@ -25,7 +25,7 @@
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/deno": "^2.5.0",
 		"@types/node": "^22",
-		"better-sqlite3": "^12.6.2",
+		"better-sqlite3": "^12.8.0",
 		"openapi-typescript": "^7.0.0",
 		"prettier": "3.8.1",
 		"prettier-plugin-svelte": "^3.5.1",

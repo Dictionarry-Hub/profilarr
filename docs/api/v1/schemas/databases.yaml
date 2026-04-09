@@ -116,3 +116,45 @@ CreateDatabaseInput:
         - ask
       default: override
       description: How to handle conflicts (only valid without a PAT, or with PAT + local_ops_enabled)
+
+UpdateDatabaseInput:
+  type: object
+  description: All fields are optional. Unknown fields are silently ignored.
+  properties:
+    name:
+      type: string
+      description: Display name (must be unique)
+    personal_access_token:
+      type: string
+      description: GitHub PAT for private repos and push access
+    git_user_name:
+      type: string
+      description: Required when personal_access_token is set
+    git_user_email:
+      type: string
+      description: Required when personal_access_token is set
+    sync_strategy:
+      type: integer
+      description: Auto-sync interval in minutes (0 = manual only)
+    auto_pull:
+      type: boolean
+      description: Whether to automatically pull updates
+    local_ops_enabled:
+      type: boolean
+      description: Force writes to local user ops even with a PAT (requires personal_access_token)
+    conflict_strategy:
+      type: string
+      enum:
+        - override
+        - align
+        - ask
+      description: How to handle conflicts (only valid without a PAT, or with PAT + local_ops_enabled)
+
+SyncTriggerResponse:
+  type: object
+  required:
+    - jobId
+  properties:
+    jobId:
+      type: integer
+      description: Job queue ID to poll via GET /api/v1/jobs/{jobId}

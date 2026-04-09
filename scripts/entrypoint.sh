@@ -1,10 +1,39 @@
 #!/bin/bash
+
+set -e
+
 # =============================================================================
 # Profilarr Container Entrypoint
 # =============================================================================
-# Handles PUID/PGID/UMASK setup for proper file permissions
-set -e
+# Two operational modes:
+#
+# 1. Root mode (default Docker):
+#    Container starts as root. PUID/PGID/UMASK env vars control which user
+#    the app ultimately runs as. Useful for NAS/home server deployments where
+#    bind-mount ownership must match a specific host UID/GID.
+#
+# 2. Non-root mode (Kubernetes / hardened Docker):
+#    Set runAsUser/runAsNonRoot in your pod securityContext (or --user in
+#    docker run). The entrypoint detects it is not root, skips all privilege
+#    operations, and execs the app directly. Volume ownership should be
+#    handled externally (K8s fsGroup, init containers, or pre-provisioned
+#    storage permissions).
+# -----------------------------------------------------------------------------
+# Set architecture-dependent SQLite path
+# -----------------------------------------------------------------------------
+ARCH=$(uname -m)
+export DENO_SQLITE_PATH="/usr/lib/${ARCH}-linux-gnu/libsqlite3.so.0"
 
+# -----------------------------------------------------------------------------
+# Non-root fast path — skip all privilege operations
+# -----------------------------------------------------------------------------
+if [ "$(id -u)" != "0" ]; then
+    umask "${UMASK:-022}"
+    mkdir -p /config/data /config/logs /config/backups /config/databases
+    exec /app/profilarr
+fi
+
+# Handles PUID/PGID/UMASK setup for proper file permissions
 PUID=${PUID:-1000}
 PGID=${PGID:-1000}
 UMASK=${UMASK:-022}
@@ -56,12 +85,6 @@ mkdir -p /config/data /config/logs /config/backups /config/databases
 # Fix ownership of config directory
 # -----------------------------------------------------------------------------
 chown -R "${PUID}:${PGID}" /config
-
-# -----------------------------------------------------------------------------
-# Set architecture-dependent SQLite path
-# -----------------------------------------------------------------------------
-ARCH=$(uname -m)
-export DENO_SQLITE_PATH="/usr/lib/${ARCH}-linux-gnu/libsqlite3.so.0"
 
 # -----------------------------------------------------------------------------
 # Drop privileges and run
