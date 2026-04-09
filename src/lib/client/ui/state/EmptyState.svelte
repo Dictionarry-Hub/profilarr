@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Plus } from 'lucide-svelte';
+	import Button from '$ui/button/Button.svelte';
 
 	export let icon: any; // Lucide icon component
 	export let title: string;
@@ -7,6 +8,7 @@
 	export let buttonText: string;
 	export let buttonHref: string;
 	export let buttonIcon: any = Plus; // Default to Plus icon
+	export let onboarding: string | undefined = undefined;
 </script>
 
 <div class="flex min-h-[calc(100vh-4rem)] items-center justify-center p-8">
@@ -29,12 +31,13 @@
 		</p>
 
 		<!-- Action Button -->
-		<a
-			href={buttonHref}
-			class="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600"
-		>
-			<svelte:component this={buttonIcon} size={18} />
-			{buttonText}
-		</a>
+		<span data-onboarding={onboarding} class="inline-block">
+			<Button
+				text={buttonText}
+				href={buttonHref}
+				icon={buttonIcon}
+				iconColor="text-blue-600 dark:text-blue-400"
+			/>
+		</span>
 	</div>
 </div>

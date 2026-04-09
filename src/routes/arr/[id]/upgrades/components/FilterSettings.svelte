@@ -262,7 +262,12 @@
 	<div class="mb-4">
 		<ActionsBar>
 			<SearchAction {searchStore} placeholder="Search filters..." />
-			<ActionButton icon={Plus} title="Add filter" on:click={addFilter} />
+			<ActionButton
+				icon={Plus}
+				title="Add filter"
+				onboarding="upgrades-add-filter"
+				on:click={addFilter}
+			/>
 		</ActionsBar>
 	</div>
 
@@ -392,17 +397,19 @@
 
 		<svelte:fragment slot="expanded" let:row>
 			<div class="space-y-4 p-6">
-				<FilterGroupComponent
-					group={row.group}
-					appType={resolvedAppType}
-					on:change={handleChange}
-				/>
+				<div data-onboarding="upgrades-filter-rules">
+					<FilterGroupComponent
+						group={row.group}
+						appType={resolvedAppType}
+						on:change={handleChange}
+					/>
+				</div>
 
 				<!-- Selection Settings -->
 				<Card flush padding="md">
 					<h3 class="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">Settings</h3>
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-						<div>
+						<div data-onboarding="upgrades-cutoff">
 							<label
 								for="cutoff-{row.id}"
 								class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
@@ -424,7 +431,7 @@
 								Score threshold for "cutoff met"
 							</p>
 						</div>
-						<div>
+						<div data-onboarding="upgrades-method">
 							<label
 								for="selector-{row.id}"
 								class="mb-1 block text-sm font-medium text-neutral-600 dark:text-neutral-400"
@@ -450,7 +457,7 @@
 								/>
 							</div>
 						</div>
-						<div>
+						<div data-onboarding="upgrades-count">
 							<label
 								for="count-{row.id}"
 								class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
@@ -472,7 +479,7 @@
 								Items per run (max {countMax} at this schedule)
 							</p>
 						</div>
-						<div>
+						<div data-onboarding="upgrades-cooldown">
 							<label
 								for="tag-{row.id}"
 								class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
@@ -503,8 +510,8 @@
 						</div>
 					</div>
 				</Card>
-			</div>
-		</svelte:fragment>
+			</div></svelte:fragment
+		>
 	</ExpandableTable>
 </div>
 

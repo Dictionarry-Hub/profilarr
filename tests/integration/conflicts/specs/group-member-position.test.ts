@@ -18,7 +18,7 @@ import {
 	queryLatestConflicts,
 	queryLatestHistory
 } from '../harness/setup.ts';
-import { Database } from 'jsr:@db/sqlite@0.12';
+import { Database } from '@db/sqlite';
 
 const PORT = 7026;
 const ORIGIN = `http://localhost:${PORT}`;

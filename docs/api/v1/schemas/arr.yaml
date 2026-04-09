@@ -1,3 +1,47 @@
+ArrInstance:
+  type: object
+  required:
+    - id
+    - name
+    - type
+    - url
+    - enabled
+    - library_refresh_interval
+    - created_at
+    - updated_at
+  properties:
+    id:
+      type: integer
+      description: Instance ID
+    name:
+      type: string
+      description: Display name
+    type:
+      $ref: '#/ArrType'
+    url:
+      type: string
+      description: Instance URL
+    tags:
+      type: string
+      nullable: true
+      description: JSON array of tags
+    enabled:
+      type: integer
+      description: Whether the instance is active (0 or 1)
+    library_refresh_interval:
+      type: integer
+      description: Library cache refresh interval in minutes (0 = manual)
+    library_last_refreshed_at:
+      type: string
+      nullable: true
+      description: Last library refresh timestamp
+    created_at:
+      type: string
+      description: Creation timestamp
+    updated_at:
+      type: string
+      description: Last update timestamp
+
 ArrType:
   type: string
   enum:

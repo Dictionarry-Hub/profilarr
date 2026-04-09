@@ -53,13 +53,19 @@
 		buttonText="Link Database"
 		buttonHref="/databases/new"
 		buttonIcon={Plus}
+		onboarding="db-add"
 	/>
 {:else}
 	<div class="space-y-6 p-4 sm:p-8">
 		<!-- Actions Bar -->
 		<ActionsBar>
 			<SearchAction searchStore={search} placeholder="Search databases..." />
-			<ActionButton icon={Plus} title="Link Database" on:click={() => goto('/databases/new')} />
+			<ActionButton
+				icon={Plus}
+				title="Link Database"
+				on:click={() => goto('/databases/new')}
+				onboarding="db-add"
+			/>
 			<ActionButton icon={Info} title="Info" on:click={() => (showInfoModal = true)} />
 			<ViewToggle bind:value={$view} />
 		</ActionsBar>

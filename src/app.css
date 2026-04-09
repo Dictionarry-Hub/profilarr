@@ -50,7 +50,7 @@ html {
 
 @layer base {
 	* {
-		font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+		font-family: var(--font-sans);
 	}
 
 	/* Default accent colors (blue) - overridden by JS */

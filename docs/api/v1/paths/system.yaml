@@ -1,81 +1,103 @@
 health:
   get:
     operationId: getHealth
-    summary: Health check (public)
+    summary: Health Check
     description: |
-      Public endpoint for uptime monitors. Returns only the overall status and
-      timestamp — no version, uptime, or component details.
-
-      Status values:
-      - `healthy`: All components functioning normally
-      - `degraded`: Core functionality works but some components have issues
-      - `unhealthy`: Core functionality is broken
+      Public endpoint, no authentication required. Use this for uptime monitors
+      and load balancers. Returns 200 for healthy or degraded, 503 for unhealthy.
     tags:
       - System
     security: []
     responses:
       '200':
-        description: Service is healthy or degraded
+        description: System is healthy or degraded (status field indicates which)
         content:
           application/json:
             schema:
               $ref: '../schemas/health.yaml#/HealthCheckResponse'
+            example:
+              status: healthy
+              timestamp: '2026-03-09T12:00:00.000Z'
       '503':
-        description: Service is unhealthy
+        description: System is unhealthy (status field will be "unhealthy")
         content:
           application/json:
             schema:
               $ref: '../schemas/health.yaml#/HealthCheckResponse'
+            example:
+              status: unhealthy
+              timestamp: '2026-03-09T12:00:00.000Z'
 
-health_diagnostics:
+status:
   get:
-    operationId: getHealthDiagnostics
-    summary: Health diagnostics (authenticated)
+    operationId: getStatus
+    summary: System Status
     description: |
-      Detailed health diagnostics including version, uptime, and per-component
-      status. Requires authentication (session or API key).
-
-      Use `?verbose=true` for additional counts, sizes, and timestamps.
+      Single-call overview designed for dashboard integrations (e.g. Homepage).
+      The `drift` field on each arr is reserved for future use and always null.
     tags:
       - System
-    parameters:
-      - name: verbose
-        in: query
-        description: Include extra detail per component (counts, sizes, timestamps)
-        schema:
-          type: boolean
-          default: false
     responses:
       '200':
-        description: Diagnostics response (healthy or degraded)
+        description: System status
         content:
           application/json:
             schema:
-              $ref: '../schemas/health.yaml#/HealthDiagnosticsResponse'
+              $ref: '../schemas/status.yaml#/StatusResponse'
+            example:
+              version: '2.0.0'
+              uptime: 86400
+              databases:
+                - id: 1
+                  name: Dictionarry
+                  enabled: true
+                  lastSyncedAt: '2026-04-09T12:00:00Z'
+                  syncStrategy: auto
+                  counts:
+                    customFormats: 52
+                    qualityProfiles: 3
+                    regularExpressions: 120
+                    delayProfiles: 1
+              arrs:
+                - id: 1
+                  name: Radarr
+                  type: radarr
+                  enabled: true
+                  sync:
+                    qualityProfiles:
+                      count: 2
+                      status: idle
+                      lastSyncedAt: '2026-04-09T12:00:00Z'
+                    delayProfiles:
+                      configured: true
+                      status: idle
+                      lastSyncedAt: '2026-04-09T12:00:00Z'
+                    mediaManagement:
+                      configured: true
+                      status: idle
+                      lastSyncedAt: '2026-04-09T12:00:00Z'
+                  drift: null
+              jobs:
+                active: 0
+                queued: 2
+                nextRunAt: '2026-04-09T13:00:00Z'
+              backups:
+                enabled: true
+                lastBackupAt: '2026-04-09T00:00:00Z'
       '401':
         description: Not authenticated
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - error
-              properties:
-                error:
-                  type: string
-                  example: Unauthorized
-      '503':
-        description: Service is unhealthy
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/health.yaml#/HealthDiagnosticsResponse'
+              $ref: '../schemas/common.yaml#/ErrorResponse'
 
 openapi:
   get:
     operationId: getOpenApiSpec
-    summary: OpenAPI specification
-    description: Returns the OpenAPI specification for this API
+    summary: OpenAPI Specification
+    description: |
+      Returns the resolved OpenAPI 3.1 spec as a single JSON document.
+      Useful for generating client SDKs or feeding to documentation tools.
     tags:
       - System
     responses:

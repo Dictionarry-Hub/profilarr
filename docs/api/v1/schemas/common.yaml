@@ -1,11 +1,3 @@
-ComponentStatus:
-  type: string
-  enum:
-    - healthy
-    - degraded
-    - unhealthy
-  description: Individual component health status
-
 HealthStatus:
   type: string
   enum:
@@ -13,3 +5,13 @@ HealthStatus:
     - degraded
     - unhealthy
   description: Overall health status
+
+ErrorResponse:
+  type: object
+  required:
+    - error
+  properties:
+    error:
+      type: string
+      description: Error message
+      example: Unauthorized

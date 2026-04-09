@@ -15,7 +15,7 @@
 import { assertEquals, assertStringIncludes } from '@std/assert';
 import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUserDirect, login } from '../harness/setup.ts';
+import { createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 
 const PORT = 7019;

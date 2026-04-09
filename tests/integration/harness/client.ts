@@ -72,6 +72,53 @@ export class TestClient {
 	}
 
 	/**
+	 * POST with multipart form data (file uploads).
+	 * Content-Type is omitted so fetch sets the multipart boundary automatically.
+	 */
+	async postMultipart(
+		path: string,
+		formData: FormData,
+		options: { headers?: Record<string, string> } = {}
+	): Promise<Response> {
+		return this.request(path, {
+			method: 'POST',
+			headers: options.headers,
+			body: formData
+		});
+	}
+
+	/**
+	 * DELETE request.
+	 */
+	async delete(
+		path: string,
+		options: { headers?: Record<string, string> } = {}
+	): Promise<Response> {
+		return this.request(path, {
+			method: 'DELETE',
+			headers: options.headers
+		});
+	}
+
+	/**
+	 * PATCH with JSON body.
+	 */
+	async patch(
+		path: string,
+		body: Record<string, unknown>,
+		options: { headers?: Record<string, string> } = {}
+	): Promise<Response> {
+		return this.request(path, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+				...options.headers
+			},
+			body: JSON.stringify(body)
+		});
+	}
+
+	/**
 	 * Core request method.
 	 */
 	private async request(
@@ -79,7 +126,7 @@ export class TestClient {
 		options: {
 			method: string;
 			headers?: Record<string, string>;
-			body?: string;
+			body?: string | FormData;
 			followRedirects?: boolean;
 		}
 	): Promise<Response> {

@@ -91,6 +91,13 @@ COPY --from=builder /build/dist/build/static /app/static
 COPY scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# Create a fixed profilarr user/group (UID/GID 1000).
+# - Root/PUID mode: entrypoint may reassign UID/GID at runtime via usermod.
+# - Non-root mode: set runAsUser: 1000 (K8s) or --user 1000 (Docker) to skip
+#   all privilege operations and run directly as this user.
+RUN groupadd -g 1000 profilarr && \
+    useradd -u 1000 -g profilarr -d /config -s /sbin/nologin profilarr
+
 # Create config directory
 RUN mkdir -p /config
 

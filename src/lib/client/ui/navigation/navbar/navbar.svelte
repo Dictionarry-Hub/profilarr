@@ -1,19 +1,16 @@
 <script lang="ts">
 	import AccentPicker from './accentPicker.svelte';
 	import ThemeToggle from './themeToggle.svelte';
+	import HelpButton from '$ui/help/HelpButton.svelte';
 	import { Menu } from 'lucide-svelte';
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import logo from '$assets/logo-512.png';
-	import { alertStore } from '$alerts/store';
-	import MobileNavAlert from '$alerts/MobileNavAlert.svelte';
-
-	$: latestAlert = $alertStore.length > 0 ? $alertStore[$alertStore.length - 1] : null;
 </script>
 
 <nav
 	class="fixed top-0 left-0 z-50 w-full border-r-0 border-b border-neutral-200 bg-neutral-50 md:z-[80] md:w-80 md:border-r dark:border-neutral-800 dark:bg-neutral-900"
 >
-	<div class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-4">
+	<div class="flex items-center justify-between gap-3 px-4 py-4">
 		<!-- Left: Hamburger (mobile) + Brand name with logo (desktop) -->
 		<div class="flex items-center gap-2">
 			<button
@@ -34,17 +31,11 @@
 			</div>
 		</div>
 
-		<!-- Center: Mobile alerts -->
-		<div class="flex min-w-0 justify-center md:hidden">
-			{#if latestAlert}
-				<MobileNavAlert id={latestAlert.id} type={latestAlert.type} message={latestAlert.message} />
-			{/if}
-		</div>
-
 		<!-- Right: Accent picker and Theme toggle -->
 		<div class="flex items-center justify-end gap-1">
 			<AccentPicker />
 			<ThemeToggle />
+			<HelpButton variant="navbar" />
 		</div>
 	</div>
 </nav>

@@ -4,6 +4,129 @@
  */
 
 export interface paths {
+	'/arr': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * List Arr Instances
+		 * @description Returns all Arr instances (Radarr/Sonarr) with secrets stripped.
+		 *
+		 *     **Use cases:**
+		 *     - Dashboard widgets showing connected instances
+		 *     - Automation scripts checking instance state
+		 *     - Prerequisite checks (e.g. onboarding)
+		 *
+		 *     **Behavior:**
+		 *     - Returns an empty array if no instances are connected
+		 *     - The `api_key` field is never included
+		 */
+		get: operations['listArrInstances'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/databases': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * List Databases
+		 * @description Secrets are stripped: `personal_access_token` is replaced by `hasPat` (boolean)
+		 *     and `local_path` is excluded.
+		 */
+		get: operations['listDatabases'];
+		put?: never;
+		/**
+		 * Link Database
+		 * @description Clones the repository, validates its PCD manifest, and processes dependencies.
+		 *     This is synchronous and may take several seconds for large repositories.
+		 *
+		 *     Field dependencies:
+		 *     - `personal_access_token` requires `git_user_name` and `git_user_email`
+		 *     - `local_ops_enabled` requires `personal_access_token`
+		 *     - `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`
+		 */
+		post: operations['createDatabase'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/databases/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		/**
+		 * Get Database
+		 * @description Secrets are stripped: `personal_access_token` is replaced by `hasPat` (boolean)
+		 *     and `local_path` is excluded.
+		 */
+		get: operations['getDatabase'];
+		put?: never;
+		post?: never;
+		/**
+		 * Unlink Database
+		 * @description Removes the database row, deletes the cloned repository from disk,
+		 *     and cancels any scheduled sync jobs.
+		 */
+		delete: operations['deleteDatabase'];
+		options?: never;
+		head?: never;
+		/**
+		 * Update Database
+		 * @description Partial update. Only the provided fields are changed. Unknown fields
+		 *     are silently ignored.
+		 *
+		 *     Field dependencies:
+		 *     - `personal_access_token` requires `git_user_name` and `git_user_email`
+		 *     - `local_ops_enabled` requires `personal_access_token`
+		 *     - `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`
+		 */
+		patch: operations['updateDatabase'];
+		trace?: never;
+	};
+	'/databases/{id}/sync': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/**
+		 * Trigger Sync
+		 * @description Async. Enqueues a `pcd.sync` job and returns 202 with the job ID.
+		 *     Poll `GET /api/v1/jobs/{jobId}` for completion.
+		 */
+		post: operations['syncDatabase'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/health': {
 		parameters: {
 			query?: never;
@@ -12,14 +135,9 @@ export interface paths {
 			cookie?: never;
 		};
 		/**
-		 * Health check (public)
-		 * @description Public endpoint for uptime monitors. Returns only the overall status and
-		 *     timestamp — no version, uptime, or component details.
-		 *
-		 *     Status values:
-		 *     - `healthy`: All components functioning normally
-		 *     - `degraded`: Core functionality works but some components have issues
-		 *     - `unhealthy`: Core functionality is broken
+		 * Health Check
+		 * @description Public endpoint, no authentication required. Use this for uptime monitors
+		 *     and load balancers. Returns 200 for healthy or degraded, 503 for unhealthy.
 		 */
 		get: operations['getHealth'];
 		put?: never;
@@ -30,7 +148,7 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
-	'/health/diagnostics': {
+	'/status': {
 		parameters: {
 			query?: never;
 			header?: never;
@@ -38,13 +156,11 @@ export interface paths {
 			cookie?: never;
 		};
 		/**
-		 * Health diagnostics (authenticated)
-		 * @description Detailed health diagnostics including version, uptime, and per-component
-		 *     status. Requires authentication (session or API key).
-		 *
-		 *     Use `?verbose=true` for additional counts, sizes, and timestamps.
+		 * System Status
+		 * @description Single-call overview designed for dashboard integrations (e.g. Homepage).
+		 *     The `drift` field on each arr is reserved for future use and always null.
 		 */
-		get: operations['getHealthDiagnostics'];
+		get: operations['getStatus'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -61,8 +177,9 @@ export interface paths {
 			cookie?: never;
 		};
 		/**
-		 * OpenAPI specification
-		 * @description Returns the OpenAPI specification for this API
+		 * OpenAPI Specification
+		 * @description Returns the resolved OpenAPI 3.1 spec as a single JSON document.
+		 *     Useful for generating client SDKs or feeding to documentation tools.
 		 */
 		get: operations['getOpenApiSpec'];
 		put?: never;
@@ -71,6 +188,121 @@ export interface paths {
 		options?: never;
 		head?: never;
 		patch?: never;
+		trace?: never;
+	};
+	'/jobs/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Get Job Status
+		 * @description Returns the current status of a job queue entry.
+		 *
+		 *     **Use cases:**
+		 *     - Polling for completion after creating a backup
+		 *     - Checking if a scheduled job has run
+		 *     - Inspecting job errors after failure
+		 *
+		 *     **Behavior:**
+		 *     - Returns the job queue record with its current status
+		 *     - If the job has executed, `result` includes the latest run history
+		 *     - If the job is still queued or running, `result` is null
+		 */
+		get: operations['getJob'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/backups': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** List Backups */
+		get: operations['listBackups'];
+		put?: never;
+		/**
+		 * Create Backup
+		 * @description Async. Enqueues a `backup.create` job and returns 202 with the job ID.
+		 *     Poll `GET /api/v1/jobs/{jobId}` for completion. The backup includes a
+		 *     sanitized database copy with all secrets stripped.
+		 */
+		post: operations['createBackup'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/backups/{filename}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Download Backup */
+		get: operations['downloadBackup'];
+		put?: never;
+		post?: never;
+		/** Delete Backup */
+		delete: operations['deleteBackup'];
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/backups/upload': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/**
+		 * Upload Backup
+		 * @description Only `.tar.gz` files, max 1GB. Archive contents are scanned for path
+		 *     traversal entries (zip slip protection). Files without a `backup-` prefix
+		 *     are renamed to `backup-uploaded-{timestamp}.tar.gz`. Duplicates rejected.
+		 */
+		post: operations['uploadBackup'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/backups/settings': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Get Backup Settings */
+		get: operations['getBackupSettings'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		/**
+		 * Update Backup Settings
+		 * @description Partial update. After saving, backup jobs are rescheduled to match the
+		 *     new settings.
+		 */
+		patch: operations['updateBackupSettings'];
 		trace?: never;
 	};
 	'/entity-testing/evaluate': {
@@ -318,15 +550,17 @@ export type webhooks = Record<string, never>;
 export interface components {
 	schemas: {
 		/**
-		 * @description Individual component health status
-		 * @enum {string}
-		 */
-		ComponentStatus: 'healthy' | 'degraded' | 'unhealthy';
-		/**
 		 * @description Overall health status
 		 * @enum {string}
 		 */
 		HealthStatus: 'healthy' | 'degraded' | 'unhealthy';
+		ErrorResponse: {
+			/**
+			 * @description Error message
+			 * @example Unauthorized
+			 */
+			error: string;
+		};
 		HealthCheckResponse: {
 			status: components['schemas']['HealthStatus'];
 			/**
@@ -335,24 +569,124 @@ export interface components {
 			 */
 			timestamp: string;
 		};
-		HealthDiagnosticsResponse: {
-			status: components['schemas']['HealthStatus'];
-			/**
-			 * Format: date-time
-			 * @description Current server time
-			 */
-			timestamp: string;
+		StatusResponse: {
 			/** @description Application version */
 			version: string;
 			/** @description Server uptime in seconds */
 			uptime: number;
-			components: {
-				sqlite: components['schemas']['SqliteHealth'];
-				repos: components['schemas']['ReposHealth'];
-				jobs: components['schemas']['JobsHealth'];
-				backups: components['schemas']['BackupsHealth'];
-				logs: components['schemas']['LogsHealth'];
+			databases: components['schemas']['StatusDatabase'][];
+			arrs: components['schemas']['StatusArr'][];
+			jobs: components['schemas']['StatusJobs'];
+			backups: components['schemas']['StatusBackups'];
+		};
+		StatusDatabase: {
+			/** @description Database instance ID */
+			id: number;
+			/** @description Display name */
+			name: string;
+			/** @description Whether the database is active */
+			enabled: boolean;
+			/**
+			 * Format: date-time
+			 * @description Last successful sync check timestamp
+			 */
+			lastSyncedAt: string | null;
+			/**
+			 * @description Sync strategy
+			 * @enum {string}
+			 */
+			syncStrategy: 'manual' | 'auto';
+			counts: components['schemas']['StatusDatabaseCounts'];
+		};
+		StatusDatabaseCounts: {
+			/** @description Number of custom formats */
+			customFormats: number;
+			/** @description Number of quality profiles */
+			qualityProfiles: number;
+			/** @description Number of regular expressions */
+			regularExpressions: number;
+			/** @description Number of delay profiles */
+			delayProfiles: number;
+		};
+		StatusArr: {
+			/** @description Arr instance ID */
+			id: number;
+			/** @description Display name */
+			name: string;
+			/**
+			 * @description Arr application type
+			 * @enum {string}
+			 */
+			type: 'radarr' | 'sonarr';
+			/** @description Whether the instance is active */
+			enabled: boolean;
+			sync: components['schemas']['StatusArrSync'];
+			/** @description Drift detection result (null until implemented) */
+			drift: components['schemas']['StatusArrDrift'] | null;
+		};
+		StatusArrSync: {
+			qualityProfiles: components['schemas']['StatusArrSyncQualityProfiles'];
+			delayProfiles: components['schemas']['StatusArrSyncSection'];
+			mediaManagement: components['schemas']['StatusArrSyncSection'];
+		};
+		StatusArrSyncQualityProfiles: {
+			/** @description Number of synced quality profiles */
+			count: number;
+			/** @description Sync status (idle, pending, in_progress, failed) */
+			status: string;
+			/**
+			 * Format: date-time
+			 * @description Last successful sync timestamp
+			 */
+			lastSyncedAt: string | null;
+		};
+		StatusArrSyncSection: {
+			/** @description Whether this sync section has been configured */
+			configured: boolean;
+			/** @description Sync status (idle, pending, in_progress, failed) */
+			status: string;
+			/**
+			 * Format: date-time
+			 * @description Last successful sync timestamp
+			 */
+			lastSyncedAt: string | null;
+		};
+		StatusArrDrift: {
+			/**
+			 * Format: date-time
+			 * @description When drift was last checked
+			 */
+			lastCheckedAt: string;
+			/** @description Whether any section has drifted */
+			drifted: boolean;
+			details: {
+				/** @description Number of drifted quality profiles */
+				qualityProfiles: number;
+				/** @description Number of drifted delay profiles */
+				delayProfiles: number;
+				/** @description Number of drifted media management configs */
+				mediaManagement: number;
 			};
+		};
+		StatusJobs: {
+			/** @description Number of currently running jobs */
+			active: number;
+			/** @description Number of queued jobs */
+			queued: number;
+			/**
+			 * Format: date-time
+			 * @description Earliest scheduled job run time
+			 */
+			nextRunAt: string | null;
+		};
+		StatusBackups: {
+			/** @description Whether automatic backups are enabled */
+			enabled: boolean;
+			/**
+			 * Format: date-time
+			 * @description Timestamp of last backup
+			 */
+			lastBackupAt: string | null;
 		};
 		/**
 		 * @description Type of media
@@ -439,10 +773,6 @@ export interface components {
 			databaseName: string;
 			/** @description Quality profile names in this database */
 			profiles: string[];
-		};
-		ErrorResponse: {
-			/** @description Error message */
-			error: string;
 		};
 		RadarrLibraryItem: {
 			/** @description Radarr movie ID */
@@ -848,6 +1178,128 @@ export interface components {
 		ImportResponse: {
 			success: boolean;
 		};
+		ArrInstance: {
+			/** @description Instance ID */
+			id: number;
+			/** @description Display name */
+			name: string;
+			type: components['schemas']['ArrType'];
+			/** @description Instance URL */
+			url: string;
+			/** @description JSON array of tags */
+			tags?: string | null;
+			/** @description Whether the instance is active (0 or 1) */
+			enabled: number;
+			/** @description Library cache refresh interval in minutes (0 = manual) */
+			library_refresh_interval: number;
+			/** @description Last library refresh timestamp */
+			library_last_refreshed_at?: string | null;
+			/** @description Creation timestamp */
+			created_at: string;
+			/** @description Last update timestamp */
+			updated_at: string;
+		};
+		DatabaseInstance: {
+			/** @description Database instance ID */
+			id: number;
+			/**
+			 * Format: uuid
+			 * @description Unique identifier
+			 */
+			uuid: string;
+			/** @description Display name */
+			name: string;
+			/** @description GitHub repository URL */
+			repository_url: string;
+			/** @description Auto-sync interval in minutes (0 = manual only) */
+			sync_strategy: number;
+			/** @description Whether to automatically pull updates (0 or 1) */
+			auto_pull: number;
+			/** @description Whether the database is active (0 or 1) */
+			enabled: number;
+			/** @description Whether the repository is private (0 or 1) */
+			is_private: number;
+			/** @description Whether local ops editing is enabled (0 or 1) */
+			local_ops_enabled: number;
+			/** @description Git user name for commits */
+			git_user_name?: string | null;
+			/** @description Git user email for commits */
+			git_user_email?: string | null;
+			/**
+			 * @description How to handle conflicts between local tweaks and upstream updates
+			 * @enum {string}
+			 */
+			conflict_strategy: 'override' | 'align' | 'ask';
+			/** @description Last successful sync timestamp */
+			last_synced_at?: string | null;
+			/** @description Creation timestamp */
+			created_at: string;
+			/** @description Last update timestamp */
+			updated_at: string;
+			/** @description Whether a personal access token is configured */
+			hasPat: boolean;
+		};
+		CreateDatabaseInput: {
+			/** @description Display name (must be unique) */
+			name: string;
+			/** @description GitHub repository URL */
+			repository_url: string;
+			/** @description Git branch to clone (defaults to remote's default branch) */
+			branch?: string;
+			/** @description GitHub PAT for private repos and push access */
+			personal_access_token?: string;
+			/** @description Required when personal_access_token is set */
+			git_user_name?: string;
+			/** @description Required when personal_access_token is set */
+			git_user_email?: string;
+			/**
+			 * @description Auto-sync interval in minutes (0 = manual only)
+			 * @default 0
+			 */
+			sync_strategy: number;
+			/**
+			 * @description Whether to automatically pull updates
+			 * @default false
+			 */
+			auto_pull: boolean;
+			/**
+			 * @description Force writes to local user ops even with a PAT (requires personal_access_token)
+			 * @default false
+			 */
+			local_ops_enabled: boolean;
+			/**
+			 * @description How to handle conflicts (only valid without a PAT, or with PAT + local_ops_enabled)
+			 * @default override
+			 * @enum {string}
+			 */
+			conflict_strategy: 'override' | 'align' | 'ask';
+		};
+		/** @description All fields are optional. Unknown fields are silently ignored. */
+		UpdateDatabaseInput: {
+			/** @description Display name (must be unique) */
+			name?: string;
+			/** @description GitHub PAT for private repos and push access */
+			personal_access_token?: string;
+			/** @description Required when personal_access_token is set */
+			git_user_name?: string;
+			/** @description Required when personal_access_token is set */
+			git_user_email?: string;
+			/** @description Auto-sync interval in minutes (0 = manual only) */
+			sync_strategy?: number;
+			/** @description Whether to automatically pull updates */
+			auto_pull?: boolean;
+			/** @description Force writes to local user ops even with a PAT (requires personal_access_token) */
+			local_ops_enabled?: boolean;
+			/**
+			 * @description How to handle conflicts (only valid without a PAT, or with PAT + local_ops_enabled)
+			 * @enum {string}
+			 */
+			conflict_strategy?: 'override' | 'align' | 'ask';
+		};
+		SyncTriggerResponse: {
+			/** @description Job queue ID to poll via GET /api/v1/jobs/{jobId} */
+			jobId: number;
+		};
 		ValidateRegexRequest: {
 			/** @description The .NET regex pattern to validate */
 			pattern: string;
@@ -860,74 +1312,101 @@ export interface components {
 			/** @description Whether the parser service was reachable. False means validation was skipped. */
 			available?: boolean | null;
 		};
-		SqliteHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Database query response time in milliseconds */
-			responseTimeMs: number;
-			/** @description Current migration version */
-			migration: number;
-			/** @description Error message if unhealthy */
-			message?: string;
+		/**
+		 * @description Current state of the job in the queue
+		 * @enum {string}
+		 */
+		JobStatus: 'queued' | 'running' | 'success' | 'failed' | 'cancelled';
+		/**
+		 * @description How the job was triggered
+		 * @enum {string}
+		 */
+		JobSource: 'manual' | 'schedule' | 'system';
+		JobRunResult: {
+			/**
+			 * @description Outcome of the job execution
+			 * @enum {string}
+			 */
+			status: 'success' | 'failure' | 'skipped' | 'cancelled';
+			/** @description Human-readable output from the handler */
+			output: string | null;
+			/** @description Error message if the job failed */
+			error: string | null;
+			/** @description Execution time in milliseconds */
+			durationMs: number;
 		};
-		ReposHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Additional status information */
-			message?: string;
-			/** @description Total number of PCD repos configured (verbose only) */
-			total?: number;
-			/** @description Number of enabled repos (verbose only) */
-			enabled?: number;
-			/** @description Number of repos with compiled cache (verbose only) */
-			cached?: number;
-			/** @description Number of disabled repos (verbose only) */
-			disabled?: number;
+		JobResponse: {
+			/** @description Job queue ID */
+			id: number;
+			/** @description Job type identifier (e.g. backup.create, arr.sync) */
+			jobType: string;
+			status: components['schemas']['JobStatus'];
+			source: components['schemas']['JobSource'];
+			/** @description When the job was enqueued */
+			createdAt: string;
+			/** @description When execution started (null if still queued) */
+			startedAt: string | null;
+			/** @description When execution finished (null if not yet complete) */
+			finishedAt: string | null;
+			/** @description Latest run result, or null if the job has not executed yet */
+			result: components['schemas']['JobRunResult'] | null;
 		};
-		JobsHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Additional status information */
-			message?: string;
+		BackupFile: {
+			/**
+			 * @description Backup archive filename
+			 * @example backup-2026-03-15-100005.tar.gz
+			 */
+			filename: string;
 			/**
 			 * Format: date-time
-			 * @description Oldest queued job run_at timestamp (verbose only)
+			 * @description File modification time (when the backup was created)
 			 */
-			oldestQueued?: string | null;
+			created: string;
+			/** @description File size in bytes */
+			size: number;
+			/**
+			 * @description Human-readable file size
+			 * @example 12.34 MB
+			 */
+			sizeFormatted: string;
 		};
-		BackupsHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Whether backups are enabled */
+		BackupCreateResponse: {
+			/** @description Job queue ID. Poll GET /api/v1/jobs/{jobId} for status. */
+			jobId: number;
+		};
+		BackupUploadResponse: {
+			/** @description Stored filename (may differ from upload name) */
+			filename: string;
+			/** @description File size in bytes */
+			size: number;
+			/** @description Human-readable file size */
+			sizeFormatted: string;
+		};
+		BackupSettings: {
+			/**
+			 * @description How often automatic backups run
+			 * @enum {string}
+			 */
+			schedule: 'hourly' | 'daily' | 'weekly' | 'monthly';
+			/** @description Days to keep backups before cleanup deletes them */
+			retentionDays: number;
+			/** @description Whether automatic backups are enabled */
 			enabled: boolean;
-			/** @description Additional status information */
-			message?: string;
-			/**
-			 * Format: date-time
-			 * @description Timestamp of last backup (verbose only)
-			 */
-			lastBackup?: string | null;
-			/** @description Number of backup files (verbose only) */
-			count?: number;
-			/** @description Human-readable total size of all backups (verbose only) */
-			totalSize?: string;
-			/** @description Configured retention period in days (verbose only) */
-			retentionDays?: number;
+			/** @description Whether to include the database in backups */
+			includeDatabase: boolean;
+			/** @description Whether backup compression is enabled */
+			compressionEnabled: boolean;
 		};
-		LogsHealth: {
-			status: components['schemas']['ComponentStatus'];
-			/** @description Additional status information */
-			message?: string;
-			/** @description Human-readable total size of log files (verbose only) */
-			totalSize?: string;
-			/** @description Number of log files (verbose only) */
-			fileCount?: number;
-			/**
-			 * Format: date
-			 * @description Date of oldest log file (verbose only)
-			 */
-			oldestLog?: string | null;
-			/**
-			 * Format: date
-			 * @description Date of newest log file (verbose only)
-			 */
-			newestLog?: string | null;
+		/** @description All fields are optional. Only provided fields are updated. */
+		BackupSettingsUpdate: {
+			/** @enum {string} */
+			schedule?: 'hourly' | 'daily' | 'weekly' | 'monthly';
+			retentionDays?: number;
+			enabled?: boolean;
+		};
+		SuccessResponse: {
+			/** @example true */
+			success: boolean;
 		};
 		RatingSource: {
 			votes?: number;
@@ -962,6 +1441,10 @@ export interface components {
 			type: 'sonarr';
 			items: components['schemas']['SonarrLibraryItem'][];
 			profilesByDatabase: components['schemas']['ProfileByDatabase'][];
+		};
+		arr_ErrorResponse: {
+			/** @description Error message */
+			error: string;
 		};
 		SkippedItem: {
 			item: components['schemas']['StaleItem'];
@@ -1055,6 +1538,395 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+	listArrInstances: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description List of Arr instances */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ArrInstance'][];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	listDatabases: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description List of linked databases */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['DatabaseInstance'][];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	createDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateDatabaseInput'];
+			};
+		};
+		responses: {
+			/** @description Database linked */
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['DatabaseInstance'];
+				};
+			};
+			/** @description Validation error */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Name and repository URL are required"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description A database with this name already exists */
+			409: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "A database with this name already exists"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Link failed (invalid URL, clone failure, bad manifest) */
+			422: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Repository not found or inaccessible"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	getDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Database detail */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['DatabaseInstance'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	deleteDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Database unlinked */
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	updateDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateDatabaseInput'];
+			};
+		};
+		responses: {
+			/** @description Database updated */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['DatabaseInstance'];
+				};
+			};
+			/** @description Validation error or empty body */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "No updatable fields provided"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description A database with this name already exists */
+			409: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "A database with this name already exists"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	syncDatabase: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Sync job enqueued */
+			202: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "jobId": 42
+					 *     }
+					 */
+					'application/json': components['schemas']['SyncTriggerResponse'];
+				};
+			};
+			/** @description Database is disabled */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database is disabled"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
 	getHealth: {
 		parameters: {
 			query?: never;
@@ -1064,45 +1936,110 @@ export interface operations {
 		};
 		requestBody?: never;
 		responses: {
-			/** @description Service is healthy or degraded */
+			/** @description System is healthy or degraded (status field indicates which) */
 			200: {
 				headers: {
 					[name: string]: unknown;
 				};
 				content: {
+					/**
+					 * @example {
+					 *       "status": "healthy",
+					 *       "timestamp": "2026-03-09T12:00:00.000Z"
+					 *     }
+					 */
 					'application/json': components['schemas']['HealthCheckResponse'];
 				};
 			};
-			/** @description Service is unhealthy */
+			/** @description System is unhealthy (status field will be "unhealthy") */
 			503: {
 				headers: {
 					[name: string]: unknown;
 				};
 				content: {
+					/**
+					 * @example {
+					 *       "status": "unhealthy",
+					 *       "timestamp": "2026-03-09T12:00:00.000Z"
+					 *     }
+					 */
 					'application/json': components['schemas']['HealthCheckResponse'];
 				};
 			};
 		};
 	};
-	getHealthDiagnostics: {
+	getStatus: {
 		parameters: {
-			query?: {
-				/** @description Include extra detail per component (counts, sizes, timestamps) */
-				verbose?: boolean;
-			};
+			query?: never;
 			header?: never;
 			path?: never;
 			cookie?: never;
 		};
 		requestBody?: never;
 		responses: {
-			/** @description Diagnostics response (healthy or degraded) */
+			/** @description System status */
 			200: {
 				headers: {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['HealthDiagnosticsResponse'];
+					/**
+					 * @example {
+					 *       "version": "2.0.0",
+					 *       "uptime": 86400,
+					 *       "databases": [
+					 *         {
+					 *           "id": 1,
+					 *           "name": "Dictionarry",
+					 *           "enabled": true,
+					 *           "lastSyncedAt": "2026-04-09T12:00:00Z",
+					 *           "syncStrategy": "auto",
+					 *           "counts": {
+					 *             "customFormats": 52,
+					 *             "qualityProfiles": 3,
+					 *             "regularExpressions": 120,
+					 *             "delayProfiles": 1
+					 *           }
+					 *         }
+					 *       ],
+					 *       "arrs": [
+					 *         {
+					 *           "id": 1,
+					 *           "name": "Radarr",
+					 *           "type": "radarr",
+					 *           "enabled": true,
+					 *           "sync": {
+					 *             "qualityProfiles": {
+					 *               "count": 2,
+					 *               "status": "idle",
+					 *               "lastSyncedAt": "2026-04-09T12:00:00Z"
+					 *             },
+					 *             "delayProfiles": {
+					 *               "configured": true,
+					 *               "status": "idle",
+					 *               "lastSyncedAt": "2026-04-09T12:00:00Z"
+					 *             },
+					 *             "mediaManagement": {
+					 *               "configured": true,
+					 *               "status": "idle",
+					 *               "lastSyncedAt": "2026-04-09T12:00:00Z"
+					 *             }
+					 *           },
+					 *           "drift": null
+					 *         }
+					 *       ],
+					 *       "jobs": {
+					 *         "active": 0,
+					 *         "queued": 2,
+					 *         "nextRunAt": "2026-04-09T13:00:00Z"
+					 *       },
+					 *       "backups": {
+					 *         "enabled": true,
+					 *         "lastBackupAt": "2026-04-09T00:00:00Z"
+					 *       }
+					 *     }
+					 */
+					'application/json': components['schemas']['StatusResponse'];
 				};
 			};
 			/** @description Not authenticated */
@@ -1111,19 +2048,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': {
-						/** @example Unauthorized */
-						error: string;
-					};
-				};
-			};
-			/** @description Service is unhealthy */
-			503: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['HealthDiagnosticsResponse'];
+					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
 		};
@@ -1144,6 +2069,453 @@ export interface operations {
 				};
 				content: {
 					'application/json': Record<string, never>;
+				};
+			};
+		};
+	};
+	getJob: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Job queue ID (returned by endpoints that create jobs) */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Job found */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "id": 42,
+					 *       "jobType": "backup.create",
+					 *       "status": "success",
+					 *       "source": "manual",
+					 *       "createdAt": "2026-03-15T10:00:00.000Z",
+					 *       "startedAt": "2026-03-15T10:00:01.000Z",
+					 *       "finishedAt": "2026-03-15T10:00:05.000Z",
+					 *       "result": {
+					 *         "status": "success",
+					 *         "output": "Backup created: backup-2026-03-15-100005.tar.gz (12.34 MB)",
+					 *         "error": null,
+					 *         "durationMs": 4000
+					 *       }
+					 *     }
+					 */
+					'application/json': components['schemas']['JobResponse'];
+				};
+			};
+			/** @description Invalid job ID (non-numeric or less than 1) */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Invalid job ID"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Job not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Job not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	listBackups: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description List of backup files, sorted newest first */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['BackupFile'][];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	createBackup: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Backup job enqueued */
+			202: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "jobId": 42
+					 *     }
+					 */
+					'application/json': components['schemas']['BackupCreateResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	downloadBackup: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Backup filename (must match `backup-*.tar.gz`) */
+				filename: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Backup file download */
+			200: {
+				headers: {
+					/** @example attachment; filename="backup-2026-03-15-100005.tar.gz" */
+					'Content-Disposition'?: string;
+					[name: string]: unknown;
+				};
+				content: {
+					'application/gzip': string;
+				};
+			};
+			/** @description Invalid filename or path traversal attempt */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Invalid filename"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Backup file not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Backup file not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	deleteBackup: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Backup filename */
+				filename: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Backup deleted */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['SuccessResponse'];
+				};
+			};
+			/** @description Invalid filename or path traversal attempt */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Invalid filename"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Backup file not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Backup file not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	uploadBackup: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'multipart/form-data': {
+					/**
+					 * Format: binary
+					 * @description The `.tar.gz` backup archive to upload
+					 */
+					file: string;
+				};
+			};
+		};
+		responses: {
+			/** @description Backup uploaded */
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "filename": "backup-uploaded-1710504000000.tar.gz",
+					 *       "size": 12345678,
+					 *       "sizeFormatted": "11.77 MB"
+					 *     }
+					 */
+					'application/json': components['schemas']['BackupUploadResponse'];
+				};
+			};
+			/** @description Invalid file (wrong type, too large, zip slip, or duplicate) */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Invalid file type. Only .tar.gz files are allowed."
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	getBackupSettings: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Current backup settings */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "schedule": "daily",
+					 *       "retentionDays": 30,
+					 *       "enabled": true,
+					 *       "includeDatabase": true,
+					 *       "compressionEnabled": true
+					 *     }
+					 */
+					'application/json': components['schemas']['BackupSettings'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	updateBackupSettings: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BackupSettingsUpdate'];
+			};
+		};
+		responses: {
+			/** @description Updated backup settings */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['BackupSettings'];
+				};
+			};
+			/** @description Invalid input (bad schedule, retention out of range, empty body) */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "retentionDays must be between 1 and 365"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
 		};
@@ -1213,7 +2585,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Instance not found */
@@ -1222,7 +2594,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Failed to fetch library */
@@ -1231,7 +2603,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 		};
@@ -1263,7 +2635,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 		};
@@ -1297,7 +2669,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Instance not found */
@@ -1306,7 +2678,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Failed to fetch episode details */
@@ -1315,7 +2687,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 		};
@@ -1351,7 +2723,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Instance not found */
@@ -1360,7 +2732,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Failed to fetch releases */
@@ -1369,7 +2741,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 		};
@@ -1406,7 +2778,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Instance not found */
@@ -1415,7 +2787,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Failed to perform cleanup */
@@ -1424,7 +2796,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 		};
@@ -1457,7 +2829,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Instance not found */
@@ -1466,7 +2838,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 			/** @description Cooldown active or sync in progress */
@@ -1484,7 +2856,7 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
-					'application/json': components['schemas']['ErrorResponse'];
+					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 		};

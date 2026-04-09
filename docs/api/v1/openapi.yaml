@@ -1,11 +1,16 @@
 openapi: 3.1.0
 info:
   title: Profilarr API
-  description: API for Profilarr - Profile management and sync for *arr applications
   version: 1.0.0
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
+  contact:
+    name: Profilarr
+    url: https://github.com/Dictionarry-Hub/profilarr
+  description: |
+    Profilarr manages configuration for Radarr and Sonarr by syncing
+    curated configuration databases into Arr instances.
 
 servers:
   - url: /api/v1
@@ -13,23 +18,51 @@ servers:
 
 tags:
   - name: System
-    description: System health and status endpoints
+    description: Health checks, system status, and API metadata.
+  - name: Jobs
+    description: Job queue status and polling
+  - name: Backups
+    description: Backup creation, listing, download, upload, and settings
   - name: Entity Testing
     description: Release parsing and custom format evaluation
   - name: Arr
-    description: Arr instance library and release endpoints
+    description: Arr instance management, library, and sync endpoints
   - name: PCD
     description: PCD entity export and portable format endpoints
+  - name: Databases
+    description: Linked database instance management
   - name: Regex
     description: Regex pattern validation
 
+security:
+  - apiKey: []
+  - session: []
+
 paths:
+  /arr:
+    $ref: './paths/arr.yaml#/instances'
+  /databases:
+    $ref: './paths/databases.yaml#/databases'
+  /databases/{id}:
+    $ref: './paths/databases.yaml#/database'
+  /databases/{id}/sync:
+    $ref: './paths/databases.yaml#/database_sync'
   /health:
     $ref: './paths/system.yaml#/health'
-  /health/diagnostics:
-    $ref: './paths/system.yaml#/health_diagnostics'
+  /status:
+    $ref: './paths/system.yaml#/status'
   /openapi.json:
     $ref: './paths/system.yaml#/openapi'
+  /jobs/{id}:
+    $ref: './paths/jobs.yaml#/job'
+  /backups:
+    $ref: './paths/backups.yaml#/backups'
+  /backups/{filename}:
+    $ref: './paths/backups.yaml#/backup_file'
+  /backups/upload:
+    $ref: './paths/backups.yaml#/upload'
+  /backups/settings:
+    $ref: './paths/backups.yaml#/settings'
   /entity-testing/evaluate:
     $ref: './paths/entity-testing.yaml#/evaluate'
   /arr/library:
@@ -50,17 +83,48 @@ paths:
     $ref: './paths/regex.yaml#/validate'
 
 components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: API key for programmatic access. Generate in Settings > Security.
+    session:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Session cookie set after browser login.
+
   schemas:
     # Common
-    ComponentStatus:
-      $ref: './schemas/common.yaml#/ComponentStatus'
     HealthStatus:
       $ref: './schemas/common.yaml#/HealthStatus'
+    ErrorResponse:
+      $ref: './schemas/common.yaml#/ErrorResponse'
     # Health
     HealthCheckResponse:
       $ref: './schemas/health.yaml#/HealthCheckResponse'
-    HealthDiagnosticsResponse:
-      $ref: './schemas/health.yaml#/HealthDiagnosticsResponse'
+    # Status
+    StatusResponse:
+      $ref: './schemas/status.yaml#/StatusResponse'
+    StatusDatabase:
+      $ref: './schemas/status.yaml#/StatusDatabase'
+    StatusDatabaseCounts:
+      $ref: './schemas/status.yaml#/StatusDatabaseCounts'
+    StatusArr:
+      $ref: './schemas/status.yaml#/StatusArr'
+    StatusArrSync:
+      $ref: './schemas/status.yaml#/StatusArrSync'
+    StatusArrSyncQualityProfiles:
+      $ref: './schemas/status.yaml#/StatusArrSyncQualityProfiles'
+    StatusArrSyncSection:
+      $ref: './schemas/status.yaml#/StatusArrSyncSection'
+    StatusArrDrift:
+      $ref: './schemas/status.yaml#/StatusArrDrift'
+    StatusJobs:
+      $ref: './schemas/status.yaml#/StatusJobs'
+    StatusBackups:
+      $ref: './schemas/status.yaml#/StatusBackups'
     # Entity Testing
     MediaType:
       $ref: './schemas/entity-testing.yaml#/MediaType'
@@ -83,8 +147,6 @@ components:
       $ref: './schemas/arr.yaml#/ScoreBreakdownItem'
     ProfileByDatabase:
       $ref: './schemas/arr.yaml#/ProfileByDatabase'
-    ErrorResponse:
-      $ref: './schemas/arr.yaml#/ErrorResponse'
     # Arr - Library
     RadarrLibraryItem:
       $ref: './schemas/arr.yaml#/RadarrLibraryItem'
@@ -140,8 +202,40 @@ components:
       $ref: './schemas/pcd.yaml#/ImportRequest'
     ImportResponse:
       $ref: './schemas/pcd.yaml#/ImportResponse'
+    # Arr
+    ArrInstance:
+      $ref: './schemas/arr.yaml#/ArrInstance'
+    # Databases
+    DatabaseInstance:
+      $ref: './schemas/databases.yaml#/DatabaseInstance'
+    CreateDatabaseInput:
+      $ref: './schemas/databases.yaml#/CreateDatabaseInput'
+    UpdateDatabaseInput:
+      $ref: './schemas/databases.yaml#/UpdateDatabaseInput'
+    SyncTriggerResponse:
+      $ref: './schemas/databases.yaml#/SyncTriggerResponse'
     # Regex
     ValidateRegexRequest:
       $ref: './schemas/regex.yaml#/ValidateRegexRequest'
     ValidateRegexResponse:
       $ref: './schemas/regex.yaml#/ValidateRegexResponse'
+    # Jobs
+    JobStatus:
+      $ref: './schemas/jobs.yaml#/JobStatus'
+    JobSource:
+      $ref: './schemas/jobs.yaml#/JobSource'
+    JobRunResult:
+      $ref: './schemas/jobs.yaml#/JobRunResult'
+    JobResponse:
+      $ref: './schemas/jobs.yaml#/JobResponse'
+    # Backups
+    BackupFile:
+      $ref: './schemas/backups.yaml#/BackupFile'
+    BackupCreateResponse:
+      $ref: './schemas/backups.yaml#/BackupCreateResponse'
+    BackupUploadResponse:
+      $ref: './schemas/backups.yaml#/BackupUploadResponse'
+    BackupSettings:
+      $ref: './schemas/backups.yaml#/BackupSettings'
+    BackupSettingsUpdate:
+      $ref: './schemas/backups.yaml#/BackupSettingsUpdate'

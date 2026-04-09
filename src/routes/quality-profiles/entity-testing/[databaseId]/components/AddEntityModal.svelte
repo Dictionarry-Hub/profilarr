@@ -156,7 +156,7 @@
 				query,
 				type: searchType
 			});
-			const response = await fetch(`/api/tmdb/search?${params}`);
+			const response = await fetch(`/tmdb/search?${params}`);
 			const data = await response.json();
 
 			if (data.error) {

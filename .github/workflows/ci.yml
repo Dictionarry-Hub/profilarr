@@ -204,6 +204,25 @@ jobs:
           APP_BASE_PATH=/tmp/ffi-warmup PORT=9999 timeout 30 ./dist/build/profilarr || true
           rm -rf /tmp/ffi-warmup
 
+      - name: Cache Docker images
+        id: docker-cache
+        uses: actions/cache@v5
+        with:
+          path: /tmp/docker-images.tar
+          key: docker-images-${{ hashFiles('tests/integration/auth/docker-compose.yml') }}
+
+      - name: Load cached Docker images
+        if: steps.docker-cache.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/docker-images.tar
+
+      - name: Pull and save Docker images
+        if: steps.docker-cache.outputs.cache-hit != 'true'
+        run: |
+          docker pull ghcr.io/navikt/mock-oauth2-server:3.0.1
+          docker pull caddy:2-alpine
+          docker pull nginx:alpine
+          docker save ghcr.io/navikt/mock-oauth2-server:3.0.1 caddy:2-alpine nginx:alpine -o /tmp/docker-images.tar
+
       - name: Run integration tests
         run: deno task test integration
 
@@ -247,6 +266,25 @@ jobs:
 
       - name: Make binary executable
         run: chmod +x dist/build/profilarr
+
+      - name: Cache Docker images
+        id: docker-cache
+        uses: actions/cache@v5
+        with:
+          path: /tmp/docker-images.tar
+          key: docker-images-${{ hashFiles('tests/integration/auth/docker-compose.yml') }}
+
+      - name: Load cached Docker images
+        if: steps.docker-cache.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/docker-images.tar
+
+      - name: Pull and save Docker images
+        if: steps.docker-cache.outputs.cache-hit != 'true'
+        run: |
+          docker pull ghcr.io/navikt/mock-oauth2-server:3.0.1
+          docker pull caddy:2-alpine
+          docker pull nginx:alpine
+          docker save ghcr.io/navikt/mock-oauth2-server:3.0.1 caddy:2-alpine nginx:alpine -o /tmp/docker-images.tar
 
       - name: Run E2E auth tests
         run: deno task test e2e auth

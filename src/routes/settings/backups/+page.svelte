@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import { Download, Trash2, RotateCcw, Upload, FolderArchive, BrushCleaning } from 'lucide-svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import type { PageData } from './$types';
-	import type { Column } from '$lib/client/ui/table/types';
-	import Table from '$lib/client/ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import Badge from '$lib/client/ui/badge/Badge.svelte';
+	import Table from '$ui/table/Table.svelte';
+	import type { Column } from '$ui/table/types';
 	import ActionsBar from '$lib/client/ui/actions/ActionsBar.svelte';
 	import ActionButton from '$lib/client/ui/actions/ActionButton.svelte';
 	import SearchAction from '$lib/client/ui/actions/SearchAction.svelte';
@@ -25,47 +25,84 @@
 	$: filteredBackups = searchStore.filterItems(data.backups, ['filename']);
 
 	const columns: Column<Backup>[] = [
+		{ key: 'created', header: 'Date', sortable: true },
 		{ key: 'filename', header: 'Filename', sortable: true },
-		{ key: 'created', header: 'Created', sortable: true },
-		{ key: 'sizeFormatted', header: 'Size', sortable: true, width: 'w-32' }
+		{ key: 'sizeFormatted', header: 'Size', sortable: true, width: 'w-28' }
 	];
 
 	// Modal state
 	let showDeleteModal = false;
 	let showRestoreModal = false;
 	let selectedBackup: string | null = null;
-	let deleteFormRef: HTMLFormElement | null = null;
 	let restoreFormRef: HTMLFormElement | null = null;
 
 	// File upload
 	let fileInput: HTMLInputElement;
-	let uploadFormRef: HTMLFormElement;
-	let createFormRef: HTMLFormElement;
 	let cleanupFormRef: HTMLFormElement;
 
 	function downloadBackup(filename: string) {
-		window.location.href = `/api/backups/download/${filename}`;
+		window.location.href = `/api/v1/backups/${filename}`;
 	}
 
 	function triggerFileUpload() {
 		fileInput?.click();
 	}
 
-	function triggerCreateBackup() {
-		createFormRef?.requestSubmit();
+	async function handleFileSelected(e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const res = await fetch('/api/v1/backups/upload', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (res.ok) {
+				alertStore.add('success', 'Backup uploaded successfully');
+				await invalidateAll();
+			} else {
+				const body = await res.json();
+				alertStore.add('error', body.error || 'Failed to upload backup');
+			}
+		} catch {
+			alertStore.add('error', 'Failed to upload backup');
+		}
+
+		input.value = '';
+	}
+
+	async function triggerCreateBackup() {
+		try {
+			const res = await fetch('/api/v1/backups', { method: 'POST' });
+
+			if (res.ok) {
+				alertStore.add('success', 'Backup queued');
+				// Delay refresh to give the job a moment to start
+				setTimeout(() => invalidateAll(), 1000);
+			} else {
+				const body = await res.json();
+				alertStore.add('error', body.error || 'Failed to create backup');
+			}
+		} catch {
+			alertStore.add('error', 'Failed to create backup');
+		}
 	}
 
 	function triggerCleanupBackups() {
 		cleanupFormRef?.requestSubmit();
 	}
 
-	function formatDateTime(date: Date): string {
+	function formatDateTime(date: string): string {
 		return new Date(date).toLocaleString();
 	}
 
-	function openDeleteModal(filename: string, formRef: HTMLFormElement) {
+	function openDeleteModal(filename: string) {
 		selectedBackup = filename;
-		deleteFormRef = formRef;
 		showDeleteModal = true;
 	}
 
@@ -75,13 +112,25 @@
 		showRestoreModal = true;
 	}
 
-	function confirmDelete() {
-		if (deleteFormRef) {
-			deleteFormRef.requestSubmit();
+	async function confirmDelete() {
+		if (!selectedBackup) return;
+
+		try {
+			const res = await fetch(`/api/v1/backups/${selectedBackup}`, { method: 'DELETE' });
+
+			if (res.ok) {
+				alertStore.add('success', 'Backup deleted successfully');
+				await invalidateAll();
+			} else {
+				const body = await res.json();
+				alertStore.add('error', body.error || 'Failed to delete backup');
+			}
+		} catch {
+			alertStore.add('error', 'Failed to delete backup');
 		}
+
 		showDeleteModal = false;
 		selectedBackup = null;
-		deleteFormRef = null;
 	}
 
 	function confirmRestore() {
@@ -96,7 +145,6 @@
 	function cancelDelete() {
 		showDeleteModal = false;
 		selectedBackup = null;
-		deleteFormRef = null;
 	}
 
 	function cancelRestore() {
@@ -115,61 +163,16 @@
 		</p>
 	</div>
 
-	<!-- Hidden forms for upload and create -->
-	<form
-		bind:this={uploadFormRef}
-		method="POST"
-		action="?/uploadBackup"
-		enctype="multipart/form-data"
+	<!-- Hidden file input for upload -->
+	<input
+		type="file"
+		accept=".tar.gz"
+		bind:this={fileInput}
 		class="hidden"
-		use:enhance={() => {
-			return async ({ result, update }) => {
-				if (result.type === 'failure' && result.data) {
-					alertStore.add(
-						'error',
-						(result.data as { error?: string }).error || 'Failed to upload backup'
-					);
-				} else if (result.type === 'success') {
-					alertStore.add('success', 'Backup uploaded successfully');
-					fileInput.value = '';
-				}
-				await update();
-			};
-		}}
-	>
-		<input
-			type="file"
-			name="file"
-			accept=".tar.gz"
-			bind:this={fileInput}
-			on:change={(e) => {
-				if (e.currentTarget.files?.length) {
-					uploadFormRef.requestSubmit();
-				}
-			}}
-		/>
-	</form>
+		on:change={handleFileSelected}
+	/>
 
-	<form
-		bind:this={createFormRef}
-		method="POST"
-		action="?/createBackup"
-		class="hidden"
-		use:enhance={() => {
-			return async ({ result, update }) => {
-				if (result.type === 'failure' && result.data) {
-					alertStore.add(
-						'error',
-						(result.data as { error?: string }).error || 'Failed to create backup'
-					);
-				} else if (result.type === 'success') {
-					alertStore.add('success', 'Backup queued');
-				}
-				await update();
-			};
-		}}
-	></form>
-
+	<!-- Hidden form for cleanup (stays as form action) -->
 	<form
 		bind:this={cleanupFormRef}
 		method="POST"
@@ -200,7 +203,7 @@
 			<Tooltip text="Create Backup">
 				<ActionButton icon={FolderArchive} on:click={triggerCreateBackup} />
 			</Tooltip>
-			<Tooltip text="Run Backup Cleanup">
+			<Tooltip text="Cleanup">
 				<ActionButton icon={BrushCleaning} on:click={triggerCleanupBackups} />
 			</Tooltip>
 		</ActionsBar>
@@ -211,25 +214,25 @@
 		{columns}
 		data={filteredBackups}
 		emptyMessage="No backups found. Create your first backup to get started."
+		actionsHeaderAlign="center"
 		compact
 		responsive
 	>
 		<svelte:fragment slot="cell" let:row let:column>
-			{#if column.key === 'filename'}
-				<Badge variant="neutral" mono>{row.filename}</Badge>
-			{:else if column.key === 'created'}
-				<Badge variant="neutral" mono>{formatDateTime(row.created)}</Badge>
+			{#if column.key === 'created'}
+				<span class="font-medium">{formatDateTime(row.created)}</span>
+			{:else if column.key === 'filename'}
+				<span class="font-mono text-neutral-500 dark:text-neutral-400">{row.filename}</span>
 			{:else if column.key === 'sizeFormatted'}
-				<Badge variant="neutral" mono>{row.sizeFormatted}</Badge>
+				<span class="text-neutral-500 dark:text-neutral-400">{row.sizeFormatted}</span>
 			{/if}
 		</svelte:fragment>
 
 		<svelte:fragment slot="actions" let:row>
-			<div class="flex items-center justify-end gap-0.5">
+			<div class="flex items-center justify-center gap-1">
 				<Button
 					icon={Download}
 					size="xs"
-					variant="ghost"
 					tooltip="Download"
 					on:click={() => downloadBackup(row.filename)}
 				/>
@@ -258,7 +261,6 @@
 					<Button
 						icon={RotateCcw}
 						size="xs"
-						variant="ghost"
 						tooltip="Restore"
 						on:click={(e) => {
 							const form = (e.currentTarget as HTMLElement)?.closest('form');
@@ -267,35 +269,13 @@
 					/>
 				</form>
 
-				<form
-					method="POST"
-					action="?/deleteBackup"
-					use:enhance={() => {
-						return async ({ result, update }) => {
-							if (result.type === 'failure' && result.data) {
-								alertStore.add(
-									'error',
-									(result.data as { error?: string }).error || 'Failed to delete backup'
-								);
-							} else if (result.type === 'success') {
-								alertStore.add('success', 'Backup deleted successfully');
-							}
-							await update();
-						};
-					}}
-				>
-					<input type="hidden" name="filename" value={row.filename} />
-					<Button
-						icon={Trash2}
-						size="xs"
-						variant="ghost"
-						tooltip="Delete"
-						on:click={(e) => {
-							const form = (e.currentTarget as HTMLElement)?.closest('form');
-							if (form) openDeleteModal(row.filename, form);
-						}}
-					/>
-				</form>
+				<Button
+					icon={Trash2}
+					size="xs"
+					iconColor="text-red-600 dark:text-red-400"
+					tooltip="Delete"
+					on:click={() => openDeleteModal(row.filename)}
+				/>
 			</div>
 		</svelte:fragment>
 	</Table>

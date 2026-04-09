@@ -9,7 +9,7 @@
 	export let emoji: string | undefined = undefined;
 	export let initialOpen: boolean = true;
 	export let hasItems: boolean = false;
-
+	export let onboardingId: string | undefined = undefined;
 	let isOpen = initialOpen;
 
 	function toggleOpen() {
@@ -18,7 +18,9 @@
 </script>
 
 <div class="mb-4">
-	<GroupHeader {label} {href} {icon} {emoji} {isOpen} {hasItems} onToggle={toggleOpen} />
+	<div data-onboarding={onboardingId}>
+		<GroupHeader {label} {href} {icon} {emoji} {isOpen} {hasItems} onToggle={toggleOpen} />
+	</div>
 
 	{#if isOpen && hasItems}
 		<div class="mt-2 grid grid-cols-[auto_1fr]" transition:slide={{ duration: 200 }}>

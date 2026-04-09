@@ -16,6 +16,7 @@ interface CreateQualityProfileInput {
 	description: string | null;
 	tags: string[];
 	language: string | null;
+	orderedItems?: OrderedItem[];
 }
 
 interface CreateQualityProfileOptions {
@@ -97,182 +98,214 @@ export async function create(options: CreateQualityProfileOptions) {
 		queries.push(linkTag);
 	}
 
-	// 3. Get all qualities and add them to the profile as individual items
-	const allQualities = await db
-		.selectFrom('qualities')
-		.select(['id', 'name'])
-		.orderBy('id')
-		.execute();
-
-	const allQualityNames = new Set(allQualities.map((quality) => quality.name));
-	const enabledQualities = new Set(['Remux-1080p', 'Bluray-1080p']);
-	const upgradeUntilName = 'Bluray-1080p';
-
-	type OrderEntry =
-		| { type: 'quality'; name: string }
-		| { type: 'group'; name: string; members: string[] };
-
-	const groupDefinitions = [
-		{
-			name: 'WEB 1080p',
-			members: ['WEBDL-1080p', 'WEBRip-1080p'],
-			enabled: false
-		},
-		{
-			name: 'Pre-releases',
-			members: ['REGIONAL', 'DVDSCR', 'TELECINE', 'TELESYNC', 'CAM', 'WORKPRINT'],
-			enabled: false
-		},
-		{
-			name: 'Unwanted',
-			members: ['Unknown', 'Raw-HD', 'BR-DISK'],
-			enabled: false
-		}
-	];
-	const groupMap = new Map(groupDefinitions.map((group) => [group.name, group]));
-	const groupAvailability = new Map(
-		groupDefinitions.map((group) => [
-			group.name,
-			group.members.every((member) => allQualityNames.has(member))
-		])
-	);
-
-	const desiredOrder: OrderEntry[] = [
-		{ type: 'quality', name: 'Remux-2160p' },
-		{ type: 'quality', name: 'Bluray-2160p' },
-		{ type: 'quality', name: 'WEBDL-2160p' },
-		{ type: 'quality', name: 'WEBRip-2160p' },
-		{ type: 'quality', name: 'HDTV-2160p' },
-		{ type: 'quality', name: 'Remux-1080p' },
-		{ type: 'quality', name: 'Bluray-1080p' },
-		{ type: 'group', name: 'WEB 1080p', members: ['WEBDL-1080p', 'WEBRip-1080p'] },
-		{ type: 'quality', name: 'HDTV-1080p' },
-		{ type: 'quality', name: 'Bluray-720p' },
-		{ type: 'quality', name: 'WEBDL-720p' },
-		{ type: 'quality', name: 'WEBRip-720p' },
-		{ type: 'quality', name: 'HDTV-720p' },
-		{ type: 'quality', name: 'Bluray-576p' },
-		{ type: 'quality', name: 'Bluray-480p' },
-		{ type: 'quality', name: 'WEBDL-480p' },
-		{ type: 'quality', name: 'WEBRip-480p' },
-		{ type: 'quality', name: 'HDTV-480p' },
-		{ type: 'quality', name: 'DVD-R' },
-		{ type: 'quality', name: 'DVD' },
-		{ type: 'quality', name: 'SDTV' },
-		{
-			type: 'group',
-			name: 'Pre-releases',
-			members: ['REGIONAL', 'DVDSCR', 'TELECINE', 'TELESYNC', 'CAM', 'WORKPRINT']
-		},
-		{ type: 'group', name: 'Unwanted', members: ['Unknown', 'Raw-HD', 'BR-DISK'] }
-	];
-
-	const orderedItems: OrderedItem[] = [];
-	const usedNames = new Set<string>();
-	let position = 1;
-
-	for (const entry of desiredOrder) {
-		if (entry.type === 'group') {
-			const group = groupMap.get(entry.name);
-			const canGroup = groupAvailability.get(entry.name) ?? false;
-			const members = group?.members ?? entry.members;
-
-			if (!canGroup) {
-				for (const member of members) {
-					if (!allQualityNames.has(member) || usedNames.has(member)) continue;
-					orderedItems.push({
-						type: 'quality',
-						name: member,
-						position,
-						enabled: false,
-						upgradeUntil: false,
-						members: []
+	// 3. Build quality list — use provided items or generate defaults
+	if (input.orderedItems) {
+		for (const item of input.orderedItems) {
+			if (item.type === 'group') {
+				const members = (item.members ?? []).map((m) => m.name).filter(Boolean);
+				queries.push({
+					sql: `INSERT INTO quality_groups (quality_profile_name, name) VALUES ('${esc(input.name)}', '${esc(item.name)}')`,
+					parameters: [],
+					query: {} as never
+				});
+				for (let i = 0; i < members.length; i++) {
+					queries.push({
+						sql: `INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name, position) VALUES ('${esc(input.name)}', '${esc(item.name)}', '${esc(members[i])}', ${i})`,
+						parameters: [],
+						query: {} as never
 					});
-					usedNames.add(member);
-					position += 1;
 				}
+			}
+			queries.push({
+				sql: `INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, quality_group_name, position, enabled, upgrade_until) VALUES ('${esc(input.name)}', ${
+					item.type === 'quality' ? `'${esc(item.name)}'` : 'NULL'
+				}, ${item.type === 'group' ? `'${esc(item.name)}'` : 'NULL'}, ${
+					item.position
+				}, ${item.enabled ? 1 : 0}, ${item.upgradeUntil ? 1 : 0})`,
+				parameters: [],
+				query: {} as never
+			});
+		}
+	} else {
+		// Generate default quality list for normal UI create
+		const allQualities = await db
+			.selectFrom('qualities')
+			.select(['id', 'name'])
+			.orderBy('id')
+			.execute();
+
+		const allQualityNames = new Set(allQualities.map((quality) => quality.name));
+		const enabledQualities = new Set(['Remux-1080p', 'Bluray-1080p']);
+		const upgradeUntilName = 'Bluray-1080p';
+
+		type OrderEntry =
+			| { type: 'quality'; name: string }
+			| { type: 'group'; name: string; members: string[] };
+
+		const groupDefinitions = [
+			{
+				name: 'WEB 1080p',
+				members: ['WEBDL-1080p', 'WEBRip-1080p'],
+				enabled: false
+			},
+			{
+				name: 'Pre-releases',
+				members: ['REGIONAL', 'DVDSCR', 'TELECINE', 'TELESYNC', 'CAM', 'WORKPRINT'],
+				enabled: false
+			},
+			{
+				name: 'Unwanted',
+				members: ['Unknown', 'Raw-HD', 'BR-DISK'],
+				enabled: false
+			}
+		];
+		const groupMap = new Map(groupDefinitions.map((group) => [group.name, group]));
+		const groupAvailability = new Map(
+			groupDefinitions.map((group) => [
+				group.name,
+				group.members.every((member) => allQualityNames.has(member))
+			])
+		);
+
+		const desiredOrder: OrderEntry[] = [
+			{ type: 'quality', name: 'Remux-2160p' },
+			{ type: 'quality', name: 'Bluray-2160p' },
+			{ type: 'quality', name: 'WEBDL-2160p' },
+			{ type: 'quality', name: 'WEBRip-2160p' },
+			{ type: 'quality', name: 'HDTV-2160p' },
+			{ type: 'quality', name: 'Remux-1080p' },
+			{ type: 'quality', name: 'Bluray-1080p' },
+			{ type: 'group', name: 'WEB 1080p', members: ['WEBDL-1080p', 'WEBRip-1080p'] },
+			{ type: 'quality', name: 'HDTV-1080p' },
+			{ type: 'quality', name: 'Bluray-720p' },
+			{ type: 'quality', name: 'WEBDL-720p' },
+			{ type: 'quality', name: 'WEBRip-720p' },
+			{ type: 'quality', name: 'HDTV-720p' },
+			{ type: 'quality', name: 'Bluray-576p' },
+			{ type: 'quality', name: 'Bluray-480p' },
+			{ type: 'quality', name: 'WEBDL-480p' },
+			{ type: 'quality', name: 'WEBRip-480p' },
+			{ type: 'quality', name: 'HDTV-480p' },
+			{ type: 'quality', name: 'DVD-R' },
+			{ type: 'quality', name: 'DVD' },
+			{ type: 'quality', name: 'SDTV' },
+			{
+				type: 'group',
+				name: 'Pre-releases',
+				members: ['REGIONAL', 'DVDSCR', 'TELECINE', 'TELESYNC', 'CAM', 'WORKPRINT']
+			},
+			{ type: 'group', name: 'Unwanted', members: ['Unknown', 'Raw-HD', 'BR-DISK'] }
+		];
+
+		const orderedItems: OrderedItem[] = [];
+		const usedNames = new Set<string>();
+		let position = 1;
+
+		for (const entry of desiredOrder) {
+			if (entry.type === 'group') {
+				const group = groupMap.get(entry.name);
+				const canGroup = groupAvailability.get(entry.name) ?? false;
+				const members = group?.members ?? entry.members;
+
+				if (!canGroup) {
+					for (const member of members) {
+						if (!allQualityNames.has(member) || usedNames.has(member)) continue;
+						orderedItems.push({
+							type: 'quality',
+							name: member,
+							position,
+							enabled: false,
+							upgradeUntil: false,
+							members: []
+						});
+						usedNames.add(member);
+						position += 1;
+					}
+					continue;
+				}
+
+				orderedItems.push({
+					type: 'group',
+					name: entry.name,
+					position,
+					enabled: group?.enabled ?? false,
+					upgradeUntil: false,
+					members: members.map((member) => ({ name: member }))
+				});
+				for (const member of members) {
+					usedNames.add(member);
+				}
+				position += 1;
 				continue;
 			}
 
+			if (!allQualityNames.has(entry.name) || usedNames.has(entry.name)) continue;
 			orderedItems.push({
-				type: 'group',
+				type: 'quality',
 				name: entry.name,
 				position,
-				enabled: group?.enabled ?? false,
-				upgradeUntil: false,
-				members: members.map((member) => ({ name: member }))
+				enabled: enabledQualities.has(entry.name),
+				upgradeUntil: entry.name === upgradeUntilName,
+				members: []
 			});
-			for (const member of members) {
-				usedNames.add(member);
-			}
+			usedNames.add(entry.name);
 			position += 1;
-			continue;
 		}
 
-		if (!allQualityNames.has(entry.name) || usedNames.has(entry.name)) continue;
-		orderedItems.push({
-			type: 'quality',
-			name: entry.name,
-			position,
-			enabled: enabledQualities.has(entry.name),
-			upgradeUntil: entry.name === upgradeUntilName,
-			members: []
-		});
-		usedNames.add(entry.name);
-		position += 1;
-	}
+		for (const quality of allQualities) {
+			if (usedNames.has(quality.name)) continue;
+			orderedItems.push({
+				type: 'quality',
+				name: quality.name,
+				position,
+				enabled: false,
+				upgradeUntil: false,
+				members: []
+			});
+			position += 1;
+		}
 
-	for (const quality of allQualities) {
-		if (usedNames.has(quality.name)) continue;
-		orderedItems.push({
-			type: 'quality',
-			name: quality.name,
-			position,
-			enabled: false,
-			upgradeUntil: false,
-			members: []
-		});
-		position += 1;
-	}
+		const groupNames = orderedItems
+			.filter((item) => item.type === 'group')
+			.map((item) => item.name);
 
-	const groupNames = orderedItems.filter((item) => item.type === 'group').map((item) => item.name);
-
-	for (const groupName of groupNames) {
-		const group = groupMap.get(groupName);
-		if (!group) continue;
-		const insertGroup = {
-			sql: `INSERT INTO quality_groups (quality_profile_name, name) VALUES ('${esc(input.name)}', '${esc(groupName)}')`,
-			parameters: [],
-			query: {} as never
-		};
-		queries.push(insertGroup);
-
-		for (let i = 0; i < group.members.length; i++) {
-			const memberName = group.members[i];
-			const insertMember = {
-				sql: `INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name, position) VALUES ('${esc(input.name)}', '${esc(groupName)}', '${esc(memberName)}', ${i})`,
+		for (const groupName of groupNames) {
+			const group = groupMap.get(groupName);
+			if (!group) continue;
+			const insertGroup = {
+				sql: `INSERT INTO quality_groups (quality_profile_name, name) VALUES ('${esc(input.name)}', '${esc(groupName)}')`,
 				parameters: [],
 				query: {} as never
 			};
-			queries.push(insertMember);
-		}
-	}
+			queries.push(insertGroup);
 
-	// Insert each quality/group into quality_profile_qualities with defaults
-	for (const item of orderedItems) {
-		const enabled = item.enabled ? 1 : 0;
-		const upgradeUntil = item.upgradeUntil ? 1 : 0;
-		const insertQuality = {
-			sql: `INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, quality_group_name, position, enabled, upgrade_until) VALUES ('${esc(input.name)}', ${
-				item.type === 'quality' ? `'${esc(item.name)}'` : 'NULL'
-			}, ${item.type === 'group' ? `'${esc(item.name)}'` : 'NULL'}, ${
-				item.position
-			}, ${enabled}, ${upgradeUntil})`,
-			parameters: [],
-			query: {} as never
-		};
-		queries.push(insertQuality);
-	}
+			for (let i = 0; i < group.members.length; i++) {
+				const memberName = group.members[i];
+				const insertMember = {
+					sql: `INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name, position) VALUES ('${esc(input.name)}', '${esc(groupName)}', '${esc(memberName)}', ${i})`,
+					parameters: [],
+					query: {} as never
+				};
+				queries.push(insertMember);
+			}
+		}
+
+		// Insert each quality/group into quality_profile_qualities with defaults
+		for (const item of orderedItems) {
+			const enabled = item.enabled ? 1 : 0;
+			const upgradeUntil = item.upgradeUntil ? 1 : 0;
+			const insertQuality = {
+				sql: `INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, quality_group_name, position, enabled, upgrade_until) VALUES ('${esc(input.name)}', ${
+					item.type === 'quality' ? `'${esc(item.name)}'` : 'NULL'
+				}, ${item.type === 'group' ? `'${esc(item.name)}'` : 'NULL'}, ${
+					item.position
+				}, ${enabled}, ${upgradeUntil})`,
+				parameters: [],
+				query: {} as never
+			};
+			queries.push(insertQuality);
+		}
+	} // end else (default quality list)
 
 	// 4. Insert language if one is selected
 	if (input.language !== null) {

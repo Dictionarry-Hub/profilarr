@@ -13,7 +13,7 @@
 import { assertEquals } from '@std/assert';
 import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUser, setApiKey } from '../harness/setup.ts';
+import { createUser, setApiKey } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 
 const PORT = 7004;
@@ -35,7 +35,7 @@ teardown(async () => {
 
 test('valid API key returns 200', async () => {
 	const c = new TestClient(ORIGIN);
-	const res = await c.get('/api/v1/health/diagnostics', {
+	const res = await c.get('/api/v1/status', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
 	assertEquals(res.status, 200);
@@ -43,7 +43,7 @@ test('valid API key returns 200', async () => {
 
 test('invalid API key returns 401', async () => {
 	const c = new TestClient(ORIGIN);
-	const res = await c.get('/api/v1/health/diagnostics', {
+	const res = await c.get('/api/v1/status', {
 		headers: { 'X-Api-Key': 'wrong-key' }
 	});
 	assertEquals(res.status, 401);
@@ -51,18 +51,17 @@ test('invalid API key returns 401', async () => {
 
 test('no auth returns 401', async () => {
 	const unauthClient = new TestClient(ORIGIN);
-	const res = await unauthClient.get('/api/v1/health/diagnostics');
+	const res = await unauthClient.get('/api/v1/status');
 	assertEquals(res.status, 401);
 });
 
 test('API key in query param returns 401', async () => {
 	const unauthClient = new TestClient(ORIGIN);
-	const res = await unauthClient.get(`/api/v1/health/diagnostics?apikey=${API_KEY}`);
+	const res = await unauthClient.get(`/api/v1/status?apikey=${API_KEY}`);
 	assertEquals(res.status, 401);
 });
 
 // --- API key scoping: only /api/ paths, not browser pages or form actions ---
-// When /api/internal/ routes exist, add a test here proving API key is rejected for those too.
 
 test('API key rejected for browser pages', async () => {
 	// API key auth is scoped to /api/ paths only.

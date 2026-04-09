@@ -17,7 +17,7 @@
 	async function fetchCommits() {
 		loading = true;
 		try {
-			const response = await fetch(`/api/databases/${data.database.id}/commits`);
+			const response = await fetch(`/databases/${data.database.id}/commits/data`);
 			if (response.ok) {
 				const result = await response.json();
 				commits = result.commits;

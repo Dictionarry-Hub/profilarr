@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Check, X, AlertCircle, CircleCheck, CircleX } from 'lucide-svelte';
 	import { fly } from 'svelte/transition';
-	import type { Regex101UnitTest } from '../../../api/regex101/[id]/+server';
+	import type { Regex101UnitTest } from '../../regex101/types';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';

@@ -134,7 +134,7 @@
 	async function fetchChanges() {
 		loading = true;
 		try {
-			const response = await fetch(`/api/databases/${data.database.id}/changes`);
+			const response = await fetch(`/databases/${data.database.id}/changes/data`);
 			if (response.ok) {
 				const result = await response.json();
 				status = result.status;

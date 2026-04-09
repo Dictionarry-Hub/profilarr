@@ -209,6 +209,7 @@
 </script>
 
 <div
+	data-onboarding="sync-media-management"
 	class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
 >
 	<!-- Header -->
@@ -278,6 +279,7 @@
 		hasConfig={state.namingDatabaseId !== null ||
 			state.qualityDefinitionsDatabaseId !== null ||
 			state.mediaSettingsDatabaseId !== null}
+		onboardingId="sync-trigger"
 		onWarning={(msg) => alertStore.add('warning', msg)}
 		on:save={handleSave}
 		on:sync={handleSync}

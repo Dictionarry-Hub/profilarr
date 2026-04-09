@@ -65,11 +65,11 @@ export function initEdit<T extends FormData>(serverData: T) {
 }
 
 /**
- * Initialize for create mode - always dirty
+ * Initialize for create mode - dirty when user changes something
  */
 export function initCreate<T extends FormData>(defaults: T) {
-	isNewMode.set(true);
-	originalSnapshot.set(null);
+	isNewMode.set(false);
+	originalSnapshot.set(structuredClone(defaults));
 	currentData.set(structuredClone(defaults));
 }
 

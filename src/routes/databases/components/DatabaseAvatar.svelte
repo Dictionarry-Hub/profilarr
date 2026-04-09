@@ -20,7 +20,7 @@
 	function getGitHubAvatar(url: string): string {
 		const match = url.match(/github\.com\/([^\/]+)\//);
 		if (match) {
-			return `/api/github/avatar/${match[1]}`;
+			return `/databases/avatar/${match[1]}`;
 		}
 		return '';
 	}

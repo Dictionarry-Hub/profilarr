@@ -34,7 +34,8 @@ const config = {
 			$notifications: './src/lib/server/notifications',
 			$cache: './src/lib/server/utils/cache',
 			$sync: './src/lib/server/sync',
-			$auth: './src/lib/server/utils/auth'
+			$auth: './src/lib/server/utils/auth',
+			$cutscene: './src/lib/client/cutscene'
 		}
 	}
 };

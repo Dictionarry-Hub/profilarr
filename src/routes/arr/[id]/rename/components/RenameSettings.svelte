@@ -108,7 +108,7 @@
 		</div>
 
 		<!-- Rename Folders -->
-		<div>
+		<div data-onboarding="rename-folders">
 			<span class="mb-1 block text-sm text-neutral-500 md:hidden dark:text-neutral-400"
 				>Folders</span
 			>
@@ -126,7 +126,7 @@
 		</div>
 
 		<!-- Summary Notifications -->
-		<div>
+		<div data-onboarding="rename-summary">
 			<span class="mb-1 block text-sm text-neutral-500 md:hidden dark:text-neutral-400"
 				>Summary</span
 			>
@@ -147,7 +147,7 @@
 		<div class="hidden h-6 w-px bg-neutral-200 md:block dark:bg-neutral-700"></div>
 
 		<!-- Schedule -->
-		<div>
+		<div data-onboarding="rename-schedule">
 			<span class="mb-1 block text-sm text-neutral-500 md:hidden dark:text-neutral-400"
 				>Schedule</span
 			>
@@ -160,7 +160,7 @@
 		</div>
 
 		<!-- Ignore Tag -->
-		<div>
+		<div data-onboarding="rename-ignore-tag">
 			<span class="mb-1 block text-sm text-neutral-500 md:hidden dark:text-neutral-400"
 				>Ignore Tag</span
 			>

@@ -79,11 +79,6 @@ export async function getCachedRepoInfo(
 		return JSON.parse(cached.data) as RepoInfo;
 	}
 
-	await logger.debug('GitHub repo info cache miss', {
-		source: 'GitHubCache',
-		meta: { cacheKey }
-	});
-
 	// Fetch from API
 	const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
 	const headers = getHeaders(pat);
@@ -169,10 +164,6 @@ export async function getCachedAvatar(owner: string): Promise<string | null> {
 		const isExpired = githubCacheQueries.isExpired(cacheKey);
 
 		if (isExpired) {
-			await logger.debug('GitHub avatar cache stale, revalidating in background', {
-				source: 'GitHubCache',
-				meta: { owner }
-			});
 			// Trigger background refresh (don't await)
 			fetchAndCacheAvatar(owner, cacheKey).catch(() => {
 				// Silently ignore background refresh errors
@@ -181,11 +172,6 @@ export async function getCachedAvatar(owner: string): Promise<string | null> {
 
 		return cached.data;
 	}
-
-	await logger.debug('GitHub avatar cache miss', {
-		source: 'GitHubCache',
-		meta: { owner }
-	});
 
 	// No cached data at all - fetch synchronously
 	return fetchAndCacheAvatar(owner, cacheKey);
@@ -202,11 +188,6 @@ export async function getCachedReleases(owner: string, repo: string): Promise<Gi
 	if (cached) {
 		return JSON.parse(cached.data) as GitHubRelease[];
 	}
-
-	await logger.debug('GitHub releases cache miss', {
-		source: 'GitHubCache',
-		meta: { owner, repo }
-	});
 
 	// Fetch from API
 	const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;

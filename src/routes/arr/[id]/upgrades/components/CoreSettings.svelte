@@ -102,13 +102,13 @@
 		</div>
 
 		<!-- Schedule -->
-		<div>
+		<div data-onboarding="upgrades-schedule">
 			<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Schedule</span>
 			<CronInput bind:value={cronValue} {minIntervalMinutes} {onWarning} />
 		</div>
 
 		<!-- Filter Mode -->
-		<div>
+		<div data-onboarding="upgrades-filter-mode">
 			<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Mode</span>
 			<DropdownSelect
 				value={filterMode}

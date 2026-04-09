@@ -13,14 +13,16 @@
 		label: 'Library',
 		href: `/arr/${instanceId}/library`,
 		active: currentPath.includes('/library'),
-		icon: Library
+		icon: Library,
+		onboarding: 'arr-tab-library'
 	};
 
 	$: syncTab = {
 		label: 'Sync',
 		href: `/arr/${instanceId}/sync`,
 		active: currentPath.includes('/sync'),
-		icon: RefreshCw
+		icon: RefreshCw,
+		onboarding: 'arr-tab-sync'
 	};
 
 	$: otherTabs = [
@@ -28,25 +30,29 @@
 			label: 'Upgrades',
 			href: `/arr/${instanceId}/upgrades`,
 			active: currentPath.includes('/upgrades'),
-			icon: ArrowUpCircle
+			icon: ArrowUpCircle,
+			onboarding: 'arr-tab-upgrades'
 		},
 		{
 			label: 'Renames',
 			href: `/arr/${instanceId}/rename`,
 			active: currentPath.includes('/rename'),
-			icon: FileEdit
+			icon: FileEdit,
+			onboarding: 'arr-tab-renames'
 		},
 		{
 			label: 'Logs',
 			href: `/arr/${instanceId}/logs`,
 			active: currentPath.includes('/logs'),
-			icon: ScrollText
+			icon: ScrollText,
+			onboarding: 'arr-tab-logs'
 		},
 		{
 			label: 'Settings',
 			href: `/arr/${instanceId}/settings`,
 			active: currentPath.includes('/settings'),
-			icon: Settings
+			icon: Settings,
+			onboarding: 'arr-tab-settings'
 		}
 	];
 

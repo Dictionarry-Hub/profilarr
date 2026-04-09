@@ -1,3 +1,32 @@
+instances:
+  get:
+    operationId: listArrInstances
+    summary: List Arr Instances
+    description: |
+      Returns all Arr instances (Radarr/Sonarr) with secrets stripped.
+
+      **Use cases:**
+      - Dashboard widgets showing connected instances
+      - Automation scripts checking instance state
+      - Prerequisite checks (e.g. onboarding)
+
+      **Behavior:**
+      - Returns an empty array if no instances are connected
+      - The `api_key` field is never included
+    tags:
+      - Arr
+    responses:
+      '200':
+        description: List of Arr instances
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/arr.yaml#/ArrInstance'
+      '401':
+        description: Not authenticated
+
 library:
   get:
     operationId: getLibrary

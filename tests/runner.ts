@@ -70,10 +70,12 @@
 
 const INTEGRATION_COMPOSE = 'tests/integration/auth/docker-compose.yml';
 const INTEGRATION_AUTH_SPEC_DIR = 'tests/integration/auth/specs';
+const INTEGRATION_API_SPEC_DIR = 'tests/integration/api/specs';
 const INTEGRATION_CONFLICT_SPEC_DIR = 'tests/integration/conflicts/specs';
 const INTEGRATION_NOTIFICATION_SPEC_DIR = 'tests/integration/notifications/specs';
+const INTEGRATION_BACKUP_SPEC_DIR = 'tests/integration/backups/specs';
 const INTEGRATION_SPEC_DIR = INTEGRATION_AUTH_SPEC_DIR; // backward compat
-const INTEGRATION_SUITES = new Set(['auth', 'conflicts', 'notifications']);
+const INTEGRATION_SUITES = new Set(['auth', 'conflicts', 'api', 'notifications', 'backups']);
 
 const E2E_PCD_CONFIG = 'tests/e2e/pcd/playwright.config.ts';
 const E2E_PCD_SPEC_DIR = 'tests/e2e/pcd/specs';
@@ -102,11 +104,12 @@ const UNIT_ALIASES: Record<string, string> = {
 	logger: 'tests/unit/logger',
 	rename: 'tests/unit/rename',
 	sanitize: 'tests/unit/sanitize',
+	backups: 'tests/unit/backups',
 	// Individual files
 	filters: 'tests/unit/upgrades/filters.test.ts',
 	normalize: 'tests/unit/upgrades/normalize.test.ts',
 	selectors: 'tests/unit/upgrades/selectors.test.ts',
-	backup: 'tests/unit/jobs/createBackup.test.ts',
+	backup: 'tests/unit/backups/createBackup.test.ts',
 	cleanup: 'tests/unit/logger/cleanupLogs.test.ts',
 	processor: 'tests/unit/rename/processor.test.ts'
 };
@@ -231,13 +234,27 @@ async function runIntegration(target?: string): Promise<number> {
 
 	// Resolve spec dirs and files
 	function getSpecDir(s: string): string {
+		if (s === 'api') return INTEGRATION_API_SPEC_DIR;
 		if (s === 'conflicts') return INTEGRATION_CONFLICT_SPEC_DIR;
 		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
+		if (s === 'backups') return INTEGRATION_BACKUP_SPEC_DIR;
 		return INTEGRATION_AUTH_SPEC_DIR;
 	}
 
+	// Validate spec file if specified
+	if (specName && suite) {
+		const testPath = `${getSpecDir(suite)}/${specName}.test.ts`;
+		try {
+			await Deno.stat(testPath);
+		} catch {
+			console.error(`Unknown integration spec: "${specName}" in suite "${suite}"`);
+			console.error(`Expected file: ${testPath}`);
+			return 1;
+		}
+	}
+
 	// Determine which suites to run
-	const suitesToRun = suite ? [suite] : ['auth', 'conflicts', 'notifications'];
+	const suitesToRun = suite ? [suite] : ['auth', 'api', 'conflicts', 'notifications'];
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
@@ -365,8 +382,10 @@ async function runIntegrationSpec(
 ): Promise<{ code: number; stdout: string; stderr: string }> {
 	const specName = specFile
 		.replace(`${INTEGRATION_AUTH_SPEC_DIR}/`, '')
+		.replace(`${INTEGRATION_API_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_CONFLICT_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_NOTIFICATION_SPEC_DIR}/`, '')
+		.replace(`${INTEGRATION_BACKUP_SPEC_DIR}/`, '')
 		.replace('.test.ts', '');
 	const args = ['run', '--allow-all', '--no-check'];
 	if (INTEGRATION_NEEDS_TLS_INSECURE.has(specName)) {
@@ -808,15 +827,16 @@ function printHelp(): void {
 		'  logger          tests/unit/logger/',
 		'  rename          tests/unit/rename/',
 		'  sanitize        tests/unit/sanitize/',
+		'  backups         tests/unit/backups/',
 		'  filters         tests/unit/upgrades/filters.test.ts',
 		'  normalize       tests/unit/upgrades/normalize.test.ts',
 		'  selectors       tests/unit/upgrades/selectors.test.ts',
-		'  backup          tests/unit/jobs/createBackup.test.ts',
+		'  backup          tests/unit/backups/createBackup.test.ts',
 		'  cleanup         tests/unit/logger/cleanupLogs.test.ts',
 		'  processor       tests/unit/rename/processor.test.ts',
 		'',
 		'Integration targets:',
-		'  (none)          All suites (auth + conflicts, parallel)',
+		'  (none)          All suites (auth + conflicts + backups, parallel)',
 		'  auth            Auth specs only (Docker auto-managed)',
 		'  auth <name>     Single auth spec: health, csrf, cookie, apiKey,',
 		'                  session, oidc, rateLimit, proxy, xForwardedFor,',
@@ -824,6 +844,8 @@ function printHelp(): void {
 		'  conflicts       Conflict specs only',
 		'  conflicts <n>   Single conflict spec: detection, grouping,',
 		'                  align, override',
+		'  backups         Backup specs only',
+		'  backups <name>  Single backup spec',
 		'  <name>          Legacy: treated as auth spec name',
 		'',
 		'E2E targets:',
