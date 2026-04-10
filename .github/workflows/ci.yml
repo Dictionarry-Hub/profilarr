@@ -4,10 +4,12 @@ on:
   push:
     branches: [develop, 'hotfix/*']
     tags: ['v*']
-    paths-ignore: ['docs/**', '*.md', '!SECURITY.md', '.github/ISSUE_TEMPLATE/**']
+    paths-ignore:
+      ['docs/**', '*.md', '!SECURITY.md', '.github/issue_template/**', '.github/assets/**']
   pull_request:
     branches: [develop]
-    paths-ignore: ['docs/**', '*.md', '!SECURITY.md', '.github/ISSUE_TEMPLATE/**']
+    paths-ignore:
+      ['docs/**', '*.md', '!SECURITY.md', '.github/issue_template/**', '.github/assets/**']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}

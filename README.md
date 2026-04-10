@@ -20,9 +20,9 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hero-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="docs/assets/hero-light.png">
-    <img alt="Profilarr screenshot" src="docs/assets/hero-light.png" width="800">
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/hero-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset=".github/assets/hero-light.png">
+    <img alt="Profilarr screenshot" src=".github/assets/hero-light.png" width="800">
   </picture>
 </p>
 
