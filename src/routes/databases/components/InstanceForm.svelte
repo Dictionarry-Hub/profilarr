@@ -469,7 +469,9 @@
 	<input type="hidden" name="git_user_name" value={gitUserName} />
 	<input type="hidden" name="git_user_email" value={gitUserEmail} />
 	<input type="hidden" name="local_ops_enabled" value={localOpsEnabled === 'true' ? '1' : '0'} />
-	<input type="hidden" name="conflict_strategy" value={conflictStrategy} />
+	{#if !showGitIdentity || localOpsEnabled === 'true'}
+		<input type="hidden" name="conflict_strategy" value={conflictStrategy} />
+	{/if}
 	<input type="hidden" name="sync_strategy" value={syncStrategy} />
 	<input type="hidden" name="auto_pull" value={autoPull === 'true' ? '1' : '0'} />
 </form>

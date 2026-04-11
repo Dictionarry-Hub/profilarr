@@ -48,9 +48,10 @@ export const actions = {
 			git_user_email: getFirstNonEmptyFormValue(formData, 'git_user_email'),
 			sync_strategy: formData.get('sync_strategy')?.toString() || '0',
 			auto_pull: formData.get('auto_pull') === '1',
-			local_ops_enabled: formData.get('local_ops_enabled') === '1',
-			conflict_strategy: formData.get('conflict_strategy')?.toString().trim() || 'override'
+			local_ops_enabled: formData.get('local_ops_enabled') === '1'
 		};
+		const cs = formData.get('conflict_strategy')?.toString().trim();
+		if (cs) raw.conflict_strategy = cs;
 
 		const result = validateLinkInput(raw);
 		if (!result.ok) {
