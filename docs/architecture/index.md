@@ -83,4 +83,5 @@ publishes a release.
 
 **Frontend**
 
+- [frontend/dirty.md](./frontend/dirty.md): Dirty store, nav guard, form lifecycle, patterns
 - [cutscene.md](./cutscene.md): Interactive onboarding system
