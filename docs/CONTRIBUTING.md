@@ -32,8 +32,8 @@
 | Tool                                      | Version | Required | Description                                              |
 | ----------------------------------------- | ------- | -------- | -------------------------------------------------------- |
 | [Git](https://git-scm.com/)               | 2.x+    | Yes      | Version control; also used at runtime for PCD operations |
-| [Deno](https://deno.com/)                 | 2.x     | Yes      | Runtime, task runner, and package manager                |
-| [Node.js](https://nodejs.org/)            | 20+     | Yes      | Required by Vite and svelte-check                        |
+| [Deno](https://deno.com/)                 | 2.7+    | Yes      | Runtime, task runner, and package manager                |
+| [Node.js](https://nodejs.org/)            | 20.19+  | Yes      | Required by Vite and svelte-check                        |
 | [.NET SDK](https://dotnet.microsoft.com/) | 8.0+    | No       | Only needed for the parser service (CF/QP testing)       |
 
 ```bash
