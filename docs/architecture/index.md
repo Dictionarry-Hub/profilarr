@@ -28,14 +28,15 @@ publishes a release.
 
 ## Tech Stack
 
-| Layer          | Choice                                                  |
-| -------------- | ------------------------------------------------------- |
-| Runtime        | Deno 2.x, compiled to a single binary                   |
-| Web framework  | SvelteKit + Svelte 5 (no runes)                         |
-| Build          | Vite + a custom Deno compile adapter                    |
-| Styling        | Tailwind CSS 4                                          |
-| Database       | SQLite (app state and PCD ops)                          |
-| Parser service | Optional C# .NET microservice at `src/services/parser/` |
+| Layer          | Choice                            |
+| -------------- | --------------------------------- |
+| Language       | TypeScript                        |
+| Runtime        | Deno 2                            |
+| Web framework  | SvelteKit (Svelte 5)              |
+| Styling        | Tailwind CSS 4                    |
+| Database       | SQLite (WAL)                      |
+| Query builder  | Kysely                            |
+| Parser service | C# / .NET microservice (optional) |
 
 ## Glossary
 
