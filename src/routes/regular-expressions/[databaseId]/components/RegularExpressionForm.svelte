@@ -295,7 +295,12 @@
 					<span class="ml-1 text-xs font-normal text-neutral-500">({unitTests.length})</span>
 				{/if}
 			</h4>
-			<UnitTests {unitTests} loading={unitTestsLoading} error={unitTestsError} />
+			<UnitTests
+				{unitTests}
+				loading={unitTestsLoading}
+				error={unitTestsError}
+				regex101Url={formData.regex101Id ? `https://regex101.com/r/${formData.regex101Id}` : ''}
+			/>
 		</div>
 	{/if}
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, X, AlertCircle, CircleCheck, CircleX } from 'lucide-svelte';
+	import { Check, X, AlertCircle, CircleCheck, CircleX, ExternalLink } from 'lucide-svelte';
 	import { fly } from 'svelte/transition';
 	import type { Regex101UnitTest } from '../../regex101/types';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
@@ -14,11 +14,13 @@
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 
 	export let unitTests: Regex101UnitTest[] = [];
 	export let loading: boolean = false;
 	export let error: string | null = null;
+	export let regex101Url: string = '';
 
 	// Data page store for search + view
 	const { search, view, filtered, setItems } = createDataPageStore(unitTests, {
@@ -208,6 +210,16 @@
 		</div>
 
 		<ViewToggle bind:value={$view} />
+
+		{#if regex101Url}
+			<Tooltip text="Regex101">
+				<ActionButton
+					icon={ExternalLink}
+					iconClass="text-blue-600 dark:text-blue-400"
+					on:click={() => window.open(regex101Url, '_blank', 'noopener,noreferrer')}
+				/>
+			</Tooltip>
+		{/if}
 	</ActionsBar>
 
 	<!-- Content -->
