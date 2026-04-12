@@ -4,10 +4,12 @@
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
-	import { Fingerprint, AlertTriangle, Check, HeartHandshake, HandMetal } from 'lucide-svelte';
+	import { Fingerprint, AlertTriangle, HeartHandshake, HandMetal } from 'lucide-svelte';
 	import Table from '$ui/table/Table.svelte';
 	import type { Column } from '$ui/table/types';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
@@ -246,35 +248,18 @@
 		<svelte:fragment slot="dropdown" let:dropdownPosition>
 			<Dropdown position={dropdownPosition} minWidth="12rem">
 				<div class="max-h-64 overflow-y-auto">
-					<button
-						type="button"
+					<DropdownHeader label="Entity" />
+					<DropdownItem
+						label="All"
+						selected={activeEntities.size === 0}
 						on:click={() => toggleEntity('__all__')}
-						class="flex w-full items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2 text-left text-sm transition-colors first:rounded-t-lg dark:border-neutral-700
-							{activeEntities.size === 0
-							? 'bg-neutral-100 dark:bg-neutral-700'
-							: 'hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
-					>
-						<span class="text-neutral-700 dark:text-neutral-300">All</span>
-						{#if activeEntities.size === 0}
-							<Check size={16} class="text-accent-600 dark:text-accent-400" />
-						{/if}
-					</button>
+					/>
 					{#each entityKeys as entity}
-						<button
-							type="button"
+						<DropdownItem
+							label={entityLabels[entity] ?? formatEntity(entity)}
+							selected={activeEntities.has(entity)}
 							on:click={() => toggleEntity(entity)}
-							class="flex w-full items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2 text-left text-sm transition-colors last:rounded-b-lg last:border-b-0 dark:border-neutral-700
-								{activeEntities.has(entity)
-								? 'bg-neutral-100 dark:bg-neutral-700'
-								: 'hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
-						>
-							<span class="text-neutral-700 dark:text-neutral-300">
-								{entityLabels[entity] ?? formatEntity(entity)}
-							</span>
-							{#if activeEntities.has(entity)}
-								<Check size={16} class="text-accent-600 dark:text-accent-400" />
-							{/if}
-						</button>
+						/>
 					{/each}
 				</div>
 			</Dropdown>
@@ -289,34 +274,19 @@
 		<svelte:fragment slot="dropdown" let:dropdownPosition>
 			<Dropdown position={dropdownPosition} minWidth="12rem">
 				<div class="max-h-64 overflow-y-auto">
-					<button
-						type="button"
+					<DropdownHeader label="Reason" />
+					<DropdownItem
+						label="All"
+						selected={activeReasons.size === 0}
 						on:click={() => toggleReason('__all__')}
-						class="flex w-full items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2 text-left text-sm transition-colors first:rounded-t-lg dark:border-neutral-700
-							{activeReasons.size === 0
-							? 'bg-neutral-100 dark:bg-neutral-700'
-							: 'hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
-					>
-						<span class="text-neutral-700 dark:text-neutral-300">All</span>
-						{#if activeReasons.size === 0}
-							<Check size={16} class="text-accent-600 dark:text-accent-400" />
-						{/if}
-					</button>
+					/>
 					{#each reasonKeys as reason}
 						{@const label = (reasonLabels[reason] ?? reason) || 'Unknown'}
-						<button
-							type="button"
+						<DropdownItem
+							{label}
+							selected={activeReasons.has(reason)}
 							on:click={() => toggleReason(reason)}
-							class="flex w-full items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2 text-left text-sm transition-colors last:rounded-b-lg last:border-b-0 dark:border-neutral-700
-								{activeReasons.has(reason)
-								? 'bg-neutral-100 dark:bg-neutral-700'
-								: 'hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
-						>
-							<span class="text-neutral-700 dark:text-neutral-300">{label}</span>
-							{#if activeReasons.has(reason)}
-								<Check size={16} class="text-accent-600 dark:text-accent-400" />
-							{/if}
-						</button>
+						/>
 					{/each}
 				</div>
 			</Dropdown>
