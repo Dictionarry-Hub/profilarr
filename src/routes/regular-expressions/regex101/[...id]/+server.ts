@@ -62,6 +62,8 @@ async function runRegexTests(
 }
 
 export const GET: RequestHandler = async ({ params, fetch }) => {
+	// Catch-all route: [...id] captures remaining path segments as a string
+	// e.g., /regex101/K6HrsR/4 -> params.id = "K6HrsR/4"
 	const { id } = params;
 
 	if (!id) {

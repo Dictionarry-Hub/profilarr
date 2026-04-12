@@ -113,7 +113,7 @@
 		unitTestsError = null;
 
 		try {
-			const response = await fetch(`/regular-expressions/regex101/${encodeURIComponent(id)}`);
+			const response = await fetch(`/regular-expressions/regex101/${id}`);
 			if (!response.ok) {
 				const data = await response.json().catch(() => ({}));
 				throw new Error(data.message || `Failed to fetch: ${response.statusText}`);
