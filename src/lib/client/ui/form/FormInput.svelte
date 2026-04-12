@@ -136,7 +136,9 @@
 				autocomplete={autocomplete
 					? (autocomplete as typeof HTMLInputElement.prototype.autocomplete)
 					: undefined}
-				class="block w-full border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {privatePaddingClass}"
+				class="block w-full border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {privatePaddingClass} {showPassword
+					? ''
+					: 'tracking-[0.25em] placeholder:tracking-normal'}"
 			/>
 			{#if hasSuffix}
 				<div class="absolute top-1/2 right-10 -translate-y-1/2">

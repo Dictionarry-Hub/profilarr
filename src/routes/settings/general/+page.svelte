@@ -19,8 +19,6 @@
 		Loader2,
 		RotateCcw,
 		FlaskConical,
-		Eye,
-		EyeOff,
 		CheckCircle,
 		XCircle,
 		AlertTriangle,
@@ -61,7 +59,6 @@
 
 	// TMDB
 	let tmdbApiKey = '';
-	let tmdbShowKey = false;
 	let tmdbTesting = false;
 
 	// Arr defaults
@@ -75,9 +72,6 @@
 	);
 	let uiFontSans: SansFont = 'dm-sans';
 	let uiFontMono: MonoFont = 'geist-mono';
-
-	// AI show/hide API key
-	let aiShowKey = false;
 
 	// --- Dropdown options ---
 
@@ -619,36 +613,21 @@
 					</div>
 				</svelte:fragment>
 				<div class="space-y-4 px-6 py-4">
-					<div class="relative">
-						<FormInput
-							label="API Read Access Token"
-							name="tmdb_api_key"
-							value={tmdbApiKey}
-							type={tmdbShowKey ? 'text' : 'password'}
-							mono
-							placeholder={data.tmdbSettings.hasApiKey ? '••••••••••••••••' : ''}
-							description={data.tmdbSettings.hasApiKey
-								? 'Leave blank to keep existing key'
-								: 'Use the API Read Access Token (not API Key) from themoviedb.org'}
-							on:input={(e) => {
-								tmdbApiKey = e.detail;
-								update('tmdb_api_key', e.detail);
-							}}
-						>
-							<button
-								slot="suffix"
-								type="button"
-								on:click={() => (tmdbShowKey = !tmdbShowKey)}
-								class="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
-							>
-								{#if tmdbShowKey}
-									<EyeOff size={16} />
-								{:else}
-									<Eye size={16} />
-								{/if}
-							</button>
-						</FormInput>
-					</div>
+					<FormInput
+						label="API Read Access Token"
+						name="tmdb_api_key"
+						value={tmdbApiKey}
+						private_
+						mono
+						placeholder={data.tmdbSettings.hasApiKey ? '••••••••••••••••' : ''}
+						description={data.tmdbSettings.hasApiKey
+							? 'Leave blank to keep existing key'
+							: 'Use the API Read Access Token (not API Key) from themoviedb.org'}
+						on:input={(e) => {
+							tmdbApiKey = e.detail;
+							update('tmdb_api_key', e.detail);
+						}}
+					/>
 				</div>
 			</ExpandableCard>
 
@@ -694,7 +673,7 @@
 								label="API Key"
 								name="ai_api_key"
 								value={aiApiKey}
-								type={aiShowKey ? 'text' : 'password'}
+								private_
 								mono
 								placeholder={data.aiSettings.hasApiKey ? '••••••••••••••••' : ''}
 								description={data.aiSettings.hasApiKey
@@ -704,20 +683,7 @@
 									aiApiKey = e.detail;
 									update('ai_api_key', e.detail);
 								}}
-							>
-								<button
-									slot="suffix"
-									type="button"
-									on:click={() => (aiShowKey = !aiShowKey)}
-									class="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
-								>
-									{#if aiShowKey}
-										<EyeOff size={16} />
-									{:else}
-										<Eye size={16} />
-									{/if}
-								</button>
-							</FormInput>
+							/>
 
 							<FormInput
 								label="Model"
