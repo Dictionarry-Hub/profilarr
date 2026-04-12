@@ -716,34 +716,23 @@
 						></div>
 					{/if}
 					<div class="relative flex items-center justify-between">
-						<button
-							type="button"
-							class="mr-2 hidden shrink-0 text-neutral-400 md:block dark:text-neutral-500 {draggedQualityFromMain?.index ===
-							index
+						<span
+							class="mr-2 hidden shrink-0 md:block {draggedQualityFromMain?.index === index
 								? 'cursor-grabbing'
 								: 'cursor-grab'}"
 							on:pointerdown={(e) => handlePointerDown(e, item, index)}
 							on:click|stopPropagation|preventDefault
 						>
-							<Grip size={16} />
-						</button>
+							<Button
+								icon={Grip}
+								size="sm"
+								variant="ghost"
+								iconColor="text-neutral-400 dark:text-neutral-500"
+							/>
+						</span>
 						<div class="flex-1">
 							<div class="font-medium text-neutral-900 dark:text-neutral-100">
-								{#if item.type === 'group'}
-									{#if data.canEditGroupMembers}
-										<button
-											type="button"
-											class="cursor-pointer hover:text-accent-600 dark:hover:text-accent-400"
-											on:click|stopPropagation={() => openEditGroupModal(item, index)}
-										>
-											{item.name}
-										</button>
-									{:else}
-										<span>{item.name}</span>
-									{/if}
-								{:else}
-									{item.name}
-								{/if}
+								{item.name}
 							</div>
 							{#if item.type === 'group' && item.members}
 								<div class="mt-1 hidden flex-wrap gap-1 md:flex">
