@@ -20,6 +20,8 @@
 		| 'neutral'
 		| `#${string}`
 		| `var(--${string})` = 'accent';
+	export let labelClass: string = '';
+	export let labelTransform: 'none' | 'capitalize' | 'uppercase' | 'lowercase' = 'none';
 
 	$: sizeClasses = compact ? 'gap-2 px-2 py-1 text-xs' : 'gap-3 px-3 py-2';
 
@@ -34,6 +36,14 @@
 			: 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700';
 
 	$: iconSize = compact ? 12 : 16;
+	$: labelTransformClass =
+		labelTransform === 'capitalize'
+			? 'capitalize'
+			: labelTransform === 'uppercase'
+				? 'uppercase'
+				: labelTransform === 'lowercase'
+					? 'lowercase'
+					: '';
 </script>
 
 <div
@@ -53,7 +63,7 @@
 				<svelte:component this={icon as ComponentType} size={iconSize} />
 			{/if}
 		{/if}
-		<span class="flex-1">{label}</span>
+		<span class="flex-1 {labelTransformClass} {labelClass}">{label}</span>
 		<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color={checkColor} />
 	</button>
 	{#if $$slots.actions}

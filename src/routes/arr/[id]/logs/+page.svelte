@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { Copy, RefreshCw, Filter, ChevronLeft, ChevronRight, Rows3 } from 'lucide-svelte';
+	import { Copy, RefreshCw, Filter, Rows3 } from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -9,6 +9,10 @@
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
+	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
+	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import type { Column } from '$ui/table/types';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
@@ -38,6 +42,12 @@
 
 	const logLevels = ['ALL', 'Trace', 'Debug', 'Info', 'Warn', 'Error', 'Fatal'] as const;
 
+	function normalizeLevel(level: string | null | undefined): string {
+		if (!level) return '';
+		const normalized = level.toLowerCase();
+		return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+	}
+
 	// Level colors matching arr log levels
 	const levelColors: Record<string, string> = {
 		Trace: 'text-neutral-500 dark:text-neutral-500',
@@ -65,7 +75,9 @@
 			width: '80px',
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
-				html: `<span class="font-semibold ${levelColors[row.level] || 'text-neutral-600 dark:text-neutral-400'}">${row.level}</span>`
+				html: `<span class="font-semibold ${
+					levelColors[normalizeLevel(row.level)] || 'text-neutral-600 dark:text-neutral-400'
+				}">${normalizeLevel(row.level)}</span>`
 			})
 		},
 		{
@@ -135,6 +147,10 @@
 
 	// Client-side search filter
 	$: filteredLogs = data.logs.records.filter((log) => {
+		if (selectedLevel !== 'ALL' && normalizeLevel(log.level) !== normalizeLevel(selectedLevel)) {
+			return false;
+		}
+
 		const query = $searchStore.query;
 		if (!query) return true;
 
@@ -159,25 +175,34 @@
 	<ActionsBar className="justify-end">
 		<SearchAction {searchStore} placeholder="Search logs..." />
 
+		<!-- Refresh -->
+		<Tooltip text="Refresh logs">
+			<ActionButton on:click={refreshLogs}>
+				<RefreshCw
+					size={20}
+					class="text-neutral-700 dark:text-neutral-300 {isRefreshing ? 'animate-spin' : ''}"
+				/>
+			</ActionButton>
+		</Tooltip>
+
 		<!-- Level Filter -->
 		<ActionButton icon={Filter} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition>
 				<Dropdown position={dropdownPosition} minWidth="8rem">
+					<DropdownHeader label="Level" />
 					{#each logLevels as level}
-						<button
-							type="button"
-							on:click={() => changeLevel(level)}
-							class="flex w-full items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2 text-left transition-colors first:rounded-t-lg last:rounded-b-lg last:border-b-0 dark:border-neutral-700
-								{selectedLevel === level
-								? 'bg-neutral-100 dark:bg-neutral-700'
-								: 'hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
-						>
-							<span
-								class="font-medium {level === 'ALL'
+						<DropdownItem
+							label={level}
+							selected={selectedLevel === level}
+							checkColor="blue"
+							labelClass={`font-mono font-medium ${
+								level === 'ALL'
 									? 'text-neutral-600 dark:text-neutral-400'
-									: levelColors[level]}">{level}</span
-							>
-						</button>
+									: levelColors[level]
+							}`}
+							labelTransform="uppercase"
+							on:click={() => changeLevel(level)}
+						/>
 					{/each}
 				</Dropdown>
 			</svelte:fragment>
@@ -206,19 +231,6 @@
 				</Dropdown>
 			</svelte:fragment>
 		</ActionButton>
-
-		<!-- Refresh -->
-		<ActionButton hasDropdown={true} dropdownPosition="right" on:click={refreshLogs}>
-			<RefreshCw
-				size={20}
-				class="text-neutral-700 dark:text-neutral-300 {isRefreshing ? 'animate-spin' : ''}"
-			/>
-			<svelte:fragment slot="dropdown" let:dropdownPosition>
-				<Dropdown position={dropdownPosition} minWidth="6rem">
-					<div class="px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400">Refresh logs</div>
-				</Dropdown>
-			</svelte:fragment>
-		</ActionButton>
 	</ActionsBar>
 
 	<!-- Stats -->
@@ -234,27 +246,7 @@
 
 		<!-- Pagination -->
 		{#if totalPages > 1}
-			<div class="flex items-center gap-2">
-				<button
-					type="button"
-					disabled={currentPage <= 1}
-					on:click={() => goToPage(currentPage - 1)}
-					class="rounded p-1 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700"
-				>
-					<ChevronLeft size={20} />
-				</button>
-				<span class="text-sm">
-					Page {currentPage} of {totalPages}
-				</span>
-				<button
-					type="button"
-					disabled={currentPage >= totalPages}
-					on:click={() => goToPage(currentPage + 1)}
-					class="rounded p-1 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700"
-				>
-					<ChevronRight size={20} />
-				</button>
-			</div>
+			<Pagination {currentPage} {totalPages} onPageChange={goToPage} />
 		{/if}
 	</div>
 
@@ -283,28 +275,8 @@
 
 	<!-- Bottom Pagination -->
 	{#if totalPages > 1}
-		<div
-			class="mt-4 flex items-center justify-center gap-2 text-sm text-neutral-600 dark:text-neutral-400"
-		>
-			<button
-				type="button"
-				disabled={currentPage <= 1}
-				on:click={() => goToPage(currentPage - 1)}
-				class="rounded p-1 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700"
-			>
-				<ChevronLeft size={20} />
-			</button>
-			<span class="text-sm">
-				Page {currentPage} of {totalPages}
-			</span>
-			<button
-				type="button"
-				disabled={currentPage >= totalPages}
-				on:click={() => goToPage(currentPage + 1)}
-				class="rounded p-1 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700"
-			>
-				<ChevronRight size={20} />
-			</button>
+		<div class="mt-4 flex justify-center">
+			<Pagination {currentPage} {totalPages} onPageChange={goToPage} />
 		</div>
 	{/if}
 </div>

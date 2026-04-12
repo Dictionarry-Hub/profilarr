@@ -66,7 +66,7 @@
 	};
 </script>
 
-<div class="overflow-x-hidden p-4 md:p-8">
+<div class="overflow-x-clip p-4 md:p-8">
 	<Tabs {tabs} {breadcrumb} responsive />
 	{#key data.instance.id}
 		<slot />
