@@ -1,17 +1,11 @@
 <script lang="ts">
-	import {
-		Download,
-		RefreshCw,
-		FileText,
-		Filter,
-		Layers,
-		Check,
-		BrushCleaning
-	} from 'lucide-svelte';
+	import { Download, RefreshCw, FileText, Filter, Layers, BrushCleaning } from 'lucide-svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
+	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { type SearchStore } from '$stores/search';
 
@@ -70,51 +64,40 @@
 
 	<!-- Log File Selector -->
 	<ActionButton icon={FileText} hasDropdown={true} dropdownPosition="right">
-		<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
-			<Dropdown position={dropdownPosition} minWidth="20rem">
+		<svelte:fragment slot="dropdown" let:dropdownPosition>
+			<Dropdown position={dropdownPosition} minWidth="16rem">
+				<DropdownHeader label="Log Files" />
 				<div class="max-h-64 overflow-y-auto">
 					{#each logFiles as file}
-						<button
-							type="button"
+						<DropdownItem
+							label={file.filename}
+							secondaryText={formatFileSize(file.size)}
+							selected={selectedFile === file.filename}
 							on:click={() => onChangeFile(file.filename)}
-							class="flex w-full items-center justify-between gap-4 border-b border-neutral-200 px-4 py-2.5 text-left transition-colors first:rounded-t-lg last:rounded-b-lg last:border-b-0 dark:border-neutral-700
-								{selectedFile === file.filename
-								? 'bg-neutral-100 dark:bg-neutral-700'
-								: 'hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
-						>
-							<div class="flex flex-col gap-0.5">
-								<span class="font-mono text-sm text-neutral-900 dark:text-neutral-100">
-									{file.filename}
-								</span>
-								<span class="text-xs text-neutral-500 dark:text-neutral-400">
-									{formatDate(file.modified)}
-								</span>
-							</div>
-							<span class="text-xs text-neutral-400 dark:text-neutral-500">
-								{formatFileSize(file.size)}
-							</span>
-						</button>
+						/>
 					{/each}
 				</div>
 			</Dropdown>
 		</svelte:fragment>
 	</ActionButton>
 
+	<!-- Download -->
+	<Tooltip text="Download">
+		<ActionButton icon={Download} on:click={onDownload} />
+	</Tooltip>
+
 	<!-- Level Filter -->
 	<ActionButton icon={Filter} hasDropdown={true} dropdownPosition="right">
-		<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
+		<svelte:fragment slot="dropdown" let:dropdownPosition>
 			<Dropdown position={dropdownPosition} minWidth="8rem">
+				<DropdownHeader label="Level" />
 				{#each logLevels as level}
-					<button
-						type="button"
+					<DropdownItem
+						label={level}
+						selected={selectedLevel === level}
+						labelClass="font-mono {levelColors[level]}"
 						on:click={() => onChangeLevel(level)}
-						class="flex w-full items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2 text-left transition-colors first:rounded-t-lg last:rounded-b-lg last:border-b-0 dark:border-neutral-700
-							{selectedLevel === level
-							? 'bg-neutral-100 dark:bg-neutral-700'
-							: 'hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
-					>
-						<span class="font-medium {levelColors[level]}">{level}</span>
-					</button>
+					/>
 				{/each}
 			</Dropdown>
 		</svelte:fragment>
@@ -122,23 +105,17 @@
 
 	<!-- Source Filter -->
 	<ActionButton icon={Layers} hasDropdown={true} dropdownPosition="right">
-		<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
+		<svelte:fragment slot="dropdown" let:dropdownPosition>
 			<Dropdown position={dropdownPosition} minWidth="12rem">
+				<DropdownHeader label="Source" />
 				<div class="max-h-64 overflow-y-auto">
 					{#each uniqueSources as source}
-						<button
-							type="button"
+						<DropdownItem
+							label={source}
+							labelClass="font-mono"
+							selected={selectedSources.has(source)}
 							on:click={() => onToggleSource(source)}
-							class="flex w-full items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2 text-left text-sm transition-colors first:rounded-t-lg last:rounded-b-lg last:border-b-0 dark:border-neutral-700
-								{selectedSources.has(source)
-								? 'bg-neutral-100 dark:bg-neutral-700'
-								: 'hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
-						>
-							<span class="text-neutral-700 dark:text-neutral-300">{source}</span>
-							{#if selectedSources.has(source)}
-								<Check size={16} class="text-accent-600 dark:text-accent-400" />
-							{/if}
-						</button>
+						/>
 					{/each}
 				</div>
 			</Dropdown>
@@ -146,7 +123,7 @@
 	</ActionButton>
 
 	<!-- Refresh -->
-	<Tooltip text="Refresh logs">
+	<Tooltip text="Refresh">
 		<ActionButton on:click={onRefresh}>
 			<RefreshCw
 				size={20}
@@ -157,13 +134,8 @@
 
 	<!-- Cleanup -->
 	{#if onCleanup}
-		<Tooltip text="Run log cleanup">
+		<Tooltip text="Cleanup">
 			<ActionButton icon={BrushCleaning} on:click={onCleanup} />
 		</Tooltip>
 	{/if}
-
-	<!-- Download -->
-	<Tooltip text="Download logs as JSON">
-		<ActionButton icon={Download} on:click={onDownload} />
-	</Tooltip>
 </ActionsBar>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Eye, Copy, ChevronLeft, ChevronRight } from 'lucide-svelte';
+	import { Eye, Copy } from 'lucide-svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -7,6 +7,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
+	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
 	import type { Column, SortDirection, SortState } from '$ui/table/types';
 	import LogsActionsBar from './components/LogsActionsBar.svelte';
 	import LogLevelLabelCell from './components/LogLevelLabelCell.svelte';
@@ -276,16 +277,8 @@
 		currentPage = totalPages;
 	}
 
-	function goToPreviousPage() {
-		if (currentPage > 1) {
-			currentPage--;
-		}
-	}
-
-	function goToNextPage() {
-		if (currentPage < totalPages) {
-			currentPage++;
-		}
+	function handlePageChange(page: number) {
+		currentPage = page;
 	}
 
 	function handleSortChange(nextSort: SortState | null) {
@@ -346,27 +339,7 @@
 
 		<!-- Pagination -->
 		{#if totalPages > 1}
-			<div class="flex items-center gap-2">
-				<button
-					type="button"
-					disabled={currentPage <= 1}
-					on:click={goToPreviousPage}
-					class="rounded p-1 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700"
-				>
-					<ChevronLeft size={20} />
-				</button>
-				<span class="text-sm">
-					Page {currentPage} of {totalPages}
-				</span>
-				<button
-					type="button"
-					disabled={currentPage >= totalPages}
-					on:click={goToNextPage}
-					class="rounded p-1 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700"
-				>
-					<ChevronRight size={20} />
-				</button>
-			</div>
+			<Pagination {currentPage} {totalPages} onPageChange={handlePageChange} />
 		{/if}
 	</div>
 
@@ -407,28 +380,8 @@
 
 	<!-- Bottom Pagination -->
 	{#if totalPages > 1}
-		<div
-			class="mt-4 flex items-center justify-center gap-2 text-sm text-neutral-600 dark:text-neutral-400"
-		>
-			<button
-				type="button"
-				disabled={currentPage <= 1}
-				on:click={goToPreviousPage}
-				class="rounded p-1 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700"
-			>
-				<ChevronLeft size={20} />
-			</button>
-			<span class="text-sm">
-				Page {currentPage} of {totalPages}
-			</span>
-			<button
-				type="button"
-				disabled={currentPage >= totalPages}
-				on:click={goToNextPage}
-				class="rounded p-1 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700"
-			>
-				<ChevronRight size={20} />
-			</button>
+		<div class="mt-4 flex justify-center">
+			<Pagination {currentPage} {totalPages} onPageChange={handlePageChange} />
 		</div>
 	{/if}
 </div>

@@ -7,6 +7,7 @@
 
 	$: isSvgIcon = icon && typeof icon === 'object' && 'path' in icon;
 	export let label: string;
+	export let secondaryText: string = '';
 	export let disabled: boolean = false;
 	export let danger: boolean = false;
 	export let selected: boolean = false;
@@ -63,7 +64,11 @@
 				<svelte:component this={icon as ComponentType} size={iconSize} />
 			{/if}
 		{/if}
-		<span class="flex-1 {labelTransformClass} {labelClass}">{label}</span>
+		<span class="flex-1 {labelTransformClass} {labelClass}"
+			>{label}{#if secondaryText}<span class="ml-1.5 text-xs text-neutral-400 dark:text-neutral-500"
+					>{secondaryText}</span
+				>{/if}</span
+		>
 		<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color={checkColor} />
 	</button>
 	{#if $$slots.actions}
