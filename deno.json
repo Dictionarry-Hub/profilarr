@@ -41,6 +41,7 @@
 		"clean:dev": "rm -rf dist/dev",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && deno lint",
+		"lint:ui": "deno run --allow-read --allow-env scripts/lint/ui.ts",
 		"check": "deno task check:server && deno task check:client",
 		"check:server": "deno check --quiet src/lib/server/**/*.ts",
 		"check:client": "NODE_ENV=development npx svelte-check --tsconfig ./tsconfig.json",
