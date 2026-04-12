@@ -4,6 +4,7 @@
 	import SectionRenderer from './components/SectionRenderer.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
+	import ActionInput from '$ui/actions/ActionInput.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import CodeBlock from '$ui/code/CodeBlock.svelte';
 	import InlineCode from '$ui/code/InlineCode.svelte';
@@ -704,30 +705,25 @@
 					<div class="mb-4">
 						<ActionsBar className="w-full">
 							<div>
-								<button
-									type="button"
-									on:click={toggleAll}
-									class="flex h-10 items-center gap-2 border border-neutral-300 bg-white px-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
-								>
-									<IconCheckbox checked={allSelected} icon={Check} color="blue" shape="circle" />
-									Select all ({selectableKeys.length})
-								</button>
+								<ActionButton square={false} on:click={toggleAll}>
+									<div
+										class="flex items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
+									>
+										<IconCheckbox checked={allSelected} icon={Check} color="blue" shape="circle" />
+										Select all ({selectableKeys.length})
+									</div>
+								</ActionButton>
 							</div>
 
 							<div class="flex-1">
-								<div
-									class="relative flex h-10 w-full items-center border border-neutral-300 bg-white px-3 text-sm text-neutral-600 transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400"
-								>
-									<input
-										type="text"
-										bind:value={commitMessage}
-										placeholder={hasIncomingChanges
-											? 'Pull incoming changes first...'
-											: 'Commit message...'}
-										disabled={hasIncomingChanges}
-										class="h-full w-full bg-transparent font-mono text-sm text-neutral-700 placeholder-neutral-400 outline-none disabled:cursor-not-allowed dark:text-neutral-300 dark:placeholder-neutral-500"
-									/>
-								</div>
+								<ActionInput
+									bind:value={commitMessage}
+									placeholder={hasIncomingChanges
+										? 'Pull incoming changes first...'
+										: 'Commit message...'}
+									disabled={hasIncomingChanges}
+									mono
+								/>
 							</div>
 
 							<div>
@@ -754,146 +750,87 @@
 				{/if}
 
 				<!-- Outgoing Table -->
-				{#if loading}
-					<div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
-						<table class="w-full">
-							<thead
-								class="border-b border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-800"
-							>
-								<tr>
-									<th class="w-12 px-4 py-3"></th>
-									<th
-										class="px-4 py-3 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
-										>Operation</th
-									>
-									<th
-										class="px-4 py-3 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
-										>Entity</th
-									>
-									<th
-										class="px-4 py-3 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
-										>Name</th
-									>
-									<th
-										class="px-4 py-3 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
-										>File</th
-									>
-								</tr>
-							</thead>
-							<tbody
-								class="divide-y divide-neutral-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900"
-							>
-								{#each Array(5) as _}
-									<tr class="animate-pulse">
-										<td class="px-4 py-3 text-center">
-											<div
-												class="mx-auto h-5 w-5 rounded border-2 border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800"
-											></div>
-										</td>
-										<td class="px-4 py-3"
-											><div class="h-5 w-16 rounded bg-neutral-200 dark:bg-neutral-700"></div></td
-										>
-										<td class="px-4 py-3"
-											><div class="h-4 w-20 rounded bg-neutral-200 dark:bg-neutral-700"></div></td
-										>
-										<td class="px-4 py-3"
-											><div class="h-4 w-32 rounded bg-neutral-200 dark:bg-neutral-700"></div></td
-										>
-										<td class="px-4 py-3"
-											><div class="h-4 w-28 rounded bg-neutral-200 dark:bg-neutral-700"></div></td
-										>
-									</tr>
-								{/each}
-							</tbody>
-						</table>
-					</div>
-				{:else if draftChanges.length === 0}
-					<p class="text-sm text-neutral-400 dark:text-neutral-500">
-						Nothing to ship — go break something, then come back.
-					</p>
-				{:else}
-					<ExpandableTable
-						columns={outgoingColumns}
-						data={draftChanges}
-						getRowId={(row) => row.key}
-						emptyMessage="No unpublished changes"
-						responsive
-						chevronPosition="right"
-						expandOnRowClick={false}
-						flushExpanded={true}
-						onRowClick={(row) => toggleRow(row.key)}
-						primaryColumnKey="name"
-						disableExpandWhen={(row) => row.operation === 'delete'}
-					>
-						<svelte:fragment slot="cell" let:row let:column>
-							{#if column.key === 'select'}
-								{#if row.generated}
-									<span class="inline-block h-5 w-5"></span>
-								{:else}
-									<IconCheckbox
-										checked={selected.has(row.key)}
-										icon={Check}
-										color={autoSelectedKeys.has(row.key) ? '#f59e0b' : 'blue'}
-										variant={autoSelectedKeys.has(row.key) ? 'filled' : 'filled'}
-										shape="circle"
-										stopPropagation
-										on:click={() => toggleRow(row.key)}
-										title={autoSelectedKeys.has(row.key)
-											? 'Auto-selected (required by other changes)'
-											: 'Selected'}
-									/>
-								{/if}
-							{:else if column.key === 'operation'}
-								<span
-									class="inline-flex rounded px-2 py-0.5 font-mono text-xs {getOperationClass(
-										row.operation
-									)}"
-								>
-									{formatOperation(row.operation)}
-								</span>
-							{:else if column.key === 'entity'}
-								<span class="text-sm text-neutral-700 dark:text-neutral-300">
-									{formatEntity(row.entity)}
-								</span>
-							{:else if column.key === 'summary'}
-								<span class="text-sm text-neutral-600 dark:text-neutral-400">
-									{row.summary}
-								</span>
-							{:else if column.key === 'name'}
-								<div class="flex flex-col gap-1">
-									<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-										{row.name}
-									</span>
-									{#if row.requires && row.requires.length > 0}
-										<span class="text-xs text-neutral-500 dark:text-neutral-400">
-											Requires:{' '}
-											{row.requires
-												.map(
-													(requirement) =>
-														`${formatEntity(requirement.entity)} "${requirement.name}"`
-												)
-												.join(', ')}
-										</span>
-									{/if}
-								</div>
-							{:else if column.key === 'updatedAt'}
-								<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
-									{formatDate(row.updatedAt)}
-								</span>
+				<ExpandableTable
+					{loading}
+					columns={outgoingColumns}
+					data={draftChanges}
+					getRowId={(row) => row.key}
+					emptyMessage="Nothing to ship - go break something, then come back."
+					responsive
+					chevronPosition="right"
+					expandOnRowClick={false}
+					flushExpanded={true}
+					onRowClick={(row) => toggleRow(row.key)}
+					primaryColumnKey="name"
+					disableExpandWhen={(row) => row.operation === 'delete'}
+				>
+					<svelte:fragment slot="cell" let:row let:column>
+						{#if column.key === 'select'}
+							{#if row.generated}
+								<span class="inline-block h-5 w-5"></span>
+							{:else}
+								<IconCheckbox
+									checked={selected.has(row.key)}
+									icon={Check}
+									color={autoSelectedKeys.has(row.key) ? '#f59e0b' : 'blue'}
+									variant={autoSelectedKeys.has(row.key) ? 'filled' : 'filled'}
+									shape="circle"
+									stopPropagation
+									on:click={() => toggleRow(row.key)}
+									title={autoSelectedKeys.has(row.key)
+										? 'Auto-selected (required by other changes)'
+										: 'Selected'}
+								/>
 							{/if}
-						</svelte:fragment>
-
-						<svelte:fragment slot="expanded" let:row>
-							<div class="px-4 py-3 md:px-6 md:py-4">
-								{#if row.entity === 'quality_profile'}
-									<QualityProfileDiff sections={row.sections} operation={row.operation} />
-								{:else}
-									<SectionRenderer sections={row.sections} operation={row.operation} />
+						{:else if column.key === 'operation'}
+							<span
+								class="inline-flex rounded px-2 py-0.5 font-mono text-xs {getOperationClass(
+									row.operation
+								)}"
+							>
+								{formatOperation(row.operation)}
+							</span>
+						{:else if column.key === 'entity'}
+							<span class="text-sm text-neutral-700 dark:text-neutral-300">
+								{formatEntity(row.entity)}
+							</span>
+						{:else if column.key === 'summary'}
+							<span class="text-sm text-neutral-600 dark:text-neutral-400">
+								{row.summary}
+							</span>
+						{:else if column.key === 'name'}
+							<div class="flex flex-col gap-1">
+								<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+									{row.name}
+								</span>
+								{#if row.requires && row.requires.length > 0}
+									<span class="text-xs text-neutral-500 dark:text-neutral-400">
+										Requires:{' '}
+										{row.requires
+											.map(
+												(requirement) => `${formatEntity(requirement.entity)} "${requirement.name}"`
+											)
+											.join(', ')}
+									</span>
 								{/if}
 							</div>
-						</svelte:fragment>
-					</ExpandableTable>
-				{/if}
+						{:else if column.key === 'updatedAt'}
+							<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+								{formatDate(row.updatedAt)}
+							</span>
+						{/if}
+					</svelte:fragment>
+
+					<svelte:fragment slot="expanded" let:row>
+						<div class="px-4 py-3 md:px-6 md:py-4">
+							{#if row.entity === 'quality_profile'}
+								<QualityProfileDiff sections={row.sections} operation={row.operation} />
+							{:else}
+								<SectionRenderer sections={row.sections} operation={row.operation} />
+							{/if}
+						</div>
+					</svelte:fragment>
+				</ExpandableTable>
 			</section>
 		{/if}
 
@@ -912,23 +849,18 @@
 					{/if}
 				</div>
 				{#if incomingChanges?.hasUpdates}
-					<button
-						type="button"
-						on:click={handlePull}
-						disabled={pulling}
-						class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-					>
-						{#if pulling}
-							<div
-								class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
-							></div>
-							Pulling...
-						{:else}
-							Pull {incomingChanges.commitsBehind} commit{incomingChanges.commitsBehind === 1
-								? ''
-								: 's'}
-						{/if}
-					</button>
+					<div class="w-full sm:w-auto">
+						<Button
+							text={pulling
+								? 'Pulling...'
+								: `Pull ${incomingChanges.commitsBehind} commit${incomingChanges.commitsBehind === 1 ? '' : 's'}`}
+							variant="primary"
+							loading={pulling}
+							disabled={pulling}
+							fullWidth
+							on:click={handlePull}
+						/>
+					</div>
 				{/if}
 			</div>
 

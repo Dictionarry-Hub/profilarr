@@ -11,6 +11,8 @@
 	export let compact: boolean = false;
 	export let emptyMessage: string = 'No data available';
 	export let defaultSort: SortState | null = null;
+	export let loading: boolean = false;
+	export let loadingRows: number = 5;
 	export let flushExpanded: boolean = false;
 	export let flushBottom: boolean = false;
 	export let expandedRows: Set<string | number> = new Set();
@@ -169,7 +171,26 @@
 {#if useMobileLayout}
 	<!-- Mobile Card Layout -->
 	<div class="space-y-3">
-		{#if displayData.length === 0}
+		{#if loading}
+			{#each Array(loadingRows) as _}
+				<div
+					class="animate-pulse overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50"
+				>
+					<div class="flex items-center justify-between gap-3 px-4 py-3">
+						<div class="h-5 w-32 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+						<div class="h-6 w-6 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+					</div>
+					<div class="space-y-2 border-t border-neutral-200 px-4 py-3 dark:border-neutral-700/60">
+						{#each columns.slice(1, 4) as _}
+							<div class="flex items-center justify-between gap-4">
+								<div class="h-4 w-16 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+								<div class="h-4 w-24 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/each}
+		{:else if displayData.length === 0}
 			<div
 				class="rounded-xl border border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400"
 			>
@@ -344,7 +365,39 @@
 			<tbody
 				class="divide-y divide-neutral-200 bg-white dark:divide-neutral-700/40 dark:bg-neutral-900/50"
 			>
-				{#if displayData.length === 0}
+				{#if loading}
+					{#each Array(loadingRows) as _, rowIdx}
+						<tr class="animate-pulse">
+							{#if chevronPosition === 'left'}
+								<td class={compact ? 'px-2 py-2' : 'px-3 py-3'}>
+									<div class="h-6 w-6 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+								</td>
+							{/if}
+							{#each columns as column, colIdx}
+								<td class="{compact ? 'px-4 py-2' : 'px-6 py-4'} {column.width || ''}">
+									<div
+										class="h-4 rounded bg-neutral-200 dark:bg-neutral-700"
+										style="width: {colIdx === 0
+											? '60%'
+											: colIdx === columns.length - 1
+												? '40%'
+												: '70%'}"
+									></div>
+								</td>
+							{/each}
+							{#if $$slots.actions}
+								<td class="{compact ? 'px-4 py-2' : 'px-6 py-4'} text-right">
+									<div class="ml-auto h-4 w-16 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+								</td>
+							{/if}
+							{#if chevronPosition === 'right'}
+								<td class="{compact ? 'px-2 py-2' : 'px-3 py-3'} text-right">
+									<div class="ml-auto h-6 w-6 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+								</td>
+							{/if}
+						</tr>
+					{/each}
+				{:else if displayData.length === 0}
 					<tr>
 						<td
 							colspan={columns.length + 1 + ($$slots.actions ? 1 : 0)}
