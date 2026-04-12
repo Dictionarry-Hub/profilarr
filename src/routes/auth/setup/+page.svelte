@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { UserPlus, Shield, Wifi, KeyRound, ShieldOff, ChevronDown } from 'lucide-svelte';
+	import { UserPlus, Shield, Wifi, KeyRound, ShieldOff } from 'lucide-svelte';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import { alertStore } from '$alerts/store';
@@ -13,8 +13,6 @@
 	let username = form?.username ?? '';
 	let password = '';
 	let confirmPassword = '';
-	let authInfoOpen = false;
-
 	// Show errors via alert system
 	$: if (form?.error) {
 		alertStore.add('error', form.error);
@@ -131,47 +129,6 @@
 					disabled={submitting}
 				/>
 			</form>
-
-			<!-- Auth info - collapsible on mobile, below form -->
-			<div class="mt-6 md:hidden">
-				<button
-					type="button"
-					on:click={() => (authInfoOpen = !authInfoOpen)}
-					class="flex w-full items-center justify-between rounded-lg border border-neutral-200/60 bg-white/50 px-4 py-3 text-left text-sm font-medium text-neutral-700 shadow-sm backdrop-blur-sm dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300"
-				>
-					<span>Auth configuration options</span>
-					<ChevronDown size={16} class="transition-transform {authInfoOpen ? 'rotate-180' : ''}" />
-				</button>
-
-				{#if authInfoOpen}
-					<div
-						class="mt-2 rounded-lg border border-neutral-200/60 bg-white/50 p-4 shadow-sm backdrop-blur-sm dark:border-neutral-700/60 dark:bg-neutral-800/50"
-					>
-						<ul class="space-y-2 text-xs text-neutral-600 dark:text-neutral-400">
-							<li class="flex items-center gap-2">
-								<Shield size={12} class="text-neutral-400" />
-								<code class="font-mono text-neutral-800 dark:text-neutral-200">on</code>
-								<span>— Full authentication</span>
-							</li>
-							<li class="flex items-center gap-2">
-								<Wifi size={12} class="text-neutral-400" />
-								<code class="font-mono text-neutral-800 dark:text-neutral-200">local</code>
-								<span>— Skip for local</span>
-							</li>
-							<li class="flex items-center gap-2">
-								<KeyRound size={12} class="text-neutral-400" />
-								<code class="font-mono text-neutral-800 dark:text-neutral-200">oidc</code>
-								<span>— External provider</span>
-							</li>
-							<li class="flex items-center gap-2">
-								<ShieldOff size={12} class="text-neutral-400" />
-								<code class="font-mono text-neutral-800 dark:text-neutral-200">off</code>
-								<span>— Reverse proxy</span>
-							</li>
-						</ul>
-					</div>
-				{/if}
-			</div>
 		</div>
 	</div>
 </div>
