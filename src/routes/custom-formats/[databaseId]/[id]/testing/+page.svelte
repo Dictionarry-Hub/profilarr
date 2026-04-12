@@ -247,6 +247,7 @@
 							<div
 								class="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800"
 							>
+								<!-- lint-disable-next-line no-raw-ui -- rowspan grouping not supported by Table component -->
 								<table class="w-full text-sm">
 									<thead
 										class="border-b border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-800"

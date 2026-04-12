@@ -190,6 +190,7 @@
 									checked={type === option.value}
 									label={option.label}
 									ariaLabel={`Set media type to ${option.label}`}
+									fullWidth
 									on:change={() => (type = option.value)}
 								/>
 								<p class="px-1 text-xs text-neutral-500 dark:text-neutral-400">
@@ -213,6 +214,7 @@
 									label={option.label}
 									ariaLabel={option.label}
 									color={option.value ? 'green' : 'red'}
+									fullWidth
 									on:change={() => (shouldMatch = option.value)}
 								/>
 								<p class="px-1 text-xs text-neutral-500 dark:text-neutral-400">
