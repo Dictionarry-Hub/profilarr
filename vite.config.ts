@@ -16,7 +16,7 @@ export default defineConfig({
 			interval: 100,
 			ignored: [
 				'**/data/**',
-				'**/logs/**',
+				'.arr/**',
 				'**/data/backups/**',
 				'**/dist/**',
 				'**/.svelte-kit/**',
