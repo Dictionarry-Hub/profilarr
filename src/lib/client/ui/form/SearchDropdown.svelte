@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { X } from 'lucide-svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
 	import FormInput from '$ui/form/FormInput.svelte';
+	import Button from '$ui/button/Button.svelte';
 
 	type Option = {
 		value: string;
@@ -186,22 +188,14 @@
 	>
 		<svelte:fragment slot="suffix">
 			{#if hasClear}
-				<button
-					type="button"
-					on:mousedown|preventDefault
+				<Button
+					icon={X}
+					variant="ghost"
+					size="xs"
+					ariaLabel="Clear selection"
+					on:mousedown={(e) => e.preventDefault()}
 					on:click={clearSelection}
-					aria-label="Clear selection"
-					class="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
-				>
-					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				</button>
+				/>
 			{/if}
 		</svelte:fragment>
 	</FormInput>

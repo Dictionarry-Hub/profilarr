@@ -11,6 +11,7 @@
 	export let readonly: boolean = false;
 	export let disabled: boolean = false;
 	export let size: 'sm' | 'md' | 'lg' = 'md';
+	export let fixed: boolean = false;
 	export let minYear: number | undefined = undefined;
 	export let maxYear: number | undefined = undefined;
 
@@ -138,6 +139,7 @@
 			hideLabel
 			name={`${name}-month`}
 			{size}
+			{fixed}
 			disabled={effectiveDisabled}
 			fullWidth={false}
 			on:change={(event) => onMonthChange(event.detail)}
@@ -149,6 +151,7 @@
 			hideLabel
 			name={`${name}-day`}
 			{size}
+			{fixed}
 			disabled={effectiveDisabled}
 			fullWidth={false}
 			on:change={(event) => onDayChange(event.detail)}
@@ -160,6 +163,7 @@
 			hideLabel
 			name={`${name}-year`}
 			{size}
+			{fixed}
 			disabled={effectiveDisabled}
 			fullWidth={false}
 			on:change={(event) => onYearChange(event.detail)}

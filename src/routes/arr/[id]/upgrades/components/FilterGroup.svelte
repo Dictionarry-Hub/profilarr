@@ -15,6 +15,7 @@
 	import Card from '$ui/card/Card.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
+	import DateInput from '$ui/form/DateInput.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import SearchDropdown from '$ui/form/SearchDropdown.svelte';
@@ -87,13 +88,7 @@
 			<span class="text-xs text-neutral-500 dark:text-neutral-400">of the following rules</span>
 		</div>
 		{#if onRemove}
-			<button
-				type="button"
-				on:click={onRemove}
-				class="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
-			>
-				<X size={16} />
-			</button>
+			<Button icon={X} variant="ghost" size="xs" on:click={onRemove} />
 		{/if}
 	</div>
 
@@ -197,23 +192,22 @@
 									<span class="text-xs text-neutral-500 dark:text-neutral-400">days</span>
 								</div>
 							{:else}
-								<input
-									type="date"
-									bind:value={child.value}
-									on:change={notifyChange}
-									class="rounded border border-neutral-300 bg-white px-2 py-1 text-xs text-neutral-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+								<DateInput
+									label="Date"
+									hideLabel
+									name="value-{childIndex}"
+									value={child.value as string}
+									fixed
+									on:change={(e) => {
+										child.value = e.detail;
+										notifyChange();
+									}}
 								/>
 							{/if}
 						{/if}
 
 						<!-- Remove Rule -->
-						<button
-							type="button"
-							on:click={() => removeChild(childIndex)}
-							class="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
-						>
-							<X size={16} />
-						</button>
+						<Button icon={X} variant="ghost" size="xs" on:click={() => removeChild(childIndex)} />
 					</div>
 				{:else if isGroup(child)}
 					<!-- Nested Group (recursive) -->
