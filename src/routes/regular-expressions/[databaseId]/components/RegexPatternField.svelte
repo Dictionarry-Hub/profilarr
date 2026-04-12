@@ -4,6 +4,7 @@
 	import { alertStore } from '$alerts/store';
 	import { sanitizeRegex101Id } from '$lib/client/utils/regex101';
 	import Label from '$ui/label/Label.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	// Props
 	export let pattern: string = '';
@@ -148,15 +149,16 @@
 				class="h-full flex-1 bg-transparent px-3 font-mono text-sm text-neutral-900 placeholder-neutral-500 outline-none dark:text-neutral-100 dark:placeholder-neutral-400"
 			/>
 			{#if regex101Url}
-				<a
-					href={regex101Url}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="flex h-full items-center justify-center border-l border-neutral-300 px-3 transition-colors hover:bg-neutral-50 dark:border-neutral-700/60 dark:hover:bg-neutral-800"
-					title="Test on regex101.com"
-				>
-					<ExternalLink size={18} class="text-blue-600 dark:text-blue-400" />
-				</a>
+				<Tooltip text="Regex101">
+					<a
+						href={regex101Url}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="flex h-full items-center justify-center border-l border-neutral-300 px-3 transition-colors hover:bg-neutral-50 dark:border-neutral-700/60 dark:hover:bg-neutral-800"
+					>
+						<ExternalLink size={18} class="text-blue-600 dark:text-blue-400" />
+					</a>
+				</Tooltip>
 			{/if}
 		</div>
 	</div>
