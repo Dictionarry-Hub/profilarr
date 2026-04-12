@@ -17,6 +17,7 @@
 	</div>
 	<div class="flex h-8 items-stretch">
 		{#if showBack}
+			<!-- lint-disable-next-line no-raw-ui -- custom border-radius to integrate with progress bar -->
 			<button
 				class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-l-lg border border-neutral-300 bg-white text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
 				on:click={onBack}
@@ -37,6 +38,7 @@
 			></div>
 		</div>
 		{#if onForward}
+			<!-- lint-disable-next-line no-raw-ui -- custom border-radius to integrate with progress bar -->
 			<button
 				class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-r-lg border border-l-0 border-neutral-300 bg-white text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
 				on:click={onForward}
