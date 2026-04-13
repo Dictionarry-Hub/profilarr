@@ -15,6 +15,7 @@
 	} from 'lucide-svelte';
 	import { parseUTC } from '$shared/utils/dates';
 	import Button from '$ui/button/Button.svelte';
+	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import Table from '$ui/table/Table.svelte';
@@ -154,17 +155,7 @@
 
 	<div class="space-y-8">
 		<!-- Change Password -->
-		<div
-			class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
-		>
-			<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">
-					Change Password
-				</h2>
-				<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-					Update your account password
-				</p>
-			</div>
+		<ExpandableCard title="Change Password" description="Update your account password">
 			<div class="p-6">
 				<form
 					method="POST"
@@ -218,20 +209,13 @@
 					</div>
 				</form>
 			</div>
-		</div>
+		</ExpandableCard>
 
 		<!-- Local Bypass -->
-		<div
-			class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+		<ExpandableCard
+			title="Local Bypass"
+			description="Skip authentication for requests from local network addresses"
 		>
-			<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">
-					Local Bypass
-				</h2>
-				<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-					Skip authentication for requests from local network addresses
-				</p>
-			</div>
 			<div class="p-6">
 				<form
 					bind:this={bypassForm}
@@ -253,22 +237,13 @@
 					/>
 				</form>
 			</div>
-		</div>
+		</ExpandableCard>
 
 		<!-- API Key -->
-		<div
-			class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+		<ExpandableCard
+			title="API Key"
+			description="Authenticate API requests via the X-Api-Key header"
 		>
-			<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-				<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">
-					API Key
-				</h2>
-				<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-					Authenticate API requests via <code
-						class="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-neutral-800">X-Api-Key</code
-					> header
-				</p>
-			</div>
 			<div class="p-6">
 				{#if apiKey}
 					<!-- Just generated — show key once -->
@@ -277,14 +252,15 @@
 							<div class="flex-1">
 								<FormInput name="apiKey" label="" type="text" value={apiKey} readonly />
 							</div>
-							<button
+							<Button
 								type="button"
-								class="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+								variant="ghost"
+								size="sm"
+								icon={Copy}
 								title="Copy"
-								onclick={copyApiKey}
-							>
-								<Copy size={18} />
-							</button>
+								ariaLabel="Copy API key"
+								on:click={copyApiKey}
+							/>
 						</div>
 						<p class="text-sm text-amber-600 dark:text-amber-400">
 							This key is shown only once — copy it now.
@@ -349,23 +325,14 @@
 					</div>
 				{/if}
 			</div>
-		</div>
+		</ExpandableCard>
 
 		<!-- Active Sessions -->
-		<div
-			class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+		<ExpandableCard
+			title="Active Sessions"
+			description="Manage your logged-in sessions across devices"
 		>
-			<div
-				class="flex flex-col gap-3 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between dark:border-neutral-800"
-			>
-				<div>
-					<h2 class="text-lg font-semibold text-neutral-900 md:text-xl dark:text-neutral-50">
-						Active Sessions
-					</h2>
-					<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-						Manage your logged-in sessions across devices
-					</p>
-				</div>
+			<svelte:fragment slot="header-right">
 				{#if data.sessions.length > 1}
 					<form
 						method="POST"
@@ -387,7 +354,7 @@
 						/>
 					</form>
 				{/if}
-			</div>
+			</svelte:fragment>
 			<div class="p-6">
 				{#if data.sessions.length > 0}
 					<Table
@@ -432,6 +399,6 @@
 					<p class="text-sm text-neutral-500 dark:text-neutral-400">No active sessions</p>
 				{/if}
 			</div>
-		</div>
+		</ExpandableCard>
 	</div>
 </div>
