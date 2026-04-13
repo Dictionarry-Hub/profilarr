@@ -103,114 +103,62 @@
 </svelte:head>
 
 <div class="mt-6 space-y-6">
-	{#if loading}
-		<!-- Skeleton Table -->
-		<div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
-			<table class="w-full">
-				<thead
-					class="border-b border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-800"
+	<ExpandableTable
+		{columns}
+		data={commits}
+		getRowId={(row) => row.hash}
+		emptyMessage="No commits found"
+		defaultSort={{ key: 'date', direction: 'desc' }}
+		chevronPosition="right"
+		responsive
+		{loading}
+		loadingRows={10}
+	>
+		<svelte:fragment slot="cell" let:row let:column>
+			{#if column.key === 'shortHash'}
+				<a
+					href={getCommitUrl(row.hash)}
+					target="_blank"
+					rel="noopener noreferrer"
+					on:click|stopPropagation
+					class="inline-flex items-center gap-1.5 font-mono text-xs text-accent-600 hover:underline dark:text-accent-400"
 				>
-					<tr>
-						<th class="w-8 px-3 py-3"></th>
-						<th
-							class="w-24 px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
-							>Commit</th
-						>
-						<th
-							class="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
-							>Message</th
-						>
-						<th
-							class="w-40 px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
-							>Author</th
-						>
-						<th
-							class="w-28 px-6 py-3 text-right text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
-							>Date</th
-						>
-					</tr>
-				</thead>
-				<tbody
-					class="divide-y divide-neutral-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900"
-				>
-					{#each Array(10) as _}
-						<tr class="animate-pulse">
-							<td class="px-3 py-4"
-								><div class="h-4 w-4 rounded bg-neutral-200 dark:bg-neutral-700"></div></td
-							>
-							<td class="px-6 py-4"
-								><div class="h-4 w-16 rounded bg-neutral-200 dark:bg-neutral-700"></div></td
-							>
-							<td class="px-6 py-4"
-								><div class="h-4 w-64 rounded bg-neutral-200 dark:bg-neutral-700"></div></td
-							>
-							<td class="px-6 py-4"
-								><div class="h-4 w-24 rounded bg-neutral-200 dark:bg-neutral-700"></div></td
-							>
-							<td class="px-6 py-4 text-right"
-								><div class="ml-auto h-4 w-16 rounded bg-neutral-200 dark:bg-neutral-700"></div></td
-							>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	{:else}
-		<ExpandableTable
-			{columns}
-			data={commits}
-			getRowId={(row) => row.hash}
-			emptyMessage="No commits found"
-			defaultSort={{ key: 'date', direction: 'desc' }}
-			chevronPosition="right"
-			responsive
-		>
-			<svelte:fragment slot="cell" let:row let:column>
-				{#if column.key === 'shortHash'}
-					<a
-						href={getCommitUrl(row.hash)}
-						target="_blank"
-						rel="noopener noreferrer"
-						on:click|stopPropagation
-						class="inline-flex items-center gap-1.5 font-mono text-xs text-accent-600 hover:underline dark:text-accent-400"
-					>
-						{row.shortHash}
-						<ExternalLink size={12} />
-					</a>
-				{:else if column.key === 'message'}
-					<span class="line-clamp-1 text-sm text-neutral-900 dark:text-neutral-100">
-						{row.message}
-					</span>
-				{:else if column.key === 'author'}
-					<span class="text-sm text-neutral-600 dark:text-neutral-400">
-						{row.author}
-					</span>
-				{:else if column.key === 'date'}
-					<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
-						{formatDate(row.date)}
-					</span>
-				{/if}
-			</svelte:fragment>
+					{row.shortHash}
+					<ExternalLink size={12} />
+				</a>
+			{:else if column.key === 'message'}
+				<span class="line-clamp-1 text-sm text-neutral-900 dark:text-neutral-100">
+					{row.message}
+				</span>
+			{:else if column.key === 'author'}
+				<span class="text-sm text-neutral-600 dark:text-neutral-400">
+					{row.author}
+				</span>
+			{:else if column.key === 'date'}
+				<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+					{formatDate(row.date)}
+				</span>
+			{/if}
+		</svelte:fragment>
 
-			<svelte:fragment slot="expanded" let:row>
-				<div class="space-y-2 p-4">
-					<div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-						<FileText size={14} />
-						<span>{row.files.length} file{row.files.length !== 1 ? 's' : ''} changed</span>
-					</div>
-					{#if row.files.length > 0}
-						<div class="grid gap-1">
-							{#each row.files as file}
-								<code
-									class="block rounded bg-neutral-100 px-2 py-1 font-mono text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-								>
-									{file}
-								</code>
-							{/each}
-						</div>
-					{/if}
+		<svelte:fragment slot="expanded" let:row>
+			<div class="space-y-2 p-4">
+				<div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+					<FileText size={14} />
+					<span>{row.files.length} file{row.files.length !== 1 ? 's' : ''} changed</span>
 				</div>
-			</svelte:fragment>
-		</ExpandableTable>
-	{/if}
+				{#if row.files.length > 0}
+					<div class="grid gap-1">
+						{#each row.files as file}
+							<code
+								class="block rounded bg-neutral-100 px-2 py-1 font-mono text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+							>
+								{file}
+							</code>
+						{/each}
+					</div>
+				{/if}
+			</div>
+		</svelte:fragment>
+	</ExpandableTable>
 </div>
