@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Film, Tv, Trash2, Import } from 'lucide-svelte';
+	import { Film, Tv, Trash2, Import, Plus } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -154,6 +154,13 @@
 		{@const formId = `delete-form-${row.id}`}
 		<div class="flex items-center gap-1">
 			<Button
+				icon={Plus}
+				tooltip="Add release"
+				variant="secondary"
+				size="xs"
+				on:click={() => dispatch('addRelease', { entityType: row.type, entityTmdbId: row.tmdb_id })}
+			/>
+			<Button
 				icon={Import}
 				tooltip="Import releases from Arr"
 				variant="secondary"
@@ -228,7 +235,6 @@
 					{cfScoresData}
 					{calculateScore}
 					deleteLayer={deleteReleaseLayer}
-					on:add={(e) => dispatch('addRelease', e.detail)}
 					on:edit={(e) => dispatch('editRelease', e.detail)}
 					on:confirmDelete={(e) => dispatch('confirmDeleteRelease', e.detail)}
 				/>

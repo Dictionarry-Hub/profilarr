@@ -1,16 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import {
-		Plus,
-		Trash2,
-		Pencil,
-		HardDrive,
-		Tag,
-		Users,
-		Bookmark,
-		Earth,
-		Layers
-	} from 'lucide-svelte';
+	import { Trash2, Pencil, HardDrive, Tag, Users, Bookmark, Earth, Layers } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -85,7 +75,6 @@
 	}
 
 	const dispatch = createEventDispatcher<{
-		add: { entityType: 'movie' | 'series'; entityTmdbId: number };
 		edit: { entityType: 'movie' | 'series'; entityTmdbId: number; release: TestRelease };
 		confirmDelete: { release: TestRelease; formRef: HTMLFormElement };
 	}>();
@@ -333,15 +322,4 @@
 			</ExpandableTable>
 		{/key}
 	{/if}
-
-	<button
-		type="button"
-		on:click={() => dispatch('add', { entityType, entityTmdbId })}
-		class="w-full rounded-lg border-2 border-dashed border-neutral-200 py-3 text-sm text-neutral-400 transition-colors hover:border-accent-300 hover:bg-accent-50/50 hover:text-accent-600 dark:border-neutral-700 dark:hover:border-accent-600 dark:hover:bg-accent-900/10 dark:hover:text-accent-400"
-	>
-		<span class="inline-flex items-center gap-1">
-			<Plus size={14} />
-			Add test release
-		</span>
-	</button>
 </div>
