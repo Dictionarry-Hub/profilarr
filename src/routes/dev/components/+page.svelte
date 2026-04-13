@@ -30,7 +30,6 @@
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import ReorderableList from '$ui/table/ReorderableList.svelte';
 	import TableActionButton from '$ui/table/TableActionButton.svelte';
 	import { createSearchStore } from '$lib/client/stores/search';
 	import ComponentCard from './ComponentCard.svelte';
@@ -98,11 +97,6 @@
 		{ key: 'name', header: 'Name', sortable: true },
 		{ key: 'score', header: 'Score', sortable: true, align: 'right' as const },
 		{ key: 'status', header: 'Status' }
-	];
-	let demoReorderItems = [
-		{ id: 'a', label: 'First item' },
-		{ id: 'b', label: 'Second item' },
-		{ id: 'c', label: 'Third item' }
 	];
 	let demoToggleAccent = true;
 	let demoToggleGreen = true;
@@ -1159,13 +1153,8 @@
 	{#if visibleIds.has('table')}
 		<ComponentCard
 			name="Table"
-			paths={[
-				'table/Table',
-				'table/ExpandableTable',
-				'table/ReorderableList',
-				'table/TableActionButton'
-			]}
-			description="Table is a generic sortable data table with responsive mobile card layout. ExpandableTable adds expandable rows with chevron toggles. ReorderableList provides drag-and-drop ordering. TableActionButton is a compact icon button for table row actions."
+			paths={['table/Table', 'table/ExpandableTable', 'table/TableActionButton']}
+			description="Table is a generic sortable data table with responsive mobile card layout. ExpandableTable adds expandable rows with chevron toggles. TableActionButton is a compact icon button for table row actions."
 		>
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
@@ -1194,24 +1183,6 @@
 						</p>
 					</svelte:fragment>
 				</ExpandableTable>
-			</div>
-
-			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					ReorderableList (drag to reorder)
-				</p>
-				<ReorderableList
-					items={demoReorderItems}
-					getKey={(item) => item.id}
-					onReorder={(items) => (demoReorderItems = items)}
-				>
-					<svelte:fragment let:item let:index>
-						<div class="flex items-center gap-3">
-							<span class="font-mono text-xs text-neutral-400">{index + 1}</span>
-							<span class="text-sm text-neutral-700 dark:text-neutral-300">{item.label}</span>
-						</div>
-					</svelte:fragment>
-				</ReorderableList>
 			</div>
 
 			<div class="space-y-3">
