@@ -1,26 +1,18 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
-	import {
-		Film,
-		Tv,
-		Star,
-		Loader2,
-		Clapperboard,
-		Check,
-		X,
-		ArrowDownAZ,
-		ArrowUpAZ
-	} from 'lucide-svelte';
+	import { Film, Tv, Star, Loader2, Clapperboard, X, ArrowDownAZ, ArrowUpAZ } from 'lucide-svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
+	import SelectableContainer from '$ui/toggle/SelectableContainer.svelte';
+	import SelectableRow from '$ui/toggle/SelectableRow.svelte';
 	import { getPersistentSearchStore, type SearchStore } from '$stores/search';
 	import { alertStore } from '$alerts/store';
 	import { page } from '$app/stores';
@@ -258,6 +250,7 @@
 				<ActionButton icon={Clapperboard} hasDropdown={true} dropdownPosition="right">
 					<svelte:fragment slot="dropdown" let:dropdownPosition>
 						<Dropdown position={dropdownPosition}>
+							<DropdownHeader label="Media type" />
 							<DropdownItem
 								icon={Film}
 								label="Movies"
@@ -280,6 +273,7 @@
 				>
 					<svelte:fragment slot="dropdown" let:dropdownPosition>
 						<Dropdown position={dropdownPosition}>
+							<DropdownHeader label="Sort by" />
 							<DropdownItem
 								label="Popularity"
 								selected={sortField === 'popularity'}
@@ -308,29 +302,26 @@
 			<!-- Results -->
 			{#if isSearching || activeQuery || results.length > 0}
 				<div
-					class="overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50"
+					class="max-h-96 overflow-hidden overflow-y-auto rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50"
 				>
-					<div class="max-h-96 overflow-y-auto">
-						{#if isSearching}
-							<div class="flex items-center justify-center p-8">
-								<Loader2 size={24} class="animate-spin text-neutral-400" />
-							</div>
-						{:else if results.length === 0}
-							<div class="p-8 text-center text-neutral-500 dark:text-neutral-400">
-								No results found
-							</div>
-						{:else}
-							<div class="divide-y divide-neutral-200 dark:divide-neutral-700/60">
-								{#each sortedResults as item}
-									{@const alreadyAdded = isAlreadyAdded(item)}
-									<button
-										type="button"
-										class="flex w-full gap-3 p-3 text-left transition-colors {alreadyAdded
-											? 'cursor-not-allowed opacity-50'
-											: 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800/80'}"
-										on:click={() => !alreadyAdded && toggleItem(item)}
-										disabled={alreadyAdded}
-									>
+					{#if isSearching}
+						<div class="flex items-center justify-center p-8">
+							<Loader2 size={24} class="animate-spin text-neutral-400" />
+						</div>
+					{:else if results.length === 0}
+						<div class="p-8 text-center text-neutral-500 dark:text-neutral-400">
+							No results found
+						</div>
+					{:else}
+						<SelectableContainer>
+							{#each sortedResults as item}
+								{@const alreadyAdded = isAlreadyAdded(item)}
+								<SelectableRow
+									checked={selectedKeys.has(getItemKey(item))}
+									disabled={alreadyAdded}
+									on:click={() => !alreadyAdded && toggleItem(item)}
+								>
+									<div class="flex gap-3">
 										<!-- Poster -->
 										<div
 											class="h-24 w-16 flex-shrink-0 overflow-hidden rounded bg-neutral-200 dark:bg-neutral-700"
@@ -354,8 +345,8 @@
 
 										<!-- Info -->
 										<div class="flex min-w-0 flex-1 flex-col">
-											<div class="flex items-start justify-between gap-2">
-												<div class="min-w-0">
+											<div class="flex items-start gap-2">
+												<div class="min-w-0 flex-1">
 													<h4 class="truncate font-medium text-neutral-900 dark:text-neutral-100">
 														{item.title}
 													</h4>
@@ -377,62 +368,46 @@
 														{/if}
 													</div>
 												</div>
-												<div class="flex items-center gap-2">
-													{#if item.voteAverage > 0}
-														<Badge variant="accent" size="sm" icon={Star}>
-															{item.voteAverage.toFixed(1)}
-														</Badge>
-													{/if}
-													{#if alreadyAdded}
-														<span
-															class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
-														>
-															Added
-														</span>
-													{:else}
-														<IconCheckbox
-															checked={selectedKeys.has(getItemKey(item))}
-															icon={Check}
-														/>
-													{/if}
-												</div>
+												{#if item.voteAverage > 0}
+													<Badge variant="accent" size="sm" icon={Star}>
+														{item.voteAverage.toFixed(1)}
+													</Badge>
+												{/if}
 											</div>
 											<p class="mt-1 line-clamp-2 text-xs text-neutral-600 dark:text-neutral-400">
 												{item.overview || 'No description available'}
 											</p>
 										</div>
-									</button>
-								{/each}
-							</div>
-						{/if}
-					</div>
+									</div>
+								</SelectableRow>
+							{/each}
+						</SelectableContainer>
+					{/if}
 				</div>
 			{/if}
 
 			<!-- Selected Items -->
-			{#if selectedItems.size > 0}
-				<div class="space-y-2">
-					<div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-						Selected ({selectedItems.size})
-					</div>
-					<div class="flex flex-wrap gap-2">
-						{#each Array.from(selectedItems.values()) as item}
-							<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-							<div class="cursor-pointer" on:click={() => removeItem(item)}>
-								<Label variant="default" size="md" rounded="xl">
-									{#if item.type === 'movie'}
-										<Film size={12} />
-									{:else}
-										<Tv size={12} />
-									{/if}
-									{item.title}
-									<X size={12} />
-								</Label>
-							</div>
-						{/each}
-					</div>
+			<div class="space-y-2">
+				<div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+					Selected ({selectedItems.size})
 				</div>
-			{/if}
+				<div class="flex flex-wrap gap-2">
+					{#each Array.from(selectedItems.values()) as item}
+						<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+						<div class="cursor-pointer" on:click={() => removeItem(item)}>
+							<Label variant="secondary" size="md" rounded="md">
+								{#if item.type === 'movie'}
+									<Film size={12} />
+								{:else}
+									<Tv size={12} />
+								{/if}
+								{item.title}
+								<X size={12} />
+							</Label>
+						</div>
+					{/each}
+				</div>
+			</div>
 
 			<form
 				bind:this={formRef}
