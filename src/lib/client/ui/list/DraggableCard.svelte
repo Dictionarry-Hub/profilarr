@@ -21,6 +21,7 @@
 			: 'cursor-grab'}"
 		on:pointerdown={onDragHandlePointerDown}
 		on:click|stopPropagation|preventDefault
+		on:keydown|stopPropagation
 		role="button"
 		tabindex="-1"
 		aria-label="Drag to reorder"
