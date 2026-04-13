@@ -20,6 +20,8 @@
 	let showInfoModal = false;
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
+	import { clickOutside } from '$lib/client/utils/clickOutside';
 	import { isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
 	import type { ArrType } from '$shared/pcd/types.ts';
 	import type { QualityDefinitionsConfig, QualityDefinitionEntry } from '$shared/pcd/display.ts';
@@ -318,25 +320,21 @@
 	</div>
 	<div slot="right" class="flex items-center gap-2">
 		<!-- Unit selector (hidden on mobile) -->
-		<div class="relative hidden qd:block">
-			<button
-				type="button"
+		<div class="relative hidden qd:block" use:clickOutside={() => (showUnitDropdown = false)}>
+			<Button
+				text={selectedUnit.label}
+				icon={ChevronDown}
+				iconPosition="right"
 				on:click={() => (showUnitDropdown = !showUnitDropdown)}
-				on:blur={() => setTimeout(() => (showUnitDropdown = false), 150)}
-				class="flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 md:py-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
-			>
-				{selectedUnit.label}
-				<ChevronDown
-					size={14}
-					class="transition-transform {showUnitDropdown ? 'rotate-180' : ''}"
-				/>
-			</button>
+			/>
 
 			{#if showUnitDropdown}
-				<Dropdown position="left" minWidth="12rem">
+				<Dropdown position="right" minWidth="16rem">
+					<DropdownHeader label="Display unit" />
 					{#each unitOptions as unit}
 						<DropdownItem
-							label="{unit.label} ({unit.short})"
+							label={unit.label}
+							secondaryText={unit.short}
 							selected={selectedUnitId === unit.id}
 							on:click={() => {
 								selectedUnitId = unit.id;
