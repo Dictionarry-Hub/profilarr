@@ -21,6 +21,8 @@
 	export let responsive: boolean = false;
 	// Progressive loading - render items in batches as user scrolls
 	export let pageSize: number | undefined = undefined;
+	// Optional per-row class callback
+	export let rowClass: ((row: T) => string) | undefined = undefined;
 
 	let isMobile = false;
 	let mediaQuery: MediaQueryList | null = null;
@@ -333,12 +335,18 @@
 						<tr
 							class="group/row {hoverable
 								? 'transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800'
-								: ''} {onRowClick || rowHref ? 'cursor-pointer' : ''}"
+								: ''} {onRowClick || rowHref ? 'cursor-pointer' : ''} {rowClass
+								? rowClass(row)
+								: ''}"
 							on:click={() => onRowClick && onRowClick(row)}
 						>
 							{#each columns as column, colIndex}
+								{@const tdExtraClass =
+									typeof column.tdClass === 'function'
+										? column.tdClass(row)
+										: (column.tdClass ?? '')}
 								<td
-									class={`${compact ? 'px-4 py-2' : 'px-6 py-4'} text-sm text-neutral-900 dark:text-neutral-100 ${getAlignClass(column.align)} ${column.width || ''} ${rowHref ? 'relative' : ''}`}
+									class={`${compact ? 'px-4 py-2' : 'px-6 py-4'} text-sm text-neutral-900 dark:text-neutral-100 ${getAlignClass(column.align)} ${column.width || ''} ${rowHref ? 'relative' : ''} ${tdExtraClass}`}
 								>
 									{#if rowHref}
 										<a href={rowHref(row)} class="cell-link" aria-label="Open row"></a>

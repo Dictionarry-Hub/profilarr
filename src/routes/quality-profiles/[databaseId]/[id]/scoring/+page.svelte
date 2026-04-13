@@ -13,7 +13,8 @@
 		X,
 		Save,
 		Plus,
-		Loader2
+		Loader2,
+		Eye
 	} from 'lucide-svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
@@ -132,6 +133,9 @@
 	// General options
 	let hideUnscoredFormats: boolean = false;
 	const HIDE_UNSCORED_STORAGE_KEY = 'scoring-hide-unscored';
+
+	// Column visibility
+	let hiddenArrTypes: Set<string> = new Set();
 
 	// Grouping
 	type GroupKey = string;
@@ -311,6 +315,15 @@
 		localStorage.setItem(HIDE_UNSCORED_STORAGE_KEY, hideUnscoredFormats.toString());
 	}
 
+	function toggleArrTypeVisibility(arrType: string) {
+		if (hiddenArrTypes.has(arrType)) {
+			hiddenArrTypes.delete(arrType);
+		} else {
+			hiddenArrTypes.add(arrType);
+		}
+		hiddenArrTypes = hiddenArrTypes;
+	}
+
 	function saveCustomGroups() {
 		const toSave = customGroups.map(({ name, key, tags }) => ({ name, key, tags }));
 		localStorage.setItem(CUSTOM_GROUPS_STORAGE_KEY, JSON.stringify(toSave));
@@ -427,6 +440,8 @@
 	function getArrTypeColor(arrType: string): IconCheckboxColor {
 		return arrTypeColors[arrType] || '#3b82f6'; // default to blue
 	}
+
+	$: visibleArrTypes = scoring?.arrTypes.filter((t) => !hiddenArrTypes.has(t)) ?? [];
 
 	$: scoring = data.scoring;
 	// Compute filtered and sorted formats
@@ -806,9 +821,26 @@
 					</Dropdown>
 				</svelte:fragment>
 			</ActionButton>
+			{#if scoring.arrTypes.length > 1}
+				<ActionButton icon={Eye} hasDropdown={true} dropdownPosition="right">
+					<svelte:fragment slot="dropdown" let:dropdownPosition>
+						<Dropdown position={dropdownPosition} minWidth="10rem">
+							<DropdownHeader label="Columns" />
+							{#each scoring.arrTypes as arrType}
+								<DropdownItem
+									label={arrType.charAt(0).toUpperCase() + arrType.slice(1)}
+									selected={!hiddenArrTypes.has(arrType)}
+									checkColor={getArrTypeColor(arrType)}
+									on:click={() => toggleArrTypeVisibility(arrType)}
+								/>
+							{/each}
+						</Dropdown>
+					</svelte:fragment>
+				</ActionButton>
+			{/if}
 			<ActionButton icon={Settings} hasDropdown={true} dropdownPosition="right">
 				<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
-					<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="14rem">
+					<Dropdown position={dropdownPosition} minWidth="14rem">
 						<DropdownHeader label="Display" />
 						<DropdownItem
 							label="Hide Unscored Formats"
@@ -922,7 +954,7 @@
 						<div class="min-w-0">
 							<ScoringTable
 								formats={group.formats}
-								arrTypes={scoring.arrTypes}
+								arrTypes={visibleArrTypes}
 								{customFormatScores}
 								{customFormatEnabled}
 								{getArrTypeColor}

@@ -33,4 +33,6 @@ export interface Column<T> {
 	cell?: (row: T) => string | ComponentType | { html: string };
 	/** Hide column in mobile responsive layout */
 	hideOnMobile?: boolean;
+	/** Custom class(es) for the td element; can be a static string or a function of the row */
+	tdClass?: string | ((row: T) => string);
 }
