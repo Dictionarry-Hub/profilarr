@@ -1,6 +1,9 @@
 <script lang="ts">
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
+	import Dropdown from '$ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
@@ -60,10 +63,23 @@
 <!-- Actions Bar -->
 <ActionsBar>
 	<SearchAction searchStore={search} placeholder="Search naming configs..." responsive />
-	<ActionButton
-		icon={Plus}
-		on:click={() => goto(`/media-management/${data.currentDatabase.id}/naming/new`)}
-	/>
+	<ActionButton icon={Plus} hasDropdown={true} dropdownPosition="right">
+		<svelte:fragment slot="dropdown" let:dropdownPosition>
+			<Dropdown position={dropdownPosition} minWidth="10rem">
+				<DropdownHeader label="New config" />
+				<DropdownItem
+					label="Radarr"
+					on:click={() =>
+						goto(`/media-management/${data.currentDatabase.id}/naming/new?arrType=radarr`)}
+				/>
+				<DropdownItem
+					label="Sonarr"
+					on:click={() =>
+						goto(`/media-management/${data.currentDatabase.id}/naming/new?arrType=sonarr`)}
+				/>
+			</Dropdown>
+		</svelte:fragment>
+	</ActionButton>
 	<ViewToggle bind:value={$view} />
 </ActionsBar>
 
