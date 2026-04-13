@@ -40,7 +40,7 @@
 		"reset:onboarding": "sqlite3 dist/dev/data/profilarr.db \"UPDATE general_settings SET onboarding_shown = 0\"",
 		"clean:dev": "rm -rf dist/dev",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && deno lint",
+		"lint": "prettier --check . && deno lint && deno task lint:ui",
 		"lint:ui": "deno run --allow-read --allow-env scripts/lint/ui.ts",
 		"check": "deno task check:server && deno task check:client",
 		"check:server": "deno check --quiet src/lib/server/**/*.ts",
