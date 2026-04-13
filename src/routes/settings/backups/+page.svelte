@@ -164,6 +164,7 @@
 	</div>
 
 	<!-- Hidden file input for upload -->
+	<!-- lint-disable-next-line no-raw-ui -- type="file" is not supported by FormInput -->
 	<input
 		type="file"
 		accept=".tar.gz"
