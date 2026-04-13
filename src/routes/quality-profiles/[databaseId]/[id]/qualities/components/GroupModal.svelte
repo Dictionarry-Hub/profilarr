@@ -216,42 +216,40 @@
 							tabindex="0"
 						>
 							<div class="flex min-w-0 flex-1 items-center justify-between gap-2.5">
-									<div class="min-w-0 flex-1 text-left">
-										<div
-											class="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100"
-										>
-											{item.name}
+								<div class="min-w-0 flex-1 text-left">
+									<div class="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
+										{item.name}
+									</div>
+								</div>
+								<div class="flex items-center gap-2">
+									{#if isMobile}
+										<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+										<div class="flex items-center gap-1" on:click|stopPropagation>
+											<Button
+												icon={ChevronUp}
+												size="xs"
+												disabled={index === 0}
+												title="Move member up"
+												ariaLabel="Move member up"
+												on:click={() => moveItem(index, 'up')}
+											/>
+											<Button
+												icon={ChevronDown}
+												size="xs"
+												disabled={index === items.length - 1}
+												title="Move member down"
+												ariaLabel="Move member down"
+												on:click={() => moveItem(index, 'down')}
+											/>
 										</div>
-									</div>
-									<div class="flex items-center gap-2">
-										{#if isMobile}
-											<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-											<div class="flex items-center gap-1" on:click|stopPropagation>
-												<Button
-													icon={ChevronUp}
-													size="xs"
-													disabled={index === 0}
-													title="Move member up"
-													ariaLabel="Move member up"
-													on:click={() => moveItem(index, 'up')}
-												/>
-												<Button
-													icon={ChevronDown}
-													size="xs"
-													disabled={index === items.length - 1}
-													title="Move member down"
-													ariaLabel="Move member down"
-													on:click={() => moveItem(index, 'down')}
-												/>
-											</div>
-										{/if}
-										<IconCheckbox
-											checked={selectedNames.has(item.name)}
-											icon={Check}
-											color="blue"
-											shape="circle"
-										/>
-									</div>
+									{/if}
+									<IconCheckbox
+										checked={selectedNames.has(item.name)}
+										icon={Check}
+										color="blue"
+										shape="circle"
+									/>
+								</div>
 							</div>
 						</DraggableCard>
 					{/each}

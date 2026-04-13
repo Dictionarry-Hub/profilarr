@@ -27,7 +27,8 @@
 		"simple-icons": "npm:simple-icons@^15.17.0",
 		"croner": "npm:croner@^9.1.0",
 		"@felix/bcrypt": "jsr:@felix/bcrypt@^1.0.8",
-		"@db/sqlite": "jsr:@db/sqlite@0.12"
+		"@db/sqlite": "jsr:@db/sqlite@0.12",
+		"svelte": "npm:svelte@^5.55.2"
 	},
 	"tasks": {
 		"dev": "deno run -A scripts/dev.ts",

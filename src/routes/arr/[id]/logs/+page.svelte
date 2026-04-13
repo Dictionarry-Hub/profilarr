@@ -196,9 +196,7 @@
 							selected={selectedLevel === level}
 							checkColor="blue"
 							labelClass={`font-mono font-medium ${
-								level === 'ALL'
-									? 'text-neutral-600 dark:text-neutral-400'
-									: levelColors[level]
+								level === 'ALL' ? 'text-neutral-600 dark:text-neutral-400' : levelColors[level]
 							}`}
 							labelTransform="uppercase"
 							on:click={() => changeLevel(level)}

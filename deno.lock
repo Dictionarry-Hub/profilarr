@@ -1493,7 +1493,8 @@
       "jsr:@std/assert@1",
       "npm:croner@^9.1.0",
       "npm:marked@^15.0.6",
-      "npm:simple-icons@^15.17.0"
+      "npm:simple-icons@^15.17.0",
+      "npm:svelte@^5.55.2"
     ],
     "packageJson": {
       "dependencies": [

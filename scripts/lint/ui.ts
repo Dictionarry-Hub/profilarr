@@ -29,7 +29,7 @@
  * Issue: https://github.com/Dictionarry-Hub/profilarr/issues/298
  */
 
-import { parse } from 'npm:svelte/compiler';
+import { parse } from 'svelte/compiler';
 
 // ============================================================================
 // CONFIGURATION
@@ -196,7 +196,7 @@ interface SnippetBlock extends BaseNode {
 	body: Fragment;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// deno-lint-ignore no-explicit-any
 type AnyNode = any;
 
 interface SvelteRoot {
