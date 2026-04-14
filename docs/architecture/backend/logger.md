@@ -2,6 +2,13 @@
 
 **Source:** `src/lib/server/utils/logger/` (`$logger/*`)
 
+## Table of Contents
+
+- [Log Levels](#log-levels)
+- [Configuration](#configuration)
+- [Output Formats](#output-formats)
+- [Usage](#usage)
+
 The logger is a singleton class that writes to two outputs simultaneously:
 colored console lines for development and JSON files for persistence. Settings
 are stored in SQLite and can be changed at runtime without a restart. Log files

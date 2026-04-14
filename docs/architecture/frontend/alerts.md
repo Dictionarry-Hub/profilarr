@@ -3,6 +3,13 @@
 **Source:** `src/lib/client/alerts/` (`$alerts/*`)
 **Mount:** `src/routes/+layout.svelte:62`
 
+## Table of Contents
+
+- [Store](#store)
+- [Settings](#settings)
+- [Consuming Alerts](#consuming-alerts)
+- [Not for Load Errors](#not-for-load-errors)
+
 Alerts are the app's toast notification system: transient messages that appear
 at a configured screen edge, auto-dismiss after a timeout, and can be clicked
 to dismiss early. They are the channel for ephemeral feedback ("Settings
