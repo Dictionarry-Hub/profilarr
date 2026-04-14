@@ -80,6 +80,7 @@ publishes a release.
 - [backend/jobs.md](./backend/jobs.md): Job queue, dispatcher, handlers, scheduling
 - [backend/logger.md](./backend/logger.md): Logger singleton, log levels, output formats, usage
 - [backend/notifications.md](./backend/notifications.md): Notification manager, definitions, notifiers
+- [backend/parser.md](./backend/parser.md): C# parser microservice, TS client, caching, integration
 - [backend/pcd.md](./backend/pcd.md): PCD system, schema, layers, writer, value guards, conflicts
 - [backend/pcd-entities.md](./backend/pcd-entities.md): PCD entity types, CRUD patterns, cascading
 - [backend/rename.md](./backend/rename.md): Arr rename pipeline, scheduling, logging, notifications
