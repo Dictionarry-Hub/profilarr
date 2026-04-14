@@ -54,7 +54,7 @@ MODULES=(
   "tests/unit/logger|tests/unit/logger"
   "tests/unit/upgrades|tests/unit/upgrades"
   "app-shell|src/app.css,src/app.d.ts,src/app.html,src/hooks.server.ts"
-  "schema-reference|src/lib/server/db/schema.sql,docs/pcdReference/0.schema.sql"
+  "schema-reference|src/lib/server/db/schema.sql,docs/backend/0.schema.sql"
 )
 
 # Parse JSON safely, returning "0,0,0,0,0,0" on failure
@@ -128,7 +128,7 @@ while IFS=$'\t' read -r name files code lines; do
   lang_code["$name"]=$((prev_code + code))
   lang_lines["$name"]=$((prev_lines + lines))
   lang_total_code=$((lang_total_code + code))
-done < <(scc_languages "${ROOT}/docs/pcdReference/0.schema.sql" 2>/dev/null || true)
+done < <(scc_languages "${ROOT}/docs/backend/0.schema.sql" 2>/dev/null || true)
 
 # Sort languages by code lines descending
 sorted_langs=()

@@ -102,13 +102,13 @@ In the Profilarr codebase:
   when it doesn't exist (old schema).
 - **UI:** Surface the new data. Handle the fallback state gracefully (e.g. show
   items in alphabetical order if no position data exists).
-- **Reference snapshot:** Update `docs/pcdReference/0.schema.sql` to reflect
+- **Reference snapshot:** Update `docs/backend/0.schema.sql` to reflect
   the new schema state. This file is documentation only - it's not used at
   runtime.
 
 ### 4. Update the reference snapshot
 
-Keep `docs/pcdReference/0.schema.sql` in the Profilarr repo in sync with the
+Keep `docs/backend/0.schema.sql` in the Profilarr repo in sync with the
 current schema state. This is the file developers read to understand the PCD
 schema without cloning the schema repo. It's a reference snapshot, not a runtime
 dependency.
@@ -182,7 +182,7 @@ ADD COLUMN position INTEGER NOT NULL DEFAULT 0;
 - Reader: sort group members by `position`, fall back to alphabetical when all
   positions are 0 (old schema or unordered data).
 - UI: allow drag-to-reorder within groups, persist position values.
-- Update `docs/pcdReference/0.schema.sql` with the new column.
+- Update `docs/backend/0.schema.sql` with the new column.
 
 **Database PCD:** bump `dependencies.schema` to `"^1.1.0"`. New ops include
 `position` values. Old ops without `position` still compile (default 0).

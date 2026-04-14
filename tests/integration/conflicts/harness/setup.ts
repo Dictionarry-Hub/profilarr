@@ -106,7 +106,7 @@ export async function createPcdRepo(basePath: string, uuid: string): Promise<str
 	await Deno.mkdir(schemaDir, { recursive: true });
 
 	// Copy PCD schema from docs
-	const schema = await Deno.readTextFile('docs/pcdReference/0.schema.sql');
+	const schema = await Deno.readTextFile('docs/backend/0.schema.sql');
 	await Deno.writeTextFile(`${schemaDir}/0.schema.sql`, schema);
 
 	log.setup(`PCD repo created at ${pcdPath}`);
