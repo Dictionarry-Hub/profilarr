@@ -85,6 +85,7 @@ publishes a release.
 - [backend/rename.md](./backend/rename.md): Arr rename pipeline, scheduling, logging, notifications
 - [backend/schema-bump.md](./backend/schema-bump.md): PCD schema evolution, safe vs unsafe changes
 - [backend/security.md](./backend/security.md): Auth modes, sessions, OIDC, API keys, security scans
+- [backend/sync.md](./backend/sync.md): Sync pipeline, transformation, section registry, cleanup
 - [backend/upgrades.md](./backend/upgrades.md): Upgrade pipeline, filters, selectors, cooldown, scheduling
 
 **Frontend**
