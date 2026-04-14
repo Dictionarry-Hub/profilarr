@@ -15,6 +15,7 @@ value guards, and conflict resolution -- see [pcd.md](./pcd.md).
 - [Quality Profiles](#quality-profiles)
   - [Qualities](#qualities)
   - [Scoring](#scoring)
+  - [Entity Testing](#entity-testing)
 - [Regular Expressions](#regular-expressions)
 - [Delay Profiles](#delay-profiles)
 - [Media Management](#media-management)
@@ -112,6 +113,15 @@ Test cases have a composite key of `(custom_format_name, title, type)`.
 Fields: title, type (movie/series), should_match, description. Updates use
 value guards on all fields. No op splitting.
 
+The CF testing page evaluates test cases against the format's conditions
+using the [parser service](./parser.md). Each test title is parsed for
+metadata (source, resolution, languages, etc.), then pattern-based
+conditions are matched against the .NET regex engine. The evaluator
+(`customFormats/evaluator.ts`) combines parsed metadata with pattern match
+results to produce per-condition match outcomes. See
+[parser.md: Custom Format Testing](./parser.md#custom-format-testing) for
+the full flow.
+
 ## Quality Profiles
 
 **Source:** `entities/qualityProfiles/`
@@ -166,6 +176,37 @@ guarded on old value), or delete (score removed). Profile-level settings
 (`minimum_custom_format_score`, `upgrade_until_score`,
 `upgrade_score_increment`) are updated in separate ops with their own
 guards.
+
+### Entity Testing
+
+**Source:** `entities/qualityProfiles/entityTests/`
+**Tables:** test_entities, test_releases
+
+Entity testing validates quality profile scoring against real examples. A
+test entity is a movie or series identified by `(type, tmdb_id)`. Each
+entity has test releases with fields: title, type, size_bytes, languages
+(JSON array), indexers (JSON array), and flags (JSON array).
+
+**Create entities** uses bulk insert, skipping duplicates by composite key.
+**Delete entity** removes releases first (value-guarded), then the entity.
+**Create releases** supports single or bulk insert; bulk skips duplicate
+titles per entity. **Update/delete releases** guard on all fields (title,
+size, languages, indexers, flags).
+
+Ops can target base or user layers depending on whether the database has
+base write access.
+
+Test entities are created from three sources: TMDB search (adds entities),
+manual release entry (title + metadata), and import from Arr (pulls recent
+releases from configured instances).
+
+The evaluation API (`/api/v1/entity-testing/evaluate`) uses the
+[parser service](./parser.md) to batch-parse all release titles, extract
+patterns from every custom format's conditions, batch-match patterns
+against parsed metadata, and evaluate each CF per release. The UI then
+computes profile scores using `allCfScores()` from `scoring/read.ts`. See
+[parser.md: Entity Testing](./parser.md#entity-testing) for the evaluation
+pipeline.
 
 ## Regular Expressions
 
