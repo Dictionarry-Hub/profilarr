@@ -3,7 +3,7 @@
 This folder is the reference architecture for Profilarr. Each file covers one
 subsystem and can be read on its own. Start here, then follow the links below
 to whichever part you're interested in. For the contribution workflow (branches,
-reviews, releases), see [CONTRIBUTING.md](../CONTRIBUTING.md).
+reviews, releases), see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Table of Contents
 
