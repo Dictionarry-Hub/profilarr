@@ -76,11 +76,12 @@ publishes a release.
 
 **Backend**
 
-- [api.md](./api.md): API v1 routes, contract-first workflow, OpenAPI spec
-- [jobs.md](./jobs.md): Job queue, dispatcher, handlers, scheduling
-- [notifications.md](./notifications.md): Notification manager, definitions, notifiers
-- [security.md](./security.md): Auth modes, sessions, OIDC, API keys, security scans
+- [backend/api.md](./backend/api.md): API v1 routes, contract-first workflow, OpenAPI spec
+- [backend/jobs.md](./backend/jobs.md): Job queue, dispatcher, handlers, scheduling
 - [backend/logger.md](./backend/logger.md): Logger singleton, log levels, output formats, usage
+- [backend/notifications.md](./backend/notifications.md): Notification manager, definitions, notifiers
+- [backend/schema-bump.md](./backend/schema-bump.md): PCD schema evolution, safe vs unsafe changes
+- [backend/security.md](./backend/security.md): Auth modes, sessions, OIDC, API keys, security scans
 
 **Frontend**
 
