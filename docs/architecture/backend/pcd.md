@@ -25,6 +25,7 @@
   - [Override Flow](#override-flow)
   - [Full-List Conflicts](#full-list-conflicts)
 - [Op Lifecycle](#op-lifecycle)
+- [Type Generation](#type-generation)
 - [Open Work](#open-work)
 
 ## What is a PCD
@@ -389,6 +390,44 @@ stateDiagram-v2
 The `pcd_op_history` table records one row per op per compile, tracking
 status, rowcount, conflict reason, and error details. This powers the
 conflict UI and provides an audit trail.
+
+## Type Generation
+
+**Source:** `scripts/generate-pcd-types.ts`
+**Output:** `src/lib/shared/pcd/types.ts`
+
+The PCD schema is the source of truth for TypeScript types. Rather than
+maintaining types by hand, a generator script introspects the schema SQL
+and produces typed interfaces for Kysely queries and query results.
+
+**How it works:**
+
+1. Fetch the schema SQL from GitHub (`Dictionarry-Hub/schema` repo, branch
+   = version) or load a local file via `--local=`.
+2. Execute the SQL in an in-memory SQLite database.
+3. Introspect every table using `PRAGMA table_info` and `PRAGMA foreign_key_list`.
+4. Parse `CHECK (column IN (...))` constraints from the `CREATE TABLE` SQL
+   to extract union types automatically.
+5. Generate two interface sets per table: a Kysely table interface (with
+   `Generated<T>` for auto-increment and defaulted columns) and a row type
+   (plain types for query results).
+6. Write the output to `src/lib/shared/pcd/types.ts`.
+
+**Semantic type resolution** follows a priority chain:
+
+1. **Manual overrides** (`COLUMN_TYPE_OVERRIDES`) for columns that store
+   integers in SQLite but need string unions in TypeScript. Currently used
+   for Sonarr's `colon_replacement_format` and `multi_episode_style` enums.
+   Runtime conversion functions live in `src/lib/shared/pcd/conversions.ts`.
+2. **CHECK constraints** parsed from the DDL. Any `CHECK (col IN ('a', 'b'))`
+   becomes `'a' | 'b'`.
+3. **Boolean pattern matching** on column names: prefixes like `is_`, `has_`,
+   `enable_`, suffixes like `_allowed`, `_enabled`, and exact matches like
+   `negate` and `required` produce `boolean` instead of `number`.
+4. **SQLite type mapping** as the fallback (INTEGER -> number, TEXT -> string).
+
+Run via `deno task generate:pcd-types` (default version) or
+`deno task generate:pcd-types --version=1.1.0` for a specific schema version.
 
 ## Open Work
 
