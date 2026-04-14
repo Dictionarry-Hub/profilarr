@@ -83,5 +83,6 @@ publishes a release.
 
 **Frontend**
 
+- [frontend/ui.md](./frontend/ui.md): UI component library, `no-raw-ui` lint rule, planned theming
 - [frontend/dirty.md](./frontend/dirty.md): Dirty store, nav guard, form lifecycle, patterns
-- [cutscene.md](./cutscene.md): Interactive onboarding system
+- [frontend/cutscene.md](./frontend/cutscene.md): Interactive onboarding system
