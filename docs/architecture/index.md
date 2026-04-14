@@ -80,6 +80,7 @@ publishes a release.
 - [jobs.md](./jobs.md): Job queue, dispatcher, handlers, scheduling
 - [notifications.md](./notifications.md): Notification manager, definitions, notifiers
 - [security.md](./security.md): Auth modes, sessions, OIDC, API keys, security scans
+- [backend/logger.md](./backend/logger.md): Logger singleton, log levels, output formats, usage
 
 **Frontend**
 
