@@ -76,6 +76,13 @@
 			suggestions: (items) => [...new Set(items.flatMap((i) => i.tags.map((t) => t.name)))].sort()
 		},
 		{
+			key: 'tagged',
+			label: 'Tagged',
+			type: 'text',
+			accessor: (item) => (item.tags.length > 0 ? 'yes' : 'no'),
+			suggestions: () => ['yes', 'no']
+		},
+		{
 			key: 'description',
 			label: 'Description',
 			type: 'text',
