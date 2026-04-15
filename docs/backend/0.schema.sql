@@ -483,3 +483,5 @@ CREATE INDEX idx_test_releases_entity ON test_releases(entity_type, entity_tmdb_
 CREATE UNIQUE INDEX idx_one_upgrade_until_per_profile
 ON quality_profile_qualities(quality_profile_name)
 WHERE upgrade_until = 1;
+
+ALTER TABLE quality_group_members ADD COLUMN position INTEGER NOT NULL DEFAULT 0;
