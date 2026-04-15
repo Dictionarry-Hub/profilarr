@@ -1,20 +1,24 @@
 <script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
+	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import SearchModeToggle from '$ui/actions/SearchModeToggle.svelte';
-	import TagInput from '$ui/form/TagInput.svelte';
-	import { createDataPageStore } from '$lib/client/stores/dataPage';
-	import { filterByText, filterByTags, createSearchFieldState } from '$lib/client/utils/search';
-	import { Info, Plus, FileText, Users, Type, Tag, Code, AlignLeft, Link } from 'lucide-svelte';
+	import { getPersistentSearchStore } from '$stores/search';
+	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
+	import { applySmartFilters } from '$ui/filter/match';
+	import type { ViewMode } from '$lib/client/stores/dataPage';
+	import { Info, Plus, FileText, Users } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import type { RegularExpressionWithTags } from '$shared/pcd/display';
@@ -52,83 +56,114 @@
 		}
 	}
 
-	// Search field options
-	const searchFields = [
-		{ value: 'name', label: 'Name' },
-		{ value: 'tags', label: 'Tags' },
-		{ value: 'pattern', label: 'Pattern' },
-		{ value: 'description', label: 'Description' },
-		{ value: 'regex101_id', label: 'Regex101 ID' }
+	// ======================================================================
+	// Smart Filter
+	// ======================================================================
+
+	let filterTags: FilterTag[] = [];
+
+	const fields: FilterFieldDef<RegularExpressionWithTags>[] = [
+		{
+			key: 'name',
+			label: 'Name',
+			type: 'text',
+			isDefault: true,
+			accessor: (item) => item.name,
+			suggestions: (items) => items.map((i) => i.name).sort()
+		},
+		{
+			key: 'tag',
+			label: 'Tag',
+			type: 'text',
+			accessor: (item) => item.tags.map((t) => t.name),
+			suggestions: (items) => [...new Set(items.flatMap((i) => i.tags.map((t) => t.name)))].sort()
+		},
+		{
+			key: 'tagged',
+			label: 'Tagged',
+			type: 'text',
+			accessor: (item) => (item.tags.length > 0 ? 'yes' : 'no'),
+			suggestions: () => ['yes', 'no']
+		},
+		{
+			key: 'pattern',
+			label: 'Pattern',
+			type: 'text',
+			accessor: (item) => item.pattern
+		},
+		{
+			key: 'description',
+			label: 'Description',
+			type: 'text',
+			accessor: (item) => item.description ?? null
+		},
+		{
+			key: 'regex101_id',
+			label: 'Regex101 ID',
+			type: 'text',
+			accessor: (item) => item.regex101_id ?? null
+		}
 	];
 
-	const searchFieldIcons: Record<string, typeof Type> = {
-		name: Type,
-		tags: Tag,
-		pattern: Code,
-		description: AlignLeft,
-		regex101_id: Link
-	};
+	// Mobile simple search fallback
+	$: mobileSearchStore = getPersistentSearchStore(`reSearch:${data.currentDatabase.id}`, {
+		debounceMs: 150
+	});
+	$: mobileQuery = $mobileSearchStore.query;
 
-	const searchState = createSearchFieldState('regularExpressionsSearch', searchFields);
+	let isMobile = false;
+	let mediaQuery: MediaQueryList | null = null;
 
-	let activeSearchField = searchState.initialField;
-	let searchTags: string[] = searchState.initialTags;
-
-	$: isTagMode = activeSearchField === 'tags';
-	$: searchFieldIcon = searchFieldIcons[activeSearchField] || Type;
-
-	function handleFieldChange(field: string) {
-		if (field === activeSearchField) return;
-		if (field === 'tags') {
-			search.clear();
-		} else {
-			searchTags = [];
-			searchState.clearTags();
+	onMount(() => {
+		if (typeof window !== 'undefined') {
+			mediaQuery = window.matchMedia('(max-width: 767px)');
+			isMobile = mediaQuery.matches;
+			mediaQuery.addEventListener('change', handleMediaChange);
 		}
-		activeSearchField = field;
-		searchState.saveField(field);
-	}
-
-	function handleTagsChange(tags: string[]) {
-		searchTags = tags;
-		searchState.saveTags(tags);
-	}
-
-	// Field accessors for text search
-	const fieldAccessors: Record<
-		string,
-		(item: RegularExpressionWithTags) => string | string[] | null
-	> = {
-		name: (item) => item.name,
-		tags: (item) => item.tags.map((t) => t.name),
-		pattern: (item) => item.pattern,
-		description: (item) => item.description ?? null,
-		regex101_id: (item) => item.regex101_id ?? null
-	};
-
-	// Initialize data page store (we'll use search and view, but do our own filtering)
-	const { search, view, setItems } = createDataPageStore(data.regularExpressions, {
-		storageKey: 'regularExpressionsView',
-		searchKeys: ['name'], // Placeholder, we do our own filtering
-		searchKey: `regularExpressionsSearch:${data.currentDatabase.id}`
 	});
 
-	// Extract the debounced query store for reactive access
-	const debouncedQuery = search.debouncedQuery;
-
-	// Update items when data changes (e.g., switching databases)
-	$: setItems(data.regularExpressions);
-
-	// Filtering based on active search field
-	$: filtered = (() => {
-		if (isTagMode) {
-			return filterByTags(data.regularExpressions, searchTags, (item) =>
-				item.tags.map((t) => t.name)
-			);
+	onDestroy(() => {
+		if (mediaQuery) {
+			mediaQuery.removeEventListener('change', handleMediaChange);
 		}
-		return filterByText(data.regularExpressions, $debouncedQuery, fieldAccessors, [
-			activeSearchField
-		]);
+	});
+
+	function handleMediaChange(e: MediaQueryListEvent) {
+		isMobile = e.matches;
+	}
+
+	// ======================================================================
+	// View Mode
+	// ======================================================================
+
+	const VIEW_STORAGE_KEY = 'regularExpressionsView';
+
+	function loadViewMode(): ViewMode {
+		if (!browser) return 'table';
+		try {
+			const stored = localStorage.getItem(VIEW_STORAGE_KEY);
+			if (stored === 'cards' || stored === 'table') return stored;
+		} catch {}
+		return window.innerWidth < 768 ? 'cards' : 'table';
+	}
+
+	let viewMode: ViewMode = loadViewMode();
+
+	$: if (browser) {
+		localStorage.setItem(VIEW_STORAGE_KEY, viewMode);
+	}
+
+	// ======================================================================
+	// Filtering
+	// ======================================================================
+
+	$: filtered = (() => {
+		let result = applySmartFilters(data.regularExpressions, filterTags, fields);
+		if (isMobile && mobileQuery) {
+			const q = mobileQuery.toLowerCase();
+			result = result.filter((r) => r.name.toLowerCase().includes(q));
+		}
+		return result;
 	})();
 
 	// Map databases to tabs
@@ -149,32 +184,25 @@
 
 	<!-- Actions Bar -->
 	<ActionsBar>
-		<SearchModeToggle
-			options={searchFields}
-			value={activeSearchField}
-			icon={searchFieldIcon}
-			onchange={handleFieldChange}
-		/>
-		{#if isTagMode}
-			<div class="flex-1">
-				<TagInput
-					tags={searchTags}
-					placeholder="Type a tag name and press Enter... (prefix NOT: to exclude)"
-					onchange={handleTagsChange}
-				/>
-			</div>
-		{:else}
+		{#if isMobile}
 			<SearchAction
-				searchStore={search}
-				placeholder="Search {searchFields
-					.find((f) => f.value === activeSearchField)
-					?.label.toLowerCase() ?? ''}..."
+				searchStore={mobileSearchStore}
+				placeholder="Search regular expressions..."
 				responsive
+			/>
+		{:else}
+			<SmartFilterBar
+				{fields}
+				items={data.regularExpressions}
+				bind:tags={filterTags}
+				storageKey={`smartFilter:regularExpressions:${data.currentDatabase.id}`}
+				placeholder="Filter regular expressions..."
 			/>
 		{/if}
 		<ActionButton icon={Plus} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown">
-				<Dropdown position="right">
+				<Dropdown position="right" minWidth="14rem">
+					<DropdownHeader label="New expression" />
 					<DropdownItem
 						icon={FileText}
 						label="Blank"
@@ -189,7 +217,7 @@
 				</Dropdown>
 			</svelte:fragment>
 		</ActionButton>
-		<ViewToggle bind:value={$view} />
+		<ViewToggle bind:value={viewMode} />
 		<ActionButton icon={Info} on:click={() => (infoModalOpen = true)} />
 	</ActionsBar>
 
@@ -208,10 +236,10 @@
 				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
 			>
 				<p class="text-neutral-600 dark:text-neutral-400">
-					No regular expressions match your search
+					No regular expressions match the current filters
 				</p>
 			</div>
-		{:else if $view === 'table'}
+		{:else if viewMode === 'table'}
 			<TableView expressions={filtered} on:clone={handleClone} on:export={handleExport} />
 		{:else}
 			<CardView expressions={filtered} on:clone={handleClone} on:export={handleExport} />
