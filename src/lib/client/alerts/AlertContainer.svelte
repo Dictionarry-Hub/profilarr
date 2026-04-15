@@ -2,6 +2,7 @@
 	import { alertStore } from './store';
 	import Alert from './Alert.svelte';
 	import { alertSettingsStore, type AlertPosition } from './settings';
+	import { sidebarCollapsed } from '$stores/sidebar';
 	import { page } from '$app/stores';
 
 	const positionClasses: Record<AlertPosition, string> = {
@@ -18,9 +19,9 @@
 </script>
 
 <div
-	class="pointer-events-none fixed inset-0 z-[100] {isAuthPage
+	class="pointer-events-none fixed inset-0 z-[100] transition-[padding-left] duration-200 ease-in-out {isAuthPage
 		? ''
-		: 'pt-16 pb-16 md:pt-0 md:pb-0 md:pl-80'}"
+		: `pt-16 pb-16 md:pt-0 md:pb-0 ${$sidebarCollapsed ? 'md:pl-10' : 'md:pl-80'}`}"
 >
 	<div class="relative h-full w-full">
 		<div

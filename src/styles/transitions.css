@@ -6,15 +6,17 @@
 }
 
 /* Fallback transitions for browsers without View Transitions API */
-@media (prefers-reduced-motion: no-preference) {
-	html {
-		transition: background-color 0.3s ease-in-out;
-	}
+@layer base {
+	@media (prefers-reduced-motion: no-preference) {
+		html {
+			transition: background-color 0.3s ease-in-out;
+		}
 
-	* {
-		transition:
-			background-color 0.3s ease-in-out,
-			border-color 0.3s ease-in-out,
-			color 0.3s ease-in-out;
+		* {
+			transition:
+				background-color 0.3s ease-in-out,
+				border-color 0.3s ease-in-out,
+				color 0.3s ease-in-out;
+		}
 	}
 }

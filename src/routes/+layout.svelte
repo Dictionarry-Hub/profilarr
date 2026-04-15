@@ -11,6 +11,7 @@
 
 	import CutsceneComplete from '$lib/client/cutscene/CutsceneComplete.svelte';
 	import { cutscene } from '$lib/client/cutscene/store';
+	import { sidebarCollapsed } from '$stores/sidebar';
 	import { FEATURES } from '$lib/shared/features';
 	import { dev } from '$app/environment';
 	import { page } from '$app/stores';
@@ -26,12 +27,22 @@
 	let innerWidth = 0;
 	$: isDesktop = innerWidth >= 768;
 
+	function handleKeydown(e: KeyboardEvent) {
+		if (!isDesktop || isAuthPage || $cutscene.active) return;
+		const tag = (e.target as HTMLElement)?.tagName;
+		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+		if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+			e.preventDefault();
+			sidebarCollapsed.toggle();
+		}
+	}
+
 	onMount(() => {
 		if (!isAuthPage && cutsceneEnabled) cutscene.init(data.onboardingShown);
 	});
 </script>
 
-<svelte:window bind:innerWidth />
+<svelte:window bind:innerWidth on:keydown={handleKeydown} />
 
 <svelte:head>
 	<link rel="icon" href={logo} />
@@ -55,6 +66,10 @@
 {/if}
 <AlertContainer />
 
-<main class={isAuthPage ? '' : 'pt-16 pb-16 md:pt-0 md:pb-0 md:pl-80'}>
+<main
+	class="{isAuthPage
+		? ''
+		: `pt-16 pb-16 md:pt-0 md:pb-0 ${$sidebarCollapsed ? 'md:pl-10' : 'md:pl-80'}`} transition-[padding-left] duration-200 ease-in-out"
+>
 	<slot />
 </main>
