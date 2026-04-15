@@ -309,8 +309,15 @@ seconds of entering `completed`, the completion message is held for the
 remaining time before transitioning. This prevents flickering during
 back-to-back jobs.
 
-The `EventSource` connects on app load (from `+layout.svelte`) and stays open
-for the session. It auto-reconnects on network drops.
+**Multi-tab coordination**: Browsers limit HTTP/1.1 connections to 6 per
+origin. Since each SSE connection is long-lived, opening 6+ tabs would exhaust
+all connection slots and freeze the app. To prevent this, the store uses the
+Web Locks API for leader election: only one tab holds the `EventSource`
+connection. The leader relays events to all other tabs via `BroadcastChannel`.
+When the leader tab closes, the browser auto-releases the lock and the next
+queued tab takes over as leader. In browsers without Web Locks or
+BroadcastChannel support, each tab falls back to its own direct `EventSource`
+connection (original behavior).
 
 **Desktop UI** (`src/lib/client/ui/navigation/pageNav/jobStatus.svelte`): A
 card component that appears above the version block in the sidebar when a job
