@@ -52,7 +52,7 @@
 			References ({data.conditionRefs.length})
 		</div>
 		{#if data.conditionRefs.length > 0}
-			<Table data={data.conditionRefs} {columns} compact>
+			<Table data={data.conditionRefs} {columns} compact responsive>
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'cfName'}
 						<InlineLink

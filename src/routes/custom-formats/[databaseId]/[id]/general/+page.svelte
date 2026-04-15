@@ -36,7 +36,7 @@
 		References ({data.profileRefs.length})
 	</div>
 	{#if data.profileRefs.length > 0}
-		<Table data={data.profileRefs} {columns} compact>
+		<Table data={data.profileRefs} {columns} compact responsive>
 			<svelte:fragment slot="cell" let:row let:column>
 				{#if column.key === 'name'}
 					<InlineLink
