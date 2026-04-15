@@ -340,18 +340,10 @@
 </div>
 
 <style>
+	/* Re-apply rounding stripped by ActionsBar's global border-radius reset.
+	   The Dropdown component's own overflow-hidden + rounded-xl handles
+	   internal clipping, so we only need to restore the container radius. */
 	.smart-filter-bar > :global(:nth-child(n + 2)) {
 		border-radius: 0.75rem !important;
-	}
-	.smart-filter-bar > :global(:nth-child(n + 2)) :global(*) {
-		border-radius: 0 !important;
-	}
-	.smart-filter-bar > :global(:nth-child(n + 2)) :global(:first-child) {
-		border-top-left-radius: 0.75rem !important;
-		border-top-right-radius: 0.75rem !important;
-	}
-	.smart-filter-bar > :global(:nth-child(n + 2)) :global(:last-child) {
-		border-bottom-left-radius: 0.75rem !important;
-		border-bottom-right-radius: 0.75rem !important;
 	}
 </style>
