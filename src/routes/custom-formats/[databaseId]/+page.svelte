@@ -7,6 +7,7 @@
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
 	import TableView from './views/TableView.svelte';
@@ -198,10 +199,12 @@
 				placeholder="Filter custom formats..."
 			/>
 		{/if}
-		<ActionButton
-			icon={Plus}
-			on:click={() => goto(`/custom-formats/${data.currentDatabase.id}/new`)}
-		/>
+		<Tooltip text="New">
+			<ActionButton
+				icon={Plus}
+				on:click={() => goto(`/custom-formats/${data.currentDatabase.id}/new`)}
+			/>
+		</Tooltip>
 		<ViewToggle bind:value={viewMode} />
 		<ActionButton icon={Info} on:click={() => (infoModalOpen = true)} />
 	</ActionsBar>
