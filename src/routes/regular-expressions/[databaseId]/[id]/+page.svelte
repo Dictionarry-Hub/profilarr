@@ -2,6 +2,9 @@
 	import { goto } from '$app/navigation';
 	import RegularExpressionForm from '../components/RegularExpressionForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
+	import Table from '$ui/table/Table.svelte';
+	import Badge from '$ui/badge/Badge.svelte';
+	import InlineLink from '$ui/link/InlineLink.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -18,6 +21,12 @@
 	function handleCancel() {
 		goto(`/regular-expressions/${data.currentDatabase.id}`);
 	}
+
+	const columns = [
+		{ key: 'cfName', header: 'Custom Format' },
+		{ key: 'conditionName', header: 'Condition' },
+		{ key: 'flags', header: 'Flags', align: 'center' as const }
+	];
 </script>
 
 <svelte:head>
@@ -37,6 +46,38 @@
 		]}
 		breadcrumbCurrent={data.regularExpression.name}
 	/>
+
+	<div class="mt-6 space-y-3 md:px-4">
+		<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+			References ({data.conditionRefs.length})
+		</div>
+		{#if data.conditionRefs.length > 0}
+			<Table data={data.conditionRefs} {columns} compact>
+				<svelte:fragment slot="cell" let:row let:column>
+					{#if column.key === 'cfName'}
+						<InlineLink
+							href="/custom-formats/{data.currentDatabase.id}/{row.cfId}/conditions"
+							text={row.cfName}
+							external
+						/>
+					{:else if column.key === 'conditionName'}
+						{row.conditionName}
+					{:else if column.key === 'flags'}
+						<div class="flex items-center justify-center gap-1">
+							{#if row.negate}
+								<Badge variant="warning" size="sm">Negate</Badge>
+							{/if}
+							{#if row.required}
+								<Badge variant="info" size="sm">Required</Badge>
+							{/if}
+						</div>
+					{/if}
+				</svelte:fragment>
+			</Table>
+		{:else}
+			<p class="text-sm text-neutral-500 dark:text-neutral-400">Not used in any custom formats.</p>
+		{/if}
+	</div>
 </div>
 
 <DirtyModal />

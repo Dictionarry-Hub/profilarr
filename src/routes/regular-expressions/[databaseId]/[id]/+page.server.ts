@@ -7,6 +7,7 @@ import type { OperationLayer } from '$pcd/core/types.ts';
 import { logger } from '$logger/logger.ts';
 import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
 import { validateRegex } from '$lib/server/utils/arr/parser/index.ts';
+import { getConditionRefsForRegex } from '$pcd/references.ts';
 
 export const load: ServerLoad = async ({ params }) => {
 	const { databaseId, id } = params;
@@ -37,9 +38,12 @@ export const load: ServerLoad = async ({ params }) => {
 		throw error(404, 'Regular expression not found');
 	}
 
+	const conditionRefs = await getConditionRefsForRegex(cache, regularExpression.name);
+
 	return {
 		currentDatabase,
 		regularExpression,
+		conditionRefs,
 		canWriteToBase: canWriteToBase(currentDatabaseId)
 	};
 };

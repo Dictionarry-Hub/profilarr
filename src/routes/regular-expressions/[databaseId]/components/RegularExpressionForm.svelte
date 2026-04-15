@@ -288,7 +288,7 @@
 
 	<!-- Unit Tests (outside form to avoid button submission issues) -->
 	{#if formData.regex101Id}
-		<div class="pb-12 md:px-4">
+		<div class="md:px-4">
 			<h4 class="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
 				Unit Tests
 				{#if !unitTestsLoading && unitTests.length > 0}
