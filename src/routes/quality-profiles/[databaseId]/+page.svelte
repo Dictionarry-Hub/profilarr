@@ -1,18 +1,22 @@
 <script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { Plus, Type, Tag, AlignLeft } from 'lucide-svelte';
+	import { Plus } from 'lucide-svelte';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import SearchModeToggle from '$ui/actions/SearchModeToggle.svelte';
-	import TagInput from '$ui/form/TagInput.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
+	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { createDataPageStore } from '$lib/client/stores/dataPage';
-	import { filterByText, filterByTags, createSearchFieldState } from '$lib/client/utils/search';
+	import { getPersistentSearchStore } from '$stores/search';
+	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
+	import { applySmartFilters } from '$ui/filter/match';
+	import type { ViewMode } from '$lib/client/stores/dataPage';
 	import { alertStore } from '$alerts/store';
 	import type { QualityProfileTableRow } from '$shared/pcd/display';
 	import type { PageData } from './$types';
@@ -48,70 +52,123 @@
 		}
 	}
 
-	// Search field options
-	const searchFields = [
-		{ value: 'name', label: 'Name' },
-		{ value: 'tags', label: 'Tags' },
-		{ value: 'description', label: 'Description' }
+	// ======================================================================
+	// Smart Filter
+	// ======================================================================
+
+	let filterTags: FilterTag[] = [];
+
+	const fields: FilterFieldDef<QualityProfileTableRow>[] = [
+		{
+			key: 'name',
+			label: 'Name',
+			type: 'text',
+			isDefault: true,
+			accessor: (item) => item.name,
+			suggestions: (items) => items.map((i) => i.name).sort()
+		},
+		{
+			key: 'tag',
+			label: 'Tag',
+			type: 'text',
+			accessor: (item) => item.tags.map((t) => t.name),
+			suggestions: (items) => [...new Set(items.flatMap((i) => i.tags.map((t) => t.name)))].sort()
+		},
+		{
+			key: 'tagged',
+			label: 'Tagged',
+			type: 'text',
+			accessor: (item) => (item.tags.length > 0 ? 'yes' : 'no'),
+			suggestions: () => ['yes', 'no']
+		},
+		{
+			key: 'description',
+			label: 'Description',
+			type: 'text',
+			accessor: (item) => item.description ?? null
+		},
+		{
+			key: 'language',
+			label: 'Language',
+			type: 'text',
+			accessor: (item) => item.language?.name ?? null,
+			suggestions: (items) =>
+				[...new Set(items.map((i) => i.language?.name).filter(Boolean) as string[])].sort()
+		},
+		{
+			key: 'upgrades',
+			label: 'Upgrades',
+			type: 'text',
+			accessor: (item) => (item.upgrades_allowed ? 'yes' : 'no'),
+			suggestions: () => ['yes', 'no']
+		},
+		{
+			key: 'formats',
+			label: 'Formats',
+			type: 'number',
+			accessor: (item) => item.custom_formats.total
+		}
 	];
 
-	const searchFieldIcons: Record<string, typeof Type> = {
-		name: Type,
-		tags: Tag,
-		description: AlignLeft
-	};
+	// Mobile simple search fallback
+	$: mobileSearchStore = getPersistentSearchStore(`qpSearch:${data.currentDatabase.id}`, {
+		debounceMs: 150
+	});
+	$: mobileQuery = $mobileSearchStore.query;
 
-	const searchState = createSearchFieldState('qualityProfilesSearch', searchFields);
+	let isMobile = false;
+	let mediaQuery: MediaQueryList | null = null;
 
-	let activeSearchField = searchState.initialField;
-	let searchTags: string[] = searchState.initialTags;
-
-	$: isTagMode = activeSearchField === 'tags';
-	$: searchFieldIcon = searchFieldIcons[activeSearchField] || Type;
-
-	function handleFieldChange(field: string) {
-		if (field === activeSearchField) return;
-		if (field === 'tags') {
-			search.clear();
-		} else {
-			searchTags = [];
-			searchState.clearTags();
+	onMount(() => {
+		if (typeof window !== 'undefined') {
+			mediaQuery = window.matchMedia('(max-width: 767px)');
+			isMobile = mediaQuery.matches;
+			mediaQuery.addEventListener('change', handleMediaChange);
 		}
-		activeSearchField = field;
-		searchState.saveField(field);
-	}
-
-	function handleTagsChange(tags: string[]) {
-		searchTags = tags;
-		searchState.saveTags(tags);
-	}
-
-	// Field accessors for text search
-	const fieldAccessors: Record<string, (item: QualityProfileTableRow) => string | string[] | null> =
-		{
-			name: (item) => item.name,
-			tags: (item) => item.tags.map((t) => t.name),
-			description: (item) => item.description ?? null
-		};
-
-	// Initialize data page store (we use search and view, but do our own filtering)
-	const { search, view, setItems } = createDataPageStore(data.qualityProfiles, {
-		storageKey: 'qualityProfilesView',
-		searchKeys: ['name'], // Placeholder, we do our own filtering
-		searchKey: `qualityProfilesSearch:${data.currentDatabase.id}`
 	});
 
-	const debouncedQuery = search.debouncedQuery;
-
-	// Update items when data changes (e.g., switching databases)
-	$: setItems(data.qualityProfiles);
-
-	// Filtering based on active search field
-	$: filtered = (() => {
-		if (isTagMode) {
-			return filterByTags(data.qualityProfiles, searchTags, (item) => item.tags.map((t) => t.name));
+	onDestroy(() => {
+		if (mediaQuery) {
+			mediaQuery.removeEventListener('change', handleMediaChange);
 		}
-		return filterByText(data.qualityProfiles, $debouncedQuery, fieldAccessors, [activeSearchField]);
+	});
+
+	function handleMediaChange(e: MediaQueryListEvent) {
+		isMobile = e.matches;
+	}
+
+	// ======================================================================
+	// View Mode
+	// ======================================================================
+
+	const VIEW_STORAGE_KEY = 'qualityProfilesView';
+
+	function loadViewMode(): ViewMode {
+		if (!browser) return 'table';
+		try {
+			const stored = localStorage.getItem(VIEW_STORAGE_KEY);
+			if (stored === 'cards' || stored === 'table') return stored;
+		} catch {}
+		return window.innerWidth < 768 ? 'cards' : 'table';
+	}
+
+	let viewMode: ViewMode = loadViewMode();
+
+	$: if (browser) {
+		localStorage.setItem(VIEW_STORAGE_KEY, viewMode);
+	}
+
+	// ======================================================================
+	// Filtering
+	// ======================================================================
+
+	$: filtered = (() => {
+		let result = applySmartFilters(data.qualityProfiles, filterTags, fields);
+		if (isMobile && mobileQuery) {
+			const q = mobileQuery.toLowerCase();
+			result = result.filter((p) => p.name.toLowerCase().includes(q));
+		}
+		return result;
 	})();
 
 	// Map databases to tabs
@@ -132,34 +189,28 @@
 
 	<!-- Actions Bar -->
 	<ActionsBar>
-		<SearchModeToggle
-			options={searchFields}
-			value={activeSearchField}
-			icon={searchFieldIcon}
-			onchange={handleFieldChange}
-		/>
-		{#if isTagMode}
-			<div class="flex-1">
-				<TagInput
-					tags={searchTags}
-					placeholder="Type a tag name and press Enter... (prefix NOT: to exclude)"
-					onchange={handleTagsChange}
-				/>
-			</div>
-		{:else}
+		{#if isMobile}
 			<SearchAction
-				searchStore={search}
-				placeholder="Search {searchFields
-					.find((f) => f.value === activeSearchField)
-					?.label.toLowerCase() ?? ''}..."
+				searchStore={mobileSearchStore}
+				placeholder="Search quality profiles..."
 				responsive
 			/>
+		{:else}
+			<SmartFilterBar
+				{fields}
+				items={data.qualityProfiles}
+				bind:tags={filterTags}
+				storageKey={`smartFilter:qualityProfiles:${data.currentDatabase.id}`}
+				placeholder="Filter quality profiles..."
+			/>
 		{/if}
-		<ActionButton
-			icon={Plus}
-			on:click={() => goto(`/quality-profiles/${data.currentDatabase.id}/new`)}
-		/>
-		<ViewToggle bind:value={$view} />
+		<Tooltip text="New">
+			<ActionButton
+				icon={Plus}
+				on:click={() => goto(`/quality-profiles/${data.currentDatabase.id}/new`)}
+			/>
+		</Tooltip>
+		<ViewToggle bind:value={viewMode} />
 	</ActionsBar>
 
 	<!-- Quality Profiles Content -->
@@ -176,9 +227,11 @@
 			<div
 				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
 			>
-				<p class="text-neutral-600 dark:text-neutral-400">No quality profiles match your search</p>
+				<p class="text-neutral-600 dark:text-neutral-400">
+					No quality profiles match the current filters
+				</p>
 			</div>
-		{:else if $view === 'table'}
+		{:else if viewMode === 'table'}
 			<TableView
 				profiles={filtered}
 				databaseId={data.currentDatabase.id}
