@@ -4,6 +4,7 @@
 	import SyncFooter from './SyncFooter.svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
+	import { jobStatus } from '$stores/jobStatus';
 
 	interface DatabaseWithProfiles {
 		id: number;
@@ -123,6 +124,7 @@
 	}
 
 	async function handleSync() {
+		jobStatus.connect();
 		syncing = true;
 		try {
 			const response = await fetch('?/syncQualityProfiles', {

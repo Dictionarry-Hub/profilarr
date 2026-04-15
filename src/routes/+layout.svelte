@@ -14,8 +14,7 @@
 	import { FEATURES } from '$lib/shared/features';
 	import { dev } from '$app/environment';
 	import { page } from '$app/stores';
-	import { onMount, onDestroy } from 'svelte';
-	import { jobStatus } from '$stores/jobStatus';
+	import { onMount } from 'svelte';
 
 	export let data;
 
@@ -28,12 +27,7 @@
 	$: isDesktop = innerWidth >= 768;
 
 	onMount(() => {
-		if (!isAuthPage) jobStatus.connect();
 		if (!isAuthPage && cutsceneEnabled) cutscene.init(data.onboardingShown);
-	});
-
-	onDestroy(() => {
-		jobStatus.disconnect();
 	});
 </script>
 

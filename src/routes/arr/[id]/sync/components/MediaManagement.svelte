@@ -3,6 +3,7 @@
 	import SyncFooter from './SyncFooter.svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
+	import { jobStatus } from '$stores/jobStatus';
 
 	interface ConfigOption {
 		name: string;
@@ -189,6 +190,7 @@
 	}
 
 	async function handleSync() {
+		jobStatus.connect();
 		syncing = true;
 		try {
 			const response = await fetch('?/syncMediaManagement', {

@@ -297,10 +297,30 @@ auth. API keys cannot access it.
 
 ### Client Side
 
-**Store** (`src/lib/client/stores/jobStatus.ts`): A Svelte writable store that
-manages an `EventSource` connection and a three-state machine:
+**On-demand connections**: The SSE connection is not always open. Browsers
+limit HTTP/1.1 connections to ~6 per origin, and a persistent EventSource
+would consume one of those slots permanently. Instead, the store connects
+just-in-time when a job is triggered and auto-disconnects after completion.
+This means zero baseline connection usage.
 
-- `idle` - no job activity, version block shows normally
+The flow:
+
+1. The triggering component calls `jobStatus.connect()` before firing the
+   action that enqueues the job.
+2. The store opens an `EventSource` to `/jobs/events` (no-op if already open).
+3. SSE delivers `job.started` and `job.finished` events as the job runs.
+4. After `job.finished`, the completion message displays for 6 seconds, then
+   the store transitions to `idle` and closes the EventSource.
+
+If multiple jobs are triggered in quick succession, the second `connect()` is
+a no-op since the connection is already open. Jobs run serially, so the SSE
+sees all started/finished events in order. The connection stays open until the
+final job's 6-second display expires.
+
+**Store** (`src/lib/client/stores/jobStatus.ts`): A Svelte writable store with
+a three-state machine:
+
+- `idle` - no job activity, EventSource closed
 - `running` - job in progress, shows spinner and label
 - `completed` - job finished, shows result for 6 seconds then returns to idle
 
@@ -308,16 +328,6 @@ The store includes holdoff logic: if a new `job.started` arrives within 5
 seconds of entering `completed`, the completion message is held for the
 remaining time before transitioning. This prevents flickering during
 back-to-back jobs.
-
-**Multi-tab coordination**: Browsers limit HTTP/1.1 connections to 6 per
-origin. Since each SSE connection is long-lived, opening 6+ tabs would exhaust
-all connection slots and freeze the app. To prevent this, the store uses the
-Web Locks API for leader election: only one tab holds the `EventSource`
-connection. The leader relays events to all other tabs via `BroadcastChannel`.
-When the leader tab closes, the browser auto-releases the lock and the next
-queued tab takes over as leader. In browsers without Web Locks or
-BroadcastChannel support, each tab falls back to its own direct `EventSource`
-connection (original behavior).
 
 **Desktop UI** (`src/lib/client/ui/navigation/pageNav/jobStatus.svelte`): A
 card component that appears above the version block in the sidebar when a job
