@@ -388,8 +388,10 @@ Sub-components for building custom menu UIs:
 
 - **`Dropdown.svelte`**: positioning container with fixed-positioning and
   hover-bridge support.
-- **`DropdownHeader.svelte`**, **`DropdownItem.svelte`**: styled section
-  header and menu item.
+- **`DropdownHeader.svelte`**, **`DropdownFooter.svelte`**,
+  **`DropdownItem.svelte`**: styled section header, footer, and menu item.
+  `DropdownFooter` mirrors `DropdownHeader` but uses `border-top` instead
+  of `border-bottom` and sits at the end of a menu (e.g. "and 12 more").
 - **`DropdownSelect.svelte`**: the `<select>` replacement (covered under
   [Inputs](#searchdropdown-and-dropdownselect)).
 - **`CustomGroupManager.svelte`**: specialized dropdown used by the custom
