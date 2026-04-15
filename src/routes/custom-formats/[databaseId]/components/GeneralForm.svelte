@@ -182,16 +182,48 @@
 		<input type="hidden" name="includeInRename" value={includeInRename} />
 
 		<div class="space-y-6">
-			<!-- Name -->
-			<FormInput
-				label="Name"
-				name="name"
-				value={name}
-				required
-				description="The name of this custom format"
-				placeholder="Enter custom format name"
-				on:input={(e) => update('name', e.detail)}
-			/>
+			<!-- Name + Include In Rename -->
+			<div class="space-y-2">
+				<div class="flex items-center justify-between">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Name<span class="text-red-500">*</span>
+					</div>
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Include In Rename
+					</div>
+				</div>
+				<div class="flex items-center justify-between">
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						The name of this custom format
+					</p>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						When enabled, this custom format's name will be included in the renamed filename.
+					</p>
+				</div>
+				<div class="flex items-end gap-4">
+					<div class="min-w-0 flex-[19]">
+						<FormInput
+							label="Name"
+							name="name"
+							value={name}
+							required
+							hideLabel
+							placeholder="Enter custom format name"
+							on:input={(e) => update('name', e.detail)}
+						/>
+					</div>
+					<div class="flex-1">
+						<Toggle
+							checked={includeInRename}
+							ariaLabel="Include in rename"
+							label={includeInRename ? 'Enabled' : 'Disabled'}
+							color="accent"
+							fullWidth
+							on:change={(e) => update('includeInRename', e.detail)}
+						/>
+					</div>
+				</div>
+			</div>
 
 			<!-- Description -->
 			<MarkdownInput
@@ -210,23 +242,6 @@
 					Add tags to organize and categorize this custom format.
 				</p>
 				<TagInput {tags} onchange={(newTags) => update('tags', newTags)} />
-			</div>
-
-			<!-- Include In Rename -->
-			<div class="space-y-2">
-				<div class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Include In Rename
-				</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					When enabled, this custom format's name will be included in the renamed filename.
-				</p>
-				<Toggle
-					checked={includeInRename}
-					ariaLabel="Include in rename"
-					label={includeInRename ? 'Enabled' : 'Disabled'}
-					color="accent"
-					on:change={(e) => update('includeInRename', e.detail)}
-				/>
 			</div>
 		</div>
 	</form>
