@@ -953,6 +953,7 @@
 					{#if group.formats.length > 0}
 						<div class="min-w-0">
 							<ScoringTable
+								{databaseId}
 								formats={group.formats}
 								arrTypes={visibleArrTypes}
 								{customFormatScores}

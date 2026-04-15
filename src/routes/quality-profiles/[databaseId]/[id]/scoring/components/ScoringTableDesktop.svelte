@@ -5,7 +5,9 @@
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import { Check } from 'lucide-svelte';
+	import InlineLink from '$ui/link/InlineLink.svelte';
 
+	export let databaseId: number;
 	export let formats: any[];
 	export let arrTypes: string[];
 	export let customFormatScores: Record<string, Record<string, number | null>>;
@@ -80,8 +82,7 @@
 >
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
-			{@const disabled = isRowDisabled(row)}
-			<span class={disabled ? 'text-neutral-500 dark:text-neutral-500' : ''}>{row.name}</span>
+			<InlineLink href="/custom-formats/{databaseId}/{row.id}/general" text={row.name} external />
 		{:else}
 			{@const arrType = column.key}
 			<div class="flex items-center justify-center gap-2">

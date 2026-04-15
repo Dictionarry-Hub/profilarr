@@ -4,7 +4,9 @@
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import { Check } from 'lucide-svelte';
 	import { createVirtualList } from '$lib/client/utils/virtualList';
+	import InlineLink from '$ui/link/InlineLink.svelte';
 
+	export let databaseId: number;
 	export let formats: any[];
 	export let arrTypes: string[];
 	export let customFormatScores: Record<string, Record<string, number | null>>;
@@ -76,7 +78,11 @@
 						? 'text-neutral-500 dark:text-neutral-500'
 						: 'text-neutral-900 dark:text-neutral-100'}"
 				>
-					{format.name}
+					<InlineLink
+						href="/custom-formats/{databaseId}/{format.id}/general"
+						text={format.name}
+						external
+					/>
 				</div>
 
 				<!-- Arr type scores -->

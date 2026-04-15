@@ -38,7 +38,7 @@ export async function scoring(
 	// 3. Get all custom formats
 	const customFormats = await db
 		.selectFrom('custom_formats')
-		.select(['name'])
+		.select(['id', 'name'])
 		.orderBy(sql`name COLLATE NOCASE`)
 		.execute();
 
@@ -75,7 +75,7 @@ export async function scoring(
 	}
 
 	// 7. Build custom format scoring data
-	const customFormatScoring = customFormats.map((cf: { name: string }) => {
+	const customFormatScoring = customFormats.map((cf: { id: number; name: string }) => {
 		const formatScores: Record<string, number | null> = {};
 		const cfScores = scoresMap.get(cf.name);
 
@@ -90,6 +90,7 @@ export async function scoring(
 		}
 
 		return {
+			id: cf.id,
 			name: cf.name,
 			tags: tagsMap.get(cf.name) ?? [],
 			scores: formatScores

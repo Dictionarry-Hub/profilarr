@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 
+	export let databaseId: number;
 	export let formats: any[];
 	export let arrTypes: string[];
 	export let customFormatScores: Record<string, Record<string, number | null>>;
@@ -49,6 +50,7 @@
 
 {#if isDesktop}
 	<ScoringTableDesktop
+		{databaseId}
 		{formats}
 		{arrTypes}
 		{customFormatScores}
@@ -59,6 +61,7 @@
 	/>
 {:else}
 	<ScoringTableMobile
+		{databaseId}
 		{formats}
 		{arrTypes}
 		{customFormatScores}

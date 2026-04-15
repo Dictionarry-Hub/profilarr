@@ -555,6 +555,20 @@ icon }` objects.
 - **`navigation/pagination/Pagination.svelte`**: page-number pagination
   consumed by tables and card grids.
 
+#### InlineLink
+
+**`$ui/link/InlineLink.svelte`** is a lightweight inline `<a>` for text-level
+links within content. It renders as accent-colored text with an underline on
+hover. Use it to link entity names to their detail pages.
+
+Props: `href` (required), `text` (required), `external` (boolean, defaults to
+false; adds `target="_blank" rel="noopener noreferrer"`).
+
+```svelte
+<!-- src/routes/quality-profiles/[databaseId]/[id]/scoring/components/ScoringTableDesktop.svelte:87 -->
+<InlineLink href="/custom-formats/{databaseId}/{row.id}/general" text={row.name} external />
+```
+
 ### Feedback and Info
 
 #### Tooltip

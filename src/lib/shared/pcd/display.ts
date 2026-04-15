@@ -341,6 +341,7 @@ export interface QualitiesPageData {
 
 /** Custom format scoring entry */
 export interface CustomFormatScoring {
+	id: number;
 	name: string;
 	tags: string[];
 	scores: Record<string, number | null>;
