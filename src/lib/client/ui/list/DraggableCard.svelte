@@ -3,6 +3,7 @@
 	export let onDragHandlePointerDown: ((e: PointerEvent) => void) | undefined = undefined;
 	export let className = '';
 	export let contentClass = 'p-3';
+	export let dragHandleOnboarding: string | undefined = undefined;
 </script>
 
 <div
@@ -25,6 +26,7 @@
 		role="button"
 		tabindex="-1"
 		aria-label="Drag to reorder"
+		data-onboarding={dragHandleOnboarding}
 	>
 		<svg
 			width="8"

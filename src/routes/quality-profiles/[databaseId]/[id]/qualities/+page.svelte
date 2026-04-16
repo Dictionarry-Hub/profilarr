@@ -612,16 +612,18 @@
 					iconColor="text-blue-600 dark:text-blue-400"
 					on:click={() => (showInfoModal = true)}
 				/>
-				<Button
-					text="Create Group"
-					icon={Layers}
-					iconColor="text-accent-600 dark:text-accent-400"
-					disabled={!data.canEditGroupMembers}
-					tooltip={!data.canEditGroupMembers
-						? 'Update the linked schema dependency to edit quality group members.'
-						: ''}
-					on:click={openCreateGroupModal}
-				/>
+				<span data-onboarding="qp-qualities-group-button">
+					<Button
+						text="Create Group"
+						icon={Layers}
+						iconColor="text-accent-600 dark:text-accent-400"
+						disabled={!data.canEditGroupMembers}
+						tooltip={!data.canEditGroupMembers
+							? 'Update the linked schema dependency to edit quality group members.'
+							: ''}
+						on:click={openCreateGroupModal}
+					/>
+				</span>
 				<Button
 					disabled={isSaving || !$isDirty || !hasEnabledItems}
 					icon={isSaving ? Loader2 : Save}
@@ -692,6 +694,8 @@
 					isDragging={draggedQualityFromMain?.index === index}
 					onDragHandlePointerDown={(e) => handlePointerDown(e, item, index)}
 					data-quality-index={index}
+					data-onboarding={index === 0 ? 'qp-qualities-card' : undefined}
+					dragHandleOnboarding={index === 0 ? 'qp-qualities-drag' : undefined}
 					on:click={() => toggleEnabled(index)}
 					on:keydown={(e) => {
 						if (e.key === 'Enter' || e.key === ' ') {
@@ -808,22 +812,26 @@
 									/>
 								</span>
 							{/if}
-							<IconCheckbox
-								checked={item.upgradeUntil}
-								icon={ArrowUp}
-								color="#07CA07"
-								shape="circle"
-								stopPropagation
-								on:click={() => toggleUpgradeUntil(index)}
-							/>
-							<IconCheckbox
-								checked={item.enabled}
-								icon={Check}
-								color="blue"
-								shape="circle"
-								stopPropagation
-								on:click={() => toggleEnabled(index)}
-							/>
+							<span data-onboarding={index === 0 ? 'qp-qualities-upgrade-until' : undefined}>
+								<IconCheckbox
+									checked={item.upgradeUntil}
+									icon={ArrowUp}
+									color="#07CA07"
+									shape="circle"
+									stopPropagation
+									on:click={() => toggleUpgradeUntil(index)}
+								/>
+							</span>
+							<span data-onboarding={index === 0 ? 'qp-qualities-enabled' : undefined}>
+								<IconCheckbox
+									checked={item.enabled}
+									icon={Check}
+									color="blue"
+									shape="circle"
+									stopPropagation
+									on:click={() => toggleEnabled(index)}
+								/>
+							</span>
 						</div>
 					</div>
 					{#if item.type === 'group' && item.members}

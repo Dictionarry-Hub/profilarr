@@ -199,27 +199,31 @@
 
 		<div class="space-y-6">
 			<!-- Name -->
-			<FormInput
-				label="Name"
-				name="name"
-				value={name}
-				required
-				description="The name of this quality profile"
-				placeholder="Enter quality profile name"
-				on:input={(e) => update('name', e.detail)}
-			/>
+			<div data-onboarding="qp-general-name">
+				<FormInput
+					label="Name"
+					name="name"
+					value={name}
+					required
+					description="The name of this quality profile"
+					placeholder="Enter quality profile name"
+					on:input={(e) => update('name', e.detail)}
+				/>
+			</div>
 
 			<!-- Description -->
-			<MarkdownInput
-				id="description"
-				label="Description"
-				description="Add any notes or details about this profile's purpose and configuration."
-				value={description}
-				onchange={(v) => update('description', v)}
-			/>
+			<div data-onboarding="qp-general-description">
+				<MarkdownInput
+					id="description"
+					label="Description"
+					description="Add any notes or details about this profile's purpose and configuration."
+					value={description}
+					onchange={(v) => update('description', v)}
+				/>
+			</div>
 
 			<!-- Tags -->
-			<div class="space-y-2">
+			<div class="space-y-2" data-onboarding="qp-general-tags">
 				<div class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Tags</div>
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Add tags to organize and categorize this quality profile.
@@ -229,16 +233,18 @@
 
 			<!-- Language -->
 			{#if availableLanguages.length > 0}
-				<SearchDropdown
-					label="Language"
-					description={`Set the preferred language for this profile. Leave empty for "Any". Radarr only. Sonarr uses custom formats for language filtering.`}
-					name="language-search"
-					placeholder="Search for a language..."
-					options={languageOptions}
-					value={selectedLanguageName}
-					hideLabel={false}
-					on:change={(e) => update('language', e.detail || null)}
-				/>
+				<div data-onboarding="qp-general-language">
+					<SearchDropdown
+						label="Language"
+						description={`Set the preferred language for this profile. Leave empty for "Any". Radarr only. Sonarr uses custom formats for language filtering.`}
+						name="language-search"
+						placeholder="Search for a language..."
+						options={languageOptions}
+						value={selectedLanguageName}
+						hideLabel={false}
+						on:change={(e) => update('language', e.detail || null)}
+					/>
+				</div>
 			{/if}
 		</div>
 	</form>

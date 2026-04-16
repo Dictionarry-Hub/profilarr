@@ -682,7 +682,7 @@
 	<div class="mt-6 space-y-6 md:px-4">
 		<!-- Profile-level Score Settings -->
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-			<div class="space-y-2">
+			<div class="space-y-2" data-onboarding="qp-scoring-minimum">
 				<label
 					for="minimumScore"
 					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
@@ -701,7 +701,7 @@
 				/>
 			</div>
 
-			<div class="space-y-2">
+			<div class="space-y-2" data-onboarding="qp-scoring-upgrade-until">
 				<label
 					for="upgradeUntilScore"
 					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
@@ -720,7 +720,7 @@
 				/>
 			</div>
 
-			<div class="space-y-2">
+			<div class="space-y-2" data-onboarding="qp-scoring-increment">
 				<label
 					for="upgradeScoreIncrement"
 					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
@@ -742,7 +742,7 @@
 
 		<!-- Custom Format Scoring -->
 
-		<ActionsBar className="md:w-full">
+		<ActionsBar className="md:w-full" onboarding="qp-scoring-actions">
 			<SearchAction {searchStore} placeholder="Search custom formats..." responsive />
 			<ActionButton icon={ArrowUpDown} hasDropdown={true} dropdownPosition="right">
 				<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
@@ -949,7 +949,7 @@
 				class:grid-cols-2={tileColumns === 2}
 				class:grid-cols-3={tileColumns === 3}
 			>
-				{#each groupedFormats as group}
+				{#each groupedFormats as group, groupIndex}
 					{#if group.formats.length > 0}
 						<div class="min-w-0">
 							<ScoringTable
@@ -960,6 +960,7 @@
 								{customFormatEnabled}
 								{getArrTypeColor}
 								title={group.name}
+								firstRowOnboarding={groupIndex === 0 ? 'qp-scoring-row' : undefined}
 								on:scoreChange={handleScoreChange}
 								on:enabledChange={handleEnabledChange}
 							/>

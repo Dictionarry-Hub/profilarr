@@ -23,6 +23,9 @@
 	export let pageSize: number | undefined = undefined;
 	// Optional per-row class callback
 	export let rowClass: ((row: T) => string) | undefined = undefined;
+	// Optional per-row HTML attributes callback (e.g. data-onboarding for cutscene targets)
+	export let rowAttributes: ((row: T, rowIndex: number) => Record<string, string>) | undefined =
+		undefined;
 
 	let isMobile = false;
 	let mediaQuery: MediaQueryList | null = null;
@@ -177,6 +180,7 @@
 						? 'cursor-pointer'
 						: ''}"
 					on:click={() => onRowClick && onRowClick(row)}
+					{...rowAttributes ? rowAttributes(row, rowIndex) : {}}
 				>
 					{#if rowHref}
 						<a
@@ -339,6 +343,7 @@
 								? rowClass(row)
 								: ''}"
 							on:click={() => onRowClick && onRowClick(row)}
+							{...rowAttributes ? rowAttributes(row, rowIndex) : {}}
 						>
 							{#each columns as column, colIndex}
 								{@const tdExtraClass =

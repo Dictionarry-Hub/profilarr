@@ -79,5 +79,23 @@ export const routeResolvers: Record<string, () => Promise<string>> = {
 		if (!dev) return '/custom-formats';
 		const { path } = await (await fetch(`/custom-formats/${dev.id}/first/testing`)).json();
 		return path;
+	},
+	firstQualityProfileGeneral: async () => {
+		const dbs = await (await fetch('/api/v1/databases')).json();
+		if (!dbs.length) return '/quality-profiles';
+		const { path } = await (await fetch(`/quality-profiles/${dbs[0].id}/first/general`)).json();
+		return path;
+	},
+	firstQualityProfileScoring: async () => {
+		const dbs = await (await fetch('/api/v1/databases')).json();
+		if (!dbs.length) return '/quality-profiles';
+		const { path } = await (await fetch(`/quality-profiles/${dbs[0].id}/first/scoring`)).json();
+		return path;
+	},
+	firstQualityProfileQualities: async () => {
+		const dbs = await (await fetch('/api/v1/databases')).json();
+		if (!dbs.length) return '/quality-profiles';
+		const { path } = await (await fetch(`/quality-profiles/${dbs[0].id}/first/qualities`)).json();
+		return path;
 	}
 };

@@ -13,6 +13,9 @@ import { arrRenameStage } from './stages/arrs/renames.ts';
 import { cfGeneralStage } from './stages/custom-formats/general.ts';
 import { cfConditionsStage } from './stages/custom-formats/conditions.ts';
 import { cfTestingStage } from './stages/custom-formats/testing.ts';
+import { qpGeneralStage } from './stages/quality-profiles/general.ts';
+import { qpScoringStage } from './stages/quality-profiles/scoring.ts';
+import { qpQualitiesStage } from './stages/quality-profiles/qualities.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
@@ -28,6 +31,9 @@ export const STAGES: Record<string, Stage> = {
 	'cf-general': cfGeneralStage,
 	'cf-conditions': cfConditionsStage,
 	'cf-testing': cfTestingStage,
+	'qp-general': qpGeneralStage,
+	'qp-scoring': qpScoringStage,
+	'qp-qualities': qpQualitiesStage,
 	help: helpStage
 };
 
@@ -51,5 +57,10 @@ export const GROUPS: StageGroup[] = [
 		name: 'Custom Formats',
 		description: 'Build and test custom formats',
 		stages: ['cf-general', 'cf-conditions', 'cf-testing']
+	},
+	{
+		name: 'Quality Profiles',
+		description: 'Rank releases with qualities and custom format scores',
+		stages: ['qp-general', 'qp-scoring', 'qp-qualities']
 	}
 ];

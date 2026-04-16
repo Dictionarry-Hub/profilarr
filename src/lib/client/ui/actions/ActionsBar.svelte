@@ -1,8 +1,12 @@
 <script lang="ts">
 	export let className: string = '';
+	export let onboarding: string | undefined = undefined;
 </script>
 
-<div class="actions-bar mx-auto flex w-full justify-center md:mx-0 md:w-auto {className}">
+<div
+	class="actions-bar mx-auto flex w-full justify-center md:mx-0 md:w-auto {className}"
+	data-onboarding={onboarding}
+>
 	<slot />
 </div>
 

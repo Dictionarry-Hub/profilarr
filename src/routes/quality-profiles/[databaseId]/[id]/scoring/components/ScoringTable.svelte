@@ -16,6 +16,7 @@
 		| `var(--${string})`;
 	export let getArrTypeColor: (arrType: string) => IconCheckboxColor;
 	export let title: string | null = null;
+	export let firstRowOnboarding: string | undefined = undefined;
 
 	import ScoringTableDesktop from './ScoringTableDesktop.svelte';
 	import ScoringTableMobile from './ScoringTableMobile.svelte';
@@ -56,6 +57,7 @@
 		{customFormatScores}
 		{customFormatEnabled}
 		{getArrTypeColor}
+		{firstRowOnboarding}
 		on:scoreChange
 		on:enabledChange
 	/>
@@ -67,6 +69,7 @@
 		{customFormatScores}
 		{customFormatEnabled}
 		{getArrTypeColor}
+		{firstRowOnboarding}
 		on:scoreChange
 		on:enabledChange
 	/>

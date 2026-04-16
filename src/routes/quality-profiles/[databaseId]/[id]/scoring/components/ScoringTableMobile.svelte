@@ -20,6 +20,7 @@
 		| `#${string}`
 		| `var(--${string})`;
 	export let getArrTypeColor: (arrType: string) => IconCheckboxColor;
+	export let firstRowOnboarding: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher<{
 		scoreChange: { formatName: string; arrType: string; score: number | null };
@@ -63,7 +64,7 @@
 		{#if topHeight > 0}
 			<div style="height: {topHeight}px;"></div>
 		{/if}
-		{#each visibleFormats as format (format.name)}
+		{#each visibleFormats as format, i (format.name)}
 			{@const rowDisabled = arrTypes.every(
 				(arrType) => !customFormatEnabled[format.name]?.[arrType]
 			)}
@@ -71,6 +72,7 @@
 				class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900 {rowDisabled
 					? 'opacity-60'
 					: ''}"
+				data-onboarding={start + i === 0 ? firstRowOnboarding : undefined}
 			>
 				<!-- Format name -->
 				<div
