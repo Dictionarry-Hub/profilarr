@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
 	import type { Column } from '$ui/table/types';
 	import { afterNavigate } from '$app/navigation';
 	import { ExternalLink, FileText } from 'lucide-svelte';
@@ -10,28 +11,48 @@
 
 	export let data: PageData;
 
+	const pageSize = 20;
+
 	let loading = true;
 	let commits: Commit[] = [];
 	let branch = '';
 	let repositoryUrl = '';
+	let currentPage = 1;
+	let totalCount = 0;
+	let fetchToken = 0;
 
-	async function fetchCommits() {
+	$: totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+	async function fetchCommits(page: number) {
+		const token = ++fetchToken;
 		loading = true;
 		try {
-			const response = await fetch(`/databases/${data.database.id}/commits/data`);
+			const response = await fetch(
+				`/databases/${data.database.id}/commits/data?page=${page}&pageSize=${pageSize}`
+			);
+			if (token !== fetchToken) return;
 			if (response.ok) {
 				const result = await response.json();
 				commits = result.commits;
+				totalCount = result.totalCount;
 				branch = result.branch;
 				repositoryUrl = result.repositoryUrl;
+				currentPage = result.page;
 			}
 		} finally {
-			loading = false;
+			if (token === fetchToken) loading = false;
 		}
 	}
 
+	function handlePageChange(page: number) {
+		if (loading || page < 1 || page > totalPages) return;
+		fetchCommits(page);
+	}
+
 	afterNavigate(() => {
-		fetchCommits();
+		currentPage = 1;
+		totalCount = 0;
+		fetchCommits(1);
 	});
 
 	function parseDate(dateStr: string): Date | null {
@@ -173,4 +194,10 @@
 			</div>
 		</svelte:fragment>
 	</ExpandableTable>
+
+	{#if totalPages > 1}
+		<div class="flex justify-center">
+			<Pagination {currentPage} {totalPages} onPageChange={handlePageChange} />
+		</div>
+	{/if}
 </div>

@@ -13,6 +13,7 @@ export {
 	checkForUpdates,
 	getIncomingChanges,
 	getCommits,
+	countCommits,
 	getCommitMessagesBetween,
 	getDiff
 } from './read.ts';

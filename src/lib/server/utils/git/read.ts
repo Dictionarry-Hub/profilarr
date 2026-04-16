@@ -204,17 +204,21 @@ ${content
 /**
  * Get commit history. The `status` tags each returned commit: pass `'installed'`
  * for refs reachable from HEAD, `'available'` for upstream-only ranges (e.g.
- * `HEAD..origin/<branch>`).
+ * `HEAD..origin/<branch>`). `offset` translates to `--skip=N` for pagination.
  */
 export async function getCommits(
 	repoPath: string,
 	limit: number = 50,
 	ref: string | undefined,
-	status: CommitStatus
+	status: CommitStatus,
+	offset: number = 0
 ): Promise<Commit[]> {
+	if (limit <= 0) return [];
+
 	// Format: hash|shortHash|message|author|email|date
 	const format = '%H|%h|%s|%an|%ae|%cI';
 	const args = ['log', `--format=${format}`, `-${limit}`];
+	if (offset > 0) args.push(`--skip=${offset}`);
 	if (ref) args.push(ref);
 	const output = await execGit(args, repoPath);
 
@@ -249,6 +253,15 @@ export async function getCommits(
 	}
 
 	return commits;
+}
+
+/**
+ * Count commits reachable from a ref expression (e.g. `HEAD`,
+ * `HEAD..origin/main`). Returns 0 if the rev-list fails (e.g. branch missing).
+ */
+export async function countCommits(repoPath: string, ref: string): Promise<number> {
+	const output = await execGitSafe(['rev-list', '--count', ref], repoPath);
+	return parseInt(output || '0', 10) || 0;
 }
 
 /**

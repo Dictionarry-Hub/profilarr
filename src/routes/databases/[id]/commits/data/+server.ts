@@ -1,7 +1,11 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { getCommits, getStatus } from '$utils/git/index.ts';
+import { countCommits, getCommits, getStatus } from '$utils/git/index.ts';
+import type { Commit } from '$utils/git/types.ts';
+
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 200;
 
 export const GET: RequestHandler = async ({ params, url }) => {
 	const id = parseInt(params.id || '', 10);
@@ -11,23 +15,62 @@ export const GET: RequestHandler = async ({ params, url }) => {
 		error(404, 'Database not found');
 	}
 
-	const limit = parseInt(url.searchParams.get('limit') || '50', 10);
+	const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10) || 1);
+	const rawPageSize =
+		parseInt(url.searchParams.get('pageSize') || String(DEFAULT_PAGE_SIZE), 10) ||
+		DEFAULT_PAGE_SIZE;
+	const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, rawPageSize));
+
 	const status = await getStatus(database.local_path, { fetch: true });
 	const branch = status.branch;
 
-	const installed = await getCommits(database.local_path, limit, 'HEAD', 'installed');
+	const availableRef = branch ? `HEAD..origin/${branch}` : null;
+	const availableCount = availableRef ? await countCommits(database.local_path, availableRef) : 0;
+	const installedCount = await countCommits(database.local_path, 'HEAD');
+	const totalCount = installedCount + availableCount;
 
-	const available =
-		status.behind > 0 && branch
-			? await getCommits(database.local_path, limit, `HEAD..origin/${branch}`, 'available')
-			: [];
+	const skip = (page - 1) * pageSize;
+	const commits: Commit[] = [];
 
-	const commits = [...available, ...installed].sort(
-		(a, b) => Date.parse(b.date) - Date.parse(a.date)
-	);
+	if (skip < availableCount && availableRef) {
+		const availableLimit = Math.min(pageSize, availableCount - skip);
+		const availableSlice = await getCommits(
+			database.local_path,
+			availableLimit,
+			availableRef,
+			'available',
+			skip
+		);
+		commits.push(...availableSlice);
+
+		const remaining = pageSize - availableSlice.length;
+		if (remaining > 0 && installedCount > 0) {
+			const installedSlice = await getCommits(
+				database.local_path,
+				remaining,
+				'HEAD',
+				'installed',
+				0
+			);
+			commits.push(...installedSlice);
+		}
+	} else if (installedCount > 0) {
+		const installedSkip = skip - availableCount;
+		const installedSlice = await getCommits(
+			database.local_path,
+			pageSize,
+			'HEAD',
+			'installed',
+			installedSkip
+		);
+		commits.push(...installedSlice);
+	}
 
 	return json({
 		commits,
+		totalCount,
+		page,
+		pageSize,
 		branch,
 		repositoryUrl: database.repository_url
 	});
