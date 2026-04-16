@@ -6,6 +6,7 @@
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
+	import FilterModeToggle from '$ui/actions/FilterModeToggle.svelte';
 	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
@@ -15,6 +16,7 @@
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
 	import { getPersistentSearchStore } from '$stores/search';
+	import { filterMode } from '$stores/filterMode';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
@@ -105,11 +107,11 @@
 		}
 	];
 
-	// Mobile simple search fallback
-	$: mobileSearchStore = getPersistentSearchStore(`reSearch:${data.currentDatabase.id}`, {
+	// Simple search fallback (used on mobile and when filterMode is 'simple')
+	$: simpleSearchStore = getPersistentSearchStore(`reSearch:${data.currentDatabase.id}`, {
 		debounceMs: 150
 	});
-	$: mobileQuery = $mobileSearchStore.query;
+	$: simpleQuery = $simpleSearchStore.query;
 
 	let isMobile = false;
 	let mediaQuery: MediaQueryList | null = null;
@@ -131,6 +133,8 @@
 	function handleMediaChange(e: MediaQueryListEvent) {
 		isMobile = e.matches;
 	}
+
+	$: useSimpleMode = isMobile || $filterMode === 'simple';
 
 	// ======================================================================
 	// View Mode
@@ -158,12 +162,12 @@
 	// ======================================================================
 
 	$: filtered = (() => {
-		let result = applySmartFilters(data.regularExpressions, filterTags, fields);
-		if (isMobile && mobileQuery) {
-			const q = mobileQuery.toLowerCase();
-			result = result.filter((r) => r.name.toLowerCase().includes(q));
+		if (useSimpleMode) {
+			if (!simpleQuery) return data.regularExpressions;
+			const q = simpleQuery.toLowerCase();
+			return data.regularExpressions.filter((r) => r.name.toLowerCase().includes(q));
 		}
-		return result;
+		return applySmartFilters(data.regularExpressions, filterTags, fields);
 	})();
 
 	// Map databases to tabs
@@ -184,9 +188,9 @@
 
 	<!-- Actions Bar -->
 	<ActionsBar>
-		{#if isMobile}
+		{#if useSimpleMode}
 			<SearchAction
-				searchStore={mobileSearchStore}
+				searchStore={simpleSearchStore}
 				placeholder="Search regular expressions..."
 				responsive
 			/>
@@ -217,6 +221,9 @@
 				</Dropdown>
 			</svelte:fragment>
 		</ActionButton>
+		{#if !isMobile}
+			<FilterModeToggle bind:value={$filterMode} />
+		{/if}
 		<ViewToggle bind:value={viewMode} />
 		<ActionButton icon={Info} on:click={() => (infoModalOpen = true)} />
 	</ActionsBar>

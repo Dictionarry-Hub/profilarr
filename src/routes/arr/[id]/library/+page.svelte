@@ -33,11 +33,14 @@
 	let filterTags: FilterTag[] = [];
 	let showFilterInfo = false;
 
-	// Mobile simple search
-	$: mobileSearchStore = getPersistentSearchStore(`arrLibrarySearch:${data.instance.id}`, {
+	// Simple search (used on mobile and when filterMode is 'simple')
+	$: simpleSearchStore = getPersistentSearchStore(`arrLibrarySearch:${data.instance.id}`, {
 		debounceMs: 150
 	});
-	$: mobileQuery = $mobileSearchStore.query;
+	$: simpleQuery = $simpleSearchStore.query;
+
+	// useSimpleMode is bound from LibraryActionBar, which derives it from isMobile + filterMode
+	let useSimpleMode = false;
 
 	const radarrFields: FilterFieldDef<RadarrLibraryItem>[] = [
 		{
@@ -539,12 +542,12 @@
 	$: radarrLibrary = library as RadarrLibraryItem[];
 	$: allMoviesWithFiles = isRadarr ? radarrLibrary.filter((m) => m.hasFile) : [];
 	$: moviesWithFiles = (() => {
-		let result = applySmartFilters(allMoviesWithFiles, filterTags, radarrFields);
-		if (mobileQuery) {
-			const q = mobileQuery.toLowerCase();
-			result = result.filter((m) => m.title.toLowerCase().includes(q));
+		if (useSimpleMode) {
+			if (!simpleQuery) return allMoviesWithFiles;
+			const q = simpleQuery.toLowerCase();
+			return allMoviesWithFiles.filter((m) => m.title.toLowerCase().includes(q));
 		}
-		return result;
+		return applySmartFilters(allMoviesWithFiles, filterTags, radarrFields);
 	})();
 
 	// ==========================================================================
@@ -554,12 +557,12 @@
 	$: sonarrLibrary = library as SonarrLibraryItem[];
 	$: filteredSeries = (() => {
 		if (!isSonarr) return [];
-		let result = applySmartFilters(sonarrLibrary, filterTags, sonarrFields);
-		if (mobileQuery) {
-			const q = mobileQuery.toLowerCase();
-			result = result.filter((s) => s.title.toLowerCase().includes(q));
+		if (useSimpleMode) {
+			if (!simpleQuery) return sonarrLibrary;
+			const q = simpleQuery.toLowerCase();
+			return sonarrLibrary.filter((s) => s.title.toLowerCase().includes(q));
 		}
-		return result;
+		return applySmartFilters(sonarrLibrary, filterTags, sonarrFields);
 	})();
 
 	let sonarrTableView: SonarrTableView;
@@ -678,7 +681,8 @@
 			items={isRadarr ? allMoviesWithFiles : sonarrLibrary}
 			bind:tags={filterTags}
 			filterStorageKey={`smartFilter:${data.instance.id}`}
-			searchStore={mobileSearchStore}
+			searchStore={simpleSearchStore}
+			bind:useSimpleMode
 			visibleColumns={activeVisibleColumns}
 			toggleableColumns={activeToggleableColumns}
 			columnLabels={activeColumnLabels}
