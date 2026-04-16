@@ -32,6 +32,8 @@ export interface RepoInfo {
 	htmlUrl: string;
 }
 
+export type CommitStatus = 'installed' | 'available';
+
 export interface Commit {
 	hash: string;
 	shortHash: string;
@@ -40,6 +42,7 @@ export interface Commit {
 	authorEmail: string;
 	date: string;
 	files: string[];
+	status: CommitStatus;
 }
 
 export interface IncomingChanges {

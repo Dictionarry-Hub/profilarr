@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
+	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
 	import { afterNavigate } from '$app/navigation';
 	import { ExternalLink, FileText } from 'lucide-svelte';
@@ -78,6 +79,11 @@
 			width: 'w-24'
 		},
 		{
+			key: 'status',
+			header: 'Status',
+			width: 'w-28'
+		},
+		{
 			key: 'message',
 			header: 'Message'
 		},
@@ -99,7 +105,7 @@
 </script>
 
 <svelte:head>
-	<title>Commits - {data.database.name} - Profilarr</title>
+	<title>Updates - {data.database.name} - Profilarr</title>
 </svelte:head>
 
 <div class="mt-6 space-y-6">
@@ -126,6 +132,12 @@
 					{row.shortHash}
 					<ExternalLink size={12} />
 				</a>
+			{:else if column.key === 'status'}
+				{#if row.status === 'installed'}
+					<Label variant="success" size="sm" rounded="md">Installed</Label>
+				{:else}
+					<Label variant="info" size="sm" rounded="md">Available</Label>
+				{/if}
 			{:else if column.key === 'message'}
 				<span class="line-clamp-1 text-sm text-neutral-900 dark:text-neutral-100">
 					{row.message}

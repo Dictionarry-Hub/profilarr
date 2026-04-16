@@ -23,7 +23,7 @@
 					onboarding: 'db-tab-changes'
 				},
 				{
-					label: 'Commits',
+					label: 'Updates',
 					href: `/databases/${database.id}/commits`,
 					icon: History,
 					active: currentPath.includes('/commits'),

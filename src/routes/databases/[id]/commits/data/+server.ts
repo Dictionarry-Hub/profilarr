@@ -14,14 +14,17 @@ export const GET: RequestHandler = async ({ params, url }) => {
 	const limit = parseInt(url.searchParams.get('limit') || '50', 10);
 	const status = await getStatus(database.local_path, { fetch: true });
 	const branch = status.branch;
-	const remoteRef = branch ? `origin/${branch}` : null;
-	const shouldUseRemote = status.behind > 0 && status.ahead === 0 && remoteRef;
-	let commits = [];
-	try {
-		commits = await getCommits(database.local_path, limit, shouldUseRemote ? remoteRef : 'HEAD');
-	} catch {
-		commits = await getCommits(database.local_path, limit);
-	}
+
+	const installed = await getCommits(database.local_path, limit, 'HEAD', 'installed');
+
+	const available =
+		status.behind > 0 && branch
+			? await getCommits(database.local_path, limit, `HEAD..origin/${branch}`, 'available')
+			: [];
+
+	const commits = [...available, ...installed].sort(
+		(a, b) => Date.parse(b.date) - Date.parse(a.date)
+	);
 
 	return json({
 		commits,
