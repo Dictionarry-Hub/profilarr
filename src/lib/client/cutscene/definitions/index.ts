@@ -10,6 +10,9 @@ import { arrOverviewStage } from './stages/arrs/overview.ts';
 import { arrSyncStage } from './stages/arrs/sync.ts';
 import { arrUpgradesStage } from './stages/arrs/upgrades.ts';
 import { arrRenameStage } from './stages/arrs/renames.ts';
+import { cfGeneralStage } from './stages/custom-formats/general.ts';
+import { cfConditionsStage } from './stages/custom-formats/conditions.ts';
+import { cfTestingStage } from './stages/custom-formats/testing.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
@@ -22,6 +25,9 @@ export const STAGES: Record<string, Stage> = {
 	'arr-sync': arrSyncStage,
 	'arr-upgrades': arrUpgradesStage,
 	'arr-renames': arrRenameStage,
+	'cf-general': cfGeneralStage,
+	'cf-conditions': cfConditionsStage,
+	'cf-testing': cfTestingStage,
 	help: helpStage
 };
 
@@ -40,5 +46,10 @@ export const GROUPS: StageGroup[] = [
 		name: 'Arr Instances',
 		description: 'Connect and manage Radarr/Sonarr instances',
 		stages: ['arr-link', 'arr-manage', 'arr-sync', 'arr-upgrades', 'arr-renames']
+	},
+	{
+		name: 'Custom Formats',
+		description: 'Build and test custom formats',
+		stages: ['cf-general', 'cf-conditions', 'cf-testing']
 	}
 ];

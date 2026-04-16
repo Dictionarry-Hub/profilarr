@@ -134,19 +134,22 @@ like Help where a "you're done" modal would be redundant.
 
 ### Current Stages
 
-| ID                | Name        | Steps | Prerequisites    | Description                                     |
-| ----------------- | ----------- | ----- | ---------------- | ----------------------------------------------- |
-| `welcome`         | Welcome     | 3     |                  | What Profilarr is and how it works              |
-| `navigation`      | Navigation  | 5     |                  | The main sections of the app                    |
-| `personalize`     | Personalize | 2     |                  | Theme toggle and accent color picker            |
-| `help`            | Help        | 1     |                  | Introduces the help button (silent)             |
-| `database-link`   | Link        | 7     |                  | Connect a configuration database                |
-| `database-manage` | Overview    | 6     | `hasDatabase`    | Tabs and features of a connected database       |
-| `arr-link`        | Link        | 5     |                  | Connect a Radarr or Sonarr instance             |
-| `arr-manage`      | Overview    | 7     | `hasArrInstance` | Tabs and features of a connected Arr instance   |
-| `arr-sync`        | Sync        | 7     | `hasArrInstance` | Configure what gets synced and when             |
-| `arr-upgrades`    | Upgrades    | 11    | `hasArrInstance` | Automated searching for better quality releases |
-| `arr-renames`     | Rename      | 7     | `hasArrInstance` | Automated file and folder renaming              |
+| ID                | Name        | Steps | Prerequisites                     | Description                                     |
+| ----------------- | ----------- | ----- | --------------------------------- | ----------------------------------------------- |
+| `welcome`         | Welcome     | 3     |                                   | What Profilarr is and how it works              |
+| `navigation`      | Navigation  | 5     |                                   | The main sections of the app                    |
+| `personalize`     | Personalize | 2     |                                   | Theme toggle and accent color picker            |
+| `help`            | Help        | 1     |                                   | Introduces the help button (silent)             |
+| `database-link`   | Link        | 7     |                                   | Connect a configuration database                |
+| `database-manage` | Overview    | 6     | `hasDatabase`                     | Tabs and features of a connected database       |
+| `arr-link`        | Link        | 5     |                                   | Connect a Radarr or Sonarr instance             |
+| `arr-manage`      | Overview    | 7     | `hasArrInstance`                  | Tabs and features of a connected Arr instance   |
+| `arr-sync`        | Sync        | 7     | `hasArrInstance`                  | Configure what gets synced and when             |
+| `arr-upgrades`    | Upgrades    | 11    | `hasArrInstance`                  | Automated searching for better quality releases |
+| `arr-renames`     | Rename      | 7     | `hasArrInstance`                  | Automated file and folder renaming              |
+| `cf-general`      | General     | 6     | `hasDatabase`                     | Identity, rename behavior, and references       |
+| `cf-conditions`   | Conditions  | 8     | `hasDatabase`                     | Define what a custom format matches             |
+| `cf-testing`      | Testing     | 7     | `hasDevDatabase`, `parserHealthy` | Verify a format against real release titles     |
 
 ## Prerequisites
 
@@ -233,6 +236,7 @@ export const GROUPS: StageGroup[] = [
 | Getting Started | Welcome, Navigation, Personalize, Help            |
 | Databases       | Connect a Database, Managing a Database           |
 | Arr Instances   | Connect an Arr Instance, Managing an Arr Instance |
+| Custom Formats  | General, Conditions, Testing                      |
 
 ## Adding Content
 

@@ -31,7 +31,7 @@
 
 <GeneralForm mode="edit" canWriteToBase={data.canWriteToBase} actionUrl="?/update" {initialData} />
 
-<div class="space-y-3 md:px-4">
+<div class="space-y-3 md:px-4" data-onboarding="cf-general-references">
 	<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 		References ({data.profileRefs.length})
 	</div>

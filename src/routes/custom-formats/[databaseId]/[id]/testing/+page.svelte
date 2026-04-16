@@ -119,6 +119,7 @@
 				icon={Plus}
 				iconColor="text-blue-600 dark:text-blue-400"
 				variant="secondary"
+				onboarding="cf-testing-add"
 				on:click={handleAddTest}
 			/>
 		</svelte:fragment>

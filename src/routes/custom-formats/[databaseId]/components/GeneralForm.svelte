@@ -201,7 +201,7 @@
 					</p>
 				</div>
 				<div class="flex items-end gap-4">
-					<div class="min-w-0 flex-[19]">
+					<div class="min-w-0 flex-[19]" data-onboarding="cf-general-name">
 						<FormInput
 							label="Name"
 							name="name"
@@ -212,7 +212,7 @@
 							on:input={(e) => update('name', e.detail)}
 						/>
 					</div>
-					<div class="flex-1">
+					<div class="flex-1" data-onboarding="cf-general-include-in-rename">
 						<Toggle
 							checked={includeInRename}
 							ariaLabel="Include in rename"
@@ -225,23 +225,25 @@
 				</div>
 			</div>
 
-			<!-- Description -->
-			<MarkdownInput
-				id="description"
-				name="description"
-				label="Description"
-				description="Add any notes or details about this custom format's purpose and configuration."
-				value={description}
-				onchange={(v) => update('description', v)}
-			/>
+			<div data-onboarding="cf-general-description-tags" class="space-y-6">
+				<!-- Description -->
+				<MarkdownInput
+					id="description"
+					name="description"
+					label="Description"
+					description="Add any notes or details about this custom format's purpose and configuration."
+					value={description}
+					onchange={(v) => update('description', v)}
+				/>
 
-			<!-- Tags -->
-			<div class="space-y-2">
-				<div class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Tags</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					Add tags to organize and categorize this custom format.
-				</p>
-				<TagInput {tags} onchange={(newTags) => update('tags', newTags)} />
+				<!-- Tags -->
+				<div class="space-y-2">
+					<div class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Tags</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Add tags to organize and categorize this custom format.
+					</p>
+					<TagInput {tags} onchange={(newTags) => update('tags', newTags)} />
+				</div>
 			</div>
 		</div>
 	</form>

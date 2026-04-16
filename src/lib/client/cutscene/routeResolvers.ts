@@ -58,5 +58,26 @@ export const routeResolvers: Record<string, () => Promise<string>> = {
 		const res = await fetch('/api/v1/arr');
 		const arr = await res.json();
 		return `/arr/${arr[0].id}/settings`;
+	},
+	firstCustomFormatGeneral: async () => {
+		const dbs = await (await fetch('/api/v1/databases')).json();
+		if (!dbs.length) return '/custom-formats';
+		const { path } = await (await fetch(`/custom-formats/${dbs[0].id}/first/general`)).json();
+		return path;
+	},
+	firstCustomFormatConditions: async () => {
+		const dbs = await (await fetch('/api/v1/databases')).json();
+		if (!dbs.length) return '/custom-formats';
+		const { path } = await (await fetch(`/custom-formats/${dbs[0].id}/first/conditions`)).json();
+		return path;
+	},
+	firstDevCustomFormatTesting: async () => {
+		const dbs: Array<{ id: number; hasPat: boolean; local_ops_enabled: number }> = await (
+			await fetch('/api/v1/databases')
+		).json();
+		const dev = dbs.find((d) => d.hasPat && !d.local_ops_enabled);
+		if (!dev) return '/custom-formats';
+		const { path } = await (await fetch(`/custom-formats/${dev.id}/first/testing`)).json();
+		return path;
 	}
 };

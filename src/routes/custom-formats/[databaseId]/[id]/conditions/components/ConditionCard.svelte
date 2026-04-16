@@ -262,6 +262,7 @@
 			<div
 				class="w-full min-w-0 shrink-0 wide:w-48"
 				title={nameConflict ? 'Duplicate condition name' : ''}
+				data-onboarding="cf-cond-name"
 			>
 				<FormInput
 					label="Name"
@@ -273,7 +274,7 @@
 					on:input={(e) => emitChange({ name: e.detail })}
 				/>
 			</div>
-			<div class="w-full min-w-0 shrink-0 wide:w-52">
+			<div class="w-full min-w-0 shrink-0 wide:w-52" data-onboarding="cf-cond-type">
 				<SearchDropdown
 					options={typeOptions}
 					value={condition.type}
@@ -294,7 +295,7 @@
 		>
 			Value
 		</div>
-		<div class="min-w-0 wide:flex-1">
+		<div class="min-w-0 wide:flex-1" data-onboarding="cf-cond-value">
 			{#if isPatternType}
 				<SearchDropdown
 					options={patternOptions}
@@ -415,36 +416,46 @@
 			Flags
 		</div>
 		<div
-			class="grid grid-cols-2 gap-2 wide:ml-auto wide:flex wide:shrink-0 wide:flex-wrap wide:items-center wide:gap-2 md:grid-cols-4"
+			class="grid grid-cols-1 gap-2 wide:ml-auto wide:flex wide:shrink-0 wide:flex-wrap wide:items-center wide:gap-2 md:grid-cols-2"
 		>
-			<Toggle
-				checked={condition.negate}
-				ariaLabel="Negate"
-				label="Negate"
-				color="red"
-				on:change={(e) => emitChange({ negate: e.detail })}
-			/>
-			<Toggle
-				checked={condition.required}
-				ariaLabel="Required"
-				label="Required"
-				color="green"
-				on:change={(e) => emitChange({ required: e.detail })}
-			/>
-			<Toggle
-				checked={radarrEnabled}
-				ariaLabel="Radarr"
-				label="Radarr"
-				checkboxColor="var(--arr-radarr-color)"
-				on:change={(e) => handleArrTypeToggle('radarr', e.detail)}
-			/>
-			<Toggle
-				checked={sonarrEnabled}
-				ariaLabel="Sonarr"
-				label="Sonarr"
-				checkboxColor="var(--arr-sonarr-color)"
-				on:change={(e) => handleArrTypeToggle('sonarr', e.detail)}
-			/>
+			<div
+				class="grid grid-cols-2 gap-2 wide:flex wide:flex-wrap wide:items-center wide:gap-2"
+				data-onboarding="cf-cond-flags-modifiers"
+			>
+				<Toggle
+					checked={condition.negate}
+					ariaLabel="Negate"
+					label="Negate"
+					color="red"
+					on:change={(e) => emitChange({ negate: e.detail })}
+				/>
+				<Toggle
+					checked={condition.required}
+					ariaLabel="Required"
+					label="Required"
+					color="green"
+					on:change={(e) => emitChange({ required: e.detail })}
+				/>
+			</div>
+			<div
+				class="grid grid-cols-2 gap-2 wide:flex wide:flex-wrap wide:items-center wide:gap-2"
+				data-onboarding="cf-cond-flags-arr"
+			>
+				<Toggle
+					checked={radarrEnabled}
+					ariaLabel="Radarr"
+					label="Radarr"
+					checkboxColor="var(--arr-radarr-color)"
+					on:change={(e) => handleArrTypeToggle('radarr', e.detail)}
+				/>
+				<Toggle
+					checked={sonarrEnabled}
+					ariaLabel="Sonarr"
+					label="Sonarr"
+					checkboxColor="var(--arr-sonarr-color)"
+					on:change={(e) => handleArrTypeToggle('sonarr', e.detail)}
+				/>
+			</div>
 		</div>
 	</div>
 

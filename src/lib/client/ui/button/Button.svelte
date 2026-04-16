@@ -30,6 +30,8 @@
 	export let tooltip: string = '';
 	export let tooltipPosition: 'top' | 'bottom' = 'bottom';
 	export let loading: boolean = false;
+	// Optional data-onboarding attribute for cutscene targeting
+	export let onboarding: string | undefined = undefined;
 
 	let isSmallScreen = false;
 	let mediaQuery: MediaQueryList | null = null;
@@ -102,6 +104,7 @@
 			title={!tooltip && title ? title : undefined}
 			aria-label={ariaLabel || tooltip || undefined}
 			class={classes}
+			data-onboarding={onboarding}
 			on:click
 		>
 			{#if effectiveIcon && iconPosition === 'left'}
@@ -141,6 +144,7 @@
 			title={!tooltip && title ? title : undefined}
 			aria-label={ariaLabel || tooltip || undefined}
 			class={classes}
+			data-onboarding={onboarding}
 			on:click
 		>
 			{#if effectiveIcon && iconPosition === 'left'}

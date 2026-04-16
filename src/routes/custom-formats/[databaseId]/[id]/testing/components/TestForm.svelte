@@ -169,17 +169,19 @@
 		>
 			<div class="space-y-6 p-4">
 				<!-- Title -->
-				<FormInput
-					label="Release Title"
-					name="title"
-					bind:value={title}
-					required
-					mono
-					placeholder="e.g., Movie.Name.2024.1080p.BluRay.x264-GROUP"
-				/>
+				<div data-onboarding="cf-test-title">
+					<FormInput
+						label="Release Title"
+						name="title"
+						bind:value={title}
+						required
+						mono
+						placeholder="e.g., Movie.Name.2024.1080p.BluRay.x264-GROUP"
+					/>
+				</div>
 
 				<!-- Media Type -->
-				<div>
+				<div data-onboarding="cf-test-type">
 					<div class="mb-3 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
 						Media Type
 					</div>
@@ -202,7 +204,7 @@
 				</div>
 
 				<!-- Expected Result -->
-				<div>
+				<div data-onboarding="cf-test-expected">
 					<div class="mb-3 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
 						Expected Result
 					</div>
@@ -226,13 +228,15 @@
 				</div>
 
 				<!-- Description -->
-				<MarkdownInput
-					label="Description"
-					placeholder="Why this test exists or what edge case it covers"
-					value={description}
-					onchange={(v) => (description = v)}
-					rows={2}
-				/>
+				<div data-onboarding="cf-test-description">
+					<MarkdownInput
+						label="Description"
+						placeholder="Why this test exists or what edge case it covers"
+						value={description}
+						onchange={(v) => (description = v)}
+						rows={2}
+					/>
+				</div>
 			</div>
 		</div>
 	</form>
