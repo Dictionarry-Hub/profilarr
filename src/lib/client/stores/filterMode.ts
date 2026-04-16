@@ -16,8 +16,10 @@ function loadFilterMode(): FilterMode {
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored === 'smart' || stored === 'simple') return stored;
-	} catch {}
-	return 'smart';
+		return 'smart';
+	} catch {
+		return 'smart';
+	}
 }
 
 export const filterMode = writable<FilterMode>(loadFilterMode());
@@ -26,6 +28,8 @@ if (browser) {
 	filterMode.subscribe((value) => {
 		try {
 			localStorage.setItem(STORAGE_KEY, value);
-		} catch {}
+		} catch {
+			// storage may be unavailable (private mode, quota); non-fatal
+		}
 	});
 }
