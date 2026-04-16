@@ -3,6 +3,7 @@
 	import { afterNavigate, goto } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
 	import { cutscene } from './store';
+	import { sidebarCollapsed } from '$stores/sidebar';
 	import { setupCompletion, teardownCompletion } from './completions.ts';
 	import { STAGES } from './definitions/index.ts';
 	import { routeResolvers } from './routeResolvers.ts';
@@ -66,6 +67,20 @@
 		return rect.top >= 0 && rect.bottom <= window.innerHeight;
 	}
 
+	function isInsideSidebar(target: string): boolean {
+		const el = document.querySelector(`[data-onboarding="${target}"]`);
+		if (!el) return false;
+		const sidebar = document.querySelector('[data-onboarding="sidebar"]');
+		return !!sidebar && (sidebar === el || sidebar.contains(el));
+	}
+
+	function ensureSidebarExpanded(): Promise<void> {
+		if (!$sidebarCollapsed) return Promise.resolve();
+		sidebarCollapsed.expand();
+		// Wait for the 200ms slide animation to finish
+		return new Promise((r) => setTimeout(r, 250));
+	}
+
 	function findTarget(): void {
 		if (!step?.target) {
 			targetRect = null;
@@ -124,7 +139,11 @@
 		setupCompletion(step, () => cutscene.advance());
 
 		const afterNav = () => {
-			tick().then(() => {
+			tick().then(async () => {
+				// Auto-expand sidebar if step targets an element inside it
+				if (step.target && isInsideSidebar(step.target)) {
+					await ensureSidebarExpanded();
+				}
 				requestAnimationFrame(() => {
 					findTarget();
 					setTimeout(

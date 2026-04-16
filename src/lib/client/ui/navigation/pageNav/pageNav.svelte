@@ -20,6 +20,7 @@
 		Tv
 	} from 'lucide-svelte';
 	import { mobileNavOpen } from '$stores/mobileNav';
+	import { sidebarCollapsed } from '$stores/sidebar';
 	import { page } from '$app/stores';
 	import logo from '$assets/logo-512.png';
 	import radarrLogo from '$assets/Radarr.svg';
@@ -52,9 +53,10 @@
 
 <nav
 	data-onboarding="sidebar"
-	class="fixed top-0 left-0 z-[70] flex h-full w-[90vw] flex-col border-r border-neutral-200 bg-neutral-50 transition-transform duration-200 dark:border-neutral-800 dark:bg-neutral-900
+	class="fixed top-0 left-0 z-[70] flex h-full w-[90vw] flex-col border-r border-neutral-200 bg-neutral-50 transition-transform duration-200 ease-in-out dark:border-neutral-800 dark:bg-neutral-900
 		{$mobileNavOpen ? 'translate-x-0' : '-translate-x-full'}
-		md:top-16 md:h-[calc(100vh-4rem)] md:w-80 md:translate-x-0 md:border-t"
+		md:top-16 md:h-[calc(100vh-4rem)] md:w-80
+		{$sidebarCollapsed ? 'md:-translate-x-full' : 'md:translate-x-0'}"
 >
 	<!-- Mobile header with logo and close button -->
 	<div

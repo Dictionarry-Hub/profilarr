@@ -14,6 +14,7 @@
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
+	import FilterModeToggle from '$ui/actions/FilterModeToggle.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
@@ -22,6 +23,7 @@
 	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import type { SearchStore } from '$stores/search';
+	import { filterMode } from '$stores/filterMode';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
 
 	export let fields: FilterFieldDef[] = [];
@@ -50,6 +52,7 @@
 	export let sortKey: string = 'title';
 	export let sortDirection: 'asc' | 'desc' = 'asc';
 	export let onSort: (key: string, direction: 'asc' | 'desc') => void = () => {};
+	export let useSimpleMode: boolean = false;
 
 	const sortOptions = [
 		{ key: 'title', label: 'Title' },
@@ -93,10 +96,12 @@
 	function handleMediaChange(e: MediaQueryListEvent) {
 		isMobile = e.matches;
 	}
+
+	$: useSimpleMode = isMobile || $filterMode === 'simple';
 </script>
 
 <ActionsBar>
-	{#if isMobile}
+	{#if useSimpleMode}
 		<SearchAction {searchStore} placeholder={filterPlaceholder} responsive />
 	{:else}
 		<SmartFilterBar
@@ -172,6 +177,9 @@
 				</Dropdown>
 			</svelte:fragment>
 		</ActionButton>
+	{/if}
+	{#if !isMobile}
+		<FilterModeToggle bind:value={$filterMode} />
 	{/if}
 	<ViewToggle bind:value={viewMode} />
 </ActionsBar>
