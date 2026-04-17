@@ -18,7 +18,8 @@ export interface Step {
 		| 'above-left'
 		| 'above-right'
 		| 'below-left'
-		| 'below-right';
+		| 'below-right'
+		| 'center';
 	freeInteract?: boolean;
 	completion: Completion;
 }

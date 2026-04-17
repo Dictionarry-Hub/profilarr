@@ -222,7 +222,7 @@
 	$: cardStyle = computeCardPosition(step?.position, targetRect);
 
 	function computeCardPosition(position: string | undefined, rect: DOMRect | null): string {
-		if (!rect) {
+		if (!rect || position === 'center') {
 			return 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);';
 		}
 
