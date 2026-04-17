@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { X } from 'lucide-svelte';
 	import Button from '$ui/button/Button.svelte';
+	import InlineCode from '$ui/code/InlineCode.svelte';
 	import CutsceneProgress from './CutsceneProgress.svelte';
 
 	export let title: string;
@@ -21,6 +22,17 @@
 	];
 
 	$: cancelTooltip = cancelQuips[Math.floor(Math.random() * cancelQuips.length)];
+
+	// Split body into segments: even indices are plain text, odd indices are inline code.
+	// Backticks without a closing pair stay as literal text.
+	$: bodySegments = (() => {
+		const parts = body.split('`');
+		if (parts.length % 2 === 0) {
+			// Unclosed backtick — render the whole body as text.
+			return [{ code: false, text: body }];
+		}
+		return parts.map((text, i) => ({ code: i % 2 === 1, text }));
+	})();
 </script>
 
 <div
@@ -36,7 +48,13 @@
 			{/if}
 		</div>
 		<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-			{body}
+			{#each bodySegments as segment}
+				{#if segment.code}
+					<InlineCode text={segment.text} rounded="sm" />
+				{:else}
+					{segment.text}
+				{/if}
+			{/each}
 		</p>
 	</div>
 	<CutsceneProgress {currentStep} {totalSteps} {onBack} {onForward} {showBack} />
