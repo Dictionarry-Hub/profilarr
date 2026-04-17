@@ -56,6 +56,10 @@
 			: 'transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900';
 	}
 
+	function rowAttributes(_: any, i: number): Record<string, string> {
+		return i === 0 && firstRowOnboarding ? { 'data-onboarding': firstRowOnboarding } : {};
+	}
+
 	function handleScoreChange(formatName: string, arrType: string, score: number | null) {
 		dispatch('scoreChange', { formatName, arrType, score });
 	}
@@ -80,9 +84,7 @@
 	pageSize={50}
 	hoverable={false}
 	{rowClass}
-	rowAttributes={firstRowOnboarding
-		? (_, i) => (i === 0 ? { 'data-onboarding': firstRowOnboarding } : {})
-		: undefined}
+	{rowAttributes}
 >
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
