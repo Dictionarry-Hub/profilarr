@@ -17,7 +17,7 @@
 <code
 	class="inline-flex items-center gap-1.5 {roundedClasses[
 		rounded
-	]} bg-neutral-100 px-1.5 py-0.5 text-[0.85em] text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+	]} bg-neutral-100 px-1 py-px text-[0.85em] text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
 	style="font-family: var(--font-code)"
 >
 	{#if icon}
