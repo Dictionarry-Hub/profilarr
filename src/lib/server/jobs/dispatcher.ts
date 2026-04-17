@@ -4,7 +4,7 @@ import { buildJobDisplayName } from './display.ts';
 import { jobQueueRegistry } from './queueRegistry.ts';
 import type { JobHandlerResult, JobQueueRecord, JobStatus } from './queueTypes.ts';
 import { logger } from '$logger/logger.ts';
-import { jobEvents, getSyncRunningLabel, getSyncCompletedLabel } from './jobEvents.ts';
+import { jobEvents, getJobRunningLabel, getJobCompletedLabel } from './jobEvents.ts';
 import './handlers/index.ts';
 
 class JobDispatcher {
@@ -107,7 +107,7 @@ class JobDispatcher {
 			type: 'job.started',
 			jobId: job.id,
 			jobType: job.jobType,
-			displayLabel: getSyncRunningLabel(job.jobType)
+			displayLabel: getJobRunningLabel(job.jobType)
 		});
 
 		let result: JobHandlerResult;
@@ -138,7 +138,7 @@ class JobDispatcher {
 			type: 'job.finished',
 			jobId: job.id,
 			jobType: job.jobType,
-			displayLabel: getSyncCompletedLabel(job.jobType),
+			displayLabel: getJobCompletedLabel(job.jobType),
 			status: result.status,
 			durationMs
 		});

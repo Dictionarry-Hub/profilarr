@@ -13,6 +13,8 @@
 	import SearchAction from '$lib/client/ui/actions/SearchAction.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { getPersistentSearchStore } from '$lib/client/stores/search';
+	import { jobStatus } from '$lib/client/stores/jobStatus';
+	import { onMount } from 'svelte';
 
 	export let data: PageData;
 
@@ -77,13 +79,12 @@
 	}
 
 	async function triggerCreateBackup() {
+		jobStatus.connect();
 		try {
 			const res = await fetch('/api/v1/backups', { method: 'POST' });
 
 			if (res.ok) {
 				alertStore.add('success', 'Backup queued');
-				// Delay refresh to give the job a moment to start
-				setTimeout(() => invalidateAll(), 1000);
 			} else {
 				const body = await res.json();
 				alertStore.add('error', body.error || 'Failed to create backup');
@@ -94,8 +95,25 @@
 	}
 
 	function triggerCleanupBackups() {
+		jobStatus.connect();
 		cleanupFormRef?.requestSubmit();
 	}
+
+	// Refresh the backups list once a backup job completes, so the new file
+	// (or the cleanup result) appears without the user needing to reload.
+	onMount(() => {
+		let prevState: string | null = null;
+		return jobStatus.subscribe((status) => {
+			if (
+				prevState === 'running' &&
+				status.state === 'completed' &&
+				status.jobType.startsWith('backup.')
+			) {
+				invalidateAll();
+			}
+			prevState = status.state;
+		});
+	});
 
 	function formatDateTime(date: string): string {
 		return new Date(date).toLocaleString();
