@@ -17,6 +17,7 @@ import { qpGeneralStage } from './stages/quality-profiles/general.ts';
 import { qpScoringStage } from './stages/quality-profiles/scoring.ts';
 import { qpQualitiesStage } from './stages/quality-profiles/qualities.ts';
 import { regexGeneralStage } from './stages/regular-expressions/general.ts';
+import { delayGeneralStage } from './stages/delay-profiles/general.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
@@ -36,6 +37,7 @@ export const STAGES: Record<string, Stage> = {
 	'qp-scoring': qpScoringStage,
 	'qp-qualities': qpQualitiesStage,
 	'regex-general': regexGeneralStage,
+	'delay-general': delayGeneralStage,
 	help: helpStage
 };
 
@@ -69,5 +71,10 @@ export const GROUPS: StageGroup[] = [
 		name: 'Quality Profiles',
 		description: 'Rank releases with qualities and custom format scores',
 		stages: ['qp-general', 'qp-scoring', 'qp-qualities']
+	},
+	{
+		name: 'Delay Profiles',
+		description: 'Wait for better releases before committing to a grab',
+		stages: ['delay-general']
 	}
 ];

@@ -221,17 +221,19 @@
 		<Card flush padding="lg">
 			<div class="space-y-6">
 				<!-- Name -->
-				<FormInput
-					label="Name"
-					name="name"
-					placeholder="e.g., Standard Delay"
-					required
-					value={formData.name}
-					on:input={(e) => update('name', e.detail)}
-				/>
+				<div data-onboarding="delay-general-name">
+					<FormInput
+						label="Name"
+						name="name"
+						placeholder="e.g., Standard Delay"
+						required
+						value={formData.name}
+						on:input={(e) => update('name', e.detail)}
+					/>
+				</div>
 
 				<!-- Protocol Preference -->
-				<div class="space-y-2">
+				<div class="space-y-2" data-onboarding="delay-general-protocol">
 					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 						Protocol Preference
 					</h3>
@@ -249,7 +251,7 @@
 				</div>
 
 				<!-- Delays -->
-				<div>
+				<div data-onboarding="delay-general-delays">
 					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Delays</h3>
 					<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
 						Time to wait before downloading from each source. Set to 0 for no delay.
@@ -298,7 +300,7 @@
 				</div>
 
 				<!-- Bypass Conditions -->
-				<div>
+				<div data-onboarding="delay-general-bypass">
 					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 						Bypass Conditions
 					</h3>

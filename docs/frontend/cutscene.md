@@ -150,6 +150,11 @@ like Help where a "you're done" modal would be redundant.
 | `cf-general`      | General     | 6     | `hasDatabase`                     | Identity, rename behavior, and references       |
 | `cf-conditions`   | Conditions  | 8     | `hasDatabase`                     | Define what a custom format matches             |
 | `cf-testing`      | Testing     | 7     | `hasDevDatabase`, `parserHealthy` | Verify a format against real release titles     |
+| `qp-general`      | General     | 6     | `hasDatabase`                     | Identity, description, tags, and language       |
+| `qp-scoring`      | Scoring     | 7     | `hasDatabase`                     | Score custom formats and shape upgrade behavior |
+| `qp-qualities`    | Qualities   | 7     | `hasDatabase`                     | Order, enable, and group qualities              |
+| `regex-general`   | General     | 6     | `hasDatabase`                     | Reusable regex patterns for CF conditions       |
+| `delay-general`   | General     | 6     | `hasDatabase`                     | Name, protocol, delays, and bypass conditions   |
 
 ## Prerequisites
 
@@ -231,12 +236,15 @@ export const GROUPS: StageGroup[] = [
 
 ### Current Groups
 
-| Name            | Stages                                            |
-| --------------- | ------------------------------------------------- |
-| Getting Started | Welcome, Navigation, Personalize, Help            |
-| Databases       | Connect a Database, Managing a Database           |
-| Arr Instances   | Connect an Arr Instance, Managing an Arr Instance |
-| Custom Formats  | General, Conditions, Testing                      |
+| Name                | Stages                                            |
+| ------------------- | ------------------------------------------------- |
+| Getting Started     | Welcome, Navigation, Personalize, Help            |
+| Databases           | Connect a Database, Managing a Database           |
+| Arr Instances       | Connect an Arr Instance, Managing an Arr Instance |
+| Custom Formats      | General, Conditions, Testing                      |
+| Quality Profiles    | General, Scoring, Qualities                       |
+| Regular Expressions | General                                           |
+| Delay Profiles      | General                                           |
 
 ## Adding Content
 
