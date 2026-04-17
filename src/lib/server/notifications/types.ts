@@ -6,10 +6,6 @@
  * Type-safe notification type constants
  */
 export const NotificationTypes = {
-	// Jobs (dynamic - constructed with job name)
-	jobSuccess: (jobName: string) => `job.${jobName}.success` as const,
-	jobFailed: (jobName: string) => `job.${jobName}.failed` as const,
-
 	// PCD / Databases
 	PCD_LINKED: 'pcd.linked',
 	PCD_UNLINKED: 'pcd.unlinked',
@@ -30,7 +26,11 @@ export const NotificationTypes = {
 	// Arr Sync
 	ARR_SYNC_SUCCESS: 'arr.sync.success',
 	ARR_SYNC_PARTIAL: 'arr.sync.partial',
-	ARR_SYNC_FAILED: 'arr.sync.failed'
+	ARR_SYNC_FAILED: 'arr.sync.failed',
+
+	// Backups
+	BACKUP_SUCCESS: 'backup.success',
+	BACKUP_FAILED: 'backup.failed'
 } as const;
 
 /**
@@ -82,6 +82,12 @@ export interface Notification {
 	severity: NotificationSeverity;
 	title: string;
 	message: string;
+	/**
+	 * Optional hint for how the message should be rendered.
+	 * Detail-tier notifiers (Discord) honor this; Summary-tier notifiers
+	 * (Ntfy, Telegram) and Passthrough (Webhook) ignore it and render plain text.
+	 */
+	messageFormat?: 'plain' | 'code';
 	blocks?: NotificationBlock[];
 }
 

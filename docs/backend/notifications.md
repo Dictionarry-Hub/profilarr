@@ -80,6 +80,7 @@ interface Notification {
 	severity: 'success' | 'error' | 'warning' | 'info';
 	title: string;
 	message: string;
+	messageFormat?: 'plain' | 'code';
 	blocks?: NotificationBlock[];
 }
 
@@ -103,6 +104,11 @@ interface SectionBlock {
 The payload is a structured document, not a rendering instruction. `blocks` is a
 single ordered array (not separate `fields[]` and `sections[]`) because ordering
 is meaningful: stats first, then content, then errors.
+
+`messageFormat` is an optional rendering hint. When set to `'code'`, Detail-tier
+notifiers (Discord) wrap the message in a code block. Summary-tier notifiers
+(Ntfy, Telegram) and Passthrough (Webhook) ignore it and render the message as
+plain text. Use for filename/path-style messages where monospace is desirable.
 
 ### Severity
 

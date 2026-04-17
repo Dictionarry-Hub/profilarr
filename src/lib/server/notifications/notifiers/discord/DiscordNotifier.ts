@@ -207,9 +207,13 @@ export class DiscordNotifier {
 	 * Build a full embed with title, description, and chrome
 	 */
 	private buildChrome(notification: Notification, color: number): DiscordEmbed {
+		const description =
+			notification.messageFormat === 'code'
+				? '```\n' + notification.message + '\n```'
+				: notification.message;
 		return {
 			title: notification.title,
-			description: notification.message,
+			description,
 			color,
 			timestamp: new Date().toISOString(),
 			author: {

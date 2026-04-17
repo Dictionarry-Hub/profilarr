@@ -16,28 +16,16 @@ export interface NotificationType {
 export const notificationTypes: NotificationType[] = [
 	// Backups
 	{
-		id: 'job.create_backup.success',
-		label: 'Backup Created (Success)',
+		id: 'backup.success',
+		label: 'Backup Completed (Success)',
 		category: 'Backups',
 		description: 'Notification when a backup is created successfully'
 	},
 	{
-		id: 'job.create_backup.failed',
-		label: 'Backup Created (Failed)',
+		id: 'backup.failed',
+		label: 'Backup Failed',
 		category: 'Backups',
 		description: 'Notification when backup creation fails'
-	},
-	{
-		id: 'job.cleanup_backups.success',
-		label: 'Backup Cleanup (Success)',
-		category: 'Backups',
-		description: 'Notification when old backups are cleaned up successfully'
-	},
-	{
-		id: 'job.cleanup_backups.failed',
-		label: 'Backup Cleanup (Failed)',
-		category: 'Backups',
-		description: 'Notification when backup cleanup fails'
 	},
 
 	// Logs
