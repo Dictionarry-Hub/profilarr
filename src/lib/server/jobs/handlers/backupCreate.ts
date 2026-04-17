@@ -8,7 +8,7 @@ import { logger } from '$logger/logger.ts';
 import { notifications } from '$notifications/definitions/index.ts';
 import { notificationManager } from '$notifications/NotificationManager.ts';
 
-async function notifyFailure(jobId: string, error: string): Promise<void> {
+async function notifyFailure(jobId: number, error: string): Promise<void> {
 	try {
 		await notificationManager.notify(notifications.backupFailed({ error }));
 	} catch (err) {

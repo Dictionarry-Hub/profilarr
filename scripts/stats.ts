@@ -502,7 +502,7 @@ type SvelteSection = 'template' | 'script' | 'style' | 'script-opening' | 'style
 
 function countSvelte(source: string): Counts {
 	let section: SvelteSection = 'template';
-	let templateState: CounterState = { inBlock: false };
+	const templateState: CounterState = { inBlock: false };
 	let scriptState: CounterState = { inBlock: false };
 	let styleState: CounterState = { inBlock: false };
 	let code = 0;
