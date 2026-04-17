@@ -588,4 +588,4 @@ when `develop` is free.
 ## Reference
 
 - `docs/ARCHITECTURE.md` - full codebase encyclopedia (modules, data flow, PCD)
-- `bash scripts/stats.sh` - per-module code stats (TS/JS/Svelte/CSS/SQL/C#)
+- `deno task stats` - per-module code stats (TS/JS/Svelte/CSS/SQL/C#)
