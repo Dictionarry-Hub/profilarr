@@ -155,7 +155,11 @@
 
 	<div class="space-y-8">
 		<!-- Change Password -->
-		<ExpandableCard title="Change Password" description="Update your account password">
+		<ExpandableCard
+			title="Change Password"
+			description="Update your account password"
+			onboardingId="security-password"
+		>
 			<div class="p-6">
 				<form
 					method="POST"
@@ -215,6 +219,7 @@
 		<ExpandableCard
 			title="Local Bypass"
 			description="Skip authentication for requests from local network addresses"
+			onboardingId="security-local-bypass"
 		>
 			<div class="p-6">
 				<form
@@ -243,6 +248,7 @@
 		<ExpandableCard
 			title="API Key"
 			description="Authenticate API requests via the X-Api-Key header"
+			onboardingId="security-api-key"
 		>
 			<div class="p-6">
 				{#if apiKey}
@@ -331,6 +337,7 @@
 		<ExpandableCard
 			title="Active Sessions"
 			description="Manage your logged-in sessions across devices"
+			onboardingId="security-sessions"
 		>
 			<svelte:fragment slot="header-right">
 				{#if data.sessions.length > 1}

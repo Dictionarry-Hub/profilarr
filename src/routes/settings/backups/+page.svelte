@@ -195,7 +195,7 @@
 	></form>
 
 	<!-- Actions Bar -->
-	<div class="mb-4">
+	<div class="mb-4" data-onboarding="backups-actions">
 		<ActionsBar>
 			<SearchAction {searchStore} placeholder="Search backups..." />
 			<Tooltip text="Upload Backup">
@@ -211,75 +211,77 @@
 	</div>
 
 	<!-- Backups Table -->
-	<Table
-		{columns}
-		data={filteredBackups}
-		emptyMessage="No backups found. Create your first backup to get started."
-		actionsHeaderAlign="center"
-		compact
-		responsive
-	>
-		<svelte:fragment slot="cell" let:row let:column>
-			{#if column.key === 'created'}
-				<span class="font-medium">{formatDateTime(row.created)}</span>
-			{:else if column.key === 'filename'}
-				<span class="font-mono text-neutral-500 dark:text-neutral-400">{row.filename}</span>
-			{:else if column.key === 'sizeFormatted'}
-				<span class="text-neutral-500 dark:text-neutral-400">{row.sizeFormatted}</span>
-			{/if}
-		</svelte:fragment>
+	<div data-onboarding="backups-table">
+		<Table
+			{columns}
+			data={filteredBackups}
+			emptyMessage="No backups found. Create your first backup to get started."
+			actionsHeaderAlign="center"
+			compact
+			responsive
+		>
+			<svelte:fragment slot="cell" let:row let:column>
+				{#if column.key === 'created'}
+					<span class="font-medium">{formatDateTime(row.created)}</span>
+				{:else if column.key === 'filename'}
+					<span class="font-mono text-neutral-500 dark:text-neutral-400">{row.filename}</span>
+				{:else if column.key === 'sizeFormatted'}
+					<span class="text-neutral-500 dark:text-neutral-400">{row.sizeFormatted}</span>
+				{/if}
+			</svelte:fragment>
 
-		<svelte:fragment slot="actions" let:row>
-			<div class="flex items-center justify-center gap-1">
-				<Button
-					icon={Download}
-					size="xs"
-					tooltip="Download"
-					on:click={() => downloadBackup(row.filename)}
-				/>
-
-				<form
-					method="POST"
-					action="?/restoreBackup"
-					use:enhance={() => {
-						return async ({ result, update }) => {
-							if (result.type === 'failure' && result.data) {
-								alertStore.add(
-									'error',
-									(result.data as { error?: string }).error || 'Failed to restore backup'
-								);
-							} else if (result.type === 'success') {
-								alertStore.add(
-									'success',
-									'Backup restored successfully. Please restart the application.'
-								);
-							}
-							await update();
-						};
-					}}
-				>
-					<input type="hidden" name="filename" value={row.filename} />
+			<svelte:fragment slot="actions" let:row>
+				<div class="flex items-center justify-center gap-1">
 					<Button
-						icon={RotateCcw}
+						icon={Download}
 						size="xs"
-						tooltip="Restore"
-						on:click={(e) => {
-							const form = (e.currentTarget as HTMLElement)?.closest('form');
-							if (form) openRestoreModal(row.filename, form);
-						}}
+						tooltip="Download"
+						on:click={() => downloadBackup(row.filename)}
 					/>
-				</form>
 
-				<Button
-					icon={Trash2}
-					size="xs"
-					iconColor="text-red-600 dark:text-red-400"
-					tooltip="Delete"
-					on:click={() => openDeleteModal(row.filename)}
-				/>
-			</div>
-		</svelte:fragment>
-	</Table>
+					<form
+						method="POST"
+						action="?/restoreBackup"
+						use:enhance={() => {
+							return async ({ result, update }) => {
+								if (result.type === 'failure' && result.data) {
+									alertStore.add(
+										'error',
+										(result.data as { error?: string }).error || 'Failed to restore backup'
+									);
+								} else if (result.type === 'success') {
+									alertStore.add(
+										'success',
+										'Backup restored successfully. Please restart the application.'
+									);
+								}
+								await update();
+							};
+						}}
+					>
+						<input type="hidden" name="filename" value={row.filename} />
+						<Button
+							icon={RotateCcw}
+							size="xs"
+							tooltip="Restore"
+							on:click={(e) => {
+								const form = (e.currentTarget as HTMLElement)?.closest('form');
+								if (form) openRestoreModal(row.filename, form);
+							}}
+						/>
+					</form>
+
+					<Button
+						icon={Trash2}
+						size="xs"
+						iconColor="text-red-600 dark:text-red-400"
+						tooltip="Delete"
+						on:click={() => openDeleteModal(row.filename)}
+					/>
+				</div>
+			</svelte:fragment>
+		</Table>
+	</div>
 </div>
 
 <!-- Delete Confirmation Modal -->

@@ -21,6 +21,12 @@ import { delayGeneralStage } from './stages/delay-profiles/general.ts';
 import { mediaNamingStage } from './stages/media-management/naming.ts';
 import { mediaQualityDefinitionsStage } from './stages/media-management/quality-definitions.ts';
 import { mediaSettingsStage } from './stages/media-management/media-settings.ts';
+import { settingsGeneralStage } from './stages/settings/general.ts';
+import { settingsJobsStage } from './stages/settings/jobs.ts';
+import { settingsLogsStage } from './stages/settings/logs.ts';
+import { settingsBackupsStage } from './stages/settings/backups.ts';
+import { settingsNotificationsStage } from './stages/settings/notifications.ts';
+import { settingsSecurityStage } from './stages/settings/security.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
@@ -44,6 +50,12 @@ export const STAGES: Record<string, Stage> = {
 	'media-naming': mediaNamingStage,
 	'media-quality-definitions': mediaQualityDefinitionsStage,
 	'media-settings': mediaSettingsStage,
+	'settings-general': settingsGeneralStage,
+	'settings-jobs': settingsJobsStage,
+	'settings-logs': settingsLogsStage,
+	'settings-backups': settingsBackupsStage,
+	'settings-notifications': settingsNotificationsStage,
+	'settings-security': settingsSecurityStage,
 	help: helpStage
 };
 
@@ -87,5 +99,18 @@ export const GROUPS: StageGroup[] = [
 		name: 'Delay Profiles',
 		description: 'Wait for better releases before committing to a grab',
 		stages: ['delay-general']
+	},
+	{
+		name: 'Settings',
+		description:
+			'App-wide preferences, background jobs, logs, backups, notifications, and security',
+		stages: [
+			'settings-general',
+			'settings-jobs',
+			'settings-logs',
+			'settings-backups',
+			'settings-notifications',
+			'settings-security'
+		]
 	}
 ];

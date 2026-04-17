@@ -158,6 +158,12 @@ like Help where a "you're done" modal would be redundant.
 | `media-naming`              | Naming              | 4     | `hasDatabase`                     | Naming formats and character replacement for files and folders |
 | `media-quality-definitions` | Quality Definitions | 1     | `hasDatabase`                     | File size gates per quality tier                               |
 | `media-settings`            | Media Settings      | 5     | `hasDatabase`                     | Propers/repacks handling and file analysis                     |
+| `settings-general`          | General             | 7     |                                   | App-wide preferences bucket                                    |
+| `settings-jobs`             | Jobs                | 4     |                                   | The event-driven job queue                                     |
+| `settings-logs`             | Logs                | 4     |                                   | Read, filter, and download log files                           |
+| `settings-backups`          | Backups             | 4     |                                   | Archive viewer and manual operations                           |
+| `settings-notifications`    | Notifications       | 5     |                                   | Push alerts to Discord, Telegram, Ntfy, or webhooks            |
+| `settings-security`         | Security            | 6     |                                   | Password, API key, local bypass, sessions                      |
 
 ## Prerequisites
 
@@ -239,16 +245,17 @@ export const GROUPS: StageGroup[] = [
 
 ### Current Groups
 
-| Name                | Stages                                            |
-| ------------------- | ------------------------------------------------- |
-| Getting Started     | Welcome, Navigation, Personalize, Help            |
-| Databases           | Connect a Database, Managing a Database           |
-| Arr Instances       | Connect an Arr Instance, Managing an Arr Instance |
-| Media Management    | Naming, Quality Definitions, Media Settings       |
-| Custom Formats      | General, Conditions, Testing                      |
-| Quality Profiles    | General, Scoring, Qualities                       |
-| Regular Expressions | General                                           |
-| Delay Profiles      | General                                           |
+| Name                | Stages                                                |
+| ------------------- | ----------------------------------------------------- |
+| Getting Started     | Welcome, Navigation, Personalize, Help                |
+| Databases           | Connect a Database, Managing a Database               |
+| Arr Instances       | Connect an Arr Instance, Managing an Arr Instance     |
+| Media Management    | Naming, Quality Definitions, Media Settings           |
+| Custom Formats      | General, Conditions, Testing                          |
+| Quality Profiles    | General, Scoring, Qualities                           |
+| Regular Expressions | General                                               |
+| Delay Profiles      | General                                               |
+| Settings            | General, Jobs, Logs, Backups, Notifications, Security |
 
 ## Adding Content
 

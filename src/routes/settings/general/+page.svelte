@@ -282,6 +282,7 @@
 			<ExpandableCard
 				title="Interface"
 				description="Customize the look and feel of the application"
+				onboardingId="general-interface"
 			>
 				<svelte:fragment slot="header-right">
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -405,6 +406,7 @@
 			<ExpandableCard
 				title="Arr Instance Defaults"
 				description="Configure default settings applied when adding new Radarr/Sonarr instances"
+				onboardingId="general-arr-defaults"
 			>
 				<div class="px-6 py-4">
 					<Toggle
@@ -427,6 +429,7 @@
 			<ExpandableCard
 				title="Backups"
 				description="Configure automatic backups, schedule, and retention policy"
+				onboardingId="general-backups"
 			>
 				<div class="grid gap-4 px-6 py-4" class:sm:grid-cols-5={backupEnabled}>
 					<div>
@@ -490,6 +493,7 @@
 			<ExpandableCard
 				title="Logging"
 				description="Configure application logs, rotation, and retention"
+				onboardingId="general-logging"
 			>
 				<svelte:fragment slot="header-right">
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -596,6 +600,7 @@
 			<ExpandableCard
 				title="TMDB Configuration"
 				description="Configure TMDB API access for searching movies and TV series"
+				onboardingId="general-tmdb"
 			>
 				<svelte:fragment slot="header-right">
 					<!-- svelte-ignore a11y-click-events-have-key-events -->

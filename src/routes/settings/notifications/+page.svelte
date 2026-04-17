@@ -104,138 +104,142 @@
 			</div>
 
 			<!-- Add Service Button -->
-			<Button
-				href="/settings/notifications/new"
-				icon={Plus}
-				iconColor="text-blue-600 dark:text-blue-400"
-				text="Add Service"
-				variant="secondary"
-			/>
+			<div data-onboarding="notifications-add">
+				<Button
+					href="/settings/notifications/new"
+					icon={Plus}
+					iconColor="text-blue-600 dark:text-blue-400"
+					text="Add Service"
+					variant="secondary"
+				/>
+			</div>
 		</div>
 	</div>
 
 	<!-- Services Table -->
-	<Table
-		{columns}
-		data={data.services}
-		emptyMessage="No notification services configured. Click 'Add Service' to get started."
-		compact
-		responsive
-	>
-		<svelte:fragment slot="cell" let:row let:column>
-			{#if column.key === 'name'}
-				<span class="font-medium">{row.name}</span>
-			{:else if column.key === 'service_type'}
-				<div class="flex items-center gap-2">
-					{#if serviceInfo[row.service_type]?.icon}
-						<svg
-							role="img"
-							viewBox="0 0 24 24"
-							class="h-4 w-4 text-neutral-600 dark:text-neutral-400"
-							fill="currentColor"
-						>
-							<path d={serviceInfo[row.service_type]!.icon!.path} />
-						</svg>
+	<div data-onboarding="notifications-table">
+		<Table
+			{columns}
+			data={data.services}
+			emptyMessage="No notification services configured. Click 'Add Service' to get started."
+			compact
+			responsive
+		>
+			<svelte:fragment slot="cell" let:row let:column>
+				{#if column.key === 'name'}
+					<span class="font-medium">{row.name}</span>
+				{:else if column.key === 'service_type'}
+					<div class="flex items-center gap-2">
+						{#if serviceInfo[row.service_type]?.icon}
+							<svg
+								role="img"
+								viewBox="0 0 24 24"
+								class="h-4 w-4 text-neutral-600 dark:text-neutral-400"
+								fill="currentColor"
+							>
+								<path d={serviceInfo[row.service_type]!.icon!.path} />
+							</svg>
+						{:else}
+							<Rss size={16} class="text-neutral-600 dark:text-neutral-400" />
+						{/if}
+						<span>{getServiceTypeName(row.service_type)}</span>
+					</div>
+				{:else if column.key === 'enabled'}
+					<Badge variant={row.enabled ? 'success' : 'neutral'} icon={row.enabled ? Bell : BellOff}>
+						{row.enabled ? 'Enabled' : 'Disabled'}
+					</Badge>
+				{:else if column.key === 'stats'}
+					{#if row.successCount + row.failedCount > 0}
+						<span class="text-xs">
+							<span class="text-green-600 dark:text-green-400">{row.successCount}</span>
+							/
+							<span class="text-red-600 dark:text-red-400">{row.failedCount}</span>
+						</span>
 					{:else}
-						<Rss size={16} class="text-neutral-600 dark:text-neutral-400" />
+						<span class="text-neutral-400 dark:text-neutral-500">-</span>
 					{/if}
-					<span>{getServiceTypeName(row.service_type)}</span>
-				</div>
-			{:else if column.key === 'enabled'}
-				<Badge variant={row.enabled ? 'success' : 'neutral'} icon={row.enabled ? Bell : BellOff}>
-					{row.enabled ? 'Enabled' : 'Disabled'}
-				</Badge>
-			{:else if column.key === 'stats'}
-				{#if row.successCount + row.failedCount > 0}
-					<span class="text-xs">
-						<span class="text-green-600 dark:text-green-400">{row.successCount}</span>
-						/
-						<span class="text-red-600 dark:text-red-400">{row.failedCount}</span>
-					</span>
-				{:else}
-					<span class="text-neutral-400 dark:text-neutral-500">-</span>
 				{/if}
-			{/if}
-		</svelte:fragment>
+			</svelte:fragment>
 
-		<svelte:fragment slot="actions" let:row>
-			<div class="flex items-center gap-1">
-				<!-- Test Button -->
-				<form
-					method="POST"
-					action="?/testNotification"
-					use:enhance={() => {
-						testingServiceId = row.id;
-						return async ({ result, update }) => {
-							if (result.type === 'failure' && result.data) {
-								alertStore.add(
-									'error',
-									(result.data as { error?: string }).error || 'Failed to send test notification'
-								);
-							} else if (result.type === 'success') {
-								alertStore.add('success', 'Test notification sent successfully');
-							}
-							testingServiceId = null;
-							await update();
-						};
-					}}
-				>
-					<input type="hidden" name="id" value={row.id} />
-					<Button
-						icon={Send}
-						iconColor="text-accent-600 dark:text-accent-400"
-						size="xs"
-						type="submit"
-						disabled={testingServiceId === row.id}
-						loading={testingServiceId === row.id}
-						tooltip="Send test notification"
-					/>
-				</form>
-
-				<!-- Edit Button -->
-				<Button
-					icon={Pencil}
-					size="xs"
-					href="/settings/notifications/edit/{row.id}"
-					tooltip="Edit service"
-				/>
-
-				<!-- Delete Button -->
-				<form
-					method="POST"
-					action="?/delete"
-					use:enhance={() => {
-						return async ({ result, update }) => {
-							if (result.type === 'failure' && result.data) {
-								alertStore.add(
-									'error',
-									(result.data as { error?: string }).error || 'Failed to delete service'
-								);
-							} else if (result.type === 'success') {
-								alertStore.add('success', 'Service deleted successfully');
-							}
-							await update();
-						};
-					}}
-				>
-					<input type="hidden" name="id" value={row.id} />
-					<Button
-						icon={Trash2}
-						iconColor="text-red-600 dark:text-red-400"
-						size="xs"
-						tooltip="Delete service"
-						on:click={(e) => {
-							const form = (e.target as HTMLElement)?.closest('form');
-							if (form) openDeleteModal(row.id, row.name, form);
+			<svelte:fragment slot="actions" let:row>
+				<div class="flex items-center gap-1">
+					<!-- Test Button -->
+					<form
+						method="POST"
+						action="?/testNotification"
+						use:enhance={() => {
+							testingServiceId = row.id;
+							return async ({ result, update }) => {
+								if (result.type === 'failure' && result.data) {
+									alertStore.add(
+										'error',
+										(result.data as { error?: string }).error || 'Failed to send test notification'
+									);
+								} else if (result.type === 'success') {
+									alertStore.add('success', 'Test notification sent successfully');
+								}
+								testingServiceId = null;
+								await update();
+							};
 						}}
+					>
+						<input type="hidden" name="id" value={row.id} />
+						<Button
+							icon={Send}
+							iconColor="text-accent-600 dark:text-accent-400"
+							size="xs"
+							type="submit"
+							disabled={testingServiceId === row.id}
+							loading={testingServiceId === row.id}
+							tooltip="Send test notification"
+						/>
+					</form>
+
+					<!-- Edit Button -->
+					<Button
+						icon={Pencil}
+						size="xs"
+						href="/settings/notifications/edit/{row.id}"
+						tooltip="Edit service"
 					/>
-				</form>
-			</div>
-		</svelte:fragment>
-	</Table>
+
+					<!-- Delete Button -->
+					<form
+						method="POST"
+						action="?/delete"
+						use:enhance={() => {
+							return async ({ result, update }) => {
+								if (result.type === 'failure' && result.data) {
+									alertStore.add(
+										'error',
+										(result.data as { error?: string }).error || 'Failed to delete service'
+									);
+								} else if (result.type === 'success') {
+									alertStore.add('success', 'Service deleted successfully');
+								}
+								await update();
+							};
+						}}
+					>
+						<input type="hidden" name="id" value={row.id} />
+						<Button
+							icon={Trash2}
+							iconColor="text-red-600 dark:text-red-400"
+							size="xs"
+							tooltip="Delete service"
+							on:click={(e) => {
+								const form = (e.target as HTMLElement)?.closest('form');
+								if (form) openDeleteModal(row.id, row.name, form);
+							}}
+						/>
+					</form>
+				</div>
+			</svelte:fragment>
+		</Table>
+	</div>
 
 	<!-- Notification History Component -->
-	<div class="mt-8">
+	<div class="mt-8" data-onboarding="notifications-history">
 		<NotificationHistory history={data.history} services={data.services} />
 	</div>
 </div>

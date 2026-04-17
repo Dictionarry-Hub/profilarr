@@ -4,6 +4,7 @@
 	export let title: string;
 	export let description: string = '';
 	export let open: boolean = true;
+	export let onboardingId: string | undefined = undefined;
 
 	function toggle() {
 		open = !open;
@@ -11,6 +12,7 @@
 </script>
 
 <div
+	data-onboarding={onboardingId}
 	class="overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
 >
 	<!-- svelte-ignore a11y-click-events-have-key-events -->

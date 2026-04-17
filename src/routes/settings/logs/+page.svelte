@@ -297,21 +297,23 @@
 	</div>
 
 	<!-- Actions Bar -->
-	<LogsActionsBar
-		{searchStore}
-		logFiles={data.logFiles}
-		selectedFile={data.selectedFile}
-		{selectedLevel}
-		{selectedSources}
-		{uniqueSources}
-		{isRefreshing}
-		onChangeFile={changeLogFile}
-		onChangeLevel={(level) => (selectedLevel = level)}
-		onToggleSource={toggleSource}
-		onRefresh={refreshLogs}
-		onDownload={downloadLogs}
-		onCleanup={triggerCleanupLogs}
-	/>
+	<div data-onboarding="logs-actions">
+		<LogsActionsBar
+			{searchStore}
+			logFiles={data.logFiles}
+			selectedFile={data.selectedFile}
+			{selectedLevel}
+			{selectedSources}
+			{uniqueSources}
+			{isRefreshing}
+			onChangeFile={changeLogFile}
+			onChangeLevel={(level) => (selectedLevel = level)}
+			onToggleSource={toggleSource}
+			onRefresh={refreshLogs}
+			onDownload={downloadLogs}
+			onCleanup={triggerCleanupLogs}
+		/>
+	</div>
 
 	<form
 		bind:this={cleanupFormRef}
@@ -344,39 +346,41 @@
 	</div>
 
 	<!-- Log Table -->
-	<Table
-		data={paginatedLogs}
-		{columns}
-		emptyMessage="No logs found"
-		hoverable={true}
-		compact={true}
-		responsive
-		initialSort={{ key: 'timestamp', direction: defaultSortDirection }}
-		onSortChange={handleSortChange}
-	>
-		<svelte:fragment slot="actions" let:row>
-			<div class="flex items-center justify-end gap-1">
-				<Button
-					icon={Copy}
-					size="xs"
-					variant="secondary"
-					title="Copy log entry"
-					ariaLabel="Copy log entry"
-					on:click={() => copyLog(row)}
-				/>
-				{#if row.meta}
+	<div data-onboarding="logs-table">
+		<Table
+			data={paginatedLogs}
+			{columns}
+			emptyMessage="No logs found"
+			hoverable={true}
+			compact={true}
+			responsive
+			initialSort={{ key: 'timestamp', direction: defaultSortDirection }}
+			onSortChange={handleSortChange}
+		>
+			<svelte:fragment slot="actions" let:row>
+				<div class="flex items-center justify-end gap-1">
 					<Button
-						icon={Eye}
+						icon={Copy}
 						size="xs"
 						variant="secondary"
-						title="View metadata"
-						ariaLabel="View metadata"
-						on:click={() => viewMeta(row.meta)}
+						title="Copy log entry"
+						ariaLabel="Copy log entry"
+						on:click={() => copyLog(row)}
 					/>
-				{/if}
-			</div>
-		</svelte:fragment>
-	</Table>
+					{#if row.meta}
+						<Button
+							icon={Eye}
+							size="xs"
+							variant="secondary"
+							title="View metadata"
+							ariaLabel="View metadata"
+							on:click={() => viewMeta(row.meta)}
+						/>
+					{/if}
+				</div>
+			</svelte:fragment>
+		</Table>
+	</div>
 
 	<!-- Bottom Pagination -->
 	{#if totalPages > 1}

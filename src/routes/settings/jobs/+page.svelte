@@ -87,7 +87,7 @@
 	</div>
 
 	<!-- Jobs Table -->
-	<div class="mb-8">
+	<div class="mb-8" data-onboarding="jobs-table">
 		<ExpandableTable
 			{columns}
 			data={data.jobs}
@@ -197,5 +197,7 @@
 	</div>
 
 	<!-- Job History -->
-	<JobHistory jobRuns={data.jobRuns} />
+	<div data-onboarding="jobs-history">
+		<JobHistory jobRuns={data.jobRuns} />
+	</div>
 </div>
