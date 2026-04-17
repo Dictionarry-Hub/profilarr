@@ -97,5 +97,11 @@ export const routeResolvers: Record<string, () => Promise<string>> = {
 		if (!dbs.length) return '/quality-profiles';
 		const { path } = await (await fetch(`/quality-profiles/${dbs[0].id}/first/qualities`)).json();
 		return path;
+	},
+	firstRegularExpression: async () => {
+		const dbs = await (await fetch('/api/v1/databases')).json();
+		if (!dbs.length) return '/regular-expressions';
+		const { path } = await (await fetch(`/regular-expressions/${dbs[0].id}/first`)).json();
+		return path;
 	}
 };

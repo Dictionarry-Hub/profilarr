@@ -238,42 +238,44 @@
 		<input type="hidden" name="layer" value={selectedLayer} />
 
 		<div class="space-y-6">
-			<!-- Name -->
-			<FormInput
-				label="Name"
-				name="name"
-				required
-				value={formData.name}
-				placeholder="e.g., Release Group - SPARKS"
-				on:input={(e) => update('name', e.detail)}
-			/>
+			<div data-onboarding="regex-metadata" class="space-y-6">
+				<!-- Name -->
+				<FormInput
+					label="Name"
+					name="name"
+					required
+					value={formData.name}
+					placeholder="e.g., Release Group - SPARKS"
+					on:input={(e) => update('name', e.detail)}
+				/>
 
-			<!-- Tags -->
-			<div>
-				<div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Tags</div>
-				<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-					Categorize this pattern for easier filtering
-				</p>
-				<div class="mt-2">
-					<TagInput
-						tags={formData.tags}
-						onchange={(newTags) => update('tags', newTags)}
-						placeholder="Add tags..."
+				<!-- Tags -->
+				<div>
+					<div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Tags</div>
+					<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+						Categorize this pattern for easier filtering
+					</p>
+					<div class="mt-2">
+						<TagInput
+							tags={formData.tags}
+							onchange={(newTags) => update('tags', newTags)}
+							placeholder="Add tags..."
+						/>
+					</div>
+				</div>
+
+				<!-- Description -->
+				<div>
+					<MarkdownInput
+						id="description"
+						name="description"
+						label="Description"
+						description="Describe what this pattern matches"
+						value={formData.description}
+						onchange={(v) => update('description', v)}
+						placeholder="What does this pattern match?"
 					/>
 				</div>
-			</div>
-
-			<!-- Description -->
-			<div>
-				<MarkdownInput
-					id="description"
-					name="description"
-					label="Description"
-					description="Describe what this pattern matches"
-					value={formData.description}
-					onchange={(v) => update('description', v)}
-					placeholder="What does this pattern match?"
-				/>
 			</div>
 
 			<RegexPatternField

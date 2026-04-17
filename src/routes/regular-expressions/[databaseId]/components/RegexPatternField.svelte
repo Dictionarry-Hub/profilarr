@@ -77,7 +77,7 @@
 
 <div class="space-y-4">
 	<!-- Regex Pattern -->
-	<div class="space-y-2">
+	<div data-onboarding="regex-pattern" class="space-y-2">
 		<div class="flex items-center justify-between gap-2">
 			<label for="pattern" class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
 				Regular Expression<span class="text-red-500">*</span>
@@ -123,13 +123,15 @@
 	</div>
 
 	<!-- Regex101 ID -->
-	<FormInput
-		label="Regex101 ID"
-		description="Link to regex101.com for testing (include version, e.g., ABC123/1)"
-		name="regex101Id"
-		value={regex101Id}
-		placeholder="e.g., GMV8jd/1"
-		mono
-		on:input={(e) => handleRegex101IdChange(e.detail)}
-	/>
+	<div data-onboarding="regex101-id">
+		<FormInput
+			label="Regex101 ID"
+			description="Link to regex101.com for testing (include version, e.g., ABC123/1)"
+			name="regex101Id"
+			value={regex101Id}
+			placeholder="e.g., GMV8jd/1"
+			mono
+			on:input={(e) => handleRegex101IdChange(e.detail)}
+		/>
+	</div>
 </div>

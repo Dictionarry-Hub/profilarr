@@ -47,7 +47,7 @@
 		breadcrumbCurrent={data.regularExpression.name}
 	/>
 
-	<div class="mt-6 space-y-3 md:px-4">
+	<div data-onboarding="regex-references" class="mt-6 space-y-3 md:px-4">
 		<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 			References ({data.conditionRefs.length})
 		</div>

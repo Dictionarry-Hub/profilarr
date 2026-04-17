@@ -16,6 +16,7 @@ import { cfTestingStage } from './stages/custom-formats/testing.ts';
 import { qpGeneralStage } from './stages/quality-profiles/general.ts';
 import { qpScoringStage } from './stages/quality-profiles/scoring.ts';
 import { qpQualitiesStage } from './stages/quality-profiles/qualities.ts';
+import { regexGeneralStage } from './stages/regular-expressions/general.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
@@ -34,6 +35,7 @@ export const STAGES: Record<string, Stage> = {
 	'qp-general': qpGeneralStage,
 	'qp-scoring': qpScoringStage,
 	'qp-qualities': qpQualitiesStage,
+	'regex-general': regexGeneralStage,
 	help: helpStage
 };
 
@@ -52,6 +54,11 @@ export const GROUPS: StageGroup[] = [
 		name: 'Arr Instances',
 		description: 'Connect and manage Radarr/Sonarr instances',
 		stages: ['arr-link', 'arr-manage', 'arr-sync', 'arr-upgrades', 'arr-renames']
+	},
+	{
+		name: 'Regular Expressions',
+		description: 'Build reusable regex patterns for custom format conditions',
+		stages: ['regex-general']
 	},
 	{
 		name: 'Custom Formats',
