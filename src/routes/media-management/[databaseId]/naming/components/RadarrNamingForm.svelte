@@ -186,7 +186,10 @@
 
 			<!-- Naming Formats -->
 			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+				<h2
+					data-onboarding="media-naming-formats"
+					class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
+				>
 					Naming Formats
 				</h2>
 				<div>
@@ -220,7 +223,10 @@
 
 			<!-- Character Replacement -->
 			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+				<h2
+					data-onboarding="media-naming-character-replacement"
+					class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
+				>
 					Character Replacement
 				</h2>
 

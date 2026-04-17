@@ -109,5 +109,27 @@ export const routeResolvers: Record<string, () => Promise<string>> = {
 		if (!dbs.length) return '/delay-profiles';
 		const { path } = await (await fetch(`/delay-profiles/${dbs[0].id}/first`)).json();
 		return path;
+	},
+	firstNaming: async () => {
+		const dbs = await (await fetch('/api/v1/databases')).json();
+		if (!dbs.length) return '/media-management';
+		const { path } = await (await fetch(`/media-management/${dbs[0].id}/naming/first`)).json();
+		return path;
+	},
+	firstQualityDefinitions: async () => {
+		const dbs = await (await fetch('/api/v1/databases')).json();
+		if (!dbs.length) return '/media-management';
+		const { path } = await (
+			await fetch(`/media-management/${dbs[0].id}/quality-definitions/first`)
+		).json();
+		return path;
+	},
+	firstMediaSettings: async () => {
+		const dbs = await (await fetch('/api/v1/databases')).json();
+		if (!dbs.length) return '/media-management';
+		const { path } = await (
+			await fetch(`/media-management/${dbs[0].id}/media-settings/first`)
+		).json();
+		return path;
 	}
 };

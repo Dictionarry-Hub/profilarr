@@ -134,7 +134,7 @@
 		class="space-y-6 rounded-xl border border-neutral-300 bg-white p-6 dark:border-neutral-700/60 dark:bg-neutral-800/50"
 	>
 		<!-- Basic Info -->
-		<div class="space-y-4">
+		<div class="space-y-4" data-onboarding="media-settings-name">
 			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Basic Info</h2>
 			<FormInput
 				label="Name"
@@ -149,7 +149,7 @@
 		<hr class="border-neutral-200 dark:border-neutral-700" />
 
 		<!-- Propers and Repacks -->
-		<div class="space-y-4">
+		<div class="space-y-4" data-onboarding="media-settings-propers-repacks">
 			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
 				Propers and Repacks
 			</h2>
@@ -169,7 +169,7 @@
 		<hr class="border-neutral-200 dark:border-neutral-700" />
 
 		<!-- Media Info -->
-		<div class="space-y-4">
+		<div class="space-y-4" data-onboarding="media-settings-file-analysis">
 			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">File Analysis</h2>
 			<div>
 				<Toggle

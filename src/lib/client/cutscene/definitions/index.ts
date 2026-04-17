@@ -18,6 +18,9 @@ import { qpScoringStage } from './stages/quality-profiles/scoring.ts';
 import { qpQualitiesStage } from './stages/quality-profiles/qualities.ts';
 import { regexGeneralStage } from './stages/regular-expressions/general.ts';
 import { delayGeneralStage } from './stages/delay-profiles/general.ts';
+import { mediaNamingStage } from './stages/media-management/naming.ts';
+import { mediaQualityDefinitionsStage } from './stages/media-management/quality-definitions.ts';
+import { mediaSettingsStage } from './stages/media-management/media-settings.ts';
 
 export const STAGES: Record<string, Stage> = {
 	welcome: welcomeStage,
@@ -38,6 +41,9 @@ export const STAGES: Record<string, Stage> = {
 	'qp-qualities': qpQualitiesStage,
 	'regex-general': regexGeneralStage,
 	'delay-general': delayGeneralStage,
+	'media-naming': mediaNamingStage,
+	'media-quality-definitions': mediaQualityDefinitionsStage,
+	'media-settings': mediaSettingsStage,
 	help: helpStage
 };
 
@@ -56,6 +62,11 @@ export const GROUPS: StageGroup[] = [
 		name: 'Arr Instances',
 		description: 'Connect and manage Radarr/Sonarr instances',
 		stages: ['arr-link', 'arr-manage', 'arr-sync', 'arr-upgrades', 'arr-renames']
+	},
+	{
+		name: 'Media Management',
+		description: 'Naming, quality definitions, and media settings',
+		stages: ['media-naming', 'media-quality-definitions', 'media-settings']
 	},
 	{
 		name: 'Regular Expressions',
