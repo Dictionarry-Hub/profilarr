@@ -37,6 +37,7 @@ const JOB_RUNNING_LABELS: Partial<Record<JobType, string>> = {
 	'arr.sync.qualityProfiles': 'Syncing Quality Profiles...',
 	'arr.sync.delayProfiles': 'Syncing Delay Profiles...',
 	'arr.sync.mediaManagement': 'Syncing Media Management...',
+	'arr.cleanup': 'Cleaning up...',
 	'backup.create': 'Creating backup...',
 	'backup.cleanup': 'Cleaning up backups...'
 };
@@ -46,6 +47,7 @@ const JOB_COMPLETED_LABELS: Partial<Record<JobType, string>> = {
 	'arr.sync.qualityProfiles': 'Quality Profiles sync',
 	'arr.sync.delayProfiles': 'Delay Profiles sync',
 	'arr.sync.mediaManagement': 'Media Management sync',
+	'arr.cleanup': 'Cleanup',
 	'backup.create': 'Backup',
 	'backup.cleanup': 'Backup cleanup'
 };

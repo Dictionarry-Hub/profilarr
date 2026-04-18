@@ -2,6 +2,7 @@
 	import { Loader2, AlertTriangle, Check } from 'lucide-svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$lib/client/alerts/store';
+	import { jobStatus } from '$lib/client/stores/jobStatus';
 	import Modal from '$ui/modal/Modal.svelte';
 
 	export let open = false;
@@ -103,6 +104,9 @@
 
 	function handleConfirm() {
 		if (hasAnythingToClean) {
+			// Open the SSE stream before submitting so the cleanup's job.started event
+			// is captured as soon as the dispatcher fires it.
+			jobStatus.connect();
 			cleanupFormRef?.requestSubmit();
 		} else {
 			open = false;
