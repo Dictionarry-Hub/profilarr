@@ -269,13 +269,15 @@ Immutable log of every job execution.
 ## Real-Time Updates (SSE)
 
 The job system pushes real-time status updates to connected browsers via
-Server-Sent Events. Currently limited to sync job types (`arr.sync.*`).
+Server-Sent Events. Enabled for sync job types (`arr.sync.*`) and backup job
+types (`backup.create`, `backup.cleanup`).
 
 ### Server Side
 
 **Event emitter** (`src/lib/server/jobs/jobEvents.ts`): A callback-based
 pub/sub singleton. The dispatcher calls `emit()` on job start and finish. The
-emitter filters by job type internally, so non-sync jobs are silently ignored.
+emitter filters by job type internally via the `JOB_RUNNING_LABELS` allow-list,
+so job types without a display label are silently ignored.
 
 Two event types:
 

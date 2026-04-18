@@ -71,7 +71,6 @@
 	}
 
 	function formatNotificationType(type: string): string {
-		// Convert 'job.create_backup.success' to 'Backup Success'
 		const parts = type.split('.');
 		if (parts.length >= 3) {
 			const action = parts[1].replace(/_/g, ' ');
