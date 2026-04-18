@@ -75,39 +75,29 @@
 	async function scanAll() {
 		phase = 'scanning';
 
-		const configPromise = fetch('/api/v1/arr/cleanup', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ instanceId, action: 'scan' })
-		})
-			.then(async (res) => {
-				if (!res.ok) {
-					const data = await res.json();
-					throw new Error(data.error || 'Config scan failed');
-				}
-				configScan = await res.json();
-			})
-			.catch((err) => {
-				configError = err instanceof Error ? err.message : 'Config scan failed';
-			});
+		try {
+			const res = await fetch(`/arr/${instanceId}/settings/cleanup/preview`);
+			if (!res.ok) {
+				const body = (await res.json().catch(() => ({}))) as { error?: string };
+				const message = body?.error ?? 'Preview failed';
+				configError = message;
+				entityError = message;
+			} else {
+				const body = (await res.json()) as {
+					configs: { ok: true; data: ConfigScanResult } | { ok: false; error: string };
+					entities: { ok: true; data: EntityScanResult } | { ok: false; error: string };
+				};
+				if (body.configs.ok) configScan = body.configs.data;
+				else configError = body.configs.error;
+				if (body.entities.ok) entityScan = body.entities.data;
+				else entityError = body.entities.error;
+			}
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Preview failed';
+			configError = message;
+			entityError = message;
+		}
 
-		const entityPromise = fetch('/api/v1/arr/cleanup', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ instanceId, action: 'scan-entities' })
-		})
-			.then(async (res) => {
-				if (!res.ok) {
-					const data = await res.json();
-					throw new Error(data.error || 'Entity scan failed');
-				}
-				entityScan = await res.json();
-			})
-			.catch((err) => {
-				entityError = err instanceof Error ? err.message : 'Entity scan failed';
-			});
-
-		await Promise.all([configPromise, entityPromise]);
 		phase = 'preview';
 	}
 

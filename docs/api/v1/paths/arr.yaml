@@ -215,57 +215,6 @@ releases:
             schema:
               $ref: '../schemas/arr.yaml#/ErrorResponse'
 
-cleanup:
-  post:
-    operationId: arrCleanup
-    summary: Scan or execute cleanup of stale configs
-    description: |
-      Detects and deletes stale namespace-suffixed custom formats and quality profiles
-      from an Arr instance that are no longer in the current sync selections.
-
-      Two actions are supported via the `action` field in the request body:
-      - `scan`: Scans for stale items and returns what would be deleted.
-      - `execute`: Deletes the stale items from a previous scan result.
-
-      Quality profiles assigned to media will be skipped with a warning (Arr returns HTTP 500 "in use").
-    tags:
-      - Arr
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            oneOf:
-              - $ref: '../schemas/arr.yaml#/CleanupScanRequest'
-              - $ref: '../schemas/arr.yaml#/CleanupExecuteRequest'
-    responses:
-      '200':
-        description: Scan or delete result
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: '../schemas/arr.yaml#/CleanupScanResult'
-                - $ref: '../schemas/arr.yaml#/CleanupDeleteResult'
-      '400':
-        description: Invalid request (missing instanceId, invalid action)
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/arr.yaml#/ErrorResponse'
-      '404':
-        description: Instance not found
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/arr.yaml#/ErrorResponse'
-      '500':
-        description: Failed to perform cleanup
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/arr.yaml#/ErrorResponse'
-
 sync-entity:
   post:
     operationId: syncEntity

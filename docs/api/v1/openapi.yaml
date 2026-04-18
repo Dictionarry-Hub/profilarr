@@ -71,8 +71,6 @@ paths:
     $ref: './paths/arr.yaml#/episodes'
   /arr/releases:
     $ref: './paths/arr.yaml#/releases'
-  /arr/cleanup:
-    $ref: './paths/arr.yaml#/cleanup'
   /arr/sync-entity:
     $ref: './paths/arr.yaml#/sync-entity'
   /pcd/export:
@@ -167,17 +165,6 @@ components:
       $ref: './schemas/arr.yaml#/GroupedRelease'
     ReleasesResponse:
       $ref: './schemas/arr.yaml#/ReleasesResponse'
-    # Arr - Cleanup
-    StaleItem:
-      $ref: './schemas/arr.yaml#/StaleItem'
-    CleanupScanRequest:
-      $ref: './schemas/arr.yaml#/CleanupScanRequest'
-    CleanupExecuteRequest:
-      $ref: './schemas/arr.yaml#/CleanupExecuteRequest'
-    CleanupScanResult:
-      $ref: './schemas/arr.yaml#/CleanupScanResult'
-    CleanupDeleteResult:
-      $ref: './schemas/arr.yaml#/CleanupDeleteResult'
     # Arr - Sync Entity
     SyncEntityRequest:
       $ref: './schemas/arr.yaml#/SyncEntityRequest'

@@ -416,33 +416,6 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
-	'/arr/cleanup': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * Scan or execute cleanup of stale configs
-		 * @description Detects and deletes stale namespace-suffixed custom formats and quality profiles
-		 *     from an Arr instance that are no longer in the current sync selections.
-		 *
-		 *     Two actions are supported via the `action` field in the request body:
-		 *     - `scan`: Scans for stale items and returns what would be deleted.
-		 *     - `execute`: Deletes the stale items from a previous scan result.
-		 *
-		 *     Quality profiles assigned to media will be skipped with a warning (Arr returns HTTP 500 "in use").
-		 */
-		post: operations['arrCleanup'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
 	'/arr/sync-entity': {
 		parameters: {
 			query?: never;
@@ -1021,41 +994,6 @@ export interface components {
 			/** @description Grouped and deduplicated releases */
 			releases: components['schemas']['GroupedRelease'][];
 		};
-		StaleItem: {
-			/** @description Arr entity ID */
-			id: number;
-			/** @description Full name including namespace suffix */
-			name: string;
-			/** @description Name with namespace suffix removed */
-			strippedName: string;
-		};
-		CleanupScanRequest: {
-			/** @description Arr instance ID */
-			instanceId: number;
-			/** @enum {string} */
-			action: 'scan';
-		};
-		CleanupExecuteRequest: {
-			/** @description Arr instance ID */
-			instanceId: number;
-			/** @enum {string} */
-			action: 'execute';
-			scanResult: components['schemas']['CleanupScanResult'];
-		};
-		CleanupScanResult: {
-			/** @description Custom formats that are no longer in sync selections */
-			staleCustomFormats: components['schemas']['StaleItem'][];
-			/** @description Quality profiles that are no longer in sync selections */
-			staleQualityProfiles: components['schemas']['StaleItem'][];
-		};
-		CleanupDeleteResult: {
-			/** @description Custom formats that were successfully deleted */
-			deletedCustomFormats: components['schemas']['StaleItem'][];
-			/** @description Quality profiles that were successfully deleted */
-			deletedQualityProfiles: components['schemas']['StaleItem'][];
-			/** @description Quality profiles that were skipped (assigned to media) */
-			skippedQualityProfiles: components['schemas']['SkippedItem'][];
-		};
 		SyncEntityRequest: {
 			/** @description Arr instance ID */
 			instanceId: number;
@@ -1445,11 +1383,6 @@ export interface components {
 		arr_ErrorResponse: {
 			/** @description Error message */
 			error: string;
-		};
-		SkippedItem: {
-			item: components['schemas']['StaleItem'];
-			/** @description Why the item was skipped (e.g. "Profile is assigned to media") */
-			reason: string;
 		};
 		PortableDelayProfile: {
 			name: string;
@@ -2736,61 +2669,6 @@ export interface operations {
 				};
 			};
 			/** @description Failed to fetch releases */
-			500: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['arr_ErrorResponse'];
-				};
-			};
-		};
-	};
-	arrCleanup: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json':
-					| components['schemas']['CleanupScanRequest']
-					| components['schemas']['CleanupExecuteRequest'];
-			};
-		};
-		responses: {
-			/** @description Scan or delete result */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json':
-						| components['schemas']['CleanupScanResult']
-						| components['schemas']['CleanupDeleteResult'];
-				};
-			};
-			/** @description Invalid request (missing instanceId, invalid action) */
-			400: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['arr_ErrorResponse'];
-				};
-			};
-			/** @description Instance not found */
-			404: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['arr_ErrorResponse'];
-				};
-			};
-			/** @description Failed to perform cleanup */
 			500: {
 				headers: {
 					[name: string]: unknown;
