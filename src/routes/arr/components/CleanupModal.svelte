@@ -1,45 +1,31 @@
 <script lang="ts">
 	import { Loader2, AlertTriangle, Check } from 'lucide-svelte';
+	import { enhance } from '$app/forms';
+	import { alertStore } from '$lib/client/alerts/store';
 	import Modal from '$ui/modal/Modal.svelte';
 
 	export let open = false;
 	export let instanceId: number;
 	export let instanceType: string = '';
 
-	// --- Config cleanup types ---
+	// --- Scan result types (match the API and server-side scan helpers) ---
 	type StaleItem = { id: number; name: string };
-	type SkippedItem = { item: StaleItem; reason: string };
 	type ConfigScanResult = { staleCustomFormats: StaleItem[]; staleQualityProfiles: StaleItem[] };
-	type ConfigDeleteResult = {
-		deletedCustomFormats: StaleItem[];
-		deletedQualityProfiles: StaleItem[];
-		skippedQualityProfiles: SkippedItem[];
-	};
-
-	// --- Entity cleanup types ---
 	type RemovedEntity = { id: number; title: string; externalId: number };
 	type EntityScanResult = { removedEntities: RemovedEntity[] };
-	type EntityDeleteResult = {
-		deletedEntities: RemovedEntity[];
-		failedEntities: { entity: RemovedEntity; reason: string }[];
-	};
 
-	type Phase = 'idle' | 'scanning' | 'preview' | 'executing' | 'results';
+	type Phase = 'idle' | 'scanning' | 'preview' | 'submitting';
 
 	let phase: Phase = 'idle';
 
-	// Config cleanup state
 	let configScan: ConfigScanResult | null = null;
-	let configResult: ConfigDeleteResult | null = null;
 	let configError: string | null = null;
-
-	// Entity cleanup state
 	let entityScan: EntityScanResult | null = null;
-	let entityResult: EntityDeleteResult | null = null;
 	let entityError: string | null = null;
 
-	// Derived
-	$: isLoading = phase === 'scanning' || phase === 'executing';
+	let cleanupFormRef: HTMLFormElement;
+
+	$: isLoading = phase === 'scanning' || phase === 'submitting';
 
 	$: configEmpty =
 		configScan != null &&
@@ -54,13 +40,24 @@
 
 	$: confirmText = (() => {
 		if (phase === 'scanning') return 'Scanning...';
-		if (phase === 'executing') return 'Cleaning...';
+		if (phase === 'submitting') return 'Queueing...';
 		if (hasAnythingToClean) return 'Clean Up';
 		return 'Close';
 	})();
 
 	$: confirmDanger = hasAnythingToClean;
-	$: confirmDisabled = phase === 'scanning' || phase === 'executing';
+	$: confirmDisabled = phase === 'scanning' || phase === 'submitting';
+
+	// Scan data sent to the server as the pre-scanned payload. Only set when both scans
+	// succeeded and at least one side has work to do; kept in sync with the form's hidden
+	// input via reactivity.
+	$: preScannedPayload = (() => {
+		if (!configScan || !entityScan) return '';
+		return JSON.stringify({
+			staleConfigs: configScan,
+			removedEntities: entityScan
+		});
+	})();
 
 	// Auto-scan when modal opens
 	$: if (open && phase === 'idle') {
@@ -70,10 +67,8 @@
 	function reset() {
 		phase = 'idle';
 		configScan = null;
-		configResult = null;
 		configError = null;
 		entityScan = null;
-		entityResult = null;
 		entityError = null;
 	}
 
@@ -116,62 +111,9 @@
 		phase = 'preview';
 	}
 
-	async function executeAll() {
-		phase = 'executing';
-
-		const promises: Promise<void>[] = [];
-
-		if (configScan && !configError && !configEmpty) {
-			promises.push(
-				fetch('/api/v1/arr/cleanup', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ instanceId, action: 'execute', scanResult: configScan })
-				})
-					.then(async (res) => {
-						if (!res.ok) {
-							const data = await res.json();
-							throw new Error(data.error || 'Config cleanup failed');
-						}
-						configResult = await res.json();
-					})
-					.catch((err) => {
-						configError = err instanceof Error ? err.message : 'Config cleanup failed';
-					})
-			);
-		}
-
-		if (entityScan && !entityError && !entityEmpty) {
-			promises.push(
-				fetch('/api/v1/arr/cleanup', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						instanceId,
-						action: 'execute-entities',
-						entities: entityScan.removedEntities
-					})
-				})
-					.then(async (res) => {
-						if (!res.ok) {
-							const data = await res.json();
-							throw new Error(data.error || 'Entity cleanup failed');
-						}
-						entityResult = await res.json();
-					})
-					.catch((err) => {
-						entityError = err instanceof Error ? err.message : 'Entity cleanup failed';
-					})
-			);
-		}
-
-		await Promise.all(promises);
-		phase = 'results';
-	}
-
 	function handleConfirm() {
 		if (hasAnythingToClean) {
-			executeAll();
+			cleanupFormRef?.requestSubmit();
 		} else {
 			open = false;
 			reset();
@@ -188,6 +130,33 @@
 	$: externalDb =
 		instanceType === 'radarr' ? 'TMDB' : instanceType === 'sonarr' ? 'TVDB' : 'external DB';
 </script>
+
+<form
+	bind:this={cleanupFormRef}
+	method="POST"
+	action="?/runCleanupNow"
+	class="hidden"
+	use:enhance={() => {
+		phase = 'submitting';
+		return async ({ result, update }) => {
+			await update({ reset: false });
+			if (result.type === 'success') {
+				alertStore.add('success', 'Cleanup queued');
+				open = false;
+				reset();
+			} else {
+				const message =
+					result.type === 'failure' && typeof result.data?.error === 'string'
+						? result.data.error
+						: 'Failed to queue cleanup';
+				alertStore.add('error', message);
+				phase = 'preview';
+			}
+		};
+	}}
+>
+	<input type="hidden" name="preScanned" value={preScannedPayload} />
+</form>
 
 <Modal
 	{open}
@@ -207,10 +176,10 @@
 					Scanning for stale configs and removed media...
 				</p>
 			</div>
-		{:else if phase === 'executing'}
+		{:else if phase === 'submitting'}
 			<div class="flex flex-col items-center gap-3 py-8">
 				<Loader2 size={32} class="animate-spin text-neutral-400" />
-				<p class="text-sm text-neutral-500 dark:text-neutral-400">Cleaning up...</p>
+				<p class="text-sm text-neutral-500 dark:text-neutral-400">Queueing cleanup job...</p>
 			</div>
 		{:else if phase === 'preview'}
 			{#if allEmpty && !configError && !entityError}
@@ -288,120 +257,6 @@
 					{/if}
 				</div>
 			{/if}
-		{:else if phase === 'results'}
-			<div class="space-y-4">
-				<!-- Config cleanup results -->
-				{#if configResult}
-					{#if configResult.deletedCustomFormats.length > 0 || configResult.deletedQualityProfiles.length > 0}
-						<div class="space-y-1">
-							{#if configResult.deletedCustomFormats.length > 0}
-								<div class="flex items-center gap-2">
-									<Check size={16} class="flex-shrink-0 text-emerald-500" />
-									<p class="text-sm text-neutral-700 dark:text-neutral-300">
-										Deleted <span class="font-medium"
-											>{configResult.deletedCustomFormats.length}</span
-										>
-										custom format{configResult.deletedCustomFormats.length === 1 ? '' : 's'}
-									</p>
-								</div>
-							{/if}
-							{#if configResult.deletedQualityProfiles.length > 0}
-								<div class="flex items-center gap-2">
-									<Check size={16} class="flex-shrink-0 text-emerald-500" />
-									<p class="text-sm text-neutral-700 dark:text-neutral-300">
-										Deleted <span class="font-medium"
-											>{configResult.deletedQualityProfiles.length}</span
-										>
-										quality profile{configResult.deletedQualityProfiles.length === 1 ? '' : 's'}
-									</p>
-								</div>
-							{/if}
-						</div>
-					{/if}
-
-					{#if configResult.skippedQualityProfiles.length > 0}
-						<div class="space-y-1">
-							<div class="flex items-center gap-2">
-								<AlertTriangle size={16} class="flex-shrink-0 text-amber-500" />
-								<p class="text-sm text-neutral-700 dark:text-neutral-300">
-									Skipped {configResult.skippedQualityProfiles.length} profile{configResult
-										.skippedQualityProfiles.length === 1
-										? ''
-										: 's'} assigned to media
-								</p>
-							</div>
-							{#each configResult.skippedQualityProfiles as skipped}
-								<p class="pl-6 text-sm text-neutral-500 dark:text-neutral-400">
-									{skipped.item.name}
-								</p>
-							{/each}
-						</div>
-					{/if}
-				{/if}
-
-				{#if configError && phase === 'results'}
-					<div
-						class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950"
-					>
-						<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-red-500" />
-						<div>
-							<p class="text-sm font-medium text-red-800 dark:text-red-200">
-								Config cleanup failed
-							</p>
-							<p class="mt-0.5 text-xs text-red-600 dark:text-red-400">{configError}</p>
-						</div>
-					</div>
-				{/if}
-
-				<!-- Entity cleanup results -->
-				{#if entityResult}
-					{#if entityResult.deletedEntities.length > 0}
-						<div class="flex items-center gap-2">
-							<Check size={16} class="flex-shrink-0 text-emerald-500" />
-							<p class="text-sm text-neutral-700 dark:text-neutral-300">
-								Deleted <span class="font-medium">{entityResult.deletedEntities.length}</span>
-								{entityLabel} removed from {externalDb}
-							</p>
-						</div>
-					{/if}
-
-					{#if entityResult.failedEntities.length > 0}
-						<div class="space-y-1">
-							<div class="flex items-center gap-2">
-								<AlertTriangle size={16} class="flex-shrink-0 text-amber-500" />
-								<p class="text-sm text-neutral-700 dark:text-neutral-300">
-									Failed to delete {entityResult.failedEntities.length}
-									{entityLabel}
-								</p>
-							</div>
-							{#each entityResult.failedEntities as failed}
-								<p class="pl-6 text-sm text-neutral-500 dark:text-neutral-400">
-									{failed.entity.title}
-								</p>
-							{/each}
-						</div>
-					{/if}
-				{/if}
-
-				{#if entityError && phase === 'results'}
-					<div
-						class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950"
-					>
-						<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-red-500" />
-						<div>
-							<p class="text-sm font-medium text-red-800 dark:text-red-200">
-								Entity cleanup failed
-							</p>
-							<p class="mt-0.5 text-xs text-red-600 dark:text-red-400">{entityError}</p>
-						</div>
-					</div>
-				{/if}
-
-				<!-- Nothing deleted at all -->
-				{#if !configResult && !entityResult && !configError && !entityError}
-					<p class="text-sm text-neutral-500 dark:text-neutral-400">Nothing was deleted.</p>
-				{/if}
-			</div>
 		{/if}
 	</div>
 </Modal>

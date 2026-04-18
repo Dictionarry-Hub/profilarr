@@ -2,22 +2,22 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { createArrClient } from '$utils/arr/factory.ts';
-import { scanForStaleItems, deleteStaleItems } from '$lib/server/sync/cleanup.ts';
-import { scanForRemovedEntities, deleteRemovedEntities } from '$lib/server/sync/entityCleanup.ts';
+import { scanForStaleItems } from '$lib/server/sync/cleanup.ts';
+import { scanForRemovedEntities } from '$lib/server/sync/entityCleanup.ts';
 import type { ArrType } from '$utils/arr/types.ts';
 
-const VALID_ACTIONS = ['scan', 'execute', 'scan-entities', 'execute-entities'] as const;
+const VALID_ACTIONS = ['scan', 'scan-entities'] as const;
 type Action = (typeof VALID_ACTIONS)[number];
 
 /**
  * POST /api/v1/arr/cleanup
  *
- * Scan or execute cleanup of stale configs and removed entities.
+ * Preview-only endpoints used by the cleanup modal. Deletion is performed by the
+ * `arr.cleanup` job handler (scheduled runs or manual enqueue via the settings page's
+ * runCleanupNow action).
  *
- * Body (scan):             { instanceId, action: 'scan' }
- * Body (execute):          { instanceId, action: 'execute', scanResult }
- * Body (scan-entities):    { instanceId, action: 'scan-entities' }
- * Body (execute-entities): { instanceId, action: 'execute-entities', entities }
+ * Body (scan):          { instanceId, action: 'scan' }
+ * Body (scan-entities): { instanceId, action: 'scan-entities' }
  */
 export const POST: RequestHandler = async ({ request }) => {
 	const body = await request.json();
@@ -50,29 +50,8 @@ export const POST: RequestHandler = async ({ request }) => {
 				return json(result);
 			}
 
-			case 'execute': {
-				const { scanResult } = body;
-				if (!scanResult) {
-					return json({ error: 'scanResult is required for execute action' }, { status: 400 });
-				}
-				const result = await deleteStaleItems(client, scanResult);
-				return json(result);
-			}
-
 			case 'scan-entities': {
 				const result = await scanForRemovedEntities(client, instanceType);
-				return json(result);
-			}
-
-			case 'execute-entities': {
-				const { entities } = body;
-				if (!entities) {
-					return json(
-						{ error: 'entities is required for execute-entities action' },
-						{ status: 400 }
-					);
-				}
-				const result = await deleteRemovedEntities(client, instanceType, entities);
 				return json(result);
 			}
 		}

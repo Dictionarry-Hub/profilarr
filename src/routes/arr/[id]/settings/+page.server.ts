@@ -8,6 +8,7 @@ import {
 	scheduleLibraryRefreshForInstance
 } from '$lib/server/jobs/init.ts';
 import { calculateNextRun } from '$lib/server/jobs/scheduleUtils.ts';
+import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { logger } from '$logger/logger.ts';
 
 export const load = ({ params }) => {
@@ -131,6 +132,55 @@ export const actions: Actions = {
 				meta: { error: err instanceof Error ? err.message : String(err) }
 			});
 			return fail(500, { error: 'Failed to save cleanup settings' });
+		}
+	},
+
+	runCleanupNow: async ({ params, request }) => {
+		const id = parseInt(params.id || '', 10);
+		if (isNaN(id)) {
+			return fail(400, { error: 'Invalid instance ID' });
+		}
+
+		const instance = arrInstancesQueries.getById(id);
+		if (!instance) {
+			return fail(404, { error: 'Instance not found' });
+		}
+
+		if (instance.type !== 'radarr' && instance.type !== 'sonarr') {
+			return fail(400, { error: `Cleanup not supported for ${instance.type}` });
+		}
+
+		const formData = await request.formData();
+		const preScannedRaw = formData.get('preScanned')?.toString();
+		let preScanned: unknown;
+		if (preScannedRaw) {
+			try {
+				preScanned = JSON.parse(preScannedRaw);
+			} catch {
+				return fail(400, { error: 'Invalid preScanned data' });
+			}
+		}
+
+		try {
+			const queued = enqueueJob({
+				jobType: 'arr.cleanup',
+				runAt: new Date().toISOString(),
+				payload: { instanceId: id, preScanned },
+				source: 'manual'
+			});
+
+			await logger.info('Manual cleanup run queued', {
+				source: 'arr/[id]/settings',
+				meta: { jobId: queued.id, instanceId: id, instanceName: instance.name }
+			});
+
+			return { success: true, queued: true };
+		} catch (err) {
+			await logger.error('Manual cleanup run failed', {
+				source: 'arr/[id]/settings',
+				meta: { instanceId: id, error: err instanceof Error ? err.message : String(err) }
+			});
+			return fail(500, { error: 'Cleanup run failed. Check logs for details.' });
 		}
 	},
 
