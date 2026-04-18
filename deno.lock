@@ -42,7 +42,6 @@
     "npm:kysely@0.27.6": "0.27.6",
     "npm:kysely@~0.27.2": "0.27.6",
     "npm:lucide-svelte@^1.0.1": "1.0.1_svelte@5.55.3__acorn@8.15.0",
-    "npm:marked@18": "18.0.0",
     "npm:marked@^15.0.6": "15.0.12",
     "npm:openapi-typescript@^7.13.0": "7.13.0_typescript@6.0.2",
     "npm:playwright@^1.58.2": "1.59.1",
@@ -52,7 +51,6 @@
     "npm:svelte-check@^4.4.6": "4.4.6_svelte@5.55.3__acorn@8.15.0_typescript@6.0.2",
     "npm:svelte@^5.55.2": "5.55.3_acorn@8.15.0",
     "npm:tailwindcss@^4.1.13": "4.2.2",
-    "npm:typescript@^6.0.2": "6.0.2",
     "npm:vite@^8.0.8": "8.0.8_@types+node@24.12.2_esbuild@0.24.2_yaml@2.8.3",
     "npm:yaml@^2.8.3": "2.8.3"
   },
@@ -1509,7 +1507,7 @@
         "npm:jose@^6.2.2",
         "npm:kysely@0.27.6",
         "npm:lucide-svelte@^1.0.1",
-        "npm:marked@18",
+        "npm:marked@^18.0.1",
         "npm:openapi-typescript@^7.13.0",
         "npm:playwright@^1.58.2",
         "npm:prettier-plugin-svelte@^3.5.1",
@@ -1519,7 +1517,7 @@
         "npm:svelte-check@^4.4.6",
         "npm:svelte@^5.55.4",
         "npm:tailwindcss@^4.1.13",
-        "npm:typescript@^6.0.2",
+        "npm:typescript@^6.0.3",
         "npm:vite@^8.0.8",
         "npm:yaml@^2.8.3"
       ]
