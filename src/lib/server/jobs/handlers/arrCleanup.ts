@@ -8,6 +8,8 @@ import { scanForStaleItems, deleteStaleItems } from '$lib/server/sync/cleanup.ts
 import { scanForRemovedEntities, deleteRemovedEntities } from '$lib/server/sync/entityCleanup.ts';
 import { calculateNextRun } from '../scheduleUtils.ts';
 import { logger } from '$logger/logger.ts';
+import { notifications } from '$notifications/definitions/index.ts';
+import { notificationManager } from '$notifications/NotificationManager.ts';
 
 const cleanupHandler: JobHandler = async (job) => {
 	const instanceId = Number(job.payload.instanceId);
@@ -67,13 +69,40 @@ const cleanupHandler: JobHandler = async (job) => {
 
 		const deletedConfigs =
 			deleteResult.deletedCustomFormats.length + deleteResult.deletedQualityProfiles.length;
-		const deletedEntities = entityDelete.deletedEntities.length;
-		const total = deletedConfigs + deletedEntities;
+		const deletedEntitiesCount = entityDelete.deletedEntities.length;
+		const nonSuccesses =
+			deleteResult.skippedQualityProfiles.length + entityDelete.failedEntities.length;
+		const total = deletedConfigs + deletedEntitiesCount;
+		const somethingHappened = total > 0 || nonSuccesses > 0;
+
+		if (somethingHappened) {
+			try {
+				await notificationManager.notify(
+					notifications.arrCleanup({
+						instanceName: instance.name,
+						instanceType,
+						deletedCustomFormats: deleteResult.deletedCustomFormats,
+						deletedQualityProfiles: deleteResult.deletedQualityProfiles,
+						skippedQualityProfiles: deleteResult.skippedQualityProfiles,
+						deletedEntities: entityDelete.deletedEntities,
+						failedEntities: entityDelete.failedEntities
+					})
+				);
+			} catch (err) {
+				await logger.error('Failed to send arr cleanup notification', {
+					source: 'CleanupJob',
+					meta: {
+						instanceId,
+						error: err instanceof Error ? err.message : String(err)
+					}
+				});
+			}
+		}
 
 		const output =
 			total === 0
 				? 'Nothing to clean up'
-				: `Deleted ${deletedConfigs} stale config(s), ${deletedEntities} removed entit${deletedEntities === 1 ? 'y' : 'ies'}`;
+				: `Deleted ${deletedConfigs} stale config(s), ${deletedEntitiesCount} removed entit${deletedEntitiesCount === 1 ? 'y' : 'ies'}`;
 
 		return {
 			status: total === 0 ? 'skipped' : 'success',
@@ -85,9 +114,35 @@ const cleanupHandler: JobHandler = async (job) => {
 			source: 'CleanupJob',
 			meta: { jobId: job.id, instanceId, instanceName: instance.name, error }
 		});
+
+		const errorMessage = error instanceof Error ? error.message : String(error);
+
+		try {
+			await notificationManager.notify(
+				notifications.arrCleanup({
+					instanceName: instance.name,
+					instanceType,
+					deletedCustomFormats: [],
+					deletedQualityProfiles: [],
+					skippedQualityProfiles: [],
+					deletedEntities: [],
+					failedEntities: [],
+					error: errorMessage
+				})
+			);
+		} catch (err) {
+			await logger.error('Failed to send arr cleanup failure notification', {
+				source: 'CleanupJob',
+				meta: {
+					instanceId,
+					error: err instanceof Error ? err.message : String(err)
+				}
+			});
+		}
+
 		return {
 			status: 'failure',
-			error: error instanceof Error ? error.message : String(error)
+			error: errorMessage
 		};
 	} finally {
 		client.close();

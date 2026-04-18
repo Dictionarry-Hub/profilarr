@@ -28,20 +28,6 @@ export const notificationTypes: NotificationType[] = [
 		description: 'Notification when backup creation fails'
 	},
 
-	// Logs
-	{
-		id: 'job.cleanup_logs.success',
-		label: 'Log Cleanup (Success)',
-		category: 'Logs',
-		description: 'Notification when old logs are cleaned up successfully'
-	},
-	{
-		id: 'job.cleanup_logs.failed',
-		label: 'Log Cleanup (Failed)',
-		category: 'Logs',
-		description: 'Notification when log cleanup fails'
-	},
-
 	// Database Sync
 	{
 		id: 'pcd.linked',
@@ -92,6 +78,28 @@ export const notificationTypes: NotificationType[] = [
 		label: 'Arr Sync Failed',
 		category: 'Arr Sync',
 		description: 'Notification when all sections fail to sync to an Arr instance'
+	},
+
+	// Arr Cleanup
+	{
+		id: 'arr.cleanup.success',
+		label: 'Arr Cleanup Completed (Success)',
+		category: 'Arr Cleanup',
+		description:
+			'Notification when stale configs and removed entities are all cleaned up successfully'
+	},
+	{
+		id: 'arr.cleanup.partial',
+		label: 'Arr Cleanup Completed (Partial)',
+		category: 'Arr Cleanup',
+		description:
+			'Notification when some items could not be deleted (skipped quality profiles or failed entity deletions)'
+	},
+	{
+		id: 'arr.cleanup.failed',
+		label: 'Arr Cleanup Failed',
+		category: 'Arr Cleanup',
+		description: 'Notification when cleanup cannot complete or no items could be deleted'
 	},
 
 	// Upgrades

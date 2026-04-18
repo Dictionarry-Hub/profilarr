@@ -142,7 +142,14 @@ export class DiscordNotifier {
 				const MAX_ITEMS_SHOWN = 15;
 
 				for (const group of block.items) {
-					const prefix = group.label === 'created' ? '🆕' : '✏️';
+					let prefix: string;
+					if (group.label === 'created') {
+						prefix = '🆕';
+					} else if (group.label === 'updated') {
+						prefix = '✏️';
+					} else {
+						prefix = `${group.label}:`;
+					}
 					const shown = group.items.slice(0, MAX_ITEMS_SHOWN);
 					const remaining = group.items.length - shown.length;
 					let line = `${prefix} ${shown.join(', ')}`;

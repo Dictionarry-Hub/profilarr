@@ -28,6 +28,11 @@ export const NotificationTypes = {
 	ARR_SYNC_PARTIAL: 'arr.sync.partial',
 	ARR_SYNC_FAILED: 'arr.sync.failed',
 
+	// Arr Cleanup
+	ARR_CLEANUP_SUCCESS: 'arr.cleanup.success',
+	ARR_CLEANUP_PARTIAL: 'arr.cleanup.partial',
+	ARR_CLEANUP_FAILED: 'arr.cleanup.failed',
+
 	// Backups
 	BACKUP_SUCCESS: 'backup.success',
 	BACKUP_FAILED: 'backup.failed'
