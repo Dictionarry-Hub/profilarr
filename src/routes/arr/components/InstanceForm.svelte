@@ -2,7 +2,8 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { Save, Wifi, Trash2, Eraser, Loader2 } from 'lucide-svelte';
-	import { parseUTC } from '$shared/utils/dates';
+	import { formatSmartDateTime } from '$shared/utils/dates';
+	import { serverTimezone } from '$lib/client/stores/timezone';
 	import CleanupModal from './CleanupModal.svelte';
 	import { alertStore } from '$alerts/store';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
@@ -255,31 +256,6 @@
 		if (minutes > 0) return `${minutes}m`;
 		return `${seconds}s`;
 	}
-
-	function formatLastRun(isoString: string): string {
-		const date = parseUTC(isoString);
-		if (!date) return '-';
-		const today = new Date();
-		const yesterday = new Date(today);
-		yesterday.setDate(yesterday.getDate() - 1);
-
-		let dateStr: string;
-		if (date.toDateString() === today.toDateString()) {
-			dateStr = 'Today';
-		} else if (date.toDateString() === yesterday.toDateString()) {
-			dateStr = 'Yesterday';
-		} else {
-			dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-		}
-
-		const timeStr = date.toLocaleTimeString('en-US', {
-			hour: 'numeric',
-			minute: '2-digit',
-			hour12: true
-		});
-
-		return `${dateStr}, ${timeStr}`;
-	}
 </script>
 
 <div class="space-y-6" class:mt-6={mode === 'edit'}>
@@ -481,7 +457,7 @@
 									<span>
 										Last: <span
 											class="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-											>{formatLastRun(cleanupSettings.lastRunAt)}</span
+											>{formatSmartDateTime(cleanupSettings.lastRunAt, $serverTimezone)}</span
 										>
 									</span>
 								</div>

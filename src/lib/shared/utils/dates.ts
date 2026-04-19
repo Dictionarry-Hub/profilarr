@@ -61,30 +61,91 @@ export function parseUTC(timestamp: string | null | undefined): Date | null {
 
 /**
  * Formats a UTC timestamp as a full date and time in the given timezone.
+ * Pass optional Intl options to customize the output format.
  *
  * @example
  * formatDateTime("2026-04-19T14:30:45.123Z", "Asia/Kuala_Lumpur")
  * // "4/19/2026, 10:30:45 PM"
+ * formatDateTime("2026-04-19T14:30:45.123Z", "Asia/Kuala_Lumpur", { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+ * // "Apr 19, 10:30 PM"
  */
-export function formatDateTime(timestamp: string | null | undefined, timezone: string): string {
+export function formatDateTime(
+	timestamp: string | null | undefined,
+	timezone: string,
+	options?: Intl.DateTimeFormatOptions
+): string {
 	if (!timestamp) return '-';
 	const date = new Date(timestamp);
 	if (Number.isNaN(date.getTime())) return '-';
-	return date.toLocaleString(undefined, { timeZone: timezone });
+	return date.toLocaleString(undefined, { timeZone: timezone, ...options });
 }
 
 /**
  * Formats a UTC timestamp as a date (no time) in the given timezone.
+ * Pass optional Intl options to customize the output format.
  *
  * @example
  * formatDate("2026-04-19T14:30:45.123Z", "Asia/Kuala_Lumpur")
  * // "4/19/2026"
+ * formatDate("2026-04-19T14:30:45.123Z", "Asia/Kuala_Lumpur", { month: 'short', day: 'numeric', year: '2-digit' })
+ * // "Apr 19, 26"
  */
-export function formatDate(timestamp: string | null | undefined, timezone: string): string {
+export function formatDate(
+	timestamp: string | null | undefined,
+	timezone: string,
+	options?: Intl.DateTimeFormatOptions
+): string {
 	if (!timestamp) return '-';
 	const date = new Date(timestamp);
 	if (Number.isNaN(date.getTime())) return '-';
-	return date.toLocaleDateString(undefined, { timeZone: timezone });
+	return date.toLocaleDateString(undefined, { timeZone: timezone, ...options });
+}
+
+/**
+ * Formats a UTC timestamp with smart date labeling.
+ * Shows "Today", "Yesterday", or a short date, followed by the time.
+ *
+ * @example
+ * formatSmartDateTime("2026-04-19T14:30:45.123Z", "America/New_York")
+ * // "Today, 10:30 AM"  (if today is Apr 19 in that timezone)
+ * // "Yesterday, 10:30 AM"
+ * // "Apr 19, 10:30 AM"
+ */
+export function formatSmartDateTime(
+	timestamp: string | null | undefined,
+	timezone: string
+): string {
+	if (!timestamp) return '-';
+	const date = new Date(timestamp);
+	if (Number.isNaN(date.getTime())) return '-';
+
+	const now = new Date();
+
+	// Format both dates as YYYY-MM-DD in the target timezone to compare calendar days
+	const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: timezone }); // en-CA gives YYYY-MM-DD
+	const dateDay = fmt.format(date);
+	const todayDay = fmt.format(now);
+
+	const yesterday = new Date(now.getTime() - 86400000);
+	const yesterdayDay = fmt.format(yesterday);
+
+	const timeStr = date.toLocaleTimeString(undefined, {
+		timeZone: timezone,
+		hour: 'numeric',
+		minute: '2-digit',
+		hour12: true
+	});
+
+	if (dateDay === todayDay) return `Today, ${timeStr}`;
+	if (dateDay === yesterdayDay) return `Yesterday, ${timeStr}`;
+
+	const dateStr = date.toLocaleDateString(undefined, {
+		timeZone: timezone,
+		month: 'short',
+		day: 'numeric'
+	});
+
+	return `${dateStr}, ${timeStr}`;
 }
 
 /**

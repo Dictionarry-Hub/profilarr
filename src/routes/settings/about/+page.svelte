@@ -6,6 +6,7 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
+	import DateTime from '$ui/datetime/DateTime.svelte';
 
 	export let data: PageData;
 
@@ -252,7 +253,7 @@
 							<span class="text-sm text-neutral-600 dark:text-neutral-400">{row.name}</span>
 						{:else if column.key === 'applied_at'}
 							<span class="text-xs text-neutral-500">
-								{new Date(row.applied_at).toLocaleDateString()}
+								<DateTime value={row.applied_at} date />
 							</span>
 						{/if}
 					</svelte:fragment>
@@ -279,7 +280,7 @@
 										<span class="text-sm text-neutral-600 dark:text-neutral-400">{row.name}</span>
 									{:else if column.key === 'applied_at'}
 										<span class="text-xs text-neutral-500">
-											{new Date(row.applied_at).toLocaleDateString()}
+											<DateTime value={row.applied_at} date />
 										</span>
 									{/if}
 								</svelte:fragment>
@@ -350,7 +351,7 @@
 								</div>
 							{:else if column.key === 'published_at'}
 								<span class="text-xs text-neutral-500 dark:text-neutral-500">
-									{new Date(row.published_at).toLocaleDateString()}
+									<DateTime value={row.published_at} date />
 								</span>
 							{:else if column.key === 'prerelease'}
 								{#if row.prerelease}
@@ -389,7 +390,7 @@
 											</div>
 										{:else if column.key === 'published_at'}
 											<span class="text-xs text-neutral-500 dark:text-neutral-500">
-												{new Date(row.published_at).toLocaleDateString()}
+												<DateTime value={row.published_at} date />
 											</span>
 										{:else if column.key === 'prerelease'}
 											{#if row.prerelease}

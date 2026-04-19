@@ -5,7 +5,8 @@
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
-	import { parseUTC } from '$shared/utils/dates';
+	import { formatDateTime } from '$shared/utils/dates';
+	import { serverTimezone } from '$lib/client/stores/timezone';
 	import { createEventDispatcher } from 'svelte';
 	import DatabaseAvatar from '../components/DatabaseAvatar.svelte';
 
@@ -28,9 +29,8 @@
 
 	// Format last synced date
 	function formatLastSynced(date: string | null): string {
-		const d = parseUTC(date);
-		if (!d) return 'Never';
-		return d.toLocaleString(undefined, {
+		if (!date) return 'Never';
+		return formatDateTime(date, $serverTimezone, {
 			month: 'short',
 			day: 'numeric',
 			hour: 'numeric',

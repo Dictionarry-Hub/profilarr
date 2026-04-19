@@ -6,6 +6,8 @@
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import type { SonarrLibraryItem } from '$utils/arr/types.ts';
 	import type { Column } from '$ui/table/types';
+	import { formatDate } from '$shared/utils/dates.ts';
+	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 
 	export let row: SonarrLibraryItem;
 	export let column: Column<SonarrLibraryItem>;
@@ -20,10 +22,13 @@
 		return `${mb.toFixed(0)} MB`;
 	}
 
-	function formatDate(isoString?: string): string {
+	function fmtDate(isoString?: string): string {
 		if (!isoString) return '-';
-		const date = new Date(isoString);
-		return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+		return formatDate(isoString, $serverTimezone, {
+			month: 'short',
+			day: 'numeric',
+			year: '2-digit'
+		});
 	}
 </script>
 
@@ -82,6 +87,6 @@
 	>
 {:else if column.key === 'dateAdded'}
 	<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300"
-		>{formatDate(row.dateAdded)}</span
+		>{fmtDate(row.dateAdded)}</span
 	>
 {/if}

@@ -16,6 +16,8 @@
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import type { Column } from '$ui/table/types';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
+	import { formatDateTime } from '$shared/utils/dates.ts';
+	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -66,7 +68,7 @@
 			width: '180px',
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
-				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${new Date(row.time).toLocaleString()}</span>`
+				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${formatDateTime(row.time, $serverTimezone)}</span>`
 			})
 		},
 		{

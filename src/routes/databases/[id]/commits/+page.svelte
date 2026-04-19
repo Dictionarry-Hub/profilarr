@@ -7,7 +7,8 @@
 	import { ExternalLink, FileText } from 'lucide-svelte';
 	import type { PageData } from './$types';
 	import type { Commit } from '$utils/git/types';
-	import { parseUTC } from '$shared/utils/dates';
+	import { parseUTC, formatDate } from '$shared/utils/dates';
+	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 
 	export let data: PageData;
 
@@ -66,14 +67,14 @@
 		return parsed ? parsed.getTime() : Number.NEGATIVE_INFINITY;
 	}
 
-	function formatDate(dateStr: string): string {
+	function fmtDate(dateStr: string): string {
 		const date = parseDate(dateStr);
 		if (!date) return '-';
 		const now = new Date();
 		const diffMs = now.getTime() - date.getTime();
 		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-		if (diffMs < 0) return date.toLocaleDateString();
+		if (diffMs < 0) return formatDate(dateStr, $serverTimezone);
 		if (diffDays === 0) {
 			const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 			if (diffHours === 0) {
@@ -86,7 +87,7 @@
 		if (diffDays < 7) return `${diffDays}d ago`;
 		if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
 
-		return date.toLocaleDateString();
+		return formatDate(dateStr, $serverTimezone);
 	}
 
 	function getCommitUrl(hash: string): string {
@@ -169,7 +170,7 @@
 				</span>
 			{:else if column.key === 'date'}
 				<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
-					{formatDate(row.date)}
+					{fmtDate(row.date)}
 				</span>
 			{/if}
 		</svelte:fragment>

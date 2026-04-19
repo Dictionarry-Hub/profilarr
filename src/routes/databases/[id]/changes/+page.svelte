@@ -42,7 +42,8 @@
 	import type { GitStatus, IncomingChanges, Commit } from '$utils/git/types';
 	import type { Column } from '$ui/table/types';
 	import type { DraftEntityChange } from './components/types';
-	import { parseUTC } from '$shared/utils/dates';
+	import { parseUTC, formatDate, formatDateTime } from '$shared/utils/dates';
+	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 
 	export let data: PageData;
 
@@ -598,14 +599,14 @@
 		return parsed ? parsed.getTime() : Number.NEGATIVE_INFINITY;
 	}
 
-	function formatDate(dateStr: string): string {
+	function fmtDate(dateStr: string): string {
 		const date = parseDate(dateStr);
 		if (!date) return '-';
 		const now = new Date();
 		const diffMs = now.getTime() - date.getTime();
 		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-		if (diffMs < 0) return date.toLocaleDateString();
+		if (diffMs < 0) return formatDate(dateStr, $serverTimezone);
 		if (diffDays === 0) {
 			const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 			if (diffHours === 0) {
@@ -617,15 +618,12 @@
 		if (diffDays === 1) return 'Yesterday';
 		if (diffDays < 7) return `${diffDays}d ago`;
 
-		return date.toLocaleDateString();
+		return formatDate(dateStr, $serverTimezone);
 	}
 
 	function formatExportedAt(value: string | null | undefined): string {
 		if (!value) return '-';
-		const parsed = parseUTC(value);
-		const date = parsed ?? new Date(value);
-		if (Number.isNaN(date.getTime())) return value;
-		return date.toLocaleString(undefined, {
+		return formatDateTime(value, $serverTimezone, {
 			year: 'numeric',
 			month: 'short',
 			day: '2-digit',
@@ -816,7 +814,7 @@
 							</div>
 						{:else if column.key === 'updatedAt'}
 							<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
-								{formatDate(row.updatedAt)}
+								{fmtDate(row.updatedAt)}
 							</span>
 						{/if}
 					</svelte:fragment>
@@ -912,7 +910,7 @@
 							</span>
 						{:else if column.key === 'date'}
 							<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
-								{formatDate(row.date)}
+								{fmtDate(row.date)}
 							</span>
 						{/if}
 					</svelte:fragment>

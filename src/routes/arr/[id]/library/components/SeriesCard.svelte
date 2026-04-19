@@ -9,6 +9,7 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
+	import DateTime from '$ui/datetime/DateTime.svelte';
 	import type { SonarrLibraryItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
 
 	export let series: SonarrLibraryItem;
@@ -222,11 +223,11 @@
 			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
 				<Calendar size={12} />
 				<span class="font-mono"
-					>{new Date(series.dateAdded).toLocaleDateString('en-US', {
-						month: 'short',
-						day: 'numeric',
-						year: '2-digit'
-					})}</span
+					><DateTime
+						value={series.dateAdded}
+						date
+						options={{ month: 'short', day: 'numeric', year: '2-digit' }}
+					/></span
 				>
 			</span>
 		{/if}

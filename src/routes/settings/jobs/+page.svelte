@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { parseUTC } from '$shared/utils/dates';
+	import { formatDateTime as formatDT, formatRelative } from '$shared/utils/dates';
+	import { serverTimezone } from '$lib/client/stores/timezone';
 	import type { Column } from '$lib/client/ui/table/types';
 	import ExpandableTable from '$lib/client/ui/table/ExpandableTable.svelte';
 	import Badge from '$lib/client/ui/badge/Badge.svelte';
@@ -41,38 +42,11 @@
 
 	// Format date/time
 	function formatDateTime(dateStr: string | null): string {
-		const parsed = parseUTC(dateStr);
-		if (!parsed) return 'Never';
-		return parsed.toLocaleString();
+		if (!dateStr) return 'Never';
+		return formatDT(dateStr, $serverTimezone);
 	}
 
 	// Get relative time (e.g., "in 5 minutes", "2 hours ago")
-	function getRelativeTime(dateStr: string | null): string {
-		const date = parseUTC(dateStr);
-		if (!date) return '-';
-
-		const now = new Date();
-		const diff = date.getTime() - now.getTime();
-		const absDiff = Math.abs(diff);
-
-		const seconds = Math.floor(absDiff / 1000);
-		const minutes = Math.floor(seconds / 60);
-		const hours = Math.floor(minutes / 60);
-		const days = Math.floor(hours / 24);
-
-		const isPast = diff < 0;
-
-		if (days > 0) {
-			return isPast ? `${days}d ago` : `in ${days}d`;
-		}
-		if (hours > 0) {
-			return isPast ? `${hours}h ago` : `in ${hours}h`;
-		}
-		if (minutes > 0) {
-			return isPast ? `${minutes}m ago` : `in ${minutes}m`;
-		}
-		return isPast ? `${seconds}s ago` : `in ${seconds}s`;
-	}
 </script>
 
 <div class="p-4 md:p-8">
@@ -112,7 +86,7 @@
 					{/if}
 				{:else if column.key === 'last_run_at'}
 					<div class="flex items-center gap-2">
-						<Badge variant="neutral" mono>{getRelativeTime(row.last_run_at)}</Badge>
+						<Badge variant="neutral" mono>{formatRelative(row.last_run_at)}</Badge>
 						{#if row.last_run_status === 'success'}
 							<Badge variant="success" icon={CheckCircle}>Success</Badge>
 						{:else if row.last_run_status === 'skipped'}
@@ -123,7 +97,7 @@
 					</div>
 				{:else if column.key === 'next_run_at'}
 					{#if row.enabled}
-						<Badge variant="neutral" mono>{getRelativeTime(row.next_run_at)}</Badge>
+						<Badge variant="neutral" mono>{formatRelative(row.next_run_at)}</Badge>
 					{:else}
 						<span class="text-neutral-400 dark:text-neutral-600">-</span>
 					{/if}

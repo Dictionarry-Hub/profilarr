@@ -12,6 +12,8 @@
 	import LogsActionsBar from './components/LogsActionsBar.svelte';
 	import LogLevelLabelCell from './components/LogLevelLabelCell.svelte';
 	import { getPersistentSearchStore } from '$lib/client/stores/search';
+	import { formatDateTime } from '$shared/utils/dates.ts';
+	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 	import type { ComponentType } from 'svelte';
@@ -63,7 +65,7 @@
 			sortAccessor: (row) => new Date(row.timestamp).getTime(),
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — date formatting, not user content
-				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${new Date(row.timestamp).toLocaleString()}</span>`
+				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${formatDateTime(row.timestamp, $serverTimezone)}</span>`
 			})
 		},
 		{

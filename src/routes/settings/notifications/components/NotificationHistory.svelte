@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Bell, CheckCircle, XCircle } from 'lucide-svelte';
-	import { parseUTC } from '$shared/utils/dates';
+	import { formatRelative } from '$shared/utils/dates';
 	import type { NotificationHistoryRecord } from '$db/queries/notificationHistory.ts';
 	import Table from '$ui/table/Table.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
@@ -16,26 +16,6 @@
 		{ key: 'status', header: 'Status', sortable: true },
 		{ key: 'sent_at', header: 'Time', sortable: true }
 	];
-
-	function formatDateTime(date: string): string {
-		const d = parseUTC(date);
-		return d ? d.toLocaleString() : '-';
-	}
-
-	function getRelativeTime(date: string): string {
-		const d = parseUTC(date);
-		if (!d) return '-';
-		const now = new Date();
-		const diff = now.getTime() - d.getTime();
-		const minutes = Math.floor(diff / 60000);
-		const hours = Math.floor(minutes / 60);
-		const days = Math.floor(hours / 24);
-
-		if (days > 0) return `${days}d ago`;
-		if (hours > 0) return `${hours}h ago`;
-		if (minutes > 0) return `${minutes}m ago`;
-		return 'Just now';
-	}
 
 	function getServiceName(serviceId: string): string {
 		const service = services.find((s) => s.id === serviceId);
@@ -83,7 +63,7 @@
 					{row.status === 'success' ? 'Success' : 'Failed'}
 				</Badge>
 			{:else if column.key === 'sent_at'}
-				<Badge variant="neutral" mono>{getRelativeTime(row.sent_at)}</Badge>
+				<Badge variant="neutral" mono>{formatRelative(row.sent_at)}</Badge>
 			{/if}
 		</svelte:fragment>
 	</Table>
