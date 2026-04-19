@@ -9,6 +9,7 @@
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import DropdownFooter from '$ui/dropdown/DropdownFooter.svelte';
 	import type { FilterFieldDef, FilterTag, SerializedFilterTag } from './types';
+	import { uuid } from '$shared/utils/uuid';
 
 	export let fields: FilterFieldDef[] = [];
 	export let items: any[] = [];
@@ -36,7 +37,7 @@
 			const stored = localStorage.getItem(storageKey);
 			if (stored) {
 				const parsed: SerializedFilterTag[] = JSON.parse(stored);
-				return parsed.map((t) => ({ ...t, id: crypto.randomUUID() }));
+				return parsed.map((t) => ({ ...t, id: uuid() }));
 			}
 		} catch {}
 		return [];
@@ -139,7 +140,7 @@
 	function addTag(field: string, value: string) {
 		const trimmed = value.trim();
 		if (!trimmed) return;
-		updateTags([...tags, { id: crypto.randomUUID(), field, value: trimmed, negated: false }]);
+		updateTags([...tags, { id: uuid(), field, value: trimmed, negated: false }]);
 		inputValue = '';
 		valueInputValue = '';
 		activeFieldDef = null;
