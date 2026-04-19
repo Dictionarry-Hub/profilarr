@@ -44,8 +44,8 @@ function rowToConfig(row: UpgradeConfigRow): UpgradeConfig {
 		filters: JSON.parse(row.filters) as FilterConfig[],
 		currentFilterIndex: row.current_filter_index,
 		lastRunAt: toUTC(row.last_run_at),
-		createdAt: toUTC(row.created_at),
-		updatedAt: toUTC(row.updated_at)
+		createdAt: toUTC(row.created_at) ?? undefined,
+		updatedAt: toUTC(row.updated_at) ?? undefined
 	};
 }
 

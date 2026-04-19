@@ -1,4 +1,27 @@
 import { db } from '../db.ts';
+import { toUTC } from '$shared/utils/dates.ts';
+
+/**
+ * Database row type for notification_history table
+ */
+interface NotificationHistoryRow {
+	id: number;
+	service_id: string;
+	notification_type: string;
+	title: string;
+	message: string;
+	metadata: string | null;
+	status: 'success' | 'failed';
+	error: string | null;
+	sent_at: string;
+}
+
+function rowToRecord(row: NotificationHistoryRow): NotificationHistoryRecord {
+	return {
+		...row,
+		sent_at: toUTC(row.sent_at)!
+	};
+}
 
 /**
  * Types for notification_history table
@@ -83,54 +106,64 @@ export const notificationHistoryQueries = {
 		const limit = filters?.limit ?? 100;
 		const offset = filters?.offset ?? 0;
 
-		return db.query<NotificationHistoryRecord>(
-			`SELECT * FROM notification_history ${whereClause} ORDER BY sent_at DESC LIMIT ? OFFSET ?`,
-			...params,
-			limit,
-			offset
-		);
+		return db
+			.query<NotificationHistoryRow>(
+				`SELECT * FROM notification_history ${whereClause} ORDER BY sent_at DESC LIMIT ? OFFSET ?`,
+				...params,
+				limit,
+				offset
+			)
+			.map(rowToRecord);
 	},
 
 	/**
 	 * Get recent notification history (last 50 by default)
 	 */
 	getRecent(limit: number = 50): NotificationHistoryRecord[] {
-		return db.query<NotificationHistoryRecord>(
-			'SELECT * FROM notification_history ORDER BY sent_at DESC LIMIT ?',
-			limit
-		);
+		return db
+			.query<NotificationHistoryRow>(
+				'SELECT * FROM notification_history ORDER BY sent_at DESC LIMIT ?',
+				limit
+			)
+			.map(rowToRecord);
 	},
 
 	/**
 	 * Get notification history for a specific service
 	 */
 	getByServiceId(serviceId: string, limit: number = 50): NotificationHistoryRecord[] {
-		return db.query<NotificationHistoryRecord>(
-			'SELECT * FROM notification_history WHERE service_id = ? ORDER BY sent_at DESC LIMIT ?',
-			serviceId,
-			limit
-		);
+		return db
+			.query<NotificationHistoryRow>(
+				'SELECT * FROM notification_history WHERE service_id = ? ORDER BY sent_at DESC LIMIT ?',
+				serviceId,
+				limit
+			)
+			.map(rowToRecord);
 	},
 
 	/**
 	 * Get notification history by type
 	 */
 	getByType(notificationType: string, limit: number = 50): NotificationHistoryRecord[] {
-		return db.query<NotificationHistoryRecord>(
-			'SELECT * FROM notification_history WHERE notification_type = ? ORDER BY sent_at DESC LIMIT ?',
-			notificationType,
-			limit
-		);
+		return db
+			.query<NotificationHistoryRow>(
+				'SELECT * FROM notification_history WHERE notification_type = ? ORDER BY sent_at DESC LIMIT ?',
+				notificationType,
+				limit
+			)
+			.map(rowToRecord);
 	},
 
 	/**
 	 * Get failed notifications
 	 */
 	getFailed(limit: number = 50): NotificationHistoryRecord[] {
-		return db.query<NotificationHistoryRecord>(
-			"SELECT * FROM notification_history WHERE status = 'failed' ORDER BY sent_at DESC LIMIT ?",
-			limit
-		);
+		return db
+			.query<NotificationHistoryRow>(
+				"SELECT * FROM notification_history WHERE status = 'failed' ORDER BY sent_at DESC LIMIT ?",
+				limit
+			)
+			.map(rowToRecord);
 	},
 
 	/**

@@ -43,8 +43,8 @@ function rowToLog(row: UpgradeRunRow): UpgradeJobLog {
 		configId: 0, // Not stored, not needed for display
 		instanceId: row.instance_id,
 		instanceName: '', // Not stored, can be joined if needed
-		startedAt: toUTC(row.started_at),
-		completedAt: toUTC(row.completed_at),
+		startedAt: toUTC(row.started_at)!,
+		completedAt: toUTC(row.completed_at)!,
 		status: row.status as 'success' | 'partial' | 'failed' | 'skipped',
 
 		config: {

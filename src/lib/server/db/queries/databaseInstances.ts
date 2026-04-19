@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { toUTC } from '$shared/utils/dates.ts';
 
 export type ConflictStrategy = 'override' | 'align' | 'ask';
 
@@ -23,6 +24,20 @@ export interface DatabaseInstance {
 	last_synced_at: string | null;
 	created_at: string;
 	updated_at: string;
+}
+
+/**
+ * Database row type (same shape, used for raw queries before normalization)
+ */
+type DatabaseInstanceRow = DatabaseInstance;
+
+function rowToInstance(row: DatabaseInstanceRow): DatabaseInstance {
+	return {
+		...row,
+		last_synced_at: toUTC(row.last_synced_at),
+		created_at: toUTC(row.created_at)!,
+		updated_at: toUTC(row.updated_at)!
+	};
 }
 
 export type DatabaseInstancePublic = Omit<DatabaseInstance, 'personal_access_token'> & {
@@ -116,30 +131,42 @@ export const databaseInstancesQueries = {
 	 * Get a database instance by ID
 	 */
 	getById(id: number): DatabaseInstance | undefined {
-		return db.queryFirst<DatabaseInstance>('SELECT * FROM database_instances WHERE id = ?', id);
+		const row = db.queryFirst<DatabaseInstanceRow>(
+			'SELECT * FROM database_instances WHERE id = ?',
+			id
+		);
+		return row ? rowToInstance(row) : undefined;
 	},
 
 	/**
 	 * Get a database instance by UUID
 	 */
 	getByUuid(uuid: string): DatabaseInstance | undefined {
-		return db.queryFirst<DatabaseInstance>('SELECT * FROM database_instances WHERE uuid = ?', uuid);
+		const row = db.queryFirst<DatabaseInstanceRow>(
+			'SELECT * FROM database_instances WHERE uuid = ?',
+			uuid
+		);
+		return row ? rowToInstance(row) : undefined;
 	},
 
 	/**
 	 * Get all database instances
 	 */
 	getAll(): DatabaseInstance[] {
-		return db.query<DatabaseInstance>('SELECT * FROM database_instances ORDER BY name');
+		return db
+			.query<DatabaseInstanceRow>('SELECT * FROM database_instances ORDER BY name')
+			.map(rowToInstance);
 	},
 
 	/**
 	 * Get enabled database instances
 	 */
 	getEnabled(): DatabaseInstance[] {
-		return db.query<DatabaseInstance>(
-			'SELECT * FROM database_instances WHERE enabled = 1 ORDER BY name'
-		);
+		return db
+			.query<DatabaseInstanceRow>(
+				'SELECT * FROM database_instances WHERE enabled = 1 ORDER BY name'
+			)
+			.map(rowToInstance);
 	},
 
 	/**
@@ -147,8 +174,9 @@ export const databaseInstancesQueries = {
 	 * Note: last_synced_at may be ISO format (with T and Z), normalize for datetime()
 	 */
 	getDueForSync(): DatabaseInstance[] {
-		return db.query<DatabaseInstance>(
-			`SELECT * FROM database_instances
+		return db
+			.query<DatabaseInstanceRow>(
+				`SELECT * FROM database_instances
        WHERE enabled = 1
        AND sync_strategy > 0
        AND (
@@ -156,7 +184,8 @@ export const databaseInstancesQueries = {
          OR datetime(replace(replace(last_synced_at, 'T', ' '), 'Z', ''), '+' || sync_strategy || ' minutes') <= datetime('now')
        )
        ORDER BY last_synced_at ASC NULLS FIRST`
-		);
+			)
+			.map(rowToInstance);
 	},
 
 	/**

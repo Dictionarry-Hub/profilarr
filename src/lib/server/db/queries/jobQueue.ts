@@ -33,7 +33,7 @@ function rowToRecord(row: JobQueueRow): JobQueueRecord {
 		id: row.id,
 		jobType: row.job_type,
 		status: row.status,
-		runAt: toUTC(row.run_at),
+		runAt: toUTC(row.run_at)!,
 		payload: parsePayload(row.payload),
 		source: row.source,
 		dedupeKey: row.dedupe_key,
@@ -41,8 +41,8 @@ function rowToRecord(row: JobQueueRow): JobQueueRecord {
 		attempts: row.attempts,
 		startedAt: toUTC(row.started_at),
 		finishedAt: toUTC(row.finished_at),
-		createdAt: toUTC(row.created_at),
-		updatedAt: toUTC(row.updated_at)
+		createdAt: toUTC(row.created_at)!,
+		updatedAt: toUTC(row.updated_at)!
 	};
 }
 

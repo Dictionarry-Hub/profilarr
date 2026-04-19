@@ -83,7 +83,7 @@ function mapLatestRow(row: LatestOpHistoryRow): PcdOpHistoryWithOp {
 			conflict_reason: row.history_conflict_reason,
 			error: row.history_error,
 			details: row.history_details,
-			applied_at: toUTC(row.history_applied_at)
+			applied_at: toUTC(row.history_applied_at)!
 		},
 		op: {
 			id: row.op_row_id,
@@ -102,8 +102,8 @@ function mapLatestRow(row: LatestOpHistoryRow): PcdOpHistoryWithOp {
 			superseded_by_op_id: row.op_superseded_by_op_id,
 			pushed_at: toUTC(row.op_pushed_at),
 			pushed_commit: row.op_pushed_commit,
-			created_at: toUTC(row.op_created_at),
-			updated_at: toUTC(row.op_updated_at)
+			created_at: toUTC(row.op_created_at)!,
+			updated_at: toUTC(row.op_updated_at)!
 		}
 	};
 }

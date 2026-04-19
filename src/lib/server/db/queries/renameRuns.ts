@@ -49,8 +49,8 @@ function rowToLog(row: RenameRunRow): RenameJobLog {
 		instanceId: row.instance_id,
 		instanceName: '', // Not stored, can be joined if needed
 		instanceType: 'radarr', // Not stored, default
-		startedAt: toUTC(row.started_at),
-		completedAt: toUTC(row.completed_at),
+		startedAt: toUTC(row.started_at)!,
+		completedAt: toUTC(row.completed_at)!,
 		status: row.status as 'success' | 'partial' | 'failed' | 'skipped',
 
 		config: {

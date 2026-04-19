@@ -36,8 +36,8 @@ function rowToSettings(row: CleanupSettingsRow): CleanupSettings {
 		cron: row.cron,
 		nextRunAt: toUTC(row.next_run_at),
 		lastRunAt: toUTC(row.last_run_at),
-		createdAt: toUTC(row.created_at),
-		updatedAt: toUTC(row.updated_at)
+		createdAt: toUTC(row.created_at)!,
+		updatedAt: toUTC(row.updated_at)!
 	};
 }
 
