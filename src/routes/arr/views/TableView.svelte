@@ -31,6 +31,10 @@
 		loadedImages = loadedImages;
 	}
 
+	function checkLoaded(node: HTMLImageElement, id: number) {
+		if (node.complete) handleImageLoad(id);
+	}
+
 	function formatType(type: string): string {
 		return type.charAt(0).toUpperCase() + type.slice(1);
 	}
@@ -72,6 +76,7 @@
 						alt={`${formatType(row.type)} logo`}
 						class="h-6 w-6 rounded {loadedImages.has(row.id) ? 'opacity-100' : 'opacity-0'}"
 						on:load={() => handleImageLoad(row.id)}
+						use:checkLoaded={row.id}
 					/>
 				</div>
 				<span class="font-medium text-neutral-900 dark:text-neutral-50">{row.name}</span>

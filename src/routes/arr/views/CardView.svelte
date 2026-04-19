@@ -31,6 +31,10 @@
 		loadedImages = loadedImages;
 	}
 
+	function checkLoaded(node: HTMLImageElement, id: number) {
+		if (node.complete) handleImageLoad(id);
+	}
+
 	function formatType(type: string): string {
 		return type.charAt(0).toUpperCase() + type.slice(1);
 	}
@@ -68,6 +72,7 @@
 									? 'opacity-100'
 									: 'opacity-0'}"
 								on:load={() => handleImageLoad(instance.id)}
+								use:checkLoaded={instance.id}
 							/>
 						</div>
 						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
