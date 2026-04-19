@@ -3,6 +3,7 @@ StatusResponse:
   required:
     - version
     - uptime
+    - timezone
     - databases
     - arrs
     - jobs
@@ -14,6 +15,9 @@ StatusResponse:
     uptime:
       type: integer
       description: Server uptime in seconds
+    timezone:
+      type: string
+      description: Server timezone (IANA, e.g. "America/New_York")
     databases:
       type: array
       items:
