@@ -116,6 +116,12 @@ const RAW_DATE_DISPLAY_RE = /\bnew Date\([^)]+\)\s*\}/;
 // Escape hatch comment pattern.
 const DISABLE_RE = /<!--\s*lint-disable-next-line\s+no-raw-dates\s+--\s*.+?-->/;
 
+const SCRIPT_OPEN_RE = /^<script\b/;
+const SCRIPT_CLOSE_RE = /^<\/script>/;
+
+const SUGGESTION_SCRIPT = 'use formatDateTime() or formatDate() from $shared/utils/dates';
+const SUGGESTION_TEMPLATE = 'use <DateTime value={...} /> from $ui/datetime/DateTime.svelte';
+
 async function lintSvelteFiles(): Promise<Violation[]> {
 	const files = await collectFiles({
 		roots: ['src/routes'],
@@ -140,11 +146,25 @@ async function lintSvelteFiles(): Promise<Violation[]> {
 		}
 
 		const lines = source.split('\n');
+		let inScript = false;
+
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
+			const trimmed = line.trimStart();
+
+			if (SCRIPT_OPEN_RE.test(trimmed)) {
+				inScript = true;
+				continue;
+			}
+			if (SCRIPT_CLOSE_RE.test(trimmed)) {
+				inScript = false;
+				continue;
+			}
 
 			// Check for escape hatch on previous line.
 			if (i > 0 && DISABLE_RE.test(lines[i - 1])) continue;
+
+			const suggestion = inScript ? SUGGESTION_SCRIPT : SUGGESTION_TEMPLATE;
 
 			const localeMatch = RAW_LOCALE_RE.exec(line);
 			if (localeMatch) {
@@ -154,7 +174,7 @@ async function lintSvelteFiles(): Promise<Violation[]> {
 					column: localeMatch.index + 1,
 					kind: 'raw-locale',
 					message: 'raw locale date method',
-					suggestion: 'use formatDateTime() or formatDate() from $shared/utils/dates'
+					suggestion
 				});
 			}
 
@@ -166,7 +186,7 @@ async function lintSvelteFiles(): Promise<Violation[]> {
 					column: dateMatch.index + 1,
 					kind: 'raw-date-display',
 					message: 'raw new Date() in template',
-					suggestion: 'use formatDateTime() or formatDate() from $shared/utils/dates'
+					suggestion
 				});
 			}
 		}
