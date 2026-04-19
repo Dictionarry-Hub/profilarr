@@ -20,6 +20,9 @@
 
 	export let data;
 
+	// Set timezone from server data (available immediately, no async fetch)
+	$: serverTimezone.set(data.timezone);
+
 	// Hide navigation on auth pages (login, setup, etc.)
 	$: isAuthPage = $page.url.pathname.startsWith('/auth/');
 
@@ -39,7 +42,6 @@
 	}
 
 	onMount(() => {
-		serverTimezone.init();
 		if (!isAuthPage && cutsceneEnabled) cutscene.init(data.onboardingShown);
 	});
 </script>
