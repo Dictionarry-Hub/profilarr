@@ -31,7 +31,7 @@ Three rules govern how Profilarr handles time:
 
 ### Database
 
-All timestamp columns are `TEXT`. Two formats coexist:
+All timestamp columns are `TEXT`. Two formats coexist (because i am stupid and still learning :D):
 
 | Format          | Source                           | Example                    |
 | --------------- | -------------------------------- | -------------------------- |
