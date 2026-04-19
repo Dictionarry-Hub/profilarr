@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { toUTC } from '$shared/utils/dates.ts';
 import type { JobQueueRecord, JobSource, JobStatus, JobType } from '$jobs/queueTypes.ts';
 
 interface JobQueueRow {
@@ -32,16 +33,16 @@ function rowToRecord(row: JobQueueRow): JobQueueRecord {
 		id: row.id,
 		jobType: row.job_type,
 		status: row.status,
-		runAt: row.run_at,
+		runAt: toUTC(row.run_at),
 		payload: parsePayload(row.payload),
 		source: row.source,
 		dedupeKey: row.dedupe_key,
-		cooldownUntil: row.cooldown_until,
+		cooldownUntil: toUTC(row.cooldown_until),
 		attempts: row.attempts,
-		startedAt: row.started_at,
-		finishedAt: row.finished_at,
-		createdAt: row.created_at,
-		updatedAt: row.updated_at
+		startedAt: toUTC(row.started_at),
+		finishedAt: toUTC(row.finished_at),
+		createdAt: toUTC(row.created_at),
+		updatedAt: toUTC(row.updated_at)
 	};
 }
 

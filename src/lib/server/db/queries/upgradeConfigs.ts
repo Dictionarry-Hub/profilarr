@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { toUTC } from '$shared/utils/dates.ts';
 import type { FilterConfig, FilterMode, UpgradeConfig } from '$shared/upgrades/filters.ts';
 
 /**
@@ -38,13 +39,13 @@ function rowToConfig(row: UpgradeConfigRow): UpgradeConfig {
 		arrInstanceId: row.arr_instance_id,
 		enabled: row.enabled === 1,
 		cron: row.cron,
-		nextRunAt: row.next_run_at,
+		nextRunAt: toUTC(row.next_run_at),
 		filterMode: row.filter_mode as FilterMode,
 		filters: JSON.parse(row.filters) as FilterConfig[],
 		currentFilterIndex: row.current_filter_index,
-		lastRunAt: row.last_run_at,
-		createdAt: row.created_at,
-		updatedAt: row.updated_at
+		lastRunAt: toUTC(row.last_run_at),
+		createdAt: toUTC(row.created_at),
+		updatedAt: toUTC(row.updated_at)
 	};
 }
 
