@@ -73,18 +73,9 @@
 						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 							{instance.name}
 						</h3>
-						<span class="relative flex h-2 w-2 flex-shrink-0">
-							<span
-								class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 {instance.enabled
-									? 'bg-emerald-400'
-									: 'bg-red-400'}"
-							></span>
-							<span
-								class="relative inline-flex h-2 w-2 rounded-full {instance.enabled
-									? 'bg-emerald-500'
-									: 'bg-red-500'}"
-							></span>
-						</span>
+						<Label variant={instance.enabled ? 'success' : 'secondary'} size="sm" rounded="md">
+							{instance.enabled ? 'Enabled' : 'Disabled'}
+						</Label>
 					</div>
 					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>
 						<Button

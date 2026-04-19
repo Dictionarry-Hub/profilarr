@@ -75,18 +75,6 @@
 					/>
 				</div>
 				<span class="font-medium text-neutral-900 dark:text-neutral-50">{row.name}</span>
-				<span class="relative flex h-2 w-2 flex-shrink-0">
-					<span
-						class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 {row.enabled
-							? 'bg-emerald-400'
-							: 'bg-red-400'}"
-					></span>
-					<span
-						class="relative inline-flex h-2 w-2 rounded-full {row.enabled
-							? 'bg-emerald-500'
-							: 'bg-red-500'}"
-					></span>
-				</span>
 			</div>
 		{:else if column.key === 'qualityProfiles'}
 			{#if row.syncedProfileNames.length > 0}
