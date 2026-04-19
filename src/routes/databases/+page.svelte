@@ -14,7 +14,7 @@
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 	import { alertStore } from '$alerts/store';
 	import type { PageData } from './$types';
-	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
+	import type { DatabaseInstanceSummary } from './+page.server.ts';
 
 	export let data: PageData;
 
@@ -30,12 +30,12 @@
 	// Modal state
 	let showUnlinkModal = false;
 	let showInfoModal = false;
-	let selectedDatabase: DatabaseInstancePublic | null = null;
+	let selectedDatabase: DatabaseInstanceSummary | null = null;
 	let unlinkFormElement: HTMLFormElement;
 	let unlinkLoading = false;
 
 	// Handle unlink from view components
-	function handleUnlink(event: CustomEvent<DatabaseInstancePublic>) {
+	function handleUnlink(event: CustomEvent<DatabaseInstanceSummary>) {
 		selectedDatabase = event.detail;
 		showUnlinkModal = true;
 	}

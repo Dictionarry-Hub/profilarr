@@ -4,27 +4,24 @@
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
-	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
+	import type { ArrInstanceSummary } from '../+page.server.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
 	import { createEventDispatcher } from 'svelte';
 
-	export let instances: ArrInstancePublic[];
+	export let instances: ArrInstanceSummary[];
 
 	const dispatch = createEventDispatcher<{
-		delete: ArrInstancePublic;
+		delete: ArrInstanceSummary;
 	}>();
 
-	// Logo lookup by type
 	const logos: Record<string, string> = {
 		radarr: radarrLogo,
 		sonarr: sonarrLogo
 	};
 
-	// Track loaded images
 	let loadedImages: Set<number> = new Set();
 
-	// Get logo path based on arr type
 	function getLogoPath(type: string): string {
 		return logos[type] || '';
 	}
@@ -34,27 +31,33 @@
 		loadedImages = loadedImages;
 	}
 
-	// Format type for display with proper casing
+	function checkLoaded(node: HTMLImageElement, id: number) {
+		if (node.complete) handleImageLoad(id);
+	}
+
 	function formatType(type: string): string {
 		return type.charAt(0).toUpperCase() + type.slice(1);
 	}
 
-	function getRowHref(instance: ArrInstancePublic): string {
+	function getRowHref(instance: ArrInstanceSummary): string {
 		return `/arr/${instance.id}`;
 	}
 
-	// Handle delete click
-	function handleDeleteClick(e: Event, instance: ArrInstancePublic) {
+	function handleDeleteClick(e: Event, instance: ArrInstanceSummary) {
 		e.stopPropagation();
 		e.preventDefault();
 		dispatch('delete', instance);
 	}
 
-	// Define table columns
-	const columns: Column<ArrInstancePublic>[] = [
+	const columns: Column<ArrInstanceSummary>[] = [
 		{ key: 'name', header: 'Name', align: 'left' },
-		{ key: 'url', header: 'URL', align: 'left' },
-		{ key: 'enabled', header: 'Enabled', align: 'center', width: 'w-24' }
+		{ key: 'qualityProfiles', header: 'Quality Profiles', align: 'left' },
+		{ key: 'delayProfile', header: 'Delay Profile', align: 'left' },
+		{ key: 'mediaManagement', header: 'Media Management', align: 'left' },
+		{ key: 'upgrades', header: 'Upgrades', align: 'center', width: 'w-24' },
+		{ key: 'renames', header: 'Renames', align: 'center', width: 'w-24' },
+		{ key: 'cleanup', header: 'Cleanup', align: 'center', width: 'w-24' },
+		{ key: 'enabled', header: 'Status', align: 'center', width: 'w-24' }
 	];
 </script>
 
@@ -62,27 +65,76 @@
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
 			<div class="flex items-center gap-3">
-				<div class="relative h-8 w-8">
+				<div class="relative h-6 w-6 flex-shrink-0">
 					{#if !loadedImages.has(row.id)}
 						<div
-							class="absolute inset-0 animate-pulse rounded-lg bg-neutral-200 dark:bg-neutral-700"
+							class="absolute inset-0 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"
 						></div>
 					{/if}
 					<img
 						src={getLogoPath(row.type)}
 						alt={`${formatType(row.type)} logo`}
-						class="h-8 w-8 rounded-lg {loadedImages.has(row.id) ? 'opacity-100' : 'opacity-0'}"
+						class="h-6 w-6 rounded {loadedImages.has(row.id) ? 'opacity-100' : 'opacity-0'}"
 						on:load={() => handleImageLoad(row.id)}
+						use:checkLoaded={row.id}
 					/>
 				</div>
-				<div class="flex items-center gap-2">
-					<div class="font-medium text-neutral-900 dark:text-neutral-50">
-						{row.name}
-					</div>
-				</div>
+				<span class="font-medium text-neutral-900 dark:text-neutral-50">{row.name}</span>
 			</div>
-		{:else if column.key === 'url'}
-			<Label variant="secondary" size="sm" rounded="md" mono>{row.url}</Label>
+		{:else if column.key === 'qualityProfiles'}
+			{#if row.syncedProfileNames.length > 0}
+				<div class="flex flex-wrap gap-1">
+					{#each row.syncedProfileNames as name}
+						<Label variant="secondary" size="sm" rounded="md">{name}</Label>
+					{/each}
+				</div>
+			{:else}
+				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
+			{/if}
+		{:else if column.key === 'delayProfile'}
+			{#if row.delayProfileName}
+				<Label variant="secondary" size="sm" rounded="md">{row.delayProfileName}</Label>
+			{:else}
+				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
+			{/if}
+		{:else if column.key === 'mediaManagement'}
+			{#if row.namingConfigName || row.qualityDefinitionsConfigName || row.mediaSettingsConfigName}
+				<div class="flex flex-wrap gap-1">
+					{#if row.namingConfigName}
+						<Label variant="secondary" size="sm" rounded="md">Naming: {row.namingConfigName}</Label>
+					{/if}
+					{#if row.qualityDefinitionsConfigName}
+						<Label variant="secondary" size="sm" rounded="md"
+							>Quality Definitions: {row.qualityDefinitionsConfigName}</Label
+						>
+					{/if}
+					{#if row.mediaSettingsConfigName}
+						<Label variant="secondary" size="sm" rounded="md"
+							>Media Settings: {row.mediaSettingsConfigName}</Label
+						>
+					{/if}
+				</div>
+			{:else}
+				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
+			{/if}
+		{:else if column.key === 'upgrades'}
+			<div class="flex justify-center">
+				<Label variant={row.upgradeEnabled ? 'success' : 'secondary'} size="sm" rounded="md"
+					>{row.upgradeEnabled ? 'On' : 'Off'}</Label
+				>
+			</div>
+		{:else if column.key === 'renames'}
+			<div class="flex justify-center">
+				<Label variant={row.renameEnabled ? 'success' : 'secondary'} size="sm" rounded="md"
+					>{row.renameEnabled ? 'On' : 'Off'}</Label
+				>
+			</div>
+		{:else if column.key === 'cleanup'}
+			<div class="flex justify-center">
+				<Label variant={row.cleanupEnabled ? 'success' : 'secondary'} size="sm" rounded="md"
+					>{row.cleanupEnabled ? 'On' : 'Off'}</Label
+				>
+			</div>
 		{:else if column.key === 'enabled'}
 			<div class="flex justify-center">
 				{#if row.enabled}

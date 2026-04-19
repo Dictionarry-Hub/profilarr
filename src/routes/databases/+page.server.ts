@@ -1,14 +1,68 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 import { pcdManager } from '$pcd/core/manager.ts';
+import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
+import { db } from '$db/db.ts';
 import { logger } from '$logger/logger.ts';
+
+export interface DatabaseInstanceSummary extends DatabaseInstancePublic {
+	qualityProfileCount: number;
+	customFormatCount: number;
+	delayProfileCount: number;
+	linkedArrCount: number;
+}
 
 export const load: ServerLoad = () => {
 	const databases = pcdManager.getAllPublic();
 
-	return {
-		databases
-	};
+	const summaries: DatabaseInstanceSummary[] = databases.map((database) => {
+		const cache = pcdManager.getCache(database.id);
+
+		let qualityProfileCount = 0;
+		let customFormatCount = 0;
+		let delayProfileCount = 0;
+
+		if (cache) {
+			qualityProfileCount =
+				cache.queryOne<{ count: number }>('SELECT COUNT(*) as count FROM quality_profiles')
+					?.count ?? 0;
+			customFormatCount =
+				cache.queryOne<{ count: number }>('SELECT COUNT(*) as count FROM custom_formats')?.count ??
+				0;
+			delayProfileCount =
+				cache.queryOne<{ count: number }>('SELECT COUNT(*) as count FROM delay_profiles')?.count ??
+				0;
+		}
+
+		const linkedArrCount =
+			db.queryFirst<{ count: number }>(
+				`SELECT COUNT(DISTINCT instance_id) as count FROM (
+				SELECT instance_id FROM arr_sync_quality_profiles WHERE database_id = ?
+				UNION
+				SELECT instance_id FROM arr_sync_delay_profiles_config WHERE database_id = ?
+				UNION
+				SELECT instance_id FROM arr_sync_media_management
+					WHERE naming_database_id = ?
+					OR quality_definitions_database_id = ?
+					OR media_settings_database_id = ?
+			)`,
+				database.id,
+				database.id,
+				database.id,
+				database.id,
+				database.id
+			)?.count ?? 0;
+
+		return {
+			...database,
+			qualityProfileCount,
+			customFormatCount,
+			delayProfileCount,
+			linkedArrCount
+		};
+	});
+
+	return { databases: summaries };
 };
 
 export const actions = {

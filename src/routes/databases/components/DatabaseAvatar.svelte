@@ -17,7 +17,13 @@
 	let imgEl: HTMLImageElement | null = null;
 	let lastSrc = '';
 
+	const LOGO_OVERRIDES: Record<string, string> = {
+		'https://github.com/Dictionarry-Hub/trash-pcd':
+			'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/trash-guides.png'
+	};
+
 	function getGitHubAvatar(url: string): string {
+		if (LOGO_OVERRIDES[url]) return LOGO_OVERRIDES[url];
 		const match = url.match(/github\.com\/([^\/]+)\//);
 		if (match) {
 			return `/databases/avatar/${match[1]}`;

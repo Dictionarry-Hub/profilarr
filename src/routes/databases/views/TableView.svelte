@@ -4,21 +4,18 @@
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
-	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
+	import type { DatabaseInstanceSummary } from '../+page.server.ts';
 	import { formatDateTime } from '$shared/utils/dates';
 	import { serverTimezone } from '$lib/client/stores/timezone';
 	import { createEventDispatcher } from 'svelte';
 	import DatabaseAvatar from '../components/DatabaseAvatar.svelte';
 
-	export let databases: DatabaseInstancePublic[];
+	export let databases: DatabaseInstanceSummary[];
 
 	const dispatch = createEventDispatcher<{
-		unlink: DatabaseInstancePublic;
+		unlink: DatabaseInstanceSummary;
 	}>();
 
-	// Avatar handled by DatabaseAvatar component
-
-	// Format sync strategy for display
 	function formatSyncStrategy(minutes: number): string {
 		if (minutes === 0) return 'Manual';
 		if (minutes < 60) return `Every ${minutes} min`;
@@ -27,7 +24,6 @@
 		return `Every ${minutes / 1440}d`;
 	}
 
-	// Format last synced date
 	function formatLastSynced(date: string | null): string {
 		if (!date) return 'Never';
 		return formatDateTime(date, $serverTimezone, {
@@ -38,21 +34,20 @@
 		});
 	}
 
-	function getRowHref(database: DatabaseInstancePublic): string {
+	function getRowHref(database: DatabaseInstanceSummary): string {
 		return `/databases/${database.id}`;
 	}
 
-	// Handle unlink click
-	function handleUnlinkClick(e: Event, database: DatabaseInstancePublic) {
+	function handleUnlinkClick(e: Event, database: DatabaseInstanceSummary) {
 		e.stopPropagation();
 		e.preventDefault();
 		dispatch('unlink', database);
 	}
 
-	// Define table columns
-	const columns: Column<DatabaseInstancePublic>[] = [
+	const columns: Column<DatabaseInstanceSummary>[] = [
 		{ key: 'name', header: 'Name', align: 'left' },
 		{ key: 'repository_url', header: 'Repository', align: 'left' },
+		{ key: 'content', header: 'Content', align: 'left' },
 		{ key: 'sync_strategy', header: 'Sync', align: 'left', width: 'w-32' },
 		{ key: 'last_synced_at', header: 'Last Synced', align: 'left', width: 'w-40' }
 	];
@@ -85,6 +80,12 @@
 			<Label variant="secondary" size="sm" rounded="md" mono>
 				{row.repository_url.replace('https://github.com/', '')}
 			</Label>
+		{:else if column.key === 'content'}
+			<div class="flex flex-wrap gap-1">
+				<Label variant="secondary" size="sm" rounded="md">{row.qualityProfileCount} Profiles</Label>
+				<Label variant="secondary" size="sm" rounded="md">{row.customFormatCount} Formats</Label>
+				<Label variant="secondary" size="sm" rounded="md">{row.delayProfileCount} Delay</Label>
+			</div>
 		{:else if column.key === 'sync_strategy'}
 			<Label variant="secondary" size="sm" rounded="md" mono>
 				{formatSyncStrategy(row.sync_strategy)}
