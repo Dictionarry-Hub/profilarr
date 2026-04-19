@@ -35,7 +35,6 @@ import {
 	classifyDirective,
 	collectFiles,
 	type Colorizer,
-	type CommentStatus,
 	offsetToLineCol,
 	pickColorizer
 } from './_lib.ts';
