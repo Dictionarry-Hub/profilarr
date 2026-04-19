@@ -12,6 +12,7 @@
 	import CutsceneComplete from '$lib/client/cutscene/CutsceneComplete.svelte';
 	import { cutscene } from '$lib/client/cutscene/store';
 	import { sidebarCollapsed } from '$stores/sidebar';
+	import { serverTimezone } from '$stores/timezone';
 	import { FEATURES } from '$lib/shared/features';
 	import { dev } from '$app/environment';
 	import { page } from '$app/stores';
@@ -38,6 +39,7 @@
 	}
 
 	onMount(() => {
+		serverTimezone.init();
 		if (!isAuthPage && cutsceneEnabled) cutscene.init(data.onboardingShown);
 	});
 </script>
