@@ -19,13 +19,7 @@
  *   deno task lint:datetime
  */
 
-import {
-	buildLineOffsets,
-	collectFiles,
-	type Colorizer,
-	offsetToLineCol,
-	pickColorizer
-} from './_lib.ts';
+import { collectFiles, type Colorizer, pickColorizer } from './_lib.ts';
 
 // ============================================================================
 // CONFIGURATION
@@ -107,7 +101,14 @@ async function lintQueryFiles(): Promise<Violation[]> {
 // ============================================================================
 
 // Patterns that indicate raw locale date usage.
-const RAW_LOCALE_RE = /\.toLocaleString\(|\.toLocaleDateString\(|\.toLocaleTimeString\(/;
+// Only flag .toLocaleString() when called on a Date (not on a number).
+// .toLocaleDateString() and .toLocaleTimeString() are always date methods.
+const RAW_LOCALE_DATE_ONLY_RE = /\.toLocaleDateString\(|\.toLocaleTimeString\(/;
+// .toLocaleString() is ambiguous (numbers also have it).
+// Flag when: (a) called on a Date-like expression, OR (b) called with
+// Intl date formatting options (month, day, year, hour, etc.).
+const RAW_TOLOCALESTRING_RE =
+	/(?:new Date\([^)]*\)|(?<!\w)(?:date|d|parsed)\)?)\s*\.toLocaleString\(|\.toLocaleString\(\s*(?:undefined|'[^']*')\s*,\s*\{[^}]*(?:month|day|year|hour|minute|second)/i;
 
 // Pattern for `new Date(something)` used directly in template expressions.
 // Matches things like `{new Date(row.timestamp)}` or `${new Date(x).toLocale`
@@ -166,16 +167,32 @@ async function lintSvelteFiles(): Promise<Violation[]> {
 
 			const suggestion = inScript ? SUGGESTION_SCRIPT : SUGGESTION_TEMPLATE;
 
-			const localeMatch = RAW_LOCALE_RE.exec(line);
-			if (localeMatch) {
+			// Check for .toLocaleDateString() / .toLocaleTimeString() (always date)
+			const dateOnlyMatch = RAW_LOCALE_DATE_ONLY_RE.exec(line);
+			if (dateOnlyMatch) {
 				violations.push({
 					file,
 					line: i + 1,
-					column: localeMatch.index + 1,
+					column: dateOnlyMatch.index + 1,
 					kind: 'raw-locale',
 					message: 'raw locale date method',
 					suggestion
 				});
+			}
+
+			// Check for .toLocaleString() only when it looks like a date call
+			if (!dateOnlyMatch) {
+				const toLocaleMatch = RAW_TOLOCALESTRING_RE.exec(line);
+				if (toLocaleMatch) {
+					violations.push({
+						file,
+						line: i + 1,
+						column: toLocaleMatch.index + 1,
+						kind: 'raw-locale',
+						message: 'raw locale date method',
+						suggestion
+					});
+				}
 			}
 
 			const dateMatch = RAW_DATE_DISPLAY_RE.exec(line);
