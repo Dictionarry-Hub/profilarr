@@ -30,6 +30,14 @@
  */
 
 import { parse } from 'svelte/compiler';
+import {
+	buildLineOffsets,
+	classifyDirective,
+	collectFiles,
+	type Colorizer,
+	offsetToLineCol,
+	pickColorizer
+} from './_lib.ts';
 
 // ============================================================================
 // CONFIGURATION
@@ -41,7 +49,6 @@ const BANNED_TAGS = new Set(['button', 'input', 'select', 'textarea', 'dialog', 
 
 const SCOPE_ROOTS = ['src/routes', 'src/lib/client'];
 const EXCLUDED_PREFIX = 'src/lib/client/ui/';
-const SKIP_DIRS = new Set(['.svelte-kit', 'node_modules']);
 
 // Fast pre-filter: if none of these tag names appear in a file's raw source,
 // the parse can be skipped entirely.
@@ -118,11 +125,6 @@ interface WalkContext {
 	offsets: number[];
 	out: Violation[];
 }
-
-type CommentStatus =
-	| { kind: 'none' }
-	| { kind: 'valid'; reason: string }
-	| { kind: 'malformed'; reason: string };
 
 // Svelte AST types - we pin just the shapes we touch, since importing the full
 // `AST` namespace from `npm:svelte/compiler` through Deno's compat shim is
@@ -208,64 +210,11 @@ interface SvelteRoot {
 // FILE DISCOVERY
 // ============================================================================
 
-async function collectSvelteFiles(): Promise<string[]> {
-	const out: string[] = [];
-
-	async function walk(dir: string): Promise<void> {
-		let entries: AsyncIterable<Deno.DirEntry>;
-		try {
-			entries = Deno.readDir(dir);
-		} catch (err) {
-			if (err instanceof Deno.errors.NotFound) return;
-			throw err;
-		}
-		for await (const entry of entries) {
-			if (SKIP_DIRS.has(entry.name)) continue;
-			const rel = `${dir}/${entry.name}`;
-			if (entry.isDirectory) {
-				await walk(rel);
-			} else if (entry.isFile && entry.name.endsWith('.svelte')) {
-				const norm = rel.replaceAll('\\', '/');
-				if (norm.startsWith(EXCLUDED_PREFIX)) continue;
-				out.push(norm);
-			}
-		}
-	}
-
-	for (const root of SCOPE_ROOTS) {
-		await walk(root);
-	}
-
-	out.sort();
-	return out;
-}
-
-// ============================================================================
-// POSITION HELPERS
-// ============================================================================
-
-function buildLineOffsets(source: string): number[] {
-	const offsets = [0];
-	for (let i = 0; i < source.length; i++) {
-		if (source.charCodeAt(i) === 10 /* \n */) {
-			offsets.push(i + 1);
-		}
-	}
-	return offsets;
-}
-
-function offsetToLineCol(offsets: number[], offset: number): { line: number; column: number } {
-	let lo = 0;
-	let hi = offsets.length - 1;
-	while (lo < hi) {
-		const mid = (lo + hi + 1) >>> 1;
-		if (offsets[mid] <= offset) {
-			lo = mid;
-		} else {
-			hi = mid - 1;
-		}
-	}
-	return { line: lo + 1, column: offset - offsets[lo] + 1 };
+function collectSvelteFiles(): Promise<string[]> {
+	return collectFiles({
+		roots: SCOPE_ROOTS,
+		acceptFile: (rel) => rel.endsWith('.svelte') && !rel.startsWith(EXCLUDED_PREFIX)
+	});
 }
 
 // ============================================================================
@@ -322,35 +271,6 @@ function precedingCommentFor(siblings: AnyNode[], index: number): CommentNode | 
 		return null;
 	}
 	return null;
-}
-
-function classifyComment(data: string): CommentStatus {
-	const trimmed = data.trim();
-	if (!/^lint-disable-next-line\b/.test(trimmed)) {
-		return { kind: 'none' };
-	}
-	const m = /^lint-disable-next-line\s+(\S+)(?:\s+--\s*(.*))?$/.exec(trimmed);
-	if (!m) {
-		return {
-			kind: 'malformed',
-			reason: `directive must be: lint-disable-next-line ${RULE_NAME} -- <reason>`
-		};
-	}
-	const [, ruleName, rawReason] = m;
-	if (ruleName !== RULE_NAME) {
-		return {
-			kind: 'malformed',
-			reason: `unknown rule "${ruleName}", expected "${RULE_NAME}"`
-		};
-	}
-	const reason = (rawReason ?? '').trim();
-	if (reason === '') {
-		return {
-			kind: 'malformed',
-			reason: 'directive reason (after `--`) must not be empty'
-		};
-	}
-	return { kind: 'valid', reason };
 }
 
 // ============================================================================
@@ -448,7 +368,7 @@ function checkElement(
 	// Escape-hatch comment (immediate preceding sibling, skipping whitespace).
 	const comment = precedingCommentFor(siblings, idx);
 	if (comment) {
-		const status = classifyComment(comment.data);
+		const status = classifyDirective(comment.data, RULE_NAME);
 		if (status.kind === 'valid') return;
 		if (status.kind === 'malformed') {
 			const { line, column } = offsetToLineCol(ctx.offsets, el.start);
@@ -503,51 +423,6 @@ function lintFile(file: string, source: string): Violation[] {
 	const offsets = buildLineOffsets(source);
 	walkFragment(root.fragment.nodes, { file, offsets, out });
 	return out;
-}
-
-// ============================================================================
-// COLOR
-// ============================================================================
-
-interface Colorizer {
-	bold: (s: string) => string;
-	dim: (s: string) => string;
-	red: (s: string) => string;
-	green: (s: string) => string;
-	yellow: (s: string) => string;
-	cyan: (s: string) => string;
-}
-
-const ansiColor: Colorizer = {
-	bold: (s) => `\x1b[1m${s}\x1b[22m`,
-	dim: (s) => `\x1b[2m${s}\x1b[22m`,
-	red: (s) => `\x1b[31m${s}\x1b[39m`,
-	green: (s) => `\x1b[32m${s}\x1b[39m`,
-	yellow: (s) => `\x1b[33m${s}\x1b[39m`,
-	cyan: (s) => `\x1b[36m${s}\x1b[39m`
-};
-
-const noColor: Colorizer = {
-	bold: (s) => s,
-	dim: (s) => s,
-	red: (s) => s,
-	green: (s) => s,
-	yellow: (s) => s,
-	cyan: (s) => s
-};
-
-// https://no-color.org/ and https://force-color.org/
-function shouldUseColor(): boolean {
-	// NO_COLOR: disable when set, even to an empty string.
-	if (Deno.env.get('NO_COLOR') !== undefined) return false;
-	// FORCE_COLOR: enable when set to any value other than "0"/"false".
-	const force = Deno.env.get('FORCE_COLOR');
-	if (force !== undefined && force !== '0' && force !== 'false') return true;
-	try {
-		return Deno.stdout.isTerminal();
-	} catch {
-		return false;
-	}
 }
 
 // ============================================================================
@@ -753,7 +628,7 @@ async function main(): Promise<void> {
 		all.push(...lintFile(file, source));
 	}
 
-	const c = shouldUseColor() ? ansiColor : noColor;
+	const c = pickColorizer();
 
 	if (all.length === 0) {
 		console.log(`${c.green('\u2713')} no raw UI element violations ${c.dim(`(${RULE_NAME})`)}`);
