@@ -52,7 +52,7 @@
 	}
 </script>
 
-<CardGrid columns={4} flush>
+<CardGrid columns={3} flush>
 	{#each instances as instance}
 		<Card href="/arr/{instance.id}" hoverable>
 			<svelte:fragment slot="header">
