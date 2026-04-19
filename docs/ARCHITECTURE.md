@@ -78,6 +78,7 @@ publishes a release.
 
 - [backend/api.md](./backend/api.md): API v1 routes, contract-first workflow, OpenAPI spec
 - [backend/database.md](./backend/database.md): App database, migrations, query layer, schema reference
+- [backend/datetime.md](./backend/datetime.md): Date/time handling, UTC storage, query normalization, timezone display
 - [backend/jobs.md](./backend/jobs.md): Job queue, dispatcher, handlers, scheduling
 - [backend/logger.md](./backend/logger.md): Logger singleton, log levels, output formats, usage
 - [backend/notifications.md](./backend/notifications.md): Notification manager, definitions, notifiers

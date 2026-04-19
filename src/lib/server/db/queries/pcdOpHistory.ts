@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { toUTC } from '$shared/utils/dates.ts';
 import type { PcdOp } from './pcdOps.ts';
 
 export type PcdOpHistoryStatus =
@@ -82,7 +83,7 @@ function mapLatestRow(row: LatestOpHistoryRow): PcdOpHistoryWithOp {
 			conflict_reason: row.history_conflict_reason,
 			error: row.history_error,
 			details: row.history_details,
-			applied_at: row.history_applied_at
+			applied_at: toUTC(row.history_applied_at)!
 		},
 		op: {
 			id: row.op_row_id,
@@ -97,12 +98,12 @@ function mapLatestRow(row: LatestOpHistoryRow): PcdOpHistoryWithOp {
 			metadata: row.op_metadata,
 			desired_state: row.op_desired_state,
 			content_hash: row.op_content_hash,
-			last_seen_in_repo_at: row.op_last_seen_in_repo_at,
+			last_seen_in_repo_at: toUTC(row.op_last_seen_in_repo_at),
 			superseded_by_op_id: row.op_superseded_by_op_id,
-			pushed_at: row.op_pushed_at,
+			pushed_at: toUTC(row.op_pushed_at),
 			pushed_commit: row.op_pushed_commit,
-			created_at: row.op_created_at,
-			updated_at: row.op_updated_at
+			created_at: toUTC(row.op_created_at)!,
+			updated_at: toUTC(row.op_updated_at)!
 		}
 	};
 }

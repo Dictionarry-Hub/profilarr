@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { toUTC } from '$shared/utils/dates.ts';
 import type { JobRunHistoryRecord, JobRunStatus, JobType } from '$jobs/queueTypes.ts';
 
 interface JobRunHistoryRow {
@@ -20,12 +21,12 @@ function rowToRecord(row: JobRunHistoryRow): JobRunHistoryRecord {
 		queueId: row.queue_id,
 		jobType: row.job_type,
 		status: row.status,
-		startedAt: row.started_at,
-		finishedAt: row.finished_at,
+		startedAt: toUTC(row.started_at)!,
+		finishedAt: toUTC(row.finished_at)!,
 		durationMs: row.duration_ms,
 		error: row.error,
 		output: row.output,
-		createdAt: row.created_at
+		createdAt: toUTC(row.created_at)!
 	};
 }
 

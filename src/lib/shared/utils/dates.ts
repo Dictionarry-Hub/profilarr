@@ -50,3 +50,129 @@ export function parseUTC(timestamp: string | null | undefined): Date | null {
 	if (!normalized) return null;
 	return new Date(normalized);
 }
+
+// ---------------------------------------------------------------------------
+// Display formatting
+//
+// These functions accept normalized UTC strings (from the query layer) and
+// the server timezone (from the serverTimezone store). They are the only
+// way dates should be rendered in the UI.
+// ---------------------------------------------------------------------------
+
+/**
+ * Formats a UTC timestamp as a full date and time in the given timezone.
+ * Pass optional Intl options to customize the output format.
+ *
+ * @example
+ * formatDateTime("2026-04-19T14:30:45.123Z", "Asia/Kuala_Lumpur")
+ * // "4/19/2026, 10:30:45 PM"
+ * formatDateTime("2026-04-19T14:30:45.123Z", "Asia/Kuala_Lumpur", { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+ * // "Apr 19, 10:30 PM"
+ */
+export function formatDateTime(
+	timestamp: string | null | undefined,
+	timezone: string,
+	options?: Intl.DateTimeFormatOptions
+): string {
+	if (!timestamp) return '-';
+	const date = new Date(timestamp);
+	if (Number.isNaN(date.getTime())) return '-';
+	return date.toLocaleString(undefined, { timeZone: timezone, ...options });
+}
+
+/**
+ * Formats a UTC timestamp as a date (no time) in the given timezone.
+ * Pass optional Intl options to customize the output format.
+ *
+ * @example
+ * formatDate("2026-04-19T14:30:45.123Z", "Asia/Kuala_Lumpur")
+ * // "4/19/2026"
+ * formatDate("2026-04-19T14:30:45.123Z", "Asia/Kuala_Lumpur", { month: 'short', day: 'numeric', year: '2-digit' })
+ * // "Apr 19, 26"
+ */
+export function formatDate(
+	timestamp: string | null | undefined,
+	timezone: string,
+	options?: Intl.DateTimeFormatOptions
+): string {
+	if (!timestamp) return '-';
+	const date = new Date(timestamp);
+	if (Number.isNaN(date.getTime())) return '-';
+	return date.toLocaleDateString(undefined, { timeZone: timezone, ...options });
+}
+
+/**
+ * Formats a UTC timestamp with smart date labeling.
+ * Shows "Today", "Yesterday", or a short date, followed by the time.
+ *
+ * @example
+ * formatSmartDateTime("2026-04-19T14:30:45.123Z", "America/New_York")
+ * // "Today, 10:30 AM"  (if today is Apr 19 in that timezone)
+ * // "Yesterday, 10:30 AM"
+ * // "Apr 19, 10:30 AM"
+ */
+export function formatSmartDateTime(
+	timestamp: string | null | undefined,
+	timezone: string
+): string {
+	if (!timestamp) return '-';
+	const date = new Date(timestamp);
+	if (Number.isNaN(date.getTime())) return '-';
+
+	const now = new Date();
+
+	// Format both dates as YYYY-MM-DD in the target timezone to compare calendar days
+	const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: timezone }); // en-CA gives YYYY-MM-DD
+	const dateDay = fmt.format(date);
+	const todayDay = fmt.format(now);
+
+	const yesterday = new Date(now.getTime() - 86400000);
+	const yesterdayDay = fmt.format(yesterday);
+
+	const timeStr = date.toLocaleTimeString(undefined, {
+		timeZone: timezone,
+		hour: 'numeric',
+		minute: '2-digit',
+		hour12: true
+	});
+
+	if (dateDay === todayDay) return `Today, ${timeStr}`;
+	if (dateDay === yesterdayDay) return `Yesterday, ${timeStr}`;
+
+	const dateStr = date.toLocaleDateString(undefined, {
+		timeZone: timezone,
+		month: 'short',
+		day: 'numeric'
+	});
+
+	return `${dateStr}, ${timeStr}`;
+}
+
+/**
+ * Formats a UTC timestamp as a relative time string.
+ * Timezone-agnostic (compares UTC instants).
+ *
+ * @example
+ * formatRelative("2026-04-19T14:30:45.123Z") // "2h ago"
+ * formatRelative("2026-04-19T16:30:45.123Z") // "in 2h"
+ */
+export function formatRelative(timestamp: string | null | undefined): string {
+	if (!timestamp) return '-';
+	const date = new Date(timestamp);
+	if (Number.isNaN(date.getTime())) return '-';
+
+	const diff = date.getTime() - Date.now();
+	const abs = Math.abs(diff);
+	const past = diff < 0;
+
+	const seconds = Math.floor(abs / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
+	const days = Math.floor(hours / 24);
+
+	if (seconds < 10) return 'just now';
+	if (days > 0) return past ? `${days}d ago` : `in ${days}d`;
+	if (hours > 0) return past ? `${hours}h ago` : `in ${hours}h`;
+	if (minutes > 0) return past ? `${minutes}m ago` : `in ${minutes}m`;
+	return past ? `${seconds}s ago` : `in ${seconds}s`;
+}

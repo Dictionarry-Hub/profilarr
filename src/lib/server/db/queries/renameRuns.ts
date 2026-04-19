@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { toUTC } from '$shared/utils/dates.ts';
 import type { RenameJobLog } from '$lib/server/rename/types.ts';
 
 /**
@@ -48,8 +49,8 @@ function rowToLog(row: RenameRunRow): RenameJobLog {
 		instanceId: row.instance_id,
 		instanceName: '', // Not stored, can be joined if needed
 		instanceType: 'radarr', // Not stored, default
-		startedAt: row.started_at,
-		completedAt: row.completed_at,
+		startedAt: toUTC(row.started_at)!,
+		completedAt: toUTC(row.completed_at)!,
 		status: row.status as 'success' | 'partial' | 'failed' | 'skipped',
 
 		config: {

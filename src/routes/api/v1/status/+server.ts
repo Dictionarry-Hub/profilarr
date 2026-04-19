@@ -26,6 +26,7 @@ export const GET: RequestHandler = async () => {
 	const response: StatusResponse = {
 		version: appInfoQueries.getVersion(),
 		uptime: Math.floor((Date.now() - startupTime) / 1000),
+		timezone: config.timezone,
 		databases: buildDatabases(),
 		arrs: buildArrs(),
 		jobs: buildJobs(),

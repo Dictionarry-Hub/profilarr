@@ -8,6 +8,8 @@
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import type { RadarrLibraryItem } from '$utils/arr/types.ts';
 	import type { Column } from '$ui/table/types';
+	import { formatDate } from '$shared/utils/dates.ts';
+	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 
 	export let row: RadarrLibraryItem;
 	export let column: Column<RadarrLibraryItem>;
@@ -22,10 +24,13 @@
 		return 'bg-red-500 dark:bg-red-400';
 	}
 
-	function formatDate(isoString?: string): string {
+	function fmtDate(isoString?: string): string {
 		if (!isoString) return '-';
-		const date = new Date(isoString);
-		return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+		return formatDate(isoString, $serverTimezone, {
+			month: 'short',
+			day: 'numeric',
+			year: '2-digit'
+		});
 	}
 </script>
 
@@ -127,7 +132,7 @@
 		</span>
 	{:else if column.key === 'dateAdded'}
 		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
-			{formatDate(row.dateAdded)}
+			{fmtDate(row.dateAdded)}
 		</span>
 	{/if}
 {:else}

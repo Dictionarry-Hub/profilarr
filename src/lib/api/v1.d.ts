@@ -547,6 +547,8 @@ export interface components {
 			version: string;
 			/** @description Server uptime in seconds */
 			uptime: number;
+			/** @description Server timezone (IANA, e.g. "America/New_York") */
+			timezone: string;
 			databases: components['schemas']['StatusDatabase'][];
 			arrs: components['schemas']['StatusArr'][];
 			jobs: components['schemas']['StatusJobs'];

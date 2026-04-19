@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { toUTC } from '$shared/utils/dates.ts';
 
 // Types
 export type SyncTrigger = 'manual' | 'on_pull' | 'schedule';
@@ -437,17 +438,17 @@ export const arrSyncQueries = {
 			qualityProfiles: qp.map((r) => ({
 				instanceId: r.instance_id,
 				cron: r.cron,
-				nextRunAt: r.next_run_at
+				nextRunAt: toUTC(r.next_run_at)
 			})),
 			delayProfiles: dp.map((r) => ({
 				instanceId: r.instance_id,
 				cron: r.cron,
-				nextRunAt: r.next_run_at
+				nextRunAt: toUTC(r.next_run_at)
 			})),
 			mediaManagement: mm.map((r) => ({
 				instanceId: r.instance_id,
 				cron: r.cron,
-				nextRunAt: r.next_run_at
+				nextRunAt: toUTC(r.next_run_at)
 			}))
 		};
 	},

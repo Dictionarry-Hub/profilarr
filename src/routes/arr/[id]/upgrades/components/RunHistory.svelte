@@ -35,6 +35,8 @@
 	import Label from '$ui/label/Label.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import type { Column } from '$ui/table/types';
+	import { formatSmartDateTime } from '$shared/utils/dates';
+	import { serverTimezone } from '$lib/client/stores/timezone';
 
 	let searchStore: SearchStore = createSearchStore();
 	let debouncedQuery: Readable<string> = searchStore.debouncedQuery;
@@ -141,30 +143,6 @@
 	function getRunNumber(row: UpgradeJobLog): number {
 		const originalIndex = runs.findIndex((r) => r.id === row.id);
 		return runs.length - originalIndex;
-	}
-
-	function formatDate(isoString: string): string {
-		const date = new Date(isoString);
-		const today = new Date();
-		const yesterday = new Date(today);
-		yesterday.setDate(yesterday.getDate() - 1);
-
-		let dateStr: string;
-		if (date.toDateString() === today.toDateString()) {
-			dateStr = 'Today';
-		} else if (date.toDateString() === yesterday.toDateString()) {
-			dateStr = 'Yesterday';
-		} else {
-			dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-		}
-
-		const timeStr = date.toLocaleTimeString('en-US', {
-			hour: 'numeric',
-			minute: '2-digit',
-			hour12: true
-		});
-
-		return `${dateStr}, ${timeStr}`;
 	}
 
 	function formatDuration(startedAt: string, completedAt: string): string {
@@ -327,7 +305,7 @@
 				</div>
 			{:else if column.key === 'date'}
 				<span class="text-neutral-600 dark:text-neutral-400">
-					{formatDate(row.startedAt)}
+					{formatSmartDateTime(row.startedAt, $serverTimezone)}
 				</span>
 			{:else if column.key === 'duration'}
 				<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">

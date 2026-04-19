@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { toUTC } from '$shared/utils/dates.ts';
 
 /**
  * Types for sessions table
@@ -15,6 +16,17 @@ export interface Session {
 	os: string | null;
 	device_type: string | null;
 	last_active_at: string | null;
+}
+
+type SessionRow = Session;
+
+function rowToSession(row: SessionRow): Session {
+	return {
+		...row,
+		expires_at: toUTC(row.expires_at)!,
+		created_at: toUTC(row.created_at)!,
+		last_active_at: toUTC(row.last_active_at)
+	};
 }
 
 /**
@@ -60,28 +72,32 @@ export const sessionsQueries = {
 	 * Get a session by ID (regardless of expiration)
 	 */
 	getById(id: string): Session | undefined {
-		return db.queryFirst<Session>('SELECT * FROM sessions WHERE id = ?', id);
+		const row = db.queryFirst<SessionRow>('SELECT * FROM sessions WHERE id = ?', id);
+		return row ? rowToSession(row) : undefined;
 	},
 
 	/**
 	 * Get a valid (non-expired) session by ID
 	 */
 	getValidById(id: string): Session | undefined {
-		return db.queryFirst<Session>(
+		const row = db.queryFirst<SessionRow>(
 			`SELECT * FROM sessions
 			 WHERE id = ? AND datetime(expires_at) > datetime('now')`,
 			id
 		);
+		return row ? rowToSession(row) : undefined;
 	},
 
 	/**
 	 * Get all sessions for a user
 	 */
 	getByUserId(userId: number): Session[] {
-		return db.query<Session>(
-			'SELECT * FROM sessions WHERE user_id = ? ORDER BY created_at DESC',
-			userId
-		);
+		return db
+			.query<SessionRow>(
+				'SELECT * FROM sessions WHERE user_id = ? ORDER BY created_at DESC',
+				userId
+			)
+			.map(rowToSession);
 	},
 
 	/**

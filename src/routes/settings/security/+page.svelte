@@ -13,7 +13,8 @@
 		Network,
 		Clock
 	} from 'lucide-svelte';
-	import { parseUTC } from '$shared/utils/dates';
+	import { parseUTC, formatDateTime, formatDate } from '$shared/utils/dates';
+	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
@@ -69,9 +70,8 @@
 		}
 	}
 
-	function formatDate(dateStr: string): string {
-		const date = parseUTC(dateStr);
-		return date ? date.toLocaleString() : '';
+	function fmtDateTime(dateStr: string): string {
+		return formatDateTime(dateStr, $serverTimezone);
 	}
 
 	interface SessionRow {
@@ -102,7 +102,7 @@
 		if (diffMins < 60) return `${diffMins}m ago`;
 		if (diffHours < 24) return `${diffHours}h ago`;
 		if (diffDays < 7) return `${diffDays}d ago`;
-		return date.toLocaleDateString();
+		return formatDate(dateStr, $serverTimezone);
 	}
 
 	const sessionColumns: Column<SessionRow>[] = [
