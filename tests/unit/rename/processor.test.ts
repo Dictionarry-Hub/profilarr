@@ -175,6 +175,7 @@ function makeInstance(overrides: Partial<ArrInstance> = {}): ArrInstance {
 		name: 'Test Radarr',
 		type: 'radarr',
 		url: 'http://localhost:7878',
+		external_url: null,
 		api_key: 'test-key',
 		tags: null,
 		enabled: 1,
