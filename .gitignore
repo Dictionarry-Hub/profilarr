@@ -29,6 +29,9 @@ Thumbs.db
 # Test arr instances (config data)
 .arr/
 
+# Local caddy reverse-proxy data (CA, certs) for preview:proxy:tls
+scripts/proxy/.caddy-data/
+
 # Env
 .env
 .env.*
