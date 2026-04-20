@@ -51,20 +51,21 @@ concurrency and makes the system deterministic.
 
 ## Job Types
 
-| Job Type                   | Purpose                             | Payload          | Scheduled |
-| -------------------------- | ----------------------------------- | ---------------- | --------- |
-| `arr.sync`                 | Combined sync (legacy)              | `{ instanceId }` | Yes       |
-| `arr.sync.qualityProfiles` | Sync quality profiles to Arr        | `{ instanceId }` | Yes       |
-| `arr.sync.delayProfiles`   | Sync delay profiles to Arr          | `{ instanceId }` | Yes       |
-| `arr.sync.mediaManagement` | Sync media management to Arr        | `{ instanceId }` | Yes       |
-| `arr.upgrade`              | Automated quality upgrades          | `{ instanceId }` | Yes       |
-| `arr.rename`               | Bulk file/folder rename             | `{ instanceId }` | Yes       |
-| `arr.cleanup`              | Remove stale configs from Arr       | `{ instanceId }` | Yes       |
-| `arr.library.refresh`      | Refresh cached library data         | `{ instanceId }` | Yes       |
-| `pcd.sync`                 | Check/pull PCD database updates     | `{ databaseId }` | Yes       |
-| `backup.create`            | Create backup archive               | `{}`             | Yes       |
-| `backup.cleanup`           | Delete old backups past retention   | `{}`             | Yes       |
-| `logs.cleanup`             | Delete old log files past retention | `{}`             | Yes       |
+| Job Type                   | Purpose                                | Payload          | Scheduled |
+| -------------------------- | -------------------------------------- | ---------------- | --------- |
+| `arr.sync`                 | Combined sync (legacy)                 | `{ instanceId }` | Yes       |
+| `arr.sync.qualityProfiles` | Sync quality profiles to Arr           | `{ instanceId }` | Yes       |
+| `arr.sync.delayProfiles`   | Sync delay profiles to Arr             | `{ instanceId }` | Yes       |
+| `arr.sync.mediaManagement` | Sync media management to Arr           | `{ instanceId }` | Yes       |
+| `arr.upgrade`              | Automated quality upgrades             | `{ instanceId }` | Yes       |
+| `arr.rename`               | Bulk file/folder rename                | `{ instanceId }` | Yes       |
+| `arr.cleanup`              | Remove stale configs from Arr          | `{ instanceId }` | Yes       |
+| `arr.library.refresh`      | Refresh cached library data            | `{ instanceId }` | Yes       |
+| `pcd.sync`                 | Check/pull PCD database updates        | `{ databaseId }` | Yes       |
+| `backup.create`            | Create backup archive                  | `{}`             | Yes       |
+| `backup.cleanup`           | Delete old backups past retention      | `{}`             | Yes       |
+| `logs.cleanup`             | Delete old log files past retention    | `{}`             | Yes       |
+| `announcements.fetch`      | Pull bulletin, reconcile announcements | `{}`             | Yes       |
 
 ## Lifecycle
 
@@ -423,6 +424,24 @@ retention period. Reschedules daily.
 
 Scans the logs directory for dated log files (`YYYY-MM-DD.log`) and deletes
 those older than the configured retention period. Reschedules daily.
+
+### Announcements Fetch
+
+**Handler:** `announcementsFetch.ts`
+
+Pulls `versions.json` and `announcements.json` from the bulletin repo
+(`Dictionarry-Hub/bulletin` by default; overridable via
+`PROFILARR_BULLETIN_URL`). Reconciles the announcements payload into SQLite
+(inserts new rows, updates mutable metadata, marks disappeared ids as
+withdrawn, unwithdraws returning ids) and overwrites the versions snapshot.
+
+Fires one `announcement.new` notification per net-new row (never for
+reappearing withdrawn ones). Reschedules every 30 minutes. Partial failures
+(one file fetchable, the other not) are logged and treated as success —
+both halves have to fail for the run to be marked `failed`.
+
+Not surfaced via SSE `JOB_RUNNING_LABELS`: it's background housekeeping,
+matches `logs.cleanup`. See [announcements.md](./announcements.md).
 
 ## Settings UI
 

@@ -230,6 +230,21 @@ export function scheduleLogCleanup(): void {
 	notify(job.runAt);
 }
 
+export function scheduleAnnouncementsFetch(): void {
+	// First run fires immediately on boot; the handler reschedules itself 30
+	// minutes out after each successful (or partially successful) run.
+	const runAt = new Date().toISOString();
+	const job = jobQueueQueries.upsertScheduled({
+		jobType: 'announcements.fetch',
+		runAt,
+		payload: {},
+		source: 'schedule',
+		dedupeKey: 'announcements.fetch'
+	});
+
+	notify(job.runAt);
+}
+
 export function scheduleAllJobs(): void {
 	const arrInstances = arrInstancesQueries.getAll();
 	for (const instance of arrInstances) {
@@ -247,4 +262,5 @@ export function scheduleAllJobs(): void {
 
 	scheduleBackupJobs();
 	scheduleLogCleanup();
+	scheduleAnnouncementsFetch();
 }
