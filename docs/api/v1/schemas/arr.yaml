@@ -20,7 +20,16 @@ ArrInstance:
       $ref: '#/ArrType'
     url:
       type: string
-      description: Instance URL
+      description: Instance URL used by Profilarr's backend for API calls
+    external_url:
+      type: string
+      nullable: true
+      description: |
+        Optional external/browser-facing URL. When set, the UI uses this for
+        "Open in Radarr/Sonarr" browser links while Profilarr's backend continues
+        to call the instance using `url`. Useful for reverse-proxied deployments
+        where the internal and external hostnames differ.
+      example: https://radarr.example.com
     tags:
       type: string
       nullable: true

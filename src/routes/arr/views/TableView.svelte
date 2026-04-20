@@ -3,6 +3,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import { getDisplayUrl } from '$lib/client/utils/arrDisplayUrl.ts';
 	import type { Column } from '$ui/table/types';
 	import type { ArrInstanceSummary } from '../+page.server.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
@@ -154,7 +155,7 @@
 				variant="secondary"
 				title={`Open in ${formatType(row.type)}`}
 				ariaLabel={`Open in ${formatType(row.type)}`}
-				href={row.url}
+				href={getDisplayUrl(row)}
 				target="_blank"
 				rel="noopener noreferrer"
 			/>

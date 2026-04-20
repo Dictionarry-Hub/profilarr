@@ -11,6 +11,7 @@
 	import { applySmartFilters } from '$ui/filter/match';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
+	import { getDisplayUrl } from '$lib/client/utils/arrDisplayUrl.ts';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 
 	import LibraryActionBar from './components/LibraryActionBar.svelte';
@@ -280,7 +281,7 @@
 	}
 
 	function handleOpen() {
-		const baseUrl = data.instance.url.replace(/\/$/, '');
+		const baseUrl = getDisplayUrl(data.instance);
 		window.open(baseUrl, '_blank', 'noopener,noreferrer');
 	}
 
@@ -537,7 +538,7 @@
 	// Radarr Data & Columns
 	// ==========================================================================
 
-	$: baseUrl = data.instance.url.replace(/\/$/, '');
+	$: baseUrl = getDisplayUrl(data.instance);
 
 	$: radarrLibrary = library as RadarrLibraryItem[];
 	$: allMoviesWithFiles = isRadarr ? radarrLibrary.filter((m) => m.hasFile) : [];

@@ -1124,8 +1124,16 @@ export interface components {
 			/** @description Display name */
 			name: string;
 			type: components['schemas']['ArrType'];
-			/** @description Instance URL */
+			/** @description Instance URL used by Profilarr's backend for API calls */
 			url: string;
+			/**
+			 * @description Optional external/browser-facing URL. When set, the UI uses this for
+			 *     "Open in Radarr/Sonarr" browser links while Profilarr's backend continues
+			 *     to call the instance using `url`. Useful for reverse-proxied deployments
+			 *     where the internal and external hostnames differ.
+			 * @example https://radarr.example.com
+			 */
+			external_url?: string | null;
 			/** @description JSON array of tags */
 			tags?: string | null;
 			/** @description Whether the instance is active (0 or 1) */
@@ -1922,6 +1930,7 @@ export interface operations {
 					 * @example {
 					 *       "version": "2.0.0",
 					 *       "uptime": 86400,
+					 *       "timezone": "America/New_York",
 					 *       "databases": [
 					 *         {
 					 *           "id": 1,

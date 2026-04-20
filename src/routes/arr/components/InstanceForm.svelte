@@ -44,6 +44,7 @@
 				name: instance.name,
 				type: instance.type,
 				url: instance.url,
+				externalUrl: instance.external_url ?? '',
 				apiKey: '', // Never pre-populate for security
 				enabled: instance.enabled ? 'true' : 'false',
 				tags: JSON.stringify(parseTags(instance.tags)),
@@ -56,6 +57,7 @@
 				name: '',
 				type: initialType,
 				url: '',
+				externalUrl: '',
 				apiKey: '',
 				enabled: 'true',
 				tags: '[]',
@@ -71,6 +73,7 @@
 	$: name = ($current.name ?? '') as string;
 	$: type = ($current.type ?? '') as string;
 	$: url = ($current.url ?? '') as string;
+	$: externalUrl = ($current.externalUrl ?? '') as string;
 	$: apiKey = ($current.apiKey ?? '') as string;
 	$: enabled = ($current.enabled ?? 'true') as string;
 	$: tags = JSON.parse(($current.tags ?? '[]') as string) as string[];
@@ -197,6 +200,7 @@
 				name,
 				type,
 				url,
+				externalUrl,
 				apiKey: '',
 				enabled,
 				tags: JSON.stringify(tags),
@@ -348,6 +352,16 @@
 				description="Use container name if on the same Docker network, e.g. http://radarr:7878"
 				required
 				on:input={(e) => update('url', e.detail)}
+			/>
+			<!-- External URL Row -->
+			<FormInput
+				label="External URL"
+				name="external_url"
+				type="url"
+				value={externalUrl}
+				placeholder="https://radarr.example.com"
+				description="Optional. Used for 'Open in Radarr/Sonarr' browser links. Leave blank to reuse the URL above. Set this when Profilarr reaches the instance internally but users reach it through a reverse proxy."
+				on:input={(e) => update('externalUrl', e.detail)}
 			/>
 			<!-- API Key + Test Connection Row -->
 			<div class="flex flex-col gap-4 md:flex-row md:items-end">
@@ -501,6 +515,7 @@
 	<input type="hidden" name="name" value={name} />
 	<input type="hidden" name="type" value={type} />
 	<input type="hidden" name="url" value={url} />
+	<input type="hidden" name="external_url" value={externalUrl} />
 	<input type="hidden" name="api_key" value={apiKey} />
 	<input type="hidden" name="enabled" value={enabled === 'true' ? '1' : '0'} />
 	<input type="hidden" name="tags" value={JSON.stringify(tags)} />

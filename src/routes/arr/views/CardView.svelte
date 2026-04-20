@@ -4,6 +4,7 @@
 	import Card from '$ui/card/Card.svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import { getDisplayUrl } from '$lib/client/utils/arrDisplayUrl.ts';
 	import type { ArrInstanceSummary } from '../+page.server.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
@@ -88,7 +89,7 @@
 							size="xs"
 							variant="ghost"
 							tooltip="Open in {formatType(instance.type)}"
-							on:click={(e) => handleExternalClick(e, instance.url)}
+							on:click={(e) => handleExternalClick(e, getDisplayUrl(instance))}
 						/>
 						<Button
 							icon={Unlink}
