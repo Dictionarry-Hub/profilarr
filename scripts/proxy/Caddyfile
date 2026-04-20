@@ -1,0 +1,13 @@
+{
+	admin off
+	persist_config off
+}
+
+http://profilarr.localhost:8080, http://localhost:8080 {
+	reverse_proxy host.docker.internal:{$UPSTREAM_PORT:6869}
+}
+
+https://profilarr.localhost:8443, https://localhost:8443 {
+	tls internal
+	reverse_proxy host.docker.internal:{$UPSTREAM_PORT:6869}
+}
