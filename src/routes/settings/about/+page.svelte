@@ -132,7 +132,7 @@
 						</span>
 					{:else if column.key === 'value'}
 						{#if row.key === 'version'}
-							<BuildIdentity status={data.versionStatus} latestVersion={data.latestStable} />
+							<BuildIdentity status={data.versionStatus} />
 						{:else if row.type === 'code'}
 							<Label variant="secondary" size="md" rounded="md" mono>
 								{row.value}

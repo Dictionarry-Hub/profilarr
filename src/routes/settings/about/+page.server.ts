@@ -63,7 +63,6 @@ export const load = () => {
 	return {
 		version: build.version,
 		versionStatus,
-		latestStable: stableLatest,
 		timezone: config.timezone,
 		paths: {
 			base: config.paths.base,
