@@ -16,6 +16,7 @@
   - [Development](#development)
 - [Database Schema](#database-schema)
 - [Publishing an Announcement](#publishing-an-announcement)
+- [Testing Locally](#testing-locally)
 - [Database Announcements](#database-announcements)
 
 ## Overview
@@ -299,6 +300,34 @@ don't re-fetch.
    and that every announcement has a matching body file (and vice versa).
 
 Instances pick it up on the next fetch (every 30 minutes) or on restart.
+
+## Testing Locally
+
+Point dev at fixture files instead of the live bulletin:
+
+```bash
+# Terminal 1
+deno task dev:bulletin
+
+# Terminal 2
+PROFILARR_BULLETIN_URL=http://localhost:6970 deno task dev
+```
+
+To preview the sidebar and About-page under a different channel, hand-edit
+`src/lib/shared/build.ts` and refresh. Do not commit — the Dockerfile
+overwrites this file on every image build.
+
+```ts
+// stable, up to date against the live bulletin
+export const build: BuildInfo = { version: '1.1.4', channel: 'stable', commit: 'abc1234' };
+
+// develop
+export const build: BuildInfo = {
+	version: '<short-sha>',
+	channel: 'develop',
+	commit: '<short-sha>'
+};
+```
 
 ## Database Announcements
 
