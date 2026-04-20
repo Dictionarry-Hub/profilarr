@@ -1,0 +1,105 @@
+AnnouncementSeverity:
+  type: string
+  enum:
+    - info
+    - warning
+    - critical
+  description: Severity level. `critical` is reserved for genuine break-glass messages.
+
+AnnouncementSummary:
+  type: object
+  description: Announcement without body. Returned by the list endpoint.
+  required:
+    - id
+    - title
+    - severity
+    - publishedAt
+    - expiresAt
+    - minVersion
+    - maxVersion
+    - link
+    - readAt
+  properties:
+    id:
+      type: string
+      description: ULID, immutable once published.
+    title:
+      type: string
+    severity:
+      $ref: '#/AnnouncementSeverity'
+    publishedAt:
+      type: string
+      format: date-time
+      description: ISO-8601 UTC. Drives sort order.
+    expiresAt:
+      type: string
+      format: date-time
+      nullable: true
+      description: Null = no expiry.
+    minVersion:
+      type: string
+      nullable: true
+      description: Minimum running version for this announcement to apply.
+    maxVersion:
+      type: string
+      nullable: true
+      description: Maximum running version for this announcement to apply.
+    link:
+      type: string
+      format: uri
+      nullable: true
+      description: Optional external "Read more" URL.
+    readAt:
+      type: string
+      format: date-time
+      nullable: true
+      description: When the announcement was opened in the app. Null = unread.
+
+AnnouncementDetail:
+  type: object
+  description: Announcement with the full markdown body. Returned by the detail endpoint.
+  required:
+    - id
+    - title
+    - severity
+    - publishedAt
+    - expiresAt
+    - minVersion
+    - maxVersion
+    - link
+    - readAt
+    - body
+  properties:
+    id:
+      type: string
+    title:
+      type: string
+    severity:
+      $ref: '#/AnnouncementSeverity'
+    publishedAt:
+      type: string
+      format: date-time
+    expiresAt:
+      type: string
+      format: date-time
+      nullable: true
+    minVersion:
+      type: string
+      nullable: true
+    maxVersion:
+      type: string
+      nullable: true
+    link:
+      type: string
+      format: uri
+      nullable: true
+    readAt:
+      type: string
+      format: date-time
+      nullable: true
+    body:
+      type: string
+      nullable: true
+      description: |
+        Raw markdown body. Lazy-fetched from the bulletin on first call.
+        May be null briefly if the lazy fetch fails; subsequent calls retry.

@@ -113,17 +113,18 @@ services:
 > testing. Linking, syncing, and all other features work without it. Remove the
 > `parser` service and related environment variables if you don't need it.
 
-| Variable      | Default     | Description                     |
-| ------------- | ----------- | ------------------------------- |
-| `PUID`        | `1000`      | User ID for file permissions    |
-| `PGID`        | `1000`      | Group ID for file permissions   |
-| `UMASK`       | `022`       | File creation mask              |
-| `TZ`          | `Etc/UTC`   | Timezone for scheduling         |
-| `PORT`        | `6868`      | Web UI port                     |
-| `HOST`        | `0.0.0.0`   | Bind address                    |
-| `AUTH`        | `on`        | Auth mode (`on`, `oidc`, `off`) |
-| `PARSER_HOST` | `localhost` | Parser service host             |
-| `PARSER_PORT` | `5000`      | Parser service port             |
+| Variable                 | Default                                                           | Description                                                    |
+| ------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------------- |
+| `PUID`                   | `1000`                                                            | User ID for file permissions                                   |
+| `PGID`                   | `1000`                                                            | Group ID for file permissions                                  |
+| `UMASK`                  | `022`                                                             | File creation mask                                             |
+| `TZ`                     | `Etc/UTC`                                                         | Timezone for scheduling                                        |
+| `PORT`                   | `6868`                                                            | Web UI port                                                    |
+| `HOST`                   | `0.0.0.0`                                                         | Bind address                                                   |
+| `AUTH`                   | `on`                                                              | Auth mode (`on`, `oidc`, `off`)                                |
+| `PARSER_HOST`            | `localhost`                                                       | Parser service host                                            |
+| `PARSER_PORT`            | `5000`                                                            | Parser service port                                            |
+| `PROFILARR_BULLETIN_URL` | `https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main` | Override for the announcement feed + release manifest base URL |
 
 See the [documentation](https://dictionarry.dev/) for full setup and
 configuration guides.

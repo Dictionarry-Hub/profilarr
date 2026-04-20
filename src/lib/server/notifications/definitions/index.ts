@@ -16,6 +16,7 @@ import { arrSync } from './arrSync.ts';
 import { arrCleanup } from './arrCleanup.ts';
 import { pcdUpdatesAvailable, pcdSyncSuccess, pcdSyncFailed } from './pcdSync.ts';
 import { backupSuccess, backupFailed } from './backup.ts';
+import { announcementNew } from './announcement.ts';
 
 export const notifications = {
 	test,
@@ -27,5 +28,6 @@ export const notifications = {
 	pcdSyncSuccess,
 	pcdSyncFailed,
 	backupSuccess,
-	backupFailed
+	backupFailed,
+	announcementNew
 };

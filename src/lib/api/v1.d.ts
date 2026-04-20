@@ -518,6 +518,54 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/announcements': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * List Announcements
+		 * @description Visible announcements only: withdrawn, expired, and version-incompatible
+		 *     entries are filtered out server-side. Bodies are not included; use the
+		 *     detail endpoint to fetch one.
+		 */
+		get: operations['listAnnouncements'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/announcements/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Get Announcement
+		 * @description Returns the full announcement including its markdown body. The body
+		 *     is lazy-fetched from the bulletin repo on first call and cached
+		 *     locally; subsequent calls read from cache.
+		 *
+		 *     404 is returned for unknown ids and for ids that have not yet been
+		 *     ingested by the fetch job (e.g. calling the API between a new
+		 *     bulletin PR merging and the next scheduled reconcile).
+		 */
+		get: operations['getAnnouncement'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -553,6 +601,7 @@ export interface components {
 			arrs: components['schemas']['StatusArr'][];
 			jobs: components['schemas']['StatusJobs'];
 			backups: components['schemas']['StatusBackups'];
+			announcements: components['schemas']['StatusAnnouncements'];
 		};
 		StatusDatabase: {
 			/** @description Database instance ID */
@@ -662,6 +711,71 @@ export interface components {
 			 * @description Timestamp of last backup
 			 */
 			lastBackupAt: string | null;
+		};
+		StatusAnnouncements: {
+			/**
+			 * @description Number of unread, visible announcements. Visibility honours
+			 *     `withdrawn`, `expires_at`, and the running build's version bounds
+			 *     (`min_version` / `max_version`).
+			 */
+			unread: number;
+		};
+		/**
+		 * @description Severity level. `critical` is reserved for genuine break-glass messages.
+		 * @enum {string}
+		 */
+		AnnouncementSeverity: 'info' | 'warning' | 'critical';
+		/** @description Announcement without body. Returned by the list endpoint. */
+		AnnouncementSummary: {
+			/** @description ULID, immutable once published. */
+			id: string;
+			title: string;
+			severity: components['schemas']['AnnouncementSeverity'];
+			/**
+			 * Format: date-time
+			 * @description ISO-8601 UTC. Drives sort order.
+			 */
+			publishedAt: string;
+			/**
+			 * Format: date-time
+			 * @description Null = no expiry.
+			 */
+			expiresAt: string | null;
+			/** @description Minimum running version for this announcement to apply. */
+			minVersion: string | null;
+			/** @description Maximum running version for this announcement to apply. */
+			maxVersion: string | null;
+			/**
+			 * Format: uri
+			 * @description Optional external "Read more" URL.
+			 */
+			link: string | null;
+			/**
+			 * Format: date-time
+			 * @description When the announcement was opened in the app. Null = unread.
+			 */
+			readAt: string | null;
+		};
+		/** @description Announcement with the full markdown body. Returned by the detail endpoint. */
+		AnnouncementDetail: {
+			id: string;
+			title: string;
+			severity: components['schemas']['AnnouncementSeverity'];
+			/** Format: date-time */
+			publishedAt: string;
+			/** Format: date-time */
+			expiresAt: string | null;
+			minVersion: string | null;
+			maxVersion: string | null;
+			/** Format: uri */
+			link: string | null;
+			/** Format: date-time */
+			readAt: string | null;
+			/**
+			 * @description Raw markdown body. Lazy-fetched from the bulletin on first call.
+			 *     May be null briefly if the lazy fetch fails; subsequent calls retry.
+			 */
+			body: string | null;
 		};
 		/**
 		 * @description Type of media
@@ -1980,6 +2094,9 @@ export interface operations {
 					 *       "backups": {
 					 *         "enabled": true,
 					 *         "lastBackupAt": "2026-04-09T00:00:00Z"
+					 *       },
+					 *       "announcements": {
+					 *         "unread": 2
 					 *       }
 					 *     }
 					 */
@@ -2883,6 +3000,91 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content?: never;
+			};
+		};
+	};
+	listAnnouncements: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Visible announcements, newest first. */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example [
+					 *       {
+					 *         "id": "01HXYZ0000000000000000000A",
+					 *         "title": "API v1 migration landing in 2.4",
+					 *         "severity": "warning",
+					 *         "publishedAt": "2026-04-10T10:00:00Z",
+					 *         "expiresAt": null,
+					 *         "minVersion": "2.0.0",
+					 *         "maxVersion": null,
+					 *         "link": "https://github.com/Dictionarry-Hub/profilarr/discussions/999",
+					 *         "readAt": null
+					 *       }
+					 *     ]
+					 */
+					'application/json': components['schemas']['AnnouncementSummary'][];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	getAnnouncement: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description ULID of the announcement. */
+				id: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Announcement detail with body. */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['AnnouncementDetail'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Announcement not found. */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
 			};
 		};
 	};

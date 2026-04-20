@@ -140,6 +140,15 @@ export const notificationTypes: NotificationType[] = [
 		label: 'Rename Failed',
 		category: 'Renames',
 		description: 'Notification when all file renames fail'
+	},
+
+	// Announcements
+	{
+		id: 'announcement.new',
+		label: 'New Announcement',
+		category: 'Announcements',
+		description:
+			'Notification when a new announcement is published by the Profilarr team and has not yet been read'
 	}
 ];
 

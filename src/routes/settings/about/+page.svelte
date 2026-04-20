@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Info, FolderOpen, Database, HelpCircle, Heart, Package } from 'lucide-svelte';
-	import VersionBadge from './components/VersionBadge.svelte';
+	import BuildIdentity from '$ui/version/BuildIdentity.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Label from '$ui/label/Label.svelte';
@@ -132,20 +132,7 @@
 						</span>
 					{:else if column.key === 'value'}
 						{#if row.key === 'version'}
-							<div class="flex items-center gap-2">
-								<Label variant="secondary" size="md" rounded="md" mono>
-									v{row.value}
-								</Label>
-								{#await data.streamed.releasesData}
-									<div class="animate-pulse">
-										<div class="h-6 w-20 rounded-full bg-neutral-200 dark:bg-neutral-800"></div>
-									</div>
-								{:then releasesData}
-									<VersionBadge status={releasesData.versionStatus} />
-								{:catch}
-									<VersionBadge status={data.versionStatus} />
-								{/await}
-							</div>
+							<BuildIdentity status={data.versionStatus} latestVersion={data.latestStable} />
 						{:else if row.type === 'code'}
 							<Label variant="secondary" size="md" rounded="md" mono>
 								{row.value}
@@ -292,122 +279,113 @@
 		{/if}
 
 		<!-- Releases Section -->
-		{#await data.streamed.releasesData}
-			<div class="space-y-2">
-				<div class="flex items-center gap-2">
-					<Package class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
-					<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Releases</h2>
-				</div>
-				<div
-					class="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
-				>
-					<div class="animate-pulse space-y-3">
-						<div class="h-8 rounded bg-neutral-200 dark:bg-neutral-800"></div>
-						<div class="h-8 rounded bg-neutral-200 dark:bg-neutral-800"></div>
-						<div class="h-8 rounded bg-neutral-200 dark:bg-neutral-800"></div>
-					</div>
-				</div>
+		<div class="space-y-2">
+			<div class="flex items-center gap-2">
+				<Package class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+				<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Releases</h2>
+				{#if data.cachedAt}
+					<span class="ml-auto text-xs text-neutral-500 dark:text-neutral-500">
+						Updated <DateTime value={data.cachedAt} />
+					</span>
+				{/if}
 			</div>
-		{:then releasesData}
-			{#if releasesData.releases.length > 0}
-				{@const currentRelease = releasesData.releases[0] as ReleaseRow}
-				<div class="space-y-2">
-					<div class="flex items-center gap-2">
-						<Package class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
-						<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Releases</h2>
-					</div>
-					<ExpandableTable
-						columns={releaseColumns}
-						data={currentRelease ? [currentRelease] : []}
-						getRowId={(row) => row.tag_name}
-						emptyMessage="No releases found"
-						responsive
-						flushExpanded
-						chevronPosition="right"
-					>
-						<svelte:fragment slot="cell" let:row let:column let:index>
-							{#if column.key === 'tag_name'}
-								<div class="flex items-center gap-2">
+			{#if data.releases.length > 0}
+				{@const currentRelease = data.releases[0]}
+				<ExpandableTable
+					columns={releaseColumns}
+					data={currentRelease ? [currentRelease] : []}
+					getRowId={(row) => row.tag_name}
+					emptyMessage="No releases found"
+					responsive
+					flushExpanded
+					chevronPosition="right"
+				>
+					<svelte:fragment slot="cell" let:row let:column let:index>
+						{#if column.key === 'tag_name'}
+							<div class="flex items-center gap-2">
+								<Label
+									variant="link"
+									size="md"
+									rounded="md"
+									mono
+									href={row.html_url}
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									{row.tag_name}
+								</Label>
+								{#if index === 0}
 									<Label
-										variant="link"
 										size="md"
 										rounded="md"
-										mono
-										href={row.html_url}
-										target="_blank"
-										rel="noopener noreferrer"
+										customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
 									>
-										{row.tag_name}
+										Latest
 									</Label>
-									{#if index === 0}
-										<Label
-											size="md"
-											rounded="md"
-											customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
-										>
-											Latest
-										</Label>
-									{/if}
-								</div>
-							{:else if column.key === 'published_at'}
-								<span class="text-xs text-neutral-500 dark:text-neutral-500">
-									<DateTime value={row.published_at} date />
-								</span>
-							{:else if column.key === 'prerelease'}
-								{#if row.prerelease}
-									<Label variant="warning" size="md" rounded="md">Pre-release</Label>
-								{:else}
-									<Label variant="secondary" size="md" rounded="md">Stable</Label>
 								{/if}
+							</div>
+						{:else if column.key === 'published_at'}
+							<span class="text-xs text-neutral-500 dark:text-neutral-500">
+								<DateTime value={row.published_at} date />
+							</span>
+						{:else if column.key === 'prerelease'}
+							{#if row.prerelease}
+								<Label variant="warning" size="md" rounded="md">Pre-release</Label>
+							{:else}
+								<Label variant="secondary" size="md" rounded="md">Stable</Label>
 							{/if}
-						</svelte:fragment>
-						<svelte:fragment slot="expanded">
-							<div class="p-3">
-								<Table columns={releaseColumns} data={releasesData.releases} responsive>
-									<svelte:fragment slot="cell" let:row let:column let:rowIndex>
-										{#if column.key === 'tag_name'}
-											<div class="flex items-center gap-2">
+						{/if}
+					</svelte:fragment>
+					<svelte:fragment slot="expanded">
+						<div class="p-3">
+							<Table columns={releaseColumns} data={data.releases} responsive>
+								<svelte:fragment slot="cell" let:row let:column let:rowIndex>
+									{#if column.key === 'tag_name'}
+										<div class="flex items-center gap-2">
+											<Label
+												variant="link"
+												size="md"
+												rounded="md"
+												mono
+												href={row.html_url}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												{row.tag_name}
+											</Label>
+											{#if rowIndex === 0}
 												<Label
-													variant="link"
 													size="md"
 													rounded="md"
-													mono
-													href={row.html_url}
-													target="_blank"
-													rel="noopener noreferrer"
+													customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
 												>
-													{row.tag_name}
+													Latest
 												</Label>
-												{#if rowIndex === 0}
-													<Label
-														size="md"
-														rounded="md"
-														customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
-													>
-														Latest
-													</Label>
-												{/if}
-											</div>
-										{:else if column.key === 'published_at'}
-											<span class="text-xs text-neutral-500 dark:text-neutral-500">
-												<DateTime value={row.published_at} date />
-											</span>
-										{:else if column.key === 'prerelease'}
-											{#if row.prerelease}
-												<Label variant="warning" size="md" rounded="md">Pre-release</Label>
-											{:else}
-												<Label variant="secondary" size="md" rounded="md">Stable</Label>
 											{/if}
+										</div>
+									{:else if column.key === 'published_at'}
+										<span class="text-xs text-neutral-500 dark:text-neutral-500">
+											<DateTime value={row.published_at} date />
+										</span>
+									{:else if column.key === 'prerelease'}
+										{#if row.prerelease}
+											<Label variant="warning" size="md" rounded="md">Pre-release</Label>
+										{:else}
+											<Label variant="secondary" size="md" rounded="md">Stable</Label>
 										{/if}
-									</svelte:fragment>
-								</Table>
-							</div>
-						</svelte:fragment>
-					</ExpandableTable>
+									{/if}
+								</svelte:fragment>
+							</Table>
+						</div>
+					</svelte:fragment>
+				</ExpandableTable>
+			{:else}
+				<div
+					class="rounded-lg border border-neutral-200 bg-white p-4 text-sm text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
+				>
+					Release data not yet available. The next scheduled sync will populate it.
 				</div>
 			{/if}
-		{:catch}
-			<!-- Silently handle errors - don't show releases section if fetch fails -->
-		{/await}
+		</div>
 	</div>
 </div>

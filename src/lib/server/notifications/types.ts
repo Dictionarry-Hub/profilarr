@@ -35,7 +35,10 @@ export const NotificationTypes = {
 
 	// Backups
 	BACKUP_SUCCESS: 'backup.success',
-	BACKUP_FAILED: 'backup.failed'
+	BACKUP_FAILED: 'backup.failed',
+
+	// Announcements
+	ANNOUNCEMENT_NEW: 'announcement.new'
 } as const;
 
 /**

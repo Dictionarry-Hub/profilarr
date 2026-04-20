@@ -10,13 +10,14 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
 import { db } from '$db/db.ts';
-import { appInfoQueries } from '$db/queries/appInfo.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
 import { getCache } from '$pcd/database/registry.ts';
 import { config } from '$config';
+import { build } from '$lib/shared/build.ts';
+import { getUnreadCount } from '$lib/server/announcements/index.ts';
 
 type StatusResponse = components['schemas']['StatusResponse'];
 
@@ -24,13 +25,14 @@ const startupTime = Date.now();
 
 export const GET: RequestHandler = async () => {
 	const response: StatusResponse = {
-		version: appInfoQueries.getVersion(),
+		version: build.version,
 		uptime: Math.floor((Date.now() - startupTime) / 1000),
 		timezone: config.timezone,
 		databases: buildDatabases(),
 		arrs: buildArrs(),
 		jobs: buildJobs(),
-		backups: await buildBackups()
+		backups: await buildBackups(),
+		announcements: { unread: getUnreadCount() }
 	};
 
 	return json(response);

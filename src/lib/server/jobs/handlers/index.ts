@@ -7,3 +7,4 @@ import './pcdSync.ts';
 import './backupCreate.ts';
 import './backupCleanup.ts';
 import './logsCleanup.ts';
+import './announcementsFetch.ts';

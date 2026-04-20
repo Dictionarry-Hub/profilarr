@@ -85,6 +85,8 @@ status:
               backups:
                 enabled: true
                 lastBackupAt: '2026-04-09T00:00:00Z'
+              announcements:
+                unread: 2
       '401':
         description: Not authenticated
         content:

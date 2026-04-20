@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { ComponentType } from 'svelte';
+	import Label from '$ui/label/Label.svelte';
 
 	interface Props {
 		label: string;
@@ -15,9 +16,20 @@
 		onclick?: (e: MouseEvent) => void;
 		/** Optional data-onboarding attribute for cutscene targeting */
 		onboardingId?: string;
+		/** When > 0, shows a count pill on the right to flag unread / pending items */
+		alert?: number;
 	}
 
-	let { label, href, activePattern, icon, iconSrc, onclick, onboardingId }: Props = $props();
+	let {
+		label,
+		href,
+		activePattern,
+		icon,
+		iconSrc,
+		onclick,
+		onboardingId,
+		alert = 0
+	}: Props = $props();
 
 	const isActive = $derived.by(() => {
 		const pathname = $page.url.pathname;
@@ -50,5 +62,8 @@
 		{@const Icon = icon}
 		<span class="nav-icon-lucide"><Icon size={14} /></span>
 	{/if}
-	{label}
+	<span class="flex-1">{label}</span>
+	{#if alert > 0}
+		<Label variant="info" size="sm" rounded="full">{alert}</Label>
+	{/if}
 </a>

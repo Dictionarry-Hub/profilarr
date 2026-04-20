@@ -117,7 +117,8 @@ All use raw SQL with `?` parameter binding and typed input/output interfaces.
 | `githubCache`          | GitHub API response cache           |
 | `tmdbSettings`         | TMDB API key storage                |
 | `aiSettings`           | AI service settings                 |
-| `appInfo`              | App metadata and setup state        |
+| `announcements`        | Announcements cache + read state    |
+| `versionsSnapshot`     | Cached bulletin versions manifest   |
 
 Query methods follow a consistent pattern: typed input interfaces for
 mutations, generic return types for reads, and the singleton `db` instance

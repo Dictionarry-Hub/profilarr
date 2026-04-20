@@ -1,85 +1,69 @@
 import { migrationRunner } from '$db/migrations.ts';
 import { config } from '$config';
-import packageJson from '../../../../package.json' with { type: 'json' };
-import { getCachedReleases, type GitHubRelease } from '$lib/server/utils/github/cache.ts';
+import { build } from '$lib/shared/build.ts';
+import { getVersionsSnapshot } from '$lib/server/announcements/index.ts';
+import { compareVersions } from '$lib/server/announcements/filter.ts';
 
 type VersionStatus = 'up-to-date' | 'out-of-date' | 'dev-build';
 
-async function fetchGitHubReleases(): Promise<GitHubRelease[]> {
-	return getCachedReleases('Dictionarry-Hub', 'profilarr');
+interface ReleaseRow {
+	tag_name: string;
+	html_url: string;
+	published_at: string;
+	prerelease: boolean;
 }
 
-function compareVersions(v1: string, v2: string): number {
-	const parts1 = v1.split('.').map(Number);
-	const parts2 = v2.split('.').map(Number);
-
-	for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-		const num1 = parts1[i] || 0;
-		const num2 = parts2[i] || 0;
-
-		if (num1 > num2) return 1;
-		if (num1 < num2) return -1;
-	}
-
-	return 0;
-}
-
-function getVersionStatus(
-	currentVersion: string,
-	latestVersion: string | undefined
+function computeVersionStatus(
+	stableLatest: string | null,
+	developLatest: string | null
 ): VersionStatus {
-	if (!latestVersion) {
-		return 'dev-build';
+	if (build.channel === 'dev') return 'dev-build';
+	if (build.version.includes('-')) return 'dev-build';
+
+	if (build.channel === 'stable') {
+		if (!stableLatest) return 'dev-build';
+		const cmp = compareVersions(build.version, stableLatest);
+		if (cmp > 0) return 'dev-build'; // ahead of "latest"
+		return cmp === 0 ? 'up-to-date' : 'out-of-date';
 	}
 
-	// Remove 'v' prefix if present
-	const current = currentVersion.replace(/^v/, '');
-	const latest = latestVersion.replace(/^v/, '');
-
-	// Check if it's a dev build (e.g., has -dev, -alpha, -beta suffix)
-	if (current.includes('-') || current.includes('dev')) {
-		return 'dev-build';
+	if (build.channel === 'develop') {
+		if (!developLatest || !build.commit) return 'dev-build';
+		return build.commit.startsWith(developLatest) || developLatest.startsWith(build.commit)
+			? 'up-to-date'
+			: 'out-of-date';
 	}
 
-	// Compare versions semantically
-	const comparison = compareVersions(current, latest);
-
-	if (comparison > 0) {
-		// Current version is greater than latest release - must be a dev build
-		return 'dev-build';
-	} else if (comparison === 0) {
-		// Versions are equal
-		return 'up-to-date';
-	} else {
-		// Current version is less than latest release
-		return 'out-of-date';
-	}
+	return 'dev-build';
 }
 
 export const load = () => {
 	const currentMigrationVersion = migrationRunner.getCurrentVersion();
 	const appliedMigrations = migrationRunner.getAppliedMigrations();
 
-	// Mark the latest migration (highest version)
 	const migrationsWithLatest = appliedMigrations.map((migration) => ({
 		...migration,
 		latest: migration.version === currentMigrationVersion
 	}));
 
-	// Return synchronous data immediately, defer releases fetch
-	const releasesPromise = fetchGitHubReleases().then((releases) => {
-		const latestRelease = releases.find((r) => !r.prerelease);
-		const versionStatus = getVersionStatus(packageJson.version, latestRelease?.tag_name);
+	const snapshot = getVersionsSnapshot();
+	const stableLatest = snapshot?.payload.channels.stable.latest ?? null;
+	const developLatest = snapshot?.payload.channels.develop.latest ?? null;
+	const versionStatus = computeVersionStatus(stableLatest, developLatest);
 
-		return {
-			releases: releases.slice(0, 10),
-			versionStatus
-		};
-	});
+	const releases: ReleaseRow[] = (snapshot?.payload.channels.stable.releases ?? [])
+		.slice(0, 10)
+		.map((r) => ({
+			tag_name: `v${r.tag}`,
+			html_url: r.url,
+			published_at: r.published_at,
+			prerelease: false
+		}));
 
 	return {
-		version: packageJson.version,
-		versionStatus: 'dev-build' as VersionStatus, // Default until releases load
+		version: build.version,
+		versionStatus,
+		latestStable: stableLatest,
 		timezone: config.timezone,
 		paths: {
 			base: config.paths.base,
@@ -91,9 +75,7 @@ export const load = () => {
 			current: currentMigrationVersion,
 			applied: migrationsWithLatest
 		},
-		// Stream the releases data
-		streamed: {
-			releasesData: releasesPromise
-		}
+		releases,
+		cachedAt: snapshot?.fetchedAt ?? null
 	};
 };
