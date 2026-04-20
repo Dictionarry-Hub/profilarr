@@ -1,6 +1,7 @@
 import { serveDir, serveFile } from 'jsr:@std/http@1/file-server';
 import { dirname, extname, fromFileUrl, join } from 'jsr:@std/path@1';
 
+import { logger } from '$logger/logger.ts';
 import server from 'SERVER';
 
 const initialized = server.init({ env: Deno.env.toObject() });
@@ -74,8 +75,35 @@ Deno.serve(
 			req = new Request(`${ORIGIN}${url.pathname}${url.search}`, request);
 		}
 
-		return server.respond(req, {
+		const sveltekitResponse = await server.respond(req, {
 			getClientAddress: () => clientAddress
 		});
+
+		logIfCsrfBlocked(sveltekitResponse, req);
+
+		return sveltekitResponse;
 	}
 );
+
+// SvelteKit's CSRF middleware runs inside server.respond() and returns a 403
+// before the handle hook, so hooks.server.ts can't observe it. Detect it here
+// so operators behind a misconfigured reverse proxy get an actionable log.
+function logIfCsrfBlocked(response: Response, request: Request): void {
+	if (response.status !== 403) return;
+	response
+		.clone()
+		.text()
+		.then((body) => {
+			if (!body.includes('Cross-site POST form submissions are forbidden')) return;
+			const url = new URL(request.url);
+			logger.warn(`CSRF blocked ${request.method} ${url.pathname}`, {
+				source: 'Auth:CSRF',
+				meta: {
+					origin: request.headers.get('origin'),
+					expectedOrigin: url.origin,
+					hint: 'If behind a reverse proxy, set the ORIGIN env var to the external URL (scheme + host + port, no trailing slash).'
+				}
+			});
+		})
+		.catch(() => {});
+}
