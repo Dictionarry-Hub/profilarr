@@ -2,11 +2,7 @@
 	import { build } from '$lib/shared/build.ts';
 	import Label from '$ui/label/Label.svelte';
 
-	/**
-	 * Single-label build identity. Renders `Channel · build` in mono, coloured
-	 * `info` when up to date and `secondary` otherwise (or when no status is
-	 * available — e.g. local dev).
-	 */
+	/** `channel · build` in mono, plus an "Up to date" chip when applicable. */
 
 	export let status: 'up-to-date' | 'out-of-date' | 'dev-build' | null = null;
 
@@ -25,9 +21,14 @@
 				? build.version
 				: null;
 
-	$: variant = status === 'up-to-date' ? 'info' : 'secondary';
+	$: upToDate = status === 'up-to-date';
 </script>
 
-<Label {variant} size="md" rounded="md" mono>
-	{buildString ? `${channelLabel} · ${buildString}` : channelLabel}
-</Label>
+<div class="flex flex-wrap items-center gap-2">
+	<Label variant="secondary" size="md" rounded="md" mono>
+		{buildString ? `${channelLabel} · ${buildString}` : channelLabel}
+	</Label>
+	{#if upToDate}
+		<Label variant="success" size="md" rounded="md">Up to date</Label>
+	{/if}
+</div>

@@ -5,9 +5,9 @@
 	import Card from '$ui/card/Card.svelte';
 
 	const CHANNEL_LABELS = {
-		stable: 'Stable',
-		develop: 'Develop',
-		dev: 'Unstable'
+		stable: 'stable',
+		develop: 'develop',
+		dev: 'unstable'
 	} as const;
 
 	const platform = getPlatformLabel();
