@@ -47,8 +47,9 @@ class Config {
 		this.host = Deno.env.get('HOST') || '0.0.0.0';
 
 		// External origin (scheme + host) for OIDC redirects and cookie security.
-		// Falls back to the local server URL when unset.
-		this.origin = Deno.env.get('ORIGIN') || this.serverUrl;
+		// Falls back to the local server URL when unset. Trailing slashes are
+		// stripped so downstream concatenation (`${origin}/path`) doesn't double up.
+		this.origin = (Deno.env.get('ORIGIN') || this.serverUrl).replace(/\/+$/, '');
 
 		// Auth mode: 'on' (default), 'off', 'oidc'
 		// Note: AUTH=local is no longer an env var — use the local bypass toggle in Settings > Security

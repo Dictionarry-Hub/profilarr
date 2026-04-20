@@ -15,7 +15,8 @@ const rootDir = join(baseDir, 'static');
 // ORIGIN env: rewrite request URLs so SvelteKit sees the external origin.
 // This is required for CSRF checks and correct URL construction behind
 // reverse proxies. Equivalent to adapter-node's ORIGIN support.
-const ORIGIN = Deno.env.get('ORIGIN');
+// Strip trailing slashes so `${ORIGIN}${pathname}` doesn't produce `//path`.
+const ORIGIN = Deno.env.get('ORIGIN')?.replace(/\/+$/, '') || undefined;
 
 Deno.serve(
 	{
