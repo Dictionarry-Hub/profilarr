@@ -539,19 +539,6 @@ CREATE TABLE regex101_cache (
 );
 
 -- ==============================================================================
--- TABLE: app_info
--- Purpose: Store application metadata (singleton pattern with id=1)
--- Migration: 018_create_app_info.ts
--- ==============================================================================
-
-CREATE TABLE app_info (
-    id INTEGER PRIMARY KEY CHECK (id = 1),
-    version TEXT NOT NULL,                  -- Application version (e.g., "2.0.0")
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==============================================================================
 -- TABLE: tmdb_settings
 -- Purpose: Store TMDB API configuration (singleton pattern with id=1)
 -- Migration: 020_create_tmdb_settings.ts
@@ -902,3 +889,42 @@ CREATE TABLE login_attempts (
 );
 
 CREATE INDEX idx_login_attempts_lookup ON login_attempts(ip, endpoint, failed_at);
+
+-- ==============================================================================
+-- TABLE: announcements
+-- Purpose: Cached announcements fetched from the bulletin repo. Read state
+--          lives inline (read_at) since Profilarr is single-user in practice.
+-- Migration: 061_create_announcements.ts
+-- ==============================================================================
+
+CREATE TABLE announcements (
+    id TEXT PRIMARY KEY,                                 -- ULID from bulletin
+    title TEXT NOT NULL,
+    severity TEXT NOT NULL CHECK (severity IN ('info','warning','critical')),
+    published_at DATETIME NOT NULL,
+    expires_at DATETIME,
+    min_version TEXT,
+    max_version TEXT,
+    link TEXT,
+    body TEXT,                                           -- null until first open
+    withdrawn INTEGER NOT NULL DEFAULT 0 CHECK (withdrawn IN (0,1)),
+    read_at DATETIME,                                    -- null = unread
+    fetched_at DATETIME NOT NULL,                        -- last manifest sync timestamp
+    body_fetched_at DATETIME                             -- set when body is lazy-loaded
+);
+
+CREATE INDEX idx_announcements_published_at ON announcements(published_at DESC);
+CREATE INDEX idx_announcements_visible ON announcements(withdrawn, expires_at);
+
+-- ==============================================================================
+-- TABLE: versions_snapshot
+-- Purpose: Singleton cache of the last successful versions.json fetch. Feeds
+--          the About page and the footer version badge.
+-- Migration: 061_create_announcements.ts
+-- ==============================================================================
+
+CREATE TABLE versions_snapshot (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    payload TEXT NOT NULL,                               -- raw versions.json as fetched
+    fetched_at DATETIME NOT NULL
+);

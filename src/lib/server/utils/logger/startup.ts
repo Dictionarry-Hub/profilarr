@@ -3,7 +3,7 @@
  */
 
 import { config } from '$config';
-import { appInfoQueries } from '$db/queries/appInfo.ts';
+import { build } from '$lib/shared/build.ts';
 import { logger } from './logger.ts';
 
 const BANNER = String.raw`
@@ -52,7 +52,7 @@ export async function logContainerConfig(): Promise<void> {
 }
 
 export function printBanner(): void {
-	const version = appInfoQueries.getVersion();
+	const version = build.version;
 	const url = config.serverUrl;
 
 	console.log(BANNER);
@@ -70,7 +70,7 @@ export interface ServerInfo {
 
 export function getServerInfo(): ServerInfo {
 	return {
-		version: appInfoQueries.getVersion(),
+		version: build.version,
 		env: Deno.env.get('DENO_ENV') || 'production',
 		timezone: config.timezone,
 		basePath: config.paths.base,
