@@ -13,7 +13,7 @@ import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { announcementNew } from '$notifications/definitions/announcement.ts';
 import type { AnnouncementRecord } from '$lib/server/announcements/types.ts';
 
-const MOCK_PORT = 7138;
+const MOCK_PORT = 7141;
 let captured: CapturedRequest[];
 let mockServer: Deno.HttpServer;
 
