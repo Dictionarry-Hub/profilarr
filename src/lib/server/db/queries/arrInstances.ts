@@ -8,6 +8,7 @@ export interface ArrInstance {
 	name: string;
 	type: string;
 	url: string;
+	external_url: string | null;
 	api_key: string;
 	tags: string | null;
 	enabled: number;
@@ -23,6 +24,7 @@ export interface CreateArrInstanceInput {
 	name: string;
 	type: string;
 	url: string;
+	externalUrl?: string | null;
 	apiKey: string;
 	tags?: string[];
 	enabled?: boolean;
@@ -32,6 +34,7 @@ export interface UpdateArrInstanceInput {
 	name?: string;
 	type?: string;
 	url?: string;
+	externalUrl?: string | null;
 	apiKey?: string;
 	tags?: string[];
 	enabled?: boolean;
@@ -50,11 +53,12 @@ export const arrInstancesQueries = {
 		const enabled = input.enabled !== false ? 1 : 0;
 
 		db.execute(
-			`INSERT INTO arr_instances (name, type, url, api_key, tags, enabled)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO arr_instances (name, type, url, external_url, api_key, tags, enabled)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
 			input.name,
 			input.type,
 			input.url,
+			input.externalUrl ?? null,
 			input.apiKey,
 			tagsJson,
 			enabled
@@ -113,6 +117,10 @@ export const arrInstancesQueries = {
 		if (input.url !== undefined) {
 			updates.push('url = ?');
 			params.push(input.url);
+		}
+		if (input.externalUrl !== undefined) {
+			updates.push('external_url = ?');
+			params.push(input.externalUrl);
 		}
 		if (input.apiKey !== undefined) {
 			updates.push('api_key = ?');

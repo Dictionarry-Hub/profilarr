@@ -36,6 +36,8 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const name = formData.get('name')?.toString().trim();
 		const url = formData.get('url')?.toString().trim();
+		const externalUrlRaw = formData.get('external_url')?.toString().trim() ?? '';
+		const externalUrl = externalUrlRaw === '' ? null : externalUrlRaw;
 		const apiKey = formData.get('api_key')?.toString().trim() || instance.api_key;
 		const tagsJson = formData.get('tags')?.toString() || '';
 		const enabled = formData.get('enabled')?.toString() === '1';
@@ -75,6 +77,7 @@ export const actions: Actions = {
 			arrInstancesQueries.update(id, {
 				name,
 				url,
+				externalUrl,
 				apiKey,
 				tags,
 				enabled,
@@ -91,6 +94,7 @@ export const actions: Actions = {
 					name,
 					type: instance.type,
 					url,
+					externalUrl,
 					libraryRefreshInterval,
 					cleanup: cleanup ? { enabled: cleanup.enabled, cron: cleanup.cron } : null
 				}

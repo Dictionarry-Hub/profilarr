@@ -60,6 +60,7 @@ import { migration as migration055 } from './migrations/055_create_login_attempt
 import { migration as migration056 } from './migrations/056_add_local_bypass.ts';
 import { migration as migration057 } from './migrations/057_hash_api_key.ts';
 import { migration as migration058 } from './migrations/058_add_onboarding_shown.ts';
+import { migration as migration059 } from './migrations/059_add_external_url_to_arr_instances.ts';
 
 export interface Migration {
 	version: number;
@@ -338,7 +339,8 @@ export function loadMigrations(): Migration[] {
 		migration055,
 		migration056,
 		migration057,
-		migration058
+		migration058,
+		migration059
 	];
 
 	// Sort by version number

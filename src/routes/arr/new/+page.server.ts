@@ -16,6 +16,8 @@ export const actions = {
 		const name = formData.get('name')?.toString().trim();
 		const type = formData.get('type')?.toString().trim();
 		const url = formData.get('url')?.toString().trim();
+		const externalUrlRaw = formData.get('external_url')?.toString().trim() ?? '';
+		const externalUrl = externalUrlRaw === '' ? null : externalUrlRaw;
 		const apiKey = formData.get('api_key')?.toString().trim();
 		const tagsJson = formData.get('tags')?.toString().trim();
 		const enabled = formData.get('enabled')?.toString() === '1';
@@ -94,6 +96,7 @@ export const actions = {
 				name,
 				type,
 				url,
+				externalUrl,
 				apiKey,
 				tags,
 				enabled
@@ -101,7 +104,7 @@ export const actions = {
 
 			await logger.info(`Created new ${type} instance: ${name}`, {
 				source: 'arr/new',
-				meta: { id, name, type, url }
+				meta: { id, name, type, url, externalUrl }
 			});
 
 			// Apply default delay profile if enabled
