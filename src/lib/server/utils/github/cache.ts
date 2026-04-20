@@ -11,20 +11,8 @@ import type { RepoInfo } from '../git/types.ts';
  */
 const TTL = {
 	REPO_INFO: 60, // 1 hour - stars/forks don't change often
-	AVATAR: 1440, // 24 hours - avatars rarely change
-	RELEASES: 30 // 30 minutes - releases are less frequent
+	AVATAR: 1440 // 24 hours - avatars rarely change
 };
-
-/**
- * GitHub Release type
- */
-export interface GitHubRelease {
-	tag_name: string;
-	name: string;
-	published_at: string;
-	html_url: string;
-	prerelease: boolean;
-}
 
 /**
  * Standard GitHub API headers
@@ -178,51 +166,6 @@ export async function getCachedAvatar(owner: string): Promise<string | null> {
 }
 
 /**
- * Get cached releases or fetch from GitHub API
- */
-export async function getCachedReleases(owner: string, repo: string): Promise<GitHubRelease[]> {
-	const cacheKey = `releases:${owner}/${repo}`;
-
-	// Check cache
-	const cached = githubCacheQueries.get(cacheKey);
-	if (cached) {
-		return JSON.parse(cached.data) as GitHubRelease[];
-	}
-
-	// Fetch from API
-	const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
-	const headers = getHeaders();
-
-	try {
-		const response = await globalThis.fetch(apiUrl, { headers });
-
-		if (!response.ok) {
-			return [];
-		}
-
-		const data = await response.json();
-		const releases: GitHubRelease[] = data.map((release: Record<string, unknown>) => ({
-			tag_name: release.tag_name,
-			name: release.name,
-			published_at: release.published_at,
-			html_url: release.html_url,
-			prerelease: release.prerelease
-		}));
-
-		// Cache the result
-		githubCacheQueries.set(cacheKey, 'releases', JSON.stringify(releases), TTL.RELEASES);
-
-		return releases;
-	} catch (err) {
-		await logger.error('Failed to fetch GitHub releases', {
-			source: 'GitHubCache',
-			meta: { error: String(err), owner, repo }
-		});
-		return [];
-	}
-}
-
-/**
  * Invalidate all cache entries for a repository
  */
 export function invalidateRepo(repositoryUrl: string): void {
@@ -231,16 +174,13 @@ export function invalidateRepo(repositoryUrl: string): void {
 		return;
 	}
 
-	const { owner, repo } = parsed;
+	const { owner } = parsed;
 
 	// Delete repo info cache
-	githubCacheQueries.delete(`repo:${owner}/${repo}`);
+	githubCacheQueries.delete(`repo:${parsed.owner}/${parsed.repo}`);
 
 	// Delete avatar cache
 	githubCacheQueries.delete(`avatar:${owner}`);
-
-	// Delete releases cache
-	githubCacheQueries.delete(`releases:${owner}/${repo}`);
 }
 
 /**
