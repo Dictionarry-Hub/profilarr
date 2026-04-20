@@ -17,6 +17,7 @@ class Config {
 		clientId: string | null;
 		clientSecret: string | null;
 	};
+	public readonly bulletinUrl: string;
 
 	constructor() {
 		// Default base path logic:
@@ -62,6 +63,15 @@ class Config {
 			clientId: Deno.env.get('OIDC_CLIENT_ID') || null,
 			clientSecret: Deno.env.get('OIDC_CLIENT_SECRET') || null
 		};
+
+		// Bulletin (announcement feed + release manifest) base URL. The default
+		// points at the live Dictionarry-Hub/bulletin repo served over GitHub's
+		// raw content CDN. Override for testing against a fork, branch, or local
+		// file server.
+		this.bulletinUrl = (
+			Deno.env.get('PROFILARR_BULLETIN_URL') ||
+			'https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main'
+		).replace(/\/+$/, '');
 	}
 
 	/**

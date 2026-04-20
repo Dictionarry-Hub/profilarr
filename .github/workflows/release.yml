@@ -65,6 +65,20 @@ jobs:
             echo "value=develop" >> $GITHUB_OUTPUT
           fi
 
+      - name: Determine build version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            ref="${{ github.ref }}"
+            echo "value=${ref#refs/tags/v}" >> $GITHUB_OUTPUT
+          else
+            echo "value=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine commit short sha
+        id: commit
+        run: echo "value=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v6
@@ -82,6 +96,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           build-args: |
             VITE_CHANNEL=${{ steps.channel.outputs.value }}
+            PROFILARR_VERSION=${{ steps.version.outputs.value }}
+            PROFILARR_COMMIT=${{ steps.commit.outputs.value }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.IMAGE_BASE }}/${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=registry,ref=${{ env.IMAGE_BASE }}/${{ matrix.image }}:buildcache-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
