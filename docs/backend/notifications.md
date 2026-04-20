@@ -68,6 +68,18 @@ flowchart TD
     NM -->|record result| HISTORY[(notification_history)]
 ```
 
+## Events
+
+Notification types are enumerated in `src/lib/shared/notifications/types.ts`
+and consumed by the settings UI for per-service subscription. Each maps to a
+definition in `src/lib/server/notifications/definitions/`.
+
+Categories include Backups, Databases, Arr Sync, Arr Cleanup, Upgrades,
+Renames, and Announcements. The announcement event (`announcement.new`) is
+fired by the `announcements.fetch` job whenever the reconciler inserts a
+new, never-seen-before announcement id. Reappearing previously-withdrawn
+announcements do not re-notify.
+
 ## Notification Payload
 
 ```
