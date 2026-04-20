@@ -1,0 +1,76 @@
+list:
+  get:
+    operationId: listAnnouncements
+    summary: List Announcements
+    description: |
+      Visible announcements only: withdrawn, expired, and version-incompatible
+      entries are filtered out server-side. Bodies are not included; use the
+      detail endpoint to fetch one.
+    tags:
+      - Announcements
+    responses:
+      '200':
+        description: Visible announcements, newest first.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/announcements.yaml#/AnnouncementSummary'
+            example:
+              - id: '01HXYZ0000000000000000000A'
+                title: 'API v1 migration landing in 2.4'
+                severity: warning
+                publishedAt: '2026-04-10T10:00:00Z'
+                expiresAt: null
+                minVersion: '2.0.0'
+                maxVersion: null
+                link: 'https://github.com/Dictionarry-Hub/profilarr/discussions/999'
+                readAt: null
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+
+detail:
+  get:
+    operationId: getAnnouncement
+    summary: Get Announcement
+    description: |
+      Returns the full announcement including its markdown body. The body
+      is lazy-fetched from the bulletin repo on first call and cached
+      locally; subsequent calls read from cache.
+
+      404 is returned for unknown ids and for ids that have not yet been
+      ingested by the fetch job (e.g. calling the API between a new
+      bulletin PR merging and the next scheduled reconcile).
+    tags:
+      - Announcements
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ULID of the announcement.
+    responses:
+      '200':
+        description: Announcement detail with body.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/announcements.yaml#/AnnouncementDetail'
+      '401':
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+      '404':
+        description: Announcement not found.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'

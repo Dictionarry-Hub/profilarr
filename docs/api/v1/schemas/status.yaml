@@ -8,6 +8,7 @@ StatusResponse:
     - arrs
     - jobs
     - backups
+    - announcements
   properties:
     version:
       type: string
@@ -30,6 +31,20 @@ StatusResponse:
       $ref: '#/StatusJobs'
     backups:
       $ref: '#/StatusBackups'
+    announcements:
+      $ref: '#/StatusAnnouncements'
+
+StatusAnnouncements:
+  type: object
+  required:
+    - unread
+  properties:
+    unread:
+      type: integer
+      description: |
+        Number of unread, visible announcements. Visibility honours
+        `withdrawn`, `expires_at`, and the running build's version bounds
+        (`min_version` / `max_version`).
 
 StatusDatabase:
   type: object

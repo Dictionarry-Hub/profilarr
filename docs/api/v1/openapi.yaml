@@ -33,6 +33,8 @@ tags:
     description: Linked database instance management
   - name: Regex
     description: Regex pattern validation
+  - name: Announcements
+    description: In-app announcements fed from the bulletin repo
 
 security:
   - apiKey: []
@@ -79,6 +81,10 @@ paths:
     $ref: './paths/pcd.yaml#/import'
   /regex/validate:
     $ref: './paths/regex.yaml#/validate'
+  /announcements:
+    $ref: './paths/announcements.yaml#/list'
+  /announcements/{id}:
+    $ref: './paths/announcements.yaml#/detail'
 
 components:
   securitySchemes:
@@ -123,6 +129,15 @@ components:
       $ref: './schemas/status.yaml#/StatusJobs'
     StatusBackups:
       $ref: './schemas/status.yaml#/StatusBackups'
+    StatusAnnouncements:
+      $ref: './schemas/status.yaml#/StatusAnnouncements'
+    # Announcements
+    AnnouncementSeverity:
+      $ref: './schemas/announcements.yaml#/AnnouncementSeverity'
+    AnnouncementSummary:
+      $ref: './schemas/announcements.yaml#/AnnouncementSummary'
+    AnnouncementDetail:
+      $ref: './schemas/announcements.yaml#/AnnouncementDetail'
     # Entity Testing
     MediaType:
       $ref: './schemas/entity-testing.yaml#/MediaType'
