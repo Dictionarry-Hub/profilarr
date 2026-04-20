@@ -33,6 +33,7 @@
 	"tasks": {
 		"dev": "deno run -A scripts/dev.ts",
 		"dev:no-auth": "AUTH=off deno run -A scripts/dev.ts",
+		"dev:bulletin": "deno run -A scripts/serve-dev-bulletin.ts",
 		"preview:proxy": "deno run -A scripts/preview-proxy.ts",
 		"preview:proxy:tls": "deno run -A scripts/preview-proxy.ts --tls",
 		"dev:server": "DENO_ENV=development PORT=6969 HOST=0.0.0.0 APP_BASE_PATH=./dist/dev PARSER_HOST=localhost PARSER_PORT=5000 VITE_PLATFORM=linux-amd64 VITE_CHANNEL=dev deno run -A npm:vite dev",

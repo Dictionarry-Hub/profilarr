@@ -1,0 +1,46 @@
+{
+	"schema": 1,
+	"updated_at": "2026-04-21T10:00:00Z",
+	"announcements": [
+		{
+			"id": "01K8000000000000000000000A",
+			"title": "Welcome to the Profilarr 2.x beta",
+			"severity": "info",
+			"published_at": "2026-04-01T09:00:00Z",
+			"expires_at": null,
+			"min_version": null,
+			"max_version": null,
+			"link": "https://github.com/Dictionarry-Hub/profilarr"
+		},
+		{
+			"id": "01K8000000000000000000000B",
+			"title": "API v1 migration landing in 2.4",
+			"severity": "warning",
+			"published_at": "2026-04-10T10:00:00Z",
+			"expires_at": null,
+			"min_version": "2.0.0",
+			"max_version": null,
+			"link": "https://github.com/Dictionarry-Hub/profilarr/discussions"
+		},
+		{
+			"id": "01K8000000000000000000000C",
+			"title": "Security fix available: please update to 2.3.0",
+			"severity": "critical",
+			"published_at": "2026-04-18T12:00:00Z",
+			"expires_at": null,
+			"min_version": null,
+			"max_version": "2.2.1",
+			"link": "https://github.com/Dictionarry-Hub/profilarr/security"
+		},
+		{
+			"id": "01K8000000000000000000000D",
+			"title": "Dark mode toggle moved to Settings > General",
+			"severity": "info",
+			"published_at": "2026-03-15T14:30:00Z",
+			"expires_at": null,
+			"min_version": null,
+			"max_version": null,
+			"link": null
+		}
+	]
+}
