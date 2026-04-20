@@ -26,10 +26,10 @@
 	import radarrLogo from '$assets/Radarr.svg';
 	import sonarrLogo from '$assets/Sonarr.svg';
 
-	export let version: string = '';
 	export let arrInstances: { id: number; name: string; type: string }[] = [];
 	export let databases: { id: number; name: string }[] = [];
 	export let parserAvailable: boolean = true;
+	export let unreadAnnouncements: number = 0;
 
 	// Close mobile nav when page changes
 	$: ($page.url.pathname, mobileNavOpen.close());
@@ -203,6 +203,7 @@
 			<GroupItem label="Security" href="/settings/security" />
 			<GroupItem label="Onboarding" href="/onboarding" onboardingId="nav-onboarding" />
 			<GroupItem label="About" href="/settings/about" />
+			<GroupItem label="Announcements" href="/announcements" alert={unreadAnnouncements} />
 			<GroupItem
 				label="Log Out"
 				href="/auth/logout"
@@ -217,7 +218,7 @@
 
 		<!-- Version scrolls with content on mobile (job status shown in bottom nav) -->
 		<div class="mt-2 md:hidden">
-			<Version {version} />
+			<Version />
 		</div>
 	</div>
 
@@ -228,6 +229,6 @@
 				<JobStatus />
 			</div>
 		{/if}
-		<Version {version} />
+		<Version />
 	</div>
 </nav>

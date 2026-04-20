@@ -56,10 +56,10 @@
 {#if !isAuthPage}
 	<Navbar />
 	<PageNav
-		version={data.version}
 		arrInstances={data.arrInstances}
 		databases={data.databases}
 		parserAvailable={data.parserAvailable}
+		unreadAnnouncements={data.unreadAnnouncements}
 	/>
 	<BottomNav />
 	<HelpButton />
