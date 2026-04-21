@@ -55,7 +55,7 @@
 
 	async function runValidation(value: string) {
 		try {
-			const res = await fetch('/api/v1/regex/validate', {
+			const res = await fetch('/regular-expressions/validate', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ pattern: value })

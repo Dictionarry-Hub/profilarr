@@ -29,8 +29,6 @@ tags:
     description: PCD entity export and portable format endpoints
   - name: Databases
     description: Linked database instance management
-  - name: Regex
-    description: Regex pattern validation
   - name: Announcements
     description: In-app announcements fed from the bulletin repo
 
@@ -75,8 +73,6 @@ paths:
     $ref: './paths/pcd.yaml#/export'
   /pcd/import:
     $ref: './paths/pcd.yaml#/import'
-  /regex/validate:
-    $ref: './paths/regex.yaml#/validate'
   /announcements:
     $ref: './paths/announcements.yaml#/list'
   /announcements/{id}:
@@ -199,11 +195,6 @@ components:
       $ref: './schemas/databases.yaml#/UpdateDatabaseInput'
     SyncTriggerResponse:
       $ref: './schemas/databases.yaml#/SyncTriggerResponse'
-    # Regex
-    ValidateRegexRequest:
-      $ref: './schemas/regex.yaml#/ValidateRegexRequest'
-    ValidateRegexResponse:
-      $ref: './schemas/regex.yaml#/ValidateRegexResponse'
     # Jobs
     JobStatus:
       $ref: './schemas/jobs.yaml#/JobStatus'

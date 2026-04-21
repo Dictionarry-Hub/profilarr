@@ -468,28 +468,6 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
-	'/regex/validate': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * Validate a .NET regex pattern
-		 * @description Validates a regex pattern using the .NET regex engine (via the parser service).
-		 *     This matches the exact validation Radarr and Sonarr perform when importing custom formats.
-		 *     If the parser service is offline, returns { valid: true } to avoid blocking saves.
-		 */
-		post: operations['validateRegex'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
 	'/announcements': {
 		parameters: {
 			query?: never;
@@ -1272,18 +1250,6 @@ export interface components {
 		SyncTriggerResponse: {
 			/** @description Job queue ID to poll via GET /api/v1/jobs/{jobId} */
 			jobId: number;
-		};
-		ValidateRegexRequest: {
-			/** @description The .NET regex pattern to validate */
-			pattern: string;
-		};
-		ValidateRegexResponse: {
-			/** @description Whether the pattern is a valid .NET regex */
-			valid: boolean;
-			/** @description The .NET ArgumentException message if invalid */
-			error?: string | null;
-			/** @description Whether the parser service was reachable. False means validation was skipped. */
-			available?: boolean | null;
 		};
 		/**
 		 * @description Current state of the job in the queue
@@ -2842,37 +2808,6 @@ export interface operations {
 				content: {
 					'application/json': components['schemas']['PcdErrorResponse'];
 				};
-			};
-		};
-	};
-	validateRegex: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['ValidateRegexRequest'];
-			};
-		};
-		responses: {
-			/** @description Validation result */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['ValidateRegexResponse'];
-				};
-			};
-			/** @description Missing pattern */
-			400: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
 			};
 		};
 	};
