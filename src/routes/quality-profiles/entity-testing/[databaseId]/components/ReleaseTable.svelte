@@ -9,10 +9,7 @@
 	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import type { Column } from '$ui/table/types';
-	import type { TestRelease } from '$shared/pcd/display.ts';
-	import type { components } from '$api/v1.d.ts';
-
-	type ReleaseEvaluation = components['schemas']['ReleaseEvaluation'];
+	import type { TestRelease, ReleaseEvaluation } from '$shared/pcd/display.ts';
 
 	interface CfScore {
 		radarr: number | null;

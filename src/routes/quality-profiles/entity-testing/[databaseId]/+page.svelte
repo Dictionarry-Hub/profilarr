@@ -30,12 +30,12 @@
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 	import { alertStore } from '$lib/client/alerts/store';
 	import type { PageData } from './$types';
-	import type { TestEntity, TestRelease } from '$shared/pcd/display.ts';
-	import type { components } from '$api/v1.d.ts';
-
-	type EvaluateResponse = components['schemas']['EvaluateResponse'];
-	type ReleaseEvaluation = components['schemas']['ReleaseEvaluation'];
-	type MediaType = components['schemas']['MediaType'];
+	import type {
+		TestEntity,
+		TestRelease,
+		EvaluateResponse,
+		ReleaseEvaluation
+	} from '$shared/pcd/display.ts';
 
 	export let data: PageData;
 
@@ -105,19 +105,21 @@
 		loadingEntityIds = loadingEntityIds;
 
 		try {
-			const response = await fetch('/api/v1/entity-testing/evaluate', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					databaseId: data.currentDatabase.id,
-					releases: entity.releases.map((r) => ({
-						id: r.id,
-						title: r.title,
-						type: entity.type,
-						languages: r.languages.length > 0 ? r.languages : undefined
-					}))
-				})
-			});
+			const response = await fetch(
+				`/quality-profiles/entity-testing/${data.currentDatabase.id}/evaluate`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						releases: entity.releases.map((r) => ({
+							id: r.id,
+							title: r.title,
+							type: entity.type,
+							languages: r.languages.length > 0 ? r.languages : undefined
+						}))
+					})
+				}
+			);
 
 			if (!response.ok) {
 				throw new Error('Failed to fetch evaluations');

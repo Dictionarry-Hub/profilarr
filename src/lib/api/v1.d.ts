@@ -305,34 +305,6 @@ export interface paths {
 		patch: operations['updateBackupSettings'];
 		trace?: never;
 	};
-	'/entity-testing/evaluate': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * Evaluate releases against custom formats
-		 * @description Parses release titles and evaluates them against all custom formats in the specified database.
-		 *
-		 *     This endpoint:
-		 *     - Parses each release title to extract metadata (resolution, source, languages, etc.)
-		 *     - Matches regex patterns using .NET-compatible regex via the parser service
-		 *     - Evaluates each release against all custom formats in the database
-		 *     - Returns which custom formats match each release
-		 *
-		 *     Results are cached for performance - repeated requests with the same titles will be faster.
-		 */
-		post: operations['evaluateReleases'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
 	'/arr/library': {
 		parameters: {
 			query?: never;
@@ -776,67 +748,6 @@ export interface components {
 			 *     May be null briefly if the lazy fetch fails; subsequent calls retry.
 			 */
 			body: string | null;
-		};
-		/**
-		 * @description Type of media
-		 * @enum {string}
-		 */
-		MediaType: 'movie' | 'series';
-		ParsedInfo: {
-			/** @description Detected source (e.g., bluray, webdl, webrip) */
-			source: string;
-			/** @description Detected resolution (e.g., 1080p, 2160p) */
-			resolution: string;
-			/** @description Quality modifier (e.g., remux, none) */
-			modifier: string;
-			/** @description Detected languages */
-			languages: string[];
-			/**
-			 * @description Where the language information came from (Indexer = indexer-provided, Title = parsed from release title)
-			 * @enum {string}
-			 */
-			languageSource: 'Indexer' | 'Title';
-			/** @description Detected release group */
-			releaseGroup?: string | null;
-			/** @description Detected year */
-			year: number;
-			/** @description Detected edition (e.g., Director's Cut) */
-			edition?: string | null;
-			/** @description Release type for series (single_episode, season_pack, etc.) */
-			releaseType?: string | null;
-		};
-		ReleaseInput: {
-			/** @description Release ID */
-			id: number;
-			/** @description Release title to parse and evaluate */
-			title: string;
-			type: components['schemas']['MediaType'];
-			/** @description Indexer-provided languages. When present and non-empty, these override languages parsed from the title. */
-			languages?: string[];
-		};
-		ReleaseEvaluation: {
-			/** @description Release ID */
-			releaseId: number;
-			/** @description Release title */
-			title: string;
-			/** @description Parsed release info (null if parsing failed) */
-			parsed?: components['schemas']['ParsedInfo'];
-			/** @description Map of custom format ID to whether it matches */
-			cfMatches: {
-				[key: string]: boolean;
-			};
-		};
-		EvaluateRequest: {
-			/** @description Database ID to use for custom format evaluation. If omitted, only parsing is performed (no CF matching). */
-			databaseId?: number;
-			/** @description Releases to evaluate */
-			releases: components['schemas']['ReleaseInput'][];
-		};
-		EvaluateResponse: {
-			/** @description Whether the parser service is available */
-			parserAvailable: boolean;
-			/** @description Evaluation results for each release */
-			evaluations: components['schemas']['ReleaseEvaluation'][];
 		};
 		/**
 		 * @description Type of Arr instance
@@ -2578,44 +2489,6 @@ export interface operations {
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
 				};
-			};
-		};
-	};
-	evaluateReleases: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['EvaluateRequest'];
-			};
-		};
-		responses: {
-			/** @description Evaluation results */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['EvaluateResponse'];
-				};
-			};
-			/** @description Invalid request (missing databaseId or releases) */
-			400: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-			/** @description Database cache not available */
-			500: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
 			};
 		};
 	};
