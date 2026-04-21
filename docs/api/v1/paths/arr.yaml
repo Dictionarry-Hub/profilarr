@@ -27,65 +27,6 @@ instances:
       '401':
         description: Not authenticated
 
-releases:
-  get:
-    operationId: getReleases
-    summary: Search for releases
-    description: |
-      Triggers an interactive search on an Arr instance and returns grouped/deduplicated results.
-
-      For Radarr: Searches for releases for the specified movie.
-      For Sonarr: Searches for season pack releases for the specified series and season.
-
-      Results are grouped by title, combining information from multiple indexers.
-    tags:
-      - Arr
-    parameters:
-      - name: instanceId
-        in: query
-        required: true
-        schema:
-          type: integer
-        description: Arr instance ID
-      - name: itemId
-        in: query
-        required: true
-        schema:
-          type: integer
-        description: Movie ID (Radarr) or Series ID (Sonarr)
-      - name: season
-        in: query
-        required: false
-        schema:
-          type: integer
-          default: 1
-        description: Season number for Sonarr searches (defaults to 1)
-    responses:
-      '200':
-        description: Release search results
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/arr.yaml#/ReleasesResponse'
-      '400':
-        description: Invalid or missing parameters
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/arr.yaml#/ErrorResponse'
-      '404':
-        description: Instance not found
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/arr.yaml#/ErrorResponse'
-      '500':
-        description: Failed to fetch releases
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/arr.yaml#/ErrorResponse'
-
 sync-entity:
   post:
     operationId: syncEntity

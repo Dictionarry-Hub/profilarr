@@ -305,31 +305,6 @@ export interface paths {
 		patch: operations['updateBackupSettings'];
 		trace?: never;
 	};
-	'/arr/releases': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/**
-		 * Search for releases
-		 * @description Triggers an interactive search on an Arr instance and returns grouped/deduplicated results.
-		 *
-		 *     For Radarr: Searches for releases for the specified movie.
-		 *     For Sonarr: Searches for season pack releases for the specified series and season.
-		 *
-		 *     Results are grouped by title, combining information from multiple indexers.
-		 */
-		get: operations['getReleases'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
 	'/arr/sync-entity': {
 		parameters: {
 			query?: never;
@@ -634,25 +609,6 @@ export interface components {
 			name: string;
 			/** @description Score assigned by the quality profile */
 			score: number;
-		};
-		GroupedRelease: {
-			/** @description Release title */
-			title: string;
-			/** @description Release size in bytes */
-			size: number;
-			/** @description Languages detected in the release */
-			languages: string[];
-			/** @description Indexers where this release was found */
-			indexers: string[];
-			/** @description Release flags (e.g., freeleech, internal) */
-			flags: string[];
-		};
-		ReleasesResponse: {
-			type: components['schemas']['ArrType'];
-			/** @description Total number of raw releases before grouping */
-			rawCount: number;
-			/** @description Grouped and deduplicated releases */
-			releases: components['schemas']['GroupedRelease'][];
 		};
 		SyncEntityRequest: {
 			/** @description Arr instance ID */
@@ -1905,60 +1861,6 @@ export interface operations {
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
-				};
-			};
-		};
-	};
-	getReleases: {
-		parameters: {
-			query: {
-				/** @description Arr instance ID */
-				instanceId: number;
-				/** @description Movie ID (Radarr) or Series ID (Sonarr) */
-				itemId: number;
-				/** @description Season number for Sonarr searches (defaults to 1) */
-				season?: number;
-			};
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description Release search results */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['ReleasesResponse'];
-				};
-			};
-			/** @description Invalid or missing parameters */
-			400: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['arr_ErrorResponse'];
-				};
-			};
-			/** @description Instance not found */
-			404: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['arr_ErrorResponse'];
-				};
-			};
-			/** @description Failed to fetch releases */
-			500: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 		};

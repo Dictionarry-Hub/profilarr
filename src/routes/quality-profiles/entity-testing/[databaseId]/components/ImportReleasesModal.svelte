@@ -175,25 +175,23 @@
 
 	async function loadReleases() {
 		if (!selectedInstanceId || !selectedItem) return;
+		if (entity?.type === 'series' && selectedSeason === null) return;
 
 		loadingReleases = true;
 		releases = [];
 		selectedReleases = new Set<string>();
 
+		const url =
+			entity?.type === 'series'
+				? `/arr/${selectedInstanceId}/library/series/${selectedItem.id}/seasons/${selectedSeason}/releases`
+				: `/arr/${selectedInstanceId}/library/movies/${selectedItem.id}/releases`;
+
 		try {
-			const params = new URLSearchParams({
-				instanceId: String(selectedInstanceId),
-				itemId: String(selectedItem.id)
-			});
-			// Add season for TV series
-			if (entity?.type === 'series' && selectedSeason !== null) {
-				params.set('season', String(selectedSeason));
-			}
-			const response = await fetch(`/api/v1/arr/releases?${params}`);
+			const response = await fetch(url);
 			const data = await response.json();
 
-			if (data.error) {
-				alertStore.add('error', data.error);
+			if (!response.ok || data.error) {
+				alertStore.add('error', data.error ?? 'Failed to fetch releases');
 			} else {
 				releases = data.releases || [];
 			}

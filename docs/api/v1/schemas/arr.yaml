@@ -85,56 +85,6 @@ ScoreBreakdownItem:
       type: integer
       description: Score assigned by the quality profile
 
-# Releases endpoint types
-GroupedRelease:
-  type: object
-  required:
-    - title
-    - size
-    - languages
-    - indexers
-    - flags
-  properties:
-    title:
-      type: string
-      description: Release title
-    size:
-      type: integer
-      description: Release size in bytes
-    languages:
-      type: array
-      items:
-        type: string
-      description: Languages detected in the release
-    indexers:
-      type: array
-      items:
-        type: string
-      description: Indexers where this release was found
-    flags:
-      type: array
-      items:
-        type: string
-      description: Release flags (e.g., freeleech, internal)
-
-ReleasesResponse:
-  type: object
-  required:
-    - type
-    - rawCount
-    - releases
-  properties:
-    type:
-      $ref: '#/ArrType'
-    rawCount:
-      type: integer
-      description: Total number of raw releases before grouping
-    releases:
-      type: array
-      items:
-        $ref: '#/GroupedRelease'
-      description: Grouped and deduplicated releases
-
 ErrorResponse:
   type: object
   required:
