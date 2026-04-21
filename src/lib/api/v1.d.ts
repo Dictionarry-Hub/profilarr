@@ -127,6 +127,65 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/databases/{id}/export': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		/**
+		 * Export Entity
+		 * @description Serializes a PCD entity from this database into its portable JSON
+		 *     representation. The portable format strips database IDs and timestamps,
+		 *     producing a self-contained snapshot suitable for clipboard copy, file
+		 *     export, or cross-database import.
+		 */
+		get: operations['exportEntity'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/databases/{id}/import': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/**
+		 * Import Entity
+		 * @description Deserializes a portable entity into PCD operations, creating it in this
+		 *     database at the specified layer.
+		 *
+		 *     The request body matches the export response format (`entityType` + `data`),
+		 *     plus `layer` to specify the target layer (`user` or `base`).
+		 *
+		 *     The `data` shape is validated against `entityType`: required fields and
+		 *     their types are checked for the matching portable schema, so mismatches
+		 *     (e.g. sending a `quality_profile` body with `entityType: delay_profile`)
+		 *     return 400. Validation is top-level only. Extra fields are ignored and
+		 *     nested array contents are not deep-checked.
+		 */
+		post: operations['importEntity'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/health': {
 		parameters: {
 			query?: never;
@@ -411,57 +470,6 @@ export interface paths {
 		 *     the cooldown. Returns 409 if a sync is already in progress or the cooldown is active.
 		 */
 		post: operations['syncEntity'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/pcd/export': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/**
-		 * Export a portable entity
-		 * @description Serializes a PCD entity into its portable JSON representation.
-		 *
-		 *     The portable format strips database IDs and timestamps, producing a
-		 *     self-contained snapshot suitable for clipboard copy, file export, or
-		 *     cross-database import.
-		 */
-		get: operations['exportEntity'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/pcd/import': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * Import a portable entity
-		 * @description Deserializes a portable entity into PCD operations, creating the entity
-		 *     in the target database and layer.
-		 *
-		 *     The request body matches the export response format (`entityType` + `data`),
-		 *     plus `databaseId` and `layer` to specify the target.
-		 *
-		 *     Name uniqueness is validated — importing an entity with a name that already
-		 *     exists will return a 400 error.
-		 */
-		post: operations['importEntity'];
 		delete?: never;
 		options?: never;
 		head?: never;
@@ -1066,12 +1074,7 @@ export interface components {
 				| components['schemas']['PortableMediaSettings']
 				| components['schemas']['PortableQualityDefinitions'];
 		};
-		PcdErrorResponse: {
-			error: string;
-		};
 		ImportRequest: {
-			/** @description The PCD database ID to import into */
-			databaseId: number;
 			/**
 			 * @description The operation layer to write to
 			 * @enum {string}
@@ -1091,6 +1094,94 @@ export interface components {
 		};
 		ImportResponse: {
 			success: boolean;
+		};
+		/** PortableDelayProfile */
+		PortableDelayProfile: {
+			name: string;
+			/** @enum {string} */
+			preferredProtocol: 'prefer_usenet' | 'prefer_torrent' | 'only_usenet' | 'only_torrent';
+			usenetDelay: number;
+			torrentDelay: number;
+			bypassIfHighestQuality: boolean;
+			bypassIfAboveCfScore: boolean;
+			minimumCfScore: number;
+		};
+		/** PortableRegularExpression */
+		PortableRegularExpression: {
+			name: string;
+			pattern: string;
+			tags: string[];
+			description: string | null;
+			regex101Id: string | null;
+		};
+		/** PortableCustomFormat */
+		PortableCustomFormat: {
+			name: string;
+			description: string | null;
+			includeInRename: boolean;
+			tags: string[];
+			conditions: Record<string, never>[];
+			tests: components['schemas']['PortableCustomFormatTest'][];
+		};
+		/** PortableCustomFormatTest */
+		PortableCustomFormatTest: {
+			title: string;
+			/** @enum {string} */
+			type: 'movie' | 'series';
+			shouldMatch: boolean;
+			description: string | null;
+		};
+		/** PortableCustomFormatScore */
+		PortableCustomFormatScore: {
+			customFormatName: string;
+			arrType: string;
+			score: number;
+		};
+		/** PortableQualityProfile */
+		PortableQualityProfile: {
+			name: string;
+			description: string | null;
+			tags: string[];
+			language: string | null;
+			orderedItems: Record<string, never>[];
+			minimumScore: number;
+			upgradeUntilScore: number;
+			upgradeScoreIncrement: number;
+			customFormatScores: components['schemas']['PortableCustomFormatScore'][];
+		};
+		/** PortableRadarrNaming */
+		PortableRadarrNaming: {
+			name: string;
+			rename: boolean;
+			movieFormat: string;
+			movieFolderFormat: string;
+			replaceIllegalCharacters: boolean;
+			colonReplacementFormat: string;
+		};
+		/** PortableSonarrNaming */
+		PortableSonarrNaming: {
+			name: string;
+			rename: boolean;
+			standardEpisodeFormat: string;
+			dailyEpisodeFormat: string;
+			animeEpisodeFormat: string;
+			seriesFolderFormat: string;
+			seasonFolderFormat: string;
+			replaceIllegalCharacters: boolean;
+			colonReplacementFormat: string;
+			customColonReplacementFormat: string | null;
+			multiEpisodeStyle: string;
+		};
+		/** PortableMediaSettings */
+		PortableMediaSettings: {
+			name: string;
+			propersRepacks: string;
+			enableMediaInfo: boolean;
+		};
+		/** PortableQualityDefinitions */
+		PortableQualityDefinitions: {
+			name: string;
+			entries: Record<string, never>[];
 		};
 		ArrInstance: {
 			/** @description Instance ID */
@@ -1355,84 +1446,6 @@ export interface components {
 		arr_ErrorResponse: {
 			/** @description Error message */
 			error: string;
-		};
-		PortableDelayProfile: {
-			name: string;
-			/** @enum {string} */
-			preferredProtocol: 'prefer_usenet' | 'prefer_torrent' | 'only_usenet' | 'only_torrent';
-			usenetDelay: number;
-			torrentDelay: number;
-			bypassIfHighestQuality: boolean;
-			bypassIfAboveCfScore: boolean;
-			minimumCfScore: number;
-		};
-		PortableRegularExpression: {
-			name: string;
-			pattern: string;
-			tags: string[];
-			description: string | null;
-			regex101Id: string | null;
-		};
-		PortableCustomFormatTest: {
-			title: string;
-			/** @enum {string} */
-			type: 'movie' | 'series';
-			shouldMatch: boolean;
-			description: string | null;
-		};
-		PortableCustomFormat: {
-			name: string;
-			description: string | null;
-			includeInRename: boolean;
-			tags: string[];
-			conditions: Record<string, never>[];
-			tests: components['schemas']['PortableCustomFormatTest'][];
-		};
-		PortableCustomFormatScore: {
-			customFormatName: string;
-			arrType: string;
-			score: number;
-		};
-		PortableQualityProfile: {
-			name: string;
-			description: string | null;
-			tags: string[];
-			language: string | null;
-			orderedItems: Record<string, never>[];
-			minimumScore: number;
-			upgradeUntilScore: number;
-			upgradeScoreIncrement: number;
-			customFormatScores: components['schemas']['PortableCustomFormatScore'][];
-		};
-		PortableRadarrNaming: {
-			name: string;
-			rename: boolean;
-			movieFormat: string;
-			movieFolderFormat: string;
-			replaceIllegalCharacters: boolean;
-			colonReplacementFormat: string;
-		};
-		PortableSonarrNaming: {
-			name: string;
-			rename: boolean;
-			standardEpisodeFormat: string;
-			dailyEpisodeFormat: string;
-			animeEpisodeFormat: string;
-			seriesFolderFormat: string;
-			seasonFolderFormat: string;
-			replaceIllegalCharacters: boolean;
-			colonReplacementFormat: string;
-			customColonReplacementFormat: string | null;
-			multiEpisodeStyle: string;
-		};
-		PortableMediaSettings: {
-			name: string;
-			propersRepacks: string;
-			enableMediaInfo: boolean;
-		};
-		PortableQualityDefinitions: {
-			name: string;
-			entries: Record<string, never>[];
 		};
 	};
 	responses: never;
@@ -1825,6 +1838,173 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Database not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	exportEntity: {
+		parameters: {
+			query: {
+				/** @description The entity type to export */
+				entityType: components['schemas']['EntityType'];
+				/** @description The entity name to export */
+				name: string;
+			};
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Portable entity JSON */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ExportResponse'];
+				};
+			};
+			/** @description Missing or invalid query parameters */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Missing required parameters: entityType, name"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database or entity not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Entity not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	importEntity: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Database instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ImportRequest'];
+			};
+		};
+		responses: {
+			/** @description Entity created successfully */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ImportResponse'];
+				};
+			};
+			/** @description Validation error (missing fields, invalid layer, invalid data) */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Missing required fields: layer, entityType, data"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Cannot write to base layer */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Cannot write to base layer"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Database not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Database not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description An entity with this name already exists */
+			409: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "A custom format with name \"Foo\" already exists"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
@@ -2673,111 +2853,6 @@ export interface operations {
 				};
 				content: {
 					'application/json': components['schemas']['arr_ErrorResponse'];
-				};
-			};
-		};
-	};
-	exportEntity: {
-		parameters: {
-			query: {
-				/** @description The PCD database ID to export from */
-				databaseId: number;
-				/** @description The entity type to export */
-				entityType: components['schemas']['EntityType'];
-				/** @description The entity name to export */
-				name: string;
-			};
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description Portable entity JSON */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['ExportResponse'];
-				};
-			};
-			/** @description Missing or invalid parameters */
-			400: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['PcdErrorResponse'];
-				};
-			};
-			/** @description Entity not found */
-			404: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['PcdErrorResponse'];
-				};
-			};
-			/** @description Database cache not available */
-			500: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['PcdErrorResponse'];
-				};
-			};
-		};
-	};
-	importEntity: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['ImportRequest'];
-			};
-		};
-		responses: {
-			/** @description Entity created successfully */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['ImportResponse'];
-				};
-			};
-			/** @description Validation error (missing fields, duplicate name, invalid data) */
-			400: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['PcdErrorResponse'];
-				};
-			};
-			/** @description Cannot write to base layer */
-			403: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['PcdErrorResponse'];
-				};
-			};
-			/** @description Database cache not available */
-			500: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['PcdErrorResponse'];
 				};
 			};
 		};

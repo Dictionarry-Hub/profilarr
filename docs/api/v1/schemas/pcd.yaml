@@ -46,14 +46,10 @@ ExportResponse:
 ImportRequest:
   type: object
   required:
-    - databaseId
     - layer
     - entityType
     - data
   properties:
-    databaseId:
-      type: integer
-      description: The PCD database ID to import into
     layer:
       type: string
       enum: [user, base]
@@ -80,18 +76,11 @@ ImportResponse:
     success:
       type: boolean
 
-PcdErrorResponse:
-  type: object
-  required:
-    - error
-  properties:
-    error:
-      type: string
-
 # --- Portable entity schemas ---
 
 PortableDelayProfile:
   type: object
+  title: PortableDelayProfile
   required:
     - name
     - preferredProtocol
@@ -119,6 +108,7 @@ PortableDelayProfile:
 
 PortableRegularExpression:
   type: object
+  title: PortableRegularExpression
   required:
     - name
     - pattern
@@ -143,6 +133,7 @@ PortableRegularExpression:
 
 PortableCustomFormatTest:
   type: object
+  title: PortableCustomFormatTest
   required:
     - title
     - type
@@ -162,6 +153,7 @@ PortableCustomFormatTest:
 
 PortableCustomFormat:
   type: object
+  title: PortableCustomFormat
   required:
     - name
     - description
@@ -193,6 +185,7 @@ PortableCustomFormat:
 
 PortableCustomFormatScore:
   type: object
+  title: PortableCustomFormatScore
   required:
     - customFormatName
     - arrType
@@ -207,6 +200,7 @@ PortableCustomFormatScore:
 
 PortableQualityProfile:
   type: object
+  title: PortableQualityProfile
   required:
     - name
     - description
@@ -248,6 +242,7 @@ PortableQualityProfile:
 
 PortableRadarrNaming:
   type: object
+  title: PortableRadarrNaming
   required:
     - name
     - rename
@@ -271,6 +266,7 @@ PortableRadarrNaming:
 
 PortableSonarrNaming:
   type: object
+  title: PortableSonarrNaming
   required:
     - name
     - rename
@@ -310,6 +306,7 @@ PortableSonarrNaming:
 
 PortableMediaSettings:
   type: object
+  title: PortableMediaSettings
   required:
     - name
     - propersRepacks
@@ -324,6 +321,7 @@ PortableMediaSettings:
 
 PortableQualityDefinitions:
   type: object
+  title: PortableQualityDefinitions
   required:
     - name
     - entries

@@ -5,33 +5,37 @@ import { ENTITY_TYPES } from '$shared/pcd/portable.ts';
 import type { EntityType } from '$shared/pcd/portable.ts';
 import type { PCDCache } from '$pcd/database/cache.ts';
 import * as serialize from '$pcd/entities/serialize.ts';
+import type { components } from '$api/v1';
+
+type ErrorResponse = components['schemas']['ErrorResponse'];
 
 const VALID_ENTITY_TYPES: ReadonlySet<string> = new Set(ENTITY_TYPES);
 
-export const GET: RequestHandler = async ({ url }) => {
-	const databaseIdParam = url.searchParams.get('databaseId');
+export const GET: RequestHandler = async ({ params, url }) => {
+	const databaseId = parseInt(params.id ?? '', 10);
+	if (isNaN(databaseId)) {
+		return json({ error: 'Invalid database ID' } satisfies ErrorResponse, { status: 400 });
+	}
+
 	const entityType = url.searchParams.get('entityType');
 	const name = url.searchParams.get('name');
 
-	if (!databaseIdParam || !entityType || !name) {
+	if (!entityType || !name) {
 		return json(
-			{ error: 'Missing required parameters: databaseId, entityType, name' },
+			{ error: 'Missing required parameters: entityType, name' } satisfies ErrorResponse,
 			{ status: 400 }
 		);
 	}
 
-	const databaseId = parseInt(databaseIdParam, 10);
-	if (isNaN(databaseId)) {
-		return json({ error: 'Invalid databaseId' }, { status: 400 });
-	}
-
 	if (!VALID_ENTITY_TYPES.has(entityType)) {
-		return json({ error: `Invalid entityType: ${entityType}` }, { status: 400 });
+		return json({ error: `Invalid entityType: ${entityType}` } satisfies ErrorResponse, {
+			status: 400
+		});
 	}
 
 	const cache = pcdManager.getCache(databaseId);
 	if (!cache) {
-		return json({ error: 'Database cache not available' }, { status: 500 });
+		return json({ error: 'Database not found' } satisfies ErrorResponse, { status: 404 });
 	}
 
 	try {
@@ -40,9 +44,9 @@ export const GET: RequestHandler = async ({ url }) => {
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Export failed';
 		if (message.includes('not found')) {
-			return json({ error: message }, { status: 404 });
+			return json({ error: message } satisfies ErrorResponse, { status: 404 });
 		}
-		return json({ error: message }, { status: 400 });
+		return json({ error: message } satisfies ErrorResponse, { status: 400 });
 	}
 };
 
