@@ -173,12 +173,6 @@ components:
       $ref: './schemas/pcd.yaml#/ExportResponse'
     PcdErrorResponse:
       $ref: './schemas/pcd.yaml#/PcdErrorResponse'
-    BundledDependency:
-      $ref: './schemas/pcd.yaml#/BundledDependency'
-    ImportConflict:
-      $ref: './schemas/pcd.yaml#/ImportConflict'
-    ConflictResolution:
-      $ref: './schemas/pcd.yaml#/ConflictResolution'
     ImportRequest:
       $ref: './schemas/pcd.yaml#/ImportRequest'
     ImportResponse:

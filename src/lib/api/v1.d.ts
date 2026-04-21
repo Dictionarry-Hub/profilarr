@@ -1069,35 +1069,6 @@ export interface components {
 		PcdErrorResponse: {
 			error: string;
 		};
-		BundledDependency: {
-			/** @description The entity type of the dependency */
-			entityType: string;
-			/** @description The portable entity payload for the dependency */
-			data: {
-				name: string;
-			} & {
-				[key: string]: unknown;
-			};
-		};
-		ImportConflict: {
-			/** @description The entity type that conflicts */
-			entityType: string;
-			/** @description The name of the conflicting entity */
-			name: string;
-		};
-		ConflictResolution: {
-			/** @description The entity type being resolved */
-			entityType: string;
-			/** @description The original name of the conflicting entity */
-			originalName: string;
-			/**
-			 * @description How to resolve the conflict
-			 * @enum {string}
-			 */
-			action: 'skip' | 'rename';
-			/** @description The new name when action is rename */
-			newName?: string;
-		};
 		ImportRequest: {
 			/** @description The PCD database ID to import into */
 			databaseId: number;
