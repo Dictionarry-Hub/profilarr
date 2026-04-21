@@ -33,6 +33,8 @@ list:
           application/json:
             schema:
               $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
 
 detail:
   get:
@@ -68,9 +70,13 @@ detail:
           application/json:
             schema:
               $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Unauthorized
       '404':
         description: Announcement not found.
         content:
           application/json:
             schema:
               $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Announcement not found

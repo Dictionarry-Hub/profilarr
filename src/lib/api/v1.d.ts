@@ -2850,6 +2850,11 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
@@ -2882,6 +2887,11 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
+					/**
+					 * @example {
+					 *       "error": "Unauthorized"
+					 *     }
+					 */
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
@@ -2891,6 +2901,11 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
+					/**
+					 * @example {
+					 *       "error": "Announcement not found"
+					 *     }
+					 */
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};

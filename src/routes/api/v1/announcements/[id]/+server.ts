@@ -13,6 +13,7 @@ import { getDetail } from '$lib/server/announcements/index.ts';
 import type { AnnouncementRecord } from '$lib/server/announcements/types.ts';
 
 type AnnouncementDetail = components['schemas']['AnnouncementDetail'];
+type ErrorResponse = components['schemas']['ErrorResponse'];
 
 function toDetail(a: AnnouncementRecord): AnnouncementDetail {
 	return {
@@ -32,12 +33,12 @@ function toDetail(a: AnnouncementRecord): AnnouncementDetail {
 export const GET: RequestHandler = async ({ params }) => {
 	const id = params.id;
 	if (!id) {
-		return json({ error: 'id is required' }, { status: 400 });
+		return json({ error: 'id is required' } satisfies ErrorResponse, { status: 400 });
 	}
 
 	const record = await getDetail(id, { loadBody: true });
 	if (!record) {
-		return json({ error: 'Announcement not found' }, { status: 404 });
+		return json({ error: 'Announcement not found' } satisfies ErrorResponse, { status: 404 });
 	}
 
 	return json(toDetail(record));
