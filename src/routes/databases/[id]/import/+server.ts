@@ -18,9 +18,10 @@ import type {
 } from '$shared/pcd/portable.ts';
 import * as deserialize from '$pcd/entities/deserialize.ts';
 import { validatePortableData } from '$pcd/entities/validate.ts';
-import type { components } from '$api/v1';
 
-type ErrorResponse = components['schemas']['ErrorResponse'];
+interface ErrorResponse {
+	error: string;
+}
 
 const VALID_ENTITY_TYPES: ReadonlySet<string> = new Set(ENTITY_TYPES);
 const VALID_LAYERS: Set<string> = new Set(['user', 'base']);

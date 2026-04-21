@@ -43,10 +43,6 @@ paths:
     $ref: './paths/databases.yaml#/database'
   /databases/{id}/sync:
     $ref: './paths/databases.yaml#/database_sync'
-  /databases/{id}/export:
-    $ref: './paths/databases.yaml#/database_export'
-  /databases/{id}/import:
-    $ref: './paths/databases.yaml#/database_import'
   /health:
     $ref: './paths/system.yaml#/health'
   /status:
@@ -164,35 +160,6 @@ components:
       $ref: './schemas/arr.yaml#/SyncEntitySuccessResponse'
     SyncEntityCooldownResponse:
       $ref: './schemas/arr.yaml#/SyncEntityCooldownResponse'
-    # PCD
-    EntityType:
-      $ref: './schemas/pcd.yaml#/EntityType'
-    ExportResponse:
-      $ref: './schemas/pcd.yaml#/ExportResponse'
-    ImportRequest:
-      $ref: './schemas/pcd.yaml#/ImportRequest'
-    ImportResponse:
-      $ref: './schemas/pcd.yaml#/ImportResponse'
-    PortableDelayProfile:
-      $ref: './schemas/pcd.yaml#/PortableDelayProfile'
-    PortableRegularExpression:
-      $ref: './schemas/pcd.yaml#/PortableRegularExpression'
-    PortableCustomFormat:
-      $ref: './schemas/pcd.yaml#/PortableCustomFormat'
-    PortableCustomFormatTest:
-      $ref: './schemas/pcd.yaml#/PortableCustomFormatTest'
-    PortableCustomFormatScore:
-      $ref: './schemas/pcd.yaml#/PortableCustomFormatScore'
-    PortableQualityProfile:
-      $ref: './schemas/pcd.yaml#/PortableQualityProfile'
-    PortableRadarrNaming:
-      $ref: './schemas/pcd.yaml#/PortableRadarrNaming'
-    PortableSonarrNaming:
-      $ref: './schemas/pcd.yaml#/PortableSonarrNaming'
-    PortableMediaSettings:
-      $ref: './schemas/pcd.yaml#/PortableMediaSettings'
-    PortableQualityDefinitions:
-      $ref: './schemas/pcd.yaml#/PortableQualityDefinitions'
     # Arr
     ArrInstance:
       $ref: './schemas/arr.yaml#/ArrInstance'

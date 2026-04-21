@@ -5,9 +5,10 @@ import { ENTITY_TYPES } from '$shared/pcd/portable.ts';
 import type { EntityType } from '$shared/pcd/portable.ts';
 import type { PCDCache } from '$pcd/database/cache.ts';
 import * as serialize from '$pcd/entities/serialize.ts';
-import type { components } from '$api/v1';
 
-type ErrorResponse = components['schemas']['ErrorResponse'];
+interface ErrorResponse {
+	error: string;
+}
 
 const VALID_ENTITY_TYPES: ReadonlySet<string> = new Set(ENTITY_TYPES);
 

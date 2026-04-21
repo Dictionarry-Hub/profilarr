@@ -35,7 +35,7 @@
 				entityType: `${arr_type}_naming`,
 				name
 			});
-			const res = await fetch(`/api/v1/databases/${data.currentDatabase.id}/export?${params}`);
+			const res = await fetch(`/databases/${data.currentDatabase.id}/export?${params}`);
 			const json = await res.json();
 			if (!res.ok) {
 				alertStore.add('error', json.error || 'Export failed');

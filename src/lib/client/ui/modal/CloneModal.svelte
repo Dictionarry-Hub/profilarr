@@ -35,7 +35,7 @@
 				entityType,
 				name: sourceName
 			});
-			const exportRes = await fetch(`/api/v1/databases/${databaseId}/export?${params}`);
+			const exportRes = await fetch(`/databases/${databaseId}/export?${params}`);
 			const exportJson = await exportRes.json();
 			if (!exportRes.ok) {
 				alertStore.add('error', exportJson.error || 'Export failed');
@@ -44,7 +44,7 @@
 
 			// Rename and import
 			exportJson.data.name = newName.trim();
-			const importRes = await fetch(`/api/v1/databases/${databaseId}/import`, {
+			const importRes = await fetch(`/databases/${databaseId}/import`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
