@@ -318,5 +318,9 @@
 				</svelte:fragment>
 			</ExpandableTable>
 		{/key}
+	{:else}
+		<p class="py-4 text-sm text-neutral-500 dark:text-neutral-400">
+			No releases yet. Import from an Arr instance to get started.
+		</p>
 	{/if}
 </div>
