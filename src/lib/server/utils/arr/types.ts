@@ -583,9 +583,10 @@ export interface SonarrSeasonItem {
 }
 
 /**
- * Sonarr library item (series-level) with all computed fields for the UI
+ * Sonarr series (library-level) computed fields for the UI.
+ * Seasons are not inlined; fetch them via the /seasons endpoint.
  */
-export interface SonarrLibraryItem {
+export interface SonarrSeriesItem {
 	id: number;
 	tvdbId?: number;
 	imdbId?: string;
@@ -596,6 +597,7 @@ export interface SonarrLibraryItem {
 	qualityProfileName: string;
 	status?: string;
 	monitored: boolean;
+	monitoredState: 'monitored' | 'partial' | 'unmonitored';
 	seasonCount: number;
 	episodeCount: number;
 	episodeFileCount: number;
@@ -603,7 +605,6 @@ export interface SonarrLibraryItem {
 	sizeOnDisk: number;
 	percentOfEpisodes: number;
 	dateAdded?: string;
-	seasons: SonarrSeasonItem[];
 	isProfilarrProfile: boolean;
 	network?: string;
 	seriesType?: string;
@@ -615,6 +616,15 @@ export interface SonarrLibraryItem {
 	originalLanguage?: { id: number; name: string };
 	firstAired?: string;
 	lastAired?: string;
+}
+
+/**
+ * Full Sonarr library item with seasons inlined.
+ * Used server-side as the cached payload; the /series endpoint strips seasons
+ * before sending, and /seasons serves them from this cache.
+ */
+export interface SonarrLibraryItem extends SonarrSeriesItem {
+	seasons: SonarrSeasonItem[];
 }
 
 // =============================================================================

@@ -6,6 +6,7 @@ import type {
 	SonarrEpisodeFile,
 	SonarrEpisodeItem,
 	SonarrLibraryItem,
+	SonarrSeasonItem,
 	SonarrQueueItem,
 	ArrQualityProfile,
 	ArrTag,
@@ -92,6 +93,27 @@ export class SonarrClient extends BaseArrClient {
 			const profile = profileMap.get(series.qualityProfileId);
 			const profileName = profile?.name ?? 'Unknown';
 
+			const seasons: SonarrSeasonItem[] = series.seasons.map((s) => ({
+				seasonNumber: s.seasonNumber,
+				monitored: s.monitored,
+				episodeCount: s.statistics.episodeCount,
+				episodeFileCount: s.statistics.episodeFileCount,
+				totalEpisodeCount: s.statistics.totalEpisodeCount,
+				sizeOnDisk: s.statistics.sizeOnDisk,
+				percentOfEpisodes: s.statistics.percentOfEpisodes
+			}));
+
+			let monitoredState: 'monitored' | 'partial' | 'unmonitored';
+			if (!series.monitored) {
+				monitoredState = 'unmonitored';
+			} else {
+				const mainSeasons = seasons.filter((s) => s.seasonNumber !== 0);
+				monitoredState =
+					mainSeasons.length === 0 || mainSeasons.every((s) => s.monitored)
+						? 'monitored'
+						: 'partial';
+			}
+
 			return {
 				id: series.id,
 				tvdbId: series.tvdbId,
@@ -103,6 +125,7 @@ export class SonarrClient extends BaseArrClient {
 				qualityProfileName: profileName,
 				status: series.status,
 				monitored: series.monitored,
+				monitoredState,
 				seasonCount: series.statistics?.seasonCount ?? series.seasons.length,
 				episodeCount: series.statistics?.episodeCount ?? 0,
 				episodeFileCount: series.statistics?.episodeFileCount ?? 0,
@@ -110,15 +133,7 @@ export class SonarrClient extends BaseArrClient {
 				sizeOnDisk: series.statistics?.sizeOnDisk ?? 0,
 				percentOfEpisodes: series.statistics?.percentOfEpisodes ?? 0,
 				dateAdded: series.added,
-				seasons: series.seasons.map((s) => ({
-					seasonNumber: s.seasonNumber,
-					monitored: s.monitored,
-					episodeCount: s.statistics.episodeCount,
-					episodeFileCount: s.statistics.episodeFileCount,
-					totalEpisodeCount: s.statistics.totalEpisodeCount,
-					sizeOnDisk: s.statistics.sizeOnDisk,
-					percentOfEpisodes: s.statistics.percentOfEpisodes
-				})),
+				seasons,
 				isProfilarrProfile: profilarrProfileNames?.has(profileName) ?? false,
 				network: series.network,
 				seriesType: series.seriesType,

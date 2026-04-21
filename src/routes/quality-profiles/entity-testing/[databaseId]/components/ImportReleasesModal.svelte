@@ -124,20 +124,22 @@
 		libraryItems = [];
 		selectedItem = null;
 
+		const isSeries = entity?.type === 'series';
+		const resourcePath = isSeries ? 'series' : 'movies';
+
 		try {
-			const response = await fetch(`/api/v1/arr/library?instanceId=${selectedInstanceId}`);
+			const response = await fetch(`/arr/${selectedInstanceId}/library/${resourcePath}`);
 			const data = await response.json();
 
-			if (data.error) {
-				alertStore.add('error', data.error);
+			if (!response.ok || data.error) {
+				alertStore.add('error', data.error ?? 'Failed to load library');
 			} else {
 				libraryItems = (data.items || []).map((item: any) => ({
 					id: item.id,
 					title: item.title,
 					year: item.year,
 					tmdbId: item.tmdbId,
-					tvdbId: item.tvdbId,
-					seasons: item.seasons?.map((s: any) => (typeof s === 'number' ? s : s.seasonNumber))
+					tvdbId: item.tvdbId
 				}));
 			}
 		} catch (err) {
@@ -145,6 +147,30 @@
 		} finally {
 			loadingLibrary = false;
 		}
+	}
+
+	async function loadSeasonsForSelectedItem() {
+		if (!selectedInstanceId || !selectedItem || entity?.type !== 'series') return;
+		if (selectedItem.seasons !== undefined) return;
+
+		try {
+			const response = await fetch(
+				`/arr/${selectedInstanceId}/library/series/${selectedItem.id}/seasons`
+			);
+			const data = await response.json();
+			if (response.ok && !data.error) {
+				const seasonNumbers: number[] = (data.seasons || [])
+					.map((s: any) => s.seasonNumber)
+					.filter((n: number) => n !== undefined);
+				selectedItem = { ...selectedItem, seasons: seasonNumbers };
+			}
+		} catch {
+			// Silent failure; UI will show no seasons until selectable
+		}
+	}
+
+	$: if (selectedItem && entity?.type === 'series' && selectedItem.seasons === undefined) {
+		loadSeasonsForSelectedItem();
 	}
 
 	async function loadReleases() {

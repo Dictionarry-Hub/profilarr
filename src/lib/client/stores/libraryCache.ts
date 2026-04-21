@@ -4,13 +4,12 @@
  */
 
 import { writable, get } from 'svelte/store';
-import type { RadarrLibraryItem, SonarrLibraryItem } from '$utils/arr/types.ts';
+import type { RadarrLibraryItem, SonarrSeriesItem } from '$utils/arr/types.ts';
 
-type LibraryData = RadarrLibraryItem[] | SonarrLibraryItem[];
+type LibraryData = RadarrLibraryItem[] | SonarrSeriesItem[];
 
 interface LibraryCacheEntry {
 	data: LibraryData;
-	profilesByDatabase: { databaseId: number; databaseName: string; profiles: string[] }[];
 	fetchedAt: number;
 }
 
@@ -45,16 +44,11 @@ function createLibraryCacheStore() {
 		/**
 		 * Store library data for an instance
 		 */
-		set(
-			instanceId: number,
-			data: LibraryData,
-			profilesByDatabase: LibraryCacheEntry['profilesByDatabase']
-		): void {
+		set(instanceId: number, data: LibraryData): void {
 			update((state) => {
 				const newEntries = new Map(state.entries);
 				newEntries.set(instanceId, {
 					data,
-					profilesByDatabase,
 					fetchedAt: Date.now()
 				});
 				return { entries: newEntries };

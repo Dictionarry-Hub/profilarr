@@ -3,7 +3,7 @@
 	import { AlertTriangle, Film } from 'lucide-svelte';
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
-	import type { RadarrLibraryItem, SonarrLibraryItem } from '$utils/arr/types.ts';
+	import type { RadarrLibraryItem, SonarrSeriesItem } from '$utils/arr/types.ts';
 	import { libraryCache } from '$stores/libraryCache';
 	import { sortTitle } from '$shared/utils/sort.ts';
 	import { getPersistentSearchStore } from '$stores/search';
@@ -108,7 +108,7 @@
 		}
 	];
 
-	const sonarrFields: FilterFieldDef<SonarrLibraryItem>[] = [
+	const sonarrFields: FilterFieldDef<SonarrSeriesItem>[] = [
 		{
 			key: 'title',
 			label: 'Title',
@@ -205,9 +205,8 @@
 	// Library Data State
 	// ==========================================================================
 
-	let library: RadarrLibraryItem[] | SonarrLibraryItem[] = [];
+	let library: RadarrLibraryItem[] | SonarrSeriesItem[] = [];
 	let libraryError: string | null = null;
-	let profilesByDatabase: { databaseId: number; databaseName: string; profiles: string[] }[] = [];
 	let loading = true;
 	let refreshing = false;
 
@@ -233,25 +232,23 @@
 
 	async function fetchLibrary(force = false) {
 		const instanceId = data.instance.id;
+		const resourcePath = isRadarr ? 'movies' : 'series';
 
 		// Check client cache first (unless forcing refresh)
 		if (!force && libraryCache.has(instanceId)) {
 			const cached = libraryCache.get(instanceId)!;
 			library = cached.data;
-			profilesByDatabase = cached.profilesByDatabase;
 			libraryError = null;
 			loading = false;
 			return;
 		}
 
-		// Fetch from API
 		try {
 			if (force) {
-				// Clear server cache first
-				await fetch(`/api/v1/arr/library?instanceId=${instanceId}`, { method: 'DELETE' });
+				await fetch(`/arr/${instanceId}/library/refresh`, { method: 'POST' });
 			}
 
-			const response = await fetch(`/api/v1/arr/library?instanceId=${instanceId}`);
+			const response = await fetch(`/arr/${instanceId}/library/${resourcePath}`);
 			if (!response.ok) {
 				throw new Error(`Failed to fetch library: ${response.statusText}`);
 			}
@@ -259,10 +256,8 @@
 			const result = await response.json();
 			library = result.items;
 			libraryError = null;
-			profilesByDatabase = result.profilesByDatabase;
 
-			// Cache the result
-			libraryCache.set(instanceId, result.items, result.profilesByDatabase);
+			libraryCache.set(instanceId, result.items);
 		} catch (err) {
 			libraryError = err instanceof Error ? err.message : 'Failed to fetch library';
 		} finally {
@@ -555,7 +550,7 @@
 	// Sonarr Data
 	// ==========================================================================
 
-	$: sonarrLibrary = library as SonarrLibraryItem[];
+	$: sonarrLibrary = library as SonarrSeriesItem[];
 	$: filteredSeries = (() => {
 		if (!isSonarr) return [];
 		if (useSimpleMode) {

@@ -4,13 +4,13 @@
 	import Label from '$ui/label/Label.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import type { SonarrLibraryItem } from '$utils/arr/types.ts';
+	import type { SonarrSeriesItem } from '$utils/arr/types.ts';
 	import type { Column } from '$ui/table/types';
 	import { formatDate } from '$shared/utils/dates.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 
-	export let row: SonarrLibraryItem;
-	export let column: Column<SonarrLibraryItem>;
+	export let row: SonarrSeriesItem;
+	export let column: Column<SonarrSeriesItem>;
 
 	$: posterUrl = row.images?.find((i) => i.coverType === 'poster')?.remoteUrl;
 

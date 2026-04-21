@@ -24,35 +24,3 @@ export async function getProfilarrProfileNames(): Promise<Set<string>> {
 
 	return profileNames;
 }
-
-export interface ProfileByDatabase {
-	databaseId: number;
-	databaseName: string;
-	profiles: string[];
-}
-
-/**
- * Get profiles grouped by database
- */
-export async function getProfilesByDatabase(): Promise<ProfileByDatabase[]> {
-	const profilesByDatabase: ProfileByDatabase[] = [];
-	const databases = pcdManager.getAll().filter((db) => db.enabled);
-
-	for (const db of databases) {
-		const dbCache = pcdManager.getCache(db.id);
-		if (!dbCache?.isBuilt()) continue;
-
-		try {
-			const names = await qualityProfileQueries.names(dbCache);
-			profilesByDatabase.push({
-				databaseId: db.id,
-				databaseName: db.name,
-				profiles: names
-			});
-		} catch {
-			// Skip if cache query fails
-		}
-	}
-
-	return profilesByDatabase;
-}

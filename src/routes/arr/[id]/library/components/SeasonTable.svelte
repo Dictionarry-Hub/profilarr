@@ -7,6 +7,17 @@
 
 	export let seasons: SonarrSeasonItem[];
 	export let episodesBySeasonNumber: Map<number, SonarrEpisodeItem[]>;
+	export let loadingSeasons: Set<number> = new Set();
+	export let onExpandSeason: ((seasonNumber: number) => void) | undefined = undefined;
+
+	let expandedRows: Set<string | number> = new Set();
+
+	$: if (onExpandSeason && expandedRows.size > 0) {
+		for (const id of expandedRows) {
+			const seasonNumber = typeof id === 'string' ? parseInt(id) : id;
+			onExpandSeason(seasonNumber);
+		}
+	}
 
 	function formatSize(bytes: number): string {
 		if (!bytes) return '-';
@@ -56,6 +67,7 @@
 	chevronPosition="right"
 	emptyMessage="No seasons"
 	disableExpandWhen={(row) => row.episodeFileCount === 0}
+	bind:expandedRows
 >
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'seasonNumber'}
@@ -77,9 +89,18 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="expanded" let:row>
-		{@const seasonEpisodes = episodesBySeasonNumber.get(row.seasonNumber) ?? []}
-		<div class="p-4">
-			<EpisodeTable episodes={seasonEpisodes} />
-		</div>
+		{#if loadingSeasons.has(row.seasonNumber)}
+			<div class="flex items-center gap-2 p-4 text-sm text-neutral-500 dark:text-neutral-400">
+				<div
+					class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
+				></div>
+				Loading episodes...
+			</div>
+		{:else}
+			{@const seasonEpisodes = episodesBySeasonNumber.get(row.seasonNumber) ?? []}
+			<div class="p-4">
+				<EpisodeTable episodes={seasonEpisodes} />
+			</div>
+		{/if}
 	</svelte:fragment>
 </ExpandableTable>

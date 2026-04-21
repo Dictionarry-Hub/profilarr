@@ -10,22 +10,15 @@
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import DateTime from '$ui/datetime/DateTime.svelte';
-	import type { SonarrLibraryItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
+	import type { SonarrSeriesItem, SonarrSeasonItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
 
-	export let series: SonarrLibraryItem;
+	export let series: SonarrSeriesItem;
 	export let baseUrl: string = '';
 	export let instanceId: number;
 	export let visibleFields: Set<string> = new Set();
 
 	$: posterUrl = series.images?.find((i) => i.coverType === 'poster')?.remoteUrl;
-
-	$: monitoredState = (() => {
-		if (!series.monitored) return 'unmonitored';
-		const mainSeasons = (series.seasons ?? []).filter((s) => s.seasonNumber !== 0);
-		if (mainSeasons.length === 0) return 'monitored';
-		const allMonitored = mainSeasons.every((s) => s.monitored);
-		return allMonitored ? 'monitored' : 'partial';
-	})();
+	$: monitoredState = series.monitoredState;
 
 	$: slug =
 		series.titleSlug ??
@@ -44,31 +37,58 @@
 
 	// Episode detail modal
 	let detailOpen = false;
-	let episodes: SonarrEpisodeItem[] = [];
-	let episodesLoading = false;
-	let episodesLoaded = false;
+	let seasons: SonarrSeasonItem[] = [];
+	let episodesBySeason: Map<number, SonarrEpisodeItem[]> = new Map();
+	let episodesLoading: Set<number> = new Set();
+	let seasonsLoading = false;
+	let seasonsLoaded = false;
 	let seasonExpandedRows: Set<string | number> = new Set();
 
-	async function openDetail() {
-		detailOpen = true;
-		if (episodesLoaded) return;
-		episodesLoading = true;
+	async function loadSeasonEpisodes(seasonNumber: number) {
+		if (episodesBySeason.has(seasonNumber) || episodesLoading.has(seasonNumber)) return;
+		episodesLoading.add(seasonNumber);
+		episodesLoading = episodesLoading;
 		try {
 			const response = await fetch(
-				`/api/v1/arr/library/episodes?instanceId=${instanceId}&seriesId=${series.id}`
+				`/arr/${instanceId}/library/series/${series.id}/seasons/${seasonNumber}/episodes`
 			);
 			if (!response.ok) throw new Error('Failed to fetch episodes');
 			const result = await response.json();
-			episodes = result.episodes;
-			episodesLoaded = true;
-			// Expand all seasons except specials by default
-			const seasonNumbers = new Set(episodes.map((ep) => ep.seasonNumber));
-			seasonNumbers.delete(0);
-			seasonExpandedRows = seasonNumbers;
+			episodesBySeason.set(seasonNumber, result.episodes);
+			episodesBySeason = episodesBySeason;
 		} catch (err) {
-			console.error(`Failed to load episodes for series ${series.id}:`, err);
+			console.error(`Failed to load episodes for series ${series.id} season ${seasonNumber}:`, err);
 		} finally {
-			episodesLoading = false;
+			episodesLoading.delete(seasonNumber);
+			episodesLoading = episodesLoading;
+		}
+	}
+
+	async function openDetail() {
+		detailOpen = true;
+		if (seasonsLoaded) return;
+		seasonsLoading = true;
+		try {
+			const response = await fetch(`/arr/${instanceId}/library/series/${series.id}/seasons`);
+			if (!response.ok) throw new Error('Failed to fetch seasons');
+			const result = await response.json();
+			seasons = result.seasons;
+			seasonsLoaded = true;
+
+			const expandable = seasons.filter((s) => s.seasonNumber !== 0 && s.episodeFileCount > 0);
+			seasonExpandedRows = new Set(expandable.map((s) => s.seasonNumber));
+			await Promise.all(expandable.map((s) => loadSeasonEpisodes(s.seasonNumber)));
+		} catch (err) {
+			console.error(`Failed to load seasons for series ${series.id}:`, err);
+		} finally {
+			seasonsLoading = false;
+		}
+	}
+
+	$: if (seasonsLoaded) {
+		for (const id of seasonExpandedRows) {
+			const seasonNumber = typeof id === 'string' ? parseInt(id) : id;
+			loadSeasonEpisodes(seasonNumber);
 		}
 	}
 
@@ -77,26 +97,21 @@
 		label: string;
 		episodeCount: number;
 		fileCount: number;
-		episodes: SonarrEpisodeItem[];
 	}
 
-	$: seasonRows = (() => {
-		const map = new Map<number, SonarrEpisodeItem[]>();
-		for (const ep of episodes) {
-			const existing = map.get(ep.seasonNumber) ?? [];
-			existing.push(ep);
-			map.set(ep.seasonNumber, existing);
-		}
-		return [...map.entries()]
-			.sort((a, b) => (a[0] === 0 ? 1 : b[0] === 0 ? -1 : a[0] - b[0]))
-			.map(([num, eps]) => ({
-				seasonNumber: num,
-				label: num === 0 ? 'Specials' : `Season ${num}`,
-				episodeCount: eps.length,
-				fileCount: eps.filter((e) => e.hasFile).length,
-				episodes: eps
-			}));
-	})();
+	$: seasonRows = seasons
+		.filter((s) => s.totalEpisodeCount > 0)
+		.sort((a, b) =>
+			a.seasonNumber === 0 ? 1 : b.seasonNumber === 0 ? -1 : a.seasonNumber - b.seasonNumber
+		)
+		.map(
+			(s): SeasonRow => ({
+				seasonNumber: s.seasonNumber,
+				label: s.seasonNumber === 0 ? 'Specials' : `Season ${s.seasonNumber}`,
+				episodeCount: s.episodeCount,
+				fileCount: s.episodeFileCount
+			})
+		);
 
 	const seasonColumns = [
 		{ key: 'label', header: 'Season', align: 'left' as const, sortable: false },
@@ -235,12 +250,12 @@
 </div>
 
 <InfoModal bind:open={detailOpen} header={series.title} size="2xl">
-	{#if episodesLoading}
+	{#if seasonsLoading}
 		<div class="flex items-center gap-2 py-4 text-sm text-neutral-500 dark:text-neutral-400">
 			<div
 				class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
 			></div>
-			Loading episodes...
+			Loading seasons...
 		</div>
 	{:else if seasonRows.length > 0}
 		<div class="episode-table-wrapper w-full">
@@ -270,51 +285,63 @@
 				</svelte:fragment>
 
 				<svelte:fragment slot="expanded" let:row>
-					<div class="divide-y divide-neutral-200 overflow-hidden dark:divide-neutral-700/40">
-						{#each row.episodes as ep}
-							<div class="space-y-2 px-3 py-3">
-								<!-- Title + Progress -->
-								<div class="flex items-center justify-between gap-2">
-									<span class="truncate text-sm text-neutral-900 dark:text-neutral-100">
-										{ep.episodeNumber}. {ep.title}
-									</span>
-									{#if ep.hasFile}
-										<div class="flex-shrink-0">
-											<ProgressIndicator
-												current={ep.customFormatScore}
-												target={ep.cutoffScore}
-												met={ep.cutoffMet}
-												mode="inline"
-											/>
+					{#if episodesLoading.has(row.seasonNumber)}
+						<div
+							class="flex items-center gap-2 px-3 py-3 text-sm text-neutral-500 dark:text-neutral-400"
+						>
+							<div
+								class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
+							></div>
+							Loading episodes...
+						</div>
+					{:else}
+						{@const seasonEpisodes = episodesBySeason.get(row.seasonNumber) ?? []}
+						<div class="divide-y divide-neutral-200 overflow-hidden dark:divide-neutral-700/40">
+							{#each seasonEpisodes as ep}
+								<div class="space-y-2 px-3 py-3">
+									<!-- Title + Progress -->
+									<div class="flex items-center justify-between gap-2">
+										<span class="truncate text-sm text-neutral-900 dark:text-neutral-100">
+											{ep.episodeNumber}. {ep.title}
+										</span>
+										{#if ep.hasFile}
+											<div class="flex-shrink-0">
+												<ProgressIndicator
+													current={ep.customFormatScore}
+													target={ep.cutoffScore}
+													met={ep.cutoffMet}
+													mode="inline"
+												/>
+											</div>
+										{:else}
+											<span class="flex-shrink-0 text-xs text-neutral-400 dark:text-neutral-500"
+												>Missing</span
+											>
+										{/if}
+									</div>
+									<!-- Filename -->
+									{#if ep.fileName}
+										<div class="font-mono text-xs break-all text-neutral-500 dark:text-neutral-400">
+											{ep.fileName}
 										</div>
-									{:else}
-										<span class="flex-shrink-0 text-xs text-neutral-400 dark:text-neutral-500"
-											>Missing</span
-										>
+									{/if}
+									<!-- Custom Formats -->
+									{#if ep.hasFile && ep.scoreBreakdown.length > 0}
+										<div class="flex flex-wrap gap-1">
+											{#each [...ep.scoreBreakdown].sort((a, b) => b.score - a.score) as item}
+												<CustomFormatBadge name={item.name} score={item.score} />
+											{/each}
+										</div>
 									{/if}
 								</div>
-								<!-- Filename -->
-								{#if ep.fileName}
-									<div class="font-mono text-xs break-all text-neutral-500 dark:text-neutral-400">
-										{ep.fileName}
-									</div>
-								{/if}
-								<!-- Custom Formats -->
-								{#if ep.hasFile && ep.scoreBreakdown.length > 0}
-									<div class="flex flex-wrap gap-1">
-										{#each [...ep.scoreBreakdown].sort((a, b) => b.score - a.score) as item}
-											<CustomFormatBadge name={item.name} score={item.score} />
-										{/each}
-									</div>
-								{/if}
-							</div>
-						{/each}
-					</div>
+							{/each}
+						</div>
+					{/if}
 				</svelte:fragment>
 			</ExpandableTable>
 		</div>
 	{:else}
-		<span class="text-sm text-neutral-500 dark:text-neutral-400">No episodes found</span>
+		<span class="text-sm text-neutral-500 dark:text-neutral-400">No seasons found</span>
 	{/if}
 </InfoModal>
 

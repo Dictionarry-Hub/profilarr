@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Column } from '$ui/table/types';
-	import type { SonarrLibraryItem } from '$utils/arr/types.ts';
+	import type { SonarrSeriesItem } from '$utils/arr/types.ts';
 
-	export let column: Column<SonarrLibraryItem>;
+	export let column: Column<SonarrSeriesItem>;
 
 	const widths = ['w-24', 'w-32', 'w-40', 'w-28', 'w-36'];
 	const randomWidth = () => widths[Math.floor(Math.random() * widths.length)];
