@@ -305,35 +305,6 @@ export interface paths {
 		patch: operations['updateBackupSettings'];
 		trace?: never;
 	};
-	'/arr/sync-entity': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * Sync a single entity to an Arr instance
-		 * @description Pushes a single entity to an Arr instance. Runs inline and returns when complete.
-		 *
-		 *     Entity types are grouped into sync sections that share cooldown and status tracking:
-		 *       - **qualityProfiles**: qualityProfile, customFormat, regularExpression
-		 *       - **delayProfiles**: delayProfile
-		 *       - **mediaManagement**: naming, qualityDefinitions, mediaSettings
-		 *
-		 *     The section is derived automatically from the entity type. A 5-second cooldown
-		 *     is enforced per section per instance — entity types within the same section share
-		 *     the cooldown. Returns 409 if a sync is already in progress or the cooldown is active.
-		 */
-		post: operations['syncEntity'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
 	'/announcements': {
 		parameters: {
 			query?: never;
@@ -610,36 +581,6 @@ export interface components {
 			/** @description Score assigned by the quality profile */
 			score: number;
 		};
-		SyncEntityRequest: {
-			/** @description Arr instance ID */
-			instanceId: number;
-			/** @description PCD database ID */
-			databaseId: number;
-			/** @description Name of the entity to sync */
-			entityName: string;
-			/**
-			 * @description Type of entity being synced. Determines which sync function runs and which cooldown group applies (qualityProfiles, delayProfiles, or mediaManagement).
-			 * @enum {string}
-			 */
-			entityType:
-				| 'qualityProfile'
-				| 'customFormat'
-				| 'regularExpression'
-				| 'delayProfile'
-				| 'naming'
-				| 'qualityDefinitions'
-				| 'mediaSettings';
-		};
-		SyncEntitySuccessResponse: {
-			/** @enum {boolean} */
-			success: true;
-		};
-		SyncEntityCooldownResponse: {
-			/** @description Cooldown or in-progress message */
-			error: string;
-			/** @description Seconds until cooldown expires */
-			retryAfter?: number;
-		};
 		ArrInstance: {
 			/** @description Instance ID */
 			id: number;
@@ -865,10 +806,6 @@ export interface components {
 		SuccessResponse: {
 			/** @example true */
 			success: boolean;
-		};
-		arr_ErrorResponse: {
-			/** @description Error message */
-			error: string;
 		};
 	};
 	responses: never;
@@ -1861,66 +1798,6 @@ export interface operations {
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
-				};
-			};
-		};
-	};
-	syncEntity: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['SyncEntityRequest'];
-			};
-		};
-		responses: {
-			/** @description Entity synced successfully */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['SyncEntitySuccessResponse'];
-				};
-			};
-			/** @description Invalid request parameters */
-			400: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['arr_ErrorResponse'];
-				};
-			};
-			/** @description Instance not found */
-			404: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['arr_ErrorResponse'];
-				};
-			};
-			/** @description Cooldown active or sync in progress */
-			409: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['SyncEntityCooldownResponse'];
-				};
-			};
-			/** @description Sync failed */
-			500: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['arr_ErrorResponse'];
 				};
 			};
 		};

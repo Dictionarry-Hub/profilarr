@@ -1,6 +1,5 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import type { components } from '$api/v1.d.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import {
@@ -14,10 +13,36 @@ import {
 } from '$lib/server/sync/entitySync.ts';
 import { logger } from '$logger/logger.ts';
 
-type SyncEntityRequest = components['schemas']['SyncEntityRequest'];
-type EntityType = NonNullable<SyncEntityRequest['entityType']>;
+/**
+ * POST /arr/{id}/resync
+ *
+ * Page-local: pushes a single PCD entity to a specific Arr instance, synchronously.
+ *
+ * Used only by SyncPromptModal after a user edits and saves an entity.
+ *
+ * Does:
+ *   - Create or update the entity on the Arr (one-way: PCD → Arr).
+ *   - Enforce a 5s cooldown per (instance, section), where sections group related
+ *     entity types (qualityProfiles, delayProfiles, mediaManagement).
+ *   - Return 409 with retryAfter if the cooldown is active, or 409 if a sync is
+ *     already in progress for the section.
+ *
+ * Does NOT:
+ *   - Sync multiple entities. One entity per call.
+ *   - Queue as a background job. Runs inline; the caller waits.
+ *   - Delete Arr entities missing from the PCD. Push-only; no reconciliation.
+ *   - Sync Arr → PCD. Direction is PCD → Arr only.
+ *   - Validate entity changes or mediate conflicts. The caller is trusted.
+ */
 
-const COOLDOWN_MS = 5_000;
+type EntityType =
+	| 'qualityProfile'
+	| 'customFormat'
+	| 'regularExpression'
+	| 'delayProfile'
+	| 'naming'
+	| 'qualityDefinitions'
+	| 'mediaSettings';
 
 type SyncSection = 'qualityProfiles' | 'delayProfiles' | 'mediaManagement';
 
@@ -31,22 +56,22 @@ const ENTITY_TYPE_TO_SECTION: Record<EntityType, SyncSection> = {
 	mediaSettings: 'mediaManagement'
 };
 
-/**
- * POST /api/v1/arr/sync-entity
- *
- * Targeted entity sync — pushes a single entity to an arr instance.
- * Runs inline (no job queue) and returns when done.
- *
- * Body: { instanceId, databaseId, entityName, entityType }
- * Returns: { success: true } or { error: '...' }
- */
-export const POST: RequestHandler = async ({ request }) => {
-	const body = (await request.json()) as SyncEntityRequest;
-	const { instanceId, databaseId, entityName, entityType } = body;
+const COOLDOWN_MS = 5_000;
 
-	if (!instanceId || typeof instanceId !== 'number') {
-		return json({ error: 'instanceId is required' }, { status: 400 });
+interface ResyncRequest {
+	databaseId: number;
+	entityName: string;
+	entityType: EntityType;
+}
+
+export const POST: RequestHandler = async ({ params, request }) => {
+	const instanceId = parseInt(params.id ?? '', 10);
+	if (!Number.isFinite(instanceId)) {
+		return json({ error: 'Invalid instance ID' }, { status: 400 });
 	}
+
+	const body = (await request.json()) as ResyncRequest;
+	const { databaseId, entityName, entityType } = body;
 
 	if (!entityType || !ENTITY_TYPE_TO_SECTION[entityType]) {
 		return json(
@@ -54,11 +79,9 @@ export const POST: RequestHandler = async ({ request }) => {
 			{ status: 400 }
 		);
 	}
-
 	if (!databaseId || typeof databaseId !== 'number') {
 		return json({ error: 'databaseId is required' }, { status: 400 });
 	}
-
 	if (!entityName || typeof entityName !== 'string') {
 		return json({ error: 'entityName is required' }, { status: 400 });
 	}
@@ -70,7 +93,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const section = ENTITY_TYPE_TO_SECTION[entityType];
 
-	// Check cooldown and in-progress status
 	const status = arrSyncQueries.getSectionSyncStatus(instanceId, section);
 	if (status) {
 		if (status.sync_status === 'pending' || status.sync_status === 'in_progress') {
@@ -119,15 +141,12 @@ export const POST: RequestHandler = async ({ request }) => {
 			case 'mediaSettings':
 				result = await syncMediaSettings(instanceId, databaseId, entityName);
 				break;
-			default:
-				return json({ error: `Unknown entity type: ${entityType}` }, { status: 400 });
 		}
 
 		if (result.success) {
 			return json({ success: true });
-		} else {
-			return json({ error: result.error ?? 'Sync failed' }, { status: 500 });
 		}
+		return json({ error: result.error ?? 'Sync failed' }, { status: 500 });
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Sync failed';
 		return json({ error: message }, { status: 500 });
