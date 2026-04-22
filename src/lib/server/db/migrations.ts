@@ -63,6 +63,7 @@ import { migration as migration058 } from './migrations/058_add_onboarding_shown
 import { migration as migration059 } from './migrations/059_add_external_url_to_arr_instances.ts';
 import { migration as migration060 } from './migrations/060_drop_app_info.ts';
 import { migration as migration061 } from './migrations/061_create_announcements.ts';
+import { migration as migration062 } from './migrations/062_drop_onboarding_shown.ts';
 
 export interface Migration {
 	version: number;
@@ -344,7 +345,8 @@ export function loadMigrations(): Migration[] {
 		migration058,
 		migration059,
 		migration060,
-		migration061
+		migration061,
+		migration062
 	];
 
 	// Sort by version number

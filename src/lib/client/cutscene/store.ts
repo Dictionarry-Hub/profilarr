@@ -37,7 +37,6 @@ function clearState(): void {
 
 function createCutsceneStore() {
 	const state = writable<CutsceneState>(loadState());
-	const onboardingShown = writable<boolean>(true);
 	const justCompleted = writable<boolean>(false);
 
 	const currentStep = derived(state, ($state) => {
@@ -52,14 +51,7 @@ function createCutsceneStore() {
 		return STAGES[$state.stageId] ?? null;
 	});
 
-	function init(shown: boolean): void {
-		onboardingShown.set(shown);
-		if (!shown) {
-			// Fresh user, clear any stale localStorage state
-			clearState();
-			state.set(DEFAULT_STATE);
-			return;
-		}
+	function init(): void {
 		// Restore any in-progress state from localStorage
 		const restored = loadState();
 		if (restored.active) {
@@ -128,15 +120,6 @@ function createCutsceneStore() {
 		});
 	}
 
-	async function dismiss(): Promise<void> {
-		onboardingShown.set(true);
-		try {
-			await fetch('/api/v1/cutscene', { method: 'POST' });
-		} catch {
-			// Best effort
-		}
-	}
-
 	function cancel(): void {
 		const current = loadState();
 		clearState();
@@ -159,14 +142,12 @@ function createCutsceneStore() {
 		subscribe: state.subscribe,
 		currentStep,
 		currentStage,
-		onboardingShown: { subscribe: onboardingShown.subscribe },
 		justCompleted: { subscribe: justCompleted.subscribe },
 		init,
 		startStage,
 		advance,
 		goBack,
 		cancel,
-		dismiss,
 		dismissCompleted,
 		reset
 	};

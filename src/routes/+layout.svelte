@@ -42,7 +42,7 @@
 	}
 
 	onMount(() => {
-		if (!isAuthPage && cutsceneEnabled) cutscene.init(data.onboardingShown);
+		if (!isAuthPage && cutsceneEnabled) cutscene.init();
 	});
 </script>
 
