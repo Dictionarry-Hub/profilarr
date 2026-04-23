@@ -29,7 +29,7 @@
 		"openapi-typescript": "^7.13.0",
 		"prettier": "3.8.3",
 		"prettier-plugin-svelte": "^3.5.1",
-		"prettier-plugin-tailwindcss": "^0.7.2",
+		"prettier-plugin-tailwindcss": "^0.7.3",
 		"svelte": "^5.55.4",
 		"svelte-check": "^4.4.6",
 		"tailwindcss": "^4.1.13",
