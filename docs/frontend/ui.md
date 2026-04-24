@@ -445,7 +445,7 @@ An add-entity modal that contains a `SearchDropdown` for picking between
 existing entities is at
 `src/routes/quality-profiles/entity-testing/[databaseId]/components/AddEntityModal.svelte`.
 
-#### DirtyModal, InfoModal, ImportModal, CloneModal, SyncPromptModal
+#### DirtyModal, InfoModal, CloneModal, SyncPromptModal
 
 Pre-composed modals for recurring flows:
 
@@ -454,9 +454,8 @@ Pre-composed modals for recurring flows:
   [`dirty.md`](./dirty.md) for details.
 - **`InfoModal.svelte`** is a single-action alert ("OK") for success and
   info messages.
-- **`ImportModal.svelte`**, **`CloneModal.svelte`**,
-  **`SyncPromptModal.svelte`** are specialized wrappers for those specific
-  flows (DB import, entity clone, sync prompt).
+- **`CloneModal.svelte`**, **`SyncPromptModal.svelte`** are specialized
+  wrappers for those specific flows (entity clone, sync prompt).
 
 ### Data Display
 

@@ -3,7 +3,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import type { Column, SortState } from '$ui/table/types';
-	import type { SonarrLibraryItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
+	import type { SonarrSeriesItem, SonarrSeasonItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
 	import { sortTitle } from '$shared/utils/sort.ts';
 
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
@@ -11,7 +11,7 @@
 	import SeriesRowSkeleton from './SeriesRowSkeleton.svelte';
 	import SeasonTable from './SeasonTable.svelte';
 
-	export let data: SonarrLibraryItem[];
+	export let data: SonarrSeriesItem[];
 	export let loading = false;
 	export let baseUrl = '';
 	export let expandAll = false;
@@ -22,7 +22,7 @@
 	const TOGGLEABLE_COLUMNS = ['episodes', 'sizeOnDisk', 'status', 'dateAdded'] as const;
 	type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
 
-	const allColumns: Column<SonarrLibraryItem>[] = [
+	const allColumns: Column<SonarrSeriesItem>[] = [
 		{
 			key: 'title',
 			header: 'Title',
@@ -70,13 +70,14 @@
 
 	const defaultSort: SortState = { key: 'title', direction: 'asc' };
 
-	const skeletonData: SonarrLibraryItem[] = Array.from({ length: 12 }, (_, i) => ({
+	const skeletonData: SonarrSeriesItem[] = Array.from({ length: 12 }, (_, i) => ({
 		id: i,
 		title: '',
 		year: 0,
 		qualityProfileId: 0,
 		qualityProfileName: '',
 		monitored: true,
+		monitoredState: 'monitored',
 		seasonCount: 0,
 		episodeCount: 0,
 		episodeFileCount: 0,
@@ -84,52 +85,86 @@
 		sizeOnDisk: 0,
 		percentOfEpisodes: 0,
 		dateAdded: '',
-		seasons: [],
 		isProfilarrProfile: false
-	})) as unknown as SonarrLibraryItem[];
+	})) as unknown as SonarrSeriesItem[];
 
 	// ==========================================================================
-	// Episode Lazy Loading
+	// Two-stage Lazy Loading (seasons → episodes)
 	// ==========================================================================
 
-	let episodeCache: Map<number, SonarrEpisodeItem[]> = new Map();
-	let episodeLoadingSet: Set<number> = new Set();
+	let seasonsCache: Map<number, SonarrSeasonItem[]> = new Map();
+	let seasonsLoadingSet: Set<number> = new Set();
+	let episodeCache: Map<string, SonarrEpisodeItem[]> = new Map();
+	let episodeLoadingSet: Set<string> = new Set();
 
-	async function loadEpisodes(seriesId: number) {
-		if (episodeCache.has(seriesId) || episodeLoadingSet.has(seriesId)) return;
+	const episodeKey = (seriesId: number, seasonNumber: number) => `${seriesId}:${seasonNumber}`;
 
-		episodeLoadingSet.add(seriesId);
+	async function loadSeasons(seriesId: number) {
+		if (seasonsCache.has(seriesId) || seasonsLoadingSet.has(seriesId)) return;
+
+		seasonsLoadingSet.add(seriesId);
+		seasonsLoadingSet = seasonsLoadingSet;
+
+		try {
+			const response = await fetch(`/arr/${instanceId}/library/series/${seriesId}/seasons`);
+			if (!response.ok) throw new Error('Failed to fetch seasons');
+			const result = await response.json();
+			seasonsCache.set(seriesId, result.seasons);
+			seasonsCache = seasonsCache;
+		} catch (err) {
+			console.error(`Failed to load seasons for series ${seriesId}:`, err);
+		} finally {
+			seasonsLoadingSet.delete(seriesId);
+			seasonsLoadingSet = seasonsLoadingSet;
+		}
+	}
+
+	async function loadSeasonEpisodes(seriesId: number, seasonNumber: number) {
+		const key = episodeKey(seriesId, seasonNumber);
+		if (episodeCache.has(key) || episodeLoadingSet.has(key)) return;
+
+		episodeLoadingSet.add(key);
 		episodeLoadingSet = episodeLoadingSet;
 
 		try {
 			const response = await fetch(
-				`/api/v1/arr/library/episodes?instanceId=${instanceId}&seriesId=${seriesId}`
+				`/arr/${instanceId}/library/series/${seriesId}/seasons/${seasonNumber}/episodes`
 			);
 			if (!response.ok) throw new Error('Failed to fetch episodes');
 			const result = await response.json();
-			episodeCache.set(seriesId, result.episodes);
+			episodeCache.set(key, result.episodes);
 			episodeCache = episodeCache;
 		} catch (err) {
-			console.error(`Failed to load episodes for series ${seriesId}:`, err);
+			console.error(`Failed to load episodes for series ${seriesId} season ${seasonNumber}:`, err);
 		} finally {
-			episodeLoadingSet.delete(seriesId);
+			episodeLoadingSet.delete(key);
 			episodeLoadingSet = episodeLoadingSet;
 		}
 	}
 
-	$: episodesBySeriesAndSeason = (() => {
-		const result = new Map<number, Map<number, SonarrEpisodeItem[]>>();
-		for (const [seriesId, episodes] of episodeCache) {
-			const seasonMap = new Map<number, SonarrEpisodeItem[]>();
-			for (const ep of episodes) {
-				const existing = seasonMap.get(ep.seasonNumber) ?? [];
-				existing.push(ep);
-				seasonMap.set(ep.seasonNumber, existing);
-			}
-			result.set(seriesId, seasonMap);
+	function episodesForSeries(
+		cache: Map<string, SonarrEpisodeItem[]>,
+		seriesId: number
+	): Map<number, SonarrEpisodeItem[]> {
+		const result = new Map<number, SonarrEpisodeItem[]>();
+		const prefix = `${seriesId}:`;
+		for (const [key, episodes] of cache) {
+			if (!key.startsWith(prefix)) continue;
+			const seasonNumber = Number(key.slice(prefix.length));
+			result.set(seasonNumber, episodes);
 		}
 		return result;
-	})();
+	}
+
+	function episodeLoadingForSeries(loadingSet: Set<string>, seriesId: number): Set<number> {
+		const result = new Set<number>();
+		const prefix = `${seriesId}:`;
+		for (const key of loadingSet) {
+			if (!key.startsWith(prefix)) continue;
+			result.add(Number(key.slice(prefix.length)));
+		}
+		return result;
+	}
 
 	let expandedRows: Set<string | number> = new Set();
 
@@ -142,11 +177,13 @@
 	$: if (expandedRows.size > 0) {
 		for (const id of expandedRows) {
 			const numId = typeof id === 'string' ? parseInt(id) : id;
-			loadEpisodes(numId);
+			loadSeasons(numId);
 		}
 	}
 
 	export function resetEpisodeCache() {
+		seasonsCache = new Map();
+		seasonsLoadingSet = new Set();
 		episodeCache = new Map();
 		episodeLoadingSet = new Set();
 	}
@@ -201,19 +238,26 @@
 	<svelte:fragment slot="expanded" let:row>
 		{#if !loading}
 			{@const seriesId = row.id}
-			{@const isEpisodeLoading = episodeLoadingSet.has(seriesId)}
-			{@const episodesBySeasonNumber = episodesBySeriesAndSeason.get(seriesId) ?? new Map()}
+			{@const isSeasonsLoading = seasonsLoadingSet.has(seriesId)}
+			{@const seasons = seasonsCache.get(seriesId) ?? []}
+			{@const episodesBySeasonNumber = episodesForSeries(episodeCache, seriesId)}
+			{@const loadingSeasons = episodeLoadingForSeries(episodeLoadingSet, seriesId)}
 
-			{#if isEpisodeLoading}
+			{#if isSeasonsLoading}
 				<div class="flex items-center gap-2 p-4 text-sm text-neutral-500 dark:text-neutral-400">
 					<div
 						class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
 					></div>
-					Loading episodes...
+					Loading seasons...
 				</div>
 			{:else}
 				<div class="p-4">
-					<SeasonTable seasons={row.seasons} {episodesBySeasonNumber} />
+					<SeasonTable
+						{seasons}
+						{episodesBySeasonNumber}
+						{loadingSeasons}
+						onExpandSeason={(seasonNumber) => loadSeasonEpisodes(seriesId, seasonNumber)}
+					/>
 				</div>
 			{/if}
 		{/if}

@@ -6,9 +6,7 @@
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import Score from '$ui/arr/Score.svelte';
 	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
-	import type { components } from '$api/v1.d.ts';
-
-	type ReleaseEvaluation = components['schemas']['ReleaseEvaluation'];
+	import type { ReleaseEvaluation } from '$shared/pcd/display.ts';
 
 	interface CfScore {
 		radarr: number | null;
@@ -70,11 +68,10 @@
 		error = null;
 
 		try {
-			const response = await fetch('/api/v1/entity-testing/evaluate', {
+			const response = await fetch(`/quality-profiles/entity-testing/${databaseId}/evaluate`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					databaseId,
 					releases: [{ id: -1, title: trimmed, type: 'movie' }]
 				})
 			});

@@ -41,11 +41,10 @@
 		const { name } = event.detail;
 		try {
 			const params = new URLSearchParams({
-				databaseId: String(data.currentDatabase.id),
 				entityType: 'regular_expression',
 				name
 			});
-			const res = await fetch(`/api/v1/pcd/export?${params}`);
+			const res = await fetch(`/databases/${data.currentDatabase.id}/export?${params}`);
 			const json = await res.json();
 			if (!res.ok) {
 				alertStore.add('error', json.error || 'Export failed');

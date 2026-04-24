@@ -214,6 +214,33 @@ export interface CustomFormatWithConditions {
 	conditions: ConditionData[];
 }
 
+// --- Entity testing evaluate endpoint ---
+
+export type MediaType = 'movie' | 'series';
+
+export interface ReleaseInput {
+	id: number;
+	title: string;
+	type: MediaType;
+	languages?: string[];
+}
+
+export interface ReleaseEvaluation {
+	releaseId: number;
+	title: string;
+	parsed?: ParsedInfo;
+	cfMatches: Record<string, boolean>;
+}
+
+export interface EvaluateRequest {
+	releases: ReleaseInput[];
+}
+
+export interface EvaluateResponse {
+	parserAvailable: boolean;
+	evaluations: ReleaseEvaluation[];
+}
+
 // ============================================================================
 // QUALITY PROFILES
 // ============================================================================

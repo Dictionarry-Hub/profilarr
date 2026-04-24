@@ -46,10 +46,10 @@
 		instanceStates = instanceStates;
 
 		try {
-			const res = await fetch('/api/v1/arr/sync-entity', {
+			const res = await fetch(`/arr/${instanceId}/resync`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ instanceId, databaseId, entityName, entityType })
+				body: JSON.stringify({ databaseId, entityName, entityType })
 			});
 
 			if (res.ok) {

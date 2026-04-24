@@ -33,11 +33,8 @@ an instruction card. The user completes the step by satisfying a condition, and
 the overlay advances. The spotlight animates smoothly between targets, and
 navigation between pages is handled automatically.
 
-New users see a prompt on first load asking if they want a guided tour. This
-starts the Welcome stage, which introduces Profilarr and ends at the onboarding
-page where users can run any stage at their own pace. The prompt is driven by a
-database flag (`onboarding_shown` on `general_settings`) that's set whether the
-user accepts or dismisses.
+Tours are launched manually from `/onboarding`, which lists every stage grouped
+by area.
 
 ## Steps
 
@@ -328,16 +325,12 @@ recalculates on scroll, resize, and navigation.
 
 Runtime state is managed by a Svelte writable store. Progress (active stage and
 current step) is saved to localStorage on every state change, so refreshing
-mid-walkthrough picks up where the user left off.
-
-The only server-side persistence is the `onboarding_shown` flag on
-`general_settings` (migration 058). This controls whether the first-run prompt
-appears. Once set, it's never unset.
+mid-walkthrough picks up where the user left off. There is no server-side
+persistence; the store is purely client-local.
 
 Cutscenes started from the onboarding page are flagged as `manualStart`. When a
 manually started cutscene completes, the completion modal appears offering to
-return to the onboarding page. Cutscenes started from the first-run prompt skip
-this.
+return to the onboarding page.
 
 ## Onboarding Page
 

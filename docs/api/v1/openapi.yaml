@@ -23,16 +23,10 @@ tags:
     description: Job queue status and polling
   - name: Backups
     description: Backup creation, listing, download, upload, and settings
-  - name: Entity Testing
-    description: Release parsing and custom format evaluation
   - name: Arr
     description: Arr instance management, library, and sync endpoints
-  - name: PCD
-    description: PCD entity export and portable format endpoints
   - name: Databases
     description: Linked database instance management
-  - name: Regex
-    description: Regex pattern validation
   - name: Announcements
     description: In-app announcements fed from the bulletin repo
 
@@ -65,22 +59,6 @@ paths:
     $ref: './paths/backups.yaml#/upload'
   /backups/settings:
     $ref: './paths/backups.yaml#/settings'
-  /entity-testing/evaluate:
-    $ref: './paths/entity-testing.yaml#/evaluate'
-  /arr/library:
-    $ref: './paths/arr.yaml#/library'
-  /arr/library/episodes:
-    $ref: './paths/arr.yaml#/episodes'
-  /arr/releases:
-    $ref: './paths/arr.yaml#/releases'
-  /arr/sync-entity:
-    $ref: './paths/arr.yaml#/sync-entity'
-  /pcd/export:
-    $ref: './paths/pcd.yaml#/export'
-  /pcd/import:
-    $ref: './paths/pcd.yaml#/import'
-  /regex/validate:
-    $ref: './paths/regex.yaml#/validate'
   /announcements:
     $ref: './paths/announcements.yaml#/list'
   /announcements/{id}:
@@ -138,19 +116,6 @@ components:
       $ref: './schemas/announcements.yaml#/AnnouncementSummary'
     AnnouncementDetail:
       $ref: './schemas/announcements.yaml#/AnnouncementDetail'
-    # Entity Testing
-    MediaType:
-      $ref: './schemas/entity-testing.yaml#/MediaType'
-    ParsedInfo:
-      $ref: './schemas/entity-testing.yaml#/ParsedInfo'
-    ReleaseInput:
-      $ref: './schemas/entity-testing.yaml#/ReleaseInput'
-    ReleaseEvaluation:
-      $ref: './schemas/entity-testing.yaml#/ReleaseEvaluation'
-    EvaluateRequest:
-      $ref: './schemas/entity-testing.yaml#/EvaluateRequest'
-    EvaluateResponse:
-      $ref: './schemas/entity-testing.yaml#/EvaluateResponse'
     # Arr - Shared
     ArrType:
       $ref: './schemas/arr.yaml#/ArrType'
@@ -158,52 +123,6 @@ components:
       $ref: './schemas/arr.yaml#/CustomFormatRef'
     ScoreBreakdownItem:
       $ref: './schemas/arr.yaml#/ScoreBreakdownItem'
-    ProfileByDatabase:
-      $ref: './schemas/arr.yaml#/ProfileByDatabase'
-    # Arr - Library
-    RadarrLibraryItem:
-      $ref: './schemas/arr.yaml#/RadarrLibraryItem'
-    SonarrSeasonItem:
-      $ref: './schemas/arr.yaml#/SonarrSeasonItem'
-    SonarrLibraryItem:
-      $ref: './schemas/arr.yaml#/SonarrLibraryItem'
-    SonarrEpisodeItem:
-      $ref: './schemas/arr.yaml#/SonarrEpisodeItem'
-    LibraryResponse:
-      $ref: './schemas/arr.yaml#/LibraryResponse'
-    EpisodesResponse:
-      $ref: './schemas/arr.yaml#/EpisodesResponse'
-    CacheInvalidatedResponse:
-      $ref: './schemas/arr.yaml#/CacheInvalidatedResponse'
-    # Arr - Releases
-    GroupedRelease:
-      $ref: './schemas/arr.yaml#/GroupedRelease'
-    ReleasesResponse:
-      $ref: './schemas/arr.yaml#/ReleasesResponse'
-    # Arr - Sync Entity
-    SyncEntityRequest:
-      $ref: './schemas/arr.yaml#/SyncEntityRequest'
-    SyncEntitySuccessResponse:
-      $ref: './schemas/arr.yaml#/SyncEntitySuccessResponse'
-    SyncEntityCooldownResponse:
-      $ref: './schemas/arr.yaml#/SyncEntityCooldownResponse'
-    # PCD
-    EntityType:
-      $ref: './schemas/pcd.yaml#/EntityType'
-    ExportResponse:
-      $ref: './schemas/pcd.yaml#/ExportResponse'
-    PcdErrorResponse:
-      $ref: './schemas/pcd.yaml#/PcdErrorResponse'
-    BundledDependency:
-      $ref: './schemas/pcd.yaml#/BundledDependency'
-    ImportConflict:
-      $ref: './schemas/pcd.yaml#/ImportConflict'
-    ConflictResolution:
-      $ref: './schemas/pcd.yaml#/ConflictResolution'
-    ImportRequest:
-      $ref: './schemas/pcd.yaml#/ImportRequest'
-    ImportResponse:
-      $ref: './schemas/pcd.yaml#/ImportResponse'
     # Arr
     ArrInstance:
       $ref: './schemas/arr.yaml#/ArrInstance'
@@ -216,11 +135,6 @@ components:
       $ref: './schemas/databases.yaml#/UpdateDatabaseInput'
     SyncTriggerResponse:
       $ref: './schemas/databases.yaml#/SyncTriggerResponse'
-    # Regex
-    ValidateRegexRequest:
-      $ref: './schemas/regex.yaml#/ValidateRegexRequest'
-    ValidateRegexResponse:
-      $ref: './schemas/regex.yaml#/ValidateRegexResponse'
     # Jobs
     JobStatus:
       $ref: './schemas/jobs.yaml#/JobStatus'

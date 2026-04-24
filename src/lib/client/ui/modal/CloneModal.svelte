@@ -32,11 +32,10 @@
 		try {
 			// Export the source entity
 			const params = new URLSearchParams({
-				databaseId: String(databaseId),
 				entityType,
 				name: sourceName
 			});
-			const exportRes = await fetch(`/api/v1/pcd/export?${params}`);
+			const exportRes = await fetch(`/databases/${databaseId}/export?${params}`);
 			const exportJson = await exportRes.json();
 			if (!exportRes.ok) {
 				alertStore.add('error', exportJson.error || 'Export failed');
@@ -45,11 +44,10 @@
 
 			// Rename and import
 			exportJson.data.name = newName.trim();
-			const importRes = await fetch('/api/v1/pcd/import', {
+			const importRes = await fetch(`/databases/${databaseId}/import`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					databaseId,
 					layer,
 					entityType,
 					data: exportJson.data

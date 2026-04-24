@@ -8,10 +8,7 @@
 	import ReleaseTable from './ReleaseTable.svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import type { Column } from '$ui/table/types';
-	import type { TestEntity, TestRelease } from '$shared/pcd/display.ts';
-	import type { components } from '$api/v1.d.ts';
-
-	type ReleaseEvaluation = components['schemas']['ReleaseEvaluation'];
+	import type { TestEntity, TestRelease, ReleaseEvaluation } from '$shared/pcd/display.ts';
 
 	interface CfScore {
 		radarr: number | null;
