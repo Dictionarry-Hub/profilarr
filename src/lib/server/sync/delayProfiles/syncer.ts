@@ -50,11 +50,6 @@ export class DelayProfileSyncer extends BaseSyncer {
 			return { success: false, itemsSynced: 0, error: 'Profile not found in PCD' };
 		}
 
-		await logger.debug(`Syncing "${profile.name}" to default profile (id=1)`, {
-			source: 'Sync:DelayProfile',
-			meta: { instanceId: this.instanceId, profileName: profile.name }
-		});
-
 		const transformed = this.transform(profile);
 		await this.client.updateDelayProfile(1, transformed);
 
