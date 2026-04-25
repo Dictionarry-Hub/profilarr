@@ -306,11 +306,6 @@ export async function syncInstance(instanceId: number): Promise<InstanceSyncResu
  * Called from manager.ts after database git pull completes
  */
 export async function triggerSyncs(context: TriggerContext): Promise<void> {
-	await logger.debug(`Sync trigger: ${context.event}`, {
-		source: 'SyncProcessor',
-		meta: { databaseId: context.databaseId }
-	});
-
 	const instanceIds = arrSyncQueries.getInstanceIdsForTrigger(context.event);
 
 	for (const instanceId of instanceIds) {
