@@ -9,6 +9,7 @@
 		FileCog
 	} from 'lucide-svelte';
 	import { page } from '$app/stores';
+	import { FEATURES } from '$lib/shared/features';
 
 	$: database = $page.data.database;
 	$: currentPath = $page.url.pathname;
@@ -36,13 +37,17 @@
 					active: currentPath.includes('/conflicts'),
 					onboarding: 'db-tab-conflicts'
 				},
-				{
-					label: 'Tweaks',
-					href: `/databases/${database.id}/tweaks`,
-					icon: Wrench,
-					active: currentPath.includes('/tweaks'),
-					onboarding: 'db-tab-tweaks'
-				},
+				...(FEATURES.tweaks
+					? [
+							{
+								label: 'Tweaks',
+								href: `/databases/${database.id}/tweaks`,
+								icon: Wrench,
+								active: currentPath.includes('/tweaks'),
+								onboarding: 'db-tab-tweaks'
+							}
+						]
+					: []),
 				...(database.hasPat
 					? [
 							{
