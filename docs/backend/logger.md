@@ -8,6 +8,8 @@
 - [Configuration](#configuration)
 - [Output Formats](#output-formats)
 - [Usage](#usage)
+- [Source Names](#source-names)
+- [Open Work](#open-work)
 
 The logger is a singleton class that writes to two outputs simultaneously:
 colored console lines for development and JSON files for persistence. Settings
@@ -102,9 +104,8 @@ await logger.errorWithTrace('Failed to compile cache', error, {
 
 **Conventions:**
 
-- `source` is the module or subsystem name (`PCDManager`, `SyncProcessor`,
-  `ArrSyncJob`, `NotificationManager`). Some modules use sub-tags like
-  `EntitySync:Cooldown`.
+- `source` identifies where the log was emitted. See
+  [Source Names](#source-names) for the naming rule.
 - `meta` carries structured context: IDs, counts, timing, error messages.
   Keep it serializable -- no class instances or circular references.
 - For testing, instantiate the `Logger` class directly with a custom config
@@ -114,3 +115,20 @@ await logger.errorWithTrace('Failed to compile cache', error, {
 import { Logger } from '$logger/logger.ts';
 const testLogger = new Logger({ logsDir: '/tmp/test-logs', minLevel: 'DEBUG' });
 ```
+
+## Source Names
+
+Source = **where** the log was emitted, not **what** is happening. Format:
+file path under `src/lib/server/` with `/` → `.` and `.ts` dropped, camelCase
+segments. Drop the file segment when it duplicates the parent directory.
+
+```
+Good: source: 'sync.qualityProfiles'     // action goes in the message
+Bad:  source: 'transform.qualityProfile' // breaks grep "sync\."
+```
+
+## Open Work
+
+- Migrate legacy sources to dot-notation, subsystem by subsystem.
+- Add a source linter (regex `/^[a-z][a-zA-Z0-9]*(\.[a-z][a-zA-Z0-9]*)*$/`);
+  gate in CI once migration is done.
