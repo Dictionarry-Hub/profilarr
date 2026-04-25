@@ -260,21 +260,11 @@ export const actions: Actions = {
 
 		try {
 			arrSyncQueries.setDelayProfilesStatusPending(id);
-			const queued = enqueueJob({
+			enqueueJob({
 				jobType: 'arr.sync.delayProfiles',
 				runAt: new Date().toISOString(),
 				payload: { instanceId: id },
 				source: 'manual'
-			});
-
-			await logger.info(`Queued delay profiles sync for "${instance.name}"`, {
-				source: 'sync',
-				meta: {
-					jobId: queued.id,
-					instanceId: id,
-					instanceName: instance.name,
-					displayName: buildJobDisplayName('arr.sync.delayProfiles', { instanceId: id })
-				}
 			});
 
 			return { success: true, message: 'Delay profiles sync queued' };
@@ -314,21 +304,11 @@ export const actions: Actions = {
 
 		try {
 			arrSyncQueries.setQualityProfilesStatusPending(id);
-			const queued = enqueueJob({
+			enqueueJob({
 				jobType: 'arr.sync.qualityProfiles',
 				runAt: new Date().toISOString(),
 				payload: { instanceId: id },
 				source: 'manual'
-			});
-
-			await logger.info(`Queued quality profiles sync for "${instance.name}"`, {
-				source: 'sync',
-				meta: {
-					jobId: queued.id,
-					instanceId: id,
-					instanceName: instance.name,
-					displayName: buildJobDisplayName('arr.sync.qualityProfiles', { instanceId: id })
-				}
 			});
 
 			return { success: true, message: 'Quality profiles sync queued' };
@@ -372,21 +352,11 @@ export const actions: Actions = {
 
 		try {
 			arrSyncQueries.setMediaManagementStatusPending(id);
-			const queued = enqueueJob({
+			enqueueJob({
 				jobType: 'arr.sync.mediaManagement',
 				runAt: new Date().toISOString(),
 				payload: { instanceId: id },
 				source: 'manual'
-			});
-
-			await logger.info(`Queued media management sync for "${instance.name}"`, {
-				source: 'sync',
-				meta: {
-					jobId: queued.id,
-					instanceId: id,
-					instanceName: instance.name,
-					displayName: buildJobDisplayName('arr.sync.mediaManagement', { instanceId: id })
-				}
 			});
 
 			return { success: true, message: 'Media management sync queued' };

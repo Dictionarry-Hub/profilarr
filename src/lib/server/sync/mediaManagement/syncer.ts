@@ -66,18 +66,6 @@ export class MediaManagementSyncer extends BaseSyncer {
 		const errors: string[] = [];
 		const items: SyncedItem[] = [];
 
-		await logger.info(`Starting media management sync for "${this.instanceName}"`, {
-			source: 'Sync:MediaManagement',
-			meta: {
-				instanceId: this.instanceId,
-				hasMediaSettings:
-					!!syncConfig.mediaSettingsDatabaseId && !!syncConfig.mediaSettingsConfigName,
-				hasNaming: !!syncConfig.namingDatabaseId && !!syncConfig.namingConfigName,
-				hasQualityDefs:
-					!!syncConfig.qualityDefinitionsDatabaseId && !!syncConfig.qualityDefinitionsConfigName
-			}
-		});
-
 		// Sync media settings if configured (both database and config name required)
 		if (syncConfig.mediaSettingsDatabaseId && syncConfig.mediaSettingsConfigName) {
 			try {

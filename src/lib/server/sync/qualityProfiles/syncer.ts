@@ -68,11 +68,6 @@ export class QualityProfileSyncer extends BaseSyncer {
 	 */
 	override async sync(): Promise<SyncResult> {
 		try {
-			await logger.info(`Starting quality profile sync for "${this.instanceName}"`, {
-				source: 'Sync:QualityProfiles',
-				meta: { instanceId: this.instanceId, instanceType: this.instanceType }
-			});
-
 			// 1. Fetch profiles and CFs from the single database
 			const { profiles, customFormats, databaseId } = await this.fetchSyncData();
 
