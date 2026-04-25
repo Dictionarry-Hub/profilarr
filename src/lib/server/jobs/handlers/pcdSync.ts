@@ -58,7 +58,10 @@ const dbSyncHandler: JobHandler = async (job) => {
 		}
 
 		if (instance.auto_pull === 1) {
-			const syncResult = await pcdManager.sync(databaseId);
+			const syncResult = await pcdManager.sync(
+				databaseId,
+				job.source === 'schedule' ? 'schedule' : 'manual-api'
+			);
 			if (!syncResult.success) {
 				return {
 					status: 'failure',
