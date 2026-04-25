@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { Save, Trash2, Star, GitFork, CircleDot, Database, GitBranch } from 'lucide-svelte';
-	import { siGithub } from 'simple-icons';
+	import { Save, Trash2, Star, GitFork, CircleDot, Database, GitBranch, ExternalLink } from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
 	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
@@ -255,17 +254,10 @@
 						href={repoInfo?.htmlUrl ?? instance?.repository_url}
 						target="_blank"
 						rel="noopener noreferrer"
+						icon={ExternalLink}
+						iconColor="text-blue-600 dark:text-blue-400"
+						text="GitHub"
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="14"
-							height="14"
-							viewBox="0 0 24 24"
-							fill="currentColor"
-						>
-							<path d={siGithub.path} />
-						</svg>
-						GitHub
 					</Button>
 				{/if}
 			</svelte:fragment>
