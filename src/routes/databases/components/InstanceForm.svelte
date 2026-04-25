@@ -165,7 +165,7 @@
 			: `Configure settings for ${instance?.name || 'this database'}.`;
 </script>
 
-<div class="space-y-6" class:mt-6={mode === 'edit'}>
+<div class="space-y-6">
 	<!-- Header -->
 	<div data-onboarding="db-header">
 		<StickyCard position="top">
