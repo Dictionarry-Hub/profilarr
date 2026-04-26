@@ -7,7 +7,7 @@
     "jsr:@felix/bcrypt@^1.0.8": "1.0.8",
     "jsr:@soapbox/kysely-deno-sqlite@^2.2.0": "2.2.0",
     "jsr:@std/assert@0.217": "0.217.0",
-    "jsr:@std/assert@1": "1.0.15",
+    "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/cli@^1.0.23": "1.0.23",
     "jsr:@std/encoding@1": "1.0.10",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
@@ -18,7 +18,7 @@
     "jsr:@std/html@^1.0.5": "1.0.5",
     "jsr:@std/http@1": "1.0.21",
     "jsr:@std/internal@^1.0.10": "1.0.12",
-    "jsr:@std/internal@^1.0.12": "1.0.12",
+    "jsr:@std/internal@^1.0.12": "1.0.13",
     "jsr:@std/internal@^1.0.9": "1.0.12",
     "jsr:@std/media-types@^1.1.0": "1.1.0",
     "jsr:@std/net@^1.0.6": "1.0.6",
@@ -88,6 +88,12 @@
         "jsr:@std/internal@^1.0.12"
       ]
     },
+    "@std/assert@1.0.19": {
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.12"
+      ]
+    },
     "@std/cli@1.0.23": {
       "integrity": "bf95b7a9425ba2af1ae5a6359daf58c508f2decf711a76ed2993cd352498ccca"
     },
@@ -123,6 +129,9 @@
     },
     "@std/internal@1.0.12": {
       "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
+    },
+    "@std/internal@1.0.13": {
+      "integrity": "2f9546691d4ac2d32859c82dff284aaeac980ddeca38430d07941e7e288725c0"
     },
     "@std/media-types@1.1.0": {
       "integrity": "c9d093f0c05c3512932b330e3cc1fe1d627b301db33a4c2c2185c02471d6eaa4"
