@@ -29,7 +29,7 @@ const PORT = 7170;
 let dbPath: string;
 
 setup(async () => {
-	await startServer(PORT, { AUTH: 'off' });
+	await startServer(PORT, { AUTH: 'off' }, 'preview');
 	dbPath = getDbPath(PORT);
 });
 

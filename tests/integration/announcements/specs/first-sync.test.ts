@@ -89,7 +89,7 @@ function readReadAt(databaseId: number, announcementId: string): string | null {
 }
 
 setup(async () => {
-	await startServer(PORT, { AUTH: 'off' });
+	await startServer(PORT, { AUTH: 'off' }, 'preview');
 	dbPath = getDbPath(PORT);
 });
 
