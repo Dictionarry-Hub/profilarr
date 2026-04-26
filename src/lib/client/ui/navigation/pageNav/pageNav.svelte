@@ -17,7 +17,8 @@
 		X,
 		Wrench,
 		Film,
-		Tv
+		Tv,
+		Megaphone
 	} from 'lucide-svelte';
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import { sidebarCollapsed } from '$stores/sidebar';
@@ -83,6 +84,14 @@
 				<GroupItem label="API Docs" href="/dev/api" />
 			</Group>
 		{/if}
+
+		<Group
+			label="Announcements"
+			emoji="📣"
+			href="/announcements"
+			icon={Megaphone}
+			alert={unreadAnnouncements}
+		/>
 
 		<Group
 			label="Databases"
@@ -203,7 +212,6 @@
 			<GroupItem label="Security" href="/settings/security" />
 			<GroupItem label="Onboarding" href="/onboarding" onboardingId="nav-onboarding" />
 			<GroupItem label="About" href="/settings/about" />
-			<GroupItem label="Announcements" href="/announcements" alert={unreadAnnouncements} />
 			<GroupItem
 				label="Log Out"
 				href="/auth/logout"
