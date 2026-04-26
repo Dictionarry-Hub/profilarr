@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { getDetail, listVisible, markRead, markUnread } from '$lib/server/announcements/index.ts';
+import { getDetail, listVisible, markRead, markUnread } from '$announcements/index.ts';
 
 export const load: PageServerLoad = async () => {
 	const visible = listVisible();

@@ -2,7 +2,7 @@
  * Announcement notification definitions
  */
 
-import type { AnnouncementRecord } from '$lib/server/announcements/types.ts';
+import type { AnnouncementRecord } from '$announcements/profilarr/types.ts';
 import type { Notification, NotificationBlock, NotificationSeverity } from '../types.ts';
 
 export interface NewAnnouncementParams {

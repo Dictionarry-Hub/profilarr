@@ -17,6 +17,7 @@
 		"$http/": "./src/lib/server/utils/http/",
 		"$utils/": "./src/lib/server/utils/",
 		"$notifications/": "./src/lib/server/notifications/",
+		"$announcements/": "./src/lib/server/announcements/",
 		"$sync/": "./src/lib/server/sync/",
 		"$cache/": "./src/lib/server/utils/cache/",
 		"$auth/": "./src/lib/server/utils/auth/",

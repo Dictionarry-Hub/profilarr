@@ -32,6 +32,7 @@ const config = {
 			$http: './src/lib/server/utils/http',
 			$utils: './src/lib/server/utils',
 			$notifications: './src/lib/server/notifications',
+			$announcements: './src/lib/server/announcements',
 			$cache: './src/lib/server/utils/cache',
 			$sync: './src/lib/server/sync',
 			$auth: './src/lib/server/utils/auth',

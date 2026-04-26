@@ -1,12 +1,14 @@
 /**
- * Pure visibility logic for announcements.
+ * Pure visibility logic for bulletin announcements.
  *
  * Used both when counting unread badge items and when serving the list to
  * the UI / API. No DB or I/O; everything here is derivable from a record
  * plus the running build's channel + version and the current time.
  */
 
-import type { AnnouncementRecord, AnnouncementSeverity } from './types.ts';
+import { isVisibleBase } from '../shared/filter.ts';
+import type { AnnouncementSeverity } from '../shared/types.ts';
+import type { AnnouncementRecord } from './types.ts';
 import type { Channel } from '$lib/shared/build.ts';
 
 export type { AnnouncementSeverity };
@@ -74,11 +76,7 @@ export function satisfiesRange(current: string, min: string | null, max: string 
  *  - Otherwise, must satisfy both `minVersion` and `maxVersion` if set.
  */
 export function isVisible(announcement: AnnouncementRecord, ctx: VisibilityContext): boolean {
-	if (announcement.withdrawn) return false;
-
-	if (announcement.expiresAt !== null && announcement.expiresAt < ctx.now) {
-		return false;
-	}
+	if (!isVisibleBase(announcement, ctx.now)) return false;
 
 	// Dev channel or local/prerelease-suffixed versions bypass range checks.
 	const isDev = ctx.channel === 'dev' || ctx.version.includes('-');

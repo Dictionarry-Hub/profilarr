@@ -4,7 +4,7 @@ import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { isParserHealthy } from '$lib/server/utils/arr/parser/client.ts';
 import { config } from '$lib/server/utils/config/config.ts';
 import { build } from '$lib/shared/build.ts';
-import { getUnreadCount } from '$lib/server/announcements/index.ts';
+import { getUnreadCount } from '$announcements/index.ts';
 
 export const load: LayoutServerLoad = async () => {
 	const arrInstances = arrInstancesQueries.getAll().map((i) => ({

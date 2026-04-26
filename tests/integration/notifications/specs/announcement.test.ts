@@ -11,7 +11,7 @@ import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifie
 import { TelegramNotifier } from '$notifications/notifiers/telegram/TelegramNotifier.ts';
 import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { announcementNew } from '$notifications/definitions/announcement.ts';
-import type { AnnouncementRecord } from '$lib/server/announcements/types.ts';
+import type { AnnouncementRecord } from '$announcements/profilarr/types.ts';
 
 const MOCK_PORT = 7141;
 let captured: CapturedRequest[];

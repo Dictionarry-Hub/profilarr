@@ -1,8 +1,8 @@
 import { migrationRunner } from '$db/migrations.ts';
 import { config } from '$config';
 import { build } from '$lib/shared/build.ts';
-import { getVersionsSnapshot } from '$lib/server/announcements/index.ts';
-import { compareVersions } from '$lib/server/announcements/filter.ts';
+import { getVersionsSnapshot } from '$announcements/index.ts';
+import { compareVersions } from '$announcements/profilarr/filter.ts';
 
 type VersionStatus = 'up-to-date' | 'out-of-date' | 'dev-build';
 
