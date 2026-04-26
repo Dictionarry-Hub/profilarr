@@ -53,7 +53,8 @@
 		"check:server": "deno check --quiet src/lib/server/**/*.ts",
 		"check:client": "NODE_ENV=development npx svelte-check --tsconfig ./tsconfig.json",
 		"test": "deno run -A tests/runner.ts",
-		"generate:api-types": "npx openapi-typescript docs/api/v1/openapi.yaml -o src/lib/api/v1.d.ts && prettier --write src/lib/api/v1.d.ts",
+		"generate:api-json": "deno run --allow-read=docs/api/v1 --allow-write=src/lib/api/v1.openapi.json scripts/generate-openapi-json.ts",
+		"generate:api-types": "deno task generate:api-json && npx openapi-typescript docs/api/v1/openapi.yaml -o src/lib/api/v1.d.ts && prettier --write src/lib/api/v1.d.ts src/lib/api/v1.openapi.json",
 		"generate:pcd-types": "deno run -A scripts/generate-pcd-types.ts",
 		"stats": "deno run --allow-read --allow-env scripts/stats.ts",
 		"webhook": "deno run --allow-net scripts/webhook-listener.ts"

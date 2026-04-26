@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { getBundledOpenApiSpec } from '$utils/openapi/spec.ts';
+import openApiSpec from '$api/v1.openapi.json' with { type: 'json' };
 
 export const GET: RequestHandler = async () => {
-	return json(await getBundledOpenApiSpec());
+	return json(openApiSpec);
 };

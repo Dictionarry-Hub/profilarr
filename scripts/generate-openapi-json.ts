@@ -1,28 +1,15 @@
-import { parse } from 'yaml';
+import { parse } from '@std/yaml';
 
-const OPENAPI_ROOT_URL = new URL('../../../../../docs/api/v1/openapi.yaml', import.meta.url);
-const SHOULD_CACHE = import.meta.env?.VITE_CHANNEL !== 'dev';
+const OPENAPI_ROOT_URL = new URL('../docs/api/v1/openapi.yaml', import.meta.url);
+const OUTPUT_URL = new URL('../src/lib/api/v1.openapi.json', import.meta.url);
 
-let bundledSpecCache: unknown | null = null;
 const parsedDocumentCache = new Map<string, unknown>();
 
-export async function getBundledOpenApiSpec(): Promise<unknown> {
-	if (SHOULD_CACHE && bundledSpecCache !== null) {
-		return bundledSpecCache;
-	}
-
-	if (!SHOULD_CACHE) {
-		parsedDocumentCache.clear();
-	}
-
+async function main(): Promise<void> {
 	const rootDocument = await loadDocument(OPENAPI_ROOT_URL);
 	const bundledSpec = await resolveNode(rootDocument, OPENAPI_ROOT_URL, new Set<string>());
 
-	if (SHOULD_CACHE) {
-		bundledSpecCache = bundledSpec;
-	}
-
-	return bundledSpec;
+	await Deno.writeTextFile(OUTPUT_URL, `${JSON.stringify(bundledSpec, null, 2)}\n`);
 }
 
 async function loadDocument(fileUrl: URL): Promise<unknown> {
@@ -167,3 +154,5 @@ function decodeJsonPointerSegment(segment: string): string {
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
+
+await main();

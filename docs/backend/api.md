@@ -91,15 +91,16 @@ be edited independently.
 
 ### Type Generation
 
-After modifying the OpenAPI spec, regenerate the TypeScript types:
+After modifying the OpenAPI spec, regenerate the committed API artifacts:
 
 ```bash
 deno task generate:api-types
 ```
 
-This runs `openapi-typescript` against `docs/api/v1/openapi.yaml` and outputs
-`src/lib/api/v1.d.ts`. The generated file should be committed alongside spec
-changes. Import types from `$api/v1` in endpoint handlers:
+This bundles `docs/api/v1/openapi.yaml` into `src/lib/api/v1.openapi.json`,
+then runs `openapi-typescript` and outputs `src/lib/api/v1.d.ts`. Both
+generated files should be committed alongside spec changes. Import types from
+`$api/v1` in endpoint handlers:
 
 ```ts
 import type { components } from '$api/v1';
