@@ -11,7 +11,7 @@
  * disk, git commit/push happens via the existing PCD git flow.
  */
 
-import { stringify as stringifyYaml } from 'yaml';
+import { stringify as stringifyYaml } from '@std/yaml';
 import { generateUlid } from '$shared/utils/ulid.ts';
 import type { AnnouncementSeverity } from './types.ts';
 

@@ -27,6 +27,7 @@
     "jsr:@std/path@^1.1.1": "1.1.2",
     "jsr:@std/path@^1.1.2": "1.1.2",
     "jsr:@std/streams@^1.0.13": "1.0.13",
+    "jsr:@std/yaml@^1.1.0": "1.1.0",
     "npm:@deno/vite-plugin@^2.0.2": "2.0.2_vite@8.0.8__@types+node@24.12.2__esbuild@0.24.2__yaml@2.8.3_@types+node@24.12.2_esbuild@0.24.2_yaml@2.8.3",
     "npm:@jsr/db__sqlite@0.12": "0.12.0",
     "npm:@playwright/test@^1.59.1": "1.59.1",
@@ -153,6 +154,9 @@
     },
     "@std/streams@1.0.13": {
       "integrity": "772d208cd0d3e5dac7c1d9e6cdb25842846d136eea4a41a62e44ed4ab0c8dd9e"
+    },
+    "@std/yaml@1.1.0": {
+      "integrity": "fc1c5c63e05c4c5eb6118355f557958035d41940d6c29d35b306ef7155d6edb0"
     }
   },
   "npm": {
@@ -1490,6 +1494,7 @@
       "jsr:@felix/bcrypt@^1.0.8",
       "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
       "jsr:@std/assert@1",
+      "jsr:@std/yaml@^1.1.0",
       "npm:croner@^9.1.0",
       "npm:marked@^15.0.6",
       "npm:simple-icons@^15.17.0",

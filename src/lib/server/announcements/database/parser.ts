@@ -10,7 +10,7 @@
  * errors and proceeds with the parsed entries.
  */
 
-import { parse as parseYaml } from 'yaml';
+import { parse as parseYaml } from '@std/yaml';
 import type { AnnouncementSeverity, DatabaseAnnouncementParsed } from './types.ts';
 
 const ANNOUNCEMENTS_SUBDIR = 'announcements';
@@ -199,11 +199,15 @@ function validateFrontmatter(raw: unknown): { frontmatter: FrontmatterShape } | 
  * Accept either a string already in ISO format, or a `Date` (which YAML
  * parses bare timestamps into). Return canonical ISO-8601 string, or null
  * if the value can't be interpreted as a date.
+ *
+ * Whole-second `Date`s are emitted without the `.000` fraction so the
+ * stored value matches the input YAML's typical style and the bulletin
+ * path's convention, instead of being silently widened by toISOString().
  */
 function normalizeDate(value: unknown): string | null {
 	if (value instanceof Date) {
-		const iso = value.toISOString();
-		return Number.isNaN(value.getTime()) ? null : iso;
+		if (Number.isNaN(value.getTime())) return null;
+		return value.toISOString().replace(/\.000Z$/, 'Z');
 	}
 	if (typeof value === 'string') {
 		const parsed = Date.parse(value);
