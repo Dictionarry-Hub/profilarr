@@ -73,5 +73,33 @@ export const actions: Actions = {
 		if (!target) return fail(400, { error: 'invalid target' });
 		inbox.markUnread(target.source, target.id, target.databaseId);
 		return { success: true };
+	},
+	markReadMany: async ({ request }) => {
+		const raw = (await request.formData()).get('targets');
+		if (typeof raw !== 'string') return fail(400, { error: 'missing targets' });
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(raw);
+		} catch {
+			return fail(400, { error: 'invalid targets json' });
+		}
+		if (!Array.isArray(parsed)) return fail(400, { error: 'targets must be an array' });
+
+		const targets: ParsedTarget[] = [];
+		for (const item of parsed) {
+			if (!item || typeof item !== 'object') continue;
+			const source = (item as { source?: unknown }).source;
+			const id = (item as { id?: unknown }).id;
+			const databaseId = (item as { databaseId?: unknown }).databaseId;
+			if (source !== 'profilarr' && source !== 'pcd') continue;
+			if (typeof id !== 'string' || !id) continue;
+			if (source === 'profilarr') {
+				targets.push({ source, id, databaseId: null });
+			} else if (typeof databaseId === 'number' && Number.isFinite(databaseId)) {
+				targets.push({ source, id, databaseId });
+			}
+		}
+		inbox.markReadMany(targets);
+		return { success: true, count: targets.length };
 	}
 };

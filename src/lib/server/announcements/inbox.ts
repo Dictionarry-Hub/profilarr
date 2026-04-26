@@ -103,6 +103,20 @@ export function markUnread(source: InboxSource, id: string, databaseId: number |
 	database.markUnread(id, databaseId);
 }
 
+export interface MarkTarget {
+	source: InboxSource;
+	id: string;
+	databaseId: number | null;
+}
+
+/** Mark a batch of announcements as read. Errors on any single target are
+ * not isolated; callers should pre-validate. */
+export function markReadMany(targets: MarkTarget[]): void {
+	for (const t of targets) {
+		markRead(t.source, t.id, t.databaseId);
+	}
+}
+
 // ─── Internal helpers ─────────────────────────────────────────────────────
 
 function listProfilarrItems(): InboxItem[] {
