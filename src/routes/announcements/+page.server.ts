@@ -26,6 +26,7 @@ export const load: PageServerLoad = async () => {
 			id: item.id,
 			databaseId: item.databaseId,
 			databaseName: item.databaseName,
+			databaseRepoUrl: item.databaseRepoUrl,
 			title: item.title,
 			severity: item.severity,
 			publishedAt: item.publishedAt,

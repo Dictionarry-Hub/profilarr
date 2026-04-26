@@ -30,6 +30,7 @@ export interface InboxItem {
 	id: string;
 	databaseId: number | null;
 	databaseName: string | null;
+	databaseRepoUrl: string | null;
 	title: string;
 	severity: AnnouncementSeverity;
 	publishedAt: string;
@@ -76,8 +77,12 @@ export async function getDetail(
 	if (databaseId === null) return undefined;
 	const record = database.getDetail(id, databaseId);
 	if (!record) return undefined;
-	const name = databaseInstancesQueries.getById(databaseId)?.name ?? '(unknown database)';
-	return databaseRecordToItem(record, name);
+	const instance = databaseInstancesQueries.getById(databaseId);
+	return databaseRecordToItem(
+		record,
+		instance?.name ?? '(unknown database)',
+		instance?.repository_url ?? null
+	);
 }
 
 export function markRead(source: InboxSource, id: string, databaseId: number | null): void {
@@ -116,7 +121,9 @@ function listProfilarrItems(): InboxItem[] {
 function listDatabaseItems(): InboxItem[] {
 	const now = new Date().toISOString();
 	const databases = databaseInstancesQueries.getAll();
-	const nameById = new Map<number, string>(databases.map((d) => [d.id, d.name]));
+	const instanceById = new Map<number, { name: string; repoUrl: string }>(
+		databases.map((d) => [d.id, { name: d.name, repoUrl: d.repository_url }])
+	);
 
 	return databaseAnnouncementQueries
 		.listAll()
@@ -124,9 +131,14 @@ function listDatabaseItems(): InboxItem[] {
 		.filter((record) =>
 			isVisibleBase({ withdrawn: record.withdrawn, expiresAt: record.expiresAt }, now)
 		)
-		.map((record) =>
-			databaseRecordToItem(record, nameById.get(record.databaseId) ?? '(unknown database)')
-		);
+		.map((record) => {
+			const instance = instanceById.get(record.databaseId);
+			return databaseRecordToItem(
+				record,
+				instance?.name ?? '(unknown database)',
+				instance?.repoUrl ?? null
+			);
+		});
 }
 
 function profilarrRecordToItem(record: profilarr.AnnouncementRecord): InboxItem {
@@ -135,6 +147,7 @@ function profilarrRecordToItem(record: profilarr.AnnouncementRecord): InboxItem 
 		id: record.id,
 		databaseId: null,
 		databaseName: null,
+		databaseRepoUrl: null,
 		title: record.title,
 		severity: record.severity,
 		publishedAt: record.publishedAt,
@@ -147,13 +160,15 @@ function profilarrRecordToItem(record: profilarr.AnnouncementRecord): InboxItem 
 
 function databaseRecordToItem(
 	record: database.DatabaseAnnouncementRecord,
-	databaseName: string
+	databaseName: string,
+	databaseRepoUrl: string | null
 ): InboxItem {
 	return {
 		source: 'pcd',
 		id: record.id,
 		databaseId: record.databaseId,
 		databaseName,
+		databaseRepoUrl,
 		title: record.title,
 		severity: record.severity,
 		publishedAt: record.publishedAt,

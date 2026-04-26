@@ -3,9 +3,10 @@
 
 	export let name: string;
 	export let repoUrl: string;
-	export let size: 'sm' | 'md' = 'sm';
+	export let size: 'xs' | 'sm' | 'md' = 'sm';
 
 	const sizeClasses = {
+		xs: 'h-5 w-5',
 		sm: 'h-8 w-8',
 		md: 'h-10 w-10'
 	};

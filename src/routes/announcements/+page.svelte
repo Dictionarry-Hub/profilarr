@@ -9,6 +9,8 @@
 	import Button from '$ui/button/Button.svelte';
 	import DateTime from '$ui/datetime/DateTime.svelte';
 	import type { Column } from '$ui/table/types';
+	import DatabaseAvatar from '../databases/components/DatabaseAvatar.svelte';
+	import logo from '$assets/logo-512.png';
 
 	function renderMarkdown(text: string): string {
 		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
@@ -36,10 +38,10 @@
 	);
 
 	const columns: Column<Row>[] = [
-		{ key: 'source', header: 'Source', width: 'w-44' },
 		{ key: 'title', header: 'Title' },
 		{ key: 'severity', header: 'Severity', width: 'w-32' },
-		{ key: 'publishedAt', header: 'Published', width: 'w-40' }
+		{ key: 'publishedAt', header: 'Published', width: 'w-40' },
+		{ key: 'source', header: 'Source', width: 'w-44' }
 	];
 
 	type SeverityVariant = 'info' | 'warning' | 'danger';
@@ -125,12 +127,15 @@
 		<svelte:fragment slot="cell" let:row let:column>
 			{#if column.key === 'source'}
 				<span
-					class="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400"
+					class="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400"
 					title={row.source === 'profilarr' ? 'Profilarr team' : (row.databaseName ?? '')}
 				>
 					{#if row.source === 'profilarr'}
-						<Megaphone class="h-3.5 w-3.5 flex-shrink-0" />
+						<img src={logo} alt="" class="h-5 w-5 flex-shrink-0" />
 						<span class="truncate">Profilarr</span>
+					{:else if row.databaseRepoUrl}
+						<DatabaseAvatar name={row.databaseName ?? ''} repoUrl={row.databaseRepoUrl} size="xs" />
+						<span class="truncate">{row.databaseName ?? '(unknown)'}</span>
 					{:else}
 						<Database class="h-3.5 w-3.5 flex-shrink-0" />
 						<span class="truncate">{row.databaseName ?? '(unknown)'}</span>
