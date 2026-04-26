@@ -125,6 +125,9 @@ export type DraftEntityChange = {
 	requires?: Array<{ key: string; entity: string; name: string }>;
 	groupId?: string;
 	generated?: boolean;
+	// Set on file-backed rows (entity 'file' or 'announcement') so commit
+	// flow can collect filepaths regardless of displayed entity.
+	path?: string;
 };
 
 export type { QualityDefinitionEntry };
