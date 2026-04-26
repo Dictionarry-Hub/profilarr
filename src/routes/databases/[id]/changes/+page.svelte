@@ -224,8 +224,8 @@
 
 	function collectFilePaths(): string[] {
 		return selectedChanges
-			.filter((change) => change.entity === 'file')
-			.map((change) => change.name);
+			.map((change) => change.path)
+			.filter((path): path is string => typeof path === 'string' && path.length > 0);
 	}
 
 	function buildSelectionKey(opIds: number[]): string {
@@ -485,17 +485,24 @@
 		try {
 			const dropKeys = buildDropKeys();
 			const opIds = new Set<number>();
+			const filePaths = new Set<string>();
 			for (const key of dropKeys) {
 				const change = changeByKey.get(key);
 				if (!change) continue;
 				for (const op of change.ops) {
 					opIds.add(op.id);
 				}
+				if (change.path) {
+					filePaths.add(change.path);
+				}
 			}
 
 			const formData = new FormData();
 			for (const opId of opIds) {
 				formData.append('opIds', String(opId));
+			}
+			for (const filepath of filePaths) {
+				formData.append('filePaths', filepath);
 			}
 
 			const response = await fetch('?/drop', {
@@ -506,19 +513,25 @@
 
 			const result = await parseActionResult(response);
 
+			// Form actions returning `{success: false, error}` come back as
+			// result.type === 'success' -- check data.success explicitly.
+			const dataSuccess = result?.data?.success;
 			const isSuccess =
 				response.ok &&
-				(result?.type === 'success' || result?.type === 'redirect' || result?.data?.success);
+				(result?.type === 'redirect' ||
+					dataSuccess === true ||
+					(dataSuccess === undefined && result?.type === 'success'));
 			const droppedCount =
 				typeof result?.data?.dropped === 'number'
 					? result.data.dropped
 					: typeof result?.dropped === 'number'
 						? result.dropped
-						: opIds.size;
+						: opIds.size + filePaths.size;
 			const errorMessage = result?.data?.error || result?.error;
 
 			if (isSuccess) {
-				alertStore.add('success', `Dropped ${droppedCount} ops`);
+				const noun = droppedCount === 1 ? 'change' : 'changes';
+				alertStore.add('success', `Dropped ${droppedCount} ${noun}`);
 				await fetchChanges();
 			} else {
 				const detail = errorMessage || `HTTP ${response.status}`;

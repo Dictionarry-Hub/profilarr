@@ -19,4 +19,14 @@ export {
 } from './read.ts';
 
 // Write helpers
-export { clone, fetch, fetchTags, pull, push, checkout, commit, getRepoInfo } from './write.ts';
+export {
+	clone,
+	fetch,
+	fetchTags,
+	pull,
+	push,
+	checkout,
+	commit,
+	restorePathsToHead,
+	getRepoInfo
+} from './write.ts';

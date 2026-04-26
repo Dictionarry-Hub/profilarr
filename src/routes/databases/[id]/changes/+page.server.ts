@@ -5,11 +5,13 @@ import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
 import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
 import { logger } from '$logger/logger.ts';
 import { pcdManager } from '$pcd/core/manager.ts';
+import { reconcileAndNotify, reconcileFromWorkingCopy } from '$announcements/database/index.ts';
 import { compile } from '$pcd/database/compiler.ts';
 import { listDraftEntityChanges } from '$pcd/ops/draftChanges.ts';
 import { exportDraftOps, previewDraftOps } from '$pcd/ops/exporter.ts';
 import { uuid } from '$shared/utils/uuid.ts';
 import { validateFilePaths } from '$utils/paths.ts';
+import { getStatus, restorePathsToHead } from '$utils/git/index.ts';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { database } = await parent();
@@ -33,12 +35,17 @@ export const actions: Actions = {
 			const opIdsInput = (formData.getAll('opIds') as string[])
 				.map((value) => Number(value))
 				.filter((value) => Number.isFinite(value));
+			const filePathsInput = (formData.getAll('filePaths') as string[]).filter(Boolean);
 
 			const opIds = new Set<number>();
+			const filePaths = new Set<string>();
 
-			if (opIdsInput.length > 0) {
+			if (opIdsInput.length > 0 || filePathsInput.length > 0) {
 				for (const opId of opIdsInput) {
 					opIds.add(opId);
+				}
+				for (const filepath of filePathsInput) {
+					filePaths.add(filepath);
 				}
 			} else {
 				const keys = (formData.getAll('keys') as string[]).filter(Boolean);
@@ -78,19 +85,82 @@ export const actions: Actions = {
 					for (const op of change.ops) {
 						opIds.add(op.id);
 					}
+					if (change.path) {
+						filePaths.add(change.path);
+					}
 				}
 			}
 
-			if (opIds.size === 0) {
-				await logger.warn('Drop requested with no operations', {
+			if (opIds.size === 0 && filePaths.size === 0) {
+				await logger.warn('Drop requested with no targets', {
 					source: 'changes',
 					meta: { databaseId: id }
 				});
-				return { success: false, error: 'No operations to drop' };
+				return { success: false, error: 'No changes selected' };
 			}
 
+			// ─── File-backed drops ──────────────────────────────────────────
+			let droppedFiles = 0;
+			let touchedAnnouncementFiles = false;
+
+			if (filePaths.size > 0) {
+				const filePathsArray = Array.from(filePaths);
+				try {
+					validateFilePaths(database.local_path, filePathsArray);
+				} catch {
+					return fail(400, { error: 'Invalid file path' });
+				}
+
+				// Bucket each requested path against the current working tree.
+				const status = await getStatus(database.local_path);
+				const untrackedSet = new Set(status.untracked);
+				const modifiedSet = new Set(status.modified);
+				const deletedSet = new Set(status.deleted);
+
+				const toDelete: string[] = [];
+				const toRestore: string[] = [];
+
+				for (const filepath of filePathsArray) {
+					if (untrackedSet.has(filepath)) {
+						toDelete.push(filepath);
+					} else if (modifiedSet.has(filepath) || deletedSet.has(filepath)) {
+						toRestore.push(filepath);
+					}
+					// Files that aren't in any bucket are clean -- nothing to drop.
+					if (filepath.startsWith('announcements/') && filepath.endsWith('.md')) {
+						touchedAnnouncementFiles = true;
+					}
+				}
+
+				for (const filepath of toDelete) {
+					try {
+						await Deno.remove(`${database.local_path}/${filepath}`);
+						droppedFiles += 1;
+					} catch (err) {
+						if (!(err instanceof Deno.errors.NotFound)) throw err;
+					}
+				}
+
+				if (toRestore.length > 0) {
+					await restorePathsToHead(database.local_path, toRestore);
+					droppedFiles += toRestore.length;
+				}
+
+				if (touchedAnnouncementFiles) {
+					try {
+						await reconcileFromWorkingCopy(id, { isFirstSync: false });
+					} catch (err) {
+						await logger.error('Failed to reconcile announcements after drop', {
+							source: 'changes',
+							meta: { databaseId: id, error: String(err) }
+						});
+					}
+				}
+			}
+
+			// ─── Op drops ───────────────────────────────────────────────────
 			const batchId = uuid();
-			let droppedCount = 0;
+			let droppedOps = 0;
 			for (const opId of opIds) {
 				const op = pcdOpsQueries.getById(opId);
 				if (!op || op.database_id !== id || op.state !== 'draft') continue;
@@ -102,18 +172,18 @@ export const actions: Actions = {
 					batchId,
 					status: 'dropped'
 				});
-				droppedCount += 1;
+				droppedOps += 1;
 			}
 
-			if (droppedCount === 0) {
-				await logger.warn('Drop requested but no draft ops matched', {
+			if (droppedOps === 0 && droppedFiles === 0) {
+				await logger.warn('Drop requested but nothing matched', {
 					source: 'changes',
-					meta: { databaseId: id, requested: opIds.size }
+					meta: { databaseId: id, requestedOps: opIds.size, requestedFiles: filePaths.size }
 				});
-				return { success: false, error: 'No operations to drop' };
+				return { success: false, error: 'No changes to drop' };
 			}
 
-			if (database.enabled) {
+			if (droppedOps > 0 && database.enabled) {
 				try {
 					await compile(database.local_path, id);
 				} catch (err) {
@@ -124,18 +194,21 @@ export const actions: Actions = {
 				}
 			}
 
-			await logger.info('Dropped draft operations', {
+			await logger.info('Dropped draft changes', {
 				source: 'changes',
 				meta: {
 					databaseId: id,
 					databaseName: database.name,
 					batchId,
 					requestedOps: opIds.size,
-					droppedOps: droppedCount,
-					opIds: Array.from(opIds)
+					droppedOps,
+					requestedFiles: filePaths.size,
+					droppedFiles,
+					opIds: Array.from(opIds),
+					filePaths: Array.from(filePaths)
 				}
 			});
-			return { success: true, dropped: droppedCount };
+			return { success: true, dropped: droppedOps + droppedFiles };
 		} catch (err) {
 			await logger.error('Failed to drop changes', {
 				source: 'changes',
@@ -239,8 +312,18 @@ export const actions: Actions = {
 			return { success: false, error: 'Database not found' };
 		}
 
+		// Capture before pcdManager.sync, which updates last_synced_at as
+		// part of its work. Used by the announcements reconciler to choose
+		// between silent insert (new link with backlog) and normal
+		// notification firing.
+		const isFirstSync = database.last_synced_at === null;
+
 		try {
-			return await pcdManager.sync(id, 'manual-ui');
+			const result = await pcdManager.sync(id, 'manual-ui');
+			if (result.success) {
+				await reconcileAndNotify(id, { source: 'changes', isFirstSync });
+			}
+			return result;
 		} catch (err) {
 			await logger.error('Failed to pull changes', {
 				source: 'changes',

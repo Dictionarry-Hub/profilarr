@@ -253,6 +253,17 @@ export async function checkout(repoPath: string, branch: string): Promise<void> 
 }
 
 /**
+ * Restore tracked files in the working tree (and index) to their HEAD
+ * versions. Used to drop modified-on-disk and deleted-on-disk file
+ * changes. Untracked files are not handled here -- the caller deletes
+ * those directly.
+ */
+export async function restorePathsToHead(repoPath: string, paths: string[]): Promise<void> {
+	if (paths.length === 0) return;
+	await execGit(['checkout', 'HEAD', '--', ...paths], repoPath);
+}
+
+/**
  * Reset repository to match remote (discards local changes)
  */
 /**
@@ -264,7 +275,9 @@ export async function stage(repoPath: string, filepaths: string[]): Promise<void
 		const relativePath = filepath.startsWith(repoPath + '/')
 			? filepath.slice(repoPath.length + 1)
 			: filepath;
-		await execGit(['add', relativePath], repoPath);
+		// `-A` so deletions are staged too; plain `git add <path>` ignores
+		// removed files. Needed for withdraw-an-announcement style commits.
+		await execGit(['add', '-A', relativePath], repoPath);
 	}
 }
 
