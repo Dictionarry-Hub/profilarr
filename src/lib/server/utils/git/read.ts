@@ -58,7 +58,7 @@ export async function getStatus(
 
 	// Get file status — use raw output to preserve leading spaces in porcelain format
 	const statusCmd = new Deno.Command('git', {
-		args: ['status', '--porcelain'],
+		args: ['status', '--porcelain', '--untracked-files=all'],
 		cwd: repoPath,
 		stdout: 'piped',
 		stderr: 'piped'
@@ -67,6 +67,7 @@ export async function getStatus(
 	const statusOutput = new TextDecoder().decode(statusResult.stdout);
 	const untracked: string[] = [];
 	const modified: string[] = [];
+	const deleted: string[] = [];
 	const staged: string[] = [];
 
 	for (const line of statusOutput.split('\n')) {
@@ -77,7 +78,9 @@ export async function getStatus(
 
 		if (status.startsWith('??')) {
 			untracked.push(file);
-		} else if (status[1] === 'M' || status[1] === 'D') {
+		} else if (status[1] === 'D' || status[0] === 'D') {
+			deleted.push(file);
+		} else if (status[1] === 'M') {
 			modified.push(file);
 		}
 		if (status[0] === 'M' || status[0] === 'A' || status[0] === 'D') {
@@ -85,9 +88,10 @@ export async function getStatus(
 		}
 	}
 
-	const isDirty = untracked.length > 0 || modified.length > 0 || staged.length > 0;
+	const isDirty =
+		untracked.length > 0 || modified.length > 0 || deleted.length > 0 || staged.length > 0;
 
-	return { branch, isDirty, ahead, behind, untracked, modified, staged };
+	return { branch, isDirty, ahead, behind, untracked, modified, deleted, staged };
 }
 
 /**

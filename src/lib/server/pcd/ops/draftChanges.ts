@@ -151,6 +151,9 @@ export type DraftEntityChange = {
 	requires?: Array<{ key: string; entity: string; name: string }>;
 	groupId?: string;
 	generated?: boolean;
+	// Set on file-backed rows (entity 'file' or 'announcement'). Lets the
+	// commit pipeline collect filepaths regardless of the displayed entity.
+	path?: string;
 };
 
 const FIELD_LABELS: Record<string, string> = {

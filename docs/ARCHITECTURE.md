@@ -71,11 +71,18 @@ publishes a release.
 - **Sync**: Pushing compiled configuration from the cache into Arr instances.
 - **Entity testing**: Evaluating quality profile scoring against real movies or
   series with TMDB metadata and real or synthetic releases.
+- **Bulletin**: The standalone `Dictionarry-Hub/bulletin` repo holding
+  `versions.json` (release manifest) and `announcements.json` (Profilarr-team
+  messages), fetched by every instance over `raw.githubusercontent.com`.
+- **Announcement**: A read-tracked message surfaced in the inbox. Two sources:
+  Profilarr-team (from the bulletin) and per-PCD (single-file markdown in a
+  linked database's working copy).
 
 ## Architecture Sections
 
 **Backend**
 
+- [backend/announcements.md](./backend/announcements.md): Bulletin fetch, version check, per-PCD announcements, inbox
 - [backend/api.md](./backend/api.md): API v1 routes, contract-first workflow, OpenAPI spec
 - [backend/database.md](./backend/database.md): App database, migrations, query layer, schema reference
 - [backend/datetime.md](./backend/datetime.md): Date/time handling, UTC storage, query normalization, timezone display

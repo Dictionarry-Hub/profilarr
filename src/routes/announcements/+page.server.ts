@@ -1,47 +1,105 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { getDetail, listVisible, markRead, markUnread } from '$lib/server/announcements/index.ts';
+import { inbox, type InboxSource } from '$announcements/index.ts';
 
 export const load: PageServerLoad = async () => {
-	const visible = listVisible();
+	const items = inbox.listInbox();
 
-	// Ensure bodies are loaded (lazy-fetches from bulletin on first miss, then
-	// cached in the DB). Announcement counts are small; parallel fetch is fine.
+	// Lazy-load bodies for bulletin entries (the database side already
+	// snapshots the body at reconcile time). Counts are small; parallel is
+	// fine.
 	const detailed = await Promise.all(
-		visible.map(async (a) => {
-			const full = (await getDetail(a.id, { loadBody: true })) ?? a;
-			return {
-				id: full.id,
-				title: full.title,
-				severity: full.severity,
-				publishedAt: full.publishedAt,
-				expiresAt: full.expiresAt,
-				link: full.link,
-				readAt: full.readAt,
-				body: full.body
-			};
+		items.map(async (item) => {
+			if (item.source === 'profilarr' && item.body === null) {
+				const full = await inbox.getDetail(item.source, item.id, item.databaseId, {
+					loadBody: true
+				});
+				return full ?? item;
+			}
+			return item;
 		})
 	);
 
-	return { announcements: detailed };
+	return {
+		announcements: detailed.map((item) => ({
+			source: item.source,
+			id: item.id,
+			databaseId: item.databaseId,
+			databaseName: item.databaseName,
+			databaseRepoUrl: item.databaseRepoUrl,
+			title: item.title,
+			severity: item.severity,
+			publishedAt: item.publishedAt,
+			expiresAt: item.expiresAt,
+			link: item.link,
+			readAt: item.readAt,
+			body: item.body
+		}))
+	};
 };
 
-function requireId(form: FormData): string | null {
+interface ParsedTarget {
+	source: InboxSource;
+	id: string;
+	databaseId: number | null;
+}
+
+function parseTarget(form: FormData): ParsedTarget | null {
 	const id = form.get('id');
-	return typeof id === 'string' && id ? id : null;
+	const source = form.get('source');
+	if (typeof id !== 'string' || !id) return null;
+	if (source !== 'profilarr' && source !== 'pcd') return null;
+
+	if (source === 'profilarr') {
+		return { source, id, databaseId: null };
+	}
+
+	const rawDbId = form.get('databaseId');
+	if (typeof rawDbId !== 'string' || !rawDbId) return null;
+	const databaseId = Number(rawDbId);
+	if (!Number.isFinite(databaseId)) return null;
+	return { source, id, databaseId };
 }
 
 export const actions: Actions = {
 	markRead: async ({ request }) => {
-		const id = requireId(await request.formData());
-		if (!id) return fail(400, { error: 'id required' });
-		markRead(id);
+		const target = parseTarget(await request.formData());
+		if (!target) return fail(400, { error: 'invalid target' });
+		inbox.markRead(target.source, target.id, target.databaseId);
 		return { success: true };
 	},
 	markUnread: async ({ request }) => {
-		const id = requireId(await request.formData());
-		if (!id) return fail(400, { error: 'id required' });
-		markUnread(id);
+		const target = parseTarget(await request.formData());
+		if (!target) return fail(400, { error: 'invalid target' });
+		inbox.markUnread(target.source, target.id, target.databaseId);
 		return { success: true };
+	},
+	markReadMany: async ({ request }) => {
+		const raw = (await request.formData()).get('targets');
+		if (typeof raw !== 'string') return fail(400, { error: 'missing targets' });
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(raw);
+		} catch {
+			return fail(400, { error: 'invalid targets json' });
+		}
+		if (!Array.isArray(parsed)) return fail(400, { error: 'targets must be an array' });
+
+		const targets: ParsedTarget[] = [];
+		for (const item of parsed) {
+			if (!item || typeof item !== 'object') continue;
+			const source = (item as { source?: unknown }).source;
+			const id = (item as { id?: unknown }).id;
+			const databaseId = (item as { databaseId?: unknown }).databaseId;
+			if (source !== 'profilarr' && source !== 'pcd') continue;
+			if (typeof id !== 'string' || !id) continue;
+			if (source === 'profilarr') {
+				targets.push({ source, id, databaseId: null });
+			} else if (typeof databaseId === 'number' && Number.isFinite(databaseId)) {
+				targets.push({ source, id, databaseId });
+			}
+		}
+		inbox.markReadMany(targets);
+		return { success: true, count: targets.length };
 	}
 };

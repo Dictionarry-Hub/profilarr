@@ -11,7 +11,7 @@ import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifie
 import { TelegramNotifier } from '$notifications/notifiers/telegram/TelegramNotifier.ts';
 import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { announcementNew } from '$notifications/definitions/announcement.ts';
-import type { AnnouncementRecord } from '$lib/server/announcements/types.ts';
+import type { AnnouncementRecord } from '$announcements/profilarr/types.ts';
 
 const MOCK_PORT = 7141;
 let captured: CapturedRequest[];
@@ -136,6 +136,74 @@ test('link block absent when announcement.link is null', () => {
 	}).blocks;
 	const link = blocks?.find((b) => b.kind === 'field' && b.label === 'Link');
 	assertEquals(link, undefined);
+});
+
+// =========================================================================
+// Source = pcd (per-database announcement)
+// =========================================================================
+
+test('pcd source: title is prefixed with the database name', () => {
+	const out = announcementNew({
+		announcement: makeAnnouncement({ title: 'Migration to v2' }),
+		source: { kind: 'pcd', databaseName: 'Library DB' }
+	});
+	assertEquals(out.title, 'Library DB: Migration to v2');
+});
+
+test('pcd source: message names the database, not the Profilarr team', () => {
+	const out = announcementNew({
+		announcement: makeAnnouncement(),
+		source: { kind: 'pcd', databaseName: 'Library DB' }
+	});
+	assertEquals(out.message, 'A new announcement from Library DB.');
+});
+
+test('pcd source: From block carries the database name', () => {
+	const blocks =
+		announcementNew({
+			announcement: makeAnnouncement(),
+			source: { kind: 'pcd', databaseName: 'Library DB' }
+		}).blocks ?? [];
+	const from = blocks.find((b) => b.kind === 'field' && b.label === 'From');
+	assertExists(from);
+	if (from?.kind === 'field') assertEquals(from.value, 'Library DB');
+});
+
+test('profilarr source: no From block (default behaviour preserved)', () => {
+	const blocks =
+		announcementNew({
+			announcement: makeAnnouncement(),
+			source: { kind: 'profilarr' }
+		}).blocks ?? [];
+	const from = blocks.find((b) => b.kind === 'field' && b.label === 'From');
+	assertEquals(from, undefined);
+});
+
+test('omitting source defaults to profilarr (no From block, original message)', () => {
+	const out = announcementNew({ announcement: makeAnnouncement() });
+	assertEquals(out.message, 'A new announcement from the Profilarr team.');
+	const from = (out.blocks ?? []).find((b) => b.kind === 'field' && b.label === 'From');
+	assertEquals(from, undefined);
+});
+
+test('pcd source: severity mapping unchanged', () => {
+	assertEquals(
+		announcementNew({
+			announcement: makeAnnouncement({ severity: 'critical' }),
+			source: { kind: 'pcd', databaseName: 'Library DB' }
+		}).severity,
+		'error'
+	);
+});
+
+test('pcd source: link block still appears when link is set', () => {
+	const blocks =
+		announcementNew({
+			announcement: makeAnnouncement({ link: 'https://example.com/x' }),
+			source: { kind: 'pcd', databaseName: 'Library DB' }
+		}).blocks ?? [];
+	const link = blocks.find((b) => b.kind === 'field' && b.label === 'Link');
+	assertExists(link);
 });
 
 // =========================================================================

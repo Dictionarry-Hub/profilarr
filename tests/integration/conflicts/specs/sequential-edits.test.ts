@@ -108,7 +108,7 @@ function seedScenario(
 }
 
 setup(async () => {
-	await startServer(PORT, { AUTH: 'off', ORIGIN });
+	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 	client = new TestClient(ORIGIN);
 
 	const basePath = `./dist/integration-${PORT}`;

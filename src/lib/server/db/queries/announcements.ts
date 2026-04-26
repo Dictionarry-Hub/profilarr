@@ -3,7 +3,7 @@ import type {
 	AnnouncementRow,
 	BulletinAnnouncement,
 	VersionsSnapshotRow
-} from '$lib/server/announcements/types.ts';
+} from '$announcements/profilarr/types.ts';
 
 /**
  * Queries for the announcements + versions_snapshot tables.

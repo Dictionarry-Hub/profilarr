@@ -96,29 +96,30 @@ create a new migration to fix it.
 Each module covers one database table and exports a queries object with typed methods.
 All use raw SQL with `?` parameter binding and typed input/output interfaces.
 
-| Module                 | Domain                              |
-| ---------------------- | ----------------------------------- |
-| `arrInstances`         | Arr instance CRUD                   |
-| `arrSync`              | Sync config and status per instance |
-| `arrCleanupSettings`   | Stale config cleanup settings       |
-| `arrRenameSettings`    | Rename job settings per instance    |
-| `authSettings`         | Session duration, API key           |
-| `sessions`             | Session CRUD and cleanup            |
-| `jobQueue`             | Job queue CRUD, claim, reschedule   |
-| `jobRunHistory`        | Job execution history               |
-| `pcdOps`               | PCD operation CRUD and filtering    |
-| `pcdOpHistory`         | Per-compile op application results  |
-| `notificationServices` | Notification service config         |
-| `logSettings`          | Log level and output settings       |
-| `renameRuns`           | Rename job run history              |
-| `upgradeRuns`          | Upgrade job run history             |
-| `parsedReleaseCache`   | Parser result cache                 |
-| `patternMatchCache`    | Regex match result cache            |
-| `githubCache`          | GitHub API response cache           |
-| `tmdbSettings`         | TMDB API key storage                |
-| `aiSettings`           | AI service settings                 |
-| `announcements`        | Announcements cache + read state    |
-| `versionsSnapshot`     | Cached bulletin versions manifest   |
+| Module                  | Domain                                                              |
+| ----------------------- | ------------------------------------------------------------------- |
+| `arrInstances`          | Arr instance CRUD                                                   |
+| `arrSync`               | Sync config and status per instance                                 |
+| `arrCleanupSettings`    | Stale config cleanup settings                                       |
+| `arrRenameSettings`     | Rename job settings per instance                                    |
+| `authSettings`          | Session duration, API key                                           |
+| `sessions`              | Session CRUD and cleanup                                            |
+| `jobQueue`              | Job queue CRUD, claim, reschedule                                   |
+| `jobRunHistory`         | Job execution history                                               |
+| `pcdOps`                | PCD operation CRUD and filtering                                    |
+| `pcdOpHistory`          | Per-compile op application results                                  |
+| `notificationServices`  | Notification service config                                         |
+| `logSettings`           | Log level and output settings                                       |
+| `renameRuns`            | Rename job run history                                              |
+| `upgradeRuns`           | Upgrade job run history                                             |
+| `parsedReleaseCache`    | Parser result cache                                                 |
+| `patternMatchCache`     | Regex match result cache                                            |
+| `githubCache`           | GitHub API response cache                                           |
+| `tmdbSettings`          | TMDB API key storage                                                |
+| `aiSettings`            | AI service settings                                                 |
+| `announcements`         | Announcements cache + read state                                    |
+| `versionsSnapshot`      | Cached bulletin versions manifest                                   |
+| `databaseAnnouncements` | Per-PCD announcement cache (scoped per database, ON DELETE CASCADE) |
 
 Query methods follow a consistent pattern: typed input interfaces for
 mutations, generic return types for reads, and the singleton `db` instance

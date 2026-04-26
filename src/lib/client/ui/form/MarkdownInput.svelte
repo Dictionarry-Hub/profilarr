@@ -24,7 +24,7 @@
 
 	$: stateClass = disabled
 		? 'bg-neutral-100 text-neutral-500 cursor-not-allowed dark:bg-neutral-800/40 dark:text-neutral-500'
-		: 'bg-white focus:border-neutral-400 dark:bg-neutral-800/50 dark:focus:border-neutral-600';
+		: 'bg-white dark:bg-neutral-800/50';
 
 	function handleInput(e: Event) {
 		const target = e.target as HTMLInputElement | HTMLTextAreaElement;
@@ -226,8 +226,8 @@
 				oninput={handleInput}
 				onkeydown={handleKeydown}
 				class="{markdown
-					? 'rounded-t-none rounded-b-xl border-t-0'
-					: 'rounded-xl'} block w-full border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {stateClass}"
+					? 'rounded-t-none rounded-bl-xl border-t-0'
+					: 'rounded-tl-xl rounded-tr-xl rounded-bl-xl'} block w-full border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {stateClass}"
 			></textarea>
 		{:else}
 			<!-- Single-line input -->
@@ -243,8 +243,8 @@
 				oninput={handleInput}
 				onkeydown={handleKeydown}
 				class="{markdown
-					? 'rounded-t-none rounded-b-xl border-t-0'
-					: 'rounded-xl'} block w-full border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {stateClass}"
+					? 'rounded-t-none rounded-bl-xl border-t-0'
+					: 'rounded-tl-xl rounded-tr-xl rounded-bl-xl'} block w-full border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {stateClass}"
 			/>
 		{/if}
 	</div>

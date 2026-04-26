@@ -10,6 +10,7 @@
 	export let initialOpen: boolean = true;
 	export let hasItems: boolean = false;
 	export let onboardingId: string | undefined = undefined;
+	export let alert: number = 0;
 	let isOpen = initialOpen;
 
 	function toggleOpen() {
@@ -19,7 +20,7 @@
 
 <div class="mb-4">
 	<div data-onboarding={onboardingId}>
-		<GroupHeader {label} {href} {icon} {emoji} {isOpen} {hasItems} onToggle={toggleOpen} />
+		<GroupHeader {label} {href} {icon} {emoji} {isOpen} {hasItems} {alert} onToggle={toggleOpen} />
 	</div>
 
 	{#if isOpen && hasItems}

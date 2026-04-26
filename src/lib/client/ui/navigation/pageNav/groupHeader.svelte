@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { ComponentType } from 'svelte';
+	import Label from '$ui/label/Label.svelte';
 
 	export let label: string;
 	export let href: string;
@@ -9,6 +10,7 @@
 	export let isOpen: boolean;
 	export let hasItems: boolean;
 	export let onToggle: () => void;
+	export let alert: number = 0;
 
 	$: isActive = hasItems
 		? $page.url.pathname === href
@@ -31,7 +33,10 @@
 		{#if icon}
 			<span class="nav-icon-lucide"><svelte:component this={icon} class="h-4 w-4" /></span>
 		{/if}
-		{label}
+		<span class="flex-1">{label}</span>
+		{#if alert > 0}
+			<Label variant="info" size="sm" rounded="full">{alert}</Label>
+		{/if}
 	</a>
 
 	<!-- Chevron toggle button (right side) - square left, rounded right -->

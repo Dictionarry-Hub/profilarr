@@ -596,16 +596,37 @@ export async function exportDraftOps(
 				toStage.push(filepath);
 			}
 
-			// Copy file changes from source working tree to clone
+			// Apply file changes from source working tree to clone. New /
+			// modified files are copied; files that no longer exist on disk
+			// (tracked-but-deleted, e.g. a withdrawn announcement) are
+			// removed from the clone so `git add` records the deletion.
 			if (filePaths.length > 0) {
 				for (const fp of filePaths) {
 					const src = `${sourcePath}/${fp}`;
 					const dest = `${repoDir}/${fp}`;
-					const destDir = dest.substring(0, dest.lastIndexOf('/'));
-					if (destDir !== repoDir) {
-						await Deno.mkdir(destDir, { recursive: true });
+					let srcExists = true;
+					try {
+						await Deno.stat(src);
+					} catch (err) {
+						if (err instanceof Deno.errors.NotFound) {
+							srcExists = false;
+						} else {
+							throw err;
+						}
 					}
-					await Deno.copyFile(src, dest);
+					if (srcExists) {
+						const destDir = dest.substring(0, dest.lastIndexOf('/'));
+						if (destDir !== repoDir) {
+							await Deno.mkdir(destDir, { recursive: true });
+						}
+						await Deno.copyFile(src, dest);
+					} else {
+						try {
+							await Deno.remove(dest);
+						} catch (err) {
+							if (!(err instanceof Deno.errors.NotFound)) throw err;
+						}
+					}
 					toStage.push(dest);
 				}
 			}

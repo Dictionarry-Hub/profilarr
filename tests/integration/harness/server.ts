@@ -16,9 +16,14 @@ interface ServerInstance {
 	port: number;
 	basePath: string;
 	url: string;
+	stdoutBuf: string[];
+	stderrBuf: string[];
+	exitStatus: Deno.CommandStatus | null;
+	startedAt: number;
 }
 
 const instances = new Map<number, ServerInstance>();
+const DEBUG_VERBOSE = Deno.env.get('INTEGRATION_DEBUG') === '1';
 
 /**
  * Spawn a server with the given port and env overrides.
@@ -77,19 +82,46 @@ export async function startServer(
 		});
 	}
 
+	const startedAt = Date.now();
 	const process = cmd.spawn();
 
-	// Drain stdout/stderr to prevent backpressure
-	drainStream(process.stdout);
-	drainStream(process.stderr);
-
+	const stdoutBuf: string[] = [];
+	const stderrBuf: string[] = [];
 	const url = `http://localhost:${port}`;
 
-	instances.set(port, { process, port, basePath, url });
+	const instance: ServerInstance = {
+		process,
+		port,
+		basePath,
+		url,
+		stdoutBuf,
+		stderrBuf,
+		exitStatus: null,
+		startedAt
+	};
+	instances.set(port, instance);
 
-	log.server(port, 'Waiting for health check...');
-	await waitForReady(url, 60_000);
-	log.server(port, `Ready at ${url}`);
+	captureStream(process.stdout, stdoutBuf, port, 'stdout');
+	captureStream(process.stderr, stderrBuf, port, 'stderr');
+
+	// Track exit so waitForReady can detect early death.
+	process.status.then((status) => {
+		instance.exitStatus = status;
+		const elapsed = Date.now() - startedAt;
+		log.server(
+			port,
+			`Process exited (code=${status.code}, signal=${status.signal ?? 'none'}) after ${elapsed}ms`
+		);
+	});
+
+	log.server(port, `PID ${process.pid} | Waiting for health check...`);
+	try {
+		await waitForReady(instance, 60_000);
+		log.server(port, `Ready at ${url} (${Date.now() - startedAt}ms)`);
+	} catch (err) {
+		dumpDiagnostics(instance);
+		throw err;
+	}
 
 	return url;
 }
@@ -136,40 +168,113 @@ export function getDbPath(port: number): string {
 }
 
 /**
- * Poll the health endpoint until the server is ready.
+ * Poll the health endpoint until the server is ready. Logs the first probe
+ * outcome we see and a heartbeat every 10s so a hung start is visible in the
+ * test output, not just at the 60s timeout.
  */
-async function waitForReady(url: string, timeoutMs: number): Promise<void> {
+async function waitForReady(instance: ServerInstance, timeoutMs: number): Promise<void> {
 	const start = Date.now();
-	const healthUrl = `${url}/api/v1/health`;
+	const healthUrl = `${instance.url}/api/v1/health`;
+	let lastFetchError: string | null = null;
+	let lastHttpStatus: number | null = null;
+	let lastLogAt = 0;
 
 	while (Date.now() - start < timeoutMs) {
-		try {
-			const res = await fetch(healthUrl, {
-				signal: AbortSignal.timeout(2000)
-			});
-			if (res.ok) return;
-		} catch {
-			// Server not ready yet
+		// If the process already exited, no point polling further.
+		if (instance.exitStatus) {
+			throw new Error(
+				`Server at ${instance.url} exited before health check ` +
+					`(code=${instance.exitStatus.code}, signal=${instance.exitStatus.signal ?? 'none'}) ` +
+					`after ${Date.now() - start}ms`
+			);
 		}
+
+		try {
+			const res = await fetch(healthUrl, { signal: AbortSignal.timeout(2000) });
+			lastHttpStatus = res.status;
+			lastFetchError = null;
+			if (res.ok) return;
+		} catch (err) {
+			lastFetchError = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+		}
+
+		const elapsed = Date.now() - start;
+		if (elapsed - lastLogAt >= 10_000) {
+			log.server(
+				instance.port,
+				`Still not ready after ${elapsed}ms ` +
+					`(lastStatus=${lastHttpStatus ?? 'n/a'}, lastErr=${lastFetchError ?? 'n/a'}, ` +
+					`stdoutLines=${instance.stdoutBuf.length}, stderrLines=${instance.stderrBuf.length})`
+			);
+			lastLogAt = elapsed;
+		}
+
 		await new Promise((r) => setTimeout(r, 500));
 	}
 
-	throw new Error(`Server at ${url} did not become ready within ${timeoutMs}ms`);
+	throw new Error(
+		`Server at ${instance.url} did not become ready within ${timeoutMs}ms ` +
+			`(lastStatus=${lastHttpStatus ?? 'n/a'}, lastErr=${lastFetchError ?? 'n/a'})`
+	);
 }
 
 /**
- * Drain a readable stream to prevent backpressure from blocking the process.
+ * Pipe a child stream into a buffer (so we can dump it on failure) and, if
+ * INTEGRATION_DEBUG=1, mirror it live so we can see what the server is doing.
+ * Buffer is bounded at 1000 lines per stream; oldest dropped first.
  */
-function drainStream(stream: ReadableStream<Uint8Array>): void {
+function captureStream(
+	stream: ReadableStream<Uint8Array>,
+	buf: string[],
+	port: number,
+	tag: 'stdout' | 'stderr'
+): void {
+	const decoder = new TextDecoder();
 	const reader = stream.getReader();
+	let leftover = '';
 	(async () => {
 		try {
 			while (true) {
-				const { done } = await reader.read();
+				const { done, value } = await reader.read();
 				if (done) break;
+				const text = leftover + decoder.decode(value, { stream: true });
+				const lines = text.split('\n');
+				leftover = lines.pop() ?? '';
+				for (const line of lines) {
+					if (buf.length >= 1000) buf.shift();
+					buf.push(line);
+					if (DEBUG_VERBOSE) {
+						console.error(`[${port}:${tag}] ${line}`);
+					}
+				}
+			}
+			if (leftover) {
+				if (buf.length >= 1000) buf.shift();
+				buf.push(leftover);
 			}
 		} catch {
 			// Stream closed
 		}
 	})();
+}
+
+/**
+ * Print everything we captured for a server that failed to come up. Called
+ * from the catch in startServer; never blocks subsequent test cleanup.
+ */
+function dumpDiagnostics(instance: ServerInstance): void {
+	const elapsed = Date.now() - instance.startedAt;
+	console.error(
+		`\n──── DIAG [:${instance.port}] failed to become ready (${elapsed}ms) ─────────────────`
+	);
+	console.error(
+		`  pid=${instance.process.pid} ` +
+			`exit=${instance.exitStatus ? `code=${instance.exitStatus.code} signal=${instance.exitStatus.signal ?? 'none'}` : 'still running'}`
+	);
+	console.error(`  basePath=${instance.basePath}`);
+	console.error(`  --- stdout (${instance.stdoutBuf.length} lines) ---`);
+	for (const line of instance.stdoutBuf.slice(-200)) console.error(`  | ${line}`);
+	console.error(`  --- stderr (${instance.stderrBuf.length} lines) ---`);
+	for (const line of instance.stderrBuf.slice(-200)) console.error(`  | ${line}`);
+	console.error(`──── end DIAG [:${instance.port}] ─────────────────────────────────────────\n`);
 }

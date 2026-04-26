@@ -1,13 +1,15 @@
 /**
- * Types for the announcements subsystem.
+ * Types for the profilarr (bulletin) announcements subsystem.
  *
  * Three logical groups:
- *  1. Bulletin payloads — exact shape fetched from raw.githubusercontent.com.
- *  2. Database row types — snake_case mirrors of the announcements/versions_snapshot tables.
- *  3. Service record types — camelCase shape exposed to API routes and load functions.
+ *  1. Bulletin payloads: exact shape fetched from raw.githubusercontent.com.
+ *  2. Database row types: snake_case mirrors of the announcements/versions_snapshot tables.
+ *  3. Service record types: camelCase shape exposed to API routes and load functions.
  */
 
-export type AnnouncementSeverity = 'info' | 'warning' | 'critical';
+import type { AnnouncementSeverity } from '../shared/types.ts';
+
+export type { AnnouncementSeverity };
 
 // ─── Bulletin payloads (raw JSON) ─────────────────────────────────────────
 

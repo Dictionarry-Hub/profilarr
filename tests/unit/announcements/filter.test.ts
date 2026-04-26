@@ -9,8 +9,8 @@ import {
 	isVisible,
 	satisfiesRange,
 	type VisibilityContext
-} from '../../../src/lib/server/announcements/filter.ts';
-import type { AnnouncementRecord } from '../../../src/lib/server/announcements/types.ts';
+} from '$announcements/profilarr/filter.ts';
+import type { AnnouncementRecord } from '$announcements/profilarr/types.ts';
 
 function makeAnnouncement(overrides: Partial<AnnouncementRecord> = {}): AnnouncementRecord {
 	return {

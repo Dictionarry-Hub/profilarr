@@ -331,14 +331,166 @@ export const build: BuildInfo = {
 
 ## Database Announcements
 
-Not yet implemented. Tracked under
-[#291](https://github.com/Dictionarry-Hub/profilarr/issues/291). Sketch:
+Per-PCD announcements live in each linked database's working copy as
+single-file markdown documents: `${pcdPath}/announcements/<ulid>.md`,
+YAML frontmatter on top, body below. There is no JSON manifest. One
+file = one announcement. Adding, editing, or withdrawing means touching
+exactly one file, which keeps maintainer diffs aligned with intent.
 
-- Same model, scoped to a specific PCD. Each PCD repo ships an
-  `announcements/` folder and a section in its `pcd.json` manifest.
-- Fetched alongside normal PCD sync, visible only to users who have the
-  database linked.
-- Reuses the `announcements` table with a `source` column
-  (`profilarr` | `pcd:<id>`).
-- No new polling job: piggybacks on PCD sync, so there's no GitHub
-  traffic outside an active database connection.
+The pipeline mirrors the bulletin: pull, parse, reconcile, fire
+`announcement.new` per net-new entry. The only differences are the
+source (working copy on disk, not the bulletin CDN), the storage table
+(`database_announcements`, scoped per database), and the trigger (the
+`pcd.sync` job and the manual `/databases/[id]/changes` pull, not a
+30-minute timer).
+
+### File Format
+
+```yaml
+---
+title: Migration to v2
+severity: warning # info | warning | critical
+published_at: 2026-04-20T10:00:00Z
+expires_at: 2026-05-20T10:00:00Z # optional
+link: https://example.com/migration # optional
+---
+Markdown body here.
+```
+
+The id is the filename minus `.md`. ULIDs are used so `ls` sorts
+chronologically. There is no `min_version` / `max_version`; PCD
+announcements do not gate by Profilarr version.
+
+The parser tolerates malformed files: each is reported as a `ParseError`
+and skipped. One bad file never blocks a reconcile.
+
+### Storage
+
+Migration `063_create_database_announcements.ts` adds the table:
+
+```sql
+CREATE TABLE database_announcements (
+  id TEXT NOT NULL,
+  database_id INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  severity TEXT NOT NULL CHECK (severity IN ('info','warning','critical')),
+  published_at DATETIME NOT NULL,
+  expires_at DATETIME,
+  link TEXT,
+  body TEXT NOT NULL,         -- snapshotted at reconcile time
+  withdrawn INTEGER NOT NULL DEFAULT 0,
+  read_at DATETIME,
+  fetched_at DATETIME NOT NULL,
+  PRIMARY KEY (id, database_id),
+  FOREIGN KEY (database_id) REFERENCES database_instances(id) ON DELETE CASCADE
+);
+```
+
+Composite PK `(id, database_id)` so the same ULID could appear under two
+PCDs without collision. `ON DELETE CASCADE` wipes the rows when a user
+unlinks a database. Body is `NOT NULL` because the working copy is on
+disk during reconcile, so we snapshot the body alongside the metadata
+(no lazy fetch like the bulletin path needs).
+
+### Reconcile
+
+`reconcileFromWorkingCopy(databaseId)` in
+`src/lib/server/announcements/database/service.ts`:
+
+1. Look up the database row (uuid, name).
+2. Resolve `pcdPath` via `getPCDPath(uuid)`.
+3. Parse every `announcements/*.md`, collecting parse errors.
+4. Compare the parsed list against existing rows for this `database_id`
+   only (the `WHERE database_id = ?` filter is the structural defense
+   against cross-source data loss).
+5. Apply the plan in a single transaction: upsert the parsed entries,
+   mark missing-from-disk ids as withdrawn, mark reappearing withdrawn
+   ids as unwithdrawn.
+6. Return `newlyInserted` so the caller can fire notifications.
+
+The generic reconcile algorithm (`shared/reconcile.ts`) is the same one
+the bulletin uses; the database service is just a thin wrapper that
+adds working-copy I/O and the source-scoped queries.
+
+#### First-sync silent path
+
+When a user newly links a PCD that already has historical announcements,
+firing one `announcement.new` per entry would be hostile. The caller
+passes `isFirstSync` to `reconcileFromWorkingCopy`, derived from
+`instance.last_synced_at === null` and captured _before_ any code path
+that updates `last_synced_at`. When true, every insert during this pass
+is stamped with `read_at = NOW()` and `newlyInserted` is returned empty
+so no notifications fire. Subsequent reconciles pass `isFirstSync: false`
+and behave normally.
+
+Detection is deliberately driven by the explicit parameter, not by "no
+rows yet for this database". A row-count fallback would silence the
+maintainer's first-ever announcement on a long-linked PCD that simply
+hadn't had any announcements before, which is the opposite of what we
+want.
+
+### Notification
+
+The bulletin and per-PCD paths share one notification type:
+`announcement.new`. The `definitions/announcement.ts` function takes an
+optional `source` parameter:
+
+```ts
+{ kind: 'profilarr' }                          // default
+{ kind: 'pcd', databaseName: 'Library DB' }    // per-PCD
+```
+
+When `kind === 'pcd'`, the title is prefixed with the database name and
+a `From` field block is added. Severity mapping and notifier output are
+unchanged. One subscription toggle covers both sources.
+
+### Triggers
+
+`reconcileAndNotify(databaseId, ctx)` is the entry point. It is called
+from every path that has just brought a working copy up to date:
+
+- The `pcd.sync` job handler, on every successful path (after pull,
+  after notify-only, and after no-updates so local maintainer edits get
+  picked up).
+- The manual `/databases/[id]/changes` pull form action, after a
+  successful `pcdManager.sync()`.
+
+Authoring (see below) calls the lower-level `reconcileFromWorkingCopy`
+directly without the notification step, since the maintainer just
+created the announcement themselves.
+
+Failures in the reconcile-and-notify pipeline are logged and swallowed.
+A broken announcement file must never fail the parent sync.
+
+### Maintainer Authoring
+
+Each database with a personal access token gets an "Announcements" tab
+under `/databases/[id]/announcements`. Three routes:
+
+- `/`: list view, parses the working copy on load, links to new + edit.
+- `/new`: form. Generates a fresh ULID on save and writes
+  `announcements/<ulid>.md` atomically (temp + rename).
+- `/[ulid]`: edit form. Save overwrites the file; Withdraw deletes it.
+
+The flow mirrors the readme + manifest editing pattern at
+`/databases/[id]/config`: dirty store for in-browser draft state, form
+POST to a server action that writes the file, no DB writes from the
+authoring UI itself. After every save / delete the action invokes
+`reconcileFromWorkingCopy(id)` so the maintainer sees their change in
+the inbox immediately. Notifications are deliberately suppressed for
+the authoring path: the maintainer just wrote this themselves.
+
+Files are written, not committed. The maintainer commits and pushes
+through the existing PCD git flow.
+
+### Inbox UNION
+
+`/announcements` UNIONs both sources via
+`src/lib/server/announcements/inbox.ts`. Each row carries a `source`
+discriminator (`profilarr` | `pcd`) plus the database name when source
+is `pcd`. The page renders a Source column with an icon per source and
+a filter chip when at least one PCD has announcements. The nav unread
+badge counts both sources via `inbox.getUnreadCount()`.
+
+Mark-read / mark-unread actions take `source` and (for `pcd`)
+`databaseId` as form fields and dispatch to the correct subsystem.

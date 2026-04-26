@@ -1,25 +1,21 @@
 /**
- * Public façade for the announcements subsystem.
+ * Top-level façade for the announcements subsystem.
  *
- * Consumers (API routes, load functions, job handler) should import from
- * here rather than reaching into individual files.
+ * Internally split into two sources:
+ *  - `profilarr/`: bulletin announcements fetched from the Dictionarry-Hub
+ *    bulletin repo over HTTPS.
+ *  - `database/`: per-PCD announcements parsed from each linked database's
+ *    working copy on disk (added in a later step).
+ *
+ * Plus shared utilities (`shared/`) and an `inbox.ts` orchestrator for the
+ * combined `/announcements` view.
+ *
+ * Consumers (API routes, load functions, job handlers) should import from
+ * here whenever possible. Subsystem-specific entry points are also
+ * available at `./profilarr` and `./database`.
  */
 
-export {
-	FETCH_INTERVAL_MS,
-	getDetail,
-	getUnreadCount,
-	getVersionsSnapshot,
-	listVisible,
-	markRead,
-	markUnread,
-	reconcileFromBulletin,
-	type ReconcileReport
-} from './service.ts';
+export * from './profilarr/index.ts';
 
-export {
-	type AnnouncementRecord,
-	type AnnouncementSeverity,
-	type BulletinVersionsFile,
-	type BulletinRelease
-} from './types.ts';
+export * as inbox from './inbox.ts';
+export type { InboxItem, InboxSource } from './inbox.ts';

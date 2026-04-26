@@ -8,12 +8,12 @@ import {
 	ANNOUNCEMENTS_CAP,
 	reconcileAnnouncements,
 	UnsupportedSchemaError
-} from '../../../src/lib/server/announcements/reconcile.ts';
+} from '$announcements/profilarr/reconcile.ts';
 import type {
 	AnnouncementRow,
 	BulletinAnnouncement,
 	BulletinAnnouncementsFile
-} from '../../../src/lib/server/announcements/types.ts';
+} from '$announcements/profilarr/types.ts';
 
 function makeBulletin(overrides: Partial<BulletinAnnouncement> = {}): BulletinAnnouncement {
 	return {

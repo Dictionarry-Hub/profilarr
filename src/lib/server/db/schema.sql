@@ -925,3 +925,35 @@ CREATE TABLE versions_snapshot (
     payload TEXT NOT NULL,                               -- raw versions.json as fetched
     fetched_at DATETIME NOT NULL
 );
+
+-- ==============================================================================
+-- TABLE: database_announcements
+-- Purpose: Per-PCD announcement cache. Populated by the pcd.sync job from
+--          announcement .md files in each linked database's working copy.
+--          Composite PK (id, database_id) so a ULID can appear under
+--          multiple PCDs. ON DELETE CASCADE wipes rows when a database is
+--          unlinked.
+-- Migration: 063_create_database_announcements.ts
+-- ==============================================================================
+
+CREATE TABLE database_announcements (
+    id TEXT NOT NULL,                                    -- ULID, matches the working-copy filename
+    database_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    severity TEXT NOT NULL CHECK (severity IN ('info','warning','critical')),
+    published_at DATETIME NOT NULL,
+    expires_at DATETIME,
+    link TEXT,
+    body TEXT NOT NULL,                                  -- snapshotted from working copy at reconcile time
+    withdrawn INTEGER NOT NULL DEFAULT 0 CHECK (withdrawn IN (0,1)),
+    read_at DATETIME,                                    -- null = unread
+    fetched_at DATETIME NOT NULL,                        -- last reconcile timestamp
+    PRIMARY KEY (id, database_id),
+    FOREIGN KEY (database_id) REFERENCES database_instances(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_database_announcements_published_at
+    ON database_announcements(published_at DESC);
+
+CREATE INDEX idx_database_announcements_visible
+    ON database_announcements(database_id, withdrawn, expires_at);

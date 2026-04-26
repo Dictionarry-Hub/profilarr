@@ -9,8 +9,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
-import { listVisible } from '$lib/server/announcements/index.ts';
-import type { AnnouncementRecord } from '$lib/server/announcements/types.ts';
+import { listVisible } from '$announcements/index.ts';
+import type { AnnouncementRecord } from '$announcements/profilarr/types.ts';
 
 type AnnouncementSummary = components['schemas']['AnnouncementSummary'];
 

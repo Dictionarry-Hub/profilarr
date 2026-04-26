@@ -1,5 +1,5 @@
 /**
- * Announcement service façade.
+ * Bulletin announcements service façade.
  *
  * Single entry point used by:
  *  - The `announcements.fetch` job (`reconcileFromBulletin`).
@@ -14,10 +14,16 @@ import { db } from '$db/db.ts';
 import { announcementQueries, versionsSnapshotQueries } from '$db/queries/announcements.ts';
 import { logger } from '$logger/logger.ts';
 import { build } from '$lib/shared/build.ts';
+import type { ReconcilePlan } from '../shared/types.ts';
 import { fetchAnnouncements, fetchBody, fetchVersions } from './client.ts';
 import { isVisible, type VisibilityContext } from './filter.ts';
-import { reconcileAnnouncements, UnsupportedSchemaError, type ReconcilePlan } from './reconcile.ts';
-import { rowToRecord, type AnnouncementRecord, type BulletinVersionsFile } from './types.ts';
+import { reconcileAnnouncements, UnsupportedSchemaError } from './reconcile.ts';
+import {
+	rowToRecord,
+	type AnnouncementRecord,
+	type BulletinAnnouncement,
+	type BulletinVersionsFile
+} from './types.ts';
 
 /** Hardcoded poll interval. No user-facing knob. */
 export const FETCH_INTERVAL_MS = 30 * 60 * 1000;
@@ -105,7 +111,7 @@ export function getVersionsSnapshot(): { payload: BulletinVersionsFile; fetchedA
 		const payload = JSON.parse(row.payload) as BulletinVersionsFile;
 		return { payload, fetchedAt: row.fetched_at };
 	} catch {
-		// Corrupted cache — treat as absent.
+		// Corrupted cache; treat as absent.
 		return null;
 	}
 }
@@ -122,7 +128,7 @@ export interface ReconcileReport {
 
 /**
  * Run a full sync cycle: fetch both files, reconcile announcements into
- * SQLite, overwrite the versions snapshot. Each half is independent — a
+ * SQLite, overwrite the versions snapshot. Each half is independent: a
  * failed versions fetch does not block the announcements reconcile and
  * vice versa.
  */
@@ -203,7 +209,10 @@ export async function reconcileFromBulletin(): Promise<ReconcileReport> {
 	};
 }
 
-async function applyPlan(plan: ReconcilePlan, fetchedAt: string): Promise<void> {
+async function applyPlan(
+	plan: ReconcilePlan<BulletinAnnouncement>,
+	fetchedAt: string
+): Promise<void> {
 	await db.transaction(() => {
 		for (const a of plan.upserts) {
 			announcementQueries.upsertFromBulletin(a, fetchedAt);

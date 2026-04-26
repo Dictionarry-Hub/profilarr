@@ -17,7 +17,7 @@ import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
 import { getCache } from '$pcd/database/registry.ts';
 import { config } from '$config';
 import { build } from '$lib/shared/build.ts';
-import { getUnreadCount } from '$lib/server/announcements/index.ts';
+import { getUnreadCount } from '$announcements/index.ts';
 
 type StatusResponse = components['schemas']['StatusResponse'];
 
