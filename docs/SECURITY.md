@@ -15,4 +15,4 @@ Please do not open public GitHub issues for security vulnerabilities.
 ## Security Architecture
 
 For details on how Profilarr handles authentication, authorization, and other
-security features, see [docs/architecture/security.md](docs/architecture/security.md).
+security features, see [backend/security.md](./backend/security.md).
