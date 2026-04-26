@@ -9,5 +9,7 @@ export const FEATURES = {
 	/** AI-powered commit message generation */
 	ai: false,
 	/** Cutscene onboarding system */
-	cutscene: true
+	cutscene: true,
+	/** Database tweaks UI */
+	tweaks: false
 } as const;

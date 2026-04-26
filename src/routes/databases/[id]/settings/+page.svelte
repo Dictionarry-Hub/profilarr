@@ -10,7 +10,7 @@
 	<title>{data.database.name} - Settings - Profilarr</title>
 </svelte:head>
 
-<div class="mt-6">
+<div>
 	<InstanceForm
 		mode="edit"
 		{form}

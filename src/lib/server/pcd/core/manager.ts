@@ -25,7 +25,7 @@ import { compile, invalidate } from '../database/compiler.ts';
 import { getCache } from '../database/registry.ts';
 import { logger } from '$logger/logger.ts';
 import { triggerSyncs } from '$sync/processor.ts';
-import type { LinkOptions, SyncResult } from './types.ts';
+import type { LinkOptions, SyncResult, SyncTrigger } from './types.ts';
 import { importBaseOps } from '../ops/importBaseOps.ts';
 import { cleanupJobsForDatabase } from '$lib/server/jobs/cleanup.ts';
 import { notificationManager } from '$notifications/NotificationManager.ts';
@@ -175,19 +175,58 @@ class PCDManager {
 	/**
 	 * Sync a PCD repository (pull updates)
 	 */
-	async sync(id: number): Promise<SyncResult> {
+	async sync(id: number, trigger: SyncTrigger = 'manual-ui'): Promise<SyncResult> {
 		const instance = databaseInstancesQueries.getById(id);
 		if (!instance) {
+			await logger.info('Database sync completed', {
+				source: 'PCDManager',
+				meta: {
+					databaseId: id,
+					trigger,
+					outcome: 'instance-not-found'
+				}
+			});
 			throw new Error(`Database instance ${id} not found`);
 		}
+
+		const summary: {
+			databaseId: number;
+			databaseName: string;
+			trigger: SyncTrigger;
+			outcome: 'no-updates' | 'pulled' | 'failed';
+			commits?: { from: string; to: string; behind: number };
+			ops?: { created: number; updated: number; orphaned: number };
+			cache?: {
+				rebuilt: true;
+				dependencyChanged: boolean;
+				opCounts: { schema: number; base: number; tweaks: number; user: number };
+				timingMs: number;
+			};
+			error?: string;
+		} = {
+			databaseId: id,
+			databaseName: instance.name,
+			trigger,
+			outcome: 'failed'
+		};
 
 		try {
 			// Check for updates first
 			const updateInfo = await checkForUpdates(instance.local_path);
+			summary.commits = {
+				from: updateInfo.currentLocalCommit,
+				to: updateInfo.latestRemoteCommit,
+				behind: updateInfo.commitsBehind
+			};
 
 			if (!updateInfo.hasUpdates) {
 				// Already up to date
 				databaseInstancesQueries.updateSyncedAt(id);
+				summary.outcome = 'no-updates';
+				await logger.info('Database sync completed', {
+					source: 'PCDManager',
+					meta: summary
+				});
 				return {
 					success: true,
 					commitsBehind: 0
@@ -220,7 +259,12 @@ class PCDManager {
 					: undefined;
 
 			try {
-				await importBaseOps(id, instance.local_path);
+				const importResult = await importBaseOps(id, instance.local_path);
+				summary.ops = {
+					created: importResult.created,
+					updated: importResult.updated,
+					orphaned: importResult.orphaned
+				};
 			} catch (error) {
 				await logger.error('Failed to import base ops after sync', {
 					source: 'PCDManager',
@@ -246,7 +290,18 @@ class PCDManager {
 
 			if (instance.enabled) {
 				try {
-					await compile(instance.local_path, id);
+					const stats = await compile(instance.local_path, id);
+					summary.cache = {
+						rebuilt: true,
+						dependencyChanged: dependencySync.changed,
+						opCounts: {
+							schema: stats.schema,
+							base: stats.base,
+							tweaks: stats.tweaks,
+							user: stats.user
+						},
+						timingMs: stats.timing
+					};
 					await logger.info('Rebuilt cache after dependency sync', {
 						source: 'PCDManager',
 						meta: {
@@ -281,6 +336,12 @@ class PCDManager {
 				// Notification failure should never block sync
 			}
 
+			summary.outcome = 'pulled';
+			await logger.info('Database sync completed', {
+				source: 'PCDManager',
+				meta: summary
+			});
+
 			return {
 				success: true,
 				commitsBehind: updateInfo.commitsBehind
@@ -297,6 +358,13 @@ class PCDManager {
 			} catch {
 				// Notification failure should never block sync
 			}
+
+			summary.outcome = 'failed';
+			summary.error = error instanceof Error ? error.message : 'Unknown error';
+			await logger.info('Database sync completed', {
+				source: 'PCDManager',
+				meta: summary
+			});
 
 			return {
 				success: false,

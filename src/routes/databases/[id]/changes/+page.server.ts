@@ -240,16 +240,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			const result = await pcdManager.sync(id);
-
-			if (result.success) {
-				await logger.info('Database synced', {
-					source: 'changes',
-					meta: { databaseId: id, commitsPulled: result.commitsBehind }
-				});
-			}
-
-			return result;
+			return await pcdManager.sync(id, 'manual-ui');
 		} catch (err) {
 			await logger.error('Failed to pull changes', {
 				source: 'changes',

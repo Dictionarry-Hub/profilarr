@@ -148,3 +148,8 @@ export interface SyncResult {
 	commitsBehind: number;
 	error?: string;
 }
+
+/**
+ * What triggered a sync run, used for completion-log telemetry
+ */
+export type SyncTrigger = 'schedule' | 'manual-api' | 'manual-ui';

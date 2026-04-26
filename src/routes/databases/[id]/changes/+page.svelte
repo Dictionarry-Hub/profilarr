@@ -30,6 +30,7 @@
 		FileCheck,
 		UserCheck,
 		GitCommit,
+		GitPullRequestCreateArrow,
 		X
 	} from 'lucide-svelte';
 	import goOnGit from '$assets/goOnGit.gif';
@@ -852,7 +853,9 @@
 							text={pulling
 								? 'Pulling...'
 								: `Pull ${incomingChanges.commitsBehind} commit${incomingChanges.commitsBehind === 1 ? '' : 's'}`}
-							variant="primary"
+							variant="secondary"
+							icon={GitPullRequestCreateArrow}
+							iconColor="text-blue-500 dark:text-blue-400"
 							loading={pulling}
 							disabled={pulling}
 							fullWidth
