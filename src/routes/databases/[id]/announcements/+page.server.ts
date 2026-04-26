@@ -26,6 +26,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : a.publishedAt > b.publishedAt ? -1 : 0));
 
 	return {
+		databaseId: id,
 		announcements: rows,
 		parseErrors: result.errors
 	};

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Plus, AlertTriangle, ExternalLink, Edit3, Trash2 } from 'lucide-svelte';
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize.ts';
@@ -21,7 +20,7 @@
 
 	export let data: PageData;
 
-	$: databaseId = $page.params.id;
+	$: databaseId = data.databaseId;
 
 	type Row = (typeof data.announcements)[number];
 
