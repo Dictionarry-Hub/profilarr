@@ -16,3 +16,6 @@
  */
 
 export * from './profilarr/index.ts';
+
+export * as inbox from './inbox.ts';
+export type { InboxItem, InboxSource } from './inbox.ts';

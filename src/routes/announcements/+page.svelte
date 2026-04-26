@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
-	import { Eye, EyeOff } from 'lucide-svelte';
+	import { Database, Eye, EyeOff, Megaphone } from 'lucide-svelte';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize.ts';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
@@ -18,7 +18,25 @@
 
 	type Row = (typeof data.announcements)[number];
 
+	type SourceFilter = 'all' | 'profilarr' | 'pcd';
+	let sourceFilter: SourceFilter = 'all';
+
+	$: visibleRows = data.announcements.filter((row) => {
+		if (sourceFilter === 'all') return true;
+		if (sourceFilter === 'profilarr') return row.source === 'profilarr';
+		return row.source === 'pcd';
+	});
+
+	$: pcdSources = Array.from(
+		new Map(
+			data.announcements
+				.filter((r) => r.source === 'pcd' && r.databaseId !== null)
+				.map((r) => [r.databaseId, r.databaseName ?? '(unknown)'])
+		).entries()
+	);
+
 	const columns: Column<Row>[] = [
+		{ key: 'source', header: 'Source', width: 'w-44' },
 		{ key: 'title', header: 'Title' },
 		{ key: 'severity', header: 'Severity', width: 'w-32' },
 		{ key: 'publishedAt', header: 'Published', width: 'w-40' }
@@ -33,11 +51,20 @@
 
 	let actionLoading: Record<string, boolean> = {};
 
-	async function toggleRead(id: string, nextRead: boolean) {
-		actionLoading = { ...actionLoading, [id]: true };
+	function rowKey(row: Row): string {
+		return row.source === 'profilarr' ? `profilarr:${row.id}` : `pcd:${row.databaseId}:${row.id}`;
+	}
+
+	async function toggleRead(row: Row, nextRead: boolean) {
+		const key = rowKey(row);
+		actionLoading = { ...actionLoading, [key]: true };
 		try {
 			const body = new FormData();
-			body.set('id', id);
+			body.set('id', row.id);
+			body.set('source', row.source);
+			if (row.source === 'pcd' && row.databaseId !== null) {
+				body.set('databaseId', String(row.databaseId));
+			}
 			await fetch(`?/${nextRead ? 'markRead' : 'markUnread'}`, {
 				method: 'POST',
 				body,
@@ -45,32 +72,71 @@
 			});
 			await invalidateAll();
 		} finally {
-			actionLoading = { ...actionLoading, [id]: false };
+			actionLoading = { ...actionLoading, [key]: false };
 		}
 	}
 </script>
 
 <div class="p-4 md:p-8">
-	<div class="mb-8">
+	<div class="mb-6">
 		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">
 			Announcements
 		</h1>
 		<p class="mt-3 text-base text-neutral-600 md:text-lg dark:text-neutral-400">
-			Messages from the Profilarr team. Expand a row to read it.
+			Messages from the Profilarr team and your linked databases. Expand a row to read it.
 		</p>
 	</div>
 
+	{#if pcdSources.length > 0}
+		<div class="mb-4 flex flex-wrap items-center gap-2">
+			<span class="text-xs font-medium text-neutral-500 dark:text-neutral-500">Show</span>
+			<Button
+				size="xs"
+				variant={sourceFilter === 'all' ? 'primary' : 'secondary'}
+				text="All"
+				on:click={() => (sourceFilter = 'all')}
+			/>
+			<Button
+				size="xs"
+				icon={Megaphone}
+				variant={sourceFilter === 'profilarr' ? 'primary' : 'secondary'}
+				text="Profilarr"
+				on:click={() => (sourceFilter = 'profilarr')}
+			/>
+			<Button
+				size="xs"
+				icon={Database}
+				variant={sourceFilter === 'pcd' ? 'primary' : 'secondary'}
+				text="Databases"
+				on:click={() => (sourceFilter = 'pcd')}
+			/>
+		</div>
+	{/if}
+
 	<ExpandableTable
 		{columns}
-		data={data.announcements}
-		getRowId={(row) => row.id}
+		data={visibleRows}
+		getRowId={rowKey}
 		emptyMessage="No announcements right now."
 		responsive
 		flushExpanded
 		chevronPosition="right"
 	>
 		<svelte:fragment slot="cell" let:row let:column>
-			{#if column.key === 'title'}
+			{#if column.key === 'source'}
+				<span
+					class="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400"
+					title={row.source === 'profilarr' ? 'Profilarr team' : (row.databaseName ?? '')}
+				>
+					{#if row.source === 'profilarr'}
+						<Megaphone class="h-3.5 w-3.5 flex-shrink-0" />
+						<span class="truncate">Profilarr</span>
+					{:else}
+						<Database class="h-3.5 w-3.5 flex-shrink-0" />
+						<span class="truncate">{row.databaseName ?? '(unknown)'}</span>
+					{/if}
+				</span>
+			{:else if column.key === 'title'}
 				<span
 					class="text-sm {row.readAt
 						? 'text-neutral-600 dark:text-neutral-400'
@@ -101,9 +167,9 @@
 					variant="secondary"
 					ariaLabel="Mark as unread"
 					tooltip="Mark as unread"
-					loading={actionLoading[row.id]}
-					disabled={actionLoading[row.id]}
-					on:click={() => toggleRead(row.id, false)}
+					loading={actionLoading[rowKey(row)]}
+					disabled={actionLoading[rowKey(row)]}
+					on:click={() => toggleRead(row, false)}
 				/>
 			{:else}
 				<Button
@@ -112,9 +178,9 @@
 					variant="secondary"
 					ariaLabel="Mark as read"
 					tooltip="Mark as read"
-					loading={actionLoading[row.id]}
-					disabled={actionLoading[row.id]}
-					on:click={() => toggleRead(row.id, true)}
+					loading={actionLoading[rowKey(row)]}
+					disabled={actionLoading[rowKey(row)]}
+					on:click={() => toggleRead(row, true)}
 				/>
 			{/if}
 		</svelte:fragment>

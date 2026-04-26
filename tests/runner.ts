@@ -74,8 +74,16 @@ const INTEGRATION_API_SPEC_DIR = 'tests/integration/api/specs';
 const INTEGRATION_CONFLICT_SPEC_DIR = 'tests/integration/conflicts/specs';
 const INTEGRATION_NOTIFICATION_SPEC_DIR = 'tests/integration/notifications/specs';
 const INTEGRATION_BACKUP_SPEC_DIR = 'tests/integration/backups/specs';
+const INTEGRATION_ANNOUNCEMENTS_SPEC_DIR = 'tests/integration/announcements/specs';
 const INTEGRATION_SPEC_DIR = INTEGRATION_AUTH_SPEC_DIR; // backward compat
-const INTEGRATION_SUITES = new Set(['auth', 'conflicts', 'api', 'notifications', 'backups']);
+const INTEGRATION_SUITES = new Set([
+	'auth',
+	'conflicts',
+	'api',
+	'notifications',
+	'backups',
+	'announcements'
+]);
 
 const E2E_PCD_CONFIG = 'tests/e2e/pcd/playwright.config.ts';
 const E2E_PCD_SPEC_DIR = 'tests/e2e/pcd/specs';
@@ -105,6 +113,7 @@ const UNIT_ALIASES: Record<string, string> = {
 	rename: 'tests/unit/rename',
 	sanitize: 'tests/unit/sanitize',
 	backups: 'tests/unit/backups',
+	announcements: 'tests/unit/announcements',
 	// Individual files
 	filters: 'tests/unit/upgrades/filters.test.ts',
 	normalize: 'tests/unit/upgrades/normalize.test.ts',
@@ -238,6 +247,7 @@ async function runIntegration(target?: string): Promise<number> {
 		if (s === 'conflicts') return INTEGRATION_CONFLICT_SPEC_DIR;
 		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
 		if (s === 'backups') return INTEGRATION_BACKUP_SPEC_DIR;
+		if (s === 'announcements') return INTEGRATION_ANNOUNCEMENTS_SPEC_DIR;
 		return INTEGRATION_AUTH_SPEC_DIR;
 	}
 
@@ -254,7 +264,9 @@ async function runIntegration(target?: string): Promise<number> {
 	}
 
 	// Determine which suites to run
-	const suitesToRun = suite ? [suite] : ['auth', 'api', 'conflicts', 'notifications'];
+	const suitesToRun = suite
+		? [suite]
+		: ['auth', 'api', 'conflicts', 'notifications', 'announcements'];
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
@@ -386,6 +398,7 @@ async function runIntegrationSpec(
 		.replace(`${INTEGRATION_CONFLICT_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_NOTIFICATION_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_BACKUP_SPEC_DIR}/`, '')
+		.replace(`${INTEGRATION_ANNOUNCEMENTS_SPEC_DIR}/`, '')
 		.replace('.test.ts', '');
 	const args = ['run', '--allow-all', '--no-check'];
 	if (INTEGRATION_NEEDS_TLS_INSECURE.has(specName)) {

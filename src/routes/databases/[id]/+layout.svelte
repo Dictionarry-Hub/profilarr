@@ -6,7 +6,8 @@
 		GitPullRequestClosed,
 		Wrench,
 		Settings,
-		FileCog
+		FileCog,
+		Megaphone
 	} from 'lucide-svelte';
 	import { page } from '$app/stores';
 	import { FEATURES } from '$lib/shared/features';
@@ -50,6 +51,12 @@
 					: []),
 				...(database.hasPat
 					? [
+							{
+								label: 'Announcements',
+								href: `/databases/${database.id}/announcements`,
+								icon: Megaphone,
+								active: currentPath.includes('/announcements')
+							},
 							{
 								label: 'Config',
 								href: `/databases/${database.id}/config`,

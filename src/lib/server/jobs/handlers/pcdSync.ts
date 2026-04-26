@@ -7,6 +7,7 @@ import { logger } from '$logger/logger.ts';
 import { getCommitMessagesBetween } from '$utils/git/index.ts';
 import { notificationManager } from '$notifications/NotificationManager.ts';
 import { notifications } from '$notifications/definitions/index.ts';
+import { reconcileAndNotify } from '$announcements/database/index.ts';
 
 const dbSyncHandler: JobHandler = async (job) => {
 	const databaseId = Number(job.payload.databaseId);
@@ -45,11 +46,17 @@ const dbSyncHandler: JobHandler = async (job) => {
 			? calculateNextRunFromMinutes(new Date().toISOString(), instance.sync_strategy)
 			: undefined;
 
+	// Capture before any code path updates `last_synced_at`. Used by the
+	// announcements reconciler to decide whether to silently insert (new
+	// link with backlog) or fire `announcement.new` per net-new entry.
+	const isFirstSync = instance.last_synced_at === null;
+
 	try {
 		const updateInfo = await pcdManager.checkForUpdates(databaseId);
 
 		if (!updateInfo.hasUpdates) {
 			databaseInstancesQueries.updateSyncedAt(databaseId);
+			await reconcileAndNotify(databaseId, { source: 'DbSyncJob', jobId: job.id, isFirstSync });
 			return {
 				status: 'skipped',
 				output: 'No updates available',
@@ -69,6 +76,8 @@ const dbSyncHandler: JobHandler = async (job) => {
 					rescheduleAt
 				};
 			}
+
+			await reconcileAndNotify(databaseId, { source: 'DbSyncJob', jobId: job.id, isFirstSync });
 
 			return {
 				status: 'success',
@@ -96,6 +105,8 @@ const dbSyncHandler: JobHandler = async (job) => {
 		} catch {
 			// Notification failure should never block the job
 		}
+
+		await reconcileAndNotify(databaseId, { source: 'DbSyncJob', jobId: job.id, isFirstSync });
 
 		return {
 			status: 'success',
