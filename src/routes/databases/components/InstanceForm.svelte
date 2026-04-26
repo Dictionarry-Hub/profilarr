@@ -1,7 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { Save, Trash2, Star, GitFork, CircleDot, Database, GitBranch, ExternalLink } from 'lucide-svelte';
+	import {
+		Save,
+		Trash2,
+		Star,
+		GitFork,
+		CircleDot,
+		Database,
+		GitBranch,
+		ExternalLink
+	} from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
 	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
@@ -257,8 +266,7 @@
 						icon={ExternalLink}
 						iconColor="text-blue-600 dark:text-blue-400"
 						text="GitHub"
-					>
-					</Button>
+					></Button>
 				{/if}
 			</svelte:fragment>
 		</StickyCard>
