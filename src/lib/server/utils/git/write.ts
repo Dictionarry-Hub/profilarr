@@ -5,6 +5,7 @@
 import { execGit, execGitSafe } from './exec.ts';
 import type { RepoInfo } from './types.ts';
 import { getCachedRepoInfo } from '../github/cache.ts';
+import { logger } from '$logger/logger.ts';
 
 type GitHubApiError = {
 	message: string;
@@ -160,27 +161,27 @@ async function validateRepository(
 		'User-Agent': 'Profilarr'
 	};
 
-	// If we have a PAT, use it directly to avoid burning unauthenticated rate limit
-	if (personalAccessToken) {
-		const authResponse = await globalThis.fetch(apiUrl, {
-			headers: { ...headers, Authorization: `Bearer ${personalAccessToken}` }
-		});
-
-		if (authResponse.ok) {
-			const data = await authResponse.json();
-			return data.private === true;
-		}
-
-		const classified = await classifyGitHubResponseError(authResponse, 'authenticated');
-		throw new Error(classified.message);
-	}
-
-	// No PAT — try unauthenticated
+	// Always probe unauthenticated. The PAT is for git operations, not the
+	// REST surface; using it here can fail (e.g. fine-grained tokens) even
+	// when git auth works fine. If the probe can't see the repo and a PAT
+	// was provided, assume private and let git clone be the real auth check.
 	const response = await globalThis.fetch(apiUrl, { headers });
 
 	if (response.ok) {
 		const data = await response.json();
 		return data.private === true;
+	}
+
+	if (personalAccessToken) {
+		await logger.debug('GitHub repo probe failed, assuming private', {
+			source: 'validateRepository',
+			meta: {
+				url: apiUrl,
+				status: response.status,
+				body: await response.clone().text()
+			}
+		});
+		return true;
 	}
 
 	const classified = await classifyGitHubResponseError(response, 'unauthenticated');
