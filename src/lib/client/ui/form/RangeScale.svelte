@@ -233,8 +233,7 @@
 					on:touchstart={(e) => handleDragStart(index, e)}
 					class="relative h-4 w-4 -translate-x-1/2 rounded-full shadow-sm transition-transform disabled:cursor-not-allowed {disabled
 						? ''
-						: 'cursor-grab hover:scale-125'} {colors.dot} {orientation ===
-					'vertical'
+						: 'cursor-grab hover:scale-125'} {colors.dot} {orientation === 'vertical'
 						? '-translate-y-1/2'
 						: ''} {draggingIndex === index && !disabled ? 'scale-150 cursor-grabbing' : ''}"
 					aria-label="Drag to adjust {marker.label}"

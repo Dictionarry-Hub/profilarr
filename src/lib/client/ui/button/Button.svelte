@@ -57,8 +57,7 @@
 
 	$: justifyClass = justify === 'between' ? 'justify-between' : 'justify-center';
 
-	$: disabledClass =
-		disabled || softDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer';
+	$: disabledClass = disabled || softDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer';
 	$: baseClasses = `inline-flex items-center ${justifyClass} font-medium transition-colors ${disabledClass}`;
 
 	const sizeClasses = {
