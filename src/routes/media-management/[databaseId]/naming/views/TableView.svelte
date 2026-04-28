@@ -9,9 +9,13 @@
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
 	import { FEATURES } from '$shared/features.ts';
+	import { goto } from '$app/navigation';
+	import { alertStore } from '$alerts/store';
+	import { mediaManagementLockedMessage } from '../../lock';
 
 	export let configs: NamingListItem[];
 	export let databaseId: number;
+	export let canWriteToBase: boolean = false;
 
 	const dispatch = createEventDispatcher<{
 		clone: { name: string; arr_type: string };
@@ -25,6 +29,11 @@
 
 	function getRowHref(config: NamingListItem): string {
 		return `/media-management/${databaseId}/naming/${config.arr_type}/${encodeURIComponent(config.name)}`;
+	}
+
+	function handleLockedRowClick(config: NamingListItem) {
+		alertStore.add('info', mediaManagementLockedMessage);
+		goto(getRowHref(config));
 	}
 
 	const columns: Column<NamingListItem>[] = [
@@ -48,7 +57,13 @@
 	];
 </script>
 
-<Table {columns} data={configs} rowHref={getRowHref} hoverable={true}>
+<Table
+	{columns}
+	data={configs}
+	rowHref={canWriteToBase ? getRowHref : undefined}
+	onRowClick={canWriteToBase ? undefined : handleLockedRowClick}
+	hoverable={true}
+>
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
 			<span class="font-medium">{row.name}</span>

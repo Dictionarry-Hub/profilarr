@@ -22,6 +22,7 @@
 	} from '$shared/pcd/mediaManagement.ts';
 	import { resolveRadarrFormat, getRadarrTokenCategories } from '$shared/pcd/namingTokens.ts';
 	import NamingPreview from './NamingPreview.svelte';
+	import { mediaManagementLockedMessage } from '../../lock';
 
 	import TokenAutocomplete from './TokenAutocomplete.svelte';
 
@@ -82,6 +83,7 @@
 	let selectedLayer: 'user' | 'base' = canWriteToBase ? 'base' : 'user';
 	let mainFormElement: HTMLFormElement;
 	let deleteFormElement: HTMLFormElement;
+	$: readOnly = !canWriteToBase;
 
 	$: databaseId = parseInt($page.params.databaseId ?? '0', 10);
 	let movieFormatInput: HTMLInputElement | HTMLTextAreaElement | null = null;
@@ -90,13 +92,30 @@
 	const radarrTokenCategories = getRadarrTokenCategories();
 
 	$: title = mode === 'create' ? 'New Radarr Naming Config' : 'Edit Radarr Naming Config';
-	$: description =
-		mode === 'create'
+	$: description = readOnly
+		? 'Media management configs from linked databases cannot be edited directly'
+		: mode === 'create'
 			? `Create a new Radarr naming configuration for ${databaseName}`
 			: `Update Radarr naming configuration`;
 	$: isValid = formData.name.trim() !== '';
 
+	function notifyLocked() {
+		alertStore.add('info', mediaManagementLockedMessage);
+	}
+
+	function updateField<K extends keyof RadarrNamingFormData>(
+		field: K,
+		value: RadarrNamingFormData[K]
+	) {
+		if (readOnly) return;
+		update<RadarrNamingFormData, K>(field, value);
+	}
+
 	async function handleSaveClick() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		if (saving) return;
 		saving = true;
 		selectedLayer = canWriteToBase ? 'base' : 'user';
@@ -105,10 +124,18 @@
 	}
 
 	async function handleDeleteClick() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		showDeleteModal = true;
 	}
 
 	async function handleDeleteConfirm() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		selectedLayer = canWriteToBase ? 'base' : 'user';
 		showDeleteModal = false;
 		await tick();
@@ -132,7 +159,7 @@
 			iconColor="text-blue-600 dark:text-blue-400"
 			on:click={() => (showInfoModal = true)}
 		/>
-		{#if mode === 'edit'}
+		{#if mode === 'edit' && !readOnly}
 			<Button
 				text={deleting ? 'Deleting...' : 'Delete'}
 				icon={Trash2}
@@ -145,7 +172,8 @@
 			text={saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
 			icon={Save}
 			iconColor="text-blue-600 dark:text-blue-400"
-			disabled={saving || !isValid || !$isDirty}
+			disabled={!readOnly && (saving || !isValid || !$isDirty)}
+			softDisabled={readOnly}
 			on:click={handleSaveClick}
 		/>
 	</div>
@@ -164,7 +192,8 @@
 				required
 				value={formData.name}
 				placeholder="e.g., default"
-				on:input={(e) => update('name', e.detail)}
+				disabled={readOnly}
+				on:input={(e) => updateField('name', e.detail)}
 			/>
 
 			<div class="space-y-2">
@@ -173,7 +202,8 @@
 					label="Rename Movies"
 					ariaLabel="Rename Movies"
 					color={formData.rename ? 'green' : 'neutral'}
-					on:change={(e) => update('rename', e.detail)}
+					disabled={readOnly}
+					on:change={(e) => updateField('rename', e.detail)}
 				/>
 				<p class="text-xs text-neutral-500 dark:text-neutral-400">
 					Rename movie files to match the naming format
@@ -200,7 +230,8 @@
 						placeholder="e.g., Movie Title (Year) Quality"
 						categories={radarrTokenCategories}
 						bind:inputElement={movieFormatInput}
-						on:input={(e) => update('movieFormat', e.detail)}
+						disabled={readOnly}
+						on:input={(e) => updateField('movieFormat', e.detail)}
 					/>
 					<NamingPreview format={formData.movieFormat} resolver={resolveRadarrFormat} />
 				</div>
@@ -213,7 +244,8 @@
 						placeholder="e.g., Movie Title (Year)"
 						categories={radarrTokenCategories}
 						bind:inputElement={movieFolderFormatInput}
-						on:input={(e) => update('movieFolderFormat', e.detail)}
+						disabled={readOnly}
+						on:input={(e) => updateField('movieFolderFormat', e.detail)}
 					/>
 					<NamingPreview format={formData.movieFolderFormat} resolver={resolveRadarrFormat} />
 				</div>
@@ -236,7 +268,8 @@
 						label="Replace Illegal Characters"
 						ariaLabel="Replace Illegal Characters"
 						color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
-						on:change={(e) => update('replaceIllegalCharacters', e.detail)}
+						disabled={readOnly}
+						on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
 					/>
 					<p class="text-xs text-neutral-500 dark:text-neutral-400">
 						Replace characters that are not allowed in file names
@@ -248,7 +281,9 @@
 						label="Colon Replacement"
 						value={formData.colonReplacementFormat}
 						options={RADARR_COLON_REPLACEMENT_OPTIONS}
-						on:change={(e) => update('colonReplacementFormat', e.detail)}
+						disabled={readOnly}
+						on:change={(e) =>
+							updateField('colonReplacementFormat', e.detail as RadarrColonReplacementFormat)}
 					/>
 				{/if}
 			</div>
@@ -312,7 +347,7 @@
 </form>
 
 <!-- Hidden delete form -->
-{#if mode === 'edit'}
+{#if mode === 'edit' && !readOnly}
 	<form
 		bind:this={deleteFormElement}
 		method="POST"

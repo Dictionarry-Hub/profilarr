@@ -17,6 +17,7 @@
 	import type { ArrType } from '$shared/pcd/types.ts';
 	import { PROPERS_REPACKS_OPTIONS, type PropersRepacks } from '$shared/pcd/mediaManagement.ts';
 	import type { AffectedArr } from '$shared/sync/types.ts';
+	import { mediaManagementLockedMessage } from '../../lock';
 
 	interface RadarrMediaSettingsRowFormData {
 		name: string;
@@ -66,21 +67,39 @@
 	let selectedLayer: 'user' | 'base' = canWriteToBase ? 'base' : 'user';
 	let mainFormElement: HTMLFormElement;
 	let deleteFormElement: HTMLFormElement;
+	$: readOnly = !canWriteToBase;
 
 	$: databaseId = parseInt($page.params.databaseId ?? '0', 10);
 
 	$: arrLabel = arrType === 'radarr' ? 'Radarr' : 'Sonarr';
 	$: title =
 		mode === 'create' ? `New ${arrLabel} Media Settings` : `Edit ${arrLabel} Media Settings`;
-	$: description =
-		mode === 'create'
+	$: description = readOnly
+		? 'Media management configs from linked databases cannot be edited directly'
+		: mode === 'create'
 			? `Create a new ${arrLabel} media settings configuration for ${databaseName}`
 			: `Update ${arrLabel} media settings configuration`;
 	$: isValid = formData.name.trim() !== '';
 	$: propersRepacksDescription =
 		PROPERS_REPACKS_OPTIONS.find((o) => o.value === formData.propersRepacks)?.description ?? '';
 
+	function notifyLocked() {
+		alertStore.add('info', mediaManagementLockedMessage);
+	}
+
+	function updateField<K extends keyof RadarrMediaSettingsRowFormData>(
+		field: K,
+		value: RadarrMediaSettingsRowFormData[K]
+	) {
+		if (readOnly) return;
+		update<RadarrMediaSettingsRowFormData, K>(field, value);
+	}
+
 	async function handleSaveClick() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		if (saving) return;
 		saving = true;
 		selectedLayer = canWriteToBase ? 'base' : 'user';
@@ -89,10 +108,18 @@
 	}
 
 	async function handleDeleteClick() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		showDeleteModal = true;
 	}
 
 	async function handleDeleteConfirm() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		selectedLayer = canWriteToBase ? 'base' : 'user';
 		showDeleteModal = false;
 		await tick();
@@ -110,7 +137,7 @@
 		<p class="text-sm text-neutral-500 dark:text-neutral-400">{description}</p>
 	</div>
 	<div slot="right" class="flex items-center gap-2">
-		{#if mode === 'edit'}
+		{#if mode === 'edit' && !readOnly}
 			<Button
 				text={deleting ? 'Deleting...' : 'Delete'}
 				icon={Trash2}
@@ -123,7 +150,8 @@
 			text={saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
 			icon={Save}
 			iconColor="text-blue-600 dark:text-blue-400"
-			disabled={saving || !isValid || !$isDirty}
+			disabled={!readOnly && (saving || !isValid || !$isDirty)}
+			softDisabled={readOnly}
 			on:click={handleSaveClick}
 		/>
 	</div>
@@ -142,7 +170,8 @@
 				placeholder="e.g., default"
 				required
 				value={formData.name}
-				on:input={(e) => update('name', e.detail)}
+				disabled={readOnly}
+				on:input={(e) => updateField('name', e.detail)}
 			/>
 		</div>
 
@@ -157,7 +186,8 @@
 				value={formData.propersRepacks}
 				options={PROPERS_REPACKS_OPTIONS}
 				fullWidth
-				on:change={(e) => update('propersRepacks', e.detail)}
+				disabled={readOnly}
+				on:change={(e) => updateField('propersRepacks', e.detail as PropersRepacks)}
 			/>
 			{#if propersRepacksDescription}
 				<p class="text-xs text-neutral-500 dark:text-neutral-400">
@@ -175,7 +205,8 @@
 				<Toggle
 					label="Enable Media Info"
 					checked={formData.enableMediaInfo}
-					on:change={() => update('enableMediaInfo', !formData.enableMediaInfo)}
+					disabled={readOnly}
+					on:change={() => updateField('enableMediaInfo', !formData.enableMediaInfo)}
 				/>
 				<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
 					Scan files to extract media information (codec, resolution, audio tracks, etc.)
@@ -238,7 +269,7 @@
 </form>
 
 <!-- Hidden delete form -->
-{#if mode === 'edit'}
+{#if mode === 'edit' && !readOnly}
 	<form
 		bind:this={deleteFormElement}
 		method="POST"
