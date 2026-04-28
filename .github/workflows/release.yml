@@ -58,21 +58,24 @@ jobs:
 
       - name: Determine channel
         id: channel
+        env:
+          REF: ${{ github.ref }}
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "value=stable" >> $GITHUB_OUTPUT
+          if [[ "$REF" == refs/tags/v* ]]; then
+            echo "value=stable" >> "$GITHUB_OUTPUT"
           else
-            echo "value=develop" >> $GITHUB_OUTPUT
+            echo "value=develop" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Determine build version
         id: version
+        env:
+          REF: ${{ github.ref }}
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            ref="${{ github.ref }}"
-            echo "value=${ref#refs/tags/v}" >> $GITHUB_OUTPUT
+          if [[ "$REF" == refs/tags/v* ]]; then
+            echo "value=${REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
           else
-            echo "value=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+            echo "value=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Determine commit short sha
