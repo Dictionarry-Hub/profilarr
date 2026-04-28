@@ -218,6 +218,11 @@ export async function update(options: UpdateRegularExpressionOptions) {
 		// pattern itself is being changed in this batch.
 		const patternForDependents = patternChanged ? input.pattern : current.pattern;
 
+		// `condition_patterns.regular_expression_name` has ON UPDATE CASCADE, so
+		// the rename op auto-cascades the FK before this op runs. Match either
+		// name so the WHERE still resolves regardless of cascade timing.
+		const cascadeNameCandidates = Array.from(new Set([current.name, input.name]));
+
 		for (const [formatName, conditions] of conditionsByFormat.entries()) {
 			const conditionQueries = conditions.map((condition) =>
 				db
@@ -225,7 +230,7 @@ export async function update(options: UpdateRegularExpressionOptions) {
 					.set({ regular_expression_name: input.name })
 					.where('custom_format_name', '=', condition.custom_format_name)
 					.where('condition_name', '=', condition.condition_name)
-					.where('regular_expression_name', '=', current.name)
+					.where('regular_expression_name', 'in', cascadeNameCandidates)
 					.compile()
 			);
 

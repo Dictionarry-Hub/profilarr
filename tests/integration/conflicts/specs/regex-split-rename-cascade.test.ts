@@ -16,7 +16,8 @@ import {
 	createPcdRepo,
 	createDatabaseInstance,
 	insertOp,
-	queryOpsByDatabase
+	queryOpsByDatabase,
+	queryLatestHistory
 } from '../harness/setup.ts';
 
 const PORT = 7029;
@@ -220,6 +221,51 @@ test('cascade op SQL targets condition_patterns, not regular_expressions', () =>
 	assert(
 		cascadeOp.sql.includes('condition_patterns'),
 		`Cascade op SQL should update condition_patterns, got: ${cascadeOp.sql}`
+	);
+});
+
+test('rename op applied cleanly during compile', () => {
+	const userOps = queryOpsByDatabase(getDbPath(PORT), dbId, {
+		origin: 'user',
+		state: 'published'
+	});
+	const renameOp = userOps.find((o) => {
+		const meta = JSON.parse(o.metadata ?? '{}');
+		return meta.entity === 'regular_expression' && meta.changed_fields?.[0] === 'name';
+	});
+	assertExists(renameOp);
+
+	const history = queryLatestHistory(getDbPath(PORT), dbId);
+	const entry = history.find((h) => h.op_id === renameOp.id);
+	assertExists(entry, 'Rename op should have a history entry');
+	assertEquals(
+		entry.status,
+		'applied',
+		`Rename op should be applied, got status=${entry.status} reason=${entry.conflict_reason}`
+	);
+});
+
+test('cascade op applied cleanly during compile', () => {
+	// Schema declares ON UPDATE CASCADE on condition_patterns.regular_expression_name,
+	// so the rename op auto-cascades the FK before this op runs. The cascade op's
+	// WHERE matches both old and new names so it stays applicable in either order.
+	const userOps = queryOpsByDatabase(getDbPath(PORT), dbId, {
+		origin: 'user',
+		state: 'published'
+	});
+	const cascadeOp = userOps.find((o) => {
+		const meta = JSON.parse(o.metadata ?? '{}');
+		return meta.entity === 'custom_format' && meta.generated === true;
+	});
+	assertExists(cascadeOp);
+
+	const history = queryLatestHistory(getDbPath(PORT), dbId);
+	const entry = history.find((h) => h.op_id === cascadeOp.id);
+	assertExists(entry, 'Cascade op should have a history entry');
+	assertEquals(
+		entry.status,
+		'applied',
+		`Cascade op should be applied, got status=${entry.status} reason=${entry.conflict_reason}`
 	);
 });
 
