@@ -7,9 +7,13 @@
 	import { Tag, Clock, Zap, Shield, Copy, Download } from 'lucide-svelte';
 	import { escapeHtml } from '$shared/utils/sanitize.ts';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { alertStore } from '$alerts/store';
 	import { FEATURES } from '$shared/features.ts';
+	import { delayProfileLockedMessage } from '../lock';
 
 	export let profiles: DelayProfilesRow[];
+	export let canWriteToBase: boolean = false;
 
 	const dispatch = createEventDispatcher<{ clone: { name: string }; export: { name: string } }>();
 
@@ -17,6 +21,11 @@
 
 	function getRowHref(row: DelayProfilesRow): string {
 		return `/delay-profiles/${databaseId}/${encodeURIComponent(row.name)}`;
+	}
+
+	function handleLockedRowClick(row: DelayProfilesRow) {
+		alertStore.add('info', delayProfileLockedMessage);
+		goto(getRowHref(row));
 	}
 
 	function formatProtocol(protocol: string): string {
@@ -119,7 +128,8 @@
 	emptyMessage="No delay profiles found"
 	hoverable={true}
 	compact={false}
-	rowHref={getRowHref}
+	rowHref={canWriteToBase ? getRowHref : undefined}
+	onRowClick={canWriteToBase ? undefined : handleLockedRowClick}
 >
 	<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 	<svelte:fragment slot="actions" let:row>
