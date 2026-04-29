@@ -9,9 +9,13 @@
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
 	import { FEATURES } from '$shared/features.ts';
+	import { goto } from '$app/navigation';
+	import { alertStore } from '$alerts/store';
+	import { mediaManagementLockedMessage } from '../../lock';
 
 	export let configs: MediaSettingsListItem[];
 	export let databaseId: number;
+	export let canWriteToBase: boolean = false;
 
 	const dispatch = createEventDispatcher<{
 		clone: { name: string; arr_type: string };
@@ -38,6 +42,17 @@
 		loadedImages.add(name);
 		loadedImages = loadedImages;
 	}
+
+	function getConfigHref(config: MediaSettingsListItem): string {
+		return `/media-management/${databaseId}/media-settings/${config.arr_type}/${encodeURIComponent(
+			config.name
+		)}`;
+	}
+
+	function handleLockedOpen(config: MediaSettingsListItem) {
+		alertStore.add('info', mediaManagementLockedMessage);
+		goto(getConfigHref(config));
+	}
 </script>
 
 <CardGrid columns={1} flush>
@@ -47,9 +62,8 @@
 			label: config.propers_repacks
 		}}
 		<Card
-			href="/media-management/{databaseId}/media-settings/{config.arr_type}/{encodeURIComponent(
-				config.name
-			)}"
+			href={canWriteToBase ? getConfigHref(config) : undefined}
+			onclick={canWriteToBase ? undefined : () => handleLockedOpen(config)}
 			hoverable
 		>
 			<div class="flex items-center gap-4">

@@ -2,14 +2,18 @@
 	import { createEventDispatcher } from 'svelte';
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { Clock, Zap, Shield, Copy, Download } from 'lucide-svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import Button from '$ui/button/Button.svelte';
+	import { alertStore } from '$alerts/store';
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
 	import { FEATURES } from '$shared/features.ts';
+	import { delayProfileLockedMessage } from '../lock';
 
 	export let profiles: DelayProfilesRow[];
+	export let canWriteToBase: boolean = false;
 
 	const dispatch = createEventDispatcher<{ clone: { name: string }; export: { name: string } }>();
 
@@ -43,11 +47,24 @@
 		const mins = minutes % 60;
 		return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 	}
+
+	function getProfileHref(profile: DelayProfilesRow): string {
+		return `/delay-profiles/${databaseId}/${encodeURIComponent(profile.name)}`;
+	}
+
+	function handleLockedOpen(profile: DelayProfilesRow) {
+		alertStore.add('info', delayProfileLockedMessage);
+		goto(getProfileHref(profile));
+	}
 </script>
 
 <CardGrid columns={5} flush>
 	{#each visibleProfiles as profile}
-		<Card href="/delay-profiles/{databaseId}/{encodeURIComponent(profile.name)}" hoverable>
+		<Card
+			href={canWriteToBase ? getProfileHref(profile) : undefined}
+			onclick={canWriteToBase ? undefined : () => handleLockedOpen(profile)}
+			hoverable
+		>
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-center justify-between">

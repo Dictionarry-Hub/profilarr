@@ -17,6 +17,7 @@
 	import type { PreferredProtocol } from '$shared/pcd/display.ts';
 	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
 	import type { AffectedArr } from '$shared/sync/types.ts';
+	import { delayProfileLockedMessage } from '../lock';
 
 	// Form data shape
 	interface DelayProfileFormData {
@@ -68,6 +69,7 @@
 
 	// Layer selection
 	let selectedLayer: 'user' | 'base' = canWriteToBase ? 'base' : 'user';
+	$: readOnly = !canWriteToBase;
 
 	// Modal states
 	let showSyncModal = false;
@@ -83,8 +85,9 @@
 
 	// Display text based on mode
 	$: title = mode === 'create' ? 'New Delay Profile' : 'Edit Delay Profile';
-	$: description =
-		mode === 'create'
+	$: description = readOnly
+		? 'Delay profiles from linked databases cannot be edited directly'
+		: mode === 'create'
 			? `Create a new delay profile for ${databaseName}`
 			: `Update delay profile settings`;
 	$: submitButtonText = mode === 'create' ? 'Create Profile' : 'Save Changes';
@@ -112,17 +115,41 @@
 	$: protocolDescription =
 		protocolOptions.find((o) => o.value === formData.preferredProtocol)?.description ?? '';
 
+	function notifyLocked() {
+		alertStore.add('info', delayProfileLockedMessage);
+	}
+
+	function updateField<K extends keyof DelayProfileFormData>(
+		field: K,
+		value: DelayProfileFormData[K]
+	) {
+		if (readOnly) return;
+		update<DelayProfileFormData, K>(field, value);
+	}
+
 	async function handleSaveClick() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		selectedLayer = canWriteToBase ? 'base' : 'user';
 		await tick();
 		mainFormElement?.requestSubmit();
 	}
 
 	async function handleDeleteClick() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		showDeleteModal = true;
 	}
 
 	async function handleDeleteConfirm() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		deleteLayer = canWriteToBase ? 'base' : 'user';
 		showDeleteModal = false;
 		await tick();
@@ -144,7 +171,7 @@
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
-				{#if mode === 'edit'}
+				{#if mode === 'edit' && !readOnly}
 					<Button
 						disabled={deleting}
 						icon={deleting ? Loader2 : Trash2}
@@ -155,7 +182,8 @@
 				{/if}
 				<Button text="Cancel" on:click={onCancel} />
 				<Button
-					disabled={saving || !isValid || !$isDirty}
+					disabled={!readOnly && (saving || !isValid || !$isDirty)}
+					softDisabled={readOnly}
 					icon={saving ? Loader2 : Save}
 					iconColor="text-blue-600 dark:text-blue-400"
 					text={saving ? (mode === 'create' ? 'Creating...' : 'Saving...') : submitButtonText}
@@ -228,7 +256,8 @@
 						placeholder="e.g., Standard Delay"
 						required
 						value={formData.name}
-						on:input={(e) => update('name', e.detail)}
+						disabled={readOnly}
+						on:input={(e) => updateField('name', e.detail)}
 					/>
 				</div>
 
@@ -241,7 +270,8 @@
 						value={formData.preferredProtocol}
 						options={protocolOptions}
 						fullWidth
-						on:change={(e) => update('preferredProtocol', e.detail)}
+						disabled={readOnly}
+						on:change={(e) => updateField('preferredProtocol', e.detail as PreferredProtocol)}
 					/>
 					{#if protocolDescription}
 						<p class="text-xs text-neutral-500 dark:text-neutral-400">
@@ -269,10 +299,10 @@
 									name="usenet-delay"
 									id="usenet-delay"
 									value={formData.usenetDelay}
-									onchange={(v) => update('usenetDelay', v)}
+									onchange={(v) => updateField('usenetDelay', v)}
 									min={0}
 									font="mono"
-									disabled={!usenetEnabled}
+									disabled={readOnly || !usenetEnabled}
 								/>
 							</div>
 						</div>
@@ -289,10 +319,10 @@
 									name="torrent-delay"
 									id="torrent-delay"
 									value={formData.torrentDelay}
-									onchange={(v) => update('torrentDelay', v)}
+									onchange={(v) => updateField('torrentDelay', v)}
 									min={0}
 									font="mono"
-									disabled={!torrentEnabled}
+									disabled={readOnly || !torrentEnabled}
 								/>
 							</div>
 						</div>
@@ -313,7 +343,9 @@
 								label="Bypass if Highest Quality"
 								checked={formData.bypassIfHighestQuality}
 								fullWidth
-								on:change={() => update('bypassIfHighestQuality', !formData.bypassIfHighestQuality)}
+								disabled={readOnly}
+								on:change={() =>
+									updateField('bypassIfHighestQuality', !formData.bypassIfHighestQuality)}
 							/>
 							<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
 								Skip delay when release is already the highest quality in profile
@@ -326,14 +358,16 @@
 									label="Bypass if Above Custom Format Score"
 									checked={formData.bypassIfAboveCfScore}
 									fullWidth
-									on:change={() => update('bypassIfAboveCfScore', !formData.bypassIfAboveCfScore)}
+									disabled={readOnly}
+									on:change={() =>
+										updateField('bypassIfAboveCfScore', !formData.bypassIfAboveCfScore)}
 								/>
 								<NumberInput
 									name="min-cf-score"
 									id="min-cf-score"
 									value={formData.minimumCfScore}
-									onchange={(v) => update('minimumCfScore', v)}
-									disabled={!formData.bypassIfAboveCfScore}
+									onchange={(v) => updateField('minimumCfScore', v)}
+									disabled={readOnly || !formData.bypassIfAboveCfScore}
 									font="mono"
 								/>
 							</div>
@@ -348,7 +382,7 @@
 	</form>
 
 	<!-- Hidden delete form -->
-	{#if mode === 'edit'}
+	{#if mode === 'edit' && !readOnly}
 		<form
 			bind:this={deleteFormElement}
 			method="POST"

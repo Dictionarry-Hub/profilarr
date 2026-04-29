@@ -8,6 +8,7 @@
 	export let variant: 'primary' | 'secondary' | 'danger' | 'ghost' = 'secondary';
 	export let size: 'xs' | 'sm' | 'md' = 'sm';
 	export let disabled: boolean = false;
+	export let softDisabled: boolean = false;
 	export let icon: ComponentType | null = null;
 	export let leadingIcon: ComponentType | { path: string } | null = null;
 	export let iconColor: string = '';
@@ -56,7 +57,8 @@
 
 	$: justifyClass = justify === 'between' ? 'justify-between' : 'justify-center';
 
-	$: baseClasses = `inline-flex items-center ${justifyClass} font-medium transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`;
+	$: disabledClass = disabled || softDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer';
+	$: baseClasses = `inline-flex items-center ${justifyClass} font-medium transition-colors ${disabledClass}`;
 
 	const sizeClasses = {
 		xs: 'gap-1 rounded-lg px-2 py-1 text-xs',
@@ -103,6 +105,7 @@
 			{rel}
 			title={!tooltip && title ? title : undefined}
 			aria-label={ariaLabel || tooltip || undefined}
+			aria-disabled={softDisabled || disabled ? 'true' : undefined}
 			class={classes}
 			data-onboarding={onboarding}
 			on:click
@@ -143,6 +146,7 @@
 			{disabled}
 			title={!tooltip && title ? title : undefined}
 			aria-label={ariaLabel || tooltip || undefined}
+			aria-disabled={softDisabled || disabled ? 'true' : undefined}
 			class={classes}
 			data-onboarding={onboarding}
 			on:click

@@ -13,6 +13,7 @@
 	import { alertStore } from '$alerts/store';
 	import { Info, Plus } from 'lucide-svelte';
 	import type { PageData } from './$types';
+	import { delayProfileLockedMessage } from './lock';
 
 	export let data: PageData;
 
@@ -20,9 +21,25 @@
 	let cloneModalOpen = false;
 	let cloneSourceName = '';
 
+	function notifyLocked() {
+		alertStore.add('info', delayProfileLockedMessage);
+	}
+
 	function handleClone(event: CustomEvent<{ name: string }>) {
+		if (!data.canWriteToBase) {
+			notifyLocked();
+			return;
+		}
 		cloneSourceName = event.detail.name;
 		cloneModalOpen = true;
+	}
+
+	function handleCreate() {
+		if (!data.canWriteToBase) {
+			notifyLocked();
+			return;
+		}
+		goto(`/delay-profiles/${data.currentDatabase.id}/new`);
 	}
 
 	async function handleExport(event: CustomEvent<{ name: string }>) {
@@ -76,10 +93,7 @@
 		<SearchAction searchStore={search} placeholder="Search delay profiles..." responsive />
 		<ViewToggle bind:value={$view} />
 		<ActionButton icon={Info} on:click={() => (showInfoModal = true)} />
-		<ActionButton
-			icon={Plus}
-			on:click={() => goto(`/delay-profiles/${data.currentDatabase.id}/new`)}
-		/>
+		<ActionButton icon={Plus} on:click={handleCreate} />
 	</ActionsBar>
 
 	<!-- Delay Profiles Content -->
@@ -99,9 +113,19 @@
 				<p class="text-neutral-600 dark:text-neutral-400">No delay profiles match your search</p>
 			</div>
 		{:else if $view === 'table'}
-			<TableView profiles={$filtered} on:clone={handleClone} on:export={handleExport} />
+			<TableView
+				profiles={$filtered}
+				canWriteToBase={data.canWriteToBase}
+				on:clone={handleClone}
+				on:export={handleExport}
+			/>
 		{:else}
-			<CardView profiles={$filtered} on:clone={handleClone} on:export={handleExport} />
+			<CardView
+				profiles={$filtered}
+				canWriteToBase={data.canWriteToBase}
+				on:clone={handleClone}
+				on:export={handleExport}
+			/>
 		{/if}
 	</div>
 </div>

@@ -23,6 +23,7 @@
 	export let unit: string = ''; // optional unit suffix for badge display
 	export let unlimitedValue: number | null = null; // value that should display as "Unlimited"
 	export let displayTransform: ((value: number) => number) | null = null; // optional transform for display values
+	export let disabled: boolean = false;
 
 	const dispatch = createEventDispatcher();
 
@@ -112,6 +113,7 @@
 
 	// Handle drag start
 	function handleDragStart(index: number, event: MouseEvent | TouchEvent) {
+		if (disabled) return;
 		event.preventDefault();
 		draggingIndex = index;
 
@@ -132,6 +134,7 @@
 
 	// Handle drag move
 	function handleDragMove(event: MouseEvent | TouchEvent) {
+		if (disabled) return;
 		if (draggingIndex === null || !container) return;
 
 		const rect = container.getBoundingClientRect();
@@ -194,6 +197,7 @@
 	class="relative select-none"
 	class:w-full={orientation === 'horizontal'}
 	class:h-full={orientation === 'vertical'}
+	class:opacity-50={disabled}
 >
 	<!-- Track container -->
 	<div
@@ -224,12 +228,14 @@
 				<!-- Dot -->
 				<button
 					type="button"
+					{disabled}
 					on:mousedown={(e) => handleDragStart(index, e)}
 					on:touchstart={(e) => handleDragStart(index, e)}
-					class="relative h-4 w-4 -translate-x-1/2 cursor-grab rounded-full shadow-sm transition-transform hover:scale-125 {colors.dot} {orientation ===
-					'vertical'
+					class="relative h-4 w-4 -translate-x-1/2 rounded-full shadow-sm transition-transform disabled:cursor-not-allowed {disabled
+						? ''
+						: 'cursor-grab hover:scale-125'} {colors.dot} {orientation === 'vertical'
 						? '-translate-y-1/2'
-						: ''} {draggingIndex === index ? 'scale-150 cursor-grabbing' : ''}"
+						: ''} {draggingIndex === index && !disabled ? 'scale-150 cursor-grabbing' : ''}"
 					aria-label="Drag to adjust {marker.label}"
 				></button>
 

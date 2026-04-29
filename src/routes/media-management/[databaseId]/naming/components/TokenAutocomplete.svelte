@@ -10,6 +10,7 @@
 	export let placeholder: string = '';
 	export let categories: TokenCategory[];
 	export let inputElement: HTMLInputElement | HTMLTextAreaElement | null = null;
+	export let disabled: boolean = false;
 
 	const dispatch = createEventDispatcher<{ input: string }>();
 
@@ -54,6 +55,7 @@
 	}
 
 	function handleInput(e: CustomEvent<string>) {
+		if (disabled) return;
 		value = e.detail;
 		dispatch('input', value);
 
@@ -69,6 +71,7 @@
 	}
 
 	function handleFocus() {
+		if (disabled) return;
 		open = true;
 		highlightedIndex = 0;
 
@@ -102,7 +105,7 @@
 	}
 
 	function selectToken(token: FlatToken) {
-		if (!inputElement) return;
+		if (disabled || !inputElement) return;
 
 		const cursor = inputElement.selectionStart ?? inputElement.value.length;
 		const insertPos = triggerPos >= 0 ? triggerPos : cursor;
@@ -123,6 +126,7 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
+		if (disabled) return;
 		if (!open) return;
 
 		switch (event.key) {
@@ -169,11 +173,12 @@
 		mono
 		wrap
 		bind:inputElement
+		{disabled}
 		on:input={handleInput}
 		on:focus={handleFocus}
 	/>
 
-	{#if open && filteredTokens.length > 0}
+	{#if !disabled && open && filteredTokens.length > 0}
 		<div
 			bind:this={listboxElement}
 			role="listbox"

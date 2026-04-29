@@ -24,6 +24,7 @@
 	} from '$shared/pcd/mediaManagement.ts';
 	import { resolveSonarrFormat, getSonarrTokenCategories } from '$shared/pcd/namingTokens.ts';
 	import NamingPreview from './NamingPreview.svelte';
+	import { mediaManagementLockedMessage } from '../../lock';
 
 	import TokenAutocomplete from './TokenAutocomplete.svelte';
 
@@ -101,6 +102,7 @@
 	let selectedLayer: 'user' | 'base' = canWriteToBase ? 'base' : 'user';
 	let mainFormElement: HTMLFormElement;
 	let deleteFormElement: HTMLFormElement;
+	$: readOnly = !canWriteToBase;
 
 	$: databaseId = parseInt($page.params.databaseId ?? '0', 10);
 	let standardEpisodeFormatInput: HTMLInputElement | HTMLTextAreaElement | null = null;
@@ -112,14 +114,31 @@
 	const sonarrTokenCategories = getSonarrTokenCategories();
 
 	$: title = mode === 'create' ? 'New Sonarr Naming Config' : 'Edit Sonarr Naming Config';
-	$: description =
-		mode === 'create'
+	$: description = readOnly
+		? 'Media management configs from linked databases cannot be edited directly'
+		: mode === 'create'
 			? `Create a new Sonarr naming configuration for ${databaseName}`
 			: `Update Sonarr naming configuration`;
 	$: isValid = formData.name.trim() !== '';
 	$: showCustomColonInput = formData.colonReplacementFormat === 'custom';
 
+	function notifyLocked() {
+		alertStore.add('info', mediaManagementLockedMessage);
+	}
+
+	function updateField<K extends keyof SonarrNamingFormData>(
+		field: K,
+		value: SonarrNamingFormData[K]
+	) {
+		if (readOnly) return;
+		update<SonarrNamingFormData, K>(field, value);
+	}
+
 	async function handleSaveClick() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		if (saving) return;
 		saving = true;
 		selectedLayer = canWriteToBase ? 'base' : 'user';
@@ -128,10 +147,18 @@
 	}
 
 	async function handleDeleteClick() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		showDeleteModal = true;
 	}
 
 	async function handleDeleteConfirm() {
+		if (readOnly) {
+			notifyLocked();
+			return;
+		}
 		selectedLayer = canWriteToBase ? 'base' : 'user';
 		showDeleteModal = false;
 		await tick();
@@ -155,7 +182,7 @@
 			iconColor="text-blue-600 dark:text-blue-400"
 			on:click={() => (showInfoModal = true)}
 		/>
-		{#if mode === 'edit'}
+		{#if mode === 'edit' && !readOnly}
 			<Button
 				text={deleting ? 'Deleting...' : 'Delete'}
 				icon={Trash2}
@@ -168,7 +195,8 @@
 			text={saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
 			icon={Save}
 			iconColor="text-blue-600 dark:text-blue-400"
-			disabled={saving || !isValid || !$isDirty}
+			disabled={!readOnly && (saving || !isValid || !$isDirty)}
+			softDisabled={readOnly}
 			on:click={handleSaveClick}
 		/>
 	</div>
@@ -187,7 +215,8 @@
 				required
 				value={formData.name}
 				placeholder="e.g., default"
-				on:input={(e) => update('name', e.detail)}
+				disabled={readOnly}
+				on:input={(e) => updateField('name', e.detail)}
 			/>
 
 			<div class="space-y-2">
@@ -196,7 +225,8 @@
 					label="Rename Episodes"
 					ariaLabel="Rename Episodes"
 					color={formData.rename ? 'green' : 'neutral'}
-					on:change={(e) => update('rename', e.detail)}
+					disabled={readOnly}
+					on:change={(e) => updateField('rename', e.detail)}
 				/>
 				<p class="text-xs text-neutral-500 dark:text-neutral-400">
 					Rename episode files to match the naming format
@@ -222,7 +252,8 @@
 						value={formData.standardEpisodeFormat}
 						categories={sonarrTokenCategories}
 						bind:inputElement={standardEpisodeFormatInput}
-						on:input={(e) => update('standardEpisodeFormat', e.detail)}
+						disabled={readOnly}
+						on:input={(e) => updateField('standardEpisodeFormat', e.detail)}
 					/>
 					<NamingPreview format={formData.standardEpisodeFormat} resolver={resolveSonarrFormat} />
 				</div>
@@ -234,7 +265,8 @@
 						value={formData.dailyEpisodeFormat}
 						categories={sonarrTokenCategories}
 						bind:inputElement={dailyEpisodeFormatInput}
-						on:input={(e) => update('dailyEpisodeFormat', e.detail)}
+						disabled={readOnly}
+						on:input={(e) => updateField('dailyEpisodeFormat', e.detail)}
 					/>
 					<NamingPreview format={formData.dailyEpisodeFormat} resolver={resolveSonarrFormat} />
 				</div>
@@ -246,7 +278,8 @@
 						value={formData.animeEpisodeFormat}
 						categories={sonarrTokenCategories}
 						bind:inputElement={animeEpisodeFormatInput}
-						on:input={(e) => update('animeEpisodeFormat', e.detail)}
+						disabled={readOnly}
+						on:input={(e) => updateField('animeEpisodeFormat', e.detail)}
 					/>
 					<NamingPreview format={formData.animeEpisodeFormat} resolver={resolveSonarrFormat} />
 				</div>
@@ -266,7 +299,8 @@
 						value={formData.seriesFolderFormat}
 						categories={sonarrTokenCategories}
 						bind:inputElement={seriesFolderFormatInput}
-						on:input={(e) => update('seriesFolderFormat', e.detail)}
+						disabled={readOnly}
+						on:input={(e) => updateField('seriesFolderFormat', e.detail)}
 					/>
 					<NamingPreview format={formData.seriesFolderFormat} resolver={resolveSonarrFormat} />
 				</div>
@@ -278,7 +312,8 @@
 						value={formData.seasonFolderFormat}
 						categories={sonarrTokenCategories}
 						bind:inputElement={seasonFolderFormatInput}
-						on:input={(e) => update('seasonFolderFormat', e.detail)}
+						disabled={readOnly}
+						on:input={(e) => updateField('seasonFolderFormat', e.detail)}
 					/>
 					<NamingPreview format={formData.seasonFolderFormat} resolver={resolveSonarrFormat} />
 				</div>
@@ -294,7 +329,8 @@
 				<DropdownSelect
 					value={formData.multiEpisodeStyle}
 					options={MULTI_EPISODE_STYLE_OPTIONS}
-					on:change={(e) => update('multiEpisodeStyle', e.detail)}
+					disabled={readOnly}
+					on:change={(e) => updateField('multiEpisodeStyle', e.detail as MultiEpisodeStyle)}
 				/>
 			</div>
 
@@ -315,7 +351,8 @@
 						label="Replace Illegal Characters"
 						ariaLabel="Replace Illegal Characters"
 						color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
-						on:change={(e) => update('replaceIllegalCharacters', e.detail)}
+						disabled={readOnly}
+						on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
 					/>
 					<p class="text-xs text-neutral-500 dark:text-neutral-400">
 						Replace characters that are not allowed in file names
@@ -327,7 +364,9 @@
 						label="Colon Replacement"
 						value={formData.colonReplacementFormat}
 						options={SONARR_COLON_REPLACEMENT_OPTIONS}
-						on:change={(e) => update('colonReplacementFormat', e.detail)}
+						disabled={readOnly}
+						on:change={(e) =>
+							updateField('colonReplacementFormat', e.detail as SonarrColonReplacementFormat)}
 					/>
 
 					{#if showCustomColonInput}
@@ -336,7 +375,8 @@
 							name="customColonReplacementFormat"
 							value={formData.customColonReplacementFormat}
 							placeholder="Enter custom replacement character(s)"
-							on:input={(e) => update('customColonReplacementFormat', e.detail)}
+							disabled={readOnly}
+							on:input={(e) => updateField('customColonReplacementFormat', e.detail)}
 						/>
 					{/if}
 				{/if}
@@ -410,7 +450,7 @@
 </form>
 
 <!-- Hidden delete form -->
-{#if mode === 'edit'}
+{#if mode === 'edit' && !readOnly}
 	<form
 		bind:this={deleteFormElement}
 		method="POST"
