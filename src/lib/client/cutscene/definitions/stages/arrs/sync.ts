@@ -46,7 +46,7 @@ export const arrSyncStage: Stage = {
 		{
 			id: 'sync-required',
 			title: 'Required Syncing',
-			body: "Quality profiles can't sync until media management and delay profiles have been saved. The custom formats and scoring inside a profile are written to work with specific naming, file size tiers, and protocol delays, so syncing a profile without those in place can produce results that look right but behave incorrectly. If you'd rather not use the database's recommended setup, create your own naming scheme or settings in the database and sync those. Profilarr just needs you to commit to one or the other.",
+			body: "Quality profiles can't sync until media management and delay profiles have been saved. The custom formats and scoring inside a profile are tuned to work with specific naming, file size tiers, and protocol delays. Without those in place, the profile still syncs, but matching, scoring, and renaming break in ways that are hard to spot until something goes wrong. You're welcome to use your own naming scheme or settings if you create and sync them through the database. Just know that the recommended setup exists for a reason, and deviating from it without understanding what each piece does will produce broken results.",
 			completion: { type: 'manual' }
 		},
 		{
