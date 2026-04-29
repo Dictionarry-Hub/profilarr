@@ -11,6 +11,12 @@
 	import type { FilterFieldDef, FilterTag, SerializedFilterTag } from './types';
 	import { uuid } from '$shared/utils/uuid';
 
+	interface SmartFilterDraft {
+		inputValue: string;
+		activeFieldKey: string | null;
+		valueInputValue: string;
+	}
+
 	export let fields: FilterFieldDef[] = [];
 	export let items: any[] = [];
 	export let tags: FilterTag[] = [];
@@ -26,10 +32,13 @@
 	let highlightedIndex = -1;
 	let dropdownOpen = false;
 	let activeFieldDef: FilterFieldDef | null = null;
+	let storageHydrated = false;
 
 	// ======================================================================
 	// Persistence
 	// ======================================================================
+
+	$: draftStorageKey = storageKey ? `${storageKey}:draft` : '';
 
 	function loadTags(): FilterTag[] {
 		if (!browser || !storageKey) return [];
@@ -49,15 +58,71 @@
 		localStorage.setItem(storageKey, JSON.stringify(serialized));
 	}
 
+	function loadDraft(): SmartFilterDraft | null {
+		if (!browser || !draftStorageKey) return null;
+		try {
+			const stored = localStorage.getItem(draftStorageKey);
+			if (!stored) return null;
+
+			const parsed = JSON.parse(stored) as Record<string, unknown>;
+			return {
+				inputValue: typeof parsed.inputValue === 'string' ? parsed.inputValue : '',
+				activeFieldKey: typeof parsed.activeFieldKey === 'string' ? parsed.activeFieldKey : null,
+				valueInputValue: typeof parsed.valueInputValue === 'string' ? parsed.valueInputValue : ''
+			};
+		} catch {}
+		return null;
+	}
+
+	function saveDraft(draft: SmartFilterDraft) {
+		if (!browser || !draftStorageKey) return;
+		const hasDraft = draft.inputValue || draft.activeFieldKey || draft.valueInputValue;
+		if (!hasDraft) {
+			localStorage.removeItem(draftStorageKey);
+			return;
+		}
+		localStorage.setItem(draftStorageKey, JSON.stringify(draft));
+	}
+
+	function restoreDraft() {
+		const draft = loadDraft();
+		if (!draft) return;
+
+		inputValue = draft.inputValue;
+		const activeField = draft.activeFieldKey
+			? fields.find((field) => field.key === draft.activeFieldKey)
+			: null;
+
+		if (activeField) {
+			activeFieldDef = activeField;
+			valueInputValue = draft.valueInputValue;
+		} else {
+			activeFieldDef = null;
+			valueInputValue = '';
+		}
+
+		dropdownOpen = false;
+		highlightedIndex = -1;
+	}
+
 	onMount(() => {
 		const loaded = loadTags();
 		if (loaded.length > 0) {
 			tags = loaded;
 			onchange?.(tags);
 		}
+		restoreDraft();
+		storageHydrated = true;
 	});
 
-	$: saveTags(tags);
+	$: if (storageHydrated) saveTags(tags);
+	$: if (storageHydrated) {
+		saveDraft({
+			inputValue,
+			activeFieldKey: activeFieldDef?.key ?? null,
+			valueInputValue: activeFieldDef ? valueInputValue : ''
+		});
+	}
 
 	// ======================================================================
 	// Field lookup helpers
@@ -123,10 +188,6 @@
 
 	// Reset highlight when suggestions change
 	$: (suggestions, (highlightedIndex = -1));
-
-	$: if (suggestions.length > 0 || showNumberHint) {
-		dropdownOpen = true;
-	}
 
 	// ======================================================================
 	// Tag management
@@ -244,11 +305,13 @@
 			event.preventDefault();
 			if (suggestions.length > 0) {
 				highlightedIndex = (highlightedIndex + 1) % suggestions.length;
+				dropdownOpen = true;
 			}
 		} else if (event.key === 'ArrowUp') {
 			event.preventDefault();
 			if (suggestions.length > 0) {
 				highlightedIndex = highlightedIndex <= 0 ? suggestions.length - 1 : highlightedIndex - 1;
+				dropdownOpen = true;
 			}
 		} else if (event.key === 'Escape') {
 			clearActiveField();
@@ -275,8 +338,6 @@
 		if (containerEl && !containerEl.contains(event.target as Node)) {
 			dropdownOpen = false;
 			isFocused = false;
-			activeFieldDef = null;
-			valueInputValue = '';
 		}
 	}
 
