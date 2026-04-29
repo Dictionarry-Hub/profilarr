@@ -26,7 +26,14 @@ export interface JobFinishedEvent {
 	durationMs: number;
 }
 
-export type JobEvent = JobStartedEvent | JobFinishedEvent;
+export interface JobProgressEvent {
+	type: 'job.progress';
+	jobId: number;
+	jobType: JobType;
+	label: string;
+}
+
+export type JobEvent = JobStartedEvent | JobFinishedEvent | JobProgressEvent;
 
 type JobEventCallback = (event: JobEvent) => void;
 
@@ -39,7 +46,8 @@ const JOB_RUNNING_LABELS: Partial<Record<JobType, string>> = {
 	'arr.sync.mediaManagement': 'Syncing Media Management...',
 	'arr.cleanup': 'Cleaning up...',
 	'backup.create': 'Creating backup...',
-	'backup.cleanup': 'Cleaning up backups...'
+	'backup.cleanup': 'Cleaning up backups...',
+	'pcd.link': 'Linking database...'
 };
 
 const JOB_COMPLETED_LABELS: Partial<Record<JobType, string>> = {
@@ -49,7 +57,8 @@ const JOB_COMPLETED_LABELS: Partial<Record<JobType, string>> = {
 	'arr.sync.mediaManagement': 'Media Management sync',
 	'arr.cleanup': 'Cleanup',
 	'backup.create': 'Backup',
-	'backup.cleanup': 'Backup cleanup'
+	'backup.cleanup': 'Backup cleanup',
+	'pcd.link': 'Database link'
 };
 
 const EMITTED_JOB_TYPES = new Set(Object.keys(JOB_RUNNING_LABELS));

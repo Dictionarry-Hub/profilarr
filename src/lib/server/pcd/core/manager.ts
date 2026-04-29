@@ -46,9 +46,14 @@ async function readSchemaVersion(pcdPath: string): Promise<string | null> {
  */
 class PCDManager {
 	/**
-	 * Link a new PCD repository
+	 * Link a new PCD repository.
+	 *
+	 * Optional progress callback receives a stage label between phases
+	 * (clone, manifest, deps, import, compile). Used by the async
+	 * `pcd.link` job handler to surface progress over SSE; sync callers
+	 * (startup auto-link, REST API) omit it.
 	 */
-	async link(options: LinkOptions): Promise<DatabaseInstance> {
+	async link(options: LinkOptions, progress?: (label: string) => void): Promise<DatabaseInstance> {
 		await logger.debug('Starting database link operation', {
 			source: 'PCDManager',
 			meta: {
@@ -63,6 +68,8 @@ class PCDManager {
 		const localPath = getPCDPath(uuid);
 
 		try {
+			progress?.('Cloning repository...');
+
 			// Clone the repository and detect if it's private
 			const isPrivate = await clone(
 				options.repositoryUrl,
@@ -71,8 +78,12 @@ class PCDManager {
 				options.personalAccessToken
 			);
 
+			progress?.('Reading manifest...');
+
 			// Validate manifest (loadManifest throws if invalid)
 			await loadManifest(localPath);
+
+			progress?.('Cloning dependencies...');
 
 			// Process dependencies (clone and validate)
 			await processDependencies(localPath, options.personalAccessToken);
@@ -99,6 +110,8 @@ class PCDManager {
 				throw new Error('Failed to retrieve created database instance');
 			}
 
+			progress?.('Importing ops...');
+
 			try {
 				await importBaseOps(id, localPath);
 			} catch (error) {
@@ -110,6 +123,8 @@ class PCDManager {
 
 			// Compile cache (only if enabled)
 			if (instance.enabled) {
+				progress?.('Compiling cache...');
+
 				try {
 					const stats = await compile(localPath, id);
 

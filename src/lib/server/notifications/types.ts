@@ -12,6 +12,7 @@ export const NotificationTypes = {
 	PCD_UPDATES_AVAILABLE: 'pcd.updates_available',
 	PCD_SYNC_SUCCESS: 'pcd.sync_success',
 	PCD_SYNC_FAILED: 'pcd.sync_failed',
+	PCD_LINK_FAILED: 'pcd.link_failed',
 
 	// Upgrades
 	UPGRADE_SUCCESS: 'upgrade.success',
