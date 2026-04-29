@@ -741,6 +741,9 @@ export function listDraftEntityChanges(databaseId: number): DraftEntityChange[] 
 	const resolveAlias = (entity: string, value: string): string => {
 		return originalName.get(`${entity}:${value}`) ?? value;
 	};
+	const scopedGroupKey = (baseKey: string, groupId?: string): string => {
+		return groupId ? `${baseKey}::${groupId}` : baseKey;
+	};
 	const groups = new Map<string, DraftEntityChange>();
 	const aggregates = new Map<string, Map<string, FieldAggregate>>();
 	const entityCreates = new Map<string, boolean>();
@@ -755,8 +758,7 @@ export function listDraftEntityChanges(databaseId: number): DraftEntityChange[] 
 		const desiredState = parseJson<Record<string, unknown>>(op.desired_state);
 		const stableKey = metadata.stable_key?.value ?? metadata.name;
 		const baseKey = `${metadata.entity}:${resolveAlias(metadata.entity, stableKey)}`;
-		const groupKey =
-			metadata.generated && metadata.group_id ? `${baseKey}::${metadata.group_id}` : baseKey;
+		const groupKey = scopedGroupKey(baseKey, metadata.group_id);
 
 		if (metadata.depends_on && metadata.depends_on.length > 0) {
 			const depSet = dependencies.get(groupKey) ?? new Set<string>();
@@ -765,9 +767,14 @@ export function listDraftEntityChanges(databaseId: number): DraftEntityChange[] 
 					dependency.entity ?? (dependency.key ? ENTITY_BY_STABLE_KEY[dependency.key] : undefined);
 				const depValue = dependency.value;
 				if (!depEntity || !depValue) continue;
-				const depKey = `${depEntity}:${resolveAlias(depEntity, depValue)}`;
-				if (depKey === groupKey) continue;
-				depSet.add(depKey);
+				const depBaseKey = `${depEntity}:${resolveAlias(depEntity, depValue)}`;
+				const depKeys = metadata.group_id
+					? [scopedGroupKey(depBaseKey, metadata.group_id), depBaseKey]
+					: [depBaseKey];
+				for (const depKey of depKeys) {
+					if (depKey === groupKey) continue;
+					depSet.add(depKey);
+				}
 			}
 			if (depSet.size > 0) {
 				dependencies.set(groupKey, depSet);
