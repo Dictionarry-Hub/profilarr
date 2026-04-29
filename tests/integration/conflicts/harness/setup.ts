@@ -13,6 +13,7 @@ export interface CreateDatabaseInstanceOpts {
 	localPath: string;
 	conflictStrategy?: 'override' | 'align' | 'ask';
 	enabled?: boolean;
+	canWriteToBase?: boolean;
 }
 
 /**
@@ -27,13 +28,15 @@ export function createDatabaseInstance(dbPath: string, opts: CreateDatabaseInsta
 			`INSERT INTO database_instances (
 				uuid, name, repository_url, local_path,
 				sync_strategy, auto_pull, enabled, is_private,
-				local_ops_enabled, conflict_strategy
-			) VALUES (?, ?, '', ?, 60, 0, ?, 0, 1, ?)`,
+				personal_access_token, local_ops_enabled, conflict_strategy
+			) VALUES (?, ?, '', ?, 60, 0, ?, 0, ?, ?, ?)`,
 			[
 				opts.uuid,
 				opts.name ?? 'test-db',
 				opts.localPath,
 				opts.enabled !== false ? 1 : 0,
+				opts.canWriteToBase ? 'test-token' : null,
+				opts.canWriteToBase ? 0 : 1,
 				opts.conflictStrategy ?? 'ask'
 			]
 		);
