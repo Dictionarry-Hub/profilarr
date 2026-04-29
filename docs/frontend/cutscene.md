@@ -141,7 +141,7 @@ like Help where a "you're done" modal would be redundant.
 | `database-manage`           | Overview            | 6     | `hasDatabase`                     | Tabs and features of a connected database                      |
 | `arr-link`                  | Link                | 5     |                                   | Connect a Radarr or Sonarr instance                            |
 | `arr-manage`                | Overview            | 7     | `hasArrInstance`                  | Tabs and features of a connected Arr instance                  |
-| `arr-sync`                  | Sync                | 7     | `hasArrInstance`                  | Configure what gets synced and when                            |
+| `arr-sync`                  | Sync                | 8     | `hasArrInstance`                  | Configure what gets synced and when                            |
 | `arr-upgrades`              | Upgrades            | 11    | `hasArrInstance`                  | Automated searching for better quality releases                |
 | `arr-renames`               | Rename              | 7     | `hasArrInstance`                  | Automated file and folder renaming                             |
 | `cf-general`                | General             | 6     | `hasDatabase`                     | Identity, rename behavior, and references                      |
