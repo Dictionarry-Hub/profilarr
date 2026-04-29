@@ -5,6 +5,7 @@ export type JobType =
 	| 'arr.sync.qualityProfiles'
 	| 'arr.sync.delayProfiles'
 	| 'arr.sync.mediaManagement'
+	| 'pcd.link'
 	| 'pcd.sync'
 	| 'backup.create'
 	| 'backup.cleanup'
@@ -55,4 +56,11 @@ export interface JobHandlerResult {
 	rescheduleAt?: string | null;
 }
 
-export type JobHandler = (job: JobQueueRecord) => Promise<JobHandlerResult>;
+export interface JobHandlerContext {
+	progress: (label: string) => void;
+}
+
+export type JobHandler = (
+	job: JobQueueRecord,
+	ctx?: JobHandlerContext
+) => Promise<JobHandlerResult>;

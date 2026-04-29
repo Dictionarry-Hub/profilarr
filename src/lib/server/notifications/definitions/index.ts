@@ -14,7 +14,7 @@ import { rename } from './rename.ts';
 import { upgrade } from './upgrade.ts';
 import { arrSync } from './arrSync.ts';
 import { arrCleanup } from './arrCleanup.ts';
-import { pcdUpdatesAvailable, pcdSyncSuccess, pcdSyncFailed } from './pcdSync.ts';
+import { pcdUpdatesAvailable, pcdSyncSuccess, pcdSyncFailed, pcdLinkFailed } from './pcdSync.ts';
 import { backupSuccess, backupFailed } from './backup.ts';
 import { announcementNew } from './announcement.ts';
 
@@ -27,6 +27,7 @@ export const notifications = {
 	pcdUpdatesAvailable,
 	pcdSyncSuccess,
 	pcdSyncFailed,
+	pcdLinkFailed,
 	backupSuccess,
 	backupFailed,
 	announcementNew

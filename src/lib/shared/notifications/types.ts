@@ -59,6 +59,12 @@ export const notificationTypes: NotificationType[] = [
 		category: 'Databases',
 		description: 'Notification when database sync fails'
 	},
+	{
+		id: 'pcd.link_failed',
+		label: 'Database Link (Failed)',
+		category: 'Databases',
+		description: 'Notification when linking a new database fails'
+	},
 
 	// Arr Sync
 	{

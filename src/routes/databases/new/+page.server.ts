@@ -1,8 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/core/manager.ts';
 import { logger } from '$logger/logger.ts';
-import { schedulePcdSyncForDatabase } from '$lib/server/jobs/init.ts';
+import { enqueueJob } from '$jobs/queueService.ts';
+import { stashLinkPat } from '$jobs/handlers/pcdLink.ts';
 import { validateLinkInput, checkNameConflict } from '$pcd/core/validate.ts';
 
 function getFirstNonEmptyFormValue(formData: FormData, key: string): string | undefined {
@@ -101,37 +101,33 @@ export const actions = {
 			});
 		}
 
-		try {
-			const instance = await pcdManager.link(input);
+		const patToken = input.personalAccessToken
+			? stashLinkPat(input.personalAccessToken)
+			: undefined;
 
-			await logger.info(`Linked new database: ${input.name}`, {
-				source: 'databases/new',
-				meta: { id: instance.id, name: input.name, repositoryUrl: input.repositoryUrl }
-			});
-
-			schedulePcdSyncForDatabase(instance.id);
-
-			redirect(303, '/databases');
-		} catch (error) {
-			// Re-throw redirect errors (they're not actual errors)
-			if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
-				throw error;
+		enqueueJob({
+			jobType: 'pcd.link',
+			runAt: new Date().toISOString(),
+			source: 'manual',
+			payload: {
+				name: input.name,
+				repositoryUrl: input.repositoryUrl,
+				branch: input.branch,
+				syncStrategy: input.syncStrategy,
+				autoPull: input.autoPull,
+				localOpsEnabled: input.localOpsEnabled,
+				gitUserName: input.gitUserName,
+				gitUserEmail: input.gitUserEmail,
+				conflictStrategy: input.conflictStrategy,
+				patToken
 			}
+		});
 
-			await logger.error('Failed to link database', {
-				source: 'databases/new',
-				meta: {
-					error: error instanceof Error ? error.message : String(error),
-					name: input.name,
-					repositoryUrl: input.repositoryUrl,
-					hasPersonalAccessToken: !!input.personalAccessToken
-				}
-			});
+		await logger.info(`Queued database link: ${input.name}`, {
+			source: 'databases/new',
+			meta: { name: input.name, repositoryUrl: input.repositoryUrl }
+		});
 
-			return fail(500, {
-				error: error instanceof Error ? error.message : 'Failed to link database',
-				values: { name: input.name, repository_url: input.repositoryUrl }
-			});
-		}
+		redirect(303, '/databases');
 	}
 } satisfies Actions;

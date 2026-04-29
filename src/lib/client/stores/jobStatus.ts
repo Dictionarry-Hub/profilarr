@@ -12,6 +12,12 @@
  * - completed -> idle after 6 seconds (then auto-disconnect)
  * - If job.started arrives during completed and < 5s elapsed, hold
  *   the completion message until 5s pass, then transition to running
+ *
+ * Optimistic running:
+ * - setRunning() lets a caller claim the running state before any SSE
+ *   event arrives (used by the link form to avoid the started-event race).
+ *   The first matching event with a jobId then claims the state for
+ *   real; later events without a matching jobId are ignored.
  */
 
 import { writable } from 'svelte/store';
@@ -29,11 +35,19 @@ export type JobStatusState =
 	  };
 
 interface StartedPayload {
+	jobId: number;
 	jobType: string;
 	displayLabel: string;
 }
 
+interface ProgressPayload {
+	jobId: number;
+	jobType: string;
+	label: string;
+}
+
 interface FinishedPayload {
+	jobId: number;
 	jobType: string;
 	displayLabel: string;
 	status: string;
@@ -44,12 +58,13 @@ const COMPLETED_DISPLAY_MS = 6_000;
 const COMPLETED_HOLDOFF_MS = 5_000;
 
 function createJobStatusStore() {
-	const { subscribe, set } = writable<JobStatusState>({ state: 'idle' });
+	const { subscribe, set, update } = writable<JobStatusState>({ state: 'idle' });
 
 	let resetTimer: ReturnType<typeof setTimeout> | null = null;
 	let holdoffTimer: ReturnType<typeof setTimeout> | null = null;
 	let completedAt = 0;
 	let pendingStartEvent: StartedPayload | null = null;
+	let currentJobId: number | null = null;
 
 	let eventSource: EventSource | null = null;
 
@@ -78,6 +93,7 @@ function createJobStatusStore() {
 			if (holdoffTimer) clearTimeout(holdoffTimer);
 			holdoffTimer = setTimeout(() => {
 				if (pendingStartEvent) {
+					currentJobId = pendingStartEvent.jobId;
 					set({
 						state: 'running',
 						jobType: pendingStartEvent.jobType,
@@ -97,10 +113,25 @@ function createJobStatusStore() {
 			clearTimeout(holdoffTimer);
 			holdoffTimer = null;
 		}
+		currentJobId = data.jobId;
 		set({ state: 'running', jobType: data.jobType, displayLabel: data.displayLabel });
 	}
 
+	function handleProgress(data: ProgressPayload) {
+		update((s) => {
+			if (s.state !== 'running') return s;
+			// Optimistic running has no jobId yet; the first progress event
+			// claims it. Once claimed, only matching events update the label.
+			if (currentJobId !== null && currentJobId !== data.jobId) return s;
+			if (currentJobId === null) currentJobId = data.jobId;
+			return { ...s, displayLabel: data.label };
+		});
+	}
+
 	function handleFinished(data: FinishedPayload) {
+		// Ignore finished events for jobs we're not tracking (stale events
+		// from prior optimistic state mismatches).
+		if (currentJobId !== null && currentJobId !== data.jobId) return;
 		clearTimers();
 		completedAt = Date.now();
 		set({
@@ -111,10 +142,10 @@ function createJobStatusStore() {
 			durationMs: data.durationMs
 		});
 		resetTimer = setTimeout(() => {
+			currentJobId = null;
 			set({ state: 'idle' });
 			completedAt = 0;
 			resetTimer = null;
-			// Auto-disconnect: no more events expected
 			closeSSE();
 		}, COMPLETED_DISPLAY_MS);
 	}
@@ -137,6 +168,14 @@ function createJobStatusStore() {
 			}
 		});
 
+		eventSource.addEventListener('job.progress', (e) => {
+			try {
+				handleProgress(JSON.parse(e.data));
+			} catch {
+				// Invalid event data
+			}
+		});
+
 		eventSource.addEventListener('job.finished', (e) => {
 			try {
 				handleFinished(JSON.parse(e.data));
@@ -150,10 +189,29 @@ function createJobStatusStore() {
 		closeSSE();
 		clearTimers();
 		completedAt = 0;
+		currentJobId = null;
 		set({ state: 'idle' });
 	}
 
-	return { subscribe, connect, disconnect };
+	function setRunning(jobType: string, displayLabel: string) {
+		// Optimistic: claim running state without a jobId. The next matching
+		// SSE event will adopt the jobId. Don't touch completedAt or timers.
+		currentJobId = null;
+		set({ state: 'running', jobType, displayLabel });
+	}
+
+	function cancelOptimistic() {
+		// Only resets if we're in an unclaimed optimistic state. Once a real
+		// event has bound a jobId, leave the state alone.
+		update((s) => {
+			if (s.state === 'running' && currentJobId === null) {
+				return { state: 'idle' };
+			}
+			return s;
+		});
+	}
+
+	return { subscribe, connect, disconnect, setRunning, cancelOptimistic };
 }
 
 export const jobStatus = createJobStatusStore();

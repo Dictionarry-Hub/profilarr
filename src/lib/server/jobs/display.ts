@@ -25,6 +25,8 @@ export function formatJobTypeLabel(jobType: JobType): string {
 			return 'Arr Cleanup';
 		case 'arr.library.refresh':
 			return 'Library Refresh';
+		case 'pcd.link':
+			return 'PCD Link';
 		case 'pcd.sync':
 			return 'PCD Sync';
 		case 'backup.create':
@@ -60,6 +62,11 @@ export function buildJobDisplayName(
 	const base = formatJobTypeLabel(jobType);
 	const instanceId = readId(payload.instanceId);
 	const databaseId = readId(payload.databaseId);
+
+	if (jobType === 'pcd.link') {
+		const name = typeof payload.name === 'string' ? payload.name : null;
+		return name ? `${base} - ${name}` : base;
+	}
 
 	if (jobType === 'pcd.sync' && databaseId !== null) {
 		const name =

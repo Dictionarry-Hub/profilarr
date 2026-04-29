@@ -112,7 +112,16 @@ class JobDispatcher {
 
 		let result: JobHandlerResult;
 		try {
-			result = await handler(job);
+			result = await handler(job, {
+				progress: (label: string) => {
+					jobEvents.emit({
+						type: 'job.progress',
+						jobId: job.id,
+						jobType: job.jobType,
+						label
+					});
+				}
+			});
 		} catch (error) {
 			result = {
 				status: 'failure',

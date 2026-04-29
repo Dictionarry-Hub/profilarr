@@ -12,6 +12,7 @@
 		ExternalLink
 	} from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
+	import { jobStatus } from '$stores/jobStatus';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
 	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
 	import type { RepoInfo } from '$utils/git/types';
@@ -449,11 +450,27 @@
 	class="hidden"
 	use:enhance={() => {
 		saving = true;
+		if (mode === 'create') {
+			// Open SSE early and claim optimistic running state so the
+			// progress bar appears immediately, even if `job.started`
+			// fires before the EventSource finishes connecting.
+			jobStatus.connect();
+			jobStatus.setRunning('pcd.link', 'Linking database...');
+		}
 		return async ({ result, update: formUpdate }) => {
 			if (result.type === 'redirect') {
-				// For create mode, clear dirty state before redirect
 				clear();
-				alertStore.add('success', 'Database linked successfully');
+				if (mode === 'edit') {
+					alertStore.add('success', 'Database linked successfully');
+				} else if (result.location?.startsWith('/databases/bruh')) {
+					// Server bounced us to the bruh page; no link was queued.
+					jobStatus.cancelOptimistic();
+				} else {
+					alertStore.add('info', 'Database link queued');
+				}
+			} else if (mode === 'create') {
+				// Validation/conflict failure: clear the optimistic bar.
+				jobStatus.cancelOptimistic();
 			}
 			await formUpdate({ reset: false });
 			saving = false;

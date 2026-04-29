@@ -22,6 +22,11 @@ export interface PcdSyncFailedParams {
 	error: string;
 }
 
+export interface PcdLinkFailedParams {
+	name: string;
+	error: string;
+}
+
 function buildChangesBlock(commitMessages: string[]): NotificationBlock | null {
 	if (commitMessages.length === 0) return null;
 	return {
@@ -78,6 +83,18 @@ export function pcdSyncFailed(params: PcdSyncFailedParams): Notification {
 		type: 'pcd.sync_failed',
 		severity: 'error',
 		title: `Database Sync Failed \u2013 ${name}`,
+		message: error,
+		blocks: []
+	};
+}
+
+export function pcdLinkFailed(params: PcdLinkFailedParams): Notification {
+	const { name, error } = params;
+
+	return {
+		type: 'pcd.link_failed',
+		severity: 'error',
+		title: `Database Link Failed \u2013 ${name}`,
 		message: error,
 		blocks: []
 	};

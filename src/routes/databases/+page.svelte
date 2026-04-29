@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { Database, Plus, Info } from 'lucide-svelte';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import EmptyState from '$ui/state/EmptyState.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -13,6 +14,7 @@
 	import CardView from './views/CardView.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 	import { alertStore } from '$alerts/store';
+	import { jobStatus } from '$stores/jobStatus';
 	import type { PageData } from './$types';
 	import type { DatabaseInstanceSummary } from './+page.server.ts';
 
@@ -39,6 +41,20 @@
 		selectedDatabase = event.detail;
 		showUnlinkModal = true;
 	}
+
+	// Refresh the list when a pcd.link job finishes so the new database appears
+	// without a manual reload.
+	onMount(() => {
+		return jobStatus.subscribe((state) => {
+			if (
+				state.state === 'completed' &&
+				state.jobType === 'pcd.link' &&
+				state.status === 'success'
+			) {
+				invalidateAll();
+			}
+		});
+	});
 </script>
 
 <svelte:head>
