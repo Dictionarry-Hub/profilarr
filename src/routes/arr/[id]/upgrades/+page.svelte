@@ -1,8 +1,13 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import type { FilterConfig, FilterMode } from '$shared/upgrades/filters';
-	import { searchRateLimits, getRunsPerHour } from '$shared/upgrades/filters';
+	import type { DynamicFilterOptions, FilterConfig, FilterMode } from '$shared/upgrades/filters';
+	import {
+		createEmptyDynamicFilterOptions,
+		searchRateLimits,
+		getRunsPerHour
+	} from '$shared/upgrades/filters';
 	import { enhance } from '$app/forms';
+	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import { isDirty, initEdit, update, current, clear } from '$lib/client/stores/dirty';
@@ -49,6 +54,12 @@
 	let saving = false;
 	let running = false;
 	let clearing = false;
+	let dynamicFilterOptions: DynamicFilterOptions = createEmptyDynamicFilterOptions(
+		data.instance.type
+	);
+	let dynamicFilterOptionsLoading = true;
+	let dynamicFilterOptionsPromise: unknown = null;
+	let dynamicFilterOptionsVersion = 0;
 
 	// Read current values from dirty store (same pattern as working pages)
 	$: enabled = ($current.enabled ?? false) as boolean;
@@ -59,6 +70,28 @@
 	// Derive runs per hour for dynamic count limits
 	$: runsPerHour = getRunsPerHour(cron) ?? 1;
 	$: appMinInterval = searchRateLimits[data.instance.type]?.minIntervalMinutes ?? 10;
+
+	$: if (browser && dynamicFilterOptionsPromise !== data.dynamicFilterOptions) {
+		dynamicFilterOptionsPromise = data.dynamicFilterOptions;
+		dynamicFilterOptions = createEmptyDynamicFilterOptions(data.instance.type);
+		dynamicFilterOptionsLoading = true;
+		dynamicFilterOptionsVersion += 1;
+		const promise = dynamicFilterOptionsPromise;
+
+		Promise.resolve(data.dynamicFilterOptions)
+			.then((options) => {
+				if (dynamicFilterOptionsPromise !== promise) return;
+				dynamicFilterOptions = options;
+				dynamicFilterOptionsLoading = false;
+				dynamicFilterOptionsVersion += 1;
+			})
+			.catch(() => {
+				if (dynamicFilterOptionsPromise !== promise) return;
+				dynamicFilterOptions = createEmptyDynamicFilterOptions(data.instance.type);
+				dynamicFilterOptionsLoading = false;
+				dynamicFilterOptionsVersion += 1;
+			});
+	}
 
 	// Handle form response - use a processed flag to avoid re-running on field changes
 	let lastFormId: unknown = null;
@@ -179,6 +212,9 @@
 				{filters}
 				appType={data.instance.type}
 				{runsPerHour}
+				{dynamicFilterOptions}
+				{dynamicFilterOptionsLoading}
+				{dynamicFilterOptionsVersion}
 				onFiltersChange={(v) => update('filters', JSON.stringify(v))}
 			/>
 		</section>

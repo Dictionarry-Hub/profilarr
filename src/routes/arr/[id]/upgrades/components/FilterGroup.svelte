@@ -8,6 +8,7 @@
 		createEmptyRule,
 		isRule,
 		isGroup,
+		type DynamicFilterOptions,
 		type FilterGroup,
 		type FilterRule,
 		type UpgradeAppType
@@ -22,10 +23,18 @@
 
 	export let group: FilterGroup;
 	export let appType: UpgradeAppType = 'radarr';
+	export let dynamicFilterOptions: DynamicFilterOptions = {};
+	export let dynamicFilterOptionsLoading: boolean = false;
+	export let dynamicFilterOptionsVersion: number = 0;
 	export let onRemove: (() => void) | null = null;
 	export let depth: number = 0;
 
 	$: fields = getFilterFields(appType);
+	const dynamicStringOperators = [
+		{ value: 'eq', label: 'is' },
+		{ value: 'neq', label: 'is not' }
+	];
+	let normalizedRulesSignature = '';
 
 	const dispatch = createEventDispatcher<{ change: void }>();
 
@@ -54,9 +63,59 @@
 		const field = getFilterField(fieldId, appType);
 		if (field) {
 			rule.field = fieldId;
-			rule.operator = field.operators[0].id;
+			rule.operator = fieldId in dynamicFilterOptions ? 'eq' : field.operators[0].id;
 			rule.value = field.values?.[0]?.value ?? null;
 			notifyChange();
+		}
+	}
+
+	function getDynamicOptions(fieldId: string, value: unknown) {
+		const options = dynamicFilterOptions[fieldId] ?? [];
+		const currentValue = typeof value === 'string' ? value.trim() : '';
+
+		if (!currentValue || options.some((option) => option.value === currentValue)) {
+			return options;
+		}
+
+		return [{ value: currentValue, label: currentValue }, ...options];
+	}
+
+	function normalizeDynamicOperators(targetGroup: FilterGroup): boolean {
+		let changed = false;
+		for (const child of targetGroup.children) {
+			if (isRule(child)) {
+				if (
+					child.field in dynamicFilterOptions &&
+					child.operator !== 'eq' &&
+					child.operator !== 'neq'
+				) {
+					child.operator = 'eq';
+					changed = true;
+				}
+				continue;
+			}
+
+			if (normalizeDynamicOperators(child)) {
+				changed = true;
+			}
+		}
+		return changed;
+	}
+
+	$: {
+		const nextSignature = JSON.stringify({
+			dynamicFields: Object.keys(dynamicFilterOptions).sort(),
+			group
+		});
+		if (nextSignature !== normalizedRulesSignature) {
+			if (normalizeDynamicOperators(group)) {
+				group = group;
+				notifyChange();
+			}
+			normalizedRulesSignature = JSON.stringify({
+				dynamicFields: Object.keys(dynamicFilterOptions).sort(),
+				group
+			});
 		}
 	}
 
@@ -102,6 +161,7 @@
 			{#each group.children as child, childIndex}
 				{#if isRule(child)}
 					{@const field = getFilterField(child.field, appType)}
+					{@const isDynamicField = child.field in dynamicFilterOptions}
 					<div class="flex items-center gap-2">
 						<!-- Field -->
 						<SearchDropdown
@@ -118,7 +178,9 @@
 						{#if field}
 							<DropdownSelect
 								value={child.operator}
-								options={field.operators.map((op) => ({ value: op.id, label: op.label }))}
+								options={isDynamicField
+									? dynamicStringOperators
+									: field.operators.map((op) => ({ value: op.id, label: op.label }))}
 								minWidth="8rem"
 								responsiveButton
 								compactDropdownThreshold={7}
@@ -150,16 +212,38 @@
 								/>
 							{/if}
 						{:else if field?.valueType === 'text'}
-							<FormInput
-								label="Value"
-								hideLabel
-								name="filter-value-{childIndex}"
-								value={child.value as string}
-								on:input={(e) => {
-									child.value = e.detail;
-									notifyChange();
-								}}
-							/>
+							{@const dynamicOptions = getDynamicOptions(field.id, child.value)}
+							{#if isDynamicField}
+								{#key `${field.id}:${childIndex}:${dynamicFilterOptionsVersion}`}
+									<SearchDropdown
+										value={String(child.value ?? '')}
+										options={dynamicOptions}
+										placeholder={dynamicFilterOptionsLoading
+											? 'Loading values...'
+											: 'Search values...'}
+										label="Value"
+										name="filter-value-{childIndex}"
+										hideLabel
+										fullWidth={false}
+										fixed
+										on:change={(e) => {
+											child.value = e.detail;
+											notifyChange();
+										}}
+									/>
+								{/key}
+							{:else}
+								<FormInput
+									label="Value"
+									hideLabel
+									name="filter-value-{childIndex}"
+									value={child.value as string}
+									on:input={(e) => {
+										child.value = e.detail;
+										notifyChange();
+									}}
+								/>
+							{/if}
 						{:else if field?.valueType === 'number'}
 							<div class="w-24">
 								<NumberInput
@@ -215,6 +299,9 @@
 						<svelte:self
 							group={child}
 							{appType}
+							{dynamicFilterOptions}
+							{dynamicFilterOptionsLoading}
+							{dynamicFilterOptionsVersion}
 							depth={depth + 1}
 							onRemove={() => removeChild(childIndex)}
 							on:change={handleNestedChange}

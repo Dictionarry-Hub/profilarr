@@ -14,6 +14,7 @@ letting Arr's own upgrade logic decide whether to grab them.
 
 - [Pipeline](#pipeline)
 - [Filters](#filters)
+- [Dynamic Filter Values](#dynamic-filter-values)
 - [Selectors](#selectors)
 - [Scheduling](#scheduling)
 - [Cooldown](#cooldown)
@@ -93,6 +94,25 @@ full list is in `src/lib/shared/upgrades/filters.ts`.
 Each filter also carries a **cutoff** (0-100%), a percentage of the quality
 profile's cutoff score. Items whose current score meets or exceeds the
 threshold are considered "cutoff met" and can be filtered out.
+
+## Dynamic Filter Values
+
+Some text fields use Arr-derived dropdown values instead of free text. These
+options are loaded by `dynamicOptions.ts` and streamed from the upgrades page
+load, so the page shell renders before heavier library/file metadata finishes
+loading.
+
+Dynamic fields use exact string operators only: `eq` and `neq` (shown as
+"is" / "is not" in the UI).
+
+| Scope  | Fields                                                   | Source                  |
+| ------ | -------------------------------------------------------- | ----------------------- |
+| Shared | `quality_profile`, `tags`, `original_language`, `genres` | Profiles, tags, library |
+| Radarr | `release_group`                                          | Movie file metadata     |
+| Sonarr | `network`, `certification`                               | Series library metadata |
+
+If an Arr source fails while loading dynamic options, the affected fields fall
+back to empty option lists and existing saved values remain visible.
 
 ## Selectors
 

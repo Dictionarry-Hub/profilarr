@@ -22,6 +22,36 @@ export interface FilterValue {
 	label: string;
 }
 
+export interface DynamicFilterOption {
+	value: string;
+	label: string;
+	[key: string]: unknown;
+}
+
+export type DynamicFilterOptions = Record<string, DynamicFilterOption[]>;
+
+export const sharedDynamicFilterFieldIds = [
+	'quality_profile',
+	'tags',
+	'original_language',
+	'genres'
+] as const;
+
+export const radarrDynamicFilterFieldIds = ['release_group'] as const;
+
+export const sonarrDynamicFilterFieldIds = ['network', 'certification'] as const;
+
+export function getDynamicFilterFieldIds(appType: string): string[] {
+	return [
+		...sharedDynamicFilterFieldIds,
+		...(appType === 'sonarr' ? sonarrDynamicFilterFieldIds : radarrDynamicFilterFieldIds)
+	];
+}
+
+export function createEmptyDynamicFilterOptions(appType: string): DynamicFilterOptions {
+	return Object.fromEntries(getDynamicFilterFieldIds(appType).map((field) => [field, []]));
+}
+
 export interface FilterField {
 	id: string;
 	label: string;
