@@ -330,30 +330,35 @@
 							iconColor={row.enabled
 								? 'text-green-600 dark:text-green-400'
 								: 'text-neutral-400 dark:text-neutral-500'}
+							responsive
 							on:click={() => toggleEnabled(row.id)}
 						/>
 						<Button
 							text="Copy"
 							icon={ClipboardCopy}
 							iconColor="text-amber-600 dark:text-amber-400"
+							responsive
 							on:click={() => copyFilter(row.id)}
 						/>
 						<Button
 							text="Paste"
 							icon={ClipboardPaste}
 							iconColor="text-amber-600 dark:text-amber-400"
+							responsive
 							on:click={() => pasteIntoFilter(row.id)}
 						/>
 						<Button
 							text="Duplicate"
 							icon={Copy}
 							iconColor="text-violet-600 dark:text-violet-400"
+							responsive
 							on:click={() => duplicateFilter(row.id)}
 						/>
 						<Button
 							text="Delete"
 							icon={Trash2}
 							iconColor="text-red-600 dark:text-red-400"
+							responsive
 							on:click={() => confirmDelete(row)}
 						/>
 					</div>
