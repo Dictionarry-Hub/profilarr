@@ -134,7 +134,11 @@
 	const valueMinWidth = '0';
 </script>
 
-<Card padding="none" flush={depth === 0} className="!border-0">
+<Card
+	padding={depth === 0 ? 'none' : 'sm'}
+	flush={depth === 0}
+	className={depth === 0 ? '!rounded-none !border-0' : '!border-neutral-200 dark:!border-neutral-700/60'}
+>
 	<!-- Group Header -->
 	<div class="mb-3 flex items-center justify-between">
 		<div class="flex items-center gap-2">
