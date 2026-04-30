@@ -218,7 +218,9 @@
 									<SearchDropdown
 										value={String(child.value ?? '')}
 										options={dynamicOptions}
-										placeholder={dynamicFilterOptionsLoading ? 'Loading values...' : 'Search values...'}
+										placeholder={dynamicFilterOptionsLoading
+											? 'Loading values...'
+											: 'Search values...'}
 										label="Value"
 										name="filter-value-{childIndex}"
 										hideLabel

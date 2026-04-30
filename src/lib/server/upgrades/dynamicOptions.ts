@@ -35,7 +35,9 @@ function setOptions(
 	options[field] = toOptions(values);
 }
 
-export async function loadDynamicFilterOptions(instance: ArrInstance): Promise<DynamicFilterOptions> {
+export async function loadDynamicFilterOptions(
+	instance: ArrInstance
+): Promise<DynamicFilterOptions> {
 	const options = createEmptyDynamicFilterOptions(instance.type);
 	const isRadarr = instance.type === 'radarr';
 	const client = isRadarr
@@ -65,7 +67,11 @@ export async function loadDynamicFilterOptions(instance: ArrInstance): Promise<D
 			'original_language',
 			movies.map((movie) => movie.originalLanguage?.name)
 		);
-		setOptions(options, 'genres', movies.flatMap((movie) => movie.genres ?? []));
+		setOptions(
+			options,
+			'genres',
+			movies.flatMap((movie) => movie.genres ?? [])
+		);
 		setOptions(options, 'release_group', movieFiles?.map((file) => file.releaseGroup) ?? []);
 
 		return options;
@@ -77,9 +83,21 @@ export async function loadDynamicFilterOptions(instance: ArrInstance): Promise<D
 		'original_language',
 		seriesList.map((series) => series.originalLanguage?.name)
 	);
-	setOptions(options, 'genres', seriesList.flatMap((series) => series.genres ?? []));
-	setOptions(options, 'network', seriesList.map((series) => series.network));
-	setOptions(options, 'certification', seriesList.map((series) => series.certification));
+	setOptions(
+		options,
+		'genres',
+		seriesList.flatMap((series) => series.genres ?? [])
+	);
+	setOptions(
+		options,
+		'network',
+		seriesList.map((series) => series.network)
+	);
+	setOptions(
+		options,
+		'certification',
+		seriesList.map((series) => series.certification)
+	);
 
 	return options;
 }

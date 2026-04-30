@@ -54,7 +54,9 @@
 	let saving = false;
 	let running = false;
 	let clearing = false;
-	let dynamicFilterOptions: DynamicFilterOptions = createEmptyDynamicFilterOptions(data.instance.type);
+	let dynamicFilterOptions: DynamicFilterOptions = createEmptyDynamicFilterOptions(
+		data.instance.type
+	);
 	let dynamicFilterOptionsLoading = true;
 	let dynamicFilterOptionsPromise: unknown = null;
 	let dynamicFilterOptionsVersion = 0;

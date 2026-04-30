@@ -105,11 +105,11 @@ loading.
 Dynamic fields use exact string operators only: `eq` and `neq` (shown as
 "is" / "is not" in the UI).
 
-| Scope  | Fields                                                  | Source                    |
-| ------ | ------------------------------------------------------- | ------------------------- |
-| Shared | `quality_profile`, `tags`, `original_language`, `genres` | Profiles, tags, library   |
-| Radarr | `release_group`                                        | Movie file metadata       |
-| Sonarr | `network`, `certification`                             | Series library metadata   |
+| Scope  | Fields                                                   | Source                  |
+| ------ | -------------------------------------------------------- | ----------------------- |
+| Shared | `quality_profile`, `tags`, `original_language`, `genres` | Profiles, tags, library |
+| Radarr | `release_group`                                          | Movie file metadata     |
+| Sonarr | `network`, `certification`                               | Series library metadata |
 
 If an Arr source fails while loading dynamic options, the affected fields fall
 back to empty option lists and existing saved values remain visible.
