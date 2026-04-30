@@ -188,7 +188,7 @@
 									? dynamicStringOperators
 									: field.operators.map((op) => ({ value: op.id, label: op.label }))}
 								minWidth="7rem"
-								width="w-28"
+								width="w-40"
 								fullWidth
 								responsiveButton
 								compactDropdownThreshold={7}
