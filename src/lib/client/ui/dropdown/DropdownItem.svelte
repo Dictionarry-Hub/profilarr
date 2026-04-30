@@ -71,7 +71,7 @@
 					>{secondaryText}</span
 				>{/if}</span
 		>
-		<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color={checkColor} />
+		<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color={checkColor} {compact} />
 	</button>
 	{#if $$slots.actions}
 		<div class="flex items-center {compact ? 'pr-2' : 'pr-3'}">
