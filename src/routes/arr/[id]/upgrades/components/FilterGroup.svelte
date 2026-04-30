@@ -167,7 +167,7 @@
 			No rules configured. Add a rule to start filtering.
 		</div>
 	{:else}
-		<div class="overflow-x-auto pb-1">
+		<div class="overflow-x-auto pb-3">
 			<div class="space-y-2 min-w-max">
 			{#each group.children as child, childIndex}
 				{#if isRule(child)}
