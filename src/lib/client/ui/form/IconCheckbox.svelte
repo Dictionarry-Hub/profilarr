@@ -115,7 +115,9 @@
 	{title}
 	on:click={handleClick}
 	style="{buttonStyle}{shape === 'circle' ? ' border-radius: 9999px !important;' : ''}"
-	class="{baseClass} {sizeClass} {shapeClass} {stateClass} {disabled ? disabledClass : enabledClass}"
+	class="{baseClass} {sizeClass} {shapeClass} {stateClass} {disabled
+		? disabledClass
+		: enabledClass}"
 >
 	{#if checked}
 		<svelte:component this={icon} size={iconSize} class={resolvedIconClass} />

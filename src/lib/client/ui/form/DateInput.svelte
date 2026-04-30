@@ -20,6 +20,7 @@
 	export let shortLabels: boolean = false;
 
 	const dispatch = createEventDispatcher<{ input: string; change: string }>();
+	type ComboboxButtonSize = 'xs' | 'sm' | 'md';
 
 	const now = new Date();
 	const currentYear = now.getFullYear();
@@ -30,6 +31,8 @@
 	let month = String(now.getMonth() + 1).padStart(2, '0');
 	let day = String(now.getDate()).padStart(2, '0');
 	let lastValue = '';
+	let comboboxButtonSize: ComboboxButtonSize;
+	let responsiveButtonSize: ComboboxButtonSize | null;
 
 	const baseMonthOptions = [
 		{ value: '01', label: 'Jan' },

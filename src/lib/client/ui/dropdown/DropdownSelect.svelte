@@ -79,9 +79,9 @@
 			? compactDropdown
 			: responsiveDropdown && isSmallScreen
 				? true
-			: compactDropdownThreshold > 0 && options.length >= compactDropdownThreshold
-				? true
-				: compact;
+				: compactDropdownThreshold > 0 && options.length >= compactDropdownThreshold
+					? true
+					: compact;
 	$: resolvedButtonSize = buttonSize ?? ((isCompactButton ? 'xs' : 'sm') as 'xs' | 'sm');
 	$: resolvedJustify = justify ?? (fullWidth || width ? 'between' : 'center');
 	$: labelClasses = isCompactButton
@@ -89,7 +89,9 @@
 		: 'text-sm text-neutral-500 dark:text-neutral-400';
 
 	function getDropdownLabel(option: { label: string; shortLabel?: string }) {
-		return mobileDropdownShortLabels && isSmallScreen ? (option.shortLabel ?? option.label) : option.label;
+		return mobileDropdownShortLabels && isSmallScreen
+			? (option.shortLabel ?? option.label)
+			: option.label;
 	}
 
 	function select(optionValue: string) {

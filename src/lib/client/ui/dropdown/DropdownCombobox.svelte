@@ -77,9 +77,9 @@
 			? compactDropdown
 			: responsiveDropdown && isSmallScreen
 				? true
-			: compactDropdownThreshold > 0 && options.length >= compactDropdownThreshold
-				? true
-				: compact;
+				: compactDropdownThreshold > 0 && options.length >= compactDropdownThreshold
+					? true
+					: compact;
 	$: resolvedButtonSize = buttonSize ?? ((isCompactButton ? 'xs' : 'sm') as 'xs' | 'sm');
 	$: resolvedJustify = justify ?? 'between';
 	$: useSelectMode = isSmallScreen && (responsiveButton || responsiveDropdown);

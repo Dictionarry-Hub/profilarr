@@ -15,10 +15,13 @@
 	export let responsive: boolean = false;
 
 	const dispatch = createEventDispatcher<{ input: string }>();
+	type ComboboxButtonSize = 'xs' | 'sm' | 'md';
 
 	let hour = '00';
 	let minute = '00';
 	let lastValue = '';
+	let comboboxButtonSize: ComboboxButtonSize;
+	let responsiveButtonSize: ComboboxButtonSize | null;
 
 	const hourOptions = Array.from({ length: 24 }, (_, idx) => {
 		const value = String(idx).padStart(2, '0');

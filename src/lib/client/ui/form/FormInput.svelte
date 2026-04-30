@@ -70,7 +70,8 @@
 	}[effectiveSize];
 	$: privatePaddingClass = hasSuffix ? 'pr-16' : 'pr-10';
 	$: widthClass = effectiveAutoWidth ? 'w-auto' : 'w-full';
-	$: autoWidthPadding = effectiveSize === 'sm' ? '1.75rem' : effectiveSize === 'lg' ? '2.75rem' : '2.25rem';
+	$: autoWidthPadding =
+		effectiveSize === 'sm' ? '1.75rem' : effectiveSize === 'lg' ? '2.75rem' : '2.25rem';
 	$: autoWidthCharacters = Math.max(value?.length ?? 0, placeholder.length, 1);
 	$: autoWidthStyle = effectiveAutoWidth
 		? `width: calc(${autoWidthCharacters}ch + ${autoWidthPadding});`

@@ -137,7 +137,9 @@
 <Card
 	padding={depth === 0 ? 'none' : 'sm'}
 	flush={depth === 0}
-	className={depth === 0 ? '!rounded-none !border-0' : '!border-neutral-200 dark:!border-neutral-700/60'}
+	className={depth === 0
+		? '!rounded-none !border-0'
+		: '!border-neutral-200 dark:!border-neutral-700/60'}
 >
 	<!-- Group Header -->
 	<div class="mb-3 flex items-center justify-between">
@@ -172,62 +174,60 @@
 		</div>
 	{:else}
 		<div class="overflow-x-auto pb-3">
-			<div class="space-y-2 min-w-max">
-			{#each group.children as child, childIndex}
-				{#if isRule(child)}
-					{@const field = getFilterField(child.field, appType)}
-					{@const isDynamicField = child.field in dynamicFilterOptions}
-					<div
-						class="rule-row flex items-center gap-1.5 md:gap-2"
-					>
-						<!-- Field -->
-						<div class="shrink-0">
-							<DropdownCombobox
-								value={child.field}
-								options={fields.map((f) => ({
-									value: f.id,
-									label: f.label,
-									shortLabel: f.shortLabel
-								}))}
-								placeholder="Select field"
-								minWidth={keyMinWidth}
-								width={keyWidthClass}
-								fullWidth
-								limit={6}
-								responsiveButton
-								responsiveDropdown
-								fixed
-								on:change={(e) => onFieldChange(child, e.detail)}
-							/>
-						</div>
-
-						<!-- Operator -->
-						{#if field}
+			<div class="min-w-max space-y-2">
+				{#each group.children as child, childIndex}
+					{#if isRule(child)}
+						{@const field = getFilterField(child.field, appType)}
+						{@const isDynamicField = child.field in dynamicFilterOptions}
+						<div class="rule-row flex items-center gap-1.5 md:gap-2">
+							<!-- Field -->
 							<div class="shrink-0">
-								<DropdownSelect
-									value={child.operator}
-									options={isDynamicField
-										? dynamicStringOperators
-										: field.operators.map((op) => ({
-												value: op.id,
-												label: op.label,
-												shortLabel: op.shortLabel
-											}))}
-									minWidth="7rem"
-									width={operatorWidthClass}
+								<DropdownCombobox
+									value={child.field}
+									options={fields.map((f) => ({
+										value: f.id,
+										label: f.label,
+										shortLabel: f.shortLabel
+									}))}
+									placeholder="Select field"
+									minWidth={keyMinWidth}
+									width={keyWidthClass}
 									fullWidth
+									limit={6}
 									responsiveButton
 									responsiveDropdown
 									fixed
-									on:change={(e) => {
-										child.operator = e.detail;
-										notifyChange();
-									}}
+									on:change={(e) => onFieldChange(child, e.detail)}
 								/>
 							</div>
 
-							<!-- Value -->
-							<div class="shrink-0">
+							<!-- Operator -->
+							{#if field}
+								<div class="shrink-0">
+									<DropdownSelect
+										value={child.operator}
+										options={isDynamicField
+											? dynamicStringOperators
+											: field.operators.map((op) => ({
+													value: op.id,
+													label: op.label,
+													shortLabel: op.shortLabel
+												}))}
+										minWidth="7rem"
+										width={operatorWidthClass}
+										fullWidth
+										responsiveButton
+										responsiveDropdown
+										fixed
+										on:change={(e) => {
+											child.operator = e.detail;
+											notifyChange();
+										}}
+									/>
+								</div>
+
+								<!-- Value -->
+								<div class="shrink-0">
 									{#if field?.valueType === 'boolean' || field?.valueType === 'select'}
 										{#if field.values}
 											<DropdownSelect
@@ -328,11 +328,11 @@
 													label="Date"
 													hideLabel
 													name="value-{childIndex}"
-												value={child.value as string}
-												fullWidth
-												responsive
-												shortLabels
-												fixed
+													value={child.value as string}
+													fullWidth
+													responsive
+													shortLabels
+													fixed
 													on:change={(e) => {
 														child.value = e.detail;
 														notifyChange();
@@ -342,29 +342,34 @@
 										{/if}
 									{/if}
 								</div>
-						{/if}
+							{/if}
 
-						<!-- Remove Rule -->
-						<div class="shrink-0">
-							<Button icon={X} variant="ghost" size="xs" on:click={() => removeChild(childIndex)} />
+							<!-- Remove Rule -->
+							<div class="shrink-0">
+								<Button
+									icon={X}
+									variant="ghost"
+									size="xs"
+									on:click={() => removeChild(childIndex)}
+								/>
+							</div>
 						</div>
-					</div>
-				{:else if isGroup(child)}
-					<!-- Nested Group (recursive) -->
-					<div class="ml-4">
-						<svelte:self
-							group={child}
-							{appType}
-							{dynamicFilterOptions}
-							{dynamicFilterOptionsLoading}
-							{dynamicFilterOptionsVersion}
-							depth={depth + 1}
-							onRemove={() => removeChild(childIndex)}
-							on:change={handleNestedChange}
-						/>
-					</div>
-				{/if}
-			{/each}
+					{:else if isGroup(child)}
+						<!-- Nested Group (recursive) -->
+						<div class="ml-4">
+							<svelte:self
+								group={child}
+								{appType}
+								{dynamicFilterOptions}
+								{dynamicFilterOptionsLoading}
+								{dynamicFilterOptionsVersion}
+								depth={depth + 1}
+								onRemove={() => removeChild(childIndex)}
+								on:change={handleNestedChange}
+							/>
+						</div>
+					{/if}
+				{/each}
 			</div>
 		</div>
 	{/if}
