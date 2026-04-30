@@ -19,7 +19,7 @@
 	import DateInput from '$ui/form/DateInput.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import SearchDropdown from '$ui/form/SearchDropdown.svelte';
+	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 
 	export let group: FilterGroup;
 	export let appType: UpgradeAppType = 'radarr';
@@ -39,6 +39,7 @@
 	const dispatch = createEventDispatcher<{ change: void }>();
 
 	function notifyChange() {
+		group = group;
 		dispatch('change');
 	}
 
@@ -69,8 +70,12 @@
 		}
 	}
 
-	function getDynamicOptions(fieldId: string, value: unknown) {
-		const options = dynamicFilterOptions[fieldId] ?? [];
+	function getDynamicOptions(
+		fieldId: string,
+		value: unknown,
+		optionsByField: DynamicFilterOptions
+	) {
+		const options = optionsByField[fieldId] ?? [];
 		const currentValue = typeof value === 'string' ? value.trim() : '';
 
 		if (!currentValue || options.some((option) => option.value === currentValue)) {
@@ -109,7 +114,6 @@
 		});
 		if (nextSignature !== normalizedRulesSignature) {
 			if (normalizeDynamicOperators(group)) {
-				group = group;
 				notifyChange();
 			}
 			normalizedRulesSignature = JSON.stringify({
@@ -164,12 +168,14 @@
 					{@const isDynamicField = child.field in dynamicFilterOptions}
 					<div class="flex items-center gap-2">
 						<!-- Field -->
-						<SearchDropdown
+						<DropdownCombobox
 							value={child.field}
 							options={fields.map((f) => ({ value: f.id, label: f.label }))}
-							placeholder="Search fields..."
-							hideLabel
-							fullWidth={false}
+							placeholder="Select field"
+							minWidth="12rem"
+							limit={6}
+							responsiveButton
+							compactDropdownThreshold={7}
 							fixed
 							on:change={(e) => onFieldChange(child, e.detail)}
 						/>
@@ -212,19 +218,16 @@
 								/>
 							{/if}
 						{:else if field?.valueType === 'text'}
-							{@const dynamicOptions = getDynamicOptions(field.id, child.value)}
 							{#if isDynamicField}
 								{#key `${field.id}:${childIndex}:${dynamicFilterOptionsVersion}`}
-									<SearchDropdown
+									<DropdownCombobox
 										value={String(child.value ?? '')}
-										options={dynamicOptions}
-										placeholder={dynamicFilterOptionsLoading
-											? 'Loading values...'
-											: 'Search values...'}
-										label="Value"
-										name="filter-value-{childIndex}"
-										hideLabel
-										fullWidth={false}
+										options={getDynamicOptions(field.id, child.value, dynamicFilterOptions)}
+										placeholder={dynamicFilterOptionsLoading ? 'Loading values...' : 'Select value'}
+										minWidth="12rem"
+										limit={6}
+										responsiveButton
+										compactDropdownThreshold={7}
 										fixed
 										on:change={(e) => {
 											child.value = e.detail;

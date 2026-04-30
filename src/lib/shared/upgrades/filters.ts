@@ -512,15 +512,87 @@ const sonarrFilterFields: FilterField[] = [
 // Public API
 // =============================================================================
 
+// Manual ordering for the field picker. The first six entries surface as the
+// default visible block (limit=6 in the combobox); the rest are reachable by
+// typing. Anything not listed here is appended in its source-array order.
+const RADARR_FIELD_ORDER = [
+	'monitored',
+	'cutoff_met',
+	'quality_profile',
+	'minimum_availability',
+	'popularity',
+	'tags',
+	'title',
+	'genres',
+	'status',
+	'original_language',
+	'year',
+	'rating',
+	'date_added',
+	'runtime',
+	'size_on_disk',
+	'release_group',
+	'collection',
+	'studio',
+	'keywords',
+	'digital_release',
+	'physical_release',
+	'tmdb_rating',
+	'imdb_rating',
+	'tomato_rating',
+	'trakt_rating'
+];
+
+const SONARR_FIELD_ORDER = [
+	'monitored',
+	'cutoff_met',
+	'quality_profile',
+	'status',
+	'network',
+	'tags',
+	'title',
+	'genres',
+	'original_language',
+	'year',
+	'rating',
+	'date_added',
+	'runtime',
+	'size_on_disk',
+	'series_type',
+	'certification',
+	'season_count',
+	'episode_count',
+	'episode_file_count',
+	'first_aired',
+	'last_aired'
+];
+
+function applyOrder(fields: FilterField[], order: string[]): FilterField[] {
+	const byId = new Map(fields.map((f) => [f.id, f]));
+	const seen = new Set<string>();
+	const ordered: FilterField[] = [];
+	for (const id of order) {
+		const f = byId.get(id);
+		if (f) {
+			ordered.push(f);
+			seen.add(id);
+		}
+	}
+	for (const f of fields) {
+		if (!seen.has(f.id)) ordered.push(f);
+	}
+	return ordered;
+}
+
 /**
  * Get filter fields for a specific app type
  */
 export function getFilterFields(appType: UpgradeAppType): FilterField[] {
 	switch (appType) {
 		case 'radarr':
-			return [...sharedFilterFields, ...radarrFilterFields];
+			return applyOrder([...sharedFilterFields, ...radarrFilterFields], RADARR_FIELD_ORDER);
 		case 'sonarr':
-			return [...sharedFilterFields, ...sonarrFilterFields];
+			return applyOrder([...sharedFilterFields, ...sonarrFilterFields], SONARR_FIELD_ORDER);
 		default:
 			return sharedFilterFields;
 	}
