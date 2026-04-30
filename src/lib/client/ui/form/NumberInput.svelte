@@ -50,8 +50,8 @@
 	$: fontClass = font === 'mono' ? 'font-mono' : font === 'sans' ? 'font-sans' : '';
 	$: inputSizeClasses = isCompact
 		? hideButtons
-			? 'rounded-lg px-2.5 py-1.5 text-xs'
-			: 'rounded-lg px-2.5 py-1.5 pr-7 text-xs'
+			? 'rounded-lg px-2 py-1 text-xs'
+			: 'rounded-lg px-2 py-1 pr-7 text-xs'
 		: 'rounded-xl px-3 py-2 pr-10 text-sm';
 	$: buttonWidthClass = isCompact ? 'w-4' : 'w-6';
 	$: iconSize = isCompact ? 10 : 12;

@@ -15,6 +15,8 @@
 	export let minYear: number | undefined = undefined;
 	export let maxYear: number | undefined = undefined;
 	export let compact: boolean = false;
+	export let fullWidth: boolean = false;
+	export let responsive: boolean = false;
 
 	const dispatch = createEventDispatcher<{ input: string; change: string }>();
 
@@ -64,13 +66,14 @@
 	$: containerClass = hideLabel && !description ? 'space-y-0' : 'space-y-2';
 	$: effectiveDisabled = disabled || readonly;
 	$: comboboxButtonSize = size === 'sm' ? 'xs' : size === 'lg' ? 'md' : 'sm';
+	$: responsiveButtonSize = responsive ? null : comboboxButtonSize;
 	$: fieldGapClass = compact ? 'gap-1' : 'gap-2';
-	$: monthWidthClass = compact ? 'w-14' : 'w-20';
-	$: monthMinWidth = compact ? '3.5rem' : '5rem';
-	$: dayWidthClass = compact ? 'w-12' : 'w-16';
-	$: dayMinWidth = compact ? '3rem' : '4rem';
-	$: yearWidthClass = compact ? 'w-16' : 'w-24';
-	$: yearMinWidth = compact ? '4rem' : '6rem';
+	$: monthWidthClass = fullWidth ? 'flex-1' : 'w-20';
+	$: monthMinWidth = fullWidth ? '0' : '5rem';
+	$: dayWidthClass = fullWidth ? 'flex-1' : 'w-16';
+	$: dayMinWidth = fullWidth ? '0' : '4rem';
+	$: yearWidthClass = fullWidth ? 'flex-1' : 'w-24';
+	$: yearMinWidth = fullWidth ? '0' : '6rem';
 
 	function parseValue(nextValue: string) {
 		if (/^\d{4}-\d{2}-\d{2}$/.test(nextValue)) {
@@ -140,7 +143,7 @@
 		</p>
 	{/if}
 
-	<div class="flex items-center {fieldGapClass}">
+	<div class="flex items-center {fieldGapClass}" class:w-full={fullWidth}>
 		<DropdownCombobox
 			value={month}
 			options={monthOptions}
@@ -150,7 +153,9 @@
 			fullWidth
 			limit={6}
 			{fixed}
-			buttonSize={comboboxButtonSize}
+			buttonSize={responsiveButtonSize}
+			responsiveButton={responsive}
+			compactDropdownThreshold={7}
 			disabled={effectiveDisabled}
 			on:change={(event) => onMonthChange(event.detail)}
 		/>
@@ -163,7 +168,9 @@
 			fullWidth
 			limit={6}
 			{fixed}
-			buttonSize={comboboxButtonSize}
+			buttonSize={responsiveButtonSize}
+			responsiveButton={responsive}
+			compactDropdownThreshold={7}
 			disabled={effectiveDisabled}
 			on:change={(event) => onDayChange(event.detail)}
 		/>
@@ -176,7 +183,9 @@
 			fullWidth
 			limit={6}
 			{fixed}
-			buttonSize={comboboxButtonSize}
+			buttonSize={responsiveButtonSize}
+			responsiveButton={responsive}
+			compactDropdownThreshold={7}
 			disabled={effectiveDisabled}
 			on:change={(event) => onYearChange(event.detail)}
 		/>

@@ -126,6 +126,12 @@
 	function handleNestedChange() {
 		notifyChange();
 	}
+
+	const keyWidthClass = 'w-fit md:w-48';
+	const operatorWidthClass = 'w-fit md:w-40';
+	const valueWidthClass = 'w-fit md:w-72';
+	const keyMinWidth = '0';
+	const valueMinWidth = '0';
 </script>
 
 <Card padding="md" flush={depth === 0}>
@@ -161,142 +167,171 @@
 			No rules configured. Add a rule to start filtering.
 		</div>
 	{:else}
-		<div class="space-y-2">
+		<div class="overflow-x-auto pb-1">
+			<div class="space-y-2 min-w-max">
 			{#each group.children as child, childIndex}
 				{#if isRule(child)}
 					{@const field = getFilterField(child.field, appType)}
 					{@const isDynamicField = child.field in dynamicFilterOptions}
-					<div class="flex items-center gap-2">
+					<div
+						class="rule-row flex items-center gap-1.5 md:gap-2"
+					>
 						<!-- Field -->
-						<DropdownCombobox
-							value={child.field}
-							options={fields.map((f) => ({ value: f.id, label: f.label }))}
-							placeholder="Select field"
-							minWidth="12rem"
-							limit={6}
-							responsiveButton
-							compactDropdownThreshold={7}
-							fixed
-							on:change={(e) => onFieldChange(child, e.detail)}
-						/>
-
-						<!-- Operator -->
-						{#if field}
-							<DropdownSelect
-								value={child.operator}
-								options={isDynamicField
-									? dynamicStringOperators
-									: field.operators.map((op) => ({ value: op.id, label: op.label }))}
-								minWidth="7rem"
-								width="w-40"
+						<div class="shrink-0">
+							<DropdownCombobox
+								value={child.field}
+								options={fields.map((f) => ({ value: f.id, label: f.label }))}
+								placeholder="Select field"
+								minWidth={keyMinWidth}
+								width={keyWidthClass}
 								fullWidth
+								limit={6}
 								responsiveButton
 								compactDropdownThreshold={7}
 								fixed
-								on:change={(e) => {
-									child.operator = e.detail;
-									notifyChange();
-								}}
+								on:change={(e) => onFieldChange(child, e.detail)}
 							/>
-						{/if}
+						</div>
 
-						<!-- Value -->
-						{#if field?.valueType === 'boolean' || field?.valueType === 'select'}
-							{#if field.values}
+						<!-- Operator -->
+						{#if field}
+							<div class="shrink-0">
 								<DropdownSelect
-									value={String(child.value)}
-									options={field.values.map((v) => ({ value: String(v.value), label: v.label }))}
-									minWidth="8rem"
+									value={child.operator}
+									options={isDynamicField
+										? dynamicStringOperators
+										: field.operators.map((op) => ({ value: op.id, label: op.label }))}
+									minWidth="7rem"
+									width={operatorWidthClass}
+									fullWidth
 									responsiveButton
 									compactDropdownThreshold={7}
 									fixed
 									on:change={(e) => {
-										const originalValue = field.values?.find(
-											(v) => String(v.value) === e.detail
-										)?.value;
-										child.value = originalValue ?? e.detail;
+										child.operator = e.detail;
 										notifyChange();
 									}}
-								/>
-							{/if}
-						{:else if field?.valueType === 'text'}
-							{#if isDynamicField}
-								{#key `${field.id}:${childIndex}:${dynamicFilterOptionsVersion}`}
-									<DropdownCombobox
-										value={String(child.value ?? '')}
-										options={getDynamicOptions(field.id, child.value, dynamicFilterOptions)}
-										placeholder={dynamicFilterOptionsLoading ? 'Loading values...' : 'Select value'}
-										minWidth="12rem"
-										limit={6}
-										responsiveButton
-										compactDropdownThreshold={7}
-										fixed
-										on:change={(e) => {
-											child.value = e.detail;
-											notifyChange();
-										}}
-									/>
-								{/key}
-							{:else}
-								<FormInput
-									label="Value"
-									hideLabel
-									name="filter-value-{childIndex}"
-									value={child.value as string}
-									on:input={(e) => {
-										child.value = e.detail;
-										notifyChange();
-									}}
-								/>
-							{/if}
-						{:else if field?.valueType === 'number'}
-							<div class="w-24">
-								<NumberInput
-									name="value-{childIndex}"
-									value={child.value as number}
-									on:change={(e) => {
-										if (e.detail !== undefined) child.value = e.detail;
-										notifyChange();
-									}}
-									font="mono"
-									responsive
 								/>
 							</div>
-						{:else if field?.valueType === 'date'}
-							{#if child.operator === 'in_last' || child.operator === 'not_in_last'}
-								<div class="flex items-center gap-2">
-									<div class="w-20">
-										<NumberInput
-											name="value-{childIndex}"
-											value={child.value as number}
-											on:change={(e) => {
-												if (e.detail !== undefined) child.value = e.detail;
-												notifyChange();
-											}}
-											min={1}
-											font="mono"
-											responsive
-										/>
-									</div>
-									<span class="text-xs text-neutral-500 dark:text-neutral-400">days</span>
+
+							<!-- Value -->
+							<div class="shrink-0">
+									{#if field?.valueType === 'boolean' || field?.valueType === 'select'}
+										{#if field.values}
+											<DropdownSelect
+												value={String(child.value)}
+												options={field.values.map((v) => ({
+													value: String(v.value),
+													label: v.label
+												}))}
+												minWidth={valueMinWidth}
+												width={valueWidthClass}
+												fullWidth
+												responsiveButton
+												compactDropdownThreshold={7}
+												fixed
+												on:change={(e) => {
+													const originalValue = field.values?.find(
+														(v) => String(v.value) === e.detail
+													)?.value;
+													child.value = originalValue ?? e.detail;
+													notifyChange();
+												}}
+											/>
+										{/if}
+									{:else if field?.valueType === 'text'}
+										{#if isDynamicField}
+											{#key `${field.id}:${childIndex}:${dynamicFilterOptionsVersion}`}
+												<DropdownCombobox
+													value={String(child.value ?? '')}
+													options={getDynamicOptions(field.id, child.value, dynamicFilterOptions)}
+													placeholder={dynamicFilterOptionsLoading
+														? 'Loading values...'
+														: 'Select value'}
+													minWidth={valueMinWidth}
+													width={valueWidthClass}
+													fullWidth
+													limit={6}
+													responsiveButton
+													compactDropdownThreshold={7}
+													fixed
+													on:change={(e) => {
+														child.value = e.detail;
+														notifyChange();
+													}}
+												/>
+											{/key}
+										{:else}
+											<div class={valueWidthClass}>
+												<FormInput
+													label="Value"
+													hideLabel
+													name="filter-value-{childIndex}"
+													value={child.value as string}
+													responsive
+													on:input={(e) => {
+														child.value = e.detail;
+														notifyChange();
+													}}
+												/>
+											</div>
+										{/if}
+									{:else if field?.valueType === 'number'}
+										<div class={valueWidthClass}>
+											<NumberInput
+												name="value-{childIndex}"
+												on:change={(e) => {
+													if (e.detail !== undefined) child.value = e.detail;
+													notifyChange();
+												}}
+												value={child.value as number}
+												font="mono"
+												responsive
+											/>
+										</div>
+									{:else if field?.valueType === 'date'}
+										{#if child.operator === 'in_last' || child.operator === 'not_in_last'}
+											<div class="{valueWidthClass} flex items-center gap-2">
+												<div class="min-w-0 flex-1">
+													<NumberInput
+														name="value-{childIndex}"
+														value={child.value as number}
+														on:change={(e) => {
+															if (e.detail !== undefined) child.value = e.detail;
+															notifyChange();
+														}}
+														min={1}
+														font="mono"
+														responsive
+													/>
+												</div>
+												<span class="text-xs text-neutral-500 dark:text-neutral-400">days</span>
+											</div>
+										{:else}
+											<div class={valueWidthClass}>
+												<DateInput
+													label="Date"
+													hideLabel
+													name="value-{childIndex}"
+												value={child.value as string}
+												fullWidth
+												responsive
+												fixed
+													on:change={(e) => {
+														child.value = e.detail;
+														notifyChange();
+													}}
+												/>
+											</div>
+										{/if}
+									{/if}
 								</div>
-							{:else}
-								<DateInput
-									label="Date"
-									hideLabel
-									name="value-{childIndex}"
-									value={child.value as string}
-									fixed
-									on:change={(e) => {
-										child.value = e.detail;
-										notifyChange();
-									}}
-								/>
-							{/if}
 						{/if}
 
 						<!-- Remove Rule -->
-						<Button icon={X} variant="ghost" size="xs" on:click={() => removeChild(childIndex)} />
+						<div class="shrink-0">
+							<Button icon={X} variant="ghost" size="xs" on:click={() => removeChild(childIndex)} />
+						</div>
 					</div>
 				{:else if isGroup(child)}
 					<!-- Nested Group (recursive) -->
@@ -314,6 +349,7 @@
 					</div>
 				{/if}
 			{/each}
+			</div>
 		</div>
 	{/if}
 

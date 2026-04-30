@@ -307,6 +307,7 @@
 			name="cron-daily-time"
 			fieldWidthRem={5}
 			value={dailyTime}
+			responsive
 			{disabled}
 			on:input={(event) => {
 				dailyTime = event.detail;
@@ -334,6 +335,7 @@
 			name="cron-weekly-time"
 			fieldWidthRem={5}
 			value={weeklyTime}
+			responsive
 			{disabled}
 			on:input={(event) => {
 				weeklyTime = event.detail;
@@ -366,6 +368,7 @@
 			name="cron-monthly-time"
 			fieldWidthRem={5}
 			value={monthlyTime}
+			responsive
 			{disabled}
 			on:input={(event) => {
 				monthlyTime = event.detail;

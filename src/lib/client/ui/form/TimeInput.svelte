@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import SearchDropdown from '$ui/form/SearchDropdown.svelte';
+	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 
 	export let label: string;
 	export let description: string = '';
@@ -12,6 +12,7 @@
 	export let disabled: boolean = false;
 	export let size: 'sm' | 'md' | 'lg' = 'md';
 	export let fieldWidthRem: number = 5;
+	export let responsive: boolean = false;
 
 	const dispatch = createEventDispatcher<{ input: string }>();
 
@@ -30,6 +31,8 @@
 
 	$: containerClass = hideLabel && !description ? 'space-y-0' : 'space-y-2';
 	$: fieldStyle = `width: ${fieldWidthRem}rem;`;
+	$: comboboxButtonSize = size === 'sm' ? 'xs' : size === 'lg' ? 'md' : 'sm';
+	$: responsiveButtonSize = responsive ? null : comboboxButtonSize;
 
 	function parseValue(nextValue: string) {
 		const [h, m] = nextValue.split(':');
@@ -84,13 +87,16 @@
 
 	<div class="flex items-center gap-1.5">
 		<div class="shrink-0" style={fieldStyle}>
-			<SearchDropdown
+			<DropdownCombobox
 				value={hour}
 				options={hourOptions}
-				label="Hour"
-				hideLabel
-				name={`${name}-hour`}
-				{size}
+				placeholder="Hour"
+				minWidth="0"
+				width="w-full"
+				buttonSize={responsiveButtonSize}
+				limit={6}
+				responsiveButton={responsive}
+				compactDropdownThreshold={7}
 				disabled={disabled || readonly}
 				fullWidth
 				on:change={(event) => onHourChange(event.detail)}
@@ -98,13 +104,16 @@
 		</div>
 		<span class="text-sm text-neutral-500 dark:text-neutral-400">:</span>
 		<div class="shrink-0" style={fieldStyle}>
-			<SearchDropdown
+			<DropdownCombobox
 				value={minute}
 				options={minuteOptions}
-				label="Minute"
-				hideLabel
-				name={`${name}-minute`}
-				{size}
+				placeholder="Minute"
+				minWidth="0"
+				width="w-full"
+				buttonSize={responsiveButtonSize}
+				limit={6}
+				responsiveButton={responsive}
+				compactDropdownThreshold={7}
 				disabled={disabled || readonly}
 				fullWidth
 				on:change={(event) => onMinuteChange(event.detail)}
