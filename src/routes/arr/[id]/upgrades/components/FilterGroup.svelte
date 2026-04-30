@@ -180,7 +180,11 @@
 						<div class="shrink-0">
 							<DropdownCombobox
 								value={child.field}
-								options={fields.map((f) => ({ value: f.id, label: f.label }))}
+								options={fields.map((f) => ({
+									value: f.id,
+									label: f.label,
+									shortLabel: f.shortLabel
+								}))}
 								placeholder="Select field"
 								minWidth={keyMinWidth}
 								width={keyWidthClass}
@@ -200,7 +204,11 @@
 									value={child.operator}
 									options={isDynamicField
 										? dynamicStringOperators
-										: field.operators.map((op) => ({ value: op.id, label: op.label }))}
+										: field.operators.map((op) => ({
+												value: op.id,
+												label: op.label,
+												shortLabel: op.shortLabel
+											}))}
 									minWidth="7rem"
 									width={operatorWidthClass}
 									fullWidth
@@ -319,6 +327,7 @@
 												value={child.value as string}
 												fullWidth
 												responsive
+												shortLabels
 												fixed
 													on:change={(e) => {
 														child.value = e.detail;

@@ -12,6 +12,7 @@ export type UpgradeAppType = 'radarr' | 'sonarr';
 export interface FilterOperator {
 	id: string;
 	label: string;
+	shortLabel?: string;
 	description?: string;
 }
 
@@ -55,6 +56,7 @@ export function createEmptyDynamicFilterOptions(appType: string): DynamicFilterO
 export interface FilterField {
 	id: string;
 	label: string;
+	shortLabel?: string;
 	description: string;
 	operators: FilterOperator[];
 	valueType: 'boolean' | 'select' | 'text' | 'number' | 'date';
@@ -146,10 +148,30 @@ const textOperators: FilterOperator[] = [
 ];
 
 const dateOperators: FilterOperator[] = [
-	{ id: 'before', label: 'is before', description: 'The date is before the specified date' },
-	{ id: 'after', label: 'is after', description: 'The date is after the specified date' },
-	{ id: 'in_last', label: 'in the last', description: 'Within the last N days' },
-	{ id: 'not_in_last', label: 'not in the last', description: 'Not within the last N days' }
+	{
+		id: 'before',
+		label: 'is before',
+		shortLabel: '<',
+		description: 'The date is before the specified date'
+	},
+	{
+		id: 'after',
+		label: 'is after',
+		shortLabel: '>',
+		description: 'The date is after the specified date'
+	},
+	{
+		id: 'in_last',
+		label: 'in the last',
+		shortLabel: 'in last',
+		description: 'Within the last N days'
+	},
+	{
+		id: 'not_in_last',
+		label: 'not in the last',
+		shortLabel: 'not in last',
+		description: 'Not within the last N days'
+	}
 ];
 
 const ordinalOperators: FilterOperator[] = [
@@ -300,6 +322,7 @@ const sharedFilterFields: FilterField[] = [
 	{
 		id: 'date_added',
 		label: 'Date Added',
+		shortLabel: 'Added',
 		description: 'When the item was added to your library',
 		operators: dateOperators,
 		valueType: 'date'
@@ -408,6 +431,7 @@ const radarrFilterFields: FilterField[] = [
 	{
 		id: 'digital_release',
 		label: 'Digital Release',
+		shortLabel: 'Digital',
 		description: 'The digital release date from TMDb',
 		operators: dateOperators,
 		valueType: 'date'
@@ -415,6 +439,7 @@ const radarrFilterFields: FilterField[] = [
 	{
 		id: 'physical_release',
 		label: 'Physical Release',
+		shortLabel: 'Physical',
 		description: 'The physical release date from TMDb',
 		operators: dateOperators,
 		valueType: 'date'
@@ -495,6 +520,7 @@ const sonarrFilterFields: FilterField[] = [
 	{
 		id: 'first_aired',
 		label: 'First Aired',
+		shortLabel: 'First Air',
 		description: 'When the first episode aired',
 		operators: dateOperators,
 		valueType: 'date'
@@ -502,6 +528,7 @@ const sonarrFilterFields: FilterField[] = [
 	{
 		id: 'last_aired',
 		label: 'Last Aired',
+		shortLabel: 'Last Air',
 		description: 'When the last episode aired',
 		operators: dateOperators,
 		valueType: 'date'

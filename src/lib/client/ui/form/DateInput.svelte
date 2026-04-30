@@ -17,6 +17,7 @@
 	export let compact: boolean = false;
 	export let fullWidth: boolean = false;
 	export let responsive: boolean = false;
+	export let shortLabels: boolean = false;
 
 	const dispatch = createEventDispatcher<{ input: string; change: string }>();
 
@@ -30,7 +31,7 @@
 	let day = String(now.getDate()).padStart(2, '0');
 	let lastValue = '';
 
-	const monthOptions = [
+	const baseMonthOptions = [
 		{ value: '01', label: 'Jan' },
 		{ value: '02', label: 'Feb' },
 		{ value: '03', label: 'Mar' },
@@ -45,6 +46,9 @@
 		{ value: '12', label: 'Dec' }
 	];
 
+	$: monthOptions = baseMonthOptions.map((option) =>
+		shortLabels ? { ...option, shortLabel: option.value } : option
+	);
 	$: effectiveMinYear = Math.min(minYear ?? defaultMinYear, maxYear ?? defaultMaxYear);
 	$: effectiveMaxYear = Math.max(maxYear ?? defaultMaxYear, minYear ?? defaultMinYear);
 	$: yearOptions = Array.from({ length: effectiveMaxYear - effectiveMinYear + 1 }, (_, idx) => {
@@ -68,11 +72,11 @@
 	$: comboboxButtonSize = size === 'sm' ? 'xs' : size === 'lg' ? 'md' : 'sm';
 	$: responsiveButtonSize = responsive ? null : comboboxButtonSize;
 	$: fieldGapClass = compact ? 'gap-1' : 'gap-2';
-	$: monthWidthClass = fullWidth ? 'flex-1' : 'w-20';
+	$: monthWidthClass = fullWidth ? (shortLabels ? 'w-fit md:flex-1' : 'flex-1') : 'w-20';
 	$: monthMinWidth = fullWidth ? '0' : '5rem';
-	$: dayWidthClass = fullWidth ? 'flex-1' : 'w-16';
+	$: dayWidthClass = fullWidth ? (shortLabels ? 'w-fit md:flex-1' : 'flex-1') : 'w-16';
 	$: dayMinWidth = fullWidth ? '0' : '4rem';
-	$: yearWidthClass = fullWidth ? 'flex-1' : 'w-24';
+	$: yearWidthClass = fullWidth ? (shortLabels ? 'w-fit md:flex-1' : 'flex-1') : 'w-24';
 	$: yearMinWidth = fullWidth ? '0' : '6rem';
 
 	function parseValue(nextValue: string) {
