@@ -124,16 +124,16 @@ const booleanOperators: FilterOperator[] = [
 ];
 
 const numberOperators: FilterOperator[] = [
-	{ id: 'eq', label: 'equals', description: 'Exactly equals the value' },
-	{ id: 'neq', label: 'does not equal', description: 'Does not equal the value' },
-	{ id: 'gt', label: 'is greater than', description: 'Greater than the value' },
+	{ id: 'eq', label: '=', description: 'Exactly equals the value' },
+	{ id: 'neq', label: '≠', description: 'Does not equal the value' },
+	{ id: 'gt', label: '>', description: 'Greater than the value' },
 	{
 		id: 'gte',
-		label: 'is greater than or equal',
+		label: '≥',
 		description: 'Greater than or equal to the value'
 	},
-	{ id: 'lt', label: 'is less than', description: 'Less than the value' },
-	{ id: 'lte', label: 'is less than or equal', description: 'Less than or equal to the value' }
+	{ id: 'lt', label: '<', description: 'Less than the value' },
+	{ id: 'lte', label: '≤', description: 'Less than or equal to the value' }
 ];
 
 const textOperators: FilterOperator[] = [
