@@ -193,7 +193,7 @@
 			<div
 				class="flex w-full items-center {triggerShellClasses} {resolvedJustify === 'between'
 					? 'justify-between'
-					: 'justify-center'} border border-neutral-300 bg-white text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-200"
+					: 'justify-center'} border border-neutral-300 bg-white font-medium text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-200"
 			>
 				<input
 					bind:this={inputEl}
@@ -201,7 +201,7 @@
 					{placeholder}
 					{disabled}
 					size="1"
-					class="min-w-0 flex-1 bg-transparent text-neutral-700 outline-none placeholder:text-neutral-400 dark:text-neutral-200 dark:placeholder:text-neutral-500"
+					class="min-w-0 flex-1 bg-transparent font-medium text-neutral-700 outline-none placeholder:text-neutral-400 dark:text-neutral-200 dark:placeholder:text-neutral-500"
 					on:input={handleInput}
 					on:keydown={handleKeyDown}
 				/>
