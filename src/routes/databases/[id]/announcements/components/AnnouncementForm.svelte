@@ -211,8 +211,8 @@
 				</div>
 			</div>
 
-			<div class="grid gap-4 md:grid-cols-2">
-				<div class="space-y-2">
+			<div class="grid gap-4 md:flex md:items-start">
+				<div class="min-w-0 space-y-2">
 					<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						Published<span class="text-red-500">*</span>
 					</span>
@@ -224,7 +224,7 @@
 					/>
 				</div>
 
-				<div class="space-y-2">
+				<div class="min-w-0 space-y-2">
 					<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						Expires<span class="text-red-500">*</span>
 					</span>

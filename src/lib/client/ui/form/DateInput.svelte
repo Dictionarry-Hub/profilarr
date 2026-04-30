@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import SearchDropdown from '$ui/form/SearchDropdown.svelte';
+	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 
 	export let label: string;
 	export let description: string = '';
@@ -14,6 +14,7 @@
 	export let fixed: boolean = false;
 	export let minYear: number | undefined = undefined;
 	export let maxYear: number | undefined = undefined;
+	export let compact: boolean = false;
 
 	const dispatch = createEventDispatcher<{ input: string; change: string }>();
 
@@ -62,6 +63,14 @@
 
 	$: containerClass = hideLabel && !description ? 'space-y-0' : 'space-y-2';
 	$: effectiveDisabled = disabled || readonly;
+	$: comboboxButtonSize = size === 'sm' ? 'xs' : size === 'lg' ? 'md' : 'sm';
+	$: fieldGapClass = compact ? 'gap-1' : 'gap-2';
+	$: monthWidthClass = compact ? 'w-14' : 'w-20';
+	$: monthMinWidth = compact ? '3.5rem' : '5rem';
+	$: dayWidthClass = compact ? 'w-12' : 'w-16';
+	$: dayMinWidth = compact ? '3rem' : '4rem';
+	$: yearWidthClass = compact ? 'w-16' : 'w-24';
+	$: yearMinWidth = compact ? '4rem' : '6rem';
 
 	function parseValue(nextValue: string) {
 		if (/^\d{4}-\d{2}-\d{2}$/.test(nextValue)) {
@@ -131,41 +140,44 @@
 		</p>
 	{/if}
 
-	<div class="flex items-center gap-2">
-		<SearchDropdown
+	<div class="flex items-center {fieldGapClass}">
+		<DropdownCombobox
 			value={month}
 			options={monthOptions}
-			label="Month"
-			hideLabel
-			name={`${name}-month`}
-			{size}
+			placeholder="Month"
+			minWidth={monthMinWidth}
+			width={monthWidthClass}
+			fullWidth
+			limit={6}
 			{fixed}
+			buttonSize={comboboxButtonSize}
 			disabled={effectiveDisabled}
-			fullWidth={false}
 			on:change={(event) => onMonthChange(event.detail)}
 		/>
-		<SearchDropdown
+		<DropdownCombobox
 			value={day}
 			options={dayOptions}
-			label="Day"
-			hideLabel
-			name={`${name}-day`}
-			{size}
+			placeholder="Day"
+			minWidth={dayMinWidth}
+			width={dayWidthClass}
+			fullWidth
+			limit={6}
 			{fixed}
+			buttonSize={comboboxButtonSize}
 			disabled={effectiveDisabled}
-			fullWidth={false}
 			on:change={(event) => onDayChange(event.detail)}
 		/>
-		<SearchDropdown
+		<DropdownCombobox
 			value={year}
 			options={yearOptions}
-			label="Year"
-			hideLabel
-			name={`${name}-year`}
-			{size}
+			placeholder="Year"
+			minWidth={yearMinWidth}
+			width={yearWidthClass}
+			fullWidth
+			limit={6}
 			{fixed}
+			buttonSize={comboboxButtonSize}
 			disabled={effectiveDisabled}
-			fullWidth={false}
 			on:change={(event) => onYearChange(event.detail)}
 		/>
 	</div>
