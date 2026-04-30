@@ -134,7 +134,7 @@
 	const valueMinWidth = '0';
 </script>
 
-<Card padding="md" flush={depth === 0}>
+<Card padding="none" flush={depth === 0} className="!border-0">
 	<!-- Group Header -->
 	<div class="mb-3 flex items-center justify-between">
 		<div class="flex items-center gap-2">
@@ -269,6 +269,7 @@
 													name="filter-value-{childIndex}"
 													value={child.value as string}
 													responsive
+													autoWidth
 													on:input={(e) => {
 														child.value = e.detail;
 														notifyChange();
@@ -287,6 +288,7 @@
 												value={child.value as number}
 												font="mono"
 												responsive
+												autoWidth
 											/>
 										</div>
 									{:else if field?.valueType === 'date'}
@@ -303,6 +305,7 @@
 														min={1}
 														font="mono"
 														responsive
+														autoWidth
 													/>
 												</div>
 												<span class="text-xs text-neutral-500 dark:text-neutral-400">days</span>

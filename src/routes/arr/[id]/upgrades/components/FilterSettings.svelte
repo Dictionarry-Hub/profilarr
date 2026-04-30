@@ -400,7 +400,7 @@
 		</svelte:fragment>
 
 		<svelte:fragment slot="expanded" let:row>
-			<div class="space-y-4 p-6">
+			<div class="space-y-4 p-3 md:p-6">
 				<div data-onboarding="upgrades-filter-rules">
 					<FilterGroupComponent
 						group={row.group}
