@@ -82,6 +82,7 @@
 				: compact;
 	$: resolvedButtonSize = buttonSize ?? ((isCompactButton ? 'xs' : 'sm') as 'xs' | 'sm');
 	$: resolvedJustify = justify ?? 'between';
+	$: useSelectMode = isSmallScreen && (responsiveButton || responsiveDropdown);
 
 	$: trimmedQuery = query.trim();
 	$: filteredOptions = !open
@@ -119,12 +120,21 @@
 		inputValue = matchedOption ? currentLabel : '';
 		query = '';
 		highlightedIndex = options.length > 0 ? 0 : -1;
+		if (useSelectMode) return;
 		await tick();
 		inputEl?.focus();
 		if (inputEl) {
 			const end = inputEl.value.length;
 			inputEl.setSelectionRange(end, end);
 		}
+	}
+
+	function toggleCombobox() {
+		if (useSelectMode && open) {
+			closeCombobox();
+			return;
+		}
+		openCombobox();
 	}
 
 	function closeCombobox() {
@@ -194,7 +204,7 @@
 		bind:this={triggerEl}
 		use:clickOutside={closeCombobox}
 	>
-		{#if open}
+		{#if open && !useSelectMode}
 			<div
 				class="flex w-full items-center {triggerShellClasses} {resolvedJustify === 'between'
 					? 'justify-between'
@@ -224,7 +234,7 @@
 				{disabled}
 				justify={resolvedJustify}
 				textColor={isPlaceholder ? 'text-neutral-400 dark:text-neutral-500' : ''}
-				on:click={openCombobox}
+				on:click={toggleCombobox}
 			/>
 		{/if}
 		{#if open}
