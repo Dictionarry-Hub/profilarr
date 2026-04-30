@@ -28,6 +28,7 @@
 	export let compactDropdownThreshold: number = 0;
 	// Responsive: auto-compact button on smaller screens (< 1280px)
 	export let responsiveButton: boolean = false;
+	export let responsiveDropdown: boolean = false;
 	export let fullWidth: boolean = false;
 	// Fixed positioning to escape overflow containers (e.g. tables)
 	export let fixed: boolean = false;
@@ -48,7 +49,7 @@
 	let triggerEl: HTMLElement;
 
 	onMount(() => {
-		if (responsiveButton && typeof window !== 'undefined') {
+		if ((responsiveButton || responsiveDropdown) && typeof window !== 'undefined') {
 			mediaQuery = window.matchMedia('(max-width: 1279px)');
 			isSmallScreen = mediaQuery.matches;
 			mediaQuery.addEventListener('change', handleMediaChange);
@@ -75,6 +76,8 @@
 	$: isCompactDropdown =
 		compactDropdown !== undefined
 			? compactDropdown
+			: responsiveDropdown && isSmallScreen
+				? true
 			: compactDropdownThreshold > 0 && options.length >= compactDropdownThreshold
 				? true
 				: compact;

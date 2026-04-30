@@ -90,6 +90,7 @@
 				value={filterMode}
 				options={modeOptions}
 				minWidth="10rem"
+				responsiveDropdown
 				on:change={(e) => onFilterModeChange?.(e.detail as FilterMode)}
 			/>
 		</div>

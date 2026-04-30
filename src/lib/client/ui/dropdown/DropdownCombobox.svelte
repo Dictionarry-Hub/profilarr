@@ -27,6 +27,7 @@
 	export let compactDropdown: boolean | undefined = undefined;
 	export let compactDropdownThreshold: number = 0;
 	export let responsiveButton: boolean = false;
+	export let responsiveDropdown: boolean = false;
 	export let fullWidth: boolean = false;
 	export let fixed: boolean = false;
 	export let width: string | undefined = undefined;
@@ -47,7 +48,7 @@
 	let triggerWidth = 0;
 
 	onMount(() => {
-		if (responsiveButton && typeof window !== 'undefined') {
+		if ((responsiveButton || responsiveDropdown) && typeof window !== 'undefined') {
 			mediaQuery = window.matchMedia('(max-width: 1279px)');
 			isSmallScreen = mediaQuery.matches;
 			mediaQuery.addEventListener('change', handleMediaChange);
@@ -74,6 +75,8 @@
 	$: isCompactDropdown =
 		compactDropdown !== undefined
 			? compactDropdown
+			: responsiveDropdown && isSmallScreen
+				? true
 			: compactDropdownThreshold > 0 && options.length >= compactDropdownThreshold
 				? true
 				: compact;
@@ -239,9 +242,8 @@
 							label={option.label}
 							icon={option.icon}
 							selected={value === option.value}
-							highlighted={i === highlightedIndex}
+							compact={isCompactDropdown}
 							on:click={() => selectOption(option)}
-							on:mouseenter={() => (highlightedIndex = i)}
 						/>
 					{/each}
 					{#if filteredOptions.length === 0}

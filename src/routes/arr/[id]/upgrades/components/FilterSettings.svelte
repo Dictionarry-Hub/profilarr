@@ -456,6 +456,7 @@
 									minWidth="14rem"
 									compactDropdownThreshold={7}
 									fullWidth
+									responsiveDropdown
 									fixed
 									on:change={(e) => {
 										row.selector = e.detail;

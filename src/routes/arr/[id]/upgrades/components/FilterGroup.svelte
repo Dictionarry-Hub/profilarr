@@ -147,7 +147,7 @@
 				]}
 				minWidth="7rem"
 				responsiveButton
-				compactDropdownThreshold={7}
+				responsiveDropdown
 				fixed
 				on:change={(e) => {
 					group.match = e.detail as 'all' | 'any';
@@ -191,7 +191,7 @@
 								fullWidth
 								limit={6}
 								responsiveButton
-								compactDropdownThreshold={7}
+								responsiveDropdown
 								fixed
 								on:change={(e) => onFieldChange(child, e.detail)}
 							/>
@@ -213,7 +213,7 @@
 									width={operatorWidthClass}
 									fullWidth
 									responsiveButton
-									compactDropdownThreshold={7}
+									responsiveDropdown
 									fixed
 									on:change={(e) => {
 										child.operator = e.detail;
@@ -236,7 +236,7 @@
 												width={valueWidthClass}
 												fullWidth
 												responsiveButton
-												compactDropdownThreshold={7}
+												responsiveDropdown
 												fixed
 												on:change={(e) => {
 													const originalValue = field.values?.find(
@@ -261,7 +261,7 @@
 													fullWidth
 													limit={6}
 													responsiveButton
-													compactDropdownThreshold={7}
+													responsiveDropdown
 													fixed
 													on:change={(e) => {
 														child.value = e.detail;

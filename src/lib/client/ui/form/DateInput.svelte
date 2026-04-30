@@ -159,6 +159,7 @@
 			{fixed}
 			buttonSize={responsiveButtonSize}
 			responsiveButton={responsive}
+			responsiveDropdown={responsive}
 			compactDropdownThreshold={7}
 			disabled={effectiveDisabled}
 			on:change={(event) => onMonthChange(event.detail)}
@@ -174,6 +175,7 @@
 			{fixed}
 			buttonSize={responsiveButtonSize}
 			responsiveButton={responsive}
+			responsiveDropdown={responsive}
 			compactDropdownThreshold={7}
 			disabled={effectiveDisabled}
 			on:change={(event) => onDayChange(event.detail)}
@@ -189,6 +191,7 @@
 			{fixed}
 			buttonSize={responsiveButtonSize}
 			responsiveButton={responsive}
+			responsiveDropdown={responsive}
 			compactDropdownThreshold={7}
 			disabled={effectiveDisabled}
 			on:change={(event) => onYearChange(event.detail)}

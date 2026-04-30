@@ -96,6 +96,7 @@
 				buttonSize={responsiveButtonSize}
 				limit={6}
 				responsiveButton={responsive}
+				responsiveDropdown={responsive}
 				compactDropdownThreshold={7}
 				disabled={disabled || readonly}
 				fullWidth
@@ -113,6 +114,7 @@
 				buttonSize={responsiveButtonSize}
 				limit={6}
 				responsiveButton={responsive}
+				responsiveDropdown={responsive}
 				compactDropdownThreshold={7}
 				disabled={disabled || readonly}
 				fullWidth

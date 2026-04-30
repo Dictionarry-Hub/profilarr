@@ -256,6 +256,7 @@
 		buttonSize="sm"
 		width="w-24"
 		justify="center"
+		responsiveDropdown
 		on:change={(event) => selectScheduleType(event.detail as ScheduleType)}
 	/>
 
@@ -324,6 +325,7 @@
 			buttonSize="sm"
 			width="w-20"
 			justify="center"
+			responsiveDropdown
 			on:change={(event) => {
 				weeklyDay = Number(event.detail);
 				updateCron();
