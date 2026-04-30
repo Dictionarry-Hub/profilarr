@@ -19,7 +19,7 @@
 	import DateInput from '$ui/form/DateInput.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import SearchDropdown from '$ui/form/SearchDropdown.svelte';
+	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 
 	export let group: FilterGroup;
 	export let appType: UpgradeAppType = 'radarr';
@@ -39,6 +39,7 @@
 	const dispatch = createEventDispatcher<{ change: void }>();
 
 	function notifyChange() {
+		group = group;
 		dispatch('change');
 	}
 
@@ -69,8 +70,12 @@
 		}
 	}
 
-	function getDynamicOptions(fieldId: string, value: unknown) {
-		const options = dynamicFilterOptions[fieldId] ?? [];
+	function getDynamicOptions(
+		fieldId: string,
+		value: unknown,
+		optionsByField: DynamicFilterOptions
+	) {
+		const options = optionsByField[fieldId] ?? [];
 		const currentValue = typeof value === 'string' ? value.trim() : '';
 
 		if (!currentValue || options.some((option) => option.value === currentValue)) {
@@ -109,7 +114,6 @@
 		});
 		if (nextSignature !== normalizedRulesSignature) {
 			if (normalizeDynamicOperators(group)) {
-				group = group;
 				notifyChange();
 			}
 			normalizedRulesSignature = JSON.stringify({
@@ -122,9 +126,21 @@
 	function handleNestedChange() {
 		notifyChange();
 	}
+
+	const keyWidthClass = 'w-fit md:w-48';
+	const operatorWidthClass = 'w-fit md:w-40';
+	const valueWidthClass = 'w-fit md:w-72';
+	const keyMinWidth = '0';
+	const valueMinWidth = '0';
 </script>
 
-<Card padding="md" flush={depth === 0}>
+<Card
+	padding={depth === 0 ? 'none' : 'sm'}
+	flush={depth === 0}
+	className={depth === 0
+		? '!rounded-none !border-0'
+		: '!border-neutral-200 dark:!border-neutral-700/60'}
+>
 	<!-- Group Header -->
 	<div class="mb-3 flex items-center justify-between">
 		<div class="flex items-center gap-2">
@@ -137,7 +153,7 @@
 				]}
 				minWidth="7rem"
 				responsiveButton
-				compactDropdownThreshold={7}
+				responsiveDropdown
 				fixed
 				on:change={(e) => {
 					group.match = e.detail as 'all' | 'any';
@@ -157,158 +173,204 @@
 			No rules configured. Add a rule to start filtering.
 		</div>
 	{:else}
-		<div class="space-y-2">
-			{#each group.children as child, childIndex}
-				{#if isRule(child)}
-					{@const field = getFilterField(child.field, appType)}
-					{@const isDynamicField = child.field in dynamicFilterOptions}
-					<div class="flex items-center gap-2">
-						<!-- Field -->
-						<SearchDropdown
-							value={child.field}
-							options={fields.map((f) => ({ value: f.id, label: f.label }))}
-							placeholder="Search fields..."
-							hideLabel
-							fullWidth={false}
-							fixed
-							on:change={(e) => onFieldChange(child, e.detail)}
-						/>
-
-						<!-- Operator -->
-						{#if field}
-							<DropdownSelect
-								value={child.operator}
-								options={isDynamicField
-									? dynamicStringOperators
-									: field.operators.map((op) => ({ value: op.id, label: op.label }))}
-								minWidth="8rem"
-								responsiveButton
-								compactDropdownThreshold={7}
-								fixed
-								on:change={(e) => {
-									child.operator = e.detail;
-									notifyChange();
-								}}
-							/>
-						{/if}
-
-						<!-- Value -->
-						{#if field?.valueType === 'boolean' || field?.valueType === 'select'}
-							{#if field.values}
-								<DropdownSelect
-									value={String(child.value)}
-									options={field.values.map((v) => ({ value: String(v.value), label: v.label }))}
-									minWidth="8rem"
+		<div class="overflow-x-auto pb-3">
+			<div class="min-w-max space-y-2">
+				{#each group.children as child, childIndex}
+					{#if isRule(child)}
+						{@const field = getFilterField(child.field, appType)}
+						{@const isDynamicField = child.field in dynamicFilterOptions}
+						<div class="rule-row flex items-center gap-1.5 md:gap-2">
+							<!-- Field -->
+							<div class="shrink-0">
+								<DropdownCombobox
+									value={child.field}
+									options={fields.map((f) => ({
+										value: f.id,
+										label: f.label,
+										shortLabel: f.shortLabel
+									}))}
+									placeholder="Select field"
+									minWidth={keyMinWidth}
+									width={keyWidthClass}
+									fullWidth
+									limit={6}
 									responsiveButton
-									compactDropdownThreshold={7}
+									responsiveDropdown
 									fixed
-									on:change={(e) => {
-										const originalValue = field.values?.find(
-											(v) => String(v.value) === e.detail
-										)?.value;
-										child.value = originalValue ?? e.detail;
-										notifyChange();
-									}}
+									on:change={(e) => onFieldChange(child, e.detail)}
 								/>
-							{/if}
-						{:else if field?.valueType === 'text'}
-							{@const dynamicOptions = getDynamicOptions(field.id, child.value)}
-							{#if isDynamicField}
-								{#key `${field.id}:${childIndex}:${dynamicFilterOptionsVersion}`}
-									<SearchDropdown
-										value={String(child.value ?? '')}
-										options={dynamicOptions}
-										placeholder={dynamicFilterOptionsLoading
-											? 'Loading values...'
-											: 'Search values...'}
-										label="Value"
-										name="filter-value-{childIndex}"
-										hideLabel
-										fullWidth={false}
+							</div>
+
+							<!-- Operator -->
+							{#if field}
+								<div class="shrink-0">
+									<DropdownSelect
+										value={child.operator}
+										options={isDynamicField
+											? dynamicStringOperators
+											: field.operators.map((op) => ({
+													value: op.id,
+													label: op.label,
+													shortLabel: op.shortLabel
+												}))}
+										minWidth="7rem"
+										width={operatorWidthClass}
+										fullWidth
+										responsiveButton
+										responsiveDropdown
 										fixed
 										on:change={(e) => {
-											child.value = e.detail;
+											child.operator = e.detail;
 											notifyChange();
 										}}
 									/>
-								{/key}
-							{:else}
-								<FormInput
-									label="Value"
-									hideLabel
-									name="filter-value-{childIndex}"
-									value={child.value as string}
-									on:input={(e) => {
-										child.value = e.detail;
-										notifyChange();
-									}}
-								/>
+								</div>
+
+								<!-- Value -->
+								<div class="shrink-0">
+									{#if field?.valueType === 'boolean' || field?.valueType === 'select'}
+										{#if field.values}
+											<DropdownSelect
+												value={String(child.value)}
+												options={field.values.map((v) => ({
+													value: String(v.value),
+													label: v.label
+												}))}
+												minWidth={valueMinWidth}
+												width={valueWidthClass}
+												fullWidth
+												responsiveButton
+												responsiveDropdown
+												fixed
+												on:change={(e) => {
+													const originalValue = field.values?.find(
+														(v) => String(v.value) === e.detail
+													)?.value;
+													child.value = originalValue ?? e.detail;
+													notifyChange();
+												}}
+											/>
+										{/if}
+									{:else if field?.valueType === 'text'}
+										{#if isDynamicField}
+											{#key `${field.id}:${childIndex}:${dynamicFilterOptionsVersion}`}
+												<DropdownCombobox
+													value={String(child.value ?? '')}
+													options={getDynamicOptions(field.id, child.value, dynamicFilterOptions)}
+													placeholder={dynamicFilterOptionsLoading
+														? 'Loading values...'
+														: 'Select value'}
+													minWidth={valueMinWidth}
+													width={valueWidthClass}
+													fullWidth
+													limit={6}
+													responsiveButton
+													responsiveDropdown
+													fixed
+													on:change={(e) => {
+														child.value = e.detail;
+														notifyChange();
+													}}
+												/>
+											{/key}
+										{:else}
+											<div class={valueWidthClass}>
+												<FormInput
+													label="Value"
+													hideLabel
+													name="filter-value-{childIndex}"
+													value={child.value as string}
+													responsive
+													autoWidth
+													on:input={(e) => {
+														child.value = e.detail;
+														notifyChange();
+													}}
+												/>
+											</div>
+										{/if}
+									{:else if field?.valueType === 'number'}
+										<div class={valueWidthClass}>
+											<NumberInput
+												name="value-{childIndex}"
+												on:change={(e) => {
+													if (e.detail !== undefined) child.value = e.detail;
+													notifyChange();
+												}}
+												value={child.value as number}
+												font="mono"
+												responsive
+												autoWidth
+											/>
+										</div>
+									{:else if field?.valueType === 'date'}
+										{#if child.operator === 'in_last' || child.operator === 'not_in_last'}
+											<div class="{valueWidthClass} flex items-center gap-2">
+												<div class="min-w-0 flex-1">
+													<NumberInput
+														name="value-{childIndex}"
+														value={child.value as number}
+														on:change={(e) => {
+															if (e.detail !== undefined) child.value = e.detail;
+															notifyChange();
+														}}
+														min={1}
+														font="mono"
+														responsive
+														autoWidth
+													/>
+												</div>
+												<span class="text-xs text-neutral-500 dark:text-neutral-400">days</span>
+											</div>
+										{:else}
+											<div class={valueWidthClass}>
+												<DateInput
+													label="Date"
+													hideLabel
+													name="value-{childIndex}"
+													value={child.value as string}
+													fullWidth
+													responsive
+													shortLabels
+													fixed
+													on:change={(e) => {
+														child.value = e.detail;
+														notifyChange();
+													}}
+												/>
+											</div>
+										{/if}
+									{/if}
+								</div>
 							{/if}
-						{:else if field?.valueType === 'number'}
-							<div class="w-24">
-								<NumberInput
-									name="value-{childIndex}"
-									value={child.value as number}
-									on:change={(e) => {
-										if (e.detail !== undefined) child.value = e.detail;
-										notifyChange();
-									}}
-									font="mono"
-									responsive
+
+							<!-- Remove Rule -->
+							<div class="shrink-0">
+								<Button
+									icon={X}
+									variant="ghost"
+									size="xs"
+									on:click={() => removeChild(childIndex)}
 								/>
 							</div>
-						{:else if field?.valueType === 'date'}
-							{#if child.operator === 'in_last' || child.operator === 'not_in_last'}
-								<div class="flex items-center gap-2">
-									<div class="w-20">
-										<NumberInput
-											name="value-{childIndex}"
-											value={child.value as number}
-											on:change={(e) => {
-												if (e.detail !== undefined) child.value = e.detail;
-												notifyChange();
-											}}
-											min={1}
-											font="mono"
-											responsive
-										/>
-									</div>
-									<span class="text-xs text-neutral-500 dark:text-neutral-400">days</span>
-								</div>
-							{:else}
-								<DateInput
-									label="Date"
-									hideLabel
-									name="value-{childIndex}"
-									value={child.value as string}
-									fixed
-									on:change={(e) => {
-										child.value = e.detail;
-										notifyChange();
-									}}
-								/>
-							{/if}
-						{/if}
-
-						<!-- Remove Rule -->
-						<Button icon={X} variant="ghost" size="xs" on:click={() => removeChild(childIndex)} />
-					</div>
-				{:else if isGroup(child)}
-					<!-- Nested Group (recursive) -->
-					<div class="ml-4">
-						<svelte:self
-							group={child}
-							{appType}
-							{dynamicFilterOptions}
-							{dynamicFilterOptionsLoading}
-							{dynamicFilterOptionsVersion}
-							depth={depth + 1}
-							onRemove={() => removeChild(childIndex)}
-							on:change={handleNestedChange}
-						/>
-					</div>
-				{/if}
-			{/each}
+						</div>
+					{:else if isGroup(child)}
+						<!-- Nested Group (recursive) -->
+						<div class="ml-4">
+							<svelte:self
+								group={child}
+								{appType}
+								{dynamicFilterOptions}
+								{dynamicFilterOptionsLoading}
+								{dynamicFilterOptionsVersion}
+								depth={depth + 1}
+								onRemove={() => removeChild(childIndex)}
+								on:change={handleNestedChange}
+							/>
+						</div>
+					{/if}
+				{/each}
+			</div>
 		</div>
 	{/if}
 

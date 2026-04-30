@@ -256,6 +256,7 @@
 		buttonSize="sm"
 		width="w-24"
 		justify="center"
+		responsiveDropdown
 		on:change={(event) => selectScheduleType(event.detail as ScheduleType)}
 	/>
 
@@ -307,6 +308,7 @@
 			name="cron-daily-time"
 			fieldWidthRem={5}
 			value={dailyTime}
+			responsive
 			{disabled}
 			on:input={(event) => {
 				dailyTime = event.detail;
@@ -323,6 +325,7 @@
 			buttonSize="sm"
 			width="w-20"
 			justify="center"
+			responsiveDropdown
 			on:change={(event) => {
 				weeklyDay = Number(event.detail);
 				updateCron();
@@ -334,6 +337,7 @@
 			name="cron-weekly-time"
 			fieldWidthRem={5}
 			value={weeklyTime}
+			responsive
 			{disabled}
 			on:input={(event) => {
 				weeklyTime = event.detail;
@@ -366,6 +370,7 @@
 			name="cron-monthly-time"
 			fieldWidthRem={5}
 			value={monthlyTime}
+			responsive
 			{disabled}
 			on:input={(event) => {
 				monthlyTime = event.detail;

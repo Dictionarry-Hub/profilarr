@@ -11,6 +11,7 @@
 	export let disabled: boolean = false;
 	export let danger: boolean = false;
 	export let selected: boolean = false;
+	export let highlighted: boolean = false;
 	export let compact: boolean = false;
 	export let checkIcon: ComponentType = Check;
 	export let checkColor:
@@ -33,8 +34,8 @@
 	$: stateClasses = disabled
 		? 'cursor-not-allowed text-neutral-400 dark:text-neutral-500'
 		: danger
-			? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900'
-			: 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700';
+			? `text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900 ${highlighted ? 'bg-red-50 dark:bg-red-900' : ''}`
+			: `text-neutral-700 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700 ${highlighted ? 'bg-neutral-100 dark:bg-neutral-700' : ''}`;
 
 	$: iconSize = compact ? 12 : 16;
 	$: labelTransformClass =
@@ -54,6 +55,7 @@
 		class="flex min-w-0 flex-1 items-center text-left transition-colors {sizeClasses} {stateClasses}"
 		{disabled}
 		on:click
+		on:mouseenter
 	>
 		{#if icon}
 			{#if isSvgIcon}
@@ -69,7 +71,7 @@
 					>{secondaryText}</span
 				>{/if}</span
 		>
-		<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color={checkColor} />
+		<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color={checkColor} {compact} />
 	</button>
 	{#if $$slots.actions}
 		<div class="flex items-center {compact ? 'pr-2' : 'pr-3'}">

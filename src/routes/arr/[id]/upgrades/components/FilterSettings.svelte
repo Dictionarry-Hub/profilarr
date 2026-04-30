@@ -51,6 +51,16 @@
 		appType === 'radarr' || appType === 'sonarr' ? appType : 'radarr'
 	) as UpgradeAppType;
 	$: countMax = calculateMaxCount(resolvedAppType, runsPerHour);
+	const selectorShortDescriptions: Record<string, string> = {
+		random: 'Any order',
+		oldest: 'Oldest first',
+		newest: 'Newest first',
+		lowest_score: 'Lowest score',
+		most_popular: 'Most popular',
+		least_popular: 'Least popular',
+		alphabetical_asc: 'A-Z',
+		alphabetical_desc: 'Z-A'
+	};
 
 	// Auto-clamp filter counts when max decreases
 	$: {
@@ -330,30 +340,35 @@
 							iconColor={row.enabled
 								? 'text-green-600 dark:text-green-400'
 								: 'text-neutral-400 dark:text-neutral-500'}
+							responsive
 							on:click={() => toggleEnabled(row.id)}
 						/>
 						<Button
 							text="Copy"
 							icon={ClipboardCopy}
 							iconColor="text-amber-600 dark:text-amber-400"
+							responsive
 							on:click={() => copyFilter(row.id)}
 						/>
 						<Button
 							text="Paste"
 							icon={ClipboardPaste}
 							iconColor="text-amber-600 dark:text-amber-400"
+							responsive
 							on:click={() => pasteIntoFilter(row.id)}
 						/>
 						<Button
 							text="Duplicate"
 							icon={Copy}
 							iconColor="text-violet-600 dark:text-violet-400"
+							responsive
 							on:click={() => duplicateFilter(row.id)}
 						/>
 						<Button
 							text="Delete"
 							icon={Trash2}
 							iconColor="text-red-600 dark:text-red-400"
+							responsive
 							on:click={() => confirmDelete(row)}
 						/>
 					</div>
@@ -400,7 +415,7 @@
 		</svelte:fragment>
 
 		<svelte:fragment slot="expanded" let:row>
-			<div class="space-y-4 p-6">
+			<div class="space-y-4 p-3 md:p-6">
 				<div data-onboarding="upgrades-filter-rules">
 					<FilterGroupComponent
 						group={row.group}
@@ -456,6 +471,9 @@
 									minWidth="14rem"
 									compactDropdownThreshold={7}
 									fullWidth
+									responsiveButton
+									responsiveDropdown
+									mobileDropdownShortLabels
 									fixed
 									on:change={(e) => {
 										row.selector = e.detail;
@@ -463,6 +481,9 @@
 									}}
 								/>
 							</div>
+							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+								{selectorShortDescriptions[row.selector] ?? 'Selection order'}
+							</p>
 						</div>
 						<div data-onboarding="upgrades-count">
 							<label
@@ -501,6 +522,7 @@
 									name="tag-{row.id}"
 									placeholder={resolveTagLabel(row)}
 									bind:value={row.tag}
+									responsive
 									on:input={handleChange}
 								/>
 							</div>

@@ -12,6 +12,7 @@ export type UpgradeAppType = 'radarr' | 'sonarr';
 export interface FilterOperator {
 	id: string;
 	label: string;
+	shortLabel?: string;
 	description?: string;
 }
 
@@ -55,6 +56,7 @@ export function createEmptyDynamicFilterOptions(appType: string): DynamicFilterO
 export interface FilterField {
 	id: string;
 	label: string;
+	shortLabel?: string;
 	description: string;
 	operators: FilterOperator[];
 	valueType: 'boolean' | 'select' | 'text' | 'number' | 'date';
@@ -124,16 +126,16 @@ const booleanOperators: FilterOperator[] = [
 ];
 
 const numberOperators: FilterOperator[] = [
-	{ id: 'eq', label: 'equals', description: 'Exactly equals the value' },
-	{ id: 'neq', label: 'does not equal', description: 'Does not equal the value' },
-	{ id: 'gt', label: 'is greater than', description: 'Greater than the value' },
+	{ id: 'eq', label: '=', description: 'Exactly equals the value' },
+	{ id: 'neq', label: '≠', description: 'Does not equal the value' },
+	{ id: 'gt', label: '>', description: 'Greater than the value' },
 	{
 		id: 'gte',
-		label: 'is greater than or equal',
+		label: '≥',
 		description: 'Greater than or equal to the value'
 	},
-	{ id: 'lt', label: 'is less than', description: 'Less than the value' },
-	{ id: 'lte', label: 'is less than or equal', description: 'Less than or equal to the value' }
+	{ id: 'lt', label: '<', description: 'Less than the value' },
+	{ id: 'lte', label: '≤', description: 'Less than or equal to the value' }
 ];
 
 const textOperators: FilterOperator[] = [
@@ -146,10 +148,30 @@ const textOperators: FilterOperator[] = [
 ];
 
 const dateOperators: FilterOperator[] = [
-	{ id: 'before', label: 'is before', description: 'The date is before the specified date' },
-	{ id: 'after', label: 'is after', description: 'The date is after the specified date' },
-	{ id: 'in_last', label: 'in the last', description: 'Within the last N days' },
-	{ id: 'not_in_last', label: 'not in the last', description: 'Not within the last N days' }
+	{
+		id: 'before',
+		label: 'is before',
+		shortLabel: '<',
+		description: 'The date is before the specified date'
+	},
+	{
+		id: 'after',
+		label: 'is after',
+		shortLabel: '>',
+		description: 'The date is after the specified date'
+	},
+	{
+		id: 'in_last',
+		label: 'in the last',
+		shortLabel: 'in last',
+		description: 'Within the last N days'
+	},
+	{
+		id: 'not_in_last',
+		label: 'not in the last',
+		shortLabel: 'not in last',
+		description: 'Not within the last N days'
+	}
 ];
 
 const ordinalOperators: FilterOperator[] = [
@@ -300,6 +322,7 @@ const sharedFilterFields: FilterField[] = [
 	{
 		id: 'date_added',
 		label: 'Date Added',
+		shortLabel: 'Added',
 		description: 'When the item was added to your library',
 		operators: dateOperators,
 		valueType: 'date'
@@ -408,6 +431,7 @@ const radarrFilterFields: FilterField[] = [
 	{
 		id: 'digital_release',
 		label: 'Digital Release',
+		shortLabel: 'Digital',
 		description: 'The digital release date from TMDb',
 		operators: dateOperators,
 		valueType: 'date'
@@ -415,6 +439,7 @@ const radarrFilterFields: FilterField[] = [
 	{
 		id: 'physical_release',
 		label: 'Physical Release',
+		shortLabel: 'Physical',
 		description: 'The physical release date from TMDb',
 		operators: dateOperators,
 		valueType: 'date'
@@ -495,6 +520,7 @@ const sonarrFilterFields: FilterField[] = [
 	{
 		id: 'first_aired',
 		label: 'First Aired',
+		shortLabel: 'First Air',
 		description: 'When the first episode aired',
 		operators: dateOperators,
 		valueType: 'date'
@@ -502,6 +528,7 @@ const sonarrFilterFields: FilterField[] = [
 	{
 		id: 'last_aired',
 		label: 'Last Aired',
+		shortLabel: 'Last Air',
 		description: 'When the last episode aired',
 		operators: dateOperators,
 		valueType: 'date'
@@ -512,15 +539,87 @@ const sonarrFilterFields: FilterField[] = [
 // Public API
 // =============================================================================
 
+// Manual ordering for the field picker. The first six entries surface as the
+// default visible block (limit=6 in the combobox); the rest are reachable by
+// typing. Anything not listed here is appended in its source-array order.
+const RADARR_FIELD_ORDER = [
+	'monitored',
+	'cutoff_met',
+	'quality_profile',
+	'minimum_availability',
+	'popularity',
+	'tags',
+	'title',
+	'genres',
+	'status',
+	'original_language',
+	'year',
+	'rating',
+	'date_added',
+	'runtime',
+	'size_on_disk',
+	'release_group',
+	'collection',
+	'studio',
+	'keywords',
+	'digital_release',
+	'physical_release',
+	'tmdb_rating',
+	'imdb_rating',
+	'tomato_rating',
+	'trakt_rating'
+];
+
+const SONARR_FIELD_ORDER = [
+	'monitored',
+	'cutoff_met',
+	'quality_profile',
+	'status',
+	'network',
+	'tags',
+	'title',
+	'genres',
+	'original_language',
+	'year',
+	'rating',
+	'date_added',
+	'runtime',
+	'size_on_disk',
+	'series_type',
+	'certification',
+	'season_count',
+	'episode_count',
+	'episode_file_count',
+	'first_aired',
+	'last_aired'
+];
+
+function applyOrder(fields: FilterField[], order: string[]): FilterField[] {
+	const byId = new Map(fields.map((f) => [f.id, f]));
+	const seen = new Set<string>();
+	const ordered: FilterField[] = [];
+	for (const id of order) {
+		const f = byId.get(id);
+		if (f) {
+			ordered.push(f);
+			seen.add(id);
+		}
+	}
+	for (const f of fields) {
+		if (!seen.has(f.id)) ordered.push(f);
+	}
+	return ordered;
+}
+
 /**
  * Get filter fields for a specific app type
  */
 export function getFilterFields(appType: UpgradeAppType): FilterField[] {
 	switch (appType) {
 		case 'radarr':
-			return [...sharedFilterFields, ...radarrFilterFields];
+			return applyOrder([...sharedFilterFields, ...radarrFilterFields], RADARR_FIELD_ORDER);
 		case 'sonarr':
-			return [...sharedFilterFields, ...sonarrFilterFields];
+			return applyOrder([...sharedFilterFields, ...sonarrFilterFields], SONARR_FIELD_ORDER);
 		default:
 			return sharedFilterFields;
 	}

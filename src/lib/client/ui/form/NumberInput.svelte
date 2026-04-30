@@ -18,6 +18,7 @@
 	export let compact: boolean = false;
 	// Responsive: auto-switch to compact on smaller screens (< 1280px)
 	export let responsive: boolean = false;
+	export let autoWidth: boolean = false;
 	export let onchange: ((value: number) => void) | undefined = undefined;
 	export let onMinBlocked: (() => void) | undefined = undefined;
 	export let onMaxBlocked: (() => void) | undefined = undefined;
@@ -47,11 +48,12 @@
 
 	$: isCompact = compact || (responsive && isSmallScreen);
 	$: hideButtons = responsive && isSmallScreen;
+	$: effectiveAutoWidth = autoWidth && (!responsive || isSmallScreen);
 	$: fontClass = font === 'mono' ? 'font-mono' : font === 'sans' ? 'font-sans' : '';
 	$: inputSizeClasses = isCompact
 		? hideButtons
-			? 'rounded-lg px-2.5 py-1.5 text-xs'
-			: 'rounded-lg px-2.5 py-1.5 pr-7 text-xs'
+			? 'rounded-lg px-2 py-1 text-xs'
+			: 'rounded-lg px-2 py-1 pr-7 text-xs'
 		: 'rounded-xl px-3 py-2 pr-10 text-sm';
 	$: buttonWidthClass = isCompact ? 'w-4' : 'w-6';
 	$: iconSize = isCompact ? 10 : 12;
@@ -61,6 +63,12 @@
 	$: buttonBottomRadius = isCompact
 		? 'rounded-br-lg rounded-bl-none rounded-tr-none rounded-tl-none'
 		: 'rounded-br-xl rounded-bl-none rounded-tr-none rounded-tl-none';
+	$: widthClass = effectiveAutoWidth ? 'w-auto' : 'w-full';
+	$: autoWidthPadding = isCompact ? '1.75rem' : '4rem';
+	$: autoWidthCharacters = Math.max(inputValue.length, placeholder.length, 1);
+	$: autoWidthStyle = effectiveAutoWidth
+		? `width: calc(${autoWidthCharacters}ch + ${autoWidthPadding});`
+		: undefined;
 
 	$: if (!isFocused) {
 		inputValue = value === undefined || value === null ? '' : String(value);
@@ -166,7 +174,8 @@
 		{required}
 		{disabled}
 		{placeholder}
-		class="block w-full [appearance:textfield] border border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400 transition-colors focus:border-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-500 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:disabled:bg-neutral-800/40 dark:disabled:text-neutral-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none {inputSizeClasses} {fontClass}"
+		style={autoWidthStyle}
+		class="block {widthClass} [appearance:textfield] border border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400 transition-colors focus:border-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-500 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:disabled:bg-neutral-800/40 dark:disabled:text-neutral-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none {inputSizeClasses} {fontClass}"
 	/>
 
 	<!-- Custom increment/decrement buttons (hidden on mobile when responsive) -->

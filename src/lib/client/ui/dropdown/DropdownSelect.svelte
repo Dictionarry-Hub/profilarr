@@ -28,6 +28,8 @@
 	export let compactDropdownThreshold: number = 0;
 	// Responsive: auto-compact button on smaller screens (< 1280px)
 	export let responsiveButton: boolean = false;
+	export let responsiveDropdown: boolean = false;
+	export let mobileDropdownShortLabels: boolean = false;
 	export let fullWidth: boolean = false;
 	// Fixed positioning to escape overflow containers (e.g. tables)
 	export let fixed: boolean = false;
@@ -48,7 +50,7 @@
 	let triggerEl: HTMLElement;
 
 	onMount(() => {
-		if (responsiveButton && typeof window !== 'undefined') {
+		if ((responsiveButton || responsiveDropdown) && typeof window !== 'undefined') {
 			mediaQuery = window.matchMedia('(max-width: 1279px)');
 			isSmallScreen = mediaQuery.matches;
 			mediaQuery.addEventListener('change', handleMediaChange);
@@ -75,14 +77,22 @@
 	$: isCompactDropdown =
 		compactDropdown !== undefined
 			? compactDropdown
-			: compactDropdownThreshold > 0 && options.length >= compactDropdownThreshold
+			: responsiveDropdown && isSmallScreen
 				? true
-				: compact;
+				: compactDropdownThreshold > 0 && options.length >= compactDropdownThreshold
+					? true
+					: compact;
 	$: resolvedButtonSize = buttonSize ?? ((isCompactButton ? 'xs' : 'sm') as 'xs' | 'sm');
 	$: resolvedJustify = justify ?? (fullWidth || width ? 'between' : 'center');
 	$: labelClasses = isCompactButton
 		? 'text-xs text-neutral-500 dark:text-neutral-400'
 		: 'text-sm text-neutral-500 dark:text-neutral-400';
+
+	function getDropdownLabel(option: { label: string; shortLabel?: string }) {
+		return mobileDropdownShortLabels && isSmallScreen
+			? (option.shortLabel ?? option.label)
+			: option.label;
+	}
 
 	function select(optionValue: string) {
 		dispatch('change', optionValue);
@@ -123,7 +133,7 @@
 			>
 				{#each options as option}
 					<DropdownItem
-						label={option.label}
+						label={getDropdownLabel(option)}
 						icon={option.icon}
 						selected={value === option.value}
 						compact={isCompactDropdown}
