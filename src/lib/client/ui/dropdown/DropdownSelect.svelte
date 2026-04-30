@@ -29,6 +29,7 @@
 	// Responsive: auto-compact button on smaller screens (< 1280px)
 	export let responsiveButton: boolean = false;
 	export let responsiveDropdown: boolean = false;
+	export let mobileDropdownShortLabels: boolean = false;
 	export let fullWidth: boolean = false;
 	// Fixed positioning to escape overflow containers (e.g. tables)
 	export let fixed: boolean = false;
@@ -87,6 +88,10 @@
 		? 'text-xs text-neutral-500 dark:text-neutral-400'
 		: 'text-sm text-neutral-500 dark:text-neutral-400';
 
+	function getDropdownLabel(option: { label: string; shortLabel?: string }) {
+		return mobileDropdownShortLabels && isSmallScreen ? (option.shortLabel ?? option.label) : option.label;
+	}
+
 	function select(optionValue: string) {
 		dispatch('change', optionValue);
 		open = false;
@@ -126,7 +131,7 @@
 			>
 				{#each options as option}
 					<DropdownItem
-						label={option.label}
+						label={getDropdownLabel(option)}
 						icon={option.icon}
 						selected={value === option.value}
 						compact={isCompactDropdown}

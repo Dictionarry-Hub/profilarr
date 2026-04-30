@@ -51,6 +51,16 @@
 		appType === 'radarr' || appType === 'sonarr' ? appType : 'radarr'
 	) as UpgradeAppType;
 	$: countMax = calculateMaxCount(resolvedAppType, runsPerHour);
+	const selectorShortDescriptions: Record<string, string> = {
+		random: 'Any order',
+		oldest: 'Oldest first',
+		newest: 'Newest first',
+		lowest_score: 'Lowest score',
+		most_popular: 'Most popular',
+		least_popular: 'Least popular',
+		alphabetical_asc: 'A-Z',
+		alphabetical_desc: 'Z-A'
+	};
 
 	// Auto-clamp filter counts when max decreases
 	$: {
@@ -461,7 +471,9 @@
 									minWidth="14rem"
 									compactDropdownThreshold={7}
 									fullWidth
+									responsiveButton
 									responsiveDropdown
+									mobileDropdownShortLabels
 									fixed
 									on:change={(e) => {
 										row.selector = e.detail;
@@ -469,6 +481,9 @@
 									}}
 								/>
 							</div>
+							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+								{selectorShortDescriptions[row.selector] ?? 'Selection order'}
+							</p>
 						</div>
 						<div data-onboarding="upgrades-count">
 							<label
