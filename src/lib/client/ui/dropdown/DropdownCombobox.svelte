@@ -44,6 +44,7 @@
 	let highlightedIndex = -1;
 	let isSmallScreen = false;
 	let mediaQuery: MediaQueryList | null = null;
+	let triggerWidth = 0;
 
 	onMount(() => {
 		if (responsiveButton && typeof window !== 'undefined') {
@@ -110,8 +111,9 @@
 
 	async function openCombobox() {
 		if (disabled || open) return;
+		triggerWidth = triggerEl?.getBoundingClientRect().width ?? 0;
 		open = true;
-		inputValue = matchedOption?.label ?? '';
+		inputValue = matchedOption ? currentLabel : '';
 		query = '';
 		highlightedIndex = options.length > 0 ? 0 : -1;
 		await tick();
@@ -194,6 +196,7 @@
 				class="flex w-full items-center {triggerShellClasses} {resolvedJustify === 'between'
 					? 'justify-between'
 					: 'justify-center'} border border-neutral-300 bg-white font-medium text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-200"
+				style={triggerWidth ? `width: ${triggerWidth}px` : undefined}
 			>
 				<input
 					bind:this={inputEl}
