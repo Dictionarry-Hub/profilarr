@@ -5,6 +5,7 @@
 		calculateMaxCount,
 		searchRateLimits,
 		resolveTagLabel,
+		type DynamicFilterOptions,
 		type FilterConfig,
 		type UpgradeAppType
 	} from '$shared/upgrades/filters';
@@ -41,6 +42,9 @@
 	export let filters: FilterConfig[] = [];
 	export let appType: string = 'radarr';
 	export let runsPerHour: number = 1;
+	export let dynamicFilterOptions: DynamicFilterOptions = {};
+	export let dynamicFilterOptionsLoading: boolean = false;
+	export let dynamicFilterOptionsVersion: number = 0;
 	export let onFiltersChange: ((filters: FilterConfig[]) => void) | undefined = undefined;
 
 	$: resolvedAppType = (
@@ -401,6 +405,9 @@
 					<FilterGroupComponent
 						group={row.group}
 						appType={resolvedAppType}
+						{dynamicFilterOptions}
+						{dynamicFilterOptionsLoading}
+						{dynamicFilterOptionsVersion}
 						on:change={handleChange}
 					/>
 				</div>

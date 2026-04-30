@@ -12,12 +12,13 @@ import { scheduleUpgradeForInstance } from '$lib/server/jobs/init.ts';
 import { upsertScheduledJob } from '$lib/server/jobs/queueService.ts';
 import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
 import { validateCronExpression, calculateNextRun } from '$lib/server/jobs/scheduleUtils.ts';
+import { loadDynamicFilterOptions } from '$lib/server/upgrades/dynamicOptions.ts';
 
 /** In-memory rate limit for upgrade dry runs: Map<instanceId, lastDryRunTimestamp> */
 const dryRunTimestamps = new Map<number, number>();
 const DRY_RUN_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
 
-export const load: ServerLoad = ({ params }) => {
+export const load: ServerLoad = async ({ params }) => {
 	const id = parseInt(params.id || '', 10);
 
 	if (isNaN(id)) {
@@ -34,13 +35,15 @@ export const load: ServerLoad = ({ params }) => {
 
 	// Load upgrade runs from database
 	const upgradeRuns = upgradeRunsQueries.getByInstanceId(id);
+	const dynamicFilterOptions = loadDynamicFilterOptions(instance);
 
 	const { api_key: _, ...safeInstance } = instance;
 
 	return {
 		instance: safeInstance,
 		config: config ?? null,
-		upgradeRuns
+		upgradeRuns,
+		dynamicFilterOptions
 	};
 };
 
