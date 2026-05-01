@@ -115,17 +115,19 @@
 			</div>
 
 			<svelte:fragment slot="footer">
-				<div class="flex items-center gap-3 text-xs text-neutral-600 dark:text-neutral-400">
+				<div
+					class="flex flex-col items-start gap-1.5 text-xs text-neutral-600 sm:flex-row sm:items-center sm:gap-3 dark:text-neutral-400"
+				>
 					<div class="flex items-center gap-1">
 						<RefreshCw size={12} class="text-blue-500 dark:text-blue-400" />
 						<span>Sync Strategy: {formatSyncStrategy(database.sync_strategy)}</span>
 					</div>
-					<span class="text-neutral-300 dark:text-neutral-600">&middot;</span>
+					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
 					<div class="flex items-center gap-1">
 						<Clock size={12} class="text-amber-500 dark:text-amber-400" />
 						<span>Last Synced: {formatLastSynced(database.last_synced_at)}</span>
 					</div>
-					<span class="text-neutral-300 dark:text-neutral-600">&middot;</span>
+					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
 					<div class="flex items-center gap-1">
 						<GitPullRequest size={12} class="text-violet-500 dark:text-violet-400" />
 						<span>Auto Pull: {database.auto_pull ? 'On' : 'Off'}</span>
