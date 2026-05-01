@@ -14,6 +14,7 @@
 	import { getPersistentSearchStore } from '$lib/client/stores/search';
 	import { formatDateTime } from '$shared/utils/dates.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
+	import { copyToClipboard } from '$lib/client/utils/clipboard';
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 	import type { ComponentType } from 'svelte';
@@ -146,24 +147,11 @@
 	async function copyLog(log: LogEntry) {
 		const logText = `[${log.timestamp}] ${log.level} - ${log.message}${log.source ? ` [${log.source}]` : ''}${log.meta ? `\nMeta: ${JSON.stringify(log.meta, null, 2)}` : ''}`;
 
-		try {
-			await navigator.clipboard.writeText(logText);
+		const copied = await copyToClipboard(logText);
+		if (copied) {
 			alertStore.add('success', 'Log entry copied to clipboard');
-		} catch {
-			// Fallback for non-secure contexts (HTTP + non-localhost)
-			const textArea = document.createElement('textarea');
-			textArea.value = logText;
-			textArea.style.position = 'fixed';
-			textArea.style.left = '-9999px';
-			document.body.appendChild(textArea);
-			textArea.select();
-			try {
-				document.execCommand('copy');
-				alertStore.add('success', 'Log entry copied to clipboard');
-			} catch {
-				alertStore.add('error', 'Failed to copy to clipboard');
-			}
-			document.body.removeChild(textArea);
+		} else {
+			alertStore.add('error', 'Failed to copy to clipboard');
 		}
 	}
 
