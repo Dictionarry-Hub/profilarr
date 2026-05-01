@@ -29,7 +29,7 @@
 	export let title: string = '';
 	export let ariaLabel: string = '';
 	export let tooltip: string = '';
-	export let tooltipPosition: 'top' | 'bottom' = 'bottom';
+	export let tooltipPosition: 'top' | 'bottom' | 'right' = 'bottom';
 	export let loading: boolean = false;
 	// Optional data-onboarding attribute for cutscene targeting
 	export let onboarding: string | undefined = undefined;
