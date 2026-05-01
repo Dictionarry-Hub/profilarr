@@ -2,7 +2,7 @@
 	import { tick } from 'svelte';
 
 	export let text: string = '';
-	export let position: 'top' | 'bottom' = 'bottom';
+	export let position: 'top' | 'bottom' | 'right' = 'bottom';
 	export let fullWidth: boolean = false;
 	export let mono: boolean = false;
 
@@ -21,6 +21,8 @@
 		// Initial position centered on trigger
 		if (position === 'top') {
 			style = `left:${centerX}px;top:${rect.top}px;transform:translate(-50%,-100%) translateY(-8px)`;
+		} else if (position === 'right') {
+			style = `left:${rect.right}px;top:${rect.top + rect.height / 2}px;transform:translate(8px,-50%)`;
 		} else {
 			style = `left:${centerX}px;top:${rect.bottom}px;transform:translate(-50%,0) translateY(8px)`;
 		}
@@ -33,11 +35,21 @@
 		const vw = window.innerWidth;
 		const vh = window.innerHeight;
 
-		let left = centerX - tip.width / 2;
-		left = Math.max(PADDING, Math.min(left, vw - tip.width - PADDING));
+		let left: number;
+		if (position === 'right') {
+			left = rect.right + 8;
+			if (left + tip.width > vw - PADDING) left = rect.left - tip.width - 8;
+			left = Math.max(PADDING, Math.min(left, vw - tip.width - PADDING));
+		} else {
+			left = centerX - tip.width / 2;
+			left = Math.max(PADDING, Math.min(left, vw - tip.width - PADDING));
+		}
 
 		let top: number;
-		if (position === 'top') {
+		if (position === 'right') {
+			top = rect.top + rect.height / 2 - tip.height / 2;
+			top = Math.max(PADDING, Math.min(top, vh - tip.height - PADDING));
+		} else if (position === 'top') {
 			top = rect.top - tip.height - 8;
 			if (top < PADDING) top = rect.bottom + 8;
 		} else {

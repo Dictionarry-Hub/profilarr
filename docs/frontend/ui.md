@@ -243,7 +243,8 @@ need: `text`, `icon` (a Lucide component), `variant`
 (`primary` / `secondary` / `danger` / `ghost` / others), `size`
 (`xs` / `sm` / `md` / `lg`), `loading`, `disabled`, `href` (renders as `<a>`),
 and `type` (for form submits). If a `tooltip` prop is provided, the button
-wraps itself in a `Tooltip`.
+wraps itself in a `Tooltip`; use `tooltipPosition="right"` for controls near
+the left edge of the viewport.
 
 A form-submit button with a loading spinner:
 
@@ -577,8 +578,8 @@ false; adds `target="_blank" rel="noopener noreferrer"`).
 
 **`$ui/tooltip/Tooltip.svelte`** wraps any child in a hover-activated
 tooltip. It handles viewport edge detection (flipping position when the
-tooltip would overflow) and supports a `fullWidth` mode for stretching to
-fit a parent container.
+tooltip would overflow), supports `top` / `bottom` / `right` positions, and
+supports a `fullWidth` mode for stretching to fit a parent container.
 
 A badge with conditional tooltip text:
 

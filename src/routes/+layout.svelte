@@ -54,7 +54,7 @@
 </svelte:head>
 
 {#if !isAuthPage}
-	<Navbar />
+	<Navbar unreadAnnouncements={data.unreadAnnouncements} />
 	<PageNav
 		arrInstances={data.arrInstances}
 		databases={data.databases}
@@ -73,7 +73,7 @@
 <main
 	class="{isAuthPage
 		? ''
-		: `pt-16 pb-16 md:pt-0 md:pb-0 ${$sidebarCollapsed ? 'md:pl-10' : 'md:pl-80'}`} transition-[padding-left] duration-200 ease-in-out"
+		: `pt-16 pb-16 md:pt-0 md:pb-0 ${$sidebarCollapsed ? 'md:pl-14' : 'md:pl-80'}`} transition-[padding-left] duration-200 ease-in-out"
 >
 	<slot />
 </main>
