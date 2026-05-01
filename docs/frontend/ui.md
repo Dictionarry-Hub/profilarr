@@ -395,7 +395,7 @@ Sub-components for building custom menu UIs:
   `DropdownFooter` mirrors `DropdownHeader` but uses `border-top` instead
   of `border-bottom` and sits at the end of a menu (e.g. "and 12 more").
 - **`DropdownSelect.svelte`**: the `<select>` replacement (covered under
-  [Inputs](#searchdropdown-and-dropdownselect)).
+  [Inputs](#dropdowncombobox-and-dropdownselect)).
 - **`CustomGroupManager.svelte`**: specialized dropdown used by the custom
   format group editor.
 
