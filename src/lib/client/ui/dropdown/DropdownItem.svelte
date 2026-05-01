@@ -24,6 +24,7 @@
 		| `var(--${string})` = 'accent';
 	export let labelClass: string = '';
 	export let labelTransform: 'none' | 'capitalize' | 'uppercase' | 'lowercase' = 'none';
+	export let customContent: boolean = false;
 
 	$: sizeClasses = compact ? 'gap-2 px-2 py-1 text-xs' : 'gap-3 px-3 py-2';
 
@@ -66,11 +67,17 @@
 				<svelte:component this={icon as ComponentType} size={iconSize} />
 			{/if}
 		{/if}
-		<span class="flex-1 {labelTransformClass} {labelClass}"
-			>{label}{#if secondaryText}<span class="ml-1.5 text-xs text-neutral-400 dark:text-neutral-500"
-					>{secondaryText}</span
-				>{/if}</span
-		>
+		{#if customContent}
+			<span class="min-w-0 flex-1 {labelClass}">
+				<slot />
+			</span>
+		{:else}
+			<span class="flex-1 {labelTransformClass} {labelClass}"
+				>{label}{#if secondaryText}<span
+						class="ml-1.5 text-xs text-neutral-400 dark:text-neutral-500">{secondaryText}</span
+					>{/if}</span
+			>
+		{/if}
 		<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color={checkColor} {compact} />
 	</button>
 	{#if $$slots.actions}

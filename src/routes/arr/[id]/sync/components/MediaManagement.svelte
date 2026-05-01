@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SearchDropdown from '$ui/form/SearchDropdown.svelte';
+	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 	import SyncFooter from './SyncFooter.svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
@@ -226,49 +226,80 @@
 	<div class="p-6">
 		<div class="grid gap-6 sm:grid-cols-3">
 			<!-- Naming -->
-			<SearchDropdown
-				label="Naming"
-				hideLabel={false}
-				fullWidth
-				options={namingOptions}
-				value={namingValue}
-				placeholder={namingOptions.length === 0
-					? 'No naming configs available'
-					: 'Select naming config...'}
-				disabled={namingOptions.length === 0}
-				description="Choose the naming config to sync. Clear to unset."
-				on:change={(e) => selectNaming(e.detail)}
-			/>
+			<div class="space-y-2">
+				<div class="space-y-1">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Naming</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Choose the naming config to sync.
+					</p>
+				</div>
+				<DropdownCombobox
+					fullWidth
+					minWidth="0"
+					dropdownWidth="100%"
+					limit={6}
+					clearable
+					options={namingOptions}
+					value={namingValue}
+					placeholder={namingOptions.length === 0
+						? 'No naming configs available'
+						: 'Select naming config...'}
+					disabled={namingOptions.length === 0}
+					on:change={(e) => selectNaming(e.detail)}
+				/>
+			</div>
 
 			<!-- Quality Definitions -->
-			<SearchDropdown
-				label="Quality Definitions"
-				hideLabel={false}
-				fullWidth
-				options={qualityDefinitionsOptions}
-				value={qualityDefinitionsValue}
-				placeholder={qualityDefinitionsOptions.length === 0
-					? 'No quality definitions configs available'
-					: 'Select quality definitions config...'}
-				disabled={qualityDefinitionsOptions.length === 0}
-				description="Choose the quality definitions config to sync. Clear to unset."
-				on:change={(e) => selectQuality(e.detail)}
-			/>
+			<div class="space-y-2">
+				<div class="space-y-1">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Quality Definitions
+					</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Choose the quality definitions config to sync.
+					</p>
+				</div>
+				<DropdownCombobox
+					fullWidth
+					minWidth="0"
+					dropdownWidth="100%"
+					limit={6}
+					clearable
+					options={qualityDefinitionsOptions}
+					value={qualityDefinitionsValue}
+					placeholder={qualityDefinitionsOptions.length === 0
+						? 'No quality definitions configs available'
+						: 'Select quality definitions config...'}
+					disabled={qualityDefinitionsOptions.length === 0}
+					on:change={(e) => selectQuality(e.detail)}
+				/>
+			</div>
 
 			<!-- Media Settings -->
-			<SearchDropdown
-				label="Media Settings"
-				hideLabel={false}
-				fullWidth
-				options={mediaSettingsOptions}
-				value={mediaSettingsValue}
-				placeholder={mediaSettingsOptions.length === 0
-					? 'No media settings configs available'
-					: 'Select media settings config...'}
-				disabled={mediaSettingsOptions.length === 0}
-				description="Choose the media settings config to sync. Clear to unset."
-				on:change={(e) => selectMedia(e.detail)}
-			/>
+			<div class="space-y-2">
+				<div class="space-y-1">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Media Settings
+					</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Choose the media settings config to sync.
+					</p>
+				</div>
+				<DropdownCombobox
+					fullWidth
+					minWidth="0"
+					dropdownWidth="100%"
+					limit={6}
+					clearable
+					options={mediaSettingsOptions}
+					value={mediaSettingsValue}
+					placeholder={mediaSettingsOptions.length === 0
+						? 'No media settings configs available'
+						: 'Select media settings config...'}
+					disabled={mediaSettingsOptions.length === 0}
+					on:change={(e) => selectMedia(e.detail)}
+				/>
+			</div>
 		</div>
 	</div>
 

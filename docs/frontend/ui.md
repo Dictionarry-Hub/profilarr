@@ -146,13 +146,14 @@ dense form grids. Typical use: retention days, timeouts, thresholds.
 />
 ```
 
-#### SearchDropdown and DropdownSelect
+#### DropdownCombobox and DropdownSelect
 
 Two related components:
 
-- **`$ui/form/SearchDropdown.svelte`** is a searchable combobox. The user
-  types to filter, keyboard arrows navigate, Enter selects. Supports fixed
-  positioning so it renders above modals and other overlay context.
+- **`$ui/dropdown/DropdownCombobox.svelte`** is the searchable dropdown. The
+  user types to filter, keyboard arrows navigate, Enter selects. It supports
+  fixed positioning, compact modes, item slots, and matching menu width to the
+  trigger.
 - **`$ui/dropdown/DropdownSelect.svelte`** is the plain `<select>` replacement:
   no search box, just click and pick.
 
@@ -172,20 +173,21 @@ Two related components:
 />
 ```
 
-`SearchDropdown` used as a sub-component inside `DateInput` to pick a year:
+`DropdownCombobox` used as a sub-component inside `DateInput` to pick a year:
 
 ```svelte
 <!-- src/lib/client/ui/form/DateInput.svelte:159 -->
-<SearchDropdown
+<DropdownCombobox
 	value={year}
 	options={yearOptions}
 	label="Year"
-	hideLabel
+	minWidth="5rem"
+	limit={6}
 	on:change={(event) => onYearChange(event.detail)}
 />
 ```
 
-Use `SearchDropdown` when the option list is long (movies, profiles,
+Use `DropdownCombobox` when the option list is long (movies, profiles,
 timezones). Use `DropdownSelect` when it's short and enumerable (log levels,
 sort order).
 
@@ -197,7 +199,7 @@ a markdown toolbar, a live preview toggle, and auto-grow behavior. Pass
 
 #### DateInput and TimeInput
 
-**`$ui/form/DateInput.svelte`** composes three `SearchDropdown`s
+**`$ui/form/DateInput.svelte`** composes three `DropdownCombobox`s
 (month / day / year) with days-in-month validation so February never accepts
 day 30. Value format is `YYYY-MM-DD`.
 
@@ -393,7 +395,7 @@ Sub-components for building custom menu UIs:
   `DropdownFooter` mirrors `DropdownHeader` but uses `border-top` instead
   of `border-bottom` and sits at the end of a menu (e.g. "and 12 more").
 - **`DropdownSelect.svelte`**: the `<select>` replacement (covered under
-  [Inputs](#searchdropdown-and-dropdownselect)).
+  [Inputs](#dropdowncombobox-and-dropdownselect)).
 - **`CustomGroupManager.svelte`**: specialized dropdown used by the custom
   format group editor.
 
@@ -441,8 +443,7 @@ A multi-step import modal with custom body content (opens in
 `ImportReleasesModal` around line 342) uses `<div slot="body">` with
 conditional step rendering driven by a local `step` variable.
 
-An add-entity modal that contains a `SearchDropdown` for picking between
-existing entities is at
+An add-entity modal with selectable search results is at
 `src/routes/quality-profiles/entity-testing/[databaseId]/components/AddEntityModal.svelte`.
 
 #### DirtyModal, InfoModal, CloneModal, SyncPromptModal
