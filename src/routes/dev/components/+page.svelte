@@ -1230,7 +1230,7 @@
 		<ComponentCard
 			name="Toggle"
 			paths={['toggle/Toggle']}
-			description="Card-style toggle with optional label text and IconCheckbox on the right. Supports color variants, disabled state, and fires change events."
+			description="Card-style toggle with optional label text, info modal, and IconCheckbox on the right. Supports color variants, disabled state, and fires change events."
 		>
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Colors</p>
@@ -1238,7 +1238,13 @@
 					<Toggle color="accent" bind:checked={demoToggleAccent} label="Accent" />
 					<Toggle color="green" bind:checked={demoToggleGreen} label="Green" />
 					<Toggle color="red" bind:checked={demoToggleRed} label="Red" />
-					<Toggle color="amber" bind:checked={demoToggleAmber} label="Amber" />
+					<Toggle
+						color="amber"
+						bind:checked={demoToggleAmber}
+						label="Amber"
+						infoHeader="Toggle Information"
+						infoBody="Optional info content can explain what a setting changes without taking the user away from the form."
+					/>
 				</div>
 			</div>
 

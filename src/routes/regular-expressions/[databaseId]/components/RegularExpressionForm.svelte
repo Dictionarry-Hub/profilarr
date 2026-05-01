@@ -35,6 +35,8 @@
 	export let canWriteToBase: boolean = false;
 	export let actionUrl: string = '';
 	export let initialData: RegularExpressionFormData;
+	export let failOnReferencedDelete: boolean = false;
+	export let referenceCount: number = 0;
 
 	// Breadcrumb (optional)
 	export let breadcrumbItems: { label: string; href: string }[] = [];
@@ -87,6 +89,10 @@
 			? `Create a new regular expression for ${databaseName}`
 			: `Update regular expression settings`;
 	$: submitButtonText = mode === 'create' ? 'Create' : 'Save Changes';
+	$: deleteBlocked = mode === 'edit' && failOnReferencedDelete && referenceCount > 0;
+	$: deleteTooltip = deleteBlocked
+		? `Referenced by ${referenceCount} custom format${referenceCount === 1 ? '' : 's'}`
+		: '';
 
 	// Unit tests state
 	let unitTests: Regex101UnitTest[] = [];
@@ -168,10 +174,11 @@
 			<div class="flex items-center gap-2">
 				{#if mode === 'edit'}
 					<Button
-						disabled={deleting}
+						disabled={deleting || deleteBlocked}
 						icon={deleting ? Loader2 : Trash2}
 						iconColor="text-red-600 dark:text-red-400"
 						text={deleting ? 'Deleting...' : 'Delete'}
+						tooltip={deleteTooltip}
 						on:click={handleDeleteClick}
 					/>
 				{/if}

@@ -30,6 +30,8 @@
 	export let canWriteToBase: boolean = false;
 	export let actionUrl: string = '';
 	export let initialData: GeneralFormData;
+	export let failOnReferencedDelete: boolean = false;
+	export let referenceCount: number = 0;
 
 	// Event handlers
 	export let onCancel: (() => void) | undefined = undefined;
@@ -72,6 +74,10 @@
 			? `After saving, you'll be able to add conditions and tests.`
 			: `Update custom format settings`;
 	$: submitButtonText = mode === 'create' ? 'Create' : 'Save Changes';
+	$: deleteBlocked = mode === 'edit' && failOnReferencedDelete && referenceCount > 0;
+	$: deleteTooltip = deleteBlocked
+		? `Referenced by ${referenceCount} quality profile${referenceCount === 1 ? '' : 's'}`
+		: '';
 
 	// Reactive getters for current values
 	$: name = ($current.name ?? '') as string;
@@ -111,10 +117,11 @@
 			<div class="flex items-center gap-2">
 				{#if mode === 'edit'}
 					<Button
-						disabled={deleting}
+						disabled={deleting || deleteBlocked}
 						icon={deleting ? Loader2 : Trash2}
 						iconColor="text-red-600 dark:text-red-400"
 						text={deleting ? 'Deleting...' : 'Delete'}
+						tooltip={deleteTooltip}
 						on:click={handleDeleteClick}
 					/>
 				{/if}

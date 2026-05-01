@@ -66,7 +66,8 @@ export const load = () => {
 			hasApiKey: !!tmdbSetting.api_key
 		},
 		generalSettings: {
-			apply_default_delay_profiles: generalSetting.apply_default_delay_profiles === 1
+			apply_default_delay_profiles: generalSetting.apply_default_delay_profiles === 1,
+			fail_on_referenced_delete: generalSetting.fail_on_referenced_delete === 1
 		}
 	};
 };
@@ -129,8 +130,9 @@ export const actions: Actions = {
 		const tmdbApiKeyInput = formData.get('tmdb_api_key') as string;
 		const tmdbApiKey = tmdbApiKeyInput || tmdbSettingsQueries.get()?.api_key || '';
 
-		// --- Arr defaults ---
+		// --- Behavior ---
 		const arrApplyDefaultDelayProfiles = formData.get('arr_apply_default_delay_profiles') === 'on';
+		const failOnReferencedDelete = formData.get('fail_on_referenced_delete') === 'on';
 
 		// --- Persist all settings ---
 		const logUpdated = logSettingsQueries.update({
@@ -189,14 +191,15 @@ export const actions: Actions = {
 		}
 
 		const arrUpdated = generalSettingsQueries.update({
-			applyDefaultDelayProfiles: arrApplyDefaultDelayProfiles
+			applyDefaultDelayProfiles: arrApplyDefaultDelayProfiles,
+			failOnReferencedDelete
 		});
 
 		if (!arrUpdated) {
-			await logger.error('Failed to update arr default settings', {
+			await logger.error('Failed to update behavior settings', {
 				source: 'settings/general'
 			});
-			return fail(500, { error: 'Failed to update arr default settings' });
+			return fail(500, { error: 'Failed to update behavior settings' });
 		}
 
 		// --- Side effects ---
@@ -216,7 +219,8 @@ export const actions: Actions = {
 				aiEnabled,
 				aiApiUrl,
 				aiModel,
-				arrApplyDefaultDelayProfiles
+				arrApplyDefaultDelayProfiles,
+				failOnReferencedDelete
 			}
 		});
 

@@ -4,6 +4,8 @@
 
 import type { PCDCache } from '$pcd/index.ts';
 import { writeOperation, type OperationLayer } from '$pcd/index.ts';
+import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
+import { getConditionRefsForRegex } from '$pcd/references.ts';
 import type { RegularExpressionWithTags } from '$shared/pcd/display.ts';
 import { uuid } from '$shared/utils/uuid.ts';
 
@@ -32,6 +34,17 @@ export async function remove(options: DeleteRegularExpressionOptions) {
 
 	const queries = [];
 	const groupId = uuid();
+
+	if (generalSettingsQueries.shouldFailOnReferencedDelete()) {
+		const conditionRefs = await getConditionRefsForRegex(cache, current.name);
+		const formatCount = new Set(conditionRefs.map((ref) => ref.cfId)).size;
+		if (formatCount > 0) {
+			return {
+				success: false,
+				error: `Referenced by ${formatCount} custom format${formatCount === 1 ? '' : 's'}`
+			};
+		}
+	}
 
 	// 1. Capture any custom format conditions that reference this regex
 	const dependentConditions = await db

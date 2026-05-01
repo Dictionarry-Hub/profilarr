@@ -6,6 +6,7 @@ import * as customFormatQueries from '$pcd/entities/customFormats/index.ts';
 import { getProfileRefsForCustomFormat } from '$pcd/references.ts';
 import type { OperationLayer } from '$pcd/core/types.ts';
 import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
 
 export const load: ServerLoad = async ({ params }) => {
 	const { databaseId, id } = params;
@@ -51,6 +52,7 @@ export const load: ServerLoad = async ({ params }) => {
 		currentDatabase,
 		format,
 		profileRefs,
+		failOnReferencedDelete: generalSettingsQueries.shouldFailOnReferencedDelete(),
 		canWriteToBase: canWriteToBase(currentDatabaseId)
 	};
 };
@@ -192,7 +194,8 @@ export const actions: Actions = {
 		});
 
 		if (!result.success) {
-			return fail(500, { error: result.error || 'Failed to delete custom format' });
+			const status = result.error?.startsWith('Referenced by ') ? 400 : 500;
+			return fail(status, { error: result.error || 'Failed to delete custom format' });
 		}
 
 		throw redirect(303, `/custom-formats/${databaseId}`);

@@ -61,8 +61,9 @@
 	let tmdbApiKey = '';
 	let tmdbTesting = false;
 
-	// Arr defaults
+	// Behavior
 	let arrApplyDefaultDelayProfiles = data.generalSettings.apply_default_delay_profiles;
+	let failOnReferencedDelete = data.generalSettings.fail_on_referenced_delete;
 
 	// UI (client-side stores)
 	let uiNavIconStyle: NavIconStyle = 'lucide';
@@ -139,6 +140,7 @@
 			backup_retention_days: backupRetentionDays,
 			tmdb_api_key: tmdbApiKey,
 			arr_apply_default_delay_profiles: arrApplyDefaultDelayProfiles,
+			fail_on_referenced_delete: failOnReferencedDelete,
 			ui_nav_icon_style: uiNavIconStyle,
 			ui_alert_position: uiAlertPosition,
 			ui_alert_duration_seconds: uiAlertDurationSeconds,
@@ -402,25 +404,44 @@
 				</div>
 			</ExpandableCard>
 
-			<!-- ==================== Arr Instance Defaults ==================== -->
+			<!-- ==================== Behavior ==================== -->
 			<ExpandableCard
-				title="Arr Instance Defaults"
-				description="Configure default settings applied when adding new Radarr/Sonarr instances"
-				onboardingId="general-arr-defaults"
+				title="Behavior"
+				description="Configure application defaults and safeguards"
+				onboardingId="general-behavior"
 			>
-				<div class="px-6 py-4">
+				<div class="grid gap-4 px-6 py-4 sm:grid-cols-5">
 					<Toggle
 						label="Apply Default Delay Profile"
 						checked={arrApplyDefaultDelayProfiles}
+						infoHeader="Apply Default Delay Profile"
+						infoBody="When enabled, Profilarr applies a default delay profile when adding a new Radarr or Sonarr instance. Disable this if you want new instances to keep their existing delay profile setup."
+						fullWidth
 						on:change={(e) => {
 							arrApplyDefaultDelayProfiles = e.detail;
 							update('arr_apply_default_delay_profiles', e.detail);
+						}}
+					/>
+					<Toggle
+						label="Block Referenced Deletes"
+						checked={failOnReferencedDelete}
+						infoHeader="Block Referenced Deletes"
+						infoBody="When enabled, Profilarr blocks deleting custom formats and regular expressions that are still referenced by other PCD entities. Disable this to allow deletes to generate cleanup operations for those references."
+						fullWidth
+						on:change={(e) => {
+							failOnReferencedDelete = e.detail;
+							update('fail_on_referenced_delete', e.detail);
 						}}
 					/>
 					<input
 						type="hidden"
 						name="arr_apply_default_delay_profiles"
 						value={arrApplyDefaultDelayProfiles ? 'on' : ''}
+					/>
+					<input
+						type="hidden"
+						name="fail_on_referenced_delete"
+						value={failOnReferencedDelete ? 'on' : ''}
 					/>
 				</div>
 			</ExpandableCard>

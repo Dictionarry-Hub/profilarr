@@ -3,13 +3,13 @@ import type { Stage } from '$cutscene/types.ts';
 export const settingsGeneralStage: Stage = {
 	id: 'settings-general',
 	name: 'General',
-	description: 'App-wide preferences: interface, Arr defaults, backups, logging, and TMDB',
+	description: 'App-wide preferences: interface, behavior, backups, logging, and TMDB',
 	steps: [
 		{
 			id: 'settings-general-intro',
 			route: '/settings/general',
 			title: 'General Settings',
-			body: 'General is the app-wide preferences bucket: look-and-feel choices, defaults applied when you add a new Arr, plus quick toggles for the backup and logging jobs. Everything on this page sits on a single form with one Save button at the top, so changes do not apply until you save.',
+			body: 'General is the app-wide preferences bucket: look-and-feel choices, behavior defaults, plus quick toggles for the backup and logging jobs. Everything on this page sits on a single form with one Save button at the top, so changes do not apply until you save.',
 			completion: { type: 'manual' }
 		},
 		{
@@ -22,10 +22,10 @@ export const settingsGeneralStage: Stage = {
 			completion: { type: 'manual' }
 		},
 		{
-			id: 'settings-general-arr-defaults',
-			target: 'general-arr-defaults',
-			title: 'Arr Instance Defaults',
-			body: 'Defaults applied when a new Arr instance is added. "Apply Default Delay Profile" toggles whether Profilarr sets a default delay profile on the first sync to a new Arr. On by default, so linking a fresh Arr picks up a sensible wait window without extra setup; turn it off if you would rather leave new Arrs with whatever delay profile they already have (or none) and set one yourself.',
+			id: 'settings-general-behavior',
+			target: 'general-behavior',
+			title: 'Behavior',
+			body: 'Behavior controls app-wide action defaults. "Apply Default Delay Profile" sets a default delay profile on first sync to a new Arr. "Block Referenced Deletes" blocks deleting custom formats and regular expressions while other PCD entities still reference them.',
 			position: 'below',
 			freeInteract: true,
 			completion: { type: 'manual' }
@@ -60,7 +60,7 @@ export const settingsGeneralStage: Stage = {
 		{
 			id: 'settings-general-summary',
 			title: 'Summary',
-			body: 'General holds the knobs that shape the whole app: interface, Arr-link defaults, the backup and logging jobs, and an optional TMDB token. Save at the top commits every change on the page at once.',
+			body: 'General holds the knobs that shape the whole app: interface, behavior, the backup and logging jobs, and an optional TMDB token. Save at the top commits every change on the page at once.',
 			completion: { type: 'manual' }
 		}
 	]

@@ -4,6 +4,8 @@
 
 import type { PCDCache } from '$pcd/index.ts';
 import { writeOperation, type OperationLayer } from '$pcd/index.ts';
+import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
+import { getProfileRefsForCustomFormat } from '$pcd/references.ts';
 import { uuid } from '$shared/utils/uuid.ts';
 
 interface DeleteCustomFormatOptions {
@@ -26,6 +28,16 @@ export async function remove(options: DeleteCustomFormatOptions) {
 
 	const queries = [];
 	const groupId = uuid();
+
+	if (generalSettingsQueries.shouldFailOnReferencedDelete()) {
+		const profileRefs = await getProfileRefsForCustomFormat(cache, formatName);
+		if (profileRefs.length > 0) {
+			return {
+				success: false,
+				error: `Referenced by ${profileRefs.length} quality profile${profileRefs.length === 1 ? '' : 's'}`
+			};
+		}
+	}
 
 	const dependentScores = await db
 		.selectFrom('quality_profile_custom_formats')
