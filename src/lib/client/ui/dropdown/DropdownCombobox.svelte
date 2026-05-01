@@ -31,6 +31,7 @@
 	export let fullWidth: boolean = false;
 	export let fixed: boolean = false;
 	export let width: string | undefined = undefined;
+	export let dropdownWidth: string | undefined = undefined;
 	export let justify: 'center' | 'between' | null = null;
 	export let disabled: boolean = false;
 	export let buttonSize: 'xs' | 'sm' | 'md' | null = null;
@@ -244,6 +245,7 @@
 				{position}
 				{mobilePosition}
 				{minWidth}
+				width={dropdownWidth}
 				compact={isCompactDropdown}
 				{fixed}
 				{triggerEl}
@@ -255,8 +257,13 @@
 							icon={option.icon}
 							selected={value === option.value}
 							compact={isCompactDropdown}
+							customContent={Boolean($$slots.item)}
 							on:click={() => selectOption(option)}
-						/>
+						>
+							{#if $$slots.item}
+								<slot name="item" {option} />
+							{/if}
+						</DropdownItem>
 					{/each}
 					{#if filteredOptions.length === 0}
 						<div
