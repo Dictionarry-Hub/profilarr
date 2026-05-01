@@ -34,6 +34,7 @@
 	export let justify: 'center' | 'between' | null = null;
 	export let disabled: boolean = false;
 	export let buttonSize: 'xs' | 'sm' | 'md' | null = null;
+	export let clearable: boolean = false;
 
 	const dispatch = createEventDispatcher<{ change: string }>();
 
@@ -145,9 +146,10 @@
 	}
 
 	function selectOption(option: Option) {
-		value = option.value;
-		inputValue = option.label;
-		dispatch('change', option.value);
+		const nextValue = clearable && option.value === value ? '' : option.value;
+		value = nextValue;
+		inputValue = nextValue ? option.label : '';
+		dispatch('change', nextValue);
 		closeCombobox();
 	}
 
