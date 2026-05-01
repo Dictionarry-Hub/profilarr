@@ -18,7 +18,7 @@
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import TagInput from '$ui/form/TagInput.svelte';
-	import SearchDropdown from '$ui/form/SearchDropdown.svelte';
+	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 	import MarkdownInput from '$ui/form/MarkdownInput.svelte';
 	import RangeScale from '$ui/form/RangeScale.svelte';
 	import type { Marker } from '$ui/form/RangeScale.svelte';
@@ -57,7 +57,8 @@
 		{ value: 'lidarr', label: 'Lidarr' },
 		{ value: 'readarr', label: 'Readarr' }
 	];
-	let demoSearchDropdownValue: string | null = null;
+	let demoComboboxValue: string | null = null;
+	let demoCompactComboboxValue: string | null = null;
 	let demoModalOpen = false;
 	let demoModalDanger = false;
 	let demoInfoModalOpen = false;
@@ -121,7 +122,7 @@
 		{ id: 'number-input', name: 'NumberInput', category: 'form' },
 		{ id: 'icon-checkbox', name: 'IconCheckbox', category: 'form' },
 		{ id: 'tag-input', name: 'TagInput', category: 'form' },
-		{ id: 'search-dropdown', name: 'SearchDropdown', category: 'form' },
+		{ id: 'dropdown-combobox', name: 'DropdownCombobox', category: 'dropdown' },
 		{ id: 'markdown-input', name: 'MarkdownInput', category: 'form' },
 		{ id: 'range-scale', name: 'RangeScale', category: 'form' },
 		{ id: 'key-value-list', name: 'KeyValueList', category: 'form' },
@@ -837,28 +838,52 @@
 		</ComponentCard>
 	{/if}
 
-	<!-- SearchDropdown -->
-	{#if visibleIds.has('search-dropdown')}
+	<!-- DropdownCombobox -->
+	{#if visibleIds.has('dropdown-combobox')}
 		<ComponentCard
-			name="SearchDropdown"
-			paths={['form/SearchDropdown']}
-			description="Single-select searchable input styled like FormInput. Filters options as you type, shows a clear button when selected, supports label/description, sizes, disabled state, and custom item slot."
+			name="DropdownCombobox"
+			paths={['dropdown/DropdownCombobox']}
+			description="Single-select searchable dropdown built from Button, Dropdown, and DropdownItem. Filters options as you type, supports compact modes, fixed positioning, item slots, and disabled state."
 		>
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Default + disabled
+					Default + compact + disabled
 				</p>
 				<div class="flex flex-wrap items-start gap-4">
 					<div class="w-56">
-						<SearchDropdown
+						<DropdownCombobox
+							fullWidth
+							minWidth="0"
+							dropdownWidth="100%"
+							limit={6}
 							options={demoAutoOptions}
-							bind:value={demoSearchDropdownValue}
+							bind:value={demoComboboxValue}
 							placeholder="Search arrs..."
-							on:change={(e) => (demoSearchDropdownValue = e.detail)}
+							on:change={(e) => (demoComboboxValue = e.detail)}
 						/>
 					</div>
 					<div class="w-56">
-						<SearchDropdown options={demoAutoOptions} placeholder="Disabled" disabled />
+						<DropdownCombobox
+							fullWidth
+							minWidth="0"
+							dropdownWidth="100%"
+							limit={4}
+							compact
+							options={demoAutoOptions}
+							bind:value={demoCompactComboboxValue}
+							placeholder="Compact"
+							on:change={(e) => (demoCompactComboboxValue = e.detail)}
+						/>
+					</div>
+					<div class="w-56">
+						<DropdownCombobox
+							fullWidth
+							minWidth="0"
+							dropdownWidth="100%"
+							options={demoAutoOptions}
+							placeholder="Disabled"
+							disabled
+						/>
 					</div>
 				</div>
 			</div>
