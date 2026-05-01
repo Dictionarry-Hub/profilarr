@@ -31,6 +31,7 @@
 	import Modal from '$ui/modal/Modal.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
+	import { copyToClipboard } from '$lib/client/utils/clipboard';
 
 	let searchStore: SearchStore = createSearchStore();
 	let debouncedQuery: Readable<string> = searchStore.debouncedQuery;
@@ -235,10 +236,10 @@
 			id: undefined
 		};
 
-		try {
-			await navigator.clipboard.writeText(JSON.stringify(exportData, null, 2));
+		const copied = await copyToClipboard(JSON.stringify(exportData, null, 2));
+		if (copied) {
 			alertStore.add('success', 'Filter copied to clipboard');
-		} catch {
+		} else {
 			alertStore.add('error', 'Failed to copy to clipboard');
 		}
 	}

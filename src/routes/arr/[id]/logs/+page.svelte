@@ -18,6 +18,7 @@
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import { formatDateTime } from '$shared/utils/dates.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
+	import { copyToClipboard } from '$lib/client/utils/clipboard';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -102,10 +103,10 @@
 	async function copyLog(log: LogEntry) {
 		const logText = `[${log.time}] ${log.level} [${log.logger}] ${log.message}${log.exception ? `\nException: ${log.exception}` : ''}`;
 
-		try {
-			await navigator.clipboard.writeText(logText);
+		const copied = await copyToClipboard(logText);
+		if (copied) {
 			alertStore.add('success', 'Log entry copied to clipboard');
-		} catch {
+		} else {
 			alertStore.add('error', 'Failed to copy to clipboard');
 		}
 	}

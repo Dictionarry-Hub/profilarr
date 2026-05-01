@@ -6,6 +6,7 @@
 	import { Copy, Check, ChevronDown } from 'lucide-svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
+	import { copyToClipboard } from '$lib/client/utils/clipboard';
 
 	export let code: string = '';
 	export let language: string = 'sql';
@@ -35,15 +36,13 @@
 	}
 
 	async function handleCopy() {
-		try {
-			await navigator.clipboard.writeText(code);
+		const copiedOk = await copyToClipboard(code);
+		if (copiedOk) {
 			copied = true;
 			if (copyTimeout) clearTimeout(copyTimeout);
 			copyTimeout = setTimeout(() => {
 				copied = false;
 			}, 2000);
-		} catch {
-			// clipboard not available
 		}
 	}
 </script>

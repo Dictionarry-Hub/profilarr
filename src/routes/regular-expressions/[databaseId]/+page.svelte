@@ -24,6 +24,7 @@
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import type { RegularExpressionWithTags } from '$shared/pcd/display';
+	import { copyToClipboard } from '$lib/client/utils/clipboard';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -50,7 +51,11 @@
 				alertStore.add('error', json.error || 'Export failed');
 				return;
 			}
-			await navigator.clipboard.writeText(JSON.stringify(json, null, 2));
+			const copied = await copyToClipboard(JSON.stringify(json, null, 2));
+			if (!copied) {
+				alertStore.add('error', 'Failed to copy to clipboard');
+				return;
+			}
 			alertStore.add('success', `Copied "${name}" to clipboard`);
 		} catch {
 			alertStore.add('error', 'Export failed');

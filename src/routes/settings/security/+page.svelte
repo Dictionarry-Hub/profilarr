@@ -22,6 +22,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import { alertStore } from '$alerts/store';
 	import type { Column } from '$ui/table/types';
+	import { copyToClipboard } from '$lib/client/utils/clipboard';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -63,10 +64,13 @@
 
 	$: apiKey = form?.apiKey ?? null;
 
-	function copyApiKey() {
+	async function copyApiKey() {
 		if (apiKey) {
-			navigator.clipboard.writeText(apiKey);
-			alertStore.add('success', 'API key copied to clipboard');
+			const copied = await copyToClipboard(apiKey);
+			alertStore.add(
+				copied ? 'success' : 'error',
+				copied ? 'API key copied to clipboard' : 'Failed to copy to clipboard'
+			);
 		}
 	}
 
