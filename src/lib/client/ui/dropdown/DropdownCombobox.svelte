@@ -12,6 +12,7 @@
 		label: string;
 		shortLabel?: string;
 		icon?: ComponentType | { path: string };
+		[key: string]: unknown;
 	};
 
 	export let label: string | undefined = undefined;
