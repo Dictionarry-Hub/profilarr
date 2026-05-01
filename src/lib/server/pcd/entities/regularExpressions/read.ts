@@ -5,6 +5,7 @@
 import { sql } from 'kysely';
 import type { PCDCache } from '$pcd/index.ts';
 import type { Tag, RegularExpressionWithTags } from '$shared/pcd/display.ts';
+import { getConditionRefCountsForRegexes } from '$pcd/references.ts';
 
 /**
  * List all regular expressions with tags
@@ -22,6 +23,7 @@ export async function list(cache: PCDCache): Promise<RegularExpressionWithTags[]
 	if (expressions.length === 0) return [];
 
 	const expressionNames = expressions.map((e) => e.name);
+	const referenceCounts = await getConditionRefCountsForRegexes(cache, expressionNames);
 
 	// Get all tags for all expressions
 	const allTags = await db
@@ -48,7 +50,8 @@ export async function list(cache: PCDCache): Promise<RegularExpressionWithTags[]
 	// Build the final result
 	return expressions.map((expression) => ({
 		...expression,
-		tags: tagsMap.get(expression.name) || []
+		tags: tagsMap.get(expression.name) || [],
+		referenceCount: referenceCounts.get(expression.name) || 0
 	}));
 }
 
@@ -76,9 +79,11 @@ export async function get(cache: PCDCache, id: number): Promise<RegularExpressio
 		.select(['t.name', 't.created_at'])
 		.where('ret.regular_expression_name', '=', regex.name)
 		.execute();
+	const referenceCounts = await getConditionRefCountsForRegexes(cache, [regex.name]);
 
 	return {
 		...regex,
-		tags
+		tags,
+		referenceCount: referenceCounts.get(regex.name) || 0
 	};
 }

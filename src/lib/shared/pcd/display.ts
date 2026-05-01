@@ -25,6 +25,7 @@ export interface Tag {
 /** Regular expression with tags (from JOIN) */
 export type RegularExpressionWithTags = RegularExpressionsRow & {
 	tags: Tag[];
+	referenceCount: number;
 };
 
 // ============================================================================
@@ -142,6 +143,7 @@ export type CustomFormatTableRow = Omit<
 	tags: Tag[];
 	conditions: ConditionRef[];
 	testCount: number;
+	referenceCount: number;
 };
 
 /** Custom format general information (for general tab) */

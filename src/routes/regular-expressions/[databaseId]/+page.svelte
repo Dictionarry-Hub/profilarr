@@ -92,6 +92,13 @@
 			suggestions: () => ['yes', 'no']
 		},
 		{
+			key: 'referenced',
+			label: 'Referenced',
+			type: 'text',
+			accessor: (item) => (item.referenceCount > 0 ? 'yes' : 'no'),
+			suggestions: () => ['yes', 'no']
+		},
+		{
 			key: 'pattern',
 			label: 'Pattern',
 			type: 'text',

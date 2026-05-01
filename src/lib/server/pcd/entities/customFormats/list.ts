@@ -5,6 +5,7 @@
 import { sql } from 'kysely';
 import type { PCDCache } from '$pcd/index.ts';
 import type { Tag, CustomFormatTableRow, ConditionRef } from '$shared/pcd/display.ts';
+import { getProfileRefCountsForCustomFormats } from '$pcd/references.ts';
 
 /**
  * Get custom formats with full data for table/card views
@@ -49,6 +50,8 @@ export async function list(cache: PCDCache): Promise<CustomFormatTableRow[]> {
 		.groupBy('custom_format_name')
 		.execute();
 
+	const referenceCounts = await getProfileRefCountsForCustomFormats(cache, formatNames);
+
 	// Build test count map
 	const testCountMap = new Map<string, number>();
 	for (const tc of testCounts) {
@@ -88,6 +91,7 @@ export async function list(cache: PCDCache): Promise<CustomFormatTableRow[]> {
 		description: format.description,
 		tags: tagsMap.get(format.name) || [],
 		conditions: conditionsMap.get(format.name) || [],
-		testCount: testCountMap.get(format.name) || 0
+		testCount: testCountMap.get(format.name) || 0,
+		referenceCount: referenceCounts.get(format.name) || 0
 	}));
 }
