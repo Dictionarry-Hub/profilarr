@@ -7,7 +7,7 @@
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
-	import SearchDropdown from '$ui/form/SearchDropdown.svelte';
+	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 	import {
 		CONDITION_TYPES,
 		PATTERN_TYPES,
@@ -90,7 +90,7 @@
 	// Check if type is pattern-based
 	$: isPatternType = PATTERN_TYPES.includes(condition.type as (typeof PATTERN_TYPES)[number]);
 
-	// SearchDropdown options for patterns
+	// DropdownCombobox options for patterns
 	$: patternOptions = availablePatterns.map((p) => ({ value: p.name, label: p.name }));
 
 	function handlePatternChange(value: string) {
@@ -146,7 +146,7 @@
 		}
 	}
 
-	// Language options for SearchDropdown
+	// Language options for DropdownCombobox
 	$: languageOptions = availableLanguages.map((l) => ({
 		value: l.name,
 		label: l.name,
@@ -275,11 +275,14 @@
 				/>
 			</div>
 			<div class="w-full min-w-0 shrink-0 wide:w-52" data-onboarding="cf-cond-type">
-				<SearchDropdown
+				<DropdownCombobox
+					fullWidth
+					minWidth="0"
+					dropdownWidth="100%"
+					limit={6}
 					options={typeOptions}
 					value={condition.type}
 					placeholder="Select type..."
-					constrainMenuHeight={false}
 					on:change={(e) => handleTypeChange(e.detail)}
 				/>
 			</div>
@@ -297,7 +300,11 @@
 		</div>
 		<div class="min-w-0 wide:flex-1" data-onboarding="cf-cond-value">
 			{#if isPatternType}
-				<SearchDropdown
+				<DropdownCombobox
+					fullWidth
+					minWidth="0"
+					dropdownWidth="100%"
+					limit={6}
 					options={patternOptions}
 					value={selectedValue}
 					placeholder="Select pattern..."
@@ -306,7 +313,11 @@
 			{:else if condition.type === 'language'}
 				<div class="flex flex-col gap-2 wide:flex-row wide:items-center">
 					<div class="min-w-0 flex-1">
-						<SearchDropdown
+						<DropdownCombobox
+							fullWidth
+							minWidth="0"
+							dropdownWidth="100%"
+							limit={6}
 							options={languageOptions}
 							value={selectedValue}
 							placeholder="Select language..."
@@ -325,7 +336,7 @@
 									</span>
 								</span>
 							</svelte:fragment>
-						</SearchDropdown>
+						</DropdownCombobox>
 					</div>
 					<Toggle
 						checked={languageExcept}
@@ -395,11 +406,14 @@
 					</div>
 				</div>
 			{:else}
-				<SearchDropdown
+				<DropdownCombobox
+					fullWidth
+					minWidth="0"
+					dropdownWidth="100%"
+					limit={6}
 					options={valueOptions}
 					value={selectedValue}
 					placeholder="Select value..."
-					constrainMenuHeight={false}
 					on:change={(e) => handleSelectChange(e.detail)}
 				/>
 			{/if}

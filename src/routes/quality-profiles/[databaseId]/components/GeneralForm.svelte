@@ -244,6 +244,7 @@
 					<DropdownCombobox
 						fullWidth
 						minWidth="0"
+						dropdownWidth="100%"
 						limit={6}
 						placeholder="Search for a language..."
 						options={languageOptions}

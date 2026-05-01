@@ -236,6 +236,7 @@
 				<DropdownCombobox
 					fullWidth
 					minWidth="0"
+					dropdownWidth="100%"
 					limit={6}
 					clearable
 					options={namingOptions}
@@ -261,6 +262,7 @@
 				<DropdownCombobox
 					fullWidth
 					minWidth="0"
+					dropdownWidth="100%"
 					limit={6}
 					clearable
 					options={qualityDefinitionsOptions}
@@ -286,6 +288,7 @@
 				<DropdownCombobox
 					fullWidth
 					minWidth="0"
+					dropdownWidth="100%"
 					limit={6}
 					clearable
 					options={mediaSettingsOptions}
