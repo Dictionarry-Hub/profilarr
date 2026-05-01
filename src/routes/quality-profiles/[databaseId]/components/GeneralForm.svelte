@@ -7,7 +7,7 @@
 	import FormInput from '$ui/form/FormInput.svelte';
 	import MarkdownInput from '$ui/form/MarkdownInput.svelte';
 	import TagInput from '$ui/form/TagInput.svelte';
-	import SearchDropdown from '$ui/form/SearchDropdown.svelte';
+	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -233,15 +233,21 @@
 
 			<!-- Language -->
 			{#if availableLanguages.length > 0}
-				<div data-onboarding="qp-general-language">
-					<SearchDropdown
-						label="Language"
-						description={`Set the preferred language for this profile. Leave empty for "Any". Radarr only. Sonarr uses custom formats for language filtering.`}
-						name="language-search"
+				<div class="space-y-2" data-onboarding="qp-general-language">
+					<div class="space-y-1">
+						<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Language</div>
+						<p class="text-xs text-neutral-600 dark:text-neutral-400">
+							Set the preferred language for this profile. Leave empty for "Any". Radarr only.
+							Sonarr uses custom formats for language filtering.
+						</p>
+					</div>
+					<DropdownCombobox
+						fullWidth
+						minWidth="0"
+						limit={6}
 						placeholder="Search for a language..."
 						options={languageOptions}
 						value={selectedLanguageName}
-						hideLabel={false}
 						on:change={(e) => update('language', e.detail || null)}
 					/>
 				</div>
