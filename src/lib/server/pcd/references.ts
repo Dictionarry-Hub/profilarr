@@ -105,6 +105,36 @@ export async function getProfileRefsForCustomFormat(
 	return [...map.values()];
 }
 
+/**
+ * Count quality profiles that reference each custom format.
+ * Uses the same one-row-per-profile semantics as getProfileRefsForCustomFormat.
+ */
+export async function getProfileRefCountsForCustomFormats(
+	cache: PCDCache,
+	cfNames: string[]
+): Promise<Map<string, number>> {
+	if (cfNames.length === 0) return new Map();
+
+	const rows = await cache.kb
+		.selectFrom('quality_profile_custom_formats as qpcf')
+		.innerJoin('quality_profiles as qp', 'qp.name', 'qpcf.quality_profile_name')
+		.select(['qpcf.custom_format_name', 'qp.id as profile_id'])
+		.where('qpcf.custom_format_name', 'in', cfNames)
+		.execute();
+
+	const refs = new Map<string, Set<number>>();
+	for (const row of rows) {
+		let profileIds = refs.get(row.custom_format_name);
+		if (!profileIds) {
+			profileIds = new Set();
+			refs.set(row.custom_format_name, profileIds);
+		}
+		profileIds.add(row.profile_id);
+	}
+
+	return new Map([...refs.entries()].map(([name, profileIds]) => [name, profileIds.size]));
+}
+
 export interface ConditionRef {
 	cfId: number;
 	cfName: string;
@@ -142,4 +172,34 @@ export async function getConditionRefsForRegex(
 		negate: !!r.negate,
 		required: !!r.required
 	}));
+}
+
+/**
+ * Count custom format condition references for each regular expression.
+ * Uses the same row semantics as getConditionRefsForRegex.
+ */
+export async function getConditionRefCountsForRegexes(
+	cache: PCDCache,
+	regexNames: string[]
+): Promise<Map<string, number>> {
+	if (regexNames.length === 0) return new Map();
+
+	const rows = await cache.kb
+		.selectFrom('condition_patterns as cp')
+		.innerJoin('custom_format_conditions as cfc', (join) =>
+			join
+				.onRef('cp.custom_format_name', '=', 'cfc.custom_format_name')
+				.onRef('cp.condition_name', '=', 'cfc.name')
+		)
+		.innerJoin('custom_formats as cf', 'cf.name', 'cp.custom_format_name')
+		.select(['cp.regular_expression_name'])
+		.where('cp.regular_expression_name', 'in', regexNames)
+		.execute();
+
+	const counts = new Map<string, number>();
+	for (const row of rows) {
+		counts.set(row.regular_expression_name, (counts.get(row.regular_expression_name) ?? 0) + 1);
+	}
+
+	return counts;
 }
