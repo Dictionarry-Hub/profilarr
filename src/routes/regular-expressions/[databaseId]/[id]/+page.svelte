@@ -17,6 +17,7 @@
 		description: data.regularExpression.description ?? '',
 		regex101Id: data.regularExpression.regex101_id ?? ''
 	};
+	$: referencedFormatCount = new Set(data.conditionRefs.map((ref) => ref.cfId)).size;
 
 	function handleCancel() {
 		goto(`/regular-expressions/${data.currentDatabase.id}`);
@@ -40,6 +41,8 @@
 		canWriteToBase={data.canWriteToBase}
 		actionUrl="?/update"
 		{initialData}
+		failOnReferencedDelete={data.failOnReferencedDelete}
+		referenceCount={referencedFormatCount}
 		onCancel={handleCancel}
 		breadcrumbItems={[
 			{ label: data.currentDatabase.name, href: `/regular-expressions/${data.currentDatabase.id}` }

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { ComponentType } from 'svelte';
-	import { Check } from 'lucide-svelte';
+	import { Check, Info } from 'lucide-svelte';
 	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
+	import InfoModal from '$lib/client/ui/modal/InfoModal.svelte';
+	import Button from '$lib/client/ui/button/Button.svelte';
 
 	export let checked: boolean = false;
 	export let disabled: boolean = false;
@@ -25,17 +27,27 @@
 	export let variant: 'filled' | 'outline' = 'filled';
 	export let iconColor: string = '';
 	export let fullWidth: boolean = false;
+	export let infoHeader: string = '';
+	export let infoBody: string = '';
 
 	const dispatch = createEventDispatcher<{ change: boolean; checked: boolean }>();
 
+	let showInfoModal = false;
+
 	$: resolvedLabel = label || ariaLabel;
 	$: resolvedCheckboxColor = checkboxColor ? checkboxColor : color === 'amber' ? '#F59E0B' : color;
+	$: hasInfo = infoHeader.trim() !== '' || infoBody.trim() !== '';
 
 	function handleToggle() {
 		if (disabled) return;
 		checked = !checked;
 		dispatch('checked', checked);
 		dispatch('change', checked);
+	}
+
+	function handleInfoClick(event: MouseEvent) {
+		event.stopPropagation();
+		showInfoModal = true;
 	}
 </script>
 
@@ -59,9 +71,20 @@
 		? 'cursor-not-allowed opacity-50'
 		: 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800'}"
 >
-	{#if label}
-		<span class="min-w-0">{label}</span>
-	{/if}
+	<div class="flex min-w-0 items-center gap-2">
+		{#if label}
+			<span class="min-w-0">{label}</span>
+		{/if}
+		{#if hasInfo}
+			<Button
+				icon={Info}
+				variant="secondary"
+				size="xs"
+				ariaLabel="More information about {resolvedLabel}"
+				on:click={handleInfoClick}
+			/>
+		{/if}
+	</div>
 	<IconCheckbox
 		{checked}
 		{icon}
@@ -74,3 +97,9 @@
 		on:click={handleToggle}
 	/>
 </div>
+
+{#if hasInfo}
+	<InfoModal bind:open={showInfoModal} header={infoHeader || resolvedLabel}>
+		<p class="text-sm leading-6 text-neutral-700 dark:text-neutral-300">{infoBody}</p>
+	</InfoModal>
+{/if}

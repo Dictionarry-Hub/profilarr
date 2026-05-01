@@ -8,6 +8,7 @@ import { logger } from '$logger/logger.ts';
 import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
 import { validateRegex } from '$lib/server/utils/arr/parser/index.ts';
 import { getConditionRefsForRegex } from '$pcd/references.ts';
+import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
 
 export const load: ServerLoad = async ({ params }) => {
 	const { databaseId, id } = params;
@@ -44,6 +45,7 @@ export const load: ServerLoad = async ({ params }) => {
 		currentDatabase,
 		regularExpression,
 		conditionRefs,
+		failOnReferencedDelete: generalSettingsQueries.shouldFailOnReferencedDelete(),
 		canWriteToBase: canWriteToBase(currentDatabaseId)
 	};
 };
@@ -206,7 +208,8 @@ export const actions: Actions = {
 		});
 
 		if (!result.success) {
-			return fail(500, { error: result.error || 'Failed to delete regular expression' });
+			const status = result.error?.startsWith('Referenced by ') ? 400 : 500;
+			return fail(status, { error: result.error || 'Failed to delete regular expression' });
 		}
 
 		throw redirect(303, `/regular-expressions/${databaseId}`);

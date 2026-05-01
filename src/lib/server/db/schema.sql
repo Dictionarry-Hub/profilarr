@@ -1,7 +1,7 @@
 -- Profilarr Database Schema
 -- This file documents the current database schema after all migrations
 -- DO NOT execute this file directly - use migrations instead
--- Last updated: 2026-04-20
+-- Last updated: 2026-05-01
 
 -- ==============================================================================
 -- TABLE: migrations
@@ -772,7 +772,7 @@ CREATE INDEX idx_rename_runs_status ON rename_runs(status);
 -- ==============================================================================
 -- TABLE: general_settings
 -- Purpose: Store general app-wide settings (singleton pattern with id=1)
--- Migration: 030_create_general_settings.ts
+-- Migration: 030_create_general_settings.ts, 064_add_fail_on_referenced_delete.ts
 -- ==============================================================================
 
 CREATE TABLE general_settings (
@@ -780,6 +780,7 @@ CREATE TABLE general_settings (
 
     -- Default delay profile settings
     apply_default_delay_profiles INTEGER NOT NULL DEFAULT 1,  -- 1=apply defaults when adding arr, 0=don't
+    fail_on_referenced_delete INTEGER NOT NULL DEFAULT 1,     -- 1=block referenced CF/regex deletes, 0=allow cleanup ops
 
     -- Metadata
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

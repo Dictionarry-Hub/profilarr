@@ -6,12 +6,14 @@ import { db } from '../db.ts';
 export interface GeneralSettings {
 	id: number;
 	apply_default_delay_profiles: number; // 1=true, 0=false
+	fail_on_referenced_delete: number; // 1=true, 0=false
 	created_at: string;
 	updated_at: string;
 }
 
 export interface UpdateGeneralSettingsInput {
 	applyDefaultDelayProfiles?: boolean;
+	failOnReferencedDelete?: boolean;
 }
 
 /**
@@ -35,6 +37,14 @@ export const generalSettingsQueries = {
 	},
 
 	/**
+	 * Check if referenced custom format and regex deletes should be blocked
+	 */
+	shouldFailOnReferencedDelete(): boolean {
+		const settings = this.get();
+		return settings?.fail_on_referenced_delete === 1;
+	},
+
+	/**
 	 * Update general settings
 	 */
 	update(input: UpdateGeneralSettingsInput): boolean {
@@ -44,6 +54,11 @@ export const generalSettingsQueries = {
 		if (input.applyDefaultDelayProfiles !== undefined) {
 			updates.push('apply_default_delay_profiles = ?');
 			params.push(input.applyDefaultDelayProfiles ? 1 : 0);
+		}
+
+		if (input.failOnReferencedDelete !== undefined) {
+			updates.push('fail_on_referenced_delete = ?');
+			params.push(input.failOnReferencedDelete ? 1 : 0);
 		}
 
 		if (updates.length === 0) {
