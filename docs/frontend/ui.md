@@ -104,6 +104,12 @@ A typical text field:
 `private_` turns the input into a password field with an eye toggle; `mono`
 switches to the monospace font stack (useful for API keys and URLs).
 
+#### CodeInput
+
+**`$ui/form/CodeInput.svelte`** is the editable code textarea. It uses the
+same tokenizer and theme colors as `CodeBlock`, with a transparent textarea
+over a highlighted layer. Use it for JSON or SQL input, not plain text forms.
+
 A plain URL input:
 
 ```svelte
@@ -447,7 +453,7 @@ conditional step rendering driven by a local `step` variable.
 An add-entity modal with selectable search results is at
 `src/routes/quality-profiles/entity-testing/[databaseId]/components/AddEntityModal.svelte`.
 
-#### DirtyModal, InfoModal, CloneModal, SyncPromptModal
+#### DirtyModal, InfoModal, PasteModal, CloneModal, SyncPromptModal
 
 Pre-composed modals for recurring flows:
 
@@ -456,6 +462,8 @@ Pre-composed modals for recurring flows:
   [`dirty.md`](./dirty.md) for details.
 - **`InfoModal.svelte`** is a single-action alert ("OK") for success and
   info messages.
+- **`PasteModal.svelte`** is the manual-paste wrapper for flows that cannot
+  use direct Clipboard API reads. See [`clipboard.md`](./clipboard.md).
 - **`CloneModal.svelte`**, **`SyncPromptModal.svelte`** are specialized
   wrappers for those specific flows (entity clone, sync prompt).
 

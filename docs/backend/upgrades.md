@@ -91,6 +91,11 @@ inCinemas -> released` for Radarr) so operators like `gte` mean "has reached
 this stage or later." Radarr and Sonarr each have app-specific fields; the
 full list is in `src/lib/shared/upgrades/filters.ts`.
 
+Filter imports are app-scoped. Shared fields can move between Radarr and
+Sonarr, but an import is blocked if any rule uses a field unavailable for the
+current app type. This prevents a pasted filter from silently changing meaning
+by dropping incompatible rules.
+
 Each filter also carries a **cutoff** (0-100%), a percentage of the quality
 profile's cutoff score. Items whose current score meets or exceeds the
 threshold are considered "cutoff met" and can be filtered out.

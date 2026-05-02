@@ -1,12 +1,12 @@
 /**
- * no-direct-clipboard-copy lint script
+ * no-direct-clipboard lint script
  *
- * Browser clipboard writes only work in secure contexts, so direct
- * `navigator.clipboard.writeText()` calls fail when Profilarr is served over
- * plain HTTP on a LAN. Use the client clipboard helper instead.
+ * Browser clipboard reads and writes only work in secure contexts, so direct
+ * `navigator.clipboard.*Text()` calls fail when Profilarr is served over plain
+ * HTTP on a LAN. Use the client clipboard helper instead.
  *
  * Usage:
- *   deno task lint:copy
+ *   deno task lint:clipboard
  */
 
 import { parse } from 'svelte/compiler';
@@ -20,15 +20,18 @@ import {
 	pickColorizer
 } from './_lib.ts';
 
-const RULE_NAME = 'no-direct-clipboard-copy';
-const SUGGESTION = "import `copyToClipboard` from '$lib/client/utils/clipboard'";
+const COPY_RULE_NAME = 'no-direct-clipboard-copy';
+const PASTE_RULE_NAME = 'no-direct-clipboard-paste';
+const RULE_NAMES = `${COPY_RULE_NAME}, ${PASTE_RULE_NAME}`;
+const COPY_SUGGESTION = "import `copyToClipboard` from '$lib/client/utils/clipboard'";
+const PASTE_SUGGESTION = "use `PasteModal` from '$ui/modal/PasteModal.svelte'";
 const SCOPE_ROOTS = ['src/routes', 'src/lib/client'];
 const EXEMPT_FILES = new Set(['src/lib/client/utils/clipboard.ts']);
 const FILE_EXT_RE = /\.(?:svelte|ts|js)$/;
 
-const SCAN_RE = /(?:clipboard\s*\.\s*writeText|execCommand\s*\()/;
+const SCAN_RE = /(?:clipboard\s*\.\s*(?:writeText|readText)|execCommand\s*\()/;
 const MATCH_RE =
-	/\b(?:(?:window|globalThis)\s*\.\s*)?navigator\s*\.\s*clipboard\s*\.\s*writeText\s*\(|\b(?:(?:window|globalThis)\s*\.\s*)?document\s*\.\s*execCommand\s*\(/g;
+	/\b(?:(?:window|globalThis)\s*\.\s*)?navigator\s*\.\s*clipboard\s*\.\s*(writeText|readText)\s*\(|\b(?:(?:window|globalThis)\s*\.\s*)?document\s*\.\s*execCommand\s*\(/g;
 
 function isServerFile(file: string): boolean {
 	if (/\+server\.(?:ts|js)$/.test(file)) return true;
@@ -55,8 +58,13 @@ interface DirectCopyViolation extends BaseViolation {
 	kind: 'direct-copy';
 }
 
+interface DirectPasteViolation extends BaseViolation {
+	kind: 'direct-paste';
+}
+
 interface MalformedDirectiveViolation extends BaseViolation {
 	kind: 'malformed-directive';
+	ruleName: string;
 	reason: string;
 }
 
@@ -72,6 +80,7 @@ interface ReadErrorViolation extends BaseViolation {
 
 type Violation =
 	| DirectCopyViolation
+	| DirectPasteViolation
 	| MalformedDirectiveViolation
 	| ParseErrorViolation
 	| ReadErrorViolation;
@@ -216,7 +225,8 @@ function stripCommentsAndStrings(src: string): string {
 function findPrecedingDirective(
 	source: string,
 	lineOffsets: number[],
-	offset: number
+	offset: number,
+	ruleName: string
 ): CommentStatus {
 	const { line } = offsetToLineCol(lineOffsets, offset);
 	let prev = line - 1;
@@ -229,7 +239,7 @@ function findPrecedingDirective(
 			continue;
 		}
 		if (trimmed.startsWith('//')) {
-			return classifyDirective(trimmed.slice(2).trim(), RULE_NAME);
+			return classifyDirective(trimmed.slice(2).trim(), ruleName);
 		}
 		return { kind: 'none' };
 	}
@@ -250,21 +260,30 @@ function lintScriptRange(
 	let m: RegExpExecArray | null;
 	while ((m = MATCH_RE.exec(stripped)) !== null) {
 		const matchOffset = scriptStart + m.index;
+		const isPaste = m[1] === 'readText';
 		if (m[0].includes('execCommand')) {
 			const afterOpenParen = source.slice(matchOffset + m[0].length);
 			if (!/^\s*(['"])copy\1/.test(afterOpenParen)) continue;
 		}
+		const ruleName = isPaste ? PASTE_RULE_NAME : COPY_RULE_NAME;
 
 		const { line, column } = offsetToLineCol(lineOffsets, matchOffset);
-		const status = findPrecedingDirective(source, lineOffsets, matchOffset);
+		const status = findPrecedingDirective(source, lineOffsets, matchOffset, ruleName);
 
 		if (status.kind === 'valid') continue;
 		if (status.kind === 'malformed') {
-			out.push({ kind: 'malformed-directive', file, line, column, reason: status.reason });
+			out.push({
+				kind: 'malformed-directive',
+				file,
+				line,
+				column,
+				ruleName,
+				reason: status.reason
+			});
 			continue;
 		}
 
-		out.push({ kind: 'direct-copy', file, line, column });
+		out.push({ kind: isPaste ? 'direct-paste' : 'direct-copy', file, line, column });
 	}
 }
 
@@ -305,6 +324,8 @@ function violationLabel(v: Violation): string {
 	switch (v.kind) {
 		case 'direct-copy':
 			return 'direct clipboard copy';
+		case 'direct-paste':
+			return 'direct clipboard paste';
 		case 'malformed-directive':
 			return 'malformed directive';
 		case 'parse-error':
@@ -317,9 +338,11 @@ function violationLabel(v: Violation): string {
 function violationDetail(v: Violation, c: Colorizer): string {
 	switch (v.kind) {
 		case 'direct-copy':
-			return `${c.dim('\u2192')} ${c.cyan(SUGGESTION)}`;
+			return `${c.dim('\u2192')} ${c.cyan(COPY_SUGGESTION)}`;
+		case 'direct-paste':
+			return `${c.dim('\u2192')} ${c.cyan(PASTE_SUGGESTION)}`;
 		case 'malformed-directive':
-			return c.dim(v.reason);
+			return c.dim(`${v.reason} (${v.ruleName})`);
 		case 'parse-error':
 		case 'read-error':
 			return c.dim(v.message);
@@ -333,7 +356,7 @@ function formatReport(violations: Violation[], c: Colorizer): string {
 	lines.push(
 		`${c.bold(c.red(`${count} ${count === 1 ? 'error' : 'errors'}`))} across ${c.bold(
 			`${fileCount} ${fileCount === 1 ? 'file' : 'files'}`
-		)} ${c.dim(`(${RULE_NAME})`)}`
+		)} ${c.dim(`(${RULE_NAMES})`)}`
 	);
 	lines.push('');
 	lines.push(c.dim('\u2500'.repeat(60)));
@@ -396,7 +419,7 @@ async function main(): Promise<void> {
 	const c = pickColorizer();
 
 	if (all.length === 0) {
-		console.log(`${c.green('\u2713')} no direct clipboard copy calls ${c.dim(`(${RULE_NAME})`)}`);
+		console.log(`${c.green('\u2713')} no direct clipboard calls ${c.dim(`(${RULE_NAMES})`)}`);
 		Deno.exit(0);
 	}
 
