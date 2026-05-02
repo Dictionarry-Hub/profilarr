@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Plus, Power, Copy, ClipboardCopy, FileJson, FileText, Trash2, Pencil } from 'lucide-svelte';
+	import {
+		Plus,
+		Power,
+		Copy,
+		ClipboardCopy,
+		FileJson,
+		FileText,
+		Trash2,
+		Pencil
+	} from 'lucide-svelte';
 	import {
 		createEmptyFilterConfig,
 		calculateMaxCount,
@@ -278,7 +287,10 @@
 				typeof imported.name === 'string' && imported.name.trim()
 					? imported.name.trim()
 					: 'Imported Filter';
-			const fallbackFilter = createEmptyFilterConfig(getUniqueFilterName(baseName), resolvedAppType);
+			const fallbackFilter = createEmptyFilterConfig(
+				getUniqueFilterName(baseName),
+				resolvedAppType
+			);
 			const importedFilter: FilterConfig = {
 				...fallbackFilter,
 				group: imported.group,

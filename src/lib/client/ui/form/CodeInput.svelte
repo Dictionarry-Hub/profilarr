@@ -60,14 +60,15 @@
 		</p>
 	{/if}
 
-	<div class="relative overflow-hidden rounded-xl border border-neutral-300 dark:border-neutral-700/60">
+	<div
+		class="relative overflow-hidden rounded-xl border border-neutral-300 dark:border-neutral-700/60"
+	>
 		<pre
 			bind:this={highlightElement}
 			aria-hidden="true"
 			class="pointer-events-none absolute inset-0 overflow-auto p-3 text-sm leading-5 whitespace-pre-wrap"
 			style="background-color: {variant.bg}; color: {variant.text}; min-height: {rows * 1.25 +
-				1.5}rem;"><code
-				class={placeholderClass}
+				1.5}rem;"><code class={placeholderClass}
 				>{#each displayTokens as t}<span
 						style={tokenColor(t.type, variant) ? `color: ${tokenColor(t.type, variant)}` : ''}
 						>{t.text}</span
