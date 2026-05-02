@@ -447,7 +447,7 @@ conditional step rendering driven by a local `step` variable.
 An add-entity modal with selectable search results is at
 `src/routes/quality-profiles/entity-testing/[databaseId]/components/AddEntityModal.svelte`.
 
-#### DirtyModal, InfoModal, CloneModal, SyncPromptModal
+#### DirtyModal, InfoModal, PasteModal, CloneModal, SyncPromptModal
 
 Pre-composed modals for recurring flows:
 
@@ -456,6 +456,8 @@ Pre-composed modals for recurring flows:
   [`dirty.md`](./dirty.md) for details.
 - **`InfoModal.svelte`** is a single-action alert ("OK") for success and
   info messages.
+- **`PasteModal.svelte`** is the manual-paste wrapper for flows that cannot
+  use direct Clipboard API reads. See [`clipboard.md`](./clipboard.md).
 - **`CloneModal.svelte`**, **`SyncPromptModal.svelte`** are specialized
   wrappers for those specific flows (entity clone, sync prompt).
 

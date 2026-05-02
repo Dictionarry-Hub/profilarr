@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, Power, Copy, ClipboardCopy, ClipboardPaste, Trash2, Pencil } from 'lucide-svelte';
+	import { Plus, Power, Copy, ClipboardCopy, FileJson, FileText, Trash2, Pencil } from 'lucide-svelte';
 	import {
 		createEmptyFilterConfig,
 		calculateMaxCount,
@@ -21,6 +21,9 @@
 	import FilterGroupComponent from './FilterGroup.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
+	import Dropdown from '$ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
@@ -29,6 +32,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
+	import PasteModal from '$ui/modal/PasteModal.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
@@ -100,6 +104,7 @@
 	// Delete confirmation
 	let deleteModalOpen = false;
 	let filterToDelete: FilterConfig | null = null;
+	let pasteModalOpen = false;
 
 	function confirmDelete(filter: FilterConfig) {
 		filterToDelete = filter;
@@ -125,19 +130,23 @@
 
 	function addFilter() {
 		// Generate unique filter name
-		let baseName = 'Filter';
-		let counter = filters.length + 1;
-		let name = `${baseName} ${counter}`;
-		while (filters.some((f) => f.name.toLowerCase() === name.toLowerCase())) {
-			counter++;
-			name = `${baseName} ${counter}`;
-		}
+		const name = getUniqueFilterName('Filter', filters.length + 1);
 
 		const newFilter = createEmptyFilterConfig(name, resolvedAppType);
 		filters = [...filters, newFilter];
 		expandedIds.add(newFilter.id);
 		expandedIds = expandedIds;
 		notifyChange();
+	}
+
+	function getUniqueFilterName(baseName: string, startCounter = 1): string {
+		let name = startCounter > 1 ? `${baseName} ${startCounter}` : baseName;
+		let counter = startCounter;
+		while (filters.some((f) => f.name.toLowerCase() === name.toLowerCase())) {
+			counter++;
+			name = `${baseName} ${counter}`;
+		}
+		return name;
 	}
 
 	function startEditing(filter: FilterConfig) {
@@ -244,12 +253,8 @@
 		}
 	}
 
-	async function pasteIntoFilter(id: string) {
-		const filter = filters.find((f) => f.id === id);
-		if (!filter) return;
-
+	function handlePasteConfirm(text: string) {
 		try {
-			const text = await navigator.clipboard.readText();
 			const imported = JSON.parse(text);
 
 			if (!imported.group) {
@@ -257,19 +262,34 @@
 				return;
 			}
 
-			// Overwrite filter settings but keep id and name
-			filter.group = imported.group;
-			filter.selector = imported.selector ?? filter.selector;
-			filter.count = imported.count ?? filter.count;
-			filter.cutoff = imported.cutoff ?? filter.cutoff;
-			filter.enabled = imported.enabled ?? filter.enabled;
+			const baseName =
+				typeof imported.name === 'string' && imported.name.trim()
+					? imported.name.trim()
+					: 'Imported Filter';
+			const fallbackFilter = createEmptyFilterConfig(getUniqueFilterName(baseName), resolvedAppType);
+			const importedFilter: FilterConfig = {
+				...fallbackFilter,
+				group: imported.group,
+				selector: imported.selector ?? fallbackFilter.selector,
+				count: imported.count ?? fallbackFilter.count,
+				cutoff: imported.cutoff ?? fallbackFilter.cutoff,
+				enabled: imported.enabled ?? fallbackFilter.enabled,
+				tag: imported.tag ?? fallbackFilter.tag
+			};
 
-			filters = filters;
+			filters = [...filters, importedFilter];
+			expandedIds.add(importedFilter.id);
+			expandedIds = expandedIds;
 			notifyChange();
-			alertStore.add('success', `Pasted settings into "${filter.name}"`);
+			alertStore.add('success', `Imported "${importedFilter.name}"`);
+			pasteModalOpen = false;
 		} catch {
 			alertStore.add('error', 'Failed to paste from clipboard');
 		}
+	}
+
+	function handlePasteCancel() {
+		pasteModalOpen = false;
 	}
 </script>
 
@@ -281,8 +301,17 @@
 				icon={Plus}
 				title="Add filter"
 				onboarding="upgrades-add-filter"
-				on:click={addFilter}
-			/>
+				hasDropdown={true}
+				dropdownPosition="right"
+			>
+				<svelte:fragment slot="dropdown">
+					<Dropdown position="right" minWidth="12rem">
+						<DropdownHeader label="New filter" />
+						<DropdownItem icon={FileText} label="Blank" on:click={addFilter} />
+						<DropdownItem icon={FileJson} label="Import" on:click={() => (pasteModalOpen = true)} />
+					</Dropdown>
+				</svelte:fragment>
+			</ActionButton>
 		</ActionsBar>
 	</div>
 
@@ -352,13 +381,6 @@
 							on:click={() => copyFilter(row.id)}
 						/>
 						<Button
-							text="Paste"
-							icon={ClipboardPaste}
-							iconColor="text-amber-600 dark:text-amber-400"
-							responsive
-							on:click={() => pasteIntoFilter(row.id)}
-						/>
-						<Button
 							text="Duplicate"
 							icon={Copy}
 							iconColor="text-violet-600 dark:text-violet-400"
@@ -393,12 +415,6 @@
 					icon={ClipboardCopy}
 					iconColor="text-amber-600 dark:text-amber-400"
 					on:click={() => copyFilter(row.id)}
-				/>
-				<Button
-					text="Paste"
-					icon={ClipboardPaste}
-					iconColor="text-amber-600 dark:text-amber-400"
-					on:click={() => pasteIntoFilter(row.id)}
 				/>
 				<Button
 					text="Duplicate"
@@ -553,4 +569,15 @@
 	confirmDanger={true}
 	on:confirm={handleDeleteConfirm}
 	on:cancel={handleDeleteCancel}
+/>
+
+<PasteModal
+	open={pasteModalOpen}
+	header="Import Filter"
+	label="Filter JSON"
+	description="Paste copied filter JSON to create a new filter."
+	placeholder={'{\n  "group": { ... }\n}'}
+	confirmText="Import"
+	on:confirm={(e) => handlePasteConfirm(e.detail)}
+	on:cancel={handlePasteCancel}
 />
