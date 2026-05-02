@@ -8,6 +8,8 @@ import { assertEquals } from '@std/assert';
 import {
 	evaluateRule,
 	evaluateGroup,
+	getDynamicFilterFieldIds,
+	getFilterFields,
 	type FilterRule,
 	type FilterGroup
 } from '../../../src/lib/shared/upgrades/filters.ts';
@@ -240,6 +242,147 @@ class FilterEvaluationTest extends BaseTest {
 				value: '4K'
 			};
 			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		// =====================
+		// Custom Format Operators
+		// =====================
+
+		this.test('custom format: includes matches present format', () => {
+			const item = { custom_formats: ['Tier 6', 'HDR10'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'includes',
+				value: 'Tier 6'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('custom format: includes rejects absent format', () => {
+			const item = { custom_formats: ['Tier 5', 'HDR10'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'includes',
+				value: 'Tier 6'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('custom format: does_not_include matches absent format', () => {
+			const item = { custom_formats: ['Tier 5', 'HDR10'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'does_not_include',
+				value: 'Tier 6'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('custom format: does_not_include rejects present format', () => {
+			const item = { custom_formats: ['Tier 6', 'HDR10'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'does_not_include',
+				value: 'Tier 6'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('custom format: is_only matches single selected format', () => {
+			const item = { custom_formats: ['Tier 6'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'is_only',
+				value: 'Tier 6'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('custom format: is_only rejects selected format with other formats', () => {
+			const item = { custom_formats: ['Tier 6', 'HDR10'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'is_only',
+				value: 'Tier 6'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('custom format: has_any matches non-empty formats', () => {
+			const item = { custom_formats: ['Tier 6'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'has_any',
+				value: null
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('custom format: has_any rejects empty formats', () => {
+			const item = { custom_formats: [] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'has_any',
+				value: null
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('custom format: has_none matches empty formats', () => {
+			const item = { custom_formats: [] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'has_none',
+				value: null
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('custom format: has_none rejects non-empty formats', () => {
+			const item = { custom_formats: ['Tier 6'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'has_none',
+				value: null
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('custom format: matching is case-insensitive', () => {
+			const item = { custom_formats: ['Tier 6'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'custom_format',
+				operator: 'includes',
+				value: 'tier 6'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('custom format: field is Radarr-only', () => {
+			assertEquals(
+				getFilterFields('radarr').some((field) => field.id === 'custom_format'),
+				true
+			);
+			assertEquals(
+				getFilterFields('sonarr').some((field) => field.id === 'custom_format'),
+				false
+			);
+		});
+
+		this.test('custom format: field is Radarr dynamic', () => {
+			assertEquals(getDynamicFilterFieldIds('radarr').includes('custom_format'), true);
+			assertEquals(getDynamicFilterFieldIds('sonarr').includes('custom_format'), false);
 		});
 
 		// =====================
@@ -847,6 +990,28 @@ class FilterEvaluationTest extends BaseTest {
 			const matched = movies.filter((m) => evaluateGroup(m, group));
 			assertEquals(matched.length, 2);
 			assertEquals(matched[0].title, 'Movie 2');
+			assertEquals(matched[1].title, 'Movie 4');
+		});
+
+		this.test('scenario: find monitored movies matching Tier 6', () => {
+			const movies = [
+				{ title: 'Movie 1', monitored: true, custom_formats: ['Tier 6'] },
+				{ title: 'Movie 2', monitored: true, custom_formats: ['Tier 5'] },
+				{ title: 'Movie 3', monitored: false, custom_formats: ['Tier 6'] },
+				{ title: 'Movie 4', monitored: true, custom_formats: ['Tier 6', 'HDR10'] }
+			];
+			const group: FilterGroup = {
+				type: 'group',
+				match: 'all',
+				children: [
+					{ type: 'rule', field: 'monitored', operator: 'is', value: true },
+					{ type: 'rule', field: 'custom_format', operator: 'includes', value: 'Tier 6' }
+				]
+			};
+
+			const matched = movies.filter((m) => evaluateGroup(m, group));
+			assertEquals(matched.length, 2);
+			assertEquals(matched[0].title, 'Movie 1');
 			assertEquals(matched[1].title, 'Movie 4');
 		});
 	}

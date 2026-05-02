@@ -6,9 +6,11 @@
 		getFilterField,
 		createEmptyGroup,
 		createEmptyRule,
+		isCustomFormatUnaryOperator,
 		isRule,
 		isGroup,
 		type DynamicFilterOptions,
+		type FilterField,
 		type FilterGroup,
 		type FilterRule,
 		type UpgradeAppType
@@ -64,10 +66,29 @@
 		const field = getFilterField(fieldId, appType);
 		if (field) {
 			rule.field = fieldId;
-			rule.operator = fieldId in dynamicFilterOptions ? 'eq' : field.operators[0].id;
-			rule.value = field.values?.[0]?.value ?? null;
+			rule.operator = getDefaultOperator(fieldId, field);
+			rule.value = getDefaultValue(fieldId, field, rule.operator);
 			notifyChange();
 		}
+	}
+
+	function getDefaultOperator(fieldId: string, field: FilterField) {
+		if (fieldId === 'custom_format') return field.operators[0].id;
+		return fieldId in dynamicFilterOptions ? 'eq' : field.operators[0].id;
+	}
+
+	function getDefaultValue(fieldId: string, field: FilterField, operator: string) {
+		if (fieldId === 'custom_format' && isCustomFormatUnaryOperator(operator)) return null;
+		if (fieldId in dynamicFilterOptions) return dynamicFilterOptions[fieldId]?.[0]?.value ?? null;
+		return field.values?.[0]?.value ?? null;
+	}
+
+	function isDynamicStringField(fieldId: string) {
+		return fieldId in dynamicFilterOptions && fieldId !== 'custom_format';
+	}
+
+	function ruleNeedsValue(rule: FilterRule) {
+		return !(rule.field === 'custom_format' && isCustomFormatUnaryOperator(rule.operator));
 	}
 
 	function getDynamicOptions(
@@ -85,16 +106,34 @@
 		return [{ value: currentValue, label: currentValue }, ...options];
 	}
 
+	function normalizeRule(rule: FilterRule): boolean {
+		const field = getFilterField(rule.field, appType);
+		if (!field) return false;
+
+		if (isDynamicStringField(rule.field) && rule.operator !== 'eq' && rule.operator !== 'neq') {
+			rule.operator = 'eq';
+			return true;
+		}
+
+		if (rule.field !== 'custom_format') return false;
+
+		let changed = false;
+		if (!field.operators.some((operator) => operator.id === rule.operator)) {
+			rule.operator = field.operators[0].id;
+			changed = true;
+		}
+		if (isCustomFormatUnaryOperator(rule.operator) && rule.value !== null) {
+			rule.value = null;
+			changed = true;
+		}
+		return changed;
+	}
+
 	function normalizeDynamicOperators(targetGroup: FilterGroup): boolean {
 		let changed = false;
 		for (const child of targetGroup.children) {
 			if (isRule(child)) {
-				if (
-					child.field in dynamicFilterOptions &&
-					child.operator !== 'eq' &&
-					child.operator !== 'neq'
-				) {
-					child.operator = 'eq';
+				if (normalizeRule(child)) {
 					changed = true;
 				}
 				continue;
@@ -124,6 +163,16 @@
 	}
 
 	function handleNestedChange() {
+		notifyChange();
+	}
+
+	function onOperatorChange(rule: FilterRule, operator: string, field: FilterField) {
+		rule.operator = operator;
+		if (rule.field === 'custom_format') {
+			rule.value = isCustomFormatUnaryOperator(operator)
+				? null
+				: (rule.value ?? getDefaultValue(rule.field, field, operator));
+		}
 		notifyChange();
 	}
 
@@ -179,6 +228,7 @@
 					{#if isRule(child)}
 						{@const field = getFilterField(child.field, appType)}
 						{@const isDynamicField = child.field in dynamicFilterOptions}
+						{@const isDynamicString = isDynamicStringField(child.field)}
 						<div class="rule-row flex items-center gap-1.5 md:gap-2">
 							<!-- Field -->
 							<div class="shrink-0">
@@ -206,7 +256,7 @@
 								<div class="shrink-0">
 									<DropdownSelect
 										value={child.operator}
-										options={isDynamicField
+										options={isDynamicString
 											? dynamicStringOperators
 											: field.operators.map((op) => ({
 													value: op.id,
@@ -219,129 +269,128 @@
 										responsiveButton
 										responsiveDropdown
 										fixed
-										on:change={(e) => {
-											child.operator = e.detail;
-											notifyChange();
-										}}
+										on:change={(e) => onOperatorChange(child, e.detail, field)}
 									/>
 								</div>
 
 								<!-- Value -->
-								<div class="shrink-0">
-									{#if field?.valueType === 'boolean' || field?.valueType === 'select'}
-										{#if field.values}
-											<DropdownSelect
-												value={String(child.value)}
-												options={field.values.map((v) => ({
-													value: String(v.value),
-													label: v.label
-												}))}
-												minWidth={valueMinWidth}
-												width={valueWidthClass}
-												fullWidth
-												responsiveButton
-												responsiveDropdown
-												fixed
-												on:change={(e) => {
-													const originalValue = field.values?.find(
-														(v) => String(v.value) === e.detail
-													)?.value;
-													child.value = originalValue ?? e.detail;
-													notifyChange();
-												}}
-											/>
-										{/if}
-									{:else if field?.valueType === 'text'}
-										{#if isDynamicField}
-											{#key `${field.id}:${childIndex}:${dynamicFilterOptionsVersion}`}
-												<DropdownCombobox
-													value={String(child.value ?? '')}
-													options={getDynamicOptions(field.id, child.value, dynamicFilterOptions)}
-													placeholder={dynamicFilterOptionsLoading
-														? 'Loading values...'
-														: 'Select value'}
+								{#if ruleNeedsValue(child)}
+									<div class="shrink-0">
+										{#if field?.valueType === 'boolean' || field?.valueType === 'select'}
+											{#if field.values}
+												<DropdownSelect
+													value={String(child.value)}
+													options={field.values.map((v) => ({
+														value: String(v.value),
+														label: v.label
+													}))}
 													minWidth={valueMinWidth}
 													width={valueWidthClass}
 													fullWidth
-													limit={6}
 													responsiveButton
 													responsiveDropdown
 													fixed
 													on:change={(e) => {
-														child.value = e.detail;
+														const originalValue = field.values?.find(
+															(v) => String(v.value) === e.detail
+														)?.value;
+														child.value = originalValue ?? e.detail;
 														notifyChange();
 													}}
 												/>
-											{/key}
-										{:else}
-											<div class={valueWidthClass}>
-												<FormInput
-													label="Value"
-													hideLabel
-													name="filter-value-{childIndex}"
-													value={child.value as string}
-													responsive
-													autoWidth
-													on:input={(e) => {
-														child.value = e.detail;
-														notifyChange();
-													}}
-												/>
-											</div>
-										{/if}
-									{:else if field?.valueType === 'number'}
-										<div class={valueWidthClass}>
-											<NumberInput
-												name="value-{childIndex}"
-												on:change={(e) => {
-													if (e.detail !== undefined) child.value = e.detail;
-													notifyChange();
-												}}
-												value={child.value as number}
-												font="mono"
-												responsive
-												autoWidth
-											/>
-										</div>
-									{:else if field?.valueType === 'date'}
-										{#if child.operator === 'in_last' || child.operator === 'not_in_last'}
-											<div class="{valueWidthClass} flex items-center gap-2">
-												<div class="min-w-0 flex-1">
-													<NumberInput
-														name="value-{childIndex}"
-														value={child.value as number}
+											{/if}
+										{:else if field?.valueType === 'text'}
+											{#if isDynamicField}
+												{#key `${field.id}:${childIndex}:${dynamicFilterOptionsVersion}`}
+													<DropdownCombobox
+														value={String(child.value ?? '')}
+														options={getDynamicOptions(field.id, child.value, dynamicFilterOptions)}
+														placeholder={dynamicFilterOptionsLoading
+															? 'Loading values...'
+															: 'Select value'}
+														minWidth={valueMinWidth}
+														width={valueWidthClass}
+														fullWidth
+														limit={6}
+														responsiveButton
+														responsiveDropdown
+														fixed
 														on:change={(e) => {
-															if (e.detail !== undefined) child.value = e.detail;
+															child.value = e.detail;
 															notifyChange();
 														}}
-														min={1}
-														font="mono"
+													/>
+												{/key}
+											{:else}
+												<div class={valueWidthClass}>
+													<FormInput
+														label="Value"
+														hideLabel
+														name="filter-value-{childIndex}"
+														value={child.value as string}
 														responsive
 														autoWidth
+														on:input={(e) => {
+															child.value = e.detail;
+															notifyChange();
+														}}
 													/>
 												</div>
-												<span class="text-xs text-neutral-500 dark:text-neutral-400">days</span>
-											</div>
-										{:else}
+											{/if}
+										{:else if field?.valueType === 'number'}
 											<div class={valueWidthClass}>
-												<DateInput
-													label="Date"
-													hideLabel
+												<NumberInput
 													name="value-{childIndex}"
-													value={child.value as string}
-													fullWidth
-													responsive
-													shortLabels
-													fixed
 													on:change={(e) => {
-														child.value = e.detail;
+														if (e.detail !== undefined) child.value = e.detail;
 														notifyChange();
 													}}
+													value={child.value as number}
+													font="mono"
+													responsive
+													autoWidth
 												/>
 											</div>
+										{:else if field?.valueType === 'date'}
+											{#if child.operator === 'in_last' || child.operator === 'not_in_last'}
+												<div class="{valueWidthClass} flex items-center gap-2">
+													<div class="min-w-0 flex-1">
+														<NumberInput
+															name="value-{childIndex}"
+															value={child.value as number}
+															on:change={(e) => {
+																if (e.detail !== undefined) child.value = e.detail;
+																notifyChange();
+															}}
+															min={1}
+															font="mono"
+															responsive
+															autoWidth
+														/>
+													</div>
+													<span class="text-xs text-neutral-500 dark:text-neutral-400">days</span>
+												</div>
+											{:else}
+												<div class={valueWidthClass}>
+													<DateInput
+														label="Date"
+														hideLabel
+														name="value-{childIndex}"
+														value={child.value as string}
+														fullWidth
+														responsive
+														shortLabels
+														fixed
+														on:change={(e) => {
+															child.value = e.detail;
+															notifyChange();
+														}}
+													/>
+												</div>
+											{/if}
 										{/if}
-									{/if}
-								</div>
+									</div>
+								{/if}
 							{/if}
 
 							<!-- Remove Rule -->

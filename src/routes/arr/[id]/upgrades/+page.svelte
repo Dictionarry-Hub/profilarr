@@ -127,7 +127,7 @@
 		</div>
 		<div slot="right" class="flex flex-wrap items-center gap-2">
 			<Button text="Info" icon={Info} href="/arr/upgrades/info" />
-			{#if !isNewConfig}
+			{#if !isNewConfig && enabled}
 				<Tooltip text="Clear dry run exclusion cache so items can be re-selected">
 					<Button
 						text={clearing ? 'Clearing...' : 'Reset Cache'}
