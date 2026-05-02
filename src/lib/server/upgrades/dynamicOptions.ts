@@ -2,6 +2,7 @@ import type { ArrInstance } from '$lib/server/db/queries/arrInstances.ts';
 import { RadarrClient } from '$lib/server/utils/arr/clients/radarr.ts';
 import { SonarrClient } from '$lib/server/utils/arr/clients/sonarr.ts';
 import type {
+	ArrCustomFormat,
 	ArrQualityProfile,
 	ArrTag,
 	RadarrMovie,
@@ -44,12 +45,15 @@ export async function loadDynamicFilterOptions(
 		? new RadarrClient(instance.url, instance.api_key)
 		: new SonarrClient(instance.url, instance.api_key);
 
-	const [profiles, tags, libraryItems] = await Promise.all([
+	const [profiles, tags, libraryItems, customFormats] = await Promise.all([
 		loadOptional<ArrQualityProfile[]>(() => client.getQualityProfiles()),
 		loadOptional<ArrTag[]>(() => client.getTags()),
 		isRadarr
 			? loadOptional<RadarrMovie[]>(() => (client as RadarrClient).getMovies())
-			: loadOptional<SonarrSeries[]>(() => (client as SonarrClient).getAllSeries())
+			: loadOptional<SonarrSeries[]>(() => (client as SonarrClient).getAllSeries()),
+		isRadarr
+			? loadOptional<ArrCustomFormat[]>(() => (client as RadarrClient).getCustomFormats())
+			: Promise.resolve(null)
 	]);
 
 	setOptions(options, 'quality_profile', profiles?.map((profile) => profile.name) ?? []);
@@ -73,6 +77,7 @@ export async function loadDynamicFilterOptions(
 			movies.flatMap((movie) => movie.genres ?? [])
 		);
 		setOptions(options, 'release_group', movieFiles?.map((file) => file.releaseGroup) ?? []);
+		setOptions(options, 'custom_format', customFormats?.map((format) => format.name) ?? []);
 
 		return options;
 	}

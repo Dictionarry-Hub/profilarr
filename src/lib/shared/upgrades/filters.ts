@@ -38,7 +38,7 @@ export const sharedDynamicFilterFieldIds = [
 	'genres'
 ] as const;
 
-export const radarrDynamicFilterFieldIds = ['release_group'] as const;
+export const radarrDynamicFilterFieldIds = ['custom_format', 'release_group'] as const;
 
 export const sonarrDynamicFilterFieldIds = ['network', 'certification'] as const;
 
@@ -190,6 +190,47 @@ const ordinalOperators: FilterOperator[] = [
 	{ id: 'gt', label: 'is past', description: 'Is past this status (further along)' },
 	{ id: 'lt', label: 'is before', description: 'Is before this status (not yet reached)' }
 ];
+
+const customFormatOperators: FilterOperator[] = [
+	{
+		id: 'includes',
+		label: 'includes',
+		shortLabel: 'has',
+		description: 'Includes this custom format'
+	},
+	{
+		id: 'does_not_include',
+		label: 'does not include',
+		shortLabel: 'lacks',
+		description: 'Does not include this custom format'
+	},
+	{
+		id: 'is_only',
+		label: 'is only',
+		shortLabel: 'only',
+		description: 'Only includes this custom format and no others'
+	},
+	{
+		id: 'has_any',
+		label: 'has any',
+		shortLabel: 'any',
+		description: 'Has one or more custom formats'
+	},
+	{
+		id: 'has_none',
+		label: 'has none',
+		shortLabel: 'none',
+		description: 'Has no custom formats'
+	}
+];
+
+export const customFormatUnaryOperators = ['has_any', 'has_none'] as const;
+
+export function isCustomFormatUnaryOperator(operator: string): boolean {
+	return customFormatUnaryOperators.includes(
+		operator as (typeof customFormatUnaryOperators)[number]
+	);
+}
 
 // =============================================================================
 // Ordinal mappings
@@ -389,6 +430,13 @@ const radarrFilterFields: FilterField[] = [
 		operators: textOperators,
 		valueType: 'text'
 	},
+	{
+		id: 'custom_format',
+		label: 'Custom Format',
+		description: 'Custom formats currently matched by the movie file',
+		operators: customFormatOperators,
+		valueType: 'text'
+	},
 
 	// Number
 	{
@@ -546,6 +594,7 @@ const RADARR_FIELD_ORDER = [
 	'monitored',
 	'cutoff_met',
 	'quality_profile',
+	'custom_format',
 	'minimum_availability',
 	'popularity',
 	'tags',
@@ -772,8 +821,30 @@ export function isGroup(child: FilterRule | FilterGroup): child is FilterGroup {
  * Evaluate a single filter rule against an item
  */
 export function evaluateRule(item: Record<string, unknown>, rule: FilterRule): boolean {
-	const fieldValue = item[rule.field];
+	const fieldValue = rule.field === 'custom_format' ? item.custom_formats : item[rule.field];
 	const ruleValue = rule.value;
+
+	if (rule.field === 'custom_format') {
+		const formats = Array.isArray(fieldValue)
+			? fieldValue.map((value) => String(value).toLowerCase())
+			: [];
+		const selected = typeof ruleValue === 'string' ? ruleValue.toLowerCase() : '';
+
+		switch (rule.operator) {
+			case 'includes':
+				return selected.length > 0 && formats.includes(selected);
+			case 'does_not_include':
+				return selected.length > 0 && !formats.includes(selected);
+			case 'is_only':
+				return selected.length > 0 && formats.length === 1 && formats[0] === selected;
+			case 'has_any':
+				return formats.length > 0;
+			case 'has_none':
+				return formats.length === 0;
+			default:
+				return false;
+		}
+	}
 
 	// Handle null/undefined field values
 	if (fieldValue === null || fieldValue === undefined) {

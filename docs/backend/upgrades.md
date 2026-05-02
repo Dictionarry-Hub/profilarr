@@ -78,18 +78,25 @@ A **group** wraps rules (or nested groups) with a match mode:
 
 Fields are typed by category:
 
-| Category | Operators                                    | Examples                                 |
-| -------- | -------------------------------------------- | ---------------------------------------- |
-| Boolean  | is, is_not                                   | monitored, cutoff_met                    |
-| Text     | contains, not_contains, starts/ends_with, eq | title, quality_profile, genres, tags     |
-| Number   | eq, neq, gt, gte, lt, lte                    | year, rating, size_on_disk, popularity   |
-| Date     | before, after, in_last, not_in_last          | date_added, digital_release, first_aired |
-| Ordinal  | eq, neq, gte, lte, gt, lt                    | status, minimum_availability             |
+| Category      | Operators                                           | Examples                                 |
+| ------------- | --------------------------------------------------- | ---------------------------------------- |
+| Boolean       | is, is_not                                          | monitored, cutoff_met                    |
+| Text          | contains, not_contains, starts/ends_with, eq        | title, quality_profile, genres, tags     |
+| Number        | eq, neq, gt, gte, lt, lte                           | year, rating, size_on_disk, popularity   |
+| Date          | before, after, in_last, not_in_last                 | date_added, digital_release, first_aired |
+| Ordinal       | eq, neq, gte, lte, gt, lt                           | status, minimum_availability             |
+| Custom Format | includes, does_not_include, is_only, has_any, has_none | custom_format                            |
 
 Ordinal fields have a defined progression (e.g. `tba -> announced ->
 inCinemas -> released` for Radarr) so operators like `gte` mean "has reached
 this stage or later." Radarr and Sonarr each have app-specific fields; the
 full list is in `src/lib/shared/upgrades/filters.ts`.
+
+The Radarr-only `custom_format` field checks the custom formats currently
+matched by the movie file. `includes`, `does_not_include`, and `is_only` take
+a custom format name. `has_any` and `has_none` are value-less operators.
+Sonarr is intentionally unsupported because a series does not have one
+series-level current custom format set.
 
 Filter imports are app-scoped. Shared fields can move between Radarr and
 Sonarr, but an import is blocked if any rule uses a field unavailable for the
@@ -107,14 +114,15 @@ options are loaded by `dynamicOptions.ts` and streamed from the upgrades page
 load, so the page shell renders before heavier library/file metadata finishes
 loading.
 
-Dynamic fields use exact string operators only: `eq` and `neq` (shown as
-"is" / "is not" in the UI).
+Most dynamic fields use exact string operators only: `eq` and `neq` (shown as
+"is" / "is not" in the UI). `custom_format` is dynamic but uses set operators.
 
-| Scope  | Fields                                                   | Source                  |
-| ------ | -------------------------------------------------------- | ----------------------- |
-| Shared | `quality_profile`, `tags`, `original_language`, `genres` | Profiles, tags, library |
-| Radarr | `release_group`                                          | Movie file metadata     |
-| Sonarr | `network`, `certification`                               | Series library metadata |
+| Scope  | Fields                                                   | Source                     |
+| ------ | -------------------------------------------------------- | -------------------------- |
+| Shared | `quality_profile`, `tags`, `original_language`, `genres` | Profiles, tags, library    |
+| Radarr | `release_group`                                          | Movie file metadata        |
+| Radarr | `custom_format`                                          | Arr custom formats         |
+| Sonarr | `network`, `certification`                               | Series library metadata    |
 
 If an Arr source fails while loading dynamic options, the affected fields fall
 back to empty option lists and existing saved values remain visible.

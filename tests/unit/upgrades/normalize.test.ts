@@ -7,12 +7,14 @@ import { BaseTest } from '../base/BaseTest.ts';
 import { assertEquals, assertAlmostEquals } from '@std/assert';
 import {
 	normalizeRadarrItem,
-	normalizeRadarrItems
+	normalizeRadarrItems,
+	normalizeSonarrItem
 } from '../../../src/lib/server/upgrades/normalize.ts';
 import type {
 	RadarrMovie,
 	RadarrMovieFile,
-	ArrQualityProfile
+	ArrQualityProfile,
+	SonarrSeries
 } from '../../../src/lib/server/utils/arr/types.ts';
 
 class NormalizeTest extends BaseTest {
@@ -209,6 +211,21 @@ class NormalizeTest extends BaseTest {
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
 			assertEquals(result.release_group, 'ZoroSenpai');
+		});
+
+		this.test('normalizes custom formats from movie file', () => {
+			const movie = this.createMockMovie();
+			const movieFile = this.createMockMovieFile({
+				customFormats: [
+					{ id: 1, name: 'Tier 6' },
+					{ id: 2, name: 'HDR10' }
+				]
+			});
+			const profile = this.createMockProfile();
+
+			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
+
+			assertEquals(result.custom_formats, ['Tier 6', 'HDR10']);
 		});
 
 		this.test('normalizes popularity', () => {
@@ -438,6 +455,7 @@ class NormalizeTest extends BaseTest {
 			assertEquals(result.score, 0);
 			assertEquals(result.release_group, '');
 			assertEquals(result.cutoff_met, false); // 0 < 320000 (80% of 400000)
+			assertEquals(result.custom_formats, []);
 		});
 
 		this.test('handles undefined profile', () => {
@@ -480,6 +498,22 @@ class NormalizeTest extends BaseTest {
 			assertEquals(result.trakt_rating, 0);
 			assertEquals(result.score, 0);
 			assertEquals(result._tags, []);
+			assertEquals(result.custom_formats, []);
+		});
+
+		this.test('normalizes sonarr custom formats as empty', () => {
+			const series: SonarrSeries = {
+				id: 1,
+				title: 'Example Series',
+				qualityProfileId: 7,
+				monitored: true,
+				seasons: []
+			};
+			const profile = this.createMockProfile();
+
+			const result = normalizeSonarrItem(series, profile, 80);
+
+			assertEquals(result.custom_formats, []);
 		});
 
 		// =====================

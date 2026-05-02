@@ -20,6 +20,7 @@ export interface UpgradeItem {
 	original_language: string;
 	genres: string;
 	tags: string;
+	custom_formats: string[];
 	rating: number;
 	runtime: number;
 	size_on_disk: number;
