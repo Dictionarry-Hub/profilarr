@@ -17,7 +17,7 @@
 
 	let content = '';
 	let wasOpen = false;
-	let inputElement: HTMLInputElement | HTMLTextAreaElement | null = null;
+	let inputElement: HTMLTextAreaElement | null = null;
 
 	$: confirmDisabled = content.trim() === '';
 	$: {
