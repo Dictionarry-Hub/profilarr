@@ -167,11 +167,11 @@
 	}
 
 	let expandedRows: Set<string | number> = new Set();
+	let previousExpandAll = expandAll;
 
-	$: if (expandAll) {
-		expandedRows = new Set(data.map((row) => row.id));
-	} else if (!expandAll && expandedRows.size === data.length) {
-		expandedRows = new Set();
+	$: if (expandAll !== previousExpandAll) {
+		expandedRows = expandAll ? new Set(data.map((row) => row.id)) : new Set();
+		previousExpandAll = expandAll;
 	}
 
 	$: if (expandedRows.size > 0) {
