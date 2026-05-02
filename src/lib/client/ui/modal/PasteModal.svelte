@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, tick } from 'svelte';
 	import Modal from './Modal.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
+	import CodeInput from '$ui/form/CodeInput.svelte';
 
 	export let open = false;
 	export let header = 'Paste';
@@ -11,6 +11,7 @@
 	export let confirmText = 'Paste';
 	export let cancelText = 'Cancel';
 	export let rows = 10;
+	export let language = 'json';
 
 	const dispatch = createEventDispatcher<{ confirm: string; cancel: void }>();
 
@@ -53,13 +54,12 @@
 	on:cancel={handleCancel}
 >
 	<div slot="body">
-		<FormInput
+		<CodeInput
 			{label}
 			{description}
 			{placeholder}
 			{rows}
-			textarea
-			mono
+			{language}
 			name="paste-modal-content"
 			bind:value={content}
 			bind:inputElement

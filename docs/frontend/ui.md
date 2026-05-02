@@ -104,6 +104,12 @@ A typical text field:
 `private_` turns the input into a password field with an eye toggle; `mono`
 switches to the monospace font stack (useful for API keys and URLs).
 
+#### CodeInput
+
+**`$ui/form/CodeInput.svelte`** is the editable code textarea. It uses the
+same tokenizer and theme colors as `CodeBlock`, with a transparent textarea
+over a highlighted layer. Use it for JSON or SQL input, not plain text forms.
+
 A plain URL input:
 
 ```svelte
