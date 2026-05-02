@@ -307,7 +307,7 @@
 				<svelte:fragment slot="dropdown">
 					<Dropdown position="right" minWidth="12rem">
 						<DropdownHeader label="New filter" />
-						<DropdownItem icon={FileText} label="Blank" on:click={addFilter} />
+						<DropdownItem icon={FileText} label="Default" on:click={addFilter} />
 						<DropdownItem icon={FileJson} label="Import" on:click={() => (pasteModalOpen = true)} />
 					</Dropdown>
 				</svelte:fragment>
