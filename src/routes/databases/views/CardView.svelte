@@ -55,7 +55,7 @@
 	}
 </script>
 
-<CardGrid columns={3} flush>
+<CardGrid columns={1} className="xl:grid-cols-2 2xl:grid-cols-3" flush>
 	{#each databases as database}
 		<Card href="/databases/{database.id}" hoverable>
 			<svelte:fragment slot="header">
