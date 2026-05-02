@@ -3,10 +3,14 @@
 	import {
 		createEmptyFilterConfig,
 		calculateMaxCount,
+		getFilterField,
+		isGroup,
+		isRule,
 		searchRateLimits,
 		resolveTagLabel,
 		type DynamicFilterOptions,
 		type FilterConfig,
+		type FilterGroup,
 		type UpgradeAppType
 	} from '$shared/upgrades/filters';
 	import { uuid } from '$shared/utils/uuid';
@@ -259,6 +263,14 @@
 
 			if (!imported.group) {
 				alertStore.add('error', 'Invalid filter format');
+				pasteModalOpen = false;
+				return;
+			}
+
+			const invalidFields = findInvalidFilterFields(imported.group);
+			if (invalidFields.length > 0) {
+				alertStore.add('error', buildInvalidFieldsMessage(invalidFields));
+				pasteModalOpen = false;
 				return;
 			}
 
@@ -285,7 +297,41 @@
 			pasteModalOpen = false;
 		} catch {
 			alertStore.add('error', 'Failed to paste from clipboard');
+			pasteModalOpen = false;
 		}
+	}
+
+	function findInvalidFilterFields(group: FilterGroup): string[] {
+		const invalid = new Set<string>();
+
+		function visit(currentGroup: FilterGroup) {
+			for (const child of currentGroup.children) {
+				if (isRule(child)) {
+					if (!getFilterField(child.field, resolvedAppType)) {
+						invalid.add(child.field);
+					}
+					continue;
+				}
+
+				if (isGroup(child)) {
+					visit(child);
+				}
+			}
+		}
+
+		visit(group);
+		return [...invalid].sort();
+	}
+
+	function buildInvalidFieldsMessage(fields: string[]): string {
+		const appLabel = resolvedAppType === 'sonarr' ? 'Sonarr' : 'Radarr';
+		if (fields.length === 1) {
+			return `Cannot import filter: "${fields[0]}" is not available for ${appLabel}.`;
+		}
+
+		return `Cannot import filter: these fields are not available for ${appLabel}: ${fields.join(
+			', '
+		)}.`;
 	}
 
 	function handlePasteCancel() {
