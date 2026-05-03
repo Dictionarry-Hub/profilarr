@@ -1,7 +1,15 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import { page } from '$app/stores';
-	import { Library, RefreshCw, ArrowUpCircle, FileEdit, ScrollText, Settings } from 'lucide-svelte';
+	import {
+		Library,
+		RefreshCw,
+		ArrowLeftRight,
+		ArrowUpCircle,
+		FileEdit,
+		ScrollText,
+		Settings
+	} from 'lucide-svelte';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
@@ -25,7 +33,16 @@
 		onboarding: 'arr-tab-sync'
 	};
 
+	$: driftTab = {
+		label: 'Drift',
+		href: `/arr/${instanceId}/drift`,
+		active: currentPath.includes('/drift'),
+		icon: ArrowLeftRight,
+		onboarding: 'arr-tab-drift'
+	};
+
 	$: otherTabs = [
+		driftTab,
 		{
 			label: 'Upgrades',
 			href: `/arr/${instanceId}/upgrades`,

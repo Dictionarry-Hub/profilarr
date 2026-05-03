@@ -65,7 +65,19 @@ Comparison rules:
 - compare normalized specifications and fields
 - ignore unmanaged extra Arr custom formats
 
+## Arr Page UI
+
+The Arr Drift page shows Drift Detection for each Arr instance.
+
+Current UI behavior:
+
+- disabled drift shows configuration only
+- enabled drift shows schedule, latest status, last checked time, next run,
+  count summary, diff hash, and stored failure detail
+- custom format drift details are grouped by missing and modified custom formats
+- the UI is read-only for drift results and does not repair or resync
+
 ## TODO
 
 Implement quality profile, delay profile, and media management comparison,
-notifications, and the sync page drift UI.
+notifications, and manual drift checks.
