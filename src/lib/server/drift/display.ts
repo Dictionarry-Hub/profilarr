@@ -320,10 +320,15 @@ function formatSpecificationValue(
 		const formatted = formatFieldValue(spec.implementation, field.name, field.value, arrType);
 		return `${fieldLabel(spec.implementation, field.name)}: ${formatted.text}`;
 	});
-	const modes = [spec.required ? 'Required' : 'Optional', spec.negate ? 'Must not match' : 'Must match'];
+	const modes = [
+		spec.required ? 'Required' : 'Optional',
+		spec.negate ? 'Must not match' : 'Must match'
+	];
 	const suffix = [...fields, ...modes].join(', ');
 
-	return value(`${implementationLabel(spec.implementation)}: ${spec.name}${suffix ? ` (${suffix})` : ''}`);
+	return value(
+		`${implementationLabel(spec.implementation)}: ${spec.name}${suffix ? ` (${suffix})` : ''}`
+	);
 }
 
 function formatFieldValue(
@@ -384,19 +389,19 @@ function formatGenericValue(raw: unknown): DriftDisplayValue {
 
 function formatBooleanValue(raw: unknown): DriftDisplayValue {
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
-	return value(Boolean(raw) ? 'Enabled' : 'Disabled', {
-		tone: Boolean(raw) ? 'success' : 'neutral'
+	return value(raw ? 'Enabled' : 'Disabled', {
+		tone: raw ? 'success' : 'neutral'
 	});
 }
 
 function formatNegateValue(raw: unknown): DriftDisplayValue {
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
-	return value(Boolean(raw) ? 'Must not match' : 'Must match');
+	return value(raw ? 'Must not match' : 'Must match');
 }
 
 function formatRequiredValue(raw: unknown): DriftDisplayValue {
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
-	return value(Boolean(raw) ? 'Required' : 'Optional');
+	return value(raw ? 'Required' : 'Optional');
 }
 
 function fieldLabel(implementation: string, field: string): string {
@@ -412,7 +417,9 @@ function fieldLabel(implementation: string, field: string): string {
 }
 
 function implementationLabel(implementation: string): string {
-	return IMPLEMENTATION_LABELS[implementation] ?? titleize(implementation.replace(/Specification$/, ''));
+	return (
+		IMPLEMENTATION_LABELS[implementation] ?? titleize(implementation.replace(/Specification$/, ''))
+	);
 }
 
 function isPatternImplementation(implementation: string): boolean {
@@ -475,7 +482,10 @@ function looksTechnical(value: string): boolean {
 	return /[\\^$.[\]()*+?{}|]/.test(value);
 }
 
-function value(text: string, options: { mono?: boolean; tone?: DriftDisplayTone } = {}): DriftDisplayValue {
+function value(
+	text: string,
+	options: { mono?: boolean; tone?: DriftDisplayTone } = {}
+): DriftDisplayValue {
 	return {
 		text,
 		mono: options.mono,
