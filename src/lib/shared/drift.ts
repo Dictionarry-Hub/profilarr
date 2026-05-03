@@ -9,3 +9,34 @@ export type DriftSection =
 export type DriftCounts = Partial<Record<DriftSection, number>>;
 
 export type DriftDiff = Record<string, unknown>;
+
+export type DriftDisplayTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
+
+export type DriftDisplayState = 'missing' | 'modified' | 'extra';
+
+export interface DriftDisplayValue {
+	text: string;
+	mono?: boolean;
+	tone?: DriftDisplayTone;
+}
+
+export interface DriftDisplayChange {
+	id: string;
+	label: string;
+	detail?: string;
+	expected?: DriftDisplayValue;
+	actual?: DriftDisplayValue;
+	tone: DriftDisplayTone;
+}
+
+export interface DriftDisplayEntity {
+	id: string;
+	section: DriftSection;
+	sectionLabel: string;
+	title: string;
+	state: DriftDisplayState;
+	stateLabel: string;
+	tone: DriftDisplayTone;
+	summary: string;
+	changes: DriftDisplayChange[];
+}
