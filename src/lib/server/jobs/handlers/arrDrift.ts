@@ -45,6 +45,14 @@ const driftHandler: JobHandler = async (job) => {
 	try {
 		const result = await checkArrDrift(client, instanceId, instance.type);
 		const now = new Date().toISOString();
+		const logMeta = {
+			jobId: job.id,
+			instanceId,
+			instanceName: instance.name,
+			status: result.status,
+			counts: result.counts,
+			diffHash: result.diffHash
+		};
 
 		arrDriftStatusQueries.upsert(instanceId, {
 			status: result.status,
@@ -57,6 +65,18 @@ const driftHandler: JobHandler = async (job) => {
 		});
 
 		const customFormatCount = result.counts.custom_formats ?? 0;
+		if (result.status === 'drift_detected') {
+			await logger.info('Drift detected', {
+				source: 'jobs.handlers.arrDrift',
+				meta: logMeta
+			});
+		} else {
+			await logger.debug('Drift check complete', {
+				source: 'jobs.handlers.arrDrift',
+				meta: logMeta
+			});
+		}
+
 		return {
 			status: 'success',
 			output:
@@ -71,7 +91,7 @@ const driftHandler: JobHandler = async (job) => {
 		const errorHash = await hashDriftDiff({ error: message });
 
 		await logger.error('Drift check failed', {
-			source: 'DriftJob',
+			source: 'jobs.handlers.arrDrift',
 			meta: { jobId: job.id, instanceId, instanceName: instance.name, error: message }
 		});
 
