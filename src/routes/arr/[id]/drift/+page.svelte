@@ -14,7 +14,7 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import type { Column } from '$ui/table/types';
-	import { ArrowLeftRight, Loader2, Play, Save, Settings } from 'lucide-svelte';
+	import { Loader2, Play, Save } from 'lucide-svelte';
 	import type { DriftDisplayEntity, DriftDisplayTone } from '$shared/drift.ts';
 	import DriftFieldDiffTable from './components/DriftFieldDiffTable.svelte';
 
@@ -36,6 +36,8 @@
 		{ key: 'section', header: 'Section', width: 'w-44' },
 		{ key: 'state', header: 'State', width: 'w-32' }
 	];
+
+	const emptyDriftEntities: DriftDisplayEntity[] = [];
 
 	let saving = false;
 	let running = false;
@@ -139,91 +141,74 @@
 		</div>
 	</StickyCard>
 
-	<div class="mt-6 space-y-6 pb-32">
-		<section>
-			<h2
-				class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-			>
-				<Settings size={18} class="text-neutral-500 dark:text-neutral-400" />
-				Settings
-			</h2>
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
-			>
-				{#if data.featureEnabled}
-					<div class="flex flex-wrap gap-4 md:items-end md:gap-6">
-						<div>
-							<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Status</span>
-							<Toggle
-								checked={enabled}
-								label={enabled ? 'Enabled' : 'Disabled'}
-								color={enabled ? 'green' : 'red'}
-								on:change={(event) => (enabled = event.detail)}
-							/>
-						</div>
-
-						<div data-onboarding="drift-schedule">
-							<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">
-								Schedule
-							</span>
-							<CronInput
-								bind:value={cron}
-								disabled={saving || !enabled}
-								minIntervalMinutes={10}
-								onWarning={(msg) => alertStore.add('warning', msg)}
-							/>
-						</div>
-
-						{#if data.status.lastCheckedAt}
-							<div
-								class="flex w-full flex-wrap items-center gap-3 border-t border-neutral-200 pt-3 text-xs text-neutral-500 md:ml-auto md:w-auto md:border-0 md:pt-0 dark:border-neutral-700 dark:text-neutral-400"
-							>
-								{#if !enabled}
-									<span
-										class="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-700 dark:bg-amber-900/50 dark:text-amber-400"
-										>Paused</span
-									>
-								{:else if timeUntilNext !== null && timeUntilNext <= 0}
-									<span
-										class="rounded bg-green-100 px-1.5 py-0.5 font-medium text-green-700 dark:bg-green-900/50 dark:text-green-400"
-										>Ready</span
-									>
-								{:else if timeUntilNext !== null}
-									<span>
-										Next: <span
-											class="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-											>{formatTimeRemaining(timeUntilNext)}</span
-										>
-									</span>
-								{/if}
-								<span>
-									Last: <span
-										class="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-										>{formatSmartDateTime(data.status.lastCheckedAt, $serverTimezone)}</span
-									>
-								</span>
-							</div>
-						{/if}
+	<div class="mt-4 space-y-6 pb-32">
+		<section class="border-b border-neutral-200 pb-5 dark:border-neutral-800">
+			{#if data.featureEnabled}
+				<div class="flex flex-wrap items-end gap-x-5 gap-y-3 md:px-4">
+					<div class="flex flex-col gap-1">
+						<span
+							class="text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
+						>
+							Detection
+						</span>
+						<Toggle
+							checked={enabled}
+							label={enabled ? 'Enabled' : 'Disabled'}
+							color={enabled ? 'green' : 'red'}
+							on:change={(event) => (enabled = event.detail)}
+						/>
 					</div>
-				{:else}
-					<div
-						class="rounded border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400"
-					>
-						Drift detection is not available.
+					<div class="flex flex-col gap-1" data-onboarding="drift-schedule">
+						<span
+							class="text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
+						>
+							Schedule
+						</span>
+						<CronInput
+							bind:value={cron}
+							disabled={saving || !enabled}
+							minIntervalMinutes={10}
+							onWarning={(msg) => alertStore.add('warning', msg)}
+						/>
 					</div>
-				{/if}
-			</div>
+					{#if data.status.lastCheckedAt}
+						<div class="ml-auto flex flex-wrap items-center gap-1.5">
+							{#if !enabled}
+								<Label variant="warning" size="md" rounded="md">Paused</Label>
+							{:else if timeUntilNext !== null && timeUntilNext <= 0}
+								<Label variant="success" size="md" rounded="md">Ready</Label>
+							{:else if timeUntilNext !== null}
+								<Label variant="secondary" size="md" rounded="md" mono>
+									Next {formatTimeRemaining(timeUntilNext)}
+								</Label>
+							{/if}
+							<Label variant="secondary" size="md" rounded="md" mono>
+								Last {formatSmartDateTime(data.status.lastCheckedAt, $serverTimezone)}
+							</Label>
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<div class="text-sm text-neutral-500 md:px-4 dark:text-neutral-400">
+					Drift detection is not available.
+				</div>
+			{/if}
 		</section>
 
-		{#if data.featureEnabled && enabled}
-			<section>
-				<h2
-					class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-				>
-					<ArrowLeftRight size={18} class="text-neutral-500 dark:text-neutral-400" />
-					Drifted Items
-				</h2>
-				{#if data.status.status === 'failed' && data.status.lastError}
+		{#if data.featureEnabled}
+			<section class="md:px-4">
+				{#if !enabled}
+					<ExpandableTable
+						columns={driftColumns}
+						data={emptyDriftEntities}
+						getRowId={(row) => row.id}
+						responsive
+						chevronPosition="right"
+						primaryColumnKey="title"
+						flushExpanded
+						emptyMessage="Drift detection is disabled. Toggle it on above to start checking."
+					/>
+				{:else if data.status.status === 'failed' && data.status.lastError}
 					<div
 						class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
 					>
@@ -264,9 +249,9 @@
 									{/if}
 								</div>
 							{:else if column.key === 'section'}
-								<Label variant="secondary" size="sm" rounded="md">{row.sectionLabel}</Label>
+								<Label variant="secondary" size="md" rounded="md">{row.sectionLabel}</Label>
 							{:else if column.key === 'state'}
-								<Label variant={toneToVariant[row.tone]} size="sm" rounded="md">
+								<Label variant={toneToVariant[row.tone]} size="md" rounded="md">
 									{row.stateLabel}
 								</Label>
 							{/if}

@@ -42,7 +42,7 @@
 			</div>
 		{:else if column.key === 'expected'}
 			{#if row.expected}
-				<Label variant={valueVariant(row.expected)} size="sm" rounded="md" mono={row.expected.mono}>
+				<Label variant={valueVariant(row.expected)} size="md" rounded="md" mono={row.expected.mono}>
 					{row.expected.text}
 				</Label>
 			{:else}
@@ -50,7 +50,7 @@
 			{/if}
 		{:else if column.key === 'actual'}
 			{#if row.actual}
-				<Label variant={valueVariant(row.actual)} size="sm" rounded="md" mono={row.actual.mono}>
+				<Label variant={valueVariant(row.actual)} size="md" rounded="md" mono={row.actual.mono}>
 					{row.actual.text}
 				</Label>
 			{:else}
