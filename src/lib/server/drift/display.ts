@@ -11,11 +11,17 @@ import type {
 	DriftDiff,
 	DriftDisplayChange,
 	DriftDisplayEntity,
+	DriftDisplayQualityItem,
 	DriftDisplayTone,
 	DriftDisplayValue
 } from '$shared/drift.ts';
 
 interface CustomFormatDiff {
+	missing?: unknown[];
+	modified?: unknown[];
+}
+
+interface QualityProfileDiff {
 	missing?: unknown[];
 	modified?: unknown[];
 }
@@ -27,6 +33,11 @@ interface DriftFieldDiff {
 }
 
 interface CustomFormatModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+interface QualityProfileModifiedDiff {
 	name: string;
 	fields: DriftFieldDiff[];
 }
@@ -65,7 +76,10 @@ export function buildDriftDisplayEntities(
 	arrType: string | undefined
 ): DriftDisplayEntity[] {
 	const syncArrType = arrType === 'radarr' || arrType === 'sonarr' ? arrType : undefined;
-	return buildCustomFormatEntities(diff.custom_formats, syncArrType);
+	return [
+		...buildCustomFormatEntities(diff.custom_formats, syncArrType),
+		...buildQualityProfileEntities(diff.quality_profiles, syncArrType)
+	];
 }
 
 function buildCustomFormatEntities(
@@ -126,6 +140,174 @@ function buildCustomFormatEntities(
 	}
 
 	return entities;
+}
+
+function buildQualityProfileEntities(
+	raw: unknown,
+	arrType: SyncArrType | undefined
+): DriftDisplayEntity[] {
+	const diff = asQualityProfileDiff(raw);
+	if (!diff) return [];
+
+	const entities: DriftDisplayEntity[] = [];
+
+	for (const item of diff.missing ?? []) {
+		const name = recordString(item, 'name');
+		if (!name) continue;
+
+		entities.push({
+			id: `quality_profiles:missing:${name}`,
+			section: 'quality_profiles',
+			sectionLabel: 'Quality Profile',
+			title: name,
+			state: 'missing',
+			stateLabel: 'Missing',
+			tone: 'danger',
+			summary: 'Profilarr expects this quality profile, but Arr does not have it.',
+			changes: [
+				{
+					id: `quality_profiles:missing:${name}:profile`,
+					label: 'Quality profile',
+					detail: 'Missing from Arr',
+					expected: value('Present'),
+					actual: value('Missing', { tone: 'danger' }),
+					tone: 'danger'
+				}
+			]
+		});
+	}
+
+	for (const item of diff.modified ?? []) {
+		const modified = asModifiedQualityProfile(item);
+		if (!modified) continue;
+		if (modified.fields.length === 0) continue;
+
+		const changes = modified.fields.map((field, index) =>
+			formatQualityProfileFieldDiff(field, index, arrType)
+		);
+
+		entities.push({
+			id: `quality_profiles:modified:${modified.name}`,
+			section: 'quality_profiles',
+			sectionLabel: 'Quality Profile',
+			title: modified.name,
+			state: 'modified',
+			stateLabel: 'Modified',
+			tone: 'warning',
+			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
+			changes
+		});
+	}
+
+	return entities;
+}
+
+function formatQualityProfileFieldDiff(
+	field: DriftFieldDiff,
+	index: number,
+	arrType: SyncArrType | undefined
+): DriftDisplayChange {
+	const formatMatch = /^formatItems\[(.+)\]$/.exec(field.path);
+	if (formatMatch) {
+		const formatName = formatMatch[1];
+		const actualState = recordString(field.actual, 'state');
+		const isMissing = field.actual === null || actualState === 'missing_custom_format';
+		const isExtra = recordString(field.expected, 'state') === 'unmanaged';
+		let detail = `${formatName} score changed`;
+		if (isExtra) {
+			detail = `${formatName} has an unmanaged nonzero score`;
+		} else if (actualState === 'missing_custom_format') {
+			detail = `${formatName} custom format is missing from Arr`;
+		} else if (isMissing) {
+			detail = `${formatName} is missing from scoring`;
+		}
+
+		return {
+			id: `quality-profile-format-item:${index}`,
+			label: 'Custom format score',
+			detail,
+			expected: formatQualityProfileFormatItemValue(field.expected),
+			actual: formatQualityProfileFormatItemValue(field.actual),
+			tone: isMissing ? 'danger' : 'warning'
+		};
+	}
+
+	if (field.path === 'items') {
+		return {
+			id: `quality-profile-items:${index}`,
+			label: 'Qualities',
+			detail: 'Quality list differs from Profilarr expected layout',
+			expected: formatQualityItemsValue(field.expected),
+			actual: formatQualityItemsValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	if (field.path === 'language') {
+		return {
+			id: `quality-profile-language:${index}`,
+			label: 'Language',
+			detail: 'Profile language changed',
+			expected: formatLanguageValue(field.expected, arrType),
+			actual: formatLanguageValue(field.actual, arrType),
+			tone: 'warning'
+		};
+	}
+
+	if (field.path === 'upgradeAllowed') {
+		return {
+			id: `quality-profile-upgrade-allowed:${index}`,
+			label: 'Upgrade Allowed',
+			detail: 'Upgrade behavior changed',
+			expected: formatBooleanValue(field.expected),
+			actual: formatBooleanValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	return {
+		id: `quality-profile-field:${index}`,
+		label: qualityProfileFieldLabel(field.path),
+		detail: 'Profile setting changed',
+		expected: formatGenericValue(field.expected),
+		actual: formatGenericValue(field.actual),
+		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
+	};
+}
+
+function asQualityItems(raw: unknown): DriftDisplayQualityItem[] | null {
+	if (!Array.isArray(raw)) return null;
+	const items: DriftDisplayQualityItem[] = [];
+	for (const item of raw) {
+		const parsed = asQualityItem(item);
+		if (!parsed) return null;
+		items.push(parsed);
+	}
+	return items;
+}
+
+function asQualityItem(raw: unknown): DriftDisplayQualityItem | null {
+	if (!isRecord(raw)) return null;
+	const type = recordString(raw, 'type');
+	const name = recordString(raw, 'name');
+	if ((type !== 'quality' && type !== 'group') || !name || typeof raw.id !== 'number') {
+		return null;
+	}
+
+	const item: DriftDisplayQualityItem = {
+		type,
+		id: raw.id,
+		name,
+		allowed: raw.allowed !== false,
+		upgradeUntil: raw.upgradeUntil === true
+	};
+
+	if (type === 'group') {
+		const members = asQualityItems(raw.items);
+		item.items = members ?? [];
+	}
+
+	return item;
 }
 
 function formatCustomFormatFieldDiff(
@@ -273,7 +455,24 @@ function asCustomFormatDiff(raw: unknown): CustomFormatDiff | null {
 	};
 }
 
+function asQualityProfileDiff(raw: unknown): QualityProfileDiff | null {
+	if (!isRecord(raw)) return null;
+	return {
+		missing: Array.isArray(raw.missing) ? raw.missing : [],
+		modified: Array.isArray(raw.modified) ? raw.modified : []
+	};
+}
+
 function asModifiedCustomFormat(raw: unknown): CustomFormatModifiedDiff | null {
+	if (!isRecord(raw)) return null;
+	const name = recordString(raw, 'name');
+	if (!name || !Array.isArray(raw.fields)) return null;
+
+	const fields = raw.fields.filter(isFieldDiff);
+	return { name, fields };
+}
+
+function asModifiedQualityProfile(raw: unknown): QualityProfileModifiedDiff | null {
 	if (!isRecord(raw)) return null;
 	const name = recordString(raw, 'name');
 	if (!name || !Array.isArray(raw.fields)) return null;
@@ -387,6 +586,49 @@ function formatGenericValue(raw: unknown): DriftDisplayValue {
 	return value('Structured value');
 }
 
+function formatQualityItemsValue(raw: unknown): DriftDisplayValue {
+	const items = asQualityItems(raw);
+	if (!items) return formatGenericValue(raw);
+
+	return value(`${items.length} top-level ${items.length === 1 ? 'item' : 'items'}`, {
+		qualityList: items
+	});
+}
+
+function formatQualityProfileFormatItemValue(raw: unknown): DriftDisplayValue {
+	if (raw === null || raw === undefined) {
+		return value('Missing from scoring array', { tone: 'danger' });
+	}
+	if (!isRecord(raw)) return formatGenericValue(raw);
+
+	const name = recordString(raw, 'name') ?? 'Custom format';
+	const state = recordString(raw, 'state');
+	if (state === 'missing_custom_format') {
+		return value(`${name}: custom format missing`, { tone: 'danger' });
+	}
+	if (state === 'unmanaged') {
+		return value(`${name}: 0 (unmanaged)`, { mono: true });
+	}
+	if (typeof raw.score === 'number') {
+		return value(`${name}: ${raw.score}`, { mono: true });
+	}
+
+	return formatGenericValue(raw);
+}
+
+function formatLanguageValue(raw: unknown, arrType: SyncArrType | undefined): DriftDisplayValue {
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (!isRecord(raw)) return formatGenericValue(raw);
+
+	const id = raw.id;
+	const name = recordString(raw, 'name');
+	if (typeof id === 'number') {
+		return value(name ?? languageName(arrType, id) ?? String(id));
+	}
+
+	return formatGenericValue(raw);
+}
+
 function formatBooleanValue(raw: unknown): DriftDisplayValue {
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
 	return value(raw ? 'Enabled' : 'Disabled', {
@@ -414,6 +656,17 @@ function fieldLabel(implementation: string, field: string): string {
 	if (field === 'max') return 'Maximum';
 	if (field === 'exceptLanguage') return 'Except Language';
 	return titleize(field);
+}
+
+function qualityProfileFieldLabel(path: string): string {
+	const labels: Record<string, string> = {
+		cutoffFormatScore: 'Cutoff Format Score',
+		minFormatScore: 'Minimum Format Score',
+		minUpgradeFormatScore: 'Minimum Upgrade Score Increment',
+		upgradeAllowed: 'Upgrade Allowed'
+	};
+
+	return labels[path] ?? titleize(path);
 }
 
 function implementationLabel(implementation: string): string {
@@ -484,12 +737,17 @@ function looksTechnical(value: string): boolean {
 
 function value(
 	text: string,
-	options: { mono?: boolean; tone?: DriftDisplayTone } = {}
+	options: {
+		mono?: boolean;
+		tone?: DriftDisplayTone;
+		qualityList?: DriftDisplayQualityItem[];
+	} = {}
 ): DriftDisplayValue {
 	return {
 		text,
 		mono: options.mono,
-		tone: options.tone
+		tone: options.tone,
+		qualityList: options.qualityList
 	};
 }
 

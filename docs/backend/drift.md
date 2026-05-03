@@ -3,6 +3,8 @@
 **Source:** `src/lib/server/jobs/handlers/arrDrift.ts`,
 `src/lib/server/db/queries/arrDriftSettings.ts`,
 `src/lib/server/db/queries/arrDriftStatus.ts`,
+`src/lib/server/drift/customFormats.ts`,
+`src/lib/server/drift/qualityProfiles.ts`,
 `src/lib/server/drift/display.ts`,
 `src/routes/arr/[id]/drift/+page.svelte`,
 `src/routes/arr/[id]/drift/+page.server.ts`,
@@ -33,7 +35,8 @@ Current handler behavior:
 - missing instances fail
 - missing or disabled settings cancel the job
 - unsupported Arr types are skipped
-- enabled jobs compare custom formats, store the latest result, and return success
+- enabled jobs compare custom formats and quality profiles, store the latest
+  result, and return success
 - scheduled jobs calculate and store the next run before returning
 
 ## Latest Status
@@ -69,6 +72,28 @@ Comparison rules:
 - compare normalized specifications and fields
 - ignore unmanaged extra Arr custom formats
 
+## Quality Profiles
+
+Quality profile drift compares selected Profilarr-managed profiles by name.
+Expected profiles are built through the same quality profile transformer used
+by sync, with actual Arr custom format ids used to resolve scoring rows.
+
+Comparison rules:
+
+- report selected quality profiles missing from Arr
+- ignore Arr profile ids
+- compare `upgradeAllowed`, `cutoff`, `minFormatScore`,
+  `cutoffFormatScore`, and `minUpgradeFormatScore`
+- compare Radarr language; ignore language for Sonarr
+- compare normalized quality item order, grouping, and allowed flags
+- compare custom format scores for custom formats managed by that profile,
+  including explicit zero scores
+- report an expected managed custom format as missing from scoring if the custom
+  format is missing from Arr
+- ignore unmanaged custom format scoring rows with score 0
+- report unmanaged custom format scoring rows with nonzero scores because they
+  affect profile behavior
+
 ## Display Formatter
 
 `src/lib/server/drift/display.ts` maps the raw `diff_json` stored in
@@ -89,6 +114,11 @@ For custom formats the formatter resolves Arr enum ids back to friendly names
 modifiers), formats sizes in human-readable bytes, and turns specification
 paths into labeled changes (negate / required / per-field changes / missing
 condition / extra condition).
+
+For quality profiles the formatter turns settings, language, qualities, and
+custom format score paths into labeled changes. Quality profile score rows show
+expected and actual score values, missing custom formats, missing score rows,
+and unmanaged nonzero score rows.
 
 Display types live in `src/lib/shared/drift.ts`.
 
@@ -125,7 +155,6 @@ configuration, or triggers sync.
 
 ## TODO
 
-- Quality profile, delay profile, and media management comparison plus their
-  display formatting.
+- Delay profile and media management comparison plus their display formatting.
 - Drift notifications for `detected` and `failed`.
 - Brief drift status on the sync page linking to the dedicated drift page.
