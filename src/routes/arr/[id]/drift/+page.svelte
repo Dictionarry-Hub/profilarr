@@ -144,10 +144,10 @@
 	<div class="mt-4 space-y-6 pb-32">
 		<section class="border-b border-neutral-200 pb-5 dark:border-neutral-800">
 			{#if data.featureEnabled}
-				<div class="flex flex-wrap items-end gap-x-5 gap-y-3 md:px-4">
-					<div class="flex flex-col gap-1">
+				<div class="flex flex-wrap gap-4 md:items-end md:gap-x-5 md:gap-y-3 md:px-4">
+					<div>
 						<span
-							class="text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
+							class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
 						>
 							Detection
 						</span>
@@ -158,9 +158,9 @@
 							on:change={(event) => (enabled = event.detail)}
 						/>
 					</div>
-					<div class="flex flex-col gap-1" data-onboarding="drift-schedule">
+					<div data-onboarding="drift-schedule">
 						<span
-							class="text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
+							class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
 						>
 							Schedule
 						</span>
@@ -172,7 +172,9 @@
 						/>
 					</div>
 					{#if data.status.lastCheckedAt}
-						<div class="ml-auto flex flex-wrap items-center gap-1.5">
+						<div
+							class="flex w-full flex-wrap items-center gap-1.5 border-t border-neutral-200 pt-3 md:ml-auto md:w-auto md:border-0 md:pt-0 dark:border-neutral-800"
+						>
 							{#if !enabled}
 								<Label variant="warning" size="md" rounded="md">Paused</Label>
 							{:else if timeUntilNext !== null && timeUntilNext <= 0}
@@ -229,7 +231,7 @@
 						chevronPosition="right"
 						primaryColumnKey="title"
 						flushExpanded
-						emptyMessage="✅ All synced up. Profilarr and Arr are best friends today."
+						emptyMessage="✅ All synced up. Move along, nothing to see here."
 					/>
 				{:else if data.driftEntities.length > 0}
 					<ExpandableTable
