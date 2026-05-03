@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import type { ActionData, PageData } from './$types';
 	import { onDestroy, onMount } from 'svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import { initEdit, update as updateDirty, clear, isDirty } from '$lib/client/stores/dirty';
+	import { jobStatus } from '$stores/jobStatus';
 	import { formatSmartDateTime } from '$shared/utils/dates';
 	import { serverTimezone } from '$lib/client/stores/timezone';
 	import Button from '$ui/button/Button.svelte';
@@ -53,7 +55,19 @@
 		interval = setInterval(() => {
 			now = Date.now();
 		}, 1000);
+		let previousJobState: string | null = null;
+		const unsubscribeJobStatus = jobStatus.subscribe((status) => {
+			if (
+				previousJobState === 'running' &&
+				status.state === 'completed' &&
+				status.jobType === 'arr.drift'
+			) {
+				invalidateAll();
+			}
+			previousJobState = status.state;
+		});
 		return () => {
+			unsubscribeJobStatus();
 			clear();
 			if (interval) clearInterval(interval);
 		};
@@ -79,6 +93,7 @@
 			initEdit({ enabled, cron });
 		}
 		if (form.error) {
+			jobStatus.cancelOptimistic();
 			alertStore.add('error', form.error);
 		}
 	}
@@ -118,9 +133,13 @@
 				iconColor="text-green-600 dark:text-green-400"
 				disabled={saving || running || $isDirty || !data.featureEnabled || !enabled}
 				on:click={() => {
+					jobStatus.connect();
+					jobStatus.setRunning('arr.drift', 'Checking drift...');
 					const runForm = document.getElementById('drift-run-form');
 					if (runForm instanceof HTMLFormElement) {
 						runForm.requestSubmit();
+					} else {
+						jobStatus.cancelOptimistic();
 					}
 				}}
 			/>

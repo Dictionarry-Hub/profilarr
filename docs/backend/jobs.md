@@ -273,8 +273,8 @@ Immutable log of every job execution.
 ## Real-Time Updates (SSE)
 
 The job system pushes real-time status updates to connected browsers via
-Server-Sent Events. Enabled for sync job types (`arr.sync.*`) and backup job
-types (`backup.create`, `backup.cleanup`).
+Server-Sent Events. Enabled for job types with running labels, currently sync,
+cleanup, drift, backup, and PCD link jobs.
 
 ### Server Side
 
