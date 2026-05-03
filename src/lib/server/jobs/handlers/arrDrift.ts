@@ -79,10 +79,7 @@ const driftHandler: JobHandler = async (job) => {
 
 		return {
 			status: 'success',
-			output:
-				totalCount === 0
-					? 'No drift detected'
-					: `Detected ${totalCount} drift item(s)`,
+			output: totalCount === 0 ? 'No drift detected' : `Detected ${totalCount} drift item(s)`,
 			rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
 		};
 	} catch (error) {

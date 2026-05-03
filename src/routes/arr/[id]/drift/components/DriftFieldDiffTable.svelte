@@ -46,7 +46,12 @@
 				{#if row.expected.qualityList}
 					<QualityListDiff items={row.expected.qualityList} />
 				{:else}
-					<Label variant={valueVariant(row.expected)} size="md" rounded="md" mono={row.expected.mono}>
+					<Label
+						variant={valueVariant(row.expected)}
+						size="md"
+						rounded="md"
+						mono={row.expected.mono}
+					>
 						{row.expected.text}
 					</Label>
 				{/if}
