@@ -27,6 +27,7 @@ export function cleanupJobsForArrInstance(instanceId: number): number {
 		'arr.sync.delayProfiles',
 		'arr.sync.mediaManagement',
 		'arr.cleanup',
+		'arr.drift',
 		'arr.library.refresh'
 	];
 

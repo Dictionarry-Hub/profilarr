@@ -101,6 +101,8 @@ All use raw SQL with `?` parameter binding and typed input/output interfaces.
 | `arrInstances`          | Arr instance CRUD                                                   |
 | `arrSync`               | Sync config and status per instance                                 |
 | `arrCleanupSettings`    | Stale config cleanup settings                                       |
+| `arrDriftSettings`      | Drift detection scheduling settings                                |
+| `arrDriftStatus`        | Latest drift detection result per Arr instance                      |
 | `arrRenameSettings`     | Rename job settings per instance                                    |
 | `authSettings`          | Session duration, API key                                           |
 | `sessions`              | Session CRUD and cleanup                                            |

@@ -1,0 +1,58 @@
+# Drift Detection
+
+**Source:** `src/lib/server/jobs/handlers/arrDrift.ts`,
+`src/lib/server/db/queries/arrDriftSettings.ts`,
+`src/lib/server/db/queries/arrDriftStatus.ts`
+
+Drift detection checks whether an Arr instance still matches the configuration
+Profilarr would sync now. It is observational: it does not write to Arr, repair
+config, delete stale items, or replace cleanup.
+
+## Job
+
+The scheduled job type is `arr.drift` with payload `{ instanceId }`.
+
+Scheduling is per Arr instance and uses `arr_drift_settings`:
+
+| Field         | Purpose                               |
+| ------------- | ------------------------------------- |
+| `enabled`     | Master switch for drift detection     |
+| `cron`        | Cron expression for scheduled checks  |
+| `next_run_at` | Next scheduled run stored as UTC text |
+
+The job queue uses dedupe key `arr.drift:{instanceId}` so each instance has at
+most one scheduled drift job.
+
+Current handler behavior:
+
+- invalid instance ids fail
+- missing instances fail
+- missing or disabled settings cancel the job
+- unsupported Arr types are skipped
+- enabled jobs skip with `Drift comparison not implemented`
+- scheduled jobs calculate and store the next run before returning
+
+## Latest Status
+
+Drift stores only the latest result per Arr instance in `arr_drift_status`.
+Job run history remains the operational history.
+
+Current implementation creates and exposes the table/query layer. The no-op job
+handler does not write drift result rows yet.
+
+| Field                         | Purpose                                      |
+| ----------------------------- | -------------------------------------------- |
+| `status`                      | `never_checked`, `clean`, `drift_detected`, `failed` |
+| `last_checked_at`             | Last completed check time                    |
+| `counts_json`                 | Count summary by drift section               |
+| `diff_json`                   | Structured latest drift result               |
+| `diff_hash`                   | Stable hash of the structured drift result   |
+| `last_notified_hash`          | Last drift hash sent as a notification       |
+| `last_notified_at`            | Last drift notification time                 |
+| `last_error`                  | Latest failure detail                        |
+| `error_hash`                  | Stable hash of the latest failure detail     |
+| `last_notified_error_hash`    | Last failure hash sent as a notification     |
+
+## TODO
+
+Implement comparison logic, notifications, and the sync page drift UI.

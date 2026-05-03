@@ -23,6 +23,8 @@ export function formatJobTypeLabel(jobType: JobType): string {
 			return 'Arr Upgrade';
 		case 'arr.cleanup':
 			return 'Arr Cleanup';
+		case 'arr.drift':
+			return 'Arr Drift';
 		case 'arr.library.refresh':
 			return 'Library Refresh';
 		case 'pcd.link':
@@ -81,6 +83,7 @@ export function buildJobDisplayName(
 			jobType === 'arr.rename' ||
 			jobType === 'arr.upgrade' ||
 			jobType === 'arr.cleanup' ||
+			jobType === 'arr.drift' ||
 			jobType === 'arr.library.refresh') &&
 		instanceId !== null
 	) {

@@ -11,5 +11,7 @@ export const FEATURES = {
 	/** Cutscene onboarding system */
 	cutscene: true,
 	/** Database tweaks UI */
-	tweaks: false
+	tweaks: false,
+	/** Arr drift detection */
+	drift: false
 } as const;
