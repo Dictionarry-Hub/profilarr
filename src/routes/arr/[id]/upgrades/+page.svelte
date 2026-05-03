@@ -18,7 +18,6 @@
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -119,42 +118,45 @@
 		<div slot="right" class="flex flex-wrap items-center gap-2">
 			<Button text="Info" icon={Info} href="/arr/upgrades/info" />
 			{#if !isNewConfig && enabled}
-				<Tooltip text="Clear dry run exclusion cache so items can be re-selected">
-					<Button
-						text={clearing ? 'Clearing...' : 'Reset Cache'}
-						icon={RotateCcw}
-						disabled={clearing || running || saving}
-						on:click={() => {
-							const f = document.getElementById('clear-cache-form');
-							if (f instanceof HTMLFormElement) f.requestSubmit();
-						}}
-					/>
-				</Tooltip>
-				<Tooltip text="Search indexers without downloading (limited to once every 10 min)">
-					<Button
-						text={running ? 'Running...' : 'Dry Run'}
-						icon={FlaskConical}
-						iconColor="text-amber-600 dark:text-amber-400"
-						disabled={running || saving || clearing || $isDirty}
-						on:click={() => {
-							const f = document.getElementById('dry-run-form');
-							if (f instanceof HTMLFormElement) f.requestSubmit();
-						}}
-					/>
-				</Tooltip>
+				<Button
+					text={clearing ? 'Clearing...' : 'Reset Cache'}
+					icon={RotateCcw}
+					disabled={clearing || running || saving}
+					tooltip="Clear dry run exclusion cache so items can be re-selected"
+					tooltipPosition="bottom"
+					tooltipAlign="right"
+					on:click={() => {
+						const f = document.getElementById('clear-cache-form');
+						if (f instanceof HTMLFormElement) f.requestSubmit();
+					}}
+				/>
+				<Button
+					text={running ? 'Running...' : 'Dry Run'}
+					icon={FlaskConical}
+					iconColor="text-amber-600 dark:text-amber-400"
+					disabled={running || saving || clearing || $isDirty}
+					tooltip="Search indexers without downloading (limited to once every 10 min)"
+					tooltipPosition="bottom"
+					tooltipAlign="right"
+					on:click={() => {
+						const f = document.getElementById('dry-run-form');
+						if (f instanceof HTMLFormElement) f.requestSubmit();
+					}}
+				/>
 				{#if isDev}
-					<Tooltip text="Run a live search that will download upgrades">
-						<Button
-							text={running ? 'Running...' : 'Live Run'}
-							icon={Play}
-							iconColor="text-red-600 dark:text-red-400"
-							disabled={running || saving || $isDirty}
-							on:click={() => {
-								const f = document.getElementById('live-run-form');
-								if (f instanceof HTMLFormElement) f.requestSubmit();
-							}}
-						/>
-					</Tooltip>
+					<Button
+						text={running ? 'Running...' : 'Live Run'}
+						icon={Play}
+						iconColor="text-red-600 dark:text-red-400"
+						disabled={running || saving || $isDirty}
+						tooltip="Run a live search that will download upgrades"
+						tooltipPosition="bottom"
+						tooltipAlign="right"
+						on:click={() => {
+							const f = document.getElementById('live-run-form');
+							if (f instanceof HTMLFormElement) f.requestSubmit();
+						}}
+					/>
 				{/if}
 			{/if}
 			<Button
