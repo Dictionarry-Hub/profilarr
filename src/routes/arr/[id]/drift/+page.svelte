@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import type { ActionData, PageData } from './$types';
 	import { onDestroy, onMount } from 'svelte';
 	import { alertStore } from '$lib/client/alerts/store';
@@ -54,7 +55,19 @@
 		interval = setInterval(() => {
 			now = Date.now();
 		}, 1000);
+		let previousJobState: string | null = null;
+		const unsubscribeJobStatus = jobStatus.subscribe((status) => {
+			if (
+				previousJobState === 'running' &&
+				status.state === 'completed' &&
+				status.jobType === 'arr.drift'
+			) {
+				invalidateAll();
+			}
+			previousJobState = status.state;
+		});
 		return () => {
+			unsubscribeJobStatus();
 			clear();
 			if (interval) clearInterval(interval);
 		};
