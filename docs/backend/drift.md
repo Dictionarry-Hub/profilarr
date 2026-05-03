@@ -29,16 +29,13 @@ Current handler behavior:
 - missing instances fail
 - missing or disabled settings cancel the job
 - unsupported Arr types are skipped
-- enabled jobs skip with `Drift comparison not implemented`
+- enabled jobs compare custom formats, store the latest result, and return success
 - scheduled jobs calculate and store the next run before returning
 
 ## Latest Status
 
 Drift stores only the latest result per Arr instance in `arr_drift_status`.
 Job run history remains the operational history.
-
-Current implementation creates and exposes the table/query layer. The no-op job
-handler does not write drift result rows yet.
 
 | Field                      | Purpose                                              |
 | -------------------------- | ---------------------------------------------------- |
@@ -53,6 +50,22 @@ handler does not write drift result rows yet.
 | `error_hash`               | Stable hash of the latest failure detail             |
 | `last_notified_error_hash` | Last failure hash sent as a notification             |
 
+## Custom Formats
+
+Custom format drift compares Profilarr-managed custom formats referenced by
+synced quality profile selections.
+
+Comparison rules:
+
+- build expected custom formats with the same transformer used by sync
+- fetch actual custom formats from Arr
+- match by custom format name
+- ignore Arr ids
+- compare `includeCustomFormatWhenRenaming`
+- compare normalized specifications and fields
+- ignore unmanaged extra Arr custom formats
+
 ## TODO
 
-Implement comparison logic, notifications, and the sync page drift UI.
+Implement quality profile, delay profile, and media management comparison,
+notifications, and the sync page drift UI.
