@@ -95,7 +95,17 @@ function normalizeCustomFormat(format: ArrCustomFormat): NormalizedCustomFormat 
 }
 
 function valuesEqual(expected: unknown, actual: unknown): boolean {
+	if (
+		(expected === null || expected === undefined || expected === false) &&
+		(actual === null || actual === undefined || actual === false)
+	) {
+		return true;
+	}
 	return stringifyCanonical(expected) === stringifyCanonical(actual);
+}
+
+function isAbsentDefault(value: unknown): boolean {
+	return value === null || value === undefined || value === false;
 }
 
 function compareFields(
@@ -111,6 +121,7 @@ function compareFields(
 		const actualField = actualFields.get(fieldKey(expectedField));
 		const path = `${specPath}.fields[${fieldKey(expectedField)}]`;
 		if (!actualField) {
+			if (isAbsentDefault(expectedField.value)) continue;
 			diffs.push({ path, expected: expectedField.value, actual: null });
 			continue;
 		}
@@ -121,6 +132,7 @@ function compareFields(
 
 	for (const actualField of actual.fields) {
 		if (expectedFields.has(fieldKey(actualField))) continue;
+		if (isAbsentDefault(actualField.value)) continue;
 		diffs.push({
 			path: `${specPath}.fields[${fieldKey(actualField)}]`,
 			expected: null,

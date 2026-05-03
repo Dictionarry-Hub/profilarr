@@ -135,6 +135,94 @@ class CustomFormatDriftTest extends BaseTest {
 			assertEquals(result.count, 0);
 		});
 
+		this.test('treats missing optional false fields as clean', () => {
+			const result = compareCustomFormatDrift(
+				[
+					customFormat({
+						name: 'Not Original or English',
+						specifications: [
+							{
+								name: 'English',
+								implementation: 'LanguageSpecification',
+								negate: true,
+								required: false,
+								fields: [{ name: 'value', value: 1 }]
+							}
+						]
+					})
+				],
+				[
+					customFormat({
+						name: 'Not Original or English',
+						specifications: [
+							{
+								name: 'English',
+								implementation: 'LanguageSpecification',
+								negate: true,
+								required: false,
+								fields: [
+									{ name: 'value', value: 1 },
+									{ name: 'exceptLanguage', value: false }
+								]
+							}
+						]
+					})
+				]
+			);
+
+			assertEquals(result.count, 0);
+		});
+
+		this.test('reports optional true fields missing from expected', () => {
+			const result = compareCustomFormatDrift(
+				[
+					customFormat({
+						name: 'Not Original or English',
+						specifications: [
+							{
+								name: 'English',
+								implementation: 'LanguageSpecification',
+								negate: true,
+								required: false,
+								fields: [{ name: 'value', value: 1 }]
+							}
+						]
+					})
+				],
+				[
+					customFormat({
+						name: 'Not Original or English',
+						specifications: [
+							{
+								name: 'English',
+								implementation: 'LanguageSpecification',
+								negate: true,
+								required: false,
+								fields: [
+									{ name: 'value', value: 1 },
+									{ name: 'exceptLanguage', value: true }
+								]
+							}
+						]
+					})
+				]
+			);
+
+			assertEquals(result.count, 1);
+			assertEquals(result.diff.modified, [
+				{
+					name: 'Not Original or English',
+					fields: [
+						{
+							path: 'specifications[LanguageSpecification:English].fields[exceptLanguage]',
+							expected: null,
+							actual: true
+						}
+					]
+				}
+			]);
+		});
+
 		this.test('reports field value mismatch with stable path', () => {
 			const result = compareCustomFormatDrift(
 				[customFormat({ name: 'Streaming Tier' })],
