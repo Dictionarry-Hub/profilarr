@@ -9,6 +9,7 @@ import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
 import { calculateNextRun, validateCronExpression } from '$lib/server/jobs/scheduleUtils.ts';
 import { FEATURES } from '$shared/features.ts';
+import { buildDriftDisplayEntities } from '$drift/display.ts';
 
 export const load: ServerLoad = ({ params }) => {
 	const id = parseInt(params.id || '', 10);
@@ -25,6 +26,7 @@ export const load: ServerLoad = ({ params }) => {
 	const driftSettings = arrDriftSettingsQueries.getByInstanceId(id);
 	const driftStatus = arrDriftStatusQueries.getByInstanceId(id);
 	const { api_key: _, ...safeInstance } = instance;
+	const diff = driftStatus?.diff ?? {};
 
 	return {
 		instance: safeInstance,
@@ -37,11 +39,9 @@ export const load: ServerLoad = ({ params }) => {
 		status: {
 			status: driftStatus?.status ?? 'never_checked',
 			lastCheckedAt: driftStatus?.lastCheckedAt ?? null,
-			counts: driftStatus?.counts ?? {},
-			diff: driftStatus?.diff ?? {},
-			diffHash: driftStatus?.diffHash ?? null,
 			lastError: driftStatus?.lastError ?? null
-		}
+		},
+		driftEntities: buildDriftDisplayEntities(diff, instance.type)
 	};
 };
 

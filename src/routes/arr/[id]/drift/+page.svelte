@@ -10,12 +10,32 @@
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import CronInput from '$ui/cron/CronInput.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
+	import Label from '$ui/label/Label.svelte';
+	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
+	import type { Column } from '$ui/table/types';
 	import { ArrowLeftRight, Loader2, Play, Save, Settings } from 'lucide-svelte';
-	import DriftDetection from './components/DriftDetection.svelte';
+	import type { DriftDisplayEntity, DriftDisplayTone } from '$shared/drift.ts';
+	import DriftFieldDiffTable from './components/DriftFieldDiffTable.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
+
+	type LabelVariant = 'default' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
+
+	const toneToVariant: Record<DriftDisplayTone, LabelVariant> = {
+		neutral: 'secondary',
+		success: 'success',
+		warning: 'warning',
+		danger: 'danger',
+		info: 'info'
+	};
+
+	const driftColumns: Column<DriftDisplayEntity>[] = [
+		{ key: 'title', header: 'Entity' },
+		{ key: 'section', header: 'Section', width: 'w-44' },
+		{ key: 'state', header: 'State', width: 'w-32' }
+	];
 
 	let saving = false;
 	let running = false;
@@ -201,9 +221,70 @@
 					class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
 				>
 					<ArrowLeftRight size={18} class="text-neutral-500 dark:text-neutral-400" />
-					Latest Result
+					Drifted Items
 				</h2>
-				<DriftDetection status={data.status} {nextRunAt} />
+				{#if data.status.status === 'failed' && data.status.lastError}
+					<div
+						class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+					>
+						{data.status.lastError}
+					</div>
+				{:else if data.status.status === 'never_checked'}
+					<div
+						class="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400"
+					>
+						No drift check has run yet.
+					</div>
+				{:else if data.status.status === 'clean'}
+					<div
+						class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
+					>
+						No drift detected.
+					</div>
+				{:else if data.driftEntities.length > 0}
+					<ExpandableTable
+						columns={driftColumns}
+						data={data.driftEntities}
+						getRowId={(row) => row.id}
+						responsive
+						chevronPosition="right"
+						primaryColumnKey="title"
+						flushExpanded
+					>
+						<svelte:fragment slot="cell" let:row let:column>
+							{#if column.key === 'title'}
+								<div class="flex flex-col gap-1">
+									<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+										{row.title}
+									</span>
+									{#if row.summary}
+										<span class="text-xs text-neutral-500 dark:text-neutral-400">
+											{row.summary}
+										</span>
+									{/if}
+								</div>
+							{:else if column.key === 'section'}
+								<Label variant="secondary" size="sm" rounded="md">{row.sectionLabel}</Label>
+							{:else if column.key === 'state'}
+								<Label variant={toneToVariant[row.tone]} size="sm" rounded="md">
+									{row.stateLabel}
+								</Label>
+							{/if}
+						</svelte:fragment>
+
+						<svelte:fragment slot="expanded" let:row>
+							<div class="px-4 py-3 md:px-6 md:py-4">
+								<DriftFieldDiffTable changes={row.changes} />
+							</div>
+						</svelte:fragment>
+					</ExpandableTable>
+				{:else}
+					<div
+						class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
+					>
+						Drift was detected, but no displayable items were stored.
+					</div>
+				{/if}
 			</section>
 		{/if}
 	</div>

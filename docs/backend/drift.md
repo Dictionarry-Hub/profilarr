@@ -72,10 +72,13 @@ The Arr Drift page shows Drift Detection for each Arr instance.
 Current UI behavior:
 
 - disabled drift shows configuration only
-- enabled drift shows schedule, latest status, last checked time, next run,
-  count summary, diff hash, and stored failure detail
+- enabled drift shows schedule controls, run now, and saved timing metadata
 - run now queues an immediate manual drift check
-- custom format drift details are grouped by missing and modified custom formats
+- drifted items are shown as expandable cards, one managed entity per card
+- custom format cards show parsed fields such as missing formats, missing
+  conditions, condition value changes, and include-in-rename changes
+- result cards do not show raw drift paths, raw JSON, hashes, or scheduler
+  metadata
 - the UI is read-only for drift results and does not repair or resync
 
 ## TODO
