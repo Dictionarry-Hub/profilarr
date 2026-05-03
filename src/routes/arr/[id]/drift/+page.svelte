@@ -221,11 +221,16 @@
 						No drift check has run yet.
 					</div>
 				{:else if data.status.status === 'clean'}
-					<div
-						class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
-					>
-						No drift detected.
-					</div>
+					<ExpandableTable
+						columns={driftColumns}
+						data={emptyDriftEntities}
+						getRowId={(row) => row.id}
+						responsive
+						chevronPosition="right"
+						primaryColumnKey="title"
+						flushExpanded
+						emptyMessage="✅ All synced up. Profilarr and Arr are best friends today."
+					/>
 				{:else if data.driftEntities.length > 0}
 					<ExpandableTable
 						columns={driftColumns}
