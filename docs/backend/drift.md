@@ -74,10 +74,11 @@ Current UI behavior:
 - disabled drift shows configuration only
 - enabled drift shows schedule, latest status, last checked time, next run,
   count summary, diff hash, and stored failure detail
+- run now queues an immediate manual drift check
 - custom format drift details are grouped by missing and modified custom formats
 - the UI is read-only for drift results and does not repair or resync
 
 ## TODO
 
 Implement quality profile, delay profile, and media management comparison,
-notifications, and manual drift checks.
+and notifications.

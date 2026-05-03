@@ -5,6 +5,8 @@ import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { logger } from '$logger/logger.ts';
 import { scheduleDriftForInstance } from '$lib/server/jobs/init.ts';
+import { enqueueJob } from '$lib/server/jobs/queueService.ts';
+import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
 import { calculateNextRun, validateCronExpression } from '$lib/server/jobs/scheduleUtils.ts';
 import { FEATURES } from '$shared/features.ts';
 
@@ -89,6 +91,54 @@ export const actions: Actions = {
 				meta: { instanceId: id, error: err }
 			});
 			return fail(500, { error: 'Failed to save drift detection settings' });
+		}
+	},
+
+	run: async ({ params }) => {
+		const id = parseInt(params.id || '', 10);
+		if (isNaN(id)) {
+			return fail(400, { error: 'Invalid instance ID' });
+		}
+
+		if (!FEATURES.drift) {
+			return fail(404, { error: 'Drift detection is not available' });
+		}
+
+		const instance = arrInstancesQueries.getById(id);
+		if (!instance) {
+			return fail(404, { error: 'Instance not found' });
+		}
+
+		const settings = arrDriftSettingsQueries.getByInstanceId(id);
+		if (!settings || !settings.enabled) {
+			return fail(400, { error: 'Drift detection is disabled' });
+		}
+
+		try {
+			const queued = enqueueJob({
+				jobType: 'arr.drift',
+				runAt: new Date().toISOString(),
+				payload: { instanceId: id },
+				source: 'manual'
+			});
+
+			await logger.info('Manual drift check queued', {
+				source: 'drift',
+				meta: {
+					jobId: queued.id,
+					instanceId: id,
+					instanceName: instance.name,
+					displayName: buildJobDisplayName('arr.drift', { instanceId: id })
+				}
+			});
+
+			return { success: true, queued: true };
+		} catch (err) {
+			await logger.error('Manual drift check failed', {
+				source: 'drift',
+				meta: { instanceId: id, error: err }
+			});
+			return fail(500, { error: 'Failed to queue drift check' });
 		}
 	}
 };

@@ -11,13 +11,14 @@
 	import CronInput from '$ui/cron/CronInput.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
-	import { ArrowLeftRight, Loader2, Save, Settings } from 'lucide-svelte';
+	import { ArrowLeftRight, Loader2, Play, Save, Settings } from 'lucide-svelte';
 	import DriftDetection from './components/DriftDetection.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
 
 	let saving = false;
+	let running = false;
 	let lastFormId: unknown = null;
 	let enabled = data.settings.enabled;
 	let cron = data.settings.cron;
@@ -47,7 +48,10 @@
 
 	$: if (form && form !== lastFormId) {
 		lastFormId = form;
-		if (form.success) {
+		if (form.success && form.queued) {
+			alertStore.add('success', 'Drift check queued');
+		}
+		if (form.success && !form.queued) {
 			if (form.nextRunAt || form.nextRunAt === null) nextRunAt = form.nextRunAt;
 			alertStore.add('success', 'Drift detection settings saved');
 			initEdit({ enabled, cron });
@@ -86,6 +90,18 @@
 			</p>
 		</div>
 		<div slot="right" class="flex items-center gap-2">
+			<Button
+				text={running ? 'Running...' : 'Run Now'}
+				icon={Play}
+				iconColor="text-green-600 dark:text-green-400"
+				disabled={saving || running || $isDirty || !data.featureEnabled || !enabled}
+				on:click={() => {
+					const runForm = document.getElementById('drift-run-form');
+					if (runForm instanceof HTMLFormElement) {
+						runForm.requestSubmit();
+					}
+				}}
+			/>
 			<Button
 				text={saving ? 'Saving...' : 'Save'}
 				icon={saving ? Loader2 : Save}
@@ -214,6 +230,19 @@
 		<input type="hidden" name="enabled" value={enabled} />
 		<input type="hidden" name="cron" value={cron} />
 	</form>
+	<form
+		id="drift-run-form"
+		method="POST"
+		action="?/run"
+		class="hidden"
+		use:enhance={() => {
+			running = true;
+			return async ({ update }) => {
+				await update({ reset: false });
+				running = false;
+			};
+		}}
+	></form>
 
 	<DirtyModal />
 {/key}
