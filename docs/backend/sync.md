@@ -26,6 +26,7 @@ updates for items that already exist.
 - [Cleanup](#cleanup)
   - [Config Cleanup](#config-cleanup)
   - [Entity Cleanup](#entity-cleanup)
+- [Drift Detection](#drift-detection)
 - [Impact Analysis](#impact-analysis)
 - [Error Handling and Recovery](#error-handling-and-recovery)
 - [Logging and Notifications](#logging-and-notifications)
@@ -252,6 +253,14 @@ Detects media removed from TMDB/TVDB by reading the Arr health API. Health
 messages with source `RemovedMovieCheck` (Radarr) or `RemovedSeriesCheck`
 (Sonarr) contain external IDs. The system extracts these IDs via regex, matches
 them against the library, and offers scan/delete operations.
+
+## Drift Detection
+
+See [drift.md](./drift.md).
+
+Drift detection checks whether Arr still matches what Profilarr would sync now.
+It may reuse sync transformers to build expected state, but it does not sync,
+repair, or cleanup.
 
 ## Impact Analysis
 

@@ -653,6 +653,75 @@ CREATE TABLE arr_cleanup_settings (
 CREATE INDEX idx_arr_cleanup_settings_instance ON arr_cleanup_settings(arr_instance_id);
 
 -- ==============================================================================
+-- TABLE: arr_drift_settings
+-- Purpose: Store drift detection scheduling configuration per arr instance
+-- Migration: 065_create_arr_drift_tables.ts
+-- ==============================================================================
+
+CREATE TABLE arr_drift_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    -- Relationship (one config per arr instance)
+    arr_instance_id INTEGER NOT NULL UNIQUE,
+
+    -- Settings
+    enabled INTEGER NOT NULL DEFAULT 0,          -- Master on/off switch
+    cron TEXT NOT NULL DEFAULT '0 0 * * *',      -- Cron expression (default: daily midnight)
+
+    -- State tracking
+    next_run_at TEXT,                            -- Next scheduled drift check
+
+    -- Metadata
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (arr_instance_id) REFERENCES arr_instances(id) ON DELETE CASCADE
+);
+
+-- Arr drift settings indexes (Migration: 065_create_arr_drift_tables.ts)
+CREATE INDEX idx_arr_drift_settings_instance ON arr_drift_settings(arr_instance_id);
+
+-- ==============================================================================
+-- TABLE: arr_drift_status
+-- Purpose: Store latest drift detection result per arr instance
+-- Migration: 065_create_arr_drift_tables.ts
+-- ==============================================================================
+
+CREATE TABLE arr_drift_status (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    -- Relationship (one latest result per arr instance)
+    arr_instance_id INTEGER NOT NULL UNIQUE,
+
+    -- Latest state
+    status TEXT NOT NULL DEFAULT 'never_checked' CHECK (
+        status IN ('never_checked', 'clean', 'drift_detected', 'failed')
+    ),
+    last_checked_at TEXT,
+    counts_json TEXT NOT NULL DEFAULT '{}',
+    diff_json TEXT NOT NULL DEFAULT '{}',
+    diff_hash TEXT,
+
+    -- Notification dedupe
+    last_notified_hash TEXT,
+    last_notified_at TEXT,
+
+    -- Failure state
+    last_error TEXT,
+    error_hash TEXT,
+    last_notified_error_hash TEXT,
+
+    -- Metadata
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (arr_instance_id) REFERENCES arr_instances(id) ON DELETE CASCADE
+);
+
+-- Arr drift status indexes (Migration: 065_create_arr_drift_tables.ts)
+CREATE INDEX idx_arr_drift_status_instance ON arr_drift_status(arr_instance_id);
+
+-- ==============================================================================
 -- TABLE: upgrade_runs
 -- Purpose: Store upgrade run history for each arr instance
 -- Migration: 026_create_upgrade_runs.ts

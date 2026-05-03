@@ -66,6 +66,7 @@ import { migration as migration061 } from './migrations/061_create_announcements
 import { migration as migration062 } from './migrations/062_drop_onboarding_shown.ts';
 import { migration as migration063 } from './migrations/063_create_database_announcements.ts';
 import { migration as migration064 } from './migrations/064_add_fail_on_referenced_delete.ts';
+import { migration as migration065 } from './migrations/065_create_arr_drift_tables.ts';
 
 export interface Migration {
 	version: number;
@@ -350,7 +351,8 @@ export function loadMigrations(): Migration[] {
 		migration061,
 		migration062,
 		migration063,
-		migration064
+		migration064,
+		migration065
 	];
 
 	// Sort by version number

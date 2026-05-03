@@ -26,6 +26,7 @@
   - [Arr Upgrade](#arr-upgrade)
   - [Arr Rename](#arr-rename)
   - [Arr Cleanup](#arr-cleanup)
+  - [Arr Drift](#arr-drift)
   - [Arr Library Refresh](#arr-library-refresh)
   - [PCD Sync](#pcd-sync)
   - [Backup Create](#backup-create)
@@ -37,8 +38,9 @@
 
 Profilarr uses an event-driven job queue for background tasks: syncing
 configuration to Arr instances, creating backups, running upgrades, renaming
-files, and cleaning up old data. The system is built around a SQLite-backed
-queue with a single-threaded dispatcher that processes jobs sequentially.
+files, checking drift, and cleaning up old data. The system is built around a
+SQLite-backed queue with a single-threaded dispatcher that processes jobs
+sequentially.
 
 The dispatcher does not poll. It calculates the delay until the next job is due
 and sets a timeout. When a new job is enqueued, the dispatcher is notified and
@@ -60,6 +62,7 @@ concurrency and makes the system deterministic.
 | `arr.upgrade`              | Automated quality upgrades             | `{ instanceId }` | Yes       |
 | `arr.rename`               | Bulk file/folder rename                | `{ instanceId }` | Yes       |
 | `arr.cleanup`              | Remove stale configs from Arr          | `{ instanceId }` | Yes       |
+| `arr.drift`                | Check Arr config drift                 | `{ instanceId }` | Yes       |
 | `arr.library.refresh`      | Refresh cached library data            | `{ instanceId }` | Yes       |
 | `pcd.sync`                 | Check/pull PCD database updates        | `{ databaseId }` | Yes       |
 | `backup.create`            | Create backup archive                  | `{}`             | Yes       |
@@ -134,9 +137,9 @@ marked finished. This creates the recurring loop for scheduled jobs.
 
 ### Cron
 
-Used by sync, upgrade, rename, and cleanup jobs. The cron expression is stored
-in the config table for each instance. `calculateNextRun()` uses the `croner`
-library to compute the next occurrence.
+Used by sync, upgrade, rename, cleanup, and drift jobs. The cron expression is
+stored in the config table for each instance. `calculateNextRun()` uses the
+`croner` library to compute the next occurrence.
 
 Cron expressions are validated with a minimum interval check to prevent
 accidental sub-minute schedules. For simple `*/N * * * *` patterns, the interval
@@ -385,6 +388,13 @@ config and triggers rename commands. Supports dry-run mode and folder renaming.
 Scans Arr instances for stale custom formats and quality profiles that exist in
 the Arr but are no longer in the PCD config, then deletes them. Also scans for
 removed entities (TMDB/TVDB items no longer in the database).
+
+### Arr Drift
+
+**Handler:** `arrDrift.ts`
+
+Checks whether an Arr instance still matches what Profilarr would sync now.
+While `FEATURES.drift` is false, drift jobs exit without contacting Arr.
 
 ### Arr Library Refresh
 

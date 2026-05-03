@@ -4,9 +4,11 @@ import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { upgradeConfigsQueries } from '$db/queries/upgradeConfigs.ts';
 import { arrRenameSettingsQueries } from '$db/queries/arrRenameSettings.ts';
 import { arrCleanupSettingsQueries } from '$db/queries/arrCleanupSettings.ts';
+import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
 import { logSettingsQueries } from '$db/queries/logSettings.ts';
+import { FEATURES } from '$shared/features.ts';
 import { calculateNextRun } from '$lib/server/sync/utils.ts';
 import { calculateNextRunFromMinutes, calculateNextRunFromSchedule } from './scheduleUtils.ts';
 import { jobDispatcher } from './dispatcher.ts';
@@ -138,6 +140,38 @@ export function scheduleCleanupForInstance(instanceId: number): void {
 	notify(job.runAt);
 }
 
+export function scheduleDriftForInstance(instanceId: number): void {
+	if (!FEATURES.drift) {
+		jobQueueQueries.unscheduleByDedupeKey(`arr.drift:${instanceId}`);
+		return;
+	}
+
+	const settings = arrDriftSettingsQueries.getByInstanceId(instanceId);
+	if (!settings || !settings.enabled) {
+		jobQueueQueries.unscheduleByDedupeKey(`arr.drift:${instanceId}`);
+		return;
+	}
+
+	let nextRun = settings.nextRunAt;
+	if (!nextRun) {
+		nextRun = calculateNextRun(settings.cron) ?? null;
+	}
+	if (!nextRun) {
+		jobQueueQueries.unscheduleByDedupeKey(`arr.drift:${instanceId}`);
+		return;
+	}
+
+	const job = jobQueueQueries.upsertScheduled({
+		jobType: 'arr.drift',
+		runAt: nextRun,
+		payload: { instanceId },
+		source: 'schedule',
+		dedupeKey: `arr.drift:${instanceId}`
+	});
+
+	notify(job.runAt);
+}
+
 export function scheduleLibraryRefreshForInstance(instanceId: number): void {
 	const instance = arrInstancesQueries.getById(instanceId);
 	if (!instance || instance.enabled === 0 || instance.library_refresh_interval <= 0) {
@@ -252,6 +286,7 @@ export function scheduleAllJobs(): void {
 		scheduleUpgradeForInstance(instance.id);
 		scheduleRenameForInstance(instance.id);
 		scheduleCleanupForInstance(instance.id);
+		scheduleDriftForInstance(instance.id);
 		scheduleLibraryRefreshForInstance(instance.id);
 	}
 

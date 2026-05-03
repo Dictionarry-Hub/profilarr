@@ -10,6 +10,7 @@ export type JobType =
 	| 'backup.create'
 	| 'backup.cleanup'
 	| 'arr.cleanup'
+	| 'arr.drift'
 	| 'arr.library.refresh'
 	| 'logs.cleanup'
 	| 'announcements.fetch';

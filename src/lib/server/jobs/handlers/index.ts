@@ -1,6 +1,7 @@
 import './arrUpgrade.ts';
 import './arrRename.ts';
 import './arrCleanup.ts';
+import './arrDrift.ts';
 import './arrLibraryRefresh.ts';
 import './arrSync.ts';
 import './pcdLink.ts';
