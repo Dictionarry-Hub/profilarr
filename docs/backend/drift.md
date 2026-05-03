@@ -2,7 +2,11 @@
 
 **Source:** `src/lib/server/jobs/handlers/arrDrift.ts`,
 `src/lib/server/db/queries/arrDriftSettings.ts`,
-`src/lib/server/db/queries/arrDriftStatus.ts`
+`src/lib/server/db/queries/arrDriftStatus.ts`,
+`src/lib/server/drift/display.ts`,
+`src/routes/arr/[id]/drift/+page.svelte`,
+`src/routes/arr/[id]/drift/+page.server.ts`,
+`src/routes/arr/[id]/drift/components/DriftFieldDiffTable.svelte`
 
 Drift detection checks whether an Arr instance still matches the configuration
 Profilarr would sync now. It is observational: it does not write to Arr, repair
@@ -65,23 +69,63 @@ Comparison rules:
 - compare normalized specifications and fields
 - ignore unmanaged extra Arr custom formats
 
-## Arr Page UI
+## Display Formatter
 
-The Arr Drift page shows Drift Detection for each Arr instance.
+`src/lib/server/drift/display.ts` maps the raw `diff_json` stored in
+`arr_drift_status` into a typed list of `DriftDisplayEntity` objects consumed
+by the page. One entity is one drifted managed item (e.g. one custom format).
+Each entity carries:
 
-Current UI behavior:
+- `section` and `sectionLabel` (e.g. `custom_formats` / `Custom Format`)
+- `state` and `stateLabel` (`missing` / `modified` / `extra`)
+- `tone` for badge color signaling
+- `summary` (one-line description, e.g. `3 changes detected`)
+- `changes[]`: per-field `DriftDisplayChange` rows with `label`, optional
+  `detail`, and `expected` / `actual` `DriftDisplayValue`s. Values carry
+  `text`, optional `mono`, and optional `tone`.
 
-- disabled drift shows configuration only
-- enabled drift shows schedule controls, run now, and saved timing metadata
-- run now queues an immediate manual drift check
-- drifted items are shown as expandable cards, one managed entity per card
-- custom format cards show parsed fields such as missing formats, missing
-  conditions, condition value changes, and include-in-rename changes
-- result cards do not show raw drift paths, raw JSON, hashes, or scheduler
-  metadata
-- the UI is read-only for drift results and does not repair or resync
+For custom formats the formatter resolves Arr enum ids back to friendly names
+(sources, resolutions, indexer flags, languages, release types, quality
+modifiers), formats sizes in human-readable bytes, and turns specification
+paths into labeled changes (negate / required / per-field changes / missing
+condition / extra condition).
+
+Display types live in `src/lib/shared/drift.ts`.
+
+## Arr Drift Page
+
+Route: `/arr/[id]/drift`. Source: `src/routes/arr/[id]/drift/+page.svelte`
+and `+page.server.ts`.
+
+Layout:
+
+- Sticky header with `Run Now` (queues a manual `arr.drift` job) and `Save`
+  (persists the schedule and enabled state).
+- Settings bar (borderless, full-width, with a bottom rule): `Detection`
+  toggle, `Schedule` `CronInput`, and timing pills aligned right
+  (`Paused` / `Ready` / `Next ...` / `Last ...`).
+- Entities section: an `ExpandableTable` with `Name` / `Entity` / `State`
+  columns, mirroring the dev changes-page diff idiom. Each drifted entity is
+  one row; expanding shows a `DriftFieldDiffTable` with `Field` / `Expected`
+  / `Actual` columns rendering the entity's `changes[]`.
+
+State rendering inside the entities section:
+
+| Latest status                          | Rendered as                                                             |
+| -------------------------------------- | ----------------------------------------------------------------------- |
+| Detection disabled                     | Empty `ExpandableTable` chrome with a disabled message in the empty row |
+| `never_checked`                        | Neutral message box                                                     |
+| `clean`                                | Success message box                                                     |
+| `failed`                               | Error message box with `last_error`                                     |
+| `drift_detected`, displayable items    | Populated `ExpandableTable`                                             |
+| `drift_detected`, no displayable items | Amber message box (formatter produced nothing for the stored diff)      |
+
+The page is read-only for drift results. It never writes to Arr, repairs
+configuration, or triggers sync.
 
 ## TODO
 
-Implement quality profile, delay profile, and media management comparison,
-and notifications.
+- Quality profile, delay profile, and media management comparison plus their
+  display formatting.
+- Drift notifications for `detected` and `failed`.
+- Brief drift status on the sync page linking to the dedicated drift page.
