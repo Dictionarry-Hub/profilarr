@@ -11,16 +11,7 @@
 	import { onMount } from 'svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import { isDirty, initEdit, update, current, clear } from '$lib/client/stores/dirty';
-	import {
-		Info,
-		Save,
-		Play,
-		RotateCcw,
-		Settings,
-		SlidersHorizontal,
-		History,
-		FlaskConical
-	} from 'lucide-svelte';
+	import { Info, Save, Play, RotateCcw, FlaskConical } from 'lucide-svelte';
 	import CoreSettings from './components/CoreSettings.svelte';
 	import FilterSettings from './components/FilterSettings.svelte';
 	import RunHistory from './components/RunHistory.svelte';
@@ -179,14 +170,8 @@
 		</div>
 	</StickyCard>
 
-	<div class="mt-6 space-y-6">
-		<section>
-			<h2
-				class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-			>
-				<Settings size={18} class="text-neutral-500 dark:text-neutral-400" />
-				Settings
-			</h2>
+	<div class="mt-4 space-y-6">
+		<section class="border-b border-neutral-200 pb-5 dark:border-neutral-800">
 			<CoreSettings
 				{enabled}
 				{cron}
@@ -202,12 +187,6 @@
 		</section>
 
 		<section data-onboarding="upgrades-filters">
-			<h2
-				class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-			>
-				<SlidersHorizontal size={18} class="text-neutral-500 dark:text-neutral-400" />
-				Filters
-			</h2>
 			<FilterSettings
 				{filters}
 				appType={data.instance.type}
@@ -221,12 +200,6 @@
 	</div>
 
 	<section class="mt-6">
-		<h2
-			class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-		>
-			<History size={18} class="text-neutral-500 dark:text-neutral-400" />
-			Run History
-		</h2>
 		<RunHistory runs={data.upgradeRuns} />
 	</section>
 
