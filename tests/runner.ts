@@ -19,7 +19,7 @@
  *   deno task test unit upgrades       tests/unit/upgrades/ only
  *   deno task test unit filters        Single file (tests/unit/upgrades/filters.test.ts)
  *
- *   Directory aliases:  auth, upgrades, jobs, logger, rename, sanitize
+ *   Directory aliases:  auth, upgrades, drift, jobs, logger, rename, sanitize
  *   File aliases:       filters, normalize, selectors, backup, cleanup, processor
  *
  * ─── Integration Tests ───────────────────────────────────────────────────
@@ -108,6 +108,7 @@ const UNIT_ALIASES: Record<string, string> = {
 	// Directories
 	auth: 'tests/unit/auth',
 	upgrades: 'tests/unit/upgrades',
+	drift: 'tests/unit/drift',
 	jobs: 'tests/unit/jobs',
 	logger: 'tests/unit/logger',
 	rename: 'tests/unit/rename',

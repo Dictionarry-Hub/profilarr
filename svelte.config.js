@@ -27,6 +27,7 @@ const config = {
 			$server: './src/server',
 			$db: './src/lib/server/db',
 			$jobs: './src/lib/server/jobs',
+			$drift: './src/lib/server/drift',
 			$pcd: './src/lib/server/pcd',
 			$arr: './src/lib/server/utils/arr',
 			$http: './src/lib/server/utils/http',

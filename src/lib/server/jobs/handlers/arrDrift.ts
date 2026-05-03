@@ -1,9 +1,15 @@
 import { jobQueueRegistry } from '../queueRegistry.ts';
 import type { JobHandler } from '../queueTypes.ts';
 import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
+import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { FEATURES } from '$shared/features.ts';
 import { calculateNextRun } from '../scheduleUtils.ts';
+import { createArrClient } from '$arr/factory.ts';
+import type { ArrType } from '$arr/types.ts';
+import { checkArrDrift } from '$drift/check.ts';
+import { hashDriftDiff } from '$drift/hash.ts';
+import { logger } from '$logger/logger.ts';
 
 const driftHandler: JobHandler = async (job) => {
 	const instanceId = Number(job.payload.instanceId);
@@ -32,11 +38,61 @@ const driftHandler: JobHandler = async (job) => {
 	const nextRunAt = calculateNextRun(settings.cron);
 	if (nextRunAt) arrDriftSettingsQueries.updateNextRunAt(instanceId, nextRunAt);
 
-	return {
-		status: 'skipped',
-		output: 'Drift comparison not implemented',
-		rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
-	};
+	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key, {
+		retries: 0
+	});
+
+	try {
+		const result = await checkArrDrift(client, instanceId, instance.type);
+		const now = new Date().toISOString();
+
+		arrDriftStatusQueries.upsert(instanceId, {
+			status: result.status,
+			lastCheckedAt: now,
+			counts: result.counts,
+			diff: result.diff,
+			diffHash: result.diffHash,
+			lastError: null,
+			errorHash: null
+		});
+
+		const customFormatCount = result.counts.custom_formats ?? 0;
+		return {
+			status: 'success',
+			output:
+				customFormatCount === 0
+					? 'No drift detected'
+					: `Detected ${customFormatCount} custom format drift item(s)`,
+			rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
+		};
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		const now = new Date().toISOString();
+		const errorHash = await hashDriftDiff({ error: message });
+
+		await logger.error('Drift check failed', {
+			source: 'DriftJob',
+			meta: { jobId: job.id, instanceId, instanceName: instance.name, error: message }
+		});
+
+		arrDriftStatusQueries.upsert(instanceId, {
+			status: 'failed',
+			lastCheckedAt: now,
+			counts: {},
+			diff: {},
+			diffHash: null,
+			lastError: message,
+			errorHash
+		});
+
+		return {
+			status: 'failure',
+			error: message,
+			rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
+		};
+	} finally {
+		client.close();
+	}
 };
 
 jobQueueRegistry.register('arr.drift', driftHandler);
