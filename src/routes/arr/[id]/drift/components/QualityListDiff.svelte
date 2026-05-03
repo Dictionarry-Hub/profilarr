@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
+	import Table from '$ui/table/Table.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { DriftDisplayQualityItem } from '$shared/drift.ts';
@@ -10,11 +11,20 @@
 		position: number;
 	}
 
-	$: rows = items.map<QualityRow>((item, index) => ({ ...item, position: index + 1 }));
+	$: rows = [...items].reverse().map<QualityRow>((item, index) => ({
+		...item,
+		position: index + 1,
+		items: item.items ? [...item.items].reverse() : item.items
+	}));
 
 	const columns: Column<QualityRow>[] = [
 		{ key: 'position', header: '#', width: 'w-12' },
 		{ key: 'name', header: 'Quality / Group' }
+	];
+
+	const memberColumns: Column<QualityRow>[] = [
+		{ key: 'position', header: '#', width: 'w-12' },
+		{ key: 'name', header: 'Quality' }
 	];
 
 	function disableExpand(row: QualityRow): boolean {
@@ -24,6 +34,10 @@
 	function rowKey(row: QualityRow): string {
 		return `${row.type}:${row.id}:${row.position}`;
 	}
+
+	function memberRows(members: DriftDisplayQualityItem[]): QualityRow[] {
+		return members.map((member, i) => ({ ...member, position: i + 1 }));
+	}
 </script>
 
 <ExpandableTable
@@ -32,6 +46,7 @@
 	getRowId={rowKey}
 	disableExpandWhen={disableExpand}
 	compact
+	flushExpanded
 	chevronPosition="right"
 	emptyMessage="No qualities"
 >
@@ -42,11 +57,7 @@
 			</span>
 		{:else if column.key === 'name'}
 			<div class="flex items-center justify-between gap-2">
-				<span
-					class="text-sm font-medium {row.allowed
-						? 'text-neutral-900 dark:text-neutral-100'
-						: 'text-neutral-400 line-through dark:text-neutral-500'}"
-				>
+				<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 					{row.name}
 				</span>
 				<div class="flex shrink-0 items-center gap-1.5">
@@ -62,18 +73,26 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="expanded" let:row>
-		{#if row.type === 'group' && row.items}
-			<div class="space-y-2 text-sm">
-				{#each row.items as member}
-					<div class="flex items-center justify-between gap-2">
-						<span class="font-medium text-neutral-700 dark:text-neutral-200">
-							{member.name}
-						</span>
-						{#if member.upgradeUntil}
-							<Label variant="info" size="sm" rounded="md">Upgrade Until</Label>
+		{#if row.type === 'group' && row.items && row.items.length > 0}
+			<div class="p-4">
+				<Table columns={memberColumns} data={memberRows(row.items)} compact hoverable={false}>
+					<svelte:fragment slot="cell" let:row let:column>
+						{#if column.key === 'position'}
+							<span class="text-sm text-neutral-500 tabular-nums dark:text-neutral-400">
+								{row.position}
+							</span>
+						{:else if column.key === 'name'}
+							<div class="flex items-center justify-between gap-2">
+								<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+									{row.name}
+								</span>
+								{#if row.upgradeUntil}
+									<Label variant="info" size="sm" rounded="md">Upgrade Until</Label>
+								{/if}
+							</div>
 						{/if}
-					</div>
-				{/each}
+					</svelte:fragment>
+				</Table>
 			</div>
 		{/if}
 	</svelte:fragment>
