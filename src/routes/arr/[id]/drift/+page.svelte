@@ -195,13 +195,7 @@
 			</div>
 		</section>
 
-		{#if data.featureEnabled && !enabled}
-			<div
-				class="rounded border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400"
-			>
-				Drift detection is disabled.
-			</div>
-		{:else if data.featureEnabled}
+		{#if data.featureEnabled && enabled}
 			<section>
 				<h2
 					class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
