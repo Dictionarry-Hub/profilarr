@@ -423,33 +423,29 @@
 					<!-- Mobile: buttons below name -->
 					<div class="flex flex-wrap items-center gap-1 md:hidden">
 						<Button
-							text={row.enabled ? 'Disable' : 'Enable'}
 							icon={Power}
 							iconColor={row.enabled
 								? 'text-green-600 dark:text-green-400'
 								: 'text-neutral-400 dark:text-neutral-500'}
-							responsive
+							tooltip={row.enabled ? 'Disable' : 'Enable'}
 							on:click={() => toggleEnabled(row.id)}
 						/>
 						<Button
-							text="Copy"
 							icon={ClipboardCopy}
 							iconColor="text-amber-600 dark:text-amber-400"
-							responsive
+							tooltip="Copy"
 							on:click={() => copyFilter(row.id)}
 						/>
 						<Button
-							text="Duplicate"
 							icon={Copy}
 							iconColor="text-violet-600 dark:text-violet-400"
-							responsive
+							tooltip="Duplicate"
 							on:click={() => duplicateFilter(row.id)}
 						/>
 						<Button
-							text="Delete"
 							icon={Trash2}
 							iconColor="text-red-600 dark:text-red-400"
-							responsive
+							tooltip="Delete"
 							on:click={() => confirmDelete(row)}
 						/>
 					</div>
@@ -461,29 +457,29 @@
 		<svelte:fragment slot="actions" let:row>
 			<div class="hidden items-center gap-1 md:flex">
 				<Button
-					text={row.enabled ? 'Disable' : 'Enable'}
 					icon={Power}
 					iconColor={row.enabled
 						? 'text-green-600 dark:text-green-400'
 						: 'text-neutral-400 dark:text-neutral-500'}
+					tooltip={row.enabled ? 'Disable' : 'Enable'}
 					on:click={() => toggleEnabled(row.id)}
 				/>
 				<Button
-					text="Copy"
 					icon={ClipboardCopy}
 					iconColor="text-amber-600 dark:text-amber-400"
+					tooltip="Copy"
 					on:click={() => copyFilter(row.id)}
 				/>
 				<Button
-					text="Duplicate"
 					icon={Copy}
 					iconColor="text-violet-600 dark:text-violet-400"
+					tooltip="Duplicate"
 					on:click={() => duplicateFilter(row.id)}
 				/>
 				<Button
-					text="Delete"
 					icon={Trash2}
 					iconColor="text-red-600 dark:text-red-400"
+					tooltip="Delete"
 					on:click={() => confirmDelete(row)}
 				/>
 			</div>
