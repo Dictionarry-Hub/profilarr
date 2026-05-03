@@ -32,8 +32,8 @@
 	};
 
 	const driftColumns: Column<DriftDisplayEntity>[] = [
-		{ key: 'title', header: 'Entity' },
-		{ key: 'section', header: 'Section', width: 'w-44' },
+		{ key: 'title', header: 'Name' },
+		{ key: 'section', header: 'Entity', width: 'w-44' },
 		{ key: 'state', header: 'State', width: 'w-32' }
 	];
 
