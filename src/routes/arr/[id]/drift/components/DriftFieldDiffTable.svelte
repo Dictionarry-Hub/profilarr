@@ -3,6 +3,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { DriftDisplayChange, DriftDisplayTone, DriftDisplayValue } from '$shared/drift.ts';
+	import QualityListDiff from './QualityListDiff.svelte';
 
 	export let changes: DriftDisplayChange[];
 
@@ -42,17 +43,25 @@
 			</div>
 		{:else if column.key === 'expected'}
 			{#if row.expected}
-				<Label variant={valueVariant(row.expected)} size="md" rounded="md" mono={row.expected.mono}>
-					{row.expected.text}
-				</Label>
+				{#if row.expected.qualityList}
+					<QualityListDiff items={row.expected.qualityList} />
+				{:else}
+					<Label variant={valueVariant(row.expected)} size="md" rounded="md" mono={row.expected.mono}>
+						{row.expected.text}
+					</Label>
+				{/if}
 			{:else}
 				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
 			{/if}
 		{:else if column.key === 'actual'}
 			{#if row.actual}
-				<Label variant={valueVariant(row.actual)} size="md" rounded="md" mono={row.actual.mono}>
-					{row.actual.text}
-				</Label>
+				{#if row.actual.qualityList}
+					<QualityListDiff items={row.actual.qualityList} />
+				{:else}
+					<Label variant={valueVariant(row.actual)} size="md" rounded="md" mono={row.actual.mono}>
+						{row.actual.text}
+					</Label>
+				{/if}
 			{:else}
 				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
 			{/if}

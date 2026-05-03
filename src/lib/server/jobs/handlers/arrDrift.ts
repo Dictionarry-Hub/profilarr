@@ -64,7 +64,7 @@ const driftHandler: JobHandler = async (job) => {
 			errorHash: null
 		});
 
-		const customFormatCount = result.counts.custom_formats ?? 0;
+		const totalCount = Object.values(result.counts).reduce((sum, count) => sum + (count ?? 0), 0);
 		if (result.status === 'drift_detected') {
 			await logger.info('Drift detected', {
 				source: 'jobs.handlers.arrDrift',
@@ -80,9 +80,9 @@ const driftHandler: JobHandler = async (job) => {
 		return {
 			status: 'success',
 			output:
-				customFormatCount === 0
+				totalCount === 0
 					? 'No drift detected'
-					: `Detected ${customFormatCount} custom format drift item(s)`,
+					: `Detected ${totalCount} drift item(s)`,
 			rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
 		};
 	} catch (error) {

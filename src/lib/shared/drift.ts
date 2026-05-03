@@ -18,6 +18,16 @@ export interface DriftDisplayValue {
 	text: string;
 	mono?: boolean;
 	tone?: DriftDisplayTone;
+	qualityList?: DriftDisplayQualityItem[];
+}
+
+export interface DriftDisplayQualityItem {
+	type: 'quality' | 'group';
+	id: number;
+	name: string;
+	allowed: boolean;
+	upgradeUntil?: boolean;
+	items?: DriftDisplayQualityItem[];
 }
 
 export interface DriftDisplayChange {
