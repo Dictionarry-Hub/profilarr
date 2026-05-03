@@ -40,18 +40,18 @@ Job run history remains the operational history.
 Current implementation creates and exposes the table/query layer. The no-op job
 handler does not write drift result rows yet.
 
-| Field                         | Purpose                                      |
-| ----------------------------- | -------------------------------------------- |
-| `status`                      | `never_checked`, `clean`, `drift_detected`, `failed` |
-| `last_checked_at`             | Last completed check time                    |
-| `counts_json`                 | Count summary by drift section               |
-| `diff_json`                   | Structured latest drift result               |
-| `diff_hash`                   | Stable hash of the structured drift result   |
-| `last_notified_hash`          | Last drift hash sent as a notification       |
-| `last_notified_at`            | Last drift notification time                 |
-| `last_error`                  | Latest failure detail                        |
-| `error_hash`                  | Stable hash of the latest failure detail     |
-| `last_notified_error_hash`    | Last failure hash sent as a notification     |
+| Field                      | Purpose                                              |
+| -------------------------- | ---------------------------------------------------- |
+| `status`                   | `never_checked`, `clean`, `drift_detected`, `failed` |
+| `last_checked_at`          | Last completed check time                            |
+| `counts_json`              | Count summary by drift section                       |
+| `diff_json`                | Structured latest drift result                       |
+| `diff_hash`                | Stable hash of the structured drift result           |
+| `last_notified_hash`       | Last drift hash sent as a notification               |
+| `last_notified_at`         | Last drift notification time                         |
+| `last_error`               | Latest failure detail                                |
+| `error_hash`               | Stable hash of the latest failure detail             |
+| `last_notified_error_hash` | Last failure hash sent as a notification             |
 
 ## TODO
 
