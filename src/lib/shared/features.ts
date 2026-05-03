@@ -13,5 +13,5 @@ export const FEATURES = {
 	/** Database tweaks UI */
 	tweaks: false,
 	/** Arr drift detection */
-	drift: true
+	drift: false
 } as const;
