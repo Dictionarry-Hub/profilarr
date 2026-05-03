@@ -197,11 +197,11 @@
 				onFiltersChange={(v) => update('filters', JSON.stringify(v))}
 			/>
 		</section>
-	</div>
 
-	<section class="mt-6">
-		<RunHistory runs={data.upgradeRuns} />
-	</section>
+		<section>
+			<RunHistory runs={data.upgradeRuns} />
+		</section>
+	</div>
 
 	<!-- Hidden forms -->
 	<form

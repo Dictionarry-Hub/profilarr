@@ -351,7 +351,7 @@
 	}
 </script>
 
-<div class="-mx-4 bg-neutral-50 px-4 pt-2 pb-6 md:-mx-8 md:px-8 dark:bg-neutral-900">
+<div class="-mx-4 bg-neutral-50 px-4 pt-2 pb-2 md:-mx-8 md:px-8 dark:bg-neutral-900">
 	<div class="mb-4">
 		<ActionsBar>
 			<SearchAction {searchStore} placeholder="Search filters..." />
