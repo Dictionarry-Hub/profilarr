@@ -130,9 +130,6 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - name: Clear corrupted native libraries
-        run: rm -rf ~/.cache/deno/plug
-
       - run: deno install --node-modules-dir
 
       - name: Run unit tests
@@ -185,9 +182,6 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - name: Clear corrupted native libraries
-        run: rm -rf ~/.cache/deno/plug
-
       - run: deno install --node-modules-dir
 
       - name: Download build artifact
@@ -198,12 +192,6 @@ jobs:
 
       - name: Make binary executable
         run: chmod +x dist/build/profilarr
-
-      - name: Warm native library cache
-        run: |
-          mkdir -p /tmp/ffi-warmup/data/databases /tmp/ffi-warmup/logs /tmp/ffi-warmup/backups
-          APP_BASE_PATH=/tmp/ffi-warmup PORT=9999 timeout 30 ./dist/build/profilarr || true
-          rm -rf /tmp/ffi-warmup
 
       - name: Cache Docker images
         id: docker-cache
@@ -251,13 +239,22 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - name: Clear corrupted native libraries
-        run: rm -rf ~/.cache/deno/plug
-
       - run: deno install --node-modules-dir
 
-      - name: Install Playwright browsers
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+
+      - name: Install Playwright browsers + system deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system deps only (browsers cached)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Download build artifact
         uses: actions/download-artifact@v8
