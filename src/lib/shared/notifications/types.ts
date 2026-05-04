@@ -108,6 +108,20 @@ export const notificationTypes: NotificationType[] = [
 		description: 'Notification when cleanup cannot complete or no items could be deleted'
 	},
 
+	// Arr Drift
+	{
+		id: 'arr.drift.detected',
+		label: 'Arr Drift Detected',
+		category: 'Arr Drift',
+		description: 'Notification when drift is detected on an Arr instance'
+	},
+	{
+		id: 'arr.drift.failed',
+		label: 'Arr Drift Failed',
+		category: 'Arr Drift',
+		description: 'Notification when an Arr drift check fails'
+	},
+
 	// Upgrades
 	{
 		id: 'upgrade.success',

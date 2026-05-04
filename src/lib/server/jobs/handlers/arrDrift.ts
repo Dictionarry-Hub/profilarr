@@ -8,8 +8,11 @@ import { calculateNextRun } from '../scheduleUtils.ts';
 import { createArrClient } from '$arr/factory.ts';
 import type { ArrType } from '$arr/types.ts';
 import { checkArrDrift } from '$drift/check.ts';
+import { buildDriftDisplayEntities } from '$drift/display.ts';
 import { hashDriftDiff } from '$drift/hash.ts';
 import { logger } from '$logger/logger.ts';
+import { notifications } from '$notifications/definitions/index.ts';
+import { notificationManager } from '$notifications/NotificationManager.ts';
 
 const driftHandler: JobHandler = async (job) => {
 	const instanceId = Number(job.payload.instanceId);
@@ -41,6 +44,7 @@ const driftHandler: JobHandler = async (job) => {
 	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key, {
 		retries: 0
 	});
+	const previousStatus = arrDriftStatusQueries.getByInstanceId(instanceId);
 
 	try {
 		const result = await checkArrDrift(client, instanceId, instance.type);
@@ -70,6 +74,20 @@ const driftHandler: JobHandler = async (job) => {
 				source: 'jobs.handlers.arrDrift',
 				meta: logMeta
 			});
+
+			if (result.diffHash !== previousStatus?.lastNotifiedHash) {
+				await notificationManager.notify(
+					notifications.arrDriftDetected({
+						instanceName: instance.name,
+						instanceType: instance.type,
+						entities: buildDriftDisplayEntities(result.diff, instance.type)
+					})
+				);
+				arrDriftStatusQueries.update(instanceId, {
+					lastNotifiedHash: result.diffHash,
+					lastNotifiedAt: now
+				});
+			}
 		} else {
 			await logger.debug('Drift check complete', {
 				source: 'jobs.handlers.arrDrift',
@@ -101,6 +119,20 @@ const driftHandler: JobHandler = async (job) => {
 			lastError: message,
 			errorHash
 		});
+
+		if (errorHash !== previousStatus?.lastNotifiedErrorHash) {
+			await notificationManager.notify(
+				notifications.arrDriftFailed({
+					instanceName: instance.name,
+					instanceType: instance.type,
+					error: message
+				})
+			);
+			arrDriftStatusQueries.update(instanceId, {
+				lastNotifiedErrorHash: errorHash,
+				lastNotifiedAt: now
+			});
+		}
 
 		return {
 			status: 'failure',

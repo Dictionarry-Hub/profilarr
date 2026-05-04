@@ -45,6 +45,8 @@ Current handler behavior:
 - unsupported Arr types are skipped
 - enabled jobs compare custom formats, quality profiles, and delay profiles,
   store the latest result, and return success
+- drift-detected and failed runs notify subscribed services when the current
+  drift or error hash has not already been notified
 - scheduled jobs calculate and store the next run before returning
 
 ## Latest Status
@@ -64,6 +66,25 @@ Job run history remains the operational history.
 | `last_error`               | Latest failure detail                                |
 | `error_hash`               | Stable hash of the latest failure detail             |
 | `last_notified_error_hash` | Last failure hash sent as a notification             |
+
+## Notifications
+
+Drift emits notification events through the shared notification manager:
+
+| Event                | Trigger                               | Severity  |
+| -------------------- | ------------------------------------- | --------- |
+| `arr.drift.detected` | Latest drift hash has not been sent   | `warning` |
+| `arr.drift.failed`   | Latest failure hash has not been sent | `error`   |
+
+Detected notifications emit one section block per drift category (Custom
+Format, Quality Profile, Delay Profile) listing up to 15 displayable drift
+entities total. If more entities exist, an additional `More` block summarises
+the remainder as `+N more`. Discord renders each section as a code-block field.
+Webhook receives the full payload. Summary-tier services such as Ntfy and
+Telegram show only the title because section blocks are omitted.
+
+Failed notifications use the first error line as the message and include the
+full error text in an `Error` section.
 
 ## Custom Formats
 
@@ -181,5 +202,4 @@ configuration, or triggers sync.
 
 ## TODO
 
-- Drift notifications for `detected` and `failed`.
 - Brief drift status on the sync page linking to the dedicated drift page.

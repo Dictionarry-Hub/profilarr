@@ -74,11 +74,11 @@ Notification types are enumerated in `src/lib/shared/notifications/types.ts`
 and consumed by the settings UI for per-service subscription. Each maps to a
 definition in `src/lib/server/notifications/definitions/`.
 
-Categories include Backups, Databases, Arr Sync, Arr Cleanup, Upgrades,
-Renames, and Announcements. The announcement event (`announcement.new`) is
-fired by the `announcements.fetch` job whenever the reconciler inserts a
-new, never-seen-before announcement id. Reappearing previously-withdrawn
-announcements do not re-notify.
+Categories include Backups, Databases, Arr Sync, Arr Cleanup, Arr Drift,
+Upgrades, Renames, and Announcements. The announcement event
+(`announcement.new`) is fired by the `announcements.fetch` job whenever the
+reconciler inserts a new, never-seen-before announcement id. Reappearing
+previously-withdrawn announcements do not re-notify.
 
 ## Notification Payload
 
@@ -238,6 +238,7 @@ tests/integration/notifications/
     upgrade.test.ts      - upgrade notification (definition + all notifiers)
     rename.test.ts       - rename notification (definition + all notifiers)
     arrSync.test.ts      - arr sync notification (definition + all notifiers)
+    arrDrift.test.ts     - arr drift notification (definition + all notifiers)
     pcdSync.test.ts      - PCD sync notification (definition + all notifiers)
 ```
 
