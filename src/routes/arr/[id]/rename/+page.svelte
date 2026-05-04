@@ -13,7 +13,6 @@
 	import DirtyModal from '$lib/client/ui/modal/DirtyModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -89,44 +88,44 @@
 		</div>
 		<div slot="right" class="flex items-center gap-2">
 			<Button text="How it works" icon={Info} on:click={() => (showInfoModal = true)} />
-			{#if !isNewConfig}
-				<Tooltip text="Preview which files would be renamed without making changes">
-					<Button
-						text={running ? 'Running...' : 'Dry Run'}
-						icon={FlaskConical}
-						iconColor="text-amber-600 dark:text-amber-400"
-						disabled={running || saving || $isDirty}
-						on:click={() => {
-							jobStatus.connect();
-							jobStatus.setRunning('arr.rename', 'Renaming files...');
-							const f = document.getElementById('dry-run-form');
-							if (f instanceof HTMLFormElement) {
-								f.requestSubmit();
-							} else {
-								jobStatus.cancelOptimistic();
-							}
-						}}
-					/>
-				</Tooltip>
-				<Tooltip text="Rename files and folders now">
-					<Button
-						text={running ? 'Running...' : 'Run Now'}
-						icon={Play}
-						iconColor="text-green-600 dark:text-green-400"
-						disabled={running || saving || $isDirty}
-						on:click={() => {
-							jobStatus.connect();
-							jobStatus.setRunning('arr.rename', 'Renaming files...');
-							const f = document.getElementById('live-run-form');
-							if (f instanceof HTMLFormElement) {
-								f.requestSubmit();
-							} else {
-								jobStatus.cancelOptimistic();
-							}
-						}}
-					/>
-				</Tooltip>
-			{/if}
+			<Button
+				text={running ? 'Running...' : 'Dry Run'}
+				icon={FlaskConical}
+				iconColor="text-amber-600 dark:text-amber-400"
+				disabled={isNewConfig || !enabled || running || saving || $isDirty}
+				tooltip="Preview which files would be renamed without making changes"
+				tooltipPosition="bottom"
+				tooltipAlign="right"
+				on:click={() => {
+					jobStatus.connect();
+					jobStatus.setRunning('arr.rename', 'Renaming files...');
+					const f = document.getElementById('dry-run-form');
+					if (f instanceof HTMLFormElement) {
+						f.requestSubmit();
+					} else {
+						jobStatus.cancelOptimistic();
+					}
+				}}
+			/>
+			<Button
+				text={running ? 'Running...' : 'Run Now'}
+				icon={Play}
+				iconColor="text-green-600 dark:text-green-400"
+				disabled={isNewConfig || !enabled || running || saving || $isDirty}
+				tooltip="Rename files and folders now"
+				tooltipPosition="bottom"
+				tooltipAlign="right"
+				on:click={() => {
+					jobStatus.connect();
+					jobStatus.setRunning('arr.rename', 'Renaming files...');
+					const f = document.getElementById('live-run-form');
+					if (f instanceof HTMLFormElement) {
+						f.requestSubmit();
+					} else {
+						jobStatus.cancelOptimistic();
+					}
+				}}
+			/>
 			<Button
 				text="Save"
 				icon={Save}
