@@ -44,6 +44,13 @@ reinitializes the connection.
 that auto-commits on success and auto-rollbacks on error. Raw
 `beginTransaction()`, `commit()`, and `rollback()` methods are also exposed.
 
+The helper issues `BEGIN IMMEDIATE` rather than the default `BEGIN DEFERRED`,
+so write transactions acquire the write lock at `BEGIN` time. Two concurrent
+writers serialize cleanly via `busy_timeout` instead of one failing
+immediately with `SQLITE_BUSY` from a deferred read→write upgrade conflict
+(SQLite explicitly bypasses the busy handler in that case to avoid a
+permanent deadlock).
+
 ## Schema
 
 `src/lib/server/db/schema.sql` is a **reference snapshot** of the current
