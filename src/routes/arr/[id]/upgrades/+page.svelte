@@ -188,7 +188,7 @@
 			/>
 		</section>
 
-		<section data-onboarding="upgrades-filters">
+		<section class="md:px-4" data-onboarding="upgrades-filters">
 			<FilterSettings
 				{filters}
 				appType={data.instance.type}
@@ -200,7 +200,7 @@
 			/>
 		</section>
 
-		<section>
+		<section class="md:px-4">
 			<RunHistory runs={data.upgradeRuns} />
 		</section>
 	</div>

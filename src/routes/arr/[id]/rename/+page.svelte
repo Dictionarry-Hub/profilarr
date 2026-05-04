@@ -132,7 +132,7 @@
 			/>
 		</section>
 
-		<section>
+		<section class="md:px-4">
 			<RenameRunHistory runs={data.renameRuns} />
 		</section>
 	</div>
