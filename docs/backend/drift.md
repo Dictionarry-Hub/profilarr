@@ -5,6 +5,7 @@
 `src/lib/server/db/queries/arrDriftStatus.ts`,
 `src/lib/server/drift/customFormats.ts`,
 `src/lib/server/drift/qualityProfiles.ts`,
+`src/lib/server/drift/delayProfiles.ts`,
 `src/lib/server/drift/display.ts`,
 `src/routes/arr/[id]/drift/+page.svelte`,
 `src/routes/arr/[id]/drift/+page.server.ts`,
@@ -35,8 +36,8 @@ Current handler behavior:
 - missing instances fail
 - missing or disabled settings cancel the job
 - unsupported Arr types are skipped
-- enabled jobs compare custom formats and quality profiles, store the latest
-  result, and return success
+- enabled jobs compare custom formats, quality profiles, and delay profiles,
+  store the latest result, and return success
 - scheduled jobs calculate and store the next run before returning
 
 ## Latest Status
@@ -94,6 +95,21 @@ Comparison rules:
 - report unmanaged custom format scoring rows with nonzero scores because they
   affect profile behavior
 
+## Delay Profiles
+
+Delay profile drift compares the selected Profilarr delay profile against Arr's
+default delay profile (`id=1`). This mirrors sync, which always overwrites the
+default Arr profile instead of creating or matching by name.
+
+Comparison rules:
+
+- build expected delay profile with the same transformer used by sync
+- no selected delay profile is clean
+- report the selected delay profile as missing if Arr does not return `id=1`
+- ignore non-default extra Arr delay profiles
+- compare id, derived protocol, delays, bypass fields, minimum custom format
+  score, order, and tags
+
 ## Display Formatter
 
 `src/lib/server/drift/display.ts` maps the raw `diff_json` stored in
@@ -119,6 +135,9 @@ For quality profiles the formatter turns settings, language, qualities, and
 custom format score paths into labeled changes. Quality profile score rows show
 expected and actual score values, missing custom formats, missing score rows,
 and unmanaged nonzero score rows.
+
+For delay profiles the formatter turns the derived protocol, delays, bypass
+flags, minimum score, order, and tags into friendly field rows.
 
 Display types live in `src/lib/shared/drift.ts`.
 
@@ -155,6 +174,6 @@ configuration, or triggers sync.
 
 ## TODO
 
-- Delay profile and media management comparison plus their display formatting.
+- Media management comparison plus display formatting.
 - Drift notifications for `detected` and `failed`.
 - Brief drift status on the sync page linking to the dedicated drift page.

@@ -9,9 +9,8 @@ import { BaseSyncer, type SyncResult } from '../base.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { getCache } from '$pcd/index.ts';
 import { getByName as getDelayProfileByName } from '$pcd/entities/delayProfiles/index.ts';
-import type { DelayProfilesRow } from '$shared/pcd/display.ts';
-import type { ArrDelayProfile } from '$arr/types.ts';
 import { logger } from '$logger/logger.ts';
+import { transformDelayProfile } from './transformer.ts';
 
 export class DelayProfileSyncer extends BaseSyncer {
 	protected get syncType(): string {
@@ -50,7 +49,7 @@ export class DelayProfileSyncer extends BaseSyncer {
 			return { success: false, itemsSynced: 0, error: 'Profile not found in PCD' };
 		}
 
-		const transformed = this.transform(profile);
+		const transformed = transformDelayProfile(profile);
 		await this.client.updateDelayProfile(1, transformed);
 
 		await logger.info(`Synced delay profile "${profile.name}" to "${this.instanceName}"`, {
@@ -62,49 +61,6 @@ export class DelayProfileSyncer extends BaseSyncer {
 			success: true,
 			itemsSynced: 1,
 			items: [{ name: profile.name, action: 'updated' as const }]
-		};
-	}
-
-	private transform(profile: DelayProfilesRow): ArrDelayProfile {
-		let enableUsenet = true;
-		let enableTorrent = true;
-		let preferredProtocol = 'usenet';
-
-		switch (profile.preferred_protocol) {
-			case 'prefer_usenet':
-				enableUsenet = true;
-				enableTorrent = true;
-				preferredProtocol = 'usenet';
-				break;
-			case 'prefer_torrent':
-				enableUsenet = true;
-				enableTorrent = true;
-				preferredProtocol = 'torrent';
-				break;
-			case 'only_usenet':
-				enableUsenet = true;
-				enableTorrent = false;
-				preferredProtocol = 'usenet';
-				break;
-			case 'only_torrent':
-				enableUsenet = false;
-				enableTorrent = true;
-				preferredProtocol = 'torrent';
-				break;
-		}
-
-		return {
-			id: 1,
-			enableUsenet,
-			enableTorrent,
-			preferredProtocol,
-			usenetDelay: profile.usenet_delay ?? 0,
-			torrentDelay: profile.torrent_delay ?? 0,
-			bypassIfHighestQuality: profile.bypass_if_highest_quality,
-			bypassIfAboveCustomFormatScore: profile.bypass_if_above_custom_format_score,
-			minimumCustomFormatScore: profile.minimum_custom_format_score ?? 0,
-			order: 2147483647, // Default profile order
-			tags: [] // Default profile must have empty tags
 		};
 	}
 

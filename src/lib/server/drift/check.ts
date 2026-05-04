@@ -2,6 +2,7 @@ import type { BaseArrClient } from '$arr/base.ts';
 import type { DriftCounts, DriftDiff } from '$shared/drift.ts';
 import type { SyncArrType } from '$sync/mappings.ts';
 import { compareCustomFormatDrift, buildExpectedCustomFormats } from './customFormats.ts';
+import { checkDelayProfileDrift } from './delayProfiles.ts';
 import { hashDriftDiff } from './hash.ts';
 import { checkQualityProfileDrift } from './qualityProfiles.ts';
 
@@ -13,13 +14,14 @@ export interface DriftCheckResult {
 }
 
 export async function checkArrDrift(
-	client: Pick<BaseArrClient, 'getCustomFormats' | 'getQualityProfiles'>,
+	client: Pick<BaseArrClient, 'getCustomFormats' | 'getQualityProfiles' | 'getDelayProfiles'>,
 	instanceId: number,
 	arrType: SyncArrType
 ): Promise<DriftCheckResult> {
-	const [expectedCustomFormats, actualCustomFormats] = await Promise.all([
+	const [expectedCustomFormats, actualCustomFormats, delayProfiles] = await Promise.all([
 		buildExpectedCustomFormats(instanceId, arrType),
-		client.getCustomFormats()
+		client.getCustomFormats(),
+		checkDelayProfileDrift(client, instanceId)
 	]);
 	const customFormats = compareCustomFormatDrift(expectedCustomFormats, actualCustomFormats);
 	const qualityProfiles = await checkQualityProfileDrift(
@@ -30,11 +32,13 @@ export async function checkArrDrift(
 	);
 	const counts: DriftCounts = {
 		custom_formats: customFormats.count,
-		quality_profiles: qualityProfiles.count
+		quality_profiles: qualityProfiles.count,
+		delay_profiles: delayProfiles.count
 	};
 	const diff: DriftDiff = {
 		custom_formats: customFormats.diff,
-		quality_profiles: qualityProfiles.diff
+		quality_profiles: qualityProfiles.diff,
+		delay_profiles: delayProfiles.diff
 	};
 	const total = Object.values(counts).reduce((sum, count) => sum + (count ?? 0), 0);
 
