@@ -24,7 +24,7 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, clearLoginAttempts, queryDb } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 
 const PORT = 7015;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -68,7 +68,7 @@ test('local bypass uses real TCP address, not proxy headers', async () => {
 	// test runs from localhost, the real TCP address IS local, so bypass
 	// works. A remote attacker spoofing X-Forwarded-For: 192.168.x.x
 	// would be rejected because their real TCP address is public.
-	const conn = new Database(getDbPath(PORT));
+	const conn = openDb(getDbPath(PORT));
 	try {
 		conn.exec('UPDATE auth_settings SET local_bypass_enabled = 1 WHERE id = 1');
 	} finally {

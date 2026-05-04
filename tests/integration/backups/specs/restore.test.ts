@@ -24,7 +24,7 @@ import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { TestClient } from '$test-harness/client.ts';
 import { createUser, login, setApiKey } from '$test-harness/setup.ts';
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 
 const PORT_A = 7035;
 const PORT_B = 7036;
@@ -39,7 +39,7 @@ let clientB: TestClient;
  * Seed known data into server A's database so we can verify it after restore.
  */
 function seedData(dbPath: string) {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO arr_instances (name, type, url, api_key, enabled)

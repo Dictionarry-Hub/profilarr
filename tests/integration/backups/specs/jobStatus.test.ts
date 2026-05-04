@@ -10,7 +10,7 @@ import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { TestClient } from '$test-harness/client.ts';
 import { createUser, login, setApiKey, queryDb } from '$test-harness/setup.ts';
-import { Database } from 'jsr:@db/sqlite@0.12';
+import { openDb } from '$test-harness/db.ts';
 
 const PORT = 7030;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -31,7 +31,7 @@ function insertJob(
 		finishedAt?: string | null;
 	}
 ): number {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO job_queue (job_type, status, run_at, payload, source, started_at, finished_at)
@@ -63,7 +63,7 @@ function insertRunHistory(
 		error?: string | null;
 	}
 ): void {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO job_run_history (queue_id, job_type, status, started_at, finished_at, duration_ms, output, error)

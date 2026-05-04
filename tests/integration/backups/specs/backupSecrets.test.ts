@@ -37,7 +37,7 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 import { hash } from '@felix/bcrypt';
 
 const PORT = 7017;
@@ -55,7 +55,7 @@ let backupDbPath: string;
 let extractDir: string;
 
 async function seedSecrets(dbPath: string) {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		// Arr instance
 		db.exec(
@@ -186,7 +186,7 @@ teardown(async () => {
 });
 
 test('backup DB does not contain arr API keys', () => {
-	const db = new Database(backupDbPath);
+	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT api_key FROM arr_instances').all() as { api_key: string }[];
 		for (const row of rows) {
@@ -198,7 +198,7 @@ test('backup DB does not contain arr API keys', () => {
 });
 
 test('backup DB does not contain database PATs', () => {
-	const db = new Database(backupDbPath);
+	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT personal_access_token FROM database_instances').all() as {
 			personal_access_token: string | null;
@@ -216,7 +216,7 @@ test('backup DB does not contain database PATs', () => {
 });
 
 test('backup DB does not contain Profilarr API key', () => {
-	const db = new Database(backupDbPath);
+	const db = openDb(backupDbPath);
 	try {
 		const row = db.prepare('SELECT api_key FROM auth_settings WHERE id = 1').get() as {
 			api_key: string | null;
@@ -228,7 +228,7 @@ test('backup DB does not contain Profilarr API key', () => {
 });
 
 test('backup DB does not contain AI API key', () => {
-	const db = new Database(backupDbPath);
+	const db = openDb(backupDbPath);
 	try {
 		const row = db.prepare('SELECT api_key FROM ai_settings WHERE id = 1').get() as
 			| {
@@ -244,7 +244,7 @@ test('backup DB does not contain AI API key', () => {
 });
 
 test('backup DB does not contain TMDB API key', () => {
-	const db = new Database(backupDbPath);
+	const db = openDb(backupDbPath);
 	try {
 		const row = db.prepare('SELECT api_key FROM tmdb_settings WHERE id = 1').get() as {
 			api_key: string;
@@ -256,7 +256,7 @@ test('backup DB does not contain TMDB API key', () => {
 });
 
 test('backup DB does not contain notification webhook URLs', () => {
-	const db = new Database(backupDbPath);
+	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT config FROM notification_services').all() as {
 			config: string;
@@ -274,7 +274,7 @@ test('backup DB does not contain notification webhook URLs', () => {
 });
 
 test('backup DB does not contain user password hashes', () => {
-	const db = new Database(backupDbPath);
+	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT * FROM users').all();
 		assertEquals(rows.length, 0, 'Backup DB still contains user records');
@@ -284,7 +284,7 @@ test('backup DB does not contain user password hashes', () => {
 });
 
 test('backup DB does not contain sessions', () => {
-	const db = new Database(backupDbPath);
+	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT * FROM sessions').all();
 		assertEquals(rows.length, 0, 'Backup DB still contains session records');
@@ -294,7 +294,7 @@ test('backup DB does not contain sessions', () => {
 });
 
 test('backup DB does not contain login attempts', () => {
-	const db = new Database(backupDbPath);
+	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT * FROM login_attempts').all();
 		assertEquals(rows.length, 0, 'Backup DB still contains login attempt records');

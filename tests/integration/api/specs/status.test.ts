@@ -16,7 +16,7 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, setApiKey } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 
 const PORT = 7035;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -25,7 +25,7 @@ const API_KEY = 'status-test-key-abc123';
 let client: TestClient;
 
 function seedDatabase(dbPath: string): void {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO database_instances (uuid, name, repository_url, local_path, enabled, sync_strategy)
@@ -37,7 +37,7 @@ function seedDatabase(dbPath: string): void {
 }
 
 function seedArrInstance(dbPath: string): void {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO arr_instances (name, type, url, api_key, enabled)

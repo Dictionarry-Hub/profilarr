@@ -43,7 +43,7 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, setApiKey } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 
 const PORT = 7020;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -53,7 +53,7 @@ let client: TestClient;
 let linkedDbId: number;
 
 function seedDatabase(dbPath: string): void {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO database_instances (uuid, name, repository_url, local_path, personal_access_token, enabled)

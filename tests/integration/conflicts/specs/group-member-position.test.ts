@@ -18,7 +18,7 @@ import {
 	queryLatestConflicts,
 	queryLatestHistory
 } from '../harness/setup.ts';
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 
 const PORT = 7026;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -849,7 +849,7 @@ test('ask: user reorder op conflicts when upstream also reordered', () => {
 // ─── Scenario 4: Conflict — align strategy ──────────────────────────────────
 
 test('align: user reorder op is auto-dropped', () => {
-	const db = new Database(getDbPath(PORT));
+	const db = openDb(getDbPath(PORT));
 	try {
 		const op = db.prepare('SELECT state FROM pcd_ops WHERE id = ?').get(alignUserOpId) as {
 			state: string;
