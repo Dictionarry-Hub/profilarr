@@ -275,11 +275,21 @@ async function runIntegration(target?: string): Promise<number> {
 		runningAuthSpecs && (!specName || !suite || INTEGRATION_NEEDS_DOCKER.has(specName));
 	let exitCode = 1;
 
+	// Docker is brought up in parallel with non-Docker specs. Specs that need
+	// Docker (see INTEGRATION_NEEDS_DOCKER) will await this promise before
+	// running; everything else proceeds immediately.
+	let dockerReady: Promise<void> | undefined;
+
 	try {
 		if (dockerRequired) {
-			console.log('Starting Docker infrastructure...');
-			await exec('docker', ['compose', '-f', INTEGRATION_COMPOSE, 'up', '-d', '--wait']);
-			console.log('Docker infrastructure ready.\n');
+			dockerReady = execQuiet('docker', [
+				'compose',
+				'-f',
+				INTEGRATION_COMPOSE,
+				'up',
+				'-d',
+				'--wait'
+			]);
 		}
 
 		// Collect spec files from all suites
@@ -365,6 +375,8 @@ async function runIntegration(target?: string): Promise<number> {
 
 			const formatSpecName = (f: string): string =>
 				f.replace('tests/integration/', '').replace('/specs/', '/').replace('.test.ts', '');
+			const specBasename = (f: string): string => f.split('/').pop()!.replace('.test.ts', '');
+			const needsDocker = (f: string): boolean => INTEGRATION_NEEDS_DOCKER.has(specBasename(f));
 
 			const RESET = '\x1b[0m';
 			const GREEN = '\x1b[32m';
@@ -373,6 +385,21 @@ async function runIntegration(target?: string): Promise<number> {
 
 			const runSpec = async (f: string): Promise<SpecResult> => {
 				const name = formatSpecName(f);
+				if (needsDocker(f) && dockerReady) {
+					try {
+						await dockerReady;
+					} catch (err) {
+						const msg = err instanceof Error ? err.message : String(err);
+						console.log(`  ${RED}✗${RESET} ${name.padEnd(NAME_WIDTH)}  (docker)`);
+						return {
+							name,
+							code: 1,
+							stdout: '',
+							stderr: `Docker infrastructure failed to start: ${msg}`,
+							durationMs: 0
+						};
+					}
+				}
 				const specStart = Date.now();
 				const result = await runIntegrationSpec(f, 'piped');
 				const durationMs = Date.now() - specStart;
@@ -388,7 +415,14 @@ async function runIntegration(target?: string): Promise<number> {
 				};
 			};
 
-			const queue = [...specFiles];
+			// Run non-Docker specs first so they fill the pool while Docker is
+			// still starting; Docker-needing specs await dockerReady inside runSpec.
+			const queue = [...specFiles].sort((a, b) => {
+				const ad = needsDocker(a);
+				const bd = needsDocker(b);
+				if (ad === bd) return 0;
+				return ad ? 1 : -1;
+			});
 			const results: SpecResult[] = [];
 			const workerCount = Math.min(CONCURRENCY, queue.length);
 			const workers = Array.from({ length: workerCount }, async () => {
@@ -771,6 +805,29 @@ async function exec(cmd: string, args: string[]): Promise<void> {
 	});
 	const { code } = await command.output();
 	if (code !== 0) {
+		throw new Error(`Command failed: ${cmd} ${args.join(' ')}`);
+	}
+}
+
+/**
+ * Run a command with stdout/stderr captured. On non-zero exit, the captured
+ * output is printed and an error is thrown. On success, output is silently
+ * discarded. Use for noisy commands whose output is only interesting on failure
+ * (e.g. docker compose up/down).
+ */
+async function execQuiet(cmd: string, args: string[]): Promise<void> {
+	const command = new Deno.Command(cmd, {
+		args,
+		stdout: 'piped',
+		stderr: 'piped'
+	});
+	const result = await command.output();
+	if (result.code !== 0) {
+		const decoder = new TextDecoder();
+		const stdout = decoder.decode(result.stdout);
+		const stderr = decoder.decode(result.stderr);
+		if (stdout) console.error(stdout);
+		if (stderr) console.error(stderr);
 		throw new Error(`Command failed: ${cmd} ${args.join(' ')}`);
 	}
 }
