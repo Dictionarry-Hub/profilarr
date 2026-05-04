@@ -8,9 +8,11 @@
 	} from '$shared/upgrades/filters';
 	import { enhance } from '$app/forms';
 	import { browser } from '$app/environment';
+	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import { isDirty, initEdit, update, current, clear } from '$lib/client/stores/dirty';
+	import { jobStatus } from '$stores/jobStatus';
 	import { Info, Save, Play, RotateCcw, FlaskConical } from 'lucide-svelte';
 	import CoreSettings from './components/CoreSettings.svelte';
 	import FilterSettings from './components/FilterSettings.svelte';
@@ -32,7 +34,21 @@
 		};
 		// Always use initEdit - isDirty should be false until user makes changes
 		initEdit(initialFormData);
-		return () => clear();
+		let previousJobState: string | null = null;
+		const unsubscribeJobStatus = jobStatus.subscribe((status) => {
+			if (
+				previousJobState === 'running' &&
+				status.state === 'completed' &&
+				status.jobType === 'arr.upgrade'
+			) {
+				invalidateAll();
+			}
+			previousJobState = status.state;
+		});
+		return () => {
+			unsubscribeJobStatus();
+			clear();
+		};
 	});
 
 	// Track if config exists
@@ -98,6 +114,7 @@
 			alertStore.add('success', 'Dry run cache cleared');
 		}
 		if (form.error) {
+			jobStatus.cancelOptimistic();
 			alertStore.add('error', form.error);
 		}
 	}
@@ -117,50 +134,60 @@
 		</div>
 		<div slot="right" class="flex flex-wrap items-center gap-2">
 			<Button text="Info" icon={Info} href="/arr/upgrades/info" />
-			{#if !isNewConfig && enabled}
+			<Button
+				text={clearing ? 'Clearing...' : 'Reset Cache'}
+				icon={RotateCcw}
+				disabled={isNewConfig || !enabled || clearing || running || saving}
+				tooltip="Clear dry run exclusion cache so items can be re-selected"
+				tooltipPosition="bottom"
+				tooltipAlign="right"
+				on:click={() => {
+					const f = document.getElementById('clear-cache-form');
+					if (f instanceof HTMLFormElement) f.requestSubmit();
+				}}
+			/>
+			<Button
+				text={running ? 'Running...' : 'Dry Run'}
+				icon={FlaskConical}
+				iconColor="text-amber-600 dark:text-amber-400"
+				disabled={isNewConfig || !enabled || running || saving || clearing || $isDirty}
+				tooltip="Search indexers without downloading (limited to once every 10 min)"
+				tooltipPosition="bottom"
+				tooltipAlign="right"
+				on:click={() => {
+					jobStatus.connect();
+					jobStatus.setRunning('arr.upgrade', 'Running upgrades...');
+					const f = document.getElementById('dry-run-form');
+					if (f instanceof HTMLFormElement) {
+						f.requestSubmit();
+					} else {
+						jobStatus.cancelOptimistic();
+					}
+				}}
+			/>
+			{#if isDev}
 				<Button
-					text={clearing ? 'Clearing...' : 'Reset Cache'}
-					icon={RotateCcw}
-					disabled={clearing || running || saving}
-					tooltip="Clear dry run exclusion cache so items can be re-selected"
+					text={running ? 'Running...' : 'Live Run'}
+					icon={Play}
+					iconColor="text-red-600 dark:text-red-400"
+					disabled={isNewConfig || !enabled || running || saving || $isDirty}
+					tooltip="Run a live search that will download upgrades"
 					tooltipPosition="bottom"
 					tooltipAlign="right"
 					on:click={() => {
-						const f = document.getElementById('clear-cache-form');
-						if (f instanceof HTMLFormElement) f.requestSubmit();
+						jobStatus.connect();
+						jobStatus.setRunning('arr.upgrade', 'Running upgrades...');
+						const f = document.getElementById('live-run-form');
+						if (f instanceof HTMLFormElement) {
+							f.requestSubmit();
+						} else {
+							jobStatus.cancelOptimistic();
+						}
 					}}
 				/>
-				<Button
-					text={running ? 'Running...' : 'Dry Run'}
-					icon={FlaskConical}
-					iconColor="text-amber-600 dark:text-amber-400"
-					disabled={running || saving || clearing || $isDirty}
-					tooltip="Search indexers without downloading (limited to once every 10 min)"
-					tooltipPosition="bottom"
-					tooltipAlign="right"
-					on:click={() => {
-						const f = document.getElementById('dry-run-form');
-						if (f instanceof HTMLFormElement) f.requestSubmit();
-					}}
-				/>
-				{#if isDev}
-					<Button
-						text={running ? 'Running...' : 'Live Run'}
-						icon={Play}
-						iconColor="text-red-600 dark:text-red-400"
-						disabled={running || saving || $isDirty}
-						tooltip="Run a live search that will download upgrades"
-						tooltipPosition="bottom"
-						tooltipAlign="right"
-						on:click={() => {
-							const f = document.getElementById('live-run-form');
-							if (f instanceof HTMLFormElement) f.requestSubmit();
-						}}
-					/>
-				{/if}
 			{/if}
 			<Button
-				text={saving ? 'Saving...' : 'Save'}
+				text="Save"
 				icon={Save}
 				iconColor="text-blue-600 dark:text-blue-400"
 				disabled={saving || running || !$isDirty}

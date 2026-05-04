@@ -46,6 +46,8 @@ const JOB_RUNNING_LABELS: Partial<Record<JobType, string>> = {
 	'arr.sync.mediaManagement': 'Syncing Media Management...',
 	'arr.cleanup': 'Cleaning up...',
 	'arr.drift': 'Checking drift...',
+	'arr.upgrade': 'Running upgrades...',
+	'arr.rename': 'Renaming files...',
 	'backup.create': 'Creating backup...',
 	'backup.cleanup': 'Cleaning up backups...',
 	'pcd.link': 'Linking database...'
@@ -58,6 +60,8 @@ const JOB_COMPLETED_LABELS: Partial<Record<JobType, string>> = {
 	'arr.sync.mediaManagement': 'Media Management sync',
 	'arr.cleanup': 'Cleanup',
 	'arr.drift': 'Drift check',
+	'arr.upgrade': 'Upgrade run',
+	'arr.rename': 'Rename run',
 	'backup.create': 'Backup',
 	'backup.cleanup': 'Backup cleanup',
 	'pcd.link': 'Database link'
