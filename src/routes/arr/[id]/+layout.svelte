@@ -84,7 +84,7 @@
 </script>
 
 <div class="overflow-x-clip p-4 md:p-8">
-	<Tabs {tabs} {breadcrumb} responsive />
+	<Tabs {tabs} {breadcrumb} responsive mobileBreakpoint={1400} />
 	{#key data.instance.id}
 		<slot />
 	{/key}

@@ -30,6 +30,7 @@
 	export let backButton: BackButton | undefined = undefined;
 	export let breadcrumb: Breadcrumb | undefined = undefined;
 	export let responsive: boolean = false;
+	export let mobileBreakpoint: number = 768;
 	export let hideWhenSingle: boolean = true;
 	export let hiddenSpacerClass: string = 'h-1';
 
@@ -41,7 +42,7 @@
 
 	onMount(() => {
 		if (responsive && typeof window !== 'undefined') {
-			mediaQuery = window.matchMedia('(max-width: 767px)');
+			mediaQuery = window.matchMedia(`(max-width: ${mobileBreakpoint - 1}px)`);
 			isMobile = mediaQuery.matches;
 			mediaQuery.addEventListener('change', handleMediaChange);
 		}

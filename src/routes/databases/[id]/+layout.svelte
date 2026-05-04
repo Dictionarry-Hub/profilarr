@@ -82,6 +82,6 @@
 </script>
 
 <div class="p-4 md:p-8">
-	<Tabs {tabs} {breadcrumb} responsive />
+	<Tabs {tabs} {breadcrumb} responsive mobileBreakpoint={1400} />
 	<slot />
 </div>
