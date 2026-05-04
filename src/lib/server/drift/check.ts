@@ -17,7 +17,11 @@ export interface DriftCheckResult {
 export async function checkArrDrift(
 	client: Pick<
 		BaseArrClient,
-		'getCustomFormats' | 'getQualityProfiles' | 'getDelayProfiles' | 'getMediaManagementConfig'
+		| 'getCustomFormats'
+		| 'getQualityProfiles'
+		| 'getDelayProfiles'
+		| 'getMediaManagementConfig'
+		| 'getNamingConfig'
 	>,
 	instanceId: number,
 	arrType: SyncArrType

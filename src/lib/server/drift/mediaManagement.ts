@@ -1,6 +1,6 @@
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import type { BaseArrClient } from '$arr/base.ts';
-import type { ArrMediaManagementConfig } from '$arr/types.ts';
+import type { ArrMediaManagementConfig, ArrNamingConfig } from '$arr/types.ts';
 import type { SyncArrType } from '$sync/mappings.ts';
 import { getCache } from '$pcd/index.ts';
 import {
@@ -8,8 +8,15 @@ import {
 	getSonarrByName as getSonarrMediaSettings
 } from '$pcd/entities/mediaManagement/media-settings/read.ts';
 import {
+	getRadarrByName as getRadarrNaming,
+	getSonarrByName as getSonarrNaming
+} from '$pcd/entities/mediaManagement/naming/read.ts';
+import {
+	normalizeNamingConfig,
 	transformMediaSettings,
-	type ArrMediaSettingsManagedFields
+	transformNamingForDrift,
+	type ArrMediaSettingsManagedFields,
+	type NormalizedNamingManagedFields
 } from '$sync/mediaManagement/transformer.ts';
 import type { DriftFieldDiff } from './customFormats.ts';
 import { stringifyCanonical } from './hash.ts';
@@ -28,8 +35,23 @@ export interface MediaSettingsDriftDiff {
 	modified: MediaSettingsModifiedDiff[];
 }
 
+export interface NamingMissingDiff {
+	name: string;
+}
+
+export interface NamingModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+export interface NamingDriftDiff {
+	missing: NamingMissingDiff[];
+	modified: NamingModifiedDiff[];
+}
+
 export interface MediaManagementDriftDiff {
 	media_settings: MediaSettingsDriftDiff;
+	naming: NamingDriftDiff;
 }
 
 export interface MediaManagementDriftResult {
@@ -41,10 +63,40 @@ export interface MediaSettingsDriftExpected extends ArrMediaSettingsManagedField
 	name: string;
 }
 
-const FIELD_ORDER = ['downloadPropersAndRepacks', 'enableMediaInfo'] as const;
+export interface NamingDriftExpected {
+	name: string;
+	arrType: SyncArrType;
+	fields: NormalizedNamingManagedFields;
+}
+
+const MEDIA_SETTINGS_FIELD_ORDER = ['downloadPropersAndRepacks', 'enableMediaInfo'] as const;
+const NAMING_FIELD_ORDER: Record<SyncArrType, string[]> = {
+	radarr: [
+		'renameMovies',
+		'replaceIllegalCharacters',
+		'colonReplacementFormat',
+		'standardMovieFormat',
+		'movieFolderFormat'
+	],
+	sonarr: [
+		'renameEpisodes',
+		'replaceIllegalCharacters',
+		'colonReplacementFormat',
+		'customColonReplacementFormat',
+		'multiEpisodeStyle',
+		'standardEpisodeFormat',
+		'dailyEpisodeFormat',
+		'animeEpisodeFormat',
+		'seriesFolderFormat',
+		'seasonFolderFormat'
+	]
+};
 
 function emptyDiff(): MediaManagementDriftDiff {
-	return { media_settings: { missing: [], modified: [] } };
+	return {
+		media_settings: { missing: [], modified: [] },
+		naming: { missing: [], modified: [] }
+	};
 }
 
 function valuesEqual(expected: unknown, actual: unknown): boolean {
@@ -58,7 +110,7 @@ function compareMediaSettings(
 	if (!actual) return null;
 
 	const diffs: DriftFieldDiff[] = [];
-	for (const field of FIELD_ORDER) {
+	for (const field of MEDIA_SETTINGS_FIELD_ORDER) {
 		if (!valuesEqual(expected[field], actual[field])) {
 			diffs.push({
 				path: field,
@@ -70,25 +122,64 @@ function compareMediaSettings(
 	return diffs;
 }
 
+function fieldValue(fields: NormalizedNamingManagedFields, field: string): unknown {
+	return (fields as unknown as Record<string, unknown>)[field];
+}
+
+function compareNaming(
+	expected: NamingDriftExpected,
+	actual: ArrNamingConfig | null
+): DriftFieldDiff[] | null {
+	if (!actual) return null;
+
+	const actualFields = normalizeNamingConfig(actual, expected.arrType);
+	const diffs: DriftFieldDiff[] = [];
+	for (const field of NAMING_FIELD_ORDER[expected.arrType]) {
+		const expectedValue = fieldValue(expected.fields, field);
+		const actualValue = fieldValue(actualFields, field);
+		if (!valuesEqual(expectedValue, actualValue)) {
+			diffs.push({
+				path: field,
+				expected: expectedValue,
+				actual: actualValue
+			});
+		}
+	}
+	return diffs;
+}
+
 export function compareMediaManagementDrift(
 	expected: MediaSettingsDriftExpected | null,
-	actual: ArrMediaManagementConfig | null
+	actual: ArrMediaManagementConfig | null,
+	expectedNaming: NamingDriftExpected | null = null,
+	actualNaming: ArrNamingConfig | null = null
 ): MediaManagementDriftResult {
 	const diff = emptyDiff();
-	if (!expected) return { count: 0, diff };
 
-	const fields = compareMediaSettings(expected, actual);
-	if (!fields) {
-		diff.media_settings.missing.push({ name: expected.name });
-		return { count: 1, diff };
+	if (expected) {
+		const fields = compareMediaSettings(expected, actual);
+		if (!fields) {
+			diff.media_settings.missing.push({ name: expected.name });
+		} else if (fields.length > 0) {
+			diff.media_settings.modified.push({ name: expected.name, fields });
+		}
 	}
 
-	if (fields.length > 0) {
-		diff.media_settings.modified.push({ name: expected.name, fields });
+	if (expectedNaming) {
+		const fields = compareNaming(expectedNaming, actualNaming);
+		if (!fields) {
+			diff.naming.missing.push({ name: expectedNaming.name });
+		} else if (fields.length > 0) {
+			diff.naming.modified.push({ name: expectedNaming.name, fields });
+		}
 	}
 
 	return {
-		count: diff.media_settings.missing.length + diff.media_settings.modified.length,
+		count:
+			diff.media_settings.missing.length +
+			diff.media_settings.modified.length +
+			diff.naming.missing.length +
+			diff.naming.modified.length,
 		diff
 	};
 }
@@ -119,14 +210,54 @@ export async function buildExpectedMediaSettings(
 	};
 }
 
+export async function buildExpectedNaming(
+	instanceId: number,
+	arrType: SyncArrType
+): Promise<NamingDriftExpected | null> {
+	const syncConfig = arrSyncQueries.getMediaManagementSync(instanceId);
+	if (!syncConfig.namingDatabaseId || !syncConfig.namingConfigName) return null;
+
+	const cache = getCache(syncConfig.namingDatabaseId);
+	if (!cache) {
+		throw new Error(`PCD cache not found for database ${syncConfig.namingDatabaseId}`);
+	}
+
+	const getByName = arrType === 'radarr' ? getRadarrNaming : getSonarrNaming;
+	const naming = await getByName(cache, syncConfig.namingConfigName);
+	if (!naming) {
+		throw new Error(
+			`Naming config "${syncConfig.namingConfigName}" not found in database ${syncConfig.namingDatabaseId}`
+		);
+	}
+
+	return {
+		name: syncConfig.namingConfigName,
+		arrType,
+		fields: transformNamingForDrift(naming, arrType)
+	};
+}
+
 export async function checkMediaManagementDrift(
-	client: Pick<BaseArrClient, 'getMediaManagementConfig'>,
+	client: Pick<BaseArrClient, 'getMediaManagementConfig' | 'getNamingConfig'>,
 	instanceId: number,
 	arrType: SyncArrType
 ): Promise<MediaManagementDriftResult> {
-	const expected = await buildExpectedMediaSettings(instanceId, arrType);
-	if (!expected) return compareMediaManagementDrift(null, null);
+	const [expectedMediaSettings, expectedNaming] = await Promise.all([
+		buildExpectedMediaSettings(instanceId, arrType),
+		buildExpectedNaming(instanceId, arrType)
+	]);
+	if (!expectedMediaSettings && !expectedNaming) {
+		return compareMediaManagementDrift(null, null);
+	}
 
-	const actual = await client.getMediaManagementConfig();
-	return compareMediaManagementDrift(expected, actual);
+	const [actualMediaSettings, actualNaming] = await Promise.all([
+		expectedMediaSettings ? client.getMediaManagementConfig() : Promise.resolve(null),
+		expectedNaming ? client.getNamingConfig() : Promise.resolve(null)
+	]);
+	return compareMediaManagementDrift(
+		expectedMediaSettings,
+		actualMediaSettings,
+		expectedNaming,
+		actualNaming
+	);
 }

@@ -31,13 +31,12 @@ import {
 	getSonarrByName as getSonarrQualityDefs
 } from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
 import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '$shared/pcd/display.ts';
-import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
-import type {
-	ArrType,
-	RadarrNamingConfig,
-	SonarrNamingConfig
-} from '$arr/types.ts';
-import { mergeMediaSettingsConfig } from './transformer.ts';
+import type { ArrType, RadarrNamingConfig, SonarrNamingConfig } from '$arr/types.ts';
+import {
+	mergeMediaSettingsConfig,
+	mergeRadarrNamingConfig,
+	mergeSonarrNamingConfig
+} from './transformer.ts';
 import { logger } from '$logger/logger.ts';
 
 export class MediaManagementSyncer extends BaseSyncer {
@@ -236,14 +235,7 @@ export class MediaManagementSyncer extends BaseSyncer {
 		const existingConfig = (await this.client.getNamingConfig()) as RadarrNamingConfig;
 
 		// Transform and update
-		const updatedConfig: RadarrNamingConfig = {
-			...existingConfig,
-			renameMovies: naming.rename,
-			replaceIllegalCharacters: naming.replace_illegal_characters,
-			colonReplacementFormat: naming.colon_replacement_format,
-			standardMovieFormat: naming.movie_format,
-			movieFolderFormat: naming.movie_folder_format
-		};
+		const updatedConfig = mergeRadarrNamingConfig(existingConfig, naming);
 
 		await logger.debug('Updating Radarr naming', {
 			source: 'Sync:Naming',
@@ -272,20 +264,8 @@ export class MediaManagementSyncer extends BaseSyncer {
 		// GET existing config
 		const existingConfig = (await this.client.getNamingConfig()) as SonarrNamingConfig;
 
-		// Transform and update - Sonarr uses integers for enums
-		const updatedConfig: SonarrNamingConfig = {
-			...existingConfig,
-			renameEpisodes: naming.rename,
-			replaceIllegalCharacters: naming.replace_illegal_characters,
-			colonReplacementFormat: colonReplacementToDb(naming.colon_replacement_format),
-			customColonReplacementFormat: naming.custom_colon_replacement_format,
-			multiEpisodeStyle: multiEpisodeStyleToDb(naming.multi_episode_style),
-			standardEpisodeFormat: naming.standard_episode_format,
-			dailyEpisodeFormat: naming.daily_episode_format,
-			animeEpisodeFormat: naming.anime_episode_format,
-			seriesFolderFormat: naming.series_folder_format,
-			seasonFolderFormat: naming.season_folder_format
-		};
+		// Transform and update
+		const updatedConfig = mergeSonarrNamingConfig(existingConfig, naming);
 
 		await logger.debug('Updating Sonarr naming', {
 			source: 'Sync:Naming',

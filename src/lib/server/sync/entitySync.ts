@@ -37,10 +37,13 @@ import {
 	getRadarrByName as getRadarrMediaSettings,
 	getSonarrByName as getSonarrMediaSettings
 } from '$pcd/entities/mediaManagement/media-settings/read.ts';
-import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
 import type { RadarrNamingConfig, SonarrNamingConfig } from '$arr/types.ts';
 import { transformDelayProfile } from './delayProfiles/transformer.ts';
-import { mergeMediaSettingsConfig } from './mediaManagement/transformer.ts';
+import {
+	mergeMediaSettingsConfig,
+	mergeRadarrNamingConfig,
+	mergeSonarrNamingConfig
+} from './mediaManagement/transformer.ts';
 
 interface SyncResult {
 	success: boolean;
@@ -331,14 +334,7 @@ export async function syncNaming(
 			}
 
 			const existing = (await client.getNamingConfig()) as RadarrNamingConfig;
-			const updated: RadarrNamingConfig = {
-				...existing,
-				renameMovies: naming.rename,
-				replaceIllegalCharacters: naming.replace_illegal_characters,
-				colonReplacementFormat: naming.colon_replacement_format,
-				standardMovieFormat: naming.movie_format,
-				movieFolderFormat: naming.movie_folder_format
-			};
+			const updated = mergeRadarrNamingConfig(existing, naming);
 			await client.updateNamingConfig(updated);
 		} else if (instance.type === 'sonarr') {
 			const naming = await getSonarrNaming(cache, configName);
@@ -347,19 +343,7 @@ export async function syncNaming(
 			}
 
 			const existing = (await client.getNamingConfig()) as SonarrNamingConfig;
-			const updated: SonarrNamingConfig = {
-				...existing,
-				renameEpisodes: naming.rename,
-				replaceIllegalCharacters: naming.replace_illegal_characters,
-				colonReplacementFormat: colonReplacementToDb(naming.colon_replacement_format),
-				customColonReplacementFormat: naming.custom_colon_replacement_format,
-				multiEpisodeStyle: multiEpisodeStyleToDb(naming.multi_episode_style),
-				standardEpisodeFormat: naming.standard_episode_format,
-				dailyEpisodeFormat: naming.daily_episode_format,
-				animeEpisodeFormat: naming.anime_episode_format,
-				seriesFolderFormat: naming.series_folder_format,
-				seasonFolderFormat: naming.season_folder_format
-			};
+			const updated = mergeSonarrNamingConfig(existing, naming);
 			await client.updateNamingConfig(updated);
 		} else {
 			return { success: false, error: `Unsupported instance type: ${instance.type}` };

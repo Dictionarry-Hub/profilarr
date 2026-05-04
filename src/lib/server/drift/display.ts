@@ -36,6 +36,10 @@ interface MediaManagementDiff {
 		missing?: unknown[];
 		modified?: unknown[];
 	};
+	naming: {
+		missing?: unknown[];
+		modified?: unknown[];
+	};
 }
 
 interface DriftFieldDiff {
@@ -60,6 +64,11 @@ interface DelayProfileModifiedDiff {
 }
 
 interface MediaSettingsModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+interface NamingModifiedDiff {
 	name: string;
 	fields: DriftFieldDiff[];
 }
@@ -334,6 +343,52 @@ function buildMediaManagementEntities(raw: unknown): DriftDisplayEntity[] {
 		});
 	}
 
+	for (const item of diff.naming.missing ?? []) {
+		const name = recordString(item, 'name');
+		if (!name) continue;
+
+		entities.push({
+			id: `media_management:naming:missing:${name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Naming: ${name}`,
+			state: 'missing',
+			stateLabel: 'Missing',
+			tone: 'danger',
+			summary: 'Profilarr expects this naming config, but Arr does not have it.',
+			changes: [
+				{
+					id: `media-management-naming-missing:${name}:config`,
+					label: 'Naming',
+					detail: 'Missing from Arr',
+					expected: value('Present'),
+					actual: value('Missing', { tone: 'danger' }),
+					tone: 'danger'
+				}
+			]
+		});
+	}
+
+	for (const item of diff.naming.modified ?? []) {
+		const modified = asModifiedNaming(item);
+		if (!modified) continue;
+		if (modified.fields.length === 0) continue;
+
+		const changes = modified.fields.map(formatNamingFieldDiff);
+
+		entities.push({
+			id: `media_management:naming:modified:${modified.name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Naming: ${modified.name}`,
+			state: 'modified',
+			stateLabel: 'Modified',
+			tone: 'warning',
+			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
+			changes
+		});
+	}
+
 	return entities;
 }
 
@@ -505,6 +560,17 @@ function formatMediaSettingsFieldDiff(field: DriftFieldDiff, index: number): Dri
 		detail: 'Media setting changed',
 		expected: formatGenericValue(field.expected),
 		actual: formatGenericValue(field.actual),
+		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
+	};
+}
+
+function formatNamingFieldDiff(field: DriftFieldDiff, index: number): DriftDisplayChange {
+	return {
+		id: `naming-field:${index}`,
+		label: namingFieldLabel(field.path),
+		detail: 'Naming setting changed',
+		expected: formatNamingValue(field.path, field.expected),
+		actual: formatNamingValue(field.path, field.actual),
 		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
 	};
 }
@@ -708,10 +774,15 @@ function asDelayProfileDiff(raw: unknown): DelayProfileDiff | null {
 function asMediaManagementDiff(raw: unknown): MediaManagementDiff | null {
 	if (!isRecord(raw)) return null;
 	const mediaSettings = isRecord(raw.media_settings) ? raw.media_settings : {};
+	const naming = isRecord(raw.naming) ? raw.naming : {};
 	return {
 		media_settings: {
 			missing: Array.isArray(mediaSettings.missing) ? mediaSettings.missing : [],
 			modified: Array.isArray(mediaSettings.modified) ? mediaSettings.modified : []
+		},
+		naming: {
+			missing: Array.isArray(naming.missing) ? naming.missing : [],
+			modified: Array.isArray(naming.modified) ? naming.modified : []
 		}
 	};
 }
@@ -744,6 +815,15 @@ function asModifiedDelayProfile(raw: unknown): DelayProfileModifiedDiff | null {
 }
 
 function asModifiedMediaSettings(raw: unknown): MediaSettingsModifiedDiff | null {
+	if (!isRecord(raw)) return null;
+	const name = recordString(raw, 'name');
+	if (!name || !Array.isArray(raw.fields)) return null;
+
+	const fields = raw.fields.filter(isFieldDiff);
+	return { name, fields };
+}
+
+function asModifiedNaming(raw: unknown): NamingModifiedDiff | null {
 	if (!isRecord(raw)) return null;
 	const name = recordString(raw, 'name');
 	if (!name || !Array.isArray(raw.fields)) return null;
@@ -911,6 +991,21 @@ function formatPropersRepacksValue(raw: unknown): DriftDisplayValue {
 	return formatGenericValue(raw);
 }
 
+function formatNamingValue(field: string, raw: unknown): DriftDisplayValue {
+	if (field === 'customColonReplacementFormat' && (raw === null || raw === undefined || raw === '')) {
+		return value('None');
+	}
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (typeof raw === 'boolean') return formatBooleanValue(raw);
+	if (typeof raw === 'string') {
+		if (field === 'colonReplacementFormat' || field === 'multiEpisodeStyle') {
+			return value(titleize(raw));
+		}
+		return value(raw, { mono: looksTechnical(raw) });
+	}
+	return formatGenericValue(raw);
+}
+
 function formatMinutesValue(raw: unknown): DriftDisplayValue {
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
 	if (typeof raw !== 'number') return formatGenericValue(raw);
@@ -988,6 +1083,26 @@ function delayProfileFieldLabel(path: string): string {
 		tags: 'Tags',
 		torrentDelay: 'Torrent Delay',
 		usenetDelay: 'Usenet Delay'
+	};
+
+	return labels[path] ?? titleize(path);
+}
+
+function namingFieldLabel(path: string): string {
+	const labels: Record<string, string> = {
+		animeEpisodeFormat: 'Anime Episode Format',
+		colonReplacementFormat: 'Colon Replacement',
+		customColonReplacementFormat: 'Custom Colon Replacement',
+		dailyEpisodeFormat: 'Daily Episode Format',
+		movieFolderFormat: 'Movie Folder Format',
+		multiEpisodeStyle: 'Multi Episode Style',
+		renameEpisodes: 'Rename Episodes',
+		renameMovies: 'Rename Movies',
+		replaceIllegalCharacters: 'Replace Illegal Characters',
+		seasonFolderFormat: 'Season Folder Format',
+		seriesFolderFormat: 'Series Folder Format',
+		standardEpisodeFormat: 'Standard Episode Format',
+		standardMovieFormat: 'Movie Format'
 	};
 
 	return labels[path] ?? titleize(path);
