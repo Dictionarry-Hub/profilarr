@@ -184,6 +184,29 @@ jobs:
 
       - run: deno install --node-modules-dir
 
+      # Dedicated cache for the FFI plug binaries (sqlite, bcrypt). The main
+      # `Cache deps` covers ~/.cache/deno but is shared across jobs and gets
+      # overwritten by Build (which never populates plug). This cache uses a
+      # separate key so it survives independently. Without this, the 30+
+      # parallel integration spec processes race to download plug binaries
+      # into the same path on a cold cache and corrupt each other.
+      - name: Cache FFI plug
+        id: plug-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/deno/plug
+          key: deno-plug-${{ runner.os }}-${{ hashFiles('deno.lock') }}-v1
+
+      - name: Pre-warm FFI plug
+        if: steps.plug-cache.outputs.cache-hit != 'true'
+        run: |
+          deno eval --ext=ts '
+            import { hash } from "@felix/bcrypt";
+            import { Database } from "@db/sqlite";
+            await hash("warmup");
+            new Database(":memory:").close();
+          '
+
       - name: Download build artifact
         uses: actions/download-artifact@v8
         with:
