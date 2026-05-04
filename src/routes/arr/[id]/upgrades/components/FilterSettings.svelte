@@ -43,7 +43,6 @@
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import Card from '$ui/card/Card.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import PasteModal from '$ui/modal/PasteModal.svelte';
 	import type { Column } from '$ui/table/types';
@@ -487,6 +486,117 @@
 
 		<svelte:fragment slot="expanded" let:row>
 			<div class="space-y-4 p-3 md:p-6">
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+					<div data-onboarding="upgrades-cutoff">
+						<label
+							for="cutoff-{row.id}"
+							class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
+						>
+							Cutoff %
+						</label>
+						<div class="mt-1">
+							<NumberInput
+								name="cutoff-{row.id}"
+								bind:value={row.cutoff}
+								min={0}
+								max={100}
+								font="mono"
+								responsive
+								on:change={handleChange}
+							/>
+						</div>
+						<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+							Score threshold for "cutoff met"
+						</p>
+					</div>
+					<div data-onboarding="upgrades-method">
+						<label
+							for="selector-{row.id}"
+							class="mb-1 block text-sm font-medium text-neutral-600 dark:text-neutral-400"
+						>
+							Method
+						</label>
+						<div class="mt-1">
+							<DropdownSelect
+								value={row.selector}
+								options={selectors.map((s) => ({
+									value: s.id,
+									label: `${s.label} - ${s.description}`,
+									shortLabel: s.label
+								}))}
+								minWidth="14rem"
+								compactDropdownThreshold={7}
+								fullWidth
+								responsiveButton
+								responsiveDropdown
+								mobileDropdownShortLabels
+								fixed
+								on:change={(e) => {
+									row.selector = e.detail;
+									handleChange();
+								}}
+							/>
+						</div>
+						<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+							{selectorShortDescriptions[row.selector] ?? 'Selection order'}
+						</p>
+					</div>
+					<div data-onboarding="upgrades-count">
+						<label
+							for="count-{row.id}"
+							class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
+						>
+							Count
+						</label>
+						<div class="mt-1">
+							<NumberInput
+								name="count-{row.id}"
+								bind:value={row.count}
+								min={1}
+								max={countMax}
+								font="mono"
+								responsive
+								on:change={handleChange}
+							/>
+						</div>
+						<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+							Items per run (max {countMax} at this schedule)
+						</p>
+					</div>
+					<div data-onboarding="upgrades-cooldown" class="lg:col-span-2">
+						<label
+							for="tag-{row.id}"
+							class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
+						>
+							Cooldown Tag
+						</label>
+						<div class="mt-1">
+							<FormInput
+								label="Cooldown tag"
+								hideLabel
+								lowercase
+								name="tag-{row.id}"
+								placeholder={resolveTagLabel(row)}
+								bind:value={row.tag}
+								responsive
+								on:input={handleChange}
+							/>
+						</div>
+						{#if getSharedTagFilters(row).length > 0}
+							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+								Shared with: {getSharedTagFilters(row).join(', ')}
+							</p>
+						{:else}
+							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+								Tag applied in your arr instance for cooldown tracking. Avoid reusing tags you use
+								elsewhere.
+							</p>
+						{/if}
+					</div>
+				</div>
+
+				<hr class="-mx-3 border-t border-neutral-200 md:-mx-6 dark:border-neutral-800" />
+
 				<div data-onboarding="upgrades-filter-rules">
 					<FilterGroupComponent
 						group={row.group}
@@ -497,119 +607,6 @@
 						on:change={handleChange}
 					/>
 				</div>
-
-				<!-- Selection Settings -->
-				<Card flush padding="md">
-					<h3 class="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">Settings</h3>
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-						<div data-onboarding="upgrades-cutoff">
-							<label
-								for="cutoff-{row.id}"
-								class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
-							>
-								Cutoff %
-							</label>
-							<div class="mt-1">
-								<NumberInput
-									name="cutoff-{row.id}"
-									bind:value={row.cutoff}
-									min={0}
-									max={100}
-									font="mono"
-									responsive
-									on:change={handleChange}
-								/>
-							</div>
-							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-								Score threshold for "cutoff met"
-							</p>
-						</div>
-						<div data-onboarding="upgrades-method">
-							<label
-								for="selector-{row.id}"
-								class="mb-1 block text-sm font-medium text-neutral-600 dark:text-neutral-400"
-							>
-								Method
-							</label>
-							<div class="mt-1">
-								<DropdownSelect
-									value={row.selector}
-									options={selectors.map((s) => ({
-										value: s.id,
-										label: `${s.label} - ${s.description}`,
-										shortLabel: s.label
-									}))}
-									minWidth="14rem"
-									compactDropdownThreshold={7}
-									fullWidth
-									responsiveButton
-									responsiveDropdown
-									mobileDropdownShortLabels
-									fixed
-									on:change={(e) => {
-										row.selector = e.detail;
-										handleChange();
-									}}
-								/>
-							</div>
-							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-								{selectorShortDescriptions[row.selector] ?? 'Selection order'}
-							</p>
-						</div>
-						<div data-onboarding="upgrades-count">
-							<label
-								for="count-{row.id}"
-								class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
-							>
-								Count
-							</label>
-							<div class="mt-1">
-								<NumberInput
-									name="count-{row.id}"
-									bind:value={row.count}
-									min={1}
-									max={countMax}
-									font="mono"
-									responsive
-									on:change={handleChange}
-								/>
-							</div>
-							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-								Items per run (max {countMax} at this schedule)
-							</p>
-						</div>
-						<div data-onboarding="upgrades-cooldown">
-							<label
-								for="tag-{row.id}"
-								class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
-							>
-								Cooldown Tag
-							</label>
-							<div class="mt-1">
-								<FormInput
-									label="Cooldown tag"
-									hideLabel
-									lowercase
-									name="tag-{row.id}"
-									placeholder={resolveTagLabel(row)}
-									bind:value={row.tag}
-									responsive
-									on:input={handleChange}
-								/>
-							</div>
-							{#if getSharedTagFilters(row).length > 0}
-								<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-									Shared with: {getSharedTagFilters(row).join(', ')}
-								</p>
-							{:else}
-								<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-									Tag applied in your arr instance for cooldown tracking. Avoid reusing tags you use
-									elsewhere.
-								</p>
-							{/if}
-						</div>
-					</div>
-				</Card>
 			</div></svelte:fragment
 		>
 	</ExpandableTable>
