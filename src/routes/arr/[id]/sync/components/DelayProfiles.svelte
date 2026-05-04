@@ -117,16 +117,16 @@
 >
 	<!-- Header -->
 	<div
-		class="flex items-start justify-between gap-6 border-b border-neutral-200 px-6 py-4 dark:border-neutral-800"
+		class="flex flex-col gap-4 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between md:gap-6 dark:border-neutral-800"
 	>
-		<div class="min-w-0 flex-1">
+		<div class="min-w-0 md:flex-1">
 			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Delay Profiles</h2>
 			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
 				Select delay profiles to sync to this instance
 			</p>
 		</div>
 		{#if progress}
-			<div class="min-w-[9rem] flex-shrink-0 pt-1">
+			<div class="min-w-[9rem] md:flex-shrink-0 md:pt-1">
 				<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
 					Delay Profiles
 				</div>
