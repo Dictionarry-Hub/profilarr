@@ -3,6 +3,7 @@
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import SyncFooter from './SyncFooter.svelte';
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
@@ -163,8 +164,7 @@
 		<div class="min-w-0 flex-1">
 			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Quality Profiles</h2>
 			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-				Select quality profiles to sync to this instance. Only one database can be used per instance
-				&mdash; to use a different database, sync it to a separate Arr instance.
+				Select quality profiles to sync to this instance.
 			</p>
 		</div>
 		{#if qpProgress || cfProgress}
@@ -222,14 +222,20 @@
 						{:else}
 							<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-5">
 								{#each database.qualityProfiles as profile}
-									<Toggle
-										checked={isSelected(database.id, profile.name)}
-										disabled={isInactive}
-										label={profile.name}
+									<Tooltip
+										text={isInactive ? 'Only one database can be used per instance.' : ''}
+										position="bottom"
 										fullWidth
-										ariaLabel={`Toggle quality profile ${profile.name} from ${database.name}`}
-										on:change={(e) => setProfile(database.id, profile.name, e.detail)}
-									/>
+									>
+										<Toggle
+											checked={isSelected(database.id, profile.name)}
+											disabled={isInactive}
+											label={profile.name}
+											fullWidth
+											ariaLabel={`Toggle quality profile ${profile.name} from ${database.name}`}
+											on:change={(e) => setProfile(database.id, profile.name, e.detail)}
+										/>
+									</Tooltip>
 								{/each}
 							</div>
 						{/if}
