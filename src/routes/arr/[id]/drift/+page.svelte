@@ -236,11 +236,16 @@
 						{data.status.lastError}
 					</div>
 				{:else if data.status.status === 'never_checked'}
-					<div
-						class="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400"
-					>
-						No drift check has run yet.
-					</div>
+					<ExpandableTable
+						columns={driftColumns}
+						data={emptyDriftEntities}
+						getRowId={(row) => row.id}
+						responsive
+						chevronPosition="right"
+						primaryColumnKey="title"
+						flushExpanded
+						emptyMessage="No drift check has run yet. Hit Run Now above to check."
+					/>
 				{:else if data.status.status === 'clean'}
 					<ExpandableTable
 						columns={driftColumns}
