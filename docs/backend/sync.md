@@ -262,6 +262,10 @@ Drift detection checks whether Arr still matches what Profilarr would sync now.
 It may reuse sync transformers to build expected state, but it does not sync,
 repair, or cleanup.
 
+Drift does not check media management. Naming, media settings, and quality
+definitions are treated as bootstrap configuration because users commonly tune
+them directly in Arr after initial sync.
+
 ## Impact Analysis
 
 **Source:** `affectedArrs.ts`

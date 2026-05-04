@@ -15,6 +15,13 @@ Drift detection checks whether an Arr instance still matches the configuration
 Profilarr would sync now. It is observational: it does not write to Arr, repair
 config, delete stale items, or replace cleanup.
 
+Drift detection intentionally focuses on actively managed sync behavior:
+custom formats, quality profiles, and the default delay profile. Media
+management is treated as bootstrap configuration and is not checked for drift.
+Users often make local Arr-side edits to naming, media settings, and quality
+definitions after initial sync, so surfacing those edits as drift would be noisy
+and low value.
+
 ## Job
 
 The scheduled job type is `arr.drift` with payload `{ instanceId }`.
@@ -174,6 +181,5 @@ configuration, or triggers sync.
 
 ## TODO
 
-- Media management comparison plus display formatting.
 - Drift notifications for `detected` and `failed`.
 - Brief drift status on the sync page linking to the dedicated drift page.
