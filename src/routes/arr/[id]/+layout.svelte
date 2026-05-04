@@ -83,7 +83,7 @@
 	};
 </script>
 
-<div class="overflow-x-clip p-4 md:p-8">
+<div class="overflow-x-clip px-4 pb-4 md:px-8 md:pb-8">
 	<Tabs {tabs} {breadcrumb} responsive mobileBreakpoint={1400} />
 	{#key data.instance.id}
 		<slot />

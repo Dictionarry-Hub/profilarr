@@ -32,7 +32,7 @@
 	export let responsive: boolean = false;
 	export let mobileBreakpoint: number = 768;
 	export let hideWhenSingle: boolean = true;
-	export let hiddenSpacerClass: string = 'h-1';
+	export let hiddenSpacerClass: string = 'h-16';
 
 	// Mobile detection
 	let isMobile = false;
@@ -73,8 +73,8 @@
 	<div class={hiddenSpacerClass}></div>
 {:else if useMobileMode}
 	<!-- Mobile: Custom dropdown with icons -->
-	<div class="border-b border-neutral-200 py-3 dark:border-neutral-800">
-		<div class="flex items-center gap-2">
+	<div class="flex h-16 items-center border-b border-neutral-200 dark:border-neutral-800">
+		<div class="flex flex-1 items-center gap-2">
 			<div
 				class="relative flex-1"
 				bind:this={triggerEl}
@@ -134,8 +134,8 @@
 	</div>
 {:else}
 	<!-- Desktop: Tab bar -->
-	<div class="border-b border-neutral-200 dark:border-neutral-800">
-		<nav class="-mb-px flex items-center justify-between gap-2" aria-label="Tabs">
+	<div class="flex h-16 items-end border-b border-neutral-200 dark:border-neutral-800">
+		<nav class="-mb-px flex flex-1 items-center justify-between gap-2" aria-label="Tabs">
 			<div class="flex gap-2">
 				{#each tabs as tab (tab.href)}
 					<button
