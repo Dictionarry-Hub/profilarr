@@ -16,6 +16,7 @@
 	interface SectionProgress {
 		total: number;
 		drifted: number;
+		message?: string;
 	}
 
 	export let databases: DatabaseWithProfiles[];
@@ -135,6 +136,9 @@
 					met={progress.drifted === 0}
 					mode="compact"
 					colorMode="completion"
+					tooltip={progress.message ?? ''}
+					tooltipPosition="bottom"
+					tooltipAlign="middle"
 				/>
 			</div>
 		{/if}

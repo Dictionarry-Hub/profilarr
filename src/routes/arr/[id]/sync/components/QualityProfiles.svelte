@@ -17,6 +17,7 @@
 	interface SectionProgress {
 		total: number;
 		drifted: number;
+		message?: string;
 	}
 
 	export let databases: DatabaseWithProfiles[];
@@ -180,6 +181,9 @@
 							met={qpProgress.drifted === 0}
 							mode="compact"
 							colorMode="completion"
+							tooltip={qpProgress.message ?? ''}
+							tooltipPosition="bottom"
+							tooltipAlign="middle"
 						/>
 					</div>
 				{/if}
@@ -194,6 +198,9 @@
 							met={cfProgress.drifted === 0}
 							mode="compact"
 							colorMode="completion"
+							tooltip={cfProgress.message ?? ''}
+							tooltipPosition="bottom"
+							tooltipAlign="middle"
 						/>
 					</div>
 				{/if}
