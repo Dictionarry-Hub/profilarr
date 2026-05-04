@@ -39,6 +39,11 @@ export const routeResolvers: Record<string, () => Promise<string>> = {
 		const arr = await res.json();
 		return `/arr/${arr[0].id}/sync`;
 	},
+	firstArrDrift: async () => {
+		const res = await fetch('/api/v1/arr');
+		const arr = await res.json();
+		return `/arr/${arr[0].id}/drift`;
+	},
 	firstArrUpgrades: async () => {
 		const res = await fetch('/api/v1/arr');
 		const arr = await res.json();

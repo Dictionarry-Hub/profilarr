@@ -31,6 +31,15 @@ export const arrOverviewStage: Stage = {
 			completion: { type: 'manual' }
 		},
 		{
+			id: 'arr-nav-drift',
+			route: { resolve: 'firstArrDrift' },
+			target: 'arr-tab-drift',
+			title: 'Drift',
+			body: "The Drift tab catches changes made directly to this Arr that no longer match your Profilarr config. Each drifted item is listed with the exact differences, so you can review what's changed and re-sync when you're ready. It also drives the per-section progress chips on the Sync tab, so you can see at a glance how much of your config is still in sync.",
+			position: 'below',
+			completion: { type: 'manual' }
+		},
+		{
 			id: 'arr-nav-upgrades',
 			route: { resolve: 'firstArrUpgrades' },
 			target: 'arr-tab-upgrades',
