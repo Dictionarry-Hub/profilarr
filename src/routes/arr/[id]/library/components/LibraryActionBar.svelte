@@ -81,7 +81,7 @@
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
-			mediaQuery = window.matchMedia('(max-width: 767px)');
+			mediaQuery = window.matchMedia('(max-width: 1399px)');
 			isMobile = mediaQuery.matches;
 			mediaQuery.addEventListener('change', handleMediaChange);
 		}

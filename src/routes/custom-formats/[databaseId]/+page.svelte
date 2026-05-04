@@ -193,7 +193,7 @@
 	<title>Custom Formats - {data.currentDatabase?.name} - Profilarr</title>
 </svelte:head>
 
-<div class="space-y-6 px-4 pt-4 pb-8 md:px-8">
+<div class="space-y-6 px-4 pb-8 md:px-8">
 	<!-- Tabs -->
 	<Tabs {tabs} responsive />
 

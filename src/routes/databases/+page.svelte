@@ -72,7 +72,7 @@
 		onboarding="db-add"
 	/>
 {:else}
-	<div class="space-y-6 p-4 sm:p-8">
+	<div class="space-y-6 px-4 pt-4 pb-8 md:px-8">
 		<!-- Actions Bar -->
 		<ActionsBar>
 			<SearchAction searchStore={search} placeholder="Search databases..." />
