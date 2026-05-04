@@ -288,7 +288,9 @@ export function normalizeSonarrNamingConfig(
 		renameEpisodes: config.renameEpisodes,
 		replaceIllegalCharacters: config.replaceIllegalCharacters,
 		colonReplacementFormat: colonReplacementFromDb(config.colonReplacementFormat),
-		customColonReplacementFormat: normalizeOptionalNamingString(config.customColonReplacementFormat),
+		customColonReplacementFormat: normalizeOptionalNamingString(
+			config.customColonReplacementFormat
+		),
 		multiEpisodeStyle: multiEpisodeStyleFromDb(config.multiEpisodeStyle),
 		standardEpisodeFormat: config.standardEpisodeFormat,
 		dailyEpisodeFormat: config.dailyEpisodeFormat,

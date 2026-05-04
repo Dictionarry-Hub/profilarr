@@ -1,6 +1,10 @@
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import type { BaseArrClient } from '$arr/base.ts';
-import type { ArrMediaManagementConfig, ArrNamingConfig, ArrQualityDefinition } from '$arr/types.ts';
+import type {
+	ArrMediaManagementConfig,
+	ArrNamingConfig,
+	ArrQualityDefinition
+} from '$arr/types.ts';
 import type { SyncArrType } from '$sync/mappings.ts';
 import { getCache } from '$pcd/index.ts';
 import {
@@ -338,7 +342,10 @@ export async function buildExpectedQualityDefinitions(
 	}
 
 	const apiMappings = await getQualityApiMappings(cache, arrType);
-	const { definitions } = transformQualityDefinitionsForArr(qualityDefinitions.entries, apiMappings);
+	const { definitions } = transformQualityDefinitionsForArr(
+		qualityDefinitions.entries,
+		apiMappings
+	);
 	return {
 		name: syncConfig.qualityDefinitionsConfigName,
 		definitions

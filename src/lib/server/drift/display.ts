@@ -635,10 +635,15 @@ function formatNamingFieldDiff(field: DriftFieldDiff, index: number): DriftDispl
 	};
 }
 
-function formatQualityDefinitionFieldDiff(field: DriftFieldDiff, index: number): DriftDisplayChange {
+function formatQualityDefinitionFieldDiff(
+	field: DriftFieldDiff,
+	index: number
+): DriftDisplayChange {
 	const parsed = parseQualityDefinitionPath(field.path);
 	const qualityName = parsed?.qualityName ?? 'Quality definition';
-	const label = parsed ? qualityDefinitionFieldLabel(parsed.field) : qualityDefinitionFieldLabel(field.path);
+	const label = parsed
+		? qualityDefinitionFieldLabel(parsed.field)
+		: qualityDefinitionFieldLabel(field.path);
 
 	return {
 		id: `quality-definition-field:${index}`,
@@ -922,11 +927,7 @@ function asModifiedQualityDefinitions(raw: unknown): QualityDefinitionsModifiedD
 }
 
 function isQualityDefinitionFieldDiff(raw: unknown): raw is DriftFieldDiff {
-	return (
-		isRecord(raw) &&
-		typeof raw.path === 'string' &&
-		Object.hasOwn(raw, 'expected')
-	);
+	return isRecord(raw) && typeof raw.path === 'string' && Object.hasOwn(raw, 'expected');
 }
 
 function isFieldDiff(raw: unknown): raw is DriftFieldDiff {
@@ -1089,7 +1090,10 @@ function formatPropersRepacksValue(raw: unknown): DriftDisplayValue {
 }
 
 function formatNamingValue(field: string, raw: unknown): DriftDisplayValue {
-	if (field === 'customColonReplacementFormat' && (raw === null || raw === undefined || raw === '')) {
+	if (
+		field === 'customColonReplacementFormat' &&
+		(raw === null || raw === undefined || raw === '')
+	) {
 		return value('None');
 	}
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
