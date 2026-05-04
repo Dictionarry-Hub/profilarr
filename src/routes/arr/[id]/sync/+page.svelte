@@ -120,22 +120,21 @@
 </svelte:head>
 
 {#key data.instance.id}
-	<div class="mt-6 space-y-6 pb-32">
-		<!-- Header -->
-		<StickyCard position="top">
-			<svelte:fragment slot="left">
-				<h1 class="text-neutral-900 dark:text-neutral-50">Sync Configuration</h1>
-				<p class="text-neutral-600 dark:text-neutral-400">
-					Configure which profiles and settings to sync to this instance.
-				</p>
-			</svelte:fragment>
-			<svelte:fragment slot="right">
-				<span data-onboarding="sync-how-it-works">
-					<Button text="How it works" icon={Info} on:click={() => (showInfoModal = true)} />
-				</span>
-			</svelte:fragment>
-		</StickyCard>
+	<StickyCard position="top">
+		<svelte:fragment slot="left">
+			<h1 class="text-neutral-900 dark:text-neutral-50">Sync Configuration</h1>
+			<p class="text-neutral-600 dark:text-neutral-400">
+				Configure which profiles and settings to sync to this instance.
+			</p>
+		</svelte:fragment>
+		<svelte:fragment slot="right">
+			<span data-onboarding="sync-how-it-works">
+				<Button text="How it works" icon={Info} on:click={() => (showInfoModal = true)} />
+			</span>
+		</svelte:fragment>
+	</StickyCard>
 
+	<div class="mt-4 space-y-6 pb-32">
 		<MediaManagement
 			databases={data.databases}
 			bind:state={mediaManagementState}
