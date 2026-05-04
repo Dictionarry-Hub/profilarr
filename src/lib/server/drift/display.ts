@@ -231,7 +231,8 @@ function buildDelayProfileEntities(raw: unknown): DriftDisplayEntity[] {
 			state: 'missing',
 			stateLabel: 'Missing',
 			tone: 'danger',
-			summary: 'Profilarr expects this delay profile on Arr default profile, but Arr does not have it.',
+			summary:
+				'Profilarr expects this delay profile on Arr default profile, but Arr does not have it.',
 			changes: [
 				{
 					id: `delay_profiles:missing:${name}:profile`,
@@ -364,10 +365,7 @@ function formatDelayProfileFieldDiff(field: DriftFieldDiff, index: number): Drif
 		};
 	}
 
-	if (
-		field.path === 'bypassIfHighestQuality' ||
-		field.path === 'bypassIfAboveCustomFormatScore'
-	) {
+	if (field.path === 'bypassIfHighestQuality' || field.path === 'bypassIfAboveCustomFormatScore') {
 		return {
 			id: `delay-profile-bypass:${index}`,
 			label: delayProfileFieldLabel(field.path),

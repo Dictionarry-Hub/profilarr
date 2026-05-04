@@ -53,9 +53,7 @@ class DelayProfileDriftTest extends BaseTest {
 		});
 
 		this.test('reports missing Arr default delay profile', () => {
-			const result = compareDelayProfileDrift(expectedDelayProfile(), [
-				arrDelayProfile({ id: 2 })
-			]);
+			const result = compareDelayProfileDrift(expectedDelayProfile(), [arrDelayProfile({ id: 2 })]);
 
 			assertEquals(result.count, 1);
 			assertEquals(result.diff.missing, [{ name: 'Standard Delay' }]);
