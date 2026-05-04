@@ -34,6 +34,10 @@ export const NotificationTypes = {
 	ARR_CLEANUP_PARTIAL: 'arr.cleanup.partial',
 	ARR_CLEANUP_FAILED: 'arr.cleanup.failed',
 
+	// Arr Drift
+	ARR_DRIFT_DETECTED: 'arr.drift.detected',
+	ARR_DRIFT_FAILED: 'arr.drift.failed',
+
 	// Backups
 	BACKUP_SUCCESS: 'backup.success',
 	BACKUP_FAILED: 'backup.failed',
