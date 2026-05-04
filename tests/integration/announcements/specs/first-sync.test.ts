@@ -12,7 +12,7 @@
 import { assertEquals, assert } from '@std/assert';
 import { run, setup, teardown, test } from '$test-harness/runner.ts';
 import { getDbPath, startServer, stopServer } from '$test-harness/server.ts';
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 import { createDatabaseInstance } from '../harness/setup.ts';
 
 const PORT = 7171;
@@ -68,7 +68,7 @@ Body for ${id}.
 }
 
 function setLastSyncedAt(databaseId: number, value: string | null): void {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec('UPDATE database_instances SET last_synced_at = ? WHERE id = ?', [value, databaseId]);
 	} finally {
@@ -77,7 +77,7 @@ function setLastSyncedAt(databaseId: number, value: string | null): void {
 }
 
 function readReadAt(databaseId: number, announcementId: string): string | null {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		const row = db
 			.prepare('SELECT read_at FROM database_announcements WHERE database_id = ? AND id = ?')

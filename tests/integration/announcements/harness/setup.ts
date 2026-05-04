@@ -5,7 +5,7 @@
  * constraints under test.
  */
 
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 
 export interface CreateDbOpts {
 	uuid: string;
@@ -19,7 +19,7 @@ export interface CreateDbOpts {
  * the integration server's actual SQLite file.
  */
 export function createDatabaseInstance(dbPath: string, opts: CreateDbOpts): number {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO database_instances (
@@ -49,7 +49,7 @@ export interface InsertAnnouncementOpts {
 
 /** Insert one `database_announcements` row directly. */
 export function insertAnnouncement(dbPath: string, opts: InsertAnnouncementOpts): void {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO database_announcements (
@@ -72,7 +72,7 @@ export function insertAnnouncement(dbPath: string, opts: InsertAnnouncementOpts)
 
 /** Count announcements scoped to a single database id. */
 export function countAnnouncementsFor(dbPath: string, databaseId: number): number {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		const row = db
 			.prepare('SELECT COUNT(*) AS c FROM database_announcements WHERE database_id = ?')
@@ -85,7 +85,7 @@ export function countAnnouncementsFor(dbPath: string, databaseId: number): numbe
 
 /** Total count across all databases. */
 export function countAnnouncements(dbPath: string): number {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		const row = db.prepare('SELECT COUNT(*) AS c FROM database_announcements').get() as
 			| { c: number }
@@ -98,7 +98,7 @@ export function countAnnouncements(dbPath: string): number {
 
 /** Delete one parent row, exercising the ON DELETE CASCADE. */
 export function deleteDatabaseInstance(dbPath: string, id: number): void {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec('DELETE FROM database_instances WHERE id = ?', [id]);
 	} finally {
@@ -108,7 +108,7 @@ export function deleteDatabaseInstance(dbPath: string, id: number): void {
 
 /** Try to insert with a non-existent database_id. Returns true if rejected. */
 export function tryInsertOrphanAnnouncement(dbPath: string, missingId: number): boolean {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		try {
 			db.exec(

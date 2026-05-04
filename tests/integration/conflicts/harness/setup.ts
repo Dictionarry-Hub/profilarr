@@ -2,7 +2,7 @@
  * PCD conflict test helpers — create database instances, insert ops, query state.
  */
 
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 import { log } from '$test-harness/log.ts';
 
 // ─── Database Instance ─────────────────────────────────────────────────────────
@@ -22,7 +22,7 @@ export interface CreateDatabaseInstanceOpts {
  */
 export function createDatabaseInstance(dbPath: string, opts: CreateDatabaseInstanceOpts): number {
 	log.setup(`Creating database instance "${opts.name ?? 'test-db'}"`);
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO database_instances (
@@ -71,7 +71,7 @@ export interface InsertOpOpts {
  * Insert a pcd_ops row directly. Returns the inserted op id.
  */
 export function insertOp(dbPath: string, opts: InsertOpOpts): number {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		db.exec(
 			`INSERT INTO pcd_ops (
@@ -151,7 +151,7 @@ export interface HistoryRow {
  * Get a single pcd_ops row by id.
  */
 export function queryOp(dbPath: string, opId: number): OpRow | undefined {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		return db.prepare('SELECT * FROM pcd_ops WHERE id = ?').get(opId) as OpRow | undefined;
 	} finally {
@@ -167,7 +167,7 @@ export function queryOpsByDatabase(
 	databaseId: number,
 	filters?: { origin?: string; state?: string }
 ): OpRow[] {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		const clauses = ['database_id = ?'];
 		const params: (string | number)[] = [databaseId];
@@ -192,7 +192,7 @@ export function queryOpsByDatabase(
  * filtered to conflicted/conflicted_pending statuses.
  */
 export function queryLatestConflicts(dbPath: string, databaseId: number): HistoryRow[] {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		return db
 			.prepare(
@@ -216,7 +216,7 @@ export function queryLatestConflicts(dbPath: string, databaseId: number): Histor
  * Get all pcd_op_history entries for a specific op.
  */
 export function queryAllHistory(dbPath: string, opId: number): HistoryRow[] {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		return db
 			.prepare('SELECT * FROM pcd_op_history WHERE op_id = ? ORDER BY id DESC')
@@ -230,7 +230,7 @@ export function queryAllHistory(dbPath: string, opId: number): HistoryRow[] {
  * Get the latest pcd_op_history entry for each op in a database (all statuses).
  */
 export function queryLatestHistory(dbPath: string, databaseId: number): HistoryRow[] {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		return db
 			.prepare(

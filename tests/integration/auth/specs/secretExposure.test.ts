@@ -48,7 +48,7 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 import { hash } from '@felix/bcrypt';
 
 const PORT = 7016;
@@ -68,7 +68,7 @@ let pcdDatabaseId: number;
 let notificationServiceId: string;
 
 async function seedSecrets(dbPath: string) {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		// Arr instance with known API key
 		db.exec(

@@ -21,7 +21,7 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { Database } from '@db/sqlite';
+import { openDb } from '$test-harness/db.ts';
 
 const PORT = 7018;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -38,7 +38,7 @@ let sessionClient: TestClient;
 let outsideDir: string;
 
 function seedDatabase(dbPath: string): { id: number; uuid: string } {
-	const db = new Database(dbPath);
+	const db = openDb(dbPath);
 	try {
 		const uuid = crypto.randomUUID();
 		const localPath = `./dist/integration-${PORT}/data/databases/${uuid}`;
