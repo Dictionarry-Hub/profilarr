@@ -1,6 +1,7 @@
 # Drift Detection
 
 **Source:** `src/lib/server/jobs/handlers/arrDrift.ts`,
+`src/lib/server/jobs/handlers/arrSync.ts`,
 `src/lib/server/db/queries/arrDriftSettings.ts`,
 `src/lib/server/db/queries/arrDriftStatus.ts`,
 `src/lib/server/drift/customFormats.ts`,
@@ -9,18 +10,19 @@
 `src/lib/server/drift/display.ts`,
 `src/routes/arr/[id]/drift/+page.svelte`,
 `src/routes/arr/[id]/drift/+page.server.ts`,
-`src/routes/arr/[id]/drift/components/DriftFieldDiffTable.svelte`
+`src/routes/arr/[id]/drift/components/DriftFieldDiffTable.svelte`,
+`src/routes/arr/[id]/sync/+page.server.ts`,
+`src/routes/arr/[id]/sync/components/QualityProfiles.svelte`,
+`src/routes/arr/[id]/sync/components/DelayProfiles.svelte`
 
 Drift detection checks whether an Arr instance still matches the configuration
 Profilarr would sync now. It is observational: it does not write to Arr, repair
 config, delete stale items, or replace cleanup.
 
-Drift detection intentionally focuses on actively managed sync behavior:
-custom formats, quality profiles, and the default delay profile. Media
-management is treated as bootstrap configuration and is not checked for drift.
-Users often make local Arr-side edits to naming, media settings, and quality
-definitions after initial sync, so surfacing those edits as drift would be noisy
-and low value.
+Drift detection currently covers custom formats, quality profiles, and the
+default delay profile. Media management coverage (naming, media settings,
+quality definitions) is planned as a follow-up; until it lands, the sync page's
+Media Management section does not surface a drift chip.
 
 ## Job
 
@@ -200,6 +202,67 @@ State rendering inside the entities section:
 The page is read-only for drift results. It never writes to Arr, repairs
 configuration, or triggers sync.
 
+## Sync Page Progress
+
+Route: `/arr/[id]/sync`. Source: `src/routes/arr/[id]/sync/+page.server.ts`,
+`src/routes/arr/[id]/sync/components/QualityProfiles.svelte`,
+`src/routes/arr/[id]/sync/components/DelayProfiles.svelte`.
+
+Per-section drift progress is rendered as `ProgressIndicator` chips in each
+sync section header (right-aligned on tablet+, stacked below the title on
+mobile). The Quality Profiles header carries two chips: one for QPs themselves
+and one for the custom formats referenced by those QPs. The Delay Profiles
+header carries one chip. The Media Management header has no chip yet.
+
+Each chip shows `current / total` where:
+
+- `total`: managed items Profilarr would sync. Selected QP count for the QP
+  chip, expected CF count from `buildExpectedCustomFormats` for the CF chip,
+  `0` or `1` for the delay profile chip.
+- `current`: `total - drifted`. For the QP chip, `drifted` counts only QPs
+  the drift comparison flagged directly. QPs that are only "transitively"
+  affected (their scoring rows reference a CF that has been deleted from
+  Arr) are not subtracted from the QP chip; the user-visible impact is
+  surfaced via the CF chip's tooltip instead.
+
+Chips render with `colorMode="completion"`: green check when `met`, yellow
+bar otherwise. Anything below 100% is yellow regardless of how close to
+completion, because for drift "almost in sync" is still actionable.
+
+Each chip has a tooltip listing up to three affected entity names with a
+`+N more` suffix when the list overflows. Examples:
+
+- `"HD Movies, 4K Movies drifted."`
+- `"HD Movies affected by drifted custom formats."`
+- `"Streaming Tier drifted, used in HD Movies, TV."`
+- `"Standard Delay drifted."`
+
+Chips are hidden entirely when any of these conditions hold:
+
+- `FEATURES.drift` is off
+- per-instance `arr_drift_settings.enabled` is false
+- drift status is `never_checked` or `failed` (or no row exists)
+- the section's denominator is zero (e.g. no selected QPs)
+
+Failures (`status === 'failed'`) surface only on the dedicated drift page.
+
+### Post-sync drift refresh
+
+The arr sync handler (`src/lib/server/jobs/handlers/arrSync.ts`) enqueues an
+`arr.drift` job after a successful sync that touched Arr (any section ran).
+This keeps the sync page chips fresh after the user fixes drift by syncing,
+instead of waiting for the next scheduled drift run. The chain is gated on
+`FEATURES.drift` and per-instance `arr_drift_settings.enabled`.
+
+The sync page subscribes to job-finished events via
+`jobStatus.onJobFinished` and calls `invalidateAll()` whenever an `arr.drift`
+job completes. The raw hook is used (not the store's state machine) because
+the state machine drops finished events for jobs it is not actively tracking,
+including a drift job chained right after a sync's completion holdoff window.
+SSE is opened on demand when the user triggers a sync and auto-closes after
+the post-completion idle window, so this does not hold a persistent connection.
+
 ## TODO
 
-- Brief drift status on the sync page linking to the dedicated drift page.
+- Media management drift comparison (naming, media settings, quality
+  definitions) plus display formatter and sync page chip.
