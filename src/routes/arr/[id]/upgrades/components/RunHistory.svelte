@@ -30,6 +30,7 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
+	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
 	import Score from '$ui/arr/Score.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Label from '$ui/label/Label.svelte';
@@ -120,6 +121,12 @@
 
 	// Check if any filters are active
 	$: hasActiveFilters = dateFilter !== 'all' || filterFilter !== 'all' || statusFilter !== 'all';
+
+	const pageSize = 20;
+	let currentPage = 1;
+	$: totalPages = Math.max(1, Math.ceil(filteredRuns.length / pageSize));
+	$: if (currentPage > totalPages) currentPage = 1;
+	$: paginatedRuns = filteredRuns.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
 	let expandedIds: Set<string> = new Set();
 
@@ -281,7 +288,7 @@
 
 	<ExpandableTable
 		{columns}
-		data={filteredRuns}
+		data={paginatedRuns}
 		getRowId={(row) => row.id}
 		bind:expandedRows={expandedIds}
 		chevronPosition="right"
@@ -576,4 +583,8 @@
 			</div>
 		</svelte:fragment>
 	</ExpandableTable>
+
+	<div class="mt-3 flex justify-center">
+		<Pagination {currentPage} {totalPages} onPageChange={(p) => (currentPage = p)} />
+	</div>
 </div>

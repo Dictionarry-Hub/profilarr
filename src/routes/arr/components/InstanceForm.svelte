@@ -262,35 +262,34 @@
 	}
 </script>
 
-<div class="space-y-6" class:mt-6={mode === 'edit'}>
-	<!-- Header -->
-	<StickyCard position="top">
-		<svelte:fragment slot="left">
-			<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
-			<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
-		</svelte:fragment>
-		<svelte:fragment slot="right">
-			{#if mode === 'edit'}
-				<Button
-					text="Delete"
-					icon={Trash2}
-					iconColor="text-red-600 dark:text-red-400"
-					disabled={saving || deleting}
-					on:click={() => (showDeleteModal = true)}
-				/>
-			{/if}
-			<div data-onboarding="arr-save">
-				<Button
-					text={saving ? 'Saving...' : 'Save'}
-					icon={Save}
-					iconColor="text-blue-600 dark:text-blue-400"
-					disabled={saving || !canSubmit}
-					on:click={handleSave}
-				/>
-			</div>
-		</svelte:fragment>
-	</StickyCard>
+<StickyCard position="top">
+	<svelte:fragment slot="left">
+		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
+		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
+	</svelte:fragment>
+	<svelte:fragment slot="right">
+		{#if mode === 'edit'}
+			<Button
+				text="Delete"
+				icon={Trash2}
+				iconColor="text-red-600 dark:text-red-400"
+				disabled={saving || deleting}
+				on:click={() => (showDeleteModal = true)}
+			/>
+		{/if}
+		<div data-onboarding="arr-save">
+			<Button
+				text={saving ? 'Saving...' : 'Save'}
+				icon={Save}
+				iconColor="text-blue-600 dark:text-blue-400"
+				disabled={saving || !canSubmit}
+				on:click={handleSave}
+			/>
+		</div>
+	</svelte:fragment>
+</StickyCard>
 
+<div class="mt-4 space-y-6">
 	<div
 		class="space-y-4 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
 	>

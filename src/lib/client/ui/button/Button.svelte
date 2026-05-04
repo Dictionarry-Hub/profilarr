@@ -29,7 +29,8 @@
 	export let title: string = '';
 	export let ariaLabel: string = '';
 	export let tooltip: string = '';
-	export let tooltipPosition: 'top' | 'bottom' | 'right' = 'bottom';
+	export let tooltipPosition: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
+	export let tooltipAlign: 'left' | 'middle' | 'right' = 'middle';
 	export let loading: boolean = false;
 	// Optional data-onboarding attribute for cutscene targeting
 	export let onboarding: string | undefined = undefined;
@@ -97,7 +98,7 @@
 	$: iconSize = effectiveSize === 'xs' ? 12 : effectiveSize === 'sm' ? 14 : 16;
 </script>
 
-<Tooltip text={tooltip} position={tooltipPosition} {fullWidth}>
+<Tooltip text={tooltip} position={tooltipPosition} align={tooltipAlign} {fullWidth}>
 	{#if href}
 		<a
 			{href}

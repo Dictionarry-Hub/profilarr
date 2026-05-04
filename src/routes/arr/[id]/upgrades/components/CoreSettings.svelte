@@ -5,6 +5,7 @@
 	import { serverTimezone } from '$lib/client/stores/timezone';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import CronInput from '$ui/cron/CronInput.svelte';
+	import Label from '$ui/label/Label.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 
 	export let enabled: boolean = true;
@@ -62,69 +63,61 @@
 	}
 </script>
 
-<div
-	class="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
->
-	<div class="flex flex-wrap gap-4 md:items-end md:gap-6">
-		<!-- Status -->
-		<div>
-			<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Status</span>
-			<Toggle
-				checked={enabled}
-				label={enabled ? 'Enabled' : 'Disabled'}
-				color={enabled ? 'green' : 'red'}
-				on:change={(e) => onEnabledChange?.(e.detail)}
-			/>
-		</div>
-
-		<!-- Schedule -->
-		<div data-onboarding="upgrades-schedule">
-			<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Schedule</span>
-			<CronInput bind:value={cronValue} {minIntervalMinutes} {onWarning} />
-		</div>
-
-		<!-- Filter Mode -->
-		<div data-onboarding="upgrades-filter-mode">
-			<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Mode</span>
-			<DropdownSelect
-				value={filterMode}
-				options={modeOptions}
-				minWidth="10rem"
-				responsiveDropdown
-				on:change={(e) => onFilterModeChange?.(e.detail as FilterMode)}
-			/>
-		</div>
-
-		<!-- Run status -->
-		{#if lastRunAt}
-			<div
-				class="flex w-full flex-wrap items-center gap-3 border-t border-neutral-200 pt-3 text-xs text-neutral-500 md:ml-auto md:w-auto md:border-0 md:pt-0 dark:border-neutral-700 dark:text-neutral-400"
-			>
-				{#if !enabled}
-					<span
-						class="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-700 dark:bg-amber-900/50 dark:text-amber-400"
-						>Paused</span
-					>
-				{:else if timeUntilNext !== null && timeUntilNext <= 0}
-					<span
-						class="rounded bg-green-100 px-1.5 py-0.5 font-medium text-green-700 dark:bg-green-900/50 dark:text-green-400"
-						>Ready</span
-					>
-				{:else if timeUntilNext !== null}
-					<span>
-						Next: <span
-							class="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-							>{formatTimeRemaining(timeUntilNext)}</span
-						>
-					</span>
-				{/if}
-				<span>
-					Last: <span
-						class="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-						>{formatSmartDateTime(lastRunAt, $serverTimezone)}</span
-					>
-				</span>
-			</div>
-		{/if}
+<div class="flex flex-wrap gap-4 md:items-end md:gap-x-5 md:gap-y-3 md:px-4">
+	<div>
+		<span
+			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
+		>
+			Status
+		</span>
+		<Toggle
+			checked={enabled}
+			label={enabled ? 'Enabled' : 'Disabled'}
+			color={enabled ? 'green' : 'red'}
+			on:change={(e) => onEnabledChange?.(e.detail)}
+		/>
 	</div>
+
+	<div data-onboarding="upgrades-schedule">
+		<span
+			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
+		>
+			Schedule
+		</span>
+		<CronInput bind:value={cronValue} {minIntervalMinutes} {onWarning} />
+	</div>
+
+	<div data-onboarding="upgrades-filter-mode">
+		<span
+			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
+		>
+			Mode
+		</span>
+		<DropdownSelect
+			value={filterMode}
+			options={modeOptions}
+			minWidth="10rem"
+			responsiveDropdown
+			on:change={(e) => onFilterModeChange?.(e.detail as FilterMode)}
+		/>
+	</div>
+
+	{#if lastRunAt}
+		<div
+			class="flex w-full flex-wrap items-center gap-1.5 border-t border-neutral-200 pt-3 md:ml-auto md:w-auto md:border-0 md:pt-0 dark:border-neutral-800"
+		>
+			{#if !enabled}
+				<Label variant="warning" size="md" rounded="md">Paused</Label>
+			{:else if timeUntilNext !== null && timeUntilNext <= 0}
+				<Label variant="success" size="md" rounded="md">Ready</Label>
+			{:else if timeUntilNext !== null}
+				<Label variant="secondary" size="md" rounded="md" mono>
+					Next {formatTimeRemaining(timeUntilNext)}
+				</Label>
+			{/if}
+			<Label variant="secondary" size="md" rounded="md" mono>
+				Last {formatSmartDateTime(lastRunAt, $serverTimezone)}
+			</Label>
+		</div>
+	{/if}
 </div>

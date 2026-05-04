@@ -1,17 +1,18 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import { isDirty, initEdit, update, current, clear } from '$lib/client/stores/dirty';
-	import { Info, Save, FlaskConical, Play, Settings, History } from 'lucide-svelte';
+	import { jobStatus } from '$stores/jobStatus';
+	import { Info, Save, FlaskConical, Play } from 'lucide-svelte';
 	import RenameSettings from './components/RenameSettings.svelte';
 	import RenameRunHistory from './components/RenameRunHistory.svelte';
 	import RenameInfoModal from './components/RenameInfoModal.svelte';
 	import DirtyModal from '$lib/client/ui/modal/DirtyModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -27,7 +28,21 @@
 		};
 		// Always use initEdit - isDirty should be false until user makes changes
 		initEdit(initialFormData);
-		return () => clear();
+		let previousJobState: string | null = null;
+		const unsubscribeJobStatus = jobStatus.subscribe((status) => {
+			if (
+				previousJobState === 'running' &&
+				status.state === 'completed' &&
+				status.jobType === 'arr.rename'
+			) {
+				invalidateAll();
+			}
+			previousJobState = status.state;
+		});
+		return () => {
+			unsubscribeJobStatus();
+			clear();
+		};
 	});
 
 	$: isNewConfig = !data.settings;
@@ -53,6 +68,7 @@
 			alertStore.add('success', 'Rename run queued');
 		}
 		if (form.error) {
+			jobStatus.cancelOptimistic();
 			alertStore.add('error', form.error);
 		}
 	}
@@ -72,34 +88,46 @@
 		</div>
 		<div slot="right" class="flex items-center gap-2">
 			<Button text="How it works" icon={Info} on:click={() => (showInfoModal = true)} />
-			{#if !isNewConfig}
-				<Tooltip text="Preview which files would be renamed without making changes">
-					<Button
-						text={running ? 'Running...' : 'Dry Run'}
-						icon={FlaskConical}
-						iconColor="text-amber-600 dark:text-amber-400"
-						disabled={running || saving || $isDirty}
-						on:click={() => {
-							const f = document.getElementById('dry-run-form');
-							if (f instanceof HTMLFormElement) f.requestSubmit();
-						}}
-					/>
-				</Tooltip>
-				<Tooltip text="Rename files and folders now">
-					<Button
-						text={running ? 'Running...' : 'Run Now'}
-						icon={Play}
-						iconColor="text-green-600 dark:text-green-400"
-						disabled={running || saving || $isDirty}
-						on:click={() => {
-							const f = document.getElementById('live-run-form');
-							if (f instanceof HTMLFormElement) f.requestSubmit();
-						}}
-					/>
-				</Tooltip>
-			{/if}
 			<Button
-				text={saving ? 'Saving...' : 'Save'}
+				text={running ? 'Running...' : 'Dry Run'}
+				icon={FlaskConical}
+				iconColor="text-amber-600 dark:text-amber-400"
+				disabled={isNewConfig || !enabled || running || saving || $isDirty}
+				tooltip="Preview which files would be renamed without making changes"
+				tooltipPosition="bottom"
+				tooltipAlign="right"
+				on:click={() => {
+					jobStatus.connect();
+					jobStatus.setRunning('arr.rename', 'Renaming files...');
+					const f = document.getElementById('dry-run-form');
+					if (f instanceof HTMLFormElement) {
+						f.requestSubmit();
+					} else {
+						jobStatus.cancelOptimistic();
+					}
+				}}
+			/>
+			<Button
+				text={running ? 'Running...' : 'Run Now'}
+				icon={Play}
+				iconColor="text-green-600 dark:text-green-400"
+				disabled={isNewConfig || !enabled || running || saving || $isDirty}
+				tooltip="Rename files and folders now"
+				tooltipPosition="bottom"
+				tooltipAlign="right"
+				on:click={() => {
+					jobStatus.connect();
+					jobStatus.setRunning('arr.rename', 'Renaming files...');
+					const f = document.getElementById('live-run-form');
+					if (f instanceof HTMLFormElement) {
+						f.requestSubmit();
+					} else {
+						jobStatus.cancelOptimistic();
+					}
+				}}
+			/>
+			<Button
+				text="Save"
 				icon={Save}
 				iconColor="text-blue-600 dark:text-blue-400"
 				disabled={saving || running || !$isDirty}
@@ -113,14 +141,8 @@
 		</div>
 	</StickyCard>
 
-	<div class="mt-6 space-y-6">
-		<section>
-			<h2
-				class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-			>
-				<Settings size={18} class="text-neutral-500 dark:text-neutral-400" />
-				Settings
-			</h2>
+	<div class="mt-4 space-y-6">
+		<section class="border-b border-neutral-200 pb-5 dark:border-neutral-800">
 			<RenameSettings
 				{enabled}
 				{renameFolders}
@@ -137,17 +159,11 @@
 				onWarning={(msg) => alertStore.add('warning', msg)}
 			/>
 		</section>
-	</div>
 
-	<section class="mt-6">
-		<h2
-			class="mb-3 flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-		>
-			<History size={18} class="text-neutral-500 dark:text-neutral-400" />
-			Run History
-		</h2>
-		<RenameRunHistory runs={data.renameRuns} />
-	</section>
+		<section class="md:px-4">
+			<RenameRunHistory runs={data.renameRuns} />
+		</section>
+	</div>
 
 	<!-- Hidden forms -->
 	<form
