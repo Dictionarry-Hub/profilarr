@@ -521,15 +521,12 @@
 								value={row.selector}
 								options={selectors.map((s) => ({
 									value: s.id,
-									label: `${s.label} - ${s.description}`,
-									shortLabel: s.label
+									label: s.label
 								}))}
 								minWidth="14rem"
-								compactDropdownThreshold={7}
 								fullWidth
 								responsiveButton
 								responsiveDropdown
-								mobileDropdownShortLabels
 								fixed
 								on:change={(e) => {
 									row.selector = e.detail;
