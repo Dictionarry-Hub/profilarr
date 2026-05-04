@@ -259,13 +259,17 @@ function captureStream(
 }
 
 /**
- * Print everything we captured for a server that failed to come up. Called
- * from the catch in startServer; never blocks subsequent test cleanup.
+ * Print everything we captured for a server. Called from the catch in
+ * startServer (reason="failed to become ready") and from harness setup/test
+ * failure paths (reason="post-failure dump"). Never blocks cleanup.
  */
-function dumpDiagnostics(instance: ServerInstance): void {
+function dumpDiagnostics(
+	instance: ServerInstance,
+	reason: string = 'failed to become ready'
+): void {
 	const elapsed = Date.now() - instance.startedAt;
 	console.error(
-		`\n──── DIAG [:${instance.port}] failed to become ready (${elapsed}ms) ─────────────────`
+		`\n──── DIAG [:${instance.port}] ${reason} (${elapsed}ms since start) ─────────────────`
 	);
 	console.error(
 		`  pid=${instance.process.pid} ` +
@@ -277,4 +281,36 @@ function dumpDiagnostics(instance: ServerInstance): void {
 	console.error(`  --- stderr (${instance.stderrBuf.length} lines) ---`);
 	for (const line of instance.stderrBuf.slice(-200)) console.error(`  | ${line}`);
 	console.error(`──── end DIAG [:${instance.port}] ─────────────────────────────────────────\n`);
+}
+
+/**
+ * Dump diagnostics for every running server instance in this process. Called
+ * from harness/runner.ts when a setup or test fails so the spec's stderr
+ * captures whatever the server logged before it died (or what it's still
+ * doing if it's still alive).
+ */
+export function dumpAllServerDiagnostics(reason: string = 'post-failure dump'): void {
+	if (instances.size === 0) return;
+	for (const instance of instances.values()) {
+		dumpDiagnostics(instance, reason);
+	}
+}
+
+/**
+ * Dump diagnostics only for server instances that have already exited
+ * (process.status resolved). Used after a test failure to surface a server
+ * crash without spamming output when the server is still healthy and the
+ * test failed for normal assertion reasons.
+ *
+ * Returns true if any server diagnostics were dumped.
+ */
+export function dumpDeadServerDiagnostics(reason: string = 'server crashed'): boolean {
+	let dumped = false;
+	for (const instance of instances.values()) {
+		if (instance.exitStatus !== null) {
+			dumpDiagnostics(instance, reason);
+			dumped = true;
+		}
+	}
+	return dumped;
 }
