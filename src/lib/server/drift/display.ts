@@ -26,6 +26,11 @@ interface QualityProfileDiff {
 	modified?: unknown[];
 }
 
+interface DelayProfileDiff {
+	missing?: unknown[];
+	modified?: unknown[];
+}
+
 interface DriftFieldDiff {
 	path: string;
 	expected: unknown;
@@ -38,6 +43,11 @@ interface CustomFormatModifiedDiff {
 }
 
 interface QualityProfileModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+interface DelayProfileModifiedDiff {
 	name: string;
 	fields: DriftFieldDiff[];
 }
@@ -78,7 +88,8 @@ export function buildDriftDisplayEntities(
 	const syncArrType = arrType === 'radarr' || arrType === 'sonarr' ? arrType : undefined;
 	return [
 		...buildCustomFormatEntities(diff.custom_formats, syncArrType),
-		...buildQualityProfileEntities(diff.quality_profiles, syncArrType)
+		...buildQualityProfileEntities(diff.quality_profiles, syncArrType),
+		...buildDelayProfileEntities(diff.delay_profiles)
 	];
 }
 
@@ -202,6 +213,61 @@ function buildQualityProfileEntities(
 	return entities;
 }
 
+function buildDelayProfileEntities(raw: unknown): DriftDisplayEntity[] {
+	const diff = asDelayProfileDiff(raw);
+	if (!diff) return [];
+
+	const entities: DriftDisplayEntity[] = [];
+
+	for (const item of diff.missing ?? []) {
+		const name = recordString(item, 'name');
+		if (!name) continue;
+
+		entities.push({
+			id: `delay_profiles:missing:${name}`,
+			section: 'delay_profiles',
+			sectionLabel: 'Delay Profile',
+			title: name,
+			state: 'missing',
+			stateLabel: 'Missing',
+			tone: 'danger',
+			summary: 'Profilarr expects this delay profile on Arr default profile, but Arr does not have it.',
+			changes: [
+				{
+					id: `delay_profiles:missing:${name}:profile`,
+					label: 'Delay profile',
+					detail: 'Default profile missing from Arr',
+					expected: value('Present'),
+					actual: value('Missing', { tone: 'danger' }),
+					tone: 'danger'
+				}
+			]
+		});
+	}
+
+	for (const item of diff.modified ?? []) {
+		const modified = asModifiedDelayProfile(item);
+		if (!modified) continue;
+		if (modified.fields.length === 0) continue;
+
+		const changes = modified.fields.map(formatDelayProfileFieldDiff);
+
+		entities.push({
+			id: `delay_profiles:modified:${modified.name}`,
+			section: 'delay_profiles',
+			sectionLabel: 'Delay Profile',
+			title: modified.name,
+			state: 'modified',
+			stateLabel: 'Modified',
+			tone: 'warning',
+			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
+			changes
+		});
+	}
+
+	return entities;
+}
+
 function formatQualityProfileFieldDiff(
 	field: DriftFieldDiff,
 	index: number,
@@ -269,6 +335,75 @@ function formatQualityProfileFieldDiff(
 		id: `quality-profile-field:${index}`,
 		label: qualityProfileFieldLabel(field.path),
 		detail: 'Profile setting changed',
+		expected: formatGenericValue(field.expected),
+		actual: formatGenericValue(field.actual),
+		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
+	};
+}
+
+function formatDelayProfileFieldDiff(field: DriftFieldDiff, index: number): DriftDisplayChange {
+	if (field.path === 'protocol') {
+		return {
+			id: `delay-profile-protocol:${index}`,
+			label: 'Protocol',
+			detail: 'Protocol preference changed',
+			expected: formatDelayProtocolValue(field.expected),
+			actual: formatDelayProtocolValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	if (field.path === 'usenetDelay' || field.path === 'torrentDelay') {
+		return {
+			id: `delay-profile-delay:${index}`,
+			label: delayProfileFieldLabel(field.path),
+			detail: 'Delay changed',
+			expected: formatMinutesValue(field.expected),
+			actual: formatMinutesValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	if (
+		field.path === 'bypassIfHighestQuality' ||
+		field.path === 'bypassIfAboveCustomFormatScore'
+	) {
+		return {
+			id: `delay-profile-bypass:${index}`,
+			label: delayProfileFieldLabel(field.path),
+			detail: 'Bypass behavior changed',
+			expected: formatBooleanValue(field.expected),
+			actual: formatBooleanValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	if (field.path === 'minimumCustomFormatScore') {
+		return {
+			id: `delay-profile-minimum-score:${index}`,
+			label: 'Minimum Custom Format Score',
+			detail: 'Bypass score threshold changed',
+			expected: formatGenericValue(field.expected),
+			actual: formatGenericValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	if (field.path === 'tags') {
+		return {
+			id: `delay-profile-tags:${index}`,
+			label: 'Tags',
+			detail: 'Default profile tags changed',
+			expected: formatTagIdsValue(field.expected),
+			actual: formatTagIdsValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	return {
+		id: `delay-profile-field:${index}`,
+		label: delayProfileFieldLabel(field.path),
+		detail: 'Delay profile setting changed',
 		expected: formatGenericValue(field.expected),
 		actual: formatGenericValue(field.actual),
 		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
@@ -463,6 +598,14 @@ function asQualityProfileDiff(raw: unknown): QualityProfileDiff | null {
 	};
 }
 
+function asDelayProfileDiff(raw: unknown): DelayProfileDiff | null {
+	if (!isRecord(raw)) return null;
+	return {
+		missing: Array.isArray(raw.missing) ? raw.missing : [],
+		modified: Array.isArray(raw.modified) ? raw.modified : []
+	};
+}
+
 function asModifiedCustomFormat(raw: unknown): CustomFormatModifiedDiff | null {
 	if (!isRecord(raw)) return null;
 	const name = recordString(raw, 'name');
@@ -473,6 +616,15 @@ function asModifiedCustomFormat(raw: unknown): CustomFormatModifiedDiff | null {
 }
 
 function asModifiedQualityProfile(raw: unknown): QualityProfileModifiedDiff | null {
+	if (!isRecord(raw)) return null;
+	const name = recordString(raw, 'name');
+	if (!name || !Array.isArray(raw.fields)) return null;
+
+	const fields = raw.fields.filter(isFieldDiff);
+	return { name, fields };
+}
+
+function asModifiedDelayProfile(raw: unknown): DelayProfileModifiedDiff | null {
 	if (!isRecord(raw)) return null;
 	const name = recordString(raw, 'name');
 	if (!name || !Array.isArray(raw.fields)) return null;
@@ -616,6 +768,32 @@ function formatQualityProfileFormatItemValue(raw: unknown): DriftDisplayValue {
 	return formatGenericValue(raw);
 }
 
+function formatDelayProtocolValue(raw: unknown): DriftDisplayValue {
+	const labels: Record<string, string> = {
+		prefer_usenet: 'Prefer Usenet',
+		prefer_torrent: 'Prefer Torrent',
+		only_usenet: 'Only Usenet',
+		only_torrent: 'Only Torrent',
+		unknown: 'Unknown'
+	};
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (typeof raw === 'string') return value(labels[raw] ?? titleize(raw));
+	return formatGenericValue(raw);
+}
+
+function formatMinutesValue(raw: unknown): DriftDisplayValue {
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (typeof raw !== 'number') return formatGenericValue(raw);
+	return value(`${raw} ${raw === 1 ? 'minute' : 'minutes'}`, { mono: true });
+}
+
+function formatTagIdsValue(raw: unknown): DriftDisplayValue {
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (!Array.isArray(raw)) return formatGenericValue(raw);
+	if (raw.length === 0) return value('None');
+	return value(raw.map((tag) => String(tag)).join(', '), { mono: true });
+}
+
 function formatLanguageValue(raw: unknown, arrType: SyncArrType | undefined): DriftDisplayValue {
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
 	if (!isRecord(raw)) return formatGenericValue(raw);
@@ -664,6 +842,22 @@ function qualityProfileFieldLabel(path: string): string {
 		minFormatScore: 'Minimum Format Score',
 		minUpgradeFormatScore: 'Minimum Upgrade Score Increment',
 		upgradeAllowed: 'Upgrade Allowed'
+	};
+
+	return labels[path] ?? titleize(path);
+}
+
+function delayProfileFieldLabel(path: string): string {
+	const labels: Record<string, string> = {
+		bypassIfAboveCustomFormatScore: 'Bypass if Above Custom Format Score',
+		bypassIfHighestQuality: 'Bypass if Highest Quality',
+		id: 'ID',
+		minimumCustomFormatScore: 'Minimum Custom Format Score',
+		order: 'Order',
+		protocol: 'Protocol',
+		tags: 'Tags',
+		torrentDelay: 'Torrent Delay',
+		usenetDelay: 'Usenet Delay'
 	};
 
 	return labels[path] ?? titleize(path);
