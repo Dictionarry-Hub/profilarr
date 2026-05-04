@@ -341,9 +341,17 @@ async function runIntegration(target?: string): Promise<number> {
 			const result = await runIntegrationSpec(specFiles[0], 'inherit');
 			exitCode = result.code;
 		} else {
-			// Multiple specs - run in parallel, collect output
-			console.log(`Running ${specFiles.length} specs in parallel...\n`);
-			const results = await Promise.all(specFiles.map((f) => runIntegrationSpec(f, 'piped')));
+			// Multiple specs - run in chunked parallel, collect output.
+			// Cap concurrency so the CI runner (2 vCPU / 7 GB) can handle the
+			// per-spec server processes without OOM-killing them mid-test.
+			const CONCURRENCY = 8;
+			console.log(`Running ${specFiles.length} specs (up to ${CONCURRENCY} in parallel)...\n`);
+			const results: Array<{ code: number; stdout: string; stderr: string }> = [];
+			for (let i = 0; i < specFiles.length; i += CONCURRENCY) {
+				const batch = specFiles.slice(i, i + CONCURRENCY);
+				const batchResults = await Promise.all(batch.map((f) => runIntegrationSpec(f, 'piped')));
+				results.push(...batchResults);
+			}
 
 			exitCode = 0;
 			for (let i = 0; i < specFiles.length; i++) {

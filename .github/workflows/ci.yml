@@ -2,8 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [develop, 'hotfix/*']
-    tags: ['v*']
+    branches: ['hotfix/*']
     paths-ignore:
       ['docs/**', '*.md', '!SECURITY.md', '.github/issue_template/**', '.github/assets/**']
   pull_request:
