@@ -70,12 +70,14 @@ const driftHandler: JobHandler = async (job) => {
 
 		const totalCount = Object.values(result.counts).reduce((sum, count) => sum + (count ?? 0), 0);
 		if (result.status === 'drift_detected') {
+			const notified = result.diffHash !== previousStatus?.lastNotifiedHash;
+
 			await logger.info('Drift detected', {
 				source: 'jobs.handlers.arrDrift',
-				meta: logMeta
+				meta: { ...logMeta, notified }
 			});
 
-			if (result.diffHash !== previousStatus?.lastNotifiedHash) {
+			if (notified) {
 				await notificationManager.notify(
 					notifications.arrDriftDetected({
 						instanceName: instance.name,
@@ -104,10 +106,17 @@ const driftHandler: JobHandler = async (job) => {
 		const message = error instanceof Error ? error.message : String(error);
 		const now = new Date().toISOString();
 		const errorHash = await hashDriftDiff({ error: message });
+		const notified = errorHash !== previousStatus?.lastNotifiedErrorHash;
 
 		await logger.error('Drift check failed', {
 			source: 'jobs.handlers.arrDrift',
-			meta: { jobId: job.id, instanceId, instanceName: instance.name, error: message }
+			meta: {
+				jobId: job.id,
+				instanceId,
+				instanceName: instance.name,
+				error: message,
+				notified
+			}
 		});
 
 		arrDriftStatusQueries.upsert(instanceId, {
@@ -120,7 +129,7 @@ const driftHandler: JobHandler = async (job) => {
 			errorHash
 		});
 
-		if (errorHash !== previousStatus?.lastNotifiedErrorHash) {
+		if (notified) {
 			await notificationManager.notify(
 				notifications.arrDriftFailed({
 					instanceName: instance.name,
