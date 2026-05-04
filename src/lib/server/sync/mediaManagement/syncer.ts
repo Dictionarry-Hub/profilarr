@@ -5,7 +5,7 @@
  * Handles three types of configs:
  * 1. Media Settings (downloadPropersAndRepacks, enableMediaInfo)
  * 2. Naming (movie/episode naming formats, folder formats)
- * 3. Quality Definitions (TODO)
+ * 3. Quality Definitions
  *
  * Flow for each:
  * 1. GET existing config from arr
@@ -33,9 +33,11 @@ import {
 import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '$shared/pcd/display.ts';
 import type { ArrType, RadarrNamingConfig, SonarrNamingConfig } from '$arr/types.ts';
 import {
+	applyQualityDefinitionsToArr,
 	mergeMediaSettingsConfig,
 	mergeRadarrNamingConfig,
-	mergeSonarrNamingConfig
+	mergeSonarrNamingConfig,
+	transformQualityDefinitionsForArr
 } from './transformer.ts';
 import { logger } from '$logger/logger.ts';
 
@@ -322,43 +324,23 @@ export class MediaManagementSyncer extends BaseSyncer {
 		// GET existing quality definitions from ARR
 		const arrDefinitions = await this.client.getQualityDefinitions();
 
-		// Build map of ARR quality name (lowercase) -> definition
-		const arrDefMap = new Map<string, (typeof arrDefinitions)[0]>();
-		for (const def of arrDefinitions) {
-			if (def.quality.name) {
-				arrDefMap.set(def.quality.name.toLowerCase(), def);
-			}
+		const transformed = transformQualityDefinitionsForArr(qualityDefsConfig.entries, apiMappings);
+		for (const qualityName of transformed.unmapped) {
+			await logger.debug(`No API mapping found for quality "${qualityName}"`, {
+				source: 'Sync:QualityDefinitions',
+				meta: { instanceId: this.instanceId, qualityName }
+			});
 		}
 
-		// Update ARR definitions with PCD values
-		let updatedCount = 0;
-		for (const entry of qualityDefsConfig.entries) {
-			// Get the API name for this quality
-			const apiName = apiMappings.get(entry.quality_name.toLowerCase());
-			if (!apiName) {
-				await logger.debug(`No API mapping found for quality "${entry.quality_name}"`, {
-					source: 'Sync:QualityDefinitions',
-					meta: { instanceId: this.instanceId, qualityName: entry.quality_name }
-				});
-				continue;
-			}
-
-			// Find matching ARR definition
-			const arrDef = arrDefMap.get(apiName.toLowerCase());
-			if (!arrDef) {
-				await logger.debug(`No ARR definition found for quality "${apiName}"`, {
-					source: 'Sync:QualityDefinitions',
-					meta: { instanceId: this.instanceId, apiName }
-				});
-				continue;
-			}
-
-			// Update the definition
-			// PCD stores 0 for "unlimited", arr API expects null
-			arrDef.minSize = entry.min_size;
-			arrDef.maxSize = entry.max_size === 0 ? null : entry.max_size;
-			arrDef.preferredSize = entry.preferred_size === 0 ? null : entry.preferred_size;
-			updatedCount++;
+		const { updatedCount, missing } = applyQualityDefinitionsToArr(
+			arrDefinitions,
+			transformed.definitions
+		);
+		for (const apiName of missing) {
+			await logger.debug(`No ARR definition found for quality "${apiName}"`, {
+				source: 'Sync:QualityDefinitions',
+				meta: { instanceId: this.instanceId, apiName }
+			});
 		}
 
 		if (updatedCount === 0) {

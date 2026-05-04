@@ -21,10 +21,8 @@ Profilarr would sync now. It is observational: it does not write to Arr, repair
 config, delete stale items, or replace cleanup.
 
 Drift detection currently covers custom formats, quality profiles, the default
-delay profile, and media management media settings and naming. Media management
-quality definitions are planned as a follow-up; until full media management
-coverage lands, the sync page's Media Management section does not surface a
-drift chip.
+delay profile, and media management media settings, naming, and quality
+definitions.
 
 ## Job
 
@@ -48,8 +46,8 @@ Current handler behavior:
 - missing or disabled settings cancel the job
 - unsupported Arr types are skipped
 - enabled jobs compare custom formats, quality profiles, delay profiles, media
-  management media settings, and media management naming, store the latest
-  result, and return success
+  management media settings, media management naming, and media management
+  quality definitions, store the latest result, and return success
 - drift-detected and failed runs notify subscribed services when the current
   drift or error hash has not already been notified
 - scheduled jobs calculate and store the next run before returning
@@ -145,15 +143,15 @@ Comparison rules:
 
 ## Media Management
 
-Media management drift compares configured media settings and naming selections
-against Arr's media management and naming configs. Quality definitions are not
-compared yet.
+Media management drift compares configured media settings, naming, and quality
+definition selections against Arr's media management, naming, and quality
+definition configs.
 
 Comparison rules:
 
-- build expected media settings and naming with the same transformers used by
-  sync
-- no selected media settings or naming config is clean
+- build expected media settings, naming, and quality definitions with the same
+  transformers used by sync
+- no selected media settings, naming, or quality definitions config is clean
 - missing selected PCD cache or config fails the drift check
 - compare `downloadPropersAndRepacks` and `enableMediaInfo`
 - compare Radarr naming fields: rename, illegal-character replacement, colon
@@ -162,7 +160,11 @@ Comparison rules:
   replacement, custom colon replacement, multi-episode style, episode formats,
   series folder format, and season folder format
 - normalize Sonarr Arr enum integers back to semantic strings before comparing
-- ignore unmanaged extra Arr media management and naming fields
+- compare quality definition `minSize`, `maxSize`, and `preferredSize`
+- normalize PCD quality definition `0` size values to Arr `null` for unlimited
+  maximum and preferred sizes
+- ignore unmapped PCD quality definitions, mapped definitions missing in Arr,
+  extra Arr quality definitions, and unmanaged Arr fields
 
 ## Display Formatter
 
@@ -193,8 +195,8 @@ and unmanaged nonzero score rows.
 For delay profiles the formatter turns the derived protocol, delays, bypass
 flags, minimum score, order, and tags into friendly field rows.
 
-For media management the formatter turns media settings and naming changes into
-friendly field rows.
+For media management the formatter turns media settings, naming, and quality
+definition changes into friendly field rows.
 
 Display types live in `src/lib/shared/drift.ts`.
 
@@ -288,7 +290,3 @@ the state machine drops finished events for jobs it is not actively tracking,
 including a drift job chained right after a sync's completion holdoff window.
 SSE is opened on demand when the user triggers a sync and auto-closes after
 the post-completion idle window, so this does not hold a persistent connection.
-
-## TODO
-
-- Media management drift comparison for quality definitions plus sync page chip.

@@ -40,9 +40,11 @@ import {
 import type { RadarrNamingConfig, SonarrNamingConfig } from '$arr/types.ts';
 import { transformDelayProfile } from './delayProfiles/transformer.ts';
 import {
+	applyQualityDefinitionsToArr,
 	mergeMediaSettingsConfig,
 	mergeRadarrNamingConfig,
-	mergeSonarrNamingConfig
+	mergeSonarrNamingConfig,
+	transformQualityDefinitionsForArr
 } from './mediaManagement/transformer.ts';
 
 interface SyncResult {
@@ -408,29 +410,8 @@ export async function syncQualityDefinitions(
 		// GET existing quality definitions from arr
 		const arrDefinitions = await client.getQualityDefinitions();
 
-		// Build map of arr quality name (lowercase) -> definition
-		const arrDefMap = new Map<string, (typeof arrDefinitions)[0]>();
-		for (const def of arrDefinitions) {
-			if (def.quality.name) {
-				arrDefMap.set(def.quality.name.toLowerCase(), def);
-			}
-		}
-
-		// Update arr definitions with PCD values
-		let updatedCount = 0;
-		for (const entry of qualityDefsConfig.entries) {
-			const apiName = apiMappings.get(entry.quality_name.toLowerCase());
-			if (!apiName) continue;
-
-			const arrDef = arrDefMap.get(apiName.toLowerCase());
-			if (!arrDef) continue;
-
-			// PCD stores 0 for "unlimited", arr API expects null
-			arrDef.minSize = entry.min_size;
-			arrDef.maxSize = entry.max_size === 0 ? null : entry.max_size;
-			arrDef.preferredSize = entry.preferred_size === 0 ? null : entry.preferred_size;
-			updatedCount++;
-		}
+		const transformed = transformQualityDefinitionsForArr(qualityDefsConfig.entries, apiMappings);
+		const { updatedCount } = applyQualityDefinitionsToArr(arrDefinitions, transformed.definitions);
 
 		if (updatedCount === 0) {
 			return { success: false, error: 'No quality definitions matched for update' };

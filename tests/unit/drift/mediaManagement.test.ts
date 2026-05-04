@@ -4,15 +4,21 @@ import {
 	compareMediaManagementDrift,
 	type MediaManagementDriftDiff,
 	type MediaSettingsDriftExpected,
-	type NamingDriftExpected
+	type NamingDriftExpected,
+	type QualityDefinitionsDriftExpected
 } from '$drift/mediaManagement.ts';
+import { buildDriftDisplayEntities } from '$drift/display.ts';
 import { hashDriftDiff } from '$drift/hash.ts';
 import type {
 	ArrMediaManagementConfig,
+	ArrQualityDefinition,
 	RadarrNamingConfig,
 	SonarrNamingConfig
 } from '$arr/types.ts';
-import { transformMediaSettings } from '$sync/mediaManagement/transformer.ts';
+import {
+	transformMediaSettings,
+	transformQualityDefinitionsForArr
+} from '$sync/mediaManagement/transformer.ts';
 
 function expectedMediaSettings(
 	input: Partial<MediaSettingsDriftExpected> = {}
@@ -101,6 +107,45 @@ function actualSonarrNaming(input: Partial<SonarrNamingConfig> = {}): SonarrNami
 	};
 }
 
+function expectedQualityDefinitions(
+	input: Partial<QualityDefinitionsDriftExpected> = {}
+): QualityDefinitionsDriftExpected {
+	return {
+		name: input.name ?? 'Standard Quality Definitions',
+		definitions: input.definitions ?? [
+			{
+				qualityName: 'WEBDL-1080p',
+				fields: {
+					minSize: 10,
+					maxSize: null,
+					preferredSize: 20
+				}
+			}
+		]
+	};
+}
+
+function actualQualityDefinition(
+	qualityName: string,
+	input: Partial<ArrQualityDefinition> = {}
+): ArrQualityDefinition {
+	return {
+		id: input.id ?? 1,
+		quality: input.quality ?? {
+			id: 3,
+			name: qualityName,
+			source: 'webdl',
+			resolution: 1080
+		},
+		title: input.title ?? null,
+		weight: input.weight ?? 1,
+		minSize: Object.hasOwn(input, 'minSize') ? (input.minSize ?? null) : 10,
+		maxSize: Object.hasOwn(input, 'maxSize') ? (input.maxSize ?? null) : null,
+		preferredSize: Object.hasOwn(input, 'preferredSize') ? (input.preferredSize ?? null) : 20,
+		...input
+	};
+}
+
 class MediaManagementDriftTest extends BaseTest {
 	runTests(): void {
 		this.test('clean when no media settings are configured', () => {
@@ -109,7 +154,8 @@ class MediaManagementDriftTest extends BaseTest {
 			assertEquals(result.count, 0);
 			assertEquals(result.diff, {
 				media_settings: { missing: [], modified: [] },
-				naming: { missing: [], modified: [] }
+				naming: { missing: [], modified: [] },
+				quality_definitions: { missing: [], modified: [] }
 			});
 		});
 
@@ -122,7 +168,8 @@ class MediaManagementDriftTest extends BaseTest {
 			assertEquals(result.count, 0);
 			assertEquals(result.diff, {
 				media_settings: { missing: [], modified: [] },
-				naming: { missing: [], modified: [] }
+				naming: { missing: [], modified: [] },
+				quality_definitions: { missing: [], modified: [] }
 			});
 		});
 
@@ -276,6 +323,192 @@ class MediaManagementDriftTest extends BaseTest {
 			]);
 		});
 
+		this.test('clean when expected and actual quality definitions match', () => {
+			const result = compareMediaManagementDrift(
+				null,
+				null,
+				null,
+				null,
+				expectedQualityDefinitions(),
+				[actualQualityDefinition('WEBDL-1080p', { title: 'Preserved' })]
+			);
+
+			assertEquals(result.count, 0);
+			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+		});
+
+		this.test('normalizes unlimited quality definition sizes to Arr null', () => {
+			const transformed = transformQualityDefinitionsForArr(
+				[
+					{
+						quality_name: 'WEBDL-1080p',
+						min_size: 10,
+						max_size: 0,
+						preferred_size: 0
+					}
+				],
+				new Map([['webdl-1080p', 'WEBDL-1080p']])
+			);
+			const result = compareMediaManagementDrift(
+				null,
+				null,
+				null,
+				null,
+				expectedQualityDefinitions({ definitions: transformed.definitions }),
+				[actualQualityDefinition('WEBDL-1080p', { preferredSize: null })]
+			);
+
+			assertEquals(transformed.definitions[0].fields, {
+				minSize: 10,
+				maxSize: null,
+				preferredSize: null
+			});
+			assertEquals(result.count, 0);
+			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+		});
+
+		this.test('treats missing Arr quality definition size fields as unlimited', () => {
+			const actual = actualQualityDefinition('WEBDL-1080p');
+			delete (actual as unknown as Record<string, unknown>).maxSize;
+
+			const result = compareMediaManagementDrift(
+				null,
+				null,
+				null,
+				null,
+				expectedQualityDefinitions(),
+				[actual]
+			);
+
+			assertEquals(result.count, 0);
+			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+		});
+
+		this.test('reports quality definition size mismatch', () => {
+			const result = compareMediaManagementDrift(
+				null,
+				null,
+				null,
+				null,
+				expectedQualityDefinitions(),
+				[actualQualityDefinition('WEBDL-1080p', { maxSize: 100 })]
+			);
+
+			assertEquals(result.count, 1);
+			assertEquals(result.diff.quality_definitions.modified, [
+				{
+					name: 'Standard Quality Definitions',
+					fields: [
+						{
+							path: 'qualityDefinitions[WEBDL-1080p].maxSize',
+							expected: null,
+							actual: 100
+						}
+					]
+				}
+			]);
+		});
+
+		this.test('ignores unmapped PCD quality definition entries', () => {
+			const transformed = transformQualityDefinitionsForArr(
+				[
+					{
+						quality_name: 'Unmapped',
+						min_size: 10,
+						max_size: 20,
+						preferred_size: 30
+					}
+				],
+				new Map()
+			);
+			const result = compareMediaManagementDrift(
+				null,
+				null,
+				null,
+				null,
+				expectedQualityDefinitions({ definitions: transformed.definitions }),
+				[]
+			);
+
+			assertEquals(transformed.unmapped, ['Unmapped']);
+			assertEquals(result.count, 0);
+			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+		});
+
+		this.test('ignores mapped quality definition entries missing in Arr', () => {
+			const result = compareMediaManagementDrift(
+				null,
+				null,
+				null,
+				null,
+				expectedQualityDefinitions({
+					definitions: [
+						...expectedQualityDefinitions().definitions,
+						{
+							qualityName: 'Bluray-1080p',
+							fields: { minSize: 10, maxSize: null, preferredSize: 20 }
+						}
+					]
+				}),
+				[actualQualityDefinition('WEBDL-1080p')]
+			);
+
+			assertEquals(result.count, 0);
+			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+		});
+
+		this.test('ignores extra Arr quality definitions and unmanaged fields', () => {
+			const result = compareMediaManagementDrift(
+				null,
+				null,
+				null,
+				null,
+				expectedQualityDefinitions(),
+				[
+					actualQualityDefinition('WEBDL-1080p', {
+						id: 99,
+						title: 'Different',
+						weight: 500,
+						quality: { id: 3, name: 'WEBDL-1080p', source: 'different', resolution: 720 }
+					}),
+					actualQualityDefinition('Bluray-1080p', { minSize: 1, maxSize: 2, preferredSize: 3 })
+				]
+			);
+
+			assertEquals(result.count, 0);
+			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+		});
+
+		this.test('displays stored quality definition diffs with omitted actual values', () => {
+			const entities = buildDriftDisplayEntities(
+				{
+					media_management: {
+						media_settings: { missing: [], modified: [] },
+						naming: { missing: [], modified: [] },
+						quality_definitions: {
+							missing: [],
+							modified: [
+								{
+									name: 'Standard Quality Definitions',
+									fields: [
+										{
+											path: 'qualityDefinitions[WEBDL-1080p].maxSize',
+											expected: null
+										}
+									]
+								}
+							]
+						}
+					}
+				},
+				'radarr'
+			);
+
+			assertEquals(entities.length, 1);
+			assertEquals(entities[0].changes[0].label, 'WEBDL-1080p');
+			assertEquals(entities[0].changes[0].actual?.text, 'Unlimited');
+		});
+
 		this.test('hash is stable for equivalent object key order', async () => {
 			const first: MediaManagementDriftDiff = {
 				media_settings: {
@@ -297,6 +530,21 @@ class MediaManagementDriftTest extends BaseTest {
 									path: 'movieFolderFormat',
 									expected: '{Movie}',
 									actual: '{Movie CleanTitle}'
+								}
+							]
+						}
+					]
+				},
+				quality_definitions: {
+					missing: [],
+					modified: [
+						{
+							name: 'Standard Quality Definitions',
+							fields: [
+								{
+									path: 'qualityDefinitions[WEBDL-1080p].maxSize',
+									expected: null,
+									actual: 100
 								}
 							]
 						}
@@ -324,6 +572,21 @@ class MediaManagementDriftTest extends BaseTest {
 								}
 							],
 							name: 'Standard Naming'
+						}
+					],
+					missing: []
+				},
+				quality_definitions: {
+					modified: [
+						{
+							fields: [
+								{
+									actual: 100,
+									expected: null,
+									path: 'qualityDefinitions[WEBDL-1080p].maxSize'
+								}
+							],
+							name: 'Standard Quality Definitions'
 						}
 					],
 					missing: []

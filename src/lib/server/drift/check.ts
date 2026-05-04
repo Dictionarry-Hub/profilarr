@@ -22,6 +22,7 @@ export async function checkArrDrift(
 		| 'getDelayProfiles'
 		| 'getMediaManagementConfig'
 		| 'getNamingConfig'
+		| 'getQualityDefinitions'
 	>,
 	instanceId: number,
 	arrType: SyncArrType

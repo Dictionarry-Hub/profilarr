@@ -2,10 +2,12 @@ import type {
 	ArrMediaManagementConfig,
 	ArrNamingConfig,
 	ArrPropersAndRepacks,
+	ArrQualityDefinition,
 	RadarrNamingConfig,
 	SonarrNamingConfig
 } from '$arr/types.ts';
 import type {
+	QualityDefinitionEntry,
 	RadarrMediaSettingsRow,
 	RadarrNamingRow,
 	SonarrMediaSettingsRow,
@@ -86,6 +88,27 @@ type SonarrNamingApiManagedFields = Omit<
 
 export type NormalizedNamingManagedFields = RadarrNamingManagedFields | SonarrNamingManagedFields;
 
+export interface QualityDefinitionManagedFields {
+	minSize: number | null;
+	maxSize: number | null;
+	preferredSize: number | null;
+}
+
+export interface MappedQualityDefinition {
+	qualityName: string;
+	fields: QualityDefinitionManagedFields;
+}
+
+export interface QualityDefinitionTransformResult {
+	definitions: MappedQualityDefinition[];
+	unmapped: string[];
+}
+
+export interface QualityDefinitionApplyResult {
+	updatedCount: number;
+	missing: string[];
+}
+
 export function transformMediaSettings(
 	mediaSettings: PcdMediaSettings
 ): ArrMediaSettingsManagedFields {
@@ -128,6 +151,63 @@ export function transformNamingForDrift(
 		return transformRadarrNaming(naming as PcdRadarrNaming);
 	}
 	return normalizeSonarrNamingConfig(transformSonarrNaming(naming as PcdSonarrNaming));
+}
+
+export function transformQualityDefinitionsForArr(
+	entries: QualityDefinitionEntry[],
+	apiMappings: Map<string, string>
+): QualityDefinitionTransformResult {
+	const definitions: MappedQualityDefinition[] = [];
+	const unmapped: string[] = [];
+
+	for (const entry of entries) {
+		const apiName = apiMappings.get(entry.quality_name.toLowerCase());
+		if (!apiName) {
+			unmapped.push(entry.quality_name);
+			continue;
+		}
+
+		definitions.push({
+			qualityName: apiName,
+			fields: transformQualityDefinition(entry)
+		});
+	}
+
+	return { definitions, unmapped };
+}
+
+export function applyQualityDefinitionsToArr(
+	arrDefinitions: ArrQualityDefinition[],
+	definitions: MappedQualityDefinition[]
+): QualityDefinitionApplyResult {
+	const arrDefMap = buildArrQualityDefinitionMap(arrDefinitions);
+	const missing: string[] = [];
+	let updatedCount = 0;
+
+	for (const definition of definitions) {
+		const arrDef = arrDefMap.get(definition.qualityName.toLowerCase());
+		if (!arrDef) {
+			missing.push(definition.qualityName);
+			continue;
+		}
+
+		arrDef.minSize = definition.fields.minSize;
+		arrDef.maxSize = definition.fields.maxSize;
+		arrDef.preferredSize = definition.fields.preferredSize;
+		updatedCount++;
+	}
+
+	return { updatedCount, missing };
+}
+
+export function normalizeArrQualityDefinition(
+	definition: Pick<ArrQualityDefinition, 'minSize' | 'maxSize' | 'preferredSize'>
+): QualityDefinitionManagedFields {
+	return {
+		minSize: definition.minSize ?? null,
+		maxSize: definition.maxSize ?? null,
+		preferredSize: definition.preferredSize ?? null
+	};
 }
 
 export function mergeMediaSettingsConfig(
@@ -221,6 +301,26 @@ export function normalizeSonarrNamingConfig(
 function normalizeOptionalNamingString(value: string | null | undefined): string | null {
 	if (value === null || value === undefined) return null;
 	return value.trim() === '' ? null : value;
+}
+
+function transformQualityDefinition(entry: QualityDefinitionEntry): QualityDefinitionManagedFields {
+	return {
+		minSize: entry.min_size,
+		maxSize: entry.max_size === 0 ? null : entry.max_size,
+		preferredSize: entry.preferred_size === 0 ? null : entry.preferred_size
+	};
+}
+
+function buildArrQualityDefinitionMap(
+	arrDefinitions: ArrQualityDefinition[]
+): Map<string, ArrQualityDefinition> {
+	const arrDefMap = new Map<string, ArrQualityDefinition>();
+	for (const definition of arrDefinitions) {
+		if (definition.quality.name) {
+			arrDefMap.set(definition.quality.name.toLowerCase(), definition);
+		}
+	}
+	return arrDefMap;
 }
 
 function mapPropersRepacks(pcdValue: string): ArrPropersAndRepacks {

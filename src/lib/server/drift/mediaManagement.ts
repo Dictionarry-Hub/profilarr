@@ -1,6 +1,6 @@
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import type { BaseArrClient } from '$arr/base.ts';
-import type { ArrMediaManagementConfig, ArrNamingConfig } from '$arr/types.ts';
+import type { ArrMediaManagementConfig, ArrNamingConfig, ArrQualityDefinition } from '$arr/types.ts';
 import type { SyncArrType } from '$sync/mappings.ts';
 import { getCache } from '$pcd/index.ts';
 import {
@@ -12,12 +12,20 @@ import {
 	getSonarrByName as getSonarrNaming
 } from '$pcd/entities/mediaManagement/naming/read.ts';
 import {
+	getRadarrByName as getRadarrQualityDefs,
+	getSonarrByName as getSonarrQualityDefs
+} from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
+import {
+	normalizeArrQualityDefinition,
 	normalizeNamingConfig,
 	transformMediaSettings,
 	transformNamingForDrift,
+	transformQualityDefinitionsForArr,
 	type ArrMediaSettingsManagedFields,
+	type MappedQualityDefinition,
 	type NormalizedNamingManagedFields
 } from '$sync/mediaManagement/transformer.ts';
+import { getQualityApiMappings } from '$sync/qualityProfiles/transformer.ts';
 import type { DriftFieldDiff } from './customFormats.ts';
 import { stringifyCanonical } from './hash.ts';
 
@@ -49,9 +57,24 @@ export interface NamingDriftDiff {
 	modified: NamingModifiedDiff[];
 }
 
+export interface QualityDefinitionsMissingDiff {
+	name: string;
+}
+
+export interface QualityDefinitionsModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+export interface QualityDefinitionsDriftDiff {
+	missing: QualityDefinitionsMissingDiff[];
+	modified: QualityDefinitionsModifiedDiff[];
+}
+
 export interface MediaManagementDriftDiff {
 	media_settings: MediaSettingsDriftDiff;
 	naming: NamingDriftDiff;
+	quality_definitions: QualityDefinitionsDriftDiff;
 }
 
 export interface MediaManagementDriftResult {
@@ -67,6 +90,11 @@ export interface NamingDriftExpected {
 	name: string;
 	arrType: SyncArrType;
 	fields: NormalizedNamingManagedFields;
+}
+
+export interface QualityDefinitionsDriftExpected {
+	name: string;
+	definitions: MappedQualityDefinition[];
 }
 
 const MEDIA_SETTINGS_FIELD_ORDER = ['downloadPropersAndRepacks', 'enableMediaInfo'] as const;
@@ -91,11 +119,13 @@ const NAMING_FIELD_ORDER: Record<SyncArrType, string[]> = {
 		'seasonFolderFormat'
 	]
 };
+const QUALITY_DEFINITION_FIELD_ORDER = ['minSize', 'maxSize', 'preferredSize'] as const;
 
 function emptyDiff(): MediaManagementDriftDiff {
 	return {
 		media_settings: { missing: [], modified: [] },
-		naming: { missing: [], modified: [] }
+		naming: { missing: [], modified: [] },
+		quality_definitions: { missing: [], modified: [] }
 	};
 }
 
@@ -148,11 +178,48 @@ function compareNaming(
 	return diffs;
 }
 
+function compareQualityDefinitions(
+	expected: QualityDefinitionsDriftExpected,
+	actual: ArrQualityDefinition[] | null
+): DriftFieldDiff[] | null {
+	if (!actual) return null;
+
+	const actualMap = new Map<string, ArrQualityDefinition>();
+	for (const definition of actual) {
+		if (definition.quality.name) {
+			actualMap.set(definition.quality.name.toLowerCase(), definition);
+		}
+	}
+
+	const diffs: DriftFieldDiff[] = [];
+	for (const definition of expected.definitions) {
+		const actualDefinition = actualMap.get(definition.qualityName.toLowerCase());
+		if (!actualDefinition) continue;
+
+		const actualFields = normalizeArrQualityDefinition(actualDefinition);
+		for (const field of QUALITY_DEFINITION_FIELD_ORDER) {
+			const expectedValue = definition.fields[field];
+			const actualValue = actualFields[field];
+			if (!valuesEqual(expectedValue, actualValue)) {
+				diffs.push({
+					path: `qualityDefinitions[${definition.qualityName}].${field}`,
+					expected: expectedValue,
+					actual: actualValue
+				});
+			}
+		}
+	}
+
+	return diffs;
+}
+
 export function compareMediaManagementDrift(
 	expected: MediaSettingsDriftExpected | null,
 	actual: ArrMediaManagementConfig | null,
 	expectedNaming: NamingDriftExpected | null = null,
-	actualNaming: ArrNamingConfig | null = null
+	actualNaming: ArrNamingConfig | null = null,
+	expectedQualityDefinitions: QualityDefinitionsDriftExpected | null = null,
+	actualQualityDefinitions: ArrQualityDefinition[] | null = null
 ): MediaManagementDriftResult {
 	const diff = emptyDiff();
 
@@ -174,12 +241,23 @@ export function compareMediaManagementDrift(
 		}
 	}
 
+	if (expectedQualityDefinitions) {
+		const fields = compareQualityDefinitions(expectedQualityDefinitions, actualQualityDefinitions);
+		if (!fields) {
+			diff.quality_definitions.missing.push({ name: expectedQualityDefinitions.name });
+		} else if (fields.length > 0) {
+			diff.quality_definitions.modified.push({ name: expectedQualityDefinitions.name, fields });
+		}
+	}
+
 	return {
 		count:
 			diff.media_settings.missing.length +
 			diff.media_settings.modified.length +
 			diff.naming.missing.length +
-			diff.naming.modified.length,
+			diff.naming.modified.length +
+			diff.quality_definitions.missing.length +
+			diff.quality_definitions.modified.length,
 		diff
 	};
 }
@@ -237,27 +315,64 @@ export async function buildExpectedNaming(
 	};
 }
 
+export async function buildExpectedQualityDefinitions(
+	instanceId: number,
+	arrType: SyncArrType
+): Promise<QualityDefinitionsDriftExpected | null> {
+	const syncConfig = arrSyncQueries.getMediaManagementSync(instanceId);
+	if (!syncConfig.qualityDefinitionsDatabaseId || !syncConfig.qualityDefinitionsConfigName) {
+		return null;
+	}
+
+	const cache = getCache(syncConfig.qualityDefinitionsDatabaseId);
+	if (!cache) {
+		throw new Error(`PCD cache not found for database ${syncConfig.qualityDefinitionsDatabaseId}`);
+	}
+
+	const getByName = arrType === 'radarr' ? getRadarrQualityDefs : getSonarrQualityDefs;
+	const qualityDefinitions = await getByName(cache, syncConfig.qualityDefinitionsConfigName);
+	if (!qualityDefinitions) {
+		throw new Error(
+			`Quality definitions "${syncConfig.qualityDefinitionsConfigName}" not found in database ${syncConfig.qualityDefinitionsDatabaseId}`
+		);
+	}
+
+	const apiMappings = await getQualityApiMappings(cache, arrType);
+	const { definitions } = transformQualityDefinitionsForArr(qualityDefinitions.entries, apiMappings);
+	return {
+		name: syncConfig.qualityDefinitionsConfigName,
+		definitions
+	};
+}
+
 export async function checkMediaManagementDrift(
-	client: Pick<BaseArrClient, 'getMediaManagementConfig' | 'getNamingConfig'>,
+	client: Pick<
+		BaseArrClient,
+		'getMediaManagementConfig' | 'getNamingConfig' | 'getQualityDefinitions'
+	>,
 	instanceId: number,
 	arrType: SyncArrType
 ): Promise<MediaManagementDriftResult> {
-	const [expectedMediaSettings, expectedNaming] = await Promise.all([
+	const [expectedMediaSettings, expectedNaming, expectedQualityDefinitions] = await Promise.all([
 		buildExpectedMediaSettings(instanceId, arrType),
-		buildExpectedNaming(instanceId, arrType)
+		buildExpectedNaming(instanceId, arrType),
+		buildExpectedQualityDefinitions(instanceId, arrType)
 	]);
-	if (!expectedMediaSettings && !expectedNaming) {
+	if (!expectedMediaSettings && !expectedNaming && !expectedQualityDefinitions) {
 		return compareMediaManagementDrift(null, null);
 	}
 
-	const [actualMediaSettings, actualNaming] = await Promise.all([
+	const [actualMediaSettings, actualNaming, actualQualityDefinitions] = await Promise.all([
 		expectedMediaSettings ? client.getMediaManagementConfig() : Promise.resolve(null),
-		expectedNaming ? client.getNamingConfig() : Promise.resolve(null)
+		expectedNaming ? client.getNamingConfig() : Promise.resolve(null),
+		expectedQualityDefinitions ? client.getQualityDefinitions() : Promise.resolve(null)
 	]);
 	return compareMediaManagementDrift(
 		expectedMediaSettings,
 		actualMediaSettings,
 		expectedNaming,
-		actualNaming
+		actualNaming,
+		expectedQualityDefinitions,
+		actualQualityDefinitions
 	);
 }

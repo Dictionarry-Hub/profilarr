@@ -40,6 +40,10 @@ interface MediaManagementDiff {
 		missing?: unknown[];
 		modified?: unknown[];
 	};
+	quality_definitions: {
+		missing?: unknown[];
+		modified?: unknown[];
+	};
 }
 
 interface DriftFieldDiff {
@@ -71,6 +75,16 @@ interface MediaSettingsModifiedDiff {
 interface NamingModifiedDiff {
 	name: string;
 	fields: DriftFieldDiff[];
+}
+
+interface QualityDefinitionsModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+interface ParsedQualityDefinitionPath {
+	qualityName: string;
+	field: string;
 }
 
 interface SpecificationValue {
@@ -389,6 +403,52 @@ function buildMediaManagementEntities(raw: unknown): DriftDisplayEntity[] {
 		});
 	}
 
+	for (const item of diff.quality_definitions.missing ?? []) {
+		const name = recordString(item, 'name');
+		if (!name) continue;
+
+		entities.push({
+			id: `media_management:quality_definitions:missing:${name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Quality Definitions: ${name}`,
+			state: 'missing',
+			stateLabel: 'Missing',
+			tone: 'danger',
+			summary: 'Profilarr expects this quality definitions config, but Arr does not have it.',
+			changes: [
+				{
+					id: `media-management-quality-definitions-missing:${name}:config`,
+					label: 'Quality definitions',
+					detail: 'Missing from Arr',
+					expected: value('Present'),
+					actual: value('Missing', { tone: 'danger' }),
+					tone: 'danger'
+				}
+			]
+		});
+	}
+
+	for (const item of diff.quality_definitions.modified ?? []) {
+		const modified = asModifiedQualityDefinitions(item);
+		if (!modified) continue;
+		if (modified.fields.length === 0) continue;
+
+		const changes = modified.fields.map(formatQualityDefinitionFieldDiff);
+
+		entities.push({
+			id: `media_management:quality_definitions:modified:${modified.name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Quality Definitions: ${modified.name}`,
+			state: 'modified',
+			stateLabel: 'Modified',
+			tone: 'warning',
+			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
+			changes
+		});
+	}
+
 	return entities;
 }
 
@@ -572,6 +632,21 @@ function formatNamingFieldDiff(field: DriftFieldDiff, index: number): DriftDispl
 		expected: formatNamingValue(field.path, field.expected),
 		actual: formatNamingValue(field.path, field.actual),
 		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
+	};
+}
+
+function formatQualityDefinitionFieldDiff(field: DriftFieldDiff, index: number): DriftDisplayChange {
+	const parsed = parseQualityDefinitionPath(field.path);
+	const qualityName = parsed?.qualityName ?? 'Quality definition';
+	const label = parsed ? qualityDefinitionFieldLabel(parsed.field) : qualityDefinitionFieldLabel(field.path);
+
+	return {
+		id: `quality-definition-field:${index}`,
+		label: qualityName,
+		detail: `${label} changed`,
+		expected: formatQualityDefinitionValue(parsed?.field ?? field.path, field.expected),
+		actual: formatQualityDefinitionValue(parsed?.field ?? field.path, field.actual),
+		tone: 'warning'
 	};
 }
 
@@ -775,6 +850,7 @@ function asMediaManagementDiff(raw: unknown): MediaManagementDiff | null {
 	if (!isRecord(raw)) return null;
 	const mediaSettings = isRecord(raw.media_settings) ? raw.media_settings : {};
 	const naming = isRecord(raw.naming) ? raw.naming : {};
+	const qualityDefinitions = isRecord(raw.quality_definitions) ? raw.quality_definitions : {};
 	return {
 		media_settings: {
 			missing: Array.isArray(mediaSettings.missing) ? mediaSettings.missing : [],
@@ -783,6 +859,10 @@ function asMediaManagementDiff(raw: unknown): MediaManagementDiff | null {
 		naming: {
 			missing: Array.isArray(naming.missing) ? naming.missing : [],
 			modified: Array.isArray(naming.modified) ? naming.modified : []
+		},
+		quality_definitions: {
+			missing: Array.isArray(qualityDefinitions.missing) ? qualityDefinitions.missing : [],
+			modified: Array.isArray(qualityDefinitions.modified) ? qualityDefinitions.modified : []
 		}
 	};
 }
@@ -830,6 +910,23 @@ function asModifiedNaming(raw: unknown): NamingModifiedDiff | null {
 
 	const fields = raw.fields.filter(isFieldDiff);
 	return { name, fields };
+}
+
+function asModifiedQualityDefinitions(raw: unknown): QualityDefinitionsModifiedDiff | null {
+	if (!isRecord(raw)) return null;
+	const name = recordString(raw, 'name');
+	if (!name || !Array.isArray(raw.fields)) return null;
+
+	const fields = raw.fields.filter(isQualityDefinitionFieldDiff);
+	return { name, fields };
+}
+
+function isQualityDefinitionFieldDiff(raw: unknown): raw is DriftFieldDiff {
+	return (
+		isRecord(raw) &&
+		typeof raw.path === 'string' &&
+		Object.hasOwn(raw, 'expected')
+	);
 }
 
 function isFieldDiff(raw: unknown): raw is DriftFieldDiff {
@@ -1006,6 +1103,18 @@ function formatNamingValue(field: string, raw: unknown): DriftDisplayValue {
 	return formatGenericValue(raw);
 }
 
+function formatQualityDefinitionValue(field: string, raw: unknown): DriftDisplayValue {
+	if (
+		(field === 'maxSize' || field === 'preferredSize') &&
+		(raw === null || raw === undefined || raw === 0)
+	) {
+		return value('Unlimited');
+	}
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (typeof raw === 'number') return value(String(raw), { mono: true });
+	return formatGenericValue(raw);
+}
+
 function formatMinutesValue(raw: unknown): DriftDisplayValue {
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
 	if (typeof raw !== 'number') return formatGenericValue(raw);
@@ -1106,6 +1215,25 @@ function namingFieldLabel(path: string): string {
 	};
 
 	return labels[path] ?? titleize(path);
+}
+
+function qualityDefinitionFieldLabel(path: string): string {
+	const labels: Record<string, string> = {
+		maxSize: 'Maximum Size',
+		minSize: 'Minimum Size',
+		preferredSize: 'Preferred Size'
+	};
+
+	return labels[path] ?? titleize(path);
+}
+
+function parseQualityDefinitionPath(path: string): ParsedQualityDefinitionPath | null {
+	const match = /^qualityDefinitions\[(.+)\]\.(.+)$/.exec(path);
+	if (!match) return null;
+	return {
+		qualityName: match[1],
+		field: match[2]
+	};
 }
 
 function implementationLabel(implementation: string): string {
