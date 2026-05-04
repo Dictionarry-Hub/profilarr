@@ -3,6 +3,7 @@ import type { ServerLoad, Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries, type SyncTrigger, type ProfileSelection } from '$db/queries/arrSync.ts';
 import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
+import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
 import { pcdManager } from '$pcd/core/manager.ts';
 import { logger } from '$logger/logger.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
@@ -121,6 +122,7 @@ async function loadDriftProgress(
 	arrType: SyncArrType
 ): Promise<DriftProgress | null> {
 	if (!FEATURES.drift) return null;
+	if (!arrDriftSettingsQueries.getByInstanceId(instanceId)?.enabled) return null;
 
 	const status = arrDriftStatusQueries.getByInstanceId(instanceId);
 	if (!status) return null;

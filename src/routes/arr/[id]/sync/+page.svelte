@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
 	import { Info } from 'lucide-svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
@@ -11,6 +12,7 @@
 	import MediaManagement from './components/MediaManagement.svelte';
 	import type { SyncTrigger } from '$db/queries/arrSync.ts';
 	import { initEdit, update, clear } from '$lib/client/stores/dirty';
+	import { jobStatus } from '$stores/jobStatus';
 
 	export let data: PageData;
 
@@ -66,6 +68,18 @@
 		initEdit({ anyDirty: false });
 		return () => clear();
 	});
+
+	// When a chained drift refresh finishes, reload page data so the
+	// progress chips reflect the new drift state immediately. Use the raw
+	// onJobFinished hook (not the store's state machine) because the state
+	// machine drops finished events for jobs it isn't actively tracking,
+	// including the drift job chained right after a sync.
+	const unsubscribeDriftFinished = jobStatus.onJobFinished((data) => {
+		if (data.jobType === 'arr.drift') {
+			invalidateAll();
+		}
+	});
+	onDestroy(unsubscribeDriftFinished);
 
 	// Sync combined dirty state to global dirty store for DirtyModal
 	$: anyDirty = qualityProfilesDirty || delayProfilesDirty || mediaManagementDirty;

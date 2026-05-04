@@ -2,15 +2,18 @@ import { jobQueueRegistry } from '../queueRegistry.ts';
 import type { JobHandler, JobType } from '../queueTypes.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
 import { createArrClient } from '$arr/factory.ts';
 import type { ArrType } from '$arr/types.ts';
 import { calculateNextRun } from '$lib/server/sync/utils.ts';
 import type { SectionType } from '$lib/server/sync/types.ts';
 import { getSection } from '$lib/server/sync/registry.ts';
+import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { logger } from '$logger/logger.ts';
 import { notifications } from '$notifications/definitions/index.ts';
 import { notificationManager } from '$notifications/NotificationManager.ts';
 import type { ArrSyncSectionResult } from '$notifications/definitions/arrSync.ts';
+import { FEATURES } from '$shared/features.ts';
 
 // Register sync handlers
 import '$lib/server/sync/qualityProfiles/handler.ts';
@@ -146,6 +149,26 @@ const arrSyncHandler: JobHandler = async (job) => {
 				source: 'ArrSyncJob',
 				meta: { instanceId, error: err instanceof Error ? err.message : 'Unknown error' }
 			});
+		}
+
+		// Chain a drift refresh after any sync that touched Arr, so the
+		// drift status reflects the new state without waiting for the next
+		// scheduled drift run. Only fires when drift is enabled (feature
+		// flag + per-instance settings).
+		if (FEATURES.drift && arrDriftSettingsQueries.getByInstanceId(instanceId)?.enabled) {
+			try {
+				enqueueJob({
+					jobType: 'arr.drift',
+					runAt: new Date().toISOString(),
+					payload: { instanceId },
+					source: 'manual'
+				});
+			} catch (err) {
+				await logger.error('Failed to enqueue post-sync drift refresh', {
+					source: 'ArrSyncJob',
+					meta: { instanceId, error: err instanceof Error ? err.message : 'Unknown error' }
+				});
+			}
 		}
 	}
 
