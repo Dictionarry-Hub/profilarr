@@ -1,9 +1,11 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import { isDirty, initEdit, update, current, clear } from '$lib/client/stores/dirty';
+	import { jobStatus } from '$stores/jobStatus';
 	import { Info, Save, FlaskConical, Play } from 'lucide-svelte';
 	import RenameSettings from './components/RenameSettings.svelte';
 	import RenameRunHistory from './components/RenameRunHistory.svelte';
@@ -27,7 +29,21 @@
 		};
 		// Always use initEdit - isDirty should be false until user makes changes
 		initEdit(initialFormData);
-		return () => clear();
+		let previousJobState: string | null = null;
+		const unsubscribeJobStatus = jobStatus.subscribe((status) => {
+			if (
+				previousJobState === 'running' &&
+				status.state === 'completed' &&
+				status.jobType === 'arr.rename'
+			) {
+				invalidateAll();
+			}
+			previousJobState = status.state;
+		});
+		return () => {
+			unsubscribeJobStatus();
+			clear();
+		};
 	});
 
 	$: isNewConfig = !data.settings;
@@ -53,6 +69,7 @@
 			alertStore.add('success', 'Rename run queued');
 		}
 		if (form.error) {
+			jobStatus.cancelOptimistic();
 			alertStore.add('error', form.error);
 		}
 	}
@@ -80,8 +97,14 @@
 						iconColor="text-amber-600 dark:text-amber-400"
 						disabled={running || saving || $isDirty}
 						on:click={() => {
+							jobStatus.connect();
+							jobStatus.setRunning('arr.rename', 'Renaming files...');
 							const f = document.getElementById('dry-run-form');
-							if (f instanceof HTMLFormElement) f.requestSubmit();
+							if (f instanceof HTMLFormElement) {
+								f.requestSubmit();
+							} else {
+								jobStatus.cancelOptimistic();
+							}
 						}}
 					/>
 				</Tooltip>
@@ -92,14 +115,20 @@
 						iconColor="text-green-600 dark:text-green-400"
 						disabled={running || saving || $isDirty}
 						on:click={() => {
+							jobStatus.connect();
+							jobStatus.setRunning('arr.rename', 'Renaming files...');
 							const f = document.getElementById('live-run-form');
-							if (f instanceof HTMLFormElement) f.requestSubmit();
+							if (f instanceof HTMLFormElement) {
+								f.requestSubmit();
+							} else {
+								jobStatus.cancelOptimistic();
+							}
 						}}
 					/>
 				</Tooltip>
 			{/if}
 			<Button
-				text={saving ? 'Saving...' : 'Save'}
+				text="Save"
 				icon={Save}
 				iconColor="text-blue-600 dark:text-blue-400"
 				disabled={saving || running || !$isDirty}
