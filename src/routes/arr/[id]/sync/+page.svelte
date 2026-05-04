@@ -155,6 +155,9 @@
 			bind:syncTrigger={mediaManagementTrigger}
 			bind:cronExpression={mediaManagementCron}
 			bind:isDirty={mediaManagementDirty}
+			namingProgress={data.driftProgress?.naming}
+			qualityDefinitionsProgress={data.driftProgress?.qualityDefinitions}
+			mediaSettingsProgress={data.driftProgress?.mediaSettings}
 		/>
 		<DelayProfiles
 			databases={data.databases}

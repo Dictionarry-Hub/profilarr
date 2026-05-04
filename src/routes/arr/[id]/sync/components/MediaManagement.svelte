@@ -1,6 +1,7 @@
 <script lang="ts">
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 	import SyncFooter from './SyncFooter.svelte';
+	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
@@ -15,6 +16,12 @@
 		namingConfigs: ConfigOption[];
 		qualityDefinitionsConfigs: ConfigOption[];
 		mediaSettingsConfigs: ConfigOption[];
+	}
+
+	interface SectionProgress {
+		total: number;
+		drifted: number;
+		message?: string;
 	}
 
 	export let databases: Database[];
@@ -33,6 +40,9 @@
 		mediaSettingsDatabaseId: null,
 		mediaSettingsConfigName: null
 	};
+	export let namingProgress: SectionProgress | undefined = undefined;
+	export let qualityDefinitionsProgress: SectionProgress | undefined = undefined;
+	export let mediaSettingsProgress: SectionProgress | undefined = undefined;
 
 	type SelectionOption = {
 		value: string;
@@ -215,11 +225,70 @@
 	class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
 >
 	<!-- Header -->
-	<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-		<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Media Management</h2>
-		<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-			Select which database config to use for each media management setting
-		</p>
+	<div
+		class="flex flex-col gap-4 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between md:gap-6 dark:border-neutral-800"
+	>
+		<div class="min-w-0 md:flex-1">
+			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Media Management</h2>
+			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+				Select which database config to use for each media management setting
+			</p>
+		</div>
+		{#if namingProgress || qualityDefinitionsProgress || mediaSettingsProgress}
+			<div class="flex flex-col gap-3 md:flex-shrink-0 md:flex-row md:flex-wrap md:gap-5 md:pt-1">
+				{#if namingProgress}
+					<div class="min-w-[9rem]">
+						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+							Naming
+						</div>
+						<ProgressIndicator
+							current={namingProgress.total - namingProgress.drifted}
+							target={namingProgress.total}
+							met={namingProgress.drifted === 0}
+							mode="compact"
+							colorMode="completion"
+							tooltip={namingProgress.message ?? ''}
+							tooltipPosition="bottom"
+							tooltipAlign="middle"
+						/>
+					</div>
+				{/if}
+				{#if qualityDefinitionsProgress}
+					<div class="min-w-[9rem]">
+						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+							Quality Definitions
+						</div>
+						<ProgressIndicator
+							current={qualityDefinitionsProgress.total - qualityDefinitionsProgress.drifted}
+							target={qualityDefinitionsProgress.total}
+							met={qualityDefinitionsProgress.drifted === 0}
+							mode="compact"
+							colorMode="completion"
+							tooltip={qualityDefinitionsProgress.message ?? ''}
+							tooltipPosition="bottom"
+							tooltipAlign="middle"
+						/>
+					</div>
+				{/if}
+				{#if mediaSettingsProgress}
+					<div class="min-w-[9rem]">
+						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+							Media Settings
+						</div>
+						<ProgressIndicator
+							current={mediaSettingsProgress.total - mediaSettingsProgress.drifted}
+							target={mediaSettingsProgress.total}
+							met={mediaSettingsProgress.drifted === 0}
+							mode="compact"
+							colorMode="completion"
+							tooltip={mediaSettingsProgress.message ?? ''}
+							tooltipPosition="bottom"
+							tooltipAlign="middle"
+						/>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	<!-- Content -->

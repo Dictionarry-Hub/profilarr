@@ -235,19 +235,23 @@ configuration, or triggers sync.
 
 Route: `/arr/[id]/sync`. Source: `src/routes/arr/[id]/sync/+page.server.ts`,
 `src/routes/arr/[id]/sync/components/QualityProfiles.svelte`,
-`src/routes/arr/[id]/sync/components/DelayProfiles.svelte`.
+`src/routes/arr/[id]/sync/components/DelayProfiles.svelte`,
+`src/routes/arr/[id]/sync/components/MediaManagement.svelte`.
 
 Per-section drift progress is rendered as `ProgressIndicator` chips in each
 sync section header (right-aligned on tablet+, stacked below the title on
 mobile). The Quality Profiles header carries two chips: one for QPs themselves
 and one for the custom formats referenced by those QPs. The Delay Profiles
-header carries one chip. The Media Management header has no chip yet.
+header carries one chip. The Media Management header carries up to three chips
+— one each for Naming, Quality Definitions, and Media Settings — corresponding
+to the three sub-configs the user selects in that section.
 
 Each chip shows `current / total` where:
 
 - `total`: managed items Profilarr would sync. Selected QP count for the QP
   chip, expected CF count from `buildExpectedCustomFormats` for the CF chip,
-  `0` or `1` for the delay profile chip.
+  `0` or `1` for the delay profile chip and each of the three Media Management
+  chips (Naming, Quality Definitions, Media Settings).
 - `current`: `total - drifted`. For the QP chip, `drifted` counts only QPs
   the drift comparison flagged directly. QPs that are only "transitively"
   affected (their scoring rows reference a CF that has been deleted from
