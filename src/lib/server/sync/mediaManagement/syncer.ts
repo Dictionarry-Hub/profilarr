@@ -34,10 +34,10 @@ import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '$shared/pcd
 import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
 import type {
 	ArrType,
-	ArrPropersAndRepacks,
 	RadarrNamingConfig,
 	SonarrNamingConfig
 } from '$arr/types.ts';
+import { mergeMediaSettingsConfig } from './transformer.ts';
 import { logger } from '$logger/logger.ts';
 
 export class MediaManagementSyncer extends BaseSyncer {
@@ -179,11 +179,7 @@ export class MediaManagementSyncer extends BaseSyncer {
 		const existingConfig = await this.client.getMediaManagementConfig();
 
 		// Transform and update
-		const updatedConfig = {
-			...existingConfig,
-			downloadPropersAndRepacks: this.mapPropersRepacks(mediaSettings.propers_repacks),
-			enableMediaInfo: mediaSettings.enable_media_info
-		};
+		const updatedConfig = mergeMediaSettingsConfig(existingConfig, mediaSettings);
 
 		await logger.debug('Updating media settings', {
 			source: 'Sync:MediaSettings',
@@ -197,15 +193,6 @@ export class MediaManagementSyncer extends BaseSyncer {
 
 		await this.client.updateMediaManagementConfig(updatedConfig);
 		return true;
-	}
-
-	private mapPropersRepacks(pcdValue: string): ArrPropersAndRepacks {
-		const mapping: Record<string, ArrPropersAndRepacks> = {
-			doNotPrefer: 'doNotPrefer',
-			preferAndUpgrade: 'preferAndUpgrade',
-			doNotUpgradeAutomatically: 'doNotUpgrade'
-		};
-		return mapping[pcdValue] ?? 'doNotPrefer';
 	}
 
 	// =========================================================================

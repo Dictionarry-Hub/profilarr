@@ -37,10 +37,10 @@ import {
 	getRadarrByName as getRadarrMediaSettings,
 	getSonarrByName as getSonarrMediaSettings
 } from '$pcd/entities/mediaManagement/media-settings/read.ts';
-import type { ArrPropersAndRepacks } from '$arr/types.ts';
 import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
 import type { RadarrNamingConfig, SonarrNamingConfig } from '$arr/types.ts';
 import { transformDelayProfile } from './delayProfiles/transformer.ts';
+import { mergeMediaSettingsConfig } from './mediaManagement/transformer.ts';
 
 interface SyncResult {
 	success: boolean;
@@ -504,11 +504,7 @@ export async function syncMediaSettings(
 		}
 
 		const existing = await client.getMediaManagementConfig();
-		const updated = {
-			...existing,
-			downloadPropersAndRepacks: mapPropersRepacks(mediaSettings.propers_repacks),
-			enableMediaInfo: mediaSettings.enable_media_info
-		};
+		const updated = mergeMediaSettingsConfig(existing, mediaSettings);
 		await client.updateMediaManagementConfig(updated);
 
 		await logger.info(`Entity sync: updated media settings "${configName}"`, {
@@ -529,13 +525,4 @@ export async function syncMediaSettings(
 	} finally {
 		client.close();
 	}
-}
-
-function mapPropersRepacks(pcdValue: string): ArrPropersAndRepacks {
-	const mapping: Record<string, ArrPropersAndRepacks> = {
-		doNotPrefer: 'doNotPrefer',
-		preferAndUpgrade: 'preferAndUpgrade',
-		doNotUpgradeAutomatically: 'doNotUpgrade'
-	};
-	return mapping[pcdValue] ?? 'doNotPrefer';
 }

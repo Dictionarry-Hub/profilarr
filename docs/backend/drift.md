@@ -7,6 +7,7 @@
 `src/lib/server/drift/customFormats.ts`,
 `src/lib/server/drift/qualityProfiles.ts`,
 `src/lib/server/drift/delayProfiles.ts`,
+`src/lib/server/drift/mediaManagement.ts`,
 `src/lib/server/drift/display.ts`,
 `src/routes/arr/[id]/drift/+page.svelte`,
 `src/routes/arr/[id]/drift/+page.server.ts`,
@@ -19,10 +20,11 @@ Drift detection checks whether an Arr instance still matches the configuration
 Profilarr would sync now. It is observational: it does not write to Arr, repair
 config, delete stale items, or replace cleanup.
 
-Drift detection currently covers custom formats, quality profiles, and the
-default delay profile. Media management coverage (naming, media settings,
-quality definitions) is planned as a follow-up; until it lands, the sync page's
-Media Management section does not surface a drift chip.
+Drift detection currently covers custom formats, quality profiles, the default
+delay profile, and media management media settings. Media management naming and
+quality definitions are planned as follow-ups; until full media management
+coverage lands, the sync page's Media Management section does not surface a
+drift chip.
 
 ## Job
 
@@ -45,8 +47,8 @@ Current handler behavior:
 - missing instances fail
 - missing or disabled settings cancel the job
 - unsupported Arr types are skipped
-- enabled jobs compare custom formats, quality profiles, and delay profiles,
-  store the latest result, and return success
+- enabled jobs compare custom formats, quality profiles, delay profiles, and
+  media management media settings, store the latest result, and return success
 - drift-detected and failed runs notify subscribed services when the current
   drift or error hash has not already been notified
 - scheduled jobs calculate and store the next run before returning
@@ -79,11 +81,11 @@ Drift emits notification events through the shared notification manager:
 | `arr.drift.failed`   | Latest failure hash has not been sent | `error`   |
 
 Detected notifications emit one section block per drift category (Custom
-Format, Quality Profile, Delay Profile) listing up to 15 displayable drift
-entities total. If more entities exist, an additional `More` block summarises
-the remainder as `+N more`. Discord renders each section as a code-block field.
-Webhook receives the full payload. Summary-tier services such as Ntfy and
-Telegram show only the title because section blocks are omitted.
+Format, Quality Profile, Delay Profile, Media Management) listing up to 15
+displayable drift entities total. If more entities exist, an additional `More`
+block summarises the remainder as `+N more`. Discord renders each section as a
+code-block field. Webhook receives the full payload. Summary-tier services such
+as Ntfy and Telegram show only the title because section blocks are omitted.
 
 Failed notifications use the first error line as the message and include the
 full error text in an `Error` section.
@@ -140,6 +142,20 @@ Comparison rules:
 - compare id, derived protocol, delays, bypass fields, minimum custom format
   score, order, and tags
 
+## Media Management
+
+Media management drift compares the configured media settings selection against
+Arr's media management config. Naming and quality definitions are not compared
+yet.
+
+Comparison rules:
+
+- build expected media settings with the same transformer used by sync
+- no selected media settings config is clean
+- missing selected PCD cache or config fails the drift check
+- compare `downloadPropersAndRepacks` and `enableMediaInfo`
+- ignore unmanaged extra Arr media management fields
+
 ## Display Formatter
 
 `src/lib/server/drift/display.ts` maps the raw `diff_json` stored in
@@ -168,6 +184,9 @@ and unmanaged nonzero score rows.
 
 For delay profiles the formatter turns the derived protocol, delays, bypass
 flags, minimum score, order, and tags into friendly field rows.
+
+For media management media settings the formatter turns propers/repacks and
+media info parsing settings into friendly field rows.
 
 Display types live in `src/lib/shared/drift.ts`.
 
@@ -264,5 +283,5 @@ the post-completion idle window, so this does not hold a persistent connection.
 
 ## TODO
 
-- Media management drift comparison (naming, media settings, quality
-  definitions) plus display formatter and sync page chip.
+- Media management drift comparison for naming and quality definitions plus
+  sync page chip.

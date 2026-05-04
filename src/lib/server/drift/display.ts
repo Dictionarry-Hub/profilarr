@@ -31,6 +31,13 @@ interface DelayProfileDiff {
 	modified?: unknown[];
 }
 
+interface MediaManagementDiff {
+	media_settings: {
+		missing?: unknown[];
+		modified?: unknown[];
+	};
+}
+
 interface DriftFieldDiff {
 	path: string;
 	expected: unknown;
@@ -48,6 +55,11 @@ interface QualityProfileModifiedDiff {
 }
 
 interface DelayProfileModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+interface MediaSettingsModifiedDiff {
 	name: string;
 	fields: DriftFieldDiff[];
 }
@@ -89,7 +101,8 @@ export function buildDriftDisplayEntities(
 	return [
 		...buildCustomFormatEntities(diff.custom_formats, syncArrType),
 		...buildQualityProfileEntities(diff.quality_profiles, syncArrType),
-		...buildDelayProfileEntities(diff.delay_profiles)
+		...buildDelayProfileEntities(diff.delay_profiles),
+		...buildMediaManagementEntities(diff.media_management)
 	];
 }
 
@@ -269,6 +282,61 @@ function buildDelayProfileEntities(raw: unknown): DriftDisplayEntity[] {
 	return entities;
 }
 
+function buildMediaManagementEntities(raw: unknown): DriftDisplayEntity[] {
+	const diff = asMediaManagementDiff(raw);
+	if (!diff) return [];
+
+	const entities: DriftDisplayEntity[] = [];
+
+	for (const item of diff.media_settings.missing ?? []) {
+		const name = recordString(item, 'name');
+		if (!name) continue;
+
+		entities.push({
+			id: `media_management:media_settings:missing:${name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Media Settings: ${name}`,
+			state: 'missing',
+			stateLabel: 'Missing',
+			tone: 'danger',
+			summary: 'Profilarr expects this media settings config, but Arr does not have it.',
+			changes: [
+				{
+					id: `media-management-media-settings-missing:${name}:config`,
+					label: 'Media Settings',
+					detail: 'Missing from Arr',
+					expected: value('Present'),
+					actual: value('Missing', { tone: 'danger' }),
+					tone: 'danger'
+				}
+			]
+		});
+	}
+
+	for (const item of diff.media_settings.modified ?? []) {
+		const modified = asModifiedMediaSettings(item);
+		if (!modified) continue;
+		if (modified.fields.length === 0) continue;
+
+		const changes = modified.fields.map(formatMediaSettingsFieldDiff);
+
+		entities.push({
+			id: `media_management:media_settings:modified:${modified.name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Media Settings: ${modified.name}`,
+			state: 'modified',
+			stateLabel: 'Modified',
+			tone: 'warning',
+			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
+			changes
+		});
+	}
+
+	return entities;
+}
+
 function formatQualityProfileFieldDiff(
 	field: DriftFieldDiff,
 	index: number,
@@ -402,6 +470,39 @@ function formatDelayProfileFieldDiff(field: DriftFieldDiff, index: number): Drif
 		id: `delay-profile-field:${index}`,
 		label: delayProfileFieldLabel(field.path),
 		detail: 'Delay profile setting changed',
+		expected: formatGenericValue(field.expected),
+		actual: formatGenericValue(field.actual),
+		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
+	};
+}
+
+function formatMediaSettingsFieldDiff(field: DriftFieldDiff, index: number): DriftDisplayChange {
+	if (field.path === 'downloadPropersAndRepacks') {
+		return {
+			id: `media-settings-propers-repacks:${index}`,
+			label: 'Propers and Repacks',
+			detail: 'Propers and repacks preference changed',
+			expected: formatPropersRepacksValue(field.expected),
+			actual: formatPropersRepacksValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	if (field.path === 'enableMediaInfo') {
+		return {
+			id: `media-settings-enable-media-info:${index}`,
+			label: 'Enable Media Info',
+			detail: 'Media info parsing changed',
+			expected: formatBooleanValue(field.expected),
+			actual: formatBooleanValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	return {
+		id: `media-settings-field:${index}`,
+		label: titleize(field.path),
+		detail: 'Media setting changed',
 		expected: formatGenericValue(field.expected),
 		actual: formatGenericValue(field.actual),
 		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
@@ -604,6 +705,17 @@ function asDelayProfileDiff(raw: unknown): DelayProfileDiff | null {
 	};
 }
 
+function asMediaManagementDiff(raw: unknown): MediaManagementDiff | null {
+	if (!isRecord(raw)) return null;
+	const mediaSettings = isRecord(raw.media_settings) ? raw.media_settings : {};
+	return {
+		media_settings: {
+			missing: Array.isArray(mediaSettings.missing) ? mediaSettings.missing : [],
+			modified: Array.isArray(mediaSettings.modified) ? mediaSettings.modified : []
+		}
+	};
+}
+
 function asModifiedCustomFormat(raw: unknown): CustomFormatModifiedDiff | null {
 	if (!isRecord(raw)) return null;
 	const name = recordString(raw, 'name');
@@ -623,6 +735,15 @@ function asModifiedQualityProfile(raw: unknown): QualityProfileModifiedDiff | nu
 }
 
 function asModifiedDelayProfile(raw: unknown): DelayProfileModifiedDiff | null {
+	if (!isRecord(raw)) return null;
+	const name = recordString(raw, 'name');
+	if (!name || !Array.isArray(raw.fields)) return null;
+
+	const fields = raw.fields.filter(isFieldDiff);
+	return { name, fields };
+}
+
+function asModifiedMediaSettings(raw: unknown): MediaSettingsModifiedDiff | null {
 	if (!isRecord(raw)) return null;
 	const name = recordString(raw, 'name');
 	if (!name || !Array.isArray(raw.fields)) return null;
@@ -773,6 +894,17 @@ function formatDelayProtocolValue(raw: unknown): DriftDisplayValue {
 		only_usenet: 'Only Usenet',
 		only_torrent: 'Only Torrent',
 		unknown: 'Unknown'
+	};
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (typeof raw === 'string') return value(labels[raw] ?? titleize(raw));
+	return formatGenericValue(raw);
+}
+
+function formatPropersRepacksValue(raw: unknown): DriftDisplayValue {
+	const labels: Record<string, string> = {
+		doNotPrefer: 'Do Not Prefer',
+		preferAndUpgrade: 'Prefer and Upgrade',
+		doNotUpgrade: 'Do Not Upgrade Automatically'
 	};
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
 	if (typeof raw === 'string') return value(labels[raw] ?? titleize(raw));
