@@ -101,18 +101,23 @@ function createJobStatusStore() {
 	}
 
 	function handleStarted(data: StartedPayload) {
-		if (resetTimer) {
-			clearTimeout(resetTimer);
-			resetTimer = null;
-		}
-
 		const elapsed = Date.now() - completedAt;
 
 		if (completedAt > 0 && elapsed < COMPLETED_HOLDOFF_MS) {
+			// Buffer the start through the holdoff. Crucially we do NOT clear
+			// resetTimer here: if this buffered start later gets cancelled
+			// (its own finished event arrives during holdoff), the previous
+			// completion's display timer should keep ticking and transition
+			// to idle on schedule. The resetTimer only gets cleared when the
+			// buffered start is actually applied, in the holdoff callback.
 			pendingStartEvent = data;
 			if (holdoffTimer) clearTimeout(holdoffTimer);
 			holdoffTimer = setTimeout(() => {
 				if (pendingStartEvent) {
+					if (resetTimer) {
+						clearTimeout(resetTimer);
+						resetTimer = null;
+					}
 					currentJobId = pendingStartEvent.jobId;
 					set({
 						state: 'running',
@@ -127,6 +132,13 @@ function createJobStatusStore() {
 			return;
 		}
 
+		// Non-holdoff branch: transition straight to running. Cancel any
+		// outstanding completion-display timer so it doesn't fire later and
+		// flip us back to idle.
+		if (resetTimer) {
+			clearTimeout(resetTimer);
+			resetTimer = null;
+		}
 		completedAt = 0;
 		pendingStartEvent = null;
 		if (holdoffTimer) {
@@ -160,6 +172,16 @@ function createJobStatusStore() {
 			} catch {
 				// Swallow listener errors so one bad listener can't break others.
 			}
+		}
+
+		// If this finished event is for a job whose start was buffered during
+		// the post-completion holdoff (i.e. its entire lifecycle fit inside
+		// the holdoff window), drop the pending start. Otherwise the holdoff
+		// timer would later apply that start and put the store into a
+		// `running` state for a job that already finished, with no future
+		// finished event coming to clear it.
+		if (pendingStartEvent !== null && pendingStartEvent.jobId === data.jobId) {
+			pendingStartEvent = null;
 		}
 
 		// Ignore finished events for jobs we're not tracking (stale events

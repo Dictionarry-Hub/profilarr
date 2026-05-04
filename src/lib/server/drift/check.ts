@@ -4,6 +4,7 @@ import type { SyncArrType } from '$sync/mappings.ts';
 import { compareCustomFormatDrift, buildExpectedCustomFormats } from './customFormats.ts';
 import { checkDelayProfileDrift } from './delayProfiles.ts';
 import { hashDriftDiff } from './hash.ts';
+import { checkMediaManagementDrift } from './mediaManagement.ts';
 import { checkQualityProfileDrift } from './qualityProfiles.ts';
 
 export interface DriftCheckResult {
@@ -14,15 +15,25 @@ export interface DriftCheckResult {
 }
 
 export async function checkArrDrift(
-	client: Pick<BaseArrClient, 'getCustomFormats' | 'getQualityProfiles' | 'getDelayProfiles'>,
+	client: Pick<
+		BaseArrClient,
+		| 'getCustomFormats'
+		| 'getQualityProfiles'
+		| 'getDelayProfiles'
+		| 'getMediaManagementConfig'
+		| 'getNamingConfig'
+		| 'getQualityDefinitions'
+	>,
 	instanceId: number,
 	arrType: SyncArrType
 ): Promise<DriftCheckResult> {
-	const [expectedCustomFormats, actualCustomFormats, delayProfiles] = await Promise.all([
-		buildExpectedCustomFormats(instanceId, arrType),
-		client.getCustomFormats(),
-		checkDelayProfileDrift(client, instanceId)
-	]);
+	const [expectedCustomFormats, actualCustomFormats, delayProfiles, mediaManagement] =
+		await Promise.all([
+			buildExpectedCustomFormats(instanceId, arrType),
+			client.getCustomFormats(),
+			checkDelayProfileDrift(client, instanceId),
+			checkMediaManagementDrift(client, instanceId, arrType)
+		]);
 	const customFormats = compareCustomFormatDrift(expectedCustomFormats, actualCustomFormats);
 	const qualityProfiles = await checkQualityProfileDrift(
 		client,
@@ -33,12 +44,14 @@ export async function checkArrDrift(
 	const counts: DriftCounts = {
 		custom_formats: customFormats.count,
 		quality_profiles: qualityProfiles.count,
-		delay_profiles: delayProfiles.count
+		delay_profiles: delayProfiles.count,
+		media_management: mediaManagement.count
 	};
 	const diff: DriftDiff = {
 		custom_formats: customFormats.diff,
 		quality_profiles: qualityProfiles.diff,
-		delay_profiles: delayProfiles.diff
+		delay_profiles: delayProfiles.diff,
+		media_management: mediaManagement.diff
 	};
 	const total = Object.values(counts).reduce((sum, count) => sum + (count ?? 0), 0);
 

@@ -35,7 +35,7 @@
 
 	const driftColumns: Column<DriftDisplayEntity>[] = [
 		{ key: 'title', header: 'Name' },
-		{ key: 'section', header: 'Entity', width: 'w-44' },
+		{ key: 'section', header: 'Entity', width: 'w-56' },
 		{ key: 'state', header: 'State', width: 'w-32' }
 	];
 
@@ -295,11 +295,16 @@
 						</svelte:fragment>
 					</ExpandableTable>
 				{:else}
-					<div
-						class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
-					>
-						Drift was detected, but no displayable items were stored.
-					</div>
+					<ExpandableTable
+						columns={driftColumns}
+						data={emptyDriftEntities}
+						getRowId={(row) => row.id}
+						responsive
+						chevronPosition="right"
+						primaryColumnKey="title"
+						flushExpanded
+						emptyMessage="Drift was detected, but no displayable items were stored."
+					/>
 				{/if}
 			</section>
 		{/if}

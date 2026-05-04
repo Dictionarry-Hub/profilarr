@@ -31,6 +31,21 @@ interface DelayProfileDiff {
 	modified?: unknown[];
 }
 
+interface MediaManagementDiff {
+	media_settings: {
+		missing?: unknown[];
+		modified?: unknown[];
+	};
+	naming: {
+		missing?: unknown[];
+		modified?: unknown[];
+	};
+	quality_definitions: {
+		missing?: unknown[];
+		modified?: unknown[];
+	};
+}
+
 interface DriftFieldDiff {
 	path: string;
 	expected: unknown;
@@ -50,6 +65,26 @@ interface QualityProfileModifiedDiff {
 interface DelayProfileModifiedDiff {
 	name: string;
 	fields: DriftFieldDiff[];
+}
+
+interface MediaSettingsModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+interface NamingModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+interface QualityDefinitionsModifiedDiff {
+	name: string;
+	fields: DriftFieldDiff[];
+}
+
+interface ParsedQualityDefinitionPath {
+	qualityName: string;
+	field: string;
 }
 
 interface SpecificationValue {
@@ -89,7 +124,8 @@ export function buildDriftDisplayEntities(
 	return [
 		...buildCustomFormatEntities(diff.custom_formats, syncArrType),
 		...buildQualityProfileEntities(diff.quality_profiles, syncArrType),
-		...buildDelayProfileEntities(diff.delay_profiles)
+		...buildDelayProfileEntities(diff.delay_profiles),
+		...buildMediaManagementEntities(diff.media_management)
 	];
 }
 
@@ -269,6 +305,153 @@ function buildDelayProfileEntities(raw: unknown): DriftDisplayEntity[] {
 	return entities;
 }
 
+function buildMediaManagementEntities(raw: unknown): DriftDisplayEntity[] {
+	const diff = asMediaManagementDiff(raw);
+	if (!diff) return [];
+
+	const entities: DriftDisplayEntity[] = [];
+
+	for (const item of diff.media_settings.missing ?? []) {
+		const name = recordString(item, 'name');
+		if (!name) continue;
+
+		entities.push({
+			id: `media_management:media_settings:missing:${name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Media Settings: ${name}`,
+			state: 'missing',
+			stateLabel: 'Missing',
+			tone: 'danger',
+			summary: 'Profilarr expects this media settings config, but Arr does not have it.',
+			changes: [
+				{
+					id: `media-management-media-settings-missing:${name}:config`,
+					label: 'Media Settings',
+					detail: 'Missing from Arr',
+					expected: value('Present'),
+					actual: value('Missing', { tone: 'danger' }),
+					tone: 'danger'
+				}
+			]
+		});
+	}
+
+	for (const item of diff.media_settings.modified ?? []) {
+		const modified = asModifiedMediaSettings(item);
+		if (!modified) continue;
+		if (modified.fields.length === 0) continue;
+
+		const changes = modified.fields.map(formatMediaSettingsFieldDiff);
+
+		entities.push({
+			id: `media_management:media_settings:modified:${modified.name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Media Settings: ${modified.name}`,
+			state: 'modified',
+			stateLabel: 'Modified',
+			tone: 'warning',
+			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
+			changes
+		});
+	}
+
+	for (const item of diff.naming.missing ?? []) {
+		const name = recordString(item, 'name');
+		if (!name) continue;
+
+		entities.push({
+			id: `media_management:naming:missing:${name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Naming: ${name}`,
+			state: 'missing',
+			stateLabel: 'Missing',
+			tone: 'danger',
+			summary: 'Profilarr expects this naming config, but Arr does not have it.',
+			changes: [
+				{
+					id: `media-management-naming-missing:${name}:config`,
+					label: 'Naming',
+					detail: 'Missing from Arr',
+					expected: value('Present'),
+					actual: value('Missing', { tone: 'danger' }),
+					tone: 'danger'
+				}
+			]
+		});
+	}
+
+	for (const item of diff.naming.modified ?? []) {
+		const modified = asModifiedNaming(item);
+		if (!modified) continue;
+		if (modified.fields.length === 0) continue;
+
+		const changes = modified.fields.map(formatNamingFieldDiff);
+
+		entities.push({
+			id: `media_management:naming:modified:${modified.name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Naming: ${modified.name}`,
+			state: 'modified',
+			stateLabel: 'Modified',
+			tone: 'warning',
+			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
+			changes
+		});
+	}
+
+	for (const item of diff.quality_definitions.missing ?? []) {
+		const name = recordString(item, 'name');
+		if (!name) continue;
+
+		entities.push({
+			id: `media_management:quality_definitions:missing:${name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Quality Definitions: ${name}`,
+			state: 'missing',
+			stateLabel: 'Missing',
+			tone: 'danger',
+			summary: 'Profilarr expects this quality definitions config, but Arr does not have it.',
+			changes: [
+				{
+					id: `media-management-quality-definitions-missing:${name}:config`,
+					label: 'Quality definitions',
+					detail: 'Missing from Arr',
+					expected: value('Present'),
+					actual: value('Missing', { tone: 'danger' }),
+					tone: 'danger'
+				}
+			]
+		});
+	}
+
+	for (const item of diff.quality_definitions.modified ?? []) {
+		const modified = asModifiedQualityDefinitions(item);
+		if (!modified) continue;
+		if (modified.fields.length === 0) continue;
+
+		const changes = modified.fields.map(formatQualityDefinitionFieldDiff);
+
+		entities.push({
+			id: `media_management:quality_definitions:modified:${modified.name}`,
+			section: 'media_management',
+			sectionLabel: 'Media Management',
+			title: `Quality Definitions: ${modified.name}`,
+			state: 'modified',
+			stateLabel: 'Modified',
+			tone: 'warning',
+			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
+			changes
+		});
+	}
+
+	return entities;
+}
+
 function formatQualityProfileFieldDiff(
 	field: DriftFieldDiff,
 	index: number,
@@ -405,6 +588,70 @@ function formatDelayProfileFieldDiff(field: DriftFieldDiff, index: number): Drif
 		expected: formatGenericValue(field.expected),
 		actual: formatGenericValue(field.actual),
 		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
+	};
+}
+
+function formatMediaSettingsFieldDiff(field: DriftFieldDiff, index: number): DriftDisplayChange {
+	if (field.path === 'downloadPropersAndRepacks') {
+		return {
+			id: `media-settings-propers-repacks:${index}`,
+			label: 'Propers and Repacks',
+			detail: 'Propers and repacks preference changed',
+			expected: formatPropersRepacksValue(field.expected),
+			actual: formatPropersRepacksValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	if (field.path === 'enableMediaInfo') {
+		return {
+			id: `media-settings-enable-media-info:${index}`,
+			label: 'Enable Media Info',
+			detail: 'Media info parsing changed',
+			expected: formatBooleanValue(field.expected),
+			actual: formatBooleanValue(field.actual),
+			tone: 'warning'
+		};
+	}
+
+	return {
+		id: `media-settings-field:${index}`,
+		label: titleize(field.path),
+		detail: 'Media setting changed',
+		expected: formatGenericValue(field.expected),
+		actual: formatGenericValue(field.actual),
+		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
+	};
+}
+
+function formatNamingFieldDiff(field: DriftFieldDiff, index: number): DriftDisplayChange {
+	return {
+		id: `naming-field:${index}`,
+		label: namingFieldLabel(field.path),
+		detail: 'Naming setting changed',
+		expected: formatNamingValue(field.path, field.expected),
+		actual: formatNamingValue(field.path, field.actual),
+		tone: field.actual === null || field.actual === undefined ? 'danger' : 'warning'
+	};
+}
+
+function formatQualityDefinitionFieldDiff(
+	field: DriftFieldDiff,
+	index: number
+): DriftDisplayChange {
+	const parsed = parseQualityDefinitionPath(field.path);
+	const qualityName = parsed?.qualityName ?? 'Quality definition';
+	const label = parsed
+		? qualityDefinitionFieldLabel(parsed.field)
+		: qualityDefinitionFieldLabel(field.path);
+
+	return {
+		id: `quality-definition-field:${index}`,
+		label: qualityName,
+		detail: `${label} changed`,
+		expected: formatQualityDefinitionValue(parsed?.field ?? field.path, field.expected),
+		actual: formatQualityDefinitionValue(parsed?.field ?? field.path, field.actual),
+		tone: 'warning'
 	};
 }
 
@@ -604,6 +851,27 @@ function asDelayProfileDiff(raw: unknown): DelayProfileDiff | null {
 	};
 }
 
+function asMediaManagementDiff(raw: unknown): MediaManagementDiff | null {
+	if (!isRecord(raw)) return null;
+	const mediaSettings = isRecord(raw.media_settings) ? raw.media_settings : {};
+	const naming = isRecord(raw.naming) ? raw.naming : {};
+	const qualityDefinitions = isRecord(raw.quality_definitions) ? raw.quality_definitions : {};
+	return {
+		media_settings: {
+			missing: Array.isArray(mediaSettings.missing) ? mediaSettings.missing : [],
+			modified: Array.isArray(mediaSettings.modified) ? mediaSettings.modified : []
+		},
+		naming: {
+			missing: Array.isArray(naming.missing) ? naming.missing : [],
+			modified: Array.isArray(naming.modified) ? naming.modified : []
+		},
+		quality_definitions: {
+			missing: Array.isArray(qualityDefinitions.missing) ? qualityDefinitions.missing : [],
+			modified: Array.isArray(qualityDefinitions.modified) ? qualityDefinitions.modified : []
+		}
+	};
+}
+
 function asModifiedCustomFormat(raw: unknown): CustomFormatModifiedDiff | null {
 	if (!isRecord(raw)) return null;
 	const name = recordString(raw, 'name');
@@ -629,6 +897,37 @@ function asModifiedDelayProfile(raw: unknown): DelayProfileModifiedDiff | null {
 
 	const fields = raw.fields.filter(isFieldDiff);
 	return { name, fields };
+}
+
+function asModifiedMediaSettings(raw: unknown): MediaSettingsModifiedDiff | null {
+	if (!isRecord(raw)) return null;
+	const name = recordString(raw, 'name');
+	if (!name || !Array.isArray(raw.fields)) return null;
+
+	const fields = raw.fields.filter(isFieldDiff);
+	return { name, fields };
+}
+
+function asModifiedNaming(raw: unknown): NamingModifiedDiff | null {
+	if (!isRecord(raw)) return null;
+	const name = recordString(raw, 'name');
+	if (!name || !Array.isArray(raw.fields)) return null;
+
+	const fields = raw.fields.filter(isFieldDiff);
+	return { name, fields };
+}
+
+function asModifiedQualityDefinitions(raw: unknown): QualityDefinitionsModifiedDiff | null {
+	if (!isRecord(raw)) return null;
+	const name = recordString(raw, 'name');
+	if (!name || !Array.isArray(raw.fields)) return null;
+
+	const fields = raw.fields.filter(isQualityDefinitionFieldDiff);
+	return { name, fields };
+}
+
+function isQualityDefinitionFieldDiff(raw: unknown): raw is DriftFieldDiff {
+	return isRecord(raw) && typeof raw.path === 'string' && Object.hasOwn(raw, 'expected');
 }
 
 function isFieldDiff(raw: unknown): raw is DriftFieldDiff {
@@ -779,6 +1078,47 @@ function formatDelayProtocolValue(raw: unknown): DriftDisplayValue {
 	return formatGenericValue(raw);
 }
 
+function formatPropersRepacksValue(raw: unknown): DriftDisplayValue {
+	const labels: Record<string, string> = {
+		doNotPrefer: 'Do Not Prefer',
+		preferAndUpgrade: 'Prefer and Upgrade',
+		doNotUpgrade: 'Do Not Upgrade Automatically'
+	};
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (typeof raw === 'string') return value(labels[raw] ?? titleize(raw));
+	return formatGenericValue(raw);
+}
+
+function formatNamingValue(field: string, raw: unknown): DriftDisplayValue {
+	if (
+		field === 'customColonReplacementFormat' &&
+		(raw === null || raw === undefined || raw === '')
+	) {
+		return value('None');
+	}
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (typeof raw === 'boolean') return formatBooleanValue(raw);
+	if (typeof raw === 'string') {
+		if (field === 'colonReplacementFormat' || field === 'multiEpisodeStyle') {
+			return value(titleize(raw));
+		}
+		return value(raw, { mono: looksTechnical(raw) });
+	}
+	return formatGenericValue(raw);
+}
+
+function formatQualityDefinitionValue(field: string, raw: unknown): DriftDisplayValue {
+	if (
+		(field === 'maxSize' || field === 'preferredSize') &&
+		(raw === null || raw === undefined || raw === 0)
+	) {
+		return value('Unlimited');
+	}
+	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
+	if (typeof raw === 'number') return value(String(raw), { mono: true });
+	return formatGenericValue(raw);
+}
+
 function formatMinutesValue(raw: unknown): DriftDisplayValue {
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
 	if (typeof raw !== 'number') return formatGenericValue(raw);
@@ -859,6 +1199,45 @@ function delayProfileFieldLabel(path: string): string {
 	};
 
 	return labels[path] ?? titleize(path);
+}
+
+function namingFieldLabel(path: string): string {
+	const labels: Record<string, string> = {
+		animeEpisodeFormat: 'Anime Episode Format',
+		colonReplacementFormat: 'Colon Replacement',
+		customColonReplacementFormat: 'Custom Colon Replacement',
+		dailyEpisodeFormat: 'Daily Episode Format',
+		movieFolderFormat: 'Movie Folder Format',
+		multiEpisodeStyle: 'Multi Episode Style',
+		renameEpisodes: 'Rename Episodes',
+		renameMovies: 'Rename Movies',
+		replaceIllegalCharacters: 'Replace Illegal Characters',
+		seasonFolderFormat: 'Season Folder Format',
+		seriesFolderFormat: 'Series Folder Format',
+		standardEpisodeFormat: 'Standard Episode Format',
+		standardMovieFormat: 'Movie Format'
+	};
+
+	return labels[path] ?? titleize(path);
+}
+
+function qualityDefinitionFieldLabel(path: string): string {
+	const labels: Record<string, string> = {
+		maxSize: 'Maximum Size',
+		minSize: 'Minimum Size',
+		preferredSize: 'Preferred Size'
+	};
+
+	return labels[path] ?? titleize(path);
+}
+
+function parseQualityDefinitionPath(path: string): ParsedQualityDefinitionPath | null {
+	const match = /^qualityDefinitions\[(.+)\]\.(.+)$/.exec(path);
+	if (!match) return null;
+	return {
+		qualityName: match[1],
+		field: match[2]
+	};
 }
 
 function implementationLabel(implementation: string): string {

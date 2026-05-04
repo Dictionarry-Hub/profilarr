@@ -21,6 +21,7 @@ import type {
 	QualityProfileDriftDiff,
 	QualityProfileModifiedDiff
 } from '$drift/qualityProfiles.ts';
+import type { MediaManagementDriftDiff } from '$drift/mediaManagement.ts';
 import { FEATURES } from '$shared/features.ts';
 import type { SyncArrType } from '$sync/mappings.ts';
 
@@ -34,6 +35,20 @@ interface DriftProgress {
 	customFormats?: SectionProgress;
 	qualityProfiles?: SectionProgress;
 	delayProfiles?: SectionProgress;
+	naming?: SectionProgress;
+	qualityDefinitions?: SectionProgress;
+	mediaSettings?: SectionProgress;
+}
+
+/**
+ * For each MM sub-config (naming, quality definitions, media settings) the
+ * "drift count" we surface in the chip is binary: 0 if there's no drift in
+ * that sub-config, 1 if there is. The denominator is also 0 or 1 — whether
+ * the sub-config is configured at all. So the chip ends up as 0/0 (hidden),
+ * 1/1 (clean), or 0/1 (drifted), mirroring the delay-profile chip pattern.
+ */
+function subConfigDrifted(sub: { missing: unknown[]; modified: unknown[] }): boolean {
+	return sub.missing.length > 0 || sub.modified.length > 0;
 }
 
 /**
@@ -130,17 +145,28 @@ async function loadDriftProgress(
 
 	const qpSync = arrSyncQueries.getQualityProfilesSync(instanceId);
 	const dpSync = arrSyncQueries.getDelayProfilesSync(instanceId);
+	const mmSync = arrSyncQueries.getMediaManagementSync(instanceId);
 
 	const qpTotal = qpSync.selections.length;
 	const dpTotal = dpSync.databaseId && dpSync.profileName ? 1 : 0;
 	const cfTotal = qpTotal > 0 ? (await buildExpectedCustomFormats(instanceId, arrType)).length : 0;
+	const namingTotal = mmSync.namingDatabaseId !== null && mmSync.namingConfigName ? 1 : 0;
+	const qualityDefinitionsTotal =
+		mmSync.qualityDefinitionsDatabaseId !== null && mmSync.qualityDefinitionsConfigName ? 1 : 0;
+	const mediaSettingsTotal =
+		mmSync.mediaSettingsDatabaseId !== null && mmSync.mediaSettingsConfigName ? 1 : 0;
 
 	const counts = status.counts ?? {};
 	const diff = status.diff as
-		| { quality_profiles?: QualityProfileDriftDiff; custom_formats?: CustomFormatDriftDiff }
+		| {
+				quality_profiles?: QualityProfileDriftDiff;
+				custom_formats?: CustomFormatDriftDiff;
+				media_management?: MediaManagementDriftDiff;
+		  }
 		| undefined;
 	const qpClass = classifyQpDrift(diff?.quality_profiles);
 	const cfNames = collectCfNames(diff?.custom_formats);
+	const mm = diff?.media_management;
 
 	const progress: DriftProgress = {};
 	if (qpTotal > 0) {
@@ -167,8 +193,39 @@ async function loadDriftProgress(
 			message: dpDrifted > 0 ? `${dpName} drifted.` : undefined
 		};
 	}
+	if (namingTotal > 0) {
+		const drifted = mm?.naming && subConfigDrifted(mm.naming) ? 1 : 0;
+		progress.naming = {
+			total: namingTotal,
+			drifted,
+			message: drifted > 0 ? `${mmSync.namingConfigName} drifted.` : undefined
+		};
+	}
+	if (qualityDefinitionsTotal > 0) {
+		const drifted = mm?.quality_definitions && subConfigDrifted(mm.quality_definitions) ? 1 : 0;
+		progress.qualityDefinitions = {
+			total: qualityDefinitionsTotal,
+			drifted,
+			message: drifted > 0 ? `${mmSync.qualityDefinitionsConfigName} drifted.` : undefined
+		};
+	}
+	if (mediaSettingsTotal > 0) {
+		const drifted = mm?.media_settings && subConfigDrifted(mm.media_settings) ? 1 : 0;
+		progress.mediaSettings = {
+			total: mediaSettingsTotal,
+			drifted,
+			message: drifted > 0 ? `${mmSync.mediaSettingsConfigName} drifted.` : undefined
+		};
+	}
 
-	if (!progress.qualityProfiles && !progress.delayProfiles && !progress.customFormats) {
+	if (
+		!progress.qualityProfiles &&
+		!progress.delayProfiles &&
+		!progress.customFormats &&
+		!progress.naming &&
+		!progress.qualityDefinitions &&
+		!progress.mediaSettings
+	) {
 		return null;
 	}
 

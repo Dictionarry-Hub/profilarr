@@ -37,10 +37,15 @@ import {
 	getRadarrByName as getRadarrMediaSettings,
 	getSonarrByName as getSonarrMediaSettings
 } from '$pcd/entities/mediaManagement/media-settings/read.ts';
-import type { ArrPropersAndRepacks } from '$arr/types.ts';
-import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
 import type { RadarrNamingConfig, SonarrNamingConfig } from '$arr/types.ts';
 import { transformDelayProfile } from './delayProfiles/transformer.ts';
+import {
+	applyQualityDefinitionsToArr,
+	mergeMediaSettingsConfig,
+	mergeRadarrNamingConfig,
+	mergeSonarrNamingConfig,
+	transformQualityDefinitionsForArr
+} from './mediaManagement/transformer.ts';
 
 interface SyncResult {
 	success: boolean;
@@ -331,14 +336,7 @@ export async function syncNaming(
 			}
 
 			const existing = (await client.getNamingConfig()) as RadarrNamingConfig;
-			const updated: RadarrNamingConfig = {
-				...existing,
-				renameMovies: naming.rename,
-				replaceIllegalCharacters: naming.replace_illegal_characters,
-				colonReplacementFormat: naming.colon_replacement_format,
-				standardMovieFormat: naming.movie_format,
-				movieFolderFormat: naming.movie_folder_format
-			};
+			const updated = mergeRadarrNamingConfig(existing, naming);
 			await client.updateNamingConfig(updated);
 		} else if (instance.type === 'sonarr') {
 			const naming = await getSonarrNaming(cache, configName);
@@ -347,19 +345,7 @@ export async function syncNaming(
 			}
 
 			const existing = (await client.getNamingConfig()) as SonarrNamingConfig;
-			const updated: SonarrNamingConfig = {
-				...existing,
-				renameEpisodes: naming.rename,
-				replaceIllegalCharacters: naming.replace_illegal_characters,
-				colonReplacementFormat: colonReplacementToDb(naming.colon_replacement_format),
-				customColonReplacementFormat: naming.custom_colon_replacement_format,
-				multiEpisodeStyle: multiEpisodeStyleToDb(naming.multi_episode_style),
-				standardEpisodeFormat: naming.standard_episode_format,
-				dailyEpisodeFormat: naming.daily_episode_format,
-				animeEpisodeFormat: naming.anime_episode_format,
-				seriesFolderFormat: naming.series_folder_format,
-				seasonFolderFormat: naming.season_folder_format
-			};
+			const updated = mergeSonarrNamingConfig(existing, naming);
 			await client.updateNamingConfig(updated);
 		} else {
 			return { success: false, error: `Unsupported instance type: ${instance.type}` };
@@ -424,29 +410,8 @@ export async function syncQualityDefinitions(
 		// GET existing quality definitions from arr
 		const arrDefinitions = await client.getQualityDefinitions();
 
-		// Build map of arr quality name (lowercase) -> definition
-		const arrDefMap = new Map<string, (typeof arrDefinitions)[0]>();
-		for (const def of arrDefinitions) {
-			if (def.quality.name) {
-				arrDefMap.set(def.quality.name.toLowerCase(), def);
-			}
-		}
-
-		// Update arr definitions with PCD values
-		let updatedCount = 0;
-		for (const entry of qualityDefsConfig.entries) {
-			const apiName = apiMappings.get(entry.quality_name.toLowerCase());
-			if (!apiName) continue;
-
-			const arrDef = arrDefMap.get(apiName.toLowerCase());
-			if (!arrDef) continue;
-
-			// PCD stores 0 for "unlimited", arr API expects null
-			arrDef.minSize = entry.min_size;
-			arrDef.maxSize = entry.max_size === 0 ? null : entry.max_size;
-			arrDef.preferredSize = entry.preferred_size === 0 ? null : entry.preferred_size;
-			updatedCount++;
-		}
+		const transformed = transformQualityDefinitionsForArr(qualityDefsConfig.entries, apiMappings);
+		const { updatedCount } = applyQualityDefinitionsToArr(arrDefinitions, transformed.definitions);
 
 		if (updatedCount === 0) {
 			return { success: false, error: 'No quality definitions matched for update' };
@@ -504,11 +469,7 @@ export async function syncMediaSettings(
 		}
 
 		const existing = await client.getMediaManagementConfig();
-		const updated = {
-			...existing,
-			downloadPropersAndRepacks: mapPropersRepacks(mediaSettings.propers_repacks),
-			enableMediaInfo: mediaSettings.enable_media_info
-		};
+		const updated = mergeMediaSettingsConfig(existing, mediaSettings);
 		await client.updateMediaManagementConfig(updated);
 
 		await logger.info(`Entity sync: updated media settings "${configName}"`, {
@@ -529,13 +490,4 @@ export async function syncMediaSettings(
 	} finally {
 		client.close();
 	}
-}
-
-function mapPropersRepacks(pcdValue: string): ArrPropersAndRepacks {
-	const mapping: Record<string, ArrPropersAndRepacks> = {
-		doNotPrefer: 'doNotPrefer',
-		preferAndUpgrade: 'preferAndUpgrade',
-		doNotUpgradeAutomatically: 'doNotUpgrade'
-	};
-	return mapping[pcdValue] ?? 'doNotPrefer';
 }
