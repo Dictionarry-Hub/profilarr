@@ -2,6 +2,8 @@ import { error, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries, type SyncTrigger, type ProfileSelection } from '$db/queries/arrSync.ts';
+import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
+import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
 import { pcdManager } from '$pcd/core/manager.ts';
 import { logger } from '$logger/logger.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
@@ -13,6 +15,165 @@ import { calculateNextRun } from '$lib/server/sync/utils.ts';
 import { scheduleArrSyncForInstance } from '$lib/server/jobs/init.ts';
 import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
+import { buildExpectedCustomFormats } from '$drift/customFormats.ts';
+import type { CustomFormatDriftDiff } from '$drift/customFormats.ts';
+import type {
+	QualityProfileDriftDiff,
+	QualityProfileModifiedDiff
+} from '$drift/qualityProfiles.ts';
+import { FEATURES } from '$shared/features.ts';
+import type { SyncArrType } from '$sync/mappings.ts';
+
+interface SectionProgress {
+	total: number;
+	drifted: number;
+	message?: string;
+}
+
+interface DriftProgress {
+	customFormats?: SectionProgress;
+	qualityProfiles?: SectionProgress;
+	delayProfiles?: SectionProgress;
+}
+
+/**
+ * A field on a modified QP is "transitive" iff it represents a CF score row
+ * that is now missing from Arr (i.e. the CF was deleted). The QP itself is
+ * structurally fine; it's just pointing at something that no longer exists.
+ */
+function fieldIsMissingCustomFormat(field: { path: string; actual: unknown }): boolean {
+	if (!field.path.startsWith('formatItems[')) return false;
+	const actual = field.actual;
+	return (
+		actual !== null &&
+		typeof actual === 'object' &&
+		'state' in actual &&
+		(actual as { state: unknown }).state === 'missing_custom_format'
+	);
+}
+
+function isTransitiveOnlyQp(modified: QualityProfileModifiedDiff): boolean {
+	if (modified.fields.length === 0) return false;
+	return modified.fields.every(fieldIsMissingCustomFormat);
+}
+
+function classifyQpDrift(qpDiff: QualityProfileDriftDiff | undefined) {
+	const result = {
+		directNames: [] as string[],
+		transitiveNames: [] as string[],
+		affectedQpNames: new Set<string>()
+	};
+	if (!qpDiff) return result;
+
+	// Missing QPs (selected but not in Arr) are always direct.
+	for (const m of qpDiff.missing) {
+		result.directNames.push(m.name);
+	}
+
+	for (const m of qpDiff.modified) {
+		if (isTransitiveOnlyQp(m)) {
+			result.transitiveNames.push(m.name);
+			result.affectedQpNames.add(m.name);
+		} else {
+			result.directNames.push(m.name);
+			// A direct drift can also reference missing CFs; track that too.
+			if (m.fields.some(fieldIsMissingCustomFormat)) {
+				result.affectedQpNames.add(m.name);
+			}
+		}
+	}
+	return result;
+}
+
+function collectCfNames(cfDiff: CustomFormatDriftDiff | undefined): string[] {
+	if (!cfDiff) return [];
+	const names: string[] = [];
+	for (const m of cfDiff.missing) names.push(m.name);
+	for (const m of cfDiff.modified) names.push(m.name);
+	return names;
+}
+
+const NAME_LIST_CAP = 3;
+
+function joinNames(names: string[]): string {
+	if (names.length <= NAME_LIST_CAP) return names.join(', ');
+	return `${names.slice(0, NAME_LIST_CAP).join(', ')} +${names.length - NAME_LIST_CAP} more`;
+}
+
+function buildQpMessage(directNames: string[], transitiveNames: string[]): string | undefined {
+	if (directNames.length === 0 && transitiveNames.length === 0) return undefined;
+	if (transitiveNames.length === 0) {
+		return `${joinNames(directNames)} drifted.`;
+	}
+	if (directNames.length === 0) {
+		return `${joinNames(transitiveNames)} affected by drifted custom formats.`;
+	}
+	return `${joinNames(directNames)} drifted; ${joinNames(transitiveNames)} also affected by drifted custom formats.`;
+}
+
+function buildCfMessage(cfNames: string[], affectedQpNames: string[]): string | undefined {
+	if (cfNames.length === 0) return undefined;
+	if (affectedQpNames.length === 0) return `${joinNames(cfNames)} drifted.`;
+	return `${joinNames(cfNames)} drifted, used in ${joinNames(affectedQpNames)}.`;
+}
+
+async function loadDriftProgress(
+	instanceId: number,
+	arrType: SyncArrType
+): Promise<DriftProgress | null> {
+	if (!FEATURES.drift) return null;
+	if (!arrDriftSettingsQueries.getByInstanceId(instanceId)?.enabled) return null;
+
+	const status = arrDriftStatusQueries.getByInstanceId(instanceId);
+	if (!status) return null;
+	if (status.status !== 'clean' && status.status !== 'drift_detected') return null;
+
+	const qpSync = arrSyncQueries.getQualityProfilesSync(instanceId);
+	const dpSync = arrSyncQueries.getDelayProfilesSync(instanceId);
+
+	const qpTotal = qpSync.selections.length;
+	const dpTotal = dpSync.databaseId && dpSync.profileName ? 1 : 0;
+	const cfTotal = qpTotal > 0 ? (await buildExpectedCustomFormats(instanceId, arrType)).length : 0;
+
+	const counts = status.counts ?? {};
+	const diff = status.diff as
+		| { quality_profiles?: QualityProfileDriftDiff; custom_formats?: CustomFormatDriftDiff }
+		| undefined;
+	const qpClass = classifyQpDrift(diff?.quality_profiles);
+	const cfNames = collectCfNames(diff?.custom_formats);
+
+	const progress: DriftProgress = {};
+	if (qpTotal > 0) {
+		progress.qualityProfiles = {
+			total: qpTotal,
+			drifted: qpClass.directNames.length,
+			message: buildQpMessage(qpClass.directNames, qpClass.transitiveNames)
+		};
+	}
+	if (cfTotal > 0) {
+		const cfDrifted = counts.custom_formats ?? 0;
+		progress.customFormats = {
+			total: cfTotal,
+			drifted: cfDrifted,
+			message: buildCfMessage(cfNames, [...qpClass.affectedQpNames])
+		};
+	}
+	if (dpTotal > 0) {
+		const dpDrifted = counts.delay_profiles ?? 0;
+		const dpName = dpSync.profileName ?? 'Default delay profile';
+		progress.delayProfiles = {
+			total: dpTotal,
+			drifted: dpDrifted,
+			message: dpDrifted > 0 ? `${dpName} drifted.` : undefined
+		};
+	}
+
+	if (!progress.qualityProfiles && !progress.delayProfiles && !progress.customFormats) {
+		return null;
+	}
+
+	return progress;
+}
 
 export const load: ServerLoad = async ({ params }) => {
 	const id = parseInt(params.id || '', 10);
@@ -86,13 +247,15 @@ export const load: ServerLoad = async ({ params }) => {
 
 	// Load existing sync data
 	const syncData = arrSyncQueries.getFullSyncData(id);
+	const driftProgress = await loadDriftProgress(id, arrType);
 
 	const { api_key: _, ...safeInstance } = instance;
 
 	return {
 		instance: safeInstance,
 		databases: databasesWithProfiles,
-		syncData
+		syncData,
+		driftProgress
 	};
 };
 

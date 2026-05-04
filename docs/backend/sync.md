@@ -262,9 +262,15 @@ Drift detection checks whether Arr still matches what Profilarr would sync now.
 It may reuse sync transformers to build expected state, but it does not sync,
 repair, or cleanup.
 
-Drift does not check media management. Naming, media settings, and quality
-definitions are treated as bootstrap configuration because users commonly tune
-them directly in Arr after initial sync.
+Drift currently covers custom formats, quality profiles, and the default delay
+profile. Media management coverage (naming, media settings, quality
+definitions) is planned as a follow-up.
+
+After a successful sync that touched Arr, the sync handler enqueues an
+`arr.drift` job for the same instance so the drift status (and the per-section
+progress chips on the sync page) reflect the new state without waiting for the
+next scheduled drift run. Gated on `FEATURES.drift` and per-instance drift
+settings.
 
 ## Impact Analysis
 

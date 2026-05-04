@@ -2,6 +2,8 @@
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import SyncFooter from './SyncFooter.svelte';
+	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
@@ -12,12 +14,20 @@
 		qualityProfiles: QualityProfileTableRow[];
 	}
 
+	interface SectionProgress {
+		total: number;
+		drifted: number;
+		message?: string;
+	}
+
 	export let databases: DatabaseWithProfiles[];
 	export let state: Record<number, Record<string, boolean>> = {};
 	export let syncTrigger: 'manual' | 'on_pull' | 'schedule' = 'manual';
 	export let cronExpression: string = '0 * * * *';
 	export let canSave: boolean = true;
 	export let warning: string | null = null;
+	export let qpProgress: SectionProgress | undefined = undefined;
+	export let cfProgress: SectionProgress | undefined = undefined;
 
 	let saving = false;
 	let syncing = false;
@@ -149,12 +159,53 @@
 	class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
 >
 	<!-- Header -->
-	<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-		<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Quality Profiles</h2>
-		<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-			Select quality profiles to sync to this instance. Only one database can be used per instance
-			&mdash; to use a different database, sync it to a separate Arr instance.
-		</p>
+	<div
+		class="flex flex-col gap-4 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between md:gap-6 dark:border-neutral-800"
+	>
+		<div class="min-w-0 md:flex-1">
+			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Quality Profiles</h2>
+			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+				Select quality profiles to sync to this instance.
+			</p>
+		</div>
+		{#if qpProgress || cfProgress}
+			<div class="flex flex-col gap-3 md:flex-shrink-0 md:flex-row md:flex-wrap md:gap-5 md:pt-1">
+				{#if qpProgress}
+					<div class="min-w-[9rem]">
+						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+							Quality Profiles
+						</div>
+						<ProgressIndicator
+							current={qpProgress.total - qpProgress.drifted}
+							target={qpProgress.total}
+							met={qpProgress.drifted === 0}
+							mode="compact"
+							colorMode="completion"
+							tooltip={qpProgress.message ?? ''}
+							tooltipPosition="bottom"
+							tooltipAlign="middle"
+						/>
+					</div>
+				{/if}
+				{#if cfProgress}
+					<div class="min-w-[9rem]">
+						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+							Custom Formats
+						</div>
+						<ProgressIndicator
+							current={cfProgress.total - cfProgress.drifted}
+							target={cfProgress.total}
+							met={cfProgress.drifted === 0}
+							mode="compact"
+							colorMode="completion"
+							tooltip={cfProgress.message ?? ''}
+							tooltipPosition="bottom"
+							tooltipAlign="middle"
+						/>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	<!-- Content -->
@@ -178,14 +229,20 @@
 						{:else}
 							<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-5">
 								{#each database.qualityProfiles as profile}
-									<Toggle
-										checked={isSelected(database.id, profile.name)}
-										disabled={isInactive}
-										label={profile.name}
+									<Tooltip
+										text={isInactive ? 'Only one database can be used per instance.' : ''}
+										position="bottom"
 										fullWidth
-										ariaLabel={`Toggle quality profile ${profile.name} from ${database.name}`}
-										on:change={(e) => setProfile(database.id, profile.name, e.detail)}
-									/>
+									>
+										<Toggle
+											checked={isSelected(database.id, profile.name)}
+											disabled={isInactive}
+											label={profile.name}
+											fullWidth
+											ariaLabel={`Toggle quality profile ${profile.name} from ${database.name}`}
+											on:change={(e) => setProfile(database.id, profile.name, e.detail)}
+										/>
+									</Tooltip>
 								{/each}
 							</div>
 						{/if}

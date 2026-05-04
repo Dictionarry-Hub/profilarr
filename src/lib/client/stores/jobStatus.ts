@@ -68,6 +68,26 @@ function createJobStatusStore() {
 
 	let eventSource: EventSource | null = null;
 
+	const finishedListeners = new Set<(data: FinishedPayload) => void>();
+
+	/**
+	 * Subscribe to every job.finished SSE event, independent of the store's
+	 * state machine. The state machine drops finished events for jobs it
+	 * isn't actively tracking (notably chained jobs that fire during the
+	 * post-completion holdoff window). Page-level consumers that need to
+	 * react to every finished event (e.g. invalidate page data after a
+	 * drift refresh) should use this hook instead of subscribing to the
+	 * store's state.
+	 *
+	 * Returns an unsubscribe function.
+	 */
+	function onJobFinished(listener: (data: FinishedPayload) => void): () => void {
+		finishedListeners.add(listener);
+		return () => {
+			finishedListeners.delete(listener);
+		};
+	}
+
 	function clearTimers() {
 		if (resetTimer) {
 			clearTimeout(resetTimer);
@@ -129,6 +149,19 @@ function createJobStatusStore() {
 	}
 
 	function handleFinished(data: FinishedPayload) {
+		// Fire raw listeners independent of the state-machine. The state
+		// machine drops finished events for jobs it isn't actively tracking
+		// (e.g. a chained job that arrived during the completion holdoff),
+		// but consumers like page-level invalidators want to react to every
+		// finished event regardless.
+		for (const listener of finishedListeners) {
+			try {
+				listener(data);
+			} catch {
+				// Swallow listener errors so one bad listener can't break others.
+			}
+		}
+
 		// Ignore finished events for jobs we're not tracking (stale events
 		// from prior optimistic state mismatches).
 		if (currentJobId !== null && currentJobId !== data.jobId) return;
@@ -211,7 +244,7 @@ function createJobStatusStore() {
 		});
 	}
 
-	return { subscribe, connect, disconnect, setRunning, cancelOptimistic };
+	return { subscribe, connect, disconnect, setRunning, cancelOptimistic, onJobFinished };
 }
 
 export const jobStatus = createJobStatusStore();
