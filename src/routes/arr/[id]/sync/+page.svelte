@@ -148,6 +148,7 @@
 			bind:syncTrigger={delayProfileTrigger}
 			bind:cronExpression={delayProfileCron}
 			bind:isDirty={delayProfilesDirty}
+			progress={data.driftProgress?.delayProfiles}
 		/>
 		<QualityProfiles
 			databases={data.databases}
@@ -157,6 +158,8 @@
 			bind:isDirty={qualityProfilesDirty}
 			canSave={qualityProfilesCanSave}
 			warning={qualityProfilesWarning}
+			qpProgress={data.driftProgress?.qualityProfiles}
+			cfProgress={data.driftProgress?.customFormats}
 		/>
 	</div>
 

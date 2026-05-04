@@ -2,6 +2,7 @@ import { error, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries, type SyncTrigger, type ProfileSelection } from '$db/queries/arrSync.ts';
+import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
 import { pcdManager } from '$pcd/core/manager.ts';
 import { logger } from '$logger/logger.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
@@ -13,6 +14,56 @@ import { calculateNextRun } from '$lib/server/sync/utils.ts';
 import { scheduleArrSyncForInstance } from '$lib/server/jobs/init.ts';
 import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
+import { buildExpectedCustomFormats } from '$drift/customFormats.ts';
+import { FEATURES } from '$shared/features.ts';
+import type { SyncArrType } from '$sync/mappings.ts';
+
+interface SectionProgress {
+	total: number;
+	drifted: number;
+}
+
+interface DriftProgress {
+	customFormats?: SectionProgress;
+	qualityProfiles?: SectionProgress;
+	delayProfiles?: SectionProgress;
+}
+
+async function loadDriftProgress(
+	instanceId: number,
+	arrType: SyncArrType
+): Promise<DriftProgress | null> {
+	if (!FEATURES.drift) return null;
+
+	const status = arrDriftStatusQueries.getByInstanceId(instanceId);
+	if (!status) return null;
+	if (status.status !== 'clean' && status.status !== 'drift_detected') return null;
+
+	const qpSync = arrSyncQueries.getQualityProfilesSync(instanceId);
+	const dpSync = arrSyncQueries.getDelayProfilesSync(instanceId);
+
+	const qpTotal = qpSync.selections.length;
+	const dpTotal = dpSync.databaseId && dpSync.profileName ? 1 : 0;
+	const cfTotal = qpTotal > 0 ? (await buildExpectedCustomFormats(instanceId, arrType)).length : 0;
+
+	const counts = status.counts ?? {};
+	const progress: DriftProgress = {};
+	if (qpTotal > 0) {
+		progress.qualityProfiles = { total: qpTotal, drifted: counts.quality_profiles ?? 0 };
+	}
+	if (dpTotal > 0) {
+		progress.delayProfiles = { total: dpTotal, drifted: counts.delay_profiles ?? 0 };
+	}
+	if (cfTotal > 0) {
+		progress.customFormats = { total: cfTotal, drifted: counts.custom_formats ?? 0 };
+	}
+
+	if (!progress.qualityProfiles && !progress.delayProfiles && !progress.customFormats) {
+		return null;
+	}
+
+	return progress;
+}
 
 export const load: ServerLoad = async ({ params }) => {
 	const id = parseInt(params.id || '', 10);
@@ -86,13 +137,15 @@ export const load: ServerLoad = async ({ params }) => {
 
 	// Load existing sync data
 	const syncData = arrSyncQueries.getFullSyncData(id);
+	const driftProgress = await loadDriftProgress(id, arrType);
 
 	const { api_key: _, ...safeInstance } = instance;
 
 	return {
 		instance: safeInstance,
 		databases: databasesWithProfiles,
-		syncData
+		syncData,
+		driftProgress
 	};
 };
 

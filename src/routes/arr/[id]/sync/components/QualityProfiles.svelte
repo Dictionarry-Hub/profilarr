@@ -2,6 +2,7 @@
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import SyncFooter from './SyncFooter.svelte';
+	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
@@ -12,12 +13,19 @@
 		qualityProfiles: QualityProfileTableRow[];
 	}
 
+	interface SectionProgress {
+		total: number;
+		drifted: number;
+	}
+
 	export let databases: DatabaseWithProfiles[];
 	export let state: Record<number, Record<string, boolean>> = {};
 	export let syncTrigger: 'manual' | 'on_pull' | 'schedule' = 'manual';
 	export let cronExpression: string = '0 * * * *';
 	export let canSave: boolean = true;
 	export let warning: string | null = null;
+	export let qpProgress: SectionProgress | undefined = undefined;
+	export let cfProgress: SectionProgress | undefined = undefined;
 
 	let saving = false;
 	let syncing = false;
@@ -149,12 +157,48 @@
 	class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
 >
 	<!-- Header -->
-	<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-		<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Quality Profiles</h2>
-		<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-			Select quality profiles to sync to this instance. Only one database can be used per instance
-			&mdash; to use a different database, sync it to a separate Arr instance.
-		</p>
+	<div
+		class="flex items-start justify-between gap-6 border-b border-neutral-200 px-6 py-4 dark:border-neutral-800"
+	>
+		<div class="min-w-0 flex-1">
+			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Quality Profiles</h2>
+			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+				Select quality profiles to sync to this instance. Only one database can be used per instance
+				&mdash; to use a different database, sync it to a separate Arr instance.
+			</p>
+		</div>
+		{#if qpProgress || cfProgress}
+			<div class="flex flex-shrink-0 gap-5 pt-1">
+				{#if qpProgress}
+					<div class="min-w-[9rem]">
+						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+							Quality Profiles
+						</div>
+						<ProgressIndicator
+							current={qpProgress.total - qpProgress.drifted}
+							target={qpProgress.total}
+							met={qpProgress.drifted === 0}
+							mode="compact"
+							colorMode="completion"
+						/>
+					</div>
+				{/if}
+				{#if cfProgress}
+					<div class="min-w-[9rem]">
+						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+							Custom Formats
+						</div>
+						<ProgressIndicator
+							current={cfProgress.total - cfProgress.drifted}
+							target={cfProgress.total}
+							met={cfProgress.drifted === 0}
+							mode="compact"
+							colorMode="completion"
+						/>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	<!-- Content -->

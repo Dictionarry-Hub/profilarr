@@ -2,6 +2,7 @@
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import SyncFooter from './SyncFooter.svelte';
+	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
@@ -10,6 +11,11 @@
 		id: number;
 		name: string;
 		delayProfiles: DelayProfilesRow[];
+	}
+
+	interface SectionProgress {
+		total: number;
+		drifted: number;
 	}
 
 	export let databases: DatabaseWithProfiles[];
@@ -22,6 +28,7 @@
 	};
 	export let syncTrigger: 'manual' | 'on_pull' | 'schedule' = 'manual';
 	export let cronExpression: string = '0 * * * *';
+	export let progress: SectionProgress | undefined = undefined;
 
 	let saving = false;
 	let syncing = false;
@@ -108,11 +115,29 @@
 	class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
 >
 	<!-- Header -->
-	<div class="border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-		<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Delay Profiles</h2>
-		<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-			Select delay profiles to sync to this instance
-		</p>
+	<div
+		class="flex items-start justify-between gap-6 border-b border-neutral-200 px-6 py-4 dark:border-neutral-800"
+	>
+		<div class="min-w-0 flex-1">
+			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Delay Profiles</h2>
+			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+				Select delay profiles to sync to this instance
+			</p>
+		</div>
+		{#if progress}
+			<div class="min-w-[9rem] flex-shrink-0 pt-1">
+				<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+					Delay Profiles
+				</div>
+				<ProgressIndicator
+					current={progress.total - progress.drifted}
+					target={progress.total}
+					met={progress.drifted === 0}
+					mode="compact"
+					colorMode="completion"
+				/>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Content -->

@@ -5,18 +5,28 @@
 	export let target: number = 0;
 	export let met: boolean = false;
 	export let mode: 'compact' | 'inline' = 'compact';
+	/**
+	 * How the bar's color is derived.
+	 * - `threshold` (default): red <50%, yellow 50-74%, green 75%+. Suited
+	 *   for "good enough" semantics like CF score.
+	 * - `completion`: green when met, yellow otherwise (regardless of how
+	 *   close to met). Suited for "anything less than 100% is a problem"
+	 *   semantics like drift.
+	 */
+	export let colorMode: 'threshold' | 'completion' = 'threshold';
 
 	$: progress = target > 0 ? Math.max(0, Math.min(current / target, 1)) : 0;
 	$: progressPercent = Math.round(progress * 100);
 
-	function getBarColor(p: number, done: boolean): string {
+	function getBarColor(p: number, done: boolean, mode: 'threshold' | 'completion'): string {
 		if (done) return 'bg-green-500 dark:bg-green-400';
+		if (mode === 'completion') return 'bg-yellow-500 dark:bg-yellow-400';
 		if (p >= 0.75) return 'bg-green-500 dark:bg-green-400';
 		if (p >= 0.5) return 'bg-yellow-500 dark:bg-yellow-400';
 		return 'bg-red-500 dark:bg-red-400';
 	}
 
-	$: barColor = getBarColor(progress, met);
+	$: barColor = getBarColor(progress, met, colorMode);
 </script>
 
 {#if mode === 'compact'}
