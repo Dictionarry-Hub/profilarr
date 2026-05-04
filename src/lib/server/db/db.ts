@@ -159,10 +159,18 @@ class DatabaseManager {
 	}
 
 	/**
-	 * Begin a transaction
+	 * Begin a transaction.
+	 *
+	 * Uses `BEGIN IMMEDIATE` so the write lock is acquired at BEGIN time
+	 * rather than on the first write. This avoids the deferred read→write
+	 * upgrade case where SQLite returns SQLITE_BUSY without invoking the
+	 * busy handler (because retrying with a stale snapshot would just
+	 * deadlock). With `busy_timeout = 5000` already set on the connection,
+	 * two concurrent writers serialize cleanly through the busy handler
+	 * instead of one failing immediately.
 	 */
 	beginTransaction(): void {
-		this.exec('BEGIN TRANSACTION');
+		this.exec('BEGIN IMMEDIATE TRANSACTION');
 	}
 
 	/**
