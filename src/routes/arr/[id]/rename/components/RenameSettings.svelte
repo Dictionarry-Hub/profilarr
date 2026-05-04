@@ -88,6 +88,7 @@
 			checked={renameFolders}
 			label={renameFolders ? 'On' : 'Off'}
 			color={renameFolders ? 'accent' : 'neutral'}
+			disabled={!enabled}
 			on:change={(e) => onRenameFoldersChange?.(e.detail)}
 		/>
 	</div>
@@ -102,6 +103,7 @@
 			checked={summaryNotifications}
 			label={summaryNotifications ? 'On' : 'Off'}
 			color={summaryNotifications ? 'accent' : 'neutral'}
+			disabled={!enabled}
 			on:change={(e) => onSummaryNotificationsChange?.(e.detail)}
 		/>
 	</div>
@@ -112,7 +114,7 @@
 		>
 			Schedule
 		</span>
-		<CronInput bind:value={cronValue} {minIntervalMinutes} {onWarning} />
+		<CronInput bind:value={cronValue} disabled={!enabled} {minIntervalMinutes} {onWarning} />
 	</div>
 
 	<div data-onboarding="rename-ignore-tag">
@@ -129,6 +131,7 @@
 			size="md"
 			value={ignoreTag}
 			placeholder="no-rename"
+			disabled={!enabled}
 			on:input={(e) => onIgnoreTagChange?.(e.detail)}
 		/>
 	</div>
