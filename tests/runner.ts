@@ -275,11 +275,21 @@ async function runIntegration(target?: string): Promise<number> {
 		runningAuthSpecs && (!specName || !suite || INTEGRATION_NEEDS_DOCKER.has(specName));
 	let exitCode = 1;
 
+	// Docker is brought up in parallel with non-Docker specs. Specs that need
+	// Docker (see INTEGRATION_NEEDS_DOCKER) will await this promise before
+	// running; everything else proceeds immediately.
+	let dockerReady: Promise<void> | undefined;
+
 	try {
 		if (dockerRequired) {
-			console.log('Starting Docker infrastructure...');
-			await exec('docker', ['compose', '-f', INTEGRATION_COMPOSE, 'up', '-d', '--wait']);
-			console.log('Docker infrastructure ready.\n');
+			dockerReady = execQuiet('docker', [
+				'compose',
+				'-f',
+				INTEGRATION_COMPOSE,
+				'up',
+				'-d',
+				'--wait'
+			]);
 		}
 
 		// Collect spec files from all suites
@@ -341,25 +351,136 @@ async function runIntegration(target?: string): Promise<number> {
 			const result = await runIntegrationSpec(specFiles[0], 'inherit');
 			exitCode = result.code;
 		} else {
-			// Multiple specs - run in parallel, collect output
-			console.log(`Running ${specFiles.length} specs in parallel...\n`);
-			const results = await Promise.all(specFiles.map((f) => runIntegrationSpec(f, 'piped')));
+			// Multiple specs - run with rolling concurrency. Keep CONCURRENCY
+			// specs running at once; as soon as any finishes, the next queued
+			// spec takes its slot. Print a live one-liner per spec as it
+			// completes, then a consolidated FAILURES section dumping full
+			// stdout+stderr only for failed specs.
+			//
+			// Concurrency is capped because each spec spawns its own profilarr
+			// server; without a cap, parallel boots saturate memory on smaller
+			// runners (CI 2 vCPU / 7 GB, WSL allocations) and the OS OOM-kills
+			// the slowest-starting servers.
+			const CONCURRENCY = 10;
+			const startMs = Date.now();
+			console.log(`Running ${specFiles.length} specs (up to ${CONCURRENCY} in parallel)...\n`);
 
-			exitCode = 0;
-			for (let i = 0; i < specFiles.length; i++) {
-				// Extract suite/spec name for display
-				const name = specFiles[i]
-					.replace('tests/integration/', '')
-					.replace('/specs/', '/')
-					.replace('.test.ts', '');
-				const result = results[i];
-				console.log(`\n${'='.repeat(60)}`);
-				console.log(` ${name}`);
-				console.log(`${'='.repeat(60)}`);
-				console.log(result.stdout);
-				if (result.stderr) console.error(result.stderr);
-				if (result.code !== 0) exitCode = 1;
+			type SpecResult = {
+				name: string;
+				code: number;
+				stdout: string;
+				stderr: string;
+				durationMs: number;
+			};
+
+			const formatSpecName = (f: string): string =>
+				f.replace('tests/integration/', '').replace('/specs/', '/').replace('.test.ts', '');
+			const specBasename = (f: string): string => f.split('/').pop()!.replace('.test.ts', '');
+			const needsDocker = (f: string): boolean => INTEGRATION_NEEDS_DOCKER.has(specBasename(f));
+
+			const RESET = '\x1b[0m';
+			const GREEN = '\x1b[32m';
+			const RED = '\x1b[31m';
+			const NAME_WIDTH = Math.max(...specFiles.map((f) => formatSpecName(f).length), 20);
+
+			const runSpec = async (f: string): Promise<SpecResult> => {
+				const name = formatSpecName(f);
+				if (needsDocker(f) && dockerReady) {
+					try {
+						await dockerReady;
+					} catch (err) {
+						const msg = err instanceof Error ? err.message : String(err);
+						console.log(`  ${RED}✗${RESET} ${name.padEnd(NAME_WIDTH)}  (docker)`);
+						return {
+							name,
+							code: 1,
+							stdout: '',
+							stderr: `Docker infrastructure failed to start: ${msg}`,
+							durationMs: 0
+						};
+					}
+				}
+				const specStart = Date.now();
+				const result = await runIntegrationSpec(f, 'piped');
+				const durationMs = Date.now() - specStart;
+				const sym = result.code === 0 ? `${GREEN}✓${RESET}` : `${RED}✗${RESET}`;
+				const dur = `${(durationMs / 1000).toFixed(1)}s`;
+				console.log(`  ${sym} ${name.padEnd(NAME_WIDTH)}  ${dur.padStart(7)}`);
+				return {
+					name,
+					code: result.code,
+					stdout: result.stdout,
+					stderr: result.stderr,
+					durationMs
+				};
+			};
+
+			// Run non-Docker specs first so they fill the pool while Docker is
+			// still starting; Docker-needing specs await dockerReady inside runSpec.
+			const queue = [...specFiles].sort((a, b) => {
+				const ad = needsDocker(a);
+				const bd = needsDocker(b);
+				if (ad === bd) return 0;
+				return ad ? 1 : -1;
+			});
+			const results: SpecResult[] = [];
+			const workerCount = Math.min(CONCURRENCY, queue.length);
+			const workers = Array.from({ length: workerCount }, async () => {
+				while (queue.length > 0) {
+					const f = queue.shift();
+					if (f === undefined) break;
+					results.push(await runSpec(f));
+				}
+			});
+			await Promise.all(workers);
+
+			const failures = results.filter((r) => r.code !== 0);
+			exitCode = failures.length > 0 ? 1 : 0;
+
+			if (failures.length > 0) {
+				console.log('');
+				console.log('='.repeat(60));
+				console.log(` FAILURES (${failures.length})`);
+				console.log('='.repeat(60));
+				for (const f of failures) {
+					console.log('');
+					console.log(`${RED}✗ ${f.name}${RESET}`);
+					console.log('');
+					// If the spec ran tests and produced a "Failures:" summary block,
+					// print only that block (the actual failures + final counts).
+					// Otherwise the spec died in setup; print stdout as-is — those
+					// dumps are already short (server start logs + diagnostic).
+					// Note: the spec's harness wraps "Failures:" in ANSI codes, so
+					// we search for the bare token then walk back to the line start.
+					const idx = f.stdout.lastIndexOf('Failures:');
+					if (idx >= 0) {
+						const lineStart = f.stdout.lastIndexOf('\n', idx) + 1;
+						console.log('  --- spec failures ---');
+						console.log(f.stdout.slice(lineStart));
+					} else {
+						console.log('  --- spec stdout ---');
+						console.log(f.stdout || '  (empty)');
+					}
+					if (f.stderr) {
+						console.log('  --- spec stderr ---');
+						console.log(f.stderr);
+					}
+				}
 			}
+
+			const totalSec = ((Date.now() - startMs) / 1000).toFixed(1);
+			console.log('');
+			console.log('='.repeat(60));
+			if (failures.length > 0) {
+				console.log(
+					` ${RED}${results.length} specs, ${failures.length} failed in ${totalSec}s${RESET}`
+				);
+				console.log(' Failed:');
+				for (const f of failures) console.log(`   ${f.name}`);
+			} else {
+				console.log(` ${GREEN}${results.length} specs passed in ${totalSec}s${RESET}`);
+			}
+			console.log('='.repeat(60));
 		}
 	} catch (error) {
 		console.error('Integration test error:', error);
@@ -684,6 +805,29 @@ async function exec(cmd: string, args: string[]): Promise<void> {
 	});
 	const { code } = await command.output();
 	if (code !== 0) {
+		throw new Error(`Command failed: ${cmd} ${args.join(' ')}`);
+	}
+}
+
+/**
+ * Run a command with stdout/stderr captured. On non-zero exit, the captured
+ * output is printed and an error is thrown. On success, output is silently
+ * discarded. Use for noisy commands whose output is only interesting on failure
+ * (e.g. docker compose up/down).
+ */
+async function execQuiet(cmd: string, args: string[]): Promise<void> {
+	const command = new Deno.Command(cmd, {
+		args,
+		stdout: 'piped',
+		stderr: 'piped'
+	});
+	const result = await command.output();
+	if (result.code !== 0) {
+		const decoder = new TextDecoder();
+		const stdout = decoder.decode(result.stdout);
+		const stderr = decoder.decode(result.stderr);
+		if (stdout) console.error(stdout);
+		if (stderr) console.error(stderr);
 		throw new Error(`Command failed: ${cmd} ${args.join(' ')}`);
 	}
 }

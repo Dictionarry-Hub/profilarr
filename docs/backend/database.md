@@ -26,13 +26,14 @@ The database initializes early in the server startup sequence
 3. `runMigrations()` -- apply pending schema changes
 4. Load log settings, initialize PCD manager, start job queue
 
-Three pragmas are set on every connection:
+Four pragmas are set on every connection:
 
-| Pragma         | Value    | Purpose                             |
-| -------------- | -------- | ----------------------------------- |
-| `foreign_keys` | `ON`     | Enforce referential integrity       |
-| `journal_mode` | `WAL`    | Write-Ahead Logging for concurrency |
-| `synchronous`  | `NORMAL` | Balanced performance/safety         |
+| Pragma         | Value    | Purpose                                                 |
+| -------------- | -------- | ------------------------------------------------------- |
+| `foreign_keys` | `ON`     | Enforce referential integrity                           |
+| `journal_mode` | `WAL`    | Write-Ahead Logging for concurrency                     |
+| `synchronous`  | `NORMAL` | Balanced performance/safety                             |
+| `busy_timeout` | `5000`   | Wait up to 5s for a write lock instead of `SQLITE_BUSY` |
 
 The manager includes **HMR recovery** for development: `isHealthy()` runs
 `SELECT 1` to verify the connection is alive. If the check fails during

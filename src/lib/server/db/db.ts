@@ -74,6 +74,13 @@ class DatabaseManager {
 			// Set synchronous to NORMAL for better performance
 			this.db.exec('PRAGMA synchronous = NORMAL');
 
+			// Wait up to 5s for a write lock instead of failing immediately
+			// with "database is locked" when another writer is active. WAL
+			// allows concurrent reads but writers still serialize; this lets
+			// SQLite handle the wait internally instead of bubbling SQLITE_BUSY
+			// up to handlers (e.g. announcements.fetch racing API writes).
+			this.db.exec('PRAGMA busy_timeout = 5000');
+
 			this.initialized = true;
 
 			await logger.debug('Database initialized', {

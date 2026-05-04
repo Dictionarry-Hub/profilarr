@@ -3,6 +3,8 @@
  * No Deno.test() — just runs functions and reports results.
  */
 
+import { dumpAllServerDiagnostics, dumpDeadServerDiagnostics } from './server.ts';
+
 const c = {
 	reset: '\x1b[0m',
 	grey: '\x1b[90m',
@@ -49,6 +51,7 @@ export async function run(): Promise<void> {
 			await setupFn();
 		} catch (error) {
 			console.error(`\n${c.red}${c.bold}Setup failed:${c.reset}`, error);
+			dumpAllServerDiagnostics('after setup failure');
 			if (teardownFn) {
 				try {
 					await teardownFn();
@@ -74,6 +77,7 @@ export async function run(): Promise<void> {
 			console.log(`${c.red}✗ fail${c.reset}`);
 			failed++;
 			failures.push({ name: t.name, error });
+			dumpDeadServerDiagnostics('server crashed during test');
 		}
 	}
 

@@ -2,8 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [develop, 'hotfix/*']
-    tags: ['v*']
+    branches: ['hotfix/*']
     paths-ignore:
       ['docs/**', '*.md', '!SECURITY.md', '.github/issue_template/**', '.github/assets/**']
   pull_request:
@@ -131,9 +130,6 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - name: Clear corrupted native libraries
-        run: rm -rf ~/.cache/deno/plug
-
       - run: deno install --node-modules-dir
 
       - name: Run unit tests
@@ -186,10 +182,30 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - name: Clear corrupted native libraries
-        run: rm -rf ~/.cache/deno/plug
-
       - run: deno install --node-modules-dir
+
+      # Dedicated cache for the FFI plug binaries (sqlite, bcrypt). The main
+      # `Cache deps` covers ~/.cache/deno but is shared across jobs and gets
+      # overwritten by Build (which never populates plug). This cache uses a
+      # separate key so it survives independently. Without this, the 30+
+      # parallel integration spec processes race to download plug binaries
+      # into the same path on a cold cache and corrupt each other.
+      - name: Cache FFI plug
+        id: plug-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/deno/plug
+          key: deno-plug-${{ runner.os }}-${{ hashFiles('deno.lock') }}-v1
+
+      - name: Pre-warm FFI plug
+        if: steps.plug-cache.outputs.cache-hit != 'true'
+        run: |
+          deno eval --ext=ts '
+            import { hash } from "@felix/bcrypt";
+            import { Database } from "@db/sqlite";
+            await hash("warmup");
+            new Database(":memory:").close();
+          '
 
       - name: Download build artifact
         uses: actions/download-artifact@v8
@@ -199,12 +215,6 @@ jobs:
 
       - name: Make binary executable
         run: chmod +x dist/build/profilarr
-
-      - name: Warm native library cache
-        run: |
-          mkdir -p /tmp/ffi-warmup/data/databases /tmp/ffi-warmup/logs /tmp/ffi-warmup/backups
-          APP_BASE_PATH=/tmp/ffi-warmup PORT=9999 timeout 30 ./dist/build/profilarr || true
-          rm -rf /tmp/ffi-warmup
 
       - name: Cache Docker images
         id: docker-cache
@@ -252,13 +262,22 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - name: Clear corrupted native libraries
-        run: rm -rf ~/.cache/deno/plug
-
       - run: deno install --node-modules-dir
 
-      - name: Install Playwright browsers
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+
+      - name: Install Playwright browsers + system deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system deps only (browsers cached)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Download build artifact
         uses: actions/download-artifact@v8
