@@ -341,9 +341,11 @@ async function runIntegration(target?: string): Promise<number> {
 			const result = await runIntegrationSpec(specFiles[0], 'inherit');
 			exitCode = result.code;
 		} else {
-			// Multiple specs - run in chunked parallel. Print a live one-liner
-			// per spec as it finishes, then a consolidated FAILURES section
-			// dumping full stdout+stderr only for failed specs.
+			// Multiple specs - run with rolling concurrency. Keep CONCURRENCY
+			// specs running at once; as soon as any finishes, the next queued
+			// spec takes its slot. Print a live one-liner per spec as it
+			// completes, then a consolidated FAILURES section dumping full
+			// stdout+stderr only for failed specs.
 			//
 			// Concurrency is capped because each spec spawns its own profilarr
 			// server; without a cap, parallel boots saturate memory on smaller
@@ -386,12 +388,17 @@ async function runIntegration(target?: string): Promise<number> {
 				};
 			};
 
+			const queue = [...specFiles];
 			const results: SpecResult[] = [];
-			for (let i = 0; i < specFiles.length; i += CONCURRENCY) {
-				const batch = specFiles.slice(i, i + CONCURRENCY);
-				const batchResults = await Promise.all(batch.map(runSpec));
-				results.push(...batchResults);
-			}
+			const workerCount = Math.min(CONCURRENCY, queue.length);
+			const workers = Array.from({ length: workerCount }, async () => {
+				while (queue.length > 0) {
+					const f = queue.shift();
+					if (f === undefined) break;
+					results.push(await runSpec(f));
+				}
+			});
+			await Promise.all(workers);
 
 			const failures = results.filter((r) => r.code !== 0);
 			exitCode = failures.length > 0 ? 1 : 0;
