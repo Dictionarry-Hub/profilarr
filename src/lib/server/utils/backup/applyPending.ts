@@ -67,11 +67,6 @@ export async function applyPendingRestore(): Promise<void> {
 		throw err;
 	}
 
-	await logger.info('Pending restore detected', {
-		source: 'applyPendingRestore',
-		meta: { archivePath }
-	});
-
 	// Verify archive still exists. If it's gone, drop the sentinel and
 	// continue boot with the existing data, destroying nothing.
 	try {
@@ -125,10 +120,6 @@ export async function applyPendingRestore(): Promise<void> {
 	}
 
 	const info = await readArchiveInfo(stagingDataDir);
-	await logger.info('Restore archive metadata', {
-		source: 'applyPendingRestore',
-		meta: info
-	});
 
 	// Wipe live data dir contents we own. Anything else (e.g. a file an
 	// operator manually placed) is left alone.
