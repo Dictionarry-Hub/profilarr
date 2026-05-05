@@ -18,7 +18,7 @@ import { createUserDirect, setApiKey } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { openDb } from '$test-harness/db.ts';
 
-const PORT = 7035;
+const PORT = 7011;
 const ORIGIN = `http://localhost:${PORT}`;
 const API_KEY = 'status-test-key-abc123';
 
