@@ -6,6 +6,7 @@ import { assert, assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '$test-harness/server.ts';
 import { openDb } from '$test-harness/db.ts';
 import { run, setup, teardown, test } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { base } from '../harness/fixtures.ts';
 import {
 	compilePcd,
@@ -22,7 +23,7 @@ import {
 } from '../harness/pcd.ts';
 import { write } from '../harness/write.ts';
 
-const PORT = 7044;
+const PORT = PORTS.pcd.conflictsDelayProfiles;
 const ORIGIN = `http://localhost:${PORT}`;
 const STRATEGIES: ConflictStrategy[] = ['ask', 'align', 'override'];
 

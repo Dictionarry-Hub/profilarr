@@ -6,11 +6,12 @@
 
 import { assertEquals, assertExists } from '@std/assert';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { TestClient } from '$test-harness/client.ts';
 import { createUser, login, setApiKey } from '$test-harness/setup.ts';
 
-const PORT = 7031;
+const PORT = PORTS.backups.listAndDownload;
 const ORIGIN = `http://localhost:${PORT}`;
 const API_KEY = 'test-api-key-backups-list-123';
 const BACKUPS_DIR = `./dist/integration-${PORT}/backups`;

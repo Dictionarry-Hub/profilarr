@@ -21,16 +21,17 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { queryDb, createUserDirect } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
-const PORT = 7006;
+const PORT = PORTS.auth.oidc;
 const ORIGIN = `http://localhost:${PORT}`;
 const MOCK_OIDC_URL = 'http://localhost:9090/default/.well-known/openid-configuration';
 
-const PROXY_PORT = 7009;
+const PROXY_PORT = PORTS.auth.oidcProxy;
 const PROXY_ORIGIN = 'https://localhost:7445';
 
 // Separate AUTH=on server for testing OIDC-disabled behavior
-const AUTH_ON_PORT = 7010;
+const AUTH_ON_PORT = PORTS.auth.oidcAuthOn;
 const AUTH_ON_ORIGIN = `http://localhost:${AUTH_ON_PORT}`;
 
 const OIDC_ENV = {

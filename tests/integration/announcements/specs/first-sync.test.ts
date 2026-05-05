@@ -11,11 +11,12 @@
 
 import { assertEquals, assert } from '@std/assert';
 import { run, setup, teardown, test } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { getDbPath, startServer, stopServer } from '$test-harness/server.ts';
 import { openDb } from '$test-harness/db.ts';
 import { createDatabaseInstance } from '../harness/setup.ts';
 
-const PORT = 7171;
+const PORT = PORTS.announcements.firstSync;
 const BASE_PATH = `./dist/integration-${PORT}`;
 
 let dbPath: string;

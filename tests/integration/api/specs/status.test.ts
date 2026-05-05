@@ -16,9 +16,10 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, setApiKey } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { openDb } from '$test-harness/db.ts';
 
-const PORT = 7011;
+const PORT = PORTS.api.status;
 const ORIGIN = `http://localhost:${PORT}`;
 const API_KEY = 'status-test-key-abc123';
 

@@ -21,13 +21,14 @@
 
 import { assertEquals, assertExists } from '@std/assert';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { TestClient } from '$test-harness/client.ts';
 import { createUser, login, setApiKey } from '$test-harness/setup.ts';
 import { openDb } from '$test-harness/db.ts';
 
-const PORT_A = 7035;
-const PORT_B = 7036;
+const PORT_A = PORTS.backups.restoreA;
+const PORT_B = PORTS.backups.restoreB;
 const ORIGIN_A = `http://localhost:${PORT_A}`;
 const ORIGIN_B = `http://localhost:${PORT_B}`;
 const API_KEY = 'test-api-key-restore-123';

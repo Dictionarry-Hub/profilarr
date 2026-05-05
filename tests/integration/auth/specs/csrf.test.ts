@@ -23,16 +23,17 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUser, createUserDirect } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
-const PORT = 7002;
+const PORT = PORTS.auth.csrf;
 const ORIGIN = `http://localhost:${PORT}`;
 
 // Tests 4-5: no ORIGIN env — SvelteKit falls back to request URL
-const NO_ORIGIN_PORT = 7012;
+const NO_ORIGIN_PORT = PORTS.auth.csrfNoOrigin;
 const NO_ORIGIN_URL = `http://localhost:${NO_ORIGIN_PORT}`;
 
 // Tests 6-7: ORIGIN differs from actual server URL (reverse proxy scenario)
-const PROXY_PORT = 7014;
+const PROXY_PORT = PORTS.auth.csrfProxy;
 const PROXY_ORIGIN = 'https://profilarr.mydomain.com';
 
 setup(async () => {
