@@ -93,6 +93,7 @@ publishes a release.
 - [backend/parser.md](./backend/parser.md): C# parser microservice, TS client, caching, integration
 - [backend/pcd.md](./backend/pcd.md): PCD system, schema, layers, writer, value guards, conflicts
 - [backend/pcd-entities.md](./backend/pcd-entities.md): PCD entity types, CRUD patterns, cascading
+- [backend/pcd-tests.md](./backend/pcd-tests.md): PCD integration test architecture, writer and conflict coverage
 - [backend/rename.md](./backend/rename.md): Arr rename pipeline, scheduling, logging, notifications
 - [backend/schema-bump.md](./backend/schema-bump.md): PCD schema evolution, safe vs unsafe changes
 - [backend/security.md](./backend/security.md): Auth modes, sessions, OIDC, API keys, security scans
