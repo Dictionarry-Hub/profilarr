@@ -10,7 +10,22 @@ export interface RegexFormInput {
 	layer?: OpOrigin;
 }
 
+export interface DelayProfileFormInput {
+	name: string;
+	preferredProtocol?: 'prefer_usenet' | 'prefer_torrent' | 'only_usenet' | 'only_torrent';
+	usenetDelay?: number;
+	torrentDelay?: number;
+	bypassIfHighestQuality?: boolean;
+	bypassIfAboveCfScore?: boolean;
+	minimumCfScore?: number;
+	layer?: OpOrigin;
+}
+
 export const write = {
+	delayProfile: {
+		update: updateDelayProfile,
+		submitUpdate: submitUpdateDelayProfile
+	},
 	regex: {
 		create: createRegex,
 		update: updateRegex,
@@ -20,6 +35,29 @@ export const write = {
 		submitRemove: submitRemoveRegex
 	}
 };
+
+export async function updateDelayProfile(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: DelayProfileFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateDelayProfile(ctx, currentName, input),
+		'update delay profile'
+	);
+}
+
+export async function submitUpdateDelayProfile(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: DelayProfileFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/delay-profiles/${ctx.dbId}/${encodeURIComponent(currentName)}?/update`,
+		delayProfileFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
 
 export async function createRegex(ctx: PcdTestContext, input: RegexFormInput): Promise<Response> {
 	return assertSuccessfulAction(await submitCreateRegex(ctx, input), 'create regex');
@@ -79,6 +117,19 @@ function regexFields(input: RegexFormInput): Record<string, string> {
 		description: input.description ?? '',
 		tags: JSON.stringify(input.tags ?? []),
 		regex101Id: input.regex101Id ?? '',
+		layer: input.layer ?? 'user'
+	};
+}
+
+function delayProfileFields(input: DelayProfileFormInput): Record<string, string> {
+	return {
+		name: input.name,
+		preferredProtocol: input.preferredProtocol ?? 'prefer_usenet',
+		usenetDelay: String(input.usenetDelay ?? 0),
+		torrentDelay: String(input.torrentDelay ?? 0),
+		bypassIfHighestQuality: String(input.bypassIfHighestQuality ?? false),
+		bypassIfAboveCfScore: String(input.bypassIfAboveCfScore ?? false),
+		minimumCfScore: String(input.minimumCfScore ?? 0),
 		layer: input.layer ?? 'user'
 	};
 }

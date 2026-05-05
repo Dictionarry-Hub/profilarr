@@ -1,6 +1,45 @@
 import type { SeedOperation } from './pcd.ts';
 
 export const base = {
+	delayProfile(input: {
+		name: string;
+		preferredProtocol?: 'prefer_usenet' | 'prefer_torrent' | 'only_usenet' | 'only_torrent';
+		usenetDelay?: number | null;
+		torrentDelay?: number | null;
+		bypassIfHighestQuality?: boolean;
+		bypassIfAboveCfScore?: boolean;
+		minimumCfScore?: number | null;
+	}): SeedOperation {
+		const preferredProtocol = input.preferredProtocol ?? 'prefer_usenet';
+		const usenetDelay =
+			preferredProtocol === 'only_torrent' ? null : (input.usenetDelay ?? 0);
+		const torrentDelay =
+			preferredProtocol === 'only_usenet' ? null : (input.torrentDelay ?? 0);
+		const bypassIfAboveCfScore = input.bypassIfAboveCfScore ?? false;
+		const minimumCfScore = bypassIfAboveCfScore ? (input.minimumCfScore ?? 0) : null;
+
+		return {
+			sql: `INSERT INTO delay_profiles (
+				       name,
+				       preferred_protocol,
+				       usenet_delay,
+				       torrent_delay,
+				       bypass_if_highest_quality,
+				       bypass_if_above_custom_format_score,
+				       minimum_custom_format_score
+			      )
+			      VALUES (
+				       ${sqlValue(input.name)},
+				       ${sqlValue(preferredProtocol)},
+				       ${sqlNumber(usenetDelay)},
+				       ${sqlNumber(torrentDelay)},
+				       ${input.bypassIfHighestQuality ? 1 : 0},
+				       ${bypassIfAboveCfScore ? 1 : 0},
+				       ${sqlNumber(minimumCfScore)}
+			      );`
+		};
+	},
+
 	regex(input: {
 		name: string;
 		pattern: string;
@@ -60,4 +99,8 @@ export const base = {
 function sqlValue(value: string | null): string {
 	if (value === null) return 'NULL';
 	return `'${value.replace(/'/g, "''")}'`;
+}
+
+function sqlNumber(value: number | null): string {
+	return value === null ? 'NULL' : String(value);
 }
