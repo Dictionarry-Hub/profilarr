@@ -263,13 +263,13 @@
 								if (result.type === 'failure' && result.data) {
 									alertStore.add(
 										'error',
-										(result.data as { error?: string }).error || 'Failed to restore backup'
+										(result.data as { error?: string }).error || 'Failed to stage restore'
 									);
 								} else if (result.type === 'success') {
-									alertStore.add(
-										'success',
-										'Backup restored successfully. Please restart the application.'
-									);
+									const message =
+										(result.data as { message?: string } | undefined)?.message ||
+										'Backup staged. Restart Profilarr to apply.';
+									alertStore.add('success', message);
 								}
 								await update();
 							};
@@ -318,7 +318,7 @@
 <Modal
 	open={showRestoreModal}
 	header="Restore Backup"
-	bodyMessage="Restoring this backup will replace all current data with the data from the backup. This action cannot be undone. You will need to restart the application after restoring.{selectedBackup
+	bodyMessage="This will stage the backup to be applied on the next restart. When Profilarr restarts, all current data will be replaced with the contents of this backup. The replacement cannot be undone after restart.{selectedBackup
 		? `\n\nBackup: ${selectedBackup}`
 		: ''}"
 	confirmText="Restore Backup"

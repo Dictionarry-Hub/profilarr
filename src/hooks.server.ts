@@ -15,6 +15,7 @@ import { logSettings } from '$logger/settings.ts';
 import { logger } from '$logger/logger.ts';
 import { db } from '$db/db.ts';
 import { runMigrations } from '$db/migrations.ts';
+import { applyPendingRestore } from '$utils/backup/applyPending.ts';
 import { initializeJobs } from '$jobs/init.ts';
 import { recoverInterruptedSyncs } from '$lib/server/sync/utils.ts';
 import { pcdManager } from '$pcd/core/manager.ts';
@@ -30,6 +31,11 @@ import { setupStateQueries } from '$db/queries/setupState.ts';
 if (!isReload) {
 	// Initialize configuration on server startup
 	await config.init();
+
+	// Apply any pending restore before opening the DB. This is the only
+	// safe window: directories exist (config.init mkdir'd them) but no
+	// SQLite handle is open yet, so we can swap files freely.
+	await applyPendingRestore();
 
 	// Initialize database
 	await db.initialize();
