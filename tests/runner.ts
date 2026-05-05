@@ -267,7 +267,7 @@ async function runIntegration(target?: string): Promise<number> {
 	// Determine which suites to run
 	const suitesToRun = suite
 		? [suite]
-		: ['auth', 'api', 'conflicts', 'notifications', 'announcements'];
+		: ['auth', 'api', 'conflicts', 'notifications', 'announcements', 'backups'];
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
