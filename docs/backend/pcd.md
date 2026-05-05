@@ -276,8 +276,12 @@ independent ops. If upstream changes the description but not the tags, only
 the description op conflicts -- the tag op still applies cleanly.
 
 Op splitting is implemented for custom format general/conditions, quality
-profile general/qualities/scoring, and regular expressions. Delay profiles
-and media management use base-origin locking instead (entities from base
+profile general/qualities/scoring, regular expressions, and delay profile
+updates. Delay profiles keep schema-constrained field pairs in one op when
+needed: protocol changes with delay NULLing, and bypass-score changes with
+minimum custom format score NULLing.
+
+Media management still uses base-origin locking instead (entities from base
 are not editable at the user layer). See
 [#421](https://github.com/Dictionarry-Hub/profilarr/issues/421) for
 remaining work.
@@ -432,9 +436,9 @@ Run via `deno task generate:pcd-types` (default version) or
 ## Open Work
 
 - [**#421**](https://github.com/Dictionarry-Hub/profilarr/issues/421):
-  Op splitting is done for CF and QP entities but not yet for regular
-  expressions. Delay profiles and media management will use base-origin
-  locking instead of per-field splits.
+  Op splitting is done for CF, QP, regular expression, and delay profile
+  updates. Media management still needs its write enablement and conflict
+  strategy decided.
 
 - [**#367**](https://github.com/Dictionarry-Hub/profilarr/issues/367):
   Stable entity IDs. Currently, entities are identified by name, and
