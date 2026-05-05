@@ -10,7 +10,7 @@ import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { TestClient } from '$test-harness/client.ts';
 import { createUser, login, setApiKey } from '$test-harness/setup.ts';
 
-const PORT = 7034;
+const PORT = 7037;
 const ORIGIN = `http://localhost:${PORT}`;
 const API_KEY = 'test-api-key-backups-settings-123';
 
