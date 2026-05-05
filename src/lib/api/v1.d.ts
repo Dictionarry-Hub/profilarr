@@ -250,7 +250,23 @@ export interface paths {
 			path?: never;
 			cookie?: never;
 		};
-		/** Download Backup */
+		/**
+		 * Download Backup
+		 * @description Download a backup archive. The local file on disk is full-fidelity, but
+		 *     the downloaded copy is sanitized on the fly so it is safer to share.
+		 *     The following are removed from the downloaded archive:
+		 *
+		 *     - Arr instances (URLs, API keys, sync configs, drift state, rename and
+		 *       cleanup history)
+		 *     - Notification services (webhook URLs, tokens, history)
+		 *     - User accounts and active sessions
+		 *     - Personal access tokens for linked databases
+		 *     - AI and TMDB API keys
+		 *
+		 *     The local archive on the server is not modified. Restoring the
+		 *     downloaded file on a different host will require re-adding the removed
+		 *     items.
+		 */
 		get: operations['downloadBackup'];
 		put?: never;
 		post?: never;
@@ -1522,7 +1538,7 @@ export interface operations {
 		};
 		requestBody?: never;
 		responses: {
-			/** @description Backup file download */
+			/** @description Sanitized backup file download */
 			200: {
 				headers: {
 					/** @example attachment; filename="backup-2026-03-15-100005.tar.gz" */

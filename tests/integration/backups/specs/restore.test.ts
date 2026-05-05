@@ -53,16 +53,19 @@ function seedData(dbPath: string) {
 }
 
 /**
- * Create a backup on server A via the v1 API, poll until complete,
- * download it, and return the raw tar.gz bytes.
+ * Create a backup on server A via the v1 API, poll until complete, and
+ * return the on-disk archive bytes.
+ *
+ * Reads from the filesystem rather than via GET /api/v1/backups/{filename}
+ * because the download endpoint sanitizes on the fly (deletes arr instances
+ * etc.) and this test wants to verify a full-fidelity restore. Reading from
+ * disk simulates an operator copying the file directly off the host.
  */
-async function createAndDownloadBackup(client: TestClient): Promise<Uint8Array> {
-	// Trigger
+async function createAndReadBackup(client: TestClient, port: number): Promise<Uint8Array> {
 	const createRes = await client.post('/api/v1/backups', {});
 	assertEquals(createRes.status, 202, 'Backup creation should return 202');
 	const { jobId } = await createRes.json();
 
-	// Poll job until complete
 	for (let i = 0; i < 30; i++) {
 		await new Promise((r) => setTimeout(r, 1000));
 		const jobRes = await client.get(`/api/v1/jobs/${jobId}`);
@@ -71,15 +74,11 @@ async function createAndDownloadBackup(client: TestClient): Promise<Uint8Array> 
 		if (job.status === 'failure') throw new Error(`Backup job failed: ${job.result?.error}`);
 	}
 
-	// Get filename and download
 	const listRes = await client.get('/api/v1/backups');
 	const backups = await listRes.json();
 	if (backups.length === 0) throw new Error('No backup files after job completed');
 
-	const res = await client.get(`/api/v1/backups/${backups[0].filename}`);
-	assertEquals(res.status, 200, 'Backup download should return 200');
-
-	return new Uint8Array(await res.arrayBuffer());
+	return await Deno.readFile(`./dist/integration-${port}/backups/${backups[0].filename}`);
 }
 
 /**
@@ -116,7 +115,7 @@ setup(async () => {
 
 	seedData(getDbPath(PORT_A));
 
-	const archiveBytes = await createAndDownloadBackup(clientA);
+	const archiveBytes = await createAndReadBackup(clientA, PORT_A);
 	await stopServer(PORT_A);
 
 	// ── Server B: restore from backup ────────────────────────────────────

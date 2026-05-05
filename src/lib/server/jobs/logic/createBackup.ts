@@ -1,9 +1,21 @@
 /**
- * Core backup creation logic
- * Separated from job definition to avoid database/config dependencies for testing
+ * Core backup creation logic.
+ *
+ * Local backups are full-fidelity: secrets are kept in the on-disk archive
+ * because it sits inside the same filesystem trust boundary as the source DB.
+ * Sanitization happens at egress (download endpoint), not at creation.
+ *
+ * The SQLite app database is copied via the online backup API rather than a
+ * raw filesystem `cp`, so the archive contains a single consistent `.db`
+ * with no `-wal`/`-shm` sidecars. Other contents of the source directory
+ * (notably `databases/` for cloned PCD repos) are copied as-is.
  */
 
 import { Database } from '@jsr/db__sqlite';
+import { db } from '$db/db.ts';
+import { migrationRunner } from '$db/migrations.ts';
+import { logger } from '$logger/logger.ts';
+import { build } from '$lib/shared/build.ts';
 
 export interface CreateBackupResult {
 	success: boolean;
@@ -12,31 +24,6 @@ export interface CreateBackupResult {
 	error?: string;
 }
 
-/**
- * SQL statements to strip secrets from a backup database copy.
- * The production database is never modified — these run against a temp copy only.
- */
-const SANITIZE_SQL = [
-	"UPDATE arr_instances SET api_key = ''",
-	'UPDATE database_instances SET personal_access_token = NULL',
-	'UPDATE auth_settings SET api_key = NULL',
-	"UPDATE ai_settings SET api_key = ''",
-	"UPDATE tmdb_settings SET api_key = ''",
-	"UPDATE notification_services SET config = '{}'",
-	'DELETE FROM users',
-	'DELETE FROM sessions',
-	'DELETE FROM login_attempts'
-];
-
-/**
- * Core backup logic - creates a tar.gz archive of a directory
- * Pure function that only depends on Deno APIs
- *
- * @param sourceDir Directory to backup (will backup this entire directory)
- * @param backupDir Directory where backup file will be saved
- * @param timestamp Optional timestamp for backup filename (defaults to current time)
- * @returns Backup result with filename and size or error
- */
 export async function createBackup(
 	sourceDir: string,
 	backupDir: string,
@@ -78,7 +65,8 @@ export async function createBackup(
 			};
 		}
 
-		// Copy source to a temp directory and sanitize the DB copy
+		// Copy source to a temp directory; the DB inside it gets replaced
+		// with a clean snapshot below.
 		tmpDir = await Deno.makeTempDir({ prefix: 'profilarr-backup-' });
 		const tmpDataDir = `${tmpDir}/data`;
 
@@ -96,32 +84,74 @@ export async function createBackup(
 			};
 		}
 
-		// Sanitize the database copy (skip if no DB in source)
+		// Replace the raw-copied DB (and its sidecars) with a consistent
+		// snapshot via SQLite's online backup API. The cp above may have
+		// captured a mid-write `-wal`/`-shm`; a snapshot of committed state
+		// is the only safe way to copy a live WAL database. Skipped when
+		// the source has no `profilarr.db` (unit tests with fake source dirs).
 		const dbPath = `${tmpDataDir}/profilarr.db`;
+		const walPath = `${tmpDataDir}/profilarr.db-wal`;
+		const shmPath = `${tmpDataDir}/profilarr.db-shm`;
 		try {
 			const dbStat = await Deno.stat(dbPath);
 			if (dbStat.isFile) {
-				const db = new Database(dbPath);
+				await Deno.remove(dbPath);
+				for (const sidecar of [walPath, shmPath]) {
+					try {
+						await Deno.remove(sidecar);
+					} catch (err) {
+						if (!(err instanceof Deno.errors.NotFound)) throw err;
+					}
+				}
+
+				const dest = new Database(dbPath);
 				try {
-					for (const sql of SANITIZE_SQL) {
-						db.exec(sql); // nosemgrep: profilarr.sql.exec-with-variable — SANITIZE_SQL is a hardcoded constant
+					db.getDatabase().backup(dest);
+					dest.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+					dest.exec('PRAGMA journal_mode = DELETE');
+
+					// Verify the snapshot. The backup API copies pages as-is,
+					// so a corrupt source produces a corrupt archive. Surfacing
+					// it here saves diagnosing mystery errors after restore.
+					const rows = dest.prepare('PRAGMA integrity_check').all() as Array<{
+						integrity_check: string;
+					}>;
+					const ok = rows.length === 1 && rows[0].integrity_check === 'ok';
+					if (!ok) {
+						await logger.warn('Backup source has integrity issues; archive contains them as-is', {
+							source: 'createBackup',
+							meta: { issues: rows.map((r) => r.integrity_check).slice(0, 10) }
+						});
 					}
 				} finally {
-					db.close();
+					dest.close();
 				}
+
+				// Write INFO.json metadata. Read by the boot-time apply step
+				// for diagnostics and by the download endpoint for sanitized
+				// flag handling. Schema version comes from the `migrations`
+				// table (Profilarr's tracking mechanism), not PRAGMA user_version.
+				const info = {
+					appVersion: build.version,
+					appChannel: build.channel,
+					schemaVersion: migrationRunner.getCurrentVersion(),
+					createdAt: now.toISOString(),
+					sanitized: false
+				};
+				await Deno.writeTextFile(`${tmpDataDir}/INFO.json`, JSON.stringify(info, null, 2));
 			}
 		} catch (error) {
 			if (error instanceof Deno.errors.NotFound) {
-				// No database to sanitize — that's fine
+				// No database in source; nothing to snapshot.
 			} else {
 				return {
 					success: false,
-					error: `Failed to sanitize backup database: ${error instanceof Error ? error.message : String(error)}`
+					error: `Failed to snapshot backup database: ${error instanceof Error ? error.message : String(error)}`
 				};
 			}
 		}
 
-		// Create tar.gz archive from the sanitized temp copy
+		// Create tar.gz archive from the temp copy
 		const command = new Deno.Command('tar', {
 			args: ['-czf', backupPath, '-C', tmpDir, 'data'],
 			stdout: 'piped',

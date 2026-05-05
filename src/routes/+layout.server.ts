@@ -6,6 +6,17 @@ import { config } from '$lib/server/utils/config/config.ts';
 import { build } from '$lib/shared/build.ts';
 import { inbox } from '$announcements/index.ts';
 
+async function readPendingRestore(): Promise<{ filename: string } | null> {
+	try {
+		const path = (await Deno.readTextFile(`${config.paths.base}/.restore-pending`)).trim();
+		const filename = path.split('/').pop() || path;
+		return { filename };
+	} catch (err) {
+		if (err instanceof Deno.errors.NotFound) return null;
+		throw err;
+	}
+}
+
 export const load: LayoutServerLoad = async () => {
 	const arrInstances = arrInstancesQueries.getAll().map((i) => ({
 		id: i.id,
@@ -24,6 +35,7 @@ export const load: LayoutServerLoad = async () => {
 		arrInstances,
 		databases,
 		parserAvailable: await isParserHealthy(),
-		unreadAnnouncements: inbox.getUnreadCount()
+		unreadAnnouncements: inbox.getUnreadCount(),
+		restorePending: await readPendingRestore()
 	};
 };

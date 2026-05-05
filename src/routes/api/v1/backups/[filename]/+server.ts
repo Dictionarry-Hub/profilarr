@@ -2,14 +2,20 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { config } from '$config';
+import { logger } from '$logger/logger.ts';
 import { isValidBackupFilename, resolveBackupPath } from '$utils/backup/validation.ts';
+import { buildSanitizedArchive } from '$utils/backup/sanitize.ts';
 
 type ErrorResponse = components['schemas']['ErrorResponse'];
 
 /**
  * GET /api/v1/backups/{filename}
  *
- * Download a backup file.
+ * Download a backup. The local archive on disk is full-fidelity, but the
+ * downloaded copy is sanitized on the fly before being streamed back: arr
+ * instances and notification services are deleted (cascading through their
+ * sync/history tables), users/sessions are wiped, and other secret-bearing
+ * fields are nulled. See `$utils/backup/sanitize.ts` for the exact policy.
  */
 export const GET: RequestHandler = async ({ params }) => {
 	const { filename } = params;
@@ -32,8 +38,20 @@ export const GET: RequestHandler = async ({ params }) => {
 		return json(error, { status: 404 });
 	}
 
-	const file = await Deno.readFile(backupPath);
-	return new Response(file, {
+	let bytes: Uint8Array;
+	try {
+		bytes = await buildSanitizedArchive(backupPath);
+	} catch (err) {
+		const message = err instanceof Error ? err.message : String(err);
+		await logger.error('Failed to sanitize backup for download', {
+			source: 'api/v1/backups/download',
+			meta: { filename, error: message }
+		});
+		const error: ErrorResponse = { error: 'Failed to prepare backup for download' };
+		return json(error, { status: 500 });
+	}
+
+	return new Response(bytes as BlobPart, {
 		headers: {
 			'Content-Type': 'application/gzip',
 			'Content-Disposition': `attachment; filename="${filename}"`

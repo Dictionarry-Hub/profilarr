@@ -17,6 +17,10 @@
 	import { dev } from '$app/environment';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
+	import { alertStore } from '$alerts/store';
+	import { AlertTriangle, X } from 'lucide-svelte';
+	import Button from '$ui/button/Button.svelte';
 
 	export let data;
 
@@ -75,5 +79,47 @@
 		? ''
 		: `pt-16 pb-16 md:pt-0 md:pb-0 ${$sidebarCollapsed ? 'md:pl-14' : 'md:pl-80'}`} transition-[padding-left] duration-200 ease-in-out"
 >
+	{#if data.restorePending && !isAuthPage}
+		<div
+			class="flex h-16 items-center gap-3 border-b border-neutral-200 bg-neutral-50 px-4 text-sm text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200"
+			role="status"
+		>
+			<AlertTriangle class="h-5 w-5 shrink-0 text-amber-500 dark:text-amber-400" />
+			<div class="min-w-0 flex-1 truncate">
+				<strong class="font-semibold">Restore pending:</strong>
+				<span class="font-mono">{data.restorePending.filename}</span>
+				<span class="hidden md:inline">
+					will be applied on the next restart. Any changes you make now will be lost.
+				</span>
+			</div>
+			<form
+				class="shrink-0"
+				method="POST"
+				action="/settings/backups?/cancelRestore"
+				use:enhance={() => {
+					return async ({ result, update }) => {
+						if (result.type === 'success') {
+							alertStore.add('success', 'Pending restore cancelled');
+						} else if (result.type === 'failure' && result.data) {
+							alertStore.add(
+								'error',
+								(result.data as { error?: string }).error || 'Failed to cancel'
+							);
+						}
+						await update();
+					};
+				}}
+			>
+				<Button
+					type="submit"
+					size="sm"
+					text="Cancel restore"
+					icon={X}
+					iconColor="text-red-600 dark:text-red-400"
+					hideTextOnMobile
+				/>
+			</form>
+		</div>
+	{/if}
 	<slot />
 </main>

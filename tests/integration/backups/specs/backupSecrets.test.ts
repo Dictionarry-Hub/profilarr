@@ -1,38 +1,28 @@
 /**
- * Integration tests: Backup secret stripping
+ * Integration tests: Backup download sanitization
  *
- * When a user downloads a backup, the included profilarr.db should NOT
- * contain any secrets. This prevents credential leakage if a backup
- * file is shared, stored insecurely, or downloaded by a compromised session.
+ * Local on-disk backup archives are full-fidelity (secrets included). The
+ * filesystem is the documented trust boundary, so an archive sitting next
+ * to the live database does not need stripping. The download endpoint
+ * (GET /api/v1/backups/{filename}) sanitizes on the fly before streaming
+ * the response, so any backup that leaves the host has secrets removed.
  *
- * The test seeds known secrets into the live database, creates a backup via
- * POST /api/v1/backups, polls the job until complete, downloads and extracts
- * the tar.gz, and inspects the database copy inside.
+ * Sanitize policy (see src/lib/server/utils/backup/sanitize.ts):
+ * - DELETE arr_instances (cascades through arr-side sync, drift, rename,
+ *   cleanup, upgrade tables)
+ * - DELETE notification_services (cascades to history)
+ * - DELETE users, sessions, login_attempts
+ * - NULL database_instances.personal_access_token (rows preserved)
+ * - Empty ai_settings.api_key, tmdb_settings.api_key
+ * - auth_settings.api_key intentionally untouched (bcrypt hash of a
+ *   high-entropy random key, computationally safe to share)
  *
- * Secrets that must be stripped:
- * - arr_instances.api_key (Radarr/Sonarr API keys)
- * - database_instances.personal_access_token (GitHub PATs)
- * - auth_settings.api_key (bcrypt-hashed Profilarr API key)
- * - ai_settings.api_key (OpenAI/Anthropic keys)
- * - tmdb_settings.api_key (TMDB key)
- * - notification_services.config (JSON with webhook URLs)
- * - users (password hashes)
- * - sessions (active session tokens)
- * - login_attempts (IP addresses)
- *
- * Tests:
- * 1. Backup DB does not contain arr API keys
- * 2. Backup DB does not contain database PATs
- * 3. Backup DB does not contain Profilarr API key
- * 4. Backup DB does not contain AI API key
- * 5. Backup DB does not contain TMDB API key
- * 6. Backup DB does not contain notification webhook URLs
- * 7. Backup DB does not contain user password hashes
- * 8. Backup DB does not contain sessions
- * 9. Backup DB does not contain login attempts
+ * The test seeds known secrets, creates a backup via the v1 API, downloads
+ * it, and inspects the downloaded copy. It also verifies the on-disk
+ * archive is bytewise unchanged by the download.
  */
 
-import { assertEquals } from '@std/assert';
+import { assert, assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, login } from '$test-harness/setup.ts';
@@ -42,6 +32,7 @@ import { hash } from '@felix/bcrypt';
 
 const PORT = 7017;
 const ORIGIN = `http://localhost:${PORT}`;
+const BACKUPS_DIR = `./dist/integration-${PORT}/backups`;
 
 // Known secrets seeded into the live DB
 const ARR_API_KEY = 'sonarr-backup-test-key-abc123';
@@ -52,7 +43,11 @@ const PROFILARR_API_KEY = 'profilarr-backup-test-key-jkl345';
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/backup-test-id/backup-test-token';
 
 let backupDbPath: string;
+let infoPath: string;
 let extractDir: string;
+let onDiskBytesBefore: Uint8Array;
+let onDiskBytesAfter: Uint8Array;
+let liveProfilarrApiKeyHash: string;
 
 async function seedSecrets(dbPath: string) {
 	const db = openDb(dbPath);
@@ -104,17 +99,26 @@ async function seedSecrets(dbPath: string) {
 	}
 }
 
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+	if (a.length !== b.length) return false;
+	for (let i = 0; i < a.length; i++) {
+		if (a[i] !== b[i]) return false;
+	}
+	return true;
+}
+
 /**
- * Trigger backup via the v1 API, poll the job until complete, download and
- * extract the archive. Returns the path to the extracted profilarr.db.
+ * Trigger backup via the v1 API, poll the job until complete, capture the
+ * on-disk bytes, download (which sanitizes on the fly), capture the on-disk
+ * bytes again to verify they're unchanged, then extract the downloaded copy.
  */
-async function downloadAndExtractBackup(client: TestClient): Promise<string> {
-	// Trigger backup creation via API
+async function downloadAndExtractBackup(
+	client: TestClient
+): Promise<{ dbPath: string; infoPath: string }> {
 	const createRes = await client.post('/api/v1/backups', {});
 	assertEquals(createRes.status, 202, 'Backup creation should return 202');
 	const { jobId } = await createRes.json();
 
-	// Poll job status until complete
 	for (let i = 0; i < 30; i++) {
 		await new Promise((r) => setTimeout(r, 1000));
 		const jobRes = await client.get(`/api/v1/jobs/${jobId}`);
@@ -123,7 +127,6 @@ async function downloadAndExtractBackup(client: TestClient): Promise<string> {
 		if (job.status === 'failure') throw new Error(`Backup job failed: ${job.result?.error}`);
 	}
 
-	// Get the backup filename from the list
 	const listRes = await client.get('/api/v1/backups');
 	assertEquals(listRes.status, 200, 'Backup list should return 200');
 	const backups = await listRes.json();
@@ -131,18 +134,24 @@ async function downloadAndExtractBackup(client: TestClient): Promise<string> {
 		throw new Error('No backup files found after job completed');
 	}
 	const backupFilename = backups[0].filename;
+	const onDiskArchivePath = `${BACKUPS_DIR}/${backupFilename}`;
 
-	// Download the backup
+	// Capture bytes BEFORE download.
+	onDiskBytesBefore = await Deno.readFile(onDiskArchivePath);
+
+	// Download triggers sanitize-on-egress.
 	const res = await client.get(`/api/v1/backups/${backupFilename}`);
 	assertEquals(res.status, 200, 'Backup download should return 200');
 
-	// Write to a temp file
+	// Capture bytes AFTER download. Should match exactly: the on-disk source
+	// is never mutated.
+	onDiskBytesAfter = await Deno.readFile(onDiskArchivePath);
+
 	const tmpDir = await Deno.makeTempDir({ prefix: 'profilarr-backup-test-' });
 	const tarPath = `${tmpDir}/backup.tar.gz`;
 	const data = new Uint8Array(await res.arrayBuffer());
 	await Deno.writeFile(tarPath, data);
 
-	// Extract
 	extractDir = `${tmpDir}/extracted`;
 	await Deno.mkdir(extractDir, { recursive: true });
 	const extract = new Deno.Command('tar', {
@@ -155,10 +164,9 @@ async function downloadAndExtractBackup(client: TestClient): Promise<string> {
 		throw new Error('Failed to extract backup tar.gz');
 	}
 
-	// Find profilarr.db in extracted contents
 	const dbPath = `${extractDir}/data/profilarr.db`;
 	await Deno.stat(dbPath);
-	return dbPath;
+	return { dbPath, infoPath: `${extractDir}/data/INFO.json` };
 }
 
 setup(async () => {
@@ -166,141 +174,177 @@ setup(async () => {
 	await createUserDirect(getDbPath(PORT), 'admin', 'password123');
 	await seedSecrets(getDbPath(PORT));
 
-	// Login and download the backup once — all tests inspect the same extracted DB
+	// Capture the live bcrypt hash so we can later assert it survives the
+	// sanitize unchanged.
+	const live = openDb(getDbPath(PORT));
+	try {
+		const row = live.prepare('SELECT api_key FROM auth_settings WHERE id = 1').get() as {
+			api_key: string;
+		};
+		liveProfilarrApiKeyHash = row.api_key;
+	} finally {
+		live.close();
+	}
+
 	const client = new TestClient(ORIGIN);
 	await login(client, 'admin', 'password123', ORIGIN);
-	backupDbPath = await downloadAndExtractBackup(client);
+	const paths = await downloadAndExtractBackup(client);
+	backupDbPath = paths.dbPath;
+	infoPath = paths.infoPath;
 });
 
 teardown(async () => {
 	await stopServer(PORT);
 	if (extractDir) {
 		try {
-			// extractDir is inside a temp dir — remove the parent
 			const tmpDir = extractDir.replace('/extracted', '');
 			await Deno.remove(tmpDir, { recursive: true });
 		} catch {
-			// Cleanup is best-effort
+			// best effort
 		}
 	}
 });
 
-test('backup DB does not contain arr API keys', () => {
+// ─── Row deletion ────────────────────────────────────────────────────────────
+
+test('downloaded archive: arr_instances rows are deleted', () => {
 	const db = openDb(backupDbPath);
 	try {
-		const rows = db.prepare('SELECT api_key FROM arr_instances').all() as { api_key: string }[];
-		for (const row of rows) {
-			assertEquals(row.api_key === ARR_API_KEY, false, 'Backup DB contains plaintext arr API key');
-		}
+		const row = db.prepare('SELECT COUNT(*) as count FROM arr_instances').get() as {
+			count: number;
+		};
+		assertEquals(row.count, 0, 'arr_instances should be empty in downloaded archive');
 	} finally {
 		db.close();
 	}
 });
 
-test('backup DB does not contain database PATs', () => {
+test('downloaded archive: notification_services rows are deleted', () => {
+	const db = openDb(backupDbPath);
+	try {
+		const row = db.prepare('SELECT COUNT(*) as count FROM notification_services').get() as {
+			count: number;
+		};
+		assertEquals(row.count, 0, 'notification_services should be empty in downloaded archive');
+	} finally {
+		db.close();
+	}
+});
+
+test('downloaded archive: users are deleted', () => {
+	const db = openDb(backupDbPath);
+	try {
+		const rows = db.prepare('SELECT * FROM users').all();
+		assertEquals(rows.length, 0);
+	} finally {
+		db.close();
+	}
+});
+
+test('downloaded archive: sessions are deleted', () => {
+	const db = openDb(backupDbPath);
+	try {
+		const rows = db.prepare('SELECT * FROM sessions').all();
+		assertEquals(rows.length, 0);
+	} finally {
+		db.close();
+	}
+});
+
+test('downloaded archive: login_attempts are deleted', () => {
+	const db = openDb(backupDbPath);
+	try {
+		const rows = db.prepare('SELECT * FROM login_attempts').all();
+		assertEquals(rows.length, 0);
+	} finally {
+		db.close();
+	}
+});
+
+// ─── Field blanking ──────────────────────────────────────────────────────────
+
+test('downloaded archive: database_instances rows preserved with PAT nulled', () => {
 	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT personal_access_token FROM database_instances').all() as {
 			personal_access_token: string | null;
 		}[];
+		assert(
+			rows.length > 0,
+			'database_instances rows should be preserved (PCD repos remain linked)'
+		);
 		for (const row of rows) {
-			assertEquals(
-				row.personal_access_token === DB_PAT,
-				false,
-				'Backup DB contains plaintext database PAT'
-			);
+			assertEquals(row.personal_access_token, null, 'PAT should be NULL in downloaded archive');
 		}
 	} finally {
 		db.close();
 	}
 });
 
-test('backup DB does not contain Profilarr API key', () => {
-	const db = openDb(backupDbPath);
-	try {
-		const row = db.prepare('SELECT api_key FROM auth_settings WHERE id = 1').get() as {
-			api_key: string | null;
-		};
-		assertEquals(row.api_key, null, 'Backup DB contains Profilarr API key hash');
-	} finally {
-		db.close();
-	}
-});
-
-test('backup DB does not contain AI API key', () => {
+test('downloaded archive: AI api_key is blanked', () => {
 	const db = openDb(backupDbPath);
 	try {
 		const row = db.prepare('SELECT api_key FROM ai_settings WHERE id = 1').get() as
-			| {
-					api_key: string | null;
-			  }
+			| { api_key: string }
 			| undefined;
 		if (row) {
-			assertEquals(row.api_key === AI_API_KEY, false, 'Backup DB contains plaintext AI API key');
+			assertNotEquals(row.api_key, AI_API_KEY, 'AI api_key plaintext should be removed');
 		}
 	} finally {
 		db.close();
 	}
 });
 
-test('backup DB does not contain TMDB API key', () => {
+test('downloaded archive: TMDB api_key is blanked', () => {
 	const db = openDb(backupDbPath);
 	try {
 		const row = db.prepare('SELECT api_key FROM tmdb_settings WHERE id = 1').get() as {
 			api_key: string;
 		};
-		assertEquals(row.api_key === TMDB_API_KEY, false, 'Backup DB contains plaintext TMDB API key');
+		assertNotEquals(row.api_key, TMDB_API_KEY, 'TMDB api_key plaintext should be removed');
 	} finally {
 		db.close();
 	}
 });
 
-test('backup DB does not contain notification webhook URLs', () => {
+// ─── Intentionally preserved ─────────────────────────────────────────────────
+
+test('downloaded archive: auth_settings.api_key bcrypt hash is preserved', () => {
 	const db = openDb(backupDbPath);
 	try {
-		const rows = db.prepare('SELECT config FROM notification_services').all() as {
-			config: string;
-		}[];
-		for (const row of rows) {
-			assertEquals(
-				row.config.includes(WEBHOOK_URL),
-				false,
-				'Backup DB contains webhook URL in notification config'
-			);
-		}
+		const row = db.prepare('SELECT api_key FROM auth_settings WHERE id = 1').get() as {
+			api_key: string | null;
+		};
+		assert(row.api_key !== null, 'auth_settings.api_key should retain its bcrypt hash');
+		assertEquals(
+			row.api_key,
+			liveProfilarrApiKeyHash,
+			'hash in archive should match the live DB value'
+		);
+		assertNotEquals(
+			row.api_key,
+			PROFILARR_API_KEY,
+			'hash should never equal plaintext (sanity check)'
+		);
 	} finally {
 		db.close();
 	}
 });
 
-test('backup DB does not contain user password hashes', () => {
-	const db = openDb(backupDbPath);
-	try {
-		const rows = db.prepare('SELECT * FROM users').all();
-		assertEquals(rows.length, 0, 'Backup DB still contains user records');
-	} finally {
-		db.close();
-	}
+// ─── INFO.json + on-disk integrity ───────────────────────────────────────────
+
+test('downloaded archive: INFO.json has sanitized=true', async () => {
+	const raw = await Deno.readTextFile(infoPath);
+	const info = JSON.parse(raw) as { sanitized?: boolean };
+	assertEquals(info.sanitized, true, 'INFO.json.sanitized should be flipped to true on download');
 });
 
-test('backup DB does not contain sessions', () => {
-	const db = openDb(backupDbPath);
-	try {
-		const rows = db.prepare('SELECT * FROM sessions').all();
-		assertEquals(rows.length, 0, 'Backup DB still contains session records');
-	} finally {
-		db.close();
-	}
-});
-
-test('backup DB does not contain login attempts', () => {
-	const db = openDb(backupDbPath);
-	try {
-		const rows = db.prepare('SELECT * FROM login_attempts').all();
-		assertEquals(rows.length, 0, 'Backup DB still contains login attempt records');
-	} finally {
-		db.close();
-	}
+test('local on-disk archive is bytewise unchanged after download', () => {
+	assertEquals(
+		bytesEqual(onDiskBytesBefore, onDiskBytesAfter),
+		true,
+		'Download must not modify the source archive on disk'
+	);
 });
 
 await run();

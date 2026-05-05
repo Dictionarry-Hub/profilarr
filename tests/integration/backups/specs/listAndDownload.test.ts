@@ -19,14 +19,21 @@ let client: TestClient;
 let unauthClient: TestClient;
 let apiKeyClient: TestClient;
 
-/** Create a dummy backup file for testing. */
+/**
+ * Create a dummy backup file for testing.
+ *
+ * The download endpoint extracts the archive and re-tars `${tmp}/data` after
+ * sanitizing, so dummies must contain a `data/` directory at the archive root
+ * for the download path to succeed. The tests below only check status and
+ * headers, so we don't need a real DB inside.
+ */
 async function createDummyBackup(filename: string, content: string = 'dummy'): Promise<void> {
-	// Create a real (tiny) tar.gz so download tests get valid gzip content
 	const tmpDir = await Deno.makeTempDir();
-	await Deno.writeTextFile(`${tmpDir}/data.txt`, content);
+	await Deno.mkdir(`${tmpDir}/data`);
+	await Deno.writeTextFile(`${tmpDir}/data/data.txt`, content);
 
 	const cmd = new Deno.Command('tar', {
-		args: ['-czf', `${BACKUPS_DIR}/${filename}`, '-C', tmpDir, 'data.txt'],
+		args: ['-czf', `${BACKUPS_DIR}/${filename}`, '-C', tmpDir, 'data'],
 		stdout: 'null',
 		stderr: 'null'
 	});
