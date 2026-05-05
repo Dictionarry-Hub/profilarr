@@ -24,8 +24,8 @@ export const base = {
 			sql: [
 				`INSERT INTO regular_expressions (name, pattern, description, regex101_id)
 				 VALUES (${sqlValue(input.name)}, ${sqlValue(input.pattern)}, ${sqlValue(
-					description
-				)}, ${sqlValue(regex101Id)});`,
+						description
+					)}, ${sqlValue(regex101Id)});`,
 				...tagSql
 			].join('\n')
 		};

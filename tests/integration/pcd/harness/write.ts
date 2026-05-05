@@ -45,11 +45,9 @@ export async function submitCreateRegex(
 	ctx: PcdTestContext,
 	input: RegexFormInput
 ): Promise<Response> {
-	return ctx.client.postForm(
-		`/regular-expressions/${ctx.dbId}/new`,
-		regexFields(input),
-		{ headers: { Origin: ctx.origin } }
-	);
+	return ctx.client.postForm(`/regular-expressions/${ctx.dbId}/new`, regexFields(input), {
+		headers: { Origin: ctx.origin }
+	});
 }
 
 export async function submitUpdateRegex(
@@ -57,11 +55,9 @@ export async function submitUpdateRegex(
 	id: number,
 	input: RegexFormInput
 ): Promise<Response> {
-	return ctx.client.postForm(
-		`/regular-expressions/${ctx.dbId}/${id}?/update`,
-		regexFields(input),
-		{ headers: { Origin: ctx.origin } }
-	);
+	return ctx.client.postForm(`/regular-expressions/${ctx.dbId}/${id}?/update`, regexFields(input), {
+		headers: { Origin: ctx.origin }
+	});
 }
 
 export async function submitRemoveRegex(
