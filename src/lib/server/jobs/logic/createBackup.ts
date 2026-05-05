@@ -14,6 +14,7 @@
 import { Database } from '@jsr/db__sqlite';
 import { db } from '$db/db.ts';
 import { migrationRunner } from '$db/migrations.ts';
+import { logger } from '$logger/logger.ts';
 import { build } from '$lib/shared/build.ts';
 
 export interface CreateBackupResult {
@@ -108,6 +109,20 @@ export async function createBackup(
 					db.getDatabase().backup(dest);
 					dest.exec('PRAGMA wal_checkpoint(TRUNCATE)');
 					dest.exec('PRAGMA journal_mode = DELETE');
+
+					// Verify the snapshot. The backup API copies pages as-is,
+					// so a corrupt source produces a corrupt archive. Surfacing
+					// it here saves diagnosing mystery errors after restore.
+					const rows = dest.prepare('PRAGMA integrity_check').all() as Array<{
+						integrity_check: string;
+					}>;
+					const ok = rows.length === 1 && rows[0].integrity_check === 'ok';
+					if (!ok) {
+						await logger.warn('Backup source has integrity issues; archive contains them as-is', {
+							source: 'createBackup',
+							meta: { issues: rows.map((r) => r.integrity_check).slice(0, 10) }
+						});
+					}
 				} finally {
 					dest.close();
 				}
