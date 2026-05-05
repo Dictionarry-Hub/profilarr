@@ -233,6 +233,21 @@ export function queryOpsSince(
 	}
 }
 
+export function setFailOnReferencedDelete(ctx: PcdTestContext, enabled: boolean): void {
+	const db = openDb(ctx.dbPath);
+	try {
+		db.exec(
+			`UPDATE general_settings
+			 SET fail_on_referenced_delete = ?,
+			     updated_at = CURRENT_TIMESTAMP
+			 WHERE id = 1`,
+			[enabled ? 1 : 0]
+		);
+	} finally {
+		db.close();
+	}
+}
+
 export function parseMetadata(op: OpRow): JsonObject {
 	return parseJsonObject(op.metadata);
 }
