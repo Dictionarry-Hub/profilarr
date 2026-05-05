@@ -368,11 +368,21 @@ Secrets are stripped at two levels:
 - **Frontend responses** - server-side load functions replace sensitive fields
   with boolean flags (`hasApiKey`, `hasPat`). Webhook URLs are omitted from
   notification config. Password hashes never leave the server.
-- **Backup downloads** - the DB copy inside the archive has all secrets nulled
-  (`arr_instances.api_key`, `database_instances.personal_access_token`,
-  `auth_settings.api_key`, `ai_settings.api_key`, `tmdb_settings.api_key`),
-  notification configs cleared, and auth tables (`users`, `sessions`,
-  `login_attempts`) emptied. The production database is never touched.
+- **Backup downloads** - local backup archives on disk are full-fidelity; the
+  filesystem is the documented trust boundary, so a backup file sitting next
+  to the live database does not need to be sanitized. The download endpoint
+  (`GET /api/v1/backups/{filename}`) instead sanitizes the archive on the fly
+  before streaming the response. Sanitization deletes whole rows from
+  `arr_instances` (cascading through arr-side sync, drift, rename, cleanup,
+  and upgrade tables) and `notification_services` (cascading through
+  history), and empties `users`, `sessions`, and `login_attempts`. Personal
+  access tokens on `database_instances`, AI keys on `ai_settings`, and TMDB
+  keys on `tmdb_settings` are nulled but the rows are kept (PCD repos remain
+  linked, schedules and other settings preserved). `auth_settings.api_key`
+  is left in place because it is a bcrypt hash of a high-entropy random key,
+  computationally infeasible to brute-force from the hash alone. The local
+  archive on disk and the production database are never modified. See
+  `src/lib/server/utils/backup/sanitize.ts` for the exact policy.
 
 ### XSS via Markdown / {@html}
 

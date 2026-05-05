@@ -6,10 +6,11 @@ import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
 import { listBackups } from '$utils/backup/list.ts';
 import { isValidBackupFilename, resolveBackupPath } from '$utils/backup/validation.ts';
+import { SANITIZED_CATEGORIES } from '$utils/backup/sanitize.ts';
 
 export const load = async () => {
 	const backups = await listBackups(config.paths.backups);
-	return { backups };
+	return { backups, sanitizedCategories: SANITIZED_CATEGORIES };
 };
 
 // These actions stay as form actions (session-only, not in the public API):

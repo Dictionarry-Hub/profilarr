@@ -37,6 +37,7 @@
 	// Modal state
 	let showDeleteModal = false;
 	let showRestoreModal = false;
+	let showDownloadModal = false;
 	let selectedBackup: string | null = null;
 	let restoreFormRef: HTMLFormElement | null = null;
 
@@ -44,8 +45,22 @@
 	let fileInput: HTMLInputElement;
 	let cleanupFormRef: HTMLFormElement;
 
-	function downloadBackup(filename: string) {
-		window.location.href = `/api/v1/backups/${filename}`;
+	function openDownloadModal(filename: string) {
+		selectedBackup = filename;
+		showDownloadModal = true;
+	}
+
+	function confirmDownload() {
+		if (selectedBackup) {
+			window.location.href = `/api/v1/backups/${selectedBackup}`;
+		}
+		showDownloadModal = false;
+		selectedBackup = null;
+	}
+
+	function cancelDownload() {
+		showDownloadModal = false;
+		selectedBackup = null;
 	}
 
 	function triggerFileUpload() {
@@ -252,7 +267,7 @@
 						icon={Download}
 						size="xs"
 						tooltip="Download"
-						on:click={() => downloadBackup(row.filename)}
+						on:click={() => openDownloadModal(row.filename)}
 					/>
 
 					<form
@@ -326,3 +341,33 @@
 	on:confirm={confirmRestore}
 	on:cancel={cancelRestore}
 />
+
+<!-- Download Confirmation Modal -->
+<Modal
+	open={showDownloadModal}
+	header="Download Backup"
+	confirmText="Download"
+	cancelText="Cancel"
+	on:confirm={confirmDownload}
+	on:cancel={cancelDownload}
+>
+	<div slot="body" class="space-y-3 text-sm text-neutral-600 dark:text-neutral-400">
+		<p>
+			The local copy on this server is full-fidelity. The downloaded file is sanitized so it's safer
+			to share. The following will be removed before download:
+		</p>
+		<ul class="list-disc space-y-1 pl-5">
+			{#each data.sanitizedCategories as category}
+				<li>{category}</li>
+			{/each}
+		</ul>
+		<p>
+			Restoring the downloaded file on a different host will require re-adding the removed items.
+			Linked databases (PCD repos), AI/TMDB settings rows, and your backup schedule are preserved
+			(with their secret values blanked).
+		</p>
+		{#if selectedBackup}
+			<p class="font-mono text-xs">Backup: {selectedBackup}</p>
+		{/if}
+	</div>
+</Modal>

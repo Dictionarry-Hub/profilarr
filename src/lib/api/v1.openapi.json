@@ -1822,6 +1822,7 @@
 			"get": {
 				"operationId": "downloadBackup",
 				"summary": "Download Backup",
+				"description": "Download a backup archive. The local file on disk is full-fidelity, but\nthe downloaded copy is sanitized on the fly so it is safer to share.\nThe following are removed from the downloaded archive:\n\n- Arr instances (URLs, API keys, sync configs, drift state, rename and\n  cleanup history)\n- Notification services (webhook URLs, tokens, history)\n- User accounts and active sessions\n- Personal access tokens for linked databases\n- AI and TMDB API keys\n\nThe local archive on the server is not modified. Restoring the\ndownloaded file on a different host will require re-adding the removed\nitems.\n",
 				"tags": ["Backups"],
 				"parameters": [
 					{
@@ -1836,7 +1837,7 @@
 				],
 				"responses": {
 					"200": {
-						"description": "Backup file download",
+						"description": "Sanitized backup file download",
 						"headers": {
 							"Content-Disposition": {
 								"schema": {
