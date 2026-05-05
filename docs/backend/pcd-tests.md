@@ -76,61 +76,99 @@ Write tests verify the writer contract for one user action at a time.
 
 Each write test follows the same shape:
 
-1. Create an isolated database instance.
-2. Seed the smallest base state needed for the action.
-3. Compile once so the writer sees the expected current state.
-4. Record an op checkpoint.
-5. Submit the real form action or API request.
-6. Query ops emitted after the checkpoint.
-7. Assert SQL shape, metadata, desired state, grouping, generated flags, and
-   dependencies.
+1. Create an isolated database instance and seed the smallest base state
+   needed for the action (`seededPcd` does both, plus an initial compile).
+2. Record an op checkpoint with `opCheckpoint(ctx)`.
+3. Submit the real form action through `write.regex.*` (or the writer for
+   the entity under test).
+4. Query ops emitted after the checkpoint with `userOpsSince(ctx, ...)`.
+5. Assert op count, metadata, desired state, grouping, generated flags, and
+   SQL shape using the helpers in `harness/pcd.ts` and the colocated
+   `helpers.ts` for the entity.
 
-Example:
+Example, taken from `tests/integration/pcd/write/regex/update.test.ts`:
 
 ```ts
-test('regex update writes one op per changed field', async () => {
-	const pcd = await setupPcd({ strategy: 'ask' });
-
-	await pcd.seedBase([
+test('scalar fields split into independent grouped ops', async () => {
+	const ctx = await seededPcd('scalars', [
 		base.regex({
-			name: 'TestRegex',
+			name: 'Scalar Regex',
 			pattern: '\\bold\\b',
-			description: 'Old'
+			description: 'Old',
+			regex101Id: 'old101'
 		})
 	]);
+	const checkpoint = opCheckpoint(ctx);
 
-	await pcd.compile();
-	const checkpoint = await pcd.ops.checkpoint();
-
-	await pcd.write.regex.update('TestRegex', {
+	await write.regex.update(ctx, 1, {
+		name: 'Scalar Regex',
 		pattern: '\\bnew\\b',
-		description: 'New'
+		description: 'New description',
+		regex101Id: 'new101'
 	});
 
-	const ops = await pcd.ops.since(checkpoint, { origin: 'user' });
-
-	expectOps(ops).toMatch([
-		{
-			entity: 'regular_expression',
-			operation: 'update',
-			changedFields: ['pattern'],
-			desiredState: {
-				pattern: { from: '\\bold\\b', to: '\\bnew\\b' }
-			}
-		},
-		{
-			entity: 'regular_expression',
-			operation: 'update',
-			changedFields: ['description'],
-			desiredState: {
-				description: { from: 'Old', to: 'New' }
-			}
-		}
-	]);
-
-	expectSameGroup(ops);
+	const ops = userOpsSince(ctx, checkpoint);
+	assertEquals(ops.length, 3);
+	assertOnlyField(ops, 'pattern');
+	assertOnlyField(ops, 'description');
+	assertOnlyField(ops, 'regex101_id');
+	assertSameGroup(ops);
 });
 ```
+
+`seededPcd` and `userOpsSince` come from a per-entity `helpers.ts`
+(`createScenarioFactory` binds the spec's port and counter). `base.regex`,
+`opCheckpoint`, `assertOnlyField`, and `assertSameGroup` come from the
+shared harness. Each spec file owns its port (one server boot per file)
+and runs in parallel with siblings.
+
+### Doc Comment Format
+
+Each write test sits behind a JSDoc block with three labeled sections so the
+inputs and expectations are visible without reading the body:
+
+```ts
+/**
+ * Context
+ *   Empty PCD (only schema seeded), compiled once.
+ *
+ * Submit
+ *   POST /regular-expressions/{ctx.dbId}/new with form fields:
+ *     name        = 'Created Regex'
+ *     pattern     = '\bcreated\b'
+ *     description = ''
+ *     regex101Id  = ''
+ *     tags        = '[]'
+ *     layer       = 'user'
+ *
+ * Expect
+ *   - userOpsSince(checkpoint).length === 1
+ *   - op.metadata.operation     === 'create'
+ *   - op.metadata.entity        === 'regular_expression'
+ *   - op.metadata.name          === 'Created Regex'
+ *   - op.desired_state.name        === 'Created Regex'
+ *   - op.desired_state.pattern     === '\bcreated\b'
+ *   - op.desired_state.description === null
+ *   - op.desired_state.regex101_id === null
+ *   - op.desired_state.tags        === []
+ *   - op.sql matches /insert into "?regular_expressions"?/i
+ */
+test('minimal regex emits one create op', async () => {
+	// ...
+});
+```
+
+Section conventions:
+
+- **Context**: seeded entities and whether compile has run. Use `Empty PCD` if
+  no entities are seeded.
+- **Submit**: the exact endpoint plus every form field and its value, including
+  fields the harness fills with defaults. The writer sees the full request, so
+  the doc shows it.
+- **Expect**: assertions as code-shaped bullets so the test body reads as their
+  literal expansion. Cover op count, metadata fields, desired state values, and
+  SQL match patterns. Failure-path tests use `response.status` and the
+  SvelteKit failure payload shape.
 
 ## Conflict Tests
 
@@ -147,11 +185,11 @@ Op state and history assertions explain how the system got there.
 
 Conflict strategy expectations:
 
-| Strategy | Conflict expectation | Final state expectation |
-| -------- | -------------------- | ----------------------- |
-| `ask`    | conflicts remain as `conflicted_pending` | upstream state plus clean user ops |
-| `align`  | conflicted user ops are dropped | upstream wins |
-| `override` | conflicted user ops are superseded or dropped, replacement ops are written | user intent wins |
+| Strategy   | Conflict expectation                                                       | Final state expectation            |
+| ---------- | -------------------------------------------------------------------------- | ---------------------------------- |
+| `ask`      | conflicts remain as `conflicted_pending`                                   | upstream state plus clean user ops |
+| `align`    | conflicted user ops are dropped                                            | upstream wins                      |
+| `override` | conflicted user ops are superseded or dropped, replacement ops are written | user intent wins                   |
 
 Example:
 
