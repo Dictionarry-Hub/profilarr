@@ -23,8 +23,12 @@ export interface DelayProfileFormInput {
 
 export const write = {
 	delayProfile: {
+		create: createDelayProfile,
 		update: updateDelayProfile,
-		submitUpdate: submitUpdateDelayProfile
+		remove: removeDelayProfile,
+		submitCreate: submitCreateDelayProfile,
+		submitUpdate: submitUpdateDelayProfile,
+		submitRemove: submitRemoveDelayProfile
 	},
 	regex: {
 		create: createRegex,
@@ -35,6 +39,13 @@ export const write = {
 		submitRemove: submitRemoveRegex
 	}
 };
+
+export async function createDelayProfile(
+	ctx: PcdTestContext,
+	input: DelayProfileFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(await submitCreateDelayProfile(ctx, input), 'create delay profile');
+}
 
 export async function updateDelayProfile(
 	ctx: PcdTestContext,
@@ -47,6 +58,28 @@ export async function updateDelayProfile(
 	);
 }
 
+export async function removeDelayProfile(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitRemoveDelayProfile(ctx, currentName, layer),
+		'delete delay profile'
+	);
+}
+
+export async function submitCreateDelayProfile(
+	ctx: PcdTestContext,
+	input: DelayProfileFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/delay-profiles/${ctx.dbId}/new`,
+		delayProfileFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
 export async function submitUpdateDelayProfile(
 	ctx: PcdTestContext,
 	currentName: string,
@@ -55,6 +88,18 @@ export async function submitUpdateDelayProfile(
 	return ctx.client.postForm(
 		`/delay-profiles/${ctx.dbId}/${encodeURIComponent(currentName)}?/update`,
 		delayProfileFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitRemoveDelayProfile(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/delay-profiles/${ctx.dbId}/${encodeURIComponent(currentName)}?/delete`,
+		{ layer },
 		{ headers: { Origin: ctx.origin } }
 	);
 }

@@ -155,6 +155,66 @@ test('rename plus scalar change emits grouped split ops', async () => {
 /**
  * Context
  *   Base layer seeded with one delay profile via base.delayProfile():
+ *     name='Pure Rename Delay', preferredProtocol='prefer_usenet',
+ *     usenetDelay=0, torrentDelay=30
+ *   Compiled.
+ *
+ * Submit
+ *   POST /delay-profiles/{ctx.dbId}/Pure%20Rename%20Delay?/update with form fields:
+ *     name                     = 'Renamed Delay'   // changed
+ *     preferredProtocol        = 'prefer_usenet'
+ *     usenetDelay              = '0'
+ *     torrentDelay             = '30'
+ *     bypassIfHighestQuality   = 'false'
+ *     bypassIfAboveCfScore     = 'false'
+ *     minimumCfScore           = '0'
+ *     layer                    = 'user'
+ *
+ * Expect
+ *   - userOpsSince(checkpoint).length === 1
+ *   - op.metadata.changed_fields === ['name']
+ *   - op.metadata.group_id      === undefined
+ *   - op.metadata.name          === 'Renamed Delay'
+ *   - op.metadata.previousName  === 'Pure Rename Delay'
+ *   - op.desired_state.name     === { from: 'Pure Rename Delay', to: 'Renamed Delay' }
+ */
+test('pure rename emits one ungrouped rename op', async () => {
+	const ctx = await seededPcd('pure-rename', [
+		base.delayProfile({
+			name: 'Pure Rename Delay',
+			preferredProtocol: 'prefer_usenet',
+			usenetDelay: 0,
+			torrentDelay: 30
+		})
+	]);
+	const checkpoint = opCheckpoint(ctx);
+
+	await write.delayProfile.update(ctx, 'Pure Rename Delay', {
+		name: 'Renamed Delay',
+		preferredProtocol: 'prefer_usenet',
+		usenetDelay: 0,
+		torrentDelay: 30,
+		bypassIfHighestQuality: false,
+		bypassIfAboveCfScore: false,
+		minimumCfScore: 0
+	});
+
+	const ops = userOpsSince(ctx, checkpoint);
+	assertEquals(ops.length, 1);
+	const renameOp = opForChangedField(ops, 'name');
+	const metadata = parseMetadata(renameOp);
+	assertEquals(metadata.group_id, undefined);
+	assertEquals(metadata.name, 'Renamed Delay');
+	assertEquals(metadata.previousName, 'Pure Rename Delay');
+	assertEquals(parseDesiredState(renameOp).name, {
+		from: 'Pure Rename Delay',
+		to: 'Renamed Delay'
+	});
+});
+
+/**
+ * Context
+ *   Base layer seeded with one delay profile via base.delayProfile():
  *     name='Torrent Only Profile', preferredProtocol='prefer_usenet',
  *     usenetDelay=10, torrentDelay=20
  *   Compiled.

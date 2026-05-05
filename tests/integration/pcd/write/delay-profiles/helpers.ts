@@ -95,3 +95,11 @@ export function assertSameGroup(ops: OpRow[]): void {
 		assertEquals(groupId, groupIds[0]);
 	}
 }
+
+export async function assertActionFailed(response: Response): Promise<void> {
+	const body = await response.text();
+	assert(
+		response.status >= 400 || body.includes('"type":"failure"'),
+		`Expected form action failure, got status=${response.status} body=${body}`
+	);
+}
