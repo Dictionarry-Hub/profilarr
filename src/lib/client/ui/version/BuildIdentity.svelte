@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { build } from '$lib/shared/build.ts';
+	import { ArrowUp } from 'lucide-svelte';
+	import type { VersionStatusInfo } from '$announcements/index.ts';
 	import Label from '$ui/label/Label.svelte';
 
-	/** `channel · build` in mono, plus an "Up to date" chip when applicable. */
-
-	export let status: 'up-to-date' | 'out-of-date' | 'dev-build' | null = null;
+	export let status: VersionStatusInfo | null = null;
 
 	const CHANNEL_LABELS = {
 		stable: 'Stable',
@@ -12,7 +12,6 @@
 		dev: 'Unstable'
 	} as const;
 
-	// v<semver> for stable, raw SHA for develop, nothing for dev.
 	$: channelLabel = CHANNEL_LABELS[build.channel];
 	$: buildString =
 		build.channel === 'stable'
@@ -21,14 +20,26 @@
 				? build.version
 				: null;
 
-	$: upToDate = status === 'up-to-date';
+	$: kind = status?.status ?? null;
 </script>
 
 <div class="flex flex-wrap items-center gap-2">
 	<Label variant="secondary" size="md" rounded="md" mono>
 		{buildString ? `${channelLabel} · ${buildString}` : channelLabel}
 	</Label>
-	{#if upToDate}
+	{#if kind === 'up-to-date'}
 		<Label variant="success" size="md" rounded="md">Up to date</Label>
+	{:else if kind === 'out-of-date' && status?.latestVersion}
+		<Label
+			variant="secondary"
+			size="md"
+			rounded="md"
+			href={status.releaseUrl ?? undefined}
+			target={status.releaseUrl ? '_blank' : undefined}
+			rel={status.releaseUrl ? 'noopener noreferrer' : undefined}
+		>
+			<ArrowUp class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+			Update Available: {status.latestVersion}
+		</Label>
 	{/if}
 </div>

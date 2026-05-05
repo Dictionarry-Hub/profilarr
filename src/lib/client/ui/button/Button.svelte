@@ -5,7 +5,7 @@
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	export let text: string = '';
-	export let variant: 'primary' | 'secondary' | 'danger' | 'ghost' = 'secondary';
+	export let variant: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline' = 'secondary';
 	export let size: 'xs' | 'sm' | 'md' = 'sm';
 	export let disabled: boolean = false;
 	export let softDisabled: boolean = false;
@@ -80,15 +80,19 @@
 			'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-200 dark:hover:bg-neutral-700',
 		danger: 'bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600',
 		ghost:
-			'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
+			'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200',
+		outline:
+			'border border-neutral-300 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700/60 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
 	};
 
 	$: effectiveSize = responsive && isSmallScreen ? 'xs' : size;
 	$: widthClass = fullWidth ? 'w-full' : '';
 	$: baseTextColor =
-		textColor || (variant === 'ghost' ? 'text-neutral-700 dark:text-neutral-300' : '');
+		textColor ||
+		(variant === 'ghost' || variant === 'outline' ? 'text-neutral-700 dark:text-neutral-300' : '');
 	$: baseIconColor =
-		iconColor || (variant === 'ghost' ? 'text-neutral-500 dark:text-neutral-400' : '');
+		iconColor ||
+		(variant === 'ghost' || variant === 'outline' ? 'text-neutral-500 dark:text-neutral-400' : '');
 	$: effectiveIcon = loading ? Loader2 : icon;
 	$: effectiveIconColor = loading ? baseIconColor + ' animate-spin' : baseIconColor;
 	$: isLeadingSvg = leadingIcon && typeof leadingIcon === 'object' && 'path' in leadingIcon;

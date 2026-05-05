@@ -15,9 +15,11 @@
 		Clock,
 		Settings,
 		Wrench,
-		Megaphone
+		Megaphone,
+		ArrowUp
 	} from 'lucide-svelte';
 	import type { ComponentType } from 'svelte';
+	import Button from '$ui/button/Button.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import { sidebarCollapsed } from '$stores/sidebar';
@@ -41,6 +43,8 @@
 	$: cutsceneActive = $cutscene.active;
 	$: iconStyle = $navIconStore;
 	$: currentPathname = $page.url.pathname;
+	$: versionStatus = $page.data.versionStatus ?? null;
+	$: outOfDate = versionStatus?.status === 'out-of-date' && versionStatus.latestVersion;
 
 	$: railLinks = [
 		{ label: 'Dev', href: '/dev', icon: Wrench, emoji: '🛠️', devOnly: true },
@@ -172,9 +176,27 @@
 		<a
 			href="/"
 			aria-label="Profilarr home"
-			class="mb-4 rounded-md p-1 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
+			class="rounded-md p-1 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
 		>
 			<img src={logo} alt="Profilarr" class="h-5 w-5" />
 		</a>
+
+		{#if outOfDate}
+			<div class="mt-2 mb-4">
+				<Button
+					icon={ArrowUp}
+					variant="outline"
+					size="sm"
+					href={versionStatus.releaseUrl ?? undefined}
+					target={versionStatus.releaseUrl ? '_blank' : undefined}
+					rel={versionStatus.releaseUrl ? 'noopener noreferrer' : undefined}
+					iconColor="text-emerald-600 dark:text-emerald-400"
+					tooltip="Update Available: {versionStatus.latestVersion}"
+					tooltipPosition="right"
+				/>
+			</div>
+		{:else}
+			<div class="mb-4"></div>
+		{/if}
 	</div>
 </nav>
