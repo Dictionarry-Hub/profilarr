@@ -16,6 +16,8 @@ export const load = async () => {
 // - cleanupBackups: convenience trigger, already automated via job queue
 // - restoreBackup: stages a pending restore; the actual swap happens at
 //   next boot via applyPendingRestore() before the DB is opened.
+// - cancelRestore: clears a staged restore. The banner in the root layout
+//   posts here from any page, so removing the sentinel is the only effect.
 //
 // All other backup operations use /api/v1/backups/* endpoints.
 export const actions: Actions = {
@@ -86,6 +88,26 @@ export const actions: Actions = {
 				meta: { filename, error: err }
 			});
 			return fail(500, { error: 'Failed to stage restore' });
+		}
+	},
+
+	cancelRestore: async () => {
+		const sentinelPath = `${config.paths.base}/.restore-pending`;
+		try {
+			await Deno.remove(sentinelPath);
+			await logger.info('Pending restore cancelled', {
+				source: 'settings/backups'
+			});
+			return { success: true, message: 'Pending restore cancelled.' };
+		} catch (err) {
+			if (err instanceof Deno.errors.NotFound) {
+				return { success: true, message: 'No pending restore to cancel.' };
+			}
+			await logger.error('Failed to cancel pending restore', {
+				source: 'settings/backups',
+				meta: { error: err }
+			});
+			return fail(500, { error: 'Failed to cancel pending restore' });
 		}
 	}
 };
