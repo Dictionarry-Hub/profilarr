@@ -36,6 +36,24 @@ teardown(async () => {
 	await stopServer(PORT);
 });
 
+/**
+ * Context
+ *   Base layer seeded with one regex via base.regex():
+ *     name='Delete Regex', pattern='\bdelete\b'
+ *   No tags, no referencing custom format conditions. Compiled.
+ *
+ * Submit
+ *   POST /regular-expressions/{ctx.dbId}/1?/delete with form fields:
+ *     layer = 'user'
+ *
+ * Expect
+ *   - userOpsSince(checkpoint).length === 1
+ *   - op.metadata.operation     === 'delete'
+ *   - op.metadata.changed_fields === ['deleted']
+ *   - op.desired_state.deleted  === true
+ *   - op.sql matches /delete from "?regular_expressions"?/i
+ *   - op.sql does NOT contain 'regular_expression_tags'
+ */
 test('unreferenced regex emits one delete op', async () => {
 	const ctx = await seededPcd('simple', [
 		base.regex({ name: 'Delete Regex', pattern: '\\bdelete\\b' })
@@ -55,6 +73,23 @@ test('unreferenced regex emits one delete op', async () => {
 	assert(!sql.includes('regular_expression_tags'));
 });
 
+/**
+ * Context
+ *   Base layer seeded with one regex via base.regex():
+ *     name='Tagged Delete Regex', pattern='\bdelete\b', tags=['A','B']
+ *   Compiled.
+ *
+ * Submit
+ *   POST /regular-expressions/{ctx.dbId}/1?/delete with form fields:
+ *     layer = 'user'
+ *
+ * Expect
+ *   - userOpsSince(checkpoint).length === 1
+ *   - op.desired_state.tags === ['A','B']
+ *   - op.sql contains 'DELETE FROM regular_expression_tags'
+ *   - op.sql contains 'DELETE FROM "regular_expressions"'
+ *   - tag-link delete appears before the regex delete in the SQL
+ */
 test('regex with tags deletes tag links before the regex', async () => {
 	const ctx = await seededPcd('with-tags', [
 		base.regex({ name: 'Tagged Delete Regex', pattern: '\\bdelete\\b', tags: ['A', 'B'] })
@@ -76,6 +111,22 @@ test('regex with tags deletes tag links before the regex', async () => {
 	assert(tagDeleteIndex < regexDeleteIndex);
 });
 
+/**
+ * Context
+ *   Base layer seeded with:
+ *     - regex { name='Referenced Regex', pattern='\breferenced\b' }
+ *     - custom format 'Format One' with condition 'Release Title'
+ *       referencing 'Referenced Regex' via condition_patterns
+ *   general_settings.fail_on_referenced_delete = 1 (default). Compiled.
+ *
+ * Submit
+ *   POST /regular-expressions/{ctx.dbId}/1?/delete with form fields:
+ *     layer = 'user'
+ *
+ * Expect
+ *   - response.status >= 400 OR body contains '"type":"failure"'
+ *   - userOpsSince(checkpoint).length === 0
+ */
 test('referenced regex is blocked when referenced deletes fail', async () => {
 	const ctx = await seededPcd('referenced-blocked', [
 		base.regex({ name: 'Referenced Regex', pattern: '\\breferenced\\b' }),
@@ -93,6 +144,28 @@ test('referenced regex is blocked when referenced deletes fail', async () => {
 	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
 });
 
+/**
+ * Context
+ *   Base layer seeded with:
+ *     - regex { name='Referenced Regex', pattern='\breferenced\b' }
+ *     - custom format 'Format One' with condition 'Release Title'
+ *       referencing 'Referenced Regex' via condition_patterns
+ *   setFailOnReferencedDelete(ctx, false) flips
+ *   general_settings.fail_on_referenced_delete to 0. Compiled.
+ *
+ * Submit
+ *   POST /regular-expressions/{ctx.dbId}/1?/delete with form fields:
+ *     layer = 'user'
+ *
+ * Expect
+ *   - userOpsSince(checkpoint).length === 2
+ *   - one op with metadata.operation === 'delete' (the regex itself)
+ *   - one op with metadata.entity === 'custom_format' and
+ *                metadata.generated === true (the cascade)
+ *   - both ops share the same metadata.group_id
+ *   - cascade op.metadata.changed_fields === ['conditions']
+ *   - cascade op.desired_state.conditions.removed is an Array
+ */
 test('referenced regex can remove dependent conditions when allowed', async () => {
 	const ctx = await seededPcd('referenced-allowed', [
 		base.regex({ name: 'Referenced Regex', pattern: '\\breferenced\\b' }),
