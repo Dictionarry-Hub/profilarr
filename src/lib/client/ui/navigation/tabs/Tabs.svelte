@@ -32,7 +32,7 @@
 	export let responsive: boolean = false;
 	export let mobileBreakpoint: number = 768;
 	export let hideWhenSingle: boolean = true;
-	export let hiddenSpacerClass: string = 'h-16';
+	export let hiddenSpacerClass: string = 'h-1';
 
 	// Mobile detection
 	let isMobile = false;
