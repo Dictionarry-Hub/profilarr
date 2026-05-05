@@ -450,3 +450,11 @@ Run via `deno task generate:pcd-types` (default version) or
 - [**#422**](https://github.com/Dictionarry-Hub/profilarr/issues/422):
   The PCD conflict test suite (86 Playwright specs) needs to migrate to
   integration tests for speed and CI reliability.
+
+- **Override-delete re-deletion**: Only `delay_profile` regenerates a
+  fresh delete when overriding a conflicted delete whose target row still
+  exists upstream. For other entities (CF, QP, regex, naming, media
+  settings), override-delete logs a warning and falls back to dropping
+  the user op without re-deleting the upstream row. Each remaining entity
+  needs its own `overrideDelete` handler before it can match delay
+  profile behavior.
