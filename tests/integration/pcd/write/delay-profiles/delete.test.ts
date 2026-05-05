@@ -6,12 +6,7 @@ import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '$test-harness/server.ts';
 import { run, setup, teardown, test } from '$test-harness/runner.ts';
 import { base } from '../../harness/fixtures.ts';
-import {
-	normalizeSql,
-	opCheckpoint,
-	parseDesiredState,
-	parseMetadata
-} from '../../harness/pcd.ts';
+import { normalizeSql, opCheckpoint, parseDesiredState, parseMetadata } from '../../harness/pcd.ts';
 import { write } from '../../harness/write.ts';
 import { createScenarioFactory, userOpsSince } from './helpers.ts';
 

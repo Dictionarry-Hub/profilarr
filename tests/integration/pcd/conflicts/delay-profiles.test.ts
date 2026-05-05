@@ -157,7 +157,10 @@ test('protocol constrained pair conflicts atomically', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertDelayProfile(ctx, 'Protocol Pair');
-		assertEquals(row.preferred_protocol, strategy === 'override' ? 'only_torrent' : 'prefer_usenet');
+		assertEquals(
+			row.preferred_protocol,
+			strategy === 'override' ? 'only_torrent' : 'prefer_usenet'
+		);
 		assertEquals(row.usenet_delay, strategy === 'override' ? null : 12);
 	}
 });
@@ -205,9 +208,12 @@ test('bypass score constrained pair conflicts atomically', async () => {
 			minimumCfScore: 80
 		});
 
-		seedUpstream(ctx, upstreamUpdate('Bypass Pair', {
-			minimum_custom_format_score: { from: 80, to: 90 }
-		}));
+		seedUpstream(
+			ctx,
+			upstreamUpdate('Bypass Pair', {
+				minimum_custom_format_score: { from: 80, to: 90 }
+			})
+		);
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
@@ -389,10 +395,7 @@ test('delete missing target auto-aligns', async () => {
 	}
 });
 
-async function newScenario(
-	strategy: ConflictStrategy,
-	name: string
-): Promise<PcdTestContext> {
+async function newScenario(strategy: ConflictStrategy, name: string): Promise<PcdTestContext> {
 	counter++;
 	return setupPcd({
 		port: PORT,
@@ -440,8 +443,7 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 	const op = ops.find((candidate) => {
 		const actual = changedFields(candidate).sort();
 		return (
-			actual.length === expected.length &&
-			actual.every((field, index) => field === expected[index])
+			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
 	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
@@ -579,7 +581,10 @@ function compiledDelayProfiles(ctx: PcdTestContext): DelayProfileRow[] {
 	}
 }
 
-function latestHistories(db: ReturnType<typeof openDb>, databaseId: number): Map<number, LatestHistory> {
+function latestHistories(
+	db: ReturnType<typeof openDb>,
+	databaseId: number
+): Map<number, LatestHistory> {
 	const rows = db
 		.prepare(
 			`SELECT op_id, status, conflict_reason

@@ -73,11 +73,9 @@ export async function submitCreateDelayProfile(
 	ctx: PcdTestContext,
 	input: DelayProfileFormInput
 ): Promise<Response> {
-	return ctx.client.postForm(
-		`/delay-profiles/${ctx.dbId}/new`,
-		delayProfileFields(input),
-		{ headers: { Origin: ctx.origin } }
-	);
+	return ctx.client.postForm(`/delay-profiles/${ctx.dbId}/new`, delayProfileFields(input), {
+		headers: { Origin: ctx.origin }
+	});
 }
 
 export async function submitUpdateDelayProfile(

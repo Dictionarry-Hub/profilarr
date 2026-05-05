@@ -551,10 +551,7 @@ function parseOpId(filepath: string): number | null {
 	return Number.isFinite(opId) ? opId : null;
 }
 
-function getConflictReason(
-	db: Database,
-	metadata: ReturnType<typeof parseOpMetadata>
-): string {
+function getConflictReason(db: Database, metadata: ReturnType<typeof parseOpMetadata>): string {
 	switch (metadata?.operation) {
 		case 'create':
 			return 'duplicate_key';

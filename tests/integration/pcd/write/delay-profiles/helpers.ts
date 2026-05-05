@@ -69,8 +69,7 @@ export function opForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 	const op = ops.find((candidate) => {
 		const actual = changedFields(candidate).sort();
 		return (
-			actual.length === expected.length &&
-			actual.every((field, index) => field === expected[index])
+			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
 	assertExists(op, `Expected a user op for ${fields.join(', ')}`);

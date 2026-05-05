@@ -11,10 +11,8 @@ export const base = {
 		minimumCfScore?: number | null;
 	}): SeedOperation {
 		const preferredProtocol = input.preferredProtocol ?? 'prefer_usenet';
-		const usenetDelay =
-			preferredProtocol === 'only_torrent' ? null : (input.usenetDelay ?? 0);
-		const torrentDelay =
-			preferredProtocol === 'only_usenet' ? null : (input.torrentDelay ?? 0);
+		const usenetDelay = preferredProtocol === 'only_torrent' ? null : (input.usenetDelay ?? 0);
+		const torrentDelay = preferredProtocol === 'only_usenet' ? null : (input.torrentDelay ?? 0);
 		const bypassIfAboveCfScore = input.bypassIfAboveCfScore ?? false;
 		const minimumCfScore = bypassIfAboveCfScore ? (input.minimumCfScore ?? 0) : null;
 
