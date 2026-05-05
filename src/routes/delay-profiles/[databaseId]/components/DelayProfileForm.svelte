@@ -17,7 +17,6 @@
 	import type { PreferredProtocol } from '$shared/pcd/display.ts';
 	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
 	import type { AffectedArr } from '$shared/sync/types.ts';
-	import { delayProfileLockedMessage } from '../lock';
 
 	// Form data shape
 	interface DelayProfileFormData {
@@ -69,7 +68,6 @@
 
 	// Layer selection
 	let selectedLayer: 'user' | 'base' = canWriteToBase ? 'base' : 'user';
-	$: readOnly = !canWriteToBase;
 
 	// Modal states
 	let showSyncModal = false;
@@ -85,9 +83,8 @@
 
 	// Display text based on mode
 	$: title = mode === 'create' ? 'New Delay Profile' : 'Edit Delay Profile';
-	$: description = readOnly
-		? 'Delay profiles from linked databases cannot be edited directly'
-		: mode === 'create'
+	$: description =
+		mode === 'create'
 			? `Create a new delay profile for ${databaseName}`
 			: `Update delay profile settings`;
 	$: submitButtonText = mode === 'create' ? 'Create Profile' : 'Save Changes';
@@ -115,41 +112,24 @@
 	$: protocolDescription =
 		protocolOptions.find((o) => o.value === formData.preferredProtocol)?.description ?? '';
 
-	function notifyLocked() {
-		alertStore.add('info', delayProfileLockedMessage);
-	}
-
 	function updateField<K extends keyof DelayProfileFormData>(
 		field: K,
 		value: DelayProfileFormData[K]
 	) {
-		if (readOnly) return;
 		update<DelayProfileFormData, K>(field, value);
 	}
 
 	async function handleSaveClick() {
-		if (readOnly) {
-			notifyLocked();
-			return;
-		}
 		selectedLayer = canWriteToBase ? 'base' : 'user';
 		await tick();
 		mainFormElement?.requestSubmit();
 	}
 
 	async function handleDeleteClick() {
-		if (readOnly) {
-			notifyLocked();
-			return;
-		}
 		showDeleteModal = true;
 	}
 
 	async function handleDeleteConfirm() {
-		if (readOnly) {
-			notifyLocked();
-			return;
-		}
 		deleteLayer = canWriteToBase ? 'base' : 'user';
 		showDeleteModal = false;
 		await tick();
@@ -171,7 +151,7 @@
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
-				{#if mode === 'edit' && !readOnly}
+				{#if mode === 'edit'}
 					<Button
 						disabled={deleting}
 						icon={deleting ? Loader2 : Trash2}
@@ -182,8 +162,7 @@
 				{/if}
 				<Button text="Cancel" on:click={onCancel} />
 				<Button
-					disabled={!readOnly && (saving || !isValid || !$isDirty)}
-					softDisabled={readOnly}
+					disabled={saving || !isValid || !$isDirty}
 					icon={saving ? Loader2 : Save}
 					iconColor="text-blue-600 dark:text-blue-400"
 					text={saving ? (mode === 'create' ? 'Creating...' : 'Saving...') : submitButtonText}
@@ -256,7 +235,6 @@
 						placeholder="e.g., Standard Delay"
 						required
 						value={formData.name}
-						disabled={readOnly}
 						on:input={(e) => updateField('name', e.detail)}
 					/>
 				</div>
@@ -270,7 +248,6 @@
 						value={formData.preferredProtocol}
 						options={protocolOptions}
 						fullWidth
-						disabled={readOnly}
 						on:change={(e) => updateField('preferredProtocol', e.detail as PreferredProtocol)}
 					/>
 					{#if protocolDescription}
@@ -302,7 +279,7 @@
 									onchange={(v) => updateField('usenetDelay', v)}
 									min={0}
 									font="mono"
-									disabled={readOnly || !usenetEnabled}
+									disabled={!usenetEnabled}
 								/>
 							</div>
 						</div>
@@ -322,7 +299,7 @@
 									onchange={(v) => updateField('torrentDelay', v)}
 									min={0}
 									font="mono"
-									disabled={readOnly || !torrentEnabled}
+									disabled={!torrentEnabled}
 								/>
 							</div>
 						</div>
@@ -343,7 +320,6 @@
 								label="Bypass if Highest Quality"
 								checked={formData.bypassIfHighestQuality}
 								fullWidth
-								disabled={readOnly}
 								on:change={() =>
 									updateField('bypassIfHighestQuality', !formData.bypassIfHighestQuality)}
 							/>
@@ -358,7 +334,6 @@
 									label="Bypass if Above Custom Format Score"
 									checked={formData.bypassIfAboveCfScore}
 									fullWidth
-									disabled={readOnly}
 									on:change={() =>
 										updateField('bypassIfAboveCfScore', !formData.bypassIfAboveCfScore)}
 								/>
@@ -367,7 +342,7 @@
 									id="min-cf-score"
 									value={formData.minimumCfScore}
 									onchange={(v) => updateField('minimumCfScore', v)}
-									disabled={readOnly || !formData.bypassIfAboveCfScore}
+									disabled={!formData.bypassIfAboveCfScore}
 									font="mono"
 								/>
 							</div>
@@ -382,7 +357,7 @@
 	</form>
 
 	<!-- Hidden delete form -->
-	{#if mode === 'edit' && !readOnly}
+	{#if mode === 'edit'}
 		<form
 			bind:this={deleteFormElement}
 			method="POST"
