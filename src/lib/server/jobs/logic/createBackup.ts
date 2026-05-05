@@ -13,6 +13,7 @@
 
 import { Database } from '@jsr/db__sqlite';
 import { db } from '$db/db.ts';
+import { migrationRunner } from '$db/migrations.ts';
 import { build } from '$lib/shared/build.ts';
 
 export interface CreateBackupResult {
@@ -113,12 +114,12 @@ export async function createBackup(
 
 				// Write INFO.json metadata. Read by the boot-time apply step
 				// for diagnostics and by the download endpoint for sanitized
-				// flag handling.
-				const schemaRow = db.queryFirst<{ user_version: number }>('PRAGMA user_version');
+				// flag handling. Schema version comes from the `migrations`
+				// table (Profilarr's tracking mechanism), not PRAGMA user_version.
 				const info = {
 					appVersion: build.version,
 					appChannel: build.channel,
-					schemaVersion: schemaRow?.user_version ?? null,
+					schemaVersion: migrationRunner.getCurrentVersion(),
 					createdAt: now.toISOString(),
 					sanitized: false
 				};
