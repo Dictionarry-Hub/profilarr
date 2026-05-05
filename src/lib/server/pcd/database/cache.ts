@@ -25,6 +25,7 @@ import {
 	parseOpMetadata
 } from '$pcd/conflicts/autoAlign/index.ts';
 import { checkFullListConflict } from '$pcd/conflicts/fullListCheck.ts';
+import { AUTO_ALIGN_ENTITIES } from '$pcd/entities/registry.ts';
 
 /**
  * PCDCache - Manages an in-memory compiled database for a single PCD
@@ -160,7 +161,7 @@ export class PCDCache {
 
 								if (status !== 'dropped') {
 									status = conflictStrategy === 'ask' ? 'conflicted_pending' : 'conflicted';
-									conflictReason = getConflictReason(metadata?.operation);
+									conflictReason = getConflictReason(this.db!, metadata);
 									const priorReason = priorConflicts.get(opId);
 									if (priorReason !== conflictReason) {
 										await logger.info('Recorded op conflict', {
@@ -247,9 +248,26 @@ export class PCDCache {
 					const shouldRecordConflict = trackHistory && (isDuplicateKey || isMissingTarget);
 
 					if (shouldRecordConflict) {
-						const status: PcdOpHistoryStatus =
+						let status: PcdOpHistoryStatus =
 							conflictStrategy === 'ask' ? 'conflicted_pending' : 'conflicted';
-						const conflictReason = isDuplicateKey ? 'duplicate_key' : 'missing_target';
+						let conflictReason = isDuplicateKey ? 'duplicate_key' : 'missing_target';
+						if (conflictStrategy === 'align') {
+							const updated = pcdOpsQueries.update(opId, { state: 'dropped' });
+							if (updated) {
+								status = 'dropped';
+								conflictReason = 'aligned';
+								stats.needsRebuild = true;
+								await logger.info('Forced align conflict', {
+									source: 'PCDCache',
+									meta: {
+										opId,
+										databaseInstanceId: this.databaseInstanceId,
+										conflictStrategy,
+										conflictReason
+									}
+								});
+							}
+						}
 						const priorReason = priorConflicts.get(opId);
 						if (priorReason !== conflictReason) {
 							await logger.info('Recorded op conflict', {
@@ -533,16 +551,48 @@ function parseOpId(filepath: string): number | null {
 	return Number.isFinite(opId) ? opId : null;
 }
 
-function getConflictReason(operation?: string): string {
-	switch (operation) {
+function getConflictReason(db: Database, metadata: ReturnType<typeof parseOpMetadata>): string {
+	switch (metadata?.operation) {
 		case 'create':
 			return 'duplicate_key';
 		case 'delete':
-			return 'missing_target';
+			return deleteTargetExists(db, metadata) ? 'guard_mismatch' : 'missing_target';
 		case 'update':
 		default:
 			return 'guard_mismatch';
 	}
+}
+
+function deleteTargetExists(db: Database, metadata: ReturnType<typeof parseOpMetadata>): boolean {
+	const entityName = metadata?.entity;
+	if (!entityName) return false;
+
+	const entity = AUTO_ALIGN_ENTITIES.get(entityName);
+	if (!entity) return false;
+
+	const typedMetadata = metadata as {
+		stable_key?: { value?: string };
+		stableKey?: { value?: string };
+	} | null;
+	const candidates = [
+		typedMetadata?.stable_key?.value,
+		typedMetadata?.stableKey?.value,
+		metadata?.name
+	].filter((value): value is string => typeof value === 'string' && value.length > 0);
+
+	for (const candidate of candidates) {
+		try {
+			// nosemgrep: profilarr.sql.template-literal-interpolation - table/column from hardcoded registry
+			const row = db
+				.prepare(`SELECT 1 FROM ${entity.table} WHERE ${entity.keyColumn} = ? LIMIT 1`)
+				.get(candidate);
+			if (row) return true;
+		} catch {
+			return false;
+		}
+	}
+
+	return false;
 }
 
 function isUniqueConstraintError(errorStr: string): boolean {

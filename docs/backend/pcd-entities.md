@@ -246,10 +246,17 @@ The schema enforces protocol constraints via CHECK clauses:
 - `only_usenet` -- `torrent_delay` must be NULL
 - bypass disabled -- `minimum_custom_format_score` must be NULL
 
-All CRUD uses single atomic ops (no per-field splitting). Value guards
-cover all fields, with careful NULL handling (`IS NULL` vs `=`).
-Base-origin locking is planned
-([#421](https://github.com/Dictionarry-Hub/profilarr/issues/421)).
+Create and delete use single atomic ops. Update splits into per-field ops
+with value guards on each changed field. Pure rename writes one `name` op
+with `previousName`; if the same submit changes other fields, all emitted
+ops share a `groupId`.
+
+Some field pairs stay atomic to satisfy schema constraints:
+
+- protocol changes group with delay NULLing when moving into or out of
+  `only_torrent` / `only_usenet`
+- bypass-score changes group with `minimum_custom_format_score` when the
+  score must become NULL or non-NULL
 
 ## Media Management
 
@@ -288,10 +295,10 @@ consistency.
 
 ## Summary
 
-| Entity             | Op splitting             | Cascading on rename     | Cascading on delete              |
-| ------------------ | ------------------------ | ----------------------- | -------------------------------- |
-| Custom format      | per-field, per-condition | QP scoring refs         | explicit QP score removal + FK   |
-| Quality profile    | per-field, per-score     | --                      | explicit sub-entity removal + FK |
-| Regular expression | main + dependents        | condition_patterns refs | dependent conditions + FK        |
-| Delay profile      | none (atomic)            | --                      | FK cascade                       |
-| Media management   | none (atomic)            | --                      | FK cascade                       |
+| Entity             | Op splitting                 | Cascading on rename     | Cascading on delete              |
+| ------------------ | ---------------------------- | ----------------------- | -------------------------------- |
+| Custom format      | per-field, per-condition     | QP scoring refs         | explicit QP score removal + FK   |
+| Quality profile    | per-field, per-score         | --                      | explicit sub-entity removal + FK |
+| Regular expression | main + dependents            | condition_patterns refs | dependent conditions + FK        |
+| Delay profile      | per-field, constrained pairs | --                      | FK cascade                       |
+| Media management   | none (atomic)                | --                      | FK cascade                       |
