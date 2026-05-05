@@ -13,6 +13,7 @@
 
 import { Database } from '@jsr/db__sqlite';
 import { db } from '$db/db.ts';
+import { build } from '$lib/shared/build.ts';
 
 export interface CreateBackupResult {
 	success: boolean;
@@ -109,6 +110,19 @@ export async function createBackup(
 				} finally {
 					dest.close();
 				}
+
+				// Write INFO.json metadata. Read by the boot-time apply step
+				// for diagnostics and by the download endpoint for sanitized
+				// flag handling.
+				const schemaRow = db.queryFirst<{ user_version: number }>('PRAGMA user_version');
+				const info = {
+					appVersion: build.version,
+					appChannel: build.channel,
+					schemaVersion: schemaRow?.user_version ?? null,
+					createdAt: now.toISOString(),
+					sanitized: false
+				};
+				await Deno.writeTextFile(`${tmpDataDir}/INFO.json`, JSON.stringify(info, null, 2));
 			}
 		} catch (error) {
 			if (error instanceof Deno.errors.NotFound) {
