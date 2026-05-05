@@ -27,6 +27,8 @@
  *   deno task test integration              All specs (parallel, Docker auto-managed)
  *   deno task test integration health       Single spec
  *   deno task test integration csrf         Single spec
+ *   deno task test integration pcd          PCD integration specs
+ *   deno task test integration pcd regex    Single PCD spec
  *
  *   Specs that need Docker (mock-oauth2-server + Caddy + nginx): oidc, cookie, proxy, reverseProxy502, reverseProxy502-manual
  *   Docker starts automatically when needed and tears down after.
@@ -72,6 +74,7 @@ const INTEGRATION_COMPOSE = 'tests/integration/auth/docker-compose.yml';
 const INTEGRATION_AUTH_SPEC_DIR = 'tests/integration/auth/specs';
 const INTEGRATION_API_SPEC_DIR = 'tests/integration/api/specs';
 const INTEGRATION_CONFLICT_SPEC_DIR = 'tests/integration/conflicts/specs';
+const INTEGRATION_PCD_SPEC_DIR = 'tests/integration/pcd';
 const INTEGRATION_NOTIFICATION_SPEC_DIR = 'tests/integration/notifications/specs';
 const INTEGRATION_BACKUP_SPEC_DIR = 'tests/integration/backups/specs';
 const INTEGRATION_ANNOUNCEMENTS_SPEC_DIR = 'tests/integration/announcements/specs';
@@ -79,6 +82,7 @@ const INTEGRATION_SPEC_DIR = INTEGRATION_AUTH_SPEC_DIR; // backward compat
 const INTEGRATION_SUITES = new Set([
 	'auth',
 	'conflicts',
+	'pcd',
 	'api',
 	'notifications',
 	'backups',
@@ -246,28 +250,17 @@ async function runIntegration(target?: string): Promise<number> {
 	function getSpecDir(s: string): string {
 		if (s === 'api') return INTEGRATION_API_SPEC_DIR;
 		if (s === 'conflicts') return INTEGRATION_CONFLICT_SPEC_DIR;
+		if (s === 'pcd') return INTEGRATION_PCD_SPEC_DIR;
 		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
 		if (s === 'backups') return INTEGRATION_BACKUP_SPEC_DIR;
 		if (s === 'announcements') return INTEGRATION_ANNOUNCEMENTS_SPEC_DIR;
 		return INTEGRATION_AUTH_SPEC_DIR;
 	}
 
-	// Validate spec file if specified
-	if (specName && suite) {
-		const testPath = `${getSpecDir(suite)}/${specName}.test.ts`;
-		try {
-			await Deno.stat(testPath);
-		} catch {
-			console.error(`Unknown integration spec: "${specName}" in suite "${suite}"`);
-			console.error(`Expected file: ${testPath}`);
-			return 1;
-		}
-	}
-
 	// Determine which suites to run
 	const suitesToRun = suite
 		? [suite]
-		: ['auth', 'api', 'conflicts', 'notifications', 'announcements', 'backups'];
+		: ['auth', 'api', 'conflicts', 'notifications', 'announcements', 'backups', 'pcd'];
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
@@ -518,6 +511,7 @@ async function runIntegrationSpec(
 		.replace(`${INTEGRATION_AUTH_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_API_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_CONFLICT_SPEC_DIR}/`, '')
+		.replace(`${INTEGRATION_PCD_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_NOTIFICATION_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_BACKUP_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_ANNOUNCEMENTS_SPEC_DIR}/`, '')
@@ -1002,6 +996,8 @@ function printHelp(): void {
 		'  conflicts       Conflict specs only',
 		'  conflicts <n>   Single conflict spec: detection, grouping,',
 		'                  align, override',
+		'  pcd             PCD specs only',
+		'  pcd <name>      Single PCD spec',
 		'  backups         Backup specs only',
 		'  backups <name>  Single backup spec',
 		'  <name>          Legacy: treated as auth spec name',
