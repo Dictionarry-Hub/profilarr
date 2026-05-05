@@ -51,7 +51,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		return json(error, { status: 500 });
 	}
 
-	return new Response(bytes, {
+	return new Response(bytes as BlobPart, {
 		headers: {
 			'Content-Type': 'application/gzip',
 			'Content-Disposition': `attachment; filename="${filename}"`
