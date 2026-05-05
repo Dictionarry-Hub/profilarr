@@ -238,7 +238,9 @@ async function runIntegration(target?: string): Promise<number> {
 		const parts = target.split(/\s+/);
 		if (parts.length >= 2 && INTEGRATION_SUITES.has(parts[0])) {
 			suite = parts[0];
-			specName = parts[1];
+			// Join remaining segments with '/' so callers can scope by nested
+			// directory: `pcd write regex` -> 'write/regex'
+			specName = parts.slice(1).join('/');
 		} else {
 			// Legacy: treat as auth spec name
 			suite = 'auth';
@@ -264,8 +266,9 @@ async function runIntegration(target?: string): Promise<number> {
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
+	const dockerSpecKey = specName?.split('/').pop();
 	const dockerRequired =
-		runningAuthSpecs && (!specName || !suite || INTEGRATION_NEEDS_DOCKER.has(specName));
+		runningAuthSpecs && (!dockerSpecKey || !suite || INTEGRATION_NEEDS_DOCKER.has(dockerSpecKey));
 	let exitCode = 1;
 
 	// Docker is brought up in parallel with non-Docker specs. Specs that need
@@ -311,15 +314,40 @@ async function runIntegration(target?: string): Promise<number> {
 		for (const s of suitesToRun) {
 			const dir = getSpecDir(s);
 			if (specName && s === suite) {
-				// Try direct path first, then search subdirectories
-				const directPath = `${dir}/${specName}.test.ts`;
+				// Resolution order:
+				//   1. <dir>/<specName>.test.ts                   exact file
+				//   2. <dir>/<specName>/                          directory, run all
+				//   3. recursive search by last segment           e.g. `pcd create`
+				const fileCandidate = `${dir}/${specName}.test.ts`;
+				const dirCandidate = `${dir}/${specName}`;
+				let resolved = false;
+
 				try {
-					await Deno.stat(directPath);
-					specFiles.push(directPath);
+					const stat = await Deno.stat(fileCandidate);
+					if (stat.isFile) {
+						specFiles.push(fileCandidate);
+						resolved = true;
+					}
 				} catch {
-					// Search subdirectories for the spec
+					// not a file
+				}
+
+				if (!resolved) {
+					try {
+						const stat = await Deno.stat(dirCandidate);
+						if (stat.isDirectory) {
+							specFiles.push(...(await collectSpecs(dirCandidate)));
+							resolved = true;
+						}
+					} catch {
+						// not a directory
+					}
+				}
+
+				if (!resolved) {
+					const lastSegment = specName.split('/').pop() ?? specName;
 					const allSpecs = await collectSpecs(dir);
-					const match = allSpecs.find((f) => f.endsWith(`/${specName}.test.ts`));
+					const match = allSpecs.find((f) => f.endsWith(`/${lastSegment}.test.ts`));
 					if (match) {
 						specFiles.push(match);
 					} else {
@@ -997,7 +1025,8 @@ function printHelp(): void {
 		'  conflicts <n>   Single conflict spec: detection, grouping,',
 		'                  align, override',
 		'  pcd             PCD specs only',
-		'  pcd <name>      Single PCD spec',
+		'  pcd <name>      Single PCD spec (recursive search by basename)',
+		'  pcd <a> <b>...  Scope by nested directory, e.g. pcd write regex',
 		'  backups         Backup specs only',
 		'  backups <name>  Single backup spec',
 		'  <name>          Legacy: treated as auth spec name',
