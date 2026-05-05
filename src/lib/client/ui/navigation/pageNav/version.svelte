@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+	import { ArrowUp } from 'lucide-svelte';
 	import { getPlatformLabel } from '$shared/utils/version.ts';
 	import { build } from '$lib/shared/build.ts';
 	import logo from '$assets/logo-512.png';
+	import Button from '$ui/button/Button.svelte';
 	import Card from '$ui/card/Card.svelte';
 
 	const CHANNEL_LABELS = {
@@ -13,7 +16,6 @@
 	const platform = getPlatformLabel();
 	const channelLabel = CHANNEL_LABELS[build.channel];
 
-	// v<semver> for stable, raw SHA for develop, nothing for dev.
 	const buildString =
 		build.channel === 'stable'
 			? `v${build.version}`
@@ -24,6 +26,9 @@
 	const line = buildString
 		? `${platform} · ${channelLabel} · ${buildString}`
 		: `${platform} · ${channelLabel}`;
+
+	$: versionStatus = $page.data.versionStatus ?? null;
+	$: outOfDate = versionStatus?.status === 'out-of-date' && versionStatus.latestVersion;
 </script>
 
 <Card padding="sm" flush className="mt-2">
@@ -34,5 +39,19 @@
 			<div class="text-xs font-semibold text-neutral-900 dark:text-neutral-50">profilarr</div>
 			<div class="font-mono text-[10px] text-neutral-600 dark:text-neutral-400">{line}</div>
 		</div>
+
+		{#if outOfDate}
+			<Button
+				icon={ArrowUp}
+				variant="outline"
+				size="md"
+				href={versionStatus.releaseUrl ?? undefined}
+				target={versionStatus.releaseUrl ? '_blank' : undefined}
+				rel={versionStatus.releaseUrl ? 'noopener noreferrer' : undefined}
+				iconColor="text-emerald-600 dark:text-emerald-400"
+				tooltip="Update Available: {versionStatus.latestVersion}"
+				tooltipPosition="right"
+			/>
+		{/if}
 	</div>
 </Card>

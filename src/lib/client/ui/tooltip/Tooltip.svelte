@@ -88,6 +88,15 @@
 	function hide() {
 		visible = false;
 	}
+
+	function portal(node: HTMLElement) {
+		document.body.appendChild(node);
+		return {
+			destroy() {
+				node.parentNode?.removeChild(node);
+			}
+		};
+	}
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -100,8 +109,9 @@
 	<slot />
 	{#if text && visible}
 		<div
+			use:portal
 			bind:this={tooltipEl}
-			class="pointer-events-none fixed z-50"
+			class="pointer-events-none fixed z-[110]"
 			style="{style};border-radius:0.75rem !important"
 		>
 			<div

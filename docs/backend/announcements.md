@@ -203,20 +203,28 @@ src/lib/shared/build.ts
 export const build: BuildInfo = {
 	version: '2.3.0',
 	channel: 'stable',
-	commit: 'abc1234'
+	commit: 'abc1234',
+	builtAt: '2026-04-15T12:00:00Z'
 };
 ```
 
 Committed to git with dev-fallback values (`version: 'dev'`,
-`channel: 'dev'`, `commit: null`). The `Dockerfile` takes three build
-args and overwrites the file before `vite build` runs, so both server
-and client bundles see the stamped values:
+`channel: 'dev'`, `commit: null`, `builtAt: null`). The `Dockerfile`
+takes four build args and overwrites the file before `vite build` runs,
+so both server and client bundles see the stamped values:
 
 ```
 ARG PROFILARR_VERSION
 ARG VITE_CHANNEL
 ARG PROFILARR_COMMIT
+ARG PROFILARR_BUILT_AT
 ```
+
+`builtAt` is the ISO timestamp the image was built. It only matters on
+the develop channel: when the local commit doesn't match the bulletin's
+`develop.latest`, comparing `builtAt` to `channels.develop.published_at`
+is the only way to tell ahead from behind (commit SHAs don't have a
+natural ordering).
 
 `.github/workflows/release.yml` populates these from the git ref: tag
 `v*.*.*` → stable + `package.json` version, push to `develop` → develop

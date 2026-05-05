@@ -29,3 +29,10 @@ export {
 export { compareVersions, isVisible, satisfiesRange, type VisibilityContext } from './filter.ts';
 
 export { ANNOUNCEMENTS_CAP, UnsupportedSchemaError, reconcileAnnouncements } from './reconcile.ts';
+
+export {
+	computeVersionStatus,
+	getVersionStatus,
+	type VersionStatus,
+	type VersionStatusInfo
+} from './version-status.ts';

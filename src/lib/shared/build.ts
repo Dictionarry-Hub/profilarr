@@ -16,10 +16,12 @@ export interface BuildInfo {
 	readonly version: string;
 	readonly channel: Channel;
 	readonly commit: string | null;
+	readonly builtAt: string | null;
 }
 
 export const build: BuildInfo = {
 	version: 'dev',
 	channel: 'dev',
-	commit: null
+	commit: null,
+	builtAt: null
 };
