@@ -25,8 +25,9 @@ import {
 	getSessionExpiry
 } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
-const PORT = 7005;
+const PORT = PORTS.auth.session;
 const ORIGIN = `http://localhost:${PORT}`;
 
 setup(async () => {

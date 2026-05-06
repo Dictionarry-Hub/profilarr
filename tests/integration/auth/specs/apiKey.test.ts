@@ -15,8 +15,9 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUser, setApiKey } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
-const PORT = 7004;
+const PORT = PORTS.auth.apiKey;
 const ORIGIN = `http://localhost:${PORT}`;
 const API_KEY = 'test-api-key-valid-12345';
 

@@ -2,7 +2,7 @@
  * Integration tests: Cookie security flags
  *
  * Verifies Set-Cookie attributes on session cookies.
- * HTTPS test goes through Caddy (self-signed TLS on :7443 → server on :7003).
+ * HTTPS test goes through Caddy (self-signed TLS on :7443 → PORTS.auth.cookieHttps).
  * HTTP test uses a separate server with no proxy.
  *
  * Tests:
@@ -17,13 +17,14 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUser, createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
 // HTTPS: Caddy on :7443 → server on :7003
-const HTTPS_PORT = 7003;
+const HTTPS_PORT = PORTS.auth.cookieHttps;
 const HTTPS_ORIGIN = 'https://localhost:7443';
 
 // HTTP: direct, no proxy
-const HTTP_PORT = 7013;
+const HTTP_PORT = PORTS.auth.cookieHttp;
 const HTTP_ORIGIN = `http://localhost:${HTTP_PORT}`;
 
 setup(async () => {

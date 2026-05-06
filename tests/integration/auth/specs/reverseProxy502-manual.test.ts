@@ -7,7 +7,7 @@
  *   deno task test integration reverseProxy502-manual
  *
  * It starts:
- * - Profilarr preview on :7019
+ * - Profilarr preview on PORTS.auth.reverseProxy502Manual
  * - nginx proxy on :7446 (small proxy_buffer_size)
  *
  * Then it pauses so you can test in a browser and inspect nginx logs after:
@@ -23,8 +23,9 @@
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
-const PORT = 7019;
+const PORT = PORTS.auth.reverseProxy502Manual;
 const PROXY_ORIGIN = 'http://localhost:7446';
 
 setup(async () => {

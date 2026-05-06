@@ -48,10 +48,11 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { openDb } from '$test-harness/db.ts';
 import { hash } from '@felix/bcrypt';
 
-const PORT = 7016;
+const PORT = PORTS.auth.secretExposure;
 const ORIGIN = `http://localhost:${PORT}`;
 
 // Known secrets — we insert these and check they don't appear in responses

@@ -7,6 +7,7 @@ import { assertEquals, assertExists, assert } from '@std/assert';
 import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import {
 	createPcdRepo,
 	createDatabaseInstance,
@@ -14,7 +15,7 @@ import {
 	queryOpsByDatabase
 } from '../harness/setup.ts';
 
-const PORT = 7034;
+const PORT = PORTS.conflicts.regexDeleteRenameGeneratedDraft;
 const ORIGIN = `http://localhost:${PORT}`;
 
 let client: TestClient;

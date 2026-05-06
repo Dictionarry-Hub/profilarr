@@ -1,8 +1,8 @@
 /**
  * Integration tests: Reverse proxy
  *
- * Server on port 7008 with ORIGIN=https://localhost:7444.
- * Caddy terminates TLS on :7444 and proxies to :7008.
+ * Server on PORTS.auth.proxy with ORIGIN=https://localhost:7444.
+ * Caddy terminates TLS on :7444 and proxies to PORTS.auth.proxy.
  * All requests go through Caddy (the real proxy path).
  *
  * Tests:
@@ -18,8 +18,9 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, queryDb } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
-const PORT = 7008;
+const PORT = PORTS.auth.proxy;
 const PROXY_ORIGIN = 'https://localhost:7444';
 
 setup(async () => {

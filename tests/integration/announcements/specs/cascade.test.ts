@@ -14,6 +14,7 @@
 
 import { assertEquals } from '@std/assert';
 import { run, setup, teardown, test } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { getDbPath, startServer, stopServer } from '$test-harness/server.ts';
 import {
 	countAnnouncements,
@@ -24,7 +25,7 @@ import {
 	tryInsertOrphanAnnouncement
 } from '../harness/setup.ts';
 
-const PORT = 7170;
+const PORT = PORTS.announcements.cascade;
 
 let dbPath: string;
 

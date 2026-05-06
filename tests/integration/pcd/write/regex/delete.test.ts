@@ -5,6 +5,7 @@
 import { assert, assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '$test-harness/server.ts';
 import { run, setup, teardown, test } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { base } from '../../harness/fixtures.ts';
 import {
 	normalizeSql,
@@ -23,7 +24,7 @@ import {
 	userOpsSince
 } from './helpers.ts';
 
-const PORT = 7040;
+const PORT = PORTS.pcd.writeRegexDelete;
 const ORIGIN = `http://localhost:${PORT}`;
 
 const { seededPcd } = createScenarioFactory(PORT, 'pcd-write-regex-delete');

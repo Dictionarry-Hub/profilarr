@@ -4,6 +4,7 @@
 
 import { assertEquals, assertExists } from '@std/assert';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { createMockServer, type CapturedRequest } from '../harness/mock-server.ts';
 import { DiscordNotifier } from '$notifications/notifiers/discord/DiscordNotifier.ts';
 import { NtfyNotifier } from '$notifications/notifiers/ntfy/NtfyNotifier.ts';
@@ -13,7 +14,7 @@ import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { upgrade } from '$notifications/definitions/upgrade.ts';
 import type { UpgradeJobLog } from '$lib/server/upgrades/types.ts';
 
-const MOCK_PORT = 7133;
+const MOCK_PORT = PORTS.notifications.upgrade;
 let captured: CapturedRequest[];
 let mockServer: Deno.HttpServer;
 

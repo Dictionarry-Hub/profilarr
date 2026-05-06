@@ -5,6 +5,7 @@
 import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '$test-harness/server.ts';
 import { run, setup, teardown, test } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { base } from '../../harness/fixtures.ts';
 import {
 	compilePcd,
@@ -16,7 +17,7 @@ import {
 import { write } from '../../harness/write.ts';
 import { assertActionFailed, createScenarioFactory, userOpsSince } from './helpers.ts';
 
-const PORT = 7042;
+const PORT = PORTS.pcd.writeDelayProfilesCreate;
 const ORIGIN = `http://localhost:${PORT}`;
 
 const { newPcd, seededPcd } = createScenarioFactory(PORT, 'pcd-write-delay-profile-create');

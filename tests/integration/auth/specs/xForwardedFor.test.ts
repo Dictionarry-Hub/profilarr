@@ -24,9 +24,10 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, clearLoginAttempts, queryDb } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { openDb } from '$test-harness/db.ts';
 
-const PORT = 7015;
+const PORT = PORTS.auth.xForwardedFor;
 const ORIGIN = `http://localhost:${PORT}`;
 
 setup(async () => {

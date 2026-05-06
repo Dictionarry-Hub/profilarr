@@ -27,10 +27,11 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 import { openDb } from '$test-harness/db.ts';
 import { hash } from '@felix/bcrypt';
 
-const PORT = 7017;
+const PORT = PORTS.backups.backupSecrets;
 const ORIGIN = `http://localhost:${PORT}`;
 const BACKUPS_DIR = `./dist/integration-${PORT}/backups`;
 

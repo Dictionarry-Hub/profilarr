@@ -17,8 +17,9 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer } from '$test-harness/server.ts';
 import { createUser, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
-const PORT = 7040;
+const PORT = PORTS.backups.restoreFormActions;
 const ORIGIN = `http://localhost:${PORT}`;
 const BASE = `./dist/integration-${PORT}`;
 const BACKUPS_DIR = `${BASE}/backups`;

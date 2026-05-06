@@ -30,8 +30,9 @@ import {
 	insertExpiredAttempts
 } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
-const PORT = 7007;
+const PORT = PORTS.auth.rateLimit;
 const ORIGIN = `http://localhost:${PORT}`;
 
 /**

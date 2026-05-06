@@ -1,8 +1,8 @@
 /**
  * Integration tests: Reverse proxy 502 reproduction
  *
- * Backend server on port 7019 with AUTH=on.
- * nginx on :7446 proxies to :7019 with proxy_buffer_size=4k.
+ * Backend server on PORTS.auth.reverseProxy502 with AUTH=on.
+ * nginx on :7446 proxies to that port with proxy_buffer_size=4k.
  *
  * Expected fixed behavior:
  * - /auth/login works through the proxy
@@ -17,8 +17,9 @@ import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
-const PORT = 7019;
+const PORT = PORTS.auth.reverseProxy502;
 const PROXY_ORIGIN = 'http://localhost:7446';
 
 setup(async () => {

@@ -11,7 +11,7 @@
  */
 import { test, expect } from '@playwright/test';
 
-const DIRECT_URL = process.env.OIDC_DIRECT_URL || 'http://localhost:7006';
+const DIRECT_URL = process.env.OIDC_DIRECT_URL || 'http://localhost:7007';
 const PROXY_URL = process.env.OIDC_PROXY_URL || 'https://localhost:7445';
 
 /**
