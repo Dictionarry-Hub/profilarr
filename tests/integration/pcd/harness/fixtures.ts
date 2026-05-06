@@ -177,6 +177,33 @@ export const base = {
 		};
 	},
 
+	qualities(input: { entries: { name: string; arrType: 'radarr' | 'sonarr' }[] }): SeedOperation {
+		const inserts = input.entries
+			.map(
+				(entry) =>
+					`INSERT OR IGNORE INTO qualities (name) VALUES (${sqlValue(entry.name)});\n` +
+					`INSERT OR IGNORE INTO quality_api_mappings (quality_name, arr_type, api_name) VALUES (${sqlValue(
+						entry.name
+					)}, ${sqlValue(entry.arrType)}, ${sqlValue(entry.name)});`
+			)
+			.join('\n');
+		return { sql: inserts };
+	},
+
+	radarrQualityDefinitions(input: {
+		name: string;
+		entries: QualityDefinitionEntry[];
+	}): SeedOperation {
+		return qualityDefinitionsSeed('radarr_quality_definitions', 'radarr', input);
+	},
+
+	sonarrQualityDefinitions(input: {
+		name: string;
+		entries: QualityDefinitionEntry[];
+	}): SeedOperation {
+		return qualityDefinitionsSeed('sonarr_quality_definitions', 'sonarr', input);
+	},
+
 	customFormatRegexCondition(input: {
 		formatName: string;
 		conditionName: string;
@@ -226,4 +253,37 @@ function mediaSettingsSeed(
 		sql: `INSERT INTO ${table} (name, propers_repacks, enable_media_info)
 			  VALUES (${sqlValue(input.name)}, ${sqlValue(propersRepacks)}, ${enableMediaInfo ? 1 : 0});`
 	};
+}
+
+interface QualityDefinitionEntry {
+	quality_name: string;
+	min_size: number;
+	max_size: number;
+	preferred_size: number;
+}
+
+function qualityDefinitionsSeed(
+	table: 'radarr_quality_definitions' | 'sonarr_quality_definitions',
+	arrType: 'radarr' | 'sonarr',
+	input: { name: string; entries: QualityDefinitionEntry[] }
+): SeedOperation {
+	const qualityInserts = input.entries
+		.map(
+			(entry) =>
+				`INSERT OR IGNORE INTO qualities (name) VALUES (${sqlValue(entry.quality_name)});\n` +
+				`INSERT OR IGNORE INTO quality_api_mappings (quality_name, arr_type, api_name) VALUES (${sqlValue(
+					entry.quality_name
+				)}, ${sqlValue(arrType)}, ${sqlValue(entry.quality_name)});`
+		)
+		.join('\n');
+
+	const definitionInserts = input.entries
+		.map(
+			(entry) =>
+				`INSERT INTO ${table} (name, quality_name, min_size, max_size, preferred_size) VALUES (` +
+				`${sqlValue(input.name)}, ${sqlValue(entry.quality_name)}, ${entry.min_size}, ${entry.max_size}, ${entry.preferred_size});`
+		)
+		.join('\n');
+
+	return { sql: `${qualityInserts}\n${definitionInserts}` };
 }

@@ -56,6 +56,19 @@ export interface RadarrNamingFormInput {
 	layer?: OpOrigin;
 }
 
+export interface QualityDefinitionEntryInput {
+	quality_name: string;
+	min_size: number;
+	max_size: number;
+	preferred_size: number;
+}
+
+export interface QualityDefinitionsFormInput {
+	name: string;
+	entries: QualityDefinitionEntryInput[];
+	layer?: OpOrigin;
+}
+
 export interface SonarrNamingFormInput {
 	name: string;
 	rename?: boolean;
@@ -111,6 +124,22 @@ export const write = {
 		submitCreate: submitCreateSonarrNaming,
 		submitUpdate: submitUpdateSonarrNaming,
 		submitRemove: submitRemoveSonarrNaming
+	},
+	qualityDefRadarr: {
+		create: createRadarrQualityDefinitions,
+		update: updateRadarrQualityDefinitions,
+		remove: removeRadarrQualityDefinitions,
+		submitCreate: submitCreateRadarrQualityDefinitions,
+		submitUpdate: submitUpdateRadarrQualityDefinitions,
+		submitRemove: submitRemoveRadarrQualityDefinitions
+	},
+	qualityDefSonarr: {
+		create: createSonarrQualityDefinitions,
+		update: updateSonarrQualityDefinitions,
+		remove: removeSonarrQualityDefinitions,
+		submitCreate: submitCreateSonarrQualityDefinitions,
+		submitUpdate: submitUpdateSonarrQualityDefinitions,
+		submitRemove: submitRemoveSonarrQualityDefinitions
 	}
 };
 
@@ -492,6 +521,152 @@ function sonarrNamingFields(input: SonarrNamingFormInput): Record<string, string
 		colonReplacementFormat: input.colonReplacementFormat ?? 'delete',
 		customColonReplacementFormat: input.customColonReplacementFormat ?? '',
 		multiEpisodeStyle: input.multiEpisodeStyle ?? 'extend',
+		layer: input.layer ?? 'user'
+	};
+}
+
+export async function createRadarrQualityDefinitions(
+	ctx: PcdTestContext,
+	input: QualityDefinitionsFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitCreateRadarrQualityDefinitions(ctx, input),
+		'create radarr quality definitions'
+	);
+}
+
+export async function updateRadarrQualityDefinitions(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: QualityDefinitionsFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateRadarrQualityDefinitions(ctx, currentName, input),
+		'update radarr quality definitions'
+	);
+}
+
+export async function removeRadarrQualityDefinitions(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitRemoveRadarrQualityDefinitions(ctx, currentName, layer),
+		'delete radarr quality definitions'
+	);
+}
+
+export async function submitCreateRadarrQualityDefinitions(
+	ctx: PcdTestContext,
+	input: QualityDefinitionsFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/quality-definitions/new`,
+		qualityDefinitionsFields(input, 'radarr'),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitUpdateRadarrQualityDefinitions(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: QualityDefinitionsFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/quality-definitions/radarr/${encodeURIComponent(currentName)}?/update`,
+		qualityDefinitionsFields(input, 'radarr'),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitRemoveRadarrQualityDefinitions(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/quality-definitions/radarr/${encodeURIComponent(currentName)}?/delete`,
+		{ layer },
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function createSonarrQualityDefinitions(
+	ctx: PcdTestContext,
+	input: QualityDefinitionsFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitCreateSonarrQualityDefinitions(ctx, input),
+		'create sonarr quality definitions'
+	);
+}
+
+export async function updateSonarrQualityDefinitions(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: QualityDefinitionsFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateSonarrQualityDefinitions(ctx, currentName, input),
+		'update sonarr quality definitions'
+	);
+}
+
+export async function removeSonarrQualityDefinitions(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitRemoveSonarrQualityDefinitions(ctx, currentName, layer),
+		'delete sonarr quality definitions'
+	);
+}
+
+export async function submitCreateSonarrQualityDefinitions(
+	ctx: PcdTestContext,
+	input: QualityDefinitionsFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/quality-definitions/new`,
+		qualityDefinitionsFields(input, 'sonarr'),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitUpdateSonarrQualityDefinitions(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: QualityDefinitionsFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/quality-definitions/sonarr/${encodeURIComponent(currentName)}?/update`,
+		qualityDefinitionsFields(input, 'sonarr'),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitRemoveSonarrQualityDefinitions(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/quality-definitions/sonarr/${encodeURIComponent(currentName)}?/delete`,
+		{ layer },
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+function qualityDefinitionsFields(
+	input: QualityDefinitionsFormInput,
+	arrType: 'radarr' | 'sonarr'
+): Record<string, string> {
+	return {
+		arrType,
+		name: input.name,
+		entries: JSON.stringify(input.entries),
 		layer: input.layer ?? 'user'
 	};
 }
