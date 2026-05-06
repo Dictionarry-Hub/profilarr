@@ -141,7 +141,8 @@ function buildFieldConflicts(
 
 function lookupNameFromMetadata(metadata: ParsedMetadata): string | null {
 	if (!metadata) return null;
-	const stableKeyValue = metadata.stable_key?.value;
+	const stableKey = (metadata as unknown as { stable_key?: { value?: unknown } }).stable_key;
+	const stableKeyValue = stableKey?.value;
 	if (typeof stableKeyValue === 'string' && stableKeyValue.length > 0) return stableKeyValue;
 	if (typeof metadata.name === 'string' && metadata.name.length > 0) return metadata.name;
 	return null;
