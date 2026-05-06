@@ -47,6 +47,8 @@ export interface OperationMetadata {
 	name: string;
 	/** Previous name if this is a rename operation */
 	previousName?: string;
+	/** Quality tier identity for per-row quality definitions ops */
+	qualityName?: string;
 	/** Stable key for locating the entity */
 	stableKey?: { key: string; value: string };
 	/** Group id for operations created as part of a single action */

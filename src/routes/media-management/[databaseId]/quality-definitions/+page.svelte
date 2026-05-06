@@ -15,7 +15,6 @@
 	import { Plus } from 'lucide-svelte';
 	import type { EntityType } from '$shared/pcd/portable.ts';
 	import type { PageData } from './$types';
-	import { mediaManagementLockedMessage } from '../lock';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
 
 	export let data: PageData;
@@ -24,15 +23,7 @@
 	let cloneSourceName = '';
 	let cloneEntityType: EntityType = 'radarr_quality_definitions';
 
-	function notifyLocked() {
-		alertStore.add('info', mediaManagementLockedMessage);
-	}
-
 	function handleClone(event: CustomEvent<{ name: string; arr_type: string }>) {
-		if (!data.canWriteToBase) {
-			notifyLocked();
-			return;
-		}
 		cloneSourceName = event.detail.name;
 		cloneEntityType = `${event.detail.arr_type}_quality_definitions` as EntityType;
 		cloneModalOpen = true;
@@ -76,31 +67,27 @@
 <!-- Actions Bar -->
 <ActionsBar>
 	<SearchAction searchStore={search} placeholder="Search quality definitions..." responsive />
-	{#if data.canWriteToBase}
-		<ActionButton icon={Plus} hasDropdown={true} dropdownPosition="right">
-			<svelte:fragment slot="dropdown" let:dropdownPosition>
-				<Dropdown position={dropdownPosition} minWidth="10rem">
-					<DropdownHeader label="New config" />
-					<DropdownItem
-						label="Radarr"
-						on:click={() =>
-							goto(
-								`/media-management/${data.currentDatabase.id}/quality-definitions/new?arrType=radarr`
-							)}
-					/>
-					<DropdownItem
-						label="Sonarr"
-						on:click={() =>
-							goto(
-								`/media-management/${data.currentDatabase.id}/quality-definitions/new?arrType=sonarr`
-							)}
-					/>
-				</Dropdown>
-			</svelte:fragment>
-		</ActionButton>
-	{:else}
-		<ActionButton icon={Plus} on:click={notifyLocked} />
-	{/if}
+	<ActionButton icon={Plus} hasDropdown={true} dropdownPosition="right">
+		<svelte:fragment slot="dropdown" let:dropdownPosition>
+			<Dropdown position={dropdownPosition} minWidth="10rem">
+				<DropdownHeader label="New config" />
+				<DropdownItem
+					label="Radarr"
+					on:click={() =>
+						goto(
+							`/media-management/${data.currentDatabase.id}/quality-definitions/new?arrType=radarr`
+						)}
+				/>
+				<DropdownItem
+					label="Sonarr"
+					on:click={() =>
+						goto(
+							`/media-management/${data.currentDatabase.id}/quality-definitions/new?arrType=sonarr`
+						)}
+				/>
+			</Dropdown>
+		</svelte:fragment>
+	</ActionButton>
 	<ViewToggle bind:value={$view} />
 </ActionsBar>
 
@@ -126,7 +113,6 @@
 		<TableView
 			configs={$filtered}
 			databaseId={data.currentDatabase.id}
-			canWriteToBase={data.canWriteToBase}
 			on:clone={handleClone}
 			on:export={handleExport}
 		/>
@@ -134,7 +120,6 @@
 		<CardView
 			configs={$filtered}
 			databaseId={data.currentDatabase.id}
-			canWriteToBase={data.canWriteToBase}
 			on:clone={handleClone}
 			on:export={handleExport}
 		/>

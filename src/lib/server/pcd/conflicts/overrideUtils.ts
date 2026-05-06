@@ -10,6 +10,7 @@ export type StoredOpMetadata = {
 	entity?: string;
 	name?: string;
 	previousName?: string;
+	qualityName?: string;
 	summary?: string;
 	title?: string;
 	stable_key?: { key?: string; value?: string };

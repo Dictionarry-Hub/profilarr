@@ -26,7 +26,6 @@
 	import type { ArrType } from '$shared/pcd/types.ts';
 	import type { QualityDefinitionsConfig, QualityDefinitionEntry } from '$shared/pcd/display.ts';
 	import type { AffectedArr } from '$shared/sync/types.ts';
-	import { mediaManagementLockedMessage } from '../../lock';
 
 	// Resolution grouping for quality definitions UI
 	type ResolutionGroup = 'SD' | '720p' | '1080p' | '2160p' | 'Prereleases' | 'Other';
@@ -131,10 +130,9 @@
 	let pendingRedirectTo = '';
 	let pendingAffectedArrs: AffectedArr[] = [];
 	let selectedLayer: 'user' | 'base' = canWriteToBase ? 'base' : 'user';
-	$: readOnly = !canWriteToBase;
 
-	$: if (!readOnly) update('name', configName);
-	$: if (!readOnly) update('entries', entries);
+	$: update('name', configName);
+	$: update('entries', entries);
 
 	$: databaseId = parseInt($page.params.databaseId ?? '0', 10);
 
@@ -147,9 +145,8 @@
 		mode === 'create'
 			? `New ${arrLabel} Quality Definitions`
 			: `Edit ${arrLabel} Quality Definitions`;
-	$: description = readOnly
-		? 'Media management configs from linked databases cannot be edited directly'
-		: mode === 'create'
+	$: description =
+		mode === 'create'
 			? `Create a new ${arrLabel} quality definitions configuration for ${databaseName}`
 			: `Update ${arrLabel} quality definitions configuration`;
 	$: isValid = configName.trim() !== '' && entries.length > 0;
@@ -272,7 +269,6 @@
 	}
 
 	function syncToEntry(qualityName: string) {
-		if (readOnly) return;
 		const markers = markersMap[qualityName];
 		const entry = entries.find((e) => e.quality_name === qualityName);
 		if (markers && entry) {
@@ -294,10 +290,6 @@
 	);
 
 	async function handleSaveClick() {
-		if (readOnly) {
-			notifyLocked();
-			return;
-		}
 		if (saving) return;
 		saving = true;
 		selectedLayer = canWriteToBase ? 'base' : 'user';
@@ -306,18 +298,10 @@
 	}
 
 	async function handleDeleteClick() {
-		if (readOnly) {
-			notifyLocked();
-			return;
-		}
 		showDeleteModal = true;
 	}
 
 	async function handleDeleteConfirm() {
-		if (readOnly) {
-			notifyLocked();
-			return;
-		}
 		selectedLayer = canWriteToBase ? 'base' : 'user';
 		showDeleteModal = false;
 		await tick();
@@ -326,10 +310,6 @@
 
 	function handleDeleteCancel() {
 		showDeleteModal = false;
-	}
-
-	function notifyLocked() {
-		alertStore.add('info', mediaManagementLockedMessage);
 	}
 </script>
 
@@ -372,7 +352,7 @@
 			iconColor="text-blue-600 dark:text-blue-400"
 			on:click={() => (showInfoModal = true)}
 		/>
-		{#if mode === 'edit' && !readOnly}
+		{#if mode === 'edit'}
 			<Button
 				text={deleting ? 'Deleting...' : 'Delete'}
 				icon={Trash2}
@@ -385,8 +365,7 @@
 			text={saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
 			icon={Save}
 			iconColor="text-blue-600 dark:text-blue-400"
-			disabled={!readOnly && (saving || !isValid || !$isDirty)}
-			softDisabled={readOnly}
+			disabled={saving || !isValid || !$isDirty}
 			on:click={handleSaveClick}
 		/>
 	</div>
@@ -400,7 +379,6 @@
 		bind:value={configName}
 		placeholder="e.g., default"
 		required
-		disabled={readOnly}
 	/>
 
 	<!-- Quality definitions table -->
@@ -460,7 +438,6 @@
 									unlimitedValue={baseScaleMax}
 									displayTransform={toDisplayUnit}
 									bind:markers={markersMap[entry.quality_name]}
-									disabled={readOnly}
 									on:change={() => syncToEntry(entry.quality_name)}
 								/>
 							</div>
@@ -481,7 +458,6 @@
 										max={markers[1].value}
 										step={1}
 										responsive
-										disabled={readOnly}
 										onchange={() => syncToEntry(entry.quality_name)}
 									/>
 								</div>
@@ -500,7 +476,6 @@
 										max={markers[2].value}
 										step={1}
 										responsive
-										disabled={readOnly}
 										onchange={() => syncToEntry(entry.quality_name)}
 									/>
 								</div>
@@ -519,7 +494,6 @@
 										max={baseScaleMax}
 										step={1}
 										responsive
-										disabled={readOnly}
 										onchange={() => syncToEntry(entry.quality_name)}
 									/>
 								</div>
@@ -584,7 +558,7 @@
 </form>
 
 <!-- Hidden delete form -->
-{#if mode === 'edit' && !readOnly}
+{#if mode === 'edit'}
 	<form
 		bind:this={deleteFormElement}
 		method="POST"

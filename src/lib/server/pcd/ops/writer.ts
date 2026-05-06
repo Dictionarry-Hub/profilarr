@@ -22,6 +22,9 @@ function buildMetadataJson(metadata?: OperationMetadata): string | null {
 	if (metadata.previousName) {
 		payload.previousName = metadata.previousName;
 	}
+	if (metadata.qualityName) {
+		payload.qualityName = metadata.qualityName;
+	}
 	if (metadata.summary) {
 		payload.summary = metadata.summary;
 	}
