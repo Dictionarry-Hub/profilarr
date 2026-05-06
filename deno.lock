@@ -1502,7 +1502,7 @@
         "npm:@jsr/db__sqlite@0.12",
         "npm:@playwright/test@^1.59.1",
         "npm:@sveltejs/kit@^2.59.1",
-        "npm:@sveltejs/vite-plugin-svelte@^7.1.0",
+        "npm:@sveltejs/vite-plugin-svelte@^7.1.1",
         "npm:@tailwindcss/vite@^4.2.4",
         "npm:@types/better-sqlite3@^7.6.13",
         "npm:@types/deno@^2.5.0",
