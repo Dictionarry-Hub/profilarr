@@ -15,7 +15,6 @@
 	import { Plus } from 'lucide-svelte';
 	import type { EntityType } from '$shared/pcd/portable.ts';
 	import type { PageData } from './$types';
-	import { mediaManagementLockedMessage } from '../lock';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
 
 	export let data: PageData;
@@ -25,10 +24,6 @@
 	let cloneEntityType: EntityType = 'radarr_media_settings';
 
 	function handleClone(event: CustomEvent<{ name: string; arr_type: string }>) {
-		if (!data.canWriteToBase) {
-			alertStore.add('info', mediaManagementLockedMessage);
-			return;
-		}
 		cloneSourceName = event.detail.name;
 		cloneEntityType = `${event.detail.arr_type}_media_settings` as EntityType;
 		cloneModalOpen = true;
