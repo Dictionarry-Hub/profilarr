@@ -15,16 +15,14 @@ type ConflictRow = {
 	title: string;
 	summary: string | null;
 	origin: string;
-	/** All op IDs in this conflict group (for batch resolution) */
-	groupOpIds: number[];
-	/** Number of collapsed intermediate conflicts */
-	collapsedCount: number;
+	/** Group identifier for visually clustering siblings from the same save. */
+	groupId: string | null;
 };
 
-function parseMetadata(raw: string | null): OperationMetadata | null {
+function parseMetadata(raw: string | null): (OperationMetadata & { group_id?: string }) | null {
 	if (!raw) return null;
 	try {
-		return JSON.parse(raw) as OperationMetadata;
+		return JSON.parse(raw) as OperationMetadata & { group_id?: string };
 	} catch {
 		return null;
 	}
@@ -60,8 +58,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 			title,
 			summary: metadata?.summary ?? null,
 			origin: op.origin,
-			groupOpIds: [op.id],
-			collapsedCount: 0
+			groupId: typeof metadata?.group_id === 'string' ? metadata.group_id : null
 		};
 	});
 
@@ -71,16 +68,10 @@ export const load: PageServerLoad = async ({ parent }) => {
 	};
 };
 
-function parseGroupOpIds(formData: FormData): number[] {
-	const raw = formData.get('groupOpIds');
-	if (!raw || typeof raw !== 'string') return [];
-	try {
-		const parsed = JSON.parse(raw) as unknown;
-		if (!Array.isArray(parsed)) return [];
-		return parsed.filter((id): id is number => typeof id === 'number' && Number.isFinite(id));
-	} catch {
-		return [];
-	}
+function parseOpId(formData: FormData): number | null {
+	const raw = formData.get('opId');
+	const opId = Number(raw);
+	return Number.isFinite(opId) ? opId : null;
 }
 
 export const actions: Actions = {
@@ -91,21 +82,14 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const groupOpIds = parseGroupOpIds(formData);
-		if (groupOpIds.length === 0) {
-			const opId = Number(formData.get('opId'));
-			if (!Number.isFinite(opId)) {
-				return fail(400, { error: 'Invalid operation id' });
-			}
-			groupOpIds.push(opId);
+		const opId = parseOpId(formData);
+		if (opId === null) {
+			return fail(400, { error: 'Invalid operation id' });
 		}
 
-		// Align all ops in the group
-		for (const opId of groupOpIds) {
-			const result = await alignConflict({ databaseId, opId });
-			if (!result.success) {
-				return fail(400, { error: result.error || 'Failed to align conflict' });
-			}
+		const result = await alignConflict({ databaseId, opId });
+		if (!result.success) {
+			return fail(400, { error: result.error || 'Failed to align conflict' });
 		}
 
 		return { success: true };
@@ -117,22 +101,14 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const groupOpIds = parseGroupOpIds(formData);
-		if (groupOpIds.length === 0) {
-			const opId = Number(formData.get('opId'));
-			if (!Number.isFinite(opId)) {
-				return fail(400, { error: 'Invalid operation id' });
-			}
-			groupOpIds.push(opId);
+		const opId = parseOpId(formData);
+		if (opId === null) {
+			return fail(400, { error: 'Invalid operation id' });
 		}
 
-		// Override sequentially, oldest first — each resolution may cascade-fix the next
-		for (const opId of groupOpIds) {
-			const result = await overrideConflict({ databaseId, opId });
-			if (!result.success) {
-				// Op may have auto-resolved from a prior override in this batch — skip
-				continue;
-			}
+		const result = await overrideConflict({ databaseId, opId });
+		if (!result.success) {
+			return fail(400, { error: result.error || 'Failed to override conflict' });
 		}
 
 		return { success: true };

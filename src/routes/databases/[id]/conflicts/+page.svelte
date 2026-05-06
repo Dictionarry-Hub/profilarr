@@ -28,9 +28,12 @@
 		title: string;
 		summary: string | null;
 		origin: string;
-		groupOpIds: number[];
-		collapsedCount: number;
+		groupId: string | null;
 	};
+
+	function groupKey(row: ConflictRow): string {
+		return row.groupId ?? `op-${row.opId}`;
+	}
 
 	let searchStore: SearchStore;
 	$: searchStore = getPersistentSearchStore(`databaseConflictsSearch:${$page.params.id}`, {
@@ -213,24 +216,34 @@
 		}
 	];
 
-	$: filteredConflicts = data.conflicts.filter((conflict) => {
-		const query = $searchStore.query?.trim().toLowerCase();
-		const matchesQuery = !query
-			? true
-			: conflict.title.toLowerCase().includes(query) ||
-				conflict.entity.toLowerCase().includes(query) ||
-				conflict.name.toLowerCase().includes(query) ||
-				(reasonLabels[conflict.conflictReason ?? 'guard_mismatch'] ?? conflict.conflictReason ?? '')
-					.toLowerCase()
-					.includes(query) ||
-				conflict.status.toLowerCase().includes(query);
+	$: filteredConflicts = data.conflicts
+		.filter((conflict) => {
+			const query = $searchStore.query?.trim().toLowerCase();
+			const matchesQuery = !query
+				? true
+				: conflict.title.toLowerCase().includes(query) ||
+					conflict.entity.toLowerCase().includes(query) ||
+					conflict.name.toLowerCase().includes(query) ||
+					(
+						reasonLabels[conflict.conflictReason ?? 'guard_mismatch'] ??
+						conflict.conflictReason ??
+						''
+					)
+						.toLowerCase()
+						.includes(query) ||
+					conflict.status.toLowerCase().includes(query);
 
-		const matchesEntity = activeEntities.size === 0 ? true : activeEntities.has(conflict.entity);
-		const matchesReason =
-			activeReasons.size === 0 ? true : activeReasons.has(conflict.conflictReason ?? '');
+			const matchesEntity = activeEntities.size === 0 ? true : activeEntities.has(conflict.entity);
+			const matchesReason =
+				activeReasons.size === 0 ? true : activeReasons.has(conflict.conflictReason ?? '');
 
-		return matchesQuery && matchesEntity && matchesReason;
-	});
+			return matchesQuery && matchesEntity && matchesReason;
+		})
+		// Cluster ops from the same save adjacently so it is obvious they came
+		// from one user action. Ungrouped conflicts each form their own
+		// single-element cluster keyed by opId, preserving their original order.
+		.slice()
+		.sort((a, b) => groupKey(a).localeCompare(groupKey(b)) || a.opId - b.opId);
 </script>
 
 <svelte:head>
@@ -305,17 +318,12 @@
 	>
 		<svelte:fragment slot="actions" let:row>
 			<div class="flex items-center justify-end gap-1">
-				{#if row.collapsedCount > 0}
-					<span class="mr-1 text-[10px] font-medium text-neutral-500 dark:text-neutral-400">
-						+{row.collapsedCount} more
-					</span>
-				{/if}
 				<form
 					method="POST"
 					action="?/align"
 					use:enhance={handleConflictAction('Conflict aligned', 'Align conflict failed')}
 				>
-					<input type="hidden" name="groupOpIds" value={JSON.stringify(row.groupOpIds)} />
+					<input type="hidden" name="opId" value={row.opId} />
 					<Button
 						icon={HeartHandshake}
 						text="Align"
@@ -330,7 +338,7 @@
 					action="?/override"
 					use:enhance={handleConflictAction('Conflict override queued', 'Override conflict failed')}
 				>
-					<input type="hidden" name="groupOpIds" value={JSON.stringify(row.groupOpIds)} />
+					<input type="hidden" name="opId" value={row.opId} />
 					<Button
 						icon={HandMetal}
 						text="Override"
