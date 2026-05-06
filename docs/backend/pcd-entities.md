@@ -264,10 +264,7 @@ Some field pairs stay atomic to satisfy schema constraints:
 **Source:** `entities/mediaManagement/`
 
 Media management covers three sub-entity types, each with Radarr and Sonarr
-variants. Media settings and naming are editable on linked databases through
-user-layer ops. Quality definitions still uses atomic writes and base-origin
-locking while its conflict strategy is pending
-([#421](https://github.com/Dictionarry-Hub/profilarr/issues/421)).
+variants. All three are editable on linked databases through user-layer ops.
 
 ### Naming
 
@@ -304,10 +301,20 @@ all emitted ops share a `groupId`.
 
 **Tables:** radarr_quality_definitions, sonarr_quality_definitions
 
-Size limits (min, max, preferred) per quality tier. Uses a **full-replace**
-strategy: delete all existing entries (each guarded on its field values),
-then insert the complete new set. This ensures ordering and size
-consistency.
+Size limits (min, max, preferred) per quality tier. Tiers are fixed by the
+`qualities` foreign key, so configs only modify existing tiers; tiers are
+not added or removed by the user.
+
+Create writes one op containing one INSERT per tier. Delete is name-only
+guarded as a single statement, so upstream tier-level changes do not block
+a delete. Update splits into one op per changed tier (covering
+`min_size`/`max_size`/`preferred_size` together as a full-row UPDATE with
+value guards), plus a separate single-statement op for a config rename
+(`UPDATE ... SET name = ? WHERE name = ?`). When one submit produces
+multiple ops, they share a `groupId`. Per-tier ops carry a new
+`metadata.qualityName` field identifying the tier; override and conflict
+handling key off this alongside `stableKey` to reconstruct intent against
+the current cache.
 
 ## Summary
 
@@ -319,4 +326,4 @@ consistency.
 | Delay profile       | per-field, constrained pairs | --                      | FK cascade                       |
 | Media naming        | per-field                    | --                      | --                               |
 | Media settings      | per-field                    | --                      | --                               |
-| Quality definitions | full-list replace            | --                      | --                               |
+| Quality definitions | per-tier (full-row)          | --                      | --                               |

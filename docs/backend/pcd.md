@@ -210,6 +210,7 @@ Each op stores two JSON blobs alongside its SQL:
 | `entity`        | Entity type (custom_format, quality_profile, etc.) |
 | `name`          | Entity name                                        |
 | `previousName`  | Original name if renamed                           |
+| `qualityName`   | Tier identity for per-row quality definitions ops  |
 | `stableKey`     | `{ key, value }` to locate the entity              |
 | `groupId`       | UUID grouping ops created as part of one action    |
 | `changedFields` | List of modified field names                       |
@@ -277,10 +278,10 @@ the description op conflicts -- the tag op still applies cleanly.
 
 Op splitting is implemented for custom format general/conditions, quality
 profile general/qualities/scoring, regular expressions, delay profile
-updates, media settings updates, and naming updates. Delay profiles keep
-schema-constrained field pairs in one op when needed: protocol changes with
-delay NULLing, and bypass-score changes with minimum custom format score
-NULLing.
+updates, media settings updates, naming updates, and quality definitions
+updates. Delay profiles keep schema-constrained field pairs in one op when
+needed: protocol changes with delay NULLing, and bypass-score changes with
+minimum custom format score NULLing.
 
 Media settings split `name`, `propers_repacks`, and `enable_media_info`
 changes into independent ops. A rename plus scalar changes share a `groupId`
@@ -292,6 +293,15 @@ int-coded fields (`colon_replacement_format`, `multi_episode_style`) write
 the int form in SET and guard while recording the string enum in
 `desired_state` so override handlers and the conflict UI work with stable
 labels.
+
+Quality definitions split per row instead of per field: each modified tier
+emits one full-row UPDATE op covering `min_size`/`max_size`/`preferred_size`
+together (tiers are fixed by the `qualities` foreign key, so add/remove is
+not part of the user surface). A config rename emits a separate
+single-statement `UPDATE ... SET name = ? WHERE name = ?` op. Per-tier ops
+carry a `metadata.qualityName` field identifying the tier so override and
+conflict handling can patch only that tier when regenerating intent against
+the current cache.
 
 ## Conflicts
 
@@ -439,10 +449,3 @@ and produces typed interfaces for Kysely queries and query results.
 
 Run via `deno task generate:pcd-types` (default version) or
 `deno task generate:pcd-types --version=1.1.0` for a specific schema version.
-
-## Open Work
-
-- [**#421**](https://github.com/Dictionarry-Hub/profilarr/issues/421):
-  Op splitting is done for CF, QP, regular expression, delay profile, media
-  settings, and naming updates. Quality definitions still need their write
-  enablement and conflict strategy decided.
