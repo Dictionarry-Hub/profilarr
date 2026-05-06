@@ -111,7 +111,9 @@ export const PORTS = {
 		conflictsRegex: 7701,
 		conflictsMediaSettings: 7702,
 		conflictsNamingRadarr: 7703,
-		conflictsNamingSonarr: 7704
+		conflictsNamingSonarr: 7704,
+		conflictsQualityDefinitionsRadarr: 7705,
+		conflictsQualityDefinitionsSonarr: 7706
 	}
 } as const;
 

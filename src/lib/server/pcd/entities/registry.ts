@@ -23,6 +23,13 @@ const SONARR_NAMING_FIELDS = [
 	'multi_episode_style'
 ];
 const MEDIA_SETTINGS_FIELDS = ['name', 'propers_repacks', 'enable_media_info'];
+const QUALITY_DEFINITIONS_FIELDS = [
+	'name',
+	'quality_name',
+	'min_size',
+	'max_size',
+	'preferred_size'
+];
 
 export const AUTO_ALIGN_ENTITIES = new Map<string, AutoAlignEntity>([
 	[
@@ -81,5 +88,21 @@ export const AUTO_ALIGN_ENTITIES = new Map<string, AutoAlignEntity>([
 	[
 		'sonarr_media_settings',
 		{ table: 'sonarr_media_settings', keyColumn: 'name', fields: MEDIA_SETTINGS_FIELDS }
+	],
+	[
+		'radarr_quality_definitions',
+		{
+			table: 'radarr_quality_definitions',
+			keyColumn: 'name',
+			fields: QUALITY_DEFINITIONS_FIELDS
+		}
+	],
+	[
+		'sonarr_quality_definitions',
+		{
+			table: 'sonarr_quality_definitions',
+			keyColumn: 'name',
+			fields: QUALITY_DEFINITIONS_FIELDS
+		}
 	]
 ]);

@@ -50,7 +50,7 @@ async function resolveName(
 	return null;
 }
 
-function resolveEntries(desiredState: StoredDesiredState): QualityDefinitionEntry[] | null {
+function resolveBulkEntries(desiredState: StoredDesiredState): QualityDefinitionEntry[] | null {
 	const field = desiredState.entries;
 	if (!field) return null;
 
@@ -64,6 +64,39 @@ function resolveEntries(desiredState: StoredDesiredState): QualityDefinitionEntr
 	if (Array.isArray(field)) return field as QualityDefinitionEntry[];
 
 	return null;
+}
+
+function reconstructEntries(
+	metadata: StoredOpMetadata | null,
+	desiredState: StoredDesiredState,
+	currentEntries: QualityDefinitionEntry[]
+): QualityDefinitionEntry[] {
+	// Legacy / bulk shape: { entries: { from, to } } or { entries: [...] }
+	const bulk = resolveBulkEntries(desiredState);
+	if (bulk) return bulk;
+
+	// Per-tier shape: metadata.qualityName identifies a single tier whose
+	// size fields appear as { from, to } pairs in desiredState. Patch only
+	// that tier; leave all others unchanged.
+	const qualityName = metadata?.qualityName;
+	if (qualityName) {
+		const minTo = getDesiredTo<number>(desiredState.min_size);
+		const maxTo = getDesiredTo<number>(desiredState.max_size);
+		const preferredTo = getDesiredTo<number>(desiredState.preferred_size);
+		return currentEntries.map((entry) =>
+			entry.quality_name === qualityName
+				? {
+						...entry,
+						min_size: minTo ?? entry.min_size,
+						max_size: maxTo ?? entry.max_size,
+						preferred_size: preferredTo ?? entry.preferred_size
+					}
+				: entry
+		);
+	}
+
+	// Pure-rename or unrecognized shape: leave entries untouched.
+	return currentEntries;
 }
 
 function entriesEqual(a: QualityDefinitionEntry[], b: QualityDefinitionEntry[]): boolean {
@@ -116,7 +149,7 @@ async function overrideRadarr(
 	const desiredName =
 		getDesiredTo<string>(desiredState.name) ??
 		(typeof desiredState.name === 'string' ? (desiredState.name as string) : current.name);
-	const desiredEntries = resolveEntries(desiredState) ?? current.entries;
+	const desiredEntries = reconstructEntries(metadata, desiredState, current.entries);
 
 	if (current.name === desiredName && entriesEqual(current.entries, desiredEntries)) {
 		return { success: true };
@@ -170,7 +203,7 @@ async function overrideSonarr(
 	const desiredName =
 		getDesiredTo<string>(desiredState.name) ??
 		(typeof desiredState.name === 'string' ? (desiredState.name as string) : current.name);
-	const desiredEntries = resolveEntries(desiredState) ?? current.entries;
+	const desiredEntries = reconstructEntries(metadata, desiredState, current.entries);
 
 	if (current.name === desiredName && entriesEqual(current.entries, desiredEntries)) {
 		return { success: true };
