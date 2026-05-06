@@ -103,7 +103,9 @@ export const PORTS = {
 		writeNamingSonarrDelete: 7621,
 		conflictsDelayProfiles: 7700,
 		conflictsRegex: 7701,
-		conflictsMediaSettings: 7702
+		conflictsMediaSettings: 7702,
+		conflictsNamingRadarr: 7703,
+		conflictsNamingSonarr: 7704
 	}
 } as const;
 
