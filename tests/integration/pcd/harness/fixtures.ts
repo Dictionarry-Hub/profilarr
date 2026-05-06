@@ -68,6 +68,22 @@ export const base = {
 		};
 	},
 
+	radarrMediaSettings(input: {
+		name: string;
+		propersRepacks?: 'doNotPrefer' | 'doNotUpgradeAutomatically' | 'preferAndUpgrade';
+		enableMediaInfo?: boolean;
+	}): SeedOperation {
+		return mediaSettingsSeed('radarr_media_settings', input);
+	},
+
+	sonarrMediaSettings(input: {
+		name: string;
+		propersRepacks?: 'doNotPrefer' | 'doNotUpgradeAutomatically' | 'preferAndUpgrade';
+		enableMediaInfo?: boolean;
+	}): SeedOperation {
+		return mediaSettingsSeed('sonarr_media_settings', input);
+	},
+
 	customFormatRegexCondition(input: {
 		formatName: string;
 		conditionName: string;
@@ -101,4 +117,20 @@ function sqlValue(value: string | null): string {
 
 function sqlNumber(value: number | null): string {
 	return value === null ? 'NULL' : String(value);
+}
+
+function mediaSettingsSeed(
+	table: 'radarr_media_settings' | 'sonarr_media_settings',
+	input: {
+		name: string;
+		propersRepacks?: 'doNotPrefer' | 'doNotUpgradeAutomatically' | 'preferAndUpgrade';
+		enableMediaInfo?: boolean;
+	}
+): SeedOperation {
+	const propersRepacks = input.propersRepacks ?? 'doNotPrefer';
+	const enableMediaInfo = input.enableMediaInfo ?? false;
+	return {
+		sql: `INSERT INTO ${table} (name, propers_repacks, enable_media_info)
+			  VALUES (${sqlValue(input.name)}, ${sqlValue(propersRepacks)}, ${enableMediaInfo ? 1 : 0});`
+	};
 }
