@@ -20,8 +20,6 @@ export async function removeRadarrMediaSettings(options: RemoveMediaSettingsOpti
 	const deleteQuery = db
 		.deleteFrom('radarr_media_settings')
 		.where('name', '=', current.name)
-		.where('propers_repacks', '=', current.propers_repacks)
-		.where('enable_media_info', '=', current.enable_media_info ? 1 : 0)
 		.compile();
 
 	return writeOperation({
@@ -61,8 +59,6 @@ export async function removeSonarrMediaSettings(options: RemoveSonarrMediaSettin
 	const deleteQuery = db
 		.deleteFrom('sonarr_media_settings')
 		.where('name', '=', current.name)
-		.where('propers_repacks', '=', current.propers_repacks)
-		.where('enable_media_info', '=', current.enable_media_info ? 1 : 0)
 		.compile();
 
 	return writeOperation({
