@@ -277,14 +277,21 @@ the description op conflicts -- the tag op still applies cleanly.
 
 Op splitting is implemented for custom format general/conditions, quality
 profile general/qualities/scoring, regular expressions, delay profile
-updates, and media settings updates. Delay profiles keep schema-constrained
-field pairs in one op when needed: protocol changes with delay NULLing, and
-bypass-score changes with minimum custom format score NULLing.
+updates, media settings updates, and naming updates. Delay profiles keep
+schema-constrained field pairs in one op when needed: protocol changes with
+delay NULLing, and bypass-score changes with minimum custom format score
+NULLing.
 
 Media settings split `name`, `propers_repacks`, and `enable_media_info`
 changes into independent ops. A rename plus scalar changes share a `groupId`
 so the conflict UI can present them as one user action while still resolving
 each field independently.
+
+Naming follows the same split pattern across Radarr and Sonarr. Sonarr's
+int-coded fields (`colon_replacement_format`, `multi_episode_style`) write
+the int form in SET and guard while recording the string enum in
+`desired_state` so override handlers and the conflict UI work with stable
+labels.
 
 ## Conflicts
 
@@ -436,6 +443,6 @@ Run via `deno task generate:pcd-types` (default version) or
 ## Open Work
 
 - [**#421**](https://github.com/Dictionarry-Hub/profilarr/issues/421):
-  Op splitting is done for CF, QP, regular expression, delay profile, and
-  media settings updates. Media management naming and quality definitions
-  still need their write enablement and conflict strategy decided.
+  Op splitting is done for CF, QP, regular expression, delay profile, media
+  settings, and naming updates. Quality definitions still need their write
+  enablement and conflict strategy decided.
