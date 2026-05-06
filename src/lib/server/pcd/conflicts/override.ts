@@ -1,9 +1,8 @@
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import { compile, getCache } from '$pcd/index.ts';
+import { compile } from '$pcd/index.ts';
 import type { WriteResult } from '$pcd/index.ts';
 import { logger } from '$logger/logger.ts';
-import { AUTO_ALIGN_ENTITIES } from '$pcd/entities/registry.ts';
 import {
 	dropOp,
 	parseJson,
@@ -26,7 +25,6 @@ import {
 } from '$pcd/entities/regularExpressions/override.ts';
 import {
 	overrideCreate as dpOverrideCreate,
-	overrideDelete as dpOverrideDelete,
 	overrideUpdate as dpOverrideUpdate
 } from '$pcd/entities/delayProfiles/override.ts';
 import {
@@ -69,9 +67,9 @@ async function overrideEntity(
 				? reOverrideCreate(databaseId, metadata, desiredState)
 				: reOverrideUpdate(databaseId, metadata, desiredState);
 		case 'delay_profile':
-			if (operation === 'create') return dpOverrideCreate(databaseId, metadata, desiredState);
-			if (operation === 'delete') return dpOverrideDelete(databaseId, metadata, desiredState);
-			return dpOverrideUpdate(databaseId, metadata, desiredState);
+			return operation === 'create'
+				? dpOverrideCreate(databaseId, metadata, desiredState)
+				: dpOverrideUpdate(databaseId, metadata, desiredState);
 		case 'radarr_naming':
 		case 'sonarr_naming':
 			return operation === 'create'
@@ -93,39 +91,6 @@ async function overrideEntity(
 				error: `Override not yet implemented for entity: ${entity}`
 			};
 	}
-}
-
-function canOverrideDelete(entity?: string): boolean {
-	return entity === 'delay_profile';
-}
-
-function deleteTargetExists(databaseId: number, metadata: StoredOpMetadata | null): boolean | null {
-	const entityName = metadata?.entity;
-	if (!entityName) return null;
-
-	const entity = AUTO_ALIGN_ENTITIES.get(entityName);
-	if (!entity) return null;
-
-	const cache = getCache(databaseId);
-	if (!cache) return null;
-
-	const typedMetadata = metadata as StoredOpMetadata & { stableKey?: { value?: string } };
-	const candidates = [
-		metadata.stable_key?.value,
-		typedMetadata.stableKey?.value,
-		metadata.name
-	].filter((value): value is string => typeof value === 'string' && value.length > 0);
-
-	for (const candidate of candidates) {
-		// nosemgrep: profilarr.sql.template-literal-interpolation - table/column from hardcoded registry
-		const row = cache.queryOne<{ found: number }>(
-			`SELECT 1 AS found FROM ${entity.table} WHERE ${entity.keyColumn} = ? LIMIT 1`,
-			candidate
-		);
-		if (row) return true;
-	}
-
-	return false;
 }
 
 export async function overrideConflict(input: {
@@ -153,9 +118,6 @@ export async function overrideConflict(input: {
 	const instance = databaseInstancesQueries.getById(databaseId);
 
 	if (operation === 'delete') {
-		const targetExists = deleteTargetExists(databaseId, metadata);
-		const canRegenerate = targetExists === true && canOverrideDelete(metadata?.entity);
-
 		const dropped = await dropOp(databaseId, opId);
 		if (!dropped) {
 			return {
@@ -165,40 +127,6 @@ export async function overrideConflict(input: {
 		}
 		if (instance?.enabled) {
 			await compile(instance.local_path, databaseId);
-		}
-
-		if (canRegenerate) {
-			const result: WriteResult = await overrideEntity(
-				databaseId,
-				metadata,
-				desiredState,
-				operation
-			);
-			if (!result.success) {
-				return {
-					success: false,
-					error: result.error || 'Failed to override conflict'
-				};
-			}
-
-			const newOpId = parseOpIdFromFilepath(result.filepath ?? null);
-			if (newOpId) {
-				await supersedeOp(databaseId, opId, newOpId);
-			}
-
-			await logger.info('Overrode conflict', {
-				source: 'PCDConflicts',
-				meta: { databaseId, opId, newOpId }
-			});
-
-			return { success: true };
-		}
-
-		if (targetExists === true) {
-			await logger.warn('Override delete fell back to drop; re-deletion not implemented', {
-				source: 'PCDConflicts',
-				meta: { databaseId, opId, entity: metadata?.entity }
-			});
 		}
 
 		await logger.info('Overrode conflict', {

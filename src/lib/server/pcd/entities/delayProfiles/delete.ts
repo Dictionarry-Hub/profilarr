@@ -16,46 +16,19 @@ interface DeleteDelayProfileOptions {
 
 /**
  * Delete a delay profile by writing an operation to the specified layer
- * Uses value guards to detect conflicts with upstream changes
+ *
+ * Value guard by name only. Once the user has decided to delete, the other
+ * field values don't matter — they're about to be gone. Matches the delete
+ * contract used by every other entity.
  */
 export async function remove(options: DeleteDelayProfileOptions) {
 	const { databaseId, cache, layer, current } = options;
 	const db = cache.kb;
 
-	// Delete the delay profile with value guards
-	let deleteProfile = db
+	const deleteProfileQuery = db
 		.deleteFrom('delay_profiles')
-		// Value guard - ensure this is the profile we expect
 		.where('name', '=', current.name)
-		.where('preferred_protocol', '=', current.preferred_protocol)
-		.where('bypass_if_highest_quality', '=', current.bypass_if_highest_quality ? 1 : 0)
-		.where(
-			'bypass_if_above_custom_format_score',
-			'=',
-			current.bypass_if_above_custom_format_score ? 1 : 0
-		);
-
-	if (current.usenet_delay === null) {
-		deleteProfile = deleteProfile.where('usenet_delay', 'is', null);
-	} else {
-		deleteProfile = deleteProfile.where('usenet_delay', '=', current.usenet_delay);
-	}
-	if (current.torrent_delay === null) {
-		deleteProfile = deleteProfile.where('torrent_delay', 'is', null);
-	} else {
-		deleteProfile = deleteProfile.where('torrent_delay', '=', current.torrent_delay);
-	}
-	if (current.minimum_custom_format_score === null) {
-		deleteProfile = deleteProfile.where('minimum_custom_format_score', 'is', null);
-	} else {
-		deleteProfile = deleteProfile.where(
-			'minimum_custom_format_score',
-			'=',
-			current.minimum_custom_format_score
-		);
-	}
-
-	const deleteProfileQuery = deleteProfile.compile();
+		.compile();
 
 	const result = await writeOperation({
 		databaseId,

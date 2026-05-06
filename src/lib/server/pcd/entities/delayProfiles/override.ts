@@ -3,7 +3,6 @@ import type { PCDCache, WriteResult } from '$pcd/index.ts';
 import type { PreferredProtocol } from '$shared/pcd/display.ts';
 import { get as getDelayProfile } from './read.ts';
 import { update } from './update.ts';
-import { remove } from './delete.ts';
 import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
 import { getDesiredTo, followRenameChain, valuesEqual } from '$pcd/conflicts/overrideUtils.ts';
 
@@ -158,41 +157,4 @@ async function overrideDelay(
 	});
 }
 
-async function overrideDelete(
-	databaseId: number,
-	metadata: StoredOpMetadata | null,
-	desiredState: StoredDesiredState | null
-): Promise<WriteResult> {
-	const cache = getCache(databaseId);
-	if (!cache) {
-		return { success: false, error: 'Cache not available' };
-	}
-
-	const profileName = await resolveProfileName(cache, databaseId, metadata, desiredState);
-	if (!profileName) {
-		return { success: true };
-	}
-
-	const profileRow = await cache.kb
-		.selectFrom('delay_profiles')
-		.select('id')
-		.where('name', '=', profileName)
-		.executeTakeFirst();
-	if (!profileRow) {
-		return { success: true };
-	}
-
-	const current = await getDelayProfile(cache, profileRow.id);
-	if (!current) {
-		return { success: true };
-	}
-
-	return remove({
-		databaseId,
-		cache,
-		layer: 'user',
-		current
-	});
-}
-
-export { overrideDelay as overrideCreate, overrideDelay as overrideUpdate, overrideDelete };
+export { overrideDelay as overrideCreate, overrideDelay as overrideUpdate };

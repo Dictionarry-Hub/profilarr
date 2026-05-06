@@ -246,10 +246,11 @@ The schema enforces protocol constraints via CHECK clauses:
 - `only_usenet` -- `torrent_delay` must be NULL
 - bypass disabled -- `minimum_custom_format_score` must be NULL
 
-Create and delete use single atomic ops. Update splits into per-field ops
-with value guards on each changed field. Pure rename writes one `name` op
-with `previousName`; if the same submit changes other fields, all emitted
-ops share a `groupId`.
+Create and delete use single atomic ops. Delete is name-only guarded
+(matches every other entity's delete contract). Update splits into per-field
+ops with value guards on each changed field. Pure rename writes one `name`
+op with `previousName`; if the same submit changes other fields, all
+emitted ops share a `groupId`.
 
 Some field pairs stay atomic to satisfy schema constraints:
 
