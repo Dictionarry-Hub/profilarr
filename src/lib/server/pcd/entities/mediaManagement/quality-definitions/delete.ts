@@ -17,22 +17,16 @@ export async function removeRadarrQualityDefinitions(options: RemoveQualityDefin
 	const { databaseId, cache, layer, current } = options;
 	const db = cache.kb;
 
-	const queries = current.entries.map((entry) =>
-		db
-			.deleteFrom('radarr_quality_definitions')
-			.where('name', '=', current.name)
-			.where('quality_name', '=', entry.quality_name)
-			.where('min_size', '=', entry.min_size)
-			.where('max_size', '=', entry.max_size)
-			.where('preferred_size', '=', entry.preferred_size)
-			.compile()
-	);
+	const deleteQuery = db
+		.deleteFrom('radarr_quality_definitions')
+		.where('name', '=', current.name)
+		.compile();
 
 	return writeOperation({
 		databaseId,
 		layer,
 		description: `remove-radarr-quality-definitions-${current.name}`,
-		queries,
+		queries: [deleteQuery],
 		desiredState: {
 			deleted: true,
 			name: current.name,
@@ -54,22 +48,16 @@ export async function removeSonarrQualityDefinitions(options: RemoveQualityDefin
 	const { databaseId, cache, layer, current } = options;
 	const db = cache.kb;
 
-	const queries = current.entries.map((entry) =>
-		db
-			.deleteFrom('sonarr_quality_definitions')
-			.where('name', '=', current.name)
-			.where('quality_name', '=', entry.quality_name)
-			.where('min_size', '=', entry.min_size)
-			.where('max_size', '=', entry.max_size)
-			.where('preferred_size', '=', entry.preferred_size)
-			.compile()
-	);
+	const deleteQuery = db
+		.deleteFrom('sonarr_quality_definitions')
+		.where('name', '=', current.name)
+		.compile();
 
 	return writeOperation({
 		databaseId,
 		layer,
 		description: `remove-sonarr-quality-definitions-${current.name}`,
-		queries,
+		queries: [deleteQuery],
 		desiredState: {
 			deleted: true,
 			name: current.name,
