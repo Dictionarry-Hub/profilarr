@@ -24,13 +24,9 @@
 	let cloneSourceName = '';
 	let cloneEntityType: EntityType = 'radarr_naming';
 
-	function notifyLocked() {
-		alertStore.add('info', mediaManagementLockedMessage);
-	}
-
 	function handleClone(event: CustomEvent<{ name: string; arr_type: string }>) {
 		if (!data.canWriteToBase) {
-			notifyLocked();
+			alertStore.add('info', mediaManagementLockedMessage);
 			return;
 		}
 		cloneSourceName = event.detail.name;
@@ -76,27 +72,23 @@
 <!-- Actions Bar -->
 <ActionsBar>
 	<SearchAction searchStore={search} placeholder="Search naming configs..." responsive />
-	{#if data.canWriteToBase}
-		<ActionButton icon={Plus} hasDropdown={true} dropdownPosition="right">
-			<svelte:fragment slot="dropdown" let:dropdownPosition>
-				<Dropdown position={dropdownPosition} minWidth="10rem">
-					<DropdownHeader label="New config" />
-					<DropdownItem
-						label="Radarr"
-						on:click={() =>
-							goto(`/media-management/${data.currentDatabase.id}/naming/new?arrType=radarr`)}
-					/>
-					<DropdownItem
-						label="Sonarr"
-						on:click={() =>
-							goto(`/media-management/${data.currentDatabase.id}/naming/new?arrType=sonarr`)}
-					/>
-				</Dropdown>
-			</svelte:fragment>
-		</ActionButton>
-	{:else}
-		<ActionButton icon={Plus} on:click={notifyLocked} />
-	{/if}
+	<ActionButton icon={Plus} hasDropdown={true} dropdownPosition="right">
+		<svelte:fragment slot="dropdown" let:dropdownPosition>
+			<Dropdown position={dropdownPosition} minWidth="10rem">
+				<DropdownHeader label="New config" />
+				<DropdownItem
+					label="Radarr"
+					on:click={() =>
+						goto(`/media-management/${data.currentDatabase.id}/naming/new?arrType=radarr`)}
+				/>
+				<DropdownItem
+					label="Sonarr"
+					on:click={() =>
+						goto(`/media-management/${data.currentDatabase.id}/naming/new?arrType=sonarr`)}
+				/>
+			</Dropdown>
+		</svelte:fragment>
+	</ActionButton>
 	<ViewToggle bind:value={$view} />
 </ActionsBar>
 
@@ -120,7 +112,6 @@
 		<TableView
 			configs={$filtered}
 			databaseId={data.currentDatabase.id}
-			canWriteToBase={data.canWriteToBase}
 			on:clone={handleClone}
 			on:export={handleExport}
 		/>
@@ -128,7 +119,6 @@
 		<CardView
 			configs={$filtered}
 			databaseId={data.currentDatabase.id}
-			canWriteToBase={data.canWriteToBase}
 			on:clone={handleClone}
 			on:export={handleExport}
 		/>
