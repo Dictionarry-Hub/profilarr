@@ -92,7 +92,8 @@ export const PORTS = {
 		writeDelayProfilesCreate: 7610,
 		writeDelayProfilesDelete: 7611,
 		writeDelayProfilesUpdate: 7612,
-		conflictsDelayProfiles: 7700
+		conflictsDelayProfiles: 7700,
+		conflictsRegex: 7701
 	}
 } as const;
 

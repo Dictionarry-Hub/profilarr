@@ -130,9 +130,10 @@ export async function remove(options: DeleteRegularExpressionOptions) {
 	// 2. Prepare regex delete query before any writes (cache will recompile)
 	const deleteRegex = db
 		.deleteFrom('regular_expressions')
-		// Value guards - ensure this is the regex we expect
+		// Value guard by name only. Once the user has decided to delete, the
+		// other field values don't matter — they're about to be gone. Matches
+		// the delete contract used by custom_format and quality_profile.
 		.where('name', '=', current.name)
-		.where('pattern', '=', current.pattern)
 		.compile();
 
 	// 3. Write custom format condition removal ops first (ordered before regex delete)
