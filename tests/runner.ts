@@ -68,6 +68,8 @@
  *   --help, -h      Show this help text.
  */
 
+import { PORTS } from './integration/harness/ports.ts';
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const INTEGRATION_COMPOSE = 'tests/integration/auth/docker-compose.yml';
@@ -682,8 +684,8 @@ async function runE2EPCD(selectors: string[], playwrightFlags: string[]): Promis
 
 async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
 	const MOCK_OIDC_URL = 'http://localhost:9090/default/.well-known/openid-configuration';
-	const DIRECT_PORT = 7006;
-	const PROXY_PORT = 7009;
+	const DIRECT_PORT = PORTS.auth.oidc;
+	const PROXY_PORT = PORTS.auth.oidcProxy;
 	const PROXY_ORIGIN = 'https://localhost:7445';
 
 	const OIDC_ENV = {
