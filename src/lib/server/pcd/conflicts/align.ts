@@ -4,26 +4,11 @@ import { compile } from '$pcd/index.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { uuid } from '$shared/utils/uuid.ts';
 import { logger } from '$logger/logger.ts';
-import type { PcdOp } from '$db/queries/pcdOps.ts';
 
 export type AlignConflictResult = {
 	success: boolean;
 	error?: string;
 };
-
-type OpMetadata = {
-	group_id?: string;
-};
-
-function getGroupId(op: PcdOp): string | null {
-	if (!op.metadata) return null;
-	try {
-		const parsed = JSON.parse(op.metadata) as OpMetadata;
-		return typeof parsed.group_id === 'string' ? parsed.group_id : null;
-	} catch {
-		return null;
-	}
-}
 
 export async function alignConflict(input: {
 	databaseId: number;
@@ -40,34 +25,17 @@ export async function alignConflict(input: {
 		return { success: false, error: 'Only published user operations can be aligned' };
 	}
 
-	const groupId = getGroupId(op);
-	let opsToDrop: PcdOp[] = [op];
-
-	if (groupId) {
-		const candidates = pcdOpsQueries.listByDatabaseAndOrigin(databaseId, 'user', {
-			states: ['published']
-		});
-		const grouped = candidates.filter((candidate) => getGroupId(candidate) === groupId);
-		if (grouped.length > 0) {
-			opsToDrop = grouped;
-		}
+	const updated = pcdOpsQueries.update(opId, { state: 'dropped' });
+	if (!updated) {
+		return { success: false, error: 'Failed to drop conflicting operation' };
 	}
 
-	const batchId = uuid();
-
-	for (const dropOp of opsToDrop) {
-		const updated = pcdOpsQueries.update(dropOp.id, { state: 'dropped' });
-		if (!updated) {
-			return { success: false, error: 'Failed to drop conflicting operation' };
-		}
-
-		pcdOpHistoryQueries.create({
-			opId: dropOp.id,
-			databaseId,
-			batchId,
-			status: 'dropped'
-		});
-	}
+	pcdOpHistoryQueries.create({
+		opId,
+		databaseId,
+		batchId: uuid(),
+		status: 'dropped'
+	});
 
 	const instance = databaseInstancesQueries.getById(databaseId);
 	if (instance?.enabled) {
@@ -76,12 +44,7 @@ export async function alignConflict(input: {
 
 	await logger.info('Aligned conflict', {
 		source: 'PCDConflicts',
-		meta: {
-			databaseId,
-			opId,
-			groupId: groupId ?? undefined,
-			droppedOpIds: opsToDrop.map((dropOp) => dropOp.id)
-		}
+		meta: { databaseId, opId }
 	});
 
 	return { success: true };
