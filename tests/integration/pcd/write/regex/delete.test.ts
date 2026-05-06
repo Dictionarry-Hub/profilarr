@@ -77,6 +77,60 @@ test('unreferenced regex emits one delete op', async () => {
 /**
  * Context
  *   Base layer seeded with one regex via base.regex():
+ *     name='Guarded Delete', pattern='\bguarded\b', description='Original'
+ *   Compiled.
+ *
+ * Submit
+ *   POST /regular-expressions/{ctx.dbId}/1?/delete with form fields:
+ *     layer = 'user'
+ *
+ * Expect
+ *   - userOpsSince(checkpoint).length === 1
+ *   - the regex delete SQL guards by name only:
+ *       op.sql matches /delete from "?regular_expressions"? where "?name"? = /i
+ *       op.sql does NOT contain "pattern" in its WHERE clause
+ *       op.sql does NOT contain "description" in its WHERE clause
+ *   - desired_state still records the regex's identifying fields for diff display:
+ *       op.desired_state.pattern      === '\bguarded\b'
+ *       op.desired_state.description  === 'Original'
+ */
+test('regex delete SQL guards by name only', async () => {
+	const ctx = await seededPcd('name-only-guard', [
+		base.regex({
+			name: 'Guarded Delete',
+			pattern: '\\bguarded\\b',
+			description: 'Original'
+		})
+	]);
+	const checkpoint = opCheckpoint(ctx);
+
+	await write.regex.remove(ctx, 1);
+
+	const ops = userOpsSince(ctx, checkpoint);
+	assertEquals(ops.length, 1);
+	const op = ops[0];
+	const sql = normalizeSql(op.sql);
+	const lowerSql = sql.toLowerCase();
+	const regexDeleteIndex = lowerSql.indexOf('delete from "regular_expressions"');
+	assert(regexDeleteIndex >= 0, 'expected regex delete in SQL');
+	const regexDeleteClause = sql.slice(regexDeleteIndex);
+	assert(/where "?name"? = /i.test(regexDeleteClause));
+	assert(
+		!/where[^;]*"?pattern"?\s*=/i.test(regexDeleteClause),
+		`pattern should not appear in regex delete WHERE clause, got: ${regexDeleteClause}`
+	);
+	assert(
+		!/where[^;]*"?description"?\s*=/i.test(regexDeleteClause),
+		`description should not appear in regex delete WHERE clause, got: ${regexDeleteClause}`
+	);
+	const desired = parseDesiredState(op);
+	assertEquals(desired.pattern, '\\bguarded\\b');
+	assertEquals(desired.description, 'Original');
+});
+
+/**
+ * Context
+ *   Base layer seeded with one regex via base.regex():
  *     name='Tagged Delete Regex', pattern='\bdelete\b', tags=['A','B']
  *   Compiled.
  *
