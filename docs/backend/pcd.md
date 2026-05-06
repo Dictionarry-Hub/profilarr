@@ -276,15 +276,15 @@ independent ops. If upstream changes the description but not the tags, only
 the description op conflicts -- the tag op still applies cleanly.
 
 Op splitting is implemented for custom format general/conditions, quality
-profile general/qualities/scoring, regular expressions, and delay profile
-updates. Delay profiles keep schema-constrained field pairs in one op when
-needed: protocol changes with delay NULLing, and bypass-score changes with
-minimum custom format score NULLing.
+profile general/qualities/scoring, regular expressions, delay profile
+updates, and media settings updates. Delay profiles keep schema-constrained
+field pairs in one op when needed: protocol changes with delay NULLing, and
+bypass-score changes with minimum custom format score NULLing.
 
-Media management still uses base-origin locking instead (entities from base
-are not editable at the user layer). See
-[#421](https://github.com/Dictionarry-Hub/profilarr/issues/421) for
-remaining work.
+Media settings split `name`, `propers_repacks`, and `enable_media_info`
+changes into independent ops. A rename plus scalar changes share a `groupId`
+so the conflict UI can present them as one user action while still resolving
+each field independently.
 
 ## Conflicts
 
@@ -436,17 +436,6 @@ Run via `deno task generate:pcd-types` (default version) or
 ## Open Work
 
 - [**#421**](https://github.com/Dictionarry-Hub/profilarr/issues/421):
-  Op splitting is done for CF, QP, regular expression, and delay profile
-  updates. Media management still needs its write enablement and conflict
-  strategy decided.
-
-- [**#367**](https://github.com/Dictionarry-Hub/profilarr/issues/367):
-  Stable entity IDs. Currently, entities are identified by name, and
-  renames cascade across all foreign key references. This makes revert
-  fragile. The plan is to assign stable, immutable IDs at op creation
-  time and switch cross-table references from name-based to ID-based FKs.
-  This unblocks user op history and safe revert.
-
-- [**#422**](https://github.com/Dictionarry-Hub/profilarr/issues/422):
-  The PCD conflict test suite (86 Playwright specs) needs to migrate to
-  integration tests for speed and CI reliability.
+  Op splitting is done for CF, QP, regular expression, delay profile, and
+  media settings updates. Media management naming and quality definitions
+  still need their write enablement and conflict strategy decided.

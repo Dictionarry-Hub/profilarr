@@ -92,8 +92,12 @@ export const PORTS = {
 		writeDelayProfilesCreate: 7610,
 		writeDelayProfilesDelete: 7611,
 		writeDelayProfilesUpdate: 7612,
+		writeMediaSettingsCreate: 7613,
+		writeMediaSettingsDelete: 7614,
+		writeMediaSettingsUpdate: 7615,
 		conflictsDelayProfiles: 7700,
-		conflictsRegex: 7701
+		conflictsRegex: 7701,
+		conflictsMediaSettings: 7702
 	}
 } as const;
 

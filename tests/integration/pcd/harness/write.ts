@@ -21,6 +21,15 @@ export interface DelayProfileFormInput {
 	layer?: OpOrigin;
 }
 
+export type MediaSettingsArrType = 'radarr' | 'sonarr';
+
+export interface MediaSettingsFormInput {
+	name: string;
+	propersRepacks?: 'doNotPrefer' | 'doNotUpgradeAutomatically' | 'preferAndUpgrade';
+	enableMediaInfo?: boolean;
+	layer?: OpOrigin;
+}
+
 export const write = {
 	delayProfile: {
 		create: createDelayProfile,
@@ -37,6 +46,14 @@ export const write = {
 		submitCreate: submitCreateRegex,
 		submitUpdate: submitUpdateRegex,
 		submitRemove: submitRemoveRegex
+	},
+	mediaSettings: {
+		create: createMediaSettings,
+		update: updateMediaSettings,
+		remove: removeMediaSettings,
+		submitCreate: submitCreateMediaSettings,
+		submitUpdate: submitUpdateMediaSettings,
+		submitRemove: submitRemoveMediaSettings
 	}
 };
 
@@ -173,6 +190,92 @@ function delayProfileFields(input: DelayProfileFormInput): Record<string, string
 		bypassIfHighestQuality: String(input.bypassIfHighestQuality ?? false),
 		bypassIfAboveCfScore: String(input.bypassIfAboveCfScore ?? false),
 		minimumCfScore: String(input.minimumCfScore ?? 0),
+		layer: input.layer ?? 'user'
+	};
+}
+
+export async function createMediaSettings(
+	ctx: PcdTestContext,
+	arrType: MediaSettingsArrType,
+	input: MediaSettingsFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitCreateMediaSettings(ctx, arrType, input),
+		`create ${arrType} media settings`
+	);
+}
+
+export async function updateMediaSettings(
+	ctx: PcdTestContext,
+	arrType: MediaSettingsArrType,
+	currentName: string,
+	input: MediaSettingsFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateMediaSettings(ctx, arrType, currentName, input),
+		`update ${arrType} media settings`
+	);
+}
+
+export async function removeMediaSettings(
+	ctx: PcdTestContext,
+	arrType: MediaSettingsArrType,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitRemoveMediaSettings(ctx, arrType, currentName, layer),
+		`delete ${arrType} media settings`
+	);
+}
+
+export async function submitCreateMediaSettings(
+	ctx: PcdTestContext,
+	arrType: MediaSettingsArrType,
+	input: MediaSettingsFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/media-settings/new`,
+		mediaSettingsFields(input, arrType),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitUpdateMediaSettings(
+	ctx: PcdTestContext,
+	arrType: MediaSettingsArrType,
+	currentName: string,
+	input: MediaSettingsFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/media-settings/${arrType}/${encodeURIComponent(currentName)}?/update`,
+		mediaSettingsFields(input, arrType),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitRemoveMediaSettings(
+	ctx: PcdTestContext,
+	arrType: MediaSettingsArrType,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/media-settings/${arrType}/${encodeURIComponent(currentName)}?/delete`,
+		{ layer },
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+function mediaSettingsFields(
+	input: MediaSettingsFormInput,
+	arrType: MediaSettingsArrType
+): Record<string, string> {
+	return {
+		arrType,
+		name: input.name,
+		propersRepacks: input.propersRepacks ?? 'doNotPrefer',
+		enableMediaInfo: String(input.enableMediaInfo ?? false),
 		layer: input.layer ?? 'user'
 	};
 }

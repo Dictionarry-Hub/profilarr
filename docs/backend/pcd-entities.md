@@ -264,8 +264,9 @@ Some field pairs stay atomic to satisfy schema constraints:
 **Source:** `entities/mediaManagement/`
 
 Media management covers three sub-entity types, each with Radarr and Sonarr
-variants. All use single atomic ops (no per-field splitting) and
-base-origin locking is planned
+variants. Media settings are editable on linked databases through user-layer
+ops. Naming and quality definitions still use atomic writes and base-origin
+locking while their conflict strategy is pending
 ([#421](https://github.com/Dictionarry-Hub/profilarr/issues/421)).
 
 ### Naming
@@ -283,7 +284,13 @@ settings.
 **Tables:** radarr_media_settings, sonarr_media_settings
 
 Global settings for propers/repacks handling and media info. Both variants
-have the same fields. Updates guard on all changed fields.
+have the same fields: name, propers_repacks, and enable_media_info.
+
+Create uses one insert op. Delete is name-only guarded, so upstream changes
+to propers_repacks or enable_media_info do not block a delete. Update splits
+into per-field ops with value guards on each changed field. Pure rename writes
+one `name` op with `previousName`; if the same submit changes scalar fields,
+all emitted ops share a `groupId`.
 
 ### Quality Definitions
 
@@ -296,10 +303,12 @@ consistency.
 
 ## Summary
 
-| Entity             | Op splitting                 | Cascading on rename     | Cascading on delete              |
-| ------------------ | ---------------------------- | ----------------------- | -------------------------------- |
-| Custom format      | per-field, per-condition     | QP scoring refs         | explicit QP score removal + FK   |
-| Quality profile    | per-field, per-score         | --                      | explicit sub-entity removal + FK |
-| Regular expression | main + dependents            | condition_patterns refs | dependent conditions + FK        |
-| Delay profile      | per-field, constrained pairs | --                      | FK cascade                       |
-| Media management   | none (atomic)                | --                      | FK cascade                       |
+| Entity              | Op splitting                 | Cascading on rename     | Cascading on delete              |
+| ------------------- | ---------------------------- | ----------------------- | -------------------------------- |
+| Custom format       | per-field, per-condition     | QP scoring refs         | explicit QP score removal + FK   |
+| Quality profile     | per-field, per-score         | --                      | explicit sub-entity removal + FK |
+| Regular expression  | main + dependents            | condition_patterns refs | dependent conditions + FK        |
+| Delay profile       | per-field, constrained pairs | --                      | FK cascade                       |
+| Media naming        | none (atomic)                | --                      | --                               |
+| Media settings      | per-field                    | --                      | --                               |
+| Quality definitions | full-list replace            | --                      | --                               |
