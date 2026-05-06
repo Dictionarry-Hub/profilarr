@@ -264,9 +264,9 @@ Some field pairs stay atomic to satisfy schema constraints:
 **Source:** `entities/mediaManagement/`
 
 Media management covers three sub-entity types, each with Radarr and Sonarr
-variants. Media settings are editable on linked databases through user-layer
-ops. Naming and quality definitions still use atomic writes and base-origin
-locking while their conflict strategy is pending
+variants. Media settings and naming are editable on linked databases through
+user-layer ops. Quality definitions still uses atomic writes and base-origin
+locking while its conflict strategy is pending
 ([#421](https://github.com/Dictionarry-Hub/profilarr/issues/421)).
 
 ### Naming
@@ -278,6 +278,14 @@ folder format. Sonarr adds standard/daily/anime episode formats, series
 folder format, season folder format, and multi-episode style. Both share
 rename toggle, illegal character replacement, and colon replacement
 settings.
+
+Create uses one insert op. Delete is name-only guarded, so upstream changes
+to format strings or other fields do not block a delete. Update splits into
+per-field ops with value guards on each changed field; Sonarr's int-coded
+`colon_replacement_format` and `multi_episode_style` use the int form in the
+SET and guard while `desired_state` records the string enum. Pure rename
+writes one `name` op with `previousName`; if the same submit changes other
+fields, all emitted ops share a `groupId`.
 
 ### Media Settings
 
@@ -309,6 +317,6 @@ consistency.
 | Quality profile     | per-field, per-score         | --                      | explicit sub-entity removal + FK |
 | Regular expression  | main + dependents            | condition_patterns refs | dependent conditions + FK        |
 | Delay profile       | per-field, constrained pairs | --                      | FK cascade                       |
-| Media naming        | none (atomic)                | --                      | --                               |
+| Media naming        | per-field                    | --                      | --                               |
 | Media settings      | per-field                    | --                      | --                               |
 | Quality definitions | full-list replace            | --                      | --                               |

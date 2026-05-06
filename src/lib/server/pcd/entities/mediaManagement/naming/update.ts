@@ -2,10 +2,30 @@
  * Update naming config operations
  */
 
-import type { PCDCache } from '$pcd/index.ts';
+import type { CompiledQuery } from 'kysely';
+import type { PCDCache, WriteResult } from '$pcd/index.ts';
 import { writeOperation, type OperationLayer } from '$pcd/index.ts';
 import type { RadarrNamingRow, SonarrNamingRow } from '$shared/pcd/display.ts';
 import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
+import { uuid } from '$shared/utils/uuid.ts';
+
+// ── Radarr ──
+
+type RadarrField =
+	| 'rename'
+	| 'movie_format'
+	| 'movie_folder_format'
+	| 'replace_illegal_characters'
+	| 'colon_replacement_format'
+	| 'name';
+
+interface RadarrFieldChange {
+	field: RadarrField;
+	from: unknown;
+	to: unknown;
+	setValue: unknown;
+	guardValue: unknown;
+}
 
 export interface UpdateRadarrNamingInput {
 	name: string;
@@ -24,11 +44,10 @@ export interface UpdateRadarrNamingOptions {
 	input: UpdateRadarrNamingInput;
 }
 
-export async function updateRadarrNaming(options: UpdateRadarrNamingOptions) {
+export async function updateRadarrNaming(options: UpdateRadarrNamingOptions): Promise<WriteResult> {
 	const { databaseId, cache, layer, current, input } = options;
 	const db = cache.kb;
 
-	// If renaming, check if new name already exists
 	if (input.name !== current.name) {
 		const existing = await db
 			.selectFrom('radarr_naming')
@@ -41,120 +60,142 @@ export async function updateRadarrNaming(options: UpdateRadarrNamingOptions) {
 		}
 	}
 
-	const setValues: Record<string, unknown> = {};
-	if (current.name !== input.name) setValues.name = input.name;
-	if (current.rename !== input.rename) setValues.rename = input.rename ? 1 : 0;
-	if (current.movie_format !== input.movieFormat) setValues.movie_format = input.movieFormat;
-	if (current.movie_folder_format !== input.movieFolderFormat) {
-		setValues.movie_folder_format = input.movieFolderFormat;
-	}
-	if (current.replace_illegal_characters !== input.replaceIllegalCharacters) {
-		setValues.replace_illegal_characters = input.replaceIllegalCharacters ? 1 : 0;
-	}
-	if (current.colon_replacement_format !== input.colonReplacementFormat) {
-		setValues.colon_replacement_format = input.colonReplacementFormat;
-	}
-
-	let updateQuery = db.updateTable('radarr_naming').set(setValues).where('name', '=', current.name);
+	const changes: RadarrFieldChange[] = [];
 
 	if (current.rename !== input.rename) {
-		updateQuery = updateQuery.where('rename', '=', current.rename ? 1 : 0);
+		changes.push({
+			field: 'rename',
+			from: current.rename,
+			to: input.rename,
+			setValue: input.rename ? 1 : 0,
+			guardValue: current.rename ? 1 : 0
+		});
 	}
 	if (current.movie_format !== input.movieFormat) {
-		updateQuery = updateQuery.where('movie_format', '=', current.movie_format);
+		changes.push({
+			field: 'movie_format',
+			from: current.movie_format,
+			to: input.movieFormat,
+			setValue: input.movieFormat,
+			guardValue: current.movie_format
+		});
 	}
 	if (current.movie_folder_format !== input.movieFolderFormat) {
-		updateQuery = updateQuery.where('movie_folder_format', '=', current.movie_folder_format);
+		changes.push({
+			field: 'movie_folder_format',
+			from: current.movie_folder_format,
+			to: input.movieFolderFormat,
+			setValue: input.movieFolderFormat,
+			guardValue: current.movie_folder_format
+		});
 	}
 	if (current.replace_illegal_characters !== input.replaceIllegalCharacters) {
-		updateQuery = updateQuery.where(
-			'replace_illegal_characters',
-			'=',
-			current.replace_illegal_characters ? 1 : 0
-		);
+		changes.push({
+			field: 'replace_illegal_characters',
+			from: current.replace_illegal_characters,
+			to: input.replaceIllegalCharacters,
+			setValue: input.replaceIllegalCharacters ? 1 : 0,
+			guardValue: current.replace_illegal_characters ? 1 : 0
+		});
 	}
 	if (current.colon_replacement_format !== input.colonReplacementFormat) {
-		updateQuery = updateQuery.where(
-			'colon_replacement_format',
-			'=',
-			current.colon_replacement_format
-		);
+		changes.push({
+			field: 'colon_replacement_format',
+			from: current.colon_replacement_format,
+			to: input.colonReplacementFormat,
+			setValue: input.colonReplacementFormat,
+			guardValue: current.colon_replacement_format
+		});
+	}
+	if (current.name !== input.name) {
+		changes.push({
+			field: 'name',
+			from: current.name,
+			to: input.name,
+			setValue: input.name,
+			guardValue: current.name
+		});
 	}
 
-	if (Object.keys(setValues).length === 0) {
+	if (changes.length === 0) {
 		return { success: true };
 	}
 
-	const updateQueryCompiled = updateQuery.compile();
+	const groupId = changes.length > 1 ? uuid() : undefined;
+	let lastResult: WriteResult | null = null;
 
-	const changes: Record<string, { from: unknown; to: unknown }> = {};
-	if (current.name !== input.name) changes.name = { from: current.name, to: input.name };
-	if (current.rename !== input.rename) changes.rename = { from: current.rename, to: input.rename };
-	if (current.movie_format !== input.movieFormat) {
-		changes.movieFormat = { from: current.movie_format, to: input.movieFormat };
-	}
-	if (current.movie_folder_format !== input.movieFolderFormat) {
-		changes.movieFolderFormat = {
-			from: current.movie_folder_format,
-			to: input.movieFolderFormat
-		};
-	}
-	if (current.replace_illegal_characters !== input.replaceIllegalCharacters) {
-		changes.replaceIllegalCharacters = {
-			from: current.replace_illegal_characters,
-			to: input.replaceIllegalCharacters
-		};
-	}
-	if (current.colon_replacement_format !== input.colonReplacementFormat) {
-		changes.colonReplacementFormat = {
-			from: current.colon_replacement_format,
-			to: input.colonReplacementFormat
-		};
-	}
+	for (let index = 0; index < changes.length; index++) {
+		const change = changes[index];
+		const isRename = change.field === 'name';
+		const result = await writeOperation({
+			databaseId,
+			layer,
+			description: `update-radarr-naming-${change.field}-${input.name}`,
+			queries: [buildRadarrUpdateQuery(cache, current, change)],
+			desiredState: {
+				[change.field]: { from: change.from, to: change.to }
+			},
+			metadata: {
+				operation: 'update',
+				entity: 'radarr_naming',
+				name: input.name,
+				...(isRename && { previousName: current.name }),
+				stableKey: { key: 'radarr_naming_name', value: current.name },
+				...(groupId && { groupId }),
+				changedFields: [change.field],
+				summary: isRename ? 'Rename Radarr naming config' : 'Update Radarr naming config',
+				title: isRename
+					? `Rename Radarr naming "${current.name}"`
+					: `Update Radarr naming "${input.name}"`
+			},
+			skipRecompile: index < changes.length - 1
+		});
 
-	const changedFields = Object.keys(changes);
-	const desiredState: Record<string, unknown> = {};
-	if (changes.name) desiredState.name = { from: current.name, to: input.name };
-	if (changes.rename) desiredState.rename = { from: current.rename, to: input.rename };
-	if (changes.movieFormat) {
-		desiredState.movie_format = { from: current.movie_format, to: input.movieFormat };
-	}
-	if (changes.movieFolderFormat) {
-		desiredState.movie_folder_format = {
-			from: current.movie_folder_format,
-			to: input.movieFolderFormat
-		};
-	}
-	if (changes.replaceIllegalCharacters) {
-		desiredState.replace_illegal_characters = {
-			from: current.replace_illegal_characters,
-			to: input.replaceIllegalCharacters
-		};
-	}
-	if (changes.colonReplacementFormat) {
-		desiredState.colon_replacement_format = {
-			from: current.colon_replacement_format,
-			to: input.colonReplacementFormat
-		};
-	}
-
-	return writeOperation({
-		databaseId,
-		layer,
-		description: `update-radarr-naming-${input.name}`,
-		queries: [updateQueryCompiled],
-		desiredState,
-		metadata: {
-			operation: 'update',
-			entity: 'radarr_naming',
-			name: input.name,
-			...(current.name !== input.name && { previousName: current.name }),
-			stableKey: { key: 'radarr_naming_name', value: current.name },
-			changedFields,
-			summary: 'Update Radarr naming config',
-			title: `Update Radarr naming "${input.name}"`
+		if (!result.success) {
+			return result;
 		}
-	});
+		lastResult = result;
+	}
+
+	return lastResult ?? { success: true };
+}
+
+function buildRadarrUpdateQuery(
+	cache: PCDCache,
+	current: RadarrNamingRow,
+	change: RadarrFieldChange
+): CompiledQuery {
+	const setValues: Record<string, unknown> = { [change.field]: change.setValue };
+	let query = cache.kb.updateTable('radarr_naming').set(setValues).where('name', '=', current.name);
+
+	if (change.field !== 'name') {
+		query = query.where(change.field, '=', change.guardValue as never);
+	}
+
+	return query.compile();
+}
+
+// ── Sonarr ──
+
+type SonarrField =
+	| 'rename'
+	| 'standard_episode_format'
+	| 'daily_episode_format'
+	| 'anime_episode_format'
+	| 'series_folder_format'
+	| 'season_folder_format'
+	| 'replace_illegal_characters'
+	| 'colon_replacement_format'
+	| 'custom_colon_replacement_format'
+	| 'multi_episode_style'
+	| 'name';
+
+interface SonarrFieldChange {
+	field: SonarrField;
+	from: unknown;
+	to: unknown;
+	setValue: unknown;
+	guardValue: unknown;
 }
 
 export interface UpdateSonarrNamingInput {
@@ -179,11 +220,10 @@ export interface UpdateSonarrNamingOptions {
 	input: UpdateSonarrNamingInput;
 }
 
-export async function updateSonarrNaming(options: UpdateSonarrNamingOptions) {
+export async function updateSonarrNaming(options: UpdateSonarrNamingOptions): Promise<WriteResult> {
 	const { databaseId, cache, layer, current, input } = options;
 	const db = cache.kb;
 
-	// If renaming, check if new name already exists
 	if (input.name !== current.name) {
 		const existing = await db
 			.selectFrom('sonarr_naming')
@@ -196,229 +236,168 @@ export async function updateSonarrNaming(options: UpdateSonarrNamingOptions) {
 		}
 	}
 
-	const currentColonReplacement = colonReplacementToDb(current.colon_replacement_format);
-	const nextColonReplacement = colonReplacementToDb(input.colonReplacementFormat);
-	const currentMultiEpisode = multiEpisodeStyleToDb(current.multi_episode_style);
-	const nextMultiEpisode = multiEpisodeStyleToDb(input.multiEpisodeStyle);
-
-	const setValues: Record<string, unknown> = {};
-	if (current.name !== input.name) setValues.name = input.name;
-	if (current.rename !== input.rename) setValues.rename = input.rename ? 1 : 0;
-	if (current.standard_episode_format !== input.standardEpisodeFormat) {
-		setValues.standard_episode_format = input.standardEpisodeFormat;
-	}
-	if (current.daily_episode_format !== input.dailyEpisodeFormat) {
-		setValues.daily_episode_format = input.dailyEpisodeFormat;
-	}
-	if (current.anime_episode_format !== input.animeEpisodeFormat) {
-		setValues.anime_episode_format = input.animeEpisodeFormat;
-	}
-	if (current.series_folder_format !== input.seriesFolderFormat) {
-		setValues.series_folder_format = input.seriesFolderFormat;
-	}
-	if (current.season_folder_format !== input.seasonFolderFormat) {
-		setValues.season_folder_format = input.seasonFolderFormat;
-	}
-	if (current.replace_illegal_characters !== input.replaceIllegalCharacters) {
-		setValues.replace_illegal_characters = input.replaceIllegalCharacters ? 1 : 0;
-	}
-	if (currentColonReplacement !== nextColonReplacement) {
-		setValues.colon_replacement_format = nextColonReplacement;
-	}
-	if (current.custom_colon_replacement_format !== input.customColonReplacementFormat) {
-		setValues.custom_colon_replacement_format = input.customColonReplacementFormat;
-	}
-	if (currentMultiEpisode !== nextMultiEpisode) {
-		setValues.multi_episode_style = nextMultiEpisode;
-	}
-
-	let updateQuery = db.updateTable('sonarr_naming').set(setValues).where('name', '=', current.name);
+	const changes: SonarrFieldChange[] = [];
 
 	if (current.rename !== input.rename) {
-		updateQuery = updateQuery.where('rename', '=', current.rename ? 1 : 0);
+		changes.push({
+			field: 'rename',
+			from: current.rename,
+			to: input.rename,
+			setValue: input.rename ? 1 : 0,
+			guardValue: current.rename ? 1 : 0
+		});
 	}
 	if (current.standard_episode_format !== input.standardEpisodeFormat) {
-		updateQuery = updateQuery.where(
-			'standard_episode_format',
-			'=',
-			current.standard_episode_format
-		);
+		changes.push({
+			field: 'standard_episode_format',
+			from: current.standard_episode_format,
+			to: input.standardEpisodeFormat,
+			setValue: input.standardEpisodeFormat,
+			guardValue: current.standard_episode_format
+		});
 	}
 	if (current.daily_episode_format !== input.dailyEpisodeFormat) {
-		updateQuery = updateQuery.where('daily_episode_format', '=', current.daily_episode_format);
+		changes.push({
+			field: 'daily_episode_format',
+			from: current.daily_episode_format,
+			to: input.dailyEpisodeFormat,
+			setValue: input.dailyEpisodeFormat,
+			guardValue: current.daily_episode_format
+		});
 	}
 	if (current.anime_episode_format !== input.animeEpisodeFormat) {
-		updateQuery = updateQuery.where('anime_episode_format', '=', current.anime_episode_format);
+		changes.push({
+			field: 'anime_episode_format',
+			from: current.anime_episode_format,
+			to: input.animeEpisodeFormat,
+			setValue: input.animeEpisodeFormat,
+			guardValue: current.anime_episode_format
+		});
 	}
 	if (current.series_folder_format !== input.seriesFolderFormat) {
-		updateQuery = updateQuery.where('series_folder_format', '=', current.series_folder_format);
+		changes.push({
+			field: 'series_folder_format',
+			from: current.series_folder_format,
+			to: input.seriesFolderFormat,
+			setValue: input.seriesFolderFormat,
+			guardValue: current.series_folder_format
+		});
 	}
 	if (current.season_folder_format !== input.seasonFolderFormat) {
-		updateQuery = updateQuery.where('season_folder_format', '=', current.season_folder_format);
+		changes.push({
+			field: 'season_folder_format',
+			from: current.season_folder_format,
+			to: input.seasonFolderFormat,
+			setValue: input.seasonFolderFormat,
+			guardValue: current.season_folder_format
+		});
 	}
 	if (current.replace_illegal_characters !== input.replaceIllegalCharacters) {
-		updateQuery = updateQuery.where(
-			'replace_illegal_characters',
-			'=',
-			current.replace_illegal_characters ? 1 : 0
-		);
+		changes.push({
+			field: 'replace_illegal_characters',
+			from: current.replace_illegal_characters,
+			to: input.replaceIllegalCharacters,
+			setValue: input.replaceIllegalCharacters ? 1 : 0,
+			guardValue: current.replace_illegal_characters ? 1 : 0
+		});
 	}
-	if (currentColonReplacement !== nextColonReplacement) {
-		updateQuery = updateQuery.where('colon_replacement_format', '=', currentColonReplacement);
+	if (current.colon_replacement_format !== input.colonReplacementFormat) {
+		changes.push({
+			field: 'colon_replacement_format',
+			from: current.colon_replacement_format,
+			to: input.colonReplacementFormat,
+			setValue: colonReplacementToDb(input.colonReplacementFormat),
+			guardValue: colonReplacementToDb(current.colon_replacement_format)
+		});
 	}
 	if (current.custom_colon_replacement_format !== input.customColonReplacementFormat) {
-		if (current.custom_colon_replacement_format === null) {
-			updateQuery = updateQuery.where('custom_colon_replacement_format', 'is', null);
-		} else {
-			updateQuery = updateQuery.where(
-				'custom_colon_replacement_format',
-				'=',
-				current.custom_colon_replacement_format
-			);
-		}
+		changes.push({
+			field: 'custom_colon_replacement_format',
+			from: current.custom_colon_replacement_format,
+			to: input.customColonReplacementFormat,
+			setValue: input.customColonReplacementFormat,
+			guardValue: current.custom_colon_replacement_format
+		});
 	}
-	if (currentMultiEpisode !== nextMultiEpisode) {
-		updateQuery = updateQuery.where('multi_episode_style', '=', currentMultiEpisode);
+	if (current.multi_episode_style !== input.multiEpisodeStyle) {
+		changes.push({
+			field: 'multi_episode_style',
+			from: current.multi_episode_style,
+			to: input.multiEpisodeStyle,
+			setValue: multiEpisodeStyleToDb(input.multiEpisodeStyle),
+			guardValue: multiEpisodeStyleToDb(current.multi_episode_style)
+		});
+	}
+	if (current.name !== input.name) {
+		changes.push({
+			field: 'name',
+			from: current.name,
+			to: input.name,
+			setValue: input.name,
+			guardValue: current.name
+		});
 	}
 
-	if (Object.keys(setValues).length === 0) {
+	if (changes.length === 0) {
 		return { success: true };
 	}
 
-	const updateQueryCompiled = updateQuery.compile();
+	const groupId = changes.length > 1 ? uuid() : undefined;
+	let lastResult: WriteResult | null = null;
 
-	const changes: Record<string, { from: unknown; to: unknown }> = {};
-	if (current.name !== input.name) changes.name = { from: current.name, to: input.name };
-	if (current.rename !== input.rename) changes.rename = { from: current.rename, to: input.rename };
-	if (current.standard_episode_format !== input.standardEpisodeFormat) {
-		changes.standardEpisodeFormat = {
-			from: current.standard_episode_format,
-			to: input.standardEpisodeFormat
-		};
-	}
-	if (current.daily_episode_format !== input.dailyEpisodeFormat) {
-		changes.dailyEpisodeFormat = {
-			from: current.daily_episode_format,
-			to: input.dailyEpisodeFormat
-		};
-	}
-	if (current.anime_episode_format !== input.animeEpisodeFormat) {
-		changes.animeEpisodeFormat = {
-			from: current.anime_episode_format,
-			to: input.animeEpisodeFormat
-		};
-	}
-	if (current.series_folder_format !== input.seriesFolderFormat) {
-		changes.seriesFolderFormat = {
-			from: current.series_folder_format,
-			to: input.seriesFolderFormat
-		};
-	}
-	if (current.season_folder_format !== input.seasonFolderFormat) {
-		changes.seasonFolderFormat = {
-			from: current.season_folder_format,
-			to: input.seasonFolderFormat
-		};
-	}
-	if (current.replace_illegal_characters !== input.replaceIllegalCharacters) {
-		changes.replaceIllegalCharacters = {
-			from: current.replace_illegal_characters,
-			to: input.replaceIllegalCharacters
-		};
-	}
-	if (currentColonReplacement !== nextColonReplacement) {
-		changes.colonReplacementFormat = {
-			from: current.colon_replacement_format,
-			to: input.colonReplacementFormat
-		};
-	}
-	if (current.custom_colon_replacement_format !== input.customColonReplacementFormat) {
-		changes.customColonReplacementFormat = {
-			from: current.custom_colon_replacement_format,
-			to: input.customColonReplacementFormat
-		};
-	}
-	if (currentMultiEpisode !== nextMultiEpisode) {
-		changes.multiEpisodeStyle = {
-			from: current.multi_episode_style,
-			to: input.multiEpisodeStyle
-		};
-	}
+	for (let index = 0; index < changes.length; index++) {
+		const change = changes[index];
+		const isRename = change.field === 'name';
+		const result = await writeOperation({
+			databaseId,
+			layer,
+			description: `update-sonarr-naming-${change.field}-${input.name}`,
+			queries: [buildSonarrUpdateQuery(cache, current, change)],
+			desiredState: {
+				[change.field]: { from: change.from, to: change.to }
+			},
+			metadata: {
+				operation: 'update',
+				entity: 'sonarr_naming',
+				name: input.name,
+				...(isRename && { previousName: current.name }),
+				stableKey: { key: 'sonarr_naming_name', value: current.name },
+				...(groupId && { groupId }),
+				changedFields: [change.field],
+				summary: isRename ? 'Rename Sonarr naming config' : 'Update Sonarr naming config',
+				title: isRename
+					? `Rename Sonarr naming "${current.name}"`
+					: `Update Sonarr naming "${input.name}"`
+			},
+			skipRecompile: index < changes.length - 1
+		});
 
-	const changedFields = Object.keys(changes);
-	const desiredState: Record<string, unknown> = {};
-	if (changes.name) desiredState.name = { from: current.name, to: input.name };
-	if (changes.rename) desiredState.rename = { from: current.rename, to: input.rename };
-	if (changes.standardEpisodeFormat) {
-		desiredState.standard_episode_format = {
-			from: current.standard_episode_format,
-			to: input.standardEpisodeFormat
-		};
-	}
-	if (changes.dailyEpisodeFormat) {
-		desiredState.daily_episode_format = {
-			from: current.daily_episode_format,
-			to: input.dailyEpisodeFormat
-		};
-	}
-	if (changes.animeEpisodeFormat) {
-		desiredState.anime_episode_format = {
-			from: current.anime_episode_format,
-			to: input.animeEpisodeFormat
-		};
-	}
-	if (changes.seriesFolderFormat) {
-		desiredState.series_folder_format = {
-			from: current.series_folder_format,
-			to: input.seriesFolderFormat
-		};
-	}
-	if (changes.seasonFolderFormat) {
-		desiredState.season_folder_format = {
-			from: current.season_folder_format,
-			to: input.seasonFolderFormat
-		};
-	}
-	if (changes.replaceIllegalCharacters) {
-		desiredState.replace_illegal_characters = {
-			from: current.replace_illegal_characters,
-			to: input.replaceIllegalCharacters
-		};
-	}
-	if (changes.colonReplacementFormat) {
-		desiredState.colon_replacement_format = {
-			from: current.colon_replacement_format,
-			to: input.colonReplacementFormat
-		};
-	}
-	if (changes.customColonReplacementFormat) {
-		desiredState.custom_colon_replacement_format = {
-			from: current.custom_colon_replacement_format,
-			to: input.customColonReplacementFormat
-		};
-	}
-	if (changes.multiEpisodeStyle) {
-		desiredState.multi_episode_style = {
-			from: current.multi_episode_style,
-			to: input.multiEpisodeStyle
-		};
-	}
-
-	return writeOperation({
-		databaseId,
-		layer,
-		description: `update-sonarr-naming-${input.name}`,
-		queries: [updateQueryCompiled],
-		desiredState,
-		metadata: {
-			operation: 'update',
-			entity: 'sonarr_naming',
-			name: input.name,
-			...(current.name !== input.name && { previousName: current.name }),
-			stableKey: { key: 'sonarr_naming_name', value: current.name },
-			changedFields,
-			summary: 'Update Sonarr naming config',
-			title: `Update Sonarr naming "${input.name}"`
+		if (!result.success) {
+			return result;
 		}
-	});
+		lastResult = result;
+	}
+
+	return lastResult ?? { success: true };
+}
+
+function buildSonarrUpdateQuery(
+	cache: PCDCache,
+	current: SonarrNamingRow,
+	change: SonarrFieldChange
+): CompiledQuery {
+	const setValues: Record<string, unknown> = { [change.field]: change.setValue };
+	let query = cache.kb.updateTable('sonarr_naming').set(setValues).where('name', '=', current.name);
+
+	if (change.field === 'name') {
+		return query.compile();
+	}
+
+	if (change.field === 'custom_colon_replacement_format' && change.guardValue === null) {
+		query = query.where('custom_colon_replacement_format', 'is', null);
+	} else {
+		query = query.where(change.field, '=', change.guardValue as never);
+	}
+
+	return query.compile();
 }

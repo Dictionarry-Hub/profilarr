@@ -30,6 +30,47 @@ export interface MediaSettingsFormInput {
 	layer?: OpOrigin;
 }
 
+export type RadarrColonFormat = 'delete' | 'dash' | 'spaceDash' | 'spaceDashSpace' | 'smart';
+export type SonarrColonFormat =
+	| 'delete'
+	| 'dash'
+	| 'spaceDash'
+	| 'spaceDashSpace'
+	| 'smart'
+	| 'custom';
+export type SonarrMultiEpisodeStyle =
+	| 'extend'
+	| 'duplicate'
+	| 'repeat'
+	| 'scene'
+	| 'range'
+	| 'prefixedRange';
+
+export interface RadarrNamingFormInput {
+	name: string;
+	rename?: boolean;
+	movieFormat?: string;
+	movieFolderFormat?: string;
+	replaceIllegalCharacters?: boolean;
+	colonReplacementFormat?: RadarrColonFormat;
+	layer?: OpOrigin;
+}
+
+export interface SonarrNamingFormInput {
+	name: string;
+	rename?: boolean;
+	standardEpisodeFormat?: string;
+	dailyEpisodeFormat?: string;
+	animeEpisodeFormat?: string;
+	seriesFolderFormat?: string;
+	seasonFolderFormat?: string;
+	replaceIllegalCharacters?: boolean;
+	colonReplacementFormat?: SonarrColonFormat;
+	customColonReplacementFormat?: string | null;
+	multiEpisodeStyle?: SonarrMultiEpisodeStyle;
+	layer?: OpOrigin;
+}
+
 export const write = {
 	delayProfile: {
 		create: createDelayProfile,
@@ -54,6 +95,22 @@ export const write = {
 		submitCreate: submitCreateMediaSettings,
 		submitUpdate: submitUpdateMediaSettings,
 		submitRemove: submitRemoveMediaSettings
+	},
+	namingRadarr: {
+		create: createRadarrNaming,
+		update: updateRadarrNaming,
+		remove: removeRadarrNaming,
+		submitCreate: submitCreateRadarrNaming,
+		submitUpdate: submitUpdateRadarrNaming,
+		submitRemove: submitRemoveRadarrNaming
+	},
+	namingSonarr: {
+		create: createSonarrNaming,
+		update: updateSonarrNaming,
+		remove: removeSonarrNaming,
+		submitCreate: submitCreateSonarrNaming,
+		submitUpdate: submitUpdateSonarrNaming,
+		submitRemove: submitRemoveSonarrNaming
 	}
 };
 
@@ -276,6 +333,165 @@ function mediaSettingsFields(
 		name: input.name,
 		propersRepacks: input.propersRepacks ?? 'doNotPrefer',
 		enableMediaInfo: String(input.enableMediaInfo ?? false),
+		layer: input.layer ?? 'user'
+	};
+}
+
+export async function createRadarrNaming(
+	ctx: PcdTestContext,
+	input: RadarrNamingFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(await submitCreateRadarrNaming(ctx, input), 'create radarr naming');
+}
+
+export async function updateRadarrNaming(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: RadarrNamingFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateRadarrNaming(ctx, currentName, input),
+		'update radarr naming'
+	);
+}
+
+export async function removeRadarrNaming(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitRemoveRadarrNaming(ctx, currentName, layer),
+		'delete radarr naming'
+	);
+}
+
+export async function submitCreateRadarrNaming(
+	ctx: PcdTestContext,
+	input: RadarrNamingFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/naming/new`,
+		radarrNamingFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitUpdateRadarrNaming(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: RadarrNamingFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/naming/radarr/${encodeURIComponent(currentName)}?/update`,
+		radarrNamingFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitRemoveRadarrNaming(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/naming/radarr/${encodeURIComponent(currentName)}?/delete`,
+		{ layer },
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function createSonarrNaming(
+	ctx: PcdTestContext,
+	input: SonarrNamingFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(await submitCreateSonarrNaming(ctx, input), 'create sonarr naming');
+}
+
+export async function updateSonarrNaming(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: SonarrNamingFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateSonarrNaming(ctx, currentName, input),
+		'update sonarr naming'
+	);
+}
+
+export async function removeSonarrNaming(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitRemoveSonarrNaming(ctx, currentName, layer),
+		'delete sonarr naming'
+	);
+}
+
+export async function submitCreateSonarrNaming(
+	ctx: PcdTestContext,
+	input: SonarrNamingFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/naming/new`,
+		sonarrNamingFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitUpdateSonarrNaming(
+	ctx: PcdTestContext,
+	currentName: string,
+	input: SonarrNamingFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/naming/sonarr/${encodeURIComponent(currentName)}?/update`,
+		sonarrNamingFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitRemoveSonarrNaming(
+	ctx: PcdTestContext,
+	currentName: string,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/media-management/${ctx.dbId}/naming/sonarr/${encodeURIComponent(currentName)}?/delete`,
+		{ layer },
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+function radarrNamingFields(input: RadarrNamingFormInput): Record<string, string> {
+	return {
+		arrType: 'radarr',
+		name: input.name,
+		rename: String(input.rename ?? true),
+		movieFormat: input.movieFormat ?? '',
+		movieFolderFormat: input.movieFolderFormat ?? '',
+		replaceIllegalCharacters: String(input.replaceIllegalCharacters ?? false),
+		colonReplacementFormat: input.colonReplacementFormat ?? 'delete',
+		layer: input.layer ?? 'user'
+	};
+}
+
+function sonarrNamingFields(input: SonarrNamingFormInput): Record<string, string> {
+	return {
+		arrType: 'sonarr',
+		name: input.name,
+		rename: String(input.rename ?? true),
+		standardEpisodeFormat: input.standardEpisodeFormat ?? '',
+		dailyEpisodeFormat: input.dailyEpisodeFormat ?? '',
+		animeEpisodeFormat: input.animeEpisodeFormat ?? '',
+		seriesFolderFormat: input.seriesFolderFormat ?? '',
+		seasonFolderFormat: input.seasonFolderFormat ?? '',
+		replaceIllegalCharacters: String(input.replaceIllegalCharacters ?? false),
+		colonReplacementFormat: input.colonReplacementFormat ?? 'delete',
+		customColonReplacementFormat: input.customColonReplacementFormat ?? '',
+		multiEpisodeStyle: input.multiEpisodeStyle ?? 'extend',
 		layer: input.layer ?? 'user'
 	};
 }

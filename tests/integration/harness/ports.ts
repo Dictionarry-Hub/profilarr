@@ -95,9 +95,17 @@ export const PORTS = {
 		writeMediaSettingsCreate: 7613,
 		writeMediaSettingsDelete: 7614,
 		writeMediaSettingsUpdate: 7615,
+		writeNamingRadarrCreate: 7616,
+		writeNamingRadarrUpdate: 7617,
+		writeNamingRadarrDelete: 7618,
+		writeNamingSonarrCreate: 7619,
+		writeNamingSonarrUpdate: 7620,
+		writeNamingSonarrDelete: 7621,
 		conflictsDelayProfiles: 7700,
 		conflictsRegex: 7701,
-		conflictsMediaSettings: 7702
+		conflictsMediaSettings: 7702,
+		conflictsNamingRadarr: 7703,
+		conflictsNamingSonarr: 7704
 	}
 } as const;
 
