@@ -2,7 +2,7 @@
  * PCD conflict tests: media settings.
  */
 
-import { assert, assertEquals, assertExists } from '@std/assert';
+import { assert, assertEquals, assertExists, assertStringIncludes } from '@std/assert';
 import { startServer, stopServer } from '$test-harness/server.ts';
 import { openDb } from '$test-harness/db.ts';
 import { run, setup, teardown, test } from '$test-harness/runner.ts';
@@ -164,6 +164,50 @@ test('rename conflict follows upstream rename by strategy', async () => {
 				assertNoMediaSettings(ctx, arrType, 'User Media');
 			}
 		}
+	}
+});
+
+/**
+ * Base
+ *   Media settings:
+ *     name='Old Media', propersRepacks='doNotPrefer'
+ *
+ * User
+ *   POST update changes:
+ *     name            = 'User Media'
+ *     propersRepacks  = 'preferAndUpgrade'
+ *
+ * Upstream
+ *   Published base rename changes:
+ *     name 'Old Media' -> 'Upstream Media'
+ *
+ * Expect
+ *   - conflict page field detail follows the upstream rename
+ *   - upstream name renders as 'Upstream Media' instead of missing value
+ */
+test('conflict page field details follow upstream rename', async () => {
+	for (const arrType of ARR_TYPES) {
+		const ctx = await seededScenario('ask', arrType, 'field-detail-upstream-rename', [
+			seedFor(arrType, {
+				name: 'Old Media',
+				propersRepacks: 'doNotPrefer',
+				enableMediaInfo: false
+			})
+		]);
+
+		await write.mediaSettings.update(ctx, arrType, 'Old Media', {
+			name: 'User Media',
+			propersRepacks: 'preferAndUpgrade',
+			enableMediaInfo: false
+		});
+
+		seedUpstream(ctx, upstreamRename(arrType, 'Old Media', 'Upstream Media'));
+		await compilePcd(ctx);
+
+		const response = await ctx.client.get(`/databases/${ctx.dbId}/conflicts`);
+		assertEquals(response.status, 200);
+		const body = await response.text();
+		assertStringIncludes(body, 'Upstream Media');
 	}
 });
 

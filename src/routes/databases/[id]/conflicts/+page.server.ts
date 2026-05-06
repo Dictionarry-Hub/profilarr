@@ -5,6 +5,7 @@ import type { OperationMetadata } from '$pcd/core/types.ts';
 import { alignConflict, overrideConflict } from '$pcd/conflicts/index.ts';
 import { getCache } from '$pcd/index.ts';
 import { AUTO_ALIGN_ENTITIES } from '$pcd/entities/registry.ts';
+import { followRenameChain } from '$pcd/conflicts/overrideUtils.ts';
 
 type FieldConflict = {
 	field: string;
@@ -36,7 +37,12 @@ type ConflictRow = {
 	complex: boolean;
 };
 
-type ParsedMetadata = (OperationMetadata & { group_id?: string }) | null;
+type ParsedMetadata =
+	| (OperationMetadata & {
+			group_id?: string;
+			stable_key?: { value?: unknown };
+	  })
+	| null;
 
 function parseMetadata(raw: string | null): ParsedMetadata {
 	if (!raw) return null;
@@ -109,6 +115,7 @@ function makeCurrentRowLookup(databaseId: number): CurrentRowLookup {
 }
 
 function buildFieldConflicts(
+	databaseId: number,
 	lookupRow: CurrentRowLookup,
 	entity: string,
 	metadata: ParsedMetadata,
@@ -123,8 +130,7 @@ function buildFieldConflicts(
 		return { fields: [], complex: true };
 	}
 
-	const lookupName = lookupNameFromMetadata(metadata);
-	const currentRow = lookupName ? lookupRow(entity, lookupName) : null;
+	const currentRow = resolveCurrentRow(databaseId, lookupRow, entity, metadata, desiredState);
 
 	const fields: FieldConflict[] = keys.map((field) => {
 		const change = desiredState[field] as { from: unknown; to: unknown };
@@ -139,13 +145,68 @@ function buildFieldConflicts(
 	return { fields, complex: false };
 }
 
-function lookupNameFromMetadata(metadata: ParsedMetadata): string | null {
-	if (!metadata) return null;
-	const stableKey = (metadata as unknown as { stable_key?: { value?: unknown } }).stable_key;
-	const stableKeyValue = stableKey?.value;
-	if (typeof stableKeyValue === 'string' && stableKeyValue.length > 0) return stableKeyValue;
-	if (typeof metadata.name === 'string' && metadata.name.length > 0) return metadata.name;
+function resolveCurrentRow(
+	databaseId: number,
+	lookupRow: CurrentRowLookup,
+	entity: string,
+	metadata: ParsedMetadata,
+	desiredState: Record<string, unknown> | null
+): Record<string, unknown> | null {
+	const candidates = lookupNameCandidates(metadata, desiredState);
+	for (const name of candidates) {
+		const row = lookupRow(entity, name);
+		if (row) return row;
+	}
+
+	if (candidates.length === 0) return null;
+
+	const resolvedName = followRenameChain(databaseId, entity, candidates[0]);
+	if (resolvedName !== candidates[0]) {
+		return lookupRow(entity, resolvedName);
+	}
+
 	return null;
+}
+
+function lookupNameCandidates(
+	metadata: ParsedMetadata,
+	desiredState: Record<string, unknown> | null
+): string[] {
+	const names = [
+		stableKeyValue(metadata),
+		metadata?.previousName,
+		metadata?.name,
+		desiredNameTo(desiredState),
+		plainDesiredName(desiredState)
+	];
+	return uniqueStrings(names);
+}
+
+function stableKeyValue(metadata: ParsedMetadata): string | null {
+	const value = metadata?.stable_key?.value ?? metadata?.stableKey?.value;
+	return typeof value === 'string' && value.length > 0 ? value : null;
+}
+
+function desiredNameTo(desiredState: Record<string, unknown> | null): string | null {
+	const name = desiredState?.name;
+	if (!isFromTo(name)) return null;
+	return typeof name.to === 'string' && name.to.length > 0 ? name.to : null;
+}
+
+function plainDesiredName(desiredState: Record<string, unknown> | null): string | null {
+	const name = desiredState?.name;
+	return typeof name === 'string' && name.length > 0 ? name : null;
+}
+
+function uniqueStrings(values: Array<string | null | undefined>): string[] {
+	const seen = new Set<string>();
+	const strings: string[] = [];
+	for (const value of values) {
+		if (!value || seen.has(value)) continue;
+		seen.add(value);
+		strings.push(value);
+	}
+	return strings;
 }
 
 export const load: PageServerLoad = async ({ parent }) => {
@@ -158,7 +219,13 @@ export const load: PageServerLoad = async ({ parent }) => {
 		const desiredState = parseDesiredState(op.desired_state ?? null);
 		const title = metadata?.title ?? metadata?.summary ?? formatTitle(metadata);
 		const entity = metadata?.entity ?? 'operation';
-		const { fields, complex } = buildFieldConflicts(lookupRow, entity, metadata, desiredState);
+		const { fields, complex } = buildFieldConflicts(
+			database.id,
+			lookupRow,
+			entity,
+			metadata,
+			desiredState
+		);
 
 		return {
 			opId: op.id,
