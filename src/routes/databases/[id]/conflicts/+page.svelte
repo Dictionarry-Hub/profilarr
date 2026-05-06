@@ -7,15 +7,23 @@
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import Button from '$ui/button/Button.svelte';
+	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
+	import Label from '$ui/label/Label.svelte';
+	import ConflictField from './ConflictField.svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
 	import { Fingerprint, AlertTriangle, HeartHandshake, HandMetal } from 'lucide-svelte';
-	import Table from '$ui/table/Table.svelte';
-	import type { Column } from '$ui/table/types';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
+
+	type FieldConflict = {
+		field: string;
+		was: unknown;
+		you: unknown;
+		upstreamNow: unknown;
+	};
 
 	type ConflictRow = {
 		opId: number;
@@ -29,6 +37,16 @@
 		summary: string | null;
 		origin: string;
 		groupId: string | null;
+		fields: FieldConflict[];
+		complex: boolean;
+	};
+
+	type ConflictGroup = {
+		key: string;
+		title: string;
+		entity: string;
+		name: string;
+		conflicts: ConflictRow[];
 	};
 
 	function groupKey(row: ConflictRow): string {
@@ -92,22 +110,25 @@
 		activeReasons = new Set(activeReasons);
 	}
 
+	type LabelVariant =
+		| 'default'
+		| 'secondary'
+		| 'destructive'
+		| 'outline'
+		| 'ghost'
+		| 'success'
+		| 'warning'
+		| 'danger'
+		| 'info'
+		| 'link';
+
 	const reasonLabels: Record<string, string> = {
 		guard_mismatch: 'Guard mismatch',
 		duplicate_key: 'Duplicate key',
 		missing_target: 'Missing target'
 	};
 
-	const badgeVariants: Record<string, string> = {
-		accent: 'bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200',
-		neutral: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
-		success: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-		warning: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-		danger: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-		info: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-	};
-
-	const reasonVariants: Record<string, string> = {
+	const reasonVariants: Record<string, LabelVariant> = {
 		guard_mismatch: 'warning',
 		duplicate_key: 'danger',
 		missing_target: 'warning'
@@ -128,29 +149,20 @@
 		test_release: 'Test Release'
 	};
 
-	const entityVariants: Record<string, string> = {
+	const entityVariants: Record<string, LabelVariant> = {
 		quality_profile: 'info',
-		custom_format: 'accent',
+		custom_format: 'default',
 		regular_expression: 'warning',
 		delay_profile: 'success',
-		radarr_naming: 'neutral',
-		sonarr_naming: 'neutral',
-		radarr_media_settings: 'neutral',
-		sonarr_media_settings: 'neutral',
-		radarr_quality_definitions: 'neutral',
-		sonarr_quality_definitions: 'neutral',
-		test_entity: 'neutral',
-		test_release: 'neutral'
+		radarr_naming: 'secondary',
+		sonarr_naming: 'secondary',
+		radarr_media_settings: 'secondary',
+		sonarr_media_settings: 'secondary',
+		radarr_quality_definitions: 'secondary',
+		sonarr_quality_definitions: 'secondary',
+		test_entity: 'secondary',
+		test_release: 'secondary'
 	};
-
-	function escapeHtml(value: string): string {
-		return value
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#39;');
-	}
 
 	function titleCase(value: string): string {
 		return value
@@ -163,87 +175,93 @@
 		return titleCase(entity.replace(/_/g, ' '));
 	}
 
-	function badgeHtml(label: string, variant: string): string {
-		const classes = badgeVariants[variant] ?? badgeVariants.neutral;
-		return `<span class="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium ${classes}">${escapeHtml(label)}</span>`;
+	function formatValue(value: unknown): string {
+		if (value === null || value === undefined) return '—';
+		if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+		if (typeof value === 'string') {
+			if (value === '') return '(empty)';
+			return value;
+		}
+		if (typeof value === 'number') return String(value);
+		try {
+			return JSON.stringify(value);
+		} catch {
+			return String(value);
+		}
 	}
 
-	const columns: Column<ConflictRow>[] = [
-		{
-			key: 'opId',
-			header: 'Op #',
-			width: '90px',
-			cell: (row) => ({
-				// nosemgrep: profilarr.xss.table-cell-html-unescaped — internal numeric operation ID
-				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${row.opId}</span>`
-			})
-		},
-		{
-			key: 'entity',
-			header: 'Entity',
-			width: '170px',
-			cell: (row) => {
-				const label = entityLabels[row.entity] ?? formatEntity(row.entity);
-				const variant = entityVariants[row.entity] ?? 'neutral';
-				return { html: badgeHtml(label, variant) };
-			}
-		},
-		{
-			key: 'name',
-			header: 'Name',
-			width: '220px',
-			cell: (row) => escapeHtml(row.name || '-')
-		},
-		{
-			key: 'conflictReason',
-			header: 'Reason',
-			width: '150px',
-			cell: (row) => {
-				const reasonKey = row.conflictReason ?? 'guard_mismatch';
-				const label = reasonLabels[reasonKey] ?? reasonKey;
-				const variant = reasonVariants[reasonKey] ?? 'neutral';
-				return { html: badgeHtml(label, variant) };
-			}
-		},
-		{
-			key: 'title',
-			header: 'Operation',
-			cell: (row) => {
-				return {
-					html: `<div class="font-normal text-neutral-900 dark:text-neutral-100">${escapeHtml(row.title)}</div>`
+	function reasonLabel(reason: string | null): string {
+		const key = reason ?? 'guard_mismatch';
+		return reasonLabels[key] ?? key;
+	}
+
+	function reasonVariant(reason: string | null): LabelVariant {
+		const key = reason ?? 'guard_mismatch';
+		return reasonVariants[key] ?? 'secondary';
+	}
+
+	function entityLabel(entity: string): string {
+		return entityLabels[entity] ?? formatEntity(entity);
+	}
+
+	function entityVariant(entity: string): LabelVariant {
+		return entityVariants[entity] ?? 'secondary';
+	}
+
+	function rowMatchesQuery(conflict: ConflictRow, query: string): boolean {
+		if (!query) return true;
+		const haystack = [
+			conflict.title,
+			conflict.entity,
+			conflict.name,
+			reasonLabels[conflict.conflictReason ?? 'guard_mismatch'] ?? conflict.conflictReason ?? '',
+			conflict.status,
+			...conflict.fields.flatMap((f) => [
+				f.field,
+				formatValue(f.was),
+				formatValue(f.you),
+				formatValue(f.upstreamNow)
+			])
+		]
+			.join(' ')
+			.toLowerCase();
+		return haystack.includes(query);
+	}
+
+	$: filteredConflicts = data.conflicts.filter((conflict) => {
+		const query = $searchStore.query?.trim().toLowerCase() ?? '';
+		const matchesQuery = rowMatchesQuery(conflict, query);
+		const matchesEntity = activeEntities.size === 0 ? true : activeEntities.has(conflict.entity);
+		const matchesReason =
+			activeReasons.size === 0 ? true : activeReasons.has(conflict.conflictReason ?? '');
+		return matchesQuery && matchesEntity && matchesReason;
+	});
+
+	$: filteredGroups = ((): ConflictGroup[] => {
+		const groups = new Map<string, ConflictGroup>();
+		for (const conflict of filteredConflicts) {
+			const key = groupKey(conflict);
+			let group = groups.get(key);
+			if (!group) {
+				group = {
+					key,
+					title: conflict.title,
+					entity: conflict.entity,
+					name: conflict.name,
+					conflicts: []
 				};
+				groups.set(key, group);
 			}
+			group.conflicts.push(conflict);
 		}
-	];
-
-	$: filteredConflicts = data.conflicts
-		.filter((conflict) => {
-			const query = $searchStore.query?.trim().toLowerCase();
-			const matchesQuery = !query
-				? true
-				: conflict.title.toLowerCase().includes(query) ||
-					conflict.entity.toLowerCase().includes(query) ||
-					conflict.name.toLowerCase().includes(query) ||
-					(
-						reasonLabels[conflict.conflictReason ?? 'guard_mismatch'] ??
-						conflict.conflictReason ??
-						''
-					)
-						.toLowerCase()
-						.includes(query) ||
-					conflict.status.toLowerCase().includes(query);
-
-			const matchesEntity = activeEntities.size === 0 ? true : activeEntities.has(conflict.entity);
-			const matchesReason =
-				activeReasons.size === 0 ? true : activeReasons.has(conflict.conflictReason ?? '');
-
-			return matchesQuery && matchesEntity && matchesReason;
-		})
-		// Cluster ops from the same save adjacently so it is obvious they came
-		// from one user action. Ungrouped conflicts each form their own
-		// single-element cluster keyed by opId, preserving their original order.
-		.slice()
-		.sort((a, b) => groupKey(a).localeCompare(groupKey(b)) || a.opId - b.opId);
+		// Stable order: groups in their natural appearance order; conflicts within
+		// a group ordered by opId so split-save siblings render in a predictable
+		// sequence.
+		for (const group of groups.values()) {
+			group.conflicts.sort((a, b) => a.opId - b.opId);
+		}
+		return Array.from(groups.values());
+	})();
 </script>
 
 <svelte:head>
@@ -307,48 +325,99 @@
 	</ActionButton>
 </ActionsBar>
 
-<div class="mt-6">
-	<Table
-		data={filteredConflicts}
-		{columns}
-		emptyMessage="No conflicts detected"
-		hoverable={true}
-		compact={true}
-		responsive
-	>
-		<svelte:fragment slot="actions" let:row>
-			<div class="flex items-center justify-end gap-1">
-				<form
-					method="POST"
-					action="?/align"
-					use:enhance={handleConflictAction('Conflict aligned', 'Align conflict failed')}
-				>
-					<input type="hidden" name="opId" value={row.opId} />
-					<Button
-						icon={HeartHandshake}
-						text="Align"
-						variant="secondary"
-						iconColor="text-emerald-600 dark:text-emerald-400"
-						size="xs"
-						type="submit"
-					/>
-				</form>
-				<form
-					method="POST"
-					action="?/override"
-					use:enhance={handleConflictAction('Conflict override queued', 'Override conflict failed')}
-				>
-					<input type="hidden" name="opId" value={row.opId} />
-					<Button
-						icon={HandMetal}
-						text="Override"
-						variant="secondary"
-						iconColor="text-accent-600 dark:text-accent-400"
-						size="xs"
-						type="submit"
-					/>
-				</form>
-			</div>
-		</svelte:fragment>
-	</Table>
+<div class="mt-6 space-y-4">
+	{#if filteredGroups.length === 0}
+		<div
+			class="rounded-lg border border-neutral-200 bg-white p-8 text-center text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
+		>
+			No conflicts detected
+		</div>
+	{:else}
+		{#each filteredGroups as group (group.key)}
+			<ExpandableCard
+				title={group.title}
+				description={group.conflicts.length > 1
+					? `${group.conflicts.length} fields conflicted`
+					: ''}
+				open
+			>
+				<svelte:fragment slot="header-right">
+					<Label variant={entityVariant(group.entity)} size="sm" rounded="md">
+						{entityLabel(group.entity)}
+					</Label>
+				</svelte:fragment>
+				<div class="divide-y divide-neutral-200 dark:divide-neutral-800">
+					{#each group.conflicts as row (row.opId)}
+						<div
+							class="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-start md:justify-between"
+						>
+							<div class="flex-1 space-y-3">
+								<div class="flex flex-wrap items-center gap-2 text-xs">
+									<span class="font-mono text-neutral-500 dark:text-neutral-400">#{row.opId}</span>
+									<Label variant={reasonVariant(row.conflictReason)} size="sm" rounded="md">
+										{reasonLabel(row.conflictReason)}
+									</Label>
+								</div>
+								{#if row.complex}
+									<p class="text-xs text-neutral-500 dark:text-neutral-400">
+										Complex change &middot; {row.summary ?? row.title}
+									</p>
+								{:else if row.fields.length === 0}
+									<p class="text-xs text-neutral-500 dark:text-neutral-400">
+										{row.summary ?? row.title}
+									</p>
+								{:else}
+									<div class="space-y-4">
+										{#each row.fields as field (field.field)}
+											<ConflictField
+												field={field.field}
+												was={field.was}
+												you={field.you}
+												upstreamNow={field.upstreamNow}
+											/>
+										{/each}
+									</div>
+								{/if}
+							</div>
+							<div class="flex shrink-0 items-center gap-2">
+								<form
+									method="POST"
+									action="?/align"
+									use:enhance={handleConflictAction('Conflict aligned', 'Align conflict failed')}
+								>
+									<input type="hidden" name="opId" value={row.opId} />
+									<Button
+										icon={HeartHandshake}
+										text="Align"
+										variant="secondary"
+										iconColor="text-emerald-600 dark:text-emerald-400"
+										size="sm"
+										type="submit"
+									/>
+								</form>
+								<form
+									method="POST"
+									action="?/override"
+									use:enhance={handleConflictAction(
+										'Conflict override queued',
+										'Override conflict failed'
+									)}
+								>
+									<input type="hidden" name="opId" value={row.opId} />
+									<Button
+										icon={HandMetal}
+										text="Override"
+										variant="secondary"
+										iconColor="text-accent-600 dark:text-accent-400"
+										size="sm"
+										type="submit"
+									/>
+								</form>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</ExpandableCard>
+		{/each}
+	{/if}
 </div>
