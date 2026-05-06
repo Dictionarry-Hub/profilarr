@@ -331,15 +331,15 @@ test('create duplicate conflict resolves by strategy', async () => {
  *   Published base op changes:
  *     usenetDelay 10 -> 20
  *
- * Expect
- *   - ask: delete op is conflicted_pending, reason='guard_mismatch'
- *   - align: delete op is dropped/aligned
- *   - override: delete op is superseded by a replacement delete op
- *   - final row is absent only for override, otherwise upstream row remains
+ * Expect (verifies the name-only delete guard)
+ *   - user delete op stays state='published' and history.status='applied' for
+ *     every strategy. The delete only guards by name, which still matches
+ *     after upstream changed an unrelated field.
+ *   - final row is absent.
  */
-test('delete guard conflict resolves by strategy', async () => {
+test('delete applies cleanly after upstream non-name field change', async () => {
 	for (const strategy of STRATEGIES) {
-		const ctx = await seededScenario(strategy, 'delete-guard', [
+		const ctx = await seededScenario(strategy, 'delete-after-field-change', [
 			base.delayProfile({ name: 'Delete Conflict', usenetDelay: 10 })
 		]);
 		const checkpoint = opCheckpoint(ctx);
@@ -350,14 +350,9 @@ test('delete guard conflict resolves by strategy', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
-
-		if (strategy === 'override') {
-			assertNoDelayProfile(ctx, 'Delete Conflict');
-		} else {
-			const row = assertDelayProfile(ctx, 'Delete Conflict');
-			assertEquals(row.usenet_delay, 20);
-		}
+		assertEquals(op.state, 'published');
+		assertLatestHistory(ctx, op, 'applied');
+		assertNoDelayProfile(ctx, 'Delete Conflict');
 	}
 });
 
