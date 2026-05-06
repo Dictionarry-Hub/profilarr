@@ -1,4 +1,11 @@
 import type { SeedOperation } from './pcd.ts';
+import {
+	colonReplacementToDb,
+	multiEpisodeStyleToDb,
+	type MultiEpisodeStyle,
+	type RadarrColonReplacementFormat,
+	type SonarrColonReplacementFormat
+} from '$shared/pcd/mediaManagement.ts';
 
 export const base = {
 	delayProfile(input: {
@@ -82,6 +89,92 @@ export const base = {
 		enableMediaInfo?: boolean;
 	}): SeedOperation {
 		return mediaSettingsSeed('sonarr_media_settings', input);
+	},
+
+	radarrNaming(input: {
+		name: string;
+		rename?: boolean;
+		movieFormat?: string;
+		movieFolderFormat?: string;
+		replaceIllegalCharacters?: boolean;
+		colonReplacementFormat?: RadarrColonReplacementFormat;
+	}): SeedOperation {
+		const rename = input.rename ?? true;
+		const movieFormat = input.movieFormat ?? '';
+		const movieFolderFormat = input.movieFolderFormat ?? '';
+		const replaceIllegal = input.replaceIllegalCharacters ?? false;
+		const colon = input.colonReplacementFormat ?? 'delete';
+		return {
+			sql: `INSERT INTO radarr_naming (
+			              name,
+			              rename,
+			              movie_format,
+			              movie_folder_format,
+			              replace_illegal_characters,
+			              colon_replacement_format
+			          )
+			          VALUES (
+			              ${sqlValue(input.name)},
+			              ${rename ? 1 : 0},
+			              ${sqlValue(movieFormat)},
+			              ${sqlValue(movieFolderFormat)},
+			              ${replaceIllegal ? 1 : 0},
+			              ${sqlValue(colon)}
+			          );`
+		};
+	},
+
+	sonarrNaming(input: {
+		name: string;
+		rename?: boolean;
+		standardEpisodeFormat?: string;
+		dailyEpisodeFormat?: string;
+		animeEpisodeFormat?: string;
+		seriesFolderFormat?: string;
+		seasonFolderFormat?: string;
+		replaceIllegalCharacters?: boolean;
+		colonReplacementFormat?: SonarrColonReplacementFormat;
+		customColonReplacementFormat?: string | null;
+		multiEpisodeStyle?: MultiEpisodeStyle;
+	}): SeedOperation {
+		const rename = input.rename ?? true;
+		const standardEpisode = input.standardEpisodeFormat ?? '';
+		const dailyEpisode = input.dailyEpisodeFormat ?? '';
+		const animeEpisode = input.animeEpisodeFormat ?? '';
+		const seriesFolder = input.seriesFolderFormat ?? '';
+		const seasonFolder = input.seasonFolderFormat ?? '';
+		const replaceIllegal = input.replaceIllegalCharacters ?? false;
+		const colon = colonReplacementToDb(input.colonReplacementFormat ?? 'delete');
+		const customColon = input.customColonReplacementFormat ?? null;
+		const multi = multiEpisodeStyleToDb(input.multiEpisodeStyle ?? 'extend');
+		return {
+			sql: `INSERT INTO sonarr_naming (
+			              name,
+			              rename,
+			              standard_episode_format,
+			              daily_episode_format,
+			              anime_episode_format,
+			              series_folder_format,
+			              season_folder_format,
+			              replace_illegal_characters,
+			              colon_replacement_format,
+			              custom_colon_replacement_format,
+			              multi_episode_style
+			          )
+			          VALUES (
+			              ${sqlValue(input.name)},
+			              ${rename ? 1 : 0},
+			              ${sqlValue(standardEpisode)},
+			              ${sqlValue(dailyEpisode)},
+			              ${sqlValue(animeEpisode)},
+			              ${sqlValue(seriesFolder)},
+			              ${sqlValue(seasonFolder)},
+			              ${replaceIllegal ? 1 : 0},
+			              ${colon},
+			              ${sqlValue(customColon)},
+			              ${multi}
+			          );`
+		};
 	},
 
 	customFormatRegexCondition(input: {
