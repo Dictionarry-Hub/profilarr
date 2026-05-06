@@ -541,11 +541,7 @@ function upstreamUpdate(
 	};
 }
 
-function upstreamRename(
-	arrType: MediaSettingsArrType,
-	from: string,
-	to: string
-): SeedOperation {
+function upstreamRename(arrType: MediaSettingsArrType, from: string, to: string): SeedOperation {
 	return {
 		sql: `UPDATE ${tableForArrType(arrType)} SET name = ${sqlValue(to)} WHERE name = ${sqlValue(from)};`,
 		metadata: JSON.stringify({

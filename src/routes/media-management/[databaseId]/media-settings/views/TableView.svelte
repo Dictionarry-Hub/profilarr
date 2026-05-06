@@ -63,12 +63,7 @@
 	];
 </script>
 
-<Table
-	{columns}
-	data={configs}
-	rowHref={getRowHref}
-	hoverable={true}
->
+<Table {columns} data={configs} rowHref={getRowHref} hoverable={true}>
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
 			<span class="font-medium">{row.name}</span>

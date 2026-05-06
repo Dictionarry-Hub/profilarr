@@ -96,7 +96,9 @@ async function updateMediaSettings(options: {
 			.executeTakeFirst();
 
 		if (existing) {
-			throw new Error(`A ${config.arrType} media settings config with name "${input.name}" already exists`);
+			throw new Error(
+				`A ${config.arrType} media settings config with name "${input.name}" already exists`
+			);
 		}
 	}
 
