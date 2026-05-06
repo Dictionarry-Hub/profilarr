@@ -4,11 +4,13 @@ import { logSettingsQueries } from '$db/queries/logSettings.ts';
 import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
 import { aiSettingsQueries } from '$db/queries/aiSettings.ts';
 import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
-import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
+import { generalSettingsQueries, type DateFormat } from '$db/queries/generalSettings.ts';
 import { logSettings } from '$logger/settings.ts';
 import { logger } from '$logger/logger.ts';
 import { scheduleBackupJobs, scheduleLogCleanup } from '$lib/server/jobs/init.ts';
 import { FEATURES } from '$shared/features.ts';
+
+const DATE_FORMATS = ['auto', 'mdy', 'dmy', 'ymd'] as const;
 
 export const load = () => {
 	const logSetting = logSettingsQueries.get();
@@ -66,6 +68,7 @@ export const load = () => {
 			hasApiKey: !!tmdbSetting.api_key
 		},
 		generalSettings: {
+			date_format: generalSetting.date_format,
 			apply_default_delay_profiles: generalSetting.apply_default_delay_profiles === 1,
 			fail_on_referenced_delete: generalSetting.fail_on_referenced_delete === 1
 		}
@@ -130,6 +133,13 @@ export const actions: Actions = {
 		const tmdbApiKeyInput = formData.get('tmdb_api_key') as string;
 		const tmdbApiKey = tmdbApiKeyInput || tmdbSettingsQueries.get()?.api_key || '';
 
+		// --- Interface ---
+		const dateFormat = formData.get('date_format') as DateFormat;
+
+		if (!DATE_FORMATS.includes(dateFormat)) {
+			return fail(400, { error: 'Invalid date format' });
+		}
+
 		// --- Behavior ---
 		const arrApplyDefaultDelayProfiles = formData.get('arr_apply_default_delay_profiles') === 'on';
 		const failOnReferencedDelete = formData.get('fail_on_referenced_delete') === 'on';
@@ -191,6 +201,7 @@ export const actions: Actions = {
 		}
 
 		const arrUpdated = generalSettingsQueries.update({
+			dateFormat,
 			applyDefaultDelayProfiles: arrApplyDefaultDelayProfiles,
 			failOnReferencedDelete
 		});
@@ -219,6 +230,7 @@ export const actions: Actions = {
 				aiEnabled,
 				aiApiUrl,
 				aiModel,
+				dateFormat,
 				arrApplyDefaultDelayProfiles,
 				failOnReferencedDelete
 			}

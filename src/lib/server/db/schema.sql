@@ -841,11 +841,14 @@ CREATE INDEX idx_rename_runs_status ON rename_runs(status);
 -- ==============================================================================
 -- TABLE: general_settings
 -- Purpose: Store general app-wide settings (singleton pattern with id=1)
--- Migration: 030_create_general_settings.ts, 064_add_fail_on_referenced_delete.ts
+-- Migration: 030_create_general_settings.ts, 064_add_fail_on_referenced_delete.ts, 066_add_date_format_setting.ts
 -- ==============================================================================
 
 CREATE TABLE general_settings (
     id INTEGER PRIMARY KEY CHECK (id = 1),
+
+    -- Interface settings
+    date_format TEXT NOT NULL DEFAULT 'auto' CHECK (date_format IN ('auto', 'mdy', 'dmy', 'ymd')),
 
     -- Default delay profile settings
     apply_default_delay_profiles INTEGER NOT NULL DEFAULT 1,  -- 1=apply defaults when adding arr, 0=don't

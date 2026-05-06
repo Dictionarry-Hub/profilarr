@@ -1,10 +1,13 @@
 import { db } from '../db.ts';
 
+export type DateFormat = 'auto' | 'mdy' | 'dmy' | 'ymd';
+
 /**
  * Types for general_settings table
  */
 export interface GeneralSettings {
 	id: number;
+	date_format: DateFormat;
 	apply_default_delay_profiles: number; // 1=true, 0=false
 	fail_on_referenced_delete: number; // 1=true, 0=false
 	created_at: string;
@@ -12,6 +15,7 @@ export interface GeneralSettings {
 }
 
 export interface UpdateGeneralSettingsInput {
+	dateFormat?: DateFormat;
 	applyDefaultDelayProfiles?: boolean;
 	failOnReferencedDelete?: boolean;
 }
@@ -50,6 +54,11 @@ export const generalSettingsQueries = {
 	update(input: UpdateGeneralSettingsInput): boolean {
 		const updates: string[] = [];
 		const params: (string | number)[] = [];
+
+		if (input.dateFormat !== undefined) {
+			updates.push('date_format = ?');
+			params.push(input.dateFormat);
+		}
 
 		if (input.applyDefaultDelayProfiles !== undefined) {
 			updates.push('apply_default_delay_profiles = ?');

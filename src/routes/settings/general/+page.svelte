@@ -33,6 +33,8 @@
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import type { PageData } from './$types';
 
+	type DateFormat = 'auto' | 'mdy' | 'dmy' | 'ymd';
+
 	export let data: PageData;
 
 	let saving = false;
@@ -71,6 +73,7 @@
 	let uiAlertDurationSeconds: number | undefined = Math.round(
 		DEFAULT_ALERT_SETTINGS.durationMs / 1000
 	);
+	let dateFormat: DateFormat = data.generalSettings.date_format;
 	let uiFontSans: SansFont = 'dm-sans';
 	let uiFontMono: MonoFont = 'geist-mono';
 
@@ -99,6 +102,13 @@
 		{ value: 'bottom-left', label: 'Bottom left' },
 		{ value: 'bottom-center', label: 'Bottom center' },
 		{ value: 'bottom-right', label: 'Bottom right' }
+	];
+
+	const dateFormatOptions = [
+		{ value: 'auto', label: 'Auto' },
+		{ value: 'mdy', label: 'MM/DD/YYYY' },
+		{ value: 'dmy', label: 'DD/MM/YYYY' },
+		{ value: 'ymd', label: 'YYYY-MM-DD' }
 	];
 
 	// --- Logging defaults ---
@@ -144,6 +154,7 @@
 			ui_nav_icon_style: uiNavIconStyle,
 			ui_alert_position: uiAlertPosition,
 			ui_alert_duration_seconds: uiAlertDurationSeconds,
+			date_format: dateFormat,
 			ui_font_sans: uiFontSans,
 			ui_font_mono: uiFontMono
 		};
@@ -367,6 +378,23 @@
 									update('ui_alert_duration_seconds', v);
 								}}
 							/>
+						</div>
+
+						<div>
+							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+								Date Format
+							</span>
+							<DropdownSelect
+								value={dateFormat}
+								options={dateFormatOptions}
+								fullWidth
+								fixed
+								on:change={(e) => {
+									dateFormat = e.detail as DateFormat;
+									update('date_format', dateFormat);
+								}}
+							/>
+							<input type="hidden" name="date_format" value={dateFormat} />
 						</div>
 
 						<div>
