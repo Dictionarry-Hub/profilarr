@@ -221,8 +221,7 @@
 			</div>
 		</div>
 
-		{#if formData.rename}
-			<div class="space-y-4" data-onboarding="media-naming-formats">
+		<div class="space-y-4" class:opacity-60={!formData.rename} data-onboarding="media-naming-formats">
 				<div class="space-y-1">
 					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						Episode Formats
@@ -237,6 +236,7 @@
 						name="standardEpisodeFormat"
 						value={formData.standardEpisodeFormat}
 						categories={sonarrTokenCategories}
+						disabled={!formData.rename}
 						bind:inputElement={standardEpisodeFormatInput}
 						on:input={(e) => updateField('standardEpisodeFormat', e.detail)}
 					/>
@@ -249,6 +249,7 @@
 						name="dailyEpisodeFormat"
 						value={formData.dailyEpisodeFormat}
 						categories={sonarrTokenCategories}
+						disabled={!formData.rename}
 						bind:inputElement={dailyEpisodeFormatInput}
 						on:input={(e) => updateField('dailyEpisodeFormat', e.detail)}
 					/>
@@ -261,6 +262,7 @@
 						name="animeEpisodeFormat"
 						value={formData.animeEpisodeFormat}
 						categories={sonarrTokenCategories}
+						disabled={!formData.rename}
 						bind:inputElement={animeEpisodeFormatInput}
 						on:input={(e) => updateField('animeEpisodeFormat', e.detail)}
 					/>
@@ -268,7 +270,7 @@
 				</div>
 			</div>
 
-			<div class="space-y-4">
+			<div class="space-y-4" class:opacity-60={!formData.rename}>
 				<div class="space-y-1">
 					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						Folder Formats
@@ -283,6 +285,7 @@
 						name="seriesFolderFormat"
 						value={formData.seriesFolderFormat}
 						categories={sonarrTokenCategories}
+						disabled={!formData.rename}
 						bind:inputElement={seriesFolderFormatInput}
 						on:input={(e) => updateField('seriesFolderFormat', e.detail)}
 					/>
@@ -295,6 +298,7 @@
 						name="seasonFolderFormat"
 						value={formData.seasonFolderFormat}
 						categories={sonarrTokenCategories}
+						disabled={!formData.rename}
 						bind:inputElement={seasonFolderFormatInput}
 						on:input={(e) => updateField('seasonFolderFormat', e.detail)}
 					/>
@@ -302,7 +306,7 @@
 				</div>
 			</div>
 
-			<div class="space-y-2">
+			<div class="space-y-2" class:opacity-60={!formData.rename}>
 				<div class="space-y-1">
 					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						Multi-Episode Style
@@ -314,11 +318,16 @@
 				<DropdownSelect
 					value={formData.multiEpisodeStyle}
 					options={MULTI_EPISODE_STYLE_OPTIONS}
+					disabled={!formData.rename}
 					on:change={(e) => updateField('multiEpisodeStyle', e.detail as MultiEpisodeStyle)}
 				/>
 			</div>
 
-			<div class="space-y-4" data-onboarding="media-naming-character-replacement">
+			<div
+				class="space-y-4"
+				class:opacity-60={!formData.rename}
+				data-onboarding="media-naming-character-replacement"
+			>
 				<div class="space-y-1">
 					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						Character Replacement
@@ -334,6 +343,7 @@
 						label="Replace Illegal Characters"
 						ariaLabel="Replace Illegal Characters"
 						color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
+						disabled={!formData.rename}
 						on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
 					/>
 					<p class="text-xs text-neutral-600 dark:text-neutral-400">
@@ -341,31 +351,30 @@
 					</p>
 				</div>
 
-				{#if formData.replaceIllegalCharacters}
-					<div class="space-y-2">
-						<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-							Colon Replacement
-						</div>
-						<DropdownSelect
-							value={formData.colonReplacementFormat}
-							options={SONARR_COLON_REPLACEMENT_OPTIONS}
-							on:change={(e) =>
-								updateField('colonReplacementFormat', e.detail as SonarrColonReplacementFormat)}
-						/>
+				<div class="space-y-2">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Colon Replacement
 					</div>
+					<DropdownSelect
+						value={formData.colonReplacementFormat}
+						options={SONARR_COLON_REPLACEMENT_OPTIONS}
+						disabled={!formData.rename || !formData.replaceIllegalCharacters}
+						on:change={(e) =>
+							updateField('colonReplacementFormat', e.detail as SonarrColonReplacementFormat)}
+					/>
+				</div>
 
-					{#if showCustomColonInput}
-						<FormInput
-							label="Custom Replacement"
-							name="customColonReplacementFormat"
-							value={formData.customColonReplacementFormat}
-							placeholder="Enter custom replacement character(s)"
-							on:input={(e) => updateField('customColonReplacementFormat', e.detail)}
-						/>
-					{/if}
+				{#if showCustomColonInput}
+					<FormInput
+						label="Custom Replacement"
+						name="customColonReplacementFormat"
+						value={formData.customColonReplacementFormat}
+						placeholder="Enter custom replacement character(s)"
+						disabled={!formData.rename || !formData.replaceIllegalCharacters}
+						on:input={(e) => updateField('customColonReplacementFormat', e.detail)}
+					/>
 				{/if}
 			</div>
-		{/if}
 	</div>
 </div>
 

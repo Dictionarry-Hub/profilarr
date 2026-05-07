@@ -198,8 +198,7 @@
 			</div>
 		</div>
 
-		{#if formData.rename}
-			<div class="space-y-4" data-onboarding="media-naming-formats">
+		<div class="space-y-4" class:opacity-60={!formData.rename} data-onboarding="media-naming-formats">
 				<div class="space-y-1">
 					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						Naming Formats
@@ -215,6 +214,7 @@
 						value={formData.movieFormat}
 						placeholder="e.g., Movie Title (Year) Quality"
 						categories={radarrTokenCategories}
+						disabled={!formData.rename}
 						bind:inputElement={movieFormatInput}
 						on:input={(e) => updateField('movieFormat', e.detail)}
 					/>
@@ -228,6 +228,7 @@
 						value={formData.movieFolderFormat}
 						placeholder="e.g., Movie Title (Year)"
 						categories={radarrTokenCategories}
+						disabled={!formData.rename}
 						bind:inputElement={movieFolderFormatInput}
 						on:input={(e) => updateField('movieFolderFormat', e.detail)}
 					/>
@@ -235,7 +236,11 @@
 				</div>
 			</div>
 
-			<div class="space-y-4" data-onboarding="media-naming-character-replacement">
+			<div
+				class="space-y-4"
+				class:opacity-60={!formData.rename}
+				data-onboarding="media-naming-character-replacement"
+			>
 				<div class="space-y-1">
 					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						Character Replacement
@@ -251,6 +256,7 @@
 						label="Replace Illegal Characters"
 						ariaLabel="Replace Illegal Characters"
 						color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
+						disabled={!formData.rename}
 						on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
 					/>
 					<p class="text-xs text-neutral-600 dark:text-neutral-400">
@@ -258,21 +264,19 @@
 					</p>
 				</div>
 
-				{#if formData.replaceIllegalCharacters}
-					<div class="space-y-2">
-						<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-							Colon Replacement
-						</div>
-						<DropdownSelect
-							value={formData.colonReplacementFormat}
-							options={RADARR_COLON_REPLACEMENT_OPTIONS}
-							on:change={(e) =>
-								updateField('colonReplacementFormat', e.detail as RadarrColonReplacementFormat)}
-						/>
+				<div class="space-y-2">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Colon Replacement
 					</div>
-				{/if}
+					<DropdownSelect
+						value={formData.colonReplacementFormat}
+						options={RADARR_COLON_REPLACEMENT_OPTIONS}
+						disabled={!formData.rename || !formData.replaceIllegalCharacters}
+						on:change={(e) =>
+							updateField('colonReplacementFormat', e.detail as RadarrColonReplacementFormat)}
+					/>
+				</div>
 			</div>
-		{/if}
 	</div>
 </div>
 
