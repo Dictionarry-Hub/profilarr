@@ -4,7 +4,11 @@
 
 import type { PCDCache } from '$pcd/index.ts';
 import type { RadarrNamingRow, SonarrNamingRow, NamingListItem } from '$shared/pcd/display.ts';
-import { colonReplacementFromDb, multiEpisodeStyleFromDb } from '$shared/pcd/mediaManagement.ts';
+import {
+	colonReplacementFromDb,
+	multiEpisodeStyleFromDb,
+	type SonarrColonReplacementFormat
+} from '$shared/pcd/mediaManagement.ts';
 
 // Note: name is PRIMARY KEY so never null, but Kysely types it as nullable
 // because the generator doesn't detect non-INTEGER primary keys
@@ -13,8 +17,27 @@ export async function list(cache: PCDCache): Promise<NamingListItem[]> {
 	const db = cache.kb;
 
 	const [radarrRows, sonarrRows] = await Promise.all([
-		db.selectFrom('radarr_naming').select(['name', 'rename', 'updated_at']).execute(),
-		db.selectFrom('sonarr_naming').select(['name', 'rename', 'updated_at']).execute()
+		db
+			.selectFrom('radarr_naming')
+			.select([
+				'name',
+				'rename',
+				'replace_illegal_characters',
+				'colon_replacement_format',
+				'updated_at'
+			])
+			.execute(),
+		db
+			.selectFrom('sonarr_naming')
+			.select([
+				'name',
+				'rename',
+				'replace_illegal_characters',
+				'colon_replacement_format',
+				'multi_episode_style',
+				'updated_at'
+			])
+			.execute()
 	]);
 
 	const items: NamingListItem[] = [];
@@ -24,6 +47,9 @@ export async function list(cache: PCDCache): Promise<NamingListItem[]> {
 			name: row.name!,
 			arr_type: 'radarr',
 			rename: row.rename === 1,
+			replace_illegal_characters: row.replace_illegal_characters === 1,
+			colon_replacement_format: row.colon_replacement_format as SonarrColonReplacementFormat,
+			multi_episode_style: null,
 			updated_at: row.updated_at
 		});
 	}
@@ -33,6 +59,9 @@ export async function list(cache: PCDCache): Promise<NamingListItem[]> {
 			name: row.name!,
 			arr_type: 'sonarr',
 			rename: row.rename === 1,
+			replace_illegal_characters: row.replace_illegal_characters === 1,
+			colon_replacement_format: colonReplacementFromDb(row.colon_replacement_format),
+			multi_episode_style: multiEpisodeStyleFromDb(row.multi_episode_style),
 			updated_at: row.updated_at
 		});
 	}

@@ -48,10 +48,15 @@ import type { ArrType } from './types.ts';
 // Naming
 export type { RadarrNamingRow, SonarrNamingRow } from './types.ts';
 
+import type { SonarrColonReplacementFormat, MultiEpisodeStyle } from './mediaManagement.ts';
+
 export interface NamingListItem {
 	name: string;
 	arr_type: Exclude<ArrType, 'all'>;
 	rename: boolean;
+	replace_illegal_characters: boolean;
+	colon_replacement_format: SonarrColonReplacementFormat;
+	multi_episode_style: MultiEpisodeStyle | null;
 	updated_at: string;
 }
 
