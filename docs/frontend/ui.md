@@ -205,9 +205,10 @@ a markdown toolbar, a live preview toggle, and auto-grow behavior. Pass
 
 #### DateInput and TimeInput
 
-**`$ui/form/DateInput.svelte`** composes three `DropdownCombobox`s
-(month / day / year) with days-in-month validation so February never accepts
-day 30. Value format is `YYYY-MM-DD`.
+**`$ui/form/DateInput.svelte`** composes three `DropdownCombobox`s for
+month, day, and year. The visible order follows the app date-format setting;
+the value format stays `YYYY-MM-DD`. It includes days-in-month validation so
+February never accepts day 30.
 
 **`$ui/form/TimeInput.svelte`** is two dropdowns (`HH` / `MM`).
 

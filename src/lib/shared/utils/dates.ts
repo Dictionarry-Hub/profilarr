@@ -52,6 +52,7 @@ export function parseUTC(timestamp: string | null | undefined): Date | null {
 }
 
 export type DateFormat = 'auto' | 'mdy' | 'dmy' | 'ymd';
+export type DatePart = 'month' | 'day' | 'year';
 
 // ---------------------------------------------------------------------------
 // Display formatting
@@ -69,6 +70,24 @@ function resolveDisplayArgs(
 		return { dateFormat: dateFormatOrOptions, options };
 	}
 	return { dateFormat: 'auto', options: dateFormatOrOptions };
+}
+
+export function getDatePartOrder(dateFormat: DateFormat): DatePart[] {
+	if (dateFormat === 'mdy') return ['month', 'day', 'year'];
+	if (dateFormat === 'dmy') return ['day', 'month', 'year'];
+	if (dateFormat === 'ymd') return ['year', 'month', 'day'];
+
+	const parts = new Intl.DateTimeFormat(undefined, {
+		year: 'numeric',
+		month: 'numeric',
+		day: 'numeric'
+	})
+		.formatToParts(new Date(Date.UTC(2006, 10, 22)))
+		.map((part) => part.type)
+		.filter((part): part is DatePart => part === 'month' || part === 'day' || part === 'year');
+
+	const uniqueParts = [...new Set(parts)];
+	return uniqueParts.length === 3 ? uniqueParts : ['month', 'day', 'year'];
 }
 
 function formatExplicitDate(

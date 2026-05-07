@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
+	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
+	import { getDatePartOrder } from '$shared/utils/dates.ts';
 
 	export let label: string;
 	export let description: string = '';
@@ -81,6 +83,7 @@
 	$: dayMinWidth = fullWidth ? '0' : '4rem';
 	$: yearWidthClass = fullWidth ? (shortLabels ? 'w-fit md:flex-1' : 'flex-1') : 'w-24';
 	$: yearMinWidth = fullWidth ? '0' : '6rem';
+	$: datePartOrder = getDatePartOrder($dateFormat);
 
 	function parseValue(nextValue: string) {
 		if (/^\d{4}-\d{2}-\d{2}$/.test(nextValue)) {
@@ -151,53 +154,59 @@
 	{/if}
 
 	<div class="flex items-center {fieldGapClass}" class:w-full={fullWidth}>
-		<DropdownCombobox
-			value={month}
-			options={monthOptions}
-			placeholder="Month"
-			minWidth={monthMinWidth}
-			width={monthWidthClass}
-			fullWidth
-			limit={6}
-			{fixed}
-			buttonSize={responsiveButtonSize}
-			responsiveButton={responsive}
-			responsiveDropdown={responsive}
-			compactDropdownThreshold={7}
-			disabled={effectiveDisabled}
-			on:change={(event) => onMonthChange(event.detail)}
-		/>
-		<DropdownCombobox
-			value={day}
-			options={dayOptions}
-			placeholder="Day"
-			minWidth={dayMinWidth}
-			width={dayWidthClass}
-			fullWidth
-			limit={6}
-			{fixed}
-			buttonSize={responsiveButtonSize}
-			responsiveButton={responsive}
-			responsiveDropdown={responsive}
-			compactDropdownThreshold={7}
-			disabled={effectiveDisabled}
-			on:change={(event) => onDayChange(event.detail)}
-		/>
-		<DropdownCombobox
-			value={year}
-			options={yearOptions}
-			placeholder="Year"
-			minWidth={yearMinWidth}
-			width={yearWidthClass}
-			fullWidth
-			limit={6}
-			{fixed}
-			buttonSize={responsiveButtonSize}
-			responsiveButton={responsive}
-			responsiveDropdown={responsive}
-			compactDropdownThreshold={7}
-			disabled={effectiveDisabled}
-			on:change={(event) => onYearChange(event.detail)}
-		/>
+		{#each datePartOrder as part (part)}
+			{#if part === 'month'}
+				<DropdownCombobox
+					value={month}
+					options={monthOptions}
+					placeholder="Month"
+					minWidth={monthMinWidth}
+					width={monthWidthClass}
+					fullWidth
+					limit={6}
+					{fixed}
+					buttonSize={responsiveButtonSize}
+					responsiveButton={responsive}
+					responsiveDropdown={responsive}
+					compactDropdownThreshold={7}
+					disabled={effectiveDisabled}
+					on:change={(event) => onMonthChange(event.detail)}
+				/>
+			{:else if part === 'day'}
+				<DropdownCombobox
+					value={day}
+					options={dayOptions}
+					placeholder="Day"
+					minWidth={dayMinWidth}
+					width={dayWidthClass}
+					fullWidth
+					limit={6}
+					{fixed}
+					buttonSize={responsiveButtonSize}
+					responsiveButton={responsive}
+					responsiveDropdown={responsive}
+					compactDropdownThreshold={7}
+					disabled={effectiveDisabled}
+					on:change={(event) => onDayChange(event.detail)}
+				/>
+			{:else}
+				<DropdownCombobox
+					value={year}
+					options={yearOptions}
+					placeholder="Year"
+					minWidth={yearMinWidth}
+					width={yearWidthClass}
+					fullWidth
+					limit={6}
+					{fixed}
+					buttonSize={responsiveButtonSize}
+					responsiveButton={responsive}
+					responsiveDropdown={responsive}
+					compactDropdownThreshold={7}
+					disabled={effectiveDisabled}
+					on:change={(event) => onYearChange(event.detail)}
+				/>
+			{/if}
+		{/each}
 	</div>
 </div>
