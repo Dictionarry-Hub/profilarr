@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
 
 export const load: LayoutServerLoad = ({ params }) => {
 	const id = parseInt(params.id || '', 10);
@@ -26,8 +27,15 @@ export const load: LayoutServerLoad = ({ params }) => {
 		!!sync.mediaManagement.qualityDefinitionsDatabaseId ||
 		!!sync.mediaManagement.mediaSettingsDatabaseId;
 
+	const driftStatus = arrDriftStatusQueries.getByInstanceId(id);
+	const driftCount =
+		driftStatus?.status === 'drift_detected'
+			? Object.values(driftStatus.counts).reduce((sum, n) => sum + (n ?? 0), 0)
+			: 0;
+
 	return {
 		instance: safe,
-		hasSyncConfig
+		hasSyncConfig,
+		driftCount
 	};
 };
