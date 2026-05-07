@@ -79,7 +79,12 @@
 		/>
 	</div>
 
-	<div data-onboarding="upgrades-schedule">
+	<div
+		data-onboarding="upgrades-schedule"
+		class:pointer-events-none={!enabled}
+		class:opacity-50={!enabled}
+		aria-disabled={!enabled}
+	>
 		<span
 			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
 		>
@@ -88,7 +93,12 @@
 		<CronInput bind:value={cronValue} {minIntervalMinutes} {onWarning} />
 	</div>
 
-	<div data-onboarding="upgrades-filter-mode">
+	<div
+		data-onboarding="upgrades-filter-mode"
+		class:pointer-events-none={!enabled}
+		class:opacity-50={!enabled}
+		aria-disabled={!enabled}
+	>
 		<span
 			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
 		>

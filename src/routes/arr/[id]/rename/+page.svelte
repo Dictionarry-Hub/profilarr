@@ -160,9 +160,19 @@
 			/>
 		</section>
 
-		<section class="md:px-4">
-			<RenameRunHistory runs={data.renameRuns} />
-		</section>
+		{#if enabled}
+			<section class="md:px-4">
+				<RenameRunHistory runs={data.renameRuns} />
+			</section>
+		{:else}
+			<section class="md:px-4">
+				<div class="rounded-xl border border-neutral-300 dark:border-neutral-700/60">
+					<p class="px-4 py-4 text-center text-sm text-neutral-600 dark:text-neutral-400">
+						Enable rename to view run history.
+					</p>
+				</div>
+			</section>
+		{/if}
 	</div>
 
 	<!-- Hidden forms -->
