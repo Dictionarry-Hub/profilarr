@@ -214,8 +214,8 @@ Layout:
   (`Paused` / `Ready` / `Next ...` / `Last ...`).
 - Entities section: an `ExpandableTable` with `Name` / `Entity` / `State`
   columns, mirroring the dev changes-page diff idiom. Each drifted entity is
-  one row; expanding shows a `DriftFieldDiffTable` with `Field` / `Expected`
-  / `Actual` columns rendering the entity's `changes[]`.
+  one row; expanding shows a `DriftFieldDiffTable` with `Field` / `Profilarr`
+  / `<Arr type> - <Arr name>` columns rendering the entity's `changes[]`.
 
 State rendering inside the entities section:
 

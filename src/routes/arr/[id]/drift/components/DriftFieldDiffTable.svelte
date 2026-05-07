@@ -6,6 +6,7 @@
 	import QualityListDiff from './QualityListDiff.svelte';
 
 	export let changes: DriftDisplayChange[];
+	export let arrLabel = 'Arr';
 
 	type LabelVariant = 'default' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -21,11 +22,11 @@
 		return toneToVariant[value.tone ?? 'neutral'];
 	}
 
-	const columns: Column<DriftDisplayChange>[] = [
+	$: columns = [
 		{ key: 'label', header: 'Field' },
-		{ key: 'expected', header: 'Expected' },
-		{ key: 'actual', header: 'Actual' }
-	];
+		{ key: 'expected', header: 'Profilarr' },
+		{ key: 'actual', header: arrLabel }
+	] satisfies Column<DriftDisplayChange>[];
 </script>
 
 <Table {columns} data={changes} compact hoverable={false} responsive>
