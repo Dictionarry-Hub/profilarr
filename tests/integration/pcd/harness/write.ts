@@ -19,6 +19,14 @@ export interface CustomFormatFormInput {
 	layer?: OpOrigin;
 }
 
+export interface QualityProfileGeneralFormInput {
+	name: string;
+	description?: string | null;
+	tags?: string[];
+	language?: string | null;
+	layer?: OpOrigin;
+}
+
 export interface DelayProfileFormInput {
 	name: string;
 	preferredProtocol?: 'prefer_usenet' | 'prefer_torrent' | 'only_usenet' | 'only_torrent';
@@ -119,6 +127,14 @@ export const write = {
 		submitCreate: submitCreateRegex,
 		submitUpdate: submitUpdateRegex,
 		submitRemove: submitRemoveRegex
+	},
+	qualityProfile: {
+		create: createQualityProfile,
+		updateGeneral: updateQualityProfileGeneral,
+		remove: removeQualityProfile,
+		submitCreate: submitCreateQualityProfile,
+		submitUpdateGeneral: submitUpdateQualityProfileGeneral,
+		submitRemove: submitRemoveQualityProfile
 	},
 	mediaSettings: {
 		create: createMediaSettings,
@@ -244,6 +260,65 @@ export async function submitRemoveCustomFormat(
 ): Promise<Response> {
 	return ctx.client.postForm(
 		`/custom-formats/${ctx.dbId}/${id}/general?/delete`,
+		{ layer },
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function createQualityProfile(
+	ctx: PcdTestContext,
+	input: QualityProfileGeneralFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(await submitCreateQualityProfile(ctx, input), 'create quality profile');
+}
+
+export async function updateQualityProfileGeneral(
+	ctx: PcdTestContext,
+	id: number,
+	input: QualityProfileGeneralFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateQualityProfileGeneral(ctx, id, input),
+		'update quality profile'
+	);
+}
+
+export async function removeQualityProfile(
+	ctx: PcdTestContext,
+	id: number,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return assertSuccessfulAction(await submitRemoveQualityProfile(ctx, id, layer), 'delete quality profile');
+}
+
+export async function submitCreateQualityProfile(
+	ctx: PcdTestContext,
+	input: QualityProfileGeneralFormInput
+): Promise<Response> {
+	return ctx.client.postForm(`/quality-profiles/${ctx.dbId}/new`, qualityProfileGeneralFields(input), {
+		headers: { Origin: ctx.origin }
+	});
+}
+
+export async function submitUpdateQualityProfileGeneral(
+	ctx: PcdTestContext,
+	id: number,
+	input: QualityProfileGeneralFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/quality-profiles/${ctx.dbId}/${id}/general?/update`,
+		qualityProfileGeneralFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitRemoveQualityProfile(
+	ctx: PcdTestContext,
+	id: number,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/quality-profiles/${ctx.dbId}/${id}/general?/delete`,
 		{ layer },
 		{ headers: { Origin: ctx.origin } }
 	);
@@ -379,6 +454,16 @@ function customFormatConditionsFields(
 	return {
 		conditions: JSON.stringify(conditions),
 		layer
+	};
+}
+
+function qualityProfileGeneralFields(input: QualityProfileGeneralFormInput): Record<string, string> {
+	return {
+		name: input.name,
+		description: input.description ?? '',
+		tags: JSON.stringify(input.tags ?? []),
+		language: input.language ?? '',
+		layer: input.layer ?? 'user'
 	};
 }
 

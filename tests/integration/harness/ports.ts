@@ -116,7 +116,8 @@ export const PORTS = {
 		conflictsQualityDefinitionsSonarr: 7706,
 		conflictsCustomFormatsGeneral: 7707,
 		conflictsCustomFormatConditions: 7708,
-		conflictsCustomFormatTests: 7709
+		conflictsCustomFormatTests: 7709,
+		conflictsQualityProfilesGeneral: 7710
 	}
 } as const;
 

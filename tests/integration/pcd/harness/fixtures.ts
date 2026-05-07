@@ -102,6 +102,62 @@ export const base = {
 		};
 	},
 
+	languages(names: string[]): SeedOperation {
+		const sql = Array.from(new Set(names.map((name) => name.trim()).filter(Boolean)))
+			.map((name) => `INSERT INTO languages (name) VALUES (${sqlValue(name)}) ON CONFLICT(name) DO NOTHING;`)
+			.join('\n');
+		return { sql };
+	},
+
+	qualityProfile(input: {
+		name: string;
+		description?: string | null;
+		tags?: string[];
+		language?: string | null;
+	}): SeedOperation {
+		const description = 'description' in input ? (input.description ?? null) : '';
+		const tags = Array.from(new Set((input.tags ?? []).map((tag) => tag.trim()).filter(Boolean)));
+		const tagSql = tags.map((tag) =>
+			[
+				`INSERT INTO tags (name) VALUES (${sqlValue(tag)}) ON CONFLICT(name) DO NOTHING;`,
+				`INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES (${sqlValue(
+					input.name
+				)}, ${sqlValue(tag)});`
+			].join('\n')
+		);
+		const languageSql = input.language
+			? [
+					`INSERT INTO languages (name) VALUES (${sqlValue(input.language)}) ON CONFLICT(name) DO NOTHING;`,
+					`INSERT INTO quality_profile_languages (quality_profile_name, language_name, type) VALUES (${sqlValue(
+						input.name
+					)}, ${sqlValue(input.language)}, 'simple');`
+				]
+			: [];
+
+		return {
+			sql: [
+				`INSERT INTO quality_profiles (
+				       name,
+				       description,
+				       upgrades_allowed,
+				       minimum_custom_format_score,
+				       upgrade_until_score,
+				       upgrade_score_increment
+			      )
+			      VALUES (
+				       ${sqlValue(input.name)},
+				       ${sqlValue(description)},
+				       1,
+				       0,
+				       0,
+				       1
+			      );`,
+				...tagSql,
+				...languageSql
+			].join('\n')
+		};
+	},
+
 	radarrMediaSettings(input: {
 		name: string;
 		propersRepacks?: 'doNotPrefer' | 'doNotUpgradeAutomatically' | 'preferAndUpgrade';
