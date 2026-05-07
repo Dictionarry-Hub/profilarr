@@ -10,7 +10,7 @@
  *   7000-7099  auth
  *   7100-7199  api
  *   7200-7299  backups
- *   7300-7399  conflicts
+ *   7300-7399  reserved
  *   7400-7499  notifications (mock webhook targets)
  *   7500-7599  announcements
  *   7600-7699  pcd writes
@@ -60,15 +60,6 @@ export const PORTS = {
 		settings: 7207,
 		upload: 7208
 	},
-	conflicts: {
-		groupMemberPosition: 7300,
-		regexDeleteRenameGeneratedDraft: 7301,
-		regexSplitPartialConflict: 7302,
-		regexSplitPerField: 7303,
-		regexSplitRenameCascade: 7304,
-		sequentialEdits: 7305,
-		upstreamChange: 7306
-	},
 	notifications: {
 		announcement: 7400,
 		arrCleanup: 7401,
@@ -113,7 +104,15 @@ export const PORTS = {
 		conflictsNamingRadarr: 7703,
 		conflictsNamingSonarr: 7704,
 		conflictsQualityDefinitionsRadarr: 7705,
-		conflictsQualityDefinitionsSonarr: 7706
+		conflictsQualityDefinitionsSonarr: 7706,
+		conflictsCustomFormatsGeneral: 7707,
+		conflictsCustomFormatConditions: 7708,
+		conflictsCustomFormatTests: 7709,
+		conflictsQualityProfilesGeneral: 7710,
+		conflictsQualityProfilesScoring: 7711,
+		conflictsQualityProfilesQualities: 7712,
+		conflictsQualityProfilesFull: 7713,
+		conflictsEngineRegressions: 7714
 	}
 } as const;
 

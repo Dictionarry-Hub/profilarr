@@ -35,18 +35,6 @@
  *
  * ─── E2E Tests ───────────────────────────────────────────────────────────
  *
- *   PCD conflict tests (Playwright against running dev server):
- *
- *   deno task test e2e                      All PCD specs (headless)
- *   deno task test e2e 1                    All CF specs (major group 1)
- *   deno task test e2e 2                    All QP specs (major group 2)
- *   deno task test e2e 3                    All regex specs (major group 3)
- *   deno task test e2e 1.12                 Single spec (1.12-cf-...)
- *   deno task test e2e 1-2                  Range (CF + QP)
- *   deno task test e2e 1.12,1.15            Comma-separated
- *   deno task test e2e --headed             Headed mode (browser visible)
- *   deno task test e2e 1.5 --debug          Debug mode (Playwright inspector)
- *
  *   Auth OIDC tests (Docker + preview servers, auto-managed):
  *
  *   deno task test e2e auth                 OIDC flow tests (headless)
@@ -75,7 +63,6 @@ import { PORTS } from './integration/harness/ports.ts';
 const INTEGRATION_COMPOSE = 'tests/integration/auth/docker-compose.yml';
 const INTEGRATION_AUTH_SPEC_DIR = 'tests/integration/auth/specs';
 const INTEGRATION_API_SPEC_DIR = 'tests/integration/api/specs';
-const INTEGRATION_CONFLICT_SPEC_DIR = 'tests/integration/conflicts/specs';
 const INTEGRATION_PCD_SPEC_DIR = 'tests/integration/pcd';
 const INTEGRATION_NOTIFICATION_SPEC_DIR = 'tests/integration/notifications/specs';
 const INTEGRATION_BACKUP_SPEC_DIR = 'tests/integration/backups/specs';
@@ -83,7 +70,6 @@ const INTEGRATION_ANNOUNCEMENTS_SPEC_DIR = 'tests/integration/announcements/spec
 const INTEGRATION_SPEC_DIR = INTEGRATION_AUTH_SPEC_DIR; // backward compat
 const INTEGRATION_SUITES = new Set([
 	'auth',
-	'conflicts',
 	'pcd',
 	'api',
 	'notifications',
@@ -91,8 +77,6 @@ const INTEGRATION_SUITES = new Set([
 	'announcements'
 ]);
 
-const E2E_PCD_CONFIG = 'tests/e2e/pcd/playwright.config.ts';
-const E2E_PCD_SPEC_DIR = 'tests/e2e/pcd/specs';
 const E2E_AUTH_CONFIG = 'tests/e2e/auth/playwright.config.ts';
 const E2E_AUTH_COMPOSE = 'tests/integration/auth/docker-compose.yml';
 const E2E_AUTH_BINARY = './dist/build/profilarr';
@@ -228,15 +212,15 @@ async function runUnit(target?: string): Promise<number> {
 // ─── Integration Tests ──────────────────────────────────────────────────────
 
 async function runIntegration(target?: string): Promise<number> {
-	// Parse suite/spec from target: "conflicts", "conflicts detection", "health", etc.
+	// Parse suite/spec from target: "pcd", "pcd write regex", "health", etc.
 	let suite: string | undefined;
 	let specName: string | undefined;
 
 	if (target && INTEGRATION_SUITES.has(target)) {
-		// "deno task test integration conflicts"
+		// "deno task test integration pcd"
 		suite = target;
 	} else if (target) {
-		// Could be "conflicts detection" (suite + spec) or "health" (legacy auth spec)
+		// Could be "pcd write regex" (suite + spec) or "health" (legacy auth spec)
 		const parts = target.split(/\s+/);
 		if (parts.length >= 2 && INTEGRATION_SUITES.has(parts[0])) {
 			suite = parts[0];
@@ -253,7 +237,6 @@ async function runIntegration(target?: string): Promise<number> {
 	// Resolve spec dirs and files
 	function getSpecDir(s: string): string {
 		if (s === 'api') return INTEGRATION_API_SPEC_DIR;
-		if (s === 'conflicts') return INTEGRATION_CONFLICT_SPEC_DIR;
 		if (s === 'pcd') return INTEGRATION_PCD_SPEC_DIR;
 		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
 		if (s === 'backups') return INTEGRATION_BACKUP_SPEC_DIR;
@@ -264,7 +247,7 @@ async function runIntegration(target?: string): Promise<number> {
 	// Determine which suites to run
 	const suitesToRun = suite
 		? [suite]
-		: ['auth', 'api', 'conflicts', 'notifications', 'announcements', 'backups', 'pcd'];
+		: ['auth', 'api', 'notifications', 'announcements', 'backups', 'pcd'];
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
@@ -471,7 +454,7 @@ async function runIntegration(target?: string): Promise<number> {
 					console.log('');
 					// If the spec ran tests and produced a "Failures:" summary block,
 					// print only that block (the actual failures + final counts).
-					// Otherwise the spec died in setup; print stdout as-is — those
+					// Otherwise the spec died in setup; print stdout as-is. Those
 					// dumps are already short (server start logs + diagnostic).
 					// Note: the spec's harness wraps "Failures:" in ANSI codes, so
 					// we search for the bare token then walk back to the line start.
@@ -540,7 +523,6 @@ async function runIntegrationSpec(
 	const specName = specFile
 		.replace(`${INTEGRATION_AUTH_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_API_SPEC_DIR}/`, '')
-		.replace(`${INTEGRATION_CONFLICT_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_PCD_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_NOTIFICATION_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_BACKUP_SPEC_DIR}/`, '')
@@ -585,101 +567,8 @@ async function runE2E(targets: string[], flags: string[]): Promise<number> {
 		return runE2EAuth(playwrightFlags);
 	}
 
-	// PCD E2E - resolve numeric selectors to spec files
-	return runE2EPCD(targets, playwrightFlags);
-}
-
-async function runE2EPCD(selectors: string[], playwrightFlags: string[]): Promise<number> {
-	const specFiles = await listSpecFiles(E2E_PCD_SPEC_DIR);
-	const testTargets: string[] = [];
-	const seen = new Set<string>();
-
-	function addTarget(target: string) {
-		if (seen.has(target)) return;
-		seen.add(target);
-		testTargets.push(target);
-	}
-
-	if (selectors.length === 0) {
-		// No selectors - run all PCD specs
-		addTarget(E2E_PCD_SPEC_DIR);
-	} else {
-		for (const selector of selectors) {
-			// Expand comma-separated values
-			for (const part of selector.split(',')) {
-				const trimmed = part.trim();
-				if (!trimmed) continue;
-
-				// Direct file path
-				if (trimmed.includes('/') || trimmed.includes('*') || trimmed.endsWith('.spec.ts')) {
-					addTarget(trimmed);
-					continue;
-				}
-
-				// Range: 1-2
-				const rangeMatch = trimmed.match(/^(\d+)-(\d+)$/);
-				if (rangeMatch) {
-					const start = parseInt(rangeMatch[1], 10);
-					const end = parseInt(rangeMatch[2], 10);
-					if (isNaN(start) || isNaN(end) || start > end) {
-						console.error(`Invalid range "${trimmed}".`);
-						return 1;
-					}
-					for (let major = start; major <= end; major++) {
-						const matches = specFiles.filter((f) => fileStartsWith(f, `${major}.`));
-						if (matches.length === 0) {
-							console.error(`No specs matched major group "${major}".`);
-							return 1;
-						}
-						matches.forEach(addTarget);
-					}
-					continue;
-				}
-
-				// Major group: 1, 2, 3
-				if (/^\d+$/.test(trimmed)) {
-					const matches = specFiles.filter((f) => fileStartsWith(f, `${trimmed}.`));
-					if (matches.length === 0) {
-						console.error(`No specs matched major group "${trimmed}".`);
-						printAvailableSpecs(specFiles);
-						return 1;
-					}
-					matches.forEach(addTarget);
-					continue;
-				}
-
-				// Exact spec: 1.12
-				if (/^\d+\.\d+$/.test(trimmed)) {
-					const matches = specFiles.filter((f) => fileStartsWith(f, `${trimmed}-`));
-					if (matches.length === 0) {
-						console.error(`No specs matched "${trimmed}".`);
-						printAvailableSpecs(specFiles);
-						return 1;
-					}
-					matches.forEach(addTarget);
-					continue;
-				}
-
-				console.error(`Unknown selector "${trimmed}".`);
-				printAvailableSpecs(specFiles);
-				return 1;
-			}
-		}
-	}
-
-	const nodeBinary = await resolvePlaywrightNodeBinary();
-	if (!nodeBinary) {
-		return 1;
-	}
-
-	const cmd = new Deno.Command(nodeBinary, {
-		args: [PLAYWRIGHT_CLI, 'test', '--config', E2E_PCD_CONFIG, ...playwrightFlags, ...testTargets],
-		stdout: 'inherit',
-		stderr: 'inherit'
-	});
-
-	const { code } = await cmd.output();
-	return code;
+	console.error('Unknown E2E target. Available target: auth');
+	return 1;
 }
 
 async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
@@ -928,34 +817,6 @@ async function getNodeMajorVersion(nodeBinary: string): Promise<number | null> {
 	}
 }
 
-async function listSpecFiles(dir: string): Promise<string[]> {
-	const files: string[] = [];
-	try {
-		for await (const entry of Deno.readDir(dir)) {
-			if (entry.isFile && entry.name.endsWith('.spec.ts')) {
-				files.push(`${dir}/${entry.name}`);
-			}
-		}
-	} catch (error) {
-		console.error(`Failed to read spec directory "${dir}".`);
-		console.error(error instanceof Error ? error.message : String(error));
-		Deno.exit(1);
-	}
-	return files.sort();
-}
-
-function fileStartsWith(filePath: string, prefix: string): boolean {
-	const name = filePath.split('/').pop() ?? filePath;
-	return name.startsWith(prefix);
-}
-
-function printAvailableSpecs(files: string[]): void {
-	console.error('\nAvailable specs:');
-	for (const file of files) {
-		console.error(`  ${file.split('/').pop()}`);
-	}
-}
-
 async function waitForReady(url: string, timeoutMs: number): Promise<void> {
 	const start = Date.now();
 	const healthUrl = `${url}/api/v1/health`;
@@ -1018,14 +879,11 @@ function printHelp(): void {
 		'  processor       tests/unit/rename/processor.test.ts',
 		'',
 		'Integration targets:',
-		'  (none)          All suites (auth + conflicts + backups, parallel)',
+		'  (none)          All integration suites, parallel',
 		'  auth            Auth specs only (Docker auto-managed)',
 		'  auth <name>     Single auth spec: health, csrf, cookie, apiKey,',
 		'                  session, oidc, rateLimit, proxy, xForwardedFor,',
 		'                  secretExposure, backupSecrets, pathTraversal',
-		'  conflicts       Conflict specs only',
-		'  conflicts <n>   Single conflict spec: detection, grouping,',
-		'                  align, override',
 		'  pcd             PCD specs only',
 		'  pcd <name>      Single PCD spec (recursive search by basename)',
 		'  pcd <a> <b>...  Scope by nested directory, e.g. pcd write regex',
@@ -1034,12 +892,7 @@ function printHelp(): void {
 		'  <name>          Legacy: treated as auth spec name',
 		'',
 		'E2E targets:',
-		'  (none)          All PCD specs (headless)',
 		'  auth            OIDC auth tests (Docker + preview servers)',
-		'  1               All CF specs (major group)',
-		'  1.12            Single spec',
-		'  1-2             Range of major groups',
-		'  1.12,1.15       Comma-separated',
 		'',
 		'Scans:',
 		'  zap --baseline  Passive scan (spider + check responses)',
@@ -1056,7 +909,6 @@ function printHelp(): void {
 		'  deno task test                       All unit tests',
 		'  deno task test unit auth             Auth unit tests only',
 		'  deno task test integration health    Single integration spec',
-		'  deno task test e2e 1.5 --headed      Single PCD spec, headed',
 		'  deno task test e2e auth --debug      OIDC auth, debug mode'
 	];
 	console.log(lines.join('\n'));

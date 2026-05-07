@@ -39,6 +39,11 @@ type RegexRow = {
 	regex101_id: string | null;
 };
 
+type RegexTagRow = {
+	regular_expression_name: string;
+	tag_name: string;
+};
+
 let counter = 0;
 
 setup(async () => {
@@ -154,6 +159,105 @@ test('rename conflict follows upstream rename by strategy', async () => {
 });
 
 /**
+ * Migrates old 3.3.
+ *
+ * Context
+ *   Base layer seeded with one regex via base.regex():
+ *     name='Rename Pattern', pattern='\boriginal\b'
+ *
+ * User
+ *   POST update changes:
+ *     pattern = '\blocal\b'
+ *
+ * Upstream
+ *   Published base rename changes:
+ *     name 'Rename Pattern' -> 'Rename Pattern Upstream'
+ *
+ * Expect
+ *   - pattern op conflicts by strategy
+ *   - final row keeps the upstream name
+ *   - final pattern is local only for override, otherwise original
+ */
+test('pattern conflict follows upstream rename by strategy', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'pattern-upstream-rename', [
+			base.regex({ name: 'Rename Pattern', pattern: '\\boriginal\\b' })
+		]);
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.regex.update(ctx, 1, {
+			name: 'Rename Pattern',
+			pattern: '\\blocal\\b'
+		});
+
+		seedUpstream(ctx, upstreamRename('Rename Pattern', 'Rename Pattern Upstream'));
+		await compilePcd(ctx);
+
+		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['pattern']);
+		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
+
+		const row = assertRegex(ctx, 'Rename Pattern Upstream');
+		assertEquals(row.pattern, strategy === 'override' ? '\\blocal\\b' : '\\boriginal\\b');
+		assertNoRegex(ctx, 'Rename Pattern');
+	}
+});
+
+/**
+ * Migrates old 3.4.
+ *
+ * Context
+ *   Base layer seeded with one regex via base.regex():
+ *     name='Description Conflict', description='Original'
+ *
+ * User
+ *   POST update changes:
+ *     description = 'Local description'
+ *
+ * Upstream
+ *   Published base op changes:
+ *     description 'Original' -> 'Upstream description'
+ *
+ * Expect
+ *   - description op conflicts by strategy
+ *   - final description is local only for override, otherwise upstream
+ */
+test('description conflict resolves by strategy', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'description-conflict', [
+			base.regex({
+				name: 'Description Conflict',
+				pattern: '\\bdescription\\b',
+				description: 'Original'
+			})
+		]);
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.regex.update(ctx, 1, {
+			name: 'Description Conflict',
+			pattern: '\\bdescription\\b',
+			description: 'Local description'
+		});
+
+		seedUpstream(
+			ctx,
+			upstreamUpdate('Description Conflict', {
+				description: { from: 'Original', to: 'Upstream description' }
+			})
+		);
+		await compilePcd(ctx);
+
+		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['description']);
+		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
+
+		const row = assertRegex(ctx, 'Description Conflict');
+		assertEquals(
+			row.description,
+			strategy === 'override' ? 'Local description' : 'Upstream description'
+		);
+	}
+});
+
+/**
  * Context
  *   Empty PCD.
  *
@@ -260,6 +364,58 @@ test('delete missing target via upstream rename auto-aligns', async () => {
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertRegex(ctx, 'Now Different');
 		assertNoRegex(ctx, 'Renamed Away');
+	}
+});
+
+/**
+ * Migrates old 3.7.
+ *
+ * Context
+ *   Base layer seeded with one regex via base.regex():
+ *     name='Tags No Conflict', pattern='\boriginal\b'
+ *
+ * User
+ *   POST update changes:
+ *     tags = ['LocalTag']
+ *
+ * Upstream
+ *   Published base op changes:
+ *     pattern '\boriginal\b' -> '\bupstream\b'
+ *
+ * Expect
+ *   - user tags op applies cleanly for every strategy
+ *   - no pending conflicts remain
+ *   - final regex has the local tag and upstream pattern
+ */
+test('tags-only update applies after upstream pattern change', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'tags-no-conflict', [
+			base.regex({ name: 'Tags No Conflict', pattern: '\\boriginal\\b' })
+		]);
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.regex.update(ctx, 1, {
+			name: 'Tags No Conflict',
+			pattern: '\\boriginal\\b',
+			tags: ['LocalTag']
+		});
+
+		seedUpstream(
+			ctx,
+			upstreamUpdate('Tags No Conflict', {
+				pattern: { from: '\\boriginal\\b', to: '\\bupstream\\b' }
+			})
+		);
+		await compilePcd(ctx);
+
+		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['tags']);
+		assertEquals(op.state, 'published');
+		assertLatestHistory(ctx, op, 'applied');
+		assertNoPendingConflicts(ctx);
+
+		const row = assertRegex(ctx, 'Tags No Conflict');
+		assertEquals(row.pattern, '\\bupstream\\b');
+		assertEquals(compiledRegexTags(ctx, 'Tags No Conflict'), ['LocalTag']);
 	}
 });
 
@@ -482,6 +638,19 @@ function assertNoRegex(ctx: PcdTestContext, name: string): void {
 }
 
 function compiledRegexes(ctx: PcdTestContext): RegexRow[] {
+	return compiledRegexState(ctx).regexes;
+}
+
+function compiledRegexTags(ctx: PcdTestContext, name: string): string[] {
+	return compiledRegexState(ctx)
+		.tags.filter((tag) => tag.regular_expression_name === name)
+		.map((tag) => tag.tag_name);
+}
+
+function compiledRegexState(ctx: PcdTestContext): {
+	regexes: RegexRow[];
+	tags: RegexTagRow[];
+} {
 	const source = openDb(ctx.dbPath);
 	const replay = openDb(':memory:');
 
@@ -520,16 +689,47 @@ function compiledRegexes(ctx: PcdTestContext): RegexRow[] {
 			replay.exec(op.sql);
 		}
 
-		return replay
+		const regexes = replay
 			.prepare(
 				`SELECT name, pattern, description, regex101_id
 				 FROM regular_expressions
 				 ORDER BY name`
 			)
 			.all() as RegexRow[];
+		const tags = replay
+			.prepare(
+				`SELECT regular_expression_name, tag_name
+				 FROM regular_expression_tags
+				 ORDER BY regular_expression_name, tag_name`
+			)
+			.all() as RegexTagRow[];
+
+		return { regexes, tags };
 	} finally {
 		replay.close();
 		source.close();
+	}
+}
+
+function assertNoPendingConflicts(ctx: PcdTestContext): void {
+	const db = openDb(ctx.dbPath);
+	try {
+		const row = db
+			.prepare(
+				`SELECT COUNT(*) AS count
+				 FROM pcd_op_history h
+				 INNER JOIN (
+				     SELECT op_id, MAX(id) AS max_id
+				     FROM pcd_op_history
+				     WHERE database_id = ?
+				     GROUP BY op_id
+				 ) latest ON h.id = latest.max_id
+				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
+			)
+			.get(ctx.dbId) as { count: number };
+		assertEquals(row.count, 0);
+	} finally {
+		db.close();
 	}
 }
 

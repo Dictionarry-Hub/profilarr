@@ -7,6 +7,15 @@ import {
 	type SonarrColonReplacementFormat
 } from '$shared/pcd/mediaManagement.ts';
 
+type QualityProfileQualityItem = {
+	type: 'quality' | 'group';
+	name: string;
+	position: number;
+	enabled?: boolean;
+	upgradeUntil?: boolean;
+	members?: Array<string | { name: string }>;
+};
+
 export const base = {
 	delayProfile(input: {
 		name: string;
@@ -71,6 +80,111 @@ export const base = {
 						description
 					)}, ${sqlValue(regex101Id)});`,
 				...tagSql
+			].join('\n')
+		};
+	},
+
+	customFormat(input: {
+		name: string;
+		description?: string | null;
+		includeInRename?: boolean;
+		tags?: string[];
+	}): SeedOperation {
+		const description = 'description' in input ? (input.description ?? null) : '';
+		const includeInRename = input.includeInRename ?? false;
+		const tags = Array.from(new Set((input.tags ?? []).map((tag) => tag.trim()).filter(Boolean)));
+		const tagSql = tags.map((tag) =>
+			[
+				`INSERT INTO tags (name) VALUES (${sqlValue(tag)}) ON CONFLICT(name) DO NOTHING;`,
+				`INSERT INTO custom_format_tags (custom_format_name, tag_name) VALUES (${sqlValue(
+					input.name
+				)}, ${sqlValue(tag)});`
+			].join('\n')
+		);
+
+		return {
+			sql: [
+				`INSERT INTO custom_formats (name, description, include_in_rename)
+				 VALUES (${sqlValue(input.name)}, ${sqlValue(description)}, ${includeInRename ? 1 : 0});`,
+				...tagSql
+			].join('\n')
+		};
+	},
+
+	languages(names: string[]): SeedOperation {
+		const sql = Array.from(new Set(names.map((name) => name.trim()).filter(Boolean)))
+			.map(
+				(name) =>
+					`INSERT INTO languages (name) VALUES (${sqlValue(name)}) ON CONFLICT(name) DO NOTHING;`
+			)
+			.join('\n');
+		return { sql };
+	},
+
+	qualityProfile(input: {
+		name: string;
+		description?: string | null;
+		tags?: string[];
+		language?: string | null;
+		minimumScore?: number;
+		upgradeUntilScore?: number;
+		upgradeScoreIncrement?: number;
+		customFormatScores?: Array<{
+			customFormatName: string;
+			arrType?: 'all' | 'radarr' | 'sonarr';
+			score: number;
+		}>;
+		qualityItems?: QualityProfileQualityItem[];
+	}): SeedOperation {
+		const description = 'description' in input ? (input.description ?? null) : '';
+		const tags = Array.from(new Set((input.tags ?? []).map((tag) => tag.trim()).filter(Boolean)));
+		const tagSql = tags.map((tag) =>
+			[
+				`INSERT INTO tags (name) VALUES (${sqlValue(tag)}) ON CONFLICT(name) DO NOTHING;`,
+				`INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES (${sqlValue(
+					input.name
+				)}, ${sqlValue(tag)});`
+			].join('\n')
+		);
+		const languageSql = input.language
+			? [
+					`INSERT INTO languages (name) VALUES (${sqlValue(input.language)}) ON CONFLICT(name) DO NOTHING;`,
+					`INSERT INTO quality_profile_languages (quality_profile_name, language_name, type) VALUES (${sqlValue(
+						input.name
+					)}, ${sqlValue(input.language)}, 'simple');`
+				]
+			: [];
+		const customFormatScoreSql = (input.customFormatScores ?? []).map(
+			(score) =>
+				`INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
+			 VALUES (${sqlValue(input.name)}, ${sqlValue(score.customFormatName)}, ${sqlValue(
+					score.arrType ?? 'all'
+				)}, ${sqlNumber(score.score)});`
+		);
+		const qualityItemSql = qualityProfileQualityItemsSql(input.name, input.qualityItems ?? []);
+
+		return {
+			sql: [
+				`INSERT INTO quality_profiles (
+				       name,
+				       description,
+				       upgrades_allowed,
+				       minimum_custom_format_score,
+				       upgrade_until_score,
+				       upgrade_score_increment
+			      )
+			      VALUES (
+				       ${sqlValue(input.name)},
+				       ${sqlValue(description)},
+				       1,
+				       ${sqlNumber(input.minimumScore ?? 0)},
+				       ${sqlNumber(input.upgradeUntilScore ?? 0)},
+				       ${sqlNumber(input.upgradeScoreIncrement ?? 1)}
+			      );`,
+				...tagSql,
+				...languageSql,
+				...customFormatScoreSql,
+				qualityItemSql
 			].join('\n')
 		};
 	},
@@ -204,6 +318,39 @@ export const base = {
 		return qualityDefinitionsSeed('sonarr_quality_definitions', 'sonarr', input);
 	},
 
+	customFormatResolutionCondition(input: {
+		formatName: string;
+		conditionName: string;
+		resolution: string;
+		negate?: boolean;
+		required?: boolean;
+		arrType?: 'all' | 'radarr' | 'sonarr';
+	}): SeedOperation {
+		return {
+			sql: `INSERT INTO custom_formats (name, description, include_in_rename)
+			      VALUES (${sqlValue(input.formatName)}, '', 0);
+
+			      INSERT INTO custom_format_conditions
+			        (custom_format_name, name, type, arr_type, negate, required)
+			      VALUES (
+			        ${sqlValue(input.formatName)},
+			        ${sqlValue(input.conditionName)},
+			        'resolution',
+			        ${sqlValue(input.arrType ?? 'all')},
+			        ${input.negate ? 1 : 0},
+			        ${input.required ? 1 : 0}
+			      );
+
+			      INSERT INTO condition_resolutions
+			        (custom_format_name, condition_name, resolution)
+			      VALUES (
+			        ${sqlValue(input.formatName)},
+			        ${sqlValue(input.conditionName)},
+			        ${sqlValue(input.resolution)}
+			      );`
+		};
+	},
+
 	customFormatRegexCondition(input: {
 		formatName: string;
 		conditionName: string;
@@ -237,6 +384,65 @@ function sqlValue(value: string | null): string {
 
 function sqlNumber(value: number | null): string {
 	return value === null ? 'NULL' : String(value);
+}
+
+function qualityProfileQualityItemsSql(
+	profileName: string,
+	items: QualityProfileQualityItem[]
+): string {
+	if (items.length === 0) return '';
+
+	const qualityNames = Array.from(
+		new Set(
+			items.flatMap((item) =>
+				item.type === 'quality' ? [item.name] : memberNames(item.members ?? [])
+			)
+		)
+	);
+	const qualitySql = qualityNames
+		.map((name) => `INSERT OR IGNORE INTO qualities (name) VALUES (${sqlValue(name)});`)
+		.join('\n');
+	const itemSql = items.map((item) => {
+		const enabled = item.enabled ?? true;
+		const upgradeUntil = item.upgradeUntil ?? false;
+
+		if (item.type === 'quality') {
+			return `INSERT INTO quality_profile_qualities
+			        (quality_profile_name, quality_name, quality_group_name, position, enabled, upgrade_until)
+			        VALUES (${sqlValue(profileName)}, ${sqlValue(item.name)}, NULL, ${item.position}, ${
+								enabled ? 1 : 0
+							}, ${upgradeUntil ? 1 : 0});`;
+		}
+
+		const members = Array.from(new Set(memberNames(item.members ?? [])));
+		const memberSql = members
+			.map(
+				(member, index) =>
+					`INSERT INTO quality_group_members
+					 (quality_profile_name, quality_group_name, quality_name, position)
+					 VALUES (${sqlValue(profileName)}, ${sqlValue(item.name)}, ${sqlValue(member)}, ${index});`
+			)
+			.join('\n');
+
+		return [
+			`INSERT INTO quality_groups (quality_profile_name, name)
+			 VALUES (${sqlValue(profileName)}, ${sqlValue(item.name)});`,
+			memberSql,
+			`INSERT INTO quality_profile_qualities
+			 (quality_profile_name, quality_name, quality_group_name, position, enabled, upgrade_until)
+			 VALUES (${sqlValue(profileName)}, NULL, ${sqlValue(item.name)}, ${item.position}, ${
+					enabled ? 1 : 0
+				}, ${upgradeUntil ? 1 : 0});`
+		].join('\n');
+	});
+
+	return [qualitySql, ...itemSql].join('\n');
+}
+
+function memberNames(members: Array<string | { name: string }>): string[] {
+	return members
+		.map((member) => (typeof member === 'string' ? member : member.name))
+		.filter(Boolean);
 }
 
 function mediaSettingsSeed(
