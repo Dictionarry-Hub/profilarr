@@ -24,6 +24,7 @@
 
 import { config } from '$config';
 import { logger } from '$logger/logger.ts';
+import { Database } from '@jsr/db__sqlite';
 
 const SENTINEL_NAME = '.restore-pending';
 const STAGING_NAME = '.restoring';
@@ -51,6 +52,32 @@ async function readArchiveInfo(stagingDataDir: string): Promise<ArchiveInfo> {
 	} catch {
 		// Older archives don't have INFO.json. Not fatal.
 		return {};
+	}
+}
+
+function rewriteDatabaseLocalPaths(stagedDbPath: string): number {
+	const database = new Database(stagedDbPath);
+	try {
+		const table = database
+			.prepare(
+				`SELECT COUNT(*) AS count
+				 FROM sqlite_master
+				 WHERE type = 'table' AND name = 'database_instances'`
+			)
+			.get() as { count: number } | undefined;
+
+		if (!table?.count) return 0;
+
+		database
+			.prepare(
+				`UPDATE database_instances
+				 SET local_path = ? || '/' || uuid
+				 WHERE local_path != ? || '/' || uuid`
+			)
+			.run(config.paths.databases, config.paths.databases);
+		return database.changes;
+	} finally {
+		database.close();
 	}
 }
 
@@ -120,6 +147,7 @@ export async function applyPendingRestore(): Promise<void> {
 	}
 
 	const info = await readArchiveInfo(stagingDataDir);
+	const rewrittenDatabasePaths = rewriteDatabaseLocalPaths(`${stagingDataDir}/profilarr.db`);
 
 	// Wipe live data dir contents we own. Anything else (e.g. a file an
 	// operator manually placed) is left alone.
@@ -145,6 +173,6 @@ export async function applyPendingRestore(): Promise<void> {
 
 	await logger.info('Pending restore applied', {
 		source: 'applyPendingRestore',
-		meta: { archivePath, info }
+		meta: { archivePath, info, rewrittenDatabasePaths }
 	});
 }

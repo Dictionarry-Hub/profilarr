@@ -22,23 +22,29 @@ import { BaseTest, type TestContext } from '../base/BaseTest.ts';
 import { assertEquals, assertRejects } from '@std/assert';
 import { applyPendingRestore } from '../../../src/lib/server/utils/backup/applyPending.ts';
 import { config } from '../../../src/lib/server/utils/config/config.ts';
+import { Database } from '@db/sqlite';
 
 const SENTINEL_NAME = '.restore-pending';
 const STAGING_NAME = '.restoring';
 
 /**
  * Build a valid tar.gz at `archivePath` containing `data/profilarr.db` and
- * `data/INFO.json`. The "DB" is an arbitrary byte string; applyPendingRestore
- * doesn't open it, only stat-checks it as a file.
+ * `data/INFO.json`.
  */
 async function createValidArchive(
 	workDir: string,
 	archivePath: string,
-	dbContents: string
+	marker: string
 ): Promise<void> {
 	const stage = `${workDir}/_stage`;
 	await Deno.mkdir(`${stage}/data`, { recursive: true });
-	await Deno.writeTextFile(`${stage}/data/profilarr.db`, dbContents);
+	const database = new Database(`${stage}/data/profilarr.db`);
+	try {
+		database.exec('CREATE TABLE restore_marker (value TEXT NOT NULL)');
+		database.exec('INSERT INTO restore_marker (value) VALUES (?)', [marker]);
+	} finally {
+		database.close();
+	}
 	await Deno.writeTextFile(
 		`${stage}/data/INFO.json`,
 		JSON.stringify({ appVersion: 'test', schemaVersion: 0, sanitized: false })
@@ -82,6 +88,19 @@ async function exists(path: string): Promise<boolean> {
 
 async function readText(path: string): Promise<string> {
 	return await Deno.readTextFile(path);
+}
+
+function readMarker(dbPath: string): string {
+	const database = new Database(dbPath);
+	try {
+		const row = database.prepare('SELECT value FROM restore_marker').get() as
+			| { value: string }
+			| undefined;
+		if (!row) throw new Error('restore_marker row missing');
+		return row.value;
+	} finally {
+		database.close();
+	}
 }
 
 class ApplyPendingTest extends BaseTest {
@@ -172,7 +191,7 @@ class ApplyPendingTest extends BaseTest {
 				await applyPendingRestore();
 
 				// New DB content moved into place.
-				assertEquals(await readText(`${ctx.tempDir}/data/profilarr.db`), 'restored-NEW');
+				assertEquals(readMarker(`${ctx.tempDir}/data/profilarr.db`), 'restored-NEW');
 				// Sidecars wiped (archive doesn't include them, and the live ones are removed pre-swap).
 				assertEquals(await exists(`${ctx.tempDir}/data/profilarr.db-wal`), false);
 				assertEquals(await exists(`${ctx.tempDir}/data/profilarr.db-shm`), false);
@@ -204,7 +223,7 @@ class ApplyPendingTest extends BaseTest {
 				await applyPendingRestore();
 
 				// New content applied, leftover gone, staging dir removed entirely.
-				assertEquals(await readText(`${ctx.tempDir}/data/profilarr.db`), 'restored-NEW');
+				assertEquals(readMarker(`${ctx.tempDir}/data/profilarr.db`), 'restored-NEW');
 				assertEquals(await exists(`${ctx.tempDir}/${STAGING_NAME}`), false);
 				assertEquals(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`), false);
 			}
