@@ -8,7 +8,6 @@
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Card from '$ui/card/Card.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
@@ -142,7 +141,7 @@
 </script>
 
 <div class="space-y-6">
-	<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
+	<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 		<svelte:fragment slot="left">
 			<div>
 				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h2>
@@ -225,8 +224,7 @@
 		<input type="hidden" name="minimumCfScore" value={formData.minimumCfScore} />
 		<input type="hidden" name="layer" value={selectedLayer} />
 
-		<Card flush padding="lg">
-			<div class="space-y-6">
+		<div class="space-y-6">
 				<!-- Name -->
 				<div data-onboarding="delay-general-name">
 					<FormInput
@@ -352,8 +350,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
-		</Card>
+		</div>
 	</form>
 
 	<!-- Hidden delete form -->
