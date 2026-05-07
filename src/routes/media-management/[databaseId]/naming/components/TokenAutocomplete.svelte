@@ -172,6 +172,7 @@
 		{placeholder}
 		mono
 		wrap
+		inputClass="text-xs"
 		bind:inputElement
 		{disabled}
 		on:input={handleInput}

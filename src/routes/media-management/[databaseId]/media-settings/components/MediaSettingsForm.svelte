@@ -111,10 +111,10 @@
 	}
 </script>
 
-<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
+<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 	<div slot="left">
-		<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">{title}</h1>
-		<p class="text-sm text-neutral-500 dark:text-neutral-400">{description}</p>
+		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
+		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
 	</div>
 	<div slot="right" class="flex items-center gap-2">
 		{#if mode === 'edit'}
@@ -136,30 +136,29 @@
 	</div>
 </StickyCard>
 
-<div class="mt-6 md:px-4">
-	<div
-		class="space-y-6 rounded-xl border border-neutral-300 bg-white p-6 dark:border-neutral-700/60 dark:bg-neutral-800/50"
-	>
-		<!-- Basic Info -->
-		<div class="space-y-4" data-onboarding="media-settings-name">
-			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Basic Info</h2>
+<div class="md:px-4">
+	<div class="space-y-6">
+		<div data-onboarding="media-settings-name">
 			<FormInput
 				label="Name"
 				name="name"
 				placeholder="e.g., default"
 				required
+				description="The name of this media settings configuration."
 				value={formData.name}
 				on:input={(e) => updateField('name', e.detail)}
 			/>
 		</div>
 
-		<hr class="border-neutral-200 dark:border-neutral-700" />
-
-		<!-- Propers and Repacks -->
-		<div class="space-y-4" data-onboarding="media-settings-propers-repacks">
-			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-				Propers and Repacks
-			</h2>
+		<div class="space-y-2" data-onboarding="media-settings-propers-repacks">
+			<div class="space-y-1">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Propers and Repacks
+				</div>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Choose how {arrLabel} handles proper and repack releases.
+				</p>
+			</div>
 			<DropdownSelect
 				value={formData.propersRepacks}
 				options={PROPERS_REPACKS_OPTIONS}
@@ -167,27 +166,24 @@
 				on:change={(e) => updateField('propersRepacks', e.detail as PropersRepacks)}
 			/>
 			{#if propersRepacksDescription}
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					{propersRepacksDescription}
 				</p>
 			{/if}
 		</div>
 
-		<hr class="border-neutral-200 dark:border-neutral-700" />
-
-		<!-- Media Info -->
-		<div class="space-y-4" data-onboarding="media-settings-file-analysis">
-			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">File Analysis</h2>
-			<div>
-				<Toggle
-					label="Enable Media Info"
-					checked={formData.enableMediaInfo}
-					on:change={() => updateField('enableMediaInfo', !formData.enableMediaInfo)}
-				/>
-				<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
-					Scan files to extract media information (codec, resolution, audio tracks, etc.)
+		<div class="space-y-2" data-onboarding="media-settings-file-analysis">
+			<div class="space-y-1">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">File Analysis</div>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Scan files to extract media information such as codec, resolution, and audio tracks.
 				</p>
 			</div>
+			<Toggle
+				label="Enable Media Info"
+				checked={formData.enableMediaInfo}
+				on:change={() => updateField('enableMediaInfo', !formData.enableMediaInfo)}
+			/>
 		</div>
 	</div>
 </div>

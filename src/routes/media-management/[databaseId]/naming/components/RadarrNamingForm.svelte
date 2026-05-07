@@ -127,10 +127,10 @@
 	}
 </script>
 
-<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
+<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 	<div slot="left">
-		<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">{title}</h1>
-		<p class="text-sm text-neutral-500 dark:text-neutral-400">{description}</p>
+		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
+		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
 	</div>
 	<div slot="right" class="flex items-center gap-2">
 		<Button
@@ -158,109 +158,127 @@
 	</div>
 </StickyCard>
 
-<div class="mt-6 md:px-4">
-	<div
-		class="space-y-6 rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
-	>
-		<!-- Basic Info -->
-		<div class="space-y-4">
-			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Basic Info</h2>
-			<FormInput
-				label="Name"
-				name="name"
-				required
-				value={formData.name}
-				placeholder="e.g., default"
-				on:input={(e) => updateField('name', e.detail)}
-			/>
-
-			<div class="space-y-2">
+<div class="md:px-4">
+	<div class="space-y-6">
+		<div class="space-y-2">
+			<div class="flex items-center justify-between gap-4">
+				<div>
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Name<span class="text-red-500">*</span>
+					</div>
+				</div>
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Rename Movies</div>
+			</div>
+			<div class="flex items-center justify-between gap-4">
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					The name of this Radarr naming configuration.
+				</p>
+				<p class="text-right text-xs text-neutral-600 dark:text-neutral-400">
+					Rename movie files to match the naming format.
+				</p>
+			</div>
+			<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_14rem] md:items-end">
+				<FormInput
+					label="Name"
+					name="name"
+					required
+					hideLabel
+					value={formData.name}
+					placeholder="e.g., default"
+					on:input={(e) => updateField('name', e.detail)}
+				/>
 				<Toggle
 					checked={formData.rename}
-					label="Rename Movies"
+					label={formData.rename ? 'Enabled' : 'Disabled'}
 					ariaLabel="Rename Movies"
 					color={formData.rename ? 'green' : 'neutral'}
+					fullWidth
 					on:change={(e) => updateField('rename', e.detail)}
 				/>
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
-					Rename movie files to match the naming format
-				</p>
 			</div>
 		</div>
 
-		{#if formData.rename}
-			<hr class="border-neutral-200 dark:border-neutral-700" />
-
-			<!-- Naming Formats -->
-			<div class="space-y-4">
-				<h2
-					data-onboarding="media-naming-formats"
-					class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
-				>
-					Naming Formats
-				</h2>
-				<div>
-					<TokenAutocomplete
-						label="Movie Format"
-						name="movieFormat"
-						value={formData.movieFormat}
-						placeholder="e.g., Movie Title (Year) Quality"
-						categories={radarrTokenCategories}
-						bind:inputElement={movieFormatInput}
-						on:input={(e) => updateField('movieFormat', e.detail)}
-					/>
-					<NamingPreview format={formData.movieFormat} resolver={resolveRadarrFormat} />
-				</div>
-
-				<div>
-					<TokenAutocomplete
-						label="Movie Folder Format"
-						name="movieFolderFormat"
-						value={formData.movieFolderFormat}
-						placeholder="e.g., Movie Title (Year)"
-						categories={radarrTokenCategories}
-						bind:inputElement={movieFolderFormatInput}
-						on:input={(e) => updateField('movieFolderFormat', e.detail)}
-					/>
-					<NamingPreview format={formData.movieFolderFormat} resolver={resolveRadarrFormat} />
-				</div>
+		<div
+			class="space-y-4"
+			class:opacity-60={!formData.rename}
+			data-onboarding="media-naming-formats"
+		>
+			<div class="space-y-1">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Naming Formats</div>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Control how Radarr names movie files and folders.
+				</p>
+			</div>
+			<div>
+				<TokenAutocomplete
+					label="Movie Format"
+					name="movieFormat"
+					value={formData.movieFormat}
+					placeholder="e.g., Movie Title (Year) Quality"
+					categories={radarrTokenCategories}
+					disabled={!formData.rename}
+					bind:inputElement={movieFormatInput}
+					on:input={(e) => updateField('movieFormat', e.detail)}
+				/>
+				<NamingPreview format={formData.movieFormat} resolver={resolveRadarrFormat} />
 			</div>
 
-			<hr class="border-neutral-200 dark:border-neutral-700" />
+			<div>
+				<TokenAutocomplete
+					label="Movie Folder Format"
+					name="movieFolderFormat"
+					value={formData.movieFolderFormat}
+					placeholder="e.g., Movie Title (Year)"
+					categories={radarrTokenCategories}
+					disabled={!formData.rename}
+					bind:inputElement={movieFolderFormatInput}
+					on:input={(e) => updateField('movieFolderFormat', e.detail)}
+				/>
+				<NamingPreview format={formData.movieFolderFormat} resolver={resolveRadarrFormat} />
+			</div>
+		</div>
 
-			<!-- Character Replacement -->
-			<div class="space-y-4">
-				<h2
-					data-onboarding="media-naming-character-replacement"
-					class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
-				>
+		<div
+			class="space-y-4"
+			class:opacity-60={!formData.rename}
+			data-onboarding="media-naming-character-replacement"
+		>
+			<div class="space-y-1">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 					Character Replacement
-				</h2>
-
-				<div class="space-y-2">
-					<Toggle
-						checked={formData.replaceIllegalCharacters}
-						label="Replace Illegal Characters"
-						ariaLabel="Replace Illegal Characters"
-						color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
-						on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
-					/>
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
-						Replace characters that are not allowed in file names
-					</p>
 				</div>
-
-				{#if formData.replaceIllegalCharacters}
-					<DropdownSelect
-						label="Colon Replacement"
-						value={formData.colonReplacementFormat}
-						options={RADARR_COLON_REPLACEMENT_OPTIONS}
-						on:change={(e) =>
-							updateField('colonReplacementFormat', e.detail as RadarrColonReplacementFormat)}
-					/>
-				{/if}
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Control how illegal filesystem characters are handled in generated names.
+				</p>
 			</div>
-		{/if}
+
+			<div class="space-y-2">
+				<Toggle
+					checked={formData.replaceIllegalCharacters}
+					label="Replace Illegal Characters"
+					ariaLabel="Replace Illegal Characters"
+					color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
+					disabled={!formData.rename}
+					on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
+				/>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Replace characters that are not allowed in file names.
+				</p>
+			</div>
+
+			<div class="space-y-2">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Colon Replacement
+				</div>
+				<DropdownSelect
+					value={formData.colonReplacementFormat}
+					options={RADARR_COLON_REPLACEMENT_OPTIONS}
+					disabled={!formData.rename || !formData.replaceIllegalCharacters}
+					on:change={(e) =>
+						updateField('colonReplacementFormat', e.detail as RadarrColonReplacementFormat)}
+				/>
+			</div>
+		</div>
 	</div>
 </div>
 
