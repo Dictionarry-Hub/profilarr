@@ -328,7 +328,7 @@
 					</div>
 				</svelte:fragment>
 				<div class="px-6 py-4">
-					<div class="grid grid-cols-1 gap-4 sm:grid-cols-5">
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
 						<div>
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 								Emoji Icons
@@ -344,7 +344,7 @@
 							/>
 						</div>
 
-						<div class="sm:col-span-2">
+						<div class="xl:col-span-2">
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 								Alert Position
 							</span>
@@ -360,7 +360,7 @@
 							/>
 						</div>
 
-						<div class="sm:col-span-2">
+						<div class="xl:col-span-2">
 							<label
 								for="ui_alert_duration"
 								class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
@@ -438,7 +438,7 @@
 				description="Configure application defaults and safeguards"
 				onboardingId="general-behavior"
 			>
-				<div class="grid gap-4 px-6 py-4 sm:grid-cols-5">
+				<div class="grid gap-4 px-6 py-4 sm:grid-cols-2 xl:grid-cols-5">
 					<Toggle
 						label="Apply Default Delay Profile"
 						checked={arrApplyDefaultDelayProfiles}
@@ -480,7 +480,7 @@
 				description="Configure automatic backups, schedule, and retention policy"
 				onboardingId="general-backups"
 			>
-				<div class="grid gap-4 px-6 py-4" class:sm:grid-cols-5={backupEnabled}>
+				<div class="grid gap-4 px-6 py-4" class:sm:grid-cols-2={backupEnabled} class:xl:grid-cols-5={backupEnabled}>
 					<div>
 						<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 							Automatic Backups
@@ -498,7 +498,7 @@
 					<input type="hidden" name="backup_enabled" value={backupEnabled ? 'on' : ''} />
 
 					{#if backupEnabled}
-						<div class="sm:col-span-2">
+						<div class="xl:col-span-2">
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 								Schedule
 							</span>
@@ -514,7 +514,7 @@
 							/>
 						</div>
 
-						<div class="sm:col-span-2">
+						<div class="xl:col-span-2">
 							<label
 								for="backup_retention_days"
 								class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
@@ -552,7 +552,7 @@
 					</div>
 				</svelte:fragment>
 				<div class="space-y-4 px-6 py-4">
-					<div class="grid gap-4" class:sm:grid-cols-7={logEnabled}>
+					<div class="grid gap-4" class:sm:grid-cols-2={logEnabled} class:xl:grid-cols-7={logEnabled}>
 						<div>
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 								Logging
@@ -600,7 +600,7 @@
 								/>
 							</div>
 
-							<div class="sm:col-span-2">
+							<div class="xl:col-span-2">
 								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 									Minimum Level
 								</span>
@@ -618,7 +618,7 @@
 								</div>
 							</div>
 
-							<div class="sm:col-span-2">
+							<div class="xl:col-span-2">
 								<label
 									for="log_retention_days"
 									class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
