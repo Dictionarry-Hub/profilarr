@@ -20,12 +20,33 @@
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
+	import Admonition from '$ui/admonition/Admonition.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
 
+	const RATE_LIMITS_KEY = 'upgrades.dismissed.rateLimits.v1';
+	const WHEN_TO_USE_KEY = 'upgrades.dismissed.whenToUse.v1';
+
+	let showRateLimitsAdmonition = true;
+	let showWhenToUseAdmonition = true;
+
+	function dismissRateLimits() {
+		localStorage.setItem(RATE_LIMITS_KEY, '1');
+		showRateLimitsAdmonition = false;
+	}
+
+	function dismissWhenToUse() {
+		localStorage.setItem(WHEN_TO_USE_KEY, '1');
+		showWhenToUseAdmonition = false;
+	}
+
 	// Initialize dirty tracking on mount (same pattern as sync page)
 	onMount(() => {
+		if (browser) {
+			showRateLimitsAdmonition = localStorage.getItem(RATE_LIMITS_KEY) !== '1';
+			showWhenToUseAdmonition = localStorage.getItem(WHEN_TO_USE_KEY) !== '1';
+		}
 		const initialFormData = {
 			enabled: data.config?.enabled ?? false,
 			cron: data.config?.cron ?? '0 */6 * * *',
@@ -200,6 +221,53 @@
 	</StickyCard>
 
 	<div class="mt-4 space-y-6">
+		{#if showRateLimitsAdmonition}
+			<div class="md:px-4">
+				<Admonition
+					variant="danger"
+					title="Indexer rate limits"
+					dismissible
+					confirmDismiss
+					confirmMessage="This warning will be permanently hidden. Make sure you have read it."
+					on:dismiss={dismissRateLimits}
+				>
+					<p>
+						Profilarr limits upgrade searches to at most one movie every 10 minutes (Radarr) and one
+						series per hour (Sonarr). These are intentionally conservative defaults, but they don't
+						override your indexer's own rules. Confirm what your indexer allows and stay within it.
+					</p>
+				</Admonition>
+			</div>
+		{/if}
+
+		{#if showWhenToUseAdmonition}
+			<div class="md:px-4">
+				<Admonition
+					variant="info"
+					title="When to use upgrades"
+					dismissible
+					confirmDismiss
+					confirmMessage="This message will be permanently hidden. Make sure you have read it."
+					on:dismiss={dismissWhenToUse}
+				>
+					<p class="mb-2">
+						Most libraries don't need upgrades running. RSS already grabs better releases as they're
+						posted; this feature only matters when your existing library has fallen behind your
+						current config. Turn it on to catch up after a change, for example:
+					</p>
+					<ul class="list-disc space-y-1 pl-5">
+						<li>You switched a library to a different quality profile</li>
+						<li>Your custom format scores changed, often after a PCD update</li>
+						<li>
+							Your Arr instance was offline for a stretch (internet outage, downtime, updates)
+						</li>
+						<li>You added a new indexer with releases you couldn't reach before</li>
+					</ul>
+					<p class="mt-2">If none of those apply, leaving it disabled is fine.</p>
+				</Admonition>
+			</div>
+		{/if}
+
 		<section class="border-b border-neutral-200 pb-5 dark:border-neutral-800">
 			<CoreSettings
 				{enabled}
