@@ -38,7 +38,8 @@
 		href: `/arr/${instanceId}/drift`,
 		active: currentPath.includes('/drift'),
 		icon: ArrowLeftRight,
-		onboarding: 'arr-tab-drift'
+		onboarding: 'arr-tab-drift',
+		badge: data.driftCount
 	};
 
 	$: otherTabs = [

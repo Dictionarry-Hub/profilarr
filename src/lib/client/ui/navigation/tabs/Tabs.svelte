@@ -14,7 +14,11 @@
 		active?: boolean;
 		icon?: ComponentType;
 		onboarding?: string;
+		badge?: number;
 	}
+
+	const badgeClass =
+		'inline-flex min-w-5 items-center justify-center rounded-full bg-blue-100 px-1.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300';
 
 	interface BackButton {
 		label: string;
@@ -100,6 +104,9 @@
 							<svelte:component this={activeTab.icon} size={16} class="shrink-0 text-accent-500" />
 						{/if}
 						<span class="truncate">{activeTab?.label ?? 'Select...'}</span>
+						{#if activeTab?.badge && activeTab.badge > 0}
+							<span class={badgeClass}>{activeTab.badge}</span>
+						{/if}
 					</span>
 					<ChevronDown
 						size={16}
@@ -113,9 +120,17 @@
 							<DropdownItem
 								icon={tab.icon}
 								label={tab.label}
+								customContent
 								selected={tab.active}
 								on:click={() => handleTabSelect(tab.href)}
-							/>
+							>
+								<span class="flex items-center gap-2">
+									<span>{tab.label}</span>
+									{#if tab.badge && tab.badge > 0}
+										<span class={badgeClass}>{tab.badge}</span>
+									{/if}
+								</span>
+							</DropdownItem>
 						{/each}
 					</Dropdown>
 				{/if}
@@ -150,6 +165,9 @@
 							<svelte:component this={tab.icon} size={16} />
 						{/if}
 						{tab.label}
+						{#if tab.badge && tab.badge > 0}
+							<span class={badgeClass}>{tab.badge}</span>
+						{/if}
 					</button>
 				{/each}
 
