@@ -160,6 +160,21 @@
 
 	let remainingValueCount = 0;
 
+	function rankSuggestions(all: string[], q: string): string[] {
+		if (!q) return all;
+		const ql = q.toLowerCase();
+		const exact: string[] = [];
+		const prefix: string[] = [];
+		const sub: string[] = [];
+		for (const s of all) {
+			const sl = s.toLowerCase();
+			if (sl === ql) exact.push(s);
+			else if (sl.startsWith(ql)) prefix.push(s);
+			else if (sl.includes(ql)) sub.push(s);
+		}
+		return [...exact, ...prefix, ...sub];
+	}
+
 	$: valueSuggestions = (() => {
 		if (phase !== 'value' || !activeFieldDef) {
 			remainingValueCount = 0;
@@ -170,9 +185,7 @@
 			return [];
 		}
 		const allSuggestions = activeFieldDef.suggestions?.(items) ?? [];
-		const matched = valueInputValue
-			? allSuggestions.filter((s) => s.toLowerCase().includes(valueInputValue.toLowerCase()))
-			: allSuggestions;
+		const matched = rankSuggestions(allSuggestions, valueInputValue);
 		remainingValueCount = Math.max(0, matched.length - 5);
 		return matched.slice(0, 5);
 	})();
@@ -198,10 +211,20 @@
 		onchange?.(newTags);
 	}
 
-	function addTag(field: string, value: string) {
+	function addTag(field: string, value: string, exact?: boolean) {
 		const trimmed = value.trim();
 		if (!trimmed) return;
-		updateTags([...tags, { id: uuid(), field, value: trimmed, negated: false }]);
+		let resolvedExact = exact;
+		if (resolvedExact === undefined) {
+			const fieldDef = fieldMap.get(field);
+			const fieldSuggestions = fieldDef?.suggestions?.(items) ?? [];
+			const trimmedLower = trimmed.toLowerCase();
+			resolvedExact = fieldSuggestions.some((s) => s.toLowerCase() === trimmedLower);
+		}
+		updateTags([
+			...tags,
+			{ id: uuid(), field, value: trimmed, negated: false, exact: resolvedExact }
+		]);
 		inputValue = '';
 		valueInputValue = '';
 		activeFieldDef = null;
@@ -278,7 +301,7 @@
 			}
 		} else if (phase === 'value' && activeFieldDef) {
 			if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
-				addTag(activeFieldDef.key, suggestions[highlightedIndex].value);
+				addTag(activeFieldDef.key, suggestions[highlightedIndex].value, true);
 			} else if (valueInputValue.trim()) {
 				addTag(activeFieldDef.key, valueInputValue);
 			}
@@ -291,7 +314,7 @@
 			const field = fieldMap.get(selected.value);
 			if (field) selectField(field);
 		} else if (phase === 'value' && activeFieldDef) {
-			addTag(activeFieldDef.key, suggestions[index].value);
+			addTag(activeFieldDef.key, suggestions[index].value, true);
 		}
 	}
 
@@ -404,7 +427,7 @@
 			{#each suggestions as suggestion, i}
 				<DropdownItem
 					label={suggestion.label}
-					selected={false}
+					highlighted={i === highlightedIndex}
 					on:click={() => handleSuggestionClick(i)}
 				/>
 			{/each}

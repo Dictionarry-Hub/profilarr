@@ -15,6 +15,7 @@ export interface FilterTag {
 	field: string;
 	value: string;
 	negated: boolean;
+	exact?: boolean;
 }
 
 export type SerializedFilterTag = Omit<FilterTag, 'id'>;
