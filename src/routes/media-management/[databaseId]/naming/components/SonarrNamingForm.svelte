@@ -150,7 +150,7 @@
 	}
 </script>
 
-<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
+<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 	<div slot="left">
 		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
 		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
@@ -181,33 +181,41 @@
 	</div>
 </StickyCard>
 
-<div class="mt-6 md:px-4">
+<div class="md:px-4">
 	<div class="space-y-6">
-		<div class="space-y-6">
-			<FormInput
-				label="Name"
-				name="name"
-				required
-				value={formData.name}
-				placeholder="e.g., default"
-				description="The name of this Sonarr naming configuration."
-				on:input={(e) => updateField('name', e.detail)}
-			/>
-
-			<div class="space-y-2">
-				<div class="space-y-1">
+		<div class="space-y-2">
+			<div class="flex items-center justify-between gap-4">
+				<div>
 					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Rename Episodes
+						Name<span class="text-red-500">*</span>
 					</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Rename episode files to match the naming format.
-					</p>
 				</div>
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Rename Episodes</div>
+			</div>
+			<div class="flex items-center justify-between gap-4">
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					The name of this Sonarr naming configuration.
+				</p>
+				<p class="text-right text-xs text-neutral-600 dark:text-neutral-400">
+					Rename episode files to match the naming format.
+				</p>
+			</div>
+			<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_14rem] md:items-end">
+				<FormInput
+					label="Name"
+					name="name"
+					required
+					hideLabel
+					value={formData.name}
+					placeholder="e.g., default"
+					on:input={(e) => updateField('name', e.detail)}
+				/>
 				<Toggle
 					checked={formData.rename}
 					label={formData.rename ? 'Enabled' : 'Disabled'}
 					ariaLabel="Rename Episodes"
 					color={formData.rename ? 'green' : 'neutral'}
+					fullWidth
 					on:change={(e) => updateField('rename', e.detail)}
 				/>
 			</div>
@@ -334,13 +342,17 @@
 				</div>
 
 				{#if formData.replaceIllegalCharacters}
-					<DropdownSelect
-						label="Colon Replacement"
-						value={formData.colonReplacementFormat}
-						options={SONARR_COLON_REPLACEMENT_OPTIONS}
-						on:change={(e) =>
-							updateField('colonReplacementFormat', e.detail as SonarrColonReplacementFormat)}
-					/>
+					<div class="space-y-2">
+						<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+							Colon Replacement
+						</div>
+						<DropdownSelect
+							value={formData.colonReplacementFormat}
+							options={SONARR_COLON_REPLACEMENT_OPTIONS}
+							on:change={(e) =>
+								updateField('colonReplacementFormat', e.detail as SonarrColonReplacementFormat)}
+						/>
+					</div>
 
 					{#if showCustomColonInput}
 						<FormInput

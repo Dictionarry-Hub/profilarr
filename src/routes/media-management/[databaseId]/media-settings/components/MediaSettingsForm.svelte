@@ -111,7 +111,7 @@
 	}
 </script>
 
-<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
+<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 	<div slot="left">
 		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
 		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
@@ -136,7 +136,7 @@
 	</div>
 </StickyCard>
 
-<div class="mt-6 md:px-4">
+<div class="md:px-4">
 	<div class="space-y-6">
 		<div data-onboarding="media-settings-name">
 			<FormInput
