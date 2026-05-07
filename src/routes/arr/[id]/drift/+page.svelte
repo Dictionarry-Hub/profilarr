@@ -205,11 +205,7 @@
 								</Label>
 							{/if}
 							<Label variant="secondary" size="md" rounded="md" mono>
-								Last {formatSmartDateTime(
-									data.status.lastCheckedAt,
-									$serverTimezone,
-									$dateFormat
-								)}
+								Last {formatSmartDateTime(data.status.lastCheckedAt, $serverTimezone, $dateFormat)}
 							</Label>
 						</div>
 					{/if}

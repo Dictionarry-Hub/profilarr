@@ -254,7 +254,9 @@
 		>
 			<svelte:fragment slot="cell" let:row let:column>
 				{#if column.key === 'created'}
-					<span class="font-medium">{formatDateTime(row.created, $serverTimezone, $dateFormat)}</span>
+					<span class="font-medium"
+						>{formatDateTime(row.created, $serverTimezone, $dateFormat)}</span
+					>
 				{:else if column.key === 'filename'}
 					<span class="font-mono text-neutral-500 dark:text-neutral-400">{row.filename}</span>
 				{:else if column.key === 'sizeFormatted'}

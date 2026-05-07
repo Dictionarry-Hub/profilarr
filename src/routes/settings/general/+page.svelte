@@ -482,7 +482,11 @@
 				description="Configure automatic backups, schedule, and retention policy"
 				onboardingId="general-backups"
 			>
-				<div class="grid gap-4 px-6 py-4" class:sm:grid-cols-2={backupEnabled} class:xl:grid-cols-5={backupEnabled}>
+				<div
+					class="grid gap-4 px-6 py-4"
+					class:sm:grid-cols-2={backupEnabled}
+					class:xl:grid-cols-5={backupEnabled}
+				>
 					<div>
 						<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 							Automatic Backups
@@ -554,7 +558,11 @@
 					</div>
 				</svelte:fragment>
 				<div class="space-y-4 px-6 py-4">
-					<div class="grid gap-4" class:sm:grid-cols-2={logEnabled} class:xl:grid-cols-7={logEnabled}>
+					<div
+						class="grid gap-4"
+						class:sm:grid-cols-2={logEnabled}
+						class:xl:grid-cols-7={logEnabled}
+					>
 						<div>
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 								Logging
