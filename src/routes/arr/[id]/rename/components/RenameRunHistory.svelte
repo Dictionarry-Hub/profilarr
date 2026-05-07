@@ -28,6 +28,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
 	import { formatSmartDateTime } from '$shared/utils/dates';
+	import { dateFormat } from '$lib/client/stores/dateFormat';
 	import { serverTimezone } from '$lib/client/stores/timezone';
 
 	let searchStore: SearchStore = createSearchStore();
@@ -195,7 +196,7 @@
 			{:else if column.key === 'date'}
 				<div class="flex items-center gap-2">
 					<span class="text-neutral-600 dark:text-neutral-400">
-						{formatSmartDateTime(row.startedAt, $serverTimezone)}
+						{formatSmartDateTime(row.startedAt, $serverTimezone, $dateFormat)}
 					</span>
 					{#if row.config.dryRun}
 						<Label variant="info" size="sm" rounded="md"><FlaskConical size={10} /> Dry Run</Label>

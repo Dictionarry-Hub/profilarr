@@ -13,6 +13,7 @@
 	import LogLevelLabelCell from './components/LogLevelLabelCell.svelte';
 	import { getPersistentSearchStore } from '$lib/client/stores/search';
 	import { formatDateTime } from '$shared/utils/dates.ts';
+	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
 	import { invalidateAll } from '$app/navigation';
@@ -66,7 +67,7 @@
 			sortAccessor: (row) => new Date(row.timestamp).getTime(),
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — date formatting, not user content
-				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${formatDateTime(row.timestamp, $serverTimezone)}</span>`
+				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${formatDateTime(row.timestamp, $serverTimezone, $dateFormat)}</span>`
 			})
 		},
 		{

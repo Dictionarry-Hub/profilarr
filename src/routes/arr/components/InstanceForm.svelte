@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { Save, Wifi, Trash2, Eraser, Loader2 } from 'lucide-svelte';
 	import { formatSmartDateTime } from '$shared/utils/dates';
+	import { dateFormat } from '$lib/client/stores/dateFormat';
 	import { serverTimezone } from '$lib/client/stores/timezone';
 	import CleanupModal from './CleanupModal.svelte';
 	import { alertStore } from '$alerts/store';
@@ -470,7 +471,11 @@
 									<span>
 										Last: <span
 											class="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-											>{formatSmartDateTime(cleanupSettings.lastRunAt, $serverTimezone)}</span
+											>{formatSmartDateTime(
+												cleanupSettings.lastRunAt,
+												$serverTimezone,
+												$dateFormat
+											)}</span
 										>
 									</span>
 								</div>

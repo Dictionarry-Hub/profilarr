@@ -1,6 +1,7 @@
 import { db } from '../db.ts';
+import type { DateFormat } from '$shared/utils/dates.ts';
 
-export type DateFormat = 'auto' | 'mdy' | 'dmy' | 'ymd';
+export type { DateFormat } from '$shared/utils/dates.ts';
 
 /**
  * Types for general_settings table

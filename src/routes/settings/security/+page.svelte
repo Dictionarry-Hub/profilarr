@@ -14,6 +14,7 @@
 		Clock
 	} from 'lucide-svelte';
 	import { parseUTC, formatDateTime, formatDate } from '$shared/utils/dates';
+	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
@@ -75,7 +76,7 @@
 	}
 
 	function fmtDateTime(dateStr: string): string {
-		return formatDateTime(dateStr, $serverTimezone);
+		return formatDateTime(dateStr, $serverTimezone, $dateFormat);
 	}
 
 	interface SessionRow {
@@ -106,7 +107,7 @@
 		if (diffMins < 60) return `${diffMins}m ago`;
 		if (diffHours < 24) return `${diffHours}h ago`;
 		if (diffDays < 7) return `${diffDays}d ago`;
-		return formatDate(dateStr, $serverTimezone);
+		return formatDate(dateStr, $serverTimezone, $dateFormat);
 	}
 
 	const sessionColumns: Column<SessionRow>[] = [

@@ -5,6 +5,7 @@
 	import { alertStore } from '$alerts/store';
 	import { navIconStore, type NavIconStyle } from '$stores/navIcons';
 	import { alertSettingsStore, type AlertPosition, DEFAULT_ALERT_SETTINGS } from '$alerts/settings';
+	import { dateFormat as dateFormatStore } from '$stores/dateFormat';
 	import {
 		fontStore,
 		sansFontOptions,
@@ -259,6 +260,7 @@
 				const durationMs = Math.max(0, Math.round((uiAlertDurationSeconds ?? 0) * 1000));
 				navIconStore.setStyle(uiNavIconStyle);
 				alertSettingsStore.setSettings({ position: uiAlertPosition, durationMs });
+				dateFormatStore.set(dateFormat);
 				fontStore.setFonts({ sans: uiFontSans, mono: uiFontMono });
 
 				// Reset dirty tracking

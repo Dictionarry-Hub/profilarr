@@ -9,6 +9,7 @@
 	import type { RadarrLibraryItem } from '$utils/arr/types.ts';
 	import type { Column } from '$ui/table/types';
 	import { formatDate } from '$shared/utils/dates.ts';
+	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 
 	export let row: RadarrLibraryItem;
@@ -26,7 +27,7 @@
 
 	function fmtDate(isoString?: string): string {
 		if (!isoString) return '-';
-		return formatDate(isoString, $serverTimezone, {
+		return formatDate(isoString, $serverTimezone, $dateFormat, {
 			month: 'short',
 			day: 'numeric',
 			year: '2-digit'
