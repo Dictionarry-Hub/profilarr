@@ -8,6 +8,7 @@
 	import type { PageData } from './$types';
 	import type { Commit } from '$utils/git/types';
 	import { parseUTC, formatDate } from '$shared/utils/dates';
+	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 
 	export let data: PageData;
@@ -74,7 +75,7 @@
 		const diffMs = now.getTime() - date.getTime();
 		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-		if (diffMs < 0) return formatDate(dateStr, $serverTimezone);
+		if (diffMs < 0) return formatDate(dateStr, $serverTimezone, $dateFormat);
 		if (diffDays === 0) {
 			const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 			if (diffHours === 0) {
@@ -87,7 +88,7 @@
 		if (diffDays < 7) return `${diffDays}d ago`;
 		if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
 
-		return formatDate(dateStr, $serverTimezone);
+		return formatDate(dateStr, $serverTimezone, $dateFormat);
 	}
 
 	function getCommitUrl(hash: string): string {

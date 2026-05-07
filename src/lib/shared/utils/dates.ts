@@ -51,6 +51,9 @@ export function parseUTC(timestamp: string | null | undefined): Date | null {
 	return new Date(normalized);
 }
 
+export type DateFormat = 'auto' | 'mdy' | 'dmy' | 'ymd';
+export type DatePart = 'month' | 'day' | 'year';
+
 // ---------------------------------------------------------------------------
 // Display formatting
 //
@@ -58,6 +61,101 @@ export function parseUTC(timestamp: string | null | undefined): Date | null {
 // the server timezone (from the serverTimezone store). They are the only
 // way dates should be rendered in the UI.
 // ---------------------------------------------------------------------------
+
+function resolveDisplayArgs(
+	dateFormatOrOptions?: DateFormat | Intl.DateTimeFormatOptions,
+	options?: Intl.DateTimeFormatOptions
+): { dateFormat: DateFormat; options?: Intl.DateTimeFormatOptions } {
+	if (typeof dateFormatOrOptions === 'string') {
+		return { dateFormat: dateFormatOrOptions, options };
+	}
+	return { dateFormat: 'auto', options: dateFormatOrOptions };
+}
+
+export function getDatePartOrder(dateFormat: DateFormat): DatePart[] {
+	if (dateFormat === 'mdy') return ['month', 'day', 'year'];
+	if (dateFormat === 'dmy') return ['day', 'month', 'year'];
+	if (dateFormat === 'ymd') return ['year', 'month', 'day'];
+
+	const parts = new Intl.DateTimeFormat(undefined, {
+		year: 'numeric',
+		month: 'numeric',
+		day: 'numeric'
+	})
+		.formatToParts(new Date(Date.UTC(2006, 10, 22)))
+		.map((part) => part.type)
+		.filter((part): part is DatePart => part === 'month' || part === 'day' || part === 'year');
+
+	const uniqueParts = [...new Set(parts)];
+	return uniqueParts.length === 3 ? uniqueParts : ['month', 'day', 'year'];
+}
+
+function formatExplicitDate(
+	date: Date,
+	timezone: string,
+	dateFormat: Exclude<DateFormat, 'auto'>
+): string {
+	const parts = new Intl.DateTimeFormat('en-US', {
+		timeZone: timezone,
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit'
+	}).formatToParts(date);
+	const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+	const year = values.year;
+	const month = values.month;
+	const day = values.day;
+
+	if (dateFormat === 'mdy') return `${month}/${day}/${year}`;
+	if (dateFormat === 'dmy') return `${day}/${month}/${year}`;
+	return `${year}-${month}-${day}`;
+}
+
+function pickTimeOptions(
+	options?: Intl.DateTimeFormatOptions
+): Intl.DateTimeFormatOptions | undefined {
+	if (!options) return undefined;
+	const timeOptions: Intl.DateTimeFormatOptions = {};
+	let hasTimeOptions = false;
+
+	if (options.hour !== undefined) {
+		timeOptions.hour = options.hour;
+		hasTimeOptions = true;
+	}
+	if (options.minute !== undefined) {
+		timeOptions.minute = options.minute;
+		hasTimeOptions = true;
+	}
+	if (options.second !== undefined) {
+		timeOptions.second = options.second;
+		hasTimeOptions = true;
+	}
+	if (options.fractionalSecondDigits !== undefined) {
+		timeOptions.fractionalSecondDigits = options.fractionalSecondDigits;
+		hasTimeOptions = true;
+	}
+	if (options.hour12 !== undefined) {
+		timeOptions.hour12 = options.hour12;
+		hasTimeOptions = true;
+	}
+	if (options.hourCycle !== undefined) {
+		timeOptions.hourCycle = options.hourCycle;
+		hasTimeOptions = true;
+	}
+	if (options.timeZoneName !== undefined) {
+		timeOptions.timeZoneName = options.timeZoneName;
+		hasTimeOptions = true;
+	}
+
+	return hasTimeOptions ? timeOptions : undefined;
+}
+
+function formatTime(date: Date, timezone: string, options?: Intl.DateTimeFormatOptions): string {
+	return date.toLocaleTimeString(undefined, {
+		timeZone: timezone,
+		...pickTimeOptions(options)
+	});
+}
 
 /**
  * Formats a UTC timestamp as a full date and time in the given timezone.
@@ -72,12 +170,21 @@ export function parseUTC(timestamp: string | null | undefined): Date | null {
 export function formatDateTime(
 	timestamp: string | null | undefined,
 	timezone: string,
+	dateFormatOrOptions?: DateFormat | Intl.DateTimeFormatOptions,
 	options?: Intl.DateTimeFormatOptions
 ): string {
 	if (!timestamp) return '-';
 	const date = new Date(timestamp);
 	if (Number.isNaN(date.getTime())) return '-';
-	return date.toLocaleString(undefined, { timeZone: timezone, ...options });
+	const args = resolveDisplayArgs(dateFormatOrOptions, options);
+	if (args.dateFormat === 'auto') {
+		return date.toLocaleString(undefined, { timeZone: timezone, ...args.options });
+	}
+	return `${formatExplicitDate(date, timezone, args.dateFormat)}, ${formatTime(
+		date,
+		timezone,
+		args.options
+	)}`;
 }
 
 /**
@@ -93,12 +200,17 @@ export function formatDateTime(
 export function formatDate(
 	timestamp: string | null | undefined,
 	timezone: string,
+	dateFormatOrOptions?: DateFormat | Intl.DateTimeFormatOptions,
 	options?: Intl.DateTimeFormatOptions
 ): string {
 	if (!timestamp) return '-';
 	const date = new Date(timestamp);
 	if (Number.isNaN(date.getTime())) return '-';
-	return date.toLocaleDateString(undefined, { timeZone: timezone, ...options });
+	const args = resolveDisplayArgs(dateFormatOrOptions, options);
+	if (args.dateFormat === 'auto') {
+		return date.toLocaleDateString(undefined, { timeZone: timezone, ...args.options });
+	}
+	return formatExplicitDate(date, timezone, args.dateFormat);
 }
 
 /**
@@ -113,7 +225,8 @@ export function formatDate(
  */
 export function formatSmartDateTime(
 	timestamp: string | null | undefined,
-	timezone: string
+	timezone: string,
+	dateFormat: DateFormat = 'auto'
 ): string {
 	if (!timestamp) return '-';
 	const date = new Date(timestamp);
@@ -139,8 +252,7 @@ export function formatSmartDateTime(
 	if (dateDay === todayDay) return `Today, ${timeStr}`;
 	if (dateDay === yesterdayDay) return `Yesterday, ${timeStr}`;
 
-	const dateStr = date.toLocaleDateString(undefined, {
-		timeZone: timezone,
+	const dateStr = formatDate(timestamp, timezone, dateFormat, {
 		month: 'short',
 		day: 'numeric'
 	});

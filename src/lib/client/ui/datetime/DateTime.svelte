@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 	import { formatDateTime, formatDate } from '$shared/utils/dates.ts';
 
@@ -8,7 +9,7 @@
 </script>
 
 {#if date}
-	{formatDate(value, $serverTimezone, options)}
+	{formatDate(value, $serverTimezone, $dateFormat, options)}
 {:else}
-	{formatDateTime(value, $serverTimezone, options)}
+	{formatDateTime(value, $serverTimezone, $dateFormat, options)}
 {/if}

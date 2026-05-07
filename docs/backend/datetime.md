@@ -1,6 +1,6 @@
 # Date and Time
 
-**Source:** `src/lib/shared/utils/dates.ts`, `src/lib/client/stores/timezone.ts`
+**Source:** `src/lib/shared/utils/dates.ts`, `src/lib/client/stores/timezone.ts`, `src/lib/client/stores/dateFormat.ts`
 
 ## Table of Contents
 
@@ -10,13 +10,13 @@
   - [Query Layer](#query-layer)
   - [API](#api)
   - [Frontend](#frontend)
-- [Timezone Store](#timezone-store)
+- [Display Stores](#display-stores)
 - [Formatting](#formatting)
 - [Lint Enforcement](#lint-enforcement)
 
 ## Principles
 
-Three rules govern how Profilarr handles time:
+Four rules govern how Profilarr handles time:
 
 1. **Store UTC.** The database and API deal exclusively in UTC. No local
    timestamps enter the persistence layer.
@@ -26,6 +26,9 @@ Three rules govern how Profilarr handles time:
 3. **Display in server TZ.** The frontend converts UTC timestamps to the
    server's configured timezone (`TZ` environment variable) before rendering.
    Browser-local time is never used.
+4. **Format by app setting.** Date ordering comes from the app-wide date
+   format setting. `auto` preserves browser-locale formatting, while explicit
+   formats render stable numeric dates.
 
 ## Layers
 
@@ -106,34 +109,37 @@ discover the server's configured TZ without a separate call:
 
 The frontend receives normalized UTC strings from page server load
 functions (which get them from the query layer). It converts these to the
-server's configured timezone for display using the `timezone` store
-(populated from `/api/v1/status` on app startup) and `Intl.DateTimeFormat`
-with the `timeZone` option. Browser-local time is never used.
+server's configured timezone for display using the `timezone` store and
+uses the `dateFormat` store to choose date ordering. Browser-local time is
+never used for timezone conversion.
 
 All date display goes through a single formatting function. Raw calls to
 `Date.toLocaleString()`, `toLocaleDateString()`, or `toLocaleTimeString()`
 are banned in Svelte files (see [Lint Enforcement](#lint-enforcement)).
 
-## Timezone Store
+## Display Stores
 
 ```
 src/lib/client/stores/timezone.ts
+src/lib/client/stores/dateFormat.ts
 ```
 
-A read-only store that holds the IANA timezone string from the server. It is
-initialized once during app startup from the `/api/v1/status` response and
-does not change for the lifetime of the session.
+Read-only stores that hold display preferences from server data. They are
+initialized from root layout data and do not change for the lifetime of the
+session unless the layout reloads after settings are saved.
 
 ```ts
 import { serverTimezone } from '$stores/timezone';
+import { dateFormat } from '$stores/dateFormat';
 
 // In a component
 const tz = $serverTimezone; // "Asia/Kuala_Lumpur"
+const fmt = $dateFormat; // "auto", "mdy", "dmy", or "ymd"
 ```
 
-The store is the single source of truth for what timezone to display dates in.
-Components never hardcode a timezone or read it from `Intl.DateTimeFormat()
-.resolvedOptions()`.
+The timezone store is the single source of truth for what timezone to display
+dates in. Components never hardcode a timezone or read it from
+`Intl.DateTimeFormat().resolvedOptions()`.
 
 ## Formatting
 
@@ -148,15 +154,16 @@ bare-timestamp problem described in [Database](#database). Called in the
 query layer only (see [Query Layer](#query-layer)).
 
 **Display.** `formatDateTime()`, `formatDate()`, and `formatRelative()`
-accept a UTC timestamp string and the server timezone, and return a
-human-readable string. These are the only functions that produce text shown
+accept a UTC timestamp string, the server timezone, and where relevant the
+date format preference. These are the only functions that produce text shown
 to users. Called in Svelte components only.
 
 ```ts
 import { formatDateTime } from '$shared/utils/dates';
 import { serverTimezone } from '$stores/timezone';
+import { dateFormat } from '$stores/dateFormat';
 
-const display = formatDateTime(job.createdAt, $serverTimezone);
+const display = formatDateTime(job.createdAt, $serverTimezone, $dateFormat);
 // "4/19/2026, 10:30:45 PM"  (in Asia/Kuala_Lumpur)
 ```
 

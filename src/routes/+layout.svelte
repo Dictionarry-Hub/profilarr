@@ -12,6 +12,7 @@
 	import CutsceneComplete from '$lib/client/cutscene/CutsceneComplete.svelte';
 	import { cutscene } from '$lib/client/cutscene/store';
 	import { sidebarCollapsed } from '$stores/sidebar';
+	import { dateFormat } from '$stores/dateFormat';
 	import { serverTimezone } from '$stores/timezone';
 	import { FEATURES } from '$lib/shared/features';
 	import { dev } from '$app/environment';
@@ -26,6 +27,7 @@
 
 	// Set timezone from server data (available immediately, no async fetch)
 	$: serverTimezone.set(data.timezone);
+	$: dateFormat.set(data.dateFormat);
 
 	// Hide navigation on auth pages (login, setup, etc.)
 	$: isAuthPage = $page.url.pathname.startsWith('/auth/');

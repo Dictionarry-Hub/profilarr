@@ -17,6 +17,7 @@
 	import type { Column } from '$ui/table/types';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import { formatDateTime } from '$shared/utils/dates.ts';
+	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
 	import type { PageData } from './$types';
@@ -69,7 +70,7 @@
 			width: '180px',
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
-				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${formatDateTime(row.time, $serverTimezone)}</span>`
+				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${formatDateTime(row.time, $serverTimezone, $dateFormat)}</span>`
 			})
 		},
 		{

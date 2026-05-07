@@ -16,6 +16,7 @@
 	import { jobStatus } from '$lib/client/stores/jobStatus';
 	import { onMount } from 'svelte';
 	import { formatDateTime } from '$shared/utils/dates';
+	import { dateFormat } from '$lib/client/stores/dateFormat';
 	import { serverTimezone } from '$lib/client/stores/timezone';
 
 	export let data: PageData;
@@ -253,7 +254,9 @@
 		>
 			<svelte:fragment slot="cell" let:row let:column>
 				{#if column.key === 'created'}
-					<span class="font-medium">{formatDateTime(row.created, $serverTimezone)}</span>
+					<span class="font-medium"
+						>{formatDateTime(row.created, $serverTimezone, $dateFormat)}</span
+					>
 				{:else if column.key === 'filename'}
 					<span class="font-mono text-neutral-500 dark:text-neutral-400">{row.filename}</span>
 				{:else if column.key === 'sizeFormatted'}

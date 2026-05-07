@@ -14,6 +14,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import type { DatabaseInstanceSummary } from '../+page.server.ts';
 	import { formatDateTime } from '$shared/utils/dates';
+	import { dateFormat } from '$lib/client/stores/dateFormat';
 	import { serverTimezone } from '$lib/client/stores/timezone';
 	import { createEventDispatcher } from 'svelte';
 	import DatabaseAvatar from '../components/DatabaseAvatar.svelte';
@@ -34,7 +35,7 @@
 
 	function formatLastSynced(date: string | null): string {
 		if (!date) return 'Never';
-		return formatDateTime(date, $serverTimezone, {
+		return formatDateTime(date, $serverTimezone, $dateFormat, {
 			month: 'short',
 			day: 'numeric',
 			hour: 'numeric',

@@ -44,6 +44,7 @@
 	import type { Column } from '$ui/table/types';
 	import type { DraftEntityChange } from './components/types';
 	import { parseUTC, formatDate, formatDateTime } from '$shared/utils/dates';
+	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 
 	export let data: PageData;
@@ -620,7 +621,7 @@
 		const diffMs = now.getTime() - date.getTime();
 		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-		if (diffMs < 0) return formatDate(dateStr, $serverTimezone);
+		if (diffMs < 0) return formatDate(dateStr, $serverTimezone, $dateFormat);
 		if (diffDays === 0) {
 			const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 			if (diffHours === 0) {
@@ -632,12 +633,12 @@
 		if (diffDays === 1) return 'Yesterday';
 		if (diffDays < 7) return `${diffDays}d ago`;
 
-		return formatDate(dateStr, $serverTimezone);
+		return formatDate(dateStr, $serverTimezone, $dateFormat);
 	}
 
 	function formatExportedAt(value: string | null | undefined): string {
 		if (!value) return '-';
-		return formatDateTime(value, $serverTimezone, {
+		return formatDateTime(value, $serverTimezone, $dateFormat, {
 			year: 'numeric',
 			month: 'short',
 			day: '2-digit',

@@ -7,6 +7,7 @@
 	import { initEdit, update as updateDirty, clear, isDirty } from '$lib/client/stores/dirty';
 	import { jobStatus } from '$stores/jobStatus';
 	import { formatSmartDateTime } from '$shared/utils/dates';
+	import { dateFormat } from '$lib/client/stores/dateFormat';
 	import { serverTimezone } from '$lib/client/stores/timezone';
 	import Button from '$ui/button/Button.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
@@ -204,7 +205,7 @@
 								</Label>
 							{/if}
 							<Label variant="secondary" size="md" rounded="md" mono>
-								Last {formatSmartDateTime(data.status.lastCheckedAt, $serverTimezone)}
+								Last {formatSmartDateTime(data.status.lastCheckedAt, $serverTimezone, $dateFormat)}
 							</Label>
 						</div>
 					{/if}

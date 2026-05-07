@@ -5,6 +5,7 @@
 	import { alertStore } from '$alerts/store';
 	import { navIconStore, type NavIconStyle } from '$stores/navIcons';
 	import { alertSettingsStore, type AlertPosition, DEFAULT_ALERT_SETTINGS } from '$alerts/settings';
+	import { dateFormat as dateFormatStore } from '$stores/dateFormat';
 	import {
 		fontStore,
 		sansFontOptions,
@@ -32,6 +33,8 @@
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import type { PageData } from './$types';
+
+	type DateFormat = 'auto' | 'mdy' | 'dmy' | 'ymd';
 
 	export let data: PageData;
 
@@ -71,6 +74,7 @@
 	let uiAlertDurationSeconds: number | undefined = Math.round(
 		DEFAULT_ALERT_SETTINGS.durationMs / 1000
 	);
+	let dateFormat: DateFormat = data.generalSettings.date_format;
 	let uiFontSans: SansFont = 'dm-sans';
 	let uiFontMono: MonoFont = 'geist-mono';
 
@@ -99,6 +103,13 @@
 		{ value: 'bottom-left', label: 'Bottom left' },
 		{ value: 'bottom-center', label: 'Bottom center' },
 		{ value: 'bottom-right', label: 'Bottom right' }
+	];
+
+	const dateFormatOptions = [
+		{ value: 'auto', label: 'Auto' },
+		{ value: 'mdy', label: 'MM/DD/YYYY' },
+		{ value: 'dmy', label: 'DD/MM/YYYY' },
+		{ value: 'ymd', label: 'YYYY-MM-DD' }
 	];
 
 	// --- Logging defaults ---
@@ -144,6 +155,7 @@
 			ui_nav_icon_style: uiNavIconStyle,
 			ui_alert_position: uiAlertPosition,
 			ui_alert_duration_seconds: uiAlertDurationSeconds,
+			date_format: dateFormat,
 			ui_font_sans: uiFontSans,
 			ui_font_mono: uiFontMono
 		};
@@ -248,6 +260,7 @@
 				const durationMs = Math.max(0, Math.round((uiAlertDurationSeconds ?? 0) * 1000));
 				navIconStore.setStyle(uiNavIconStyle);
 				alertSettingsStore.setSettings({ position: uiAlertPosition, durationMs });
+				dateFormatStore.set(dateFormat);
 				fontStore.setFonts({ sans: uiFontSans, mono: uiFontMono });
 
 				// Reset dirty tracking
@@ -317,7 +330,7 @@
 					</div>
 				</svelte:fragment>
 				<div class="px-6 py-4">
-					<div class="grid grid-cols-1 gap-4 sm:grid-cols-5">
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
 						<div>
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 								Emoji Icons
@@ -333,7 +346,7 @@
 							/>
 						</div>
 
-						<div class="sm:col-span-2">
+						<div class="xl:col-span-2">
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 								Alert Position
 							</span>
@@ -349,7 +362,7 @@
 							/>
 						</div>
 
-						<div class="sm:col-span-2">
+						<div class="xl:col-span-2">
 							<label
 								for="ui_alert_duration"
 								class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
@@ -367,6 +380,23 @@
 									update('ui_alert_duration_seconds', v);
 								}}
 							/>
+						</div>
+
+						<div>
+							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+								Date Format
+							</span>
+							<DropdownSelect
+								value={dateFormat}
+								options={dateFormatOptions}
+								fullWidth
+								fixed
+								on:change={(e) => {
+									dateFormat = e.detail as DateFormat;
+									update('date_format', dateFormat);
+								}}
+							/>
+							<input type="hidden" name="date_format" value={dateFormat} />
 						</div>
 
 						<div>
@@ -410,7 +440,7 @@
 				description="Configure application defaults and safeguards"
 				onboardingId="general-behavior"
 			>
-				<div class="grid gap-4 px-6 py-4 sm:grid-cols-5">
+				<div class="grid gap-4 px-6 py-4 sm:grid-cols-2 xl:grid-cols-5">
 					<Toggle
 						label="Apply Default Delay Profile"
 						checked={arrApplyDefaultDelayProfiles}
@@ -452,7 +482,11 @@
 				description="Configure automatic backups, schedule, and retention policy"
 				onboardingId="general-backups"
 			>
-				<div class="grid gap-4 px-6 py-4" class:sm:grid-cols-5={backupEnabled}>
+				<div
+					class="grid gap-4 px-6 py-4"
+					class:sm:grid-cols-2={backupEnabled}
+					class:xl:grid-cols-5={backupEnabled}
+				>
 					<div>
 						<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 							Automatic Backups
@@ -470,7 +504,7 @@
 					<input type="hidden" name="backup_enabled" value={backupEnabled ? 'on' : ''} />
 
 					{#if backupEnabled}
-						<div class="sm:col-span-2">
+						<div class="xl:col-span-2">
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 								Schedule
 							</span>
@@ -486,7 +520,7 @@
 							/>
 						</div>
 
-						<div class="sm:col-span-2">
+						<div class="xl:col-span-2">
 							<label
 								for="backup_retention_days"
 								class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
@@ -524,7 +558,11 @@
 					</div>
 				</svelte:fragment>
 				<div class="space-y-4 px-6 py-4">
-					<div class="grid gap-4" class:sm:grid-cols-7={logEnabled}>
+					<div
+						class="grid gap-4"
+						class:sm:grid-cols-2={logEnabled}
+						class:xl:grid-cols-7={logEnabled}
+					>
 						<div>
 							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 								Logging
@@ -572,7 +610,7 @@
 								/>
 							</div>
 
-							<div class="sm:col-span-2">
+							<div class="xl:col-span-2">
 								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
 									Minimum Level
 								</span>
@@ -590,7 +628,7 @@
 								</div>
 							</div>
 
-							<div class="sm:col-span-2">
+							<div class="xl:col-span-2">
 								<label
 									for="log_retention_days"
 									class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { formatDateTime as formatDT, formatRelative } from '$shared/utils/dates';
+	import { dateFormat } from '$lib/client/stores/dateFormat';
 	import { serverTimezone } from '$lib/client/stores/timezone';
 	import type { Column } from '$lib/client/ui/table/types';
 	import ExpandableTable from '$lib/client/ui/table/ExpandableTable.svelte';
@@ -43,7 +44,7 @@
 	// Format date/time
 	function formatDateTime(dateStr: string | null): string {
 		if (!dateStr) return 'Never';
-		return formatDT(dateStr, $serverTimezone);
+		return formatDT(dateStr, $serverTimezone, $dateFormat);
 	}
 
 	// Get relative time (e.g., "in 5 minutes", "2 hours ago")

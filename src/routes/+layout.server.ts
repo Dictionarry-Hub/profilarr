@@ -5,6 +5,7 @@ import { isParserHealthy } from '$lib/server/utils/arr/parser/client.ts';
 import { config } from '$lib/server/utils/config/config.ts';
 import { build } from '$lib/shared/build.ts';
 import { getVersionStatus, inbox } from '$announcements/index.ts';
+import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
 
 async function readPendingRestore(): Promise<{ filename: string } | null> {
 	try {
@@ -33,6 +34,7 @@ export const load: LayoutServerLoad = async () => {
 		version: build.version,
 		versionStatus: getVersionStatus(),
 		timezone: config.timezone,
+		dateFormat: generalSettingsQueries.get()?.date_format ?? 'auto',
 		arrInstances,
 		databases,
 		parserAvailable: await isParserHealthy(),
