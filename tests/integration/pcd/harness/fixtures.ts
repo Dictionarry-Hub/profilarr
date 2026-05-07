@@ -231,6 +231,39 @@ export const base = {
 		return qualityDefinitionsSeed('sonarr_quality_definitions', 'sonarr', input);
 	},
 
+	customFormatResolutionCondition(input: {
+		formatName: string;
+		conditionName: string;
+		resolution: string;
+		negate?: boolean;
+		required?: boolean;
+		arrType?: 'all' | 'radarr' | 'sonarr';
+	}): SeedOperation {
+		return {
+			sql: `INSERT INTO custom_formats (name, description, include_in_rename)
+			      VALUES (${sqlValue(input.formatName)}, '', 0);
+
+			      INSERT INTO custom_format_conditions
+			        (custom_format_name, name, type, arr_type, negate, required)
+			      VALUES (
+			        ${sqlValue(input.formatName)},
+			        ${sqlValue(input.conditionName)},
+			        'resolution',
+			        ${sqlValue(input.arrType ?? 'all')},
+			        ${input.negate ? 1 : 0},
+			        ${input.required ? 1 : 0}
+			      );
+
+			      INSERT INTO condition_resolutions
+			        (custom_format_name, condition_name, resolution)
+			      VALUES (
+			        ${sqlValue(input.formatName)},
+			        ${sqlValue(input.conditionName)},
+			        ${sqlValue(input.resolution)}
+			      );`
+		};
+	},
+
 	customFormatRegexCondition(input: {
 		formatName: string;
 		conditionName: string;

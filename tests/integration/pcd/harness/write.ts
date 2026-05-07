@@ -1,5 +1,6 @@
 import { assert } from '@std/assert';
 import type { OpOrigin, PcdTestContext } from './pcd.ts';
+import type { ConditionData } from '$shared/pcd/display.ts';
 
 export interface RegexFormInput {
 	name: string;
@@ -96,9 +97,11 @@ export const write = {
 	customFormat: {
 		create: createCustomFormat,
 		update: updateCustomFormat,
+		updateConditions: updateCustomFormatConditions,
 		remove: removeCustomFormat,
 		submitCreate: submitCreateCustomFormat,
 		submitUpdate: submitUpdateCustomFormat,
+		submitUpdateConditions: submitUpdateCustomFormatConditions,
 		submitRemove: submitRemoveCustomFormat
 	},
 	delayProfile: {
@@ -188,6 +191,18 @@ export async function removeCustomFormat(
 	);
 }
 
+export async function updateCustomFormatConditions(
+	ctx: PcdTestContext,
+	id: number,
+	conditions: ConditionData[],
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateCustomFormatConditions(ctx, id, conditions, layer),
+		'update custom format conditions'
+	);
+}
+
 export async function submitCreateCustomFormat(
 	ctx: PcdTestContext,
 	input: CustomFormatFormInput
@@ -205,6 +220,19 @@ export async function submitUpdateCustomFormat(
 	return ctx.client.postForm(
 		`/custom-formats/${ctx.dbId}/${id}/general?/update`,
 		customFormatFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitUpdateCustomFormatConditions(
+	ctx: PcdTestContext,
+	id: number,
+	conditions: ConditionData[],
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/custom-formats/${ctx.dbId}/${id}/conditions?/update`,
+		customFormatConditionsFields(conditions, layer),
 		{ headers: { Origin: ctx.origin } }
 	);
 }
@@ -341,6 +369,16 @@ function customFormatFields(input: CustomFormatFormInput): Record<string, string
 		tags: JSON.stringify(input.tags ?? []),
 		includeInRename: String(input.includeInRename ?? false),
 		layer: input.layer ?? 'user'
+	};
+}
+
+function customFormatConditionsFields(
+	conditions: ConditionData[],
+	layer: OpOrigin
+): Record<string, string> {
+	return {
+		conditions: JSON.stringify(conditions),
+		layer
 	};
 }
 
