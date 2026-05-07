@@ -10,6 +10,14 @@ export interface RegexFormInput {
 	layer?: OpOrigin;
 }
 
+export interface CustomFormatFormInput {
+	name: string;
+	description?: string | null;
+	includeInRename?: boolean;
+	tags?: string[];
+	layer?: OpOrigin;
+}
+
 export interface DelayProfileFormInput {
 	name: string;
 	preferredProtocol?: 'prefer_usenet' | 'prefer_torrent' | 'only_usenet' | 'only_torrent';
@@ -85,6 +93,14 @@ export interface SonarrNamingFormInput {
 }
 
 export const write = {
+	customFormat: {
+		create: createCustomFormat,
+		update: updateCustomFormat,
+		remove: removeCustomFormat,
+		submitCreate: submitCreateCustomFormat,
+		submitUpdate: submitUpdateCustomFormat,
+		submitRemove: submitRemoveCustomFormat
+	},
 	delayProfile: {
 		create: createDelayProfile,
 		update: updateDelayProfile,
@@ -142,6 +158,68 @@ export const write = {
 		submitRemove: submitRemoveSonarrQualityDefinitions
 	}
 };
+
+export async function createCustomFormat(
+	ctx: PcdTestContext,
+	input: CustomFormatFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(await submitCreateCustomFormat(ctx, input), 'create custom format');
+}
+
+export async function updateCustomFormat(
+	ctx: PcdTestContext,
+	id: number,
+	input: CustomFormatFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateCustomFormat(ctx, id, input),
+		'update custom format'
+	);
+}
+
+export async function removeCustomFormat(
+	ctx: PcdTestContext,
+	id: number,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitRemoveCustomFormat(ctx, id, layer),
+		'delete custom format'
+	);
+}
+
+export async function submitCreateCustomFormat(
+	ctx: PcdTestContext,
+	input: CustomFormatFormInput
+): Promise<Response> {
+	return ctx.client.postForm(`/custom-formats/${ctx.dbId}/new`, customFormatFields(input), {
+		headers: { Origin: ctx.origin }
+	});
+}
+
+export async function submitUpdateCustomFormat(
+	ctx: PcdTestContext,
+	id: number,
+	input: CustomFormatFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/custom-formats/${ctx.dbId}/${id}/general?/update`,
+		customFormatFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitRemoveCustomFormat(
+	ctx: PcdTestContext,
+	id: number,
+	layer: OpOrigin = 'user'
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/custom-formats/${ctx.dbId}/${id}/general?/delete`,
+		{ layer },
+		{ headers: { Origin: ctx.origin } }
+	);
+}
 
 export async function createDelayProfile(
 	ctx: PcdTestContext,
@@ -254,6 +332,16 @@ export async function submitRemoveRegex(
 		{ layer },
 		{ headers: { Origin: ctx.origin } }
 	);
+}
+
+function customFormatFields(input: CustomFormatFormInput): Record<string, string> {
+	return {
+		name: input.name,
+		description: input.description ?? '',
+		tags: JSON.stringify(input.tags ?? []),
+		includeInRename: String(input.includeInRename ?? false),
+		layer: input.layer ?? 'user'
+	};
 }
 
 function regexFields(input: RegexFormInput): Record<string, string> {

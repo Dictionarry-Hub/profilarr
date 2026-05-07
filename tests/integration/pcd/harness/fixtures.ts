@@ -75,6 +75,33 @@ export const base = {
 		};
 	},
 
+	customFormat(input: {
+		name: string;
+		description?: string | null;
+		includeInRename?: boolean;
+		tags?: string[];
+	}): SeedOperation {
+		const description = 'description' in input ? (input.description ?? null) : '';
+		const includeInRename = input.includeInRename ?? false;
+		const tags = Array.from(new Set((input.tags ?? []).map((tag) => tag.trim()).filter(Boolean)));
+		const tagSql = tags.map((tag) =>
+			[
+				`INSERT INTO tags (name) VALUES (${sqlValue(tag)}) ON CONFLICT(name) DO NOTHING;`,
+				`INSERT INTO custom_format_tags (custom_format_name, tag_name) VALUES (${sqlValue(
+					input.name
+				)}, ${sqlValue(tag)});`
+			].join('\n')
+		);
+
+		return {
+			sql: [
+				`INSERT INTO custom_formats (name, description, include_in_rename)
+				 VALUES (${sqlValue(input.name)}, ${sqlValue(description)}, ${includeInRename ? 1 : 0});`,
+				...tagSql
+			].join('\n')
+		};
+	},
+
 	radarrMediaSettings(input: {
 		name: string;
 		propersRepacks?: 'doNotPrefer' | 'doNotUpgradeAutomatically' | 'preferAndUpgrade';
