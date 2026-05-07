@@ -81,6 +81,10 @@ export function applySmartFilters<T>(
 				const tagLower = tag.value.toLowerCase();
 				if (rawValue == null) {
 					matches = false;
+				} else if (tag.exact) {
+					matches = Array.isArray(rawValue)
+						? rawValue.some((v) => v.toLowerCase() === tagLower)
+						: String(rawValue).toLowerCase() === tagLower;
 				} else if (Array.isArray(rawValue)) {
 					matches = rawValue.some((v) => v.toLowerCase().includes(tagLower));
 				} else {
