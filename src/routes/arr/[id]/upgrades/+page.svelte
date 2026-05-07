@@ -283,21 +283,31 @@
 			/>
 		</section>
 
-		<section class="md:px-4" data-onboarding="upgrades-filters">
-			<FilterSettings
-				{filters}
-				appType={data.instance.type}
-				{runsPerHour}
-				{dynamicFilterOptions}
-				{dynamicFilterOptionsLoading}
-				{dynamicFilterOptionsVersion}
-				onFiltersChange={(v) => update('filters', JSON.stringify(v))}
-			/>
-		</section>
+		{#if enabled}
+			<section class="md:px-4" data-onboarding="upgrades-filters">
+				<FilterSettings
+					{filters}
+					appType={data.instance.type}
+					{runsPerHour}
+					{dynamicFilterOptions}
+					{dynamicFilterOptionsLoading}
+					{dynamicFilterOptionsVersion}
+					onFiltersChange={(v) => update('filters', JSON.stringify(v))}
+				/>
+			</section>
 
-		<section class="md:px-4">
-			<RunHistory runs={data.upgradeRuns} />
-		</section>
+			<section class="md:px-4">
+				<RunHistory runs={data.upgradeRuns} />
+			</section>
+		{:else}
+			<section class="md:px-4">
+				<div class="rounded-xl border border-neutral-300 dark:border-neutral-700/60">
+					<p class="px-4 py-4 text-center text-sm text-neutral-600 dark:text-neutral-400">
+						Enable upgrades to configure filters and view run history.
+					</p>
+				</div>
+			</section>
+		{/if}
 	</div>
 
 	<!-- Hidden forms -->
