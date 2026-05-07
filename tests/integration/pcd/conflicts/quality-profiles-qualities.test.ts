@@ -706,6 +706,50 @@ test('matching upstream group member reorder auto-aligns user op', async () => {
 });
 
 /**
+ * Migrates old group-member-position compatibility coverage.
+ *
+ * Context
+ *   Base layer contains legacy quality_group_members inserts without position.
+ *
+ * Expect
+ *   - legacy ops compile without conflicts
+ *   - SQLite default position is preserved
+ */
+test('legacy group member ops without position compile cleanly', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'legacy-group-member-no-position', [
+			{
+				sql: `INSERT INTO qualities (name) VALUES ('DVD'), ('SDTV'), ('WEBDL-480p');
+
+				      INSERT INTO quality_profiles (name, description)
+				      VALUES ('Legacy Group Profile', 'Legacy');
+
+				      INSERT INTO quality_groups (quality_profile_name, name)
+				      VALUES ('Legacy Group Profile', 'Legacy Group');
+
+				      INSERT INTO quality_group_members
+				        (quality_profile_name, quality_group_name, quality_name)
+				      VALUES
+				        ('Legacy Group Profile', 'Legacy Group', 'DVD'),
+				        ('Legacy Group Profile', 'Legacy Group', 'SDTV'),
+				        ('Legacy Group Profile', 'Legacy Group', 'WEBDL-480p');
+
+				      INSERT INTO quality_profile_qualities
+				        (quality_profile_name, quality_group_name, quality_name, position, enabled, upgrade_until)
+				      VALUES ('Legacy Group Profile', 'Legacy Group', NULL, 0, 1, 0);`
+			}
+		]);
+
+		assertNoPendingConflicts(ctx);
+		assertEquals(compiledGroupMemberRows(ctx, 'Legacy Group Profile', 'Legacy Group'), [
+			{ quality_name: 'DVD', position: 0 },
+			{ quality_name: 'SDTV', position: 0 },
+			{ quality_name: 'WEBDL-480p', position: 0 }
+		]);
+	}
+});
+
+/**
  * Migrates old 2.49.
  *
  * Context
@@ -1111,6 +1155,21 @@ function compiledGroupMembers(
 		)
 		.sort((a, b) => a.position - b.position)
 		.map((member) => member.quality_name);
+}
+
+function compiledGroupMemberRows(
+	ctx: PcdTestContext,
+	profileName: string,
+	groupName: string
+): Array<{ quality_name: string; position: number }> {
+	return compiledQualityProfileState(ctx)
+		.groupMembers.filter(
+			(member) =>
+				member.quality_profile_name === profileName &&
+				member.quality_group_name === groupName
+		)
+		.sort((a, b) => a.quality_name.localeCompare(b.quality_name))
+		.map((member) => ({ quality_name: member.quality_name, position: member.position }));
 }
 
 function qualityItem(

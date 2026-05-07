@@ -75,7 +75,6 @@ import { PORTS } from './integration/harness/ports.ts';
 const INTEGRATION_COMPOSE = 'tests/integration/auth/docker-compose.yml';
 const INTEGRATION_AUTH_SPEC_DIR = 'tests/integration/auth/specs';
 const INTEGRATION_API_SPEC_DIR = 'tests/integration/api/specs';
-const INTEGRATION_CONFLICT_SPEC_DIR = 'tests/integration/conflicts/specs';
 const INTEGRATION_PCD_SPEC_DIR = 'tests/integration/pcd';
 const INTEGRATION_NOTIFICATION_SPEC_DIR = 'tests/integration/notifications/specs';
 const INTEGRATION_BACKUP_SPEC_DIR = 'tests/integration/backups/specs';
@@ -83,7 +82,6 @@ const INTEGRATION_ANNOUNCEMENTS_SPEC_DIR = 'tests/integration/announcements/spec
 const INTEGRATION_SPEC_DIR = INTEGRATION_AUTH_SPEC_DIR; // backward compat
 const INTEGRATION_SUITES = new Set([
 	'auth',
-	'conflicts',
 	'pcd',
 	'api',
 	'notifications',
@@ -228,15 +226,15 @@ async function runUnit(target?: string): Promise<number> {
 // ─── Integration Tests ──────────────────────────────────────────────────────
 
 async function runIntegration(target?: string): Promise<number> {
-	// Parse suite/spec from target: "conflicts", "conflicts detection", "health", etc.
+	// Parse suite/spec from target: "pcd", "pcd write regex", "health", etc.
 	let suite: string | undefined;
 	let specName: string | undefined;
 
 	if (target && INTEGRATION_SUITES.has(target)) {
-		// "deno task test integration conflicts"
+		// "deno task test integration pcd"
 		suite = target;
 	} else if (target) {
-		// Could be "conflicts detection" (suite + spec) or "health" (legacy auth spec)
+		// Could be "pcd write regex" (suite + spec) or "health" (legacy auth spec)
 		const parts = target.split(/\s+/);
 		if (parts.length >= 2 && INTEGRATION_SUITES.has(parts[0])) {
 			suite = parts[0];
@@ -253,7 +251,6 @@ async function runIntegration(target?: string): Promise<number> {
 	// Resolve spec dirs and files
 	function getSpecDir(s: string): string {
 		if (s === 'api') return INTEGRATION_API_SPEC_DIR;
-		if (s === 'conflicts') return INTEGRATION_CONFLICT_SPEC_DIR;
 		if (s === 'pcd') return INTEGRATION_PCD_SPEC_DIR;
 		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
 		if (s === 'backups') return INTEGRATION_BACKUP_SPEC_DIR;
@@ -264,7 +261,7 @@ async function runIntegration(target?: string): Promise<number> {
 	// Determine which suites to run
 	const suitesToRun = suite
 		? [suite]
-		: ['auth', 'api', 'conflicts', 'notifications', 'announcements', 'backups', 'pcd'];
+		: ['auth', 'api', 'notifications', 'announcements', 'backups', 'pcd'];
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
@@ -471,7 +468,7 @@ async function runIntegration(target?: string): Promise<number> {
 					console.log('');
 					// If the spec ran tests and produced a "Failures:" summary block,
 					// print only that block (the actual failures + final counts).
-					// Otherwise the spec died in setup; print stdout as-is — those
+					// Otherwise the spec died in setup; print stdout as-is. Those
 					// dumps are already short (server start logs + diagnostic).
 					// Note: the spec's harness wraps "Failures:" in ANSI codes, so
 					// we search for the bare token then walk back to the line start.
@@ -540,7 +537,6 @@ async function runIntegrationSpec(
 	const specName = specFile
 		.replace(`${INTEGRATION_AUTH_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_API_SPEC_DIR}/`, '')
-		.replace(`${INTEGRATION_CONFLICT_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_PCD_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_NOTIFICATION_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_BACKUP_SPEC_DIR}/`, '')
@@ -1018,14 +1014,11 @@ function printHelp(): void {
 		'  processor       tests/unit/rename/processor.test.ts',
 		'',
 		'Integration targets:',
-		'  (none)          All suites (auth + conflicts + backups, parallel)',
+		'  (none)          All integration suites, parallel',
 		'  auth            Auth specs only (Docker auto-managed)',
 		'  auth <name>     Single auth spec: health, csrf, cookie, apiKey,',
 		'                  session, oidc, rateLimit, proxy, xForwardedFor,',
 		'                  secretExposure, backupSecrets, pathTraversal',
-		'  conflicts       Conflict specs only',
-		'  conflicts <n>   Single conflict spec: detection, grouping,',
-		'                  align, override',
 		'  pcd             PCD specs only',
 		'  pcd <name>      Single PCD spec (recursive search by basename)',
 		'  pcd <a> <b>...  Scope by nested directory, e.g. pcd write regex',
