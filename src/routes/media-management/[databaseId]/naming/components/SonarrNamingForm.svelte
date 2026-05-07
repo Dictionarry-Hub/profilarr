@@ -190,7 +190,9 @@
 						Name<span class="text-red-500">*</span>
 					</div>
 				</div>
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Rename Episodes</div>
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Rename Episodes
+				</div>
 			</div>
 			<div class="flex items-center justify-between gap-4">
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
@@ -221,160 +223,162 @@
 			</div>
 		</div>
 
-		<div class="space-y-4" class:opacity-60={!formData.rename} data-onboarding="media-naming-formats">
-				<div class="space-y-1">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Episode Formats
-					</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Control how Sonarr names standard, daily, and anime episodes.
-					</p>
+		<div
+			class="space-y-4"
+			class:opacity-60={!formData.rename}
+			data-onboarding="media-naming-formats"
+		>
+			<div class="space-y-1">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Episode Formats
 				</div>
-				<div>
-					<TokenAutocomplete
-						label="Standard Episode Format"
-						name="standardEpisodeFormat"
-						value={formData.standardEpisodeFormat}
-						categories={sonarrTokenCategories}
-						disabled={!formData.rename}
-						bind:inputElement={standardEpisodeFormatInput}
-						on:input={(e) => updateField('standardEpisodeFormat', e.detail)}
-					/>
-					<NamingPreview format={formData.standardEpisodeFormat} resolver={resolveSonarrFormat} />
-				</div>
-
-				<div>
-					<TokenAutocomplete
-						label="Daily Episode Format"
-						name="dailyEpisodeFormat"
-						value={formData.dailyEpisodeFormat}
-						categories={sonarrTokenCategories}
-						disabled={!formData.rename}
-						bind:inputElement={dailyEpisodeFormatInput}
-						on:input={(e) => updateField('dailyEpisodeFormat', e.detail)}
-					/>
-					<NamingPreview format={formData.dailyEpisodeFormat} resolver={resolveSonarrFormat} />
-				</div>
-
-				<div>
-					<TokenAutocomplete
-						label="Anime Episode Format"
-						name="animeEpisodeFormat"
-						value={formData.animeEpisodeFormat}
-						categories={sonarrTokenCategories}
-						disabled={!formData.rename}
-						bind:inputElement={animeEpisodeFormatInput}
-						on:input={(e) => updateField('animeEpisodeFormat', e.detail)}
-					/>
-					<NamingPreview format={formData.animeEpisodeFormat} resolver={resolveSonarrFormat} />
-				</div>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Control how Sonarr names standard, daily, and anime episodes.
+				</p>
+			</div>
+			<div>
+				<TokenAutocomplete
+					label="Standard Episode Format"
+					name="standardEpisodeFormat"
+					value={formData.standardEpisodeFormat}
+					categories={sonarrTokenCategories}
+					disabled={!formData.rename}
+					bind:inputElement={standardEpisodeFormatInput}
+					on:input={(e) => updateField('standardEpisodeFormat', e.detail)}
+				/>
+				<NamingPreview format={formData.standardEpisodeFormat} resolver={resolveSonarrFormat} />
 			</div>
 
-			<div class="space-y-4" class:opacity-60={!formData.rename}>
-				<div class="space-y-1">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Folder Formats
-					</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Control how Sonarr names series and season folders.
-					</p>
-				</div>
-				<div>
-					<TokenAutocomplete
-						label="Series Folder Format"
-						name="seriesFolderFormat"
-						value={formData.seriesFolderFormat}
-						categories={sonarrTokenCategories}
-						disabled={!formData.rename}
-						bind:inputElement={seriesFolderFormatInput}
-						on:input={(e) => updateField('seriesFolderFormat', e.detail)}
-					/>
-					<NamingPreview format={formData.seriesFolderFormat} resolver={resolveSonarrFormat} />
-				</div>
-
-				<div>
-					<TokenAutocomplete
-						label="Season Folder Format"
-						name="seasonFolderFormat"
-						value={formData.seasonFolderFormat}
-						categories={sonarrTokenCategories}
-						disabled={!formData.rename}
-						bind:inputElement={seasonFolderFormatInput}
-						on:input={(e) => updateField('seasonFolderFormat', e.detail)}
-					/>
-					<NamingPreview format={formData.seasonFolderFormat} resolver={resolveSonarrFormat} />
-				</div>
+			<div>
+				<TokenAutocomplete
+					label="Daily Episode Format"
+					name="dailyEpisodeFormat"
+					value={formData.dailyEpisodeFormat}
+					categories={sonarrTokenCategories}
+					disabled={!formData.rename}
+					bind:inputElement={dailyEpisodeFormatInput}
+					on:input={(e) => updateField('dailyEpisodeFormat', e.detail)}
+				/>
+				<NamingPreview format={formData.dailyEpisodeFormat} resolver={resolveSonarrFormat} />
 			</div>
 
-			<div class="space-y-2" class:opacity-60={!formData.rename}>
-				<div class="space-y-1">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Multi-Episode Style
-					</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Choose how multi-episode files are represented in generated names.
-					</p>
+			<div>
+				<TokenAutocomplete
+					label="Anime Episode Format"
+					name="animeEpisodeFormat"
+					value={formData.animeEpisodeFormat}
+					categories={sonarrTokenCategories}
+					disabled={!formData.rename}
+					bind:inputElement={animeEpisodeFormatInput}
+					on:input={(e) => updateField('animeEpisodeFormat', e.detail)}
+				/>
+				<NamingPreview format={formData.animeEpisodeFormat} resolver={resolveSonarrFormat} />
+			</div>
+		</div>
+
+		<div class="space-y-4" class:opacity-60={!formData.rename}>
+			<div class="space-y-1">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Folder Formats</div>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Control how Sonarr names series and season folders.
+				</p>
+			</div>
+			<div>
+				<TokenAutocomplete
+					label="Series Folder Format"
+					name="seriesFolderFormat"
+					value={formData.seriesFolderFormat}
+					categories={sonarrTokenCategories}
+					disabled={!formData.rename}
+					bind:inputElement={seriesFolderFormatInput}
+					on:input={(e) => updateField('seriesFolderFormat', e.detail)}
+				/>
+				<NamingPreview format={formData.seriesFolderFormat} resolver={resolveSonarrFormat} />
+			</div>
+
+			<div>
+				<TokenAutocomplete
+					label="Season Folder Format"
+					name="seasonFolderFormat"
+					value={formData.seasonFolderFormat}
+					categories={sonarrTokenCategories}
+					disabled={!formData.rename}
+					bind:inputElement={seasonFolderFormatInput}
+					on:input={(e) => updateField('seasonFolderFormat', e.detail)}
+				/>
+				<NamingPreview format={formData.seasonFolderFormat} resolver={resolveSonarrFormat} />
+			</div>
+		</div>
+
+		<div class="space-y-2" class:opacity-60={!formData.rename}>
+			<div class="space-y-1">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Multi-Episode Style
+				</div>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Choose how multi-episode files are represented in generated names.
+				</p>
+			</div>
+			<DropdownSelect
+				value={formData.multiEpisodeStyle}
+				options={MULTI_EPISODE_STYLE_OPTIONS}
+				disabled={!formData.rename}
+				on:change={(e) => updateField('multiEpisodeStyle', e.detail as MultiEpisodeStyle)}
+			/>
+		</div>
+
+		<div
+			class="space-y-4"
+			class:opacity-60={!formData.rename}
+			data-onboarding="media-naming-character-replacement"
+		>
+			<div class="space-y-1">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Character Replacement
+				</div>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Control how illegal filesystem characters are handled in generated names.
+				</p>
+			</div>
+
+			<div class="space-y-2">
+				<Toggle
+					checked={formData.replaceIllegalCharacters}
+					label="Replace Illegal Characters"
+					ariaLabel="Replace Illegal Characters"
+					color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
+					disabled={!formData.rename}
+					on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
+				/>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Replace characters that are not allowed in file names.
+				</p>
+			</div>
+
+			<div class="space-y-2">
+				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Colon Replacement
 				</div>
 				<DropdownSelect
-					value={formData.multiEpisodeStyle}
-					options={MULTI_EPISODE_STYLE_OPTIONS}
-					disabled={!formData.rename}
-					on:change={(e) => updateField('multiEpisodeStyle', e.detail as MultiEpisodeStyle)}
+					value={formData.colonReplacementFormat}
+					options={SONARR_COLON_REPLACEMENT_OPTIONS}
+					disabled={!formData.rename || !formData.replaceIllegalCharacters}
+					on:change={(e) =>
+						updateField('colonReplacementFormat', e.detail as SonarrColonReplacementFormat)}
 				/>
 			</div>
 
-			<div
-				class="space-y-4"
-				class:opacity-60={!formData.rename}
-				data-onboarding="media-naming-character-replacement"
-			>
-				<div class="space-y-1">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Character Replacement
-					</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Control how illegal filesystem characters are handled in generated names.
-					</p>
-				</div>
-
-				<div class="space-y-2">
-					<Toggle
-						checked={formData.replaceIllegalCharacters}
-						label="Replace Illegal Characters"
-						ariaLabel="Replace Illegal Characters"
-						color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
-						disabled={!formData.rename}
-						on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
-					/>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Replace characters that are not allowed in file names.
-					</p>
-				</div>
-
-				<div class="space-y-2">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Colon Replacement
-					</div>
-					<DropdownSelect
-						value={formData.colonReplacementFormat}
-						options={SONARR_COLON_REPLACEMENT_OPTIONS}
-						disabled={!formData.rename || !formData.replaceIllegalCharacters}
-						on:change={(e) =>
-							updateField('colonReplacementFormat', e.detail as SonarrColonReplacementFormat)}
-					/>
-				</div>
-
-				{#if showCustomColonInput}
-					<FormInput
-						label="Custom Replacement"
-						name="customColonReplacementFormat"
-						value={formData.customColonReplacementFormat}
-						placeholder="Enter custom replacement character(s)"
-						disabled={!formData.rename || !formData.replaceIllegalCharacters}
-						on:input={(e) => updateField('customColonReplacementFormat', e.detail)}
-					/>
-				{/if}
-			</div>
+			{#if showCustomColonInput}
+				<FormInput
+					label="Custom Replacement"
+					name="customColonReplacementFormat"
+					value={formData.customColonReplacementFormat}
+					placeholder="Enter custom replacement character(s)"
+					disabled={!formData.rename || !formData.replaceIllegalCharacters}
+					on:input={(e) => updateField('customColonReplacementFormat', e.detail)}
+				/>
+			{/if}
+		</div>
 	</div>
 </div>
 

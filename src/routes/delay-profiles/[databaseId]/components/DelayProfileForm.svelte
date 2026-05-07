@@ -225,131 +225,131 @@
 		<input type="hidden" name="layer" value={selectedLayer} />
 
 		<div class="space-y-6">
-				<!-- Name -->
-				<div data-onboarding="delay-general-name">
-					<FormInput
-						label="Name"
-						name="name"
-						placeholder="e.g., Standard Delay"
-						required
-						value={formData.name}
-						on:input={(e) => updateField('name', e.detail)}
-					/>
-				</div>
+			<!-- Name -->
+			<div data-onboarding="delay-general-name">
+				<FormInput
+					label="Name"
+					name="name"
+					placeholder="e.g., Standard Delay"
+					required
+					value={formData.name}
+					on:input={(e) => updateField('name', e.detail)}
+				/>
+			</div>
 
-				<!-- Protocol Preference -->
-				<div class="space-y-2" data-onboarding="delay-general-protocol">
-					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-						Protocol Preference
-					</h3>
-					<DropdownSelect
-						value={formData.preferredProtocol}
-						options={protocolOptions}
-						fullWidth
-						on:change={(e) => updateField('preferredProtocol', e.detail as PreferredProtocol)}
-					/>
-					{#if protocolDescription}
-						<p class="text-xs text-neutral-500 dark:text-neutral-400">
-							{protocolDescription}
-						</p>
-					{/if}
-				</div>
-
-				<!-- Delays -->
-				<div data-onboarding="delay-general-delays">
-					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Delays</h3>
-					<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-						Time to wait before downloading from each source. Set to 0 for no delay.
+			<!-- Protocol Preference -->
+			<div class="space-y-2" data-onboarding="delay-general-protocol">
+				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+					Protocol Preference
+				</h3>
+				<DropdownSelect
+					value={formData.preferredProtocol}
+					options={protocolOptions}
+					fullWidth
+					on:change={(e) => updateField('preferredProtocol', e.detail as PreferredProtocol)}
+				/>
+				{#if protocolDescription}
+					<p class="text-xs text-neutral-500 dark:text-neutral-400">
+						{protocolDescription}
 					</p>
-					<div class="mt-3 grid gap-4 sm:grid-cols-2">
-						<div>
-							<label
-								for="usenet-delay"
-								class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-							>
-								Usenet Delay (minutes)
-							</label>
-							<div class="mt-1">
-								<NumberInput
-									name="usenet-delay"
-									id="usenet-delay"
-									value={formData.usenetDelay}
-									onchange={(v) => updateField('usenetDelay', v)}
-									min={0}
-									font="mono"
-									disabled={!usenetEnabled}
-								/>
-							</div>
-						</div>
+				{/if}
+			</div>
 
-						<div>
-							<label
-								for="torrent-delay"
-								class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-							>
-								Torrent Delay (minutes)
-							</label>
-							<div class="mt-1">
-								<NumberInput
-									name="torrent-delay"
-									id="torrent-delay"
-									value={formData.torrentDelay}
-									onchange={(v) => updateField('torrentDelay', v)}
-									min={0}
-									font="mono"
-									disabled={!torrentEnabled}
-								/>
-							</div>
+			<!-- Delays -->
+			<div data-onboarding="delay-general-delays">
+				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Delays</h3>
+				<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+					Time to wait before downloading from each source. Set to 0 for no delay.
+				</p>
+				<div class="mt-3 grid gap-4 sm:grid-cols-2">
+					<div>
+						<label
+							for="usenet-delay"
+							class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+						>
+							Usenet Delay (minutes)
+						</label>
+						<div class="mt-1">
+							<NumberInput
+								name="usenet-delay"
+								id="usenet-delay"
+								value={formData.usenetDelay}
+								onchange={(v) => updateField('usenetDelay', v)}
+								min={0}
+								font="mono"
+								disabled={!usenetEnabled}
+							/>
+						</div>
+					</div>
+
+					<div>
+						<label
+							for="torrent-delay"
+							class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+						>
+							Torrent Delay (minutes)
+						</label>
+						<div class="mt-1">
+							<NumberInput
+								name="torrent-delay"
+								id="torrent-delay"
+								value={formData.torrentDelay}
+								onchange={(v) => updateField('torrentDelay', v)}
+								min={0}
+								font="mono"
+								disabled={!torrentEnabled}
+							/>
 						</div>
 					</div>
 				</div>
+			</div>
 
-				<!-- Bypass Conditions -->
-				<div data-onboarding="delay-general-bypass">
-					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-						Bypass Conditions
-					</h3>
-					<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-						Skip the delay when these conditions are met.
-					</p>
-					<div class="mt-3 space-y-3">
-						<div>
+			<!-- Bypass Conditions -->
+			<div data-onboarding="delay-general-bypass">
+				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+					Bypass Conditions
+				</h3>
+				<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+					Skip the delay when these conditions are met.
+				</p>
+				<div class="mt-3 space-y-3">
+					<div>
+						<Toggle
+							label="Bypass if Highest Quality"
+							checked={formData.bypassIfHighestQuality}
+							fullWidth
+							on:change={() =>
+								updateField('bypassIfHighestQuality', !formData.bypassIfHighestQuality)}
+						/>
+						<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
+							Skip delay when release is already the highest quality in profile
+						</p>
+					</div>
+
+					<div>
+						<div class="grid grid-cols-1 items-center gap-3 sm:grid-cols-2">
 							<Toggle
-								label="Bypass if Highest Quality"
-								checked={formData.bypassIfHighestQuality}
+								label="Bypass if Above Custom Format Score"
+								checked={formData.bypassIfAboveCfScore}
 								fullWidth
 								on:change={() =>
-									updateField('bypassIfHighestQuality', !formData.bypassIfHighestQuality)}
+									updateField('bypassIfAboveCfScore', !formData.bypassIfAboveCfScore)}
 							/>
-							<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
-								Skip delay when release is already the highest quality in profile
-							</p>
+							<NumberInput
+								name="min-cf-score"
+								id="min-cf-score"
+								value={formData.minimumCfScore}
+								onchange={(v) => updateField('minimumCfScore', v)}
+								disabled={!formData.bypassIfAboveCfScore}
+								font="mono"
+							/>
 						</div>
-
-						<div>
-							<div class="grid grid-cols-1 items-center gap-3 sm:grid-cols-2">
-								<Toggle
-									label="Bypass if Above Custom Format Score"
-									checked={formData.bypassIfAboveCfScore}
-									fullWidth
-									on:change={() =>
-										updateField('bypassIfAboveCfScore', !formData.bypassIfAboveCfScore)}
-								/>
-								<NumberInput
-									name="min-cf-score"
-									id="min-cf-score"
-									value={formData.minimumCfScore}
-									onchange={(v) => updateField('minimumCfScore', v)}
-									disabled={!formData.bypassIfAboveCfScore}
-									font="mono"
-								/>
-							</div>
-							<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
-								Skip delay when release exceeds minimum score
-							</p>
-						</div>
+						<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
+							Skip delay when release exceeds minimum score
+						</p>
 					</div>
 				</div>
+			</div>
 		</div>
 	</form>
 
