@@ -27,6 +27,20 @@ export interface QualityProfileGeneralFormInput {
 	layer?: OpOrigin;
 }
 
+export interface QualityProfileScoreInput {
+	customFormatName: string;
+	arrType?: 'all' | 'radarr' | 'sonarr';
+	score: number | null;
+}
+
+export interface QualityProfileScoringFormInput {
+	minimumScore?: number;
+	upgradeUntilScore?: number;
+	upgradeScoreIncrement?: number;
+	customFormatScores?: QualityProfileScoreInput[];
+	layer?: OpOrigin;
+}
+
 export interface DelayProfileFormInput {
 	name: string;
 	preferredProtocol?: 'prefer_usenet' | 'prefer_torrent' | 'only_usenet' | 'only_torrent';
@@ -131,9 +145,11 @@ export const write = {
 	qualityProfile: {
 		create: createQualityProfile,
 		updateGeneral: updateQualityProfileGeneral,
+		updateScoring: updateQualityProfileScoring,
 		remove: removeQualityProfile,
 		submitCreate: submitCreateQualityProfile,
 		submitUpdateGeneral: submitUpdateQualityProfileGeneral,
+		submitUpdateScoring: submitUpdateQualityProfileScoring,
 		submitRemove: submitRemoveQualityProfile
 	},
 	mediaSettings: {
@@ -291,6 +307,17 @@ export async function removeQualityProfile(
 	return assertSuccessfulAction(await submitRemoveQualityProfile(ctx, id, layer), 'delete quality profile');
 }
 
+export async function updateQualityProfileScoring(
+	ctx: PcdTestContext,
+	id: number,
+	input: QualityProfileScoringFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateQualityProfileScoring(ctx, id, input),
+		'update quality profile scoring'
+	);
+}
+
 export async function submitCreateQualityProfile(
 	ctx: PcdTestContext,
 	input: QualityProfileGeneralFormInput
@@ -308,6 +335,18 @@ export async function submitUpdateQualityProfileGeneral(
 	return ctx.client.postForm(
 		`/quality-profiles/${ctx.dbId}/${id}/general?/update`,
 		qualityProfileGeneralFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitUpdateQualityProfileScoring(
+	ctx: PcdTestContext,
+	id: number,
+	input: QualityProfileScoringFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/quality-profiles/${ctx.dbId}/${id}/scoring?/update`,
+		qualityProfileScoringFields(input),
 		{ headers: { Origin: ctx.origin } }
 	);
 }
@@ -463,6 +502,22 @@ function qualityProfileGeneralFields(input: QualityProfileGeneralFormInput): Rec
 		description: input.description ?? '',
 		tags: JSON.stringify(input.tags ?? []),
 		language: input.language ?? '',
+		layer: input.layer ?? 'user'
+	};
+}
+
+function qualityProfileScoringFields(input: QualityProfileScoringFormInput): Record<string, string> {
+	return {
+		minimumScore: String(input.minimumScore ?? 0),
+		upgradeUntilScore: String(input.upgradeUntilScore ?? 0),
+		upgradeScoreIncrement: String(input.upgradeScoreIncrement ?? 1),
+		customFormatScores: JSON.stringify(
+			(input.customFormatScores ?? []).map((score) => ({
+				customFormatName: score.customFormatName,
+				arrType: score.arrType ?? 'all',
+				score: score.score
+			}))
+		),
 		layer: input.layer ?? 'user'
 	};
 }

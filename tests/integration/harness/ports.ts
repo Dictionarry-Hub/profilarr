@@ -117,7 +117,8 @@ export const PORTS = {
 		conflictsCustomFormatsGeneral: 7707,
 		conflictsCustomFormatConditions: 7708,
 		conflictsCustomFormatTests: 7709,
-		conflictsQualityProfilesGeneral: 7710
+		conflictsQualityProfilesGeneral: 7710,
+		conflictsQualityProfilesScoring: 7711
 	}
 } as const;
 

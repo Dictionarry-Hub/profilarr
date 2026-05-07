@@ -114,6 +114,14 @@ export const base = {
 		description?: string | null;
 		tags?: string[];
 		language?: string | null;
+		minimumScore?: number;
+		upgradeUntilScore?: number;
+		upgradeScoreIncrement?: number;
+		customFormatScores?: Array<{
+			customFormatName: string;
+			arrType?: 'all' | 'radarr' | 'sonarr';
+			score: number;
+		}>;
 	}): SeedOperation {
 		const description = 'description' in input ? (input.description ?? null) : '';
 		const tags = Array.from(new Set((input.tags ?? []).map((tag) => tag.trim()).filter(Boolean)));
@@ -133,6 +141,12 @@ export const base = {
 					)}, ${sqlValue(input.language)}, 'simple');`
 				]
 			: [];
+		const customFormatScoreSql = (input.customFormatScores ?? []).map((score) =>
+			`INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
+			 VALUES (${sqlValue(input.name)}, ${sqlValue(score.customFormatName)}, ${sqlValue(
+					score.arrType ?? 'all'
+				)}, ${sqlNumber(score.score)});`
+		);
 
 		return {
 			sql: [
@@ -148,12 +162,13 @@ export const base = {
 				       ${sqlValue(input.name)},
 				       ${sqlValue(description)},
 				       1,
-				       0,
-				       0,
-				       1
+				       ${sqlNumber(input.minimumScore ?? 0)},
+				       ${sqlNumber(input.upgradeUntilScore ?? 0)},
+				       ${sqlNumber(input.upgradeScoreIncrement ?? 1)}
 			      );`,
 				...tagSql,
-				...languageSql
+				...languageSql,
+				...customFormatScoreSql
 			].join('\n')
 		};
 	},
