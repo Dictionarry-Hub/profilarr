@@ -40,6 +40,11 @@
 		{ key: 'state', header: 'State', width: 'w-32' }
 	];
 
+	const arrTypeLabels: Record<string, string> = {
+		radarr: 'Radarr',
+		sonarr: 'Sonarr'
+	};
+
 	const emptyDriftEntities: DriftDisplayEntity[] = [];
 
 	let saving = false;
@@ -82,6 +87,7 @@
 	$: updateDirty('cron', cron);
 	$: nextRunTime = nextRunAt ? new Date(nextRunAt).getTime() : null;
 	$: timeUntilNext = nextRunTime ? nextRunTime - now : null;
+	$: driftArrLabel = `${arrTypeLabels[data.instance.type] ?? data.instance.type} - ${data.instance.name}`;
 
 	$: if (form && form !== lastFormId) {
 		lastFormId = form;
@@ -291,7 +297,7 @@
 
 						<svelte:fragment slot="expanded" let:row>
 							<div class="px-4 py-3 md:px-6 md:py-4">
-								<DriftFieldDiffTable changes={row.changes} />
+								<DriftFieldDiffTable changes={row.changes} arrLabel={driftArrLabel} />
 							</div>
 						</svelte:fragment>
 					</ExpandableTable>
