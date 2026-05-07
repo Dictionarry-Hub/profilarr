@@ -119,7 +119,8 @@ export const PORTS = {
 		conflictsCustomFormatTests: 7709,
 		conflictsQualityProfilesGeneral: 7710,
 		conflictsQualityProfilesScoring: 7711,
-		conflictsQualityProfilesQualities: 7712
+		conflictsQualityProfilesQualities: 7712,
+		conflictsQualityProfilesFull: 7713
 	}
 } as const;
 
