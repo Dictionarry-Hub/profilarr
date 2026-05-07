@@ -152,8 +152,8 @@
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
 	<div slot="left">
-		<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">{title}</h1>
-		<p class="text-sm text-neutral-500 dark:text-neutral-400">{description}</p>
+		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
+		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
 	</div>
 	<div slot="right" class="flex items-center gap-2">
 		<Button
@@ -183,43 +183,46 @@
 
 <div class="mt-6 md:px-4">
 	<div class="space-y-6">
-		<!-- Basic Info -->
-		<div class="space-y-4">
-			<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">Basic Info</h2>
+		<div class="space-y-6">
 			<FormInput
 				label="Name"
 				name="name"
 				required
 				value={formData.name}
 				placeholder="e.g., default"
+				description="The name of this Sonarr naming configuration."
 				on:input={(e) => updateField('name', e.detail)}
 			/>
 
 			<div class="space-y-2">
+				<div class="space-y-1">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Rename Episodes
+					</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Rename episode files to match the naming format.
+					</p>
+				</div>
 				<Toggle
 					checked={formData.rename}
-					label="Rename Episodes"
+					label={formData.rename ? 'Enabled' : 'Disabled'}
 					ariaLabel="Rename Episodes"
 					color={formData.rename ? 'green' : 'neutral'}
 					on:change={(e) => updateField('rename', e.detail)}
 				/>
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
-					Rename episode files to match the naming format
-				</p>
 			</div>
 		</div>
 
 		{#if formData.rename}
-			<hr class="border-neutral-200 dark:border-neutral-700" />
-
-			<!-- Episode Formats -->
-			<div class="space-y-4">
-				<h2
-					data-onboarding="media-naming-formats"
-					class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
-				>
-					Episode Formats
-				</h2>
+			<div class="space-y-4" data-onboarding="media-naming-formats">
+				<div class="space-y-1">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Episode Formats
+					</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Control how Sonarr names standard, daily, and anime episodes.
+					</p>
+				</div>
 				<div>
 					<TokenAutocomplete
 						label="Standard Episode Format"
@@ -257,13 +260,15 @@
 				</div>
 			</div>
 
-			<hr class="border-neutral-200 dark:border-neutral-700" />
-
-			<!-- Folder Formats -->
 			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-					Folder Formats
-				</h2>
+				<div class="space-y-1">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Folder Formats
+					</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Control how Sonarr names series and season folders.
+					</p>
+				</div>
 				<div>
 					<TokenAutocomplete
 						label="Series Folder Format"
@@ -289,13 +294,15 @@
 				</div>
 			</div>
 
-			<hr class="border-neutral-200 dark:border-neutral-700" />
-
-			<!-- Multi-Episode Style -->
-			<div class="space-y-4">
-				<h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-					Multi-Episode Style
-				</h2>
+			<div class="space-y-2">
+				<div class="space-y-1">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Multi-Episode Style
+					</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Choose how multi-episode files are represented in generated names.
+					</p>
+				</div>
 				<DropdownSelect
 					value={formData.multiEpisodeStyle}
 					options={MULTI_EPISODE_STYLE_OPTIONS}
@@ -303,16 +310,15 @@
 				/>
 			</div>
 
-			<hr class="border-neutral-200 dark:border-neutral-700" />
-
-			<!-- Character Replacement -->
-			<div class="space-y-4">
-				<h2
-					data-onboarding="media-naming-character-replacement"
-					class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
-				>
-					Character Replacement
-				</h2>
+			<div class="space-y-4" data-onboarding="media-naming-character-replacement">
+				<div class="space-y-1">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Character Replacement
+					</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Control how illegal filesystem characters are handled in generated names.
+					</p>
+				</div>
 
 				<div class="space-y-2">
 					<Toggle
@@ -322,8 +328,8 @@
 						color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
 						on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
 					/>
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
-						Replace characters that are not allowed in file names
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						Replace characters that are not allowed in file names.
 					</p>
 				</div>
 
