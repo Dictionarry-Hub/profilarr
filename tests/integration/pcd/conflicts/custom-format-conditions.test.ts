@@ -470,7 +470,10 @@ test('condition update applies when referenced regex changes upstream', async ()
 			})
 		]);
 
-		seedUpstream(ctx, upstreamUpdateRegexPattern(REGEX_DEP, REGEX_DEP_PATTERN_V1, REGEX_DEP_PATTERN_V2));
+		seedUpstream(
+			ctx,
+			upstreamUpdateRegexPattern(REGEX_DEP, REGEX_DEP_PATTERN_V1, REGEX_DEP_PATTERN_V2)
+		);
 		await compilePcd(ctx);
 
 		const op = firstOpForCondition(opsSince(ctx, checkpoint), REGEX_DEP_CONDITION);
@@ -828,7 +831,9 @@ function opsSince(ctx: PcdTestContext, checkpoint: number): OpRow[] {
 }
 
 function firstOpForCondition(ops: OpRow[], conditionName: string): OpRow {
-	const op = ops.find((candidate) => changedFields(candidate).includes(`condition:${conditionName}`));
+	const op = ops.find((candidate) =>
+		changedFields(candidate).includes(`condition:${conditionName}`)
+	);
 	assertExists(op, `Expected a user op for condition ${conditionName}`);
 	return op;
 }
@@ -1318,11 +1323,13 @@ function upstreamUpdatePattern(
 		        AND condition_name = ${sqlValue(conditionName)}
 		        AND regular_expression_name = ${sqlValue(from)};`,
 		metadata: JSON.stringify(conditionMetadata(formatName, conditionName)),
-		desiredState: JSON.stringify(conditionUpdateDesiredState(conditionName, {
-			base: { type: 'release_title', arrType: 'all', negate: false, required: false },
-			from: { patterns: [{ name: from, pattern: REGEX_A_PATTERN }] },
-			to: { patterns: [{ name: to, pattern: REGEX_C_PATTERN }] }
-		}))
+		desiredState: JSON.stringify(
+			conditionUpdateDesiredState(conditionName, {
+				base: { type: 'release_title', arrType: 'all', negate: false, required: false },
+				from: { patterns: [{ name: from, pattern: REGEX_A_PATTERN }] },
+				to: { patterns: [{ name: to, pattern: REGEX_C_PATTERN }] }
+			})
+		)
 	};
 }
 
@@ -1359,11 +1366,13 @@ function upstreamUpdateLanguage(
 		        AND language_name = ${sqlValue(from)}
 		        AND except_language = 0;`,
 		metadata: JSON.stringify(conditionMetadata(formatName, conditionName)),
-		desiredState: JSON.stringify(conditionUpdateDesiredState(conditionName, {
-			base: { type: 'language', arrType: 'all', negate: false, required: false },
-			from: { languages: [{ name: from, except: false }] },
-			to: { languages: [{ name: to, except: false }] }
-		}))
+		desiredState: JSON.stringify(
+			conditionUpdateDesiredState(conditionName, {
+				base: { type: 'language', arrType: 'all', negate: false, required: false },
+				from: { languages: [{ name: from, except: false }] },
+				to: { languages: [{ name: to, except: false }] }
+			})
+		)
 	};
 }
 
@@ -1381,11 +1390,13 @@ function upstreamUpdateSize(
 		        AND min_bytes = ${from}
 		        AND max_bytes IS NULL;`,
 		metadata: JSON.stringify(conditionMetadata(formatName, conditionName)),
-		desiredState: JSON.stringify(conditionUpdateDesiredState(conditionName, {
-			base: { type: 'size', arrType: 'all', negate: false, required: false },
-			from: { size: { minBytes: from, maxBytes: null } },
-			to: { size: { minBytes: to, maxBytes: null } }
-		}))
+		desiredState: JSON.stringify(
+			conditionUpdateDesiredState(conditionName, {
+				base: { type: 'size', arrType: 'all', negate: false, required: false },
+				from: { size: { minBytes: from, maxBytes: null } },
+				to: { size: { minBytes: to, maxBytes: null } }
+			})
+		)
 	};
 }
 
@@ -1403,11 +1414,13 @@ function upstreamUpdateYear(
 		        AND min_year = ${from}
 		        AND max_year IS NULL;`,
 		metadata: JSON.stringify(conditionMetadata(formatName, conditionName)),
-		desiredState: JSON.stringify(conditionUpdateDesiredState(conditionName, {
-			base: { type: 'year', arrType: 'all', negate: false, required: false },
-			from: { years: { minYear: from, maxYear: null } },
-			to: { years: { minYear: to, maxYear: null } }
-		}))
+		desiredState: JSON.stringify(
+			conditionUpdateDesiredState(conditionName, {
+				base: { type: 'year', arrType: 'all', negate: false, required: false },
+				from: { years: { minYear: from, maxYear: null } },
+				to: { years: { minYear: to, maxYear: null } }
+			})
+		)
 	};
 }
 

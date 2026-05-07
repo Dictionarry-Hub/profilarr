@@ -101,9 +101,7 @@ test('matching upstream minimum score auto-aligns user op', async () => {
 		);
 		await compilePcd(ctx);
 
-		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
-			'minimum_custom_format_score'
-		]);
+		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['minimum_custom_format_score']);
 		assertEquals(op.state, 'dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
@@ -155,9 +153,7 @@ test('minimum score applies after upstream description change', async () => {
 		);
 		await compilePcd(ctx);
 
-		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
-			'minimum_custom_format_score'
-		]);
+		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['minimum_custom_format_score']);
 		assertEquals(op.state, 'published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
@@ -296,20 +292,19 @@ test('matching upstream custom format score auto-aligns user op', async () => {
 			base.customFormat({ name: CUSTOM_FORMAT_NAME }),
 			base.qualityProfile({
 				name: PROFILE_NAME,
-				customFormatScores: [
-					{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }
-				]
+				customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }]
 			})
 		]);
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 21 }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 21 }]
 		});
 
-		seedUpstream(ctx, upstreamUpdateCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 10, 21));
+		seedUpstream(
+			ctx,
+			upstreamUpdateCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 10, 21)
+		);
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
@@ -353,9 +348,7 @@ test('matching upstream add custom format score auto-aligns user op', async () =
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 17 }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 17 }]
 		});
 
 		seedUpstream(ctx, upstreamAddCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 17));
@@ -397,20 +390,19 @@ test('matching upstream remove custom format score auto-aligns user op', async (
 			base.customFormat({ name: CUSTOM_FORMAT_NAME }),
 			base.qualityProfile({
 				name: PROFILE_NAME,
-				customFormatScores: [
-					{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }
-				]
+				customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }]
 			})
 		]);
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: null }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: null }]
 		});
 
-		seedUpstream(ctx, upstreamRemoveCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 10));
+		seedUpstream(
+			ctx,
+			upstreamRemoveCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 10)
+		);
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
@@ -459,9 +451,7 @@ test('minimum score update after upstream rename resolves by strategy', async ()
 		seedUpstream(ctx, upstreamRename(PROFILE_NAME, 'Scoring Profile Upstream'));
 		await compilePcd(ctx);
 
-		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
-			'minimum_custom_format_score'
-		]);
+		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['minimum_custom_format_score']);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfileScoring(ctx, 'Scoring Profile Upstream');
@@ -571,9 +561,7 @@ test('minimum score conflict resolves by strategy', async () => {
 		);
 		await compilePcd(ctx);
 
-		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
-			'minimum_custom_format_score'
-		]);
+		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['minimum_custom_format_score']);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
@@ -702,20 +690,19 @@ test('custom format score conflict resolves by strategy', async () => {
 			base.customFormat({ name: CUSTOM_FORMAT_NAME }),
 			base.qualityProfile({
 				name: PROFILE_NAME,
-				customFormatScores: [
-					{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }
-				]
+				customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }]
 			})
 		]);
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 20 }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 20 }]
 		});
 
-		seedUpstream(ctx, upstreamUpdateCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 10, 30));
+		seedUpstream(
+			ctx,
+			upstreamUpdateCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 10, 30)
+		);
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
@@ -767,9 +754,7 @@ test('different custom format score rows apply without conflict', async () => {
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 11 }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 11 }]
 		});
 
 		seedUpstream(
@@ -819,12 +804,13 @@ test('add custom format score conflict resolves by strategy', async () => {
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 50 }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 50 }]
 		});
 
-		seedUpstream(ctx, upstreamAddCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 100));
+		seedUpstream(
+			ctx,
+			upstreamAddCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 100)
+		);
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
@@ -864,20 +850,19 @@ test('remove custom format score conflicts with upstream update', async () => {
 			base.customFormat({ name: CUSTOM_FORMAT_NAME }),
 			base.qualityProfile({
 				name: PROFILE_NAME,
-				customFormatScores: [
-					{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }
-				]
+				customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }]
 			})
 		]);
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: null }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: null }]
 		});
 
-		seedUpstream(ctx, upstreamUpdateCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 10, 30));
+		seedUpstream(
+			ctx,
+			upstreamUpdateCustomFormatScore(PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr', 10, 30)
+		);
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
@@ -921,18 +906,14 @@ test('custom format score survives when same-save minimum score conflicts', asyn
 			base.customFormat({ name: CUSTOM_FORMAT_NAME }),
 			base.qualityProfile({
 				name: PROFILE_NAME,
-				customFormatScores: [
-					{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }
-				]
+				customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }]
 			})
 		]);
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
 			minimumScore: 10,
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 20 }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 20 }]
 		});
 
 		seedUpstream(
@@ -985,17 +966,13 @@ test('custom format score dependency rename resolves by strategy', async () => {
 			base.customFormat({ name: CUSTOM_FORMAT_NAME }),
 			base.qualityProfile({
 				name: PROFILE_NAME,
-				customFormatScores: [
-					{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }
-				]
+				customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }]
 			})
 		]);
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 20 }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 20 }]
 		});
 
 		seedUpstream(ctx, upstreamCustomFormatRename(CUSTOM_FORMAT_NAME, 'Scoring CF Renamed'));
@@ -1040,17 +1017,13 @@ test('custom format score dependency delete resolves by strategy', async () => {
 			base.customFormat({ name: CUSTOM_FORMAT_NAME }),
 			base.qualityProfile({
 				name: PROFILE_NAME,
-				customFormatScores: [
-					{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }
-				]
+				customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 10 }]
 			})
 		]);
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.qualityProfile.updateScoring(ctx, 1, {
-			customFormatScores: [
-				{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 20 }
-			]
+			customFormatScores: [{ customFormatName: CUSTOM_FORMAT_NAME, arrType: 'radarr', score: 20 }]
 		});
 
 		seedUpstream(ctx, upstreamCustomFormatDelete(CUSTOM_FORMAT_NAME));
@@ -1214,10 +1187,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 	}
 }
 
-function assertQualityProfileScoring(
-	ctx: PcdTestContext,
-	name: string
-): QualityProfileScoringRow {
+function assertQualityProfileScoring(ctx: PcdTestContext, name: string): QualityProfileScoringRow {
 	const row = compiledQualityProfileScoring(ctx).find((profile) => profile.name === name);
 	assertExists(row, `Expected quality profile ${name}`);
 	return row;

@@ -241,9 +241,7 @@ test('real-world multi-surface conflict resolves by strategy', async () => {
 					...PRERELEASE_MEMBERS
 				].map((name) => ({ name, arrType: 'radarr' as const }))
 			}),
-			...[AMZN, MUBI, SHO, DRPO, H265, X265, NF, ATVP].map((name) =>
-				base.customFormat({ name })
-			),
+			...[AMZN, MUBI, SHO, DRPO, H265, X265, NF, ATVP].map((name) => base.customFormat({ name })),
 			base.qualityProfile({
 				name: PROFILE_NAME,
 				description: baseDescription,
@@ -583,8 +581,7 @@ function compiledGroupMembers(
 	return compiledQualityProfileState(ctx)
 		.groupMembers.filter(
 			(member) =>
-				member.quality_profile_name === profileName &&
-				member.quality_group_name === groupName
+				member.quality_profile_name === profileName && member.quality_group_name === groupName
 		)
 		.sort((a, b) => a.position - b.position)
 		.map((member) => member.quality_name);
@@ -905,9 +902,7 @@ function qualityProfileQualityItemsSql(
 ): string {
 	const qualityNames = Array.from(
 		new Set(
-			items.flatMap((item) =>
-				item.type === 'quality' ? [item.name] : memberNames(item.members)
-			)
+			items.flatMap((item) => (item.type === 'quality' ? [item.name] : memberNames(item.members)))
 		)
 	);
 	const qualitySql = qualityNames
@@ -918,8 +913,8 @@ function qualityProfileQualityItemsSql(
 			return `INSERT INTO quality_profile_qualities
 			        (quality_profile_name, quality_name, quality_group_name, position, enabled, upgrade_until)
 			        VALUES (${sqlValue(profileName)}, ${sqlValue(item.name)}, NULL, ${item.position}, ${
-							item.enabled ? 1 : 0
-						}, ${item.upgradeUntil ? 1 : 0});`;
+								item.enabled ? 1 : 0
+							}, ${item.upgradeUntil ? 1 : 0});`;
 		}
 
 		const members = Array.from(new Set(memberNames(item.members)));
@@ -983,9 +978,7 @@ function qualityItemKey(item: QualityProfileQualityItemInput): string {
 	return `${item.type}:${item.name}`;
 }
 
-function memberNames(
-	members: QualityProfileQualityItemInput['members'] | undefined
-): string[] {
+function memberNames(members: QualityProfileQualityItemInput['members'] | undefined): string[] {
 	return (members ?? []).map((member) => member.name);
 }
 

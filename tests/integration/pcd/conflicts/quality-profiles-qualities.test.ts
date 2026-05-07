@@ -827,9 +827,7 @@ test('quality group member reorder conflicts with upstream member add', async ()
 test('quality group member add conflicts with upstream member reorder', async () => {
 	for (const strategy of STRATEGIES) {
 		const baseItems = [qualityGroup(GROUP_NAME, 0, [QUALITY_A, QUALITY_B, QUALITY_C])];
-		const localItems = [
-			qualityGroup(GROUP_NAME, 0, [QUALITY_A, QUALITY_B, QUALITY_C, QUALITY_D])
-		];
+		const localItems = [qualityGroup(GROUP_NAME, 0, [QUALITY_A, QUALITY_B, QUALITY_C, QUALITY_D])];
 		const upstreamItems = [qualityGroup(GROUP_NAME, 0, [QUALITY_C, QUALITY_A, QUALITY_B])];
 		const ctx = await seededScenario(strategy, 'quality-group-member-add-upstream-reorder', [
 			base.qualities({ entries: [{ name: QUALITY_D, arrType: 'radarr' }] }),
@@ -883,7 +881,11 @@ test('quality group member add conflicts with upstream member reorder', async ()
 test('quality group collapse applies after upstream member reorder', async () => {
 	for (const strategy of STRATEGIES) {
 		const baseItems = [qualityGroup(GROUP_NAME, 0, [QUALITY_A, QUALITY_B, QUALITY_C])];
-		const localItems = [qualityItem(QUALITY_A, 0), qualityItem(QUALITY_B, 1), qualityItem(QUALITY_C, 2)];
+		const localItems = [
+			qualityItem(QUALITY_A, 0),
+			qualityItem(QUALITY_B, 1),
+			qualityItem(QUALITY_C, 2)
+		];
 		const upstreamItems = [qualityGroup(GROUP_NAME, 0, [QUALITY_C, QUALITY_A, QUALITY_B])];
 		const ctx = await seededScenario(strategy, 'quality-group-collapse-upstream-member-reorder', [
 			base.qualityProfile({
@@ -1120,8 +1122,7 @@ function assertQualityItem(
 	name: string
 ): QualityItemRow {
 	const row = compiledQualityProfileState(ctx).qualityItems.find(
-		(item) =>
-			item.quality_profile_name === profileName && item.type === type && item.name === name
+		(item) => item.quality_profile_name === profileName && item.type === type && item.name === name
 	);
 	assertExists(row, `Expected quality item ${type}:${name}`);
 	return row;
@@ -1150,8 +1151,7 @@ function compiledGroupMembers(
 	return compiledQualityProfileState(ctx)
 		.groupMembers.filter(
 			(member) =>
-				member.quality_profile_name === profileName &&
-				member.quality_group_name === groupName
+				member.quality_profile_name === profileName && member.quality_group_name === groupName
 		)
 		.sort((a, b) => a.position - b.position)
 		.map((member) => member.quality_name);
@@ -1165,8 +1165,7 @@ function compiledGroupMemberRows(
 	return compiledQualityProfileState(ctx)
 		.groupMembers.filter(
 			(member) =>
-				member.quality_profile_name === profileName &&
-				member.quality_group_name === groupName
+				member.quality_profile_name === profileName && member.quality_group_name === groupName
 		)
 		.sort((a, b) => a.quality_name.localeCompare(b.quality_name))
 		.map((member) => ({ quality_name: member.quality_name, position: member.position }));
@@ -1429,9 +1428,7 @@ function qualityItemKey(item: QualityProfileQualityItemInput): string {
 	return `${item.type}:${item.name}`;
 }
 
-function memberNames(
-	members: QualityProfileQualityItemInput['members'] | undefined
-): string[] {
+function memberNames(members: QualityProfileQualityItemInput['members'] | undefined): string[] {
 	return (members ?? []).map((member) => member.name);
 }
 

@@ -301,7 +301,10 @@ export async function createQualityProfile(
 	ctx: PcdTestContext,
 	input: QualityProfileGeneralFormInput
 ): Promise<Response> {
-	return assertSuccessfulAction(await submitCreateQualityProfile(ctx, input), 'create quality profile');
+	return assertSuccessfulAction(
+		await submitCreateQualityProfile(ctx, input),
+		'create quality profile'
+	);
 }
 
 export async function updateQualityProfileGeneral(
@@ -320,7 +323,10 @@ export async function removeQualityProfile(
 	id: number,
 	layer: OpOrigin = 'user'
 ): Promise<Response> {
-	return assertSuccessfulAction(await submitRemoveQualityProfile(ctx, id, layer), 'delete quality profile');
+	return assertSuccessfulAction(
+		await submitRemoveQualityProfile(ctx, id, layer),
+		'delete quality profile'
+	);
 }
 
 export async function updateQualityProfileScoring(
@@ -349,9 +355,13 @@ export async function submitCreateQualityProfile(
 	ctx: PcdTestContext,
 	input: QualityProfileGeneralFormInput
 ): Promise<Response> {
-	return ctx.client.postForm(`/quality-profiles/${ctx.dbId}/new`, qualityProfileGeneralFields(input), {
-		headers: { Origin: ctx.origin }
-	});
+	return ctx.client.postForm(
+		`/quality-profiles/${ctx.dbId}/new`,
+		qualityProfileGeneralFields(input),
+		{
+			headers: { Origin: ctx.origin }
+		}
+	);
 }
 
 export async function submitUpdateQualityProfileGeneral(
@@ -535,7 +545,9 @@ function customFormatConditionsFields(
 	};
 }
 
-function qualityProfileGeneralFields(input: QualityProfileGeneralFormInput): Record<string, string> {
+function qualityProfileGeneralFields(
+	input: QualityProfileGeneralFormInput
+): Record<string, string> {
 	return {
 		name: input.name,
 		description: input.description ?? '',
@@ -545,7 +557,9 @@ function qualityProfileGeneralFields(input: QualityProfileGeneralFormInput): Rec
 	};
 }
 
-function qualityProfileScoringFields(input: QualityProfileScoringFormInput): Record<string, string> {
+function qualityProfileScoringFields(
+	input: QualityProfileScoringFormInput
+): Record<string, string> {
 	return {
 		minimumScore: String(input.minimumScore ?? 0),
 		upgradeUntilScore: String(input.upgradeUntilScore ?? 0),

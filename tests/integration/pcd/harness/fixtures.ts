@@ -113,7 +113,10 @@ export const base = {
 
 	languages(names: string[]): SeedOperation {
 		const sql = Array.from(new Set(names.map((name) => name.trim()).filter(Boolean)))
-			.map((name) => `INSERT INTO languages (name) VALUES (${sqlValue(name)}) ON CONFLICT(name) DO NOTHING;`)
+			.map(
+				(name) =>
+					`INSERT INTO languages (name) VALUES (${sqlValue(name)}) ON CONFLICT(name) DO NOTHING;`
+			)
 			.join('\n');
 		return { sql };
 	},
@@ -151,8 +154,9 @@ export const base = {
 					)}, ${sqlValue(input.language)}, 'simple');`
 				]
 			: [];
-		const customFormatScoreSql = (input.customFormatScores ?? []).map((score) =>
-			`INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
+		const customFormatScoreSql = (input.customFormatScores ?? []).map(
+			(score) =>
+				`INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
 			 VALUES (${sqlValue(input.name)}, ${sqlValue(score.customFormatName)}, ${sqlValue(
 					score.arrType ?? 'all'
 				)}, ${sqlNumber(score.score)});`
@@ -406,8 +410,8 @@ function qualityProfileQualityItemsSql(
 			return `INSERT INTO quality_profile_qualities
 			        (quality_profile_name, quality_name, quality_group_name, position, enabled, upgrade_until)
 			        VALUES (${sqlValue(profileName)}, ${sqlValue(item.name)}, NULL, ${item.position}, ${
-							enabled ? 1 : 0
-						}, ${upgradeUntil ? 1 : 0});`;
+								enabled ? 1 : 0
+							}, ${upgradeUntil ? 1 : 0});`;
 		}
 
 		const members = Array.from(new Set(memberNames(item.members ?? [])));
