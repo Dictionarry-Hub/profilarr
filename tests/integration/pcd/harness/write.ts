@@ -33,11 +33,25 @@ export interface QualityProfileScoreInput {
 	score: number | null;
 }
 
+export interface QualityProfileQualityItemInput {
+	type: 'quality' | 'group';
+	name: string;
+	position: number;
+	enabled: boolean;
+	upgradeUntil: boolean;
+	members?: Array<{ name: string }>;
+}
+
 export interface QualityProfileScoringFormInput {
 	minimumScore?: number;
 	upgradeUntilScore?: number;
 	upgradeScoreIncrement?: number;
 	customFormatScores?: QualityProfileScoreInput[];
+	layer?: OpOrigin;
+}
+
+export interface QualityProfileQualitiesFormInput {
+	orderedItems: QualityProfileQualityItemInput[];
 	layer?: OpOrigin;
 }
 
@@ -146,10 +160,12 @@ export const write = {
 		create: createQualityProfile,
 		updateGeneral: updateQualityProfileGeneral,
 		updateScoring: updateQualityProfileScoring,
+		updateQualities: updateQualityProfileQualities,
 		remove: removeQualityProfile,
 		submitCreate: submitCreateQualityProfile,
 		submitUpdateGeneral: submitUpdateQualityProfileGeneral,
 		submitUpdateScoring: submitUpdateQualityProfileScoring,
+		submitUpdateQualities: submitUpdateQualityProfileQualities,
 		submitRemove: submitRemoveQualityProfile
 	},
 	mediaSettings: {
@@ -318,6 +334,17 @@ export async function updateQualityProfileScoring(
 	);
 }
 
+export async function updateQualityProfileQualities(
+	ctx: PcdTestContext,
+	id: number,
+	input: QualityProfileQualitiesFormInput
+): Promise<Response> {
+	return assertSuccessfulAction(
+		await submitUpdateQualityProfileQualities(ctx, id, input),
+		'update quality profile qualities'
+	);
+}
+
 export async function submitCreateQualityProfile(
 	ctx: PcdTestContext,
 	input: QualityProfileGeneralFormInput
@@ -347,6 +374,18 @@ export async function submitUpdateQualityProfileScoring(
 	return ctx.client.postForm(
 		`/quality-profiles/${ctx.dbId}/${id}/scoring?/update`,
 		qualityProfileScoringFields(input),
+		{ headers: { Origin: ctx.origin } }
+	);
+}
+
+export async function submitUpdateQualityProfileQualities(
+	ctx: PcdTestContext,
+	id: number,
+	input: QualityProfileQualitiesFormInput
+): Promise<Response> {
+	return ctx.client.postForm(
+		`/quality-profiles/${ctx.dbId}/${id}/qualities?/update`,
+		qualityProfileQualitiesFields(input),
 		{ headers: { Origin: ctx.origin } }
 	);
 }
@@ -518,6 +557,15 @@ function qualityProfileScoringFields(input: QualityProfileScoringFormInput): Rec
 				score: score.score
 			}))
 		),
+		layer: input.layer ?? 'user'
+	};
+}
+
+function qualityProfileQualitiesFields(
+	input: QualityProfileQualitiesFormInput
+): Record<string, string> {
+	return {
+		orderedItems: JSON.stringify(input.orderedItems),
 		layer: input.layer ?? 'user'
 	};
 }
