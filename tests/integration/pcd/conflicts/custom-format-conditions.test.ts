@@ -40,6 +40,30 @@ const LOCAL_A_SOURCE = 'DVD';
 const LOCAL_B_SOURCE = 'Television';
 const UPSTREAM_B_SOURCE = 'WEBRip';
 const UPSTREAM_C_RESOLUTION = '720p';
+const RENAMED_CONDITION = 'Not 2160p Renamed';
+const PATTERN_CONDITION = 'E2E Pattern Cond 1.19';
+const REGEX_A = 'E2E Pattern A 1.19';
+const REGEX_B = 'E2E Pattern B 1.19';
+const REGEX_C = 'E2E Pattern C 1.19';
+const REGEX_A_PATTERN = '\\bTESTA\\b';
+const REGEX_B_PATTERN = '\\bTESTB\\b';
+const REGEX_C_PATTERN = '\\bTESTC\\b';
+const REGEX_DEP_CONDITION = 'E2E Regex Condition 1.23';
+const REGEX_DEP = 'E2E Regex Dep 1.23';
+const REGEX_DEP_PATTERN_V1 = '\\bDEP123\\b';
+const REGEX_DEP_PATTERN_V2 = '\\bDEP456\\b';
+const LANGUAGE_CONDITION = 'E2E Language Cond 1.20';
+const BASE_LANGUAGE = 'English';
+const LOCAL_LANGUAGE = 'French';
+const UPSTREAM_LANGUAGE = 'Spanish';
+const SIZE_CONDITION = 'E2E Size Cond 1.21';
+const BASE_MIN_BYTES = 1_000_000;
+const LOCAL_MIN_BYTES = 2_000_000;
+const UPSTREAM_MIN_BYTES = 3_000_000;
+const YEAR_CONDITION = 'E2E Year Cond 1.22';
+const BASE_MIN_YEAR = 2000;
+const LOCAL_MIN_YEAR = 2001;
+const UPSTREAM_MIN_YEAR = 2002;
 
 type LatestHistory = {
 	status: string;
@@ -65,6 +89,38 @@ type SourceRow = {
 	custom_format_name: string;
 	condition_name: string;
 	source: string;
+};
+
+type PatternRow = {
+	custom_format_name: string;
+	condition_name: string;
+	regular_expression_name: string;
+};
+
+type LanguageRow = {
+	custom_format_name: string;
+	condition_name: string;
+	language_name: string;
+	except_language: number;
+};
+
+type SizeRow = {
+	custom_format_name: string;
+	condition_name: string;
+	min_bytes: number | null;
+	max_bytes: number | null;
+};
+
+type YearRow = {
+	custom_format_name: string;
+	condition_name: string;
+	min_year: number | null;
+	max_year: number | null;
+};
+
+type RegexRow = {
+	name: string;
+	pattern: string;
 };
 
 let counter = 0;
@@ -241,6 +297,335 @@ test('multiple condition changes isolate overlapping conflict', async () => {
 
 /**
  * Context
+ *   Base layer seeded with one custom format resolution condition.
+ *
+ * User
+ *   POST conditions update renames:
+ *     'Not 2160p' -> 'Not 2160p Renamed'
+ *
+ * Upstream
+ *   Published base op changes:
+ *     required false -> true
+ *
+ * Expect
+ *   - rename delete op conflicts by strategy
+ *   - override removes the upstream condition and keeps the renamed local condition
+ *   - ask/align keep both conditions under current strategy-driven compile behavior
+ */
+test('condition rename conflict resolves by strategy', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'condition-rename-conflict');
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.customFormat.updateConditions(ctx, 1, [
+			resolutionCondition(RENAMED_CONDITION, ORIGINAL_RESOLUTION)
+		]);
+
+		seedUpstream(ctx, upstreamUpdateRequired(FORMAT_NAME, CONDITION_NAME, false, true));
+		await compilePcd(ctx);
+
+		const userOps = opsSince(ctx, checkpoint);
+		const deleteOp = firstOpForCondition(userOps, CONDITION_NAME);
+		assertStrategyOutcome(ctx, deleteOp, strategy, 'guard_mismatch');
+
+		const addOp = firstOpForCondition(userOps, RENAMED_CONDITION);
+		assertEquals(addOp.state, 'published');
+		assertLatestHistory(ctx, addOp, 'applied');
+
+		assertConditionResolution(ctx, FORMAT_NAME, RENAMED_CONDITION, ORIGINAL_RESOLUTION);
+		assertConditionBase(ctx, FORMAT_NAME, RENAMED_CONDITION, {
+			type: 'resolution',
+			arrType: 'all',
+			negate: true,
+			required: false
+		});
+
+		if (strategy === 'override') {
+			assertNoCondition(ctx, FORMAT_NAME, CONDITION_NAME);
+		} else {
+			assertConditionResolution(ctx, FORMAT_NAME, CONDITION_NAME, ORIGINAL_RESOLUTION);
+			assertConditionBase(ctx, FORMAT_NAME, CONDITION_NAME, {
+				type: 'resolution',
+				arrType: 'all',
+				negate: true,
+				required: true
+			});
+		}
+	}
+});
+
+/**
+ * Context
+ *   Base layer seeded with one custom format resolution condition.
+ *
+ * User
+ *   POST conditions update changes:
+ *     required false -> true
+ *     arrType all -> radarr
+ *
+ * Upstream
+ *   Published base op changes:
+ *     negate true -> false
+ *
+ * Expect
+ *   - condition op conflicts by strategy
+ *   - override keeps local required/arrType and original negate
+ *   - ask/align keep upstream negate and original required/arrType
+ */
+test('condition base toggles conflict by strategy', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'condition-toggle-conflict');
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.customFormat.updateConditions(ctx, 1, [
+			resolutionCondition(CONDITION_NAME, ORIGINAL_RESOLUTION, {
+				arrType: 'radarr',
+				required: true,
+				negate: true
+			})
+		]);
+
+		seedUpstream(ctx, upstreamUpdateNegate(FORMAT_NAME, CONDITION_NAME, true, false));
+		await compilePcd(ctx);
+
+		const op = firstOpForCondition(opsSince(ctx, checkpoint), CONDITION_NAME);
+		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
+
+		assertConditionBase(
+			ctx,
+			FORMAT_NAME,
+			CONDITION_NAME,
+			strategy === 'override'
+				? { type: 'resolution', arrType: 'radarr', negate: true, required: true }
+				: { type: 'resolution', arrType: 'all', negate: false, required: false }
+		);
+	}
+});
+
+/**
+ * Context
+ *   Base layer seeded with three regexes and one release title pattern condition.
+ *
+ * User
+ *   POST conditions update changes:
+ *     pattern REGEX_A -> REGEX_B
+ *
+ * Upstream
+ *   Published base op changes:
+ *     pattern REGEX_A -> REGEX_C
+ *
+ * Expect
+ *   - condition op conflicts by strategy
+ *   - final pattern is user value only for override, otherwise upstream
+ */
+test('pattern condition value conflict resolves by strategy', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'condition-pattern-conflict', patternSeed());
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.customFormat.updateConditions(ctx, 1, [
+			patternCondition(PATTERN_CONDITION, REGEX_B, REGEX_B_PATTERN)
+		]);
+
+		seedUpstream(ctx, upstreamUpdatePattern(FORMAT_NAME, PATTERN_CONDITION, REGEX_A, REGEX_C));
+		await compilePcd(ctx);
+
+		const op = firstOpForCondition(opsSince(ctx, checkpoint), PATTERN_CONDITION);
+		assertStrategyOutcome(ctx, op, strategy, 'duplicate_key');
+
+		assertConditionPattern(
+			ctx,
+			FORMAT_NAME,
+			PATTERN_CONDITION,
+			strategy === 'override' ? REGEX_B : REGEX_C
+		);
+	}
+});
+
+/**
+ * Context
+ *   Base layer seeded with one regex and one release title pattern condition.
+ *
+ * User
+ *   POST conditions update changes:
+ *     condition required false -> true
+ *
+ * Upstream
+ *   Published base op changes:
+ *     referenced regex pattern V1 -> V2
+ *
+ * Expect
+ *   - condition op applies cleanly for every strategy
+ *   - no pending conflicts remain
+ *   - condition keeps the local required toggle and regex gets upstream pattern
+ */
+test('condition update applies when referenced regex changes upstream', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'condition-regex-dependency', regexDependencySeed());
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.customFormat.updateConditions(ctx, 1, [
+			patternCondition(REGEX_DEP_CONDITION, REGEX_DEP, REGEX_DEP_PATTERN_V1, {
+				required: true
+			})
+		]);
+
+		seedUpstream(ctx, upstreamUpdateRegexPattern(REGEX_DEP, REGEX_DEP_PATTERN_V1, REGEX_DEP_PATTERN_V2));
+		await compilePcd(ctx);
+
+		const op = firstOpForCondition(opsSince(ctx, checkpoint), REGEX_DEP_CONDITION);
+		assertEquals(op.state, 'published');
+		assertLatestHistory(ctx, op, 'applied');
+		assertNoPendingConflicts(ctx);
+
+		assertConditionBase(ctx, FORMAT_NAME, REGEX_DEP_CONDITION, {
+			type: 'release_title',
+			arrType: 'all',
+			negate: false,
+			required: true
+		});
+		assertConditionPattern(ctx, FORMAT_NAME, REGEX_DEP_CONDITION, REGEX_DEP);
+		assertRegexPattern(ctx, REGEX_DEP, REGEX_DEP_PATTERN_V2);
+	}
+});
+
+/**
+ * Context
+ *   Base layer seeded with one language condition and all referenced languages.
+ *
+ * User
+ *   POST conditions update changes:
+ *     language English -> French
+ *
+ * Upstream
+ *   Published base op changes:
+ *     language English -> Spanish
+ *
+ * Expect
+ *   - condition op conflicts by strategy
+ *   - final language is user value only for override, otherwise upstream
+ */
+test('language condition value conflict resolves by strategy', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'condition-language-conflict', [
+			languageConditionSeed(LANGUAGE_CONDITION, BASE_LANGUAGE)
+		]);
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.customFormat.updateConditions(ctx, 1, [
+			languageCondition(LANGUAGE_CONDITION, LOCAL_LANGUAGE)
+		]);
+
+		seedUpstream(
+			ctx,
+			upstreamUpdateLanguage(FORMAT_NAME, LANGUAGE_CONDITION, BASE_LANGUAGE, UPSTREAM_LANGUAGE)
+		);
+		await compilePcd(ctx);
+
+		const op = firstOpForCondition(opsSince(ctx, checkpoint), LANGUAGE_CONDITION);
+		assertStrategyOutcome(ctx, op, strategy, 'duplicate_key');
+
+		assertConditionLanguage(
+			ctx,
+			FORMAT_NAME,
+			LANGUAGE_CONDITION,
+			strategy === 'override' ? LOCAL_LANGUAGE : UPSTREAM_LANGUAGE
+		);
+	}
+});
+
+/**
+ * Context
+ *   Base layer seeded with one size condition.
+ *
+ * User
+ *   POST conditions update changes:
+ *     minBytes BASE -> LOCAL
+ *
+ * Upstream
+ *   Published base op changes:
+ *     minBytes BASE -> UPSTREAM
+ *
+ * Expect
+ *   - condition op conflicts by strategy
+ *   - final size is user value only for override, otherwise upstream
+ */
+test('size condition value conflict resolves by strategy', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'condition-size-conflict', [
+			sizeConditionSeed(SIZE_CONDITION, BASE_MIN_BYTES)
+		]);
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.customFormat.updateConditions(ctx, 1, [
+			sizeCondition(SIZE_CONDITION, LOCAL_MIN_BYTES)
+		]);
+
+		seedUpstream(
+			ctx,
+			upstreamUpdateSize(FORMAT_NAME, SIZE_CONDITION, BASE_MIN_BYTES, UPSTREAM_MIN_BYTES)
+		);
+		await compilePcd(ctx);
+
+		const op = firstOpForCondition(opsSince(ctx, checkpoint), SIZE_CONDITION);
+		assertStrategyOutcome(ctx, op, strategy, 'duplicate_key');
+
+		assertConditionSize(
+			ctx,
+			FORMAT_NAME,
+			SIZE_CONDITION,
+			strategy === 'override' ? LOCAL_MIN_BYTES : UPSTREAM_MIN_BYTES
+		);
+	}
+});
+
+/**
+ * Context
+ *   Base layer seeded with one year condition.
+ *
+ * User
+ *   POST conditions update changes:
+ *     minYear BASE -> LOCAL
+ *
+ * Upstream
+ *   Published base op changes:
+ *     minYear BASE -> UPSTREAM
+ *
+ * Expect
+ *   - condition op conflicts by strategy
+ *   - final year is user value only for override, otherwise upstream
+ */
+test('year condition value conflict resolves by strategy', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'condition-year-conflict', [
+			yearConditionSeed(YEAR_CONDITION, BASE_MIN_YEAR)
+		]);
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.customFormat.updateConditions(ctx, 1, [
+			yearCondition(YEAR_CONDITION, LOCAL_MIN_YEAR)
+		]);
+
+		seedUpstream(
+			ctx,
+			upstreamUpdateYear(FORMAT_NAME, YEAR_CONDITION, BASE_MIN_YEAR, UPSTREAM_MIN_YEAR)
+		);
+		await compilePcd(ctx);
+
+		const op = firstOpForCondition(opsSince(ctx, checkpoint), YEAR_CONDITION);
+		assertStrategyOutcome(ctx, op, strategy, 'duplicate_key');
+
+		assertConditionYear(
+			ctx,
+			FORMAT_NAME,
+			YEAR_CONDITION,
+			strategy === 'override' ? LOCAL_MIN_YEAR : UPSTREAM_MIN_YEAR
+		);
+	}
+});
+
+/**
+ * Context
  *   Base layer seeded with one custom format resolution condition:
  *     format='x265', condition='Not 2160p', resolution='2160p'
  *
@@ -359,13 +744,21 @@ function seedUpstream(ctx: PcdTestContext, operation: SeedOperation): number {
 	});
 }
 
-function resolutionCondition(name: string, resolution: string): ConditionData {
+function resolutionCondition(
+	name: string,
+	resolution: string,
+	options: {
+		arrType?: 'all' | 'radarr' | 'sonarr';
+		negate?: boolean;
+		required?: boolean;
+	} = {}
+): ConditionData {
 	return {
 		name,
 		type: 'resolution',
-		arrType: 'all',
-		negate: true,
-		required: false,
+		arrType: options.arrType ?? 'all',
+		negate: options.negate ?? true,
+		required: options.required ?? false,
 		resolutions: [resolution]
 	};
 }
@@ -378,6 +771,55 @@ function sourceCondition(name: string, source: string, negate = false): Conditio
 		negate,
 		required: false,
 		sources: [source]
+	};
+}
+
+function patternCondition(
+	name: string,
+	regexName: string,
+	pattern: string,
+	options: { required?: boolean } = {}
+): ConditionData {
+	return {
+		name,
+		type: 'release_title',
+		arrType: 'all',
+		negate: false,
+		required: options.required ?? false,
+		patterns: [{ name: regexName, pattern }]
+	};
+}
+
+function languageCondition(name: string, language: string): ConditionData {
+	return {
+		name,
+		type: 'language',
+		arrType: 'all',
+		negate: false,
+		required: false,
+		languages: [{ name: language, except: false }]
+	};
+}
+
+function sizeCondition(name: string, minBytes: number): ConditionData {
+	return {
+		name,
+		type: 'size',
+		arrType: 'all',
+		negate: false,
+		required: false,
+		size: { minBytes, maxBytes: null }
+	};
+}
+
+function yearCondition(name: string, minYear: number): ConditionData {
+	return {
+		name,
+		type: 'year',
+		arrType: 'all',
+		negate: false,
+		required: false,
+		years: { minYear, maxYear: null }
 	};
 }
 
@@ -506,6 +948,97 @@ function assertConditionSource(
 	assertEquals(row.source, source);
 }
 
+function assertConditionPattern(
+	ctx: PcdTestContext,
+	formatName: string,
+	conditionName: string,
+	regexName: string
+): void {
+	const condition = assertCondition(ctx, formatName, conditionName);
+	assertEquals(condition.type, 'release_title');
+	const row = compiledConditionState(ctx).patterns.find(
+		(candidate) =>
+			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
+	);
+	assertExists(row, `Expected pattern for ${conditionName}`);
+	assertEquals(row.regular_expression_name, regexName);
+}
+
+function assertRegexPattern(ctx: PcdTestContext, regexName: string, pattern: string): void {
+	const row = compiledConditionState(ctx).regexes.find((candidate) => candidate.name === regexName);
+	assertExists(row, `Expected regex ${regexName}`);
+	assertEquals(row.pattern, pattern);
+}
+
+function assertConditionLanguage(
+	ctx: PcdTestContext,
+	formatName: string,
+	conditionName: string,
+	language: string
+): void {
+	const condition = assertCondition(ctx, formatName, conditionName);
+	assertEquals(condition.type, 'language');
+	const row = compiledConditionState(ctx).languages.find(
+		(candidate) =>
+			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
+	);
+	assertExists(row, `Expected language for ${conditionName}`);
+	assertEquals(row.language_name, language);
+	assertEquals(row.except_language, 0);
+}
+
+function assertConditionSize(
+	ctx: PcdTestContext,
+	formatName: string,
+	conditionName: string,
+	minBytes: number
+): void {
+	const condition = assertCondition(ctx, formatName, conditionName);
+	assertEquals(condition.type, 'size');
+	const row = compiledConditionState(ctx).sizes.find(
+		(candidate) =>
+			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
+	);
+	assertExists(row, `Expected size for ${conditionName}`);
+	assertEquals(row.min_bytes, minBytes);
+	assertEquals(row.max_bytes, null);
+}
+
+function assertConditionYear(
+	ctx: PcdTestContext,
+	formatName: string,
+	conditionName: string,
+	minYear: number
+): void {
+	const condition = assertCondition(ctx, formatName, conditionName);
+	assertEquals(condition.type, 'year');
+	const row = compiledConditionState(ctx).years.find(
+		(candidate) =>
+			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
+	);
+	assertExists(row, `Expected year for ${conditionName}`);
+	assertEquals(row.min_year, minYear);
+	assertEquals(row.max_year, null);
+}
+
+function assertConditionBase(
+	ctx: PcdTestContext,
+	formatName: string,
+	conditionName: string,
+	expected: {
+		type: string;
+		arrType: string;
+		negate: boolean;
+		required: boolean;
+	}
+): void {
+	const row = assertCondition(ctx, formatName, conditionName);
+	assertEquals(row.type, expected.type);
+	assertEquals(row.arr_type, expected.arrType);
+	assertEquals(row.negate, expected.negate ? 1 : 0);
+	assertEquals(row.required, expected.required ? 1 : 0);
+}
+
 function assertCondition(
 	ctx: PcdTestContext,
 	formatName: string,
@@ -529,6 +1062,11 @@ function compiledConditionState(ctx: PcdTestContext): {
 	conditions: ConditionRow[];
 	resolutions: ResolutionRow[];
 	sources: SourceRow[];
+	patterns: PatternRow[];
+	languages: LanguageRow[];
+	sizes: SizeRow[];
+	years: YearRow[];
+	regexes: RegexRow[];
 } {
 	const source = openDb(ctx.dbPath);
 	const replay = openDb(':memory:');
@@ -589,8 +1127,43 @@ function compiledConditionState(ctx: PcdTestContext): {
 				 ORDER BY custom_format_name, condition_name`
 			)
 			.all() as SourceRow[];
+		const patterns = replay
+			.prepare(
+				`SELECT custom_format_name, condition_name, regular_expression_name
+				 FROM condition_patterns
+				 ORDER BY custom_format_name, condition_name`
+			)
+			.all() as PatternRow[];
+		const languages = replay
+			.prepare(
+				`SELECT custom_format_name, condition_name, language_name, except_language
+				 FROM condition_languages
+				 ORDER BY custom_format_name, condition_name`
+			)
+			.all() as LanguageRow[];
+		const sizes = replay
+			.prepare(
+				`SELECT custom_format_name, condition_name, min_bytes, max_bytes
+				 FROM condition_sizes
+				 ORDER BY custom_format_name, condition_name`
+			)
+			.all() as SizeRow[];
+		const years = replay
+			.prepare(
+				`SELECT custom_format_name, condition_name, min_year, max_year
+				 FROM condition_years
+				 ORDER BY custom_format_name, condition_name`
+			)
+			.all() as YearRow[];
+		const regexes = replay
+			.prepare(
+				`SELECT name, pattern
+				 FROM regular_expressions
+				 ORDER BY name`
+			)
+			.all() as RegexRow[];
 
-		return { conditions, resolutions, sources };
+		return { conditions, resolutions, sources, patterns, languages, sizes, years, regexes };
 	} finally {
 		replay.close();
 		source.close();
@@ -652,6 +1225,189 @@ function upstreamUpdateResolution(
 				]
 			}
 		})
+	};
+}
+
+function upstreamUpdateRequired(
+	formatName: string,
+	conditionName: string,
+	from: boolean,
+	to: boolean
+): SeedOperation {
+	return upstreamUpdateConditionBase(formatName, conditionName, {
+		field: 'required',
+		from,
+		to,
+		baseFrom: { type: 'resolution', arrType: 'all', negate: true, required: from },
+		baseTo: { type: 'resolution', arrType: 'all', negate: true, required: to },
+		values: { resolutions: [ORIGINAL_RESOLUTION] }
+	});
+}
+
+function upstreamUpdateNegate(
+	formatName: string,
+	conditionName: string,
+	from: boolean,
+	to: boolean
+): SeedOperation {
+	return upstreamUpdateConditionBase(formatName, conditionName, {
+		field: 'negate',
+		from,
+		to,
+		baseFrom: { type: 'resolution', arrType: 'all', negate: from, required: false },
+		baseTo: { type: 'resolution', arrType: 'all', negate: to, required: false },
+		values: { resolutions: [ORIGINAL_RESOLUTION] }
+	});
+}
+
+function upstreamUpdateConditionBase(
+	formatName: string,
+	conditionName: string,
+	input: {
+		field: 'required' | 'negate';
+		from: boolean;
+		to: boolean;
+		baseFrom: Record<string, unknown>;
+		baseTo: Record<string, unknown>;
+		values: Record<string, unknown>;
+	}
+): SeedOperation {
+	return {
+		sql: `UPDATE custom_format_conditions
+		      SET ${input.field} = ${input.to ? 1 : 0}
+		      WHERE custom_format_name = ${sqlValue(formatName)}
+		        AND name = ${sqlValue(conditionName)}
+		        AND ${input.field} = ${input.from ? 1 : 0};`,
+		metadata: JSON.stringify({
+			operation: 'update',
+			entity: 'custom_format',
+			name: formatName,
+			stable_key: { key: 'custom_format_name', value: formatName },
+			changed_fields: ['conditions', `condition:${conditionName}`]
+		}),
+		desiredState: JSON.stringify({
+			conditions: {
+				updated: [
+					{
+						name: conditionName,
+						base: {
+							from: input.baseFrom,
+							to: input.baseTo
+						},
+						values: {
+							from: input.values,
+							to: input.values
+						}
+					}
+				]
+			}
+		})
+	};
+}
+
+function upstreamUpdatePattern(
+	formatName: string,
+	conditionName: string,
+	from: string,
+	to: string
+): SeedOperation {
+	return {
+		sql: `UPDATE condition_patterns
+		      SET regular_expression_name = ${sqlValue(to)}
+		      WHERE custom_format_name = ${sqlValue(formatName)}
+		        AND condition_name = ${sqlValue(conditionName)}
+		        AND regular_expression_name = ${sqlValue(from)};`,
+		metadata: JSON.stringify(conditionMetadata(formatName, conditionName)),
+		desiredState: JSON.stringify(conditionUpdateDesiredState(conditionName, {
+			base: { type: 'release_title', arrType: 'all', negate: false, required: false },
+			from: { patterns: [{ name: from, pattern: REGEX_A_PATTERN }] },
+			to: { patterns: [{ name: to, pattern: REGEX_C_PATTERN }] }
+		}))
+	};
+}
+
+function upstreamUpdateRegexPattern(name: string, from: string, to: string): SeedOperation {
+	return {
+		sql: `UPDATE regular_expressions
+		      SET pattern = ${sqlValue(to)}
+		      WHERE name = ${sqlValue(name)}
+		        AND pattern = ${sqlValue(from)};`,
+		metadata: JSON.stringify({
+			operation: 'update',
+			entity: 'regular_expression',
+			name,
+			stable_key: { key: 'regular_expression_name', value: name },
+			changed_fields: ['pattern']
+		}),
+		desiredState: JSON.stringify({
+			pattern: { from, to }
+		})
+	};
+}
+
+function upstreamUpdateLanguage(
+	formatName: string,
+	conditionName: string,
+	from: string,
+	to: string
+): SeedOperation {
+	return {
+		sql: `UPDATE condition_languages
+		      SET language_name = ${sqlValue(to)}
+		      WHERE custom_format_name = ${sqlValue(formatName)}
+		        AND condition_name = ${sqlValue(conditionName)}
+		        AND language_name = ${sqlValue(from)}
+		        AND except_language = 0;`,
+		metadata: JSON.stringify(conditionMetadata(formatName, conditionName)),
+		desiredState: JSON.stringify(conditionUpdateDesiredState(conditionName, {
+			base: { type: 'language', arrType: 'all', negate: false, required: false },
+			from: { languages: [{ name: from, except: false }] },
+			to: { languages: [{ name: to, except: false }] }
+		}))
+	};
+}
+
+function upstreamUpdateSize(
+	formatName: string,
+	conditionName: string,
+	from: number,
+	to: number
+): SeedOperation {
+	return {
+		sql: `UPDATE condition_sizes
+		      SET min_bytes = ${to}
+		      WHERE custom_format_name = ${sqlValue(formatName)}
+		        AND condition_name = ${sqlValue(conditionName)}
+		        AND min_bytes = ${from}
+		        AND max_bytes IS NULL;`,
+		metadata: JSON.stringify(conditionMetadata(formatName, conditionName)),
+		desiredState: JSON.stringify(conditionUpdateDesiredState(conditionName, {
+			base: { type: 'size', arrType: 'all', negate: false, required: false },
+			from: { size: { minBytes: from, maxBytes: null } },
+			to: { size: { minBytes: to, maxBytes: null } }
+		}))
+	};
+}
+
+function upstreamUpdateYear(
+	formatName: string,
+	conditionName: string,
+	from: number,
+	to: number
+): SeedOperation {
+	return {
+		sql: `UPDATE condition_years
+		      SET min_year = ${to}
+		      WHERE custom_format_name = ${sqlValue(formatName)}
+		        AND condition_name = ${sqlValue(conditionName)}
+		        AND min_year = ${from}
+		        AND max_year IS NULL;`,
+		metadata: JSON.stringify(conditionMetadata(formatName, conditionName)),
+		desiredState: JSON.stringify(conditionUpdateDesiredState(conditionName, {
+			base: { type: 'year', arrType: 'all', negate: false, required: false },
+			from: { years: { minYear: from, maxYear: null } },
+			to: { years: { minYear: to, maxYear: null } }
+		}))
 	};
 }
 
@@ -870,6 +1626,155 @@ function resolutionConditionSql(
 	        INSERT INTO condition_resolutions
 	          (custom_format_name, condition_name, resolution)
 	        VALUES (${sqlValue(formatName)}, ${sqlValue(conditionName)}, ${sqlValue(resolution)});`;
+}
+
+function patternSeed(): Array<SeedOperation> {
+	return [
+		base.regex({ name: REGEX_A, pattern: REGEX_A_PATTERN }),
+		base.regex({ name: REGEX_B, pattern: REGEX_B_PATTERN }),
+		base.regex({ name: REGEX_C, pattern: REGEX_C_PATTERN }),
+		base.customFormatRegexCondition({
+			formatName: FORMAT_NAME,
+			conditionName: PATTERN_CONDITION,
+			regexName: REGEX_A
+		})
+	];
+}
+
+function regexDependencySeed(): Array<SeedOperation> {
+	return [
+		base.regex({ name: REGEX_DEP, pattern: REGEX_DEP_PATTERN_V1 }),
+		base.customFormatRegexCondition({
+			formatName: FORMAT_NAME,
+			conditionName: REGEX_DEP_CONDITION,
+			regexName: REGEX_DEP
+		})
+	];
+}
+
+function languageConditionSeed(conditionName: string, language: string): SeedOperation {
+	return {
+		sql: [
+			`INSERT INTO custom_formats (name, description, include_in_rename)
+			 VALUES (${sqlValue(FORMAT_NAME)}, '', 0);`,
+			languageSql(BASE_LANGUAGE),
+			languageSql(LOCAL_LANGUAGE),
+			languageSql(UPSTREAM_LANGUAGE),
+			languageConditionSql(FORMAT_NAME, conditionName, language)
+		].join('\n')
+	};
+}
+
+function sizeConditionSeed(conditionName: string, minBytes: number): SeedOperation {
+	return {
+		sql: [
+			`INSERT INTO custom_formats (name, description, include_in_rename)
+			 VALUES (${sqlValue(FORMAT_NAME)}, '', 0);`,
+			sizeConditionSql(FORMAT_NAME, conditionName, minBytes)
+		].join('\n')
+	};
+}
+
+function yearConditionSeed(conditionName: string, minYear: number): SeedOperation {
+	return {
+		sql: [
+			`INSERT INTO custom_formats (name, description, include_in_rename)
+			 VALUES (${sqlValue(FORMAT_NAME)}, '', 0);`,
+			yearConditionSql(FORMAT_NAME, conditionName, minYear)
+		].join('\n')
+	};
+}
+
+function languageSql(name: string): string {
+	return `INSERT INTO languages (name) VALUES (${sqlValue(name)});`;
+}
+
+function languageConditionSql(formatName: string, conditionName: string, language: string): string {
+	return `INSERT INTO custom_format_conditions
+	          (custom_format_name, name, type, arr_type, negate, required)
+	        VALUES (
+	          ${sqlValue(formatName)},
+	          ${sqlValue(conditionName)},
+	          'language',
+	          'all',
+	          0,
+	          0
+	        );
+
+	        INSERT INTO condition_languages
+	          (custom_format_name, condition_name, language_name, except_language)
+	        VALUES (${sqlValue(formatName)}, ${sqlValue(conditionName)}, ${sqlValue(language)}, 0);`;
+}
+
+function sizeConditionSql(formatName: string, conditionName: string, minBytes: number): string {
+	return `INSERT INTO custom_format_conditions
+	          (custom_format_name, name, type, arr_type, negate, required)
+	        VALUES (
+	          ${sqlValue(formatName)},
+	          ${sqlValue(conditionName)},
+	          'size',
+	          'all',
+	          0,
+	          0
+	        );
+
+	        INSERT INTO condition_sizes
+	          (custom_format_name, condition_name, min_bytes, max_bytes)
+	        VALUES (${sqlValue(formatName)}, ${sqlValue(conditionName)}, ${minBytes}, NULL);`;
+}
+
+function yearConditionSql(formatName: string, conditionName: string, minYear: number): string {
+	return `INSERT INTO custom_format_conditions
+	          (custom_format_name, name, type, arr_type, negate, required)
+	        VALUES (
+	          ${sqlValue(formatName)},
+	          ${sqlValue(conditionName)},
+	          'year',
+	          'all',
+	          0,
+	          0
+	        );
+
+	        INSERT INTO condition_years
+	          (custom_format_name, condition_name, min_year, max_year)
+	        VALUES (${sqlValue(formatName)}, ${sqlValue(conditionName)}, ${minYear}, NULL);`;
+}
+
+function conditionMetadata(formatName: string, conditionName: string): Record<string, unknown> {
+	return {
+		operation: 'update',
+		entity: 'custom_format',
+		name: formatName,
+		stable_key: { key: 'custom_format_name', value: formatName },
+		changed_fields: ['conditions', `condition:${conditionName}`]
+	};
+}
+
+function conditionUpdateDesiredState(
+	conditionName: string,
+	input: {
+		base: Record<string, unknown>;
+		from: Record<string, unknown>;
+		to: Record<string, unknown>;
+	}
+): Record<string, unknown> {
+	return {
+		conditions: {
+			updated: [
+				{
+					name: conditionName,
+					base: {
+						from: input.base,
+						to: input.base
+					},
+					values: {
+						from: input.from,
+						to: input.to
+					}
+				}
+			]
+		}
+	};
 }
 
 function sqlValue(value: string | null): string {
