@@ -107,6 +107,12 @@ export const actions: Actions = {
 			return fail(400, { error: 'Backup retention days must be between 1 and 365' });
 		}
 
+		const currentBackupSettings = backupSettingsQueries.get();
+		if (!currentBackupSettings) {
+			return fail(500, { error: 'Backup settings not found' });
+		}
+		const backupScheduleChanged = currentBackupSettings.schedule !== backupSchedule;
+
 		// --- AI settings (feature-flagged) ---
 		let aiEnabled = false;
 		let aiApiUrl = '';
@@ -216,7 +222,7 @@ export const actions: Actions = {
 		// --- Side effects ---
 		logSettings.reload();
 		scheduleLogCleanup();
-		scheduleBackupJobs();
+		scheduleBackupJobs({ forceBackup: backupScheduleChanged });
 
 		await logger.info('General settings saved', {
 			source: 'settings/general',

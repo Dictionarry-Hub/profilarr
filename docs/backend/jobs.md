@@ -169,6 +169,11 @@ fixed times:
 | `weekly`  | 7 days from now at midnight   |
 | `monthly` | 1st of next month at midnight |
 
+Schedule rebuild preserves an existing queued run time for named schedules.
+Startup and unrelated settings saves do not move the next run. A fresh run time
+is calculated when the job is missing, cancelled, re-enabled, or the backup
+cadence changes.
+
 ### Manual Triggers
 
 Any job can be triggered manually via "Run now" in the settings UI or via API.

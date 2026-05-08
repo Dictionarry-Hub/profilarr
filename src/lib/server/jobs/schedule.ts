@@ -18,6 +18,12 @@ function notify(runAt: string | null): void {
 	jobDispatcher.notifyJobEnqueued(runAt);
 }
 
+function preservedQueuedRunAt(dedupeKey: string, force: boolean = false): string | null {
+	if (force) return null;
+	const existing = jobQueueQueries.getByDedupeKey(dedupeKey);
+	return existing?.status === 'queued' ? existing.runAt : null;
+}
+
 export function scheduleArrSyncForInstance(instanceId: number): void {
 	const status = arrSyncQueries.getSyncConfigStatus(instanceId);
 
@@ -214,7 +220,12 @@ export function schedulePcdSyncForDatabase(databaseId: number): void {
 	notify(job.runAt);
 }
 
-export function scheduleBackupJobs(): void {
+interface ScheduleBackupJobsOptions {
+	forceBackup?: boolean;
+	forceCleanup?: boolean;
+}
+
+export function scheduleBackupJobs(options: ScheduleBackupJobsOptions = {}): void {
 	const settings = backupSettingsQueries.get();
 	if (!settings || settings.enabled !== 1) {
 		jobQueueQueries.cancelByDedupeKey('backup.create');
@@ -222,8 +233,12 @@ export function scheduleBackupJobs(): void {
 		return;
 	}
 
-	const backupRunAt = calculateNextRunFromSchedule(settings.schedule);
-	const cleanupRunAt = calculateNextRunFromSchedule('daily');
+	const backupRunAt =
+		preservedQueuedRunAt('backup.create', options.forceBackup) ??
+		calculateNextRunFromSchedule(settings.schedule);
+	const cleanupRunAt =
+		preservedQueuedRunAt('backup.cleanup', options.forceCleanup) ??
+		calculateNextRunFromSchedule('daily');
 
 	const backupJob = jobQueueQueries.upsertScheduled({
 		jobType: 'backup.create',
@@ -245,14 +260,19 @@ export function scheduleBackupJobs(): void {
 	notify(cleanupJob.runAt);
 }
 
-export function scheduleLogCleanup(): void {
+interface ScheduleLogCleanupOptions {
+	force?: boolean;
+}
+
+export function scheduleLogCleanup(options: ScheduleLogCleanupOptions = {}): void {
 	const settings = logSettingsQueries.get();
 	if (!settings || settings.file_logging !== 1) {
 		jobQueueQueries.cancelByDedupeKey('logs.cleanup');
 		return;
 	}
 
-	const runAt = calculateNextRunFromSchedule('daily');
+	const runAt =
+		preservedQueuedRunAt('logs.cleanup', options.force) ?? calculateNextRunFromSchedule('daily');
 	const job = jobQueueQueries.upsertScheduled({
 		jobType: 'logs.cleanup',
 		runAt,
