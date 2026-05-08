@@ -55,6 +55,12 @@ function matchesNumberCondition(actual: number, condition: NumberCondition): boo
 	}
 }
 
+function stringValues(rawValue: string | number | string[] | null): string[] {
+	if (rawValue == null) return [];
+	if (Array.isArray(rawValue)) return rawValue;
+	return [String(rawValue)];
+}
+
 export function applySmartFilters<T>(
 	items: T[],
 	tags: FilterTag[],
@@ -64,35 +70,41 @@ export function applySmartFilters<T>(
 
 	const fieldMap = new Map(fields.map((f) => [f.key, f]));
 
-	return items.filter((item) => {
-		return tags.every((tag) => {
-			const field = fieldMap.get(tag.field);
-			if (!field) return true;
+	const matchedItems = items
+		.map((item, index) => {
+			let exactRank = 0;
+			const matchesAllTags = tags.every((tag) => {
+				const field = fieldMap.get(tag.field);
+				if (!field) return true;
 
-			const rawValue = field.accessor(item);
+				const rawValue = field.accessor(item);
 
-			let matches: boolean;
+				let matches: boolean;
 
-			if (field.type === 'number') {
-				const condition = parseNumberCondition(tag.value);
-				if (!condition || rawValue == null) return !tag.negated;
-				matches = matchesNumberCondition(Number(rawValue), condition);
-			} else {
-				const tagLower = tag.value.toLowerCase();
-				if (rawValue == null) {
-					matches = false;
-				} else if (tag.exact) {
-					matches = Array.isArray(rawValue)
-						? rawValue.some((v) => v.toLowerCase() === tagLower)
-						: String(rawValue).toLowerCase() === tagLower;
-				} else if (Array.isArray(rawValue)) {
-					matches = rawValue.some((v) => v.toLowerCase().includes(tagLower));
+				if (field.type === 'number') {
+					const condition = parseNumberCondition(tag.value);
+					if (!condition || rawValue == null) return !tag.negated;
+					matches = matchesNumberCondition(Number(rawValue), condition);
 				} else {
-					matches = String(rawValue).toLowerCase().includes(tagLower);
-				}
-			}
+					const tagLower = tag.value.toLowerCase();
+					const values = stringValues(rawValue);
+					const hasExactMatch = values.some((v) => v.toLowerCase() === tagLower);
 
-			return tag.negated ? !matches : matches;
-		});
-	});
+					matches = values.some((v) => v.toLowerCase().includes(tagLower));
+
+					if (matches && !tag.negated && hasExactMatch) {
+						exactRank += 1;
+					}
+				}
+
+				return tag.negated ? !matches : matches;
+			});
+
+			return matchesAllTags ? { item, index, exactRank } : null;
+		})
+		.filter((result): result is { item: T; index: number; exactRank: number } => result !== null);
+
+	return matchedItems
+		.sort((a, b) => b.exactRank - a.exactRank || a.index - b.index)
+		.map((result) => result.item);
 }

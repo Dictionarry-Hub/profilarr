@@ -46,7 +46,12 @@
 			const stored = localStorage.getItem(storageKey);
 			if (stored) {
 				const parsed: SerializedFilterTag[] = JSON.parse(stored);
-				return parsed.map((t) => ({ ...t, id: uuid() }));
+				return parsed.map((t) => ({
+					id: uuid(),
+					field: t.field,
+					value: t.value,
+					negated: t.negated
+				}));
 			}
 		} catch {}
 		return [];
@@ -211,20 +216,10 @@
 		onchange?.(newTags);
 	}
 
-	function addTag(field: string, value: string, exact?: boolean) {
+	function addTag(field: string, value: string) {
 		const trimmed = value.trim();
 		if (!trimmed) return;
-		let resolvedExact = exact;
-		if (resolvedExact === undefined) {
-			const fieldDef = fieldMap.get(field);
-			const fieldSuggestions = fieldDef?.suggestions?.(items) ?? [];
-			const trimmedLower = trimmed.toLowerCase();
-			resolvedExact = fieldSuggestions.some((s) => s.toLowerCase() === trimmedLower);
-		}
-		updateTags([
-			...tags,
-			{ id: uuid(), field, value: trimmed, negated: false, exact: resolvedExact }
-		]);
+		updateTags([...tags, { id: uuid(), field, value: trimmed, negated: false }]);
 		inputValue = '';
 		valueInputValue = '';
 		activeFieldDef = null;
@@ -293,7 +288,7 @@
 				const field = fieldMap.get(selected.value);
 				if (field) selectField(field);
 			} else {
-				// No field match — create tag with default field
+				// No field match: create tag with default field
 				const trimmed = inputValue.trim();
 				if (trimmed && defaultField) {
 					addTag(defaultField.key, trimmed);
@@ -301,7 +296,7 @@
 			}
 		} else if (phase === 'value' && activeFieldDef) {
 			if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
-				addTag(activeFieldDef.key, suggestions[highlightedIndex].value, true);
+				addTag(activeFieldDef.key, suggestions[highlightedIndex].value);
 			} else if (valueInputValue.trim()) {
 				addTag(activeFieldDef.key, valueInputValue);
 			}
@@ -314,7 +309,7 @@
 			const field = fieldMap.get(selected.value);
 			if (field) selectField(field);
 		} else if (phase === 'value' && activeFieldDef) {
-			addTag(activeFieldDef.key, suggestions[index].value, true);
+			addTag(activeFieldDef.key, suggestions[index].value);
 		}
 	}
 
