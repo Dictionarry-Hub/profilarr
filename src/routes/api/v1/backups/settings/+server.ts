@@ -70,6 +70,13 @@ export const PATCH: RequestHandler = async ({ request }) => {
 		return json(error, { status: 400 });
 	}
 
+	const current = backupSettingsQueries.get();
+	if (!current) {
+		const error: ErrorResponse = { error: 'Backup settings not found' };
+		return json(error, { status: 500 });
+	}
+	const scheduleChanged = schedule !== undefined && schedule !== current.schedule;
+
 	// Build update input
 	const updateInput: {
 		schedule?: string;
@@ -82,7 +89,7 @@ export const PATCH: RequestHandler = async ({ request }) => {
 	if (enabled !== undefined) updateInput.enabled = enabled;
 
 	backupSettingsQueries.update(updateInput);
-	await scheduleBackupJobs();
+	await scheduleBackupJobs({ forceBackup: scheduleChanged });
 
 	// Return updated settings
 	const updated = backupSettingsQueries.get()!;
