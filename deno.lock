@@ -1524,7 +1524,7 @@
         "npm:svelte@^5.55.5",
         "npm:tailwindcss@^4.1.13",
         "npm:typescript@^6.0.3",
-        "npm:vite@^8.0.10",
+        "npm:vite@^8.0.11",
         "npm:yaml@^2.8.4"
       ]
     }
