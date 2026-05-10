@@ -47,7 +47,6 @@
 				url: instance.url,
 				externalUrl: instance.external_url ?? '',
 				apiKey: '', // Never pre-populate for security
-				enabled: instance.enabled ? 'true' : 'false',
 				tags: JSON.stringify(parseTags(instance.tags)),
 				libraryRefreshInterval: String(instance.library_refresh_interval ?? 0),
 				cleanupEnabled: cleanupSettings?.enabled ?? false,
@@ -60,7 +59,6 @@
 				url: '',
 				externalUrl: '',
 				apiKey: '',
-				enabled: 'true',
 				tags: '[]',
 				libraryRefreshInterval: '0',
 				cleanupEnabled: false,
@@ -76,7 +74,6 @@
 	$: url = ($current.url ?? '') as string;
 	$: externalUrl = ($current.externalUrl ?? '') as string;
 	$: apiKey = ($current.apiKey ?? '') as string;
-	$: enabled = ($current.enabled ?? 'true') as string;
 	$: tags = JSON.parse(($current.tags ?? '[]') as string) as string[];
 	$: libraryRefreshInterval = ($current.libraryRefreshInterval ?? '0') as string;
 	$: cleanupEnabled = ($current.cleanupEnabled ?? false) as boolean;
@@ -100,11 +97,6 @@
 	const typeOptions = [
 		{ value: 'radarr', label: 'Radarr' },
 		{ value: 'sonarr', label: 'Sonarr' }
-	];
-
-	const enabledOptions = [
-		{ value: 'true', label: 'Enabled' },
-		{ value: 'false', label: 'Disabled' }
 	];
 
 	const libraryRefreshOptions = [
@@ -203,7 +195,6 @@
 				url,
 				externalUrl,
 				apiKey: '',
-				enabled,
 				tags: JSON.stringify(tags),
 				libraryRefreshInterval,
 				cleanupEnabled,
@@ -294,54 +285,49 @@
 	<div
 		class="space-y-4 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
 	>
-		<!-- Type Row -->
-		<div class="space-y-2" data-onboarding="arr-type">
-			<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-				Type{#if mode === 'create'}<span class="text-red-500">*</span>{/if}
-			</span>
-			{#if mode === 'edit'}
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
-					Type cannot be changed after creation
-				</p>
-			{/if}
-			<DropdownSelect
-				value={type}
-				options={typeOptions}
-				placeholder="Select type..."
-				disabled={mode === 'edit'}
-				on:change={(e) => update('type', e.detail)}
-			/>
-		</div>
 		<!-- Name, URL, API Key -->
 		<div data-onboarding="arr-connection" class="space-y-4">
-			<!-- Name + Status Row -->
-			<div class="flex flex-col gap-4 md:flex-row md:items-end">
-				<div class="flex-1">
-					<FormInput
-						label="Name"
-						name="name"
-						value={name}
-						placeholder="e.g., Main Radarr, 4K Sonarr"
-						required
-						on:input={(e) => update('name', e.detail)}
-					/>
+			<div class="space-y-2">
+				<div class="flex items-center gap-4">
+					<div class="min-w-0 flex-[12] text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Name<span class="text-red-500">*</span>
+					</div>
+					<div class="flex-1 text-right text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Type{#if mode === 'create'}<span class="text-red-500">*</span>{/if}
+					</div>
 				</div>
-				<div class="space-y-1">
-					<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-						>Status</span
-					>
-					<DropdownSelect
-						value={enabled}
-						options={enabledOptions}
-						on:change={(e) => update('enabled', e.detail)}
-					/>
+				<div class="flex items-center gap-4">
+					<p class="min-w-0 flex-1 text-xs text-neutral-600 dark:text-neutral-400">
+						The display name for this Arr instance
+					</p>
+					<p class="flex-1 text-right text-xs text-neutral-600 dark:text-neutral-400">
+						Type cannot be changed after creation
+					</p>
+				</div>
+				<div class="flex items-end gap-4">
+					<div class="min-w-0 flex-[12]">
+						<FormInput
+							label="Name"
+							name="name"
+							value={name}
+							placeholder="e.g., Main Radarr, 4K Sonarr"
+							required
+							hideLabel
+							on:input={(e) => update('name', e.detail)}
+						/>
+					</div>
+					<div class="min-w-0 flex-1" data-onboarding="arr-type">
+						<DropdownSelect
+							value={type}
+							options={typeOptions}
+							placeholder="Select type..."
+							disabled={mode === 'edit'}
+							fullWidth
+							on:change={(e) => update('type', e.detail)}
+						/>
+					</div>
 				</div>
 			</div>
-			{#if enabled === 'false'}
-				<p class="text-xs text-amber-600 dark:text-amber-400">
-					Disabled instances are excluded from sync operations
-				</p>
-			{/if}
 			<!-- URL Row -->
 			<FormInput
 				label="URL"
@@ -521,7 +507,6 @@
 	<input type="hidden" name="url" value={url} />
 	<input type="hidden" name="external_url" value={externalUrl} />
 	<input type="hidden" name="api_key" value={apiKey} />
-	<input type="hidden" name="enabled" value={enabled === 'true' ? '1' : '0'} />
 	<input type="hidden" name="tags" value={JSON.stringify(tags)} />
 	<input type="hidden" name="library_refresh_interval" value={libraryRefreshInterval} />
 </form>

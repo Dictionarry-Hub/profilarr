@@ -79,9 +79,6 @@
 						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 							{instance.name}
 						</h3>
-						<Label variant={instance.enabled ? 'success' : 'secondary'} size="sm" rounded="md">
-							{instance.enabled ? 'Enabled' : 'Disabled'}
-						</Label>
 					</div>
 					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>
 						<Button
