@@ -20,7 +20,6 @@ export const actions = {
 		const externalUrl = externalUrlRaw === '' ? null : externalUrlRaw;
 		const apiKey = formData.get('api_key')?.toString().trim();
 		const tagsJson = formData.get('tags')?.toString().trim();
-		const enabled = formData.get('enabled')?.toString() === '1';
 
 		// Validation
 		if (!name || !type || !url || !apiKey) {
@@ -98,8 +97,7 @@ export const actions = {
 				url,
 				externalUrl,
 				apiKey,
-				tags,
-				enabled
+				tags
 			});
 
 			await logger.info(`Created new ${type} instance: ${name}`, {

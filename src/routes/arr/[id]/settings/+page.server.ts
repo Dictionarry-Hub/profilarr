@@ -40,7 +40,6 @@ export const actions: Actions = {
 		const externalUrl = externalUrlRaw === '' ? null : externalUrlRaw;
 		const apiKey = formData.get('api_key')?.toString().trim() || instance.api_key;
 		const tagsJson = formData.get('tags')?.toString() || '';
-		const enabled = formData.get('enabled')?.toString() === '1';
 		const libraryRefreshInterval =
 			parseInt(formData.get('library_refresh_interval')?.toString() || '0', 10) || 0;
 
@@ -80,7 +79,6 @@ export const actions: Actions = {
 				externalUrl,
 				apiKey,
 				tags,
-				enabled,
 				libraryRefreshInterval
 			});
 

@@ -10,6 +10,10 @@ updates resources by name. There is no diff tracking or rollback. Operations are
 idempotent on retry because name-based matching converts would-be creates into
 updates for items that already exist.
 
+Arr instances are always active. Legacy disabled rows are migrated back to
+enabled, and the settings UI no longer exposes an instance-level disable
+control.
+
 ## Table of Contents
 
 - [Pipeline](#pipeline)

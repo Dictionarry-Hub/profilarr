@@ -27,7 +27,6 @@ export interface CreateArrInstanceInput {
 	externalUrl?: string | null;
 	apiKey: string;
 	tags?: string[];
-	enabled?: boolean;
 }
 
 export interface UpdateArrInstanceInput {
@@ -37,7 +36,6 @@ export interface UpdateArrInstanceInput {
 	externalUrl?: string | null;
 	apiKey?: string;
 	tags?: string[];
-	enabled?: boolean;
 	libraryRefreshInterval?: number;
 }
 
@@ -50,7 +48,6 @@ export const arrInstancesQueries = {
 	 */
 	create(input: CreateArrInstanceInput): number {
 		const tagsJson = input.tags && input.tags.length > 0 ? JSON.stringify(input.tags) : null;
-		const enabled = input.enabled !== false ? 1 : 0;
 
 		db.execute(
 			`INSERT INTO arr_instances (name, type, url, external_url, api_key, tags, enabled)
@@ -61,7 +58,7 @@ export const arrInstancesQueries = {
 			input.externalUrl ?? null,
 			input.apiKey,
 			tagsJson,
-			enabled
+			1
 		);
 
 		// Get the last inserted ID
@@ -129,10 +126,6 @@ export const arrInstancesQueries = {
 		if (input.tags !== undefined) {
 			updates.push('tags = ?');
 			params.push(input.tags.length > 0 ? JSON.stringify(input.tags) : null);
-		}
-		if (input.enabled !== undefined) {
-			updates.push('enabled = ?');
-			params.push(input.enabled ? 1 : 0);
 		}
 		if (input.libraryRefreshInterval !== undefined) {
 			updates.push('library_refresh_interval = ?');

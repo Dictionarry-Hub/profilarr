@@ -57,8 +57,7 @@
 		{ key: 'mediaManagement', header: 'Media Management', align: 'left' },
 		{ key: 'upgrades', header: 'Upgrades', align: 'center', width: 'w-24' },
 		{ key: 'renames', header: 'Renames', align: 'center', width: 'w-24' },
-		{ key: 'cleanup', header: 'Cleanup', align: 'center', width: 'w-24' },
-		{ key: 'enabled', header: 'Status', align: 'center', width: 'w-24' }
+		{ key: 'cleanup', header: 'Cleanup', align: 'center', width: 'w-24' }
 	];
 </script>
 
@@ -135,14 +134,6 @@
 				<Label variant={row.cleanupEnabled ? 'success' : 'secondary'} size="sm" rounded="md"
 					>{row.cleanupEnabled ? 'On' : 'Off'}</Label
 				>
-			</div>
-		{:else if column.key === 'enabled'}
-			<div class="flex justify-center">
-				{#if row.enabled}
-					<Label variant="success" size="sm" rounded="md">Enabled</Label>
-				{:else}
-					<Label variant="secondary" size="sm" rounded="md">Disabled</Label>
-				{/if}
 			</div>
 		{/if}
 	</svelte:fragment>

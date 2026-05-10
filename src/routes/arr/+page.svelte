@@ -157,13 +157,5 @@
 				automatically when changes are detected.
 			</div>
 		</div>
-
-		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Enabled/Disabled</div>
-			<div class="mt-1">
-				Disabled instances are excluded from sync operations but remain configured. This is useful
-				for temporarily pausing sync without removing the instance.
-			</div>
-		</div>
 	</div>
 </InfoModal>
