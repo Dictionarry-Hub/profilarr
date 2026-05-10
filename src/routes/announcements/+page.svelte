@@ -130,9 +130,10 @@
 	})();
 
 	const columns: Column<Row>[] = [
-		{ key: 'title', header: 'Title' },
 		{ key: 'severity', header: 'Severity', width: 'w-32' },
+		{ key: 'title', header: 'Title' },
 		{ key: 'publishedAt', header: 'Published', width: 'w-40' },
+		{ key: 'expiresAt', header: 'Expires', width: 'w-40' },
 		{ key: 'source', header: 'Source', width: 'w-44' }
 	];
 
@@ -319,6 +320,12 @@
 				{:else if column.key === 'publishedAt'}
 					<span class="text-xs text-neutral-500 dark:text-neutral-500">
 						<DateTime value={row.publishedAt} date />
+					</span>
+				{:else if column.key === 'expiresAt'}
+					<span class="text-xs text-neutral-500 dark:text-neutral-500">
+						{#if row.expiresAt}
+							<DateTime value={row.expiresAt} date />
+						{/if}
 					</span>
 				{/if}
 			</svelte:fragment>
