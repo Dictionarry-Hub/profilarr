@@ -16,7 +16,7 @@
 	},
 	"devDependencies": {
 		"@deno/vite-plugin": "^2.0.2",
-		"@playwright/test": "^1.59.1",
+		"@playwright/test": "^1.60.0",
 		"playwright": "^1.58.2",
 		"@sveltejs/kit": "^2.59.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
