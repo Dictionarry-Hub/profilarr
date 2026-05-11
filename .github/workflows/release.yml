@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BASE: ghcr.io/dictionarry-hub
+  IMAGE_BASE: ghcr.io/${{ github.repository_owner }}
 
 permissions:
   contents: read
