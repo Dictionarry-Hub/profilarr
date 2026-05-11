@@ -7,7 +7,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BASE: ghcr.io/${{ github.repository_owner }}
 
 permissions:
   contents: read
@@ -44,6 +43,9 @@ jobs:
             runner: ubuntu-24.04-arm
 
     steps:
+      - name: Set Image Base
+        run: echo "IMAGE_BASE=ghcr.io/$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
@@ -142,6 +144,9 @@ jobs:
         image: [profilarr, profilarr-parser]
 
     steps:
+      - name: Set Image Base
+        run: echo "IMAGE_BASE=ghcr.io/$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Download digests
         uses: actions/download-artifact@v8
         with:
