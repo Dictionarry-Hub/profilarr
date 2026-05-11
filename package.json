@@ -12,7 +12,7 @@
 		"lucide-svelte": "^1.0.1",
 		"marked": "^18.0.3",
 		"simple-icons": "^16.18.1",
-		"yaml": "^2.8.4"
+		"yaml": "^2.9.0"
 	},
 	"devDependencies": {
 		"@deno/vite-plugin": "^2.0.2",
