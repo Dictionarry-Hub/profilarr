@@ -50,6 +50,7 @@ obj/
 *.user
 *.suo
 *.sln
+*.lscache
 .vs/
 
 # Bruno environments (contain API keys)
