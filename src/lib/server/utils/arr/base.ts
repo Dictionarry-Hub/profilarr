@@ -29,6 +29,8 @@ export interface ArrClientOptions {
 	retries?: number;
 }
 
+export const INTERACTIVE_SEARCH_TIMEOUT_MS = 120000;
+
 export class BaseArrClient extends BaseHttpClient {
 	private apiKey: string;
 	protected apiVersion: string = 'v3'; // Default to v3, can be overridden by subclasses

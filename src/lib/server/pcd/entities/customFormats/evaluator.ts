@@ -37,6 +37,32 @@ export interface PatternMatchMaps {
 	releaseGroup: Map<string, boolean>;
 }
 
+export type EvaluationArrType = 'radarr' | 'sonarr';
+
+/**
+ * Keep only conditions that the target Arr app would receive during sync.
+ */
+export function filterConditionsForArrType(
+	conditions: ConditionData[],
+	arrType: EvaluationArrType
+): ConditionData[] {
+	return conditions.filter((condition) => {
+		if (condition.arrType !== 'all' && condition.arrType !== arrType) {
+			return false;
+		}
+
+		if (condition.type === 'quality_modifier' && arrType === 'sonarr') {
+			return false;
+		}
+
+		if (condition.type === 'release_type' && arrType === 'radarr') {
+			return false;
+		}
+
+		return true;
+	});
+}
+
 /**
  * Extract unique regex patterns from custom format conditions, grouped by type.
  * Each type's patterns need to be matched against different text:

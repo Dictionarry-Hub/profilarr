@@ -1,4 +1,4 @@
-import { BaseArrClient } from '../base.ts';
+import { BaseArrClient, INTERACTIVE_SEARCH_TIMEOUT_MS } from '../base.ts';
 import type {
 	SonarrSeries,
 	SonarrRelease,
@@ -324,7 +324,8 @@ export class SonarrClient extends BaseArrClient {
 	 */
 	getReleases(seriesId: number, seasonNumber: number): Promise<SonarrRelease[]> {
 		return this.get<SonarrRelease[]>(
-			`/api/${this.apiVersion}/release?seriesId=${seriesId}&seasonNumber=${seasonNumber}`
+			`/api/${this.apiVersion}/release?seriesId=${seriesId}&seasonNumber=${seasonNumber}`,
+			{ timeout: INTERACTIVE_SEARCH_TIMEOUT_MS }
 		);
 	}
 

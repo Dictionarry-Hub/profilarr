@@ -192,7 +192,7 @@ all custom formats. The evaluation flow uses batch operations for performance:
 ```mermaid
 flowchart TD
     REQ[Releases from UI] --> PARSE["parseWithCacheBatch()"]
-    PARSE --> EXTRACT["extractPatternsByType() from all CFs"]
+    PARSE --> EXTRACT["extractPatternsByType() from applicable CF conditions"]
     EXTRACT --> MATCH["matchPatternsBatch() per type"]
     MATCH --> EVAL["evaluateCustomFormat() per release per CF"]
     EVAL --> RESP["Return: parsed info + CF match results"]
@@ -200,7 +200,10 @@ flowchart TD
 
 The evaluator (`customFormats/evaluator.ts`) groups patterns by condition type
 (title, edition, release group) before batch matching, ensuring each unique
-text is only matched once against each pattern set.
+text is only matched once against each pattern set. Entity testing filters
+conditions by target app before matching and evaluation, mirroring sync
+behavior: movie releases use `all` and `radarr` conditions, while series
+releases use `all` and `sonarr` conditions.
 
 ### Regex Validation
 

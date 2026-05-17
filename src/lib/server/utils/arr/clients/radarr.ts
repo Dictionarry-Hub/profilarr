@@ -1,4 +1,4 @@
-import { BaseArrClient } from '../base.ts';
+import { BaseArrClient, INTERACTIVE_SEARCH_TIMEOUT_MS } from '../base.ts';
 import { HttpError } from '$utils/http/types.ts';
 import type {
 	RadarrMovie,
@@ -195,7 +195,9 @@ export class RadarrClient extends BaseArrClient {
 	 * Note: This can take several seconds as it searches indexers in real-time
 	 */
 	getReleases(movieId: number): Promise<RadarrRelease[]> {
-		return this.get<RadarrRelease[]>(`/api/${this.apiVersion}/release?movieId=${movieId}`);
+		return this.get<RadarrRelease[]>(`/api/${this.apiVersion}/release?movieId=${movieId}`, {
+			timeout: INTERACTIVE_SEARCH_TIMEOUT_MS
+		});
 	}
 
 	/**
