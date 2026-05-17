@@ -122,6 +122,7 @@ services:
 | `PORT`                   | `6868`                                                            | Web UI port                                                    |
 | `HOST`                   | `0.0.0.0`                                                         | Bind address                                                   |
 | `AUTH`                   | `on`                                                              | Auth mode (`on`, `oidc`, `off`)                                |
+| `ORIGIN`                 | -                                                                 | Public URL when running behind a reverse proxy (e.g. `https://profilarr.example.com`) |
 | `PARSER_HOST`            | `localhost`                                                       | Parser service host                                            |
 | `PARSER_PORT`            | `5000`                                                            | Parser service port                                            |
 | `PROFILARR_BULLETIN_URL` | `https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main` | Override for the announcement feed + release manifest base URL |
