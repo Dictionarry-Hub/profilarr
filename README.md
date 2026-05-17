@@ -26,11 +26,6 @@
   </picture>
 </p>
 
-> [!WARNING]
-> V2 is not yet ready for production use. It is currently in closed beta.
-> For production use, see [Profilarr V1](https://github.com/Dictionarry-Hub/profilarr/tree/v1).
-> Join our [Discord](https://discord.gg/2A89tXZMgA) if you'd like to beta test.
-
 ## 🌍 Overview
 
 If you manage a media server, you've probably spent hours configuring quality
