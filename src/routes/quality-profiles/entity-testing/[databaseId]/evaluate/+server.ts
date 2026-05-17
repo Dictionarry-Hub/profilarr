@@ -13,10 +13,7 @@ import {
 	extractPatternsByType,
 	filterConditionsForArrType
 } from '$pcd/entities/customFormats/index.ts';
-import type {
-	EvaluationArrType,
-	PatternMatchMaps
-} from '$pcd/entities/customFormats/index.ts';
+import type { EvaluationArrType, PatternMatchMaps } from '$pcd/entities/customFormats/index.ts';
 import type { EvaluateRequest, EvaluateResponse, ReleaseEvaluation } from '$shared/pcd/display.ts';
 
 function getArrTypeForRelease(type: 'movie' | 'series'): EvaluationArrType {
