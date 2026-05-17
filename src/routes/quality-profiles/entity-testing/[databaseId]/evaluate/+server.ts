@@ -10,10 +10,15 @@ import {
 	getAllConditionsForEvaluation,
 	evaluateCustomFormat,
 	getParsedInfo,
-	extractPatternsByType
+	extractPatternsByType,
+	filterConditionsForArrType
 } from '$pcd/entities/customFormats/index.ts';
-import type { PatternMatchMaps } from '$pcd/entities/customFormats/index.ts';
+import type { EvaluationArrType, PatternMatchMaps } from '$pcd/entities/customFormats/index.ts';
 import type { EvaluateRequest, EvaluateResponse, ReleaseEvaluation } from '$shared/pcd/display.ts';
+
+function getArrTypeForRelease(type: 'movie' | 'series'): EvaluationArrType {
+	return type === 'movie' ? 'radarr' : 'sonarr';
+}
 
 export const POST: RequestHandler = async ({ params, request }) => {
 	const databaseId = Number(params.databaseId);
@@ -50,7 +55,24 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
 	const customFormats = await getAllConditionsForEvaluation(cache);
 
-	const patternsByType = extractPatternsByType(customFormats);
+	const releaseArrTypes = new Set<EvaluationArrType>(
+		releases.map((release) => getArrTypeForRelease(release.type))
+	);
+	const customFormatsForPatternMatching = customFormats.map((cf) => {
+		const conditions = new Set<(typeof cf.conditions)[number]>();
+		for (const arrType of releaseArrTypes) {
+			for (const condition of filterConditionsForArrType(cf.conditions, arrType)) {
+				conditions.add(condition);
+			}
+		}
+
+		return {
+			name: cf.name,
+			conditions: [...conditions]
+		};
+	});
+
+	const patternsByType = extractPatternsByType(customFormatsForPatternMatching);
 	const releaseTitles = releases.map((r) => r.title);
 
 	const editionTexts = new Set<string>();
@@ -98,14 +120,16 @@ export const POST: RequestHandler = async ({ params, request }) => {
 				};
 
 		const cfMatches: Record<string, boolean> = {};
+		const arrType = getArrTypeForRelease(release.type);
 		for (const cf of customFormats) {
-			if (cf.conditions.length === 0) {
+			const conditions = filterConditionsForArrType(cf.conditions, arrType);
+			if (conditions.length === 0) {
 				cfMatches[cf.name] = false;
 				continue;
 			}
 
 			const result = evaluateCustomFormat(
-				cf.conditions,
+				conditions,
 				parsed,
 				release.title,
 				patternMatchMaps,
