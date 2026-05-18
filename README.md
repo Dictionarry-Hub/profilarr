@@ -117,6 +117,9 @@ services:
 | `PORT`                   | `6868`                                                            | Web UI port                                                                           |
 | `HOST`                   | `0.0.0.0`                                                         | Bind address                                                                          |
 | `AUTH`                   | `on`                                                              | Auth mode (`on`, `oidc`, `off`)                                                       |
+| `OIDC_CLIENT_SECRET`     |                                                                   | Needed for oidc                                                                       |
+| `OIDC_CLIENT_ID`         |                                                                   | Needed for oidc                                                                       |
+| `OIDC_DISCVOERY_URL`     |                                                                   | Needed for oidc                                                                       |
 | `ORIGIN`                 | -                                                                 | Public URL when running behind a reverse proxy (e.g. `https://profilarr.example.com`) |
 | `PARSER_HOST`            | `localhost`                                                       | Parser service host                                                                   |
 | `PARSER_PORT`            | `5000`                                                            | Parser service port                                                                   |
