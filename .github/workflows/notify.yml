@@ -1,10 +1,10 @@
 name: Notify
 on:
   push:
-    branches:
-      - develop
+    tags:
+      - 'v*.*.*'
 jobs:
-  call-notify-commit:
-    uses: Dictionarry-Hub/parrot/.github/workflows/notify-commit.yml@v1
+  call-notify-release:
+    uses: Dictionarry-Hub/parrot/.github/workflows/notify-release.yml@v1
     secrets:
       PARROT_URL: ${{ secrets.PARROT_URL }}
