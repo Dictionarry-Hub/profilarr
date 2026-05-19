@@ -59,15 +59,15 @@ export const actions = {
 			});
 		}
 
-		// Check if API key already exists (each Arr instance has a unique API key)
-		if (arrInstancesQueries.apiKeyExists(apiKey)) {
+		// Check if target already exists
+		if (arrInstancesQueries.targetExists(type, url)) {
 			await logger.warn('Attempted to create duplicate instance', {
 				source: 'arr/new',
 				meta: { name, type, url }
 			});
 
 			return fail(400, {
-				error: 'This instance is already connected',
+				error: 'This instance target is already configured',
 				values: { name, type, url }
 			});
 		}

@@ -134,3 +134,7 @@ All use raw SQL with `?` parameter binding and typed input/output interfaces.
 Query methods follow a consistent pattern: typed input interfaces for
 mutations, generic return types for reads, and the singleton `db` instance
 for all operations.
+
+Arr instance duplicate detection is based on normalized `type + url`, not API
+key. This allows cloned Radarr/Sonarr instances to reuse an API key while still
+blocking accidental duplicate targets.

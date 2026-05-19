@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { normalizeArrInstanceUrl } from '$arr/url.ts';
 
 /**
  * Types for arr_instances table
@@ -177,9 +178,6 @@ export const arrInstancesQueries = {
 	},
 
 	/**
-	 * Check if an instance with the same API key already exists
-	 */
-	/**
 	 * Update library_last_refreshed_at timestamp
 	 */
 	updateLibraryRefreshedAt(id: number): void {
@@ -190,20 +188,19 @@ export const arrInstancesQueries = {
 		);
 	},
 
-	apiKeyExists(apiKey: string, excludeId?: number): boolean {
-		if (excludeId !== undefined) {
-			const result = db.queryFirst<{ count: number }>(
-				'SELECT COUNT(*) as count FROM arr_instances WHERE api_key = ? AND id != ?',
-				apiKey,
-				excludeId
-			);
-			return (result?.count ?? 0) > 0;
-		}
-
-		const result = db.queryFirst<{ count: number }>(
-			'SELECT COUNT(*) as count FROM arr_instances WHERE api_key = ?',
-			apiKey
+	/**
+	 * Check if an instance with the same type and normalized URL already exists
+	 */
+	targetExists(type: string, url: string, excludeId?: number): boolean {
+		const normalizedUrl = normalizeArrInstanceUrl(url);
+		const instances = db.query<Pick<ArrInstance, 'id' | 'url'>>(
+			'SELECT id, url FROM arr_instances WHERE type = ?',
+			type
 		);
-		return (result?.count ?? 0) > 0;
+
+		return instances.some((instance) => {
+			if (excludeId !== undefined && instance.id === excludeId) return false;
+			return normalizeArrInstanceUrl(instance.url) === normalizedUrl;
+		});
 	}
 };

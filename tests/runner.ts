@@ -66,12 +66,14 @@ const INTEGRATION_API_SPEC_DIR = 'tests/integration/api/specs';
 const INTEGRATION_PCD_SPEC_DIR = 'tests/integration/pcd';
 const INTEGRATION_NOTIFICATION_SPEC_DIR = 'tests/integration/notifications/specs';
 const INTEGRATION_BACKUP_SPEC_DIR = 'tests/integration/backups/specs';
+const INTEGRATION_ARR_SPEC_DIR = 'tests/integration/arr/specs';
 const INTEGRATION_ANNOUNCEMENTS_SPEC_DIR = 'tests/integration/announcements/specs';
 const INTEGRATION_SPEC_DIR = INTEGRATION_AUTH_SPEC_DIR; // backward compat
 const INTEGRATION_SUITES = new Set([
 	'auth',
 	'pcd',
 	'api',
+	'arr',
 	'notifications',
 	'backups',
 	'announcements'
@@ -238,6 +240,7 @@ async function runIntegration(target?: string): Promise<number> {
 	// Resolve spec dirs and files
 	function getSpecDir(s: string): string {
 		if (s === 'api') return INTEGRATION_API_SPEC_DIR;
+		if (s === 'arr') return INTEGRATION_ARR_SPEC_DIR;
 		if (s === 'pcd') return INTEGRATION_PCD_SPEC_DIR;
 		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
 		if (s === 'backups') return INTEGRATION_BACKUP_SPEC_DIR;
@@ -248,7 +251,7 @@ async function runIntegration(target?: string): Promise<number> {
 	// Determine which suites to run
 	const suitesToRun = suite
 		? [suite]
-		: ['auth', 'api', 'notifications', 'announcements', 'backups', 'pcd'];
+		: ['auth', 'api', 'arr', 'notifications', 'announcements', 'backups', 'pcd'];
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
@@ -524,6 +527,7 @@ async function runIntegrationSpec(
 	const specName = specFile
 		.replace(`${INTEGRATION_AUTH_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_API_SPEC_DIR}/`, '')
+		.replace(`${INTEGRATION_ARR_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_PCD_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_NOTIFICATION_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_BACKUP_SPEC_DIR}/`, '')
