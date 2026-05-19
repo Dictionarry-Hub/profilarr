@@ -22,6 +22,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ secrets.BACKPORT_TOKEN }}
 
       - name: Resolve hotfix tag
         id: tag
@@ -85,8 +86,14 @@ jobs:
         env:
           HOTFIX_TAG: ${{ steps.tag.outputs.name }}
           PREVIOUS_TAG: ${{ steps.previous.outputs.name }}
+          BACKPORT_TOKEN: ${{ secrets.BACKPORT_TOKEN }}
         run: |
           set -euo pipefail
+
+          if [[ -z "$BACKPORT_TOKEN" ]]; then
+            echo "BACKPORT_TOKEN secret is required so the backport PR can trigger CI." >&2
+            exit 1
+          fi
 
           branch="backport/${HOTFIX_TAG}-to-develop"
 
@@ -102,7 +109,7 @@ jobs:
       - name: Open backport PR
         if: steps.needed.outputs.value == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.BACKPORT_TOKEN }}
           HOTFIX_TAG: ${{ steps.tag.outputs.name }}
           PREVIOUS_TAG: ${{ steps.previous.outputs.name }}
           BRANCH: ${{ steps.branch.outputs.name }}
@@ -116,6 +123,12 @@ jobs:
           fi
 
           commits="$(git log --oneline "${PREVIOUS_TAG}..${HOTFIX_TAG}")"
+          commit_count="$(git rev-list --count "${PREVIOUS_TAG}..${HOTFIX_TAG}")"
+          title="fix: backport ${HOTFIX_TAG} hotfixes to develop"
+          if [[ "$commit_count" == "1" ]]; then
+            title="$(git log -1 --format=%s "$HOTFIX_TAG")"
+          fi
+
           body="$(mktemp)"
 
           {
@@ -133,5 +146,5 @@ jobs:
           gh pr create \
             --base develop \
             --head "$BRANCH" \
-            --title "fix: backport ${HOTFIX_TAG} hotfix to develop" \
+            --title "$title" \
             --body-file "$body"
