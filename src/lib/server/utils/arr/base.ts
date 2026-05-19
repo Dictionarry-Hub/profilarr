@@ -30,6 +30,7 @@ export interface ArrClientOptions {
 }
 
 export const INTERACTIVE_SEARCH_TIMEOUT_MS = 120000;
+export const LIBRARY_REQUEST_TIMEOUT_MS = 300000;
 
 export class BaseArrClient extends BaseHttpClient {
 	private apiKey: string;
