@@ -73,7 +73,12 @@ export async function updateGeneral(options: UpdateGeneralOptions) {
 		}
 	}
 
-	const rawCurrentDescription = current.description;
+	const rawProfile = await db
+		.selectFrom('quality_profiles')
+		.select('description')
+		.where('name', '=', current.name)
+		.executeTakeFirst();
+	const rawCurrentDescription = rawProfile?.description ?? null;
 	const normalizedCurrentDescription = rawCurrentDescription ?? '';
 	const normalizedNextDescription = input.description?.trim() ?? '';
 	const descriptionChanged = normalizedCurrentDescription !== normalizedNextDescription;
