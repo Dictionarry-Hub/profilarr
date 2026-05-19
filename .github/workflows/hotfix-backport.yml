@@ -1,0 +1,137 @@
+name: Hotfix Backport
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      hotfix_tag:
+        description: Hotfix tag to backport, for example v2.0.2
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  backport:
+    name: Backport to develop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve hotfix tag
+        id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_TAG: ${{ inputs.hotfix_tag }}
+        run: |
+          set -euo pipefail
+
+          tag="$REF_NAME"
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            tag="$INPUT_TAG"
+          fi
+
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag must look like v2.0.2, got: $tag" >&2
+            exit 1
+          fi
+
+          git rev-parse --verify "refs/tags/$tag" >/dev/null
+          tag_sha="$(git rev-list -n 1 "$tag")"
+
+          echo "name=$tag" >> "$GITHUB_OUTPUT"
+          echo "sha=$tag_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether backport is needed
+        id: needed
+        env:
+          TAG_SHA: ${{ steps.tag.outputs.sha }}
+        run: |
+          set -euo pipefail
+
+          git fetch origin develop
+          if git merge-base --is-ancestor "$TAG_SHA" origin/develop; then
+            echo "value=false" >> "$GITHUB_OUTPUT"
+            echo "Tagged commit is already in develop. No backport needed."
+          else
+            echo "value=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Find previous stable tag
+        if: steps.needed.outputs.value == 'true'
+        id: previous
+        env:
+          HOTFIX_TAG: ${{ steps.tag.outputs.name }}
+        run: |
+          set -euo pipefail
+
+          previous_tag="$(git tag --merged "$HOTFIX_TAG" --sort=-version:refname --list 'v[0-9]*.[0-9]*.[0-9]*' | awk -v current="$HOTFIX_TAG" '$0 != current { print; exit }')"
+          if [[ -z "$previous_tag" ]]; then
+            echo "Could not determine previous stable tag before $HOTFIX_TAG" >&2
+            exit 1
+          fi
+
+          echo "name=$previous_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Create backport branch
+        if: steps.needed.outputs.value == 'true'
+        id: branch
+        env:
+          HOTFIX_TAG: ${{ steps.tag.outputs.name }}
+          PREVIOUS_TAG: ${{ steps.previous.outputs.name }}
+        run: |
+          set -euo pipefail
+
+          branch="backport/${HOTFIX_TAG}-to-develop"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout -B "$branch" origin/develop
+          git cherry-pick "${PREVIOUS_TAG}..${HOTFIX_TAG}"
+          git push --force-with-lease origin "$branch"
+
+          echo "name=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Open backport PR
+        if: steps.needed.outputs.value == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HOTFIX_TAG: ${{ steps.tag.outputs.name }}
+          PREVIOUS_TAG: ${{ steps.previous.outputs.name }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          set -euo pipefail
+
+          existing_pr="$(gh pr list --head "$BRANCH" --base develop --state open --json number --jq '.[0].number // empty')"
+          if [[ -n "$existing_pr" ]]; then
+            echo "Backport PR already exists for $BRANCH."
+            exit 0
+          fi
+
+          commits="$(git log --oneline "${PREVIOUS_TAG}..${HOTFIX_TAG}")"
+          body="$(mktemp)"
+
+          {
+            echo "Backports hotfix tag \`${HOTFIX_TAG}\` into \`develop\`."
+            echo
+            echo "Commits:"
+            echo
+            echo "\`\`\`"
+            echo "$commits"
+            echo "\`\`\`"
+            echo
+            echo "Hotfix tag: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${HOTFIX_TAG}"
+          } > "$body"
+
+          gh pr create \
+            --base develop \
+            --head "$BRANCH" \
+            --title "fix: backport ${HOTFIX_TAG} hotfix to develop" \
+            --body-file "$body"
