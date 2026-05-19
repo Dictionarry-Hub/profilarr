@@ -89,6 +89,8 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
+      # Uncomment ORIGIN if you use a reverse proxy to access your containers.
+      #- ORIGIN=https://profilarr.yourdomain.com
       - PARSER_HOST=parser
       - PARSER_PORT=5000
     depends_on:
