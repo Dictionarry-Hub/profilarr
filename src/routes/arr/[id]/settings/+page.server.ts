@@ -57,9 +57,9 @@ export const actions: Actions = {
 			return fail(400, { error: 'An instance with this name already exists' });
 		}
 
-		// Check if API key already exists (each Arr instance has a unique API key)
-		if (arrInstancesQueries.apiKeyExists(apiKey, id)) {
-			return fail(400, { error: 'This instance is already connected' });
+		// Check if target already exists
+		if (arrInstancesQueries.targetExists(instance.type, url, id)) {
+			return fail(400, { error: 'This instance target is already configured' });
 		}
 
 		// Parse tags

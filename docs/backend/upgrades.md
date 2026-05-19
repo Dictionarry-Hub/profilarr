@@ -159,6 +159,16 @@ The [job system](./jobs.md) manages dispatch via `nextRunAt` / `lastRunAt`.
 After each run, the handler calculates the next cron occurrence and updates
 `nextRunAt`.
 
+Arr instance records are de-duplicated by normalized `type + url` during
+creation and settings edits. This prevents accidental duplicate records for the
+same Arr target from bypassing per-instance upgrade cooldowns while still
+allowing cloned 4K instances that reuse the same API key on different targets.
+This is a guardrail, not an anti-abuse boundary. A user who intentionally routes
+the same Arr instance through multiple aliases or reverse proxies can still
+bypass this check, but that setup has no legitimate operational purpose inside
+Profilarr. Duplicate aliases are treated as intentional misuse rather than a
+case the app tries to fully prevent.
+
 ## Cooldown
 
 The cooldown system prevents the same item from being searched repeatedly
