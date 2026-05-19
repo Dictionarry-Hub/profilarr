@@ -75,7 +75,7 @@ test('description update from null guards with is null', async () => {
 	});
 
 	const sql = normalizeSql(op.sql).toLowerCase();
-	assert(sql.includes('description is null'), `Expected NULL guard, got ${sql}`);
+	assert(sql.includes('description" is null'), `Expected NULL guard, got ${sql}`);
 	assert(!sql.includes(`description = ''`), `Expected no empty-string guard, got ${sql}`);
 });
 
