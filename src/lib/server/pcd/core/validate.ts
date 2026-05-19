@@ -17,6 +17,39 @@ type UpdateValidationResult =
 	| { ok: false; error: string };
 
 const VALID_CONFLICT_STRATEGIES = ['override', 'align', 'ask'] as const;
+const FIRST_PARTY_DATABASE_BRANCH = 'v2';
+const FIRST_PARTY_DATABASE_REPO = 'github.com/dictionarry-hub/database';
+
+function normalizeGitHubRepoUrl(repositoryUrl: string): string | null {
+	const trimmed = repositoryUrl.trim();
+	const withoutGitSuffix = trimmed.endsWith('.git') ? trimmed.slice(0, -4) : trimmed;
+
+	if (withoutGitSuffix.startsWith('git@github.com:')) {
+		return `github.com/${withoutGitSuffix.slice('git@github.com:'.length)}`.toLowerCase();
+	}
+
+	const withScheme = /^https?:\/\//i.test(withoutGitSuffix)
+		? withoutGitSuffix
+		: `https://${withoutGitSuffix}`;
+
+	try {
+		const url = new URL(withScheme);
+		const pathname = url.pathname.replace(/^\/+|\/+$/g, '');
+		return `${url.hostname}/${pathname}`.toLowerCase();
+	} catch {
+		return null;
+	}
+}
+
+function defaultBranchForRepository(
+	repositoryUrl: string,
+	branch: string | undefined
+): string | undefined {
+	if (branch) return branch;
+	return normalizeGitHubRepoUrl(repositoryUrl) === FIRST_PARTY_DATABASE_REPO
+		? FIRST_PARTY_DATABASE_BRANCH
+		: undefined;
+}
 
 /**
  * Validate and coerce link input from either API JSON or form data.
@@ -30,8 +63,9 @@ export function validateLinkInput(body: Record<string, unknown>): ValidationResu
 		return { ok: false, error: 'Name and repository URL are required' };
 	}
 
-	const branch =
+	const rawBranch =
 		typeof body.branch === 'string' && body.branch.trim() ? body.branch.trim() : undefined;
+	const branch = defaultBranchForRepository(repositoryUrl, rawBranch);
 	const personalAccessToken =
 		typeof body.personal_access_token === 'string' && body.personal_access_token.trim()
 			? body.personal_access_token.trim()

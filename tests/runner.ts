@@ -105,6 +105,7 @@ const UNIT_ALIASES: Record<string, string> = {
 	sanitize: 'tests/unit/sanitize',
 	backups: 'tests/unit/backups',
 	announcements: 'tests/unit/announcements',
+	pcd: 'tests/unit/pcd',
 	// Individual files
 	filters: 'tests/unit/upgrades/filters.test.ts',
 	normalize: 'tests/unit/upgrades/normalize.test.ts',
