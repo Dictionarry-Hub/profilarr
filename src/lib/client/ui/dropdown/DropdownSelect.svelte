@@ -2,7 +2,7 @@
 	import type { ComponentType } from 'svelte';
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
-	import { ChevronDown } from 'lucide-svelte';
+	import { ChevronDown, ChevronUp } from 'lucide-svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Dropdown from './Dropdown.svelte';
 	import DropdownItem from './DropdownItem.svelte';
@@ -20,6 +20,7 @@
 	export let minWidth: string = '8rem';
 	export let position: 'left' | 'right' | 'middle' = 'left';
 	export let mobilePosition: 'left' | 'right' | 'middle' | null = null;
+	export let placement: 'auto' | 'bottom' | 'top' = 'auto';
 	// Separate compact controls - compact is shorthand for both
 	export let compact: boolean = false;
 	export let compactButton: boolean | undefined = undefined;
@@ -48,6 +49,7 @@
 	let isSmallScreen = false;
 	let mediaQuery: MediaQueryList | null = null;
 	let triggerEl: HTMLElement;
+	let resolvedPlacement: 'bottom' | 'top' = 'bottom';
 
 	onMount(() => {
 		if ((responsiveButton || responsiveDropdown) && typeof window !== 'undefined') {
@@ -84,6 +86,7 @@
 					: compact;
 	$: resolvedButtonSize = buttonSize ?? ((isCompactButton ? 'xs' : 'sm') as 'xs' | 'sm');
 	$: resolvedJustify = justify ?? (fullWidth || width ? 'between' : 'center');
+	$: chevronIcon = open && resolvedPlacement === 'top' ? ChevronUp : ChevronDown;
 	$: labelClasses = isCompactButton
 		? 'text-xs text-neutral-500 dark:text-neutral-400'
 		: 'text-sm text-neutral-500 dark:text-neutral-400';
@@ -112,7 +115,7 @@
 	>
 		<Button
 			text={currentLabel}
-			icon={ChevronDown}
+			icon={chevronIcon}
 			iconPosition="right"
 			leadingIcon={currentIcon}
 			size={resolvedButtonSize}
@@ -126,10 +129,12 @@
 			<Dropdown
 				{position}
 				{mobilePosition}
+				{placement}
 				{minWidth}
 				compact={isCompactDropdown}
 				{fixed}
 				{triggerEl}
+				on:placementchange={(e) => (resolvedPlacement = e.detail)}
 			>
 				{#each options as option}
 					<DropdownItem
