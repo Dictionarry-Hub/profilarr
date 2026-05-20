@@ -126,6 +126,17 @@ export const actions: Actions = {
 			return fail(400, { error: 'Each condition must have at least one Arr type selected' });
 		}
 
+		const hasInvalidSizeRange = conditions.some(
+			(c) =>
+				c.type === 'size' &&
+				c.size?.minBytes != null &&
+				c.size?.maxBytes != null &&
+				c.size.maxBytes <= c.size.minBytes
+		);
+		if (hasInvalidSizeRange) {
+			return fail(400, { error: 'Max size must be greater than min size.' });
+		}
+
 		// Check layer permission
 		if (layer === 'base' && !canWriteToBase(currentDatabaseId)) {
 			return fail(403, { error: 'Cannot write to base layer without personal access token' });
