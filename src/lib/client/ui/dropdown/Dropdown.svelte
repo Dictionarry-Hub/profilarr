@@ -1,17 +1,22 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
+
+	const dispatch = createEventDispatcher<{ placementchange: 'bottom' | 'top' }>();
 
 	export let position: 'left' | 'right' | 'middle' = 'left';
 	export let mobilePosition: 'left' | 'right' | 'middle' | null = null;
 	export let minWidth: string = '12rem';
 	export let width: string | undefined = undefined;
 	export let compact: boolean = false;
+	export let placement: 'auto' | 'bottom' | 'top' = 'auto';
 	// Fixed positioning to escape overflow containers
 	export let fixed: boolean = false;
 	export let triggerEl: HTMLElement | null = null;
 
 	let dropdownEl: HTMLElement;
 	let fixedStyle = '';
+	let resolvedPlacement: 'bottom' | 'top' = 'bottom';
+	let lastDispatchedPlacement: 'bottom' | 'top' | null = null;
 
 	const positionClasses = {
 		left: 'left-0',
@@ -33,13 +38,28 @@
 			: positionClasses[position];
 
 	$: marginClass = compact ? 'mt-1' : 'mt-3';
+	$: topMarginClass = compact ? 'mb-1' : 'mb-3';
 	$: gap = compact ? 4 : 12; // pixels gap below trigger
 	$: roundedClass = compact ? 'rounded-lg' : 'rounded-xl';
+	$: verticalClass =
+		resolvedPlacement === 'top' ? `bottom-full ${topMarginClass}` : `top-full ${marginClass}`;
+
+	function resolvePlacement(rect: DOMRect): 'bottom' | 'top' {
+		if (placement !== 'auto') return placement;
+		return rect.top + rect.height / 2 > window.innerHeight / 2 ? 'top' : 'bottom';
+	}
 
 	function updateFixedPosition() {
-		if (!fixed || !triggerEl) return;
+		if (!triggerEl) return;
 
 		const rect = triggerEl.getBoundingClientRect();
+		resolvedPlacement = resolvePlacement(rect);
+		if (resolvedPlacement !== lastDispatchedPlacement) {
+			lastDispatchedPlacement = resolvedPlacement;
+			dispatch('placementchange', resolvedPlacement);
+		}
+		if (!fixed) return;
+
 		let left = rect.left;
 
 		if (position === 'right') {
@@ -55,12 +75,19 @@
 			}
 		}
 
-		fixedStyle = `top: ${rect.bottom + gap}px; left: ${left}px;`;
+		const verticalStyle =
+			resolvedPlacement === 'top'
+				? `bottom: ${window.innerHeight - rect.top + gap}px;`
+				: `top: ${rect.bottom + gap}px;`;
+
+		fixedStyle = `${verticalStyle} left: ${left}px;`;
 	}
 
 	onMount(() => {
-		if (fixed && triggerEl) {
+		if (triggerEl) {
 			updateFixedPosition();
+		}
+		if (fixed && triggerEl) {
 			window.addEventListener('scroll', updateFixedPosition, true);
 			window.addEventListener('resize', updateFixedPosition);
 			return () => {
@@ -71,21 +98,23 @@
 		return;
 	});
 
-	$: if (fixed && triggerEl && dropdownEl) {
+	$: if (triggerEl && dropdownEl) {
 		updateFixedPosition();
 	}
 </script>
 
 <!-- Invisible hover bridge to keep dropdown open when moving mouse down -->
 {#if !fixed}
-	<div class="absolute top-full z-40 h-3 w-full"></div>
+	<div
+		class="absolute z-40 h-3 w-full {resolvedPlacement === 'top' ? 'bottom-full' : 'top-full'}"
+	></div>
 {/if}
 
 <div
 	bind:this={dropdownEl}
 	class="z-50 overflow-hidden border border-neutral-300 bg-neutral-100 shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900 dark:shadow-black/25 {roundedClass} {fixed
 		? 'fixed'
-		: 'absolute top-full ' + marginClass} {positionClass}"
+		: 'absolute ' + verticalClass} {positionClass}"
 	style="min-width: {minWidth}; {width ? `width: ${width};` : ''} {fixed ? fixedStyle : ''}"
 >
 	<div class="bg-white/80 dark:bg-neutral-800/50">

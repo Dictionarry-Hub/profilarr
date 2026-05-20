@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
 	import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte';
-	import { ChevronDown } from 'lucide-svelte';
+	import { ChevronDown, ChevronUp } from 'lucide-svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
 	import Button from '$ui/button/Button.svelte';
 	import Dropdown from './Dropdown.svelte';
@@ -23,6 +23,7 @@
 	export let minWidth: string = '12rem';
 	export let position: 'left' | 'right' | 'middle' = 'left';
 	export let mobilePosition: 'left' | 'right' | 'middle' | null = null;
+	export let placement: 'auto' | 'bottom' | 'top' = 'auto';
 	export let compact: boolean = false;
 	export let compactButton: boolean | undefined = undefined;
 	export let compactDropdown: boolean | undefined = undefined;
@@ -49,6 +50,7 @@
 	let isSmallScreen = false;
 	let mediaQuery: MediaQueryList | null = null;
 	let triggerWidth = 0;
+	let resolvedPlacement: 'bottom' | 'top' = 'bottom';
 
 	onMount(() => {
 		if ((responsiveButton || responsiveDropdown) && typeof window !== 'undefined') {
@@ -86,6 +88,7 @@
 	$: resolvedButtonSize = buttonSize ?? ((isCompactButton ? 'xs' : 'sm') as 'xs' | 'sm');
 	$: resolvedJustify = justify ?? 'between';
 	$: useSelectMode = isSmallScreen && (responsiveButton || responsiveDropdown);
+	$: chevronIcon = open && resolvedPlacement === 'top' ? ChevronUp : ChevronDown;
 
 	$: trimmedQuery = query.trim();
 	$: filteredOptions = !open
@@ -225,12 +228,16 @@
 					on:input={handleInput}
 					on:keydown={handleKeyDown}
 				/>
-				<ChevronDown size={chevronSize} class="shrink-0 text-neutral-500 dark:text-neutral-400" />
+				<svelte:component
+					this={chevronIcon}
+					size={chevronSize}
+					class="shrink-0 text-neutral-500 dark:text-neutral-400"
+				/>
 			</div>
 		{:else}
 			<Button
 				text={currentLabel}
-				icon={ChevronDown}
+				icon={chevronIcon}
 				iconPosition="right"
 				leadingIcon={currentIcon}
 				size={resolvedButtonSize}
@@ -245,11 +252,13 @@
 			<Dropdown
 				{position}
 				{mobilePosition}
+				{placement}
 				{minWidth}
 				width={dropdownWidth}
 				compact={isCompactDropdown}
 				{fixed}
 				{triggerEl}
+				on:placementchange={(e) => (resolvedPlacement = e.detail)}
 			>
 				<div class="overflow-y-auto" style={maxHeightStyle}>
 					{#each filteredOptions as option, i (option.value)}
