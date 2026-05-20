@@ -7,8 +7,6 @@ on:
       ['docs/**', '*.md', '!SECURITY.md', '.github/issue_template/**', '.github/assets/**']
   pull_request:
     branches: [develop]
-    paths-ignore:
-      ['docs/**', '*.md', '!SECURITY.md', '.github/issue_template/**', '.github/assets/**']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -18,10 +16,73 @@ permissions:
   contents: read
 
 jobs:
+  detect-changes:
+    name: Detect Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.filter.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - id: filter
+        name: Classify changed files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base_ref="origin/${{ github.base_ref }}"
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            changed_files="$(git diff --name-only "$base_ref"...HEAD)"
+          else
+            before="${{ github.event.before }}"
+            if [[ "$before" =~ ^0+$ ]]; then
+              changed_files="$(git diff --name-only HEAD~1 HEAD)"
+            else
+              changed_files="$(git diff --name-only "$before" "${{ github.sha }}")"
+            fi
+          fi
+
+          if [[ -z "$changed_files" ]]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          docs_only=true
+          while IFS= read -r file; do
+            case "$file" in
+              docs/*|*.md|.github/issue_template/*|.github/assets/*)
+                if [[ "$file" == "SECURITY.md" ]]; then
+                  docs_only=false
+                  break
+                fi
+                ;;
+              *)
+                docs_only=false
+                break
+                ;;
+            esac
+          done <<< "$changed_files"
+
+          echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
+
+  docs-only:
+    name: Docs-only CI
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.docs_only == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain skipped jobs
+        run: echo "Only docs or metadata files changed; build, lint, type-check, test, Semgrep, integration, and E2E jobs were intentionally skipped."
+
   # ─── Build ──────────────────────────────────────────────────────────────
 
   build:
     name: Build
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -58,6 +119,8 @@ jobs:
 
   lint:
     name: Lint
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -82,6 +145,8 @@ jobs:
 
   type-check:
     name: Type Check
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -113,6 +178,8 @@ jobs:
 
   unit:
     name: Unit Tests
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -137,6 +204,8 @@ jobs:
 
   semgrep:
     name: Semgrep
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     container:
       image: semgrep/semgrep
@@ -160,7 +229,8 @@ jobs:
 
   integration:
     name: Integration Tests
-    needs: [build]
+    needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -240,7 +310,8 @@ jobs:
 
   e2e-auth:
     name: E2E Tests
-    needs: [build]
+    needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
