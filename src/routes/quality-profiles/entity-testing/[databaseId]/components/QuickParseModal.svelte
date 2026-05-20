@@ -45,6 +45,7 @@
 	let loading = false;
 	let evaluation: ReleaseEvaluation | null = null;
 	let error: string | null = null;
+	let selectedArrType: keyof CfScore = 'radarr';
 
 	$: profileOptions = [
 		{ value: '', label: 'No Profile' },
