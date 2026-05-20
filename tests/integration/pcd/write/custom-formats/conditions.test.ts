@@ -42,9 +42,7 @@ teardown(async () => {
  *   - no user ops are written
  */
 test('invalid size condition range fails without writing ops', async () => {
-	const ctx = await seededPcd('invalid-size-range', [
-		base.customFormat({ name: 'Size Format' })
-	]);
+	const ctx = await seededPcd('invalid-size-range', [base.customFormat({ name: 'Size Format' })]);
 	const checkpoint = opCheckpoint(ctx);
 
 	const response = await write.customFormat.submitUpdateConditions(ctx, 1, [
@@ -63,10 +61,42 @@ test('invalid size condition range fails without writing ops', async () => {
 	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
 });
 
-function sizeCondition(size: {
-	minBytes: number | null;
-	maxBytes: number | null;
-}): ConditionData {
+/**
+ * Context
+ *   Base layer seeded with one custom format.
+ *
+ * Submit
+ *   POST /custom-formats/{ctx.dbId}/{id}/conditions?/update with:
+ *     condition.type = 'size'
+ *     condition.size.minBytes = -1
+ *     condition.size.maxBytes = 1 GiB
+ *
+ * Expect
+ *   - response is a SvelteKit form failure
+ *   - body contains "Size values must be zero or greater."
+ *   - no user ops are written
+ */
+test('negative size condition value fails without writing ops', async () => {
+	const ctx = await seededPcd('negative-size-value', [base.customFormat({ name: 'Size Format' })]);
+	const checkpoint = opCheckpoint(ctx);
+
+	const response = await write.customFormat.submitUpdateConditions(ctx, 1, [
+		sizeCondition({
+			minBytes: -1,
+			maxBytes: GB
+		})
+	]);
+
+	const body = await response.text();
+	assert(
+		response.status >= 400 || body.includes('"type":"failure"'),
+		`Expected form action failure, got status=${response.status} body=${body}`
+	);
+	assert(body.includes('Size values must be zero or greater.'));
+	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+});
+
+function sizeCondition(size: { minBytes: number | null; maxBytes: number | null }): ConditionData {
 	return {
 		name: 'Size',
 		type: 'size',

@@ -68,7 +68,8 @@
 		: `rounded-xl py-2 pl-3 text-sm ${warningPaddingClass}`;
 	$: buttonWidthClass = isCompact ? 'w-4' : 'w-6';
 	$: iconSize = isCompact ? 10 : 12;
-	$: warningRightClass = warningTooltip && !hideButtons ? (isCompact ? 'right-6' : 'right-8') : 'right-2';
+	$: warningRightClass =
+		warningTooltip && !hideButtons ? (isCompact ? 'right-6' : 'right-8') : 'right-2';
 	$: buttonTopRadius = isCompact
 		? 'rounded-tr-lg rounded-tl-none rounded-br-none rounded-bl-none'
 		: 'rounded-tr-xl rounded-tl-none rounded-br-none rounded-bl-none';

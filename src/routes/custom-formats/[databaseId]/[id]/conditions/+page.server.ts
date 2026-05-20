@@ -126,6 +126,16 @@ export const actions: Actions = {
 			return fail(400, { error: 'Each condition must have at least one Arr type selected' });
 		}
 
+		const hasNegativeSizeValue = conditions.some(
+			(c) =>
+				c.type === 'size' &&
+				((c.size?.minBytes != null && c.size.minBytes < 0) ||
+					(c.size?.maxBytes != null && c.size.maxBytes < 0))
+		);
+		if (hasNegativeSizeValue) {
+			return fail(400, { error: 'Size values must be zero or greater.' });
+		}
+
 		const hasInvalidSizeRange = conditions.some(
 			(c) =>
 				c.type === 'size' &&
