@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-	import { ChevronUp, ChevronDown } from 'lucide-svelte';
+	import { ChevronUp, ChevronDown, CircleAlert } from 'lucide-svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	const dispatch = createEventDispatcher<{ change: number | undefined }>();
 
@@ -13,6 +14,7 @@
 	export let step: number = 1;
 	export let required: boolean = false;
 	export let disabled: boolean = false;
+	export let warningTooltip: string = '';
 	export let placeholder: string = '';
 	export let font: 'mono' | 'sans' | undefined = undefined;
 	export let compact: boolean = false;
@@ -50,13 +52,23 @@
 	$: hideButtons = responsive && isSmallScreen;
 	$: effectiveAutoWidth = autoWidth && (!responsive || isSmallScreen);
 	$: fontClass = font === 'mono' ? 'font-mono' : font === 'sans' ? 'font-sans' : '';
+	$: warningPaddingClass = warningTooltip
+		? isCompact && hideButtons
+			? 'pr-7'
+			: 'pr-16'
+		: isCompact && hideButtons
+			? 'pr-2'
+			: isCompact
+				? 'pr-7'
+				: 'pr-10';
 	$: inputSizeClasses = isCompact
 		? hideButtons
-			? 'rounded-lg px-2 py-1 text-xs'
-			: 'rounded-lg px-2 py-1 pr-7 text-xs'
-		: 'rounded-xl px-3 py-2 pr-10 text-sm';
+			? `rounded-lg py-1 pl-2 text-xs ${warningPaddingClass}`
+			: `rounded-lg px-2 py-1 text-xs ${warningPaddingClass}`
+		: `rounded-xl py-2 pl-3 text-sm ${warningPaddingClass}`;
 	$: buttonWidthClass = isCompact ? 'w-4' : 'w-6';
 	$: iconSize = isCompact ? 10 : 12;
+	$: warningRightClass = warningTooltip && !hideButtons ? (isCompact ? 'right-6' : 'right-8') : 'right-2';
 	$: buttonTopRadius = isCompact
 		? 'rounded-tr-lg rounded-tl-none rounded-br-none rounded-bl-none'
 		: 'rounded-tr-xl rounded-tl-none rounded-br-none rounded-bl-none';
@@ -177,6 +189,16 @@
 		style={autoWidthStyle}
 		class="block {widthClass} [appearance:textfield] border border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400 transition-colors focus:border-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-500 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:disabled:bg-neutral-800/40 dark:disabled:text-neutral-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none {inputSizeClasses} {fontClass}"
 	/>
+
+	{#if warningTooltip}
+		<div class="absolute top-1/2 z-10 -translate-y-1/2 {warningRightClass}">
+			<Tooltip text={warningTooltip} position="top">
+				<span class="inline-flex items-center text-red-600 dark:text-red-400">
+					<CircleAlert size={isCompact ? 12 : 14} />
+				</span>
+			</Tooltip>
+		</div>
+	{/if}
 
 	<!-- Custom increment/decrement buttons (hidden on mobile when responsive) -->
 	{#if !hideButtons}
