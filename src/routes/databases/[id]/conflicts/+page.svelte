@@ -6,6 +6,7 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import Admonition from '$ui/admonition/Admonition.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import Label from '$ui/label/Label.svelte';
@@ -64,6 +65,10 @@
 	).sort();
 	let activeEntities = new Set<string>();
 	let activeReasons = new Set<string>();
+
+	const alignHelp = 'Drop your local operation and accept the upstream database change.';
+	const overrideHelp =
+		'Keep your local operation by replaying it against the latest upstream data.';
 
 	function handleConflictAction(successMessage: string, failureMessage: string) {
 		return () => {
@@ -333,6 +338,15 @@
 			No conflicts detected
 		</div>
 	{:else}
+		<Admonition title="Resolving conflicts" variant="info">
+			<p>
+				<span class="font-medium text-neutral-900 dark:text-neutral-50">Align</span>
+				drops your local operation and accepts the upstream database change.
+				<span class="font-medium text-neutral-900 dark:text-neutral-50">Override</span>
+				keeps your local operation by replaying it against the latest upstream data.
+			</p>
+		</Admonition>
+
 		{#each filteredGroups as group (group.key)}
 			<ExpandableCard
 				title={group.title}
@@ -392,6 +406,8 @@
 										variant="secondary"
 										iconColor="text-emerald-600 dark:text-emerald-400"
 										size="sm"
+										tooltip={alignHelp}
+										tooltipPosition="top"
 										type="submit"
 									/>
 								</form>
@@ -410,6 +426,8 @@
 										variant="secondary"
 										iconColor="text-accent-600 dark:text-accent-400"
 										size="sm"
+										tooltip={overrideHelp}
+										tooltipPosition="top"
 										type="submit"
 									/>
 								</form>
