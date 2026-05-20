@@ -36,6 +36,7 @@
 	export let availableLanguages: { name: string; radarr: boolean; sonarr: boolean }[] = [];
 
 	// Computed states based on mode
+	let lastEditedSizeField: 'min' | 'max' | null = null;
 	$: isDraft = mode === 'draft';
 	$: rightPaddingClass = 'pr-3';
 	$: conditionNameId = `condition-name-${(condition.name || 'untitled')
@@ -200,8 +201,18 @@
 	$: maxSizeGB = condition.size?.maxBytes
 		? condition.size.maxBytes / 1024 / 1024 / 1024
 		: undefined;
+	$: hasInvalidSizeRange =
+		condition.size?.minBytes != null &&
+		condition.size?.maxBytes != null &&
+		condition.size.maxBytes <= condition.size.minBytes;
+	$: invalidSizeWarning = hasInvalidSizeRange ? 'Max size must be greater than min size.' : '';
+	$: minSizeWarning =
+		hasInvalidSizeRange && lastEditedSizeField === 'min' ? invalidSizeWarning : '';
+	$: maxSizeWarning =
+		hasInvalidSizeRange && lastEditedSizeField !== 'min' ? invalidSizeWarning : '';
 
 	function handleMinSizeChange(value: number | undefined) {
+		lastEditedSizeField = 'min';
 		const currentSize = condition.size ?? { minBytes: null, maxBytes: null };
 		emitChange({
 			size: {
@@ -212,6 +223,7 @@
 	}
 
 	function handleMaxSizeChange(value: number | undefined) {
+		lastEditedSizeField = 'max';
 		const currentSize = condition.size ?? { minBytes: null, maxBytes: null };
 		emitChange({
 			size: {
@@ -348,31 +360,35 @@
 					/>
 				</div>
 			{:else if condition.type === 'size'}
-				<div class="flex flex-col gap-2 wide:flex-row wide:items-center">
-					<div class="w-full flex-1">
-						<NumberInput
-							name="minSize"
-							value={minSizeGB}
-							min={0}
-							step={1}
-							font="mono"
-							responsive
-							placeholder="Min GB"
-							on:change={(e) => handleMinSizeChange(e.detail)}
-						/>
-					</div>
-					<span class="hidden text-sm text-neutral-500 wide:inline">-</span>
-					<div class="w-full flex-1">
-						<NumberInput
-							name="maxSize"
-							value={maxSizeGB}
-							min={0}
-							step={1}
-							font="mono"
-							responsive
-							placeholder="Max GB"
-							on:change={(e) => handleMaxSizeChange(e.detail)}
-						/>
+				<div>
+					<div class="flex flex-col gap-2 wide:flex-row wide:items-center">
+						<div class="w-full flex-1">
+							<NumberInput
+								name="minSize"
+								value={minSizeGB}
+								min={0}
+								step={1}
+								warningTooltip={minSizeWarning}
+								font="mono"
+								responsive
+								placeholder="Min GB"
+								on:change={(e) => handleMinSizeChange(e.detail)}
+							/>
+						</div>
+						<span class="hidden text-sm text-neutral-500 wide:inline">-</span>
+						<div class="w-full flex-1">
+							<NumberInput
+								name="maxSize"
+								value={maxSizeGB}
+								min={0}
+								step={1}
+								warningTooltip={maxSizeWarning}
+								font="mono"
+								responsive
+								placeholder="Max GB"
+								on:change={(e) => handleMaxSizeChange(e.detail)}
+							/>
+						</div>
 					</div>
 				</div>
 			{:else if condition.type === 'year'}

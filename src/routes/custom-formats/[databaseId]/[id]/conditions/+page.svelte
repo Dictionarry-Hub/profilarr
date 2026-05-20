@@ -79,9 +79,19 @@
 	})();
 	$: hasDuplicateNames = duplicateNames.size > 0;
 	$: hasMissingArrType = conditions.some((c) => c.arrType === '');
+	$: hasInvalidSizeRange = conditions.some((c) => isInvalidSizeRange(c));
 
 	function hasNameConflict(condition: KeyedCondition): boolean {
 		return duplicateNames.has(condition.name.trim().toLowerCase());
+	}
+
+	function isInvalidSizeRange(condition: ConditionData): boolean {
+		return (
+			condition.type === 'size' &&
+			condition.size?.minBytes != null &&
+			condition.size?.maxBytes != null &&
+			condition.size.maxBytes <= condition.size.minBytes
+		);
 	}
 
 	function isConditionValid(condition: ConditionData): boolean {
@@ -194,28 +204,25 @@
 	}
 
 	$: hasEmptyNames = conditions.some((c) => !c.name.trim());
+	$: saveBlocked =
+		hasDrafts ||
+		hasEmptyNames ||
+		hasDuplicateNames ||
+		hasInvalidConditions ||
+		hasInvalidSizeRange ||
+		hasMissingArrType;
+	$: saveTooltip = (() => {
+		if (hasDrafts) return 'Confirm or discard draft conditions before saving.';
+		if (hasEmptyNames) return 'All conditions must have a name.';
+		if (hasDuplicateNames) return 'Condition names must be unique.';
+		if (hasInvalidConditions) return 'Some conditions are missing required values.';
+		if (hasInvalidSizeRange) return 'Max size must be greater than min size.';
+		if (hasMissingArrType) return 'Each condition must have at least one Arr type selected.';
+		return '';
+	})();
 
 	async function handleSaveClick() {
-		if (hasDrafts) {
-			alertStore.add('warning', 'Confirm or discard draft conditions before saving.');
-			return;
-		}
-		if (hasEmptyNames) {
-			alertStore.add('warning', 'All conditions must have a name.');
-			return;
-		}
-		if (hasDuplicateNames) {
-			alertStore.add('warning', 'Condition names must be unique.');
-			return;
-		}
-		if (hasInvalidConditions) {
-			alertStore.add('warning', 'Some conditions are missing required values.');
-			return;
-		}
-		if (hasMissingArrType) {
-			alertStore.add('warning', 'Each condition must have at least one Arr type selected.');
-			return;
-		}
+		if (saveBlocked) return;
 		selectedLayer = data.canWriteToBase ? 'base' : 'user';
 		await tick();
 		mainFormElement?.requestSubmit();
@@ -297,7 +304,8 @@
 					icon={saving ? Loader2 : Save}
 					iconColor="text-green-600 dark:text-green-400"
 					variant="secondary"
-					disabled={saving || !$isDirty}
+					disabled={saving || !$isDirty || saveBlocked}
+					tooltip={saveTooltip}
 					on:click={handleSaveClick}
 				/>
 			</div>

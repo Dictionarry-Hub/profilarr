@@ -102,6 +102,7 @@ export const PORTS = {
 		writeQualityDefinitionsSonarrUpdate: 7626,
 		writeQualityDefinitionsSonarrDelete: 7627,
 		writeQualityProfilesGeneralUpdate: 7628,
+		writeCustomFormatConditions: 7629,
 		conflictsDelayProfiles: 7700,
 		conflictsRegex: 7701,
 		conflictsMediaSettings: 7702,
