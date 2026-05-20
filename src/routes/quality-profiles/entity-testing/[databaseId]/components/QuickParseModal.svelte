@@ -1,5 +1,16 @@
 <script lang="ts">
-	import { HardDrive, Tag, Users, Bookmark, Earth, Layers, AlertTriangle, X } from 'lucide-svelte';
+	import {
+		HardDrive,
+		Tag,
+		Users,
+		Bookmark,
+		Earth,
+		Layers,
+		AlertTriangle,
+		X,
+		Film,
+		Tv
+	} from 'lucide-svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
@@ -30,13 +41,19 @@
 
 	let title = '';
 	let selectedProfileId: string = '';
+	let selectedReleaseType: 'movie' | 'series' = 'movie';
 	let loading = false;
 	let evaluation: ReleaseEvaluation | null = null;
 	let error: string | null = null;
+	let selectedArrType: keyof CfScore = 'radarr';
 
 	$: profileOptions = [
 		{ value: '', label: 'No Profile' },
 		...qualityProfiles.map((p) => ({ value: String(p.id), label: p.name }))
+	];
+	$: releaseTypeOptions = [
+		{ value: 'movie', label: 'Movie', icon: Film },
+		{ value: 'series', label: 'Series', icon: Tv }
 	];
 
 	let debounceTimer: ReturnType<typeof setTimeout>;
@@ -45,22 +62,39 @@
 	$: if (open) {
 		title = '';
 		selectedProfileId = '';
+		selectedReleaseType = 'movie';
 		evaluation = null;
 		error = null;
 	}
 
 	// Auto-parse on title change with debounce
-	$: if (title) {
+	$: if (title || selectedReleaseType) {
 		clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(() => {
-			parse(title);
-		}, 400);
-	} else {
+		if (title) {
+			debounceTimer = setTimeout(() => {
+				parse(title, selectedReleaseType);
+			}, 400);
+		} else {
+			evaluation = null;
+			error = null;
+		}
+	}
+
+	$: selectedArrType = selectedReleaseType === 'movie' ? 'radarr' : 'sonarr';
+	$: releasePlaceholder =
+		selectedReleaseType === 'movie'
+			? 'Movie.2024.2160p.UHD.BluRay.REMUX.DV.HDR.DTS-HD.MA.7.1-GROUP'
+			: 'Series.S01E01.2160p.WEB-DL.DDP5.1.HDR.H.265-GROUP';
+
+	function setReleaseType(type: string) {
+		if (type !== 'movie' && type !== 'series') return;
+		if (selectedReleaseType === type) return;
+		selectedReleaseType = type;
 		evaluation = null;
 		error = null;
 	}
 
-	async function parse(value: string) {
+	async function parse(value: string, releaseType: 'movie' | 'series') {
 		const trimmed = value.trim();
 		if (!trimmed || !parserAvailable) return;
 
@@ -72,7 +106,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					releases: [{ id: -1, title: trimmed, type: 'movie' }]
+					releases: [{ id: -1, title: trimmed, type: releaseType }]
 				})
 			});
 
@@ -81,11 +115,15 @@
 			}
 
 			const result = await response.json();
+			if (title.trim() !== trimmed || selectedReleaseType !== releaseType) return;
 			evaluation = result.evaluations?.[0] ?? null;
 		} catch (err) {
+			if (title.trim() !== trimmed || selectedReleaseType !== releaseType) return;
 			error = err instanceof Error ? err.message : 'Failed to parse release';
 		} finally {
-			loading = false;
+			if (title.trim() === trimmed && selectedReleaseType === releaseType) {
+				loading = false;
+			}
 		}
 	}
 
@@ -107,7 +145,7 @@
 			if (!matched) continue;
 			const cfScore = profileScores.scores[cfName];
 			if (cfScore) {
-				const score = cfScore.radarr;
+				const score = cfScore[selectedArrType];
 				if (score !== null) {
 					totalScore += score;
 				}
@@ -133,7 +171,7 @@
 			if (!matched) continue;
 			const cfScore = profileScores.scores[cfName];
 			if (cfScore) {
-				const score = cfScore.radarr;
+				const score = cfScore[selectedArrType];
 				if (score !== null && score !== 0) {
 					matches.push({ name: cfName, score });
 				}
@@ -155,7 +193,14 @@
 
 <Modal bind:open header="Quick Parse" size="xl" on:cancel={() => (open = false)}>
 	<svelte:fragment slot="header-extra">
-		<div class="ml-auto">
+		<div class="ml-auto flex items-center gap-2">
+			<DropdownSelect
+				value={selectedReleaseType}
+				options={releaseTypeOptions}
+				position="right"
+				minWidth="8rem"
+				on:change={(e) => setReleaseType(e.detail)}
+			/>
 			<DropdownSelect
 				value={selectedProfileId}
 				options={profileOptions}
@@ -181,7 +226,7 @@
 			label="Release Title"
 			description="Paste a full release title to parse and score"
 			bind:value={title}
-			placeholder="Movie.2024.2160p.UHD.BluRay.REMUX.DV.HDR.DTS-HD.MA.7.1-GROUP"
+			placeholder={releasePlaceholder}
 			mono
 			size="sm"
 		/>
