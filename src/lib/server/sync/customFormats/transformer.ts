@@ -15,6 +15,12 @@ import {
 } from '../mappings.ts';
 import { sortConditions } from '$shared/pcd/conditions.ts';
 
+const BYTES_PER_GB = 1024 * 1024 * 1024;
+
+function bytesToGb(value: number | null): number {
+	return value == null ? 0 : value / BYTES_PER_GB;
+}
+
 // =============================================================================
 // Arr API Types
 // =============================================================================
@@ -172,8 +178,8 @@ function transformCondition(
 			const size = condition.size;
 			if (!size) return null;
 			spec.fields = [
-				{ name: 'min', value: size.minBytes ?? 0 },
-				{ name: 'max', value: size.maxBytes ?? 0 }
+				{ name: 'min', value: bytesToGb(size.minBytes) },
+				{ name: 'max', value: bytesToGb(size.maxBytes) }
 			];
 			break;
 		}
