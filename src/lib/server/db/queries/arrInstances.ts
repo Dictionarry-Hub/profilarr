@@ -12,6 +12,8 @@ export interface ArrInstance {
 	url: string;
 	external_url: string | null;
 	api_key: string;
+	basic_auth_username: string | null;
+	basic_auth_password: string | null;
 	tags: string | null;
 	enabled: number;
 	library_refresh_interval: number;
@@ -23,7 +25,26 @@ export interface ArrInstance {
 	updated_at: string;
 }
 
-export type ArrInstancePublic = Omit<ArrInstance, 'api_key'>;
+export type ArrInstancePublic = Omit<
+	ArrInstance,
+	'api_key' | 'basic_auth_username' | 'basic_auth_password'
+>;
+
+export function toPublicArrInstance(instance: ArrInstance): ArrInstancePublic {
+	return {
+		id: instance.id,
+		name: instance.name,
+		type: instance.type,
+		url: instance.url,
+		external_url: instance.external_url,
+		tags: instance.tags,
+		enabled: instance.enabled,
+		library_refresh_interval: instance.library_refresh_interval,
+		library_last_refreshed_at: instance.library_last_refreshed_at,
+		created_at: instance.created_at,
+		updated_at: instance.updated_at
+	};
+}
 
 export interface DetectedVersionInput {
 	version: string;
@@ -37,6 +58,8 @@ export interface CreateArrInstanceInput {
 	url: string;
 	externalUrl?: string | null;
 	apiKey: string;
+	basicAuthUsername?: string | null;
+	basicAuthPassword?: string | null;
 	tags?: string[];
 }
 
@@ -46,6 +69,8 @@ export interface UpdateArrInstanceInput {
 	url?: string;
 	externalUrl?: string | null;
 	apiKey?: string;
+	basicAuthUsername?: string | null;
+	basicAuthPassword?: string | null;
 	tags?: string[];
 	libraryRefreshInterval?: number;
 }
@@ -61,13 +86,17 @@ export const arrInstancesQueries = {
 		const tagsJson = input.tags && input.tags.length > 0 ? JSON.stringify(input.tags) : null;
 
 		db.execute(
-			`INSERT INTO arr_instances (name, type, url, external_url, api_key, tags, enabled)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO arr_instances (
+				name, type, url, external_url, api_key, basic_auth_username, basic_auth_password, tags, enabled
+			)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			input.name,
 			input.type,
 			input.url,
 			input.externalUrl ?? null,
 			input.apiKey,
+			input.basicAuthUsername ?? null,
+			input.basicAuthPassword ?? null,
 			tagsJson,
 			1
 		);
@@ -139,6 +168,14 @@ export const arrInstancesQueries = {
 		if (input.apiKey !== undefined) {
 			updates.push('api_key = ?');
 			params.push(input.apiKey);
+		}
+		if (input.basicAuthUsername !== undefined) {
+			updates.push('basic_auth_username = ?');
+			params.push(input.basicAuthUsername);
+		}
+		if (input.basicAuthPassword !== undefined) {
+			updates.push('basic_auth_password = ?');
+			params.push(input.basicAuthPassword);
 		}
 		if (input.tags !== undefined) {
 			updates.push('tags = ?');

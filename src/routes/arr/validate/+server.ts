@@ -10,7 +10,8 @@ const VALID_TYPES = ['radarr', 'sonarr'];
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { type, url, apiKey, instanceId } = await request.json();
+		const { type, url, apiKey, instanceId, basicAuthUsername, basicAuthPassword } =
+			await request.json();
 
 		// Validation
 		if (!type || !url || !apiKey) {
@@ -26,7 +27,12 @@ export const POST: RequestHandler = async ({ request }) => {
 			typeof instanceId === 'number' ? arrInstancesQueries.getById(instanceId) : undefined;
 
 		// Create client and probe (3 second timeout, no retries for quick feedback)
-		const client = createArrClient(type as ArrType, url, apiKey, { timeout: 3000, retries: 0 });
+		const client = createArrClient(type as ArrType, url, apiKey, {
+			timeout: 3000,
+			retries: 0,
+			basicAuthUsername,
+			basicAuthPassword
+		});
 		let info: ArrVersionInfo | null;
 		try {
 			if (existing) {

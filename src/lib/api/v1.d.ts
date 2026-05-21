@@ -22,7 +22,7 @@ export interface paths {
 		 *
 		 *     **Behavior:**
 		 *     - Returns an empty array if no instances are connected
-		 *     - The `api_key` field is never included
+		 *     - The `api_key`, `basic_auth_username`, and `basic_auth_password` fields are never included
 		 */
 		get: operations['listArrInstances'];
 		put?: never;

@@ -40,6 +40,8 @@
 		url: string;
 		externalUrl: string;
 		apiKey: string;
+		basicAuthUsername: string;
+		basicAuthPassword: string;
 		tags: string;
 		libraryRefreshInterval: string;
 		cleanupEnabled: boolean;
@@ -65,6 +67,8 @@
 				url: instance.url,
 				externalUrl: instance.external_url ?? '',
 				apiKey: '', // Never pre-populate for security
+				basicAuthUsername: '',
+				basicAuthPassword: '',
 				tags: JSON.stringify(parseTags(instance.tags)),
 				libraryRefreshInterval: String(instance.library_refresh_interval ?? 0),
 				cleanupEnabled: cleanupSettings?.enabled ?? false,
@@ -78,6 +82,8 @@
 			url: '',
 			externalUrl: '',
 			apiKey: '',
+			basicAuthUsername: '',
+			basicAuthPassword: '',
 			tags: '[]',
 			libraryRefreshInterval: '0',
 			cleanupEnabled: false,
@@ -104,6 +110,8 @@
 	$: url = (values.url ?? '') as string;
 	$: externalUrl = (values.externalUrl ?? '') as string;
 	$: apiKey = (values.apiKey ?? '') as string;
+	$: basicAuthUsername = (values.basicAuthUsername ?? '') as string;
+	$: basicAuthPassword = (values.basicAuthPassword ?? '') as string;
 	$: tags = parseTags(values.tags);
 	$: libraryRefreshInterval = (values.libraryRefreshInterval ?? '0') as string;
 	$: cleanupEnabled = (values.cleanupEnabled ?? false) as boolean;
@@ -122,6 +130,8 @@
 	let deleting = false;
 	let showDeleteModal = false;
 	let showCleanupModal = false;
+	let basicAuthUsernameTouched = false;
+	let basicAuthPasswordTouched = false;
 
 	// Options for dropdowns
 	const typeOptions = [
@@ -156,7 +166,9 @@
 					type,
 					url,
 					apiKey,
-					instanceId: mode === 'edit' ? instance?.id : undefined
+					instanceId: mode === 'edit' ? instance?.id : undefined,
+					basicAuthUsername,
+					basicAuthPassword
 				})
 			});
 
@@ -199,7 +211,13 @@
 				const response = await fetch('/arr/validate', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ type, url, apiKey })
+					body: JSON.stringify({
+						type,
+						url,
+						apiKey,
+						basicAuthUsername,
+						basicAuthPassword
+					})
 				});
 
 				const result = await response.json();
@@ -242,11 +260,15 @@
 				url,
 				externalUrl,
 				apiKey: '',
+				basicAuthUsername: '',
+				basicAuthPassword: '',
 				tags: JSON.stringify(tags),
 				libraryRefreshInterval,
 				cleanupEnabled,
 				cleanupCron
 			});
+			basicAuthUsernameTouched = false;
+			basicAuthPasswordTouched = false;
 		}
 		if (form.error) {
 			alertStore.add('error', form.error);
@@ -434,6 +456,35 @@
 					{/if}
 				</p>
 			{/if}
+			<div class="space-y-2">
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Optional. Use when a reverse proxy protects this Arr instance with Basic Auth.
+					{#if mode === 'edit'}Leave blank to keep existing credentials.{/if}
+				</p>
+				<div class="grid gap-4 md:grid-cols-2">
+					<FormInput
+						label="Basic Auth Username"
+						name="basic_auth_username"
+						value={basicAuthUsername}
+						placeholder={mode === 'edit' ? 'Leave blank to keep existing username' : 'Optional'}
+						on:input={(e) => {
+							basicAuthUsernameTouched = true;
+							update('basicAuthUsername', e.detail);
+						}}
+					/>
+					<FormInput
+						label="Basic Auth Password"
+						name="basic_auth_password"
+						value={basicAuthPassword}
+						placeholder={mode === 'edit' ? '••••••••••••••••' : 'Optional'}
+						private_
+						on:input={(e) => {
+							basicAuthPasswordTouched = true;
+							update('basicAuthPassword', e.detail);
+						}}
+					/>
+				</div>
+			</div>
 		</div>
 		<!-- Tags Row -->
 		<div class="space-y-2">
@@ -572,6 +623,18 @@
 	<input type="hidden" name="url" value={url} />
 	<input type="hidden" name="external_url" value={externalUrl} />
 	<input type="hidden" name="api_key" value={apiKey} />
+	<input type="hidden" name="basic_auth_username" value={basicAuthUsername} />
+	<input type="hidden" name="basic_auth_password" value={basicAuthPassword} />
+	<input
+		type="hidden"
+		name="basic_auth_username_touched"
+		value={basicAuthUsernameTouched ? '1' : '0'}
+	/>
+	<input
+		type="hidden"
+		name="basic_auth_password_touched"
+		value={basicAuthPasswordTouched ? '1' : '0'}
+	/>
 	<input type="hidden" name="tags" value={JSON.stringify(tags)} />
 	<input type="hidden" name="library_refresh_interval" value={libraryRefreshInterval} />
 </form>

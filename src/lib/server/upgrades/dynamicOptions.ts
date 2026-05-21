@@ -1,6 +1,7 @@
 import type { ArrInstance } from '$lib/server/db/queries/arrInstances.ts';
 import { RadarrClient } from '$lib/server/utils/arr/clients/radarr.ts';
 import { SonarrClient } from '$lib/server/utils/arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '$lib/server/utils/arr/factory.ts';
 import type {
 	ArrCustomFormat,
 	ArrQualityProfile,
@@ -42,8 +43,8 @@ export async function loadDynamicFilterOptions(
 	const options = createEmptyDynamicFilterOptions(instance.type);
 	const isRadarr = instance.type === 'radarr';
 	const client = isRadarr
-		? new RadarrClient(instance.url, instance.api_key)
-		: new SonarrClient(instance.url, instance.api_key);
+		? new RadarrClient(instance.url, instance.api_key, arrClientOptionsFromInstance(instance))
+		: new SonarrClient(instance.url, instance.api_key, arrClientOptionsFromInstance(instance));
 
 	const [profiles, tags, libraryItems, customFormats] = await Promise.all([
 		loadOptional<ArrQualityProfile[]>(() => client.getQualityProfiles()),

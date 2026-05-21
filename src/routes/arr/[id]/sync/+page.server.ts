@@ -1,7 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries, type SyncTrigger, type ProfileSelection } from '$db/queries/arrSync.ts';
 import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
 import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
@@ -349,7 +349,7 @@ export const load: ServerLoad = async ({ params }) => {
 	const driftProgress = await loadDriftProgress(id, arrType, hasProfileItemSizes(instance));
 	const databasePriorities = arrSyncQueries.getDatabasePriorities(id);
 
-	const { api_key: _, ...safeInstance } = instance;
+	const safeInstance = toPublicArrInstance(instance);
 
 	return {
 		instance: safeInstance,
