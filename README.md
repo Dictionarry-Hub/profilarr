@@ -119,13 +119,19 @@ services:
 | `PORT`                   | `6868`                                                            | Web UI port                                                                           |
 | `HOST`                   | `0.0.0.0`                                                         | Bind address                                                                          |
 | `AUTH`                   | `on`                                                              | Auth mode (`on`, `oidc`, `off`)                                                       |
-| `OIDC_CLIENT_SECRET`     |                                                                   | Needed for oidc                                                                       |
-| `OIDC_CLIENT_ID`         |                                                                   | Needed for oidc                                                                       |
-| `OIDC_DISCVOERY_URL`     |                                                                   | Needed for oidc                                                                       |
+| `OIDC_CLIENT_SECRET`     | -                                                                 | OIDC client secret (when `AUTH=oidc`)                                                 |
+| `OIDC_CLIENT_ID`         | -                                                                 | OIDC client ID (when `AUTH=oidc`)                                                     |
+| `OIDC_DISCOVERY_URL`     | -                                                                 | OIDC discovery URL (when `AUTH=oidc`)                                                 |
 | `ORIGIN`                 | -                                                                 | Public URL when running behind a reverse proxy (e.g. `https://profilarr.example.com`) |
 | `PARSER_HOST`            | `localhost`                                                       | Parser service host                                                                   |
 | `PARSER_PORT`            | `5000`                                                            | Parser service port                                                                   |
 | `PROFILARR_BULLETIN_URL` | `https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main` | Override for the announcement feed + release manifest base URL                        |
+
+> [!NOTE]
+> When using OIDC `ORIGIN=` *must* be set to your Profilarr URL, and Profilarr
+> expects `{ORIGIN}/auth/oidc/callback` for the redirect URL 
+> (e.g. `https://profilarr.example.com/auth/oidc/callback`). Many 
+> IdPs will infer this automatically.
 
 See the [documentation](https://dictionarry.dev/) for full setup and
 configuration guides.
