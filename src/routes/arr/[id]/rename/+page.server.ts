@@ -1,6 +1,6 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
 import { arrRenameSettingsQueries } from '$db/queries/arrRenameSettings.ts';
 import { renameRunsQueries } from '$db/queries/renameRuns.ts';
 import { logger } from '$logger/logger.ts';
@@ -25,7 +25,7 @@ export const load: ServerLoad = ({ params }) => {
 	const settings = arrRenameSettingsQueries.getByInstanceId(id);
 	const renameRuns = renameRunsQueries.getByInstanceId(id);
 
-	const { api_key: _, ...safeInstance } = instance;
+	const safeInstance = toPublicArrInstance(instance);
 
 	return {
 		instance: safeInstance,

@@ -4,6 +4,7 @@ import { RadarrClient } from './clients/radarr.ts';
 import { SonarrClient } from './clients/sonarr.ts';
 import { LidarrClient } from './clients/lidarr.ts';
 import { ChaptarrClient } from './clients/chaptarr.ts';
+import type { ArrInstance } from '$db/queries/arrInstances.ts';
 
 /**
  * Factory function to create an arr client instance
@@ -31,4 +32,15 @@ export function createArrClient(
 		default:
 			throw new Error(`Unknown arr type: ${type}`);
 	}
+}
+
+export function arrClientOptionsFromInstance(
+	instance: Pick<ArrInstance, 'basic_auth_username' | 'basic_auth_password'>,
+	options?: ArrClientOptions
+): ArrClientOptions {
+	return {
+		...options,
+		basicAuthUsername: instance.basic_auth_username,
+		basicAuthPassword: instance.basic_auth_password
+	};
 }

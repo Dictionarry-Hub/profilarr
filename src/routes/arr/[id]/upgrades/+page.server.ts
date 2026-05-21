@@ -1,6 +1,6 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
 import { upgradeConfigsQueries } from '$db/queries/upgradeConfigs.ts';
 import { upgradeRunsQueries } from '$db/queries/upgradeRuns.ts';
 import { logger } from '$logger/logger.ts';
@@ -37,7 +37,7 @@ export const load: ServerLoad = async ({ params }) => {
 	const upgradeRuns = upgradeRunsQueries.getByInstanceId(id);
 	const dynamicFilterOptions = loadDynamicFilterOptions(instance);
 
-	const { api_key: _, ...safeInstance } = instance;
+	const safeInstance = toPublicArrInstance(instance);
 
 	return {
 		instance: safeInstance,

@@ -39,6 +39,24 @@ export const actions: Actions = {
 		const externalUrlRaw = formData.get('external_url')?.toString().trim() ?? '';
 		const externalUrl = externalUrlRaw === '' ? null : externalUrlRaw;
 		const apiKey = formData.get('api_key')?.toString().trim() || instance.api_key;
+		const basicAuthUsernameRaw = formData.get('basic_auth_username')?.toString().trim();
+		const basicAuthPasswordRaw = formData.get('basic_auth_password')?.toString();
+		const basicAuthUsernameTouched =
+			formData.get('basic_auth_username_touched')?.toString() === '1';
+		const basicAuthPasswordTouched =
+			formData.get('basic_auth_password_touched')?.toString() === '1';
+		const basicAuthUsername =
+			basicAuthUsernameTouched && basicAuthUsernameRaw !== undefined
+				? basicAuthUsernameRaw === ''
+					? null
+					: basicAuthUsernameRaw
+				: instance.basic_auth_username;
+		const basicAuthPassword =
+			basicAuthPasswordTouched && basicAuthPasswordRaw !== undefined
+				? basicAuthPasswordRaw === ''
+					? null
+					: basicAuthPasswordRaw
+				: instance.basic_auth_password;
 		const tagsJson = formData.get('tags')?.toString() || '';
 		const libraryRefreshInterval =
 			parseInt(formData.get('library_refresh_interval')?.toString() || '0', 10) || 0;
@@ -78,6 +96,8 @@ export const actions: Actions = {
 				url,
 				externalUrl,
 				apiKey,
+				basicAuthUsername,
+				basicAuthPassword,
 				tags,
 				libraryRefreshInterval
 			});

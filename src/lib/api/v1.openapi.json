@@ -58,7 +58,7 @@
 			"get": {
 				"operationId": "listArrInstances",
 				"summary": "List Arr Instances",
-				"description": "Returns all Arr instances (Radarr/Sonarr) with secrets stripped.\n\n**Use cases:**\n- Dashboard widgets showing connected instances\n- Automation scripts checking instance state\n- Prerequisite checks (e.g. onboarding)\n\n**Behavior:**\n- Returns an empty array if no instances are connected\n- The `api_key` field is never included\n",
+				"description": "Returns all Arr instances (Radarr/Sonarr) with secrets stripped.\n\n**Use cases:**\n- Dashboard widgets showing connected instances\n- Automation scripts checking instance state\n- Prerequisite checks (e.g. onboarding)\n\n**Behavior:**\n- Returns an empty array if no instances are connected\n- The `api_key`, `basic_auth_username`, and `basic_auth_password` fields are never included\n",
 				"tags": ["Arr"],
 				"responses": {
 					"200": {

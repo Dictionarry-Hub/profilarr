@@ -3,7 +3,7 @@ import type { JobHandler, JobType } from '../queueTypes.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
-import { createArrClient } from '$arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
 import type { ArrType } from '$arr/types.ts';
 import { calculateNextRun } from '$lib/server/sync/utils.ts';
 import type { SectionType } from '$lib/server/sync/types.ts';
@@ -72,7 +72,12 @@ const arrSyncHandler: JobHandler = async (job) => {
 		return { status: 'skipped', output: 'No sync sections specified' };
 	}
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 	const results: string[] = [];
 	const sectionResults: ArrSyncSectionResult[] = [];
 	let failures = 0;

@@ -177,6 +177,8 @@ function makeInstance(overrides: Partial<ArrInstance> = {}): ArrInstance {
 		url: 'http://localhost:7878',
 		external_url: null,
 		api_key: 'test-key',
+		basic_auth_username: null,
+		basic_auth_password: null,
 		tags: null,
 		enabled: 1,
 		library_refresh_interval: 60,

@@ -10,7 +10,7 @@
 import { arrInstancesQueries, type ArrInstance } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { calculateNextRun } from './utils.ts';
-import { createArrClient } from '$arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
 import type { ArrType } from '$arr/types.ts';
 import { logger } from '$logger/logger.ts';
 import { upsertScheduledJob } from '$lib/server/jobs/queueService.ts';
@@ -131,7 +131,12 @@ async function processInstanceSections(
 		instanceName: instance.name
 	};
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 
 	// Process sections sequentially (quality profiles depend on custom formats being synced first)
 	for (const sectionType of sectionTypes) {
@@ -280,7 +285,12 @@ export async function syncInstance(instanceId: number): Promise<InstanceSyncResu
 		meta: { instanceId }
 	});
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 	const result: InstanceSyncResult = {
 		instanceId,
 		instanceName: instance.name

@@ -1,6 +1,6 @@
 import { error, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries, type SyncTrigger, type ProfileSelection } from '$db/queries/arrSync.ts';
 import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
 import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
@@ -306,7 +306,7 @@ export const load: ServerLoad = async ({ params }) => {
 	const syncData = arrSyncQueries.getFullSyncData(id);
 	const driftProgress = await loadDriftProgress(id, arrType);
 
-	const { api_key: _, ...safeInstance } = instance;
+	const safeInstance = toPublicArrInstance(instance);
 
 	return {
 		instance: safeInstance,

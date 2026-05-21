@@ -19,6 +19,10 @@ export const actions = {
 		const externalUrlRaw = formData.get('external_url')?.toString().trim() ?? '';
 		const externalUrl = externalUrlRaw === '' ? null : externalUrlRaw;
 		const apiKey = formData.get('api_key')?.toString().trim();
+		const basicAuthUsernameRaw = formData.get('basic_auth_username')?.toString().trim() ?? '';
+		const basicAuthPasswordRaw = formData.get('basic_auth_password')?.toString() ?? '';
+		const basicAuthUsername = basicAuthUsernameRaw === '' ? null : basicAuthUsernameRaw;
+		const basicAuthPassword = basicAuthPasswordRaw === '' ? null : basicAuthPasswordRaw;
 		const tagsJson = formData.get('tags')?.toString().trim();
 
 		// Validation
@@ -97,6 +101,8 @@ export const actions = {
 				url,
 				externalUrl,
 				apiKey,
+				basicAuthUsername,
+				basicAuthPassword,
 				tags
 			});
 
@@ -111,7 +117,10 @@ export const actions = {
 				generalSettingsQueries.shouldApplyDefaultDelayProfiles()
 			) {
 				try {
-					const client = createArrClient(type as ArrType, url, apiKey);
+					const client = createArrClient(type as ArrType, url, apiKey, {
+						basicAuthUsername,
+						basicAuthPassword
+					});
 					const defaultProfile = getDefaultDelayProfile(type);
 
 					// Update the default delay profile (id=1)

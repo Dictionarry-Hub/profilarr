@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { createArrClient } from '$utils/arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$utils/arr/factory.ts';
 import { scanForStaleItems, type CleanupScanResult } from '$lib/server/sync/cleanup.ts';
 import { scanForRemovedEntities, type EntityScanResult } from '$lib/server/sync/entityCleanup.ts';
 import type { ArrType } from '$utils/arr/types.ts';
@@ -39,9 +39,12 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 
 	const instanceType = instance.type as 'radarr' | 'sonarr';
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key, {
-		retries: 0
-	});
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance, { retries: 0 })
+	);
 
 	try {
 		const [configs, entities] = await Promise.all([

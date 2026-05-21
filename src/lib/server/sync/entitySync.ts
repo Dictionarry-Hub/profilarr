@@ -5,7 +5,7 @@
 
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { createArrClient } from '$utils/arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$utils/arr/factory.ts';
 import { getCache } from '$pcd/index.ts';
 import { logger } from '$logger/logger.ts';
 import type { ArrType } from '$utils/arr/types.ts';
@@ -67,7 +67,12 @@ export async function syncQualityProfile(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 
 	try {
 		// Fetch the QP from PCD
@@ -157,7 +162,12 @@ export async function syncCustomFormat(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 
 	try {
 		const pcdFormat = await fetchCustomFormatFromPcd(cache, formatName);
@@ -216,7 +226,12 @@ export async function syncRegularExpression(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 
 	try {
 		// Find all CFs that use this regex
@@ -280,7 +295,12 @@ export async function syncDelayProfile(
 	const cache = getCache(databaseId);
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 
 	try {
 		const profile = await getDelayProfileByName(cache, profileName);
@@ -326,7 +346,12 @@ export async function syncNaming(
 	const cache = getCache(databaseId);
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 
 	try {
 		if (instance.type === 'radarr') {
@@ -387,7 +412,12 @@ export async function syncQualityDefinitions(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 
 	try {
 		const getByName = instanceType === 'radarr' ? getRadarrQualityDefs : getSonarrQualityDefs;
@@ -458,7 +488,12 @@ export async function syncMediaSettings(
 	const cache = getCache(databaseId);
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 
 	try {
 		const getByName = instance.type === 'radarr' ? getRadarrMediaSettings : getSonarrMediaSettings;
