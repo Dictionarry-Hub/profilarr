@@ -98,6 +98,7 @@ export interface NamingDriftExpected {
 
 export interface QualityDefinitionsDriftExpected {
 	name: string;
+	arrType?: SyncArrType;
 	definitions: MappedQualityDefinition[];
 }
 
@@ -124,6 +125,10 @@ const NAMING_FIELD_ORDER: Record<SyncArrType, string[]> = {
 	]
 };
 const QUALITY_DEFINITION_FIELD_ORDER = ['minSize', 'maxSize', 'preferredSize'] as const;
+const QUALITY_DEFINITION_UNLIMITED_MAX: Record<SyncArrType, number> = {
+	radarr: 2000,
+	sonarr: 1000
+};
 
 function emptyDiff(): MediaManagementDriftDiff {
 	return {
@@ -184,7 +189,8 @@ function compareNaming(
 
 function compareQualityDefinitions(
 	expected: QualityDefinitionsDriftExpected,
-	actual: ArrQualityDefinition[] | null
+	actual: ArrQualityDefinition[] | null,
+	arrType: SyncArrType
 ): DriftFieldDiff[] | null {
 	if (!actual) return null;
 
@@ -201,6 +207,9 @@ function compareQualityDefinitions(
 		if (!actualDefinition) continue;
 
 		const actualFields = normalizeArrQualityDefinition(actualDefinition);
+		if (actualFields.maxSize === QUALITY_DEFINITION_UNLIMITED_MAX[arrType]) {
+			actualFields.maxSize = null;
+		}
 		for (const field of QUALITY_DEFINITION_FIELD_ORDER) {
 			const expectedValue = definition.fields[field];
 			const actualValue = actualFields[field];
@@ -246,7 +255,11 @@ export function compareMediaManagementDrift(
 	}
 
 	if (expectedQualityDefinitions) {
-		const fields = compareQualityDefinitions(expectedQualityDefinitions, actualQualityDefinitions);
+		const fields = compareQualityDefinitions(
+			expectedQualityDefinitions,
+			actualQualityDefinitions,
+			expectedQualityDefinitions.arrType ?? 'radarr'
+		);
 		if (!fields) {
 			diff.quality_definitions.missing.push({ name: expectedQualityDefinitions.name });
 		} else if (fields.length > 0) {
@@ -348,6 +361,7 @@ export async function buildExpectedQualityDefinitions(
 	);
 	return {
 		name: syncConfig.qualityDefinitionsConfigName,
+		arrType,
 		definitions
 	};
 }
