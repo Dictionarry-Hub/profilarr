@@ -1535,7 +1535,7 @@
         "npm:prettier@3.8.3",
         "npm:simple-icons@^16.20.0",
         "npm:svelte-check@^4.4.8",
-        "npm:svelte@^5.55.8",
+        "npm:svelte@^5.55.9",
         "npm:tailwindcss@^4.1.13",
         "npm:typescript@^6.0.3",
         "npm:vite@^8.0.13",
