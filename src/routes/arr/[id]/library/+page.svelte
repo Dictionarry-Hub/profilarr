@@ -68,6 +68,13 @@
 			suggestions: (items) => [...new Set(items.map((m) => m.qualityProfileName))].sort()
 		},
 		{
+			key: 'profileManagedBy',
+			label: 'Profile Managed By',
+			type: 'text',
+			accessor: (m) => (m.isProfilarrProfile ? 'Profilarr' : 'External'),
+			suggestions: () => ['Profilarr', 'External']
+		},
+		{
 			key: 'format',
 			label: 'Format',
 			type: 'text',
@@ -123,6 +130,13 @@
 			type: 'text',
 			accessor: (s) => s.qualityProfileName,
 			suggestions: (items) => [...new Set(items.map((s) => s.qualityProfileName))].sort()
+		},
+		{
+			key: 'profileManagedBy',
+			label: 'Profile Managed By',
+			type: 'text',
+			accessor: (s) => (s.isProfilarrProfile ? 'Profilarr' : 'External'),
+			suggestions: () => ['Profilarr', 'External']
 		},
 		{
 			key: 'network',
