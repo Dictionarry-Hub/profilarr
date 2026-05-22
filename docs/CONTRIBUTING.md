@@ -13,6 +13,7 @@
 - [Guidelines](#guidelines)
   - [Naming](#naming)
   - [Code Conventions](#code-conventions)
+  - [AI-Assisted Contributions](#ai-assisted-contributions)
   - [Off-Limits](#off-limits)
   - [Reporting Issues](#reporting-issues)
   - [Closing Issues](#closing-issues)
@@ -300,6 +301,39 @@ not what you did.
 - **Dirty tracking.** Use the dirty store to block saves + warn on navigation.
 - **Routes > modals.** Only use modals for confirmations or rare one-off forms.
 - **API:** extend `/api/v1/*` only; legacy routes are migration targets.
+
+### AI-Assisted Contributions
+
+AI tools may be used as assistants, but the contribution must be yours. You are
+responsible for the code, the reasoning behind it, and the communication around
+it.
+
+PR descriptions, issue comments, and review replies must reflect your own
+understanding of the change. Do not submit generated summaries, invented
+context, unrelated validation notes, or explanations you cannot personally stand
+behind. Using AI to tidy wording is fine; outsourcing the substance of the
+conversation is not.
+
+AI-assisted contributions must still follow the normal project rules:
+
+- Keep the PR focused to one feature, fix, or documentation change.
+- Follow the existing architecture, style, and conventions.
+- Do not include unrelated cleanup, generated noise, editor metadata, chat logs,
+  AI tool configuration, or promotional links.
+- Be ready to answer questions and make follow-up changes yourself.
+
+When reporting validation, use this project's commands. For code changes, that
+usually means the same Deno-based checks used by CI: `deno task lint`,
+`deno task check`, `deno task build`, or the relevant `deno task test ...`
+command. Do not list unrelated npm, framework, or generated tool commands as if
+they validate Profilarr.
+
+If you could not run a relevant check, say that plainly and explain why. A PR
+does not need to be perfect before review, but the validation notes should be
+accurate.
+
+Maintainers may close PRs that appear to be unreviewed generated output,
+issue-scraping submissions, advertising, or changes the author cannot explain.
 
 ### Off-Limits
 
