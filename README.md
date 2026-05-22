@@ -128,9 +128,9 @@ services:
 | `PROFILARR_BULLETIN_URL` | `https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main` | Override for the announcement feed + release manifest base URL                        |
 
 > [!NOTE]
-> When using OIDC `ORIGIN=` *must* be set to your Profilarr URL, and Profilarr
-> expects `{ORIGIN}/auth/oidc/callback` for the redirect URL 
-> (e.g. `https://profilarr.example.com/auth/oidc/callback`). Many 
+> When using OIDC `ORIGIN=` _must_ be set to your Profilarr URL, and Profilarr
+> expects `{ORIGIN}/auth/oidc/callback` for the redirect URL
+> (e.g. `https://profilarr.example.com/auth/oidc/callback`). Many
 > IdPs will infer this automatically.
 
 See the [documentation](https://dictionarry.dev/) for full setup and

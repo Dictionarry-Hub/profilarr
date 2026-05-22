@@ -32,7 +32,7 @@ export const mediaNamingStage: Stage = {
 			id: 'media-naming-character-replacement',
 			target: 'media-naming-character-replacement',
 			title: 'Character Replacement',
-			body: 'Filesystems reject characters like : ? * < > | on most operating systems, so Radarr and Sonarr can rewrite them before they hit disk. "Replace Illegal Characters" is the master toggle; when it is on, the colon replacement dropdown decides how colons specifically are handled (delete, replace with space, dash, etc.). Sonarr also lets you pick a custom replacement string. Leave this enabled unless you are on a filesystem that tolerates the original characters and you want names preserved exactly.',
+			body: 'Filesystems reject characters like : ? * < > | on most operating systems, so Radarr and Sonarr can rewrite them before they hit disk. "Replace Illegal Characters" is the master toggle; when it is on, the colon replacement dropdown decides how colons specifically are handled (delete, replace with space, dash, etc.). Sonarr also lets you pick a custom replacement string. Leaving this disabled instructs Sonarr to simply remove the illegal character instead. Leave this disabled unless you have a very specific reason not to.',
 			position: 'above',
 			freeInteract: true,
 			completion: { type: 'manual' }
