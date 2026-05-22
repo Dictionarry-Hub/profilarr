@@ -48,7 +48,7 @@
 		rename: true,
 		movieFormat: '{Movie Title} ({Release Year}) {Quality Full}',
 		movieFolderFormat: '{Movie Title} ({Release Year})',
-		replaceIllegalCharacters: true,
+		replaceIllegalCharacters: false,
 		colonReplacementFormat: 'delete'
 	};
 

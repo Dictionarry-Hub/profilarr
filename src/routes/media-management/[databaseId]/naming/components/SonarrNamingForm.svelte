@@ -60,7 +60,7 @@
 			'{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}',
 		seriesFolderFormat: '{Series Title}',
 		seasonFolderFormat: 'Season {season}',
-		replaceIllegalCharacters: true,
+		replaceIllegalCharacters: false,
 		colonReplacementFormat: 'delete',
 		customColonReplacementFormat: '',
 		multiEpisodeStyle: 'extend'
