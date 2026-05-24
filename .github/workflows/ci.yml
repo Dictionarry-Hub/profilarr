@@ -7,8 +7,6 @@ on:
       ['docs/**', '*.md', '!SECURITY.md', '.github/issue_template/**', '.github/assets/**']
   pull_request:
     branches: [develop]
-    paths-ignore:
-      ['docs/**', '*.md', '!SECURITY.md', '.github/issue_template/**', '.github/assets/**']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -16,12 +14,50 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
+  ci-scope:
+    name: Detect CI Scope
+    runs-on: ubuntu-latest
+    outputs:
+      full_ci: ${{ steps.push.outputs.full_ci || steps.filter.outputs.full_ci }}
+    steps:
+      - id: push
+        if: github.event_name != 'pull_request'
+        run: echo "full_ci=true" >> "$GITHUB_OUTPUT"
+
+      - id: filter
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v4
+        with:
+          predicate-quantifier: every
+          filters: |
+            full_ci:
+              - '**'
+              - '!docs/**'
+              - '!*.md'
+              - '!LICENSE'
+              - '!.github/issue_template/**'
+              - '!.github/assets/**'
+
+  docs-only:
+    name: Docs-only CI
+    needs: [ci-scope]
+    if: ${{ needs.ci-scope.outputs.full_ci != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report skipped CI
+        run: |
+          echo "Docs-only change detected." >> "$GITHUB_STEP_SUMMARY"
+          echo "Build, lint, type-check, tests, Semgrep, integration, and E2E jobs were intentionally skipped." >> "$GITHUB_STEP_SUMMARY"
+
   # ─── Build ──────────────────────────────────────────────────────────────
 
   build:
     name: Build
+    needs: [ci-scope]
+    if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -58,6 +94,8 @@ jobs:
 
   lint:
     name: Lint
+    needs: [ci-scope]
+    if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -82,6 +120,8 @@ jobs:
 
   type-check:
     name: Type Check
+    needs: [ci-scope]
+    if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -113,6 +153,8 @@ jobs:
 
   unit:
     name: Unit Tests
+    needs: [ci-scope]
+    if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -137,6 +179,8 @@ jobs:
 
   semgrep:
     name: Semgrep
+    needs: [ci-scope]
+    if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     container:
       image: semgrep/semgrep
@@ -160,7 +204,8 @@ jobs:
 
   integration:
     name: Integration Tests
-    needs: [build]
+    needs: [ci-scope, build]
+    if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -240,7 +285,8 @@ jobs:
 
   e2e-auth:
     name: E2E Tests
-    needs: [build]
+    needs: [ci-scope, build]
+    if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
