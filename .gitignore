@@ -39,6 +39,9 @@ scripts/proxy/.caddy-data/
 !.env.test
 tests/integration/notifications/.env
 
+# Local release planning
+.release-plan.md
+
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
