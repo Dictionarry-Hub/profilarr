@@ -325,7 +325,11 @@
 			</Dropdown>
 		</svelte:fragment>
 	</ActionButton>
-	<ActionButton icon={Info} title="About conflict actions" on:click={() => (showInfoModal = true)} />
+	<ActionButton
+		icon={Info}
+		title="About conflict actions"
+		on:click={() => (showInfoModal = true)}
+	/>
 </ActionsBar>
 
 <div class="mt-6 space-y-4">
@@ -429,16 +433,12 @@
 	<div class="space-y-4 text-sm text-neutral-700 dark:text-neutral-300">
 		<section>
 			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Align</h3>
-			<p>
-				Align accepts the database version and discards your local change for this conflict.
-			</p>
+			<p>Align accepts the database version and discards your local change for this conflict.</p>
 		</section>
 
 		<section>
 			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Override</h3>
-			<p>
-				Override keeps your local change and reapplies it on top of the new version.
-			</p>
+			<p>Override keeps your local change and reapplies it on top of the new version.</p>
 		</section>
 	</div>
 </InfoModal>
