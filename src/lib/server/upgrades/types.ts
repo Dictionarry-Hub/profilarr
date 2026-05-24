@@ -2,7 +2,11 @@
  * Types for the upgrade processing system
  */
 
-import type { RadarrMovie, SonarrSeries } from '$lib/server/utils/arr/types.ts';
+import type {
+	RadarrMovie,
+	ScoreBreakdownItem,
+	SonarrSeries
+} from '$lib/server/utils/arr/types.ts';
 import type { FilterGroup } from '$shared/upgrades/filters.ts';
 
 /**
@@ -17,14 +21,18 @@ export interface UpgradeItem {
 	monitored: boolean;
 	cutoff_met: boolean;
 	quality_profile: string;
+	quality_name: string;
+	file_name: string;
 	original_language: string;
 	genres: string;
 	tags: string;
 	custom_formats: string[];
+	score_breakdown: ScoreBreakdownItem[];
 	rating: number;
 	runtime: number;
 	size_on_disk: number;
 	date_added: string;
+	path: string;
 
 	// Radarr-only fields (empty/zero defaults for Sonarr)
 	minimum_availability: string;
@@ -92,7 +100,7 @@ export interface UpgradeNewRelease {
 	release: string; // release title
 	formats: string[];
 	score: number;
-	seasonNumber?: number; // Sonarr only — which season this grab is for
+	seasonNumber?: number; // Sonarr only, which season this grab is for
 }
 
 /**

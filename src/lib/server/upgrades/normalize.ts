@@ -7,9 +7,30 @@ import type {
 	RadarrMovie,
 	RadarrMovieFile,
 	SonarrSeries,
-	ArrQualityProfile
+	ArrQualityProfile,
+	CustomFormatRef,
+	QualityProfileFormatItem,
+	ScoreBreakdownItem
 } from '$lib/server/utils/arr/types.ts';
 import type { UpgradeItem } from './types.ts';
+
+function getFileName(path: string | undefined): string {
+	if (!path) return '';
+	return path.split('/').pop() ?? path;
+}
+
+function computeScoreBreakdown(
+	customFormats: CustomFormatRef[],
+	profileFormatItems: QualityProfileFormatItem[]
+): ScoreBreakdownItem[] {
+	return customFormats.map((format) => {
+		const profileItem = profileFormatItems.find((item) => item.format === format.id);
+		return {
+			name: format.name,
+			score: profileItem?.score ?? 0
+		};
+	});
+}
 
 /**
  * Normalize a Radarr movie to an UpgradeItem for filter evaluation
@@ -67,14 +88,20 @@ export function normalizeRadarrItem(
 		monitored: movie.monitored ?? false,
 		cutoff_met: cutoffMet,
 		quality_profile: profile?.name ?? 'Unknown',
+		quality_name: movieFile?.quality?.quality?.name ?? '',
+		file_name: getFileName(movieFile?.relativePath ?? movieFile?.path),
 		original_language: movie.originalLanguage?.name ?? '',
 		genres: movie.genres?.join(', ') ?? '',
 		tags,
 		custom_formats: movieFile?.customFormats.map((cf) => cf.name) ?? [],
+		score_breakdown: movieFile
+			? computeScoreBreakdown(movieFile.customFormats, profile?.formatItems ?? [])
+			: [],
 		rating: tmdbRating,
 		runtime: movie.runtime ?? 0,
 		size_on_disk: sizeOnDiskGB,
 		date_added: dateAdded,
+		path: movie.path ?? '',
 
 		// Radarr-specific fields
 		minimum_availability: movie.minimumAvailability ?? 'released',
@@ -168,14 +195,18 @@ export function normalizeSonarrItem(
 		monitored: series.monitored,
 		cutoff_met: cutoffMet,
 		quality_profile: profile?.name ?? 'Unknown',
+		quality_name: '',
+		file_name: '',
 		original_language: series.originalLanguage?.name ?? '',
 		genres: series.genres?.join(', ') ?? '',
 		tags,
 		custom_formats: [],
+		score_breakdown: [],
 		rating: series.ratings?.value ?? 0,
 		runtime: series.runtime ?? 0,
 		size_on_disk: sizeOnDiskGB,
 		date_added: dateAdded,
+		path: series.path ?? '',
 
 		// Radarr fields (defaults for Sonarr)
 		minimum_availability: '',

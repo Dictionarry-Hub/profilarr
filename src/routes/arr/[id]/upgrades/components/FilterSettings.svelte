@@ -7,7 +7,10 @@
 		FileJson,
 		FileText,
 		Trash2,
-		Pencil
+		Pencil,
+		Eye,
+		Loader2,
+		CircleDot
 	} from 'lucide-svelte';
 	import {
 		createEmptyFilterConfig,
@@ -24,6 +27,7 @@
 	} from '$shared/upgrades/filters';
 	import { uuid } from '$shared/utils/uuid';
 	import { selectors } from '$shared/upgrades/selectors';
+	import { afterUpdate, onMount } from 'svelte';
 	import {
 		createSearchStore,
 		getPersistentSearchStore,
@@ -45,12 +49,16 @@
 	import Button from '$ui/button/Button.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import PasteModal from '$ui/modal/PasteModal.svelte';
+	import Label from '$ui/label/Label.svelte';
+	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
 
 	let searchStore: SearchStore = createSearchStore();
 	let debouncedQuery: Readable<string> = searchStore.debouncedQuery;
+	let previewSearchStore: SearchStore = createSearchStore();
+	let previewDebouncedQuery: Readable<string> = previewSearchStore.debouncedQuery;
 	$: if ($page?.params?.id) {
 		searchStore = getPersistentSearchStore(`upgradeFiltersSearch:${$page.params.id}`);
 		debouncedQuery = searchStore.debouncedQuery;
@@ -78,6 +86,88 @@
 		alphabetical_asc: 'A-Z',
 		alphabetical_desc: 'Z-A'
 	};
+
+	type PreviewStatus = 'selected' | 'selectable' | 'cooldown' | 'filtered_out';
+	type PreviewLabelVariant = 'secondary' | 'success' | 'warning' | 'info';
+	type PreviewFlowNodeId =
+		| 'library'
+		| 'filteredOut'
+		| 'matched'
+		| 'cooldown'
+		| 'available'
+		| 'selected'
+		| 'remaining';
+
+	interface PreviewItem {
+		id: number;
+		title: string;
+		year: number;
+		status: PreviewStatus;
+		reason: string;
+		details: PreviewDetails;
+	}
+
+	interface PreviewFormat {
+		name: string;
+		score: number;
+	}
+
+	interface PreviewDetails {
+		qualityProfile: string;
+		fileName: string;
+		customFormats: PreviewFormat[];
+		score: number;
+		tags: string[];
+		monitored: boolean;
+		dateAdded: string;
+		sizeOnDisk: number;
+		releaseGroup: string;
+		status: string;
+	}
+
+	interface PreviewResult {
+		filterName: string;
+		totalItems: number;
+		matchedCount: number;
+		cooldownCount: number;
+		selectableCount: number;
+		selectedCount: number;
+		requestedCount: number;
+		selector: string;
+		items: PreviewItem[];
+	}
+
+	interface PreviewFlowPath {
+		id: string;
+		from: PreviewFlowNodeId;
+		to: PreviewFlowNodeId;
+		d: string;
+	}
+
+	const previewStatusMeta: Record<
+		PreviewStatus,
+		{ label: string; variant: PreviewLabelVariant }
+	> = {
+		selected: { label: 'Selected', variant: 'success' },
+		selectable: { label: 'Selectable', variant: 'info' },
+		cooldown: { label: 'Cooldown', variant: 'warning' },
+		filtered_out: { label: 'Filtered out', variant: 'secondary' }
+	};
+	const previewStatusOptions: { value: PreviewStatus; label: string }[] = [
+		{ value: 'selected', label: 'Selected' },
+		{ value: 'selectable', label: 'Selectable' },
+		{ value: 'cooldown', label: 'Cooldown' },
+		{ value: 'filtered_out', label: 'Filtered out' }
+	];
+	const previewFlowEdges: { from: PreviewFlowNodeId; to: PreviewFlowNodeId }[] = [
+		{ from: 'library', to: 'filteredOut' },
+		{ from: 'library', to: 'matched' },
+		{ from: 'matched', to: 'cooldown' },
+		{ from: 'matched', to: 'available' },
+		{ from: 'available', to: 'selected' },
+		{ from: 'available', to: 'remaining' }
+	];
+	const previewSkeletonRows = Array.from({ length: 8 });
 
 	// Auto-clamp filter counts when max decreases
 	$: {
@@ -110,6 +200,11 @@
 	let expandedIds: Set<string> = new Set();
 
 	const columns: Column<FilterConfig>[] = [{ key: 'name', header: 'Name', sortable: true }];
+	const previewColumns: Column<PreviewItem>[] = [
+		{ key: 'title', header: 'Title', sortable: true, width: 'w-64' },
+		{ key: 'status', header: 'Status', width: 'w-32' },
+		{ key: 'reason', header: 'Reason' }
+	];
 	let editingId: string | null = null;
 	let editingName: string = '';
 
@@ -117,6 +212,32 @@
 	let deleteModalOpen = false;
 	let filterToDelete: FilterConfig | null = null;
 	let pasteModalOpen = false;
+	let previewModalOpen = false;
+	let previewFilter: FilterConfig | null = null;
+	let previewLoading = false;
+	let previewLoadingText = 'Loading library data...';
+	let previewError: string | null = null;
+	let previewData: PreviewResult | null = null;
+	let previewStatusFilters: Set<PreviewStatus> = new Set();
+	let previewExpandedIds: Set<string | number> = new Set();
+	let previewRequestId = 0;
+	let previewStepTimer: ReturnType<typeof setTimeout> | undefined;
+	let previewFlowContainer: HTMLDivElement | null = null;
+	let previewFlowNodeRefs: Partial<Record<PreviewFlowNodeId, HTMLDivElement>> = {};
+	let previewFlowPaths: PreviewFlowPath[] = [];
+	let previewFlowFrame: number | undefined;
+	const previewFlowNodeClass =
+		'w-32 rounded bg-neutral-100 px-3 py-2 text-center dark:bg-neutral-800';
+	const previewFlowLabelClass =
+		'text-[10px] font-medium text-neutral-500 uppercase dark:text-neutral-400';
+	const previewFlowValueClass =
+		'font-mono text-lg font-semibold text-neutral-900 dark:text-neutral-100';
+
+	$: filteredPreviewItems = filterPreviewItems(
+		previewData?.items ?? [],
+		$previewDebouncedQuery,
+		previewStatusFilters
+	);
 
 	function confirmDelete(filter: FilterConfig) {
 		filterToDelete = filter;
@@ -348,6 +469,248 @@
 	function handlePasteCancel() {
 		pasteModalOpen = false;
 	}
+
+	function clearPreviewStepTimer() {
+		if (previewStepTimer) {
+			clearTimeout(previewStepTimer);
+			previewStepTimer = undefined;
+		}
+	}
+
+	function resetPreviewFilters() {
+		previewSearchStore.clear();
+		previewStatusFilters = new Set();
+		previewExpandedIds = new Set();
+	}
+
+	function filterPreviewItems(
+		items: PreviewItem[],
+		query: string,
+		statuses: Set<PreviewStatus>
+	): PreviewItem[] {
+		let result = items;
+		const queryLower = query.trim().toLowerCase();
+
+		if (queryLower) {
+			result = result.filter(
+				(item) =>
+					item.title.toLowerCase().includes(queryLower) ||
+					item.reason.toLowerCase().includes(queryLower) ||
+					previewStatusMeta[item.status].label.toLowerCase().includes(queryLower)
+			);
+		}
+
+		if (statuses.size > 0) {
+			result = result.filter((item) => statuses.has(item.status));
+		}
+
+		return result;
+	}
+
+	function togglePreviewStatus(status: PreviewStatus) {
+		if (previewStatusFilters.has(status)) {
+			previewStatusFilters.delete(status);
+		} else {
+			previewStatusFilters.add(status);
+		}
+		previewStatusFilters = new Set(previewStatusFilters);
+	}
+
+	function clearPreviewStatusFilters() {
+		previewStatusFilters = new Set();
+	}
+
+	async function openPreview(filter: FilterConfig) {
+		const requestId = previewRequestId + 1;
+		previewRequestId = requestId;
+		previewFilter = filter;
+		previewModalOpen = true;
+		previewLoading = true;
+		previewLoadingText = 'Loading library data...';
+		previewError = null;
+		previewData = null;
+		previewFlowPaths = [];
+		resetPreviewFilters();
+		clearPreviewStepTimer();
+		previewStepTimer = setTimeout(() => {
+			if (requestId === previewRequestId) {
+				previewLoadingText = 'Evaluating filter...';
+			}
+		}, 700);
+
+		try {
+			const instanceId = $page.params.id;
+			if (!instanceId) {
+				throw new Error('Invalid instance ID');
+			}
+
+			const response = await fetch(`/arr/${instanceId}/upgrades/preview`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ filter: structuredClone(filter) })
+			});
+			const result = await response.json().catch(() => ({}));
+
+			if (requestId !== previewRequestId) {
+				return;
+			}
+
+			if (!response.ok) {
+				throw new Error(result.error ?? 'Failed to preview filter');
+			}
+
+			previewData = result as PreviewResult;
+		} catch (err) {
+			if (requestId === previewRequestId) {
+				previewError = err instanceof Error ? err.message : 'Failed to preview filter';
+			}
+		} finally {
+			if (requestId === previewRequestId) {
+				clearPreviewStepTimer();
+				previewLoading = false;
+				schedulePreviewFlowPathUpdate();
+			}
+		}
+	}
+
+	function closePreview() {
+		previewRequestId += 1;
+		clearPreviewStepTimer();
+		previewModalOpen = false;
+		previewLoading = false;
+		previewFilter = null;
+		previewData = null;
+		previewFlowPaths = [];
+	}
+
+	function formatPreviewSize(sizeGb: number): string {
+		if (!sizeGb) return 'None';
+		if (sizeGb >= 1) return `${sizeGb.toFixed(1)} GB`;
+		return `${Math.round(sizeGb * 1024)} MB`;
+	}
+
+	function formatPreviewDate(value: string): string {
+		if (!value) return 'Unknown';
+		const date = new Date(value);
+		if (Number.isNaN(date.getTime())) return 'Unknown';
+		return date.toLocaleDateString();
+	}
+
+	function formatPreviewScore(score: number): string {
+		return score.toLocaleString();
+	}
+
+	function formatPreviewStatus(status: string): string {
+		if (!status) return 'Unknown';
+		return status
+			.replace(/([a-z])([A-Z])/g, '$1 $2')
+			.replace(/_/g, ' ')
+			.replace(/\b\w/g, (letter) => letter.toUpperCase());
+	}
+
+	function previewStatusVariant(status: string): PreviewLabelVariant {
+		switch (status) {
+			case 'released':
+			case 'continuing':
+				return 'success';
+			case 'inCinemas':
+			case 'upcoming':
+				return 'info';
+			default:
+				return 'secondary';
+		}
+	}
+
+	function renderFlowValue(value: number): string {
+		return value.toLocaleString();
+	}
+
+	$: previewFilteredOutCount =
+		previewData ? previewData.totalItems - previewData.matchedCount : 0;
+	$: previewRemainingCount =
+		previewData ? previewData.selectableCount - previewData.selectedCount : 0;
+
+	function calculatePreviewFlowPath(
+		fromEl: HTMLDivElement,
+		toEl: HTMLDivElement,
+		containerEl: HTMLDivElement
+	): string {
+		const containerRect = containerEl.getBoundingClientRect();
+		const fromRect = fromEl.getBoundingClientRect();
+		const toRect = toEl.getBoundingClientRect();
+		const fromX = fromRect.right - containerRect.left;
+		const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
+		const toX = toRect.left - containerRect.left;
+		const toY = toRect.top + toRect.height / 2 - containerRect.top;
+		const endX = toX - 10;
+		const distance = endX - fromX;
+		const controlOffset = distance * 0.45;
+
+		return `M ${fromX} ${fromY} C ${fromX + controlOffset} ${fromY}, ${endX - controlOffset} ${toY}, ${endX} ${toY}`;
+	}
+
+	function previewFlowPathsEqual(nextPaths: PreviewFlowPath[]): boolean {
+		return (
+			previewFlowPaths.length === nextPaths.length &&
+			previewFlowPaths.every((path, index) => {
+				const nextPath = nextPaths[index];
+				if (!nextPath) return false;
+				return (
+					path.id === nextPath.id &&
+					path.from === nextPath.from &&
+					path.to === nextPath.to &&
+					path.d === nextPath.d
+				);
+			})
+		);
+	}
+
+	function updatePreviewFlowPaths() {
+		if (!previewData || !previewFlowContainer) {
+			if (previewFlowPaths.length > 0) previewFlowPaths = [];
+			return;
+		}
+
+		const nextPaths = previewFlowEdges.flatMap((edge) => {
+			const fromEl = previewFlowNodeRefs[edge.from];
+			const toEl = previewFlowNodeRefs[edge.to];
+			if (!fromEl || !toEl || !previewFlowContainer) return [];
+
+			const d = calculatePreviewFlowPath(fromEl, toEl, previewFlowContainer);
+			return [{ id: `${edge.from}-${edge.to}`, ...edge, d }];
+		});
+
+		if (!previewFlowPathsEqual(nextPaths)) {
+			previewFlowPaths = nextPaths;
+		}
+	}
+
+	function schedulePreviewFlowPathUpdate() {
+		if (typeof requestAnimationFrame === 'undefined') return;
+		if (previewFlowFrame !== undefined) return;
+
+		previewFlowFrame = requestAnimationFrame(() => {
+			previewFlowFrame = undefined;
+			updatePreviewFlowPaths();
+		});
+	}
+
+	afterUpdate(() => {
+		if (previewData) {
+			schedulePreviewFlowPathUpdate();
+		}
+	});
+
+	onMount(() => {
+		window.addEventListener('resize', schedulePreviewFlowPathUpdate);
+
+		return () => {
+			window.removeEventListener('resize', schedulePreviewFlowPathUpdate);
+			if (previewFlowFrame !== undefined) {
+				cancelAnimationFrame(previewFlowFrame);
+			}
+		};
+	});
 </script>
 
 <div class="-mx-4 bg-neutral-50 px-4 pt-2 pb-2 md:-mx-8 md:px-8 dark:bg-neutral-900">
@@ -422,6 +785,12 @@
 					<!-- Mobile: buttons below name -->
 					<div class="flex flex-wrap items-center gap-1 md:hidden">
 						<Button
+							icon={Eye}
+							iconColor="text-blue-600 dark:text-blue-400"
+							tooltip="Preview"
+							on:click={() => openPreview(row)}
+						/>
+						<Button
 							icon={Power}
 							iconColor={row.enabled
 								? 'text-green-600 dark:text-green-400'
@@ -455,6 +824,12 @@
 		<!-- Desktop: buttons in actions slot -->
 		<svelte:fragment slot="actions" let:row>
 			<div class="hidden items-center gap-1 md:flex">
+				<Button
+					icon={Eye}
+					iconColor="text-blue-600 dark:text-blue-400"
+					tooltip="Preview"
+					on:click={() => openPreview(row)}
+				/>
 				<Button
 					icon={Power}
 					iconColor={row.enabled
@@ -618,6 +993,353 @@
 	on:confirm={handleDeleteConfirm}
 	on:cancel={handleDeleteCancel}
 />
+
+<Modal
+	open={previewModalOpen}
+	header={previewFilter ? `Preview: ${previewFilter.name}` : 'Preview Filter'}
+	size="2xl"
+	height="xl"
+	on:cancel={closePreview}
+>
+	<svelte:fragment slot="body">
+		{#if previewLoading}
+			<div class="space-y-4">
+				<div class="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+					<Loader2 size={16} class="animate-spin text-blue-600 dark:text-blue-400" />
+					<span>{previewLoadingText}</span>
+				</div>
+				<div
+					class="overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700/60"
+				>
+					{#each previewSkeletonRows as _}
+						<div class="flex gap-4 border-b border-neutral-200 p-4 last:border-0 dark:border-neutral-800">
+							<div class="h-4 w-2/5 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800"></div>
+							<div class="h-4 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800"></div>
+							<div class="h-4 w-28 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800"></div>
+							<div class="h-4 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800"></div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{:else if previewError}
+			<div
+				class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+			>
+				{previewError}
+			</div>
+		{:else if previewData}
+			<div class="space-y-4">
+				<ActionsBar className="md:justify-start">
+					<SearchAction
+						searchStore={previewSearchStore}
+						placeholder="Search items..."
+						responsive
+					/>
+					<ActionButton icon={CircleDot} hasDropdown square title="Filter by status">
+						<svelte:fragment slot="dropdown">
+							<Dropdown position="right" mobilePosition="middle" minWidth="12rem">
+								<DropdownHeader label="Status" />
+								<DropdownItem
+									label="All statuses"
+									selected={previewStatusFilters.size === 0}
+									on:click={clearPreviewStatusFilters}
+								/>
+								{#each previewStatusOptions as option}
+									<DropdownItem
+										label={option.label}
+										selected={previewStatusFilters.has(option.value)}
+										on:click={() => togglePreviewStatus(option.value)}
+									/>
+								{/each}
+							</Dropdown>
+						</svelte:fragment>
+					</ActionButton>
+				</ActionsBar>
+
+				<div class="overflow-x-auto rounded-lg border border-neutral-300 dark:border-neutral-700/60">
+					<div class="relative min-w-[52rem] p-4" bind:this={previewFlowContainer}>
+						<div class="relative z-10 grid grid-cols-4 gap-x-20">
+							<div class="flex min-h-44 items-center">
+								<div
+									bind:this={previewFlowNodeRefs.library}
+									class={previewFlowNodeClass}
+								>
+									<div class={previewFlowLabelClass}>Library</div>
+									<div class={previewFlowValueClass}>
+										{renderFlowValue(previewData.totalItems)}
+									</div>
+								</div>
+							</div>
+
+							<div class="flex min-h-44 flex-col justify-between">
+								<div
+									bind:this={previewFlowNodeRefs.filteredOut}
+									class={previewFlowNodeClass}
+								>
+									<div class={previewFlowLabelClass}>Filtered Out</div>
+									<div class={previewFlowValueClass}>
+										{renderFlowValue(previewFilteredOutCount)}
+									</div>
+								</div>
+								<div
+									bind:this={previewFlowNodeRefs.matched}
+									class={previewFlowNodeClass}
+								>
+									<div class={previewFlowLabelClass}>Eligible</div>
+									<div class={previewFlowValueClass}>
+										{renderFlowValue(previewData.matchedCount)}
+									</div>
+								</div>
+							</div>
+
+							<div class="flex min-h-44 flex-col justify-between">
+								<div
+									bind:this={previewFlowNodeRefs.cooldown}
+									class={previewFlowNodeClass}
+								>
+									<div class={previewFlowLabelClass}>On Cooldown</div>
+									<div class={previewFlowValueClass}>
+										{renderFlowValue(previewData.cooldownCount)}
+									</div>
+								</div>
+								<div
+									bind:this={previewFlowNodeRefs.available}
+									class={previewFlowNodeClass}
+								>
+									<div class={previewFlowLabelClass}>Eligible</div>
+									<div class={previewFlowValueClass}>
+										{renderFlowValue(previewData.selectableCount)}
+									</div>
+								</div>
+							</div>
+
+							<div class="flex min-h-44 flex-col justify-between">
+								<div
+									bind:this={previewFlowNodeRefs.selected}
+									class={previewFlowNodeClass}
+								>
+									<div class={previewFlowLabelClass}>Selected</div>
+									<div class={previewFlowValueClass}>
+										{renderFlowValue(previewData.selectedCount)} / {renderFlowValue(previewData.requestedCount)}
+									</div>
+								</div>
+								<div
+									bind:this={previewFlowNodeRefs.remaining}
+									class={previewFlowNodeClass}
+								>
+									<div class={previewFlowLabelClass}>Remaining</div>
+									<div class={previewFlowValueClass}>
+										{renderFlowValue(previewRemainingCount)}
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<svg
+							class="pointer-events-none absolute inset-0 z-20 h-full w-full text-neutral-300 dark:text-neutral-700"
+							fill="none"
+							aria-hidden="true"
+						>
+							<defs>
+								<marker
+									id="preview-flow-arrow"
+									markerWidth="10"
+									markerHeight="10"
+									refX="8"
+									refY="5"
+									orient="auto"
+								>
+									<path d="M 0 0 L 10 5 L 0 10 Z" fill="currentColor" />
+								</marker>
+							</defs>
+							{#each previewFlowPaths as path}
+								<path
+									d={path.d}
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									marker-end="url(#preview-flow-arrow)"
+								/>
+							{/each}
+						</svg>
+					</div>
+				</div>
+
+				<ExpandableTable
+					columns={previewColumns}
+					data={filteredPreviewItems}
+					getRowId={(row) => row.id}
+					bind:expandedRows={previewExpandedIds}
+					compact
+					responsive
+					flushExpanded
+					fixedLayout
+					pageSize={100}
+					emptyMessage="No preview items match."
+				>
+					<svelte:fragment slot="cell" let:row let:column>
+						{#if column.key === 'title'}
+							<div class="min-w-0">
+								<div class="truncate font-medium">{row.title}</div>
+								<div class="text-xs text-neutral-500 dark:text-neutral-400">{row.year}</div>
+							</div>
+						{:else if column.key === 'status'}
+							<Label variant={previewStatusMeta[row.status].variant} size="sm" rounded="md">
+								{previewStatusMeta[row.status].label}
+							</Label>
+						{:else if column.key === 'reason'}
+							<span class="break-words text-neutral-600 dark:text-neutral-300">
+								{row.reason}
+							</span>
+						{/if}
+					</svelte:fragment>
+
+					<svelte:fragment slot="expanded" let:row>
+						<div class="min-w-0 overflow-hidden p-4">
+							<div class="divide-y divide-neutral-200 dark:divide-neutral-800">
+								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										File on Disk
+									</div>
+									<div class="min-w-0">
+										{#if row.details.fileName}
+											<code
+												class="font-mono text-xs break-all text-neutral-600 dark:text-neutral-400"
+											>
+												{row.details.fileName}
+											</code>
+										{:else}
+											<div class="text-xs text-neutral-500 dark:text-neutral-400">No file</div>
+										{/if}
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-2 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										Custom Formats
+									</div>
+									<div class="min-w-0">
+										{#if row.details.customFormats.length > 0}
+											<div class="flex min-w-0 flex-wrap items-center gap-2">
+												{#each [...row.details.customFormats].sort((a, b) => b.score - a.score) as item}
+													<CustomFormatBadge name={item.name} score={item.score} />
+												{/each}
+											</div>
+										{:else}
+											<div class="text-xs text-neutral-500 dark:text-neutral-400">
+												No custom formats matched
+											</div>
+										{/if}
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										Profile
+									</div>
+									<div class="min-w-0 break-words text-sm text-neutral-900 dark:text-neutral-100">
+										{row.details.qualityProfile}
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										Score
+									</div>
+									<div class="font-mono text-sm text-neutral-900 dark:text-neutral-100">
+										{formatPreviewScore(row.details.score)}
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										Monitored
+									</div>
+									<div>
+										<Label
+											variant={row.details.monitored ? 'success' : 'secondary'}
+											size="sm"
+											rounded="md"
+										>
+											{row.details.monitored ? 'Yes' : 'No'}
+										</Label>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										Status
+									</div>
+									<div>
+										<Label
+											variant={previewStatusVariant(row.details.status)}
+											size="sm"
+											rounded="md"
+										>
+											{formatPreviewStatus(row.details.status)}
+										</Label>
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										Size
+									</div>
+									<div class="font-mono text-sm text-neutral-900 dark:text-neutral-100">
+										{formatPreviewSize(row.details.sizeOnDisk)}
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										Added
+									</div>
+									<div class="font-mono text-sm text-neutral-900 dark:text-neutral-100">
+										{formatPreviewDate(row.details.dateAdded)}
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										Release Group
+									</div>
+									<div
+										class="min-w-0 break-words font-mono text-sm text-neutral-900 dark:text-neutral-100"
+									>
+										{row.details.releaseGroup || 'None'}
+									</div>
+								</div>
+
+								<div class="grid grid-cols-1 gap-2 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+										Tags
+									</div>
+									<div class="min-w-0">
+										{#if row.details.tags.length > 0}
+											<div class="flex min-w-0 flex-wrap items-center gap-2">
+												{#each row.details.tags as tag}
+													<Label variant="secondary" size="sm" rounded="md">{tag}</Label>
+												{/each}
+											</div>
+										{:else}
+											<div class="text-xs text-neutral-500 dark:text-neutral-400">No tags</div>
+										{/if}
+									</div>
+								</div>
+							</div>
+						</div>
+					</svelte:fragment>
+				</ExpandableTable>
+			</div>
+		{/if}
+	</svelte:fragment>
+
+	<svelte:fragment slot="footer">
+		<div class="flex w-full justify-end">
+			<Button text="Close" on:click={closePreview} />
+		</div>
+	</svelte:fragment>
+</Modal>
 
 <PasteModal
 	open={pasteModalOpen}
