@@ -198,6 +198,9 @@ inside the savepoint, then rolled back. If any constraint fails (foreign
 key, unique, NOT NULL, CHECK), the write is rejected with a detailed
 error before anything is persisted.
 
+Before a base draft export is pushed, the exporter also validates the
+final batch against a clean base view: schema ops, published base ops, then the proposed export SQL. This catches dependency or constraint errors that would not be visible when validating against the current draft cache.
+
 ### Metadata and Desired State
 
 Each op stores two JSON blobs alongside its SQL:
@@ -239,6 +242,15 @@ When a user deletes an entity they just created (same layer, no dependent
 ops referencing it), the writer marks the original create op as `dropped`
 instead of writing a new delete op. This avoids accumulating redundant
 create-then-delete pairs.
+
+Dependent ops include both same-entity follow-up ops and `dependsOn`
+references from other entities. For example, a quality profile scoring op
+that references a newly created custom format prevents that custom format
+create from being silently cancelled.
+
+Dropping draft creates from the Changes page also respects `dependsOn`.
+If a selected create has unselected draft dependents, the drop is blocked
+and the user is told which outstanding changes must be selected too.
 
 ### Base vs User
 

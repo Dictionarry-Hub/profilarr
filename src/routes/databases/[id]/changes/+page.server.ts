@@ -7,7 +7,7 @@ import { logger } from '$logger/logger.ts';
 import { pcdManager } from '$pcd/core/manager.ts';
 import { reconcileAndNotify, reconcileFromWorkingCopy } from '$announcements/database/index.ts';
 import { compile } from '$pcd/database/compiler.ts';
-import { listDraftEntityChanges } from '$pcd/ops/draftChanges.ts';
+import { findDraftDropBlockers, listDraftEntityChanges } from '$pcd/ops/draftChanges.ts';
 import { exportDraftOps, previewDraftOps } from '$pcd/ops/exporter.ts';
 import { uuid } from '$shared/utils/uuid.ts';
 import { validateFilePaths } from '$utils/paths.ts';
@@ -97,6 +97,19 @@ export const actions: Actions = {
 					meta: { databaseId: id }
 				});
 				return { success: false, error: 'No changes selected' };
+			}
+
+			const blockers = findDraftDropBlockers(id, opIds);
+			if (blockers.length > 0) {
+				const details = blockers
+					.map(
+						(blocker) => `${formatEntity(blocker.entity)} "${blocker.name}" (${blocker.summary})`
+					)
+					.join(', ');
+				return {
+					success: false,
+					error: `Cannot drop selected changes because other outstanding changes depend on them. Select these changes too, then drop again: ${details}`
+				};
 			}
 
 			// ─── File-backed drops ──────────────────────────────────────────
@@ -336,3 +349,8 @@ export const actions: Actions = {
 		}
 	}
 };
+
+function formatEntity(entity: string): string {
+	const trimmed = entity.replace(/[_-]+/g, ' ').trim();
+	return trimmed.replace(/\b\w/g, (char) => char.toUpperCase());
+}
