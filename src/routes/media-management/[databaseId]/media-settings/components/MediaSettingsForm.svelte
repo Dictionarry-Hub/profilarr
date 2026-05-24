@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { tick } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -39,6 +39,8 @@
 		propersRepacks: 'doNotPrefer',
 		enableMediaInfo: true
 	};
+	const PROPERS_REPACKS_CONFIRM_TEXT =
+		'I UNDERSTAND THIS CAN BREAK CUSTOM FORMAT SCORING AND CAUSE INCONSISTENT GRAB BEHAVIOR';
 
 	function mapToFormData(data: RadarrMediaSettingsRow | null): RadarrMediaSettingsRowFormData {
 		if (!data) return defaults;
@@ -61,8 +63,13 @@
 	let deleting = false;
 	let showDeleteModal = false;
 	let showSyncModal = false;
+	let showPropersRepacksModal = false;
 	let pendingRedirectTo = '';
 	let pendingAffectedArrs: AffectedArr[] = [];
+	let pendingPropersRepacks: PropersRepacks | null = null;
+	let propersRepacksConfirmation = '';
+	let propersRepacksConfirmationElement: HTMLInputElement | HTMLTextAreaElement | null = null;
+	let propersRepacksPasteElement: HTMLInputElement | HTMLTextAreaElement | null = null;
 	let selectedLayer: 'user' | 'base' = canWriteToBase ? 'base' : 'user';
 	let mainFormElement: HTMLFormElement;
 	let deleteFormElement: HTMLFormElement;
@@ -79,12 +86,48 @@
 	$: isValid = formData.name.trim() !== '';
 	$: propersRepacksDescription =
 		PROPERS_REPACKS_OPTIONS.find((o) => o.value === formData.propersRepacks)?.description ?? '';
+	$: canConfirmPropersRepacks = propersRepacksConfirmation === PROPERS_REPACKS_CONFIRM_TEXT;
+	$: {
+		if (propersRepacksConfirmationElement !== propersRepacksPasteElement) {
+			propersRepacksPasteElement?.removeEventListener('paste', blockPropersRepacksPaste);
+			propersRepacksPasteElement = propersRepacksConfirmationElement;
+			propersRepacksPasteElement?.addEventListener('paste', blockPropersRepacksPaste);
+		}
+	}
 
 	function updateField<K extends keyof RadarrMediaSettingsRowFormData>(
 		field: K,
 		value: RadarrMediaSettingsRowFormData[K]
 	) {
 		update<RadarrMediaSettingsRowFormData, K>(field, value);
+	}
+
+	function handlePropersRepacksChange(value: PropersRepacks) {
+		if (value === formData.propersRepacks) return;
+		if (value === 'doNotPrefer') {
+			updateField('propersRepacks', value);
+			return;
+		}
+
+		pendingPropersRepacks = value;
+		propersRepacksConfirmation = '';
+		showPropersRepacksModal = true;
+	}
+
+	function confirmPropersRepacksChange() {
+		if (!pendingPropersRepacks || !canConfirmPropersRepacks) return;
+		updateField('propersRepacks', pendingPropersRepacks);
+		closePropersRepacksModal();
+	}
+
+	function closePropersRepacksModal() {
+		showPropersRepacksModal = false;
+		pendingPropersRepacks = null;
+		propersRepacksConfirmation = '';
+	}
+
+	function blockPropersRepacksPaste(event: ClipboardEvent) {
+		event.preventDefault();
 	}
 
 	async function handleSaveClick() {
@@ -109,6 +152,10 @@
 	function handleDeleteCancel() {
 		showDeleteModal = false;
 	}
+
+	onDestroy(() => {
+		propersRepacksPasteElement?.removeEventListener('paste', blockPropersRepacksPaste);
+	});
 </script>
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
@@ -163,7 +210,7 @@
 				value={formData.propersRepacks}
 				options={PROPERS_REPACKS_OPTIONS}
 				fullWidth
-				on:change={(e) => updateField('propersRepacks', e.detail as PropersRepacks)}
+				on:change={(e) => handlePropersRepacksChange(e.detail as PropersRepacks)}
 			/>
 			{#if propersRepacksDescription}
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
@@ -276,6 +323,37 @@
 	on:confirm={handleDeleteConfirm}
 	on:cancel={handleDeleteCancel}
 />
+
+<Modal
+	open={showPropersRepacksModal}
+	header="Change propers and repacks"
+	confirmText="Change"
+	cancelText="Cancel"
+	confirmDanger={true}
+	confirmDisabled={!canConfirmPropersRepacks}
+	on:confirm={confirmPropersRepacksChange}
+	on:cancel={closePropersRepacksModal}
+>
+	<div slot="body" class="space-y-4">
+		<p class="text-sm text-neutral-700 dark:text-neutral-300">
+			Profilarr expects proper and repack preferences to be handled by custom formats. Changing
+			this setting enables Arr's built-in preference system, which can override custom format
+			scores and make grab decisions look wrong or inconsistent.
+		</p>
+		<p class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+			Type <span class="font-mono">{PROPERS_REPACKS_CONFIRM_TEXT}</span> to continue.
+		</p>
+		<FormInput
+			label="Confirmation"
+			name="propers-repacks-confirmation"
+			value={propersRepacksConfirmation}
+			placeholder="Type the confirmation text"
+			description="Type the confirmation text exactly to unlock this change."
+			bind:inputElement={propersRepacksConfirmationElement}
+			on:input={(e) => (propersRepacksConfirmation = e.detail)}
+		/>
+	</div>
+</Modal>
 
 <!-- Sync Prompt Modal -->
 <SyncPromptModal
