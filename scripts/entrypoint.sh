@@ -25,6 +25,23 @@ ARCH=$(uname -m)
 export DENO_SQLITE_PATH="/usr/lib/${ARCH}-linux-gnu/libsqlite3.so.0"
 
 # -----------------------------------------------------------------------------
+# Resolve *_FILE env vars from secret files (Docker secrets pattern)
+# -----------------------------------------------------------------------------
+# Runs before the non-root fast path so it applies in both root and non-root modes
+for var in $(printenv | grep '_FILE=' | cut -d= -f1); do
+    case "$var" in *_FILE) ;; *) continue ;; esac
+    secret_path=$(printenv "$var")
+    if [ -f "$secret_path" ]; then
+        real_var=${var%_FILE}
+        export "$real_var=$(tr -d '\n' < "$secret_path")"
+        unset "$var"
+        echo "[entrypoint] $real_var loaded from $secret_path. Your paranoia is secured- feel better?"
+    else
+        echo "[entrypoint] WARN: $var points to $secret_path which does not exist. Check your pathing."
+    fi
+done
+
+# -----------------------------------------------------------------------------
 # Non-root fast path — skip all privilege operations
 # -----------------------------------------------------------------------------
 if [ "$(id -u)" != "0" ]; then
