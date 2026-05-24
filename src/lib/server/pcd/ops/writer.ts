@@ -81,6 +81,7 @@ async function cancelOutCreate(
 		entity?: string;
 		name?: string;
 		stable_key?: { key?: string; value?: string };
+		depends_on?: Array<{ entity?: string; key?: string; value?: string }>;
 	};
 
 	function hasDependentOps(
@@ -115,6 +116,18 @@ async function cancelOutCreate(
 				parsed.name === createdMeta.name
 			) {
 				return true;
+			}
+
+			if (createdMeta.entity && createdStableKey?.key && createdStableKey.value) {
+				for (const dependency of parsed.depends_on ?? []) {
+					if (
+						dependency.entity === createdMeta.entity &&
+						dependency.key === createdStableKey.key &&
+						dependency.value === createdStableKey.value
+					) {
+						return true;
+					}
+				}
 			}
 
 			if (createdMeta.entity === 'test_entity' && createdStableKey?.value) {

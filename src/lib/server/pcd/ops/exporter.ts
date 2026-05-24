@@ -4,6 +4,7 @@ import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
 import { logger } from '$logger/logger.ts';
 import { stage, commit, configureIdentity } from '$utils/git/write.ts';
 import { execGit } from '$utils/git/exec.ts';
+import { Database } from '@jsr/db__sqlite';
 import { getBranch, getStatus } from '$utils/git/read.ts';
 import { compile } from '../database/compiler.ts';
 import { canWriteToBase } from './writer.ts';
@@ -12,6 +13,7 @@ import { uuid } from '$shared/utils/uuid.ts';
 import { validateFilePaths } from '$utils/paths.ts';
 import { getMaxOpNumber } from '$pcd/utils/git.ts';
 import { loadManifest } from '$pcd/manifest/manifest.ts';
+import { loadOperationsFromDir } from '$pcd/utils/operations.ts';
 
 type ExportResult =
 	| {
@@ -77,6 +79,8 @@ type ExportPreview = {
 
 type PreviewResult = { success: true; preview: ExportPreview } | { success: false; error: string };
 
+type ExportValidationResult = { valid: true } | { valid: false; error: string };
+
 type ParsedMetadata = {
 	operation?: string;
 	entity?: string;
@@ -121,6 +125,76 @@ function buildMetadataJson(message: string, opIds: number[], exportedAt: string)
 		exported_at: exportedAt,
 		op_ids: opIds
 	});
+}
+
+function formatSqlValidationError(error: unknown): string {
+	const errorStr = String(error);
+	if (errorStr.includes('FOREIGN KEY constraint failed')) {
+		return `Foreign key constraint failed. ${errorStr}`;
+	}
+	if (errorStr.includes('UNIQUE constraint failed')) {
+		return `Unique constraint failed. ${errorStr}`;
+	}
+	if (errorStr.includes('NOT NULL constraint failed')) {
+		return `Required field is missing. ${errorStr}`;
+	}
+	if (errorStr.includes('CHECK constraint failed')) {
+		return `Value validation failed. ${errorStr}`;
+	}
+	return errorStr;
+}
+
+async function validateExportPlan(
+	databaseId: number,
+	repoPath: string,
+	plan: ExportPlan
+): Promise<ExportValidationResult> {
+	const validationDb = new Database(':memory:', { int64: true });
+
+	try {
+		validationDb.exec('PRAGMA foreign_keys = ON');
+
+		const schemaOps = await loadOperationsFromDir(`${repoPath}/deps/schema/ops`, 'schema');
+		for (const op of schemaOps) {
+			try {
+				validationDb.exec(op.sql);
+			} catch (error) {
+				return {
+					valid: false,
+					error: `Existing schema operation ${op.filename} failed validation: ${formatSqlValidationError(error)}`
+				};
+			}
+		}
+
+		const baseOps = pcdOpsQueries
+			.listByDatabaseAndOrigin(databaseId, 'base', { states: ['published'] })
+			.sort((a, b) => (a.sequence ?? a.id) - (b.sequence ?? b.id));
+
+		for (const op of baseOps) {
+			const label = op.filename ?? `pcd_op_${op.id}.sql`;
+			try {
+				validationDb.exec(op.sql);
+			} catch (error) {
+				return {
+					valid: false,
+					error: `Existing base operation ${label} failed validation: ${formatSqlValidationError(error)}`
+				};
+			}
+		}
+
+		try {
+			validationDb.exec(plan.dbSql);
+		} catch (error) {
+			return {
+				valid: false,
+				error: `Export batch ${plan.filename} failed validation: ${formatSqlValidationError(error)}`
+			};
+		}
+
+		return { valid: true };
+	} finally {
+		validationDb.close();
+	}
 }
 
 function opLabel(op: { metadata?: string | null }): string | null {
@@ -397,21 +471,27 @@ async function buildExportPlan(
 	const maxOpNumber = await getMaxOpNumber(repoPath);
 	const opNumber = maxOpNumber + 1;
 	const filename = `${opNumber}.${slugify(trimmedMessage)}.sql`;
+	const plan: ExportPlan = {
+		filename,
+		filepath: `ops/${filename}`,
+		fileContent,
+		dbSql,
+		metadataJson,
+		contentHash,
+		opIds: opIdList,
+		exportedAt,
+		opNumber,
+		ops
+	};
+
+	const validation = await validateExportPlan(databaseId, repoPath, plan);
+	if (!validation.valid) {
+		return { success: false, error: validation.error };
+	}
 
 	return {
 		success: true,
-		plan: {
-			filename,
-			filepath: `ops/${filename}`,
-			fileContent,
-			dbSql,
-			metadataJson,
-			contentHash,
-			opIds: opIdList,
-			exportedAt,
-			opNumber,
-			ops
-		}
+		plan
 	};
 }
 

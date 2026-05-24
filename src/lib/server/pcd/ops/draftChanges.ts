@@ -156,6 +156,13 @@ export type DraftEntityChange = {
 	path?: string;
 };
 
+export type DraftDropBlocker = {
+	key: string;
+	entity: string;
+	name: string;
+	summary: string;
+};
+
 const FIELD_LABELS: Record<string, string> = {
 	quality_profile_name: 'Quality profile',
 	custom_format_name: 'Custom format',
@@ -917,4 +924,77 @@ export function listDraftEntityChanges(databaseId: number): DraftEntityChange[] 
 		return a.updatedAt < b.updatedAt ? 1 : -1;
 	});
 	return results;
+}
+
+export function findDraftDropBlockers(
+	databaseId: number,
+	selectedOpIds: Iterable<number>
+): DraftDropBlocker[] {
+	const changes = listDraftEntityChanges(databaseId);
+	const changeByKey = new Map(changes.map((change) => [change.key, change]));
+	const keyByOpId = new Map<number, string>();
+
+	for (const change of changes) {
+		for (const op of change.ops) {
+			keyByOpId.set(op.id, change.key);
+		}
+	}
+
+	const selectedKeys = new Set<string>();
+	for (const opId of selectedOpIds) {
+		const key = keyByOpId.get(opId);
+		if (key) selectedKeys.add(key);
+	}
+
+	const selectedCreateKeys = new Set<string>();
+	for (const key of selectedKeys) {
+		const change = changeByKey.get(key);
+		if (change?.operation === 'create') {
+			selectedCreateKeys.add(key);
+		}
+	}
+
+	if (selectedCreateKeys.size === 0) {
+		return [];
+	}
+
+	const dependentsByKey = new Map<string, Set<string>>();
+	for (const change of changes) {
+		for (const requirement of change.requires ?? []) {
+			const dependents = dependentsByKey.get(requirement.key) ?? new Set<string>();
+			dependents.add(change.key);
+			dependentsByKey.set(requirement.key, dependents);
+		}
+	}
+
+	const blockerKeys = new Set<string>();
+	const queue = Array.from(selectedCreateKeys);
+	while (queue.length > 0) {
+		const key = queue.shift();
+		if (!key) continue;
+		for (const dependentKey of dependentsByKey.get(key) ?? []) {
+			if (selectedKeys.has(dependentKey) || blockerKeys.has(dependentKey)) continue;
+			blockerKeys.add(dependentKey);
+			if (changeByKey.get(dependentKey)?.operation === 'create') {
+				queue.push(dependentKey);
+			}
+		}
+	}
+
+	return Array.from(blockerKeys)
+		.map((key) => {
+			const change = changeByKey.get(key);
+			if (!change) return null;
+			return {
+				key: change.key,
+				entity: change.entity,
+				name: change.name,
+				summary: change.summary
+			};
+		})
+		.filter((blocker): blocker is DraftDropBlocker => blocker !== null)
+		.sort((a, b) => {
+			if (a.entity === b.entity) return a.name.localeCompare(b.name);
+			return a.entity.localeCompare(b.entity);
+		});
 }
