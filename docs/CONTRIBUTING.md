@@ -20,6 +20,7 @@
 - [Examples](#examples)
   - [Adding a settings page](#adding-a-settings-page)
   - [Bug found during testing](#bug-found-during-testing)
+  - [Fast patch release](#fast-patch-release)
   - [Hotfix while mid-feature](#hotfix-while-mid-feature)
   - [Multiple features in progress](#multiple-features-in-progress)
   - [Community contribution](#community-contribution)
@@ -75,7 +76,7 @@ beta testers and to keep the gap between `:develop` and `:latest` short.
 ### Develop
 
 `develop` is the default branch, but it's not where day-to-day work happens.
-It's the **testing branch**: it always contains the next minor version being
+It's the **testing branch**: it always contains the next release being
 evaluated by beta testers. Every push to `develop` builds the `:develop` Docker
 image.
 
@@ -88,12 +89,38 @@ go through the same feature branch → PR → squash merge flow as everything el
 This ensures all changes run through CI before landing. Active feature branches
 rebase onto `develop` to pick up these fixes.
 
+Before merging anything into a free `develop`, define the next release batch:
+target version, included PRs, whether it needs a soak, and what kind of fixes
+are allowed while it soaks. Use a local `.release-plan.md` scratch file if
+useful; it's ignored by git so the plan can change without repo churn.
+
+Once the batch is assembled, treat `develop` as that release candidate. Don't
+add unrelated work during the soak; it either fixes the current batch or waits
+for the next one. Small, low-risk bug fixes may be added if they are easy to
+verify and don't change the release risk profile.
+
 ### Stable
 
-A release needs either **1 week on `develop` with no issues reported**, or
-**sign-off from the maintainer + 2 testers**, whichever comes first. Automated
-tests must pass in both cases. Once the criteria are met, `develop` gets tagged
-(e.g. `v2.3.0`) which builds the `:latest` and `:v2.3.0` Docker images.
+What a release needs depends on what's in it. Automated tests must pass either
+way.
+
+If the batch contains anything that needs other people to verify it (a new
+feature, anything risky, or anything the author can't confidently confirm
+alone), it **soaks**: either **1 week on `develop` with no issues reported**, or
+**sign-off from the maintainer + 2 testers**, whichever comes first.
+
+If the batch is entirely small, low-risk changes the author can verify
+themselves (most bug fixes, docs, dependency bumps, minor tweaks), it can be
+tagged **as soon as CI passes**; no soak needed.
+
+This is the same bar as a hotfix, pointed forward: if you can confidently verify
+it yourself, it doesn't need the beta cycle. Once the criteria are met,
+`develop` gets tagged (e.g. `v2.3.0`) which builds the `:latest` and `:v2.3.0`
+Docker images.
+
+The soak applies to the batch as a whole. Once a batch is being soaked, don't
+tack new untested work onto it; that resets the testing clock. New features
+wait for the next batch.
 
 Then the cycle repeats: the next batch of complete feature branches is merged
 into `develop` for testing.
@@ -294,6 +321,10 @@ not what you did.
 | New feature     | `v2.1.0` → `v2.2.0` |
 | Breaking change | `v2.1.0` → `v3.0.0` |
 
+A release takes the version of its highest-impact change. A batch with any
+feature in it is a minor, even if it's mostly bug fixes; a batch of only fixes
+is a patch.
+
 ### Code Conventions
 
 - **Svelte 5, no runes.** Use `onclick`, no `$state` / `$derived`.
@@ -450,6 +481,26 @@ git fetch origin
 git rebase origin/develop
 git push --force-with-lease
 ```
+
+### Fast patch release
+
+The last minor (`v2.5.0`) is tagged. Since then, three small changes have landed
+on `develop`: a dropdown clipping fix, a typo in an error message, and a
+dependency bump. All three are low-risk and easy to verify yourself.
+
+There's no feature in the batch and nothing risky, so it doesn't need a soak.
+Once CI passes, you tag it:
+
+```bash
+git checkout develop
+git pull
+git tag v2.5.1
+git push --tags
+```
+
+`:latest` and `:v2.5.1` build. It's a patch because the batch is only fixes. If
+a feature had landed in the batch it would be a minor, and anything needing
+verification would soak first.
 
 ### Hotfix while mid-feature
 
