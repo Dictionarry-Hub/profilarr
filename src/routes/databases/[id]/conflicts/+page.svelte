@@ -7,12 +7,13 @@
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import Button from '$ui/button/Button.svelte';
+	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import ConflictField from './ConflictField.svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
-	import { Fingerprint, AlertTriangle, HeartHandshake, HandMetal } from 'lucide-svelte';
+	import { Fingerprint, AlertTriangle, HeartHandshake, HandMetal, Info } from 'lucide-svelte';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import type { PageData } from './$types';
 
@@ -64,6 +65,7 @@
 	).sort();
 	let activeEntities = new Set<string>();
 	let activeReasons = new Set<string>();
+	let showInfoModal = false;
 
 	function handleConflictAction(successMessage: string, failureMessage: string) {
 		return () => {
@@ -323,6 +325,7 @@
 			</Dropdown>
 		</svelte:fragment>
 	</ActionButton>
+	<ActionButton icon={Info} title="About conflict actions" on:click={() => (showInfoModal = true)} />
 </ActionsBar>
 
 <div class="mt-6 space-y-4">
@@ -421,3 +424,21 @@
 		{/each}
 	{/if}
 </div>
+
+<InfoModal bind:open={showInfoModal} header="Conflict Actions">
+	<div class="space-y-4 text-sm text-neutral-700 dark:text-neutral-300">
+		<section>
+			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Align</h3>
+			<p>
+				Align accepts the database version and discards your local change for this conflict.
+			</p>
+		</section>
+
+		<section>
+			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Override</h3>
+			<p>
+				Override keeps your local change and reapplies it on top of the new version.
+			</p>
+		</section>
+	</div>
+</InfoModal>
