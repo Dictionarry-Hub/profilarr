@@ -27,6 +27,10 @@ updates:
     ignore:
       - dependency-name: '@sveltejs/vite-plugin-svelte'
         update-types: ['version-update:semver-major']
+      - dependency-name: 'kysely'
+        update-types:
+          - 'version-update:semver-minor'
+          - 'version-update:semver-major'
 
   - package-ecosystem: github-actions
     directory: /
