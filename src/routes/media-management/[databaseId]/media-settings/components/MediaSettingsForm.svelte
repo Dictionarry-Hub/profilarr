@@ -126,7 +126,7 @@
 		propersRepacksConfirmation = '';
 	}
 
-	function blockPropersRepacksPaste(event: ClipboardEvent) {
+	function blockPropersRepacksPaste(event: Event) {
 		event.preventDefault();
 	}
 
@@ -336,9 +336,9 @@
 >
 	<div slot="body" class="space-y-4">
 		<p class="text-sm text-neutral-700 dark:text-neutral-300">
-			Profilarr expects proper and repack preferences to be handled by custom formats. Changing
-			this setting enables Arr's built-in preference system, which can override custom format
-			scores and make grab decisions look wrong or inconsistent.
+			Profilarr expects proper and repack preferences to be handled by custom formats. Changing this
+			setting enables Arr's built-in preference system, which can override custom format scores and
+			make grab decisions look wrong or inconsistent.
 		</p>
 		<p class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 			Type <span class="font-mono">{PROPERS_REPACKS_CONFIRM_TEXT}</span> to continue.
