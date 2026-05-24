@@ -10,7 +10,7 @@ export const personalizeStage: Stage = {
 			target: 'theme-toggle',
 			title: 'Theme',
 			body: 'Click this to toggle between light and dark mode. Try it out, then continue.',
-			position: 'below',
+			position: 'center',
 			completion: { type: 'manual' }
 		},
 		{
@@ -18,7 +18,7 @@ export const personalizeStage: Stage = {
 			target: 'accent-picker',
 			title: 'Accent Color',
 			body: 'Pick a color that suits you. Click to open the picker, then choose one you like.',
-			position: 'below-right',
+			position: 'center',
 			freeInteract: true,
 			completion: { type: 'manual' }
 		}
