@@ -103,8 +103,8 @@
 			<div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">profilarr</div>
 		</div>
 		<div class="flex items-center justify-end gap-1">
-			<AccentPicker />
-			<ThemeToggle />
+			<AccentPicker onboarding="accent-picker" />
+			<ThemeToggle onboarding="theme-toggle" />
 			<HelpButton variant="navbar" />
 			{#if !cutsceneActive}
 				<button

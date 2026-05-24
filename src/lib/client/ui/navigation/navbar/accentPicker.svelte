@@ -3,6 +3,8 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import { Check } from 'lucide-svelte';
 
+	export let onboarding: string | undefined = undefined;
+
 	let open = false;
 	let triggerEl: HTMLElement;
 
@@ -23,7 +25,7 @@
 
 <svelte:window on:click={handleClickOutside} />
 
-<div class="accent-picker relative" data-onboarding="accent-picker">
+<div class="accent-picker relative" data-onboarding={onboarding}>
 	<button
 		bind:this={triggerEl}
 		on:click|stopPropagation={() => (open = !open)}
