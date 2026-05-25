@@ -14,7 +14,7 @@ import {
 	parseDesiredState,
 	parseMetadata
 } from '../../harness/pcd.ts';
-import { write } from '../../harness/write.ts';
+import { VALID_SONARR_NAMING_DEFAULTS, write } from '../../harness/write.ts';
 import { assertActionFailed, createScenarioFactory, userOpsSince } from './helpers.ts';
 
 const PORT = PORTS.pcd.writeNamingSonarrCreate;
@@ -39,11 +39,11 @@ teardown(async () => {
  *     arrType                       = 'sonarr'
  *     name                          = 'Created Naming'
  *     rename                        = 'true'
- *     standardEpisodeFormat         = ''
- *     dailyEpisodeFormat            = ''
- *     animeEpisodeFormat            = ''
- *     seriesFolderFormat            = ''
- *     seasonFolderFormat            = ''
+ *     standardEpisodeFormat         = '{Series Title} - S{season:00}E{episode:00}'
+ *     dailyEpisodeFormat            = '{Series Title} - {Air-Date}'
+ *     animeEpisodeFormat            = '{Series Title} - {absolute:000}'
+ *     seriesFolderFormat            = '{Series Title}'
+ *     seasonFolderFormat            = 'Season {season:00}'
  *     replaceIllegalCharacters      = 'false'
  *     colonReplacementFormat        = 'delete'
  *     customColonReplacementFormat  = ''   // null when blank
@@ -56,11 +56,11 @@ teardown(async () => {
  *   - op.metadata.name      === 'Created Naming'
  *   - op.desired_state.name                            === 'Created Naming'
  *   - op.desired_state.rename                          === true
- *   - op.desired_state.standard_episode_format         === ''
- *   - op.desired_state.daily_episode_format            === ''
- *   - op.desired_state.anime_episode_format            === ''
- *   - op.desired_state.series_folder_format            === ''
- *   - op.desired_state.season_folder_format            === ''
+ *   - op.desired_state.standard_episode_format         === '{Series Title} - S{season:00}E{episode:00}'
+ *   - op.desired_state.daily_episode_format            === '{Series Title} - {Air-Date}'
+ *   - op.desired_state.anime_episode_format            === '{Series Title} - {absolute:000}'
+ *   - op.desired_state.series_folder_format            === '{Series Title}'
+ *   - op.desired_state.season_folder_format            === 'Season {season:00}'
  *   - op.desired_state.replace_illegal_characters      === false
  *   - op.desired_state.colon_replacement_format        === 'delete'
  *   - op.desired_state.custom_colon_replacement_format === null
@@ -84,11 +84,14 @@ test('minimal sonarr naming emits one create op', async () => {
 	const desired = parseDesiredState(op);
 	assertEquals(desired.name, 'Created Naming');
 	assertEquals(desired.rename, true);
-	assertEquals(desired.standard_episode_format, '');
-	assertEquals(desired.daily_episode_format, '');
-	assertEquals(desired.anime_episode_format, '');
-	assertEquals(desired.series_folder_format, '');
-	assertEquals(desired.season_folder_format, '');
+	assertEquals(
+		desired.standard_episode_format,
+		VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat
+	);
+	assertEquals(desired.daily_episode_format, VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat);
+	assertEquals(desired.anime_episode_format, VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat);
+	assertEquals(desired.series_folder_format, VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat);
+	assertEquals(desired.season_folder_format, VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat);
 	assertEquals(desired.replace_illegal_characters, false);
 	assertEquals(desired.colon_replacement_format, 'delete');
 	assertEquals(desired.custom_colon_replacement_format, null);
@@ -106,9 +109,9 @@ test('minimal sonarr naming emits one create op', async () => {
  *     arrType                       = 'sonarr'
  *     name                          = 'Tuned Naming'
  *     rename                        = 'false'
- *     standardEpisodeFormat         = '{Series Title}'
- *     dailyEpisodeFormat            = '{Series Title}'
- *     animeEpisodeFormat            = '{Series Title}'
+ *     standardEpisodeFormat         = 'S{season}E{episode}'
+ *     dailyEpisodeFormat            = '{Series Title} - {Air-Date}'
+ *     animeEpisodeFormat            = '{Series Title} - {absolute:000}'
  *     seriesFolderFormat            = '{Series Title}'
  *     seasonFolderFormat            = 'Season {season:00}'
  *     replaceIllegalCharacters      = 'true'
@@ -119,7 +122,7 @@ test('minimal sonarr naming emits one create op', async () => {
  * Expect
  *   - userOpsSince(checkpoint).length === 1
  *   - op.desired_state.rename                          === false
- *   - op.desired_state.standard_episode_format         === '{Series Title}'
+ *   - op.desired_state.standard_episode_format         === 'S{season}E{episode}'
  *   - op.desired_state.replace_illegal_characters      === true
  *   - op.desired_state.colon_replacement_format        === 'custom'
  *   - op.desired_state.custom_colon_replacement_format === ' - '
@@ -133,9 +136,9 @@ test('sonarr naming non-default values are recorded', async () => {
 	await write.namingSonarr.create(ctx, {
 		name: 'Tuned Naming',
 		rename: false,
-		standardEpisodeFormat: '{Series Title}',
-		dailyEpisodeFormat: '{Series Title}',
-		animeEpisodeFormat: '{Series Title}',
+		standardEpisodeFormat: 'S{season}E{episode}',
+		dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+		animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
 		seriesFolderFormat: '{Series Title}',
 		seasonFolderFormat: 'Season {season:00}',
 		replaceIllegalCharacters: true,
@@ -148,7 +151,7 @@ test('sonarr naming non-default values are recorded', async () => {
 	assertEquals(ops.length, 1);
 	const desired = parseDesiredState(ops[0]);
 	assertEquals(desired.rename, false);
-	assertEquals(desired.standard_episode_format, '{Series Title}');
+	assertEquals(desired.standard_episode_format, 'S{season}E{episode}');
 	assertEquals(desired.replace_illegal_characters, true);
 	assertEquals(desired.colon_replacement_format, 'custom');
 	assertEquals(desired.custom_colon_replacement_format, ' - ');
@@ -175,6 +178,178 @@ test('duplicate sonarr naming name fails without writing ops', async () => {
 
 	const response = await write.namingSonarr.submitCreate(ctx, { name: 'existing naming' });
 
+	await assertActionFailed(response);
+	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+});
+
+/**
+ * Context
+ *   Empty PCD (only schema seeded), compiled once.
+ *
+ * Submit
+ *   POST /media-management/{ctx.dbId}/naming/new with form fields:
+ *     arrType               = 'sonarr'
+ *     name                  = 'Invalid Standard Format'
+ *     standardEpisodeFormat = '{Series Title}'
+ *     layer                 = 'user'
+ *
+ * Expect
+ *   - response is a SvelteKit form failure
+ *   - body contains "Standard episode format: Must contain season and episode numbers OR Original Title"
+ *   - userOpsSince(checkpoint).length === 0
+ */
+test('sonarr standard episode format missing numbering fails without writing ops', async () => {
+	const ctx = await newPcd('invalid-standard-format');
+	await compilePcd(ctx);
+	const checkpoint = opCheckpoint(ctx);
+
+	const response = await write.namingSonarr.submitCreate(ctx, {
+		name: 'Invalid Standard Format',
+		standardEpisodeFormat: '{Series Title}'
+	});
+
+	const body = await response.clone().text();
+	assert(
+		body.includes(
+			'Standard episode format: Must contain season and episode numbers OR Original Title'
+		)
+	);
+	await assertActionFailed(response);
+	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+});
+
+/**
+ * Context
+ *   Empty PCD (only schema seeded), compiled once.
+ *
+ * Submit
+ *   POST /media-management/{ctx.dbId}/naming/new with form fields:
+ *     arrType            = 'sonarr'
+ *     name               = 'Invalid Daily Format'
+ *     dailyEpisodeFormat = '{Series Title}'
+ *     layer              = 'user'
+ *
+ * Expect
+ *   - response is a SvelteKit form failure
+ *   - body contains "Daily episode format: Must contain Air Date OR Season and Episode OR Original Title"
+ *   - userOpsSince(checkpoint).length === 0
+ */
+test('sonarr daily episode format missing date or numbering fails without writing ops', async () => {
+	const ctx = await newPcd('invalid-daily-format');
+	await compilePcd(ctx);
+	const checkpoint = opCheckpoint(ctx);
+
+	const response = await write.namingSonarr.submitCreate(ctx, {
+		name: 'Invalid Daily Format',
+		dailyEpisodeFormat: '{Series Title}'
+	});
+
+	const body = await response.clone().text();
+	assert(
+		body.includes(
+			'Daily episode format: Must contain Air Date OR Season and Episode OR Original Title'
+		)
+	);
+	await assertActionFailed(response);
+	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+});
+
+/**
+ * Context
+ *   Empty PCD (only schema seeded), compiled once.
+ *
+ * Submit
+ *   POST /media-management/{ctx.dbId}/naming/new with form fields:
+ *     arrType            = 'sonarr'
+ *     name               = 'Invalid Anime Format'
+ *     animeEpisodeFormat = '{Series Title}'
+ *     layer              = 'user'
+ *
+ * Expect
+ *   - response is a SvelteKit form failure
+ *   - body contains "Anime episode format: Must contain Absolute Episode number OR Season and Episode OR Original Title"
+ *   - userOpsSince(checkpoint).length === 0
+ */
+test('sonarr anime episode format missing absolute or numbering fails without writing ops', async () => {
+	const ctx = await newPcd('invalid-anime-format');
+	await compilePcd(ctx);
+	const checkpoint = opCheckpoint(ctx);
+
+	const response = await write.namingSonarr.submitCreate(ctx, {
+		name: 'Invalid Anime Format',
+		animeEpisodeFormat: '{Series Title}'
+	});
+
+	const body = await response.clone().text();
+	assert(
+		body.includes(
+			'Anime episode format: Must contain Absolute Episode number OR Season and Episode OR Original Title'
+		)
+	);
+	await assertActionFailed(response);
+	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+});
+
+/**
+ * Context
+ *   Empty PCD (only schema seeded), compiled once.
+ *
+ * Submit
+ *   POST /media-management/{ctx.dbId}/naming/new with form fields:
+ *     arrType            = 'sonarr'
+ *     name               = 'Invalid Series Folder'
+ *     seriesFolderFormat = '{Series Year}'
+ *     layer              = 'user'
+ *
+ * Expect
+ *   - response is a SvelteKit form failure
+ *   - body contains "Series folder format: Must contain series title"
+ *   - userOpsSince(checkpoint).length === 0
+ */
+test('sonarr series folder format missing series title fails without writing ops', async () => {
+	const ctx = await newPcd('invalid-series-folder');
+	await compilePcd(ctx);
+	const checkpoint = opCheckpoint(ctx);
+
+	const response = await write.namingSonarr.submitCreate(ctx, {
+		name: 'Invalid Series Folder',
+		seriesFolderFormat: '{Series Year}'
+	});
+
+	const body = await response.clone().text();
+	assert(body.includes('Series folder format: Must contain series title'));
+	await assertActionFailed(response);
+	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+});
+
+/**
+ * Context
+ *   Empty PCD (only schema seeded), compiled once.
+ *
+ * Submit
+ *   POST /media-management/{ctx.dbId}/naming/new with form fields:
+ *     arrType            = 'sonarr'
+ *     name               = 'Invalid Season Folder'
+ *     seasonFolderFormat = 'Season'
+ *     layer              = 'user'
+ *
+ * Expect
+ *   - response is a SvelteKit form failure
+ *   - body contains "Season folder format: Must contain season number"
+ *   - userOpsSince(checkpoint).length === 0
+ */
+test('sonarr season folder format missing season number fails without writing ops', async () => {
+	const ctx = await newPcd('invalid-season-folder');
+	await compilePcd(ctx);
+	const checkpoint = opCheckpoint(ctx);
+
+	const response = await write.namingSonarr.submitCreate(ctx, {
+		name: 'Invalid Season Folder',
+		seasonFolderFormat: 'Season'
+	});
+
+	const body = await response.clone().text();
+	assert(body.includes('Season folder format: Must contain season number'));
 	await assertActionFailed(response);
 	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
 });

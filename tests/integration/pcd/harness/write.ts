@@ -91,6 +91,19 @@ export type SonarrMultiEpisodeStyle =
 	| 'range'
 	| 'prefixedRange';
 
+export const VALID_RADARR_NAMING_DEFAULTS = {
+	movieFormat: '{Movie Title} ({Release Year})',
+	movieFolderFormat: '{Movie Title}'
+} as const;
+
+export const VALID_SONARR_NAMING_DEFAULTS = {
+	standardEpisodeFormat: '{Series Title} - S{season:00}E{episode:00}',
+	dailyEpisodeFormat: '{Series Title} - {Air-Date}',
+	animeEpisodeFormat: '{Series Title} - {absolute:000}',
+	seriesFolderFormat: '{Series Title}',
+	seasonFolderFormat: 'Season {season:00}'
+} as const;
+
 export interface RadarrNamingFormInput {
 	name: string;
 	rename?: boolean;
@@ -827,8 +840,8 @@ function radarrNamingFields(input: RadarrNamingFormInput): Record<string, string
 		arrType: 'radarr',
 		name: input.name,
 		rename: String(input.rename ?? true),
-		movieFormat: input.movieFormat ?? '',
-		movieFolderFormat: input.movieFolderFormat ?? '',
+		movieFormat: input.movieFormat ?? VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+		movieFolderFormat: input.movieFolderFormat ?? VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat,
 		replaceIllegalCharacters: String(input.replaceIllegalCharacters ?? false),
 		colonReplacementFormat: input.colonReplacementFormat ?? 'delete',
 		layer: input.layer ?? 'user'
@@ -840,11 +853,12 @@ function sonarrNamingFields(input: SonarrNamingFormInput): Record<string, string
 		arrType: 'sonarr',
 		name: input.name,
 		rename: String(input.rename ?? true),
-		standardEpisodeFormat: input.standardEpisodeFormat ?? '',
-		dailyEpisodeFormat: input.dailyEpisodeFormat ?? '',
-		animeEpisodeFormat: input.animeEpisodeFormat ?? '',
-		seriesFolderFormat: input.seriesFolderFormat ?? '',
-		seasonFolderFormat: input.seasonFolderFormat ?? '',
+		standardEpisodeFormat:
+			input.standardEpisodeFormat ?? VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+		dailyEpisodeFormat: input.dailyEpisodeFormat ?? VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+		animeEpisodeFormat: input.animeEpisodeFormat ?? VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+		seriesFolderFormat: input.seriesFolderFormat ?? VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+		seasonFolderFormat: input.seasonFolderFormat ?? VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 		replaceIllegalCharacters: String(input.replaceIllegalCharacters ?? false),
 		colonReplacementFormat: input.colonReplacementFormat ?? 'delete',
 		customColonReplacementFormat: input.customColonReplacementFormat ?? '',

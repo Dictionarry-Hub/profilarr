@@ -14,7 +14,7 @@ import { run, setup, teardown, test } from '$test-harness/runner.ts';
 import { PORTS } from '$test-harness/ports.ts';
 import { base } from '../../harness/fixtures.ts';
 import { opCheckpoint, parseDesiredState, parseMetadata } from '../../harness/pcd.ts';
-import { write } from '../../harness/write.ts';
+import { VALID_SONARR_NAMING_DEFAULTS, write } from '../../harness/write.ts';
 import {
 	assertOnlyField,
 	assertSameGroup,
@@ -39,9 +39,10 @@ teardown(async () => {
 /**
  * Context
  *   Base layer seeded with one sonarr_naming row:
- *     name='Split Naming', standardEpisodeFormat='{Series Title}',
- *     dailyEpisodeFormat='{Series Title}', animeEpisodeFormat='{Series Title}',
- *     seriesFolderFormat='{Series Title}', seasonFolderFormat='Season {season}',
+ *     name='Split Naming', standardEpisodeFormat='{Series Title} - S{season:00}E{episode:00}',
+ *     dailyEpisodeFormat='{Series Title} - {Air-Date}',
+ *     animeEpisodeFormat='{Series Title} - {absolute:000}',
+ *     seriesFolderFormat='{Series Title}', seasonFolderFormat='Season {season:00}',
  *     replaceIllegalCharacters=false, colonReplacementFormat='delete',
  *     customColonReplacementFormat=null, multiEpisodeStyle='extend'
  *   Compiled.
@@ -49,7 +50,7 @@ teardown(async () => {
  * Submit
  *   POST /media-management/{ctx.dbId}/naming/sonarr/Split%20Naming?/update
  *     with form fields changing:
- *       standardEpisodeFormat        = '{Series Title} - S{season:00}E{episode:00}'  // string
+ *       standardEpisodeFormat        = 'S{season}E{episode}'                         // string
  *       replaceIllegalCharacters     = 'true'                                        // bool
  *       customColonReplacementFormat = ' - '                                         // nullable text (null -> value)
  *       multiEpisodeStyle            = 'range'                                       // int-coded enum
@@ -67,11 +68,11 @@ test('representative scalar fields across datatype shapes split into grouped ops
 	const ctx = await seededPcd('scalars', [
 		base.sonarrNaming({
 			name: 'Split Naming',
-			standardEpisodeFormat: '{Series Title}',
-			dailyEpisodeFormat: '{Series Title}',
-			animeEpisodeFormat: '{Series Title}',
-			seriesFolderFormat: '{Series Title}',
-			seasonFolderFormat: 'Season {season:00}'
+			standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+			dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+			animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+			seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+			seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat
 		})
 	]);
 	const checkpoint = opCheckpoint(ctx);
@@ -79,11 +80,11 @@ test('representative scalar fields across datatype shapes split into grouped ops
 	await write.namingSonarr.update(ctx, 'Split Naming', {
 		name: 'Split Naming',
 		rename: true,
-		standardEpisodeFormat: '{Series Title} - S{season:00}E{episode:00}',
-		dailyEpisodeFormat: '{Series Title}',
-		animeEpisodeFormat: '{Series Title}',
-		seriesFolderFormat: '{Series Title}',
-		seasonFolderFormat: 'Season {season:00}',
+		standardEpisodeFormat: 'S{season}E{episode}',
+		dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+		animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+		seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+		seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 		replaceIllegalCharacters: true,
 		colonReplacementFormat: 'delete',
 		customColonReplacementFormat: ' - ',
@@ -102,14 +103,15 @@ test('representative scalar fields across datatype shapes split into grouped ops
 /**
  * Context
  *   Base layer seeded with one row:
- *     name='Old Naming', standardEpisodeFormat='{Series Title}', other defaults
+ *     name='Old Naming', standardEpisodeFormat='{Series Title} - S{season:00}E{episode:00}',
+ *     other fields valid defaults
  *   Compiled.
  *
  * Submit
  *   POST /media-management/{ctx.dbId}/naming/sonarr/Old%20Naming?/update
  *     with form fields:
  *       name                  = 'New Naming'                                  // changed
- *       standardEpisodeFormat = '{Series Title} - S{season:00}E{episode:00}'  // changed
+ *       standardEpisodeFormat = 'S{season}E{episode}'  // changed
  *       (others unchanged)
  *
  * Expect
@@ -125,7 +127,11 @@ test('rename plus scalar change emits grouped split ops', async () => {
 	const ctx = await seededPcd('rename-scalar', [
 		base.sonarrNaming({
 			name: 'Old Naming',
-			standardEpisodeFormat: '{Series Title}'
+			standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+			dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+			animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+			seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+			seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat
 		})
 	]);
 	const checkpoint = opCheckpoint(ctx);
@@ -133,11 +139,11 @@ test('rename plus scalar change emits grouped split ops', async () => {
 	await write.namingSonarr.update(ctx, 'Old Naming', {
 		name: 'New Naming',
 		rename: true,
-		standardEpisodeFormat: '{Series Title} - S{season:00}E{episode:00}',
-		dailyEpisodeFormat: '',
-		animeEpisodeFormat: '',
-		seriesFolderFormat: '',
-		seasonFolderFormat: '',
+		standardEpisodeFormat: 'S{season}E{episode}',
+		dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+		animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+		seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+		seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 		replaceIllegalCharacters: false,
 		colonReplacementFormat: 'delete',
 		customColonReplacementFormat: null,
@@ -159,13 +165,18 @@ test('rename plus scalar change emits grouped split ops', async () => {
 /**
  * Context
  *   Base layer seeded with one row:
- *     name='Pure Rename', defaults
+ *     name='Pure Rename', valid defaults
  *   Compiled.
  *
  * Submit
  *   POST /media-management/{ctx.dbId}/naming/sonarr/Pure%20Rename?/update
  *     with form fields:
  *       name = 'Renamed'   // changed
+ *       standardEpisodeFormat = '{Series Title} - S{season:00}E{episode:00}'
+ *       dailyEpisodeFormat    = '{Series Title} - {Air-Date}'
+ *       animeEpisodeFormat    = '{Series Title} - {absolute:000}'
+ *       seriesFolderFormat    = '{Series Title}'
+ *       seasonFolderFormat    = 'Season {season:00}'
  *       (all others unchanged)
  *
  * Expect
@@ -177,17 +188,26 @@ test('rename plus scalar change emits grouped split ops', async () => {
  *   - op.desired_state.name     === { from: 'Pure Rename', to: 'Renamed' }
  */
 test('pure rename emits one ungrouped rename op', async () => {
-	const ctx = await seededPcd('pure-rename', [base.sonarrNaming({ name: 'Pure Rename' })]);
+	const ctx = await seededPcd('pure-rename', [
+		base.sonarrNaming({
+			name: 'Pure Rename',
+			standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+			dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+			animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+			seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+			seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat
+		})
+	]);
 	const checkpoint = opCheckpoint(ctx);
 
 	await write.namingSonarr.update(ctx, 'Pure Rename', {
 		name: 'Renamed',
 		rename: true,
-		standardEpisodeFormat: '',
-		dailyEpisodeFormat: '',
-		animeEpisodeFormat: '',
-		seriesFolderFormat: '',
-		seasonFolderFormat: '',
+		standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+		dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+		animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+		seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+		seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 		replaceIllegalCharacters: false,
 		colonReplacementFormat: 'delete',
 		customColonReplacementFormat: null,
@@ -207,7 +227,7 @@ test('pure rename emits one ungrouped rename op', async () => {
 /**
  * Context
  *   Base layer seeded with one row:
- *     name='Noop Naming', defaults
+ *     name='Noop Naming', valid defaults
  *   Compiled.
  *
  * Submit identical values.
@@ -216,17 +236,26 @@ test('pure rename emits one ungrouped rename op', async () => {
  *   - userOpsSince(checkpoint).length === 0
  */
 test('unchanged submit writes no ops', async () => {
-	const ctx = await seededPcd('noop', [base.sonarrNaming({ name: 'Noop Naming' })]);
+	const ctx = await seededPcd('noop', [
+		base.sonarrNaming({
+			name: 'Noop Naming',
+			standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+			dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+			animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+			seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+			seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat
+		})
+	]);
 	const checkpoint = opCheckpoint(ctx);
 
 	await write.namingSonarr.update(ctx, 'Noop Naming', {
 		name: 'Noop Naming',
 		rename: true,
-		standardEpisodeFormat: '',
-		dailyEpisodeFormat: '',
-		animeEpisodeFormat: '',
-		seriesFolderFormat: '',
-		seasonFolderFormat: '',
+		standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+		dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+		animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+		seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+		seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 		replaceIllegalCharacters: false,
 		colonReplacementFormat: 'delete',
 		customColonReplacementFormat: null,

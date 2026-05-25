@@ -21,7 +21,7 @@ import {
 	type PcdTestContext,
 	type SeedOperation
 } from '../harness/pcd.ts';
-import { write } from '../harness/write.ts';
+import { VALID_RADARR_NAMING_DEFAULTS, write } from '../harness/write.ts';
 
 const PORT = PORTS.pcd.conflictsNamingRadarr;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -54,17 +54,17 @@ teardown(async () => {
 /**
  * Base
  *   Radarr naming:
- *     name='Split Conflict', movieFormat='{Movie Title}',
+ *     name='Split Conflict', movieFormat='{Movie Title} ({Release Year})',
  *     replaceIllegalCharacters=false
  *
  * User
  *   POST update changes:
- *     movieFormat              = '{Movie Title} ({Release Year})'
+ *     movieFormat              = '{Movie Title} - user ({Release Year})'
  *     replaceIllegalCharacters = true
  *
  * Upstream
  *   Published base op changes:
- *     movie_format '{Movie Title}' -> '{Movie Title} - upstream'
+ *     movie_format '{Movie Title} ({Release Year})' -> '{Movie Title} - upstream ({Release Year})'
  *
  * Expect
  *   - movie_format conflicts by strategy
@@ -77,8 +77,8 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 		const ctx = await seededScenario(strategy, 'split-scalar', [
 			base.radarrNaming({
 				name: 'Split Conflict',
-				movieFormat: '{Movie Title}',
-				movieFolderFormat: '{Movie Title}',
+				movieFormat: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+				movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat,
 				replaceIllegalCharacters: false
 			})
 		]);
@@ -87,8 +87,8 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 		await write.namingRadarr.update(ctx, 'Split Conflict', {
 			name: 'Split Conflict',
 			rename: true,
-			movieFormat: '{Movie Title} ({Release Year})',
-			movieFolderFormat: '{Movie Title}',
+			movieFormat: '{Movie Title} - user ({Release Year})',
+			movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat,
 			replaceIllegalCharacters: true,
 			colonReplacementFormat: 'delete'
 		});
@@ -97,8 +97,8 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 			ctx,
 			upstreamUpdate('Split Conflict', {
 				movie_format: {
-					from: '{Movie Title}',
-					to: '{Movie Title} - upstream'
+					from: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+					to: '{Movie Title} - upstream ({Release Year})'
 				}
 			})
 		);
@@ -115,7 +115,9 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 		assertEquals(row.replace_illegal_characters, 1);
 		assertEquals(
 			row.movie_format,
-			strategy === 'override' ? '{Movie Title} ({Release Year})' : '{Movie Title} - upstream'
+			strategy === 'override'
+				? '{Movie Title} - user ({Release Year})'
+				: '{Movie Title} - upstream ({Release Year})'
 		);
 	}
 });
@@ -141,15 +143,19 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 test('rename conflict follows upstream rename by strategy', async () => {
 	for (const strategy of STRATEGIES) {
 		const ctx = await seededScenario(strategy, 'rename', [
-			base.radarrNaming({ name: 'Old Naming' })
+			base.radarrNaming({
+				name: 'Old Naming',
+				movieFormat: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+				movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat
+			})
 		]);
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.namingRadarr.update(ctx, 'Old Naming', {
 			name: 'User Naming',
 			rename: true,
-			movieFormat: '',
-			movieFolderFormat: '',
+			movieFormat: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+			movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat,
 			replaceIllegalCharacters: false,
 			colonReplacementFormat: 'delete'
 		});
@@ -173,12 +179,12 @@ test('rename conflict follows upstream rename by strategy', async () => {
 /**
  * Base
  *   Radarr naming:
- *     name='Old Naming', movieFormat='{Movie Title}'
+ *     name='Old Naming', movieFormat='{Movie Title} ({Release Year})'
  *
  * User
  *   POST update changes:
  *     name        = 'User Naming'
- *     movieFormat = '{Movie Title} ({Release Year})'
+ *     movieFormat = '{Movie Title} - user ({Release Year})'
  *
  * Upstream
  *   Published base rename changes:
@@ -192,16 +198,16 @@ test('conflict page field details follow upstream rename', async () => {
 	const ctx = await seededScenario('ask', 'field-detail-upstream-rename', [
 		base.radarrNaming({
 			name: 'Old Naming',
-			movieFormat: '{Movie Title}',
-			movieFolderFormat: '{Movie Title}'
+			movieFormat: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+			movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat
 		})
 	]);
 
 	await write.namingRadarr.update(ctx, 'Old Naming', {
 		name: 'User Naming',
 		rename: true,
-		movieFormat: '{Movie Title} ({Release Year})',
-		movieFolderFormat: '{Movie Title}',
+		movieFormat: '{Movie Title} - user ({Release Year})',
+		movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat,
 		replaceIllegalCharacters: false,
 		colonReplacementFormat: 'delete'
 	});
@@ -221,12 +227,12 @@ test('conflict page field details follow upstream rename', async () => {
  *
  * User
  *   POST create radarr naming:
- *     name='Create Conflict', movieFormat='{Movie Title} ({Release Year})',
+ *     name='Create Conflict', movieFormat='{Movie Title} - user ({Release Year})',
  *     replaceIllegalCharacters=true
  *
  * Upstream
  *   Published base create:
- *     name='Create Conflict', movieFormat='{Movie Title}',
+ *     name='Create Conflict', movieFormat='{Movie Title} ({Release Year})',
  *     replaceIllegalCharacters=false
  *
  * Expect
@@ -242,8 +248,8 @@ test('create duplicate conflict resolves by strategy', async () => {
 		await write.namingRadarr.create(ctx, {
 			name: 'Create Conflict',
 			rename: true,
-			movieFormat: '{Movie Title} ({Release Year})',
-			movieFolderFormat: '{Movie Title}',
+			movieFormat: '{Movie Title} - user ({Release Year})',
+			movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat,
 			replaceIllegalCharacters: true,
 			colonReplacementFormat: 'delete'
 		});
@@ -252,8 +258,8 @@ test('create duplicate conflict resolves by strategy', async () => {
 			ctx,
 			base.radarrNaming({
 				name: 'Create Conflict',
-				movieFormat: '{Movie Title}',
-				movieFolderFormat: '{Movie Title}',
+				movieFormat: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+				movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat,
 				replaceIllegalCharacters: false
 			})
 		);
@@ -265,7 +271,9 @@ test('create duplicate conflict resolves by strategy', async () => {
 		const row = assertRadarrNaming(ctx, 'Create Conflict');
 		assertEquals(
 			row.movie_format,
-			strategy === 'override' ? '{Movie Title} ({Release Year})' : '{Movie Title}'
+			strategy === 'override'
+				? '{Movie Title} - user ({Release Year})'
+				: VALID_RADARR_NAMING_DEFAULTS.movieFormat
 		);
 		assertEquals(row.replace_illegal_characters, strategy === 'override' ? 1 : 0);
 	}

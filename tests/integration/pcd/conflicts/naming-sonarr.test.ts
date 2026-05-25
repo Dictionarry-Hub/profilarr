@@ -21,7 +21,7 @@ import {
 	type PcdTestContext,
 	type SeedOperation
 } from '../harness/pcd.ts';
-import { write } from '../harness/write.ts';
+import { VALID_SONARR_NAMING_DEFAULTS, write } from '../harness/write.ts';
 import { multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
 
 const PORT = PORTS.pcd.conflictsNamingSonarr;
@@ -55,17 +55,17 @@ teardown(async () => {
 /**
  * Base
  *   Sonarr naming:
- *     name='Split Conflict', standardEpisodeFormat='{Series Title}',
+ *     name='Split Conflict', standardEpisodeFormat='{Series Title} - S{season:00}E{episode:00}',
  *     multiEpisodeStyle='extend'
  *
  * User
  *   POST update changes:
- *     standardEpisodeFormat = '{Series Title} - S{season:00}E{episode:00}'
+ *     standardEpisodeFormat = 'S{season}E{episode}'
  *     multiEpisodeStyle     = 'range'
  *
  * Upstream
  *   Published base op changes:
- *     standard_episode_format '{Series Title}' -> '{Series Title} (upstream)'
+ *     standard_episode_format '{Series Title} - S{season:00}E{episode:00}' -> '{Series Title} - upstream S{season:00}E{episode:00}'
  *
  * Expect
  *   - standard_episode_format conflicts by strategy
@@ -79,7 +79,11 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 		const ctx = await seededScenario(strategy, 'split-scalar', [
 			base.sonarrNaming({
 				name: 'Split Conflict',
-				standardEpisodeFormat: '{Series Title}',
+				standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+				dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+				animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+				seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+				seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 				multiEpisodeStyle: 'extend'
 			})
 		]);
@@ -88,11 +92,11 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 		await write.namingSonarr.update(ctx, 'Split Conflict', {
 			name: 'Split Conflict',
 			rename: true,
-			standardEpisodeFormat: '{Series Title} - S{season:00}E{episode:00}',
-			dailyEpisodeFormat: '',
-			animeEpisodeFormat: '',
-			seriesFolderFormat: '',
-			seasonFolderFormat: '',
+			standardEpisodeFormat: 'S{season}E{episode}',
+			dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+			animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+			seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+			seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 			replaceIllegalCharacters: false,
 			colonReplacementFormat: 'delete',
 			customColonReplacementFormat: null,
@@ -103,8 +107,8 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 			ctx,
 			upstreamUpdate('Split Conflict', {
 				standard_episode_format: {
-					from: '{Series Title}',
-					to: '{Series Title} (upstream)'
+					from: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+					to: '{Series Title} - upstream S{season:00}E{episode:00}'
 				}
 			})
 		);
@@ -122,8 +126,8 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 		assertEquals(
 			row.standard_episode_format,
 			strategy === 'override'
-				? '{Series Title} - S{season:00}E{episode:00}'
-				: '{Series Title} (upstream)'
+				? 'S{season}E{episode}'
+				: '{Series Title} - upstream S{season:00}E{episode:00}'
 		);
 	}
 });
@@ -149,18 +153,25 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 test('rename conflict follows upstream rename by strategy', async () => {
 	for (const strategy of STRATEGIES) {
 		const ctx = await seededScenario(strategy, 'rename', [
-			base.sonarrNaming({ name: 'Old Naming' })
+			base.sonarrNaming({
+				name: 'Old Naming',
+				standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+				dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+				animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+				seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+				seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat
+			})
 		]);
 		const checkpoint = opCheckpoint(ctx);
 
 		await write.namingSonarr.update(ctx, 'Old Naming', {
 			name: 'User Naming',
 			rename: true,
-			standardEpisodeFormat: '',
-			dailyEpisodeFormat: '',
-			animeEpisodeFormat: '',
-			seriesFolderFormat: '',
-			seasonFolderFormat: '',
+			standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+			dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+			animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+			seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+			seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 			replaceIllegalCharacters: false,
 			colonReplacementFormat: 'delete',
 			customColonReplacementFormat: null,
@@ -186,12 +197,12 @@ test('rename conflict follows upstream rename by strategy', async () => {
 /**
  * Base
  *   Sonarr naming:
- *     name='Old Naming', standardEpisodeFormat='{Series Title}'
+ *     name='Old Naming', standardEpisodeFormat='{Series Title} - S{season:00}E{episode:00}'
  *
  * User
  *   POST update changes:
  *     name                  = 'User Naming'
- *     standardEpisodeFormat = '{Series Title} - S{season:00}E{episode:00}'
+ *     standardEpisodeFormat = 'S{season}E{episode}'
  *
  * Upstream
  *   Published base rename changes:
@@ -205,18 +216,22 @@ test('conflict page field details follow upstream rename', async () => {
 	const ctx = await seededScenario('ask', 'field-detail-upstream-rename', [
 		base.sonarrNaming({
 			name: 'Old Naming',
-			standardEpisodeFormat: '{Series Title}'
+			standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+			dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+			animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+			seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+			seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat
 		})
 	]);
 
 	await write.namingSonarr.update(ctx, 'Old Naming', {
 		name: 'User Naming',
 		rename: true,
-		standardEpisodeFormat: '{Series Title} - S{season:00}E{episode:00}',
-		dailyEpisodeFormat: '',
-		animeEpisodeFormat: '',
-		seriesFolderFormat: '',
-		seasonFolderFormat: '',
+		standardEpisodeFormat: 'S{season}E{episode}',
+		dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+		animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+		seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+		seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 		replaceIllegalCharacters: false,
 		colonReplacementFormat: 'delete',
 		customColonReplacementFormat: null,
@@ -238,12 +253,12 @@ test('conflict page field details follow upstream rename', async () => {
  *
  * User
  *   POST create sonarr naming:
- *     name='Create Conflict', standardEpisodeFormat='{Series Title} - S{season:00}E{episode:00}',
+ *     name='Create Conflict', standardEpisodeFormat='S{season}E{episode}',
  *     multiEpisodeStyle='range'
  *
  * Upstream
  *   Published base create:
- *     name='Create Conflict', standardEpisodeFormat='{Series Title}',
+ *     name='Create Conflict', standardEpisodeFormat='{Series Title} - S{season:00}E{episode:00}',
  *     multiEpisodeStyle='extend'
  *
  * Expect
@@ -259,11 +274,11 @@ test('create duplicate conflict resolves by strategy', async () => {
 		await write.namingSonarr.create(ctx, {
 			name: 'Create Conflict',
 			rename: true,
-			standardEpisodeFormat: '{Series Title} - S{season:00}E{episode:00}',
-			dailyEpisodeFormat: '',
-			animeEpisodeFormat: '',
-			seriesFolderFormat: '',
-			seasonFolderFormat: '',
+			standardEpisodeFormat: 'S{season}E{episode}',
+			dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+			animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+			seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+			seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 			replaceIllegalCharacters: false,
 			colonReplacementFormat: 'delete',
 			customColonReplacementFormat: null,
@@ -274,7 +289,11 @@ test('create duplicate conflict resolves by strategy', async () => {
 			ctx,
 			base.sonarrNaming({
 				name: 'Create Conflict',
-				standardEpisodeFormat: '{Series Title}',
+				standardEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat,
+				dailyEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat,
+				animeEpisodeFormat: VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat,
+				seriesFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat,
+				seasonFolderFormat: VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat,
 				multiEpisodeStyle: 'extend'
 			})
 		);
@@ -286,7 +305,9 @@ test('create duplicate conflict resolves by strategy', async () => {
 		const row = assertSonarrNaming(ctx, 'Create Conflict');
 		assertEquals(
 			row.standard_episode_format,
-			strategy === 'override' ? '{Series Title} - S{season:00}E{episode:00}' : '{Series Title}'
+			strategy === 'override'
+				? 'S{season}E{episode}'
+				: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat
 		);
 		assertEquals(
 			row.multi_episode_style,

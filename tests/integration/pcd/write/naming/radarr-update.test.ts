@@ -12,7 +12,7 @@ import { run, setup, teardown, test } from '$test-harness/runner.ts';
 import { PORTS } from '$test-harness/ports.ts';
 import { base } from '../../harness/fixtures.ts';
 import { opCheckpoint, parseDesiredState, parseMetadata } from '../../harness/pcd.ts';
-import { write } from '../../harness/write.ts';
+import { VALID_RADARR_NAMING_DEFAULTS, write } from '../../harness/write.ts';
 import {
 	assertOnlyField,
 	assertSameGroup,
@@ -140,13 +140,15 @@ test('rename plus scalar change emits grouped split ops', async () => {
 /**
  * Context
  *   Base layer seeded with one row:
- *     name='Pure Rename', other fields default
+ *     name='Pure Rename', other fields valid defaults
  *   Compiled.
  *
  * Submit
  *   POST /media-management/{ctx.dbId}/naming/radarr/Pure%20Rename?/update
  *     with form fields:
  *       name = 'Renamed'   // changed
+ *       movieFormat       = '{Movie Title} ({Release Year})'
+ *       movieFolderFormat = '{Movie Title}'
  *       (all others unchanged)
  *
  * Expect
@@ -158,14 +160,20 @@ test('rename plus scalar change emits grouped split ops', async () => {
  *   - op.desired_state.name     === { from: 'Pure Rename', to: 'Renamed' }
  */
 test('pure rename emits one ungrouped rename op', async () => {
-	const ctx = await seededPcd('pure-rename', [base.radarrNaming({ name: 'Pure Rename' })]);
+	const ctx = await seededPcd('pure-rename', [
+		base.radarrNaming({
+			name: 'Pure Rename',
+			movieFormat: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+			movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat
+		})
+	]);
 	const checkpoint = opCheckpoint(ctx);
 
 	await write.namingRadarr.update(ctx, 'Pure Rename', {
 		name: 'Renamed',
 		rename: true,
-		movieFormat: '',
-		movieFolderFormat: '',
+		movieFormat: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+		movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat,
 		replaceIllegalCharacters: false,
 		colonReplacementFormat: 'delete'
 	});
@@ -183,7 +191,7 @@ test('pure rename emits one ungrouped rename op', async () => {
 /**
  * Context
  *   Base layer seeded with one row:
- *     name='Noop Naming', defaults
+ *     name='Noop Naming', valid defaults
  *   Compiled.
  *
  * Submit identical values.
@@ -192,14 +200,20 @@ test('pure rename emits one ungrouped rename op', async () => {
  *   - userOpsSince(checkpoint).length === 0
  */
 test('unchanged submit writes no ops', async () => {
-	const ctx = await seededPcd('noop', [base.radarrNaming({ name: 'Noop Naming' })]);
+	const ctx = await seededPcd('noop', [
+		base.radarrNaming({
+			name: 'Noop Naming',
+			movieFormat: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+			movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat
+		})
+	]);
 	const checkpoint = opCheckpoint(ctx);
 
 	await write.namingRadarr.update(ctx, 'Noop Naming', {
 		name: 'Noop Naming',
 		rename: true,
-		movieFormat: '',
-		movieFolderFormat: '',
+		movieFormat: VALID_RADARR_NAMING_DEFAULTS.movieFormat,
+		movieFolderFormat: VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat,
 		replaceIllegalCharacters: false,
 		colonReplacementFormat: 'delete'
 	});
