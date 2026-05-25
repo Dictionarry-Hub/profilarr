@@ -61,11 +61,15 @@ export const actions: Actions = {
 				'colonReplacementFormat'
 			) as RadarrNamingRow['colon_replacement_format'];
 
-			const movieFormatValidation = validateNamingFormat(movieFormat || '', 'radarr');
+			const movieFormatValidation = validateNamingFormat(movieFormat || '', 'radarr', {
+				field: 'movieFormat'
+			});
 			if (!movieFormatValidation.valid) {
 				return fail(400, { error: `Movie format: ${movieFormatValidation.errors.join(', ')}` });
 			}
-			const folderFormatValidation = validateNamingFormat(movieFolderFormat || '', 'radarr');
+			const folderFormatValidation = validateNamingFormat(movieFolderFormat || '', 'radarr', {
+				field: 'movieFolderFormat'
+			});
 			if (!folderFormatValidation.valid) {
 				return fail(400, { error: `Folder format: ${folderFormatValidation.errors.join(', ')}` });
 			}
@@ -114,14 +118,36 @@ export const actions: Actions = {
 			) as SonarrNamingRow['multi_episode_style'];
 
 			const formatFields = [
-				{ name: 'Standard episode format', value: standardEpisodeFormat },
-				{ name: 'Daily episode format', value: dailyEpisodeFormat },
-				{ name: 'Anime episode format', value: animeEpisodeFormat },
-				{ name: 'Series folder format', value: seriesFolderFormat },
-				{ name: 'Season folder format', value: seasonFolderFormat }
+				{
+					name: 'Standard episode format',
+					value: standardEpisodeFormat,
+					field: 'standardEpisodeFormat' as const
+				},
+				{
+					name: 'Daily episode format',
+					value: dailyEpisodeFormat,
+					field: 'dailyEpisodeFormat' as const
+				},
+				{
+					name: 'Anime episode format',
+					value: animeEpisodeFormat,
+					field: 'animeEpisodeFormat' as const
+				},
+				{
+					name: 'Series folder format',
+					value: seriesFolderFormat,
+					field: 'seriesFolderFormat' as const
+				},
+				{
+					name: 'Season folder format',
+					value: seasonFolderFormat,
+					field: 'seasonFolderFormat' as const
+				}
 			];
 			for (const field of formatFields) {
-				const validation = validateNamingFormat(field.value || '', 'sonarr');
+				const validation = validateNamingFormat(field.value || '', 'sonarr', {
+					field: field.field
+				});
 				if (!validation.valid) {
 					return fail(400, { error: `${field.name}: ${validation.errors.join(', ')}` });
 				}
