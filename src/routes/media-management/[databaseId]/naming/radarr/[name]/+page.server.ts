@@ -89,11 +89,15 @@ export const actions: Actions = {
 			'colonReplacementFormat'
 		) as RadarrNamingRow['colon_replacement_format'];
 
-		const movieFormatValidation = validateNamingFormat(movieFormat || '', 'radarr');
+		const movieFormatValidation = validateNamingFormat(movieFormat || '', 'radarr', {
+			field: 'movieFormat'
+		});
 		if (!movieFormatValidation.valid) {
 			return fail(400, { error: `Movie format: ${movieFormatValidation.errors.join(', ')}` });
 		}
-		const folderFormatValidation = validateNamingFormat(movieFolderFormat || '', 'radarr');
+		const folderFormatValidation = validateNamingFormat(movieFolderFormat || '', 'radarr', {
+			field: 'movieFolderFormat'
+		});
 		if (!folderFormatValidation.valid) {
 			return fail(400, { error: `Folder format: ${folderFormatValidation.errors.join(', ')}` });
 		}
