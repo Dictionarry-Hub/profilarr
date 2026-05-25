@@ -145,7 +145,9 @@ export const actions: Actions = {
 				}
 			];
 			for (const field of formatFields) {
-				const validation = validateNamingFormat(field.value || '', 'sonarr', { field: field.field });
+				const validation = validateNamingFormat(field.value || '', 'sonarr', {
+					field: field.field
+				});
 				if (!validation.valid) {
 					return fail(400, { error: `${field.name}: ${validation.errors.join(', ')}` });
 				}

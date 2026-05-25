@@ -72,7 +72,10 @@ Deno.test('naming tokens keeps existing default formats valid and previewable', 
 Deno.test('naming tokens preserves current generic validation behavior', () => {
 	assertValid('', 'radarr');
 	assertValid('{[Quality Full]}{-Release Group}', 'radarr');
-	assertEquals(resolveRadarrFormat('{[Quality Full]}{-Release Group}'), '[Bluray-1080p Proper]-EVOLVE');
+	assertEquals(
+		resolveRadarrFormat('{[Quality Full]}{-Release Group}'),
+		'[Bluray-1080p Proper]-EVOLVE'
+	);
 
 	assertInvalid('{Definitely Missing}', 'radarr');
 	assertInvalid('{Definitely Missing}', 'sonarr');
@@ -99,9 +102,15 @@ Deno.test('naming tokens normalizes Arr-style token spelling', () => {
 	}
 
 	assertValid('{Movie.CleanTitle}', 'radarr');
-	assertEquals(resolveRadarrFormat('{Movie.CleanTitle}'), resolveRadarrFormat('{Movie CleanTitle}'));
+	assertEquals(
+		resolveRadarrFormat('{Movie.CleanTitle}'),
+		resolveRadarrFormat('{Movie CleanTitle}')
+	);
 	assertValid('{Series_TitleYear}', 'sonarr');
-	assertEquals(resolveSonarrFormat('{Series_TitleYear}'), resolveSonarrFormat('{Series TitleYear}'));
+	assertEquals(
+		resolveSonarrFormat('{Series_TitleYear}'),
+		resolveSonarrFormat('{Series TitleYear}')
+	);
 	assertValid('{ReleaseGroup}', 'sonarr');
 	assertEquals(resolveSonarrFormat('{ReleaseGroup}'), resolveSonarrFormat('{Release Group}'));
 
@@ -241,7 +250,14 @@ Deno.test('naming tokens previews custom format parameters', () => {
 });
 
 Deno.test('naming tokens validates and previews Sonarr numbering flexibility', () => {
-	for (const format of ['{season}', '{episode}', '{absolute}', '{season:000}', '{episode:000}', '{absolute:0000}']) {
+	for (const format of [
+		'{season}',
+		'{episode}',
+		'{absolute}',
+		'{season:000}',
+		'{episode:000}',
+		'{absolute:0000}'
+	]) {
 		assertValid(format, 'sonarr');
 	}
 

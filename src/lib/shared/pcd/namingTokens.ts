@@ -70,9 +70,7 @@ function parseTokenContent(raw: string, inner: string): ParsedNamingToken | null
 
 	const parameterIndex = tokenWithParameter.indexOf(':');
 	const tokenName =
-		parameterIndex >= 0
-			? tokenWithParameter.slice(0, parameterIndex).trim()
-			: tokenWithParameter;
+		parameterIndex >= 0 ? tokenWithParameter.slice(0, parameterIndex).trim() : tokenWithParameter;
 	const parameter = parameterIndex >= 0 ? tokenWithParameter.slice(parameterIndex + 1) : null;
 
 	if (!tokenName || !/^[A-Za-z]/.test(tokenName) || parameter === '') {
@@ -808,7 +806,9 @@ const MEDIA_LANGUAGE_TOKEN_NAMES = new Set(
 	].map(normalizeTokenName)
 );
 
-const SONARR_NUMBER_TOKEN_NAMES = new Set(['season', 'episode', 'absolute'].map(normalizeTokenName));
+const SONARR_NUMBER_TOKEN_NAMES = new Set(
+	['season', 'episode', 'absolute'].map(normalizeTokenName)
+);
 const RADARR_MOVIE_TITLE_TOKEN_NAMES = new Set(
 	[
 		'Movie Title',
@@ -880,7 +880,9 @@ function getSampleValue(
 	lookup: Map<string, string>
 ): string | undefined {
 	if (token.parameter !== null) {
-		const parameterSpecific = lookup.get(normalizeTokenName(`${token.tokenName}:${token.parameter}`));
+		const parameterSpecific = lookup.get(
+			normalizeTokenName(`${token.tokenName}:${token.parameter}`)
+		);
 		if (parameterSpecific !== undefined) {
 			return parameterSpecific;
 		}
@@ -1062,11 +1064,15 @@ export function resolveFormat(
 }
 
 export function resolveRadarrFormat(format: string): string {
-	return resolveFormat(format, RADARR_SAMPLE_VALUES, { customFormats: RADARR_SAMPLE_CUSTOM_FORMATS });
+	return resolveFormat(format, RADARR_SAMPLE_VALUES, {
+		customFormats: RADARR_SAMPLE_CUSTOM_FORMATS
+	});
 }
 
 export function resolveSonarrFormat(format: string): string {
-	return resolveFormat(format, SONARR_SAMPLE_VALUES, { customFormats: SONARR_SAMPLE_CUSTOM_FORMATS });
+	return resolveFormat(format, SONARR_SAMPLE_VALUES, {
+		customFormats: SONARR_SAMPLE_CUSTOM_FORMATS
+	});
 }
 
 // ============================================================================
