@@ -84,10 +84,7 @@ test('minimal sonarr naming emits one create op', async () => {
 	const desired = parseDesiredState(op);
 	assertEquals(desired.name, 'Created Naming');
 	assertEquals(desired.rename, true);
-	assertEquals(
-		desired.standard_episode_format,
-		VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat
-	);
+	assertEquals(desired.standard_episode_format, VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat);
 	assertEquals(desired.daily_episode_format, VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat);
 	assertEquals(desired.anime_episode_format, VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat);
 	assertEquals(desired.series_folder_format, VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat);
