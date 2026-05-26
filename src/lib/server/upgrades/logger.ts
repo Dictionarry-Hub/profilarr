@@ -115,6 +115,40 @@ export async function logUpgradeError(
 	});
 }
 
+export async function logUpgradeQueueDetectionMismatch(details: {
+	instanceId: number;
+	instanceName: string;
+	app: 'Radarr' | 'Sonarr';
+	filterName: string;
+	commandId: number;
+	reportedDownloads: number;
+	observedDownloads: number;
+	graceElapsedMs: number;
+	commandMessage?: string;
+}): Promise<void> {
+	await logger.warn(
+		`Upgrade detection under-reported ${details.app} grabs: command reported ${details.reportedDownloads}, queue observation saw ${details.observedDownloads}`,
+		{
+			source: SOURCE,
+			meta: details
+		}
+	);
+}
+
+export async function logUpgradeCommandCompleted(details: {
+	commandId: number;
+	status: string;
+	elapsedMs: number;
+	commandMessage?: string;
+	reportedDownloads: number | null;
+	observedDownloads: number;
+}): Promise<void> {
+	await logger.debug(`Upgrade command ${details.commandId} completed`, {
+		source: SOURCE,
+		meta: details
+	});
+}
+
 /**
  * Log when dry run cache is cleared
  */

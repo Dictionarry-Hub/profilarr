@@ -48,6 +48,13 @@ flowchart TD
     BATCH --> LOG
 ```
 
+Live searches watch the Arr queue as soon as the search command is created.
+Queue entries are accumulated every 3 seconds while the command runs. After
+the command completes, the processor parses Arr's downloaded report count from
+the command message and keeps watching for up to 3 minutes if fewer queue
+entries were observed. If Arr reports zero downloads, the run finishes
+immediately after command completion.
+
 ### Status
 
 | Status    | Meaning                                       |
@@ -210,7 +217,11 @@ Every run produces an `UpgradeJobLog` that captures the full funnel:
   details (title, current score/formats, upgrade releases with scores)
 - **Results** -- searches triggered, successful, failed, errors
 
-Three logging functions in `logger.ts`:
+If Arr reports more downloaded releases than Profilarr observed in the queue,
+the run still records the upgrades it saw and logs a warning with the reported
+and observed counts.
+
+Core logging functions in `logger.ts`:
 
 - `logUpgradeRun(log)` -- persists the full log to the `upgrade_runs` table
   and writes a summary to the [logger](./logger.md) with source
@@ -218,6 +229,8 @@ Three logging functions in `logger.ts`:
   failed.
 - `logUpgradeSkipped(instanceId, name, reason)` -- DEBUG-level.
 - `logUpgradeError(instanceId, name, error)` -- ERROR-level.
+- `logUpgradeQueueDetectionMismatch(details)` -- WARN-level diagnostic when
+  Arr reports more downloads than the queue monitor observed.
 
 ## Notifications
 
