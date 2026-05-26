@@ -1,0 +1,63 @@
+# git-cliff configuration for GitHub release notes.
+# https://git-cliff.org/docs/configuration
+
+[changelog]
+body = """
+{%- if version -%}
+## {{ version }}
+{%- else -%}
+## Unreleased
+{%- endif %}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim }}
+
+{% for commit in commits -%}
+- {% if commit.scope and commit.scope != "deps" and commit.scope != "deps-dev" %}{{ commit.scope }}: {% endif %}{% if commit.breaking %}**Breaking:** {% endif %}{{ commit.message | upper_first | trim }}
+{% endfor %}
+{%- endfor -%}
+{% set first_time_contributors = github.contributors | filter(attribute="is_first_time", value=true) %}
+{% if first_time_contributors | length > 0 %}
+### 🌱 New Contributors
+
+{% for contributor in first_time_contributors -%}
+- @{{ contributor.username }} made their first contribution in #{{ contributor.pr_number }}
+{% endfor %}
+{% endif -%}
+{% if previous.version and version -%}
+**Full Changelog**: https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/compare/{{ previous.version }}...{{ version }}
+{% endif %}
+"""
+trim = true
+render_always = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+require_conventional = true
+split_commits = false
+protect_breaking_commits = true
+filter_commits = true
+fail_on_unmatched_commit = true
+tag_pattern = "v[0-9]+\\.[0-9]+\\.[0-9]+"
+topo_order = false
+topo_order_commits = true
+sort_commits = "oldest"
+
+commit_parsers = [
+	{ message = "^feat", group = "<!-- 0 -->✨ Features" },
+	{ message = "^fix", group = "<!-- 1 -->🐛 Fixes" },
+	{ message = "^perf", group = "<!-- 2 -->⚡ Performance" },
+	{ message = "^security", group = "<!-- 3 -->🔒 Security" },
+	{ message = "^docs", group = "<!-- 4 -->📚 Documentation" },
+	{ message = "^refactor", group = "<!-- 5 -->♻️ Refactors" },
+	{ message = "^test", group = "<!-- 6 -->🧪 Tests" },
+	{ message = "^build", group = "<!-- 7 -->🔧 Maintenance" },
+	{ message = "^chore\\(deps.*\\)", group = "<!-- 9 -->📦 Dependencies" },
+	{ message = "^chore", group = "<!-- 7 -->🔧 Maintenance" },
+	{ message = "^style", group = "<!-- 7 -->🔧 Maintenance" },
+	{ message = "^ci", group = "<!-- 8 -->⚙️ CI" }
+]
+
+[remote.github]
+owner = "Dictionarry-Hub"
+repo = "profilarr"
