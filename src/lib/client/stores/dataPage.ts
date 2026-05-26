@@ -74,7 +74,9 @@ export function createViewModeStore(config: ViewModeConfig) {
 		view.subscribe((value) => {
 			try {
 				localStorage.setItem(storageKey, value);
-			} catch {}
+			} catch {
+				// Some browsers can deny storage access.
+			}
 		});
 	}
 
