@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import {
 		HardDrive,
 		Tag,
@@ -46,6 +47,14 @@
 	let evaluation: ReleaseEvaluation | null = null;
 	let error: string | null = null;
 	let selectedArrType: keyof CfScore = 'radarr';
+	const RELEASE_TYPE_STORAGE_KEY = 'entityTesting.quickParseReleaseType';
+
+	if (browser) {
+		const stored = localStorage.getItem(RELEASE_TYPE_STORAGE_KEY);
+		if (stored === 'movie' || stored === 'series') {
+			selectedReleaseType = stored;
+		}
+	}
 
 	$: profileOptions = [
 		{ value: '', label: 'No Profile' },
@@ -62,7 +71,6 @@
 	$: if (open) {
 		title = '';
 		selectedProfileId = '';
-		selectedReleaseType = 'movie';
 		evaluation = null;
 		error = null;
 	}
@@ -90,6 +98,9 @@
 		if (type !== 'movie' && type !== 'series') return;
 		if (selectedReleaseType === type) return;
 		selectedReleaseType = type;
+		if (browser) {
+			localStorage.setItem(RELEASE_TYPE_STORAGE_KEY, selectedReleaseType);
+		}
 		evaluation = null;
 		error = null;
 	}
