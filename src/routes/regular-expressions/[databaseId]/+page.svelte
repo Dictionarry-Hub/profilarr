@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { browser } from '$app/environment';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
@@ -19,7 +18,7 @@
 	import { filterMode } from '$stores/filterMode';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
-	import type { ViewMode } from '$lib/client/stores/dataPage';
+	import { createViewModeStore } from '$lib/client/stores/dataPage';
 	import { Info, Plus, FileText, Users } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
@@ -151,22 +150,7 @@
 	// View Mode
 	// ======================================================================
 
-	const VIEW_STORAGE_KEY = 'regularExpressionsView';
-
-	function loadViewMode(): ViewMode {
-		if (!browser) return 'table';
-		try {
-			const stored = localStorage.getItem(VIEW_STORAGE_KEY);
-			if (stored === 'cards' || stored === 'table') return stored;
-		} catch {}
-		return window.innerWidth < 768 ? 'cards' : 'table';
-	}
-
-	let viewMode: ViewMode = loadViewMode();
-
-	$: if (browser) {
-		localStorage.setItem(VIEW_STORAGE_KEY, viewMode);
-	}
+	const viewMode = createViewModeStore({ storageKey: 'regularExpressionsView' });
 
 	// ======================================================================
 	// Filtering
@@ -235,7 +219,7 @@
 		{#if !isMobile}
 			<FilterModeToggle bind:value={$filterMode} />
 		{/if}
-		<ViewToggle bind:value={viewMode} />
+		<ViewToggle bind:value={$viewMode} />
 		<ActionButton icon={Info} on:click={() => (infoModalOpen = true)} />
 	</ActionsBar>
 
@@ -257,7 +241,7 @@
 					No regular expressions match the current filters
 				</p>
 			</div>
-		{:else if viewMode === 'table'}
+		{:else if $viewMode === 'table'}
 			<TableView expressions={filtered} on:clone={handleClone} on:export={handleExport} />
 		{:else}
 			<CardView expressions={filtered} on:clone={handleClone} on:export={handleExport} />

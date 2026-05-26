@@ -46,7 +46,7 @@
 	export let onRefresh: () => void;
 	export let onOpen: () => void;
 	export let instanceType: string = 'radarr';
-	export let viewMode: ViewMode = 'table';
+	export let viewMode: ViewMode = 'cards';
 	export let expandAll: boolean = false;
 	export let onToggleExpandAll: () => void = () => {};
 	export let sortKey: string = 'title';

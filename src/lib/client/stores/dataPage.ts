@@ -9,6 +9,15 @@ import { createSearchStore, getPersistentSearchStore, type SearchStore } from '.
 
 export type ViewMode = 'table' | 'cards';
 
+export interface ViewModeConfig {
+	/** Key for localStorage persistence */
+	storageKey: string;
+	/** Default view mode when no saved preference exists */
+	defaultView?: ViewMode;
+	/** Mobile breakpoint in px, below which cards always win */
+	mobileBreakpoint?: number;
+}
+
 export interface DataPageConfig<T> {
 	/** Key for localStorage persistence */
 	storageKey: string;
@@ -40,6 +49,40 @@ export interface DataPageStore<T> {
 	setItems: (items: T[]) => void;
 }
 
+export function createViewModeStore(config: ViewModeConfig) {
+	const { storageKey, defaultView = 'cards', mobileBreakpoint = 768 } = config;
+	let initialView: ViewMode = defaultView;
+
+	if (browser) {
+		try {
+			const stored = localStorage.getItem(storageKey);
+			if (stored === 'cards' || stored === 'table') {
+				initialView = stored;
+			} else if (window.innerWidth < mobileBreakpoint) {
+				initialView = 'cards';
+			}
+		} catch {
+			if (window.innerWidth < mobileBreakpoint) {
+				initialView = 'cards';
+			}
+		}
+	}
+
+	const view = writable<ViewMode>(initialView);
+
+	if (browser) {
+		view.subscribe((value) => {
+			try {
+				localStorage.setItem(storageKey, value);
+			} catch {
+				// Some browsers can deny storage access.
+			}
+		});
+	}
+
+	return view;
+}
+
 /**
  * Create a data page store for managing list pages
  *
@@ -65,18 +108,7 @@ export function createDataPageStore<T>(
 			? getPersistentSearchStore(config.searchKey, { debounceMs })
 			: createSearchStore({ debounceMs }));
 
-	// Determine initial view: localStorage > mobile detection > defaultView
-	const storedView = browser ? (localStorage.getItem(storageKey) as ViewMode | null) : null;
-	const isMobile = browser ? window.innerWidth < 768 : false;
-	const initialView = storedView ?? (isMobile ? 'cards' : defaultView);
-	const view = writable<ViewMode>(initialView);
-
-	// Persist view changes to localStorage
-	if (browser) {
-		view.subscribe((value) => {
-			localStorage.setItem(storageKey, value);
-		});
-	}
+	const view = createViewModeStore({ storageKey, defaultView });
 
 	// Filtered items derived from search
 	const filtered = derived([items, search.debouncedQuery], ([$items, $query]) => {
