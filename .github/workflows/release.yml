@@ -184,3 +184,45 @@ jobs:
       - name: Inspect manifest
         run: |
           docker buildx imagetools inspect ${{ env.IMAGE_BASE }}/${{ matrix.image }}:${{ steps.meta.outputs.version }}
+
+  # ─── Publish GitHub release notes ──────────────────────────────────────
+
+  github-release:
+    name: GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [manifest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --current --output RELEASE_NOTES.md
+        env:
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --title "$TAG" \
+              --notes-file RELEASE_NOTES.md \
+              --latest
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes-file RELEASE_NOTES.md \
+              --verify-tag \
+              --latest
+          fi
