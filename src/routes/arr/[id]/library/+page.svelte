@@ -9,7 +9,7 @@
 	import { getPersistentSearchStore } from '$stores/search';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
-	import type { ViewMode } from '$lib/client/stores/dataPage';
+	import { createViewModeStore } from '$lib/client/stores/dataPage';
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
 	import { getDisplayUrl } from '$lib/client/utils/arrDisplayUrl.ts';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
@@ -176,21 +176,7 @@
 	// View Mode
 	// ==========================================================================
 
-	const VIEW_STORAGE_KEY = 'profilarr-library-view';
-	function loadViewMode(): ViewMode {
-		if (!browser) return 'table';
-		try {
-			const stored = localStorage.getItem(VIEW_STORAGE_KEY);
-			if (stored === 'cards' || stored === 'table') return stored;
-		} catch {}
-		return window.innerWidth < 768 ? 'cards' : 'table';
-	}
-
-	let viewMode: ViewMode = loadViewMode();
-
-	$: if (browser) {
-		localStorage.setItem(VIEW_STORAGE_KEY, viewMode);
-	}
+	const viewMode = createViewModeStore({ storageKey: 'profilarr-library-view' });
 
 	// ==========================================================================
 	// Expand All
@@ -702,7 +688,7 @@
 			onRefresh={handleRefresh}
 			onOpen={handleOpen}
 			instanceType={data.instance.type}
-			bind:viewMode
+			bind:viewMode={$viewMode}
 			{expandAll}
 			onToggleExpandAll={toggleExpandAll}
 			sortKey={cardSortKey}
@@ -715,7 +701,7 @@
 			onFilterInfo={() => (showFilterInfo = true)}
 		/>
 
-		{#if viewMode === 'table'}
+		{#if $viewMode === 'table'}
 			{#if isRadarr}
 				{#if allMoviesWithFiles.length === 0 && !loading && !refreshing}
 					<div

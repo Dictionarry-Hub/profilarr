@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { Plus } from 'lucide-svelte';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
@@ -18,7 +17,7 @@
 	import { filterMode } from '$stores/filterMode';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
-	import type { ViewMode } from '$lib/client/stores/dataPage';
+	import { createViewModeStore } from '$lib/client/stores/dataPage';
 	import { alertStore } from '$alerts/store';
 	import type { QualityProfileTableRow } from '$shared/pcd/display';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
@@ -149,22 +148,7 @@
 	// View Mode
 	// ======================================================================
 
-	const VIEW_STORAGE_KEY = 'qualityProfilesView';
-
-	function loadViewMode(): ViewMode {
-		if (!browser) return 'table';
-		try {
-			const stored = localStorage.getItem(VIEW_STORAGE_KEY);
-			if (stored === 'cards' || stored === 'table') return stored;
-		} catch {}
-		return window.innerWidth < 768 ? 'cards' : 'table';
-	}
-
-	let viewMode: ViewMode = loadViewMode();
-
-	$: if (browser) {
-		localStorage.setItem(VIEW_STORAGE_KEY, viewMode);
-	}
+	const viewMode = createViewModeStore({ storageKey: 'qualityProfilesView' });
 
 	// ======================================================================
 	// Filtering
@@ -221,7 +205,7 @@
 		{#if !isMobile}
 			<FilterModeToggle bind:value={$filterMode} />
 		{/if}
-		<ViewToggle bind:value={viewMode} />
+		<ViewToggle bind:value={$viewMode} />
 	</ActionsBar>
 
 	<!-- Quality Profiles Content -->
@@ -242,7 +226,7 @@
 					No quality profiles match the current filters
 				</p>
 			</div>
-		{:else if viewMode === 'table'}
+		{:else if $viewMode === 'table'}
 			<TableView
 				profiles={filtered}
 				databaseId={data.currentDatabase.id}

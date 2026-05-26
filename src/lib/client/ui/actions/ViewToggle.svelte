@@ -6,7 +6,7 @@
 	import { Eye, LayoutGrid, Table } from 'lucide-svelte';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
 
-	export let value: ViewMode = 'table';
+	export let value: ViewMode = 'cards';
 	export let position: 'left' | 'right' | 'middle' = 'right';
 </script>
 
