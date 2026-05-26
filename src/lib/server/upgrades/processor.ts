@@ -213,9 +213,7 @@ function mergeSonarrQueueItem(
 ): void {
 	const existing = queueMap.get(queueItem.seriesId) ?? [];
 	const alreadySeen = existing.some((item) =>
-		queueItem.downloadId
-			? item.downloadId === queueItem.downloadId
-			: item.title === queueItem.title
+		queueItem.downloadId ? item.downloadId === queueItem.downloadId : item.title === queueItem.title
 	);
 
 	if (!alreadySeen) {
