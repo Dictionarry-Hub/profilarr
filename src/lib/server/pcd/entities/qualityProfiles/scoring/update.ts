@@ -23,6 +23,7 @@ interface CustomFormatScore {
 }
 
 interface UpdateScoringInput {
+	upgradesAllowed: boolean;
 	minimumScore: number;
 	upgradeUntilScore: number;
 	upgradeScoreIncrement: number;
@@ -64,7 +65,12 @@ export async function updateScoring(options: UpdateScoringOptions) {
 
 	const currentProfile = await db
 		.selectFrom('quality_profiles')
-		.select(['minimum_custom_format_score', 'upgrade_until_score', 'upgrade_score_increment'])
+		.select([
+			'upgrades_allowed',
+			'minimum_custom_format_score',
+			'upgrade_until_score',
+			'upgrade_score_increment'
+		])
 		.where('name', '=', profileName)
 		.executeTakeFirst();
 
@@ -84,6 +90,30 @@ export async function updateScoring(options: UpdateScoringOptions) {
 	}
 
 	const ops: ScoringOp[] = [];
+	const currentUpgradesAllowed = currentProfile.upgrades_allowed === 1;
+
+	if (currentUpgradesAllowed !== input.upgradesAllowed) {
+		const query = db
+			.updateTable('quality_profiles')
+			.set({ upgrades_allowed: input.upgradesAllowed ? 1 : 0 })
+			.where('name', '=', profileName)
+			.where('upgrades_allowed', '=', currentProfile.upgrades_allowed)
+			.compile();
+
+		ops.push({
+			description: `update-quality-profile-upgrades-allowed-${profileName}`,
+			queries: [query],
+			desiredState: {
+				upgrades_allowed: {
+					from: currentUpgradesAllowed,
+					to: input.upgradesAllowed
+				}
+			},
+			changedFields: ['upgrades_allowed'],
+			summary: 'Update quality profile upgrades allowed',
+			title: `Update upgrades allowed for quality profile "${profileName}"`
+		});
+	}
 
 	// Expand 'all' rows into per-arr-type rows for any CFs being modified.
 	// This prevents ghost fallbacks when a specific arr_type score is deleted

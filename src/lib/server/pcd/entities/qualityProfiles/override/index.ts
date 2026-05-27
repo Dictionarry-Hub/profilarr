@@ -26,12 +26,14 @@ function hasScoringChanges(
 	desiredState: StoredDesiredState | null
 ): boolean {
 	if (metadata?.changed_fields?.includes('minimum_custom_format_score')) return true;
+	if (metadata?.changed_fields?.includes('upgrades_allowed')) return true;
 	if (metadata?.changed_fields?.includes('upgrade_until_score')) return true;
 	if (metadata?.changed_fields?.includes('upgrade_score_increment')) return true;
 	if (metadata?.changed_fields?.includes('custom_format_scores')) return true;
 	if (metadata?.changed_fields?.some((field) => field.startsWith('custom_format_score:')))
 		return true;
 	if (desiredState?.custom_format_scores) return true;
+	if (desiredState?.upgrades_allowed) return true;
 	if (desiredState?.minimum_custom_format_score) return true;
 	if (desiredState?.upgrade_until_score) return true;
 	if (desiredState?.upgrade_score_increment) return true;
