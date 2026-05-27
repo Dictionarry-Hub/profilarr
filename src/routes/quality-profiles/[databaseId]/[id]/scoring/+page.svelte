@@ -1,6 +1,7 @@
 <script lang="ts">
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
+	import Toggle from '$ui/toggle/Toggle.svelte';
 	import {
 		Info,
 		ArrowUpDown,
@@ -57,6 +58,7 @@
 
 	// Scoring data shape
 	interface ScoringFormData {
+		upgradesAllowed: boolean;
 		minimumScore: number;
 		upgradeUntilScore: number;
 		upgradeScoreIncrement: number;
@@ -71,6 +73,7 @@
 	function buildInitialData(scoring: typeof data.scoring): ScoringFormData {
 		if (!scoring) {
 			return {
+				upgradesAllowed: true,
 				minimumScore: 0,
 				upgradeUntilScore: 0,
 				upgradeScoreIncrement: 1,
@@ -91,6 +94,7 @@
 		});
 
 		return {
+			upgradesAllowed: scoring.upgrades_allowed,
 			minimumScore: scoring.minimum_custom_format_score,
 			upgradeUntilScore: scoring.upgrade_until_score,
 			upgradeScoreIncrement: scoring.upgrade_score_increment,
@@ -103,6 +107,7 @@
 	$: initEdit(initialData);
 
 	// Reactive getters for current values
+	$: upgradesAllowed = ($current.upgradesAllowed ?? true) as boolean;
 	$: minimumScore = ($current.minimumScore ?? 0) as number;
 	$: upgradeUntilScore = ($current.upgradeUntilScore ?? 0) as number;
 	$: upgradeScoreIncrement = ($current.upgradeScoreIncrement ?? 1) as number;
@@ -672,6 +677,7 @@
 			};
 		}}
 	>
+		<input type="hidden" name="upgradesAllowed" value={upgradesAllowed ? 'true' : 'false'} />
 		<input type="hidden" name="minimumScore" value={minimumScore} />
 		<input type="hidden" name="upgradeUntilScore" value={upgradeUntilScore} />
 		<input type="hidden" name="upgradeScoreIncrement" value={upgradeScoreIncrement} />
@@ -681,7 +687,26 @@
 
 	<div class="mt-6 space-y-6 md:px-4">
 		<!-- Profile-level Score Settings -->
-		<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+		<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+			<div class="space-y-2" data-onboarding="qp-scoring-upgrades-allowed">
+				<label
+					for="upgradesAllowed"
+					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+				>
+					Upgrades Allowed
+				</label>
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					Allow this profile to upgrade existing media
+				</p>
+				<Toggle
+					checked={upgradesAllowed}
+					label={upgradesAllowed ? 'Enabled' : 'Disabled'}
+					ariaLabel="Upgrades allowed"
+					fullWidth
+					on:change={(event) => update('upgradesAllowed', event.detail)}
+				/>
+			</div>
+
 			<div class="space-y-2" data-onboarding="qp-scoring-minimum">
 				<label
 					for="minimumScore"
@@ -717,6 +742,7 @@
 					onchange={(v) => update('upgradeUntilScore', v)}
 					step={1}
 					font="mono"
+					disabled={!upgradesAllowed}
 				/>
 			</div>
 
@@ -736,6 +762,7 @@
 					onchange={(v) => update('upgradeScoreIncrement', v)}
 					step={1}
 					font="mono"
+					disabled={!upgradesAllowed}
 				/>
 			</div>
 		</div>
@@ -959,6 +986,7 @@
 								{customFormatScores}
 								{customFormatEnabled}
 								{getArrTypeColor}
+								disabled={!upgradesAllowed}
 								title={group.name}
 								firstRowOnboarding={groupIndex === 0 ? 'qp-scoring-row' : undefined}
 								on:scoreChange={handleScoreChange}

@@ -12,6 +12,7 @@
 	export let arrTypes: string[];
 	export let customFormatScores: Record<string, Record<string, number | null>>;
 	export let customFormatEnabled: Record<string, Record<string, boolean>>;
+	export let disabled: boolean = false;
 	type IconCheckboxColor =
 		| 'accent'
 		| 'blue'
@@ -61,10 +62,12 @@
 	}
 
 	function handleScoreChange(formatName: string, arrType: string, score: number | null) {
+		if (disabled) return;
 		dispatch('scoreChange', { formatName, arrType, score });
 	}
 
 	function handleToggleEnabled(formatName: string, arrType: string) {
+		if (disabled) return;
 		const isEnabled = customFormatEnabled[formatName]?.[arrType] ?? false;
 		if (isEnabled) {
 			dispatch('scoreChange', { formatName, arrType, score: null });
@@ -97,6 +100,7 @@
 					icon={Check}
 					color={getArrTypeColor(arrType)}
 					shape="circle"
+					{disabled}
 					on:click={() => handleToggleEnabled(row.name, arrType)}
 				/>
 				{#if customFormatScores[row.name]}
@@ -106,7 +110,7 @@
 							value={customFormatScores[row.name][arrType] ?? 0}
 							onchange={(newValue) => handleScoreChange(row.name, arrType, newValue)}
 							step={1}
-							disabled={!customFormatEnabled[row.name]?.[arrType]}
+							disabled={disabled || !customFormatEnabled[row.name]?.[arrType]}
 							font="mono"
 						/>
 					</div>
