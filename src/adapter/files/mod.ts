@@ -20,7 +20,7 @@ const ORIGIN = Deno.env.get('ORIGIN')?.replace(/\/+$/, '') || undefined;
 
 Deno.serve(
 	{
-		port: Number.parseInt(Deno.env.get('PORT') ?? '8000'),
+		port: Number.parseInt(Deno.env.get('PORT') ?? '6868'),
 		hostname: Deno.env.get('HOST') ?? '0.0.0.0'
 	},
 	async (request: Request, info: Deno.ServeHandlerInfo<Deno.NetAddr>): Promise<Response> => {
