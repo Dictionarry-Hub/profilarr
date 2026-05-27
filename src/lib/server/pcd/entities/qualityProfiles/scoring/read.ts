@@ -24,7 +24,12 @@ export async function scoring(
 	// 1. Get profile settings
 	const profile = await db
 		.selectFrom('quality_profiles')
-		.select(['minimum_custom_format_score', 'upgrade_until_score', 'upgrade_score_increment'])
+		.select([
+			'upgrades_allowed',
+			'minimum_custom_format_score',
+			'upgrade_until_score',
+			'upgrade_score_increment'
+		])
 		.where('name', '=', profileName)
 		.executeTakeFirst();
 
@@ -101,6 +106,7 @@ export async function scoring(
 		databaseId,
 		arrTypes,
 		customFormats: customFormatScoring,
+		upgrades_allowed: profile.upgrades_allowed === 1,
 		minimum_custom_format_score: profile.minimum_custom_format_score,
 		upgrade_until_score: profile.upgrade_until_score,
 		upgrade_score_increment: profile.upgrade_score_increment

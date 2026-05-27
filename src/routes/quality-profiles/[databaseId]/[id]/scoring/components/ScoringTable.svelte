@@ -6,6 +6,7 @@
 	export let arrTypes: string[];
 	export let customFormatScores: Record<string, Record<string, number | null>>;
 	export let customFormatEnabled: Record<string, Record<string, boolean>>;
+	export let disabled: boolean = false;
 	type IconCheckboxColor =
 		| 'accent'
 		| 'blue'
@@ -56,6 +57,7 @@
 		{arrTypes}
 		{customFormatScores}
 		{customFormatEnabled}
+		{disabled}
 		{getArrTypeColor}
 		{firstRowOnboarding}
 		on:scoreChange
@@ -68,6 +70,7 @@
 		{arrTypes}
 		{customFormatScores}
 		{customFormatEnabled}
+		{disabled}
 		{getArrTypeColor}
 		{firstRowOnboarding}
 		on:scoreChange

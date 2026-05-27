@@ -43,6 +43,7 @@ export interface QualityProfileQualityItemInput {
 }
 
 export interface QualityProfileScoringFormInput {
+	upgradesAllowed?: boolean;
 	minimumScore?: number;
 	upgradeUntilScore?: number;
 	upgradeScoreIncrement?: number;
@@ -574,6 +575,7 @@ function qualityProfileScoringFields(
 	input: QualityProfileScoringFormInput
 ): Record<string, string> {
 	return {
+		upgradesAllowed: String(input.upgradesAllowed ?? true),
 		minimumScore: String(input.minimumScore ?? 0),
 		upgradeUntilScore: String(input.upgradeUntilScore ?? 0),
 		upgradeScoreIncrement: String(input.upgradeScoreIncrement ?? 1),

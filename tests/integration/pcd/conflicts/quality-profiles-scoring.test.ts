@@ -38,6 +38,7 @@ type LatestHistory = {
 type QualityProfileScoringRow = {
 	name: string;
 	description: string | null;
+	upgrades_allowed: number;
 	minimum_custom_format_score: number;
 	upgrade_until_score: number;
 	upgrade_score_increment: number;
@@ -266,6 +267,37 @@ test('matching upstream upgrade score increment auto-aligns user op', async () =
 	}
 });
 
+test('matching upstream upgrades allowed auto-aligns user op', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'upgrades-allowed-auto-align', [
+			base.qualityProfile({
+				name: PROFILE_NAME
+			})
+		]);
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.qualityProfile.updateScoring(ctx, 1, {
+			upgradesAllowed: false
+		});
+
+		seedUpstream(
+			ctx,
+			upstreamProfileScoringUpdate(PROFILE_NAME, {
+				upgrades_allowed: { from: true, to: false }
+			})
+		);
+		await compilePcd(ctx);
+
+		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['upgrades_allowed']);
+		assertEquals(op.state, 'dropped');
+		assertLatestHistory(ctx, op, 'dropped', 'aligned');
+		assertNoPendingConflicts(ctx);
+
+		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
+		assertEquals(row.upgrades_allowed, 0);
+	}
+});
+
 /**
  * Migrates old 2.14.
  *
@@ -456,6 +488,31 @@ test('minimum score update after upstream rename resolves by strategy', async ()
 
 		const row = assertQualityProfileScoring(ctx, 'Scoring Profile Upstream');
 		assertEquals(row.minimum_custom_format_score, strategy === 'override' ? 7 : 0);
+		assertNoQualityProfileScoring(ctx, PROFILE_NAME);
+	}
+});
+
+test('upgrades allowed update after upstream rename resolves by strategy', async () => {
+	for (const strategy of STRATEGIES) {
+		const ctx = await seededScenario(strategy, 'upgrades-allowed-upstream-rename', [
+			base.qualityProfile({
+				name: PROFILE_NAME
+			})
+		]);
+		const checkpoint = opCheckpoint(ctx);
+
+		await write.qualityProfile.updateScoring(ctx, 1, {
+			upgradesAllowed: false
+		});
+
+		seedUpstream(ctx, upstreamRename(PROFILE_NAME, 'Scoring Profile Upstream'));
+		await compilePcd(ctx);
+
+		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['upgrades_allowed']);
+		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
+
+		const row = assertQualityProfileScoring(ctx, 'Scoring Profile Upstream');
+		assertEquals(row.upgrades_allowed, strategy === 'override' ? 0 : 1);
 		assertNoQualityProfileScoring(ctx, PROFILE_NAME);
 	}
 });
@@ -1270,6 +1327,7 @@ function compiledQualityProfileState(ctx: PcdTestContext): {
 			.prepare(
 				`SELECT name,
 				        description,
+				        upgrades_allowed,
 				        minimum_custom_format_score,
 				        upgrade_until_score,
 				        upgrade_score_increment

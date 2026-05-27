@@ -143,6 +143,9 @@ function validateQualityProfile(data: Record<string, unknown>): string | null {
 	if (!Array.isArray(data.orderedItems)) {
 		return 'data.orderedItems must be an array';
 	}
+	if (data.upgradesAllowed !== undefined && typeof data.upgradesAllowed !== 'boolean') {
+		return 'data.upgradesAllowed must be a boolean';
+	}
 	if (typeof data.minimumScore !== 'number') {
 		return 'data.minimumScore must be a number';
 	}

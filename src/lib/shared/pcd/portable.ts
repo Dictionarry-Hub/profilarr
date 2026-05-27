@@ -93,6 +93,7 @@ export interface PortableQualityProfile {
 	tags: string[];
 	language: string | null;
 	orderedItems: OrderedItem[];
+	upgradesAllowed?: boolean;
 	minimumScore: number;
 	upgradeUntilScore: number;
 	upgradeScoreIncrement: number;

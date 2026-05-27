@@ -133,7 +133,8 @@ Quality profiles tie everything together: an ordered list of acceptable
 qualities, custom format scores that influence selection, language
 preferences, and upgrade thresholds.
 
-**Fields:** name, description, tags, language
+**Fields:** name, description, tags, language, upgrades_allowed,
+minimum_custom_format_score, upgrade_until_score, upgrade_score_increment
 
 **Create** inserts the profile with defaults (`upgrades_allowed = 1`,
 scores at 0, increment at 1), then seeds all available qualities as
@@ -164,7 +165,7 @@ name without conflict.
 ### Scoring
 
 **Source:** `entities/qualityProfiles/scoring/`
-**Tables:** quality_profile_custom_formats
+**Tables:** quality_profiles, quality_profile_custom_formats
 
 Each profile assigns scores to custom formats, optionally per `arr_type`
 (`all`, `radarr`, `sonarr`). When a score set to `all` is modified for a
@@ -173,9 +174,9 @@ change only affects the targeted type.
 
 Score operations are per-CF: insert (new score), update (changed score,
 guarded on old value), or delete (score removed). Profile-level settings
-(`minimum_custom_format_score`, `upgrade_until_score`,
-`upgrade_score_increment`) are updated in separate ops with their own
-guards.
+(`upgrades_allowed`, `minimum_custom_format_score`,
+`upgrade_until_score`, `upgrade_score_increment`) are updated in separate
+ops with their own guards.
 
 ### Entity Testing
 

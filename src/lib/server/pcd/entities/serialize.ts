@@ -139,6 +139,7 @@ export async function serializeQualityProfile(
 		.select([
 			'name',
 			'description',
+			'upgrades_allowed',
 			'minimum_custom_format_score',
 			'upgrade_until_score',
 			'upgrade_score_increment'
@@ -177,6 +178,7 @@ export async function serializeQualityProfile(
 		tags: tags.map((t) => t.name),
 		language: languageRow?.language_name ?? null,
 		orderedItems: qualitiesData.orderedItems,
+		upgradesAllowed: profile.upgrades_allowed === 1,
 		minimumScore: profile.minimum_custom_format_score,
 		upgradeUntilScore: profile.upgrade_until_score,
 		upgradeScoreIncrement: profile.upgrade_score_increment,

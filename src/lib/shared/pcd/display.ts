@@ -386,6 +386,7 @@ export interface QualityProfileScoring {
 	databaseId: number;
 	arrTypes: string[];
 	customFormats: CustomFormatScoring[];
+	upgrades_allowed: boolean;
 	minimum_custom_format_score: number;
 	upgrade_until_score: number;
 	upgrade_score_increment: number;

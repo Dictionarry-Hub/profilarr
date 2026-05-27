@@ -164,6 +164,7 @@ export async function deserializeQualityProfile(
 		layer,
 		profileName: portable.name,
 		input: {
+			upgradesAllowed: portable.upgradesAllowed ?? true,
 			minimumScore: portable.minimumScore,
 			upgradeUntilScore: portable.upgradeUntilScore,
 			upgradeScoreIncrement: portable.upgradeScoreIncrement,

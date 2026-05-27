@@ -126,6 +126,7 @@ export const base = {
 		description?: string | null;
 		tags?: string[];
 		language?: string | null;
+		upgradesAllowed?: boolean;
 		minimumScore?: number;
 		upgradeUntilScore?: number;
 		upgradeScoreIncrement?: number;
@@ -176,7 +177,7 @@ export const base = {
 			      VALUES (
 				       ${sqlValue(input.name)},
 				       ${sqlValue(description)},
-				       1,
+				       ${input.upgradesAllowed === false ? 0 : 1},
 				       ${sqlNumber(input.minimumScore ?? 0)},
 				       ${sqlNumber(input.upgradeUntilScore ?? 0)},
 				       ${sqlNumber(input.upgradeScoreIncrement ?? 1)}

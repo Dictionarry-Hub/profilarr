@@ -59,6 +59,26 @@ export async function overrideScoring(
 	const nextDesiredState: StoredDesiredState = {};
 	const changedFields: string[] = [];
 
+	const desiredUpgradesAllowed = getDesiredTo<boolean>(desiredState.upgrades_allowed);
+	if (
+		desiredUpgradesAllowed !== undefined &&
+		!valuesEqual(desiredUpgradesAllowed, currentScoring.upgrades_allowed)
+	) {
+		queries.push({
+			sql: `UPDATE quality_profiles
+SET upgrades_allowed = ${desiredUpgradesAllowed ? 1 : 0}
+WHERE name = '${esc(profileName)}'
+  AND upgrades_allowed = ${currentScoring.upgrades_allowed ? 1 : 0}`,
+			parameters: [],
+			query: {} as never
+		});
+		nextDesiredState.upgrades_allowed = {
+			from: currentScoring.upgrades_allowed,
+			to: desiredUpgradesAllowed
+		};
+		changedFields.push('upgrades_allowed');
+	}
+
 	const desiredMinimum = getDesiredTo<number>(desiredState.minimum_custom_format_score);
 	if (
 		desiredMinimum !== undefined &&

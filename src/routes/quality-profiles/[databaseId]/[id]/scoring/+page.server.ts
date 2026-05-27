@@ -78,6 +78,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 
 		// Parse form data
+		const upgradesAllowed = formData.get('upgradesAllowed') !== 'false';
 		const minimumScore = parseInt(formData.get('minimumScore') as string, 10) || 0;
 		const upgradeUntilScore = parseInt(formData.get('upgradeUntilScore') as string, 10) || 0;
 		const upgradeScoreIncrement =
@@ -127,6 +128,7 @@ export const actions: Actions = {
 				layer,
 				profileName: profile.name,
 				input: {
+					upgradesAllowed,
 					minimumScore,
 					upgradeUntilScore,
 					upgradeScoreIncrement,
