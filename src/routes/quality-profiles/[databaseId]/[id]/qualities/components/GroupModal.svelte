@@ -189,7 +189,7 @@
 			</div>
 		{/if}
 
-		<div class="min-h-0 flex-1 overflow-y-auto pr-2 [scrollbar-gutter:stable]">
+		<div class="min-h-0 flex-1 overflow-y-auto pr-2 scrollbar-gutter-stable">
 			{#if items.length < 2}
 				<div class="px-3 py-2 text-sm text-neutral-500 dark:text-neutral-400">
 					At least two qualities are required for a group.
