@@ -326,7 +326,7 @@ export interface SonarrSeasonStatistics {
 export interface SonarrSeason {
 	seasonNumber: number;
 	monitored: boolean;
-	statistics: SonarrSeasonStatistics;
+	statistics?: SonarrSeasonStatistics;
 }
 
 /**
