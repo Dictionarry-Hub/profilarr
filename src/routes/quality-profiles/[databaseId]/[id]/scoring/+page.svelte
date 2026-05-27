@@ -986,7 +986,6 @@
 								{customFormatScores}
 								{customFormatEnabled}
 								{getArrTypeColor}
-								disabled={!upgradesAllowed}
 								title={group.name}
 								firstRowOnboarding={groupIndex === 0 ? 'qp-scoring-row' : undefined}
 								on:scoreChange={handleScoreChange}
