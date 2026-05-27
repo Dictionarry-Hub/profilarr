@@ -20,7 +20,10 @@ import type {
 	RadarrMovie,
 	RadarrMovieFile,
 	SonarrSeries,
-	ArrTag
+	ArrTag,
+	ArrCommand,
+	RadarrQueueItem,
+	SonarrQueueItem
 } from '$lib/server/utils/arr/types.ts';
 import { normalizeRadarrItems, normalizeSonarrItems } from './normalize.ts';
 import {
@@ -31,7 +34,14 @@ import {
 	isFilterExhausted,
 	resetFilterCooldown
 } from './cooldown.ts';
-import { logUpgradeRun, logUpgradeError, logUpgradeSkipped } from './logger.ts';
+import {
+	logUpgradeRun,
+	logUpgradeError,
+	logUpgradeSkipped,
+	logUpgradeQueueDetectionMismatch,
+	logUpgradeCommandCompleted
+} from './logger.ts';
+import { parseDownloadedReportCount } from './commandMessages.ts';
 import { notifications } from '$notifications/definitions/index.ts';
 import { notificationManager } from '$notifications/NotificationManager.ts';
 
@@ -42,6 +52,9 @@ import { notificationManager } from '$notifications/NotificationManager.ts';
  */
 const dryRunExclusions = new Map<number, { items: Set<number>; timestamp: number }>();
 const DRY_RUN_EXCLUSION_TTL_MS = 60 * 60 * 1000; // 1 hour
+const UPGRADE_QUEUE_POLL_INTERVAL_MS = 3000;
+const UPGRADE_QUEUE_GRACE_MS = 3 * 60 * 1000;
+const UPGRADE_COMMAND_TIMEOUT_MS = 60 * 60 * 1000;
 
 /**
  * Extract poster URL from arr API image data
@@ -89,32 +102,125 @@ export function clearDryRunExclusions(instanceId: number): number[] {
 	return clearedIds;
 }
 
-/**
- * Poll a queue function until results stabilize (no new items between polls)
- * Waits intervalMs between attempts, up to maxAttempts
- */
-async function pollQueue<T>(
-	fetch: () => Promise<T[]>,
-	maxAttempts = 5,
-	intervalMs = 3000
-): Promise<T[]> {
-	let lastCount = 0;
-	let stableResult: T[] = [];
+function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-	for (let i = 0; i < maxAttempts; i++) {
-		await new Promise((r) => setTimeout(r, intervalMs));
-		const result = await fetch();
+function isCommandComplete(command: ArrCommand): boolean {
+	return command.status === 'completed';
+}
 
-		if (result.length > 0 && result.length === lastCount) {
-			// Queue stabilized — same count as last poll
-			return result;
+function isCommandFailed(command: ArrCommand): boolean {
+	return command.status === 'failed';
+}
+
+async function monitorQueueDuringCommand<T>(options: {
+	commandId: number;
+	getCommand: (commandId: number) => Promise<ArrCommand>;
+	getQueue: () => Promise<T[]>;
+	mergeQueueItem: (item: T) => void;
+	getObservedCount: () => number;
+	onCommandComplete: (details: {
+		command: ArrCommand;
+		elapsedMs: number;
+		reportedDownloads: number | null;
+		observedDownloads: number;
+	}) => Promise<void>;
+	onMismatch: (details: {
+		command: ArrCommand;
+		reportedDownloads: number;
+		observedDownloads: number;
+		graceElapsedMs: number;
+	}) => Promise<void>;
+}): Promise<ArrCommand> {
+	const startTime = Date.now();
+	let command: ArrCommand | null = null;
+	let completedAt: number | null = null;
+	let reportedDownloads: number | null = null;
+	let completionLogged = false;
+	let mismatchLogged = false;
+
+	while (true) {
+		const elapsedMs = Date.now() - startTime;
+		if (elapsedMs >= UPGRADE_COMMAND_TIMEOUT_MS) {
+			throw new Error(`Command ${options.commandId} timed out after 60 minutes`);
 		}
 
-		stableResult = result;
-		lastCount = result.length;
+		command = await options.getCommand(options.commandId);
+
+		if (isCommandFailed(command)) {
+			throw new Error(`Command ${options.commandId} failed: ${command.message || 'Unknown error'}`);
+		}
+
+		const queue = await options.getQueue();
+		for (const item of queue) {
+			options.mergeQueueItem(item);
+		}
+
+		if (isCommandComplete(command)) {
+			if (completedAt === null) {
+				completedAt = Date.now();
+			}
+			if (reportedDownloads === null) {
+				reportedDownloads = parseDownloadedReportCount(command.message);
+			}
+
+			if (!completionLogged) {
+				await options.onCommandComplete({
+					command,
+					elapsedMs: Date.now() - startTime,
+					reportedDownloads,
+					observedDownloads: options.getObservedCount()
+				});
+				completionLogged = true;
+			}
+
+			if (reportedDownloads === 0) {
+				return command;
+			}
+
+			if (reportedDownloads === null) {
+				return command;
+			}
+
+			if (options.getObservedCount() >= reportedDownloads) {
+				return command;
+			}
+
+			const graceElapsedMs = Date.now() - completedAt;
+			if (graceElapsedMs >= UPGRADE_QUEUE_GRACE_MS) {
+				if (options.getObservedCount() < reportedDownloads && !mismatchLogged) {
+					await options.onMismatch({
+						command,
+						reportedDownloads,
+						observedDownloads: options.getObservedCount(),
+						graceElapsedMs
+					});
+					mismatchLogged = true;
+				}
+
+				return command;
+			}
+		}
+
+		await sleep(UPGRADE_QUEUE_POLL_INTERVAL_MS);
+	}
+}
+
+function mergeSonarrQueueItem(
+	queueMap: Map<number, SonarrQueueItem[]>,
+	queueItem: SonarrQueueItem
+): void {
+	const existing = queueMap.get(queueItem.seriesId) ?? [];
+	const alreadySeen = existing.some((item) =>
+		queueItem.downloadId ? item.downloadId === queueItem.downloadId : item.title === queueItem.title
+	);
+
+	if (!alreadySeen) {
+		existing.push(queueItem);
 	}
 
-	return stableResult;
+	queueMap.set(queueItem.seriesId, existing);
 }
 
 /**
@@ -462,7 +568,7 @@ export async function processUpgradeConfig(
 					}
 				}
 			} else {
-				// Live mode - trigger search, wait, check queue
+				// Live mode - trigger search and monitor queue while Arr processes it
 				try {
 					const itemIds = selectedItems.map((item) => item.id);
 
@@ -470,12 +576,39 @@ export async function processUpgradeConfig(
 						// Radarr: batch search
 						const radarr = client as RadarrClient;
 						const searchCommand = await radarr.searchMovies(itemIds);
-						await radarr.waitForCommand(searchCommand.id);
 						searchesTriggered = itemIds.length;
 
-						// Poll queue until results stabilize
-						const queue = await pollQueue(() => radarr.getQueue(itemIds));
-						const queueMap = new Map(queue.map((q) => [q.movieId, q]));
+						const queueMap = new Map<number, RadarrQueueItem>();
+						await monitorQueueDuringCommand({
+							commandId: searchCommand.id,
+							getCommand: (commandId) => radarr.getCommand(commandId),
+							getQueue: () => radarr.getQueue(itemIds),
+							mergeQueueItem: (item) => {
+								queueMap.set(item.movieId, item);
+							},
+							getObservedCount: () => queueMap.size,
+							onCommandComplete: (details) =>
+								logUpgradeCommandCompleted({
+									commandId: searchCommand.id,
+									status: details.command.status,
+									elapsedMs: details.elapsedMs,
+									commandMessage: details.command.message,
+									reportedDownloads: details.reportedDownloads,
+									observedDownloads: details.observedDownloads
+								}),
+							onMismatch: (details) =>
+								logUpgradeQueueDetectionMismatch({
+									instanceId: instance.id,
+									instanceName: instance.name,
+									app: 'Radarr',
+									filterName: filter.name,
+									commandId: searchCommand.id,
+									reportedDownloads: details.reportedDownloads,
+									observedDownloads: details.observedDownloads,
+									graceElapsedMs: details.graceElapsedMs,
+									commandMessage: details.command.message
+								})
+						});
 
 						for (const item of selectedItems) {
 							const original = getOriginalFile(item);
@@ -518,23 +651,41 @@ export async function processUpgradeConfig(
 					} else {
 						// Sonarr: search one series at a time
 						const sonarr = client as SonarrClient;
+						const queueMap = new Map<number, SonarrQueueItem[]>();
 
 						for (const item of selectedItems) {
 							const cmd = await sonarr.searchSeries(item.id);
-							await sonarr.waitForCommand(cmd.id);
+							await monitorQueueDuringCommand({
+								commandId: cmd.id,
+								getCommand: (commandId) => sonarr.getCommand(commandId),
+								getQueue: () => sonarr.getQueue([item.id]),
+								mergeQueueItem: (queueItem) => {
+									mergeSonarrQueueItem(queueMap, queueItem);
+								},
+								getObservedCount: () => queueMap.get(item.id)?.length ?? 0,
+								onCommandComplete: (details) =>
+									logUpgradeCommandCompleted({
+										commandId: cmd.id,
+										status: details.command.status,
+										elapsedMs: details.elapsedMs,
+										commandMessage: details.command.message,
+										reportedDownloads: details.reportedDownloads,
+										observedDownloads: details.observedDownloads
+									}),
+								onMismatch: (details) =>
+									logUpgradeQueueDetectionMismatch({
+										instanceId: instance.id,
+										instanceName: instance.name,
+										app: 'Sonarr',
+										filterName: filter.name,
+										commandId: cmd.id,
+										reportedDownloads: details.reportedDownloads,
+										observedDownloads: details.observedDownloads,
+										graceElapsedMs: details.graceElapsedMs,
+										commandMessage: details.command.message
+									})
+							});
 							searchesTriggered++;
-						}
-
-						// Poll queue until results stabilize
-						const queue = await pollQueue(() => sonarr.getQueue(itemIds));
-						// Group queue items by seriesId, deduplicate by release title
-						const queueMap = new Map<number, typeof queue>();
-						for (const q of queue) {
-							const existing = queueMap.get(q.seriesId) ?? [];
-							if (!existing.some((e) => e.title === q.title)) {
-								existing.push(q);
-							}
-							queueMap.set(q.seriesId, existing);
 						}
 
 						for (const item of selectedItems) {
