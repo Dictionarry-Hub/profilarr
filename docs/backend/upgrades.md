@@ -165,6 +165,12 @@ cooldown, and does not apply or reset cooldown tags. Results are grouped as
 selected, selectable, cooldown, and filtered out so users can inspect the
 filtered pool before triggering a real run.
 
+Preview library data is cached in memory for 5 minutes per Arr instance. An
+expired entry is treated as a cache miss: preview fetches fresh library data
+from Arr and replaces the cached entry. This keeps repeated filter edits fast
+while limiting stale preview data to a short window. Real upgrade runs do not
+use this preview cache.
+
 ## Scheduling
 
 Each Arr instance has a single upgrade config with a global cron schedule.

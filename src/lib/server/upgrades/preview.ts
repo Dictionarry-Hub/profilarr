@@ -1,7 +1,13 @@
 import type { ArrInstance } from '$db/queries/arrInstances.ts';
 import { RadarrClient } from '$utils/arr/clients/radarr.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import type { ArrTag, RadarrMovieFile } from '$utils/arr/types.ts';
+import type {
+	ArrQualityProfile,
+	ArrTag,
+	RadarrMovie,
+	RadarrMovieFile,
+	SonarrSeries
+} from '$utils/arr/types.ts';
 import {
 	evaluateGroup,
 	evaluateRule,
@@ -59,6 +65,30 @@ export interface UpgradeFilterPreviewResult {
 	selector: string;
 	items: UpgradeFilterPreviewItem[];
 }
+
+interface RadarrPreviewCacheEntry {
+	expiresAt: number;
+	movies: RadarrMovie[];
+	profiles: ArrQualityProfile[];
+	movieFiles: RadarrMovieFile[];
+	tags: ArrTag[];
+}
+
+interface SonarrPreviewCacheEntry {
+	expiresAt: number;
+	series: SonarrSeries[];
+	profiles: ArrQualityProfile[];
+	tags: ArrTag[];
+}
+
+interface PreviewLoadResult {
+	items: UpgradeItem[];
+	tags: ArrTag[];
+}
+
+const PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
+const radarrPreviewCache = new Map<number, RadarrPreviewCacheEntry>();
+const sonarrPreviewCache = new Map<number, SonarrPreviewCacheEntry>();
 
 function toPreviewItem(
 	item: UpgradeItem,
@@ -206,36 +236,101 @@ function explainGroupMismatch(
 	return 'Filter rules did not match';
 }
 
-async function loadRadarrItems(client: RadarrClient, filter: FilterConfig) {
-	const [movies, profiles] = await Promise.all([client.getMovies(), client.getQualityProfiles()]);
-	const movieIdsWithFiles = movies.filter((movie) => movie.hasFile).map((movie) => movie.id);
-	const movieFiles = await client.getMovieFiles(movieIdsWithFiles);
-	const tags = await client.getTags();
+async function loadRadarrItems(
+	instanceId: number,
+	client: RadarrClient,
+	filter: FilterConfig
+): Promise<PreviewLoadResult> {
+	const cached = radarrPreviewCache.get(instanceId);
+	const now = Date.now();
+	let movies: RadarrMovie[];
+	let profiles: ArrQualityProfile[];
+	let movieFiles: RadarrMovieFile[];
+	let tags: ArrTag[];
+
+	if (cached && cached.expiresAt > now) {
+		movies = cached.movies;
+		profiles = cached.profiles;
+		movieFiles = cached.movieFiles;
+		tags = cached.tags;
+	} else {
+		const [loadedMovies, loadedProfiles] = await Promise.all([
+			client.getMovies(),
+			client.getQualityProfiles()
+		]);
+		const movieIdsWithFiles = loadedMovies
+			.filter((movie) => movie.hasFile)
+			.map((movie) => movie.id);
+		const loadedMovieFiles = await client.getMovieFiles(movieIdsWithFiles);
+		const loadedTags = await client.getTags();
+
+		movies = loadedMovies;
+		profiles = loadedProfiles;
+		movieFiles = loadedMovieFiles;
+		tags = loadedTags;
+
+		radarrPreviewCache.set(instanceId, {
+			expiresAt: Date.now() + PREVIEW_CACHE_TTL_MS,
+			movies,
+			profiles,
+			movieFiles,
+			tags
+		});
+	}
 
 	const movieFileMap = new Map<number, RadarrMovieFile>(
 		movieFiles.map((movieFile) => [movieFile.movieId, movieFile])
 	);
 	const profileMap = new Map(profiles.map((profile) => [profile.id, profile]));
 	const tagMap = new Map(tags.map((tag) => [tag.id, tag.label]));
+	const items = normalizeRadarrItems(movies, movieFileMap, profileMap, filter.cutoff, tagMap);
 
 	return {
-		items: normalizeRadarrItems(movies, movieFileMap, profileMap, filter.cutoff, tagMap),
+		items,
 		tags
 	};
 }
 
-async function loadSonarrItems(client: SonarrClient, filter: FilterConfig) {
-	const [series, profiles] = await Promise.all([
-		client.getAllSeries(),
-		client.getQualityProfiles()
-	]);
-	const tags = await client.getTags();
+async function loadSonarrItems(
+	instanceId: number,
+	client: SonarrClient,
+	filter: FilterConfig
+): Promise<PreviewLoadResult> {
+	const cached = sonarrPreviewCache.get(instanceId);
+	const now = Date.now();
+	let series: SonarrSeries[];
+	let profiles: ArrQualityProfile[];
+	let tags: ArrTag[];
+
+	if (cached && cached.expiresAt > now) {
+		series = cached.series;
+		profiles = cached.profiles;
+		tags = cached.tags;
+	} else {
+		const [loadedSeries, loadedProfiles] = await Promise.all([
+			client.getAllSeries(),
+			client.getQualityProfiles()
+		]);
+		const loadedTags = await client.getTags();
+
+		series = loadedSeries;
+		profiles = loadedProfiles;
+		tags = loadedTags;
+
+		sonarrPreviewCache.set(instanceId, {
+			expiresAt: Date.now() + PREVIEW_CACHE_TTL_MS,
+			series,
+			profiles,
+			tags
+		});
+	}
 
 	const profileMap = new Map(profiles.map((profile) => [profile.id, profile]));
 	const tagMap = new Map(tags.map((tag) => [tag.id, tag.label]));
+	const items = normalizeSonarrItems(series, profileMap, filter.cutoff, tagMap);
 
 	return {
-		items: normalizeSonarrItems(series, profileMap, filter.cutoff, tagMap),
+		items,
 		tags
 	};
 }
@@ -250,10 +345,12 @@ function buildPreview(
 		evaluateGroup(item as unknown as Record<string, unknown>, filter.group)
 	);
 	const matchedIds = new Set(matchedItems.map((item) => item.id));
+
 	const tagLabel = resolveTagLabel(filter);
 	const cooldownItems = matchedItems.filter((item) => hasFilterTag(item._tags, tags, tagLabel));
 	const cooldownIds = new Set(cooldownItems.map((item) => item.id));
 	const selectableItems = matchedItems.filter((item) => !cooldownIds.has(item.id));
+
 	const selector = getSelector(filter.selector);
 	const orderedSelectableItems = selector
 		? selector.select(selectableItems, selectableItems.length)
@@ -263,6 +360,7 @@ function buildPreview(
 	const remainingSelectableItems = orderedSelectableItems.filter(
 		(item) => !selectedIds.has(item.id)
 	);
+
 	const filteredOutItems = normalizedItems.filter((item) => !matchedIds.has(item.id));
 	const selectorLabel = selector?.label ?? filter.selector;
 	const cooldownRemaining = pluralize(selectableItems.length, 'item');
@@ -312,9 +410,8 @@ export async function previewUpgradeFilter(
 	try {
 		const { items, tags } =
 			instance.type === 'radarr'
-				? await loadRadarrItems(client as RadarrClient, filter)
-				: await loadSonarrItems(client as SonarrClient, filter);
-
+				? await loadRadarrItems(instance.id, client as RadarrClient, filter)
+				: await loadSonarrItems(instance.id, client as SonarrClient, filter);
 		return buildPreview(filter, items, tags, appType);
 	} finally {
 		client.close();
