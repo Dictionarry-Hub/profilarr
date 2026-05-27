@@ -308,12 +308,12 @@ function createSkippedLog(
  * Pick the best season to search for a Sonarr series (for dry-run interactive search)
  * Picks the latest monitored season that has episode files
  */
-function pickSeasonForSearch(series: SonarrSeries): number {
+function pickSeasonForSearch(series: SonarrSeries): number | undefined {
 	const monitored = series.seasons
 		.filter((s) => s.monitored && s.statistics.episodeFileCount > 0)
 		.sort((a, b) => b.seasonNumber - a.seasonNumber);
 
-	return monitored[0]?.seasonNumber ?? 1;
+	return monitored[0]?.seasonNumber;
 }
 
 /**
@@ -523,6 +523,16 @@ export async function processUpgradeConfig(
 						} else {
 							const series = item._raw as SonarrSeries;
 							searchedSeason = pickSeasonForSearch(series);
+							if (searchedSeason == null) {
+								selectionItems.push({
+									id: item.id,
+									title: item.title,
+									original,
+									upgrades: [],
+									imageUrl: getPosterUrl(item._raw)
+								});
+								continue;
+							}
 							const releases = await (client as SonarrClient).getReleases(item.id, searchedSeason);
 							bestRelease = releases.find((r) => r.approved && !r.rejected);
 						}
