@@ -96,11 +96,11 @@ export class SonarrClient extends BaseArrClient {
 			const seasons: SonarrSeasonItem[] = series.seasons.map((s) => ({
 				seasonNumber: s.seasonNumber,
 				monitored: s.monitored,
-				episodeCount: s.statistics.episodeCount,
-				episodeFileCount: s.statistics.episodeFileCount,
-				totalEpisodeCount: s.statistics.totalEpisodeCount,
-				sizeOnDisk: s.statistics.sizeOnDisk,
-				percentOfEpisodes: s.statistics.percentOfEpisodes
+				episodeCount: s.statistics?.episodeCount ?? 0,
+				episodeFileCount: s.statistics?.episodeFileCount ?? 0,
+				totalEpisodeCount: s.statistics?.totalEpisodeCount ?? 0,
+				sizeOnDisk: s.statistics?.sizeOnDisk ?? 0,
+				percentOfEpisodes: s.statistics?.percentOfEpisodes ?? 0
 			}));
 
 			let monitoredState: 'monitored' | 'partial' | 'unmonitored';

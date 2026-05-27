@@ -310,7 +310,7 @@ function createSkippedLog(
  */
 function pickSeasonForSearch(series: SonarrSeries): number | undefined {
 	const monitored = series.seasons
-		.filter((s) => s.monitored && s.statistics.episodeFileCount > 0)
+		.filter((s) => s.monitored && (s.statistics?.episodeFileCount ?? 0) > 0)
 		.sort((a, b) => b.seasonNumber - a.seasonNumber);
 
 	return monitored[0]?.seasonNumber;
