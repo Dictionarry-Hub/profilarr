@@ -8,9 +8,7 @@
 		FileText,
 		Trash2,
 		Pencil,
-		Eye,
-		Loader2,
-		CircleDot
+		Eye
 	} from 'lucide-svelte';
 	import {
 		createEmptyFilterConfig,
@@ -18,7 +16,6 @@
 		getFilterField,
 		isGroup,
 		isRule,
-		searchRateLimits,
 		resolveTagLabel,
 		type DynamicFilterOptions,
 		type FilterConfig,
@@ -35,6 +32,7 @@
 	import type { Readable } from 'svelte/store';
 	import { page } from '$app/stores';
 	import FilterGroupComponent from './FilterGroup.svelte';
+	import FilterPreviewModal from './FilterPreviewModal.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
@@ -48,16 +46,12 @@
 	import Button from '$ui/button/Button.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import PasteModal from '$ui/modal/PasteModal.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
 
 	let searchStore: SearchStore = createSearchStore();
 	let debouncedQuery: Readable<string> = searchStore.debouncedQuery;
-	let previewSearchStore: SearchStore = createSearchStore();
-	let previewDebouncedQuery: Readable<string> = previewSearchStore.debouncedQuery;
 	$: if ($page?.params?.id) {
 		searchStore = getPersistentSearchStore(`upgradeFiltersSearch:${$page.params.id}`);
 		debouncedQuery = searchStore.debouncedQuery;
@@ -85,65 +79,6 @@
 		alphabetical_asc: 'A-Z',
 		alphabetical_desc: 'Z-A'
 	};
-
-	type PreviewStatus = 'selected' | 'selectable' | 'cooldown' | 'filtered_out';
-	type PreviewLabelVariant = 'secondary' | 'success' | 'warning' | 'info';
-
-	interface PreviewItem {
-		id: number;
-		title: string;
-		year: number;
-		status: PreviewStatus;
-		reason: string;
-		details: PreviewDetails;
-	}
-
-	interface PreviewFormat {
-		name: string;
-		score: number;
-	}
-
-	interface PreviewDetails {
-		qualityProfile: string;
-		fileName: string;
-		customFormats: PreviewFormat[];
-		score: number;
-		tags: string[];
-		monitored: boolean;
-		dateAdded: string;
-		sizeOnDisk: number;
-		releaseGroup: string;
-		status: string;
-	}
-
-	interface PreviewResult {
-		filterName: string;
-		totalItems: number;
-		matchedCount: number;
-		cooldownCount: number;
-		selectableCount: number;
-		selectedCount: number;
-		requestedCount: number;
-		selector: string;
-		items: PreviewItem[];
-	}
-
-	const previewStatusMeta: Record<
-		PreviewStatus,
-		{ label: string; variant: PreviewLabelVariant }
-	> = {
-		selected: { label: 'Will search next', variant: 'success' },
-		selectable: { label: 'Eligible later', variant: 'info' },
-		cooldown: { label: 'Already searched', variant: 'warning' },
-		filtered_out: { label: "Doesn't match", variant: 'secondary' }
-	};
-	const previewStatusOptions: { value: PreviewStatus; label: string }[] = [
-		{ value: 'selected', label: 'Will search next' },
-		{ value: 'selectable', label: 'Eligible later' },
-		{ value: 'cooldown', label: 'Already searched' },
-		{ value: 'filtered_out', label: "Doesn't match" }
-	];
-	const previewSkeletonRows = Array.from({ length: 8 });
 
 	// Auto-clamp filter counts when max decreases
 	$: {
@@ -176,11 +111,6 @@
 	let expandedIds: Set<string> = new Set();
 
 	const columns: Column<FilterConfig>[] = [{ key: 'name', header: 'Name', sortable: true }];
-	const previewColumns: Column<PreviewItem>[] = [
-		{ key: 'title', header: 'Title', sortable: true, width: 'w-64' },
-		{ key: 'status', header: 'Status', width: 'w-32' },
-		{ key: 'reason', header: 'Reason' }
-	];
 	let editingId: string | null = null;
 	let editingName: string = '';
 
@@ -190,20 +120,6 @@
 	let pasteModalOpen = false;
 	let previewModalOpen = false;
 	let previewFilter: FilterConfig | null = null;
-	let previewLoading = false;
-	let previewLoadingText = 'Loading library data...';
-	let previewError: string | null = null;
-	let previewData: PreviewResult | null = null;
-	let previewStatusFilters: Set<PreviewStatus> = new Set();
-	let previewExpandedIds: Set<string | number> = new Set();
-	let previewRequestId = 0;
-	let previewStepTimer: ReturnType<typeof setTimeout> | undefined;
-
-	$: filteredPreviewItems = filterPreviewItems(
-		previewData?.items ?? [],
-		$previewDebouncedQuery,
-		previewStatusFilters
-	);
 
 	function confirmDelete(filter: FilterConfig) {
 		filterToDelete = filter;
@@ -436,172 +352,14 @@
 		pasteModalOpen = false;
 	}
 
-	function clearPreviewStepTimer() {
-		if (previewStepTimer) {
-			clearTimeout(previewStepTimer);
-			previewStepTimer = undefined;
-		}
-	}
-
-	function resetPreviewFilters() {
-		previewSearchStore.clear();
-		previewStatusFilters = new Set();
-		previewExpandedIds = new Set();
-	}
-
-	function filterPreviewItems(
-		items: PreviewItem[],
-		query: string,
-		statuses: Set<PreviewStatus>
-	): PreviewItem[] {
-		let result = items;
-		const queryLower = query.trim().toLowerCase();
-
-		if (queryLower) {
-			result = result.filter(
-				(item) =>
-					item.title.toLowerCase().includes(queryLower) ||
-					item.reason.toLowerCase().includes(queryLower) ||
-					previewStatusMeta[item.status].label.toLowerCase().includes(queryLower)
-			);
-		}
-
-		if (statuses.size > 0) {
-			result = result.filter((item) => statuses.has(item.status));
-		}
-
-		return result;
-	}
-
-	function togglePreviewStatus(status: PreviewStatus) {
-		if (previewStatusFilters.has(status)) {
-			previewStatusFilters.delete(status);
-		} else {
-			previewStatusFilters.add(status);
-		}
-		previewStatusFilters = new Set(previewStatusFilters);
-	}
-
-	function clearPreviewStatusFilters() {
-		previewStatusFilters = new Set();
-	}
-
-	async function openPreview(filter: FilterConfig) {
-		const requestId = previewRequestId + 1;
-		previewRequestId = requestId;
+	function openPreview(filter: FilterConfig) {
 		previewFilter = filter;
 		previewModalOpen = true;
-		previewLoading = true;
-		previewLoadingText = 'Loading library data...';
-		previewError = null;
-		previewData = null;
-		resetPreviewFilters();
-		clearPreviewStepTimer();
-		previewStepTimer = setTimeout(() => {
-			if (requestId === previewRequestId) {
-				previewLoadingText = 'Evaluating filter...';
-			}
-		}, 700);
-
-		try {
-			const instanceId = $page.params.id;
-			if (!instanceId) {
-				throw new Error('Invalid instance ID');
-			}
-
-			const response = await fetch(`/arr/${instanceId}/upgrades/preview`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ filter: structuredClone(filter) })
-			});
-			const result = await response.json().catch(() => ({}));
-
-			if (requestId !== previewRequestId) {
-				return;
-			}
-
-			if (!response.ok) {
-				throw new Error(result.error ?? 'Failed to preview filter');
-			}
-
-			previewData = result as PreviewResult;
-		} catch (err) {
-			if (requestId === previewRequestId) {
-				previewError = err instanceof Error ? err.message : 'Failed to preview filter';
-			}
-		} finally {
-			if (requestId === previewRequestId) {
-				clearPreviewStepTimer();
-				previewLoading = false;
-			}
-		}
 	}
 
 	function closePreview() {
-		previewRequestId += 1;
-		clearPreviewStepTimer();
 		previewModalOpen = false;
-		previewLoading = false;
 		previewFilter = null;
-		previewData = null;
-	}
-
-	function formatPreviewSize(sizeGb: number): string {
-		if (!sizeGb) return 'None';
-		if (sizeGb >= 1) return `${sizeGb.toFixed(1)} GB`;
-		return `${Math.round(sizeGb * 1024)} MB`;
-	}
-
-	function formatPreviewDate(value: string): string {
-		if (!value) return 'Unknown';
-		const date = new Date(value);
-		if (Number.isNaN(date.getTime())) return 'Unknown';
-		return date.toLocaleDateString();
-	}
-
-	function formatPreviewScore(score: number): string {
-		return score.toLocaleString();
-	}
-
-	function formatPreviewStatus(status: string): string {
-		if (!status) return 'Unknown';
-		return status
-			.replace(/([a-z])([A-Z])/g, '$1 $2')
-			.replace(/_/g, ' ')
-			.replace(/\b\w/g, (letter) => letter.toUpperCase());
-	}
-
-	function previewStatusVariant(status: string): PreviewLabelVariant {
-		switch (status) {
-			case 'released':
-			case 'continuing':
-				return 'success';
-			case 'inCinemas':
-			case 'upcoming':
-				return 'info';
-			default:
-				return 'secondary';
-		}
-	}
-
-	function formatPreviewCount(value: number): string {
-		return value.toLocaleString();
-	}
-
-	function formatPreviewItemCount(count: number, singular: string, plural: string): string {
-		return `${formatPreviewCount(count)} ${count === 1 ? singular : plural}`;
-	}
-
-	function getPreviewSelectorLabel(selectorId: string): string {
-		return selectors.find((selector) => selector.id === selectorId)?.label ?? selectorId;
-	}
-
-	function getPreviewEligibleLaterCount(data: PreviewResult): number {
-		return Math.max(0, data.selectableCount - data.selectedCount);
-	}
-
-	function getPreviewDoesNotMatchCount(data: PreviewResult): number {
-		return Math.max(0, data.totalItems - data.matchedCount);
 	}
 </script>
 
@@ -886,304 +644,12 @@
 	on:cancel={handleDeleteCancel}
 />
 
-<Modal
+<FilterPreviewModal
 	open={previewModalOpen}
-	header={previewFilter ? `Preview: ${previewFilter.name}` : 'Preview Filter'}
-	size="2xl"
-	height="xl"
-	on:cancel={closePreview}
->
-	<svelte:fragment slot="body">
-		{#if previewLoading}
-			<div class="space-y-4">
-				<div class="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-					<Loader2 size={16} class="animate-spin text-blue-600 dark:text-blue-400" />
-					<span>{previewLoadingText}</span>
-				</div>
-				<div
-					class="overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700/60"
-				>
-					{#each previewSkeletonRows as _}
-						<div class="flex gap-4 border-b border-neutral-200 p-4 last:border-0 dark:border-neutral-800">
-							<div class="h-4 w-2/5 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800"></div>
-							<div class="h-4 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800"></div>
-							<div class="h-4 w-28 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800"></div>
-							<div class="h-4 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-800"></div>
-						</div>
-					{/each}
-				</div>
-			</div>
-		{:else if previewError}
-			<div
-				class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
-			>
-				{previewError}
-			</div>
-		{:else if previewData}
-			<div class="space-y-4">
-				<div
-					class="space-y-3 rounded-lg border border-neutral-300 bg-white p-4 dark:border-neutral-700/60 dark:bg-neutral-900"
-				>
-					<div class="flex">
-						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
-							Library
-						</span>
-						<span class="text-sm text-neutral-900 dark:text-neutral-100">
-							{formatPreviewItemCount(previewData.totalItems, 'item', 'items')} checked
-						</span>
-					</div>
-
-					<div class="flex">
-						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
-							Filter
-						</span>
-						<span class="text-sm text-neutral-900 dark:text-neutral-100">
-							"{previewData.filterName}"
-							<span class="mx-1 text-neutral-400">&rarr;</span>
-							<span class="font-mono font-medium">{formatPreviewCount(previewData.matchedCount)}</span>
-							matched
-							<span class="mx-1 text-neutral-400">&rarr;</span>
-							<span class="font-mono font-medium">{formatPreviewCount(previewData.selectableCount)}</span>
-							after cooldown
-						</span>
-					</div>
-
-					<div class="flex">
-						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
-							Selection
-						</span>
-						<span class="text-sm text-neutral-900 dark:text-neutral-100">
-							{getPreviewSelectorLabel(previewData.selector)}
-							<span class="font-mono font-medium">{formatPreviewCount(previewData.selectedCount)}</span>
-							of <span class="font-mono">{formatPreviewCount(previewData.requestedCount)}</span>
-							will search next
-							{#if getPreviewEligibleLaterCount(previewData) > 0}
-								<span class="mx-1 text-neutral-400">&rarr;</span>
-								{formatPreviewItemCount(getPreviewEligibleLaterCount(previewData), 'item', 'items')}
-								eligible later
-							{/if}
-						</span>
-					</div>
-
-					<div class="flex">
-						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
-							Cooldown
-						</span>
-						<span class="text-sm text-neutral-900 dark:text-neutral-100">
-							{formatPreviewItemCount(previewData.cooldownCount, 'item', 'items')} already
-							searched,
-							{formatPreviewItemCount(
-								getPreviewDoesNotMatchCount(previewData),
-								'item does',
-								'items do'
-							)}
-							not match
-						</span>
-					</div>
-				</div>
-
-				<ActionsBar className="md:justify-start">
-					<SearchAction
-						searchStore={previewSearchStore}
-						placeholder="Search items..."
-						responsive
-					/>
-					<ActionButton icon={CircleDot} hasDropdown square title="Filter by status">
-						<svelte:fragment slot="dropdown">
-							<Dropdown position="right" mobilePosition="middle" minWidth="12rem">
-								<DropdownHeader label="Status" />
-								<DropdownItem
-									label="All statuses"
-									selected={previewStatusFilters.size === 0}
-									on:click={clearPreviewStatusFilters}
-								/>
-								{#each previewStatusOptions as option}
-									<DropdownItem
-										label={option.label}
-										selected={previewStatusFilters.has(option.value)}
-										on:click={() => togglePreviewStatus(option.value)}
-									/>
-								{/each}
-							</Dropdown>
-						</svelte:fragment>
-					</ActionButton>
-				</ActionsBar>
-
-				<ExpandableTable
-					columns={previewColumns}
-					data={filteredPreviewItems}
-					getRowId={(row) => row.id}
-					bind:expandedRows={previewExpandedIds}
-					compact
-					responsive
-					flushExpanded
-					fixedLayout
-					pageSize={100}
-					emptyMessage="No preview items match."
-				>
-					<svelte:fragment slot="cell" let:row let:column>
-						{#if column.key === 'title'}
-							<div class="min-w-0">
-								<div class="truncate font-medium">{row.title}</div>
-								<div class="text-xs text-neutral-500 dark:text-neutral-400">{row.year}</div>
-							</div>
-						{:else if column.key === 'status'}
-							<Label variant={previewStatusMeta[row.status].variant} size="sm" rounded="md">
-								{previewStatusMeta[row.status].label}
-							</Label>
-						{:else if column.key === 'reason'}
-							<span class="break-words text-neutral-600 dark:text-neutral-300">
-								{row.reason}
-							</span>
-						{/if}
-					</svelte:fragment>
-
-					<svelte:fragment slot="expanded" let:row>
-						<div class="min-w-0 overflow-hidden p-4">
-							<div class="divide-y divide-neutral-200 dark:divide-neutral-800">
-								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										File on Disk
-									</div>
-									<div class="min-w-0">
-										{#if row.details.fileName}
-											<code
-												class="font-mono text-xs break-all text-neutral-600 dark:text-neutral-400"
-											>
-												{row.details.fileName}
-											</code>
-										{:else}
-											<div class="text-xs text-neutral-500 dark:text-neutral-400">No file</div>
-										{/if}
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1 gap-2 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Custom Formats
-									</div>
-									<div class="min-w-0">
-										{#if row.details.customFormats.length > 0}
-											<div class="flex min-w-0 flex-wrap items-center gap-2">
-												{#each [...row.details.customFormats].sort((a, b) => b.score - a.score) as item}
-													<CustomFormatBadge name={item.name} score={item.score} />
-												{/each}
-											</div>
-										{:else}
-											<div class="text-xs text-neutral-500 dark:text-neutral-400">
-												No custom formats matched
-											</div>
-										{/if}
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Profile
-									</div>
-									<div class="min-w-0 break-words text-sm text-neutral-900 dark:text-neutral-100">
-										{row.details.qualityProfile}
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Score
-									</div>
-									<div class="font-mono text-sm text-neutral-900 dark:text-neutral-100">
-										{formatPreviewScore(row.details.score)}
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Monitored
-									</div>
-									<div>
-										<Label
-											variant={row.details.monitored ? 'success' : 'secondary'}
-											size="sm"
-											rounded="md"
-										>
-											{row.details.monitored ? 'Yes' : 'No'}
-										</Label>
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Status
-									</div>
-									<div>
-										<Label
-											variant={previewStatusVariant(row.details.status)}
-											size="sm"
-											rounded="md"
-										>
-											{formatPreviewStatus(row.details.status)}
-										</Label>
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Size
-									</div>
-									<div class="font-mono text-sm text-neutral-900 dark:text-neutral-100">
-										{formatPreviewSize(row.details.sizeOnDisk)}
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Added
-									</div>
-									<div class="font-mono text-sm text-neutral-900 dark:text-neutral-100">
-										{formatPreviewDate(row.details.dateAdded)}
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Release Group
-									</div>
-									<div
-										class="min-w-0 break-words font-mono text-sm text-neutral-900 dark:text-neutral-100"
-									>
-										{row.details.releaseGroup || 'None'}
-									</div>
-								</div>
-
-								<div class="grid grid-cols-1 gap-2 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Tags
-									</div>
-									<div class="min-w-0">
-										{#if row.details.tags.length > 0}
-											<div class="flex min-w-0 flex-wrap items-center gap-2">
-												{#each row.details.tags as tag}
-													<Label variant="secondary" size="sm" rounded="md">{tag}</Label>
-												{/each}
-											</div>
-										{:else}
-											<div class="text-xs text-neutral-500 dark:text-neutral-400">No tags</div>
-										{/if}
-									</div>
-								</div>
-							</div>
-						</div>
-					</svelte:fragment>
-				</ExpandableTable>
-			</div>
-		{/if}
-	</svelte:fragment>
-
-	<svelte:fragment slot="footer">
-		<div class="flex w-full justify-end">
-			<Button text="Close" on:click={closePreview} />
-		</div>
-	</svelte:fragment>
-</Modal>
+	filter={previewFilter}
+	instanceId={$page.params.id}
+	on:close={closePreview}
+/>
 
 <PasteModal
 	open={pasteModalOpen}
