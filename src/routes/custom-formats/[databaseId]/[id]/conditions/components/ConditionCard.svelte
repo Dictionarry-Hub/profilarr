@@ -446,10 +446,10 @@
 			Flags
 		</div>
 		<div
-			class="grid grid-cols-1 gap-2 wide:ml-auto wide:flex wide:shrink-0 wide:flex-wrap wide:items-center wide:gap-2 md:grid-cols-2"
+			class="grid grid-cols-1 gap-2 min-[900px]:grid-cols-2 wide:ml-auto wide:flex wide:shrink-0 wide:flex-wrap wide:items-center wide:gap-2"
 		>
 			<div
-				class="grid grid-cols-2 gap-2 wide:flex wide:flex-wrap wide:items-center wide:gap-2"
+				class="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 wide:flex wide:flex-wrap wide:items-center wide:gap-2"
 				data-onboarding="cf-cond-flags-modifiers"
 			>
 				<Toggle
@@ -457,6 +457,7 @@
 					ariaLabel="Negate"
 					label="Negate"
 					color="red"
+					fullWidth
 					on:change={(e) => emitChange({ negate: e.detail })}
 				/>
 				<Toggle
@@ -464,11 +465,12 @@
 					ariaLabel="Required"
 					label="Required"
 					color="green"
+					fullWidth
 					on:change={(e) => emitChange({ required: e.detail })}
 				/>
 			</div>
 			<div
-				class="grid grid-cols-2 gap-2 wide:flex wide:flex-wrap wide:items-center wide:gap-2"
+				class="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 wide:flex wide:flex-wrap wide:items-center wide:gap-2"
 				data-onboarding="cf-cond-flags-arr"
 			>
 				<Toggle
@@ -476,6 +478,7 @@
 					ariaLabel="Radarr"
 					label="Radarr"
 					checkboxColor="var(--arr-radarr-color)"
+					fullWidth
 					on:change={(e) => handleArrTypeToggle('radarr', e.detail)}
 				/>
 				<Toggle
@@ -483,6 +486,7 @@
 					ariaLabel="Sonarr"
 					label="Sonarr"
 					checkboxColor="var(--arr-sonarr-color)"
+					fullWidth
 					on:change={(e) => handleArrTypeToggle('sonarr', e.detail)}
 				/>
 			</div>
