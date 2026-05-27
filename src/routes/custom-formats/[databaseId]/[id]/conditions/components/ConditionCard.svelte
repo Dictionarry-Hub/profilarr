@@ -446,10 +446,10 @@
 			Flags
 		</div>
 		<div
-			class="grid grid-cols-1 gap-2 min-[900px]:grid-cols-2 wide:ml-auto wide:flex wide:shrink-0 wide:flex-wrap wide:items-center wide:gap-2"
+			class="grid grid-cols-1 gap-2 wide:ml-auto wide:flex wide:shrink-0 wide:flex-wrap wide:items-center"
 		>
 			<div
-				class="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 wide:flex wide:flex-wrap wide:items-center wide:gap-2"
+				class="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 wide:flex wide:flex-wrap wide:items-center wide:[&>*]:w-fit wide:[&>*]:justify-start"
 				data-onboarding="cf-cond-flags-modifiers"
 			>
 				<Toggle
@@ -470,7 +470,7 @@
 				/>
 			</div>
 			<div
-				class="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 wide:flex wide:flex-wrap wide:items-center wide:gap-2"
+				class="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 wide:flex wide:flex-wrap wide:items-center wide:[&>*]:w-fit wide:[&>*]:justify-start"
 				data-onboarding="cf-cond-flags-arr"
 			>
 				<Toggle
