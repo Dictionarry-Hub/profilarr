@@ -198,7 +198,9 @@ cooldown across them.
 
 Dry-run mode fetches available releases for each selected item and compares
 scores without triggering actual searches. This lets users preview what the
-system would do.
+system would do. For Sonarr, dry runs only query monitored seasons that already
+have files; selected series without an eligible season are shown without a
+previewed upgrade.
 
 An in-memory exclusion cache (1-hour TTL, keyed by instance ID) tracks items
 selected in previous dry runs so the same items aren't re-picked on repeated
