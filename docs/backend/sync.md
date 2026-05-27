@@ -233,8 +233,9 @@ using the regex), delay profiles, naming, quality definitions, and media
 settings.
 
 Entity sync uses the same transform logic as batch sync but operates on a
-single entity. For quality profiles, the first-time path syncs referenced CFs;
-the update path reuses existing Arr CF IDs.
+single entity. For quality profiles, targeted sync first syncs the profile's
+referenced CFs before creates and updates so newly scored formats have Arr IDs
+before the profile payload is built.
 
 ## Cleanup
 

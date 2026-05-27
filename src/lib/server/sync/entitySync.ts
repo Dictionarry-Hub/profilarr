@@ -80,24 +80,15 @@ export async function syncQualityProfile(
 		const existingProfiles = await client.getQualityProfiles();
 		const existingProfile = existingProfiles.find((p) => p.name === profileName);
 
-		let formatIdMap: Map<string, number>;
-
-		if (existingProfile) {
-			// Update path: build formatIdMap from existing arr CFs (no CF sync needed)
-			const existingFormats = await client.getCustomFormats();
-			formatIdMap = new Map(existingFormats.map((f) => [f.name, f.id!]));
-		} else {
-			// First-time path: sync referenced CFs first, then create QP
-			const referencedNames = await getCustomFormatsForProfile(cache, profileName, instanceType);
-			const pcdFormats = new Map<string, PcdCustomFormat>();
-			for (const name of referencedNames) {
-				const pcdFormat = await fetchCustomFormatFromPcd(cache, name);
-				if (pcdFormat) {
-					pcdFormats.set(name, pcdFormat);
-				}
+		const referencedNames = await getCustomFormatsForProfile(cache, profileName, instanceType);
+		const pcdFormats = new Map<string, PcdCustomFormat>();
+		for (const name of referencedNames) {
+			const pcdFormat = await fetchCustomFormatFromPcd(cache, name);
+			if (pcdFormat) {
+				pcdFormats.set(name, pcdFormat);
 			}
-			formatIdMap = await syncCustomFormats(client, instanceId, instanceType, pcdFormats);
 		}
+		const formatIdMap = await syncCustomFormats(client, instanceId, instanceType, pcdFormats);
 
 		// Get quality API mappings
 		const qualityMappings = await getQualityApiMappings(cache, instanceType);
