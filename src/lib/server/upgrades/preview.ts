@@ -265,10 +265,11 @@ function buildPreview(
 	);
 	const filteredOutItems = normalizedItems.filter((item) => !matchedIds.has(item.id));
 	const selectorLabel = selector?.label ?? filter.selector;
+	const cooldownRemaining = pluralize(selectableItems.length, 'item');
 	const cooldownReason =
 		selectableItems.length > 0
-			? `On cooldown, ${pluralize(selectableItems.length, 'item')} remaining before reset`
-			: 'On cooldown, cycle will reset on next run';
+			? `Already searched by this filter. ${cooldownRemaining} still eligible before the cooldown resets.`
+			: 'Already searched by this filter. Cooldown will reset on the next run.';
 
 	return {
 		filterName: filter.name,
@@ -281,10 +282,10 @@ function buildPreview(
 		selector: filter.selector,
 		items: [
 			...selectedItems.map((item) =>
-				toPreviewItem(item, 'selected', `Would be selected next by ${selectorLabel}`)
+				toPreviewItem(item, 'selected', `Will search next using ${selectorLabel}`)
 			),
 			...remainingSelectableItems.map((item) =>
-				toPreviewItem(item, 'selectable', 'Matched filter and not on cooldown')
+				toPreviewItem(item, 'selectable', 'Matches this filter and is waiting for a later run')
 			),
 			...cooldownItems.map((item) => toPreviewItem(item, 'cooldown', cooldownReason)),
 			...filteredOutItems.map((item) =>

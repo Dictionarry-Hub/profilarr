@@ -27,7 +27,6 @@
 	} from '$shared/upgrades/filters';
 	import { uuid } from '$shared/utils/uuid';
 	import { selectors } from '$shared/upgrades/selectors';
-	import { afterUpdate, onMount } from 'svelte';
 	import {
 		createSearchStore,
 		getPersistentSearchStore,
@@ -89,14 +88,6 @@
 
 	type PreviewStatus = 'selected' | 'selectable' | 'cooldown' | 'filtered_out';
 	type PreviewLabelVariant = 'secondary' | 'success' | 'warning' | 'info';
-	type PreviewFlowNodeId =
-		| 'library'
-		| 'filteredOut'
-		| 'matched'
-		| 'cooldown'
-		| 'available'
-		| 'selected'
-		| 'remaining';
 
 	interface PreviewItem {
 		id: number;
@@ -137,35 +128,20 @@
 		items: PreviewItem[];
 	}
 
-	interface PreviewFlowPath {
-		id: string;
-		from: PreviewFlowNodeId;
-		to: PreviewFlowNodeId;
-		d: string;
-	}
-
 	const previewStatusMeta: Record<
 		PreviewStatus,
 		{ label: string; variant: PreviewLabelVariant }
 	> = {
-		selected: { label: 'Selected', variant: 'success' },
-		selectable: { label: 'Selectable', variant: 'info' },
-		cooldown: { label: 'Cooldown', variant: 'warning' },
-		filtered_out: { label: 'Filtered out', variant: 'secondary' }
+		selected: { label: 'Will search next', variant: 'success' },
+		selectable: { label: 'Eligible later', variant: 'info' },
+		cooldown: { label: 'Already searched', variant: 'warning' },
+		filtered_out: { label: "Doesn't match", variant: 'secondary' }
 	};
 	const previewStatusOptions: { value: PreviewStatus; label: string }[] = [
-		{ value: 'selected', label: 'Selected' },
-		{ value: 'selectable', label: 'Selectable' },
-		{ value: 'cooldown', label: 'Cooldown' },
-		{ value: 'filtered_out', label: 'Filtered out' }
-	];
-	const previewFlowEdges: { from: PreviewFlowNodeId; to: PreviewFlowNodeId }[] = [
-		{ from: 'library', to: 'filteredOut' },
-		{ from: 'library', to: 'matched' },
-		{ from: 'matched', to: 'cooldown' },
-		{ from: 'matched', to: 'available' },
-		{ from: 'available', to: 'selected' },
-		{ from: 'available', to: 'remaining' }
+		{ value: 'selected', label: 'Will search next' },
+		{ value: 'selectable', label: 'Eligible later' },
+		{ value: 'cooldown', label: 'Already searched' },
+		{ value: 'filtered_out', label: "Doesn't match" }
 	];
 	const previewSkeletonRows = Array.from({ length: 8 });
 
@@ -222,16 +198,6 @@
 	let previewExpandedIds: Set<string | number> = new Set();
 	let previewRequestId = 0;
 	let previewStepTimer: ReturnType<typeof setTimeout> | undefined;
-	let previewFlowContainer: HTMLDivElement | null = null;
-	let previewFlowNodeRefs: Partial<Record<PreviewFlowNodeId, HTMLDivElement>> = {};
-	let previewFlowPaths: PreviewFlowPath[] = [];
-	let previewFlowFrame: number | undefined;
-	const previewFlowNodeClass =
-		'w-32 rounded bg-neutral-100 px-3 py-2 text-center dark:bg-neutral-800';
-	const previewFlowLabelClass =
-		'text-[10px] font-medium text-neutral-500 uppercase dark:text-neutral-400';
-	const previewFlowValueClass =
-		'font-mono text-lg font-semibold text-neutral-900 dark:text-neutral-100';
 
 	$: filteredPreviewItems = filterPreviewItems(
 		previewData?.items ?? [],
@@ -529,7 +495,6 @@
 		previewLoadingText = 'Loading library data...';
 		previewError = null;
 		previewData = null;
-		previewFlowPaths = [];
 		resetPreviewFilters();
 		clearPreviewStepTimer();
 		previewStepTimer = setTimeout(() => {
@@ -568,7 +533,6 @@
 			if (requestId === previewRequestId) {
 				clearPreviewStepTimer();
 				previewLoading = false;
-				schedulePreviewFlowPathUpdate();
 			}
 		}
 	}
@@ -580,7 +544,6 @@
 		previewLoading = false;
 		previewFilter = null;
 		previewData = null;
-		previewFlowPaths = [];
 	}
 
 	function formatPreviewSize(sizeGb: number): string {
@@ -621,96 +584,25 @@
 		}
 	}
 
-	function renderFlowValue(value: number): string {
+	function formatPreviewCount(value: number): string {
 		return value.toLocaleString();
 	}
 
-	$: previewFilteredOutCount =
-		previewData ? previewData.totalItems - previewData.matchedCount : 0;
-	$: previewRemainingCount =
-		previewData ? previewData.selectableCount - previewData.selectedCount : 0;
-
-	function calculatePreviewFlowPath(
-		fromEl: HTMLDivElement,
-		toEl: HTMLDivElement,
-		containerEl: HTMLDivElement
-	): string {
-		const containerRect = containerEl.getBoundingClientRect();
-		const fromRect = fromEl.getBoundingClientRect();
-		const toRect = toEl.getBoundingClientRect();
-		const fromX = fromRect.right - containerRect.left;
-		const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
-		const toX = toRect.left - containerRect.left;
-		const toY = toRect.top + toRect.height / 2 - containerRect.top;
-		const endX = toX - 10;
-		const distance = endX - fromX;
-		const controlOffset = distance * 0.45;
-
-		return `M ${fromX} ${fromY} C ${fromX + controlOffset} ${fromY}, ${endX - controlOffset} ${toY}, ${endX} ${toY}`;
+	function formatPreviewItemCount(count: number, singular: string, plural: string): string {
+		return `${formatPreviewCount(count)} ${count === 1 ? singular : plural}`;
 	}
 
-	function previewFlowPathsEqual(nextPaths: PreviewFlowPath[]): boolean {
-		return (
-			previewFlowPaths.length === nextPaths.length &&
-			previewFlowPaths.every((path, index) => {
-				const nextPath = nextPaths[index];
-				if (!nextPath) return false;
-				return (
-					path.id === nextPath.id &&
-					path.from === nextPath.from &&
-					path.to === nextPath.to &&
-					path.d === nextPath.d
-				);
-			})
-		);
+	function getPreviewSelectorLabel(selectorId: string): string {
+		return selectors.find((selector) => selector.id === selectorId)?.label ?? selectorId;
 	}
 
-	function updatePreviewFlowPaths() {
-		if (!previewData || !previewFlowContainer) {
-			if (previewFlowPaths.length > 0) previewFlowPaths = [];
-			return;
-		}
-
-		const nextPaths = previewFlowEdges.flatMap((edge) => {
-			const fromEl = previewFlowNodeRefs[edge.from];
-			const toEl = previewFlowNodeRefs[edge.to];
-			if (!fromEl || !toEl || !previewFlowContainer) return [];
-
-			const d = calculatePreviewFlowPath(fromEl, toEl, previewFlowContainer);
-			return [{ id: `${edge.from}-${edge.to}`, ...edge, d }];
-		});
-
-		if (!previewFlowPathsEqual(nextPaths)) {
-			previewFlowPaths = nextPaths;
-		}
+	function getPreviewEligibleLaterCount(data: PreviewResult): number {
+		return Math.max(0, data.selectableCount - data.selectedCount);
 	}
 
-	function schedulePreviewFlowPathUpdate() {
-		if (typeof requestAnimationFrame === 'undefined') return;
-		if (previewFlowFrame !== undefined) return;
-
-		previewFlowFrame = requestAnimationFrame(() => {
-			previewFlowFrame = undefined;
-			updatePreviewFlowPaths();
-		});
+	function getPreviewDoesNotMatchCount(data: PreviewResult): number {
+		return Math.max(0, data.totalItems - data.matchedCount);
 	}
-
-	afterUpdate(() => {
-		if (previewData) {
-			schedulePreviewFlowPathUpdate();
-		}
-	});
-
-	onMount(() => {
-		window.addEventListener('resize', schedulePreviewFlowPathUpdate);
-
-		return () => {
-			window.removeEventListener('resize', schedulePreviewFlowPathUpdate);
-			if (previewFlowFrame !== undefined) {
-				cancelAnimationFrame(previewFlowFrame);
-			}
-		};
-	});
 </script>
 
 <div class="-mx-4 bg-neutral-50 px-4 pt-2 pb-2 md:-mx-8 md:px-8 dark:bg-neutral-900">
@@ -1029,6 +921,67 @@
 			</div>
 		{:else if previewData}
 			<div class="space-y-4">
+				<div
+					class="space-y-3 rounded-lg border border-neutral-300 bg-white p-4 dark:border-neutral-700/60 dark:bg-neutral-900"
+				>
+					<div class="flex">
+						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+							Library
+						</span>
+						<span class="text-sm text-neutral-900 dark:text-neutral-100">
+							{formatPreviewItemCount(previewData.totalItems, 'item', 'items')} checked
+						</span>
+					</div>
+
+					<div class="flex">
+						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+							Filter
+						</span>
+						<span class="text-sm text-neutral-900 dark:text-neutral-100">
+							"{previewData.filterName}"
+							<span class="mx-1 text-neutral-400">&rarr;</span>
+							<span class="font-mono font-medium">{formatPreviewCount(previewData.matchedCount)}</span>
+							matched
+							<span class="mx-1 text-neutral-400">&rarr;</span>
+							<span class="font-mono font-medium">{formatPreviewCount(previewData.selectableCount)}</span>
+							after cooldown
+						</span>
+					</div>
+
+					<div class="flex">
+						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+							Selection
+						</span>
+						<span class="text-sm text-neutral-900 dark:text-neutral-100">
+							{getPreviewSelectorLabel(previewData.selector)}
+							<span class="font-mono font-medium">{formatPreviewCount(previewData.selectedCount)}</span>
+							of <span class="font-mono">{formatPreviewCount(previewData.requestedCount)}</span>
+							will search next
+							{#if getPreviewEligibleLaterCount(previewData) > 0}
+								<span class="mx-1 text-neutral-400">&rarr;</span>
+								{formatPreviewItemCount(getPreviewEligibleLaterCount(previewData), 'item', 'items')}
+								eligible later
+							{/if}
+						</span>
+					</div>
+
+					<div class="flex">
+						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+							Cooldown
+						</span>
+						<span class="text-sm text-neutral-900 dark:text-neutral-100">
+							{formatPreviewItemCount(previewData.cooldownCount, 'item', 'items')} already
+							searched,
+							{formatPreviewItemCount(
+								getPreviewDoesNotMatchCount(previewData),
+								'item does',
+								'items do'
+							)}
+							not match
+						</span>
+					</div>
+				</div>
+
 				<ActionsBar className="md:justify-start">
 					<SearchAction
 						searchStore={previewSearchStore}
@@ -1055,115 +1008,6 @@
 						</svelte:fragment>
 					</ActionButton>
 				</ActionsBar>
-
-				<div class="overflow-x-auto rounded-lg border border-neutral-300 dark:border-neutral-700/60">
-					<div class="relative min-w-[52rem] p-4" bind:this={previewFlowContainer}>
-						<div class="relative z-10 grid grid-cols-4 gap-x-20">
-							<div class="flex min-h-44 items-center">
-								<div
-									bind:this={previewFlowNodeRefs.library}
-									class={previewFlowNodeClass}
-								>
-									<div class={previewFlowLabelClass}>Library</div>
-									<div class={previewFlowValueClass}>
-										{renderFlowValue(previewData.totalItems)}
-									</div>
-								</div>
-							</div>
-
-							<div class="flex min-h-44 flex-col justify-between">
-								<div
-									bind:this={previewFlowNodeRefs.filteredOut}
-									class={previewFlowNodeClass}
-								>
-									<div class={previewFlowLabelClass}>Filtered Out</div>
-									<div class={previewFlowValueClass}>
-										{renderFlowValue(previewFilteredOutCount)}
-									</div>
-								</div>
-								<div
-									bind:this={previewFlowNodeRefs.matched}
-									class={previewFlowNodeClass}
-								>
-									<div class={previewFlowLabelClass}>Eligible</div>
-									<div class={previewFlowValueClass}>
-										{renderFlowValue(previewData.matchedCount)}
-									</div>
-								</div>
-							</div>
-
-							<div class="flex min-h-44 flex-col justify-between">
-								<div
-									bind:this={previewFlowNodeRefs.cooldown}
-									class={previewFlowNodeClass}
-								>
-									<div class={previewFlowLabelClass}>On Cooldown</div>
-									<div class={previewFlowValueClass}>
-										{renderFlowValue(previewData.cooldownCount)}
-									</div>
-								</div>
-								<div
-									bind:this={previewFlowNodeRefs.available}
-									class={previewFlowNodeClass}
-								>
-									<div class={previewFlowLabelClass}>Eligible</div>
-									<div class={previewFlowValueClass}>
-										{renderFlowValue(previewData.selectableCount)}
-									</div>
-								</div>
-							</div>
-
-							<div class="flex min-h-44 flex-col justify-between">
-								<div
-									bind:this={previewFlowNodeRefs.selected}
-									class={previewFlowNodeClass}
-								>
-									<div class={previewFlowLabelClass}>Selected</div>
-									<div class={previewFlowValueClass}>
-										{renderFlowValue(previewData.selectedCount)} / {renderFlowValue(previewData.requestedCount)}
-									</div>
-								</div>
-								<div
-									bind:this={previewFlowNodeRefs.remaining}
-									class={previewFlowNodeClass}
-								>
-									<div class={previewFlowLabelClass}>Remaining</div>
-									<div class={previewFlowValueClass}>
-										{renderFlowValue(previewRemainingCount)}
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<svg
-							class="pointer-events-none absolute inset-0 z-20 h-full w-full text-neutral-300 dark:text-neutral-700"
-							fill="none"
-							aria-hidden="true"
-						>
-							<defs>
-								<marker
-									id="preview-flow-arrow"
-									markerWidth="10"
-									markerHeight="10"
-									refX="8"
-									refY="5"
-									orient="auto"
-								>
-									<path d="M 0 0 L 10 5 L 0 10 Z" fill="currentColor" />
-								</marker>
-							</defs>
-							{#each previewFlowPaths as path}
-								<path
-									d={path.d}
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									marker-end="url(#preview-flow-arrow)"
-								/>
-							{/each}
-						</svg>
-					</div>
-				</div>
 
 				<ExpandableTable
 					columns={previewColumns}
