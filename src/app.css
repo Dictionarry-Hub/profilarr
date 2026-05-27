@@ -16,10 +16,6 @@
 @source not '../test-results';
 @source not '../node_modules';
 
-html {
-	scrollbar-gutter: stable;
-}
-
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
