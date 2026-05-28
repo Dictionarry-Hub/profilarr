@@ -28,20 +28,32 @@
 	export let form: any = undefined;
 	export let cleanupSettings: CleanupSettings | null = null;
 
-	// Parse tags from JSON string
-	const parseTags = (tagsJson: string | null): string[] => {
-		if (!tagsJson) return [];
+	type FormSnapshot = {
+		name: string;
+		type: string;
+		url: string;
+		externalUrl: string;
+		apiKey: string;
+		tags: string;
+		libraryRefreshInterval: string;
+		cleanupEnabled: boolean;
+		cleanupCron: string;
+	};
+
+	const parseTags = (tagsValue: unknown): string[] => {
+		if (Array.isArray(tagsValue)) return tagsValue.filter((tag) => typeof tag === 'string');
+		if (typeof tagsValue !== 'string' || !tagsValue) return [];
 		try {
-			return JSON.parse(tagsJson);
+			const parsed = JSON.parse(tagsValue);
+			return Array.isArray(parsed) ? parsed.filter((tag) => typeof tag === 'string') : [];
 		} catch {
 			return [];
 		}
 	};
 
-	// Initialize dirty tracking on mount
-	onMount(() => {
+	const buildInitialValues = (): FormSnapshot => {
 		if (mode === 'edit' && instance) {
-			initEdit({
+			return {
 				name: instance.name,
 				type: instance.type,
 				url: instance.url,
@@ -51,33 +63,45 @@
 				libraryRefreshInterval: String(instance.library_refresh_interval ?? 0),
 				cleanupEnabled: cleanupSettings?.enabled ?? false,
 				cleanupCron: cleanupSettings?.cron ?? '0 0 * * 0'
-			});
-		} else {
-			initCreate({
-				name: '',
-				type: initialType,
-				url: '',
-				externalUrl: '',
-				apiKey: '',
-				tags: '[]',
-				libraryRefreshInterval: '0',
-				cleanupEnabled: false,
-				cleanupCron: '0 0 * * 0'
-			});
+			};
 		}
+
+		return {
+			name: '',
+			type: initialType,
+			url: '',
+			externalUrl: '',
+			apiKey: '',
+			tags: '[]',
+			libraryRefreshInterval: '0',
+			cleanupEnabled: false,
+			cleanupCron: '0 0 * * 0'
+		};
+	};
+
+	const initialValues = buildInitialValues();
+	let dirtyInitialized = false;
+
+	// Initialize dirty tracking on mount
+	onMount(() => {
+		if (mode === 'edit' && instance) initEdit(initialValues);
+		else initCreate(initialValues);
+		dirtyInitialized = true;
 		return () => clear();
 	});
 
+	$: values = dirtyInitialized ? $current : initialValues;
+
 	// Read current values from dirty store
-	$: name = ($current.name ?? '') as string;
-	$: type = ($current.type ?? '') as string;
-	$: url = ($current.url ?? '') as string;
-	$: externalUrl = ($current.externalUrl ?? '') as string;
-	$: apiKey = ($current.apiKey ?? '') as string;
-	$: tags = JSON.parse(($current.tags ?? '[]') as string) as string[];
-	$: libraryRefreshInterval = ($current.libraryRefreshInterval ?? '0') as string;
-	$: cleanupEnabled = ($current.cleanupEnabled ?? false) as boolean;
-	$: cleanupCron = ($current.cleanupCron ?? '0 0 * * 0') as string;
+	$: name = (values.name ?? '') as string;
+	$: type = (values.type ?? '') as string;
+	$: url = (values.url ?? '') as string;
+	$: externalUrl = (values.externalUrl ?? '') as string;
+	$: apiKey = (values.apiKey ?? '') as string;
+	$: tags = parseTags(values.tags);
+	$: libraryRefreshInterval = (values.libraryRefreshInterval ?? '0') as string;
+	$: cleanupEnabled = (values.cleanupEnabled ?? false) as boolean;
+	$: cleanupCron = (values.cleanupCron ?? '0 0 * * 0') as string;
 
 	// CronInput sync pattern (bind:value needs a local variable)
 	let cronInputValue = cleanupSettings?.cron ?? '0 0 * * 0';
