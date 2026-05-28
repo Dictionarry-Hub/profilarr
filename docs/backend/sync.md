@@ -21,6 +21,12 @@ control.
   - [Processor Flow](#processor-flow)
   - [Status](#status)
 - [Section Registry](#section-registry)
+- [Database Priority](#database-priority)
+  - [Schema](#schema)
+  - [Lifecycle](#lifecycle)
+  - [Sync Order](#sync-order)
+  - [UI](#ui)
+  - [Open Questions](#open-questions)
 - [Transformation](#transformation)
   - [Custom Formats](#custom-formats)
   - [Quality Profiles](#quality-profiles)
@@ -104,11 +110,101 @@ logic. Each section type implements a `SectionHandler` interface:
 
 Three handlers register themselves on import via `registerSection()`:
 
-| Section           | Config scope                                                            |
-| ----------------- | ----------------------------------------------------------------------- |
-| `qualityProfiles` | Multi-profile selection from one database                               |
-| `delayProfiles`   | Single profile selection (or none)                                      |
-| `mediaManagement` | Three independent configs (naming, media settings, quality definitions) |
+| Section           | Config scope                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------ |
+| `qualityProfiles` | Multi-profile selection from one or more databases (see [Database Priority](#database-priority)) |
+| `delayProfiles`   | Single profile selection (or none)                                                               |
+| `mediaManagement` | Three independent configs (naming, media settings, quality definitions)                          |
+
+## Database Priority
+
+Quality profile sync supports multiple databases per Arr instance. A priority
+ordering determines which database's version of an entity wins when more than
+one database manages the same name. Other sections (delay profiles, media
+management) are unaffected because they are idempotent, single-config
+selections where priority has no practical effect.
+
+### Schema
+
+A junction table stores the priority ordering per instance:
+
+```sql
+CREATE TABLE arr_sync_database_priority (
+    instance_id INTEGER NOT NULL,
+    database_id INTEGER NOT NULL,
+    priority INTEGER NOT NULL,
+    PRIMARY KEY (instance_id, database_id),
+    FOREIGN KEY (instance_id) REFERENCES arr_instances(id) ON DELETE CASCADE,
+    FOREIGN KEY (database_id) REFERENCES database_instances(id) ON DELETE CASCADE
+);
+```
+
+Every (instance, database) pair has a row. Priority 1 is the highest priority.
+The table is always fully populated: every Arr instance has a row for every
+linked database.
+
+### Lifecycle
+
+Priority rows are created and removed automatically. The user never manually
+adds or removes a database from the priority list.
+
+| Event              | Action                                                           |
+| ------------------ | ---------------------------------------------------------------- |
+| Database linked    | Insert a row for every Arr instance, appended at lowest priority |
+| Instance created   | Insert a row for every linked database, ordered by database ID   |
+| Database unlinked  | FK cascade deletes all rows for that database                    |
+| Instance deleted   | FK cascade deletes all rows for that instance                    |
+| User reorders (UI) | Update priority values to reflect the new drag-and-drop ordering |
+
+On migration, existing (instance, database) pairs are seeded using
+`ROW_NUMBER() OVER (PARTITION BY instance_id ORDER BY database_id)` so every
+instance gets a clean 1, 2, 3... sequence based on database creation order.
+
+### Sync Order
+
+The syncer groups quality profile selections by database, then iterates
+databases in priority order from lowest to highest. The highest-priority
+database syncs last, so its version of any shared entity overwrites earlier
+versions via Arr's name-based matching.
+
+For a setup with two databases (foo at priority 1, bar at priority 2):
+
+1. Bar syncs first (lower priority). Its profiles and referenced CFs are
+   pushed to Arr.
+2. Foo syncs next (higher priority). Its profiles and referenced CFs are
+   pushed, overwriting any names that bar already created.
+
+The Arr API's name-based create-or-update behavior handles the overwriting
+naturally. No merge logic or conflict resolution is needed.
+
+CFs are pulled along with their profiles as they are today. If both databases
+define a CF with the same name, the higher-priority database's version is the
+one that persists after sync completes.
+
+### UI
+
+The sync page shows each database as a draggable card, ordered by priority.
+Profile toggles are nested inside each database card. Users can select
+profiles from multiple databases simultaneously. Drag-and-drop reordering
+sets the priority, with the topmost card being highest priority.
+
+### Open Questions
+
+- **Drift with overlapping entities.** Drift currently compares per-database
+  expected state against Arr. When a higher-priority database overwrites a
+  lower-priority database's entity, the lower-priority database will report
+  drift for that entity. This is technically accurate but not actionable. For
+  now this is accepted as minor noise given that overlapping entities are
+  expected to be rare (a handful of CFs, no profiles). Revisit if multi-database
+  adoption makes the noise significant.
+
+- **On-demand entity sync and hierarchy.** Entity sync takes an explicit
+  (instanceId, databaseId, entityName) and pushes from that database
+  regardless of priority. If a user edits an entity in a lower-priority
+  database and pushes, it overwrites the higher-priority version until the
+  next full sync restores it. This is accepted for now because the user
+  explicitly chose to push that edit. Revisit if this causes confusion in
+  practice.
 
 ## Transformation
 
