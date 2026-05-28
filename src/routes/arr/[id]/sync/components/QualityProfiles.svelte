@@ -5,6 +5,7 @@
 	import SyncFooter from './SyncFooter.svelte';
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import Button from '$ui/button/Button.svelte';
 	import { ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
@@ -283,33 +284,29 @@
 					>
 						<div class="space-y-3">
 							<div class="flex items-center justify-between">
-								<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
-									{database.name}
-								</h3>
 								<div class="flex items-center gap-2">
-									<Label variant="info" size="sm" rounded="md">
-										Priority #{index + 1}
-									</Label>
+									<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
+										{database.name}
+									</h3>
 									<!-- Mobile reorder buttons -->
 									<div class="flex gap-1 md:hidden">
-										<button
-											class="rounded p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30 dark:text-neutral-500 dark:hover:text-neutral-300"
+										<Button
+											icon={ChevronUp}
+											size="xs"
 											disabled={index === 0}
-											onclick={() => moveDatabase(index, -1)}
-											aria-label="Move up"
-										>
-											<ChevronUp size={16} />
-										</button>
-										<button
-											class="rounded p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30 dark:text-neutral-500 dark:hover:text-neutral-300"
+											on:click={() => moveDatabase(index, -1)}
+										/>
+										<Button
+											icon={ChevronDown}
+											size="xs"
 											disabled={index === orderedDatabases.length - 1}
-											onclick={() => moveDatabase(index, 1)}
-											aria-label="Move down"
-										>
-											<ChevronDown size={16} />
-										</button>
+											on:click={() => moveDatabase(index, 1)}
+										/>
 									</div>
 								</div>
+								<Label variant="info" size="sm" rounded="md">
+									Priority #{index + 1}
+								</Label>
 							</div>
 
 							{#if database.qualityProfiles.length === 0}
