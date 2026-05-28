@@ -1,11 +1,17 @@
 import type { BaseArrClient } from '$arr/base.ts';
 import type { DriftCounts, DriftDiff } from '$shared/drift.ts';
 import type { SyncArrType } from '$sync/mappings.ts';
-import { compareCustomFormatDrift, buildExpectedCustomFormats } from './customFormats.ts';
+import {
+	buildExpectedCustomFormatsPerDatabase,
+	compareCustomFormatDriftPerDatabase
+} from './customFormats.ts';
 import { checkDelayProfileDrift } from './delayProfiles.ts';
 import { hashDriftDiff } from './hash.ts';
 import { checkMediaManagementDrift } from './mediaManagement.ts';
-import { checkQualityProfileDrift } from './qualityProfiles.ts';
+import {
+	buildExpectedQualityProfilesPerDatabase,
+	compareQualityProfileDriftPerDatabase
+} from './qualityProfiles.ts';
 
 export interface DriftCheckResult {
 	status: 'clean' | 'drift_detected';
@@ -27,20 +33,27 @@ export async function checkArrDrift(
 	instanceId: number,
 	arrType: SyncArrType
 ): Promise<DriftCheckResult> {
-	const [expectedCustomFormats, actualCustomFormats, delayProfiles, mediaManagement] =
-		await Promise.all([
-			buildExpectedCustomFormats(instanceId, arrType),
-			client.getCustomFormats(),
-			checkDelayProfileDrift(client, instanceId),
-			checkMediaManagementDrift(client, instanceId, arrType)
-		]);
-	const customFormats = compareCustomFormatDrift(expectedCustomFormats, actualCustomFormats);
-	const qualityProfiles = await checkQualityProfileDrift(
-		client,
-		instanceId,
-		arrType,
-		actualCustomFormats
+	const [expectedCfPerDb, actualCustomFormats, delayProfiles, mediaManagement] = await Promise.all([
+		buildExpectedCustomFormatsPerDatabase(instanceId, arrType),
+		client.getCustomFormats(),
+		checkDelayProfileDrift(client, instanceId),
+		checkMediaManagementDrift(client, instanceId, arrType)
+	]);
+
+	const customFormats = compareCustomFormatDriftPerDatabase(expectedCfPerDb, actualCustomFormats);
+
+	const [expectedQpPerDb, actualProfiles] = await Promise.all([
+		buildExpectedQualityProfilesPerDatabase(instanceId, arrType, actualCustomFormats),
+		client.getQualityProfiles()
+	]);
+
+	const qualityProfiles = compareQualityProfileDriftPerDatabase(
+		expectedQpPerDb,
+		actualProfiles,
+		actualCustomFormats,
+		arrType
 	);
+
 	const counts: DriftCounts = {
 		custom_formats: customFormats.count,
 		quality_profiles: qualityProfiles.count,
@@ -48,8 +61,8 @@ export async function checkArrDrift(
 		media_management: mediaManagement.count
 	};
 	const diff: DriftDiff = {
-		custom_formats: customFormats.diff,
-		quality_profiles: qualityProfiles.diff,
+		custom_formats: customFormats.diffs,
+		quality_profiles: qualityProfiles.diffs,
 		delay_profiles: delayProfiles.diff,
 		media_management: mediaManagement.diff
 	};

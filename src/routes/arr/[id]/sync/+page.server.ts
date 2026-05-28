@@ -15,11 +15,12 @@ import { calculateNextRun } from '$lib/server/sync/utils.ts';
 import { scheduleArrSyncForInstance } from '$lib/server/jobs/init.ts';
 import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
-import { buildExpectedCustomFormats } from '$drift/customFormats.ts';
-import type { CustomFormatDriftDiff } from '$drift/customFormats.ts';
+import { buildExpectedCustomFormatsPerDatabase } from '$drift/customFormats.ts';
+import type { CustomFormatDriftDiff, DatabaseCustomFormatDriftDiff } from '$drift/customFormats.ts';
 import type {
 	QualityProfileDriftDiff,
-	QualityProfileModifiedDiff
+	QualityProfileModifiedDiff,
+	DatabaseQualityProfileDriftDiff
 } from '$drift/qualityProfiles.ts';
 import type { MediaManagementDriftDiff } from '$drift/mediaManagement.ts';
 import { FEATURES } from '$shared/features.ts';
@@ -72,39 +73,69 @@ function isTransitiveOnlyQp(modified: QualityProfileModifiedDiff): boolean {
 	return modified.fields.every(fieldIsMissingCustomFormat);
 }
 
-function classifyQpDrift(qpDiff: QualityProfileDriftDiff | undefined) {
+function extractQpDiffs(raw: unknown): QualityProfileDriftDiff[] {
+	if (Array.isArray(raw)) {
+		return raw
+			.filter(
+				(entry): entry is DatabaseQualityProfileDriftDiff =>
+					entry != null && typeof entry === 'object' && 'diff' in entry
+			)
+			.map((entry) => entry.diff);
+	}
+	if (raw != null && typeof raw === 'object' && ('missing' in raw || 'modified' in raw)) {
+		return [raw as QualityProfileDriftDiff];
+	}
+	return [];
+}
+
+function extractCfDiffs(raw: unknown): CustomFormatDriftDiff[] {
+	if (Array.isArray(raw)) {
+		return raw
+			.filter(
+				(entry): entry is DatabaseCustomFormatDriftDiff =>
+					entry != null && typeof entry === 'object' && 'diff' in entry
+			)
+			.map((entry) => entry.diff);
+	}
+	if (raw != null && typeof raw === 'object' && ('missing' in raw || 'modified' in raw)) {
+		return [raw as CustomFormatDriftDiff];
+	}
+	return [];
+}
+
+function classifyQpDrift(qpDiffs: QualityProfileDriftDiff[]) {
 	const result = {
 		directNames: [] as string[],
 		transitiveNames: [] as string[],
 		affectedQpNames: new Set<string>()
 	};
-	if (!qpDiff) return result;
 
-	// Missing QPs (selected but not in Arr) are always direct.
-	for (const m of qpDiff.missing) {
-		result.directNames.push(m.name);
-	}
-
-	for (const m of qpDiff.modified) {
-		if (isTransitiveOnlyQp(m)) {
-			result.transitiveNames.push(m.name);
-			result.affectedQpNames.add(m.name);
-		} else {
+	for (const qpDiff of qpDiffs) {
+		for (const m of qpDiff.missing) {
 			result.directNames.push(m.name);
-			// A direct drift can also reference missing CFs; track that too.
-			if (m.fields.some(fieldIsMissingCustomFormat)) {
+		}
+
+		for (const m of qpDiff.modified) {
+			if (isTransitiveOnlyQp(m)) {
+				result.transitiveNames.push(m.name);
 				result.affectedQpNames.add(m.name);
+			} else {
+				result.directNames.push(m.name);
+				if (m.fields.some(fieldIsMissingCustomFormat)) {
+					result.affectedQpNames.add(m.name);
+				}
 			}
 		}
 	}
 	return result;
 }
 
-function collectCfNames(cfDiff: CustomFormatDriftDiff | undefined): string[] {
-	if (!cfDiff) return [];
+function collectCfNames(cfDiffs: CustomFormatDriftDiff[]): string[] {
 	const names: string[] = [];
-	for (const m of cfDiff.missing) names.push(m.name);
-	for (const m of cfDiff.modified) names.push(m.name);
+	for (const cfDiff of cfDiffs) {
+		for (const m of cfDiff.missing) names.push(m.name);
+		for (const m of cfDiff.modified) names.push(m.name);
+	}
 	return names;
 }
 
@@ -149,7 +180,15 @@ async function loadDriftProgress(
 
 	const qpTotal = qpSync.selections.length;
 	const dpTotal = dpSync.databaseId && dpSync.profileName ? 1 : 0;
-	const cfTotal = qpTotal > 0 ? (await buildExpectedCustomFormats(instanceId, arrType)).length : 0;
+
+	let cfTotal = 0;
+	if (qpTotal > 0) {
+		const perDb = await buildExpectedCustomFormatsPerDatabase(instanceId, arrType);
+		for (const { formats } of perDb.values()) {
+			cfTotal += formats.length;
+		}
+	}
+
 	const namingTotal = mmSync.namingDatabaseId !== null && mmSync.namingConfigName ? 1 : 0;
 	const qualityDefinitionsTotal =
 		mmSync.qualityDefinitionsDatabaseId !== null && mmSync.qualityDefinitionsConfigName ? 1 : 0;
@@ -157,16 +196,12 @@ async function loadDriftProgress(
 		mmSync.mediaSettingsDatabaseId !== null && mmSync.mediaSettingsConfigName ? 1 : 0;
 
 	const counts = status.counts ?? {};
-	const diff = status.diff as
-		| {
-				quality_profiles?: QualityProfileDriftDiff;
-				custom_formats?: CustomFormatDriftDiff;
-				media_management?: MediaManagementDriftDiff;
-		  }
-		| undefined;
-	const qpClass = classifyQpDrift(diff?.quality_profiles);
-	const cfNames = collectCfNames(diff?.custom_formats);
-	const mm = diff?.media_management;
+	const diff = status.diff as Record<string, unknown> | undefined;
+	const qpDiffs = extractQpDiffs(diff?.quality_profiles);
+	const cfDiffsList = extractCfDiffs(diff?.custom_formats);
+	const qpClass = classifyQpDrift(qpDiffs);
+	const cfNames = collectCfNames(cfDiffsList);
+	const mm = diff?.media_management as MediaManagementDriftDiff | undefined;
 
 	const progress: DriftProgress = {};
 	if (qpTotal > 0) {

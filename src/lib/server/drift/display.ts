@@ -133,27 +133,50 @@ function buildCustomFormatEntities(
 	raw: unknown,
 	arrType: SyncArrType | undefined
 ): DriftDisplayEntity[] {
+	if (Array.isArray(raw)) {
+		const entities: DriftDisplayEntity[] = [];
+		for (const entry of raw) {
+			if (!isRecord(entry)) continue;
+			const databaseId = entry.databaseId;
+			const databaseName = recordString(entry, 'databaseName');
+			const diff = asCustomFormatDiff(entry.diff);
+			if (!diff) continue;
+			entities.push(...buildCustomFormatDiffEntities(diff, arrType, databaseId, databaseName));
+		}
+		return entities;
+	}
+
 	const diff = asCustomFormatDiff(raw);
 	if (!diff) return [];
+	return buildCustomFormatDiffEntities(diff, arrType);
+}
 
+function buildCustomFormatDiffEntities(
+	diff: CustomFormatDiff,
+	arrType: SyncArrType | undefined,
+	databaseId?: unknown,
+	databaseName?: string | null
+): DriftDisplayEntity[] {
 	const entities: DriftDisplayEntity[] = [];
+	const idPrefix = databaseId != null ? `custom_formats:${databaseId}` : 'custom_formats';
 
 	for (const item of diff.missing ?? []) {
 		const name = recordString(item, 'name');
 		if (!name) continue;
 
 		entities.push({
-			id: `custom_formats:missing:${name}`,
+			id: `${idPrefix}:missing:${name}`,
 			section: 'custom_formats',
 			sectionLabel: 'Custom Format',
 			title: name,
+			databaseName: databaseName ?? undefined,
 			state: 'missing',
 			stateLabel: 'Missing',
 			tone: 'danger',
 			summary: 'Profilarr expects this custom format, but Arr does not have it.',
 			changes: [
 				{
-					id: `custom_formats:missing:${name}:format`,
+					id: `${idPrefix}:missing:${name}:format`,
 					label: 'Custom format',
 					detail: 'Missing from Arr',
 					expected: value('Present'),
@@ -174,10 +197,11 @@ function buildCustomFormatEntities(
 		);
 
 		entities.push({
-			id: `custom_formats:modified:${modified.name}`,
+			id: `${idPrefix}:modified:${modified.name}`,
 			section: 'custom_formats',
 			sectionLabel: 'Custom Format',
 			title: modified.name,
+			databaseName: databaseName ?? undefined,
 			state: 'modified',
 			stateLabel: 'Modified',
 			tone: 'warning',
@@ -193,27 +217,50 @@ function buildQualityProfileEntities(
 	raw: unknown,
 	arrType: SyncArrType | undefined
 ): DriftDisplayEntity[] {
+	if (Array.isArray(raw)) {
+		const entities: DriftDisplayEntity[] = [];
+		for (const entry of raw) {
+			if (!isRecord(entry)) continue;
+			const databaseId = entry.databaseId;
+			const databaseName = recordString(entry, 'databaseName');
+			const diff = asQualityProfileDiff(entry.diff);
+			if (!diff) continue;
+			entities.push(...buildQualityProfileDiffEntities(diff, arrType, databaseId, databaseName));
+		}
+		return entities;
+	}
+
 	const diff = asQualityProfileDiff(raw);
 	if (!diff) return [];
+	return buildQualityProfileDiffEntities(diff, arrType);
+}
 
+function buildQualityProfileDiffEntities(
+	diff: QualityProfileDiff,
+	arrType: SyncArrType | undefined,
+	databaseId?: unknown,
+	databaseName?: string | null
+): DriftDisplayEntity[] {
 	const entities: DriftDisplayEntity[] = [];
+	const idPrefix = databaseId != null ? `quality_profiles:${databaseId}` : 'quality_profiles';
 
 	for (const item of diff.missing ?? []) {
 		const name = recordString(item, 'name');
 		if (!name) continue;
 
 		entities.push({
-			id: `quality_profiles:missing:${name}`,
+			id: `${idPrefix}:missing:${name}`,
 			section: 'quality_profiles',
 			sectionLabel: 'Quality Profile',
 			title: name,
+			databaseName: databaseName ?? undefined,
 			state: 'missing',
 			stateLabel: 'Missing',
 			tone: 'danger',
 			summary: 'Profilarr expects this quality profile, but Arr does not have it.',
 			changes: [
 				{
-					id: `quality_profiles:missing:${name}:profile`,
+					id: `${idPrefix}:missing:${name}:profile`,
 					label: 'Quality profile',
 					detail: 'Missing from Arr',
 					expected: value('Present'),
@@ -234,10 +281,11 @@ function buildQualityProfileEntities(
 		);
 
 		entities.push({
-			id: `quality_profiles:modified:${modified.name}`,
+			id: `${idPrefix}:modified:${modified.name}`,
 			section: 'quality_profiles',
 			sectionLabel: 'Quality Profile',
 			title: modified.name,
+			databaseName: databaseName ?? undefined,
 			state: 'modified',
 			stateLabel: 'Modified',
 			tone: 'warning',

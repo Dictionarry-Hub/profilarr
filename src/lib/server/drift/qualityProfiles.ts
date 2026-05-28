@@ -1,4 +1,5 @@
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import type { BaseArrClient } from '$arr/base.ts';
 import type {
 	ArrCustomFormat,
@@ -34,6 +35,12 @@ export interface QualityProfileDriftDiff {
 
 export interface QualityProfileDriftResult {
 	count: number;
+	diff: QualityProfileDriftDiff;
+}
+
+export interface DatabaseQualityProfileDriftDiff {
+	databaseId: number;
+	databaseName: string;
 	diff: QualityProfileDriftDiff;
 }
 
@@ -344,6 +351,98 @@ export async function buildExpectedQualityProfiles(
 	}
 
 	return expected;
+}
+
+export interface PerDatabaseExpectedProfiles {
+	databaseName: string;
+	profiles: QualityProfileDriftExpected[];
+}
+
+export async function buildExpectedQualityProfilesPerDatabase(
+	instanceId: number,
+	arrType: SyncArrType,
+	actualCustomFormats: ArrCustomFormat[]
+): Promise<Map<number, PerDatabaseExpectedProfiles>> {
+	const syncConfig = arrSyncQueries.getQualityProfilesSync(instanceId);
+	const result = new Map<number, PerDatabaseExpectedProfiles>();
+	if (syncConfig.selections.length === 0) return result;
+
+	const formatIdMap = new Map<string, number>();
+	for (const format of actualCustomFormats) {
+		if (format.id !== undefined) formatIdMap.set(format.name, format.id);
+	}
+
+	const selectionsByDb = new Map<number, typeof syncConfig.selections>();
+	for (const selection of syncConfig.selections) {
+		const existing = selectionsByDb.get(selection.databaseId) ?? [];
+		existing.push(selection);
+		selectionsByDb.set(selection.databaseId, existing);
+	}
+
+	for (const [databaseId, selections] of selectionsByDb) {
+		const cache = getCache(databaseId);
+		if (!cache) {
+			throw new Error(`PCD cache not found for database ${databaseId}`);
+		}
+
+		const dbInstance = databaseInstancesQueries.getById(databaseId);
+		const databaseName = dbInstance?.name ?? `Database ${databaseId}`;
+		const profiles: QualityProfileDriftExpected[] = [];
+
+		for (const selection of selections) {
+			const pcdProfile = await fetchQualityProfileFromPcd(cache, selection.profileName, arrType);
+			if (!pcdProfile) {
+				throw new Error(
+					`Quality profile "${selection.profileName}" not found in database ${databaseId}`
+				);
+			}
+
+			const [qualityMappings, managedCustomFormatNames] = await Promise.all([
+				getQualityApiMappings(cache, arrType),
+				getCustomFormatsForProfile(cache, selection.profileName, arrType)
+			]);
+
+			const profile = transformQualityProfile(pcdProfile, arrType, qualityMappings, formatIdMap);
+			profile.name = pcdProfile.name;
+			profiles.push({
+				profile,
+				managedCustomFormatNames,
+				managedCustomFormatScores: pcdProfile.customFormats.map((format) => ({
+					name: format.formatName,
+					score: format.score
+				}))
+			});
+		}
+
+		if (profiles.length > 0) {
+			result.set(databaseId, { databaseName, profiles });
+		}
+	}
+
+	return result;
+}
+
+export function compareQualityProfileDriftPerDatabase(
+	perDb: Map<number, PerDatabaseExpectedProfiles>,
+	actualProfiles: ArrQualityProfile[],
+	actualCustomFormats: ArrCustomFormat[],
+	arrType: SyncArrType
+): { count: number; diffs: DatabaseQualityProfileDriftDiff[] } {
+	const diffs: DatabaseQualityProfileDriftDiff[] = [];
+	let count = 0;
+
+	for (const [databaseId, { databaseName, profiles }] of perDb) {
+		const result = compareQualityProfileDrift(
+			profiles,
+			actualProfiles,
+			actualCustomFormats,
+			arrType
+		);
+		count += result.count;
+		diffs.push({ databaseId, databaseName, diff: result.diff });
+	}
+
+	return { count, diffs };
 }
 
 export async function checkQualityProfileDrift(

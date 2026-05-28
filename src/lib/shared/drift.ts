@@ -44,6 +44,7 @@ export interface DriftDisplayEntity {
 	section: DriftSection;
 	sectionLabel: string;
 	title: string;
+	databaseName?: string;
 	state: DriftDisplayState;
 	stateLabel: string;
 	tone: DriftDisplayTone;

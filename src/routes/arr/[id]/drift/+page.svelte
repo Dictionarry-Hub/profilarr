@@ -279,6 +279,11 @@
 									<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 										{row.title}
 									</span>
+									{#if row.databaseName}
+										<span class="text-xs text-neutral-400 dark:text-neutral-500">
+											{row.databaseName}
+										</span>
+									{/if}
 									{#if row.summary}
 										<span class="text-xs text-neutral-500 dark:text-neutral-400">
 											{row.summary}
