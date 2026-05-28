@@ -4,6 +4,7 @@
 	import DraggableCard from '$ui/list/DraggableCard.svelte';
 	import SyncFooter from './SyncFooter.svelte';
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
+	import Label from '$ui/label/Label.svelte';
 	import { ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
@@ -282,34 +283,32 @@
 					>
 						<div class="space-y-3">
 							<div class="flex items-center justify-between">
+								<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
+									{database.name}
+								</h3>
 								<div class="flex items-center gap-2">
-									<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
-										{database.name}
-									</h3>
-									<span
-										class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400"
-									>
-										{index + 1}
-									</span>
-								</div>
-								<!-- Mobile reorder buttons -->
-								<div class="flex gap-1 md:hidden">
-									<button
-										class="rounded p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30 dark:text-neutral-500 dark:hover:text-neutral-300"
-										disabled={index === 0}
-										onclick={() => moveDatabase(index, -1)}
-										aria-label="Move up"
-									>
-										<ChevronUp size={16} />
-									</button>
-									<button
-										class="rounded p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30 dark:text-neutral-500 dark:hover:text-neutral-300"
-										disabled={index === orderedDatabases.length - 1}
-										onclick={() => moveDatabase(index, 1)}
-										aria-label="Move down"
-									>
-										<ChevronDown size={16} />
-									</button>
+									<Label variant="info" size="sm" rounded="md">
+										Priority #{index + 1}
+									</Label>
+									<!-- Mobile reorder buttons -->
+									<div class="flex gap-1 md:hidden">
+										<button
+											class="rounded p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30 dark:text-neutral-500 dark:hover:text-neutral-300"
+											disabled={index === 0}
+											onclick={() => moveDatabase(index, -1)}
+											aria-label="Move up"
+										>
+											<ChevronUp size={16} />
+										</button>
+										<button
+											class="rounded p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30 dark:text-neutral-500 dark:hover:text-neutral-300"
+											disabled={index === orderedDatabases.length - 1}
+											onclick={() => moveDatabase(index, 1)}
+											aria-label="Move down"
+										>
+											<ChevronDown size={16} />
+										</button>
+									</div>
 								</div>
 							</div>
 
