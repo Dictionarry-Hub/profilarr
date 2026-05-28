@@ -4,6 +4,8 @@
 	import type { FilterConfig } from '$shared/upgrades/filters';
 	import { selectors } from '$shared/upgrades/selectors';
 	import { createSearchStore, type SearchStore } from '$lib/client/stores/search';
+	import { serverTimezone } from '$lib/client/stores/timezone';
+	import { formatDate } from '$shared/utils/dates';
 	import type { Readable } from 'svelte/store';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
@@ -218,11 +220,10 @@
 		return `${Math.round(sizeGb * 1024)} MB`;
 	}
 
-	function formatDate(value: string): string {
+	function formatDateValue(value: string): string {
 		if (!value) return 'Unknown';
-		const date = new Date(value);
-		if (Number.isNaN(date.getTime())) return 'Unknown';
-		return date.toLocaleDateString();
+		const result = formatDate(value, $serverTimezone);
+		return result === '-' ? 'Unknown' : result;
 	}
 
 	function formatScore(score: number): string {
@@ -531,7 +532,7 @@
 										Added
 									</div>
 									<div class="font-mono text-sm text-neutral-900 dark:text-neutral-100">
-										{formatDate(row.details.dateAdded)}
+										{formatDateValue(row.details.dateAdded)}
 									</div>
 								</div>
 
