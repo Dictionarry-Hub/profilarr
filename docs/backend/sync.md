@@ -190,14 +190,6 @@ sets the priority, with the topmost card being highest priority.
 
 ### Open Questions
 
-- **Drift with overlapping entities.** Drift currently compares per-database
-  expected state against Arr. When a higher-priority database overwrites a
-  lower-priority database's entity, the lower-priority database will report
-  drift for that entity. This is technically accurate but not actionable. For
-  now this is accepted as minor noise given that overlapping entities are
-  expected to be rare (a handful of CFs, no profiles). Revisit if multi-database
-  adoption makes the noise significant.
-
 - **On-demand entity sync and hierarchy.** Entity sync takes an explicit
   (instanceId, databaseId, entityName) and pushes from that database
   regardless of priority. If a user edits an entity in a lower-priority
@@ -366,6 +358,15 @@ repair, or cleanup.
 Drift currently covers custom formats, quality profiles, and the default delay
 profile. Media management coverage (naming, media settings, quality
 definitions) is planned as a follow-up.
+
+For custom formats and quality profiles, drift is computed per-database. Each
+database's expected state is built independently (no cross-database dedup), so
+overlapping entities appear in every database that manages them. If a
+higher-priority database overwrites a lower-priority database's entity, the
+lower-priority database reports drift for that entity. This is intentional:
+it gives visibility into which databases conflict and what each one expects.
+Drift counts are raw sums across databases (the same entity drifted in two
+databases counts as two).
 
 After a successful sync that touched Arr, the sync handler enqueues an
 `arr.drift` job for the same instance so the drift status (and the per-section
