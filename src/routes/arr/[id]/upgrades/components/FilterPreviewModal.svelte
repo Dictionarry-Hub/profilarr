@@ -369,7 +369,7 @@
 				</div>
 
 				<ActionsBar className="md:justify-start">
-					<SearchAction searchStore={searchStore} placeholder="Search items..." responsive />
+					<SearchAction {searchStore} placeholder="Search items..." responsive />
 					<ActionButton icon={CircleDot} hasDropdown square title="Filter by status">
 						<svelte:fragment slot="dropdown">
 							<Dropdown position="right" mobilePosition="middle" minWidth="12rem">
@@ -518,9 +518,7 @@
 								<div
 									class="grid grid-cols-1 gap-1 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center"
 								>
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Size
-									</div>
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Size</div>
 									<div class="font-mono text-sm text-neutral-900 dark:text-neutral-100">
 										{formatSize(row.details.sizeOnDisk)}
 									</div>
@@ -553,9 +551,7 @@
 								<div
 									class="grid grid-cols-1 gap-2 py-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center"
 								>
-									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-										Tags
-									</div>
+									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Tags</div>
 									<div class="min-w-0">
 										{#if row.details.tags.length > 0}
 											<div class="flex min-w-0 flex-wrap items-center gap-2">

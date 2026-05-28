@@ -2,11 +2,7 @@
  * Types for the upgrade processing system
  */
 
-import type {
-	RadarrMovie,
-	ScoreBreakdownItem,
-	SonarrSeries
-} from '$lib/server/utils/arr/types.ts';
+import type { RadarrMovie, ScoreBreakdownItem, SonarrSeries } from '$lib/server/utils/arr/types.ts';
 import type { FilterGroup } from '$shared/upgrades/filters.ts';
 
 /**
