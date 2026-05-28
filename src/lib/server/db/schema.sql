@@ -419,6 +419,21 @@ CREATE TABLE arr_sync_quality_profiles (
 );
 
 -- ==============================================================================
+-- TABLE: arr_sync_database_priority
+-- Purpose: Store database priority ordering per Arr instance for QP sync
+-- Migration: 069_create_arr_sync_database_priority.ts
+-- ==============================================================================
+
+CREATE TABLE arr_sync_database_priority (
+    instance_id INTEGER NOT NULL,
+    database_id INTEGER NOT NULL,
+    priority INTEGER NOT NULL,
+    PRIMARY KEY (instance_id, database_id),
+    FOREIGN KEY (instance_id) REFERENCES arr_instances(id) ON DELETE CASCADE,
+    FOREIGN KEY (database_id) REFERENCES database_instances(id) ON DELETE CASCADE
+);
+
+-- ==============================================================================
 -- TABLE: arr_sync_quality_profiles_config
 -- Purpose: Store quality profile sync trigger configuration (one per instance)
 -- Migration: 015_create_arr_sync_tables.ts, 016_add_should_sync_flags.ts, 034_add_sync_status.ts

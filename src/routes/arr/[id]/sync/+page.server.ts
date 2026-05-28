@@ -305,6 +305,7 @@ export const load: ServerLoad = async ({ params }) => {
 	// Load existing sync data
 	const syncData = arrSyncQueries.getFullSyncData(id);
 	const driftProgress = await loadDriftProgress(id, arrType);
+	const databasePriorities = arrSyncQueries.getDatabasePriorities(id);
 
 	const { api_key: _, ...safeInstance } = instance;
 
@@ -312,7 +313,8 @@ export const load: ServerLoad = async ({ params }) => {
 		instance: safeInstance,
 		databases: databasesWithProfiles,
 		syncData,
-		driftProgress
+		driftProgress,
+		databasePriorities
 	};
 };
 
@@ -326,6 +328,7 @@ export const actions: Actions = {
 		const instance = arrInstancesQueries.getById(id);
 		const formData = await request.formData();
 		const selectionsJson = formData.get('selections') as string;
+		const prioritiesJson = formData.get('priorities') as string;
 		const trigger = formData.get('trigger') as SyncTrigger;
 		const cron = formData.get('cron') as string | null;
 
@@ -338,6 +341,13 @@ export const actions: Actions = {
 				cron: effectiveCron,
 				nextRunAt: effectiveTrigger === 'schedule' ? calculateNextRun(effectiveCron) : null
 			});
+
+			const priorities: { databaseId: number; priority: number }[] = JSON.parse(
+				prioritiesJson || '[]'
+			);
+			if (priorities.length > 0) {
+				arrSyncQueries.saveDatabasePriorities(id, priorities);
+			}
 
 			await logger.info(`Quality profiles sync config saved for "${instance?.name}"`, {
 				source: 'sync',

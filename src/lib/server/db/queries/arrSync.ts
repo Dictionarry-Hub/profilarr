@@ -902,6 +902,62 @@ export const arrSyncQueries = {
 		);
 	},
 
+	// ── Database Priority ────────────────────────────────────────────────
+
+	getDatabasePriorities(instanceId: number): { databaseId: number; priority: number }[] {
+		return db
+			.query<{ database_id: number; priority: number }>(
+				`SELECT database_id, priority FROM arr_sync_database_priority
+			 WHERE instance_id = ? ORDER BY priority ASC`,
+				instanceId
+			)
+			.map((row) => ({ databaseId: row.database_id, priority: row.priority }));
+	},
+
+	saveDatabasePriorities(
+		instanceId: number,
+		priorities: { databaseId: number; priority: number }[]
+	): void {
+		db.execute('DELETE FROM arr_sync_database_priority WHERE instance_id = ?', instanceId);
+		for (const { databaseId, priority } of priorities) {
+			db.execute(
+				'INSERT INTO arr_sync_database_priority (instance_id, database_id, priority) VALUES (?, ?, ?)',
+				instanceId,
+				databaseId,
+				priority
+			);
+		}
+	},
+
+	ensureAllDatabasePriorities(databaseId: number): void {
+		db.execute(
+			`INSERT INTO arr_sync_database_priority (instance_id, database_id, priority)
+			 SELECT ai.id, ?,
+				COALESCE((SELECT MAX(priority) FROM arr_sync_database_priority WHERE instance_id = ai.id), 0) + 1
+			 FROM arr_instances ai
+			 WHERE NOT EXISTS (
+				SELECT 1 FROM arr_sync_database_priority
+				WHERE instance_id = ai.id AND database_id = ?
+			 )`,
+			databaseId,
+			databaseId
+		);
+	},
+
+	ensureAllInstancePriorities(instanceId: number): void {
+		db.execute(
+			`INSERT INTO arr_sync_database_priority (instance_id, database_id, priority)
+			 SELECT ?, di.id, ROW_NUMBER() OVER (ORDER BY di.id)
+			 FROM database_instances di
+			 WHERE NOT EXISTS (
+				SELECT 1 FROM arr_sync_database_priority
+				WHERE instance_id = ? AND database_id = di.id
+			 )`,
+			instanceId,
+			instanceId
+		);
+	},
+
 	getInstanceIdsForTrigger(trigger: SyncTrigger): number[] {
 		const rows = db.query<{ instance_id: number }>(
 			`SELECT instance_id FROM arr_sync_quality_profiles_config WHERE trigger = ?

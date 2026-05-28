@@ -168,6 +168,7 @@
 		/>
 		<QualityProfiles
 			databases={data.databases}
+			databasePriorities={data.databasePriorities}
 			bind:state={qualityProfileState}
 			bind:syncTrigger={qualityProfileTrigger}
 			bind:cronExpression={qualityProfileCron}
@@ -190,13 +191,11 @@
 			</div>
 
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">
-					One Database Per Instance
-				</div>
+				<div class="font-medium text-neutral-900 dark:text-neutral-100">Database Priority</div>
 				<p class="mt-1">
-					Each Arr instance syncs from a single database. Quality profiles and their custom formats
-					all come from the same database. If you want to use profiles from a different database,
-					sync it to a separate Arr instance.
+					You can sync quality profiles from multiple databases. Drag to reorder databases by
+					priority. The topmost database has the highest priority and its profiles will overwrite
+					any matching profiles from lower-priority databases.
 				</p>
 			</div>
 

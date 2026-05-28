@@ -2,16 +2,18 @@
  * Quality profile syncer
  * Syncs quality profiles from PCD to arr instances
  *
- * All selected profiles must come from a single database (enforced by the UI).
+ * Supports multiple databases per instance via priority ordering. Databases
+ * are processed from lowest priority to highest so the highest-priority
+ * database's entities overwrite earlier ones via Arr's name-based matching.
  *
- * Sync order:
+ * Sync order per database:
  * 1. Fetch profiles and referenced CFs from the database's PCD cache
- * 2. Sync custom formats → build formatIdMap
+ * 2. Sync custom formats (accumulate into shared formatIdMap)
  * 3. Sync quality profiles using the formatIdMap
  */
 
 import { BaseSyncer, type SyncResult } from '../base.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { arrSyncQueries, type ProfileSelection } from '$db/queries/arrSync.ts';
 import { getCache, getCachedDatabaseIds } from '$pcd/index.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { logger } from '$logger/logger.ts';
@@ -64,14 +66,15 @@ export class QualityProfileSyncer extends BaseSyncer {
 	}
 
 	/**
-	 * Override sync to handle the quality profile sync flow
+	 * Override sync to handle multi-database quality profile sync flow.
+	 * Processes databases from lowest priority to highest so the highest-
+	 * priority database's entities are what remain in Arr after sync.
 	 */
 	override async sync(): Promise<SyncResult> {
 		try {
-			// 1. Fetch profiles and CFs from the single database
-			const { profiles, customFormats, databaseId } = await this.fetchSyncData();
+			const syncConfig = arrSyncQueries.getQualityProfilesSync(this.instanceId);
 
-			if (profiles.length === 0) {
+			if (syncConfig.selections.length === 0) {
 				await logger.debug(`No quality profiles to sync for "${this.instanceName}"`, {
 					source: 'Sync:QualityProfiles',
 					meta: { instanceId: this.instanceId }
@@ -79,47 +82,101 @@ export class QualityProfileSyncer extends BaseSyncer {
 				return { success: true, itemsSynced: 0 };
 			}
 
-			// 2. Sync custom formats
-			const formatIdMap = await syncCustomFormats(
-				this.client,
-				this.instanceId,
-				this.instanceType,
-				customFormats
-			);
+			const priorities = arrSyncQueries.getDatabasePriorities(this.instanceId);
 
-			// 3. Get quality API mappings
-			const cache = getCache(databaseId);
-			if (!cache) throw new Error(`PCD cache not found for database ${databaseId}`);
-			const qualityMappings = await getQualityApiMappings(cache, this.instanceType);
+			// Group selections by database
+			const selectionsByDb = new Map<number, ProfileSelection[]>();
+			for (const sel of syncConfig.selections) {
+				if (!selectionsByDb.has(sel.databaseId)) {
+					selectionsByDb.set(sel.databaseId, []);
+				}
+				selectionsByDb.get(sel.databaseId)!.push(sel);
+			}
 
-			// 4. Sync quality profiles
+			// Sort: highest priority number first (lowest priority syncs first, highest last wins)
+			const sortedDbIds = [...selectionsByDb.keys()].sort((a, b) => {
+				const pa = priorities.find((p) => p.databaseId === a)?.priority ?? Infinity;
+				const pb = priorities.find((p) => p.databaseId === b)?.priority ?? Infinity;
+				return pb - pa;
+			});
+
 			const existingProfiles = await this.client.getQualityProfiles();
 			const existingMap = new Map(existingProfiles.map((p) => [p.name, p.id]));
 
-			const syncedProfiles = await this.syncQualityProfiles(
-				profiles,
-				formatIdMap,
-				qualityMappings,
-				existingMap
-			);
+			const allFormatIdMap = new Map<string, number>();
+			const allSyncedProfiles: SyncedProfileSummary[] = [];
+
+			for (const databaseId of sortedDbIds) {
+				const dbSelections = selectionsByDb.get(databaseId)!;
+
+				try {
+					const { profiles, customFormats } = await this.fetchSyncDataForDatabase(
+						databaseId,
+						dbSelections
+					);
+
+					if (profiles.length === 0) continue;
+
+					const formatIdMap = await syncCustomFormats(
+						this.client,
+						this.instanceId,
+						this.instanceType,
+						customFormats
+					);
+					for (const [k, v] of formatIdMap) allFormatIdMap.set(k, v);
+
+					const cache = getCache(databaseId);
+					if (!cache) continue;
+					const qualityMappings = await getQualityApiMappings(cache, this.instanceType);
+
+					const synced = await this.syncQualityProfiles(
+						profiles,
+						allFormatIdMap,
+						qualityMappings,
+						existingMap
+					);
+					allSyncedProfiles.push(...synced);
+
+					await logger.info(
+						`Synced ${synced.length} profile(s) from database ${databaseId} for "${this.instanceName}"`,
+						{
+							source: 'Sync:QualityProfiles',
+							meta: {
+								instanceId: this.instanceId,
+								databaseId,
+								profiles: synced.map((p) => ({
+									name: p.name,
+									action: p.action,
+									formats: p.formats.length
+								}))
+							}
+						}
+					);
+				} catch (error) {
+					const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+					await logger.error(
+						`Failed syncing database ${databaseId} for "${this.instanceName}", continuing`,
+						{
+							source: 'Sync:QualityProfiles',
+							meta: { instanceId: this.instanceId, databaseId, error: errorMsg }
+						}
+					);
+				}
+			}
 
 			await logger.info(`Completed quality profile sync for "${this.instanceName}"`, {
 				source: 'Sync:QualityProfiles',
 				meta: {
 					instanceId: this.instanceId,
-					databaseId,
-					profiles: syncedProfiles.map((p) => ({
-						name: p.name,
-						action: p.action,
-						formats: p.formats.length
-					}))
+					databases: sortedDbIds,
+					totalProfiles: allSyncedProfiles.length
 				}
 			});
 
 			return {
 				success: true,
-				itemsSynced: syncedProfiles.length,
-				items: syncedProfiles.map((p) => ({ name: p.name, action: p.action }))
+				itemsSynced: allSyncedProfiles.length,
+				items: allSyncedProfiles.map((p) => ({ name: p.name, action: p.action }))
 			};
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unknown error';
@@ -134,30 +191,22 @@ export class QualityProfileSyncer extends BaseSyncer {
 	}
 
 	/**
-	 * Fetch profiles and CFs from the single database.
-	 * All selections must belong to one database (enforced by frontend).
+	 * Fetch profiles and CFs from a specific database for the given selections.
 	 */
-	private async fetchSyncData(): Promise<{
+	private async fetchSyncDataForDatabase(
+		databaseId: number,
+		selections: ProfileSelection[]
+	): Promise<{
 		profiles: ProfileSyncData[];
 		customFormats: Map<string, PcdCustomFormat>;
-		databaseId: number;
 	}> {
-		const syncConfig = arrSyncQueries.getQualityProfilesSync(this.instanceId);
-
-		if (syncConfig.selections.length === 0) {
-			return { profiles: [], customFormats: new Map(), databaseId: 0 };
-		}
-
-		// All selections come from a single database
-		const databaseId = syncConfig.selections[0].databaseId;
-
 		const dbInstance = databaseInstancesQueries.getById(databaseId);
 		if (!dbInstance) {
 			await logger.warn(`Skipping sync for deleted database ${databaseId}`, {
 				source: 'Sync:QualityProfiles',
 				meta: { instanceId: this.instanceId, databaseId }
 			});
-			return { profiles: [], customFormats: new Map(), databaseId };
+			return { profiles: [], customFormats: new Map() };
 		}
 
 		const cache = getCache(databaseId);
@@ -174,14 +223,13 @@ export class QualityProfileSyncer extends BaseSyncer {
 					databaseName: dbInstance?.name ?? null
 				}
 			});
-			return { profiles: [], customFormats: new Map(), databaseId };
+			return { profiles: [], customFormats: new Map() };
 		}
 
 		const profiles: ProfileSyncData[] = [];
 		const customFormats = new Map<string, PcdCustomFormat>();
 
-		for (const selection of syncConfig.selections) {
-			// Fetch the quality profile
+		for (const selection of selections) {
 			const pcdProfile = await fetchQualityProfileFromPcd(
 				cache,
 				selection.profileName,
@@ -198,7 +246,6 @@ export class QualityProfileSyncer extends BaseSyncer {
 				continue;
 			}
 
-			// Get referenced custom format names
 			const referencedFormatNames = await getCustomFormatsForProfile(
 				cache,
 				selection.profileName,
@@ -207,7 +254,6 @@ export class QualityProfileSyncer extends BaseSyncer {
 
 			profiles.push({ pcdProfile, referencedFormatNames });
 
-			// Fetch custom formats (dedupe by name)
 			for (const formatName of referencedFormatNames) {
 				if (!customFormats.has(formatName)) {
 					const pcdFormat = await fetchCustomFormatFromPcd(cache, formatName);
@@ -218,7 +264,7 @@ export class QualityProfileSyncer extends BaseSyncer {
 			}
 		}
 
-		return { profiles, customFormats, databaseId };
+		return { profiles, customFormats };
 	}
 
 	/**
@@ -254,7 +300,6 @@ export class QualityProfileSyncer extends BaseSyncer {
 			try {
 				const isUpdate = existingMap.has(pcdProfile.name);
 				if (isUpdate) {
-					// Update existing
 					const existingId = existingMap.get(pcdProfile.name)!;
 					arrProfile.id = existingId;
 					await this.client.updateQualityProfile(existingId, arrProfile);
@@ -263,7 +308,6 @@ export class QualityProfileSyncer extends BaseSyncer {
 						meta: { instanceId: this.instanceId, profileId: existingId, pcdName: pcdProfile.name }
 					});
 				} else {
-					// Create new
 					const response = await this.client.createQualityProfile(arrProfile);
 					existingMap.set(pcdProfile.name, response.id);
 					await logger.debug(`Created quality profile "${pcdProfile.name}"`, {
@@ -272,7 +316,6 @@ export class QualityProfileSyncer extends BaseSyncer {
 					});
 				}
 
-				// Build summary for completion log
 				const scoredFormats = arrProfile.formatItems
 					.filter((f) => f.score !== 0)
 					.map((f) => ({ name: f.name, score: f.score }));

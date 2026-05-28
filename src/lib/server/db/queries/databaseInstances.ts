@@ -1,5 +1,6 @@
 import { db } from '../db.ts';
 import { toUTC } from '$shared/utils/dates.ts';
+import { arrSyncQueries } from './arrSync.ts';
 
 export type ConflictStrategy = 'override' | 'align' | 'ask';
 
@@ -124,7 +125,13 @@ export const databaseInstancesQueries = {
 
 		// Get the last inserted ID
 		const result = db.queryFirst<{ id: number }>('SELECT last_insert_rowid() as id');
-		return result?.id ?? 0;
+		const id = result?.id ?? 0;
+
+		if (id > 0) {
+			arrSyncQueries.ensureAllDatabasePriorities(id);
+		}
+
+		return id;
 	},
 
 	/**
