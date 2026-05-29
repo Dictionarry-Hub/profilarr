@@ -40,7 +40,7 @@
 	$: marginClass = compact ? 'mt-1' : 'mt-3';
 	$: topMarginClass = compact ? 'mb-1' : 'mb-3';
 	$: gap = compact ? 4 : 12; // pixels gap below trigger
-	$: roundedClass = compact ? 'rounded-lg' : 'rounded-xl';
+	$: roundedClass = compact ? 'rounded-control-sm' : 'rounded-control';
 	$: verticalClass =
 		resolvedPlacement === 'top' ? `bottom-full ${topMarginClass}` : `top-full ${marginClass}`;
 
@@ -53,8 +53,7 @@
 		if (!triggerEl) return;
 
 		const rect = triggerEl.getBoundingClientRect();
-		const effectivePosition =
-			mobilePosition && window.innerWidth < 768 ? mobilePosition : position;
+		const effectivePosition = mobilePosition && window.innerWidth < 768 ? mobilePosition : position;
 		resolvedPlacement = resolvePlacement(rect);
 		if (resolvedPlacement !== lastDispatchedPlacement) {
 			lastDispatchedPlacement = resolvedPlacement;
@@ -114,12 +113,12 @@
 
 <div
 	bind:this={dropdownEl}
-	class="z-50 overflow-hidden border border-neutral-300 bg-neutral-100 shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900 dark:shadow-black/25 {roundedClass} {fixed
+	class="z-50 overflow-hidden border border-border bg-surface-muted shadow-xl {roundedClass} {fixed
 		? 'fixed'
 		: 'absolute ' + verticalClass} {positionClass}"
 	style="min-width: {minWidth}; {width ? `width: ${width};` : ''} {fixed ? fixedStyle : ''}"
 >
-	<div class="bg-white/80 dark:bg-neutral-800/50">
+	<div class="bg-surface">
 		<slot />
 	</div>
 </div>

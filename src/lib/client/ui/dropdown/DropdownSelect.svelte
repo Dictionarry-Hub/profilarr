@@ -89,10 +89,12 @@
 					: compact;
 	$: resolvedButtonSize = buttonSize ?? ((isCompactButton ? 'xs' : 'sm') as 'xs' | 'sm');
 	$: resolvedJustify = justify ?? (fullWidth || width || !buttonText ? 'between' : 'center');
-	$: chevronIcon = showChevron ? (open && resolvedPlacement === 'top' ? ChevronUp : ChevronDown) : null;
-	$: labelClasses = isCompactButton
-		? 'text-xs text-neutral-500 dark:text-neutral-400'
-		: 'text-sm text-neutral-500 dark:text-neutral-400';
+	$: chevronIcon = showChevron
+		? open && resolvedPlacement === 'top'
+			? ChevronUp
+			: ChevronDown
+		: null;
+	$: labelClasses = isCompactButton ? 'text-xs text-text-muted' : 'text-sm text-text-muted';
 
 	function getDropdownLabel(option: { label: string; shortLabel?: string }) {
 		return mobileDropdownShortLabels && isSmallScreen
@@ -126,7 +128,7 @@
 			{disabled}
 			variant={showText ? 'secondary' : 'ghost'}
 			justify={resolvedJustify}
-			textColor={isPlaceholder ? 'text-neutral-400 dark:text-neutral-500' : ''}
+			textColor={isPlaceholder ? 'text-text-subtle' : ''}
 			on:click={() => !disabled && (open = !open)}
 		/>
 		{#if open}

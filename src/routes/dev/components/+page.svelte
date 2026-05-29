@@ -671,9 +671,9 @@
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-text-muted uppercase">Header, items, and footer</p>
 				<div
-					class="inline-block min-w-48 overflow-hidden rounded-xl border border-neutral-300 bg-neutral-100 shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900"
+					class="inline-block min-w-48 overflow-hidden rounded-control border border-border bg-surface-muted shadow-xl"
 				>
-					<div class="bg-white/80 dark:bg-neutral-800/50">
+					<div class="bg-surface">
 						<DropdownHeader label="Actions" />
 						<DropdownItem icon={FileText} label="Normal item" />
 						<DropdownItem icon={Star} label="With secondary text" secondaryText="ctrl+s" />
@@ -688,9 +688,9 @@
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-text-muted uppercase">Compact variant</p>
 				<div
-					class="inline-block min-w-40 overflow-hidden rounded-lg border border-neutral-300 bg-neutral-100 shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900"
+					class="inline-block min-w-40 overflow-hidden rounded-control-sm border border-border bg-surface-muted shadow-xl"
 				>
-					<div class="bg-white/80 dark:bg-neutral-800/50">
+					<div class="bg-surface">
 						<DropdownHeader label="View" compact />
 						<DropdownItem icon={FileText} label="Cards" selected compact />
 						<DropdownItem icon={Settings} label="Table" compact />

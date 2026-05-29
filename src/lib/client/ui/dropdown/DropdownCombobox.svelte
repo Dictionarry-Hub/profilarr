@@ -109,9 +109,7 @@
 		}
 	}
 
-	$: labelClasses = isCompactButton
-		? 'text-xs text-neutral-500 dark:text-neutral-400'
-		: 'text-sm text-neutral-500 dark:text-neutral-400';
+	$: labelClasses = isCompactButton ? 'text-xs text-text-muted' : 'text-sm text-text-muted';
 
 	$: triggerShellClasses = isCompactButton
 		? 'gap-1 rounded-lg px-2 py-1 text-xs'
@@ -215,7 +213,7 @@
 			<div
 				class="flex w-full items-center {triggerShellClasses} {resolvedJustify === 'between'
 					? 'justify-between'
-					: 'justify-center'} border border-neutral-300 bg-white font-medium text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-200"
+					: 'justify-center'} border border-border bg-surface font-medium text-text-soft shadow-control"
 				style={triggerWidth ? `width: ${triggerWidth}px` : undefined}
 			>
 				<input
@@ -224,15 +222,11 @@
 					{placeholder}
 					{disabled}
 					size="1"
-					class="min-w-0 flex-1 bg-transparent font-medium text-neutral-700 outline-none placeholder:text-neutral-400 dark:text-neutral-200 dark:placeholder:text-neutral-500"
+					class="min-w-0 flex-1 bg-transparent font-medium text-text-soft outline-none placeholder:text-text-subtle"
 					on:input={handleInput}
 					on:keydown={handleKeyDown}
 				/>
-				<svelte:component
-					this={chevronIcon}
-					size={chevronSize}
-					class="shrink-0 text-neutral-500 dark:text-neutral-400"
-				/>
+				<svelte:component this={chevronIcon} size={chevronSize} class="shrink-0 text-text-muted" />
 			</div>
 		{:else}
 			<Button
@@ -244,7 +238,7 @@
 				fullWidth={true}
 				{disabled}
 				justify={resolvedJustify}
-				textColor={isPlaceholder ? 'text-neutral-400 dark:text-neutral-500' : ''}
+				textColor={isPlaceholder ? 'text-text-subtle' : ''}
 				on:click={toggleCombobox}
 			/>
 		{/if}
@@ -277,7 +271,7 @@
 					{/each}
 					{#if filteredOptions.length === 0}
 						<div
-							class="text-neutral-400 dark:text-neutral-500 {isCompactDropdown
+							class="text-text-subtle {isCompactDropdown
 								? 'px-2 py-1 text-xs'
 								: 'px-3 py-2 text-xs'}"
 						>
