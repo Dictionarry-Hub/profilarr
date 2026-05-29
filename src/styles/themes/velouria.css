@@ -1,0 +1,107 @@
+/*
+ * Velouria
+ *
+ * "All I think about now is you, Velouria."
+ *
+ * Named for the Pixies' Bossanova track: surf rock launched into orbit. A red
+ * planet hangs in the void on the cover, warm and vivid against
+ * infinite black. The songs are about space, aliens, havalinas,
+ * and digging for fire. It's the sound of a band staring up at
+ * the sky and deciding to go there.
+ *
+ * The palette is that album cover. Backgrounds are the void --
+ * deep, warm black with a reddish undertone, not cold like deep
+ * space but warm like the dark between bonfires on a beach.
+ * Surfaces lift in dark burgundy tones, the color of wine at
+ * night. Text is warm cream, sand catching firelight, not the
+ * sterile blue-white of lab monitors. The accent is the planet
+ * itself: a warm, vivid vermillion that isn't aggressive but
+ * commands the eye the way a red planet commands the sky.
+ *
+ * Borders are the faintest suggestion of heat shimmer. Status
+ * colors glow like signal lights on a radio tower transmitting
+ * into the dark. Shadows are warm and deep, embers not ice.
+ *
+ * Syne is an art-world grotesque, slightly unconventional in its
+ * proportions -- the kind of typeface Vaughan Oliver would have
+ * specified for a 4AD sleeve. Space Mono handles the readouts,
+ * retro-futuristic, transmitting from somewhere out there.
+ */
+
+.theme-velouria {
+	--theme-font-sans: 'Syne', ui-sans-serif, system-ui, sans-serif;
+	--theme-font-mono: 'Space Mono', ui-monospace, monospace;
+
+	/* The void between bonfires */
+	--theme-bg: #120c0e;
+
+	/* Wine at night */
+	--theme-surface: #1e1418;
+	--theme-surface-muted: #120c0e;
+	--theme-surface-hover: #2a1e22;
+	--theme-surface-hover-muted: #181012;
+
+	/* Sand catching firelight */
+	--theme-text: #ede4da;
+	--theme-text-soft: #c4b5a6;
+	--theme-text-muted: #8a7868;
+	--theme-text-subtle: #4d3f35;
+
+	/* Heat shimmer at the horizon */
+	--theme-border: rgb(140 70 60 / 0.3);
+	--theme-border-muted: rgb(140 70 60 / 0.18);
+	--theme-border-subtle: rgb(140 70 60 / 0.1);
+
+	/* The red planet, vivid against the black */
+	--theme-accent-solid: #e63a1e;
+	--theme-accent-solid-hover: #c82e14;
+	--theme-on-accent: #ffffff;
+
+	/* System fault: hotter red */
+	--theme-danger-solid: #e53935;
+	--theme-danger-solid-hover: #c62828;
+	--theme-on-danger: #ffffff;
+
+	/* Flush and ghost: night air on the beach */
+	--theme-flush-bg: var(--theme-bg);
+	--theme-flush-hover: var(--theme-surface-hover);
+	--theme-ghost-bg: transparent;
+	--theme-ghost-border: transparent;
+	--theme-ghost-label-bg: rgb(140 70 60 / 0.1);
+	--theme-ghost-label-text: #8a7868;
+
+	/* Radio tower signal lights */
+	--theme-success-bg: rgb(80 160 80 / 0.1);
+	--theme-success-text: #6abf6a;
+	--theme-success-border: rgb(80 160 80 / 0.25);
+	--theme-success-icon: #6abf6a;
+
+	--theme-warning-bg: rgb(210 160 40 / 0.1);
+	--theme-warning-text: #e0b840;
+	--theme-warning-border: rgb(210 160 40 / 0.25);
+	--theme-warning-icon: #e0b840;
+
+	--theme-danger-bg: rgb(230 58 30 / 0.1);
+	--theme-danger-text: #f07060;
+	--theme-danger-border: rgb(230 58 30 / 0.25);
+	--theme-danger-icon: #f07060;
+
+	--theme-info-bg: rgb(100 140 200 / 0.1);
+	--theme-info-text: #80a8d8;
+	--theme-info-border: rgb(100 140 200 / 0.25);
+	--theme-info-icon: #80a8d8;
+
+	/* Links: a cooler frequency in the transmission */
+	--theme-link-text: #80a8d8;
+
+	/* Smooth, organic, like a planet's curve */
+	--theme-radius-control-sm: 0.375rem;
+	--theme-radius-control: 0.5rem;
+	--theme-radius-card: 0.75rem;
+	--theme-radius-pill: 9999px;
+
+	/* Warm embers, not cold shadows */
+	--theme-shadow-card: 0 4px 16px -2px rgb(18 12 14 / 0.6), 0 0 8px -2px rgb(230 58 30 / 0.06);
+	--theme-shadow-control: none;
+	--theme-shadow-control-active: 0 0 0 2px rgb(230 58 30 / 0.25);
+}

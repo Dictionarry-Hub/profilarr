@@ -1,0 +1,111 @@
+/*
+ * Monolith
+ *
+ * "Open the pod bay doors, HAL."
+ * "I'm sorry, Dave. I'm afraid I can't do that."
+ *
+ * The year is 2001 -- or rather, 1968's dream of it. Inside
+ * Discovery One, everything is white. Not the harsh white of
+ * fluorescent offices but the warm ivory of spacecraft panels
+ * designed to keep astronauts sane across 500 million miles of
+ * nothing. Surfaces are clean. Borders are panel seams. Shadows
+ * barely exist because the lighting is diffuse and omnidirectional.
+ * It's calm in here. Almost too calm.
+ *
+ * And then there's the eye. One red point in all that white.
+ * Always watching. Always helpful. Always certain. HAL 9000
+ * doesn't raise his voice. He doesn't need to. He's the most
+ * reliable computer ever made. He told you so himself.
+ *
+ * The palette is Discovery's interior: warm off-whites that don't
+ * strain, cool panel surfaces that recede, near-black text with the
+ * density of the Monolith itself -- that perfect black rectangle
+ * whose proportions (1:4:9) are the squares of the first three
+ * integers. Nothing about this is accidental. The accent is HAL's
+ * eye: a warm, specific red that isn't aggressive but never lets you
+ * forget it's there. Status indicators are control panel lights,
+ * designed to be read at a glance from across the centrifuge.
+ *
+ * Jost is geometric and mid-century, the typeface Kubrick would
+ * have specified if web fonts existed in 1968. Space Mono is for
+ * the readouts -- retro-futuristic, built for data, uncomfortable
+ * in exactly the right way.
+ */
+
+.theme-monolith {
+	--theme-font-sans: 'Jost', ui-sans-serif, system-ui, sans-serif;
+	--theme-font-mono: 'Space Mono', ui-monospace, monospace;
+
+	/* Discovery's interior: warm ivory, not clinical white */
+	--theme-bg: #f5f2ec;
+
+	/* Panel surfaces catching diffuse light */
+	--theme-surface: #ffffff;
+	--theme-surface-muted: #f5f2ec;
+	--theme-surface-hover: #edeae3;
+	--theme-surface-hover-muted: #f0ede6;
+
+	/* Text with the density of the Monolith */
+	--theme-text: #1a1714;
+	--theme-text-soft: #3d3832;
+	--theme-text-muted: #7a7368;
+	--theme-text-subtle: #b8b1a6;
+
+	/* Panel seams: precise, warm, barely there */
+	--theme-border: #ddd8cf;
+	--theme-border-muted: #e8e4dc;
+	--theme-border-subtle: #f0ede6;
+
+	/* HAL's eye: warm red, always watching */
+	--theme-accent-solid: #c62828;
+	--theme-accent-solid-hover: #ab1a1a;
+	--theme-on-accent: #ffffff;
+
+	/* System fault */
+	--theme-danger-solid: #c62828;
+	--theme-danger-solid-hover: #ab1a1a;
+	--theme-on-danger: #ffffff;
+
+	/* Flush and ghost: Discovery's air */
+	--theme-flush-bg: var(--theme-bg);
+	--theme-flush-hover: var(--theme-surface-hover);
+	--theme-ghost-bg: transparent;
+	--theme-ghost-border: transparent;
+	--theme-ghost-label-bg: rgb(26 23 20 / 0.05);
+	--theme-ghost-label-text: #7a7368;
+
+	/* Control panel indicator lights */
+	--theme-success-bg: rgb(46 125 50 / 0.08);
+	--theme-success-text: #2e7d32;
+	--theme-success-border: rgb(46 125 50 / 0.25);
+	--theme-success-icon: #2e7d32;
+
+	--theme-warning-bg: rgb(230 160 0 / 0.08);
+	--theme-warning-text: #b8860b;
+	--theme-warning-border: rgb(230 160 0 / 0.25);
+	--theme-warning-icon: #b8860b;
+
+	--theme-danger-bg: rgb(198 40 40 / 0.06);
+	--theme-danger-text: #c62828;
+	--theme-danger-border: rgb(198 40 40 / 0.2);
+	--theme-danger-icon: #c62828;
+
+	--theme-info-bg: rgb(21 101 192 / 0.06);
+	--theme-info-text: #1565c0;
+	--theme-info-border: rgb(21 101 192 / 0.2);
+	--theme-info-icon: #1565c0;
+
+	/* Links: instrument readout blue */
+	--theme-link-text: #1565c0;
+
+	/* Smooth, geometric, like Discovery's displays */
+	--theme-radius-control-sm: 0.375rem;
+	--theme-radius-control: 0.5rem;
+	--theme-radius-card: 0.75rem;
+	--theme-radius-pill: 9999px;
+
+	/* The Monolith casts a clean, geometric shadow */
+	--theme-shadow-card: 0 1px 3px rgb(26 23 20 / 0.06), 0 4px 12px rgb(26 23 20 / 0.04);
+	--theme-shadow-control: none;
+	--theme-shadow-control-active: 0 0 0 2px rgb(198 40 40 / 0.15);
+}

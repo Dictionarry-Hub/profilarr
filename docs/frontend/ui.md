@@ -931,5 +931,7 @@ and are tracked in issue #298:
 | Classic       | dark  | `.theme-classic`     | Profilarr v1: deep charcoal (#111827), gray-800 surfaces, blue-600 accent, tighter radius (8px cards, 6px controls), card shadows, Schibsted Grotesk / Fira Code       |
 | Vesper        | dark  | `.theme-vesper`      | Twilight indigo (#161122), violet-purple surfaces, amber-gold accent (the evening star), soft card shadows, slightly larger card radius, IBM Plex Sans / IBM Plex Mono |
 | Ashruvarsha   | dark  | `.theme-ashruvarsha` | Cyberpunk sprawl (#0b0e14), cyan circuit-trace borders, hot magenta accent, neon-glow card shadows, sharp corners (6px cards, 4px controls), Rajdhani / Space Mono     |
+| Monolith      | light | `.theme-monolith`    | 2001: A Space Odyssey (#f5f2ec), warm ivory panels, HAL red accent, geometric shadows, smooth radius (12px cards, 8px controls), Jost / Space Mono                     |
+| Velouria      | dark  | `.theme-velouria`    | Pixies' Bossanova (#120c0e), warm burgundy surfaces, vermillion red accent, ember-glow card shadows, organic radius (12px cards, 8px controls), Syne / Space Mono      |
 
 Planned: user-loadable custom theme files.

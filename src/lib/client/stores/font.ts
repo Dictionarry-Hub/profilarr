@@ -10,7 +10,14 @@ import { browser } from '$app/environment';
 import { themePreference } from '$stores/theme.ts';
 import { getThemeDefinition } from '$lib/client/themes/registry.ts';
 
-export type SansFont = 'auto' | 'dm-sans' | 'inter' | 'ibm-plex-sans' | 'rajdhani';
+export type SansFont =
+	| 'auto'
+	| 'dm-sans'
+	| 'inter'
+	| 'ibm-plex-sans'
+	| 'rajdhani'
+	| 'jost'
+	| 'syne';
 export type MonoFont = 'auto' | 'geist-mono' | 'jetbrains-mono' | 'ibm-plex-mono' | 'space-mono';
 
 export interface FontSettings {
@@ -24,7 +31,9 @@ const sansFontStacks: Record<Exclude<SansFont, 'auto'>, string> = {
 	'dm-sans': "'DM Sans', ui-sans-serif, system-ui, sans-serif",
 	inter: "'Inter', ui-sans-serif, system-ui, sans-serif",
 	'ibm-plex-sans': "'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
-	rajdhani: "'Rajdhani', ui-sans-serif, system-ui, sans-serif"
+	rajdhani: "'Rajdhani', ui-sans-serif, system-ui, sans-serif",
+	jost: "'Jost', ui-sans-serif, system-ui, sans-serif",
+	syne: "'Syne', ui-sans-serif, system-ui, sans-serif"
 };
 
 const monoFontStacks: Record<Exclude<MonoFont, 'auto'>, string> = {
@@ -38,7 +47,9 @@ const allSansOptions: { value: Exclude<SansFont, 'auto'>; label: string }[] = [
 	{ value: 'dm-sans', label: 'DM Sans' },
 	{ value: 'inter', label: 'Inter' },
 	{ value: 'ibm-plex-sans', label: 'IBM Plex Sans' },
-	{ value: 'rajdhani', label: 'Rajdhani' }
+	{ value: 'rajdhani', label: 'Rajdhani' },
+	{ value: 'jost', label: 'Jost' },
+	{ value: 'syne', label: 'Syne' }
 ];
 
 const allMonoOptions: { value: Exclude<MonoFont, 'auto'>; label: string }[] = [

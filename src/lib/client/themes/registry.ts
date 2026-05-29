@@ -1,5 +1,15 @@
 import type { ComponentType } from 'svelte';
-import { History, Monitor, MoonStar, Sparkle, Sun, Turntable, Zap } from 'lucide-svelte';
+import {
+	History,
+	Monitor,
+	MoonStar,
+	Flame,
+	RectangleVertical,
+	Sparkle,
+	Sun,
+	Turntable,
+	Zap
+} from 'lucide-svelte';
 
 export type ThemePreference =
 	| 'system'
@@ -8,7 +18,9 @@ export type ThemePreference =
 	| 'retro'
 	| 'classic'
 	| 'vesper'
-	| 'ashruvarsha';
+	| 'ashruvarsha'
+	| 'monolith'
+	| 'velouria';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeDefinition {
@@ -97,6 +109,28 @@ export const themeDefinitions: ThemeDefinition[] = [
 		className: 'theme-ashruvarsha',
 		mode: 'dark',
 		defaultSans: 'rajdhani',
+		defaultMono: 'space-mono'
+	},
+	{
+		value: 'monolith',
+		label: 'Monolith',
+		shortLabel: 'Monolith',
+		description: 'Open the pod bay doors',
+		icon: RectangleVertical,
+		className: 'theme-monolith',
+		mode: 'light',
+		defaultSans: 'jost',
+		defaultMono: 'space-mono'
+	},
+	{
+		value: 'velouria',
+		label: 'Velouria',
+		shortLabel: 'Velouria',
+		description: 'Dig for fire',
+		icon: Flame,
+		className: 'theme-velouria',
+		mode: 'dark',
+		defaultSans: 'syne',
 		defaultMono: 'space-mono'
 	}
 ];

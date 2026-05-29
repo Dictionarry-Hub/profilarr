@@ -5,6 +5,8 @@
 	import Joi from './characters/Joi.svelte';
 	import Oracle from './characters/Oracle.svelte';
 	import Hatchling from './characters/Hatchling.svelte';
+	import Hal from './characters/Hal.svelte';
+	import Planet from './characters/Planet.svelte';
 
 	export let variant: 'fab' | 'navbar' = 'fab';
 
@@ -30,8 +32,12 @@
 	class={isFab ? 'fixed right-6 bottom-6 z-50 hidden md:block' : 'relative md:hidden'}
 	on:click|stopPropagation
 >
-	{#if $themePreference === 'ashruvarsha'}
+	{#if $themePreference === 'velouria'}
+		<Planet {variant} {open} onToggle={toggle} onClose={close} />
+	{:else if $themePreference === 'ashruvarsha'}
 		<Joi {variant} {open} onToggle={toggle} onClose={close} />
+	{:else if $themePreference === 'monolith'}
+		<Hal {variant} {open} onToggle={toggle} onClose={close} />
 	{:else if $themePreference === 'vesper'}
 		<Oracle {variant} {open} onToggle={toggle} onClose={close} />
 	{:else if $themePreference === 'classic'}
