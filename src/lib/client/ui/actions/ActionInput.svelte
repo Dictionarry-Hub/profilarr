@@ -9,13 +9,13 @@
 </script>
 
 <div
-	class="relative flex h-10 w-full items-center rounded-xl border border-neutral-300 bg-white transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50 {disabled
+	class="relative flex h-10 w-full items-center rounded-control border border-border bg-surface shadow-control transition-colors {disabled
 		? 'cursor-not-allowed opacity-50'
 		: ''}"
 >
 	{#if icon}
 		<div class="pointer-events-none absolute left-3 flex items-center">
-			<svelte:component this={icon} size={18} class="text-neutral-500 dark:text-neutral-400" />
+			<svelte:component this={icon} size={18} class="text-text-muted" />
 		</div>
 	{/if}
 
@@ -24,7 +24,7 @@
 		bind:value
 		{placeholder}
 		{disabled}
-		class="h-full w-full bg-transparent text-sm text-neutral-900 placeholder-neutral-400 outline-none disabled:cursor-not-allowed dark:text-neutral-100 dark:placeholder-neutral-500 {mono
+		class="h-full w-full bg-transparent text-sm text-text placeholder-text-subtle outline-none disabled:cursor-not-allowed {mono
 			? 'font-mono'
 			: ''} {icon ? 'pr-3 pl-10' : 'px-3'}"
 	/>

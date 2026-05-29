@@ -39,10 +39,10 @@
 	role="group"
 >
 	<button
-		class="flex h-10 w-10 items-center justify-center border border-neutral-200 bg-white transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700"
+		class="flex h-10 w-10 items-center justify-center border border-border bg-surface shadow-control transition-colors hover:bg-surface-hover active:shadow-control-active"
 	>
 		<div class="relative">
-			<Binoculars size={20} class="text-neutral-700 dark:text-neutral-300" />
+			<Binoculars size={20} class="text-text-soft" />
 			{#if enabledCount < options.length}
 				<div
 					class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-accent-600 text-[9px] font-bold text-white"
@@ -57,26 +57,24 @@
 		<div class="z-50" transition:fly={{ y: -8, duration: 150 }}>
 			<div class="absolute top-full z-40 h-3 w-full"></div>
 			<div
-				class="absolute top-full right-0 z-50 mt-3 min-w-48 rounded-lg border border-neutral-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
+				class="absolute top-full right-0 z-50 mt-3 min-w-48 rounded-control border border-border bg-surface shadow-lg"
 			>
-				<div class="px-3 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-					Search in...
-				</div>
+				<div class="px-3 py-2 text-xs font-medium text-text-muted">Search in...</div>
 				{#each options as option}
 					<button
-						class="flex w-full items-center gap-3 border-t border-neutral-200 px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-700"
+						class="flex w-full items-center gap-3 border-t border-border-muted px-3 py-2 text-left text-sm transition-colors hover:bg-surface-hover"
 						on:click={() => toggleOption(option.key)}
 					>
 						<div
 							class="flex h-4 w-4 items-center justify-center rounded border {option.enabled
 								? 'border-accent-600 bg-accent-600 dark:border-accent-500 dark:bg-accent-500'
-								: 'border-neutral-300 dark:border-neutral-600'}"
+								: 'border-border-muted'}"
 						>
 							{#if option.enabled}
 								<Check size={12} class="text-white" />
 							{/if}
 						</div>
-						<span class="text-neutral-700 dark:text-neutral-300">{option.label}</span>
+						<span class="text-text-soft">{option.label}</span>
 					</button>
 				{/each}
 			</div>

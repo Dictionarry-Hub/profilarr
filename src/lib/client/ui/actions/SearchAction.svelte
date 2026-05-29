@@ -106,14 +106,14 @@
 		<button
 			type="button"
 			on:click={openModal}
-			class="relative flex h-10 w-full items-center justify-between rounded-xl border border-neutral-300 bg-white px-3 transition-colors hover:bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
+			class="relative flex h-10 w-full items-center justify-between rounded-control border border-border bg-surface px-3 shadow-control transition-colors hover:bg-surface-hover"
 			title="Search"
 		>
 			<span class="flex items-center gap-2">
 				{#if !hideIcon}
-					<Search size={20} class="text-neutral-700 dark:text-neutral-300" />
+					<Search size={20} class="text-text-soft" />
 				{/if}
-				<span class="max-w-[14rem] truncate text-sm text-neutral-600 dark:text-neutral-300">
+				<span class="max-w-[14rem] truncate text-sm text-text-soft">
 					{query || activeQuery || 'Search'}
 				</span>
 			</span>
@@ -132,14 +132,14 @@
 			transition:fade={{ duration: 150 }}
 		>
 			<div
-				class="search-action-modal w-full max-w-lg rounded-xl border border-neutral-300 bg-white shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900"
+				class="search-action-modal w-full max-w-lg rounded-control border border-border bg-surface shadow-xl"
 				transition:fly={{ y: -20, duration: 200 }}
 			>
 				<div class="relative flex items-center p-3">
 					<!-- Search icon -->
 					{#if !hideIcon}
 						<div class="pointer-events-none absolute left-6 flex items-center">
-							<Search size={18} class="text-neutral-500 dark:text-neutral-400" />
+							<Search size={18} class="text-text-muted" />
 						</div>
 					{/if}
 
@@ -158,7 +158,7 @@
 						on:input={handleInput}
 						on:keydown={handleKeydown}
 						{placeholder}
-						class="h-10 w-full rounded-lg bg-transparent pr-10 text-sm text-neutral-900 placeholder-neutral-500 outline-none dark:text-neutral-100 dark:placeholder-neutral-400 {activeQuery
+						class="h-10 w-full rounded-lg bg-transparent pr-10 text-sm text-text placeholder-text-subtle outline-none {activeQuery
 							? 'pl-2'
 							: hideIcon
 								? 'pl-3'
@@ -169,23 +169,23 @@
 					{#if query}
 						<button
 							on:click={handleClear}
-							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800"
+							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-hover"
 						>
-							<X size={18} class="text-neutral-500 dark:text-neutral-400" />
+							<X size={18} class="text-text-muted" />
 						</button>
 					{:else if activeQuery}
 						<button
 							on:click={handleClearQuery}
-							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800"
+							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-hover"
 						>
-							<X size={18} class="text-neutral-500 dark:text-neutral-400" />
+							<X size={18} class="text-text-muted" />
 						</button>
 					{:else}
 						<button
 							on:click={closeModal}
-							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800"
+							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-hover"
 						>
-							<X size={18} class="text-neutral-500 dark:text-neutral-400" />
+							<X size={18} class="text-text-muted" />
 						</button>
 					{/if}
 				</div>
@@ -196,12 +196,12 @@
 	<!-- Desktop: Inline search -->
 	<div class="relative flex flex-1">
 		<div
-			class="relative flex h-10 w-full items-center rounded-xl border border-neutral-300 bg-white transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50"
+			class="relative flex h-10 w-full items-center rounded-control border border-border bg-surface shadow-control transition-colors"
 		>
 			<!-- Search icon -->
 			{#if !hideIcon}
 				<div class="pointer-events-none absolute left-3 flex items-center">
-					<Search size={18} class="text-neutral-500 dark:text-neutral-400" />
+					<Search size={18} class="text-text-muted" />
 				</div>
 			{/if}
 
@@ -222,7 +222,7 @@
 				on:focus={() => (isFocused = true)}
 				on:blur={() => (isFocused = false)}
 				placeholder={activeQuery ? '' : placeholder}
-				class="h-full w-full bg-transparent pr-10 text-base text-neutral-900 placeholder-neutral-500 outline-none sm:text-sm dark:text-neutral-100 dark:placeholder-neutral-400 {activeQuery
+				class="h-full w-full bg-transparent pr-10 text-base text-text placeholder-text-subtle outline-none sm:text-sm {activeQuery
 					? 'pl-2'
 					: hideIcon
 						? 'pl-3'
@@ -233,16 +233,16 @@
 			{#if query}
 				<button
 					on:click={handleClear}
-					class="absolute right-2 flex h-6 w-6 items-center justify-center rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800"
+					class="absolute right-2 flex h-6 w-6 items-center justify-center rounded-lg hover:bg-surface-hover"
 				>
-					<X size={14} class="text-neutral-500 dark:text-neutral-400" />
+					<X size={14} class="text-text-muted" />
 				</button>
 			{:else if activeQuery}
 				<button
 					on:click={handleClearQuery}
-					class="absolute right-2 flex h-6 w-6 items-center justify-center rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800"
+					class="absolute right-2 flex h-6 w-6 items-center justify-center rounded-lg hover:bg-surface-hover"
 				>
-					<X size={14} class="text-neutral-500 dark:text-neutral-400" />
+					<X size={14} class="text-text-muted" />
 				</button>
 			{/if}
 		</div>
@@ -251,6 +251,6 @@
 
 <style>
 	.search-action-modal {
-		border-radius: 0.75rem !important;
+		border-radius: var(--theme-radius-control) !important;
 	}
 </style>

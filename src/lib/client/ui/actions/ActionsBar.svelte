@@ -15,7 +15,6 @@
 		margin-left: -1px;
 	}
 
-	/* Reset rounding for grouped items, then re-apply for edges */
 	.actions-bar :global(> * > *) {
 		border-radius: 0 !important;
 	}
@@ -28,38 +27,37 @@
 		border-radius: 0 !important;
 	}
 
-	/* Apply rounding to the actual bordered elements inside first/last children */
 	.actions-bar :global(> *:first-child > *) {
-		border-top-left-radius: 0.75rem !important;
-		border-bottom-left-radius: 0.75rem !important;
+		border-top-left-radius: var(--theme-radius-control) !important;
+		border-bottom-left-radius: var(--theme-radius-control) !important;
 	}
 
 	.actions-bar :global(> *:first-child > button) {
-		border-top-left-radius: 0.75rem !important;
-		border-bottom-left-radius: 0.75rem !important;
+		border-top-left-radius: var(--theme-radius-control) !important;
+		border-bottom-left-radius: var(--theme-radius-control) !important;
 	}
 
 	.actions-bar :global(> *:first-child > * > button) {
-		border-top-left-radius: 0.75rem !important;
-		border-bottom-left-radius: 0.75rem !important;
+		border-top-left-radius: var(--theme-radius-control) !important;
+		border-bottom-left-radius: var(--theme-radius-control) !important;
 	}
 
 	.actions-bar :global(> *:last-child > *) {
-		border-top-right-radius: 0.75rem !important;
-		border-bottom-right-radius: 0.75rem !important;
+		border-top-right-radius: var(--theme-radius-control) !important;
+		border-bottom-right-radius: var(--theme-radius-control) !important;
 	}
 
 	.actions-bar :global(> *:last-child > button) {
-		border-top-right-radius: 0.75rem !important;
-		border-bottom-right-radius: 0.75rem !important;
+		border-top-right-radius: var(--theme-radius-control) !important;
+		border-bottom-right-radius: var(--theme-radius-control) !important;
 	}
 
 	.actions-bar :global(> *:last-child > * > button) {
-		border-top-right-radius: 0.75rem !important;
-		border-bottom-right-radius: 0.75rem !important;
+		border-top-right-radius: var(--theme-radius-control) !important;
+		border-bottom-right-radius: var(--theme-radius-control) !important;
 	}
 
 	.actions-bar :global(> *:only-child > *) {
-		border-radius: 0.75rem !important;
+		border-radius: var(--theme-radius-control) !important;
 	}
 </style>

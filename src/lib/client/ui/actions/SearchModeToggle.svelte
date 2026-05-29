@@ -19,12 +19,12 @@
 					<button
 						type="button"
 						on:click={() => onchange(option.value)}
-						class="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700 {value ===
+						class="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm transition-colors hover:bg-surface-hover {value ===
 						option.value
-							? 'bg-neutral-50 dark:bg-neutral-700'
+							? 'bg-surface-hover'
 							: ''}"
 					>
-						<span class="text-neutral-700 dark:text-neutral-300">{option.label}</span>
+						<span class="text-text-soft">{option.label}</span>
 						<IconCheckbox
 							checked={value === option.value}
 							icon={Check}

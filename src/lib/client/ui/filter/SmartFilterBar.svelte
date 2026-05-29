@@ -369,10 +369,10 @@
 
 <div class="smart-filter-bar relative flex min-w-0 flex-1" bind:this={containerEl}>
 	<div
-		class="relative flex h-10 w-full items-center gap-1.5 overflow-x-auto rounded-xl border border-neutral-300 bg-white px-3 transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50"
+		class="relative flex h-10 w-full items-center gap-1.5 overflow-x-auto rounded-control border border-border bg-surface px-3 shadow-control transition-colors"
 	>
 		<div class="pointer-events-none flex-shrink-0">
-			<Filter size={16} class="text-neutral-500 dark:text-neutral-400" />
+			<Filter size={16} class="text-text-muted" />
 		</div>
 		{#each tags as tag, index (tag.id)}
 			<FilterTagComponent
@@ -393,7 +393,7 @@
 				on:input={handleValueInput}
 				on:focus={handleFocus}
 				placeholder="Type a value..."
-				class="h-full min-w-[80px] flex-1 bg-transparent text-base text-neutral-900 placeholder-neutral-500 outline-none sm:text-sm dark:text-neutral-100 dark:placeholder-neutral-400"
+				class="h-full min-w-[80px] flex-1 bg-transparent text-base text-text placeholder-text-subtle outline-none sm:text-sm"
 			/>
 		{:else}
 			<input
@@ -404,7 +404,7 @@
 				on:input={handleInput}
 				on:focus={handleFocus}
 				{placeholder}
-				class="h-full min-w-[120px] flex-1 bg-transparent text-base text-neutral-900 placeholder-neutral-500 outline-none sm:text-sm dark:text-neutral-100 dark:placeholder-neutral-400"
+				class="h-full min-w-[120px] flex-1 bg-transparent text-base text-text placeholder-text-subtle outline-none sm:text-sm"
 			/>
 		{/if}
 	</div>
@@ -438,6 +438,6 @@
 	   The Dropdown component's own overflow-hidden + rounded-xl handles
 	   internal clipping, so we only need to restore the container radius. */
 	.smart-filter-bar > :global(:nth-child(n + 2)) {
-		border-radius: 0.75rem !important;
+		border-radius: var(--theme-radius-control) !important;
 	}
 </style>
