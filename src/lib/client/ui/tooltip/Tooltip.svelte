@@ -112,13 +112,13 @@
 			use:portal
 			bind:this={tooltipEl}
 			class="pointer-events-none fixed z-[110]"
-			style="{style};border-radius:0.75rem !important"
+			style="{style};border-radius:var(--theme-radius-control) !important"
 		>
 			<div
-				class="border border-neutral-300 bg-white px-2 py-1 text-xs font-medium whitespace-pre-wrap text-neutral-900 shadow-lg dark:border-neutral-700/60 dark:bg-neutral-800 dark:text-neutral-50 {mono
+				class="border border-border bg-surface px-2 py-1 text-xs font-medium whitespace-pre-wrap text-text shadow-lg {mono
 					? 'font-mono'
 					: ''}"
-				style="border-radius:0.75rem !important"
+				style="border-radius:var(--theme-radius-control) !important"
 			>
 				{text}
 			</div>
