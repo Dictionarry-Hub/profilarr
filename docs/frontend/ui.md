@@ -679,40 +679,251 @@ Components scoped to Radarr / Sonarr semantics rather than generic UI:
 **Status:** in progress. Tracked in
 [issue #298](https://github.com/Dictionarry-Hub/profilarr/issues/298).
 
-Today, every component in `src/lib/client/ui/` ships with hardcoded
-Tailwind palette classes paired with `dark:` variants:
+Components in `src/lib/client/ui/` use **semantic CSS variable tokens**
+instead of hardcoded Tailwind palette classes. Each theme lives in its own
+CSS file and swaps the token values; components never reference specific
+colors or `dark:` prefixes directly:
 
 ```svelte
+<!-- Before -->
 <button class="bg-white border-neutral-300 text-neutral-700
                dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200">
-```
 
-This works, but it pins the app to exactly two themes (light and dark) and
-duplicates every color decision across two class strings.
-
-The plan is to migrate to **semantic CSS variable tokens** so components
-reference intent-level names (`bg-surface`, `text-text`, `border-border`)
-instead of palette values. Each theme then lives in its own CSS file and
-swaps the token values:
-
-```svelte
+<!-- After -->
 <button class="bg-surface border-border text-text">
 ```
 
-Theme files live under `src/styles/themes/`. The default light theme defines
-baseline variables on `:root`; the default dark theme overrides those
-variables under `.dark`. `src/app.css` exposes those variables through
-Tailwind's `@theme`, so components use normal utilities instead of inline
-styles.
+### How it works
 
-Theme metadata lives in `src/lib/client/themes/registry.ts`. Add a theme
-there when adding its CSS file so the picker has labels, descriptions, icons,
-and optional attribution in one place.
+**Theme CSS files** live under `src/styles/themes/`. Each file sets CSS
+custom properties (`--theme-*`) scoped to a CSS selector:
 
-The first token set is intentionally small:
+| File                | Selector       | Description                          |
+| ------------------- | -------------- | ------------------------------------ |
+| `default-light.css` | `:root`        | Baseline values; always loaded first |
+| `default-dark.css`  | `.dark`        | Dark mode overrides                  |
+| `retro.css`         | `.theme-retro` | Win98 / Napster aesthetic            |
 
-- Surfaces: `bg-app`, `bg-surface`, `bg-surface-muted`, `bg-surface-hover`
-- Text: `text-text`, `text-text-soft`, `text-text-muted`, `text-text-subtle`
-- Borders: `border-border`, `border-border-muted`, `border-border-subtle`
-- Actions: `bg-accent-solid`, `bg-danger-solid`, plus matching `on-*` text
-- Shape/elevation: `rounded-control`, `rounded-card`, `shadow-card`
+`src/app.css` imports all theme files and maps the `--theme-*` variables
+into Tailwind's `@theme` block, producing standard utility classes:
+
+```css
+@theme {
+	--color-surface: var(--theme-surface);
+	--color-text: var(--theme-text);
+	--radius-card: var(--theme-radius-card);
+	/* ... */
+}
+```
+
+Components then use `bg-surface`, `text-text`, `rounded-card`, etc. as
+normal Tailwind classes. No `dark:` prefix is needed because the active
+theme's CSS selector controls which values the tokens resolve to.
+
+**FOUC prevention.** `src/app.html` contains an inline `<script>` that
+reads the user's theme preference from `localStorage` and applies the
+correct class on `<html>` before the first paint, so there is no flash of
+the wrong theme.
+
+### Token reference
+
+All tokens are prefixed `--theme-` in the CSS files and exposed as Tailwind
+utilities without that prefix.
+
+**Surfaces**
+
+| Token                         | Utility                  | Usage                                |
+| ----------------------------- | ------------------------ | ------------------------------------ |
+| `--theme-bg`                  | `bg-app`                 | Page background                      |
+| `--theme-surface`             | `bg-surface`             | Card, modal, and panel backgrounds   |
+| `--theme-surface-muted`       | `bg-surface-muted`       | Recessed or secondary surfaces       |
+| `--theme-surface-hover`       | `bg-surface-hover`       | Hover state for interactive surfaces |
+| `--theme-surface-hover-muted` | `bg-surface-hover-muted` | Subtle hover for muted surfaces      |
+
+**Text**
+
+| Token                 | Utility            | Usage                         |
+| --------------------- | ------------------ | ----------------------------- |
+| `--theme-text`        | `text-text`        | Primary body text             |
+| `--theme-text-soft`   | `text-text-soft`   | Secondary text, button labels |
+| `--theme-text-muted`  | `text-text-muted`  | Placeholders, captions        |
+| `--theme-text-subtle` | `text-text-subtle` | Disabled or decorative text   |
+
+**Borders**
+
+| Token                   | Utility                | Usage                     |
+| ----------------------- | ---------------------- | ------------------------- |
+| `--theme-border`        | `border-border`        | Default component borders |
+| `--theme-border-muted`  | `border-border-muted`  | Internal dividers         |
+| `--theme-border-subtle` | `border-border-subtle` | Faint separators          |
+
+**Actions**
+
+| Token                        | Utility                 | Usage                |
+| ---------------------------- | ----------------------- | -------------------- |
+| `--theme-accent-solid`       | `bg-accent-solid`       | Primary action fill  |
+| `--theme-accent-solid-hover` | `bg-accent-solid-hover` | Primary action hover |
+| `--theme-on-accent`          | `text-on-accent`        | Text on accent fill  |
+| `--theme-danger-solid`       | `bg-danger-solid`       | Danger action fill   |
+| `--theme-danger-solid-hover` | `bg-danger-solid-hover` | Danger action hover  |
+| `--theme-on-danger`          | `text-on-danger`        | Text on danger fill  |
+
+**Status colors** (used by Label, alerts, badges):
+
+| Token                     | Usage                  |
+| ------------------------- | ---------------------- |
+| `--theme-success-bg/text` | Success feedback       |
+| `--theme-warning-bg/text` | Warning feedback       |
+| `--theme-danger-bg/text`  | Danger/error feedback  |
+| `--theme-info-bg/text`    | Informational feedback |
+| `--theme-link-text`       | Inline link color      |
+
+**Ghost and flush variants** (used by Button ghost, Card flush, Label ghost):
+
+| Token                      | Usage                                      |
+| -------------------------- | ------------------------------------------ |
+| `--theme-flush-bg`         | Card flush background (matches page)       |
+| `--theme-flush-hover`      | Card flush hover                           |
+| `--theme-ghost-bg`         | Ghost button fill (transparent in default) |
+| `--theme-ghost-border`     | Ghost button border                        |
+| `--theme-ghost-label-bg`   | Ghost Label fill                           |
+| `--theme-ghost-label-text` | Ghost Label text                           |
+
+The retro theme uses these to render ghost buttons as solid raised controls
+and flush cards as surfaced panels, matching its Win98 aesthetic.
+
+**Shape and elevation**
+
+| Token                           | Utility                 | Usage                       |
+| ------------------------------- | ----------------------- | --------------------------- |
+| `--theme-radius-control-sm`     | `rounded-control-sm`    | Small controls (xs buttons) |
+| `--theme-radius-control`        | `rounded-control`       | Standard controls           |
+| `--theme-radius-card`           | `rounded-card`          | Cards, modals, panels       |
+| `--theme-radius-pill`           | `rounded-pill`          | Pill-shaped labels, badges  |
+| `--theme-shadow-card`           | `shadow-card`           | Card elevation              |
+| `--theme-shadow-control`        | `shadow-control`        | Button/input resting shadow |
+| `--theme-shadow-control-active` | `shadow-control-active` | Button/input pressed shadow |
+
+Default themes use `none` for all shadows. The retro theme uses inset
+bevels (`inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080`) to produce
+the raised 3D button effect, and swaps to reversed bevels on
+`shadow-control-active` for the pressed state.
+
+**Typography**
+
+| Token               | Utility     | Usage                       |
+| ------------------- | ----------- | --------------------------- |
+| `--theme-font-sans` | `font-sans` | Body text font stack        |
+| `--theme-font-mono` | `font-mono` | Monospace / code font stack |
+
+Each theme can declare its own default fonts. Default themes use DM Sans /
+Geist Mono; the retro theme uses Tahoma / Courier New. The font store
+(`$stores/font.ts`) lets users override both with an explicit choice or
+`auto` (defer to the theme). When `auto` is selected, the font picker
+hides the option that matches the current theme's default so the user only
+sees alternatives.
+
+### Theme registry
+
+`src/lib/client/themes/registry.ts` is the single source of truth for
+available themes. Each entry is a `ThemeDefinition`:
+
+```ts
+interface ThemeDefinition {
+    value: ThemePreference;       // localStorage key, e.g. 'retro'
+    label: string;                // Display name
+    shortLabel: string;           // Compact label for tight spaces
+    description: string;          // One-liner for the picker
+    icon: ComponentType;          // Lucide icon
+    className: string | null;     // CSS class applied to <html> (null for system)
+    mode: ThemeMode | 'system';   // 'light', 'dark', or 'system'
+    defaultSans?: string;         // Theme's default sans font key
+    defaultMono?: string;         // Theme's default mono font key
+    author?: string;              // Attribution (community themes)
+    url?: string;                 // Attribution link
+}
+```
+
+To add a theme: create a CSS file under `src/styles/themes/`, import it in
+`app.css`, add an entry to the registry, and optionally add the selector to
+the FOUC script in `app.html`.
+
+### Theme store
+
+`$stores/theme.ts` exports two stores:
+
+- **`themeStore`**: writable store of the resolved `ThemeMode`
+  (`'light'` | `'dark'`). Exposes `setPreference(p)`, `toggle()`, and
+  `getPreference()`. On `system`, it resolves via
+  `prefers-color-scheme` and listens for changes. Uses the View Transitions
+  API (`document.startViewTransition`) for smooth theme switches when
+  available.
+- **`themePreference`**: read-only store of the raw `ThemePreference`
+  (e.g. `'retro'`, `'system'`). Used by the font store to look up
+  theme-specific font defaults.
+
+### Theme picker
+
+The old light/dark toggle (`themeToggle.svelte`) was replaced with a
+registry-backed `DropdownSelect` that lists every theme from the registry.
+It lives in the navbar and renders icon-only at the default size, expanding
+to show labels in the dropdown menu.
+
+### Migrated components
+
+The following components have been migrated from hardcoded palette classes
+to semantic tokens. Each uses the pattern described above: `bg-surface`
+instead of `bg-white dark:bg-neutral-800`, `text-text` instead of
+`text-neutral-700 dark:text-neutral-200`, `rounded-card` / `rounded-control`
+instead of hardcoded `rounded-lg`, and `shadow-card` / `shadow-control`
+instead of theme-specific shadow values.
+
+| Category    | Components                                                                                                                                                                                    |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Button      | `Button.svelte`                                                                                                                                                                               |
+| Card        | `Card.svelte`, `ExpandableCard.svelte`                                                                                                                                                        |
+| Dropdown    | `Dropdown.svelte`, `DropdownCombobox.svelte`, `DropdownSelect.svelte`, `DropdownHeader.svelte`, `DropdownFooter.svelte`, `DropdownItem.svelte`                                                |
+| Form        | `FormInput.svelte`, `NumberInput.svelte`, `IconCheckbox.svelte`                                                                                                                               |
+| Label       | `Label.svelte`                                                                                                                                                                                |
+| Table       | `Table.svelte`, `ExpandableTable.svelte`, `TableActionButton.svelte`                                                                                                                          |
+| Toggle      | `Toggle.svelte`                                                                                                                                                                               |
+| Tooltip     | `Tooltip.svelte`                                                                                                                                                                              |
+| Navigation  | `navbar.svelte`, `themeToggle.svelte`, `accentPicker.svelte`, `pageNav.svelte`, `group.svelte`, `groupHeader.svelte`, `groupItem.svelte`, `jobStatus.svelte`, `version.svelte`, `Tabs.svelte` |
+| Actions     | `ActionsBar.svelte`, `ActionButton.svelte`, `ActionInput.svelte`, `SearchAction.svelte`, `SearchFilterAction.svelte`, `SearchModeToggle.svelte`                                               |
+| Filter      | `SmartFilterBar.svelte`                                                                                                                                                                       |
+| Display     | `CodeBlock.svelte` (display), `Markdown.svelte`                                                                                                                                               |
+| Help        | `HelpButton.svelte`                                                                                                                                                                           |
+| Route views | Login page, table views (arr, custom formats, databases, media settings, naming, quality definitions, quality profiles, regular expressions)                                                  |
+
+### Not yet migrated
+
+These components still use hardcoded palette classes with `dark:` prefixes
+and are tracked in issue #298:
+
+- **Modal family:** `Modal.svelte`, `DirtyModal.svelte`, `InfoModal.svelte`,
+  `CloneModal.svelte`, `SyncPromptModal.svelte`
+- **Form:** `DateInput.svelte`, `TimeInput.svelte`, `TagInput.svelte`,
+  `MarkdownInput.svelte`, `KeyValueList.svelte`, `RangeScale.svelte`,
+  `CodeInput.svelte`, `SearchDropdown.svelte`
+- **Cron:** `CronInput.svelte`
+- **Card:** `CardGrid.svelte`, `StickyCard.svelte`
+- **Badge/Arr:** `Badge.svelte`, `CustomFormatBadge.svelte`,
+  `Score.svelte`, `ProgressIndicator.svelte`
+- **Navigation:** `Breadcrumb.svelte`, `BottomNav.svelte`,
+  `Pagination.svelte`
+- **Other:** `EmptyState.svelte`, `FilterTag.svelte`, `ViewToggle.svelte`,
+  `DraggableCard.svelte`, `SelectableContainer.svelte`,
+  `SelectableRow.svelte`
+- **Styles:** `prose.css`, `scrollbar.css`
+
+### Available themes
+
+| Theme         | Mode  | Selector           | Description                                                                                                       |
+| ------------- | ----- | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| System        | auto  | (none)             | Follows device `prefers-color-scheme`                                                                             |
+| Default Light | light | `.light` / `:root` | Clean neutral palette, DM Sans / Geist Mono                                                                       |
+| Default Dark  | dark  | `.dark`            | Semi-transparent surfaces on dark background                                                                      |
+| Retro         | light | `.theme-retro`     | Win98 / Napster: silver-grey, navy accent, square corners, inset bevels, Tahoma / Courier New, Clippy help button |
+
+Planned: `classic.css` (dark-only, replicating the v1 Profilarr look) and
+user-loadable custom theme files.
