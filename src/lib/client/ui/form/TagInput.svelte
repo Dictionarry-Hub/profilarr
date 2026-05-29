@@ -60,7 +60,7 @@
 </script>
 
 <div
-	class="flex min-h-[2.5rem] flex-wrap items-center gap-2 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-50"
+	class="flex min-h-[2.5rem] flex-wrap items-center gap-2 rounded-card border border-border bg-surface px-3 py-2 text-sm text-text transition-colors"
 >
 	{#each tags as tag, index (tag)}
 		<span class="inline-flex items-center gap-1">
@@ -70,7 +70,7 @@
 			<button
 				type="button"
 				on:click={() => removeTag(index)}
-				class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+				class="text-text-subtle hover:text-text-soft"
 				aria-label="Remove tag"
 			>
 				<X size={14} />
@@ -84,6 +84,6 @@
 		bind:value={inputValue}
 		on:keydown={handleKeydown}
 		{placeholder}
-		class="min-w-[120px] flex-1 border-0 bg-transparent text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:ring-0 dark:text-neutral-50 dark:placeholder:text-neutral-500"
+		class="min-w-[120px] flex-1 border-0 bg-transparent text-sm text-text outline-none placeholder:text-text-subtle focus:ring-0"
 	/>
 </div>
