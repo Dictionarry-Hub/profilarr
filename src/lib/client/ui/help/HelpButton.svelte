@@ -158,37 +158,41 @@
 		</div>
 	{/if}
 
-	<button
-		class="{isRetro ? 'clippy' : 'parrot'} cursor-pointer {isFab
-			? isRetro
+	{#if isFab}
+		<button
+			class="{isRetro ? 'clippy' : 'parrot'} cursor-pointer {isRetro
 				? 'group flex h-12 w-12 items-center justify-center border border-border bg-surface shadow-control active:shadow-control-active'
-				: 'group flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 bg-neutral-100 shadow-sm transition-shadow hover:shadow-md dark:border-neutral-700/60 dark:bg-neutral-900 dark:shadow-black/10'
-			: isRetro
-				? 'flex h-9 w-9 items-center justify-center hover:bg-surface-hover'
-				: 'flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800'}"
-		on:click={toggle}
-		aria-label="Help"
-	>
-		{#if isRetro}
-			{#if isFab}
+				: 'group flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 bg-neutral-100 shadow-sm transition-shadow hover:shadow-md dark:border-neutral-700/60 dark:bg-neutral-900 dark:shadow-black/10'}"
+			on:click={toggle}
+			aria-label="Help"
+		>
+			{#if isRetro}
 				<span class="text-2xl select-none" class:clippy-wave={open}>📎</span>
 			{:else}
-				<span class="text-lg" class:clippy-wave={open}>📎</span>
-			{/if}
-		{:else}
-			{#if isFab}
 				<span class="nav-icon-emoji text-2xl select-none" class:squawk={open}>🦜</span>
 				<span class="nav-icon-lucide text-neutral-700 dark:text-neutral-200" class:squawk={open}>
 					<Bird size={24} class="-scale-x-100" />
 				</span>
+			{/if}
+		</button>
+	{:else}
+		<button
+			class="{isRetro
+				? 'clippy'
+				: 'parrot'} flex h-9 w-9 cursor-pointer items-center justify-center rounded-control border border-[var(--theme-ghost-border)] bg-[var(--theme-ghost-bg)] shadow-control transition-colors active:shadow-control-active hover:bg-surface-hover hover:text-text-soft"
+			on:click={toggle}
+			aria-label="Help"
+		>
+			{#if isRetro}
+				<span class="text-lg" class:clippy-wave={open}>📎</span>
 			{:else}
 				<span class="nav-icon-emoji text-lg" class:squawk={open}>🦜</span>
 				<span class="nav-icon-lucide" class:squawk={open}>
-					<Bird class="h-[18px] w-[18px] -scale-x-100 text-neutral-700 dark:text-neutral-300" />
+					<Bird class="h-[18px] w-[18px] -scale-x-100" />
 				</span>
 			{/if}
-		{/if}
-	</button>
+		</button>
+	{/if}
 </div>
 
 <style>

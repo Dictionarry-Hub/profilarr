@@ -71,7 +71,7 @@
 </script>
 
 <nav
-	class="fixed top-0 left-0 z-50 w-full border-r-0 border-b border-neutral-200 bg-neutral-50 transition-[width,height] duration-200 ease-in-out md:z-[80] md:overflow-hidden md:border-r dark:border-neutral-800 dark:bg-neutral-900
+	class="fixed top-0 left-0 z-50 w-full border-r-0 border-b border-border bg-surface-muted transition-[width,height] duration-200 ease-in-out md:z-[80] md:overflow-hidden md:border-r
 		{collapsed ? 'md:h-screen md:w-14' : 'md:h-16 md:w-80'}"
 >
 	<!-- Mobile -->
@@ -80,7 +80,7 @@
 			<button
 				type="button"
 				on:click={() => mobileNavOpen.open()}
-				class="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+				class="rounded-md p-1.5 text-text-muted hover:bg-surface-hover hover:text-text-soft"
 				aria-label="Open menu"
 			>
 				<Menu size={20} />
@@ -100,7 +100,7 @@
 	>
 		<div class="flex items-center gap-2">
 			<img src={logo} alt="Profilarr logo" class="ml-4 h-5 w-5 translate-y-[2px]" />
-			<div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">profilarr</div>
+			<div class="text-xl font-bold text-text">profilarr</div>
 		</div>
 		<div class="flex items-center justify-end gap-1">
 			<AccentPicker onboarding="accent-picker" />
@@ -144,11 +144,11 @@
 								<a
 									href={item.href}
 									aria-label={item.label}
-									class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 {isActive(
+									class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-text-muted transition-colors hover:bg-surface-hover hover:text-text-soft {isActive(
 										item.href,
 										currentPathname
 									)
-										? 'border-neutral-300 bg-white text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-200'
+										? 'border-border bg-surface text-text-soft'
 										: ''}"
 								>
 									{#if iconStyle === 'emoji'}
@@ -174,7 +174,7 @@
 		<a
 			href="/"
 			aria-label="Profilarr home"
-			class="rounded-md p-1 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
+			class="rounded-md p-1 transition-colors hover:bg-surface-hover"
 		>
 			<img src={logo} alt="Profilarr" class="h-5 w-5" />
 		</a>
