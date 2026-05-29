@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import './styles/fonts.css';
+@import './styles/themes/default-light.css';
+@import './styles/themes/default-dark.css';
 @import './styles/prose.css';
 @import './styles/scrollbar.css';
 @import './styles/transitions.css';
@@ -42,6 +44,30 @@
 	--color-accent-800: var(--accent-800);
 	--color-accent-900: var(--accent-900);
 	--color-accent-950: var(--accent-950);
+
+	/* Semantic theme tokens */
+	--color-app: var(--theme-bg);
+	--color-surface: var(--theme-surface);
+	--color-surface-muted: var(--theme-surface-muted);
+	--color-surface-hover: var(--theme-surface-hover);
+	--color-surface-hover-muted: var(--theme-surface-hover-muted);
+	--color-text: var(--theme-text);
+	--color-text-soft: var(--theme-text-soft);
+	--color-text-muted: var(--theme-text-muted);
+	--color-text-subtle: var(--theme-text-subtle);
+	--color-border: var(--theme-border);
+	--color-border-muted: var(--theme-border-muted);
+	--color-border-subtle: var(--theme-border-subtle);
+	--color-accent-solid: var(--theme-accent-solid);
+	--color-accent-solid-hover: var(--theme-accent-solid-hover);
+	--color-on-accent: var(--theme-on-accent);
+	--color-danger-solid: var(--theme-danger-solid);
+	--color-danger-solid-hover: var(--theme-danger-solid-hover);
+	--color-on-danger: var(--theme-on-danger);
+	--radius-control-sm: var(--theme-radius-control-sm);
+	--radius-control: var(--theme-radius-control);
+	--radius-card: var(--theme-radius-card);
+	--shadow-card: var(--theme-shadow-card);
 }
 
 @layer base {
@@ -67,6 +93,6 @@
 	}
 
 	html {
-		@apply bg-neutral-50 dark:bg-neutral-900;
+		@apply bg-app text-text;
 	}
 }

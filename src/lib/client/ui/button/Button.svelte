@@ -62,37 +62,33 @@
 	$: baseClasses = `inline-flex items-center ${justifyClass} font-medium transition-colors ${disabledClass}`;
 
 	const sizeClasses = {
-		xs: 'gap-1 rounded-lg px-2 py-1 text-xs',
-		sm: 'gap-1.5 rounded-xl px-3 py-1.5 text-sm md:py-2',
-		md: 'gap-2 rounded-xl px-4 py-2.5'
+		xs: 'gap-1 rounded-control-sm px-2 py-1 text-xs',
+		sm: 'gap-1.5 rounded-control px-3 py-1.5 text-sm md:py-2',
+		md: 'gap-2 rounded-control px-4 py-2.5'
 	};
 
 	const iconOnlySizeClasses = {
-		xs: 'rounded-lg p-1.5 text-xs',
-		sm: 'rounded-xl p-2 text-sm',
-		md: 'rounded-xl p-2.5'
+		xs: 'rounded-control-sm p-1.5 text-xs',
+		sm: 'rounded-control p-2 text-sm',
+		md: 'rounded-control p-2.5'
 	};
 
 	const variantClasses = {
-		primary:
-			'bg-accent-600 text-white hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600',
+		primary: 'bg-accent-solid text-on-accent hover:bg-accent-solid-hover',
 		secondary:
-			'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-200 dark:hover:bg-neutral-700',
-		danger: 'bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600',
-		ghost:
-			'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200',
+			'border border-border bg-surface text-text-soft hover:bg-surface-hover',
+		danger: 'bg-danger-solid text-on-danger hover:bg-danger-solid-hover',
+		ghost: 'text-text-muted hover:bg-surface-hover hover:text-text-soft',
 		outline:
-			'border border-neutral-300 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700/60 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
+			'border border-border text-text-muted hover:bg-surface-hover hover:text-text-soft'
 	};
 
 	$: effectiveSize = responsive && isSmallScreen ? 'xs' : size;
 	$: widthClass = fullWidth ? 'w-full' : '';
 	$: baseTextColor =
-		textColor ||
-		(variant === 'ghost' || variant === 'outline' ? 'text-neutral-700 dark:text-neutral-300' : '');
+		textColor || (variant === 'ghost' || variant === 'outline' ? 'text-text-soft' : '');
 	$: baseIconColor =
-		iconColor ||
-		(variant === 'ghost' || variant === 'outline' ? 'text-neutral-500 dark:text-neutral-400' : '');
+		iconColor || (variant === 'ghost' || variant === 'outline' ? 'text-text-muted' : '');
 	$: effectiveIcon = loading ? Loader2 : icon;
 	$: effectiveIconColor = loading ? baseIconColor + ' animate-spin' : baseIconColor;
 	$: isLeadingSvg = leadingIcon && typeof leadingIcon === 'object' && 'path' in leadingIcon;

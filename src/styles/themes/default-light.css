@@ -1,0 +1,24 @@
+:root {
+	--theme-bg: #fafafa;
+	--theme-surface: #ffffff;
+	--theme-surface-muted: #fafafa;
+	--theme-surface-hover: #f5f5f5;
+	--theme-surface-hover-muted: #fafafa;
+	--theme-text: #171717;
+	--theme-text-soft: #404040;
+	--theme-text-muted: #737373;
+	--theme-text-subtle: #a3a3a3;
+	--theme-border: #d4d4d4;
+	--theme-border-muted: #e5e5e5;
+	--theme-border-subtle: #f5f5f5;
+	--theme-accent-solid: var(--accent-600);
+	--theme-accent-solid-hover: var(--accent-700);
+	--theme-on-accent: #ffffff;
+	--theme-danger-solid: #dc2626;
+	--theme-danger-solid-hover: #b91c1c;
+	--theme-on-danger: #ffffff;
+	--theme-radius-control-sm: 0.5rem;
+	--theme-radius-control: 0.75rem;
+	--theme-radius-card: 0.75rem;
+	--theme-shadow-card: none;
+}

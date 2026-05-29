@@ -34,18 +34,18 @@
 		lg: 'mx-5'
 	}[padding];
 
-	$: bgClass = isFlush ? 'bg-neutral-50 dark:bg-neutral-900' : 'bg-white dark:bg-neutral-800/50';
+	$: bgClass = isFlush ? 'bg-app' : 'bg-surface';
 
 	$: hoverClass =
 		hoverable || interactive
 			? isFlush
-				? 'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800/60'
-				: 'transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/80'
+				? 'transition-colors hover:bg-surface-hover'
+				: 'transition-colors hover:bg-surface-hover-muted'
 			: '';
 
 	$: cursorClass = interactive ? 'cursor-pointer' : '';
 
-	$: cardClass = `flex flex-col overflow-hidden rounded-xl border border-neutral-300 dark:border-neutral-700/60 ${bgClass} ${hoverClass} ${cursorClass} ${className}`;
+	$: cardClass = `flex flex-col overflow-hidden rounded-card border border-border shadow-card ${bgClass} ${hoverClass} ${cursorClass} ${className}`;
 </script>
 
 {#if href}
@@ -54,7 +54,7 @@
 			<div class={paddingClass}>
 				<slot name="header" />
 			</div>
-			<div class="border-t border-neutral-200 dark:border-neutral-700/60 {dividerClass}"></div>
+			<div class="border-t border-border-muted {dividerClass}"></div>
 		{/if}
 
 		<div class="flex flex-1 flex-col {paddingClass}">
@@ -62,7 +62,7 @@
 		</div>
 
 		{#if hasFooter}
-			<div class="border-t border-neutral-200 dark:border-neutral-700/60 {dividerClass}"></div>
+			<div class="border-t border-border-muted {dividerClass}"></div>
 			<div class={paddingClass}>
 				<slot name="footer" />
 			</div>
@@ -75,7 +75,7 @@
 			<div class={paddingClass}>
 				<slot name="header" />
 			</div>
-			<div class="border-t border-neutral-200 dark:border-neutral-700/60 {dividerClass}"></div>
+			<div class="border-t border-border-muted {dividerClass}"></div>
 		{/if}
 
 		<div class="flex flex-1 flex-col {paddingClass}">
@@ -83,7 +83,7 @@
 		</div>
 
 		{#if hasFooter}
-			<div class="border-t border-neutral-200 dark:border-neutral-700/60 {dividerClass}"></div>
+			<div class="border-t border-border-muted {dividerClass}"></div>
 			<div class={paddingClass}>
 				<slot name="footer" />
 			</div>

@@ -1,0 +1,24 @@
+.dark {
+	--theme-bg: #171717;
+	--theme-surface: rgb(38 38 38 / 0.5);
+	--theme-surface-muted: #171717;
+	--theme-surface-hover: #404040;
+	--theme-surface-hover-muted: rgb(38 38 38 / 0.8);
+	--theme-text: #fafafa;
+	--theme-text-soft: #e5e5e5;
+	--theme-text-muted: #a3a3a3;
+	--theme-text-subtle: #525252;
+	--theme-border: rgb(64 64 64 / 0.6);
+	--theme-border-muted: rgb(64 64 64 / 0.6);
+	--theme-border-subtle: rgb(64 64 64 / 0.4);
+	--theme-accent-solid: var(--accent-500);
+	--theme-accent-solid-hover: var(--accent-600);
+	--theme-on-accent: #ffffff;
+	--theme-danger-solid: #ef4444;
+	--theme-danger-solid-hover: #dc2626;
+	--theme-on-danger: #ffffff;
+	--theme-radius-control-sm: 0.5rem;
+	--theme-radius-control: 0.75rem;
+	--theme-radius-card: 0.75rem;
+	--theme-shadow-card: none;
+}

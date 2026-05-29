@@ -674,9 +674,9 @@ Components scoped to Radarr / Sonarr semantics rather than generic UI:
 - **`$ui/arr/ProgressIndicator.svelte`**: progress bar for long-running
   arr operations (sync, bulk upgrade).
 
-## Semantic Tokens and Theming (Planned)
+## Semantic Tokens and Theming
 
-**Status:** not started. Tracked in
+**Status:** in progress. Tracked in
 [issue #298](https://github.com/Dictionarry-Hub/profilarr/issues/298).
 
 Today, every component in `src/lib/client/ui/` ships with hardcoded
@@ -698,3 +698,17 @@ swaps the token values:
 ```svelte
 <button class="bg-surface border-border text-text">
 ```
+
+Theme files live under `src/styles/themes/`. The default light theme defines
+baseline variables on `:root`; the default dark theme overrides those
+variables under `.dark`. `src/app.css` exposes those variables through
+Tailwind's `@theme`, so components use normal utilities instead of inline
+styles.
+
+The first token set is intentionally small:
+
+- Surfaces: `bg-app`, `bg-surface`, `bg-surface-muted`, `bg-surface-hover`
+- Text: `text-text`, `text-text-soft`, `text-text-muted`, `text-text-subtle`
+- Borders: `border-border`, `border-border-muted`, `border-border-subtle`
+- Actions: `bg-accent-solid`, `bg-danger-solid`, plus matching `on-*` text
+- Shape/elevation: `rounded-control`, `rounded-card`, `shadow-card`
