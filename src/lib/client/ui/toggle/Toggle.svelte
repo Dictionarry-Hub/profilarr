@@ -67,9 +67,9 @@
 	}}
 	class="flex {fullWidth
 		? 'w-full justify-between'
-		: 'w-fit'} items-center gap-3 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-700 transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-200 {disabled
+		: 'w-fit'} items-center gap-3 rounded-control border border-border bg-surface px-3 py-2 text-sm text-text-soft shadow-control transition-colors {disabled
 		? 'cursor-not-allowed opacity-50'
-		: 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800'}"
+		: 'cursor-pointer hover:bg-surface-hover'}"
 >
 	<div class="flex min-w-0 items-center gap-2">
 		{#if label}
@@ -100,6 +100,6 @@
 
 {#if hasInfo}
 	<InfoModal bind:open={showInfoModal} header={infoHeader || resolvedLabel}>
-		<p class="text-sm leading-6 text-neutral-700 dark:text-neutral-300">{infoBody}</p>
+		<p class="text-sm leading-6 text-text-soft">{infoBody}</p>
 	</InfoModal>
 {/if}
