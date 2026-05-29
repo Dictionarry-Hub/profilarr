@@ -17,19 +17,19 @@
 
 	const styles = {
 		success:
-			'border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100/80 dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-100 dark:hover:bg-emerald-950/70',
+			'border-[var(--theme-success-border)] bg-[var(--theme-success-bg)] text-[var(--theme-success-text)]',
 		error:
-			'border-red-200 bg-red-50 text-red-900 hover:bg-red-100/80 dark:border-red-800/60 dark:bg-red-950/50 dark:text-red-100 dark:hover:bg-red-950/70',
+			'border-[var(--theme-danger-border)] bg-[var(--theme-danger-bg)] text-[var(--theme-danger-text)]',
 		warning:
-			'border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100/80 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-100 dark:hover:bg-amber-950/70',
-		info: 'border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100/80 dark:border-sky-800/60 dark:bg-sky-950/50 dark:text-sky-100 dark:hover:bg-sky-950/70'
+			'border-[var(--theme-warning-border)] bg-[var(--theme-warning-bg)] text-[var(--theme-warning-text)]',
+		info: 'border-[var(--theme-info-border)] bg-[var(--theme-info-bg)] text-[var(--theme-info-text)]'
 	};
 
 	const iconColors = {
-		success: 'text-emerald-600 dark:text-emerald-300',
-		error: 'text-red-600 dark:text-red-300',
-		warning: 'text-amber-600 dark:text-amber-300',
-		info: 'text-sky-600 dark:text-sky-300'
+		success: 'text-[var(--theme-success-icon)]',
+		error: 'text-[var(--theme-danger-icon)]',
+		warning: 'text-[var(--theme-warning-icon)]',
+		info: 'text-[var(--theme-info-icon)]'
 	};
 
 	const Icon = icons[type];
@@ -51,7 +51,7 @@
 			dismiss();
 		}
 	}}
-	class="flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 shadow-lg shadow-black/5 backdrop-blur-sm transition-colors {styles[
+	class="flex cursor-pointer items-center gap-3 rounded-card border px-4 py-3 shadow-lg shadow-black/5 backdrop-blur-sm transition-colors {styles[
 		type
 	]}"
 >

@@ -768,15 +768,21 @@ utilities without that prefix.
 | `--theme-danger-solid-hover` | `bg-danger-solid-hover` | Danger action hover  |
 | `--theme-on-danger`          | `text-on-danger`        | Text on danger fill  |
 
-**Status colors** (used by Label, alerts, badges):
+**Status colors** (used by Label, Alert, badges):
 
-| Token                     | Usage                  |
-| ------------------------- | ---------------------- |
-| `--theme-success-bg/text` | Success feedback       |
-| `--theme-warning-bg/text` | Warning feedback       |
-| `--theme-danger-bg/text`  | Danger/error feedback  |
-| `--theme-info-bg/text`    | Informational feedback |
-| `--theme-link-text`       | Inline link color      |
+Each status has four tokens: `bg`, `text`, `border`, and `icon`. The
+`border` and `icon` tokens are used by `Alert.svelte` for the toast border
+and leading icon color. The alert `error` type maps to `danger` tokens.
+
+| Token                     | Usage             |
+| ------------------------- | ----------------- |
+| `--theme-{status}-bg`     | Status background |
+| `--theme-{status}-text`   | Status text       |
+| `--theme-{status}-border` | Status border     |
+| `--theme-{status}-icon`   | Status icon color |
+| `--theme-link-text`       | Inline link color |
+
+Where `{status}` is one of `success`, `warning`, `danger`, `info`.
 
 **Ghost and flush variants** (used by Button ghost, Card flush, Label ghost):
 
