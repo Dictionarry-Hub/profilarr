@@ -38,6 +38,8 @@ function readPreference(): ThemePreference {
 	return 'system';
 }
 
+const preferenceWritable = writable<ThemePreference>(readPreference());
+
 function createThemeStore() {
 	let preference = readPreference();
 	const initialTheme = resolvePreference(preference);
@@ -72,6 +74,7 @@ function createThemeStore() {
 
 	function setPreference(nextPreference: ThemePreference) {
 		preference = nextPreference;
+		preferenceWritable.set(preference);
 		const nextTheme = resolvePreference(preference);
 		set(nextTheme.mode as ThemeMode);
 		applyTheme(nextTheme);
@@ -92,3 +95,4 @@ function createThemeStore() {
 }
 
 export const themeStore = createThemeStore();
+export const themePreference = { subscribe: preferenceWritable.subscribe };

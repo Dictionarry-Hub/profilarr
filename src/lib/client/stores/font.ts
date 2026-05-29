@@ -7,7 +7,7 @@
 
 import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
-import { themeStore } from '$stores/theme.ts';
+import { themePreference } from '$stores/theme.ts';
 import { getThemeDefinition } from '$lib/client/themes/registry.ts';
 
 export type SansFont = 'auto' | 'dm-sans' | 'inter' | 'ibm-plex-sans';
@@ -107,15 +107,13 @@ function createFontStore() {
 export const fontStore = createFontStore();
 
 /** Sans options filtered to exclude the font that matches the current theme default. */
-export const sansFontOptions = derived(themeStore, ($theme) => {
-	const pref = themeStore.getPreference();
-	const def = getThemeDefinition(pref);
+export const sansFontOptions = derived(themePreference, ($pref) => {
+	const def = getThemeDefinition($pref);
 	return allSansOptions.filter((o) => o.value !== def.defaultSans);
 });
 
 /** Mono options filtered to exclude the font that matches the current theme default. */
-export const monoFontOptions = derived(themeStore, ($theme) => {
-	const pref = themeStore.getPreference();
-	const def = getThemeDefinition(pref);
+export const monoFontOptions = derived(themePreference, ($pref) => {
+	const def = getThemeDefinition($pref);
 	return allMonoOptions.filter((o) => o.value !== def.defaultMono);
 });

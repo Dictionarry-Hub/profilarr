@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Bug, Bird, Lightbulb } from 'lucide-svelte';
 	import { fly } from 'svelte/transition';
-	import { themeStore } from '$stores/theme.ts';
+	import { themePreference } from '$stores/theme.ts';
 
 	export let variant: 'fab' | 'navbar' = 'fab';
 
@@ -54,10 +54,7 @@
 	let open = false;
 	let quip = '';
 
-	$: isRetro = (() => {
-		$themeStore;
-		return themeStore.getPreference() === 'retro';
-	})();
+	$: isRetro = $themePreference === 'retro';
 	$: activeQuips = isRetro ? clippyQuips : parrotQuips;
 
 	function pickQuip() {
