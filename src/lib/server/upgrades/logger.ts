@@ -125,6 +125,9 @@ export async function logUpgradeQueueDetectionMismatch(details: {
 	observedDownloads: number;
 	graceElapsedMs: number;
 	commandMessage?: string;
+	searchedItems?: { id: number; title: string }[];
+	observedItems?: { id: number; title: string }[];
+	missedItems?: { id: number; title: string }[];
 }): Promise<void> {
 	await logger.warn(
 		`Upgrade detection under-reported ${details.app} grabs: command reported ${details.reportedDownloads}, queue observation saw ${details.observedDownloads}`,
