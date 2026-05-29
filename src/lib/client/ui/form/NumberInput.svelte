@@ -63,19 +63,19 @@
 				: 'pr-10';
 	$: inputSizeClasses = isCompact
 		? hideButtons
-			? `rounded-lg py-1 pl-2 text-xs ${warningPaddingClass}`
-			: `rounded-lg px-2 py-1 text-xs ${warningPaddingClass}`
-		: `rounded-xl py-2 pl-3 text-sm ${warningPaddingClass}`;
+			? `rounded-control-sm py-1 pl-2 text-xs ${warningPaddingClass}`
+			: `rounded-control-sm px-2 py-1 text-xs ${warningPaddingClass}`
+		: `rounded-control py-2 pl-3 text-sm ${warningPaddingClass}`;
 	$: buttonWidthClass = isCompact ? 'w-4' : 'w-6';
 	$: iconSize = isCompact ? 10 : 12;
 	$: warningRightClass =
 		warningTooltip && !hideButtons ? (isCompact ? 'right-6' : 'right-8') : 'right-2';
 	$: buttonTopRadius = isCompact
-		? 'rounded-tr-lg rounded-tl-none rounded-br-none rounded-bl-none'
-		: 'rounded-tr-xl rounded-tl-none rounded-br-none rounded-bl-none';
+		? 'rounded-tr-control-sm rounded-tl-none rounded-br-none rounded-bl-none'
+		: 'rounded-tr-control rounded-tl-none rounded-br-none rounded-bl-none';
 	$: buttonBottomRadius = isCompact
-		? 'rounded-br-lg rounded-bl-none rounded-tr-none rounded-tl-none'
-		: 'rounded-br-xl rounded-bl-none rounded-tr-none rounded-tl-none';
+		? 'rounded-br-control-sm rounded-bl-none rounded-tr-none rounded-tl-none'
+		: 'rounded-br-control rounded-bl-none rounded-tr-none rounded-tl-none';
 	$: widthClass = effectiveAutoWidth ? 'w-auto' : 'w-full';
 	$: autoWidthPadding = isCompact ? '1.75rem' : '4rem';
 	$: autoWidthCharacters = Math.max(inputValue.length, placeholder.length, 1);
@@ -188,13 +188,13 @@
 		{disabled}
 		{placeholder}
 		style={autoWidthStyle}
-		class="block {widthClass} [appearance:textfield] border border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400 transition-colors focus:border-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-500 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:disabled:bg-neutral-800/40 dark:disabled:text-neutral-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none {inputSizeClasses} {fontClass}"
+		class="block {widthClass} [appearance:textfield] border border-border bg-surface text-text shadow-control placeholder-text-subtle transition-colors focus:border-text-subtle focus:outline-none disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-text-muted [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none {inputSizeClasses} {fontClass}"
 	/>
 
 	{#if warningTooltip}
 		<div class="absolute top-1/2 z-10 -translate-y-1/2 {warningRightClass}">
 			<Tooltip text={warningTooltip} position="top">
-				<span class="inline-flex items-center text-red-600 dark:text-red-400">
+				<span class="inline-flex items-center text-danger-solid">
 					<CircleAlert size={isCompact ? 12 : 14} />
 				</span>
 			</Tooltip>
@@ -208,7 +208,7 @@
 				type="button"
 				on:click={increment}
 				{disabled}
-				class="flex flex-1 {buttonWidthClass} items-center justify-center {buttonTopRadius} border border-neutral-300 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+				class="flex flex-1 {buttonWidthClass} items-center justify-center {buttonTopRadius} border border-border bg-surface text-text-muted shadow-control transition-colors hover:bg-surface-hover active:shadow-control-active disabled:cursor-not-allowed disabled:opacity-40"
 			>
 				<ChevronUp size={iconSize} />
 			</button>
@@ -216,7 +216,7 @@
 				type="button"
 				on:click={decrement}
 				{disabled}
-				class="flex flex-1 {buttonWidthClass} items-center justify-center {buttonBottomRadius} border border-t-0 border-neutral-300 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+				class="flex flex-1 {buttonWidthClass} items-center justify-center {buttonBottomRadius} border border-t-0 border-border bg-surface text-text-muted shadow-control transition-colors hover:bg-surface-hover active:shadow-control-active disabled:cursor-not-allowed disabled:opacity-40"
 			>
 				<ChevronDown size={iconSize} />
 			</button>
