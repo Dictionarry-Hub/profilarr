@@ -4,6 +4,8 @@
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
+	import DropdownFooter from '$ui/dropdown/DropdownFooter.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
@@ -658,20 +660,52 @@
 			name="Dropdown"
 			paths={[
 				'dropdown/Dropdown',
+				'dropdown/DropdownHeader',
+				'dropdown/DropdownFooter',
 				'dropdown/DropdownItem',
 				'dropdown/DropdownSelect',
 				'dropdown/CustomGroupManager'
 			]}
-			description="Dropdown is a positioned menu container. DropdownItem is a selectable row with optional icon, danger, and selected states. DropdownSelect composes Button + Dropdown into a select widget. CustomGroupManager is a specialized tag grouping form."
+			description="Dropdown is a positioned menu container. DropdownHeader/Footer add section labels. DropdownItem is a selectable row with optional icon, danger, and selected states. DropdownSelect composes Button + Dropdown into a select widget."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Dropdown + DropdownItem (hover to open)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Header, items, and footer</p>
+				<div
+					class="inline-block min-w-48 overflow-hidden rounded-xl border border-neutral-300 bg-neutral-100 shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900"
+				>
+					<div class="bg-white/80 dark:bg-neutral-800/50">
+						<DropdownHeader label="Actions" />
+						<DropdownItem icon={FileText} label="Normal item" />
+						<DropdownItem icon={Star} label="With secondary text" secondaryText="ctrl+s" />
+						<DropdownItem icon={Info} label="Selected item" selected />
+						<DropdownItem icon={Trash2} label="Danger item" danger />
+						<DropdownItem icon={Plus} label="Disabled item" disabled />
+						<DropdownFooter label="3 more items" />
+					</div>
+				</div>
+			</div>
+
+			<div class="space-y-3">
+				<p class="text-xs font-medium text-text-muted uppercase">Compact variant</p>
+				<div
+					class="inline-block min-w-40 overflow-hidden rounded-lg border border-neutral-300 bg-neutral-100 shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900"
+				>
+					<div class="bg-white/80 dark:bg-neutral-800/50">
+						<DropdownHeader label="View" compact />
+						<DropdownItem icon={FileText} label="Cards" selected compact />
+						<DropdownItem icon={Settings} label="Table" compact />
+						<DropdownFooter label="2 views" compact />
+					</div>
+				</div>
+			</div>
+
+			<div class="space-y-3">
+				<p class="text-xs font-medium text-text-muted uppercase">In ActionButton (hover to open)</p>
 				<ActionsBar className="md:justify-start">
 					<ActionButton icon={Filter} hasDropdown={true} dropdownPosition="left">
 						<svelte:fragment slot="dropdown">
 							<Dropdown position="left">
+								<DropdownHeader label="Filter by" />
 								<DropdownItem icon={FileText} label="Normal item" />
 								<DropdownItem icon={Info} label="Selected item" selected />
 								<DropdownItem icon={Trash2} label="Danger item" danger />
@@ -683,9 +717,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					DropdownSelect
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">DropdownSelect</p>
 				<div class="flex flex-wrap items-center gap-4">
 					<DropdownSelect
 						label="Arr type"
