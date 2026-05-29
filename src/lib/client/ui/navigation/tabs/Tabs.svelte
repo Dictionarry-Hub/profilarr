@@ -77,7 +77,7 @@
 	<div class={hiddenSpacerClass}></div>
 {:else if useMobileMode}
 	<!-- Mobile: Custom dropdown with icons -->
-	<div class="flex h-16 items-center border-b border-neutral-200 dark:border-neutral-800">
+	<div class="flex h-16 items-center border-b border-border">
 		<div class="flex flex-1 items-center gap-2">
 			<div
 				class="relative flex-1"
@@ -87,18 +87,16 @@
 				<button
 					type="button"
 					on:click={() => (dropdownOpen = !dropdownOpen)}
-					class="flex w-full items-center justify-between gap-2 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-100 dark:hover:bg-neutral-700"
+					class="flex w-full items-center justify-between gap-2 rounded-control border border-border bg-surface px-3 py-2 text-sm font-medium text-text shadow-control transition-colors hover:bg-surface-hover"
 				>
 					<span class="flex items-center gap-1.5 overflow-hidden">
 						{#if breadcrumb}
 							{#each breadcrumb.items as item}
-								<span class="shrink-0 text-neutral-500 dark:text-neutral-400">{item.label}</span>
-								<ChevronRight size={12} class="shrink-0 text-neutral-400 dark:text-neutral-600" />
+								<span class="shrink-0 text-text-muted">{item.label}</span>
+								<ChevronRight size={12} class="shrink-0 text-text-subtle" />
 							{/each}
-							<span class="shrink-0 text-neutral-500 dark:text-neutral-400"
-								>{breadcrumb.current}</span
-							>
-							<ChevronRight size={12} class="shrink-0 text-neutral-400 dark:text-neutral-600" />
+							<span class="shrink-0 text-text-muted">{breadcrumb.current}</span>
+							<ChevronRight size={12} class="shrink-0 text-text-subtle" />
 						{/if}
 						{#if activeTab?.icon && !breadcrumb}
 							<svelte:component this={activeTab.icon} size={16} class="shrink-0 text-accent-500" />
@@ -110,7 +108,7 @@
 					</span>
 					<ChevronDown
 						size={16}
-						class="text-neutral-400 transition-transform {dropdownOpen ? 'rotate-180' : ''}"
+						class="text-text-muted transition-transform {dropdownOpen ? 'rotate-180' : ''}"
 					/>
 				</button>
 
@@ -139,7 +137,7 @@
 				<button
 					type="button"
 					on:click={() => history.back()}
-					class="flex cursor-pointer items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 hover:text-neutral-900 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+					class="flex cursor-pointer items-center gap-1.5 rounded-control border border-border bg-surface px-3 py-2 text-sm font-medium text-text-soft shadow-control transition-colors hover:bg-surface-hover hover:text-text"
 				>
 					<ArrowLeft size={14} />
 					{backButton.label}
@@ -149,7 +147,7 @@
 	</div>
 {:else}
 	<!-- Desktop: Tab bar -->
-	<div class="flex h-16 items-end border-b border-neutral-200 dark:border-neutral-800">
+	<div class="flex h-16 items-end border-b border-border">
 		<nav class="-mb-px flex flex-1 items-center justify-between gap-2" aria-label="Tabs">
 			<div class="flex gap-2">
 				{#each tabs as tab (tab.href)}
@@ -159,7 +157,7 @@
 						data-onboarding={tab.onboarding || null}
 						class="flex cursor-pointer items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors {tab.active
 							? 'border-accent-600 text-accent-600 dark:border-accent-500 dark:text-accent-500'
-							: 'border-transparent text-neutral-600 hover:border-neutral-300 hover:text-neutral-900 dark:text-neutral-400 dark:hover:border-neutral-700 dark:hover:text-neutral-50'}"
+							: 'border-transparent text-text-soft hover:border-border hover:text-text'}"
 					>
 						{#if tab.icon}
 							<svelte:component this={tab.icon} size={16} />
@@ -181,7 +179,7 @@
 				<button
 					type="button"
 					on:click={() => history.back()}
-					class="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+					class="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm font-medium text-text-soft transition-colors hover:text-text"
 				>
 					<ArrowLeft size={14} />
 					{backButton.label}
