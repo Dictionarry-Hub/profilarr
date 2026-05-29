@@ -94,9 +94,7 @@
 			/>
 
 			{#if nameConflict}
-				<p class="text-xs text-red-600 dark:text-red-400">
-					An entity with this name already exists.
-				</p>
+				<p class="text-xs text-danger-solid">An entity with this name already exists.</p>
 			{/if}
 		</div>
 	</div>

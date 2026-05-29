@@ -55,19 +55,19 @@
 			<div
 				class="relative my-4 flex max-h-[calc(100svh-2rem)] w-full {sizeClasses[
 					size
-				]} flex-col rounded-xl border border-neutral-300 bg-white shadow-xl sm:my-0 dark:border-neutral-700/60 dark:bg-neutral-900"
+				]} flex-col rounded-card border border-border bg-surface shadow-xl sm:my-0"
 				in:scale={{ duration: 170, start: 0.97, opacity: 0.5, easing: cubicOut }}
 				out:scale={{ duration: 120, start: 0.97, opacity: 0.5, easing: cubicIn }}
 			>
 				<!-- Header -->
 				<div
-					class="flex flex-shrink-0 items-center justify-between border-b border-neutral-300 px-6 py-4 dark:border-neutral-700/60"
+					class="flex flex-shrink-0 items-center justify-between border-b border-border px-6 py-4"
 				>
-					<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{header}</h2>
+					<h2 class="text-lg font-semibold text-text">{header}</h2>
 					<button
 						type="button"
 						on:click={handleClose}
-						class="rounded-lg p-1 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+						class="rounded-control-sm p-1 text-text-muted transition-colors hover:bg-surface-hover hover:text-text-soft"
 					>
 						<X size={20} />
 					</button>

@@ -132,19 +132,17 @@
 <Modal {open} header="Sync Changes" on:cancel={skip}>
 	<svelte:fragment slot="body">
 		<div class="space-y-3">
-			<p class="text-sm text-neutral-600 dark:text-neutral-400">
+			<p class="text-sm text-text-muted">
 				The following instances sync this entity. Would you like to push your changes now?
 			</p>
 
 			<div class="space-y-2">
 				{#each affectedArrs as arr (arr.instanceId)}
 					{@const state = instanceStates.get(arr.instanceId) || 'idle'}
-					<div
-						class="rounded-xl border border-neutral-200 bg-white px-3 py-2.5 dark:border-neutral-700/60 dark:bg-neutral-800/50"
-					>
+					<div class="rounded-card border border-border bg-surface px-3 py-2.5">
 						<div class="flex items-center justify-between">
 							<div>
-								<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+								<span class="text-sm font-medium text-text">
 									{arr.instanceName}
 								</span>
 								{#if state !== 'idle'}
@@ -167,14 +165,14 @@
 											on:click={() => syncInstance(arr.instanceId)}
 										/>
 									{:else if state === 'syncing'}
-										<Loader2 size={16} class="animate-spin text-neutral-400" />
+										<Loader2 size={16} class="animate-spin text-text-muted" />
 									{:else if state === 'done'}
-										<Check size={16} class="text-green-500" />
+										<Check size={16} class="text-[var(--theme-success-icon)]" />
 									{/if}
 								{:else if state === 'syncing'}
-									<Loader2 size={16} class="animate-spin text-neutral-400" />
+									<Loader2 size={16} class="animate-spin text-text-muted" />
 								{:else if state === 'done'}
-									<Check size={16} class="text-green-500" />
+									<Check size={16} class="text-[var(--theme-success-icon)]" />
 								{:else if state === 'failed' || state === 'cooldown'}
 									<Button
 										text="Retry"

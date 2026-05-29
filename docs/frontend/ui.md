@@ -898,6 +898,8 @@ instead of theme-specific shadow values.
 | Actions     | `ActionsBar.svelte`, `ActionButton.svelte`, `ActionInput.svelte`, `SearchAction.svelte`, `SearchFilterAction.svelte`, `SearchModeToggle.svelte`                                               |
 | Filter      | `SmartFilterBar.svelte`                                                                                                                                                                       |
 | Display     | `CodeBlock.svelte` (display), `Markdown.svelte`                                                                                                                                               |
+| Modal       | `Modal.svelte`, `InfoModal.svelte`, `CloneModal.svelte`, `SyncPromptModal.svelte` (`DirtyModal` and `PasteModal` are pure wrappers with no styling)                                           |
+| Alerts      | `Alert.svelte`                                                                                                                                                                                |
 | Help        | `HelpButton.svelte`                                                                                                                                                                           |
 | Route views | Login page, table views (arr, custom formats, databases, media settings, naming, quality definitions, quality profiles, regular expressions)                                                  |
 
@@ -906,8 +908,6 @@ instead of theme-specific shadow values.
 These components still use hardcoded palette classes with `dark:` prefixes
 and are tracked in issue #298:
 
-- **Modal family:** `Modal.svelte`, `DirtyModal.svelte`, `InfoModal.svelte`,
-  `CloneModal.svelte`, `SyncPromptModal.svelte`
 - **Form:** `DateInput.svelte`, `TimeInput.svelte`, `TagInput.svelte`,
   `MarkdownInput.svelte`, `KeyValueList.svelte`, `RangeScale.svelte`,
   `CodeInput.svelte`, `SearchDropdown.svelte`
