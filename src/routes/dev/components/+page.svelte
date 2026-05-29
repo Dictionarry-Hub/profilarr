@@ -12,6 +12,7 @@
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
+	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import Score from '$ui/arr/Score.svelte';
 	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
@@ -366,8 +367,8 @@
 	{#if visibleIds.has('card')}
 		<ComponentCard
 			name="Card"
-			paths={['card/Card', 'card/StickyCard']}
-			description="Card is a structural container with optional header/body/footer slots separated by dividers. Supports padding sizes, hoverable state, click handler, and link mode (renders as anchor). StickyCard is a separate sticky header/footer bar with left/right slots."
+			paths={['card/Card', 'card/ExpandableCard', 'card/StickyCard']}
+			description="Card is a structural container with optional header/body/footer slots separated by dividers. Supports padding sizes, hoverable state, click handler, flush mode, and link mode (renders as anchor). ExpandableCard adds a collapsible body with header-right slot. StickyCard is a sticky header/footer bar."
 		>
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
@@ -439,6 +440,97 @@
 					<Card padding="lg">
 						<p class="text-xs text-neutral-500 dark:text-neutral-400">lg</p>
 					</Card>
+				</div>
+			</div>
+
+			<div class="space-y-3">
+				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+					Flush (matches page background)
+				</p>
+				<div class="max-w-sm">
+					<Card flush>
+						<p class="text-sm text-neutral-600 dark:text-neutral-400">
+							Flush card uses <code>bg-app</code> instead of <code>bg-surface</code>.
+						</p>
+					</Card>
+				</div>
+			</div>
+
+			<div class="space-y-3">
+				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+					Flush + hoverable
+				</p>
+				<div class="max-w-sm">
+					<Card flush hoverable>
+						<svelte:fragment slot="header">
+							<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+								Flush Hoverable
+							</h3>
+						</svelte:fragment>
+						<p class="text-sm text-neutral-600 dark:text-neutral-400">
+							Hover to see the flush hover token in action.
+						</p>
+					</Card>
+				</div>
+			</div>
+
+			<div class="space-y-3">
+				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+					Link card (renders as anchor)
+				</p>
+				<div class="max-w-sm">
+					<Card href="/dev/components" hoverable>
+						<svelte:fragment slot="header">
+							<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+								Linked Card
+							</h3>
+						</svelte:fragment>
+						<p class="text-sm text-neutral-600 dark:text-neutral-400">
+							This card is an anchor element. Click to navigate.
+						</p>
+					</Card>
+				</div>
+			</div>
+
+			<div class="space-y-3">
+				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+					ExpandableCard
+				</p>
+				<div class="space-y-3">
+					<ExpandableCard title="Expanded Section" description="Click the header to collapse">
+						<div class="px-6 py-4">
+							<p class="text-sm text-neutral-600 dark:text-neutral-400">
+								Body content visible by default.
+							</p>
+						</div>
+					</ExpandableCard>
+					<ExpandableCard
+						title="Collapsed Section"
+						description="Click the header to expand"
+						open={false}
+					>
+						<div class="px-6 py-4">
+							<p class="text-sm text-neutral-600 dark:text-neutral-400">
+								This content is hidden until expanded.
+							</p>
+						</div>
+					</ExpandableCard>
+					<ExpandableCard
+						title="With Header Actions"
+						description="Actions in the header-right slot"
+					>
+						<svelte:fragment slot="header-right">
+							<div class="flex items-center gap-1" on:click|stopPropagation>
+								<Button icon={Plus} size="xs" variant="ghost" />
+								<Button icon={Settings} size="xs" variant="ghost" />
+							</div>
+						</svelte:fragment>
+						<div class="px-6 py-4">
+							<p class="text-sm text-neutral-600 dark:text-neutral-400">
+								The header-right slot holds inline actions.
+							</p>
+						</div>
+					</ExpandableCard>
 				</div>
 			</div>
 
