@@ -1,7 +1,14 @@
 import type { ComponentType } from 'svelte';
-import { History, Monitor, MoonStar, Sun, Turntable } from 'lucide-svelte';
+import { History, Monitor, MoonStar, Sparkle, Sun, Turntable, Zap } from 'lucide-svelte';
 
-export type ThemePreference = 'system' | 'default-light' | 'default-dark' | 'retro' | 'classic';
+export type ThemePreference =
+	| 'system'
+	| 'default-light'
+	| 'default-dark'
+	| 'retro'
+	| 'classic'
+	| 'vesper'
+	| 'neon';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeDefinition {
@@ -69,6 +76,28 @@ export const themeDefinitions: ThemeDefinition[] = [
 		mode: 'dark',
 		defaultSans: 'dm-sans',
 		defaultMono: 'geist-mono'
+	},
+	{
+		value: 'vesper',
+		label: 'Vesper',
+		shortLabel: 'Vesper',
+		description: 'Twilight indigo with amber starlight',
+		icon: Sparkle,
+		className: 'theme-vesper',
+		mode: 'dark',
+		defaultSans: 'ibm-plex-sans',
+		defaultMono: 'ibm-plex-mono'
+	},
+	{
+		value: 'neon',
+		label: 'Neon',
+		shortLabel: 'Neon',
+		description: 'Cyberpunk sprawl with hot magenta neon',
+		icon: Zap,
+		className: 'theme-neon',
+		mode: 'dark',
+		defaultSans: 'inter',
+		defaultMono: 'jetbrains-mono'
 	}
 ];
 

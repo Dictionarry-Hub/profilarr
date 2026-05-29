@@ -21,7 +21,9 @@
 				var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 				var themeMap = {
 					retro: { cls: 'theme-retro', scheme: 'light' },
-					classic: { cls: 'theme-classic', scheme: 'dark' }
+					classic: { cls: 'theme-classic', scheme: 'dark' },
+					vesper: { cls: 'theme-vesper', scheme: 'dark' },
+					neon: { cls: 'theme-neon', scheme: 'dark' }
 				};
 				var mapped = themeMap[stored];
 				if (mapped) {

@@ -901,6 +901,7 @@ instead of theme-specific shadow values.
 | Modal       | `Modal.svelte`, `InfoModal.svelte`, `CloneModal.svelte`, `SyncPromptModal.svelte` (`DirtyModal` and `PasteModal` are pure wrappers with no styling)                                           |
 | Alerts      | `Alert.svelte`                                                                                                                                                                                |
 | Help        | `HelpButton.svelte`                                                                                                                                                                           |
+| List        | `DraggableCard.svelte`                                                                                                                                                                        |
 | Route views | Login page, table views (arr, custom formats, databases, media settings, naming, quality definitions, quality profiles, regular expressions)                                                  |
 
 ### Not yet migrated
@@ -916,18 +917,19 @@ and are tracked in issue #298:
 - **Navigation:** `Breadcrumb.svelte`, `BottomNav.svelte`,
   `Pagination.svelte`
 - **Other:** `EmptyState.svelte`, `FilterTag.svelte`, `ViewToggle.svelte`,
-  `DraggableCard.svelte`, `SelectableContainer.svelte`,
-  `SelectableRow.svelte`
+  `SelectableContainer.svelte`, `SelectableRow.svelte`
 - **Styles:** `prose.css`, `scrollbar.css`
 
 ### Available themes
 
-| Theme         | Mode  | Selector           | Description                                                                                                                                                      |
-| ------------- | ----- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| System        | auto  | (none)             | Follows device `prefers-color-scheme`                                                                                                                            |
-| Default Light | light | `.light` / `:root` | Clean neutral palette, DM Sans / Geist Mono                                                                                                                      |
-| Default Dark  | dark  | `.dark`            | Semi-transparent surfaces on dark background                                                                                                                     |
-| Retro         | light | `.theme-retro`     | Win98 / Napster: silver-grey, navy accent, square corners, inset bevels, Tahoma / Courier New, Clippy help button                                                |
-| Classic       | dark  | `.theme-classic`   | Profilarr v1: deep charcoal (#111827), gray-800 surfaces, blue-600 accent, tighter radius (8px cards, 6px controls), card shadows, Schibsted Grotesk / Fira Code |
+| Theme         | Mode  | Selector           | Description                                                                                                                                                            |
+| ------------- | ----- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| System        | auto  | (none)             | Follows device `prefers-color-scheme`                                                                                                                                  |
+| Default Light | light | `.light` / `:root` | Clean neutral palette, DM Sans / Geist Mono                                                                                                                            |
+| Default Dark  | dark  | `.dark`            | Semi-transparent surfaces on dark background                                                                                                                           |
+| Retro         | light | `.theme-retro`     | Win98 / Napster: silver-grey, navy accent, square corners, inset bevels, Tahoma / Courier New, Clippy help button                                                      |
+| Classic       | dark  | `.theme-classic`   | Profilarr v1: deep charcoal (#111827), gray-800 surfaces, blue-600 accent, tighter radius (8px cards, 6px controls), card shadows, Schibsted Grotesk / Fira Code       |
+| Vesper        | dark  | `.theme-vesper`    | Twilight indigo (#161122), violet-purple surfaces, amber-gold accent (the evening star), soft card shadows, slightly larger card radius, IBM Plex Sans / IBM Plex Mono |
+| Neon          | dark  | `.theme-neon`      | Cyberpunk sprawl (#0b0e14), cyan circuit-trace borders, hot magenta accent, neon-glow card shadows, sharp corners (6px cards, 4px controls), Inter / JetBrains Mono    |
 
 Planned: user-loadable custom theme files.

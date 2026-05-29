@@ -1,0 +1,102 @@
+/*
+ * Neon
+ *
+ * The grid never sleeps. Somewhere in the sprawl, your instances are
+ * running -- Radarr nodes pulling feeds, Sonarr scrapers indexing,
+ * quality profiles filtering signal from noise. Profilarr is the deck
+ * you jack into to manage it all. Each configuration is a payload.
+ * Each sync is a run. The PCD system is your firmware -- append-only
+ * ops building state like memory stacking in a neural interface.
+ *
+ * Backgrounds are the dark between streetlights -- near-black with a
+ * cold blue undertone from distant screens. Surfaces are panels
+ * reflecting ambient neon. Text glows cool blue-white like a
+ * holographic terminal readout. The accent is hot magenta -- the
+ * unmistakable color of a neon sign cutting through rain and fog.
+ * Borders trace like circuit paths at low opacity. Cards cast a faint
+ * colored glow, because in the sprawl, nothing exists without casting
+ * light.
+ *
+ * Sharp corners. Industrial spacing. Everything built for function,
+ * not comfort. Inter is clean, dense, corporate-precise -- the font
+ * of megacorp interfaces. JetBrains Mono has ligatures for reading
+ * config at 3am.
+ */
+
+.theme-neon {
+	--theme-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--theme-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+	/* The dark between streetlights */
+	--theme-bg: #0b0e14;
+
+	/* Panels reflecting ambient neon */
+	--theme-surface: #111825;
+	--theme-surface-muted: #0b0e14;
+	--theme-surface-hover: #172035;
+	--theme-surface-hover-muted: #0f1420;
+
+	/* Holographic terminal readout */
+	--theme-text: #d0e4f7;
+	--theme-text-soft: #8eaac8;
+	--theme-text-muted: #4d6a88;
+	--theme-text-subtle: #283848;
+
+	/* Circuit traces */
+	--theme-border: rgb(0 200 220 / 0.25);
+	--theme-border-muted: rgb(0 200 220 / 0.15);
+	--theme-border-subtle: rgb(0 200 220 / 0.08);
+
+	/* Hot magenta -- a neon sign cutting through rain */
+	--theme-accent-solid: #f72585;
+	--theme-accent-solid-hover: #e01070;
+	--theme-on-accent: #ffffff;
+
+	/* Red alert in the sprawl */
+	--theme-danger-solid: #ff3344;
+	--theme-danger-solid-hover: #dd1a2a;
+	--theme-on-danger: #ffffff;
+
+	/* Flush and ghost: dark chrome */
+	--theme-flush-bg: var(--theme-bg);
+	--theme-flush-hover: var(--theme-surface-hover);
+	--theme-ghost-bg: transparent;
+	--theme-ghost-border: transparent;
+	--theme-ghost-label-bg: rgb(0 200 220 / 0.08);
+	--theme-ghost-label-text: #4d6a88;
+
+	/* Status: neon indicators on a dark HUD */
+	--theme-success-bg: rgb(0 255 136 / 0.08);
+	--theme-success-text: #00ff88;
+	--theme-success-border: rgb(0 255 136 / 0.25);
+	--theme-success-icon: #00ff88;
+
+	--theme-warning-bg: rgb(255 200 0 / 0.08);
+	--theme-warning-text: #ffc800;
+	--theme-warning-border: rgb(255 200 0 / 0.25);
+	--theme-warning-icon: #ffc800;
+
+	--theme-danger-bg: rgb(255 51 68 / 0.08);
+	--theme-danger-text: #ff6675;
+	--theme-danger-border: rgb(255 51 68 / 0.25);
+	--theme-danger-icon: #ff6675;
+
+	--theme-info-bg: rgb(0 200 220 / 0.08);
+	--theme-info-text: #00d4ee;
+	--theme-info-border: rgb(0 200 220 / 0.25);
+	--theme-info-icon: #00d4ee;
+
+	/* Links: cyan data streams */
+	--theme-link-text: #00d4ee;
+
+	/* Sharp. Industrial. No wasted geometry. */
+	--theme-radius-control-sm: 0.25rem;
+	--theme-radius-control: 0.375rem;
+	--theme-radius-card: 0.375rem;
+	--theme-radius-pill: 9999px;
+
+	/* Every neon sign casts its own color onto the street */
+	--theme-shadow-card: 0 0 20px -4px rgb(0 200 220 / 0.12), 0 0 6px -2px rgb(247 37 133 / 0.08);
+	--theme-shadow-control: none;
+	--theme-shadow-control-active: 0 0 8px rgb(247 37 133 / 0.3);
+}

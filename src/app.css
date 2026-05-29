@@ -4,6 +4,8 @@
 @import './styles/themes/default-dark.css';
 @import './styles/themes/retro.css';
 @import './styles/themes/classic.css';
+@import './styles/themes/vesper.css';
+@import './styles/themes/neon.css';
 @import './styles/prose.css';
 @import './styles/scrollbar.css';
 @import './styles/transitions.css';

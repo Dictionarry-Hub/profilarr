@@ -1,0 +1,99 @@
+/*
+ * Vesper
+ *
+ * Named for the evening star — Venus as it appears at dusk. In Latin,
+ * "vesper" means evening: the liminal hour when the sky deepens from
+ * indigo to near-black and the first star burns through. Sailors used
+ * it as a bearing. Monks rang bells for it. It marks the threshold
+ * between what was and what will be.
+ *
+ * The palette is drawn from that twilight window. Backgrounds are the
+ * sky forty minutes after sunset — deep violet-indigo, not quite black,
+ * still holding color. Surfaces lift slightly, like clouds catching the
+ * last ambient light. Text is cool silver, starlight just becoming
+ * visible. The accent is warm amber-gold: Venus herself, burning steady
+ * against the darkening sky. Borders trace the haze where sky meets
+ * horizon. Shadows carry a faint warmth, light bleeding over the edge
+ * of the world.
+ *
+ * IBM Plex was chosen for its precision — the typeface of instruments
+ * and observatories, designed to be read in low light without strain.
+ */
+
+.theme-vesper {
+	--theme-font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+	--theme-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+	/* The sky, forty minutes after sunset */
+	--theme-bg: #161122;
+
+	/* Clouds catching the last ambient light */
+	--theme-surface: #1e1832;
+	--theme-surface-muted: #161122;
+	--theme-surface-hover: #271f40;
+	--theme-surface-hover-muted: #1a1429;
+
+	/* Starlight becoming visible */
+	--theme-text: #e2ddf0;
+	--theme-text-soft: #c4bdd6;
+	--theme-text-muted: #8e86a3;
+	--theme-text-subtle: #554d6b;
+
+	/* The haze where sky meets horizon */
+	--theme-border: rgb(88 75 120 / 0.5);
+	--theme-border-muted: rgb(88 75 120 / 0.35);
+	--theme-border-subtle: rgb(88 75 120 / 0.2);
+
+	/* Venus, burning amber-gold against the violet */
+	--theme-accent-solid: #d4a24c;
+	--theme-accent-solid-hover: #c08a30;
+	--theme-on-accent: #120e1c;
+
+	/* Warning flare on the horizon */
+	--theme-danger-solid: #d94f5c;
+	--theme-danger-solid-hover: #c23a47;
+	--theme-on-danger: #ffffff;
+
+	/* Flush and ghost: night air */
+	--theme-flush-bg: var(--theme-bg);
+	--theme-flush-hover: var(--theme-surface-hover);
+	--theme-ghost-bg: transparent;
+	--theme-ghost-border: transparent;
+	--theme-ghost-label-bg: rgb(88 75 120 / 0.2);
+	--theme-ghost-label-text: #8e86a3;
+
+	/* Status: seen through twilight */
+	--theme-success-bg: rgb(34 120 80 / 0.15);
+	--theme-success-text: #6dd8a0;
+	--theme-success-border: rgb(34 120 80 / 0.4);
+	--theme-success-icon: #6dd8a0;
+
+	--theme-warning-bg: rgb(180 130 40 / 0.15);
+	--theme-warning-text: #ecc86a;
+	--theme-warning-border: rgb(180 130 40 / 0.4);
+	--theme-warning-icon: #ecc86a;
+
+	--theme-danger-bg: rgb(180 55 65 / 0.15);
+	--theme-danger-text: #f09098;
+	--theme-danger-border: rgb(180 55 65 / 0.4);
+	--theme-danger-icon: #f09098;
+
+	--theme-info-bg: rgb(70 90 170 / 0.15);
+	--theme-info-text: #9ab0f0;
+	--theme-info-border: rgb(70 90 170 / 0.4);
+	--theme-info-icon: #9ab0f0;
+
+	/* Links: a cooler star, not the evening one */
+	--theme-link-text: #9ab0f0;
+
+	/* Organic, nothing sharp — like the curve of the horizon */
+	--theme-radius-control-sm: 0.5rem;
+	--theme-radius-control: 0.75rem;
+	--theme-radius-card: 0.875rem;
+	--theme-radius-pill: 9999px;
+
+	/* Light bleeding over the edge of the world */
+	--theme-shadow-card: 0 4px 20px -4px rgb(22 17 34 / 0.6);
+	--theme-shadow-control: none;
+	--theme-shadow-control-active: none;
+}
