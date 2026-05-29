@@ -2,7 +2,7 @@
 	--theme-bg: #171717;
 	--theme-surface: rgb(38 38 38 / 0.5);
 	--theme-surface-muted: #171717;
-	--theme-surface-hover: #404040;
+	--theme-surface-hover: rgb(38 38 38 / 0.6);
 	--theme-surface-hover-muted: rgb(38 38 38 / 0.8);
 	--theme-text: #fafafa;
 	--theme-text-soft: #e5e5e5;
