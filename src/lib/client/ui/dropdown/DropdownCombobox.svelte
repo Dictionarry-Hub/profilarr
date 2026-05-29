@@ -112,8 +112,8 @@
 	$: labelClasses = isCompactButton ? 'text-xs text-text-muted' : 'text-sm text-text-muted';
 
 	$: triggerShellClasses = isCompactButton
-		? 'gap-1 rounded-lg px-2 py-1 text-xs'
-		: 'gap-1.5 rounded-xl px-3 py-1.5 text-sm md:py-2';
+		? 'gap-1 rounded-control-sm px-2 py-1 text-xs'
+		: 'gap-1.5 rounded-control px-3 py-1.5 text-sm md:py-2';
 
 	$: chevronSize = isCompactButton ? 12 : 14;
 
