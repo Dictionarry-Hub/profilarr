@@ -34,12 +34,12 @@
 		lg: 'mx-5'
 	}[padding];
 
-	$: bgClass = isFlush ? 'bg-app' : 'bg-surface';
+	$: bgClass = isFlush ? 'bg-[var(--theme-flush-bg)]' : 'bg-surface';
 
 	$: hoverClass =
 		hoverable || interactive
 			? isFlush
-				? 'transition-colors hover:bg-surface-hover'
+				? 'transition-colors hover:bg-[var(--theme-flush-hover)]'
 				: 'transition-colors hover:bg-surface-hover-muted'
 			: '';
 

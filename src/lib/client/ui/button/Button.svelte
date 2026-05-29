@@ -77,7 +77,8 @@
 		primary: 'bg-accent-solid text-on-accent hover:bg-accent-solid-hover',
 		secondary: 'border border-border bg-surface text-text-soft hover:bg-surface-hover',
 		danger: 'bg-danger-solid text-on-danger hover:bg-danger-solid-hover',
-		ghost: 'text-text-muted hover:bg-surface-hover hover:text-text-soft',
+		ghost:
+			'border border-[var(--theme-ghost-border)] bg-[var(--theme-ghost-bg)] text-text-muted hover:bg-surface-hover hover:text-text-soft',
 		outline: 'border border-border text-text-muted hover:bg-surface-hover hover:text-text-soft'
 	};
 

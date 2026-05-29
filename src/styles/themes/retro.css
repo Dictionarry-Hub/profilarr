@@ -17,6 +17,10 @@
 	--theme-danger-solid: #cc0000;
 	--theme-danger-solid-hover: #990000;
 	--theme-on-danger: #ffffff;
+	--theme-flush-bg: var(--theme-surface);
+	--theme-flush-hover: var(--theme-surface-hover-muted);
+	--theme-ghost-bg: var(--theme-surface);
+	--theme-ghost-border: var(--theme-border);
 	--theme-radius-control-sm: 0px;
 	--theme-radius-control: 0px;
 	--theme-radius-card: 0px;

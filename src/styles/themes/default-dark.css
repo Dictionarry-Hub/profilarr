@@ -20,6 +20,10 @@
 	--theme-radius-control-sm: 0.5rem;
 	--theme-radius-control: 0.75rem;
 	--theme-radius-card: 0.75rem;
+	--theme-flush-bg: var(--theme-bg);
+	--theme-flush-hover: var(--theme-surface-hover);
+	--theme-ghost-bg: transparent;
+	--theme-ghost-border: transparent;
 	--theme-shadow-card: none;
 	--theme-shadow-control: none;
 	--theme-shadow-control-active: none;
