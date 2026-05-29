@@ -19,10 +19,14 @@
 				// Theme
 				var stored = localStorage.getItem('theme');
 				var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-				var themeMap = { retro: { cls: 'theme-retro', scheme: 'light' } };
+				var themeMap = {
+					retro: { cls: 'theme-retro', scheme: 'light' },
+					classic: { cls: 'theme-classic', scheme: 'dark' }
+				};
 				var mapped = themeMap[stored];
 				if (mapped) {
 					d.classList.add(mapped.cls);
+					d.classList.add(mapped.scheme);
 					d.style.colorScheme = mapped.scheme;
 				} else {
 					var theme =

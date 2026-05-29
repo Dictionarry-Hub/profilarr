@@ -922,12 +922,12 @@ and are tracked in issue #298:
 
 ### Available themes
 
-| Theme         | Mode  | Selector           | Description                                                                                                       |
-| ------------- | ----- | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| System        | auto  | (none)             | Follows device `prefers-color-scheme`                                                                             |
-| Default Light | light | `.light` / `:root` | Clean neutral palette, DM Sans / Geist Mono                                                                       |
-| Default Dark  | dark  | `.dark`            | Semi-transparent surfaces on dark background                                                                      |
-| Retro         | light | `.theme-retro`     | Win98 / Napster: silver-grey, navy accent, square corners, inset bevels, Tahoma / Courier New, Clippy help button |
+| Theme         | Mode  | Selector           | Description                                                                                                                                                      |
+| ------------- | ----- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| System        | auto  | (none)             | Follows device `prefers-color-scheme`                                                                                                                            |
+| Default Light | light | `.light` / `:root` | Clean neutral palette, DM Sans / Geist Mono                                                                                                                      |
+| Default Dark  | dark  | `.dark`            | Semi-transparent surfaces on dark background                                                                                                                     |
+| Retro         | light | `.theme-retro`     | Win98 / Napster: silver-grey, navy accent, square corners, inset bevels, Tahoma / Courier New, Clippy help button                                                |
+| Classic       | dark  | `.theme-classic`   | Profilarr v1: deep charcoal (#111827), gray-800 surfaces, blue-600 accent, tighter radius (8px cards, 6px controls), card shadows, Schibsted Grotesk / Fira Code |
 
-Planned: `classic.css` (dark-only, replicating the v1 Profilarr look) and
-user-loadable custom theme files.
+Planned: user-loadable custom theme files.

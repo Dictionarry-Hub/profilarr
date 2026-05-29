@@ -1,7 +1,7 @@
 import type { ComponentType } from 'svelte';
-import { Monitor, MoonStar, Sun, Turntable } from 'lucide-svelte';
+import { History, Monitor, MoonStar, Sun, Turntable } from 'lucide-svelte';
 
-export type ThemePreference = 'system' | 'default-light' | 'default-dark' | 'retro';
+export type ThemePreference = 'system' | 'default-light' | 'default-dark' | 'retro' | 'classic';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeDefinition {
@@ -58,6 +58,17 @@ export const themeDefinitions: ThemeDefinition[] = [
 		icon: Turntable,
 		className: 'theme-retro',
 		mode: 'light'
+	},
+	{
+		value: 'classic',
+		label: 'Classic',
+		shortLabel: 'Classic',
+		description: 'The original Profilarr v1 look',
+		icon: History,
+		className: 'theme-classic',
+		mode: 'dark',
+		defaultSans: 'dm-sans',
+		defaultMono: 'geist-mono'
 	}
 ];
 

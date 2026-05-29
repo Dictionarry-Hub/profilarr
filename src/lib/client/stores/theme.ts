@@ -63,7 +63,9 @@ function createThemeStore() {
 			const apply = () => {
 				document.documentElement.classList.remove(...themeClassNames);
 				if (newTheme.className) document.documentElement.classList.add(newTheme.className);
-				document.documentElement.style.colorScheme = newTheme.mode as ThemeMode;
+				const modeClass = newTheme.mode as ThemeMode;
+				if (modeClass !== newTheme.className) document.documentElement.classList.add(modeClass);
+				document.documentElement.style.colorScheme = modeClass;
 			};
 
 			// Use View Transitions API if available for smooth theme changes.
