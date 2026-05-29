@@ -51,9 +51,9 @@
 	{href}
 	{onclick}
 	data-onboarding={onboardingId}
-	class="flex items-center gap-2 rounded-lg py-1.5 pr-2 pl-3 font-sans text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 {isActive
-		? 'bg-neutral-200 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
-		: ''}"
+	class="flex items-center gap-2 rounded-control border py-1.5 pr-2 pl-3 font-sans text-sm font-semibold text-text-muted transition-colors hover:bg-surface-hover hover:text-text {isActive
+		? 'border-border bg-surface text-text shadow-control'
+		: 'border-transparent'}"
 >
 	{#if iconSrc}
 		<span class="nav-icon-emoji"><img src={iconSrc} alt="" class="h-3.5 w-3.5" /></span>

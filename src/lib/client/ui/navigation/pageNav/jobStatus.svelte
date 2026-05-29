@@ -15,7 +15,7 @@
 		{#if $jobStatus.state === 'running'}
 			<Loader2 size={16} class="flex-shrink-0 animate-spin text-blue-500 dark:text-blue-400" />
 			<div class="flex-1">
-				<div class="text-xs font-semibold text-neutral-900 dark:text-neutral-50">
+				<div class="text-xs font-semibold text-text">
 					{$jobStatus.displayLabel}
 				</div>
 			</div>
@@ -26,13 +26,13 @@
 				<XCircle size={16} class="flex-shrink-0 text-red-600 dark:text-red-400" />
 			{/if}
 			<div class="flex-1">
-				<div class="text-xs font-semibold text-neutral-900 dark:text-neutral-50">
+				<div class="text-xs font-semibold text-text">
 					{$jobStatus.displayLabel}
 					{$jobStatus.status === 'success' || $jobStatus.status === 'skipped'
 						? 'complete'
 						: 'failed'}
 				</div>
-				<div class="font-mono text-[10px] text-neutral-600 dark:text-neutral-400">
+				<div class="font-mono text-[10px] text-text-muted">
 					{formatDuration($jobStatus.durationMs)}
 				</div>
 			</div>

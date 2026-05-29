@@ -36,8 +36,8 @@
 		<img src={logo} alt="Profilarr logo" class="h-5 w-5 flex-shrink-0" />
 
 		<div class="flex-1">
-			<div class="text-xs font-semibold text-neutral-900 dark:text-neutral-50">profilarr</div>
-			<div class="font-mono text-[10px] text-neutral-600 dark:text-neutral-400">{line}</div>
+			<div class="text-xs font-semibold text-text">profilarr</div>
+			<div class="font-mono text-[10px] text-text-muted">{line}</div>
 		</div>
 
 		{#if outOfDate}

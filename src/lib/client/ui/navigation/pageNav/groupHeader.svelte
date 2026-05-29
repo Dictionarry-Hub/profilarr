@@ -12,20 +12,22 @@
 	export let onToggle: () => void;
 	export let alert: number = 0;
 
-	$: isActive = hasItems
-		? $page.url.pathname === href
-		: $page.url.pathname === href || $page.url.pathname.startsWith(href + '/');
+	$: isActive = $page.url.pathname === href || $page.url.pathname.startsWith(href + '/');
 </script>
 
-<div class="group/header flex items-center">
+<div
+	class="group/header flex items-center rounded-control border {isActive
+		? 'border-border bg-surface shadow-control'
+		: 'border-transparent'}"
+>
 	<!-- Main navigation button (left side) - rounded left, square right (or fully rounded if no items) -->
 	<a
 		{href}
-		class="flex flex-1 items-center gap-2 py-1.5 pr-2 pl-3 font-sans text-sm font-semibold text-neutral-700 transition-colors group-hover/header:bg-neutral-200 hover:bg-neutral-200 dark:text-neutral-300 dark:group-hover/header:bg-neutral-800 dark:hover:bg-neutral-800 {hasItems
-			? 'rounded-l-lg'
-			: 'rounded-lg'} {isActive
-			? 'bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700'
-			: ''}"
+		class="flex flex-1 items-center gap-2 py-1.5 pr-2 pl-3 font-sans text-sm font-semibold text-text-soft transition-colors {isActive
+			? ''
+			: 'group-hover/header:bg-surface-hover hover:bg-surface-hover'} {hasItems
+			? 'rounded-l-control'
+			: 'rounded-control'}"
 	>
 		{#if emoji}
 			<span class="nav-icon-emoji">{emoji}</span>
@@ -43,15 +45,13 @@
 	{#if hasItems}
 		<button
 			onclick={onToggle}
-			class="flex items-center self-stretch rounded-r-lg pr-1.5 pl-1.5 transition-colors group-hover/header:bg-neutral-200 hover:!bg-neutral-300 dark:group-hover/header:bg-neutral-800 dark:hover:!bg-neutral-700 {isActive
-				? 'bg-neutral-200 hover:!bg-neutral-300 dark:bg-neutral-800 dark:hover:!bg-neutral-700'
-				: ''}"
+			class="flex items-center self-stretch rounded-r-control pr-1.5 pl-1.5 transition-colors {isActive
+				? 'hover:!bg-surface-hover'
+				: 'group-hover/header:bg-surface-hover hover:!bg-surface-hover-muted'}"
 			aria-label={isOpen ? 'Collapse group' : 'Expand group'}
 		>
 			<svg
-				class="h-4 w-4 text-neutral-600 transition-transform dark:text-neutral-400 {isOpen
-					? 'rotate-90'
-					: ''}"
+				class="h-4 w-4 text-text-muted transition-transform {isOpen ? 'rotate-90' : ''}"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
