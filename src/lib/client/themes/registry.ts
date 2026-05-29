@@ -8,7 +8,7 @@ export type ThemePreference =
 	| 'retro'
 	| 'classic'
 	| 'vesper'
-	| 'neon';
+	| 'tannhauser';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeDefinition {
@@ -89,12 +89,12 @@ export const themeDefinitions: ThemeDefinition[] = [
 		defaultMono: 'ibm-plex-mono'
 	},
 	{
-		value: 'neon',
-		label: 'Neon',
-		shortLabel: 'Neon',
-		description: 'Cyberpunk sprawl with hot magenta neon',
+		value: 'tannhauser',
+		label: 'Tannhauser',
+		shortLabel: 'Tannhauser',
+		description: 'C-beams glittering in the dark',
 		icon: Zap,
-		className: 'theme-neon',
+		className: 'theme-tannhauser',
 		mode: 'dark',
 		defaultSans: 'inter',
 		defaultMono: 'jetbrains-mono'

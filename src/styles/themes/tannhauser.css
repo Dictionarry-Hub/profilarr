@@ -1,5 +1,7 @@
 /*
- * Neon
+ * Tannhauser
+ *
+ * "I've watched C-beams glitter in the dark near the Tannhauser Gate."
  *
  * The grid never sleeps. Somewhere in the sprawl, your instances are
  * running -- Radarr nodes pulling feeds, Sonarr scrapers indexing,
@@ -10,9 +12,9 @@
  *
  * Backgrounds are the dark between streetlights -- near-black with a
  * cold blue undertone from distant screens. Surfaces are panels
- * reflecting ambient neon. Text glows cool blue-white like a
+ * reflecting ambient light. Text glows cool blue-white like a
  * holographic terminal readout. The accent is hot magenta -- the
- * unmistakable color of a neon sign cutting through rain and fog.
+ * unmistakable color of a sign cutting through rain and fog.
  * Borders trace like circuit paths at low opacity. Cards cast a faint
  * colored glow, because in the sprawl, nothing exists without casting
  * light.
@@ -23,14 +25,14 @@
  * config at 3am.
  */
 
-.theme-neon {
+.theme-tannhauser {
 	--theme-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 	--theme-font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
 	/* The dark between streetlights */
 	--theme-bg: #0b0e14;
 
-	/* Panels reflecting ambient neon */
+	/* Panels reflecting ambient light */
 	--theme-surface: #111825;
 	--theme-surface-muted: #0b0e14;
 	--theme-surface-hover: #172035;
@@ -47,7 +49,7 @@
 	--theme-border-muted: rgb(0 200 220 / 0.15);
 	--theme-border-subtle: rgb(0 200 220 / 0.08);
 
-	/* Hot magenta -- a neon sign cutting through rain */
+	/* Hot magenta -- a sign cutting through rain */
 	--theme-accent-solid: #f72585;
 	--theme-accent-solid-hover: #e01070;
 	--theme-on-accent: #ffffff;
@@ -65,7 +67,7 @@
 	--theme-ghost-label-bg: rgb(0 200 220 / 0.08);
 	--theme-ghost-label-text: #4d6a88;
 
-	/* Status: neon indicators on a dark HUD */
+	/* Status indicators on a dark HUD */
 	--theme-success-bg: rgb(0 255 136 / 0.08);
 	--theme-success-text: #00ff88;
 	--theme-success-border: rgb(0 255 136 / 0.25);
@@ -95,7 +97,7 @@
 	--theme-radius-card: 0.375rem;
 	--theme-radius-pill: 9999px;
 
-	/* Every neon sign casts its own color onto the street */
+	/* C-beams glittering in the dark */
 	--theme-shadow-card: 0 0 20px -4px rgb(0 200 220 / 0.12), 0 0 6px -2px rgb(247 37 133 / 0.08);
 	--theme-shadow-control: none;
 	--theme-shadow-control-active: 0 0 8px rgb(247 37 133 / 0.3);
