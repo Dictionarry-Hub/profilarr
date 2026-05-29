@@ -1,0 +1,26 @@
+.theme-retro {
+	--theme-bg: #c0c0c0;
+	--theme-surface: #d4d0c8;
+	--theme-surface-muted: #c0c0c0;
+	--theme-surface-hover: #b8b4ac;
+	--theme-surface-hover-muted: #cac6be;
+	--theme-text: #000000;
+	--theme-text-soft: #1a1a1a;
+	--theme-text-muted: #555555;
+	--theme-text-subtle: #808080;
+	--theme-border: #808080;
+	--theme-border-muted: #a0a0a0;
+	--theme-border-subtle: #c0c0c0;
+	--theme-accent-solid: #000080;
+	--theme-accent-solid-hover: #0000b0;
+	--theme-on-accent: #ffffff;
+	--theme-danger-solid: #cc0000;
+	--theme-danger-solid-hover: #990000;
+	--theme-on-danger: #ffffff;
+	--theme-radius-control-sm: 0px;
+	--theme-radius-control: 0px;
+	--theme-radius-card: 0px;
+	--theme-shadow-card: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
+	--theme-shadow-control: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
+	--theme-shadow-control-active: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+}

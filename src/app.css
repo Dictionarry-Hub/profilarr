@@ -2,6 +2,7 @@
 @import './styles/fonts.css';
 @import './styles/themes/default-light.css';
 @import './styles/themes/default-dark.css';
+@import './styles/themes/retro.css';
 @import './styles/prose.css';
 @import './styles/scrollbar.css';
 @import './styles/transitions.css';
@@ -68,6 +69,8 @@
 	--radius-control: var(--theme-radius-control);
 	--radius-card: var(--theme-radius-card);
 	--shadow-card: var(--theme-shadow-card);
+	--shadow-control: var(--theme-shadow-control);
+	--shadow-control-active: var(--theme-shadow-control-active);
 }
 
 @layer base {

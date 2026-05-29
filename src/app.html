@@ -19,16 +19,23 @@
 				// Theme
 				var stored = localStorage.getItem('theme');
 				var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-				var theme =
-					stored === 'default-light' || stored === 'light'
-						? 'light'
-						: stored === 'default-dark' || stored === 'dark'
-							? 'dark'
-							: prefersDark
+				var themeMap = { retro: { cls: 'theme-retro', scheme: 'light' } };
+				var mapped = themeMap[stored];
+				if (mapped) {
+					d.classList.add(mapped.cls);
+					d.style.colorScheme = mapped.scheme;
+				} else {
+					var theme =
+						stored === 'default-light' || stored === 'light'
+							? 'light'
+							: stored === 'default-dark' || stored === 'dark'
 								? 'dark'
-								: 'light';
-				d.classList.add(theme);
-				d.style.colorScheme = theme;
+								: prefersDark
+									? 'dark'
+									: 'light';
+					d.classList.add(theme);
+					d.style.colorScheme = theme;
+				}
 
 				// Accent color
 				var accent = localStorage.getItem('accent') || 'blue';

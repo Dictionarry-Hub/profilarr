@@ -59,7 +59,7 @@
 	$: justifyClass = justify === 'between' ? 'justify-between' : 'justify-center';
 
 	$: disabledClass = disabled || softDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer';
-	$: baseClasses = `inline-flex items-center ${justifyClass} font-medium transition-colors ${disabledClass}`;
+	$: baseClasses = `inline-flex items-center ${justifyClass} font-medium shadow-control active:shadow-control-active transition-colors ${disabledClass}`;
 
 	const sizeClasses = {
 		xs: 'gap-1 rounded-control-sm px-2 py-1 text-xs',
@@ -75,12 +75,10 @@
 
 	const variantClasses = {
 		primary: 'bg-accent-solid text-on-accent hover:bg-accent-solid-hover',
-		secondary:
-			'border border-border bg-surface text-text-soft hover:bg-surface-hover',
+		secondary: 'border border-border bg-surface text-text-soft hover:bg-surface-hover',
 		danger: 'bg-danger-solid text-on-danger hover:bg-danger-solid-hover',
 		ghost: 'text-text-muted hover:bg-surface-hover hover:text-text-soft',
-		outline:
-			'border border-border text-text-muted hover:bg-surface-hover hover:text-text-soft'
+		outline: 'border border-border text-text-muted hover:bg-surface-hover hover:text-text-soft'
 	};
 
 	$: effectiveSize = responsive && isSmallScreen ? 'xs' : size;
