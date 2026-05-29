@@ -24,6 +24,18 @@
 	--theme-flush-hover: var(--theme-surface-hover);
 	--theme-ghost-bg: transparent;
 	--theme-ghost-border: transparent;
+	--theme-ghost-label-bg: rgb(245 245 245 / 0.6);
+	--theme-ghost-label-text: #525252;
+	--theme-success-bg: #d1fae5;
+	--theme-success-text: #065f46;
+	--theme-warning-bg: #fef3c7;
+	--theme-warning-text: #92400e;
+	--theme-danger-bg: #fee2e2;
+	--theme-danger-text: #991b1b;
+	--theme-info-bg: #dbeafe;
+	--theme-info-text: #1e40af;
+	--theme-link-text: #1d4ed8;
+	--theme-radius-pill: 9999px;
 	--theme-shadow-card: none;
 	--theme-shadow-control: none;
 	--theme-shadow-control-active: none;

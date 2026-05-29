@@ -68,6 +68,7 @@
 	--radius-control-sm: var(--theme-radius-control-sm);
 	--radius-control: var(--theme-radius-control);
 	--radius-card: var(--theme-radius-card);
+	--radius-pill: var(--theme-radius-pill);
 	--shadow-card: var(--theme-shadow-card);
 	--shadow-control: var(--theme-shadow-control);
 	--shadow-control-active: var(--theme-shadow-control-active);

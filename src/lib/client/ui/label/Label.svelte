@@ -19,17 +19,16 @@
 	export let rel: string | undefined = undefined;
 
 	const variantClasses = {
-		default: 'bg-accent-600 text-white dark:bg-accent-500 dark:text-white',
-		secondary: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
-		destructive: 'bg-red-600 text-white dark:bg-red-500 dark:text-white',
-		outline:
-			'border border-neutral-300 text-neutral-700 dark:border-neutral-600 dark:text-neutral-300',
-		ghost: 'bg-neutral-100/60 text-neutral-600 dark:bg-neutral-800/40 dark:text-neutral-400',
-		success: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-		warning: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-		danger: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-		info: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-		link: 'bg-neutral-100 text-blue-700 dark:bg-neutral-800 dark:text-blue-300'
+		default: 'bg-accent-solid text-on-accent',
+		secondary: 'border border-border bg-surface text-text-soft shadow-control',
+		destructive: 'bg-danger-solid text-on-danger',
+		outline: 'border border-border text-text-soft',
+		ghost: 'bg-[var(--theme-ghost-label-bg)] text-[var(--theme-ghost-label-text)]',
+		success: 'bg-[var(--theme-success-bg)] text-[var(--theme-success-text)]',
+		warning: 'bg-[var(--theme-warning-bg)] text-[var(--theme-warning-text)]',
+		danger: 'bg-[var(--theme-danger-bg)] text-[var(--theme-danger-text)]',
+		info: 'bg-[var(--theme-info-bg)] text-[var(--theme-info-text)]',
+		link: 'bg-surface-hover text-[var(--theme-link-text)]'
 	};
 
 	const sizeClasses = {
@@ -39,11 +38,11 @@
 	};
 
 	const roundedClasses = {
-		sm: 'rounded',
-		md: 'rounded-md',
-		lg: 'rounded-lg',
-		xl: 'rounded-xl',
-		full: 'rounded-full'
+		sm: 'rounded-control-sm',
+		md: 'rounded-control-sm',
+		lg: 'rounded-control',
+		xl: 'rounded-control',
+		full: 'rounded-pill'
 	};
 
 	$: resolvedVariantClasses = customVariant || variantClasses[variant];
