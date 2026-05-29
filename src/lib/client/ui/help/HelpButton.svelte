@@ -7,6 +7,7 @@
 	import Hatchling from './characters/Hatchling.svelte';
 	import Hal from './characters/Hal.svelte';
 	import Planet from './characters/Planet.svelte';
+	import Alien from './characters/Alien.svelte';
 
 	export let variant: 'fab' | 'navbar' = 'fab';
 
@@ -32,7 +33,9 @@
 	class={isFab ? 'fixed right-6 bottom-6 z-50 hidden md:block' : 'relative md:hidden'}
 	on:click|stopPropagation
 >
-	{#if $themePreference === 'velouria'}
+	{#if $themePreference === 'roswell'}
+		<Alien {variant} {open} onToggle={toggle} onClose={close} />
+	{:else if $themePreference === 'velouria'}
 		<Planet {variant} {open} onToggle={toggle} onClose={close} />
 	{:else if $themePreference === 'ashruvarsha'}
 		<Joi {variant} {open} onToggle={toggle} onClose={close} />

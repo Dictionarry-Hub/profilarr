@@ -1524,6 +1524,7 @@
       "dependencies": [
         "npm:@deno/vite-plugin@^2.0.2",
         "npm:@jsr/db__sqlite@0.12",
+        "npm:@lucide/lab@~0.1.2",
         "npm:@playwright/test@^1.60.0",
         "npm:@sveltejs/kit@^2.61.1",
         "npm:@sveltejs/vite-plugin-svelte@^7.1.2",

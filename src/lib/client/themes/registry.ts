@@ -8,6 +8,7 @@ import {
 	Sparkle,
 	Sun,
 	Turntable,
+	Radar,
 	Zap
 } from 'lucide-svelte';
 
@@ -20,7 +21,8 @@ export type ThemePreference =
 	| 'vesper'
 	| 'ashruvarsha'
 	| 'monolith'
-	| 'velouria';
+	| 'velouria'
+	| 'roswell';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeDefinition {
@@ -131,6 +133,17 @@ export const themeDefinitions: ThemeDefinition[] = [
 		className: 'theme-velouria',
 		mode: 'dark',
 		defaultSans: 'syne',
+		defaultMono: 'space-mono'
+	},
+	{
+		value: 'roswell',
+		label: 'Roswell',
+		shortLabel: 'Roswell',
+		description: 'Motorway to Roswell',
+		icon: Radar,
+		className: 'theme-roswell',
+		mode: 'light',
+		defaultSans: 'outfit',
 		defaultMono: 'space-mono'
 	}
 ];

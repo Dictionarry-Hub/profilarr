@@ -1,0 +1,107 @@
+/*
+ * Roswell
+ *
+ * "Motorway to Roswell. Population: you."
+ *
+ * July 1947. Something fell out of the sky over the New Mexico
+ * desert and the world split into those who saw it and those who
+ * were told it was a weather balloon. Roswell became a word that
+ * means something beyond its coordinates: the suspicion that
+ * the truth is real, it's just classified.
+ *
+ * This is a light theme built from that suspicion. The background
+ * is white with the faintest lavender cast, like desert light
+ * filtered through something not quite atmospheric. Surfaces are
+ * clean and clinical, the walls of a facility designed to look
+ * unremarkable. Borders are faint, precise, the kind of lines
+ * you'd find on redacted documents. Text is dark with a cool
+ * violet undertone, ink that knows more than it's saying.
+ *
+ * The accent is electric violet: the color of something that
+ * shouldn't be there, pulsing behind a locked door. Not
+ * aggressive, but impossible to ignore. It's the frequency
+ * that makes the instruments go quiet.
+ *
+ * Outfit is geometric and slightly alien: letters built from
+ * circles and straight lines, friendly enough for body text
+ * but just unusual enough that you keep looking. Space Mono
+ * handles the data, because whatever crashed here left logs.
+ */
+
+.theme-roswell {
+	--theme-font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+	--theme-font-mono: 'Space Mono', ui-monospace, monospace;
+
+	/* Desert light through classified glass */
+	--theme-bg: #f8f6fc;
+
+	/* Facility walls: clean, clinical, unremarkable */
+	--theme-surface: #ffffff;
+	--theme-surface-muted: #f3f0f9;
+	--theme-surface-hover: #ece7f4;
+	--theme-surface-hover-muted: #f0ecf6;
+
+	/* Text with a violet clearance level */
+	--theme-text: #1a1528;
+	--theme-text-soft: #362d4a;
+	--theme-text-muted: #6e6088;
+	--theme-text-subtle: #a498be;
+
+	/* Redacted borders: faint, precise */
+	--theme-border: #d5cce5;
+	--theme-border-muted: #e3ddef;
+	--theme-border-subtle: #f0ecf6;
+
+	/* The frequency behind the locked door */
+	--theme-accent-solid: #7c3aed;
+	--theme-accent-solid-hover: #6d28d9;
+	--theme-on-accent: #ffffff;
+
+	/* Containment breach */
+	--theme-danger-solid: #dc2626;
+	--theme-danger-solid-hover: #b91c1c;
+	--theme-on-danger: #ffffff;
+
+	/* Flush and ghost */
+	--theme-flush-bg: var(--theme-bg);
+	--theme-flush-hover: var(--theme-surface-hover);
+	--theme-ghost-bg: transparent;
+	--theme-ghost-border: transparent;
+	--theme-ghost-label-bg: rgb(26 21 40 / 0.05);
+	--theme-ghost-label-text: #6e6088;
+
+	/* Instrument panel readouts */
+	--theme-success-bg: rgb(22 163 74 / 0.08);
+	--theme-success-text: #15803d;
+	--theme-success-border: rgb(22 163 74 / 0.25);
+	--theme-success-icon: #15803d;
+
+	--theme-warning-bg: rgb(202 138 4 / 0.08);
+	--theme-warning-text: #a16207;
+	--theme-warning-border: rgb(202 138 4 / 0.25);
+	--theme-warning-icon: #a16207;
+
+	--theme-danger-bg: rgb(220 38 38 / 0.06);
+	--theme-danger-text: #dc2626;
+	--theme-danger-border: rgb(220 38 38 / 0.2);
+	--theme-danger-icon: #dc2626;
+
+	--theme-info-bg: rgb(124 58 237 / 0.06);
+	--theme-info-text: #6d28d9;
+	--theme-info-border: rgb(124 58 237 / 0.2);
+	--theme-info-icon: #6d28d9;
+
+	/* Links: classified frequency */
+	--theme-link-text: #6d28d9;
+
+	/* Smooth, geometric, slightly alien */
+	--theme-radius-control-sm: 0.375rem;
+	--theme-radius-control: 0.5rem;
+	--theme-radius-card: 0.75rem;
+	--theme-radius-pill: 9999px;
+
+	/* Clean facility lighting */
+	--theme-shadow-card: 0 1px 3px rgb(26 21 40 / 0.06), 0 4px 12px rgb(26 21 40 / 0.04);
+	--theme-shadow-control: none;
+	--theme-shadow-control-active: 0 0 0 2px rgb(124 58 237 / 0.15);
+}

@@ -17,7 +17,8 @@ export type SansFont =
 	| 'ibm-plex-sans'
 	| 'rajdhani'
 	| 'jost'
-	| 'syne';
+	| 'syne'
+	| 'outfit';
 export type MonoFont = 'auto' | 'geist-mono' | 'jetbrains-mono' | 'ibm-plex-mono' | 'space-mono';
 
 export interface FontSettings {
@@ -33,7 +34,8 @@ const sansFontStacks: Record<Exclude<SansFont, 'auto'>, string> = {
 	'ibm-plex-sans': "'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
 	rajdhani: "'Rajdhani', ui-sans-serif, system-ui, sans-serif",
 	jost: "'Jost', ui-sans-serif, system-ui, sans-serif",
-	syne: "'Syne', ui-sans-serif, system-ui, sans-serif"
+	syne: "'Syne', ui-sans-serif, system-ui, sans-serif",
+	outfit: "'Outfit', ui-sans-serif, system-ui, sans-serif"
 };
 
 const monoFontStacks: Record<Exclude<MonoFont, 'auto'>, string> = {
@@ -49,7 +51,8 @@ const allSansOptions: { value: Exclude<SansFont, 'auto'>; label: string }[] = [
 	{ value: 'ibm-plex-sans', label: 'IBM Plex Sans' },
 	{ value: 'rajdhani', label: 'Rajdhani' },
 	{ value: 'jost', label: 'Jost' },
-	{ value: 'syne', label: 'Syne' }
+	{ value: 'syne', label: 'Syne' },
+	{ value: 'outfit', label: 'Outfit' }
 ];
 
 const allMonoOptions: { value: Exclude<MonoFont, 'auto'>; label: string }[] = [

@@ -6,6 +6,7 @@
 	"type": "module",
 	"dependencies": {
 		"@jsr/db__sqlite": "^0.12.0",
+		"@lucide/lab": "^0.1.2",
 		"croner": "^10.0.1",
 		"jose": "^6.2.3",
 		"kysely": "0.27.6",
