@@ -50,11 +50,11 @@
 	}
 
 	$: fontClass = mono ? 'font-mono' : '';
-	$: pickerClass = type === 'time' || type === 'date' ? 'dark:[color-scheme:dark]' : '';
+	$: pickerClass = '';
 	$: stateClass =
 		readonly || disabled
-			? 'bg-neutral-100 text-neutral-500 cursor-not-allowed dark:bg-neutral-800/40 dark:text-neutral-500'
-			: 'bg-white focus:border-neutral-400 dark:bg-neutral-800/50 dark:focus:border-neutral-600';
+			? 'bg-surface-muted text-text-muted cursor-not-allowed'
+			: 'bg-surface focus:border-text-subtle';
 	$: containerClass = hideLabel && !description ? 'space-y-0' : 'space-y-2';
 	$: hasSuffix = !!$$slots.suffix;
 
@@ -64,9 +64,9 @@
 	$: effectiveSize = responsive && isSmallScreen ? 'sm' : size;
 	$: effectiveAutoWidth = autoWidth && (!responsive || isSmallScreen);
 	$: sizeClasses = {
-		sm: 'rounded-lg px-2 py-1 text-xs',
-		md: 'rounded-xl px-3 py-2 text-sm',
-		lg: 'rounded-xl px-4 py-2.5 text-base'
+		sm: 'rounded-control-sm px-2 py-1 text-xs',
+		md: 'rounded-control px-3 py-2 text-sm',
+		lg: 'rounded-control px-4 py-2.5 text-base'
 	}[effectiveSize];
 	$: privatePaddingClass = hasSuffix ? 'pr-16' : 'pr-10';
 	$: widthClass = effectiveAutoWidth ? 'w-auto' : 'w-full';
@@ -110,17 +110,12 @@
 </script>
 
 <div class={containerClass}>
-	<label
-		for={name}
-		class="block text-sm font-medium text-neutral-900 dark:text-neutral-100 {hideLabel
-			? 'sr-only'
-			: ''}"
-	>
-		{label}{#if required}<span class="text-red-500">*</span>{/if}
+	<label for={name} class="block text-sm font-medium text-text {hideLabel ? 'sr-only' : ''}">
+		{label}{#if required}<span class="text-danger-solid">*</span>{/if}
 	</label>
 
 	{#if description}
-		<p class="text-xs text-neutral-600 dark:text-neutral-400">
+		<p class="text-xs text-text-soft">
 			{description}
 		</p>
 	{/if}
@@ -140,7 +135,7 @@
 				oninput={handleInput}
 				onfocus={handleFocus}
 				onblur={handleBlur}
-				class="block w-full resize-none border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:border-neutral-300 focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {hasSuffix
+				class="block w-full resize-none border border-border text-text shadow-control placeholder-text-subtle transition-colors focus:outline-none {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {hasSuffix
 					? 'pr-10'
 					: ''}"
 			></textarea>
@@ -169,7 +164,7 @@
 					? (autocomplete as typeof HTMLInputElement.prototype.autocomplete)
 					: undefined}
 				style={autoWidthStyle}
-				class="block {widthClass} border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {privatePaddingClass} {showPassword
+				class="block {widthClass} border border-border text-text shadow-control placeholder-text-subtle transition-colors focus:outline-none {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {privatePaddingClass} {showPassword
 					? ''
 					: 'tracking-[0.25em] placeholder:tracking-normal'}"
 			/>
@@ -180,7 +175,7 @@
 			{/if}
 			<button
 				type="button"
-				class="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
+				class="absolute top-1/2 right-3 -translate-y-1/2 text-text-subtle hover:text-text-soft"
 				onclick={() => (showPassword = !showPassword)}
 			>
 				{#if showPassword}
@@ -205,7 +200,7 @@
 				oninput={handleInput}
 				onfocus={handleFocus}
 				onblur={handleBlur}
-				class="block w-full resize-none overflow-hidden border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {hasSuffix
+				class="block w-full resize-none overflow-hidden border border-border text-text shadow-control placeholder-text-subtle transition-colors focus:outline-none {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {hasSuffix
 					? 'pr-10'
 					: ''}"
 				use:autoResize={value}
@@ -235,7 +230,7 @@
 					? (autocomplete as typeof HTMLInputElement.prototype.autocomplete)
 					: undefined}
 				style={autoWidthStyle}
-				class="block {widthClass} border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {hasSuffix
+				class="block {widthClass} border border-border text-text shadow-control placeholder-text-subtle transition-colors focus:outline-none {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {hasSuffix
 					? 'pr-10'
 					: ''}"
 			/>

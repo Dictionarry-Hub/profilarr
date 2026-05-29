@@ -24,13 +24,13 @@
 	<title>Login - Profilarr</title>
 </svelte:head>
 
-<div class="flex min-h-screen items-center justify-center bg-neutral-100 p-4 dark:bg-neutral-900">
+<div class="flex min-h-screen items-center justify-center bg-app p-4">
 	<div class="w-full max-w-sm">
 		<div class="mb-8 flex items-center gap-4">
 			<img src={logo} alt="Profilarr logo" class="h-12 w-12" />
 			<div>
-				<h1 class="text-xl font-bold text-neutral-900 dark:text-neutral-50">Welcome back</h1>
-				<p class="text-sm text-neutral-600 dark:text-neutral-400">Sign in to continue.</p>
+				<h1 class="text-xl font-bold text-text">Welcome back</h1>
+				<p class="text-sm text-text-soft">Sign in to continue.</p>
 			</div>
 		</div>
 
