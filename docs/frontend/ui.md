@@ -705,6 +705,10 @@ variables under `.dark`. `src/app.css` exposes those variables through
 Tailwind's `@theme`, so components use normal utilities instead of inline
 styles.
 
+Theme metadata lives in `src/lib/client/themes/registry.ts`. Add a theme
+there when adding its CSS file so the picker has labels, descriptions, icons,
+and optional attribution in one place.
+
 The first token set is intentionally small:
 
 - Surfaces: `bg-app`, `bg-surface`, `bg-surface-muted`, `bg-surface-hover`

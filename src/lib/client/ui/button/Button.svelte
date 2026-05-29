@@ -92,7 +92,7 @@
 	$: effectiveIcon = loading ? Loader2 : icon;
 	$: effectiveIconColor = loading ? baseIconColor + ' animate-spin' : baseIconColor;
 	$: isLeadingSvg = leadingIcon && typeof leadingIcon === 'object' && 'path' in leadingIcon;
-	$: isIconOnly = icon && !text && !leadingIcon;
+	$: isIconOnly = !!((icon || leadingIcon) && !text);
 	$: activeSizeClasses = isIconOnly ? iconOnlySizeClasses : sizeClasses;
 	$: classes = `group ${baseClasses} ${activeSizeClasses[effectiveSize]} ${variantClasses[variant]} ${widthClass}`;
 	$: iconSize = effectiveSize === 'xs' ? 12 : effectiveSize === 'sm' ? 14 : 16;

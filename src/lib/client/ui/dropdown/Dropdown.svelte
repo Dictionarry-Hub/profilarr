@@ -53,6 +53,8 @@
 		if (!triggerEl) return;
 
 		const rect = triggerEl.getBoundingClientRect();
+		const effectivePosition =
+			mobilePosition && window.innerWidth < 768 ? mobilePosition : position;
 		resolvedPlacement = resolvePlacement(rect);
 		if (resolvedPlacement !== lastDispatchedPlacement) {
 			lastDispatchedPlacement = resolvedPlacement;
@@ -62,13 +64,13 @@
 
 		let left = rect.left;
 
-		if (position === 'right') {
+		if (effectivePosition === 'right') {
 			left = rect.right;
 			// Adjust to align right edge
 			if (dropdownEl) {
 				left = rect.right - dropdownEl.offsetWidth;
 			}
-		} else if (position === 'middle') {
+		} else if (effectivePosition === 'middle') {
 			left = rect.left + rect.width / 2;
 			if (dropdownEl) {
 				left -= dropdownEl.offsetWidth / 2;

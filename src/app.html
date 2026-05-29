@@ -19,7 +19,14 @@
 				// Theme
 				var stored = localStorage.getItem('theme');
 				var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-				var theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
+				var theme =
+					stored === 'default-light' || stored === 'light'
+						? 'light'
+						: stored === 'default-dark' || stored === 'dark'
+							? 'dark'
+							: prefersDark
+								? 'dark'
+								: 'light';
 				d.classList.add(theme);
 				d.style.colorScheme = theme;
 

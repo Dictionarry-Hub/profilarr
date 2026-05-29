@@ -7,35 +7,42 @@
 
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import {
+	getThemeDefinition,
+	isThemePreference,
+	themeClassNames,
+	type ThemeMode,
+	type ThemePreference
+} from '$lib/client/themes/registry.ts';
 
-type Theme = 'light' | 'dark';
-export type ThemePreference = Theme | 'system';
-
-const THEME_CLASSES = ['light', 'dark'];
-
-function getSystemTheme(): Theme {
+function getSystemTheme(): ThemeMode {
 	if (!browser) return 'dark';
 	return globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-function resolveTheme(preference: ThemePreference): Theme {
-	return preference === 'system' ? getSystemTheme() : preference;
+function resolvePreference(preference: ThemePreference) {
+	const definition = getThemeDefinition(preference);
+	if (definition.mode !== 'system') return definition;
+
+	return getThemeDefinition(getSystemTheme() === 'dark' ? 'default-dark' : 'default-light');
 }
 
 function readPreference(): ThemePreference {
 	if (!browser) return 'system';
 
 	const stored = localStorage.getItem('theme');
-	if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
+	if (isThemePreference(stored)) return stored;
+	if (stored === 'light') return 'default-light';
+	if (stored === 'dark') return 'default-dark';
 
 	return 'system';
 }
 
 function createThemeStore() {
 	let preference = readPreference();
-	const initialTheme = resolveTheme(preference);
+	const initialTheme = resolvePreference(preference);
 
-	const { subscribe, set } = writable<Theme>(initialTheme);
+	const { subscribe, set } = writable<ThemeMode>(initialTheme.mode as ThemeMode);
 
 	// Apply theme on initialization
 	if (browser) {
@@ -43,18 +50,18 @@ function createThemeStore() {
 		const mediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)');
 		mediaQuery.addEventListener('change', () => {
 			if (preference !== 'system') return;
-			const nextTheme = resolveTheme(preference);
-			set(nextTheme);
+			const nextTheme = resolvePreference(preference);
+			set(nextTheme.mode as ThemeMode);
 			applyTheme(nextTheme);
 		});
 	}
 
-	function applyTheme(newTheme: Theme) {
+	function applyTheme(newTheme: ReturnType<typeof resolvePreference>) {
 		if (browser) {
 			const apply = () => {
-				document.documentElement.classList.remove(...THEME_CLASSES);
-				document.documentElement.classList.add(newTheme);
-				document.documentElement.style.colorScheme = newTheme;
+				document.documentElement.classList.remove(...themeClassNames);
+				if (newTheme.className) document.documentElement.classList.add(newTheme.className);
+				document.documentElement.style.colorScheme = newTheme.mode as ThemeMode;
 			};
 
 			// Use View Transitions API if available for smooth theme changes.
@@ -65,15 +72,15 @@ function createThemeStore() {
 
 	function setPreference(nextPreference: ThemePreference) {
 		preference = nextPreference;
-		const nextTheme = resolveTheme(preference);
-		set(nextTheme);
+		const nextTheme = resolvePreference(preference);
+		set(nextTheme.mode as ThemeMode);
 		applyTheme(nextTheme);
 		if (browser) localStorage.setItem('theme', preference);
 	}
 
 	function toggle() {
-		const currentTheme = resolveTheme(preference);
-		setPreference(currentTheme === 'light' ? 'dark' : 'light');
+		const currentTheme = resolvePreference(preference);
+		setPreference(currentTheme.mode === 'light' ? 'default-dark' : 'default-light');
 	}
 
 	return {

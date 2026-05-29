@@ -42,6 +42,8 @@
 	export let disabled: boolean = false;
 	// Optional button size override
 	export let buttonSize: 'xs' | 'sm' | 'md' | null = null;
+	export let showText: boolean = true;
+	export let showChevron: boolean = true;
 
 	const dispatch = createEventDispatcher<{ change: string }>();
 
@@ -74,6 +76,7 @@
 	$: currentLabel = matchedOption?.shortLabel
 		? matchedOption.shortLabel
 		: matchedOption?.label || placeholder;
+	$: buttonText = showText ? currentLabel : '';
 	$: isPlaceholder = !matchedOption;
 	$: isCompactButton = compactButton ?? (responsiveButton ? isSmallScreen : compact);
 	$: isCompactDropdown =
@@ -85,8 +88,8 @@
 					? true
 					: compact;
 	$: resolvedButtonSize = buttonSize ?? ((isCompactButton ? 'xs' : 'sm') as 'xs' | 'sm');
-	$: resolvedJustify = justify ?? (fullWidth || width ? 'between' : 'center');
-	$: chevronIcon = open && resolvedPlacement === 'top' ? ChevronUp : ChevronDown;
+	$: resolvedJustify = justify ?? (fullWidth || width || !buttonText ? 'between' : 'center');
+	$: chevronIcon = showChevron ? (open && resolvedPlacement === 'top' ? ChevronUp : ChevronDown) : null;
 	$: labelClasses = isCompactButton
 		? 'text-xs text-neutral-500 dark:text-neutral-400'
 		: 'text-sm text-neutral-500 dark:text-neutral-400';
@@ -114,7 +117,7 @@
 		use:clickOutside={() => (open = false)}
 	>
 		<Button
-			text={currentLabel}
+			text={buttonText}
 			icon={chevronIcon}
 			iconPosition="right"
 			leadingIcon={currentIcon}
