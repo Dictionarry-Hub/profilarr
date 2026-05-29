@@ -606,8 +606,18 @@ export async function processUpgradeConfig(
 									reportedDownloads: details.reportedDownloads,
 									observedDownloads: details.observedDownloads
 								}),
-							onMismatch: (details) =>
-								logUpgradeQueueDetectionMismatch({
+							onMismatch: (details) => {
+								const searched = selectedItems.map((item) => ({
+									id: item.id,
+									title: item.title
+								}));
+								const observedIds = new Set(queueMap.keys());
+								const observed = [...queueMap.values()].map((item) => ({
+									id: item.movieId,
+									title: item.title
+								}));
+								const missed = searched.filter((item) => !observedIds.has(item.id));
+								return logUpgradeQueueDetectionMismatch({
 									instanceId: instance.id,
 									instanceName: instance.name,
 									app: 'Radarr',
@@ -616,8 +626,12 @@ export async function processUpgradeConfig(
 									reportedDownloads: details.reportedDownloads,
 									observedDownloads: details.observedDownloads,
 									graceElapsedMs: details.graceElapsedMs,
-									commandMessage: details.command.message
-								})
+									commandMessage: details.command.message,
+									searchedItems: searched,
+									observedItems: observed,
+									missedItems: missed
+								});
+							}
 						});
 
 						for (const item of selectedItems) {
@@ -682,8 +696,13 @@ export async function processUpgradeConfig(
 										reportedDownloads: details.reportedDownloads,
 										observedDownloads: details.observedDownloads
 									}),
-								onMismatch: (details) =>
-									logUpgradeQueueDetectionMismatch({
+								onMismatch: (details) => {
+									const searched = [{ id: item.id, title: item.title }];
+									const observed = (queueMap.get(item.id) ?? []).map((q) => ({
+										id: q.seriesId,
+										title: q.title
+									}));
+									return logUpgradeQueueDetectionMismatch({
 										instanceId: instance.id,
 										instanceName: instance.name,
 										app: 'Sonarr',
@@ -692,8 +711,12 @@ export async function processUpgradeConfig(
 										reportedDownloads: details.reportedDownloads,
 										observedDownloads: details.observedDownloads,
 										graceElapsedMs: details.graceElapsedMs,
-										commandMessage: details.command.message
-									})
+										commandMessage: details.command.message,
+										searchedItems: searched,
+										observedItems: observed,
+										missedItems: searched
+									});
+								}
 							});
 							searchesTriggered++;
 						}
