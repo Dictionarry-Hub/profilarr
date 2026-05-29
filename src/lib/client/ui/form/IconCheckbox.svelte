@@ -35,17 +35,14 @@
 
 	$: sizeClass = compact ? 'h-3.5 w-3.5' : 'h-5 w-5';
 	$: iconSize = compact ? 9 : 14;
-	const baseClass = 'flex items-center justify-center border transition-colors';
-	const uncheckedClass =
-		'border-neutral-300 bg-white hover:border-neutral-400 hover:bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:hover:border-neutral-600 dark:hover:bg-neutral-800';
+	const baseClass = 'flex items-center justify-center border shadow-control transition-colors';
+	const uncheckedClass = 'border-border bg-surface hover:bg-surface-hover';
 	const disabledClass = 'cursor-not-allowed opacity-50';
 	const enabledClass = 'cursor-pointer focus:outline-none';
 
 	const filledClasses = {
-		accent:
-			'border-accent-600 bg-accent-600 hover:brightness-110 dark:border-accent-500 dark:bg-accent-500',
-		neutral:
-			'border-neutral-900 bg-neutral-900 hover:brightness-110 dark:border-neutral-200 dark:bg-neutral-200',
+		accent: 'border-accent-solid bg-accent-solid hover:brightness-110',
+		neutral: 'border-text bg-text hover:brightness-110',
 		green:
 			'border-green-600 bg-green-600 hover:brightness-110 dark:border-green-500 dark:bg-green-500',
 		red: 'border-red-600 bg-red-600 hover:brightness-110 dark:border-red-500 dark:bg-red-500',
@@ -53,19 +50,15 @@
 	};
 
 	const outlineClasses = {
-		accent:
-			'border-accent-600 bg-white hover:bg-neutral-50 dark:border-accent-500 dark:bg-neutral-800/50 dark:hover:bg-neutral-800',
-		neutral:
-			'border-neutral-400 bg-white hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800/50 dark:hover:bg-neutral-800',
-		green:
-			'border-green-600 bg-white hover:bg-neutral-50 dark:border-green-500 dark:bg-neutral-800/50 dark:hover:bg-neutral-800',
-		red: 'border-red-600 bg-white hover:bg-neutral-50 dark:border-red-500 dark:bg-neutral-800/50 dark:hover:bg-neutral-800',
-		blue: 'border-blue-600 bg-white hover:bg-neutral-50 dark:border-blue-500 dark:bg-neutral-800/50 dark:hover:bg-neutral-800'
+		accent: 'border-accent-solid bg-surface hover:bg-surface-hover',
+		neutral: 'border-border bg-surface hover:bg-surface-hover',
+		green: 'border-green-600 bg-surface hover:bg-surface-hover dark:border-green-500',
+		red: 'border-red-600 bg-surface hover:bg-surface-hover dark:border-red-500',
+		blue: 'border-blue-600 bg-surface hover:bg-surface-hover dark:border-blue-500'
 	};
 
 	const customFilledClass = 'hover:brightness-110';
-	const customOutlineClass =
-		'bg-white hover:bg-neutral-50 dark:bg-neutral-800/50 dark:hover:bg-neutral-800';
+	const customOutlineClass = 'bg-surface hover:bg-surface-hover';
 
 	$: resolvedColorKey = isCustomColor ? 'accent' : color;
 	$: resolvedFilledClass =
@@ -87,8 +80,8 @@
 			: '';
 
 	const outlineIconClasses = {
-		accent: 'text-accent-600 dark:text-accent-400',
-		neutral: 'text-neutral-900 dark:text-neutral-100',
+		accent: 'text-accent-solid',
+		neutral: 'text-text',
 		green: 'text-green-600 dark:text-green-400',
 		red: 'text-red-600 dark:text-red-400',
 		blue: 'text-blue-600 dark:text-blue-400'
@@ -114,7 +107,7 @@
 	{disabled}
 	{title}
 	on:click={handleClick}
-	style="{buttonStyle}{shape === 'circle' ? ' border-radius: 9999px !important;' : ''}"
+	style={buttonStyle || undefined}
 	class="{baseClass} {sizeClass} {shapeClass} {stateClass} {disabled
 		? disabledClass
 		: enabledClass}"
@@ -123,3 +116,9 @@
 		<svelte:component this={icon} size={iconSize} class={resolvedIconClass} />
 	{/if}
 </button>
+
+<style>
+	:global(.theme-retro) button {
+		border-radius: 0 !important;
+	}
+</style>
