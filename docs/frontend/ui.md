@@ -887,7 +887,7 @@ instead of theme-specific shadow values.
 | Category    | Components                                                                                                                                                                                    |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Button      | `Button.svelte`                                                                                                                                                                               |
-| Card        | `Card.svelte`, `ExpandableCard.svelte`                                                                                                                                                        |
+| Card        | `Card.svelte`, `ExpandableCard.svelte`, `StickyCard.svelte` (`CardGrid` is pure layout, no colors)                                                                                            |
 | Dropdown    | `Dropdown.svelte`, `DropdownCombobox.svelte`, `DropdownSelect.svelte`, `DropdownHeader.svelte`, `DropdownFooter.svelte`, `DropdownItem.svelte`                                                |
 | Form        | `FormInput.svelte`, `NumberInput.svelte`, `IconCheckbox.svelte`                                                                                                                               |
 | Label       | `Label.svelte`                                                                                                                                                                                |
@@ -912,7 +912,6 @@ and are tracked in issue #298:
   `MarkdownInput.svelte`, `KeyValueList.svelte`, `RangeScale.svelte`,
   `CodeInput.svelte`, `SearchDropdown.svelte`
 - **Cron:** `CronInput.svelte`
-- **Card:** `CardGrid.svelte`, `StickyCard.svelte`
 - **Badge/Arr:** `Badge.svelte`, `CustomFormatBadge.svelte`,
   `Score.svelte`, `ProgressIndicator.svelte`
 - **Navigation:** `Breadcrumb.svelte`, `BottomNav.svelte`,
