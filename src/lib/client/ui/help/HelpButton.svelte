@@ -4,6 +4,7 @@
 	import Clippy from './characters/Clippy.svelte';
 	import Joi from './characters/Joi.svelte';
 	import Oracle from './characters/Oracle.svelte';
+	import Hatchling from './characters/Hatchling.svelte';
 
 	export let variant: 'fab' | 'navbar' = 'fab';
 
@@ -33,6 +34,8 @@
 		<Joi {variant} {open} onToggle={toggle} onClose={close} />
 	{:else if $themePreference === 'vesper'}
 		<Oracle {variant} {open} onToggle={toggle} onClose={close} />
+	{:else if $themePreference === 'classic'}
+		<Hatchling {variant} {open} onToggle={toggle} onClose={close} />
 	{:else if $themePreference === 'retro'}
 		<Clippy {variant} {open} onToggle={toggle} onClose={close} />
 	{:else}
