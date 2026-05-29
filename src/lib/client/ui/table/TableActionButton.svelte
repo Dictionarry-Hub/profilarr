@@ -23,12 +23,11 @@
 	};
 
 	const variantClasses = {
-		neutral:
-			'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800',
+		neutral: 'border-border bg-surface text-text-soft hover:bg-surface-hover',
 		danger:
-			'border-neutral-300 bg-white text-neutral-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-red-800 dark:hover:bg-red-900/20 dark:hover:text-red-400',
+			'border-border bg-surface text-text-soft hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-800 dark:hover:bg-red-900/20 dark:hover:text-red-400',
 		accent:
-			'border-neutral-300 bg-white text-neutral-700 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-accent-700 dark:hover:bg-accent-900/20 dark:hover:text-accent-400'
+			'border-border bg-surface text-text-soft hover:border-accent-300 hover:bg-accent-50 hover:text-accent-600 dark:hover:border-accent-700 dark:hover:bg-accent-900/20 dark:hover:text-accent-400'
 	};
 
 	function handleClick(event: MouseEvent) {

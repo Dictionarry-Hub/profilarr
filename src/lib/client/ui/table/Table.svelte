@@ -167,7 +167,7 @@
 	<div class="space-y-3">
 		{#if displayData.length === 0}
 			<div
-				class="rounded-xl border border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400"
+				class="rounded-control border border-border bg-surface p-8 text-center text-sm text-text-muted"
 			>
 				{emptyMessage}
 			</div>
@@ -175,7 +175,7 @@
 			{#each displayData as row, rowIndex}
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div
-					class="group/row relative overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50 {onRowClick ||
+					class="group/row relative overflow-hidden rounded-control border border-border bg-surface {onRowClick ||
 					rowHref
 						? 'cursor-pointer'
 						: ''}"
@@ -191,7 +191,7 @@
 					{/if}
 					<!-- Primary row: first column as title + actions -->
 					<div class="flex items-center justify-between gap-3 px-4 py-3">
-						<div class="min-w-0 flex-1 font-medium text-neutral-900 dark:text-neutral-100">
+						<div class="min-w-0 flex-1 font-medium text-text">
 							{#if columns[0].cell}
 								{@const rendered = columns[0].cell(row)}
 								{#if typeof rendered === 'string'}
@@ -217,13 +217,11 @@
 
 					<!-- Secondary columns as label-value pairs -->
 					{#if columns.length > 1}
-						<div class="space-y-2 border-t border-neutral-200 px-4 py-3 dark:border-neutral-700/60">
+						<div class="space-y-2 border-t border-border px-4 py-3">
 							{#each columns.slice(1) as column, colIndex}
 								<div class="flex items-center justify-between gap-4 text-sm">
-									<span class="shrink-0 text-neutral-500 dark:text-neutral-400"
-										>{column.header}</span
-									>
-									<span class="min-w-0 text-right text-neutral-700 dark:text-neutral-300">
+									<span class="shrink-0 text-text-muted">{column.header}</span>
+									<span class="min-w-0 text-right text-text-soft">
 										{#if column.cell}
 											{@const rendered = column.cell(row)}
 											{#if typeof rendered === 'string'}
@@ -253,16 +251,14 @@
 	</div>
 {:else}
 	<!-- Desktop Table Layout -->
-	<div class="overflow-x-auto rounded-xl border border-neutral-300 dark:border-neutral-700/60">
+	<div class="overflow-x-auto rounded-control border border-border">
 		<table class="w-full">
 			<!-- Header -->
-			<thead
-				class="border-b border-neutral-300 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/50"
-			>
+			<thead class="border-b border-border bg-surface">
 				<tr>
 					{#each columns as column}
 						<th
-							class={`${compact ? 'px-4 py-2.5' : 'px-6 py-3'} text-xs font-semibold text-neutral-500 dark:text-neutral-400 ${getAlignClass(column.align)} ${column.width || ''}`}
+							class={`${compact ? 'px-4 py-2.5' : 'px-6 py-3'} text-xs font-semibold text-text-muted ${getAlignClass(column.align)} ${column.width || ''}`}
 						>
 							{#if column.sortable}
 								<div
@@ -283,7 +279,7 @@
 									{/if}
 									<span>{column.header}</span>
 									<span
-										class="text-[0.6rem] text-neutral-400 transition-opacity group-hover:text-neutral-600 group-hover:dark:text-neutral-200"
+										class="text-[0.6rem] text-text-subtle transition-opacity group-hover:text-text-soft"
 									>
 										{#if sortKey === column.key}
 											{sortDirection === 'asc' ? '▲' : '▼'}
@@ -313,7 +309,7 @@
 					<!-- Actions column slot -->
 					{#if $$slots.actions}
 						<th
-							class={`${compact ? 'px-4 py-2.5' : 'px-6 py-3'} ${actionsHeaderAlign === 'left' ? 'text-left' : actionsHeaderAlign === 'center' ? 'text-center' : 'text-right'} text-xs font-semibold text-neutral-500 dark:text-neutral-400`}
+							class={`${compact ? 'px-4 py-2.5' : 'px-6 py-3'} ${actionsHeaderAlign === 'left' ? 'text-left' : actionsHeaderAlign === 'center' ? 'text-center' : 'text-right'} text-xs font-semibold text-text-muted`}
 						>
 							{actionsHeader}
 						</th>
@@ -322,14 +318,12 @@
 			</thead>
 
 			<!-- Body -->
-			<tbody
-				class="divide-y divide-neutral-200 bg-white dark:divide-neutral-700/40 dark:bg-neutral-900/50"
-			>
+			<tbody class="divide-y divide-border bg-surface-muted">
 				{#if displayData.length === 0}
 					<tr>
 						<td
 							colspan={columns.length + ($$slots.actions ? 1 : 0)}
-							class="px-6 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400"
+							class="px-6 py-8 text-center text-sm text-text-muted"
 						>
 							{emptyMessage}
 						</td>
@@ -338,7 +332,7 @@
 					{#each displayData as row, rowIndex}
 						<tr
 							class="group/row {hoverable
-								? 'transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800'
+								? 'transition-colors hover:bg-surface-hover'
 								: ''} {onRowClick || rowHref ? 'cursor-pointer' : ''} {rowClass
 								? rowClass(row)
 								: ''}"
@@ -351,7 +345,7 @@
 										? column.tdClass(row)
 										: (column.tdClass ?? '')}
 								<td
-									class={`${compact ? 'px-4 py-2' : 'px-6 py-4'} text-sm text-neutral-900 dark:text-neutral-100 ${getAlignClass(column.align)} ${column.width || ''} ${rowHref ? 'relative' : ''} ${tdExtraClass}`}
+									class={`${compact ? 'px-4 py-2' : 'px-6 py-4'} text-sm text-text ${getAlignClass(column.align)} ${column.width || ''} ${rowHref ? 'relative' : ''} ${tdExtraClass}`}
 								>
 									{#if rowHref}
 										<a href={rowHref(row)} class="cell-link" aria-label="Open row"></a>

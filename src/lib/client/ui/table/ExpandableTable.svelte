@@ -173,18 +173,16 @@
 	<div class="space-y-3">
 		{#if loading}
 			{#each Array(loadingRows) as _}
-				<div
-					class="animate-pulse overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50"
-				>
+				<div class="animate-pulse overflow-hidden rounded-control border border-border bg-surface">
 					<div class="flex items-center justify-between gap-3 px-4 py-3">
-						<div class="h-5 w-32 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-						<div class="h-6 w-6 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+						<div class="h-5 w-32 rounded bg-surface-hover"></div>
+						<div class="h-6 w-6 rounded bg-surface-hover"></div>
 					</div>
-					<div class="space-y-2 border-t border-neutral-200 px-4 py-3 dark:border-neutral-700/60">
+					<div class="space-y-2 border-t border-border px-4 py-3">
 						{#each columns.slice(1, 4) as _}
 							<div class="flex items-center justify-between gap-4">
-								<div class="h-4 w-16 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-								<div class="h-4 w-24 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+								<div class="h-4 w-16 rounded bg-surface-hover"></div>
+								<div class="h-4 w-24 rounded bg-surface-hover"></div>
 							</div>
 						{/each}
 					</div>
@@ -192,16 +190,14 @@
 			{/each}
 		{:else if displayData.length === 0}
 			<div
-				class="rounded-xl border border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400"
+				class="rounded-control border border-border bg-surface p-8 text-center text-sm text-text-muted"
 			>
 				{emptyMessage}
 			</div>
 		{:else}
 			{#each displayData as row, index}
 				{@const rowId = getRowId(row)}
-				<div
-					class="overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50"
-				>
+				<div class="overflow-hidden rounded-control border border-border bg-surface">
 					<!-- Card Header - clickable to expand -->
 					<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 					<div
@@ -218,9 +214,7 @@
 					>
 						<!-- Primary row: first column as title + actions + chevron -->
 						<div class="flex items-start justify-between gap-3 px-4 py-3">
-							<div
-								class="min-w-0 flex-1 font-medium break-words text-neutral-900 dark:text-neutral-100"
-							>
+							<div class="min-w-0 flex-1 font-medium break-words text-text">
 								<slot
 									name="cell"
 									{row}
@@ -254,15 +248,11 @@
 
 						<!-- Secondary columns as label-value pairs -->
 						{#if mobileSecondaryColumns.length > 0}
-							<div
-								class="space-y-2 border-t border-neutral-200 px-4 py-3 dark:border-neutral-700/60"
-							>
+							<div class="space-y-2 border-t border-border px-4 py-3">
 								{#each mobileSecondaryColumns as column, colIndex}
 									<div class="flex items-center justify-between gap-4 text-sm">
-										<span class="shrink-0 text-neutral-500 dark:text-neutral-400"
-											>{column.header}</span
-										>
-										<span class="min-w-0 text-right text-neutral-700 dark:text-neutral-300">
+										<span class="shrink-0 text-text-muted">{column.header}</span>
+										<span class="min-w-0 text-right text-text-soft">
 											<slot
 												name="cell"
 												{row}
@@ -281,13 +271,9 @@
 
 					<!-- Expanded Content -->
 					{#if !shouldDisableExpand(row) && expandedRows.has(rowId)}
-						<div
-							class="border-t border-neutral-200 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-900"
-						>
+						<div class="border-t border-border bg-surface-muted">
 							<slot name="expanded" {row}>
-								<div class="p-4 text-sm text-neutral-500 dark:text-neutral-400">
-									No additional details
-								</div>
+								<div class="p-4 text-sm text-text-muted">No additional details</div>
 							</slot>
 						</div>
 					{/if}
@@ -301,14 +287,12 @@
 {:else}
 	<!-- Desktop Table Layout -->
 	<div
-		class="overflow-x-auto rounded-xl border border-neutral-300 dark:border-neutral-700/60 {flushBottom
+		class="overflow-x-auto rounded-control border border-border {flushBottom
 			? 'rounded-b-none border-b-0'
 			: ''}"
 	>
 		<table class="w-full">
-			<thead
-				class="border-b border-neutral-300 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/50"
-			>
+			<thead class="border-b border-border bg-surface">
 				<tr>
 					<!-- Expand column (left) -->
 					{#if chevronPosition === 'left'}
@@ -318,7 +302,7 @@
 						<th
 							class="{compact
 								? 'px-4 py-2.5'
-								: 'px-6 py-3'} text-xs font-semibold text-neutral-500 dark:text-neutral-400 {getAlignClass(
+								: 'px-6 py-3'} text-xs font-semibold text-text-muted {getAlignClass(
 								column.align
 							)} {column.width || ''}"
 						>
@@ -326,7 +310,7 @@
 								<button
 									type="button"
 									on:click={() => handleSort(column)}
-									class="inline-flex items-center gap-1 transition-colors hover:text-neutral-900 dark:hover:text-neutral-100 {column.align ===
+									class="inline-flex items-center gap-1 transition-colors hover:text-text {column.align ===
 									'right'
 										? 'flex-row-reverse'
 										: ''}"
@@ -334,9 +318,9 @@
 									{column.header}
 									{#if sortState?.key === column.key}
 										{#if sortState.direction === 'asc'}
-											<ArrowUp size={12} class="text-accent-500" />
+											<ArrowUp size={12} class="text-accent-solid" />
 										{:else}
-											<ArrowDown size={12} class="text-accent-500" />
+											<ArrowDown size={12} class="text-accent-solid" />
 										{/if}
 									{:else}
 										<ArrowUpDown size={12} class="opacity-30" />
@@ -351,7 +335,7 @@
 						<th
 							class="{compact
 								? 'px-4 py-2.5'
-								: 'px-6 py-3'} w-20 text-right text-xs font-semibold text-neutral-500 dark:text-neutral-400"
+								: 'px-6 py-3'} w-20 text-right text-xs font-semibold text-text-muted"
 						>
 							Actions
 						</th>
@@ -362,21 +346,19 @@
 					{/if}
 				</tr>
 			</thead>
-			<tbody
-				class="divide-y divide-neutral-200 bg-white dark:divide-neutral-700/40 dark:bg-neutral-900/50"
-			>
+			<tbody class="divide-y divide-border bg-surface-muted">
 				{#if loading}
 					{#each Array(loadingRows) as _, rowIdx}
 						<tr class="animate-pulse">
 							{#if chevronPosition === 'left'}
 								<td class={compact ? 'px-2 py-2' : 'px-3 py-3'}>
-									<div class="h-6 w-6 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+									<div class="h-6 w-6 rounded bg-surface-hover"></div>
 								</td>
 							{/if}
 							{#each columns as column, colIdx}
 								<td class="{compact ? 'px-4 py-2' : 'px-6 py-4'} {column.width || ''}">
 									<div
-										class="h-4 rounded bg-neutral-200 dark:bg-neutral-700"
+										class="h-4 rounded bg-surface-hover"
 										style="width: {colIdx === 0
 											? '60%'
 											: colIdx === columns.length - 1
@@ -387,12 +369,12 @@
 							{/each}
 							{#if $$slots.actions}
 								<td class="{compact ? 'px-4 py-2' : 'px-6 py-4'} text-right">
-									<div class="ml-auto h-4 w-16 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+									<div class="ml-auto h-4 w-16 rounded bg-surface-hover"></div>
 								</td>
 							{/if}
 							{#if chevronPosition === 'right'}
 								<td class="{compact ? 'px-2 py-2' : 'px-3 py-3'} text-right">
-									<div class="ml-auto h-6 w-6 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+									<div class="ml-auto h-6 w-6 rounded bg-surface-hover"></div>
 								</td>
 							{/if}
 						</tr>
@@ -401,7 +383,7 @@
 					<tr>
 						<td
 							colspan={columns.length + 1 + ($$slots.actions ? 1 : 0)}
-							class="px-6 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400"
+							class="px-6 py-8 text-center text-sm text-text-muted"
 						>
 							{emptyMessage}
 						</td>
@@ -412,12 +394,12 @@
 
 						<!-- Main Row -->
 						<tr
-							class="cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800"
+							class="cursor-pointer transition-colors hover:bg-surface-hover"
 							on:click={() => handleRowClick(rowId, row)}
 						>
 							<!-- Expand Icon (left) -->
 							{#if chevronPosition === 'left'}
-								<td class="{compact ? 'px-2 py-2' : 'px-3 py-3'} text-neutral-400">
+								<td class="{compact ? 'px-2 py-2' : 'px-3 py-3'} text-text-subtle">
 									{#if !shouldDisableExpand(row)}
 										<Button
 											icon={expandedRows.has(rowId) ? ChevronUp : ChevronDown}
@@ -434,9 +416,7 @@
 
 							{#each columns as column}
 								<td
-									class="{compact
-										? 'px-4 py-2'
-										: 'px-6 py-4'} text-sm text-neutral-900 dark:text-neutral-100 {getAlignClass(
+									class="{compact ? 'px-4 py-2' : 'px-6 py-4'} text-sm text-text {getAlignClass(
 										column.align
 									)} {column.width || ''}"
 								>
@@ -456,7 +436,7 @@
 
 							<!-- Expand Icon (right) -->
 							{#if chevronPosition === 'right'}
-								<td class="{compact ? 'px-2 py-2' : 'px-3 py-3'} text-right text-neutral-400">
+								<td class="{compact ? 'px-2 py-2' : 'px-3 py-3'} text-right text-text-subtle">
 									{#if !shouldDisableExpand(row)}
 										<Button
 											icon={expandedRows.has(rowId) ? ChevronUp : ChevronDown}
@@ -474,7 +454,7 @@
 
 						<!-- Expanded Row -->
 						{#if !shouldDisableExpand(row) && expandedRows.has(rowId)}
-							<tr class="bg-neutral-50 dark:bg-neutral-900/30">
+							<tr class="bg-surface-muted">
 								<td
 									colspan={columns.length + 1 + ($$slots.actions ? 1 : 0)}
 									class={flushExpanded ? '' : compact ? 'px-4 py-3' : 'px-6 py-4'}
@@ -482,9 +462,7 @@
 									<div class={flushExpanded ? '' : 'ml-6'}>
 										<slot name="expanded" {row}>
 											<!-- Default expanded content -->
-											<div class="text-sm text-neutral-500 dark:text-neutral-400">
-												No additional details
-											</div>
+											<div class="text-sm text-text-muted">No additional details</div>
 										</slot>
 									</div>
 								</td>
