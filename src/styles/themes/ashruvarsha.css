@@ -1,7 +1,10 @@
 /*
- * Tannhauser
+ * Ashruvarsha (अश्रुवर्ष)
  *
- * "I've watched C-beams glitter in the dark near the Tannhauser Gate."
+ * Sanskrit: ashru (tear) + varsha (rain). Tears in rain.
+ *
+ * "I've watched C-beams glitter in the dark near the Tannhauser Gate.
+ *  All those moments will be lost in time, like tears in rain."
  *
  * The grid never sleeps. Somewhere in the sprawl, your instances are
  * running -- Radarr nodes pulling feeds, Sonarr scrapers indexing,
@@ -20,14 +23,14 @@
  * light.
  *
  * Sharp corners. Industrial spacing. Everything built for function,
- * not comfort. Inter is clean, dense, corporate-precise -- the font
- * of megacorp interfaces. JetBrains Mono has ligatures for reading
- * config at 3am.
+ * not comfort. Rajdhani is geometric with Devanagari roots -- the
+ * script of the language this theme is named in. Space Mono is
+ * retro-futuristic, the monospace of a replicant's terminal.
  */
 
-.theme-tannhauser {
-	--theme-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-	--theme-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+.theme-ashruvarsha {
+	--theme-font-sans: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
+	--theme-font-mono: 'Space Mono', ui-monospace, monospace;
 
 	/* The dark between streetlights */
 	--theme-bg: #0b0e14;

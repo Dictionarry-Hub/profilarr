@@ -10,8 +10,8 @@ import { browser } from '$app/environment';
 import { themePreference } from '$stores/theme.ts';
 import { getThemeDefinition } from '$lib/client/themes/registry.ts';
 
-export type SansFont = 'auto' | 'dm-sans' | 'inter' | 'ibm-plex-sans';
-export type MonoFont = 'auto' | 'geist-mono' | 'jetbrains-mono' | 'ibm-plex-mono';
+export type SansFont = 'auto' | 'dm-sans' | 'inter' | 'ibm-plex-sans' | 'rajdhani';
+export type MonoFont = 'auto' | 'geist-mono' | 'jetbrains-mono' | 'ibm-plex-mono' | 'space-mono';
 
 export interface FontSettings {
 	sans: SansFont;
@@ -23,25 +23,29 @@ const STORAGE_KEY = 'fontSettings';
 const sansFontStacks: Record<Exclude<SansFont, 'auto'>, string> = {
 	'dm-sans': "'DM Sans', ui-sans-serif, system-ui, sans-serif",
 	inter: "'Inter', ui-sans-serif, system-ui, sans-serif",
-	'ibm-plex-sans': "'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif"
+	'ibm-plex-sans': "'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
+	rajdhani: "'Rajdhani', ui-sans-serif, system-ui, sans-serif"
 };
 
 const monoFontStacks: Record<Exclude<MonoFont, 'auto'>, string> = {
 	'geist-mono': "'Geist Mono', ui-monospace, monospace",
 	'jetbrains-mono': "'JetBrains Mono', ui-monospace, monospace",
-	'ibm-plex-mono': "'IBM Plex Mono', ui-monospace, monospace"
+	'ibm-plex-mono': "'IBM Plex Mono', ui-monospace, monospace",
+	'space-mono': "'Space Mono', ui-monospace, monospace"
 };
 
 const allSansOptions: { value: Exclude<SansFont, 'auto'>; label: string }[] = [
 	{ value: 'dm-sans', label: 'DM Sans' },
 	{ value: 'inter', label: 'Inter' },
-	{ value: 'ibm-plex-sans', label: 'IBM Plex Sans' }
+	{ value: 'ibm-plex-sans', label: 'IBM Plex Sans' },
+	{ value: 'rajdhani', label: 'Rajdhani' }
 ];
 
 const allMonoOptions: { value: Exclude<MonoFont, 'auto'>; label: string }[] = [
 	{ value: 'geist-mono', label: 'Geist Mono' },
 	{ value: 'jetbrains-mono', label: 'JetBrains Mono' },
-	{ value: 'ibm-plex-mono', label: 'IBM Plex Mono' }
+	{ value: 'ibm-plex-mono', label: 'IBM Plex Mono' },
+	{ value: 'space-mono', label: 'Space Mono' }
 ];
 
 function applyFonts(settings: FontSettings) {

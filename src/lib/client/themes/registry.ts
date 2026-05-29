@@ -8,7 +8,7 @@ export type ThemePreference =
 	| 'retro'
 	| 'classic'
 	| 'vesper'
-	| 'tannhauser';
+	| 'ashruvarsha';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeDefinition {
@@ -89,15 +89,15 @@ export const themeDefinitions: ThemeDefinition[] = [
 		defaultMono: 'ibm-plex-mono'
 	},
 	{
-		value: 'tannhauser',
-		label: 'Tannhauser',
-		shortLabel: 'Tannhauser',
-		description: 'C-beams glittering in the dark',
+		value: 'ashruvarsha',
+		label: 'Ashruvarsha',
+		shortLabel: 'Ashruvarsha',
+		description: 'Tears in rain',
 		icon: Zap,
-		className: 'theme-tannhauser',
+		className: 'theme-ashruvarsha',
 		mode: 'dark',
-		defaultSans: 'inter',
-		defaultMono: 'jetbrains-mono'
+		defaultSans: 'rajdhani',
+		defaultMono: 'space-mono'
 	}
 ];
 

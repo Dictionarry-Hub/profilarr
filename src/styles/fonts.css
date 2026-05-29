@@ -61,3 +61,43 @@
 	font-display: swap;
 	src: url('/fonts/IBMPlexMono-Bold.woff2') format('woff2');
 }
+
+@font-face {
+	font-family: 'Rajdhani';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/Rajdhani-Regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Rajdhani';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('/fonts/Rajdhani-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Rajdhani';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('/fonts/Rajdhani-Bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Space Mono';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/SpaceMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Space Mono';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('/fonts/SpaceMono-Bold.woff2') format('woff2');
+}

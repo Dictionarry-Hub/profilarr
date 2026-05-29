@@ -78,8 +78,8 @@
 	let quip = '';
 
 	$: isRetro = $themePreference === 'retro';
-	$: isTannhauser = $themePreference === 'tannhauser';
-	$: activeQuips = isTannhauser ? joiQuips : isRetro ? clippyQuips : parrotQuips;
+	$: isAshruvarsha = $themePreference === 'ashruvarsha';
+	$: activeQuips = isAshruvarsha ? joiQuips : isRetro ? clippyQuips : parrotQuips;
 
 	function pickQuip() {
 		quip = activeQuips[Math.floor(Math.random() * activeQuips.length)];
@@ -107,7 +107,7 @@
 	on:click|stopPropagation
 >
 	{#if open}
-		{#if isTannhauser}
+		{#if isAshruvarsha}
 			<!-- Joi holographic popup -->
 			<div
 				transition:fly={{ y: isFab ? 8 : -8, duration: 200 }}
@@ -233,7 +233,7 @@
 	{/if}
 
 	{#if isFab}
-		{#if isTannhauser}
+		{#if isAshruvarsha}
 			<!-- Holographic Bot projection -->
 			<div
 				class="joi-fab cursor-pointer"
@@ -272,7 +272,7 @@
 			</button>
 		{/if}
 	{:else}
-		{#if isTannhauser}
+		{#if isAshruvarsha}
 			<!-- Joi navbar variant: compact holographic button -->
 			<button
 				class="joi-nav-btn flex h-9 w-9 cursor-pointer items-center justify-center rounded-sm border border-[rgb(0_210_230_/_0.25)] bg-transparent text-[#00d4ee] transition-all hover:border-[rgb(0_210_230_/_0.5)] hover:text-[#f72585] hover:shadow-[0_0_12px_rgb(0_210_230_/_0.15)]"
@@ -397,7 +397,7 @@
 		}
 	}
 
-	/* ===== Joi / Tannhauser theme ===== */
+	/* ===== Joi / Ashruvarsha theme ===== */
 
 	/* ===== Joi holographic Bot ===== */
 
