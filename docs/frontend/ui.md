@@ -889,7 +889,7 @@ instead of theme-specific shadow values.
 | Button      | `Button.svelte`                                                                                                                                                                               |
 | Card        | `Card.svelte`, `ExpandableCard.svelte`, `StickyCard.svelte` (`CardGrid` is pure layout, no colors)                                                                                            |
 | Dropdown    | `Dropdown.svelte`, `DropdownCombobox.svelte`, `DropdownSelect.svelte`, `DropdownHeader.svelte`, `DropdownFooter.svelte`, `DropdownItem.svelte`                                                |
-| Form        | `FormInput.svelte`, `NumberInput.svelte`, `IconCheckbox.svelte`                                                                                                                               |
+| Form        | `FormInput.svelte`, `NumberInput.svelte`, `IconCheckbox.svelte`, `MarkdownInput.svelte`                                                                                                       |
 | Label       | `Label.svelte`                                                                                                                                                                                |
 | Table       | `Table.svelte`, `ExpandableTable.svelte`, `TableActionButton.svelte`                                                                                                                          |
 | Toggle      | `Toggle.svelte`                                                                                                                                                                               |
@@ -909,8 +909,8 @@ These components still use hardcoded palette classes with `dark:` prefixes
 and are tracked in issue #298:
 
 - **Form:** `DateInput.svelte`, `TimeInput.svelte`, `TagInput.svelte`,
-  `MarkdownInput.svelte`, `KeyValueList.svelte`, `RangeScale.svelte`,
-  `CodeInput.svelte`, `SearchDropdown.svelte`
+  `KeyValueList.svelte`, `RangeScale.svelte`, `CodeInput.svelte`,
+  `SearchDropdown.svelte`
 - **Cron:** `CronInput.svelte`
 - **Badge/Arr:** `Badge.svelte`, `CustomFormatBadge.svelte`,
   `Score.svelte`, `ProgressIndicator.svelte`

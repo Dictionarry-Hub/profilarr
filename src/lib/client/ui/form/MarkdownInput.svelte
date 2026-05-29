@@ -2,6 +2,7 @@
 	import { Bold, Italic, List, ListOrdered, Link, Code, Eye, Edit3 } from 'lucide-svelte';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize';
+	import Button from '$ui/button/Button.svelte';
 
 	// Props
 	export let value: string = '';
@@ -22,9 +23,7 @@
 	let textareaElement: HTMLTextAreaElement;
 	let inputElement: HTMLInputElement;
 
-	$: stateClass = disabled
-		? 'bg-neutral-100 text-neutral-500 cursor-not-allowed dark:bg-neutral-800/40 dark:text-neutral-500'
-		: 'bg-white dark:bg-neutral-800/50';
+	$: stateClass = disabled ? 'bg-surface text-text-muted cursor-not-allowed' : 'bg-surface';
 
 	function handleInput(e: Event) {
 		const target = e.target as HTMLInputElement | HTMLTextAreaElement;
@@ -112,8 +111,7 @@
 
 	// Markdown to HTML renderer for preview using marked
 	function renderMarkdown(text: string): string {
-		if (!text)
-			return '<p class="text-neutral-400 dark:text-neutral-500 italic">Nothing to preview</p>';
+		if (!text) return '<p class="text-text-subtle italic">Nothing to preview</p>';
 		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
 	}
 
@@ -146,16 +144,16 @@
 
 <div class="space-y-2">
 	{#if label}
-		<label for={id} class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+		<label for={id} class="block text-sm font-medium text-text">
 			{label}
 			{#if required}
-				<span class="text-red-500">*</span>
+				<span class="text-danger-solid">*</span>
 			{/if}
 		</label>
 	{/if}
 
 	{#if description}
-		<p class="text-xs text-neutral-600 dark:text-neutral-400">
+		<p class="text-xs text-text-muted">
 			{description}
 		</p>
 	{/if}
@@ -165,46 +163,35 @@
 		{#if markdown}
 			<!-- Toolbar -->
 			<div
-				class="flex items-center justify-between rounded-t-xl border border-neutral-300 bg-neutral-50/80 px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/40 {showPreview
+				class="flex items-center justify-between rounded-t-card border border-border bg-surface px-3 py-2 {showPreview
 					? 'border-b-0'
 					: ''}"
 			>
 				<div class="flex items-center gap-1">
 					{#each toolbarButtons as btn}
-						<button
-							type="button"
-							onclick={btn.action}
-							title={btn.title}
+						<Button
+							icon={btn.icon}
+							size="sm"
+							variant="ghost"
 							disabled={disabled || showPreview}
-							class="rounded-md p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
-						>
-							<svelte:component this={btn.icon} size={16} />
-						</button>
+							on:click={btn.action}
+						/>
 					{/each}
 				</div>
-				<button
-					type="button"
-					onclick={() => (showPreview = !showPreview)}
-					title={showPreview ? 'Edit' : 'Preview'}
-					class="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors {showPreview
-						? 'bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100'
-						: 'text-neutral-600 hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-neutral-700'}"
-				>
-					{#if showPreview}
-						<Edit3 size={14} />
-						Edit
-					{:else}
-						<Eye size={14} />
-						Preview
-					{/if}
-				</button>
+				<Button
+					icon={showPreview ? Edit3 : Eye}
+					text={showPreview ? 'Edit' : 'Preview'}
+					size="xs"
+					variant="secondary"
+					on:click={() => (showPreview = !showPreview)}
+				/>
 			</div>
 		{/if}
 
 		{#if showPreview && markdown}
 			<!-- Preview -->
 			<div
-				class="prose prose-sm max-w-none rounded-b-xl border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-100"
+				class="prose prose-sm max-w-none rounded-b-card border border-border bg-surface px-3 py-2 text-text"
 			>
 				<!-- nosemgrep: profilarr.xss.at-html-usage -->
 				{@html renderMarkdown(value)}
@@ -226,8 +213,8 @@
 				oninput={handleInput}
 				onkeydown={handleKeydown}
 				class="{markdown
-					? 'rounded-t-none rounded-bl-xl border-t-0'
-					: 'rounded-tl-xl rounded-tr-xl rounded-bl-xl'} block w-full border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {stateClass}"
+					? 'rounded-t-none rounded-bl-card border-t-0'
+					: 'rounded-tl-card rounded-tr-card rounded-bl-card'} block w-full border border-border px-3 py-2 text-sm text-text placeholder-text-subtle transition-colors focus:outline-none {stateClass}"
 			></textarea>
 		{:else}
 			<!-- Single-line input -->
@@ -243,8 +230,8 @@
 				oninput={handleInput}
 				onkeydown={handleKeydown}
 				class="{markdown
-					? 'rounded-t-none rounded-bl-xl border-t-0'
-					: 'rounded-tl-xl rounded-tr-xl rounded-bl-xl'} block w-full border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {stateClass}"
+					? 'rounded-t-none rounded-bl-card border-t-0'
+					: 'rounded-tl-card rounded-tr-card rounded-bl-card'} block w-full border border-border px-3 py-2 text-sm text-text placeholder-text-subtle transition-colors focus:outline-none {stateClass}"
 			/>
 		{/if}
 	</div>
