@@ -75,8 +75,8 @@
 		DEFAULT_ALERT_SETTINGS.durationMs / 1000
 	);
 	let dateFormat: DateFormat = data.generalSettings.date_format;
-	let uiFontSans: SansFont = 'dm-sans';
-	let uiFontMono: MonoFont = 'geist-mono';
+	let uiFontSans: SansFont = 'auto';
+	let uiFontMono: MonoFont = 'auto';
 
 	// --- Dropdown options ---
 
@@ -405,7 +405,7 @@
 							</span>
 							<DropdownSelect
 								value={uiFontSans}
-								options={sansFontOptions}
+								options={[{ value: 'auto', label: 'Auto' }, ...$sansFontOptions]}
 								fullWidth
 								fixed
 								on:change={(e) => {
@@ -421,7 +421,7 @@
 							</span>
 							<DropdownSelect
 								value={uiFontMono}
-								options={monoFontOptions}
+								options={[{ value: 'auto', label: 'Auto' }, ...$monoFontOptions]}
 								fullWidth
 								fixed
 								on:change={(e) => {

@@ -12,6 +12,8 @@ export interface ThemeDefinition {
 	icon: ComponentType;
 	className: string | null;
 	mode: ThemeMode | 'system';
+	defaultSans?: string;
+	defaultMono?: string;
 	author?: string;
 	url?: string;
 }
@@ -33,7 +35,9 @@ export const themeDefinitions: ThemeDefinition[] = [
 		description: 'Profilarr default light theme',
 		icon: Sun,
 		className: 'light',
-		mode: 'light'
+		mode: 'light',
+		defaultSans: 'dm-sans',
+		defaultMono: 'geist-mono'
 	},
 	{
 		value: 'default-dark',
@@ -42,7 +46,9 @@ export const themeDefinitions: ThemeDefinition[] = [
 		description: 'Profilarr default dark theme',
 		icon: MoonStar,
 		className: 'dark',
-		mode: 'dark'
+		mode: 'dark',
+		defaultSans: 'dm-sans',
+		defaultMono: 'geist-mono'
 	},
 	{
 		value: 'retro',

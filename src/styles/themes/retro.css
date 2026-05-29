@@ -1,4 +1,6 @@
 .theme-retro {
+	--theme-font-sans: Tahoma, 'MS Sans Serif', Arial, sans-serif;
+	--theme-font-mono: 'Courier New', Courier, monospace;
 	--theme-bg: #c0c0c0;
 	--theme-surface: #d4d0c8;
 	--theme-surface-muted: #c0c0c0;

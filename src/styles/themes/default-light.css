@@ -1,4 +1,6 @@
 :root {
+	--theme-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+	--theme-font-mono: 'Geist Mono', ui-monospace, monospace;
 	--theme-bg: #fafafa;
 	--theme-surface: #ffffff;
 	--theme-surface-muted: #fafafa;

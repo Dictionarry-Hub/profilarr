@@ -22,8 +22,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-	--font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-	--font-mono: 'Geist Mono', ui-monospace, monospace;
+	--font-sans: var(--theme-font-sans);
+	--font-mono: var(--theme-font-mono);
 	--font-code:
 		'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
 

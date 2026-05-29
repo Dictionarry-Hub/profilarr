@@ -1,4 +1,6 @@
 .dark {
+	--theme-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+	--theme-font-mono: 'Geist Mono', ui-monospace, monospace;
 	--theme-bg: #171717;
 	--theme-surface: rgb(38 38 38 / 0.5);
 	--theme-surface-muted: #171717;
