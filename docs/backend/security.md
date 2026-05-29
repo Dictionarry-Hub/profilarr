@@ -378,11 +378,13 @@ Secrets are stripped at two levels:
   history), and empties `users`, `sessions`, and `login_attempts`. Personal
   access tokens on `database_instances`, AI keys on `ai_settings`, and TMDB
   keys on `tmdb_settings` are nulled but the rows are kept (PCD repos remain
-  linked, schedules and other settings preserved). `auth_settings.api_key`
-  is left in place because it is a bcrypt hash of a high-entropy random key,
-  computationally infeasible to brute-force from the hash alone. The local
-  archive on disk and the production database are never modified. See
-  `src/lib/server/utils/backup/sanitize.ts` for the exact policy.
+  linked, schedules and other settings preserved). Embedded HTTP(S)
+  credentials are also stripped from cloned PCD repository `.git/config`
+  remote URLs. `auth_settings.api_key` is left in place because it is a
+  bcrypt hash of a high-entropy random key, computationally infeasible to
+  brute-force from the hash alone. The local archive on disk and the production
+  database are never modified. See `src/lib/server/utils/backup/sanitize.ts`
+  for the exact policy.
 
 ### XSS via Markdown / {@html}
 

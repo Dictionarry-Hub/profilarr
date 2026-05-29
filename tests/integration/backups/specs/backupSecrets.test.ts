@@ -13,6 +13,7 @@
  * - DELETE notification_services (cascades to history)
  * - DELETE users, sessions, login_attempts
  * - NULL database_instances.personal_access_token (rows preserved)
+ * - Strip credentials from cloned repository .git/config remote URLs
  * - Empty ai_settings.api_key, tmdb_settings.api_key
  * - auth_settings.api_key intentionally untouched (bcrypt hash of a
  *   high-entropy random key, computationally safe to share)
@@ -38,6 +39,8 @@ const BACKUPS_DIR = `./dist/integration-${PORT}/backups`;
 // Known secrets seeded into the live DB
 const ARR_API_KEY = 'sonarr-backup-test-key-abc123';
 const DB_PAT = 'ghp-backup-test-pat-xyz789';
+const GIT_REMOTE_PAT = 'ghp-backup-test-git-remote-pat-uvw123';
+const DEP_GIT_REMOTE_PAT = 'ghp-backup-test-dep-git-remote-pat-mno345';
 const TMDB_API_KEY = 'tmdb-backup-test-key-def456';
 const AI_API_KEY = 'sk-backup-test-ai-key-ghi012';
 const PROFILARR_API_KEY = 'profilarr-backup-test-key-jkl345';
@@ -49,6 +52,7 @@ let extractDir: string;
 let onDiskBytesBefore: Uint8Array;
 let onDiskBytesAfter: Uint8Array;
 let liveProfilarrApiKeyHash: string;
+let databaseUuid: string;
 
 async function seedSecrets(dbPath: string) {
 	const db = openDb(dbPath);
@@ -62,10 +66,35 @@ async function seedSecrets(dbPath: string) {
 
 		// Database instance
 		const uuid = crypto.randomUUID();
+		databaseUuid = uuid;
 		db.exec(
 			`INSERT INTO database_instances (uuid, name, repository_url, personal_access_token, local_path, enabled)
 			 VALUES (?, 'Backup Test DB', 'https://github.com/test/repo', ?, ?, 1)`,
 			[uuid, DB_PAT, `./data/databases/${uuid}`]
+		);
+
+		const repoPath = `./dist/integration-${PORT}/data/databases/${uuid}`;
+		await Deno.mkdir(`${repoPath}/.git`, { recursive: true });
+		await Deno.writeTextFile(
+			`${repoPath}/.git/config`,
+			`[core]
+\trepositoryformatversion = 0
+\tfilemode = true
+[remote "origin"]
+\turl = https://${GIT_REMOTE_PAT}@github.com/test/repo.git
+\tfetch = +refs/heads/*:refs/remotes/origin/*
+`
+		);
+		await Deno.mkdir(`${repoPath}/deps/schema/.git`, { recursive: true });
+		await Deno.writeTextFile(
+			`${repoPath}/deps/schema/.git/config`,
+			`[core]
+\trepositoryformatversion = 0
+\tfilemode = true
+[remote "origin"]
+\turl = https://x-access-token:${DEP_GIT_REMOTE_PAT}@github.com/test/schema.git
+\tfetch = +refs/heads/*:refs/remotes/origin/*
+`
 		);
 
 		// TMDB API key
@@ -280,6 +309,28 @@ test('downloaded archive: database_instances rows preserved with PAT nulled', ()
 	} finally {
 		db.close();
 	}
+});
+
+test('downloaded archive: cloned repository git remotes have credentials stripped', async () => {
+	const repoConfig = await Deno.readTextFile(
+		`${extractDir}/data/databases/${databaseUuid}/.git/config`
+	);
+	const depConfig = await Deno.readTextFile(
+		`${extractDir}/data/databases/${databaseUuid}/deps/schema/.git/config`
+	);
+
+	assertEquals(
+		repoConfig.includes(GIT_REMOTE_PAT),
+		false,
+		'Repository remote PAT should be removed from .git/config'
+	);
+	assertEquals(
+		depConfig.includes(DEP_GIT_REMOTE_PAT),
+		false,
+		'Dependency remote PAT should be removed from .git/config'
+	);
+	assertEquals(repoConfig.includes('url = https://github.com/test/repo.git'), true);
+	assertEquals(depConfig.includes('url = https://github.com/test/schema.git'), true);
 });
 
 test('downloaded archive: AI api_key is blanked', () => {

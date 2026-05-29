@@ -356,8 +356,9 @@
 >
 	<div slot="body" class="space-y-3 text-sm text-neutral-600 dark:text-neutral-400">
 		<p>
-			The local copy on this server is full-fidelity. The downloaded file is sanitized so it's safer
-			to share. The following will be removed before download:
+			The local copy on this server includes everything needed for restore, including secrets. The
+			downloaded file is sanitized so it's safer to share. The following will be removed before
+			download:
 		</p>
 		<ul class="list-disc space-y-1 pl-5">
 			{#each data.sanitizedCategories as category}
