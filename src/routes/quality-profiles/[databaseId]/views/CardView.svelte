@@ -100,19 +100,19 @@
 			<svelte:fragment slot="footer">
 				<div class="flex items-center gap-3 text-xs">
 					<div class="flex items-center gap-1">
-						<BookOpenText size={12} class="text-neutral-400" />
+						<BookOpenText size={12} class="text-text-muted" />
 						<Label variant="secondary" size="sm" rounded="md" mono
 							>{profile.custom_formats.total}</Label
 						>
 					</div>
 					<div class="flex items-center gap-1">
-						<Gauge size={12} class="text-neutral-400" />
+						<Gauge size={12} class="text-text-muted" />
 						<Label variant="secondary" size="sm" rounded="md" mono
 							>{profile.minimum_custom_format_score}</Label
 						>
 					</div>
 					<div class="flex items-center gap-1">
-						<Earth size={12} class="text-neutral-400" />
+						<Earth size={12} class="text-text-muted" />
 						<Label variant="secondary" size="sm" rounded="md"
 							>{profile.language ? profile.language.name : 'Any'}</Label
 						>
