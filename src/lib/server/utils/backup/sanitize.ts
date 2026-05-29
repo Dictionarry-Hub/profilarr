@@ -18,6 +18,8 @@
  *   emails for OIDC users.
  * - database_instances PATs are nulled but the rows stay (PCD repos remain
  *   linked to the user post-restore).
+ * - Git remote URLs in cloned PCD repos are kept, but any embedded HTTP(S)
+ *   credentials are removed from `.git/config`.
  * - ai_settings / tmdb_settings api keys nulled (rows stay).
  * - auth_settings.api_key NOT touched; it's bcrypt-hashed of a high-entropy
  *   random key, so the hash is computationally infeasible to brute-force.
@@ -54,8 +56,57 @@ export const SANITIZED_CATEGORIES = [
 	'Notification services (webhook URLs, tokens, history)',
 	'User accounts and active sessions',
 	'Personal access tokens for linked databases',
+	'Credentials embedded in cloned database Git remote URLs',
 	'AI and TMDB API keys'
 ];
+
+function sanitizeGitConfigContent(content: string): string {
+	return content.replace(/^(\s*url\s*=\s*)(\S+)(.*)$/gm, (match, prefix, rawUrl, suffix) => {
+		try {
+			const url = new URL(rawUrl);
+			if (url.protocol !== 'http:' && url.protocol !== 'https:') return match;
+			if (!url.username && !url.password) return match;
+
+			url.username = '';
+			url.password = '';
+			return `${prefix}${url.toString()}${suffix}`;
+		} catch {
+			return match;
+		}
+	});
+}
+
+async function sanitizeGitConfigs(rootDir: string): Promise<void> {
+	async function walk(dir: string): Promise<void> {
+		for await (const entry of Deno.readDir(dir)) {
+			const path = `${dir}/${entry.name}`;
+
+			if (entry.isDirectory) {
+				if (entry.name === '.git') {
+					const configPath = `${path}/config`;
+					try {
+						const content = await Deno.readTextFile(configPath);
+						const sanitized = sanitizeGitConfigContent(content);
+						if (sanitized !== content) {
+							await Deno.writeTextFile(configPath, sanitized);
+						}
+					} catch (err) {
+						if (!(err instanceof Deno.errors.NotFound)) throw err;
+					}
+					continue;
+				}
+
+				await walk(path);
+			}
+		}
+	}
+
+	try {
+		await walk(rootDir);
+	} catch (err) {
+		if (!(err instanceof Deno.errors.NotFound)) throw err;
+	}
+}
 
 /**
  * Apply the sanitize SQL to an open SQLite database handle.
@@ -118,6 +169,8 @@ export async function buildSanitizedArchive(archivePath: string): Promise<Uint8A
 				dest.close();
 			}
 		}
+
+		await sanitizeGitConfigs(`${dataDir}/databases`);
 
 		// Flip INFO.json's sanitized flag.
 		const infoPath = `${dataDir}/INFO.json`;
