@@ -1,5 +1,5 @@
 import type { ComponentType } from 'svelte';
-import { Disc, Monitor, MoonStar, Sun } from 'lucide-svelte';
+import { Monitor, MoonStar, Sun, Turntable } from 'lucide-svelte';
 
 export type ThemePreference = 'system' | 'default-light' | 'default-dark' | 'retro';
 export type ThemeMode = 'light' | 'dark';
@@ -49,7 +49,7 @@ export const themeDefinitions: ThemeDefinition[] = [
 		label: 'Retro',
 		shortLabel: 'Retro',
 		description: 'Windows 98 and Napster-era aesthetic',
-		icon: Disc,
+		icon: Turntable,
 		className: 'theme-retro',
 		mode: 'light'
 	}
