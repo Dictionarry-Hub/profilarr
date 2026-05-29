@@ -124,6 +124,7 @@
 			size={resolvedButtonSize}
 			{fullWidth}
 			{disabled}
+			variant={showText ? 'secondary' : 'ghost'}
 			justify={resolvedJustify}
 			textColor={isPlaceholder ? 'text-neutral-400 dark:text-neutral-500' : ''}
 			on:click={() => !disabled && (open = !open)}

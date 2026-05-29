@@ -12,6 +12,7 @@
 
 	let mounted = false;
 	let selectedPreference: ThemePreference = 'system';
+	let pickerKey = 0;
 
 	onMount(() => {
 		selectedPreference = themeStore.getPreference();
@@ -30,22 +31,25 @@
 		if (!isThemePreference(preference)) return;
 		selectedPreference = preference;
 		themeStore.setPreference(preference);
+		pickerKey += 1;
 	}
 </script>
 
 <div class="theme-picker" data-onboarding={onboarding}>
 	{#if mounted}
-		<DropdownSelect
-			value={selectedPreference}
-			{options}
-			position="middle"
-			mobilePosition="right"
-			minWidth="12rem"
-			fixed
-			buttonSize="md"
-			showText={false}
-			showChevron={false}
-			on:change={(e) => select(e.detail)}
-		/>
+		{#key pickerKey}
+			<DropdownSelect
+				value={selectedPreference}
+				{options}
+				position="middle"
+				mobilePosition="right"
+				minWidth="12rem"
+				fixed
+				buttonSize="md"
+				showText={false}
+				showChevron={false}
+				on:change={(e) => select(e.detail)}
+			/>
+		{/key}
 	{/if}
 </div>

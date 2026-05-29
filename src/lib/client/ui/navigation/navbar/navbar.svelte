@@ -107,14 +107,13 @@
 			<ThemeToggle onboarding="theme-toggle" />
 			<HelpButton variant="navbar" />
 			{#if !cutsceneActive}
-				<button
-					type="button"
+				<Button
+					icon={ChevronLeft}
+					variant="ghost"
+					size="md"
+					ariaLabel="Collapse sidebar"
 					on:click={() => sidebarCollapsed.collapse()}
-					class="cursor-pointer rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
-					aria-label="Collapse sidebar"
-				>
-					<ChevronLeft size={18} />
-				</button>
+				/>
 			{/if}
 		</div>
 	</div>
@@ -125,16 +124,15 @@
 			{collapsed ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}"
 	>
 		<div class="mt-4">
-			<Tooltip text="Expand sidebar" position="right">
-				<button
-					type="button"
-					aria-label="Expand sidebar"
-					class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
-					on:click={() => sidebarCollapsed.expand()}
-				>
-					<ChevronRight size={16} />
-				</button>
-			</Tooltip>
+			<Button
+				icon={ChevronRight}
+				variant="ghost"
+				size="md"
+				tooltip="Expand sidebar"
+				tooltipPosition="right"
+				ariaLabel="Expand sidebar"
+				on:click={() => sidebarCollapsed.expand()}
+			/>
 		</div>
 
 		<div class="flex min-h-0 flex-1 items-center">

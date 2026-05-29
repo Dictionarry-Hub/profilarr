@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { accentStore, accentColors, type AccentColor } from '$stores/accent';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import { Check } from 'lucide-svelte';
+	import Button from '$ui/button/Button.svelte';
+	import { Check, Circle } from 'lucide-svelte';
 
 	export let onboarding: string | undefined = undefined;
 
 	let open = false;
 	let triggerEl: HTMLElement;
 
-	$: currentColor = accentColors.find((c) => c.value === $accentStore) ?? accentColors[0];
+	function toggleOpen(event: MouseEvent) {
+		event.stopPropagation();
+		open = !open;
+	}
 
 	function select(accent: AccentColor) {
 		accentStore.set(accent);
@@ -25,15 +29,15 @@
 
 <svelte:window on:click={handleClickOutside} />
 
-<div class="accent-picker relative" data-onboarding={onboarding}>
-	<button
-		bind:this={triggerEl}
-		on:click|stopPropagation={() => (open = !open)}
-		class="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
-		aria-label="Select accent color"
-	>
-		<span class="h-4 w-4 rounded-full" style="background-color: {currentColor.color}"></span>
-	</button>
+<div class="accent-picker relative" data-onboarding={onboarding} bind:this={triggerEl}>
+	<Button
+		icon={Circle}
+		iconColor="fill-accent-solid text-transparent"
+		variant="ghost"
+		size="md"
+		ariaLabel="Select accent color"
+		on:click={toggleOpen}
+	/>
 
 	{#if open}
 		<Dropdown position="middle" minWidth="auto" fixed={true} {triggerEl}>
