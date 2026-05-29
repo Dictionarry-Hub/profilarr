@@ -46,7 +46,7 @@
 
 {#if title}
 	<div class="mb-3">
-		<h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{title}</h3>
+		<h3 class="text-lg font-semibold text-text">{title}</h3>
 	</div>
 {/if}
 

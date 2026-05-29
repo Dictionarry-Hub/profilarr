@@ -59,7 +59,7 @@
 <div use:action class="space-y-2">
 	{#if formats.length === 0}
 		<div
-			class="rounded-lg border border-neutral-200 bg-white px-4 py-8 text-center text-sm text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
+			class="rounded-card border border-border bg-surface px-4 py-8 text-center text-sm text-text-muted"
 		>
 			No custom formats found
 		</div>
@@ -72,16 +72,14 @@
 				(arrType) => !customFormatEnabled[format.name]?.[arrType]
 			)}
 			<div
-				class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900 {rowDisabled
-					? 'opacity-60'
-					: ''}"
+				class="rounded-card border border-border bg-surface {rowDisabled ? 'opacity-60' : ''}"
 				data-onboarding={start + i === 0 ? firstRowOnboarding : undefined}
 			>
 				<!-- Format name -->
 				<div
-					class="border-b border-neutral-200 px-4 py-2.5 text-sm font-medium dark:border-neutral-800 {rowDisabled
-						? 'text-neutral-500 dark:text-neutral-500'
-						: 'text-neutral-900 dark:text-neutral-100'}"
+					class="border-b border-border px-4 py-2.5 text-sm font-medium {rowDisabled
+						? 'text-text-muted'
+						: 'text-text'}"
 				>
 					<InlineLink
 						href="/custom-formats/{databaseId}/{format.id}/general"
@@ -91,7 +89,7 @@
 				</div>
 
 				<!-- Arr type scores -->
-				<div class="divide-y divide-neutral-100 px-4 dark:divide-neutral-800">
+				<div class="divide-y divide-border-muted px-4">
 					{#each arrTypes as arrType}
 						<div class="flex items-center justify-between gap-3 py-2.5">
 							<div class="flex items-center gap-2">
@@ -103,7 +101,7 @@
 									{disabled}
 									on:click={() => handleToggleEnabled(format.name, arrType)}
 								/>
-								<span class="text-xs font-medium text-neutral-600 capitalize dark:text-neutral-400">
+								<span class="text-xs font-medium text-text-soft capitalize">
 									{arrType}
 								</span>
 							</div>

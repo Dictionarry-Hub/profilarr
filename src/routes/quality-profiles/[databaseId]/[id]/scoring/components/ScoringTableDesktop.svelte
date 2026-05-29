@@ -39,7 +39,7 @@
 			header: 'Custom Format',
 			tdClass: (row: any) => {
 				const disabled = isRowDisabled(row);
-				return `sticky left-0 z-[1] font-medium ${disabled ? 'bg-neutral-100 dark:bg-neutral-800' : 'bg-white dark:bg-neutral-900'}`;
+				return `sticky left-0 z-[1] font-medium bg-surface-muted`;
 			}
 		},
 		...arrTypes.map((arrType) => ({
@@ -52,9 +52,7 @@
 
 	function rowClass(row: any): string {
 		const disabled = isRowDisabled(row);
-		return disabled
-			? 'bg-neutral-100 opacity-60 dark:bg-neutral-800'
-			: 'transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900';
+		return disabled ? 'bg-surface-muted opacity-60' : '';
 	}
 
 	function rowAttributes(_: any, i: number): Record<string, string> {
