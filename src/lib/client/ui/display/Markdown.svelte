@@ -17,7 +17,7 @@
 
 {#if html}
 	<span
-		class="markdown text-xs text-neutral-600 dark:text-neutral-400"
+		class="markdown text-xs text-text-soft"
 		style={maxLines
 			? `display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: ${maxLines}; overflow: hidden;`
 			: ''}
@@ -29,15 +29,14 @@
 
 <style>
 	.markdown :global(code) {
-		background-color: rgb(229 231 235);
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-control);
+		color: var(--color-text-soft);
 		padding: 0.125rem 0.25rem;
-		border-radius: 0.25rem;
+		border-radius: var(--radius-control-sm);
 		font-size: 0.75rem;
 		font-family: var(--font-mono);
-	}
-
-	:global(.dark) .markdown :global(code) {
-		background-color: rgb(38 38 38);
 	}
 
 	.markdown :global(strong) {
@@ -45,11 +44,7 @@
 	}
 
 	.markdown :global(a) {
-		color: rgb(var(--color-accent-600));
+		color: var(--theme-link-text);
 		text-decoration: underline;
-	}
-
-	:global(.dark) .markdown :global(a) {
-		color: rgb(var(--color-accent-400));
 	}
 </style>

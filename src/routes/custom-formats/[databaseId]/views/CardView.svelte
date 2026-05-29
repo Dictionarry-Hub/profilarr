@@ -31,8 +31,8 @@
 
 	function getConditionVariant(
 		condition: CustomFormatTableRow['conditions'][number]
-	): 'danger' | 'success' | 'warning' | 'secondary' {
-		if (condition.required && condition.negate) return 'danger';
+	): 'destructive' | 'success' | 'warning' | 'secondary' {
+		if (condition.required && condition.negate) return 'destructive';
 		if (condition.required) return 'success';
 		if (condition.negate) return 'warning';
 		return 'secondary';

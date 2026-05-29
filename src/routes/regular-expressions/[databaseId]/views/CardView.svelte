@@ -31,7 +31,7 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-end justify-between gap-2">
 					<div class="flex min-w-0 flex-wrap items-center gap-1.5">
-						<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						<h3 class="text-sm font-semibold text-text">
 							{expression.name}
 						</h3>
 						{#each expression.tags as tag}

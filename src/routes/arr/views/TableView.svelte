@@ -67,9 +67,7 @@
 			<div class="flex items-center gap-3">
 				<div class="relative h-6 w-6 flex-shrink-0">
 					{#if !loadedImages.has(row.id)}
-						<div
-							class="absolute inset-0 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"
-						></div>
+						<div class="absolute inset-0 animate-pulse rounded bg-surface-hover"></div>
 					{/if}
 					<img
 						src={getLogoPath(row.type)}
@@ -79,7 +77,7 @@
 						use:checkLoaded={row.id}
 					/>
 				</div>
-				<span class="font-medium text-neutral-900 dark:text-neutral-50">{row.name}</span>
+				<span class="font-medium text-text">{row.name}</span>
 			</div>
 		{:else if column.key === 'qualityProfiles'}
 			{#if row.syncedProfileNames.length > 0}
@@ -89,13 +87,13 @@
 					{/each}
 				</div>
 			{:else}
-				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
+				<span class="text-xs text-text-muted">None</span>
 			{/if}
 		{:else if column.key === 'delayProfile'}
 			{#if row.delayProfileName}
 				<Label variant="secondary" size="sm" rounded="md">{row.delayProfileName}</Label>
 			{:else}
-				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
+				<span class="text-xs text-text-muted">None</span>
 			{/if}
 		{:else if column.key === 'mediaManagement'}
 			{#if row.namingConfigName || row.qualityDefinitionsConfigName || row.mediaSettingsConfigName}
@@ -115,7 +113,7 @@
 					{/if}
 				</div>
 			{:else}
-				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
+				<span class="text-xs text-text-muted">None</span>
 			{/if}
 		{:else if column.key === 'upgrades'}
 			<div class="flex justify-center">
@@ -155,7 +153,7 @@
 				size="xs"
 				title="Unlink instance"
 				variant="secondary"
-				iconColor="text-red-600 dark:text-red-400"
+				iconColor="text-danger-solid"
 				on:click={(e) => handleDeleteClick(e, row)}
 			/>
 		</div>

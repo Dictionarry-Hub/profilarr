@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import Table from '$ui/table/Table.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
+	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
 	import { Tag, ToggleRight, Copy, Download } from 'lucide-svelte';
@@ -58,9 +58,9 @@
 			</div>
 		{:else if column.key === 'rename'}
 			{#if row.rename}
-				<Badge variant="success">Enabled</Badge>
+				<Label variant="success" size="sm" rounded="md">Enabled</Label>
 			{:else}
-				<Badge variant="neutral">Disabled</Badge>
+				<Label variant="secondary" size="sm" rounded="md">Disabled</Label>
 			{/if}
 		{/if}
 	</svelte:fragment>

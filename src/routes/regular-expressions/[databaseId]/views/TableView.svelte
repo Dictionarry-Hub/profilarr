@@ -54,7 +54,7 @@
 								${row.tags
 									.map(
 										(tag) => `
-									<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200">
+									<span class="inline-flex items-center px-2 py-0.5 rounded-control-sm text-[10px] font-medium bg-accent-solid text-on-accent">
 										${escapeHtml(tag.name)}
 									</span>
 								`
@@ -75,7 +75,7 @@
 			align: 'left',
 			width: 'w-[40%]',
 			cell: (row: RegularExpressionWithTags) => ({
-				html: `<code class="font-mono text-xs bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded break-all">${escapeHtml(row.pattern)}</code>`
+				html: `<code class="font-mono text-xs border border-border bg-surface text-text-soft shadow-control px-2 py-1 rounded-control-sm break-all">${escapeHtml(row.pattern)}</code>`
 			})
 		},
 		{
@@ -86,8 +86,8 @@
 			width: 'w-[30%]',
 			cell: (row: RegularExpressionWithTags) => ({
 				html: row.description
-					? `<span class="text-sm text-neutral-600 dark:text-neutral-400 prose-inline">${parseMarkdown(row.description)}</span>`
-					: `<span class="text-neutral-400">-</span>`
+					? `<span class="text-sm text-text-soft prose-inline">${parseMarkdown(row.description)}</span>`
+					: `<span class="text-text-muted">-</span>`
 			})
 		},
 		{
@@ -98,8 +98,8 @@
 			width: 'w-24',
 			cell: (row: RegularExpressionWithTags) => ({
 				html: row.regex101_id
-					? `<a href="https://regex101.com/r/${escapeHtml(row.regex101_id)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-mono text-xs text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300 hover:underline">${escapeHtml(row.regex101_id)}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>`
-					: `<span class="text-neutral-400">-</span>`
+					? `<a href="https://regex101.com/r/${escapeHtml(row.regex101_id)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-mono text-xs text-[var(--theme-link-text)] hover:underline">${escapeHtml(row.regex101_id)}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>`
+					: `<span class="text-text-muted">-</span>`
 			})
 		}
 	];
@@ -140,15 +140,14 @@
 <style>
 	/* Inline prose styles for markdown content */
 	:global(.prose-inline code) {
-		background-color: rgb(229 231 235);
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-control);
+		color: var(--color-text-soft);
 		padding: 0.125rem 0.25rem;
-		border-radius: 0.25rem;
+		border-radius: var(--radius-control-sm);
 		font-size: 0.75rem;
 		font-family: var(--font-mono);
-	}
-
-	:global(.dark .prose-inline code) {
-		background-color: rgb(38 38 38);
 	}
 
 	:global(.prose-inline strong) {
@@ -156,11 +155,7 @@
 	}
 
 	:global(.prose-inline a) {
-		color: rgb(var(--color-accent-600));
+		color: var(--theme-link-text);
 		text-decoration: underline;
-	}
-
-	:global(.dark .prose-inline a) {
-		color: rgb(var(--color-accent-400));
 	}
 </style>

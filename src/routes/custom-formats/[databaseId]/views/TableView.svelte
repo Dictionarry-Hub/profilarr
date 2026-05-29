@@ -55,7 +55,7 @@
 								${row.tags
 									.map(
 										(tag) => `
-									<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200">
+									<span class="inline-flex items-center px-2 py-0.5 rounded-control-sm text-[10px] font-medium bg-accent-solid text-on-accent">
 										${escapeHtml(tag.name)}
 									</span>
 								`
@@ -76,8 +76,8 @@
 			align: 'left',
 			cell: (row: CustomFormatTableRow) => ({
 				html: row.description
-					? `<span class="text-sm text-neutral-600 dark:text-neutral-400 prose-inline">${parseMarkdown(row.description)}</span>`
-					: `<span class="text-neutral-400">-</span>`
+					? `<span class="text-sm text-text-soft prose-inline">${parseMarkdown(row.description)}</span>`
+					: `<span class="text-text-muted">-</span>`
 			})
 		},
 		{
@@ -97,21 +97,18 @@
 									// !required + !negate = neutral (optional)
 									let colorClass: string;
 									if (c.required && c.negate) {
-										colorClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+										colorClass = 'bg-danger-solid text-on-danger';
 									} else if (c.required) {
-										colorClass =
-											'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+										colorClass = 'bg-[var(--theme-success-bg)] text-[var(--theme-success-text)]';
 									} else if (c.negate) {
-										colorClass =
-											'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
+										colorClass = 'bg-[var(--theme-warning-bg)] text-[var(--theme-warning-text)]';
 									} else {
-										colorClass =
-											'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300';
+										colorClass = 'border border-border bg-surface text-text-soft shadow-control';
 									}
-									return `<span class="inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] font-medium ${colorClass}">${escapeHtml(c.name)}</span>`;
+									return `<span class="inline-flex items-center px-1.5 py-0.5 rounded-control-sm font-mono text-[10px] font-medium ${colorClass}">${escapeHtml(c.name)}</span>`;
 								})
 								.join('')}</div>`
-						: `<span class="text-neutral-400 text-xs">None</span>`
+						: `<span class="text-text-muted text-xs">None</span>`
 			})
 		},
 		{
@@ -124,8 +121,8 @@
 			cell: (row: CustomFormatTableRow) => ({
 				html:
 					row.testCount > 0
-						? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">${row.testCount}</span>`
-						: `<span class="text-neutral-400 text-xs">-</span>`
+						? `<span class="inline-flex items-center px-2 py-0.5 rounded-control-sm text-xs font-medium border border-border bg-surface text-text-soft shadow-control">${row.testCount}</span>`
+						: `<span class="text-text-muted text-xs">-</span>`
 			})
 		}
 	];
@@ -166,15 +163,14 @@
 <style>
 	/* Inline prose styles for markdown content */
 	:global(.prose-inline code) {
-		background-color: rgb(229 231 235);
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-control);
+		color: var(--color-text-soft);
 		padding: 0.125rem 0.25rem;
-		border-radius: 0.25rem;
+		border-radius: var(--radius-control-sm);
 		font-size: 0.75rem;
 		font-family: var(--font-mono);
-	}
-
-	:global(.dark .prose-inline code) {
-		background-color: rgb(38 38 38);
 	}
 
 	:global(.prose-inline strong) {
@@ -182,11 +178,7 @@
 	}
 
 	:global(.prose-inline a) {
-		color: rgb(var(--color-accent-600));
+		color: var(--theme-link-text);
 		text-decoration: underline;
-	}
-
-	:global(.dark .prose-inline a) {
-		color: rgb(var(--color-accent-400));
 	}
 </style>

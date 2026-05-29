@@ -60,7 +60,7 @@
 			<div class="flex items-center gap-3">
 				<DatabaseAvatar name={row.name} repoUrl={row.repository_url} size="sm" />
 				<div class="flex items-center gap-2">
-					<div class="font-medium text-neutral-900 dark:text-neutral-50">
+					<div class="font-medium text-text">
 						{row.name}
 					</div>
 					{#if row.is_private}
@@ -115,7 +115,7 @@
 				size="xs"
 				title="Unlink database"
 				variant="secondary"
-				iconColor="text-red-600 dark:text-red-400"
+				iconColor="text-danger-solid"
 				on:click={(e) => handleUnlinkClick(e, row)}
 			/>
 		</div>

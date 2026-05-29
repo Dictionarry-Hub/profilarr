@@ -18,13 +18,13 @@
 	}
 
 	const qualitySecondary =
-		'inline-flex items-center leading-none font-medium font-mono px-2.5 py-1 text-xs rounded-md bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300';
+		'inline-flex items-center leading-none font-medium font-mono px-2.5 py-1 text-xs rounded-control-sm border border-border bg-surface text-text-soft shadow-control';
 	const qualitySuccess =
-		'inline-flex items-center leading-none font-medium font-mono px-2.5 py-1 text-xs rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
+		'inline-flex items-center leading-none font-medium font-mono px-2.5 py-1 text-xs rounded-control-sm bg-[var(--theme-success-bg)] text-[var(--theme-success-text)]';
 	const labelSecondary =
-		'inline-flex items-center leading-none font-medium font-mono px-2 py-1 text-[10px] rounded-md bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300';
+		'inline-flex items-center leading-none font-medium font-mono px-2 py-1 text-[10px] rounded-control-sm border border-border bg-surface text-text-soft shadow-control';
 	const labelSecondaryNoMono =
-		'inline-flex items-center leading-none font-medium px-2 py-1 text-[10px] rounded-md bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300';
+		'inline-flex items-center leading-none font-medium px-2 py-1 text-[10px] rounded-control-sm border border-border bg-surface text-text-soft shadow-control';
 
 	// Define table columns for quality profiles
 	const columns: Column<QualityProfileTableRow>[] = [
@@ -46,7 +46,7 @@
 								${row.tags
 									.map(
 										(tag) => `
-									<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200">
+									<span class="inline-flex items-center px-2 py-0.5 rounded-control-sm text-[10px] font-medium bg-accent-solid text-on-accent">
 										${escapeHtml(tag.name)}
 									</span>
 								`
@@ -68,7 +68,7 @@
 			cell: (row: QualityProfileTableRow) => ({
 				html: row.description
 					? sanitizeHtml(row.description)
-					: '<span class="text-neutral-400">No description</span>'
+					: '<span class="text-text-muted">No description</span>'
 			})
 		},
 		{
@@ -129,7 +129,7 @@
 							<div class="flex items-center gap-1.5">Increment: <span class="${labelSecondary}">${row.upgrade_score_increment}</span></div>
 						`
 								: `
-							<div class="text-neutral-500 dark:text-neutral-400">No Upgrades</div>
+							<div class="text-text-muted">No Upgrades</div>
 						`
 						}
 					</div>

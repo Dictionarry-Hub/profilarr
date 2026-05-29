@@ -62,7 +62,7 @@
 			width: 'w-44',
 			cell: (row: DelayProfilesRow) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — formatProtocol returns hardcoded string
-				html: `<span class="font-mono text-xs bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded">${formatProtocol(row.preferred_protocol)}</span>`
+				html: `<span class="font-mono text-xs border border-border bg-surface text-text-soft shadow-control px-2 py-0.5 rounded-control-sm">${formatProtocol(row.preferred_protocol)}</span>`
 			})
 		},
 		{
@@ -75,8 +75,8 @@
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — formatDelay returns hardcoded string
 				html: `
 					<div class="text-xs space-y-0.5">
-						${row.usenet_delay !== null ? `<div>Usenet: <span class="font-mono text-[10px] bg-neutral-100 dark:bg-neutral-800 px-1 rounded">${formatDelay(row.usenet_delay)}</span></div>` : ''}
-						${row.torrent_delay !== null ? `<div>Torrent: <span class="font-mono text-[10px] bg-neutral-100 dark:bg-neutral-800 px-1 rounded">${formatDelay(row.torrent_delay)}</span></div>` : ''}
+						${row.usenet_delay !== null ? `<div>Usenet: <span class="font-mono text-[10px] border border-border bg-surface text-text-soft shadow-control px-1 rounded-control-sm">${formatDelay(row.usenet_delay)}</span></div>` : ''}
+						${row.torrent_delay !== null ? `<div>Torrent: <span class="font-mono text-[10px] border border-border bg-surface text-text-soft shadow-control px-1 rounded-control-sm">${formatDelay(row.torrent_delay)}</span></div>` : ''}
 					</div>
 				`
 			})
@@ -97,14 +97,14 @@
 				}
 
 				if (bypasses.length === 0) {
-					return { html: '<span class="text-neutral-400">None</span>' };
+					return { html: '<span class="text-text-muted">None</span>' };
 				}
 
 				return {
 					// nosemgrep: profilarr.xss.table-cell-html-unescaped — bypasses built from hardcoded strings
 					html: `
 						<div class="text-xs space-y-0.5">
-							${bypasses.map((b) => `<div class="font-mono text-[10px] bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-1.5 py-0.5 rounded inline-block">${b}</div>`).join('')}
+							${bypasses.map((b) => `<div class="font-mono text-[10px] bg-[var(--theme-success-bg)] text-[var(--theme-success-text)] px-1.5 py-0.5 rounded-control-sm inline-block">${b}</div>`).join('')}
 						</div>
 					`
 				};

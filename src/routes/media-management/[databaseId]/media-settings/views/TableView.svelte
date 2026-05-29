@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import Table from '$ui/table/Table.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
+	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
 	import { Tag, Info, RefreshCw, Copy, Download } from 'lucide-svelte';
@@ -26,9 +26,9 @@
 	// Map propers_repacks values to badge variants and labels
 	const propersRepacksConfig: Record<
 		string,
-		{ variant: 'neutral' | 'success' | 'warning'; label: string }
+		{ variant: 'secondary' | 'success' | 'warning'; label: string }
 	> = {
-		doNotPrefer: { variant: 'neutral', label: 'Do Not Prefer' },
+		doNotPrefer: { variant: 'secondary', label: 'Do Not Prefer' },
 		preferAndUpgrade: { variant: 'success', label: 'Prefer & Upgrade' },
 		doNotUpgradeAutomatically: { variant: 'warning', label: 'No Auto Upgrade' }
 	};
@@ -73,15 +73,15 @@
 			</div>
 		{:else if column.key === 'propers_repacks'}
 			{@const config = propersRepacksConfig[row.propers_repacks] || {
-				variant: 'neutral',
+				variant: 'secondary',
 				label: row.propers_repacks
 			}}
-			<Badge variant={config.variant}>{config.label}</Badge>
+			<Label variant={config.variant} size="sm" rounded="md">{config.label}</Label>
 		{:else if column.key === 'enable_media_info'}
 			{#if row.enable_media_info}
-				<Badge variant="success">Enabled</Badge>
+				<Label variant="success" size="sm" rounded="md">Enabled</Label>
 			{:else}
-				<Badge variant="neutral">Disabled</Badge>
+				<Label variant="secondary" size="sm" rounded="md">Disabled</Label>
 			{/if}
 		{/if}
 	</svelte:fragment>
