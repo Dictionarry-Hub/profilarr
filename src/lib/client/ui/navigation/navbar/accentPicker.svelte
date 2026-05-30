@@ -5,6 +5,7 @@
 	import { Check, Circle } from 'lucide-svelte';
 
 	export let onboarding: string | undefined = undefined;
+	export let fixedColor: string | undefined = undefined;
 
 	let open = false;
 	let triggerEl: HTMLElement;
@@ -15,6 +16,7 @@
 	}
 
 	function select(accent: AccentColor) {
+		if (fixedColor) return;
 		accentStore.set(accent);
 		open = false;
 	}
@@ -42,18 +44,27 @@
 	{#if open}
 		<Dropdown position="middle" minWidth="auto" fixed={true} {triggerEl}>
 			<div class="flex flex-col gap-2 p-2">
-				{#each accentColors as accent}
-					<button
-						on:click|stopPropagation={() => select(accent.value)}
-						class="relative flex h-6 w-6 items-center justify-center rounded-full transition-transform hover:scale-110"
-						style="background-color: {accent.color}"
-						aria-label={accent.label}
+				{#if fixedColor}
+					<div
+						class="relative flex h-6 w-6 items-center justify-center rounded-full"
+						style="background-color: {fixedColor}"
 					>
-						{#if $accentStore === accent.value}
-							<Check size={14} class="text-white" />
-						{/if}
-					</button>
-				{/each}
+						<Check size={14} class="text-white" />
+					</div>
+				{:else}
+					{#each accentColors as accent}
+						<button
+							on:click|stopPropagation={() => select(accent.value)}
+							class="relative flex h-6 w-6 items-center justify-center rounded-full transition-transform hover:scale-110"
+							style="background-color: {accent.color}"
+							aria-label={accent.label}
+						>
+							{#if $accentStore === accent.value}
+								<Check size={14} class="text-white" />
+							{/if}
+						</button>
+					{/each}
+				{/if}
 			</div>
 		</Dropdown>
 	{/if}

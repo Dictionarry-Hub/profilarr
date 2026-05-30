@@ -35,6 +35,8 @@ export interface ThemeDefinition {
 	icon: ComponentType;
 	className: string | null;
 	mode: ThemeMode | 'system';
+	fixedAccent?: boolean;
+	accentColor?: string;
 	defaultSans?: string;
 	defaultMono?: string;
 	author?: string;
@@ -80,7 +82,9 @@ export const themeDefinitions: ThemeDefinition[] = [
 		description: 'Windows 98 and Napster-era aesthetic',
 		icon: Turntable,
 		className: 'theme-retro',
-		mode: 'light'
+		mode: 'light',
+		fixedAccent: true,
+		accentColor: '#000080'
 	},
 	{
 		value: 'classic',
@@ -90,6 +94,8 @@ export const themeDefinitions: ThemeDefinition[] = [
 		icon: History,
 		className: 'theme-classic',
 		mode: 'dark',
+		fixedAccent: true,
+		accentColor: '#2563eb',
 		defaultSans: 'dm-sans',
 		defaultMono: 'geist-mono'
 	},
@@ -101,6 +107,8 @@ export const themeDefinitions: ThemeDefinition[] = [
 		icon: Sparkle,
 		className: 'theme-vesper',
 		mode: 'dark',
+		fixedAccent: true,
+		accentColor: '#d4a24c',
 		defaultSans: 'ibm-plex-sans',
 		defaultMono: 'ibm-plex-mono'
 	},
@@ -112,6 +120,8 @@ export const themeDefinitions: ThemeDefinition[] = [
 		icon: Zap,
 		className: 'theme-ashruvarsha',
 		mode: 'dark',
+		fixedAccent: true,
+		accentColor: '#f72585',
 		defaultSans: 'rajdhani',
 		defaultMono: 'space-mono'
 	},
@@ -123,6 +133,8 @@ export const themeDefinitions: ThemeDefinition[] = [
 		icon: RectangleVertical,
 		className: 'theme-monolith',
 		mode: 'light',
+		fixedAccent: true,
+		accentColor: '#c62828',
 		defaultSans: 'jost',
 		defaultMono: 'space-mono'
 	},
@@ -134,6 +146,8 @@ export const themeDefinitions: ThemeDefinition[] = [
 		icon: Flame,
 		className: 'theme-velouria',
 		mode: 'dark',
+		fixedAccent: true,
+		accentColor: '#e63a1e',
 		defaultSans: 'syne',
 		defaultMono: 'space-mono'
 	},
@@ -145,6 +159,8 @@ export const themeDefinitions: ThemeDefinition[] = [
 		icon: Radar,
 		className: 'theme-roswell',
 		mode: 'light',
+		fixedAccent: true,
+		accentColor: '#7c3aed',
 		defaultSans: 'outfit',
 		defaultMono: 'space-mono'
 	},
@@ -156,6 +172,8 @@ export const themeDefinitions: ThemeDefinition[] = [
 		icon: Skull,
 		className: 'theme-larbalestier',
 		mode: 'dark',
+		fixedAccent: true,
+		accentColor: '#cc8800',
 		defaultSans: 'archivo',
 		defaultMono: 'space-mono'
 	}

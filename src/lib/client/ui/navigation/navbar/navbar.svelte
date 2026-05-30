@@ -26,6 +26,8 @@
 	import { navIconStore } from '$stores/navIcons';
 	import { cutscene } from '$lib/client/cutscene/store';
 	import { page } from '$app/stores';
+	import { themePreference } from '$stores/theme.ts';
+	import { getThemeDefinition } from '$lib/client/themes/registry.ts';
 	import logo from '$assets/logo-512.png';
 
 	export let unreadAnnouncements: number = 0;
@@ -45,6 +47,8 @@
 	$: currentPathname = $page.url.pathname;
 	$: versionStatus = $page.data.versionStatus ?? null;
 	$: outOfDate = versionStatus?.status === 'out-of-date' && versionStatus.latestVersion;
+	$: themeDef = getThemeDefinition($themePreference);
+	$: fixedAccentColor = themeDef.fixedAccent ? themeDef.accentColor : undefined;
 
 	$: railLinks = [
 		{ label: 'Dev', href: '/dev', icon: Wrench, emoji: '🛠️', devOnly: true },
@@ -87,7 +91,7 @@
 			</button>
 		</div>
 		<div class="flex items-center justify-end gap-1">
-			<AccentPicker />
+			<AccentPicker fixedColor={fixedAccentColor} />
 			<ThemeToggle />
 			<HelpButton variant="navbar" />
 		</div>
@@ -103,7 +107,7 @@
 			<div class="text-xl font-bold text-text">profilarr</div>
 		</div>
 		<div class="flex items-center justify-end gap-1">
-			<AccentPicker onboarding="accent-picker" />
+			<AccentPicker onboarding="accent-picker" fixedColor={fixedAccentColor} />
 			<ThemeToggle onboarding="theme-toggle" />
 			<HelpButton variant="navbar" />
 			{#if !cutsceneActive}
