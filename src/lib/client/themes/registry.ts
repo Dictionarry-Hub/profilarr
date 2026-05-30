@@ -9,6 +9,7 @@ import {
 	Sun,
 	Turntable,
 	Radar,
+	Skull,
 	Zap
 } from 'lucide-svelte';
 
@@ -22,7 +23,8 @@ export type ThemePreference =
 	| 'ashruvarsha'
 	| 'monolith'
 	| 'velouria'
-	| 'roswell';
+	| 'roswell'
+	| 'larbalestier';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeDefinition {
@@ -144,6 +146,17 @@ export const themeDefinitions: ThemeDefinition[] = [
 		className: 'theme-roswell',
 		mode: 'light',
 		defaultSans: 'outfit',
+		defaultMono: 'space-mono'
+	},
+	{
+		value: 'larbalestier',
+		label: 'Larbalestier',
+		shortLabel: 'Larbalestier',
+		description: 'Monkey gone to heaven',
+		icon: Skull,
+		className: 'theme-larbalestier',
+		mode: 'dark',
+		defaultSans: 'archivo',
 		defaultMono: 'space-mono'
 	}
 ];

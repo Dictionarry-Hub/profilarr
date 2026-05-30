@@ -8,6 +8,7 @@
 	import Hal from './characters/Hal.svelte';
 	import Planet from './characters/Planet.svelte';
 	import Alien from './characters/Alien.svelte';
+	import Monkey from './characters/Monkey.svelte';
 
 	export let variant: 'fab' | 'navbar' = 'fab';
 
@@ -33,7 +34,9 @@
 	class={isFab ? 'fixed right-6 bottom-6 z-50 hidden md:block' : 'relative md:hidden'}
 	on:click|stopPropagation
 >
-	{#if $themePreference === 'roswell'}
+	{#if $themePreference === 'larbalestier'}
+		<Monkey {variant} {open} onToggle={toggle} onClose={close} />
+	{:else if $themePreference === 'roswell'}
 		<Alien {variant} {open} onToggle={toggle} onClose={close} />
 	{:else if $themePreference === 'velouria'}
 		<Planet {variant} {open} onToggle={toggle} onClose={close} />

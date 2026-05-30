@@ -18,7 +18,8 @@ export type SansFont =
 	| 'rajdhani'
 	| 'jost'
 	| 'syne'
-	| 'outfit';
+	| 'outfit'
+	| 'archivo';
 export type MonoFont = 'auto' | 'geist-mono' | 'jetbrains-mono' | 'ibm-plex-mono' | 'space-mono';
 
 export interface FontSettings {
@@ -35,7 +36,8 @@ const sansFontStacks: Record<Exclude<SansFont, 'auto'>, string> = {
 	rajdhani: "'Rajdhani', ui-sans-serif, system-ui, sans-serif",
 	jost: "'Jost', ui-sans-serif, system-ui, sans-serif",
 	syne: "'Syne', ui-sans-serif, system-ui, sans-serif",
-	outfit: "'Outfit', ui-sans-serif, system-ui, sans-serif"
+	outfit: "'Outfit', ui-sans-serif, system-ui, sans-serif",
+	archivo: "'Archivo', ui-sans-serif, system-ui, sans-serif"
 };
 
 const monoFontStacks: Record<Exclude<MonoFont, 'auto'>, string> = {
@@ -52,7 +54,8 @@ const allSansOptions: { value: Exclude<SansFont, 'auto'>; label: string }[] = [
 	{ value: 'rajdhani', label: 'Rajdhani' },
 	{ value: 'jost', label: 'Jost' },
 	{ value: 'syne', label: 'Syne' },
-	{ value: 'outfit', label: 'Outfit' }
+	{ value: 'outfit', label: 'Outfit' },
+	{ value: 'archivo', label: 'Archivo' }
 ];
 
 const allMonoOptions: { value: Exclude<MonoFont, 'auto'>; label: string }[] = [

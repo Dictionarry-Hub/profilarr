@@ -1,0 +1,107 @@
+/*
+ * Larbalestier
+ *
+ * "This monkey's gone to heaven."
+ *
+ * 1989. Four people in a room in Boston making the loudest quiet
+ * record anyone had heard. Gil Norton cleaned up the edges just
+ * enough to let the chaos through. The result was Doolittle: an
+ * album that sounds like breaking into a building and finding
+ * something beautiful inside.
+ *
+ * The palette is the room where it was made. Deep espresso
+ * darkness, the color of a studio at 3am with the overhead
+ * lights off and only the board glowing. Surfaces are warm
+ * brown, wood panels and amp cabinets and coffee rings on the
+ * console. Borders are fret wire, thin and precise against all
+ * that warmth. Text is pale, the color of notebook paper under
+ * a desk lamp.
+ *
+ * The accent is burnt amber, the glow of a tube amp pushed past
+ * its rating. Hot, analog, just a little dangerous. It's the
+ * color of the moment right before feedback.
+ *
+ * Archivo is sharp. Geometric terminals, tight spacing, the kind
+ * of typeface that looks like it was designed with a ruler and a
+ * grudge. It cuts through the warm darkness like a guitar through
+ * a quiet verse. Space Mono handles the data, because even chaos
+ * needs a track sheet.
+ */
+
+.theme-larbalestier {
+	--theme-font-sans: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+	--theme-font-mono: 'Space Mono', ui-monospace, monospace;
+
+	/* 3am in the studio */
+	--theme-bg: #110e0c;
+
+	/* Amp cabinets and wood panels */
+	--theme-surface: #1c1714;
+	--theme-surface-muted: #110e0c;
+	--theme-surface-hover: #271f1a;
+	--theme-surface-hover-muted: #1c1714;
+
+	/* Notebook paper under a desk lamp */
+	--theme-text: #ede4d8;
+	--theme-text-soft: #c4b8a8;
+	--theme-text-muted: #8c7e6e;
+	--theme-text-subtle: #5e5248;
+
+	/* Fret wire: thin, precise */
+	--theme-border: #3a3028;
+	--theme-border-muted: #2e261e;
+	--theme-border-subtle: #221c16;
+
+	/* Tube amp glow: burnt amber */
+	--theme-accent-solid: #cc8800;
+	--theme-accent-solid-hover: #b37808;
+	--theme-on-accent: #110e0c;
+
+	/* Blown fuse */
+	--theme-danger-solid: #dc2626;
+	--theme-danger-solid-hover: #b91c1c;
+	--theme-on-danger: #ffffff;
+
+	/* Flush and ghost */
+	--theme-flush-bg: var(--theme-bg);
+	--theme-flush-hover: var(--theme-surface-hover);
+	--theme-ghost-bg: transparent;
+	--theme-ghost-border: transparent;
+	--theme-ghost-label-bg: rgb(237 228 216 / 0.05);
+	--theme-ghost-label-text: #8c7e6e;
+
+	/* Board channel indicators */
+	--theme-success-bg: rgb(34 197 94 / 0.08);
+	--theme-success-text: #4ade80;
+	--theme-success-border: rgb(34 197 94 / 0.2);
+	--theme-success-icon: #4ade80;
+
+	--theme-warning-bg: rgb(204 136 0 / 0.1);
+	--theme-warning-text: #cc8800;
+	--theme-warning-border: rgb(204 136 0 / 0.25);
+	--theme-warning-icon: #cc8800;
+
+	--theme-danger-bg: rgb(220 38 38 / 0.08);
+	--theme-danger-text: #f87171;
+	--theme-danger-border: rgb(220 38 38 / 0.2);
+	--theme-danger-icon: #f87171;
+
+	--theme-info-bg: rgb(204 136 0 / 0.06);
+	--theme-info-text: #cc8800;
+	--theme-info-border: rgb(204 136 0 / 0.15);
+	--theme-info-icon: #cc8800;
+
+	/* Links: amber signal */
+	--theme-link-text: #cc8800;
+
+	/* Sharp, tight, no nonsense */
+	--theme-radius-control-sm: 0.25rem;
+	--theme-radius-control: 0.375rem;
+	--theme-radius-card: 0.5rem;
+	--theme-radius-pill: 9999px;
+
+	/* Studio shadow: warm and close */
+	--theme-shadow-card: 0 1px 4px rgb(0 0 0 / 0.3), 0 4px 12px rgb(0 0 0 / 0.2);
+	--theme-shadow-control: none;
+	--theme-shadow-control-active: 0 0 0 2px rgb(204 136 0 / 0.25);
+}
