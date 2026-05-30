@@ -37,6 +37,7 @@ export interface ThemeDefinition {
 	mode: ThemeMode | 'system';
 	fixedAccent?: boolean;
 	accentColor?: string;
+	themeAccents?: { label: string; color: string; hover: string; onAccent: string }[];
 	defaultSans?: string;
 	defaultMono?: string;
 	author?: string;
@@ -120,8 +121,13 @@ export const themeDefinitions: ThemeDefinition[] = [
 		icon: Zap,
 		className: 'theme-ashruvarsha',
 		mode: 'dark',
-		fixedAccent: true,
-		accentColor: '#f72585',
+		themeAccents: [
+			{ label: 'Magenta', color: '#f72585', hover: '#e01070', onAccent: '#ffffff' },
+			{ label: 'Cyan', color: '#00f5d4', hover: '#00d4b8', onAccent: '#0b0e14' },
+			{ label: 'Electric', color: '#3a86ff', hover: '#2070e0', onAccent: '#ffffff' },
+			{ label: 'Acid', color: '#80ff72', hover: '#60e050', onAccent: '#0b0e14' },
+			{ label: 'Blaze', color: '#ff6700', hover: '#e05a00', onAccent: '#ffffff' }
+		],
 		defaultSans: 'rajdhani',
 		defaultMono: 'space-mono'
 	},

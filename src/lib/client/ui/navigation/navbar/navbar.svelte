@@ -49,6 +49,8 @@
 	$: outOfDate = versionStatus?.status === 'out-of-date' && versionStatus.latestVersion;
 	$: themeDef = getThemeDefinition($themePreference);
 	$: fixedAccentColor = themeDef.fixedAccent ? themeDef.accentColor : undefined;
+	$: themeAccents = themeDef.themeAccents;
+	$: themeName = themeDef.value;
 
 	$: railLinks = [
 		{ label: 'Dev', href: '/dev', icon: Wrench, emoji: '🛠️', devOnly: true },
@@ -91,7 +93,7 @@
 			</button>
 		</div>
 		<div class="flex items-center justify-end gap-1">
-			<AccentPicker fixedColor={fixedAccentColor} />
+			<AccentPicker fixedColor={fixedAccentColor} {themeAccents} {themeName} />
 			<ThemeToggle />
 			<HelpButton variant="navbar" />
 		</div>
@@ -107,7 +109,12 @@
 			<div class="text-xl font-bold text-text">profilarr</div>
 		</div>
 		<div class="flex items-center justify-end gap-1">
-			<AccentPicker onboarding="accent-picker" fixedColor={fixedAccentColor} />
+			<AccentPicker
+				onboarding="accent-picker"
+				fixedColor={fixedAccentColor}
+				{themeAccents}
+				{themeName}
+			/>
 			<ThemeToggle onboarding="theme-toggle" />
 			<HelpButton variant="navbar" />
 			{#if !cutsceneActive}
