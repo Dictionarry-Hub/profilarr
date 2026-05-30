@@ -99,7 +99,11 @@
 							<ChevronRight size={12} class="shrink-0 text-text-subtle" />
 						{/if}
 						{#if activeTab?.icon && !breadcrumb}
-							<svelte:component this={activeTab.icon} size={16} class="shrink-0 text-accent-500" />
+							<svelte:component
+								this={activeTab.icon}
+								size={16}
+								class="shrink-0 text-accent-solid"
+							/>
 						{/if}
 						<span class="truncate">{activeTab?.label ?? 'Select...'}</span>
 						{#if activeTab?.badge && activeTab.badge > 0}
@@ -156,7 +160,7 @@
 						on:click={() => handleTabSelect(tab.href)}
 						data-onboarding={tab.onboarding || null}
 						class="flex cursor-pointer items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors {tab.active
-							? 'border-accent-600 text-accent-600 dark:border-accent-500 dark:text-accent-500'
+							? 'border-accent-solid text-accent-solid'
 							: 'border-transparent text-text-soft hover:border-border hover:text-text'}"
 					>
 						{#if tab.icon}
