@@ -193,19 +193,13 @@ test('move upgrade until between existing rows clears before setting', async () 
 	const ctx = await seededPcd('move-upgrade-until-existing', [
 		base.qualityProfile({
 			name: PROFILE_NAME,
-			qualityItems: [
-				qualityItem(QUALITY_A, 0, { upgradeUntil: true }),
-				qualityItem(QUALITY_B, 1)
-			]
+			qualityItems: [qualityItem(QUALITY_A, 0, { upgradeUntil: true }), qualityItem(QUALITY_B, 1)]
 		})
 	]);
 	const checkpoint = opCheckpoint(ctx);
 
 	await write.qualityProfile.updateQualities(ctx, 1, {
-		orderedItems: [
-			qualityItem(QUALITY_A, 0),
-			qualityItem(QUALITY_B, 1, { upgradeUntil: true })
-		]
+		orderedItems: [qualityItem(QUALITY_A, 0), qualityItem(QUALITY_B, 1, { upgradeUntil: true })]
 	});
 
 	const op = singleQualitiesOp(ctx, checkpoint);
@@ -332,10 +326,7 @@ function assertSqlOrder(sql: string, before: string, after: string): void {
 	const afterIndex = normalized.indexOf(after);
 	assert(beforeIndex >= 0, `Expected SQL to contain ${before}, got ${normalized}`);
 	assert(afterIndex >= 0, `Expected SQL to contain ${after}, got ${normalized}`);
-	assert(
-		beforeIndex < afterIndex,
-		`Expected ${before} before ${after}, got ${normalized}`
-	);
+	assert(beforeIndex < afterIndex, `Expected ${before} before ${after}, got ${normalized}`);
 }
 
 function compiledQualityOrder(ctx: PcdTestContext): string[] {
