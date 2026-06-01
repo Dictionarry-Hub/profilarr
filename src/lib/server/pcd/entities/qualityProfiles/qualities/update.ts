@@ -428,6 +428,20 @@ export async function updateQualities(options: UpdateQualitiesOptions) {
 
 	const rowOps: QualityRowOp[] = [];
 
+	function pushUpdateOp(change: { current: OrderedItem; next: OrderedItem }) {
+		const queries = buildUpdateQueries(profileName, change.current, change.next);
+		if (queries.length === 0) return;
+
+		rowOps.push({
+			description: `update-quality-profile-row-${profileName}-${change.next.type}-${change.next.name}`,
+			queries,
+			desiredState: rowDesiredState('update', rowKey(change.next), change.current, change.next),
+			changedFields: [rowFieldKey(change.next)],
+			summary: 'Update quality profile quality row',
+			title: `Update ${change.next.type} "${change.next.name}" on quality profile "${profileName}"`
+		});
+	}
+
 	for (const item of removedItems) {
 		rowOps.push({
 			description: `remove-quality-profile-row-${profileName}-${item.type}-${item.name}`,
@@ -437,6 +451,19 @@ export async function updateQualities(options: UpdateQualitiesOptions) {
 			summary: 'Remove quality profile quality row',
 			title: `Remove ${item.type} "${item.name}" from quality profile "${profileName}"`
 		});
+	}
+
+	const clearingUpgradeUntilUpdates = updatedItems.filter(
+		(change) => change.current.upgradeUntil && !change.next.upgradeUntil
+	);
+	const remainingUpdates = updatedItems.filter(
+		(change) => !(change.current.upgradeUntil && !change.next.upgradeUntil)
+	);
+
+	// Clear existing upgrade_until rows before inserts or updates that set a
+	// new one. The partial UNIQUE index only allows one marker per profile.
+	for (const change of clearingUpgradeUntilUpdates) {
+		pushUpdateOp(change);
 	}
 
 	for (const item of addedItems) {
@@ -450,26 +477,15 @@ export async function updateQualities(options: UpdateQualitiesOptions) {
 		});
 	}
 
-	// Sort updates so rows clearing upgrade_until (→false) come before rows
-	// setting it (→true). The partial UNIQUE index idx_one_upgrade_until_per_profile
-	// only allows one upgrade_until=1 per profile, so the clear must run first.
-	const sortedUpdates = [...updatedItems].sort((a, b) => {
+	// For remaining updates, keep rows setting upgrade_until last for the same
+	// partial UNIQUE index.
+	const sortedUpdates = [...remainingUpdates].sort((a, b) => {
 		if (a.next.upgradeUntil === b.next.upgradeUntil) return 0;
 		return a.next.upgradeUntil ? 1 : -1;
 	});
 
 	for (const change of sortedUpdates) {
-		const queries = buildUpdateQueries(profileName, change.current, change.next);
-		if (queries.length === 0) continue;
-
-		rowOps.push({
-			description: `update-quality-profile-row-${profileName}-${change.next.type}-${change.next.name}`,
-			queries,
-			desiredState: rowDesiredState('update', rowKey(change.next), change.current, change.next),
-			changedFields: [rowFieldKey(change.next)],
-			summary: 'Update quality profile quality row',
-			title: `Update ${change.next.type} "${change.next.name}" on quality profile "${profileName}"`
-		});
+		pushUpdateOp(change);
 	}
 
 	if (rowOps.length === 0) {

@@ -104,6 +104,7 @@ export const PORTS = {
 		writeQualityProfilesGeneralUpdate: 7628,
 		writeCustomFormatConditions: 7629,
 		writeQualityProfilesScoringUpdate: 7630,
+		writeQualityProfilesQualitiesUpdate: 7631,
 		conflictsDelayProfiles: 7700,
 		conflictsRegex: 7701,
 		conflictsMediaSettings: 7702,
