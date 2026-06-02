@@ -30,8 +30,8 @@
 		"prettier": "3.8.3",
 		"prettier-plugin-svelte": "^4.0.1",
 		"prettier-plugin-tailwindcss": "^0.8.0",
-		"svelte": "^5.55.10",
-		"svelte-check": "^4.4.8",
+		"svelte": "^5.56.1",
+		"svelte-check": "^4.5.0",
 		"tailwindcss": "^4.1.13",
 		"typescript": "^6.0.3",
 		"vite": "^8.0.14"
