@@ -172,7 +172,9 @@
 				icon={FlaskConical}
 				iconColor="text-amber-600 dark:text-amber-400"
 				disabled={isNewConfig || !enabled || running || saving || clearing || $isDirty}
-				tooltip="Search indexers without downloading (limited to once every 10 min)"
+				tooltip={data.instance.type === 'sonarr'
+					? 'Search indexers without downloading. Only searches the latest monitored season per series (limited to once every 10 min)'
+					: 'Search indexers without downloading (limited to once every 10 min)'}
 				tooltipPosition="bottom"
 				tooltipAlign="right"
 				on:click={() => {
