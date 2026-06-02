@@ -29,6 +29,13 @@
 
 	// Resolution grouping for quality definitions UI
 	type ResolutionGroup = 'SD' | '720p' | '1080p' | '2160p' | 'Prereleases' | 'Other';
+	type QualitySizeField = 'min' | 'preferred' | 'max';
+
+	interface NumberCorrectionDetail {
+		inputValue: number;
+		value: number;
+		reason: 'min' | 'max';
+	}
 
 	const RESOLUTION_GROUP_ORDER: ResolutionGroup[] = [
 		'2160p',
@@ -279,6 +286,23 @@
 		}
 	}
 
+	function formatCorrectedSize(field: QualitySizeField, value: number): string {
+		if ((field === 'preferred' || field === 'max') && value >= baseScaleMax) {
+			return `${baseScaleMax} MB/m (unlimited)`;
+		}
+
+		return `${value} MB/m`;
+	}
+
+	function handleSizeCorrection(field: QualitySizeField, detail: NumberCorrectionDetail) {
+		const label = field === 'min' ? 'Min' : field === 'preferred' ? 'Preferred' : 'Max';
+		const action = detail.reason === 'min' ? 'raised' : 'lowered';
+		alertStore.add(
+			'warning',
+			`${label} was ${action} to ${formatCorrectedSize(field, detail.value)}.`
+		);
+	}
+
 	// Note: API uses 0 for "unlimited", so convert baseScaleMax → 0 on save
 	$: entriesForSubmit = JSON.stringify(
 		entries.map((e) => ({
@@ -458,7 +482,9 @@
 										max={markers[1].value}
 										step={1}
 										responsive
+										validateOn="blur"
 										onchange={() => syncToEntry(entry.quality_name)}
+										on:correction={(event) => handleSizeCorrection('min', event.detail)}
 									/>
 								</div>
 
@@ -476,7 +502,9 @@
 										max={markers[2].value}
 										step={1}
 										responsive
+										validateOn="blur"
 										onchange={() => syncToEntry(entry.quality_name)}
+										on:correction={(event) => handleSizeCorrection('preferred', event.detail)}
 									/>
 								</div>
 
@@ -494,7 +522,9 @@
 										max={baseScaleMax}
 										step={1}
 										responsive
+										validateOn="blur"
 										onchange={() => syncToEntry(entry.quality_name)}
+										on:correction={(event) => handleSizeCorrection('max', event.detail)}
 									/>
 								</div>
 							</div>
