@@ -93,6 +93,7 @@
 	$: cron = ($current.cron ?? '0 */6 * * *') as string;
 	$: filterMode = ($current.filterMode ?? 'round_robin') as FilterMode;
 	$: filters = JSON.parse(($current.filters ?? '[]') as string) as FilterConfig[];
+	$: hasEnabledFilter = filters.some((f) => f.enabled);
 
 	// Derive runs per hour for dynamic count limits
 	$: runsPerHour = getRunsPerHour(cron) ?? 1;
@@ -158,8 +159,10 @@
 			<Button
 				text={clearing ? 'Clearing...' : 'Reset Cache'}
 				icon={RotateCcw}
-				disabled={isNewConfig || !enabled || clearing || running || saving}
-				tooltip="Clear dry run exclusion cache so items can be re-selected"
+				disabled={isNewConfig || !enabled || !hasEnabledFilter || clearing || running || saving}
+				tooltip={!hasEnabledFilter
+					? 'Add and enable at least one filter before running'
+					: 'Clear dry run exclusion cache so items can be re-selected'}
 				tooltipPosition="bottom"
 				tooltipAlign="right"
 				on:click={() => {
@@ -171,10 +174,18 @@
 				text={running ? 'Running...' : 'Dry Run'}
 				icon={FlaskConical}
 				iconColor="text-amber-600 dark:text-amber-400"
-				disabled={isNewConfig || !enabled || running || saving || clearing || $isDirty}
-				tooltip={data.instance.type === 'sonarr'
-					? 'Search indexers without downloading. Only searches the latest monitored season per series (limited to once every 10 min)'
-					: 'Search indexers without downloading (limited to once every 10 min)'}
+				disabled={isNewConfig ||
+					!enabled ||
+					!hasEnabledFilter ||
+					running ||
+					saving ||
+					clearing ||
+					$isDirty}
+				tooltip={!hasEnabledFilter
+					? 'Add and enable at least one filter before running'
+					: data.instance.type === 'sonarr'
+						? 'Search indexers without downloading. Only searches the latest monitored season per series (limited to once every 10 min)'
+						: 'Search indexers without downloading (limited to once every 10 min)'}
 				tooltipPosition="bottom"
 				tooltipAlign="right"
 				on:click={() => {
@@ -193,8 +204,10 @@
 					text={running ? 'Running...' : 'Live Run'}
 					icon={Play}
 					iconColor="text-red-600 dark:text-red-400"
-					disabled={isNewConfig || !enabled || running || saving || $isDirty}
-					tooltip="Run a live search that will download upgrades"
+					disabled={isNewConfig || !enabled || !hasEnabledFilter || running || saving || $isDirty}
+					tooltip={!hasEnabledFilter
+						? 'Add and enable at least one filter before running'
+						: 'Run a live search that will download upgrades'}
 					tooltipPosition="bottom"
 					tooltipAlign="right"
 					on:click={() => {
