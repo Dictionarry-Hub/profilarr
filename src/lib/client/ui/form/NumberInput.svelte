@@ -343,7 +343,7 @@
 				onpointerdown={(event) => startStepRepeat('increment', event)}
 				onpointerleave={clearStepRepeat}
 				disabled={incrementDisabled}
-				class="flex flex-1 {buttonWidthClass} items-center justify-center {buttonTopRadius} border border-neutral-300 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+				class="flex flex-1 {buttonWidthClass} cursor-pointer items-center justify-center {buttonTopRadius} border border-neutral-300 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
 			>
 				<ChevronUp size={iconSize} />
 			</button>
@@ -353,7 +353,7 @@
 				onpointerdown={(event) => startStepRepeat('decrement', event)}
 				onpointerleave={clearStepRepeat}
 				disabled={decrementDisabled}
-				class="flex flex-1 {buttonWidthClass} items-center justify-center {buttonBottomRadius} border border-t-0 border-neutral-300 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+				class="flex flex-1 {buttonWidthClass} cursor-pointer items-center justify-center {buttonBottomRadius} border border-t-0 border-neutral-300 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
 			>
 				<ChevronDown size={iconSize} />
 			</button>
