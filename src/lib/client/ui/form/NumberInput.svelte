@@ -4,6 +4,7 @@
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	type CorrectionReason = 'min' | 'max';
+	type StepDirection = 'increment' | 'decrement';
 
 	const dispatch = createEventDispatcher<{
 		change: number | undefined;
@@ -31,10 +32,21 @@
 	export let onMinBlocked: (() => void) | undefined = undefined;
 	export let onMaxBlocked: (() => void) | undefined = undefined;
 
+	const repeatDelayMs = 350;
+	const repeatInitialIntervalMs = 100;
+	const repeatMinIntervalMs = 1;
+	const repeatRampDurationMs = 5000;
+	const ignoreClickResetDelayMs = 100;
+
 	let inputValue = value === undefined || value === null ? '' : String(value);
 	let isFocused = false;
 	let isSmallScreen = false;
 	let mediaQuery: MediaQueryList | null = null;
+	let repeatTimeout: ReturnType<typeof setTimeout> | null = null;
+	let ignoreClickResetTimeout: ReturnType<typeof setTimeout> | null = null;
+	let repeatingDirection: StepDirection | null = null;
+	let repeatStartedAt = 0;
+	let ignoreNextClick = false;
 
 	onMount(() => {
 		if (responsive && typeof window !== 'undefined') {
@@ -48,6 +60,8 @@
 		if (mediaQuery) {
 			mediaQuery.removeEventListener('change', handleMediaChange);
 		}
+		clearStepRepeat();
+		clearIgnoredClickReset();
 	});
 
 	function handleMediaChange(e: MediaQueryListEvent) {
@@ -131,7 +145,7 @@
 			onMaxBlocked?.();
 			return;
 		}
-		updateValue(currentValue + step);
+		updateValue(max === undefined ? currentValue + step : Math.min(max, currentValue + step));
 	}
 
 	function decrement() {
@@ -140,7 +154,105 @@
 			onMinBlocked?.();
 			return;
 		}
-		updateValue(currentValue - step);
+		updateValue(min === undefined ? currentValue - step : Math.max(min, currentValue - step));
+	}
+
+	function canStep(direction: StepDirection): boolean {
+		return direction === 'increment' ? !incrementDisabled : !decrementDisabled;
+	}
+
+	function stepValue(direction: StepDirection) {
+		if (direction === 'increment') {
+			increment();
+		} else {
+			decrement();
+		}
+	}
+
+	function commitFocusedValue() {
+		if (isFocused && validateOn === 'blur') {
+			handleBlur();
+		}
+	}
+
+	function clearIgnoredClickReset() {
+		if (ignoreClickResetTimeout) {
+			clearTimeout(ignoreClickResetTimeout);
+			ignoreClickResetTimeout = null;
+		}
+	}
+
+	function clearStepRepeat() {
+		if (repeatTimeout) {
+			clearTimeout(repeatTimeout);
+			repeatTimeout = null;
+		}
+		repeatingDirection = null;
+		repeatStartedAt = 0;
+
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('pointerup', clearStepRepeat);
+			window.removeEventListener('blur', clearStepRepeat);
+		}
+
+		if (ignoreNextClick && !ignoreClickResetTimeout) {
+			ignoreClickResetTimeout = setTimeout(() => {
+				ignoreNextClick = false;
+				ignoreClickResetTimeout = null;
+			}, ignoreClickResetDelayMs);
+		}
+	}
+
+	function getRepeatInterval(): number {
+		const elapsedMs = Date.now() - repeatStartedAt;
+		const progress = Math.min(1, elapsedMs / repeatRampDurationMs);
+		const easedProgress = progress * progress * (3 - 2 * progress);
+		return Math.round(
+			repeatInitialIntervalMs -
+				(repeatInitialIntervalMs - repeatMinIntervalMs) * easedProgress
+		);
+	}
+
+	function repeatStep() {
+		if (!repeatingDirection || !canStep(repeatingDirection)) {
+			clearStepRepeat();
+			return;
+		}
+
+		stepValue(repeatingDirection);
+		repeatTimeout = setTimeout(repeatStep, getRepeatInterval());
+	}
+
+	function startStepRepeat(direction: StepDirection, event: PointerEvent) {
+		if (!canStep(direction)) {
+			return;
+		}
+
+		clearStepRepeat();
+		clearIgnoredClickReset();
+		event.preventDefault();
+		ignoreNextClick = true;
+		commitFocusedValue();
+		stepValue(direction);
+		repeatingDirection = direction;
+		repeatStartedAt = Date.now();
+
+		if (typeof window !== 'undefined') {
+			window.addEventListener('pointerup', clearStepRepeat);
+			window.addEventListener('blur', clearStepRepeat);
+		}
+
+		repeatTimeout = setTimeout(repeatStep, repeatDelayMs);
+	}
+
+	function handleStepClick(direction: StepDirection) {
+		if (ignoreNextClick) {
+			ignoreNextClick = false;
+			clearIgnoredClickReset();
+			return;
+		}
+
+		stepValue(direction);
 	}
 
 	// Validate on input
@@ -169,6 +281,7 @@
 	}
 
 	function handleBlur() {
+		if (!isFocused) return;
 		isFocused = false;
 		if (inputValue === '' || inputValue === '-' || inputValue === '.' || inputValue === '-.') {
 			value = undefined;
@@ -198,9 +311,9 @@
 		{id}
 		{name}
 		bind:value={inputValue}
-		on:input={handleInput}
-		on:focus={handleFocus}
-		on:blur={handleBlur}
+		oninput={handleInput}
+		onfocus={handleFocus}
+		onblur={handleBlur}
 		{min}
 		{max}
 		{step}
@@ -226,7 +339,9 @@
 		<div class="absolute top-0 right-0 bottom-0 flex flex-col">
 			<button
 				type="button"
-				on:click={increment}
+				onclick={() => handleStepClick('increment')}
+				onpointerdown={(event) => startStepRepeat('increment', event)}
+				onpointerleave={clearStepRepeat}
 				disabled={incrementDisabled}
 				class="flex flex-1 {buttonWidthClass} items-center justify-center {buttonTopRadius} border border-neutral-300 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
 			>
@@ -234,7 +349,9 @@
 			</button>
 			<button
 				type="button"
-				on:click={decrement}
+				onclick={() => handleStepClick('decrement')}
+				onpointerdown={(event) => startStepRepeat('decrement', event)}
+				onpointerleave={clearStepRepeat}
 				disabled={decrementDisabled}
 				class="flex flex-1 {buttonWidthClass} items-center justify-center {buttonBottomRadius} border border-t-0 border-neutral-300 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
 			>
