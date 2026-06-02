@@ -3,7 +3,12 @@
 	import { ChevronUp, ChevronDown, CircleAlert } from 'lucide-svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
-	const dispatch = createEventDispatcher<{ change: number | undefined }>();
+	type CorrectionReason = 'min' | 'max';
+
+	const dispatch = createEventDispatcher<{
+		change: number | undefined;
+		correction: { inputValue: number; value: number; reason: CorrectionReason };
+	}>();
 
 	// Props
 	export let name: string;
@@ -18,6 +23,7 @@
 	export let placeholder: string = '';
 	export let font: 'mono' | 'sans' | undefined = undefined;
 	export let compact: boolean = false;
+	export let validateOn: 'input' | 'blur' = 'input';
 	// Responsive: auto-switch to compact on smaller screens (< 1280px)
 	export let responsive: boolean = false;
 	export let autoWidth: boolean = false;
@@ -87,11 +93,31 @@
 		inputValue = value === undefined || value === null ? '' : String(value);
 	}
 
-	function updateValue(newValue: number) {
+	function clampValue(rawValue: number): { value: number; reason: CorrectionReason | undefined } {
+		let newValue = rawValue;
+		let reason: CorrectionReason | undefined = undefined;
+
+		if (min !== undefined && newValue < min) {
+			newValue = min;
+			reason = 'min';
+		}
+
+		if (max !== undefined && newValue > max) {
+			newValue = max;
+			reason = 'max';
+		}
+
+		return { value: newValue, reason };
+	}
+
+	function updateValue(newValue: number, rawValue: number = newValue, reason?: CorrectionReason) {
 		value = newValue;
 		inputValue = String(newValue);
 		onchange?.(newValue);
 		dispatch('change', newValue);
+		if (reason && rawValue !== newValue) {
+			dispatch('correction', { inputValue: rawValue, value: newValue, reason });
+		}
 	}
 
 	// Increment/decrement handlers
@@ -124,21 +150,18 @@
 			return;
 		}
 
-		let newValue = Number(inputValue);
+		const rawValue = Number(inputValue);
 
-		if (Number.isNaN(newValue)) {
+		if (Number.isNaN(rawValue)) {
 			return;
 		}
 
-		if (min !== undefined && newValue < min) {
-			newValue = min;
+		if (validateOn === 'blur') {
+			return;
 		}
 
-		if (max !== undefined && newValue > max) {
-			newValue = max;
-		}
-
-		updateValue(newValue);
+		const result = clampValue(rawValue);
+		updateValue(result.value, rawValue, result.reason);
 	}
 
 	function handleBlur() {
@@ -150,21 +173,14 @@
 			return;
 		}
 
-		let newValue = Number(inputValue);
-		if (Number.isNaN(newValue)) {
+		const rawValue = Number(inputValue);
+		if (Number.isNaN(rawValue)) {
 			inputValue = value === undefined || value === null ? '' : String(value);
 			return;
 		}
 
-		if (min !== undefined && newValue < min) {
-			newValue = min;
-		}
-
-		if (max !== undefined && newValue > max) {
-			newValue = max;
-		}
-
-		updateValue(newValue);
+		const result = clampValue(rawValue);
+		updateValue(result.value, rawValue, result.reason);
 	}
 
 	function handleFocus() {

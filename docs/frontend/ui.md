@@ -136,6 +136,8 @@ flush with surrounding content when `label` is omitted.
 **`$ui/form/NumberInput.svelte`** wraps `<input type="number">` and adds
 increment/decrement buttons, min/max validation, and a `compact` mode for
 dense form grids. Typical use: retention days, timeouts, thresholds.
+Use `validateOn="blur"` when the field should allow free typing and only
+commit min/max validation after focus leaves the input.
 
 ```svelte
 <!-- src/routes/settings/general/+page.svelte:472 -->
