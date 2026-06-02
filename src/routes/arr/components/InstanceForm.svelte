@@ -287,45 +287,40 @@
 	>
 		<!-- Name, URL, API Key -->
 		<div data-onboarding="arr-connection" class="space-y-4">
-			<div class="space-y-2">
-				<div class="flex items-center gap-4">
-					<div class="min-w-0 flex-[12] text-sm font-medium text-neutral-900 dark:text-neutral-100">
+			<div class="flex flex-col gap-4 2xl:flex-row">
+				<div class="min-w-0 space-y-2 2xl:flex-[3]">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						Name<span class="text-red-500">*</span>
 					</div>
-					<div class="flex-1 text-right text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Type{#if mode === 'create'}<span class="text-red-500">*</span>{/if}
-					</div>
-				</div>
-				<div class="flex items-center gap-4">
-					<p class="min-w-0 flex-1 text-xs text-neutral-600 dark:text-neutral-400">
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
 						The display name for this Arr instance
 					</p>
-					<p class="flex-1 text-right text-xs text-neutral-600 dark:text-neutral-400">
+					<FormInput
+						label="Name"
+						name="name"
+						value={name}
+						placeholder="e.g., Main Radarr, 4K Sonarr"
+						required
+						hideLabel
+						on:input={(e) => update('name', e.detail)}
+					/>
+				</div>
+				<div class="min-w-0 space-y-2 2xl:flex-1" data-onboarding="arr-type">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Type{#if mode === 'create'}<span class="text-red-500">*</span>{/if}
+					</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
 						Type cannot be changed after creation
 					</p>
-				</div>
-				<div class="flex items-end gap-4">
-					<div class="min-w-0 flex-[12]">
-						<FormInput
-							label="Name"
-							name="name"
-							value={name}
-							placeholder="e.g., Main Radarr, 4K Sonarr"
-							required
-							hideLabel
-							on:input={(e) => update('name', e.detail)}
-						/>
-					</div>
-					<div class="min-w-0 flex-1" data-onboarding="arr-type">
-						<DropdownSelect
-							value={type}
-							options={typeOptions}
-							placeholder="Select type..."
-							disabled={mode === 'edit'}
-							fullWidth
-							on:change={(e) => update('type', e.detail)}
-						/>
-					</div>
+					<DropdownSelect
+						value={type}
+						options={typeOptions}
+						placeholder="Select type..."
+						disabled={mode === 'edit'}
+						fullWidth
+						position="right"
+						on:change={(e) => update('type', e.detail)}
+					/>
 				</div>
 			</div>
 			<!-- URL Row -->
