@@ -550,7 +550,8 @@ export async function processUpgradeConfig(
 										...(searchedSeason != null ? { seasonNumber: searchedSeason } : {})
 									}
 								],
-								imageUrl: getPosterUrl(item._raw)
+								imageUrl: getPosterUrl(item._raw),
+								...(searchedSeason != null ? { searchedSeasonNumber: searchedSeason } : {})
 							});
 							successful++;
 						} else {
@@ -559,7 +560,8 @@ export async function processUpgradeConfig(
 								title: item.title,
 								original,
 								upgrades: [],
-								imageUrl: getPosterUrl(item._raw)
+								imageUrl: getPosterUrl(item._raw),
+								...(searchedSeason != null ? { searchedSeasonNumber: searchedSeason } : {})
 							});
 						}
 						searchesTriggered++;
@@ -569,7 +571,8 @@ export async function processUpgradeConfig(
 							title: item.title,
 							original,
 							upgrades: [],
-							imageUrl: getPosterUrl(item._raw)
+							imageUrl: getPosterUrl(item._raw),
+							...(searchedSeason != null ? { searchedSeasonNumber: searchedSeason } : {})
 						});
 						failed++;
 						errors.push(

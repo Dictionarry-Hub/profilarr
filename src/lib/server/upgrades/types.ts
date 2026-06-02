@@ -104,6 +104,7 @@ export interface UpgradeSelectionItem {
 	original: UpgradeOriginal;
 	upgrades: UpgradeNewRelease[];
 	imageUrl?: string;
+	searchedSeasonNumber?: number;
 }
 
 /**

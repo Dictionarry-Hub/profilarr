@@ -220,6 +220,8 @@
 			}
 
 			for (const season of [...allSeasons].sort((a, b) => a - b)) {
+				const wasSearched =
+					item.searchedSeasonNumber == null || season === item.searchedSeasonNumber;
 				result.push({
 					id: item.id * 1000 + season,
 					title: `${item.title} - Season ${season}`,
@@ -228,7 +230,8 @@
 						title: item.title,
 						episodes: seasonEpisodes.get(season) ?? []
 					},
-					upgrades: seasonUpgrades.get(season) ?? []
+					upgrades: seasonUpgrades.get(season) ?? [],
+					searchedSeasonNumber: wasSearched ? season : -1
 				});
 			}
 		}
@@ -515,6 +518,8 @@
 										{:else}
 											<Badge variant="neutral" size="sm">No formats</Badge>
 										{/if}
+									{:else if item.searchedSeasonNumber === -1}
+										<Badge variant="neutral" size="sm">Not searched</Badge>
 									{:else}
 										<Badge variant="neutral" size="sm">No upgrade</Badge>
 									{/if}
@@ -571,6 +576,10 @@
 												</span>
 											</div>
 										{/each}
+									{:else if item.searchedSeasonNumber === -1}
+										<div class="text-xs text-neutral-500 italic dark:text-neutral-400">
+											Not searched (dry run only searches latest monitored season)
+										</div>
 									{:else}
 										<div class="text-xs text-neutral-500 italic dark:text-neutral-400">
 											No upgrade available
