@@ -208,8 +208,7 @@
 		const progress = Math.min(1, elapsedMs / repeatRampDurationMs);
 		const easedProgress = progress * progress * (3 - 2 * progress);
 		return Math.round(
-			repeatInitialIntervalMs -
-				(repeatInitialIntervalMs - repeatMinIntervalMs) * easedProgress
+			repeatInitialIntervalMs - (repeatInitialIntervalMs - repeatMinIntervalMs) * easedProgress
 		);
 	}
 
