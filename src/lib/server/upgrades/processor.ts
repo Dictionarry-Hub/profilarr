@@ -511,11 +511,11 @@ export async function processUpgradeConfig(
 
 				for (const item of selectedItems) {
 					const original = getOriginalFile(item);
+					let searchedSeason: number | undefined;
 					try {
 						let bestRelease:
 							| { title: string; customFormats: { name: string }[]; customFormatScore: number }
 							| undefined;
-						let searchedSeason: number | undefined;
 
 						if (isRadarr) {
 							const releases = await (client as RadarrClient).getReleases(item.id);
@@ -550,7 +550,8 @@ export async function processUpgradeConfig(
 										...(searchedSeason != null ? { seasonNumber: searchedSeason } : {})
 									}
 								],
-								imageUrl: getPosterUrl(item._raw)
+								imageUrl: getPosterUrl(item._raw),
+								...(searchedSeason != null ? { searchedSeasonNumber: searchedSeason } : {})
 							});
 							successful++;
 						} else {
@@ -559,7 +560,8 @@ export async function processUpgradeConfig(
 								title: item.title,
 								original,
 								upgrades: [],
-								imageUrl: getPosterUrl(item._raw)
+								imageUrl: getPosterUrl(item._raw),
+								...(searchedSeason != null ? { searchedSeasonNumber: searchedSeason } : {})
 							});
 						}
 						searchesTriggered++;
@@ -569,7 +571,8 @@ export async function processUpgradeConfig(
 							title: item.title,
 							original,
 							upgrades: [],
-							imageUrl: getPosterUrl(item._raw)
+							imageUrl: getPosterUrl(item._raw),
+							...(searchedSeason != null ? { searchedSeasonNumber: searchedSeason } : {})
 						});
 						failed++;
 						errors.push(
