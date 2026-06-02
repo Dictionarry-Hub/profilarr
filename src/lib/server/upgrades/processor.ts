@@ -511,11 +511,11 @@ export async function processUpgradeConfig(
 
 				for (const item of selectedItems) {
 					const original = getOriginalFile(item);
+					let searchedSeason: number | undefined;
 					try {
 						let bestRelease:
 							| { title: string; customFormats: { name: string }[]; customFormatScore: number }
 							| undefined;
-						let searchedSeason: number | undefined;
 
 						if (isRadarr) {
 							const releases = await (client as RadarrClient).getReleases(item.id);
