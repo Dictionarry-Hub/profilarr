@@ -34,8 +34,9 @@
 				<div>
 					<dt class="font-medium text-neutral-900 dark:text-neutral-100">Dry Run</dt>
 					<dd class="text-neutral-600 dark:text-neutral-400">
-						Shows what would be renamed without making changes. Use this to preview before
-						committing.
+						Shows what files would be renamed without making changes. Use this to preview before
+						committing. Folder renames cannot be previewed because the Arr API does not support it,
+						so a live run may also rename folders not shown here.
 					</dd>
 				</div>
 				<div>
