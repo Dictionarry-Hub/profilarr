@@ -32,7 +32,7 @@
 
 	function parseMarkdown(text: string | null): string {
 		if (!text) return '';
-		return sanitizeHtml(marked.parseInline(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
+		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
 	}
 
 	const columns: Column<CustomFormatTableRow>[] = [
@@ -162,31 +162,3 @@
 		</div>
 	</svelte:fragment>
 </Table>
-
-<style>
-	/* Inline prose styles for markdown content */
-	:global(.prose-inline code) {
-		background-color: rgb(229 231 235);
-		padding: 0.125rem 0.25rem;
-		border-radius: 0.25rem;
-		font-size: 0.75rem;
-		font-family: var(--font-mono);
-	}
-
-	:global(.dark .prose-inline code) {
-		background-color: rgb(38 38 38);
-	}
-
-	:global(.prose-inline strong) {
-		font-weight: 600;
-	}
-
-	:global(.prose-inline a) {
-		color: rgb(var(--color-accent-600));
-		text-decoration: underline;
-	}
-
-	:global(.dark .prose-inline a) {
-		color: rgb(var(--color-accent-400));
-	}
-</style>
