@@ -295,6 +295,11 @@
 					<span class="text-sm text-neutral-900 dark:text-neutral-100">
 						{#if row.config.dryRun}
 							<span class="font-mono">{row.results.filesNeedingRename}</span> files would be renamed
+							{#if row.config.renameFolders}
+								<div class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+									Folder renames are not included in dry run previews.
+								</div>
+							{/if}
 						{:else}
 							<span class="font-mono">{row.results.filesRenamed}</span> file{row.results
 								.filesRenamed !== 1
