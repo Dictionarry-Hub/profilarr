@@ -89,7 +89,7 @@
 
 				<!-- Description -->
 				{#if format.description}
-					<div class="prose-inline line-clamp-2 text-xs text-neutral-600 dark:text-neutral-400">
+					<div class="prose-inline line-clamp-3 text-xs text-neutral-600 dark:text-neutral-400">
 						{@html parseMarkdown(format.description)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 					</div>
 				{:else}

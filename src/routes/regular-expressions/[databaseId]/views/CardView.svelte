@@ -72,7 +72,7 @@
 			<div class="space-y-3">
 				<CodeBlock code={expression.pattern} />
 				{#if expression.description}
-					<Markdown content={expression.description} inline={false} />
+					<Markdown content={expression.description} inline={false} maxLines={3} />
 				{/if}
 			</div>
 		</Card>
