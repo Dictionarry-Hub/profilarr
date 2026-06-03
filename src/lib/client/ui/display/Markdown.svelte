@@ -52,4 +52,34 @@
 	:global(.dark) .markdown :global(a) {
 		color: rgb(var(--color-accent-400));
 	}
+
+	.markdown :global(ul),
+	.markdown :global(ol) {
+		padding-left: 1.5rem;
+		margin: 0.5rem 0;
+	}
+
+	.markdown :global(ul) {
+		list-style-type: disc;
+	}
+
+	.markdown :global(ol) {
+		list-style-type: decimal;
+	}
+
+	.markdown :global(li) {
+		margin: 0.25rem 0;
+	}
+
+	.markdown :global(p) {
+		margin: 0.25rem 0;
+	}
+
+	.markdown :global(p:first-child) {
+		margin-top: 0;
+	}
+
+	.markdown :global(p:last-child) {
+		margin-bottom: 0;
+	}
 </style>
