@@ -93,7 +93,7 @@
 				icon={FlaskConical}
 				iconColor="text-amber-600 dark:text-amber-400"
 				disabled={isNewConfig || !enabled || running || saving || $isDirty}
-				tooltip="Preview which files would be renamed without making changes"
+				tooltip="Preview which files would be renamed without making changes. Folder renames cannot be previewed."
 				tooltipPosition="bottom"
 				tooltipAlign="right"
 				on:click={() => {
