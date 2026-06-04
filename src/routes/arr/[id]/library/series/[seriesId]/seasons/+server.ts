@@ -3,6 +3,7 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { cache } from '$cache/cache.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
 import type { SonarrLibraryItem } from '$utils/arr/types.ts';
 import { getProfilarrProfileNames } from '$lib/server/sync/libraryHelpers.ts';
 import { logger } from '$logger/logger.ts';
@@ -23,7 +24,11 @@ async function getLibraryCached(instanceId: number): Promise<SonarrLibraryItem[]
 			: MANUAL_CACHE_TTL;
 
 	const profilarrProfileNames = await getProfilarrProfileNames();
-	const client = new SonarrClient(instance.url, instance.api_key);
+	const client = new SonarrClient(
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 	try {
 		const items = await client.getLibrary(profilarrProfileNames);
 		cache.set(cacheKey, items, ttl);

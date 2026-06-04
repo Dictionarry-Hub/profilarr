@@ -25,10 +25,10 @@
  *   delay-profiles, regular-expressions, media-management, arr/[id]/sync)
  *
  * Tests:
- * 1. /arr list does not expose arr API keys
- * 2. /arr/[id]/upgrades does not expose arr API key
- * 3. /arr/[id]/rename does not expose arr API key
- * 4. /arr/[id]/sync does not expose arr API key
+ * 1. /arr list does not expose arr credentials
+ * 2. /arr/[id]/upgrades does not expose arr credentials
+ * 3. /arr/[id]/rename does not expose arr credentials
+ * 4. /arr/[id]/sync does not expose arr credentials
  * 5. /databases list does not expose PATs
  * 6. /databases/[id]/tweaks does not expose PAT
  * 7. /quality-profiles/[databaseId] list does not expose PATs
@@ -57,6 +57,8 @@ const ORIGIN = `http://localhost:${PORT}`;
 
 // Known secrets — we insert these and check they don't appear in responses
 const ARR_API_KEY = 'sonarr-secret-key-abc123def456';
+const ARR_BASIC_AUTH_USERNAME = 'arr-basic-auth-user';
+const ARR_BASIC_AUTH_PASSWORD = 'arr-basic-auth-pass';
 const DB_PAT = 'ghp-secret-pat-token-uvw567xyz890';
 const TMDB_API_KEY = 'tmdb-secret-key-xyz789ghi012';
 const AI_API_KEY = 'sk-ai-secret-key-jkl345mno678';
@@ -71,11 +73,13 @@ let notificationServiceId: string;
 async function seedSecrets(dbPath: string) {
 	const db = openDb(dbPath);
 	try {
-		// Arr instance with known API key
+		// Arr instance with known credentials
 		db.exec(
-			`INSERT INTO arr_instances (name, type, url, api_key, enabled)
-			 VALUES ('Test Sonarr', 'sonarr', 'http://localhost:8989', ?, 1)`,
-			[ARR_API_KEY]
+			`INSERT INTO arr_instances (
+				name, type, url, api_key, basic_auth_username, basic_auth_password, enabled
+			)
+			 VALUES ('Test Sonarr', 'sonarr', 'http://localhost:8989', ?, ?, ?, 1)`,
+			[ARR_API_KEY, ARR_BASIC_AUTH_USERNAME, ARR_BASIC_AUTH_PASSWORD]
 		);
 		const arrRow = db.prepare('SELECT id FROM arr_instances WHERE name = ?').get('Test Sonarr') as {
 			id: number;
@@ -159,26 +163,32 @@ teardown(async () => {
 	await stopServer(PORT);
 });
 
-// --- Arr API keys ---
+// --- Arr credentials ---
 
-test('/arr list does not expose arr API keys', async () => {
+function assertArrCredentialsNotExposed(body: string) {
+	assertNotExposed(body, ARR_API_KEY, 'arr API key');
+	assertNotExposed(body, ARR_BASIC_AUTH_USERNAME, 'arr Basic Auth username');
+	assertNotExposed(body, ARR_BASIC_AUTH_PASSWORD, 'arr Basic Auth password');
+}
+
+test('/arr list does not expose arr credentials', async () => {
 	const body = await fetchPage('/arr');
-	assertNotExposed(body, ARR_API_KEY, 'arr API key');
+	assertArrCredentialsNotExposed(body);
 });
 
-test('/arr/[id]/upgrades does not expose arr API key', async () => {
+test('/arr/[id]/upgrades does not expose arr credentials', async () => {
 	const body = await fetchPage(`/arr/${arrInstanceId}/upgrades`);
-	assertNotExposed(body, ARR_API_KEY, 'arr API key');
+	assertArrCredentialsNotExposed(body);
 });
 
-test('/arr/[id]/rename does not expose arr API key', async () => {
+test('/arr/[id]/rename does not expose arr credentials', async () => {
 	const body = await fetchPage(`/arr/${arrInstanceId}/rename`);
-	assertNotExposed(body, ARR_API_KEY, 'arr API key');
+	assertArrCredentialsNotExposed(body);
 });
 
-test('/arr/[id]/sync does not expose arr API key', async () => {
+test('/arr/[id]/sync does not expose arr credentials', async () => {
 	const body = await fetchPage(`/arr/${arrInstanceId}/sync`);
-	assertNotExposed(body, ARR_API_KEY, 'arr API key');
+	assertArrCredentialsNotExposed(body);
 });
 
 // --- Database PATs ---

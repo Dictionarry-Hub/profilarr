@@ -2,7 +2,7 @@ import { error, fail } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
 import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
 import { logger } from '$logger/logger.ts';
 import { scheduleDriftForInstance } from '$lib/server/jobs/init.ts';
 import { enqueueJob } from '$lib/server/jobs/queueService.ts';
@@ -25,7 +25,7 @@ export const load: ServerLoad = ({ params }) => {
 
 	const driftSettings = arrDriftSettingsQueries.getByInstanceId(id);
 	const driftStatus = arrDriftStatusQueries.getByInstanceId(id);
-	const { api_key: _, ...safeInstance } = instance;
+	const safeInstance = toPublicArrInstance(instance);
 	const diff = driftStatus?.diff ?? {};
 
 	return {

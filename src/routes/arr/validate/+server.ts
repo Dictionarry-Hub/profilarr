@@ -7,7 +7,7 @@ const VALID_TYPES = ['radarr', 'sonarr'];
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { type, url, apiKey } = await request.json();
+		const { type, url, apiKey, basicAuthUsername, basicAuthPassword } = await request.json();
 
 		// Validation
 		if (!type || !url || !apiKey) {
@@ -19,7 +19,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Create client and test connection (3 second timeout, no retries for quick feedback)
-		const client = createArrClient(type as ArrType, url, apiKey, { timeout: 3000, retries: 0 });
+		const client = createArrClient(type as ArrType, url, apiKey, {
+			timeout: 3000,
+			retries: 0,
+			basicAuthUsername,
+			basicAuthPassword
+		});
 		const isConnected = await client.testConnection();
 		client.close();
 

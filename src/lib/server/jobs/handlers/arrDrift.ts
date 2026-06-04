@@ -5,7 +5,7 @@ import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { FEATURES } from '$shared/features.ts';
 import { calculateNextRun } from '../scheduleUtils.ts';
-import { createArrClient } from '$arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
 import type { ArrType } from '$arr/types.ts';
 import { checkArrDrift } from '$drift/check.ts';
 import { buildDriftDisplayEntities } from '$drift/display.ts';
@@ -41,9 +41,12 @@ const driftHandler: JobHandler = async (job) => {
 	const nextRunAt = calculateNextRun(settings.cron);
 	if (nextRunAt) arrDriftSettingsQueries.updateNextRunAt(instanceId, nextRunAt);
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key, {
-		retries: 0
-	});
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance, { retries: 0 })
+	);
 	const previousStatus = arrDriftStatusQueries.getByInstanceId(instanceId);
 
 	try {

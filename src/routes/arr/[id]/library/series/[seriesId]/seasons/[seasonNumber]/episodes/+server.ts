@@ -3,20 +3,29 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { cache } from '$cache/cache.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
+import type { ArrInstance } from '$db/queries/arrInstances.ts';
 import type { SonarrEpisodeItem } from '$utils/arr/types.ts';
 import { logger } from '$logger/logger.ts';
 
 const EPISODE_CACHE_TTL = 300;
 
 async function getSeriesEpisodesCached(
-	instance: { id: number; url: string; api_key: string },
+	instance: Pick<
+		ArrInstance,
+		'id' | 'url' | 'api_key' | 'basic_auth_username' | 'basic_auth_password'
+	>,
 	seriesId: number
 ): Promise<SonarrEpisodeItem[]> {
 	const cacheKey = `library-episodes:${instance.id}:${seriesId}`;
 	const cached = cache.get<SonarrEpisodeItem[]>(cacheKey);
 	if (cached) return cached;
 
-	const client = new SonarrClient(instance.url, instance.api_key);
+	const client = new SonarrClient(
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 	try {
 		const profiles = await client.getQualityProfiles();
 		const series = await client.getSeries(seriesId);

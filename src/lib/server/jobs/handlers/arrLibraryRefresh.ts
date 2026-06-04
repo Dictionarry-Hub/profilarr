@@ -4,6 +4,7 @@ import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { cache } from '$cache/cache.ts';
 import { RadarrClient } from '$utils/arr/clients/radarr.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
 import { LIBRARY_REQUEST_TIMEOUT_MS } from '$utils/arr/base.ts';
 import { getProfilarrProfileNames } from '$lib/server/sync/libraryHelpers.ts';
 import { calculateNextRunFromMinutes } from '../scheduleUtils.ts';
@@ -51,7 +52,9 @@ const libraryRefreshHandler: JobHandler = async (job) => {
 	}
 
 	const profilarrProfileNames = await getProfilarrProfileNames();
-	const clientOptions = { timeout: LIBRARY_REQUEST_TIMEOUT_MS };
+	const clientOptions = arrClientOptionsFromInstance(instance, {
+		timeout: LIBRARY_REQUEST_TIMEOUT_MS
+	});
 	const client =
 		instance.type === 'radarr'
 			? new RadarrClient(instance.url, instance.api_key, clientOptions)

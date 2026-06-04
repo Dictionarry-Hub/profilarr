@@ -2,7 +2,7 @@ import { jobQueueRegistry } from '../queueRegistry.ts';
 import type { JobHandler } from '../queueTypes.ts';
 import { arrCleanupSettingsQueries } from '$db/queries/arrCleanupSettings.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { createArrClient } from '$utils/arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$utils/arr/factory.ts';
 import type { ArrType } from '$utils/arr/types.ts';
 import {
 	scanForStaleItems,
@@ -73,9 +73,12 @@ const cleanupHandler: JobHandler = async (job) => {
 
 	const instanceType = instance.type as 'radarr' | 'sonarr';
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key, {
-		retries: 0
-	});
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance, { retries: 0 })
+	);
 
 	try {
 		const preScanned = extractPreScanned(job.payload);

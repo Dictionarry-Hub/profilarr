@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
 
@@ -17,7 +17,7 @@ export const load: LayoutServerLoad = ({ params }) => {
 		error(404, `Instance not found: ${id}`);
 	}
 
-	const { api_key, ...safe } = instance;
+	const safe = toPublicArrInstance(instance);
 
 	const sync = arrSyncQueries.getFullSyncData(id);
 	const hasSyncConfig =

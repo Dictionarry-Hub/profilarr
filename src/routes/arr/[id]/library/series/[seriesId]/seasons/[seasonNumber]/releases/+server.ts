@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
 import { groupSonarrReleases } from '$utils/arr/releaseImport.ts';
 import { logger } from '$logger/logger.ts';
 
@@ -28,7 +29,11 @@ export const GET: RequestHandler = async ({ params }) => {
 		);
 	}
 
-	const client = new SonarrClient(instance.url, instance.api_key);
+	const client = new SonarrClient(
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 	try {
 		const releases = await client.getSeasonPackReleases(seriesId, seasonNumber);
 		const grouped = groupSonarrReleases(releases);

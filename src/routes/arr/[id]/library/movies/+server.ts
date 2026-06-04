@@ -3,6 +3,7 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { cache } from '$cache/cache.ts';
 import { RadarrClient } from '$utils/arr/clients/radarr.ts';
+import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
 import { LIBRARY_REQUEST_TIMEOUT_MS } from '$utils/arr/base.ts';
 import type { RadarrLibraryItem } from '$utils/arr/types.ts';
 import { getProfilarrProfileNames } from '$lib/server/sync/libraryHelpers.ts';
@@ -36,9 +37,13 @@ export const GET: RequestHandler = async ({ params }) => {
 			: MANUAL_CACHE_TTL;
 
 	const profilarrProfileNames = await getProfilarrProfileNames();
-	const client = new RadarrClient(instance.url, instance.api_key, {
-		timeout: LIBRARY_REQUEST_TIMEOUT_MS
-	});
+	const client = new RadarrClient(
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance, {
+			timeout: LIBRARY_REQUEST_TIMEOUT_MS
+		})
+	);
 	try {
 		const items = await client.getLibrary(profilarrProfileNames);
 		cache.set(cacheKey, items, ttl);

@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS migrations (
 -- ==============================================================================
 -- TABLE: arr_instances
 -- Purpose: Store configuration for *arr application instances (Radarr, Sonarr, etc.)
--- Migration: 001_create_arr_instances.ts, 053_add_library_refresh_to_arr_instances.ts, 059_add_external_url_to_arr_instances.ts, 067_enable_all_arr_instances.ts
+-- Migration: 001_create_arr_instances.ts, 053_add_library_refresh_to_arr_instances.ts, 059_add_external_url_to_arr_instances.ts, 067_enable_all_arr_instances.ts, 068_add_basic_auth_to_arr_instances.ts
 -- ==============================================================================
 
 CREATE TABLE arr_instances (
@@ -32,6 +32,8 @@ CREATE TABLE arr_instances (
     url TEXT NOT NULL,                      -- Base URL used by Profilarr's backend (e.g., "http://localhost:7878")
     external_url TEXT,                      -- Optional browser-facing URL for UI links (Migration 059); falls back to url when NULL
     api_key TEXT NOT NULL,                  -- API key for authentication
+    basic_auth_username TEXT,               -- Optional Basic Auth username for reverse proxies
+    basic_auth_password TEXT,               -- Optional Basic Auth password for reverse proxies
 
     -- Configuration
     tags TEXT,                              -- JSON array of tags (e.g., '["movies","4k"]')

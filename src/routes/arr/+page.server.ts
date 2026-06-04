@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
 import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { upgradeConfigsQueries } from '$db/queries/upgradeConfigs.ts';
@@ -33,7 +33,8 @@ function computeCompositeSyncStatus(statuses: string[]): CompositeSyncStatus {
 export const load: ServerLoad = () => {
 	const instances = arrInstancesQueries.getAll();
 
-	const summaries: ArrInstanceSummary[] = instances.map(({ api_key, ...safe }) => {
+	const summaries: ArrInstanceSummary[] = instances.map((instance) => {
+		const safe = toPublicArrInstance(instance);
 		const syncStatus = arrSyncQueries.getSyncConfigStatus(safe.id);
 		const qpSync = arrSyncQueries.getQualityProfilesSync(safe.id);
 		const dpSync = arrSyncQueries.getDelayProfilesSync(safe.id);

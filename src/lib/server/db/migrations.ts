@@ -69,6 +69,7 @@ import { migration as migration064 } from './migrations/064_add_fail_on_referenc
 import { migration as migration065 } from './migrations/065_create_arr_drift_tables.ts';
 import { migration as migration066 } from './migrations/066_add_date_format_setting.ts';
 import { migration as migration067 } from './migrations/067_enable_all_arr_instances.ts';
+import { migration as migration068 } from './migrations/068_add_basic_auth_to_arr_instances.ts';
 
 export interface Migration {
 	version: number;
@@ -356,7 +357,8 @@ export function loadMigrations(): Migration[] {
 		migration064,
 		migration065,
 		migration066,
-		migration067
+		migration067,
+		migration068
 	];
 
 	// Sort by version number
