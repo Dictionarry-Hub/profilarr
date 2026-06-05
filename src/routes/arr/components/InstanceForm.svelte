@@ -465,6 +465,7 @@
 								text="Run Now"
 								icon={Eraser}
 								iconColor="text-amber-600 dark:text-amber-400"
+								disabled={$isDirty || saving}
 								on:click={() => (showCleanupModal = true)}
 							/>
 						</div>
