@@ -10,7 +10,7 @@
 		"jose": "^6.2.3",
 		"kysely": "0.27.6",
 		"lucide-svelte": "^1.0.1",
-		"marked": "^18.0.4",
+		"marked": "^18.0.5",
 		"simple-icons": "^16.22.0",
 		"yaml": "^2.9.0"
 	},
