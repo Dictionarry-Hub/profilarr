@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { Copy, RefreshCw, Filter, Rows3 } from 'lucide-svelte';
+	import { Copy, RefreshCw, Filter, Rows3, Loader2, AlertTriangle } from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -150,24 +150,21 @@
 	}
 
 	// Client-side search filter
-	$: filteredLogs = data.logs.records.filter((log) => {
-		if (selectedLevel !== 'ALL' && normalizeLevel(log.level) !== normalizeLevel(selectedLevel)) {
-			return false;
-		}
+	function filterLogs(records: LogEntry[], query: string): LogEntry[] {
+		return records.filter((log) => {
+			if (selectedLevel !== 'ALL' && normalizeLevel(log.level) !== normalizeLevel(selectedLevel)) {
+				return false;
+			}
 
-		const query = $searchStore.query;
-		if (!query) return true;
+			if (!query) return true;
 
-		const searchLower = query.toLowerCase();
-		return (
-			log.message.toLowerCase().includes(searchLower) ||
-			log.logger.toLowerCase().includes(searchLower)
-		);
-	});
-
-	// Pagination info
-	$: totalPages = Math.ceil(data.logs.totalRecords / data.logs.pageSize);
-	$: currentPage = data.logs.page;
+			const searchLower = query.toLowerCase();
+			return (
+				log.message.toLowerCase().includes(searchLower) ||
+				log.logger.toLowerCase().includes(searchLower)
+			);
+		});
+	}
 </script>
 
 <svelte:head>
@@ -235,50 +232,74 @@
 		</ActionButton>
 	</ActionsBar>
 
-	<!-- Stats -->
-	<div
-		class="mt-6 mb-4 flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400"
-	>
-		<span>
-			Showing {filteredLogs.length} of {data.logs.totalRecords} logs
-			{#if selectedLevel !== 'ALL'}
-				(filtered by {selectedLevel})
-			{/if}
-		</span>
-
-		<!-- Pagination -->
-		{#if totalPages > 1}
-			<Pagination {currentPage} {totalPages} onPageChange={goToPage} />
-		{/if}
-	</div>
-
-	<!-- Log Table -->
-	<Table
-		data={filteredLogs}
-		{columns}
-		emptyMessage="No logs found"
-		hoverable={true}
-		compact={true}
-		responsive
-	>
-		<svelte:fragment slot="actions" let:row>
-			<div class="flex items-center justify-end gap-1">
-				<Button
-					icon={Copy}
-					size="xs"
-					variant="secondary"
-					title="Copy log entry"
-					ariaLabel="Copy log entry"
-					on:click={() => copyLog(row)}
-				/>
-			</div>
-		</svelte:fragment>
-	</Table>
-
-	<!-- Bottom Pagination -->
-	{#if totalPages > 1}
-		<div class="mt-4 flex justify-center">
-			<Pagination {currentPage} {totalPages} onPageChange={goToPage} />
+	{#await data.logs}
+		<!-- Loading state -->
+		<div
+			class="mt-12 flex flex-col items-center justify-center gap-3 text-neutral-500 dark:text-neutral-400"
+		>
+			<Loader2 size={24} class="animate-spin" />
+			<span class="text-sm">Loading logs...</span>
 		</div>
-	{/if}
+	{:then logs}
+		{@const filteredLogs = filterLogs(logs.records, $searchStore.query)}
+		{@const totalPages = Math.ceil(logs.totalRecords / logs.pageSize)}
+		{@const currentPage = logs.page}
+
+		<!-- Stats -->
+		<div
+			class="mt-6 mb-4 flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400"
+		>
+			<span>
+				Showing {filteredLogs.length} of {logs.totalRecords} logs
+				{#if selectedLevel !== 'ALL'}
+					(filtered by {selectedLevel})
+				{/if}
+			</span>
+
+			<!-- Pagination -->
+			{#if totalPages > 1}
+				<Pagination {currentPage} {totalPages} onPageChange={goToPage} />
+			{/if}
+		</div>
+
+		<!-- Log Table -->
+		<Table
+			data={filteredLogs}
+			{columns}
+			emptyMessage="No logs found"
+			hoverable={true}
+			compact={true}
+			responsive
+		>
+			<svelte:fragment slot="actions" let:row>
+				<div class="flex items-center justify-end gap-1">
+					<Button
+						icon={Copy}
+						size="xs"
+						variant="secondary"
+						title="Copy log entry"
+						ariaLabel="Copy log entry"
+						on:click={() => copyLog(row)}
+					/>
+				</div>
+			</svelte:fragment>
+		</Table>
+
+		<!-- Bottom Pagination -->
+		{#if totalPages > 1}
+			<div class="mt-4 flex justify-center">
+				<Pagination {currentPage} {totalPages} onPageChange={goToPage} />
+			</div>
+		{/if}
+	{:catch err}
+		<!-- Error state -->
+		<div
+			class="mt-12 flex flex-col items-center justify-center gap-3 text-neutral-500 dark:text-neutral-400"
+		>
+			<AlertTriangle size={24} class="text-yellow-500 dark:text-yellow-400" />
+			<span class="text-sm">Failed to load logs from this instance.</span>
+			<span class="text-xs">{err instanceof Error ? err.message : String(err)}</span>
+			<Button variant="secondary" size="sm" on:click={refreshLogs}>Retry</Button>
+		</div>
+	{/await}
 </div>
