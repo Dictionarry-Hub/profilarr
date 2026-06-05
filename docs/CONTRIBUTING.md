@@ -13,6 +13,7 @@
 - [Guidelines](#guidelines)
   - [Naming](#naming)
   - [Code Conventions](#code-conventions)
+  - [Versioning](#versioning)
   - [AI-Assisted Contributions](#ai-assisted-contributions)
   - [Off-Limits](#off-limits)
   - [Reporting Issues](#reporting-issues)
@@ -321,9 +322,8 @@ not what you did.
 | New feature     | `v2.1.0` → `v2.2.0` |
 | Breaking change | `v2.1.0` → `v3.0.0` |
 
-A release takes the version of its highest-impact change. A batch with any
-feature in it is a minor, even if it's mostly bug fixes; a batch of only fixes
-is a patch.
+A release takes the version of its highest-impact change. See
+[Versioning](#versioning) for how to decide which row a change falls into.
 
 ### Code Conventions
 
@@ -332,6 +332,38 @@ is a patch.
 - **Dirty tracking.** Use the dirty store to block saves + warn on navigation.
 - **Routes > modals.** Only use modals for confirmations or rare one-off forms.
 - **API:** extend `/api/v1/*` only; legacy routes are migration targets.
+
+### Versioning
+
+Version bumps are scoped to what the user achieves, not what the developer
+changed. Define each feature by its atomic goal: the smallest user-facing unit
+with a describable purpose. Version against that goal, not against the size of
+the diff or whether the code is "new."
+
+**Patch**: the goal stays the same; the how changes.
+
+A number input's goal is "increase and decrease an integer." Adding
+hold-to-change with an acceleration curve is a patch. The user still increases
+and decreases an integer; the interaction just got smoother. New code, new
+behavior, but same atomic plane.
+
+**Minor**: the goal expands.
+
+That same number input gains float support. The user can now do something they
+couldn't before: work with decimal values. The atomic plane grew, even if the
+code diff is small.
+
+**Major**: the product-level contract breaks.
+
+The PCD format changes and existing databases can't be read without migration.
+The Docker volume layout changes and existing mounts break on upgrade. An entire
+workflow gets removed that users built around. Major means the user's existing
+setup stops working or requires manual intervention to continue. This is about
+the application's contract with its users, not individual components.
+
+A release batch takes the version of its highest-impact change. If any change
+in the batch is a minor, the release is a minor. If every change is a patch,
+the release is a patch.
 
 ### AI-Assisted Contributions
 
