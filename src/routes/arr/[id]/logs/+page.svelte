@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 	import { Copy, RefreshCw, Filter, Rows3, Loader2, AlertTriangle } from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
 	import Table from '$ui/table/Table.svelte';
@@ -33,6 +34,62 @@
 		exception?: string | null;
 	}
 
+	interface LogResponse {
+		page: number;
+		pageSize: number;
+		totalRecords: number;
+		records: LogEntry[];
+	}
+
+	// Client-side log fetching — avoids blocking tab navigation with a
+	// server-streamed promise. The page load returns instantly; logs are
+	// fetched separately via the colocated +server.ts endpoint.
+	let logs: LogResponse | null = null;
+	let logsLoading = true;
+	let logsError: string | null = null;
+	let fetchController: AbortController | null = null;
+
+	function buildLogsUrl(filters: { page: number; pageSize: number; level?: string }): string {
+		const params = new URLSearchParams();
+		params.set('page', String(filters.page));
+		params.set('pageSize', String(filters.pageSize));
+		if (filters.level) params.set('level', filters.level);
+		return `/arr/${$page.params.id}/logs?${params}`;
+	}
+
+	async function fetchLogs(filters: { page: number; pageSize: number; level?: string }) {
+		// Abort any in-flight request
+		fetchController?.abort();
+		fetchController = new AbortController();
+		const { signal } = fetchController;
+
+		logs = null;
+		logsLoading = true;
+		logsError = null;
+
+		try {
+			const res = await fetch(buildLogsUrl(filters), {
+				signal,
+				headers: { Accept: 'application/json' }
+			});
+			if (!res.ok) {
+				const body = await res.json().catch(() => null);
+				throw new Error(body?.message || `HTTP ${res.status}`);
+			}
+			logs = await res.json();
+		} catch (err) {
+			if ((err as Error).name === 'AbortError') return;
+			logsError = err instanceof Error ? err.message : String(err);
+		} finally {
+			logsLoading = false;
+		}
+	}
+
+	// Fetch logs on mount and whenever filters change via navigation
+	$: if (browser) {
+		fetchLogs(data.filters);
+	}
+
 	// Initialize search store
 	let searchStore: SearchStore;
 	$: searchStore = getPersistentSearchStore(`arrLogsSearch:${$page.params.id}`, {
@@ -42,7 +99,6 @@
 	// Filter state
 	let selectedLevel: string = data.filters.level || 'ALL';
 	let pageSize: number = data.filters.pageSize;
-	let isRefreshing = false;
 
 	const logLevels = ['ALL', 'Trace', 'Debug', 'Info', 'Warn', 'Error', 'Fatal'] as const;
 
@@ -112,7 +168,8 @@
 		}
 	}
 
-	// Navigate with updated params
+	// Navigate with updated params — triggers server load which updates
+	// data.filters, which triggers the reactive fetchLogs call above.
 	function updateParams(params: Record<string, string | number | undefined>) {
 		const url = new URL($page.url);
 		for (const [key, value] of Object.entries(params)) {
@@ -126,10 +183,8 @@
 	}
 
 	// Refresh logs
-	async function refreshLogs() {
-		isRefreshing = true;
-		await goto($page.url.toString(), { invalidateAll: true });
-		isRefreshing = false;
+	function refreshLogs() {
+		fetchLogs(data.filters);
 	}
 
 	// Change level filter
@@ -150,21 +205,29 @@
 	}
 
 	// Client-side search filter
-	function filterLogs(records: LogEntry[], query: string): LogEntry[] {
-		return records.filter((log) => {
-			if (selectedLevel !== 'ALL' && normalizeLevel(log.level) !== normalizeLevel(selectedLevel)) {
-				return false;
-			}
+	$: filteredLogs = logs
+		? logs.records.filter((log) => {
+				if (
+					selectedLevel !== 'ALL' &&
+					normalizeLevel(log.level) !== normalizeLevel(selectedLevel)
+				) {
+					return false;
+				}
 
-			if (!query) return true;
+				const query = $searchStore.query;
+				if (!query) return true;
 
-			const searchLower = query.toLowerCase();
-			return (
-				log.message.toLowerCase().includes(searchLower) ||
-				log.logger.toLowerCase().includes(searchLower)
-			);
-		});
-	}
+				const searchLower = query.toLowerCase();
+				return (
+					log.message.toLowerCase().includes(searchLower) ||
+					log.logger.toLowerCase().includes(searchLower)
+				);
+			})
+		: [];
+
+	// Pagination info
+	$: totalPages = logs ? Math.ceil(logs.totalRecords / logs.pageSize) : 0;
+	$: currentPage = logs?.page ?? 1;
 </script>
 
 <svelte:head>
@@ -181,7 +244,7 @@
 			<ActionButton on:click={refreshLogs}>
 				<RefreshCw
 					size={20}
-					class="text-neutral-700 dark:text-neutral-300 {isRefreshing ? 'animate-spin' : ''}"
+					class="text-neutral-700 dark:text-neutral-300 {logsLoading ? 'animate-spin' : ''}"
 				/>
 			</ActionButton>
 		</Tooltip>
@@ -232,7 +295,7 @@
 		</ActionButton>
 	</ActionsBar>
 
-	{#await data.logs}
+	{#if logsLoading}
 		<!-- Loading state -->
 		<div
 			class="mt-12 flex flex-col items-center justify-center gap-3 text-neutral-500 dark:text-neutral-400"
@@ -240,11 +303,17 @@
 			<Loader2 size={24} class="animate-spin" />
 			<span class="text-sm">Loading logs...</span>
 		</div>
-	{:then logs}
-		{@const filteredLogs = filterLogs(logs.records, $searchStore.query)}
-		{@const totalPages = Math.ceil(logs.totalRecords / logs.pageSize)}
-		{@const currentPage = logs.page}
-
+	{:else if logsError}
+		<!-- Error state -->
+		<div
+			class="mt-12 flex flex-col items-center justify-center gap-3 text-neutral-500 dark:text-neutral-400"
+		>
+			<AlertTriangle size={24} class="text-yellow-500 dark:text-yellow-400" />
+			<span class="text-sm">Failed to load logs from this instance.</span>
+			<span class="text-xs">{logsError}</span>
+			<Button variant="secondary" size="sm" on:click={refreshLogs}>Retry</Button>
+		</div>
+	{:else if logs}
 		<!-- Stats -->
 		<div
 			class="mt-6 mb-4 flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400"
@@ -291,15 +360,5 @@
 				<Pagination {currentPage} {totalPages} onPageChange={goToPage} />
 			</div>
 		{/if}
-	{:catch err}
-		<!-- Error state -->
-		<div
-			class="mt-12 flex flex-col items-center justify-center gap-3 text-neutral-500 dark:text-neutral-400"
-		>
-			<AlertTriangle size={24} class="text-yellow-500 dark:text-yellow-400" />
-			<span class="text-sm">Failed to load logs from this instance.</span>
-			<span class="text-xs">{err instanceof Error ? err.message : String(err)}</span>
-			<Button variant="secondary" size="sm" on:click={refreshLogs}>Retry</Button>
-		</div>
-	{/await}
+	{/if}
 </div>
