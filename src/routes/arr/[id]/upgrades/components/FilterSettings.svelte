@@ -7,7 +7,8 @@
 		FileJson,
 		FileText,
 		Trash2,
-		Pencil
+		Pencil,
+		Eye
 	} from 'lucide-svelte';
 	import {
 		createEmptyFilterConfig,
@@ -15,7 +16,6 @@
 		getFilterField,
 		isGroup,
 		isRule,
-		searchRateLimits,
 		resolveTagLabel,
 		type DynamicFilterOptions,
 		type FilterConfig,
@@ -32,6 +32,7 @@
 	import type { Readable } from 'svelte/store';
 	import { page } from '$app/stores';
 	import FilterGroupComponent from './FilterGroup.svelte';
+	import FilterPreviewModal from './FilterPreviewModal.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
@@ -117,6 +118,8 @@
 	let deleteModalOpen = false;
 	let filterToDelete: FilterConfig | null = null;
 	let pasteModalOpen = false;
+	let previewModalOpen = false;
+	let previewFilter: FilterConfig | null = null;
 
 	function confirmDelete(filter: FilterConfig) {
 		filterToDelete = filter;
@@ -348,6 +351,16 @@
 	function handlePasteCancel() {
 		pasteModalOpen = false;
 	}
+
+	function openPreview(filter: FilterConfig) {
+		previewFilter = filter;
+		previewModalOpen = true;
+	}
+
+	function closePreview() {
+		previewModalOpen = false;
+		previewFilter = null;
+	}
 </script>
 
 <div class="-mx-4 bg-neutral-50 px-4 pt-2 pb-2 md:-mx-8 md:px-8 dark:bg-neutral-900">
@@ -422,6 +435,12 @@
 					<!-- Mobile: buttons below name -->
 					<div class="flex flex-wrap items-center gap-1 md:hidden">
 						<Button
+							icon={Eye}
+							iconColor="text-blue-600 dark:text-blue-400"
+							tooltip="Preview"
+							on:click={() => openPreview(row)}
+						/>
+						<Button
 							icon={Power}
 							iconColor={row.enabled
 								? 'text-green-600 dark:text-green-400'
@@ -455,6 +474,12 @@
 		<!-- Desktop: buttons in actions slot -->
 		<svelte:fragment slot="actions" let:row>
 			<div class="hidden items-center gap-1 md:flex">
+				<Button
+					icon={Eye}
+					iconColor="text-blue-600 dark:text-blue-400"
+					tooltip="Preview"
+					on:click={() => openPreview(row)}
+				/>
 				<Button
 					icon={Power}
 					iconColor={row.enabled
@@ -617,6 +642,13 @@
 	confirmDanger={true}
 	on:confirm={handleDeleteConfirm}
 	on:cancel={handleDeleteCancel}
+/>
+
+<FilterPreviewModal
+	open={previewModalOpen}
+	filter={previewFilter}
+	instanceId={$page.params.id}
+	on:close={closePreview}
 />
 
 <PasteModal

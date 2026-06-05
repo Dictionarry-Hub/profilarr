@@ -21,10 +21,12 @@
 	export let onRowClick: ((row: T) => void) | null = null;
 	export let primaryColumnKey: string | null = null;
 	export let disableExpandWhen: ((row: T) => boolean) | null = null;
+	export let rowClass: ((row: T) => string) | null = null;
 	// Mobile responsive mode - switches to card layout on small screens
 	export let responsive: boolean = false;
 	// Progressive loading - render items in batches as user scrolls
 	export let pageSize: number | undefined = undefined;
+	export let fixedLayout: boolean = false;
 
 	let isMobile = false;
 	let mediaQuery: MediaQueryList | null = null;
@@ -200,7 +202,9 @@
 			{#each displayData as row, index}
 				{@const rowId = getRowId(row)}
 				<div
-					class="overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50"
+					class="overflow-hidden rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50 {rowClass
+						? rowClass(row)
+						: ''}"
 				>
 					<!-- Card Header - clickable to expand -->
 					<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
@@ -305,14 +309,14 @@
 			? 'rounded-b-none border-b-0'
 			: ''}"
 	>
-		<table class="w-full">
+		<table class="w-full {fixedLayout ? 'table-fixed' : ''}">
 			<thead
 				class="border-b border-neutral-300 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/50"
 			>
 				<tr>
 					<!-- Expand column (left) -->
 					{#if chevronPosition === 'left'}
-						<th class="{compact ? 'px-2 py-2.5' : 'px-3 py-3'} w-8"></th>
+						<th class="{compact ? 'px-3 py-2.5' : 'px-4 py-3'} w-12"></th>
 					{/if}
 					{#each columns as column}
 						<th
@@ -358,7 +362,7 @@
 					{/if}
 					<!-- Expand column (right) -->
 					{#if chevronPosition === 'right'}
-						<th class="{compact ? 'px-2 py-2.5' : 'px-3 py-3'} w-8"></th>
+						<th class="{compact ? 'px-3 py-2.5' : 'px-4 py-3'} w-12"></th>
 					{/if}
 				</tr>
 			</thead>
@@ -412,12 +416,14 @@
 
 						<!-- Main Row -->
 						<tr
-							class="cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800"
+							class="cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 {rowClass
+								? rowClass(row)
+								: ''}"
 							on:click={() => handleRowClick(rowId, row)}
 						>
 							<!-- Expand Icon (left) -->
 							{#if chevronPosition === 'left'}
-								<td class="{compact ? 'px-2 py-2' : 'px-3 py-3'} text-neutral-400">
+								<td class="{compact ? 'px-3 py-2' : 'px-4 py-3'} text-neutral-400">
 									{#if !shouldDisableExpand(row)}
 										<Button
 											icon={expandedRows.has(rowId) ? ChevronUp : ChevronDown}
@@ -456,7 +462,7 @@
 
 							<!-- Expand Icon (right) -->
 							{#if chevronPosition === 'right'}
-								<td class="{compact ? 'px-2 py-2' : 'px-3 py-3'} text-right text-neutral-400">
+								<td class="{compact ? 'px-3 py-2' : 'px-4 py-3'} text-right text-neutral-400">
 									{#if !shouldDisableExpand(row)}
 										<Button
 											icon={expandedRows.has(rowId) ? ChevronUp : ChevronDown}

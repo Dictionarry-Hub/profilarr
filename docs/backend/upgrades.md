@@ -16,6 +16,7 @@ letting Arr's own upgrade logic decide whether to grab them.
 - [Filters](#filters)
 - [Dynamic Filter Values](#dynamic-filter-values)
 - [Selectors](#selectors)
+- [Filter Preview](#filter-preview)
 - [Scheduling](#scheduling)
 - [Cooldown](#cooldown)
 - [Dry Run](#dry-run)
@@ -151,6 +152,24 @@ specifies a selector strategy and a count (items per run).
 | `alphabetical_desc` | Z-A by title                     |
 
 Selector definitions live in `src/lib/shared/upgrades/selectors.ts`.
+
+## Filter Preview
+
+The upgrades page can preview a single filter without running a dry run. The
+preview fetches the current Arr library, quality profiles, file metadata where
+needed, and tags, then applies the same normalization, filter evaluation,
+cooldown tag check, and selector ordering used by the upgrade processor.
+
+Preview is read-only. It does not search indexers, does not use the dry-run
+cooldown, and does not apply or reset cooldown tags. Results are grouped as
+selected, selectable, cooldown, and filtered out so users can inspect the
+filtered pool before triggering a real run.
+
+Preview library data is cached in memory for 5 minutes per Arr instance. An
+expired entry is treated as a cache miss: preview fetches fresh library data
+from Arr and replaces the cached entry. This keeps repeated filter edits fast
+while limiting stale preview data to a short window. Real upgrade runs do not
+use this preview cache.
 
 ## Scheduling
 
