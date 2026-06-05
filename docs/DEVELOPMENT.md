@@ -97,6 +97,26 @@ wait for the next batch.
 Then the cycle repeats: the next batch of complete feature branches is merged
 into `develop` for testing.
 
+#### Release Communication
+
+When a minor or major release starts soaking on `develop`, two things happen:
+
+1. **Bulletin announcement**: publish an announcement via the
+   [bulletin repo](https://github.com/Dictionarry-Hub/bulletin) targeting the
+   current stable version range. This reaches every running instance and lets
+   users know a new release is available for testing on `:develop`.
+
+2. **GitHub Discussion**: open a discussion in the profilarr repo summarizing
+   what's in the batch, what to watch for, and where to report issues. Link
+   this discussion from the announcement's `link` field so users go straight
+   from the inbox to the feedback thread.
+
+Both go out once `:develop` has rebuilt with the full batch merged. Don't
+announce a planned release before there's something to test.
+
+Patch releases that skip the soak (bug fixes, deps, docs) don't need either.
+They're tagged as soon as CI passes and show up in the normal release notes.
+
 #### Hotfixes
 
 If a core feature is broken in a stable release and it can't wait for the next
