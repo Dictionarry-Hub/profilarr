@@ -17,7 +17,7 @@
 	"devDependencies": {
 		"@deno/vite-plugin": "^2.0.2",
 		"@playwright/test": "^1.60.0",
-		"@sveltejs/kit": "^2.63.0",
+		"@sveltejs/kit": "^2.63.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/better-sqlite3": "^7.6.13",
@@ -30,7 +30,7 @@
 		"prettier": "3.8.3",
 		"prettier-plugin-svelte": "^4.1.0",
 		"prettier-plugin-tailwindcss": "^0.8.0",
-		"svelte": "^5.56.2",
+		"svelte": "^5.56.3",
 		"svelte-check": "^4.6.0",
 		"tailwindcss": "^4.1.13",
 		"typescript": "^6.0.3",
