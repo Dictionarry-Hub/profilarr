@@ -17,7 +17,7 @@
 	"devDependencies": {
 		"@deno/vite-plugin": "^2.0.2",
 		"@playwright/test": "^1.60.0",
-		"@sveltejs/kit": "^2.64.0",
+		"@sveltejs/kit": "^2.65.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/better-sqlite3": "^7.6.13",
