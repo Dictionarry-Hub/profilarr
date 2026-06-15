@@ -19,7 +19,7 @@
 		"@playwright/test": "^1.60.0",
 		"@sveltejs/kit": "^2.65.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
-		"@tailwindcss/vite": "^4.3.0",
+		"@tailwindcss/vite": "^4.3.1",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/deno": "^2.7.0",
 		"@types/node": "^24",
