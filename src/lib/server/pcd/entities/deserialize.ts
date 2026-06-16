@@ -89,6 +89,10 @@ export async function deserializeCustomFormat(options: DeserializeOptions<Portab
 		}
 	});
 
+	if (!createResult.success) {
+		throw new Error(createResult.error ?? 'Failed to create custom format');
+	}
+
 	// 2. Add conditions (empty originalConditions = all new)
 	if (portable.conditions.length > 0) {
 		const freshCache = getCache(databaseId);

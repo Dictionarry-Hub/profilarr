@@ -28,6 +28,8 @@ interface UpdateConditionsOptions {
 	originalConditions: ConditionData[];
 	/** The new/modified conditions from the client */
 	conditions: ConditionData[];
+	/** Skip the final recompile — caller is responsible for calling recompileCache. */
+	skipRecompile?: boolean;
 }
 
 /**
@@ -153,7 +155,7 @@ function generateConditionValueSql(
  * 3. Find conditions to update (names that exist in both)
  */
 export async function updateConditions(options: UpdateConditionsOptions) {
-	const { databaseId, layer, formatName, originalConditions, conditions } = options;
+	const { databaseId, layer, formatName, originalConditions, conditions, skipRecompile } = options;
 
 	// Validate unique condition names (case-insensitive)
 	const normalizedNames = conditions.map((c) => c.name.trim().toLowerCase());
@@ -478,7 +480,9 @@ WHERE custom_format_name = '${esc(formatName)}'
 		lastResult = result;
 	}
 
-	await recompileCache(databaseId);
+	if (!skipRecompile) {
+		await recompileCache(databaseId);
+	}
 	return lastResult ?? { success: true };
 }
 

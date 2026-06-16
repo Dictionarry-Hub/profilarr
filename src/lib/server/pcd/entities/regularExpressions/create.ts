@@ -19,6 +19,7 @@ interface CreateRegularExpressionOptions {
 	cache: PCDCache;
 	layer: OperationLayer;
 	input: CreateRegularExpressionInput;
+	skipRecompile?: boolean;
 }
 
 /**
@@ -32,7 +33,7 @@ function esc(value: string): string {
  * Create a regular expression by writing an operation to the specified layer
  */
 export async function create(options: CreateRegularExpressionOptions) {
-	const { databaseId, cache, layer, input } = options;
+	const { databaseId, cache, layer, input, skipRecompile } = options;
 	const db = cache.kb;
 
 	const queries = [];
@@ -93,6 +94,7 @@ export async function create(options: CreateRegularExpressionOptions) {
 		layer,
 		description: `create-regular-expression-${input.name}`,
 		queries,
+		skipRecompile,
 		desiredState: {
 			name: input.name,
 			pattern: input.pattern,

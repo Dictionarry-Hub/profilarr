@@ -19,13 +19,14 @@ interface CreateCustomFormatOptions {
 	cache: PCDCache;
 	layer: OperationLayer;
 	input: CreateCustomFormatInput;
+	skipRecompile?: boolean;
 }
 
 /**
  * Create a custom format by writing an operation to the specified layer
  */
 export async function create(options: CreateCustomFormatOptions) {
-	const { databaseId, cache, layer, input } = options;
+	const { databaseId, cache, layer, input, skipRecompile } = options;
 	const db = cache.kb;
 
 	const existing = await db
@@ -52,43 +53,80 @@ export async function create(options: CreateCustomFormatOptions) {
 		(descriptionChanged ? 1 : 0) + (includeChanged ? 1 : 0) + (uniqueTags.length > 0 ? 1 : 0);
 	const groupId = opCount > 0 ? uuid() : undefined;
 
-	// 1. Insert the custom format with name and empty description
-	// Always include description as '' to match v1 translator behavior (not NULL)
-	const formatQueries = [];
+	// Build all queries upfront
 	const insertFormat = db
 		.insertInto('custom_formats')
 		.values({ name: input.name, description: '' })
 		.compile();
 
-	formatQueries.push(insertFormat);
+	const descriptionQuery = descriptionChanged
+		? db
+				.updateTable('custom_formats')
+				.set({ description: normalizedDescription })
+				.where('name', '=', input.name)
+				.where('description', '=', '')
+				.compile()
+		: null;
 
-	// 2. Insert tags (create if not exist, then link) as a separate op
+	const includeQuery = includeChanged
+		? db
+				.updateTable('custom_formats')
+				.set({ include_in_rename: 1 })
+				.where('name', '=', input.name)
+				.where('include_in_rename', '=', 0)
+				.compile()
+		: null;
+
 	const tagQueries = [];
 	for (const tagName of uniqueTags) {
-		// Insert tag if not exists
-		const insertTag = db
-			.insertInto('tags')
-			.values({ name: tagName })
-			.onConflict((oc) => oc.column('name').doNothing())
-			.compile();
-
-		tagQueries.push(insertTag);
-
-		// Link tag to custom format using name-based FKs
-		const linkTag = db
-			.insertInto('custom_format_tags')
-			.values({ custom_format_name: input.name, tag_name: tagName })
-			.compile();
-
-		tagQueries.push(linkTag);
+		tagQueries.push(
+			db
+				.insertInto('tags')
+				.values({ name: tagName })
+				.onConflict((oc) => oc.column('name').doNothing())
+				.compile()
+		);
+		tagQueries.push(
+			db
+				.insertInto('custom_format_tags')
+				.values({ custom_format_name: input.name, tag_name: tagName })
+				.compile()
+		);
 	}
 
-	// Write the general create operation
+	if (skipRecompile) {
+		// Consolidated path: all SQL in one writeOperation so custom_format_tags FK on
+		// custom_formats passes within the same validation savepoint. No recompile here —
+		// caller is responsible for calling recompileCache after the full batch.
+		const allQueries = [
+			insertFormat,
+			...(descriptionQuery ? [descriptionQuery] : []),
+			...(includeQuery ? [includeQuery] : []),
+			...tagQueries
+		];
+		return writeOperation({
+			databaseId,
+			layer,
+			description: `create-custom-format-${input.name}`,
+			queries: allQueries,
+			skipRecompile: true,
+			desiredState: { name: input.name },
+			metadata: {
+				operation: 'create',
+				entity: 'custom_format',
+				name: input.name,
+				...(groupId && { groupId })
+			}
+		});
+	}
+
+	// Multi-step path for normal (non-skipRecompile) creates: each field update gets its own
+	// op log entry. Write 1 never uses skipRecompile so tags (write 4) sees the CF in the KB.
 	const createResult = await writeOperation({
 		databaseId,
 		layer,
 		description: `create-custom-format-${input.name}`,
-		queries: formatQueries,
+		queries: [insertFormat],
 		desiredState: {
 			name: input.name
 		},
@@ -107,18 +145,11 @@ export async function create(options: CreateCustomFormatOptions) {
 	let lastResult = createResult;
 
 	if (descriptionChanged) {
-		const descriptionQuery = db
-			.updateTable('custom_formats')
-			.set({ description: normalizedDescription })
-			.where('name', '=', input.name)
-			.where('description', '=', '')
-			.compile();
-
 		const descriptionResult = await writeOperation({
 			databaseId,
 			layer,
 			description: `update-custom-format-description-${input.name}`,
-			queries: [descriptionQuery],
+			queries: [descriptionQuery!],
 			desiredState: {
 				description: { from: '', to: normalizedDescription }
 			},
@@ -141,18 +172,11 @@ export async function create(options: CreateCustomFormatOptions) {
 	}
 
 	if (includeChanged) {
-		const includeQuery = db
-			.updateTable('custom_formats')
-			.set({ include_in_rename: 1 })
-			.where('name', '=', input.name)
-			.where('include_in_rename', '=', 0)
-			.compile();
-
 		const includeResult = await writeOperation({
 			databaseId,
 			layer,
 			description: `update-custom-format-include-rename-${input.name}`,
-			queries: [includeQuery],
+			queries: [includeQuery!],
 			desiredState: {
 				include_in_rename: { from: false, to: true }
 			},

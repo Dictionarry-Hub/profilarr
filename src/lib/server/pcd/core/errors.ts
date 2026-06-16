@@ -75,3 +75,13 @@ export class ManifestValidationError extends PCDError {
 		this.name = 'ManifestValidationError';
 	}
 }
+
+/**
+ * Error when a name already exists in the target (duplicate conflict)
+ */
+export class ConflictError extends PCDError {
+	constructor(message: string) {
+		super(message);
+		this.name = 'ConflictError';
+	}
+}
