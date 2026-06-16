@@ -357,8 +357,10 @@ export const base = {
 		conditionName: string;
 		regexName: string;
 		type?: 'release_title' | 'release_group' | 'edition';
+		arrType?: 'all' | 'radarr' | 'sonarr' | null;
 	}): SeedOperation {
 		const type = input.type ?? 'release_title';
+		const arrTypeSql = input.arrType === undefined ? "'all'" : sqlValue(input.arrType);
 		return {
 			sql: `INSERT INTO custom_formats (name, description, include_in_rename)
 			      VALUES (${sqlValue(input.formatName)}, '', 0);
@@ -367,13 +369,35 @@ export const base = {
 			        (custom_format_name, name, type, arr_type, negate, required)
 			      VALUES (${sqlValue(input.formatName)}, ${sqlValue(input.conditionName)}, ${sqlValue(
 							type
-						)}, 'all', 0, 0);
+						)}, ${arrTypeSql}, 0, 0);
 
 			      INSERT INTO condition_patterns
 			        (custom_format_name, condition_name, regular_expression_name)
 			      VALUES (${sqlValue(input.formatName)}, ${sqlValue(input.conditionName)}, ${sqlValue(
 							input.regexName
 						)});`
+		};
+	},
+
+	/**
+	 * Adds a test row to an existing custom format.
+	 * The CF must already exist (use customFormatRegexCondition first).
+	 * description: '' seeds an empty-string description, reproducing the
+	 * createTest truthy-check bug: '' → NULL in target, causing a mismatch.
+	 */
+	customFormatTest(input: {
+		formatName: string;
+		title: string;
+		type?: 'movie' | 'series';
+		shouldMatch?: boolean;
+		description?: string | null;
+	}): SeedOperation {
+		const type = input.type ?? 'movie';
+		const shouldMatch = input.shouldMatch !== false ? 1 : 0;
+		const descSql = input.description == null ? 'NULL' : sqlValue(input.description);
+		return {
+			sql: `INSERT INTO custom_format_tests (custom_format_name, title, type, should_match, description)
+			      VALUES (${sqlValue(input.formatName)}, ${sqlValue(input.title)}, ${sqlValue(type)}, ${shouldMatch}, ${descSql});`
 		};
 	}
 };
