@@ -129,4 +129,5 @@
 	sourceName={cloneSourceName}
 	existingNames={data.mediaSettingsConfigs.map((c) => c.name)}
 	canWriteToBase={data.canWriteToBase}
+	databases={data.databases}
 />

@@ -291,4 +291,5 @@
 	sourceName={cloneSourceName}
 	existingNames={data.customFormats.map((f) => f.name)}
 	canWriteToBase={data.canWriteToBase}
+	databases={data.databases}
 />

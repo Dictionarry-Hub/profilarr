@@ -133,4 +133,5 @@
 	sourceName={cloneSourceName}
 	existingNames={data.qualityDefinitionsConfigs.map((c) => c.name)}
 	canWriteToBase={data.canWriteToBase}
+	databases={data.databases}
 />

@@ -251,4 +251,5 @@
 	sourceName={cloneSourceName}
 	existingNames={data.qualityProfiles.map((p) => p.name)}
 	canWriteToBase={data.canWriteToBase}
+	databases={data.databases}
 />

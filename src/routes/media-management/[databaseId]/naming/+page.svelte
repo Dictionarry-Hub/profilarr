@@ -127,4 +127,5 @@
 	sourceName={cloneSourceName}
 	existingNames={data.namingConfigs.map((c) => c.name)}
 	canWriteToBase={data.canWriteToBase}
+	databases={data.databases}
 />

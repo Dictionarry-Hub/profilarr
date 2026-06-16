@@ -149,4 +149,5 @@
 	sourceName={cloneSourceName}
 	existingNames={data.delayProfiles.map((p) => p.name)}
 	canWriteToBase={data.canWriteToBase}
+	databases={data.databases}
 />

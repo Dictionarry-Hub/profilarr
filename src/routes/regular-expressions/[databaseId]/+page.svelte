@@ -302,4 +302,5 @@
 	sourceName={cloneSourceName}
 	existingNames={data.regularExpressions.map((r) => r.name)}
 	canWriteToBase={data.canWriteToBase}
+	databases={data.databases}
 />
