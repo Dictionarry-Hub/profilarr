@@ -60,7 +60,7 @@ jobs:
     if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: denoland/setup-deno@v2
         with:
@@ -98,7 +98,7 @@ jobs:
     if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: denoland/setup-deno@v2
         with:
@@ -124,7 +124,7 @@ jobs:
     if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: denoland/setup-deno@v2
         with:
@@ -157,7 +157,7 @@ jobs:
     if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: denoland/setup-deno@v2
         with:
@@ -185,7 +185,7 @@ jobs:
     container:
       image: semgrep/semgrep
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Run Semgrep
         run: |
@@ -208,7 +208,7 @@ jobs:
     if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: denoland/setup-deno@v2
         with:
@@ -289,7 +289,7 @@ jobs:
     if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: denoland/setup-deno@v2
         with:
