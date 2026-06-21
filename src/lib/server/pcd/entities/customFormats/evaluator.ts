@@ -377,7 +377,7 @@ function evaluateLanguage(
 	const expected = expectedParts.join(' OR ');
 
 	for (const lang of condition.languages) {
-		const langEnum = Language[lang.name as keyof typeof Language];
+		const langEnum = languageNameToEnum.get(lang.name);
 		if (langEnum === undefined) continue;
 
 		const hasLanguage = effectiveLangs.includes(langEnum);
