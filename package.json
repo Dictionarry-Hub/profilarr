@@ -23,7 +23,7 @@
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/deno": "^2.7.0",
 		"@types/node": "^24",
-		"better-sqlite3": "^12.10.1",
+		"better-sqlite3": "^12.11.1",
 		"esbuild": "^0.28.1",
 		"openapi-typescript": "^7.13.0",
 		"playwright": "^1.58.2",
