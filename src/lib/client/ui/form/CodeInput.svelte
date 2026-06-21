@@ -91,8 +91,7 @@
 			oninput={handleInput}
 			onscroll={handleScroll}
 			onfocus={() => dispatch('focus')}
-			onblur={() => dispatch('blur')}
-		></textarea>
+			onblur={() => dispatch('blur')}></textarea>
 	</div>
 </div>
 
