@@ -7,6 +7,7 @@ const IMAGES = ['profilarr:alpine', 'profilarr-parser:alpine'];
 function usage(): never {
 	console.error('Usage:');
 	console.error('  deno task release:dry v2.6.0');
+	console.error('  deno task release:scan');
 	console.error('  deno task release v2.6.0');
 	Deno.exit(1);
 }
@@ -55,11 +56,15 @@ async function scanImages() {
 	}
 }
 
-const tag = assertVersion(version);
-
-if (mode === 'dry') {
+if (mode === 'scan') {
+	await buildImages();
+	await scanImages();
+	console.log('All images clean.');
+} else if (mode === 'dry') {
+	const tag = assertVersion(version);
 	await run('git-cliff', ['--config', 'cliff.toml', '--unreleased', '--tag', tag]);
 } else if (mode === 'tag') {
+	const tag = assertVersion(version);
 	await buildImages();
 	await scanImages();
 
