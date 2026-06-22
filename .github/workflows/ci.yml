@@ -200,6 +200,33 @@ jobs:
             --config p/csharp \
             --error
 
+  # ─── Container scanning ────────────────────────────────────────────────
+
+  trivy:
+    name: Trivy
+    needs: [ci-scope]
+    if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build images
+        run: docker compose -f compose.yml -f compose.dev.yml build
+
+      - name: Scan profilarr
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'profilarr:alpine'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+
+      - name: Scan parser
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'profilarr-parser:alpine'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+
   # ─── Tests that need the binary ─────────────────────────────────────────
 
   integration:
