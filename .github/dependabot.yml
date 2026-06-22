@@ -3,27 +3,14 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
+      day: monday
+      time: '14:00'
+      timezone: 'Australia/Adelaide'
     open-pull-requests-limit: 10
-    groups:
-      svelte:
-        patterns: ['svelte', 'svelte-check', '@sveltejs/kit']
-      vite:
-        patterns:
-          - 'vite'
-          - '@deno/vite-plugin'
-          - '@sveltejs/vite-plugin-svelte'
-          - 'esbuild'
-      tailwind:
-        patterns: ['tailwindcss', '@tailwindcss/*']
-      prettier:
-        patterns: ['prettier', 'prettier-plugin-*']
-      eslint:
-        patterns: ['eslint*', '@eslint/*', 'typescript-eslint']
-      playwright:
-        patterns: ['@playwright/test', 'playwright']
-      types:
-        patterns: ['@types/*']
+    cooldown:
+      default-days: 3
+      semver-major-days: 7
     ignore:
       - dependency-name: '@sveltejs/vite-plugin-svelte'
         update-types: ['version-update:semver-major']
@@ -32,8 +19,26 @@ updates:
           - 'version-update:semver-minor'
           - 'version-update:semver-major'
 
+  - package-ecosystem: deno
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '14:00'
+      timezone: 'Australia/Adelaide'
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 3
+      semver-major-days: 7
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
+      day: monday
+      time: '14:00'
+      timezone: 'Australia/Adelaide'
     open-pull-requests-limit: 10
+    cooldown:
+      default-days: 3
+      semver-major-days: 7
