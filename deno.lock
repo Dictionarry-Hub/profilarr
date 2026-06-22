@@ -19,7 +19,7 @@
     "npm:croner@^10.0.1": "10.0.1",
     "npm:kysely@~0.27.2": "0.27.6",
     "npm:marked@^18.0.5": "18.0.5",
-    "npm:simple-icons@^15.17.0": "15.22.0",
+    "npm:simple-icons@^16.23.0": "16.24.0",
     "npm:svelte@^5.56.3": "5.56.3"
   },
   "jsr": {
@@ -176,8 +176,8 @@
       "integrity": "sha512-S6GcvALHg6K4ohtu4E7x0a1AqhAjp6cV8KhLSyN9qVapnzJkusVBxZRcIU9AeYsbe6P1hKDusSbEOzGyyuce6w==",
       "bin": true
     },
-    "simple-icons@15.22.0": {
-      "integrity": "sha512-i/w5Ie4tENfGYbdCo2iJ+oies0vOFd8QXWHopKOUzudfLCvnmeheF2PpHp89Z2azpc+c2su3lMiWO/SpP+429A=="
+    "simple-icons@16.24.0": {
+      "integrity": "sha512-lAPW1rqgwPQ4tdIY15TtcKSgSelvJexz8q/B+a7Igg1dJoXR0LPjScLkLMI8UbLSkS41/fLVZWIhsH7HPUwAgQ=="
     },
     "svelte@5.56.3": {
       "integrity": "sha512-w7JvrM5IFl5cmfbY0TLik9o7mjRUJmRMhOR51tBPu708Gr/MjbGs7VnJnr/B0CaXeI4vtnOh7RKxDr0cwhMdDA==",
@@ -213,7 +213,7 @@
       "jsr:@std/yaml@^1.1.1",
       "npm:croner@^10.0.1",
       "npm:marked@^18.0.5",
-      "npm:simple-icons@^15.17.0",
+      "npm:simple-icons@^16.23.0",
       "npm:svelte@^5.56.3"
     ]
   }
