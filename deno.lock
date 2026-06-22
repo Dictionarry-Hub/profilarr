@@ -18,7 +18,7 @@
     "jsr:@std/yaml@^1.1.1": "1.1.1",
     "npm:croner@^9.1.0": "9.1.0",
     "npm:kysely@~0.27.2": "0.27.6",
-    "npm:marked@^15.0.6": "15.0.12",
+    "npm:marked@^18.0.5": "18.0.5",
     "npm:simple-icons@^15.17.0": "15.22.0",
     "npm:svelte@^5.56.3": "5.56.3"
   },
@@ -172,8 +172,8 @@
         "@jridgewell/sourcemap-codec"
       ]
     },
-    "marked@15.0.12": {
-      "integrity": "sha512-8dD6FusOQSrpv9Z1rdNMdlSgQOIP880DHqnohobOmYLElGEqAL/JvxvuxZO16r4HtjTlfPRDC1hbvxC9dPN2nA==",
+    "marked@18.0.5": {
+      "integrity": "sha512-S6GcvALHg6K4ohtu4E7x0a1AqhAjp6cV8KhLSyN9qVapnzJkusVBxZRcIU9AeYsbe6P1hKDusSbEOzGyyuce6w==",
       "bin": true
     },
     "simple-icons@15.22.0": {
@@ -212,7 +212,7 @@
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/yaml@^1.1.1",
       "npm:croner@^9.1.0",
-      "npm:marked@^15.0.6",
+      "npm:marked@^18.0.5",
       "npm:simple-icons@^15.17.0",
       "npm:svelte@^5.56.3"
     ]
