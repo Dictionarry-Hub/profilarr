@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Plus, AlertTriangle, ExternalLink, Edit3, Trash2 } from '@lucide/svelte';
+	import { Plus, AlertTriangle, ExternalLink, Edit3, Trash2 } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize.ts';

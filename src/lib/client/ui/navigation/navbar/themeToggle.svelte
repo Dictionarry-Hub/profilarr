@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { themeStore } from '$stores/theme.ts';
-	import { MoonStar, Sun } from '@lucide/svelte';
+	import { MoonStar, Sun } from 'lucide-svelte';
 
 	export let onboarding: string | undefined = undefined;
 

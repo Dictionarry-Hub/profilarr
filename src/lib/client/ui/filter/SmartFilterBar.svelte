@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { Filter } from '@lucide/svelte';
+	import { Filter } from 'lucide-svelte';
 	import FilterTagComponent from './FilterTag.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, Trash2 } from '@lucide/svelte';
+	import { Plus, Trash2 } from 'lucide-svelte';
 	import FormInput from './FormInput.svelte';
 	import NumberInput from './NumberInput.svelte';
 

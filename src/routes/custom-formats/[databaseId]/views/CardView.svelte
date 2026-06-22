@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
-	import { FlaskConical, Copy, Download } from '@lucide/svelte';
+	import { FlaskConical, Copy, Download } from 'lucide-svelte';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize';
 	import { page } from '$app/stores';

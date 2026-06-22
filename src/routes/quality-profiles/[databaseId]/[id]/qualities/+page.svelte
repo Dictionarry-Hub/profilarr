@@ -12,7 +12,7 @@
 		ChevronUp,
 		ChevronDown,
 		Pencil
-	} from '@lucide/svelte';
+	} from 'lucide-svelte';
 	import DraggableCard from '$ui/list/DraggableCard.svelte';
 	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
 	import Label from '$ui/label/Label.svelte';

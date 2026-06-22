@@ -2,7 +2,7 @@
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
-	import { Search, X } from '@lucide/svelte';
+	import { Search, X } from 'lucide-svelte';
 	import type { SearchStore } from '$lib/client/stores/search';
 	import Badge from '$ui/badge/Badge.svelte';
 

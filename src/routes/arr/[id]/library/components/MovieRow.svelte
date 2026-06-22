@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, CircleAlert, Film, CheckCircle, Megaphone, Clapperboard } from '@lucide/svelte';
+	import { Check, CircleAlert, Film, CheckCircle, Megaphone, Clapperboard } from 'lucide-svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Score from '$ui/arr/Score.svelte';

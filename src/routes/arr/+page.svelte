@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Server, Plus, Info } from '@lucide/svelte';
+	import { Server, Plus, Info } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import EmptyState from '$ui/state/EmptyState.svelte';

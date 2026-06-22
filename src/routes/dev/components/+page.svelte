@@ -33,7 +33,7 @@
 	import TableActionButton from '$ui/table/TableActionButton.svelte';
 	import { createSearchStore } from '$lib/client/stores/search';
 	import ComponentCard from './ComponentCard.svelte';
-	import { Plus, Info, Trash2, FileText, Filter, Check, Star, Settings } from '@lucide/svelte';
+	import { Plus, Info, Trash2, FileText, Filter, Check, Star, Settings } from 'lucide-svelte';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
 
 	const search = createSearchStore();

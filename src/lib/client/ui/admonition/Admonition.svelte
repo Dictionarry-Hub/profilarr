@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
-	import { X, Info, AlertTriangle, AlertOctagon, CheckCircle2, MessageSquare } from '@lucide/svelte';
+	import { X, Info, AlertTriangle, AlertOctagon, CheckCircle2, MessageSquare } from 'lucide-svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 

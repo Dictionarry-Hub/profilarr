@@ -12,7 +12,7 @@
 		Smartphone,
 		Network,
 		Clock
-	} from '@lucide/svelte';
+	} from 'lucide-svelte';
 	import { parseUTC, formatDateTime, formatDate } from '$shared/utils/dates';
 	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';

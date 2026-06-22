@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onDestroy } from 'svelte';
-	import { CircleDot, Loader2 } from '@lucide/svelte';
+	import { CircleDot, Loader2 } from 'lucide-svelte';
 	import type { FilterConfig } from '$shared/upgrades/filters';
 	import { selectors } from '$shared/upgrades/selectors';
 	import { createSearchStore, type SearchStore } from '$lib/client/stores/search';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus } from '@lucide/svelte';
+	import { Plus } from 'lucide-svelte';
 	import Button from '$ui/button/Button.svelte';
 
 	export let icon: any; // Lucide icon component

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-	import { Check, ChevronUp, ChevronDown } from '@lucide/svelte';
+	import { Check, ChevronUp, ChevronDown } from 'lucide-svelte';
 	import DraggableCard from '$ui/list/DraggableCard.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';

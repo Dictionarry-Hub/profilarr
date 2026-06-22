@@ -2,7 +2,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import CronInput from '$ui/cron/CronInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import { RefreshCw, Save, Loader2, AlertTriangle } from '@lucide/svelte';
+	import { RefreshCw, Save, Loader2, AlertTriangle } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	export let syncTrigger: 'manual' | 'on_pull' | 'schedule' = 'manual';

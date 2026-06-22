@@ -29,7 +29,7 @@
 		// Runtime
 		"@db/sqlite": "jsr:@db/sqlite@0.13.0",
 		"@felix/bcrypt": "jsr:@felix/bcrypt@^1.0.8",
-		"@lucide/svelte": "npm:@lucide/svelte@^1.0.1",
+		"lucide-svelte": "npm:lucide-svelte@^1.0.1",
 		"@soapbox/kysely-deno-sqlite": "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
 		"@std/yaml": "jsr:@std/yaml@^1.1.1",
 		"@sveltejs/kit": "npm:@sveltejs/kit@^2.66.0",

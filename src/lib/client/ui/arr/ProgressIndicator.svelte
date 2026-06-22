@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check } from '@lucide/svelte';
+	import { Check } from 'lucide-svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	export let current: number = 0;

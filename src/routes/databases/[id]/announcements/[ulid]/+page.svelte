@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import { page } from '$app/stores';
-	import { AlertTriangle } from '@lucide/svelte';
+	import { AlertTriangle } from 'lucide-svelte';
 	import Card from '$ui/card/Card.svelte';
 	import AnnouncementForm from '../components/AnnouncementForm.svelte';
 

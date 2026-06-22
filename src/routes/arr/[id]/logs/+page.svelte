@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
-	import { Copy, RefreshCw, Filter, Rows3, Loader2, AlertTriangle } from '@lucide/svelte';
+	import { Copy, RefreshCw, Filter, Rows3, Loader2, AlertTriangle } from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';

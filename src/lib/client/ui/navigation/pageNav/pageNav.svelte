@@ -19,7 +19,7 @@
 		Film,
 		Tv,
 		Megaphone
-	} from '@lucide/svelte';
+	} from 'lucide-svelte';
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import { sidebarCollapsed } from '$stores/sidebar';
 	import { page } from '$app/stores';

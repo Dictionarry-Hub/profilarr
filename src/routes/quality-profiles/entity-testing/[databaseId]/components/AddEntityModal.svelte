@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
-	import { Film, Tv, Star, Loader2, Clapperboard, X, ArrowDownAZ, ArrowUpAZ } from '@lucide/svelte';
+	import { Film, Tv, Star, Loader2, Clapperboard, X, ArrowDownAZ, ArrowUpAZ } from 'lucide-svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Label from '$ui/label/Label.svelte';

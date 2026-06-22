@@ -11,7 +11,7 @@
 		X,
 		Film,
 		Tv
-	} from '@lucide/svelte';
+	} from 'lucide-svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';

@@ -3,7 +3,7 @@
 	import { themes, getTheme, type ThemeVariant } from './themes';
 	import { themeStore } from '$lib/client/stores/theme';
 	import { browser } from '$app/environment';
-	import { Copy, Check, ChevronDown } from '@lucide/svelte';
+	import { Copy, Check, ChevronDown } from 'lucide-svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';

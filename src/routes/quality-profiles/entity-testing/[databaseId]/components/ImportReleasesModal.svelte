@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
-	import { Film, Tv, Loader2, Server, CircuitBoard, ArrowDownAZ, ArrowUpAZ } from '@lucide/svelte';
+	import { Film, Tv, Loader2, Server, CircuitBoard, ArrowDownAZ, ArrowUpAZ } from 'lucide-svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';

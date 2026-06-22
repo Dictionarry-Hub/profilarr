@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
 	import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte';
-	import { ChevronDown, ChevronUp } from '@lucide/svelte';
+	import { ChevronDown, ChevronUp } from 'lucide-svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
 	import Button from '$ui/button/Button.svelte';
 	import Dropdown from './Dropdown.svelte';

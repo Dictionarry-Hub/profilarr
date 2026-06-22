@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Info, FolderOpen, Database, HelpCircle, Heart, Package } from '@lucide/svelte';
+	import { Info, FolderOpen, Database, HelpCircle, Heart, Package } from 'lucide-svelte';
 	import BuildIdentity from '$ui/version/BuildIdentity.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';

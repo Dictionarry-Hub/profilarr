@@ -3,7 +3,7 @@
 	import { cutscene } from './store';
 	import Modal from '$ui/modal/Modal.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import { X, ArrowRight, Bird } from '@lucide/svelte';
+	import { X, ArrowRight, Bird } from 'lucide-svelte';
 
 	const { justCompleted } = cutscene;
 

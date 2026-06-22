@@ -6,7 +6,7 @@
 	import WebhookConfiguration from './WebhookConfiguration.svelte';
 	import TelegramConfiguration from './TelegramConfiguration.svelte';
 	import { groupNotificationTypesByCategory } from '$shared/notifications/types';
-	import { Plus, Save, ListChecks, CheckCircle, XCircle, Rss } from '@lucide/svelte';
+	import { Plus, Save, ListChecks, CheckCircle, XCircle, Rss } from 'lucide-svelte';
 	import { siDiscord, siNtfy, siTelegram } from 'simple-icons';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';

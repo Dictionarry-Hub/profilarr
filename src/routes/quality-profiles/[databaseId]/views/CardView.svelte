@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
-	import { BookOpenText, Gauge, Earth, Copy, Download } from '@lucide/svelte';
+	import { BookOpenText, Gauge, Earth, Copy, Download } from 'lucide-svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import Label from '$ui/label/Label.svelte';

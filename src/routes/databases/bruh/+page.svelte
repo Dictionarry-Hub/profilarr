@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RotateCcw } from '@lucide/svelte';
+	import { RotateCcw } from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';

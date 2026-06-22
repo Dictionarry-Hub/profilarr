@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Bold, Italic, List, ListOrdered, Link, Code, Eye, Edit3 } from '@lucide/svelte';
+	import { Bold, Italic, List, ListOrdered, Link, Code, Eye, Edit3 } from 'lucide-svelte';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize';
 

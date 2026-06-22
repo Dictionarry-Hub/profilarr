@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, X, FolderPlus } from '@lucide/svelte';
+	import { Plus, X, FolderPlus } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import {
 		getFilterFields,

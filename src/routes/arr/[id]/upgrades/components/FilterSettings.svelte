@@ -9,7 +9,7 @@
 		Trash2,
 		Pencil,
 		Eye
-	} from '@lucide/svelte';
+	} from 'lucide-svelte';
 	import {
 		createEmptyFilterConfig,
 		calculateMaxCount,

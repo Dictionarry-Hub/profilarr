@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fade, scale } from 'svelte/transition';
-	import { X } from '@lucide/svelte';
+	import { X } from 'lucide-svelte';
 
 	export let open = false;
 	export let header = 'Information';

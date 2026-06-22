@@ -13,7 +13,7 @@
 	import { alertStore } from '$lib/client/alerts/store';
 	import { isDirty, initEdit, update, current, clear } from '$lib/client/stores/dirty';
 	import { jobStatus } from '$stores/jobStatus';
-	import { Info, Save, Play, RotateCcw, FlaskConical } from '@lucide/svelte';
+	import { Info, Save, Play, RotateCcw, FlaskConical } from 'lucide-svelte';
 	import CoreSettings from './components/CoreSettings.svelte';
 	import FilterSettings from './components/FilterSettings.svelte';
 	import RunHistory from './components/RunHistory.svelte';

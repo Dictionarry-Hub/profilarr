@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { onDestroy, onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { Info } from '@lucide/svelte';
+	import { Info } from 'lucide-svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';

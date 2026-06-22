@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Database, Plus } from '@lucide/svelte';
+	import { Database, Plus } from 'lucide-svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
 	import type { PageData } from './$types';
 

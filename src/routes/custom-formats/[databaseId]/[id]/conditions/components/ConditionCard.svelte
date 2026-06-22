@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Trash2 } from '@lucide/svelte';
+	import { Check, Trash2 } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import RadarrIcon from '$lib/client/assets/Radarr.svg';
 	import SonarrIcon from '$lib/client/assets/Sonarr.svg';

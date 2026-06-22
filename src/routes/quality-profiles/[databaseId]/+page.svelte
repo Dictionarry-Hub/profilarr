@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { Plus } from '@lucide/svelte';
+	import { Plus } from 'lucide-svelte';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { accentStore, accentColors, type AccentColor } from '$stores/accent';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import { Check } from '@lucide/svelte';
+	import { Check } from 'lucide-svelte';
 
 	export let onboarding: string | undefined = undefined;
 

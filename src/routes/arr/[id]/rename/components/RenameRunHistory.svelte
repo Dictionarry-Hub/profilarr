@@ -8,7 +8,7 @@
 		Check,
 		FlaskConical,
 		Play
-	} from '@lucide/svelte';
+	} from 'lucide-svelte';
 	import type { RenameJobLog } from '$lib/server/rename/types.ts';
 	import {
 		createSearchStore,

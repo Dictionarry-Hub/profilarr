@@ -6,7 +6,7 @@
 	import { alertStore } from '$lib/client/alerts/store';
 	import { isDirty, initEdit, update, current, clear } from '$lib/client/stores/dirty';
 	import { jobStatus } from '$stores/jobStatus';
-	import { Info, Save, FlaskConical, Play } from '@lucide/svelte';
+	import { Info, Save, FlaskConical, Play } from 'lucide-svelte';
 	import RenameSettings from './components/RenameSettings.svelte';
 	import RenameRunHistory from './components/RenameRunHistory.svelte';
 	import RenameInfoModal from './components/RenameInfoModal.svelte';

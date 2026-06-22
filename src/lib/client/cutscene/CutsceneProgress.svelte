@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronLeft, ChevronRight, Check } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight, Check } from 'lucide-svelte';
 
 	export let currentStep: number = 0;
 	export let totalSteps: number = 0;

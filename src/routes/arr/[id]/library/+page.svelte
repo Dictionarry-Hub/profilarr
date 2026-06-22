@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { AlertTriangle, Film } from '@lucide/svelte';
+	import { AlertTriangle, Film } from 'lucide-svelte';
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import type { RadarrLibraryItem, SonarrSeriesItem } from '$utils/arr/types.ts';

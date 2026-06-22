@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown } from '@lucide/svelte';
+	import { ChevronDown } from 'lucide-svelte';
 
 	export let title: string;
 	export let description: string = '';

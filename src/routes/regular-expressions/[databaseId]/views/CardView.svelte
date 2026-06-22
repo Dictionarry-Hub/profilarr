@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { RegularExpressionWithTags } from '$shared/pcd/display';
-	import { ExternalLink, Copy, Download } from '@lucide/svelte';
+	import { ExternalLink, Copy, Download } from 'lucide-svelte';
 	import { page } from '$app/stores';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Loader2, CheckCircle2, XCircle } from '@lucide/svelte';
+	import { Loader2, CheckCircle2, XCircle } from 'lucide-svelte';
 	import { jobStatus } from '$stores/jobStatus';
 	import Card from '$ui/card/Card.svelte';
 

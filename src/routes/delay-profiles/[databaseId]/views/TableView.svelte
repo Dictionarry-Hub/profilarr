@@ -4,7 +4,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
-	import { Tag, Clock, Zap, Shield, Copy, Download } from '@lucide/svelte';
+	import { Tag, Clock, Zap, Shield, Copy, Download } from 'lucide-svelte';
 	import { escapeHtml } from '$shared/utils/sanitize.ts';
 	import { page } from '$app/stores';
 	import { FEATURES } from '$shared/features.ts';

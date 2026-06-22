@@ -24,7 +24,7 @@
 		XCircle,
 		AlertTriangle,
 		Info
-	} from '@lucide/svelte';
+	} from 'lucide-svelte';
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import Button from '$ui/button/Button.svelte';

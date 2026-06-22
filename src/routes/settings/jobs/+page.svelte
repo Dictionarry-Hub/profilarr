@@ -7,7 +7,7 @@
 	import ExpandableTable from '$lib/client/ui/table/ExpandableTable.svelte';
 	import Badge from '$lib/client/ui/badge/Badge.svelte';
 	import JobHistory from './components/JobHistory.svelte';
-	import { CheckCircle, XCircle, AlertCircle, MinusCircle } from '@lucide/svelte';
+	import { CheckCircle, XCircle, AlertCircle, MinusCircle } from 'lucide-svelte';
 
 	export let data: PageData;
 

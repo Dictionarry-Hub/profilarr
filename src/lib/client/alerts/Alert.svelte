@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CheckCircle, XCircle, AlertTriangle, Info } from '@lucide/svelte';
+	import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-svelte';
 	import type { AlertType } from './store';
 	import { alertStore } from './store';
 	import { fade, fly } from 'svelte/transition';

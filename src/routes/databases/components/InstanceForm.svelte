@@ -10,7 +10,7 @@
 		Database,
 		GitBranch,
 		ExternalLink
-	} from '@lucide/svelte';
+	} from 'lucide-svelte';
 	import { alertStore } from '$alerts/store';
 	import { jobStatus } from '$stores/jobStatus';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';

@@ -12,7 +12,7 @@
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
-	import { Plus } from '@lucide/svelte';
+	import { Plus } from 'lucide-svelte';
 	import type { EntityType } from '$shared/pcd/portable.ts';
 	import type { PageData } from './$types';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
