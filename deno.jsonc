@@ -1,5 +1,5 @@
 {
-	"nodeModulesDir": "manual",
+	"nodeModulesDir": "auto",
 	"imports": {
 		// Path aliases
 		"$lib/": "./src/lib/",
@@ -27,7 +27,7 @@
 		"$test-harness/": "./tests/integration/harness/",
 
 		// Runtime
-		"@db/sqlite": "jsr:@db/sqlite@0.13.0",
+		"@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",
 		"@felix/bcrypt": "jsr:@felix/bcrypt@^1.0.8",
 		"lucide-svelte": "npm:lucide-svelte@^1.0.1",
 		"@soapbox/kysely-deno-sqlite": "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
