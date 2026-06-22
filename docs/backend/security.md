@@ -24,6 +24,7 @@
   - [E2E Tests](#e2e-tests-srctestse2especsauth)
   - [Security Scans](#security-scans)
     - [SAST - Semgrep](#sast--semgrep)
+    - [Container Scanning - Trivy](#container-scanning--trivy)
     - [DAST - OWASP ZAP](#dast--owasp-zap)
   - [Infrastructure](#infrastructure)
 
@@ -575,7 +576,38 @@ same line as the `{@html}`:
 - Community rules are free-tier only (no cross-file taint analysis)
 - Svelte files use generic/regex matching, not AST. Rules can't trace data flow
   through function calls, so sanitised-but-flagged code needs `nosemgrep`
-- No dependency vulnerability scanning (Semgrep Supply Chain requires login)
+- No dependency vulnerability scanning (Semgrep Supply Chain requires login).
+  Trivy partially covers this gap for OS-level packages in the container image
+  (see below).
+
+#### Container Scanning - Trivy
+
+Scans Docker images for known vulnerabilities in OS packages. Trivy pulls apart
+image layers, checks every installed package against vulnerability databases
+(NVD, distro advisories), and reports each CVE with severity and fix
+availability.
+
+**Where it runs:**
+
+- **CI** (`ci.yml`): a `trivy` job runs in parallel with lint, type-check,
+  unit tests, and semgrep. It builds both Docker images (`profilarr` and
+  `profilarr-parser`) from their Dockerfiles and scans them. PRs with
+  CRITICAL or HIGH CVEs fail the check.
+- **Release script** (`deno task release`): builds and scans both images
+  before prompting for the version tag. If either scan fails, the release
+  aborts before tagging. Requires `trivy` on PATH.
+
+**Configuration:**
+
+- Severity threshold: `CRITICAL,HIGH`
+- Exit code 1 on findings (blocking in both CI and release)
+- CI uses the `aquasecurity/trivy-action` GitHub Action
+- Release script uses the `trivy` CLI directly
+
+**Future considerations:** scheduled scanning (weekly cron against `:latest`
+and `:develop` on GHCR) would catch new CVE advisories published after a
+release. Currently cut because the fix is always "release a new version," so
+the value over CI + release gating is low.
 
 #### DAST - OWASP ZAP
 
