@@ -22,7 +22,7 @@
 		"@tailwindcss/vite": "^4.3.1",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/deno": "^2.7.0",
-		"@types/node": "^24",
+		"@types/node": "^26",
 		"better-sqlite3": "^12.11.1",
 		"esbuild": "^0.28.1",
 		"openapi-typescript": "^7.13.0",
