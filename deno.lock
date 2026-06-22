@@ -20,7 +20,7 @@
     "npm:kysely@~0.27.2": "0.27.6",
     "npm:marked@^15.0.6": "15.0.12",
     "npm:simple-icons@^15.17.0": "15.22.0",
-    "npm:svelte@^5.55.2": "5.56.3"
+    "npm:svelte@^5.56.3": "5.56.3"
   },
   "jsr": {
     "@db/sqlite@0.13.0": {
@@ -214,7 +214,7 @@
       "npm:croner@^9.1.0",
       "npm:marked@^15.0.6",
       "npm:simple-icons@^15.17.0",
-      "npm:svelte@^5.55.2"
+      "npm:svelte@^5.56.3"
     ]
   }
 }

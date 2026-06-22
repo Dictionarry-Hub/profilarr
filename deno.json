@@ -31,7 +31,7 @@
 		"croner": "npm:croner@^9.1.0",
 		"@felix/bcrypt": "jsr:@felix/bcrypt@^1.0.8",
 		"@db/sqlite": "jsr:@db/sqlite@0.13.0",
-		"svelte": "npm:svelte@^5.55.2"
+		"svelte": "npm:svelte@^5.56.3"
 	},
 	"tasks": {
 		"dev": "deno run -A scripts/dev.ts",
