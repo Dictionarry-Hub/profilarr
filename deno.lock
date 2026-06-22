@@ -6,13 +6,13 @@
     "jsr:@denosaurs/plug@^1.1.0": "1.1.0",
     "jsr:@felix/bcrypt@^1.0.8": "1.0.8",
     "jsr:@soapbox/kysely-deno-sqlite@^2.2.0": "2.2.0",
-    "jsr:@std/assert@1": "1.0.19",
+    "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/encoding@1": "1.0.10",
     "jsr:@std/fmt@1": "1.0.10",
     "jsr:@std/fs@1": "1.0.24",
-    "jsr:@std/internal@^1.0.12": "1.0.13",
+    "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/internal@^1.0.14": "1.0.14",
-    "jsr:@std/path@1": "1.0.9",
+    "jsr:@std/path@1": "1.1.5",
     "jsr:@std/path@1.0": "1.0.9",
     "jsr:@std/path@^1.1.5": "1.1.5",
     "jsr:@std/yaml@^1.1.0": "1.1.0",
@@ -51,12 +51,6 @@
         "npm:kysely"
       ]
     },
-    "@std/assert@1.0.15": {
-      "integrity": "d64018e951dbdfab9777335ecdb000c0b4e3df036984083be219ce5941e4703b",
-      "dependencies": [
-        "jsr:@std/internal@^1.0.12"
-      ]
-    },
     "@std/assert@1.0.19": {
       "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
       "dependencies": [
@@ -75,9 +69,6 @@
         "jsr:@std/internal@^1.0.14",
         "jsr:@std/path@^1.1.5"
       ]
-    },
-    "@std/internal@1.0.13": {
-      "integrity": "2f9546691d4ac2d32859c82dff284aaeac980ddeca38430d07941e7e288725c0"
     },
     "@std/internal@1.0.14": {
       "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
@@ -218,7 +209,7 @@
       "jsr:@db/sqlite@0.13.0",
       "jsr:@felix/bcrypt@^1.0.8",
       "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
-      "jsr:@std/assert@1",
+      "jsr:@std/assert@^1.0.19",
       "jsr:@std/yaml@^1.1.0",
       "npm:croner@^9.1.0",
       "npm:marked@^15.0.6",
