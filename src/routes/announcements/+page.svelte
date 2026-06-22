@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
-	import { Database, Eye, EyeOff, Info, ArrowDownUp, Filter, MailCheck } from 'lucide-svelte';
+	import { Database, Eye, EyeOff, Info, ArrowDownUp, Filter, MailCheck } from '@lucide/svelte';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize.ts';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';

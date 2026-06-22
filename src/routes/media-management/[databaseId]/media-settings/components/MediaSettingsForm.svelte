@@ -11,7 +11,7 @@
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import { alertStore } from '$alerts/store';
-	import { Save, Trash2 } from 'lucide-svelte';
+	import { Save, Trash2 } from '@lucide/svelte';
 	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
 	import type { RadarrMediaSettingsRow } from '$shared/pcd/display.ts';
 	import type { ArrType } from '$shared/pcd/types.ts';

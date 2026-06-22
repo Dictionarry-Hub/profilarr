@@ -4,7 +4,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { RegularExpressionWithTags } from '$shared/pcd/display';
-	import { Tag, Code, FileText, Link, Copy, Download } from 'lucide-svelte';
+	import { Tag, Code, FileText, Link, Copy, Download } from '@lucide/svelte';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize';
 	import { page } from '$app/stores';

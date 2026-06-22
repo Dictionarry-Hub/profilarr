@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { Save, Wifi, Trash2, Eraser, Loader2 } from 'lucide-svelte';
+	import { Save, Wifi, Trash2, Eraser, Loader2 } from '@lucide/svelte';
 	import { formatSmartDateTime } from '$shared/utils/dates';
 	import { dateFormat } from '$lib/client/stores/dateFormat';
 	import { serverTimezone } from '$lib/client/stores/timezone';

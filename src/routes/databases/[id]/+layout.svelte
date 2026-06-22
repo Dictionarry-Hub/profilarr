@@ -8,7 +8,7 @@
 		Settings,
 		FileCog,
 		Megaphone
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import { page } from '$app/stores';
 	import { FEATURES } from '$lib/shared/features';
 

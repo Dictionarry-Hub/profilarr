@@ -1,7 +1,14 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
-	import { X, Info, AlertTriangle, AlertOctagon, CheckCircle2, MessageSquare } from 'lucide-svelte';
+	import {
+		X,
+		Info,
+		AlertTriangle,
+		AlertOctagon,
+		CheckCircle2,
+		MessageSquare
+	} from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 
@@ -9,7 +16,7 @@
 
 	export let variant: Variant = 'info';
 	export let title: string | undefined = undefined;
-	export let icon: ComponentType | undefined = undefined;
+	export let icon: Component | undefined = undefined;
 	export let dismissible: boolean = false;
 	export let confirmDismiss: boolean = false;
 	export let confirmHeader: string = 'Are you sure?';
@@ -19,7 +26,7 @@
 
 	const dispatch = createEventDispatcher<{ dismiss: void }>();
 
-	const defaultIcons: Record<Variant, ComponentType> = {
+	const defaultIcons: Record<Variant, Component> = {
 		info: Info,
 		warning: AlertTriangle,
 		danger: AlertOctagon,

@@ -17,7 +17,7 @@
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
 	import { createViewModeStore } from '$lib/client/stores/dataPage';
-	import { Info, Plus } from 'lucide-svelte';
+	import { Info, Plus } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';

@@ -2,7 +2,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { enhance } from '$app/forms';
-	import { Plus, AlertTriangle, Check, X, Pencil, Trash2 } from 'lucide-svelte';
+	import { Plus, AlertTriangle, Check, X, Pencil, Trash2 } from '@lucide/svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Modal from '$ui/modal/Modal.svelte';

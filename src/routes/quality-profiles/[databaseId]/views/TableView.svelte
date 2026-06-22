@@ -4,7 +4,16 @@
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
-	import { Tag, FileText, Layers, BookOpenText, Gauge, Earth, Copy, Download } from 'lucide-svelte';
+	import {
+		Tag,
+		FileText,
+		Layers,
+		BookOpenText,
+		Gauge,
+		Earth,
+		Copy,
+		Download
+	} from '@lucide/svelte';
 	import { sanitizeHtml, escapeHtml } from '$shared/utils/sanitize.ts';
 	import { FEATURES } from '$shared/features.ts';
 

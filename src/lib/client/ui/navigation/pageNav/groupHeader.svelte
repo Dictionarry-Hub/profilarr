@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import Label from '$ui/label/Label.svelte';
 
 	export let label: string;
 	export let href: string;
-	export let icon: ComponentType | undefined = undefined;
+	export let icon: Component | undefined = undefined;
 	export let emoji: string | undefined = undefined;
 	export let isOpen: boolean;
 	export let hasItems: boolean;

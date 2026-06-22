@@ -7,7 +7,7 @@
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import { Trash2, Loader2, Save, X } from 'lucide-svelte';
+	import { Trash2, Loader2, Save, X } from '@lucide/svelte';
 	import { isDirty, initEdit, initCreate, update, clear } from '$lib/client/stores/dirty';
 
 	// Props

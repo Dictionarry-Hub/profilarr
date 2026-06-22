@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Check } from 'lucide-svelte';
-	import type { ComponentType } from 'svelte';
+	import { Check } from '@lucide/svelte';
+	import type { Component } from 'svelte';
 	import ActionButton from './ActionButton.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 
 	export let options: { value: string; label: string }[] = [];
 	export let value: string = '';
-	export let icon: ComponentType;
+	export let icon: Component;
 	export let onchange: (value: string) => void = () => {};
 </script>
 

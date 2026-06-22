@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Download, RefreshCw, FileText, Filter, Layers, BrushCleaning } from 'lucide-svelte';
+	import { Download, RefreshCw, FileText, Filter, Layers, BrushCleaning } from '@lucide/svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';

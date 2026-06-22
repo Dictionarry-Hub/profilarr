@@ -9,7 +9,7 @@
 		FileEdit,
 		ScrollText,
 		Settings
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
-	import { Check } from 'lucide-svelte';
+	import type { Component } from 'svelte';
+	import { Check } from '@lucide/svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 
-	export let icon: ComponentType | { path: string } | undefined = undefined;
+	export let icon: Component | { path: string } | undefined = undefined;
 
 	$: isSvgIcon = icon && typeof icon === 'object' && 'path' in icon;
 	export let label: string;
@@ -13,7 +13,7 @@
 	export let selected: boolean = false;
 	export let highlighted: boolean = false;
 	export let compact: boolean = false;
-	export let checkIcon: ComponentType = Check;
+	export let checkIcon: Component = Check;
 	export let checkColor:
 		| 'accent'
 		| 'blue'
@@ -64,7 +64,7 @@
 					<path d={(icon as { path: string }).path} />
 				</svg>
 			{:else}
-				<svelte:component this={icon as ComponentType} size={iconSize} />
+				<svelte:component this={icon as Component} size={iconSize} />
 			{/if}
 		{/if}
 		{#if customContent}

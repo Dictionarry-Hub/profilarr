@@ -3,7 +3,7 @@
 	import Modal from './Modal.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
-	import { Check, X, Loader2, RefreshCw, ArrowRight } from 'lucide-svelte';
+	import { Check, X, Loader2, RefreshCw, ArrowRight } from '@lucide/svelte';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 
 	export let open = false;

@@ -2,7 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
 	import { page } from '$app/stores';
-	import { Clock, Zap, Copy, Download } from 'lucide-svelte';
+	import { Clock, Zap, Copy, Download } from '@lucide/svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import Button from '$ui/button/Button.svelte';

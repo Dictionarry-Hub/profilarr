@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import Label from '$ui/label/Label.svelte';
 
 	interface Props {
@@ -9,7 +9,7 @@
 		/** Optional pattern to match against pathname for active state (supports string includes or regex) */
 		activePattern?: string | RegExp;
 		/** Optional Lucide icon component */
-		icon?: ComponentType;
+		icon?: Component;
 		/** Optional SVG image source URL */
 		iconSrc?: string;
 		/** Optional click handler (use e.preventDefault() to override navigation) */

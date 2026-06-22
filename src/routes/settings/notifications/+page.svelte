@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
-	import { Plus, Trash2, Bell, BellOff, Rss, Send, Pencil } from 'lucide-svelte';
+	import { Plus, Trash2, Bell, BellOff, Rss, Send, Pencil } from '@lucide/svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import NotificationHistory from './components/NotificationHistory.svelte';
 	import Table from '$ui/table/Table.svelte';

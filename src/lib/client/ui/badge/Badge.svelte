@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 
 	export let variant:
 		| 'accent'
@@ -11,7 +11,7 @@
 		| 'radarr'
 		| 'sonarr' = 'accent';
 	export let size: 'sm' | 'md' = 'sm';
-	export let icon: ComponentType | null = null;
+	export let icon: Component | null = null;
 	export let mono: boolean = false;
 
 	const variantClasses: Record<typeof variant, string> = {

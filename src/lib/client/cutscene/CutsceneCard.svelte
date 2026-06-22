@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X } from 'lucide-svelte';
+	import { X } from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import InlineCode from '$ui/code/InlineCode.svelte';
 	import CutsceneProgress from './CutsceneProgress.svelte';
