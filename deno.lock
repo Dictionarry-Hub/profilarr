@@ -15,7 +15,7 @@
     "jsr:@std/path@1": "1.1.5",
     "jsr:@std/path@1.0": "1.0.9",
     "jsr:@std/path@^1.1.5": "1.1.5",
-    "jsr:@std/yaml@^1.1.0": "1.1.0",
+    "jsr:@std/yaml@^1.1.1": "1.1.1",
     "npm:croner@^9.1.0": "9.1.0",
     "npm:kysely@~0.27.2": "0.27.6",
     "npm:marked@^15.0.6": "15.0.12",
@@ -82,8 +82,8 @@
         "jsr:@std/internal@^1.0.14"
       ]
     },
-    "@std/yaml@1.1.0": {
-      "integrity": "fc1c5c63e05c4c5eb6118355f557958035d41940d6c29d35b306ef7155d6edb0"
+    "@std/yaml@1.1.1": {
+      "integrity": "a57665ecf3d17b926380593a56625d8a10cc7281802f1e993b5ebc94a48e71f8"
     }
   },
   "npm": {
@@ -210,7 +210,7 @@
       "jsr:@felix/bcrypt@^1.0.8",
       "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
       "jsr:@std/assert@^1.0.19",
-      "jsr:@std/yaml@^1.1.0",
+      "jsr:@std/yaml@^1.1.1",
       "npm:croner@^9.1.0",
       "npm:marked@^15.0.6",
       "npm:simple-icons@^15.17.0",
