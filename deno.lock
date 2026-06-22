@@ -37,7 +37,7 @@
     "npm:svelte-check@*": "4.6.0_svelte@5.56.3_typescript@6.0.3",
     "npm:svelte-check@^4.6.0": "4.6.0_svelte@5.56.3_typescript@6.0.3",
     "npm:svelte@^5.56.3": "5.56.3",
-    "npm:tailwindcss@^4.1.13": "4.3.1",
+    "npm:tailwindcss@^4.3.1": "4.3.1",
     "npm:typescript@^6.0.3": "6.0.3",
     "npm:vite@*": "8.0.16_@types+node@26.0.0_esbuild@0.28.1",
     "npm:vite@^8.0.16": "8.0.16_@types+node@26.0.0_esbuild@0.28.1"
@@ -1244,7 +1244,7 @@
       "npm:simple-icons@^16.23.0",
       "npm:svelte-check@^4.6.0",
       "npm:svelte@^5.56.3",
-      "npm:tailwindcss@^4.1.13",
+      "npm:tailwindcss@^4.3.1",
       "npm:typescript@^6.0.3",
       "npm:vite@^8.0.16"
     ]
