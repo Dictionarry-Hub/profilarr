@@ -52,7 +52,7 @@ commit_parsers = [
 	{ message = "^refactor", group = "<!-- 5 -->♻️ Refactors" },
 	{ message = "^test", group = "<!-- 6 -->🧪 Tests" },
 	{ message = "^build", group = "<!-- 7 -->🔧 Maintenance" },
-	{ message = "^chore\\(deps.*\\)", group = "<!-- 9 -->📦 Dependencies" },
+	{ message = "^chore\\(deps.*\\)", skip = true },
 	{ message = "^chore", group = "<!-- 7 -->🔧 Maintenance" },
 	{ message = "^style", group = "<!-- 7 -->🔧 Maintenance" },
 	{ message = "^ci", group = "<!-- 8 -->⚙️ CI" }
