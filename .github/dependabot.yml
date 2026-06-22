@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: npm
+  - package-ecosystem: deno
     directory: /
     schedule:
       interval: weekly
@@ -18,18 +18,6 @@ updates:
         update-types:
           - 'version-update:semver-minor'
           - 'version-update:semver-major'
-
-  - package-ecosystem: deno
-    directory: /
-    schedule:
-      interval: weekly
-      day: monday
-      time: '14:00'
-      timezone: 'Australia/Adelaide'
-    open-pull-requests-limit: 10
-    cooldown:
-      default-days: 3
-      semver-major-days: 7
 
   - package-ecosystem: github-actions
     directory: /

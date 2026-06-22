@@ -1,5 +1,5 @@
-import { Database } from '@jsr/db__sqlite';
-import type { RestBindParameters } from '@jsr/db__sqlite';
+import { Database } from '@db/sqlite';
+import type { RestBindParameters } from '@db/sqlite';
 import { config } from '$config';
 import { logger } from '$logger/logger.ts';
 

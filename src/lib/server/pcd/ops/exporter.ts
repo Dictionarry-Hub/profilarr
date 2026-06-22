@@ -4,7 +4,7 @@ import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
 import { logger } from '$logger/logger.ts';
 import { stage, commit, configureIdentity } from '$utils/git/write.ts';
 import { execGit } from '$utils/git/exec.ts';
-import { Database } from '@jsr/db__sqlite';
+import { Database } from '@db/sqlite';
 import { getBranch, getStatus } from '$utils/git/read.ts';
 import { compile } from '../database/compiler.ts';
 import { canWriteToBase } from './writer.ts';

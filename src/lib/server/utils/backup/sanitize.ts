@@ -30,7 +30,7 @@
  * being deleted.
  */
 
-import { Database } from '@jsr/db__sqlite';
+import { Database } from '@db/sqlite';
 
 /**
  * SQL applied to a backup database copy at download time. Order matters

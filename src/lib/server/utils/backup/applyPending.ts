@@ -24,7 +24,7 @@
 
 import { config } from '$config';
 import { logger } from '$logger/logger.ts';
-import { Database } from '@jsr/db__sqlite';
+import { Database } from '@db/sqlite';
 
 const SENTINEL_NAME = '.restore-pending';
 const STAGING_NAME = '.restoring';
