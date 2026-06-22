@@ -80,7 +80,7 @@ RUN DENO_TARGET=$(case "${TARGETARCH}" in \
 # -----------------------------------------------------------------------------
 # Stage 2: Runtime
 # -----------------------------------------------------------------------------
-FROM debian:12-slim
+FROM alpine:3.24
 
 # Labels for container metadata
 LABEL org.opencontainers.image.title="Profilarr"
@@ -90,19 +90,35 @@ LABEL org.opencontainers.image.licenses="AGPL-3.0"
 
 # Install runtime dependencies
 # - git: PCD repository operations (clone, pull, push)
-# - tar: Backup creation and restoration
+# - tar: GNU tar for backup compatibility (not busybox tar)
 # - curl: Health checks
-# - gosu: Drop privileges to non-root user
+# - su-exec: Drop privileges to non-root user (Alpine equivalent of gosu)
 # - ca-certificates: HTTPS connections
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# - sqlite-libs: SQLite shared library for FFI
+# - gcompat: glibc compatibility shim for the Deno binary
+# - libgcc: GCC runtime needed by the compiled binary
+# - bash: Entrypoint uses bash
+# - shadow: Provides usermod/groupmod for PUID/PGID runtime changes
+RUN apk add --no-cache \
     git \
     tar \
     curl \
-    gosu \
+    su-exec \
     ca-certificates \
-    libsqlite3-0 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    sqlite-libs \
+    gcompat \
+    libgcc \
+    bash \
+    shadow \
+    && apk upgrade --no-cache
+
+# Build a stub for __res_init, a glibc DNS resolver symbol the Deno binary
+# references but never calls. Alpine's musl doesn't provide it, so we compile
+# a no-op into a shared library and preload it.
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev \
+    && echo 'int __res_init(void) { return 0; }' \
+       | gcc -shared -o /usr/lib/libres_stub.so -x c - \
+    && apk del .build-deps
 
 # Create application directory
 WORKDIR /app
@@ -120,8 +136,8 @@ RUN chmod +x /entrypoint.sh
 # - Root/PUID mode: entrypoint may reassign UID/GID at runtime via usermod.
 # - Non-root mode: set runAsUser: 1000 (K8s) or --user 1000 (Docker) to skip
 #   all privilege operations and run directly as this user.
-RUN groupadd -g 1000 profilarr && \
-    useradd -u 1000 -g profilarr -d /config -s /sbin/nologin profilarr
+RUN addgroup -g 1000 profilarr && \
+    adduser -u 1000 -G profilarr -D -h /config -s /sbin/nologin profilarr
 
 # Create config directory
 RUN mkdir -p /config
@@ -131,7 +147,8 @@ ENV PORT=6868
 ENV HOST=0.0.0.0
 ENV APP_BASE_PATH=/config
 ENV TZ=UTC
-# DENO_SQLITE_PATH is set in entrypoint.sh based on architecture
+ENV DENO_SQLITE_PATH=/usr/lib/libsqlite3.so.0
+ENV LD_PRELOAD=/usr/lib/libres_stub.so
 
 # Expose port
 EXPOSE 6868
@@ -144,6 +161,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 VOLUME /config
 
 # Entrypoint handles PUID/PGID/UMASK then runs the app
-# Starts as root for chown/useradd, drops to PUID via gosu before exec
+# Starts as root for chown/useradd, drops to PUID via su-exec before exec
 # nosemgrep: dockerfile.security.missing-user-entrypoint.missing-user-entrypoint
 ENTRYPOINT ["/entrypoint.sh"]

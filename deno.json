@@ -61,7 +61,9 @@
 		"generate:api-types": "deno task generate:api-json && npx openapi-typescript docs/api/v1/openapi.yaml -o src/lib/api/v1.d.ts && prettier --write src/lib/api/v1.d.ts src/lib/api/v1.openapi.json",
 		"generate:pcd-types": "deno run -A scripts/generate-pcd-types.ts",
 		"stats": "deno run --allow-read --allow-env scripts/stats.ts",
-		"webhook": "deno run --allow-net scripts/webhook-listener.ts"
+		"webhook": "deno run --allow-net scripts/webhook-listener.ts",
+		"docker:build": "docker compose -f compose.yml -f compose.dev.yml build",
+		"docker:up": "docker compose -f compose.yml -f compose.dev.yml up --build"
 	},
 	"compilerOptions": {
 		"lib": ["deno.window", "dom"],

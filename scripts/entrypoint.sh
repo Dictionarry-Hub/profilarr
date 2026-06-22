@@ -19,12 +19,6 @@ set -e
 #    handled externally (K8s fsGroup, init containers, or pre-provisioned
 #    storage permissions).
 # -----------------------------------------------------------------------------
-# Set architecture-dependent SQLite path
-# -----------------------------------------------------------------------------
-ARCH=$(uname -m)
-export DENO_SQLITE_PATH="/usr/lib/${ARCH}-linux-gnu/libsqlite3.so.0"
-
-# -----------------------------------------------------------------------------
 # Resolve *_FILE env vars from secret files (Docker secrets pattern)
 # -----------------------------------------------------------------------------
 # Runs before the non-root fast path so it applies in both root and non-root modes
@@ -106,4 +100,4 @@ chown -R "${PUID}:${PGID}" /config
 # -----------------------------------------------------------------------------
 # Drop privileges and run
 # -----------------------------------------------------------------------------
-exec gosu "${APP_USER}" /app/profilarr
+exec su-exec "${APP_USER}" /app/profilarr

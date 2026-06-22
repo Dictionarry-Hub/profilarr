@@ -1,0 +1,12 @@
+services:
+  profilarr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: profilarr:alpine
+
+  parser:
+    build:
+      context: .
+      dockerfile: Dockerfile.parser
+    image: profilarr-parser:alpine

@@ -39,6 +39,9 @@ WORKDIR /app
 # Copy built application
 COPY --from=builder /app ./
 
+# Pick up security patches from the base image
+RUN apk upgrade --no-cache
+
 # Create non-root user
 RUN addgroup -g 1000 parser && \
     adduser -u 1000 -G parser -D -h /app parser
