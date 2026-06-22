@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
-	import { Download, Trash2, RotateCcw, Upload, FolderArchive, BrushCleaning } from 'lucide-svelte';
+	import { Download, Trash2, RotateCcw, Upload, FolderArchive, BrushCleaning } from '@lucide/svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import type { PageData } from './$types';
 	import Button from '$ui/button/Button.svelte';

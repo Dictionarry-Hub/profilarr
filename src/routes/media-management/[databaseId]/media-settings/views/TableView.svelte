@@ -4,7 +4,7 @@
 	import Badge from '$ui/badge/Badge.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
-	import { Tag, Info, RefreshCw, Copy, Download } from 'lucide-svelte';
+	import { Tag, Info, RefreshCw, Copy, Download } from '@lucide/svelte';
 	import type { MediaSettingsListItem } from '$shared/pcd/display.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';

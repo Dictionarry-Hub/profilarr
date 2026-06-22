@@ -10,7 +10,7 @@
 		FlaskConical,
 		Play,
 		Info
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import type {
 		UpgradeJobLog,
 		UpgradeSelectionItem,

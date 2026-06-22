@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Eye, Copy } from 'lucide-svelte';
+	import { Eye, Copy } from '@lucide/svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
 	import Modal from '$ui/modal/Modal.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ExternalLink } from 'lucide-svelte';
+	import { ExternalLink } from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import type { Column, SortState } from '$ui/table/types';

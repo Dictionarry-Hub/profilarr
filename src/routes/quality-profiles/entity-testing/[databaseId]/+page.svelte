@@ -11,7 +11,7 @@
 		Sliders,
 		Check,
 		FlaskConical
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';

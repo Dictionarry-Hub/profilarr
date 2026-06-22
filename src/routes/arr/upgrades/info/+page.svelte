@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getFilterFields, filterModes, type FilterField } from '$shared/upgrades/filters';
 	import { selectors } from '$shared/upgrades/selectors';
-	import { ArrowLeft } from 'lucide-svelte';
+	import { ArrowLeft } from '@lucide/svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';

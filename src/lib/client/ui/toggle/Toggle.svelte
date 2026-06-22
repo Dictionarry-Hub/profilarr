@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { ComponentType } from 'svelte';
-	import { Check, Info } from 'lucide-svelte';
+	import { Check, Info } from '@lucide/svelte';
 	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
 	import InfoModal from '$lib/client/ui/modal/InfoModal.svelte';
 	import Button from '$lib/client/ui/button/Button.svelte';

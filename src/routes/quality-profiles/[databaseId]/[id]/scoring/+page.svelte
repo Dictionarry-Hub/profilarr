@@ -16,7 +16,7 @@
 		Plus,
 		Loader2,
 		Eye
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';

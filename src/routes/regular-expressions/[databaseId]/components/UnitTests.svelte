@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, X, AlertCircle, CircleCheck, CircleX, ExternalLink } from 'lucide-svelte';
+	import { Check, X, AlertCircle, CircleCheck, CircleX, ExternalLink } from '@lucide/svelte';
 	import { fly } from 'svelte/transition';
 	import type { Regex101UnitTest } from '../../regex101/types';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';

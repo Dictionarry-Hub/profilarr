@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { ComponentType } from 'svelte';
-	import { Loader2 } from 'lucide-svelte';
+	import { Loader2 } from '@lucide/svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	export let text: string = '';

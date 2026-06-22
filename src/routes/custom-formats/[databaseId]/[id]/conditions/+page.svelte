@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { tick } from 'svelte';
-	import { Plus, Save, Loader2, Info } from 'lucide-svelte';
+	import { Plus, Save, Loader2, Info } from '@lucide/svelte';
 	import ConditionCard from './components/ConditionCard.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Button from '$ui/button/Button.svelte';

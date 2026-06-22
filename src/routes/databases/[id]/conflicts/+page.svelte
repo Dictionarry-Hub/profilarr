@@ -13,7 +13,7 @@
 	import ConflictField from './ConflictField.svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
-	import { Fingerprint, AlertTriangle, HeartHandshake, HandMetal, Info } from 'lucide-svelte';
+	import { Fingerprint, AlertTriangle, HeartHandshake, HandMetal, Info } from '@lucide/svelte';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import type { PageData } from './$types';
 

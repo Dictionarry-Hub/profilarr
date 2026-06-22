@@ -12,7 +12,7 @@
 		Clock,
 		Calendar,
 		Star
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';

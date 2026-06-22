@@ -17,7 +17,7 @@
 		Wrench,
 		Megaphone,
 		ArrowUp
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import type { ComponentType } from 'svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';

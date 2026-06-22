@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check } from 'lucide-svelte';
+	import { Check } from '@lucide/svelte';
 	import type { ComponentType } from 'svelte';
 	import ActionButton from './ActionButton.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';

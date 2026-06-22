@@ -17,6 +17,7 @@
     "jsr:@std/path@^1.1.5": "1.1.5",
     "jsr:@std/yaml@^1.1.1": "1.1.1",
     "npm:@deno/vite-plugin@^2.0.2": "2.0.2_vite@8.0.16__@types+node@26.0.0__esbuild@0.28.1_@types+node@26.0.0_esbuild@0.28.1",
+    "npm:@lucide/svelte@^1.0.1": "1.21.0_svelte@5.56.3",
     "npm:@playwright/test@^1.61.0": "1.61.0",
     "npm:@sveltejs/kit@^2.66.0": "2.66.0_@sveltejs+vite-plugin-svelte@7.1.2__svelte@5.56.3__vite@8.0.16___@types+node@26.0.0___esbuild@0.28.1__@types+node@26.0.0__esbuild@0.28.1_svelte@5.56.3_typescript@6.0.3_vite@8.0.16__@types+node@26.0.0__esbuild@0.28.1_@types+node@26.0.0_esbuild@0.28.1",
     "npm:@sveltejs/vite-plugin-svelte@^7.1.2": "7.1.2_svelte@5.56.3_vite@8.0.16__@types+node@26.0.0__esbuild@0.28.1_@types+node@26.0.0_esbuild@0.28.1",
@@ -28,7 +29,6 @@
     "npm:jose@^6.2.3": "6.2.3",
     "npm:kysely@0.27.6": "0.27.6",
     "npm:kysely@~0.27.2": "0.27.6",
-    "npm:lucide-svelte@^1.0.1": "1.0.1_svelte@5.56.3",
     "npm:marked@^18.0.5": "18.0.5",
     "npm:openapi-typescript@^7.13.0": "7.13.0_typescript@6.0.3",
     "npm:playwright@^1.58.2": "1.61.0",
@@ -330,6 +330,12 @@
         "@jsr/std__bytes"
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/std__streams/1.1.1.tgz"
+    },
+    "@lucide/svelte@1.21.0_svelte@5.56.3": {
+      "integrity": "sha512-MEv//A7Jv3kHukZowv/DWp1MAtUzJKYwtJsmnQ7X98lCgtac3z3NbaToDl3Q6jO3gS9sougFpcD+t+YuxOkRMw==",
+      "dependencies": [
+        "svelte"
+      ]
     },
     "@napi-rs/wasm-runtime@1.1.5_@emnapi+core@1.10.0_@emnapi+runtime@1.10.0": {
       "integrity": "sha512-AWPoBRJ9tsnVhor4sjO7rkni+7p+2IAEFj6cx06UgP10jkQHqay/36uRV/bFkgrh18D9vb4cr8Q0Pthskgzy+Q==",
@@ -889,13 +895,6 @@
     "locate-character@3.0.0": {
       "integrity": "sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA=="
     },
-    "lucide-svelte@1.0.1_svelte@5.56.3": {
-      "integrity": "sha512-WvzZgk0pqzgda+AErLvgWxHkfg/+GgUwqKMRHvzt0IqyMdmyEDzDCk3Z+Wo/3y753oIgx8u9Q4eUbWkghFa8Jg==",
-      "dependencies": [
-        "svelte"
-      ],
-      "deprecated": true
-    },
     "magic-string@0.30.21": {
       "integrity": "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==",
       "dependencies": [
@@ -1172,6 +1171,7 @@
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/yaml@^1.1.1",
       "npm:@deno/vite-plugin@^2.0.2",
+      "npm:@lucide/svelte@^1.0.1",
       "npm:@playwright/test@^1.61.0",
       "npm:@sveltejs/kit@^2.66.0",
       "npm:@sveltejs/vite-plugin-svelte@^7.1.2",
@@ -1182,7 +1182,6 @@
       "npm:esbuild@~0.28.1",
       "npm:jose@^6.2.3",
       "npm:kysely@0.27.6",
-      "npm:lucide-svelte@^1.0.1",
       "npm:marked@^18.0.5",
       "npm:openapi-typescript@^7.13.0",
       "npm:playwright@^1.58.2",

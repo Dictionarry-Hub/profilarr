@@ -2,7 +2,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fade, scale } from 'svelte/transition';
-	import { X, Check, Loader2 } from 'lucide-svelte';
+	import { X, Check, Loader2 } from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 
 	// Props
