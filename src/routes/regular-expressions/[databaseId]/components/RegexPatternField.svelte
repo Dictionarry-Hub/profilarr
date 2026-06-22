@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { AlertCircle, Check, X, Loader2 } from 'lucide-svelte';
+	import { AlertCircle, Check, X, Loader2 } from '@lucide/svelte';
 	import { alertStore } from '$alerts/store';
 	import { sanitizeRegex101Id } from '$lib/client/utils/regex101';
 	import Label from '$ui/label/Label.svelte';

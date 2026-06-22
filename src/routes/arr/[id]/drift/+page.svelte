@@ -17,7 +17,7 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import type { Column } from '$ui/table/types';
-	import { Loader2, Play, Save } from 'lucide-svelte';
+	import { Loader2, Play, Save } from '@lucide/svelte';
 	import type { DriftDisplayEntity, DriftDisplayTone } from '$shared/drift.ts';
 	import DriftFieldDiffTable from './components/DriftFieldDiffTable.svelte';
 

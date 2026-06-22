@@ -1,5 +1,15 @@
 <script lang="ts">
-	import { Tv, CircleAlert, Check, Info, Play, Square, Clock, Star, Calendar } from 'lucide-svelte';
+	import {
+		Tv,
+		CircleAlert,
+		Check,
+		Info,
+		Play,
+		Square,
+		Clock,
+		Star,
+		Calendar
+	} from '@lucide/svelte';
 	import Label from '$ui/label/Label.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Badge from '$ui/badge/Badge.svelte';

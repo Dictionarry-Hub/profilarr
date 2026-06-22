@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { build } from '$lib/shared/build.ts';
-	import { ArrowUp } from 'lucide-svelte';
+	import { ArrowUp } from '@lucide/svelte';
 	import type { VersionStatusInfo } from '$announcements/index.ts';
 	import Label from '$ui/label/Label.svelte';
 

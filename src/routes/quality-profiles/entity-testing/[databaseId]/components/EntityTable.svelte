@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Film, Tv, Trash2, Import, Plus } from 'lucide-svelte';
+	import { Film, Tv, Trash2, Import, Plus } from '@lucide/svelte';
 	import { createEventDispatcher } from 'svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Button from '$ui/button/Button.svelte';

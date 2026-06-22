@@ -1,4 +1,4 @@
-import type { ComponentType } from 'svelte';
+import type { Component } from 'svelte';
 
 /**
  * Column definition for table
@@ -16,7 +16,7 @@ export interface Column<T> {
 	/** Header text to display */
 	header: string;
 	/** Optional icon component to display before header text */
-	headerIcon?: ComponentType;
+	headerIcon?: Component;
 	/** Optional width class (e.g., 'w-32', 'w-1/4') */
 	width?: string;
 	/** Text alignment */
@@ -30,7 +30,7 @@ export interface Column<T> {
 	/** Default sort direction when column is first sorted */
 	defaultSortDirection?: SortDirection;
 	/** Custom cell renderer - receives the full row object */
-	cell?: (row: T) => string | ComponentType | { html: string };
+	cell?: (row: T) => string | Component | { html: string };
 	/** Hide column in mobile responsive layout */
 	hideOnMobile?: boolean;
 	/** Custom class(es) for the td element; can be a static string or a function of the row */

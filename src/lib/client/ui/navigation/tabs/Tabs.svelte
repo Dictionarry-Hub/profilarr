@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
-	import type { ComponentType } from 'svelte';
-	import { ArrowLeft, ChevronRight, ChevronDown } from 'lucide-svelte';
+	import type { Component } from 'svelte';
+	import { ArrowLeft, ChevronRight, ChevronDown } from '@lucide/svelte';
 	import Breadcrumb from '$ui/navigation/breadcrumb/Breadcrumb.svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
@@ -12,7 +12,7 @@
 		label: string;
 		href: string;
 		active?: boolean;
-		icon?: ComponentType;
+		icon?: Component;
 		onboarding?: string;
 		badge?: number;
 	}

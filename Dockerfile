@@ -14,7 +14,7 @@ FROM denoland/deno:2.7.12 AS builder
 WORKDIR /build
 
 # Copy dependency files first (cache key)
-COPY deno.json deno.lock* ./
+COPY deno.jsonc deno.lock* ./
 
 # Copy everything else
 COPY . .

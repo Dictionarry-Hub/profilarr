@@ -1,4 +1,4 @@
-import type { Database } from '@jsr/db__sqlite';
+import type { Database } from '@db/sqlite';
 import type { ParsedOpMetadata, UpdateRule } from '../types.ts';
 
 type ScoringDesiredEntry = {

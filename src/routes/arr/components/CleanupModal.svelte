@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Loader2, AlertTriangle, Check } from 'lucide-svelte';
+	import { Loader2, AlertTriangle, Check } from '@lucide/svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$lib/client/alerts/store';
 	import { jobStatus } from '$lib/client/stores/jobStatus';

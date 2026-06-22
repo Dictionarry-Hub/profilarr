@@ -3,7 +3,7 @@
 	import Table from '$lib/client/ui/table/Table.svelte';
 	import Badge from '$lib/client/ui/badge/Badge.svelte';
 	import Toggle from '$lib/client/ui/toggle/Toggle.svelte';
-	import { CheckCircle, XCircle, Clock, MinusCircle } from 'lucide-svelte';
+	import { CheckCircle, XCircle, Clock, MinusCircle } from '@lucide/svelte';
 	import { parseUTC } from '$shared/utils/dates';
 
 	type JobRun = {

@@ -1,4 +1,4 @@
-import type { Database } from '@jsr/db__sqlite';
+import type { Database } from '@db/sqlite';
 import type { AutoAlignEntity } from '$pcd/entities/registry.ts';
 import { AUTO_ALIGN_ENTITIES } from '$pcd/entities/registry.ts';
 import type { ParsedOpMetadata } from './types.ts';

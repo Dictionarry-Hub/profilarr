@@ -2,7 +2,7 @@
  * PCD Cache - In-memory compiled view of PCD operations
  */
 
-import { Database } from '@jsr/db__sqlite';
+import { Database } from '@db/sqlite';
 import { Kysely } from 'kysely';
 // @ts-ignore - Deno JSR import not recognized by svelte-check
 import { DenoSqlite3Dialect } from '@soapbox/kysely-deno-sqlite';

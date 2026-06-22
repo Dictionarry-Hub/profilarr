@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Eye, Copy } from 'lucide-svelte';
+	import { Eye, Copy } from '@lucide/svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -18,7 +18,7 @@
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 
 	export let data: PageData;
 
@@ -30,7 +30,7 @@
 		meta?: unknown;
 	}
 
-	const levelCellComponent = LogLevelLabelCell as unknown as ComponentType;
+	const levelCellComponent = LogLevelLabelCell as unknown as Component;
 
 	// Initialize search store
 	const searchStore = getPersistentSearchStore('settingsLogsSearch', { debounceMs: 300 });

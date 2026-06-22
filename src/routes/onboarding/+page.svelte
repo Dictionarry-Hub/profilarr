@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Play } from 'lucide-svelte';
+	import { Play } from '@lucide/svelte';
 	import { cutscene } from '$lib/client/cutscene/store';
 	import { STAGES, GROUPS } from '$lib/client/cutscene/definitions/index.ts';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';

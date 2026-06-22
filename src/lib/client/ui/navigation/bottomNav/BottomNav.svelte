@@ -12,7 +12,7 @@
 		Loader2,
 		CheckCircle2,
 		XCircle
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import { jobStatus } from '$stores/jobStatus';
 	import { slide } from 'svelte/transition';
 

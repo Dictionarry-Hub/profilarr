@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
-	import { Check } from 'lucide-svelte';
+	import type { Component } from 'svelte';
+	import { Check } from '@lucide/svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 
 	export let checked: boolean = false;
 	export let disabled: boolean = false;
-	export let icon: ComponentType = Check;
+	export let icon: Component = Check;
 	export let checkColor:
 		| 'accent'
 		| 'blue'

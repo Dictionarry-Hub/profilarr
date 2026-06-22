@@ -17,8 +17,8 @@
 		Wrench,
 		Megaphone,
 		ArrowUp
-	} from 'lucide-svelte';
-	import type { ComponentType } from 'svelte';
+	} from '@lucide/svelte';
+	import type { Component } from 'svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { mobileNavOpen } from '$stores/mobileNav';
@@ -33,7 +33,7 @@
 	type RailLink = {
 		label: string;
 		href: string;
-		icon: ComponentType;
+		icon: Component;
 		emoji: string;
 		devOnly?: boolean;
 		alert?: number;

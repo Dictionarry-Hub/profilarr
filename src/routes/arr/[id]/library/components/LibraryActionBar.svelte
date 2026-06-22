@@ -10,7 +10,7 @@
 		ArrowDown,
 		ChevronsDownUp,
 		ChevronsUpDown
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import GroupHeader from './groupHeader.svelte';
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import { slide } from 'svelte/transition';
 
 	export let label: string;
 	export let href: string;
-	export let icon: ComponentType | undefined = undefined;
+	export let icon: Component | undefined = undefined;
 	export let emoji: string | undefined = undefined;
 	export let initialOpen: boolean = true;
 	export let hasItems: boolean = false;

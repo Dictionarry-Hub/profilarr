@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { ComponentType } from 'svelte';
-	import { Check, Info } from 'lucide-svelte';
+	import type { Component } from 'svelte';
+	import { Check, Info } from '@lucide/svelte';
 	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
 	import InfoModal from '$lib/client/ui/modal/InfoModal.svelte';
 	import Button from '$lib/client/ui/button/Button.svelte';
@@ -13,7 +13,7 @@
 	// Legacy color prop (mapped to IconCheckbox color)
 	export let color: 'accent' | 'amber' | 'green' | 'red' | 'neutral' = 'accent';
 	// IconCheckbox passthrough props
-	export let icon: ComponentType = Check;
+	export let icon: Component = Check;
 	export let checkboxColor:
 		| 'accent'
 		| 'blue'

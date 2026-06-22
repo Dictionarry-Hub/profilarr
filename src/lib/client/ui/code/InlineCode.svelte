@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 
 	export let text: string;
-	export let icon: ComponentType | null = null;
+	export let icon: Component | null = null;
 	export let rounded: 'sm' | 'md' | 'lg' | 'xl' | 'full' = 'full';
 
 	const roundedClasses = {

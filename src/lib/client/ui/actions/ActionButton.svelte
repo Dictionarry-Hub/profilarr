@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 
-	export let icon: ComponentType | undefined = undefined;
+	export let icon: Component | undefined = undefined;
 	export let iconClass: string = '';
 	export let square: boolean = true; // Fixed size square button
 	export let hasDropdown: boolean = false;

@@ -4,7 +4,7 @@
 	import type { Column } from '$ui/table/types';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
-	import { Check } from 'lucide-svelte';
+	import { Check } from '@lucide/svelte';
 	import InlineLink from '$ui/link/InlineLink.svelte';
 
 	export let databaseId: number;

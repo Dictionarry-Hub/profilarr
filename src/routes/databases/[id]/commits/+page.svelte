@@ -4,7 +4,7 @@
 	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
 	import type { Column } from '$ui/table/types';
 	import { afterNavigate } from '$app/navigation';
-	import { ExternalLink, FileText } from 'lucide-svelte';
+	import { ExternalLink, FileText } from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import type { Commit } from '$utils/git/types';
 	import { parseUTC, formatDate } from '$shared/utils/dates';

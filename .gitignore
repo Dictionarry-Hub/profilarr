@@ -43,6 +43,7 @@ tests/integration/notifications/.env
 .release-plan.md
 
 # Vite
+.vite/
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .svelte-kit/

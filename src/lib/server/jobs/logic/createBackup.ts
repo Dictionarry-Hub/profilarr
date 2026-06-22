@@ -11,7 +11,7 @@
  * (notably `databases/` for cloned PCD repos) are copied as-is.
  */
 
-import { Database } from '@jsr/db__sqlite';
+import { Database } from '@db/sqlite';
 import { db } from '$db/db.ts';
 import { migrationRunner } from '$db/migrations.ts';
 import { logger } from '$logger/logger.ts';

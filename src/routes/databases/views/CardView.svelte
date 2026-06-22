@@ -7,7 +7,7 @@
 		RefreshCw,
 		Clock,
 		GitPullRequest
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';

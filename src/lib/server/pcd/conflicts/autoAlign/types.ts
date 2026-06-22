@@ -1,4 +1,4 @@
-import type { Database } from '@jsr/db__sqlite';
+import type { Database } from '@db/sqlite';
 
 export type ConflictStrategy = 'override' | 'align' | 'ask';
 

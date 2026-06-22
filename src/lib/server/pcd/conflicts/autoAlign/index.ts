@@ -1,4 +1,4 @@
-import type { Database } from '@jsr/db__sqlite';
+import type { Database } from '@db/sqlite';
 import { defaultFieldGuardRule } from './rules/defaultFieldGuard.ts';
 import { missingTargetDeleteRule } from './rules/missingTargetDelete.ts';
 import { qualityProfileQualitiesRowRule } from './rules/qualityProfileQualitiesRow.ts';

@@ -8,7 +8,7 @@
 		FileText,
 		Archive,
 		Info
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 
 	const settingsItems = [
 		{

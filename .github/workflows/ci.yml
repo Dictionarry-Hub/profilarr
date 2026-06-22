@@ -146,7 +146,7 @@ jobs:
       - run: deno install --node-modules-dir
 
       - name: Sync SvelteKit types
-        run: npx svelte-kit sync
+        run: deno run -A npm:@sveltejs/kit sync
 
       - name: Type check
         run: deno task check
@@ -346,11 +346,11 @@ jobs:
 
       - name: Install Playwright browsers + system deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
+        run: deno run -A npm:playwright install --with-deps chromium
 
       - name: Install Playwright system deps only (browsers cached)
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+        run: deno run -A npm:playwright install-deps chromium
 
       - name: Download build artifact
         uses: actions/download-artifact@v8

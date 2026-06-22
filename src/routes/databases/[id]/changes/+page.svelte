@@ -32,7 +32,7 @@
 		GitCommit,
 		GitPullRequestCreateArrow,
 		X
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import goOnGit from '$assets/goOnGit.gif';
 	import Button from '$ui/button/Button.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';

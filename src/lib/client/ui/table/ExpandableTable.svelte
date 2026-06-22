@@ -1,6 +1,6 @@
 <script lang="ts" generics="T extends Record<string, any>">
 	import { onMount, onDestroy } from 'svelte';
-	import { ChevronDown, ChevronUp, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-svelte';
+	import { ChevronDown, ChevronUp, ArrowUp, ArrowDown, ArrowUpDown } from '@lucide/svelte';
 	import type { Column, SortState } from './types';
 	import Button from '$ui/button/Button.svelte';
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';

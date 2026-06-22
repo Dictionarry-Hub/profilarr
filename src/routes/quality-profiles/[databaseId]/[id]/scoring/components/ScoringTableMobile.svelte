@@ -2,7 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
-	import { Check } from 'lucide-svelte';
+	import { Check } from '@lucide/svelte';
 	import { createVirtualList } from '$lib/client/utils/virtualList';
 	import InlineLink from '$ui/link/InlineLink.svelte';
 

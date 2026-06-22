@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 
-	export let icon: ComponentType;
+	export let icon: Component;
 	export let title: string;
 	export let variant: 'neutral' | 'danger' | 'accent' = 'neutral';
 	export let size: 'sm' | 'md' = 'md';

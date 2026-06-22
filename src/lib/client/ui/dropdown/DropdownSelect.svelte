@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
-	import { ChevronDown, ChevronUp } from 'lucide-svelte';
+	import { ChevronDown, ChevronUp } from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Dropdown from './Dropdown.svelte';
 	import DropdownItem from './DropdownItem.svelte';
@@ -14,7 +14,7 @@
 		label: string;
 		shortLabel?: string;
 		description?: string;
-		icon?: ComponentType | { path: string };
+		icon?: Component | { path: string };
 	}[];
 	export let placeholder: string = 'Select...';
 	export let minWidth: string = '8rem';

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte';
-	import { ChevronDown, ChevronUp } from 'lucide-svelte';
+	import { ChevronDown, ChevronUp } from '@lucide/svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
 	import Button from '$ui/button/Button.svelte';
 	import Dropdown from './Dropdown.svelte';
@@ -11,7 +11,7 @@
 		value: string;
 		label: string;
 		shortLabel?: string;
-		icon?: ComponentType | { path: string };
+		icon?: Component | { path: string };
 		[key: string]: unknown;
 	};
 

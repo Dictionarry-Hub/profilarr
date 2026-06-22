@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 
 	export let value: string = '';
 	export let placeholder: string = '';
 	export let disabled: boolean = false;
 	export let mono: boolean = false;
-	export let icon: ComponentType | null = null;
+	export let icon: Component | null = null;
 </script>
 
 <div

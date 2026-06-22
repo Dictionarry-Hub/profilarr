@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	export let checked: boolean = false;
-	export let icon: ComponentType;
+	export let icon: Component;
 	export let color:
 		| 'accent'
 		| 'blue'

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import type { ComponentType } from 'svelte';
-	import { Loader2 } from 'lucide-svelte';
+	import type { Component } from 'svelte';
+	import { Loader2 } from '@lucide/svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	export let text: string = '';
@@ -9,8 +9,8 @@
 	export let size: 'xs' | 'sm' | 'md' = 'sm';
 	export let disabled: boolean = false;
 	export let softDisabled: boolean = false;
-	export let icon: ComponentType | null = null;
-	export let leadingIcon: ComponentType | { path: string } | null = null;
+	export let icon: Component | null = null;
+	export let leadingIcon: Component | { path: string } | null = null;
 	export let iconColor: string = '';
 	export let textColor: string = '';
 	export let iconPosition: 'left' | 'right' = 'left';
@@ -131,7 +131,7 @@
 							<path d={(leadingIcon as { path: string }).path} />
 						</svg>
 					{:else}
-						<svelte:component this={leadingIcon as ComponentType} size={iconSize} />
+						<svelte:component this={leadingIcon as Component} size={iconSize} />
 					{/if}
 					{#if text}
 						<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>
@@ -172,7 +172,7 @@
 							<path d={(leadingIcon as { path: string }).path} />
 						</svg>
 					{:else}
-						<svelte:component this={leadingIcon as ComponentType} size={iconSize} />
+						<svelte:component this={leadingIcon as Component} size={iconSize} />
 					{/if}
 					{#if text}
 						<span class="{baseTextColor} {hideTextOnMobile ? 'hidden md:inline' : ''}">{text}</span>
