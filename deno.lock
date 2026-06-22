@@ -16,7 +16,7 @@
     "jsr:@std/path@1.0": "1.0.9",
     "jsr:@std/path@^1.1.5": "1.1.5",
     "jsr:@std/yaml@^1.1.1": "1.1.1",
-    "npm:croner@^9.1.0": "9.1.0",
+    "npm:croner@^10.0.1": "10.0.1",
     "npm:kysely@~0.27.2": "0.27.6",
     "npm:marked@^18.0.5": "18.0.5",
     "npm:simple-icons@^15.17.0": "15.22.0",
@@ -139,8 +139,8 @@
     "clsx@2.1.1": {
       "integrity": "sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA=="
     },
-    "croner@9.1.0": {
-      "integrity": "sha512-p9nwwR4qyT5W996vBZhdvBCnMhicY5ytZkR4D1Xj0wuTDEiMnjwR57Q3RXYY/s0EpX6Ay3vgIcfaR+ewGHsi+g=="
+    "croner@10.0.1": {
+      "integrity": "sha512-ixNtAJndqh173VQ4KodSdJEI6nuioBWI0V1ITNKhZZsO0pEMoDxz539T4FTTbSZ/xIOSuDnzxLVRqBVSvPNE2g=="
     },
     "devalue@5.8.1": {
       "integrity": "sha512-4CXDYRBGqN+57wVJkuXBYmpAVUSg3L6JAQa/DFqm238G73E1wuyc/JhGQJzN7vUf/CMphYau2zXbfWzDR5aTEw=="
@@ -211,7 +211,7 @@
       "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/yaml@^1.1.1",
-      "npm:croner@^9.1.0",
+      "npm:croner@^10.0.1",
       "npm:marked@^18.0.5",
       "npm:simple-icons@^15.17.0",
       "npm:svelte@^5.56.3"
