@@ -8,8 +8,10 @@
  * Scope: route `+page.svelte` files under `src/routes`.
  *
  * Required:
- *   import PageMeta from '$ui/meta/PageMeta.svelte';
  *   <PageMeta title="Settings" />
+ *
+ * Raw <svelte:head> in route pages is disallowed. Page metadata should live
+ * behind PageMeta so title handling stays consistent.
  *
  * Escape hatch:
  *   <!-- lint-disable page-meta -- reason goes here -->
@@ -29,21 +31,14 @@ import {
 
 const RULE_NAME = 'page-meta';
 const COMPONENT_NAME = 'PageMeta';
-const COMPONENT_IMPORT = '$ui/meta/PageMeta.svelte';
 const SCOPE_ROOTS = ['src/routes'];
 const PAGE_FILE_RE = /(?:^|\/)\+page\.svelte$/;
-const IMPORT_RE =
-	/import\s+PageMeta\s+from\s+(["'])\$ui\/meta\/PageMeta\.svelte\1\s*;?/;
 const DISABLE_RE = /<!--\s*lint-disable\s+page-meta(?:\s+--\s*([\s\S]*?))?\s*-->/;
 
 interface BaseViolation {
 	file: string;
 	line: number;
 	column: number;
-}
-
-interface MissingImportViolation extends BaseViolation {
-	kind: 'missing-import';
 }
 
 interface MissingComponentViolation extends BaseViolation {
@@ -56,6 +51,10 @@ interface MissingTitleViolation extends BaseViolation {
 
 interface RawTitleViolation extends BaseViolation {
 	kind: 'raw-title';
+}
+
+interface RawHeadViolation extends BaseViolation {
+	kind: 'raw-head';
 }
 
 interface MalformedDirectiveViolation extends BaseViolation {
@@ -74,10 +73,10 @@ interface ReadErrorViolation extends BaseViolation {
 }
 
 type Violation =
-	| MissingImportViolation
 	| MissingComponentViolation
 	| MissingTitleViolation
 	| RawTitleViolation
+	| RawHeadViolation
 	| MalformedDirectiveViolation
 	| ParseErrorViolation
 	| ReadErrorViolation;
@@ -108,17 +107,9 @@ interface Fragment {
 	nodes: AnyNode[];
 }
 
-interface ScriptBlock {
-	start: number;
-	end: number;
-	content: { start: number; end: number };
-}
-
 interface SvelteRoot {
 	type: 'Root';
 	fragment: Fragment;
-	instance: ScriptBlock | null;
-	module: ScriptBlock | null;
 }
 
 interface ElementLike {
@@ -144,6 +135,7 @@ interface ScanResult {
 	hasPageMeta: boolean;
 	pageMetaHasTitle: boolean;
 	pageMetaOffset: number | null;
+	rawHeadOffsets: number[];
 	rawTitleOffsets: number[];
 }
 
@@ -152,11 +144,6 @@ function collectPageFiles(): Promise<string[]> {
 		roots: SCOPE_ROOTS,
 		acceptFile: (rel) => PAGE_FILE_RE.test(rel)
 	});
-}
-
-function getInstanceScript(source: string, root: SvelteRoot): string {
-	if (!root.instance) return '';
-	return source.slice(root.instance.content.start, root.instance.content.end);
 }
 
 function checkDisableDirective(source: string, offsets: number[], file: string): Violation[] | null {
@@ -207,6 +194,11 @@ function walkFragment(nodes: AnyNode[], result: ScanResult): void {
 				break;
 			}
 
+			case 'SvelteHead': {
+				result.rawHeadOffsets.push(el.start);
+				break;
+			}
+
 			case 'RegularElement':
 			case 'SlotElement':
 			case 'SvelteElement':
@@ -214,7 +206,6 @@ function walkFragment(nodes: AnyNode[], result: ScanResult): void {
 			case 'SvelteBoundary':
 			case 'SvelteDocument':
 			case 'SvelteFragment':
-			case 'SvelteHead':
 			case 'SvelteSelf':
 			case 'SvelteWindow': {
 				if (el.fragment?.nodes) walkFragment(el.fragment.nodes, result);
@@ -280,12 +271,11 @@ function lintFile(file: string, source: string): Violation[] {
 		return out;
 	}
 
-	const script = getInstanceScript(source, root);
-	const hasImport = IMPORT_RE.test(script);
 	const scan: ScanResult = {
 		hasPageMeta: false,
 		pageMetaHasTitle: false,
 		pageMetaOffset: null,
+		rawHeadOffsets: [],
 		rawTitleOffsets: []
 	};
 
@@ -293,15 +283,16 @@ function lintFile(file: string, source: string): Violation[] {
 		walkFragment(root.fragment.nodes, scan);
 	}
 
-	if (!hasImport) {
-		out.push({ kind: 'missing-import', file, line: 1, column: 1 });
-	}
 	if (!scan.hasPageMeta) {
 		out.push({ kind: 'missing-component', file, line: 1, column: 1 });
 	} else if (!scan.pageMetaHasTitle) {
 		const offset = scan.pageMetaOffset ?? 0;
 		const { line, column } = offsetToLineCol(offsets, offset);
 		out.push({ kind: 'missing-title', file, line, column });
+	}
+	for (const offset of scan.rawHeadOffsets) {
+		const { line, column } = offsetToLineCol(offsets, offset);
+		out.push({ kind: 'raw-head', file, line, column });
 	}
 	for (const offset of scan.rawTitleOffsets) {
 		const { line, column } = offsetToLineCol(offsets, offset);
@@ -313,12 +304,12 @@ function lintFile(file: string, source: string): Violation[] {
 
 function violationLabel(v: Violation): string {
 	switch (v.kind) {
-		case 'missing-import':
-			return 'missing import';
 		case 'missing-component':
 			return 'missing PageMeta';
 		case 'missing-title':
 			return 'missing title prop';
+		case 'raw-head':
+			return 'raw <svelte:head>';
 		case 'raw-title':
 			return 'raw <title>';
 		case 'malformed-directive':
@@ -333,12 +324,12 @@ function violationLabel(v: Violation): string {
 function violationDetail(v: Violation, c: Colorizer): string {
 	const arrow = c.dim('\u2192');
 	switch (v.kind) {
-		case 'missing-import':
-			return `${arrow} import ${COMPONENT_NAME} from ${c.cyan(`'${COMPONENT_IMPORT}'`)}`;
 		case 'missing-component':
 			return `${arrow} render ${c.cyan(`<${COMPONENT_NAME} title="..." />`)}`;
 		case 'missing-title':
 			return `${arrow} pass a short page title`;
+		case 'raw-head':
+			return `${arrow} use ${c.cyan(`<${COMPONENT_NAME} title="..." />`)} instead`;
 		case 'raw-title':
 			return `${arrow} use ${c.cyan(`<${COMPONENT_NAME} title="..." />`)} instead`;
 		case 'malformed-directive':
@@ -362,12 +353,8 @@ function formatReport(violations: Violation[], c: Colorizer): string {
 
 	lines.push('');
 	lines.push(c.bold('Rule:'));
-	lines.push(
-		`  Route pages must import ${c.cyan(COMPONENT_NAME)} from ${c.cyan(
-			`'${COMPONENT_IMPORT}'`
-		)} and render ${c.cyan(`<${COMPONENT_NAME} title="..." />`)}.`
-	);
-	lines.push(`  Raw ${c.cyan('<svelte:head><title>')} page titles are not allowed.`);
+	lines.push(`  Route pages must render ${c.cyan(`<${COMPONENT_NAME} title="..." />`)}.`);
+	lines.push(`  Raw ${c.cyan('<svelte:head>')} in route pages is not allowed.`);
 	lines.push('');
 	lines.push(c.bold('Escape hatch:'));
 	lines.push(`  ${c.dim(`<!-- lint-disable ${RULE_NAME} -- reason goes here -->`)}`);
