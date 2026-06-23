@@ -68,20 +68,13 @@
 			<div style="height: {topHeight}px;"></div>
 		{/if}
 		{#each visibleFormats as format, i (format.name)}
-			{@const rowDisabled = arrTypes.every(
-				(arrType) => !customFormatEnabled[format.name]?.[arrType]
-			)}
 			<div
-				class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900 {rowDisabled
-					? 'opacity-60'
-					: ''}"
+				class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
 				data-onboarding={start + i === 0 ? firstRowOnboarding : undefined}
 			>
 				<!-- Format name -->
 				<div
-					class="border-b border-neutral-200 px-4 py-2.5 text-sm font-medium dark:border-neutral-800 {rowDisabled
-						? 'text-neutral-500 dark:text-neutral-500'
-						: 'text-neutral-900 dark:text-neutral-100'}"
+					class="border-b border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-900 dark:border-neutral-800 dark:text-neutral-100"
 				>
 					<InlineLink
 						href="/custom-formats/{databaseId}/{format.id}/general"
