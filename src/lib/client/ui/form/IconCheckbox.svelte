@@ -37,7 +37,7 @@
 	$: iconSize = compact ? 9 : 14;
 	const baseClass = 'flex items-center justify-center border transition-colors';
 	const uncheckedClass =
-		'border-neutral-300 bg-white hover:border-neutral-400 hover:bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:hover:border-neutral-600 dark:hover:bg-neutral-800';
+		'border-2 border-neutral-400 bg-white hover:border-neutral-600 hover:bg-neutral-50 dark:border-neutral-500 dark:bg-neutral-800/50 dark:hover:border-neutral-300 dark:hover:bg-neutral-800';
 	const disabledClass = 'cursor-not-allowed opacity-50';
 	const enabledClass = 'cursor-pointer focus:outline-none';
 
