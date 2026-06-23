@@ -146,7 +146,11 @@ function collectPageFiles(): Promise<string[]> {
 	});
 }
 
-function checkDisableDirective(source: string, offsets: number[], file: string): Violation[] | null {
+function checkDisableDirective(
+	source: string,
+	offsets: number[],
+	file: string
+): Violation[] | null {
 	const match = DISABLE_RE.exec(source);
 	if (!match) return null;
 
