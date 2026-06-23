@@ -14,6 +14,7 @@ import SetupPage from './components/auth/SetupPage';
 import LoginPage from './components/auth/LoginPage';
 import Navbar from '@ui/Navbar';
 import Footer from '@ui/Footer';
+import DeprecationBanner from '@ui/DeprecationBanner';
 import {ToastContainer} from 'react-toastify';
 import {checkSetupStatus} from '@api/auth';
 import 'react-toastify/dist/ReactToastify.css';
@@ -144,6 +145,7 @@ function App() {
                 <ErrorBoundary>
                     <div className='min-h-screen flex flex-col bg-gray-900 text-gray-100'>
                         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+                        <DeprecationBanner />
                         <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-2 flex-grow flex-1 w-full'>
                             <Routes>
                                 <Route path='/regex' element={<RegexPage />} />
