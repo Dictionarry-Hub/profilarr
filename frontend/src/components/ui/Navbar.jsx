@@ -1,40 +1,8 @@
-import PropTypes from 'prop-types';
 import {useState, useEffect, useRef, useLayoutEffect} from 'react';
 import {Link, useLocation} from 'react-router-dom';
 import Logo from '@ui/Logo';
 
-function ToggleSwitch({checked, onChange}) {
-    return (
-        <label className='flex items-center cursor-pointer'>
-            <div className='relative'>
-                <input
-                    type='checkbox'
-                    className='sr-only'
-                    checked={checked}
-                    onChange={onChange}
-                />
-                <div
-                    className={`block w-14 h-8 rounded-full ${
-                        checked ? 'bg-blue-600' : 'bg-gray-600'
-                    } transition-colors duration-300`}></div>
-                <div
-                    className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 ${
-                        checked ? 'transform translate-x-6' : ''
-                    }`}></div>
-            </div>
-            <div className='ml-3 text-gray-300 font-medium'>
-                {checked ? 'Dark' : 'Light'}
-            </div>
-        </label>
-    );
-}
-
-ToggleSwitch.propTypes = {
-    checked: PropTypes.bool.isRequired,
-    onChange: PropTypes.func.isRequired
-};
-
-function Navbar({darkMode, setDarkMode}) {
+function Navbar() {
     const [tabOffset, setTabOffset] = useState(0);
     const [tabWidth, setTabWidth] = useState(0);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -133,7 +101,9 @@ function Navbar({darkMode, setDarkMode}) {
                             </Link>
                             <Link
                                 to='/media-management'
-                                ref={el => (tabsRef.current['media-management'] = el)}
+                                ref={el =>
+                                    (tabsRef.current['media-management'] = el)
+                                }
                                 className={`px-3 py-2 rounded-md text-sm font-medium relative z-10 ${
                                     activeTab === 'media-management'
                                         ? 'text-white'
@@ -153,23 +123,35 @@ function Navbar({darkMode, setDarkMode}) {
                             </Link>
                         </div>
                     </div>
-                    <div className='hidden lg:block'>
-                        <ToggleSwitch
-                            checked={darkMode}
-                            onChange={() => setDarkMode(!darkMode)}
-                        />
-                    </div>
                     <button
                         className='lg:hidden p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white'
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                         <span className='sr-only'>Open main menu</span>
                         {isMobileMenuOpen ? (
-                            <svg className='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                            <svg
+                                className='h-6 w-6'
+                                fill='none'
+                                viewBox='0 0 24 24'
+                                stroke='currentColor'>
+                                <path
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    strokeWidth={2}
+                                    d='M6 18L18 6M6 6l12 12'
+                                />
                             </svg>
                         ) : (
-                            <svg className='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 6h16M4 12h16M4 18h16' />
+                            <svg
+                                className='h-6 w-6'
+                                fill='none'
+                                viewBox='0 0 24 24'
+                                stroke='currentColor'>
+                                <path
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    strokeWidth={2}
+                                    d='M4 6h16M4 12h16M4 18h16'
+                                />
                             </svg>
                         )}
                     </button>
@@ -223,22 +205,11 @@ function Navbar({darkMode, setDarkMode}) {
                                 Settings
                             </Link>
                         </div>
-                        <div className='px-4 py-3 border-t border-gray-700'>
-                            <ToggleSwitch
-                                checked={darkMode}
-                                onChange={() => setDarkMode(!darkMode)}
-                            />
-                        </div>
                     </div>
                 )}
             </div>
         </nav>
     );
 }
-
-Navbar.propTypes = {
-    darkMode: PropTypes.bool.isRequired,
-    setDarkMode: PropTypes.func.isRequired
-};
 
 export default Navbar;
