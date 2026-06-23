@@ -29,33 +29,22 @@
 		enabledChange: { formatName: string; arrType: string; enabled: boolean };
 	}>();
 
-	function isRowDisabled(format: any): boolean {
-		return arrTypes.every((arrType) => !customFormatEnabled[format.name]?.[arrType]);
-	}
+	$: columns = ((activeArrTypes) =>
+		[
+			{
+				key: 'name',
+				header: 'Custom Format',
+				tdClass: 'sticky left-0 z-[1] bg-white font-medium dark:bg-neutral-900'
+			},
+			...activeArrTypes.map((arrType) => ({
+				key: arrType,
+				header: arrType.charAt(0).toUpperCase() + arrType.slice(1),
+				align: 'center' as const,
+				width: 'w-64'
+			}))
+		] as Column<any>[])(arrTypes);
 
-	$: columns = [
-		{
-			key: 'name',
-			header: 'Custom Format',
-			tdClass: (row: any) => {
-				const disabled = isRowDisabled(row);
-				return `sticky left-0 z-[1] font-medium ${disabled ? 'bg-neutral-100 dark:bg-neutral-800' : 'bg-white dark:bg-neutral-900'}`;
-			}
-		},
-		...arrTypes.map((arrType) => ({
-			key: arrType,
-			header: arrType.charAt(0).toUpperCase() + arrType.slice(1),
-			align: 'center' as const,
-			width: 'w-64'
-		}))
-	] as Column<any>[];
-
-	function rowClass(row: any): string {
-		const disabled = isRowDisabled(row);
-		return disabled
-			? 'bg-neutral-100 opacity-60 dark:bg-neutral-800'
-			: 'transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900';
-	}
+	const rowClass = () => 'transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900';
 
 	function rowAttributes(_: any, i: number): Record<string, string> {
 		return i === 0 && firstRowOnboarding ? { 'data-onboarding': firstRowOnboarding } : {};
