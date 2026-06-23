@@ -1,6 +1,7 @@
 <script lang="ts">
 	import MediaSettingsForm from '../components/MediaSettingsForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -17,6 +18,8 @@
 		}
 	});
 </script>
+
+<PageMeta title={`${data.currentDatabase.name} · Media Settings · New`} />
 
 {#if selectedArrType}
 	<MediaSettingsForm

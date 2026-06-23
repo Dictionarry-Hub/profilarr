@@ -6,6 +6,7 @@
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
@@ -72,9 +73,7 @@
 	}));
 </script>
 
-<svelte:head>
-	<title>Delay Profiles - {data.currentDatabase?.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.currentDatabase.name} · Delay Profiles`} />
 
 <div class="space-y-6 px-4 pb-8 md:px-8">
 	<!-- Tabs -->

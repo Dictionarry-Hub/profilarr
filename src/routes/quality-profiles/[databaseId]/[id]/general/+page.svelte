@@ -1,5 +1,6 @@
 <script lang="ts">
 	import GeneralForm from '../../components/GeneralForm.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -13,9 +14,7 @@
 	};
 </script>
 
-<svelte:head>
-	<title>{data.profile.name} - General - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.profile.name} · General`} />
 
 <div class="mt-6">
 	<GeneralForm

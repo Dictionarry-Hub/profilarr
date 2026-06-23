@@ -9,6 +9,7 @@
 		Archive,
 		Info
 	} from '@lucide/svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 
 	const settingsItems = [
 		{
@@ -69,6 +70,8 @@
 		}
 	];
 </script>
+
+<PageMeta title="Settings" />
 
 <div class="px-4 pt-4 pb-8 md:px-8">
 	<div class="mb-8">

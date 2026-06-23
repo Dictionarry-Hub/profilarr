@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import TestForm from '../components/TestForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -12,9 +13,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>New Test - {data.format.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.format.name} · Testing · New`} />
 
 <TestForm
 	mode="create"

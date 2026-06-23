@@ -3,6 +3,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import Score from '$ui/arr/Score.svelte';
 	import InlineLink from '$ui/link/InlineLink.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { page } from '$app/stores';
 	import type { PageData } from './$types';
 
@@ -25,9 +26,7 @@
 	];
 </script>
 
-<svelte:head>
-	<title>{data.format.name} - General - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.format.name} · General`} />
 
 <GeneralForm
 	mode="edit"

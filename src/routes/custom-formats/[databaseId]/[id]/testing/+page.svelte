@@ -8,6 +8,7 @@
 	import Modal from '$ui/modal/Modal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { PageData } from './$types';
 	import type { TestWithResult } from './+page.server';
@@ -99,9 +100,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{data.format.name} - Testing - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.format.name} · Testing`} />
 
 <div class="space-y-6">
 	<StickyCard position="top">

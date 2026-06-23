@@ -7,6 +7,7 @@
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import QualityProfiles from './components/QualityProfiles.svelte';
 	import DelayProfiles from './components/DelayProfiles.svelte';
 	import MediaManagement from './components/MediaManagement.svelte';
@@ -129,9 +130,7 @@
 	})();
 </script>
 
-<svelte:head>
-	<title>{data.instance.name} - Sync - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.instance.name} · Sync`} />
 
 {#key data.instance.id}
 	<StickyCard position="top">

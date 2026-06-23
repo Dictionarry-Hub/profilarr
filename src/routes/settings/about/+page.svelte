@@ -7,6 +7,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
 	import DateTime from '$ui/datetime/DateTime.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 
 	export let data: PageData;
 
@@ -114,6 +115,8 @@
 		{ key: 'prerelease', header: 'Type', width: 'w-24' }
 	];
 </script>
+
+<PageMeta title="About" />
 
 <div class="p-4 md:p-8">
 	<h1 class="mb-6 text-3xl font-bold text-neutral-900 dark:text-neutral-50">About Profilarr</h1>

@@ -6,6 +6,7 @@
 	import type { Column } from '$lib/client/ui/table/types';
 	import ExpandableTable from '$lib/client/ui/table/ExpandableTable.svelte';
 	import Badge from '$lib/client/ui/badge/Badge.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import JobHistory from './components/JobHistory.svelte';
 	import { CheckCircle, XCircle, AlertCircle, MinusCircle } from '@lucide/svelte';
 
@@ -49,6 +50,8 @@
 
 	// Get relative time (e.g., "in 5 minutes", "2 hours ago")
 </script>
+
+<PageMeta title="Jobs" />
 
 <div class="p-4 md:p-8">
 	<!-- Header -->

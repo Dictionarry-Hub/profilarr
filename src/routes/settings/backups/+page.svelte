@@ -14,6 +14,7 @@
 	import type { PageData } from './$types';
 	import Button from '$ui/button/Button.svelte';
 	import Table from '$ui/table/Table.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
 	import ActionsBar from '$lib/client/ui/actions/ActionsBar.svelte';
 	import ActionButton from '$lib/client/ui/actions/ActionButton.svelte';
@@ -192,6 +193,8 @@
 		restoreFormRef = null;
 	}
 </script>
+
+<PageMeta title="Backups" />
 
 <div class="p-4 md:p-8">
 	<!-- Header -->

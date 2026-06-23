@@ -5,6 +5,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import InlineLink from '$ui/link/InlineLink.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -30,9 +31,7 @@
 	];
 </script>
 
-<svelte:head>
-	<title>{data.regularExpression.name} - Regular Expressions - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.regularExpression.name} · General`} />
 
 <div class="p-4 md:p-8">
 	<RegularExpressionForm

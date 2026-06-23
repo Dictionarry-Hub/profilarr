@@ -4,12 +4,18 @@
 	import { AlertTriangle } from '@lucide/svelte';
 	import Card from '$ui/card/Card.svelte';
 	import AnnouncementForm from '../components/AnnouncementForm.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
 
 	$: databaseId = parseInt($page.params.id ?? '0', 10);
+	$: pageTitle = data.announcement.title
+		? `${data.announcement.title} · Edit`
+		: `${data.database.name} · Announcement · Edit`;
 </script>
+
+<PageMeta title={pageTitle} />
 
 <div class="space-y-4">
 	{#if data.parseError}

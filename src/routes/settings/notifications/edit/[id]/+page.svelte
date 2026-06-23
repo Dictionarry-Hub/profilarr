@@ -1,13 +1,12 @@
 <script lang="ts">
 	import NotificationServiceForm from '../../components/NotificationServiceForm.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 </script>
 
-<svelte:head>
-	<title>{data.service.name} - Notifications - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.service.name} · Edit`} />
 
 <div class="p-4 md:p-8">
 	<NotificationServiceForm

@@ -28,6 +28,7 @@
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import CustomGroupManager from '$ui/dropdown/CustomGroupManager.svelte';
 	import ScoringTable from './components/ScoringTable.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import { onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
@@ -615,9 +616,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Scoring - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.profileName} · Scoring`} />
 
 {#if scoring}
 	<StickyCard position="top">

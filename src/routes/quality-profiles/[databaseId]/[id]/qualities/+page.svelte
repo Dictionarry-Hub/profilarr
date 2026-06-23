@@ -20,6 +20,7 @@
 	import GroupModal from './components/GroupModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
@@ -592,9 +593,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Qualities - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.profileName} · Qualities`} />
 
 {#key `${$page.url.pathname}:${data.canEditGroupMembers ? 1 : 0}`}
 	<StickyCard position="top">

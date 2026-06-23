@@ -19,6 +19,7 @@
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { getPersistentSearchStore } from '$stores/search';
 	import { alertStore } from '$alerts/store';
 
@@ -201,6 +202,8 @@
 		}
 	}
 </script>
+
+<PageMeta title="Announcements" />
 
 <div class="p-4 md:p-8">
 	<div class="mb-6">

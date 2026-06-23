@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import InstanceForm from '../components/InstanceForm.svelte';
 	import type { ActionData } from './$types';
 
@@ -9,9 +10,7 @@
 	$: typeFromUrl = $page.url.searchParams.get('type') || '';
 </script>
 
-<svelte:head>
-	<title>Add Instance - Profilarr</title>
-</svelte:head>
+<PageMeta title="Arr Instance · New" />
 
 <div class="p-8">
 	<InstanceForm mode="create" {form} initialType={typeFromUrl} />

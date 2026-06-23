@@ -26,6 +26,7 @@
 	import CodeBlock from '$ui/code/CodeBlock.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import Table from '$ui/table/Table.svelte';
@@ -147,9 +148,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Components | Dev</title>
-</svelte:head>
+<PageMeta title="Dev · UI Preview" />
 
 <div class="space-y-6 px-4 pt-8 pb-8 md:px-8 md:pt-12">
 	<h1 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Component Library</h1>

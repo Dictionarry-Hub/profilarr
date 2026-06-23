@@ -6,6 +6,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Table from '$ui/table/Table.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
 
 	const radarrFields = getFilterFields('radarr');
@@ -117,9 +118,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>How Upgrades Work - Profilarr</title>
-</svelte:head>
+<PageMeta title="Upgrades Help" />
 
 <div class="p-8">
 	<StickyCard position="top">

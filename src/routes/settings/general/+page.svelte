@@ -32,6 +32,7 @@
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	type DateFormat = 'auto' | 'mdy' | 'dmy' | 'ymd';
@@ -245,6 +246,8 @@
 		}
 	}
 </script>
+
+<PageMeta title="General" />
 
 <form
 	id="general-settings-form"

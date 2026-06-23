@@ -15,6 +15,7 @@
 	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import { formatDateTime } from '$shared/utils/dates.ts';
@@ -230,9 +231,7 @@
 	$: currentPage = logs?.page ?? 1;
 </script>
 
-<svelte:head>
-	<title>{data.instance.name} - Logs - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.instance.name} · Logs`} />
 
 <div class="mt-6">
 	<!-- Actions Bar -->

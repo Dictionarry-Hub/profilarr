@@ -1,10 +1,13 @@
 <script lang="ts">
 	import MediaSettingsForm from '../../components/MediaSettingsForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 </script>
+
+<PageMeta title={`${data.mediaSettingsConfig.name} · Radarr Media Settings`} />
 
 <MediaSettingsForm
 	mode="edit"

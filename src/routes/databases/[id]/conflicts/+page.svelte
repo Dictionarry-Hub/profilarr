@@ -10,6 +10,7 @@
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import ConflictField from './ConflictField.svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
@@ -266,9 +267,7 @@
 	})();
 </script>
 
-<svelte:head>
-	<title>Conflicts - {data.database.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.database.name} · Conflicts`} />
 
 <ActionsBar className="justify-end mt-6">
 	<SearchAction {searchStore} placeholder="Search conflicts..." />
