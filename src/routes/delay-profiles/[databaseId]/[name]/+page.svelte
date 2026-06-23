@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import DelayProfileForm from '../components/DelayProfileForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -22,9 +23,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{data.delayProfile.name} - Delay Profiles - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.delayProfile.name} · General`} />
 
 <div class="p-4 md:p-8">
 	<DelayProfileForm

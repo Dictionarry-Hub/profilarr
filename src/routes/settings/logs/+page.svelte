@@ -8,6 +8,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column, SortDirection, SortState } from '$ui/table/types';
 	import LogsActionsBar from './components/LogsActionsBar.svelte';
 	import LogLevelLabelCell from './components/LogLevelLabelCell.svelte';
@@ -277,6 +278,8 @@
 		currentPage = 1;
 	}
 </script>
+
+<PageMeta title="Logs" />
 
 <div class="p-4 md:p-8">
 	<!-- Header -->

@@ -9,6 +9,7 @@
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
@@ -40,9 +41,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Arr Instances - Profilarr</title>
-</svelte:head>
+<PageMeta title="Arr" />
 
 {#if data.instances.length === 0}
 	<EmptyState

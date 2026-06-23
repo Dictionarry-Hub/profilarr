@@ -13,6 +13,7 @@
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
 	import { getDisplayUrl } from '$lib/client/utils/arrDisplayUrl.ts';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 
 	import LibraryActionBar from './components/LibraryActionBar.svelte';
 	import RadarrTableView from './components/RadarrTableView.svelte';
@@ -638,9 +639,7 @@
 	$: visibleSeriesCards = sortedSeries.slice(0, $cardVisibleCount);
 </script>
 
-<svelte:head>
-	<title>{data.instance.name} - Library - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.instance.name} · Library`} />
 
 <div class="mt-6 space-y-6">
 	{#if libraryError && !loading}

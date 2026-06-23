@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import GeneralForm from '../components/GeneralForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -19,9 +20,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>New Custom Format - {data.currentDatabase?.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.currentDatabase.name} · Custom Format · New`} />
 
 <div class="p-4 md:p-8">
 	<GeneralForm

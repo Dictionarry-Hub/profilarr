@@ -4,6 +4,7 @@
 	import { UserPlus, Shield, Wifi, KeyRound, ShieldOff } from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$alerts/store';
 	import logo from '$assets/logo-512.png';
 
@@ -19,9 +20,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Setup - Profilarr</title>
-</svelte:head>
+<PageMeta title="Setup" />
 
 <div class="flex min-h-screen items-center justify-center bg-neutral-100 p-4 dark:bg-neutral-900">
 	<div class="flex w-full max-w-3xl flex-col gap-8 md:flex-row md:gap-12">

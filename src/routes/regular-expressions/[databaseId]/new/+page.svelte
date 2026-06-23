@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import RegularExpressionForm from '../components/RegularExpressionForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -20,9 +21,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>New Regular Expression - {data.currentDatabase?.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.currentDatabase.name} · Regular Expression · New`} />
 
 <div class="p-4 md:p-8">
 	<RegularExpressionForm

@@ -2,6 +2,7 @@
 	import type { ActionData, PageData } from './$types';
 	import { page } from '$app/stores';
 	import AnnouncementForm from '../components/AnnouncementForm.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -21,5 +22,7 @@
 	// returns nothing client-relevant).
 	$: void data;
 </script>
+
+<PageMeta title={`${data.database.name} · Announcement · New`} />
 
 <AnnouncementForm mode="create" {databaseId} {initial} {form} />

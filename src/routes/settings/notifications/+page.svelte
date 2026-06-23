@@ -7,6 +7,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import type { Column } from '$ui/table/types';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { siDiscord, siNtfy, siTelegram } from 'simple-icons';
 	import Button from '$ui/button/Button.svelte';
 	import type { PageData } from './$types';
@@ -88,6 +89,8 @@
 		}
 	}
 </script>
+
+<PageMeta title="Notifications" />
 
 <div class="p-4 md:p-8">
 	<!-- Header -->

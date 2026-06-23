@@ -2,6 +2,7 @@
 	import { RotateCcw } from '@lucide/svelte';
 	import { alertStore } from '$alerts/store';
 	import { onMount } from 'svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -22,9 +23,7 @@
 	$: embedUrl = data.type === 'youtube' ? getYouTubeEmbedUrl(data.url) : '';
 </script>
 
-<svelte:head>
-	<title>Bruh - Profilarr</title>
-</svelte:head>
+<PageMeta title="Bruh" />
 
 <div class="flex min-h-screen items-center bg-white p-8 dark:bg-neutral-950">
 	<div class="mx-auto w-full max-w-4xl space-y-6">

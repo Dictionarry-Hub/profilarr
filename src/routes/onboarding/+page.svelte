@@ -7,6 +7,7 @@
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 	import { alertStore } from '$alerts/store';
 
@@ -49,9 +50,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Onboarding - Profilarr</title>
-</svelte:head>
+<PageMeta title="Onboarding" />
 
 <div class="p-4 md:p-8">
 	<!-- Header -->

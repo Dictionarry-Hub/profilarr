@@ -1,12 +1,11 @@
 <script lang="ts">
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 </script>
 
-<svelte:head>
-	<title>Tweaks - {data.database.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.database.name} · Tweaks`} />
 
 <div class="mt-6">
 	<div

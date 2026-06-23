@@ -21,6 +21,7 @@
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Admonition from '$ui/admonition/Admonition.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -142,9 +143,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{data.instance.name} - Upgrades - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.instance.name} · Upgrades`} />
 
 {#key data.instance.id}
 	<StickyCard position="top">

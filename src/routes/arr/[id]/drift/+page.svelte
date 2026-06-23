@@ -16,6 +16,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
 	import { Loader2, Play, Save } from '@lucide/svelte';
 	import type { DriftDisplayEntity, DriftDisplayTone } from '$shared/drift.ts';
@@ -121,9 +122,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{data.instance.name} - Drift - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.instance.name} · Drift`} />
 
 {#key data.instance.id}
 	<StickyCard position="top">

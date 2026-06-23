@@ -10,6 +10,7 @@
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$alerts/store';
 	import { sortConditions } from '$shared/pcd/conditions';
 	import { current, isDirty, initEdit, update } from '$lib/client/stores/dirty';
@@ -229,9 +230,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{data.format.name} - Conditions - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.format.name} · Conditions`} />
 
 <form
 	bind:this={mainFormElement}

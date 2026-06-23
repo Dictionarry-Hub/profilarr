@@ -12,6 +12,7 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
 	import { getPersistentSearchStore } from '$stores/search';
@@ -173,9 +174,7 @@
 	}));
 </script>
 
-<svelte:head>
-	<title>Regular Expressions - {data.currentDatabase?.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.currentDatabase.name} · Regular Expressions`} />
 
 <div class="space-y-6 px-4 pb-8 md:px-8">
 	<!-- Tabs -->

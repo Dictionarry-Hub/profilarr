@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { Database, Plus } from '@lucide/svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 </script>
 
-<svelte:head>
-	<title>Media Management - Profilarr</title>
-</svelte:head>
+<PageMeta title="Media Management" />
 
 {#if data.databases.length === 0}
 	<EmptyState

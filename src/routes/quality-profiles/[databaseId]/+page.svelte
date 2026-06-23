@@ -11,6 +11,7 @@
 	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
 	import { getPersistentSearchStore } from '$stores/search';
@@ -171,9 +172,7 @@
 	}));
 </script>
 
-<svelte:head>
-	<title>Quality Profiles - {data.currentDatabase?.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.currentDatabase.name} · Quality Profiles`} />
 
 <div class="space-y-6 px-4 pb-8 md:px-8">
 	<!-- Tabs -->

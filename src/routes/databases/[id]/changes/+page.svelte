@@ -9,6 +9,7 @@
 	import CodeBlock from '$ui/code/CodeBlock.svelte';
 	import InlineCode from '$ui/code/InlineCode.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import {
 		Check,
 		Send,
@@ -675,9 +676,7 @@
 	];
 </script>
 
-<svelte:head>
-	<title>Changes - {data.database.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.database.name} · Changes`} />
 
 {#if allQuiet}
 	<div class="mt-6 flex h-[calc(100vh-12rem)] flex-col items-center justify-center text-center">

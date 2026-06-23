@@ -7,6 +7,7 @@
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
@@ -63,6 +64,8 @@
 	// Update items when data changes
 	$: setItems(data.qualityDefinitionsConfigs);
 </script>
+
+<PageMeta title={`${data.currentDatabase.name} · Quality Definitions`} />
 
 <!-- Actions Bar -->
 <ActionsBar>

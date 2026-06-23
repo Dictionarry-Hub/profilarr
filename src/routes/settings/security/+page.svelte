@@ -21,6 +21,7 @@
 	import FormInput from '$ui/form/FormInput.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import Table from '$ui/table/Table.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$alerts/store';
 	import type { Column } from '$ui/table/types';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
@@ -149,6 +150,8 @@
 		}
 	];
 </script>
+
+<PageMeta title="Security" />
 
 <div class="p-4 md:p-8">
 	<div class="mb-8">

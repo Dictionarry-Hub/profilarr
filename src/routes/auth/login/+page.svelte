@@ -4,6 +4,7 @@
 	import { LogIn, KeyRound } from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$alerts/store';
 	import logo from '$assets/logo-512.png';
 
@@ -20,9 +21,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Login - Profilarr</title>
-</svelte:head>
+<PageMeta title="Login" />
 
 <div class="flex min-h-screen items-center justify-center bg-neutral-100 p-4 dark:bg-neutral-900">
 	<div class="w-full max-w-sm">

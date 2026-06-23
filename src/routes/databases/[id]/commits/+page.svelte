@@ -2,6 +2,7 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
 	import { afterNavigate } from '$app/navigation';
 	import { ExternalLink, FileText } from '@lucide/svelte';
@@ -127,9 +128,7 @@
 	];
 </script>
 
-<svelte:head>
-	<title>Updates - {data.database.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.database.name} · Updates`} />
 
 <div class="mt-6 space-y-6">
 	<ExpandableTable

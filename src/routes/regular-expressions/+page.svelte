@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { Database, Plus } from '@lucide/svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 </script>
 
-<svelte:head>
-	<title>Regular Expressions - Profilarr</title>
-</svelte:head>
+<PageMeta title="Regular Expressions" />
 
 {#if data.databases.length === 0}
 	<EmptyState

@@ -27,6 +27,7 @@
 	import ReleaseModal from './components/ReleaseModal.svelte';
 	import ImportReleasesModal from './components/ImportReleasesModal.svelte';
 	import EntityTable from './components/EntityTable.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 	import { alertStore } from '$lib/client/alerts/store';
 	import type { PageData } from './$types';
@@ -361,9 +362,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Entity Testing - {data.currentDatabase?.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.currentDatabase.name} · Quality Profile Tests`} />
 
 <div class="space-y-6 px-4 pb-8 md:px-8">
 	<!-- Database Tabs -->

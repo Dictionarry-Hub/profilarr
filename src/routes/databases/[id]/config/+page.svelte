@@ -11,6 +11,7 @@
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$lib/client/alerts/store';
 	import {
 		isDirty,
@@ -77,9 +78,7 @@
 		: [0, 0, 0];
 </script>
 
-<svelte:head>
-	<title>Config - {data.database.name} - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.database.name} · Config`} />
 
 <form
 	method="POST"

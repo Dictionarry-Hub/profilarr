@@ -1,13 +1,12 @@
 <script lang="ts">
 	import InstanceForm from '../../components/InstanceForm.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	export let form: ActionData;
 	export let data: PageData;
 </script>
 
-<svelte:head>
-	<title>{data.instance.name} - Settings - Profilarr</title>
-</svelte:head>
+<PageMeta title={`${data.instance.name} · Settings`} />
 
 <InstanceForm mode="edit" {form} instance={data.instance} cleanupSettings={data.cleanupSettings} />

@@ -11,6 +11,7 @@
 	import EmptyState from '$ui/state/EmptyState.svelte';
 	import DateTime from '$ui/datetime/DateTime.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
+	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import WithdrawAnnouncementModal from './components/WithdrawAnnouncementModal.svelte';
 	import type { Column } from '$ui/table/types';
 
@@ -40,6 +41,8 @@
 
 	let withdrawTarget: Row | null = null;
 </script>
+
+<PageMeta title={`${data.database.name} · Announcements`} />
 
 <div class="space-y-5">
 	{#if data.announcements.length > 0}
