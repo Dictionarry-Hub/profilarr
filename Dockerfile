@@ -80,7 +80,7 @@ RUN DENO_TARGET=$(case "${TARGETARCH}" in \
 # -----------------------------------------------------------------------------
 # Stage 2: Runtime
 # -----------------------------------------------------------------------------
-FROM alpine:3.24
+FROM denoland/deno:alpine-2.7.12
 
 # Labels for container metadata
 LABEL org.opencontainers.image.title="Profilarr"
@@ -95,8 +95,6 @@ LABEL org.opencontainers.image.licenses="AGPL-3.0"
 # - su-exec: Drop privileges to non-root user (Alpine equivalent of gosu)
 # - ca-certificates: HTTPS connections
 # - sqlite-libs: SQLite shared library for FFI
-# - gcompat: glibc compatibility shim for the Deno binary
-# - libgcc: GCC runtime needed by the compiled binary
 # - bash: Entrypoint uses bash
 # - shadow: Provides usermod/groupmod for PUID/PGID runtime changes
 RUN apk add --no-cache \
@@ -106,19 +104,9 @@ RUN apk add --no-cache \
     su-exec \
     ca-certificates \
     sqlite-libs \
-    gcompat \
-    libgcc \
     bash \
     shadow \
     && apk upgrade --no-cache
-
-# Build a stub for __res_init, a glibc DNS resolver symbol the Deno binary
-# references but never calls. Alpine's musl doesn't provide it, so we compile
-# a no-op into a shared library and preload it.
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev \
-    && echo 'int __res_init(void) { return 0; }' \
-       | gcc -shared -o /usr/lib/libres_stub.so -x c - \
-    && apk del .build-deps
 
 # Create application directory
 WORKDIR /app
@@ -136,7 +124,9 @@ RUN chmod +x /entrypoint.sh
 # - Root/PUID mode: entrypoint may reassign UID/GID at runtime via usermod.
 # - Non-root mode: set runAsUser: 1000 (K8s) or --user 1000 (Docker) to skip
 #   all privilege operations and run directly as this user.
-RUN addgroup -g 1000 profilarr && \
+RUN deluser deno 2>/dev/null || true && \
+    delgroup deno 2>/dev/null || true && \
+    addgroup -g 1000 profilarr && \
     adduser -u 1000 -G profilarr -D -h /config -s /sbin/nologin profilarr
 
 # Create config directory
@@ -147,8 +137,9 @@ ENV PORT=6868
 ENV HOST=0.0.0.0
 ENV APP_BASE_PATH=/config
 ENV TZ=UTC
+ENV DENO_DIR=/config/.cache/deno
 ENV DENO_SQLITE_PATH=/usr/lib/libsqlite3.so.0
-ENV LD_PRELOAD=/usr/lib/libres_stub.so
+ENV LD_LIBRARY_PATH=/usr/local/lib/glibc
 
 # Expose port
 EXPOSE 6868
