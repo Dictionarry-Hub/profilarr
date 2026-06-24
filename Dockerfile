@@ -60,6 +60,8 @@ EOF
 
 ENV APP_BASE_PATH=/build/dist/build
 RUN deno run -A npm:vite build
+RUN DENO_DIR=/tmp/profilarr-deno-cache \
+    deno eval "import { hash } from '@felix/bcrypt'; await hash('profilarr')"
 RUN DENO_TARGET=$(case "${TARGETARCH}" in \
         arm64) echo "aarch64-unknown-linux-gnu" ;; \
         *)     echo "x86_64-unknown-linux-gnu" ;; \
@@ -115,6 +117,7 @@ WORKDIR /app
 COPY --from=builder /build/dist/build/profilarr /app/profilarr
 COPY --from=builder /build/dist/build/server.js /app/server.js
 COPY --from=builder /build/dist/build/static /app/static
+COPY --from=builder /tmp/profilarr-deno-cache/plug /app/deno-cache/plug
 
 # Copy entrypoint script
 COPY scripts/entrypoint.sh /entrypoint.sh
@@ -137,7 +140,7 @@ ENV PORT=6868
 ENV HOST=0.0.0.0
 ENV APP_BASE_PATH=/config
 ENV TZ=UTC
-ENV DENO_DIR=/config/.cache/deno
+ENV DENO_DIR=/app/deno-cache
 ENV DENO_SQLITE_PATH=/usr/lib/libsqlite3.so.0
 ENV LD_LIBRARY_PATH=/usr/local/lib/glibc
 
