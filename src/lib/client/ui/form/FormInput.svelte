@@ -142,8 +142,7 @@
 				onblur={handleBlur}
 				class="block w-full resize-none border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:border-neutral-300 focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {hasSuffix
 					? 'pr-10'
-					: ''}"
-			></textarea>
+					: ''}"></textarea>
 			{#if hasSuffix}
 				<div class="absolute top-3 right-3">
 					<slot name="suffix" />
@@ -208,8 +207,7 @@
 				class="block w-full resize-none overflow-hidden border border-neutral-300 text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none dark:border-neutral-700/60 dark:text-neutral-50 dark:placeholder-neutral-500 {sizeClasses} {fontClass} {pickerClass} {stateClass} {inputClass} {hasSuffix
 					? 'pr-10'
 					: ''}"
-				use:autoResize={value}
-			></textarea>
+				use:autoResize={value}></textarea>
 			{#if hasSuffix}
 				<div class="absolute top-3 right-3">
 					<slot name="suffix" />
