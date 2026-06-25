@@ -37,7 +37,11 @@ function matchCount(source: string, pattern: RegExp): number {
 	return Array.from(source.matchAll(pattern)).length;
 }
 
-function requireTool(versions: ToolVersions, tool: keyof ToolVersions, violations: string[]): string {
+function requireTool(
+	versions: ToolVersions,
+	tool: keyof ToolVersions,
+	violations: string[]
+): string {
 	const version = versions[tool];
 	if (!version) {
 		violations.push(`${TOOL_VERSIONS_PATH} is missing ${tool}`);
