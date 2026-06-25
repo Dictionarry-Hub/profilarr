@@ -9,7 +9,8 @@
 # -----------------------------------------------------------------------------
 # Stage 1: Build
 # -----------------------------------------------------------------------------
-FROM denoland/deno:2.7.12 AS builder
+ARG DENO_VERSION=2.8.3
+FROM denoland/deno:${DENO_VERSION} AS builder
 
 WORKDIR /build
 
@@ -20,7 +21,7 @@ COPY deno.jsonc deno.lock* ./
 COPY . .
 
 # Install dependencies (needs full source to resolve npm: imports)
-RUN deno install --node-modules-dir
+RUN deno ci
 
 # Build the application
 # 1. Vite builds SvelteKit to dist/build/
@@ -82,7 +83,7 @@ RUN DENO_TARGET=$(case "${TARGETARCH}" in \
 # -----------------------------------------------------------------------------
 # Stage 2: Runtime
 # -----------------------------------------------------------------------------
-FROM denoland/deno:alpine-2.7.12
+FROM denoland/deno:alpine-${DENO_VERSION}
 
 # Labels for container metadata
 LABEL org.opencontainers.image.title="Profilarr"

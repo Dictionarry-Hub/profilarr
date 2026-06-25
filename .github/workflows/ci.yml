@@ -64,7 +64,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
 
       - name: Cache deps
         uses: actions/cache@v5
@@ -75,7 +75,7 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - run: deno install --node-modules-dir
+      - run: deno ci
 
       - name: Build
         run: deno task build
@@ -102,7 +102,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
 
       - name: Cache deps
         uses: actions/cache@v5
@@ -113,7 +113,7 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - run: deno install --node-modules-dir
+      - run: deno ci
 
       - name: Lint
         run: deno task lint
@@ -128,11 +128,11 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version-file: .tool-versions
 
       - name: Cache deps
         uses: actions/cache@v5
@@ -143,7 +143,7 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - run: deno install --node-modules-dir
+      - run: deno ci
 
       - name: Sync SvelteKit types
         run: deno run -A npm:@sveltejs/kit sync
@@ -161,7 +161,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
 
       - name: Cache deps
         uses: actions/cache@v5
@@ -172,7 +172,7 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - run: deno install --node-modules-dir
+      - run: deno ci
 
       - name: Run unit tests
         run: deno task test
@@ -239,11 +239,11 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version-file: .tool-versions
 
       - name: Cache deps
         uses: actions/cache@v5
@@ -254,7 +254,7 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - run: deno install --node-modules-dir
+      - run: deno ci
 
       # Dedicated cache for the FFI plug binaries (sqlite, bcrypt). The main
       # `Cache deps` covers ~/.cache/deno but is shared across jobs and gets
@@ -320,11 +320,11 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version-file: .tool-versions
 
       - name: Cache deps
         uses: actions/cache@v5
@@ -335,7 +335,7 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - run: deno install --node-modules-dir
+      - run: deno ci
 
       - name: Cache Playwright browsers
         id: playwright-cache
