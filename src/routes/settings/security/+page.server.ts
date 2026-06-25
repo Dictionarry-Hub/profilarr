@@ -11,11 +11,18 @@ export const load: ServerLoad = async ({ cookies }) => {
 	const user = usersQueries.getByUsername('admin') ?? usersQueries.getById(1);
 
 	if (!user) {
-		return { sessions: [], hasApiKey: false, currentSessionId: null };
+		return {
+			sessions: [],
+			hasApiKey: false,
+			canRegenerateApiKey: true,
+			currentSessionId: null,
+			localBypassEnabled: false
+		};
 	}
 
 	const sessions = sessionsQueries.getByUserId(user.id);
 	const hasApiKey = authSettingsQueries.hasApiKey();
+	const canRegenerateApiKey = authSettingsQueries.canRegenerateApiKey();
 	const localBypassEnabled = authSettingsQueries.isLocalBypassEnabled();
 
 	return {
@@ -31,6 +38,7 @@ export const load: ServerLoad = async ({ cookies }) => {
 			isCurrent: s.id === currentSessionId
 		})),
 		hasApiKey,
+		canRegenerateApiKey,
 		currentSessionId,
 		localBypassEnabled
 	};
@@ -90,6 +98,12 @@ export const actions: Actions = {
 	},
 
 	regenerateApiKey: async () => {
+		if (!authSettingsQueries.canRegenerateApiKey()) {
+			return fail(400, {
+				apiKeyError: 'API key is managed by PROFILARR_API_KEY and cannot be regenerated'
+			});
+		}
+
 		const newKey = await authSettingsQueries.regenerateApiKey();
 
 		await logger.info('API key regenerated', {

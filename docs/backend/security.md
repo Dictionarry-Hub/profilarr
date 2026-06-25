@@ -172,6 +172,9 @@ session checks in the request flow.
 - `regenerateApiKey()` returns the plaintext key once for the user to copy; only
   the hash is persisted
 - Validation uses async bcrypt `verify()` against the stored hash
+- `PROFILARR_API_KEY` can declaratively set the active API key from the
+  environment. When set, it takes precedence over the database hash and
+  regeneration is disabled in Settings > Security.
 - Invalid keys are logged with a masked value (`****` + last 4 chars)
 
 ## Request Flow

@@ -12,6 +12,7 @@ class Config {
 	public readonly host: string;
 	public readonly origin: string;
 	public readonly authMode: AuthMode;
+	public readonly profilarrApiKey: string | null;
 	public readonly oidc: {
 		discoveryUrl: string | null;
 		clientId: string | null;
@@ -56,6 +57,9 @@ class Config {
 		// Note: AUTH=local is no longer an env var — use the local bypass toggle in Settings > Security
 		const auth = (Deno.env.get('AUTH') || 'on').toLowerCase();
 		this.authMode = ['on', 'off', 'oidc'].includes(auth) ? (auth as AuthMode) : 'on';
+
+		// Optional declarative internal API key for GitOps/container deployments.
+		this.profilarrApiKey = Deno.env.get('PROFILARR_API_KEY') || null;
 
 		// OIDC configuration (only used when AUTH=oidc)
 		this.oidc = {

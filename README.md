@@ -133,6 +133,7 @@ services:
 | `ORIGIN`                 | -                                                                 | Public URL when running behind a reverse proxy (e.g. `https://profilarr.example.com`) |
 | `PARSER_HOST`            | `localhost`                                                       | Parser service host                                                                   |
 | `PARSER_PORT`            | `5000`                                                            | Parser service port                                                                   |
+| `PROFILARR_API_KEY`      | -                                                                 | Declaratively set the internal API key for `X-Api-Key` API authentication             |
 | `PROFILARR_BULLETIN_URL` | `https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main` | Override for the announcement feed + release manifest base URL                        |
 
 > [!NOTE]

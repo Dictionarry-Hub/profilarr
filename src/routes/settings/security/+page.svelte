@@ -51,6 +51,9 @@
 	$: if (form?.apiKeyRegenerated) {
 		alertStore.add('success', 'API key regenerated');
 	}
+	$: if (form?.apiKeyError) {
+		alertStore.add('error', form.apiKeyError);
+	}
 	$: if (form?.sessionRevoked) {
 		alertStore.add('success', 'Session revoked');
 	}
@@ -65,6 +68,10 @@
 	}
 
 	$: apiKey = form?.apiKey ?? null;
+	$: apiKeyRegenerationDisabled = regeneratingKey || !data.canRegenerateApiKey;
+	$: apiKeyRegenerationTooltip = data.canRegenerateApiKey
+		? ''
+		: 'API key is managed by PROFILARR_API_KEY';
 
 	async function copyApiKey() {
 		if (apiKey) {
@@ -296,7 +303,8 @@
 								size="sm"
 								icon={RefreshCw}
 								text={regeneratingKey ? 'Regenerating...' : 'Regenerate'}
-								disabled={regeneratingKey}
+								disabled={apiKeyRegenerationDisabled}
+								tooltip={apiKeyRegenerationTooltip}
 							/>
 						</form>
 					</div>
@@ -304,8 +312,12 @@
 					<!-- Key exists but can't be displayed -->
 					<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 						<p class="text-sm text-neutral-500 dark:text-neutral-400">
-							Your API key is hashed and cannot be displayed. Regenerating will replace the current
-							key.
+							{#if data.canRegenerateApiKey}
+								Your API key is hashed and cannot be displayed. Regenerating will replace the
+								current key.
+							{:else}
+								Your API key is managed by the PROFILARR_API_KEY environment variable.
+							{/if}
 						</p>
 						<form
 							method="POST"
@@ -325,7 +337,8 @@
 								icon={RefreshCw}
 								iconColor="text-emerald-500"
 								text={regeneratingKey ? 'Regenerating...' : 'Regenerate'}
-								disabled={regeneratingKey}
+								disabled={apiKeyRegenerationDisabled}
+								tooltip={apiKeyRegenerationTooltip}
 							/>
 						</form>
 					</div>

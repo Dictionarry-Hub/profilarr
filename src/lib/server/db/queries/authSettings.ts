@@ -1,6 +1,7 @@
 import { db } from '../db.ts';
 import { generateApiKey } from '$auth/apiKey.ts';
 import { hash, verify } from '@felix/bcrypt';
+import { config } from '$config';
 
 /**
  * Types for auth_settings table
@@ -17,6 +18,16 @@ export interface AuthSettings {
 export interface UpdateAuthSettingsInput {
 	sessionDurationHours?: number;
 	apiKey?: string | null;
+}
+
+export enum ApiKeySource {
+	Environment = 'environment',
+	Generated = 'generated'
+}
+
+export interface ApiKey {
+	source: ApiKeySource;
+	key: string | null;
 }
 
 /**
@@ -46,7 +57,25 @@ export const authSettingsQueries = {
 	 * Check whether an API key is configured
 	 */
 	hasApiKey(): boolean {
-		return this.get().api_key !== null;
+		return config.profilarrApiKey !== null || this.get().api_key !== null;
+	},
+
+	/**
+	 * Check whether users can regenerate the API key from the UI
+	 */
+	canRegenerateApiKey(): boolean {
+		return config.profilarrApiKey === null;
+	},
+
+	/**
+	 * Get the active API key and where it comes from.
+	 */
+	getApiKey(): ApiKey {
+		if (config.profilarrApiKey !== null) {
+			return { source: ApiKeySource.Environment, key: config.profilarrApiKey };
+		}
+
+		return { source: ApiKeySource.Generated, key: this.get().api_key };
 	},
 
 	/**
@@ -102,6 +131,10 @@ export const authSettingsQueries = {
 	 * Regenerate API key — returns the plaintext key (stored as bcrypt hash)
 	 */
 	async regenerateApiKey(): Promise<string> {
+		if (!this.canRegenerateApiKey()) {
+			throw new Error('PROFILARR_API_KEY is set; API key regeneration is disabled');
+		}
+
 		const plaintext = generateApiKey();
 		const hashed = await hash(plaintext);
 		this.update({ apiKey: hashed });
@@ -116,12 +149,17 @@ export const authSettingsQueries = {
 	},
 
 	/**
-	 * Validate an API key against the stored bcrypt hash
+	 * Validate an API key against the active source.
 	 */
 	async validateApiKey(key: string): Promise<boolean> {
-		const settings = this.get();
-		if (settings.api_key === null) return false;
+		const activeKey = this.getApiKey();
+		if (activeKey.key === null) return false;
 
-		return verify(key, settings.api_key);
+		switch (activeKey.source) {
+			case ApiKeySource.Environment:
+				return key === activeKey.key;
+			case ApiKeySource.Generated:
+				return verify(key, activeKey.key);
+		}
 	}
 };
