@@ -30,6 +30,36 @@ export interface ApiKey {
 	key: string | null;
 }
 
+const encoder = new TextEncoder();
+
+async function timingSafeStringEquals(left: string, right: string): Promise<boolean> {
+	const [leftHash, rightHash] = await Promise.all([
+		crypto.subtle.digest('SHA-256', encoder.encode(left)),
+		crypto.subtle.digest('SHA-256', encoder.encode(right))
+	]);
+
+	const leftBytes = new Uint8Array(leftHash);
+	const rightBytes = new Uint8Array(rightHash);
+	let diff = 0;
+
+	for (let i = 0; i < leftBytes.length; i++) {
+		diff |= leftBytes[i] ^ rightBytes[i];
+	}
+
+	return diff === 0;
+}
+
+async function verifyApiKey(candidate: string, activeKey: ApiKey): Promise<boolean> {
+	if (activeKey.key === null) return false;
+
+	switch (activeKey.source) {
+		case ApiKeySource.Environment:
+			return timingSafeStringEquals(candidate, activeKey.key);
+		case ApiKeySource.Generated:
+			return verify(candidate, activeKey.key);
+	}
+}
+
 /**
  * All queries for auth_settings table
  * Singleton pattern - only one settings record exists
@@ -152,14 +182,6 @@ export const authSettingsQueries = {
 	 * Validate an API key against the active source.
 	 */
 	async validateApiKey(key: string): Promise<boolean> {
-		const activeKey = this.getApiKey();
-		if (activeKey.key === null) return false;
-
-		switch (activeKey.source) {
-			case ApiKeySource.Environment:
-				return key === activeKey.key;
-			case ApiKeySource.Generated:
-				return verify(key, activeKey.key);
-		}
+		return verifyApiKey(key, this.getApiKey());
 	}
 };

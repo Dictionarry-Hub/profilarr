@@ -42,7 +42,8 @@ export const PORTS = {
 		reverseProxy502Manual: 7014,
 		secretExposure: 7015,
 		session: 7016,
-		xForwardedFor: 7017
+		xForwardedFor: 7017,
+		envApiKey: 7018
 	},
 	api: {
 		arr: 7100,
