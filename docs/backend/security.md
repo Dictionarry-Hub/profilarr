@@ -172,6 +172,11 @@ session checks in the request flow.
 - `regenerateApiKey()` returns the plaintext key once for the user to copy; only
   the hash is persisted
 - Validation uses async bcrypt `verify()` against the stored hash
+- `PROFILARR_API_KEY` can declaratively set the active API key from the
+  environment. It must be at least 32 characters long. The value is a plaintext
+  runtime secret, is not persisted to SQLite, and is not bcrypt-hashed. When
+  set, it overrides the database hash and regeneration is disabled in Settings >
+  Security. Removing it reactivates the stored database key if one exists.
 - Invalid keys are logged with a masked value (`****` + last 4 chars)
 
 ## Request Flow

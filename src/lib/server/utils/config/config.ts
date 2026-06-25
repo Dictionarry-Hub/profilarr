@@ -4,6 +4,8 @@
 
 export type AuthMode = 'on' | 'off' | 'oidc';
 
+export const PROFILARR_API_KEY_MIN_LENGTH = 32;
+
 class Config {
 	private basePath: string;
 	public readonly timezone: string;
@@ -12,6 +14,7 @@ class Config {
 	public readonly host: string;
 	public readonly origin: string;
 	public readonly authMode: AuthMode;
+	public readonly profilarrApiKey: string | null;
 	public readonly oidc: {
 		discoveryUrl: string | null;
 		clientId: string | null;
@@ -56,6 +59,15 @@ class Config {
 		// Note: AUTH=local is no longer an env var — use the local bypass toggle in Settings > Security
 		const auth = (Deno.env.get('AUTH') || 'on').toLowerCase();
 		this.authMode = ['on', 'off', 'oidc'].includes(auth) ? (auth as AuthMode) : 'on';
+
+		// Optional declarative internal API key for GitOps/container deployments.
+		const profilarrApiKey = Deno.env.get('PROFILARR_API_KEY') || null;
+		if (profilarrApiKey !== null && profilarrApiKey.length < PROFILARR_API_KEY_MIN_LENGTH) {
+			throw new Error(
+				`PROFILARR_API_KEY must be at least ${PROFILARR_API_KEY_MIN_LENGTH} characters long`
+			);
+		}
+		this.profilarrApiKey = profilarrApiKey;
 
 		// OIDC configuration (only used when AUTH=oidc)
 		this.oidc = {

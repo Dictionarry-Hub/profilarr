@@ -1,6 +1,7 @@
 import { db } from '../db.ts';
 import { generateApiKey } from '$auth/apiKey.ts';
 import { hash, verify } from '@felix/bcrypt';
+import { config } from '$config';
 
 /**
  * Types for auth_settings table
@@ -17,6 +18,46 @@ export interface AuthSettings {
 export interface UpdateAuthSettingsInput {
 	sessionDurationHours?: number;
 	apiKey?: string | null;
+}
+
+export enum ApiKeySource {
+	Environment = 'environment',
+	Generated = 'generated'
+}
+
+export interface ApiKey {
+	source: ApiKeySource;
+	key: string | null;
+}
+
+const encoder = new TextEncoder();
+
+async function timingSafeStringEquals(left: string, right: string): Promise<boolean> {
+	const [leftHash, rightHash] = await Promise.all([
+		crypto.subtle.digest('SHA-256', encoder.encode(left)),
+		crypto.subtle.digest('SHA-256', encoder.encode(right))
+	]);
+
+	const leftBytes = new Uint8Array(leftHash);
+	const rightBytes = new Uint8Array(rightHash);
+	let diff = 0;
+
+	for (let i = 0; i < leftBytes.length; i++) {
+		diff |= leftBytes[i] ^ rightBytes[i];
+	}
+
+	return diff === 0;
+}
+
+async function verifyApiKey(candidate: string, activeKey: ApiKey): Promise<boolean> {
+	if (activeKey.key === null) return false;
+
+	switch (activeKey.source) {
+		case ApiKeySource.Environment:
+			return timingSafeStringEquals(candidate, activeKey.key);
+		case ApiKeySource.Generated:
+			return verify(candidate, activeKey.key);
+	}
 }
 
 /**
@@ -46,7 +87,25 @@ export const authSettingsQueries = {
 	 * Check whether an API key is configured
 	 */
 	hasApiKey(): boolean {
-		return this.get().api_key !== null;
+		return config.profilarrApiKey !== null || this.get().api_key !== null;
+	},
+
+	/**
+	 * Check whether users can regenerate the API key from the UI
+	 */
+	canRegenerateApiKey(): boolean {
+		return config.profilarrApiKey === null;
+	},
+
+	/**
+	 * Get the active API key and where it comes from.
+	 */
+	getApiKey(): ApiKey {
+		if (config.profilarrApiKey !== null) {
+			return { source: ApiKeySource.Environment, key: config.profilarrApiKey };
+		}
+
+		return { source: ApiKeySource.Generated, key: this.get().api_key };
 	},
 
 	/**
@@ -102,6 +161,10 @@ export const authSettingsQueries = {
 	 * Regenerate API key — returns the plaintext key (stored as bcrypt hash)
 	 */
 	async regenerateApiKey(): Promise<string> {
+		if (!this.canRegenerateApiKey()) {
+			throw new Error('PROFILARR_API_KEY is set; API key regeneration is disabled');
+		}
+
 		const plaintext = generateApiKey();
 		const hashed = await hash(plaintext);
 		this.update({ apiKey: hashed });
@@ -116,12 +179,9 @@ export const authSettingsQueries = {
 	},
 
 	/**
-	 * Validate an API key against the stored bcrypt hash
+	 * Validate an API key against the active source.
 	 */
 	async validateApiKey(key: string): Promise<boolean> {
-		const settings = this.get();
-		if (settings.api_key === null) return false;
-
-		return verify(key, settings.api_key);
+		return verifyApiKey(key, this.getApiKey());
 	}
 };
