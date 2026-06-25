@@ -818,6 +818,27 @@ export function isGroup(child: FilterRule | FilterGroup): child is FilterGroup {
 }
 
 /**
+ * Fields whose value is a comma-joined string of multiple values (e.g. tags,
+ * genres). For these, equality/text operators are evaluated against each
+ * individual value (set membership) instead of the whole joined string, so a
+ * rule like "Tags is not X" means "X is not among the item's tags" regardless
+ * of any other values present.
+ */
+export const multiValueFields = ['tags', 'genres'] as const;
+
+export function isMultiValueField(field: string): boolean {
+	return (multiValueFields as readonly string[]).includes(field);
+}
+
+/** Split a comma-joined multi-value field into trimmed, lowercased parts. */
+function splitMultiValue(value: unknown): string[] {
+	return String(value)
+		.split(',')
+		.map((part) => part.trim().toLowerCase())
+		.filter(Boolean);
+}
+
+/**
  * Evaluate a single filter rule against an item
  */
 export function evaluateRule(item: Record<string, unknown>, rule: FilterRule): boolean {
@@ -853,6 +874,30 @@ export function evaluateRule(item: Record<string, unknown>, rule: FilterRule): b
 			return true;
 		}
 		return false;
+	}
+
+	// Multi-value fields (tags, genres): evaluate against the set of values, so
+	// membership/negation considers each value independently rather than the
+	// whole comma-joined string.
+	if (isMultiValueField(rule.field)) {
+		const values = splitMultiValue(fieldValue);
+		const target = String(ruleValue).toLowerCase();
+		switch (rule.operator) {
+			case 'eq':
+				return values.includes(target);
+			case 'neq':
+				return !values.includes(target);
+			case 'contains':
+				return values.some((value) => value.includes(target));
+			case 'not_contains':
+				return !values.some((value) => value.includes(target));
+			case 'starts_with':
+				return values.some((value) => value.startsWith(target));
+			case 'ends_with':
+				return values.some((value) => value.endsWith(target));
+			default:
+				return false;
+		}
 	}
 
 	// Check if this field uses ordinal comparison

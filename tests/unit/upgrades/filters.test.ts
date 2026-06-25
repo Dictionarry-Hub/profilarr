@@ -1014,6 +1014,175 @@ class FilterEvaluationTest extends BaseTest {
 			assertEquals(matched[0].title, 'Movie 1');
 			assertEquals(matched[1].title, 'Movie 4');
 		});
+
+		// =====================
+		// Multi-value fields (tags / genres)
+		// =====================
+		// These fields arrive as a comma-joined string of many values
+		// (e.g. "no-redownload, profilarr-upgrade-all-movies"). The UI only
+		// exposes "is" (eq) / "is not" (neq) for them, and the user intent is
+		// set membership: "Tags is not X" must mean "X is not among the tags",
+		// not "the whole joined string is not equal to X".
+
+		this.test('tags: eq matches when value is one of several tags (membership)', () => {
+			const item = { tags: 'no-redownload, profilarr-upgrade-all-movies' };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'eq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: eq rejects value that is not among the tags', () => {
+			const item = { tags: 'profilarr-upgrade-all-movies, hdr' };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'eq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('tags: neq excludes item that has the tag among others (the bug)', () => {
+			// Ace Ventura: tagged no-redownload PLUS several profilarr cooldown tags.
+			// "Tags is not no-redownload" must exclude it (return false), because it
+			// DOES carry no-redownload. The old whole-string compare returned true.
+			const item = {
+				tags: 'no-redownload, profilarr-filter, profilarr-upgrade-all, profilarr-upgrade-all-1080p-movies, profilarr-upgrade-all-movies'
+			};
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'neq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('tags: neq matches item that lacks the tag', () => {
+			const item = { tags: 'profilarr-upgrade-all-movies, hdr' };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'neq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: neq matches item with empty tag string', () => {
+			const item = { tags: '' };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'neq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: eq rejects item with empty tag string', () => {
+			const item = { tags: '' };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'eq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('tags: membership is case-insensitive', () => {
+			const item = { tags: 'No-Redownload, HDR' };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'eq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: single exact tag still matches eq', () => {
+			const item = { tags: 'no-redownload' };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'eq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('genres: eq matches one of several genres (membership)', () => {
+			const item = { genres: 'Action, Comedy, Crime' };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'genres',
+				operator: 'eq',
+				value: 'comedy'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('genres: neq excludes item that has the genre among others', () => {
+			const item = { genres: 'Comedy, Crime, Mystery' };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'genres',
+				operator: 'neq',
+				value: 'comedy'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('genres: contains matches per-element, not across the comma', () => {
+			const item = { genres: 'Science Fiction, Action' };
+			// Matches within a single value...
+			assertEquals(
+				evaluateRule(item, {
+					type: 'rule',
+					field: 'genres',
+					operator: 'contains',
+					value: 'fiction'
+				}),
+				true
+			);
+			// ...but not across the joining ", " boundary.
+			assertEquals(
+				evaluateRule(item, {
+					type: 'rule',
+					field: 'genres',
+					operator: 'contains',
+					value: 'fiction, a'
+				}),
+				false
+			);
+		});
+
+		this.test('scenario: exclude no-redownload across a mixed library', () => {
+			// Mirrors the real "Upgrade all FHD movies" filter: only items WITHOUT
+			// the no-redownload tag should pass, regardless of profilarr cooldown tags.
+			const movies = [
+				{ title: 'Keep A', tags: 'profilarr-upgrade-all-movies' },
+				{ title: 'Skip B', tags: 'no-redownload' },
+				{ title: 'Skip C', tags: 'no-redownload, profilarr-upgrade-all-1080p-movies' },
+				{ title: 'Keep D', tags: '' }
+			];
+			const group: FilterGroup = {
+				type: 'group',
+				match: 'all',
+				children: [{ type: 'rule', field: 'tags', operator: 'neq', value: 'no-redownload' }]
+			};
+
+			const matched = movies.filter((m) => evaluateGroup(m, group));
+			assertEquals(matched.length, 2);
+			assertEquals(matched[0].title, 'Keep A');
+			assertEquals(matched[1].title, 'Keep D');
+		});
 	}
 }
 
