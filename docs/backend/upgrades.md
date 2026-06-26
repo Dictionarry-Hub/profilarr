@@ -89,7 +89,8 @@ Fields are typed by category:
 | Category      | Operators                                              | Examples                                 |
 | ------------- | ------------------------------------------------------ | ---------------------------------------- |
 | Boolean       | is, is_not                                             | monitored, cutoff_met                    |
-| Text          | contains, not_contains, starts/ends_with, eq           | title, quality_profile, genres, tags     |
+| Text          | contains, not_contains, starts/ends_with, eq           | title, quality_profile                   |
+| Multi-value   | includes, does_not_include, is_only, has_any, has_none | genres, tags                             |
 | Number        | eq, neq, gt, gte, lt, lte                              | year, rating, size_on_disk, popularity   |
 | Date          | before, after, in_last, not_in_last                    | date_added, digital_release, first_aired |
 | Ordinal       | eq, neq, gte, lte, gt, lt                              | status, minimum_availability             |
@@ -123,7 +124,9 @@ load, so the page shell renders before heavier library/file metadata finishes
 loading.
 
 Most dynamic fields use exact string operators only: `eq` and `neq` (shown as
-"is" / "is not" in the UI). `custom_format` is dynamic but uses set operators.
+"is" / "is not" in the UI). `tags`, `genres`, and `custom_format` are dynamic
+but use set operators. Existing saved `eq` / `neq` tag and genre rules are
+treated as `includes` / `does_not_include` for compatibility.
 
 | Scope  | Fields                                                   | Source                  |
 | ------ | -------------------------------------------------------- | ----------------------- |

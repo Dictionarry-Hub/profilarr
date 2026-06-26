@@ -191,7 +191,7 @@ class NormalizeTest extends BaseTest {
 			assertEquals(result.original_language, 'Japanese');
 		});
 
-		this.test('normalizes genres as comma-separated string', () => {
+		this.test('normalizes genres as string array', () => {
 			const movie = this.createMockMovie({
 				genres: ['Comedy', 'Fantasy', 'Horror']
 			});
@@ -200,7 +200,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.genres, 'Comedy, Fantasy, Horror');
+			assertEquals(result.genres, ['Comedy', 'Fantasy', 'Horror']);
 		});
 
 		this.test('normalizes release group from movie file', () => {
@@ -404,9 +404,15 @@ class NormalizeTest extends BaseTest {
 			const movie = this.createMockMovie({ tags: [1, 2, 3] });
 			const movieFile = this.createMockMovieFile();
 			const profile = this.createMockProfile();
+			const tagMap = new Map([
+				[1, 'no-redownload'],
+				[2, 'profilarr-upgrades'],
+				[3, 'manual-review']
+			]);
 
-			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
+			const result = normalizeRadarrItem(movie, movieFile, profile, 80, tagMap);
 
+			assertEquals(result.tags, ['no-redownload', 'profilarr-upgrades', 'manual-review']);
 			assertEquals(result._tags, [1, 2, 3]);
 		});
 
@@ -487,7 +493,7 @@ class NormalizeTest extends BaseTest {
 			assertEquals(result.collection, '');
 			assertEquals(result.studio, '');
 			assertEquals(result.original_language, '');
-			assertEquals(result.genres, '');
+			assertEquals(result.genres, []);
 			assertEquals(result.release_group, '');
 			assertEquals(result.popularity, 0);
 			assertEquals(result.runtime, 0);

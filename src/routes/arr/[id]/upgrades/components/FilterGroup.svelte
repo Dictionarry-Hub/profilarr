@@ -7,8 +7,11 @@
 		createEmptyGroup,
 		createEmptyRule,
 		isCustomFormatUnaryOperator,
+		isMultiValueFilterField,
+		isMultiValueUnaryOperator,
 		isRule,
 		isGroup,
+		normalizeFilterGroup,
 		type DynamicFilterOptions,
 		type FilterField,
 		type FilterGroup,
@@ -73,22 +76,35 @@
 	}
 
 	function getDefaultOperator(fieldId: string, field: FilterField) {
-		if (fieldId === 'custom_format') return field.operators[0].id;
+		if (fieldId === 'custom_format' || isMultiValueFilterField(fieldId)) {
+			return field.operators[0].id;
+		}
 		return fieldId in dynamicFilterOptions ? 'eq' : field.operators[0].id;
 	}
 
 	function getDefaultValue(fieldId: string, field: FilterField, operator: string) {
-		if (fieldId === 'custom_format' && isCustomFormatUnaryOperator(operator)) return null;
+		if (isValuelessOperator(fieldId, operator)) return null;
 		if (fieldId in dynamicFilterOptions) return dynamicFilterOptions[fieldId]?.[0]?.value ?? null;
 		return field.values?.[0]?.value ?? null;
 	}
 
 	function isDynamicStringField(fieldId: string) {
-		return fieldId in dynamicFilterOptions && fieldId !== 'custom_format';
+		return (
+			fieldId in dynamicFilterOptions &&
+			fieldId !== 'custom_format' &&
+			!isMultiValueFilterField(fieldId)
+		);
+	}
+
+	function isValuelessOperator(fieldId: string, operator: string) {
+		return (
+			(fieldId === 'custom_format' && isCustomFormatUnaryOperator(operator)) ||
+			(isMultiValueFilterField(fieldId) && isMultiValueUnaryOperator(operator))
+		);
 	}
 
 	function ruleNeedsValue(rule: FilterRule) {
-		return !(rule.field === 'custom_format' && isCustomFormatUnaryOperator(rule.operator));
+		return !isValuelessOperator(rule.field, rule.operator);
 	}
 
 	function getDynamicOptions(
@@ -106,44 +122,8 @@
 		return [{ value: currentValue, label: currentValue }, ...options];
 	}
 
-	function normalizeRule(rule: FilterRule): boolean {
-		const field = getFilterField(rule.field, appType);
-		if (!field) return false;
-
-		if (isDynamicStringField(rule.field) && rule.operator !== 'eq' && rule.operator !== 'neq') {
-			rule.operator = 'eq';
-			return true;
-		}
-
-		if (rule.field !== 'custom_format') return false;
-
-		let changed = false;
-		if (!field.operators.some((operator) => operator.id === rule.operator)) {
-			rule.operator = field.operators[0].id;
-			changed = true;
-		}
-		if (isCustomFormatUnaryOperator(rule.operator) && rule.value !== null) {
-			rule.value = null;
-			changed = true;
-		}
-		return changed;
-	}
-
 	function normalizeDynamicOperators(targetGroup: FilterGroup): boolean {
-		let changed = false;
-		for (const child of targetGroup.children) {
-			if (isRule(child)) {
-				if (normalizeRule(child)) {
-					changed = true;
-				}
-				continue;
-			}
-
-			if (normalizeDynamicOperators(child)) {
-				changed = true;
-			}
-		}
-		return changed;
+		return normalizeFilterGroup(targetGroup, appType, { dynamicFilterOptions });
 	}
 
 	$: {
@@ -168,8 +148,8 @@
 
 	function onOperatorChange(rule: FilterRule, operator: string, field: FilterField) {
 		rule.operator = operator;
-		if (rule.field === 'custom_format') {
-			rule.value = isCustomFormatUnaryOperator(operator)
+		if (rule.field === 'custom_format' || isMultiValueFilterField(rule.field)) {
+			rule.value = isValuelessOperator(rule.field, operator)
 				? null
 				: (rule.value ?? getDefaultValue(rule.field, field, operator));
 		}

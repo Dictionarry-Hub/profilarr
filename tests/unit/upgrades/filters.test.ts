@@ -10,9 +10,10 @@ import {
 	evaluateGroup,
 	getDynamicFilterFieldIds,
 	getFilterFields,
+	normalizeFilterGroup,
 	type FilterRule,
 	type FilterGroup
-} from '../../../src/lib/shared/upgrades/filters.ts';
+} from '$shared/upgrades/filters.ts';
 
 class FilterEvaluationTest extends BaseTest {
 	runTests(): void {
@@ -242,6 +243,152 @@ class FilterEvaluationTest extends BaseTest {
 				value: '4K'
 			};
 			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		// =====================
+		// Multi-Value Operators
+		// =====================
+
+		this.test('tags: includes matches exact tag in multi-tag list', () => {
+			const item = { tags: ['no-redownload', 'profilarr-upgrades'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'includes',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: does_not_include rejects exact tag in multi-tag list', () => {
+			const item = { tags: ['no-redownload', 'profilarr-upgrades'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'does_not_include',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('tags: has_any matches non-empty tag list', () => {
+			const item = { tags: ['no-redownload'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'has_any',
+				value: null
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: is_only matches single selected tag', () => {
+			const item = { tags: ['no-redownload'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'is_only',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: is_only rejects selected tag with other tags', () => {
+			const item = { tags: ['no-redownload', 'profilarr-upgrades'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'is_only',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('tags: has_none matches empty tag list', () => {
+			const item = { tags: [] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'has_none',
+				value: null
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: legacy eq matches exact tag in multi-tag list', () => {
+			const item = { tags: ['no-redownload', 'profilarr-upgrades'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'eq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: legacy neq rejects exact tag in multi-tag list', () => {
+			const item = { tags: ['no-redownload', 'profilarr-upgrades'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'neq',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('genres: includes matches exact genre in multi-genre list', () => {
+			const item = { genres: ['Comedy', 'Fantasy'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'genres',
+				operator: 'includes',
+				value: 'fantasy'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('genres: legacy neq rejects exact genre in multi-genre list', () => {
+			const item = { genres: ['Comedy', 'Fantasy'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'genres',
+				operator: 'neq',
+				value: 'Fantasy'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('multi-value normalize: maps legacy tag and genre operators', () => {
+			const group: FilterGroup = {
+				type: 'group',
+				match: 'all',
+				children: [
+					{ type: 'rule', field: 'tags', operator: 'eq', value: 'no-redownload' },
+					{ type: 'rule', field: 'tags', operator: 'neq', value: 'manual-review' },
+					{ type: 'rule', field: 'genres', operator: 'eq', value: 'Action' },
+					{ type: 'rule', field: 'genres', operator: 'neq', value: 'Comedy' }
+				]
+			};
+
+			assertEquals(normalizeFilterGroup(group, 'radarr'), true);
+			const rules = group.children as FilterRule[];
+			assertEquals(rules[0].operator, 'includes');
+			assertEquals(rules[1].operator, 'does_not_include');
+			assertEquals(rules[2].operator, 'includes');
+			assertEquals(rules[3].operator, 'does_not_include');
+		});
+
+		this.test('multi-value normalize: clears values for unary operators', () => {
+			const group: FilterGroup = {
+				type: 'group',
+				match: 'all',
+				children: [{ type: 'rule', field: 'tags', operator: 'has_any', value: 'unused' }]
+			};
+
+			assertEquals(normalizeFilterGroup(group, 'radarr'), true);
+			const rule = group.children[0] as FilterRule;
+			assertEquals(rule.value, null);
 		});
 
 		// =====================
