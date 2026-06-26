@@ -75,9 +75,7 @@ export function normalizeRadarrItem(
 	const physicalRelease = movie.physicalRelease ?? null;
 
 	// Convert tag IDs to labels
-	const tags = (movie.tags ?? [])
-		.map((tagId) => tagMap?.get(tagId) ?? '')
-		.filter(Boolean);
+	const tags = (movie.tags ?? []).map((tagId) => tagMap?.get(tagId) ?? '').filter(Boolean);
 
 	return {
 		// Shared fields
@@ -181,9 +179,7 @@ export function normalizeSonarrItem(
 	const dateAdded = series.added ?? new Date().toISOString();
 
 	// Convert tag IDs to labels
-	const tags = (series.tags ?? [])
-		.map((tagId) => tagMap?.get(tagId) ?? '')
-		.filter(Boolean);
+	const tags = (series.tags ?? []).map((tagId) => tagMap?.get(tagId) ?? '').filter(Boolean);
 
 	return {
 		// Shared fields

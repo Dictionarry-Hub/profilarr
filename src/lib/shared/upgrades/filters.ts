@@ -1003,7 +1003,9 @@ function evaluateMultiValueRule(fieldValue: unknown, rule: FilterRule): boolean 
 		case 'does_not_include':
 			return selected.length > 0 && !normalizedValues.includes(selected);
 		case 'is_only':
-			return selected.length > 0 && normalizedValues.length === 1 && normalizedValues[0] === selected;
+			return (
+				selected.length > 0 && normalizedValues.length === 1 && normalizedValues[0] === selected
+			);
 		case 'has_any':
 			return normalizedValues.length > 0;
 		case 'has_none':
