@@ -10,9 +10,10 @@ import {
 	evaluateGroup,
 	getDynamicFilterFieldIds,
 	getFilterFields,
+	normalizeFilterGroup,
 	type FilterRule,
 	type FilterGroup
-} from '../../../src/lib/shared/upgrades/filters.ts';
+} from '$shared/upgrades/filters.ts';
 
 class FilterEvaluationTest extends BaseTest {
 	runTests(): void {
@@ -334,6 +335,38 @@ class FilterEvaluationTest extends BaseTest {
 				value: 'Fantasy'
 			};
 			assertEquals(evaluateRule(item, rule), false);
+		});
+
+		this.test('multi-value normalize: maps legacy tag and genre operators', () => {
+			const group: FilterGroup = {
+				type: 'group',
+				match: 'all',
+				children: [
+					{ type: 'rule', field: 'tags', operator: 'eq', value: 'no-redownload' },
+					{ type: 'rule', field: 'tags', operator: 'neq', value: 'manual-review' },
+					{ type: 'rule', field: 'genres', operator: 'eq', value: 'Action' },
+					{ type: 'rule', field: 'genres', operator: 'neq', value: 'Comedy' }
+				]
+			};
+
+			assertEquals(normalizeFilterGroup(group, 'radarr'), true);
+			const rules = group.children as FilterRule[];
+			assertEquals(rules[0].operator, 'includes');
+			assertEquals(rules[1].operator, 'does_not_include');
+			assertEquals(rules[2].operator, 'includes');
+			assertEquals(rules[3].operator, 'does_not_include');
+		});
+
+		this.test('multi-value normalize: clears values for unary operators', () => {
+			const group: FilterGroup = {
+				type: 'group',
+				match: 'all',
+				children: [{ type: 'rule', field: 'tags', operator: 'has_any', value: 'unused' }]
+			};
+
+			assertEquals(normalizeFilterGroup(group, 'radarr'), true);
+			const rule = group.children[0] as FilterRule;
+			assertEquals(rule.value, null);
 		});
 
 		// =====================

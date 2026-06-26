@@ -281,6 +281,114 @@ export function normalizeMultiValueOperator(operator: string): string {
 	return operator;
 }
 
+function isValuelessOperator(fieldId: string, operator: string): boolean {
+	return (
+		(fieldId === 'custom_format' && isCustomFormatUnaryOperator(operator)) ||
+		(isMultiValueFilterField(fieldId) && isMultiValueUnaryOperator(operator))
+	);
+}
+
+function getDefaultRuleValue(
+	fieldId: string,
+	field: FilterField,
+	operator: string,
+	dynamicFilterOptions?: DynamicFilterOptions
+): FilterValueType {
+	if (isValuelessOperator(fieldId, operator)) return null;
+	if (dynamicFilterOptions && fieldId in dynamicFilterOptions) {
+		return dynamicFilterOptions[fieldId]?.[0]?.value ?? null;
+	}
+	return field.values?.[0]?.value ?? null;
+}
+
+export interface NormalizeFilterRulesOptions {
+	dynamicFilterOptions?: DynamicFilterOptions;
+}
+
+export function normalizeFilterRule(
+	rule: FilterRule,
+	appType: UpgradeAppType,
+	options: NormalizeFilterRulesOptions = {}
+): boolean {
+	const field = getFilterField(rule.field, appType);
+	if (!field) return false;
+
+	if (isMultiValueFilterField(rule.field)) {
+		let changed = false;
+		const normalizedOperator = normalizeMultiValueOperator(rule.operator);
+		if (rule.operator !== normalizedOperator) {
+			rule.operator = normalizedOperator;
+			changed = true;
+		}
+		if (!field.operators.some((operator) => operator.id === rule.operator)) {
+			rule.operator = field.operators[0].id;
+			changed = true;
+		}
+		if (isMultiValueUnaryOperator(rule.operator) && rule.value !== null) {
+			rule.value = null;
+			changed = true;
+		}
+		if (!isMultiValueUnaryOperator(rule.operator) && rule.value === null) {
+			const defaultValue = getDefaultRuleValue(
+				rule.field,
+				field,
+				rule.operator,
+				options.dynamicFilterOptions
+			);
+			if (rule.value !== defaultValue) {
+				rule.value = defaultValue;
+				changed = true;
+			}
+		}
+		return changed;
+	}
+
+	if (
+		options.dynamicFilterOptions &&
+		rule.field in options.dynamicFilterOptions &&
+		rule.field !== 'custom_format' &&
+		rule.operator !== 'eq' &&
+		rule.operator !== 'neq'
+	) {
+		rule.operator = 'eq';
+		return true;
+	}
+
+	if (rule.field !== 'custom_format') return false;
+
+	let changed = false;
+	if (!field.operators.some((operator) => operator.id === rule.operator)) {
+		rule.operator = field.operators[0].id;
+		changed = true;
+	}
+	if (isCustomFormatUnaryOperator(rule.operator) && rule.value !== null) {
+		rule.value = null;
+		changed = true;
+	}
+	return changed;
+}
+
+export function normalizeFilterGroup(
+	group: FilterGroup,
+	appType: UpgradeAppType,
+	options: NormalizeFilterRulesOptions = {}
+): boolean {
+	let changed = false;
+	for (const child of group.children) {
+		if (isRule(child)) {
+			if (normalizeFilterRule(child, appType, options)) {
+				changed = true;
+			}
+			continue;
+		}
+
+		if (normalizeFilterGroup(child, appType, options)) {
+			changed = true;
+		}
+	}
+	return changed;
+}
+
 // =============================================================================
 // Ordinal mappings
 // =============================================================================

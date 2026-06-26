@@ -11,7 +11,7 @@
 		isMultiValueUnaryOperator,
 		isRule,
 		isGroup,
-		normalizeMultiValueOperator,
+		normalizeFilterGroup,
 		type DynamicFilterOptions,
 		type FilterField,
 		type FilterGroup,
@@ -122,66 +122,8 @@
 		return [{ value: currentValue, label: currentValue }, ...options];
 	}
 
-	function normalizeRule(rule: FilterRule): boolean {
-		const field = getFilterField(rule.field, appType);
-		if (!field) return false;
-
-		if (isMultiValueFilterField(rule.field)) {
-			let changed = false;
-			const normalizedOperator = normalizeMultiValueOperator(rule.operator);
-			if (rule.operator !== normalizedOperator) {
-				rule.operator = normalizedOperator;
-				changed = true;
-			}
-			if (!field.operators.some((operator) => operator.id === rule.operator)) {
-				rule.operator = field.operators[0].id;
-				changed = true;
-			}
-			if (isMultiValueUnaryOperator(rule.operator) && rule.value !== null) {
-				rule.value = null;
-				changed = true;
-			}
-			if (!isMultiValueUnaryOperator(rule.operator) && rule.value === null) {
-				rule.value = getDefaultValue(rule.field, field, rule.operator);
-				changed = true;
-			}
-			return changed;
-		}
-
-		if (isDynamicStringField(rule.field) && rule.operator !== 'eq' && rule.operator !== 'neq') {
-			rule.operator = 'eq';
-			return true;
-		}
-
-		if (rule.field !== 'custom_format') return false;
-
-		let changed = false;
-		if (!field.operators.some((operator) => operator.id === rule.operator)) {
-			rule.operator = field.operators[0].id;
-			changed = true;
-		}
-		if (isCustomFormatUnaryOperator(rule.operator) && rule.value !== null) {
-			rule.value = null;
-			changed = true;
-		}
-		return changed;
-	}
-
 	function normalizeDynamicOperators(targetGroup: FilterGroup): boolean {
-		let changed = false;
-		for (const child of targetGroup.children) {
-			if (isRule(child)) {
-				if (normalizeRule(child)) {
-					changed = true;
-				}
-				continue;
-			}
-
-			if (normalizeDynamicOperators(child)) {
-				changed = true;
-			}
-		}
-		return changed;
+		return normalizeFilterGroup(targetGroup, appType, { dynamicFilterOptions });
 	}
 
 	$: {
