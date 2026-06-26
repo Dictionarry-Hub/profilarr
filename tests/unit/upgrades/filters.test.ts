@@ -282,6 +282,28 @@ class FilterEvaluationTest extends BaseTest {
 			assertEquals(evaluateRule(item, rule), true);
 		});
 
+		this.test('tags: is_only matches single selected tag', () => {
+			const item = { tags: ['no-redownload'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'is_only',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), true);
+		});
+
+		this.test('tags: is_only rejects selected tag with other tags', () => {
+			const item = { tags: ['no-redownload', 'profilarr-upgrades'] };
+			const rule: FilterRule = {
+				type: 'rule',
+				field: 'tags',
+				operator: 'is_only',
+				value: 'no-redownload'
+			};
+			assertEquals(evaluateRule(item, rule), false);
+		});
+
 		this.test('tags: has_none matches empty tag list', () => {
 			const item = { tags: [] };
 			const rule: FilterRule = {
