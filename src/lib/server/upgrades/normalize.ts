@@ -77,8 +77,7 @@ export function normalizeRadarrItem(
 	// Convert tag IDs to labels
 	const tags = (movie.tags ?? [])
 		.map((tagId) => tagMap?.get(tagId) ?? '')
-		.filter(Boolean)
-		.join(', ');
+		.filter(Boolean);
 
 	return {
 		// Shared fields
@@ -91,7 +90,7 @@ export function normalizeRadarrItem(
 		quality_name: movieFile?.quality?.quality?.name ?? '',
 		file_name: getFileName(movieFile?.relativePath ?? movieFile?.path),
 		original_language: movie.originalLanguage?.name ?? '',
-		genres: movie.genres?.join(', ') ?? '',
+		genres: movie.genres ?? [],
 		tags,
 		custom_formats: movieFile?.customFormats.map((cf) => cf.name) ?? [],
 		score_breakdown: movieFile
@@ -184,8 +183,7 @@ export function normalizeSonarrItem(
 	// Convert tag IDs to labels
 	const tags = (series.tags ?? [])
 		.map((tagId) => tagMap?.get(tagId) ?? '')
-		.filter(Boolean)
-		.join(', ');
+		.filter(Boolean);
 
 	return {
 		// Shared fields
@@ -198,7 +196,7 @@ export function normalizeSonarrItem(
 		quality_name: '',
 		file_name: '',
 		original_language: series.originalLanguage?.name ?? '',
-		genres: series.genres?.join(', ') ?? '',
+		genres: series.genres ?? [],
 		tags,
 		custom_formats: [],
 		score_breakdown: [],

@@ -20,8 +20,8 @@ export interface UpgradeItem {
 	quality_name: string;
 	file_name: string;
 	original_language: string;
-	genres: string;
-	tags: string;
+	genres: string[];
+	tags: string[];
 	custom_formats: string[];
 	score_breakdown: ScoreBreakdownItem[];
 	rating: number;

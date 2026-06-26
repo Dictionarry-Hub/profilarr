@@ -147,6 +147,39 @@ const textOperators: FilterOperator[] = [
 	{ id: 'neq', label: 'does not equal', description: 'Does not equal the text' }
 ];
 
+const multiValueOperators: FilterOperator[] = [
+	{
+		id: 'includes',
+		label: 'includes',
+		shortLabel: 'has',
+		description: 'Includes this value'
+	},
+	{
+		id: 'does_not_include',
+		label: 'does not include',
+		shortLabel: 'lacks',
+		description: 'Does not include this value'
+	},
+	{
+		id: 'is_only',
+		label: 'is only',
+		shortLabel: 'only',
+		description: 'Only includes this value and no others'
+	},
+	{
+		id: 'has_any',
+		label: 'has any',
+		shortLabel: 'any',
+		description: 'Has one or more values'
+	},
+	{
+		id: 'has_none',
+		label: 'has none',
+		shortLabel: 'none',
+		description: 'Has no values'
+	}
+];
+
 const dateOperators: FilterOperator[] = [
 	{
 		id: 'before',
@@ -225,11 +258,27 @@ const customFormatOperators: FilterOperator[] = [
 ];
 
 export const customFormatUnaryOperators = ['has_any', 'has_none'] as const;
+export const multiValueFilterFieldIds = ['tags', 'genres'] as const;
+export const multiValueUnaryOperators = ['has_any', 'has_none'] as const;
 
 export function isCustomFormatUnaryOperator(operator: string): boolean {
 	return customFormatUnaryOperators.includes(
 		operator as (typeof customFormatUnaryOperators)[number]
 	);
+}
+
+export function isMultiValueFilterField(fieldId: string): boolean {
+	return multiValueFilterFieldIds.includes(fieldId as (typeof multiValueFilterFieldIds)[number]);
+}
+
+export function isMultiValueUnaryOperator(operator: string): boolean {
+	return multiValueUnaryOperators.includes(operator as (typeof multiValueUnaryOperators)[number]);
+}
+
+export function normalizeMultiValueOperator(operator: string): string {
+	if (operator === 'eq') return 'includes';
+	if (operator === 'neq') return 'does_not_include';
+	return operator;
 }
 
 // =============================================================================
@@ -318,14 +367,14 @@ const sharedFilterFields: FilterField[] = [
 		id: 'genres',
 		label: 'Genres',
 		description: 'Genres (Action, Comedy, Drama, etc.)',
-		operators: textOperators,
+		operators: multiValueOperators,
 		valueType: 'text'
 	},
 	{
 		id: 'tags',
 		label: 'Tags',
 		description: 'Tags applied to the item',
-		operators: textOperators,
+		operators: multiValueOperators,
 		valueType: 'text'
 	},
 
@@ -817,6 +866,53 @@ export function isGroup(child: FilterRule | FilterGroup): child is FilterGroup {
 	return child.type === 'group';
 }
 
+function getMultiValueItems(value: unknown): string[] {
+	if (Array.isArray(value)) {
+		return value.map((item) => String(item).trim()).filter(Boolean);
+	}
+
+	if (typeof value === 'string') {
+		return value
+			.split(',')
+			.map((item) => item.trim())
+			.filter(Boolean);
+	}
+
+	return [];
+}
+
+function evaluateMultiValueRule(fieldValue: unknown, rule: FilterRule): boolean {
+	const values = getMultiValueItems(fieldValue);
+	const normalizedValues = values.map((value) => value.toLowerCase());
+	const selected =
+		typeof rule.value === 'string' || typeof rule.value === 'number'
+			? String(rule.value).trim().toLowerCase()
+			: '';
+
+	switch (normalizeMultiValueOperator(rule.operator)) {
+		case 'includes':
+			return selected.length > 0 && normalizedValues.includes(selected);
+		case 'does_not_include':
+			return selected.length > 0 && !normalizedValues.includes(selected);
+		case 'is_only':
+			return selected.length > 0 && normalizedValues.length === 1 && normalizedValues[0] === selected;
+		case 'has_any':
+			return normalizedValues.length > 0;
+		case 'has_none':
+			return normalizedValues.length === 0;
+		case 'contains':
+			return selected.length > 0 && normalizedValues.some((value) => value.includes(selected));
+		case 'not_contains':
+			return selected.length > 0 && normalizedValues.every((value) => !value.includes(selected));
+		case 'starts_with':
+			return selected.length > 0 && normalizedValues.some((value) => value.startsWith(selected));
+		case 'ends_with':
+			return selected.length > 0 && normalizedValues.some((value) => value.endsWith(selected));
+		default:
+			return false;
+	}
+}
+
 /**
  * Evaluate a single filter rule against an item
  */
@@ -844,6 +940,10 @@ export function evaluateRule(item: Record<string, unknown>, rule: FilterRule): b
 			default:
 				return false;
 		}
+	}
+
+	if (isMultiValueFilterField(rule.field)) {
+		return evaluateMultiValueRule(fieldValue, rule);
 	}
 
 	// Handle null/undefined field values

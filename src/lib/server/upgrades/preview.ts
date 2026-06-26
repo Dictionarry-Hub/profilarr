@@ -106,10 +106,7 @@ function toPreviewItem(
 			fileName: item.file_name,
 			customFormats: item.score_breakdown,
 			score: item.score,
-			tags: item.tags
-				.split(',')
-				.map((tag) => tag.trim())
-				.filter(Boolean),
+			tags: item.tags,
 			monitored: item.monitored,
 			dateAdded: item.date_added,
 			sizeOnDisk: item.size_on_disk,
