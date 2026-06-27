@@ -175,8 +175,10 @@ Each entity carries:
 
 - `section` and `sectionLabel` (e.g. `custom_formats` / `Custom Format`)
 - `state` and `stateLabel` (`missing` / `modified` / `extra`)
+- optional `databaseId` / `databaseName` for database-scoped QP and CF drift
 - `tone` for badge color signaling
 - `summary` (one-line description, e.g. `3 changes detected`)
+- optional duplicate drift metadata for lower-priority database duplicates
 - `changes[]`: per-field `DriftDisplayChange` rows with `label`, optional
   `detail`, and `expected` / `actual` `DriftDisplayValue`s. Values carry
   `text`, optional `mono`, and optional `tone`.
@@ -198,6 +200,29 @@ flags, minimum score, order, and tags into friendly field rows.
 For media management the formatter turns media settings, naming, and quality
 definition changes into friendly field rows.
 
+### Duplicate Drift Metadata
+
+Quality profile sync can select profiles from multiple databases. When more
+than one selected database manages the same quality profile or custom format
+name, priority determines the effective winner. The highest-priority database
+is synced last and owns the Arr state for that name.
+
+Drift display entities can mark lower-priority rows with duplicate metadata:
+
+| Field                | Purpose                                            |
+| -------------------- | -------------------------------------------------- |
+| `reason`             | Currently `lower_priority_duplicate`               |
+| `key`                | Stable section/name key for the duplicated entity  |
+| `winnerDatabaseId`   | Database id that owns the effective synced version |
+| `winnerDatabaseName` | Database name shown on the drift page              |
+
+Current behavior is intentionally conservative: duplicate drift is still shown,
+counted, hashed, included in progress chips, included in tab badges, and
+eligible for notifications. The metadata only exposes which rows are
+lower-priority duplicates. A future settings-backed "include duplicate drift"
+preference may use the same metadata to control drift page visibility, sync
+progress counts, badge counts, and notifications.
+
 Display types live in `src/lib/shared/drift.ts`.
 
 ## Arr Drift Page
@@ -216,6 +241,8 @@ Layout:
   columns, mirroring the dev changes-page diff idiom. Each drifted entity is
   one row; expanding shows a `DriftFieldDiffTable` with `Field` / `Profilarr`
   / `<Arr type> - <Arr name>` columns rendering the entity's `changes[]`.
+- Lower-priority duplicate drift rows are labelled with the duplicate marker
+  and the winning database name. They remain visible in the table.
 
 State rendering inside the entities section:
 

@@ -1,4 +1,5 @@
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { getCache } from '$pcd/index.ts';
 import { getCustomFormatsForProfile } from '$pcd/references.ts';
 import type { BaseArrClient } from '$arr/base.ts';
@@ -33,6 +34,12 @@ export interface CustomFormatDriftDiff {
 
 export interface CustomFormatDriftResult {
 	count: number;
+	diff: CustomFormatDriftDiff;
+}
+
+export interface DatabaseCustomFormatDriftDiff {
+	databaseId: number;
+	databaseName: string;
 	diff: CustomFormatDriftDiff;
 }
 
@@ -269,6 +276,76 @@ export async function buildExpectedCustomFormats(
 	}
 
 	return [...expected.values()];
+}
+
+export interface PerDatabaseExpectedFormats {
+	databaseName: string;
+	formats: ArrCustomFormat[];
+}
+
+export async function buildExpectedCustomFormatsPerDatabase(
+	instanceId: number,
+	arrType: SyncArrType
+): Promise<Map<number, PerDatabaseExpectedFormats>> {
+	const syncConfig = arrSyncQueries.getQualityProfilesSync(instanceId);
+	const result = new Map<number, PerDatabaseExpectedFormats>();
+	if (syncConfig.selections.length === 0) return result;
+
+	const selectionsByDb = new Map<number, typeof syncConfig.selections>();
+	for (const selection of syncConfig.selections) {
+		const existing = selectionsByDb.get(selection.databaseId) ?? [];
+		existing.push(selection);
+		selectionsByDb.set(selection.databaseId, existing);
+	}
+
+	for (const [databaseId, selections] of selectionsByDb) {
+		const cache = getCache(databaseId);
+		if (!cache) {
+			throw new Error(`PCD cache not found for database ${databaseId}`);
+		}
+
+		const dbInstance = databaseInstancesQueries.getById(databaseId);
+		const databaseName = dbInstance?.name ?? `Database ${databaseId}`;
+		const expected = new Map<string, ArrCustomFormat>();
+
+		for (const selection of selections) {
+			const formatNames = await getCustomFormatsForProfile(cache, selection.profileName, arrType);
+			for (const formatName of formatNames) {
+				if (expected.has(formatName)) continue;
+
+				const pcdFormat = await fetchCustomFormatFromPcd(cache, formatName);
+				if (!pcdFormat) {
+					throw new Error(`Custom format "${formatName}" not found in database ${databaseId}`);
+				}
+
+				const arrFormat = transformCustomFormat(pcdFormat, arrType);
+				arrFormat.name = formatName;
+				expected.set(formatName, arrFormat);
+			}
+		}
+
+		if (expected.size > 0) {
+			result.set(databaseId, { databaseName, formats: [...expected.values()] });
+		}
+	}
+
+	return result;
+}
+
+export function compareCustomFormatDriftPerDatabase(
+	perDb: Map<number, PerDatabaseExpectedFormats>,
+	actualFormats: ArrCustomFormat[]
+): { count: number; diffs: DatabaseCustomFormatDriftDiff[] } {
+	const diffs: DatabaseCustomFormatDriftDiff[] = [];
+	let count = 0;
+
+	for (const [databaseId, { databaseName, formats }] of perDb) {
+		const result = compareCustomFormatDrift(formats, actualFormats);
+		count += result.count;
+		diffs.push({ databaseId, databaseName, diff: result.diff });
+	}
+
+	return { count, diffs };
 }
 
 export async function checkCustomFormatDrift(

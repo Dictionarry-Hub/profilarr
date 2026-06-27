@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import Toggle from '$ui/toggle/Toggle.svelte';
+	import DraggableCard from '$ui/list/DraggableCard.svelte';
 	import SyncFooter from './SyncFooter.svelte';
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import Label from '$ui/label/Label.svelte';
+	import Button from '$ui/button/Button.svelte';
+	import { ChevronUp, ChevronDown } from '@lucide/svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
@@ -20,7 +23,13 @@
 		message?: string;
 	}
 
+	interface DatabasePriority {
+		databaseId: number;
+		priority: number;
+	}
+
 	export let databases: DatabaseWithProfiles[];
+	export let databasePriorities: DatabasePriority[] = [];
 	export let state: Record<number, Record<string, boolean>> = {};
 	export let syncTrigger: 'manual' | 'on_pull' | 'schedule' = 'manual';
 	export let cronExpression: string = '0 * * * *';
@@ -33,10 +42,17 @@
 	let syncing = false;
 
 	// Track saved state for dirty detection
-	let savedState = JSON.stringify({ state, syncTrigger, cronExpression });
-	$: currentState = JSON.stringify({ state, syncTrigger, cronExpression });
+	let savedState = JSON.stringify({ state, syncTrigger, cronExpression, databasePriorities });
+	$: currentState = JSON.stringify({ state, syncTrigger, cronExpression, databasePriorities });
 	export let isDirty = false;
 	$: isDirty = currentState !== savedState;
+
+	// Order databases by priority
+	$: orderedDatabases = [...databases].sort((a, b) => {
+		const pa = databasePriorities.find((p) => p.databaseId === a.id)?.priority ?? Infinity;
+		const pb = databasePriorities.find((p) => p.databaseId === b.id)?.priority ?? Infinity;
+		return pa - pb;
+	});
 
 	// Initialize state for all databases/profiles
 	$: {
@@ -69,29 +85,9 @@
 		Object.values(db).some((selected) => selected)
 	);
 
-	// Track which database currently has selections (null = none)
-	$: activeDatabaseId = (() => {
-		for (const [dbId, profiles] of Object.entries(state)) {
-			if (Object.values(profiles).some((selected) => selected)) {
-				return parseInt(dbId);
-			}
-		}
-		return null;
-	})();
-
 	function setProfile(databaseId: number, profileName: string, checked: boolean) {
-		if (checked) {
-			// Clear selections from other databases (1 database per category)
-			for (const dbId of Object.keys(state)) {
-				if (parseInt(dbId) !== databaseId) {
-					for (const name of Object.keys(state[parseInt(dbId)])) {
-						state[parseInt(dbId)][name] = false;
-					}
-				}
-			}
-		}
 		state[databaseId][profileName] = checked;
-		state = { ...state }; // Reassign to trigger reactivity
+		state = { ...state };
 	}
 
 	function getSelections(): { databaseId: number; profileName: string }[] {
@@ -106,11 +102,77 @@
 		return selections;
 	}
 
+	// ── Drag-and-drop reordering ────────────────────────────────────────
+
+	let draggedDb: { id: number; index: number } | null = null;
+	let hoverTargetIndex: number | null = null;
+	let lastTargetIndex: number | null = null;
+
+	function getTargetFromPoint(x: number, y: number): { index: number } | null {
+		const el = document.elementFromPoint(x, y);
+		const card = el?.closest('[data-db-index]') as HTMLElement | null;
+		if (!card) return null;
+		const idx = parseInt(card.dataset.dbIndex!, 10);
+		if (isNaN(idx) || idx < 0 || idx >= orderedDatabases.length) return null;
+		return { index: idx };
+	}
+
+	function handlePointerDown(e: PointerEvent, database: DatabaseWithProfiles, index: number) {
+		e.preventDefault();
+		document.body.classList.add('dragging');
+		draggedDb = { id: database.id, index };
+		document.addEventListener('pointermove', handlePointerMove);
+		document.addEventListener('pointerup', handlePointerUp);
+	}
+
+	function handlePointerMove(e: PointerEvent) {
+		if (!draggedDb) return;
+		const target = getTargetFromPoint(e.clientX, e.clientY);
+		if (!target || target.index === lastTargetIndex) return;
+		lastTargetIndex = target.index;
+		hoverTargetIndex = target.index;
+
+		if (target.index !== draggedDb.index) {
+			const newOrder = [...orderedDatabases];
+			const [moved] = newOrder.splice(draggedDb.index, 1);
+			newOrder.splice(target.index, 0, moved);
+			orderedDatabases = newOrder;
+			databasePriorities = newOrder.map((db, i) => ({ databaseId: db.id, priority: i + 1 }));
+			draggedDb = { ...draggedDb, index: target.index };
+		}
+	}
+
+	function handlePointerUp() {
+		resetDragState();
+	}
+
+	function resetDragState() {
+		draggedDb = null;
+		hoverTargetIndex = null;
+		lastTargetIndex = null;
+		document.removeEventListener('pointermove', handlePointerMove);
+		document.removeEventListener('pointerup', handlePointerUp);
+		document.body.classList.remove('dragging');
+	}
+
+	// Mobile reorder buttons
+	function moveDatabase(index: number, direction: -1 | 1) {
+		const newIndex = index + direction;
+		if (newIndex < 0 || newIndex >= orderedDatabases.length) return;
+		const newOrder = [...orderedDatabases];
+		[newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]];
+		orderedDatabases = newOrder;
+		databasePriorities = newOrder.map((db, i) => ({ databaseId: db.id, priority: i + 1 }));
+	}
+
+	// ── Save / Sync ─────────────────────────────────────────────────────
+
 	async function handleSave() {
 		saving = true;
 		try {
 			const formData = new FormData();
 			formData.set('selections', JSON.stringify(getSelections()));
+			formData.set('priorities', JSON.stringify(databasePriorities));
 			formData.set('trigger', syncTrigger);
 			formData.set('cron', cronExpression);
 
@@ -121,8 +183,7 @@
 
 			if (response.ok) {
 				alertStore.add('success', 'Quality profiles sync config saved');
-				// Update saved state to current
-				savedState = JSON.stringify({ state, syncTrigger, cronExpression });
+				savedState = JSON.stringify({ state, syncTrigger, cronExpression, databasePriorities });
 			} else {
 				alertStore.add('error', 'Failed to save quality profiles sync config');
 			}
@@ -165,7 +226,7 @@
 		<div class="min-w-0 md:flex-1">
 			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Quality Profiles</h2>
 			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-				Select quality profiles to sync to this instance.
+				Select quality profiles to sync. Drag databases to set priority.
 			</p>
 		</div>
 		{#if qpProgress || cfProgress}
@@ -210,43 +271,61 @@
 
 	<!-- Content -->
 	<div class="p-6">
-		{#if databases.length === 0}
+		{#if orderedDatabases.length === 0}
 			<p class="text-sm text-neutral-500 dark:text-neutral-400">No databases configured</p>
 		{:else}
-			<div class="space-y-6">
-				{#each databases as database}
-					{@const isInactive = activeDatabaseId !== null && activeDatabaseId !== database.id}
-					<div class="space-y-3">
-						<h3
-							class="text-sm font-semibold text-neutral-900 dark:text-neutral-50"
-							class:opacity-50={isInactive}
-						>
-							{database.name}
-						</h3>
+			<div class="space-y-3">
+				{#each orderedDatabases as database, index (database.id)}
+					<DraggableCard
+						isDragging={draggedDb?.index === index}
+						onDragHandlePointerDown={(e) => handlePointerDown(e, database, index)}
+						contentClass="p-4"
+						data-db-index={index}
+					>
+						<div class="space-y-3">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center gap-2">
+									<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
+										{database.name}
+									</h3>
+									<!-- Mobile reorder buttons -->
+									<div class="flex gap-1 md:hidden">
+										<Button
+											icon={ChevronUp}
+											size="xs"
+											disabled={index === 0}
+											on:click={() => moveDatabase(index, -1)}
+										/>
+										<Button
+											icon={ChevronDown}
+											size="xs"
+											disabled={index === orderedDatabases.length - 1}
+											on:click={() => moveDatabase(index, 1)}
+										/>
+									</div>
+								</div>
+								<Label variant="info" size="sm" rounded="md">
+									Priority #{index + 1}
+								</Label>
+							</div>
 
-						{#if database.qualityProfiles.length === 0}
-							<p class="text-sm text-neutral-500 dark:text-neutral-400">No quality profiles</p>
-						{:else}
-							<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-5">
-								{#each database.qualityProfiles as profile}
-									<Tooltip
-										text={isInactive ? 'Only one database can be used per instance.' : ''}
-										position="bottom"
-										fullWidth
-									>
+							{#if database.qualityProfiles.length === 0}
+								<p class="text-sm text-neutral-500 dark:text-neutral-400">No quality profiles</p>
+							{:else}
+								<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-5">
+									{#each database.qualityProfiles as profile}
 										<Toggle
 											checked={isSelected(database.id, profile.name)}
-											disabled={isInactive}
 											label={profile.name}
 											fullWidth
 											ariaLabel={`Toggle quality profile ${profile.name} from ${database.name}`}
 											on:change={(e) => setProfile(database.id, profile.name, e.detail)}
 										/>
-									</Tooltip>
-								{/each}
-							</div>
-						{/if}
-					</div>
+									{/each}
+								</div>
+							{/if}
+						</div>
+					</DraggableCard>
 				{/each}
 			</div>
 		{/if}

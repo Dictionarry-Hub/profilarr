@@ -9,9 +9,9 @@ import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
 import { calculateNextRun, validateCronExpression } from '$lib/server/jobs/scheduleUtils.ts';
 import { FEATURES } from '$shared/features.ts';
-import { buildDriftDisplayEntities } from '$drift/display.ts';
+import { buildDriftDisplayEntitiesForInstance } from '$drift/display.ts';
 
-export const load: ServerLoad = ({ params }) => {
+export const load: ServerLoad = async ({ params }) => {
 	const id = parseInt(params.id || '', 10);
 
 	if (isNaN(id)) {
@@ -27,6 +27,8 @@ export const load: ServerLoad = ({ params }) => {
 	const driftStatus = arrDriftStatusQueries.getByInstanceId(id);
 	const { api_key: _, ...safeInstance } = instance;
 	const diff = driftStatus?.diff ?? {};
+	const driftEntities = await buildDriftDisplayEntitiesForInstance(diff, instance.type, id);
+	const duplicateDriftCount = driftEntities.filter((entity) => entity.duplicateDrift).length;
 
 	return {
 		instance: safeInstance,
@@ -41,7 +43,11 @@ export const load: ServerLoad = ({ params }) => {
 			lastCheckedAt: driftStatus?.lastCheckedAt ?? null,
 			lastError: driftStatus?.lastError ?? null
 		},
-		driftEntities: buildDriftDisplayEntities(diff, instance.type)
+		driftEntities,
+		driftView: {
+			duplicateDriftCount,
+			hasDuplicateDrift: duplicateDriftCount > 0
+		}
 	};
 };
 

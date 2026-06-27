@@ -52,7 +52,12 @@ function buildDriftedItemBlocks(
 		blocks.push({
 			kind: 'section',
 			title: label,
-			content: group.map((entity) => `- ${entity.title}: ${entity.summary}`).join('\n')
+			content: group
+				.map((entity) => {
+					const db = entity.databaseName ? ` (${entity.databaseName})` : '';
+					return `- ${entity.title}${db}: ${entity.summary}`;
+				})
+				.join('\n')
 		});
 	}
 

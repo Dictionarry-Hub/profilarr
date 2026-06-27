@@ -1,5 +1,6 @@
 import { db } from '../db.ts';
 import { normalizeArrInstanceUrl } from '$arr/url.ts';
+import { arrSyncQueries } from './arrSync.ts';
 
 /**
  * Types for arr_instances table
@@ -64,7 +65,13 @@ export const arrInstancesQueries = {
 
 		// Get the last inserted ID
 		const result = db.queryFirst<{ id: number }>('SELECT last_insert_rowid() as id');
-		return result?.id ?? 0;
+		const id = result?.id ?? 0;
+
+		if (id > 0) {
+			arrSyncQueries.ensureAllInstancePriorities(id);
+		}
+
+		return id;
 	},
 
 	/**

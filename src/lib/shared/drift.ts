@@ -39,14 +39,24 @@ export interface DriftDisplayChange {
 	tone: DriftDisplayTone;
 }
 
+export interface DriftDisplayDuplicateDrift {
+	reason: 'lower_priority_duplicate';
+	key: string;
+	winnerDatabaseId: number;
+	winnerDatabaseName: string;
+}
+
 export interface DriftDisplayEntity {
 	id: string;
 	section: DriftSection;
 	sectionLabel: string;
 	title: string;
+	databaseId?: number;
+	databaseName?: string;
 	state: DriftDisplayState;
 	stateLabel: string;
 	tone: DriftDisplayTone;
 	summary: string;
 	changes: DriftDisplayChange[];
+	duplicateDrift?: DriftDisplayDuplicateDrift;
 }
