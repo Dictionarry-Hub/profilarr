@@ -234,6 +234,8 @@ Key behaviors:
 - Enum conditions (`source`, `resolution`, `indexer_flag`, etc.) resolve PCD
   string names to Arr integer IDs via `mappings.ts`. Radarr and Sonarr use
   different integer values for the same concept.
+- Size condition bounds are stored as bytes and rounded to two decimal GB
+  values before syncing to Arr.
 - `syncCustomFormats()` returns a `Map<name, arrId>` covering every CF on the
   instance (not just synced ones). Quality profiles need this because the Arr API
   requires every CF to appear in profile `formatItems`.

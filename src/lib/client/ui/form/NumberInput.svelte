@@ -11,13 +11,14 @@
 		correction: { inputValue: number; value: number; reason: CorrectionReason };
 	}>();
 
-	// Props
 	export let name: string;
 	export let id: string = name;
 	export let value: number | undefined = undefined;
 	export let min: number | undefined = undefined;
 	export let max: number | undefined = undefined;
 	export let step: number = 1;
+	export let maxDecimals: number | undefined = undefined;
+	export let emptyStepValue: number | undefined = undefined;
 	export let required: boolean = false;
 	export let disabled: boolean = false;
 	export let warningTooltip: string = '';
@@ -47,6 +48,7 @@
 	let repeatingDirection: StepDirection | null = null;
 	let repeatStartedAt = 0;
 	let ignoreNextClick = false;
+	let inputMode: 'decimal' | 'numeric' = 'numeric';
 
 	onMount(() => {
 		if (responsive && typeof window !== 'undefined') {
@@ -66,6 +68,21 @@
 
 	function handleMediaChange(e: MediaQueryListEvent) {
 		isSmallScreen = e.matches;
+	}
+
+	function getDecimalPlaces(number: number): number {
+		if (!Number.isFinite(number)) return 0;
+		const text = String(number);
+		if (text.includes('e-')) {
+			const [, exponent] = text.split('e-');
+			return Number(exponent) || 0;
+		}
+		return text.split('.')[1]?.length ?? 0;
+	}
+
+	function normalizeMaxDecimals(value: number | undefined): number | undefined {
+		if (value === undefined || !Number.isFinite(value)) return undefined;
+		return Math.max(0, Math.floor(value));
 	}
 
 	$: isCompact = compact || (responsive && isSmallScreen);
@@ -102,13 +119,82 @@
 	$: autoWidthStyle = effectiveAutoWidth
 		? `width: calc(${autoWidthCharacters}ch + ${autoWidthPadding});`
 		: undefined;
+	$: stepDecimals = getDecimalPlaces(step);
+	$: normalizedMaxDecimals = normalizeMaxDecimals(maxDecimals);
+	$: effectiveMaxDecimals = normalizedMaxDecimals ?? stepDecimals;
+	$: allowDecimals = effectiveMaxDecimals > 0;
+	$: inputMode = allowDecimals ? 'decimal' : 'numeric';
+	$: draftState = getDraftState(inputValue);
+	$: hasInvalidDraft =
+		isFocused &&
+		(draftState.status === 'invalid' ||
+			(draftState.status === 'valid' && isOutsideRange(draftState.value)));
+	$: inputStateClass = hasInvalidDraft
+		? 'border-red-500 bg-white focus:border-red-500 dark:border-red-500/70 dark:bg-neutral-800/50 dark:focus:border-red-400'
+		: 'border-neutral-300 bg-white focus:border-neutral-400 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:focus:border-neutral-600';
 	$: canIncrement = max === undefined || value === undefined || value < max;
 	$: canDecrement = min === undefined || value === undefined || value > min;
 	$: incrementDisabled = disabled || !canIncrement;
 	$: decrementDisabled = disabled || !canDecrement;
 
 	$: if (!isFocused) {
-		inputValue = value === undefined || value === null ? '' : String(value);
+		inputValue = formatValue(value);
+	}
+
+	function formatValue(nextValue: number | undefined | null): string {
+		if (nextValue === undefined || nextValue === null) return '';
+		if (normalizedMaxDecimals !== undefined || stepDecimals > 0) {
+			return String(roundToDecimals(nextValue, effectiveMaxDecimals));
+		}
+		return String(nextValue);
+	}
+
+	function roundToDecimals(rawValue: number, decimals: number): number {
+		if (decimals <= 0) return Math.round(rawValue);
+		const factor = 10 ** decimals;
+		return Math.round((rawValue + Number.EPSILON) * factor) / factor;
+	}
+
+	function normalizeValue(rawValue: number): {
+		value: number;
+		reason: CorrectionReason | undefined;
+	} {
+		return clampValue(roundToDecimals(rawValue, effectiveMaxDecimals));
+	}
+
+	function getDecimalLength(text: string): number {
+		const [, decimals = ''] = text.split('.');
+		return decimals.length;
+	}
+
+	function isEmptyDraft(text: string): boolean {
+		return text === '' || text === '-' || text === '.' || text === '-.';
+	}
+
+	function isIncompleteDecimal(text: string): boolean {
+		return allowDecimals && /^-?\d+\.$/.test(text);
+	}
+
+	function isOutsideRange(rawValue: number): boolean {
+		return (min !== undefined && rawValue < min) || (max !== undefined && rawValue > max);
+	}
+
+	function getDraftState(
+		text: string
+	): { status: 'empty' | 'partial' | 'invalid' } | { status: 'valid'; value: number } {
+		if (text === '') return { status: 'empty' };
+		if (isEmptyDraft(text) || isIncompleteDecimal(text)) return { status: 'partial' };
+
+		const pattern = allowDecimals ? /^-?(?:\d+|\d+\.\d+|\.\d+)$/ : /^-?\d+$/;
+		if (!pattern.test(text)) return { status: 'invalid' };
+
+		if (allowDecimals && getDecimalLength(text) > effectiveMaxDecimals) {
+			return { status: 'invalid' };
+		}
+
+		const rawValue = Number(text);
+		if (!Number.isFinite(rawValue)) return { status: 'invalid' };
+		return { status: 'valid', value: rawValue };
 	}
 
 	function clampValue(rawValue: number): { value: number; reason: CorrectionReason | undefined } {
@@ -128,9 +214,16 @@
 		return { value: newValue, reason };
 	}
 
-	function updateValue(newValue: number, rawValue: number = newValue, reason?: CorrectionReason) {
+	function updateValue(
+		newValue: number,
+		rawValue: number = newValue,
+		reason?: CorrectionReason,
+		syncInput = true
+	) {
 		value = newValue;
-		inputValue = String(newValue);
+		if (syncInput) {
+			inputValue = formatValue(newValue);
+		}
 		onchange?.(newValue);
 		dispatch('change', newValue);
 		if (reason && rawValue !== newValue) {
@@ -138,23 +231,38 @@
 		}
 	}
 
-	// Increment/decrement handlers
+	function seedFromEmptyValue(): boolean {
+		if (value !== undefined || emptyStepValue === undefined || !Number.isFinite(emptyStepValue)) {
+			return false;
+		}
+
+		const result = normalizeValue(emptyStepValue);
+		updateValue(result.value, emptyStepValue, result.reason);
+		return true;
+	}
+
 	function increment() {
+		if (seedFromEmptyValue()) return;
+
 		const currentValue = value ?? min ?? 0;
 		if (max !== undefined && currentValue >= max) {
 			onMaxBlocked?.();
 			return;
 		}
-		updateValue(max === undefined ? currentValue + step : Math.min(max, currentValue + step));
+		const result = normalizeValue(currentValue + step);
+		updateValue(result.value, currentValue + step, result.reason);
 	}
 
 	function decrement() {
+		if (seedFromEmptyValue()) return;
+
 		const currentValue = value ?? min ?? 0;
 		if (min !== undefined && currentValue <= min) {
 			onMinBlocked?.();
 			return;
 		}
-		updateValue(min === undefined ? currentValue - step : Math.max(min, currentValue - step));
+		const result = normalizeValue(currentValue - step);
+		updateValue(result.value, currentValue - step, result.reason);
 	}
 
 	function canStep(direction: StepDirection): boolean {
@@ -169,10 +277,33 @@
 		}
 	}
 
-	function commitFocusedValue() {
-		if (isFocused && validateOn === 'blur') {
-			handleBlur();
+	function commitInputValue() {
+		if (isEmptyDraft(inputValue)) {
+			value = undefined;
+			dispatch('change', undefined);
+			inputValue = '';
+			return;
 		}
+
+		if (!/^-?(?:\d+\.?\d*|\.\d+)$/.test(inputValue)) {
+			inputValue = formatValue(value);
+			return;
+		}
+
+		const rawValue = Number(inputValue);
+		if (!Number.isFinite(rawValue)) {
+			inputValue = formatValue(value);
+			return;
+		}
+
+		const result = normalizeValue(rawValue);
+		updateValue(result.value, rawValue, result.reason);
+	}
+
+	function commitFocusedValue() {
+		if (!isFocused) return;
+		isFocused = false;
+		commitInputValue();
 	}
 
 	function clearIgnoredClickReset() {
@@ -223,9 +354,7 @@
 	}
 
 	function startStepRepeat(direction: StepDirection, event: PointerEvent) {
-		if (!canStep(direction)) {
-			return;
-		}
+		if (!canStep(direction)) return;
 
 		clearStepRepeat();
 		clearIgnoredClickReset();
@@ -254,73 +383,59 @@
 		stepValue(direction);
 	}
 
-	// Validate on input
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;
-
 		inputValue = target.value;
 
-		// Allow partial input states (e.g., "-", ".", "-.")
-		if (inputValue === '' || inputValue === '-' || inputValue === '.' || inputValue === '-.') {
-			return;
-		}
+		const state = getDraftState(inputValue);
+		if (state.status !== 'valid' || validateOn === 'blur') return;
 
-		const rawValue = Number(inputValue);
-
-		if (Number.isNaN(rawValue)) {
-			return;
-		}
-
-		if (validateOn === 'blur') {
-			return;
-		}
-
-		const result = clampValue(rawValue);
-		updateValue(result.value, rawValue, result.reason);
+		updateValue(state.value, state.value, undefined, false);
 	}
 
 	function handleBlur() {
 		if (!isFocused) return;
 		isFocused = false;
-		if (inputValue === '' || inputValue === '-' || inputValue === '.' || inputValue === '-.') {
-			value = undefined;
-			dispatch('change', undefined);
-			inputValue = '';
-			return;
-		}
-
-		const rawValue = Number(inputValue);
-		if (Number.isNaN(rawValue)) {
-			inputValue = value === undefined || value === null ? '' : String(value);
-			return;
-		}
-
-		const result = clampValue(rawValue);
-		updateValue(result.value, rawValue, result.reason);
+		commitInputValue();
 	}
 
 	function handleFocus() {
 		isFocused = true;
 	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (disabled || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
+
+		event.preventDefault();
+		if (isFocused) {
+			commitInputValue();
+			isFocused = true;
+		}
+		stepValue(event.key === 'ArrowUp' ? 'increment' : 'decrement');
+	}
 </script>
 
 <div class="relative">
 	<input
-		type="number"
+		type="text"
 		{id}
 		{name}
+		inputmode={inputMode}
+		role="spinbutton"
+		aria-valuemin={min}
+		aria-valuemax={max}
+		aria-valuenow={value}
+		aria-invalid={hasInvalidDraft ? 'true' : undefined}
 		bind:value={inputValue}
 		oninput={handleInput}
 		onfocus={handleFocus}
 		onblur={handleBlur}
-		{min}
-		{max}
-		{step}
+		onkeydown={handleKeydown}
 		{required}
 		{disabled}
 		{placeholder}
 		style={autoWidthStyle}
-		class="block {widthClass} [appearance:textfield] border border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400 transition-colors focus:border-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-500 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-50 dark:placeholder-neutral-500 dark:focus:border-neutral-600 dark:disabled:bg-neutral-800/40 dark:disabled:text-neutral-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none {inputSizeClasses} {fontClass}"
+		class="block {widthClass} border text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-500 dark:text-neutral-50 dark:placeholder-neutral-500 dark:disabled:bg-neutral-800/40 dark:disabled:text-neutral-500 {inputSizeClasses} {fontClass} {inputStateClass}"
 	/>
 
 	{#if warningTooltip}
@@ -333,7 +448,6 @@
 		</div>
 	{/if}
 
-	<!-- Custom increment/decrement buttons (hidden on mobile when responsive) -->
 	{#if !hideButtons}
 		<div class="absolute top-0 right-0 bottom-0 flex flex-col">
 			<button
