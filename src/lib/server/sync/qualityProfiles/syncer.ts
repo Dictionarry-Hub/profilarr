@@ -105,6 +105,7 @@ export class QualityProfileSyncer extends BaseSyncer {
 
 			const allFormatIdMap = new Map<string, number>();
 			const allSyncedProfiles: SyncedProfileSummary[] = [];
+			const failures: { databaseId: number; error: string }[] = [];
 
 			for (const databaseId of sortedDbIds) {
 				const dbSelections = selectionsByDb.get(databaseId)!;
@@ -126,7 +127,7 @@ export class QualityProfileSyncer extends BaseSyncer {
 					for (const [k, v] of formatIdMap) allFormatIdMap.set(k, v);
 
 					const cache = getCache(databaseId);
-					if (!cache) continue;
+					if (!cache) throw new Error(`PCD cache not found for database ${databaseId}`);
 					const qualityMappings = await getQualityApiMappings(cache, this.instanceType);
 
 					const synced = await this.syncQualityProfiles(
@@ -161,7 +162,20 @@ export class QualityProfileSyncer extends BaseSyncer {
 							meta: { instanceId: this.instanceId, databaseId, error: errorMsg }
 						}
 					);
+					failures.push({ databaseId, error: errorMsg });
 				}
+			}
+
+			if (failures.length > 0) {
+				const error = failures
+					.map((failure) => `database ${failure.databaseId}: ${failure.error}`)
+					.join('; ');
+				return {
+					success: false,
+					itemsSynced: allSyncedProfiles.length,
+					items: allSyncedProfiles.map((p) => ({ name: p.name, action: p.action })),
+					error: `Quality profile sync failed for ${failures.length} database(s): ${error}`
+				};
 			}
 
 			await logger.info(`Completed quality profile sync for "${this.instanceName}"`, {
@@ -206,7 +220,7 @@ export class QualityProfileSyncer extends BaseSyncer {
 				source: 'Sync:QualityProfiles',
 				meta: { instanceId: this.instanceId, databaseId }
 			});
-			return { profiles: [], customFormats: new Map() };
+			throw new Error(`Database ${databaseId} not found`);
 		}
 
 		const cache = getCache(databaseId);
@@ -223,7 +237,7 @@ export class QualityProfileSyncer extends BaseSyncer {
 					databaseName: dbInstance?.name ?? null
 				}
 			});
-			return { profiles: [], customFormats: new Map() };
+			throw new Error(`PCD cache not found for database ${databaseId}`);
 		}
 
 		const profiles: ProfileSyncData[] = [];
