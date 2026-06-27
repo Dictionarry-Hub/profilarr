@@ -155,7 +155,10 @@
 		return Math.round((rawValue + Number.EPSILON) * factor) / factor;
 	}
 
-	function normalizeValue(rawValue: number): { value: number; reason: CorrectionReason | undefined } {
+	function normalizeValue(rawValue: number): {
+		value: number;
+		reason: CorrectionReason | undefined;
+	} {
 		return clampValue(roundToDecimals(rawValue, effectiveMaxDecimals));
 	}
 

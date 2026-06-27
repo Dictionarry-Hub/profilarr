@@ -204,14 +204,11 @@
 		return Math.round((bytes / BYTES_PER_GB + Number.EPSILON) * factor) / factor;
 	}
 
-	$: minSizeGB = condition.size?.minBytes != null
-		? bytesToDisplayGb(condition.size.minBytes)
-		: undefined;
-	$: maxSizeGB = condition.size?.maxBytes != null
-		? bytesToDisplayGb(condition.size.maxBytes)
-		: undefined;
-	$: minSizeEmptyStepValue =
-		maxSizeGB == null ? undefined : Math.max(0, maxSizeGB - SIZE_STEP_GB);
+	$: minSizeGB =
+		condition.size?.minBytes != null ? bytesToDisplayGb(condition.size.minBytes) : undefined;
+	$: maxSizeGB =
+		condition.size?.maxBytes != null ? bytesToDisplayGb(condition.size.maxBytes) : undefined;
+	$: minSizeEmptyStepValue = maxSizeGB == null ? undefined : Math.max(0, maxSizeGB - SIZE_STEP_GB);
 	$: maxSizeEmptyStepValue = minSizeGB == null ? undefined : minSizeGB + SIZE_STEP_GB;
 	$: hasInvalidSizeRange =
 		condition.size?.minBytes != null &&
