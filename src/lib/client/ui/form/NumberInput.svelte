@@ -18,6 +18,7 @@
 	export let max: number | undefined = undefined;
 	export let step: number = 1;
 	export let maxDecimals: number | undefined = undefined;
+	export let emptyStepValue: number | undefined = undefined;
 	export let required: boolean = false;
 	export let disabled: boolean = false;
 	export let warningTooltip: string = '';
@@ -226,7 +227,19 @@
 		}
 	}
 
+	function seedFromEmptyValue(): boolean {
+		if (value !== undefined || emptyStepValue === undefined || !Number.isFinite(emptyStepValue)) {
+			return false;
+		}
+
+		const result = normalizeValue(emptyStepValue);
+		updateValue(result.value, emptyStepValue, result.reason);
+		return true;
+	}
+
 	function increment() {
+		if (seedFromEmptyValue()) return;
+
 		const currentValue = value ?? min ?? 0;
 		if (max !== undefined && currentValue >= max) {
 			onMaxBlocked?.();
@@ -237,6 +250,8 @@
 	}
 
 	function decrement() {
+		if (seedFromEmptyValue()) return;
+
 		const currentValue = value ?? min ?? 0;
 		if (min !== undefined && currentValue <= min) {
 			onMinBlocked?.();

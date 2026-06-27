@@ -35,6 +35,10 @@
 	export let availablePatterns: { id: number; name: string; pattern: string }[] = [];
 	export let availableLanguages: { name: string; radarr: boolean; sonarr: boolean }[] = [];
 
+	const BYTES_PER_GB = 1024 * 1024 * 1024;
+	const SIZE_STEP_GB = 0.01;
+	const SIZE_MAX_DECIMALS = 2;
+
 	// Computed states based on mode
 	let lastEditedSizeField: 'min' | 'max' | null = null;
 	$: isDraft = mode === 'draft';
@@ -195,12 +199,15 @@
 	$: typeOptions = filteredConditionTypes.map((t) => ({ value: t.value, label: t.label }));
 
 	// Size helpers (convert between bytes and GB for display)
-	$: minSizeGB = condition.size?.minBytes
-		? condition.size.minBytes / 1024 / 1024 / 1024
+	$: minSizeGB = condition.size?.minBytes != null
+		? condition.size.minBytes / BYTES_PER_GB
 		: undefined;
-	$: maxSizeGB = condition.size?.maxBytes
-		? condition.size.maxBytes / 1024 / 1024 / 1024
+	$: maxSizeGB = condition.size?.maxBytes != null
+		? condition.size.maxBytes / BYTES_PER_GB
 		: undefined;
+	$: minSizeEmptyStepValue =
+		maxSizeGB == null ? undefined : Math.max(0, maxSizeGB - SIZE_STEP_GB);
+	$: maxSizeEmptyStepValue = minSizeGB == null ? undefined : minSizeGB + SIZE_STEP_GB;
 	$: hasInvalidSizeRange =
 		condition.size?.minBytes != null &&
 		condition.size?.maxBytes != null &&
@@ -217,7 +224,7 @@
 		emitChange({
 			size: {
 				...currentSize,
-				minBytes: value == null ? null : Math.round(value * 1024 * 1024 * 1024)
+				minBytes: value == null ? null : Math.round(value * BYTES_PER_GB)
 			}
 		});
 	}
@@ -228,7 +235,7 @@
 		emitChange({
 			size: {
 				...currentSize,
-				maxBytes: value == null ? null : Math.round(value * 1024 * 1024 * 1024)
+				maxBytes: value == null ? null : Math.round(value * BYTES_PER_GB)
 			}
 		});
 	}
@@ -367,8 +374,9 @@
 								name="minSize"
 								value={minSizeGB}
 								min={0}
-								step={0.01}
-								maxDecimals={2}
+								step={SIZE_STEP_GB}
+								maxDecimals={SIZE_MAX_DECIMALS}
+								emptyStepValue={minSizeEmptyStepValue}
 								warningTooltip={minSizeWarning}
 								font="mono"
 								responsive
@@ -382,8 +390,9 @@
 								name="maxSize"
 								value={maxSizeGB}
 								min={0}
-								step={0.01}
-								maxDecimals={2}
+								step={SIZE_STEP_GB}
+								maxDecimals={SIZE_MAX_DECIMALS}
+								emptyStepValue={maxSizeEmptyStepValue}
 								warningTooltip={maxSizeWarning}
 								font="mono"
 								responsive

@@ -143,7 +143,9 @@ text while focused, so decimal fields can accept in-progress values like `.`,
 Use `validateOn="blur"` when the field should allow free typing and only
 commit min/max validation after focus leaves the input. Use decimal `step`
 values and `maxDecimals` for float inputs; button clicks increment by `step`,
-and blur normalizes the draft back to the allowed precision and range.
+and blur normalizes the draft back to the allowed precision and range. Use
+`emptyStepValue` when an empty input needs a domain-specific first step, such
+as seeding an empty range bound from its paired value.
 
 ```svelte
 <!-- src/routes/settings/general/+page.svelte:472 -->
