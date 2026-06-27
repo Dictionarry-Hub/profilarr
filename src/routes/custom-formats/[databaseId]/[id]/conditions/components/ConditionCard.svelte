@@ -107,6 +107,24 @@
 		emitChange({ patterns: pattern ? [{ name: pattern.name, pattern: pattern.pattern }] : [] });
 	}
 
+	function patternFromName(name: string) {
+		const normalizedName = name.trim().toLowerCase();
+		if (!normalizedName) return null;
+		return availablePatterns.find((p) => p.name.toLowerCase() === normalizedName) ?? null;
+	}
+
+	function handleNameChange(name: string) {
+		const updates: Partial<ConditionData> = { name };
+		const hasSelectedPattern = (condition.patterns?.length ?? 0) > 0;
+		if (isPatternType && !hasSelectedPattern) {
+			const pattern = patternFromName(name);
+			if (pattern) {
+				updates.patterns = [{ name: pattern.name, pattern: pattern.pattern }];
+			}
+		}
+		emitChange(updates);
+	}
+
 	// Reactive selected value based on condition type
 	$: selectedValue = (() => {
 		if (isPatternType) {
@@ -292,7 +310,7 @@
 					value={condition.name}
 					placeholder="Condition name"
 					description={nameError}
-					on:input={(e) => emitChange({ name: e.detail })}
+					on:input={(e) => handleNameChange(e.detail)}
 				/>
 			</div>
 			<div class="w-full min-w-0 shrink-0 wide:w-52" data-onboarding="cf-cond-type">
