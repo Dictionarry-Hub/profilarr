@@ -16,9 +16,12 @@ import {
 import { sortConditions } from '$shared/pcd/conditions.ts';
 
 const BYTES_PER_GB = 1024 * 1024 * 1024;
+const SIZE_GB_DECIMALS = 2;
 
 function bytesToGb(value: number | null): number {
-	return value == null ? 0 : value / BYTES_PER_GB;
+	if (value == null) return 0;
+	const factor = 10 ** SIZE_GB_DECIMALS;
+	return Math.round((value / BYTES_PER_GB + Number.EPSILON) * factor) / factor;
 }
 
 // =============================================================================
