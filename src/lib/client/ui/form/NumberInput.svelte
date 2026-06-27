@@ -48,6 +48,7 @@
 	let repeatingDirection: StepDirection | null = null;
 	let repeatStartedAt = 0;
 	let ignoreNextClick = false;
+	let inputMode: 'decimal' | 'numeric' = 'numeric';
 
 	onMount(() => {
 		if (responsive && typeof window !== 'undefined') {
