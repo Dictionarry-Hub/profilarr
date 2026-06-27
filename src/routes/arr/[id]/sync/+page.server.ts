@@ -381,7 +381,7 @@ export const actions: Actions = {
 				prioritiesJson || '[]'
 			);
 			if (priorities.length > 0) {
-				arrSyncQueries.saveDatabasePriorities(id, priorities);
+				await arrSyncQueries.saveDatabasePriorities(id, priorities);
 			}
 
 			await logger.info(`Quality profiles sync config saved for "${instance?.name}"`, {

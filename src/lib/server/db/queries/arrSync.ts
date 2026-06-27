@@ -914,19 +914,21 @@ export const arrSyncQueries = {
 			.map((row) => ({ databaseId: row.database_id, priority: row.priority }));
 	},
 
-	saveDatabasePriorities(
+	async saveDatabasePriorities(
 		instanceId: number,
 		priorities: { databaseId: number; priority: number }[]
-	): void {
-		db.execute('DELETE FROM arr_sync_database_priority WHERE instance_id = ?', instanceId);
-		for (const { databaseId, priority } of priorities) {
-			db.execute(
-				'INSERT INTO arr_sync_database_priority (instance_id, database_id, priority) VALUES (?, ?, ?)',
-				instanceId,
-				databaseId,
-				priority
-			);
-		}
+	): Promise<void> {
+		await db.transaction(() => {
+			db.execute('DELETE FROM arr_sync_database_priority WHERE instance_id = ?', instanceId);
+			for (const { databaseId, priority } of priorities) {
+				db.execute(
+					'INSERT INTO arr_sync_database_priority (instance_id, database_id, priority) VALUES (?, ?, ?)',
+					instanceId,
+					databaseId,
+					priority
+				);
+			}
+		});
 	},
 
 	ensureAllDatabasePriorities(databaseId: number): void {
