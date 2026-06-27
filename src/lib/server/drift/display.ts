@@ -210,7 +210,7 @@ function addDuplicateCandidates(
 	for (const [name, entries] of byName) {
 		const sorted = [...entries.values()].sort(
 			(a, b) =>
-				(priorityFor(a.databaseId, priorities) - priorityFor(b.databaseId, priorities)) ||
+				priorityFor(a.databaseId, priorities) - priorityFor(b.databaseId, priorities) ||
 				a.databaseId - b.databaseId
 		);
 		if (sorted.length < 2) continue;

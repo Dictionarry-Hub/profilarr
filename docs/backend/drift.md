@@ -209,12 +209,12 @@ is synced last and owns the Arr state for that name.
 
 Drift display entities can mark lower-priority rows with duplicate metadata:
 
-| Field                | Purpose                                             |
-| -------------------- | --------------------------------------------------- |
-| `reason`             | Currently `lower_priority_duplicate`                |
-| `key`                | Stable section/name key for the duplicated entity   |
-| `winnerDatabaseId`   | Database id that owns the effective synced version  |
-| `winnerDatabaseName` | Database name shown on the drift page               |
+| Field                | Purpose                                            |
+| -------------------- | -------------------------------------------------- |
+| `reason`             | Currently `lower_priority_duplicate`               |
+| `key`                | Stable section/name key for the duplicated entity  |
+| `winnerDatabaseId`   | Database id that owns the effective synced version |
+| `winnerDatabaseName` | Database name shown on the drift page              |
 
 Current behavior is intentionally conservative: duplicate drift is still shown,
 counted, hashed, included in progress chips, included in tab badges, and
