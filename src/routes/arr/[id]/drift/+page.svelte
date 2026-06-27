@@ -212,6 +212,12 @@
 							<Label variant="secondary" size="md" rounded="md" mono>
 								Last {formatSmartDateTime(data.status.lastCheckedAt, $serverTimezone, $dateFormat)}
 							</Label>
+							{#if data.driftView.hasDuplicateDrift}
+								<Label variant="info" size="md" rounded="md">
+									{data.driftView.duplicateDriftCount}
+									{data.driftView.duplicateDriftCount === 1 ? 'duplicate' : 'duplicates'}
+								</Label>
+							{/if}
 						</div>
 					{/if}
 				</div>
@@ -276,9 +282,17 @@
 						<svelte:fragment slot="cell" let:row let:column>
 							{#if column.key === 'title'}
 								<div class="flex flex-col gap-1">
-									<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-										{row.title}
-									</span>
+									<div class="flex flex-wrap items-center gap-1.5">
+										<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+											{row.title}
+										</span>
+										{#if row.duplicateDrift}
+											<Label variant="info" size="sm" rounded="md">Duplicate</Label>
+											<Label variant="secondary" size="sm" rounded="md">
+												{row.duplicateDrift.winnerDatabaseName} wins
+											</Label>
+										{/if}
+									</div>
 									{#if row.databaseName}
 										<span class="text-xs text-neutral-400 dark:text-neutral-500">
 											{row.databaseName}

@@ -10,11 +10,15 @@ import {
 import type {
 	DriftDiff,
 	DriftDisplayChange,
+	DriftDisplayDuplicateDrift,
 	DriftDisplayEntity,
 	DriftDisplayQualityItem,
 	DriftDisplayTone,
 	DriftDisplayValue
 } from '$shared/drift.ts';
+import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
+import { buildExpectedCustomFormatsPerDatabase } from './customFormats.ts';
 
 interface CustomFormatDiff {
 	missing?: unknown[];
@@ -116,45 +120,161 @@ const IMPLEMENTATION_LABELS: Record<string, string> = {
 	YearSpecification: 'Year'
 };
 
+type DuplicateDriftLookup = Map<string, DriftDisplayDuplicateDrift>;
+
+interface DuplicateCandidate {
+	databaseId: number;
+	databaseName: string;
+	name: string;
+}
+
 export function buildDriftDisplayEntities(
 	diff: DriftDiff,
-	arrType: string | undefined
+	arrType: string | undefined,
+	duplicateDriftLookup: DuplicateDriftLookup = new Map()
 ): DriftDisplayEntity[] {
 	const syncArrType = arrType === 'radarr' || arrType === 'sonarr' ? arrType : undefined;
 	return [
-		...buildCustomFormatEntities(diff.custom_formats, syncArrType),
-		...buildQualityProfileEntities(diff.quality_profiles, syncArrType),
+		...buildCustomFormatEntities(diff.custom_formats, syncArrType, duplicateDriftLookup),
+		...buildQualityProfileEntities(diff.quality_profiles, syncArrType, duplicateDriftLookup),
 		...buildDelayProfileEntities(diff.delay_profiles),
 		...buildMediaManagementEntities(diff.media_management)
 	];
 }
 
+export async function buildDriftDisplayEntitiesForInstance(
+	diff: DriftDiff,
+	arrType: string | undefined,
+	instanceId: number
+): Promise<DriftDisplayEntity[]> {
+	const syncArrType = arrType === 'radarr' || arrType === 'sonarr' ? arrType : undefined;
+	if (!syncArrType) return buildDriftDisplayEntities(diff, arrType);
+
+	try {
+		const duplicateDriftLookup = await buildDuplicateDriftLookup(instanceId, syncArrType);
+		return buildDriftDisplayEntities(diff, arrType, duplicateDriftLookup);
+	} catch {
+		return buildDriftDisplayEntities(diff, arrType);
+	}
+}
+
+async function buildDuplicateDriftLookup(
+	instanceId: number,
+	arrType: SyncArrType
+): Promise<DuplicateDriftLookup> {
+	const lookup: DuplicateDriftLookup = new Map();
+	const priorities = new Map(
+		arrSyncQueries.getDatabasePriorities(instanceId).map((row) => [row.databaseId, row.priority])
+	);
+	const getDatabaseName = (databaseId: number) =>
+		databaseInstancesQueries.getById(databaseId)?.name ?? `Database ${databaseId}`;
+
+	const qualityProfileCandidates = arrSyncQueries
+		.getQualityProfilesSync(instanceId)
+		.selections.map((selection) => ({
+			databaseId: selection.databaseId,
+			databaseName: getDatabaseName(selection.databaseId),
+			name: selection.profileName
+		}));
+	addDuplicateCandidates(lookup, 'quality_profiles', qualityProfileCandidates, priorities);
+
+	try {
+		const perDbFormats = await buildExpectedCustomFormatsPerDatabase(instanceId, arrType);
+		const customFormatCandidates: DuplicateCandidate[] = [];
+		for (const [databaseId, { databaseName, formats }] of perDbFormats) {
+			for (const format of formats) {
+				customFormatCandidates.push({ databaseId, databaseName, name: format.name });
+			}
+		}
+		addDuplicateCandidates(lookup, 'custom_formats', customFormatCandidates, priorities);
+	} catch {
+		// Duplicate drift is display metadata only, so stored drift should still render if caches moved.
+	}
+
+	return lookup;
+}
+
+function addDuplicateCandidates(
+	lookup: DuplicateDriftLookup,
+	section: 'custom_formats' | 'quality_profiles',
+	candidates: DuplicateCandidate[],
+	priorities: Map<number, number>
+): void {
+	const byName = new Map<string, Map<number, DuplicateCandidate>>();
+	for (const candidate of candidates) {
+		const entries = byName.get(candidate.name) ?? new Map<number, DuplicateCandidate>();
+		entries.set(candidate.databaseId, candidate);
+		byName.set(candidate.name, entries);
+	}
+
+	for (const [name, entries] of byName) {
+		const sorted = [...entries.values()].sort(
+			(a, b) =>
+				(priorityFor(a.databaseId, priorities) - priorityFor(b.databaseId, priorities)) ||
+				a.databaseId - b.databaseId
+		);
+		if (sorted.length < 2) continue;
+
+		const winner = sorted[0];
+		for (const candidate of sorted.slice(1)) {
+			lookup.set(duplicateLookupKey(section, candidate.databaseId, name), {
+				reason: 'lower_priority_duplicate',
+				key: `${section}:${name}`,
+				winnerDatabaseId: winner.databaseId,
+				winnerDatabaseName: winner.databaseName
+			});
+		}
+	}
+}
+
+function priorityFor(databaseId: number, priorities: Map<number, number>): number {
+	return priorities.get(databaseId) ?? Number.MAX_SAFE_INTEGER;
+}
+
+function duplicateLookupKey(
+	section: 'custom_formats' | 'quality_profiles',
+	databaseId: number,
+	name: string
+): string {
+	return `${section}:${databaseId}:${name}`;
+}
+
 function buildCustomFormatEntities(
 	raw: unknown,
-	arrType: SyncArrType | undefined
+	arrType: SyncArrType | undefined,
+	duplicateDriftLookup: DuplicateDriftLookup
 ): DriftDisplayEntity[] {
 	if (Array.isArray(raw)) {
 		const entities: DriftDisplayEntity[] = [];
 		for (const entry of raw) {
 			if (!isRecord(entry)) continue;
-			const databaseId = entry.databaseId;
+			const databaseId = recordNumber(entry, 'databaseId');
 			const databaseName = recordString(entry, 'databaseName');
 			const diff = asCustomFormatDiff(entry.diff);
 			if (!diff) continue;
-			entities.push(...buildCustomFormatDiffEntities(diff, arrType, databaseId, databaseName));
+			entities.push(
+				...buildCustomFormatDiffEntities(
+					diff,
+					arrType,
+					duplicateDriftLookup,
+					databaseId,
+					databaseName
+				)
+			);
 		}
 		return entities;
 	}
 
 	const diff = asCustomFormatDiff(raw);
 	if (!diff) return [];
-	return buildCustomFormatDiffEntities(diff, arrType);
+	return buildCustomFormatDiffEntities(diff, arrType, duplicateDriftLookup);
 }
 
 function buildCustomFormatDiffEntities(
 	diff: CustomFormatDiff,
 	arrType: SyncArrType | undefined,
-	databaseId?: unknown,
+	duplicateDriftLookup: DuplicateDriftLookup,
+	databaseId?: number | null,
 	databaseName?: string | null
 ): DriftDisplayEntity[] {
 	const entities: DriftDisplayEntity[] = [];
@@ -169,6 +289,7 @@ function buildCustomFormatDiffEntities(
 			section: 'custom_formats',
 			sectionLabel: 'Custom Format',
 			title: name,
+			databaseId: databaseId ?? undefined,
 			databaseName: databaseName ?? undefined,
 			state: 'missing',
 			stateLabel: 'Missing',
@@ -183,7 +304,11 @@ function buildCustomFormatDiffEntities(
 					actual: value('Missing', { tone: 'danger' }),
 					tone: 'danger'
 				}
-			]
+			],
+			duplicateDrift:
+				databaseId != null
+					? duplicateDriftLookup.get(duplicateLookupKey('custom_formats', databaseId, name))
+					: undefined
 		});
 	}
 
@@ -201,12 +326,19 @@ function buildCustomFormatDiffEntities(
 			section: 'custom_formats',
 			sectionLabel: 'Custom Format',
 			title: modified.name,
+			databaseId: databaseId ?? undefined,
 			databaseName: databaseName ?? undefined,
 			state: 'modified',
 			stateLabel: 'Modified',
 			tone: 'warning',
 			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
-			changes
+			changes,
+			duplicateDrift:
+				databaseId != null
+					? duplicateDriftLookup.get(
+							duplicateLookupKey('custom_formats', databaseId, modified.name)
+						)
+					: undefined
 		});
 	}
 
@@ -215,30 +347,40 @@ function buildCustomFormatDiffEntities(
 
 function buildQualityProfileEntities(
 	raw: unknown,
-	arrType: SyncArrType | undefined
+	arrType: SyncArrType | undefined,
+	duplicateDriftLookup: DuplicateDriftLookup
 ): DriftDisplayEntity[] {
 	if (Array.isArray(raw)) {
 		const entities: DriftDisplayEntity[] = [];
 		for (const entry of raw) {
 			if (!isRecord(entry)) continue;
-			const databaseId = entry.databaseId;
+			const databaseId = recordNumber(entry, 'databaseId');
 			const databaseName = recordString(entry, 'databaseName');
 			const diff = asQualityProfileDiff(entry.diff);
 			if (!diff) continue;
-			entities.push(...buildQualityProfileDiffEntities(diff, arrType, databaseId, databaseName));
+			entities.push(
+				...buildQualityProfileDiffEntities(
+					diff,
+					arrType,
+					duplicateDriftLookup,
+					databaseId,
+					databaseName
+				)
+			);
 		}
 		return entities;
 	}
 
 	const diff = asQualityProfileDiff(raw);
 	if (!diff) return [];
-	return buildQualityProfileDiffEntities(diff, arrType);
+	return buildQualityProfileDiffEntities(diff, arrType, duplicateDriftLookup);
 }
 
 function buildQualityProfileDiffEntities(
 	diff: QualityProfileDiff,
 	arrType: SyncArrType | undefined,
-	databaseId?: unknown,
+	duplicateDriftLookup: DuplicateDriftLookup,
+	databaseId?: number | null,
 	databaseName?: string | null
 ): DriftDisplayEntity[] {
 	const entities: DriftDisplayEntity[] = [];
@@ -253,6 +395,7 @@ function buildQualityProfileDiffEntities(
 			section: 'quality_profiles',
 			sectionLabel: 'Quality Profile',
 			title: name,
+			databaseId: databaseId ?? undefined,
 			databaseName: databaseName ?? undefined,
 			state: 'missing',
 			stateLabel: 'Missing',
@@ -267,7 +410,11 @@ function buildQualityProfileDiffEntities(
 					actual: value('Missing', { tone: 'danger' }),
 					tone: 'danger'
 				}
-			]
+			],
+			duplicateDrift:
+				databaseId != null
+					? duplicateDriftLookup.get(duplicateLookupKey('quality_profiles', databaseId, name))
+					: undefined
 		});
 	}
 
@@ -285,12 +432,19 @@ function buildQualityProfileDiffEntities(
 			section: 'quality_profiles',
 			sectionLabel: 'Quality Profile',
 			title: modified.name,
+			databaseId: databaseId ?? undefined,
 			databaseName: databaseName ?? undefined,
 			state: 'modified',
 			stateLabel: 'Modified',
 			tone: 'warning',
 			summary: `${changes.length} ${changes.length === 1 ? 'change' : 'changes'} detected`,
-			changes
+			changes,
+			duplicateDrift:
+				databaseId != null
+					? duplicateDriftLookup.get(
+							duplicateLookupKey('quality_profiles', databaseId, modified.name)
+						)
+					: undefined
 		});
 	}
 
@@ -1374,6 +1528,12 @@ function recordString(raw: unknown, key: string): string | null {
 	if (!isRecord(raw)) return null;
 	const value = raw[key];
 	return typeof value === 'string' ? value : null;
+}
+
+function recordNumber(raw: unknown, key: string): number | null {
+	if (!isRecord(raw)) return null;
+	const value = raw[key];
+	return typeof value === 'number' ? value : null;
 }
 
 function isRecord(raw: unknown): raw is Record<string, unknown> {
