@@ -199,11 +199,16 @@
 	$: typeOptions = filteredConditionTypes.map((t) => ({ value: t.value, label: t.label }));
 
 	// Size helpers (convert between bytes and GB for display)
+	function bytesToDisplayGb(bytes: number): number {
+		const factor = 10 ** SIZE_MAX_DECIMALS;
+		return Math.round((bytes / BYTES_PER_GB + Number.EPSILON) * factor) / factor;
+	}
+
 	$: minSizeGB = condition.size?.minBytes != null
-		? condition.size.minBytes / BYTES_PER_GB
+		? bytesToDisplayGb(condition.size.minBytes)
 		: undefined;
 	$: maxSizeGB = condition.size?.maxBytes != null
-		? condition.size.maxBytes / BYTES_PER_GB
+		? bytesToDisplayGb(condition.size.maxBytes)
 		: undefined;
 	$: minSizeEmptyStepValue =
 		maxSizeGB == null ? undefined : Math.max(0, maxSizeGB - SIZE_STEP_GB);
