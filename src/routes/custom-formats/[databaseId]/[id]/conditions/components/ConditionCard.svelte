@@ -367,7 +367,8 @@
 								name="minSize"
 								value={minSizeGB}
 								min={0}
-								step={1}
+								step={0.01}
+								maxDecimals={2}
 								warningTooltip={minSizeWarning}
 								font="mono"
 								responsive
@@ -381,7 +382,8 @@
 								name="maxSize"
 								value={maxSizeGB}
 								min={0}
-								step={1}
+								step={0.01}
+								maxDecimals={2}
 								warningTooltip={maxSizeWarning}
 								font="mono"
 								responsive

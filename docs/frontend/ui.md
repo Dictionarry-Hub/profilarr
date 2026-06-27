@@ -133,12 +133,17 @@ flush with surrounding content when `label` is omitted.
 
 #### NumberInput
 
-**`$ui/form/NumberInput.svelte`** wraps `<input type="number">` and adds
+**`$ui/form/NumberInput.svelte`** wraps a numeric text input and adds
 increment/decrement buttons with press-and-hold repeat, min/max validation,
-and a `compact` mode for dense form grids. Typical use: retention days,
-timeouts, thresholds.
+optional decimal precision, and a `compact` mode for dense form grids.
+Typical use: retention days, timeouts, thresholds. The visible value is draft
+text while focused, so decimal fields can accept in-progress values like `.`,
+`0.`, and `0.0` before they become final numbers.
+
 Use `validateOn="blur"` when the field should allow free typing and only
-commit min/max validation after focus leaves the input.
+commit min/max validation after focus leaves the input. Use decimal `step`
+values and `maxDecimals` for float inputs; button clicks increment by `step`,
+and blur normalizes the draft back to the allowed precision and range.
 
 ```svelte
 <!-- src/routes/settings/general/+page.svelte:472 -->
