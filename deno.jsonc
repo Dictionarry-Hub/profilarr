@@ -42,7 +42,7 @@
 
 		// Tooling
 		"@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.2",
-		"@playwright/test": "npm:@playwright/test@^1.61.0",
+		"@playwright/test": "npm:@playwright/test@^1.61.1",
 		"@std/assert": "jsr:@std/assert@^1.0.19",
 		"@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^7.1.2",
 		"@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.1",
