@@ -67,7 +67,7 @@ jobs:
           deno-version-file: .tool-versions
 
       - name: Cache deps
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: |
             ~/.cache/deno
@@ -105,7 +105,7 @@ jobs:
           deno-version-file: .tool-versions
 
       - name: Cache deps
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: |
             ~/.cache/deno
@@ -135,7 +135,7 @@ jobs:
           node-version-file: .tool-versions
 
       - name: Cache deps
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: |
             ~/.cache/deno
@@ -164,7 +164,7 @@ jobs:
           deno-version-file: .tool-versions
 
       - name: Cache deps
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: |
             ~/.cache/deno
@@ -246,7 +246,7 @@ jobs:
           node-version-file: .tool-versions
 
       - name: Cache deps
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: |
             ~/.cache/deno
@@ -264,7 +264,7 @@ jobs:
       # into the same path on a cold cache and corrupt each other.
       - name: Cache FFI plug
         id: plug-cache
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/deno/plug
           key: deno-plug-${{ runner.os }}-${{ hashFiles('deno.lock') }}-v1
@@ -290,7 +290,7 @@ jobs:
 
       - name: Cache Docker images
         id: docker-cache
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: /tmp/docker-images.tar
           key: docker-images-${{ hashFiles('tests/integration/auth/docker-compose.yml') }}
@@ -327,7 +327,7 @@ jobs:
           node-version-file: .tool-versions
 
       - name: Cache deps
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: |
             ~/.cache/deno
@@ -339,7 +339,7 @@ jobs:
 
       - name: Cache Playwright browsers
         id: playwright-cache
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('deno.lock') }}
@@ -363,7 +363,7 @@ jobs:
 
       - name: Cache Docker images
         id: docker-cache
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: /tmp/docker-images.tar
           key: docker-images-${{ hashFiles('tests/integration/auth/docker-compose.yml') }}
