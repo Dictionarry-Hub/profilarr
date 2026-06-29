@@ -16,7 +16,7 @@
     "npm:@deno/vite-plugin@^2.0.2": "2.0.2_vite@8.1.0__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1",
     "npm:@jsr/db__sqlite@0.12.0": "0.12.0",
     "npm:@lucide/svelte@^1.21.0": "1.21.0_svelte@5.56.3",
-    "npm:@playwright/test@^1.61.0": "1.61.0",
+    "npm:@playwright/test@^1.61.1": "1.61.1",
     "npm:@sveltejs/kit@^2.68.0": "2.68.0_@sveltejs+vite-plugin-svelte@7.1.2__svelte@5.56.3__vite@8.1.0___@types+node@22.20.0___esbuild@0.28.1__@types+node@22.20.0__esbuild@0.28.1_svelte@5.56.3_typescript@6.0.3_vite@8.1.0__@types+node@22.20.0__esbuild@0.28.1",
     "npm:@sveltejs/vite-plugin-svelte@^7.1.2": "7.1.2_svelte@5.56.3_vite@8.1.0__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1",
     "npm:@tailwindcss/vite@^4.3.1": "4.3.1_vite@8.1.0__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1",
@@ -29,7 +29,7 @@
     "npm:kysely@~0.27.2": "0.27.6",
     "npm:marked@^18.0.5": "18.0.5",
     "npm:openapi-typescript@^7.13.0": "7.13.0_typescript@6.0.3",
-    "npm:playwright@^1.61.0": "1.61.0",
+    "npm:playwright@^1.61.0": "1.61.1",
     "npm:prettier-plugin-svelte@^4.1.1": "4.1.1_prettier@3.8.4_svelte@5.56.3",
     "npm:prettier-plugin-tailwindcss@0.8": "0.8.0_prettier@3.8.4_prettier-plugin-svelte@4.1.1__prettier@3.8.4__svelte@5.56.3_svelte@5.56.3",
     "npm:prettier@3.8.4": "3.8.4",
@@ -399,8 +399,8 @@
     "@oxc-project/types@0.137.0": {
       "integrity": "sha512-WT+Gb24i8hmvo85AIv2oEYouEXkRlKAlT9WaCa3TfLgNCN+GhrJOGZuIlMouAh38Qe4QOx26eUOVsq70qXrywA=="
     },
-    "@playwright/test@1.61.0": {
-      "integrity": "sha512-cKA5B6lpFEMyMGjxF54QihfYpB4FkEGH+qZhtArDEG+wezQAJY8Pq6C7T1SjWz+FFzt3TbyoXBQYk/0292TdJA==",
+    "@playwright/test@1.61.1": {
+      "integrity": "sha512-8nKv6+0RJSL9FE4jYOEGXnPeM/Hg12qZpmqzZjRh3qM0Y7c3z1mrOTfFLids72RDQYVh9WpLEfR5WdpNX4fkig==",
       "dependencies": [
         "playwright"
       ],
@@ -1005,12 +1005,12 @@
     "picomatch@4.0.4": {
       "integrity": "sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A=="
     },
-    "playwright-core@1.61.0": {
-      "integrity": "sha512-caX7TrY3Ml6egyDX0WUcTHDxodl/b51y5wJOdCEA36QviK/s2g081hvmGs8eaE3DWb6NYZQ6BjO/QkNRPenoPA==",
+    "playwright-core@1.61.1": {
+      "integrity": "sha512-h7Qlt6m4REp25qvIdvbDtVmD4LqVXfpRxhORv9L0jzETM05p4fuPJ3dKyuSXQxDSbXnmS79HAgi9589lGSpLkg==",
       "bin": true
     },
-    "playwright@1.61.0": {
-      "integrity": "sha512-Z+7BeeqQPRRzklHsVFP4KTGIyMxKUmfeRA4WisM6G3/XW6nwGeX6fX9qYaDa+CiUqpOkb2f6X3nar05R3kSuJQ==",
+    "playwright@1.61.1": {
+      "integrity": "sha512-DWnY5o3YbLWK4GovuAVwpqL+1VwGNdUGrRr++8j8PtQQzvAVZUIMjKQ90fY689sEJZJBbZVw1rXaOKSTitkzPQ==",
       "dependencies": [
         "playwright-core"
       ],
@@ -1223,7 +1223,7 @@
       "npm:@deno/vite-plugin@^2.0.2",
       "npm:@jsr/db__sqlite@0.12.0",
       "npm:@lucide/svelte@^1.21.0",
-      "npm:@playwright/test@^1.61.0",
+      "npm:@playwright/test@^1.61.1",
       "npm:@sveltejs/kit@^2.68.0",
       "npm:@sveltejs/vite-plugin-svelte@^7.1.2",
       "npm:@tailwindcss/vite@^4.3.1",
