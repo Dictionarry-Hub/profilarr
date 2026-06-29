@@ -237,11 +237,10 @@ public static class QualityParser
             return result;
         }
 
-        // Resolution only
-        if (resolution != Resolution.Unknown && isRemux)
+        // Resolution-only releases fallback to HDTV/SDTV in Sonarr/Radarr.
+        if (resolution != Resolution.Unknown)
         {
-            result.Source = QualitySource.Bluray;
-            result.Modifier = QualityModifier.Remux;
+            result.Source = QualitySource.TV;
         }
 
         return result;

@@ -69,8 +69,9 @@ Each parser uses pre-compiled regexes tried in priority order. First match wins
 returns null and the endpoint uses defaults (empty lists, zeros, nulls).
 
 **QualityParser** handles edge cases like anime patterns (`bd720`, `bd1080`),
-MPEG2 detection for RawHD, and Remux fallback logic (Remux without explicit
-source assumes Bluray).
+MPEG2 detection for RawHD, Remux fallback logic (Remux without explicit source
+assumes Bluray), and Arr-style source fallback where resolution-only releases
+are treated as television source.
 
 **TitleParser** tries 8+ regex patterns sequentially for movies, handling anime
 with subgroups, German/French tracker formats, special editions, and
