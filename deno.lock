@@ -34,8 +34,7 @@
     "npm:prettier-plugin-tailwindcss@0.8": "0.8.0_prettier@3.8.4_prettier-plugin-svelte@4.1.1__prettier@3.8.4__svelte@5.56.3_svelte@5.56.3",
     "npm:prettier@3.8.4": "3.8.4",
     "npm:simple-icons@^16.24.0": "16.24.0",
-    "npm:svelte-check@*": "4.6.0_svelte@5.56.3_typescript@6.0.3",
-    "npm:svelte-check@^4.6.0": "4.6.0_svelte@5.56.3_typescript@6.0.3",
+    "npm:svelte-check@^4.7.1": "4.7.1_svelte@5.56.3_typescript@6.0.3",
     "npm:svelte@^5.56.3": "5.56.3",
     "npm:tailwindcss@^4.3.1": "4.3.1",
     "npm:typescript@^6.0.3": "6.0.3",
@@ -552,8 +551,8 @@
       ],
       "bin": true
     },
-    "@sveltejs/load-config@0.1.1": {
-      "integrity": "sha512-BXXm+VOH/9X4N7Dd1iZ2MqA1h7M+9i2noI8QYuLDY8QcN2WHYn7D/VK/+IJNfcAmRw7ACNJ538UT9GXIhnBTiA=="
+    "@sveltejs/load-config@0.2.0": {
+      "integrity": "sha512-1LgZ/qUqSoq+QorD83lk2hka79Px0wXNW2q5V1nZlxGhQgw1jrsIbVz5YiCeucVLo4XvFLjXukUaQjIiqowkcg=="
     },
     "@sveltejs/vite-plugin-svelte@7.1.2_svelte@5.56.3_vite@8.1.0__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1": {
       "integrity": "sha512-DrUBA2UXRfDmUX/ZTiEopd3X40yavsJF1FX2RygcuIScHL7o5YX1fMvoYnDhjeJQC4weCOklirpNWlcb2NiSeA==",
@@ -1109,8 +1108,8 @@
     "supports-color@10.2.2": {
       "integrity": "sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g=="
     },
-    "svelte-check@4.6.0_svelte@5.56.3_typescript@6.0.3": {
-      "integrity": "sha512-KhVnDFDSid57mmZtHz8gfW8AAGylOZ0vPnOIzVmAL+urzwK8sBYXRss953gD8T0OdgAQ11mdWhE6uadmtOz8TQ==",
+    "svelte-check@4.7.1_svelte@5.56.3_typescript@6.0.3": {
+      "integrity": "sha512-FGUOmAqxXdN/H9Zm8slrqO7SLtFisXRB7rfOsHNJ3MLTD2po/+Stg8XyErkpumPHbuUiYTcqrEIzxpVWKTLqtg==",
       "dependencies": [
         "@jridgewell/trace-mapping",
         "@sveltejs/load-config",
@@ -1241,7 +1240,7 @@
       "npm:prettier-plugin-tailwindcss@0.8",
       "npm:prettier@3.8.4",
       "npm:simple-icons@^16.24.0",
-      "npm:svelte-check@^4.6.0",
+      "npm:svelte-check@^4.7.1",
       "npm:svelte@^5.56.3",
       "npm:tailwindcss@^4.3.1",
       "npm:typescript@^6.0.3",
