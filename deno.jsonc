@@ -1,5 +1,6 @@
 {
 	"nodeModulesDir": "auto",
+	"minimumDependencyAge": "P7D",
 	"imports": {
 		// Path aliases
 		"$lib/": "./src/lib/",
