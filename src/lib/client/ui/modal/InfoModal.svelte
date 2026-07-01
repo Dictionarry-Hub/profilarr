@@ -39,7 +39,7 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<div
-		class="fixed inset-0 z-[100] overflow-y-auto bg-black/50 p-4 backdrop-blur-sm sm:p-6"
+		class="fixed inset-0 z-[100] overflow-y-auto bg-overlay p-4 backdrop-blur-sm sm:p-6"
 		in:fade={{ duration: 140 }}
 		out:fade={{ duration: 110 }}
 		role="dialog"
@@ -55,7 +55,7 @@
 			<div
 				class="relative my-4 flex max-h-[calc(100svh-2rem)] w-full {sizeClasses[
 					size
-				]} flex-col rounded-card border border-border bg-surface shadow-xl sm:my-0"
+				]} flex-col rounded-card border border-border bg-surface shadow-card sm:my-0"
 				in:scale={{ duration: 170, start: 0.97, opacity: 0.5, easing: cubicOut }}
 				out:scale={{ duration: 120, start: 0.97, opacity: 0.5, easing: cubicIn }}
 			>

@@ -29,10 +29,10 @@
 	$: syncDisabled = syncing || isDirty || !hasConfig;
 </script>
 
-<div class="border-t border-neutral-200 px-4 py-4 md:px-6 dark:border-neutral-800">
+<div class="border-t border-border px-4 py-4 md:px-6">
 	<div class="flex flex-col gap-3">
 		{#if warning}
-			<div class="flex items-center gap-1.5 text-xs text-amber-600 sm:hidden dark:text-amber-400">
+			<div class="flex items-center gap-1.5 text-xs text-warning-icon sm:hidden">
 				<AlertTriangle size={14} class="flex-shrink-0" />
 				<span>{warning}</span>
 			</div>
@@ -41,7 +41,7 @@
 		<!-- Row 1: Trigger + Warning + Buttons -->
 		<div class="flex items-center justify-between gap-2">
 			<div data-onboarding={onboardingId}>
-				<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Trigger</span>
+				<span class="mb-1 block text-xs text-text-muted">Trigger</span>
 				<DropdownSelect
 					value={syncTrigger}
 					options={triggerOptions}
@@ -56,9 +56,7 @@
 				<span class="mb-1 block text-xs text-transparent select-none">&nbsp;</span>
 				<div class="flex items-center gap-3">
 					{#if warning}
-						<div
-							class="hidden items-center gap-1.5 text-xs text-amber-600 sm:flex dark:text-amber-400"
-						>
+						<div class="hidden items-center gap-1.5 text-xs text-warning-icon sm:flex">
 							<AlertTriangle size={14} class="flex-shrink-0" />
 							<span>{warning}</span>
 						</div>
@@ -68,9 +66,7 @@
 						variant="secondary"
 						disabled={syncDisabled}
 						icon={syncing ? Loader2 : RefreshCw}
-						iconColor={syncing
-							? 'text-blue-600 dark:text-blue-400 animate-spin'
-							: 'text-blue-600 dark:text-blue-400'}
+						iconColor={syncing ? 'text-info-icon animate-spin' : 'text-info-icon '}
 						title={isDirty ? 'Save changes before syncing' : ''}
 						on:click={() => dispatch('sync')}
 					/>
@@ -79,9 +75,7 @@
 						variant="secondary"
 						disabled={saveDisabled}
 						icon={saving ? Loader2 : Save}
-						iconColor={saving
-							? 'text-green-600 dark:text-green-400 animate-spin'
-							: 'text-green-600 dark:text-green-400'}
+						iconColor={saving ? 'text-success-icon animate-spin' : 'text-success-icon '}
 						on:click={() => dispatch('save')}
 					/>
 				</div>
@@ -90,8 +84,8 @@
 
 		<!-- Row 2: Cron (only when schedule) -->
 		{#if syncTrigger === 'schedule'}
-			<div class="border-t border-neutral-200 pt-3 dark:border-neutral-800">
-				<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Schedule</span>
+			<div class="border-t border-border pt-3">
+				<span class="mb-1 block text-xs text-text-muted">Schedule</span>
 				<CronInput
 					bind:value={cronExpression}
 					disabled={saving}

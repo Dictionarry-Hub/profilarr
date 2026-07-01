@@ -145,7 +145,7 @@
 	}
 </script>
 
-<div class="-mx-4 bg-neutral-50 px-4 pt-2 pb-6 md:-mx-8 md:px-8 dark:bg-neutral-900">
+<div class="-mx-4 bg-surface-muted px-4 pt-2 pb-6 md:-mx-8 md:px-8">
 	<div class="mb-4">
 		<ActionsBar>
 			<SearchAction {searchStore} placeholder="Search runs..." />
@@ -190,34 +190,34 @@
 	>
 		<svelte:fragment slot="cell" let:row let:column>
 			{#if column.key === 'runNumber'}
-				<span class="font-mono text-neutral-500 dark:text-neutral-500">
+				<span class="font-mono text-text-muted">
 					#{getRunNumber(row)}
 				</span>
 			{:else if column.key === 'date'}
 				<div class="flex items-center gap-2">
-					<span class="text-neutral-600 dark:text-neutral-400">
+					<span class="text-text-soft">
 						{formatSmartDateTime(row.startedAt, $serverTimezone, $dateFormat)}
 					</span>
 					{#if row.config.dryRun}
-						<Label variant="info" size="sm" rounded="md"><FlaskConical size={10} /> Dry Run</Label>
+						<Label variant="info" size="sm" radius="md"><FlaskConical size={10} /> Dry Run</Label>
 					{:else if row.config.manual}
-						<Label variant="success" size="sm" rounded="md"><Play size={10} /> Manual</Label>
+						<Label variant="success" size="sm" radius="md"><Play size={10} /> Manual</Label>
 					{/if}
 				</div>
 			{:else if column.key === 'duration'}
-				<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">
+				<span class="font-mono text-xs text-text-soft">
 					{formatDuration(row.startedAt, row.completedAt)}
 				</span>
 			{:else if column.key === 'status'}
 				{@const config = statusConfig[row.status] || statusConfig.failed}
-				<Label variant={config.variant} size="sm" rounded="md">
+				<Label variant={config.variant} size="sm" radius="md">
 					<svelte:component this={config.icon} size={10} />
 					{row.status.charAt(0).toUpperCase() + row.status.slice(1)}
 				</Label>
 			{:else if column.key === 'summary'}
-				<span class="text-sm text-neutral-600 dark:text-neutral-400">
+				<span class="text-sm text-text-soft">
 					<span class="font-mono">{row.library.totalItems.toLocaleString()}</span> scanned
-					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
+					<span class="mx-1 text-text">&rarr;</span>
 					{#if row.config.dryRun}
 						<span class="font-mono">{row.results.filesNeedingRename}</span> would rename
 					{:else}
@@ -249,10 +249,8 @@
 			<div class="space-y-3 p-6">
 				<!-- Config -->
 				<div class="flex">
-					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
-						>Config</span
-					>
-					<span class="text-sm text-neutral-900 dark:text-neutral-100">
+					<span class="w-24 shrink-0 text-sm font-medium text-text-muted">Config</span>
+					<span class="text-sm text-text">
 						{#if row.config.renameFolders}Folders enabled{:else}Files only{/if}
 						{#if row.config.ignoreTag}
 							| Ignore tag: "{row.config.ignoreTag}"
@@ -262,12 +260,10 @@
 
 				<!-- Library -->
 				<div class="flex">
-					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
-						>Library</span
-					>
-					<span class="text-sm text-neutral-900 dark:text-neutral-100">
+					<span class="w-24 shrink-0 text-sm font-medium text-text-muted">Library</span>
+					<span class="text-sm text-text">
 						<span class="font-mono">{row.library.totalItems.toLocaleString()}</span> items
-						<span class="ml-1 font-mono text-xs text-neutral-500 dark:text-neutral-400">
+						<span class="ml-1 font-mono text-xs text-text-muted">
 							({row.library.fetchDurationMs}ms)
 						</span>
 					</span>
@@ -276,12 +272,10 @@
 				<!-- Filtering -->
 				{#if row.filtering.skippedByTag > 0}
 					<div class="flex">
-						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
-							>Filtered</span
-						>
-						<span class="text-sm text-neutral-900 dark:text-neutral-100">
+						<span class="w-24 shrink-0 text-sm font-medium text-text-muted">Filtered</span>
+						<span class="text-sm text-text">
 							<span class="font-mono">{row.filtering.skippedByTag}</span> skipped by tag
-							<span class="mx-1 text-neutral-400">&rarr;</span>
+							<span class="mx-1 text-text-subtle">&rarr;</span>
 							<span class="font-mono font-medium">{row.filtering.afterIgnoreTag}</span> remaining
 						</span>
 					</div>
@@ -289,10 +283,8 @@
 
 				<!-- Results -->
 				<div class="flex">
-					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
-						>Results</span
-					>
-					<span class="text-sm text-neutral-900 dark:text-neutral-100">
+					<span class="w-24 shrink-0 text-sm font-medium text-text-muted">Results</span>
+					<span class="text-sm text-text">
 						{#if row.config.dryRun}
 							<span class="font-mono">{row.results.filesNeedingRename}</span> files would be renamed
 						{:else}
@@ -308,9 +300,7 @@
 							{/if}
 						{/if}
 						{#if row.results.commandsFailed > 0}
-							<span class="font-mono text-red-600 dark:text-red-400"
-								>, {row.results.commandsFailed} failed</span
-							>
+							<span class="font-mono text-danger-icon">, {row.results.commandsFailed} failed</span>
 						{/if}
 					</span>
 				</div>
@@ -318,12 +308,10 @@
 				<!-- Errors -->
 				{#if row.results.errors.length > 0}
 					<div class="flex">
-						<span class="w-24 shrink-0 text-sm font-medium text-red-500 dark:text-red-400"
-							>Errors</span
-						>
+						<span class="w-24 shrink-0 text-sm font-medium text-danger-icon">Errors</span>
 						<div class="space-y-1">
 							{#each row.results.errors as error}
-								<div class="text-sm text-red-600 dark:text-red-400">{error}</div>
+								<div class="text-sm text-danger-icon">{error}</div>
 							{/each}
 						</div>
 					</div>
@@ -335,10 +323,8 @@
 						{ key: 'title', header: 'Title', sortable: false },
 						{ key: 'changes', header: 'Changes', sortable: false, align: 'center' as const }
 					]}
-					<div class="mt-4 border-t border-neutral-200 pt-4 dark:border-neutral-700">
-						<div
-							class="mb-3 flex items-center gap-1.5 text-sm font-medium text-neutral-700 dark:text-neutral-300"
-						>
+					<div class="mt-4 border-t border-border pt-4">
+						<div class="mb-3 flex items-center gap-1.5 text-sm font-medium text-text-soft">
 							<FileText size={14} />
 							Items {row.config.dryRun ? 'Needing Rename' : 'Renamed'}
 						</div>
@@ -352,7 +338,7 @@
 						>
 							<svelte:fragment slot="cell" let:row={item} let:column>
 								{#if column.key === 'title'}
-									<span class="text-neutral-900 dark:text-neutral-100">{item.title}</span>
+									<span class="text-text">{item.title}</span>
 								{:else if column.key === 'changes'}
 									<div class="flex gap-1">
 										{#if item.folder}
@@ -370,29 +356,17 @@
 							<svelte:fragment slot="expanded" let:row={item}>
 								<div class="space-y-3 p-4">
 									{#if item.folder}
-										<div class="space-y-1 border-b border-neutral-200 pb-3 dark:border-neutral-700">
-											<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-												Folder
-											</div>
+										<div class="space-y-1 border-b border-border pb-3">
+											<div class="mb-1 text-xs font-medium text-text-muted">Folder</div>
 											<div class="flex gap-2">
-												<span
-													class="w-12 shrink-0 text-xs font-medium text-neutral-500 dark:text-neutral-400"
-													>From:</span
-												>
-												<span
-													class="font-mono text-xs break-all text-neutral-700 dark:text-neutral-300"
-												>
+												<span class="w-12 shrink-0 text-xs font-medium text-text-muted">From:</span>
+												<span class="font-mono text-xs break-all text-text-soft">
 													{item.folder.existingPath}
 												</span>
 											</div>
 											<div class="flex gap-2">
-												<span
-													class="w-12 shrink-0 text-xs font-medium text-emerald-600 dark:text-emerald-400"
-													>To:</span
-												>
-												<span
-													class="font-mono text-xs break-all text-neutral-700 dark:text-neutral-300"
-												>
+												<span class="w-12 shrink-0 text-xs font-medium text-success-icon">To:</span>
+												<span class="font-mono text-xs break-all text-text-soft">
 													{item.folder.newPath}
 												</span>
 											</div>
@@ -401,24 +375,14 @@
 									{#each item.files as file}
 										<div class="space-y-1">
 											<div class="flex gap-2">
-												<span
-													class="w-12 shrink-0 text-xs font-medium text-neutral-500 dark:text-neutral-400"
-													>From:</span
-												>
-												<span
-													class="font-mono text-xs break-all text-neutral-700 dark:text-neutral-300"
-												>
+												<span class="w-12 shrink-0 text-xs font-medium text-text-muted">From:</span>
+												<span class="font-mono text-xs break-all text-text-soft">
 													{getFileName(file.existingPath)}
 												</span>
 											</div>
 											<div class="flex gap-2">
-												<span
-													class="w-12 shrink-0 text-xs font-medium text-emerald-600 dark:text-emerald-400"
-													>To:</span
-												>
-												<span
-													class="font-mono text-xs break-all text-neutral-700 dark:text-neutral-300"
-												>
+												<span class="w-12 shrink-0 text-xs font-medium text-success-icon">To:</span>
+												<span class="font-mono text-xs break-all text-text-soft">
 													{getFileName(file.newPath)}
 												</span>
 											</div>

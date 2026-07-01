@@ -81,8 +81,8 @@
 {#key data.instance.id}
 	<StickyCard position="top">
 		<div slot="left">
-			<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Rename</h1>
-			<p class="text-sm text-neutral-500 dark:text-neutral-400">
+			<h1 class="text-xl font-semibold text-text">Rename</h1>
+			<p class="text-sm text-text-muted">
 				Automatically rename files and folders to match your naming format.
 			</p>
 		</div>
@@ -91,7 +91,7 @@
 			<Button
 				text={running ? 'Running...' : 'Dry Run'}
 				icon={FlaskConical}
-				iconColor="text-amber-600 dark:text-amber-400"
+				iconColor="text-warning-icon "
 				disabled={isNewConfig || !enabled || running || saving || $isDirty}
 				tooltip="Preview which files would be renamed without making changes"
 				tooltipPosition="bottom"
@@ -110,7 +110,7 @@
 			<Button
 				text={running ? 'Running...' : 'Run Now'}
 				icon={Play}
-				iconColor="text-green-600 dark:text-green-400"
+				iconColor="text-success-icon "
 				disabled={isNewConfig || !enabled || running || saving || $isDirty}
 				tooltip="Rename files and folders now"
 				tooltipPosition="bottom"
@@ -129,7 +129,7 @@
 			<Button
 				text="Save"
 				icon={Save}
-				iconColor="text-blue-600 dark:text-blue-400"
+				iconColor="text-info-icon "
 				disabled={saving || running || !$isDirty}
 				on:click={() => {
 					const saveForm = document.getElementById('save-form');
@@ -142,7 +142,7 @@
 	</StickyCard>
 
 	<div class="mt-4 space-y-6">
-		<section class="border-b border-neutral-200 pb-5 dark:border-neutral-800">
+		<section class="border-b border-border pb-5">
 			<RenameSettings
 				{enabled}
 				{renameFolders}
@@ -166,8 +166,8 @@
 			</section>
 		{:else}
 			<section class="md:px-4">
-				<div class="rounded-xl border border-neutral-300 dark:border-neutral-700/60">
-					<p class="px-4 py-4 text-center text-sm text-neutral-600 dark:text-neutral-400">
+				<div class="rounded-card border border-border">
+					<p class="px-4 py-4 text-center text-sm text-text-soft">
 						Enable rename to view run history.
 					</p>
 				</div>

@@ -97,6 +97,7 @@
 
 	/* Links: instrument readout blue */
 	--theme-link-text: #1565c0;
+	--theme-overlay: rgb(0 0 0 / 0.5);
 
 	/* Smooth, geometric, like Discovery's displays */
 	--theme-radius-control-sm: 0.375rem;

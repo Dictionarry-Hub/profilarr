@@ -236,7 +236,7 @@
 	}
 </script>
 
-<div class="-mx-4 bg-neutral-50 px-4 pt-2 pb-6 md:-mx-8 md:px-8 dark:bg-neutral-900">
+<div class="-mx-4 bg-surface-muted px-4 pt-2 pb-6 md:-mx-8 md:px-8">
 	<div class="mb-4">
 		<ActionsBar>
 			<SearchAction {searchStore} placeholder="Search runs..." />
@@ -299,29 +299,29 @@
 	>
 		<svelte:fragment slot="cell" let:row let:column>
 			{#if column.key === 'runNumber'}
-				<span class="font-mono text-neutral-500 dark:text-neutral-500">
+				<span class="font-mono text-text-muted">
 					#{getRunNumber(row)}
 				</span>
 			{:else if column.key === 'filter'}
 				<div class="flex items-center gap-2">
-					<span class="font-medium text-neutral-900 dark:text-neutral-100">
+					<span class="font-medium text-text">
 						{row.config.selectedFilter || 'Unknown'}
 					</span>
 					{#if row.config.dryRun}
-						<Label variant="info" size="sm" rounded="md"><FlaskConical size={10} /> Dry Run</Label>
+						<Label variant="info" size="sm" radius="md"><FlaskConical size={10} /> Dry Run</Label>
 					{/if}
 				</div>
 			{:else if column.key === 'date'}
-				<span class="text-neutral-600 dark:text-neutral-400">
+				<span class="text-text-soft">
 					{formatSmartDateTime(row.startedAt, $serverTimezone, $dateFormat)}
 				</span>
 			{:else if column.key === 'duration'}
-				<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">
+				<span class="font-mono text-xs text-text-soft">
 					{formatDuration(row.startedAt, row.completedAt)}
 				</span>
 			{:else if column.key === 'status'}
 				{@const config = statusConfig[row.status] || statusConfig.failed}
-				<Label variant={config.variant} size="sm" rounded="md">
+				<Label variant={config.variant} size="sm" radius="md">
 					<svelte:component this={config.icon} size={10} />
 					{row.status.charAt(0).toUpperCase() + row.status.slice(1)}
 				</Label>
@@ -333,24 +333,24 @@
 								.map((i) => {
 									const lines = [i.title];
 									for (const u of i.upgrades) {
-										lines.push(`  ${u.release}`);
-										lines.push(`  CF Score: ${u.score}`);
+										lines.push(` ${u.release}`);
+										lines.push(` CF Score: ${u.score}`);
 									}
 									return lines.join('\n');
 								})
 								.join('\n\n')
 						: 'No upgrades'}
-				<span class="text-sm text-neutral-600 dark:text-neutral-400">
+				<span class="text-sm text-text-soft">
 					<span class="font-mono">{row.filter.matchedCount}</span> filtered
-					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
+					<span class="mx-1 text-text">&rarr;</span>
 					<span class="font-mono">{row.filter.afterCooldown}</span> after cooldown
-					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
+					<span class="mx-1 text-text">&rarr;</span>
 					<Tooltip text={tooltipText} mono>
 						<span
 							class="inline-flex items-center gap-1 font-mono {row.results.successful > 0
 								? 'cursor-help'
 								: ''}"
-							><span class={row.results.successful > 0 ? 'text-green-600 dark:text-green-400' : ''}
+							><span class={row.results.successful > 0 ? 'text-success-icon ' : ''}
 								>{row.results.successful}</span
 							>
 							upgraded {#if row.results.successful > 0}<Info size={12} />{/if}</span
@@ -364,10 +364,8 @@
 			<div class="space-y-3 p-6">
 				<!-- Config -->
 				<div class="flex">
-					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
-						>Config</span
-					>
-					<span class="text-sm text-neutral-900 dark:text-neutral-100">
+					<span class="w-24 shrink-0 text-sm font-medium text-text-muted">Config</span>
+					<span class="text-sm text-text">
 						Schedule: {formatSchedule(row.config.cron)} | Mode: {formatFilterMode(
 							row.config.filterMode
 						)}
@@ -376,15 +374,13 @@
 
 				<!-- Library -->
 				<div class="flex">
-					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
-						>Library</span
-					>
-					<span class="text-sm text-neutral-900 dark:text-neutral-100">
+					<span class="w-24 shrink-0 text-sm font-medium text-text-muted">Library</span>
+					<span class="text-sm text-text">
 						<span class="font-mono">{row.library.totalItems.toLocaleString()}</span> items
 						{#if row.library.fetchedFromCache}
-							<span class="text-neutral-500 dark:text-neutral-400">(cached)</span>
+							<span class="text-text-muted">(cached)</span>
 						{/if}
-						<span class="ml-1 font-mono text-xs text-neutral-500 dark:text-neutral-400">
+						<span class="ml-1 font-mono text-xs text-text-muted">
 							({row.library.fetchDurationMs}ms)
 						</span>
 					</span>
@@ -392,24 +388,20 @@
 
 				<!-- Filter -->
 				<div class="flex">
-					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
-						>Filter</span
-					>
-					<span class="text-sm text-neutral-900 dark:text-neutral-100">
+					<span class="w-24 shrink-0 text-sm font-medium text-text-muted">Filter</span>
+					<span class="text-sm text-text">
 						"{row.filter.name}"
-						<span class="mx-1 text-neutral-400">&rarr;</span>
+						<span class="mx-1 text-text-subtle">&rarr;</span>
 						<span class="font-mono font-medium">{row.filter.matchedCount}</span> filtered
-						<span class="mx-1 text-neutral-400">&rarr;</span>
+						<span class="mx-1 text-text-subtle">&rarr;</span>
 						<span class="font-mono font-medium">{row.filter.afterCooldown}</span> after cooldown
 					</span>
 				</div>
 
 				<!-- Selection -->
 				<div class="flex">
-					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
-						>Selection</span
-					>
-					<span class="text-sm text-neutral-900 dark:text-neutral-100">
+					<span class="w-24 shrink-0 text-sm font-medium text-text-muted">Selection</span>
+					<span class="text-sm text-text">
 						{formatMethod(row.selection.method)}
 						<span class="font-mono font-medium">{row.selection.actualCount}</span> of
 						<span class="font-mono">{row.selection.requestedCount}</span>
@@ -418,29 +410,21 @@
 
 				<!-- Results -->
 				<div class="flex">
-					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
-						>Results</span
-					>
-					<span class="text-sm text-neutral-900 dark:text-neutral-100">
+					<span class="w-24 shrink-0 text-sm font-medium text-text-muted">Results</span>
+					<span class="text-sm text-text">
 						{#if row.config.dryRun}
 							<span class="font-mono">{row.results.searchesTriggered}</span> previewed,
-							<span
-								class="{row.results.successful > 0
-									? 'text-green-600 dark:text-green-400'
-									: ''} font-mono">{row.results.successful}</span
+							<span class="{row.results.successful > 0 ? 'text-success-icon ' : ''} font-mono"
+								>{row.results.successful}</span
 							> upgrades found
 						{:else}
 							<span class="font-mono">{row.results.searchesTriggered}</span> searches triggered,
-							<span
-								class="{row.results.successful > 0
-									? 'text-green-600 dark:text-green-400'
-									: ''} font-mono">{row.results.successful}</span
+							<span class="{row.results.successful > 0 ? 'text-success-icon ' : ''} font-mono"
+								>{row.results.successful}</span
 							> grabbed
 						{/if}
 						{#if row.results.failed > 0}
-							<span class="font-mono text-red-600 dark:text-red-400"
-								>, {row.results.failed} failed</span
-							>
+							<span class="font-mono text-danger-icon">, {row.results.failed} failed</span>
 						{/if}
 					</span>
 				</div>
@@ -454,10 +438,8 @@
 						{ key: 'delta', header: 'Delta', sortable: false, align: 'center' as const },
 						{ key: 'formats', header: 'Formats', sortable: false }
 					]}
-					<div class="mt-4 border-t border-neutral-200 pt-4 dark:border-neutral-700">
-						<div
-							class="mb-3 flex items-center gap-1.5 text-sm font-medium text-neutral-700 dark:text-neutral-300"
-						>
+					<div class="mt-4 border-t border-border pt-4">
+						<div class="mb-3 flex items-center gap-1.5 text-sm font-medium text-text-soft">
 							<Search size={14} />
 							Items Searched
 						</div>
@@ -471,12 +453,12 @@
 						>
 							<svelte:fragment slot="cell" let:row={item} let:column>
 								{#if column.key === 'title'}
-									<span class="text-neutral-900 dark:text-neutral-100">{item.title}</span>
+									<span class="text-text">{item.title}</span>
 								{:else if column.key === 'current'}
 									{#if item.original.type === 'movie'}
 										<Badge variant="neutral" mono>{item.original.score.toLocaleString()}</Badge>
 									{:else}
-										<span class="text-xs text-neutral-500"
+										<span class="text-xs text-text-muted"
 											>{item.original.episodes?.length ?? 0} episodes</span
 										>
 									{/if}
@@ -488,7 +470,7 @@
 											{/each}
 										</div>
 									{:else}
-										<span class="text-neutral-400">—</span>
+										<span class="text-text-subtle">—</span>
 									{/if}
 								{:else if column.key === 'delta'}
 									{#if item.upgrades.length > 0 && item.original.type === 'movie'}
@@ -501,7 +483,7 @@
 											>{item.upgrades.length} grab{item.upgrades.length > 1 ? 's' : ''}</Badge
 										>
 									{:else}
-										<span class="text-neutral-400">—</span>
+										<span class="text-text-subtle">—</span>
 									{/if}
 								{:else if column.key === 'formats'}
 									{#if item.upgrades.length > 0}
@@ -525,12 +507,10 @@
 								<div class="space-y-2 py-2 pl-2">
 									{#if item.original.type === 'movie'}
 										<div class="flex gap-2">
-											<span
-												class="w-16 shrink-0 text-xs font-medium text-neutral-500 dark:text-neutral-400"
-												>Current:</span
+											<span class="w-16 shrink-0 text-xs font-medium text-text-muted">Current:</span
 											>
 											<span
-												class="truncate font-mono text-xs text-neutral-700 dark:text-neutral-300"
+												class="truncate font-mono text-xs text-text-soft"
 												title={item.original.fileName}
 											>
 												{item.original.fileName}
@@ -538,14 +518,14 @@
 										</div>
 									{:else}
 										<div>
-											<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+											<span class="text-xs font-medium text-text-muted">
 												Episodes on disk ({item.original.episodes?.length ?? 0}):
 											</span>
 											<div class="mt-1 space-y-0.5">
 												{#each item.original.episodes ?? [] as ep}
 													<div class="flex items-center gap-2">
 														<span
-															class="truncate font-mono text-xs text-neutral-700 dark:text-neutral-300"
+															class="truncate font-mono text-xs text-text-soft"
 															title={ep.fileName}
 														>
 															{ep.fileName}
@@ -559,22 +539,16 @@
 									{#if item.upgrades.length > 0}
 										{#each item.upgrades as u}
 											<div class="flex gap-2">
-												<span
-													class="w-16 shrink-0 text-xs font-medium text-emerald-600 dark:text-emerald-400"
+												<span class="w-16 shrink-0 text-xs font-medium text-success-icon"
 													>Upgrade:</span
 												>
-												<span
-													class="truncate font-mono text-xs text-neutral-700 dark:text-neutral-300"
-													title={u.release}
-												>
+												<span class="truncate font-mono text-xs text-text-soft" title={u.release}>
 													{u.release}
 												</span>
 											</div>
 										{/each}
 									{:else}
-										<div class="text-xs text-neutral-500 italic dark:text-neutral-400">
-											No upgrade available
-										</div>
+										<div class="text-xs text-text-muted italic">No upgrade available</div>
 									{/if}
 								</div>
 							</svelte:fragment>

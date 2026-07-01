@@ -20,7 +20,7 @@
 		? 'border-border bg-surface shadow-control'
 		: 'border-transparent'}"
 >
-	<!-- Main navigation button (left side) - rounded left, square right (or fully rounded if no items) -->
+	<!-- Main navigation button (left side) - radius left, square right (or fully radiused if no items) -->
 	<a
 		{href}
 		class="flex flex-1 items-center gap-2 py-1.5 pr-2 pl-3 font-sans text-sm font-semibold text-text-soft transition-colors {isActive
@@ -37,11 +37,11 @@
 		{/if}
 		<span class="flex-1">{label}</span>
 		{#if alert > 0}
-			<Label variant="info" size="sm" rounded="full">{alert}</Label>
+			<Label variant="info" size="sm" radius="full">{alert}</Label>
 		{/if}
 	</a>
 
-	<!-- Chevron toggle button (right side) - square left, rounded right -->
+	<!-- Chevron toggle button (right side) - square left, radius right -->
 	{#if hasItems}
 		<button
 			onclick={onToggle}

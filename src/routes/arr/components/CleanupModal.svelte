@@ -165,53 +165,47 @@
 	<div slot="body">
 		{#if phase === 'scanning'}
 			<div class="flex flex-col items-center gap-3 py-8">
-				<Loader2 size={32} class="animate-spin text-neutral-400" />
-				<p class="text-sm text-neutral-500 dark:text-neutral-400">
-					Scanning for stale configs and removed media...
-				</p>
+				<Loader2 size={32} class="animate-spin text-text-subtle" />
+				<p class="text-sm text-text-muted">Scanning for stale configs and removed media...</p>
 			</div>
 		{:else if phase === 'submitting'}
 			<div class="flex flex-col items-center gap-3 py-8">
-				<Loader2 size={32} class="animate-spin text-neutral-400" />
-				<p class="text-sm text-neutral-500 dark:text-neutral-400">Queueing cleanup job...</p>
+				<Loader2 size={32} class="animate-spin text-text-subtle" />
+				<p class="text-sm text-text-muted">Queueing cleanup job...</p>
 			</div>
 		{:else if phase === 'preview'}
 			{#if allEmpty && !configError && !entityError}
 				<div class="flex flex-col items-center gap-3 py-8">
-					<Check size={32} class="text-emerald-500" />
-					<p class="text-sm text-neutral-600 dark:text-neutral-400">
-						Nothing to clean up. Everything looks good.
-					</p>
+					<Check size={32} class="text-success-icon" />
+					<p class="text-sm text-text-soft">Nothing to clean up. Everything looks good.</p>
 				</div>
 			{:else}
 				<div class="space-y-4">
 					<!-- Config cleanup preview -->
 					{#if configError}
 						<div
-							class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950"
+							class="flex items-start gap-3 rounded-card border border-danger-border bg-danger-bg p-3"
 						>
-							<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-red-500" />
+							<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-danger-icon" />
 							<div>
-								<p class="text-sm font-medium text-red-800 dark:text-red-200">Config scan failed</p>
-								<p class="mt-0.5 text-xs text-red-600 dark:text-red-400">{configError}</p>
+								<p class="text-sm font-medium text-danger-text">Config scan failed</p>
+								<p class="mt-0.5 text-xs text-danger-icon">{configError}</p>
 							</div>
 						</div>
 					{:else if !configEmpty && configScan}
 						<div class="space-y-2">
-							<p
-								class="text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
-							>
+							<p class="text-xs font-medium tracking-wide text-text-muted uppercase">
 								Stale Configs
 							</p>
 							<div class="space-y-1">
 								{#if configScan.staleCustomFormats.length > 0}
-									<p class="text-sm text-neutral-700 dark:text-neutral-300">
+									<p class="text-sm text-text-soft">
 										<span class="font-medium">{configScan.staleCustomFormats.length}</span> custom
 										format{configScan.staleCustomFormats.length === 1 ? '' : 's'}
 									</p>
 								{/if}
 								{#if configScan.staleQualityProfiles.length > 0}
-									<p class="text-sm text-neutral-700 dark:text-neutral-300">
+									<p class="text-sm text-text-soft">
 										<span class="font-medium">{configScan.staleQualityProfiles.length}</span>
 										quality profile{configScan.staleQualityProfiles.length === 1 ? '' : 's'}
 									</p>
@@ -223,28 +217,26 @@
 					<!-- Entity cleanup preview -->
 					{#if entityError}
 						<div
-							class="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950"
+							class="flex items-start gap-3 rounded-card border border-danger-border bg-danger-bg p-3"
 						>
-							<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-red-500" />
+							<AlertTriangle size={16} class="mt-0.5 flex-shrink-0 text-danger-icon" />
 							<div>
-								<p class="text-sm font-medium text-red-800 dark:text-red-200">Entity scan failed</p>
-								<p class="mt-0.5 text-xs text-red-600 dark:text-red-400">{entityError}</p>
+								<p class="text-sm font-medium text-danger-text">Entity scan failed</p>
+								<p class="mt-0.5 text-xs text-danger-icon">{entityError}</p>
 							</div>
 						</div>
 					{:else if !entityEmpty && entityScan}
 						<div class="space-y-2">
-							<p
-								class="text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
-							>
+							<p class="text-xs font-medium tracking-wide text-text-muted uppercase">
 								Removed Media
 							</p>
-							<p class="text-sm text-neutral-700 dark:text-neutral-300">
+							<p class="text-sm text-text-soft">
 								<span class="font-medium">{entityScan.removedEntities.length}</span>
 								{entityLabel} removed from {externalDb}
 							</p>
 							<div class="max-h-40 overflow-y-auto">
 								{#each entityScan.removedEntities as entity}
-									<p class="text-sm text-neutral-500 dark:text-neutral-400">{entity.title}</p>
+									<p class="text-sm text-text-muted">{entity.title}</p>
 								{/each}
 							</div>
 						</div>

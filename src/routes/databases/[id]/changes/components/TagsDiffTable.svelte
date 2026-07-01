@@ -48,7 +48,7 @@
 					{/each}
 				</div>
 			{:else}
-				<span class="text-sm text-neutral-400">—</span>
+				<span class="text-sm text-text-subtle">—</span>
 			{/if}
 		{:else if column.key === 'added'}
 			{#if row.added.length > 0}
@@ -58,7 +58,7 @@
 					{/each}
 				</div>
 			{:else}
-				<span class="text-sm text-neutral-400">—</span>
+				<span class="text-sm text-text-subtle">—</span>
 			{/if}
 		{/if}
 	</svelte:fragment>

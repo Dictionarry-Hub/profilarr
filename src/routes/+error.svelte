@@ -7,22 +7,22 @@
 </script>
 
 <div
-	class="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-neutral-50 px-4 dark:bg-neutral-900"
+	class="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-surface-muted px-4"
 >
 	<div class="flex max-w-6xl items-center gap-12">
 		<!-- Left column: Error info and button -->
 		<div class="flex-1">
-			<h1 class="mb-4 text-9xl font-bold text-neutral-900 dark:text-neutral-50">
+			<h1 class="mb-4 text-9xl font-bold text-text">
 				{statusCode}
 			</h1>
 
-			<p class="mb-8 text-lg text-neutral-600 dark:text-neutral-400">
+			<p class="mb-8 text-lg text-text-soft">
 				{errorMessage}
 			</p>
 
 			<a
 				href="/"
-				class="inline-block rounded-lg bg-neutral-900 px-6 py-3 font-semibold text-white transition-colors hover:bg-neutral-700 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-200"
+				class="inline-block rounded-card bg-surface px-6 py-3 font-semibold text-on-accent transition-colors hover:bg-surface"
 			>
 				Go Home
 			</a>
@@ -31,7 +31,7 @@
 		<!-- Right column: 404 gif -->
 		{#if statusCode === 404}
 			<div class="flex-1">
-				<img src={gif404} alt="404 Not Found" class="h-auto w-full rounded-lg" />
+				<img src={gif404} alt="404 Not Found" class="h-auto w-full rounded-card" />
 			</div>
 		{/if}
 	</div>

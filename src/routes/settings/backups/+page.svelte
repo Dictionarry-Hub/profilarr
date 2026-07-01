@@ -189,8 +189,8 @@
 <div class="p-4 md:p-8">
 	<!-- Header -->
 	<div class="mb-8">
-		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">Backups</h1>
-		<p class="mt-3 text-base text-neutral-600 md:text-lg dark:text-neutral-400">
+		<h1 class="text-2xl font-bold text-text md:text-3xl">Backups</h1>
+		<p class="mt-3 text-base text-text-soft md:text-lg">
 			Manage database and configuration backups
 		</p>
 	</div>
@@ -258,9 +258,9 @@
 						>{formatDateTime(row.created, $serverTimezone, $dateFormat)}</span
 					>
 				{:else if column.key === 'filename'}
-					<span class="font-mono text-neutral-500 dark:text-neutral-400">{row.filename}</span>
+					<span class="font-mono text-text-muted">{row.filename}</span>
 				{:else if column.key === 'sizeFormatted'}
-					<span class="text-neutral-500 dark:text-neutral-400">{row.sizeFormatted}</span>
+					<span class="text-text-muted">{row.sizeFormatted}</span>
 				{/if}
 			</svelte:fragment>
 
@@ -308,7 +308,7 @@
 					<Button
 						icon={Trash2}
 						size="xs"
-						iconColor="text-red-600 dark:text-red-400"
+						iconColor="text-danger-icon "
 						tooltip="Delete"
 						on:click={() => openDeleteModal(row.filename)}
 					/>
@@ -354,7 +354,7 @@
 	on:confirm={confirmDownload}
 	on:cancel={cancelDownload}
 >
-	<div slot="body" class="space-y-3 text-sm text-neutral-600 dark:text-neutral-400">
+	<div slot="body" class="space-y-3 text-sm text-text-soft">
 		<p>
 			The local copy on this server includes everything needed for restore, including secrets. The
 			downloaded file is sanitized so it's safer to share. The following will be removed before

@@ -152,21 +152,21 @@
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 	<div slot="left">
-		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
-		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
+		<h1 class="text-text">{title}</h1>
+		<p class="text-text-soft">{description}</p>
 	</div>
 	<div slot="right" class="flex items-center gap-2">
 		<Button
 			text="Info"
 			icon={Info}
-			iconColor="text-blue-600 dark:text-blue-400"
+			iconColor="text-info-icon "
 			on:click={() => (showInfoModal = true)}
 		/>
 		{#if mode === 'edit'}
 			<Button
 				text={deleting ? 'Deleting...' : 'Delete'}
 				icon={Trash2}
-				iconColor="text-red-600 dark:text-red-400"
+				iconColor="text-danger-icon "
 				disabled={deleting || saving}
 				on:click={handleDeleteClick}
 			/>
@@ -174,7 +174,7 @@
 		<Button
 			text={saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
 			icon={Save}
-			iconColor="text-blue-600 dark:text-blue-400"
+			iconColor="text-info-icon "
 			disabled={saving || !isValid || !$isDirty}
 			on:click={handleSaveClick}
 		/>
@@ -186,19 +186,15 @@
 		<div class="space-y-2">
 			<div class="flex items-center justify-between gap-4">
 				<div>
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Name<span class="text-red-500">*</span>
+					<div class="text-sm font-medium text-text">
+						Name<span class="text-danger-icon">*</span>
 					</div>
 				</div>
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Rename Episodes
-				</div>
+				<div class="text-sm font-medium text-text">Rename Episodes</div>
 			</div>
 			<div class="flex items-center justify-between gap-4">
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					The name of this Sonarr naming configuration.
-				</p>
-				<p class="text-right text-xs text-neutral-600 dark:text-neutral-400">
+				<p class="text-xs text-text-soft">The name of this Sonarr naming configuration.</p>
+				<p class="text-right text-xs text-text-soft">
 					Rename episode files to match the naming format.
 				</p>
 			</div>
@@ -229,10 +225,8 @@
 			data-onboarding="media-naming-formats"
 		>
 			<div class="space-y-1">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Episode Formats
-				</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+				<div class="text-sm font-medium text-text">Episode Formats</div>
+				<p class="text-xs text-text-soft">
 					Control how Sonarr names standard, daily, and anime episodes.
 				</p>
 			</div>
@@ -278,10 +272,8 @@
 
 		<div class="space-y-4" class:opacity-60={!formData.rename}>
 			<div class="space-y-1">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Folder Formats</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					Control how Sonarr names series and season folders.
-				</p>
+				<div class="text-sm font-medium text-text">Folder Formats</div>
+				<p class="text-xs text-text-soft">Control how Sonarr names series and season folders.</p>
 			</div>
 			<div>
 				<TokenAutocomplete
@@ -312,10 +304,8 @@
 
 		<div class="space-y-2" class:opacity-60={!formData.rename}>
 			<div class="space-y-1">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Multi-Episode Style
-				</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+				<div class="text-sm font-medium text-text">Multi-Episode Style</div>
+				<p class="text-xs text-text-soft">
 					Choose how multi-episode files are represented in generated names.
 				</p>
 			</div>
@@ -333,10 +323,8 @@
 			data-onboarding="media-naming-character-replacement"
 		>
 			<div class="space-y-1">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Character Replacement
-				</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+				<div class="text-sm font-medium text-text">Character Replacement</div>
+				<p class="text-xs text-text-soft">
 					Control how illegal filesystem characters are handled in generated names.
 				</p>
 			</div>
@@ -350,15 +338,11 @@
 					disabled={!formData.rename}
 					on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
 				/>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					Replace characters that are not allowed in file names.
-				</p>
+				<p class="text-xs text-text-soft">Replace characters that are not allowed in file names.</p>
 			</div>
 
 			<div class="space-y-2">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Colon Replacement
-				</div>
+				<div class="text-sm font-medium text-text">Colon Replacement</div>
 				<DropdownSelect
 					value={formData.colonReplacementFormat}
 					options={SONARR_COLON_REPLACEMENT_OPTIONS}
@@ -484,46 +468,46 @@
 />
 
 <InfoModal bind:open={showInfoModal} header="Sonarr Naming Configuration">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="space-y-4 text-sm text-text-soft">
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Format Strings</div>
+			<div class="font-medium text-text">Format Strings</div>
 			<p class="mt-1">
 				Format strings control how Sonarr names episode files and folders. Use tokens like
-				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+				<code class="rounded-control-sm bg-surface-hover px-1 py-0.5 font-mono text-xs"
 					>{'{Series Title}'}</code
 				>
 				and
-				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+				<code class="rounded-control-sm bg-surface-hover px-1 py-0.5 font-mono text-xs"
 					>{'{Episode Title}'}</code
 				>
 				to build your naming pattern. Sonarr has separate formats for standard, daily, and anime episodes.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Token Autocomplete</div>
+			<div class="font-medium text-text">Token Autocomplete</div>
 			<p class="mt-1">
-				Type <code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+				Type <code class="rounded-control-sm bg-surface-hover px-1 py-0.5 font-mono text-xs"
 					>{'{'}</code
 				> in any format field to open the token picker. Filter by typing, then use arrow keys and Enter
 				or click to insert.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Live Preview</div>
+			<div class="font-medium text-text">Live Preview</div>
 			<p class="mt-1">
 				A preview line below each format field shows how your pattern resolves with sample data, so
 				you can see the result as you type.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Multi-Episode Style</div>
+			<div class="font-medium text-text">Multi-Episode Style</div>
 			<p class="mt-1">
 				Controls how multi-episode files are named. "Extend" appends additional episode numbers
 				(S01E01-E02), while other styles use different separator patterns.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Character Replacement</div>
+			<div class="font-medium text-text">Character Replacement</div>
 			<p class="mt-1">
 				When enabled, illegal filesystem characters are replaced automatically. The colon
 				replacement option controls how colons specifically are handled. Sonarr also supports a

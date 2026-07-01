@@ -11,7 +11,7 @@
 
 <span class="inline-flex items-center gap-1">
 	<button type="button" on:click={ontogglenegated} class="cursor-pointer">
-		<Label variant={tag.negated ? 'danger' : 'info'} size="md" rounded="md">
+		<Label variant={tag.negated ? 'danger' : 'info'} size="md" radius="md">
 			<span class="opacity-60">{fieldLabel}:</span>
 			<span class={tag.negated ? 'line-through' : ''}>{tag.value}</span>
 		</Label>
@@ -19,7 +19,7 @@
 	<button
 		type="button"
 		on:click={onremove}
-		class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+		class="text-text-subtle hover:text-text-soft"
 		aria-label="Remove filter"
 	>
 		<X size={14} />

@@ -350,7 +350,7 @@
 	}
 </script>
 
-<div class="-mx-4 bg-neutral-50 px-4 pt-2 pb-2 md:-mx-8 md:px-8 dark:bg-neutral-900">
+<div class="-mx-4 bg-surface-muted px-4 pt-2 pb-2 md:-mx-8 md:px-8">
 	<div class="mb-4">
 		<ActionsBar>
 			<SearchAction {searchStore} placeholder="Search filters..." />
@@ -399,11 +399,7 @@
 								/>
 							</div>
 						{:else}
-							<span
-								class={row.enabled
-									? 'text-neutral-900 dark:text-neutral-100'
-									: 'text-neutral-400 dark:text-neutral-500'}
-							>
+							<span class={row.enabled ? 'text-text ' : 'text-text-subtle '}>
 								{row.name}
 							</span>
 							<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
@@ -412,7 +408,7 @@
 							</div>
 							{#if !row.enabled}
 								<span
-									class="rounded bg-neutral-200 px-1.5 py-0.5 text-xs text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400"
+									class="rounded-control-sm bg-surface-hover px-1.5 py-0.5 text-xs text-text-muted"
 								>
 									Disabled
 								</span>
@@ -423,27 +419,25 @@
 					<div class="flex flex-wrap items-center gap-1 md:hidden">
 						<Button
 							icon={Power}
-							iconColor={row.enabled
-								? 'text-green-600 dark:text-green-400'
-								: 'text-neutral-400 dark:text-neutral-500'}
+							iconColor={row.enabled ? 'text-success-icon ' : 'text-text-subtle '}
 							tooltip={row.enabled ? 'Disable' : 'Enable'}
 							on:click={() => toggleEnabled(row.id)}
 						/>
 						<Button
 							icon={ClipboardCopy}
-							iconColor="text-amber-600 dark:text-amber-400"
+							iconColor="text-warning-icon "
 							tooltip="Copy"
 							on:click={() => copyFilter(row.id)}
 						/>
 						<Button
 							icon={Copy}
-							iconColor="text-violet-600 dark:text-violet-400"
+							iconColor="text-accent-solid"
 							tooltip="Duplicate"
 							on:click={() => duplicateFilter(row.id)}
 						/>
 						<Button
 							icon={Trash2}
-							iconColor="text-red-600 dark:text-red-400"
+							iconColor="text-danger-icon "
 							tooltip="Delete"
 							on:click={() => confirmDelete(row)}
 						/>
@@ -457,27 +451,25 @@
 			<div class="hidden items-center gap-1 md:flex">
 				<Button
 					icon={Power}
-					iconColor={row.enabled
-						? 'text-green-600 dark:text-green-400'
-						: 'text-neutral-400 dark:text-neutral-500'}
+					iconColor={row.enabled ? 'text-success-icon ' : 'text-text-subtle '}
 					tooltip={row.enabled ? 'Disable' : 'Enable'}
 					on:click={() => toggleEnabled(row.id)}
 				/>
 				<Button
 					icon={ClipboardCopy}
-					iconColor="text-amber-600 dark:text-amber-400"
+					iconColor="text-warning-icon "
 					tooltip="Copy"
 					on:click={() => copyFilter(row.id)}
 				/>
 				<Button
 					icon={Copy}
-					iconColor="text-violet-600 dark:text-violet-400"
+					iconColor="text-accent-solid"
 					tooltip="Duplicate"
 					on:click={() => duplicateFilter(row.id)}
 				/>
 				<Button
 					icon={Trash2}
-					iconColor="text-red-600 dark:text-red-400"
+					iconColor="text-danger-icon "
 					tooltip="Delete"
 					on:click={() => confirmDelete(row)}
 				/>
@@ -488,10 +480,7 @@
 			<div class="space-y-4 p-3 md:p-6">
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
 					<div data-onboarding="upgrades-cutoff">
-						<label
-							for="cutoff-{row.id}"
-							class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
-						>
+						<label for="cutoff-{row.id}" class="block text-sm font-medium text-text-soft">
 							Cutoff %
 						</label>
 						<div class="mt-1">
@@ -505,15 +494,10 @@
 								on:change={handleChange}
 							/>
 						</div>
-						<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-							Score threshold for "cutoff met"
-						</p>
+						<p class="mt-1 text-xs text-text-muted">Score threshold for "cutoff met"</p>
 					</div>
 					<div data-onboarding="upgrades-method">
-						<label
-							for="selector-{row.id}"
-							class="mb-1 block text-sm font-medium text-neutral-600 dark:text-neutral-400"
-						>
+						<label for="selector-{row.id}" class="mb-1 block text-sm font-medium text-text-soft">
 							Method
 						</label>
 						<div class="mt-1">
@@ -534,15 +518,12 @@
 								}}
 							/>
 						</div>
-						<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+						<p class="mt-1 text-xs text-text-muted">
 							{selectorShortDescriptions[row.selector] ?? 'Selection order'}
 						</p>
 					</div>
 					<div data-onboarding="upgrades-count">
-						<label
-							for="count-{row.id}"
-							class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
-						>
+						<label for="count-{row.id}" class="block text-sm font-medium text-text-soft">
 							Count
 						</label>
 						<div class="mt-1">
@@ -556,15 +537,12 @@
 								on:change={handleChange}
 							/>
 						</div>
-						<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+						<p class="mt-1 text-xs text-text-muted">
 							Items per run (max {countMax} at this schedule)
 						</p>
 					</div>
 					<div data-onboarding="upgrades-cooldown" class="lg:col-span-2">
-						<label
-							for="tag-{row.id}"
-							class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
-						>
+						<label for="tag-{row.id}" class="block text-sm font-medium text-text-soft">
 							Cooldown Tag
 						</label>
 						<div class="mt-1">
@@ -580,11 +558,11 @@
 							/>
 						</div>
 						{#if getSharedTagFilters(row).length > 0}
-							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+							<p class="mt-1 text-xs text-text-muted">
 								Shared with: {getSharedTagFilters(row).join(', ')}
 							</p>
 						{:else}
-							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+							<p class="mt-1 text-xs text-text-muted">
 								Tag applied in your arr instance for cooldown tracking. Avoid reusing tags you use
 								elsewhere.
 							</p>
@@ -592,7 +570,7 @@
 					</div>
 				</div>
 
-				<hr class="-mx-3 border-t border-neutral-200 md:-mx-6 dark:border-neutral-800" />
+				<hr class="-mx-3 border-t border-border md:-mx-6" />
 
 				<div data-onboarding="upgrades-filter-rules">
 					<FilterGroupComponent
@@ -624,7 +602,7 @@
 	header="Import Filter"
 	label="Filter JSON"
 	description="Paste copied filter JSON to create a new filter."
-	placeholder={'{\n  "group": { ... }\n}'}
+	placeholder={'{\n "group": { ... }\n}'}
 	confirmText="Import"
 	on:confirm={(e) => handlePasteConfirm(e.detail)}
 	on:cancel={handlePasteCancel}

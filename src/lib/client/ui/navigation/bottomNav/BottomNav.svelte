@@ -63,31 +63,31 @@
 </script>
 
 <nav
-	class="fixed right-0 bottom-0 left-0 z-50 border-t border-neutral-200 bg-neutral-50 pb-[env(safe-area-inset-bottom)] md:hidden dark:border-neutral-800 dark:bg-neutral-900"
+	class="fixed right-0 bottom-0 left-0 z-50 border-t border-border bg-surface-muted pb-[env(safe-area-inset-bottom)] md:hidden"
 >
 	{#if $jobStatus.state !== 'idle'}
 		<div
-			class="flex items-center justify-center gap-2 border-b border-neutral-200 px-3 py-1.5 dark:border-neutral-800"
+			class="flex items-center justify-center gap-2 border-b border-border px-3 py-1.5"
 			transition:slide={{ duration: 200 }}
 		>
 			{#if $jobStatus.state === 'running'}
-				<Loader2 size={14} class="flex-shrink-0 animate-spin text-blue-500 dark:text-blue-400" />
-				<span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+				<Loader2 size={14} class="flex-shrink-0 animate-spin text-info-icon " />
+				<span class="text-xs font-medium text-text-soft">
 					{$jobStatus.displayLabel}
 				</span>
 			{:else if $jobStatus.state === 'completed'}
 				{#if $jobStatus.status === 'success' || $jobStatus.status === 'skipped'}
-					<CheckCircle2 size={14} class="flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
+					<CheckCircle2 size={14} class="flex-shrink-0 text-success-icon " />
 				{:else}
-					<XCircle size={14} class="flex-shrink-0 text-red-600 dark:text-red-400" />
+					<XCircle size={14} class="flex-shrink-0 text-danger-icon " />
 				{/if}
-				<span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+				<span class="text-xs font-medium text-text-soft">
 					{$jobStatus.displayLabel}
 					{$jobStatus.status === 'success' || $jobStatus.status === 'skipped'
 						? 'complete'
 						: 'failed'}
 				</span>
-				<span class="font-mono text-[10px] text-neutral-500 dark:text-neutral-500">
+				<span class="font-mono text-[10px] text-text-muted">
 					{formatDuration($jobStatus.durationMs)}
 				</span>
 			{/if}
@@ -102,9 +102,7 @@
 				class="flex flex-col items-center justify-center py-2 transition-colors
 					{item.priority === 'medium' ? 'hidden sm:flex' : ''}
 					{item.priority === 'low' ? 'hidden' : ''}
-					{active
-					? 'text-accent-600 dark:text-accent-400'
-					: 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'}"
+					{active ? 'text-accent-solid' : 'text-text-muted hover:text-text-soft '}"
 			>
 				<span class="nav-icon-emoji text-xl">{item.emoji}</span>
 				<span class="nav-icon-lucide">

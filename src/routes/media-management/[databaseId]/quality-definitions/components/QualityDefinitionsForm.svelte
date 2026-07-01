@@ -315,8 +315,8 @@
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 	<div slot="left">
-		<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">{title}</h1>
-		<p class="text-sm text-neutral-500 dark:text-neutral-400">{description}</p>
+		<h1 class="text-xl font-semibold text-text">{title}</h1>
+		<p class="text-sm text-text-muted">{description}</p>
 	</div>
 	<div slot="right" class="flex items-center gap-2">
 		<!-- Unit selector (hidden on mobile) -->
@@ -349,14 +349,14 @@
 		<Button
 			text="Info"
 			icon={Info}
-			iconColor="text-blue-600 dark:text-blue-400"
+			iconColor="text-info-icon "
 			on:click={() => (showInfoModal = true)}
 		/>
 		{#if mode === 'edit'}
 			<Button
 				text={deleting ? 'Deleting...' : 'Delete'}
 				icon={Trash2}
-				iconColor="text-red-600 dark:text-red-400"
+				iconColor="text-danger-icon "
 				disabled={deleting || saving}
 				on:click={handleDeleteClick}
 			/>
@@ -364,7 +364,7 @@
 		<Button
 			text={saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
 			icon={Save}
-			iconColor="text-blue-600 dark:text-blue-400"
+			iconColor="text-info-icon "
 			disabled={saving || !isValid || !$isDirty}
 			on:click={handleSaveClick}
 		/>
@@ -383,10 +383,8 @@
 
 	<!-- Quality definitions table -->
 	{#if entries.length === 0}
-		<div
-			class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-		>
-			<p class="text-neutral-600 dark:text-neutral-400">
+		<div class="rounded-card border border-border bg-surface p-8 text-center">
+			<p class="text-text-soft">
 				No qualities available for {arrLabel}
 			</p>
 		</div>
@@ -404,7 +402,7 @@
 					{row.label}
 				{:else if column.key === 'count'}
 					<span
-						class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
+						class="rounded-pill bg-surface-hover px-2 py-0.5 text-xs font-medium text-text-soft"
 					>
 						{row.entries.length}
 					</span>
@@ -412,16 +410,14 @@
 			</svelte:fragment>
 
 			<svelte:fragment slot="expanded" let:row>
-				<div class="divide-y divide-neutral-200 dark:divide-neutral-700">
+				<div class="divide-y divide-border">
 					{#each row.entries as entry (entry.quality_name)}
 						{@const markers = markersMap[entry.quality_name] || createMarkers(entry)}
 						<div
-							class="flex flex-col gap-3 bg-white px-4 py-4 qd:flex-row qd:items-center qd:gap-3 qd:pt-5 qd:pr-4 qd:pb-8 qd:pl-8 dark:bg-neutral-900"
+							class="flex flex-col gap-3 bg-surface px-4 py-4 qd:flex-row qd:items-center qd:gap-3 qd:pt-5 qd:pr-4 qd:pb-8 qd:pl-8"
 						>
 							<!-- Quality Name -->
-							<div
-								class="text-sm font-medium text-neutral-900 qd:w-32 qd:shrink-0 dark:text-neutral-100"
-							>
+							<div class="text-sm font-medium text-text qd:w-32 qd:shrink-0">
 								{entry.quality_name}
 							</div>
 
@@ -445,10 +441,8 @@
 							<!-- Number Inputs -->
 							<div class="flex gap-2 qd:contents">
 								<div class="flex-1 qd:w-24 qd:flex-none qd:shrink-0">
-									<div
-										class="mb-1 flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400"
-									>
-										Min <span class="text-neutral-400 dark:text-neutral-500">(MB/m)</span>
+									<div class="mb-1 flex items-center gap-1 text-xs font-medium text-info-icon">
+										Min <span class="text-text-subtle">(MB/m)</span>
 									</div>
 									<NumberInput
 										id="min-{entry.quality_name}"
@@ -463,10 +457,8 @@
 								</div>
 
 								<div class="flex-1 qd:w-24 qd:flex-none qd:shrink-0">
-									<div
-										class="mb-1 flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400"
-									>
-										Pref <span class="text-neutral-400 dark:text-neutral-500">(MB/m)</span>
+									<div class="mb-1 flex items-center gap-1 text-xs font-medium text-success-icon">
+										Pref <span class="text-text-subtle">(MB/m)</span>
 									</div>
 									<NumberInput
 										id="preferred-{entry.quality_name}"
@@ -481,10 +473,8 @@
 								</div>
 
 								<div class="flex-1 qd:w-24 qd:flex-none qd:shrink-0">
-									<div
-										class="mb-1 flex items-center gap-1 text-xs font-medium text-orange-600 dark:text-orange-400"
-									>
-										Max <span class="text-neutral-400 dark:text-neutral-500">(MB/m)</span>
+									<div class="mb-1 flex items-center gap-1 text-xs font-medium text-warning-icon">
+										Max <span class="text-text-subtle">(MB/m)</span>
 									</div>
 									<NumberInput
 										id="max-{entry.quality_name}"
@@ -606,23 +596,21 @@
 
 <!-- Info Modal -->
 <InfoModal bind:open={showInfoModal} header="Quality Definitions">
-	<div class="space-y-3 text-sm text-neutral-700 dark:text-neutral-300">
+	<div class="space-y-3 text-sm text-text-soft">
 		<p>
 			Quality definitions control the acceptable file size range for each quality level. All values
 			are stored in <strong>MB per minute</strong> of runtime.
 		</p>
 		<div class="space-y-1">
 			<p>
-				<span class="font-medium text-blue-600 dark:text-blue-400">Min</span> — reject files smaller than
-				this.
+				<span class="font-medium text-info-icon">Min</span> — reject files smaller than this.
 			</p>
 			<p>
-				<span class="font-medium text-green-600 dark:text-green-400">Preferred</span> — ideal target size.
-				Files closest to this are prioritized.
+				<span class="font-medium text-success-icon">Preferred</span> — ideal target size. Files closest
+				to this are prioritized.
 			</p>
 			<p>
-				<span class="font-medium text-orange-600 dark:text-orange-400">Max</span> — reject files larger
-				than this.
+				<span class="font-medium text-warning-icon">Max</span> — reject files larger than this.
 			</p>
 		</div>
 		<p>

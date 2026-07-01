@@ -113,7 +113,7 @@
 
 <div
 	bind:this={dropdownEl}
-	class="z-50 overflow-hidden border border-border bg-surface-muted shadow-xl {roundedClass} {fixed
+	class="z-50 overflow-hidden border border-border bg-surface-muted shadow-card {roundedClass} {fixed
 		? 'fixed'
 		: 'absolute ' + verticalClass} {positionClass}"
 	style="min-width: {minWidth}; {width ? `width: ${width};` : ''} {fixed ? fixedStyle : ''}"

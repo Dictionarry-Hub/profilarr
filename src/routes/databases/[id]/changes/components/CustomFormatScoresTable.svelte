@@ -48,7 +48,7 @@
 <Table {columns} data={rows} compact hoverable={false} responsive>
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'custom_format_name'}
-			<span class="text-sm text-neutral-700 dark:text-neutral-200">
+			<span class="text-sm text-text-soft">
 				{row.custom_format_name}
 			</span>
 		{:else if column.key === 'arr_type'}
@@ -57,19 +57,19 @@
 			{:else if row.arr_type === 'sonarr'}
 				<img src={sonarrLogo} alt="Sonarr" class="h-5 w-5" />
 			{:else}
-				<span class="text-sm text-neutral-500 dark:text-neutral-400">
+				<span class="text-sm text-text-muted">
 					{formatTitle(row.arr_type)}
 				</span>
 			{/if}
 		{:else if column.key === 'before'}
 			{#if row.before === null}
-				<span class="text-sm text-neutral-400">—</span>
+				<span class="text-sm text-text-subtle">—</span>
 			{:else}
 				<Badge variant="neutral" size="md" mono>{formatValue(row.before)}</Badge>
 			{/if}
 		{:else if column.key === 'after'}
 			{#if row.after === null}
-				<span class="text-sm text-neutral-400">—</span>
+				<span class="text-sm text-text-subtle">—</span>
 			{:else}
 				<Badge variant="neutral" size="md" mono>{formatValue(row.after)}</Badge>
 			{/if}

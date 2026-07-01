@@ -107,8 +107,8 @@
 <div class="mt-6 space-y-6">
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
-			<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{pageTitle}</h2>
-			<p class="text-sm text-neutral-600 dark:text-neutral-400">{pageDescription}</p>
+			<h2 class="text-lg font-semibold text-text">{pageTitle}</h2>
+			<p class="text-sm text-text-soft">{pageDescription}</p>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
@@ -116,7 +116,7 @@
 					<Button
 						disabled={deleting}
 						icon={deleting ? Loader2 : Trash2}
-						iconColor="text-red-600 dark:text-red-400"
+						iconColor="text-danger-icon "
 						text={deleting ? 'Deleting...' : 'Delete'}
 						on:click={handleDeleteClick}
 					/>
@@ -125,7 +125,7 @@
 				<Button
 					disabled={saving || !isValid || (mode === 'edit' && !$isDirty)}
 					icon={saving ? Loader2 : Save}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					text={saving ? (mode === 'create' ? 'Creating...' : 'Saving...') : submitButtonText}
 					on:click={handleSaveClick}
 				/>
@@ -164,9 +164,7 @@
 		<input type="hidden" name="currentTitle" value={originalTitle} />
 		<input type="hidden" name="currentType" value={originalType} />
 
-		<div
-			class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
-		>
+		<div class="rounded-card border border-border bg-surface">
 			<div class="space-y-6 p-4">
 				<!-- Title -->
 				<div data-onboarding="cf-test-title">
@@ -182,9 +180,7 @@
 
 				<!-- Media Type -->
 				<div data-onboarding="cf-test-type">
-					<div class="mb-3 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-						Media Type
-					</div>
+					<div class="mb-3 block text-sm font-medium text-text-soft">Media Type</div>
 					<div class="grid gap-2 sm:grid-cols-2">
 						{#each typeOptions as option}
 							<div class="space-y-1">
@@ -195,7 +191,7 @@
 									fullWidth
 									on:change={() => (type = option.value)}
 								/>
-								<p class="px-1 text-xs text-neutral-500 dark:text-neutral-400">
+								<p class="px-1 text-xs text-text-muted">
 									{option.description}
 								</p>
 							</div>
@@ -205,9 +201,7 @@
 
 				<!-- Expected Result -->
 				<div data-onboarding="cf-test-expected">
-					<div class="mb-3 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-						Expected Result
-					</div>
+					<div class="mb-3 block text-sm font-medium text-text-soft">Expected Result</div>
 					<div class="grid gap-2 sm:grid-cols-2">
 						{#each matchOptions as option}
 							<div class="space-y-1">
@@ -219,7 +213,7 @@
 									fullWidth
 									on:change={() => (shouldMatch = option.value)}
 								/>
-								<p class="px-1 text-xs text-neutral-500 dark:text-neutral-400">
+								<p class="px-1 text-xs text-text-muted">
 									{option.description}
 								</p>
 							</div>

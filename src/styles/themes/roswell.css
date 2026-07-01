@@ -93,6 +93,7 @@
 
 	/* Links: classified frequency */
 	--theme-link-text: #6d28d9;
+	--theme-overlay: rgb(0 0 0 / 0.5);
 
 	/* Smooth, geometric, slightly alien */
 	--theme-radius-control-sm: 0.375rem;

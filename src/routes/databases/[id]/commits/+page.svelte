@@ -150,27 +150,27 @@
 					target="_blank"
 					rel="noopener noreferrer"
 					on:click|stopPropagation
-					class="inline-flex items-center gap-1.5 font-mono text-xs text-accent-600 hover:underline dark:text-accent-400"
+					class="inline-flex items-center gap-1.5 font-mono text-xs text-link-text hover:underline"
 				>
 					{row.shortHash}
 					<ExternalLink size={12} />
 				</a>
 			{:else if column.key === 'status'}
 				{#if row.status === 'installed'}
-					<Label variant="success" size="sm" rounded="md">Installed</Label>
+					<Label variant="success" size="sm" radius="md">Installed</Label>
 				{:else}
-					<Label variant="info" size="sm" rounded="md">Available</Label>
+					<Label variant="info" size="sm" radius="md">Available</Label>
 				{/if}
 			{:else if column.key === 'message'}
-				<span class="line-clamp-1 text-sm text-neutral-900 dark:text-neutral-100">
+				<span class="line-clamp-1 text-sm text-text">
 					{row.message}
 				</span>
 			{:else if column.key === 'author'}
-				<span class="text-sm text-neutral-600 dark:text-neutral-400">
+				<span class="text-sm text-text-soft">
 					{row.author}
 				</span>
 			{:else if column.key === 'date'}
-				<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+				<span class="font-mono text-xs text-text-muted">
 					{fmtDate(row.date)}
 				</span>
 			{/if}
@@ -178,7 +178,7 @@
 
 		<svelte:fragment slot="expanded" let:row>
 			<div class="space-y-2 p-4">
-				<div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+				<div class="flex items-center gap-2 text-xs text-text-muted">
 					<FileText size={14} />
 					<span>{row.files.length} file{row.files.length !== 1 ? 's' : ''} changed</span>
 				</div>
@@ -186,7 +186,7 @@
 					<div class="grid gap-1">
 						{#each row.files as file}
 							<code
-								class="block rounded bg-neutral-100 px-2 py-1 font-mono text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+								class="block rounded-control-sm bg-surface-hover px-2 py-1 font-mono text-xs text-text-soft"
 							>
 								{file}
 							</code>

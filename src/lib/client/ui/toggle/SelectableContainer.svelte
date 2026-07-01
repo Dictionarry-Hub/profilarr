@@ -9,7 +9,7 @@
 </script>
 
 <div
-	class="divide-y divide-neutral-200 overflow-hidden rounded-xl border border-neutral-300 dark:divide-neutral-700/40 dark:border-neutral-700/60 {paddingClass}"
+	class="divide-y divide-border overflow-hidden rounded-card border border-border {paddingClass}"
 >
 	<slot />
 </div>

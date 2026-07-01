@@ -93,6 +93,7 @@
 
 	/* Links: cyan data streams */
 	--theme-link-text: #00d4ee;
+	--theme-overlay: rgb(0 0 0 / 0.5);
 
 	/* Sharp. Industrial. No wasted geometry. */
 	--theme-radius-control-sm: 0.25rem;

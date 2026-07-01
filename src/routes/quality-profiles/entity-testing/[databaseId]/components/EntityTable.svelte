@@ -109,17 +109,15 @@
 					<img
 						src="https://image.tmdb.org/t/p/w92{row.poster_path}"
 						alt={row.title}
-						class="h-full w-full rounded object-cover"
+						class="h-full w-full rounded-control-sm object-cover"
 					/>
 				</div>
 			{:else}
-				<div
-					class="flex h-12 w-8 items-center justify-center rounded bg-neutral-200 dark:bg-neutral-700"
-				>
+				<div class="flex h-12 w-8 items-center justify-center rounded-control-sm bg-surface-hover">
 					{#if row.type === 'movie'}
-						<Film size={16} class="text-neutral-400" />
+						<Film size={16} class="text-text-subtle" />
 					{:else}
-						<Tv size={16} class="text-neutral-400" />
+						<Tv size={16} class="text-text-subtle" />
 					{/if}
 				</div>
 			{/if}
@@ -127,21 +125,21 @@
 			<div class="flex flex-col">
 				<span class="font-medium">{row.title}</span>
 				{#if row.year}
-					<span class="text-xs text-neutral-500 dark:text-neutral-400">{row.year}</span>
+					<span class="text-xs text-text-muted">{row.year}</span>
 				{/if}
 			</div>
 		{:else if column.key === 'type'}
-			<Label variant="secondary" size="sm" rounded="xl">
+			<Label variant="secondary" size="sm" radius="xl">
 				{#if row.type === 'movie'}
-					<Film size={12} class="text-amber-500" />
+					<Film size={12} class="text-warning-icon" />
 					Movie
 				{:else}
-					<Tv size={12} class="text-cyan-500" />
+					<Tv size={12} class="text-info-icon" />
 					Series
 				{/if}
 			</Label>
 		{:else if column.key === 'releases'}
-			<span class="text-neutral-600 dark:text-neutral-400">
+			<span class="text-text-soft">
 				{row.releases.length}
 			</span>
 		{/if}
@@ -191,7 +189,7 @@
 					tooltip="Delete entity"
 					variant="secondary"
 					size="xs"
-					iconColor="group-hover:text-red-500 dark:group-hover:text-red-400"
+					iconColor="group-hover:text-danger-icon "
 					on:click={() => {
 						const form = document.getElementById(formId) as HTMLFormElement;
 						dispatch('confirmDelete', { entity: row, formRef: form });
@@ -204,7 +202,7 @@
 	<svelte:fragment slot="expanded" let:row>
 		<div class="px-4 py-3">
 			{#if loadingEntityIds.has(row.id)}
-				<div class="flex items-center justify-center py-8 text-neutral-500 dark:text-neutral-400">
+				<div class="flex items-center justify-center py-8 text-text-muted">
 					<svg
 						class="mr-2 h-5 w-5 animate-spin"
 						xmlns="http://www.w3.org/2000/svg"

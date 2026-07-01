@@ -166,7 +166,7 @@
 	on:cancel={() => dispatch('cancel')}
 >
 	<div slot="body" class="flex h-full flex-col gap-4">
-		<p class="text-sm text-neutral-600 dark:text-neutral-400">
+		<p class="text-sm text-text-soft">
 			{description}
 		</p>
 
@@ -182,7 +182,7 @@
 		/>
 
 		{#if items.length >= 2}
-			<div class="px-1 text-xs text-neutral-500 dark:text-neutral-400">
+			<div class="px-1 text-xs text-text-muted">
 				{isMobile
 					? 'Use the move buttons to reorder selected members before saving the group.'
 					: 'Drag to reorder selected members before saving the group.'}
@@ -191,7 +191,7 @@
 
 		<div class="min-h-0 flex-1 overflow-y-auto pr-2 scrollbar-gutter-stable">
 			{#if items.length < 2}
-				<div class="px-3 py-2 text-sm text-neutral-500 dark:text-neutral-400">
+				<div class="px-3 py-2 text-sm text-text-muted">
 					At least two qualities are required for a group.
 				</div>
 			{:else}
@@ -210,14 +210,14 @@
 									handleToggle(item.name);
 								}
 							}}
-							className="cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800"
+							className="cursor-pointer transition-colors hover:bg-surface-muted "
 							contentClass="px-3 py-2.5"
 							role="button"
 							tabindex="0"
 						>
 							<div class="flex min-w-0 flex-1 items-center justify-between gap-2.5">
 								<div class="min-w-0 flex-1 text-left">
-									<div class="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
+									<div class="truncate text-sm font-medium text-text">
 										{item.name}
 									</div>
 								</div>

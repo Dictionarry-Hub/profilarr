@@ -89,10 +89,8 @@
 		<!-- Content -->
 		<div class="mt-6">
 			{#if $filtered.length === 0}
-				<div
-					class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-				>
-					<p class="text-neutral-600 dark:text-neutral-400">No databases match your search</p>
+				<div class="rounded-card border border-border bg-surface p-8 text-center">
+					<p class="text-text-soft">No databases match your search</p>
 				</div>
 			{:else if $view === 'table'}
 				<TableView databases={$filtered} on:unlink={handleUnlink} />
@@ -152,9 +150,9 @@
 
 <!-- Info Modal -->
 <InfoModal bind:open={showInfoModal} header="Databases">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="space-y-4 text-sm text-text-soft">
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">What are Databases?</div>
+			<div class="font-medium text-text">What are Databases?</div>
 			<div class="mt-1">
 				Databases are Profilarr Compliant Database (PCD) repositories containing quality profiles,
 				custom formats, and other configurations. Link a database to import and sync configurations
@@ -163,7 +161,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Private & Dev Badges</div>
+			<div class="font-medium text-text">Private & Dev Badges</div>
 			<div class="mt-1">
 				<strong>Private</strong> indicates the repository requires authentication.
 				<strong>Dev</strong> means you have a personal access token configured, allowing you to push changes
@@ -172,7 +170,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Sync Strategy</div>
+			<div class="font-medium text-text">Sync Strategy</div>
 			<div class="mt-1">
 				Controls how often Profilarr checks for updates from the remote repository. Set to "Manual"
 				to only sync when you explicitly trigger it, or choose an interval for automatic updates.
@@ -180,7 +178,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Unlinking</div>
+			<div class="font-medium text-text">Unlinking</div>
 			<div class="mt-1">
 				Unlinking a database removes all local data associated with it. Your Arr instances will keep
 				any configurations that were already synced, but you won't be able to sync updates until you

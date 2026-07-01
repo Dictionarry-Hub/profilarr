@@ -244,9 +244,9 @@
 			{@const loadingSeasons = episodeLoadingForSeries(episodeLoadingSet, seriesId)}
 
 			{#if isSeasonsLoading}
-				<div class="flex items-center gap-2 p-4 text-sm text-neutral-500 dark:text-neutral-400">
+				<div class="flex items-center gap-2 p-4 text-sm text-text-muted">
 					<div
-						class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
+						class="h-4 w-4 animate-spin rounded-pill border-2 border-border border-t-accent-solid"
 					></div>
 					Loading seasons...
 				</div>

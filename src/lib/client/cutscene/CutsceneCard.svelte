@@ -35,22 +35,20 @@
 	})();
 </script>
 
-<div
-	class="flex flex-col gap-3 rounded-xl border border-neutral-300 bg-neutral-100 p-4 dark:border-neutral-700/60 dark:bg-neutral-900"
->
+<div class="flex flex-col gap-3 rounded-card border border-border bg-surface-hover p-4">
 	<div>
 		<div class="flex items-start justify-between gap-2">
-			<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+			<h3 class="text-sm font-semibold text-text">
 				{title}
 			</h3>
 			{#if onCancel}
 				<Button icon={X} variant="ghost" size="xs" title={cancelTooltip} on:click={onCancel} />
 			{/if}
 		</div>
-		<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+		<p class="mt-1 text-sm text-text-soft">
 			{#each bodySegments as segment}
 				{#if segment.code}
-					<InlineCode text={segment.text} rounded="sm" />
+					<InlineCode text={segment.text} radius="sm" />
 				{:else}
 					{segment.text}
 				{/if}

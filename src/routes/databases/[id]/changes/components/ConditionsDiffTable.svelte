@@ -134,7 +134,7 @@
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
 			<div class="flex flex-wrap items-center gap-2">
-				<span class="text-sm text-neutral-700 dark:text-neutral-200">
+				<span class="text-sm text-text-soft">
 					{row.name}
 				</span>
 				<Badge variant={changeBadgeVariant(row.change)} size="sm">
@@ -144,15 +144,15 @@
 		{:else if column.key === 'type'}
 			{@const change = getConditionField(row, 'type')}
 			{#if change.before !== undefined && change.after !== undefined && change.before !== change.after}
-				<span class="text-sm text-neutral-600 dark:text-neutral-300">
+				<span class="text-sm text-text-soft">
 					{formatTitle(String(change.before))} -&gt; {formatTitle(String(change.after))}
 				</span>
 			{:else if change.after !== undefined || change.before !== undefined}
-				<span class="text-sm text-neutral-600 dark:text-neutral-300">
+				<span class="text-sm text-text-soft">
 					{formatTitle(String(change.after ?? change.before))}
 				</span>
 			{:else}
-				<span class="text-sm text-neutral-400">—</span>
+				<span class="text-sm text-text-subtle">—</span>
 			{/if}
 		{:else if column.key === 'value'}
 			{@const beforeValue = row.before?.values ? extractConditionValue(row.before.values) : null}
@@ -162,7 +162,7 @@
 					<Badge variant="neutral" size="sm" mono={beforeValue.mono}>
 						{beforeValue.value}
 					</Badge>
-					<span class="text-neutral-400">-&gt;</span>
+					<span class="text-text-subtle">-&gt;</span>
 					<Badge variant="neutral" size="sm" mono={afterValue.mono}>
 						{afterValue.value}
 					</Badge>
@@ -172,7 +172,7 @@
 					{(afterValue ?? beforeValue)?.value}
 				</Badge>
 			{:else}
-				<span class="text-sm text-neutral-400">—</span>
+				<span class="text-sm text-text-subtle">—</span>
 			{/if}
 		{:else if column.key === 'arr'}
 			{@const change = getConditionField(row, 'arrType')}
@@ -192,7 +192,7 @@
 					{:else}
 						<Badge variant="neutral" size="sm">{formatTitle(before)}</Badge>
 					{/if}
-					<span class="text-neutral-400">-&gt;</span>
+					<span class="text-text-subtle">-&gt;</span>
 					{#if after === 'all'}
 						<div class="flex items-center gap-1">
 							<img src={radarrLogo} alt="Radarr" class="h-4 w-4" />
@@ -225,7 +225,7 @@
 					<Badge variant={change.before ? 'success' : 'neutral'} size="sm">
 						{formatBoolean(change.before as boolean)}
 					</Badge>
-					<span class="text-neutral-400">-&gt;</span>
+					<span class="text-text-subtle">-&gt;</span>
 					<Badge variant={change.after ? 'success' : 'neutral'} size="sm">
 						{formatBoolean(change.after as boolean)}
 					</Badge>
@@ -242,7 +242,7 @@
 					<Badge variant={change.before ? 'success' : 'neutral'} size="sm">
 						{formatBoolean(change.before as boolean)}
 					</Badge>
-					<span class="text-neutral-400">-&gt;</span>
+					<span class="text-text-subtle">-&gt;</span>
 					<Badge variant={change.after ? 'success' : 'neutral'} size="sm">
 						{formatBoolean(change.after as boolean)}
 					</Badge>

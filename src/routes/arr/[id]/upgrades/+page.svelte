@@ -148,10 +148,8 @@
 {#key data.instance.id}
 	<StickyCard position="top">
 		<div slot="left">
-			<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Upgrades</h1>
-			<p class="text-sm text-neutral-500 dark:text-neutral-400">
-				Automatically search for better quality releases.
-			</p>
+			<h1 class="text-xl font-semibold text-text">Upgrades</h1>
+			<p class="text-sm text-text-muted">Automatically search for better quality releases.</p>
 		</div>
 		<div slot="right" class="flex flex-wrap items-center gap-2">
 			<Button text="Info" icon={Info} href="/arr/upgrades/info" />
@@ -170,7 +168,7 @@
 			<Button
 				text={running ? 'Running...' : 'Dry Run'}
 				icon={FlaskConical}
-				iconColor="text-amber-600 dark:text-amber-400"
+				iconColor="text-warning-icon "
 				disabled={isNewConfig || !enabled || running || saving || clearing || $isDirty}
 				tooltip="Search indexers without downloading (limited to once every 10 min)"
 				tooltipPosition="bottom"
@@ -190,7 +188,7 @@
 				<Button
 					text={running ? 'Running...' : 'Live Run'}
 					icon={Play}
-					iconColor="text-red-600 dark:text-red-400"
+					iconColor="text-danger-icon "
 					disabled={isNewConfig || !enabled || running || saving || $isDirty}
 					tooltip="Run a live search that will download upgrades"
 					tooltipPosition="bottom"
@@ -210,7 +208,7 @@
 			<Button
 				text="Save"
 				icon={Save}
-				iconColor="text-blue-600 dark:text-blue-400"
+				iconColor="text-info-icon "
 				disabled={saving || running || !$isDirty}
 				on:click={() => {
 					const f = document.getElementById('save-form');
@@ -268,7 +266,7 @@
 			</div>
 		{/if}
 
-		<section class="border-b border-neutral-200 pb-5 dark:border-neutral-800">
+		<section class="border-b border-border pb-5">
 			<CoreSettings
 				{enabled}
 				{cron}
@@ -301,8 +299,8 @@
 			</section>
 		{:else}
 			<section class="md:px-4">
-				<div class="rounded-xl border border-neutral-300 dark:border-neutral-700/60">
-					<p class="px-4 py-4 text-center text-sm text-neutral-600 dark:text-neutral-400">
+				<div class="rounded-card border border-border">
+					<p class="px-4 py-4 text-center text-sm text-text-soft">
 						Enable upgrades to configure filters and view run history.
 					</p>
 				</div>

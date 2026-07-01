@@ -83,10 +83,10 @@
 >
 	{#if data.restorePending && !isAuthPage}
 		<div
-			class="flex h-16 items-center gap-3 border-b border-neutral-200 bg-neutral-50 px-4 text-sm text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200"
+			class="flex h-16 items-center gap-3 border-b border-border bg-surface-muted px-4 text-sm text-text-soft"
 			role="status"
 		>
-			<AlertTriangle class="h-5 w-5 shrink-0 text-amber-500 dark:text-amber-400" />
+			<AlertTriangle class="h-5 w-5 shrink-0 text-warning-icon " />
 			<div class="min-w-0 flex-1 truncate">
 				<strong class="font-semibold">Restore pending:</strong>
 				<span class="font-mono">{data.restorePending.filename}</span>
@@ -117,7 +117,7 @@
 					size="sm"
 					text="Cancel restore"
 					icon={X}
-					iconColor="text-red-600 dark:text-red-400"
+					iconColor="text-danger-icon "
 					hideTextOnMobile
 				/>
 			</form>

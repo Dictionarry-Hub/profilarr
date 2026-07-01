@@ -256,15 +256,15 @@
 
 <StickyCard position="top">
 	<svelte:fragment slot="left">
-		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
-		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
+		<h1 class="text-text">{title}</h1>
+		<p class="text-text-soft">{description}</p>
 	</svelte:fragment>
 	<svelte:fragment slot="right">
 		{#if mode === 'edit'}
 			<Button
 				text="Delete"
 				icon={Trash2}
-				iconColor="text-red-600 dark:text-red-400"
+				iconColor="text-danger-icon "
 				disabled={saving || deleting}
 				on:click={() => (showDeleteModal = true)}
 			/>
@@ -273,7 +273,7 @@
 			<Button
 				text={saving ? 'Saving...' : 'Save'}
 				icon={Save}
-				iconColor="text-blue-600 dark:text-blue-400"
+				iconColor="text-info-icon "
 				disabled={saving || !canSubmit}
 				on:click={handleSave}
 			/>
@@ -282,25 +282,23 @@
 </StickyCard>
 
 <div class="mt-4 space-y-6">
-	<div
-		class="space-y-4 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
-	>
+	<div class="space-y-4 rounded-card border border-border bg-surface p-4">
 		<!-- Name, URL, API Key -->
 		<div data-onboarding="arr-connection" class="space-y-4">
 			<div class="space-y-2">
 				<div class="flex items-center gap-4">
-					<div class="min-w-0 flex-[12] text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Name<span class="text-red-500">*</span>
+					<div class="min-w-0 flex-[12] text-sm font-medium text-text">
+						Name<span class="text-danger-icon">*</span>
 					</div>
-					<div class="flex-1 text-right text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Type{#if mode === 'create'}<span class="text-red-500">*</span>{/if}
+					<div class="flex-1 text-right text-sm font-medium text-text">
+						Type{#if mode === 'create'}<span class="text-danger-icon">*</span>{/if}
 					</div>
 				</div>
 				<div class="flex items-center gap-4">
-					<p class="min-w-0 flex-1 text-xs text-neutral-600 dark:text-neutral-400">
+					<p class="min-w-0 flex-1 text-xs text-text-soft">
 						The display name for this Arr instance
 					</p>
-					<p class="flex-1 text-right text-xs text-neutral-600 dark:text-neutral-400">
+					<p class="flex-1 text-right text-xs text-text-soft">
 						Type cannot be changed after creation
 					</p>
 				</div>
@@ -373,19 +371,15 @@
 		</div>
 		<!-- Tags Row -->
 		<div class="space-y-2">
-			<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"> Tags </span>
-			<p class="text-xs text-neutral-500 dark:text-neutral-400">
-				Press Enter to add a tag, Backspace to remove
-			</p>
+			<span class="block text-sm font-medium text-text"> Tags </span>
+			<p class="text-xs text-text-muted">Press Enter to add a tag, Backspace to remove</p>
 			<TagInput {tags} on:change={(e) => update('tags', JSON.stringify(e.detail))} />
 		</div>
 		<!-- Library Refresh (edit mode only) -->
 		{#if mode === 'edit' && instance}
 			<div class="space-y-2">
-				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Library Refresh
-				</span>
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+				<span class="block text-sm font-medium text-text"> Library Refresh </span>
+				<p class="text-xs text-text-muted">
 					How often to refresh cached library data in the background
 				</p>
 				<DropdownSelect
@@ -399,10 +393,8 @@
 		<!-- Cleanup (edit mode only) -->
 		{#if mode === 'edit' && instance}
 			<div class="space-y-2">
-				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Cleanup
-				</span>
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+				<span class="block text-sm font-medium text-text"> Cleanup </span>
+				<p class="text-xs text-text-muted">
 					Remove unused quality profiles, custom formats, and media flagged as removed from
 					TMDB/TVDB
 				</p>
@@ -421,12 +413,8 @@
 					{#if cleanupEnabled}
 						<!-- Schedule -->
 						<div class="col-span-2 md:col-span-1 md:flex md:items-center md:gap-2">
-							<span class="mb-1 block text-sm text-neutral-500 md:hidden dark:text-neutral-400"
-								>Schedule</span
-							>
-							<span class="hidden text-sm text-neutral-500 md:inline dark:text-neutral-400"
-								>Schedule:</span
-							>
+							<span class="mb-1 block text-sm text-text-muted md:hidden">Schedule</span>
+							<span class="hidden text-sm text-text-muted md:inline">Schedule:</span>
 							<CronInput
 								bind:value={cronInputValue}
 								fixed={true}
@@ -439,24 +427,24 @@
 						<div class="col-span-2 flex flex-wrap items-center gap-3 md:ml-auto">
 							{#if cleanupSettings?.lastRunAt}
 								<div
-									class="flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-3 text-xs text-neutral-500 md:border-0 md:pt-0 dark:border-neutral-700 dark:text-neutral-400"
+									class="flex flex-wrap items-center gap-3 border-t border-border pt-3 text-xs text-text-muted md:border-0 md:pt-0"
 								>
 									{#if cleanupTimeUntilNext !== null && cleanupTimeUntilNext <= 0}
 										<span
-											class="rounded bg-green-100 px-1.5 py-0.5 font-medium text-green-700 dark:bg-green-900/50 dark:text-green-400"
+											class="rounded-control-sm bg-success-bg px-1.5 py-0.5 font-medium text-success-text"
 											>Ready</span
 										>
 									{:else if cleanupTimeUntilNext !== null}
 										<span>
 											Next: <span
-												class="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+												class="rounded-control-sm bg-surface-hover px-1.5 py-0.5 font-mono text-text-soft"
 												>{formatTimeRemaining(cleanupTimeUntilNext)}</span
 											>
 										</span>
 									{/if}
 									<span>
 										Last: <span
-											class="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+											class="rounded-control-sm bg-surface-hover px-1.5 py-0.5 font-mono text-text-soft"
 											>{formatSmartDateTime(
 												cleanupSettings.lastRunAt,
 												$serverTimezone,
@@ -469,7 +457,7 @@
 							<Button
 								text="Run Now"
 								icon={Eraser}
-								iconColor="text-amber-600 dark:text-amber-400"
+								iconColor="text-warning-icon "
 								on:click={() => (showCleanupModal = true)}
 							/>
 						</div>

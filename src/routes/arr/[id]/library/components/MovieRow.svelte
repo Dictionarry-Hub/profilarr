@@ -19,10 +19,10 @@
 	$: posterUrl = row.images?.find((i) => i.coverType === 'poster')?.remoteUrl;
 
 	function getProgressColor(progress: number, cutoffMet: boolean): string {
-		if (cutoffMet) return 'bg-green-500 dark:bg-green-400';
-		if (progress >= 0.75) return 'bg-yellow-500 dark:bg-yellow-400';
-		if (progress >= 0.5) return 'bg-orange-500 dark:bg-orange-400';
-		return 'bg-red-500 dark:bg-red-400';
+		if (cutoffMet) return 'bg-success-bg ';
+		if (progress >= 0.75) return 'bg-warning-bg ';
+		if (progress >= 0.5) return 'bg-warning-bg ';
+		return 'bg-danger-bg ';
 	}
 
 	function fmtDate(isoString?: string): string {
@@ -45,21 +45,19 @@
 		/>
 	{:else if column.key === 'title'}
 		<div class="flex items-center gap-3">
-			<div
-				class="h-12 w-8 flex-shrink-0 overflow-hidden rounded bg-neutral-200 dark:bg-neutral-800"
-			>
+			<div class="h-12 w-8 flex-shrink-0 overflow-hidden rounded-control-sm bg-surface-hover">
 				{#if posterUrl}
 					<img src={posterUrl} alt="" loading="lazy" class="h-full w-full object-cover" />
 				{:else}
 					<div class="flex h-full w-full items-center justify-center">
-						<Film size={12} class="text-neutral-400 dark:text-neutral-600" />
+						<Film size={12} class="text-text-subtle " />
 					</div>
 				{/if}
 			</div>
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-50">{row.title}</div>
+				<div class="font-medium text-text">{row.title}</div>
 				{#if row.year}
-					<div class="text-xs text-neutral-500 dark:text-neutral-400">{row.year}</div>
+					<div class="text-xs text-text-muted">{row.year}</div>
 				{/if}
 			</div>
 		</div>
@@ -78,32 +76,32 @@
 	{:else if column.key === 'customFormatScore'}
 		<div class="text-right">
 			<Score score={row.customFormatScore} showSign={false} colored={false} />
-			<span class="text-xs text-neutral-500 dark:text-neutral-400">
+			<span class="text-xs text-text-muted">
 				/ {row.cutoffScore.toLocaleString()}
 			</span>
 		</div>
 	{:else if column.key === 'progress'}
 		<div class="flex items-center gap-2">
-			<div class="h-2 flex-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+			<div class="h-2 flex-1 overflow-hidden rounded-pill bg-surface-hover">
 				<div
-					class="h-full rounded-full transition-all {getProgressColor(row.progress, row.cutoffMet)}"
+					class="h-full rounded-pill transition-all {getProgressColor(row.progress, row.cutoffMet)}"
 					style="width: {Math.max(0, Math.min(row.progress * 100, 100))}%"
 				></div>
 			</div>
 			{#if row.cutoffMet}
-				<Check size={16} class="flex-shrink-0 text-green-600 dark:text-green-400" />
+				<Check size={16} class="flex-shrink-0 text-success-icon " />
 			{:else}
-				<span class="w-10 text-right font-mono text-xs text-neutral-500 dark:text-neutral-400">
+				<span class="w-10 text-right font-mono text-xs text-text-muted">
 					{Math.max(0, Math.min(Math.round(row.progress * 100), 100))}%
 				</span>
 			{/if}
 		</div>
 	{:else if column.key === 'releaseGroup'}
-		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
+		<span class="font-mono text-xs text-text-soft">
 			{row.releaseGroup ?? '-'}
 		</span>
 	{:else if column.key === 'sizeOnDisk'}
-		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
+		<span class="font-mono text-xs text-text-soft">
 			{#if row.sizeOnDisk}
 				{@const gb = row.sizeOnDisk / (1024 * 1024 * 1024)}
 				{gb >= 1 ? `${gb.toFixed(1)} GB` : `${Math.round(row.sizeOnDisk / (1024 * 1024))} MB`}
@@ -128,11 +126,11 @@
 			<Label variant="secondary" size="sm">{row.status ?? '-'}</Label>
 		{/if}
 	{:else if column.key === 'popularity'}
-		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
+		<span class="font-mono text-xs text-text-soft">
 			{row.popularity?.toFixed(1) ?? '-'}
 		</span>
 	{:else if column.key === 'dateAdded'}
-		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
+		<span class="font-mono text-xs text-text-soft">
 			{fmtDate(row.dateAdded)}
 		</span>
 	{/if}
@@ -141,9 +139,7 @@
 	<div class="flex flex-col gap-3 p-4">
 		<!-- File Name -->
 		{#if row.fileName}
-			<code class="font-mono text-xs break-all text-neutral-600 dark:text-neutral-400"
-				>{row.fileName}</code
-			>
+			<code class="font-mono text-xs break-all text-text-soft">{row.fileName}</code>
 		{/if}
 
 		<!-- Custom Formats with Scores (sorted by score descending) -->
@@ -154,7 +150,7 @@
 				{/each}
 			</div>
 		{:else}
-			<div class="text-xs text-neutral-500 dark:text-neutral-400">No custom formats matched</div>
+			<div class="text-xs text-text-muted">No custom formats matched</div>
 		{/if}
 	</div>
 {/if}

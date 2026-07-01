@@ -182,15 +182,16 @@
 				{#if mode === 'edit'}
 					<div class="flex items-center gap-3">
 						{#if repoInfo}
-							<img src={repoInfo.ownerAvatarUrl} alt={repoInfo.owner} class="h-8 w-8 rounded-lg" />
+							<img
+								src={repoInfo.ownerAvatarUrl}
+								alt={repoInfo.owner}
+								class="h-8 w-8 rounded-card"
+							/>
 							<div class="flex flex-col gap-1">
-								<code
-									class="text-sm text-neutral-700 dark:text-neutral-300"
-									style="font-family: var(--font-code)"
-								>
+								<code class="text-sm text-text-soft" style="font-family: var(--font-code)">
 									{repoInfo.owner}/{repoInfo.repo}
 								</code>
-								<div class="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
+								<div class="flex items-center gap-3 text-xs text-text-muted">
 									{#if currentBranch}
 										<span class="flex items-center gap-1">
 											<GitBranch size={12} />
@@ -218,17 +219,15 @@
 								</div>
 							</div>
 						{:else}
-							<div
-								class="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-700"
-							>
-								<Database size={16} class="text-neutral-500 dark:text-neutral-400" />
+							<div class="flex h-8 w-8 items-center justify-center rounded-card bg-surface-hover">
+								<Database size={16} class="text-text-muted " />
 							</div>
 							<div class="flex flex-col gap-1">
-								<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+								<span class="text-sm font-medium text-text-soft">
 									{instance?.name ?? 'Database'}
 								</span>
 								{#if instance?.repository_url}
-									<code class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+									<code class="font-mono text-xs text-text-muted">
 										{instance.repository_url.replace('https://github.com/', '')}
 									</code>
 								{/if}
@@ -236,8 +235,8 @@
 						{/if}
 					</div>
 				{:else}
-					<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
-					<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
+					<h1 class="text-text">{title}</h1>
+					<p class="text-text-soft">{description}</p>
 				{/if}
 			</svelte:fragment>
 			<svelte:fragment slot="right">
@@ -245,7 +244,7 @@
 					<Button
 						text="Unlink"
 						icon={Trash2}
-						iconColor="text-red-600 dark:text-red-400"
+						iconColor="text-danger-icon "
 						disabled={saving || deleting}
 						on:click={() => (showDeleteModal = true)}
 					/>
@@ -254,7 +253,7 @@
 					<Button
 						text={saving ? 'Saving...' : 'Save'}
 						icon={Save}
-						iconColor="text-blue-600 dark:text-blue-400"
+						iconColor="text-info-icon "
 						disabled={saving || !canSubmit}
 						on:click={handleSave}
 					/>
@@ -265,7 +264,7 @@
 						target="_blank"
 						rel="noopener noreferrer"
 						icon={ExternalLink}
-						iconColor="text-blue-600 dark:text-blue-400"
+						iconColor="text-info-icon "
 						text="GitHub"
 					></Button>
 				{/if}
@@ -273,9 +272,7 @@
 		</StickyCard>
 	</div>
 
-	<div
-		class="space-y-4 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
-	>
+	<div class="space-y-4 rounded-card border border-border bg-surface p-4">
 		<!-- Name, Repository URL, Branch -->
 		<div data-onboarding="db-name-repo-branch" class="space-y-4">
 			<FormInput
@@ -355,10 +352,8 @@
 		<!-- Local Ops Only Row -->
 		{#if showGitIdentity}
 			<div class="space-y-2">
-				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Local Ops Only
-				</span>
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+				<span class="block text-sm font-medium text-text"> Local Ops Only </span>
+				<p class="text-xs text-text-muted">
 					Force changes to save as local user ops even when a personal access token is set.
 				</p>
 				<DropdownSelect
@@ -373,23 +368,21 @@
 		<!-- Conflict Strategy Row -->
 		{#if !showGitIdentity || localOpsEnabled === 'true'}
 			<div data-onboarding="db-conflict" class="space-y-2">
-				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Conflict Strategy
-				</span>
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+				<span class="block text-sm font-medium text-text"> Conflict Strategy </span>
+				<p class="text-xs text-text-muted">
 					How to handle user ops that conflict with upstream changes.
 				</p>
-				<ul class="list-disc space-y-1 pl-5 text-xs text-neutral-500 dark:text-neutral-400">
+				<ul class="list-disc space-y-1 pl-5 text-xs text-text-muted">
 					<li>
-						<span class="font-medium text-neutral-700 dark:text-neutral-200">Override:</span>
+						<span class="font-medium text-text-soft">Override:</span>
 						reapply your local change with updated guards.
 					</li>
 					<li>
-						<span class="font-medium text-neutral-700 dark:text-neutral-200">Align:</span>
+						<span class="font-medium text-text-soft">Align:</span>
 						drop the local op and accept upstream changes.
 					</li>
 					<li>
-						<span class="font-medium text-neutral-700 dark:text-neutral-200">Ask:</span>
+						<span class="font-medium text-text-soft">Ask:</span>
 						mark conflicts as pending for manual review.
 					</li>
 				</ul>
@@ -405,10 +398,8 @@
 		<!-- Sync Strategy & Auto Pull -->
 		<div data-onboarding="db-sync" class="space-y-4">
 			<div class="space-y-2">
-				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Sync Strategy
-				</span>
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+				<span class="block text-sm font-medium text-text"> Sync Strategy </span>
+				<p class="text-xs text-text-muted">
 					How often to check for updates from the remote repository
 				</p>
 				<DropdownSelect
@@ -420,10 +411,8 @@
 			</div>
 
 			<div class="space-y-2">
-				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Auto Pull
-				</span>
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+				<span class="block text-sm font-medium text-text"> Auto Pull </span>
+				<p class="text-xs text-text-muted">
 					Automatically pull updates when available, or just receive notifications
 				</p>
 				<DropdownSelect
@@ -433,7 +422,7 @@
 				/>
 			</div>
 			{#if autoPull === 'false'}
-				<p class="text-xs text-amber-600 dark:text-amber-400">
+				<p class="text-xs text-warning-icon">
 					You will receive notifications when updates are available but they won't be applied
 					automatically
 				</p>

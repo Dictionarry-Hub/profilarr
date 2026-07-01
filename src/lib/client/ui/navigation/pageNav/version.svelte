@@ -48,7 +48,7 @@
 				href={versionStatus.releaseUrl ?? undefined}
 				target={versionStatus.releaseUrl ? '_blank' : undefined}
 				rel={versionStatus.releaseUrl ? 'noopener noreferrer' : undefined}
-				iconColor="text-emerald-600 dark:text-emerald-400"
+				iconColor="text-success-icon "
 				tooltip="Update Available: {versionStatus.latestVersion}"
 				tooltipPosition="right"
 			/>

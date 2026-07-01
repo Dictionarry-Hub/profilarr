@@ -76,13 +76,13 @@
 
 <div class="relative {sizeClasses[size]}">
 	{#if !loaded}
-		<div class="absolute inset-0 animate-pulse rounded-lg bg-neutral-200 dark:bg-neutral-700"></div>
+		<div class="absolute inset-0 animate-pulse rounded-card bg-surface-hover"></div>
 	{/if}
 	{#if failed}
 		<div
 			class="flex {sizeClasses[
 				size
-			]} items-center justify-center rounded-lg bg-neutral-200 text-xs font-semibold text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
+			]} items-center justify-center rounded-card bg-surface-hover text-xs font-semibold text-text-soft"
 		>
 			{name?.slice(0, 1) ?? '?'}
 		</div>
@@ -91,7 +91,7 @@
 			bind:this={imgEl}
 			src={avatarSrc}
 			alt="{name} avatar"
-			class="{sizeClasses[size]} rounded-lg {loaded ? 'opacity-100' : 'opacity-0'}"
+			class="{sizeClasses[size]} rounded-card {loaded ? 'opacity-100' : 'opacity-0'}"
 			on:load={handleLoad}
 			on:error={handleError}
 		/>

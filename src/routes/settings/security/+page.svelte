@@ -135,7 +135,7 @@
 			headerIcon: Network,
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — IP from session DB, not user content
-				html: `<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">${row.ip_address ?? 'Unknown'}</span>`
+				html: `<span class="font-mono text-xs text-text-muted ">${row.ip_address ?? 'Unknown'}</span>`
 			})
 		},
 		{
@@ -144,7 +144,7 @@
 			headerIcon: Clock,
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — formatted timestamp
-				html: `<span class="text-xs text-neutral-500 dark:text-neutral-400">${formatRelativeTime(row.last_active_at)}</span>`
+				html: `<span class="text-xs text-text-muted ">${formatRelativeTime(row.last_active_at)}</span>`
 			})
 		}
 	];
@@ -152,8 +152,8 @@
 
 <div class="p-4 md:p-8">
 	<div class="mb-8">
-		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">Security</h1>
-		<p class="mt-2 text-base text-neutral-600 md:mt-3 md:text-lg dark:text-neutral-400">
+		<h1 class="text-2xl font-bold text-text md:text-3xl">Security</h1>
+		<p class="mt-2 text-base text-text-soft md:mt-3 md:text-lg">
 			Manage your password, API key, and active sessions
 		</p>
 	</div>
@@ -211,7 +211,7 @@
 							variant="secondary"
 							size="sm"
 							icon={Check}
-							iconColor="text-accent-500"
+							iconColor="text-accent-solid"
 							text={changingPassword ? 'Saving...' : 'Change Password'}
 							disabled={changingPassword}
 						/>
@@ -273,9 +273,7 @@
 								on:click={copyApiKey}
 							/>
 						</div>
-						<p class="text-sm text-amber-600 dark:text-amber-400">
-							This key is shown only once — copy it now.
-						</p>
+						<p class="text-sm text-warning-icon">This key is shown only once — copy it now.</p>
 						<form
 							method="POST"
 							action="?/regenerateApiKey"
@@ -300,7 +298,7 @@
 				{:else if data.hasApiKey}
 					<!-- Key exists but can't be displayed -->
 					<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-						<p class="text-sm text-neutral-500 dark:text-neutral-400">
+						<p class="text-sm text-text-muted">
 							Your API key is hashed and cannot be displayed. Regenerating will replace the current
 							key.
 						</p>
@@ -320,7 +318,7 @@
 								variant="secondary"
 								size="sm"
 								icon={RefreshCw}
-								iconColor="text-emerald-500"
+								iconColor="text-success-icon"
 								text={regeneratingKey ? 'Regenerating...' : 'Regenerate'}
 								disabled={regeneratingKey}
 							/>
@@ -329,7 +327,7 @@
 				{:else}
 					<!-- No key configured -->
 					<div class="flex items-center gap-4">
-						<p class="text-sm text-neutral-500 dark:text-neutral-400">No API key configured</p>
+						<p class="text-sm text-text-muted">No API key configured</p>
 						<form method="POST" action="?/regenerateApiKey" use:enhance>
 							<Button type="submit" variant="secondary" size="sm" text="Generate Key" />
 						</form>
@@ -361,7 +359,7 @@
 							variant="secondary"
 							size="xs"
 							icon={LogOut}
-							iconColor="text-red-500"
+							iconColor="text-danger-icon"
 							text="Revoke Others"
 						/>
 					</form>
@@ -379,7 +377,7 @@
 						<svelte:fragment slot="actions" let:row>
 							{#if row.isCurrent}
 								<span
-									class="inline-flex items-center rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+									class="inline-flex items-center rounded-control-sm bg-success-bg px-2 py-0.5 text-xs font-medium text-success-text"
 									>Current</span
 								>
 							{:else}
@@ -399,7 +397,7 @@
 										title="Revoke session"
 										ariaLabel="Revoke session"
 										variant="secondary"
-										iconColor="text-red-600 dark:text-red-400"
+										iconColor="text-danger-icon "
 										size="xs"
 										type="submit"
 									/>
@@ -408,7 +406,7 @@
 						</svelte:fragment>
 					</Table>
 				{:else}
-					<p class="text-sm text-neutral-500 dark:text-neutral-400">No active sessions</p>
+					<p class="text-sm text-text-muted">No active sessions</p>
 				{/if}
 			</div>
 		</ExpandableCard>

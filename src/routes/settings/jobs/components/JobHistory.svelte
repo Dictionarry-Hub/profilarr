@@ -76,13 +76,13 @@
 <div class="space-y-4">
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-2">
-			<Clock size={18} class="text-neutral-600 dark:text-neutral-400" />
-			<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">Recent Job Runs</h2>
+			<Clock size={18} class="text-text-soft " />
+			<h2 class="text-lg font-semibold text-text">Recent Job Runs</h2>
 		</div>
 
 		{#if skippedCount > 0}
 			<div class="flex items-center gap-2">
-				<span class="text-sm text-neutral-500 dark:text-neutral-400">
+				<span class="text-sm text-text-muted">
 					{skippedCount} skipped
 				</span>
 				<Toggle bind:checked={showSkipped} label="Show skipped runs" />
@@ -110,15 +110,11 @@
 				<Badge variant="neutral" mono>{formatDuration(row.durationMs)}</Badge>
 			{:else if column.key === 'output'}
 				{#if row.error}
-					<span class="line-clamp-1 font-mono text-xs text-red-600 dark:text-red-400"
-						>{row.error}</span
-					>
+					<span class="line-clamp-1 font-mono text-xs text-danger-icon">{row.error}</span>
 				{:else if row.output}
-					<span class="line-clamp-1 font-mono text-xs text-neutral-600 dark:text-neutral-400"
-						>{row.output}</span
-					>
+					<span class="line-clamp-1 font-mono text-xs text-text-soft">{row.output}</span>
 				{:else}
-					<span class="text-neutral-400 dark:text-neutral-600">-</span>
+					<span class="text-text-subtle">-</span>
 				{/if}
 			{/if}
 		</svelte:fragment>

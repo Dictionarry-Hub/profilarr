@@ -12,7 +12,7 @@
 		| 'link' = 'default';
 	export let customVariant: string = '';
 	export let size: 'sm' | 'md' | 'lg' = 'md';
-	export let rounded: 'sm' | 'md' | 'lg' | 'xl' | 'full' = 'full';
+	export let radius: 'sm' | 'md' | 'lg' | 'xl' | 'full' = 'full';
 	export let mono: boolean = false;
 	export let href: string | undefined = undefined;
 	export let target: string | undefined = undefined;
@@ -37,7 +37,7 @@
 		lg: 'gap-1.5 px-3 py-1.5 text-sm'
 	};
 
-	const roundedClasses = {
+	const radiusClasses = {
 		sm: 'rounded-control-sm',
 		md: 'rounded-control-sm',
 		lg: 'rounded-control',
@@ -46,7 +46,7 @@
 	};
 
 	$: resolvedVariantClasses = customVariant || variantClasses[variant];
-	$: classes = `inline-flex items-center leading-none font-medium ${resolvedVariantClasses} ${sizeClasses[size]} ${roundedClasses[rounded]} ${mono ? 'font-mono' : ''}`;
+	$: classes = `inline-flex items-center leading-none font-medium ${resolvedVariantClasses} ${sizeClasses[size]} ${radiusClasses[radius]} ${mono ? 'font-mono' : ''}`;
 </script>
 
 {#if href}

@@ -166,8 +166,8 @@
 	<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent}>
 		<svelte:fragment slot="left">
 			<div>
-				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h2>
-				<p class="text-sm text-neutral-600 dark:text-neutral-400">{description_}</p>
+				<h2 class="text-lg font-semibold text-text">{title}</h2>
+				<p class="text-sm text-text-soft">{description_}</p>
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
@@ -176,7 +176,7 @@
 					<Button
 						disabled={deleting || deleteBlocked}
 						icon={deleting ? Loader2 : Trash2}
-						iconColor="text-red-600 dark:text-red-400"
+						iconColor="text-danger-icon "
 						text={deleting ? 'Deleting...' : 'Delete'}
 						tooltip={deleteTooltip}
 						on:click={handleDeleteClick}
@@ -186,7 +186,7 @@
 				<Button
 					disabled={saving || !isValid || !$isDirty}
 					icon={saving ? Loader2 : Save}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					text={saving ? (mode === 'create' ? 'Creating...' : 'Saving...') : submitButtonText}
 					tooltip={saveTooltip}
 					tooltipPosition="bottom"
@@ -258,10 +258,8 @@
 
 				<!-- Tags -->
 				<div>
-					<div class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Tags</div>
-					<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-						Categorize this pattern for easier filtering
-					</p>
+					<div class="block text-sm font-medium text-text-soft">Tags</div>
+					<p class="mt-1 text-xs text-text-muted">Categorize this pattern for easier filtering</p>
 					<div class="mt-2">
 						<TagInput
 							tags={formData.tags}
@@ -298,10 +296,10 @@
 	<!-- Unit Tests (outside form to avoid button submission issues) -->
 	{#if formData.regex101Id}
 		<div class="md:px-4">
-			<h4 class="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
+			<h4 class="mb-3 text-sm font-medium text-text-soft">
 				Unit Tests
 				{#if !unitTestsLoading && unitTests.length > 0}
-					<span class="ml-1 text-xs font-normal text-neutral-500">({unitTests.length})</span>
+					<span class="ml-1 text-xs font-normal text-text-muted">({unitTests.length})</span>
 				{/if}
 			</h4>
 			<UnitTests

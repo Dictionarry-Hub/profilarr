@@ -45,8 +45,8 @@
 	{#if data.announcements.length > 0}
 		<StickyCard position="top">
 			<svelte:fragment slot="left">
-				<h1 class="text-neutral-900 dark:text-neutral-50">Announcements</h1>
-				<p class="text-neutral-600 dark:text-neutral-400">
+				<h1 class="text-text">Announcements</h1>
+				<p class="text-text-soft">
 					Author messages that linked instances of this database will see in their inbox.
 				</p>
 			</svelte:fragment>
@@ -55,7 +55,7 @@
 					text="New announcement"
 					icon={Plus}
 					variant="secondary"
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					on:click={() => goto(`/databases/${databaseId}/announcements/new`)}
 				/>
 			</svelte:fragment>
@@ -65,12 +65,12 @@
 	{#if data.parseErrors.length > 0}
 		<Card padding="md">
 			<div class="flex items-start gap-3">
-				<AlertTriangle class="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400" />
+				<AlertTriangle class="h-5 w-5 flex-shrink-0 text-warning-icon " />
 				<div class="space-y-2 text-sm">
-					<div class="font-medium text-neutral-900 dark:text-neutral-100">
+					<div class="font-medium text-text">
 						{data.parseErrors.length} file(s) could not be parsed
 					</div>
-					<ul class="space-y-1 text-xs text-neutral-600 dark:text-neutral-400">
+					<ul class="space-y-1 text-xs text-text-soft">
 						{#each data.parseErrors as err}
 							<li>
 								<code class="font-mono">{err.filename}</code>
@@ -108,7 +108,7 @@
 						icon={Edit3}
 						size="xs"
 						variant="secondary"
-						iconColor="text-blue-600 dark:text-blue-400"
+						iconColor="text-info-icon "
 						ariaLabel="Edit"
 						tooltip="Edit"
 						on:click={() => goto(`/databases/${databaseId}/announcements/${row.id}`)}
@@ -117,7 +117,7 @@
 						icon={Trash2}
 						size="xs"
 						variant="secondary"
-						iconColor="text-red-600 dark:text-red-400"
+						iconColor="text-danger-icon "
 						ariaLabel="Withdraw"
 						tooltip="Withdraw"
 						on:click={() => (withdrawTarget = row)}
@@ -127,14 +127,13 @@
 
 			<svelte:fragment slot="cell" let:row let:column>
 				{#if column.key === 'title'}
-					<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">{row.title}</span
-					>
+					<span class="text-sm font-medium text-text">{row.title}</span>
 					{#if row.link}
 						<a
 							href={row.link}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="ml-2 inline-flex items-center text-accent-600 hover:underline dark:text-accent-400"
+							class="ml-2 inline-flex items-center text-link-text hover:underline"
 							on:click|stopPropagation
 							aria-label="External link"
 						>
@@ -142,20 +141,20 @@
 						</a>
 					{/if}
 				{:else if column.key === 'severity'}
-					<Label variant={severityVariant[row.severity]} size="md" rounded="md" mono>
+					<Label variant={severityVariant[row.severity]} size="md" radius="md" mono>
 						{row.severity.toUpperCase()}
 					</Label>
 				{:else if column.key === 'publishedAt'}
-					<span class="text-xs text-neutral-500 dark:text-neutral-500">
+					<span class="text-xs text-text-muted">
 						<DateTime value={row.publishedAt} date />
 					</span>
 				{:else if column.key === 'expiresAt'}
 					{#if row.expiresAt}
-						<span class="text-xs text-neutral-500 dark:text-neutral-500">
+						<span class="text-xs text-text-muted">
 							<DateTime value={row.expiresAt} date />
 						</span>
 					{:else}
-						<span class="text-xs text-neutral-400 dark:text-neutral-600">never</span>
+						<span class="text-xs text-text-subtle">never</span>
 					{/if}
 				{/if}
 			</svelte:fragment>
@@ -167,9 +166,7 @@
 							{@html renderMarkdown(row.body)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 						</div>
 					{:else}
-						<p class="text-sm text-neutral-500 dark:text-neutral-500">
-							This announcement has no body.
-						</p>
+						<p class="text-sm text-text-muted">This announcement has no body.</p>
 					{/if}
 				</div>
 			</svelte:fragment>

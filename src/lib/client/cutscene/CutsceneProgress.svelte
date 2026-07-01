@@ -12,39 +12,39 @@
 </script>
 
 <div class="flex flex-col gap-1.5">
-	<div class="text-right text-xs text-neutral-400 dark:text-neutral-500">
+	<div class="text-right text-xs text-text-subtle">
 		{currentStep + 1}/{totalSteps}
 	</div>
 	<div class="flex h-8 items-stretch">
 		{#if showBack}
 			<!-- lint-disable-next-line no-raw-ui -- custom border-radius to integrate with progress bar -->
 			<button
-				class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-l-lg border border-neutral-300 bg-white text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+				class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-l-card border border-border bg-surface text-text-muted transition-colors hover:bg-surface-hover hover:text-text-soft"
 				on:click={onBack}
 			>
 				<ChevronLeft size={14} />
 			</button>
 		{/if}
 		<div
-			class="relative flex min-w-[120px] flex-1 items-center overflow-hidden border-y border-neutral-300 bg-neutral-200/50 dark:border-neutral-700/60 dark:bg-neutral-800/30"
+			class="relative flex min-w-[120px] flex-1 items-center overflow-hidden border-y border-border bg-surface-hover/50"
 			class:border-l={!showBack}
-			class:rounded-l-lg={!showBack}
+			class:rounded-l-card={!showBack}
 			class:border-r={!onForward}
-			class:rounded-r-lg={!onForward}
+			class:rounded-r-card={!onForward}
 		>
 			<div
-				class="absolute inset-y-0 left-0 bg-accent-500 transition-all duration-300"
+				class="absolute inset-y-0 left-0 bg-accent-solid transition-all duration-300"
 				style="width: {progressPercent}%"
 			></div>
 		</div>
 		{#if onForward}
 			<!-- lint-disable-next-line no-raw-ui -- custom border-radius to integrate with progress bar -->
 			<button
-				class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-r-lg border border-l-0 border-neutral-300 bg-white text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700/60 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+				class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-r-card border border-l-0 border-border bg-surface text-text-muted transition-colors hover:bg-surface-hover hover:text-text-soft"
 				on:click={onForward}
 			>
 				{#if isLastStep}
-					<Check size={14} class="text-green-500" />
+					<Check size={14} class="text-success-icon" />
 				{:else}
 					<ChevronRight size={14} />
 				{/if}

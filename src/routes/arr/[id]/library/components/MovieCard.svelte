@@ -42,20 +42,20 @@
 </script>
 
 <div
-	class="group flex flex-col overflow-hidden rounded-xl border border-neutral-300 bg-neutral-50 transition-colors dark:border-neutral-700/60 dark:bg-neutral-900"
+	class="group flex flex-col overflow-hidden rounded-card border border-border bg-surface-muted transition-colors"
 >
 	<!-- Poster -->
 	<a
 		href="{baseUrl}/movie/{movie.tmdbId}"
 		target="_blank"
 		rel="noopener noreferrer"
-		class="relative aspect-[2/3] w-full overflow-hidden bg-neutral-200 dark:bg-neutral-800"
+		class="relative aspect-[2/3] w-full overflow-hidden bg-surface-hover"
 	>
 		{#if posterUrl}
 			<img src={posterUrl} alt={movie.title} loading="lazy" class="h-full w-full object-cover" />
 		{:else}
 			<div class="flex h-full w-full items-center justify-center">
-				<Film class="h-12 w-12 text-neutral-400 dark:text-neutral-600" />
+				<Film class="h-12 w-12 text-text-subtle " />
 			</div>
 		{/if}
 
@@ -92,15 +92,12 @@
 	<!-- Content -->
 	<div class="flex flex-1 flex-col gap-2 p-3">
 		{#if visibleFields.has('title')}
-			<h3
-				class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100"
-				title={movie.title}
-			>
+			<h3 class="truncate text-sm font-semibold text-text" title={movie.title}>
 				{movie.title}
 			</h3>
 		{/if}
 		{#if visibleFields.has('year') && movie.year}
-			<span class="text-xs text-neutral-500 dark:text-neutral-400">{movie.year}</span>
+			<span class="text-xs text-text-muted">{movie.year}</span>
 		{/if}
 		{#if visibleFields.has('profile') || visibleFields.has('size')}
 			<div class="flex items-center justify-between gap-1.5">
@@ -116,9 +113,7 @@
 					</Tooltip>
 				{/if}
 				{#if visibleFields.has('size') && movie.hasFile && movie.sizeOnDisk}
-					<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400"
-						>{formatSize(movie.sizeOnDisk)}</span
-					>
+					<span class="font-mono text-xs text-text-muted">{formatSize(movie.sizeOnDisk)}</span>
 				{/if}
 			</div>
 		{/if}
@@ -145,7 +140,7 @@
 		{/if}
 
 		{#if visibleFields.has('releaseGroup') && movie.hasFile && movie.releaseGroup}
-			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+			<span class="flex items-center gap-1 text-xs text-text-muted">
 				<Users size={12} />
 				<span class="truncate font-mono">{movie.releaseGroup}</span>
 			</span>
@@ -159,35 +154,35 @@
 			/>
 		{/if}
 		{#if visibleFields.has('popularity') && movie.popularity}
-			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+			<span class="flex items-center gap-1 text-xs text-text-muted">
 				<Flame size={12} />
 				<span class="font-mono">{movie.popularity.toFixed(1)}</span>
 			</span>
 		{/if}
 		{#if visibleFields.has('runtime') && movie.runtime}
-			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+			<span class="flex items-center gap-1 text-xs text-text-muted">
 				<Clock size={12} />
 				{movie.runtime} min
 			</span>
 		{/if}
 		{#if visibleFields.has('rating') && movie.ratings}
-			<div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+			<div class="flex items-center gap-2 text-xs text-text-muted">
 				{#if movie.ratings.imdb}
 					<span class="flex items-center gap-1">
-						<Star size={12} class="text-yellow-500" />
+						<Star size={12} class="text-warning-icon" />
 						<span class="font-mono">{movie.ratings.imdb.value}</span>
 					</span>
 				{/if}
 				{#if movie.ratings.tmdb}
 					<span class="flex items-center gap-1">
-						<Star size={12} class="text-blue-500" />
+						<Star size={12} class="text-info-icon" />
 						<span class="font-mono">{movie.ratings.tmdb.value}</span>
 					</span>
 				{/if}
 			</div>
 		{/if}
 		{#if visibleFields.has('dateAdded') && movie.dateAdded}
-			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+			<span class="flex items-center gap-1 text-xs text-text-muted">
 				<Calendar size={12} />
 				<span class="font-mono"
 					><DateTime
@@ -205,17 +200,15 @@
 	<div class="space-y-4">
 		{#if movie.fileName}
 			<div>
-				<div class="mb-1 text-xs font-medium text-neutral-900 dark:text-neutral-100">File</div>
-				<code class="block font-mono text-xs break-all text-neutral-600 dark:text-neutral-400">
+				<div class="mb-1 text-xs font-medium text-text">File</div>
+				<code class="block font-mono text-xs break-all text-text-soft">
 					{movie.fileName}
 				</code>
 			</div>
 		{/if}
 
 		<div>
-			<div class="mb-1.5 text-xs font-medium text-neutral-900 dark:text-neutral-100">
-				Custom Formats
-			</div>
+			<div class="mb-1.5 text-xs font-medium text-text">Custom Formats</div>
 			{#if movie.scoreBreakdown.length > 0}
 				<div class="flex flex-wrap gap-1.5">
 					{#each [...movie.scoreBreakdown].sort((a, b) => b.score - a.score) as item}
@@ -223,8 +216,7 @@
 					{/each}
 				</div>
 			{:else}
-				<span class="text-xs text-neutral-500 dark:text-neutral-400">No custom formats matched</span
-				>
+				<span class="text-xs text-text-muted">No custom formats matched</span>
 			{/if}
 		</div>
 	</div>

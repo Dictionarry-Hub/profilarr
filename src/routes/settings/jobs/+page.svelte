@@ -53,10 +53,8 @@
 <div class="p-4 md:p-8">
 	<!-- Header -->
 	<div class="mb-8">
-		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">
-			Background Jobs
-		</h1>
-		<p class="mt-3 text-base text-neutral-600 md:text-lg dark:text-neutral-400">
+		<h1 class="text-2xl font-bold text-text md:text-3xl">Background Jobs</h1>
+		<p class="mt-3 text-base text-text-soft md:text-lg">
 			Manage scheduled tasks and automation workflows
 		</p>
 	</div>
@@ -100,7 +98,7 @@
 					{#if row.enabled}
 						<Badge variant="neutral" mono>{formatRelative(row.next_run_at)}</Badge>
 					{:else}
-						<span class="text-neutral-400 dark:text-neutral-600">-</span>
+						<span class="text-text-subtle">-</span>
 					{/if}
 				{/if}
 			</svelte:fragment>
@@ -109,15 +107,13 @@
 				<div class="space-y-3 px-6 py-4 text-sm">
 					<!-- Description -->
 					{#if row.description}
-						<p class="text-neutral-600 dark:text-neutral-400">{row.description}</p>
+						<p class="text-text-soft">{row.description}</p>
 					{/if}
 
 					<div class="grid grid-cols-3 gap-4">
 						<!-- Last Run Details -->
 						<div>
-							<div
-								class="text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-500"
-							>
+							<div class="text-xs font-medium tracking-wider text-text-muted uppercase">
 								Last Run
 							</div>
 							<div class="mt-1">
@@ -127,9 +123,7 @@
 
 						<!-- Duration -->
 						<div>
-							<div
-								class="text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-500"
-							>
+							<div class="text-xs font-medium tracking-wider text-text-muted uppercase">
 								Duration
 							</div>
 							<div class="mt-1">
@@ -139,9 +133,7 @@
 
 						<!-- Next Run Details -->
 						<div>
-							<div
-								class="text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-500"
-							>
+							<div class="text-xs font-medium tracking-wider text-text-muted uppercase">
 								Next Run
 							</div>
 							<div class="mt-1">
@@ -157,12 +149,12 @@
 					<!-- Error Message -->
 					{#if row.last_run_error}
 						<div
-							class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
+							class="flex items-start gap-2 rounded-card border border-danger-border bg-danger-bg p-3"
 						>
-							<AlertCircle size={16} class="mt-0.5 flex-shrink-0 text-red-600 dark:text-red-400" />
+							<AlertCircle size={16} class="mt-0.5 flex-shrink-0 text-danger-icon " />
 							<div>
-								<div class="text-xs font-medium text-red-800 dark:text-red-200">Last Run Error</div>
-								<div class="mt-1 text-sm text-red-700 dark:text-red-300">{row.last_run_error}</div>
+								<div class="text-xs font-medium text-danger-text">Last Run Error</div>
+								<div class="mt-1 text-sm text-danger-text">{row.last_run_error}</div>
 							</div>
 						</div>
 					{/if}

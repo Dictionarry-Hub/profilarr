@@ -79,27 +79,27 @@
 	<!-- Regex Pattern -->
 	<div data-onboarding="regex-pattern" class="space-y-2">
 		<div class="flex items-center justify-between gap-2">
-			<label for="pattern" class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-				Regular Expression<span class="text-red-500">*</span>
+			<label for="pattern" class="block text-sm font-medium text-text">
+				Regular Expression<span class="text-danger-icon">*</span>
 			</label>
 			{#if validationState === 'checking'}
-				<Label variant="secondary" size="sm" rounded="md">
-					<Loader2 size={10} class="animate-spin text-neutral-500 dark:text-neutral-400" />
+				<Label variant="secondary" size="sm" radius="md">
+					<Loader2 size={10} class="animate-spin text-text-muted " />
 					Checking...
 				</Label>
 			{:else if validationState === 'valid'}
-				<Label variant="secondary" size="sm" rounded="md">
-					<Check size={10} class="text-green-500 dark:text-green-400" />
+				<Label variant="secondary" size="sm" radius="md">
+					<Check size={10} class="text-success-icon " />
 					Valid
 				</Label>
 			{:else if validationState === 'invalid'}
-				<Label variant="secondary" size="sm" rounded="md">
-					<X size={10} class="text-red-500 dark:text-red-400" />
+				<Label variant="secondary" size="sm" radius="md">
+					<X size={10} class="text-danger-icon " />
 					Invalid
 				</Label>
 			{:else if validationState === 'unavailable'}
-				<Label variant="secondary" size="sm" rounded="md">
-					<AlertCircle size={10} class="text-neutral-400 dark:text-neutral-500" />
+				<Label variant="secondary" size="sm" radius="md">
+					<AlertCircle size={10} class="text-text-subtle " />
 					Parser unavailable
 				</Label>
 			{/if}
@@ -118,7 +118,7 @@
 			on:input={(e) => handlePatternChange(e.detail)}
 		/>
 		{#if validationState === 'invalid' && validationError}
-			<p class="font-mono text-xs text-red-600 dark:text-red-400">{validationError}</p>
+			<p class="font-mono text-xs text-danger-icon">{validationError}</p>
 		{/if}
 	</div>
 

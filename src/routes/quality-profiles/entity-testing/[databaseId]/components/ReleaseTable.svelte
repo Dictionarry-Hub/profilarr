@@ -144,28 +144,28 @@
 							{release.title}
 						</span>
 					{:else if column.key === 'size_bytes'}
-						<span class="font-mono text-[11px] text-neutral-600 dark:text-neutral-400">
+						<span class="font-mono text-[11px] text-text-soft">
 							{formatSize(release.size_bytes)}
 						</span>
 					{:else if column.key === 'indexers'}
 						{#if release.indexers.length > 0}
 							<div class="flex flex-wrap gap-1">
 								{#each release.indexers as indexer}
-									<Label variant="secondary" size="sm" rounded="xl">{indexer}</Label>
+									<Label variant="secondary" size="sm" radius="xl">{indexer}</Label>
 								{/each}
 							</div>
 						{:else}
-							<span class="text-neutral-400">—</span>
+							<span class="text-text-subtle">—</span>
 						{/if}
 					{:else if column.key === 'languages'}
 						{#if release.languages.length > 0}
 							<div class="flex flex-wrap gap-1">
 								{#each release.languages as lang}
-									<Label variant="secondary" size="sm" rounded="xl">{lang}</Label>
+									<Label variant="secondary" size="sm" radius="xl">{lang}</Label>
 								{/each}
 							</div>
 						{:else}
-							<span class="text-neutral-400">—</span>
+							<span class="text-text-subtle">—</span>
 						{/if}
 					{:else if column.key === 'score'}
 						<Score score={calculateScore(release.id, entityType)} />
@@ -207,7 +207,7 @@
 								tooltip="Delete release"
 								variant="secondary"
 								size="xs"
-								iconColor="group-hover:text-red-500 dark:group-hover:text-red-400"
+								iconColor="group-hover:text-danger-icon "
 								on:click={() => {
 									const form = document.getElementById(releaseFormId) as HTMLFormElement;
 									dispatch('confirmDelete', { release, formRef: form });
@@ -224,69 +224,59 @@
 						<div class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-xs">
 							<!-- Parsed Info Row -->
 							{#if evaluation?.parsed}
-								<div class="pt-0.5 font-medium text-neutral-500 dark:text-neutral-400">Parsed</div>
+								<div class="pt-0.5 font-medium text-text-muted">Parsed</div>
 								<div class="flex flex-wrap items-center gap-2">
 									<span
-										class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+										class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 									>
-										<HardDrive size={12} class="text-blue-500" />
-										<span class="text-neutral-500 dark:text-neutral-400">Source</span>
-										<span class="font-medium text-neutral-800 dark:text-neutral-100"
-											>{evaluation.parsed.source}</span
-										>
+										<HardDrive size={12} class="text-info-icon" />
+										<span class="text-text-muted">Source</span>
+										<span class="font-medium text-text">{evaluation.parsed.source}</span>
 									</span>
 									<span
-										class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+										class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 									>
-										<Layers size={12} class="text-indigo-500" />
-										<span class="text-neutral-500 dark:text-neutral-400">Resolution</span>
-										<span class="font-medium text-neutral-800 dark:text-neutral-100"
-											>{evaluation.parsed.resolution}</span
-										>
+										<Layers size={12} class="text-accent-solid" />
+										<span class="text-text-muted">Resolution</span>
+										<span class="font-medium text-text">{evaluation.parsed.resolution}</span>
 									</span>
 									{#if evaluation.parsed.modifier !== 'None'}
 										<span
-											class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+											class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 										>
-											<Tag size={12} class="text-amber-500" />
-											<span class="text-neutral-500 dark:text-neutral-400">Modifier</span>
-											<span class="font-medium text-neutral-800 dark:text-neutral-100"
-												>{evaluation.parsed.modifier}</span
-											>
+											<Tag size={12} class="text-warning-icon" />
+											<span class="text-text-muted">Modifier</span>
+											<span class="font-medium text-text">{evaluation.parsed.modifier}</span>
 										</span>
 									{/if}
 									{#if evaluation.parsed.releaseGroup}
 										<span
-											class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+											class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 										>
-											<Users size={12} class="text-teal-500" />
-											<span class="text-neutral-500 dark:text-neutral-400">Group</span>
-											<span class="font-medium text-neutral-800 dark:text-neutral-100"
-												>{evaluation.parsed.releaseGroup}</span
-											>
+											<Users size={12} class="text-info-icon" />
+											<span class="text-text-muted">Group</span>
+											<span class="font-medium text-text">{evaluation.parsed.releaseGroup}</span>
 										</span>
 									{/if}
 									{#if evaluation.parsed.edition}
 										<span
-											class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+											class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 										>
-											<Bookmark size={12} class="text-orange-500" />
-											<span class="text-neutral-500 dark:text-neutral-400">Edition</span>
-											<span class="font-medium text-neutral-800 dark:text-neutral-100"
-												>{evaluation.parsed.edition}</span
-											>
+											<Bookmark size={12} class="text-warning-icon" />
+											<span class="text-text-muted">Edition</span>
+											<span class="font-medium text-text">{evaluation.parsed.edition}</span>
 										</span>
 									{/if}
 									{#if evaluation.parsed.languages.length > 0}
 										<span
-											class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+											class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 										>
-											<Earth size={12} class="text-emerald-500" />
-											<span class="text-neutral-500 dark:text-neutral-400">Languages</span>
-											<span class="font-medium text-neutral-800 dark:text-neutral-100"
+											<Earth size={12} class="text-success-icon" />
+											<span class="text-text-muted">Languages</span>
+											<span class="font-medium text-text"
 												>{evaluation.parsed.languages.join(', ')}</span
 											>
-											<span class="text-[10px] text-neutral-400 dark:text-neutral-500"
+											<span class="text-[10px] text-text-subtle"
 												>({evaluation.parsed.languageSource})</span
 											>
 										</span>
@@ -295,14 +285,14 @@
 							{/if}
 
 							<!-- Custom Formats Row -->
-							<div class="pt-0.5 font-medium text-neutral-500 dark:text-neutral-400">Formats</div>
+							<div class="pt-0.5 font-medium text-text-muted">Formats</div>
 							<div>
 								{#if !selectedProfileId}
-									<span class="text-neutral-400 italic"
+									<span class="text-text-subtle italic"
 										>Select a quality profile to see scores.</span
 									>
 								{:else if matchingFormats.length === 0}
-									<span class="text-neutral-400 italic"
+									<span class="text-text-subtle italic"
 										>No custom formats matched with non-zero scores.</span
 									>
 								{:else}
@@ -319,7 +309,7 @@
 			</ExpandableTable>
 		{/key}
 	{:else}
-		<p class="py-4 text-sm text-neutral-500 dark:text-neutral-400">
+		<p class="py-4 text-sm text-text-muted">
 			No releases yet. Import from an Arr instance to get started.
 		</p>
 	{/if}

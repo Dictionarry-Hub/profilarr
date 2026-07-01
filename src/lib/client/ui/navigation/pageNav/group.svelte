@@ -27,7 +27,7 @@
 		<div class="mt-2 grid grid-cols-[auto_1fr]" transition:slide={{ duration: 200 }}>
 			<!-- Column 1: Vertical line -->
 			<div class="flex justify-center px-5">
-				<div class="w-0.5 rounded-full bg-border"></div>
+				<div class="w-0.5 rounded-pill bg-border"></div>
 			</div>
 
 			<!-- Column 2: Items -->

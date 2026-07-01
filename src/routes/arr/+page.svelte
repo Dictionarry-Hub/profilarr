@@ -72,10 +72,8 @@
 		<!-- Content -->
 		<div class="mt-6">
 			{#if $filtered.length === 0}
-				<div
-					class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-				>
-					<p class="text-neutral-600 dark:text-neutral-400">No instances match your search</p>
+				<div class="rounded-card border border-border bg-surface p-8 text-center">
+					<p class="text-text-soft">No instances match your search</p>
 				</div>
 			{:else if $view === 'table'}
 				<TableView instances={$filtered} on:delete={handleDelete} />
@@ -132,9 +130,9 @@
 
 <!-- Info Modal -->
 <InfoModal bind:open={showInfoModal} header="Arr Instances">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="space-y-4 text-sm text-text-soft">
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">What are Arr Instances?</div>
+			<div class="font-medium text-text">What are Arr Instances?</div>
 			<div class="mt-1">
 				Arr instances are your Radarr and Sonarr applications. Profilarr connects to these instances
 				to sync quality profiles, custom formats, and other configurations.
@@ -142,7 +140,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Adding an Instance</div>
+			<div class="font-medium text-text">Adding an Instance</div>
 			<div class="mt-1">
 				To add an instance, you'll need the URL and API key from your Radarr or Sonarr application.
 				You can find the API key in Settings → General → Security.
@@ -150,7 +148,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Syncing</div>
+			<div class="font-medium text-text">Syncing</div>
 			<div class="mt-1">
 				Once connected, you can configure sync settings to push profiles and formats from your
 				linked databases to each instance. Sync can be triggered manually, on a schedule, or

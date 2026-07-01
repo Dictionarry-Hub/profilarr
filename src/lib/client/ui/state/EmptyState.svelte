@@ -15,29 +15,24 @@
 	<div class="w-full max-w-md text-center">
 		<!-- Icon -->
 		<div class="mb-6 flex justify-center">
-			<div class="rounded-full bg-neutral-100 p-6 dark:bg-neutral-800">
-				<svelte:component this={icon} class="h-12 w-12 text-neutral-400 dark:text-neutral-500" />
+			<div class="rounded-pill bg-surface-hover p-6">
+				<svelte:component this={icon} class="h-12 w-12 text-text-subtle " />
 			</div>
 		</div>
 
 		<!-- Title -->
-		<h1 class="mb-3 text-2xl font-bold text-neutral-900 dark:text-neutral-50">
+		<h1 class="mb-3 text-2xl font-bold text-text">
 			{title}
 		</h1>
 
 		<!-- Description -->
-		<p class="mb-8 text-neutral-600 dark:text-neutral-400">
+		<p class="mb-8 text-text-soft">
 			{description}
 		</p>
 
 		<!-- Action Button -->
 		<span data-onboarding={onboarding} class="inline-block">
-			<Button
-				text={buttonText}
-				href={buttonHref}
-				icon={buttonIcon}
-				iconColor="text-blue-600 dark:text-blue-400"
-			/>
+			<Button text={buttonText} href={buttonHref} icon={buttonIcon} iconColor="text-info-icon " />
 		</span>
 	</div>
 </div>

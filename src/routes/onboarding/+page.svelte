@@ -56,8 +56,8 @@
 <div class="p-4 md:p-8">
 	<!-- Header -->
 	<div class="mb-8">
-		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">Onboarding</h1>
-		<p class="mt-2 text-base text-neutral-600 md:mt-3 md:text-lg dark:text-neutral-400">
+		<h1 class="text-2xl font-bold text-text md:text-3xl">Onboarding</h1>
+		<p class="mt-2 text-base text-text-soft md:mt-3 md:text-lg">
 			Guided walkthroughs to help you get the most out of Profilarr. Run any stage at your own pace.
 		</p>
 	</div>
@@ -71,29 +71,29 @@
 		<!-- Groups -->
 		{#each filteredGroups as group}
 			<ExpandableCard title={group.name} description={group.description}>
-				<div class="divide-y divide-neutral-200 dark:divide-neutral-700/60">
+				<div class="divide-y divide-border">
 					{#each group.stages as stageId}
 						{@const stage = STAGES[stageId]}
 						{#if stage}
 							<div class="flex items-center gap-4 px-6 py-4">
 								<div class="min-w-0 flex-1">
 									<div class="flex items-center gap-2">
-										<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+										<h3 class="text-sm font-semibold text-text">
 											{stage.name}
 										</h3>
-										<Label variant="secondary" size="sm" rounded="md">
+										<Label variant="secondary" size="sm" radius="md">
 											{stage.steps.length}
 											{stage.steps.length === 1 ? 'step' : 'steps'}
 										</Label>
 									</div>
-									<p class="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
+									<p class="mt-1 text-xs text-text-soft">
 										{stage.description}
 									</p>
 								</div>
 								<Button
 									text="Start"
 									icon={Play}
-									iconColor="text-accent-600 dark:text-accent-400"
+									iconColor="text-accent-solid"
 									size="sm"
 									on:click={() => handleStart(stageId)}
 								/>

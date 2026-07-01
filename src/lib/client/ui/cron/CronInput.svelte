@@ -280,9 +280,9 @@
 				}}
 			/>
 		</div>
-		<span class="text-sm text-neutral-500 dark:text-neutral-400">minutes</span>
+		<span class="text-sm text-text-muted">minutes</span>
 	{:else if scheduleType === 'hourly'}
-		<span class="text-sm text-neutral-500 dark:text-neutral-400">at</span>
+		<span class="text-sm text-text-muted">at</span>
 		<div class="w-24">
 			<NumberInput
 				name="cron-hourly-minute"
@@ -300,7 +300,7 @@
 				}}
 			/>
 		</div>
-		<span class="text-sm text-neutral-500 dark:text-neutral-400">min</span>
+		<span class="text-sm text-text-muted">min</span>
 	{:else if scheduleType === 'daily'}
 		<TimeInput
 			label="Time"
@@ -346,7 +346,7 @@
 		/>
 	{:else if scheduleType === 'monthly'}
 		<div class="basis-full md:hidden"></div>
-		<span class="text-sm text-neutral-500 dark:text-neutral-400">day</span>
+		<span class="text-sm text-text-muted">day</span>
 		<div class="w-24">
 			<NumberInput
 				name="cron-monthly-day"
@@ -387,12 +387,12 @@
 				placeholder="0 * * * *"
 				mono
 				{disabled}
-				inputClass={cronError ? 'border-red-500 focus:border-red-500' : ''}
+				inputClass={cronError ? 'border-danger-border focus:border-danger-border' : ''}
 				on:input={(event) => onCustomInput(event.detail)}
 			/>
 		</div>
 	{/if}
 	{#if cronError && scheduleType !== 'custom'}
-		<span class="text-xs text-red-500">{cronError}</span>
+		<span class="text-xs text-danger-icon">{cronError}</span>
 	{/if}
 </div>

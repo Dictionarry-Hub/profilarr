@@ -115,7 +115,7 @@
 			style="{style};border-radius:var(--theme-radius-control) !important"
 		>
 			<div
-				class="border border-border bg-surface px-2 py-1 text-xs font-medium whitespace-pre-wrap text-text shadow-lg {mono
+				class="border border-border bg-surface px-2 py-1 text-xs font-medium whitespace-pre-wrap text-text shadow-card {mono
 					? 'font-mono'
 					: ''}"
 				style="border-radius:var(--theme-radius-control) !important"

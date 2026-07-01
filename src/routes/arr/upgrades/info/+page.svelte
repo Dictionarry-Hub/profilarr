@@ -20,9 +20,10 @@
 		date: 'Date'
 	};
 
-	const badgeBase = 'inline-flex items-center rounded font-medium px-1.5 py-0.5 text-[10px]';
-	const badgeAccent = 'bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200';
-	const badgeNeutral = 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300';
+	const badgeBase =
+		'inline-flex items-center rounded-control-sm font-medium px-1.5 py-0.5 text-[10px]';
+	const badgeAccent = 'bg-surface-hover text-accent-solid';
+	const badgeNeutral = 'bg-surface-hover text-text-soft ';
 
 	const fieldColumns: Column<FilterField>[] = [
 		{ key: 'label', header: 'Field', sortable: false },
@@ -124,7 +125,7 @@
 <div class="p-8">
 	<StickyCard position="top">
 		<div slot="left">
-			<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">How Upgrades Work</h1>
+			<h1 class="text-xl font-semibold text-text">How Upgrades Work</h1>
 		</div>
 		<div slot="right">
 			<Button text="Back" icon={ArrowLeft} on:click={handleBack} />
@@ -133,23 +134,20 @@
 
 	<div class="mt-6 space-y-8 px-4">
 		<!-- Intro -->
-		<div class="text-neutral-600 dark:text-neutral-400">
+		<div class="text-text-soft">
 			<p>
 				Radarr and Sonarr don't search for the best release. They monitor RSS feeds and grab the
 				first thing that qualifies as an upgrade. To get optimal releases, you need manual searches.
-				This module automates that: <span class="font-medium text-neutral-700 dark:text-neutral-300"
-					>Filter</span
-				>
+				This module automates that: <span class="font-medium text-text-soft">Filter</span>
 				your library,
-				<span class="font-medium text-neutral-700 dark:text-neutral-300">Select</span> items to
-				search, then
-				<span class="font-medium text-neutral-700 dark:text-neutral-300">Search</span> for better releases.
+				<span class="font-medium text-text-soft">Select</span> items to search, then
+				<span class="font-medium text-text-soft">Search</span> for better releases.
 			</p>
 		</div>
 
 		<!-- Concepts -->
 		<section>
-			<h2 class="mb-3 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Concepts</h2>
+			<h2 class="mb-3 text-lg font-semibold text-text">Concepts</h2>
 			<ExpandableTable
 				columns={conceptColumns}
 				data={concepts}
@@ -160,7 +158,7 @@
 			>
 				<svelte:fragment slot="expanded" let:row>
 					<div class="px-6 py-4">
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">{row.details}</p>
+						<p class="text-sm text-text-soft">{row.details}</p>
 					</div>
 				</svelte:fragment>
 			</ExpandableTable>
@@ -168,30 +166,24 @@
 
 		<!-- Selectors Reference -->
 		<section>
-			<h2 class="mb-3 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Selectors</h2>
+			<h2 class="mb-3 text-lg font-semibold text-text">Selectors</h2>
 			<Table columns={selectorColumns} data={selectors} emptyMessage="No selectors" />
 		</section>
 
 		<!-- Filter Modes Reference -->
 		<section>
-			<h2 class="mb-3 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-				Filter Modes
-			</h2>
+			<h2 class="mb-3 text-lg font-semibold text-text">Filter Modes</h2>
 			<Table columns={modeColumns} data={filterModes} emptyMessage="No modes" />
 		</section>
 
 		<!-- Filter Fields Reference -->
 		<section>
-			<h2 class="mb-3 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-				Radarr Filter Fields
-			</h2>
+			<h2 class="mb-3 text-lg font-semibold text-text">Radarr Filter Fields</h2>
 			<Table columns={fieldColumns} data={radarrFields} emptyMessage="No fields" />
 		</section>
 
 		<section>
-			<h2 class="mb-3 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-				Sonarr Filter Fields
-			</h2>
+			<h2 class="mb-3 text-lg font-semibold text-text">Sonarr Filter Fields</h2>
 			<Table columns={fieldColumns} data={sonarrFields} emptyMessage="No fields" />
 		</section>
 	</div>

@@ -45,7 +45,7 @@
 			<Binoculars size={20} class="text-text-soft" />
 			{#if enabledCount < options.length}
 				<div
-					class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-accent-600 text-[9px] font-bold text-white"
+					class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-pill bg-accent-solid text-[9px] font-bold text-on-accent"
 				>
 					{enabledCount}
 				</div>
@@ -57,7 +57,7 @@
 		<div class="z-50" transition:fly={{ y: -8, duration: 150 }}>
 			<div class="absolute top-full z-40 h-3 w-full"></div>
 			<div
-				class="absolute top-full right-0 z-50 mt-3 min-w-48 rounded-control border border-border bg-surface shadow-lg"
+				class="absolute top-full right-0 z-50 mt-3 min-w-48 rounded-control border border-border bg-surface shadow-card"
 			>
 				<div class="px-3 py-2 text-xs font-medium text-text-muted">Search in...</div>
 				{#each options as option}
@@ -66,12 +66,12 @@
 						on:click={() => toggleOption(option.key)}
 					>
 						<div
-							class="flex h-4 w-4 items-center justify-center rounded border {option.enabled
-								? 'border-accent-600 bg-accent-600 dark:border-accent-500 dark:bg-accent-500'
+							class="flex h-4 w-4 items-center justify-center rounded-control-sm border {option.enabled
+								? 'border-accent-solid bg-accent-solid'
 								: 'border-border-muted'}"
 						>
 							{#if option.enabled}
-								<Check size={12} class="text-white" />
+								<Check size={12} class="text-on-accent" />
 							{/if}
 						</div>
 						<span class="text-text-soft">{option.label}</span>

@@ -33,11 +33,11 @@
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'label'}
 			<div class="flex flex-col gap-0.5">
-				<span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+				<span class="text-sm font-medium text-text-soft">
 					{row.label}
 				</span>
 				{#if row.detail}
-					<span class="text-xs text-neutral-500 dark:text-neutral-400">
+					<span class="text-xs text-text-muted">
 						{row.detail}
 					</span>
 				{/if}
@@ -50,26 +50,26 @@
 					<Label
 						variant={valueVariant(row.expected)}
 						size="md"
-						rounded="md"
+						radius="md"
 						mono={row.expected.mono}
 					>
 						{row.expected.text}
 					</Label>
 				{/if}
 			{:else}
-				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
+				<span class="text-xs text-text-subtle">None</span>
 			{/if}
 		{:else if column.key === 'actual'}
 			{#if row.actual}
 				{#if row.actual.qualityList}
 					<QualityListDiff items={row.actual.qualityList} />
 				{:else}
-					<Label variant={valueVariant(row.actual)} size="md" rounded="md" mono={row.actual.mono}>
+					<Label variant={valueVariant(row.actual)} size="md" radius="md" mono={row.actual.mono}>
 						{row.actual.text}
 					</Label>
 				{/if}
 			{:else}
-				<span class="text-xs text-neutral-400 dark:text-neutral-500">None</span>
+				<span class="text-xs text-text-subtle">None</span>
 			{/if}
 		{/if}
 	</svelte:fragment>

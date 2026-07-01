@@ -99,32 +99,32 @@
 					{#each themeAccents as accent}
 						<button
 							on:click|stopPropagation={() => selectThemeAccent(accent)}
-							class="relative flex h-6 w-6 items-center justify-center rounded-full transition-transform hover:scale-110"
+							class="relative flex h-6 w-6 items-center justify-center rounded-pill transition-transform hover:scale-110"
 							style="background-color: {accent.color}"
 							aria-label={accent.label}
 						>
 							{#if selectedThemeAccent === accent.color}
-								<Check size={14} class="text-white" />
+								<Check size={14} class="text-on-accent" />
 							{/if}
 						</button>
 					{/each}
 				{:else if fixedColor}
 					<div
-						class="relative flex h-6 w-6 items-center justify-center rounded-full"
+						class="relative flex h-6 w-6 items-center justify-center rounded-pill"
 						style="background-color: {fixedColor}"
 					>
-						<Check size={14} class="text-white" />
+						<Check size={14} class="text-on-accent" />
 					</div>
 				{:else}
 					{#each accentColors as accent}
 						<button
 							on:click|stopPropagation={() => select(accent.value)}
-							class="relative flex h-6 w-6 items-center justify-center rounded-full transition-transform hover:scale-110"
+							class="relative flex h-6 w-6 items-center justify-center rounded-pill transition-transform hover:scale-110"
 							style="background-color: {accent.color}"
 							aria-label={accent.label}
 						>
 							{#if $accentStore === accent.value}
-								<Check size={14} class="text-white" />
+								<Check size={14} class="text-on-accent" />
 							{/if}
 						</button>
 					{/each}

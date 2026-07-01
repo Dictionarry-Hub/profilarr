@@ -147,7 +147,7 @@
 								</span>
 								{#if state !== 'idle'}
 									<div class="mt-1">
-										<Label variant={getStateVariant(state)} size="sm" rounded="md">
+										<Label variant={getStateVariant(state)} size="sm" radius="md">
 											{getStateLabel(state, arr.instanceId)}
 										</Label>
 									</div>

@@ -9,7 +9,7 @@
 </script>
 
 <div class="space-y-4">
-	<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Ntfy Configuration</h3>
+	<h3 class="text-sm font-semibold text-text">Ntfy Configuration</h3>
 
 	<!-- Server URL -->
 	<FormInput

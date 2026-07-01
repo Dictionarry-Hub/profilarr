@@ -39,7 +39,7 @@
 />
 
 <div class="space-y-3 md:px-4" data-onboarding="cf-general-references">
-	<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+	<div class="text-sm font-medium text-text">
 		References ({data.profileRefs.length})
 	</div>
 	{#if data.profileRefs.length > 0}
@@ -59,6 +59,6 @@
 			</svelte:fragment>
 		</Table>
 	{:else}
-		<p class="text-sm text-neutral-500 dark:text-neutral-400">Not used in any quality profiles.</p>
+		<p class="text-sm text-text-muted">Not used in any quality profiles.</p>
 	{/if}
 </div>

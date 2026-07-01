@@ -23,51 +23,47 @@
 	<title>Setup - Profilarr</title>
 </svelte:head>
 
-<div class="flex min-h-screen items-center justify-center bg-neutral-100 p-4 dark:bg-neutral-900">
+<div class="flex min-h-screen items-center justify-center bg-surface-hover p-4">
 	<div class="flex w-full max-w-3xl flex-col gap-8 md:flex-row md:gap-12">
 		<!-- Header - always first -->
 		<div class="flex flex-col space-y-6 md:flex-1">
 			<div class="flex items-center gap-4">
 				<img src={logo} alt="Profilarr logo" class="h-12 w-12" />
 				<div>
-					<h1 class="text-xl font-bold text-neutral-900 dark:text-neutral-50">
-						Welcome to Profilarr
-					</h1>
-					<p class="text-sm text-neutral-600 dark:text-neutral-400">
-						Create your admin account to get started.
-					</p>
+					<h1 class="text-xl font-bold text-text">Welcome to Profilarr</h1>
+					<p class="text-sm text-text-soft">Create your admin account to get started.</p>
 				</div>
 			</div>
 
 			<!-- Auth info - visible on desktop, hidden on mobile (shown below form) -->
 			<div
-				class="hidden rounded-xl border border-neutral-200/60 bg-white/50 p-5 shadow-sm backdrop-blur-sm md:block dark:border-neutral-700/60 dark:bg-neutral-800/50"
+				class="hidden rounded-card border border-border bg-surface/50 p-5 shadow-card backdrop-blur-sm md:block"
 			>
-				<p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+				<p class="text-xs font-medium text-text-soft">
 					Configure authentication via the <code
-						class="rounded bg-neutral-200 px-1 py-0.5 text-[11px] dark:bg-neutral-700">AUTH</code
+						class="rounded-control-sm bg-surface-hover px-1 py-0.5 text-[11px]">AUTH</code
 					> environment variable:
 				</p>
-				<ul class="mt-3 space-y-2 text-xs text-neutral-600 dark:text-neutral-400">
+				<ul class="mt-3 space-y-2 text-xs text-text-soft">
 					<li class="flex items-center gap-2">
-						<Shield size={12} class="text-neutral-400" />
-						<code class="font-mono text-neutral-800 dark:text-neutral-200">on</code>
+						<Shield size={12} class="text-text-subtle" />
+						<code class="font-mono text-text">on</code>
 						<span>— Full authentication</span>
-						<span class="text-neutral-400 dark:text-neutral-500">(default)</span>
+						<span class="text-text-subtle">(default)</span>
 					</li>
 					<li class="flex items-center gap-2">
-						<Wifi size={12} class="text-neutral-400" />
-						<code class="font-mono text-neutral-800 dark:text-neutral-200">local</code>
+						<Wifi size={12} class="text-text-subtle" />
+						<code class="font-mono text-text">local</code>
 						<span>— Skip auth for local network</span>
 					</li>
 					<li class="flex items-center gap-2">
-						<KeyRound size={12} class="text-neutral-400" />
-						<code class="font-mono text-neutral-800 dark:text-neutral-200">oidc</code>
+						<KeyRound size={12} class="text-text-subtle" />
+						<code class="font-mono text-text">oidc</code>
 						<span>— Use external provider</span>
 					</li>
 					<li class="flex items-center gap-2">
-						<ShieldOff size={12} class="text-neutral-400" />
-						<code class="font-mono text-neutral-800 dark:text-neutral-200">off</code>
+						<ShieldOff size={12} class="text-text-subtle" />
+						<code class="font-mono text-text">off</code>
 						<span>— For reverse proxy setups</span>
 					</li>
 				</ul>

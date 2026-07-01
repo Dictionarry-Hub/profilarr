@@ -77,13 +77,13 @@
 
 <div class={`${containerClass} inline-flex flex-col`}>
 	{#if !hideLabel}
-		<label for={name} class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-			{label}{#if required}<span class="text-red-500">*</span>{/if}
+		<label for={name} class="block text-sm font-medium text-text">
+			{label}{#if required}<span class="text-danger-icon">*</span>{/if}
 		</label>
 	{/if}
 
 	{#if description}
-		<p class="text-xs text-neutral-600 dark:text-neutral-400">
+		<p class="text-xs text-text-soft">
 			{description}
 		</p>
 	{/if}
@@ -106,7 +106,7 @@
 				on:change={(event) => onHourChange(event.detail)}
 			/>
 		</div>
-		<span class="text-sm text-neutral-500 dark:text-neutral-400">:</span>
+		<span class="text-sm text-text-muted">:</span>
 		<div class="shrink-0" style={fieldStyle}>
 			<DropdownCombobox
 				value={minute}

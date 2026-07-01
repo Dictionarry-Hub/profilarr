@@ -63,10 +63,10 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-center justify-between gap-2">
 					<div class="flex min-w-0 items-center gap-2">
-						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						<h3 class="truncate text-sm font-semibold text-text">
 							{profile.name}
 						</h3>
-						<Label variant={protocolVariant(profile.preferred_protocol)} size="sm" rounded="md">
+						<Label variant={protocolVariant(profile.preferred_protocol)} size="sm" radius="md">
 							{formatProtocol(profile.preferred_protocol)}
 						</Label>
 					</div>
@@ -95,44 +95,38 @@
 				<div class="space-y-1">
 					{#if profile.usenet_delay !== null}
 						<div class="flex items-center justify-between text-xs">
-							<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+							<span class="flex items-center gap-1.5 text-text-muted">
 								<Clock size={11} />Usenet
 							</span>
-							<span class="font-mono text-neutral-900 dark:text-neutral-100"
-								>{formatDelay(profile.usenet_delay)}</span
-							>
+							<span class="font-mono text-text">{formatDelay(profile.usenet_delay)}</span>
 						</div>
 					{/if}
 					{#if profile.torrent_delay !== null}
 						<div class="flex items-center justify-between text-xs">
-							<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+							<span class="flex items-center gap-1.5 text-text-muted">
 								<Clock size={11} />Torrent
 							</span>
-							<span class="font-mono text-neutral-900 dark:text-neutral-100"
-								>{formatDelay(profile.torrent_delay)}</span
-							>
+							<span class="font-mono text-text">{formatDelay(profile.torrent_delay)}</span>
 						</div>
 					{/if}
 				</div>
 
 				{#if profile.bypass_if_highest_quality || profile.bypass_if_above_custom_format_score}
-					<div class="space-y-1 border-t border-neutral-200 pt-2.5 dark:border-neutral-700/60">
+					<div class="space-y-1 border-t border-border pt-2.5">
 						{#if profile.bypass_if_highest_quality}
 							<div class="flex items-center justify-between text-xs">
-								<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+								<span class="flex items-center gap-1.5 text-text-muted">
 									<Zap size={11} />Highest quality
 								</span>
-								<span class="font-mono text-neutral-900 dark:text-neutral-100">✓</span>
+								<span class="font-mono text-text">✓</span>
 							</div>
 						{/if}
 						{#if profile.bypass_if_above_custom_format_score && profile.minimum_custom_format_score !== null}
 							<div class="flex items-center justify-between text-xs">
-								<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+								<span class="flex items-center gap-1.5 text-text-muted">
 									<Zap size={11} />Min CF score
 								</span>
-								<span class="font-mono text-neutral-900 dark:text-neutral-100"
-									>≥ {profile.minimum_custom_format_score}</span
-								>
+								<span class="font-mono text-text">≥ {profile.minimum_custom_format_score}</span>
 							</div>
 						{/if}
 					</div>

@@ -108,25 +108,21 @@
 			<!-- Header -->
 			<StickyCard position="top">
 				<svelte:fragment slot="left">
-					<h1 class="text-neutral-900 dark:text-neutral-50">Config</h1>
-					<p class="text-neutral-600 dark:text-neutral-400">
-						Edit the database manifest and README
-					</p>
+					<h1 class="text-text">Config</h1>
+					<p class="text-text-soft">Edit the database manifest and README</p>
 				</svelte:fragment>
 				<svelte:fragment slot="right">
 					<Button
 						text={saving ? 'Saving...' : 'Save'}
 						icon={Save}
-						iconColor="text-blue-600 dark:text-blue-400"
+						iconColor="text-info-icon "
 						disabled={saving || !$isDirty}
 						type="submit"
 					/>
 				</svelte:fragment>
 			</StickyCard>
 
-			<div
-				class="space-y-5 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
-			>
+			<div class="space-y-5 rounded-card border border-border bg-surface p-4">
 				<!-- Name -->
 				<FormInput
 					label="Name"
@@ -151,10 +147,10 @@
 
 				<!-- Version -->
 				<div class="space-y-1">
-					<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-						Version <span class="text-red-500">*</span>
+					<span class="block text-sm font-medium text-text-soft">
+						Version <span class="text-danger-icon">*</span>
 					</span>
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
+					<p class="text-xs text-text-muted">
 						Semantic version of the database (MAJOR.MINOR.PATCH)
 					</p>
 					<div class="mt-1 flex items-center gap-1">
@@ -170,7 +166,7 @@
 									alertStore.add('warning', 'Database version must be at least 1.0.0')}
 							/>
 						</div>
-						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
+						<span class="text-lg font-medium text-text-subtle">.</span>
 						<div class="w-20">
 							<NumberInput
 								name="version-minor"
@@ -181,7 +177,7 @@
 									updateManifest('version', updateVersionPart(manifest!.version, 1, v))}
 							/>
 						</div>
-						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
+						<span class="text-lg font-medium text-text-subtle">.</span>
 						<div class="w-20">
 							<NumberInput
 								name="version-patch"
@@ -197,10 +193,10 @@
 
 				<!-- Minimum Profilarr Version -->
 				<div class="space-y-1">
-					<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-						Minimum Profilarr Version <span class="text-red-500">*</span>
+					<span class="block text-sm font-medium text-text-soft">
+						Minimum Profilarr Version <span class="text-danger-icon">*</span>
 					</span>
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
+					<p class="text-xs text-text-muted">
 						Minimum Profilarr version required to use this database
 					</p>
 					<div class="mt-1 flex items-center gap-1">
@@ -219,7 +215,7 @@
 									alertStore.add('warning', 'Minimum Profilarr version must be at least 2.0.0')}
 							/>
 						</div>
-						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
+						<span class="text-lg font-medium text-text-subtle">.</span>
 						<div class="w-20">
 							<NumberInput
 								name="profilarr-version-minor"
@@ -233,7 +229,7 @@
 									)}
 							/>
 						</div>
-						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
+						<span class="text-lg font-medium text-text-subtle">.</span>
 						<div class="w-20">
 							<NumberInput
 								name="profilarr-version-patch"
@@ -252,10 +248,8 @@
 
 				<!-- Arr Types -->
 				<div class="space-y-1">
-					<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-						Arr Types
-					</span>
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
+					<span class="block text-sm font-medium text-text-soft"> Arr Types </span>
+					<p class="text-xs text-text-muted">
 						Which arr applications this database supports. Leave empty if all are supported.
 					</p>
 					<div class="mt-1">
@@ -269,10 +263,8 @@
 
 				<!-- Tags -->
 				<div class="space-y-1">
-					<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Tags</span>
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
-						Descriptive keywords for discovery
-					</p>
+					<span class="block text-sm font-medium text-text-soft">Tags</span>
+					<p class="text-xs text-text-muted">Descriptive keywords for discovery</p>
 					<div class="mt-1">
 						<TagInput
 							tags={manifest.tags ?? []}
@@ -335,12 +327,8 @@
 
 				<!-- README -->
 				<div class="space-y-1">
-					<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-						>README</span
-					>
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
-						Documentation for your database
-					</p>
+					<span class="block text-sm font-medium text-text-soft">README</span>
+					<p class="text-xs text-text-muted">Documentation for your database</p>
 					<div class="mt-1">
 						<MarkdownInput
 							value={readme}
@@ -353,7 +341,7 @@
 			</div>
 		</div>
 	{:else}
-		<p class="text-sm text-neutral-500 dark:text-neutral-400">No manifest found</p>
+		<p class="text-sm text-text-muted">No manifest found</p>
 	{/if}
 </form>
 

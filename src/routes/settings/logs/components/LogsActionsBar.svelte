@@ -35,11 +35,11 @@
 	const logLevels = ['ALL', 'DEBUG', 'INFO', 'WARN', 'ERROR'] as const;
 
 	const levelColors: Record<string, string> = {
-		ALL: 'text-neutral-600 dark:text-neutral-400',
-		DEBUG: 'text-cyan-600 dark:text-cyan-400',
-		INFO: 'text-green-600 dark:text-green-400',
-		WARN: 'text-yellow-600 dark:text-yellow-400',
-		ERROR: 'text-red-600 dark:text-red-400'
+		ALL: 'text-text-soft ',
+		DEBUG: 'text-info-icon ',
+		INFO: 'text-success-icon ',
+		WARN: 'text-warning-icon ',
+		ERROR: 'text-danger-icon '
 	};
 
 	function formatFileSize(bytes: number): string {
@@ -115,10 +115,7 @@
 	<!-- Refresh -->
 	<Tooltip text="Refresh">
 		<ActionButton on:click={onRefresh}>
-			<RefreshCw
-				size={20}
-				class="text-neutral-700 dark:text-neutral-300 {isRefreshing ? 'animate-spin' : ''}"
-			/>
+			<RefreshCw size={20} class="text-text-soft {isRefreshing ? 'animate-spin' : ''}" />
 		</ActionButton>
 	</Tooltip>
 

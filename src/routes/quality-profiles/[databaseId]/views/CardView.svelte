@@ -38,7 +38,7 @@
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-end justify-between gap-2">
-					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+					<h3 class="text-sm font-semibold text-text">
 						{profile.name}
 					</h3>
 					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>
@@ -66,13 +66,13 @@
 				{#if profile.tags.length > 0}
 					<div class="flex flex-wrap gap-1">
 						{#each profile.tags as tag}
-							<Label variant="info" size="sm" rounded="md">{tag.name}</Label>
+							<Label variant="info" size="sm" radius="md">{tag.name}</Label>
 						{/each}
 					</div>
 				{/if}
 
 				{#if profile.description}
-					<div class="description text-xs text-neutral-600 dark:text-neutral-400">
+					<div class="description text-xs text-text-soft">
 						{@html sanitizeHtml(profile.description)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 					</div>
 				{/if}
@@ -81,18 +81,18 @@
 				<div class="mt-auto flex flex-wrap items-center gap-1">
 					{#each visibleQualities as quality, idx}
 						{#if idx > 0}
-							<span class="text-xs text-neutral-400">›</span>
+							<span class="text-xs text-text-subtle">›</span>
 						{/if}
 						<Label
 							variant={quality.is_upgrade_until ? 'success' : 'secondary'}
 							size="sm"
-							rounded="md"
+							radius="md"
 							mono>{quality.name}</Label
 						>
 					{/each}
 					{#if hiddenCount > 0}
-						<span class="text-xs text-neutral-400">›</span>
-						<Label variant="secondary" size="sm" rounded="md">+{hiddenCount} more</Label>
+						<span class="text-xs text-text-subtle">›</span>
+						<Label variant="secondary" size="sm" radius="md">+{hiddenCount} more</Label>
 					{/if}
 				</div>
 			</div>
@@ -101,19 +101,19 @@
 				<div class="flex items-center gap-3 text-xs">
 					<div class="flex items-center gap-1">
 						<BookOpenText size={12} class="text-text-muted" />
-						<Label variant="secondary" size="sm" rounded="md" mono
+						<Label variant="secondary" size="sm" radius="md" mono
 							>{profile.custom_formats.total}</Label
 						>
 					</div>
 					<div class="flex items-center gap-1">
 						<Gauge size={12} class="text-text-muted" />
-						<Label variant="secondary" size="sm" rounded="md" mono
+						<Label variant="secondary" size="sm" radius="md" mono
 							>{profile.minimum_custom_format_score}</Label
 						>
 					</div>
 					<div class="flex items-center gap-1">
 						<Earth size={12} class="text-text-muted" />
-						<Label variant="secondary" size="sm" rounded="md"
+						<Label variant="secondary" size="sm" radius="md"
 							>{profile.language ? profile.language.name : 'Any'}</Label
 						>
 					</div>

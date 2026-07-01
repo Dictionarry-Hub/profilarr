@@ -214,20 +214,14 @@
 	<!-- Custom Formats Content -->
 	<div class="mt-6">
 		{#if data.customFormats.length === 0}
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-			>
-				<p class="text-neutral-600 dark:text-neutral-400">
+			<div class="rounded-card border border-border bg-surface p-8 text-center">
+				<p class="text-text-soft">
 					No custom formats found for {data.currentDatabase?.name}
 				</p>
 			</div>
 		{:else if filtered.length === 0}
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-			>
-				<p class="text-neutral-600 dark:text-neutral-400">
-					No custom formats match the current filters
-				</p>
+			<div class="rounded-card border border-border bg-surface p-8 text-center">
+				<p class="text-text-soft">No custom formats match the current filters</p>
 			</div>
 		{:else if $viewMode === 'table'}
 			<TableView formats={filtered} on:clone={handleClone} on:export={handleExport} />
@@ -239,11 +233,9 @@
 
 <!-- Info Modal -->
 <InfoModal bind:open={infoModalOpen} header="About Custom Formats">
-	<div class="space-y-4 text-sm text-neutral-700 dark:text-neutral-300">
+	<div class="space-y-4 text-sm text-text-soft">
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">
-				What Are Custom Formats?
-			</h3>
+			<h3 class="mb-2 font-semibold text-text">What Are Custom Formats?</h3>
 			<p>
 				Custom formats identify specific release characteristics &mdash; codec, resolution, source,
 				release group, and more. When a release matches a format's conditions, quality profiles use
@@ -252,7 +244,7 @@
 		</section>
 
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Conditions</h3>
+			<h3 class="mb-2 font-semibold text-text">Conditions</h3>
 			<p>
 				Each custom format has one or more conditions grouped by type (Release Title, Release Group,
 				Source, Resolution, etc.). Conditions use AND logic between types and OR logic within a
@@ -262,9 +254,7 @@
 		</section>
 
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">
-				Regular Expressions in Profilarr
-			</h3>
+			<h3 class="mb-2 font-semibold text-text">Regular Expressions in Profilarr</h3>
 			<p>
 				Release Title conditions use regular expressions (regex) to match patterns in release names.
 				In Profilarr, regex patterns are managed as their own reusable entity &mdash; a single
@@ -275,7 +265,7 @@
 				You can browse and manage patterns on the
 				<a
 					href="/regular-expressions/{data.currentDatabase.id}"
-					class="font-medium text-accent-600 underline hover:text-accent-500 dark:text-accent-400 dark:hover:text-accent-300"
+					class="font-medium text-link-text underline"
 				>
 					Regular Expressions
 				</a> page.

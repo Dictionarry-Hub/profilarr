@@ -45,13 +45,13 @@
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-end justify-between gap-2">
-					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+					<h3 class="text-sm font-semibold text-text">
 						{format.name}
 					</h3>
 					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>
 						{#if format.testCount > 0}
 							<div
-								class="flex items-center gap-1 rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
+								class="flex items-center gap-1 rounded-control-sm bg-surface-hover px-1.5 py-0.5 text-xs text-text-soft"
 								title="{format.testCount} test{format.testCount !== 1 ? 's' : ''}"
 							>
 								<FlaskConical size={12} />
@@ -82,31 +82,31 @@
 				{#if format.tags.length > 0}
 					<div class="flex flex-wrap gap-1">
 						{#each format.tags as tag}
-							<Label variant="info" size="sm" rounded="md">{tag.name}</Label>
+							<Label variant="info" size="sm" radius="md">{tag.name}</Label>
 						{/each}
 					</div>
 				{/if}
 
 				<!-- Description -->
 				{#if format.description}
-					<div class="prose-inline line-clamp-2 text-xs text-neutral-600 dark:text-neutral-400">
+					<div class="prose-inline line-clamp-2 text-xs text-text-soft">
 						{@html parseMarkdown(format.description)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 					</div>
 				{:else}
-					<div class="text-xs text-neutral-400 italic dark:text-neutral-500">No description</div>
+					<div class="text-xs text-text-subtle italic">No description</div>
 				{/if}
 
 				<!-- Conditions -->
 				{#if format.conditions.length > 0}
 					<div class="flex flex-wrap gap-1">
 						{#each sortConditions(format.conditions) as condition}
-							<Label variant={getConditionVariant(condition)} size="sm" rounded="md" mono
+							<Label variant={getConditionVariant(condition)} size="sm" radius="md" mono
 								>{condition.name}</Label
 							>
 						{/each}
 					</div>
 				{:else}
-					<div class="text-xs text-neutral-400">None</div>
+					<div class="text-xs text-text-subtle">None</div>
 				{/if}
 			</div>
 		</Card>

@@ -117,13 +117,13 @@
 
 <div class="space-y-3">
 	{#if label}
-		<span class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+		<span class="block text-sm font-medium text-text-soft">
 			{label}
 		</span>
 	{/if}
 
 	{#if description}
-		<p class="text-xs text-neutral-500 dark:text-neutral-400">
+		<p class="text-xs text-text-muted">
 			{description}
 		</p>
 	{/if}
@@ -132,7 +132,7 @@
 		{#if entries.length > 0}
 			<!-- Header (desktop only) -->
 			<div
-				class="hidden text-xs font-medium text-neutral-500 md:grid md:grid-cols-[1fr_auto_auto] md:gap-2 dark:text-neutral-400"
+				class="hidden text-xs font-medium text-text-muted md:grid md:grid-cols-[1fr_auto_auto] md:gap-2"
 			>
 				<span>{keyLabel}</span>
 				<span>{valueLabel}</span>
@@ -145,15 +145,13 @@
 			{@const isLocked = lockedFirst && index === 0}
 			{@const [vMajor, vMinor, vPatch] = parseVersion(entry.value)}
 			<!-- Mobile: stacked layout -->
-			<div
-				class="space-y-2 rounded-lg border border-neutral-200 p-3 md:hidden dark:border-neutral-700"
-			>
+			<div class="space-y-2 rounded-card border border-border p-3 md:hidden">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400">{keyLabel}</span>
+					<span class="text-xs font-medium text-text-muted">{keyLabel}</span>
 					<button
 						type="button"
 						onclick={() => (isLocked ? onLockedDeleteAttempt?.() : removeEntry(index))}
-						class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+						class="flex h-8 w-8 items-center justify-center rounded-card text-text-subtle transition-colors hover:bg-danger-bg hover:text-danger-icon"
 						aria-label="Remove entry"
 					>
 						<Trash2 size={16} />
@@ -172,7 +170,7 @@
 					}}
 					on:input={(e) => updateKey(index, e.detail)}
 				/>
-				<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400">{valueLabel}</span>
+				<span class="text-xs font-medium text-text-muted">{valueLabel}</span>
 				{#if valueType === 'version'}
 					<div class="flex items-center gap-1">
 						<div class="w-16">
@@ -187,7 +185,7 @@
 								onMinBlocked={isLocked ? onLockedVersionMinBlocked : undefined}
 							/>
 						</div>
-						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
+						<span class="text-lg font-medium text-text-subtle">.</span>
 						<div class="w-16">
 							<NumberInput
 								name="version-minor-{index}-mobile"
@@ -197,7 +195,7 @@
 								onchange={(v) => updateValue(index, updateVersionPart(entry.value, 1, v))}
 							/>
 						</div>
-						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
+						<span class="text-lg font-medium text-text-subtle">.</span>
 						<div class="w-16">
 							<NumberInput
 								name="version-patch-{index}-mobile"
@@ -248,7 +246,7 @@
 								onMinBlocked={isLocked ? onLockedVersionMinBlocked : undefined}
 							/>
 						</div>
-						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
+						<span class="text-lg font-medium text-text-subtle">.</span>
 						<div class="w-16">
 							<NumberInput
 								name="version-minor-{index}"
@@ -258,7 +256,7 @@
 								onchange={(v) => updateValue(index, updateVersionPart(entry.value, 1, v))}
 							/>
 						</div>
-						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
+						<span class="text-lg font-medium text-text-subtle">.</span>
 						<div class="w-16">
 							<NumberInput
 								name="version-patch-{index}"
@@ -281,7 +279,7 @@
 				<button
 					type="button"
 					onclick={() => (isLocked ? onLockedDeleteAttempt?.() : removeEntry(index))}
-					class="flex h-[38px] w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+					class="flex h-[38px] w-8 items-center justify-center rounded-card text-text-subtle transition-colors hover:bg-danger-bg hover:text-danger-icon"
 					aria-label="Remove entry"
 				>
 					<Trash2 size={16} />
@@ -293,7 +291,7 @@
 		<button
 			type="button"
 			onclick={addEntry}
-			class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+			class="flex items-center gap-1.5 rounded-card px-3 py-2 text-sm font-medium text-text-soft transition-colors hover:bg-surface-hover"
 		>
 			<Plus size={16} />
 			Add entry

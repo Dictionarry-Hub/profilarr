@@ -644,28 +644,22 @@
 
 <div class="mt-6 space-y-6">
 	{#if libraryError && !loading}
-		<div
-			class="rounded-lg border border-red-200 bg-red-50 p-6 dark:border-red-800 dark:bg-red-950/40"
-		>
+		<div class="rounded-card border border-danger-border bg-danger-bg p-6">
 			<div class="flex items-center gap-3">
-				<AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+				<AlertTriangle class="h-5 w-5 text-danger-icon " />
 				<div>
-					<h3 class="font-medium text-red-800 dark:text-red-200">Failed to load library</h3>
-					<p class="mt-1 text-sm text-red-600 dark:text-red-400">{libraryError}</p>
+					<h3 class="font-medium text-danger-text">Failed to load library</h3>
+					<p class="mt-1 text-sm text-danger-icon">{libraryError}</p>
 				</div>
 			</div>
 		</div>
 	{:else if !isSupported}
-		<div
-			class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
-		>
+		<div class="rounded-card border border-border bg-surface p-6">
 			<div class="flex items-center gap-3">
-				<Film class="h-5 w-5 text-neutral-400" />
+				<Film class="h-5 w-5 text-text-subtle" />
 				<div>
-					<h3 class="font-medium text-neutral-900 dark:text-neutral-50">
-						Library view not yet available
-					</h3>
-					<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+					<h3 class="font-medium text-text">Library view not yet available</h3>
+					<p class="mt-1 text-sm text-text-soft">
 						Library view is currently only supported for Radarr and Sonarr instances.
 					</p>
 				</div>
@@ -704,16 +698,12 @@
 		{#if $viewMode === 'table'}
 			{#if isRadarr}
 				{#if allMoviesWithFiles.length === 0 && !loading && !refreshing}
-					<div
-						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
-					>
+					<div class="rounded-card border border-border bg-surface p-6">
 						<div class="flex items-center gap-3">
-							<Film class="h-5 w-5 text-neutral-400" />
+							<Film class="h-5 w-5 text-text-subtle" />
 							<div>
-								<h3 class="font-medium text-neutral-900 dark:text-neutral-50">
-									No movies with files
-								</h3>
-								<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+								<h3 class="font-medium text-text">No movies with files</h3>
+								<p class="mt-1 text-sm text-text-soft">
 									This library has {library.length} movies but none have downloaded files yet.
 								</p>
 							</div>
@@ -733,14 +723,12 @@
 				{/if}
 			{:else if isSonarr}
 				{#if sonarrLibrary.length === 0 && !loading && !refreshing}
-					<div
-						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
-					>
+					<div class="rounded-card border border-border bg-surface p-6">
 						<div class="flex items-center gap-3">
-							<Film class="h-5 w-5 text-neutral-400" />
+							<Film class="h-5 w-5 text-text-subtle" />
 							<div>
-								<h3 class="font-medium text-neutral-900 dark:text-neutral-50">No series found</h3>
-								<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+								<h3 class="font-medium text-text">No series found</h3>
+								<p class="mt-1 text-sm text-text-soft">
 									This Sonarr instance has no series in its library.
 								</p>
 							</div>
@@ -769,23 +757,21 @@
 				<LibraryCardGrid columns={6}>
 					{#each Array(15) as _}
 						<div
-							class="animate-pulse overflow-hidden rounded-xl border border-neutral-300 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-900"
+							class="animate-pulse overflow-hidden rounded-card border border-border bg-surface-muted"
 						>
-							<div class="aspect-[2/3] w-full bg-neutral-200 dark:bg-neutral-800"></div>
+							<div class="aspect-[2/3] w-full bg-surface-hover"></div>
 							<div class="space-y-2 p-3">
-								<div class="h-4 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-								<div class="h-3 w-1/4 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-								<div class="h-5 w-1/2 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+								<div class="h-4 w-3/4 rounded-control-sm bg-surface-hover"></div>
+								<div class="h-3 w-1/4 rounded-control-sm bg-surface-hover"></div>
+								<div class="h-5 w-1/2 rounded-control-sm bg-surface-hover"></div>
 							</div>
 						</div>
 					{/each}
 				</LibraryCardGrid>
 			{:else if isRadarr}
 				{#if moviesWithFiles.length === 0}
-					<div
-						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
-					>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400">
+					<div class="rounded-card border border-border bg-surface p-6">
+						<p class="text-sm text-text-muted">
 							{filterTags.length > 0
 								? 'No movies match the current filters'
 								: 'No movies with files'}
@@ -801,10 +787,8 @@
 				{/if}
 			{:else if isSonarr}
 				{#if filteredSeries.length === 0}
-					<div
-						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
-					>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400">
+					<div class="rounded-card border border-border bg-surface p-6">
+						<p class="text-sm text-text-muted">
 							{filterTags.length > 0 ? 'No series match the current filters' : 'No series found'}
 						</p>
 					</div>
@@ -827,36 +811,36 @@
 </div>
 
 <InfoModal bind:open={showFilterInfo} header="How Filters Work">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="space-y-4 text-sm text-text-soft">
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Quick Search</div>
+			<div class="font-medium text-text">Quick Search</div>
 			<p class="mt-1">
 				Start typing and press Enter to search by title. No need to select a field first.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Field Filters</div>
+			<div class="font-medium text-text">Field Filters</div>
 			<p class="mt-1">
 				Click the input to see all available fields. Select one, then type or pick a value to create
 				a filter.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Number Filters</div>
+			<div class="font-medium text-text">Number Filters</div>
 			<p class="mt-1">
 				For numeric fields like Score or Year, use operators such as &gt;1000, &lt;500, &gt;=200, or
 				ranges like 2020-2025.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Negation</div>
+			<div class="font-medium text-text">Negation</div>
 			<p class="mt-1">
 				Click any filter tag to toggle it to NOT mode. Negated filters exclude matching items
 				instead of including them.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Combining Filters</div>
+			<div class="font-medium text-text">Combining Filters</div>
 			<p class="mt-1">
 				Multiple filters use AND logic. All must match. Press Backspace on an empty input to remove
 				the last filter, or click the X on any tag.

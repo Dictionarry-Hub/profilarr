@@ -204,10 +204,8 @@
 
 <div class="p-4 md:p-8">
 	<div class="mb-6">
-		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">
-			Announcements
-		</h1>
-		<p class="mt-3 text-base text-neutral-600 md:text-lg dark:text-neutral-400">
+		<h1 class="text-2xl font-bold text-text md:text-3xl">Announcements</h1>
+		<p class="mt-3 text-base text-text-soft md:text-lg">
 			Messages from the Profilarr team and your linked databases. Expand a row to read it.
 		</p>
 	</div>
@@ -283,7 +281,7 @@
 			<svelte:fragment slot="cell" let:row let:column>
 				{#if column.key === 'source'}
 					<span
-						class="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400"
+						class="flex items-center gap-2 text-xs text-text-soft"
 						title={row.source === 'profilarr' ? 'Profilarr team' : (row.databaseName ?? '')}
 					>
 						{#if row.source === 'profilarr'}
@@ -302,27 +300,25 @@
 						{/if}
 					</span>
 				{:else if column.key === 'title'}
-					<span
-						class="text-sm {row.readAt
-							? 'text-neutral-600 dark:text-neutral-400'
-							: 'font-semibold text-neutral-900 dark:text-neutral-100'}"
-					>
+					<span class="text-sm {row.readAt ? 'text-text-soft ' : 'font-semibold text-text '}">
 						{#if !row.readAt}
-							<span class="mr-2 inline-block h-2 w-2 rounded-full bg-accent-500" aria-label="Unread"
+							<span
+								class="mr-2 inline-block h-2 w-2 rounded-pill bg-accent-solid"
+								aria-label="Unread"
 							></span>
 						{/if}
 						{row.title}
 					</span>
 				{:else if column.key === 'severity'}
-					<Label variant={severityVariant[row.severity]} size="md" rounded="md" mono>
+					<Label variant={severityVariant[row.severity]} size="md" radius="md" mono>
 						{row.severity.toUpperCase()}
 					</Label>
 				{:else if column.key === 'publishedAt'}
-					<span class="text-xs text-neutral-500 dark:text-neutral-500">
+					<span class="text-xs text-text-muted">
 						<DateTime value={row.publishedAt} date />
 					</span>
 				{:else if column.key === 'expiresAt'}
-					<span class="text-xs text-neutral-500 dark:text-neutral-500">
+					<span class="text-xs text-text-muted">
 						{#if row.expiresAt}
 							<DateTime value={row.expiresAt} date />
 						{/if}
@@ -363,9 +359,7 @@
 							{@html renderMarkdown(row.body)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 						</div>
 					{:else}
-						<p class="text-sm text-neutral-500 dark:text-neutral-500">
-							Announcement body is not available.
-						</p>
+						<p class="text-sm text-text-muted">Announcement body is not available.</p>
 					{/if}
 
 					{#if row.link}
@@ -374,7 +368,7 @@
 								href={row.link}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="text-xs text-accent-600 hover:underline dark:text-accent-400"
+								class="text-xs text-link-text hover:underline"
 							>
 								Read more ↗
 							</a>
@@ -387,9 +381,9 @@
 </div>
 
 <InfoModal bind:open={infoModalOpen} header="About Announcements">
-	<div class="space-y-4 text-sm text-neutral-700 dark:text-neutral-300">
+	<div class="space-y-4 text-sm text-text-soft">
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">What's in here?</h3>
+			<h3 class="mb-2 font-semibold text-text">What's in here?</h3>
 			<p>
 				Announcements come from two places. <strong>Profilarr</strong> messages are posted by the
 				Profilarr team and reach every instance via the public bulletin. <strong>Database</strong>
@@ -399,7 +393,7 @@
 		</section>
 
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Read state</h3>
+			<h3 class="mb-2 font-semibold text-text">Read state</h3>
 			<p>
 				Read state is tracked per announcement on this instance. Use the eye icon on a row to flip
 				it, or "Mark visible as read" to clear out everything currently in view (filters and search
@@ -408,7 +402,7 @@
 		</section>
 
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Severity</h3>
+			<h3 class="mb-2 font-semibold text-text">Severity</h3>
 			<p>
 				<strong>Info</strong> is general news.
 				<strong>Warning</strong> means something needs attention soon.

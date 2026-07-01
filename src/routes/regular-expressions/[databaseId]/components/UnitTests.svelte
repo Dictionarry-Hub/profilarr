@@ -129,12 +129,12 @@
 		{#each skeletonTests as skeleton (skeleton.id)}
 			<Card padding="sm" flush>
 				<div class="flex items-center gap-3">
-					<div class="h-5 w-5 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
+					<div class="h-5 w-5 animate-pulse rounded-control-sm bg-surface-hover"></div>
 					<div class="flex-1 space-y-1.5">
-						<div class="h-3 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
-						<div class="h-4 w-48 animate-pulse rounded bg-neutral-100 dark:bg-neutral-800"></div>
+						<div class="h-3 w-24 animate-pulse rounded-control-sm bg-surface-hover"></div>
+						<div class="h-4 w-48 animate-pulse rounded-control-sm bg-surface-hover"></div>
 					</div>
-					<div class="h-5 w-16 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
+					<div class="h-5 w-16 animate-pulse rounded-pill bg-surface-hover"></div>
 				</div>
 			</Card>
 		{/each}
@@ -142,14 +142,14 @@
 {:else if error}
 	<!-- Error State -->
 	<div
-		class="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300"
+		class="flex items-center gap-2 rounded-card border border-danger-border bg-danger-bg p-3 text-sm text-danger-text"
 	>
 		<AlertCircle size={16} />
 		<span>{error}</span>
 	</div>
 {:else if unitTests.length === 0}
 	<!-- No Tests -->
-	<p class="text-sm text-neutral-500 dark:text-neutral-400">No unit tests found for this regex.</p>
+	<p class="text-sm text-text-muted">No unit tests found for this regex.</p>
 {:else}
 	<!-- Actions Bar -->
 	<ActionsBar>
@@ -215,7 +215,7 @@
 			<Tooltip text="Regex101">
 				<ActionButton
 					icon={ExternalLink}
-					iconClass="text-blue-600 dark:text-blue-400"
+					iconClass="text-info-icon "
 					on:click={() => window.open(regex101Url, '_blank', 'noopener,noreferrer')}
 				/>
 			</Tooltip>
@@ -224,12 +224,8 @@
 
 	<!-- Content -->
 	{#if $filtered.length === 0}
-		<div
-			class="mt-4 rounded-lg border border-neutral-200 bg-white p-6 text-center dark:border-neutral-800 dark:bg-neutral-900"
-		>
-			<p class="text-sm text-neutral-500 dark:text-neutral-400">
-				No tests match the current filters.
-			</p>
+		<div class="mt-4 rounded-card border border-border bg-surface p-6 text-center">
+			<p class="text-sm text-text-muted">No tests match the current filters.</p>
 		</div>
 	{:else if $view === 'table'}
 		<!-- Table View -->
@@ -243,44 +239,38 @@
 			>
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'testString'}
-						<Label variant="secondary" size="md" rounded="md" mono>{row.testString}</Label>
+						<Label variant="secondary" size="md" radius="md" mono>{row.testString}</Label>
 					{:else if column.key === 'description'}
 						{#if row.description}
-							<span class="text-sm text-neutral-600 dark:text-neutral-400">{row.description}</span>
+							<span class="text-sm text-text-soft">{row.description}</span>
 						{:else}
-							<span class="text-neutral-400 dark:text-neutral-500">—</span>
+							<span class="text-text-subtle">—</span>
 						{/if}
 					{:else if column.key === 'criteria'}
 						<Label
 							variant={row.criteria === 'DOES_MATCH' ? 'success' : 'danger'}
 							size="sm"
-							rounded="md"
+							radius="md"
 						>
 							{row.criteria === 'DOES_MATCH' ? 'Should Match' : "Shouldn't Match"}
 						</Label>
 					{:else if column.key === 'passed'}
 						{#if row.passed === undefined}
 							<div class="flex items-center justify-center">
-								<div
-									class="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800"
-								>
-									<span class="text-xs font-medium text-neutral-400 dark:text-neutral-500">?</span>
+								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-surface-hover">
+									<span class="text-xs font-medium text-text-subtle">?</span>
 								</div>
 							</div>
 						{:else if row.passed}
 							<div class="flex items-center justify-center">
-								<div
-									class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900"
-								>
-									<Check size={14} class="text-emerald-600 dark:text-emerald-400" />
+								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-success-bg">
+									<Check size={14} class="text-success-icon " />
 								</div>
 							</div>
 						{:else}
 							<div class="flex items-center justify-center">
-								<div
-									class="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900"
-								>
-									<X size={14} class="text-red-600 dark:text-red-400" />
+								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-danger-bg">
+									<X size={14} class="text-danger-icon " />
 								</div>
 							</div>
 						{/if}
@@ -299,7 +289,7 @@
 							<div class="flex items-start gap-2">
 								<div class="min-w-0 flex-1">
 									<span
-										class="inline-flex flex-wrap items-center gap-1 rounded-md bg-neutral-100 px-2.5 py-1 font-mono text-xs font-medium break-all text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+										class="inline-flex flex-wrap items-center gap-1 rounded-control-sm bg-surface-hover px-2.5 py-1 font-mono text-xs font-medium break-all text-text-soft"
 										>{test.testString}</span
 									>
 								</div>
@@ -307,7 +297,7 @@
 									<Label
 										variant={test.criteria === 'DOES_MATCH' ? 'success' : 'danger'}
 										size="sm"
-										rounded="md"
+										radius="md"
 									>
 										{test.criteria === 'DOES_MATCH' ? 'Should Match' : "Shouldn't Match"}
 									</Label>
@@ -316,19 +306,19 @@
 							<div class="flex items-start gap-2">
 								<div class="min-w-0 flex-1">
 									{#if test.description}
-										<p class="text-xs text-neutral-500 dark:text-neutral-400">{test.description}</p>
+										<p class="text-xs text-text-muted">{test.description}</p>
 									{/if}
 								</div>
 								<div class="shrink-0">
 									{#if test.passed === undefined}
-										<Label variant="warning" size="sm" rounded="md">Unknown</Label>
+										<Label variant="warning" size="sm" radius="md">Unknown</Label>
 									{:else if test.passed}
-										<Label variant="success" size="sm" rounded="md">
+										<Label variant="success" size="sm" radius="md">
 											<Check size={10} />
 											Passed
 										</Label>
 									{:else}
-										<Label variant="danger" size="sm" rounded="md">
+										<Label variant="danger" size="sm" radius="md">
 											<X size={10} />
 											Failed
 										</Label>
@@ -340,29 +330,29 @@
 						<!-- Mobile: stacked -->
 						<div class="space-y-2 md:hidden">
 							<span
-								class="inline-flex flex-wrap items-center gap-1 rounded-md bg-neutral-100 px-2.5 py-1 font-mono text-xs font-medium break-all text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+								class="inline-flex flex-wrap items-center gap-1 rounded-control-sm bg-surface-hover px-2.5 py-1 font-mono text-xs font-medium break-all text-text-soft"
 								>{test.testString}</span
 							>
 							{#if test.description}
-								<p class="text-xs text-neutral-500 dark:text-neutral-400">{test.description}</p>
+								<p class="text-xs text-text-muted">{test.description}</p>
 							{/if}
 							<div class="flex items-center gap-2">
 								<Label
 									variant={test.criteria === 'DOES_MATCH' ? 'success' : 'danger'}
 									size="sm"
-									rounded="md"
+									radius="md"
 								>
 									{test.criteria === 'DOES_MATCH' ? 'Should Match' : "Shouldn't Match"}
 								</Label>
 								{#if test.passed === undefined}
-									<Label variant="warning" size="sm" rounded="md">Unknown</Label>
+									<Label variant="warning" size="sm" radius="md">Unknown</Label>
 								{:else if test.passed}
-									<Label variant="success" size="sm" rounded="md">
+									<Label variant="success" size="sm" radius="md">
 										<Check size={10} />
 										Passed
 									</Label>
 								{:else}
-									<Label variant="danger" size="sm" rounded="md">
+									<Label variant="danger" size="sm" radius="md">
 										<X size={10} />
 										Failed
 									</Label>

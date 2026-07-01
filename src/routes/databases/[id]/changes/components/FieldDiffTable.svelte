@@ -149,7 +149,7 @@
 <Table {columns} data={rows} compact hoverable={false} responsive>
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'label'}
-			<span class="text-sm text-neutral-700 dark:text-neutral-200">
+			<span class="text-sm text-text-soft">
 				{row.label}
 			</span>
 		{:else if column.key === 'before'}
@@ -178,7 +178,7 @@
 						href={regex101Url(beforeValue)}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 text-accent-700 hover:underline dark:text-accent-300"
+						class="inline-flex items-center gap-1 text-link-text hover:underline"
 						title="Open on regex101"
 					>
 						{beforeValue}
@@ -202,7 +202,7 @@
 					{beforeValue}
 				</Badge>
 			{:else}
-				<span class="text-sm text-neutral-600 dark:text-neutral-400">
+				<span class="text-sm text-text-soft">
 					{formatValue(beforeValue)}
 				</span>
 			{/if}
@@ -232,7 +232,7 @@
 						href={regex101Url(afterValue)}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 text-accent-700 hover:underline dark:text-accent-300"
+						class="inline-flex items-center gap-1 text-link-text hover:underline"
 						title="Open on regex101"
 					>
 						{afterValue}
@@ -256,7 +256,7 @@
 					{afterValue}
 				</Badge>
 			{:else}
-				<span class="text-sm text-neutral-700 dark:text-neutral-200">
+				<span class="text-sm text-text-soft">
 					{formatValue(afterValue)}
 				</span>
 			{/if}

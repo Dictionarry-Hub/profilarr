@@ -128,8 +128,8 @@
 {#key data.instance.id}
 	<StickyCard position="top">
 		<div slot="left">
-			<h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Drift</h1>
-			<p class="text-sm text-neutral-500 dark:text-neutral-400">
+			<h1 class="text-xl font-semibold text-text">Drift</h1>
+			<p class="text-sm text-text-muted">
 				Compare synced configuration against the current Arr state.
 			</p>
 		</div>
@@ -137,7 +137,7 @@
 			<Button
 				text={running ? 'Running...' : 'Run Now'}
 				icon={Play}
-				iconColor="text-green-600 dark:text-green-400"
+				iconColor="text-success-icon "
 				disabled={saving || running || $isDirty || !data.featureEnabled || !enabled}
 				on:click={() => {
 					jobStatus.connect();
@@ -153,9 +153,7 @@
 			<Button
 				text={saving ? 'Saving...' : 'Save'}
 				icon={saving ? Loader2 : Save}
-				iconColor={saving
-					? 'text-blue-600 dark:text-blue-400 animate-spin'
-					: 'text-blue-600 dark:text-blue-400'}
+				iconColor={saving ? 'text-info-icon animate-spin' : 'text-info-icon '}
 				disabled={saving || !$isDirty || !data.featureEnabled}
 				on:click={() => {
 					const saveForm = document.getElementById('drift-save-form');
@@ -168,12 +166,12 @@
 	</StickyCard>
 
 	<div class="mt-4 space-y-6 pb-32">
-		<section class="border-b border-neutral-200 pb-5 dark:border-neutral-800">
+		<section class="border-b border-border pb-5">
 			{#if data.featureEnabled}
 				<div class="flex flex-wrap gap-4 md:items-end md:gap-x-5 md:gap-y-3 md:px-4">
 					<div>
 						<span
-							class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
+							class="mb-1 block text-[10px] font-medium tracking-wider text-text-subtle uppercase"
 						>
 							Detection
 						</span>
@@ -186,7 +184,7 @@
 					</div>
 					<div data-onboarding="drift-schedule">
 						<span
-							class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
+							class="mb-1 block text-[10px] font-medium tracking-wider text-text-subtle uppercase"
 						>
 							Schedule
 						</span>
@@ -199,27 +197,25 @@
 					</div>
 					{#if data.status.lastCheckedAt}
 						<div
-							class="flex w-full flex-wrap items-center gap-1.5 border-t border-neutral-200 pt-3 md:ml-auto md:w-auto md:border-0 md:pt-0 dark:border-neutral-800"
+							class="flex w-full flex-wrap items-center gap-1.5 border-t border-border pt-3 md:ml-auto md:w-auto md:border-0 md:pt-0"
 						>
 							{#if !enabled}
-								<Label variant="warning" size="md" rounded="md">Paused</Label>
+								<Label variant="warning" size="md" radius="md">Paused</Label>
 							{:else if timeUntilNext !== null && timeUntilNext <= 0}
-								<Label variant="success" size="md" rounded="md">Ready</Label>
+								<Label variant="success" size="md" radius="md">Ready</Label>
 							{:else if timeUntilNext !== null}
-								<Label variant="secondary" size="md" rounded="md" mono>
+								<Label variant="secondary" size="md" radius="md" mono>
 									Next {formatTimeRemaining(timeUntilNext)}
 								</Label>
 							{/if}
-							<Label variant="secondary" size="md" rounded="md" mono>
+							<Label variant="secondary" size="md" radius="md" mono>
 								Last {formatSmartDateTime(data.status.lastCheckedAt, $serverTimezone, $dateFormat)}
 							</Label>
 						</div>
 					{/if}
 				</div>
 			{:else}
-				<div class="text-sm text-neutral-500 md:px-4 dark:text-neutral-400">
-					Drift detection is not available.
-				</div>
+				<div class="text-sm text-text-muted md:px-4">Drift detection is not available.</div>
 			{/if}
 		</section>
 
@@ -238,7 +234,7 @@
 					/>
 				{:else if data.status.status === 'failed' && data.status.lastError}
 					<div
-						class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+						class="rounded-card border border-danger-border bg-danger-bg p-4 text-sm text-danger-text"
 					>
 						{data.status.lastError}
 					</div>
@@ -277,19 +273,19 @@
 						<svelte:fragment slot="cell" let:row let:column>
 							{#if column.key === 'title'}
 								<div class="flex flex-col gap-1">
-									<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+									<span class="text-sm font-medium text-text">
 										{row.title}
 									</span>
 									{#if row.summary}
-										<span class="text-xs text-neutral-500 dark:text-neutral-400">
+										<span class="text-xs text-text-muted">
 											{row.summary}
 										</span>
 									{/if}
 								</div>
 							{:else if column.key === 'section'}
-								<Label variant="secondary" size="md" rounded="md">{row.sectionLabel}</Label>
+								<Label variant="secondary" size="md" radius="md">{row.sectionLabel}</Label>
 							{:else if column.key === 'state'}
-								<Label variant={toneToVariant[row.tone]} size="md" rounded="md">
+								<Label variant={toneToVariant[row.tone]} size="md" radius="md">
 									{row.stateLabel}
 								</Label>
 							{/if}

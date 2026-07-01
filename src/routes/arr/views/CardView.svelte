@@ -63,20 +63,20 @@
 						<div class="relative h-6 w-6 flex-shrink-0">
 							{#if !loadedImages.has(instance.id)}
 								<div
-									class="absolute inset-0 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"
+									class="absolute inset-0 animate-pulse rounded-control-sm bg-surface-hover"
 								></div>
 							{/if}
 							<img
 								src={getLogoPath(instance.type)}
 								alt={`${instance.type} logo`}
-								class="h-6 w-6 rounded {loadedImages.has(instance.id)
+								class="h-6 w-6 rounded-control-sm {loadedImages.has(instance.id)
 									? 'opacity-100'
 									: 'opacity-0'}"
 								on:load={() => handleImageLoad(instance.id)}
 								use:checkLoaded={instance.id}
 							/>
 						</div>
-						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						<h3 class="truncate text-sm font-semibold text-text">
 							{instance.name}
 						</h3>
 					</div>
@@ -92,7 +92,7 @@
 							icon={Unlink}
 							size="xs"
 							variant="ghost"
-							iconColor="text-red-600 dark:text-red-400"
+							iconColor="text-danger-icon "
 							tooltip="Unlink instance"
 							on:click={(e) => handleDeleteClick(e, instance)}
 						/>
@@ -102,76 +102,70 @@
 
 			<div class="flex flex-1 flex-col gap-2">
 				<div>
-					<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
-						>Quality Profiles:</span
-					>
+					<span class="text-xs font-medium text-text-muted">Quality Profiles:</span>
 					{#if instance.syncedProfileNames.length > 0}
 						<div class="mt-1 flex flex-wrap gap-1">
 							{#each instance.syncedProfileNames as name}
-								<Label variant="secondary" size="sm" rounded="md">{name}</Label>
+								<Label variant="secondary" size="sm" radius="md">{name}</Label>
 							{/each}
 						</div>
 					{:else}
-						<span class="ml-1 text-xs text-neutral-400 dark:text-neutral-500">None</span>
+						<span class="ml-1 text-xs text-text-subtle">None</span>
 					{/if}
 				</div>
 				<div>
-					<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
-						>Delay Profile:</span
-					>
+					<span class="text-xs font-medium text-text-muted">Delay Profile:</span>
 					{#if instance.delayProfileName}
 						<span class="ml-1"
-							><Label variant="secondary" size="sm" rounded="md">{instance.delayProfileName}</Label
+							><Label variant="secondary" size="sm" radius="md">{instance.delayProfileName}</Label
 							></span
 						>
 					{:else}
-						<span class="ml-1 text-xs text-neutral-400 dark:text-neutral-500">None</span>
+						<span class="ml-1 text-xs text-text-subtle">None</span>
 					{/if}
 				</div>
 				<div>
-					<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
-						>Media Management:</span
-					>
+					<span class="text-xs font-medium text-text-muted">Media Management:</span>
 					{#if instance.namingConfigName || instance.qualityDefinitionsConfigName || instance.mediaSettingsConfigName}
 						<div class="mt-1 flex flex-wrap gap-1">
 							{#if instance.namingConfigName}
-								<Label variant="secondary" size="sm" rounded="md"
+								<Label variant="secondary" size="sm" radius="md"
 									>Naming: {instance.namingConfigName}</Label
 								>
 							{/if}
 							{#if instance.qualityDefinitionsConfigName}
-								<Label variant="secondary" size="sm" rounded="md"
+								<Label variant="secondary" size="sm" radius="md"
 									>Quality Definitions: {instance.qualityDefinitionsConfigName}</Label
 								>
 							{/if}
 							{#if instance.mediaSettingsConfigName}
-								<Label variant="secondary" size="sm" rounded="md"
+								<Label variant="secondary" size="sm" radius="md"
 									>Media Settings: {instance.mediaSettingsConfigName}</Label
 								>
 							{/if}
 						</div>
 					{:else}
-						<span class="ml-1 text-xs text-neutral-400 dark:text-neutral-500">None</span>
+						<span class="ml-1 text-xs text-text-subtle">None</span>
 					{/if}
 				</div>
 			</div>
 
 			<svelte:fragment slot="footer">
 				<div
-					class="flex flex-col items-start gap-1.5 text-xs text-neutral-600 sm:flex-row sm:items-center sm:gap-3 dark:text-neutral-400"
+					class="flex flex-col items-start gap-1.5 text-xs text-text-soft sm:flex-row sm:items-center sm:gap-3"
 				>
 					<div class="flex items-center gap-1">
-						<ArrowUpCircle size={12} class="text-amber-500 dark:text-amber-400" />
+						<ArrowUpCircle size={12} class="text-warning-icon " />
 						<span>Upgrades: {instance.upgradeEnabled ? 'On' : 'Off'}</span>
 					</div>
-					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
+					<span class="hidden text-text sm:inline">&middot;</span>
 					<div class="flex items-center gap-1">
-						<Type size={12} class="text-blue-500 dark:text-blue-400" />
+						<Type size={12} class="text-info-icon " />
 						<span>Renames: {instance.renameEnabled ? 'On' : 'Off'}</span>
 					</div>
-					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
+					<span class="hidden text-text sm:inline">&middot;</span>
 					<div class="flex items-center gap-1">
-						<Trash2 size={12} class="text-rose-500 dark:text-rose-400" />
+						<Trash2 size={12} class="text-danger-icon " />
 						<span>Cleanup: {instance.cleanupEnabled ? 'On' : 'Off'}</span>
 					</div>
 				</div>

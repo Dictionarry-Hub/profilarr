@@ -226,7 +226,7 @@
 	<div slot="body" class="space-y-4">
 		{#if !parserAvailable}
 			<div
-				class="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-800/50 dark:bg-amber-900/20 dark:text-amber-400"
+				class="flex items-center gap-2 rounded-card border border-warning-border bg-warning-bg px-3 py-2 text-sm text-warning-text"
 			>
 				<AlertTriangle size={16} />
 				Parser service unavailable. Release parsing is disabled.
@@ -245,20 +245,18 @@
 		<!-- Results -->
 		{#if error}
 			<div
-				class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-400"
+				class="rounded-card border border-danger-border bg-danger-bg px-3 py-2 text-sm text-danger-text"
 			>
 				{error}
 			</div>
 		{/if}
 
 		{#if evaluation}
-			<div
-				class="space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-900/50"
-			>
+			<div class="space-y-3 rounded-card border border-border bg-surface-muted p-4">
 				<!-- Score -->
 				{#if numericProfileId}
 					<div class="flex items-center gap-2 text-sm">
-						<span class="font-medium text-neutral-500 dark:text-neutral-400">Score</span>
+						<span class="font-medium text-text-muted">Score</span>
 						<Score {score} />
 					</div>
 				{/if}
@@ -266,69 +264,58 @@
 				<!-- Parsed Info -->
 				{#if evaluation.parsed}
 					<div class="space-y-2 text-xs">
-						<div class="font-medium text-neutral-500 dark:text-neutral-400">Parsed</div>
+						<div class="font-medium text-text-muted">Parsed</div>
 						<div class="flex flex-wrap items-center gap-2">
 							<span
-								class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+								class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 							>
-								<HardDrive size={12} class="text-blue-500" />
-								<span class="text-neutral-500 dark:text-neutral-400">Source</span>
-								<span class="font-medium text-neutral-800 dark:text-neutral-100"
-									>{evaluation.parsed.source}</span
-								>
+								<HardDrive size={12} class="text-info-icon" />
+								<span class="text-text-muted">Source</span>
+								<span class="font-medium text-text">{evaluation.parsed.source}</span>
 							</span>
 							<span
-								class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+								class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 							>
-								<Layers size={12} class="text-indigo-500" />
-								<span class="text-neutral-500 dark:text-neutral-400">Resolution</span>
-								<span class="font-medium text-neutral-800 dark:text-neutral-100"
-									>{evaluation.parsed.resolution}</span
-								>
+								<Layers size={12} class="text-accent-solid" />
+								<span class="text-text-muted">Resolution</span>
+								<span class="font-medium text-text">{evaluation.parsed.resolution}</span>
 							</span>
 							{#if evaluation.parsed.modifier !== 'None'}
 								<span
-									class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+									class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 								>
-									<Tag size={12} class="text-amber-500" />
-									<span class="text-neutral-500 dark:text-neutral-400">Modifier</span>
-									<span class="font-medium text-neutral-800 dark:text-neutral-100"
-										>{evaluation.parsed.modifier}</span
-									>
+									<Tag size={12} class="text-warning-icon" />
+									<span class="text-text-muted">Modifier</span>
+									<span class="font-medium text-text">{evaluation.parsed.modifier}</span>
 								</span>
 							{/if}
 							{#if evaluation.parsed.releaseGroup}
 								<span
-									class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+									class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 								>
-									<Users size={12} class="text-teal-500" />
-									<span class="text-neutral-500 dark:text-neutral-400">Group</span>
-									<span class="font-medium text-neutral-800 dark:text-neutral-100"
-										>{evaluation.parsed.releaseGroup}</span
-									>
+									<Users size={12} class="text-info-icon" />
+									<span class="text-text-muted">Group</span>
+									<span class="font-medium text-text">{evaluation.parsed.releaseGroup}</span>
 								</span>
 							{/if}
 							{#if evaluation.parsed.edition}
 								<span
-									class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+									class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 								>
-									<Bookmark size={12} class="text-orange-500" />
-									<span class="text-neutral-500 dark:text-neutral-400">Edition</span>
-									<span class="font-medium text-neutral-800 dark:text-neutral-100"
-										>{evaluation.parsed.edition}</span
-									>
+									<Bookmark size={12} class="text-warning-icon" />
+									<span class="text-text-muted">Edition</span>
+									<span class="font-medium text-text">{evaluation.parsed.edition}</span>
 								</span>
 							{/if}
 							{#if evaluation.parsed.languages.length > 0}
 								<span
-									class="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700/60 dark:bg-neutral-800/50"
+									class="inline-flex items-center gap-1.5 rounded-card border border-border bg-surface px-2 py-1"
 								>
-									<Earth size={12} class="text-emerald-500" />
-									<span class="text-neutral-500 dark:text-neutral-400">Languages</span>
-									<span class="font-medium text-neutral-800 dark:text-neutral-100"
-										>{evaluation.parsed.languages.join(', ')}</span
+									<Earth size={12} class="text-success-icon" />
+									<span class="text-text-muted">Languages</span>
+									<span class="font-medium text-text">{evaluation.parsed.languages.join(', ')}</span
 									>
-									<span class="text-[10px] text-neutral-400 dark:text-neutral-500"
+									<span class="text-[10px] text-text-subtle"
 										>({evaluation.parsed.languageSource})</span
 									>
 								</span>
@@ -339,12 +326,12 @@
 
 				<!-- Custom Formats -->
 				<div class="space-y-2 text-xs">
-					<div class="font-medium text-neutral-500 dark:text-neutral-400">Formats</div>
+					<div class="font-medium text-text-muted">Formats</div>
 					<div>
 						{#if !numericProfileId}
-							<span class="text-neutral-400 italic">Select a quality profile to see scores.</span>
+							<span class="text-text-subtle italic">Select a quality profile to see scores.</span>
 						{:else if matchingFormats.length === 0}
-							<span class="text-neutral-400 italic"
+							<span class="text-text-subtle italic"
 								>No custom formats matched with non-zero scores.</span
 							>
 						{:else}

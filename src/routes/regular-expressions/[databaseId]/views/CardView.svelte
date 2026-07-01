@@ -35,7 +35,7 @@
 							{expression.name}
 						</h3>
 						{#each expression.tags as tag}
-							<Label variant="info" size="sm" rounded="md">{tag.name}</Label>
+							<Label variant="info" size="sm" radius="md">{tag.name}</Label>
 						{/each}
 					</div>
 					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>

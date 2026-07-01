@@ -275,17 +275,15 @@
 	<div class="p-4 md:p-8">
 		<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 			<div>
-				<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">
-					General Settings
-				</h1>
-				<p class="mt-2 text-base text-neutral-600 md:mt-3 md:text-lg dark:text-neutral-400">
+				<h1 class="text-2xl font-bold text-text md:text-3xl">General Settings</h1>
+				<p class="mt-2 text-base text-text-soft md:mt-3 md:text-lg">
 					Configure general application settings and preferences
 				</p>
 			</div>
 			<Button
 				text={saving ? 'Saving...' : 'Save'}
 				icon={saving ? Loader2 : Save}
-				iconColor="text-blue-600 dark:text-blue-400"
+				iconColor="text-info-icon "
 				loading={saving}
 				disabled={saving || !$isDirty}
 				type="submit"
@@ -305,25 +303,25 @@
 					<div class="flex items-center gap-1" on:click|stopPropagation>
 						<Button
 							icon={CheckCircle}
-							iconColor="text-green-600 dark:text-green-400"
+							iconColor="text-success-icon "
 							size="xs"
 							on:click={() => alertStore.add('success', 'Success alert example.')}
 						/>
 						<Button
 							icon={XCircle}
-							iconColor="text-red-600 dark:text-red-400"
+							iconColor="text-danger-icon "
 							size="xs"
 							on:click={() => alertStore.add('error', 'Error alert example.')}
 						/>
 						<Button
 							icon={AlertTriangle}
-							iconColor="text-yellow-500 dark:text-yellow-400"
+							iconColor="text-warning-icon "
 							size="xs"
 							on:click={() => alertStore.add('warning', 'Warning alert example.')}
 						/>
 						<Button
 							icon={Info}
-							iconColor="text-blue-600 dark:text-blue-400"
+							iconColor="text-info-icon "
 							size="xs"
 							on:click={() => alertStore.add('info', 'Info alert example.')}
 						/>
@@ -332,9 +330,7 @@
 				<div class="px-6 py-4">
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
 						<div>
-							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-								Emoji Icons
-							</span>
+							<span class="mb-1 block text-sm font-medium text-text"> Emoji Icons </span>
 							<Toggle
 								label={uiNavIconStyle === 'emoji' ? 'Enabled' : 'Disabled'}
 								checked={uiNavIconStyle === 'emoji'}
@@ -347,9 +343,7 @@
 						</div>
 
 						<div class="xl:col-span-2">
-							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-								Alert Position
-							</span>
+							<span class="mb-1 block text-sm font-medium text-text"> Alert Position </span>
 							<DropdownSelect
 								value={uiAlertPosition}
 								options={alertPositionOptions}
@@ -363,10 +357,7 @@
 						</div>
 
 						<div class="xl:col-span-2">
-							<label
-								for="ui_alert_duration"
-								class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
-							>
+							<label for="ui_alert_duration" class="mb-1 block text-sm font-medium text-text">
 								Alert Duration (seconds)
 							</label>
 							<NumberInput
@@ -383,9 +374,7 @@
 						</div>
 
 						<div>
-							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-								Date Format
-							</span>
+							<span class="mb-1 block text-sm font-medium text-text"> Date Format </span>
 							<DropdownSelect
 								value={dateFormat}
 								options={dateFormatOptions}
@@ -400,9 +389,7 @@
 						</div>
 
 						<div>
-							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-								Sans Font
-							</span>
+							<span class="mb-1 block text-sm font-medium text-text"> Sans Font </span>
 							<DropdownSelect
 								value={uiFontSans}
 								options={[{ value: 'auto', label: 'Auto' }, ...$sansFontOptions]}
@@ -416,9 +403,7 @@
 						</div>
 
 						<div>
-							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-								Mono Font
-							</span>
+							<span class="mb-1 block text-sm font-medium text-text"> Mono Font </span>
 							<DropdownSelect
 								value={uiFontMono}
 								options={[{ value: 'auto', label: 'Auto' }, ...$monoFontOptions]}
@@ -488,9 +473,7 @@
 					class:xl:grid-cols-5={backupEnabled}
 				>
 					<div>
-						<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-							Automatic Backups
-						</span>
+						<span class="mb-1 block text-sm font-medium text-text"> Automatic Backups </span>
 						<Toggle
 							label={backupEnabled ? 'Enabled' : 'Disabled'}
 							checked={backupEnabled}
@@ -505,9 +488,7 @@
 
 					{#if backupEnabled}
 						<div class="xl:col-span-2">
-							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-								Schedule
-							</span>
+							<span class="mb-1 block text-sm font-medium text-text"> Schedule </span>
 							<DropdownSelect
 								value={backupSchedule}
 								options={backupScheduleOptions}
@@ -521,10 +502,7 @@
 						</div>
 
 						<div class="xl:col-span-2">
-							<label
-								for="backup_retention_days"
-								class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
-							>
+							<label for="backup_retention_days" class="mb-1 block text-sm font-medium text-text">
 								Retention Period (days)
 							</label>
 							<NumberInput
@@ -564,9 +542,7 @@
 						class:xl:grid-cols-7={logEnabled}
 					>
 						<div>
-							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-								Logging
-							</span>
+							<span class="mb-1 block text-sm font-medium text-text"> Logging </span>
 							<Toggle
 								label={logEnabled ? 'Enabled' : 'Disabled'}
 								checked={logEnabled}
@@ -581,9 +557,7 @@
 
 						{#if logEnabled}
 							<div>
-								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-									File Logging
-								</span>
+								<span class="mb-1 block text-sm font-medium text-text"> File Logging </span>
 								<Toggle
 									label={logFileLogging ? 'Enabled' : 'Disabled'}
 									checked={logFileLogging}
@@ -596,9 +570,7 @@
 							</div>
 
 							<div>
-								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-									Console Logging
-								</span>
+								<span class="mb-1 block text-sm font-medium text-text"> Console Logging </span>
 								<Toggle
 									label={logConsoleLogging ? 'Enabled' : 'Disabled'}
 									checked={logConsoleLogging}
@@ -611,9 +583,7 @@
 							</div>
 
 							<div class="xl:col-span-2">
-								<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-									Minimum Level
-								</span>
+								<span class="mb-1 block text-sm font-medium text-text"> Minimum Level </span>
 								<div class="font-mono">
 									<DropdownSelect
 										value={logMinLevel}
@@ -629,10 +599,7 @@
 							</div>
 
 							<div class="xl:col-span-2">
-								<label
-									for="log_retention_days"
-									class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50"
-								>
+								<label for="log_retention_days" class="mb-1 block text-sm font-medium text-text">
 									Retention Period (days)
 								</label>
 								<NumberInput

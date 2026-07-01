@@ -71,7 +71,7 @@
 >
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'seasonNumber'}
-			<span class="font-medium text-neutral-900 dark:text-neutral-100">
+			<span class="font-medium text-text">
 				{getSeasonLabel(row.seasonNumber)}
 			</span>
 		{:else if column.key === 'episodeFileCount'}
@@ -82,17 +82,15 @@
 				mode="compact"
 			/>
 		{:else if column.key === 'sizeOnDisk'}
-			<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300"
-				>{formatSize(row.sizeOnDisk)}</span
-			>
+			<span class="font-mono text-xs text-text-soft">{formatSize(row.sizeOnDisk)}</span>
 		{/if}
 	</svelte:fragment>
 
 	<svelte:fragment slot="expanded" let:row>
 		{#if loadingSeasons.has(row.seasonNumber)}
-			<div class="flex items-center gap-2 p-4 text-sm text-neutral-500 dark:text-neutral-400">
+			<div class="flex items-center gap-2 p-4 text-sm text-text-muted">
 				<div
-					class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
+					class="h-4 w-4 animate-spin rounded-pill border-2 border-border border-t-accent-solid"
 				></div>
 				Loading episodes...
 			</div>

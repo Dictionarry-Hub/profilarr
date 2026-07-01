@@ -29,21 +29,21 @@
 </script>
 
 <div class="space-y-1.5">
-	<h4 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+	<h4 class="text-sm font-semibold text-text">
 		{titleCase(field)}
 	</h4>
 	<dl class="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-xs">
 		<div class="flex items-baseline gap-1.5">
-			<dt class="text-neutral-500 dark:text-neutral-400">Original:</dt>
-			<dd class="font-mono text-neutral-900 dark:text-neutral-100">{formatValue(was)}</dd>
+			<dt class="text-text-muted">Original:</dt>
+			<dd class="font-mono text-text">{formatValue(was)}</dd>
 		</div>
 		<div class="flex items-baseline gap-1.5">
-			<dt class="text-neutral-500 dark:text-neutral-400">You Set:</dt>
-			<dd class="font-mono text-neutral-900 dark:text-neutral-100">{formatValue(you)}</dd>
+			<dt class="text-text-muted">You Set:</dt>
+			<dd class="font-mono text-text">{formatValue(you)}</dd>
 		</div>
 		<div class="flex items-baseline gap-1.5">
-			<dt class="text-neutral-500 dark:text-neutral-400">Upstream Set:</dt>
-			<dd class="font-mono text-neutral-900 dark:text-neutral-100">{formatValue(upstreamNow)}</dd>
+			<dt class="text-text-muted">Upstream Set:</dt>
+			<dd class="font-mono text-text">{formatValue(upstreamNow)}</dd>
 		</div>
 	</dl>
 </div>

@@ -76,12 +76,12 @@
 				variant: 'secondary',
 				label: row.propers_repacks
 			}}
-			<Label variant={config.variant} size="sm" rounded="md">{config.label}</Label>
+			<Label variant={config.variant} size="sm" radius="md">{config.label}</Label>
 		{:else if column.key === 'enable_media_info'}
 			{#if row.enable_media_info}
-				<Label variant="success" size="sm" rounded="md">Enabled</Label>
+				<Label variant="success" size="sm" radius="md">Enabled</Label>
 			{:else}
-				<Label variant="secondary" size="sm" rounded="md">Disabled</Label>
+				<Label variant="secondary" size="sm" radius="md">Disabled</Label>
 			{/if}
 		{/if}
 	</svelte:fragment>

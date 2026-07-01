@@ -42,19 +42,19 @@
 	/>
 {:else if column.key === 'title'}
 	<div class="flex items-center gap-3">
-		<div class="h-12 w-8 flex-shrink-0 overflow-hidden rounded bg-neutral-200 dark:bg-neutral-800">
+		<div class="h-12 w-8 flex-shrink-0 overflow-hidden rounded-control-sm bg-surface-hover">
 			{#if posterUrl}
 				<img src={posterUrl} alt="" loading="lazy" class="h-full w-full object-cover" />
 			{:else}
 				<div class="flex h-full w-full items-center justify-center">
-					<Tv size={12} class="text-neutral-400 dark:text-neutral-600" />
+					<Tv size={12} class="text-text-subtle " />
 				</div>
 			{/if}
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-50">{row.title}</div>
+			<div class="font-medium text-text">{row.title}</div>
 			{#if row.year}
-				<div class="text-xs text-neutral-500 dark:text-neutral-400">{row.year}</div>
+				<div class="text-xs text-text-muted">{row.year}</div>
 			{/if}
 		</div>
 	</div>
@@ -83,11 +83,7 @@
 		<Label variant="secondary" size="sm">{row.status ?? '-'}</Label>
 	{/if}
 {:else if column.key === 'sizeOnDisk'}
-	<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300"
-		>{formatSize(row.sizeOnDisk)}</span
-	>
+	<span class="font-mono text-xs text-text-soft">{formatSize(row.sizeOnDisk)}</span>
 {:else if column.key === 'dateAdded'}
-	<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300"
-		>{fmtDate(row.dateAdded)}</span
-	>
+	<span class="font-mono text-xs text-text-soft">{fmtDate(row.dateAdded)}</span>
 {/if}

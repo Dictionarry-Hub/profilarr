@@ -12,7 +12,7 @@
 		| 'neutral'
 		| `#${string}`
 		| `var(--${string})` = 'accent'; // accent, semantic colors, hex (#FFC230), or CSS var (var(--arr-radarr-color))
-	export let shape: 'square' | 'circle' | 'rounded' = 'rounded';
+	export let shape: 'square' | 'circle' | 'soft' = 'soft';
 	export let disabled: boolean = false;
 	export let variant: 'filled' | 'outline' = 'filled';
 	export let iconColor: string = '';
@@ -25,11 +25,11 @@
 	// Shape classes
 	const shapeClasses: Record<string, string> = {
 		square: 'rounded-none',
-		circle: 'rounded-full',
-		rounded: 'rounded-lg'
+		circle: 'rounded-pill',
+		soft: 'rounded-card'
 	};
 
-	$: shapeClass = shapeClasses[shape] || shapeClasses.rounded;
+	$: shapeClass = shapeClasses[shape] || shapeClasses.soft;
 	$: isCustomColor = color.startsWith('#') || color.startsWith('var(');
 	$: isAccent = color === 'accent';
 
@@ -43,18 +43,17 @@
 	const filledClasses = {
 		accent: 'border-accent-solid bg-accent-solid hover:brightness-110',
 		neutral: 'border-text bg-text hover:brightness-110',
-		green:
-			'border-green-600 bg-green-600 hover:brightness-110 dark:border-green-500 dark:bg-green-500',
-		red: 'border-red-600 bg-red-600 hover:brightness-110 dark:border-red-500 dark:bg-red-500',
-		blue: 'border-blue-600 bg-blue-600 hover:brightness-110 dark:border-blue-500 dark:bg-blue-500'
+		green: 'border-success-border bg-success-bg hover:brightness-110 ',
+		red: 'border-danger-border bg-danger-bg hover:brightness-110 ',
+		blue: 'border-info-border bg-info-bg hover:brightness-110 '
 	};
 
 	const outlineClasses = {
 		accent: 'border-accent-solid bg-surface hover:bg-surface-hover',
 		neutral: 'border-border bg-surface hover:bg-surface-hover',
-		green: 'border-green-600 bg-surface hover:bg-surface-hover dark:border-green-500',
-		red: 'border-red-600 bg-surface hover:bg-surface-hover dark:border-red-500',
-		blue: 'border-blue-600 bg-surface hover:bg-surface-hover dark:border-blue-500'
+		green: 'border-success-border bg-surface hover:bg-surface-hover ',
+		red: 'border-danger-border bg-surface hover:bg-surface-hover ',
+		blue: 'border-info-border bg-surface hover:bg-surface-hover '
 	};
 
 	const customFilledClass = 'hover:brightness-110';
@@ -82,15 +81,15 @@
 	const outlineIconClasses = {
 		accent: 'text-accent-solid',
 		neutral: 'text-text',
-		green: 'text-green-600 dark:text-green-400',
-		red: 'text-red-600 dark:text-red-400',
-		blue: 'text-blue-600 dark:text-blue-400'
+		green: 'text-success-icon ',
+		red: 'text-danger-icon ',
+		blue: 'text-info-icon '
 	};
 
 	$: outlineIconClass = isCustomColor
 		? 'text-current'
 		: outlineIconClasses[color as keyof typeof outlineIconClasses] || outlineIconClasses.accent;
-	$: resolvedIconClass = iconColor || (variant === 'filled' ? 'text-white' : outlineIconClass);
+	$: resolvedIconClass = iconColor || (variant === 'filled' ? 'text-on-accent' : outlineIconClass);
 
 	function handleClick(event: MouseEvent) {
 		if (stopPropagation) {

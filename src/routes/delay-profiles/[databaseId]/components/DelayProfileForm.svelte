@@ -144,8 +144,8 @@
 	<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 		<svelte:fragment slot="left">
 			<div>
-				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h2>
-				<p class="text-sm text-neutral-600 dark:text-neutral-400">{description}</p>
+				<h2 class="text-lg font-semibold text-text">{title}</h2>
+				<p class="text-sm text-text-soft">{description}</p>
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
@@ -154,7 +154,7 @@
 					<Button
 						disabled={deleting}
 						icon={deleting ? Loader2 : Trash2}
-						iconColor="text-red-600 dark:text-red-400"
+						iconColor="text-danger-icon "
 						text={deleting ? 'Deleting...' : 'Delete'}
 						on:click={handleDeleteClick}
 					/>
@@ -163,7 +163,7 @@
 				<Button
 					disabled={saving || !isValid || !$isDirty}
 					icon={saving ? Loader2 : Save}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					text={saving ? (mode === 'create' ? 'Creating...' : 'Saving...') : submitButtonText}
 					on:click={handleSaveClick}
 				/>
@@ -239,9 +239,7 @@
 
 			<!-- Protocol Preference -->
 			<div class="space-y-2" data-onboarding="delay-general-protocol">
-				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-					Protocol Preference
-				</h3>
+				<h3 class="text-sm font-semibold text-text">Protocol Preference</h3>
 				<DropdownSelect
 					value={formData.preferredProtocol}
 					options={protocolOptions}
@@ -249,7 +247,7 @@
 					on:change={(e) => updateField('preferredProtocol', e.detail as PreferredProtocol)}
 				/>
 				{#if protocolDescription}
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
+					<p class="text-xs text-text-muted">
 						{protocolDescription}
 					</p>
 				{/if}
@@ -257,16 +255,13 @@
 
 			<!-- Delays -->
 			<div data-onboarding="delay-general-delays">
-				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Delays</h3>
-				<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<h3 class="text-sm font-semibold text-text">Delays</h3>
+				<p class="mt-1 text-xs text-text-muted">
 					Time to wait before downloading from each source. Set to 0 for no delay.
 				</p>
 				<div class="mt-3 grid gap-4 sm:grid-cols-2">
 					<div>
-						<label
-							for="usenet-delay"
-							class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-						>
+						<label for="usenet-delay" class="block text-sm font-medium text-text-soft">
 							Usenet Delay (minutes)
 						</label>
 						<div class="mt-1">
@@ -283,10 +278,7 @@
 					</div>
 
 					<div>
-						<label
-							for="torrent-delay"
-							class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-						>
+						<label for="torrent-delay" class="block text-sm font-medium text-text-soft">
 							Torrent Delay (minutes)
 						</label>
 						<div class="mt-1">
@@ -306,12 +298,8 @@
 
 			<!-- Bypass Conditions -->
 			<div data-onboarding="delay-general-bypass">
-				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-					Bypass Conditions
-				</h3>
-				<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-					Skip the delay when these conditions are met.
-				</p>
+				<h3 class="text-sm font-semibold text-text">Bypass Conditions</h3>
+				<p class="mt-1 text-xs text-text-muted">Skip the delay when these conditions are met.</p>
 				<div class="mt-3 space-y-3">
 					<div>
 						<Toggle
@@ -321,7 +309,7 @@
 							on:change={() =>
 								updateField('bypassIfHighestQuality', !formData.bypassIfHighestQuality)}
 						/>
-						<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
+						<p class="mt-1 px-3 text-xs text-text-muted">
 							Skip delay when release is already the highest quality in profile
 						</p>
 					</div>
@@ -344,7 +332,7 @@
 								font="mono"
 							/>
 						</div>
-						<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
+						<p class="mt-1 px-3 text-xs text-text-muted">
 							Skip delay when release exceeds minimum score
 						</p>
 					</div>

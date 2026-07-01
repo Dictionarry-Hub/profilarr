@@ -46,14 +46,14 @@
 >
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'episodeNumber'}
-			<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+			<span class="font-mono text-xs text-text-muted">
 				{row.episodeNumber}
 			</span>
 		{:else if column.key === 'title'}
 			<div>
-				<span class="text-sm text-neutral-900 dark:text-neutral-100">{row.title}</span>
+				<span class="text-sm text-text">{row.title}</span>
 				{#if row.size}
-					<span class="ml-2 font-mono text-xs text-neutral-400">{formatSize(row.size)}</span>
+					<span class="ml-2 font-mono text-xs text-text-subtle">{formatSize(row.size)}</span>
 				{/if}
 			</div>
 		{:else if column.key === 'qualityName'}
@@ -73,9 +73,7 @@
 	<svelte:fragment slot="expanded" let:row>
 		<div class="flex flex-col gap-2 px-4 py-2">
 			{#if row.fileName}
-				<code class="font-mono text-xs break-all text-neutral-600 dark:text-neutral-400"
-					>{row.fileName}</code
-				>
+				<code class="font-mono text-xs break-all text-text-soft">{row.fileName}</code>
 			{/if}
 
 			{#if row.scoreBreakdown.length > 0}
@@ -85,7 +83,7 @@
 					{/each}
 				</div>
 			{:else}
-				<div class="text-xs text-neutral-500 dark:text-neutral-400">No custom formats matched</div>
+				<div class="text-xs text-text-muted">No custom formats matched</div>
 			{/if}
 		</div>
 	</svelte:fragment>

@@ -54,12 +54,12 @@
 
 	// Level colors matching arr log levels
 	const levelColors: Record<string, string> = {
-		Trace: 'text-neutral-500 dark:text-neutral-500',
-		Debug: 'text-cyan-600 dark:text-cyan-400',
-		Info: 'text-green-600 dark:text-green-400',
-		Warn: 'text-yellow-600 dark:text-yellow-400',
-		Error: 'text-red-600 dark:text-red-400',
-		Fatal: 'text-red-800 dark:text-red-300'
+		Trace: 'text-text-muted ',
+		Debug: 'text-info-icon ',
+		Info: 'text-success-icon ',
+		Warn: 'text-warning-icon ',
+		Error: 'text-danger-icon ',
+		Fatal: 'text-danger-text '
 	};
 
 	// Table columns
@@ -70,7 +70,7 @@
 			width: '180px',
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
-				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${formatDateTime(row.time, $serverTimezone, $dateFormat)}</span>`
+				html: `<span class="font-mono text-xs text-text-soft ">${formatDateTime(row.time, $serverTimezone, $dateFormat)}</span>`
 			})
 		},
 		{
@@ -80,7 +80,7 @@
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
 				html: `<span class="font-semibold ${
-					levelColors[normalizeLevel(row.level)] || 'text-neutral-600 dark:text-neutral-400'
+					levelColors[normalizeLevel(row.level)] || 'text-text-soft '
 				}">${normalizeLevel(row.level)}</span>`
 			})
 		},
@@ -90,7 +90,7 @@
 			width: '200px',
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
-				html: `<span class="font-mono text-xs text-neutral-500 dark:text-neutral-500">${row.logger}</span>`
+				html: `<span class="font-mono text-xs text-text-muted ">${row.logger}</span>`
 			})
 		},
 		{
@@ -182,10 +182,7 @@
 		<!-- Refresh -->
 		<Tooltip text="Refresh logs">
 			<ActionButton on:click={refreshLogs}>
-				<RefreshCw
-					size={20}
-					class="text-neutral-700 dark:text-neutral-300 {isRefreshing ? 'animate-spin' : ''}"
-				/>
+				<RefreshCw size={20} class="text-text-soft {isRefreshing ? 'animate-spin' : ''}" />
 			</ActionButton>
 		</Tooltip>
 
@@ -200,7 +197,7 @@
 							selected={selectedLevel === level}
 							checkColor="blue"
 							labelClass={`font-mono font-medium ${
-								level === 'ALL' ? 'text-neutral-600 dark:text-neutral-400' : levelColors[level]
+								level === 'ALL' ? 'text-text-soft ' : levelColors[level]
 							}`}
 							labelTransform="uppercase"
 							on:click={() => changeLevel(level)}
@@ -215,10 +212,7 @@
 			<svelte:fragment slot="dropdown" let:dropdownPosition>
 				<Dropdown position={dropdownPosition} minWidth="10rem">
 					<div class="p-3">
-						<label
-							for="pageSize"
-							class="mb-2 block text-xs font-medium text-neutral-600 dark:text-neutral-400"
-						>
+						<label for="pageSize" class="mb-2 block text-xs font-medium text-text-soft">
 							Rows per page
 						</label>
 						<NumberInput
@@ -236,9 +230,7 @@
 	</ActionsBar>
 
 	<!-- Stats -->
-	<div
-		class="mt-6 mb-4 flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400"
-	>
+	<div class="mt-6 mb-4 flex items-center justify-between text-sm text-text-soft">
 		<span>
 			Showing {filteredLogs.length} of {data.logs.totalRecords} logs
 			{#if selectedLevel !== 'ALL'}

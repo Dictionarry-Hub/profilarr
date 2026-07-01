@@ -8,9 +8,7 @@
 </script>
 
 <div class="space-y-4">
-	<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-		Webhook Configuration
-	</h3>
+	<h3 class="text-sm font-semibold text-text">Webhook Configuration</h3>
 
 	<!-- Webhook URL -->
 	<FormInput

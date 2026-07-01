@@ -107,17 +107,15 @@
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
 			<div>
-				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Test Cases</h2>
-				<p class="text-sm text-neutral-600 dark:text-neutral-400">
-					Test release titles against this custom format
-				</p>
+				<h2 class="text-lg font-semibold text-text">Test Cases</h2>
+				<p class="text-sm text-text-soft">Test release titles against this custom format</p>
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<Button
 				text="Add Test"
 				icon={Plus}
-				iconColor="text-blue-600 dark:text-blue-400"
+				iconColor="text-info-icon "
 				variant="secondary"
 				onboarding="cf-testing-add"
 				on:click={handleAddTest}
@@ -129,14 +127,12 @@
 		<!-- Parser Warning -->
 		{#if !data.parserAvailable}
 			<div
-				class="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20"
+				class="flex items-center gap-3 rounded-card border border-warning-border bg-warning-bg p-4"
 			>
-				<AlertTriangle size={20} class="text-amber-600 dark:text-amber-400" />
+				<AlertTriangle size={20} class="text-warning-icon " />
 				<div>
-					<p class="text-sm font-medium text-amber-800 dark:text-amber-200">
-						Parser service unavailable
-					</p>
-					<p class="text-xs text-amber-600 dark:text-amber-400">
+					<p class="text-sm font-medium text-warning-text">Parser service unavailable</p>
+					<p class="text-xs text-warning-icon">
 						Test results cannot be evaluated. Start the parser microservice to see pass/fail status.
 					</p>
 				</div>
@@ -145,10 +141,8 @@
 
 		<!-- Tests List -->
 		{#if data.tests.length === 0}
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-			>
-				<p class="text-neutral-600 dark:text-neutral-400">
+			<div class="rounded-card border border-border bg-surface p-8 text-center">
+				<p class="text-text-soft">
 					No test cases yet. Add a test to verify this custom format works correctly.
 				</p>
 			</div>
@@ -165,48 +159,42 @@
 					{#if column.key === 'title'}
 						<code class="font-mono text-sm">{row.title}</code>
 						{#if row.description}
-							<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">{row.description}</p>
+							<p class="mt-1 text-xs text-text-muted">{row.description}</p>
 						{/if}
 					{:else if column.key === 'should_match'}
 						{#if row.should_match}
 							<span
-								class="inline-flex items-center gap-1 rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+								class="inline-flex items-center gap-1 rounded-control-sm bg-success-bg px-2 py-0.5 text-xs font-medium text-success-text"
 								>Should Match</span
 							>
 						{:else}
 							<span
-								class="inline-flex items-center gap-1 rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-200"
+								class="inline-flex items-center gap-1 rounded-control-sm bg-danger-bg px-2 py-0.5 text-xs font-medium text-danger-text"
 								>Shouldn't Match</span
 							>
 						{/if}
 					{:else if column.key === 'type'}
 						<span
-							class="inline-flex items-center gap-1 rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+							class="inline-flex items-center gap-1 rounded-control-sm bg-surface-hover px-2 py-0.5 text-xs font-medium text-text-soft"
 							>{row.type}</span
 						>
 					{:else if column.key === 'result'}
 						{#if row.result === 'pass'}
 							<div class="flex items-center justify-center">
-								<div
-									class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900"
-								>
-									<Check size={14} class="text-emerald-600 dark:text-emerald-400" />
+								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-success-bg">
+									<Check size={14} class="text-success-icon " />
 								</div>
 							</div>
 						{:else if row.result === 'fail'}
 							<div class="flex items-center justify-center">
-								<div
-									class="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900"
-								>
-									<X size={14} class="text-red-600 dark:text-red-400" />
+								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-danger-bg">
+									<X size={14} class="text-danger-icon " />
 								</div>
 							</div>
 						{:else}
 							<div class="flex items-center justify-center">
-								<div
-									class="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900"
-								>
-									<span class="text-sm font-medium text-amber-600 dark:text-amber-400">?</span>
+								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-warning-bg">
+									<span class="text-sm font-medium text-warning-icon">?</span>
 								</div>
 							</div>
 						{/if}
@@ -245,56 +233,50 @@
 
 					<div class="px-4 py-3">
 						{#if row.conditions.length > 0}
-							<div
-								class="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800"
-							>
+							<div class="overflow-x-auto rounded-card border border-border">
 								<!-- lint-disable-next-line no-raw-ui -- rowspan grouping not supported by Table component -->
 								<table class="w-full text-sm">
-									<thead
-										class="border-b border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-800"
-									>
+									<thead class="border-b border-border bg-surface-muted">
 										<tr>
 											<th
-												class="px-3 py-2 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
+												class="px-3 py-2 text-left text-xs font-medium tracking-wider text-text-soft uppercase"
 												>Type</th
 											>
 											<th
-												class="px-3 py-2 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
+												class="px-3 py-2 text-left text-xs font-medium tracking-wider text-text-soft uppercase"
 												>Condition</th
 											>
 											<th
-												class="px-3 py-2 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
+												class="px-3 py-2 text-left text-xs font-medium tracking-wider text-text-soft uppercase"
 												>Expected</th
 											>
 											<th
-												class="px-3 py-2 text-left text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
+												class="px-3 py-2 text-left text-xs font-medium tracking-wider text-text-soft uppercase"
 												>Actual</th
 											>
 											<th
-												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
+												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-text-soft uppercase"
 												>Pass</th
 											>
 											<th
-												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
+												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-text-soft uppercase"
 												>Type Pass</th
 											>
 											<th
-												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
+												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-text-soft uppercase"
 												>Expected</th
 											>
 											<th
-												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
+												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-text-soft uppercase"
 												>Actual</th
 											>
 											<th
-												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-neutral-700 uppercase dark:text-neutral-300"
+												class="px-3 py-2 text-center text-xs font-medium tracking-wider text-text-soft uppercase"
 												>Result</th
 											>
 										</tr>
 									</thead>
-									<tbody
-										class="divide-y divide-neutral-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900"
-									>
+									<tbody class="divide-y divide-border bg-surface">
 										{#each conditionTypes as conditionType, typeIndex}
 											{@const conditions = groupedConditions[conditionType]}
 											{#each conditions as condition, condIndex}
@@ -302,12 +284,12 @@
 													{#if condIndex === 0}
 														<td
 															rowspan={conditions.length}
-															class="border-r border-neutral-200 px-3 py-2 align-top font-medium text-neutral-900 dark:border-neutral-800 dark:text-neutral-100"
+															class="border-r border-border px-3 py-2 align-top font-medium text-text"
 														>
 															{conditionTypeLabels[conditionType] || conditionType}
 														</td>
 													{/if}
-													<td class="px-3 py-2 text-neutral-700 dark:text-neutral-300">
+													<td class="px-3 py-2 text-text-soft">
 														<div class="flex items-center gap-2">
 															<span>{condition.conditionName}</span>
 															{#if condition.required}
@@ -318,13 +300,13 @@
 														</div>
 													</td>
 													<td
-														class="max-w-48 truncate px-3 py-2 font-mono text-xs text-neutral-600 dark:text-neutral-400"
+														class="max-w-48 truncate px-3 py-2 font-mono text-xs text-text-soft"
 														title={condition.expected}
 													>
 														{condition.expected}
 													</td>
 													<td
-														class="max-w-48 truncate px-3 py-2 font-mono text-xs text-neutral-600 dark:text-neutral-400"
+														class="max-w-48 truncate px-3 py-2 font-mono text-xs text-text-soft"
 														title={condition.actual}
 													>
 														{condition.actual}
@@ -332,15 +314,15 @@
 													<td class="px-3 py-2 text-center">
 														{#if condition.passes}
 															<div
-																class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900"
+																class="inline-flex h-5 w-5 items-center justify-center rounded-pill bg-success-bg"
 															>
-																<Check size={12} class="text-emerald-600 dark:text-emerald-400" />
+																<Check size={12} class="text-success-icon " />
 															</div>
 														{:else}
 															<div
-																class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-100 dark:bg-red-900"
+																class="inline-flex h-5 w-5 items-center justify-center rounded-pill bg-danger-bg"
 															>
-																<X size={12} class="text-red-600 dark:text-red-400" />
+																<X size={12} class="text-danger-icon " />
 															</div>
 														{/if}
 													</td>
@@ -357,19 +339,19 @@
 														{@const typePass = requiredPass && optionalPass}
 														<td
 															rowspan={conditions.length}
-															class="border-l border-neutral-200 px-3 py-2 text-center align-middle dark:border-neutral-800"
+															class="border-l border-border px-3 py-2 text-center align-middle"
 														>
 															{#if typePass}
 																<div
-																	class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900"
+																	class="inline-flex h-6 w-6 items-center justify-center rounded-pill bg-success-bg"
 																>
-																	<Check size={14} class="text-emerald-600 dark:text-emerald-400" />
+																	<Check size={14} class="text-success-icon " />
 																</div>
 															{:else}
 																<div
-																	class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900"
+																	class="inline-flex h-6 w-6 items-center justify-center rounded-pill bg-danger-bg"
 																>
-																	<X size={14} class="text-red-600 dark:text-red-400" />
+																	<X size={14} class="text-danger-icon " />
 																</div>
 															{/if}
 														</td>
@@ -377,98 +359,81 @@
 													{#if typeIndex === 0 && condIndex === 0}
 														<td
 															rowspan={row.conditions.length}
-															class="border-l border-neutral-200 px-3 py-2 text-center align-middle dark:border-neutral-800"
+															class="border-l border-border px-3 py-2 text-center align-middle"
 														>
 															{#if row.should_match}
 																<div
-																	class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900"
+																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-success-bg"
 																>
-																	<Check size={24} class="text-emerald-600 dark:text-emerald-400" />
+																	<Check size={24} class="text-success-icon " />
 																</div>
-																<div
-																	class="mt-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
-																>
+																<div class="mt-1 text-[10px] font-medium text-success-icon">
 																	MATCH
 																</div>
 															{:else}
 																<div
-																	class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900"
+																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-danger-bg"
 																>
-																	<X size={24} class="text-red-600 dark:text-red-400" />
+																	<X size={24} class="text-danger-icon " />
 																</div>
-																<div
-																	class="mt-1 text-[10px] font-medium text-red-600 dark:text-red-400"
-																>
+																<div class="mt-1 text-[10px] font-medium text-danger-icon">
 																	NO MATCH
 																</div>
 															{/if}
 														</td>
 														<td
 															rowspan={row.conditions.length}
-															class="border-l border-neutral-200 px-3 py-2 text-center align-middle dark:border-neutral-800"
+															class="border-l border-border px-3 py-2 text-center align-middle"
 														>
 															{#if row.actual_match}
 																<div
-																	class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900"
+																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-success-bg"
 																>
-																	<Check size={24} class="text-emerald-600 dark:text-emerald-400" />
+																	<Check size={24} class="text-success-icon " />
 																</div>
-																<div
-																	class="mt-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
-																>
+																<div class="mt-1 text-[10px] font-medium text-success-icon">
 																	MATCH
 																</div>
 															{:else}
 																<div
-																	class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900"
+																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-danger-bg"
 																>
-																	<X size={24} class="text-red-600 dark:text-red-400" />
+																	<X size={24} class="text-danger-icon " />
 																</div>
-																<div
-																	class="mt-1 text-[10px] font-medium text-red-600 dark:text-red-400"
-																>
+																<div class="mt-1 text-[10px] font-medium text-danger-icon">
 																	NO MATCH
 																</div>
 															{/if}
 														</td>
 														<td
 															rowspan={row.conditions.length}
-															class="border-l border-neutral-200 px-3 py-2 text-center align-middle dark:border-neutral-800"
+															class="border-l border-border px-3 py-2 text-center align-middle"
 														>
 															{#if row.result === 'pass'}
 																<div
-																	class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900"
+																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-success-bg"
 																>
-																	<Check size={24} class="text-emerald-600 dark:text-emerald-400" />
+																	<Check size={24} class="text-success-icon " />
 																</div>
-																<div
-																	class="mt-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
-																>
+																<div class="mt-1 text-[10px] font-medium text-success-icon">
 																	PASS
 																</div>
 															{:else if row.result === 'fail'}
 																<div
-																	class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900"
+																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-danger-bg"
 																>
-																	<X size={24} class="text-red-600 dark:text-red-400" />
+																	<X size={24} class="text-danger-icon " />
 																</div>
-																<div
-																	class="mt-1 text-[10px] font-medium text-red-600 dark:text-red-400"
-																>
+																<div class="mt-1 text-[10px] font-medium text-danger-icon">
 																	FAIL
 																</div>
 															{:else}
 																<div
-																	class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900"
+																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-warning-bg"
 																>
-																	<span
-																		class="text-lg font-medium text-amber-600 dark:text-amber-400"
-																		>?</span
-																	>
+																	<span class="text-lg font-medium text-warning-icon">?</span>
 																</div>
-																<div
-																	class="mt-1 text-[10px] font-medium text-amber-600 dark:text-amber-400"
-																>
+																<div class="mt-1 text-[10px] font-medium text-warning-icon">
 																	UNKNOWN
 																</div>
 															{/if}
@@ -485,26 +450,25 @@
 							{#if row.parsed}
 								<details class="mt-4">
 									<summary
-										class="cursor-pointer text-xs font-semibold tracking-wider text-neutral-500 uppercase hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
+										class="cursor-pointer text-xs font-semibold tracking-wider text-text-muted uppercase hover:text-text-soft"
 									>
 										Parsed Values
 									</summary>
 									<div class="mt-2 flex flex-wrap gap-2">
 										<div class="flex items-center gap-1.5">
-											<span class="text-xs text-neutral-500 dark:text-neutral-400">Source:</span>
+											<span class="text-xs text-text-muted">Source:</span>
 											<Badge variant="neutral" size="md">{row.parsed.source}</Badge>
 										</div>
 										<div class="flex items-center gap-1.5">
-											<span class="text-xs text-neutral-500 dark:text-neutral-400">Resolution:</span
-											>
+											<span class="text-xs text-text-muted">Resolution:</span>
 											<Badge variant="neutral" size="md">{row.parsed.resolution}</Badge>
 										</div>
 										<div class="flex items-center gap-1.5">
-											<span class="text-xs text-neutral-500 dark:text-neutral-400">Modifier:</span>
+											<span class="text-xs text-text-muted">Modifier:</span>
 											<Badge variant="neutral" size="md">{row.parsed.modifier}</Badge>
 										</div>
 										<div class="flex items-center gap-1.5">
-											<span class="text-xs text-neutral-500 dark:text-neutral-400">Languages:</span>
+											<span class="text-xs text-text-muted">Languages:</span>
 											<Badge variant="neutral" size="md"
 												>{row.parsed.languages.length > 0
 													? row.parsed.languages.join(', ')
@@ -513,29 +477,25 @@
 										</div>
 										{#if row.parsed.releaseGroup}
 											<div class="flex items-center gap-1.5">
-												<span class="text-xs text-neutral-500 dark:text-neutral-400"
-													>Release Group:</span
-												>
+												<span class="text-xs text-text-muted">Release Group:</span>
 												<Badge variant="neutral" size="md">{row.parsed.releaseGroup}</Badge>
 											</div>
 										{/if}
 										{#if row.parsed.year}
 											<div class="flex items-center gap-1.5">
-												<span class="text-xs text-neutral-500 dark:text-neutral-400">Year:</span>
+												<span class="text-xs text-text-muted">Year:</span>
 												<Badge variant="neutral" size="md">{row.parsed.year}</Badge>
 											</div>
 										{/if}
 										{#if row.parsed.edition}
 											<div class="flex items-center gap-1.5">
-												<span class="text-xs text-neutral-500 dark:text-neutral-400">Edition:</span>
+												<span class="text-xs text-text-muted">Edition:</span>
 												<Badge variant="neutral" size="md">{row.parsed.edition}</Badge>
 											</div>
 										{/if}
 										{#if row.parsed.releaseType}
 											<div class="flex items-center gap-1.5">
-												<span class="text-xs text-neutral-500 dark:text-neutral-400"
-													>Release Type:</span
-												>
+												<span class="text-xs text-text-muted">Release Type:</span>
 												<Badge variant="neutral" size="md">{row.parsed.releaseType}</Badge>
 											</div>
 										{/if}
@@ -543,7 +503,7 @@
 								</details>
 							{/if}
 						{:else if !row.parsed}
-							<div class="text-sm text-neutral-500 dark:text-neutral-400">
+							<div class="text-sm text-text-muted">
 								Parser unavailable - unable to evaluate conditions
 							</div>
 						{/if}
@@ -557,7 +517,7 @@
 							title="Edit test case"
 							ariaLabel="Edit test case"
 							variant="secondary"
-							iconColor="text-accent-600 dark:text-accent-400"
+							iconColor="text-accent-solid"
 							size="xs"
 							on:click={() => {
 								if (readOnly) {
@@ -579,7 +539,7 @@
 								title="Delete test case"
 								ariaLabel="Delete test case"
 								variant="secondary"
-								iconColor="text-red-600 dark:text-red-400"
+								iconColor="text-danger-icon "
 								size="xs"
 								on:click={(e) => {
 									if (readOnly) {

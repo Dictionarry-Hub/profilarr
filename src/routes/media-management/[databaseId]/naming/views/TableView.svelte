@@ -58,9 +58,9 @@
 			</div>
 		{:else if column.key === 'rename'}
 			{#if row.rename}
-				<Label variant="success" size="sm" rounded="md">Enabled</Label>
+				<Label variant="success" size="sm" radius="md">Enabled</Label>
 			{:else}
-				<Label variant="secondary" size="sm" rounded="md">Disabled</Label>
+				<Label variant="secondary" size="sm" radius="md">Disabled</Label>
 			{/if}
 		{/if}
 	</svelte:fragment>

@@ -335,7 +335,7 @@
 <div class="mt-6 space-y-4">
 	{#if filteredGroups.length === 0}
 		<div
-			class="rounded-lg border border-neutral-200 bg-white p-8 text-center text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
+			class="rounded-card border border-border bg-surface p-8 text-center text-sm text-text-soft"
 		>
 			No conflicts detected
 		</div>
@@ -349,28 +349,28 @@
 				open
 			>
 				<svelte:fragment slot="header-right">
-					<Label variant={entityVariant(group.entity)} size="sm" rounded="md">
+					<Label variant={entityVariant(group.entity)} size="sm" radius="md">
 						{entityLabel(group.entity)}
 					</Label>
 				</svelte:fragment>
-				<div class="divide-y divide-neutral-200 dark:divide-neutral-800">
+				<div class="divide-y divide-border">
 					{#each group.conflicts as row (row.opId)}
 						<div
 							class="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-start md:justify-between"
 						>
 							<div class="flex-1 space-y-3">
 								<div class="flex flex-wrap items-center gap-2 text-xs">
-									<span class="font-mono text-neutral-500 dark:text-neutral-400">#{row.opId}</span>
-									<Label variant={reasonVariant(row.conflictReason)} size="sm" rounded="md">
+									<span class="font-mono text-text-muted">#{row.opId}</span>
+									<Label variant={reasonVariant(row.conflictReason)} size="sm" radius="md">
 										{reasonLabel(row.conflictReason)}
 									</Label>
 								</div>
 								{#if row.complex}
-									<p class="text-xs text-neutral-500 dark:text-neutral-400">
+									<p class="text-xs text-text-muted">
 										Complex change &middot; {row.summary ?? row.title}
 									</p>
 								{:else if row.fields.length === 0}
-									<p class="text-xs text-neutral-500 dark:text-neutral-400">
+									<p class="text-xs text-text-muted">
 										{row.summary ?? row.title}
 									</p>
 								{:else}
@@ -397,7 +397,7 @@
 										icon={HeartHandshake}
 										text="Align"
 										variant="secondary"
-										iconColor="text-emerald-600 dark:text-emerald-400"
+										iconColor="text-success-icon "
 										size="sm"
 										type="submit"
 									/>
@@ -415,7 +415,7 @@
 										icon={HandMetal}
 										text="Override"
 										variant="secondary"
-										iconColor="text-accent-600 dark:text-accent-400"
+										iconColor="text-accent-solid"
 										size="sm"
 										type="submit"
 									/>
@@ -430,14 +430,14 @@
 </div>
 
 <InfoModal bind:open={showInfoModal} header="Conflict Actions">
-	<div class="space-y-4 text-sm text-neutral-700 dark:text-neutral-300">
+	<div class="space-y-4 text-sm text-text-soft">
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Align</h3>
+			<h3 class="mb-2 font-semibold text-text">Align</h3>
 			<p>Align accepts the database version and discards your local change for this conflict.</p>
 		</section>
 
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Override</h3>
+			<h3 class="mb-2 font-semibold text-text">Override</h3>
 			<p>Override keeps your local change and reapplies it on top of the new version.</p>
 		</section>
 	</div>

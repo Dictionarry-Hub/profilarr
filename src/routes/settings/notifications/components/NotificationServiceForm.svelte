@@ -126,8 +126,8 @@
 	>
 		<svelte:fragment slot="left">
 			<div>
-				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h2>
-				<p class="text-sm text-neutral-600 dark:text-neutral-400">{description}</p>
+				<h2 class="text-lg font-semibold text-text">{title}</h2>
+				<p class="text-sm text-text-soft">{description}</p>
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
@@ -136,7 +136,7 @@
 				<Button
 					text={saving ? 'Saving...' : submitText}
 					icon={mode === 'create' ? Plus : Save}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					disabled={saving || !serviceName}
 					type="submit"
 				/>
@@ -152,10 +152,8 @@
 		<!-- Service Type + Service Name -->
 		<div class="grid grid-cols-8 gap-4">
 			<div class="col-span-2 space-y-2">
-				<span class="block text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-					Service Type
-				</span>
-				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+				<span class="block text-sm font-semibold text-text"> Service Type </span>
+				<p class="text-xs text-text-muted">
 					{#if mode === 'edit'}
 						Type cannot be changed after creation
 					{:else}
@@ -205,10 +203,8 @@
 		<div class="space-y-4">
 			<div class="flex items-start justify-between">
 				<div>
-					<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-						Notification Types
-					</h3>
-					<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+					<h3 class="text-sm font-semibold text-text">Notification Types</h3>
+					<p class="mt-1 text-xs text-text-muted">
 						Select which types of notifications should be sent to this service
 					</p>
 				</div>
@@ -216,7 +212,7 @@
 					<Button
 						text="All"
 						icon={ListChecks}
-						iconColor="text-blue-500 dark:text-blue-400"
+						iconColor="text-info-icon "
 						size="sm"
 						variant="secondary"
 						on:click={() => enableByStatus('all')}
@@ -224,7 +220,7 @@
 					<Button
 						text="Success"
 						icon={CheckCircle}
-						iconColor="text-green-500 dark:text-green-400"
+						iconColor="text-success-icon "
 						size="sm"
 						variant="secondary"
 						on:click={() => enableByStatus('success')}
@@ -232,7 +228,7 @@
 					<Button
 						text="Failed"
 						icon={XCircle}
-						iconColor="text-red-500 dark:text-red-400"
+						iconColor="text-danger-icon "
 						size="sm"
 						variant="secondary"
 						on:click={() => enableByStatus('failed')}
@@ -251,9 +247,7 @@
 			>
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'category'}
-						<span
-							class="text-xs font-semibold tracking-wide text-neutral-500 uppercase dark:text-neutral-400"
-						>
+						<span class="text-xs font-semibold tracking-wide text-text-muted uppercase">
 							{row.category}
 						</span>
 					{/if}

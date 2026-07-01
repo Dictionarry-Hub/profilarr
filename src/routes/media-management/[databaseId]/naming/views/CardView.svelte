@@ -67,19 +67,19 @@
 						<div class="relative h-6 w-6 flex-shrink-0">
 							{#if !loadedImages.has(config.name)}
 								<div
-									class="absolute inset-0 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"
+									class="absolute inset-0 animate-pulse rounded-control-sm bg-surface-hover"
 								></div>
 							{/if}
 							<img
 								src={logos[config.arr_type]}
 								alt="{config.arr_type} logo"
-								class="h-6 w-6 rounded {loadedImages.has(config.name)
+								class="h-6 w-6 rounded-control-sm {loadedImages.has(config.name)
 									? 'opacity-100'
 									: 'opacity-0'}"
 								on:load={() => handleImageLoad(config.name)}
 							/>
 						</div>
-						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						<h3 class="truncate text-sm font-semibold text-text">
 							{config.name}
 						</h3>
 					</div>
@@ -107,37 +107,37 @@
 
 			<div class="space-y-1">
 				<div class="flex items-center justify-between text-xs">
-					<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+					<span class="flex items-center gap-1.5 text-text-muted">
 						<Pencil size={11} />Rename
 					</span>
-					<span class="font-mono text-neutral-900 dark:text-neutral-100">
+					<span class="font-mono text-text">
 						{config.rename ? '✓' : '✗'}
 					</span>
 				</div>
 				<div class="flex items-center justify-between text-xs">
-					<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+					<span class="flex items-center gap-1.5 text-text-muted">
 						<Ban size={11} />Illegal characters
 					</span>
-					<span class="font-mono text-neutral-900 dark:text-neutral-100">
+					<span class="font-mono text-text">
 						{config.replace_illegal_characters ? '✓' : '✗'}
 					</span>
 				</div>
 				{#if config.replace_illegal_characters}
 					<div class="flex items-center justify-between gap-2 text-xs">
-						<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+						<span class="flex items-center gap-1.5 text-text-muted">
 							<Replace size={11} />Colon replacement
 						</span>
-						<span class="truncate font-mono text-neutral-900 dark:text-neutral-100">
+						<span class="truncate font-mono text-text">
 							{formatColonReplacement(config.colon_replacement_format)}
 						</span>
 					</div>
 				{/if}
 				{#if config.arr_type === 'sonarr' && config.multi_episode_style !== null}
 					<div class="flex items-center justify-between gap-2 text-xs">
-						<span class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+						<span class="flex items-center gap-1.5 text-text-muted">
 							<List size={11} />Multi-episode
 						</span>
-						<span class="truncate font-mono text-neutral-900 dark:text-neutral-100">
+						<span class="truncate font-mono text-text">
 							{getMultiEpisodeStyleLabel(config.multi_episode_style)}
 						</span>
 					</div>

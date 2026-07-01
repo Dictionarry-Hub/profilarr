@@ -183,7 +183,7 @@
 		<div
 			bind:this={listboxElement}
 			role="listbox"
-			class="absolute top-full z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-neutral-300 bg-white p-1 shadow-sm dark:border-neutral-700/60 dark:bg-neutral-800"
+			class="absolute top-full z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-card border border-border bg-surface p-1 shadow-card"
 		>
 			{#each filteredTokens as token, index}
 				<!-- lint-disable-next-line no-raw-ui -- listbox option with role="option"/aria-selected semantics not supported by Button -->
@@ -193,19 +193,20 @@
 					aria-selected={highlightedIndex === index}
 					on:mouseenter={() => (highlightedIndex = index)}
 					on:mousedown|preventDefault={() => selectToken(token)}
-					class="w-full rounded-lg px-3 py-2 text-left transition-colors {highlightedIndex === index
-						? 'bg-neutral-100 dark:bg-neutral-700/60'
-						: 'hover:bg-neutral-50 dark:hover:bg-neutral-700/30'}"
+					class="w-full rounded-card px-3 py-2 text-left transition-colors {highlightedIndex ===
+					index
+						? 'bg-surface-hover '
+						: 'hover:bg-surface-muted '}"
 				>
 					<div class="flex items-center justify-between">
 						<span
 							class="font-mono text-sm {highlightedIndex === index
-								? 'text-neutral-900 dark:text-neutral-50'
-								: 'text-neutral-700 dark:text-neutral-200'}">{token.token}</span
+								? 'text-text '
+								: 'text-text-soft '}">{token.token}</span
 						>
-						<span class="text-xs text-neutral-400 dark:text-neutral-500">{token.category}</span>
+						<span class="text-xs text-text-subtle">{token.category}</span>
 					</div>
-					<p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{token.description}</p>
+					<p class="mt-0.5 text-xs text-text-muted">{token.description}</p>
 				</button>
 			{/each}
 		</div>

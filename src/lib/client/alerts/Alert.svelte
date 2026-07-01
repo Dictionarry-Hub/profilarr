@@ -51,7 +51,7 @@
 			dismiss();
 		}
 	}}
-	class="flex cursor-pointer items-center gap-3 rounded-card border px-4 py-3 shadow-lg shadow-black/5 backdrop-blur-sm transition-colors {styles[
+	class="flex cursor-pointer items-center gap-3 rounded-card border px-4 py-3 shadow-card shadow-card-black/5 backdrop-blur-sm transition-colors {styles[
 		type
 	]}"
 >

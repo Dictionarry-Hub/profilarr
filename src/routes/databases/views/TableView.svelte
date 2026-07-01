@@ -64,13 +64,13 @@
 						{row.name}
 					</div>
 					{#if row.is_private}
-						<Label variant="secondary" size="sm" rounded="md" mono>
+						<Label variant="secondary" size="sm" radius="md" mono>
 							<Lock size={12} />
 							Private
 						</Label>
 					{/if}
 					{#if row.hasPat}
-						<Label variant="info" size="sm" rounded="md" mono>
+						<Label variant="info" size="sm" radius="md" mono>
 							<Code size={12} />
 							Dev
 						</Label>
@@ -78,21 +78,21 @@
 				</div>
 			</div>
 		{:else if column.key === 'repository_url'}
-			<Label variant="secondary" size="sm" rounded="md" mono>
+			<Label variant="secondary" size="sm" radius="md" mono>
 				{row.repository_url.replace('https://github.com/', '')}
 			</Label>
 		{:else if column.key === 'content'}
 			<div class="flex flex-wrap gap-1">
-				<Label variant="secondary" size="sm" rounded="md">{row.qualityProfileCount} Profiles</Label>
-				<Label variant="secondary" size="sm" rounded="md">{row.customFormatCount} Formats</Label>
-				<Label variant="secondary" size="sm" rounded="md">{row.delayProfileCount} Delay</Label>
+				<Label variant="secondary" size="sm" radius="md">{row.qualityProfileCount} Profiles</Label>
+				<Label variant="secondary" size="sm" radius="md">{row.customFormatCount} Formats</Label>
+				<Label variant="secondary" size="sm" radius="md">{row.delayProfileCount} Delay</Label>
 			</div>
 		{:else if column.key === 'sync_strategy'}
-			<Label variant="secondary" size="sm" rounded="md" mono>
+			<Label variant="secondary" size="sm" radius="md" mono>
 				{formatSyncStrategy(row.sync_strategy)}
 			</Label>
 		{:else if column.key === 'last_synced_at'}
-			<Label variant="secondary" size="sm" rounded="md" mono>
+			<Label variant="secondary" size="sm" radius="md" mono>
 				{formatLastSynced(row.last_synced_at)}
 			</Label>
 		{/if}

@@ -66,9 +66,7 @@
 
 <div class="flex flex-wrap gap-4 md:items-end md:gap-x-5 md:gap-y-3 md:px-4">
 	<div>
-		<span
-			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
-		>
+		<span class="mb-1 block text-[10px] font-medium tracking-wider text-text-subtle uppercase">
 			Status
 		</span>
 		<Toggle
@@ -80,9 +78,7 @@
 	</div>
 
 	<div data-onboarding="rename-folders">
-		<span
-			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
-		>
+		<span class="mb-1 block text-[10px] font-medium tracking-wider text-text-subtle uppercase">
 			Folders
 		</span>
 		<Toggle
@@ -95,9 +91,7 @@
 	</div>
 
 	<div data-onboarding="rename-summary">
-		<span
-			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
-		>
+		<span class="mb-1 block text-[10px] font-medium tracking-wider text-text-subtle uppercase">
 			Summary
 		</span>
 		<Toggle
@@ -110,18 +104,14 @@
 	</div>
 
 	<div data-onboarding="rename-schedule">
-		<span
-			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
-		>
+		<span class="mb-1 block text-[10px] font-medium tracking-wider text-text-subtle uppercase">
 			Schedule
 		</span>
 		<CronInput bind:value={cronValue} disabled={!enabled} {minIntervalMinutes} {onWarning} />
 	</div>
 
 	<div data-onboarding="rename-ignore-tag">
-		<span
-			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
-		>
+		<span class="mb-1 block text-[10px] font-medium tracking-wider text-text-subtle uppercase">
 			Ignore Tag
 		</span>
 		<FormInput
@@ -139,18 +129,18 @@
 
 	{#if lastRunAt}
 		<div
-			class="flex w-full flex-wrap items-center gap-1.5 border-t border-neutral-200 pt-3 md:ml-auto md:w-auto md:border-0 md:pt-0 dark:border-neutral-800"
+			class="flex w-full flex-wrap items-center gap-1.5 border-t border-border pt-3 md:ml-auto md:w-auto md:border-0 md:pt-0"
 		>
 			{#if !enabled}
-				<Label variant="warning" size="md" rounded="md">Paused</Label>
+				<Label variant="warning" size="md" radius="md">Paused</Label>
 			{:else if timeUntilNext !== null && timeUntilNext <= 0}
-				<Label variant="success" size="md" rounded="md">Ready</Label>
+				<Label variant="success" size="md" radius="md">Ready</Label>
 			{:else if timeUntilNext !== null}
-				<Label variant="secondary" size="md" rounded="md" mono>
+				<Label variant="secondary" size="md" radius="md" mono>
 					Next {formatTimeRemaining(timeUntilNext)}
 				</Label>
 			{/if}
-			<Label variant="secondary" size="md" rounded="md" mono>
+			<Label variant="secondary" size="md" radius="md" mono>
 				Last {formatSmartDateTime(lastRunAt, $serverTimezone, $dateFormat)}
 			</Label>
 		</div>

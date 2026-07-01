@@ -35,7 +35,7 @@
 	$: stateClasses = disabled
 		? 'cursor-not-allowed text-text-subtle'
 		: danger
-			? `text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900 ${highlighted ? 'bg-red-50 dark:bg-red-900' : ''}`
+			? `text-danger-icon hover:bg-danger-bg ${highlighted ? 'bg-danger-bg ' : ''}`
 			: `text-text-soft hover:bg-surface-hover ${highlighted ? 'bg-surface-hover' : ''}`;
 
 	$: iconSize = compact ? 12 : 16;

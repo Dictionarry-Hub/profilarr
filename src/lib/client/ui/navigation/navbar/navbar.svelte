@@ -86,7 +86,7 @@
 			<button
 				type="button"
 				on:click={() => mobileNavOpen.open()}
-				class="rounded-md p-1.5 text-text-muted hover:bg-surface-hover hover:text-text-soft"
+				class="rounded-control-sm p-1.5 text-text-muted hover:bg-surface-hover hover:text-text-soft"
 				aria-label="Open menu"
 			>
 				<Menu size={20} />
@@ -155,7 +155,7 @@
 								<a
 									href={item.href}
 									aria-label={item.label}
-									class="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent text-text-muted transition-colors hover:bg-surface-hover hover:text-text-soft {isActive(
+									class="flex h-9 w-9 items-center justify-center rounded-card border border-transparent text-text-muted transition-colors hover:bg-surface-hover hover:text-text-soft {isActive(
 										item.href,
 										currentPathname
 									)
@@ -171,7 +171,7 @@
 							</Tooltip>
 							{#if (item.alert ?? 0) > 0}
 								<span
-									class="absolute -top-0.5 -right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-blue-600 px-1 text-[9px] leading-none font-semibold text-white dark:bg-blue-500"
+									class="absolute -top-0.5 -right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-pill bg-info-bg px-1 text-[9px] leading-none font-semibold text-on-accent"
 								>
 									{item.alert}
 								</span>
@@ -185,7 +185,7 @@
 		<a
 			href="/"
 			aria-label="Profilarr home"
-			class="rounded-md p-1 transition-colors hover:bg-surface-hover"
+			class="rounded-control-sm p-1 transition-colors hover:bg-surface-hover"
 		>
 			<img src={logo} alt="Profilarr" class="h-5 w-5" />
 		</a>
@@ -199,7 +199,7 @@
 					href={versionStatus.releaseUrl ?? undefined}
 					target={versionStatus.releaseUrl ? '_blank' : undefined}
 					rel={versionStatus.releaseUrl ? 'noopener noreferrer' : undefined}
-					iconColor="text-emerald-600 dark:text-emerald-400"
+					iconColor="text-success-icon "
 					tooltip="Update Available: {versionStatus.latestVersion}"
 					tooltipPosition="right"
 				/>

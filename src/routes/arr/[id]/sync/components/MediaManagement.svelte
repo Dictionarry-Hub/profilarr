@@ -220,17 +220,14 @@
 	}
 </script>
 
-<div
-	data-onboarding="sync-media-management"
-	class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
->
+<div data-onboarding="sync-media-management" class="rounded-card border border-border bg-surface">
 	<!-- Header -->
 	<div
-		class="flex flex-col gap-4 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between md:gap-6 dark:border-neutral-800"
+		class="flex flex-col gap-4 border-b border-border px-6 py-4 md:flex-row md:items-start md:justify-between md:gap-6"
 	>
 		<div class="min-w-0 md:flex-1">
-			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Media Management</h2>
-			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+			<h2 class="text-xl font-semibold text-text">Media Management</h2>
+			<p class="mt-1 text-sm text-text-soft">
 				Select which database config to use for each media management setting
 			</p>
 		</div>
@@ -238,9 +235,7 @@
 			<div class="flex flex-col gap-3 md:flex-shrink-0 md:flex-row md:flex-wrap md:gap-5 md:pt-1">
 				{#if namingProgress}
 					<div class="min-w-[9rem]">
-						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-							Naming
-						</div>
+						<div class="mb-1 text-xs font-medium text-text-muted">Naming</div>
 						<ProgressIndicator
 							current={namingProgress.total - namingProgress.drifted}
 							target={namingProgress.total}
@@ -255,9 +250,7 @@
 				{/if}
 				{#if qualityDefinitionsProgress}
 					<div class="min-w-[9rem]">
-						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-							Quality Definitions
-						</div>
+						<div class="mb-1 text-xs font-medium text-text-muted">Quality Definitions</div>
 						<ProgressIndicator
 							current={qualityDefinitionsProgress.total - qualityDefinitionsProgress.drifted}
 							target={qualityDefinitionsProgress.total}
@@ -272,9 +265,7 @@
 				{/if}
 				{#if mediaSettingsProgress}
 					<div class="min-w-[9rem]">
-						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-							Media Settings
-						</div>
+						<div class="mb-1 text-xs font-medium text-text-muted">Media Settings</div>
 						<ProgressIndicator
 							current={mediaSettingsProgress.total - mediaSettingsProgress.drifted}
 							target={mediaSettingsProgress.total}
@@ -297,10 +288,8 @@
 			<!-- Naming -->
 			<div class="space-y-2">
 				<div class="space-y-1">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Naming</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Choose the naming config to sync.
-					</p>
+					<div class="text-sm font-medium text-text">Naming</div>
+					<p class="text-xs text-text-soft">Choose the naming config to sync.</p>
 				</div>
 				<DropdownCombobox
 					fullWidth
@@ -321,12 +310,8 @@
 			<!-- Quality Definitions -->
 			<div class="space-y-2">
 				<div class="space-y-1">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Quality Definitions
-					</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Choose the quality definitions config to sync.
-					</p>
+					<div class="text-sm font-medium text-text">Quality Definitions</div>
+					<p class="text-xs text-text-soft">Choose the quality definitions config to sync.</p>
 				</div>
 				<DropdownCombobox
 					fullWidth
@@ -347,12 +332,8 @@
 			<!-- Media Settings -->
 			<div class="space-y-2">
 				<div class="space-y-1">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Media Settings
-					</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Choose the media settings config to sync.
-					</p>
+					<div class="text-sm font-medium text-text">Media Settings</div>
+					<p class="text-xs text-text-soft">Choose the media settings config to sync.</p>
 				</div>
 				<DropdownCombobox
 					fullWidth

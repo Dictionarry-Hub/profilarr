@@ -12,9 +12,7 @@
 </script>
 
 <div class="space-y-4">
-	<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-		Discord Configuration
-	</h3>
+	<h3 class="text-sm font-semibold text-text">Discord Configuration</h3>
 
 	<!-- Webhook URL -->
 	<FormInput
@@ -60,7 +58,7 @@
 			on:change={() => (enableMentions = !enableMentions)}
 		/>
 		<input type="hidden" name="enable_mentions" value={enableMentions ? 'on' : ''} />
-		<p class="mt-1 px-3 text-xs text-neutral-500 dark:text-neutral-400">
+		<p class="mt-1 px-3 text-xs text-text-muted">
 			Mention @here in notifications to alert online users
 		</p>
 	</div>

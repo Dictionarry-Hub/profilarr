@@ -118,7 +118,7 @@
 				</span>
 			</span>
 			{#if query || activeQuery}
-				<span class="h-2.5 w-2.5 rounded-full bg-accent-500"></span>
+				<span class="h-2.5 w-2.5 rounded-pill bg-accent-solid"></span>
 			{/if}
 		</button>
 	</div>
@@ -127,12 +127,12 @@
 	{#if modalOpen}
 		<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 		<div
-			class="fixed inset-0 z-[100] flex items-start justify-center bg-black/50 px-4 pt-4"
+			class="fixed inset-0 z-[100] flex items-start justify-center bg-overlay px-4 pt-4"
 			on:click={handleBackdropClick}
 			transition:fade={{ duration: 150 }}
 		>
 			<div
-				class="search-action-modal w-full max-w-lg rounded-control border border-border bg-surface shadow-xl"
+				class="search-action-modal w-full max-w-lg rounded-control border border-border bg-surface shadow-card"
 				transition:fly={{ y: -20, duration: 200 }}
 			>
 				<div class="relative flex items-center p-3">
@@ -158,7 +158,7 @@
 						on:input={handleInput}
 						on:keydown={handleKeydown}
 						{placeholder}
-						class="h-10 w-full rounded-lg bg-transparent pr-10 text-sm text-text placeholder-text-subtle outline-none {activeQuery
+						class="h-10 w-full rounded-card bg-transparent pr-10 text-sm text-text placeholder-text-subtle outline-none {activeQuery
 							? 'pl-2'
 							: hideIcon
 								? 'pl-3'
@@ -169,21 +169,21 @@
 					{#if query}
 						<button
 							on:click={handleClear}
-							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-hover"
+							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-card hover:bg-surface-hover"
 						>
 							<X size={18} class="text-text-muted" />
 						</button>
 					{:else if activeQuery}
 						<button
 							on:click={handleClearQuery}
-							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-hover"
+							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-card hover:bg-surface-hover"
 						>
 							<X size={18} class="text-text-muted" />
 						</button>
 					{:else}
 						<button
 							on:click={closeModal}
-							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-hover"
+							class="absolute right-6 flex h-8 w-8 items-center justify-center rounded-card hover:bg-surface-hover"
 						>
 							<X size={18} class="text-text-muted" />
 						</button>
@@ -233,14 +233,14 @@
 			{#if query}
 				<button
 					on:click={handleClear}
-					class="absolute right-2 flex h-6 w-6 items-center justify-center rounded-lg hover:bg-surface-hover"
+					class="absolute right-2 flex h-6 w-6 items-center justify-center rounded-card hover:bg-surface-hover"
 				>
 					<X size={14} class="text-text-muted" />
 				</button>
 			{:else if activeQuery}
 				<button
 					on:click={handleClearQuery}
-					class="absolute right-2 flex h-6 w-6 items-center justify-center rounded-lg hover:bg-surface-hover"
+					class="absolute right-2 flex h-6 w-6 items-center justify-center rounded-card hover:bg-surface-hover"
 				>
 					<X size={14} class="text-text-muted" />
 				</button>

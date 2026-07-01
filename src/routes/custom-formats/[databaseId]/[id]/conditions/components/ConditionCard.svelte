@@ -263,11 +263,9 @@
 >
 	<!-- Identity -->
 	<div
-		class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0 dark:border-neutral-800 dark:bg-neutral-900/40"
+		class="rounded-card border border-border bg-surface-muted/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0"
 	>
-		<div
-			class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase wide:hidden dark:text-neutral-400"
-		>
+		<div class="mb-2 text-[11px] font-medium tracking-wide text-text-muted uppercase wide:hidden">
 			Identity
 		</div>
 		<div class="grid gap-2 wide:contents">
@@ -303,11 +301,9 @@
 
 	<!-- Value -->
 	<div
-		class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0 dark:border-neutral-800 dark:bg-neutral-900/40"
+		class="rounded-card border border-border bg-surface-muted/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0"
 	>
-		<div
-			class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase wide:hidden dark:text-neutral-400"
-		>
+		<div class="mb-2 text-[11px] font-medium tracking-wide text-text-muted uppercase wide:hidden">
 			Value
 		</div>
 		<div class="min-w-0 wide:flex-1" data-onboarding="cf-cond-value">
@@ -375,7 +371,7 @@
 								on:change={(e) => handleMinSizeChange(e.detail)}
 							/>
 						</div>
-						<span class="hidden text-sm text-neutral-500 wide:inline">-</span>
+						<span class="hidden text-sm text-text-muted wide:inline">-</span>
 						<div class="w-full flex-1">
 							<NumberInput
 								name="maxSize"
@@ -406,7 +402,7 @@
 							on:change={(e) => handleMinYearChange(e.detail)}
 						/>
 					</div>
-					<span class="hidden text-sm text-neutral-500 wide:inline">-</span>
+					<span class="hidden text-sm text-text-muted wide:inline">-</span>
 					<div class="w-full flex-1">
 						<NumberInput
 							name="maxYear"
@@ -438,11 +434,9 @@
 
 	<!-- Flags -->
 	<div
-		class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0 dark:border-neutral-800 dark:bg-neutral-900/40"
+		class="rounded-card border border-border bg-surface-muted/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0"
 	>
-		<div
-			class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase wide:hidden dark:text-neutral-400"
-		>
+		<div class="mb-2 text-[11px] font-medium tracking-wide text-text-muted uppercase wide:hidden">
 			Flags
 		</div>
 		<div
@@ -495,11 +489,9 @@
 
 	<!-- Actions -->
 	<div
-		class="rounded-xl border border-neutral-200 bg-neutral-50/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0 dark:border-neutral-800 dark:bg-neutral-900/40"
+		class="rounded-card border border-border bg-surface-muted/40 p-2 wide:contents wide:border-0 wide:bg-transparent wide:p-0"
 	>
-		<div
-			class="mb-2 text-[11px] font-medium tracking-wide text-neutral-500 uppercase wide:hidden dark:text-neutral-400"
-		>
+		<div class="mb-2 text-[11px] font-medium tracking-wide text-text-muted uppercase wide:hidden">
 			Actions
 		</div>
 		{#if isDraft}
@@ -507,7 +499,7 @@
 				<Button
 					text="Discard"
 					icon={Trash2}
-					iconColor="text-red-600 dark:text-red-400"
+					iconColor="text-danger-icon "
 					variant="secondary"
 					title="Discard condition"
 					ariaLabel="Discard condition"
@@ -516,7 +508,7 @@
 				<Button
 					text="Accept"
 					icon={Check}
-					iconColor="text-green-600 dark:text-green-400"
+					iconColor="text-success-icon "
 					variant="secondary"
 					title="Confirm condition"
 					ariaLabel="Confirm condition"
@@ -528,7 +520,7 @@
 				<Button
 					text="Remove"
 					icon={Trash2}
-					iconColor="text-red-600 dark:text-red-400"
+					iconColor="text-danger-icon "
 					variant="secondary"
 					title="Remove condition"
 					ariaLabel="Remove condition"

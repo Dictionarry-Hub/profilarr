@@ -93,6 +93,7 @@
 
 	/* Links: amber signal */
 	--theme-link-text: #cc8800;
+	--theme-overlay: rgb(0 0 0 / 0.5);
 
 	/* Sharp, tight, no nonsense */
 	--theme-radius-control-sm: 0.25rem;

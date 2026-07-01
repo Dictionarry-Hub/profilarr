@@ -186,14 +186,12 @@
 <Card
 	padding={depth === 0 ? 'none' : 'sm'}
 	flush={depth === 0}
-	className={depth === 0
-		? '!rounded-none !border-0'
-		: '!border-neutral-200 dark:!border-neutral-700/60'}
+	className={depth === 0 ? '!rounded-none !border-0' : '!border-border dark:!border-border'}
 >
 	<!-- Group Header -->
 	<div class="mb-3 flex items-center justify-between">
 		<div class="flex items-center gap-2">
-			<span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Match</span>
+			<span class="text-xs font-medium text-text-soft">Match</span>
 			<DropdownSelect
 				value={group.match}
 				options={[
@@ -209,7 +207,7 @@
 					notifyChange();
 				}}
 			/>
-			<span class="text-xs text-neutral-500 dark:text-neutral-400">of the following rules</span>
+			<span class="text-xs text-text-muted">of the following rules</span>
 		</div>
 		{#if onRemove}
 			<Button icon={X} variant="ghost" size="xs" on:click={onRemove} />
@@ -218,9 +216,7 @@
 
 	<!-- Children (Rules and Nested Groups) -->
 	{#if group.children.length === 0}
-		<div class="text-sm text-neutral-500 dark:text-neutral-400">
-			No rules configured. Add a rule to start filtering.
-		</div>
+		<div class="text-sm text-text-muted">No rules configured. Add a rule to start filtering.</div>
 	{:else}
 		<div class="overflow-x-auto pb-3">
 			<div class="min-w-max space-y-2">
@@ -368,7 +364,7 @@
 															autoWidth
 														/>
 													</div>
-													<span class="text-xs text-neutral-500 dark:text-neutral-400">days</span>
+													<span class="text-xs text-text-muted">days</span>
 												</div>
 											{:else}
 												<div class={valueWidthClass}>

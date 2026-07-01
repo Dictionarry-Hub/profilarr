@@ -52,20 +52,20 @@
 >
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'position'}
-			<span class="text-sm text-neutral-500 tabular-nums dark:text-neutral-400">
+			<span class="text-sm text-text-muted tabular-nums">
 				{row.position}
 			</span>
 		{:else if column.key === 'name'}
 			<div class="flex items-center justify-between gap-2">
-				<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+				<span class="text-sm font-medium text-text">
 					{row.name}
 				</span>
 				<div class="flex shrink-0 items-center gap-1.5">
-					<Label variant={row.allowed ? 'success' : 'secondary'} size="sm" rounded="md">
+					<Label variant={row.allowed ? 'success' : 'secondary'} size="sm" radius="md">
 						{row.allowed ? 'Enabled' : 'Disabled'}
 					</Label>
 					{#if row.upgradeUntil}
-						<Label variant="info" size="sm" rounded="md">Upgrade Until</Label>
+						<Label variant="info" size="sm" radius="md">Upgrade Until</Label>
 					{/if}
 				</div>
 			</div>
@@ -78,16 +78,16 @@
 				<Table columns={memberColumns} data={memberRows(row.items)} compact hoverable={false}>
 					<svelte:fragment slot="cell" let:row let:column>
 						{#if column.key === 'position'}
-							<span class="text-sm text-neutral-500 tabular-nums dark:text-neutral-400">
+							<span class="text-sm text-text-muted tabular-nums">
 								{row.position}
 							</span>
 						{:else if column.key === 'name'}
 							<div class="flex items-center justify-between gap-2">
-								<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+								<span class="text-sm font-medium text-text">
 									{row.name}
 								</span>
 								{#if row.upgradeUntil}
-									<Label variant="info" size="sm" rounded="md">Upgrade Until</Label>
+									<Label variant="info" size="sm" radius="md">Upgrade Until</Label>
 								{/if}
 							</div>
 						{/if}

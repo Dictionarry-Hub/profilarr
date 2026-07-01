@@ -155,17 +155,15 @@
 </svelte:head>
 
 <div class="space-y-6 px-4 pt-8 pb-8 md:px-8 md:pt-12">
-	<h1 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Component Library</h1>
+	<h1 class="text-2xl font-bold text-text">Component Library</h1>
 
 	<ActionsBar>
 		<SearchAction searchStore={search} placeholder="Search components..." responsive />
 	</ActionsBar>
 
 	{#if visibleIds.size === 0}
-		<div
-			class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-		>
-			<p class="text-neutral-500 dark:text-neutral-400">No components match your search.</p>
+		<div class="rounded-card border border-border bg-surface p-8 text-center">
+			<p class="text-text-muted">No components match your search.</p>
 		</div>
 	{/if}
 
@@ -182,7 +180,7 @@
 			description="ActionsBar groups action items with collapsed borders and auto-rounding. ActionButton provides icon buttons with optional hover dropdowns. SearchAction is a search input with responsive mobile modal. ViewToggle switches between card/table views."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+				<p class="text-xs font-medium text-text-muted uppercase">
 					Full bar (search + buttons + view toggle)
 				</p>
 				<ActionsBar>
@@ -202,7 +200,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+				<p class="text-xs font-medium text-text-muted uppercase">
 					Search only (single item rounding)
 				</p>
 				<ActionsBar>
@@ -211,9 +209,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Buttons only
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Buttons only</p>
 				<ActionsBar className="md:justify-start">
 					<ActionButton icon={Plus} title="Add" />
 					<ActionButton icon={Trash2} variant="danger" title="Delete" />
@@ -231,41 +227,37 @@
 			description="Score displays a numeric value with sign and color coding (positive green, negative red, zero neutral). CustomFormatBadge shows a CF name with its score as a pill."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Score variants
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Score variants</p>
 				<div class="flex flex-wrap items-center gap-4">
 					<div class="flex items-center gap-2">
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Positive:</span>
+						<span class="text-xs text-text-muted">Positive:</span>
 						<Score score={150} />
 					</div>
 					<div class="flex items-center gap-2">
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Negative:</span>
+						<span class="text-xs text-text-muted">Negative:</span>
 						<Score score={-50} />
 					</div>
 					<div class="flex items-center gap-2">
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Zero:</span>
+						<span class="text-xs text-text-muted">Zero:</span>
 						<Score score={0} />
 					</div>
 					<div class="flex items-center gap-2">
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Null:</span>
+						<span class="text-xs text-text-muted">Null:</span>
 						<Score score={null} />
 					</div>
 					<div class="flex items-center gap-2">
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Uncolored:</span>
+						<span class="text-xs text-text-muted">Uncolored:</span>
 						<Score score={75} colored={false} />
 					</div>
 					<div class="flex items-center gap-2">
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Small:</span>
+						<span class="text-xs text-text-muted">Small:</span>
 						<Score score={42} size="sm" />
 					</div>
 				</div>
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Custom Format Badges
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Custom Format Badges</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<CustomFormatBadge name="Remux" score={150} />
 					<CustomFormatBadge name="BR-DISK" score={-10000} />
@@ -284,7 +276,7 @@
 			description="Status/label pill with six color variants, two sizes, optional icon, and mono font option."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Variants</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Variants</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Badge variant="accent">Accent</Badge>
 					<Badge variant="neutral">Neutral</Badge>
@@ -296,7 +288,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Sizes</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Sizes</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Badge variant="accent" size="sm">Small</Badge>
 					<Badge variant="accent" size="md">Medium</Badge>
@@ -304,9 +296,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Mono + icon
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Mono + icon</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Badge variant="neutral" mono>v2.0.0</Badge>
 					<Badge variant="success" icon={Info}>With icon</Badge>
@@ -323,7 +313,7 @@
 			description="Multi-variant button with primary, secondary, danger, and ghost styles. Supports three sizes, icons (left/right), responsive sizing, full-width, hide-text-on-mobile, and renders as an anchor when href is provided."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Variants</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Variants</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Button text="Primary" variant="primary" />
 					<Button text="Secondary" variant="secondary" />
@@ -333,7 +323,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Sizes</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Sizes</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Button text="Extra Small" variant="primary" size="xs" />
 					<Button text="Small" variant="primary" size="sm" />
@@ -342,9 +332,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					With icons
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">With icons</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Button text="Add" variant="primary" icon={Plus} />
 					<Button text="Delete" variant="danger" icon={Trash2} />
@@ -354,7 +342,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Disabled</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Disabled</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Button text="Primary" variant="primary" disabled />
 					<Button text="Secondary" variant="secondary" disabled />
@@ -373,15 +361,13 @@
 			description="Card is a structural container with optional header/body/footer slots separated by dividers. Supports padding sizes, hoverable state, click handler, flush mode, and link mode (renders as anchor). ExpandableCard adds a collapsible body with header-right slot. StickyCard is a sticky header/footer bar."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Header + body + footer
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Header + body + footer</p>
 				<div class="max-w-sm">
 					<Card>
 						<svelte:fragment slot="header">
-							<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">HD-1080p</h3>
+							<h3 class="text-sm font-semibold text-text">HD-1080p</h3>
 						</svelte:fragment>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">
+						<p class="text-sm text-text-soft">
 							A quality profile for 1080p content with remux preferences and HDR scoring.
 						</p>
 						<svelte:fragment slot="footer">
@@ -395,30 +381,22 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Body only (minimal)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Body only (minimal)</p>
 				<div class="max-w-sm">
 					<Card>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">
-							A simple body-only card with no header or footer.
-						</p>
+						<p class="text-sm text-text-soft">A simple body-only card with no header or footer.</p>
 					</Card>
 				</div>
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Hoverable + clickable
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Hoverable + clickable</p>
 				<div class="max-w-sm">
 					<Card hoverable onclick={() => {}}>
 						<svelte:fragment slot="header">
-							<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-								Clickable Card
-							</h3>
+							<h3 class="text-sm font-semibold text-text">Clickable Card</h3>
 						</svelte:fragment>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">
+						<p class="text-sm text-text-soft">
 							Hover and click this card. Shows cursor and bg transition.
 						</p>
 					</Card>
@@ -426,32 +404,28 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Padding variants
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Padding variants</p>
 				<div class="grid gap-3 md:grid-cols-4">
 					<Card padding="none">
-						<div class="p-2 text-xs text-neutral-500 dark:text-neutral-400">none</div>
+						<div class="p-2 text-xs text-text-muted">none</div>
 					</Card>
 					<Card padding="sm">
-						<p class="text-xs text-neutral-500 dark:text-neutral-400">sm</p>
+						<p class="text-xs text-text-muted">sm</p>
 					</Card>
 					<Card padding="md">
-						<p class="text-xs text-neutral-500 dark:text-neutral-400">md</p>
+						<p class="text-xs text-text-muted">md</p>
 					</Card>
 					<Card padding="lg">
-						<p class="text-xs text-neutral-500 dark:text-neutral-400">lg</p>
+						<p class="text-xs text-text-muted">lg</p>
 					</Card>
 				</div>
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Flush (matches page background)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Flush (matches page background)</p>
 				<div class="max-w-sm">
 					<Card flush>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">
+						<p class="text-sm text-text-soft">
 							Flush card uses <code>bg-app</code> instead of <code>bg-surface</code>.
 						</p>
 					</Card>
@@ -459,51 +433,35 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Flush + hoverable
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Flush + hoverable</p>
 				<div class="max-w-sm">
 					<Card flush hoverable>
 						<svelte:fragment slot="header">
-							<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-								Flush Hoverable
-							</h3>
+							<h3 class="text-sm font-semibold text-text">Flush Hoverable</h3>
 						</svelte:fragment>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">
-							Hover to see the flush hover token in action.
-						</p>
+						<p class="text-sm text-text-soft">Hover to see the flush hover token in action.</p>
 					</Card>
 				</div>
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Link card (renders as anchor)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Link card (renders as anchor)</p>
 				<div class="max-w-sm">
 					<Card href="/dev/components" hoverable>
 						<svelte:fragment slot="header">
-							<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-								Linked Card
-							</h3>
+							<h3 class="text-sm font-semibold text-text">Linked Card</h3>
 						</svelte:fragment>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">
-							This card is an anchor element. Click to navigate.
-						</p>
+						<p class="text-sm text-text-soft">This card is an anchor element. Click to navigate.</p>
 					</Card>
 				</div>
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					ExpandableCard
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">ExpandableCard</p>
 				<div class="space-y-3">
 					<ExpandableCard title="Expanded Section" description="Click the header to collapse">
 						<div class="px-6 py-4">
-							<p class="text-sm text-neutral-600 dark:text-neutral-400">
-								Body content visible by default.
-							</p>
+							<p class="text-sm text-text-soft">Body content visible by default.</p>
 						</div>
 					</ExpandableCard>
 					<ExpandableCard
@@ -512,9 +470,7 @@
 						open={false}
 					>
 						<div class="px-6 py-4">
-							<p class="text-sm text-neutral-600 dark:text-neutral-400">
-								This content is hidden until expanded.
-							</p>
+							<p class="text-sm text-text-soft">This content is hidden until expanded.</p>
 						</div>
 					</ExpandableCard>
 					<ExpandableCard
@@ -528,25 +484,21 @@
 							</div>
 						</svelte:fragment>
 						<div class="px-6 py-4">
-							<p class="text-sm text-neutral-600 dark:text-neutral-400">
-								The header-right slot holds inline actions.
-							</p>
+							<p class="text-sm text-text-soft">The header-right slot holds inline actions.</p>
 						</div>
 					</ExpandableCard>
 				</div>
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					StickyCard (scroll to see)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">StickyCard (scroll to see)</p>
 				<div
-					class="relative h-48 overflow-x-hidden overflow-y-auto rounded-lg border border-neutral-200 dark:border-neutral-700"
+					class="relative h-48 overflow-x-hidden overflow-y-auto rounded-card border border-border"
 				>
 					<StickyCard position="top" variant="default">
 						<svelte:fragment slot="left">
-							<h1 class="text-neutral-900 dark:text-neutral-100">Page Title</h1>
-							<p class="text-neutral-500 dark:text-neutral-400">Subtitle text</p>
+							<h1 class="text-text">Page Title</h1>
+							<p class="text-text-muted">Subtitle text</p>
 						</svelte:fragment>
 						<svelte:fragment slot="right">
 							<Button text="Save" variant="primary" size="xs" />
@@ -555,7 +507,7 @@
 					</StickyCard>
 					<div class="p-4 pt-20">
 						<div class="space-y-2">
-							{#each Array(15) as _}<p class="text-sm text-neutral-400">Scroll content...</p>{/each}
+							{#each Array(15) as _}<p class="text-sm text-text-subtle">Scroll content...</p>{/each}
 						</div>
 					</div>
 				</div>
@@ -571,15 +523,15 @@
 			description="Responsive grid container for Card components. Automatically adjusts columns by breakpoint: 1 on mobile, scaling up to the configured max. Supports 1–4 columns and three gap sizes. Uses CSS Grid so cards in the same row share equal height."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+				<p class="text-xs font-medium text-text-muted uppercase">
 					3 columns (resize browser to see responsive)
 				</p>
 				<CardGrid columns={3}>
 					<Card>
 						<svelte:fragment slot="header">
-							<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Remux</h3>
+							<h3 class="text-sm font-semibold text-text">Remux</h3>
 						</svelte:fragment>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">
+						<p class="text-sm text-text-soft">
 							Full disc remux with lossless audio. This card has more text to demonstrate equal row
 							heights across the grid.
 						</p>
@@ -589,18 +541,18 @@
 					</Card>
 					<Card>
 						<svelte:fragment slot="header">
-							<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">BR-DISK</h3>
+							<h3 class="text-sm font-semibold text-text">BR-DISK</h3>
 						</svelte:fragment>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">Raw disc image. Blocked.</p>
+						<p class="text-sm text-text-soft">Raw disc image. Blocked.</p>
 						<svelte:fragment slot="footer">
 							<Badge variant="danger" size="sm">-10000</Badge>
 						</svelte:fragment>
 					</Card>
 					<Card>
 						<svelte:fragment slot="header">
-							<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">x264</h3>
+							<h3 class="text-sm font-semibold text-text">x264</h3>
 						</svelte:fragment>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">H.264 encode.</p>
+						<p class="text-sm text-text-soft">H.264 encode.</p>
 						<svelte:fragment slot="footer">
 							<Badge variant="neutral" size="sm">0</Badge>
 						</svelte:fragment>
@@ -609,27 +561,23 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					2 columns, small gap
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">2 columns, small gap</p>
 				<CardGrid columns={2} gap="sm">
 					<Card padding="sm">
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">Left card</p>
+						<p class="text-sm text-text-soft">Left card</p>
 					</Card>
 					<Card padding="sm">
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">Right card</p>
+						<p class="text-sm text-text-soft">Right card</p>
 					</Card>
 				</CardGrid>
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					4 columns, large gap
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">4 columns, large gap</p>
 				<CardGrid columns={4} gap="lg">
 					{#each ['A', 'B', 'C', 'D'] as label}
 						<Card hoverable onclick={() => {}}>
-							<p class="text-center text-sm font-medium text-neutral-700 dark:text-neutral-300">
+							<p class="text-center text-sm font-medium text-text-soft">
 								{label}
 							</p>
 						</Card>
@@ -638,13 +586,13 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+				<p class="text-xs font-medium text-text-muted uppercase">
 					Flush (cards match page background)
 				</p>
 				<CardGrid columns={3} flush>
 					{#each ['Flush A', 'Flush B', 'Flush C'] as label}
 						<Card>
-							<p class="text-center text-sm font-medium text-neutral-700 dark:text-neutral-300">
+							<p class="text-center text-sm font-medium text-text-soft">
 								{label}
 							</p>
 						</Card>
@@ -671,7 +619,7 @@
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-text-muted uppercase">Header, items, and footer</p>
 				<div
-					class="inline-block min-w-48 overflow-hidden rounded-control border border-border bg-surface-muted shadow-xl"
+					class="inline-block min-w-48 overflow-hidden rounded-control border border-border bg-surface-muted shadow-card"
 				>
 					<div class="bg-surface">
 						<DropdownHeader label="Actions" />
@@ -688,7 +636,7 @@
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-text-muted uppercase">Compact variant</p>
 				<div
-					class="inline-block min-w-40 overflow-hidden rounded-control-sm border border-border bg-surface-muted shadow-xl"
+					class="inline-block min-w-40 overflow-hidden rounded-control-sm border border-border bg-surface-muted shadow-card"
 				>
 					<div class="bg-surface">
 						<DropdownHeader label="View" compact />
@@ -750,9 +698,7 @@
 			description="Labeled field wrapper supporting text, textarea, password (with visibility toggle), readonly, required, mono font, and sizing variants (sm/md/lg)."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Size variants
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Size variants</p>
 				<div class="grid gap-3 md:grid-cols-3">
 					<FormInput label="Small" size="sm" placeholder="Small input" bind:value={demoFormText} />
 					<FormInput
@@ -766,9 +712,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Text + textarea
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Text + textarea</p>
 				<div class="grid gap-3 md:grid-cols-2">
 					<FormInput label="Text" placeholder="Enter text..." bind:value={demoFormText} />
 					<FormInput
@@ -781,9 +725,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Password (toggle visibility)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Password (toggle visibility)</p>
 				<div class="max-w-sm">
 					<FormInput
 						label="Password"
@@ -795,9 +737,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Readonly + required + mono
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Readonly + required + mono</p>
 				<div class="grid gap-3 md:grid-cols-3">
 					<FormInput label="Readonly" value="Cannot edit" readonly />
 					<FormInput label="Required" placeholder="Required field" required />
@@ -815,9 +755,7 @@
 			description="Numeric input with custom increment/decrement stepper buttons. Supports min/max/step constraints, compact sizing, responsive auto-compact, mono/sans font, and disabled state. Hides steppers on mobile when responsive."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Default + compact
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Default + compact</p>
 				<div class="flex flex-wrap items-center gap-3">
 					<div class="w-32">
 						<NumberInput
@@ -842,9 +780,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Mono font + disabled
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Mono font + disabled</p>
 				<div class="flex flex-wrap items-center gap-3">
 					<div class="w-32">
 						<NumberInput name="demo-num-mono" value={42} font="mono" />
@@ -862,44 +798,40 @@
 		<ComponentCard
 			name="IconCheckbox"
 			paths={['form/IconCheckbox']}
-			description="Icon-based checkbox toggle with five named colors (accent, blue, green, red, neutral) plus hex color support. Two variants (filled/outline), three shapes (rounded, square, circle). Used for toggling custom formats, conditions, etc."
+			description="Icon-based checkbox toggle with five named colors (accent, blue, green, red, neutral) plus hex color support. Two variants (filled/outline), three shapes (radius, square, circle). Used for toggling custom formats, conditions, etc."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Colors (filled)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Colors (filled)</p>
 				<div class="flex flex-wrap items-center gap-3">
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Check} color="accent" bind:checked={checkedAccent} />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Accent</span>
+						<span class="text-xs text-text-muted">Accent</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Check} color="blue" bind:checked={checkedBlue} />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Blue</span>
+						<span class="text-xs text-text-muted">Blue</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Check} color="green" bind:checked={checkedGreen} />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Green</span>
+						<span class="text-xs text-text-muted">Green</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Check} color="red" bind:checked={checkedRed} />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Red</span>
+						<span class="text-xs text-text-muted">Red</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Check} color="neutral" bind:checked={checkedNeutral} />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Neutral</span>
+						<span class="text-xs text-text-muted">Neutral</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Star} color="#FFC230" checked />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Hex</span>
+						<span class="text-xs text-text-muted">Hex</span>
 					</div>
 				</div>
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Outline variant
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Outline variant</p>
 				<div class="flex flex-wrap items-center gap-3">
 					<IconCheckbox
 						icon={Check}
@@ -915,29 +847,27 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Shapes + unchecked + disabled
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Shapes + unchecked + disabled</p>
 				<div class="flex flex-wrap items-center gap-3">
 					<div class="flex items-center gap-1.5">
-						<IconCheckbox icon={Check} shape="rounded" bind:checked={checkedSquare} />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Rounded</span>
+						<IconCheckbox icon={Check} shape="soft" bind:checked={checkedSquare} />
+						<span class="text-xs text-text-muted">Rounded</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Check} shape="square" bind:checked={checkedSquare} />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Square</span>
+						<span class="text-xs text-text-muted">Square</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Check} shape="circle" bind:checked={checkedCircle} />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Circle</span>
+						<span class="text-xs text-text-muted">Circle</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Check} bind:checked={unchecked} />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Unchecked</span>
+						<span class="text-xs text-text-muted">Unchecked</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<IconCheckbox icon={Check} checked disabled />
-						<span class="text-xs text-neutral-500 dark:text-neutral-400">Disabled</span>
+						<span class="text-xs text-text-muted">Disabled</span>
 					</div>
 				</div>
 			</div>
@@ -952,7 +882,7 @@
 			description="Tag entry field with accent Badge chips. Type and press Enter to add, click X or Backspace to remove. Duplicate detection with alert toast. Tags render as Badge components inside a styled input container."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+				<p class="text-xs font-medium text-text-muted uppercase">
 					Interactive (try adding/removing)
 				</p>
 				<div class="max-w-lg">
@@ -970,9 +900,7 @@
 			description="Single-select searchable dropdown built from Button, Dropdown, and DropdownItem. Filters options as you type, supports compact modes, fixed positioning, item slots, and disabled state."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Default + compact + disabled
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Default + compact + disabled</p>
 				<div class="flex flex-wrap items-start gap-4">
 					<div class="w-56">
 						<DropdownCombobox
@@ -1022,9 +950,7 @@
 			description="Markdown-enabled textarea or single-line input with formatting toolbar (bold, italic, code, link, lists) and live preview toggle. Supports Ctrl+B/I shortcuts, label, description, required, and disabled states."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Multiline with toolbar
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Multiline with toolbar</p>
 				<MarkdownInput
 					label="Description"
 					description="Supports **markdown** formatting"
@@ -1035,9 +961,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Single-line
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Single-line</p>
 				<MarkdownInput
 					label="Title"
 					placeholder="Single-line markdown..."
@@ -1047,7 +971,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Disabled</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Disabled</p>
 				<MarkdownInput label="Locked" value="Cannot edit this" disabled rows={2} />
 			</div>
 		</ComponentCard>
@@ -1061,7 +985,7 @@
 			description="Draggable range slider with multiple color-coded markers and badge labels. Supports 7 marker colors (accent, blue, green, orange, red, purple, neutral), horizontal/vertical orientation, step snapping, min separation between markers, unit suffixes, and unlimited value display."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+				<p class="text-xs font-medium text-text-muted uppercase">
 					Multiple markers (drag to adjust)
 				</p>
 				<div class="px-4 py-8">
@@ -1070,9 +994,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Single marker
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Single marker</p>
 				<div class="px-4 py-8">
 					<RangeScale min={0} max={100} step={1} bind:markers={demoRangeSingle} />
 				</div>
@@ -1088,9 +1010,7 @@
 			description="Dynamic key-value pair editor with add/remove. Supports text and version value types (version uses NumberInput steppers for major.minor.patch). Responsive layout: stacked cards on mobile, grid on desktop. Supports locked first entry, custom labels, and add-disabled state."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Text mode
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Text mode</p>
 				<KeyValueList
 					bind:value={demoKV}
 					label="Environment Variables"
@@ -1101,9 +1021,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Version mode
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Version mode</p>
 				<KeyValueList
 					bind:value={demoKVVersion}
 					label="Version Constraints"
@@ -1122,7 +1040,7 @@
 			description="Inline label/tag pill with eight color variants (default, secondary, destructive, outline, ghost, success, warning, info), three sizes, three border-radius options, optional mono font, and optional href (renders as anchor)."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Variants</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Variants</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Label variant="default">Default</Label>
 					<Label variant="secondary">Secondary</Label>
@@ -1136,7 +1054,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Sizes</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Sizes</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Label size="sm">Small</Label>
 					<Label size="md">Medium</Label>
@@ -1145,18 +1063,16 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Rounded</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Rounded</p>
 				<div class="flex flex-wrap items-center gap-2">
-					<Label rounded="sm">Rounded SM</Label>
-					<Label rounded="md">Rounded MD</Label>
-					<Label rounded="full">Rounded Full</Label>
+					<Label radius="sm">Rounded SM</Label>
+					<Label radius="md">Rounded MD</Label>
+					<Label radius="full">Rounded Full</Label>
 				</div>
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Mono + link
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Mono + link</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Label variant="ghost" mono>v2.0.0</Label>
 					<Label variant="secondary" mono>1080p</Label>
@@ -1174,9 +1090,7 @@
 			description="CodeBlock renders syntax-highlighted code (SQL, JSON, plaintext) with a themed code area, header slot, and copy button. InlineCode renders inline code snippets with optional icon."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					CodeBlock (SQL)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">CodeBlock (SQL)</p>
 				<CodeBlock
 					code="SELECT * FROM profiles\nWHERE name = 'HD-1080p'\nORDER BY id;"
 					language="sql"
@@ -1184,11 +1098,9 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					CodeBlock (JSON)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">CodeBlock (JSON)</p>
 				<CodeBlock
-					code={'{\n  "name": "HD-1080p",\n  "cutoff": 7,\n  "items": [4, 7, 3]\n}'}
+					code={'{\n "name": "HD-1080p",\n "cutoff": 7,\n "items": [4, 7, 3]\n}'}
 					language="json"
 				/>
 			</div>
@@ -1203,9 +1115,7 @@
 			description="Modal is the base confirm/cancel dialog with header, body slot, footer buttons, size/height options, loading state, and danger variant. InfoModal is a read-only modal with close button and body slot. DirtyModal is a pre-configured Modal for unsaved changes warnings (no unique styling)."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Modal (confirm/cancel)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Modal (confirm/cancel)</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<Button
 						text="Open Modal"
@@ -1243,9 +1153,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					InfoModal (read-only)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">InfoModal (read-only)</p>
 				<Button
 					text="Open Info Modal"
 					variant="secondary"
@@ -1253,7 +1161,7 @@
 					on:click={() => (demoInfoModalOpen = true)}
 				/>
 				<InfoModal bind:open={demoInfoModalOpen} header="About Profiles">
-					<div class="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
+					<div class="space-y-2 text-sm text-text-soft">
 						<p>Profiles define quality preferences for your media library.</p>
 						<p>Each profile can have custom formats, quality cutoffs, and upgrade rules.</p>
 					</div>
@@ -1270,9 +1178,7 @@
 			description="Responsive tab bar with active state underline, optional icons, breadcrumb, and back button. On mobile (when responsive), collapses to a dropdown select. Navbar, pageNav, bottomNav, accentPicker, themeToggle are app chrome — visible in the live layout already."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					With icons + breadcrumb
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">With icons + breadcrumb</p>
 				<Tabs
 					tabs={[
 						{ label: 'Overview', href: '#tab-overview', active: true, icon: Info },
@@ -1284,9 +1190,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Plain tabs
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Plain tabs</p>
 				<Tabs
 					tabs={[
 						{ label: 'General', href: '#tab-general', active: true },
@@ -1306,9 +1210,7 @@
 			description="Table is a generic sortable data table with responsive mobile card layout. ExpandableTable adds expandable rows with chevron toggles. TableActionButton is a compact icon button for table row actions."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					Table (sortable, click headers)
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Table (sortable, click headers)</p>
 				<Table columns={demoTableColumns} data={demoTableData} compact>
 					<svelte:fragment slot="actions" let:row>
 						<TableActionButton icon={Trash2} title="Delete" variant="danger" />
@@ -1317,7 +1219,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
+				<p class="text-xs font-medium text-text-muted uppercase">
 					ExpandableTable (click rows to expand)
 				</p>
 				<ExpandableTable
@@ -1327,7 +1229,7 @@
 					compact
 				>
 					<svelte:fragment slot="expanded" let:row>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400">
+						<p class="text-sm text-text-muted">
 							Details for {row.name} — score: {row.score}, status: {row.status}
 						</p>
 					</svelte:fragment>
@@ -1335,9 +1237,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">
-					TableActionButton variants
-				</p>
+				<p class="text-xs font-medium text-text-muted uppercase">TableActionButton variants</p>
 				<div class="flex items-center gap-2">
 					<TableActionButton icon={Info} title="Info" variant="neutral" />
 					<TableActionButton icon={Trash2} title="Delete" variant="danger" />
@@ -1357,7 +1257,7 @@
 			description="Card-style toggle with optional label text, info modal, and IconCheckbox on the right. Supports color variants, disabled state, and fires change events."
 		>
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Colors</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Colors</p>
 				<div class="grid gap-3 md:grid-cols-2">
 					<Toggle color="accent" bind:checked={demoToggleAccent} label="Accent" />
 					<Toggle color="green" bind:checked={demoToggleGreen} label="Green" />
@@ -1373,7 +1273,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Disabled</p>
+				<p class="text-xs font-medium text-text-muted uppercase">Disabled</p>
 				<div class="flex flex-wrap items-center gap-4">
 					<Toggle color="accent" checked disabled label="Disabled on" />
 					<Toggle color="accent" checked={false} disabled label="Disabled off" />
@@ -1381,7 +1281,7 @@
 			</div>
 
 			<div class="space-y-3">
-				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">No label</p>
+				<p class="text-xs font-medium text-text-muted uppercase">No label</p>
 				<div class="flex flex-wrap items-center gap-4">
 					<Toggle color="accent" bind:checked={demoToggleAccent} ariaLabel="Accent toggle" />
 					<Toggle color="green" bind:checked={demoToggleGreen} ariaLabel="Green toggle" />

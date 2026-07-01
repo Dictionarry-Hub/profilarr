@@ -7,7 +7,7 @@
 	export let onPageChange: (page: number) => void;
 </script>
 
-<div class="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+<div class="flex items-center gap-2 text-sm text-text-soft">
 	<Button
 		variant="ghost"
 		size="sm"

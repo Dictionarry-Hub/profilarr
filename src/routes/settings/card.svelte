@@ -6,12 +6,12 @@
 
 <a
 	{href}
-	class="block rounded-lg border-2 border-neutral-200 bg-white p-5 transition hover:border-neutral-400 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-600"
+	class="block rounded-card border-2 border-border bg-surface p-5 transition hover:border-border"
 >
-	<h2 class="mb-2 text-lg font-semibold text-neutral-900 dark:text-neutral-50">
+	<h2 class="mb-2 text-lg font-semibold text-text">
 		{label}
 	</h2>
-	<p class="text-sm text-neutral-600 dark:text-neutral-400">
+	<p class="text-sm text-text-soft">
 		{description}
 	</p>
 </a>

@@ -34,7 +34,7 @@
 <div class="space-y-5">
 	{#each sections as section}
 		<div class="space-y-3">
-			<div class="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+			<div class="text-sm font-semibold text-text-muted">
 				{section.title}
 			</div>
 
@@ -46,7 +46,7 @@
 				{/if}
 				{#if tagsRow}
 					<div class="space-y-2">
-						<div class="text-sm font-medium text-neutral-600 dark:text-neutral-300">Tags</div>
+						<div class="text-sm font-medium text-text-soft">Tags</div>
 						<TagsDiffTable
 							removed={(tagsRow.remove ?? []).map((tag) => String(tag))}
 							added={(tagsRow.add ?? []).map((tag) => String(tag))}
@@ -59,7 +59,7 @@
 			{#if hasRows(section.rows, 'custom_format_scores')}
 				{#each getRows(section.rows, 'custom_format_scores') as scoreRow}
 					<div class="space-y-2">
-						<div class="text-sm font-medium text-neutral-600 dark:text-neutral-300">
+						<div class="text-sm font-medium text-text-soft">
 							{scoreRow.label}
 						</div>
 						<CustomFormatScoresTable rows={scoreRow.rows} {operation} />

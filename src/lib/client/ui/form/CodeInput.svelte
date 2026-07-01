@@ -27,10 +27,7 @@
 	$: tokens = tokenize(value, language);
 	$: displayTokens = tokens.length > 0 ? tokens : [{ type: 'text', text: placeholder }];
 	$: placeholderClass = value ? '' : 'opacity-45';
-	$: stateClass =
-		readonly || disabled
-			? 'cursor-not-allowed opacity-70'
-			: 'focus:border-neutral-300 dark:focus:border-neutral-600';
+	$: stateClass = readonly || disabled ? 'cursor-not-allowed opacity-70' : 'focus:border-border ';
 
 	function tokenColor(type: string, v: ThemeVariant): string | undefined {
 		return (v as unknown as Record<string, string>)[type] ?? undefined;
@@ -50,19 +47,17 @@
 </script>
 
 <div class="space-y-2">
-	<label for={name} class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-		{label}{#if required}<span class="text-red-500">*</span>{/if}
+	<label for={name} class="block text-sm font-medium text-text">
+		{label}{#if required}<span class="text-danger-icon">*</span>{/if}
 	</label>
 
 	{#if description}
-		<p class="text-xs text-neutral-600 dark:text-neutral-400">
+		<p class="text-xs text-text-soft">
 			{description}
 		</p>
 	{/if}
 
-	<div
-		class="relative overflow-hidden rounded-xl border border-neutral-300 dark:border-neutral-700/60"
-	>
+	<div class="relative overflow-hidden rounded-card border border-border">
 		<pre
 			bind:this={highlightElement}
 			aria-hidden="true"
@@ -86,7 +81,7 @@
 			autocomplete="off"
 			autocapitalize="off"
 			bind:this={inputElement}
-			class="relative block w-full resize-y overflow-auto border-0 bg-transparent p-3 text-sm leading-5 whitespace-pre-wrap text-transparent caret-neutral-900 outline-none selection:bg-accent-500/30 dark:caret-neutral-50 {stateClass}"
+			class="relative block w-full resize-y overflow-auto border-0 bg-transparent p-3 text-sm leading-5 whitespace-pre-wrap text-transparent caret-text outline-none selection:bg-accent-solid {stateClass}"
 			style="min-height: {rows * 1.25 + 1.5}rem;"
 			oninput={handleInput}
 			onscroll={handleScroll}

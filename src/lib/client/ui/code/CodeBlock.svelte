@@ -21,10 +21,7 @@
 	$: tokens = tokenize(code, language);
 	$: langLabel = language === 'sql' ? 'SQL' : language === 'json' ? 'JSON' : language;
 	$: langVariant = language === 'sql' ? ('info' as const) : ('secondary' as const);
-	$: langCustomVariant =
-		language === 'json'
-			? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-			: '';
+	$: langCustomVariant = language === 'json' ? 'bg-warning-bg text-warning-text ' : '';
 
 	function tokenColor(type: string, v: ThemeVariant): string | undefined {
 		return (v as unknown as Record<string, string>)[type] ?? undefined;
@@ -47,13 +44,9 @@
 	}
 </script>
 
-<div
-	class="code-block overflow-hidden rounded-xl border border-neutral-300 dark:border-neutral-700/60"
->
-	<div
-		class="flex flex-wrap items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-3 py-2 dark:border-neutral-700/60 dark:bg-neutral-900"
-	>
-		<Label variant={langVariant} customVariant={langCustomVariant} size="sm" rounded="md" mono
+<div class="code-block overflow-hidden rounded-card border border-border">
+	<div class="flex flex-wrap items-center gap-2 border-b border-border bg-surface-muted px-3 py-2">
+		<Label variant={langVariant} customVariant={langCustomVariant} size="sm" radius="md" mono
 			>{langLabel}</Label
 		>
 		<slot name="header" />
@@ -63,7 +56,7 @@
 					<select
 						value={themeName}
 						onchange={(e) => selectTheme(e.currentTarget.value)}
-						class="appearance-none rounded bg-neutral-100 py-0.5 pr-5 pl-1.5 font-mono text-[10px] font-medium text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500"
+						class="appearance-none rounded-control-sm bg-surface-hover py-0.5 pr-5 pl-1.5 font-mono text-[10px] font-medium text-text-subtle"
 					>
 						{#each themes as t}
 							<option value={t.name}>{t.name}</option>
@@ -71,14 +64,14 @@
 					</select>
 					<ChevronDown
 						size={10}
-						class="pointer-events-none absolute top-1/2 right-1 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
+						class="pointer-events-none absolute top-1/2 right-1 -translate-y-1/2 text-text-subtle "
 					/>
 				</div>
 			{/if}
 			{#if copyable}
 				<Button
 					icon={copied ? Check : Copy}
-					iconColor={copied ? 'text-green-500' : ''}
+					iconColor={copied ? 'text-success-icon' : ''}
 					size="xs"
 					variant="secondary"
 					title="Copy to clipboard"

@@ -202,7 +202,7 @@
 	// Use animated rect for visuals, real rect for card positioning
 	$: spotlightRect = animatedRect;
 
-	// Compute clip-path for click-blocking overlay (with rounded hole)
+	// Compute clip-path for click-blocking overlay (with radius hole)
 	$: clipPath = computeClipPath(targetRect);
 
 	function computeClipPath(rect: DOMRect | null): string {
@@ -212,7 +212,7 @@
 		const r = rect.right + PAD;
 		const b = rect.bottom + PAD;
 		const R = RADIUS;
-		// SVG path: outer rect (full viewport) + inner rounded rect (cutout, counter-clockwise for evenodd)
+		// SVG path: outer rect (full viewport) + inner radius rect (cutout, counter-clockwise for evenodd)
 		const outer = `M0,0 H${windowWidth} V${windowHeight} H0 Z`;
 		const inner = `M${l + R},${t} H${r - R} Q${r},${t} ${r},${t + R} V${b - R} Q${r},${b} ${r - R},${b} H${l + R} Q${l},${b} ${l},${b - R} V${t + R} Q${l},${t} ${l + R},${t} Z`;
 		return `path(evenodd, "${outer} ${inner}")`;
@@ -307,7 +307,7 @@
 		style="pointer-events: none;"
 		transition:fade={{ duration: 200 }}
 	>
-		<!-- Visual overlay (SVG mask for rounded cutout) -->
+		<!-- Visual overlay (SVG mask for radius cutout) -->
 		<svg class="absolute inset-0 h-full w-full" style="pointer-events: none;">
 			<defs>
 				<mask id="cutscene-mask">

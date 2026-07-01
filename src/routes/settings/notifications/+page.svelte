@@ -94,10 +94,8 @@
 	<div class="mb-8">
 		<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 			<div>
-				<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">
-					Notifications
-				</h1>
-				<p class="mt-2 text-base text-neutral-600 md:mt-3 md:text-lg dark:text-neutral-400">
+				<h1 class="text-2xl font-bold text-text md:text-3xl">Notifications</h1>
+				<p class="mt-2 text-base text-text-soft md:mt-3 md:text-lg">
 					Manage notification services and delivery settings
 				</p>
 			</div>
@@ -107,7 +105,7 @@
 				<Button
 					href="/settings/notifications/new"
 					icon={Plus}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					text="Add Service"
 					variant="secondary"
 				/>
@@ -133,13 +131,13 @@
 							<svg
 								role="img"
 								viewBox="0 0 24 24"
-								class="h-4 w-4 text-neutral-600 dark:text-neutral-400"
+								class="h-4 w-4 text-text-soft"
 								fill="currentColor"
 							>
 								<path d={serviceInfo[row.service_type]!.icon!.path} />
 							</svg>
 						{:else}
-							<Rss size={16} class="text-neutral-600 dark:text-neutral-400" />
+							<Rss size={16} class="text-text-soft " />
 						{/if}
 						<span>{getServiceTypeName(row.service_type)}</span>
 					</div>
@@ -150,12 +148,12 @@
 				{:else if column.key === 'stats'}
 					{#if row.successCount + row.failedCount > 0}
 						<span class="text-xs">
-							<span class="text-green-600 dark:text-green-400">{row.successCount}</span>
+							<span class="text-success-icon">{row.successCount}</span>
 							/
-							<span class="text-red-600 dark:text-red-400">{row.failedCount}</span>
+							<span class="text-danger-icon">{row.failedCount}</span>
 						</span>
 					{:else}
-						<span class="text-neutral-400 dark:text-neutral-500">-</span>
+						<span class="text-text-subtle">-</span>
 					{/if}
 				{/if}
 			</svelte:fragment>
@@ -185,7 +183,7 @@
 						<input type="hidden" name="id" value={row.id} />
 						<Button
 							icon={Send}
-							iconColor="text-accent-600 dark:text-accent-400"
+							iconColor="text-accent-solid"
 							size="xs"
 							type="submit"
 							disabled={testingServiceId === row.id}
@@ -223,7 +221,7 @@
 						<input type="hidden" name="id" value={row.id} />
 						<Button
 							icon={Trash2}
-							iconColor="text-red-600 dark:text-red-400"
+							iconColor="text-danger-icon "
 							size="xs"
 							tooltip="Delete service"
 							on:click={(e) => {

@@ -599,24 +599,22 @@
 {#key `${$page.url.pathname}:${data.canEditGroupMembers ? 1 : 0}`}
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
-			<h1 class="text-neutral-900 dark:text-neutral-50">Qualities</h1>
-			<p class="text-neutral-600 dark:text-neutral-400">
-				Configure ordering, grouping, and upgrade behavior.
-			</p>
+			<h1 class="text-text">Qualities</h1>
+			<p class="text-text-soft">Configure ordering, grouping, and upgrade behavior.</p>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
 				<Button
 					text="Info"
 					icon={Info}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					on:click={() => (showInfoModal = true)}
 				/>
 				<span data-onboarding="qp-qualities-group-button">
 					<Button
 						text="Create Group"
 						icon={Layers}
-						iconColor="text-accent-600 dark:text-accent-400"
+						iconColor="text-accent-solid"
 						disabled={!data.canEditGroupMembers}
 						tooltip={!data.canEditGroupMembers
 							? 'Update the linked schema dependency to edit quality group members.'
@@ -627,7 +625,7 @@
 				<Button
 					disabled={isSaving || !$isDirty || !hasEnabledItems}
 					icon={isSaving ? Loader2 : Save}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					text={isSaving ? 'Saving...' : 'Save'}
 					on:click={handleSaveClick}
 				/>
@@ -636,7 +634,7 @@
 	</StickyCard>
 
 	{#if !data.canEditGroupMembers}
-		<div class="mt-4 px-4 text-sm text-amber-700 dark:text-amber-300">
+		<div class="mt-4 px-4 text-sm text-warning-text">
 			<div class="flex items-start gap-2">
 				<AlertTriangle size={16} class="mt-0.5 shrink-0" />
 				<p>
@@ -709,23 +707,23 @@
 				>
 					{#if hoverTargetIndex === index && willCreateGroup}
 						<div
-							class="pointer-events-none absolute inset-0 rounded-lg border-2 border-dashed border-green-500 bg-green-50/30 dark:border-green-400 dark:bg-green-950/30"
+							class="pointer-events-none absolute inset-0 rounded-card border-2 border-dashed border-success-border bg-success-bg/30"
 						></div>
 					{/if}
 					{#if hoverTargetIndex === index && willAddToGroup}
 						<div
-							class="pointer-events-none absolute inset-0 rounded-lg border-2 border-dashed border-accent-500 bg-accent-50/30 dark:border-accent-400 dark:bg-accent-950/30"
+							class="pointer-events-none absolute inset-0 rounded-card border-2 border-dashed border-accent-solid bg-surface-hover"
 						></div>
 					{/if}
 					<div class="relative flex items-center justify-between">
 						<div class="flex-1">
-							<div class="font-medium text-neutral-900 dark:text-neutral-100">
+							<div class="font-medium text-text">
 								{item.name}
 							</div>
 							{#if item.type === 'group' && item.members}
 								<div class="mt-1 hidden flex-wrap gap-1 md:flex">
 									{#each item.members as member}
-										<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
+										<Label variant="secondary" size="sm" radius="md">{member.name}</Label>
 									{/each}
 								</div>
 							{/if}
@@ -776,13 +774,9 @@
 								/>
 							</div>
 							{#if hoverTargetIndex === index && willCreateGroup}
-								<div class="text-xs font-medium text-green-600 dark:text-green-400">
-									Create Group
-								</div>
+								<div class="text-xs font-medium text-success-icon">Create Group</div>
 							{:else if hoverTargetIndex === index && willAddToGroup}
-								<div class="text-xs font-medium text-accent-600 dark:text-accent-400">
-									Add to Group
-								</div>
+								<div class="text-xs font-medium text-accent-solid">Add to Group</div>
 							{/if}
 							{#if item.type === 'group'}
 								<span class="hidden md:inline-flex">
@@ -837,7 +831,7 @@
 					{#if item.type === 'group' && item.members}
 						<div class="mt-3 flex flex-wrap gap-1 md:hidden">
 							{#each item.members as member}
-								<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
+								<Label variant="secondary" size="sm" radius="md">{member.name}</Label>
 							{/each}
 						</div>
 					{/if}
@@ -848,9 +842,9 @@
 	</div>
 
 	<InfoModal bind:open={showInfoModal} header="Qualities">
-		<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+		<div class="space-y-4 text-sm text-text-soft">
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">Qualities</div>
+				<div class="font-medium text-text">Qualities</div>
 				<div class="mt-1">
 					Define the order, grouping, and configuration of qualities. In previous versions, only
 					enabled qualities were tracked. The new system stores all qualities (enabled and disabled)
@@ -860,7 +854,7 @@
 			</div>
 
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">Reordering</div>
+				<div class="font-medium text-text">Reordering</div>
 				<div class="mt-1">
 					Drag and drop qualities to change their priority. Higher positions indicate higher
 					preference. The order determines which quality will be selected when multiple options are
@@ -869,7 +863,7 @@
 			</div>
 
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">Creating Groups</div>
+				<div class="font-medium text-text">Creating Groups</div>
 				<div class="mt-1">
 					On desktop, hold Ctrl (or Cmd on Mac) while dragging a quality onto another quality to
 					create a group. Groups allow multiple qualities to be treated as equal priority. You can
@@ -879,7 +873,7 @@
 			</div>
 
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">Group Names</div>
+				<div class="font-medium text-text">Group Names</div>
 				<div class="mt-1">
 					Click on a group name to edit it. Groups automatically get a default name when created,
 					but you can customize this to better describe the qualities it contains.
@@ -887,7 +881,7 @@
 			</div>
 
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">Collapsing Groups</div>
+				<div class="font-medium text-text">Collapsing Groups</div>
 				<div class="mt-1">
 					Click the X button on a group to break it apart into individual qualities. The qualities
 					will maintain their enabled state and position.
@@ -895,7 +889,7 @@
 			</div>
 
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">Enabled/Disabled</div>
+				<div class="font-medium text-text">Enabled/Disabled</div>
 				<div class="mt-1">
 					The blue checkbox indicates whether a quality is enabled. Click anywhere on the quality
 					row or the checkbox itself to toggle. Disabled qualities are still tracked for ordering
@@ -904,7 +898,7 @@
 			</div>
 
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">Upgrade Until</div>
+				<div class="font-medium text-text">Upgrade Until</div>
 				<div class="mt-1">
 					The green arrow checkbox marks a quality as the "upgrade until" threshold. Only one
 					quality can have this flag at a time. When a file reaches this quality level, the system

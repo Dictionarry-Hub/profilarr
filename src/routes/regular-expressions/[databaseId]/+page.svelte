@@ -226,20 +226,14 @@
 	<!-- Regular Expressions Content -->
 	<div class="mt-6">
 		{#if data.regularExpressions.length === 0}
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-			>
-				<p class="text-neutral-600 dark:text-neutral-400">
+			<div class="rounded-card border border-border bg-surface p-8 text-center">
+				<p class="text-text-soft">
 					No regular expressions found for {data.currentDatabase?.name}
 				</p>
 			</div>
 		{:else if filtered.length === 0}
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-			>
-				<p class="text-neutral-600 dark:text-neutral-400">
-					No regular expressions match the current filters
-				</p>
+			<div class="rounded-card border border-border bg-surface p-8 text-center">
+				<p class="text-text-soft">No regular expressions match the current filters</p>
 			</div>
 		{:else if $viewMode === 'table'}
 			<TableView expressions={filtered} on:clone={handleClone} on:export={handleExport} />
@@ -251,9 +245,9 @@
 
 <!-- Info Modal -->
 <InfoModal bind:open={infoModalOpen} header="About Regular Expressions">
-	<div class="space-y-4 text-sm text-neutral-700 dark:text-neutral-300">
+	<div class="space-y-4 text-sm text-text-soft">
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">How It Works</h3>
+			<h3 class="mb-2 font-semibold text-text">How It Works</h3>
 			<p>
 				Regular expressions in Profilarr are separated from custom formats to make them reusable.
 				When multiple custom formats share the same pattern, you only need to update it in one
@@ -267,7 +261,7 @@
 		</section>
 
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Regex Flavor</h3>
+			<h3 class="mb-2 font-semibold text-text">Regex Flavor</h3>
 			<p>
 				Radarr and Sonarr use the <strong>.NET regex engine</strong> (specifically .NET 6+). Patterns
 				are matched case-insensitively by default.
@@ -275,20 +269,20 @@
 		</section>
 
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">Testing Patterns</h3>
+			<h3 class="mb-2 font-semibold text-text">Testing Patterns</h3>
 			<p>
 				Use <a
 					href="https://regex101.com"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="text-accent-600 hover:underline dark:text-accent-400">regex101.com</a
+					class="text-link-text hover:underline">regex101.com</a
 				>
 				to test your patterns. Make sure to select the <strong>.NET</strong> flavor from the dropdown
 				for accurate results.
 			</p>
-			<p class="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+			<p class="mt-2 text-xs text-text-muted">
 				Tip: When saving a regex101 link, include the version number (e.g., <code
-					class="rounded bg-neutral-100 px-1 dark:bg-neutral-800">ABC123/1</code
+					class="rounded-control-sm bg-surface-hover px-1">ABC123/1</code
 				>) to ensure it always points to your specific version.
 			</p>
 		</section>

@@ -160,15 +160,15 @@
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 	<div slot="left">
-		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
-		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
+		<h1 class="text-text">{title}</h1>
+		<p class="text-text-soft">{description}</p>
 	</div>
 	<div slot="right" class="flex items-center gap-2">
 		{#if mode === 'edit'}
 			<Button
 				text={deleting ? 'Deleting...' : 'Delete'}
 				icon={Trash2}
-				iconColor="text-red-600 dark:text-red-400"
+				iconColor="text-danger-icon "
 				disabled={deleting || saving}
 				on:click={handleDeleteClick}
 			/>
@@ -176,7 +176,7 @@
 		<Button
 			text={saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
 			icon={Save}
-			iconColor="text-blue-600 dark:text-blue-400"
+			iconColor="text-info-icon "
 			disabled={saving || !isValid || !$isDirty}
 			on:click={handleSaveClick}
 		/>
@@ -199,10 +199,8 @@
 
 		<div class="space-y-2" data-onboarding="media-settings-propers-repacks">
 			<div class="space-y-1">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Propers and Repacks
-				</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+				<div class="text-sm font-medium text-text">Propers and Repacks</div>
+				<p class="text-xs text-text-soft">
 					Choose how {arrLabel} handles proper and repack releases.
 				</p>
 			</div>
@@ -213,7 +211,7 @@
 				on:change={(e) => handlePropersRepacksChange(e.detail as PropersRepacks)}
 			/>
 			{#if propersRepacksDescription}
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+				<p class="text-xs text-text-soft">
 					{propersRepacksDescription}
 				</p>
 			{/if}
@@ -221,8 +219,8 @@
 
 		<div class="space-y-2" data-onboarding="media-settings-file-analysis">
 			<div class="space-y-1">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">File Analysis</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+				<div class="text-sm font-medium text-text">File Analysis</div>
+				<p class="text-xs text-text-soft">
 					Scan files to extract media information such as codec, resolution, and audio tracks.
 				</p>
 			</div>
@@ -335,12 +333,12 @@
 	on:cancel={closePropersRepacksModal}
 >
 	<div slot="body" class="space-y-4">
-		<p class="text-sm text-neutral-700 dark:text-neutral-300">
+		<p class="text-sm text-text-soft">
 			Profilarr expects proper and repack preferences to be handled by custom formats. Changing this
 			setting enables Arr's built-in preference system, which can override custom format scores and
 			make grab decisions look wrong or inconsistent.
 		</p>
-		<p class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+		<p class="text-sm font-medium text-text">
 			Type <span class="font-mono">{PROPERS_REPACKS_CONFIRM_TEXT}</span> to continue.
 		</p>
 		<FormInput

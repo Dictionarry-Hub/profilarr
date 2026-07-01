@@ -38,7 +38,7 @@
 
 {#if operation === 'create'}
 	<div class="space-y-2">
-		<div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Value</div>
+		<div class="text-sm font-medium text-text-muted">Value</div>
 		<Table {columns} data={afterItems} compact hoverable={false} emptyMessage="—" responsive>
 			<svelte:fragment slot="cell" let:row let:column>
 				{#if column.key === 'position'}
@@ -47,7 +47,7 @@
 					</Badge>
 				{:else if column.key === 'name'}
 					<div class="flex flex-wrap items-center gap-2">
-						<span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+						<span class="text-sm font-medium text-text-soft">
 							{row.name}
 						</span>
 						<div class="flex flex-wrap gap-1">
@@ -71,7 +71,7 @@
 	</div>
 {:else if operation === 'delete'}
 	<div class="space-y-2">
-		<div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Value</div>
+		<div class="text-sm font-medium text-text-muted">Value</div>
 		<Table {columns} data={beforeItems} compact hoverable={false} emptyMessage="—" responsive>
 			<svelte:fragment slot="cell" let:row let:column>
 				{#if column.key === 'position'}
@@ -80,7 +80,7 @@
 					</Badge>
 				{:else if column.key === 'name'}
 					<div class="flex flex-wrap items-center gap-2">
-						<span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+						<span class="text-sm font-medium text-text-soft">
 							{row.name}
 						</span>
 						<div class="flex flex-wrap gap-1">
@@ -105,7 +105,7 @@
 {:else}
 	<div class="grid gap-4 md:grid-cols-2">
 		<div class="space-y-2">
-			<div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Before</div>
+			<div class="text-sm font-medium text-text-muted">Before</div>
 			<Table {columns} data={beforeItems} compact hoverable={false} emptyMessage="—" responsive>
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'position'}
@@ -114,7 +114,7 @@
 						</Badge>
 					{:else if column.key === 'name'}
 						<div class="flex flex-wrap items-center gap-2">
-							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+							<span class="text-sm font-medium text-text-soft">
 								{row.name}
 							</span>
 							<div class="flex flex-wrap gap-1">
@@ -137,7 +137,7 @@
 			</Table>
 		</div>
 		<div class="space-y-2">
-			<div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">After</div>
+			<div class="text-sm font-medium text-text-muted">After</div>
 			<Table {columns} data={afterItems} compact hoverable={false} emptyMessage="—" responsive>
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'position'}
@@ -146,7 +146,7 @@
 						</Badge>
 					{:else if column.key === 'name'}
 						<div class="flex flex-wrap items-center gap-2">
-							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+							<span class="text-sm font-medium text-text-soft">
 								{row.name}
 							</span>
 							<div class="flex flex-wrap gap-1">

@@ -116,32 +116,32 @@
 </script>
 
 <div class="p-4 md:p-8">
-	<h1 class="mb-6 text-3xl font-bold text-neutral-900 dark:text-neutral-50">About Profilarr</h1>
+	<h1 class="mb-6 text-3xl font-bold text-text">About Profilarr</h1>
 
 	<div class="space-y-6">
 		<div class="space-y-2">
 			<div class="flex items-center gap-2">
-				<Info class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
-				<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Application</h2>
+				<Info class="h-4 w-4 text-text-soft " />
+				<h2 class="text-sm font-semibold text-text">Application</h2>
 			</div>
 			<Table columns={infoColumns} data={appRows} responsive>
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'label'}
-						<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						<span class="text-sm font-medium text-text">
 							{row.label}
 						</span>
 					{:else if column.key === 'value'}
 						{#if row.key === 'version'}
 							<BuildIdentity status={data.versionStatus} />
 						{:else if row.type === 'code'}
-							<Label variant="secondary" size="md" rounded="md" mono>
+							<Label variant="secondary" size="md" radius="md" mono>
 								{row.value}
 							</Label>
 						{:else if row.type === 'link'}
 							<Label
 								variant="link"
 								size="md"
-								rounded="md"
+								radius="md"
 								mono
 								href={row.href}
 								target="_blank"
@@ -150,7 +150,7 @@
 								{row.value}
 							</Label>
 						{:else}
-							<span class="text-sm text-neutral-600 dark:text-neutral-400">{row.value}</span>
+							<span class="text-sm text-text-soft">{row.value}</span>
 						{/if}
 					{/if}
 				</svelte:fragment>
@@ -161,31 +161,28 @@
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
 					{#if section.icon}
-						<svelte:component
-							this={section.icon}
-							class="h-4 w-4 text-neutral-600 dark:text-neutral-400"
-						/>
+						<svelte:component this={section.icon} class="h-4 w-4 text-text-soft " />
 					{/if}
-					<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
+					<h2 class="text-sm font-semibold text-text">
 						{section.title}
 					</h2>
 				</div>
 				<Table columns={infoColumns} data={section.rows} responsive>
 					<svelte:fragment slot="cell" let:row let:column>
 						{#if column.key === 'label'}
-							<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+							<span class="text-sm font-medium text-text">
 								{row.label}
 							</span>
 						{:else if column.key === 'value'}
 							{#if row.type === 'code'}
-								<Label variant="secondary" size="md" rounded="md" mono>
+								<Label variant="secondary" size="md" radius="md" mono>
 									{row.value}
 								</Label>
 							{:else if row.type === 'link'}
 								<Label
 									variant="link"
 									size="md"
-									rounded="md"
+									radius="md"
 									mono
 									href={row.href}
 									target="_blank"
@@ -194,7 +191,7 @@
 									{row.value}
 								</Label>
 							{:else}
-								<span class="text-sm text-neutral-600 dark:text-neutral-400">{row.value}</span>
+								<span class="text-sm text-text-soft">{row.value}</span>
 							{/if}
 						{/if}
 					</svelte:fragment>
@@ -208,8 +205,8 @@
 				data.migration.applied.find((m) => m.latest) ?? data.migration.applied[0]}
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
-					<Database class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
-					<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Database</h2>
+					<Database class="h-4 w-4 text-text-soft " />
+					<h2 class="text-sm font-semibold text-text">Database</h2>
 				</div>
 				<ExpandableTable
 					columns={migrationColumns}
@@ -223,23 +220,19 @@
 					<svelte:fragment slot="cell" let:row let:column>
 						{#if column.key === 'version'}
 							<div class="flex items-center gap-2">
-								<Label variant="secondary" size="md" rounded="md" mono>
+								<Label variant="secondary" size="md" radius="md" mono>
 									v{row.version}
 								</Label>
 								{#if row.latest}
-									<Label
-										size="md"
-										rounded="md"
-										customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
-									>
+									<Label size="md" radius="md" customVariant="bg-surface-hover text-accent-solid">
 										Latest
 									</Label>
 								{/if}
 							</div>
 						{:else if column.key === 'name'}
-							<span class="text-sm text-neutral-600 dark:text-neutral-400">{row.name}</span>
+							<span class="text-sm text-text-soft">{row.name}</span>
 						{:else if column.key === 'applied_at'}
-							<span class="text-xs text-neutral-500">
+							<span class="text-xs text-text-muted">
 								<DateTime value={row.applied_at} date />
 							</span>
 						{/if}
@@ -250,23 +243,23 @@
 								<svelte:fragment slot="cell" let:row let:column>
 									{#if column.key === 'version'}
 										<div class="flex items-center gap-2">
-											<Label variant="secondary" size="md" rounded="md" mono>
+											<Label variant="secondary" size="md" radius="md" mono>
 												v{row.version}
 											</Label>
 											{#if row.latest}
 												<Label
 													size="md"
-													rounded="md"
-													customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
+													radius="md"
+													customVariant="bg-surface-hover text-accent-solid"
 												>
 													Latest
 												</Label>
 											{/if}
 										</div>
 									{:else if column.key === 'name'}
-										<span class="text-sm text-neutral-600 dark:text-neutral-400">{row.name}</span>
+										<span class="text-sm text-text-soft">{row.name}</span>
 									{:else if column.key === 'applied_at'}
-										<span class="text-xs text-neutral-500">
+										<span class="text-xs text-text-muted">
 											<DateTime value={row.applied_at} date />
 										</span>
 									{/if}
@@ -281,10 +274,10 @@
 		<!-- Releases Section -->
 		<div class="space-y-2">
 			<div class="flex items-center gap-2">
-				<Package class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
-				<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-50">Releases</h2>
+				<Package class="h-4 w-4 text-text-soft " />
+				<h2 class="text-sm font-semibold text-text">Releases</h2>
 				{#if data.cachedAt}
-					<span class="ml-auto text-xs text-neutral-500 dark:text-neutral-500">
+					<span class="ml-auto text-xs text-text-muted">
 						Updated <DateTime value={data.cachedAt} />
 					</span>
 				{/if}
@@ -306,7 +299,7 @@
 								<Label
 									variant="link"
 									size="md"
-									rounded="md"
+									radius="md"
 									mono
 									href={row.html_url}
 									target="_blank"
@@ -315,24 +308,20 @@
 									{row.tag_name}
 								</Label>
 								{#if index === 0}
-									<Label
-										size="md"
-										rounded="md"
-										customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
-									>
+									<Label size="md" radius="md" customVariant="bg-surface-hover text-accent-solid">
 										Latest
 									</Label>
 								{/if}
 							</div>
 						{:else if column.key === 'published_at'}
-							<span class="text-xs text-neutral-500 dark:text-neutral-500">
+							<span class="text-xs text-text-muted">
 								<DateTime value={row.published_at} date />
 							</span>
 						{:else if column.key === 'prerelease'}
 							{#if row.prerelease}
-								<Label variant="warning" size="md" rounded="md">Pre-release</Label>
+								<Label variant="warning" size="md" radius="md">Pre-release</Label>
 							{:else}
-								<Label variant="secondary" size="md" rounded="md">Stable</Label>
+								<Label variant="secondary" size="md" radius="md">Stable</Label>
 							{/if}
 						{/if}
 					</svelte:fragment>
@@ -345,7 +334,7 @@
 											<Label
 												variant="link"
 												size="md"
-												rounded="md"
+												radius="md"
 												mono
 												href={row.html_url}
 												target="_blank"
@@ -356,22 +345,22 @@
 											{#if rowIndex === 0}
 												<Label
 													size="md"
-													rounded="md"
-													customVariant="bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-200"
+													radius="md"
+													customVariant="bg-surface-hover text-accent-solid"
 												>
 													Latest
 												</Label>
 											{/if}
 										</div>
 									{:else if column.key === 'published_at'}
-										<span class="text-xs text-neutral-500 dark:text-neutral-500">
+										<span class="text-xs text-text-muted">
 											<DateTime value={row.published_at} date />
 										</span>
 									{:else if column.key === 'prerelease'}
 										{#if row.prerelease}
-											<Label variant="warning" size="md" rounded="md">Pre-release</Label>
+											<Label variant="warning" size="md" radius="md">Pre-release</Label>
 										{:else}
-											<Label variant="secondary" size="md" rounded="md">Stable</Label>
+											<Label variant="secondary" size="md" radius="md">Stable</Label>
 										{/if}
 									{/if}
 								</svelte:fragment>
@@ -380,9 +369,7 @@
 					</svelte:fragment>
 				</ExpandableTable>
 			{:else}
-				<div
-					class="rounded-lg border border-neutral-200 bg-white p-4 text-sm text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
-				>
+				<div class="rounded-card border border-border bg-surface p-4 text-sm text-text-muted">
 					Release data not yet available. The next scheduled sync will populate it.
 				</div>
 			{/if}

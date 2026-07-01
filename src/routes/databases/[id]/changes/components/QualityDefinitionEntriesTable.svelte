@@ -46,11 +46,11 @@
 
 {#if operation === 'create' || operation === 'delete'}
 	<div class="space-y-2">
-		<div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Value</div>
+		<div class="text-sm font-medium text-text-muted">Value</div>
 		<Table {columns} data={valueEntries} compact hoverable={false} emptyMessage="—" responsive>
 			<svelte:fragment slot="cell" let:row let:column>
 				{#if column.key === 'quality_name'}
-					<span class="text-sm text-neutral-700 dark:text-neutral-200">{row.quality_name}</span>
+					<span class="text-sm text-text-soft">{row.quality_name}</span>
 				{:else if column.key === 'min_size'}
 					{@const display = renderSizeBadge(row.min_size, column.key)}
 					<Badge variant="neutral" size="md" mono={display.mono}>{display.text}</Badge>
@@ -67,11 +67,11 @@
 {:else}
 	<div class="grid gap-4 md:grid-cols-2">
 		<div class="space-y-2">
-			<div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Before</div>
+			<div class="text-sm font-medium text-text-muted">Before</div>
 			<Table {columns} data={beforeEntries} compact hoverable={false} emptyMessage="—" responsive>
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'quality_name'}
-						<span class="text-sm text-neutral-700 dark:text-neutral-200">{row.quality_name}</span>
+						<span class="text-sm text-text-soft">{row.quality_name}</span>
 					{:else if column.key === 'min_size'}
 						{@const display = renderSizeBadge(row.min_size, column.key)}
 						<Badge variant="neutral" size="md" mono={display.mono}>{display.text}</Badge>
@@ -86,11 +86,11 @@
 			</Table>
 		</div>
 		<div class="space-y-2">
-			<div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">After</div>
+			<div class="text-sm font-medium text-text-muted">After</div>
 			<Table {columns} data={afterEntries} compact hoverable={false} emptyMessage="—" responsive>
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'quality_name'}
-						<span class="text-sm text-neutral-700 dark:text-neutral-200">{row.quality_name}</span>
+						<span class="text-sm text-text-soft">{row.quality_name}</span>
 					{:else if column.key === 'min_size'}
 						{@const display = renderSizeBadge(row.min_size, column.key)}
 						<Badge variant="neutral" size="md" mono={display.mono}>{display.text}</Badge>

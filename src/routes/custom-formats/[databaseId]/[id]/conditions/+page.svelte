@@ -277,8 +277,8 @@
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
 			<div>
-				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Conditions</h2>
-				<p class="text-sm text-neutral-600 dark:text-neutral-400">
+				<h2 class="text-lg font-semibold text-text">Conditions</h2>
+				<p class="text-sm text-text-soft">
 					Define the conditions that must be met for this custom format to match a release.
 				</p>
 			</div>
@@ -294,7 +294,7 @@
 				<Button
 					text="Add Condition"
 					icon={Plus}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					variant="secondary"
 					onboarding="cf-conditions-add"
 					on:click={addDraftCondition}
@@ -302,7 +302,7 @@
 				<Button
 					text={saving ? 'Saving...' : 'Save'}
 					icon={saving ? Loader2 : Save}
-					iconColor="text-green-600 dark:text-green-400"
+					iconColor="text-success-icon "
 					variant="secondary"
 					disabled={saving || !$isDirty || saveBlocked}
 					tooltip={saveTooltip}
@@ -317,15 +317,13 @@
 		{#if draftConditions.length > 0}
 			<div class="space-y-2">
 				<div class="flex items-center gap-2 px-3">
-					<span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">Drafts</span>
+					<span class="text-sm font-medium text-text-soft">Drafts</span>
 					<Badge variant="neutral" size="sm">{draftConditions.length}</Badge>
 				</div>
-				<div
-					class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-neutral-200 wide:dark:divide-neutral-800"
-				>
+				<div class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-border wide:">
 					{#each draftConditions as draft (draft._key)}
 						<div
-							class="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 wide:rounded-none wide:border-0 wide:bg-transparent wide:px-0 wide:py-0 dark:border-neutral-800 dark:bg-neutral-900"
+							class="rounded-card border border-border bg-surface px-2 py-1.5 wide:rounded-none wide:border-0 wide:bg-transparent wide:px-0 wide:py-0"
 						>
 							<ConditionCard
 								mode="draft"
@@ -344,19 +342,17 @@
 
 		<!-- Existing conditions sorted by status, type, then name -->
 		{#if conditions.length === 0 && draftConditions.length === 0}
-			<p class="px-3 text-sm text-neutral-500 dark:text-neutral-400">No conditions defined</p>
+			<p class="px-3 text-sm text-text-muted">No conditions defined</p>
 		{:else if conditions.length > 0}
 			<div class="space-y-2">
 				<div class="flex items-center gap-2 px-3">
-					<span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">Conditions</span>
+					<span class="text-sm font-medium text-text-soft">Conditions</span>
 					<Badge variant="neutral" size="sm">{conditions.length}</Badge>
 				</div>
-				<div
-					class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-neutral-200 wide:dark:divide-neutral-800"
-				>
+				<div class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-border wide:">
 					{#each sortedConditions as condition (condition._key)}
 						<div
-							class="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 wide:rounded-none wide:border-0 wide:bg-transparent wide:px-0 wide:py-0 dark:border-neutral-800 dark:bg-neutral-900"
+							class="rounded-card border border-border bg-surface px-2 py-1.5 wide:rounded-none wide:border-0 wide:bg-transparent wide:px-0 wide:py-0"
 						>
 							<ConditionCard
 								{condition}
@@ -375,9 +371,9 @@
 </form>
 
 <InfoModal bind:open={infoModalOpen} header="Condition Types">
-	<div class="space-y-4 text-sm text-neutral-700 dark:text-neutral-300">
+	<div class="space-y-4 text-sm text-text-soft">
 		<section>
-			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">How Conditions Work</h3>
+			<h3 class="mb-2 font-semibold text-text">How Conditions Work</h3>
 			<p>
 				Conditions are grouped by type. Between types, logic is <strong>AND</strong> &mdash; every
 				type must pass. Within a type, logic is <strong>OR</strong> &mdash; any condition can satisfy
@@ -394,73 +390,73 @@
 			</ul>
 		</section>
 
-		<div class="border-t border-neutral-200 pt-4 dark:border-neutral-700">
-			<h3 class="mb-3 font-semibold text-neutral-900 dark:text-neutral-100">Types</h3>
+		<div class="border-t border-border pt-4">
+			<h3 class="mb-3 font-semibold text-text">Types</h3>
 			<div class="space-y-3">
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Release Title</div>
+					<div class="font-medium text-text">Release Title</div>
 					<p class="mt-0.5">
 						Matches regex patterns against the full release name. Uses reusable patterns managed on
 						the Regular Expressions page.
 					</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Release Group</div>
+					<div class="font-medium text-text">Release Group</div>
 					<p class="mt-0.5">
 						Matches regex patterns against the release group name (the tag after the final dash,
 						e.g. FraMeSToR).
 					</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Edition</div>
+					<div class="font-medium text-text">Edition</div>
 					<p class="mt-0.5">
 						Matches regex patterns against the edition field (Director's Cut, Extended, etc.).
 						Radarr only.
 					</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Resolution</div>
+					<div class="font-medium text-text">Resolution</div>
 					<p class="mt-0.5">
 						Matches the parsed video resolution (360p, 480p, 576p, 720p, 1080p, 2160p).
 					</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Source</div>
+					<div class="font-medium text-text">Source</div>
 					<p class="mt-0.5">
 						Matches the release source &mdash; where the content was captured from (BluRay, WEB-DL,
 						WEBRip, DVD, Television, etc.).
 					</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Quality Modifier</div>
+					<div class="font-medium text-text">Quality Modifier</div>
 					<p class="mt-0.5">
 						Matches quality modifiers like REMUX, BRDISK, or Regional. Radarr only.
 					</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Language</div>
+					<div class="font-medium text-text">Language</div>
 					<p class="mt-0.5">Matches the detected audio language of the release.</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Release Type</div>
+					<div class="font-medium text-text">Release Type</div>
 					<p class="mt-0.5">
 						Matches the type of TV release (Season Pack, Single Episode, etc.). Sonarr only.
 					</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Indexer Flag</div>
+					<div class="font-medium text-text">Indexer Flag</div>
 					<p class="mt-0.5">
 						Matches flags set by the indexer (Freeleech, Halfleech, Internal, etc.).
 					</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Size</div>
+					<div class="font-medium text-text">Size</div>
 					<p class="mt-0.5">
 						Matches the file size of the release. Set a minimum, maximum, or both (in GB).
 					</p>
 				</div>
 				<div>
-					<div class="font-medium text-neutral-800 dark:text-neutral-200">Year</div>
+					<div class="font-medium text-text">Year</div>
 					<p class="mt-0.5">Matches the release year. Set a minimum, maximum, or both.</p>
 				</div>
 			</div>

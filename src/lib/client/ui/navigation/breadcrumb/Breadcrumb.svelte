@@ -7,13 +7,10 @@
 
 <div class="flex items-center gap-2 text-sm">
 	{#each items as item}
-		<a
-			href={item.href}
-			class="text-neutral-500 transition-colors hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-		>
+		<a href={item.href} class="text-text-muted transition-colors hover:text-text-soft">
 			{item.label}
 		</a>
-		<ChevronRight size={14} class="text-neutral-400 dark:text-neutral-600" />
+		<ChevronRight size={14} class="text-text-subtle " />
 	{/each}
-	<span class="font-medium text-neutral-900 dark:text-neutral-50">{current}</span>
+	<span class="font-medium text-text">{current}</span>
 </div>

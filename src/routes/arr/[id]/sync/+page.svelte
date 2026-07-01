@@ -136,10 +136,8 @@
 {#key data.instance.id}
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
-			<h1 class="text-neutral-900 dark:text-neutral-50">Sync Configuration</h1>
-			<p class="text-neutral-600 dark:text-neutral-400">
-				Configure which profiles and settings to sync to this instance.
-			</p>
+			<h1 class="text-text">Sync Configuration</h1>
+			<p class="text-text-soft">Configure which profiles and settings to sync to this instance.</p>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<span data-onboarding="sync-how-it-works">
@@ -181,9 +179,9 @@
 	</div>
 
 	<InfoModal bind:open={showInfoModal} header="How Sync Works">
-		<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+		<div class="space-y-4 text-sm text-text-soft">
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">Automatic Dependencies</div>
+				<div class="font-medium text-text">Automatic Dependencies</div>
 				<p class="mt-1">
 					Quality Profiles will automatically sync the custom formats they need - you don't need to
 					select them separately.
@@ -191,9 +189,7 @@
 			</div>
 
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">
-					One Database Per Instance
-				</div>
+				<div class="font-medium text-text">One Database Per Instance</div>
 				<p class="mt-1">
 					Each Arr instance syncs from a single database. Quality profiles and their custom formats
 					all come from the same database. If you want to use profiles from a different database,
@@ -202,7 +198,7 @@
 			</div>
 
 			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-100">Setup Order</div>
+				<div class="font-medium text-text">Setup Order</div>
 				<p class="mt-1">
 					Configure from top to bottom. Media management and delay profiles must be saved before
 					quality profiles can be synced. Quality profiles depend on these settings to ensure your
@@ -210,12 +206,12 @@
 				</p>
 			</div>
 
-			<div class="border-t border-neutral-200 pt-4 dark:border-neutral-700">
-				<div class="mb-3 font-medium text-neutral-900 dark:text-neutral-100">Sync Methods</div>
+			<div class="border-t border-border pt-4">
+				<div class="mb-3 font-medium text-text">Sync Methods</div>
 
 				<div class="space-y-3">
 					<div>
-						<div class="font-medium text-neutral-800 dark:text-neutral-200">Manual</div>
+						<div class="font-medium text-text">Manual</div>
 						<p class="mt-0.5">
 							You manually click the sync button. Useful for media management settings that rarely
 							get updates.
@@ -223,19 +219,19 @@
 					</div>
 
 					<div>
-						<div class="font-medium text-neutral-800 dark:text-neutral-200">Schedule</div>
+						<div class="font-medium text-text">Schedule</div>
 						<p class="mt-0.5">Syncs on a defined schedule using cron expressions.</p>
 					</div>
 
 					<div>
-						<div class="font-medium text-neutral-800 dark:text-neutral-200">On Pull</div>
+						<div class="font-medium text-text">On Pull</div>
 						<p class="mt-0.5">
 							Syncs when the upstream database gets a change (when you pull from remote).
 						</p>
 					</div>
 
 					<div>
-						<div class="font-medium text-neutral-800 dark:text-neutral-200">On Change</div>
+						<div class="font-medium text-text">On Change</div>
 						<p class="mt-0.5">
 							Syncs when anything changes - whether you pull from upstream or change something
 							yourself.
@@ -244,31 +240,29 @@
 				</div>
 			</div>
 
-			<div class="border-t border-neutral-200 pt-4 dark:border-neutral-700">
-				<div class="mb-3 font-medium text-neutral-900 dark:text-neutral-100">Cron Expressions</div>
+			<div class="border-t border-border pt-4">
+				<div class="mb-3 font-medium text-text">Cron Expressions</div>
 				<p class="mb-3">
 					Schedule uses standard cron syntax: <code
-						class="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-xs dark:bg-neutral-800"
+						class="rounded-control-sm bg-surface-hover px-1.5 py-0.5 font-mono text-xs"
 						>minute hour day month weekday</code
 					>
 				</p>
 				<div class="space-y-1.5 font-mono text-xs">
 					<div class="flex gap-3">
-						<code class="rounded bg-neutral-100 px-1.5 py-0.5 dark:bg-neutral-800">0 * * * *</code>
+						<code class="rounded-control-sm bg-surface-hover px-1.5 py-0.5">0 * * * *</code>
 						<span class="font-sans">Every hour</span>
 					</div>
 					<div class="flex gap-3">
-						<code class="rounded bg-neutral-100 px-1.5 py-0.5 dark:bg-neutral-800"
-							>*/15 * * * *</code
-						>
+						<code class="rounded-control-sm bg-surface-hover px-1.5 py-0.5">*/15 * * * *</code>
 						<span class="font-sans">Every 15 minutes</span>
 					</div>
 					<div class="flex gap-3">
-						<code class="rounded bg-neutral-100 px-1.5 py-0.5 dark:bg-neutral-800">0 0 * * *</code>
+						<code class="rounded-control-sm bg-surface-hover px-1.5 py-0.5">0 0 * * *</code>
 						<span class="font-sans">Daily at midnight</span>
 					</div>
 					<div class="flex gap-3">
-						<code class="rounded bg-neutral-100 px-1.5 py-0.5 dark:bg-neutral-800">0 6 * * 1</code>
+						<code class="rounded-control-sm bg-surface-hover px-1.5 py-0.5">0 6 * * 1</code>
 						<span class="font-sans">Every Monday at 6am</span>
 					</div>
 				</div>

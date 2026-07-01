@@ -588,13 +588,13 @@
 	function getOperationClass(op: string | null): string {
 		switch (op) {
 			case 'create':
-				return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+				return 'bg-success-bg text-success-text ';
 			case 'update':
-				return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+				return 'bg-info-bg text-info-text ';
 			case 'delete':
-				return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+				return 'bg-danger-bg text-danger-text ';
 			default:
-				return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200';
+				return 'bg-surface-hover text-text ';
 		}
 	}
 
@@ -681,10 +681,8 @@
 
 {#if allQuiet}
 	<div class="mt-6 flex h-[calc(100vh-12rem)] flex-col items-center justify-center text-center">
-		<img src={goOnGit} alt="Go on, git!" class="mb-4 w-64 rounded-lg" />
-		<p class="text-sm text-neutral-400 dark:text-neutral-500">
-			No changes to pull or publish right now.
-		</p>
+		<img src={goOnGit} alt="Go on, git!" class="mb-4 w-64 rounded-card" />
+		<p class="text-sm text-text-subtle">No changes to pull or publish right now.</p>
 	</div>
 {:else}
 	<div class="mt-6 space-y-6">
@@ -692,9 +690,7 @@
 		{#if isDeveloper}
 			<section>
 				<div class="mb-3 flex items-center gap-2">
-					<h2
-						class="flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-					>
+					<h2 class="flex items-center gap-2 text-lg font-semibold text-text">
 						<Send size={20} />
 						Outgoing Changes
 					</h2>
@@ -705,13 +701,11 @@
 
 				<!-- Actions Bar -->
 				{#if loading}
-					<div
-						class="mb-4 animate-pulse rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800"
-					>
+					<div class="mb-4 animate-pulse rounded-card border border-border bg-surface p-4">
 						<div class="flex items-center gap-4">
-							<div class="h-9 w-48 rounded-md bg-neutral-200 dark:bg-neutral-700"></div>
-							<div class="h-9 w-24 rounded-md bg-neutral-200 dark:bg-neutral-700"></div>
-							<div class="h-9 w-24 rounded-md bg-neutral-200 dark:bg-neutral-700"></div>
+							<div class="h-9 w-48 rounded-control-sm bg-surface-hover"></div>
+							<div class="h-9 w-24 rounded-control-sm bg-surface-hover"></div>
+							<div class="h-9 w-24 rounded-control-sm bg-surface-hover"></div>
 						</div>
 					</div>
 				{:else if draftChanges.length > 0}
@@ -719,9 +713,7 @@
 						<ActionsBar className="w-full">
 							<div>
 								<ActionButton square={false} on:click={toggleAll}>
-									<div
-										class="flex items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
-									>
+									<div class="flex items-center gap-2 text-sm font-medium text-text-soft">
 										<IconCheckbox checked={allSelected} icon={Check} color="blue" shape="circle" />
 										Select all ({selectableKeys.length})
 									</div>
@@ -797,27 +789,27 @@
 							{/if}
 						{:else if column.key === 'operation'}
 							<span
-								class="inline-flex rounded px-2 py-0.5 font-mono text-xs {getOperationClass(
+								class="inline-flex rounded-control-sm px-2 py-0.5 font-mono text-xs {getOperationClass(
 									row.operation
 								)}"
 							>
 								{formatOperation(row.operation)}
 							</span>
 						{:else if column.key === 'entity'}
-							<span class="text-sm text-neutral-700 dark:text-neutral-300">
+							<span class="text-sm text-text-soft">
 								{formatEntity(row.entity)}
 							</span>
 						{:else if column.key === 'summary'}
-							<span class="text-sm text-neutral-600 dark:text-neutral-400">
+							<span class="text-sm text-text-soft">
 								{row.summary}
 							</span>
 						{:else if column.key === 'name'}
 							<div class="flex flex-col gap-1">
-								<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+								<span class="text-sm font-medium text-text">
 									{row.name}
 								</span>
 								{#if row.requires && row.requires.length > 0}
-									<span class="text-xs text-neutral-500 dark:text-neutral-400">
+									<span class="text-xs text-text-muted">
 										Requires:{' '}
 										{row.requires
 											.map(
@@ -828,7 +820,7 @@
 								{/if}
 							</div>
 						{:else if column.key === 'updatedAt'}
-							<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+							<span class="font-mono text-xs text-text-muted">
 								{fmtDate(row.updatedAt)}
 							</span>
 						{/if}
@@ -851,9 +843,7 @@
 		<section>
 			<div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div class="flex items-center gap-2">
-					<h2
-						class="flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-					>
+					<h2 class="flex items-center gap-2 text-lg font-semibold text-text">
 						<Download size={20} />
 						Incoming Changes
 					</h2>
@@ -869,7 +859,7 @@
 								: `Pull ${incomingChanges.commitsBehind} commit${incomingChanges.commitsBehind === 1 ? '' : 's'}`}
 							variant="secondary"
 							icon={GitPullRequestCreateArrow}
-							iconColor="text-blue-500 dark:text-blue-400"
+							iconColor="text-info-icon "
 							loading={pulling}
 							disabled={pulling}
 							fullWidth
@@ -880,16 +870,14 @@
 			</div>
 
 			{#if loading}
-				<div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
+				<div class="overflow-hidden rounded-card border border-border">
 					<div class="animate-pulse p-8">
-						<div class="h-4 w-48 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+						<div class="h-4 w-48 rounded-control-sm bg-surface-hover"></div>
 					</div>
 				</div>
 			{:else if !incomingChanges?.hasUpdates}
-				<div
-					class="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900"
-				>
-					<p class="text-sm text-neutral-500 dark:text-neutral-400">
+				<div class="rounded-card border border-border bg-surface-muted px-4 py-3">
+					<p class="text-sm text-text-muted">
 						{#if data.database.auto_pull}
 							All caught up. Auto-pull will grab updates for you.
 						{:else}
@@ -912,21 +900,21 @@
 								target="_blank"
 								rel="noopener noreferrer"
 								on:click|stopPropagation
-								class="inline-flex items-center gap-1.5 font-mono text-xs text-accent-600 hover:underline dark:text-accent-400"
+								class="inline-flex items-center gap-1.5 font-mono text-xs text-link-text hover:underline"
 							>
 								{row.shortHash}
 								<ExternalLink size={12} />
 							</a>
 						{:else if column.key === 'message'}
-							<span class="line-clamp-1 text-sm text-neutral-900 dark:text-neutral-100">
+							<span class="line-clamp-1 text-sm text-text">
 								{row.message}
 							</span>
 						{:else if column.key === 'author'}
-							<span class="text-sm text-neutral-600 dark:text-neutral-400">
+							<span class="text-sm text-text-soft">
 								{row.author}
 							</span>
 						{:else if column.key === 'date'}
-							<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+							<span class="font-mono text-xs text-text-muted">
 								{fmtDate(row.date)}
 							</span>
 						{/if}
@@ -934,7 +922,7 @@
 
 					<svelte:fragment slot="expanded" let:row>
 						<div class="space-y-2">
-							<div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+							<div class="flex items-center gap-2 text-xs text-text-muted">
 								<FileText size={14} />
 								<span>{row.files.length} file{row.files.length !== 1 ? 's' : ''} changed</span>
 							</div>
@@ -942,7 +930,7 @@
 								<div class="grid gap-1">
 									{#each row.files as file}
 										<code
-											class="block rounded bg-neutral-100 px-2 py-1 font-mono text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+											class="block rounded-control-sm bg-surface-hover px-2 py-1 font-mono text-xs text-text-soft"
 										>
 											{file}
 										</code>
@@ -983,48 +971,46 @@
 	<svelte:fragment slot="header-extra">
 		{#if previewData}
 			{#if !previewData.checks.clean}
-				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Dirty</Label>
+				<Label variant="danger" size="sm" radius="md"><XCircle size={11} /> Dirty</Label>
 			{/if}
 			{#if !previewData.checks.upToDate}
-				<Label variant="warning" size="sm" rounded="md" mono>
+				<Label variant="warning" size="sm" radius="md" mono>
 					<GitBranch size={11} /> A{previewData.checks.ahead}/B{previewData.checks.behind}
 				</Label>
 			{/if}
 			{#if !previewData.checks.remoteReachable}
-				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Remote failed</Label>
+				<Label variant="danger" size="sm" radius="md"><XCircle size={11} /> Remote failed</Label>
 			{/if}
 			{#if !previewData.checks.manifestValid}
-				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Manifest invalid</Label
-				>
+				<Label variant="danger" size="sm" radius="md"><XCircle size={11} /> Manifest invalid</Label>
 			{/if}
 			{#if !previewData.checks.identitySet}
-				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Identity missing</Label
-				>
+				<Label variant="danger" size="sm" radius="md"><XCircle size={11} /> Identity missing</Label>
 			{/if}
 			{#if !previewData.checks.canWriteToBase}
-				<Label variant="danger" size="sm" rounded="md"><XCircle size={11} /> Publish blocked</Label>
+				<Label variant="danger" size="sm" radius="md"><XCircle size={11} /> Publish blocked</Label>
 			{/if}
 		{/if}
 	</svelte:fragment>
 
 	<svelte:fragment slot="body">
 		{#if previewing}
-			<div class="flex items-center gap-3 text-sm text-neutral-600 dark:text-neutral-400">
+			<div class="flex items-center gap-3 text-sm text-text-soft">
 				<div
-					class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent"
+					class="h-4 w-4 animate-spin rounded-pill border-2 border-border border-t-transparent"
 				></div>
 				Preparing preview...
 			</div>
 		{:else if previewError}
-			<p class="text-sm text-red-600 dark:text-red-400">Preview failed: {previewError}</p>
+			<p class="text-sm text-danger-icon">Preview failed: {previewError}</p>
 		{:else if previewData}
 			<div class="space-y-4">
 				<!-- Commit message -->
-				<InlineCode text={commitMessage.trim()} icon={GitCommit} rounded="md" />
+				<InlineCode text={commitMessage.trim()} icon={GitCommit} radius="md" />
 
 				{#if previewData.errors.length > 0}
 					<div
-						class="rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200"
+						class="rounded-control-sm border border-danger-border bg-danger-bg px-3 py-2 text-xs text-danger-text"
 					>
 						{#each previewData.errors as error}
 							<div>{error}</div>
@@ -1034,7 +1020,7 @@
 
 				{#if previewSelectionMismatch}
 					<div
-						class="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200"
+						class="rounded-control-sm border border-warning-border bg-warning-bg px-3 py-2 text-xs text-warning-text"
 					>
 						Selection changed since preview. Preview again before exporting.
 					</div>
@@ -1042,7 +1028,7 @@
 
 				{#if previewMessageMismatch}
 					<div
-						class="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200"
+						class="rounded-control-sm border border-warning-border bg-warning-bg px-3 py-2 text-xs text-warning-text"
 					>
 						Commit message changed since preview. Preview again before exporting.
 					</div>
@@ -1052,26 +1038,26 @@
 					<CodeBlock code={previewData.content} language="sql">
 						<svelte:fragment slot="header">
 							{#if previewOpCount > 0 || selectedOpCount > 0}
-								<Label variant="secondary" size="sm" rounded="md" mono>
+								<Label variant="secondary" size="sm" radius="md" mono>
 									<FileCode size={11} />
 									{previewData.ok ? (previewData.filepath ?? 'ops/unknown.sql') : '-'}
 								</Label>
 							{/if}
-							<Label variant="secondary" size="sm" rounded="md" mono>
+							<Label variant="secondary" size="sm" radius="md" mono>
 								<Layers size={11} />
 								{previewData.ok ? previewOpCount : selectedOpCount} ops
 							</Label>
 							{#if (previewData.filePaths?.length ?? 0) > 0}
-								<Label variant="secondary" size="sm" rounded="md" mono>
+								<Label variant="secondary" size="sm" radius="md" mono>
 									<Files size={11} />
 									{previewData.filePaths?.length} files
 								</Label>
 							{/if}
-							<Label variant="secondary" size="sm" rounded="md">
+							<Label variant="secondary" size="sm" radius="md">
 								<Clock size={11} />
 								{formatExportedAt(previewData.exportedAt)}
 							</Label>
-							<Label variant="secondary" size="sm" rounded="md">
+							<Label variant="secondary" size="sm" radius="md">
 								<User size={11} />
 								{previewData.gitIdentity?.name ?? '-'} &lt;{previewData.gitIdentity?.email ??
 									'-'}&gt;
@@ -1080,7 +1066,7 @@
 					</CodeBlock>
 				{:else if previewData.ok && (previewData.filePaths?.length ?? 0) > 0}
 					<div
-						class="rounded border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
+						class="rounded-control-sm border border-border bg-surface-muted px-3 py-2 text-xs text-text-soft"
 					>
 						<div class="mb-1 font-semibold">Files to commit:</div>
 						{#each previewData.filePaths ?? [] as fp}
@@ -1088,13 +1074,13 @@
 						{/each}
 					</div>
 				{:else if !previewData.ok}
-					<p class="text-xs text-neutral-500 dark:text-neutral-400">
+					<p class="text-xs text-text-muted">
 						Resolve the preflight errors, then preview again to see the export output.
 					</p>
 				{/if}
 			</div>
 		{:else}
-			<p class="text-sm text-neutral-600 dark:text-neutral-400">No preview data returned.</p>
+			<p class="text-sm text-text-soft">No preview data returned.</p>
 		{/if}
 	</svelte:fragment>
 
@@ -1102,14 +1088,14 @@
 		<Button
 			text="Close"
 			icon={X}
-			iconColor="text-red-500"
+			iconColor="text-danger-icon"
 			disabled={committing}
 			on:click={handlePreviewCancel}
 		/>
 		<Button
 			text="Approve & Export"
 			icon={committing ? Loader2 : Check}
-			iconColor={committing ? '' : 'text-blue-500'}
+			iconColor={committing ? '' : 'text-info-icon'}
 			disabled={previewConfirmDisabled || committing}
 			loading={committing}
 			on:click={handleExportConfirm}

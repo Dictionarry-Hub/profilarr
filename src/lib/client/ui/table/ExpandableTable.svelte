@@ -175,14 +175,14 @@
 			{#each Array(loadingRows) as _}
 				<div class="animate-pulse overflow-hidden rounded-control border border-border bg-surface">
 					<div class="flex items-center justify-between gap-3 px-4 py-3">
-						<div class="h-5 w-32 rounded bg-surface-hover"></div>
-						<div class="h-6 w-6 rounded bg-surface-hover"></div>
+						<div class="h-5 w-32 rounded-control-sm bg-surface-hover"></div>
+						<div class="h-6 w-6 rounded-control-sm bg-surface-hover"></div>
 					</div>
 					<div class="space-y-2 border-t border-border px-4 py-3">
 						{#each columns.slice(1, 4) as _}
 							<div class="flex items-center justify-between gap-4">
-								<div class="h-4 w-16 rounded bg-surface-hover"></div>
-								<div class="h-4 w-24 rounded bg-surface-hover"></div>
+								<div class="h-4 w-16 rounded-control-sm bg-surface-hover"></div>
+								<div class="h-4 w-24 rounded-control-sm bg-surface-hover"></div>
 							</div>
 						{/each}
 					</div>
@@ -352,13 +352,13 @@
 						<tr class="animate-pulse">
 							{#if chevronPosition === 'left'}
 								<td class={compact ? 'px-2 py-2' : 'px-3 py-3'}>
-									<div class="h-6 w-6 rounded bg-surface-hover"></div>
+									<div class="h-6 w-6 rounded-control-sm bg-surface-hover"></div>
 								</td>
 							{/if}
 							{#each columns as column, colIdx}
 								<td class="{compact ? 'px-4 py-2' : 'px-6 py-4'} {column.width || ''}">
 									<div
-										class="h-4 rounded bg-surface-hover"
+										class="h-4 rounded-control-sm bg-surface-hover"
 										style="width: {colIdx === 0
 											? '60%'
 											: colIdx === columns.length - 1
@@ -369,12 +369,12 @@
 							{/each}
 							{#if $$slots.actions}
 								<td class="{compact ? 'px-4 py-2' : 'px-6 py-4'} text-right">
-									<div class="ml-auto h-4 w-16 rounded bg-surface-hover"></div>
+									<div class="ml-auto h-4 w-16 rounded-control-sm bg-surface-hover"></div>
 								</td>
 							{/if}
 							{#if chevronPosition === 'right'}
 								<td class="{compact ? 'px-2 py-2' : 'px-3 py-3'} text-right">
-									<div class="ml-auto h-6 w-6 rounded bg-surface-hover"></div>
+									<div class="ml-auto h-6 w-6 rounded-control-sm bg-surface-hover"></div>
 								</td>
 							{/if}
 						</tr>

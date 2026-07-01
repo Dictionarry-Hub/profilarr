@@ -64,17 +64,17 @@
 				<div class="flex items-center justify-between gap-2">
 					<div class="flex min-w-0 items-center gap-2">
 						<DatabaseAvatar name={database.name} repoUrl={database.repository_url} size="sm" />
-						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+						<h3 class="truncate text-sm font-semibold text-text">
 							{database.name}
 						</h3>
 						{#if database.is_private}
-							<Label variant="secondary" size="sm" rounded="md" mono>
+							<Label variant="secondary" size="sm" radius="md" mono>
 								<Lock size={12} />
 								Private
 							</Label>
 						{/if}
 						{#if database.hasPat}
-							<Label variant="info" size="sm" rounded="md" mono>
+							<Label variant="info" size="sm" radius="md" mono>
 								<Code size={12} />
 								Dev
 							</Label>
@@ -92,7 +92,7 @@
 							icon={Unlink}
 							size="xs"
 							variant="ghost"
-							iconColor="text-red-600 dark:text-red-400"
+							iconColor="text-danger-icon "
 							tooltip="Unlink database"
 							on:click={(e) => handleUnlinkClick(e, database)}
 						/>
@@ -101,36 +101,36 @@
 			</svelte:fragment>
 
 			<div class="flex flex-wrap gap-1">
-				<Label variant="secondary" size="sm" rounded="md" mono>
+				<Label variant="secondary" size="sm" radius="md" mono>
 					{database.repository_url.replace('https://github.com/', '')}
 				</Label>
-				<Label variant="secondary" size="sm" rounded="md"
+				<Label variant="secondary" size="sm" radius="md"
 					>{database.qualityProfileCount} Quality Profiles</Label
 				>
-				<Label variant="secondary" size="sm" rounded="md"
+				<Label variant="secondary" size="sm" radius="md"
 					>{database.customFormatCount} Custom Formats</Label
 				>
-				<Label variant="secondary" size="sm" rounded="md"
+				<Label variant="secondary" size="sm" radius="md"
 					>{database.delayProfileCount} Delay Profiles</Label
 				>
 			</div>
 
 			<svelte:fragment slot="footer">
 				<div
-					class="flex flex-col items-start gap-1.5 text-xs text-neutral-600 sm:flex-row sm:items-center sm:gap-3 dark:text-neutral-400"
+					class="flex flex-col items-start gap-1.5 text-xs text-text-soft sm:flex-row sm:items-center sm:gap-3"
 				>
 					<div class="flex items-center gap-1">
-						<RefreshCw size={12} class="text-blue-500 dark:text-blue-400" />
+						<RefreshCw size={12} class="text-info-icon " />
 						<span>Sync Strategy: {formatSyncStrategy(database.sync_strategy)}</span>
 					</div>
-					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
+					<span class="hidden text-text sm:inline">&middot;</span>
 					<div class="flex items-center gap-1">
-						<Clock size={12} class="text-amber-500 dark:text-amber-400" />
+						<Clock size={12} class="text-warning-icon " />
 						<span>Last Synced: {formatLastSynced(database.last_synced_at)}</span>
 					</div>
-					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
+					<span class="hidden text-text sm:inline">&middot;</span>
 					<div class="flex items-center gap-1">
-						<GitPullRequest size={12} class="text-violet-500 dark:text-violet-400" />
+						<GitPullRequest size={12} class="text-accent-solid" />
 						<span>Auto Pull: {database.auto_pull ? 'On' : 'Off'}</span>
 					</div>
 				</div>

@@ -25,9 +25,9 @@
 	const variantClasses = {
 		neutral: 'border-border bg-surface text-text-soft hover:bg-surface-hover',
 		danger:
-			'border-border bg-surface text-text-soft hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-800 dark:hover:bg-red-900/20 dark:hover:text-red-400',
+			'border-border bg-surface text-text-soft hover:border-danger-border hover:bg-danger-bg hover:text-danger-icon ',
 		accent:
-			'border-border bg-surface text-text-soft hover:border-accent-300 hover:bg-accent-50 hover:text-accent-600 dark:hover:border-accent-700 dark:hover:bg-accent-900/20 dark:hover:text-accent-400'
+			'border-border bg-surface text-text-soft hover:border-accent-solid hover:bg-surface-hover hover:text-accent-solid'
 	};
 
 	function handleClick(event: MouseEvent) {
@@ -42,7 +42,7 @@
 	{type}
 	{disabled}
 	on:click={handleClick}
-	class="inline-flex items-center justify-center rounded border transition-colors {sizeClasses[
+	class="inline-flex items-center justify-center rounded-control-sm border transition-colors {sizeClasses[
 		size
 	]} {variantClasses[variant]} disabled:cursor-not-allowed disabled:opacity-50"
 	{title}

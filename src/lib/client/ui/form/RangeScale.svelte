@@ -34,32 +34,32 @@
 	// Color classes for markers
 	const colorClasses: Record<MarkerColor, { dot: string; badge: string }> = {
 		accent: {
-			dot: 'bg-accent-500',
-			badge: 'bg-accent-100 text-accent-700 dark:bg-accent-900/40 dark:text-accent-300'
+			dot: 'bg-accent-solid',
+			badge: 'bg-surface-hover text-accent-solid'
 		},
 		blue: {
-			dot: 'bg-blue-500',
-			badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+			dot: 'bg-info-bg',
+			badge: 'bg-info-bg text-info-text '
 		},
 		green: {
-			dot: 'bg-green-500',
-			badge: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+			dot: 'bg-success-bg',
+			badge: 'bg-success-bg text-success-text '
 		},
 		orange: {
-			dot: 'bg-orange-500',
-			badge: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+			dot: 'bg-warning-bg',
+			badge: 'bg-warning-bg text-warning-text '
 		},
 		red: {
-			dot: 'bg-red-500',
-			badge: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+			dot: 'bg-danger-bg',
+			badge: 'bg-danger-bg text-danger-text '
 		},
 		purple: {
-			dot: 'bg-purple-500',
-			badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
+			dot: 'bg-accent-solid',
+			badge: 'bg-surface-hover text-accent-solid'
 		},
 		neutral: {
-			dot: 'bg-neutral-500',
-			badge: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'
+			dot: 'bg-surface-hover',
+			badge: 'bg-surface-hover text-text-soft '
 		}
 	};
 
@@ -210,7 +210,7 @@
 	>
 		<!-- Track line -->
 		<div
-			class="absolute rounded-full bg-neutral-200 dark:bg-neutral-700 {orientation === 'horizontal'
+			class="absolute rounded-pill bg-surface-hover {orientation === 'horizontal'
 				? 'top-1/2 h-1 w-full -translate-y-1/2'
 				: 'left-1/2 h-full w-1 -translate-x-1/2'}"
 		></div>
@@ -231,7 +231,7 @@
 					{disabled}
 					on:mousedown={(e) => handleDragStart(index, e)}
 					on:touchstart={(e) => handleDragStart(index, e)}
-					class="relative h-4 w-4 -translate-x-1/2 rounded-full shadow-sm transition-transform disabled:cursor-not-allowed {disabled
+					class="relative h-4 w-4 -translate-x-1/2 rounded-pill shadow-card transition-transform disabled:cursor-not-allowed {disabled
 						? ''
 						: 'cursor-grab hover:scale-125'} {colors.dot} {orientation === 'vertical'
 						? '-translate-y-1/2'
@@ -245,7 +245,9 @@
 						? `left-0 -translate-x-1/2 ${index % 2 === 0 ? 'top-6' : 'bottom-6'}`
 						: 'left-6 translate-x-0'}"
 				>
-					<span class="inline-block rounded px-1.5 py-0.5 text-xs font-medium {colors.badge}">
+					<span
+						class="inline-block rounded-control-sm px-1.5 py-0.5 text-xs font-medium {colors.badge}"
+					>
 						{marker.label}: {unlimitedValue !== null && marker.value >= unlimitedValue
 							? 'Unlimited'
 							: `${displayTransform ? displayTransform(marker.value).toFixed(1) : Math.round(marker.value)}${unit ? ` ${unit}` : ''}`}

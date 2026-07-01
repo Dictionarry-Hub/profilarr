@@ -154,27 +154,20 @@
 	}
 </script>
 
-<div
-	data-onboarding="sync-quality-profiles"
-	class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
->
+<div data-onboarding="sync-quality-profiles" class="rounded-card border border-border bg-surface">
 	<!-- Header -->
 	<div
-		class="flex flex-col gap-4 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between md:gap-6 dark:border-neutral-800"
+		class="flex flex-col gap-4 border-b border-border px-6 py-4 md:flex-row md:items-start md:justify-between md:gap-6"
 	>
 		<div class="min-w-0 md:flex-1">
-			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Quality Profiles</h2>
-			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-				Select quality profiles to sync to this instance.
-			</p>
+			<h2 class="text-xl font-semibold text-text">Quality Profiles</h2>
+			<p class="mt-1 text-sm text-text-soft">Select quality profiles to sync to this instance.</p>
 		</div>
 		{#if qpProgress || cfProgress}
 			<div class="flex flex-col gap-3 md:flex-shrink-0 md:flex-row md:flex-wrap md:gap-5 md:pt-1">
 				{#if qpProgress}
 					<div class="min-w-[9rem]">
-						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-							Quality Profiles
-						</div>
+						<div class="mb-1 text-xs font-medium text-text-muted">Quality Profiles</div>
 						<ProgressIndicator
 							current={qpProgress.total - qpProgress.drifted}
 							target={qpProgress.total}
@@ -189,9 +182,7 @@
 				{/if}
 				{#if cfProgress}
 					<div class="min-w-[9rem]">
-						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-							Custom Formats
-						</div>
+						<div class="mb-1 text-xs font-medium text-text-muted">Custom Formats</div>
 						<ProgressIndicator
 							current={cfProgress.total - cfProgress.drifted}
 							target={cfProgress.total}
@@ -211,21 +202,18 @@
 	<!-- Content -->
 	<div class="p-6">
 		{#if databases.length === 0}
-			<p class="text-sm text-neutral-500 dark:text-neutral-400">No databases configured</p>
+			<p class="text-sm text-text-muted">No databases configured</p>
 		{:else}
 			<div class="space-y-6">
 				{#each databases as database}
 					{@const isInactive = activeDatabaseId !== null && activeDatabaseId !== database.id}
 					<div class="space-y-3">
-						<h3
-							class="text-sm font-semibold text-neutral-900 dark:text-neutral-50"
-							class:opacity-50={isInactive}
-						>
+						<h3 class="text-sm font-semibold text-text" class:opacity-50={isInactive}>
 							{database.name}
 						</h3>
 
 						{#if database.qualityProfiles.length === 0}
-							<p class="text-sm text-neutral-500 dark:text-neutral-400">No quality profiles</p>
+							<p class="text-sm text-text-muted">No quality profiles</p>
 						{:else}
 							<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-5">
 								{#each database.qualityProfiles as profile}

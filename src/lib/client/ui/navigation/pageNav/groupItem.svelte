@@ -64,6 +64,6 @@
 	{/if}
 	<span class="flex-1">{label}</span>
 	{#if alert > 0}
-		<Label variant="info" size="sm" rounded="full">{alert}</Label>
+		<Label variant="info" size="sm" radius="full">{alert}</Label>
 	{/if}
 </a>

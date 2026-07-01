@@ -12,14 +12,14 @@
 
 	$: colorClass =
 		score === null
-			? 'text-neutral-400'
+			? 'text-text-subtle'
 			: !colored
-				? 'text-neutral-900 dark:text-neutral-100'
+				? 'text-text '
 				: score > 0
-					? 'text-emerald-600 dark:text-emerald-400'
+					? 'text-success-icon '
 					: score < 0
-						? 'text-red-600 dark:text-red-400'
-						: 'text-neutral-500';
+						? 'text-danger-icon '
+						: 'text-text-muted';
 
 	$: sizeClass = size === 'sm' ? 'text-xs' : 'text-sm';
 
@@ -36,5 +36,5 @@
 		{displayValue}
 	</span>
 {:else}
-	<span class="text-neutral-400 {sizeClass}">—</span>
+	<span class="text-text-subtle {sizeClass}">—</span>
 {/if}

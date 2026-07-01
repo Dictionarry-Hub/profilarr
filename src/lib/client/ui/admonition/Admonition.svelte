@@ -29,29 +29,29 @@
 
 	const variantStyles: Record<Variant, { accent: string; surface: string; divider: string }> = {
 		info: {
-			accent: 'text-blue-700 dark:text-blue-300',
-			surface: 'border-blue-200 bg-blue-50 dark:border-blue-800/50 dark:bg-blue-950/30',
-			divider: 'border-blue-200 dark:border-blue-800/50'
+			accent: 'text-info-text ',
+			surface: 'border-info-border bg-info-bg ',
+			divider: 'border-info-border '
 		},
 		warning: {
-			accent: 'text-amber-700 dark:text-amber-300',
-			surface: 'border-amber-200 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-950/30',
-			divider: 'border-amber-200 dark:border-amber-800/50'
+			accent: 'text-warning-text ',
+			surface: 'border-warning-border bg-warning-bg ',
+			divider: 'border-warning-border '
 		},
 		danger: {
-			accent: 'text-red-700 dark:text-red-300',
-			surface: 'border-red-200 bg-red-50 dark:border-red-800/50 dark:bg-red-950/30',
-			divider: 'border-red-200 dark:border-red-800/50'
+			accent: 'text-danger-text ',
+			surface: 'border-danger-border bg-danger-bg ',
+			divider: 'border-danger-border '
 		},
 		success: {
-			accent: 'text-green-700 dark:text-green-300',
-			surface: 'border-green-200 bg-green-50 dark:border-green-800/50 dark:bg-green-950/30',
-			divider: 'border-green-200 dark:border-green-800/50'
+			accent: 'text-success-text ',
+			surface: 'border-success-border bg-success-bg ',
+			divider: 'border-success-border '
 		},
 		note: {
-			accent: 'text-neutral-700 dark:text-neutral-300',
-			surface: 'border-neutral-300 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-900',
-			divider: 'border-neutral-300 dark:border-neutral-700/60'
+			accent: 'text-text-soft ',
+			surface: 'border-border bg-surface-muted ',
+			divider: 'border-border '
 		}
 	};
 
@@ -78,13 +78,13 @@
 	$: IconCmp = icon ?? defaultIcons[variant];
 </script>
 
-<div class="overflow-hidden rounded-xl border {style.surface} {className}">
+<div class="overflow-hidden rounded-card border {style.surface} {className}">
 	<div class="flex items-center gap-2 border-b px-4 py-2 {style.divider}">
 		<div class="shrink-0 {style.accent}">
 			<svelte:component this={IconCmp} size={18} />
 		</div>
 		{#if title}
-			<h3 class="flex-1 text-sm font-semibold text-neutral-900 dark:text-neutral-50">{title}</h3>
+			<h3 class="flex-1 text-sm font-semibold text-text">{title}</h3>
 		{:else}
 			<div class="flex-1"></div>
 		{/if}
@@ -98,7 +98,7 @@
 			/>
 		{/if}
 	</div>
-	<div class="px-4 py-3 text-sm text-neutral-700 dark:text-neutral-300">
+	<div class="px-4 py-3 text-sm text-text-soft">
 		<slot />
 	</div>
 </div>

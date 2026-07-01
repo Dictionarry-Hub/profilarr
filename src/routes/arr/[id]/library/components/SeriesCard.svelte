@@ -120,20 +120,20 @@
 </script>
 
 <div
-	class="group flex flex-col overflow-hidden rounded-xl border border-neutral-300 bg-neutral-50 transition-colors dark:border-neutral-700/60 dark:bg-neutral-900"
+	class="group flex flex-col overflow-hidden rounded-card border border-border bg-surface-muted transition-colors"
 >
 	<!-- Poster -->
 	<a
 		href="{baseUrl}/series/{slug}"
 		target="_blank"
 		rel="noopener noreferrer"
-		class="relative aspect-[2/3] w-full overflow-hidden bg-neutral-200 dark:bg-neutral-800"
+		class="relative aspect-[2/3] w-full overflow-hidden bg-surface-hover"
 	>
 		{#if posterUrl}
 			<img src={posterUrl} alt={series.title} loading="lazy" class="h-full w-full object-cover" />
 		{:else}
 			<div class="flex h-full w-full items-center justify-center">
-				<Tv class="h-12 w-12 text-neutral-400 dark:text-neutral-600" />
+				<Tv class="h-12 w-12 text-text-subtle " />
 			</div>
 		{/if}
 		<!-- Monitored indicator -->
@@ -171,15 +171,12 @@
 	<!-- Content -->
 	<div class="flex flex-1 flex-col gap-2 p-3">
 		{#if visibleFields.has('title')}
-			<h3
-				class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100"
-				title={series.title}
-			>
+			<h3 class="truncate text-sm font-semibold text-text" title={series.title}>
 				{series.title}
 			</h3>
 		{/if}
 		{#if visibleFields.has('year') && series.year}
-			<span class="text-xs text-neutral-500 dark:text-neutral-400">{series.year}</span>
+			<span class="text-xs text-text-muted">{series.year}</span>
 		{/if}
 		{#if visibleFields.has('status') && series.status}
 			{#if series.status === 'continuing'}
@@ -213,7 +210,7 @@
 					</Tooltip>
 				{/if}
 				{#if visibleFields.has('size') && series.sizeOnDisk}
-					<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+					<span class="font-mono text-xs text-text-muted">
 						{formatSize(series.sizeOnDisk)}
 					</span>
 				{/if}
@@ -229,13 +226,13 @@
 			/>
 		{/if}
 		{#if visibleFields.has('rating') && series.ratings}
-			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
-				<Star size={12} class="text-yellow-500" />
+			<span class="flex items-center gap-1 text-xs text-text-muted">
+				<Star size={12} class="text-warning-icon" />
 				<span class="font-mono">{series.ratings.value}</span>
 			</span>
 		{/if}
 		{#if visibleFields.has('dateAdded') && series.dateAdded}
-			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+			<span class="flex items-center gap-1 text-xs text-text-muted">
 				<Calendar size={12} />
 				<span class="font-mono"
 					><DateTime
@@ -251,9 +248,9 @@
 
 <InfoModal bind:open={detailOpen} header={series.title} size="2xl">
 	{#if seasonsLoading}
-		<div class="flex items-center gap-2 py-4 text-sm text-neutral-500 dark:text-neutral-400">
+		<div class="flex items-center gap-2 py-4 text-sm text-text-muted">
 			<div
-				class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
+				class="h-4 w-4 animate-spin rounded-pill border-2 border-border border-t-accent-solid"
 			></div>
 			Loading seasons...
 		</div>
@@ -269,39 +266,37 @@
 			>
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'label'}
-						<span class="font-medium text-neutral-900 dark:text-neutral-100">{row.label}</span>
+						<span class="font-medium text-text">{row.label}</span>
 					{:else if column.key === 'episodes'}
 						<span class="font-mono text-xs">
 							<span
 								class={row.fileCount === row.episodeCount
-									? 'text-green-600 dark:text-green-400'
-									: 'text-neutral-700 dark:text-neutral-300'}
+									? 'text-success-icon '
+									: 'text-text-soft '}
 							>
 								{row.fileCount}
 							</span>
-							<span class="text-neutral-400 dark:text-neutral-500">/ {row.episodeCount}</span>
+							<span class="text-text-subtle">/ {row.episodeCount}</span>
 						</span>
 					{/if}
 				</svelte:fragment>
 
 				<svelte:fragment slot="expanded" let:row>
 					{#if episodesLoading.has(row.seasonNumber)}
-						<div
-							class="flex items-center gap-2 px-3 py-3 text-sm text-neutral-500 dark:text-neutral-400"
-						>
+						<div class="flex items-center gap-2 px-3 py-3 text-sm text-text-muted">
 							<div
-								class="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-accent-500"
+								class="h-4 w-4 animate-spin rounded-pill border-2 border-border border-t-accent-solid"
 							></div>
 							Loading episodes...
 						</div>
 					{:else}
 						{@const seasonEpisodes = episodesBySeason.get(row.seasonNumber) ?? []}
-						<div class="divide-y divide-neutral-200 overflow-hidden dark:divide-neutral-700/40">
+						<div class="divide-y divide-border overflow-hidden">
 							{#each seasonEpisodes as ep}
 								<div class="space-y-2 px-3 py-3">
 									<!-- Title + Progress -->
 									<div class="flex items-center justify-between gap-2">
-										<span class="truncate text-sm text-neutral-900 dark:text-neutral-100">
+										<span class="truncate text-sm text-text">
 											{ep.episodeNumber}. {ep.title}
 										</span>
 										{#if ep.hasFile}
@@ -314,14 +309,12 @@
 												/>
 											</div>
 										{:else}
-											<span class="flex-shrink-0 text-xs text-neutral-400 dark:text-neutral-500"
-												>Missing</span
-											>
+											<span class="flex-shrink-0 text-xs text-text-subtle">Missing</span>
 										{/if}
 									</div>
 									<!-- Filename -->
 									{#if ep.fileName}
-										<div class="font-mono text-xs break-all text-neutral-500 dark:text-neutral-400">
+										<div class="font-mono text-xs break-all text-text-muted">
 											{ep.fileName}
 										</div>
 									{/if}
@@ -341,7 +334,7 @@
 			</ExpandableTable>
 		</div>
 	{:else}
-		<span class="text-sm text-neutral-500 dark:text-neutral-400">No seasons found</span>
+		<span class="text-sm text-text-muted">No seasons found</span>
 	{/if}
 </InfoModal>
 

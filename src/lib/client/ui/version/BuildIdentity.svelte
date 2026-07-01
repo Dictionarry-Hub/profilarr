@@ -24,21 +24,21 @@
 </script>
 
 <div class="flex flex-wrap items-center gap-2">
-	<Label variant="secondary" size="md" rounded="md" mono>
+	<Label variant="secondary" size="md" radius="md" mono>
 		{buildString ? `${channelLabel} · ${buildString}` : channelLabel}
 	</Label>
 	{#if kind === 'up-to-date'}
-		<Label variant="success" size="md" rounded="md">Up to date</Label>
+		<Label variant="success" size="md" radius="md">Up to date</Label>
 	{:else if kind === 'out-of-date' && status?.latestVersion}
 		<Label
 			variant="secondary"
 			size="md"
-			rounded="md"
+			radius="md"
 			href={status.releaseUrl ?? undefined}
 			target={status.releaseUrl ? '_blank' : undefined}
 			rel={status.releaseUrl ? 'noopener noreferrer' : undefined}
 		>
-			<ArrowUp class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+			<ArrowUp class="h-3.5 w-3.5 text-success-icon " />
 			Update Available: {status.latestVersion}
 		</Label>
 	{/if}

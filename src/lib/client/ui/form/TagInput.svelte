@@ -64,7 +64,7 @@
 >
 	{#each tags as tag, index (tag)}
 		<span class="inline-flex items-center gap-1">
-			<Label variant={isNegated(tag) ? 'danger' : 'info'} size="md" rounded="md"
+			<Label variant={isNegated(tag) ? 'danger' : 'info'} size="md" radius="md"
 				>{displayName(tag)}</Label
 			>
 			<button

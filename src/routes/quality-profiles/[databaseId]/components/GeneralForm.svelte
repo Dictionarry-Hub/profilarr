@@ -119,8 +119,8 @@
 	<!-- Header with actions -->
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
-			<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
-			<p class="text-neutral-600 dark:text-neutral-400">{description_}</p>
+			<h1 class="text-text">{title}</h1>
+			<p class="text-text-soft">{description_}</p>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
@@ -128,7 +128,7 @@
 					<Button
 						disabled={deleting}
 						icon={deleting ? Loader2 : Trash2}
-						iconColor="text-red-600 dark:text-red-400"
+						iconColor="text-danger-icon "
 						text={deleting ? 'Deleting...' : 'Delete'}
 						on:click={handleDeleteClick}
 					/>
@@ -139,7 +139,7 @@
 				<Button
 					disabled={saving || !isValid || !$isDirty}
 					icon={saving ? Loader2 : Save}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					text={saving ? (mode === 'create' ? 'Creating...' : 'Saving...') : submitButtonText}
 					on:click={handleSaveClick}
 				/>
@@ -224,8 +224,8 @@
 
 			<!-- Tags -->
 			<div class="space-y-2" data-onboarding="qp-general-tags">
-				<div class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Tags</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+				<div class="block text-sm font-medium text-text">Tags</div>
+				<p class="text-xs text-text-soft">
 					Add tags to organize and categorize this quality profile.
 				</p>
 				<TagInput {tags} onchange={(newTags) => update('tags', newTags)} />
@@ -235,8 +235,8 @@
 			{#if availableLanguages.length > 0}
 				<div class="space-y-2" data-onboarding="qp-general-language">
 					<div class="space-y-1">
-						<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Language</div>
-						<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						<div class="text-sm font-medium text-text">Language</div>
+						<p class="text-xs text-text-soft">
 							Set the preferred language for this profile. Leave empty for "Any". Radarr only.
 							Sonarr uses custom formats for language filtering.
 						</p>

@@ -622,8 +622,8 @@
 {#if scoring}
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
-			<h1 class="text-neutral-900 dark:text-neutral-50">Scoring</h1>
-			<p class="text-neutral-600 dark:text-neutral-400">Configure custom format scores</p>
+			<h1 class="text-text">Scoring</h1>
+			<p class="text-text-soft">Configure custom format scores</p>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
@@ -632,7 +632,7 @@
 				<Button
 					disabled={isSaving || !$isDirty}
 					icon={isSaving ? Loader2 : Save}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					text={isSaving ? 'Saving...' : 'Save'}
 					on:click={handleSaveClick}
 				/>
@@ -689,15 +689,10 @@
 		<!-- Profile-level Score Settings -->
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 			<div class="space-y-2" data-onboarding="qp-scoring-upgrades-allowed">
-				<label
-					for="upgradesAllowed"
-					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
-				>
+				<label for="upgradesAllowed" class="block text-sm font-medium text-text">
 					Upgrades Allowed
 				</label>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					Allow this profile to upgrade existing media
-				</p>
+				<p class="text-xs text-text-soft">Allow this profile to upgrade existing media</p>
 				<Toggle
 					checked={upgradesAllowed}
 					label={upgradesAllowed ? 'Enabled' : 'Disabled'}
@@ -708,15 +703,10 @@
 			</div>
 
 			<div class="space-y-2" data-onboarding="qp-scoring-minimum">
-				<label
-					for="minimumScore"
-					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
-				>
+				<label for="minimumScore" class="block text-sm font-medium text-text">
 					Minimum Score
 				</label>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					Minimum custom format score required to download
-				</p>
+				<p class="text-xs text-text-soft">Minimum custom format score required to download</p>
 				<NumberInput
 					name="minimumScore"
 					value={minimumScore}
@@ -727,15 +717,10 @@
 			</div>
 
 			<div class="space-y-2" data-onboarding="qp-scoring-upgrade-until">
-				<label
-					for="upgradeUntilScore"
-					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
-				>
+				<label for="upgradeUntilScore" class="block text-sm font-medium text-text">
 					Upgrade Until Score
 				</label>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					Stop upgrading when this score is reached
-				</p>
+				<p class="text-xs text-text-soft">Stop upgrading when this score is reached</p>
 				<NumberInput
 					name="upgradeUntilScore"
 					value={upgradeUntilScore}
@@ -747,15 +732,10 @@
 			</div>
 
 			<div class="space-y-2" data-onboarding="qp-scoring-increment">
-				<label
-					for="upgradeScoreIncrement"
-					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
-				>
+				<label for="upgradeScoreIncrement" class="block text-sm font-medium text-text">
 					Upgrade Score Increment
 				</label>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					Minimum score improvement needed to upgrade
-				</p>
+				<p class="text-xs text-text-soft">Minimum score improvement needed to upgrade</p>
 				<NumberInput
 					name="upgradeScoreIncrement"
 					value={upgradeScoreIncrement}
@@ -882,10 +862,8 @@
 				<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
 					<Dropdown position={dropdownPosition} minWidth="16rem">
 						<!-- Save current config form -->
-						<div class="border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
-							<div class="mb-2 text-xs font-medium text-neutral-700 dark:text-neutral-300">
-								Save Current Settings
-							</div>
+						<div class="border-b border-border px-4 py-3">
+							<div class="mb-2 text-xs font-medium text-text-soft">Save Current Settings</div>
 							<form on:submit|preventDefault={handleSaveProfile} class="space-y-2">
 								<FormInput
 									label="Profile name"
@@ -945,13 +923,13 @@
 		<!-- Custom Format Scores Tables -->
 		{#if searchQuery === 'santiagoisthebest'}
 			<div
-				class="flex items-center justify-center rounded-lg border border-neutral-200 bg-white p-8 dark:border-neutral-800 dark:bg-neutral-900"
+				class="flex items-center justify-center rounded-card border border-border bg-surface p-8"
 			>
 				<img src="/src/lib/client/assets/thanks.gif" alt="Thanks!" class="max-w-full" />
 			</div>
 		{:else if searchQuery === 'rickroll' || searchQuery === 'nevergonnagiveyouup'}
 			<div
-				class="flex items-center justify-center rounded-lg border border-neutral-200 bg-white p-8 dark:border-neutral-800 dark:bg-neutral-900"
+				class="flex items-center justify-center rounded-card border border-border bg-surface p-8"
 			>
 				<img
 					src="/src/lib/client/assets/nggyu.gif"
@@ -960,8 +938,8 @@
 				/>
 			</div>
 		{:else if sortedCustomFormats.length === 0}
-			<div class="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
-				<div class="px-6 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
+			<div class="overflow-x-auto rounded-card border border-border">
+				<div class="px-6 py-8 text-center text-sm text-text-muted">
 					{#if scoring.customFormats.length === 0}
 						No custom formats found
 					{:else}
@@ -1000,9 +978,9 @@
 {/if}
 
 <InfoModal bind:open={showInfoModal} header="Custom Format Scoring">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="space-y-4 text-sm text-text-soft">
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Custom Format Scores</div>
+			<div class="font-medium text-text">Custom Format Scores</div>
 			<div class="mt-1">
 				Each custom format can have different scores for different Arr types (Radarr, Sonarr). The
 				score determines how much a release is preferred when it matches the custom format.
@@ -1010,7 +988,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Minimum Score</div>
+			<div class="font-medium text-text">Minimum Score</div>
 			<div class="mt-1">
 				The minimum total custom format score required for a release to be downloaded. Releases with
 				scores below this threshold will be rejected.
@@ -1018,7 +996,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Upgrade Until Score</div>
+			<div class="font-medium text-text">Upgrade Until Score</div>
 			<div class="mt-1">
 				Once a release reaches this score, the system will stop looking for upgrades. This prevents
 				unnecessary upgrades when you've already got a good quality release.
@@ -1026,7 +1004,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Upgrade Score Increment</div>
+			<div class="font-medium text-text">Upgrade Score Increment</div>
 			<div class="mt-1">
 				The minimum score improvement required to trigger an upgrade. This prevents minor upgrades
 				that don't significantly improve quality.
@@ -1034,9 +1012,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">
-				Positive vs Negative Scores
-			</div>
+			<div class="font-medium text-text">Positive vs Negative Scores</div>
 			<div class="mt-1">
 				Positive scores increase preference for releases matching the custom format. Negative scores
 				decrease preference or can block releases entirely when combined with the minimum score
@@ -1047,9 +1023,9 @@
 </InfoModal>
 
 <InfoModal bind:open={showOptionsInfoModal} header="Display Options">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="space-y-4 text-sm text-text-soft">
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Search</div>
+			<div class="font-medium text-text">Search</div>
 			<div class="mt-1">
 				Filter custom formats by name. The search is case-insensitive and matches any part of the
 				format name.
@@ -1057,7 +1033,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Sort</div>
+			<div class="font-medium text-text">Sort</div>
 			<div class="mt-1">
 				Sort custom formats by Name (A-Z), Radarr score, or Sonarr score. Click the same option
 				again to reverse the sort direction (ascending ↑ or descending ↓). Formats with no score are
@@ -1066,7 +1042,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Grouping</div>
+			<div class="font-medium text-text">Grouping</div>
 			<div class="mt-1">
 				Organize custom formats into separate tables based on their tags. You can select multiple
 				groups at once. Available groups include Audio, HDR, Release Group, Codec, Resolution, and
@@ -1076,7 +1052,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Custom Groups</div>
+			<div class="font-medium text-text">Custom Groups</div>
 			<div class="mt-1">
 				Create your own custom groups by entering a name and comma-separated tags at the bottom of
 				the Grouping dropdown. Your custom groups are saved to your browser and can be deleted at
@@ -1086,7 +1062,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Tiling</div>
+			<div class="font-medium text-text">Tiling</div>
 			<div class="mt-1">
 				Display tables in 1, 2, or 3 columns. This is especially useful when using grouping to view
 				multiple format categories side-by-side.
@@ -1094,7 +1070,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Hide Unscored Formats</div>
+			<div class="font-medium text-text">Hide Unscored Formats</div>
 			<div class="mt-1">
 				Hide custom formats that have no score assigned for any Arr type. This helps focus on
 				formats that are currently being used in your quality profile.
@@ -1102,7 +1078,7 @@
 		</div>
 
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Profiles</div>
+			<div class="font-medium text-text">Profiles</div>
 			<div class="mt-1">
 				Save your current display configuration (search, sort, grouping, custom groups, tiling, and
 				options) as a named profile. Load saved profiles to quickly switch between different views.

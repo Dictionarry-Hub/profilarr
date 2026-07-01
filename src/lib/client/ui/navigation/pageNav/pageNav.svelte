@@ -46,7 +46,7 @@
 {#if $mobileNavOpen}
 	<button
 		type="button"
-		class="fixed inset-0 z-[60] bg-black/50 md:hidden"
+		class="fixed inset-0 z-[60] bg-overlay md:hidden"
 		on:click={() => mobileNavOpen.close()}
 		aria-label="Close menu"
 	></button>
@@ -68,7 +68,7 @@
 		<button
 			type="button"
 			on:click={() => mobileNavOpen.close()}
-			class="rounded-md p-1.5 text-text-muted hover:bg-surface-hover hover:text-text-soft"
+			class="rounded-control-sm p-1.5 text-text-muted hover:bg-surface-hover hover:text-text-soft"
 			aria-label="Close menu"
 		>
 			<X size={20} />

@@ -66,7 +66,7 @@
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
 			<div class="flex flex-wrap items-center gap-2">
-				<span class="text-sm text-neutral-700 dark:text-neutral-200">
+				<span class="text-sm text-text-soft">
 					{row.name}
 				</span>
 				<Badge variant={changeBadgeVariant(row.change)} size="sm">
@@ -78,7 +78,7 @@
 			{#if change.before !== undefined && change.after !== undefined && change.before !== change.after}
 				<div class="flex flex-wrap items-center gap-1">
 					<Badge variant="neutral" size="sm">{formatTypeLabel(change.before as string)}</Badge>
-					<span class="text-neutral-400">-&gt;</span>
+					<span class="text-text-subtle">-&gt;</span>
 					<Badge variant="neutral" size="sm">{formatTypeLabel(change.after as string)}</Badge>
 				</div>
 			{:else}
@@ -93,7 +93,7 @@
 					<Badge variant={(change.before as boolean) ? 'success' : 'neutral'} size="sm">
 						{formatBoolean(change.before as boolean)}
 					</Badge>
-					<span class="text-neutral-400">-&gt;</span>
+					<span class="text-text-subtle">-&gt;</span>
 					<Badge variant={(change.after as boolean) ? 'success' : 'neutral'} size="sm">
 						{formatBoolean(change.after as boolean)}
 					</Badge>
@@ -108,14 +108,14 @@
 			{#if change.before !== undefined && change.after !== undefined && change.before !== change.after}
 				<div class="space-y-2">
 					<div>
-						<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Before</div>
+						<div class="text-xs font-medium text-text-muted">Before</div>
 						<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
 							<!-- nosemgrep: profilarr.xss.at-html-usage -->
 							{@html parseMarkdown(String(change.before ?? ''))}
 						</div>
 					</div>
 					<div>
-						<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">After</div>
+						<div class="text-xs font-medium text-text-muted">After</div>
 						<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
 							<!-- nosemgrep: profilarr.xss.at-html-usage -->
 							{@html parseMarkdown(String(change.after ?? ''))}
@@ -128,7 +128,7 @@
 					{@html parseMarkdown(String(change.after ?? change.before ?? ''))}
 				</div>
 			{:else}
-				<span class="text-sm text-neutral-400">—</span>
+				<span class="text-sm text-text-subtle">—</span>
 			{/if}
 		{/if}
 	</svelte:fragment>

@@ -67,7 +67,7 @@
 			sortAccessor: (row) => new Date(row.timestamp).getTime(),
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — date formatting, not user content
-				html: `<span class="font-mono text-xs text-neutral-600 dark:text-neutral-400">${formatDateTime(row.timestamp, $serverTimezone, $dateFormat)}</span>`
+				html: `<span class="font-mono text-xs text-text-soft ">${formatDateTime(row.timestamp, $serverTimezone, $dateFormat)}</span>`
 			})
 		},
 		{
@@ -281,8 +281,8 @@
 <div class="p-4 md:p-8">
 	<!-- Header -->
 	<div class="mb-8">
-		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">Logs</h1>
-		<p class="mt-3 text-base text-neutral-600 md:text-lg dark:text-neutral-400">
+		<h1 class="text-2xl font-bold text-text md:text-3xl">Logs</h1>
+		<p class="mt-3 text-base text-text-soft md:text-lg">
 			Application logs with filtering and search
 		</p>
 	</div>
@@ -320,9 +320,7 @@
 	></form>
 
 	<!-- Stats -->
-	<div
-		class="mt-6 mb-4 flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400"
-	>
+	<div class="mt-6 mb-4 flex items-center justify-between text-sm text-text-soft">
 		<span>
 			Showing {startIndex + 1}-{endIndex} of {filteredLogs.length} logs
 			{#if filteredLogs.length !== data.logs.length}

@@ -90,18 +90,14 @@
 <!-- Naming Configs Content -->
 <div class="mt-6">
 	{#if data.namingConfigs.length === 0}
-		<div
-			class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-		>
-			<p class="text-neutral-600 dark:text-neutral-400">
+		<div class="rounded-card border border-border bg-surface p-8 text-center">
+			<p class="text-text-soft">
 				No naming configs found for {data.currentDatabase?.name}
 			</p>
 		</div>
 	{:else if $filtered.length === 0}
-		<div
-			class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-		>
-			<p class="text-neutral-600 dark:text-neutral-400">No naming configs match your search</p>
+		<div class="rounded-card border border-border bg-surface p-8 text-center">
+			<p class="text-text-soft">No naming configs match your search</p>
 		</div>
 	{:else if $view === 'table'}
 		<TableView

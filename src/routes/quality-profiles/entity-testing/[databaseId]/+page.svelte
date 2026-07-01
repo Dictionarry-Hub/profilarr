@@ -388,9 +388,7 @@
 			square={!selectedProfile}
 		>
 			{#if selectedProfile}
-				<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300"
-					>{selectedProfile.name}</span
-				>
+				<span class="ml-2 text-sm text-text-soft">{selectedProfile.name}</span>
 			{/if}
 			<Dropdown slot="dropdown" position="right">
 				<DropdownHeader label="Quality Profile" />
@@ -433,22 +431,19 @@
 	<!-- Entity Testing Content -->
 	<div class="mt-6">
 		{#if data.testEntities.length === 0}
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-			>
+			<div class="rounded-card border border-border bg-surface p-8 text-center">
 				{#if !data.tmdbConfigured}
 					<div class="flex flex-col items-center gap-2">
-						<AlertTriangle size={24} class="text-amber-500" />
-						<p class="text-neutral-600 dark:text-neutral-400">
+						<AlertTriangle size={24} class="text-warning-icon" />
+						<p class="text-text-soft">
 							TMDB API key not configured. <a
 								href="/settings/general"
-								class="text-accent-600 hover:underline dark:text-accent-400"
-								>Configure in Settings</a
+								class="text-link-text hover:underline">Configure in Settings</a
 							>
 						</p>
 					</div>
 				{:else}
-					<p class="text-neutral-600 dark:text-neutral-400">
+					<p class="text-text-soft">
 						No entity tests found for {data.currentDatabase?.name}
 					</p>
 				{/if}
@@ -477,16 +472,16 @@
 </div>
 
 <InfoModal bind:open={showInfoModal} header="How Entity Testing Works">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="space-y-4 text-sm text-text-soft">
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Adding Entities</div>
+			<div class="font-medium text-text">Adding Entities</div>
 			<p class="mt-1">
 				Add movies or TV series from TMDB to use as test cases. These represent the media you want
 				to simulate release matching for.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Test Releases</div>
+			<div class="font-medium text-text">Test Releases</div>
 			<p class="mt-1">
 				For each entity, add test releases with realistic release titles (e.g.,
 				"Movie.2024.1080p.BluRay.REMUX-GROUP"). You can also specify size, languages, indexers, and
@@ -494,14 +489,14 @@
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Quality Profile Scoring</div>
+			<div class="font-medium text-text">Quality Profile Scoring</div>
 			<p class="mt-1">
 				Select a quality profile from the dropdown to see how each release would score. The score is
 				calculated by matching custom formats and summing their configured point values.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Custom Format Matching</div>
+			<div class="font-medium text-text">Custom Format Matching</div>
 			<p class="mt-1">
 				Expand a release row to see parsed metadata and which custom formats matched. Each matched
 				format shows its score contribution, helping you understand why a release scored the way it

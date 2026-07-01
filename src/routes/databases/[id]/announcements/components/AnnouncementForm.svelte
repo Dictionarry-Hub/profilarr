@@ -113,10 +113,10 @@
 <div class="space-y-5">
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
-			<h1 class="text-neutral-900 dark:text-neutral-50">
+			<h1 class="text-text">
 				{mode === 'create' ? 'New announcement' : 'Edit announcement'}
 			</h1>
-			<p class="text-neutral-600 dark:text-neutral-400">
+			<p class="text-text-soft">
 				{mode === 'create'
 					? 'Publish a message that linked instances of this database will see in their inbox.'
 					: 'Edit, save, or withdraw this announcement.'}
@@ -128,7 +128,7 @@
 					text="Withdraw"
 					icon={Trash2}
 					variant="secondary"
-					iconColor="text-red-600 dark:text-red-400"
+					iconColor="text-danger-icon "
 					loading={withdrawing}
 					disabled={withdrawing || saving}
 					on:click={() => (showDeleteModal = true)}
@@ -137,7 +137,7 @@
 			<Button
 				text={saving ? 'Saving...' : 'Save'}
 				icon={saving ? Loader2 : Save}
-				iconColor="text-blue-600 dark:text-blue-400"
+				iconColor="text-info-icon "
 				disabled={!canSubmit || saving || withdrawing}
 				on:click={onSubmitClick}
 			/>
@@ -185,9 +185,7 @@
 		<input type="hidden" name="link" value={link} />
 		<input type="hidden" name="body" value={body} />
 
-		<div
-			class="space-y-5 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
-		>
+		<div class="space-y-5 rounded-card border border-border bg-surface p-4">
 			<div class="grid gap-4 md:grid-cols-10">
 				<div class="md:col-span-9">
 					<FormInput
@@ -199,8 +197,8 @@
 					/>
 				</div>
 				<div class="space-y-2 md:col-span-1">
-					<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Severity<span class="text-red-500">*</span>
+					<span class="block text-sm font-medium text-text">
+						Severity<span class="text-danger-icon">*</span>
 					</span>
 					<DropdownSelect
 						value={severity}
@@ -213,8 +211,8 @@
 
 			<div class="grid gap-4 md:flex md:items-start">
 				<div class="min-w-0 space-y-2">
-					<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Published<span class="text-red-500">*</span>
+					<span class="block text-sm font-medium text-text">
+						Published<span class="text-danger-icon">*</span>
 					</span>
 					<DateInput
 						label="Published date"
@@ -225,8 +223,8 @@
 				</div>
 
 				<div class="min-w-0 space-y-2">
-					<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Expires<span class="text-red-500">*</span>
+					<span class="block text-sm font-medium text-text">
+						Expires<span class="text-danger-icon">*</span>
 					</span>
 					<DateInput
 						label="Expires date"

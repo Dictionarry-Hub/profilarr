@@ -91,18 +91,14 @@
 	<!-- Delay Profiles Content -->
 	<div class="mt-6">
 		{#if data.delayProfiles.length === 0}
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-			>
-				<p class="text-neutral-600 dark:text-neutral-400">
+			<div class="rounded-card border border-border bg-surface p-8 text-center">
+				<p class="text-text-soft">
 					No delay profiles found for {data.currentDatabase?.name}
 				</p>
 			</div>
 		{:else if $filtered.length === 0}
-			<div
-				class="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900"
-			>
-				<p class="text-neutral-600 dark:text-neutral-400">No delay profiles match your search</p>
+			<div class="rounded-card border border-border bg-surface p-8 text-center">
+				<p class="text-text-soft">No delay profiles match your search</p>
 			</div>
 		{:else if $view === 'table'}
 			<TableView profiles={$filtered} on:clone={handleClone} on:export={handleExport} />
@@ -113,27 +109,23 @@
 </div>
 
 <InfoModal bind:open={showInfoModal} header="How Delay Profile Sync Works">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="space-y-4 text-sm text-text-soft">
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">
-				Replaces Existing Profiles
-			</div>
+			<div class="font-medium text-text">Replaces Existing Profiles</div>
 			<p class="mt-1">
 				When syncing, all existing delay profiles on the arr instance are deleted and replaced with
 				the ones you've selected. The default profile (which cannot be deleted) is preserved.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">
-				Selection Order = Priority
-			</div>
+			<div class="font-medium text-text">Selection Order = Priority</div>
 			<p class="mt-1">
 				The order you select profiles determines their priority. The first profile in your selection
 				list gets the highest priority (order 1), the second gets order 2, and so on.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Tag-Based Matching</div>
+			<div class="font-medium text-text">Tag-Based Matching</div>
 			<p class="mt-1">
 				Delay profiles use tags to apply to specific series/movies. When multiple profiles match
 				(via tags), the one with the lowest order number takes precedence.

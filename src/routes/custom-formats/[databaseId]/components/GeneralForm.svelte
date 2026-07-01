@@ -110,8 +110,8 @@
 	<!-- Header with actions -->
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
-			<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h2>
-			<p class="text-sm text-neutral-600 dark:text-neutral-400">{description_}</p>
+			<h2 class="text-lg font-semibold text-text">{title}</h2>
+			<p class="text-sm text-text-soft">{description_}</p>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
@@ -119,7 +119,7 @@
 					<Button
 						disabled={deleting || deleteBlocked}
 						icon={deleting ? Loader2 : Trash2}
-						iconColor="text-red-600 dark:text-red-400"
+						iconColor="text-danger-icon "
 						text={deleting ? 'Deleting...' : 'Delete'}
 						tooltip={deleteTooltip}
 						on:click={handleDeleteClick}
@@ -131,7 +131,7 @@
 				<Button
 					disabled={saving || !isValid || !$isDirty}
 					icon={saving ? Loader2 : Save}
-					iconColor="text-blue-600 dark:text-blue-400"
+					iconColor="text-info-icon "
 					text={saving ? (mode === 'create' ? 'Creating...' : 'Saving...') : submitButtonText}
 					on:click={handleSaveClick}
 				/>
@@ -192,18 +192,14 @@
 			<!-- Name + Include In Rename -->
 			<div class="space-y-2">
 				<div class="flex items-center justify-between">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Name<span class="text-red-500">*</span>
+					<div class="text-sm font-medium text-text">
+						Name<span class="text-danger-icon">*</span>
 					</div>
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Include In Rename
-					</div>
+					<div class="text-sm font-medium text-text">Include In Rename</div>
 				</div>
 				<div class="flex items-center justify-between">
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						The name of this custom format
-					</p>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					<p class="text-xs text-text-soft">The name of this custom format</p>
+					<p class="text-xs text-text-soft">
 						When enabled, this custom format's name will be included in the renamed filename.
 					</p>
 				</div>
@@ -245,8 +241,8 @@
 
 				<!-- Tags -->
 				<div class="space-y-2">
-					<div class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Tags</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					<div class="block text-sm font-medium text-text">Tags</div>
+					<p class="text-xs text-text-soft">
 						Add tags to organize and categorize this custom format.
 					</p>
 					<TagInput {tags} onchange={(newTags) => update('tags', newTags)} />

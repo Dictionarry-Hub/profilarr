@@ -384,7 +384,7 @@
 		{/each}
 
 		{#if activeFieldDef}
-			<Label variant="info" size="md" rounded="md">{activeFieldDef.label}</Label>
+			<Label variant="info" size="md" radius="md">{activeFieldDef.label}</Label>
 			<input
 				bind:this={valueInputEl}
 				type="text"
@@ -435,7 +435,7 @@
 
 <style>
 	/* Re-apply rounding stripped by ActionsBar's global border-radius reset.
-	   The Dropdown component's own overflow-hidden + rounded-xl handles
+	   The Dropdown component's own overflow-hidden + rounded-card handles
 	   internal clipping, so we only need to restore the container radius. */
 	.smart-filter-bar > :global(:nth-child(n + 2)) {
 		border-radius: var(--theme-radius-control) !important;

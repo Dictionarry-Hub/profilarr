@@ -225,14 +225,10 @@
 >
 	<div slot="body" class="space-y-4">
 		{#if !tmdbConfigured}
-			<div
-				class="rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800"
-			>
-				<p class="text-sm text-neutral-600 dark:text-neutral-300">
+			<div class="rounded-card border border-border bg-surface-muted p-4">
+				<p class="text-sm text-text-soft">
 					TMDB API key not configured. Please add your API key in
-					<a
-						href="/settings/general"
-						class="font-medium text-accent-600 hover:underline dark:text-accent-400">Settings</a
+					<a href="/settings/general" class="font-medium text-link-text hover:underline">Settings</a
 					>
 					to search for movies and TV series.
 				</p>
@@ -302,16 +298,14 @@
 			<!-- Results -->
 			{#if isSearching || activeQuery || results.length > 0}
 				<div
-					class="max-h-96 overflow-hidden overflow-y-auto rounded-xl border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50"
+					class="max-h-96 overflow-hidden overflow-y-auto rounded-card border border-border bg-surface"
 				>
 					{#if isSearching}
 						<div class="flex items-center justify-center p-8">
-							<Loader2 size={24} class="animate-spin text-neutral-400" />
+							<Loader2 size={24} class="animate-spin text-text-subtle" />
 						</div>
 					{:else if results.length === 0}
-						<div class="p-8 text-center text-neutral-500 dark:text-neutral-400">
-							No results found
-						</div>
+						<div class="p-8 text-center text-text-muted">No results found</div>
 					{:else}
 						<SelectableContainer>
 							{#each sortedResults as item}
@@ -324,7 +318,7 @@
 									<div class="flex gap-3">
 										<!-- Poster -->
 										<div
-											class="h-24 w-16 flex-shrink-0 overflow-hidden rounded bg-neutral-200 dark:bg-neutral-700"
+											class="h-24 w-16 flex-shrink-0 overflow-hidden rounded-control-sm bg-surface-hover"
 										>
 											{#if item.posterPath}
 												<img
@@ -335,9 +329,9 @@
 											{:else}
 												<div class="flex h-full w-full items-center justify-center">
 													{#if item.type === 'movie'}
-														<Film size={24} class="text-neutral-400" />
+														<Film size={24} class="text-text-subtle" />
 													{:else}
-														<Tv size={24} class="text-neutral-400" />
+														<Tv size={24} class="text-text-subtle" />
 													{/if}
 												</div>
 											{/if}
@@ -347,12 +341,10 @@
 										<div class="flex min-w-0 flex-1 flex-col">
 											<div class="flex items-start gap-2">
 												<div class="min-w-0 flex-1">
-													<h4 class="truncate font-medium text-neutral-900 dark:text-neutral-100">
+													<h4 class="truncate font-medium text-text">
 														{item.title}
 													</h4>
-													<div
-														class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400"
-													>
+													<div class="flex items-center gap-2 text-xs text-text-muted">
 														<span class="flex items-center gap-1">
 															{#if item.type === 'movie'}
 																<Film size={12} />
@@ -374,7 +366,7 @@
 													</Badge>
 												{/if}
 											</div>
-											<p class="mt-1 line-clamp-2 text-xs text-neutral-600 dark:text-neutral-400">
+											<p class="mt-1 line-clamp-2 text-xs text-text-soft">
 												{item.overview || 'No description available'}
 											</p>
 										</div>
@@ -388,14 +380,14 @@
 
 			<!-- Selected Items -->
 			<div class="space-y-2">
-				<div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+				<div class="text-sm font-medium text-text-soft">
 					Selected ({selectedItems.size})
 				</div>
 				<div class="flex flex-wrap gap-2">
 					{#each Array.from(selectedItems.values()) as item}
 						<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 						<div class="cursor-pointer" on:click={() => removeItem(item)}>
-							<Label variant="secondary" size="md" rounded="md">
+							<Label variant="secondary" size="md" radius="md">
 								{#if item.type === 'movie'}
 									<Film size={12} />
 								{:else}

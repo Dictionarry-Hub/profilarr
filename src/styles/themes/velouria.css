@@ -93,6 +93,7 @@
 
 	/* Links: a cooler frequency in the transmission */
 	--theme-link-text: #80a8d8;
+	--theme-overlay: rgb(0 0 0 / 0.5);
 
 	/* Smooth, organic, like a planet's curve */
 	--theme-radius-control-sm: 0.375rem;

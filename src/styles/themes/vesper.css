@@ -85,6 +85,7 @@
 
 	/* Links: a cooler star, not the evening one */
 	--theme-link-text: #9ab0f0;
+	--theme-overlay: rgb(0 0 0 / 0.5);
 
 	/* Organic, nothing sharp — like the curve of the horizon */
 	--theme-radius-control-sm: 0.5rem;

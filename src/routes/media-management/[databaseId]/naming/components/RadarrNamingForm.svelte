@@ -129,21 +129,21 @@
 
 <StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 	<div slot="left">
-		<h1 class="text-neutral-900 dark:text-neutral-50">{title}</h1>
-		<p class="text-neutral-600 dark:text-neutral-400">{description}</p>
+		<h1 class="text-text">{title}</h1>
+		<p class="text-text-soft">{description}</p>
 	</div>
 	<div slot="right" class="flex items-center gap-2">
 		<Button
 			text="Info"
 			icon={Info}
-			iconColor="text-blue-600 dark:text-blue-400"
+			iconColor="text-info-icon "
 			on:click={() => (showInfoModal = true)}
 		/>
 		{#if mode === 'edit'}
 			<Button
 				text={deleting ? 'Deleting...' : 'Delete'}
 				icon={Trash2}
-				iconColor="text-red-600 dark:text-red-400"
+				iconColor="text-danger-icon "
 				disabled={deleting || saving}
 				on:click={handleDeleteClick}
 			/>
@@ -151,7 +151,7 @@
 		<Button
 			text={saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
 			icon={Save}
-			iconColor="text-blue-600 dark:text-blue-400"
+			iconColor="text-info-icon "
 			disabled={saving || !isValid || !$isDirty}
 			on:click={handleSaveClick}
 		/>
@@ -163,17 +163,15 @@
 		<div class="space-y-2">
 			<div class="flex items-center justify-between gap-4">
 				<div>
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Name<span class="text-red-500">*</span>
+					<div class="text-sm font-medium text-text">
+						Name<span class="text-danger-icon">*</span>
 					</div>
 				</div>
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Rename Movies</div>
+				<div class="text-sm font-medium text-text">Rename Movies</div>
 			</div>
 			<div class="flex items-center justify-between gap-4">
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					The name of this Radarr naming configuration.
-				</p>
-				<p class="text-right text-xs text-neutral-600 dark:text-neutral-400">
+				<p class="text-xs text-text-soft">The name of this Radarr naming configuration.</p>
+				<p class="text-right text-xs text-text-soft">
 					Rename movie files to match the naming format.
 				</p>
 			</div>
@@ -204,10 +202,8 @@
 			data-onboarding="media-naming-formats"
 		>
 			<div class="space-y-1">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">Naming Formats</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					Control how Radarr names movie files and folders.
-				</p>
+				<div class="text-sm font-medium text-text">Naming Formats</div>
+				<p class="text-xs text-text-soft">Control how Radarr names movie files and folders.</p>
 			</div>
 			<div>
 				<TokenAutocomplete
@@ -244,10 +240,8 @@
 			data-onboarding="media-naming-character-replacement"
 		>
 			<div class="space-y-1">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Character Replacement
-				</div>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+				<div class="text-sm font-medium text-text">Character Replacement</div>
+				<p class="text-xs text-text-soft">
 					Control how illegal filesystem characters are handled in generated names.
 				</p>
 			</div>
@@ -261,15 +255,11 @@
 					disabled={!formData.rename}
 					on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
 				/>
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
-					Replace characters that are not allowed in file names.
-				</p>
+				<p class="text-xs text-text-soft">Replace characters that are not allowed in file names.</p>
 			</div>
 
 			<div class="space-y-2">
-				<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-					Colon Replacement
-				</div>
+				<div class="text-sm font-medium text-text">Colon Replacement</div>
 				<DropdownSelect
 					value={formData.colonReplacementFormat}
 					options={RADARR_COLON_REPLACEMENT_OPTIONS}
@@ -375,39 +365,39 @@
 />
 
 <InfoModal bind:open={showInfoModal} header="Radarr Naming Configuration">
-	<div class="space-y-4 text-sm text-neutral-600 dark:text-neutral-400">
+	<div class="space-y-4 text-sm text-text-soft">
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Format Strings</div>
+			<div class="font-medium text-text">Format Strings</div>
 			<p class="mt-1">
 				Format strings control how Radarr names movie files and folders. Use tokens like
-				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+				<code class="rounded-control-sm bg-surface-hover px-1 py-0.5 font-mono text-xs"
 					>{'{Movie Title}'}</code
 				>
 				and
-				<code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+				<code class="rounded-control-sm bg-surface-hover px-1 py-0.5 font-mono text-xs"
 					>{'{Release Year}'}</code
 				>
 				to build your naming pattern.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Token Autocomplete</div>
+			<div class="font-medium text-text">Token Autocomplete</div>
 			<p class="mt-1">
-				Type <code class="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs dark:bg-neutral-800"
+				Type <code class="rounded-control-sm bg-surface-hover px-1 py-0.5 font-mono text-xs"
 					>{'{'}</code
 				> in any format field to open the token picker. Filter by typing, then use arrow keys and Enter
 				or click to insert.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Live Preview</div>
+			<div class="font-medium text-text">Live Preview</div>
 			<p class="mt-1">
 				A preview line below each format field shows how your pattern resolves with sample data, so
 				you can see the result as you type.
 			</p>
 		</div>
 		<div>
-			<div class="font-medium text-neutral-900 dark:text-neutral-100">Character Replacement</div>
+			<div class="font-medium text-text">Character Replacement</div>
 			<p class="mt-1">
 				When enabled, illegal filesystem characters are replaced automatically. The colon
 				replacement option controls how colons specifically are handled (deleted, replaced with a

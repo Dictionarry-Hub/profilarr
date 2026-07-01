@@ -38,7 +38,7 @@
 
 	const iconVariantClasses = {
 		neutral: '',
-		danger: 'group-hover:text-red-600 dark:group-hover:text-red-400'
+		danger: 'group-hover:text-danger-icon '
 	};
 </script>
 

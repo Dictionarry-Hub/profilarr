@@ -67,12 +67,14 @@
 			<div class="flex items-center gap-3">
 				<div class="relative h-6 w-6 flex-shrink-0">
 					{#if !loadedImages.has(row.id)}
-						<div class="absolute inset-0 animate-pulse rounded bg-surface-hover"></div>
+						<div class="absolute inset-0 animate-pulse rounded-control-sm bg-surface-hover"></div>
 					{/if}
 					<img
 						src={getLogoPath(row.type)}
 						alt={`${formatType(row.type)} logo`}
-						class="h-6 w-6 rounded {loadedImages.has(row.id) ? 'opacity-100' : 'opacity-0'}"
+						class="h-6 w-6 rounded-control-sm {loadedImages.has(row.id)
+							? 'opacity-100'
+							: 'opacity-0'}"
 						on:load={() => handleImageLoad(row.id)}
 						use:checkLoaded={row.id}
 					/>
@@ -83,7 +85,7 @@
 			{#if row.syncedProfileNames.length > 0}
 				<div class="flex flex-wrap gap-1">
 					{#each row.syncedProfileNames as name}
-						<Label variant="secondary" size="sm" rounded="md">{name}</Label>
+						<Label variant="secondary" size="sm" radius="md">{name}</Label>
 					{/each}
 				</div>
 			{:else}
@@ -91,7 +93,7 @@
 			{/if}
 		{:else if column.key === 'delayProfile'}
 			{#if row.delayProfileName}
-				<Label variant="secondary" size="sm" rounded="md">{row.delayProfileName}</Label>
+				<Label variant="secondary" size="sm" radius="md">{row.delayProfileName}</Label>
 			{:else}
 				<span class="text-xs text-text-muted">None</span>
 			{/if}
@@ -99,15 +101,15 @@
 			{#if row.namingConfigName || row.qualityDefinitionsConfigName || row.mediaSettingsConfigName}
 				<div class="flex flex-wrap gap-1">
 					{#if row.namingConfigName}
-						<Label variant="secondary" size="sm" rounded="md">Naming: {row.namingConfigName}</Label>
+						<Label variant="secondary" size="sm" radius="md">Naming: {row.namingConfigName}</Label>
 					{/if}
 					{#if row.qualityDefinitionsConfigName}
-						<Label variant="secondary" size="sm" rounded="md"
+						<Label variant="secondary" size="sm" radius="md"
 							>Quality Definitions: {row.qualityDefinitionsConfigName}</Label
 						>
 					{/if}
 					{#if row.mediaSettingsConfigName}
-						<Label variant="secondary" size="sm" rounded="md"
+						<Label variant="secondary" size="sm" radius="md"
 							>Media Settings: {row.mediaSettingsConfigName}</Label
 						>
 					{/if}
@@ -117,19 +119,19 @@
 			{/if}
 		{:else if column.key === 'upgrades'}
 			<div class="flex justify-center">
-				<Label variant={row.upgradeEnabled ? 'success' : 'secondary'} size="sm" rounded="md"
+				<Label variant={row.upgradeEnabled ? 'success' : 'secondary'} size="sm" radius="md"
 					>{row.upgradeEnabled ? 'On' : 'Off'}</Label
 				>
 			</div>
 		{:else if column.key === 'renames'}
 			<div class="flex justify-center">
-				<Label variant={row.renameEnabled ? 'success' : 'secondary'} size="sm" rounded="md"
+				<Label variant={row.renameEnabled ? 'success' : 'secondary'} size="sm" radius="md"
 					>{row.renameEnabled ? 'On' : 'Off'}</Label
 				>
 			</div>
 		{:else if column.key === 'cleanup'}
 			<div class="flex justify-center">
-				<Label variant={row.cleanupEnabled ? 'success' : 'secondary'} size="sm" rounded="md"
+				<Label variant={row.cleanupEnabled ? 'success' : 'secondary'} size="sm" radius="md"
 					>{row.cleanupEnabled ? 'On' : 'Off'}</Label
 				>
 			</div>

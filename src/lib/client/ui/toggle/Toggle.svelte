@@ -23,7 +23,7 @@
 		| `#${string}`
 		| `var(--${string})`
 		| '' = '';
-	export let shape: 'square' | 'circle' | 'rounded' = 'circle';
+	export let shape: 'square' | 'circle' | 'soft' = 'circle';
 	export let variant: 'filled' | 'outline' = 'filled';
 	export let iconColor: string = '';
 	export let fullWidth: boolean = false;
