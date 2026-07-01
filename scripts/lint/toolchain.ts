@@ -37,6 +37,21 @@ function matchCount(source: string, pattern: RegExp): number {
 	return Array.from(source.matchAll(pattern)).length;
 }
 
+function escapeRegExp(source: string): string {
+	return source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function actionUseCount(source: string, action: string, major: string): number {
+	const escapedAction = escapeRegExp(action);
+	const escapedMajor = escapeRegExp(major);
+	const pattern = new RegExp(
+		`uses:\\s+${escapedAction}@(?:${escapedMajor}|[0-9a-f]{40}\\s+#\\s+${escapedMajor}(?:\\.\\d+){0,2})(?:\\s|$)`,
+		'g'
+	);
+
+	return matchCount(source, pattern);
+}
+
 function requireTool(
 	versions: ToolVersions,
 	tool: keyof ToolVersions,
@@ -68,7 +83,7 @@ function checkDockerfile(source: string, denoVersion: string, violations: string
 }
 
 function checkCi(source: string, violations: string[]): void {
-	const denoSetups = matchCount(source, /uses:\s+denoland\/setup-deno@v2/g);
+	const denoSetups = actionUseCount(source, 'denoland/setup-deno', 'v2');
 	const denoVersionFiles = matchCount(source, /deno-version-file:\s+\.tool-versions/g);
 	if (denoSetups !== denoVersionFiles) {
 		violations.push(
@@ -80,7 +95,7 @@ function checkCi(source: string, violations: string[]): void {
 		violations.push(`${CI_PATH} must use deno-version-file, not deno-version`);
 	}
 
-	const nodeSetups = matchCount(source, /uses:\s+actions\/setup-node@v6/g);
+	const nodeSetups = actionUseCount(source, 'actions/setup-node', 'v6');
 	const nodeVersionFiles = matchCount(source, /node-version-file:\s+\.tool-versions/g);
 	if (nodeSetups !== nodeVersionFiles) {
 		violations.push(

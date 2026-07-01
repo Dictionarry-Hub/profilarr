@@ -9,8 +9,7 @@ updates:
       timezone: 'Australia/Adelaide'
     open-pull-requests-limit: 10
     cooldown:
-      default-days: 3
-      semver-major-days: 7
+      default-days: 7
     ignore:
       # @db/sqlite is pinned to the npm-compat package at 0.12.0; 0.13.0's
       # npm.jsr.io tarball has a broken checksum, so any bump fails CI.
@@ -35,4 +34,4 @@ updates:
       timezone: 'Australia/Adelaide'
     open-pull-requests-limit: 10
     cooldown:
-      default-days: 3
+      default-days: 7
