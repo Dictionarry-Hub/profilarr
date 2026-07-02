@@ -23,7 +23,7 @@
 	const badgeBase =
 		'inline-flex items-center rounded-control-sm font-medium px-1.5 py-0.5 text-[10px]';
 	const badgeAccent = 'bg-surface-hover text-accent-solid';
-	const badgeNeutral = 'bg-surface-hover text-text-soft ';
+	const badgeNeutral = 'bg-surface-hover text-text-soft';
 
 	const fieldColumns: Column<FilterField>[] = [
 		{ key: 'label', header: 'Field', sortable: false },

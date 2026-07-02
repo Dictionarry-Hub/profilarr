@@ -64,7 +64,7 @@
 					</select>
 					<ChevronDown
 						size={10}
-						class="pointer-events-none absolute top-1/2 right-1 -translate-y-1/2 text-text-subtle "
+						class="pointer-events-none absolute top-1/2 right-1 -translate-y-1/2 text-text-subtle"
 					/>
 				</div>
 			{/if}

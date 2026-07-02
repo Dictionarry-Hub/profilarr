@@ -15,7 +15,7 @@
 	{#if data.parseError}
 		<Card padding="md">
 			<div class="flex items-start gap-3">
-				<AlertTriangle class="h-5 w-5 flex-shrink-0 text-warning-icon " />
+				<AlertTriangle class="h-5 w-5 flex-shrink-0 text-warning-icon" />
 				<div class="text-sm">
 					<div class="font-medium text-text">The announcement file is malformed</div>
 					<p class="mt-1 text-xs text-text-soft">

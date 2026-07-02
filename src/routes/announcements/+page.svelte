@@ -300,7 +300,7 @@
 						{/if}
 					</span>
 				{:else if column.key === 'title'}
-					<span class="text-sm {row.readAt ? 'text-text-soft ' : 'font-semibold text-text '}">
+					<span class="text-sm {row.readAt ? 'text-text-soft' : 'font-semibold text-text'}">
 						{#if !row.readAt}
 							<span
 								class="mr-2 inline-block h-2 w-2 rounded-pill bg-accent-solid"

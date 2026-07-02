@@ -105,7 +105,7 @@
 				<Button
 					href="/settings/notifications/new"
 					icon={Plus}
-					iconColor="text-info-icon "
+					iconColor="text-info-icon"
 					text="Add Service"
 					variant="secondary"
 				/>
@@ -137,7 +137,7 @@
 								<path d={serviceInfo[row.service_type]!.icon!.path} />
 							</svg>
 						{:else}
-							<Rss size={16} class="text-text-soft " />
+							<Rss size={16} class="text-text-soft" />
 						{/if}
 						<span>{getServiceTypeName(row.service_type)}</span>
 					</div>
@@ -221,7 +221,7 @@
 						<input type="hidden" name="id" value={row.id} />
 						<Button
 							icon={Trash2}
-							iconColor="text-danger-icon "
+							iconColor="text-danger-icon"
 							size="xs"
 							tooltip="Delete service"
 							on:click={(e) => {

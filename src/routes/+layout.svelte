@@ -86,7 +86,7 @@
 			class="flex h-16 items-center gap-3 border-b border-border bg-surface-muted px-4 text-sm text-text-soft"
 			role="status"
 		>
-			<AlertTriangle class="h-5 w-5 shrink-0 text-warning-icon " />
+			<AlertTriangle class="h-5 w-5 shrink-0 text-warning-icon" />
 			<div class="min-w-0 flex-1 truncate">
 				<strong class="font-semibold">Restore pending:</strong>
 				<span class="font-mono">{data.restorePending.filename}</span>
@@ -117,7 +117,7 @@
 					size="sm"
 					text="Cancel restore"
 					icon={X}
-					iconColor="text-danger-icon "
+					iconColor="text-danger-icon"
 					hideTextOnMobile
 				/>
 			</form>

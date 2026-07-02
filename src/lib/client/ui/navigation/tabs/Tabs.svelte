@@ -18,7 +18,7 @@
 	}
 
 	const badgeClass =
-		'inline-flex min-w-5 items-center justify-center rounded-pill bg-info-bg px-1.5 text-xs font-semibold text-info-text ';
+		'inline-flex min-w-5 items-center justify-center rounded-pill bg-info-bg px-1.5 text-xs font-semibold text-info-text';
 
 	interface BackButton {
 		label: string;

@@ -3,7 +3,7 @@
 	export let score: number;
 
 	$: scoreClass =
-		score > 0 ? 'text-success-icon ' : score < 0 ? 'text-danger-icon ' : 'text-text-muted';
+		score > 0 ? 'text-success-icon' : score < 0 ? 'text-danger-icon' : 'text-text-muted';
 
 	$: displayScore = score > 0 ? `+${score.toLocaleString()}` : score.toLocaleString();
 </script>

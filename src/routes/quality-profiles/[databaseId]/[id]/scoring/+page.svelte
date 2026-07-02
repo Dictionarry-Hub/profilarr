@@ -632,7 +632,7 @@
 				<Button
 					disabled={isSaving || !$isDirty}
 					icon={isSaving ? Loader2 : Save}
-					iconColor="text-info-icon "
+					iconColor="text-info-icon"
 					text={isSaving ? 'Saving...' : 'Save'}
 					on:click={handleSaveClick}
 				/>

@@ -54,12 +54,12 @@
 
 	// Level colors matching arr log levels
 	const levelColors: Record<string, string> = {
-		Trace: 'text-text-muted ',
-		Debug: 'text-info-icon ',
-		Info: 'text-success-icon ',
-		Warn: 'text-warning-icon ',
-		Error: 'text-danger-icon ',
-		Fatal: 'text-danger-text '
+		Trace: 'text-text-muted',
+		Debug: 'text-info-icon',
+		Info: 'text-success-icon',
+		Warn: 'text-warning-icon',
+		Error: 'text-danger-icon',
+		Fatal: 'text-danger-text'
 	};
 
 	// Table columns
@@ -70,7 +70,7 @@
 			width: '180px',
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
-				html: `<span class="font-mono text-xs text-text-soft ">${formatDateTime(row.time, $serverTimezone, $dateFormat)}</span>`
+				html: `<span class="font-mono text-xs text-text-soft">${formatDateTime(row.time, $serverTimezone, $dateFormat)}</span>`
 			})
 		},
 		{
@@ -80,7 +80,7 @@
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
 				html: `<span class="font-semibold ${
-					levelColors[normalizeLevel(row.level)] || 'text-text-soft '
+					levelColors[normalizeLevel(row.level)] || 'text-text-soft'
 				}">${normalizeLevel(row.level)}</span>`
 			})
 		},
@@ -90,7 +90,7 @@
 			width: '200px',
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
-				html: `<span class="font-mono text-xs text-text-muted ">${row.logger}</span>`
+				html: `<span class="font-mono text-xs text-text-muted">${row.logger}</span>`
 			})
 		},
 		{

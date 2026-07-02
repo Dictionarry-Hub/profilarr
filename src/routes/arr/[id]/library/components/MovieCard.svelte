@@ -55,7 +55,7 @@
 			<img src={posterUrl} alt={movie.title} loading="lazy" class="h-full w-full object-cover" />
 		{:else}
 			<div class="flex h-full w-full items-center justify-center">
-				<Film class="h-12 w-12 text-text-subtle " />
+				<Film class="h-12 w-12 text-text-subtle" />
 			</div>
 		{/if}
 

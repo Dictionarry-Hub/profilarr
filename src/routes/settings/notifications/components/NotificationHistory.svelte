@@ -35,7 +35,7 @@
 
 <div class="space-y-4">
 	<div class="flex items-center gap-2">
-		<Bell size={18} class="text-text-soft " />
+		<Bell size={18} class="text-text-soft" />
 		<h2 class="text-lg font-semibold text-text md:text-xl">Recent Notifications</h2>
 	</div>
 

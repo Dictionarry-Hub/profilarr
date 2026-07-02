@@ -43,17 +43,17 @@
 	const filledClasses = {
 		accent: 'border-accent-solid bg-accent-solid hover:brightness-110',
 		neutral: 'border-text bg-text hover:brightness-110',
-		green: 'border-success-border bg-success-bg hover:brightness-110 ',
-		red: 'border-danger-border bg-danger-bg hover:brightness-110 ',
-		blue: 'border-info-border bg-info-bg hover:brightness-110 '
+		green: 'border-success-border bg-success-bg hover:brightness-110',
+		red: 'border-danger-border bg-danger-bg hover:brightness-110',
+		blue: 'border-info-border bg-info-bg hover:brightness-110'
 	};
 
 	const outlineClasses = {
 		accent: 'border-accent-solid bg-surface hover:bg-surface-hover',
 		neutral: 'border-border bg-surface hover:bg-surface-hover',
-		green: 'border-success-border bg-surface hover:bg-surface-hover ',
-		red: 'border-danger-border bg-surface hover:bg-surface-hover ',
-		blue: 'border-info-border bg-surface hover:bg-surface-hover '
+		green: 'border-success-border bg-surface hover:bg-surface-hover',
+		red: 'border-danger-border bg-surface hover:bg-surface-hover',
+		blue: 'border-info-border bg-surface hover:bg-surface-hover'
 	};
 
 	const customFilledClass = 'hover:brightness-110';
@@ -81,9 +81,9 @@
 	const outlineIconClasses = {
 		accent: 'text-accent-solid',
 		neutral: 'text-text',
-		green: 'text-success-icon ',
-		red: 'text-danger-icon ',
-		blue: 'text-info-icon '
+		green: 'text-success-icon',
+		red: 'text-danger-icon',
+		blue: 'text-info-icon'
 	};
 
 	$: outlineIconClass = isCustomColor

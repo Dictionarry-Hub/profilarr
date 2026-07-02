@@ -27,11 +27,11 @@
 	$: progressPercent = Math.round(progress * 100);
 
 	function getBarColor(p: number, done: boolean, mode: 'threshold' | 'completion'): string {
-		if (done) return 'bg-success-bg ';
+		if (done) return 'bg-success-bg';
 		if (mode === 'completion') return 'bg-warning-bg ';
-		if (p >= 0.75) return 'bg-success-bg ';
-		if (p >= 0.5) return 'bg-warning-bg ';
-		return 'bg-danger-bg ';
+		if (p >= 0.75) return 'bg-success-bg';
+		if (p >= 0.5) return 'bg-warning-bg';
+		return 'bg-danger-bg';
 	}
 
 	$: barColor = getBarColor(progress, met, colorMode);
@@ -55,7 +55,7 @@
 						</span>
 					</span>
 					{#if met}
-						<Check size={14} class="flex-shrink-0 text-success-icon " />
+						<Check size={14} class="flex-shrink-0 text-success-icon" />
 					{:else}
 						<span class="font-mono text-xs text-text-subtle">
 							{progressPercent}%
@@ -82,7 +82,7 @@
 					{current.toLocaleString()} / {target.toLocaleString()}
 				</span>
 				{#if met}
-					<Check size={12} class="flex-shrink-0 text-success-icon " />
+					<Check size={12} class="flex-shrink-0 text-success-icon" />
 				{/if}
 			</div>
 		{/if}
@@ -96,7 +96,7 @@
 				<span class="text-text-subtle">/ {target.toLocaleString()}</span>
 			</span>
 			{#if met}
-				<Check size={14} class="flex-shrink-0 text-success-icon " />
+				<Check size={14} class="flex-shrink-0 text-success-icon" />
 			{:else}
 				<span class="font-mono text-xs text-text-subtle">
 					{progressPercent}%
@@ -123,7 +123,7 @@
 			{current.toLocaleString()} / {target.toLocaleString()}
 		</span>
 		{#if met}
-			<Check size={12} class="flex-shrink-0 text-success-icon " />
+			<Check size={12} class="flex-shrink-0 text-success-icon" />
 		{/if}
 	</div>
 {/if}

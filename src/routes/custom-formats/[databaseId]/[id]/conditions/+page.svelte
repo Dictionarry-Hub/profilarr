@@ -294,7 +294,7 @@
 				<Button
 					text="Add Condition"
 					icon={Plus}
-					iconColor="text-info-icon "
+					iconColor="text-info-icon"
 					variant="secondary"
 					onboarding="cf-conditions-add"
 					on:click={addDraftCondition}
@@ -302,7 +302,7 @@
 				<Button
 					text={saving ? 'Saving...' : 'Save'}
 					icon={saving ? Loader2 : Save}
-					iconColor="text-success-icon "
+					iconColor="text-success-icon"
 					variant="secondary"
 					disabled={saving || !$isDirty || saveBlocked}
 					tooltip={saveTooltip}

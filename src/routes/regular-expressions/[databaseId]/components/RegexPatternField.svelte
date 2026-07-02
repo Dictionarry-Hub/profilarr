@@ -84,22 +84,22 @@
 			</label>
 			{#if validationState === 'checking'}
 				<Label variant="secondary" size="sm" radius="md">
-					<Loader2 size={10} class="animate-spin text-text-muted " />
+					<Loader2 size={10} class="animate-spin text-text-muted" />
 					Checking...
 				</Label>
 			{:else if validationState === 'valid'}
 				<Label variant="secondary" size="sm" radius="md">
-					<Check size={10} class="text-success-icon " />
+					<Check size={10} class="text-success-icon" />
 					Valid
 				</Label>
 			{:else if validationState === 'invalid'}
 				<Label variant="secondary" size="sm" radius="md">
-					<X size={10} class="text-danger-icon " />
+					<X size={10} class="text-danger-icon" />
 					Invalid
 				</Label>
 			{:else if validationState === 'unavailable'}
 				<Label variant="secondary" size="sm" radius="md">
-					<AlertCircle size={10} class="text-text-subtle " />
+					<AlertCircle size={10} class="text-text-subtle" />
 					Parser unavailable
 				</Label>
 			{/if}

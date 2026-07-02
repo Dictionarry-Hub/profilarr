@@ -220,7 +220,7 @@
 							</div>
 						{:else}
 							<div class="flex h-8 w-8 items-center justify-center rounded-card bg-surface-hover">
-								<Database size={16} class="text-text-muted " />
+								<Database size={16} class="text-text-muted" />
 							</div>
 							<div class="flex flex-col gap-1">
 								<span class="text-sm font-medium text-text-soft">
@@ -244,7 +244,7 @@
 					<Button
 						text="Unlink"
 						icon={Trash2}
-						iconColor="text-danger-icon "
+						iconColor="text-danger-icon"
 						disabled={saving || deleting}
 						on:click={() => (showDeleteModal = true)}
 					/>
@@ -253,7 +253,7 @@
 					<Button
 						text={saving ? 'Saving...' : 'Save'}
 						icon={Save}
-						iconColor="text-info-icon "
+						iconColor="text-info-icon"
 						disabled={saving || !canSubmit}
 						on:click={handleSave}
 					/>
@@ -264,7 +264,7 @@
 						target="_blank"
 						rel="noopener noreferrer"
 						icon={ExternalLink}
-						iconColor="text-info-icon "
+						iconColor="text-info-icon"
 						text="GitHub"
 					></Button>
 				{/if}

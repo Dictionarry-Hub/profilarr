@@ -47,7 +47,7 @@
 				<img src={posterUrl} alt="" loading="lazy" class="h-full w-full object-cover" />
 			{:else}
 				<div class="flex h-full w-full items-center justify-center">
-					<Tv size={12} class="text-text-subtle " />
+					<Tv size={12} class="text-text-subtle" />
 				</div>
 			{/if}
 		</div>

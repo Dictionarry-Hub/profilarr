@@ -189,7 +189,7 @@
 					tooltip="Delete entity"
 					variant="secondary"
 					size="xs"
-					iconColor="group-hover:text-danger-icon "
+					iconColor="group-hover:text-danger-icon"
 					on:click={() => {
 						const form = document.getElementById(formId) as HTMLFormElement;
 						dispatch('confirmDelete', { entity: row, formRef: form });

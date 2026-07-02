@@ -67,7 +67,7 @@
 			sortAccessor: (row) => new Date(row.timestamp).getTime(),
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — date formatting, not user content
-				html: `<span class="font-mono text-xs text-text-soft ">${formatDateTime(row.timestamp, $serverTimezone, $dateFormat)}</span>`
+				html: `<span class="font-mono text-xs text-text-soft">${formatDateTime(row.timestamp, $serverTimezone, $dateFormat)}</span>`
 			})
 		},
 		{

@@ -128,7 +128,7 @@
 					text="Withdraw"
 					icon={Trash2}
 					variant="secondary"
-					iconColor="text-danger-icon "
+					iconColor="text-danger-icon"
 					loading={withdrawing}
 					disabled={withdrawing || saving}
 					on:click={() => (showDeleteModal = true)}
@@ -137,7 +137,7 @@
 			<Button
 				text={saving ? 'Saving...' : 'Save'}
 				icon={saving ? Loader2 : Save}
-				iconColor="text-info-icon "
+				iconColor="text-info-icon"
 				disabled={!canSubmit || saving || withdrawing}
 				on:click={onSubmitClick}
 			/>

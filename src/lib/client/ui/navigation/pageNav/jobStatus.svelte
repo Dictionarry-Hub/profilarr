@@ -13,7 +13,7 @@
 <Card padding="sm" flush className="mt-2">
 	<div class="flex items-center gap-2.5">
 		{#if $jobStatus.state === 'running'}
-			<Loader2 size={16} class="flex-shrink-0 animate-spin text-info-icon " />
+			<Loader2 size={16} class="flex-shrink-0 animate-spin text-info-icon" />
 			<div class="flex-1">
 				<div class="text-xs font-semibold text-text">
 					{$jobStatus.displayLabel}
@@ -21,9 +21,9 @@
 			</div>
 		{:else if $jobStatus.state === 'completed'}
 			{#if $jobStatus.status === 'success' || $jobStatus.status === 'skipped'}
-				<CheckCircle2 size={16} class="flex-shrink-0 text-success-icon " />
+				<CheckCircle2 size={16} class="flex-shrink-0 text-success-icon" />
 			{:else}
-				<XCircle size={16} class="flex-shrink-0 text-danger-icon " />
+				<XCircle size={16} class="flex-shrink-0 text-danger-icon" />
 			{/if}
 			<div class="flex-1">
 				<div class="text-xs font-semibold text-text">

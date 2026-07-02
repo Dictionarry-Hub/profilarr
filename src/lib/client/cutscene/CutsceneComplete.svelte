@@ -42,7 +42,7 @@
 	<div slot="body">
 		<div class="mb-4 flex justify-center text-4xl">
 			<span class="nav-icon-emoji">🦜</span>
-			<span class="nav-icon-lucide"><Bird size={36} class="-scale-x-100 text-text-soft " /></span>
+			<span class="nav-icon-lucide"><Bird size={36} class="-scale-x-100 text-text-soft" /></span>
 		</div>
 		<p class="text-center text-sm text-text-muted italic">
 			{quip}

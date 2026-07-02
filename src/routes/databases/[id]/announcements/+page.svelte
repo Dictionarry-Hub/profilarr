@@ -55,7 +55,7 @@
 					text="New announcement"
 					icon={Plus}
 					variant="secondary"
-					iconColor="text-info-icon "
+					iconColor="text-info-icon"
 					on:click={() => goto(`/databases/${databaseId}/announcements/new`)}
 				/>
 			</svelte:fragment>
@@ -65,7 +65,7 @@
 	{#if data.parseErrors.length > 0}
 		<Card padding="md">
 			<div class="flex items-start gap-3">
-				<AlertTriangle class="h-5 w-5 flex-shrink-0 text-warning-icon " />
+				<AlertTriangle class="h-5 w-5 flex-shrink-0 text-warning-icon" />
 				<div class="space-y-2 text-sm">
 					<div class="font-medium text-text">
 						{data.parseErrors.length} file(s) could not be parsed
@@ -108,7 +108,7 @@
 						icon={Edit3}
 						size="xs"
 						variant="secondary"
-						iconColor="text-info-icon "
+						iconColor="text-info-icon"
 						ariaLabel="Edit"
 						tooltip="Edit"
 						on:click={() => goto(`/databases/${databaseId}/announcements/${row.id}`)}
@@ -117,7 +117,7 @@
 						icon={Trash2}
 						size="xs"
 						variant="secondary"
-						iconColor="text-danger-icon "
+						iconColor="text-danger-icon"
 						ariaLabel="Withdraw"
 						tooltip="Withdraw"
 						on:click={() => (withdrawTarget = row)}

@@ -264,7 +264,7 @@
 			<Button
 				text="Delete"
 				icon={Trash2}
-				iconColor="text-danger-icon "
+				iconColor="text-danger-icon"
 				disabled={saving || deleting}
 				on:click={() => (showDeleteModal = true)}
 			/>
@@ -273,7 +273,7 @@
 			<Button
 				text={saving ? 'Saving...' : 'Save'}
 				icon={Save}
-				iconColor="text-info-icon "
+				iconColor="text-info-icon"
 				disabled={saving || !canSubmit}
 				on:click={handleSave}
 			/>
@@ -457,7 +457,7 @@
 							<Button
 								text="Run Now"
 								icon={Eraser}
-								iconColor="text-warning-icon "
+								iconColor="text-warning-icon"
 								on:click={() => (showCleanupModal = true)}
 							/>
 						</div>

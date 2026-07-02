@@ -71,15 +71,15 @@
 			transition:slide={{ duration: 200 }}
 		>
 			{#if $jobStatus.state === 'running'}
-				<Loader2 size={14} class="flex-shrink-0 animate-spin text-info-icon " />
+				<Loader2 size={14} class="flex-shrink-0 animate-spin text-info-icon" />
 				<span class="text-xs font-medium text-text-soft">
 					{$jobStatus.displayLabel}
 				</span>
 			{:else if $jobStatus.state === 'completed'}
 				{#if $jobStatus.status === 'success' || $jobStatus.status === 'skipped'}
-					<CheckCircle2 size={14} class="flex-shrink-0 text-success-icon " />
+					<CheckCircle2 size={14} class="flex-shrink-0 text-success-icon" />
 				{:else}
-					<XCircle size={14} class="flex-shrink-0 text-danger-icon " />
+					<XCircle size={14} class="flex-shrink-0 text-danger-icon" />
 				{/if}
 				<span class="text-xs font-medium text-text-soft">
 					{$jobStatus.displayLabel}

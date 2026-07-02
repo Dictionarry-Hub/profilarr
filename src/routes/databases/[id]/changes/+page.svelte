@@ -588,13 +588,13 @@
 	function getOperationClass(op: string | null): string {
 		switch (op) {
 			case 'create':
-				return 'bg-success-bg text-success-text ';
+				return 'bg-success-bg text-success-text';
 			case 'update':
-				return 'bg-info-bg text-info-text ';
+				return 'bg-info-bg text-info-text';
 			case 'delete':
-				return 'bg-danger-bg text-danger-text ';
+				return 'bg-danger-bg text-danger-text';
 			default:
-				return 'bg-surface-hover text-text ';
+				return 'bg-surface-hover text-text';
 		}
 	}
 
@@ -859,7 +859,7 @@
 								: `Pull ${incomingChanges.commitsBehind} commit${incomingChanges.commitsBehind === 1 ? '' : 's'}`}
 							variant="secondary"
 							icon={GitPullRequestCreateArrow}
-							iconColor="text-info-icon "
+							iconColor="text-info-icon"
 							loading={pulling}
 							disabled={pulling}
 							fullWidth

@@ -38,7 +38,7 @@
 			target={status.releaseUrl ? '_blank' : undefined}
 			rel={status.releaseUrl ? 'noopener noreferrer' : undefined}
 		>
-			<ArrowUp class="h-3.5 w-3.5 text-success-icon " />
+			<ArrowUp class="h-3.5 w-3.5 text-success-icon" />
 			Update Available: {status.latestVersion}
 		</Label>
 	{/if}

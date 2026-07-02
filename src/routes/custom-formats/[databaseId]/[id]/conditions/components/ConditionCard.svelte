@@ -499,7 +499,7 @@
 				<Button
 					text="Discard"
 					icon={Trash2}
-					iconColor="text-danger-icon "
+					iconColor="text-danger-icon"
 					variant="secondary"
 					title="Discard condition"
 					ariaLabel="Discard condition"
@@ -508,7 +508,7 @@
 				<Button
 					text="Accept"
 					icon={Check}
-					iconColor="text-success-icon "
+					iconColor="text-success-icon"
 					variant="secondary"
 					title="Confirm condition"
 					ariaLabel="Confirm condition"
@@ -520,7 +520,7 @@
 				<Button
 					text="Remove"
 					icon={Trash2}
-					iconColor="text-danger-icon "
+					iconColor="text-danger-icon"
 					variant="secondary"
 					title="Remove condition"
 					ariaLabel="Remove condition"

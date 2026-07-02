@@ -16,13 +16,13 @@
 
 	const variantClasses: Record<typeof variant, string> = {
 		accent: 'bg-surface-hover text-accent-solid',
-		neutral: 'bg-surface-hover text-text-soft ',
-		success: 'bg-success-bg text-success-text ',
-		warning: 'bg-warning-bg text-warning-text ',
-		danger: 'bg-danger-bg text-danger-text ',
-		info: 'bg-info-bg text-info-text ',
-		radarr: 'text-text ',
-		sonarr: 'text-text '
+		neutral: 'bg-surface-hover text-text-soft',
+		success: 'bg-success-bg text-success-text',
+		warning: 'bg-warning-bg text-warning-text',
+		danger: 'bg-danger-bg text-danger-text',
+		info: 'bg-info-bg text-info-text',
+		radarr: 'text-text',
+		sonarr: 'text-text'
 	};
 
 	const sizeClasses: Record<typeof size, string> = {

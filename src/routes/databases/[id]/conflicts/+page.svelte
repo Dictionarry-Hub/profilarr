@@ -397,7 +397,7 @@
 										icon={HeartHandshake}
 										text="Align"
 										variant="secondary"
-										iconColor="text-success-icon "
+										iconColor="text-success-icon"
 										size="sm"
 										type="submit"
 									/>

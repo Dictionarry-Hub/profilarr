@@ -19,10 +19,10 @@
 	$: posterUrl = row.images?.find((i) => i.coverType === 'poster')?.remoteUrl;
 
 	function getProgressColor(progress: number, cutoffMet: boolean): string {
-		if (cutoffMet) return 'bg-success-bg ';
-		if (progress >= 0.75) return 'bg-warning-bg ';
-		if (progress >= 0.5) return 'bg-warning-bg ';
-		return 'bg-danger-bg ';
+		if (cutoffMet) return 'bg-success-bg';
+		if (progress >= 0.75) return 'bg-warning-bg';
+		if (progress >= 0.5) return 'bg-warning-bg';
+		return 'bg-danger-bg';
 	}
 
 	function fmtDate(isoString?: string): string {
@@ -50,7 +50,7 @@
 					<img src={posterUrl} alt="" loading="lazy" class="h-full w-full object-cover" />
 				{:else}
 					<div class="flex h-full w-full items-center justify-center">
-						<Film size={12} class="text-text-subtle " />
+						<Film size={12} class="text-text-subtle" />
 					</div>
 				{/if}
 			</div>
@@ -89,7 +89,7 @@
 				></div>
 			</div>
 			{#if row.cutoffMet}
-				<Check size={16} class="flex-shrink-0 text-success-icon " />
+				<Check size={16} class="flex-shrink-0 text-success-icon" />
 			{:else}
 				<span class="w-10 text-right font-mono text-xs text-text-muted">
 					{Math.max(0, Math.min(Math.round(row.progress * 100), 100))}%

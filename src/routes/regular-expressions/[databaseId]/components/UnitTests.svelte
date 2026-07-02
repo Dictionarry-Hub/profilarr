@@ -215,7 +215,7 @@
 			<Tooltip text="Regex101">
 				<ActionButton
 					icon={ExternalLink}
-					iconClass="text-info-icon "
+					iconClass="text-info-icon"
 					on:click={() => window.open(regex101Url, '_blank', 'noopener,noreferrer')}
 				/>
 			</Tooltip>
@@ -264,13 +264,13 @@
 						{:else if row.passed}
 							<div class="flex items-center justify-center">
 								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-success-bg">
-									<Check size={14} class="text-success-icon " />
+									<Check size={14} class="text-success-icon" />
 								</div>
 							</div>
 						{:else}
 							<div class="flex items-center justify-center">
 								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-danger-bg">
-									<X size={14} class="text-danger-icon " />
+									<X size={14} class="text-danger-icon" />
 								</div>
 							</div>
 						{/if}

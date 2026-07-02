@@ -151,7 +151,7 @@
 						<div
 							class="flex items-start gap-2 rounded-card border border-danger-border bg-danger-bg p-3"
 						>
-							<AlertCircle size={16} class="mt-0.5 flex-shrink-0 text-danger-icon " />
+							<AlertCircle size={16} class="mt-0.5 flex-shrink-0 text-danger-icon" />
 							<div>
 								<div class="text-xs font-medium text-danger-text">Last Run Error</div>
 								<div class="mt-1 text-sm text-danger-text">{row.last_run_error}</div>

@@ -14,11 +14,11 @@
 		score === null
 			? 'text-text-subtle'
 			: !colored
-				? 'text-text '
+				? 'text-text'
 				: score > 0
-					? 'text-success-icon '
+					? 'text-success-icon'
 					: score < 0
-						? 'text-danger-icon '
+						? 'text-danger-icon'
 						: 'text-text-muted';
 
 	$: sizeClass = size === 'sm' ? 'text-xs' : 'text-sm';

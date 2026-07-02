@@ -136,14 +136,14 @@
 		<Button
 			text="Info"
 			icon={Info}
-			iconColor="text-info-icon "
+			iconColor="text-info-icon"
 			on:click={() => (showInfoModal = true)}
 		/>
 		{#if mode === 'edit'}
 			<Button
 				text={deleting ? 'Deleting...' : 'Delete'}
 				icon={Trash2}
-				iconColor="text-danger-icon "
+				iconColor="text-danger-icon"
 				disabled={deleting || saving}
 				on:click={handleDeleteClick}
 			/>
@@ -151,7 +151,7 @@
 		<Button
 			text={saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
 			icon={Save}
-			iconColor="text-info-icon "
+			iconColor="text-info-icon"
 			disabled={saving || !isValid || !$isDirty}
 			on:click={handleSaveClick}
 		/>

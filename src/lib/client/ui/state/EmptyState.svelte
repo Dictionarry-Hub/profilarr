@@ -16,7 +16,7 @@
 		<!-- Icon -->
 		<div class="mb-6 flex justify-center">
 			<div class="rounded-pill bg-surface-hover p-6">
-				<svelte:component this={icon} class="h-12 w-12 text-text-subtle " />
+				<svelte:component this={icon} class="h-12 w-12 text-text-subtle" />
 			</div>
 		</div>
 
@@ -32,7 +32,7 @@
 
 		<!-- Action Button -->
 		<span data-onboarding={onboarding} class="inline-block">
-			<Button text={buttonText} href={buttonHref} icon={buttonIcon} iconColor="text-info-icon " />
+			<Button text={buttonText} href={buttonHref} icon={buttonIcon} iconColor="text-info-icon" />
 		</span>
 	</div>
 </div>

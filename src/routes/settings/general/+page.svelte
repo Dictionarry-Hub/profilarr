@@ -283,7 +283,7 @@
 			<Button
 				text={saving ? 'Saving...' : 'Save'}
 				icon={saving ? Loader2 : Save}
-				iconColor="text-info-icon "
+				iconColor="text-info-icon"
 				loading={saving}
 				disabled={saving || !$isDirty}
 				type="submit"
@@ -303,25 +303,25 @@
 					<div class="flex items-center gap-1" on:click|stopPropagation>
 						<Button
 							icon={CheckCircle}
-							iconColor="text-success-icon "
+							iconColor="text-success-icon"
 							size="xs"
 							on:click={() => alertStore.add('success', 'Success alert example.')}
 						/>
 						<Button
 							icon={XCircle}
-							iconColor="text-danger-icon "
+							iconColor="text-danger-icon"
 							size="xs"
 							on:click={() => alertStore.add('error', 'Error alert example.')}
 						/>
 						<Button
 							icon={AlertTriangle}
-							iconColor="text-warning-icon "
+							iconColor="text-warning-icon"
 							size="xs"
 							on:click={() => alertStore.add('warning', 'Warning alert example.')}
 						/>
 						<Button
 							icon={Info}
-							iconColor="text-info-icon "
+							iconColor="text-info-icon"
 							size="xs"
 							on:click={() => alertStore.add('info', 'Info alert example.')}
 						/>

@@ -92,7 +92,7 @@
 							icon={Unlink}
 							size="xs"
 							variant="ghost"
-							iconColor="text-danger-icon "
+							iconColor="text-danger-icon"
 							tooltip="Unlink database"
 							on:click={(e) => handleUnlinkClick(e, database)}
 						/>
@@ -120,12 +120,12 @@
 					class="flex flex-col items-start gap-1.5 text-xs text-text-soft sm:flex-row sm:items-center sm:gap-3"
 				>
 					<div class="flex items-center gap-1">
-						<RefreshCw size={12} class="text-info-icon " />
+						<RefreshCw size={12} class="text-info-icon" />
 						<span>Sync Strategy: {formatSyncStrategy(database.sync_strategy)}</span>
 					</div>
 					<span class="hidden text-text sm:inline">&middot;</span>
 					<div class="flex items-center gap-1">
-						<Clock size={12} class="text-warning-icon " />
+						<Clock size={12} class="text-warning-icon" />
 						<span>Last Synced: {formatLastSynced(database.last_synced_at)}</span>
 					</div>
 					<span class="hidden text-text sm:inline">&middot;</span>

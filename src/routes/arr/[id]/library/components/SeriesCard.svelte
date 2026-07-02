@@ -133,7 +133,7 @@
 			<img src={posterUrl} alt={series.title} loading="lazy" class="h-full w-full object-cover" />
 		{:else}
 			<div class="flex h-full w-full items-center justify-center">
-				<Tv class="h-12 w-12 text-text-subtle " />
+				<Tv class="h-12 w-12 text-text-subtle" />
 			</div>
 		{/if}
 		<!-- Monitored indicator -->
@@ -271,8 +271,8 @@
 						<span class="font-mono text-xs">
 							<span
 								class={row.fileCount === row.episodeCount
-									? 'text-success-icon '
-									: 'text-text-soft '}
+									? 'text-success-icon'
+									: 'text-text-soft'}
 							>
 								{row.fileCount}
 							</span>

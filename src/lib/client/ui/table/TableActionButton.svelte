@@ -25,7 +25,7 @@
 	const variantClasses = {
 		neutral: 'border-border bg-surface text-text-soft hover:bg-surface-hover',
 		danger:
-			'border-border bg-surface text-text-soft hover:border-danger-border hover:bg-danger-bg hover:text-danger-icon ',
+			'border-border bg-surface text-text-soft hover:border-danger-border hover:bg-danger-bg hover:text-danger-icon',
 		accent:
 			'border-border bg-surface text-text-soft hover:border-accent-solid hover:bg-surface-hover hover:text-accent-solid'
 	};

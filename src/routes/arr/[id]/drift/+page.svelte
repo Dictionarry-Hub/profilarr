@@ -137,7 +137,7 @@
 			<Button
 				text={running ? 'Running...' : 'Run Now'}
 				icon={Play}
-				iconColor="text-success-icon "
+				iconColor="text-success-icon"
 				disabled={saving || running || $isDirty || !data.featureEnabled || !enabled}
 				on:click={() => {
 					jobStatus.connect();

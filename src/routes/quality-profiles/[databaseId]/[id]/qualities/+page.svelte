@@ -607,7 +607,7 @@
 				<Button
 					text="Info"
 					icon={Info}
-					iconColor="text-info-icon "
+					iconColor="text-info-icon"
 					on:click={() => (showInfoModal = true)}
 				/>
 				<span data-onboarding="qp-qualities-group-button">
@@ -625,7 +625,7 @@
 				<Button
 					disabled={isSaving || !$isDirty || !hasEnabledItems}
 					icon={isSaving ? Loader2 : Save}
-					iconColor="text-info-icon "
+					iconColor="text-info-icon"
 					text={isSaving ? 'Saving...' : 'Save'}
 					on:click={handleSaveClick}
 				/>

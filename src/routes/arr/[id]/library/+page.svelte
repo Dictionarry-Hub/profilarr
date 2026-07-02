@@ -646,7 +646,7 @@
 	{#if libraryError && !loading}
 		<div class="rounded-card border border-danger-border bg-danger-bg p-6">
 			<div class="flex items-center gap-3">
-				<AlertTriangle class="h-5 w-5 text-danger-icon " />
+				<AlertTriangle class="h-5 w-5 text-danger-icon" />
 				<div>
 					<h3 class="font-medium text-danger-text">Failed to load library</h3>
 					<p class="mt-1 text-sm text-danger-icon">{libraryError}</p>

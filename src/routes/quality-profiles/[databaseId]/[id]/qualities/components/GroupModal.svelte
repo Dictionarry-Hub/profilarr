@@ -210,7 +210,7 @@
 									handleToggle(item.name);
 								}
 							}}
-							className="cursor-pointer transition-colors hover:bg-surface-muted "
+							className="cursor-pointer transition-colors hover:bg-surface-muted"
 							contentClass="px-3 py-2.5"
 							role="button"
 							tabindex="0"

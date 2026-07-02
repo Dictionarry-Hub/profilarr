@@ -195,14 +195,14 @@
 					on:mousedown|preventDefault={() => selectToken(token)}
 					class="w-full rounded-card px-3 py-2 text-left transition-colors {highlightedIndex ===
 					index
-						? 'bg-surface-hover '
-						: 'hover:bg-surface-muted '}"
+						? 'bg-surface-hover'
+						: 'hover:bg-surface-muted'}"
 				>
 					<div class="flex items-center justify-between">
 						<span
 							class="font-mono text-sm {highlightedIndex === index
-								? 'text-text '
-								: 'text-text-soft '}">{token.token}</span
+								? 'text-text'
+								: 'text-text-soft'}">{token.token}</span
 						>
 						<span class="text-xs text-text-subtle">{token.category}</span>
 					</div>

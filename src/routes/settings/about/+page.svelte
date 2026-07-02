@@ -121,7 +121,7 @@
 	<div class="space-y-6">
 		<div class="space-y-2">
 			<div class="flex items-center gap-2">
-				<Info class="h-4 w-4 text-text-soft " />
+				<Info class="h-4 w-4 text-text-soft" />
 				<h2 class="text-sm font-semibold text-text">Application</h2>
 			</div>
 			<Table columns={infoColumns} data={appRows} responsive>
@@ -161,7 +161,7 @@
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
 					{#if section.icon}
-						<svelte:component this={section.icon} class="h-4 w-4 text-text-soft " />
+						<svelte:component this={section.icon} class="h-4 w-4 text-text-soft" />
 					{/if}
 					<h2 class="text-sm font-semibold text-text">
 						{section.title}
@@ -205,7 +205,7 @@
 				data.migration.applied.find((m) => m.latest) ?? data.migration.applied[0]}
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
-					<Database class="h-4 w-4 text-text-soft " />
+					<Database class="h-4 w-4 text-text-soft" />
 					<h2 class="text-sm font-semibold text-text">Database</h2>
 				</div>
 				<ExpandableTable
@@ -274,7 +274,7 @@
 		<!-- Releases Section -->
 		<div class="space-y-2">
 			<div class="flex items-center gap-2">
-				<Package class="h-4 w-4 text-text-soft " />
+				<Package class="h-4 w-4 text-text-soft" />
 				<h2 class="text-sm font-semibold text-text">Releases</h2>
 				{#if data.cachedAt}
 					<span class="ml-auto text-xs text-text-muted">

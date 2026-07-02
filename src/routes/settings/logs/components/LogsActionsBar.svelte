@@ -35,11 +35,11 @@
 	const logLevels = ['ALL', 'DEBUG', 'INFO', 'WARN', 'ERROR'] as const;
 
 	const levelColors: Record<string, string> = {
-		ALL: 'text-text-soft ',
-		DEBUG: 'text-info-icon ',
-		INFO: 'text-success-icon ',
-		WARN: 'text-warning-icon ',
-		ERROR: 'text-danger-icon '
+		ALL: 'text-text-soft',
+		DEBUG: 'text-info-icon',
+		INFO: 'text-success-icon',
+		WARN: 'text-warning-icon',
+		ERROR: 'text-danger-icon'
 	};
 
 	function formatFileSize(bytes: number): string {

@@ -308,7 +308,7 @@
 					<Button
 						icon={Trash2}
 						size="xs"
-						iconColor="text-danger-icon "
+						iconColor="text-danger-icon"
 						tooltip="Delete"
 						on:click={() => openDeleteModal(row.filename)}
 					/>

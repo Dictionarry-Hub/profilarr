@@ -136,7 +136,7 @@
 				<Button
 					text={saving ? 'Saving...' : submitText}
 					icon={mode === 'create' ? Plus : Save}
-					iconColor="text-info-icon "
+					iconColor="text-info-icon"
 					disabled={saving || !serviceName}
 					type="submit"
 				/>
@@ -212,7 +212,7 @@
 					<Button
 						text="All"
 						icon={ListChecks}
-						iconColor="text-info-icon "
+						iconColor="text-info-icon"
 						size="sm"
 						variant="secondary"
 						on:click={() => enableByStatus('all')}
@@ -220,7 +220,7 @@
 					<Button
 						text="Success"
 						icon={CheckCircle}
-						iconColor="text-success-icon "
+						iconColor="text-success-icon"
 						size="sm"
 						variant="secondary"
 						on:click={() => enableByStatus('success')}
@@ -228,7 +228,7 @@
 					<Button
 						text="Failed"
 						icon={XCircle}
-						iconColor="text-danger-icon "
+						iconColor="text-danger-icon"
 						size="sm"
 						variant="secondary"
 						on:click={() => enableByStatus('failed')}

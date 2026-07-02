@@ -92,7 +92,7 @@
 							icon={Unlink}
 							size="xs"
 							variant="ghost"
-							iconColor="text-danger-icon "
+							iconColor="text-danger-icon"
 							tooltip="Unlink instance"
 							on:click={(e) => handleDeleteClick(e, instance)}
 						/>
@@ -155,17 +155,17 @@
 					class="flex flex-col items-start gap-1.5 text-xs text-text-soft sm:flex-row sm:items-center sm:gap-3"
 				>
 					<div class="flex items-center gap-1">
-						<ArrowUpCircle size={12} class="text-warning-icon " />
+						<ArrowUpCircle size={12} class="text-warning-icon" />
 						<span>Upgrades: {instance.upgradeEnabled ? 'On' : 'Off'}</span>
 					</div>
 					<span class="hidden text-text sm:inline">&middot;</span>
 					<div class="flex items-center gap-1">
-						<Type size={12} class="text-info-icon " />
+						<Type size={12} class="text-info-icon" />
 						<span>Renames: {instance.renameEnabled ? 'On' : 'Off'}</span>
 					</div>
 					<span class="hidden text-text sm:inline">&middot;</span>
 					<div class="flex items-center gap-1">
-						<Trash2 size={12} class="text-danger-icon " />
+						<Trash2 size={12} class="text-danger-icon" />
 						<span>Cleanup: {instance.cleanupEnabled ? 'On' : 'Off'}</span>
 					</div>
 				</div>

@@ -115,7 +115,7 @@
 					<Button
 						text={saving ? 'Saving...' : 'Save'}
 						icon={Save}
-						iconColor="text-info-icon "
+						iconColor="text-info-icon"
 						disabled={saving || !$isDirty}
 						type="submit"
 					/>

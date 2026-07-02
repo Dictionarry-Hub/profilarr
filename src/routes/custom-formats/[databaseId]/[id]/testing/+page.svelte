@@ -115,7 +115,7 @@
 			<Button
 				text="Add Test"
 				icon={Plus}
-				iconColor="text-info-icon "
+				iconColor="text-info-icon"
 				variant="secondary"
 				onboarding="cf-testing-add"
 				on:click={handleAddTest}
@@ -129,7 +129,7 @@
 			<div
 				class="flex items-center gap-3 rounded-card border border-warning-border bg-warning-bg p-4"
 			>
-				<AlertTriangle size={20} class="text-warning-icon " />
+				<AlertTriangle size={20} class="text-warning-icon" />
 				<div>
 					<p class="text-sm font-medium text-warning-text">Parser service unavailable</p>
 					<p class="text-xs text-warning-icon">
@@ -182,13 +182,13 @@
 						{#if row.result === 'pass'}
 							<div class="flex items-center justify-center">
 								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-success-bg">
-									<Check size={14} class="text-success-icon " />
+									<Check size={14} class="text-success-icon" />
 								</div>
 							</div>
 						{:else if row.result === 'fail'}
 							<div class="flex items-center justify-center">
 								<div class="flex h-6 w-6 items-center justify-center rounded-pill bg-danger-bg">
-									<X size={14} class="text-danger-icon " />
+									<X size={14} class="text-danger-icon" />
 								</div>
 							</div>
 						{:else}
@@ -316,13 +316,13 @@
 															<div
 																class="inline-flex h-5 w-5 items-center justify-center rounded-pill bg-success-bg"
 															>
-																<Check size={12} class="text-success-icon " />
+																<Check size={12} class="text-success-icon" />
 															</div>
 														{:else}
 															<div
 																class="inline-flex h-5 w-5 items-center justify-center rounded-pill bg-danger-bg"
 															>
-																<X size={12} class="text-danger-icon " />
+																<X size={12} class="text-danger-icon" />
 															</div>
 														{/if}
 													</td>
@@ -345,13 +345,13 @@
 																<div
 																	class="inline-flex h-6 w-6 items-center justify-center rounded-pill bg-success-bg"
 																>
-																	<Check size={14} class="text-success-icon " />
+																	<Check size={14} class="text-success-icon" />
 																</div>
 															{:else}
 																<div
 																	class="inline-flex h-6 w-6 items-center justify-center rounded-pill bg-danger-bg"
 																>
-																	<X size={14} class="text-danger-icon " />
+																	<X size={14} class="text-danger-icon" />
 																</div>
 															{/if}
 														</td>
@@ -365,7 +365,7 @@
 																<div
 																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-success-bg"
 																>
-																	<Check size={24} class="text-success-icon " />
+																	<Check size={24} class="text-success-icon" />
 																</div>
 																<div class="mt-1 text-[10px] font-medium text-success-icon">
 																	MATCH
@@ -374,7 +374,7 @@
 																<div
 																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-danger-bg"
 																>
-																	<X size={24} class="text-danger-icon " />
+																	<X size={24} class="text-danger-icon" />
 																</div>
 																<div class="mt-1 text-[10px] font-medium text-danger-icon">
 																	NO MATCH
@@ -389,7 +389,7 @@
 																<div
 																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-success-bg"
 																>
-																	<Check size={24} class="text-success-icon " />
+																	<Check size={24} class="text-success-icon" />
 																</div>
 																<div class="mt-1 text-[10px] font-medium text-success-icon">
 																	MATCH
@@ -398,7 +398,7 @@
 																<div
 																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-danger-bg"
 																>
-																	<X size={24} class="text-danger-icon " />
+																	<X size={24} class="text-danger-icon" />
 																</div>
 																<div class="mt-1 text-[10px] font-medium text-danger-icon">
 																	NO MATCH
@@ -413,7 +413,7 @@
 																<div
 																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-success-bg"
 																>
-																	<Check size={24} class="text-success-icon " />
+																	<Check size={24} class="text-success-icon" />
 																</div>
 																<div class="mt-1 text-[10px] font-medium text-success-icon">
 																	PASS
@@ -422,7 +422,7 @@
 																<div
 																	class="inline-flex h-10 w-10 items-center justify-center rounded-pill bg-danger-bg"
 																>
-																	<X size={24} class="text-danger-icon " />
+																	<X size={24} class="text-danger-icon" />
 																</div>
 																<div class="mt-1 text-[10px] font-medium text-danger-icon">
 																	FAIL
@@ -539,7 +539,7 @@
 								title="Delete test case"
 								ariaLabel="Delete test case"
 								variant="secondary"
-								iconColor="text-danger-icon "
+								iconColor="text-danger-icon"
 								size="xs"
 								on:click={(e) => {
 									if (readOnly) {

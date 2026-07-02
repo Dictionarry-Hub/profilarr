@@ -76,7 +76,7 @@
 <div class="space-y-4">
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-2">
-			<Clock size={18} class="text-text-soft " />
+			<Clock size={18} class="text-text-soft" />
 			<h2 class="text-lg font-semibold text-text">Recent Job Runs</h2>
 		</div>
 

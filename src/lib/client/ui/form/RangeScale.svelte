@@ -39,19 +39,19 @@
 		},
 		blue: {
 			dot: 'bg-info-bg',
-			badge: 'bg-info-bg text-info-text '
+			badge: 'bg-info-bg text-info-text'
 		},
 		green: {
 			dot: 'bg-success-bg',
-			badge: 'bg-success-bg text-success-text '
+			badge: 'bg-success-bg text-success-text'
 		},
 		orange: {
 			dot: 'bg-warning-bg',
-			badge: 'bg-warning-bg text-warning-text '
+			badge: 'bg-warning-bg text-warning-text'
 		},
 		red: {
 			dot: 'bg-danger-bg',
-			badge: 'bg-danger-bg text-danger-text '
+			badge: 'bg-danger-bg text-danger-text'
 		},
 		purple: {
 			dot: 'bg-accent-solid',
@@ -59,7 +59,7 @@
 		},
 		neutral: {
 			dot: 'bg-surface-hover',
-			badge: 'bg-surface-hover text-text-soft '
+			badge: 'bg-surface-hover text-text-soft'
 		}
 	};
 

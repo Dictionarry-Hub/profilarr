@@ -135,7 +135,7 @@
 			headerIcon: Network,
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — IP from session DB, not user content
-				html: `<span class="font-mono text-xs text-text-muted ">${row.ip_address ?? 'Unknown'}</span>`
+				html: `<span class="font-mono text-xs text-text-muted">${row.ip_address ?? 'Unknown'}</span>`
 			})
 		},
 		{
@@ -144,7 +144,7 @@
 			headerIcon: Clock,
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — formatted timestamp
-				html: `<span class="text-xs text-text-muted ">${formatRelativeTime(row.last_active_at)}</span>`
+				html: `<span class="text-xs text-text-muted">${formatRelativeTime(row.last_active_at)}</span>`
 			})
 		}
 	];
@@ -397,7 +397,7 @@
 										title="Revoke session"
 										ariaLabel="Revoke session"
 										variant="secondary"
-										iconColor="text-danger-icon "
+										iconColor="text-danger-icon"
 										size="xs"
 										type="submit"
 									/>

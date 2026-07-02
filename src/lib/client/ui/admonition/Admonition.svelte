@@ -29,29 +29,29 @@
 
 	const variantStyles: Record<Variant, { accent: string; surface: string; divider: string }> = {
 		info: {
-			accent: 'text-info-text ',
-			surface: 'border-info-border bg-info-bg ',
-			divider: 'border-info-border '
+			accent: 'text-info-text',
+			surface: 'border-info-border bg-info-bg',
+			divider: 'border-info-border'
 		},
 		warning: {
-			accent: 'text-warning-text ',
-			surface: 'border-warning-border bg-warning-bg ',
-			divider: 'border-warning-border '
+			accent: 'text-warning-text',
+			surface: 'border-warning-border bg-warning-bg',
+			divider: 'border-warning-border'
 		},
 		danger: {
-			accent: 'text-danger-text ',
-			surface: 'border-danger-border bg-danger-bg ',
-			divider: 'border-danger-border '
+			accent: 'text-danger-text',
+			surface: 'border-danger-border bg-danger-bg',
+			divider: 'border-danger-border'
 		},
 		success: {
-			accent: 'text-success-text ',
-			surface: 'border-success-border bg-success-bg ',
-			divider: 'border-success-border '
+			accent: 'text-success-text',
+			surface: 'border-success-border bg-success-bg',
+			divider: 'border-success-border'
 		},
 		note: {
-			accent: 'text-text-soft ',
-			surface: 'border-border bg-surface-muted ',
-			divider: 'border-border '
+			accent: 'text-text-soft',
+			surface: 'border-border bg-surface-muted',
+			divider: 'border-border'
 		}
 	};
 

@@ -91,7 +91,7 @@
 			<Button
 				text={running ? 'Running...' : 'Dry Run'}
 				icon={FlaskConical}
-				iconColor="text-warning-icon "
+				iconColor="text-warning-icon"
 				disabled={isNewConfig || !enabled || running || saving || $isDirty}
 				tooltip="Preview which files would be renamed without making changes"
 				tooltipPosition="bottom"
@@ -110,7 +110,7 @@
 			<Button
 				text={running ? 'Running...' : 'Run Now'}
 				icon={Play}
-				iconColor="text-success-icon "
+				iconColor="text-success-icon"
 				disabled={isNewConfig || !enabled || running || saving || $isDirty}
 				tooltip="Rename files and folders now"
 				tooltipPosition="bottom"
@@ -129,7 +129,7 @@
 			<Button
 				text="Save"
 				icon={Save}
-				iconColor="text-info-icon "
+				iconColor="text-info-icon"
 				disabled={saving || running || !$isDirty}
 				on:click={() => {
 					const saveForm = document.getElementById('save-form');

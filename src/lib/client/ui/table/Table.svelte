@@ -258,7 +258,7 @@
 				<tr>
 					{#each columns as column}
 						<th
-							class={`${compact ? 'px-4 py-2.5' : 'px-6 py-3'} text-xs font-semibold text-text-muted ${getAlignClass(column.align)} ${column.width || ''}`}
+							class={`${compact ? 'px-4 py-2.5' : 'px-6 py-3'} text-xs font-semibold text-text-muted ${getAlignClass(column.align)} ${column.width ||''}`}
 						>
 							{#if column.sortable}
 								<div
@@ -345,7 +345,7 @@
 										? column.tdClass(row)
 										: (column.tdClass ?? '')}
 								<td
-									class={`${compact ? 'px-4 py-2' : 'px-6 py-4'} text-sm text-text ${getAlignClass(column.align)} ${column.width || ''} ${rowHref ? 'relative' : ''} ${tdExtraClass}`}
+									class={`${compact ? 'px-4 py-2' : 'px-6 py-4'} text-sm text-text ${getAlignClass(column.align)} ${column.width ||''} ${rowHref ? 'relative' : ''} ${tdExtraClass}`}
 								>
 									{#if rowHref}
 										<a href={rowHref(row)} class="cell-link" aria-label="Open row"></a>

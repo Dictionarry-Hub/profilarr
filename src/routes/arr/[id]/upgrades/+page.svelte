@@ -168,7 +168,7 @@
 			<Button
 				text={running ? 'Running...' : 'Dry Run'}
 				icon={FlaskConical}
-				iconColor="text-warning-icon "
+				iconColor="text-warning-icon"
 				disabled={isNewConfig || !enabled || running || saving || clearing || $isDirty}
 				tooltip="Search indexers without downloading (limited to once every 10 min)"
 				tooltipPosition="bottom"
@@ -188,7 +188,7 @@
 				<Button
 					text={running ? 'Running...' : 'Live Run'}
 					icon={Play}
-					iconColor="text-danger-icon "
+					iconColor="text-danger-icon"
 					disabled={isNewConfig || !enabled || running || saving || $isDirty}
 					tooltip="Run a live search that will download upgrades"
 					tooltipPosition="bottom"
@@ -208,7 +208,7 @@
 			<Button
 				text="Save"
 				icon={Save}
-				iconColor="text-info-icon "
+				iconColor="text-info-icon"
 				disabled={saving || running || !$isDirty}
 				on:click={() => {
 					const f = document.getElementById('save-form');

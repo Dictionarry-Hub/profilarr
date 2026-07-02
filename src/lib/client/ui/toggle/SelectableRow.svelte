@@ -20,7 +20,7 @@
 	type="button"
 	class="flex w-full items-center justify-between gap-3 bg-surface p-3 text-left transition-colors {disabled
 		? 'cursor-not-allowed opacity-50'
-		: 'cursor-pointer hover:bg-surface-muted '}"
+		: 'cursor-pointer hover:bg-surface-muted'}"
 	{disabled}
 	on:click
 >

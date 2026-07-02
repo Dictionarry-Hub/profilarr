@@ -399,7 +399,7 @@
 								/>
 							</div>
 						{:else}
-							<span class={row.enabled ? 'text-text ' : 'text-text-subtle '}>
+							<span class={row.enabled ? 'text-text' : 'text-text-subtle'}>
 								{row.name}
 							</span>
 							<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
@@ -419,13 +419,13 @@
 					<div class="flex flex-wrap items-center gap-1 md:hidden">
 						<Button
 							icon={Power}
-							iconColor={row.enabled ? 'text-success-icon ' : 'text-text-subtle '}
+							iconColor={row.enabled ? 'text-success-icon' : 'text-text-subtle'}
 							tooltip={row.enabled ? 'Disable' : 'Enable'}
 							on:click={() => toggleEnabled(row.id)}
 						/>
 						<Button
 							icon={ClipboardCopy}
-							iconColor="text-warning-icon "
+							iconColor="text-warning-icon"
 							tooltip="Copy"
 							on:click={() => copyFilter(row.id)}
 						/>
@@ -437,7 +437,7 @@
 						/>
 						<Button
 							icon={Trash2}
-							iconColor="text-danger-icon "
+							iconColor="text-danger-icon"
 							tooltip="Delete"
 							on:click={() => confirmDelete(row)}
 						/>
@@ -451,13 +451,13 @@
 			<div class="hidden items-center gap-1 md:flex">
 				<Button
 					icon={Power}
-					iconColor={row.enabled ? 'text-success-icon ' : 'text-text-subtle '}
+					iconColor={row.enabled ? 'text-success-icon' : 'text-text-subtle'}
 					tooltip={row.enabled ? 'Disable' : 'Enable'}
 					on:click={() => toggleEnabled(row.id)}
 				/>
 				<Button
 					icon={ClipboardCopy}
-					iconColor="text-warning-icon "
+					iconColor="text-warning-icon"
 					tooltip="Copy"
 					on:click={() => copyFilter(row.id)}
 				/>
@@ -469,7 +469,7 @@
 				/>
 				<Button
 					icon={Trash2}
-					iconColor="text-danger-icon "
+					iconColor="text-danger-icon"
 					tooltip="Delete"
 					on:click={() => confirmDelete(row)}
 				/>

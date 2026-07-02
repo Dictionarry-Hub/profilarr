@@ -10,7 +10,7 @@
 		<a href={item.href} class="text-text-muted transition-colors hover:text-text-soft">
 			{item.label}
 		</a>
-		<ChevronRight size={14} class="text-text-subtle " />
+		<ChevronRight size={14} class="text-text-subtle" />
 	{/each}
 	<span class="font-medium text-text">{current}</span>
 </div>

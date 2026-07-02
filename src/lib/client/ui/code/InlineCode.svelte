@@ -21,7 +21,7 @@
 	style="font-family: var(--font-code)"
 >
 	{#if icon}
-		<svelte:component this={icon} size={12} class="shrink-0 text-text-subtle " />
+		<svelte:component this={icon} size={12} class="shrink-0 text-text-subtle" />
 	{/if}
 	{text}
 </code>

@@ -119,7 +119,7 @@
 					<Button
 						disabled={deleting || deleteBlocked}
 						icon={deleting ? Loader2 : Trash2}
-						iconColor="text-danger-icon "
+						iconColor="text-danger-icon"
 						text={deleting ? 'Deleting...' : 'Delete'}
 						tooltip={deleteTooltip}
 						on:click={handleDeleteClick}
@@ -131,7 +131,7 @@
 				<Button
 					disabled={saving || !isValid || !$isDirty}
 					icon={saving ? Loader2 : Save}
-					iconColor="text-info-icon "
+					iconColor="text-info-icon"
 					text={saving ? (mode === 'create' ? 'Creating...' : 'Saving...') : submitButtonText}
 					on:click={handleSaveClick}
 				/>

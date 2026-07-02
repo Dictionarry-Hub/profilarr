@@ -350,7 +350,7 @@
 							class="inline-flex items-center gap-1 font-mono {row.results.successful > 0
 								? 'cursor-help'
 								: ''}"
-							><span class={row.results.successful > 0 ? 'text-success-icon ' : ''}
+							><span class={row.results.successful > 0 ? 'text-success-icon' : ''}
 								>{row.results.successful}</span
 							>
 							upgraded {#if row.results.successful > 0}<Info size={12} />{/if}</span
@@ -414,12 +414,12 @@
 					<span class="text-sm text-text">
 						{#if row.config.dryRun}
 							<span class="font-mono">{row.results.searchesTriggered}</span> previewed,
-							<span class="{row.results.successful > 0 ? 'text-success-icon ' : ''} font-mono"
+							<span class="{row.results.successful > 0 ? 'text-success-icon' : ''} font-mono"
 								>{row.results.successful}</span
 							> upgrades found
 						{:else}
 							<span class="font-mono">{row.results.searchesTriggered}</span> searches triggered,
-							<span class="{row.results.successful > 0 ? 'text-success-icon ' : ''} font-mono"
+							<span class="{row.results.successful > 0 ? 'text-success-icon' : ''} font-mono"
 								>{row.results.successful}</span
 							> grabbed
 						{/if}
