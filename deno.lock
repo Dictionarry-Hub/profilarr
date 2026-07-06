@@ -15,7 +15,7 @@
     "jsr:@std/yaml@^1.1.1": "1.1.1",
     "npm:@deno/vite-plugin@^2.0.2": "2.0.2_vite@8.1.0__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1",
     "npm:@jsr/db__sqlite@0.12.0": "0.12.0",
-    "npm:@lucide/svelte@^1.21.0": "1.21.0_svelte@5.56.4",
+    "npm:@lucide/svelte@^1.22.0": "1.22.0_svelte@5.56.4",
     "npm:@playwright/test@^1.61.1": "1.61.1",
     "npm:@sveltejs/kit@^2.68.0": "2.68.0_@sveltejs+vite-plugin-svelte@7.1.2__svelte@5.56.4__vite@8.1.0___@types+node@22.20.0___esbuild@0.28.1_svelte@5.56.4_typescript@6.0.3_vite@8.1.0__@types+node@22.20.0__esbuild@0.28.1",
     "npm:@sveltejs/vite-plugin-svelte@^7.1.2": "7.1.2_svelte@5.56.4_vite@8.1.0__@types+node@22.20.0__esbuild@0.28.1",
@@ -382,8 +382,8 @@
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/std__streams/1.1.1.tgz"
     },
-    "@lucide/svelte@1.21.0_svelte@5.56.4": {
-      "integrity": "sha512-MEv//A7Jv3kHukZowv/DWp1MAtUzJKYwtJsmnQ7X98lCgtac3z3NbaToDl3Q6jO3gS9sougFpcD+t+YuxOkRMw==",
+    "@lucide/svelte@1.22.0_svelte@5.56.4": {
+      "integrity": "sha512-eaNC3GGu9ma7mviB9vPL6OnawXqxdvRnoAQSq5l15mBlsuwD7kozZ7pzPXSlT6OwSl7hz4qTk+ZU3OEewwi5gQ==",
       "dependencies": [
         "svelte"
       ]
@@ -1222,7 +1222,7 @@
       "jsr:@std/yaml@^1.1.1",
       "npm:@deno/vite-plugin@^2.0.2",
       "npm:@jsr/db__sqlite@0.12.0",
-      "npm:@lucide/svelte@^1.21.0",
+      "npm:@lucide/svelte@^1.22.0",
       "npm:@playwright/test@^1.61.1",
       "npm:@sveltejs/kit@^2.68.0",
       "npm:@sveltejs/vite-plugin-svelte@^7.1.2",
