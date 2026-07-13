@@ -33,7 +33,7 @@
 		"@lucide/svelte": "npm:@lucide/svelte@^1.22.0",
 		"@soapbox/kysely-deno-sqlite": "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
 		"@std/yaml": "jsr:@std/yaml@^1.1.1",
-		"@sveltejs/kit": "npm:@sveltejs/kit@^2.68.0",
+		"@sveltejs/kit": "npm:@sveltejs/kit@^2.69.1",
 		"croner": "npm:croner@^10.0.1",
 		"jose": "npm:jose@^6.2.3",
 		"kysely": "npm:kysely@0.27.6",
