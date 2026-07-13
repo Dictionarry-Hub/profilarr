@@ -87,6 +87,7 @@ drifts between instances. Profilarr tries to make that easier.
 ```yaml
 services:
   profilarr:
+    # See "Release channels" below for available tags.
     image: ghcr.io/dictionarry-hub/profilarr:latest
     container_name: profilarr
     ports:
@@ -117,6 +118,23 @@ services:
 > The parser service is only required for custom format and quality profile
 > testing. Linking, syncing, and all other features work without it. Remove the
 > `parser` service and related environment variables if you don't need it.
+
+#### Release channels
+
+New features are tested on the `develop` image by beta testers first. Once a
+batch is verified, it becomes a stable release.
+
+Choose an image tag based on how you want to receive these releases:
+
+| Type    | Tag       | Description                                                           |
+| ------- | --------- | --------------------------------------------------------------------- |
+| Latest  | `latest`  | Newest stable release, including future major versions                |
+| Develop | `develop` | Pre-release builds under testing; not guaranteed stable               |
+| Exact   | `2.1.0`   | A specific release; never updates                                     |
+| Major   | `2`       | Newest stable release within v2; never updates to a new major version |
+
+Both the `profilarr` and `profilarr-parser` images publish the same tags; keep
+them on the same channel.
 
 | Variable                 | Default                                                           | Description                                                                           |
 | ------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
