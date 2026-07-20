@@ -34,7 +34,7 @@
     "npm:prettier-plugin-tailwindcss@0.8": "0.8.0_prettier@3.8.4_prettier-plugin-svelte@4.1.1__prettier@3.8.4__svelte@5.56.4_svelte@5.56.4",
     "npm:prettier@3.8.4": "3.8.4",
     "npm:simple-icons@^16.24.1": "16.24.1",
-    "npm:svelte-check@^4.7.1": "4.7.1_svelte@5.56.4_typescript@6.0.3",
+    "npm:svelte-check@^4.7.2": "4.7.2_svelte@5.56.4_typescript@6.0.3",
     "npm:svelte@^5.56.4": "5.56.4",
     "npm:tailwindcss@^4.3.1": "4.3.1",
     "npm:typescript@^6.0.3": "6.0.3",
@@ -1108,8 +1108,8 @@
     "supports-color@10.2.2": {
       "integrity": "sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g=="
     },
-    "svelte-check@4.7.1_svelte@5.56.4_typescript@6.0.3": {
-      "integrity": "sha512-FGUOmAqxXdN/H9Zm8slrqO7SLtFisXRB7rfOsHNJ3MLTD2po/+Stg8XyErkpumPHbuUiYTcqrEIzxpVWKTLqtg==",
+    "svelte-check@4.7.2_svelte@5.56.4_typescript@6.0.3": {
+      "integrity": "sha512-GoS4XJdGswlq0rIT1vtFLzJY1bvHtY37McY9H9Gkm1Ggw/ICdZYn8J/Z8Yi0BEL0i3R4+jtaWVePjyppMlij/A==",
       "dependencies": [
         "@jridgewell/trace-mapping",
         "@sveltejs/load-config",
@@ -1240,7 +1240,7 @@
       "npm:prettier-plugin-tailwindcss@0.8",
       "npm:prettier@3.8.4",
       "npm:simple-icons@^16.24.1",
-      "npm:svelte-check@^4.7.1",
+      "npm:svelte-check@^4.7.2",
       "npm:svelte@^5.56.4",
       "npm:tailwindcss@^4.3.1",
       "npm:typescript@^6.0.3",
