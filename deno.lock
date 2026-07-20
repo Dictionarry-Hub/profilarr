@@ -12,7 +12,7 @@
     "jsr:@std/internal@^1.0.14": "1.0.14",
     "jsr:@std/path@1": "1.1.5",
     "jsr:@std/path@^1.1.5": "1.1.5",
-    "jsr:@std/yaml@^1.1.1": "1.1.1",
+    "jsr:@std/yaml@^1.1.2": "1.1.2",
     "npm:@deno/vite-plugin@^2.0.2": "2.0.2_vite@8.1.4__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1",
     "npm:@jsr/db__sqlite@0.12.0": "0.12.0",
     "npm:@lucide/svelte@^1.22.0": "1.22.0_svelte@5.56.4",
@@ -90,8 +90,8 @@
         "jsr:@std/internal@^1.0.14"
       ]
     },
-    "@std/yaml@1.1.1": {
-      "integrity": "a57665ecf3d17b926380593a56625d8a10cc7281802f1e993b5ebc94a48e71f8"
+    "@std/yaml@1.1.2": {
+      "integrity": "de612653c036749ba2044165e316f52412b0f0698afffb7ee80b5331d6d2abae"
     }
   },
   "npm": {
@@ -1222,7 +1222,7 @@
       "jsr:@felix/bcrypt@^1.0.8",
       "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
       "jsr:@std/assert@^1.0.19",
-      "jsr:@std/yaml@^1.1.1",
+      "jsr:@std/yaml@^1.1.2",
       "npm:@deno/vite-plugin@^2.0.2",
       "npm:@jsr/db__sqlite@0.12.0",
       "npm:@lucide/svelte@^1.22.0",
