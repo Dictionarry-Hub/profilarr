@@ -58,7 +58,7 @@
 		"svelte-check": "npm:svelte-check@^4.7.2",
 		"tailwindcss": "npm:tailwindcss@^4.3.1",
 		"typescript": "npm:typescript@^6.0.3",
-		"vite": "npm:vite@^8.1.0"
+		"vite": "npm:vite@^8.1.4"
 	},
 	"tasks": {
 		"dev": "deno run -A scripts/dev.ts",
