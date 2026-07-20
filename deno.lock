@@ -33,7 +33,7 @@
     "npm:prettier-plugin-svelte@^4.1.1": "4.1.1_prettier@3.8.4_svelte@5.56.4",
     "npm:prettier-plugin-tailwindcss@0.8": "0.8.0_prettier@3.8.4_prettier-plugin-svelte@4.1.1__prettier@3.8.4__svelte@5.56.4_svelte@5.56.4",
     "npm:prettier@3.8.4": "3.8.4",
-    "npm:simple-icons@^16.24.1": "16.24.1",
+    "npm:simple-icons@^16.26.0": "16.26.0",
     "npm:svelte-check@^4.7.2": "4.7.2_svelte@5.56.4_typescript@6.0.3",
     "npm:svelte@^5.56.4": "5.56.4",
     "npm:tailwindcss@^4.3.1": "4.3.1",
@@ -1094,8 +1094,8 @@
     "set-cookie-parser@3.1.2": {
       "integrity": "sha512-5/r/lTwbJ3zQ+qwdUFZYeRNqda7P5HD8zQKqlSjdGt1/S0cjLAphHusj4Y58ahDtWn/g32xrIS58/ikOvwl0Lw=="
     },
-    "simple-icons@16.24.1": {
-      "integrity": "sha512-AnDQPrZAVzYSym7cBVIrnbhLk9auWGgkl+9hKvkbTqGEfH6TU7WKgumEXYYaJuM1Ib87+cnzr881UZniCM7t+A=="
+    "simple-icons@16.26.0": {
+      "integrity": "sha512-T9rNJtyOshULM8heLlvrZY346g9zOgZILQ3vxP+FWcX13RhaOLez7YM/hNCEx3b5gJckSCNDoNsjZuDncSMYSQ=="
     },
     "sirv@3.0.2": {
       "integrity": "sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==",
@@ -1242,7 +1242,7 @@
       "npm:prettier-plugin-svelte@^4.1.1",
       "npm:prettier-plugin-tailwindcss@0.8",
       "npm:prettier@3.8.4",
-      "npm:simple-icons@^16.24.1",
+      "npm:simple-icons@^16.26.0",
       "npm:svelte-check@^4.7.2",
       "npm:svelte@^5.56.4",
       "npm:tailwindcss@^4.3.1",
