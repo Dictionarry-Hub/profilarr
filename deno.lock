@@ -17,7 +17,7 @@
     "npm:@jsr/db__sqlite@0.12.0": "0.12.0",
     "npm:@lucide/svelte@^1.22.0": "1.22.0_svelte@5.56.4",
     "npm:@playwright/test@^1.61.1": "1.61.1",
-    "npm:@sveltejs/kit@^2.68.0": "2.68.0_@sveltejs+vite-plugin-svelte@7.1.2__svelte@5.56.4__vite@8.1.4___@types+node@22.20.0___esbuild@0.28.1__@types+node@22.20.0__esbuild@0.28.1_svelte@5.56.4_typescript@6.0.3_vite@8.1.4__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1",
+    "npm:@sveltejs/kit@^2.69.2": "2.69.2_@sveltejs+vite-plugin-svelte@7.1.2__svelte@5.56.4__vite@8.1.4___@types+node@22.20.0___esbuild@0.28.1__@types+node@22.20.0__esbuild@0.28.1_svelte@5.56.4_typescript@6.0.3_vite@8.1.4__@types+node@22.20.0__esbuild@0.28.1",
     "npm:@sveltejs/vite-plugin-svelte@^7.1.2": "7.1.2_svelte@5.56.4_vite@8.1.4__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1",
     "npm:@tailwindcss/vite@^4.3.1": "4.3.1_vite@8.1.4__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1",
     "npm:@types/deno@^2.7.0": "2.7.0",
@@ -526,8 +526,8 @@
         "acorn"
       ]
     },
-    "@sveltejs/kit@2.68.0_@sveltejs+vite-plugin-svelte@7.1.2__svelte@5.56.4__vite@8.1.4___@types+node@22.20.0___esbuild@0.28.1__@types+node@22.20.0__esbuild@0.28.1_svelte@5.56.4_typescript@6.0.3_vite@8.1.4__@types+node@22.20.0__esbuild@0.28.1_@types+node@22.20.0_esbuild@0.28.1": {
-      "integrity": "sha512-PdKiWsqinAoubVsSiRgVFkg3MHzGhQPnwQ8VxnGQKpZYijpapZ3UHHBje0GeByt2TvfjHPw+kxV+dNK2RIZg9g==",
+    "@sveltejs/kit@2.69.2_@sveltejs+vite-plugin-svelte@7.1.2__svelte@5.56.4__vite@8.1.4___@types+node@22.20.0___esbuild@0.28.1__@types+node@22.20.0__esbuild@0.28.1_svelte@5.56.4_typescript@6.0.3_vite@8.1.4__@types+node@22.20.0__esbuild@0.28.1": {
+      "integrity": "sha512-CMdPDbYjRwRu4KXTxBVMuOpFPCt1i/v0ANennotec+K9Cmb2e3w2yYzJiC6Vh/WSvm9Khi5sJMZa0rJPqfHlDw==",
       "dependencies": [
         "@standard-schema/spec",
         "@sveltejs/acorn-typescript",
@@ -1091,8 +1091,8 @@
         "mri"
       ]
     },
-    "set-cookie-parser@3.1.1": {
-      "integrity": "sha512-vM9SUhjsUYs6UeJUmygc5Ofm5eQGe85riob5ju6XCgFGJI5PLV4nrDAQpQjd+LkFBpAkADn5BQQpZ9EUNkyLuA=="
+    "set-cookie-parser@3.1.2": {
+      "integrity": "sha512-5/r/lTwbJ3zQ+qwdUFZYeRNqda7P5HD8zQKqlSjdGt1/S0cjLAphHusj4Y58ahDtWn/g32xrIS58/ikOvwl0Lw=="
     },
     "simple-icons@16.24.1": {
       "integrity": "sha512-AnDQPrZAVzYSym7cBVIrnbhLk9auWGgkl+9hKvkbTqGEfH6TU7WKgumEXYYaJuM1Ib87+cnzr881UZniCM7t+A=="
@@ -1227,7 +1227,7 @@
       "npm:@jsr/db__sqlite@0.12.0",
       "npm:@lucide/svelte@^1.22.0",
       "npm:@playwright/test@^1.61.1",
-      "npm:@sveltejs/kit@^2.68.0",
+      "npm:@sveltejs/kit@^2.69.2",
       "npm:@sveltejs/vite-plugin-svelte@^7.1.2",
       "npm:@tailwindcss/vite@^4.3.1",
       "npm:@types/deno@^2.7.0",
