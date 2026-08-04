@@ -46,7 +46,7 @@
 		"@playwright/test": "npm:@playwright/test@^1.61.1",
 		"@std/assert": "jsr:@std/assert@^1.0.19",
 		"@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^7.2.0",
-		"@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.2",
+		"@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.3",
 		"@types/deno": "npm:@types/deno@^2.7.0",
 		"@types/node": "npm:@types/node@^22.20.1",
 		"esbuild": "npm:esbuild@^0.28.1",
