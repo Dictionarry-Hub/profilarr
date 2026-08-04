@@ -52,7 +52,7 @@
 		"esbuild": "npm:esbuild@^0.28.1",
 		"openapi-typescript": "npm:openapi-typescript@^7.13.0",
 		"playwright": "npm:playwright@^1.61.1",
-		"prettier": "npm:prettier@3.8.4",
+		"prettier": "npm:prettier@3.9.6",
 		"prettier-plugin-svelte": "npm:prettier-plugin-svelte@^4.1.1",
 		"prettier-plugin-tailwindcss": "npm:prettier-plugin-tailwindcss@^0.8.0",
 		"svelte-check": "npm:svelte-check@^4.7.2",

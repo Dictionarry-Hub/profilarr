@@ -30,9 +30,9 @@
     "npm:marked@^18.0.7": "18.0.7",
     "npm:openapi-typescript@^7.13.0": "7.13.0_typescript@6.0.3",
     "npm:playwright@^1.61.1": "1.61.1",
-    "npm:prettier-plugin-svelte@^4.1.1": "4.1.1_prettier@3.8.4_svelte@5.56.8",
-    "npm:prettier-plugin-tailwindcss@0.8": "0.8.0_prettier@3.8.4_prettier-plugin-svelte@4.1.1__prettier@3.8.4__svelte@5.56.8_svelte@5.56.8",
-    "npm:prettier@3.8.4": "3.8.4",
+    "npm:prettier-plugin-svelte@^4.1.1": "4.1.1_prettier@3.9.6_svelte@5.56.8",
+    "npm:prettier-plugin-tailwindcss@0.8": "0.8.0_prettier@3.9.6_prettier-plugin-svelte@4.1.1__prettier@3.9.6__svelte@5.56.8",
+    "npm:prettier@3.9.6": "3.9.6",
     "npm:simple-icons@^16.26.0": "16.26.0",
     "npm:svelte-check@^4.7.2": "4.7.2_svelte@5.56.8_typescript@6.0.3",
     "npm:svelte@^5.56.8": "5.56.8",
@@ -1033,14 +1033,14 @@
         "source-map-js"
       ]
     },
-    "prettier-plugin-svelte@4.1.1_prettier@3.8.4_svelte@5.56.8": {
+    "prettier-plugin-svelte@4.1.1_prettier@3.9.6_svelte@5.56.8": {
       "integrity": "sha512-wXvbXMjSvb4C9ENWTHXyd+ihakKCsJ6rJhLP6/8HFNj4GkZr48jqL9PoKsl2sk7SyCZRTnJ7O2TTowUpOxP/KA==",
       "dependencies": [
         "prettier",
         "svelte"
       ]
     },
-    "prettier-plugin-tailwindcss@0.8.0_prettier@3.8.4_prettier-plugin-svelte@4.1.1__prettier@3.8.4__svelte@5.56.8_svelte@5.56.8": {
+    "prettier-plugin-tailwindcss@0.8.0_prettier@3.9.6_prettier-plugin-svelte@4.1.1__prettier@3.9.6__svelte@5.56.8": {
       "integrity": "sha512-V8ITGH87yuBDF6JpEZTOVlUz/saAwqb8f3HRgUj8Lh+tGCcrmorhsLpYqzygwFwK0PE2Ib6Mv3M7T/uE2tZV1g==",
       "dependencies": [
         "prettier",
@@ -1050,8 +1050,8 @@
         "prettier-plugin-svelte"
       ]
     },
-    "prettier@3.8.4": {
-      "integrity": "sha512-N2MylSdi48+5N/6S5j+maeHbUSIzzZ5uOcX5Hm4QpV8Dkb1HFjfAKTKX6yNPJQD9AhcT3ifHNB66tWTTJDi11Q==",
+    "prettier@3.9.6": {
+      "integrity": "sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==",
       "bin": true
     },
     "readdirp@4.1.2": {
@@ -1241,7 +1241,7 @@
       "npm:playwright@^1.61.1",
       "npm:prettier-plugin-svelte@^4.1.1",
       "npm:prettier-plugin-tailwindcss@0.8",
-      "npm:prettier@3.8.4",
+      "npm:prettier@3.9.6",
       "npm:simple-icons@^16.26.0",
       "npm:svelte-check@^4.7.2",
       "npm:svelte@^5.56.8",
