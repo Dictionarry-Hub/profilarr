@@ -58,7 +58,7 @@ async function runParser() {
 
 async function runServer() {
 	const cmd = new Deno.Command('deno', {
-		args: ['run', '-A', 'npm:vite', 'dev'],
+		args: ['run', '-A', 'vite', 'dev'],
 		env: {
 			...Deno.env.toObject(),
 			DENO_ENV: 'development',

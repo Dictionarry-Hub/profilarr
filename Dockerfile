@@ -60,7 +60,7 @@ export const build: BuildInfo = {
 EOF
 
 ENV APP_BASE_PATH=/build/dist/build
-RUN deno run -A npm:vite build
+RUN deno run -A vite build
 RUN DENO_DIR=/tmp/profilarr-deno-cache \
     deno eval "import { hash } from '@felix/bcrypt'; await hash('profilarr')"
 RUN DENO_TARGET=$(case "${TARGETARCH}" in \

@@ -75,7 +75,7 @@ export async function startServer(
 		env.VITE_PLATFORM = 'linux-amd64';
 		env.VITE_CHANNEL = 'test';
 		cmd = new Deno.Command('deno', {
-			args: ['run', '-A', 'npm:vite', 'dev', '--port', String(port)],
+			args: ['run', '-A', 'vite', 'dev', '--port', String(port)],
 			env,
 			stdout: 'piped',
 			stderr: 'piped'
