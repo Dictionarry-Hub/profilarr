@@ -39,7 +39,7 @@
 		"kysely": "npm:kysely@0.27.6",
 		"marked": "npm:marked@^18.0.5",
 		"simple-icons": "npm:simple-icons@^16.26.0",
-		"svelte": "npm:svelte@^5.56.4",
+		"svelte": "npm:svelte@^5.56.8",
 
 		// Tooling
 		"@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.2",
