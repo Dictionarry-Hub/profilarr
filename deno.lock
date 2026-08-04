@@ -27,7 +27,7 @@
     "npm:jose@^6.2.3": "6.2.3",
     "npm:kysely@0.27.6": "0.27.6",
     "npm:kysely@~0.27.2": "0.27.6",
-    "npm:marked@^18.0.5": "18.0.5",
+    "npm:marked@^18.0.7": "18.0.7",
     "npm:openapi-typescript@^7.13.0": "7.13.0_typescript@6.0.3",
     "npm:playwright@^1.61.1": "1.61.1",
     "npm:prettier-plugin-svelte@^4.1.1": "4.1.1_prettier@3.8.4_svelte@5.56.8",
@@ -955,8 +955,8 @@
         "@jridgewell/sourcemap-codec"
       ]
     },
-    "marked@18.0.5": {
-      "integrity": "sha512-S6GcvALHg6K4ohtu4E7x0a1AqhAjp6cV8KhLSyN9qVapnzJkusVBxZRcIU9AeYsbe6P1hKDusSbEOzGyyuce6w==",
+    "marked@18.0.7": {
+      "integrity": "sha512-iDVQ5ldaiKXn6b2JroX5kgRfmwgqolW7NpaEzTl1k/2Zh1njIEN9yniyLV/mOvWwtsE8OGgkjsCYvijuPk1dtA==",
       "bin": true
     },
     "minimatch@5.1.9": {
@@ -1236,7 +1236,7 @@
       "npm:esbuild@~0.28.1",
       "npm:jose@^6.2.3",
       "npm:kysely@0.27.6",
-      "npm:marked@^18.0.5",
+      "npm:marked@^18.0.7",
       "npm:openapi-typescript@^7.13.0",
       "npm:playwright@^1.61.1",
       "npm:prettier-plugin-svelte@^4.1.1",
