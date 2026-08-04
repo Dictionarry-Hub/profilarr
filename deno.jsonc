@@ -54,7 +54,7 @@
 		"playwright": "npm:playwright@^1.61.1",
 		"prettier": "npm:prettier@3.8.4",
 		"prettier-plugin-svelte": "npm:prettier-plugin-svelte@^4.1.1",
-		"prettier-plugin-tailwindcss": "npm:prettier-plugin-tailwindcss@^0.8.0",
+		"prettier-plugin-tailwindcss": "npm:prettier-plugin-tailwindcss@^0.8.1",
 		"svelte-check": "npm:svelte-check@^4.7.2",
 		"tailwindcss": "npm:tailwindcss@^4.3.2",
 		"typescript": "npm:typescript@^6.0.3",
