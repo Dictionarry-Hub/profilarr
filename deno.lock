@@ -2,16 +2,16 @@
   "version": "5",
   "specifiers": {
     "jsr:@denosaurs/plug@^1.1.0": "1.1.0",
-    "jsr:@felix/bcrypt@^1.0.8": "1.0.8",
+    "jsr:@felix/bcrypt@^2.1.0": "2.1.0",
     "jsr:@soapbox/kysely-deno-sqlite@^2.2.0": "2.2.0",
     "jsr:@std/assert@^1.0.19": "1.0.19",
-    "jsr:@std/encoding@1": "1.0.10",
+    "jsr:@std/encoding@1": "1.0.11",
     "jsr:@std/fmt@1": "1.0.10",
     "jsr:@std/fs@1": "1.0.24",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/internal@^1.0.14": "1.0.14",
-    "jsr:@std/path@1": "1.1.5",
-    "jsr:@std/path@^1.1.5": "1.1.5",
+    "jsr:@std/path@1": "1.1.6",
+    "jsr:@std/path@^1.1.5": "1.1.6",
     "jsr:@std/yaml@^1.1.2": "1.1.2",
     "npm:@deno/vite-plugin@^2.0.2": "2.0.2_vite@8.1.5__@types+node@22.20.1__esbuild@0.28.1_@types+node@22.20.1",
     "npm:@jsr/db__sqlite@0.12.0": "0.12.0",
@@ -50,8 +50,8 @@
         "jsr:@std/path@1"
       ]
     },
-    "@felix/bcrypt@1.0.8": {
-      "integrity": "59c41160fc027882479c512db5d53792c4d91aadcd49467c85caa2f1679046f2",
+    "@felix/bcrypt@2.1.0": {
+      "integrity": "9fd8126db86879a7fa441117cece09a4198f59de29372cdef7d2730e83a988bc",
       "dependencies": [
         "jsr:@denosaurs/plug"
       ]
@@ -68,8 +68,8 @@
         "jsr:@std/internal@^1.0.12"
       ]
     },
-    "@std/encoding@1.0.10": {
-      "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
+    "@std/encoding@1.0.11": {
+      "integrity": "e7cef2f0b3153bccc17431e7c864a1de03a4b6d9647389c43e08aaa775d37385"
     },
     "@std/fmt@1.0.10": {
       "integrity": "90dfba288802ac6de82fb31d0917eb9e4450b9925b954d5e51fc29ac07419db5"
@@ -84,8 +84,8 @@
     "@std/internal@1.0.14": {
       "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
     },
-    "@std/path@1.1.5": {
-      "integrity": "ccea00982ea28c36becaf6e62f855406c76a8c32d462f66f415bbb7d83a271bc",
+    "@std/path@1.1.6": {
+      "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
       "dependencies": [
         "jsr:@std/internal@^1.0.14"
       ]
@@ -1219,7 +1219,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@felix/bcrypt@^1.0.8",
+      "jsr:@felix/bcrypt@^2.1.0",
       "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/yaml@^1.1.2",
