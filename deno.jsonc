@@ -48,7 +48,7 @@
 		"@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^7.2.0",
 		"@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.2",
 		"@types/deno": "npm:@types/deno@^2.7.0",
-		"@types/node": "npm:@types/node@^22.20.0",
+		"@types/node": "npm:@types/node@^22.20.1",
 		"esbuild": "npm:esbuild@^0.28.1",
 		"openapi-typescript": "npm:openapi-typescript@^7.13.0",
 		"playwright": "npm:playwright@^1.61.1",
