@@ -13,6 +13,25 @@ export interface Selector<T = any> {
 	select: (items: T[], count: number) => T[];
 }
 
+function compareSize(
+	a: { size_on_disk?: unknown },
+	b: { size_on_disk?: unknown },
+	direction: 'asc' | 'desc'
+): number {
+	const sizeA =
+		typeof a.size_on_disk === 'number' && Number.isFinite(a.size_on_disk) && a.size_on_disk > 0
+			? a.size_on_disk
+			: null;
+	const sizeB =
+		typeof b.size_on_disk === 'number' && Number.isFinite(b.size_on_disk) && b.size_on_disk > 0
+			? b.size_on_disk
+			: null;
+
+	if (sizeA === null) return sizeB === null ? 0 : 1;
+	if (sizeB === null) return -1;
+	return direction === 'asc' ? sizeA - sizeB : sizeB - sizeA;
+}
+
 /**
  * All available selectors
  */
@@ -58,6 +77,24 @@ export const selectors: Selector[] = [
 		description: 'Select items with lowest custom format score',
 		select: (items, count) => {
 			const sorted = [...items].sort((a, b) => (a.score || 0) - (b.score || 0));
+			return sorted.slice(0, count);
+		}
+	},
+	{
+		id: 'size_desc',
+		label: 'Size (Largest First)',
+		description: 'Select items with the largest size on disk first',
+		select: (items, count) => {
+			const sorted = [...items].sort((a, b) => compareSize(a, b, 'desc'));
+			return sorted.slice(0, count);
+		}
+	},
+	{
+		id: 'size_asc',
+		label: 'Size (Smallest First)',
+		description: 'Select items with the smallest positive size on disk first',
+		select: (items, count) => {
+			const sorted = [...items].sort((a, b) => compareSize(a, b, 'asc'));
 			return sorted.slice(0, count);
 		}
 	},

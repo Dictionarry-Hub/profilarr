@@ -18,6 +18,7 @@ interface MockItem {
 	dateAdded: string;
 	score: number;
 	popularity: number;
+	size_on_disk?: number;
 }
 
 class SelectorsTest extends BaseTest {
@@ -82,6 +83,8 @@ class SelectorsTest extends BaseTest {
 			assertEquals(isValidSelector('oldest'), true);
 			assertEquals(isValidSelector('newest'), true);
 			assertEquals(isValidSelector('lowest_score'), true);
+			assertEquals(isValidSelector('size_desc'), true);
+			assertEquals(isValidSelector('size_asc'), true);
 			assertEquals(isValidSelector('most_popular'), true);
 			assertEquals(isValidSelector('least_popular'), true);
 		});
@@ -93,15 +96,65 @@ class SelectorsTest extends BaseTest {
 
 		this.test('getAllSelectorIds returns all selector ids', () => {
 			const ids = getAllSelectorIds();
-			assertEquals(ids.length, 8);
+			assertEquals(ids.length, 10);
 			assert(ids.includes('random'));
 			assert(ids.includes('oldest'));
 			assert(ids.includes('newest'));
 			assert(ids.includes('lowest_score'));
+			assert(ids.includes('size_desc'));
+			assert(ids.includes('size_asc'));
 			assert(ids.includes('most_popular'));
 			assert(ids.includes('least_popular'));
 			assert(ids.includes('alphabetical_asc'));
 			assert(ids.includes('alphabetical_desc'));
+		});
+
+		// =====================
+		// Size Selectors
+		// =====================
+
+		this.test('size_desc: selects largest positive sizes first', () => {
+			const items: MockItem[] = [
+				{ id: 1, title: 'A', dateAdded: '', score: 0, popularity: 0, size_on_disk: 8 },
+				{ id: 2, title: 'B', dateAdded: '', score: 0, popularity: 0, size_on_disk: 12 },
+				{ id: 3, title: 'C', dateAdded: '', score: 0, popularity: 0, size_on_disk: 3 },
+				{ id: 4, title: 'Zero', dateAdded: '', score: 0, popularity: 0, size_on_disk: 0 },
+				{ id: 5, title: 'Missing', dateAdded: '', score: 0, popularity: 0 },
+				{ id: 6, title: 'Invalid', dateAdded: '', score: 0, popularity: 0, size_on_disk: NaN }
+			];
+			const originalOrder = items.map((item) => item.id);
+			const selector = getSelector('size_desc')!;
+			const selected = selector.select(items, 10);
+			const limited = selector.select(items, 2);
+
+			assertEquals(
+				selected.map((item) => item.id),
+				[2, 1, 3, 4, 5, 6]
+			);
+			assertEquals(
+				limited.map((item) => item.id),
+				[2, 1]
+			);
+			assertEquals(
+				items.map((item) => item.id),
+				originalOrder
+			);
+		});
+
+		this.test('size_asc: selects smallest positive sizes and puts unusable sizes last', () => {
+			const items: MockItem[] = [
+				{ id: 1, title: 'Zero', dateAdded: '', score: 0, popularity: 0, size_on_disk: 0 },
+				{ id: 2, title: 'Eight', dateAdded: '', score: 0, popularity: 0, size_on_disk: 8 },
+				{ id: 3, title: 'Missing', dateAdded: '', score: 0, popularity: 0 },
+				{ id: 4, title: 'Three', dateAdded: '', score: 0, popularity: 0, size_on_disk: 3 },
+				{ id: 5, title: 'Invalid', dateAdded: '', score: 0, popularity: 0, size_on_disk: NaN }
+			];
+			const selected = getSelector('size_asc')!.select(items, 10);
+
+			assertEquals(
+				selected.map((item) => item.id),
+				[4, 2, 1, 3, 5]
+			);
 		});
 
 		// =====================

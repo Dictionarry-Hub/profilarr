@@ -149,6 +149,8 @@ specifies a selector strategy and a count (items per run).
 | `oldest`            | Oldest by date added             |
 | `newest`            | Newest by date added             |
 | `lowest_score`      | Lowest custom format score first |
+| `size_desc`         | Largest size on disk first       |
+| `size_asc`          | Smallest positive size first     |
 | `most_popular`      | Highest popularity first         |
 | `least_popular`     | Lowest popularity first          |
 | `alphabetical_asc`  | A-Z by title                     |
