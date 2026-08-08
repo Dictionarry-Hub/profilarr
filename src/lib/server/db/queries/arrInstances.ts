@@ -187,10 +187,10 @@ export const arrInstancesQueries = {
 	/**
 	 * Update library_last_refreshed_at timestamp
 	 */
-	updateLibraryRefreshedAt(id: number): void {
+	updateLibraryRefreshedAt(id: number, refreshedAt: string = new Date().toISOString()): void {
 		db.execute(
 			'UPDATE arr_instances SET library_last_refreshed_at = ? WHERE id = ?',
-			new Date().toISOString(),
+			refreshedAt,
 			id
 		);
 	},

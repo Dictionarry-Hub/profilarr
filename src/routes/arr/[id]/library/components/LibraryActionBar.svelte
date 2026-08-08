@@ -38,7 +38,7 @@
 	export let toggleableCardFields: readonly string[] = [];
 	export let cardFieldLabels: Record<string, string> = {};
 	export let onToggleCardField: (key: string) => void = () => {};
-	export let cacheAgeText: string | null = null;
+	export let refreshStatusText: string | null = null;
 	export let refreshing: boolean = false;
 
 	export let onToggleColumn: (key: string) => void;
@@ -74,7 +74,7 @@
 	$: isRadarr = instanceType === 'radarr';
 	$: filterPlaceholder = isRadarr ? 'Filter movies...' : 'Filter series...';
 	$: openLabel = isRadarr ? 'Open in Radarr' : 'Open in Sonarr';
-	$: refreshTooltip = cacheAgeText ? `Refresh · ${cacheAgeText}` : 'Refresh';
+	$: refreshTooltip = refreshStatusText ? `Refresh · ${refreshStatusText}` : 'Refresh';
 
 	let isMobile = false;
 	let mediaQuery: MediaQueryList | null = null;
