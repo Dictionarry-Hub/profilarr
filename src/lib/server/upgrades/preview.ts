@@ -301,9 +301,6 @@ async function loadSonarrItems(
 ): Promise<PreviewLoadResult> {
 	const cached = sonarrPreviewCache.get(instanceId);
 	const now = Date.now();
-	let series: SonarrSeries[];
-	let profiles: ArrQualityProfile[];
-	let tags: ArrTag[];
 	let cacheEntry: SonarrPreviewCacheEntry;
 
 	if (cached && cached.expiresAt > now) {
@@ -324,9 +321,7 @@ async function loadSonarrItems(
 		sonarrPreviewCache.set(instanceId, cacheEntry);
 	}
 
-	series = cacheEntry.series;
-	profiles = cacheEntry.profiles;
-	tags = cacheEntry.tags;
+	const { series, profiles, tags } = cacheEntry;
 
 	let episodeFiles: SonarrEpisodeFileMap | undefined;
 	if (filterNeedsSonarrScores(filter)) {
