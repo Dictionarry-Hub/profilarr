@@ -57,6 +57,7 @@ export interface UpgradeItem {
 
 	// For selectors (camelCase versions)
 	dateAdded: string;
+	/** Radarr file score, or Sonarr episode-file average when score data is required. */
 	score: number;
 
 	// Original data for API calls

@@ -14,6 +14,7 @@ import type {
 	RadarrMovie,
 	RadarrMovieFile,
 	ArrQualityProfile,
+	SonarrEpisodeFile,
 	SonarrSeries
 } from '../../../src/lib/server/utils/arr/types.ts';
 
@@ -123,6 +124,20 @@ class NormalizeTest extends BaseTest {
 				{ format: 1440, name: '1080p WEB-DL', score: 200000 },
 				{ format: 1424, name: '1080p Bluray', score: 140000 }
 			],
+			...overrides
+		};
+	}
+
+	private createMockEpisodeFile(overrides: Partial<SonarrEpisodeFile> = {}): SonarrEpisodeFile {
+		return {
+			id: 1,
+			seriesId: 1,
+			seasonNumber: 1,
+			size: 1_000_000,
+			quality: { quality: { id: 1, name: 'WEBDL-1080p' } },
+			customFormats: [],
+			customFormatScore: 0,
+			qualityCutoffNotMet: true,
 			...overrides
 		};
 	}
@@ -520,6 +535,62 @@ class NormalizeTest extends BaseTest {
 			const result = normalizeSonarrItem(series, profile, 80);
 
 			assertEquals(result.custom_formats, []);
+		});
+
+		this.test('normalizes sonarr score as the episode-file average', () => {
+			const series: SonarrSeries = {
+				id: 1,
+				title: 'Example Series',
+				qualityProfileId: 7,
+				monitored: true,
+				seasons: []
+			};
+			const profile = this.createMockProfile({ cutoffFormatScore: 201 });
+			const files = [
+				this.createMockEpisodeFile({ id: 1, customFormatScore: 100 }),
+				this.createMockEpisodeFile({ id: 2, customFormatScore: 101 })
+			];
+
+			const result = normalizeSonarrItem(series, profile, 50, files);
+
+			assertEquals(result.score, 100.5);
+			assertEquals(result.cutoff_met, true);
+		});
+
+		this.test('normalizes sonarr cutoff as not met when the average is below threshold', () => {
+			const series: SonarrSeries = {
+				id: 1,
+				title: 'Example Series',
+				qualityProfileId: 7,
+				monitored: true,
+				seasons: []
+			};
+			const profile = this.createMockProfile({ cutoffFormatScore: 400 });
+			const files = [
+				this.createMockEpisodeFile({ id: 1, customFormatScore: -100 }),
+				this.createMockEpisodeFile({ id: 2, customFormatScore: 200 })
+			];
+
+			const result = normalizeSonarrItem(series, profile, 80, files);
+
+			assertEquals(result.score, 50);
+			assertEquals(result.cutoff_met, false);
+		});
+
+		this.test('normalizes sonarr series without files as zero and cutoff not met', () => {
+			const series: SonarrSeries = {
+				id: 1,
+				title: 'Example Series',
+				qualityProfileId: 7,
+				monitored: true,
+				seasons: []
+			};
+			const profile = this.createMockProfile({ cutoffFormatScore: 0 });
+
+			const result = normalizeSonarrItem(series, profile, 100, []);
+
+			assertEquals(result.score, 0);
+			assertEquals(result.cutoff_met, false);
 		});
 
 		// =====================

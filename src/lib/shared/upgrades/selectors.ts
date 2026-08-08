@@ -74,7 +74,7 @@ export const selectors: Selector[] = [
 	{
 		id: 'lowest_score',
 		label: 'Lowest Score',
-		description: 'Select items with lowest custom format score',
+		description: 'Select items with lowest custom format score (Sonarr: series average)',
 		select: (items, count) => {
 			const sorted = [...items].sort((a, b) => (a.score || 0) - (b.score || 0));
 			return sorted.slice(0, count);

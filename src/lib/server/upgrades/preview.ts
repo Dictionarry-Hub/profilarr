@@ -23,6 +23,11 @@ import {
 import { getSelector } from '$shared/upgrades/selectors.ts';
 import { hasFilterTag, resolveTagLabel } from './cooldown.ts';
 import { normalizeRadarrItems, normalizeSonarrItems } from './normalize.ts';
+import {
+	filterNeedsSonarrScores,
+	loadSonarrEpisodeFiles,
+	type SonarrEpisodeFileMap
+} from './sonarrScores.ts';
 import type { UpgradeItem } from './types.ts';
 
 export type UpgradeFilterPreviewStatus = 'selected' | 'selectable' | 'cooldown' | 'filtered_out';
@@ -79,6 +84,7 @@ interface SonarrPreviewCacheEntry {
 	series: SonarrSeries[];
 	profiles: ArrQualityProfile[];
 	tags: ArrTag[];
+	episodeFiles?: SonarrEpisodeFileMap;
 }
 
 interface PreviewLoadResult {
@@ -298,11 +304,10 @@ async function loadSonarrItems(
 	let series: SonarrSeries[];
 	let profiles: ArrQualityProfile[];
 	let tags: ArrTag[];
+	let cacheEntry: SonarrPreviewCacheEntry;
 
 	if (cached && cached.expiresAt > now) {
-		series = cached.series;
-		profiles = cached.profiles;
-		tags = cached.tags;
+		cacheEntry = cached;
 	} else {
 		const [loadedSeries, loadedProfiles] = await Promise.all([
 			client.getAllSeries(),
@@ -310,21 +315,28 @@ async function loadSonarrItems(
 		]);
 		const loadedTags = await client.getTags();
 
-		series = loadedSeries;
-		profiles = loadedProfiles;
-		tags = loadedTags;
-
-		sonarrPreviewCache.set(instanceId, {
+		cacheEntry = {
 			expiresAt: Date.now() + PREVIEW_CACHE_TTL_MS,
-			series,
-			profiles,
-			tags
-		});
+			series: loadedSeries,
+			profiles: loadedProfiles,
+			tags: loadedTags
+		};
+		sonarrPreviewCache.set(instanceId, cacheEntry);
+	}
+
+	series = cacheEntry.series;
+	profiles = cacheEntry.profiles;
+	tags = cacheEntry.tags;
+
+	let episodeFiles: SonarrEpisodeFileMap | undefined;
+	if (filterNeedsSonarrScores(filter)) {
+		episodeFiles = await loadSonarrEpisodeFiles(client, series, cacheEntry.episodeFiles);
+		cacheEntry.episodeFiles = episodeFiles;
 	}
 
 	const profileMap = new Map(profiles.map((profile) => [profile.id, profile]));
 	const tagMap = new Map(tags.map((tag) => [tag.id, tag.label]));
-	const items = normalizeSonarrItems(series, profileMap, filter.cutoff, tagMap);
+	const items = normalizeSonarrItems(series, profileMap, filter.cutoff, episodeFiles, tagMap);
 
 	return {
 		items,

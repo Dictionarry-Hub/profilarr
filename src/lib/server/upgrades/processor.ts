@@ -13,8 +13,7 @@ import type {
 	UpgradeItem,
 	UpgradeJobLog,
 	UpgradeSelectionItem,
-	UpgradeOriginal,
-	UpgradeOriginalEpisode
+	UpgradeOriginal
 } from './types.ts';
 import type {
 	RadarrMovie,
@@ -26,6 +25,12 @@ import type {
 	SonarrQueueItem
 } from '$lib/server/utils/arr/types.ts';
 import { normalizeRadarrItems, normalizeSonarrItems } from './normalize.ts';
+import {
+	averageEpisodeFileScore,
+	filterNeedsSonarrScores,
+	loadSonarrEpisodeFiles,
+	type SonarrEpisodeFileMap
+} from './sonarrScores.ts';
 import {
 	filterByFilterTag,
 	resolveTagLabel,
@@ -356,8 +361,8 @@ export async function processUpgradeConfig(
 
 		// Radarr-only: movie file map for original file lookup
 		let movieFileMap: Map<number, RadarrMovieFile> | undefined;
-		// Sonarr-only: episode file names cache (populated after selection)
-		const episodeFileCache = new Map<number, UpgradeOriginalEpisode[]>();
+		// Sonarr-only: episode files loaded for scoring and original-file details
+		let sonarrEpisodeFiles: SonarrEpisodeFileMap = new Map();
 
 		if (isRadarr) {
 			const radarr = client as RadarrClient;
@@ -405,14 +410,28 @@ export async function processUpgradeConfig(
 
 			tags = await sonarr.getTags();
 			const tagMap = new Map(tags.map((t) => [t.id, t.label]));
+			if (filterNeedsSonarrScores(filter)) {
+				sonarrEpisodeFiles = await loadSonarrEpisodeFiles(sonarr, allSeries);
+			}
 
-			normalizedItems = normalizeSonarrItems(allSeries, profileMap, filter.cutoff, tagMap);
+			normalizedItems = normalizeSonarrItems(
+				allSeries,
+				profileMap,
+				filter.cutoff,
+				sonarrEpisodeFiles,
+				tagMap
+			);
 			totalItems = allSeries.length;
 
 			getOriginalFile = (item: UpgradeItem) => ({
 				type: 'series' as const,
 				title: item.title,
-				episodes: episodeFileCache.get(item.id) ?? []
+				episodes: (sonarrEpisodeFiles.get(item.id) ?? []).map((file) => ({
+					seasonNumber: file.seasonNumber,
+					fileName: file.relativePath?.split('/').pop() ?? 'Unknown',
+					formats: file.customFormats?.map((format) => format.name) ?? [],
+					score: file.customFormatScore ?? 0
+				}))
 			});
 		}
 
@@ -472,23 +491,14 @@ export async function processUpgradeConfig(
 			? selector.select(availableItems, filter.count)
 			: availableItems.slice(0, filter.count);
 
-		// Fetch episode files for selected Sonarr series (only for selected items, not whole library)
+		// Fetch missing episode files for selected Sonarr series and reuse score hydration data.
 		if (!isRadarr && selectedItems.length > 0) {
 			const sonarr = client as SonarrClient;
-			for (const item of selectedItems) {
-				try {
-					const epFiles = await sonarr.getEpisodeFiles(item.id);
-					const episodes: UpgradeOriginalEpisode[] = epFiles.map((f) => ({
-						seasonNumber: f.seasonNumber,
-						fileName: f.relativePath?.split('/').pop() ?? 'Unknown',
-						formats: f.customFormats?.map((cf) => cf.name) ?? [],
-						score: f.customFormatScore ?? 0
-					}));
-					episodeFileCache.set(item.id, episodes);
-				} catch {
-					episodeFileCache.set(item.id, []);
-				}
-			}
+			sonarrEpisodeFiles = await loadSonarrEpisodeFiles(
+				sonarr,
+				selectedItems.map((item) => item._raw as SonarrSeries),
+				sonarrEpisodeFiles
+			);
 		}
 
 		// =====================================================================
@@ -512,6 +522,7 @@ export async function processUpgradeConfig(
 				for (const item of selectedItems) {
 					const original = getOriginalFile(item);
 					let searchedSeason: number | undefined;
+					let currentComparisonScore = item.score;
 					try {
 						let bestRelease:
 							| { title: string; customFormats: { name: string }[]; customFormatScore: number }
@@ -533,11 +544,18 @@ export async function processUpgradeConfig(
 								});
 								continue;
 							}
-							const releases = await (client as SonarrClient).getReleases(item.id, searchedSeason);
+							currentComparisonScore = averageEpisodeFileScore(
+								sonarrEpisodeFiles.get(item.id) ?? [],
+								searchedSeason
+							);
+							const releases = await (client as SonarrClient).getReleases(
+								item.id,
+								searchedSeason
+							);
 							bestRelease = releases.find((r) => r.approved && !r.rejected);
 						}
 
-						if (bestRelease && bestRelease.customFormatScore > item.score) {
+						if (bestRelease && bestRelease.customFormatScore > currentComparisonScore) {
 							selectionItems.push({
 								id: item.id,
 								title: item.title,

@@ -114,7 +114,16 @@ by dropping incompatible rules.
 
 Each filter also carries a **cutoff** (0-100%), a percentage of the quality
 profile's cutoff score. Items whose current score meets or exceeds the
-threshold are considered "cutoff met" and can be filtered out.
+threshold are considered "cutoff met" and can be filtered out. Radarr uses
+the movie file's custom format score. Sonarr uses the average custom format
+score across all existing episode files in the series; a series without files
+has not met cutoff.
+
+Sonarr episode files are fetched only when the active filter uses `cutoff_met`
+or the Lowest Score selector. Sonarr requires one episode-file request per
+file-bearing series, so Profilarr fetches them with bounded concurrency. Filter
+preview caches the results for 5 minutes; real upgrade runs always fetch fresh
+scores.
 
 ## Dynamic Filter Values
 
@@ -157,6 +166,8 @@ specifies a selector strategy and a count (items per run).
 | `alphabetical_desc` | Z-A by title                     |
 
 Selector definitions live in `src/lib/shared/upgrades/selectors.ts`.
+For Sonarr, Lowest Score uses the average custom format score across every
+episode file in the series.
 
 ## Filter Preview
 
@@ -223,8 +234,9 @@ cooldown across them.
 Dry-run mode fetches available releases for each selected item and compares
 scores without triggering actual searches. This lets users preview what the
 system would do. For Sonarr, dry runs only query monitored seasons that already
-have files; selected series without an eligible season are shown without a
-previewed upgrade.
+have files, and compare a release against the average score of files in the
+searched season. Selected series without an eligible season are shown without
+a previewed upgrade.
 
 An in-memory exclusion cache (1-hour TTL, keyed by instance ID) tracks items
 selected in previous dry runs so the same items aren't re-picked on repeated
