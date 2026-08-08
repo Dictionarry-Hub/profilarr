@@ -489,11 +489,7 @@
 						name="fail_on_referenced_delete"
 						value={failOnReferencedDelete ? 'on' : ''}
 					/>
-					<input
-						type="hidden"
-						name="sync_prompt_enabled"
-						value={syncPromptEnabled ? 'on' : ''}
-					/>
+					<input type="hidden" name="sync_prompt_enabled" value={syncPromptEnabled ? 'on' : ''} />
 				</div>
 			</ExpandableCard>
 
