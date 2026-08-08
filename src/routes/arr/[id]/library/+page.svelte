@@ -4,7 +4,6 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import type { RadarrLibraryItem, SonarrSeriesItem } from '$utils/arr/types.ts';
-	import { libraryCache } from '$stores/libraryCache';
 	import { sortTitle } from '$shared/utils/sort.ts';
 	import { getPersistentSearchStore } from '$stores/search';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
@@ -210,13 +209,14 @@
 	let libraryError: string | null = null;
 	let loading = true;
 	let refreshing = false;
+	let refreshedAt: string | null = null;
+	let nextRefreshAt: string | null = null;
 
-	// Cache age tracking
-	let cacheAgeTick = 0;
-	let cacheAgeInterval: ReturnType<typeof setInterval>;
+	let clockTick = Date.now();
+	let clockInterval: ReturnType<typeof setInterval>;
 
-	function formatCacheAge(seconds: number): string {
-		if (seconds < 60) return 'just now';
+	function formatElapsed(seconds: number): string {
+		if (seconds < 60) return `${seconds}s ago`;
 		const minutes = Math.floor(seconds / 60);
 		if (minutes < 60) return `${minutes}m ago`;
 		const hours = Math.floor(minutes / 60);
@@ -225,28 +225,53 @@
 		return `${hours}h ${remainingMinutes}m ago`;
 	}
 
-	$: cacheAgeSeconds = (() => {
-		cacheAgeTick;
-		return libraryCache.getAge(data.instance.id);
+	function formatUntil(seconds: number): string {
+		if (seconds < 60) return `${seconds}s`;
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+		if (minutes < 60) return `${minutes}m ${remainingSeconds}s`;
+		const hours = Math.floor(minutes / 60);
+		const remainingMinutes = minutes % 60;
+		return `${hours}h ${remainingMinutes}m`;
+	}
+
+	function parseTimestamp(value: string | null): number | null {
+		if (!value) return null;
+		const timestamp = Date.parse(value);
+		return Number.isFinite(timestamp) ? timestamp : null;
+	}
+
+	$: refreshStatusText = (() => {
+		clockTick;
+		const refreshedTimestamp = parseTimestamp(refreshedAt);
+		if (refreshedTimestamp === null) return null;
+
+		const elapsedSeconds = Math.max(0, Math.floor((Date.now() - refreshedTimestamp) / 1000));
+		const parts = [formatElapsed(elapsedSeconds)];
+		const nextRefreshTimestamp = parseTimestamp(nextRefreshAt);
+
+		if (nextRefreshTimestamp === null) {
+			parts.push('Automatic refresh off');
+		} else {
+			const secondsUntil = Math.ceil((nextRefreshTimestamp - Date.now()) / 1000);
+			parts.push(secondsUntil > 0 ? `Next in ${formatUntil(secondsUntil)}` : 'Refresh due');
+		}
+
+		return parts.join(' · ');
 	})();
-	$: cacheAgeText = cacheAgeSeconds !== null ? formatCacheAge(cacheAgeSeconds) : null;
 
 	async function fetchLibrary(force = false) {
 		const instanceId = data.instance.id;
 		const resourcePath = isRadarr ? 'movies' : 'series';
 
-		// Check client cache first (unless forcing refresh)
-		if (!force && libraryCache.has(instanceId)) {
-			const cached = libraryCache.get(instanceId)!;
-			library = cached.data;
-			libraryError = null;
-			loading = false;
-			return;
-		}
-
 		try {
 			if (force) {
-				await fetch(`/arr/${instanceId}/library/refresh`, { method: 'POST' });
+				const refreshResponse = await fetch(`/arr/${instanceId}/library/refresh`, {
+					method: 'POST'
+				});
+				if (!refreshResponse.ok) {
+					throw new Error(`Failed to refresh library: ${refreshResponse.statusText}`);
+				}
 			}
 
 			const response = await fetch(`/arr/${instanceId}/library/${resourcePath}`);
@@ -256,9 +281,9 @@
 
 			const result = await response.json();
 			library = result.items;
+			refreshedAt = result.refreshedAt;
+			nextRefreshAt = result.nextRefreshAt;
 			libraryError = null;
-
-			libraryCache.set(instanceId, result.items);
 		} catch (err) {
 			libraryError = err instanceof Error ? err.message : 'Failed to fetch library';
 		} finally {
@@ -269,7 +294,6 @@
 
 	async function handleRefresh() {
 		refreshing = true;
-		libraryCache.invalidate(data.instance.id);
 		if (isSonarr) {
 			sonarrTableView?.resetEpisodeCache();
 		}
@@ -286,19 +310,21 @@
 	onMount(() => {
 		currentInstanceId = data.instance.id;
 		fetchLibrary();
-		cacheAgeInterval = setInterval(() => {
-			cacheAgeTick++;
-		}, 30000); // Update age display every 30s
+		clockInterval = setInterval(() => {
+			clockTick = Date.now();
+		}, 1000);
 	});
 
 	onDestroy(() => {
-		if (cacheAgeInterval) clearInterval(cacheAgeInterval);
+		if (clockInterval) clearInterval(clockInterval);
 	});
 
 	// Refetch if instance changes (navigation between instances)
 	$: if (browser && data.instance.id && data.instance.id !== currentInstanceId) {
 		currentInstanceId = data.instance.id;
 		loading = true;
+		refreshedAt = null;
+		nextRefreshAt = null;
 		sonarrTableView?.resetEpisodeCache();
 		fetchLibrary();
 	}
@@ -681,7 +707,7 @@
 			visibleColumns={activeVisibleColumns}
 			toggleableColumns={activeToggleableColumns}
 			columnLabels={activeColumnLabels}
-			cacheAgeText={loading ? null : cacheAgeText}
+			refreshStatusText={loading ? null : refreshStatusText}
 			{refreshing}
 			onToggleColumn={toggleColumn}
 			onRefresh={handleRefresh}
