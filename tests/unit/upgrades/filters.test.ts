@@ -27,9 +27,7 @@ class FilterEvaluationTest extends BaseTest {
 					{
 						type: 'group',
 						match: 'any',
-						children: [
-							{ type: 'rule', field: 'cutoff_met', operator: 'is', value: false }
-						]
+						children: [{ type: 'rule', field: 'cutoff_met', operator: 'is', value: false }]
 					}
 				]
 			};

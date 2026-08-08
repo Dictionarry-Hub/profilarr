@@ -9,12 +9,7 @@ import type { ArrInstance } from '$lib/server/db/queries/arrInstances.ts';
 import type { UpgradeConfig, FilterConfig } from '$shared/upgrades/filters.ts';
 import { evaluateGroup } from '$shared/upgrades/filters.ts';
 import { getSelector } from '$shared/upgrades/selectors.ts';
-import type {
-	UpgradeItem,
-	UpgradeJobLog,
-	UpgradeSelectionItem,
-	UpgradeOriginal
-} from './types.ts';
+import type { UpgradeItem, UpgradeJobLog, UpgradeSelectionItem, UpgradeOriginal } from './types.ts';
 import type {
 	RadarrMovie,
 	RadarrMovieFile,
@@ -548,10 +543,7 @@ export async function processUpgradeConfig(
 								sonarrEpisodeFiles.get(item.id) ?? [],
 								searchedSeason
 							);
-							const releases = await (client as SonarrClient).getReleases(
-								item.id,
-								searchedSeason
-							);
+							const releases = await (client as SonarrClient).getReleases(item.id, searchedSeason);
 							bestRelease = releases.find((r) => r.approved && !r.rejected);
 						}
 

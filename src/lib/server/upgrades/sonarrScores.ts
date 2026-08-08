@@ -6,14 +6,9 @@ const EPISODE_FILE_FETCH_CONCURRENCY = 10;
 
 export type SonarrEpisodeFileMap = Map<number, SonarrEpisodeFile[]>;
 
-export function averageEpisodeFileScore(
-	files: SonarrEpisodeFile[],
-	seasonNumber?: number
-): number {
+export function averageEpisodeFileScore(files: SonarrEpisodeFile[], seasonNumber?: number): number {
 	const matchingFiles =
-		seasonNumber === undefined
-			? files
-			: files.filter((file) => file.seasonNumber === seasonNumber);
+		seasonNumber === undefined ? files : files.filter((file) => file.seasonNumber === seasonNumber);
 
 	if (matchingFiles.length === 0) return 0;
 
