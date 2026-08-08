@@ -52,16 +52,15 @@ export async function scanForStaleItems(
 	const expectedQPNames = new Set(selections.map((s) => s.profileName));
 	const expectedCFNames = new Set<string>();
 
-	if (selections.length > 0) {
-		const databaseId = selections[0].databaseId;
-		const cache = getCache(databaseId);
-		if (cache) {
-			for (const sel of selections) {
-				const cfNames = await getCustomFormatsForProfile(cache, sel.profileName, arrType);
-				for (const name of cfNames) {
-					expectedCFNames.add(name);
-				}
-			}
+	for (const sel of selections) {
+		const cache = getCache(sel.databaseId);
+		if (!cache) {
+			throw new Error(`PCD cache not found for database ${sel.databaseId}`);
+		}
+
+		const cfNames = await getCustomFormatsForProfile(cache, sel.profileName, arrType);
+		for (const name of cfNames) {
+			expectedCFNames.add(name);
 		}
 	}
 
