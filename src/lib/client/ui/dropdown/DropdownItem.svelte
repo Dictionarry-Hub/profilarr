@@ -15,13 +15,7 @@
 	export let compact: boolean = false;
 	export let checkIcon: Component = Check;
 	export let checkColor:
-		| 'accent'
-		| 'blue'
-		| 'green'
-		| 'red'
-		| 'neutral'
-		| `#${string}`
-		| `var(--${string})` = 'accent';
+		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})` = 'accent';
 	export let labelClass: string = '';
 	export let labelTransform: 'none' | 'capitalize' | 'uppercase' | 'lowercase' = 'none';
 	export let customContent: boolean = false;

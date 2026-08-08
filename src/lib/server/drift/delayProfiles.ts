@@ -8,11 +8,7 @@ import type { DriftFieldDiff } from './customFormats.ts';
 import { stringifyCanonical } from './hash.ts';
 
 type DelayProtocol =
-	| 'prefer_usenet'
-	| 'prefer_torrent'
-	| 'only_usenet'
-	| 'only_torrent'
-	| 'unknown';
+	'prefer_usenet' | 'prefer_torrent' | 'only_usenet' | 'only_torrent' | 'unknown';
 
 export interface DelayProfileMissingDiff {
 	name: string;

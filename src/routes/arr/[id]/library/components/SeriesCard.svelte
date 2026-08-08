@@ -114,14 +114,12 @@
 		.sort((a, b) =>
 			a.seasonNumber === 0 ? 1 : b.seasonNumber === 0 ? -1 : a.seasonNumber - b.seasonNumber
 		)
-		.map(
-			(s): SeasonRow => ({
-				seasonNumber: s.seasonNumber,
-				label: s.seasonNumber === 0 ? 'Specials' : `Season ${s.seasonNumber}`,
-				episodeCount: s.episodeCount,
-				fileCount: s.episodeFileCount
-			})
-		);
+		.map((s): SeasonRow => ({
+			seasonNumber: s.seasonNumber,
+			label: s.seasonNumber === 0 ? 'Specials' : `Season ${s.seasonNumber}`,
+			episodeCount: s.episodeCount,
+			fileCount: s.episodeFileCount
+		}));
 
 	const seasonColumns = [
 		{ key: 'label', header: 'Season', align: 'left' as const, sortable: false },

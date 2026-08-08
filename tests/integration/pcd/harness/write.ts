@@ -78,19 +78,9 @@ export interface MediaSettingsFormInput {
 
 export type RadarrColonFormat = 'delete' | 'dash' | 'spaceDash' | 'spaceDashSpace' | 'smart';
 export type SonarrColonFormat =
-	| 'delete'
-	| 'dash'
-	| 'spaceDash'
-	| 'spaceDashSpace'
-	| 'smart'
-	| 'custom';
+	'delete' | 'dash' | 'spaceDash' | 'spaceDashSpace' | 'smart' | 'custom';
 export type SonarrMultiEpisodeStyle =
-	| 'extend'
-	| 'duplicate'
-	| 'repeat'
-	| 'scene'
-	| 'range'
-	| 'prefixedRange';
+	'extend' | 'duplicate' | 'repeat' | 'scene' | 'range' | 'prefixedRange';
 
 export const VALID_RADARR_NAMING_DEFAULTS = {
 	movieFormat: '{Movie Title} ({Release Year})',

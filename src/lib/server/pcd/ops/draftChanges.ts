@@ -479,8 +479,7 @@ function mergeConditions(target: FieldAggregate, value: unknown) {
 			arrType: (base?.from as Record<string, unknown> | undefined)?.arrType as string | undefined,
 			negate: (base?.from as Record<string, unknown> | undefined)?.negate as boolean | undefined,
 			required: (base?.from as Record<string, unknown> | undefined)?.required as
-				| boolean
-				| undefined,
+				boolean | undefined,
 			values: (values?.from as Record<string, unknown>) ?? null
 		};
 		const after: ConditionSnapshot = {

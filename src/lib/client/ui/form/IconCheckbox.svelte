@@ -5,13 +5,7 @@
 	export let checked: boolean = false;
 	export let icon: Component;
 	export let color:
-		| 'accent'
-		| 'blue'
-		| 'green'
-		| 'red'
-		| 'neutral'
-		| `#${string}`
-		| `var(--${string})` = 'accent'; // accent, semantic colors, hex (#FFC230), or CSS var (var(--arr-radarr-color))
+		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})` = 'accent'; // accent, semantic colors, hex (#FFC230), or CSS var (var(--arr-radarr-color))
 	export let shape: 'square' | 'circle' | 'rounded' = 'rounded';
 	export let disabled: boolean = false;
 	export let variant: 'filled' | 'outline' = 'filled';

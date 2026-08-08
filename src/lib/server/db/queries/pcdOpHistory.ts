@@ -3,13 +3,7 @@ import { toUTC } from '$shared/utils/dates.ts';
 import type { PcdOp } from './pcdOps.ts';
 
 export type PcdOpHistoryStatus =
-	| 'applied'
-	| 'skipped'
-	| 'conflicted'
-	| 'conflicted_pending'
-	| 'error'
-	| 'dropped'
-	| 'superseded';
+	'applied' | 'skipped' | 'conflicted' | 'conflicted_pending' | 'error' | 'dropped' | 'superseded';
 
 export interface PcdOpHistory {
 	id: number;

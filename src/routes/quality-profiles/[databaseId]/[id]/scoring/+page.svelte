@@ -429,13 +429,7 @@
 	}
 
 	type IconCheckboxColor =
-		| 'accent'
-		| 'blue'
-		| 'green'
-		| 'red'
-		| 'neutral'
-		| `#${string}`
-		| `var(--${string})`;
+		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})`;
 
 	// Arr type color mapping
 	const arrTypeColors: Record<string, IconCheckboxColor> = {

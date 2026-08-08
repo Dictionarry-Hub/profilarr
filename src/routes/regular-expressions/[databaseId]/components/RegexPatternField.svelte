@@ -12,8 +12,8 @@
 	export let onPatternChange: ((value: string) => void) | undefined = undefined;
 	export let onRegex101IdChange: ((value: string) => void) | undefined = undefined;
 	export let onValidationStateChange:
-		| ((state: 'idle' | 'checking' | 'valid' | 'invalid' | 'unavailable') => void)
-		| undefined = undefined;
+		((state: 'idle' | 'checking' | 'valid' | 'invalid' | 'unavailable') => void) | undefined =
+		undefined;
 
 	function handlePatternChange(value: string) {
 		pattern = value;

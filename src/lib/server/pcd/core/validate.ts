@@ -13,8 +13,7 @@ type ValidatedLinkInput = Omit<LinkOptions, 'conflictStrategy' | 'syncStrategy'>
 type ValidationResult = { ok: true; input: ValidatedLinkInput } | { ok: false; error: string };
 
 type UpdateValidationResult =
-	| { ok: true; input: UpdateDatabaseInstanceInput }
-	| { ok: false; error: string };
+	{ ok: true; input: UpdateDatabaseInstanceInput } | { ok: false; error: string };
 
 const VALID_CONFLICT_STRATEGIES = ['override', 'align', 'ask'] as const;
 const FIRST_PARTY_DATABASE_BRANCH = 'v2';

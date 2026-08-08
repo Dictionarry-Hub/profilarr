@@ -50,9 +50,7 @@ export class PCDCache {
 		const batchId = uuid();
 		const instance = databaseInstancesQueries.getById(this.databaseInstanceId);
 		const conflictStrategy = (instance?.conflict_strategy ?? 'override') as
-			| 'override'
-			| 'align'
-			| 'ask';
+			'override' | 'align' | 'ask';
 		const userOps = pcdOpsQueries.listByDatabaseAndOrigin(this.databaseInstanceId, 'user', {
 			states: ['published']
 		});
@@ -378,8 +376,7 @@ export class PCDCache {
 		// cf(name) - Custom format lookup by name
 		this.db.function('cf', (name: string) => {
 			const result = this.db!.prepare('SELECT id FROM custom_formats WHERE name = ?').get(name) as
-				| { id: number }
-				| undefined;
+				{ id: number } | undefined;
 			if (!result) {
 				throw new Error(`Custom format not found: ${name}`);
 			}
@@ -389,8 +386,7 @@ export class PCDCache {
 		// dp(name) - Delay profile lookup by name
 		this.db.function('dp', (name: string) => {
 			const result = this.db!.prepare('SELECT id FROM delay_profiles WHERE name = ?').get(name) as
-				| { id: number }
-				| undefined;
+				{ id: number } | undefined;
 			if (!result) {
 				throw new Error(`Delay profile not found: ${name}`);
 			}
@@ -400,8 +396,7 @@ export class PCDCache {
 		// tag(name) - Tag lookup by name (creates if not exists)
 		this.db.function('tag', (name: string) => {
 			const result = this.db!.prepare('SELECT id FROM tags WHERE name = ?').get(name) as
-				| { id: number }
-				| undefined;
+				{ id: number } | undefined;
 			if (!result) {
 				throw new Error(`Tag not found: ${name}`);
 			}

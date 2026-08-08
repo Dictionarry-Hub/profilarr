@@ -59,8 +59,7 @@ function readRestoredLocalPath(dbPath: string): string {
 	const database = new Database(dbPath);
 	try {
 		const row = database.prepare('SELECT local_path FROM database_instances').get() as
-			| { local_path: string }
-			| undefined;
+			{ local_path: string } | undefined;
 		if (!row) throw new Error('database_instances row missing');
 		return row.local_path;
 	} finally {
