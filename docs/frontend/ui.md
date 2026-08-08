@@ -410,6 +410,8 @@ Sub-components for building custom menu UIs:
   hover-bridge support.
 - **`DropdownHeader.svelte`**, **`DropdownFooter.svelte`**,
   **`DropdownItem.svelte`**: styled section header, footer, and menu item.
+  `DropdownItem` supports optional inline secondary text and a muted description
+  rendered below the main label.
   `DropdownFooter` mirrors `DropdownHeader` but uses `border-top` instead
   of `border-bottom` and sits at the end of a menu (e.g. "and 12 more").
 - **`DropdownSelect.svelte`**: the `<select>` replacement (covered under

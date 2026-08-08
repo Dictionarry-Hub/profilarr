@@ -22,6 +22,10 @@
 	import { alertStore } from '$alerts/store';
 	import type { QualityProfileTableRow } from '$shared/pcd/display';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import {
+		qualityProfileLanguageLabel,
+		qualityProfileSearchValues
+	} from '$lib/client/utils/entitySearch';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -66,8 +70,16 @@
 
 	const fields: FilterFieldDef<QualityProfileTableRow>[] = [
 		{
+			key: 'all',
+			label: 'All',
+			description: 'Name, tags, description, language and qualities',
+			type: 'text',
+			accessor: qualityProfileSearchValues
+		},
+		{
 			key: 'name',
 			label: 'Name',
+			description: 'Quality profile name',
 			type: 'text',
 			isDefault: true,
 			accessor: (item) => item.name,
@@ -76,6 +88,7 @@
 		{
 			key: 'tag',
 			label: 'Tag',
+			description: 'Assigned tag names',
 			type: 'text',
 			accessor: (item) => item.tags.map((t) => t.name),
 			suggestions: (items) => [...new Set(items.flatMap((i) => i.tags.map((t) => t.name)))].sort()
@@ -83,6 +96,7 @@
 		{
 			key: 'tagged',
 			label: 'Tagged',
+			description: 'Whether any tags are assigned',
 			type: 'text',
 			accessor: (item) => (item.tags.length > 0 ? 'yes' : 'no'),
 			suggestions: () => ['yes', 'no']
@@ -90,20 +104,23 @@
 		{
 			key: 'description',
 			label: 'Description',
+			description: 'Quality profile description',
 			type: 'text',
 			accessor: (item) => item.description ?? null
 		},
 		{
 			key: 'language',
 			label: 'Language',
+			description: 'Configured profile language',
 			type: 'text',
-			accessor: (item) => item.language?.name ?? null,
+			accessor: qualityProfileLanguageLabel,
 			suggestions: (items) =>
-				[...new Set(items.map((i) => i.language?.name).filter(Boolean) as string[])].sort()
+				[...new Set(items.map(qualityProfileLanguageLabel))].sort()
 		},
 		{
 			key: 'upgrades',
 			label: 'Upgrades',
+			description: 'Whether upgrades are allowed',
 			type: 'text',
 			accessor: (item) => (item.upgrades_allowed ? 'yes' : 'no'),
 			suggestions: () => ['yes', 'no']
@@ -111,6 +128,7 @@
 		{
 			key: 'formats',
 			label: 'Formats',
+			description: 'Number of scored custom formats',
 			type: 'number',
 			accessor: (item) => item.custom_formats.total
 		}

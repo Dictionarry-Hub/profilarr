@@ -4,6 +4,7 @@ export type FilterFieldType = 'text' | 'number';
 export interface FilterFieldDef<T = any> {
 	key: string;
 	label: string;
+	description?: string;
 	type: FilterFieldType;
 	accessor: (item: T) => string | number | string[] | null;
 	suggestions?: (items: T[]) => string[];
