@@ -16,6 +16,8 @@
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import LogLevelCell from '$ui/table/LogLevelCell.svelte';
+	import LogSourceCell from '$ui/table/LogSourceCell.svelte';
 	import type { Column } from '$ui/table/types';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import { formatDateTime } from '$shared/utils/dates.ts';
@@ -23,6 +25,7 @@
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
 	import type { PageData } from './$types';
+	import type { Component } from 'svelte';
 
 	export let data: PageData;
 
@@ -41,6 +44,9 @@
 		totalRecords: number;
 		records: LogEntry[];
 	}
+
+	const levelCellComponent = LogLevelCell as unknown as Component;
+	const sourceCellComponent = LogSourceCell as unknown as Component;
 
 	// Client-side log fetching — avoids blocking tab navigation with a
 	// server-streamed promise. The page load returns instantly; logs are
@@ -101,13 +107,7 @@
 	let selectedLevel: string = data.filters.level || 'ALL';
 	let pageSize: number = data.filters.pageSize;
 
-	const logLevels = ['ALL', 'Trace', 'Debug', 'Info', 'Warn', 'Error', 'Fatal'] as const;
-
-	function normalizeLevel(level: string | null | undefined): string {
-		if (!level) return '';
-		const normalized = level.toLowerCase();
-		return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-	}
+	const logLevels = ['ALL', 'Fatal', 'Error', 'Warn', 'Info', 'Debug', 'Trace'] as const;
 
 	// Level colors matching arr log levels
 	const levelColors: Record<string, string> = {
@@ -123,7 +123,7 @@
 	const columns: Column<LogEntry>[] = [
 		{
 			key: 'time',
-			header: 'Time',
+			header: 'Timestamp',
 			width: '180px',
 			cell: (row) => ({
 				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
@@ -134,21 +134,13 @@
 			key: 'level',
 			header: 'Level',
 			width: '80px',
-			cell: (row) => ({
-				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
-				html: `<span class="font-semibold ${
-					levelColors[normalizeLevel(row.level)] || 'text-neutral-600 dark:text-neutral-400'
-				}">${normalizeLevel(row.level)}</span>`
-			})
+			cell: () => levelCellComponent
 		},
 		{
 			key: 'logger',
-			header: 'Logger',
+			header: 'Source',
 			width: '200px',
-			cell: (row) => ({
-				// nosemgrep: profilarr.xss.table-cell-html-unescaped — arr API data, not user content
-				html: `<span class="font-mono text-xs text-neutral-500 dark:text-neutral-500">${row.logger}</span>`
-			})
+			cell: () => sourceCellComponent
 		},
 		{
 			key: 'message',
@@ -222,6 +214,11 @@
 	// Pagination info
 	$: totalPages = logs ? Math.ceil(logs.totalRecords / logs.pageSize) : 0;
 	$: currentPage = logs?.page ?? 1;
+	$: rangeStart = logs && logs.records.length > 0 ? (logs.page - 1) * logs.pageSize + 1 : 0;
+	$: rangeEnd =
+		logs && logs.records.length > 0
+			? Math.min(rangeStart + logs.records.length - 1, logs.totalRecords)
+			: 0;
 </script>
 
 <PageMeta title={`${data.instance.name} · Logs`} />
@@ -245,7 +242,7 @@
 		<ActionButton icon={Filter} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition>
 				<Dropdown position={dropdownPosition} minWidth="8rem">
-					<DropdownHeader label="Level" />
+					<DropdownHeader label="Level and Above" />
 					{#each logLevels as level}
 						<DropdownItem
 							label={level}
@@ -311,9 +308,10 @@
 			class="mt-6 mb-4 flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400"
 		>
 			<span>
-				Showing {filteredLogs.length} of {logs.totalRecords} logs
-				{#if selectedLevel !== 'ALL'}
-					(filtered by {selectedLevel})
+				{#if $searchStore.query}
+					Showing {filteredLogs.length} matches from logs {rangeStart}–{rangeEnd} of {logs.totalRecords}
+				{:else}
+					Showing {rangeStart}–{rangeEnd} of {logs.totalRecords} logs
 				{/if}
 			</span>
 
