@@ -90,7 +90,7 @@
 			name: 'Cutoff %',
 			summary: 'Quality score threshold for the Cutoff Met field',
 			details:
-				'The Cutoff Met filter field checks if an item\'s custom format score has reached this percentage of the profile\'s cutoff score. Set to 80% means items below 80% of their cutoff will have "Cutoff Met = false".'
+				'The Cutoff Met filter field checks if an item\'s custom format score has reached this percentage of the profile\'s cutoff score. Radarr uses the movie file score; Sonarr uses the average score across every episode file in the series. Set to 80% means items below 80% of their cutoff will have "Cutoff Met = false".'
 		},
 		{
 			id: 'multiple-filters',

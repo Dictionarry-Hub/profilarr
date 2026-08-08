@@ -10,6 +10,7 @@ import {
 	evaluateGroup,
 	getDynamicFilterFieldIds,
 	getFilterFields,
+	filterGroupUsesField,
 	normalizeFilterGroup,
 	type FilterRule,
 	type FilterGroup
@@ -17,6 +18,24 @@ import {
 
 class FilterEvaluationTest extends BaseTest {
 	runTests(): void {
+		this.test('field usage detects rules in nested groups', () => {
+			const group: FilterGroup = {
+				type: 'group',
+				match: 'all',
+				children: [
+					{ type: 'rule', field: 'monitored', operator: 'is', value: true },
+					{
+						type: 'group',
+						match: 'any',
+						children: [{ type: 'rule', field: 'cutoff_met', operator: 'is', value: false }]
+					}
+				]
+			};
+
+			assertEquals(filterGroupUsesField(group, 'cutoff_met'), true);
+			assertEquals(filterGroupUsesField(group, 'year'), false);
+		});
+
 		// =====================
 		// Boolean Operators
 		// =====================

@@ -974,6 +974,15 @@ export function isGroup(child: FilterRule | FilterGroup): child is FilterGroup {
 	return child.type === 'group';
 }
 
+/**
+ * Check whether a filter group contains a rule for a field, including nested groups.
+ */
+export function filterGroupUsesField(group: FilterGroup, fieldId: string): boolean {
+	return group.children.some((child) =>
+		isRule(child) ? child.field === fieldId : filterGroupUsesField(child, fieldId)
+	);
+}
+
 function getMultiValueItems(value: unknown): string[] {
 	if (Array.isArray(value)) {
 		return value.map((item) => String(item).trim()).filter(Boolean);

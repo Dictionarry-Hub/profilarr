@@ -6,6 +6,7 @@
 import type {
 	RadarrMovie,
 	RadarrMovieFile,
+	SonarrEpisodeFile,
 	SonarrSeries,
 	ArrQualityProfile,
 	CustomFormatRef,
@@ -13,6 +14,7 @@ import type {
 	ScoreBreakdownItem
 } from '$lib/server/utils/arr/types.ts';
 import type { UpgradeItem } from './types.ts';
+import { averageEpisodeFileScore } from './sonarrScores.ts';
 
 function getFileName(path: string | undefined): string {
 	if (!path) return '';
@@ -158,19 +160,20 @@ export function normalizeRadarrItems(
  * @param series - The raw series from Sonarr API
  * @param profile - The quality profile
  * @param cutoffPercent - The cutoff percentage from filter config (0-100)
+ * @param episodeFiles - Episode files used to calculate the series score when hydrated
  * @param tagMap - Map of tag IDs to labels for resolving tag names
  */
 export function normalizeSonarrItem(
 	series: SonarrSeries,
 	profile: ArrQualityProfile | undefined,
-	_cutoffPercent: number,
+	cutoffPercent: number,
+	episodeFiles?: SonarrEpisodeFile[],
 	tagMap?: Map<number, string>
 ): UpgradeItem {
-	// Score: 0 for now (series-level score requires fetching all episode files)
-	const currentScore = 0;
-
-	// Cutoff: always false for now (no series-level score)
-	const cutoffMet = false;
+	const currentScore = episodeFiles ? averageEpisodeFileScore(episodeFiles) : 0;
+	const profileCutoff = profile?.cutoffFormatScore ?? 0;
+	const cutoffThreshold = (profileCutoff * cutoffPercent) / 100;
+	const cutoffMet = Boolean(episodeFiles?.length) && currentScore >= cutoffThreshold;
 
 	// Convert size to GB
 	const sizeOnDiskGB = (series.statistics?.sizeOnDisk ?? 0) / (1024 * 1024 * 1024);
@@ -244,10 +247,17 @@ export function normalizeSonarrItems(
 	seriesList: SonarrSeries[],
 	profileMap: Map<number, ArrQualityProfile>,
 	cutoffPercent: number,
+	episodeFileMap?: Map<number, SonarrEpisodeFile[]>,
 	tagMap?: Map<number, string>
 ): UpgradeItem[] {
 	return seriesList.map((series) => {
 		const profile = profileMap.get(series.qualityProfileId);
-		return normalizeSonarrItem(series, profile, cutoffPercent, tagMap);
+		return normalizeSonarrItem(
+			series,
+			profile,
+			cutoffPercent,
+			episodeFileMap?.get(series.id),
+			tagMap
+		);
 	});
 }
