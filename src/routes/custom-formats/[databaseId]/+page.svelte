@@ -23,6 +23,7 @@
 	import { alertStore } from '$alerts/store';
 	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import { customFormatSearchValues } from '$lib/client/utils/entitySearch';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -68,8 +69,16 @@
 
 	const fields: FilterFieldDef<CustomFormatTableRow>[] = [
 		{
+			key: 'all',
+			label: 'All',
+			description: 'Name, tags, description and conditions',
+			type: 'text',
+			accessor: customFormatSearchValues
+		},
+		{
 			key: 'name',
 			label: 'Name',
+			description: 'Custom format name',
 			type: 'text',
 			isDefault: true,
 			accessor: (item) => item.name,
@@ -78,6 +87,7 @@
 		{
 			key: 'tag',
 			label: 'Tag',
+			description: 'Assigned tag names',
 			type: 'text',
 			accessor: (item) => item.tags.map((t) => t.name),
 			suggestions: (items) => [...new Set(items.flatMap((i) => i.tags.map((t) => t.name)))].sort()
@@ -85,6 +95,7 @@
 		{
 			key: 'tagged',
 			label: 'Tagged',
+			description: 'Whether any tags are assigned',
 			type: 'text',
 			accessor: (item) => (item.tags.length > 0 ? 'yes' : 'no'),
 			suggestions: () => ['yes', 'no']
@@ -92,6 +103,7 @@
 		{
 			key: 'referenced',
 			label: 'Referenced',
+			description: 'Whether a quality profile uses it',
 			type: 'text',
 			accessor: (item) => (item.referenceCount > 0 ? 'yes' : 'no'),
 			suggestions: () => ['yes', 'no']
@@ -99,12 +111,14 @@
 		{
 			key: 'description',
 			label: 'Description',
+			description: 'Custom format description',
 			type: 'text',
 			accessor: (item) => item.description ?? null
 		},
 		{
 			key: 'condition',
 			label: 'Condition',
+			description: 'Condition names',
 			type: 'text',
 			accessor: (item) => item.conditions.map((c) => c.name),
 			suggestions: (items) =>
@@ -113,6 +127,7 @@
 		{
 			key: 'tests',
 			label: 'Tests',
+			description: 'Number of configured test cases',
 			type: 'number',
 			accessor: (item) => item.testCount
 		}

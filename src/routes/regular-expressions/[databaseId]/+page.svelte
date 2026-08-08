@@ -25,6 +25,7 @@
 	import { alertStore } from '$alerts/store';
 	import type { RegularExpressionWithTags } from '$shared/pcd/display';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import { regularExpressionSearchValues } from '$lib/client/utils/entitySearch';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -70,8 +71,16 @@
 
 	const fields: FilterFieldDef<RegularExpressionWithTags>[] = [
 		{
+			key: 'all',
+			label: 'All',
+			description: 'Name, tags, pattern, description and Regex101 ID',
+			type: 'text',
+			accessor: regularExpressionSearchValues
+		},
+		{
 			key: 'name',
 			label: 'Name',
+			description: 'Regular expression name',
 			type: 'text',
 			isDefault: true,
 			accessor: (item) => item.name,
@@ -80,6 +89,7 @@
 		{
 			key: 'tag',
 			label: 'Tag',
+			description: 'Assigned tag names',
 			type: 'text',
 			accessor: (item) => item.tags.map((t) => t.name),
 			suggestions: (items) => [...new Set(items.flatMap((i) => i.tags.map((t) => t.name)))].sort()
@@ -87,6 +97,7 @@
 		{
 			key: 'tagged',
 			label: 'Tagged',
+			description: 'Whether any tags are assigned',
 			type: 'text',
 			accessor: (item) => (item.tags.length > 0 ? 'yes' : 'no'),
 			suggestions: () => ['yes', 'no']
@@ -94,6 +105,7 @@
 		{
 			key: 'referenced',
 			label: 'Referenced',
+			description: 'Whether a custom format uses it',
 			type: 'text',
 			accessor: (item) => (item.referenceCount > 0 ? 'yes' : 'no'),
 			suggestions: () => ['yes', 'no']
@@ -101,18 +113,21 @@
 		{
 			key: 'pattern',
 			label: 'Pattern',
+			description: 'Regular expression pattern',
 			type: 'text',
 			accessor: (item) => item.pattern
 		},
 		{
 			key: 'description',
 			label: 'Description',
+			description: 'Regular expression description',
 			type: 'text',
 			accessor: (item) => item.description ?? null
 		},
 		{
 			key: 'regex101_id',
 			label: 'Regex101 ID',
+			description: 'Linked Regex101 identifier',
 			type: 'text',
 			accessor: (item) => item.regex101_id ?? null
 		}

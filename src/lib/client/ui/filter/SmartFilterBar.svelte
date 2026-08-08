@@ -157,10 +157,21 @@
 	$: fieldSuggestions = (() => {
 		if (phase !== 'field') return [];
 		const q = inputValue.trim().toLowerCase();
-		if (!q) return fields.map((f) => ({ key: f.key, label: f.label, type: f.type }));
+		if (!q)
+			return fields.map((f) => ({
+				key: f.key,
+				label: f.label,
+				description: f.description ?? '',
+				type: f.type
+			}));
 		return fields
 			.filter((f) => f.label.toLowerCase().includes(q) || f.key.toLowerCase().includes(q))
-			.map((f) => ({ key: f.key, label: f.label, type: f.type }));
+			.map((f) => ({
+				key: f.key,
+				label: f.label,
+				description: f.description ?? '',
+				type: f.type
+			}));
 	})();
 
 	let remainingValueCount = 0;
@@ -197,9 +208,14 @@
 
 	$: suggestions =
 		phase === 'field'
-			? fieldSuggestions.map((f) => ({ label: f.label, hint: f.type, value: f.key }))
+			? fieldSuggestions.map((f) => ({
+					label: f.label,
+					description: f.description,
+					hint: f.type,
+					value: f.key
+				}))
 			: phase === 'value'
-				? valueSuggestions.map((s) => ({ label: s, hint: '', value: s }))
+				? valueSuggestions.map((s) => ({ label: s, description: '', hint: '', value: s }))
 				: [];
 
 	$: showNumberHint = phase === 'value' && activeFieldDef?.type === 'number';
@@ -422,6 +438,7 @@
 			{#each suggestions as suggestion, i}
 				<DropdownItem
 					label={suggestion.label}
+					description={suggestion.description}
 					highlighted={i === highlightedIndex}
 					on:click={() => handleSuggestionClick(i)}
 				/>

@@ -8,6 +8,7 @@
 	$: isSvgIcon = icon && typeof icon === 'object' && 'path' in icon;
 	export let label: string;
 	export let secondaryText: string = '';
+	export let description: string = '';
 	export let disabled: boolean = false;
 	export let danger: boolean = false;
 	export let selected: boolean = false;
@@ -66,11 +67,18 @@
 				<slot />
 			</span>
 		{:else}
-			<span class="flex-1 {labelTransformClass} {labelClass}"
-				>{label}{#if secondaryText}<span
-						class="ml-1.5 text-xs text-neutral-400 dark:text-neutral-500">{secondaryText}</span
-					>{/if}</span
-			>
+			<span class="min-w-0 flex-1 {labelClass}">
+				<span class={labelTransformClass}
+					>{label}{#if secondaryText}<span
+							class="ml-1.5 text-xs text-neutral-400 dark:text-neutral-500">{secondaryText}</span
+						>{/if}</span
+				>
+				{#if description}
+					<span class="mt-0.5 block text-xs leading-snug text-neutral-400 dark:text-neutral-500">
+						{description}
+					</span>
+				{/if}
+			</span>
 		{/if}
 		<IconCheckbox icon={checkIcon} checked={selected} shape="circle" color={checkColor} {compact} />
 	</button>
