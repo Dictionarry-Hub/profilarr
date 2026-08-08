@@ -114,8 +114,7 @@
 			description: 'Configured profile language',
 			type: 'text',
 			accessor: qualityProfileLanguageLabel,
-			suggestions: (items) =>
-				[...new Set(items.map(qualityProfileLanguageLabel))].sort()
+			suggestions: (items) => [...new Set(items.map(qualityProfileLanguageLabel))].sort()
 		},
 		{
 			key: 'upgrades',

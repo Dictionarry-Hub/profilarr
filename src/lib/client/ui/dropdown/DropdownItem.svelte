@@ -68,7 +68,7 @@
 			</span>
 		{:else}
 			<span class="min-w-0 flex-1 {labelClass}">
-				<span class="{labelTransformClass}"
+				<span class={labelTransformClass}
 					>{label}{#if secondaryText}<span
 							class="ml-1.5 text-xs text-neutral-400 dark:text-neutral-500">{secondaryText}</span
 						>{/if}</span
