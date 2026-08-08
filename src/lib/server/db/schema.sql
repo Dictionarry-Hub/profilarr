@@ -856,7 +856,7 @@ CREATE INDEX idx_rename_runs_status ON rename_runs(status);
 -- ==============================================================================
 -- TABLE: general_settings
 -- Purpose: Store general app-wide settings (singleton pattern with id=1)
--- Migration: 030_create_general_settings.ts, 064_add_fail_on_referenced_delete.ts, 066_add_date_format_setting.ts
+-- Migration: 030_create_general_settings.ts, 064_add_fail_on_referenced_delete.ts, 066_add_date_format_setting.ts, 070_add_sync_prompt_setting.ts
 -- ==============================================================================
 
 CREATE TABLE general_settings (
@@ -868,6 +868,7 @@ CREATE TABLE general_settings (
     -- Default delay profile settings
     apply_default_delay_profiles INTEGER NOT NULL DEFAULT 1,  -- 1=apply defaults when adding arr, 0=don't
     fail_on_referenced_delete INTEGER NOT NULL DEFAULT 1,     -- 1=block referenced CF/regex deletes, 0=allow cleanup ops
+    sync_prompt_enabled INTEGER NOT NULL DEFAULT 1,           -- 1=prompt after entity saves, 0=redirect normally
 
     -- Metadata
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

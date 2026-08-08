@@ -11,6 +11,7 @@ export interface GeneralSettings {
 	date_format: DateFormat;
 	apply_default_delay_profiles: number; // 1=true, 0=false
 	fail_on_referenced_delete: number; // 1=true, 0=false
+	sync_prompt_enabled: number; // 1=true, 0=false
 	created_at: string;
 	updated_at: string;
 }
@@ -19,6 +20,7 @@ export interface UpdateGeneralSettingsInput {
 	dateFormat?: DateFormat;
 	applyDefaultDelayProfiles?: boolean;
 	failOnReferencedDelete?: boolean;
+	syncPromptEnabled?: boolean;
 }
 
 /**
@@ -50,6 +52,14 @@ export const generalSettingsQueries = {
 	},
 
 	/**
+	 * Check if entity saves should prompt to sync affected Arr instances
+	 */
+	shouldShowSyncPrompt(): boolean {
+		const settings = this.get();
+		return settings?.sync_prompt_enabled !== 0;
+	},
+
+	/**
 	 * Update general settings
 	 */
 	update(input: UpdateGeneralSettingsInput): boolean {
@@ -69,6 +79,11 @@ export const generalSettingsQueries = {
 		if (input.failOnReferencedDelete !== undefined) {
 			updates.push('fail_on_referenced_delete = ?');
 			params.push(input.failOnReferencedDelete ? 1 : 0);
+		}
+
+		if (input.syncPromptEnabled !== undefined) {
+			updates.push('sync_prompt_enabled = ?');
+			params.push(input.syncPromptEnabled ? 1 : 0);
 		}
 
 		if (updates.length === 0) {
