@@ -74,6 +74,8 @@
 		oldest: 'Oldest first',
 		newest: 'Newest first',
 		lowest_score: 'Lowest score',
+		size_desc: 'Largest first',
+		size_asc: 'Smallest first',
 		most_popular: 'Most popular',
 		least_popular: 'Least popular',
 		alphabetical_asc: 'A-Z',
