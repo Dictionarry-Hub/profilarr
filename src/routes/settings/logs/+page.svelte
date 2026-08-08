@@ -9,9 +9,10 @@
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import LogLevelCell from '$ui/table/LogLevelCell.svelte';
+	import LogSourceCell from '$ui/table/LogSourceCell.svelte';
 	import type { Column, SortDirection, SortState } from '$ui/table/types';
 	import LogsActionsBar from './components/LogsActionsBar.svelte';
-	import LogLevelLabelCell from './components/LogLevelLabelCell.svelte';
 	import { getPersistentSearchStore } from '$lib/client/stores/search';
 	import { formatDateTime } from '$shared/utils/dates.ts';
 	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
@@ -31,7 +32,8 @@
 		meta?: unknown;
 	}
 
-	const levelCellComponent = LogLevelLabelCell as unknown as Component;
+	const levelCellComponent = LogLevelCell as unknown as Component;
+	const sourceCellComponent = LogSourceCell as unknown as Component;
 
 	// Initialize search store
 	const searchStore = getPersistentSearchStore('settingsLogsSearch', { debounceMs: 300 });
@@ -81,7 +83,7 @@
 			key: 'source',
 			header: 'Source',
 			sortable: true,
-			cell: (row) => row.source || '-'
+			cell: () => sourceCellComponent
 		},
 		{
 			key: 'message',
