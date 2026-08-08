@@ -70,6 +70,7 @@ import { migration as migration065 } from './migrations/065_create_arr_drift_tab
 import { migration as migration066 } from './migrations/066_add_date_format_setting.ts';
 import { migration as migration067 } from './migrations/067_enable_all_arr_instances.ts';
 import { migration as migration069 } from './migrations/069_create_arr_sync_database_priority.ts';
+import { migration as migration070 } from './migrations/070_add_sync_prompt_setting.ts';
 
 export interface Migration {
 	version: number;
@@ -358,7 +359,8 @@ export function loadMigrations(): Migration[] {
 		migration065,
 		migration066,
 		migration067,
-		migration069
+		migration069,
+		migration070
 	];
 
 	// Sort by version number

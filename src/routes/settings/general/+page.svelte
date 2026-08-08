@@ -68,6 +68,7 @@
 	// Behavior
 	let arrApplyDefaultDelayProfiles = data.generalSettings.apply_default_delay_profiles;
 	let failOnReferencedDelete = data.generalSettings.fail_on_referenced_delete;
+	let syncPromptEnabled = data.generalSettings.sync_prompt_enabled;
 
 	// UI (client-side stores)
 	let uiNavIconStyle: NavIconStyle = 'lucide';
@@ -153,6 +154,7 @@
 			tmdb_api_key: tmdbApiKey,
 			arr_apply_default_delay_profiles: arrApplyDefaultDelayProfiles,
 			fail_on_referenced_delete: failOnReferencedDelete,
+			sync_prompt_enabled: syncPromptEnabled,
 			ui_nav_icon_style: uiNavIconStyle,
 			ui_alert_position: uiAlertPosition,
 			ui_alert_duration_seconds: uiAlertDurationSeconds,
@@ -466,6 +468,17 @@
 							update('fail_on_referenced_delete', e.detail);
 						}}
 					/>
+					<Toggle
+						label="Prompt to Sync Changes"
+						checked={syncPromptEnabled}
+						infoHeader="Prompt to Sync Changes"
+						infoBody="When enabled, Profilarr prompts you to sync affected Arr instances after saving an entity. Disable this to return normally without offering an immediate sync."
+						fullWidth
+						on:change={(e) => {
+							syncPromptEnabled = e.detail;
+							update('sync_prompt_enabled', e.detail);
+						}}
+					/>
 					<input
 						type="hidden"
 						name="arr_apply_default_delay_profiles"
@@ -475,6 +488,11 @@
 						type="hidden"
 						name="fail_on_referenced_delete"
 						value={failOnReferencedDelete ? 'on' : ''}
+					/>
+					<input
+						type="hidden"
+						name="sync_prompt_enabled"
+						value={syncPromptEnabled ? 'on' : ''}
 					/>
 				</div>
 			</ExpandableCard>

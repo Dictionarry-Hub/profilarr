@@ -70,7 +70,8 @@ export const load = () => {
 		generalSettings: {
 			date_format: generalSetting.date_format,
 			apply_default_delay_profiles: generalSetting.apply_default_delay_profiles === 1,
-			fail_on_referenced_delete: generalSetting.fail_on_referenced_delete === 1
+			fail_on_referenced_delete: generalSetting.fail_on_referenced_delete === 1,
+			sync_prompt_enabled: generalSetting.sync_prompt_enabled === 1
 		}
 	};
 };
@@ -149,6 +150,7 @@ export const actions: Actions = {
 		// --- Behavior ---
 		const arrApplyDefaultDelayProfiles = formData.get('arr_apply_default_delay_profiles') === 'on';
 		const failOnReferencedDelete = formData.get('fail_on_referenced_delete') === 'on';
+		const syncPromptEnabled = formData.get('sync_prompt_enabled') === 'on';
 
 		// --- Persist all settings ---
 		const logUpdated = logSettingsQueries.update({
@@ -209,7 +211,8 @@ export const actions: Actions = {
 		const arrUpdated = generalSettingsQueries.update({
 			dateFormat,
 			applyDefaultDelayProfiles: arrApplyDefaultDelayProfiles,
-			failOnReferencedDelete
+			failOnReferencedDelete,
+			syncPromptEnabled
 		});
 
 		if (!arrUpdated) {
@@ -238,7 +241,8 @@ export const actions: Actions = {
 				aiModel,
 				dateFormat,
 				arrApplyDefaultDelayProfiles,
-				failOnReferencedDelete
+				failOnReferencedDelete,
+				syncPromptEnabled
 			}
 		});
 

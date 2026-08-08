@@ -4,6 +4,7 @@
  */
 
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
 import { getCache } from '$pcd/index.ts';
 import type { AffectedArr } from '$shared/sync/types.ts';
 
@@ -17,7 +18,8 @@ type EntityType =
 	| 'mediaSettings';
 
 /**
- * Find all arr instances affected by an entity change
+ * Find all Arr instances to show in the post-save sync prompt.
+ * Returns no instances when the prompt is disabled.
  */
 export function getAffectedArrs({
 	entityType,
@@ -29,6 +31,8 @@ export function getAffectedArrs({
 	entityName: string;
 }): AffectedArr[] {
 	try {
+		if (!generalSettingsQueries.shouldShowSyncPrompt()) return [];
+
 		switch (entityType) {
 			case 'qualityProfile':
 				return getAffectedArrsForQualityProfile(databaseId, entityName);

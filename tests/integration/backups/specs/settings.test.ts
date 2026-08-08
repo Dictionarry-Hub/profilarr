@@ -108,6 +108,7 @@ async function saveGeneralSettings(fields: {
 		{
 			date_format: 'auto',
 			arr_apply_default_delay_profiles: 'on',
+			sync_prompt_enabled: 'on',
 			backup_enabled: 'on',
 			backup_schedule: fields.backupSchedule,
 			backup_retention_days: String(fields.backupRetentionDays),
