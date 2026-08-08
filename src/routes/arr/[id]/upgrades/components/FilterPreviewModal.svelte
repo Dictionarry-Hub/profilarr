@@ -470,7 +470,7 @@
 									<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
 										Profile
 									</div>
-									<div class="min-w-0 break-words text-sm text-neutral-900 dark:text-neutral-100">
+									<div class="min-w-0 text-sm break-words text-neutral-900 dark:text-neutral-100">
 										{row.details.qualityProfile}
 									</div>
 								</div>
@@ -543,7 +543,7 @@
 										Release Group
 									</div>
 									<div
-										class="min-w-0 break-words font-mono text-sm text-neutral-900 dark:text-neutral-100"
+										class="min-w-0 font-mono text-sm break-words text-neutral-900 dark:text-neutral-100"
 									>
 										{row.details.releaseGroup || 'None'}
 									</div>

@@ -88,8 +88,7 @@ export function countAnnouncements(dbPath: string): number {
 	const db = openDb(dbPath);
 	try {
 		const row = db.prepare('SELECT COUNT(*) AS c FROM database_announcements').get() as
-			| { c: number }
-			| undefined;
+			{ c: number } | undefined;
 		return row?.c ?? 0;
 	} finally {
 		db.close();

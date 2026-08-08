@@ -139,8 +139,7 @@ export async function create(options: CreateQualityProfileOptions) {
 		const upgradeUntilName = 'Bluray-1080p';
 
 		type OrderEntry =
-			| { type: 'quality'; name: string }
-			| { type: 'group'; name: string; members: string[] };
+			{ type: 'quality'; name: string } | { type: 'group'; name: string; members: string[] };
 
 		const groupDefinitions = [
 			{

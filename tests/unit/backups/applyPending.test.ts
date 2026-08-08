@@ -94,8 +94,7 @@ function readMarker(dbPath: string): string {
 	const database = new Database(dbPath);
 	try {
 		const row = database.prepare('SELECT value FROM restore_marker').get() as
-			| { value: string }
-			| undefined;
+			{ value: string } | undefined;
 		if (!row) throw new Error('restore_marker row missing');
 		return row.value;
 	} finally {

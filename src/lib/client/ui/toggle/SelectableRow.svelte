@@ -7,13 +7,7 @@
 	export let disabled: boolean = false;
 	export let icon: Component = Check;
 	export let checkColor:
-		| 'accent'
-		| 'blue'
-		| 'green'
-		| 'red'
-		| 'neutral'
-		| `#${string}`
-		| `var(--${string})` = 'accent';
+		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})` = 'accent';
 </script>
 
 <button

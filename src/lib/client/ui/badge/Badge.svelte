@@ -2,14 +2,8 @@
 	import type { Component } from 'svelte';
 
 	export let variant:
-		| 'accent'
-		| 'neutral'
-		| 'success'
-		| 'warning'
-		| 'danger'
-		| 'info'
-		| 'radarr'
-		| 'sonarr' = 'accent';
+		'accent' | 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'radarr' | 'sonarr' =
+		'accent';
 	export let size: 'sm' | 'md' = 'sm';
 	export let icon: Component | null = null;
 	export let mono: boolean = false;

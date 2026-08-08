@@ -56,8 +56,7 @@ function setQueuedScheduledJob(
 	const db = openDb(dbPath);
 	try {
 		const existing = db.prepare('SELECT id FROM job_queue WHERE dedupe_key = ?').get(dedupeKey) as
-			| { id: number }
-			| undefined;
+			{ id: number } | undefined;
 		if (existing) {
 			db.exec(
 				`UPDATE job_queue
@@ -82,8 +81,7 @@ function getScheduledRunAt(dbPath: string, dedupeKey: string): string | null {
 	const db = openDb(dbPath);
 	try {
 		const row = db.prepare('SELECT run_at FROM job_queue WHERE dedupe_key = ?').get(dedupeKey) as
-			| { run_at: string }
-			| undefined;
+			{ run_at: string } | undefined;
 		return row?.run_at ?? null;
 	} finally {
 		db.close();

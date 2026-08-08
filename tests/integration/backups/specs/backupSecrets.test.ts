@@ -337,8 +337,7 @@ test('downloaded archive: AI api_key is blanked', () => {
 	const db = openDb(backupDbPath);
 	try {
 		const row = db.prepare('SELECT api_key FROM ai_settings WHERE id = 1').get() as
-			| { api_key: string }
-			| undefined;
+			{ api_key: string } | undefined;
 		if (row) {
 			assertNotEquals(row.api_key, AI_API_KEY, 'AI api_key plaintext should be removed');
 		}

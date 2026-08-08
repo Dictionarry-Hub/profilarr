@@ -14,13 +14,7 @@
 	export let customFormatEnabled: Record<string, Record<string, boolean>>;
 	export let disabled: boolean = false;
 	type IconCheckboxColor =
-		| 'accent'
-		| 'blue'
-		| 'green'
-		| 'red'
-		| 'neutral'
-		| `#${string}`
-		| `var(--${string})`;
+		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})`;
 	export let getArrTypeColor: (arrType: string) => IconCheckboxColor;
 	export let firstRowOnboarding: string | undefined = undefined;
 

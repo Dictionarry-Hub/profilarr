@@ -115,10 +115,7 @@ interface ReadErrorViolation extends BaseViolation {
 }
 
 type Violation =
-	| RawUiViolation
-	| MalformedDirectiveViolation
-	| ParseErrorViolation
-	| ReadErrorViolation;
+	RawUiViolation | MalformedDirectiveViolation | ParseErrorViolation | ReadErrorViolation;
 
 interface WalkContext {
 	file: string;

@@ -117,10 +117,7 @@ interface ReadErrorViolation extends BaseViolation {
 }
 
 type Violation =
-	| InsecureUuidViolation
-	| MalformedDirectiveViolation
-	| ParseErrorViolation
-	| ReadErrorViolation;
+	InsecureUuidViolation | MalformedDirectiveViolation | ParseErrorViolation | ReadErrorViolation;
 
 // Minimal Svelte AST shape. We only touch `instance` and `module` script
 // blocks; their `content` carries byte offsets into the original source.

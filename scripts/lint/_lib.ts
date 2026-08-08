@@ -101,9 +101,7 @@ export function offsetToLineCol(
 // ============================================================================
 
 export type CommentStatus =
-	| { kind: 'none' }
-	| { kind: 'valid'; reason: string }
-	| { kind: 'malformed'; reason: string };
+	{ kind: 'none' } | { kind: 'valid'; reason: string } | { kind: 'malformed'; reason: string };
 
 export function classifyDirective(data: string, ruleName: string): CommentStatus {
 	const trimmed = data.trim();

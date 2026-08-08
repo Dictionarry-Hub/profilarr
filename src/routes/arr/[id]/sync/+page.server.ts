@@ -453,11 +453,9 @@ export const actions: Actions = {
 		const namingDatabaseId = formData.get('namingDatabaseId') as string | null;
 		const namingConfigName = formData.get('namingConfigName') as string | null;
 		const qualityDefinitionsDatabaseId = formData.get('qualityDefinitionsDatabaseId') as
-			| string
-			| null;
+			string | null;
 		const qualityDefinitionsConfigName = formData.get('qualityDefinitionsConfigName') as
-			| string
-			| null;
+			string | null;
 		const mediaSettingsDatabaseId = formData.get('mediaSettingsDatabaseId') as string | null;
 		const mediaSettingsConfigName = formData.get('mediaSettingsConfigName') as string | null;
 		const trigger = formData.get('trigger') as SyncTrigger;

@@ -15,12 +15,7 @@
 // API expects: 'delete', 'dash', 'spaceDash', 'spaceDashSpace', 'smart', 'custom'
 
 export type SonarrColonReplacementFormat =
-	| 'delete'
-	| 'dash'
-	| 'spaceDash'
-	| 'spaceDashSpace'
-	| 'smart'
-	| 'custom';
+	'delete' | 'dash' | 'spaceDash' | 'spaceDashSpace' | 'smart' | 'custom';
 
 const COLON_REPLACEMENT_FROM_DB: Record<number, SonarrColonReplacementFormat> = {
 	0: 'delete',
@@ -73,12 +68,7 @@ export function getColonReplacementLabel(value: SonarrColonReplacementFormat): s
 // API expects: 'extend', 'duplicate', 'repeat', 'scene', 'range', 'prefixedRange'
 
 export type MultiEpisodeStyle =
-	| 'extend'
-	| 'duplicate'
-	| 'repeat'
-	| 'scene'
-	| 'range'
-	| 'prefixedRange';
+	'extend' | 'duplicate' | 'repeat' | 'scene' | 'range' | 'prefixedRange';
 
 const MULTI_EPISODE_FROM_DB: Record<number, MultiEpisodeStyle> = {
 	0: 'extend',
@@ -130,11 +120,7 @@ export function getMultiEpisodeStyleLabel(value: MultiEpisodeStyle): string {
 // Radarr stores as strings directly in the DB, but we still need UI options
 
 export type RadarrColonReplacementFormat =
-	| 'delete'
-	| 'dash'
-	| 'spaceDash'
-	| 'spaceDashSpace'
-	| 'smart';
+	'delete' | 'dash' | 'spaceDash' | 'spaceDashSpace' | 'smart';
 
 export const RADARR_COLON_REPLACEMENT_OPTIONS: {
 	value: RadarrColonReplacementFormat;
