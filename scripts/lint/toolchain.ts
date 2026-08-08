@@ -95,7 +95,7 @@ function checkCi(source: string, violations: string[]): void {
 		violations.push(`${CI_PATH} must use deno-version-file, not deno-version`);
 	}
 
-	const nodeSetups = actionUseCount(source, 'actions/setup-node', 'v6');
+	const nodeSetups = actionUseCount(source, 'actions/setup-node', 'v7');
 	const nodeVersionFiles = matchCount(source, /node-version-file:\s+\.tool-versions/g);
 	if (nodeSetups !== nodeVersionFiles) {
 		violations.push(
