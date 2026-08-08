@@ -416,7 +416,7 @@ export class BaseArrClient extends BaseHttpClient {
 		if (params.pageSize !== undefined) queryParams.set('pageSize', String(params.pageSize));
 		if (params.sortKey) queryParams.set('sortKey', params.sortKey);
 		if (params.sortDirection) queryParams.set('sortDirection', params.sortDirection);
-		if (params.level) queryParams.set('level', params.level);
+		if (params.level) queryParams.set('level', params.level.toLowerCase());
 
 		const queryString = queryParams.toString();
 		const url = `/api/${this.apiVersion}/log${queryString ? `?${queryString}` : ''}`;

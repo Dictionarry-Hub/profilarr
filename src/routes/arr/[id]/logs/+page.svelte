@@ -208,13 +208,6 @@
 	// Client-side search filter
 	$: filteredLogs = logs
 		? logs.records.filter((log) => {
-				if (
-					selectedLevel !== 'ALL' &&
-					normalizeLevel(log.level) !== normalizeLevel(selectedLevel)
-				) {
-					return false;
-				}
-
 				const query = $searchStore.query;
 				if (!query) return true;
 
