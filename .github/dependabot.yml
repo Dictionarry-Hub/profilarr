@@ -3,11 +3,13 @@ updates:
   - package-ecosystem: deno
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: '14:00'
       timezone: 'Australia/Adelaide'
-    open-pull-requests-limit: 10
+    groups:
+      deno:
+        patterns:
+          - '*'
     cooldown:
       default-days: 7
     ignore:
@@ -32,6 +34,9 @@ updates:
       day: monday
       time: '14:00'
       timezone: 'Australia/Adelaide'
-    open-pull-requests-limit: 10
+    groups:
+      github:
+        patterns:
+          - '*'
     cooldown:
       default-days: 7
