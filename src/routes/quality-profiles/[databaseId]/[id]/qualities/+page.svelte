@@ -724,7 +724,11 @@
 							{#if item.type === 'group' && item.members}
 								<div class="mt-1 hidden flex-wrap gap-1 md:flex">
 									{#each item.members as member}
-										<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
+										<Label
+											customVariant="bg-white text-neutral-700 shadow-sm dark:bg-neutral-900 dark:text-neutral-300 dark:shadow-black/10"
+											size="sm"
+											rounded="md">{member.name}</Label
+										>
 									{/each}
 								</div>
 							{/if}
@@ -836,7 +840,11 @@
 					{#if item.type === 'group' && item.members}
 						<div class="mt-3 flex flex-wrap gap-1 md:hidden">
 							{#each item.members as member}
-								<Label variant="secondary" size="sm" rounded="md">{member.name}</Label>
+								<Label
+									customVariant="bg-white text-neutral-700 shadow-sm dark:bg-neutral-900 dark:text-neutral-300 dark:shadow-black/10"
+									size="sm"
+									rounded="md">{member.name}</Label
+								>
 							{/each}
 						</div>
 					{/if}

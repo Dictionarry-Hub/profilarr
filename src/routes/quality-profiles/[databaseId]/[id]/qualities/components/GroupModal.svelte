@@ -210,7 +210,7 @@
 									handleToggle(item.name);
 								}
 							}}
-							className="cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800"
+							className="cursor-pointer transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
 							contentClass="px-3 py-2.5"
 							role="button"
 							tabindex="0"
