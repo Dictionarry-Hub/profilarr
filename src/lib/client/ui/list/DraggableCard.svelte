@@ -8,7 +8,8 @@
 
 	const variantClasses = {
 		default: 'border border-neutral-300 bg-white dark:border-neutral-700/60 dark:bg-neutral-800/50',
-		ghost: 'bg-neutral-100/60 dark:bg-neutral-800/40',
+		ghost:
+			'border border-neutral-300 bg-neutral-50 dark:border-neutral-700/60 dark:bg-neutral-800/40',
 		outline: 'border border-neutral-300 dark:border-neutral-700/60'
 	};
 </script>
