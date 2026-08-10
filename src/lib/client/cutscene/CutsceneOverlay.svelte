@@ -12,6 +12,7 @@
 	let targetRect: DOMRect | null = null;
 	let windowWidth = 0;
 	let windowHeight = 0;
+	let interactionRects: DOMRect[] = [];
 
 	const { currentStep } = cutscene;
 
@@ -30,7 +31,10 @@
 
 	// Padding around the spotlight cutout
 	const PAD = 8;
+	const INTERACTION_PAD = 2;
 	const RADIUS = 12;
+
+	type SpotlightRect = { x: number; y: number; w: number; h: number };
 
 	// Animated spotlight position (for smooth transitions between targets)
 	let animatedRect = { x: 0, y: 0, w: 0, h: 0 };
@@ -81,9 +85,22 @@
 		return new Promise((r) => setTimeout(r, 250));
 	}
 
+	function rectChanged(
+		current: { x: number; y: number; w: number; h: number },
+		next: { x: number; y: number; w: number; h: number }
+	): boolean {
+		return (
+			Math.abs(current.x - next.x) > 0.5 ||
+			Math.abs(current.y - next.y) > 0.5 ||
+			Math.abs(current.w - next.w) > 0.5 ||
+			Math.abs(current.h - next.h) > 0.5
+		);
+	}
+
 	function findTarget(): void {
 		if (!step?.target) {
 			targetRect = null;
+			interactionRects = [];
 			return;
 		}
 		const el = document.querySelector(`[data-onboarding="${step.target}"]`);
@@ -102,16 +119,26 @@
 				h: rect.height + PAD * 2
 			};
 
-			if (targetRect && (animatedRect.w > 0 || animatedRect.h > 0)) {
+			if (
+				targetRect &&
+				(animatedRect.w > 0 || animatedRect.h > 0) &&
+				rectChanged(animatedRect, newRect)
+			) {
 				// Animate from current position to new position
 				lerpRect(animatedRect, newRect, 500);
 			} else {
-				// First target, snap immediately
+				// First or unchanged target, snap immediately
 				animatedRect = newRect;
 			}
 			targetRect = rect;
+			interactionRects = (step.interactionTargets ?? [])
+				.map((target) => document.querySelector(`[data-onboarding="${target}"]`))
+				.filter((target): target is Element => target !== null)
+				.map((target) => target.getBoundingClientRect())
+				.filter((target) => target.width > 0 && target.height > 0);
 		} else {
 			targetRect = null;
+			interactionRects = [];
 		}
 	}
 
@@ -188,33 +215,85 @@
 		}
 	});
 
-	// Watch for target appearing via MutationObserver
+	// Watch for primary and interaction targets appearing or disappearing
 	let observer: MutationObserver | null = null;
-	$: if (step?.target && !targetRect && typeof window !== 'undefined') {
+	$: if (typeof window !== 'undefined') {
 		observer?.disconnect();
-		observer = new MutationObserver(() => {
-			findTarget();
-			if (targetRect) observer?.disconnect();
-		});
-		observer.observe(document.body, { childList: true, subtree: true });
+		observer = null;
+		if (step?.target && (!targetRect || (step.interactionTargets?.length ?? 0) > 0)) {
+			observer = new MutationObserver(() => findTarget());
+			observer.observe(document.body, { childList: true, subtree: true });
+		}
 	}
 
 	// Use animated rect for visuals, real rect for card positioning
 	$: spotlightRect = animatedRect;
+	$: interactionSpotlightRects = interactionRects.map((rect) => padRect(rect, INTERACTION_PAD));
 
-	// Compute clip-path for click-blocking overlay (with rounded hole)
-	$: clipPath = computeClipPath(targetRect);
+	// Compute clip-path for click-blocking overlay (with rounded holes)
+	$: clickThroughRects = mergeOverlappingRects([
+		...(targetRect ? [padRect(targetRect, PAD)] : []),
+		...interactionSpotlightRects
+	]);
+	$: clipPath = computeClipPath(clickThroughRects);
 
-	function computeClipPath(rect: DOMRect | null): string {
-		if (!rect) return 'none';
-		const l = rect.left - PAD;
-		const t = rect.top - PAD;
-		const r = rect.right + PAD;
-		const b = rect.bottom + PAD;
-		const R = RADIUS;
-		// SVG path: outer rect (full viewport) + inner rounded rect (cutout, counter-clockwise for evenodd)
+	function padRect(rect: DOMRect, padding: number): SpotlightRect {
+		return {
+			x: rect.left - padding,
+			y: rect.top - padding,
+			w: rect.width + padding * 2,
+			h: rect.height + padding * 2
+		};
+	}
+
+	function overlaps(a: SpotlightRect, b: SpotlightRect): boolean {
+		return (
+			a.x <= b.x + b.w &&
+			a.x + a.w >= b.x &&
+			a.y <= b.y + b.h &&
+			a.y + a.h >= b.y
+		);
+	}
+
+	function mergeOverlappingRects(rects: SpotlightRect[]): SpotlightRect[] {
+		const merged = rects.map((rect) => ({ ...rect }));
+		let changed = true;
+
+		while (changed) {
+			changed = false;
+			for (let i = 0; i < merged.length; i++) {
+				for (let j = i + 1; j < merged.length; j++) {
+					if (!overlaps(merged[i], merged[j])) continue;
+
+					const left = Math.min(merged[i].x, merged[j].x);
+					const top = Math.min(merged[i].y, merged[j].y);
+					const right = Math.max(merged[i].x + merged[i].w, merged[j].x + merged[j].w);
+					const bottom = Math.max(merged[i].y + merged[i].h, merged[j].y + merged[j].h);
+					merged[i] = { x: left, y: top, w: right - left, h: bottom - top };
+					merged.splice(j, 1);
+					changed = true;
+					break;
+				}
+				if (changed) break;
+			}
+		}
+
+		return merged;
+	}
+
+	function computeClipPath(rects: SpotlightRect[]): string {
+		if (rects.length === 0) return 'none';
 		const outer = `M0,0 H${windowWidth} V${windowHeight} H0 Z`;
-		const inner = `M${l + R},${t} H${r - R} Q${r},${t} ${r},${t + R} V${b - R} Q${r},${b} ${r - R},${b} H${l + R} Q${l},${b} ${l},${b - R} V${t + R} Q${l},${t} ${l + R},${t} Z`;
+		const inner = rects
+			.map((rect) => {
+				const l = rect.x;
+				const t = rect.y;
+				const r = rect.x + rect.w;
+				const b = rect.y + rect.h;
+				const radius = Math.min(RADIUS, rect.w / 2, rect.h / 2);
+				return `M${l + radius},${t} H${r - radius} Q${r},${t} ${r},${t + radius} V${b - radius} Q${r},${b} ${r - radius},${b} H${l + radius} Q${l},${b} ${l},${b - radius} V${t + radius} Q${l},${t} ${l + radius},${t} Z`;
+			})
+			.join(' ');
 		return `path(evenodd, "${outer} ${inner}")`;
 	}
 
@@ -323,6 +402,17 @@
 							fill="black"
 						/>
 					{/if}
+					{#each interactionSpotlightRects as rect}
+						<rect
+							x={rect.x}
+							y={rect.y}
+							width={rect.w}
+							height={rect.h}
+							rx={RADIUS}
+							ry={RADIUS}
+							fill="black"
+						/>
+					{/each}
 				</mask>
 			</defs>
 			<rect
@@ -334,7 +424,7 @@
 			/>
 		</svg>
 
-		<!-- Click-blocking overlay with hole for cutout (disabled for manual steps so users can interact freely) -->
+		<!-- Click-blocking overlay with holes for cutouts (disabled for free-interaction steps) -->
 		{#if !step.freeInteract}
 			<div class="absolute inset-0" style="pointer-events: auto; clip-path: {clipPath};"></div>
 		{/if}

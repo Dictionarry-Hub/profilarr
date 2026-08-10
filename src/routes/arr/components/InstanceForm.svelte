@@ -319,6 +319,7 @@
 						disabled={mode === 'edit'}
 						fullWidth
 						position="right"
+						menuOnboarding="arr-type-menu"
 						on:change={(e) => update('type', e.detail)}
 					/>
 				</div>
