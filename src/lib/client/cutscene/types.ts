@@ -20,6 +20,7 @@ export interface Step {
 		| 'below-left'
 		| 'below-right'
 		| 'center';
+	interactionTargets?: string[];
 	freeInteract?: boolean;
 	completion: Completion;
 }

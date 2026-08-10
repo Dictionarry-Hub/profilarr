@@ -28,7 +28,8 @@ export const arrLinkStage: Stage = {
 			target: 'arr-type',
 			title: 'Instance Type',
 			body: 'First, select whether this is a Radarr (movies) or Sonarr (TV shows) instance.',
-			position: 'below',
+			position: 'center',
+			interactionTargets: ['arr-type-menu'],
 			completion: { type: 'manual' }
 		},
 		{

@@ -49,6 +49,7 @@ interface Step {
 	title: string;
 	body: string;
 	position?: Position;
+	interactionTargets?: string[];
 	freeInteract?: boolean;
 	completion: Completion;
 }
@@ -63,6 +64,12 @@ a dynamic resolver (see [Dynamic Routes](#dynamic-routes)).
 `position` controls where the instruction card sits relative to the target:
 `above`, `below`, `left`, `right`, `above-left`, `above-right`, `below-left`,
 `below-right`. Defaults to `below`.
+
+`interactionTargets` identifies additional `data-onboarding` elements that may
+appear outside the primary spotlight, such as an open dropdown menu. Each
+mounted target gets its own spotlight cutout and remains clickable while the
+rest of the page stays blocked. The primary `target` still controls card
+positioning, scrolling, and click completion.
 
 `freeInteract` disables the click-blocking overlay for this step, allowing the
 user to interact with the full UI. Used when a step involves opening dropdowns or
@@ -315,7 +322,8 @@ The overlay uses two layers working together:
 
 - **CSS clip-path** handles click blocking. A separate div with
   `pointer-events: auto` uses a clip-path polygon that covers everything except
-  the cutout area. Clicks in the cutout pass through to the real UI beneath.
+  the primary and interaction cutout areas. Clicks in the cutouts pass through
+  to the real UI beneath.
 
 Both layers are needed because SVG masks don't affect pointer events. The
 spotlight finds its target via `querySelector('[data-onboarding="..."]')` and

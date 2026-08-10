@@ -12,6 +12,7 @@
 	// Fixed positioning to escape overflow containers
 	export let fixed: boolean = false;
 	export let triggerEl: HTMLElement | null = null;
+	export let onboarding: string | undefined = undefined;
 
 	let dropdownEl: HTMLElement;
 	let fixedStyle = '';
@@ -112,6 +113,7 @@
 
 <div
 	bind:this={dropdownEl}
+	data-onboarding={onboarding}
 	class="z-50 overflow-hidden border border-neutral-300 bg-neutral-100 shadow-xl dark:border-neutral-700/60 dark:bg-neutral-900 dark:shadow-black/25 {roundedClass} {fixed
 		? 'fixed'
 		: 'absolute ' + verticalClass} {positionClass}"

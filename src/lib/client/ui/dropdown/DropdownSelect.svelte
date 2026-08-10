@@ -42,6 +42,8 @@
 	export let disabled: boolean = false;
 	// Optional button size override
 	export let buttonSize: 'xs' | 'sm' | 'md' | null = null;
+	// Optional onboarding target for the rendered menu
+	export let menuOnboarding: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher<{ change: string }>();
 
@@ -134,6 +136,7 @@
 				compact={isCompactDropdown}
 				{fixed}
 				{triggerEl}
+				onboarding={menuOnboarding}
 				on:placementchange={(e) => (resolvedPlacement = e.detail)}
 			>
 				{#each options as option}
