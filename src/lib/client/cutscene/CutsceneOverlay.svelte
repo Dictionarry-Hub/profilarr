@@ -247,12 +247,7 @@
 	}
 
 	function overlaps(a: SpotlightRect, b: SpotlightRect): boolean {
-		return (
-			a.x <= b.x + b.w &&
-			a.x + a.w >= b.x &&
-			a.y <= b.y + b.h &&
-			a.y + a.h >= b.y
-		);
+		return a.x <= b.x + b.w && a.x + a.w >= b.x && a.y <= b.y + b.h && a.y + a.h >= b.y;
 	}
 
 	function mergeOverlappingRects(rects: SpotlightRect[]): SpotlightRect[] {
