@@ -11,6 +11,7 @@
 	import { formatDate } from '$shared/utils/dates.ts';
 	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
+	import MovieAvailabilityBadge from './MovieAvailabilityBadge.svelte';
 
 	export let row: RadarrLibraryItem;
 	export let column: Column<RadarrLibraryItem>;
@@ -56,8 +57,13 @@
 					</div>
 				{/if}
 			</div>
-			<div>
-				<div class="font-medium text-neutral-900 dark:text-neutral-50">{row.title}</div>
+			<div class="min-w-0">
+				<div class="flex flex-wrap items-center gap-2">
+					<div class="font-medium text-neutral-900 dark:text-neutral-50">{row.title}</div>
+					{#if !row.hasFile}
+						<MovieAvailabilityBadge hasFile={row.hasFile} status={row.status} />
+					{/if}
+				</div>
 				{#if row.year}
 					<div class="text-xs text-neutral-500 dark:text-neutral-400">{row.year}</div>
 				{/if}
@@ -139,22 +145,28 @@
 {:else}
 	<!-- Expanded content -->
 	<div class="flex flex-col gap-3 p-4">
-		<!-- File Name -->
-		{#if row.fileName}
-			<code class="font-mono text-xs break-all text-neutral-600 dark:text-neutral-400"
-				>{row.fileName}</code
-			>
-		{/if}
-
-		<!-- Custom Formats with Scores (sorted by score descending) -->
-		{#if row.scoreBreakdown.length > 0}
-			<div class="flex flex-wrap items-center gap-2">
-				{#each [...row.scoreBreakdown].sort((a, b) => b.score - a.score) as item}
-					<CustomFormatBadge name={item.name} score={item.score} />
-				{/each}
+		{#if !row.hasFile}
+			<div class="text-sm text-neutral-600 dark:text-neutral-400">
+				No file yet — this movie is still waiting for its big download debut.
 			</div>
 		{:else}
-			<div class="text-xs text-neutral-500 dark:text-neutral-400">No custom formats matched</div>
+			<!-- File Name -->
+			{#if row.fileName}
+				<code class="font-mono text-xs break-all text-neutral-600 dark:text-neutral-400"
+					>{row.fileName}</code
+				>
+			{/if}
+
+			<!-- Custom Formats with Scores (sorted by score descending) -->
+			{#if row.scoreBreakdown.length > 0}
+				<div class="flex flex-wrap items-center gap-2">
+					{#each [...row.scoreBreakdown].sort((a, b) => b.score - a.score) as item}
+						<CustomFormatBadge name={item.name} score={item.score} />
+					{/each}
+				</div>
+			{:else}
+				<div class="text-xs text-neutral-500 dark:text-neutral-400">No custom formats matched</div>
+			{/if}
 		{/if}
 	</div>
 {/if}

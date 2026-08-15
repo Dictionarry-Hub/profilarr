@@ -23,6 +23,7 @@
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import DateTime from '$ui/datetime/DateTime.svelte';
 	import type { RadarrLibraryItem } from '$utils/arr/types.ts';
+	import MovieAvailabilityBadge from './MovieAvailabilityBadge.svelte';
 
 	export let movie: RadarrLibraryItem;
 	export let baseUrl: string = '';
@@ -72,25 +73,26 @@
 		{/if}
 
 		<!-- Info button -->
-		{#if movie.hasFile}
-			<div class="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
-				<Button
-					icon={Info}
-					size="xs"
-					variant="secondary"
-					tooltip="File details"
-					on:click={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-						detailOpen = true;
-					}}
-				/>
-			</div>
-		{/if}
+		<div class="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+			<Button
+				icon={Info}
+				size="xs"
+				variant="secondary"
+				tooltip={movie.hasFile ? 'File details' : 'Movie details'}
+				on:click={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					detailOpen = true;
+				}}
+			/>
+		</div>
 	</a>
 
 	<!-- Content -->
 	<div class="flex flex-1 flex-col gap-2 p-3">
+		{#if !movie.hasFile}
+			<div><MovieAvailabilityBadge hasFile={movie.hasFile} status={movie.status} /></div>
+		{/if}
 		{#if visibleFields.has('title')}
 			<h3
 				class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100"
@@ -202,30 +204,37 @@
 </div>
 
 <InfoModal bind:open={detailOpen} header={movie.title} size="xl">
-	<div class="space-y-4">
-		{#if movie.fileName}
-			<div>
-				<div class="mb-1 text-xs font-medium text-neutral-900 dark:text-neutral-100">File</div>
-				<code class="block font-mono text-xs break-all text-neutral-600 dark:text-neutral-400">
-					{movie.fileName}
-				</code>
-			</div>
-		{/if}
-
-		<div>
-			<div class="mb-1.5 text-xs font-medium text-neutral-900 dark:text-neutral-100">
-				Custom Formats
-			</div>
-			{#if movie.scoreBreakdown.length > 0}
-				<div class="flex flex-wrap gap-1.5">
-					{#each [...movie.scoreBreakdown].sort((a, b) => b.score - a.score) as item}
-						<CustomFormatBadge name={item.name} score={item.score} />
-					{/each}
+	{#if !movie.hasFile}
+		<p class="text-sm text-neutral-600 dark:text-neutral-400">
+			No file yet — this movie is still waiting for its big download debut.
+		</p>
+	{:else}
+		<div class="space-y-4">
+			{#if movie.fileName}
+				<div>
+					<div class="mb-1 text-xs font-medium text-neutral-900 dark:text-neutral-100">File</div>
+					<code class="block font-mono text-xs break-all text-neutral-600 dark:text-neutral-400">
+						{movie.fileName}
+					</code>
 				</div>
-			{:else}
-				<span class="text-xs text-neutral-500 dark:text-neutral-400">No custom formats matched</span
-				>
 			{/if}
+
+			<div>
+				<div class="mb-1.5 text-xs font-medium text-neutral-900 dark:text-neutral-100">
+					Custom Formats
+				</div>
+				{#if movie.scoreBreakdown.length > 0}
+					<div class="flex flex-wrap gap-1.5">
+						{#each [...movie.scoreBreakdown].sort((a, b) => b.score - a.score) as item}
+							<CustomFormatBadge name={item.name} score={item.score} />
+						{/each}
+					</div>
+				{:else}
+					<span class="text-xs text-neutral-500 dark:text-neutral-400"
+						>No custom formats matched</span
+					>
+				{/if}
+			</div>
 		</div>
-	</div>
+	{/if}
 </InfoModal>

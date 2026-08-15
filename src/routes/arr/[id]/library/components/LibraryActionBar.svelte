@@ -8,6 +8,7 @@
 		ArrowUpDown,
 		ArrowUp,
 		ArrowDown,
+		HardDrive,
 		ChevronsDownUp,
 		ChevronsUpDown
 	} from '@lucide/svelte';
@@ -46,6 +47,11 @@
 	export let onRefresh: () => void;
 	export let onOpen: () => void;
 	export let instanceType: string = 'radarr';
+	export let movieDownloadStatuses: Set<'downloaded' | 'missing'> = new Set([
+		'downloaded',
+		'missing'
+	]);
+	export let onMovieDownloadStatusToggle: (status: 'downloaded' | 'missing') => void = () => {};
 	export let viewMode: ViewMode = 'cards';
 	export let expandAll: boolean = false;
 	export let onToggleExpandAll: () => void = () => {};
@@ -180,6 +186,25 @@
 	{/if}
 	{#if !isMobile}
 		<FilterModeToggle bind:value={$filterMode} />
+	{/if}
+	{#if isRadarr}
+		<ActionButton icon={HardDrive} hasDropdown={true} dropdownPosition="right">
+			<svelte:fragment slot="dropdown" let:dropdownPosition>
+				<Dropdown position={dropdownPosition} minWidth="12rem">
+					<DropdownHeader label="Download status" />
+					<DropdownItem
+						label="Downloaded"
+						selected={movieDownloadStatuses.has('downloaded')}
+						on:click={() => onMovieDownloadStatusToggle('downloaded')}
+					/>
+					<DropdownItem
+						label="Missing"
+						selected={movieDownloadStatuses.has('missing')}
+						on:click={() => onMovieDownloadStatusToggle('missing')}
+					/>
+				</Dropdown>
+			</svelte:fragment>
+		</ActionButton>
 	{/if}
 	<ViewToggle bind:value={viewMode} />
 </ActionsBar>
