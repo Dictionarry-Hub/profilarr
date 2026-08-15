@@ -188,11 +188,7 @@
 		<FilterModeToggle bind:value={$filterMode} />
 	{/if}
 	{#if isRadarr}
-		<ActionButton
-			icon={HardDrive}
-			hasDropdown={true}
-			dropdownPosition="right"
-		>
+		<ActionButton icon={HardDrive} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition>
 				<Dropdown position={dropdownPosition} minWidth="12rem">
 					<DropdownHeader label="Download status" />

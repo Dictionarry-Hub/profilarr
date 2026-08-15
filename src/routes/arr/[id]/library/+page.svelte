@@ -596,10 +596,10 @@
 		: movieDownloadStatuses.size === 0
 			? 'No download statuses selected'
 			: movieDownloadStatuses.size === 1 && movieDownloadStatuses.has('downloaded')
-			? 'No downloaded movies'
-			: movieDownloadStatuses.size === 1 && movieDownloadStatuses.has('missing')
-				? 'No missing movies'
-				: 'No movies found';
+				? 'No downloaded movies'
+				: movieDownloadStatuses.size === 1 && movieDownloadStatuses.has('missing')
+					? 'No missing movies'
+					: 'No movies found';
 
 	// ==========================================================================
 	// Sonarr Data
