@@ -100,6 +100,7 @@ LABEL org.opencontainers.image.licenses="AGPL-3.0"
 # - sqlite-libs: SQLite shared library for FFI
 # - bash: Entrypoint uses bash
 # - shadow: Provides usermod/groupmod for PUID/PGID runtime changes
+# - tini: PID 1 init for signal forwarding and orphaned process reaping
 RUN apk add --no-cache \
     git \
     tar \
@@ -109,6 +110,7 @@ RUN apk add --no-cache \
     sqlite-libs \
     bash \
     shadow \
+    tini \
     && apk upgrade --no-cache
 
 # Create application directory
@@ -155,7 +157,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 # Volume for persistent data
 VOLUME /config
 
-# Entrypoint handles PUID/PGID/UMASK then runs the app
-# Starts as root for chown/useradd, drops to PUID via su-exec before exec
+# Tini runs as PID 1 to forward signals and reap orphaned child processes.
+# The entrypoint handles PUID/PGID/UMASK, then drops privileges and runs the app.
 # nosemgrep: dockerfile.security.missing-user-entrypoint.missing-user-entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
