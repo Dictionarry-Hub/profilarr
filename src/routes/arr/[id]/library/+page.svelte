@@ -42,6 +42,18 @@
 
 	// useSimpleMode is bound from LibraryActionBar, which derives it from isMobile + filterMode
 	let useSimpleMode = false;
+	type MovieDownloadStatus = 'downloaded' | 'missing';
+	let movieDownloadStatuses = new Set<MovieDownloadStatus>(['downloaded', 'missing']);
+
+	function handleMovieDownloadStatusToggle(status: MovieDownloadStatus) {
+		const next = new Set(movieDownloadStatuses);
+		if (next.has(status)) {
+			next.delete(status);
+		} else {
+			next.add(status);
+		}
+		movieDownloadStatuses = next;
+	}
 
 	const radarrFields: FilterFieldDef<RadarrLibraryItem>[] = [
 		{
@@ -322,6 +334,7 @@
 	// Refetch if instance changes (navigation between instances)
 	$: if (browser && data.instance.id && data.instance.id !== currentInstanceId) {
 		currentInstanceId = data.instance.id;
+		movieDownloadStatuses = new Set(['downloaded', 'missing']);
 		loading = true;
 		refreshedAt = null;
 		nextRefreshAt = null;
@@ -563,15 +576,30 @@
 	$: baseUrl = getDisplayUrl(data.instance);
 
 	$: radarrLibrary = library as RadarrLibraryItem[];
-	$: allMoviesWithFiles = isRadarr ? radarrLibrary.filter((m) => m.hasFile) : [];
-	$: moviesWithFiles = (() => {
+	$: scopedMovies = isRadarr
+		? radarrLibrary.filter((movie) => {
+				const status: MovieDownloadStatus = movie.hasFile ? 'downloaded' : 'missing';
+				return movieDownloadStatuses.has(status);
+			})
+		: [];
+	$: filteredMovies = (() => {
 		if (useSimpleMode) {
-			if (!simpleQuery) return allMoviesWithFiles;
+			if (!simpleQuery) return scopedMovies;
 			const q = simpleQuery.toLowerCase();
-			return allMoviesWithFiles.filter((m) => m.title.toLowerCase().includes(q));
+			return scopedMovies.filter((m) => m.title.toLowerCase().includes(q));
 		}
-		return applySmartFilters(allMoviesWithFiles, filterTags, radarrFields);
+		return applySmartFilters(scopedMovies, filterTags, radarrFields);
 	})();
+	$: hasActiveMovieFilter = useSimpleMode ? simpleQuery.trim().length > 0 : filterTags.length > 0;
+	$: movieEmptyMessage = hasActiveMovieFilter
+		? 'No movies match the current filters'
+		: movieDownloadStatuses.size === 0
+			? 'No download statuses selected'
+			: movieDownloadStatuses.size === 1 && movieDownloadStatuses.has('downloaded')
+			? 'No downloaded movies'
+			: movieDownloadStatuses.size === 1 && movieDownloadStatuses.has('missing')
+				? 'No missing movies'
+				: 'No movies found';
 
 	// ==========================================================================
 	// Sonarr Data
@@ -638,7 +666,7 @@
 		});
 	}
 
-	$: sortedMovies = sortItems(moviesWithFiles, cardSortKey, cardSortDirection);
+	$: sortedMovies = sortItems(filteredMovies, cardSortKey, cardSortDirection);
 	$: sortedSeries = sortItems(filteredSeries, cardSortKey, cardSortDirection);
 
 	// ==========================================================================
@@ -699,7 +727,7 @@
 	{:else}
 		<LibraryActionBar
 			fields={activeFields}
-			items={isRadarr ? allMoviesWithFiles : sonarrLibrary}
+			items={isRadarr ? scopedMovies : sonarrLibrary}
 			bind:tags={filterTags}
 			filterStorageKey={`smartFilter:${data.instance.id}`}
 			searchStore={simpleSearchStore}
@@ -713,6 +741,8 @@
 			onRefresh={handleRefresh}
 			onOpen={handleOpen}
 			instanceType={data.instance.type}
+			{movieDownloadStatuses}
+			onMovieDownloadStatusToggle={handleMovieDownloadStatusToggle}
 			bind:viewMode={$viewMode}
 			{expandAll}
 			onToggleExpandAll={toggleExpandAll}
@@ -728,32 +758,28 @@
 
 		{#if $viewMode === 'table'}
 			{#if isRadarr}
-				{#if allMoviesWithFiles.length === 0 && !loading && !refreshing}
+				{#if radarrLibrary.length === 0 && !loading && !refreshing}
 					<div
 						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
 					>
 						<div class="flex items-center gap-3">
 							<Film class="h-5 w-5 text-neutral-400" />
 							<div>
-								<h3 class="font-medium text-neutral-900 dark:text-neutral-50">
-									No movies with files
-								</h3>
+								<h3 class="font-medium text-neutral-900 dark:text-neutral-50">No movies found</h3>
 								<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-									This library has {library.length} movies but none have downloaded files yet.
+									This Radarr instance has no movies in its library.
 								</p>
 							</div>
 						</div>
 					</div>
 				{:else}
 					<RadarrTableView
-						data={moviesWithFiles}
+						data={filteredMovies}
 						loading={loading || refreshing}
 						{baseUrl}
 						{expandAll}
 						visibleColumns={activeVisibleColumns}
-						emptyMessage={filterTags.length > 0
-							? 'No movies match the current filters'
-							: 'No movies with files'}
+						emptyMessage={movieEmptyMessage}
 					/>
 				{/if}
 			{:else if isSonarr}
@@ -806,15 +832,11 @@
 					{/each}
 				</LibraryCardGrid>
 			{:else if isRadarr}
-				{#if moviesWithFiles.length === 0}
+				{#if filteredMovies.length === 0}
 					<div
 						class="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"
 					>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400">
-							{filterTags.length > 0
-								? 'No movies match the current filters'
-								: 'No movies with files'}
-						</p>
+						<p class="text-sm text-neutral-500 dark:text-neutral-400">{movieEmptyMessage}</p>
 					</div>
 				{:else}
 					<LibraryCardGrid columns={6}>
