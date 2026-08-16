@@ -19,6 +19,8 @@
 	<div class="h-5 w-14 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
 {:else if column.key === 'sizeOnDisk'}
 	<div class="h-4 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
+{:else if column.key === 'releaseGroups'}
+	<div class="h-4 w-20 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
 {:else if column.key === 'dateAdded'}
 	<div class="h-4 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
 {/if}

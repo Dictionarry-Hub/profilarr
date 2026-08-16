@@ -8,7 +8,8 @@
 		Square,
 		Clock,
 		Star,
-		Calendar
+		Calendar,
+		Users
 	} from '@lucide/svelte';
 	import Label from '$ui/label/Label.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
@@ -21,11 +22,13 @@
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import DateTime from '$ui/datetime/DateTime.svelte';
 	import type { SonarrSeriesItem, SonarrSeasonItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
+	import { primaryReleaseGroup } from './releaseGroups.ts';
 
 	export let series: SonarrSeriesItem;
 	export let baseUrl: string = '';
 	export let instanceId: number;
 	export let visibleFields: Set<string> = new Set();
+	export let highlightGroups: string[] = [];
 
 	$: posterUrl = series.images?.find((i) => i.coverType === 'poster')?.remoteUrl;
 	$: monitoredState = series.monitoredState;
@@ -228,6 +231,20 @@
 			</div>
 		{/if}
 
+		{#if visibleFields.has('releaseGroups') && series.releaseGroups?.length}
+			{@const groups = series.releaseGroups}
+			<Tooltip text={groups.length > 1 ? groups.join(', ') : ''} position="top">
+				<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+					<Users size={12} class="flex-shrink-0" />
+					<span class="truncate font-mono">{primaryReleaseGroup(groups, highlightGroups)}</span>
+					{#if groups.length > 1}
+						<span class="flex-shrink-0 font-mono text-neutral-400 dark:text-neutral-500"
+							>+{groups.length - 1}</span
+						>
+					{/if}
+				</span>
+			</Tooltip>
+		{/if}
 		{#if visibleFields.has('episodes')}
 			<ProgressIndicator
 				current={series.episodeFileCount}

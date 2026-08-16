@@ -366,6 +366,7 @@ export interface SonarrSeries {
 		episodeCount: number;
 		totalEpisodeCount: number;
 		sizeOnDisk: number;
+		releaseGroups?: string[];
 		percentOfEpisodes: number;
 	};
 }
@@ -604,6 +605,7 @@ export interface SonarrSeriesItem {
 	totalEpisodeCount: number;
 	sizeOnDisk: number;
 	percentOfEpisodes: number;
+	releaseGroups: string[];
 	dateAdded?: string;
 	isProfilarrProfile: boolean;
 	network?: string;
