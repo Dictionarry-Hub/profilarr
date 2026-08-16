@@ -199,9 +199,14 @@
 
 	// Handle type change - reset values
 	function handleTypeChange(newType: string) {
+		const isNewPatternType = PATTERN_TYPES.includes(newType as (typeof PATTERN_TYPES)[number]);
+		const matchingPattern = isNewPatternType ? patternFromName(condition.name) : null;
+
 		emitChange({
 			type: newType,
-			patterns: undefined,
+			patterns: matchingPattern
+				? [{ name: matchingPattern.name, pattern: matchingPattern.pattern }]
+				: undefined,
 			languages: undefined,
 			sources: undefined,
 			resolutions: undefined,
