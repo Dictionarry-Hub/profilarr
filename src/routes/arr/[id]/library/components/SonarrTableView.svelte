@@ -18,8 +18,15 @@
 	export let instanceId: number;
 	export let emptyMessage = 'No series found';
 	export let visibleColumns: Set<string>;
+	export let highlightGroups: string[] = [];
 
-	const TOGGLEABLE_COLUMNS = ['episodes', 'sizeOnDisk', 'status', 'dateAdded'] as const;
+	const TOGGLEABLE_COLUMNS = [
+		'episodes',
+		'sizeOnDisk',
+		'releaseGroups',
+		'status',
+		'dateAdded'
+	] as const;
 	type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
 
 	const allColumns: Column<SonarrSeriesItem>[] = [
@@ -49,6 +56,14 @@
 			sortable: true,
 			sortAccessor: (row) => row.sizeOnDisk,
 			defaultSortDirection: 'desc'
+		},
+		{
+			key: 'releaseGroups',
+			header: 'Release Group(s)',
+			align: 'left',
+			width: 'w-40',
+			sortable: true,
+			sortAccessor: (row) => row.releaseGroups?.[0] ?? ''
 		},
 		{
 			key: 'dateAdded',
@@ -212,7 +227,7 @@
 				mode="compact"
 			/>
 		{:else}
-			<SeriesRow {row} {column} />
+			<SeriesRow {row} {column} {highlightGroups} />
 		{/if}
 	</svelte:fragment>
 

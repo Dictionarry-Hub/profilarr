@@ -73,6 +73,14 @@
 				[...new Set(items.map((m) => m.qualityName).filter(Boolean) as string[])].sort()
 		},
 		{
+			key: 'releaseGroup',
+			label: 'Release Group',
+			type: 'text',
+			accessor: (m) => m.releaseGroup ?? '',
+			suggestions: (items) =>
+				[...new Set(items.map((m) => m.releaseGroup).filter(Boolean) as string[])].sort()
+		},
+		{
 			key: 'profile',
 			label: 'Profile',
 			type: 'text',
@@ -135,6 +143,13 @@
 			accessor: (s) => s.title,
 			isDefault: true,
 			suggestions: (items) => items.map((s) => s.title).sort()
+		},
+		{
+			key: 'releaseGroup',
+			label: 'Release Group(s)',
+			type: 'text',
+			accessor: (s) => s.releaseGroups ?? [],
+			suggestions: (items) => [...new Set(items.flatMap((s) => s.releaseGroups ?? []))].sort()
 		},
 		{
 			key: 'profile',
@@ -391,7 +406,7 @@
 	const radarrColumnLabels: Record<RadarrToggleableColumn, string> = {
 		qualityName: 'Quality',
 		score: 'Score',
-		releaseGroup: 'Group',
+		releaseGroup: 'Release Group',
 		sizeOnDisk: 'Size',
 		status: 'Status',
 		popularity: 'Popularity',
@@ -403,7 +418,13 @@
 	// ==========================================================================
 
 	const SONARR_STORAGE_KEY = 'profilarr-library-sonarr-columns';
-	const SONARR_TOGGLEABLE_COLUMNS = ['status', 'episodes', 'sizeOnDisk', 'dateAdded'] as const;
+	const SONARR_TOGGLEABLE_COLUMNS = [
+		'status',
+		'episodes',
+		'sizeOnDisk',
+		'releaseGroups',
+		'dateAdded'
+	] as const;
 	type SonarrToggleableColumn = (typeof SONARR_TOGGLEABLE_COLUMNS)[number];
 
 	function loadSonarrColumnVisibility(): Set<SonarrToggleableColumn> {
@@ -439,6 +460,7 @@
 	const sonarrColumnLabels: Record<SonarrToggleableColumn, string> = {
 		episodes: 'Episodes',
 		sizeOnDisk: 'Size',
+		releaseGroups: 'Release Group(s)',
 		status: 'Status',
 		dateAdded: 'Added'
 	};
@@ -508,6 +530,7 @@
 		'size',
 		'episodes',
 		'year',
+		'releaseGroups',
 		'status',
 		'rating',
 		'dateAdded'
@@ -522,6 +545,7 @@
 		size: 'Size',
 		episodes: 'Episodes',
 		year: 'Year',
+		releaseGroups: 'Release Group(s)',
 		status: 'Status',
 		rating: 'Rating',
 		dateAdded: 'Date Added'
@@ -615,6 +639,12 @@
 		}
 		return applySmartFilters(sonarrLibrary, filterTags, sonarrFields);
 	})();
+
+	// Values of any active (non-negated) release group filter, so the Sonarr views can
+	// surface the group the user filtered on instead of the most common one.
+	$: activeReleaseGroups = useSimpleMode
+		? []
+		: filterTags.filter((t) => t.field === 'releaseGroup' && !t.negated).map((t) => t.value);
 
 	let sonarrTableView: SonarrTableView;
 
@@ -806,6 +836,7 @@
 						{expandAll}
 						instanceId={data.instance.id}
 						visibleColumns={activeVisibleColumns}
+						highlightGroups={activeReleaseGroups}
 						emptyMessage={filterTags.length > 0
 							? 'No series match the current filters'
 							: 'No series found'}
@@ -863,6 +894,7 @@
 								{baseUrl}
 								instanceId={data.instance.id}
 								visibleFields={activeVisibleCardFields}
+								highlightGroups={activeReleaseGroups}
 							/>
 						{/each}
 					</LibraryCardGrid>

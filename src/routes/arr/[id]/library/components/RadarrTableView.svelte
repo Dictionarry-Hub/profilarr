@@ -82,7 +82,7 @@
 			sortAccessor: (row) => (row.dateAdded ? new Date(row.dateAdded).getTime() : 0),
 			defaultSortDirection: 'desc'
 		},
-		{ key: 'releaseGroup', header: 'Group', align: 'left', width: 'w-28', sortable: true }
+		{ key: 'releaseGroup', header: 'Release Group', align: 'left', width: 'w-36', sortable: true }
 	];
 
 	$: columns = allColumns.filter(

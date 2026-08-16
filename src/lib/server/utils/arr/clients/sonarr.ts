@@ -103,6 +103,22 @@ export class SonarrClient extends BaseArrClient {
 				percentOfEpisodes: s.statistics?.percentOfEpisodes ?? 0
 			}));
 
+			// Sonarr only exposes distinct release group lists (per season and aggregated
+			// per series), never per-file counts. Rank by how many seasons each group
+			// appears in as a proxy for how much of the series it accounts for.
+			const releaseGroupSeasons = new Map<string, number>();
+			for (const season of series.seasons) {
+				for (const group of season.statistics?.releaseGroups ?? []) {
+					releaseGroupSeasons.set(group, (releaseGroupSeasons.get(group) ?? 0) + 1);
+				}
+			}
+			for (const group of series.statistics?.releaseGroups ?? []) {
+				if (!releaseGroupSeasons.has(group)) releaseGroupSeasons.set(group, 0);
+			}
+			const releaseGroups = [...releaseGroupSeasons.entries()]
+				.sort(([aName, aCount], [bName, bCount]) => bCount - aCount || aName.localeCompare(bName))
+				.map(([group]) => group);
+
 			let monitoredState: 'monitored' | 'partial' | 'unmonitored';
 			if (!series.monitored) {
 				monitoredState = 'unmonitored';
@@ -132,6 +148,7 @@ export class SonarrClient extends BaseArrClient {
 				totalEpisodeCount: series.statistics?.totalEpisodeCount ?? 0,
 				sizeOnDisk: series.statistics?.sizeOnDisk ?? 0,
 				percentOfEpisodes: series.statistics?.percentOfEpisodes ?? 0,
+				releaseGroups,
 				dateAdded: series.added,
 				seasons,
 				isProfilarrProfile: profilarrProfileNames?.has(profileName) ?? false,

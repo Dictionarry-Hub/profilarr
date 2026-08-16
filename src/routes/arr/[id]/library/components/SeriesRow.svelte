@@ -6,12 +6,14 @@
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import type { SonarrSeriesItem } from '$utils/arr/types.ts';
 	import type { Column } from '$ui/table/types';
+	import { primaryReleaseGroup } from './releaseGroups.ts';
 	import { formatDate } from '$shared/utils/dates.ts';
 	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';
 
 	export let row: SonarrSeriesItem;
 	export let column: Column<SonarrSeriesItem>;
+	export let highlightGroups: string[] = [];
 
 	$: posterUrl = row.images?.find((i) => i.coverType === 'poster')?.remoteUrl;
 
@@ -81,6 +83,20 @@
 		<Label variant="info" size="sm"><svelte:component this={Clock} size={12} /> Upcoming</Label>
 	{:else}
 		<Label variant="secondary" size="sm">{row.status ?? '-'}</Label>
+	{/if}
+{:else if column.key === 'releaseGroups'}
+	{@const groups = row.releaseGroups ?? []}
+	{#if groups.length > 0}
+		<Tooltip text={groups.length > 1 ? groups.join(', ') : ''} position="top">
+			<span class="truncate font-mono text-xs text-neutral-700 dark:text-neutral-300">
+				{primaryReleaseGroup(groups, highlightGroups)}
+				{#if groups.length > 1}
+					<span class="text-neutral-500 dark:text-neutral-400">+{groups.length - 1}</span>
+				{/if}
+			</span>
+		</Tooltip>
+	{:else}
+		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">-</span>
 	{/if}
 {:else if column.key === 'sizeOnDisk'}
 	<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300"
