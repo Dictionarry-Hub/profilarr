@@ -29,6 +29,8 @@ export interface Column<T> {
 	sortComparator?: (a: T, b: T) => number;
 	/** Default sort direction when column is first sorted */
 	defaultSortDirection?: SortDirection;
+	/** Keep null and undefined values after known values in both sort directions */
+	sortNullsLast?: boolean;
 	/** Custom cell renderer - receives the full row object */
 	cell?: (row: T) => string | Component | { html: string };
 	/** Hide column in mobile responsive layout */

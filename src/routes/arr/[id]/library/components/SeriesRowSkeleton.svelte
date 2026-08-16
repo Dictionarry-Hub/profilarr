@@ -21,6 +21,6 @@
 	<div class="h-4 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
 {:else if column.key === 'releaseGroups'}
 	<div class="h-4 w-20 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
-{:else if column.key === 'dateAdded'}
+{:else if column.key === 'dateAdded' || column.key === 'firstAired' || column.key === 'previousAiring'}
 	<div class="h-4 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
 {/if}

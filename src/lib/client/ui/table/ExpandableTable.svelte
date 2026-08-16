@@ -101,13 +101,18 @@
 
 		return [...items].sort((a, b) => {
 			let comparison = 0;
+			const aVal = column.sortAccessor ? column.sortAccessor(a) : getCellValue(a, column.key);
+			const bVal = column.sortAccessor ? column.sortAccessor(b) : getCellValue(b, column.key);
+
+			if (column.sortNullsLast) {
+				if (aVal == null && bVal == null) return 0;
+				if (aVal == null) return 1;
+				if (bVal == null) return -1;
+			}
 
 			if (column.sortComparator) {
 				comparison = column.sortComparator(a, b);
 			} else {
-				const aVal = column.sortAccessor ? column.sortAccessor(a) : getCellValue(a, column.key);
-				const bVal = column.sortAccessor ? column.sortAccessor(b) : getCellValue(b, column.key);
-
 				// Handle null/undefined
 				if (aVal == null && bVal == null) comparison = 0;
 				else if (aVal == null) comparison = 1;

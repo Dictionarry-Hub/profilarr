@@ -30,7 +30,7 @@
 		return formatDate(isoString, $serverTimezone, $dateFormat, {
 			month: 'short',
 			day: 'numeric',
-			year: '2-digit'
+			year: 'numeric'
 		});
 	}
 </script>
@@ -105,5 +105,13 @@
 {:else if column.key === 'dateAdded'}
 	<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300"
 		>{fmtDate(row.dateAdded)}</span
+	>
+{:else if column.key === 'firstAired'}
+	<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300"
+		>{fmtDate(row.firstAired)}</span
+	>
+{:else if column.key === 'previousAiring'}
+	<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300"
+		>{fmtDate(row.previousAiring)}</span
 	>
 {/if}

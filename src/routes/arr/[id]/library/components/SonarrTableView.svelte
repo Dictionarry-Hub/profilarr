@@ -4,7 +4,7 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import type { Column, SortState } from '$ui/table/types';
 	import type { SonarrSeriesItem, SonarrSeasonItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
-	import { sortTitle } from '$shared/utils/sort.ts';
+	import { dateSortValue, sortTitle } from '$shared/utils/sort.ts';
 
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import SeriesRow from './SeriesRow.svelte';
@@ -25,7 +25,9 @@
 		'sizeOnDisk',
 		'releaseGroups',
 		'status',
-		'dateAdded'
+		'dateAdded',
+		'firstAired',
+		'previousAiring'
 	] as const;
 	type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
 
@@ -73,6 +75,26 @@
 			sortable: true,
 			sortAccessor: (row) => (row.dateAdded ? new Date(row.dateAdded).getTime() : 0),
 			defaultSortDirection: 'desc'
+		},
+		{
+			key: 'firstAired',
+			header: 'Series Premiere',
+			align: 'right',
+			width: 'w-36',
+			sortable: true,
+			sortAccessor: (row) => dateSortValue(row.firstAired),
+			defaultSortDirection: 'desc',
+			sortNullsLast: true
+		},
+		{
+			key: 'previousAiring',
+			header: 'Latest Aired Episode',
+			align: 'right',
+			width: 'w-44',
+			sortable: true,
+			sortAccessor: (row) => dateSortValue(row.previousAiring),
+			defaultSortDirection: 'desc',
+			sortNullsLast: true
 		}
 	];
 

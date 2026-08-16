@@ -139,6 +139,14 @@
 		}
 
 		const sorted = [...rows].sort((a, b) => {
+			if (column.sortNullsLast) {
+				const aValue = getSortValue(a, column);
+				const bValue = getSortValue(b, column);
+				if (aValue == null && bValue == null) return 0;
+				if (aValue == null) return sortDirection === 'desc' ? -1 : 1;
+				if (bValue == null) return sortDirection === 'desc' ? 1 : -1;
+			}
+
 			if (column.sortComparator) {
 				return column.sortComparator(a, b);
 			}
