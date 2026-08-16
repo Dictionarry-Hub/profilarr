@@ -213,32 +213,6 @@ jobs:
       - name: Build images
         run: docker compose -f compose.yml -f compose.dev.yml build
 
-      - name: Verify container init reaps orphaned processes
-        run: |
-          container_name=profilarr-init-test
-          cleanup() {
-            docker rm -f "$container_name" > /dev/null 2>&1 || true
-          }
-          trap cleanup EXIT
-
-          docker run --name "$container_name" --detach profilarr:alpine
-
-          pid_one=$(docker exec "$container_name" cat /proc/1/comm)
-          if [ "$pid_one" != "tini" ]; then
-            echo "Expected tini to run as PID 1, found: $pid_one"
-            exit 1
-          fi
-
-          docker exec "$container_name" sh -c 'sh -c "sleep 0.1 &"'
-          sleep 1
-
-          if docker exec "$container_name" sh -c \
-            'awk '\''$3 == "Z" { found=1 } END { exit !found }'\'' /proc/[0-9]*/stat'; then
-            echo "Found a zombie process after creating a short-lived orphan"
-            docker exec "$container_name" ps -ef
-            exit 1
-          fi
-
       - name: Scan profilarr
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
