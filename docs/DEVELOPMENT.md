@@ -117,6 +117,19 @@ announce a planned release before there's something to test.
 Patch releases that skip the soak (bug fixes, deps, docs) don't need either.
 They're tagged as soon as CI passes and show up in the normal release notes.
 
+#### Excluding Absorbed Fixes from Release Notes
+
+If a fix only corrects a feature that has not reached stable yet, omit the fix
+from the eventual release notes by adding this footer to the extended commit
+message when squash merging the PR:
+
+```text
+changelog: ignore
+```
+
+For a commit that has already been merged without the footer, add its full SHA
+to `.cliffignore`.
+
 #### Hotfixes
 
 If a core feature is broken in a stable release and it can't wait for the next
