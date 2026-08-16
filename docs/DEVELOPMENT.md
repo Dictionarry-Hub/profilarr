@@ -127,6 +127,8 @@ message when squash merging the PR:
 changelog: ignore
 ```
 
+`changelog: skip` works too; both spellings are matched.
+
 For a commit that has already been merged without the footer, add its full SHA
 to `.cliffignore`.
 

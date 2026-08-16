@@ -44,7 +44,7 @@ topo_order_commits = true
 sort_commits = "oldest"
 
 commit_parsers = [
-	{ footer = "^changelog: ?ignore", skip = true },
+	{ footer = "^changelog: ?(ignore|skip)", skip = true },
 	{ message = "^feat", group = "<!-- 0 -->✨ Features" },
 	{ message = "^fix", group = "<!-- 1 -->🐛 Fixes" },
 	{ message = "^perf", group = "<!-- 2 -->⚡ Performance" },
