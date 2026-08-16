@@ -353,6 +353,7 @@ export interface SonarrSeries {
 	certification?: string;
 	firstAired?: string;
 	lastAired?: string;
+	previousAiring?: string;
 	originalLanguage?: { id: number; name: string };
 	ratings?: { value: number; votes: number };
 	seasons: SonarrSeason[];
@@ -510,6 +511,10 @@ export interface RadarrLibraryItem {
 	monitored: boolean;
 	status?: string;
 	dateAdded?: string;
+	initialReleaseDate?: string;
+	theatricalReleaseDate?: string;
+	digitalReleaseDate?: string;
+	physicalReleaseDate?: string;
 	popularity?: number;
 	sizeOnDisk?: number;
 	runtime?: number;
@@ -618,6 +623,7 @@ export interface SonarrSeriesItem {
 	originalLanguage?: { id: number; name: string };
 	firstAired?: string;
 	lastAired?: string;
+	previousAiring?: string;
 }
 
 /**

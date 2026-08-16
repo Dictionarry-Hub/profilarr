@@ -188,14 +188,67 @@
 				{/if}
 			</div>
 		{/if}
-		{#if visibleFields.has('dateAdded') && movie.dateAdded}
+		{#if visibleFields.has('dateAdded')}
 			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
 				<Calendar size={12} />
+				<span>Added:</span>
 				<span class="font-mono"
 					><DateTime
 						value={movie.dateAdded}
 						date
-						options={{ month: 'short', day: 'numeric', year: '2-digit' }}
+						options={{ month: 'short', day: 'numeric', year: 'numeric' }}
+					/></span
+				>
+			</span>
+		{/if}
+		{#if visibleFields.has('initialReleaseDate')}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Calendar size={12} />
+				<span>Initial:</span>
+				<span class="font-mono"
+					><DateTime
+						value={movie.initialReleaseDate}
+						date
+						options={{ month: 'short', day: 'numeric', year: 'numeric' }}
+					/></span
+				>
+			</span>
+		{/if}
+		{#if visibleFields.has('theatricalReleaseDate')}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Calendar size={12} />
+				<span>Theatrical:</span>
+				<span class="font-mono"
+					><DateTime
+						value={movie.theatricalReleaseDate}
+						date
+						options={{ month: 'short', day: 'numeric', year: 'numeric' }}
+					/></span
+				>
+			</span>
+		{/if}
+		{#if visibleFields.has('digitalReleaseDate')}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Calendar size={12} />
+				<span>Digital:</span>
+				<span class="font-mono"
+					><DateTime
+						value={movie.digitalReleaseDate}
+						date
+						options={{ month: 'short', day: 'numeric', year: 'numeric' }}
+					/></span
+				>
+			</span>
+		{/if}
+		{#if visibleFields.has('physicalReleaseDate')}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Calendar size={12} />
+				<span>Physical:</span>
+				<span class="font-mono"
+					><DateTime
+						value={movie.physicalReleaseDate}
+						date
+						options={{ month: 'short', day: 'numeric', year: 'numeric' }}
 					/></span
 				>
 			</span>

@@ -161,7 +161,8 @@ export class SonarrClient extends BaseArrClient {
 				images: series.images,
 				originalLanguage: series.originalLanguage,
 				firstAired: series.firstAired,
-				lastAired: series.lastAired
+				lastAired: series.lastAired,
+				previousAiring: series.previousAiring
 			};
 		});
 	}

@@ -60,7 +60,7 @@
 	export let onSort: (key: string, direction: 'asc' | 'desc') => void = () => {};
 	export let useSimpleMode: boolean = false;
 
-	const sortOptions = [
+	const commonSortOptions = [
 		{ key: 'title', label: 'Title' },
 		{ key: 'size', label: 'Size' },
 		{ key: 'dateAdded', label: 'Date Added' },
@@ -78,6 +78,19 @@
 	}
 
 	$: isRadarr = instanceType === 'radarr';
+	$: sortOptions = isRadarr
+		? [
+				...commonSortOptions,
+				{ key: 'initialReleaseDate', label: 'Initial Release' },
+				{ key: 'theatricalReleaseDate', label: 'Theatrical Release' },
+				{ key: 'digitalReleaseDate', label: 'Digital Release' },
+				{ key: 'physicalReleaseDate', label: 'Physical Release' }
+			]
+		: [
+				...commonSortOptions,
+				{ key: 'firstAired', label: 'Series Premiere' },
+				{ key: 'previousAiring', label: 'Latest Aired Episode' }
+			];
 	$: filterPlaceholder = isRadarr ? 'Filter movies...' : 'Filter series...';
 	$: openLabel = isRadarr ? 'Open in Radarr' : 'Open in Sonarr';
 	$: refreshTooltip = refreshStatusText ? `Refresh · ${refreshStatusText}` : 'Refresh';

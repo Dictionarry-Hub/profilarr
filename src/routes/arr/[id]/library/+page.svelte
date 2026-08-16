@@ -4,7 +4,7 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import type { RadarrLibraryItem, SonarrSeriesItem } from '$utils/arr/types.ts';
-	import { sortTitle } from '$shared/utils/sort.ts';
+	import { compareOptionalDates, sortTitle } from '$shared/utils/sort.ts';
 	import { getPersistentSearchStore } from '$stores/search';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
@@ -362,6 +362,12 @@
 	// ==========================================================================
 
 	const RADARR_STORAGE_KEY = 'profilarr-library-columns';
+	const RADARR_RELEASE_DATE_KEYS = [
+		'initialReleaseDate',
+		'theatricalReleaseDate',
+		'digitalReleaseDate',
+		'physicalReleaseDate'
+	] as const;
 	const RADARR_TOGGLEABLE_COLUMNS = [
 		'status',
 		'qualityName',
@@ -369,12 +375,16 @@
 		'sizeOnDisk',
 		'popularity',
 		'dateAdded',
+		...RADARR_RELEASE_DATE_KEYS,
 		'releaseGroup'
 	] as const;
+	const RADARR_DEFAULT_COLUMNS = RADARR_TOGGLEABLE_COLUMNS.filter(
+		(key) => !RADARR_RELEASE_DATE_KEYS.includes(key as (typeof RADARR_RELEASE_DATE_KEYS)[number])
+	);
 	type RadarrToggleableColumn = (typeof RADARR_TOGGLEABLE_COLUMNS)[number];
 
 	function loadRadarrColumnVisibility(): Set<RadarrToggleableColumn> {
-		if (!browser) return new Set(RADARR_TOGGLEABLE_COLUMNS);
+		if (!browser) return new Set<RadarrToggleableColumn>(RADARR_DEFAULT_COLUMNS);
 		try {
 			const stored = localStorage.getItem(RADARR_STORAGE_KEY);
 			if (stored) {
@@ -382,7 +392,7 @@
 				return new Set(parsed);
 			}
 		} catch {}
-		return new Set(RADARR_TOGGLEABLE_COLUMNS);
+		return new Set<RadarrToggleableColumn>(RADARR_DEFAULT_COLUMNS);
 	}
 
 	function saveRadarrColumnVisibility(visible: Set<RadarrToggleableColumn>) {
@@ -410,7 +420,11 @@
 		sizeOnDisk: 'Size',
 		status: 'Status',
 		popularity: 'Popularity',
-		dateAdded: 'Added'
+		dateAdded: 'Added',
+		initialReleaseDate: 'Initial Release',
+		theatricalReleaseDate: 'Theatrical Release',
+		digitalReleaseDate: 'Digital Release',
+		physicalReleaseDate: 'Physical Release'
 	};
 
 	// ==========================================================================
@@ -423,12 +437,17 @@
 		'episodes',
 		'sizeOnDisk',
 		'releaseGroups',
-		'dateAdded'
+		'dateAdded',
+		'firstAired',
+		'previousAiring'
 	] as const;
+	const SONARR_DEFAULT_COLUMNS = SONARR_TOGGLEABLE_COLUMNS.filter(
+		(key) => key !== 'firstAired' && key !== 'previousAiring'
+	);
 	type SonarrToggleableColumn = (typeof SONARR_TOGGLEABLE_COLUMNS)[number];
 
 	function loadSonarrColumnVisibility(): Set<SonarrToggleableColumn> {
-		if (!browser) return new Set(SONARR_TOGGLEABLE_COLUMNS);
+		if (!browser) return new Set<SonarrToggleableColumn>(SONARR_DEFAULT_COLUMNS);
 		try {
 			const stored = localStorage.getItem(SONARR_STORAGE_KEY);
 			if (stored) {
@@ -436,7 +455,7 @@
 				return new Set(parsed);
 			}
 		} catch {}
-		return new Set(SONARR_TOGGLEABLE_COLUMNS);
+		return new Set<SonarrToggleableColumn>(SONARR_DEFAULT_COLUMNS);
 	}
 
 	function saveSonarrColumnVisibility(visible: Set<SonarrToggleableColumn>) {
@@ -462,7 +481,9 @@
 		sizeOnDisk: 'Size',
 		releaseGroups: 'Release Group(s)',
 		status: 'Status',
-		dateAdded: 'Added'
+		dateAdded: 'Added',
+		firstAired: 'Series Premiere',
+		previousAiring: 'Latest Aired Episode'
 	};
 
 	// ==========================================================================
@@ -501,7 +522,8 @@
 		'popularity',
 		'runtime',
 		'rating',
-		'dateAdded'
+		'dateAdded',
+		...RADARR_RELEASE_DATE_KEYS
 	] as const;
 	const RADARR_CARD_DEFAULTS: readonly string[] = ['monitored', 'profile', 'size', 'score'];
 	type RadarrCardField = (typeof RADARR_CARD_FIELDS)[number];
@@ -519,7 +541,11 @@
 		popularity: 'Popularity',
 		runtime: 'Runtime',
 		rating: 'Rating',
-		dateAdded: 'Date Added'
+		dateAdded: 'Date Added',
+		initialReleaseDate: 'Initial Release',
+		theatricalReleaseDate: 'Theatrical Release',
+		digitalReleaseDate: 'Digital Release',
+		physicalReleaseDate: 'Physical Release'
 	};
 
 	const SONARR_CARD_STORAGE_KEY = 'profilarr-library-card-fields-sonarr';
@@ -533,7 +559,9 @@
 		'releaseGroups',
 		'status',
 		'rating',
-		'dateAdded'
+		'dateAdded',
+		'firstAired',
+		'previousAiring'
 	] as const;
 	const SONARR_CARD_DEFAULTS: readonly string[] = ['monitored', 'profile', 'size', 'episodes'];
 	type SonarrCardField = (typeof SONARR_CARD_FIELDS)[number];
@@ -548,7 +576,9 @@
 		releaseGroups: 'Release Group(s)',
 		status: 'Status',
 		rating: 'Rating',
-		dateAdded: 'Date Added'
+		dateAdded: 'Date Added',
+		firstAired: 'Series Premiere',
+		previousAiring: 'Latest Aired Episode'
 	};
 
 	function loadCardFields<T extends string>(key: string, defaults: readonly string[]): Set<T> {
@@ -654,6 +684,14 @@
 
 	let cardSortKey = 'title';
 	let cardSortDirection: 'asc' | 'desc' = 'asc';
+	$: if (
+		(isRadarr && (cardSortKey === 'firstAired' || cardSortKey === 'previousAiring')) ||
+		(isSonarr &&
+			RADARR_RELEASE_DATE_KEYS.includes(cardSortKey as (typeof RADARR_RELEASE_DATE_KEYS)[number]))
+	) {
+		cardSortKey = 'title';
+		cardSortDirection = 'asc';
+	}
 
 	function handleCardSort(key: string, direction: 'asc' | 'desc') {
 		cardSortKey = key;
@@ -662,6 +700,14 @@
 
 	function sortItems<T>(items: T[], key: string, direction: 'asc' | 'desc'): T[] {
 		return [...items].sort((a: any, b: any) => {
+			if (
+				RADARR_RELEASE_DATE_KEYS.includes(key as (typeof RADARR_RELEASE_DATE_KEYS)[number]) ||
+				key === 'firstAired' ||
+				key === 'previousAiring'
+			) {
+				return compareOptionalDates(a[key], b[key], direction);
+			}
+
 			let aVal: any;
 			let bVal: any;
 

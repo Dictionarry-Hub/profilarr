@@ -1,5 +1,6 @@
 import { BaseArrClient, INTERACTIVE_SEARCH_TIMEOUT_MS } from '../base.ts';
 import { HttpError } from '$utils/http/types.ts';
+import { resolveRadarrInitialReleaseDate } from '../releaseDates.ts';
 import type {
 	RadarrMovie,
 	RadarrMovieFile,
@@ -98,6 +99,7 @@ export class RadarrClient extends BaseArrClient {
 		const libraryItems: RadarrLibraryItem[] = movies.map((movie) => {
 			const profile = profileMap.get(movie.qualityProfileId);
 			const movieFile = movieFileMap.get(movie.id);
+			const initialReleaseDate = resolveRadarrInitialReleaseDate(movie);
 
 			const customFormats = movieFile?.customFormats ?? [];
 			const customFormatScore = movieFile?.customFormatScore ?? 0;
@@ -126,6 +128,10 @@ export class RadarrClient extends BaseArrClient {
 				monitored: movie.monitored ?? false,
 				status: movie.status,
 				dateAdded: movie.added,
+				initialReleaseDate,
+				theatricalReleaseDate: movie.inCinemas,
+				digitalReleaseDate: movie.digitalRelease,
+				physicalReleaseDate: movie.physicalRelease,
 				popularity: movie.popularity,
 				sizeOnDisk: movie.sizeOnDisk,
 				runtime: movie.runtime,

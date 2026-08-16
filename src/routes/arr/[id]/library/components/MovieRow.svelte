@@ -31,7 +31,7 @@
 		return formatDate(isoString, $serverTimezone, $dateFormat, {
 			month: 'short',
 			day: 'numeric',
-			year: '2-digit'
+			year: 'numeric'
 		});
 	}
 </script>
@@ -140,6 +140,22 @@
 	{:else if column.key === 'dateAdded'}
 		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
 			{fmtDate(row.dateAdded)}
+		</span>
+	{:else if column.key === 'initialReleaseDate'}
+		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
+			{fmtDate(row.initialReleaseDate)}
+		</span>
+	{:else if column.key === 'theatricalReleaseDate'}
+		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
+			{fmtDate(row.theatricalReleaseDate)}
+		</span>
+	{:else if column.key === 'digitalReleaseDate'}
+		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
+			{fmtDate(row.digitalReleaseDate)}
+		</span>
+	{:else if column.key === 'physicalReleaseDate'}
+		<span class="font-mono text-xs text-neutral-700 dark:text-neutral-300">
+			{fmtDate(row.physicalReleaseDate)}
 		</span>
 	{/if}
 {:else}

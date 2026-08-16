@@ -30,7 +30,7 @@
 	</div>
 {:else if column.key === 'popularity'}
 	<div class="h-4 w-8 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
-{:else if column.key === 'dateAdded'}
+{:else if column.key === 'dateAdded' || column.key === 'initialReleaseDate' || column.key === 'theatricalReleaseDate' || column.key === 'digitalReleaseDate' || column.key === 'physicalReleaseDate'}
 	<div class="h-4 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"></div>
 {:else if column.key === 'actions'}
 	<div class="flex justify-center">

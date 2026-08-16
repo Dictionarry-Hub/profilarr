@@ -259,14 +259,41 @@
 				<span class="font-mono">{series.ratings.value}</span>
 			</span>
 		{/if}
-		{#if visibleFields.has('dateAdded') && series.dateAdded}
+		{#if visibleFields.has('dateAdded')}
 			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
 				<Calendar size={12} />
+				<span>Added:</span>
 				<span class="font-mono"
 					><DateTime
 						value={series.dateAdded}
 						date
-						options={{ month: 'short', day: 'numeric', year: '2-digit' }}
+						options={{ month: 'short', day: 'numeric', year: 'numeric' }}
+					/></span
+				>
+			</span>
+		{/if}
+		{#if visibleFields.has('firstAired')}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Calendar size={12} />
+				<span>Premiere:</span>
+				<span class="font-mono"
+					><DateTime
+						value={series.firstAired}
+						date
+						options={{ month: 'short', day: 'numeric', year: 'numeric' }}
+					/></span
+				>
+			</span>
+		{/if}
+		{#if visibleFields.has('previousAiring')}
+			<span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<Calendar size={12} />
+				<span>Latest aired:</span>
+				<span class="font-mono"
+					><DateTime
+						value={series.previousAiring}
+						date
+						options={{ month: 'short', day: 'numeric', year: 'numeric' }}
 					/></span
 				>
 			</span>

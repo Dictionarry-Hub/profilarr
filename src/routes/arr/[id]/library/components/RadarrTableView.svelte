@@ -4,7 +4,7 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import type { Column, SortState } from '$ui/table/types';
 	import type { RadarrLibraryItem } from '$utils/arr/types.ts';
-	import { sortTitle } from '$shared/utils/sort.ts';
+	import { dateSortValue, sortTitle } from '$shared/utils/sort.ts';
 
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import MovieRow from './MovieRow.svelte';
@@ -32,7 +32,11 @@
 		'sizeOnDisk',
 		'status',
 		'popularity',
-		'dateAdded'
+		'dateAdded',
+		'initialReleaseDate',
+		'theatricalReleaseDate',
+		'digitalReleaseDate',
+		'physicalReleaseDate'
 	] as const;
 	type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
 
@@ -81,6 +85,46 @@
 			sortable: true,
 			sortAccessor: (row) => (row.dateAdded ? new Date(row.dateAdded).getTime() : 0),
 			defaultSortDirection: 'desc'
+		},
+		{
+			key: 'initialReleaseDate',
+			header: 'Initial Release',
+			align: 'right',
+			width: 'w-32',
+			sortable: true,
+			sortAccessor: (row) => dateSortValue(row.initialReleaseDate),
+			defaultSortDirection: 'desc',
+			sortNullsLast: true
+		},
+		{
+			key: 'theatricalReleaseDate',
+			header: 'Theatrical Release',
+			align: 'right',
+			width: 'w-40',
+			sortable: true,
+			sortAccessor: (row) => dateSortValue(row.theatricalReleaseDate),
+			defaultSortDirection: 'desc',
+			sortNullsLast: true
+		},
+		{
+			key: 'digitalReleaseDate',
+			header: 'Digital Release',
+			align: 'right',
+			width: 'w-36',
+			sortable: true,
+			sortAccessor: (row) => dateSortValue(row.digitalReleaseDate),
+			defaultSortDirection: 'desc',
+			sortNullsLast: true
+		},
+		{
+			key: 'physicalReleaseDate',
+			header: 'Physical Release',
+			align: 'right',
+			width: 'w-36',
+			sortable: true,
+			sortAccessor: (row) => dateSortValue(row.physicalReleaseDate),
+			defaultSortDirection: 'desc',
+			sortNullsLast: true
 		},
 		{ key: 'releaseGroup', header: 'Release Group', align: 'left', width: 'w-36', sortable: true }
 	];
