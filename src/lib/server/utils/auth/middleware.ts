@@ -8,7 +8,7 @@ import { config } from '$config';
 import { usersQueries, type User } from '$db/queries/users.ts';
 import { sessionsQueries, type Session } from '$db/queries/sessions.ts';
 import { authSettingsQueries } from '$db/queries/authSettings.ts';
-import { isLocalAddress, getClientIp } from './network.ts';
+import { getClientIp } from './network.ts';
 import { logger } from '$logger/logger.ts';
 export { isPublicPath } from './publicPaths.ts';
 
@@ -19,7 +19,7 @@ export interface AuthState {
 	needsSetup: boolean;
 	user: User | null;
 	session: Session | null;
-	skipAuth: boolean; // true when AUTH=off or local bypass+local IP
+	skipAuth: boolean; // true when AUTH=off
 }
 
 /**
@@ -62,22 +62,6 @@ export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 				source: 'Auth:APIKey',
 				meta: { ip, endpoint, key: maskedKey }
 			});
-		}
-	}
-
-	// Local bypass - skip auth for local IPs (DB-backed toggle)
-	if (authSettingsQueries.isLocalBypassEnabled()) {
-		const clientIp = getClientIp(event, false);
-		if (isLocalAddress(clientIp)) {
-			return {
-				// Setup gating only applies under AUTH=on: OIDC mode has no
-				// local setup flow, and forcing it locks OIDC-only deployments
-				// out of every route, including OIDC login itself (#601)
-				needsSetup: config.authMode === 'on' && !hasLocalUsers,
-				user: null,
-				session: null,
-				skipAuth: true
-			};
 		}
 	}
 

@@ -71,6 +71,7 @@ import { migration as migration066 } from './migrations/066_add_date_format_sett
 import { migration as migration067 } from './migrations/067_enable_all_arr_instances.ts';
 import { migration as migration069 } from './migrations/069_create_arr_sync_database_priority.ts';
 import { migration as migration070 } from './migrations/070_add_sync_prompt_setting.ts';
+import { migration as migration071 } from './migrations/071_remove_local_bypass.ts';
 
 export interface Migration {
 	version: number;
@@ -360,7 +361,8 @@ export function loadMigrations(): Migration[] {
 		migration066,
 		migration067,
 		migration069,
-		migration070
+		migration070,
+		migration071
 	];
 
 	// Sort by version number

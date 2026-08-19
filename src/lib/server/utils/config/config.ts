@@ -56,7 +56,6 @@ class Config {
 		this.origin = (Deno.env.get('ORIGIN') || this.serverUrl).replace(/\/+$/, '');
 
 		// Auth mode: 'on' (default), 'off', 'oidc'
-		// Note: AUTH=local is no longer an env var — use the local bypass toggle in Settings > Security
 		const auth = (Deno.env.get('AUTH') || 'on').toLowerCase();
 		this.authMode = ['on', 'off', 'oidc'].includes(auth) ? (auth as AuthMode) : 'on';
 
