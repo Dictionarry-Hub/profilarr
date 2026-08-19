@@ -19,7 +19,6 @@
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$alerts/store';
@@ -35,8 +34,6 @@
 	let confirmPassword = '';
 
 	let regeneratingKey = false;
-	let togglingBypass = false;
-	let bypassForm: HTMLFormElement;
 
 	// Handle form responses
 	$: if (form?.passwordSuccess) {
@@ -62,9 +59,6 @@
 	}
 	$: if (form?.sessionError) {
 		alertStore.add('error', form.sessionError);
-	}
-	$: if (form?.localBypassToggled) {
-		alertStore.add('success', `Local bypass ${form.localBypassEnabled ? 'enabled' : 'disabled'}`);
 	}
 
 	$: apiKey = form?.apiKey ?? null;
@@ -226,35 +220,6 @@
 							disabled={changingPassword}
 						/>
 					</div>
-				</form>
-			</div>
-		</ExpandableCard>
-
-		<!-- Local Bypass -->
-		<ExpandableCard
-			title="Local Bypass"
-			description="Skip authentication for requests from local network addresses"
-			onboardingId="security-local-bypass"
-		>
-			<div class="p-6">
-				<form
-					bind:this={bypassForm}
-					method="POST"
-					action="?/toggleLocalBypass"
-					use:enhance={() => {
-						togglingBypass = true;
-						return async ({ update }) => {
-							await update();
-							togglingBypass = false;
-						};
-					}}
-				>
-					<Toggle
-						label={data.localBypassEnabled ? 'Enabled' : 'Disabled'}
-						checked={data.localBypassEnabled}
-						disabled={togglingBypass}
-						on:change={() => bypassForm.requestSubmit()}
-					/>
 				</form>
 			</div>
 		</ExpandableCard>

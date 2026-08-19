@@ -1,22 +1,18 @@
 /**
  * Integration tests: X-Forwarded-For behaviour
  *
- * The local bypass auth check uses getClientIp(event, false) which ignores
- * proxy headers and uses the real TCP address. This means a remote attacker
- * cannot spoof X-Forwarded-For: 192.168.x.x to bypass auth. This fix can't
- * be demonstrated here because integration tests run from localhost (the real
- * TCP address is already local) - it's verified by unit tests in network.test.ts.
+ * Session metadata (IP recorded on login) uses trustProxy=true, so a spoofed
+ * X-Forwarded-For gets stored in the sessions table. This is cosmetic (doesn't
+ * affect auth decisions) but means session IP metadata isn't trustworthy
+ * without a reverse proxy stripping client headers.
  *
- * What IS still true: session metadata (IP recorded on login) uses
- * trustProxy=true, so a spoofed X-Forwarded-For gets stored in the sessions
- * table. This is cosmetic (doesn't affect auth decisions) but means session
- * IP metadata isn't trustworthy without a reverse proxy stripping client headers.
+ * Rate limiting and login-attempt recording use the real TCP address
+ * (trustProxy=false), so spoofed headers cannot influence them.
  *
  * Tests:
  * 1. Spoofed X-Forwarded-For is recorded in session metadata
- * 2. Local bypass works for genuine local connections (trustProxy=false uses real TCP)
- * 3. Rate limit not bypassed by rotating X-Forwarded-For
- * 4. Failed login attempts recorded under real IP, not spoofed header
+ * 2. Rate limit not bypassed by rotating X-Forwarded-For
+ * 3. Failed login attempts recorded under real IP, not spoofed header
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
@@ -25,7 +21,6 @@ import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
 import { createUserDirect, clearLoginAttempts, queryDb } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { PORTS } from '$test-harness/ports.ts';
-import { openDb } from '$test-harness/db.ts';
 
 const PORT = PORTS.auth.xForwardedFor;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -61,29 +56,6 @@ test('spoofed X-Forwarded-For is recorded in session metadata', async () => {
 
 	assertEquals(rows.length, 1);
 	assertEquals(rows[0].ip_address, spoofedIp);
-});
-
-test('local bypass uses real TCP address, not proxy headers', async () => {
-	// The local bypass check passes trustProxy=false, so it ignores
-	// X-Forwarded-For and uses getClientAddress() (real TCP). Since this
-	// test runs from localhost, the real TCP address IS local, so bypass
-	// works. A remote attacker spoofing X-Forwarded-For: 192.168.x.x
-	// would be rejected because their real TCP address is public.
-	const conn = openDb(getDbPath(PORT));
-	try {
-		conn.exec('UPDATE auth_settings SET local_bypass_enabled = 1 WHERE id = 1');
-	} finally {
-		conn.close();
-	}
-
-	const client = new TestClient(ORIGIN);
-	const res = await client.get('/databases', {
-		headers: { 'X-Forwarded-For': '192.168.1.100' }
-	});
-
-	// 200 = local bypass worked. This succeeds because the real TCP address
-	// is localhost (local), NOT because of the spoofed header.
-	assertNotEquals(res.status, 303);
 });
 
 test('rate limit not bypassed by rotating X-Forwarded-For', async () => {

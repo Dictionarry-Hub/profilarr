@@ -7,7 +7,6 @@
   - [AUTH=on](#authon-default)
   - [AUTH=oidc](#authoidc)
   - [AUTH=off](#authoff)
-  - [Local Bypass](#local-bypass)
   - [API Key](#api-key)
 - [Request Flow](#request-flow)
 - [Security Features](#security-features)
@@ -60,7 +59,7 @@ say - It's _stupidity mitigation_. Patent Pending.
 ## Auth Modes
 
 Set via `AUTH` env var. All modes except `off` also support API key auth via
-`X-Api-Key` header and an optional local bypass toggle.
+`X-Api-Key` header.
 
 | Variable             | Default | Description                                           | Example                                                      |
 | -------------------- | ------- | ----------------------------------------------------- | ------------------------------------------------------------ |
@@ -139,36 +138,16 @@ No auth checks. All requests are allowed through. Intended for deployments
 behind an authenticating reverse proxy like Authelia or Authentik. The setup
 page is blocked in this mode since there's no local user to create.
 
-### Local Bypass
-
-Separate from auth modes - a DB-backed toggle in
-`auth_settings.local_bypass_enabled`, managed via Settings > Security. Works
-alongside `on` and `oidc` modes.
-
-When enabled, requests from local network IPs skip auth entirely. Under
-`AUTH=on`, the setup flow is still enforced until a local user exists. Under
-`AUTH=oidc` there is no local setup flow, so bypass never redirects to
-`/auth/setup` (it previously did, locking OIDC-only deployments out of every
-route including OIDC login — see #601). Based on Sonarr's
-`DisabledForLocalAddresses` auth type, which uses the same approach - check the
-remote IP against private ranges and bypass auth if it matches (see
-`IpAddressExtensions.cs` and `UiAuthorizationHandler.cs` in Sonarr's source).
-
-Recognised local ranges: `127.0.0.0/8`, `10.0.0.0/8`, `172.16.0.0/12`,
-`192.168.0.0/16`, `169.254.0.0/16` (IPv4), `::1`, `fe80::/10`, `fc00::/7`,
-`fec0::/10` (IPv6). IPv6-mapped IPv4 addresses (`::ffff:192.168.x.x`) are also
-handled. Unlike Sonarr, we don't currently support CGNAT (`100.64.0.0/10`).
-
 ### API Key
 
-Available in all modes except `AUTH=off`. Checked before local bypass and
-session checks in the request flow.
+Available in all modes except `AUTH=off`. Checked before session checks in the
+request flow.
 
 - Header: `X-Api-Key`
 - Scoped to `/api/` paths only. Browser pages and SvelteKit form actions require
   a real session. Requests with a valid API key to non-API paths get 403. This
   prevents the API key from being used as a second admin login (e.g.
-  regenerating its own key or toggling local bypass via settings form actions).
+  regenerating its own key or changing auth settings via settings form actions).
   When `/api/internal/` routes exist, API key auth will be excluded from those
   too.
 - Key is bcrypt-hashed in the database - never stored as plaintext
@@ -198,18 +177,8 @@ flowchart TD
     APIKEY -->|Valid| S_API["skipAuth=false
     needsSetup=false
     user=api"]
-    APIKEY -->|Invalid| LOG_BAD[Log warning] --> BYPASS
-    APIKEY -->|No header| BYPASS
-
-    BYPASS{"Local bypass
-    enabled in DB?"}
-    BYPASS -->|Yes| LOCAL_IP{"Client IP
-    local?"}
-    LOCAL_IP -->|Yes| S_LOCAL["skipAuth=true
-    needsSetup=!hasLocalUsers
-    user=null"]
-    LOCAL_IP -->|No| OIDC
-    BYPASS -->|No| OIDC
+    APIKEY -->|Invalid| LOG_BAD[Log warning] --> OIDC
+    APIKEY -->|No header| OIDC
 
     OIDC{AUTH=oidc?}
     OIDC -->|Yes| SESS_OIDC[Check session cookie] --> S_OIDC["skipAuth=false
@@ -223,7 +192,6 @@ flowchart TD
 
     S_OFF --> HOOK
     S_API --> HOOK
-    S_LOCAL --> HOOK
     S_OIDC --> HOOK
     S_ON --> HOOK
 
@@ -361,7 +329,7 @@ The current public allowlist:
 | `/auth/oidc/callback` | Provider redirects back here after authentication |
 | `/api/v1/health`      | Uptime monitors need this without credentials     |
 
-Everything else requires a valid session, API key, or local bypass.
+Everything else requires a valid session or API key.
 `/auth/logout` is not public - it requires an existing session to clear.
 
 Page-level guards add further restrictions on top:
@@ -487,7 +455,7 @@ needed.
 
 | File                    | Tests                                                                                    |
 | ----------------------- | ---------------------------------------------------------------------------------------- |
-| `network.test.ts`       | IPv4/IPv6 local classification, boundary addresses, `getClientIp` with trustProxy on/off |
+| `network.test.ts`       | `getClientIp` proxy header handling with trustProxy on/off                               |
 | `publicPaths.test.ts`   | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
 | `loginAnalysis.test.ts` | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
 
@@ -514,11 +482,11 @@ and run in parallel via `deno task test integration`.
 | `oidc.test.ts`           | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, AUTH=on rejection, proxy flow                           |
 | `rateLimit.test.ts`      | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                             |
 | `proxy.test.ts`          | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                     |
-| `xForwardedFor.test.ts`  | 7015             | Spoofed header limited to session metadata; local bypass and login throttling use real TCP     |
+| `xForwardedFor.test.ts`  | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                     |
 | `secretExposure.test.ts` | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                 |
 | `backupSecrets.test.ts`  | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                        |
 | `pathTraversal.test.ts`  | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints               |
-| `localBypass.test.ts`    | 7019, 7020       | Bypass vs setup gating: OIDC lockout regression (#601), AUTH=on setup still enforced           |
+| `localBypass.test.ts`    | 7019             | Local bypass removal: requests from local addresses require auth                               |
 
 ### E2E Tests (`tests/e2e/auth/`)
 

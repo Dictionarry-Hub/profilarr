@@ -15,15 +15,13 @@ export const load: ServerLoad = async ({ cookies }) => {
 			sessions: [],
 			hasApiKey: false,
 			canRegenerateApiKey: true,
-			currentSessionId: null,
-			localBypassEnabled: false
+			currentSessionId: null
 		};
 	}
 
 	const sessions = sessionsQueries.getByUserId(user.id);
 	const hasApiKey = authSettingsQueries.hasApiKey();
 	const canRegenerateApiKey = authSettingsQueries.canRegenerateApiKey();
-	const localBypassEnabled = authSettingsQueries.isLocalBypassEnabled();
 
 	return {
 		sessions: sessions.map((s) => ({
@@ -39,8 +37,7 @@ export const load: ServerLoad = async ({ cookies }) => {
 		})),
 		hasApiKey,
 		canRegenerateApiKey,
-		currentSessionId,
-		localBypassEnabled
+		currentSessionId
 	};
 };
 
@@ -134,16 +131,6 @@ export const actions: Actions = {
 		});
 
 		return { sessionRevoked: true };
-	},
-
-	toggleLocalBypass: async () => {
-		const current = authSettingsQueries.isLocalBypassEnabled();
-		authSettingsQueries.setLocalBypass(!current);
-
-		const state = !current ? 'enabled' : 'disabled';
-		await logger.info(`Local bypass ${state}`, { source: 'Auth:Settings' });
-
-		return { localBypassToggled: true, localBypassEnabled: !current };
 	},
 
 	revokeOtherSessions: async ({ cookies }) => {

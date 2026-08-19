@@ -133,7 +133,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		throw redirect(303, '/auth/setup');
 	}
 
-	// AUTH=off or local bypass with local IP - skip auth after setup
+	// AUTH=off - skip auth after setup
 	if (auth.skipAuth) {
 		return resolveAndStrip();
 	}

@@ -936,14 +936,13 @@ CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
 -- ==============================================================================
 -- TABLE: auth_settings
 -- Purpose: Store auth configuration (singleton pattern with id=1)
--- Migration: 036_create_auth_tables.ts, 056_add_local_bypass.ts
+-- Migration: 036_create_auth_tables.ts, 056_add_local_bypass.ts, 071_remove_local_bypass.ts
 -- ==============================================================================
 
 CREATE TABLE auth_settings (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     session_duration_hours INTEGER NOT NULL DEFAULT 168,  -- 7 days
     api_key TEXT,                           -- Bcrypt-hashed API key for programmatic access
-    local_bypass_enabled INTEGER NOT NULL DEFAULT 0, -- Skip auth for local IPs (Migration 056)
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
