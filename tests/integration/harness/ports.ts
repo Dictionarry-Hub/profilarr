@@ -43,7 +43,9 @@ export const PORTS = {
 		secretExposure: 7015,
 		session: 7016,
 		xForwardedFor: 7017,
-		envApiKey: 7018
+		envApiKey: 7018,
+		localBypassOidc: 7019,
+		localBypassAuthOn: 7020
 	},
 	api: {
 		arr: 7100,
