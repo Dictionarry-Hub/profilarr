@@ -87,6 +87,7 @@ const PLAYWRIGHT_CLI = './node_modules/playwright/cli.js';
 // Integration specs that require Docker infrastructure
 const INTEGRATION_NEEDS_DOCKER = new Set([
 	'oidc',
+	'localBypass',
 	'cookie',
 	'proxy',
 	'reverseProxy502',

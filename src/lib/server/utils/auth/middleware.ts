@@ -70,7 +70,10 @@ export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 		const clientIp = getClientIp(event, false);
 		if (isLocalAddress(clientIp)) {
 			return {
-				needsSetup: !hasLocalUsers,
+				// Setup gating only applies under AUTH=on: OIDC mode has no
+				// local setup flow, and forcing it locks OIDC-only deployments
+				// out of every route, including OIDC login itself (#601)
+				needsSetup: config.authMode === 'on' && !hasLocalUsers,
 				user: null,
 				session: null,
 				skipAuth: true
