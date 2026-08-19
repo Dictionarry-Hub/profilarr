@@ -145,8 +145,11 @@ Separate from auth modes - a DB-backed toggle in
 `auth_settings.local_bypass_enabled`, managed via Settings > Security. Works
 alongside `on` and `oidc` modes.
 
-When enabled, requests from local network IPs skip auth entirely. If no local
-user exists yet, the setup flow is still enforced. Based on Sonarr's
+When enabled, requests from local network IPs skip auth entirely. Under
+`AUTH=on`, the setup flow is still enforced until a local user exists. Under
+`AUTH=oidc` there is no local setup flow, so bypass never redirects to
+`/auth/setup` (it previously did, locking OIDC-only deployments out of every
+route including OIDC login — see #601). Based on Sonarr's
 `DisabledForLocalAddresses` auth type, which uses the same approach - check the
 remote IP against private ranges and bypass auth if it matches (see
 `IpAddressExtensions.cs` and `UiAuthorizationHandler.cs` in Sonarr's source).
@@ -515,6 +518,7 @@ and run in parallel via `deno task test integration`.
 | `secretExposure.test.ts` | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                 |
 | `backupSecrets.test.ts`  | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                        |
 | `pathTraversal.test.ts`  | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints               |
+| `localBypass.test.ts`    | 7019, 7020       | Bypass vs setup gating: OIDC lockout regression (#601), AUTH=on setup still enforced           |
 
 ### E2E Tests (`tests/e2e/auth/`)
 
