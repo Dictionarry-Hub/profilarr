@@ -11,11 +11,12 @@
 <h3 align="center">Build, test, and deploy configurations across your media stack</h3>
 
 <p align="center">
-  <a href="https://github.com/Dictionarry-Hub/profilarr/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Dictionarry-Hub/profilarr/ci.yml?label=CI" alt="CI"></a>
-  <a href="https://github.com/Dictionarry-Hub/profilarr/releases"><img src="https://img.shields.io/github/v/release/Dictionarry-Hub/profilarr" alt="Release"></a>
-  <a href="https://github.com/Dictionarry-Hub/profilarr/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue" alt="License"></a>
+  <a href="https://github.com/Dictionarry-Hub/profilarr/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Dictionarry-Hub/profilarr/ci.yml?label=CI&amp;logo=githubactions&amp;logoColor=white" alt="CI"></a>
+  <a href="https://github.com/Dictionarry-Hub/profilarr/releases"><img src="https://img.shields.io/github/v/release/Dictionarry-Hub/profilarr?logo=github&amp;logoColor=white" alt="Release"></a>
+  <a href="https://github.com/Dictionarry-Hub/profilarr/pkgs/container/profilarr"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fipitio.github.io%2Fbackage%2FDictionarry-Hub%2Fprofilarr%2Fprofilarr.json&amp;query=%24.downloads&amp;label=Downloads&amp;logo=github&amp;logoColor=white" alt="Downloads"></a>
+  <a href="https://github.com/Dictionarry-Hub/profilarr/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue?logo=gnu&amp;logoColor=white" alt="License"></a>
   <a href="https://discord.gg/2A89tXZMgA"><img src="https://img.shields.io/discord/1202375791556431892?color=5865F2&logo=discord&logoColor=white" alt="Discord"></a>
-  <a href="https://dictionarry.dev"><img src="https://img.shields.io/badge/Website-dictionarry.dev-blue" alt="Website"></a>
+  <a href="https://dictionarry.dev"><img src="https://img.shields.io/badge/Website-dictionarry.dev-blue?logo=googleearth&amp;logoColor=white" alt="Website"></a>
 </p>
 
 <p align="center">
