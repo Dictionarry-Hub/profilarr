@@ -9,6 +9,26 @@
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
 	import { createViewModeStore } from '$lib/client/stores/dataPage';
+	import {
+		createLibraryCardFieldsPref,
+		createLibraryColumnsPref,
+		createLibraryDownloadStatusesPref,
+		createLibraryExpandAllPref,
+		createLibrarySortPref,
+		toggleSetPref
+	} from '$stores/libraryPrefs';
+	import {
+		RADARR_CARD_FIELDS,
+		RADARR_RELEASE_DATE_KEYS,
+		RADARR_TOGGLEABLE_COLUMNS,
+		SONARR_CARD_FIELDS,
+		SONARR_TOGGLEABLE_COLUMNS,
+		type LibraryDownloadStatus,
+		type RadarrCardField,
+		type RadarrToggleableColumn,
+		type SonarrCardField,
+		type SonarrToggleableColumn
+	} from '$shared/utils/libraryPrefs';
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
 	import { getDisplayUrl } from '$lib/client/utils/arrDisplayUrl.ts';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
@@ -23,8 +43,10 @@
 
 	export let data: PageData;
 
-	$: isRadarr = data.instance.type === 'radarr';
-	$: isSonarr = data.instance.type === 'sonarr';
+	$: instanceId = data.instance.id;
+	$: instanceType = data.instance.type;
+	$: isRadarr = instanceType === 'radarr';
+	$: isSonarr = instanceType === 'sonarr';
 	$: isSupported = isRadarr || isSonarr;
 
 	// ==========================================================================
@@ -42,17 +64,11 @@
 
 	// useSimpleMode is bound from LibraryActionBar, which derives it from isMobile + filterMode
 	let useSimpleMode = false;
-	type MovieDownloadStatus = 'downloaded' | 'missing';
-	let movieDownloadStatuses = new Set<MovieDownloadStatus>(['downloaded', 'missing']);
 
-	function handleMovieDownloadStatusToggle(status: MovieDownloadStatus) {
-		const next = new Set(movieDownloadStatuses);
-		if (next.has(status)) {
-			next.delete(status);
-		} else {
-			next.add(status);
-		}
-		movieDownloadStatuses = next;
+	$: movieDownloadStatusesPref = createLibraryDownloadStatusesPref(instanceId);
+
+	function handleMovieDownloadStatusToggle(status: LibraryDownloadStatus) {
+		toggleSetPref(movieDownloadStatusesPref, status);
 	}
 
 	const radarrFields: FilterFieldDef<RadarrLibraryItem>[] = [
@@ -209,23 +225,10 @@
 	// Expand All
 	// ==========================================================================
 
-	const EXPAND_ALL_STORAGE_KEY = 'profilarr-library-expand-all';
-
-	function loadExpandAll(): boolean {
-		if (!browser) return false;
-		try {
-			return localStorage.getItem(EXPAND_ALL_STORAGE_KEY) === 'true';
-		} catch {}
-		return false;
-	}
-
-	let expandAll = loadExpandAll();
+	const expandAllPref = createLibraryExpandAllPref();
 
 	function toggleExpandAll() {
-		expandAll = !expandAll;
-		if (browser) {
-			localStorage.setItem(EXPAND_ALL_STORAGE_KEY, String(expandAll));
-		}
+		expandAllPref.update((value) => !value);
 	}
 
 	// ==========================================================================
@@ -349,7 +352,6 @@
 	// Refetch if instance changes (navigation between instances)
 	$: if (browser && data.instance.id && data.instance.id !== currentInstanceId) {
 		currentInstanceId = data.instance.id;
-		movieDownloadStatuses = new Set(['downloaded', 'missing']);
 		loading = true;
 		refreshedAt = null;
 		nextRefreshAt = null;
@@ -360,58 +362,6 @@
 	// ==========================================================================
 	// Column Visibility (Radarr)
 	// ==========================================================================
-
-	const RADARR_STORAGE_KEY = 'profilarr-library-columns';
-	const RADARR_RELEASE_DATE_KEYS = [
-		'initialReleaseDate',
-		'theatricalReleaseDate',
-		'digitalReleaseDate',
-		'physicalReleaseDate'
-	] as const;
-	const RADARR_TOGGLEABLE_COLUMNS = [
-		'status',
-		'qualityName',
-		'score',
-		'sizeOnDisk',
-		'popularity',
-		'dateAdded',
-		...RADARR_RELEASE_DATE_KEYS,
-		'releaseGroup'
-	] as const;
-	const RADARR_DEFAULT_COLUMNS = RADARR_TOGGLEABLE_COLUMNS.filter(
-		(key) => !RADARR_RELEASE_DATE_KEYS.includes(key as (typeof RADARR_RELEASE_DATE_KEYS)[number])
-	);
-	type RadarrToggleableColumn = (typeof RADARR_TOGGLEABLE_COLUMNS)[number];
-
-	function loadRadarrColumnVisibility(): Set<RadarrToggleableColumn> {
-		if (!browser) return new Set<RadarrToggleableColumn>(RADARR_DEFAULT_COLUMNS);
-		try {
-			const stored = localStorage.getItem(RADARR_STORAGE_KEY);
-			if (stored) {
-				const parsed = JSON.parse(stored) as RadarrToggleableColumn[];
-				return new Set(parsed);
-			}
-		} catch {}
-		return new Set<RadarrToggleableColumn>(RADARR_DEFAULT_COLUMNS);
-	}
-
-	function saveRadarrColumnVisibility(visible: Set<RadarrToggleableColumn>) {
-		if (!browser) return;
-		localStorage.setItem(RADARR_STORAGE_KEY, JSON.stringify([...visible]));
-	}
-
-	let radarrVisibleColumns = loadRadarrColumnVisibility();
-
-	function toggleRadarrColumn(key: string) {
-		const colKey = key as RadarrToggleableColumn;
-		if (radarrVisibleColumns.has(colKey)) {
-			radarrVisibleColumns.delete(colKey);
-		} else {
-			radarrVisibleColumns.add(colKey);
-		}
-		radarrVisibleColumns = radarrVisibleColumns;
-		saveRadarrColumnVisibility(radarrVisibleColumns);
-	}
 
 	const radarrColumnLabels: Record<RadarrToggleableColumn, string> = {
 		qualityName: 'Quality',
@@ -431,51 +381,6 @@
 	// Column Visibility (Sonarr)
 	// ==========================================================================
 
-	const SONARR_STORAGE_KEY = 'profilarr-library-sonarr-columns';
-	const SONARR_TOGGLEABLE_COLUMNS = [
-		'status',
-		'episodes',
-		'sizeOnDisk',
-		'releaseGroups',
-		'dateAdded',
-		'firstAired',
-		'previousAiring'
-	] as const;
-	const SONARR_DEFAULT_COLUMNS = SONARR_TOGGLEABLE_COLUMNS.filter(
-		(key) => key !== 'firstAired' && key !== 'previousAiring'
-	);
-	type SonarrToggleableColumn = (typeof SONARR_TOGGLEABLE_COLUMNS)[number];
-
-	function loadSonarrColumnVisibility(): Set<SonarrToggleableColumn> {
-		if (!browser) return new Set<SonarrToggleableColumn>(SONARR_DEFAULT_COLUMNS);
-		try {
-			const stored = localStorage.getItem(SONARR_STORAGE_KEY);
-			if (stored) {
-				const parsed = JSON.parse(stored) as SonarrToggleableColumn[];
-				return new Set(parsed);
-			}
-		} catch {}
-		return new Set<SonarrToggleableColumn>(SONARR_DEFAULT_COLUMNS);
-	}
-
-	function saveSonarrColumnVisibility(visible: Set<SonarrToggleableColumn>) {
-		if (!browser) return;
-		localStorage.setItem(SONARR_STORAGE_KEY, JSON.stringify([...visible]));
-	}
-
-	let sonarrVisibleColumns = loadSonarrColumnVisibility();
-
-	function toggleSonarrColumn(key: string) {
-		const colKey = key as SonarrToggleableColumn;
-		if (sonarrVisibleColumns.has(colKey)) {
-			sonarrVisibleColumns.delete(colKey);
-		} else {
-			sonarrVisibleColumns.add(colKey);
-		}
-		sonarrVisibleColumns = sonarrVisibleColumns;
-		saveSonarrColumnVisibility(sonarrVisibleColumns);
-	}
-
 	const sonarrColumnLabels: Record<SonarrToggleableColumn, string> = {
 		episodes: 'Episodes',
 		sizeOnDisk: 'Size',
@@ -490,43 +395,18 @@
 	// Unified column toggle (delegates based on type)
 	// ==========================================================================
 
+	$: columnsPref = createLibraryColumnsPref(instanceType);
 	$: activeToggleableColumns = isRadarr ? RADARR_TOGGLEABLE_COLUMNS : SONARR_TOGGLEABLE_COLUMNS;
 	$: activeColumnLabels = isRadarr ? radarrColumnLabels : sonarrColumnLabels;
-	$: activeVisibleColumns = isRadarr
-		? new Set([...radarrVisibleColumns])
-		: new Set([...sonarrVisibleColumns]);
+	$: activeVisibleColumns = $columnsPref;
 
 	function toggleColumn(key: string) {
-		if (isRadarr) {
-			toggleRadarrColumn(key);
-		} else {
-			toggleSonarrColumn(key);
-		}
+		toggleSetPref(columnsPref, key);
 	}
 
 	// ==========================================================================
 	// Card Field Visibility
 	// ==========================================================================
-
-	const RADARR_CARD_STORAGE_KEY = 'profilarr-library-card-fields';
-	const RADARR_CARD_FIELDS = [
-		'monitored',
-		'title',
-		'profile',
-		'size',
-		'score',
-		'quality',
-		'year',
-		'releaseGroup',
-		'status',
-		'popularity',
-		'runtime',
-		'rating',
-		'dateAdded',
-		...RADARR_RELEASE_DATE_KEYS
-	] as const;
-	const RADARR_CARD_DEFAULTS: readonly string[] = ['monitored', 'profile', 'size', 'score'];
-	type RadarrCardField = (typeof RADARR_CARD_FIELDS)[number];
 
 	const radarrCardFieldLabels: Record<RadarrCardField, string> = {
 		monitored: 'Monitored',
@@ -548,24 +428,6 @@
 		physicalReleaseDate: 'Physical Release'
 	};
 
-	const SONARR_CARD_STORAGE_KEY = 'profilarr-library-card-fields-sonarr';
-	const SONARR_CARD_FIELDS = [
-		'monitored',
-		'title',
-		'profile',
-		'size',
-		'episodes',
-		'year',
-		'releaseGroups',
-		'status',
-		'rating',
-		'dateAdded',
-		'firstAired',
-		'previousAiring'
-	] as const;
-	const SONARR_CARD_DEFAULTS: readonly string[] = ['monitored', 'profile', 'size', 'episodes'];
-	type SonarrCardField = (typeof SONARR_CARD_FIELDS)[number];
-
 	const sonarrCardFieldLabels: Record<SonarrCardField, string> = {
 		monitored: 'Monitored',
 		title: 'Title',
@@ -581,47 +443,15 @@
 		previousAiring: 'Latest Aired Episode'
 	};
 
-	function loadCardFields<T extends string>(key: string, defaults: readonly string[]): Set<T> {
-		if (!browser) return new Set(defaults as T[]);
-		try {
-			const stored = localStorage.getItem(key);
-			if (stored) return new Set(JSON.parse(stored) as T[]);
-		} catch {}
-		return new Set(defaults as T[]);
-	}
-
-	let radarrCardFields = loadCardFields<RadarrCardField>(
-		RADARR_CARD_STORAGE_KEY,
-		RADARR_CARD_DEFAULTS
-	);
-	let sonarrCardFields = loadCardFields<SonarrCardField>(
-		SONARR_CARD_STORAGE_KEY,
-		SONARR_CARD_DEFAULTS
-	);
+	$: cardFieldsPref = createLibraryCardFieldsPref(instanceType);
 
 	function toggleCardField(key: string) {
-		if (isRadarr) {
-			const k = key as RadarrCardField;
-			if (radarrCardFields.has(k)) radarrCardFields.delete(k);
-			else radarrCardFields.add(k);
-			radarrCardFields = radarrCardFields;
-			if (browser)
-				localStorage.setItem(RADARR_CARD_STORAGE_KEY, JSON.stringify([...radarrCardFields]));
-		} else {
-			const k = key as SonarrCardField;
-			if (sonarrCardFields.has(k)) sonarrCardFields.delete(k);
-			else sonarrCardFields.add(k);
-			sonarrCardFields = sonarrCardFields;
-			if (browser)
-				localStorage.setItem(SONARR_CARD_STORAGE_KEY, JSON.stringify([...sonarrCardFields]));
-		}
+		toggleSetPref(cardFieldsPref, key);
 	}
 
 	$: activeCardFields = isRadarr ? RADARR_CARD_FIELDS : SONARR_CARD_FIELDS;
 	$: activeCardFieldLabels = isRadarr ? radarrCardFieldLabels : sonarrCardFieldLabels;
-	$: activeVisibleCardFields = isRadarr
-		? new Set([...radarrCardFields])
-		: new Set([...sonarrCardFields]);
+	$: activeVisibleCardFields = $cardFieldsPref;
 
 	// ==========================================================================
 	// Radarr Data & Columns
@@ -632,8 +462,8 @@
 	$: radarrLibrary = library as RadarrLibraryItem[];
 	$: scopedMovies = isRadarr
 		? radarrLibrary.filter((movie) => {
-				const status: MovieDownloadStatus = movie.hasFile ? 'downloaded' : 'missing';
-				return movieDownloadStatuses.has(status);
+				const status: LibraryDownloadStatus = movie.hasFile ? 'downloaded' : 'missing';
+				return $movieDownloadStatusesPref.has(status);
 			})
 		: [];
 	$: filteredMovies = (() => {
@@ -647,11 +477,11 @@
 	$: hasActiveMovieFilter = useSimpleMode ? simpleQuery.trim().length > 0 : filterTags.length > 0;
 	$: movieEmptyMessage = hasActiveMovieFilter
 		? 'No movies match the current filters'
-		: movieDownloadStatuses.size === 0
+		: $movieDownloadStatusesPref.size === 0
 			? 'No download statuses selected'
-			: movieDownloadStatuses.size === 1 && movieDownloadStatuses.has('downloaded')
+			: $movieDownloadStatusesPref.size === 1 && $movieDownloadStatusesPref.has('downloaded')
 				? 'No downloaded movies'
-				: movieDownloadStatuses.size === 1 && movieDownloadStatuses.has('missing')
+				: $movieDownloadStatusesPref.size === 1 && $movieDownloadStatusesPref.has('missing')
 					? 'No missing movies'
 					: 'No movies found';
 
@@ -682,20 +512,10 @@
 	// Card Sort
 	// ==========================================================================
 
-	let cardSortKey = 'title';
-	let cardSortDirection: 'asc' | 'desc' = 'asc';
-	$: if (
-		(isRadarr && (cardSortKey === 'firstAired' || cardSortKey === 'previousAiring')) ||
-		(isSonarr &&
-			RADARR_RELEASE_DATE_KEYS.includes(cardSortKey as (typeof RADARR_RELEASE_DATE_KEYS)[number]))
-	) {
-		cardSortKey = 'title';
-		cardSortDirection = 'asc';
-	}
+	$: sortPref = createLibrarySortPref(instanceId, instanceType);
 
 	function handleCardSort(key: string, direction: 'asc' | 'desc') {
-		cardSortKey = key;
-		cardSortDirection = direction;
+		sortPref.set({ key, direction });
 	}
 
 	function sortItems<T>(items: T[], key: string, direction: 'asc' | 'desc'): T[] {
@@ -742,8 +562,8 @@
 		});
 	}
 
-	$: sortedMovies = sortItems(filteredMovies, cardSortKey, cardSortDirection);
-	$: sortedSeries = sortItems(filteredSeries, cardSortKey, cardSortDirection);
+	$: sortedMovies = sortItems(filteredMovies, $sortPref.key, $sortPref.direction);
+	$: sortedSeries = sortItems(filteredSeries, $sortPref.key, $sortPref.direction);
 
 	// ==========================================================================
 	// Card View Progressive Loading
@@ -817,13 +637,13 @@
 			onRefresh={handleRefresh}
 			onOpen={handleOpen}
 			instanceType={data.instance.type}
-			{movieDownloadStatuses}
+			movieDownloadStatuses={$movieDownloadStatusesPref}
 			onMovieDownloadStatusToggle={handleMovieDownloadStatusToggle}
 			bind:viewMode={$viewMode}
-			{expandAll}
+			expandAll={$expandAllPref}
 			onToggleExpandAll={toggleExpandAll}
-			sortKey={cardSortKey}
-			sortDirection={cardSortDirection}
+			sortKey={$sortPref.key}
+			sortDirection={$sortPref.direction}
 			onSort={handleCardSort}
 			visibleCardFields={activeVisibleCardFields}
 			toggleableCardFields={activeCardFields}
@@ -853,7 +673,7 @@
 						data={filteredMovies}
 						loading={loading || refreshing}
 						{baseUrl}
-						{expandAll}
+						expandAll={$expandAllPref}
 						visibleColumns={activeVisibleColumns}
 						emptyMessage={movieEmptyMessage}
 					/>
@@ -879,7 +699,7 @@
 						data={filteredSeries}
 						loading={loading || refreshing}
 						{baseUrl}
-						{expandAll}
+						expandAll={$expandAllPref}
 						instanceId={data.instance.id}
 						visibleColumns={activeVisibleColumns}
 						highlightGroups={activeReleaseGroups}

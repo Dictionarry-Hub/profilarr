@@ -12,6 +12,7 @@
 		ChevronsDownUp,
 		ChevronsUpDown
 	} from '@lucide/svelte';
+	import { getLibrarySortOptions } from '$shared/utils/libraryPrefs';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
@@ -60,14 +61,6 @@
 	export let onSort: (key: string, direction: 'asc' | 'desc') => void = () => {};
 	export let useSimpleMode: boolean = false;
 
-	const commonSortOptions = [
-		{ key: 'title', label: 'Title' },
-		{ key: 'size', label: 'Size' },
-		{ key: 'dateAdded', label: 'Date Added' },
-		{ key: 'year', label: 'Year' },
-		{ key: 'score', label: 'Score' }
-	];
-
 	function handleSortClick(key: string) {
 		if (sortKey === key) {
 			const newDir = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -78,19 +71,7 @@
 	}
 
 	$: isRadarr = instanceType === 'radarr';
-	$: sortOptions = isRadarr
-		? [
-				...commonSortOptions,
-				{ key: 'initialReleaseDate', label: 'Initial Release' },
-				{ key: 'theatricalReleaseDate', label: 'Theatrical Release' },
-				{ key: 'digitalReleaseDate', label: 'Digital Release' },
-				{ key: 'physicalReleaseDate', label: 'Physical Release' }
-			]
-		: [
-				...commonSortOptions,
-				{ key: 'firstAired', label: 'Series Premiere' },
-				{ key: 'previousAiring', label: 'Latest Aired Episode' }
-			];
+	$: sortOptions = getLibrarySortOptions(instanceType);
 	$: filterPlaceholder = isRadarr ? 'Filter movies...' : 'Filter series...';
 	$: openLabel = isRadarr ? 'Open in Radarr' : 'Open in Sonarr';
 	$: refreshTooltip = refreshStatusText ? `Refresh · ${refreshStatusText}` : 'Refresh';
