@@ -260,6 +260,13 @@ comment so the reporter knows what to expect:
 Duplicates, out-of-scope requests, and won't-fix decisions should be closed
 immediately with a brief explanation.
 
+If a report can't be reproduced or is missing details, label it `❓ needs info`
+and ask for what's needed, usually the Profilarr log export and the Arr log from
+the time of the event. If there's no reply after 7 days, close it with a short
+comment. It can be reopened once the information is available:
+
+> Closing as can't reproduce. Happy to reopen if you can share the logs.
+
 ## Examples
 
 ### Community contribution
