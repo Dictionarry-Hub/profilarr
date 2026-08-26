@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import type { ServerLoad } from '@sveltejs/kit';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 

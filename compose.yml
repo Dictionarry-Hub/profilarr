@@ -14,6 +14,8 @@ services:
       - TZ=Etc/UTC
       # - PORT=6868
       # - HOST=0.0.0.0
+      # - ORIGIN=https://profilarr.example.com
+      # - BASE_URL=/profilarr   # serves ONLY from this subpath, everything else 404s
       - PARSER_HOST=parser
       - PARSER_PORT=5000
     depends_on:

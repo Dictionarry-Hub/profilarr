@@ -1,4 +1,5 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import type { Actions } from '@sveltejs/kit';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { pcdManager } from '$pcd/core/manager.ts';

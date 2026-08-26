@@ -8,7 +8,7 @@ if (!isReload) {
 }
 
 import type { Handle } from '@sveltejs/kit';
-import { redirect } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import { config } from '$config';
 import { printBanner, getServerInfo, logContainerConfig } from '$logger/startup.ts';
 import { logSettings } from '$logger/settings.ts';
@@ -111,6 +111,23 @@ if (!isReload) {
 }
 
 /**
+ * Put the base URL back on bundled asset URLs.
+ *
+ * Assets imported through Vite (`import logo from '$assets/logo-512.png'`) resolve
+ * from the importing chunk's own location in the browser, so they are already correct
+ * there. The SSR bundle, however, inlines them as `/_app/...` paths anchored at the
+ * server root, which lose the prefix. Everything SvelteKit emits itself is relative to
+ * the page and unaffected.
+ *
+ * Rewriting the rendered HTML here catches every asset import, current and future,
+ * without each component having to remember. Does nothing when there is no base URL.
+ */
+function rebaseAssetUrls({ html }: { html: string }): string {
+	if (!config.baseUrl) return html;
+	return html.replaceAll('"/_app/', `"${config.baseUrl}/_app/`);
+}
+
+/**
  * Auth middleware
  * Handles authentication, authorization, and session management
  */
@@ -118,7 +135,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Strip Link preload headers from all responses to keep response headers
 	// small enough for reverse proxies with default buffer sizes.
 	async function resolveAndStrip(): Promise<Response> {
-		const response = await resolve(event);
+		const response = await resolve(event, { transformPageChunk: rebaseAssetUrls });
 		response.headers.delete('link');
 		return response;
 	}

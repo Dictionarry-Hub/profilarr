@@ -1,4 +1,5 @@
-import { redirect, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import type { RequestHandler } from './$types';
 import { config } from '$config';
 import { getDiscoveryDocument, generateState, buildAuthorizationUrl } from '$auth/oidc.ts';
@@ -57,7 +58,7 @@ export const GET: RequestHandler = async (event) => {
 	// Build authorization URL and redirect
 	const authUrl = buildAuthorizationUrl(discovery.authorization_endpoint, {
 		clientId: config.oidc.clientId,
-		redirectUri: `${config.origin}/auth/oidc/callback`,
+		redirectUri: `${config.externalUrl}/auth/oidc/callback`,
 		state,
 		nonce
 	});

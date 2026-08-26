@@ -99,6 +99,7 @@ publishes a release.
 - [backend/security.md](./backend/security.md): Auth modes, sessions, OIDC, API keys, security scans
 - [backend/sync.md](./backend/sync.md): Sync pipeline, transformation, section registry, cleanup
 - [backend/upgrades.md](./backend/upgrades.md): Upgrade pipeline, filters, selectors, cooldown, scheduling
+- [backend/base-url.md](./backend/base-url.md): Serving from a subpath behind a reverse proxy, `BASE_URL`, URLs that carry the base
 - [backend/utilities.md](./backend/utilities.md): HTTP client, config, cache, markdown, Git, TMDB
 
 **Frontend**
