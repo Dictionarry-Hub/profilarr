@@ -22,6 +22,10 @@ AGENTS.md
 # Editor — track shared settings, ignore personal files
 .vscode/
 
+# mise: track mise.toml, ignore personal overrides
+mise.local.toml
+.mise.local.toml
+
 # OS
 .DS_Store
 Thumbs.db
@@ -71,3 +75,7 @@ tests/e2e/*/playwright-report/
 
 # Research repos
 research/
+
+# Core dumps
+core
+core.*
