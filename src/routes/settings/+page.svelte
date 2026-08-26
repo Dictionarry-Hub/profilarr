@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import {
 		Sliders,
 		ShieldCheck,
@@ -14,56 +15,56 @@
 	const settingsItems = [
 		{
 			label: 'General',
-			href: '/settings/general',
+			href: resolve('/settings/general'),
 			description: 'Application defaults, preferences, and behaviors',
 			icon: Sliders,
 			iconClass: 'text-blue-600 dark:text-blue-400'
 		},
 		{
 			label: 'Security',
-			href: '/settings/security',
+			href: resolve('/settings/security'),
 			description: 'Access control and sensitive operations',
 			icon: ShieldCheck,
 			iconClass: 'text-rose-600 dark:text-rose-400'
 		},
 		{
 			label: 'Onboarding',
-			href: '/onboarding',
+			href: resolve('/onboarding'),
 			description: 'Guided walkthroughs and interactive tutorials',
 			icon: GraduationCap,
 			iconClass: 'text-violet-600 dark:text-violet-400'
 		},
 		{
 			label: 'Notifications',
-			href: '/settings/notifications',
+			href: resolve('/settings/notifications'),
 			description: 'Alerts, webhooks, and delivery settings',
 			icon: Bell,
 			iconClass: 'text-amber-600 dark:text-amber-400'
 		},
 		{
 			label: 'Jobs',
-			href: '/settings/jobs',
+			href: resolve('/settings/jobs'),
 			description: 'Scheduled tasks and automation workflows',
 			icon: Clock,
 			iconClass: 'text-emerald-600 dark:text-emerald-400'
 		},
 		{
 			label: 'Logs',
-			href: '/settings/logs',
+			href: resolve('/settings/logs'),
 			description: 'System logs and error history',
 			icon: FileText,
 			iconClass: 'text-neutral-700 dark:text-neutral-300'
 		},
 		{
 			label: 'Backups',
-			href: '/settings/backups',
+			href: resolve('/settings/backups'),
 			description: 'Snapshots, restore, and retention',
 			icon: Archive,
 			iconClass: 'text-blue-600 dark:text-blue-400'
 		},
 		{
 			label: 'About',
-			href: '/settings/about',
+			href: resolve('/settings/about'),
 			description: 'Build info, status, and diagnostics',
 			icon: Info,
 			iconClass: 'text-neutral-700 dark:text-neutral-300'

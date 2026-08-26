@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import RegularExpressionForm from '../components/RegularExpressionForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
@@ -17,7 +18,7 @@
 	};
 
 	function handleCancel() {
-		goto(`/regular-expressions/${data.currentDatabase.id}`);
+		goto(resolve(`/regular-expressions/${data.currentDatabase.id}`));
 	}
 </script>
 

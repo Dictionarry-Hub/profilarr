@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -119,7 +120,7 @@
 		unitTestsError = null;
 
 		try {
-			const response = await fetch(`/regular-expressions/regex101/${id}`);
+			const response = await fetch(resolve(`/regular-expressions/regex101/${id}`));
 			if (!response.ok) {
 				const data = await response.json().catch(() => ({}));
 				throw new Error(data.message || `Failed to fetch: ${response.statusText}`);

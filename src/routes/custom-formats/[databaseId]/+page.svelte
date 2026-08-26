@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount, onDestroy } from 'svelte';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
@@ -44,7 +45,7 @@
 				entityType: 'custom_format',
 				name
 			});
-			const res = await fetch(`/databases/${data.currentDatabase.id}/export?${params}`);
+			const res = await fetch(resolve(`/databases/${data.currentDatabase.id}/export?${params}`));
 			const json = await res.json();
 			if (!res.ok) {
 				alertStore.add('error', json.error || 'Export failed');
@@ -184,7 +185,7 @@
 	// Map databases to tabs
 	$: tabs = data.databases.map((db) => ({
 		label: db.name,
-		href: `/custom-formats/${db.id}`,
+		href: resolve(`/custom-formats/${db.id}`),
 		active: db.id === data.currentDatabase.id
 	}));
 </script>
@@ -215,7 +216,7 @@
 		<Tooltip text="New">
 			<ActionButton
 				icon={Plus}
-				on:click={() => goto(`/custom-formats/${data.currentDatabase.id}/new`)}
+				on:click={() => goto(resolve(`/custom-formats/${data.currentDatabase.id}/new`))}
 			/>
 		</Tooltip>
 		{#if !isMobile}
@@ -288,7 +289,7 @@
 			<p class="mt-2">
 				You can browse and manage patterns on the
 				<a
-					href="/regular-expressions/{data.currentDatabase.id}"
+					href={resolve(`/regular-expressions/${data.currentDatabase.id}`)}
 					class="font-medium text-accent-600 underline hover:text-accent-500 dark:text-accent-400 dark:hover:text-accent-300"
 				>
 					Regular Expressions

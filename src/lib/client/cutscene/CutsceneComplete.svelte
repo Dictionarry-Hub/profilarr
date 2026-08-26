@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { cutscene } from './store';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -30,7 +31,7 @@
 
 	function goToOnboarding(): void {
 		cutscene.dismissCompleted();
-		goto('/onboarding');
+		goto(resolve('/onboarding'));
 	}
 
 	function close(): void {

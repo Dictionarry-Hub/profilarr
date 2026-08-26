@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { routePath } from '$lib/client/utils/routePath';
 	import { alertStore } from './store';
 	import Alert from './Alert.svelte';
 	import { alertSettingsStore, type AlertPosition } from './settings';
@@ -15,7 +16,7 @@
 	};
 
 	$: position = positionClasses[$alertSettingsStore.position] ?? positionClasses['top-center'];
-	$: isAuthPage = $page.url.pathname.startsWith('/auth/');
+	$: isAuthPage = routePath($page.url.pathname).startsWith('/auth/');
 </script>
 
 <div

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { routePath } from '$lib/client/utils/routePath';
+	import { resolve } from '$app/paths';
 	import '../app.css';
 	import '$stores/font';
 	import logo from '$assets/logo-512.png';
@@ -30,7 +32,7 @@
 	$: dateFormat.set(data.dateFormat);
 
 	// Hide navigation on auth pages (login, setup, etc.)
-	$: isAuthPage = $page.url.pathname.startsWith('/auth/');
+	$: isAuthPage = routePath($page.url.pathname).startsWith('/auth/');
 
 	$: cutsceneEnabled = FEATURES.cutscene || dev;
 
@@ -97,7 +99,7 @@
 			<form
 				class="shrink-0"
 				method="POST"
-				action="/settings/backups?/cancelRestore"
+				action={resolve('/settings/backups?/cancelRestore')}
 				use:enhance={() => {
 					return async ({ result, update }) => {
 						if (result.type === 'success') {

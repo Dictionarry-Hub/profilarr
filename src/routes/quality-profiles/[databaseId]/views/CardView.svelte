@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import { BookOpenText, Gauge, Earth, Copy, Download } from '@lucide/svelte';
@@ -34,7 +35,7 @@
 	{#each visibleProfiles as profile}
 		{@const visibleQualities = profile.qualities.slice(0, qualityLimit)}
 		{@const hiddenCount = Math.max(0, profile.qualities.length - qualityLimit)}
-		<Card href="/quality-profiles/{databaseId}/{profile.id}/general" hoverable>
+		<Card href={resolve(`/quality-profiles/${databaseId}/${profile.id}/general`)} hoverable>
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-end justify-between gap-2">

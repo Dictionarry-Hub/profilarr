@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';
@@ -34,9 +35,9 @@
 	}
 
 	function getConfigHref(config: NamingListItem): string {
-		return `/media-management/${databaseId}/naming/${config.arr_type}/${encodeURIComponent(
-			config.name
-		)}`;
+		return resolve(
+			`/media-management/${databaseId}/naming/${config.arr_type}/${encodeURIComponent(config.name)}`
+		);
 	}
 
 	function formatColonReplacement(value: SonarrColonReplacementFormat): string {

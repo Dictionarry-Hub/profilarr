@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
@@ -61,7 +62,7 @@
 		params.set('page', String(filters.page));
 		params.set('pageSize', String(filters.pageSize));
 		if (filters.level) params.set('level', filters.level);
-		return `/arr/${$page.params.id}/logs?${params}`;
+		return resolve(`/arr/${$page.params.id}/logs?${params}`);
 	}
 
 	async function fetchLogs(filters: { page: number; pageSize: number; level?: string }) {

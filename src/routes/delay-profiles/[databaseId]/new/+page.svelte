@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import DelayProfileForm from '../components/DelayProfileForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
@@ -19,7 +20,7 @@
 	};
 
 	function handleCancel() {
-		goto(`/delay-profiles/${data.currentDatabase.id}`);
+		goto(resolve(`/delay-profiles/${data.currentDatabase.id}`));
 	}
 </script>
 

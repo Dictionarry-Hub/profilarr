@@ -1,5 +1,9 @@
 <script lang="ts">
 	import { onDestroy, tick } from 'svelte';
+	// `base` rather than `resolve()`: cutscene steps carry plain app paths as `string`,
+	// resolved at runtime, and `resolve()` only accepts statically known route literals.
+	import { base } from '$app/paths';
+	import { routePath } from '$lib/client/utils/routePath';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
 	import { cutscene } from './store';
@@ -183,11 +187,12 @@
 			});
 		};
 
-		// Navigate if step requires a specific route
+		// Navigate if step requires a specific route. Step definitions hold plain app
+		// paths, so the URL base only gets applied here, at the navigation boundary.
 		if (step.route) {
 			resolveRoute(step.route).then((resolved) => {
-				if (window.location.pathname !== resolved) {
-					goto(resolved).then(afterNav);
+				if (routePath(window.location.pathname) !== resolved) {
+					goto(`${base}${resolved}`).then(afterNav);
 				} else {
 					afterNav();
 				}

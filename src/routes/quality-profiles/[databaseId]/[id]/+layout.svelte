@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import { page } from '$app/stores';
@@ -14,26 +15,26 @@
 	$: tabs = [
 		{
 			label: 'General',
-			href: `/quality-profiles/${databaseId}/${profileId}/general`,
+			href: resolve(`/quality-profiles/${databaseId}/${profileId}/general`),
 			active: currentPath.includes('/general'),
 			icon: FileText
 		},
 		{
 			label: 'Scoring',
-			href: `/quality-profiles/${databaseId}/${profileId}/scoring`,
+			href: resolve(`/quality-profiles/${databaseId}/${profileId}/scoring`),
 			active: currentPath.includes('/scoring'),
 			icon: Scale
 		},
 		{
 			label: 'Qualities',
-			href: `/quality-profiles/${databaseId}/${profileId}/qualities`,
+			href: resolve(`/quality-profiles/${databaseId}/${profileId}/qualities`),
 			active: currentPath.includes('/qualities'),
 			icon: Layers
 		}
 	];
 
 	$: breadcrumb = {
-		items: [{ label: data.databaseName, href: `/quality-profiles/${databaseId}` }],
+		items: [{ label: data.databaseName, href: resolve(`/quality-profiles/${databaseId}`) }],
 		current: data.profileName
 	};
 </script>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import TestForm from '../components/TestForm.svelte';
@@ -9,7 +10,7 @@
 	export let data: PageData;
 
 	function handleCancel() {
-		goto(`/custom-formats/${$page.params.databaseId}/${$page.params.id}/testing`);
+		goto(resolve(`/custom-formats/${$page.params.databaseId}/${$page.params.id}/testing`));
 	}
 </script>
 

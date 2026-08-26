@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import { page } from '$app/stores';
@@ -14,13 +15,13 @@
 	$: tabs = [
 		{
 			label: 'General',
-			href: `/custom-formats/${databaseId}/${formatId}/general`,
+			href: resolve(`/custom-formats/${databaseId}/${formatId}/general`),
 			active: currentPath.includes('/general'),
 			icon: FileText
 		},
 		{
 			label: 'Conditions',
-			href: `/custom-formats/${databaseId}/${formatId}/conditions`,
+			href: resolve(`/custom-formats/${databaseId}/${formatId}/conditions`),
 			active: currentPath.includes('/conditions'),
 			icon: Filter
 		},
@@ -28,7 +29,7 @@
 			? [
 					{
 						label: 'Testing',
-						href: `/custom-formats/${databaseId}/${formatId}/testing`,
+						href: resolve(`/custom-formats/${databaseId}/${formatId}/testing`),
 						active: currentPath.includes('/testing'),
 						icon: FlaskConical
 					}
@@ -37,7 +38,7 @@
 	];
 
 	$: breadcrumb = {
-		items: [{ label: data.databaseName, href: `/custom-formats/${databaseId}` }],
+		items: [{ label: data.databaseName, href: resolve(`/custom-formats/${databaseId}`) }],
 		current: data.formatName
 	};
 </script>

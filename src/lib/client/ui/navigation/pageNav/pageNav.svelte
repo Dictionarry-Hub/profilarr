@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import Group from './group.svelte';
 	import GroupItem from './groupItem.svelte';
 	import Version from './version.svelte';
@@ -79,16 +80,23 @@
 
 	<div class="flex-1 overflow-y-auto p-4">
 		{#if import.meta.env.DEV}
-			<Group label="Dev" emoji="🛠️" href="/dev" icon={Wrench} initialOpen={true} hasItems={true}>
-				<GroupItem label="Components" href="/dev/components" />
-				<GroupItem label="API Docs" href="/dev/api" />
+			<Group
+				label="Dev"
+				emoji="🛠️"
+				href={resolve('/dev')}
+				icon={Wrench}
+				initialOpen={true}
+				hasItems={true}
+			>
+				<GroupItem label="Components" href={resolve('/dev/components')} />
+				<GroupItem label="API Docs" href={resolve('/dev/api')} />
 			</Group>
 		{/if}
 
 		<Group
 			label="Announcements"
 			emoji="📣"
-			href="/announcements"
+			href={resolve('/announcements')}
 			icon={Megaphone}
 			alert={unreadAnnouncements}
 		/>
@@ -96,21 +104,21 @@
 		<Group
 			label="Databases"
 			emoji="📦"
-			href="/databases"
+			href={resolve('/databases')}
 			icon={FolderTree}
 			hasItems={databases.length > 0}
 			initialOpen={true}
 			onboardingId="nav-databases"
 		>
 			{#each databases as db (db.id)}
-				<GroupItem label={db.name} href="/databases/{db.id}" />
+				<GroupItem label={db.name} href={resolve(`/databases/${db.id}`)} />
 			{/each}
 		</Group>
 
 		<Group
 			label="Arrs"
 			emoji="🔗"
-			href="/arr"
+			href={resolve('/arr')}
 			icon={Link}
 			hasItems={arrInstances.length > 0}
 			initialOpen={true}
@@ -119,7 +127,7 @@
 			{#each arrInstances as instance (instance.id)}
 				<GroupItem
 					label={instance.name}
-					href="/arr/{instance.id}"
+					href={resolve(`/arr/${instance.id}`)}
 					icon={instance.type === 'radarr' ? Film : Tv}
 					iconSrc={instance.type === 'radarr' ? radarrLogo : sonarrLogo}
 				/>
@@ -130,21 +138,21 @@
 			<Group
 				label="Quality Profiles"
 				emoji="⚡"
-				href="/quality-profiles"
+				href={resolve('/quality-profiles')}
 				icon={Sliders}
 				initialOpen={true}
 				hasItems={parserAvailable}
 				onboardingId="nav-quality-profiles"
 			>
 				{#if parserAvailable}
-					<GroupItem label="Testing" href="/quality-profiles/entity-testing" />
+					<GroupItem label="Testing" href={resolve('/quality-profiles/entity-testing')} />
 				{/if}
 			</Group>
 
 			<Group
 				label="Custom Formats"
 				emoji="🎨"
-				href="/custom-formats"
+				href={resolve('/custom-formats')}
 				icon={Palette}
 				initialOpen={false}
 				onboardingId="nav-custom-formats"
@@ -153,7 +161,7 @@
 			<Group
 				label="Regular Expressions"
 				emoji="🔬"
-				href="/regular-expressions"
+				href={resolve('/regular-expressions')}
 				icon={Microscope}
 				initialOpen={false}
 				onboardingId="nav-regex"
@@ -162,7 +170,7 @@
 			<Group
 				label="Media Management"
 				emoji="🏷️"
-				href="/media-management"
+				href={resolve('/media-management')}
 				icon={Tag}
 				initialOpen={true}
 				hasItems={true}
@@ -170,17 +178,17 @@
 			>
 				<GroupItem
 					label="Naming Settings"
-					href="/media-management?section=naming"
+					href={resolve('/media-management?section=naming')}
 					activePattern="/naming"
 				/>
 				<GroupItem
 					label="Quality Definitions"
-					href="/media-management?section=quality-definitions"
+					href={resolve('/media-management?section=quality-definitions')}
 					activePattern="/quality-definitions"
 				/>
 				<GroupItem
 					label="Media Settings"
-					href="/media-management?section=media-settings"
+					href={resolve('/media-management?section=media-settings')}
 					activePattern="/media-settings"
 				/>
 			</Group>
@@ -188,7 +196,7 @@
 			<Group
 				label="Delay Profiles"
 				emoji="⏳"
-				href="/delay-profiles"
+				href={resolve('/delay-profiles')}
 				icon={Clock}
 				initialOpen={false}
 				onboardingId="nav-delay-profiles"
@@ -198,27 +206,27 @@
 		<Group
 			label="Settings"
 			emoji="⚙️"
-			href="/settings"
+			href={resolve('/settings')}
 			icon={Settings}
 			initialOpen={true}
 			hasItems={true}
 			onboardingId="nav-settings"
 		>
-			<GroupItem label="General" href="/settings/general" />
-			<GroupItem label="Jobs" href="/settings/jobs" />
-			<GroupItem label="Logs" href="/settings/logs" />
-			<GroupItem label="Backups" href="/settings/backups" />
-			<GroupItem label="Notifications" href="/settings/notifications" />
-			<GroupItem label="Security" href="/settings/security" />
-			<GroupItem label="Onboarding" href="/onboarding" onboardingId="nav-onboarding" />
-			<GroupItem label="About" href="/settings/about" />
+			<GroupItem label="General" href={resolve('/settings/general')} />
+			<GroupItem label="Jobs" href={resolve('/settings/jobs')} />
+			<GroupItem label="Logs" href={resolve('/settings/logs')} />
+			<GroupItem label="Backups" href={resolve('/settings/backups')} />
+			<GroupItem label="Notifications" href={resolve('/settings/notifications')} />
+			<GroupItem label="Security" href={resolve('/settings/security')} />
+			<GroupItem label="Onboarding" href={resolve('/onboarding')} onboardingId="nav-onboarding" />
+			<GroupItem label="About" href={resolve('/settings/about')} />
 			<GroupItem
 				label="Log Out"
-				href="/auth/logout"
+				href={resolve('/auth/logout')}
 				onclick={(e) => {
 					e.preventDefault();
-					fetch('/auth/logout', { method: 'POST' }).then(() => {
-						window.location.href = '/auth/login';
+					fetch(resolve('/auth/logout'), { method: 'POST' }).then(() => {
+						window.location.href = resolve('/auth/login');
 					});
 				}}
 			/>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
 	import { Film, Tv, Loader2, Server, CircuitBoard, ArrowDownAZ, ArrowUpAZ } from '@lucide/svelte';
@@ -128,7 +129,7 @@
 		const resourcePath = isSeries ? 'series' : 'movies';
 
 		try {
-			const response = await fetch(`/arr/${selectedInstanceId}/library/${resourcePath}`);
+			const response = await fetch(resolve(`/arr/${selectedInstanceId}/library/${resourcePath}`));
 			const data = await response.json();
 
 			if (!response.ok || data.error) {
@@ -155,7 +156,7 @@
 
 		try {
 			const response = await fetch(
-				`/arr/${selectedInstanceId}/library/series/${selectedItem.id}/seasons`
+				resolve(`/arr/${selectedInstanceId}/library/series/${selectedItem.id}/seasons`)
 			);
 			const data = await response.json();
 			if (response.ok && !data.error) {
@@ -183,8 +184,10 @@
 
 		const url =
 			entity?.type === 'series'
-				? `/arr/${selectedInstanceId}/library/series/${selectedItem.id}/seasons/${selectedSeason}/releases`
-				: `/arr/${selectedInstanceId}/library/movies/${selectedItem.id}/releases`;
+				? resolve(
+						`/arr/${selectedInstanceId}/library/series/${selectedItem.id}/seasons/${selectedSeason}/releases`
+					)
+				: resolve(`/arr/${selectedInstanceId}/library/movies/${selectedItem.id}/releases`);
 
 		try {
 			const response = await fetch(url);
@@ -415,10 +418,10 @@
 					<p class="text-sm text-neutral-600 dark:text-neutral-300">
 						No {entity?.type === 'movie' ? 'Radarr' : 'Sonarr'} instances configured.
 						<a
-							href="/settings/arr"
+							href={resolve('/arr')}
 							class="font-medium text-accent-600 hover:underline dark:text-accent-400"
 						>
-							Configure in Settings
+							Configure instances
 						</a>
 					</p>
 				</Card>

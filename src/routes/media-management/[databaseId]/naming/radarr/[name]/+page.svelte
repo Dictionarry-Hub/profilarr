@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import RadarrNamingForm from '../../components/RadarrNamingForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
@@ -18,7 +19,7 @@
 	breadcrumbItems={[
 		{
 			label: data.currentDatabase.name,
-			href: `/media-management/${data.currentDatabase.id}/naming`
+			href: resolve(`/media-management/${data.currentDatabase.id}/naming`)
 		}
 	]}
 	breadcrumbCurrent={data.namingConfig.name}

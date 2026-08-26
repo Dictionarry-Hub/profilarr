@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { ExternalLink, Unlink, Lock, Code } from '@lucide/svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -36,7 +37,7 @@
 	}
 
 	function getRowHref(database: DatabaseInstanceSummary): string {
-		return `/databases/${database.id}`;
+		return resolve(`/databases/${database.id}`);
 	}
 
 	function handleUnlinkClick(e: Event, database: DatabaseInstanceSummary) {

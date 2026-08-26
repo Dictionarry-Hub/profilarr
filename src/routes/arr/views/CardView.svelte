@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { ExternalLink, Unlink, ArrowUpCircle, Type, Trash2 } from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Card from '$ui/card/Card.svelte';
@@ -55,7 +56,7 @@
 
 <CardGrid columns={1} className="lg:grid-cols-2 2xl:grid-cols-3" flush>
 	{#each instances as instance}
-		<Card href="/arr/{instance.id}" hoverable>
+		<Card href={resolve(`/arr/${instance.id}`)} hoverable>
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-center justify-between gap-2">
