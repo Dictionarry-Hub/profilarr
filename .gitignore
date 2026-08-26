@@ -13,7 +13,7 @@ AGENTS.md
 .wrangler
 /dist
 /static/*
-!/static/fonts/
+!/static/.gitkeep
 
 # Application
 /temp
@@ -22,7 +22,7 @@ AGENTS.md
 # Editor — track shared settings, ignore personal files
 .vscode/
 
-# mise: track mise.toml, ignore personal overrides
+# mise — track mise.toml, ignore personal overrides
 mise.local.toml
 .mise.local.toml
 
