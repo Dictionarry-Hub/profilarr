@@ -101,6 +101,9 @@ services:
       - TZ=Etc/UTC
       # Uncomment ORIGIN if you use a reverse proxy to access your containers.
       #- ORIGIN=https://profilarr.yourdomain.com
+      # Uncomment BASE_URL to serve Profilarr from a subpath (e.g. /profilarr).
+      # Profilarr then serves ONLY from that subpath: everything else returns 404.
+      #- BASE_URL=/profilarr
       - PARSER_HOST=parser
       - PARSER_PORT=5000
     depends_on:
@@ -150,6 +153,7 @@ them on the same channel.
 | `OIDC_CLIENT_ID`         | -                                                                 | OIDC client ID (when `AUTH=oidc`)                                                     |
 | `OIDC_DISCOVERY_URL`     | -                                                                 | OIDC discovery URL (when `AUTH=oidc`)                                                 |
 | `ORIGIN`                 | -                                                                 | Public URL when running behind a reverse proxy (e.g. `https://profilarr.example.com`) |
+| `BASE_URL`               | -                                                                 | Subpath to serve from behind a reverse proxy (e.g. `/profilarr`)                      |
 | `PARSER_HOST`            | `localhost`                                                       | Parser service host                                                                   |
 | `PARSER_PORT`            | `5000`                                                            | Parser service port                                                                   |
 | `PROFILARR_API_KEY`      | -                                                                 | Plaintext runtime secret for `X-Api-Key` auth                                         |
@@ -161,7 +165,7 @@ Removing it reactivates the stored database key if one exists.
 
 > [!NOTE]
 > When using OIDC `ORIGIN=` _must_ be set to your Profilarr URL, and Profilarr
-> expects `{ORIGIN}/auth/oidc/callback` for the redirect URL
+> expects `{ORIGIN}{BASE_URL}/auth/oidc/callback` for the redirect URL
 > (e.g. `https://profilarr.example.com/auth/oidc/callback`). Many
 > IdPs will infer this automatically.
 

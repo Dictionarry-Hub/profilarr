@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import MediaSettingsForm from '../../components/MediaSettingsForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
@@ -19,7 +20,7 @@
 	breadcrumbItems={[
 		{
 			label: data.currentDatabase.name,
-			href: `/media-management/${data.currentDatabase.id}/media-settings`
+			href: resolve(`/media-management/${data.currentDatabase.id}/media-settings`)
 		}
 	]}
 	breadcrumbCurrent={data.mediaSettingsConfig.name}

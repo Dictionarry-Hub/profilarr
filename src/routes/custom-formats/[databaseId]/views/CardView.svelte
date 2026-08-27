@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
 	import { FlaskConical, Copy, Download } from '@lucide/svelte';
@@ -41,7 +42,7 @@
 
 <CardGrid flush>
 	{#each visibleFormats as format}
-		<Card href="/custom-formats/{databaseId}/{format.id}" hoverable>
+		<Card href={resolve(`/custom-formats/${databaseId}/${format.id}`)} hoverable>
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-end justify-between gap-2">

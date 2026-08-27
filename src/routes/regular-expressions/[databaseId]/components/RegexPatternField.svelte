@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { AlertCircle, Check, X, Loader2 } from '@lucide/svelte';
 	import { alertStore } from '$alerts/store';
@@ -55,7 +56,7 @@
 
 	async function runValidation(value: string) {
 		try {
-			const res = await fetch('/regular-expressions/validate', {
+			const res = await fetch(resolve('/regular-expressions/validate'), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ pattern: value })

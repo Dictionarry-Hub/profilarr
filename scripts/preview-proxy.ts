@@ -8,6 +8,9 @@
  * Accepts flags:
  *   --origin <value>   ORIGIN env passed to the binary (default: proxy origin).
  *   --no-origin        Start the binary without an ORIGIN env var.
+ *   --base-url <path>  BASE_URL env passed to the binary, e.g. /profilarr. Caddy
+ *                      forwards the prefix as-is, which is how it has to be
+ *                      configured in production.
  *   --tls              Terminate TLS at caddy on :8443. Reproduces the
  *                      https-origin / http-upstream CSRF 403.
  *
@@ -24,11 +27,13 @@ function parseArgs(argv: string[]): {
 	origin: string | null;
 	noOrigin: boolean;
 	tls: boolean;
+	baseUrl: string;
 	help: boolean;
 } {
 	let origin: string | null = null;
 	let noOrigin = false;
 	let tls = false;
+	let baseUrl = '';
 	let help = false;
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
@@ -36,9 +41,11 @@ function parseArgs(argv: string[]): {
 		else if (a === '--tls') tls = true;
 		else if (a === '--origin') origin = argv[++i] ?? '';
 		else if (a.startsWith('--origin=')) origin = a.slice('--origin='.length);
+		else if (a === '--base-url') baseUrl = argv[++i] ?? '';
+		else if (a.startsWith('--base-url=')) baseUrl = a.slice('--base-url='.length);
 		else if (a === '-h' || a === '--help') help = true;
 	}
-	return { origin, noOrigin, tls, help };
+	return { origin, noOrigin, tls, baseUrl, help };
 }
 
 const cliArgs = parseArgs(Deno.args);
@@ -54,6 +61,9 @@ Flags:
                      Default: ${proxyOrigin}
                      Try "${proxyOrigin}/" to repro the trailing-slash 404 bug.
   --no-origin        Start the binary without an ORIGIN env var.
+  --base-url <path>  BASE_URL env passed to the compiled binary, e.g. /profilarr.
+                     Caddy forwards the prefix as-is; browse to
+                     ${proxyOrigin}/profilarr to exercise it.
   --tls              Terminate TLS at caddy on :8443 with caddy's local CA.
                      Reproduces the https-origin / http-upstream CSRF 403 bug
                      when combined with --no-origin.
@@ -218,6 +228,11 @@ async function runServer() {
 	} else {
 		delete env.ORIGIN;
 	}
+	if (cliArgs.baseUrl) {
+		env.BASE_URL = cliArgs.baseUrl;
+	} else {
+		delete env.BASE_URL;
+	}
 
 	const cmd = new Deno.Command(BINARY_PATH, {
 		env,
@@ -236,10 +251,12 @@ async function runServer() {
 	return proc.status;
 }
 
-console.log(`${colors.caddy}[caddy]${colors.reset}  Reverse proxy: ${proxyOrigin}`);
+console.log(
+	`${colors.caddy}[caddy]${colors.reset}  Reverse proxy: ${proxyOrigin}${cliArgs.baseUrl}`
+);
 console.log(`${colors.parser}[parser]${colors.reset} Starting .NET parser service...`);
 console.log(
-	`${colors.server}[server]${colors.reset} Starting compiled binary on :${UPSTREAM_PORT} (ORIGIN=${effectiveOrigin ?? '(unset)'})...`
+	`${colors.server}[server]${colors.reset} Starting compiled binary on :${UPSTREAM_PORT} (ORIGIN=${effectiveOrigin ?? '(unset)'}, BASE_URL=${cliArgs.baseUrl || '(unset)'})...`
 );
 if (cliArgs.tls) {
 	const certPath = `${CADDY_DATA_DIR}/caddy/pki/authorities/local/root.crt`;

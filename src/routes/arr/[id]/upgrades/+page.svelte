@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { PageData, ActionData } from './$types';
 	import type { DynamicFilterOptions, FilterConfig, FilterMode } from '$shared/upgrades/filters';
 	import {
@@ -154,7 +155,7 @@
 			</p>
 		</div>
 		<div slot="right" class="flex flex-wrap items-center gap-2">
-			<Button text="Info" icon={Info} href="/arr/upgrades/info" />
+			<Button text="Info" icon={Info} href={resolve('/arr/upgrades/info')} />
 			<Button
 				text={clearing ? 'Clearing...' : 'Reset Cache'}
 				icon={RotateCcw}

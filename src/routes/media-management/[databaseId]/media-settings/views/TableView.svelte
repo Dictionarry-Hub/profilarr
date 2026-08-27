@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
@@ -34,7 +35,9 @@
 	};
 
 	function getRowHref(config: MediaSettingsListItem): string {
-		return `/media-management/${databaseId}/media-settings/${config.arr_type}/${encodeURIComponent(config.name)}`;
+		return resolve(
+			`/media-management/${databaseId}/media-settings/${config.arr_type}/${encodeURIComponent(config.name)}`
+		);
 	}
 
 	const columns: Column<MediaSettingsListItem>[] = [

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import {
@@ -107,7 +108,7 @@
 
 		try {
 			const response = await fetch(
-				`/quality-profiles/entity-testing/${data.currentDatabase.id}/evaluate`,
+				resolve(`/quality-profiles/entity-testing/${data.currentDatabase.id}/evaluate`),
 				{
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -260,7 +261,7 @@
 	// Map databases to tabs
 	$: tabs = data.databases.map((db) => ({
 		label: db.name,
-		href: `/quality-profiles/entity-testing/${db.id}`,
+		href: resolve(`/quality-profiles/entity-testing/${db.id}`),
 		active: db.id === data.currentDatabase.id
 	}));
 
@@ -440,7 +441,7 @@
 						<AlertTriangle size={24} class="text-amber-500" />
 						<p class="text-neutral-600 dark:text-neutral-400">
 							TMDB API key not configured. <a
-								href="/settings/general"
+								href={resolve('/settings/general')}
 								class="text-accent-600 hover:underline dark:text-accent-400"
 								>Configure in Settings</a
 							>

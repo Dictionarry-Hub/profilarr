@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
@@ -37,7 +38,7 @@
 				entityType: `${arr_type}_naming`,
 				name
 			});
-			const res = await fetch(`/databases/${data.currentDatabase.id}/export?${params}`);
+			const res = await fetch(resolve(`/databases/${data.currentDatabase.id}/export?${params}`));
 			const json = await res.json();
 			if (!res.ok) {
 				alertStore.add('error', json.error || 'Export failed');
@@ -77,12 +78,12 @@
 				<DropdownItem
 					label="Radarr"
 					on:click={() =>
-						goto(`/media-management/${data.currentDatabase.id}/naming/new?arrType=radarr`)}
+						goto(resolve(`/media-management/${data.currentDatabase.id}/naming/new?arrType=radarr`))}
 				/>
 				<DropdownItem
 					label="Sonarr"
 					on:click={() =>
-						goto(`/media-management/${data.currentDatabase.id}/naming/new?arrType=sonarr`)}
+						goto(resolve(`/media-management/${data.currentDatabase.id}/naming/new?arrType=sonarr`))}
 				/>
 			</Dropdown>
 		</svelte:fragment>

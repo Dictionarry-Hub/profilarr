@@ -53,7 +53,7 @@ export async function logContainerConfig(): Promise<void> {
 
 export function printBanner(): void {
 	const version = build.version;
-	const url = config.serverUrl;
+	const url = `${config.serverUrl}${config.baseUrl}`;
 
 	console.log(BANNER);
 	console.log(`  v${version}  |  ${url}`);
@@ -65,6 +65,7 @@ export interface ServerInfo {
 	env: string;
 	timezone: string;
 	basePath: string;
+	baseUrl: string;
 	hostname: string;
 }
 
@@ -74,6 +75,7 @@ export function getServerInfo(): ServerInfo {
 		env: Deno.env.get('DENO_ENV') || 'production',
 		timezone: config.timezone,
 		basePath: config.paths.base,
+		baseUrl: config.baseUrl || '/',
 		hostname: typeof Deno !== 'undefined' ? Deno.hostname() : 'unknown'
 	};
 }

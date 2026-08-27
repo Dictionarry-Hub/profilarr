@@ -1,5 +1,6 @@
 import type { Actions, RequestEvent } from '@sveltejs/kit';
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import { logger } from '$logger/logger.ts';
 import { notificationServicesQueries } from '$db/queries/notificationServices.ts';
 import { getAllNotificationTypeIds } from '$shared/notifications/types.ts';

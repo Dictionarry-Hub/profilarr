@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
 	import DiscordConfiguration from './DiscordConfiguration.svelte';
@@ -121,7 +122,7 @@
 >
 	<StickyCard
 		position="top"
-		breadcrumbItems={[{ label: 'Notifications', href: '/settings/notifications' }]}
+		breadcrumbItems={[{ label: 'Notifications', href: resolve('/settings/notifications') }]}
 		breadcrumbCurrent={mode === 'edit' ? (initialData.name ?? 'Edit') : 'New'}
 	>
 		<svelte:fragment slot="left">
@@ -132,7 +133,7 @@
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
-				<Button text="Cancel" variant="secondary" href="/settings/notifications" />
+				<Button text="Cancel" variant="secondary" href={resolve('/settings/notifications')} />
 				<Button
 					text={saving ? 'Saving...' : submitText}
 					icon={mode === 'create' ? Plus : Save}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -18,7 +19,7 @@
 	$: databaseId = $page.params.databaseId;
 
 	function getRowHref(row: CustomFormatTableRow): string {
-		return `/custom-formats/${databaseId}/${row.id}`;
+		return resolve(`/custom-formats/${databaseId}/${row.id}`);
 	}
 
 	function escapeHtml(text: string): string {

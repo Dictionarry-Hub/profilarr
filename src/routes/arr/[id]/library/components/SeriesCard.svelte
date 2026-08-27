@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import {
 		Tv,
 		CircleAlert,
@@ -63,7 +64,7 @@
 		episodesLoading = episodesLoading;
 		try {
 			const response = await fetch(
-				`/arr/${instanceId}/library/series/${series.id}/seasons/${seasonNumber}/episodes`
+				resolve(`/arr/${instanceId}/library/series/${series.id}/seasons/${seasonNumber}/episodes`)
 			);
 			if (!response.ok) throw new Error('Failed to fetch episodes');
 			const result = await response.json();
@@ -82,7 +83,9 @@
 		if (seasonsLoaded) return;
 		seasonsLoading = true;
 		try {
-			const response = await fetch(`/arr/${instanceId}/library/series/${series.id}/seasons`);
+			const response = await fetch(
+				resolve(`/arr/${instanceId}/library/series/${series.id}/seasons`)
+			);
 			if (!response.ok) throw new Error('Failed to fetch seasons');
 			const result = await response.json();
 			seasons = result.seasons;

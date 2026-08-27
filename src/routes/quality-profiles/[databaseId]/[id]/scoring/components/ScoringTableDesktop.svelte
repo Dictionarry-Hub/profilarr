@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import Table from '$ui/table/Table.svelte';
 	import type { Column } from '$ui/table/types';
@@ -74,7 +75,11 @@
 >
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
-			<InlineLink href="/custom-formats/{databaseId}/{row.id}/general" text={row.name} external />
+			<InlineLink
+				href={resolve(`/custom-formats/${databaseId}/${row.id}/general`)}
+				text={row.name}
+				external
+			/>
 		{:else}
 			{@const arrType = column.key}
 			<div class="flex items-center justify-center gap-2">
