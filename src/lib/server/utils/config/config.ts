@@ -6,6 +6,24 @@ export type AuthMode = 'on' | 'off' | 'oidc';
 
 export const PROFILARR_API_KEY_MIN_LENGTH = 32;
 
+// Rename job defaults. Both preserve the job's existing behaviour: the request
+// timeout is BaseHttpClient's own fallback, which the rename call site currently
+// inherits by passing no options, and the command wait is the loop bound that is
+// currently hardcoded. Raising either is opt-in via the environment.
+const RENAME_REQUEST_TIMEOUT_DEFAULT_MS = 30000;
+const RENAME_COMMAND_WAIT_DEFAULT_MS = 30000;
+
+/**
+ * Read a positive integer from the environment, falling back to `fallback` when
+ * the variable is unset, unparseable, or not positive.
+ */
+function positiveIntEnv(name: string, fallback: number): number {
+	const raw = Deno.env.get(name);
+	if (!raw) return fallback;
+	const parsed = parseInt(raw, 10);
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 class Config {
 	private basePath: string;
 	public readonly timezone: string;
@@ -21,6 +39,10 @@ class Config {
 		clientSecret: string | null;
 	};
 	public readonly bulletinUrl: string;
+	public readonly rename: {
+		requestTimeoutMs: number;
+		commandWaitMs: number;
+	};
 
 	constructor() {
 		// Default base path logic:
@@ -83,6 +105,17 @@ class Config {
 			Deno.env.get('PROFILARR_BULLETIN_URL') ||
 			'https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main'
 		).replace(/\/+$/, '');
+
+		// Rename job timeouts. `requestTimeoutMs` is the HTTP timeout for every arr
+		// request the rename job makes; `commandWaitMs` bounds how long it waits for
+		// the arr to spawn its background Bulk Move command after a folder rename.
+		this.rename = {
+			requestTimeoutMs: positiveIntEnv(
+				'RENAME_REQUEST_TIMEOUT_MS',
+				RENAME_REQUEST_TIMEOUT_DEFAULT_MS
+			),
+			commandWaitMs: positiveIntEnv('RENAME_COMMAND_WAIT_MS', RENAME_COMMAND_WAIT_DEFAULT_MS)
+		};
 	}
 
 	/**

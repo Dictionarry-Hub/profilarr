@@ -18,6 +18,7 @@ import { logRenameRun, logRenameError } from './logger.ts';
 import { notifications } from '$notifications/definitions/index.ts';
 import { notificationManager } from '$notifications/NotificationManager.ts';
 import { logger } from '$logger/logger.ts';
+import { config } from '$config';
 
 import {
 	createLog,
@@ -62,8 +63,10 @@ async function waitForSpawnedCommand(
 	label: string
 ): Promise<void> {
 	// Poll for the new command to appear (may take a moment)
-	for (let attempt = 0; attempt < 30; attempt++) {
-		await new Promise((r) => setTimeout(r, 1000));
+	const pollIntervalMs = 1000;
+	const maxAttempts = Math.max(1, Math.ceil(config.rename.commandWaitMs / pollIntervalMs));
+	for (let attempt = 0; attempt < maxAttempts; attempt++) {
+		await new Promise((r) => setTimeout(r, pollIntervalMs));
 
 		const commands = await client.getCommands();
 		const newCmd = commands.find(
@@ -90,9 +93,12 @@ async function waitForSpawnedCommand(
 		}
 	}
 
-	await logger.warn(`No spawned command found for ${label} after 30s, proceeding`, {
-		source: SOURCE
-	});
+	await logger.warn(
+		`No spawned command found for ${label} after ${(maxAttempts * pollIntervalMs) / 1000}s, proceeding`,
+		{
+			source: SOURCE
+		}
+	);
 }
 
 // =========================================================================
@@ -254,7 +260,8 @@ export async function processRenameConfig(
 		const client = createArrClient(
 			instance.type as 'radarr' | 'sonarr',
 			instance.url,
-			instance.api_key
+			instance.api_key,
+			{ timeout: config.rename.requestTimeoutMs }
 		);
 
 		let adapter: RenameAdapter;

@@ -56,6 +56,7 @@ configuration. Key properties:
 | `parserUrl` | `PARSER_HOST/PORT` | Parser microservice URL          |
 | `oidc`      | `OIDC_*`           | OIDC discovery URL, client creds |
 | `timezone`  | `TZ`               | Fallback to system timezone      |
+| `rename`    | `RENAME_*`         | Rename job request/command waits |
 
 The `paths` object computes derived directories (logs, database, backups,
 data) from `basePath`. `init()` creates all required directories at startup

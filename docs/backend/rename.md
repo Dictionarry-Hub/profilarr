@@ -80,7 +80,9 @@ enabling live runs.
 4. **Folder rename** (if `renameFolders` is enabled) -- groups items by root
    folder and calls the Arr editor endpoint per group. Folder renames spawn a
    background "Bulk Move" command; `waitForSpawnedCommand` polls `getCommands`
-   every second for up to 30 seconds to find and await it.
+   every second for up to `RENAME_COMMAND_WAIT_MS` (30 seconds by default) to
+   find and await it. If no command appears in that window the processor logs a
+   warning and moves on to the next batch.
 5. **After snapshot** -- captures the same entities again.
 6. **Diff** -- `diffSnapshots()` compares before/after by entity ID. Folder
    path changes and file relative path changes (matched by file ID) are
@@ -112,6 +114,24 @@ instance):
 The job system manages scheduling via `nextRunAt` / `lastRunAt`. After each
 run, the handler calculates the next cron occurrence and updates `nextRunAt`.
 See [jobs.md](./jobs.md) for the dispatch and scheduling details.
+
+### Timeouts
+
+Two environment variables bound the rename job. Both are read by
+[Config](./utilities.md#config) and apply to every instance:
+
+| Variable                    | Default | Purpose                                                            |
+| --------------------------- | ------- | ------------------------------------------------------------------ |
+| `RENAME_REQUEST_TIMEOUT_MS` | `30000` | HTTP timeout for every Arr request the rename job makes            |
+| `RENAME_COMMAND_WAIT_MS`    | `30000` | How long to wait for the Arr to spawn its background Bulk Move job |
+
+Both defaults preserve the job's existing behaviour, so an unconfigured instance
+is unaffected. Large libraries on slow storage need both raised **together**: the
+rename job issues the same full-library requests the library refresh job makes
+with `LIBRARY_REQUEST_TIMEOUT_MS`, so `RENAME_REQUEST_TIMEOUT_MS` is the one to
+raise first -- but doing so on its own still leaves the Bulk Move wait at 30
+seconds, after which the processor proceeds without waiting and the snapshot diff
+undercounts what was renamed.
 
 ## Logging
 
