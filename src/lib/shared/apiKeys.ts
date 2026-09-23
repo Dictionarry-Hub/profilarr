@@ -8,6 +8,12 @@
 
 export type ApiKeyAccess = 'read' | 'write';
 
+/** Display name for the PROFILARR_API_KEY env key, which has no database row */
+export const ENV_API_KEY_NAME = 'Environment';
+
+/** API authentication docs, linked from the API keys UI when `FEATURES.docs` is on */
+export const API_KEYS_DOCS_URL = 'https://profilarr.com/api/v1#authentication';
+
 /** Area id -> access level. An area missing from the map has no access. */
 export type ApiKeyAreaPermissions = Record<string, ApiKeyAccess>;
 
@@ -35,6 +41,26 @@ export function hasApiAccess(
 	const granted = permissions[area];
 	if (granted === 'write') return true;
 	return granted === 'read' && access === 'read';
+}
+
+export interface ApiKeyAccessEntry {
+	area: ApiArea;
+	access: ApiKeyAccess;
+}
+
+/**
+ * The areas a key can use, in `areas` order, or `'all'` for full access.
+ * Areas not in `areas` are left out.
+ */
+export function apiKeyAccessEntries(
+	permissions: ApiKeyPermissions,
+	areas: ApiArea[]
+): ApiKeyAccessEntry[] | 'all' {
+	if (permissions === 'all') return 'all';
+
+	return areas
+		.filter((area) => permissions[area.id])
+		.map((area) => ({ area, access: permissions[area.id] }));
 }
 
 /**

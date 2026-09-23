@@ -12,7 +12,7 @@
 import { verify } from '@felix/bcrypt';
 import { config } from '$config';
 import { apiKeysQueries } from '$db/queries/apiKeys.ts';
-import { isApiKeyExpired, type ApiKeyPermissions } from '$shared/apiKeys.ts';
+import { ENV_API_KEY_NAME, isApiKeyExpired, type ApiKeyPermissions } from '$shared/apiKeys.ts';
 import { logger } from '$logger/logger.ts';
 
 export interface ResolvedApiKey {
@@ -26,8 +26,6 @@ export type ApiKeyResolution =
 	| { status: 'valid'; key: ResolvedApiKey }
 	| { status: 'expired'; key: ResolvedApiKey }
 	| { status: 'invalid' };
-
-export const ENV_API_KEY_NAME = 'Environment';
 
 const LAST_USED_THROTTLE_MS = 60 * 1000;
 

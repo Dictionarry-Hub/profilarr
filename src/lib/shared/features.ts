@@ -13,5 +13,7 @@ export const FEATURES = {
 	/** Database tweaks UI */
 	tweaks: false,
 	/** Arr drift detection */
-	drift: true
+	drift: true,
+	/** Links to the profilarr.com docs site */
+	docs: false
 } as const;
