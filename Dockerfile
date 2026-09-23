@@ -9,7 +9,7 @@
 # -----------------------------------------------------------------------------
 # Stage 1: Build
 # -----------------------------------------------------------------------------
-ARG DENO_VERSION=2.8.3
+ARG DENO_VERSION=2.9.7
 FROM denoland/deno:${DENO_VERSION} AS builder
 
 WORKDIR /build
@@ -63,11 +63,16 @@ ENV APP_BASE_PATH=/build/dist/build
 RUN deno run -A vite build
 RUN DENO_DIR=/tmp/profilarr-deno-cache \
     deno eval "import { hash } from '@felix/bcrypt'; await hash('profilarr')"
+# --node-modules-dir=none + --exclude-unused-npm embed only what the server
+# reaches instead of the whole node_modules tree (build tooling included).
+# See docs/ARCHITECTURE.md#runtime-and-memory.
 RUN DENO_TARGET=$(case "${TARGETARCH}" in \
         arm64) echo "aarch64-unknown-linux-gnu" ;; \
         *)     echo "x86_64-unknown-linux-gnu" ;; \
     esac) && \
     deno compile \
+    --node-modules-dir=none \
+    --exclude-unused-npm \
     --no-check \
     --allow-net \
     --allow-read \

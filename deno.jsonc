@@ -69,7 +69,7 @@
 		"dev:server": "DENO_ENV=development PORT=6969 HOST=0.0.0.0 APP_BASE_PATH=./dist/dev PARSER_HOST=localhost PARSER_PORT=5000 VITE_PLATFORM=linux-amd64 VITE_CHANNEL=dev deno run -A vite dev",
 		"dev:server:no-auth": "AUTH=off DENO_ENV=development PORT=6969 HOST=0.0.0.0 APP_BASE_PATH=./dist/dev PARSER_HOST=localhost PARSER_PORT=5000 VITE_PLATFORM=linux-amd64 VITE_CHANNEL=dev deno run -A vite dev",
 		"dev:parser": "cd src/services/parser && dotnet watch run --urls http://localhost:5000",
-		"build": "APP_BASE_PATH=./dist/build deno run -A vite build && deno compile --no-check --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-run --allow-sys --target x86_64-unknown-linux-gnu --output dist/build/profilarr dist/build/mod.ts",
+		"build": "APP_BASE_PATH=./dist/build deno run -A vite build && deno compile --node-modules-dir=none --exclude-unused-npm --no-check --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-run --allow-sys --target x86_64-unknown-linux-gnu --output dist/build/profilarr dist/build/mod.ts",
 		"preview": "PORT=6869 HOST=0.0.0.0 APP_BASE_PATH=./dist/dev PARSER_HOST=localhost PARSER_PORT=5000 ./dist/build/profilarr",
 		"clean:dev": "rm -rf dist/dev",
 		"format": "prettier --write .",

@@ -21,7 +21,9 @@ const ORIGIN = Deno.env.get('ORIGIN')?.replace(/\/+$/, '') || undefined;
 Deno.serve(
 	{
 		port: Number.parseInt(Deno.env.get('PORT') ?? '8000'),
-		hostname: Deno.env.get('HOST') ?? '0.0.0.0'
+		hostname: Deno.env.get('HOST') ?? '0.0.0.0',
+		// Deno 2.9 made response compression opt-in; it was on by default before.
+		automaticCompression: true
 	},
 	async (request: Request, info: Deno.ServeHandlerInfo<Deno.NetAddr>): Promise<Response> => {
 		// Real TCP address — never trust client-supplied headers at the adapter level.

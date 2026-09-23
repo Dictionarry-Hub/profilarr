@@ -9,6 +9,7 @@ reviews, releases), see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 - [Purpose](#purpose)
 - [Tech Stack](#tech-stack)
+- [Runtime and Memory](#runtime-and-memory)
 - [Glossary](#glossary)
 - [Architecture Sections](#architecture-sections)
 
@@ -37,6 +38,32 @@ publishes a release.
 | Database       | SQLite (WAL)                      |
 | Query builder  | Kysely                            |
 | Parser service | C# / .NET microservice (optional) |
+
+## Runtime and Memory
+
+Profilarr ships as a `deno compile` binary. The compile step passes
+`--node-modules-dir=none --exclude-unused-npm`, so Deno embeds only the packages
+the server imports rather than the whole `node_modules` folder, which also
+contains build tooling. A package loaded through a computed `import()` can't be
+detected at compile time and would be missing from the binary.
+
+Where memory goes at idle:
+
+| Component         | Approximate size            | Notes                                               |
+| ----------------- | --------------------------- | --------------------------------------------------- |
+| Runtime and app   | ~85 MB                      | Deno/V8, loaded code, app DB, ~20-25 MB of V8 heap  |
+| PCD cache         | ~30-50 MB per database      | In-memory SQLite, native memory, grows with content |
+| Arr library cache | ~10-15 MB per large library | V8 heap, `src/lib/server/utils/cache/cache.ts`      |
+
+Known improvement areas:
+
+- **PCD caches.** Each linked database keeps its compiled cache in memory for
+  the life of the process, even when idle. Loading caches on demand (entity
+  pages, sync, validation) and evicting them when idle would remove most of this
+  cost. A compile takes a few seconds, so the first access after eviction would
+  be slower.
+- **Library cache expiry.** `cache.ts` expires entries lazily: an expired entry
+  is only freed the next time it is read.
 
 ## Glossary
 
