@@ -6,7 +6,6 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { type SearchStore } from '$stores/search';
 
 	interface LogFile {
@@ -72,9 +71,7 @@
 	</ActionButton>
 
 	<!-- Download -->
-	<Tooltip text="Download">
-		<ActionButton icon={Download} on:click={onDownload} />
-	</Tooltip>
+	<ActionButton icon={Download} tooltip="Download" tooltipAlign="middle" on:click={onDownload} />
 
 	<!-- Level Filter -->
 	<ActionButton icon={Filter} hasDropdown={true} dropdownPosition="right">
@@ -113,19 +110,20 @@
 	</ActionButton>
 
 	<!-- Refresh -->
-	<Tooltip text="Refresh">
-		<ActionButton on:click={onRefresh}>
-			<RefreshCw
-				size={20}
-				class="text-neutral-700 dark:text-neutral-300 {isRefreshing ? 'animate-spin' : ''}"
-			/>
-		</ActionButton>
-	</Tooltip>
+	<ActionButton tooltip="Refresh" tooltipAlign="right" on:click={onRefresh}>
+		<RefreshCw
+			size={20}
+			class="text-neutral-700 dark:text-neutral-300 {isRefreshing ? 'animate-spin' : ''}"
+		/>
+	</ActionButton>
 
 	<!-- Cleanup -->
 	{#if onCleanup}
-		<Tooltip text="Cleanup">
-			<ActionButton icon={BrushCleaning} on:click={onCleanup} />
-		</Tooltip>
+		<ActionButton
+			icon={BrushCleaning}
+			tooltip="Cleanup"
+			tooltipAlign="right"
+			on:click={onCleanup}
+		/>
 	{/if}
 </ActionsBar>

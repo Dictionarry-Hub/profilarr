@@ -298,9 +298,18 @@ A row action inside a table body:
 
 #### Toggle
 
-**`$ui/toggle/Toggle.svelte`** is the boolean switch. Emits a `change` event
-with `detail` being the new boolean. Supports inline label text, a
-`fullWidth` mode for grid cells, and custom colors.
+**`$ui/toggle/Toggle.svelte`** is the boolean toggle button. The whole
+bordered button is the click target (`role="switch"`, Enter/Space toggle).
+The button stays neutral in both states; checked, the label goes full
+strength and a check icon in `color` slides in on the right (pinned to the
+far edge with `fullWidth`). `color` accepts `accent` / `amber` / `green` / `red` / `neutral`;
+`checkboxColor` overrides it and also accepts a hex value or CSS variable
+(e.g. `var(--arr-radarr-color)`). Without a label it renders as a compact
+square that shows only the check. Emits a `change` event with `detail`
+being the new boolean. Supports `fullWidth` for grid cells and `disabled`.
+`infoHeader` / `infoBody` show a large tooltip when the toggle is hovered;
+the body is also linked to the toggle with `aria-describedby` for screen
+readers.
 
 ```svelte
 <!-- src/routes/settings/general/+page.svelte:322 -->
@@ -601,6 +610,8 @@ false; adds `target="_blank" rel="noopener noreferrer"`).
 tooltip. It handles viewport edge detection (flipping position when the
 tooltip would overflow), supports `top` / `bottom` / `right` positions, and
 supports a `fullWidth` mode for stretching to fit a parent container.
+`size="lg"` wraps longer text at a fixed max width, and `header` adds a bold
+title line above the text.
 
 A badge with conditional tooltip text:
 
@@ -662,7 +673,12 @@ top of a list page:
 - **`ActionsBar.svelte`**: horizontal container that merges children's
   borders so they look like a single unit.
 - **`ActionButton.svelte`**, **`ActionInput.svelte`**: button and input
-  styled to fit inside the bar.
+  styled to fit inside the bar. `ActionButton` takes `tooltip`,
+  `tooltipPosition` (`top` / `bottom`) and `tooltipAlign`
+  (`left` / `middle` / `right`), set explicitly per call site like
+  `dropdownPosition`. Buttons at the right end of a bar use
+  `tooltipAlign="right"`; buttons with a hover dropdown use
+  `tooltipPosition="top"` so the tooltip doesn't cover the menu.
 - **`SearchAction.svelte`**: search field optimized for the bar (with
   clear / submit handling).
 - **`SearchFilterAction.svelte`**: filter button with an indicator for

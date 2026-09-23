@@ -13,7 +13,6 @@
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import LogLevelCell from '$ui/table/LogLevelCell.svelte';
@@ -229,14 +228,12 @@
 		<SearchAction {searchStore} placeholder="Search logs..." />
 
 		<!-- Refresh -->
-		<Tooltip text="Refresh logs">
-			<ActionButton on:click={refreshLogs}>
-				<RefreshCw
-					size={20}
-					class="text-neutral-700 dark:text-neutral-300 {logsLoading ? 'animate-spin' : ''}"
-				/>
-			</ActionButton>
-		</Tooltip>
+		<ActionButton tooltip="Refresh logs" tooltipAlign="right" on:click={refreshLogs}>
+			<RefreshCw
+				size={20}
+				class="text-neutral-700 dark:text-neutral-300 {logsLoading ? 'animate-spin' : ''}"
+			/>
+		</ActionButton>
 
 		<!-- Level Filter -->
 		<ActionButton icon={Filter} hasDropdown={true} dropdownPosition="right">

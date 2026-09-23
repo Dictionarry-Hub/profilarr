@@ -74,7 +74,7 @@
 		<Toggle
 			checked={enabled}
 			label={enabled ? 'Enabled' : 'Disabled'}
-			color={enabled ? 'green' : 'red'}
+			color="green"
 			on:change={(e) => onEnabledChange?.(e.detail)}
 		/>
 	</div>

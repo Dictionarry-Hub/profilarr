@@ -77,11 +77,17 @@
 			<SearchAction searchStore={search} placeholder="Search databases..." />
 			<ActionButton
 				icon={Plus}
-				title="Link Database"
+				tooltip="Link Database"
+				tooltipAlign="right"
 				on:click={() => goto('/databases/new')}
 				onboarding="db-add"
 			/>
-			<ActionButton icon={Info} title="Info" on:click={() => (showInfoModal = true)} />
+			<ActionButton
+				icon={Info}
+				tooltip="Info"
+				tooltipAlign="right"
+				on:click={() => (showInfoModal = true)}
+			/>
 			<ViewToggle bind:value={$view} />
 		</ActionsBar>
 

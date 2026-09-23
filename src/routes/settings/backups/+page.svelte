@@ -19,7 +19,6 @@
 	import ActionsBar from '$lib/client/ui/actions/ActionsBar.svelte';
 	import ActionButton from '$lib/client/ui/actions/ActionButton.svelte';
 	import SearchAction from '$lib/client/ui/actions/SearchAction.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { getPersistentSearchStore } from '$lib/client/stores/search';
 	import { jobStatus } from '$lib/client/stores/jobStatus';
 	import { onMount } from 'svelte';
@@ -240,15 +239,24 @@
 	<div class="mb-4" data-onboarding="backups-actions">
 		<ActionsBar>
 			<SearchAction {searchStore} placeholder="Search backups..." />
-			<Tooltip text="Upload Backup">
-				<ActionButton icon={Upload} on:click={triggerFileUpload} />
-			</Tooltip>
-			<Tooltip text="Create Backup">
-				<ActionButton icon={FolderArchive} on:click={triggerCreateBackup} />
-			</Tooltip>
-			<Tooltip text="Cleanup">
-				<ActionButton icon={BrushCleaning} on:click={triggerCleanupBackups} />
-			</Tooltip>
+			<ActionButton
+				icon={Upload}
+				tooltip="Upload Backup"
+				tooltipAlign="right"
+				on:click={triggerFileUpload}
+			/>
+			<ActionButton
+				icon={FolderArchive}
+				tooltip="Create Backup"
+				tooltipAlign="right"
+				on:click={triggerCreateBackup}
+			/>
+			<ActionButton
+				icon={BrushCleaning}
+				tooltip="Cleanup"
+				tooltipAlign="right"
+				on:click={triggerCleanupBackups}
+			/>
 		</ActionsBar>
 	</div>
 
@@ -280,6 +288,7 @@
 						icon={Download}
 						size="xs"
 						tooltip="Download"
+						tooltipAlign="right"
 						on:click={() => openDownloadModal(row.filename)}
 					/>
 
@@ -308,6 +317,7 @@
 							icon={RotateCcw}
 							size="xs"
 							tooltip="Restore"
+							tooltipAlign="right"
 							on:click={(e) => {
 								const form = (e.currentTarget as HTMLElement)?.closest('form');
 								if (form) openRestoreModal(row.filename, form);
@@ -320,6 +330,7 @@
 						size="xs"
 						iconColor="text-red-600 dark:text-red-400"
 						tooltip="Delete"
+						tooltipAlign="right"
 						on:click={() => openDeleteModal(row.filename)}
 					/>
 				</div>

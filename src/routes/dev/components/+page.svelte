@@ -183,7 +183,7 @@
 				</p>
 				<ActionsBar>
 					<SearchAction searchStore={demoSearch} placeholder="Search..." responsive />
-					<ActionButton icon={Plus} title="Add" />
+					<ActionButton icon={Plus} tooltip="Add" />
 					<ActionButton icon={Filter} hasDropdown={true} dropdownPosition="right">
 						<svelte:fragment slot="dropdown">
 							<Dropdown position="right">
@@ -192,7 +192,7 @@
 							</Dropdown>
 						</svelte:fragment>
 					</ActionButton>
-					<ActionButton icon={Info} title="Info" />
+					<ActionButton icon={Info} tooltip="Info" />
 					<ViewToggle bind:value={demoView} />
 				</ActionsBar>
 			</div>
@@ -211,9 +211,9 @@
 					Buttons only
 				</p>
 				<ActionsBar className="md:justify-start">
-					<ActionButton icon={Plus} title="Add" />
-					<ActionButton icon={Trash2} variant="danger" title="Delete" />
-					<ActionButton icon={Info} title="Info" />
+					<ActionButton icon={Plus} tooltip="Add" />
+					<ActionButton icon={Trash2} variant="danger" tooltip="Delete" />
+					<ActionButton icon={Info} tooltip="Info" />
 				</ActionsBar>
 			</div>
 		</ComponentCard>
@@ -1229,7 +1229,7 @@
 		<ComponentCard
 			name="Toggle"
 			paths={['toggle/Toggle']}
-			description="Card-style toggle with optional label text, info modal, and IconCheckbox on the right. Supports color variants, disabled state, and fires change events."
+			description="Toggle button with optional label text and an optional info tooltip shown on hover. Checked state shows a colored check on the right. Supports color variants, disabled state, and fires change events."
 		>
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Colors</p>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import type { Component } from 'svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	export let icon: Component | undefined = undefined;
 	export let iconClass: string = '';
@@ -8,7 +9,9 @@
 	export let hasDropdown: boolean = false;
 	export let dropdownPosition: 'left' | 'right' | 'middle' = 'left';
 	export let disabled: boolean = false;
-	export let title: string = '';
+	export let tooltip: string = '';
+	export let tooltipPosition: 'top' | 'bottom' = 'bottom';
+	export let tooltipAlign: 'left' | 'middle' | 'right' = 'middle';
 	export let type: 'button' | 'submit' = 'button';
 	export let variant: 'neutral' | 'danger' = 'neutral';
 	export let onboarding: string | undefined = undefined;
@@ -49,26 +52,27 @@
 	role="group"
 	data-onboarding={onboarding}
 >
-	<button
-		{type}
-		{title}
-		class="flex items-center justify-center border border-neutral-300 bg-white transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50 {square
-			? 'h-10 w-10'
-			: 'h-10 px-4'} {disabled ? 'cursor-not-allowed opacity-50' : variantClasses[variant]}"
-		{disabled}
-		on:click
-	>
-		{#if icon}
-			<svelte:component
-				this={icon}
-				size={20}
-				class="text-neutral-700 dark:text-neutral-200 {variant === 'danger'
-					? iconVariantClasses.danger
-					: ''} {iconClass}"
-			/>
-		{/if}
-		<slot />
-	</button>
+	<Tooltip text={tooltip} position={tooltipPosition} align={tooltipAlign}>
+		<button
+			{type}
+			class="flex items-center justify-center border border-neutral-300 bg-white transition-colors dark:border-neutral-700/60 dark:bg-neutral-800/50 {square
+				? 'h-10 w-10'
+				: 'h-10 px-4'} {disabled ? 'cursor-not-allowed opacity-50' : variantClasses[variant]}"
+			{disabled}
+			on:click
+		>
+			{#if icon}
+				<svelte:component
+					this={icon}
+					size={20}
+					class="text-neutral-700 dark:text-neutral-200 {variant === 'danger'
+						? iconVariantClasses.danger
+						: ''} {iconClass}"
+				/>
+			{/if}
+			<slot />
+		</button>
+	</Tooltip>
 
 	{#if hasDropdown && isHovered}
 		<div class="z-50" transition:fade={{ duration: 150 }}>

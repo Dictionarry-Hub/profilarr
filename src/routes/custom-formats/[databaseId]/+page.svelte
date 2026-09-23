@@ -7,7 +7,6 @@
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import FilterModeToggle from '$ui/actions/FilterModeToggle.svelte';
 	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
@@ -212,12 +211,12 @@
 				placeholder="Filter custom formats..."
 			/>
 		{/if}
-		<Tooltip text="New">
-			<ActionButton
-				icon={Plus}
-				on:click={() => goto(`/custom-formats/${data.currentDatabase.id}/new`)}
-			/>
-		</Tooltip>
+		<ActionButton
+			icon={Plus}
+			tooltip="New"
+			tooltipAlign="right"
+			on:click={() => goto(`/custom-formats/${data.currentDatabase.id}/new`)}
+		/>
 		{#if !isMobile}
 			<FilterModeToggle bind:value={$filterMode} />
 		{/if}

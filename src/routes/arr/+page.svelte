@@ -60,11 +60,17 @@
 			<SearchAction searchStore={search} placeholder="Search instances..." />
 			<ActionButton
 				icon={Plus}
-				title="Add Instance"
+				tooltip="Add Instance"
+				tooltipAlign="right"
 				on:click={() => goto('/arr/new')}
 				onboarding="arr-add"
 			/>
-			<ActionButton icon={Info} title="Info" on:click={() => (showInfoModal = true)} />
+			<ActionButton
+				icon={Info}
+				tooltip="Info"
+				tooltipAlign="right"
+				on:click={() => (showInfoModal = true)}
+			/>
 			<ViewToggle bind:value={$view} />
 		</ActionsBar>
 

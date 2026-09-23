@@ -20,7 +20,6 @@
 	import Modal from '$ui/modal/Modal.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import AddEntityModal from './components/AddEntityModal.svelte';
 	import QuickParseModal from './components/QuickParseModal.svelte';
@@ -370,16 +369,19 @@
 
 	<!-- Actions Bar -->
 	<ActionsBar className="w-full justify-center md:w-full md:mx-auto">
-		<Tooltip text="How It Works">
-			<ActionButton icon={Info} on:click={() => (showInfoModal = true)} />
-		</Tooltip>
+		<ActionButton
+			icon={Info}
+			tooltip="How It Works"
+			tooltipAlign="left"
+			on:click={() => (showInfoModal = true)}
+		/>
 		<SearchAction searchStore={search} placeholder={searchPlaceholder} responsive />
-		<Tooltip text="Add Entity">
-			<ActionButton
-				icon={Plus}
-				on:click={() => (data.canWriteToBase ? (showAddModal = true) : notifyReadOnly())}
-			/>
-		</Tooltip>
+		<ActionButton
+			icon={Plus}
+			tooltip="Add Entity"
+			tooltipAlign="right"
+			on:click={() => (data.canWriteToBase ? (showAddModal = true) : notifyReadOnly())}
+		/>
 		<ActionButton
 			icon={Sliders}
 			hasDropdown={true}
@@ -407,9 +409,12 @@
 				{/each}
 			</Dropdown>
 		</ActionButton>
-		<Tooltip text="Quick Parse">
-			<ActionButton icon={FlaskConical} on:click={() => (showQuickParseModal = true)} />
-		</Tooltip>
+		<ActionButton
+			icon={FlaskConical}
+			tooltip="Quick Parse"
+			tooltipAlign="right"
+			on:click={() => (showQuickParseModal = true)}
+		/>
 		<ActionButton icon={Clapperboard} hasDropdown={true} dropdownPosition="right">
 			<Dropdown slot="dropdown" position="right">
 				<DropdownHeader label="Entity Type" />

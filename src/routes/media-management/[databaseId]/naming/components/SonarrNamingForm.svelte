@@ -216,7 +216,7 @@
 					checked={formData.rename}
 					label={formData.rename ? 'Enabled' : 'Disabled'}
 					ariaLabel="Rename Episodes"
-					color={formData.rename ? 'green' : 'neutral'}
+					color="green"
 					fullWidth
 					on:change={(e) => updateField('rename', e.detail)}
 				/>
@@ -346,7 +346,7 @@
 					checked={formData.replaceIllegalCharacters}
 					label="Replace Illegal Characters"
 					ariaLabel="Replace Illegal Characters"
-					color={formData.replaceIllegalCharacters ? 'green' : 'neutral'}
+					color="green"
 					disabled={!formData.rename}
 					on:change={(e) => updateField('replaceIllegalCharacters', e.detail)}
 				/>

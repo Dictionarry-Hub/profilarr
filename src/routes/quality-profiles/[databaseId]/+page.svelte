@@ -9,7 +9,6 @@
 	import ViewToggle from '$ui/actions/ViewToggle.svelte';
 	import FilterModeToggle from '$ui/actions/FilterModeToggle.svelte';
 	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import CloneModal from '$ui/modal/CloneModal.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
@@ -212,12 +211,12 @@
 				placeholder="Filter quality profiles..."
 			/>
 		{/if}
-		<Tooltip text="New">
-			<ActionButton
-				icon={Plus}
-				on:click={() => goto(`/quality-profiles/${data.currentDatabase.id}/new`)}
-			/>
-		</Tooltip>
+		<ActionButton
+			icon={Plus}
+			tooltip="New"
+			tooltipAlign="right"
+			on:click={() => goto(`/quality-profiles/${data.currentDatabase.id}/new`)}
+		/>
 		{#if !isMobile}
 			<FilterModeToggle bind:value={$filterMode} />
 		{/if}
