@@ -118,16 +118,19 @@
 			style="{style};border-radius:0.75rem !important"
 		>
 			<div
-				class="border border-neutral-300 bg-white text-xs whitespace-pre-wrap shadow-lg dark:border-neutral-700/60 dark:bg-neutral-800 {size ===
+				class="border border-neutral-300 bg-white text-xs shadow-lg dark:border-neutral-700/60 dark:bg-neutral-800 {size ===
 				'lg'
 					? 'max-w-xs px-3 py-2 leading-5 text-neutral-600 dark:text-neutral-300'
-					: 'px-2 py-1 font-medium text-neutral-900 dark:text-neutral-50'} {mono ? 'font-mono' : ''}"
+					: 'px-2 py-1 font-medium text-neutral-900 dark:text-neutral-50'} {mono
+					? 'font-mono'
+					: ''}"
 				style="border-radius:0.75rem !important"
 			>
 				{#if header}
 					<p class="mb-0.5 font-semibold text-neutral-900 dark:text-neutral-50">{header}</p>
 				{/if}
-				{text}
+				<!-- pre-wrap only on the text, so the whitespace after the header isn't rendered -->
+				<span class="whitespace-pre-wrap">{text}</span>
 			</div>
 		</div>
 	{/if}
