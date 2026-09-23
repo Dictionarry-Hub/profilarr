@@ -409,7 +409,7 @@
 						<Toggle
 							checked={cleanupEnabled}
 							label={cleanupEnabled ? 'Enabled' : 'Disabled'}
-							color={cleanupEnabled ? 'green' : 'red'}
+							color="green"
 							on:change={(e) => update('cleanupEnabled', e.detail)}
 						/>
 					</div>
