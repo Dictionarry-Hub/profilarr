@@ -34,6 +34,7 @@
 		expiry: string;
 		fullAccess: boolean;
 		access: Record<string, AreaAccess>;
+		[key: string]: unknown;
 	}
 
 	const defaults: ApiKeyFormData = {
