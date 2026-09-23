@@ -1,10 +1,15 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 
 contact_links:
-  - name: 💬 Support Question
+  - name: 💬 Questions & Support
     url: https://github.com/Dictionarry-Hub/profilarr/discussions/new?category=q-a
-    about: Ask questions and get help from the community
-
-  - name: 📚 Check the Docs
-    url: https://dictionarry.dev
-    about: Read the documentation before opening an issue
+    about: Setup help and general questions
+  - name: 🗃️ Database Content
+    url: https://github.com/Dictionarry-Hub/database/issues
+    about: Wrong scores, regex, or profiles in the Dictionarry database. For other databases, use that database's repo.
+  - name: 🔒 Security Vulnerability
+    url: https://github.com/Dictionarry-Hub/profilarr/security/advisories/new
+    about: Report privately. Do not open a public issue.
+  - name: 📚 Docs
+    url: https://v2.dictionarry.dev
+    about: Read the documentation

@@ -1,48 +1,69 @@
-name: ✨ Feature Request
-description: Suggest a new feature or improvement
-type: Feature
+name: 🚀 Feature Request
+description: Suggest a new feature or an improvement to an existing one
+type: 🚀 Feature
+labels: ['🔍 needs triage']
 
 body:
-  - type: textarea
-    id: what
+  - type: markdown
     attributes:
-      label: What do you want?
-      placeholder: Describe the feature you'd like to see
-    validations:
-      required: true
-
-  - type: textarea
-    id: why
-    attributes:
-      label: Why do you want it?
-      placeholder: Explain your use case and why this would be valuable
-    validations:
-      required: true
-
-  - type: textarea
-    id: workarounds
-    attributes:
-      label: Have you tried any workarounds?
-      placeholder: Describe any alternatives you've tried
-
-  - type: checkboxes
-    id: help
-    attributes:
-      label: Would you help implement this?
-      options:
-        - label: I'm willing to help implement this feature
+      value: |
+        Please read the [issue guidelines](https://github.com/Dictionarry-Hub/profilarr/issues/936) first.
 
   - type: dropdown
-    id: importance
+    id: area
     attributes:
-      label: How important is this to you?
+      label: Area
       options:
-        - Low
-        - Medium
-        - High
+        - Databases (linking, pulling, conflicts, local changes)
+        - Entities (Quality Profiles, Custom Formats, Regular Expressions, Delay Profiles, Media Management)
+        - Arr Instances
+        - Sync
+        - Drift
+        - Library
+        - Upgrades
+        - Rename
+        - Jobs & Scheduling
+        - Notifications
+        - Authentication & Security
+        - Backups
+        - Logs
+        - Settings
+        - Onboarding
+        - Announcements / Inbox
+        - Public API
+        - Parser Service
+        - Installation / Docker / Startup
+        - Other / not listed
+    validations:
+      required: true
 
   - type: input
-    id: related
+    id: area-details
     attributes:
-      label: Related issues
-      placeholder: '#123, #456'
+      label: Area details
+      description: Which page or feature. If you picked Other, describe the part of Profilarr this affects.
+
+  - type: textarea
+    id: request
+    attributes:
+      label: What do you want, and why?
+      description: The problem you're trying to solve, and what you'd like Profilarr to do about it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: How do you handle this today?
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched existing issues and this hasn't been requested.
+          required: true
+        - label: I read the issue guidelines.
+          required: true
+        - label: I've verified this request, including any AI-written parts, marked guesses as guesses, and can answer follow-up questions.
+          required: true
