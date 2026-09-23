@@ -5,6 +5,10 @@
  * should read from it directly where possible, or use defaults that are checked
  * against it where Docker syntax requires a literal fallback.
  *
+ * The npm `typescript` package (used by svelte-check, SvelteKit, and
+ * openapi-typescript) must exactly match the TypeScript version bundled with
+ * the pinned Deno, so client and server type checks use the same compiler.
+ *
  * Usage:
  *   deno task lint:toolchain
  */
@@ -12,6 +16,7 @@
 const TOOL_VERSIONS_PATH = '.tool-versions';
 const DOCKERFILE_PATH = 'Dockerfile';
 const CI_PATH = '.github/workflows/ci.yml';
+const DENO_CONFIG_PATH = 'deno.jsonc';
 
 interface ToolVersions {
 	deno?: string;
@@ -108,10 +113,31 @@ function checkCi(source: string, violations: string[]): void {
 	}
 }
 
-const [toolVersionsSource, dockerfileSource, ciSource] = await Promise.all([
+function checkTypescript(source: string, violations: string[]): void {
+	const bundled = Deno.version.typescript;
+	const declared = /"typescript":\s*"npm:typescript@([^"]+)"/.exec(source)?.[1];
+
+	if (!declared) {
+		violations.push(`${DENO_CONFIG_PATH} is missing the typescript package`);
+		return;
+	}
+
+	if (!/^\d+\.\d+\.\d+$/.test(declared)) {
+		violations.push(`${DENO_CONFIG_PATH} typescript must be an exact version, got ${declared}`);
+	}
+
+	if (declared !== bundled) {
+		violations.push(
+			`${DENO_CONFIG_PATH} typescript is ${declared}, Deno ${Deno.version.deno} ships TypeScript ${bundled}`
+		);
+	}
+}
+
+const [toolVersionsSource, dockerfileSource, ciSource, denoConfigSource] = await Promise.all([
 	Deno.readTextFile(TOOL_VERSIONS_PATH),
 	Deno.readTextFile(DOCKERFILE_PATH),
-	Deno.readTextFile(CI_PATH)
+	Deno.readTextFile(CI_PATH),
+	Deno.readTextFile(DENO_CONFIG_PATH)
 ]);
 
 const violations: string[] = [];
@@ -125,6 +151,7 @@ if (denoVersion && !/^\d+\.\d+\.\d+$/.test(denoVersion)) {
 
 checkDockerfile(dockerfileSource, denoVersion, violations);
 checkCi(ciSource, violations);
+checkTypescript(denoConfigSource, violations);
 
 if (violations.length > 0) {
 	console.error('Toolchain drift detected:');

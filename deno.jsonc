@@ -57,7 +57,7 @@
 		"prettier-plugin-tailwindcss": "npm:prettier-plugin-tailwindcss@^0.8.1",
 		"svelte-check": "npm:svelte-check@^4.7.4",
 		"tailwindcss": "npm:tailwindcss@^4.3.3",
-		"typescript": "npm:typescript@^7.0.2",
+		"typescript": "npm:typescript@6.0.3",
 		"vite": "npm:vite@^8.2.0"
 	},
 	"tasks": {

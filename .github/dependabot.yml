@@ -26,6 +26,9 @@ updates:
       - dependency-name: '@types/node'
         update-types:
           - 'version-update:semver-major'
+      # typescript must match the version bundled with the pinned Deno
+      # (enforced by lint:toolchain). Bump it alongside Deno instead.
+      - dependency-name: 'typescript'
 
   - package-ecosystem: github-actions
     directory: /
