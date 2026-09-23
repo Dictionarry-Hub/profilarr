@@ -298,9 +298,16 @@ A row action inside a table body:
 
 #### Toggle
 
-**`$ui/toggle/Toggle.svelte`** is the boolean switch. Emits a `change` event
-with `detail` being the new boolean. Supports inline label text, a
-`fullWidth` mode for grid cells, and custom colors.
+**`$ui/toggle/Toggle.svelte`** is the boolean toggle button. The whole
+bordered button is the click target (`role="switch"`, Enter/Space toggle).
+The button stays neutral in both states; checked, the label goes full
+strength and a check icon in `color` slides in on the right (pinned to the
+far edge with `fullWidth`). `color` accepts `accent` / `amber` / `green` / `red` / `neutral`;
+`checkboxColor` overrides it and also accepts a hex value or CSS variable
+(e.g. `var(--arr-radarr-color)`). Without a label it renders as a compact
+square that shows only the check. Emits a `change` event with `detail`
+being the new boolean. Supports `fullWidth` for grid cells, `disabled`, and
+an optional info modal via `infoHeader` / `infoBody`.
 
 ```svelte
 <!-- src/routes/settings/general/+page.svelte:322 -->

@@ -1229,7 +1229,7 @@
 		<ComponentCard
 			name="Toggle"
 			paths={['toggle/Toggle']}
-			description="Card-style toggle with optional label text, info modal, and IconCheckbox on the right. Supports color variants, disabled state, and fires change events."
+			description="Toggle button with optional label text and info modal. Checked state shows a colored check on the right. Supports color variants, disabled state, and fires change events."
 		>
 			<div class="space-y-3">
 				<p class="text-xs font-medium text-neutral-500 uppercase dark:text-neutral-400">Colors</p>
