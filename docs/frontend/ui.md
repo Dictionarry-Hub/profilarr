@@ -673,7 +673,12 @@ top of a list page:
 - **`ActionsBar.svelte`**: horizontal container that merges children's
   borders so they look like a single unit.
 - **`ActionButton.svelte`**, **`ActionInput.svelte`**: button and input
-  styled to fit inside the bar.
+  styled to fit inside the bar. `ActionButton` takes `tooltip`,
+  `tooltipPosition` (`top` / `bottom`) and `tooltipAlign`
+  (`left` / `middle` / `right`), set explicitly per call site like
+  `dropdownPosition`. Buttons at the right end of a bar use
+  `tooltipAlign="right"`; buttons with a hover dropdown use
+  `tooltipPosition="top"` so the tooltip doesn't cover the menu.
 - **`SearchAction.svelte`**: search field optimized for the bar (with
   clear / submit handling).
 - **`SearchFilterAction.svelte`**: filter button with an indicator for

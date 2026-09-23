@@ -183,7 +183,7 @@
 				</p>
 				<ActionsBar>
 					<SearchAction searchStore={demoSearch} placeholder="Search..." responsive />
-					<ActionButton icon={Plus} title="Add" />
+					<ActionButton icon={Plus} tooltip="Add" />
 					<ActionButton icon={Filter} hasDropdown={true} dropdownPosition="right">
 						<svelte:fragment slot="dropdown">
 							<Dropdown position="right">
@@ -192,7 +192,7 @@
 							</Dropdown>
 						</svelte:fragment>
 					</ActionButton>
-					<ActionButton icon={Info} title="Info" />
+					<ActionButton icon={Info} tooltip="Info" />
 					<ViewToggle bind:value={demoView} />
 				</ActionsBar>
 			</div>
@@ -211,9 +211,9 @@
 					Buttons only
 				</p>
 				<ActionsBar className="md:justify-start">
-					<ActionButton icon={Plus} title="Add" />
-					<ActionButton icon={Trash2} variant="danger" title="Delete" />
-					<ActionButton icon={Info} title="Info" />
+					<ActionButton icon={Plus} tooltip="Add" />
+					<ActionButton icon={Trash2} variant="danger" tooltip="Delete" />
+					<ActionButton icon={Info} tooltip="Info" />
 				</ActionsBar>
 			</div>
 		</ComponentCard>

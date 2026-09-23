@@ -716,16 +716,14 @@
 				{:else if draftChanges.length > 0}
 					<div class="mb-4">
 						<ActionsBar className="w-full">
-							<div>
-								<ActionButton square={false} on:click={toggleAll}>
-									<div
-										class="flex items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
-									>
-										<IconCheckbox checked={allSelected} icon={Check} color="blue" shape="circle" />
-										Select all ({selectableKeys.length})
-									</div>
-								</ActionButton>
-							</div>
+							<ActionButton square={false} on:click={toggleAll}>
+								<div
+									class="flex items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
+								>
+									<IconCheckbox checked={allSelected} icon={Check} color="blue" shape="circle" />
+									Select all ({selectableKeys.length})
+								</div>
+							</ActionButton>
 
 							<div class="flex-1">
 								<ActionInput
@@ -738,25 +736,23 @@
 								/>
 							</div>
 
-							<div>
-								<ActionButton
-									icon={previewing ? Loader2 : Upload}
-									iconClass={previewing ? 'animate-spin' : ''}
-									title={previewing ? 'Preparing preview' : 'Preview export'}
-									disabled={hasIncomingChanges || previewing || committing}
-									on:click={handlePreview}
-								/>
-							</div>
+							<ActionButton
+								icon={previewing ? Loader2 : Upload}
+								iconClass={previewing ? 'animate-spin' : ''}
+								tooltip={previewing ? 'Preparing preview' : 'Preview export'}
+								tooltipAlign="right"
+								disabled={hasIncomingChanges || previewing || committing}
+								on:click={handlePreview}
+							/>
 
-							<div class="flex">
-								<ActionButton
-									icon={Trash2}
-									variant="danger"
-									title="Drop selected changes"
-									disabled={dropping}
-									on:click={requestDrop}
-								/>
-							</div>
+							<ActionButton
+								icon={Trash2}
+								variant="danger"
+								tooltip="Drop selected changes"
+								tooltipAlign="right"
+								disabled={dropping}
+								on:click={requestDrop}
+							/>
 						</ActionsBar>
 					</div>
 				{/if}

@@ -17,7 +17,6 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { getPersistentSearchStore } from '$stores/search';
@@ -219,13 +218,15 @@
 		<SearchAction {searchStore} placeholder="Search announcements..." responsive />
 
 		<!-- Mark all visible as read -->
-		<Tooltip
-			text={visibleUnreadCount > 0
+		<ActionButton
+			icon={MailCheck}
+			tooltip={visibleUnreadCount > 0
 				? `Mark ${visibleUnreadCount} visible as read`
 				: 'Nothing to mark'}
-		>
-			<ActionButton icon={MailCheck} disabled={markAllLoading} on:click={markAllVisibleRead} />
-		</Tooltip>
+			tooltipAlign="right"
+			disabled={markAllLoading}
+			on:click={markAllVisibleRead}
+		/>
 
 		<!-- Sort -->
 		<ActionButton icon={ArrowDownUp} hasDropdown={true} dropdownPosition="right">
@@ -268,9 +269,12 @@
 		</ActionButton>
 
 		<!-- Info -->
-		<Tooltip text="About">
-			<ActionButton icon={Info} on:click={() => (infoModalOpen = true)} />
-		</Tooltip>
+		<ActionButton
+			icon={Info}
+			tooltip="About"
+			tooltipAlign="right"
+			on:click={() => (infoModalOpen = true)}
+		/>
 	</ActionsBar>
 
 	<div class="mt-6">

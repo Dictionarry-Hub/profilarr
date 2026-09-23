@@ -20,7 +20,6 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
@@ -111,20 +110,16 @@
 			storageKey={filterStorageKey}
 			placeholder={filterPlaceholder}
 		/>
-		<Tooltip text="Filter help">
-			<ActionButton icon={Info} on:click={onFilterInfo} />
-		</Tooltip>
+		<ActionButton icon={Info} tooltip="Filter help" tooltipAlign="right" on:click={onFilterInfo} />
 	{/if}
-	<Tooltip text={refreshTooltip}>
-		<ActionButton
-			icon={RefreshCw}
-			iconClass={refreshing ? 'animate-spin' : ''}
-			on:click={onRefresh}
-		/>
-	</Tooltip>
-	<Tooltip text={openLabel}>
-		<ActionButton icon={ExternalLink} on:click={onOpen} />
-	</Tooltip>
+	<ActionButton
+		icon={RefreshCw}
+		tooltip={refreshTooltip}
+		tooltipAlign="right"
+		iconClass={refreshing ? 'animate-spin' : ''}
+		on:click={onRefresh}
+	/>
+	<ActionButton icon={ExternalLink} tooltip={openLabel} tooltipAlign="right" on:click={onOpen} />
 	{#if viewMode === 'cards'}
 		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition>
@@ -157,12 +152,12 @@
 		</ActionButton>
 	{/if}
 	{#if viewMode === 'table'}
-		<Tooltip text={expandAll ? 'Collapse all rows' : 'Expand all rows'}>
-			<ActionButton
-				icon={expandAll ? ChevronsDownUp : ChevronsUpDown}
-				on:click={onToggleExpandAll}
-			/>
-		</Tooltip>
+		<ActionButton
+			icon={expandAll ? ChevronsDownUp : ChevronsUpDown}
+			tooltip={expandAll ? 'Collapse all rows' : 'Expand all rows'}
+			tooltipAlign="right"
+			on:click={onToggleExpandAll}
+		/>
 		<ActionButton icon={TableProperties} hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown" let:dropdownPosition>
 				<Dropdown position={dropdownPosition} minWidth="14rem">

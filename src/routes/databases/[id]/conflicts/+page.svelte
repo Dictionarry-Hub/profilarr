@@ -273,7 +273,9 @@
 	<SearchAction {searchStore} placeholder="Search conflicts..." />
 	<ActionButton
 		icon={Fingerprint}
-		title="Filter entity"
+		tooltip="Filter entity"
+		tooltipPosition="top"
+		tooltipAlign="right"
 		hasDropdown={true}
 		dropdownPosition="right"
 	>
@@ -299,7 +301,9 @@
 	</ActionButton>
 	<ActionButton
 		icon={AlertTriangle}
-		title="Filter reason"
+		tooltip="Filter reason"
+		tooltipPosition="top"
+		tooltipAlign="right"
 		hasDropdown={true}
 		dropdownPosition="right"
 	>
@@ -326,7 +330,8 @@
 	</ActionButton>
 	<ActionButton
 		icon={Info}
-		title="About conflict actions"
+		tooltip="About conflict actions"
+		tooltipAlign="right"
 		on:click={() => (showInfoModal = true)}
 	/>
 </ActionsBar>

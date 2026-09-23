@@ -371,7 +371,9 @@
 			<SearchAction {searchStore} placeholder="Search filters..." />
 			<ActionButton
 				icon={Plus}
-				title="Add filter"
+				tooltip="Add filter"
+				tooltipPosition="top"
+				tooltipAlign="right"
 				onboarding="upgrades-add-filter"
 				hasDropdown={true}
 				dropdownPosition="right"

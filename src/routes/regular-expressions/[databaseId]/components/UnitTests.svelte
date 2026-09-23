@@ -14,7 +14,6 @@
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 
 	export let unitTests: Regex101UnitTest[] = [];
@@ -162,7 +161,12 @@
 			on:mouseleave={passLeave}
 			role="group"
 		>
-			<ActionButton icon={CircleCheck} title="Filter by result" />
+			<ActionButton
+				icon={CircleCheck}
+				tooltip="Filter by result"
+				tooltipPosition="top"
+				tooltipAlign="right"
+			/>
 			{#if passHovered}
 				<div class="z-50" transition:fly={{ y: -8, duration: 150 }}>
 					<Dropdown position="right">
@@ -189,7 +193,12 @@
 			on:mouseleave={matchLeave}
 			role="group"
 		>
-			<ActionButton icon={CircleX} title="Filter by expected" />
+			<ActionButton
+				icon={CircleX}
+				tooltip="Filter by expected"
+				tooltipPosition="top"
+				tooltipAlign="right"
+			/>
 			{#if matchHovered}
 				<div class="z-50" transition:fly={{ y: -8, duration: 150 }}>
 					<Dropdown position="right">
@@ -212,13 +221,13 @@
 		<ViewToggle bind:value={$view} />
 
 		{#if regex101Url}
-			<Tooltip text="Regex101">
-				<ActionButton
-					icon={ExternalLink}
-					iconClass="text-blue-600 dark:text-blue-400"
-					on:click={() => window.open(regex101Url, '_blank', 'noopener,noreferrer')}
-				/>
-			</Tooltip>
+			<ActionButton
+				icon={ExternalLink}
+				tooltip="Regex101"
+				tooltipAlign="right"
+				iconClass="text-blue-600 dark:text-blue-400"
+				on:click={() => window.open(regex101Url, '_blank', 'noopener,noreferrer')}
+			/>
 		{/if}
 	</ActionsBar>
 

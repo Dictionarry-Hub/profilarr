@@ -371,7 +371,14 @@
 
 				<ActionsBar className="md:justify-start">
 					<SearchAction {searchStore} placeholder="Search items..." responsive />
-					<ActionButton icon={CircleDot} hasDropdown square title="Filter by status">
+					<ActionButton
+						icon={CircleDot}
+						hasDropdown
+						square
+						tooltip="Filter by status"
+						tooltipPosition="top"
+						tooltipAlign="right"
+					>
 						<svelte:fragment slot="dropdown">
 							<Dropdown position="right" mobilePosition="middle" minWidth="12rem">
 								<DropdownHeader label="Status" />
