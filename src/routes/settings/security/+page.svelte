@@ -24,7 +24,7 @@
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import Table from '$ui/table/Table.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
+	import Label from '$ui/label/Label.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import InlineCode from '$ui/code/InlineCode.svelte';
@@ -312,10 +312,10 @@
 								</span>
 							{:else if column.key === 'access'}
 								{#if row.access === 'all'}
-									<Badge variant="neutral" size="md">
+									<Label variant="secondary" size="md" rounded="md">
 										<ShieldCheck size={12} class="text-blue-600 dark:text-blue-400" />
 										Full access
-									</Badge>
+									</Label>
 								{:else if row.access.length === 0}
 									<span class="text-xs text-neutral-500 dark:text-neutral-400">No access</span>
 								{:else}
@@ -325,14 +325,14 @@
 												text={`${entry.access === 'write' ? 'Read & write' : 'Read'} access to ${entry.area.name}`}
 												position="top"
 											>
-												<Badge variant="neutral" size="md">
+												<Label variant="secondary" size="md" rounded="md">
 													{#if entry.access === 'write'}
 														<Pencil size={12} class="text-amber-600 dark:text-amber-400" />
 													{:else}
 														<Eye size={12} class="text-emerald-600 dark:text-emerald-400" />
 													{/if}
 													{entry.area.name}
-												</Badge>
+												</Label>
 											</Tooltip>
 										{/each}
 									</div>
@@ -343,7 +343,7 @@
 								</span>
 							{:else if column.key === 'expiresAt'}
 								{#if row.expired}
-									<Badge variant="danger">Expired</Badge>
+									<Label variant="danger" size="sm" rounded="md">Expired</Label>
 								{:else}
 									<span class="text-xs text-neutral-500 dark:text-neutral-400">
 										{row.expiresAt
@@ -360,7 +360,7 @@
 						<svelte:fragment slot="actions" let:row>
 							{#if row.id === null}
 								<Tooltip text="Set by PROFILARR_API_KEY" position="left">
-									<Badge variant="neutral">env</Badge>
+									<Label variant="secondary" size="sm" rounded="md">env</Label>
 								</Tooltip>
 							{:else}
 								<Button
