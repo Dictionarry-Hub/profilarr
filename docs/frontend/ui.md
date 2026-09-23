@@ -306,8 +306,10 @@ far edge with `fullWidth`). `color` accepts `accent` / `amber` / `green` / `red`
 `checkboxColor` overrides it and also accepts a hex value or CSS variable
 (e.g. `var(--arr-radarr-color)`). Without a label it renders as a compact
 square that shows only the check. Emits a `change` event with `detail`
-being the new boolean. Supports `fullWidth` for grid cells, `disabled`, and
-an optional info modal via `infoHeader` / `infoBody`.
+being the new boolean. Supports `fullWidth` for grid cells and `disabled`.
+`infoHeader` / `infoBody` show a large tooltip when the toggle is hovered;
+the body is also linked to the toggle with `aria-describedby` for screen
+readers.
 
 ```svelte
 <!-- src/routes/settings/general/+page.svelte:322 -->
@@ -608,6 +610,8 @@ false; adds `target="_blank" rel="noopener noreferrer"`).
 tooltip. It handles viewport edge detection (flipping position when the
 tooltip would overflow), supports `top` / `bottom` / `right` positions, and
 supports a `fullWidth` mode for stretching to fit a parent container.
+`size="lg"` wraps longer text at a fixed max width, and `header` adds a bold
+title line above the text.
 
 A badge with conditional tooltip text:
 
