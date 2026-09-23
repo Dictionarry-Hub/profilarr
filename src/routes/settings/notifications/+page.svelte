@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
 	import { Plus, Trash2, Bell, BellOff, Rss, Send, Pencil } from '@lucide/svelte';
@@ -108,7 +109,7 @@
 			<!-- Add Service Button -->
 			<div data-onboarding="notifications-add">
 				<Button
-					href="/settings/notifications/new"
+					href={resolve('/settings/notifications/new')}
 					icon={Plus}
 					iconColor="text-blue-600 dark:text-blue-400"
 					text="Add Service"
@@ -201,7 +202,7 @@
 					<Button
 						icon={Pencil}
 						size="xs"
-						href="/settings/notifications/edit/{row.id}"
+						href={resolve(`/settings/notifications/edit/${row.id}`)}
 						tooltip="Edit service"
 					/>
 

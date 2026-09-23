@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
@@ -1154,7 +1155,7 @@
 						{ label: 'Settings', href: '#tab-settings', active: false, icon: Settings },
 						{ label: 'Logs', href: '#tab-logs', active: false, icon: FileText }
 					]}
-					breadcrumb={{ items: [{ label: 'Dev', href: '/dev' }], current: 'Components' }}
+					breadcrumb={{ items: [{ label: 'Dev', href: resolve('/dev') }], current: 'Components' }}
 				/>
 			</div>
 

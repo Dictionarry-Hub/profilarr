@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import QualityDefinitionsForm from '../components/QualityDefinitionsForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
@@ -17,7 +18,7 @@
 
 	onMount(() => {
 		if (!selectedArrType) {
-			goto(`/media-management/${data.currentDatabase.id}/quality-definitions`, {
+			goto(resolve(`/media-management/${data.currentDatabase.id}/quality-definitions`), {
 				replaceState: true
 			});
 		}

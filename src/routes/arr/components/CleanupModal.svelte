@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { Loader2, AlertTriangle, Check } from '@lucide/svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$lib/client/alerts/store';
@@ -77,7 +78,7 @@
 		phase = 'scanning';
 
 		try {
-			const res = await fetch(`/arr/${instanceId}/settings/cleanup/preview`);
+			const res = await fetch(resolve(`/arr/${instanceId}/settings/cleanup/preview`));
 			if (!res.ok) {
 				const body = (await res.json().catch(() => ({}))) as { error?: string };
 				const message = body?.error ?? 'Preview failed';

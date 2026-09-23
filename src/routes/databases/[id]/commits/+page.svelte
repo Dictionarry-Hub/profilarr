@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
@@ -31,7 +32,7 @@
 		loading = true;
 		try {
 			const response = await fetch(
-				`/databases/${data.database.id}/commits/data?page=${page}&pageSize=${pageSize}`
+				resolve(`/databases/${data.database.id}/commits/data?page=${page}&pageSize=${pageSize}`)
 			);
 			if (token !== fetchToken) return;
 			if (response.ok) {

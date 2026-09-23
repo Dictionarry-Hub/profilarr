@@ -1,4 +1,5 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import type { Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrCleanupSettingsQueries } from '$db/queries/arrCleanupSettings.ts';

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount, onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { Save, Wifi, Trash2, Eraser, Loader2 } from '@lucide/svelte';
@@ -119,7 +120,7 @@
 
 		testing = true;
 		try {
-			const response = await fetch('/arr/validate', {
+			const response = await fetch(resolve('/arr/validate'), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ type, url, apiKey })
@@ -156,7 +157,7 @@
 
 			// Only test connection if API key was provided
 			if (apiKey) {
-				const response = await fetch('/arr/validate', {
+				const response = await fetch(resolve('/arr/validate'), {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ type, url, apiKey })

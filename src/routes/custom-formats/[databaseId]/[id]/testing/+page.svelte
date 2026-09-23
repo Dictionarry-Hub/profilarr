@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { enhance } from '$app/forms';
@@ -66,7 +67,7 @@
 			notifyReadOnly();
 			return;
 		}
-		goto(`/custom-formats/${$page.params.databaseId}/${$page.params.id}/testing/new`);
+		goto(resolve(`/custom-formats/${$page.params.databaseId}/${$page.params.id}/testing/new`));
 	}
 
 	function getRowId(test: Test) {
@@ -564,7 +565,9 @@
 									return;
 								}
 								goto(
-									`/custom-formats/${$page.params.databaseId}/${$page.params.id}/testing/edit?title=${encodeURIComponent(row.title)}&type=${encodeURIComponent(row.type)}`
+									resolve(
+										`/custom-formats/${$page.params.databaseId}/${$page.params.id}/testing/edit?title=${encodeURIComponent(row.title)}&type=${encodeURIComponent(row.type)}`
+									)
 								);
 							}}
 						/>

@@ -1,5 +1,6 @@
 import type { Actions, ServerLoad } from '@sveltejs/kit';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import { config } from '$config';
 import { usersQueries } from '$db/queries/users.ts';
 import { sessionsQueries } from '$db/queries/sessions.ts';

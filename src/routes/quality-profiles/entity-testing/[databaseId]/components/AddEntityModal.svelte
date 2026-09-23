@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
 	import { Film, Tv, Star, Loader2, Clapperboard, X, ArrowDownAZ, ArrowUpAZ } from '@lucide/svelte';
@@ -148,7 +149,7 @@
 				query,
 				type: searchType
 			});
-			const response = await fetch(`/tmdb/search?${params}`);
+			const response = await fetch(resolve(`/tmdb/search?${params}`));
 			const data = await response.json();
 
 			if (data.error) {
@@ -231,7 +232,7 @@
 				<p class="text-sm text-neutral-600 dark:text-neutral-300">
 					TMDB API key not configured. Please add your API key in
 					<a
-						href="/settings/general"
+						href={resolve('/settings/general')}
 						class="font-medium text-accent-600 hover:underline dark:text-accent-400">Settings</a
 					>
 					to search for movies and TV series.

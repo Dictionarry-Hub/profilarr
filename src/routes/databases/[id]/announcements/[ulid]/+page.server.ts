@@ -1,4 +1,5 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import type { Actions, PageServerLoad } from './$types';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import {

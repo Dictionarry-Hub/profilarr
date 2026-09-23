@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import { enhance } from '$app/forms';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -29,7 +30,7 @@
 	<form
 		bind:this={formEl}
 		method="POST"
-		action={`/databases/${databaseId}/announcements/${announcementId}?/delete`}
+		action={resolve(`/databases/${databaseId}/announcements/${announcementId}?/delete`)}
 		class="hidden"
 		use:enhance={() => {
 			withdrawing = true;

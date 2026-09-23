@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Plus } from '@lucide/svelte';
@@ -45,7 +46,7 @@
 				entityType: 'quality_profile',
 				name
 			});
-			const res = await fetch(`/databases/${data.currentDatabase.id}/export?${params}`);
+			const res = await fetch(resolve(`/databases/${data.currentDatabase.id}/export?${params}`));
 			const json = await res.json();
 			if (!res.ok) {
 				alertStore.add('error', json.error || 'Export failed');
@@ -184,7 +185,7 @@
 	// Map databases to tabs
 	$: tabs = data.databases.map((db) => ({
 		label: db.name,
-		href: `/quality-profiles/${db.id}`,
+		href: resolve(`/quality-profiles/${db.id}`),
 		active: db.id === data.currentDatabase.id
 	}));
 </script>
@@ -215,7 +216,7 @@
 		<Tooltip text="New">
 			<ActionButton
 				icon={Plus}
-				on:click={() => goto(`/quality-profiles/${data.currentDatabase.id}/new`)}
+				on:click={() => goto(resolve(`/quality-profiles/${data.currentDatabase.id}/new`))}
 			/>
 		</Tooltip>
 		{#if !isMobile}

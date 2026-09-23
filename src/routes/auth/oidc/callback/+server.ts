@@ -1,4 +1,5 @@
-import { redirect, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import type { RequestHandler } from './$types';
 import { config } from '$config';
 import { getDiscoveryDocument, exchangeCode, verifyAndDecodeIdToken } from '$auth/oidc.ts';
@@ -57,7 +58,7 @@ export const GET: RequestHandler = async (event) => {
 		tokens = await exchangeCode(discovery.token_endpoint, code, {
 			clientId: config.oidc.clientId,
 			clientSecret: config.oidc.clientSecret,
-			redirectUri: `${config.origin}/auth/oidc/callback`
+			redirectUri: `${config.externalUrl}/auth/oidc/callback`
 		});
 	} catch (err) {
 		await logger.warn('OIDC token exchange failed', {

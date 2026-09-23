@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher, onDestroy } from 'svelte';
 	import { CircleDot, Loader2 } from '@lucide/svelte';
 	import type { FilterConfig } from '$shared/upgrades/filters';
@@ -178,7 +179,7 @@
 		}, 700);
 
 		try {
-			const response = await fetch(`/arr/${targetInstanceId}/upgrades/preview`, {
+			const response = await fetch(resolve(`/arr/${targetInstanceId}/upgrades/preview`), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ filter: structuredClone(targetFilter) })

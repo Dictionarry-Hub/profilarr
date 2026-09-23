@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -23,7 +24,9 @@
 	};
 
 	function getRowHref(config: QualityDefinitionListItem): string {
-		return `/media-management/${databaseId}/quality-definitions/${config.arr_type}/${encodeURIComponent(config.name)}`;
+		return resolve(
+			`/media-management/${databaseId}/quality-definitions/${config.arr_type}/${encodeURIComponent(config.name)}`
+		);
 	}
 
 	const columns: Column<QualityDefinitionListItem>[] = [

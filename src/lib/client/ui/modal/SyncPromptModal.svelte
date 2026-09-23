@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import Modal from './Modal.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -46,7 +47,7 @@
 		instanceStates = instanceStates;
 
 		try {
-			const res = await fetch(`/arr/${instanceId}/resync`, {
+			const res = await fetch(resolve(`/arr/${instanceId}/resync`), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ databaseId, entityName, entityType })

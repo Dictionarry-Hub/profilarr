@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import type { RequestHandler } from './$types';
 import { sessionsQueries } from '$db/queries/sessions.ts';
 import { usersQueries } from '$db/queries/users.ts';

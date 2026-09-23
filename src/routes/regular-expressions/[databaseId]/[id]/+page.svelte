@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import RegularExpressionForm from '../components/RegularExpressionForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
@@ -21,7 +22,7 @@
 	$: referencedFormatCount = new Set(data.conditionRefs.map((ref) => ref.cfId)).size;
 
 	function handleCancel() {
-		goto(`/regular-expressions/${data.currentDatabase.id}`);
+		goto(resolve(`/regular-expressions/${data.currentDatabase.id}`));
 	}
 
 	const columns = [
@@ -44,7 +45,10 @@
 		referenceCount={referencedFormatCount}
 		onCancel={handleCancel}
 		breadcrumbItems={[
-			{ label: data.currentDatabase.name, href: `/regular-expressions/${data.currentDatabase.id}` }
+			{
+				label: data.currentDatabase.name,
+				href: resolve(`/regular-expressions/${data.currentDatabase.id}`)
+			}
 		]}
 		breadcrumbCurrent={data.regularExpression.name}
 	/>
@@ -58,7 +62,7 @@
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'cfName'}
 						<InlineLink
-							href="/custom-formats/{data.currentDatabase.id}/{row.cfId}/conditions"
+							href={resolve(`/custom-formats/${data.currentDatabase.id}/${row.cfId}/conditions`)}
 							text={row.cfName}
 							external
 						/>

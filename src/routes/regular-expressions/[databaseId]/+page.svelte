@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount, onDestroy } from 'svelte';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
@@ -46,7 +47,7 @@
 				entityType: 'regular_expression',
 				name
 			});
-			const res = await fetch(`/databases/${data.currentDatabase.id}/export?${params}`);
+			const res = await fetch(resolve(`/databases/${data.currentDatabase.id}/export?${params}`));
 			const json = await res.json();
 			if (!res.ok) {
 				alertStore.add('error', json.error || 'Export failed');
@@ -184,7 +185,7 @@
 	// Map databases to tabs
 	$: tabs = data.databases.map((db) => ({
 		label: db.name,
-		href: `/regular-expressions/${db.id}`,
+		href: resolve(`/regular-expressions/${db.id}`),
 		active: db.id === data.currentDatabase.id
 	}));
 </script>
@@ -219,13 +220,15 @@
 					<DropdownItem
 						icon={FileText}
 						label="Blank"
-						on:click={() => goto(`/regular-expressions/${data.currentDatabase.id}/new`)}
+						on:click={() => goto(resolve(`/regular-expressions/${data.currentDatabase.id}/new`))}
 					/>
 					<DropdownItem
 						icon={Users}
 						label="Release Group"
 						on:click={() =>
-							goto(`/regular-expressions/${data.currentDatabase.id}/new?preset=release-group`)}
+							goto(
+								resolve(`/regular-expressions/${data.currentDatabase.id}/new?preset=release-group`)
+							)}
 					/>
 				</Dropdown>
 			</svelte:fragment>

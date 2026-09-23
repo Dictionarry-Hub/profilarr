@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import type { RegularExpressionWithTags } from '$shared/pcd/display';
 	import { ExternalLink, Copy, Download } from '@lucide/svelte';
@@ -26,7 +27,7 @@
 
 <CardGrid flush>
 	{#each visibleExpressions as expression (expression.id)}
-		<Card href="/regular-expressions/{databaseId}/{expression.id}" hoverable>
+		<Card href={resolve(`/regular-expressions/${databaseId}/${expression.id}`)} hoverable>
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-end justify-between gap-2">

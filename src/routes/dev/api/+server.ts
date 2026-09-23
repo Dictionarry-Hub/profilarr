@@ -1,14 +1,17 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import type { RequestHandler } from '@sveltejs/kit';
 import { escapeHtml } from '$shared/utils/sanitize';
+import { config } from '$config';
 
 export const GET: RequestHandler = async ({ url }) => {
 	if (import.meta.env.VITE_CHANNEL !== 'dev') {
 		throw redirect(302, '/');
 	}
 
+	// Browser-facing: the URL base is stripped off `url` on the way in, so it has to
+	// go back on for the spec fetch to land on the right place behind a proxy.
 	const specUrl = new URL(url.href);
-	specUrl.pathname = url.pathname.replace(/\/dev\/api\/?$/, '/api/v1/openapi.json');
+	specUrl.pathname = `${config.baseUrl}${url.pathname.replace(/\/dev\/api\/?$/, '/api/v1/openapi.json')}`;
 	specUrl.search = '';
 	specUrl.hash = '';
 

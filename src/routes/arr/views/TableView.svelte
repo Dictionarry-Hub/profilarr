@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { ExternalLink, Unlink } from '@lucide/svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -41,7 +42,7 @@
 	}
 
 	function getRowHref(instance: ArrInstanceSummary): string {
-		return `/arr/${instance.id}`;
+		return resolve(`/arr/${instance.id}`);
 	}
 
 	function handleDeleteClick(e: Event, instance: ArrInstanceSummary) {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { routePath } from '$lib/client/utils/routePath';
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import {
@@ -462,7 +463,7 @@
 				clear();
 				if (mode === 'edit') {
 					alertStore.add('success', 'Database linked successfully');
-				} else if (result.location?.startsWith('/databases/bruh')) {
+				} else if (routePath(result.location ?? '').startsWith('/databases/bruh')) {
 					// Server bounced us to the bruh page; no link was queued.
 					jobStatus.cancelOptimistic();
 				} else {

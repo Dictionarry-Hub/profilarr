@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
+	import { routePath } from '$lib/client/utils/routePath';
 	import {
 		FolderTree,
 		Link,
@@ -32,33 +34,53 @@
 	};
 
 	const items: NavItem[] = [
-		{ href: '/databases', label: 'Databases', icon: FolderTree, emoji: '📦', priority: 'always' },
-		{ href: '/arr', label: 'Arrs', icon: Link, emoji: '🔗', priority: 'always' },
 		{
-			href: '/quality-profiles',
+			href: resolve('/databases'),
+			label: 'Databases',
+			icon: FolderTree,
+			emoji: '📦',
+			priority: 'always'
+		},
+		{ href: resolve('/arr'), label: 'Arrs', icon: Link, emoji: '🔗', priority: 'always' },
+		{
+			href: resolve('/quality-profiles'),
 			label: 'Profiles',
 			icon: Sliders,
 			emoji: '⚡',
 			priority: 'always'
 		},
-		{ href: '/custom-formats', label: 'Formats', icon: Palette, emoji: '🎨', priority: 'always' },
-		{ href: '/settings', label: 'Settings', icon: Settings, emoji: '⚙️', priority: 'always' },
 		{
-			href: '/regular-expressions',
+			href: resolve('/custom-formats'),
+			label: 'Formats',
+			icon: Palette,
+			emoji: '🎨',
+			priority: 'always'
+		},
+		{
+			href: resolve('/settings'),
+			label: 'Settings',
+			icon: Settings,
+			emoji: '⚙️',
+			priority: 'always'
+		},
+		{
+			href: resolve('/regular-expressions'),
 			label: 'Regex',
 			icon: Microscope,
 			emoji: '🔬',
 			priority: 'medium'
 		},
-		{ href: '/media-management', label: 'Media', icon: Tag, emoji: '🏷️', priority: 'low' },
-		{ href: '/delay-profiles', label: 'Delay', icon: Clock, emoji: '⏳', priority: 'low' }
+		{ href: resolve('/media-management'), label: 'Media', icon: Tag, emoji: '🏷️', priority: 'low' },
+		{ href: resolve('/delay-profiles'), label: 'Delay', icon: Clock, emoji: '⏳', priority: 'low' }
 	];
 
 	$: pathname = $page.url.pathname;
 
 	function isActive(href: string, currentPath: string): boolean {
-		if (href === '/') return currentPath === '/';
-		return currentPath.startsWith(href);
+		const target = routePath(href);
+		const current = routePath(currentPath);
+		if (target === '/') return current === '/';
+		return current.startsWith(target);
 	}
 </script>
 

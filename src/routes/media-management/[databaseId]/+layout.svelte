@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import { page } from '$app/stores';
 	import type { LayoutData } from './$types';
@@ -22,7 +23,7 @@
 	// Map databases to tabs - preserve current config type when switching databases
 	$: databaseTabs = data.databases.map((db) => ({
 		label: db.name,
-		href: `/media-management/${db.id}/${currentConfigType}`,
+		href: resolve(`/media-management/${db.id}/${currentConfigType}`),
 		active: db.id === data.currentDatabase.id
 	}));
 </script>

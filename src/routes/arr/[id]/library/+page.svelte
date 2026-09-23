@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount, onDestroy } from 'svelte';
 	import { AlertTriangle, Film } from '@lucide/svelte';
 	import { browser } from '$app/environment';
@@ -296,7 +297,7 @@
 
 		try {
 			if (force) {
-				const refreshResponse = await fetch(`/arr/${instanceId}/library/refresh`, {
+				const refreshResponse = await fetch(resolve(`/arr/${instanceId}/library/refresh`), {
 					method: 'POST'
 				});
 				if (!refreshResponse.ok) {
@@ -304,7 +305,7 @@
 				}
 			}
 
-			const response = await fetch(`/arr/${instanceId}/library/${resourcePath}`);
+			const response = await fetch(resolve(`/arr/${instanceId}/library/${resourcePath}`));
 			if (!response.ok) {
 				throw new Error(`Failed to fetch library: ${response.statusText}`);
 			}

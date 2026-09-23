@@ -16,6 +16,7 @@ interface ServerInstance {
 	port: number;
 	basePath: string;
 	url: string;
+	baseUrl: string;
 	stdoutBuf: string[];
 	stderrBuf: string[];
 	exitStatus: Deno.CommandStatus | null;
@@ -88,12 +89,16 @@ export async function startServer(
 	const stdoutBuf: string[] = [];
 	const stderrBuf: string[] = [];
 	const url = `http://localhost:${port}`;
+	// The app is served only from BASE_URL when it is set, so the health probe has
+	// to carry the prefix too.
+	const baseUrl = env.BASE_URL ?? '';
 
 	const instance: ServerInstance = {
 		process,
 		port,
 		basePath,
 		url,
+		baseUrl,
 		stdoutBuf,
 		stderrBuf,
 		exitStatus: null,
@@ -174,7 +179,7 @@ export function getDbPath(port: number): string {
  */
 async function waitForReady(instance: ServerInstance, timeoutMs: number): Promise<void> {
 	const start = Date.now();
-	const healthUrl = `${instance.url}/api/v1/health`;
+	const healthUrl = `${instance.url}${instance.baseUrl}/api/v1/health`;
 	let lastFetchError: string | null = null;
 	let lastHttpStatus: number | null = null;
 	let lastLogAt = 0;

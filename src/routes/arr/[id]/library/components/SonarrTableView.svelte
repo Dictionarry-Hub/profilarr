@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { ExternalLink } from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
@@ -143,7 +144,9 @@
 		seasonsLoadingSet = seasonsLoadingSet;
 
 		try {
-			const response = await fetch(`/arr/${instanceId}/library/series/${seriesId}/seasons`);
+			const response = await fetch(
+				resolve(`/arr/${instanceId}/library/series/${seriesId}/seasons`)
+			);
 			if (!response.ok) throw new Error('Failed to fetch seasons');
 			const result = await response.json();
 			seasonsCache.set(seriesId, result.seasons);
@@ -165,7 +168,7 @@
 
 		try {
 			const response = await fetch(
-				`/arr/${instanceId}/library/series/${seriesId}/seasons/${seasonNumber}/episodes`
+				resolve(`/arr/${instanceId}/library/series/${seriesId}/seasons/${seasonNumber}/episodes`)
 			);
 			if (!response.ok) throw new Error('Failed to fetch episodes');
 			const result = await response.json();

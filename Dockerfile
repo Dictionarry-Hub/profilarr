@@ -152,7 +152,7 @@ EXPOSE 6868
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -sf http://localhost:${PORT}/api/v1/health || exit 1
+    CMD curl -sf http://localhost:${PORT}${BASE_URL}/api/v1/health || exit 1
 
 # Volume for persistent data
 VOLUME /config

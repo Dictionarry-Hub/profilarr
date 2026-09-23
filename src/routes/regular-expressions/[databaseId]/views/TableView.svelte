@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -17,7 +18,7 @@
 	$: databaseId = $page.params.databaseId;
 
 	function getRowHref(row: RegularExpressionWithTags): string {
-		return `/regular-expressions/${databaseId}/${row.id}`;
+		return resolve(`/regular-expressions/${databaseId}/${row.id}`);
 	}
 
 	function escapeHtml(text: string): string {

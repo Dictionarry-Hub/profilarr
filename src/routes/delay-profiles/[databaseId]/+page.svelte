@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
@@ -28,7 +29,7 @@
 	}
 
 	function handleCreate() {
-		goto(`/delay-profiles/${data.currentDatabase.id}/new`);
+		goto(resolve(`/delay-profiles/${data.currentDatabase.id}/new`));
 	}
 
 	async function handleExport(event: CustomEvent<{ name: string }>) {
@@ -38,7 +39,7 @@
 				entityType: 'delay_profile',
 				name
 			});
-			const res = await fetch(`/databases/${data.currentDatabase.id}/export?${params}`);
+			const res = await fetch(resolve(`/databases/${data.currentDatabase.id}/export?${params}`));
 			const json = await res.json();
 			if (!res.ok) {
 				alertStore.add('error', json.error || 'Export failed');
@@ -68,7 +69,7 @@
 	// Map databases to tabs
 	$: tabs = data.databases.map((db) => ({
 		label: db.name,
-		href: `/delay-profiles/${db.id}`,
+		href: resolve(`/delay-profiles/${db.id}`),
 		active: db.id === data.currentDatabase.id
 	}));
 </script>

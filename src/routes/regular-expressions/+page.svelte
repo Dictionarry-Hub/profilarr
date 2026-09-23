@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { Database, Plus } from '@lucide/svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
@@ -15,7 +16,7 @@
 		title="No Databases Linked"
 		description="Link a Profilarr Compliant Database to manage regular expressions."
 		buttonText="Link Database"
-		buttonHref="/databases/new"
+		buttonHref={resolve('/databases/new')}
 		buttonIcon={Plus}
 	/>
 {/if}

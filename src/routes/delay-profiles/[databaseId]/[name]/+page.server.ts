@@ -1,4 +1,5 @@
-import { error, redirect, fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
+import { redirect } from '$utils/redirect/redirect.ts';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
 import { pcdManager } from '$pcd/core/manager.ts';
 import { canWriteToBase } from '$pcd/ops/writer.ts';

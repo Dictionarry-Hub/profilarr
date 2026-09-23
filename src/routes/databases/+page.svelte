@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { Database, Plus, Info } from '@lucide/svelte';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -66,7 +67,7 @@
 		title="No Databases Linked"
 		description="Link a Profilarr Compliant Database to get started with profile management."
 		buttonText="Link Database"
-		buttonHref="/databases/new"
+		buttonHref={resolve('/databases/new')}
 		buttonIcon={Plus}
 		onboarding="db-add"
 	/>
@@ -78,7 +79,7 @@
 			<ActionButton
 				icon={Plus}
 				title="Link Database"
-				on:click={() => goto('/databases/new')}
+				on:click={() => goto(resolve('/databases/new'))}
 				onboarding="db-add"
 			/>
 			<ActionButton icon={Info} title="Info" on:click={() => (showInfoModal = true)} />

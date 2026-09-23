@@ -5,7 +5,7 @@
  * with a server-side cookie + redirect(302) for instant navigation.
  */
 
-import { redirect } from '@sveltejs/kit';
+import { redirect } from './redirect.ts';
 import type { Cookies } from '@sveltejs/kit';
 import { pcdManager } from '$pcd/core/manager.ts';
 

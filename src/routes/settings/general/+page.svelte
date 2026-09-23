@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
 	import { enhance } from '$app/forms';
@@ -229,7 +230,7 @@
 
 		tmdbTesting = true;
 		try {
-			const response = await fetch('/tmdb/validate', {
+			const response = await fetch(resolve('/tmdb/validate'), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ apiKey: tmdbApiKey })

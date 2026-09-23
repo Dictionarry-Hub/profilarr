@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { invalidateAll } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import Modal from './Modal.svelte';
@@ -35,7 +36,7 @@
 				entityType,
 				name: sourceName
 			});
-			const exportRes = await fetch(`/databases/${databaseId}/export?${params}`);
+			const exportRes = await fetch(resolve(`/databases/${databaseId}/export?${params}`));
 			const exportJson = await exportRes.json();
 			if (!exportRes.ok) {
 				alertStore.add('error', exportJson.error || 'Export failed');
@@ -44,7 +45,7 @@
 
 			// Rename and import
 			exportJson.data.name = newName.trim();
-			const importRes = await fetch(`/databases/${databaseId}/import`, {
+			const importRes = await fetch(resolve(`/databases/${databaseId}/import`), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({

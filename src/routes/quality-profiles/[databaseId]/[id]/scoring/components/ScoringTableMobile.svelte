@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
@@ -71,7 +72,7 @@
 					class="border-b border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-900 dark:border-neutral-800 dark:text-neutral-100"
 				>
 					<InlineLink
-						href="/custom-formats/{databaseId}/{format.id}/general"
+						href={resolve(`/custom-formats/${databaseId}/${format.id}/general`)}
 						text={format.name}
 						external
 					/>

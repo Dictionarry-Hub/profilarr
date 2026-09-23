@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 
 	export let name: string;
@@ -27,7 +28,7 @@
 		if (LOGO_OVERRIDES[url]) return LOGO_OVERRIDES[url];
 		const match = url.match(/github\.com\/([^\/]+)\//);
 		if (match) {
-			return `/databases/avatar/${match[1]}`;
+			return resolve(`/databases/avatar/${match[1]}`);
 		}
 		return '';
 	}

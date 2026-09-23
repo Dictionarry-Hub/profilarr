@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
@@ -24,7 +25,9 @@
 	};
 
 	function getRowHref(config: NamingListItem): string {
-		return `/media-management/${databaseId}/naming/${config.arr_type}/${encodeURIComponent(config.name)}`;
+		return resolve(
+			`/media-management/${databaseId}/naming/${config.arr_type}/${encodeURIComponent(config.name)}`
+		);
 	}
 
 	const columns: Column<NamingListItem>[] = [

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
 	import { page } from '$app/stores';
@@ -52,7 +53,7 @@
 	}
 
 	function getProfileHref(profile: DelayProfilesRow): string {
-		return `/delay-profiles/${databaseId}/${encodeURIComponent(profile.name)}`;
+		return resolve(`/delay-profiles/${databaseId}/${encodeURIComponent(profile.name)}`);
 	}
 </script>
 

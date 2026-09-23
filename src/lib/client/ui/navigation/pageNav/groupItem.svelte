@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import type { Component } from 'svelte';
 	import Label from '$ui/label/Label.svelte';
+	import { isRouteActive, routePath } from '$lib/client/utils/routePath';
 
 	interface Props {
 		label: string;
@@ -32,7 +33,9 @@
 	}: Props = $props();
 
 	const isActive = $derived.by(() => {
-		const pathname = $page.url.pathname;
+		// Compare app paths, not raw URLs: pathname carries the URL base in the browser
+		// while href is base-relative during SSR.
+		const pathname = routePath($page.url.pathname);
 
 		// Use custom pattern if provided
 		if (activePattern) {
@@ -43,7 +46,7 @@
 		}
 
 		// Default behavior
-		return pathname === href || pathname.startsWith(href + '/');
+		return isRouteActive(href, pathname);
 	});
 </script>
 

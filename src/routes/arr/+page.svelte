@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { Server, Plus, Info } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
@@ -49,7 +50,7 @@
 		title="No Arr Instances"
 		description="Add a Radarr or Sonarr instance to get started."
 		buttonText="Add Instance"
-		buttonHref="/arr/new"
+		buttonHref={resolve('/arr/new')}
 		buttonIcon={Plus}
 		onboarding="arr-add"
 	/>
@@ -61,7 +62,7 @@
 			<ActionButton
 				icon={Plus}
 				title="Add Instance"
-				on:click={() => goto('/arr/new')}
+				on:click={() => goto(resolve('/arr/new'))}
 				onboarding="arr-add"
 			/>
 			<ActionButton icon={Info} title="Info" on:click={() => (showInfoModal = true)} />

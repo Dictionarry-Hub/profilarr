@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import RadarrNamingForm from '../components/RadarrNamingForm.svelte';
 	import SonarrNamingForm from '../components/SonarrNamingForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
@@ -15,7 +16,7 @@
 
 	onMount(() => {
 		if (!selectedArrType) {
-			goto(`/media-management/${data.currentDatabase.id}/naming`, { replaceState: true });
+			goto(resolve(`/media-management/${data.currentDatabase.id}/naming`), { replaceState: true });
 		}
 	});
 </script>

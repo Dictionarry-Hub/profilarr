@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import {
 		ExternalLink,
 		Unlink,
@@ -58,7 +59,7 @@
 
 <CardGrid columns={1} className="xl:grid-cols-2 2xl:grid-cols-3" flush>
 	{#each databases as database}
-		<Card href="/databases/{database.id}" hoverable>
+		<Card href={resolve(`/databases/${database.id}`)} hoverable>
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-center justify-between gap-2">

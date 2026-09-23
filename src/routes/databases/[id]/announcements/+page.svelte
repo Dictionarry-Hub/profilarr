@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
 	import { Plus, AlertTriangle, ExternalLink, Edit3, Trash2 } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
@@ -59,7 +60,7 @@
 					icon={Plus}
 					variant="secondary"
 					iconColor="text-blue-600 dark:text-blue-400"
-					on:click={() => goto(`/databases/${databaseId}/announcements/new`)}
+					on:click={() => goto(resolve(`/databases/${databaseId}/announcements/new`))}
 				/>
 			</svelte:fragment>
 		</StickyCard>
@@ -92,7 +93,7 @@
 			title="No announcements yet"
 			description="When you publish an announcement here, it ships with the next push of this database."
 			buttonText="New announcement"
-			buttonHref={`/databases/${databaseId}/announcements/new`}
+			buttonHref={resolve(`/databases/${databaseId}/announcements/new`)}
 			buttonIcon={Plus}
 		/>
 	{:else}
@@ -114,7 +115,7 @@
 						iconColor="text-blue-600 dark:text-blue-400"
 						ariaLabel="Edit"
 						tooltip="Edit"
-						on:click={() => goto(`/databases/${databaseId}/announcements/${row.id}`)}
+						on:click={() => goto(resolve(`/databases/${databaseId}/announcements/${row.id}`))}
 					/>
 					<Button
 						icon={Trash2}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { createEventDispatcher } from 'svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -16,7 +17,7 @@
 	$: databaseId = $page.params.databaseId;
 
 	function getRowHref(row: DelayProfilesRow): string {
-		return `/delay-profiles/${databaseId}/${encodeURIComponent(row.name)}`;
+		return resolve(`/delay-profiles/${databaseId}/${encodeURIComponent(row.name)}`);
 	}
 
 	function formatProtocol(protocol: string): string {

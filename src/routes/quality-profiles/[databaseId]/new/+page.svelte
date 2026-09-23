@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import GeneralForm from '../components/GeneralForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
@@ -16,7 +17,7 @@
 	};
 
 	function handleCancel() {
-		goto(`/quality-profiles/${data.currentDatabase.id}`);
+		goto(resolve(`/quality-profiles/${data.currentDatabase.id}`));
 	}
 </script>
 

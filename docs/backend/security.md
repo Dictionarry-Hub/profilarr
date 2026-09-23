@@ -65,6 +65,7 @@ Set via `AUTH` env var. All modes except `off` also support API key auth via
 | -------------------- | ------- | ----------------------------------------------------- | ------------------------------------------------------------ |
 | `AUTH`               | `on`    | Auth mode: `on`, `off`, `oidc`                        | `oidc`                                                       |
 | `ORIGIN`             | -       | Scheme + host for reverse proxy (CSRF, cookies, OIDC) | `https://profilarr.mydomain.com`                             |
+| `BASE_URL`           | -       | Subpath to serve from behind a reverse proxy          | `/profilarr`                                                 |
 | `OIDC_DISCOVERY_URL` | -       | OIDC provider discovery endpoint (AUTH=oidc only)     | `https://auth.mydomain.com/.well-known/openid-configuration` |
 | `OIDC_CLIENT_ID`     | -       | OIDC client ID (AUTH=oidc only)                       | `profilarr`                                                  |
 | `OIDC_CLIENT_SECRET` | -       | OIDC client secret (AUTH=oidc only)                   | `your-secret`                                                |
@@ -292,17 +293,22 @@ Mismatch -> 403 "Cross-site POST form submissions are forbidden"
 ```
 
 **The fix** (`src/adapter/files/mod.ts`): rewrites `request.url` when `ORIGIN`
-is set, matching `adapter-node` behaviour:
+is set, matching `adapter-node` behaviour. The same rewrite strips the base URL
+(see [base-url.md](./base-url.md)) so SvelteKit routes on plain app paths:
 
 ```ts
-let req = request;
-const origin = Deno.env.get('ORIGIN');
-if (origin) {
-	const url = new URL(request.url);
-	req = new Request(`${origin}${url.pathname}${url.search}`, request);
-}
+const url = new URL(request.url);
+const pathname = stripBaseUrl(url.pathname, BASE_URL);
+if (pathname === null) return notFound();
+
+const target = `${ORIGIN ?? url.origin}${pathname}${url.search}`;
+const req = target === request.url ? request : new Request(target, request);
 return server.respond(req, { getClientAddress: () => clientAddress });
 ```
+
+`ORIGIN` is only ever the origin, meaning scheme, host and port. It must not carry
+a path, because the comparison above is against the browser's Origin header, which
+cannot carry one. The subpath is configured with `BASE_URL` and nowhere else.
 
 Notes:
 

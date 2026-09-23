@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { LogIn, KeyRound } from '@lucide/svelte';
@@ -36,7 +37,7 @@
 		{#if data.authMode === 'oidc'}
 			<!-- OIDC login button -->
 			<Button
-				href="/auth/oidc/login"
+				href={resolve('/auth/oidc/login')}
 				variant="primary"
 				size="md"
 				fullWidth

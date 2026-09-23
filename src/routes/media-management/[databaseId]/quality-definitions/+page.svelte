@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
@@ -37,7 +38,7 @@
 				entityType: `${arr_type}_quality_definitions`,
 				name
 			});
-			const res = await fetch(`/databases/${data.currentDatabase.id}/export?${params}`);
+			const res = await fetch(resolve(`/databases/${data.currentDatabase.id}/export?${params}`));
 			const json = await res.json();
 			if (!res.ok) {
 				alertStore.add('error', json.error || 'Export failed');
@@ -78,14 +79,18 @@
 					label="Radarr"
 					on:click={() =>
 						goto(
-							`/media-management/${data.currentDatabase.id}/quality-definitions/new?arrType=radarr`
+							resolve(
+								`/media-management/${data.currentDatabase.id}/quality-definitions/new?arrType=radarr`
+							)
 						)}
 				/>
 				<DropdownItem
 					label="Sonarr"
 					on:click={() =>
 						goto(
-							`/media-management/${data.currentDatabase.id}/quality-definitions/new?arrType=sonarr`
+							resolve(
+								`/media-management/${data.currentDatabase.id}/quality-definitions/new?arrType=sonarr`
+							)
 						)}
 				/>
 			</Dropdown>

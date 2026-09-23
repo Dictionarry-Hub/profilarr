@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import {
 		GitBranch,
@@ -19,21 +20,21 @@
 		? [
 				{
 					label: 'Changes',
-					href: `/databases/${database.id}/changes`,
+					href: resolve(`/databases/${database.id}/changes`),
 					icon: GitBranch,
 					active: currentPath.endsWith('/changes'),
 					onboarding: 'db-tab-changes'
 				},
 				{
 					label: 'Updates',
-					href: `/databases/${database.id}/commits`,
+					href: resolve(`/databases/${database.id}/commits`),
 					icon: History,
 					active: currentPath.includes('/commits'),
 					onboarding: 'db-tab-commits'
 				},
 				{
 					label: 'Conflicts',
-					href: `/databases/${database.id}/conflicts`,
+					href: resolve(`/databases/${database.id}/conflicts`),
 					icon: GitPullRequestClosed,
 					active: currentPath.includes('/conflicts'),
 					onboarding: 'db-tab-conflicts'
@@ -42,7 +43,7 @@
 					? [
 							{
 								label: 'Tweaks',
-								href: `/databases/${database.id}/tweaks`,
+								href: resolve(`/databases/${database.id}/tweaks`),
 								icon: Wrench,
 								active: currentPath.includes('/tweaks'),
 								onboarding: 'db-tab-tweaks'
@@ -53,13 +54,13 @@
 					? [
 							{
 								label: 'Announcements',
-								href: `/databases/${database.id}/announcements`,
+								href: resolve(`/databases/${database.id}/announcements`),
 								icon: Megaphone,
 								active: currentPath.includes('/announcements')
 							},
 							{
 								label: 'Config',
-								href: `/databases/${database.id}/config`,
+								href: resolve(`/databases/${database.id}/config`),
 								icon: FileCog,
 								active: currentPath.includes('/config')
 							}
@@ -67,7 +68,7 @@
 					: []),
 				{
 					label: 'Settings',
-					href: `/databases/${database.id}/settings`,
+					href: resolve(`/databases/${database.id}/settings`),
 					icon: Settings,
 					active: currentPath.includes('/settings'),
 					onboarding: 'db-tab-settings'
@@ -76,7 +77,7 @@
 		: [];
 
 	$: breadcrumb = {
-		items: [{ label: 'Databases', href: '/databases' }],
+		items: [{ label: 'Databases', href: resolve('/databases') }],
 		current: database?.name ?? ''
 	};
 </script>

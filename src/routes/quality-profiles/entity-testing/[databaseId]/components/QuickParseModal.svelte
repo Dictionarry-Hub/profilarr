@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { browser } from '$app/environment';
 	import {
 		HardDrive,
@@ -113,13 +114,16 @@
 		error = null;
 
 		try {
-			const response = await fetch(`/quality-profiles/entity-testing/${databaseId}/evaluate`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					releases: [{ id: -1, title: trimmed, type: releaseType }]
-				})
-			});
+			const response = await fetch(
+				resolve(`/quality-profiles/entity-testing/${databaseId}/evaluate`),
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						releases: [{ id: -1, title: trimmed, type: releaseType }]
+					})
+				}
+			);
 
 			if (!response.ok) {
 				throw new Error('Failed to parse release');

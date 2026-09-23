@@ -13,7 +13,7 @@ AGENTS.md
 .wrangler
 /dist
 /static/*
-!/static/fonts/
+!/static/.gitkeep
 
 # Application
 /temp
@@ -21,6 +21,10 @@ AGENTS.md
 
 # Editor — track shared settings, ignore personal files
 .vscode/
+
+# mise — track mise.toml, ignore personal overrides
+mise.local.toml
+.mise.local.toml
 
 # OS
 .DS_Store
@@ -71,3 +75,7 @@ tests/e2e/*/playwright-report/
 
 # Research repos
 research/
+
+# Core dumps
+core
+core.*

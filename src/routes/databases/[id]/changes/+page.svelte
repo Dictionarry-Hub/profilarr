@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import QualityProfileDiff from './components/QualityProfileDiff.svelte';
 	import SectionRenderer from './components/SectionRenderer.svelte';
@@ -139,7 +140,7 @@
 	async function fetchChanges() {
 		loading = true;
 		try {
-			const response = await fetch(`/databases/${data.database.id}/changes/data`);
+			const response = await fetch(resolve(`/databases/${data.database.id}/changes/data`));
 			if (response.ok) {
 				const result = await response.json();
 				status = result.status;

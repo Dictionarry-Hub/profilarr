@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import GeneralForm from '../../components/GeneralForm.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import Score from '$ui/arr/Score.svelte';
@@ -46,7 +47,7 @@
 			<svelte:fragment slot="cell" let:row let:column>
 				{#if column.key === 'name'}
 					<InlineLink
-						href="/quality-profiles/{databaseId}/{row.id}/scoring"
+						href={resolve(`/quality-profiles/${databaseId}/${row.id}/scoring`)}
 						text={row.name}
 						external
 					/>

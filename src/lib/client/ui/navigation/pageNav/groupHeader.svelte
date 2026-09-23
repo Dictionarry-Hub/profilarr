@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import type { Component } from 'svelte';
 	import Label from '$ui/label/Label.svelte';
+	import { isRouteActive } from '$lib/client/utils/routePath';
 
 	export let label: string;
 	export let href: string;
@@ -12,9 +13,7 @@
 	export let onToggle: () => void;
 	export let alert: number = 0;
 
-	$: isActive = hasItems
-		? $page.url.pathname === href
-		: $page.url.pathname === href || $page.url.pathname.startsWith(href + '/');
+	$: isActive = isRouteActive(href, $page.url.pathname, { exact: hasItems });
 </script>
 
 <div class="group/header flex items-center">

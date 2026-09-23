@@ -1,4 +1,5 @@
 import type { Step } from './types.ts';
+import { routePath } from '$lib/client/utils/routePath';
 import { stateChecks } from './stateChecks.ts';
 
 let cleanup: (() => void) | null = null;
@@ -43,7 +44,7 @@ export function setupCompletion(step: Step, onComplete: () => void): void {
 			const targetPath = step.completion.path;
 
 			const checkRoute = (): boolean => {
-				return window.location.pathname === targetPath;
+				return routePath(window.location.pathname) === targetPath;
 			};
 
 			// Already there

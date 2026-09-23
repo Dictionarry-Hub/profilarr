@@ -20,6 +20,7 @@
  *   real; later events without a matching jobId are ignored.
  */
 
+import { resolve } from '$app/paths';
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 
@@ -213,7 +214,7 @@ function createJobStatusStore() {
 	function connect() {
 		if (!browser || eventSource) return;
 
-		eventSource = new EventSource('/jobs/events');
+		eventSource = new EventSource(resolve('/jobs/events'));
 
 		eventSource.addEventListener('job.started', (e) => {
 			try {

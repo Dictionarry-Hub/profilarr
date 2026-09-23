@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+	import { isRouteActive } from '$lib/client/utils/routePath';
 	import AccentPicker from './accentPicker.svelte';
 	import ThemeToggle from './themeToggle.svelte';
 	import HelpButton from '$ui/help/HelpButton.svelte';
@@ -47,27 +49,30 @@
 	$: outOfDate = versionStatus?.status === 'out-of-date' && versionStatus.latestVersion;
 
 	$: railLinks = [
-		{ label: 'Dev', href: '/dev', icon: Wrench, emoji: '🛠️', devOnly: true },
+		{ label: 'Dev', href: resolve('/dev'), icon: Wrench, emoji: '🛠️', devOnly: true },
 		{
 			label: 'Announcements',
-			href: '/announcements',
+			href: resolve('/announcements'),
 			icon: Megaphone,
 			emoji: '📣',
 			alert: unreadAnnouncements
 		},
-		{ label: 'Databases', href: '/databases', icon: FolderTree, emoji: '📦' },
-		{ label: 'Arrs', href: '/arr', icon: Link, emoji: '🔗' },
-		{ label: 'Quality Profiles', href: '/quality-profiles', icon: Sliders, emoji: '⚡' },
-		{ label: 'Custom Formats', href: '/custom-formats', icon: Palette, emoji: '🎨' },
-		{ label: 'Regular Expressions', href: '/regular-expressions', icon: Microscope, emoji: '🔬' },
-		{ label: 'Media Management', href: '/media-management', icon: Tag, emoji: '🏷️' },
-		{ label: 'Delay Profiles', href: '/delay-profiles', icon: Clock, emoji: '⏳' },
-		{ label: 'Settings', href: '/settings', icon: Settings, emoji: '⚙️' }
+		{ label: 'Databases', href: resolve('/databases'), icon: FolderTree, emoji: '📦' },
+		{ label: 'Arrs', href: resolve('/arr'), icon: Link, emoji: '🔗' },
+		{ label: 'Quality Profiles', href: resolve('/quality-profiles'), icon: Sliders, emoji: '⚡' },
+		{ label: 'Custom Formats', href: resolve('/custom-formats'), icon: Palette, emoji: '🎨' },
+		{
+			label: 'Regular Expressions',
+			href: resolve('/regular-expressions'),
+			icon: Microscope,
+			emoji: '🔬'
+		},
+		{ label: 'Media Management', href: resolve('/media-management'), icon: Tag, emoji: '🏷️' },
+		{ label: 'Delay Profiles', href: resolve('/delay-profiles'), icon: Clock, emoji: '⏳' },
+		{ label: 'Settings', href: resolve('/settings'), icon: Settings, emoji: '⚙️' }
 	] satisfies RailLink[];
 
-	function isActive(href: string, pathname: string): boolean {
-		return pathname === href || pathname.startsWith(href + '/');
-	}
+	const isActive = isRouteActive;
 </script>
 
 <nav
@@ -174,7 +179,7 @@
 		</div>
 
 		<a
-			href="/"
+			href={resolve('/')}
 			aria-label="Profilarr home"
 			class="rounded-md p-1 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
 		>

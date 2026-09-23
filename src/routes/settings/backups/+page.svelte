@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
@@ -61,7 +62,7 @@
 
 	function confirmDownload() {
 		if (selectedBackup) {
-			window.location.href = `/api/v1/backups/${selectedBackup}`;
+			window.location.href = resolve(`/api/v1/backups/${selectedBackup}`);
 		}
 		showDownloadModal = false;
 		selectedBackup = null;
@@ -85,7 +86,7 @@
 		formData.append('file', file);
 
 		try {
-			const res = await fetch('/api/v1/backups/upload', {
+			const res = await fetch(resolve('/api/v1/backups/upload'), {
 				method: 'POST',
 				body: formData
 			});
@@ -107,7 +108,7 @@
 	async function triggerCreateBackup() {
 		jobStatus.connect();
 		try {
-			const res = await fetch('/api/v1/backups', { method: 'POST' });
+			const res = await fetch(resolve('/api/v1/backups'), { method: 'POST' });
 
 			if (res.ok) {
 				alertStore.add('success', 'Backup queued');
@@ -156,7 +157,7 @@
 		if (!selectedBackup) return;
 
 		try {
-			const res = await fetch(`/api/v1/backups/${selectedBackup}`, { method: 'DELETE' });
+			const res = await fetch(resolve(`/api/v1/backups/${selectedBackup}`), { method: 'DELETE' });
 
 			if (res.ok) {
 				alertStore.add('success', 'Backup deleted successfully');

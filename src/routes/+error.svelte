@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import gif404 from '$assets/404.gif';
 
@@ -21,7 +22,7 @@
 			</p>
 
 			<a
-				href="/"
+				href={resolve('/')}
 				class="inline-block rounded-lg bg-neutral-900 px-6 py-3 font-semibold text-white transition-colors hover:bg-neutral-700 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-200"
 			>
 				Go Home

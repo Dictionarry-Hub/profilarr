@@ -13,6 +13,7 @@ class Config {
 	public readonly port: number;
 	public readonly host: string;
 	public readonly origin: string;
+	public readonly baseUrl: string;
 	public readonly authMode: AuthMode;
 	public readonly profilarrApiKey: string | null;
 	public readonly oidc: {
@@ -55,6 +56,11 @@ class Config {
 		// stripped so downstream concatenation (`${origin}/path`) doesn't double up.
 		this.origin = (Deno.env.get('ORIGIN') || this.serverUrl).replace(/\/+$/, '');
 
+		// Base URL (subpath) for running behind a reverse proxy, mirroring Radarr's
+		// and Sonarr's "URL Base". BASE_URL is the only source, and it is used exactly
+		// as given: '/profilarr' works, anything else is the operator's problem.
+		this.baseUrl = Deno.env.get('BASE_URL') ?? '';
+
 		// Auth mode: 'on' (default), 'off', 'oidc'
 		const auth = (Deno.env.get('AUTH') || 'on').toLowerCase();
 		this.authMode = ['on', 'off', 'oidc'].includes(auth) ? (auth as AuthMode) : 'on';
@@ -91,6 +97,15 @@ class Config {
 	get serverUrl(): string {
 		const displayHost = this.host === '0.0.0.0' ? 'localhost' : this.host;
 		return `http://${displayHost}:${this.port}`;
+	}
+
+	/**
+	 * The full external URL of this instance, including the URL base.
+	 * Use for anything that leaves the server: OIDC redirect URIs, notification
+	 * deep links, the startup banner.
+	 */
+	get externalUrl(): string {
+		return `${this.origin}${this.baseUrl}`;
 	}
 
 	/**
