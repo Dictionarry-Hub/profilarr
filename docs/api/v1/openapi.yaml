@@ -70,7 +70,14 @@ components:
       type: apiKey
       in: header
       name: X-Api-Key
-      description: API key for programmatic access. Generate in Settings > Security.
+      description: |
+        API key for programmatic access. Create keys in Settings > Security.
+
+        Each key has either full access or per-area access. Areas match the
+        tags in this spec, and each operation's `x-permission` says whether it
+        needs `read` or `write` access to its area. Write access includes
+        read. A key without the required access gets 403, and an expired key
+        gets 401.
     session:
       type: apiKey
       in: cookie

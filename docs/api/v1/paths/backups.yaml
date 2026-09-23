@@ -4,6 +4,7 @@ backups:
     summary: List Backups
     tags:
       - Backups
+    x-permission: read
     responses:
       '200':
         description: List of backup files, sorted newest first
@@ -21,6 +22,14 @@ backups:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to Backups
   post:
     operationId: createBackup
     summary: Create Backup
@@ -30,6 +39,7 @@ backups:
       sanitized database copy with all secrets stripped.
     tags:
       - Backups
+    x-permission: write
     responses:
       '202':
         description: Backup job enqueued
@@ -47,6 +57,14 @@ backups:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Backups
 
 backup_file:
   get:
@@ -69,6 +87,7 @@ backup_file:
       items.
     tags:
       - Backups
+    x-permission: read
     parameters:
       - name: filename
         in: path
@@ -105,6 +124,14 @@ backup_file:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to Backups
       '404':
         description: Backup file not found
         content:
@@ -118,6 +145,7 @@ backup_file:
     summary: Delete Backup
     tags:
       - Backups
+    x-permission: write
     parameters:
       - name: filename
         in: path
@@ -148,6 +176,14 @@ backup_file:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Backups
       '404':
         description: Backup file not found
         content:
@@ -167,6 +203,7 @@ upload:
       are renamed to `backup-uploaded-{timestamp}.tar.gz`. Duplicates rejected.
     tags:
       - Backups
+    x-permission: write
     requestBody:
       required: true
       content:
@@ -207,6 +244,14 @@ upload:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Backups
 
 settings:
   get:
@@ -214,6 +259,7 @@ settings:
     summary: Get Backup Settings
     tags:
       - Backups
+    x-permission: read
     responses:
       '200':
         description: Current backup settings
@@ -235,6 +281,14 @@ settings:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to Backups
   patch:
     operationId: updateBackupSettings
     summary: Update Backup Settings
@@ -243,6 +297,7 @@ settings:
       new settings.
     tags:
       - Backups
+    x-permission: write
     requestBody:
       required: true
       content:
@@ -272,3 +327,11 @@ settings:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Backups

@@ -936,16 +936,36 @@ CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
 -- ==============================================================================
 -- TABLE: auth_settings
 -- Purpose: Store auth configuration (singleton pattern with id=1)
--- Migration: 036_create_auth_tables.ts, 056_add_local_bypass.ts, 071_remove_local_bypass.ts
+-- Migration: 036_create_auth_tables.ts, 056_add_local_bypass.ts, 071_remove_local_bypass.ts,
+--            072_create_api_keys.ts
 -- ==============================================================================
 
 CREATE TABLE auth_settings (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     session_duration_hours INTEGER NOT NULL DEFAULT 168,  -- 7 days
-    api_key TEXT,                           -- Bcrypt-hashed API key for programmatic access
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ==============================================================================
+-- TABLE: api_keys
+-- Purpose: Named API keys for programmatic access to /api/v1. Keys cannot be
+--          changed after creation; they are only created and deleted.
+-- Migration: 072_create_api_keys.ts
+-- ==============================================================================
+
+CREATE TABLE api_keys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,                     -- Unique, case-insensitive
+    key_hash TEXT NOT NULL,                 -- Bcrypt hash of the key
+    key_hint TEXT,                          -- Last 4 chars of the key; NULL for the key migrated from auth_settings
+    permissions TEXT NOT NULL,              -- JSON: "all", or {"<area>": "read" | "write"}
+    expires_at DATETIME,                    -- NULL = never expires
+    last_used_at DATETIME,                  -- Updated at most once a minute
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX idx_api_keys_name ON api_keys(name COLLATE NOCASE);
 
 -- ==============================================================================
 -- TABLE: setup_state

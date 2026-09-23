@@ -156,8 +156,8 @@ them on the same channel.
 | `PROFILARR_BULLETIN_URL` | `https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main` | Override for the announcement feed + release manifest base URL                        |
 
 `PROFILARR_API_KEY` must be at least 32 characters long. It is not persisted to
-SQLite or bcrypt-hashed; while set, it overrides the stored database key.
-Removing it reactivates the stored database key if one exists.
+SQLite or bcrypt-hashed. It always has full access and works alongside any keys
+created in Settings > Security.
 
 > [!NOTE]
 > When using OIDC `ORIGIN=` _must_ be set to your Profilarr URL, and Profilarr

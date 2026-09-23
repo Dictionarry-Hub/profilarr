@@ -112,7 +112,8 @@ All use raw SQL with `?` parameter binding and typed input/output interfaces.
 | `arrDriftSettings`      | Drift detection scheduling settings                                 |
 | `arrDriftStatus`        | Latest drift detection result per Arr instance                      |
 | `arrRenameSettings`     | Rename job settings per instance                                    |
-| `authSettings`          | Session duration, API key                                           |
+| `authSettings`          | Session duration                                                    |
+| `apiKeys`               | Named API keys: hash, hint, permissions, expiry, last use           |
 | `sessions`              | Session CRUD and cleanup                                            |
 | `jobQueue`              | Job queue CRUD, claim, reschedule                                   |
 | `jobRunHistory`         | Job execution history                                               |

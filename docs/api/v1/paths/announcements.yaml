@@ -8,6 +8,7 @@ list:
       detail endpoint to fetch one.
     tags:
       - Announcements
+    x-permission: read
     responses:
       '200':
         description: Visible announcements, newest first.
@@ -35,6 +36,14 @@ list:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to Announcements
 
 detail:
   get:
@@ -50,6 +59,7 @@ detail:
       bulletin PR merging and the next scheduled reconcile).
     tags:
       - Announcements
+    x-permission: read
     parameters:
       - name: id
         in: path
@@ -72,6 +82,14 @@ detail:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to Announcements
       '404':
         description: Announcement not found.
         content:

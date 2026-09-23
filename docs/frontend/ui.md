@@ -368,8 +368,11 @@ The card family is the primary content container:
   internal padding when the card is used as a grid child.
 - **`$ui/card/CardGrid.svelte`** is a responsive grid (1 / 2 / 3 / 4 / 5
   column breakpoints) that lays cards out.
-- **`$ui/card/ExpandableCard.svelte`** is a card with a collapsible body
-  and a header that supports a right-slot for inline actions.
+- **`$ui/card/ExpandableCard.svelte`** is a card with a collapsible body.
+  Its header has a `header-right` slot beside the title and a
+  `header-actions` slot at the far right next to the chevron; clicks in
+  `header-actions` don't collapse the card. A `description` slot overrides
+  the `description` prop when it needs markup such as inline code.
 - **`$ui/card/StickyCard.svelte`** is a card that pins to the bottom of
   the viewport, typically used as a save/discard action bar.
 

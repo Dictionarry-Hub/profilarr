@@ -18,7 +18,7 @@
  * - databases/[id]/+layout.server.ts → personal_access_token to all /databases/[id]/* pages
  * - databases/+page.server.ts → personal_access_token in database list
  * - settings/general/+page.server.ts → TMDB + AI api_key
- * - settings/security/+page.server.ts → Profilarr api_key
+ * - settings/security/+page.server.ts → Profilarr API key hashes
  * - settings/notifications/+page.server.ts → webhook_url in config JSON
  * - settings/notifications/edit/[id]/+page.server.ts → webhook_url in edit form
  * - 12 pages using pcdManager.getAll() → PATs (quality-profiles, custom-formats,
@@ -67,6 +67,7 @@ let arrInstanceId: number;
 let databaseId: number;
 let pcdDatabaseId: number;
 let notificationServiceId: string;
+let profilarrApiKeyHash: string;
 
 async function seedSecrets(dbPath: string) {
 	const db = openDb(dbPath);
@@ -106,8 +107,11 @@ async function seedSecrets(dbPath: string) {
 		}
 
 		// Profilarr API key (bcrypt-hashed)
-		const hashedApiKey = await hash(PROFILARR_API_KEY);
-		db.exec('UPDATE auth_settings SET api_key = ? WHERE id = 1', [hashedApiKey]);
+		profilarrApiKeyHash = await hash(PROFILARR_API_KEY);
+		db.exec(
+			`INSERT INTO api_keys (name, key_hash, key_hint, permissions) VALUES ('Exposure Test', ?, ?, '"all"')`,
+			[profilarrApiKeyHash, PROFILARR_API_KEY.slice(-4)]
+		);
 
 		// Set PAT on auto-linked Dictionarry database so entity pages return 200
 		// (the server auto-links this PCD on first startup, giving it a compiled cache)
@@ -236,6 +240,7 @@ test('/settings/general does not expose AI API key', async () => {
 test('/settings/security does not expose Profilarr API key', async () => {
 	const body = await fetchPage('/settings/security');
 	assertNotExposed(body, PROFILARR_API_KEY, 'Profilarr API key');
+	assertNotExposed(body, profilarrApiKeyHash, 'Profilarr API key hash');
 });
 
 // --- Notification webhook URLs ---

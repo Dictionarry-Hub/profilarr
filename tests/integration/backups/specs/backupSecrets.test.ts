@@ -15,8 +15,7 @@
  * - NULL database_instances.personal_access_token (rows preserved)
  * - Strip credentials from cloned repository .git/config remote URLs
  * - Empty ai_settings.api_key, tmdb_settings.api_key
- * - auth_settings.api_key intentionally untouched (bcrypt hash of a
- *   high-entropy random key, computationally safe to share)
+ * - DELETE api_keys
  *
  * The test seeds known secrets, creates a backup via the v1 API, downloads
  * it, and inspects the downloaded copy. It also verifies the on-disk
@@ -51,7 +50,7 @@ let infoPath: string;
 let extractDir: string;
 let onDiskBytesBefore: Uint8Array;
 let onDiskBytesAfter: Uint8Array;
-let liveProfilarrApiKeyHash: string;
+let liveApiKeyCount: number;
 let databaseUuid: string;
 
 async function seedSecrets(dbPath: string) {
@@ -110,7 +109,10 @@ async function seedSecrets(dbPath: string) {
 
 		// Profilarr API key (bcrypt-hashed)
 		const hashedApiKey = await hash(PROFILARR_API_KEY);
-		db.exec('UPDATE auth_settings SET api_key = ? WHERE id = 1', [hashedApiKey]);
+		db.exec(
+			`INSERT INTO api_keys (name, key_hash, key_hint, permissions) VALUES ('Backup Test', ?, ?, '"all"')`,
+			[hashedApiKey, PROFILARR_API_KEY.slice(-4)]
+		);
 
 		// Notification service with webhook URL
 		const serviceId = crypto.randomUUID();
@@ -204,14 +206,12 @@ setup(async () => {
 	await createUserDirect(getDbPath(PORT), 'admin', 'password123');
 	await seedSecrets(getDbPath(PORT));
 
-	// Capture the live bcrypt hash so we can later assert it survives the
-	// sanitize unchanged.
+	// Record the live key count so we can assert the download never touches
+	// the production database.
 	const live = openDb(getDbPath(PORT));
 	try {
-		const row = live.prepare('SELECT api_key FROM auth_settings WHERE id = 1').get() as {
-			api_key: string;
-		};
-		liveProfilarrApiKeyHash = row.api_key;
+		const row = live.prepare('SELECT COUNT(*) as count FROM api_keys').get() as { count: number };
+		liveApiKeyCount = row.count;
 	} finally {
 		live.close();
 	}
@@ -358,25 +358,24 @@ test('downloaded archive: TMDB api_key is blanked', () => {
 	}
 });
 
-// ─── Intentionally preserved ─────────────────────────────────────────────────
+// ─── API keys ────────────────────────────────────────────────────────────────
 
-test('downloaded archive: auth_settings.api_key bcrypt hash is preserved', () => {
+test('downloaded archive: api_keys rows are deleted', () => {
 	const db = openDb(backupDbPath);
 	try {
-		const row = db.prepare('SELECT api_key FROM auth_settings WHERE id = 1').get() as {
-			api_key: string | null;
-		};
-		assert(row.api_key !== null, 'auth_settings.api_key should retain its bcrypt hash');
-		assertEquals(
-			row.api_key,
-			liveProfilarrApiKeyHash,
-			'hash in archive should match the live DB value'
-		);
-		assertNotEquals(
-			row.api_key,
-			PROFILARR_API_KEY,
-			'hash should never equal plaintext (sanity check)'
-		);
+		const row = db.prepare('SELECT COUNT(*) as count FROM api_keys').get() as { count: number };
+		assertEquals(row.count, 0, 'api_keys should be empty in the downloaded archive');
+	} finally {
+		db.close();
+	}
+});
+
+test('live database api_keys are untouched by the download', () => {
+	assertEquals(liveApiKeyCount, 1, 'seeded API key should exist in the live DB');
+	const db = openDb(getDbPath(PORT));
+	try {
+		const row = db.prepare('SELECT COUNT(*) as count FROM api_keys').get() as { count: number };
+		assertEquals(row.count, liveApiKeyCount, 'live api_keys should be unchanged');
 	} finally {
 		db.close();
 	}

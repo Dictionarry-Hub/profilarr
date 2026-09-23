@@ -26,6 +26,7 @@ import {
 	cleanupExpiredSessions
 } from '$auth/middleware.ts';
 import { cleanupExpiredAttempts } from '$auth/rateLimit.ts';
+import { checkApiKeyAccess } from '$auth/apiPermissions.ts';
 import { setupStateQueries } from '$db/queries/setupState.ts';
 
 if (!isReload) {
@@ -148,21 +149,41 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return resolveAndStrip();
 	}
 
-	// API key auth is scoped to /api/ paths only.
+	// API key auth is scoped to /api/v1 paths only.
 	// Browser pages and form actions require a real session.
-	if (auth.user && !auth.session && auth.user.username === 'api') {
-		if (!event.url.pathname.startsWith('/api/')) {
+	if (auth.apiKey) {
+		if (!event.url.pathname.startsWith('/api/v1/')) {
 			return new Response(JSON.stringify({ error: 'API key auth is not accepted for this path' }), {
 				status: 403,
 				headers: { 'Content-Type': 'application/json' }
 			});
+		}
+
+		// Unmatched routes fall through to SvelteKit's 404
+		if (event.route.id) {
+			const denial = checkApiKeyAccess(auth.apiKey, event.route.id, event.request.method);
+			if (denial) {
+				void logger.warn('API key denied', {
+					source: 'Auth:APIKey',
+					meta: {
+						name: auth.apiKey.name,
+						method: event.request.method,
+						endpoint: event.url.pathname
+					}
+				});
+				return new Response(JSON.stringify({ error: denial }), {
+					status: 403,
+					headers: { 'Content-Type': 'application/json' }
+				});
+			}
 		}
 	}
 
 	// Not authenticated - redirect or return 401
 	if (!auth.user) {
 		if (event.url.pathname.startsWith('/api')) {
-			return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+			const error = auth.apiKeyExpired ? 'API key has expired' : 'Unauthorized';
+			return new Response(JSON.stringify({ error }), {
 				status: 401,
 				headers: { 'Content-Type': 'application/json' }
 			});
@@ -178,6 +199,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Authenticated - attach user to locals for use in routes
 	event.locals.user = auth.user;
 	event.locals.session = auth.session;
+	event.locals.apiKey = auth.apiKey;
 
 	return resolveAndStrip();
 };

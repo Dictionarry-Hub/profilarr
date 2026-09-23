@@ -24,9 +24,9 @@ export const settingsSecurityStage: Stage = {
 		{
 			id: 'settings-security-api-key',
 			target: 'security-api-key',
-			title: 'API Key',
-			body: 'A single API key per instance, sent via the `X-Api-Key` header, bcrypt-hashed on the server so the raw value cannot be recovered after it is generated. Generate once, copy the key immediately (it is shown once and never again), and regenerate to rotate. Regenerating invalidates anything still using the old key, so rotate before deleting old clients, not after.',
-			position: 'below',
+			title: 'API Keys',
+			body: 'Named keys for scripts and integrations, sent via the `X-Api-Key` header. Each key has full access or read / read & write access per API area, and an optional expiry. Keys are bcrypt-hashed and shown once at creation, then cannot be changed. To rotate, create a new key, move your clients over, then delete the old one.',
+			position: 'above',
 			freeInteract: true,
 			completion: { type: 'manual' }
 		},
@@ -42,7 +42,7 @@ export const settingsSecurityStage: Stage = {
 		{
 			id: 'settings-security-summary',
 			title: 'Summary',
-			body: 'Security is a cross-mode toolkit: use the parts that match your auth mode, rotate the API key when credentials leak, and revoke sessions you do not recognize.',
+			body: 'Security is a cross-mode toolkit: use the parts that match your auth mode, replace an API key when it leaks, and revoke sessions you do not recognize.',
 			completion: { type: 'manual' }
 		}
 	]

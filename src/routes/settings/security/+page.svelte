@@ -3,15 +3,19 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import {
-		Copy,
-		RefreshCw,
 		LogOut,
 		Check,
 		Globe,
 		Monitor,
 		Smartphone,
 		Network,
-		Clock
+		Clock,
+		Plus,
+		Trash2,
+		BookOpen,
+		Eye,
+		Pencil,
+		ShieldCheck
 	} from '@lucide/svelte';
 	import { parseUTC, formatDateTime, formatDate } from '$shared/utils/dates';
 	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
@@ -20,10 +24,20 @@
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import Table from '$ui/table/Table.svelte';
+	import Label from '$ui/label/Label.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import Modal from '$ui/modal/Modal.svelte';
+	import InlineCode from '$ui/code/InlineCode.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$alerts/store';
 	import type { Column } from '$ui/table/types';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import { FEATURES } from '$shared/features';
+	import {
+		API_KEYS_DOCS_URL,
+		ENV_API_KEY_NAME,
+		apiKeyAccessEntries,
+		type ApiKeyAccessEntry
+	} from '$shared/apiKeys';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -32,8 +46,6 @@
 	let currentPassword = '';
 	let newPassword = '';
 	let confirmPassword = '';
-
-	let regeneratingKey = false;
 
 	// Handle form responses
 	$: if (form?.passwordSuccess) {
@@ -45,8 +57,8 @@
 	$: if (form?.passwordError) {
 		alertStore.add('error', form.passwordError);
 	}
-	$: if (form?.apiKeyRegenerated) {
-		alertStore.add('success', 'API key regenerated');
+	$: if (form?.apiKeyDeleted) {
+		alertStore.add('success', `API key "${form.apiKeyDeleted}" deleted`);
 	}
 	$: if (form?.apiKeyError) {
 		alertStore.add('error', form.apiKeyError);
@@ -61,20 +73,55 @@
 		alertStore.add('error', form.sessionError);
 	}
 
-	$: apiKey = form?.apiKey ?? null;
-	$: apiKeyRegenerationDisabled = regeneratingKey || !data.canRegenerateApiKey;
-	$: apiKeyRegenerationTooltip = data.canRegenerateApiKey
-		? ''
-		: 'API key is managed by PROFILARR_API_KEY';
+	interface ApiKeyRow {
+		/** null for the env key */
+		id: number | null;
+		name: string;
+		access: ApiKeyAccessEntry[] | 'all';
+		keyHint: string | null;
+		expiresAt: string | null;
+		expired: boolean;
+		lastUsedAt: string | null;
+	}
 
-	async function copyApiKey() {
-		if (apiKey) {
-			const copied = await copyToClipboard(apiKey);
-			alertStore.add(
-				copied ? 'success' : 'error',
-				copied ? 'API key copied to clipboard' : 'Failed to copy to clipboard'
-			);
-		}
+	const envKeyRow: ApiKeyRow = {
+		id: null,
+		name: ENV_API_KEY_NAME,
+		access: 'all',
+		keyHint: null,
+		expiresAt: null,
+		expired: false,
+		lastUsedAt: null
+	};
+
+	$: apiKeyRows = [
+		...data.apiKeys.map((key): ApiKeyRow => ({
+			id: key.id,
+			name: key.name,
+			access: apiKeyAccessEntries(key.permissions, data.apiAreas),
+			keyHint: key.keyHint,
+			expiresAt: key.expiresAt,
+			expired: key.expired,
+			lastUsedAt: key.lastUsedAt
+		})),
+		...(data.hasEnvApiKey ? [envKeyRow] : [])
+	];
+
+	const apiKeyColumns: Column<ApiKeyRow>[] = [
+		{ key: 'name', header: 'Name' },
+		{ key: 'access', header: 'Access' },
+		{ key: 'keyHint', header: 'Key', hideOnMobile: true },
+		{ key: 'expiresAt', header: 'Expires' },
+		{ key: 'lastUsedAt', header: 'Last Used', hideOnMobile: true }
+	];
+
+	let pendingDelete: ApiKeyRow | null = null;
+	let deleteForm: HTMLFormElement;
+
+	function confirmDelete() {
+		// The form data is read synchronously on submit, so the modal can close right away
+		deleteForm.requestSubmit();
+		pendingDelete = null;
 	}
 
 	function fmtDateTime(dateStr: string): string {
@@ -158,7 +205,7 @@
 	<div class="mb-8">
 		<h1 class="text-2xl font-bold text-neutral-900 md:text-3xl dark:text-neutral-50">Security</h1>
 		<p class="mt-2 text-base text-neutral-600 md:mt-3 md:text-lg dark:text-neutral-400">
-			Manage your password, API key, and active sessions
+			Manage your password, API keys, and active sessions
 		</p>
 	</div>
 
@@ -224,98 +271,123 @@
 			</div>
 		</ExpandableCard>
 
-		<!-- API Key -->
-		<ExpandableCard
-			title="API Key"
-			description="Authenticate API requests via the X-Api-Key header"
-			onboardingId="security-api-key"
-		>
+		<!-- API Keys -->
+		<ExpandableCard title="API Keys" onboardingId="security-api-key">
+			<svelte:fragment slot="description">
+				Authenticate API requests with the <InlineCode text="X-Api-Key" rounded="sm" /> header
+			</svelte:fragment>
+			<svelte:fragment slot="header-actions">
+				<Button
+					variant="secondary"
+					icon={BookOpen}
+					text="API docs"
+					href={FEATURES.docs ? API_KEYS_DOCS_URL : undefined}
+					target={FEATURES.docs ? '_blank' : undefined}
+					rel={FEATURES.docs ? 'noopener noreferrer' : undefined}
+					disabled={!FEATURES.docs}
+					tooltip={FEATURES.docs ? '' : 'Docs coming soon'}
+				/>
+				<Button
+					variant="secondary"
+					icon={Plus}
+					iconColor="text-accent-500"
+					text="New Key"
+					href="/settings/security/api-keys/new"
+				/>
+			</svelte:fragment>
 			<div class="p-6">
-				{#if apiKey}
-					<!-- Just generated — show key once -->
-					<div class="space-y-3">
-						<div class="flex items-center gap-2">
-							<div class="flex-1">
-								<FormInput name="apiKey" label="" type="text" value={apiKey} readonly />
-							</div>
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								icon={Copy}
-								title="Copy"
-								ariaLabel="Copy API key"
-								on:click={copyApiKey}
-							/>
-						</div>
-						<p class="text-sm text-amber-600 dark:text-amber-400">
-							This key is shown only once — copy it now.
-						</p>
-						<form
-							method="POST"
-							action="?/regenerateApiKey"
-							use:enhance={() => {
-								regeneratingKey = true;
-								return async ({ update }) => {
-									await update();
-									regeneratingKey = false;
-								};
-							}}
-						>
-							<Button
-								type="submit"
-								variant="secondary"
-								size="sm"
-								icon={RefreshCw}
-								text={regeneratingKey ? 'Regenerating...' : 'Regenerate'}
-								disabled={apiKeyRegenerationDisabled}
-								tooltip={apiKeyRegenerationTooltip}
-							/>
-						</form>
-					</div>
-				{:else if data.hasApiKey}
-					<!-- Key exists but can't be displayed -->
-					<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-						<p class="text-sm text-neutral-500 dark:text-neutral-400">
-							{#if data.canRegenerateApiKey}
-								Your API key is hashed and cannot be displayed. Regenerating will replace the
-								current key.
-							{:else}
-								Your API key is managed by the PROFILARR_API_KEY environment variable.
+				{#if apiKeyRows.length > 0}
+					<Table
+						columns={apiKeyColumns}
+						data={apiKeyRows}
+						compact
+						responsive
+						hoverable={false}
+						actionsHeader=""
+					>
+						<svelte:fragment slot="cell" let:row let:column>
+							{#if column.key === 'name'}
+								<span class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+									{row.name}
+								</span>
+							{:else if column.key === 'access'}
+								{#if row.access === 'all'}
+									<Label variant="secondary" size="md" rounded="md">
+										<ShieldCheck size={12} class="text-blue-600 dark:text-blue-400" />
+										Full access
+									</Label>
+								{:else if row.access.length === 0}
+									<span class="text-xs text-neutral-500 dark:text-neutral-400">No access</span>
+								{:else}
+									<div class="flex flex-wrap gap-1">
+										{#each row.access as entry (entry.area.id)}
+											<Tooltip
+												text={`${entry.access === 'write' ? 'Read & write' : 'Read'} access to ${entry.area.name}`}
+												position="top"
+											>
+												<Label variant="secondary" size="md" rounded="md">
+													{#if entry.access === 'write'}
+														<Pencil size={12} class="text-amber-600 dark:text-amber-400" />
+													{:else}
+														<Eye size={12} class="text-emerald-600 dark:text-emerald-400" />
+													{/if}
+													{entry.area.name}
+												</Label>
+											</Tooltip>
+										{/each}
+									</div>
+								{/if}
+							{:else if column.key === 'keyHint'}
+								<span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+									{row.keyHint ? `••••${row.keyHint}` : '—'}
+								</span>
+							{:else if column.key === 'expiresAt'}
+								{#if row.expired}
+									<Label variant="danger" size="sm" rounded="md">Expired</Label>
+								{:else}
+									<span class="text-xs text-neutral-500 dark:text-neutral-400">
+										{row.expiresAt
+											? formatDate(row.expiresAt, $serverTimezone, $dateFormat)
+											: 'Never'}
+									</span>
+								{/if}
+							{:else if column.key === 'lastUsedAt'}
+								<span class="text-xs text-neutral-500 dark:text-neutral-400">
+									{row.id === null ? '—' : formatRelativeTime(row.lastUsedAt)}
+								</span>
 							{/if}
-						</p>
-						<form
-							method="POST"
-							action="?/regenerateApiKey"
-							use:enhance={() => {
-								regeneratingKey = true;
-								return async ({ update }) => {
-									await update();
-									regeneratingKey = false;
-								};
-							}}
-						>
-							<Button
-								type="submit"
-								variant="secondary"
-								size="sm"
-								icon={RefreshCw}
-								iconColor="text-emerald-500"
-								text={regeneratingKey ? 'Regenerating...' : 'Regenerate'}
-								disabled={apiKeyRegenerationDisabled}
-								tooltip={apiKeyRegenerationTooltip}
-							/>
-						</form>
-					</div>
+						</svelte:fragment>
+						<svelte:fragment slot="actions" let:row>
+							{#if row.id === null}
+								<Tooltip text="Set by PROFILARR_API_KEY" position="left">
+									<Label variant="secondary" size="sm" rounded="md">env</Label>
+								</Tooltip>
+							{:else}
+								<Button
+									icon={Trash2}
+									title="Delete API key"
+									ariaLabel="Delete API key"
+									variant="secondary"
+									iconColor="text-red-600 dark:text-red-400"
+									size="xs"
+									on:click={() => (pendingDelete = row)}
+								/>
+							{/if}
+						</svelte:fragment>
+					</Table>
 				{:else}
-					<!-- No key configured -->
-					<div class="flex items-center gap-4">
-						<p class="text-sm text-neutral-500 dark:text-neutral-400">No API key configured</p>
-						<form method="POST" action="?/regenerateApiKey" use:enhance>
-							<Button type="submit" variant="secondary" size="sm" text="Generate Key" />
-						</form>
-					</div>
+					<p class="text-sm text-neutral-500 dark:text-neutral-400">No API keys yet</p>
 				{/if}
+
+				<form
+					method="POST"
+					action="?/deleteApiKey"
+					class="hidden"
+					bind:this={deleteForm}
+					use:enhance
+				>
+					<input type="hidden" name="id" value={pendingDelete?.id ?? ''} />
+				</form>
 			</div>
 		</ExpandableCard>
 
@@ -325,7 +397,7 @@
 			description="Manage your logged-in sessions across devices"
 			onboardingId="security-sessions"
 		>
-			<svelte:fragment slot="header-right">
+			<svelte:fragment slot="header-actions">
 				{#if data.sessions.length > 1}
 					<form
 						method="POST"
@@ -340,7 +412,6 @@
 						<Button
 							type="submit"
 							variant="secondary"
-							size="xs"
 							icon={LogOut}
 							iconColor="text-red-500"
 							text="Revoke Others"
@@ -395,3 +466,14 @@
 		</ExpandableCard>
 	</div>
 </div>
+
+<Modal
+	open={pendingDelete !== null}
+	header="Delete API Key"
+	bodyMessage={`Delete "${pendingDelete?.name ?? ''}"? Anything using this key stops working immediately.`}
+	confirmText="Delete"
+	cancelText="Cancel"
+	confirmDanger
+	on:confirm={confirmDelete}
+	on:cancel={() => (pendingDelete = null)}
+/>

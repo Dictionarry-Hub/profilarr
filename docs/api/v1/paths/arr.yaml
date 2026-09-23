@@ -15,6 +15,7 @@ instances:
       - The `api_key` field is never included
     tags:
       - Arr
+    x-permission: read
     responses:
       '200':
         description: List of Arr instances
@@ -26,3 +27,11 @@ instances:
                 $ref: '../schemas/arr.yaml#/ArrInstance'
       '401':
         description: Not authenticated
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to Arr

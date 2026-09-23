@@ -2,9 +2,23 @@ import type { Actions, ServerLoad } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { usersQueries } from '$db/queries/users.ts';
 import { sessionsQueries } from '$db/queries/sessions.ts';
-import { authSettingsQueries } from '$db/queries/authSettings.ts';
+import { apiKeysQueries } from '$db/queries/apiKeys.ts';
 import { hashPassword, verifyPassword } from '$auth/password.ts';
+import { API_AREAS } from '$auth/apiPermissions.ts';
+import { config } from '$config';
+import { isApiKeyExpired } from '$shared/apiKeys.ts';
 import { logger } from '$logger/logger.ts';
+
+function loadApiKeys() {
+	return {
+		apiKeys: apiKeysQueries.list().map((key) => ({
+			...key,
+			expired: isApiKeyExpired(key.expiresAt)
+		})),
+		hasEnvApiKey: config.profilarrApiKey !== null,
+		apiAreas: API_AREAS
+	};
+}
 
 export const load: ServerLoad = async ({ cookies }) => {
 	const currentSessionId = cookies.get('session');
@@ -13,15 +27,12 @@ export const load: ServerLoad = async ({ cookies }) => {
 	if (!user) {
 		return {
 			sessions: [],
-			hasApiKey: false,
-			canRegenerateApiKey: true,
+			...loadApiKeys(),
 			currentSessionId: null
 		};
 	}
 
 	const sessions = sessionsQueries.getByUserId(user.id);
-	const hasApiKey = authSettingsQueries.hasApiKey();
-	const canRegenerateApiKey = authSettingsQueries.canRegenerateApiKey();
 
 	return {
 		sessions: sessions.map((s) => ({
@@ -35,8 +46,7 @@ export const load: ServerLoad = async ({ cookies }) => {
 			device_type: s.device_type,
 			isCurrent: s.id === currentSessionId
 		})),
-		hasApiKey,
-		canRegenerateApiKey,
+		...loadApiKeys(),
 		currentSessionId
 	};
 };
@@ -94,20 +104,27 @@ export const actions: Actions = {
 		return { passwordSuccess: true };
 	},
 
-	regenerateApiKey: async () => {
-		if (!authSettingsQueries.canRegenerateApiKey()) {
-			return fail(400, {
-				apiKeyError: 'API key is managed by PROFILARR_API_KEY and cannot be regenerated'
-			});
+	deleteApiKey: async ({ request }) => {
+		const formData = await request.formData();
+		const id = Number(formData.get('id'));
+
+		if (!Number.isInteger(id) || id < 1) {
+			return fail(400, { apiKeyError: 'Invalid API key' });
 		}
 
-		const newKey = await authSettingsQueries.regenerateApiKey();
+		const apiKey = apiKeysQueries.getById(id);
+		if (!apiKey) {
+			return fail(404, { apiKeyError: 'API key not found' });
+		}
 
-		await logger.info('API key regenerated', {
-			source: 'Auth:APIKey'
+		apiKeysQueries.delete(id);
+
+		await logger.info(`API key '${apiKey.name}' deleted`, {
+			source: 'Auth:APIKey',
+			meta: { id, name: apiKey.name }
 		});
 
-		return { apiKey: newKey, apiKeyRegenerated: true };
+		return { apiKeyDeleted: apiKey.name };
 	},
 
 	revokeSession: async ({ request, cookies }) => {
