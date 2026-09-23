@@ -67,14 +67,32 @@ The auth middleware (`src/lib/server/utils/auth/middleware.ts`) enforces this by
 path prefix. SvelteKit's built-in CSRF protection (Origin header check on
 mutations) ensures session requests came from the Profilarr UI.
 
-See `docs/architecture/security.md` for the full auth system, request flow,
-rate limiting, and secret stripping.
+API keys can be scoped, so every authenticated operation must declare the
+access it needs with `x-permission`, and have exactly one tag, which is its
+area:
+
+```yaml
+tags:
+  - Databases
+x-permission: write
+```
+
+Use `read` for operations that only return data, including POSTs that compute
+something without changing state, and `write` for anything that changes state.
+Document a `403` response alongside the `401`. Operations without a label are
+denied to scoped keys. `deno task lint:api-permissions` fails CI until every
+operation has one, and until every handler under `src/routes/api/v1` matches a
+labelled operation. Sessions are unaffected by permissions.
+
+See [security.md](./security.md#api-keys) for the full auth system, request
+flow, rate limiting, and secret stripping.
 
 ## Contract-First Workflow
 
 New endpoints follow a spec-first process:
 
-1. **Define** paths and schemas in `docs/api/v1/` (YAML)
+1. **Define** paths and schemas in `docs/api/v1/` (YAML), including each
+   operation's `x-permission`
 2. **Generate** TypeScript types from the spec into `src/lib/api/v1.d.ts`
 3. **Implement** the endpoint handler, using the generated types
 4. **Test** with integration tests that verify the contract (status codes,
@@ -161,7 +179,8 @@ or that the contract alone doesn't capture:
 
 Every v1 endpoint should have integration tests that verify:
 
-- Auth enforcement (401 without credentials, 200 with API key or session)
+- Auth enforcement (401 without credentials, 200 with API key or session, 403
+  for an API key without the operation's `x-permission` access)
 - Response shape matches the contract (required fields present)
 - No secret leakage (sensitive fields stripped)
 - Correct behavior with seeded data

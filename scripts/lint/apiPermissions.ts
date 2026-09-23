@@ -7,19 +7,31 @@
  * label is denied to every scoped key, which is safe but almost always a
  * mistake, so this rule fails CI instead.
  *
- * Rules, checked against the bundled spec (`src/lib/api/v1.openapi.json`):
+ * Spec rules, checked against the bundled spec (`src/lib/api/v1.openapi.json`):
  *   - `x-permission` is `read` or `write`
  *   - exactly one tag, which is the operation's area
  *   - the tag is declared in the spec's top-level `tags`
  *
- * Public operations (`security: []`) are skipped.
+ * Route rule: every handler exported from a `+server.ts` under
+ * `src/routes/api/v1` resolves to a labelled operation, using the same lookup
+ * the server uses at runtime. This catches handlers missing from the spec and
+ * route paths that don't match their spec path, which the spec rules can't see.
+ *
+ * Public operations (`security: []`) and public paths are skipped.
  *
  * Usage:
  *   deno task lint:api-permissions
  */
 
+import { getApiRequirement } from '../../src/lib/server/utils/auth/apiPermissions.ts';
+import { isPublicPath } from '../../src/lib/server/utils/auth/publicPaths.ts';
+
 const SPEC_PATH = 'src/lib/api/v1.openapi.json';
+const ROUTES_ROOT = 'src/routes';
+const API_V1_ROUTES = `${ROUTES_ROOT}/api/v1`;
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'];
+const EXPORTED_METHOD_RE =
+	/export\s+(?:const|(?:async\s+)?function)\s+(GET|POST|PUT|PATCH|DELETE)\b/g;
 
 interface SpecOperation {
 	operationId?: string;
@@ -60,12 +72,34 @@ for (const [path, item] of Object.entries(spec.paths)) {
 	}
 }
 
+async function collectServerFiles(dir: string): Promise<string[]> {
+	const files: string[] = [];
+	for await (const entry of Deno.readDir(dir)) {
+		const path = `${dir}/${entry.name}`;
+		if (entry.isDirectory) files.push(...(await collectServerFiles(path)));
+		else if (entry.name === '+server.ts') files.push(path);
+	}
+	return files;
+}
+
+for (const file of (await collectServerFiles(API_V1_ROUTES)).sort()) {
+	const routeId = file.slice(ROUTES_ROOT.length, -'/+server.ts'.length);
+	if (isPublicPath(routeId)) continue;
+
+	const source = await Deno.readTextFile(file);
+	for (const match of source.matchAll(EXPORTED_METHOD_RE)) {
+		if (!getApiRequirement(routeId, match[1])) {
+			violations.push(`${match[1]} ${routeId}: no labelled operation in the spec`);
+		}
+	}
+}
+
 if (violations.length > 0) {
 	console.error('API permission labels missing or invalid:');
 	for (const violation of violations) {
 		console.error(`- ${violation}`);
 	}
-	console.error('\nFix the operation in docs/api/v1/paths/, then regenerate the spec:');
+	console.error('\nAdd or fix the operation in docs/api/v1/paths/, then regenerate the spec:');
 	console.error('  deno task generate:api-types');
 	Deno.exit(1);
 }

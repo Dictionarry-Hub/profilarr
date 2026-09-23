@@ -7,7 +7,8 @@
   - [AUTH=on](#authon-default)
   - [AUTH=oidc](#authoidc)
   - [AUTH=off](#authoff)
-  - [API Key](#api-key)
+  - [API Keys](#api-keys)
+    - [Permissions](#permissions)
 - [Request Flow](#request-flow)
 - [Security Features](#security-features)
   - [Hashing](#hashing)
@@ -138,28 +139,54 @@ No auth checks. All requests are allowed through. Intended for deployments
 behind an authenticating reverse proxy like Authelia or Authentik. The setup
 page is blocked in this mode since there's no local user to create.
 
-### API Key
+### API Keys
 
 Available in all modes except `AUTH=off`. Checked before session checks in the
 request flow.
 
 - Header: `X-Api-Key`
-- Scoped to `/api/` paths only. Browser pages and SvelteKit form actions require
-  a real session. Requests with a valid API key to non-API paths get 403. This
-  prevents the API key from being used as a second admin login (e.g.
-  regenerating its own key or changing auth settings via settings form actions).
-  When `/api/internal/` routes exist, API key auth will be excluded from those
-  too.
-- Key is bcrypt-hashed in the database - never stored as plaintext
-- `regenerateApiKey()` returns the plaintext key once for the user to copy; only
-  the hash is persisted
-- Validation uses async bcrypt `verify()` against the stored hash
-- `PROFILARR_API_KEY` can declaratively set the active API key from the
-  environment. It must be at least 32 characters long. The value is a plaintext
-  runtime secret, is not persisted to SQLite, and is not bcrypt-hashed. When
-  set, it overrides the database hash and regeneration is disabled in Settings >
-  Security. Removing it reactivates the stored database key if one exists.
+- Scoped to `/api/v1/` paths only. Browser pages and SvelteKit form actions
+  require a real session. Requests with a valid API key to other paths get 403.
+  This prevents an API key from being used as a second admin login (e.g.
+  creating keys or changing auth settings via settings form actions).
+- Keys are named, stored in `api_keys`, and managed in Settings > Security.
+  They are only created and deleted; nothing about a key changes after
+  creation, so a key can never widen its own access.
+- Each key has full access (`"all"`) or per-area access: `read` or `write`
+  (write includes read) per OpenAPI tag. `"all"` covers areas added later.
+- Keys expire after 30 days, 90 days, 1 year, or never. An expired key gets 401
+  `API key has expired`.
+- Key is bcrypt-hashed in the database; the plaintext is shown once at creation.
+  The last 4 characters are stored so the UI can tell keys apart.
+- Keys carry no identifier, so an unknown key is checked against every stored
+  hash with async bcrypt `verify()`. Keys that have matched are remembered in
+  memory by SHA-256, and their row is re-read on each request, so deletion and
+  expiry take effect immediately.
+- `last_used_at` is updated at most once a minute per key.
+- `PROFILARR_API_KEY` adds a key from the environment. It must be at least 32
+  characters long. The value is a plaintext runtime secret, is not persisted to
+  SQLite, and is not bcrypt-hashed. It always has full access and works
+  alongside stored keys.
 - Invalid keys are logged with a masked value (`****` + last 4 chars)
+
+#### Permissions
+
+Each authenticated `/api/v1` operation declares `x-permission: read | write` in
+the OpenAPI spec, and its single tag is its area. At startup
+`src/lib/server/utils/auth/apiPermissions.ts` reads the bundled spec into a
+lookup of method + path to area and access. On each request the matched route
+id is converted to the spec's path form (parameter names ignored) and checked
+against the key:
+
+- Full-access keys pass without a lookup.
+- Operations with no label are denied to scoped keys (fail closed). The
+  `lint:api-permissions` rule fails CI if an authenticated operation is missing
+  its label or does not have exactly one tag, or if a route handler under
+  `src/routes/api/v1` doesn't resolve to a labelled operation (a handler
+  missing from the spec, or a route path that doesn't match its spec path).
+- A key without the required access gets 403, e.g.
+  `API key does not have write access to Databases`.
+- HEAD is treated as GET.
 
 ## Request Flow
 
@@ -230,16 +257,16 @@ flowchart TD
 
 ### Hashing
 
-Passwords and the Profilarr API key are both bcrypt-hashed. Passwords are hashed
-at account creation and password change. The API key is hashed at generation
-time (migration 057 cleared any legacy plaintext keys); `regenerateApiKey()`
-returns the plaintext once for the user to copy, then only the hash is
-persisted. Validation uses async bcrypt `verify()` in both cases.
+Passwords and Profilarr API keys are both bcrypt-hashed. Passwords are hashed
+at account creation and password change. API keys are hashed at creation; the
+plaintext is returned once for the user to copy, then only the hash and the
+last 4 characters are persisted. Validation uses async bcrypt `verify()` in
+both cases.
 
 This differs from most apps in the arr ecosystem. Sonarr, Radarr, and similar
 tools store their API keys as plaintext in the database and always display them
-to authenticated users in settings. Profilarr treats the API key more like a
-password - hashed on storage, shown once at generation, never retrievable
+to authenticated users in settings. Profilarr treats API keys more like
+passwords - hashed on storage, shown once at creation, never retrievable
 afterward. This is closer to how services like GitHub and Stripe handle API
 keys.
 
@@ -357,9 +384,8 @@ Secrets are stripped at two levels:
   keys on `tmdb_settings` are nulled but the rows are kept (PCD repos remain
   linked, schedules and other settings preserved). Embedded HTTP(S)
   credentials are also stripped from cloned PCD repository `.git/config`
-  remote URLs. `auth_settings.api_key` is left in place because it is a
-  bcrypt hash of a high-entropy random key, computationally infeasible to
-  brute-force from the hash alone. The local archive on disk and the production
+  remote URLs. API keys are removed: `api_keys` is emptied, or in backups from
+  before migration 072, `auth_settings.api_key` is nulled. The local archive on disk and the production
   database are never modified. See `src/lib/server/utils/backup/sanitize.ts`
   for the exact policy.
 
@@ -453,11 +479,12 @@ Pure function tests for the core auth utilities - IP classification, path
 allowlisting, and login failure analysis. No server instances or network calls
 needed.
 
-| File                    | Tests                                                                                    |
-| ----------------------- | ---------------------------------------------------------------------------------------- |
-| `network.test.ts`       | `getClientIp` proxy header handling with trustProxy on/off                               |
-| `publicPaths.test.ts`   | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
-| `loginAnalysis.test.ts` | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
+| File                     | Tests                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| `network.test.ts`        | `getClientIp` proxy header handling with trustProxy on/off                               |
+| `publicPaths.test.ts`    | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
+| `loginAnalysis.test.ts`  | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
+| `apiPermissions.test.ts` | Route id to spec path mapping, permission lookup, read/write/area checks, area list      |
 
 **Sanitize tests** (`tests/unit/sanitize/`):
 
@@ -472,21 +499,23 @@ end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
 `ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
 and run in parallel via `deno task test integration`.
 
-| File                     | Port             | Tests                                                                                          |
-| ------------------------ | ---------------- | ---------------------------------------------------------------------------------------------- |
-| `health.test.ts`         | 7001             | Public health vs authenticated diagnostics, no info disclosure                                 |
-| `csrf.test.ts`           | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                   |
-| `cookie.test.ts`         | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                              |
-| `apiKey.test.ts`         | 7004             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths                          |
-| `session.test.ts`        | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection |
-| `oidc.test.ts`           | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, AUTH=on rejection, proxy flow                           |
-| `rateLimit.test.ts`      | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                             |
-| `proxy.test.ts`          | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                     |
-| `xForwardedFor.test.ts`  | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                     |
-| `secretExposure.test.ts` | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                 |
-| `backupSecrets.test.ts`  | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                        |
-| `pathTraversal.test.ts`  | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints               |
-| `localBypass.test.ts`    | 7019             | Local bypass removal: requests from local addresses require auth                               |
+| File                        | Port             | Tests                                                                                          |
+| --------------------------- | ---------------- | ---------------------------------------------------------------------------------------------- |
+| `health.test.ts`            | 7001             | Public health vs authenticated diagnostics, no info disclosure                                 |
+| `csrf.test.ts`              | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                   |
+| `cookie.test.ts`            | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                              |
+| `apiKey.test.ts`            | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management       |
+| `apiKeyPermissions.test.ts` | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at          |
+| `envApiKey.test.ts`         | 7018             | Env key works alongside stored keys, "Environment" name reserved                               |
+| `session.test.ts`           | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection |
+| `oidc.test.ts`              | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, AUTH=on rejection, proxy flow                           |
+| `rateLimit.test.ts`         | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                             |
+| `proxy.test.ts`             | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                     |
+| `xForwardedFor.test.ts`     | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                     |
+| `secretExposure.test.ts`    | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                 |
+| `backupSecrets.test.ts`     | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                        |
+| `pathTraversal.test.ts`     | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints               |
+| `localBypass.test.ts`       | 7019             | Local bypass removal: requests from local addresses require auth                               |
 
 ### E2E Tests (`tests/e2e/auth/`)
 

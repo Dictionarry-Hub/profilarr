@@ -80,7 +80,7 @@
 		"lint:datetime": "deno run --allow-read --allow-env scripts/lint/datetime.ts",
 		"lint:clipboard": "deno run --allow-read --allow-env scripts/lint/clipboard.ts",
 		"lint:page-meta": "deno run --allow-read --allow-env scripts/lint/pageMeta.ts",
-		"lint:api-permissions": "deno run --allow-read=src/lib/api/v1.openapi.json scripts/lint/apiPermissions.ts",
+		"lint:api-permissions": "deno run --allow-read=src/lib/api/v1.openapi.json,src/routes/api/v1 scripts/lint/apiPermissions.ts",
 		"check": "deno task check:server && deno task check:client",
 		"check:server": "deno check --quiet src/lib/server/**/*.ts",
 		"check:client": "NODE_ENV=development deno run -A svelte-check --tsconfig ./tsconfig.json",

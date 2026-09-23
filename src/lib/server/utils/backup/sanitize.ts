@@ -21,8 +21,8 @@
  * - Git remote URLs in cloned PCD repos are kept, but any embedded HTTP(S)
  *   credentials are removed from `.git/config`.
  * - ai_settings / tmdb_settings api keys nulled (rows stay).
- * - auth_settings.api_key NOT touched; it's bcrypt-hashed of a high-entropy
- *   random key, so the hash is computationally infeasible to brute-force.
+ * - api_keys rows deleted. Backups from before migration 072 keep the key
+ *   in auth_settings.api_key instead, which is nulled. See `stripApiKeys`.
  *
  * This is more aggressive than a strict per-field strip but it's fail-safe:
  * any new sensitive column added later to arr_instances or
@@ -55,6 +55,7 @@ export const SANITIZED_CATEGORIES = [
 	'Arr instances (URLs, API keys, sync configs, drift state, rename and cleanup history)',
 	'Notification services (webhook URLs, tokens, history)',
 	'User accounts and active sessions',
+	'API keys',
 	'Personal access tokens for linked databases',
 	'Credentials embedded in cloned database Git remote URLs',
 	'AI and TMDB API keys'
@@ -115,6 +116,28 @@ async function sanitizeGitConfigs(rootDir: string): Promise<void> {
 export function applySanitize(db: Database): void {
 	for (const sql of SANITIZE_SQL) {
 		db.exec(sql); // nosemgrep: profilarr.sql.exec-with-variable - SANITIZE_SQL is a hardcoded constant
+	}
+	stripApiKeys(db);
+}
+
+/**
+ * Where API keys live depends on the backup's age: the api_keys table from
+ * migration 072 on, the auth_settings.api_key column before it. Checking
+ * first keeps older backups downloadable.
+ */
+function stripApiKeys(db: Database): void {
+	const hasTable = db
+		.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'api_keys'")
+		.get();
+	if (hasTable) {
+		db.exec('DELETE FROM api_keys');
+	}
+
+	const hasLegacyColumn = db
+		.prepare("SELECT 1 FROM pragma_table_info('auth_settings') WHERE name = 'api_key'")
+		.get();
+	if (hasLegacyColumn) {
+		db.exec('UPDATE auth_settings SET api_key = NULL');
 	}
 }
 

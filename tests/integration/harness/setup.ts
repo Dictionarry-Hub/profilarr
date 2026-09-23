@@ -70,17 +70,54 @@ export async function createUserDirect(
 	}
 }
 
+export interface ApiKeyOptions {
+	/** Defaults to `test-<last 4 chars>`, so several keys per spec don't collide */
+	name?: string;
+	/** Stored permissions: `'all'` (default) or an area -> access map */
+	permissions?: 'all' | Record<string, string>;
+	/** ISO timestamp; null (default) never expires */
+	expiresAt?: string | null;
+}
+
 /**
- * Set an API key directly in the database (bcrypt-hashed).
+ * Add an API key directly in the database (bcrypt-hashed). Full access and
+ * no expiry unless options say otherwise.
  */
-export async function setApiKey(dbPath: string, apiKey: string): Promise<void> {
-	log.setup('Setting API key in DB');
+export async function setApiKey(
+	dbPath: string,
+	apiKey: string,
+	options: ApiKeyOptions = {}
+): Promise<void> {
+	const name = options.name ?? `test-${apiKey.slice(-4)}`;
+	log.setup(`Adding API key "${name}" in DB`);
 	const hashed = await hash(apiKey);
 	const db = openDb(dbPath);
 	try {
-		db.exec('UPDATE auth_settings SET api_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1', [
-			hashed
-		]);
+		db.exec(
+			`INSERT INTO api_keys (name, key_hash, key_hint, permissions, expires_at, created_at)
+			 VALUES (?, ?, ?, ?, ?, ?)`,
+			[
+				name,
+				hashed,
+				apiKey.slice(-4),
+				JSON.stringify(options.permissions ?? 'all'),
+				options.expiresAt ?? null,
+				new Date().toISOString()
+			]
+		);
+	} finally {
+		db.close();
+	}
+}
+
+/**
+ * Delete an API key by name directly in the database.
+ */
+export function deleteApiKey(dbPath: string, name: string): void {
+	log.setup(`Deleting API key "${name}" in DB`);
+	const db = openDb(dbPath);
+	try {
+		db.exec('DELETE FROM api_keys WHERE name = ?', [name]);
 	} finally {
 		db.close();
 	}
