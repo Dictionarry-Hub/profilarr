@@ -60,6 +60,7 @@
 				"summary": "List Arr Instances",
 				"description": "Returns all Arr instances (Radarr/Sonarr) with secrets stripped.\n\n**Use cases:**\n- Dashboard widgets showing connected instances\n- Automation scripts checking instance state\n- Prerequisite checks (e.g. onboarding)\n\n**Behavior:**\n- Returns an empty array if no instances are connected\n- The `api_key` field is never included\n",
 				"tags": ["Arr"],
+				"x-permission": "read",
 				"responses": {
 					"200": {
 						"description": "List of Arr instances",
@@ -137,6 +138,27 @@
 					},
 					"401": {
 						"description": "Not authenticated"
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to Arr"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -147,6 +169,7 @@
 				"summary": "List Databases",
 				"description": "Secrets are stripped: `personal_access_token` is replaced by `hasPat` (boolean)\nand `local_path` is excluded.\n",
 				"tags": ["Databases"],
+				"x-permission": "read",
 				"responses": {
 					"200": {
 						"description": "List of linked databases",
@@ -264,6 +287,27 @@
 								}
 							}
 						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to Databases"
+								}
+							}
+						}
 					}
 				}
 			},
@@ -272,6 +316,7 @@
 				"summary": "Link Database",
 				"description": "Clones the repository, validates its PCD manifest, and processes dependencies.\nThis is synchronous and may take several seconds for large repositories.\n\nField dependencies:\n- `personal_access_token` requires `git_user_name` and `git_user_email`\n- `local_ops_enabled` requires `personal_access_token`\n- `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`\n",
 				"tags": ["Databases"],
+				"x-permission": "write",
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -469,6 +514,27 @@
 							}
 						}
 					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have write access to Databases"
+								}
+							}
+						}
+					},
 					"409": {
 						"description": "A database with this name already exists",
 						"content": {
@@ -531,6 +597,7 @@
 				"summary": "Get Database",
 				"description": "Secrets are stripped: `personal_access_token` is replaced by `hasPat` (boolean)\nand `local_path` is excluded.\n",
 				"tags": ["Databases"],
+				"x-permission": "read",
 				"responses": {
 					"200": {
 						"description": "Database detail",
@@ -649,6 +716,27 @@
 							}
 						}
 					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to Databases"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Database not found",
 						"content": {
@@ -677,6 +765,7 @@
 				"summary": "Update Database",
 				"description": "Partial update. Only the provided fields are changed. Unknown fields\nare silently ignored.\n\nField dependencies:\n- `personal_access_token` requires `git_user_name` and `git_user_email`\n- `local_ops_enabled` requires `personal_access_token`\n- `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`\n",
 				"tags": ["Databases"],
+				"x-permission": "write",
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -862,6 +951,27 @@
 							}
 						}
 					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have write access to Databases"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Database not found",
 						"content": {
@@ -911,6 +1021,7 @@
 				"summary": "Unlink Database",
 				"description": "Removes the database row, deletes the cloned repository from disk,\nand cancels any scheduled sync jobs.\n",
 				"tags": ["Databases"],
+				"x-permission": "write",
 				"responses": {
 					"204": {
 						"description": "Database unlinked"
@@ -932,6 +1043,27 @@
 								},
 								"example": {
 									"error": "Unauthorized"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have write access to Databases"
 								}
 							}
 						}
@@ -977,6 +1109,7 @@
 				"summary": "Trigger Sync",
 				"description": "Async. Enqueues a `pcd.sync` job and returns 202 with the job ID.\nPoll `GET /api/v1/jobs/{jobId}` for completion.\n",
 				"tags": ["Databases"],
+				"x-permission": "write",
 				"responses": {
 					"202": {
 						"description": "Sync job enqueued",
@@ -1036,6 +1169,27 @@
 								},
 								"example": {
 									"error": "Unauthorized"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have write access to Databases"
 								}
 							}
 						}
@@ -1135,6 +1289,7 @@
 				"summary": "System Status",
 				"description": "Single-call overview designed for dashboard integrations (e.g. Homepage).\nThe `drift` field on each arr is reserved for future use and always null.\n",
 				"tags": ["System"],
+				"x-permission": "read",
 				"responses": {
 					"200": {
 						"description": "System status",
@@ -1494,6 +1649,27 @@
 								}
 							}
 						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to System"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -1504,6 +1680,7 @@
 				"summary": "OpenAPI Specification",
 				"description": "Returns the resolved OpenAPI 3.1 spec as a single JSON document.\nUseful for generating client SDKs or feeding to documentation tools.\n",
 				"tags": ["System"],
+				"x-permission": "read",
 				"responses": {
 					"200": {
 						"description": "OpenAPI specification",
@@ -1511,6 +1688,27 @@
 							"application/json": {
 								"schema": {
 									"type": "object"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to System"
 								}
 							}
 						}
@@ -1524,6 +1722,7 @@
 				"summary": "Get Job Status",
 				"description": "Returns the current status of a job queue entry.\n\n**Use cases:**\n- Polling for completion after creating a backup\n- Checking if a scheduled job has run\n- Inspecting job errors after failure\n\n**Behavior:**\n- Returns the job queue record with its current status\n- If the job has executed, `result` includes the latest run history\n- If the job is still queued or running, `result` is null\n",
 				"tags": ["Jobs"],
+				"x-permission": "read",
 				"parameters": [
 					{
 						"name": "id",
@@ -1680,6 +1879,27 @@
 							}
 						}
 					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to Jobs"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Job not found",
 						"content": {
@@ -1709,6 +1929,7 @@
 				"operationId": "listBackups",
 				"summary": "List Backups",
 				"tags": ["Backups"],
+				"x-permission": "read",
 				"responses": {
 					"200": {
 						"description": "List of backup files, sorted newest first",
@@ -1765,6 +1986,27 @@
 								}
 							}
 						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to Backups"
+								}
+							}
+						}
 					}
 				}
 			},
@@ -1773,6 +2015,7 @@
 				"summary": "Create Backup",
 				"description": "Async. Enqueues a `backup.create` job and returns 202 with the job ID.\nPoll `GET /api/v1/jobs/{jobId}` for completion. The backup includes a\nsanitized database copy with all secrets stripped.\n",
 				"tags": ["Backups"],
+				"x-permission": "write",
 				"responses": {
 					"202": {
 						"description": "Backup job enqueued",
@@ -1814,6 +2057,27 @@
 								}
 							}
 						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have write access to Backups"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -1824,6 +2088,7 @@
 				"summary": "Download Backup",
 				"description": "Download a backup archive. The local file on disk is full-fidelity, but\nthe downloaded copy is sanitized on the fly so it is safer to share.\nThe following are removed from the downloaded archive:\n\n- Arr instances (URLs, API keys, sync configs, drift state, rename and\n  cleanup history)\n- Notification services (webhook URLs, tokens, history)\n- User accounts and active sessions\n- Personal access tokens for linked databases\n- AI and TMDB API keys\n\nThe local archive on the server is not modified. Restoring the\ndownloaded file on a different host will require re-adding the removed\nitems.\n",
 				"tags": ["Backups"],
+				"x-permission": "read",
 				"parameters": [
 					{
 						"name": "filename",
@@ -1897,6 +2162,27 @@
 							}
 						}
 					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to Backups"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Backup file not found",
 						"content": {
@@ -1924,6 +2210,7 @@
 				"operationId": "deleteBackup",
 				"summary": "Delete Backup",
 				"tags": ["Backups"],
+				"x-permission": "write",
 				"parameters": [
 					{
 						"name": "filename",
@@ -1995,6 +2282,27 @@
 							}
 						}
 					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have write access to Backups"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Backup file not found",
 						"content": {
@@ -2025,6 +2333,7 @@
 				"summary": "Upload Backup",
 				"description": "Only `.tar.gz` files, max 1GB. Archive contents are scanned for path\ntraversal entries (zip slip protection). Files without a `backup-` prefix\nare renamed to `backup-uploaded-{timestamp}.tar.gz`. Duplicates rejected.\n",
 				"tags": ["Backups"],
+				"x-permission": "write",
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -2115,6 +2424,27 @@
 								}
 							}
 						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have write access to Backups"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -2124,6 +2454,7 @@
 				"operationId": "getBackupSettings",
 				"summary": "Get Backup Settings",
 				"tags": ["Backups"],
+				"x-permission": "read",
 				"responses": {
 					"200": {
 						"description": "Current backup settings",
@@ -2194,6 +2525,27 @@
 								}
 							}
 						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to Backups"
+								}
+							}
+						}
 					}
 				}
 			},
@@ -2202,6 +2554,7 @@
 				"summary": "Update Backup Settings",
 				"description": "Partial update. After saving, backup jobs are rescheduled to match the\nnew settings.\n",
 				"tags": ["Backups"],
+				"x-permission": "write",
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -2311,6 +2664,27 @@
 								}
 							}
 						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have write access to Backups"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -2321,6 +2695,7 @@
 				"summary": "List Announcements",
 				"description": "Visible announcements only: withdrawn, expired, and version-incompatible\nentries are filtered out server-side. Bodies are not included; use the\ndetail endpoint to fetch one.\n",
 				"tags": ["Announcements"],
+				"x-permission": "read",
 				"responses": {
 					"200": {
 						"description": "Visible announcements, newest first.",
@@ -2427,6 +2802,27 @@
 								}
 							}
 						}
+					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to Announcements"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -2437,6 +2833,7 @@
 				"summary": "Get Announcement",
 				"description": "Returns the full announcement including its markdown body. The body\nis lazy-fetched from the bulletin repo on first call and cached\nlocally; subsequent calls read from cache.\n\n404 is returned for unknown ids and for ids that have not yet been\ningested by the fetch job (e.g. calling the API between a new\nbulletin PR merging and the next scheduled reconcile).\n",
 				"tags": ["Announcements"],
+				"x-permission": "read",
 				"parameters": [
 					{
 						"name": "id",
@@ -2538,6 +2935,27 @@
 							}
 						}
 					},
+					"403": {
+						"description": "API key does not have the required permission",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error"],
+									"properties": {
+										"error": {
+											"type": "string",
+											"description": "Error message",
+											"example": "Unauthorized"
+										}
+									}
+								},
+								"example": {
+									"error": "API key does not have read access to Announcements"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Announcement not found.",
 						"content": {
@@ -2569,7 +2987,7 @@
 				"type": "apiKey",
 				"in": "header",
 				"name": "X-Api-Key",
-				"description": "API key for programmatic access. Generate in Settings > Security."
+				"description": "API key for programmatic access. Create keys in Settings > Security.\n\nEach key has either full access or per-area access. Areas match the\ntags in this spec, and each operation's `x-permission` says whether it\nneeds `read` or `write` access to its area. Write access includes\nread. A key without the required access gets 403, and an expired key\ngets 401.\n"
 			},
 			"session": {
 				"type": "apiKey",

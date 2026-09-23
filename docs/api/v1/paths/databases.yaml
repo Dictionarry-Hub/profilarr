@@ -7,6 +7,7 @@ databases:
       and `local_path` is excluded.
     tags:
       - Databases
+    x-permission: read
     responses:
       '200':
         description: List of linked databases
@@ -22,6 +23,14 @@ databases:
           application/json:
             schema:
               $ref: '../schemas/common.yaml#/ErrorResponse'
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to Databases
   post:
     operationId: createDatabase
     summary: Link Database
@@ -35,6 +44,7 @@ databases:
       - `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`
     tags:
       - Databases
+    x-permission: write
     requestBody:
       required: true
       content:
@@ -64,6 +74,14 @@ databases:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Databases
       '409':
         description: A database with this name already exists
         content:
@@ -97,6 +115,7 @@ database:
       and `local_path` is excluded.
     tags:
       - Databases
+    x-permission: read
     responses:
       '200':
         description: Database detail
@@ -112,6 +131,14 @@ database:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to Databases
       '404':
         description: Database not found
         content:
@@ -133,6 +160,7 @@ database:
       - `conflict_strategy` is only accepted without a PAT, or with PAT + `local_ops_enabled`
     tags:
       - Databases
+    x-permission: write
     requestBody:
       required: true
       content:
@@ -162,6 +190,14 @@ database:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Databases
       '404':
         description: Database not found
         content:
@@ -186,6 +222,7 @@ database:
       and cancels any scheduled sync jobs.
     tags:
       - Databases
+    x-permission: write
     responses:
       '204':
         description: Database unlinked
@@ -197,6 +234,14 @@ database:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Databases
       '404':
         description: Database not found
         content:
@@ -222,6 +267,7 @@ database_sync:
       Poll `GET /api/v1/jobs/{jobId}` for completion.
     tags:
       - Databases
+    x-permission: write
     responses:
       '202':
         description: Sync job enqueued
@@ -247,6 +293,14 @@ database_sync:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Databases
       '404':
         description: Database not found
         content:

@@ -2,6 +2,7 @@
 // for information about these interfaces
 import type { User } from '$db/queries/users.ts';
 import type { Session } from '$db/queries/sessions.ts';
+import type { ResolvedApiKey } from '$auth/apiKeyAuth.ts';
 
 declare global {
 	namespace App {
@@ -9,6 +10,7 @@ declare global {
 		interface Locals {
 			user: User | null;
 			session: Session | null;
+			apiKey: ResolvedApiKey | null;
 		}
 		// interface PageData {}
 		// interface PageState {}

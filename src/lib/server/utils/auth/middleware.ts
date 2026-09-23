@@ -9,6 +9,7 @@ import { usersQueries, type User } from '$db/queries/users.ts';
 import { sessionsQueries, type Session } from '$db/queries/sessions.ts';
 import { authSettingsQueries } from '$db/queries/authSettings.ts';
 import { getClientIp } from './network.ts';
+import { resolveApiKey, type ResolvedApiKey } from './apiKeyAuth.ts';
 import { logger } from '$logger/logger.ts';
 export { isPublicPath } from './publicPaths.ts';
 
@@ -20,6 +21,8 @@ export interface AuthState {
 	user: User | null;
 	session: Session | null;
 	skipAuth: boolean; // true when AUTH=off
+	apiKey: ResolvedApiKey | null; // set when authenticated by X-Api-Key
+	apiKeyExpired: boolean; // X-Api-Key matched a key that has expired
 }
 
 /**
@@ -35,29 +38,43 @@ export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 			needsSetup: false,
 			user: null,
 			session: null,
-			skipAuth: true
+			skipAuth: true,
+			apiKey: null,
+			apiKeyExpired: false
 		};
 	}
 
 	// Check API key — works for all modes except AUTH=off
-	const apiKey = event.request.headers.get('X-Api-Key');
-	if (apiKey) {
+	let apiKeyExpired = false;
+	const apiKeyHeader = event.request.headers.get('X-Api-Key');
+	if (apiKeyHeader) {
 		const ip = getClientIp(event, false);
 		const endpoint = event.url.pathname;
+		const resolution = await resolveApiKey(apiKeyHeader);
 
-		if (await authSettingsQueries.validateApiKey(apiKey)) {
+		if (resolution.status === 'valid') {
 			void logger.debug('API key authenticated', {
 				source: 'Auth:APIKey',
-				meta: { ip, endpoint }
+				meta: { ip, endpoint, name: resolution.key.name }
 			});
 			return {
 				needsSetup: false,
 				user: { id: 0, username: 'api' } as User,
 				session: null,
-				skipAuth: false
+				skipAuth: false,
+				apiKey: resolution.key,
+				apiKeyExpired: false
 			};
+		}
+
+		if (resolution.status === 'expired') {
+			apiKeyExpired = true;
+			void logger.warn('Expired API key', {
+				source: 'Auth:APIKey',
+				meta: { ip, endpoint, name: resolution.key.name }
+			});
 		} else {
-			const maskedKey = apiKey.length > 4 ? `****${apiKey.slice(-4)}` : '****';
+			const maskedKey = apiKeyHeader.length > 4 ? `****${apiKeyHeader.slice(-4)}` : '****';
 			void logger.warn('Invalid API key', {
 				source: 'Auth:APIKey',
 				meta: { ip, endpoint, key: maskedKey }
@@ -75,7 +92,9 @@ export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 			needsSetup: false,
 			user,
 			session,
-			skipAuth: false
+			skipAuth: false,
+			apiKey: null,
+			apiKeyExpired
 		};
 	}
 
@@ -88,7 +107,9 @@ export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 		needsSetup: !hasLocalUsers,
 		user,
 		session,
-		skipAuth: false
+		skipAuth: false,
+		apiKey: null,
+		apiKeyExpired
 	};
 }
 

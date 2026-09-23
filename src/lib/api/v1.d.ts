@@ -857,6 +857,20 @@ export interface operations {
 				};
 				content?: never;
 			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to Arr"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
 		};
 	};
 	listDatabases: {
@@ -883,6 +897,20 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to Databases"
+					 *     }
+					 */
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
@@ -933,6 +961,20 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Databases"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
@@ -1003,6 +1045,20 @@ export interface operations {
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to Databases"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
 			/** @description Database not found */
 			404: {
 				headers: {
@@ -1047,6 +1103,20 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Databases"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
@@ -1116,6 +1186,20 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Databases"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
@@ -1200,6 +1284,20 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Databases"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
@@ -1349,6 +1447,20 @@ export interface operations {
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to System"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
 		};
 	};
 	getOpenApiSpec: {
@@ -1367,6 +1479,20 @@ export interface operations {
 				};
 				content: {
 					'application/json': Record<string, never>;
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to System"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
 		};
@@ -1437,6 +1563,20 @@ export interface operations {
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to Jobs"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
 			/** @description Job not found */
 			404: {
 				headers: {
@@ -1485,6 +1625,20 @@ export interface operations {
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to Backups"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
 		};
 	};
 	createBackup: {
@@ -1519,6 +1673,20 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Backups"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
@@ -1572,6 +1740,20 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to Backups"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
@@ -1637,6 +1819,20 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Backups"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
@@ -1721,6 +1917,20 @@ export interface operations {
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Backups"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
 		};
 	};
 	getBackupSettings: {
@@ -1759,6 +1969,20 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to Backups"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
@@ -1816,6 +2040,20 @@ export interface operations {
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Backups"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
 		};
 	};
 	listAnnouncements: {
@@ -1865,6 +2103,20 @@ export interface operations {
 					'application/json': components['schemas']['ErrorResponse'];
 				};
 			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to Announcements"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
 		};
 	};
 	getAnnouncement: {
@@ -1897,6 +2149,20 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "Unauthorized"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have read access to Announcements"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];

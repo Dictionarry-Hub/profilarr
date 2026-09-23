@@ -37,6 +37,7 @@ status:
       The `drift` field on each arr is reserved for future use and always null.
     tags:
       - System
+    x-permission: read
     responses:
       '200':
         description: System status
@@ -93,6 +94,14 @@ status:
           application/json:
             schema:
               $ref: '../schemas/common.yaml#/ErrorResponse'
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to System
 
 openapi:
   get:
@@ -103,6 +112,7 @@ openapi:
       Useful for generating client SDKs or feeding to documentation tools.
     tags:
       - System
+    x-permission: read
     responses:
       '200':
         description: OpenAPI specification
@@ -110,3 +120,11 @@ openapi:
           application/json:
             schema:
               type: object
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to System

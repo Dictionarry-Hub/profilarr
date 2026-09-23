@@ -16,6 +16,7 @@ job:
       - If the job is still queued or running, `result` is null
     tags:
       - Jobs
+    x-permission: read
     parameters:
       - name: id
         in: path
@@ -59,6 +60,14 @@ job:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: Unauthorized
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have read access to Jobs
       '404':
         description: Job not found
         content:
