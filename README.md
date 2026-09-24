@@ -169,29 +169,8 @@ created in Settings > Security.
 > (e.g. `https://profilarr.example.com/auth/oidc/callback`). Many
 > IdPs will infer this automatically.
 
-#### Outbound proxy
-
-Outbound requests (GitHub, PCD operations, notifications, TMDB) can go through
-an HTTP or SOCKS5 proxy. Profilarr runs on Deno, which reads the proxy
-variables above, and git does the same, so no other setup is needed.
-
-```yaml
-environment:
-  - HTTPS_PROXY=http://user:pass@gluetun:8888
-  - NO_PROXY=localhost,127.0.0.1,parser,radarr,sonarr
-```
-
-- Proxy URLs take the form `scheme://user:pass@host:port`, where the scheme is
-  `http`, `socks5` or `socks5h`. Use `socks5h` so DNS lookups also go through
-  the proxy.
-- URL-encode special characters in the username and password, e.g. `@` as
-  `%40` and `:` as `%3A`.
-- List your Arr instances and the parser in `NO_PROXY` by name, IP or range
-  (e.g. `192.168.1.0/24`). Unlisted hosts are sent to the proxy, which usually
-  can't reach them. `HTTP_PROXY` and `ALL_PROXY` also cover `http://`
-  addresses, so this matters most when either is set.
-- Profilarr logs the detected proxy settings at startup, with credentials
-  removed.
+To route outbound requests through an HTTP or SOCKS5 proxy, see
+[Outbound Proxy](docs/backend/utilities.md#outbound-proxy).
 
 See the [documentation](https://dictionarry.dev/) for full setup and
 configuration guides.
