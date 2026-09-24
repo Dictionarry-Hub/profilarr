@@ -17,7 +17,7 @@ the HTTP client, config, cache, markdown, Git, and TMDB utilities.
 
 ## HTTP Client
 
-**Source:** `utils/http/` (BaseHttpClient, HttpError)
+**Source:** `utils/http/` (BaseHttpClient, HttpError, proxy)
 
 `BaseHttpClient` is the generic HTTP foundation. It provides typed methods
 (`get`, `post`, `put`, `delete`, `patch`) with automatic JSON
@@ -30,6 +30,12 @@ delay, and max attempts.
 
 `HttpError` standardizes failures with status code, response body, and cause
 chain.
+
+Outbound proxies come from the standard `HTTP_PROXY`, `HTTPS_PROXY`,
+`ALL_PROXY`, and `NO_PROXY` variables. Deno applies them to every fetch,
+including `Deno.createHttpClient` clients, and git reads them too, so no client
+code handles proxies. `getProxyEnv()` in `proxy.ts` reads the same variables so
+startup can log them with credentials stripped.
 
 Extended by:
 

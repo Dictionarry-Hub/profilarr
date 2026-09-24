@@ -4,6 +4,7 @@
 
 import { config } from '$config';
 import { build } from '$lib/shared/build.ts';
+import { getProxyEnv } from '$http/proxy.ts';
 import { logger } from './logger.ts';
 
 const BANNER = String.raw`
@@ -49,6 +50,34 @@ export async function logContainerConfig(): Promise<void> {
 			tz: Deno.env.get('TZ') || 'UTC'
 		}
 	});
+}
+
+/**
+ * Log outbound proxy settings (only when a proxy variable is set).
+ * Credentials are never logged.
+ */
+export async function logProxyConfig(): Promise<void> {
+	const { proxies, noProxy } = getProxyEnv();
+	if (proxies.length === 0) return;
+
+	await logger.info('Outbound proxy configured', {
+		source: 'utils.logger.startup',
+		meta: { proxies, noProxy }
+	});
+
+	for (const proxy of proxies) {
+		if (proxy.url === null) {
+			await logger.warn(`${proxy.variable} is not a valid proxy URL`, {
+				source: 'utils.logger.startup'
+			});
+		}
+	}
+
+	if (noProxy.length === 0) {
+		await logger.warn('NO_PROXY is not set; Arr and parser requests may also use the proxy', {
+			source: 'utils.logger.startup'
+		});
+	}
 }
 
 export function printBanner(): void {
