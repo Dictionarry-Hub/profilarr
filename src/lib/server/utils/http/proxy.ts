@@ -9,17 +9,12 @@
 /** Checked uppercase first, then lowercase, matching Deno */
 const PROXY_VARS = ['HTTPS_PROXY', 'HTTP_PROXY', 'ALL_PROXY'];
 
-export interface ProxySetting {
-	/** Variable name as set, e.g. HTTPS_PROXY or https_proxy */
-	variable: string;
-	/** scheme://host:port with credentials removed, or null if it couldn't be parsed */
-	url: string | null;
-	/** Whether the URL includes a username or password */
-	auth: boolean;
-}
-
 export interface ProxyEnv {
-	proxies: ProxySetting[];
+	/**
+	 * Variable name as set (e.g. HTTPS_PROXY or https_proxy) mapped to its URL
+	 * with any login masked, or null if the URL couldn't be parsed
+	 */
+	proxies: Record<string, string | null>;
 	noProxy: string[];
 }
 
@@ -34,29 +29,27 @@ function readVar(get: EnvGetter, name: string): { variable: string; value: strin
 }
 
 /**
- * Reduce a proxy URL to scheme://host:port. The raw value is never returned
- * because it may contain credentials.
+ * Reduce a proxy URL to scheme://host:port, with any login replaced by ***.
+ * The raw value is never returned because it may contain credentials.
  */
-function stripCredentials(value: string): { url: string | null; auth: boolean } {
+function maskProxyUrl(value: string): string | null {
 	// Deno treats a proxy without a scheme as http://
 	const withScheme = value.includes('://') ? value : `http://${value}`;
 	try {
 		const parsed = new URL(withScheme);
-		if (!parsed.host) return { url: null, auth: false };
-		return {
-			url: `${parsed.protocol}//${parsed.host}`,
-			auth: parsed.username !== '' || parsed.password !== ''
-		};
+		if (!parsed.host) return null;
+		const login = parsed.username || parsed.password ? '***@' : '';
+		return `${parsed.protocol}//${login}${parsed.host}`;
 	} catch {
-		return { url: null, auth: false };
+		return null;
 	}
 }
 
 export function getProxyEnv(get: EnvGetter = (name) => Deno.env.get(name)): ProxyEnv {
-	const proxies: ProxySetting[] = [];
+	const proxies: Record<string, string | null> = {};
 	for (const name of PROXY_VARS) {
 		const entry = readVar(get, name);
-		if (entry) proxies.push({ variable: entry.variable, ...stripCredentials(entry.value) });
+		if (entry) proxies[entry.variable] = maskProxyUrl(entry.value);
 	}
 
 	const noProxy = readVar(get, 'NO_PROXY')?.value.split(',') ?? [];

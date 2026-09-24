@@ -58,16 +58,16 @@ export async function logContainerConfig(): Promise<void> {
  */
 export async function logProxyConfig(): Promise<void> {
 	const { proxies, noProxy } = getProxyEnv();
-	if (proxies.length === 0) return;
+	if (Object.keys(proxies).length === 0) return;
 
 	await logger.info('Outbound proxy configured', {
 		source: 'utils.logger.startup',
 		meta: { proxies, noProxy }
 	});
 
-	for (const proxy of proxies) {
-		if (proxy.url === null) {
-			await logger.warn(`${proxy.variable} is not a valid proxy URL`, {
+	for (const [variable, url] of Object.entries(proxies)) {
+		if (url === null) {
+			await logger.warn(`${variable} is not a valid proxy URL`, {
 				source: 'utils.logger.startup'
 			});
 		}

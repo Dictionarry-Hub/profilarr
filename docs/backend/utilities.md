@@ -68,7 +68,8 @@ environment:
   `http://` addresses, so this matters most when either is set.
 
 `getProxyEnv()` reads the same variables (uppercase first, then lowercase, like
-Deno) and reduces each proxy URL to `scheme://host:port`. At startup,
+Deno) and reduces each proxy URL to `scheme://host:port`, masking any login as
+`***@`. At startup,
 `logProxyConfig()` logs the result and warns when a URL can't be parsed or
 `NO_PROXY` is empty. Credentials are never logged.
 
