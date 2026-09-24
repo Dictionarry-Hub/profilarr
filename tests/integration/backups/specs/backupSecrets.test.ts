@@ -18,8 +18,10 @@
  * - DELETE api_keys
  *
  * The test seeds known secrets, creates a backup via the v1 API, downloads
- * it, and inspects the downloaded copy. It also verifies the on-disk
- * archive is bytewise unchanged by the download.
+ * it, and inspects the downloaded copy. SQL checks only see live rows, so the
+ * archive's files are also searched as raw bytes: deleted rows stay in
+ * SQLite's free space unless they're overwritten. It also verifies the
+ * on-disk archive is bytewise unchanged by the download.
  */
 
 import { assert, assertEquals, assertNotEquals } from '@std/assert';
@@ -51,6 +53,8 @@ let extractDir: string;
 let onDiskBytesBefore: Uint8Array;
 let onDiskBytesAfter: Uint8Array;
 let liveApiKeyCount: number;
+let profilarrApiKeyHash: string;
+let liveSessionIds: string[];
 let databaseUuid: string;
 
 async function seedSecrets(dbPath: string) {
@@ -108,10 +112,10 @@ async function seedSecrets(dbPath: string) {
 		}
 
 		// Profilarr API key (bcrypt-hashed)
-		const hashedApiKey = await hash(PROFILARR_API_KEY);
+		profilarrApiKeyHash = await hash(PROFILARR_API_KEY);
 		db.exec(
 			`INSERT INTO api_keys (name, key_hash, key_hint, permissions) VALUES ('Backup Test', ?, ?, '"all"')`,
-			[hashedApiKey, PROFILARR_API_KEY.slice(-4)]
+			[profilarrApiKeyHash, PROFILARR_API_KEY.slice(-4)]
 		);
 
 		// Notification service with webhook URL
@@ -218,6 +222,16 @@ setup(async () => {
 
 	const client = new TestClient(ORIGIN);
 	await login(client, 'admin', 'password123', ORIGIN);
+
+	// The login session is in the backup; its token is a live credential
+	const sessions = openDb(getDbPath(PORT));
+	try {
+		const rows = sessions.prepare('SELECT id FROM sessions').all() as { id: string }[];
+		liveSessionIds = rows.map((row) => row.id);
+	} finally {
+		sessions.close();
+	}
+
 	const paths = await downloadAndExtractBackup(client);
 	backupDbPath = paths.dbPath;
 	infoPath = paths.infoPath;
@@ -379,6 +393,44 @@ test('live database api_keys are untouched by the download', () => {
 	} finally {
 		db.close();
 	}
+});
+
+// ─── Raw file contents ───────────────────────────────────────────────────────
+
+async function collectFiles(dir: string): Promise<string[]> {
+	const files: string[] = [];
+	for await (const entry of Deno.readDir(dir)) {
+		const path = `${dir}/${entry.name}`;
+		if (entry.isDirectory) files.push(...(await collectFiles(path)));
+		else if (entry.isFile) files.push(path);
+	}
+	return files;
+}
+
+test('downloaded archive: no secret bytes remain in any file', async () => {
+	assert(liveSessionIds.length > 0, 'login should have created a session to check for');
+
+	const secrets: Record<string, string> = {
+		'Arr API key': ARR_API_KEY,
+		'database PAT': DB_PAT,
+		'TMDB API key': TMDB_API_KEY,
+		'AI API key': AI_API_KEY,
+		'webhook URL': WEBHOOK_URL,
+		'Profilarr API key hash': profilarrApiKeyHash
+	};
+	liveSessionIds.forEach((id, i) => (secrets[`session token ${i + 1}`] = id));
+
+	// latin1 maps every byte to one character, so ASCII secrets match exactly
+	const decoder = new TextDecoder('latin1');
+	const found: string[] = [];
+	for (const file of await collectFiles(`${extractDir}/data`)) {
+		const text = decoder.decode(await Deno.readFile(file));
+		for (const [label, secret] of Object.entries(secrets)) {
+			if (text.includes(secret)) found.push(`${label} in ${file.slice(extractDir.length + 1)}`);
+		}
+	}
+
+	assertEquals(found, [], 'secrets are recoverable from the raw bytes of the downloaded archive');
 });
 
 // ─── INFO.json + on-disk integrity ───────────────────────────────────────────
