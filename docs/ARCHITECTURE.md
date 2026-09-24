@@ -126,7 +126,7 @@ Known improvement areas:
 - [backend/security.md](./backend/security.md): Auth modes, sessions, OIDC, API keys, security scans
 - [backend/sync.md](./backend/sync.md): Sync pipeline, transformation, section registry, cleanup
 - [backend/upgrades.md](./backend/upgrades.md): Upgrade pipeline, filters, selectors, cooldown, scheduling
-- [backend/utilities.md](./backend/utilities.md): HTTP client, config, cache, markdown, Git, TMDB
+- [backend/utilities.md](./backend/utilities.md): HTTP client, outbound proxy, config, cache, markdown, Git, TMDB
 
 **Frontend**
 

@@ -10,7 +10,7 @@ if (!isReload) {
 import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { config } from '$config';
-import { printBanner, getServerInfo, logContainerConfig } from '$logger/startup.ts';
+import { printBanner, getServerInfo, logContainerConfig, logProxyConfig } from '$logger/startup.ts';
 import { logSettings } from '$logger/settings.ts';
 import { logger } from '$logger/logger.ts';
 import { db } from '$db/db.ts';
@@ -49,6 +49,9 @@ if (!isReload) {
 
 	// Log container config (if running in Docker)
 	await logContainerConfig();
+
+	// Log outbound proxy settings (if any are set)
+	await logProxyConfig();
 
 	// Initialize PCD caches (must be after migrations and log settings)
 	await pcdManager.initialize();

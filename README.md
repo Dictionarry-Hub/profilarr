@@ -154,6 +154,10 @@ them on the same channel.
 | `PARSER_PORT`            | `5000`                                                            | Parser service port                                                                   |
 | `PROFILARR_API_KEY`      | -                                                                 | Plaintext runtime secret for `X-Api-Key` auth                                         |
 | `PROFILARR_BULLETIN_URL` | `https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main` | Override for the announcement feed + release manifest base URL                        |
+| `HTTPS_PROXY`            | -                                                                 | Proxy for outbound `https://` requests                                                |
+| `HTTP_PROXY`             | -                                                                 | Proxy for outbound `http://` requests                                                 |
+| `ALL_PROXY`              | -                                                                 | Proxy for both `http://` and `https://` requests                                      |
+| `NO_PROXY`               | -                                                                 | Comma-separated hosts, IPs or ranges that bypass the proxy                            |
 
 `PROFILARR_API_KEY` must be at least 32 characters long. It is not persisted to
 SQLite or bcrypt-hashed. It always has full access and works alongside any keys
@@ -164,6 +168,9 @@ created in Settings > Security.
 > expects `{ORIGIN}/auth/oidc/callback` for the redirect URL
 > (e.g. `https://profilarr.example.com/auth/oidc/callback`). Many
 > IdPs will infer this automatically.
+
+To route outbound requests through an HTTP or SOCKS5 proxy, see
+[Outbound Proxy](docs/backend/utilities.md#outbound-proxy).
 
 See the [documentation](https://dictionarry.dev/) for full setup and
 configuration guides.

@@ -4,11 +4,13 @@
 
 Shared backend infrastructure used across the codebase. Each module is small
 but foundational -- other subsystems extend or import these. This doc covers
-the HTTP client, config, cache, markdown, Git, and TMDB utilities.
+the HTTP client, outbound proxy, config, cache, markdown, Git, and TMDB
+utilities.
 
 ## Table of Contents
 
 - [HTTP Client](#http-client)
+- [Outbound Proxy](#outbound-proxy)
 - [Config](#config)
 - [Cache](#cache)
 - [Markdown](#markdown)
@@ -39,6 +41,37 @@ Extended by:
 | Parser client   | `utils/arr/parser/client.ts`    |
 | TMDB client     | `utils/tmdb/client.ts`          |
 | Webhook clients | `notifications/notifiers/base/` |
+
+## Outbound Proxy
+
+**Source:** `utils/http/proxy.ts`, `utils/logger/startup.ts`
+
+Profilarr has no proxy setting of its own. Deno applies the standard
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, and `NO_PROXY` variables to every
+fetch, including `Deno.createHttpClient` clients, and git reads them too. That
+covers GitHub, PCD operations, notifications, and TMDB.
+
+```yaml
+environment:
+  - HTTPS_PROXY=http://user:pass@gluetun:8888
+  - NO_PROXY=localhost,127.0.0.1,parser,radarr,sonarr
+```
+
+- Proxy URLs take the form `scheme://user:pass@host:port`, where the scheme is
+  `http`, `socks5`, or `socks5h`. `socks5h` sends DNS lookups through the
+  proxy too.
+- Special characters in the username and password must be URL-encoded (`@` as
+  `%40`, `:` as `%3A`).
+- `NO_PROXY` takes host names, IPs, and ranges (e.g. `192.168.1.0/24`). Arr
+  instances and the parser belong there; unlisted hosts are sent to the proxy,
+  which usually can't reach them. `HTTP_PROXY` and `ALL_PROXY` also cover
+  `http://` addresses, so this matters most when either is set.
+
+`getProxyEnv()` reads the same variables (uppercase first, then lowercase, like
+Deno) and reduces each proxy URL to `scheme://host:port`, masking any login as
+`***@`. At startup,
+`logProxyConfig()` logs the result and warns when a URL can't be parsed or
+`NO_PROXY` is empty. Credentials are never logged.
 
 ## Config
 
