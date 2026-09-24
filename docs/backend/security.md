@@ -385,8 +385,12 @@ Secrets are stripped at two levels:
   linked, schedules and other settings preserved). Embedded HTTP(S)
   credentials are also stripped from cloned PCD repository `.git/config`
   remote URLs. API keys are removed: `api_keys` is emptied, or in backups from
-  before migration 072, `auth_settings.api_key` is nulled. The local archive on disk and the production
-  database are never modified. See `src/lib/server/utils/backup/sanitize.ts`
+  before migration 072, `auth_settings.api_key` is nulled. SQLite keeps
+  deleted rows in the file's free space, so the sanitizer enables
+  `secure_delete` before removing anything and runs `VACUUM` afterwards; the
+  backup secrets test also searches the downloaded files' raw bytes for the
+  seeded secrets. The local archive on disk and the production database are
+  never modified. See `src/lib/server/utils/backup/sanitize.ts`
   for the exact policy.
 
 ### XSS via Markdown / {@html}

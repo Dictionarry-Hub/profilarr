@@ -114,10 +114,16 @@ async function sanitizeGitConfigs(rootDir: string): Promise<void> {
  * Caller is responsible for opening and closing the handle.
  */
 export function applySanitize(db: Database): void {
+	// SQLite doesn't erase deleted data by default: removed rows stay in the
+	// file's free space and can be read from the raw bytes. secure_delete
+	// zeroes them as they're removed, and VACUUM rebuilds the file from live
+	// rows only, dropping any free space left over.
+	db.exec('PRAGMA secure_delete = ON');
 	for (const sql of SANITIZE_SQL) {
 		db.exec(sql); // nosemgrep: profilarr.sql.exec-with-variable - SANITIZE_SQL is a hardcoded constant
 	}
 	stripApiKeys(db);
+	db.exec('VACUUM');
 }
 
 /**
