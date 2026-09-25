@@ -9,26 +9,9 @@ export const GET: RequestHandler = async (event) => {
 	const { cookies } = event;
 	const ip = getClientIp(event, false);
 
-	// Validate OIDC configuration
-	if (config.authMode !== 'oidc') {
+	// SSO is enabled when all three OIDC settings are present (checked at startup)
+	if (!config.oidcEnabled || !config.oidc.discoveryUrl || !config.oidc.clientId) {
 		throw error(400, 'OIDC authentication is not enabled');
-	}
-
-	if (!config.oidc.discoveryUrl || !config.oidc.clientId || !config.oidc.clientSecret) {
-		const missing = [
-			!config.oidc.discoveryUrl && 'OIDC_DISCOVERY_URL',
-			!config.oidc.clientId && 'OIDC_CLIENT_ID',
-			!config.oidc.clientSecret && 'OIDC_CLIENT_SECRET'
-		].filter(Boolean);
-
-		await logger.error(`OIDC config missing: ${missing.join(', ')}`, {
-			source: 'Auth:OIDC',
-			meta: { missing }
-		});
-		throw error(
-			500,
-			'OIDC is not configured. Set OIDC_DISCOVERY_URL, OIDC_CLIENT_ID, and OIDC_CLIENT_SECRET'
-		);
 	}
 
 	await logger.debug('OIDC flow started', {

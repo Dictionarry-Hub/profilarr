@@ -220,3 +220,29 @@ export function queryDb(dbPath: string, sql: string, params: unknown[] = []): un
 		db.close();
 	}
 }
+
+/**
+ * Read the outcome of a SvelteKit form action POST.
+ *
+ * Form actions answer with HTTP 200 and a JSON body carrying the real result,
+ * e.g. {"type":"failure","status":400} or {"type":"redirect","status":303,"location":"/"}.
+ * Responses that never reached the action (hook redirects, 403 for API keys)
+ * fall back to the HTTP status and Location header.
+ */
+export async function formResult(
+	res: Response
+): Promise<{ status: number; location: string | null }> {
+	const body = await res.text();
+	try {
+		const parsed = JSON.parse(body);
+		if (typeof parsed?.status === 'number') {
+			return { status: parsed.status, location: parsed.location ?? null };
+		}
+		if (parsed?.type === 'success') {
+			return { status: 200, location: null };
+		}
+	} catch {
+		// Not JSON
+	}
+	return { status: res.status, location: res.headers.get('location') };
+}

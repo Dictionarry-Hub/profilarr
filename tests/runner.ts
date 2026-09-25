@@ -30,7 +30,7 @@
  *   deno task test integration pcd          PCD integration specs
  *   deno task test integration pcd regex    Single PCD spec
  *
- *   Specs that need Docker (mock-oauth2-server + Caddy + nginx): oidc, cookie, proxy, reverseProxy502, reverseProxy502-manual
+ *   Specs that need Docker (mock-oauth2-server + Caddy + nginx): oidc, loginMethods, localAccount, cookie, proxy, reverseProxy502, reverseProxy502-manual
  *   Docker starts automatically when needed and tears down after.
  *
  * ─── E2E Tests ───────────────────────────────────────────────────────────
@@ -87,6 +87,8 @@ const PLAYWRIGHT_CLI = './node_modules/playwright/cli.js';
 // Integration specs that require Docker infrastructure
 const INTEGRATION_NEEDS_DOCKER = new Set([
 	'oidc',
+	'loginMethods',
+	'localAccount',
 	'cookie',
 	'proxy',
 	'reverseProxy502',
@@ -356,7 +358,12 @@ async function runIntegration(target?: string): Promise<number> {
 		}
 
 		if (specFiles.length === 1) {
-			// Single spec - run with inherited output
+			// Single spec - run with inherited output. Wait for Docker first if
+			// the spec needs it, like the multi-spec path does.
+			const basename = specFiles[0].split('/').pop()!.replace('.test.ts', '');
+			if (dockerReady && INTEGRATION_NEEDS_DOCKER.has(basename)) {
+				await dockerReady;
+			}
 			console.log(`Running: ${specFiles[0]}\n`);
 			const result = await runIntegrationSpec(specFiles[0], 'inherit');
 			exitCode = result.code;
@@ -583,7 +590,7 @@ async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
 	const PROXY_ORIGIN = 'https://localhost:7445';
 
 	const OIDC_ENV = {
-		AUTH: 'oidc',
+		AUTH: 'on',
 		OIDC_DISCOVERY_URL: MOCK_OIDC_URL,
 		OIDC_CLIENT_ID: 'profilarr',
 		OIDC_CLIENT_SECRET: 'secret'

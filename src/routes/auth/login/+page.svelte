@@ -33,17 +33,7 @@
 			</div>
 		</div>
 
-		{#if data.authMode === 'oidc'}
-			<!-- OIDC login button -->
-			<Button
-				href="/auth/oidc/login"
-				variant="primary"
-				size="md"
-				fullWidth
-				icon={KeyRound}
-				text="Sign in with SSO"
-			/>
-		{:else}
+		{#if data.password}
 			<!-- Username/password form -->
 			<form
 				method="POST"
@@ -87,6 +77,26 @@
 					disabled={submitting}
 				/>
 			</form>
+		{/if}
+
+		{#if data.password && data.sso}
+			<div class="my-6 flex items-center gap-3">
+				<div class="h-px flex-1 bg-neutral-300 dark:bg-neutral-700"></div>
+				<span class="text-xs text-neutral-500 uppercase dark:text-neutral-400">or</span>
+				<div class="h-px flex-1 bg-neutral-300 dark:bg-neutral-700"></div>
+			</div>
+		{/if}
+
+		{#if data.sso}
+			<!-- OIDC login button -->
+			<Button
+				href="/auth/oidc/login"
+				variant={data.password ? 'secondary' : 'primary'}
+				size="md"
+				fullWidth
+				icon={KeyRound}
+				text="Sign in with SSO"
+			/>
 		{/if}
 	</div>
 </div>

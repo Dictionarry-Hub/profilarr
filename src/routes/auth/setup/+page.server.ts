@@ -5,19 +5,23 @@ import { usersQueries } from '$db/queries/users.ts';
 import { sessionsQueries } from '$db/queries/sessions.ts';
 import { authSettingsQueries } from '$db/queries/authSettings.ts';
 import { hashPassword } from '$auth/password.ts';
+import { needsSetup, validateNewLocalAccount } from '$auth/loginOptions.ts';
 import { getClientIp } from '$auth/network.ts';
 import { parseUserAgent } from '$auth/userAgent.ts';
 import { logger } from '$logger/logger.ts';
 
-export const load: ServerLoad = () => {
-	// AUTH=off — no local auth, setup has no purpose
-	if (config.authMode === 'off') {
-		throw redirect(303, '/');
-	}
+function setupOpen(): boolean {
+	return needsSetup({
+		authMode: config.authMode,
+		oidcEnabled: config.oidcEnabled,
+		hasLocalAccount: usersQueries.existsLocal()
+	});
+}
 
-	// If local users already exist, redirect to home
-	// (OIDC users don't count - they need to create a local account to use password auth)
-	if (usersQueries.existsLocal()) {
+export const load: ServerLoad = () => {
+	// Setup is only open with AUTH=on, no SSO, and no password account yet.
+	// With SSO configured, the first user signs in with SSO instead.
+	if (!setupOpen()) {
 		throw redirect(303, '/');
 	}
 
@@ -28,14 +32,9 @@ export const actions: Actions = {
 	default: async (event) => {
 		const { request, cookies } = event;
 
-		// AUTH=off — setup not allowed
-		if (config.authMode === 'off') {
-			throw redirect(303, '/');
-		}
-
-		// Double-check no local users exist (race condition protection)
-		if (usersQueries.existsLocal()) {
-			void logger.warn('Setup attempt after user already exists', {
+		// Re-check inside the action (race condition protection)
+		if (!setupOpen()) {
+			void logger.warn('Setup attempt while setup is closed', {
 				source: 'Auth:Setup',
 				meta: { ip: getClientIp(event, false) }
 			});
@@ -47,25 +46,13 @@ export const actions: Actions = {
 		const password = formData.get('password') as string;
 		const confirmPassword = formData.get('confirmPassword') as string;
 
-		// Validation
-		if (!username) {
-			return fail(400, { error: 'Username is required', username });
-		}
-
-		if (username.length < 3) {
-			return fail(400, { error: 'Username must be at least 3 characters', username });
-		}
-
-		if (!password) {
-			return fail(400, { error: 'Password is required', username });
-		}
-
-		if (password.length < 8) {
-			return fail(400, { error: 'Password must be at least 8 characters', username });
-		}
-
-		if (password !== confirmPassword) {
-			return fail(400, { error: 'Passwords do not match', username });
+		const validationError = validateNewLocalAccount(
+			username ?? '',
+			password ?? '',
+			confirmPassword
+		);
+		if (validationError) {
+			return fail(400, { error: validationError, username });
 		}
 
 		try {

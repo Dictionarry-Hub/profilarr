@@ -28,6 +28,7 @@ import {
 import { cleanupExpiredAttempts } from '$auth/rateLimit.ts';
 import { checkApiKeyAccess } from '$auth/apiPermissions.ts';
 import { setupStateQueries } from '$db/queries/setupState.ts';
+import { usersQueries } from '$db/queries/users.ts';
 
 if (!isReload) {
 	// Initialize configuration on server startup
@@ -101,6 +102,18 @@ if (!isReload) {
 				source: 'Auth:Session',
 				meta: { count: expiredCount }
 			}
+		);
+	}
+
+	// TODO(v3.0.0): Remove this warning along with the AUTH=oidc alias
+	// (see parseAuthConfig in $utils/config/auth.ts).
+	if (config.deprecatedOidcMode) {
+		const leftover = usersQueries.existsLocal()
+			? ' A local password account exists, so the login page now also shows the password form.'
+			: '';
+		await logger.warn(
+			`AUTH=oidc is deprecated and will stop working in v3.0.0. Set AUTH=on instead; SSO stays enabled while the OIDC_* settings are set.${leftover}`,
+			{ source: 'Auth' }
 		);
 	}
 

@@ -9,14 +9,14 @@ export const settingsSecurityStage: Stage = {
 			id: 'settings-security-intro',
 			route: '/settings/security',
 			title: 'Security',
-			body: 'Your password, API key, and active sessions all live on this page. Which sections are meaningful depends on the `AUTH` mode you started Profilarr with: password change applies when `AUTH=on`; with `AUTH=oidc` your identity provider owns credentials; with `AUTH=off` no auth is applied at all. API keys and sessions behave the same across modes.',
+			body: 'Your password, API key, and active sessions all live on this page. The account section depends on how you signed in: with a password you can change it here; with SSO your identity provider owns your credentials, but you can add a local account to fall back on. With `AUTH=off` no auth is applied at all. API keys and sessions behave the same either way.',
 			completion: { type: 'manual' }
 		},
 		{
 			id: 'settings-security-password',
 			target: 'security-password',
-			title: 'Change Password',
-			body: 'A three-field form: current password, new password, and confirm. Only meaningful under `AUTH=on`, where Profilarr owns the credential; under `AUTH=oidc` or `AUTH=off` this form does nothing useful because Profilarr is not the source of truth for your identity.',
+			title: 'Your Account',
+			body: 'Signed in with a password, this is where you change it: current password, new password, and confirm. Signed in with SSO, you can instead create a local account here, so you can still sign in if your identity provider is unavailable. Only one local account can exist.',
 			position: 'below',
 			freeInteract: true,
 			completion: { type: 'manual' }

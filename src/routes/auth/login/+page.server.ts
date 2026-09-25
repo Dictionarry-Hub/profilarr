@@ -13,21 +13,18 @@ import {
 	getAttemptCategory
 } from '$auth/loginAnalysis.ts';
 import { checkRateLimit, recordFailedAttempt, clearAttempts } from '$auth/rateLimit.ts';
+import { getLoginOptions, isOidcUsername, needsSetup } from '$auth/loginOptions.ts';
 import { logger } from '$logger/logger.ts';
 
 export const load: ServerLoad = () => {
-	// OIDC mode - just show the OIDC button, no setup needed
-	if (config.authMode === 'oidc') {
-		return { authMode: 'oidc' };
-	}
+	const hasLocalAccount = usersQueries.existsLocal();
 
-	// If no local users exist, redirect to setup
-	// (OIDC users don't count - they can't login with password)
-	if (!usersQueries.existsLocal()) {
+	// Fresh install without SSO: create the first account instead
+	if (needsSetup({ authMode: config.authMode, oidcEnabled: config.oidcEnabled, hasLocalAccount })) {
 		throw redirect(303, '/auth/setup');
 	}
 
-	return { authMode: config.authMode };
+	return getLoginOptions({ oidcEnabled: config.oidcEnabled, hasLocalAccount });
 };
 
 export const actions: Actions = {
@@ -55,8 +52,8 @@ export const actions: Actions = {
 			return fail(400, { error: 'Username and password are required', username });
 		}
 
-		// Find user
-		const user = usersQueries.getByUsername(username);
+		// Find user. SSO accounts have no password and can't sign in here.
+		const user = isOidcUsername(username) ? undefined : usersQueries.getByUsername(username);
 		if (!user) {
 			const allUsernames = usersQueries.getAllUsernames();
 			const analysis = analyzeLoginFailure(username, allUsernames, false);

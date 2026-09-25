@@ -1,4 +1,4 @@
-import { assertEquals, assertStringIncludes } from '@std/assert';
+import { assert, assertEquals, assertStringIncludes } from '@std/assert';
 
 Deno.test('PROFILARR_API_KEY shorter than 32 characters fails config import', async () => {
 	const result = await new Deno.Command('deno', {
@@ -9,8 +9,10 @@ Deno.test('PROFILARR_API_KEY shorter than 32 characters fails config import', as
 	}).output();
 
 	assertEquals(result.code, 1);
-	assertStringIncludes(
-		new TextDecoder().decode(result.stderr),
-		'PROFILARR_API_KEY must be at least 32 characters long'
-	);
+	const stderr = new TextDecoder().decode(result.stderr);
+	assertStringIncludes(stderr, 'PROFILARR_API_KEY must be at least 32 characters long');
+	// Printed as a log line, not an uncaught error with a stack trace
+	assertStringIncludes(stderr, 'ERROR');
+	assertStringIncludes(stderr, '[Config]');
+	assert(!stderr.includes('Uncaught'), stderr);
 });

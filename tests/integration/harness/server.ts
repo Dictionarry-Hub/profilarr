@@ -127,9 +127,13 @@ export async function startServer(
 }
 
 /**
- * Stop a specific server instance.
+ * Stop a specific server instance. Its data directory is removed unless
+ * `keepData` is set, which lets a spec restart the server on the same database.
  */
-export async function stopServer(port: number): Promise<void> {
+export async function stopServer(
+	port: number,
+	options: { keepData?: boolean } = {}
+): Promise<void> {
 	const instance = instances.get(port);
 	if (!instance) return;
 
@@ -141,11 +145,13 @@ export async function stopServer(port: number): Promise<void> {
 		// Process may already be dead
 	}
 
-	log.server(port, `Cleaning up ${instance.basePath}`);
-	try {
-		await Deno.remove(instance.basePath, { recursive: true });
-	} catch {
-		// Directory may not exist
+	if (!options.keepData) {
+		log.server(port, `Cleaning up ${instance.basePath}`);
+		try {
+			await Deno.remove(instance.basePath, { recursive: true });
+		} catch {
+			// Directory may not exist
+		}
 	}
 
 	instances.delete(port);
@@ -158,6 +164,16 @@ export async function stopServer(port: number): Promise<void> {
 export async function stopAll(): Promise<void> {
 	const ports = [...instances.keys()];
 	await Promise.all(ports.map((port) => stopServer(port)));
+}
+
+/**
+ * Get everything a server instance has printed so far (stdout then stderr).
+ * Only the most recent 1000 lines per stream are kept.
+ */
+export function getServerOutput(port: number): string {
+	const instance = instances.get(port);
+	if (!instance) return '';
+	return [...instance.stdoutBuf, ...instance.stderrBuf].join('\n');
 }
 
 /**

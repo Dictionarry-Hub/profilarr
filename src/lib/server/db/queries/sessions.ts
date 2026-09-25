@@ -89,14 +89,11 @@ export const sessionsQueries = {
 	},
 
 	/**
-	 * Get all sessions for a user
+	 * Get all sessions across every account (password and SSO)
 	 */
-	getByUserId(userId: number): Session[] {
+	getAll(): Session[] {
 		return db
-			.query<SessionRow>(
-				'SELECT * FROM sessions WHERE user_id = ? ORDER BY created_at DESC',
-				userId
-			)
+			.query<SessionRow>('SELECT * FROM sessions ORDER BY created_at DESC')
 			.map(rowToSession);
 	},
 
@@ -116,10 +113,10 @@ export const sessionsQueries = {
 	},
 
 	/**
-	 * Delete all sessions except one (logout other devices)
+	 * Delete every session except one, across all accounts (logout other devices)
 	 */
-	deleteOthersByUserId(userId: number, keepSessionId: string): number {
-		return db.execute('DELETE FROM sessions WHERE user_id = ? AND id != ?', userId, keepSessionId);
+	deleteAllExcept(keepSessionId: string): number {
+		return db.execute('DELETE FROM sessions WHERE id != ?', keepSessionId);
 	},
 
 	/**

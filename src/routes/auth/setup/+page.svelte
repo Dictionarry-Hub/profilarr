@@ -1,9 +1,11 @@
 <script lang="ts">
 	import type { ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { UserPlus, Shield, Wifi, KeyRound, ShieldOff } from '@lucide/svelte';
+	import { UserPlus, Shield, KeyRound, ShieldOff } from '@lucide/svelte';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
+	import Card from '$ui/card/Card.svelte';
+	import InlineLink from '$ui/link/InlineLink.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$alerts/store';
 	import logo from '$assets/logo-512.png';
@@ -38,38 +40,39 @@
 				</div>
 			</div>
 
-			<!-- Auth info - visible on desktop, hidden on mobile (shown below form) -->
-			<div
-				class="hidden rounded-xl border border-neutral-200/60 bg-white/50 p-5 shadow-sm backdrop-blur-sm md:block dark:border-neutral-700/60 dark:bg-neutral-800/50"
-			>
-				<p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-					Configure authentication via the <code
-						class="rounded bg-neutral-200 px-1 py-0.5 text-[11px] dark:bg-neutral-700">AUTH</code
-					> environment variable:
-				</p>
-				<ul class="mt-3 space-y-2 text-xs text-neutral-600 dark:text-neutral-400">
-					<li class="flex items-center gap-2">
-						<Shield size={12} class="text-neutral-400" />
-						<code class="font-mono text-neutral-800 dark:text-neutral-200">on</code>
-						<span>— Full authentication</span>
-						<span class="text-neutral-400 dark:text-neutral-500">(default)</span>
-					</li>
-					<li class="flex items-center gap-2">
-						<Wifi size={12} class="text-neutral-400" />
-						<code class="font-mono text-neutral-800 dark:text-neutral-200">local</code>
-						<span>— Skip auth for local network</span>
-					</li>
-					<li class="flex items-center gap-2">
-						<KeyRound size={12} class="text-neutral-400" />
-						<code class="font-mono text-neutral-800 dark:text-neutral-200">oidc</code>
-						<span>— Use external provider</span>
-					</li>
-					<li class="flex items-center gap-2">
-						<ShieldOff size={12} class="text-neutral-400" />
-						<code class="font-mono text-neutral-800 dark:text-neutral-200">off</code>
-						<span>— For reverse proxy setups</span>
-					</li>
-				</ul>
+			<!-- Auth info - desktop only -->
+			<div class="hidden md:block">
+				<Card padding="lg">
+					<p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+						Configure authentication via the <code
+							class="rounded bg-neutral-200 px-1 py-0.5 text-[11px] dark:bg-neutral-700">AUTH</code
+						> environment variable:
+					</p>
+					<ul class="mt-3 space-y-2 text-xs text-neutral-600 dark:text-neutral-400">
+						<li class="flex items-center gap-2">
+							<Shield size={12} class="text-neutral-400" />
+							<code class="font-mono text-neutral-800 dark:text-neutral-200">on</code>
+							<span>— Full authentication</span>
+							<span class="text-neutral-400 dark:text-neutral-500">(default)</span>
+						</li>
+						<li class="flex items-center gap-2">
+							<ShieldOff size={12} class="text-neutral-400" />
+							<code class="font-mono text-neutral-800 dark:text-neutral-200">off</code>
+							<span>— For reverse proxy setups</span>
+						</li>
+					</ul>
+					<p class="mt-4 flex items-start gap-2 text-xs text-neutral-600 dark:text-neutral-400">
+						<KeyRound size={12} class="mt-0.5 shrink-0 text-neutral-400" />
+						<span>
+							To sign in with an external provider (SSO) instead, see the
+							<InlineLink
+								href="https://github.com/Dictionarry-Hub/profilarr#production"
+								text="OIDC settings"
+								external
+							/>.
+						</span>
+					</p>
+				</Card>
 			</div>
 		</div>
 

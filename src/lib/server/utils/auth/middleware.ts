@@ -10,6 +10,7 @@ import { sessionsQueries, type Session } from '$db/queries/sessions.ts';
 import { authSettingsQueries } from '$db/queries/authSettings.ts';
 import { getClientIp } from './network.ts';
 import { resolveApiKey, type ResolvedApiKey } from './apiKeyAuth.ts';
+import { needsSetup } from './loginOptions.ts';
 import { logger } from '$logger/logger.ts';
 export { isPublicPath } from './publicPaths.ts';
 
@@ -82,29 +83,18 @@ export async function getAuthState(event: RequestEvent): Promise<AuthState> {
 		}
 	}
 
-	// AUTH=oidc - uses sessions but no local user/password
-	if (config.authMode === 'oidc') {
-		const sessionId = event.cookies.get('session');
-		const session = sessionId ? (sessionsQueries.getValidById(sessionId) ?? null) : null;
-		const user = session ? (usersQueries.getById(session.user_id) ?? null) : null;
-
-		return {
-			needsSetup: false,
-			user,
-			session,
-			skipAuth: false,
-			apiKey: null,
-			apiKeyExpired
-		};
-	}
-
-	// AUTH=on (default) - check session cookie
+	// AUTH=on (default) - check session cookie. Password and SSO sign-ins
+	// both create sessions, so they're checked the same way.
 	const sessionId = event.cookies.get('session');
 	const session = sessionId ? (sessionsQueries.getValidById(sessionId) ?? null) : null;
 	const user = session ? (usersQueries.getById(session.user_id) ?? null) : null;
 
 	return {
-		needsSetup: !hasLocalUsers,
+		needsSetup: needsSetup({
+			authMode: config.authMode,
+			oidcEnabled: config.oidcEnabled,
+			hasLocalAccount: hasLocalUsers
+		}),
 		user,
 		session,
 		skipAuth: false,
