@@ -38,6 +38,7 @@ const origin = (port: number) => `http://localhost:${port}`;
 
 const DEPRECATION_WARNING = 'AUTH=oidc is deprecated';
 const LOCKED_OUT_ERROR = 'SSO accounts exist but the OIDC_* settings are missing';
+const LOGOUT_LINK = 'href="/auth/logout"';
 const LEFTOVER_ACCOUNT_WARNING = 'local password account exists';
 
 /**
@@ -165,6 +166,14 @@ test('B: password sign-in works', async () => {
 	assertEquals(await formResult(res), { status: 303, location: '/' });
 	const page = await client.get('/databases');
 	assertNotEquals(page.status, 303, 'Should be signed in');
+});
+
+test('B: sidebar shows Log Out', async () => {
+	const client = new TestClient(origin(B));
+	await login(client, 'admin', 'password123', origin(B));
+	const res = await client.get('/databases');
+	assertEquals(res.status, 200);
+	assertStringIncludes(await res.text(), LOGOUT_LINK);
 });
 
 test('B: SSO login endpoint is refused when SSO is not configured', async () => {
@@ -343,6 +352,21 @@ test('G: no redirect to setup or login', async () => {
 	const res = await client.get('/');
 	const location = res.headers.get('location') ?? '';
 	assert(!location.startsWith('/auth/'), `Unexpected redirect to ${location}`);
+});
+
+test('G: login page redirects home', async () => {
+	// Nothing to sign in to with AUTH=off, e.g. an old bookmark to /auth/login
+	const client = new TestClient(origin(G));
+	const res = await client.get('/auth/login');
+	assertEquals(res.status, 303);
+	assertEquals(res.headers.get('location'), '/');
+});
+
+test('G: sidebar hides Log Out', async () => {
+	const client = new TestClient(origin(G));
+	const res = await client.get('/databases');
+	assertEquals(res.status, 200);
+	assert(!(await res.text()).includes(LOGOUT_LINK), 'Log Out should be hidden with AUTH=off');
 });
 
 test('G: SSO settings are ignored', async () => {

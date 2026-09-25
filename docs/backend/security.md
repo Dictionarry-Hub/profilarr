@@ -171,7 +171,8 @@ password account would fall back to `AUTH=on` and open first-run setup.
 
 No auth checks. All requests are allowed through. Intended for deployments
 behind an authenticating reverse proxy like Authelia or Authentik. The setup
-page is blocked, and the `OIDC_*` settings are ignored.
+and login pages redirect to `/`, Log Out is hidden, and the `OIDC_*` settings
+are ignored.
 
 ### Accounts
 
@@ -445,8 +446,8 @@ Page-level guards add further restrictions on top:
 
 - `/auth/setup` redirects to `/` unless first-run setup is open (`AUTH=on`, SSO
   not enabled, no password account)
-- `/auth/login` redirects to `/auth/setup` while setup is open; otherwise it
-  shows the password form, the SSO button, or both
+- `/auth/login` redirects to `/` with `AUTH=off`, and to `/auth/setup` while
+  setup is open; otherwise it shows the password form, the SSO button, or both
 - `/auth/oidc/login` and `/auth/oidc/callback` return 400 unless SSO is enabled
 
 ### Secret Stripping

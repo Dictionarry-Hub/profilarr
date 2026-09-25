@@ -31,6 +31,7 @@
 	export let databases: { id: number; name: string }[] = [];
 	export let parserAvailable: boolean = true;
 	export let unreadAnnouncements: number = 0;
+	export let showLogout: boolean = true;
 
 	// Close mobile nav when page changes
 	$: ($page.url.pathname, mobileNavOpen.close());
@@ -212,16 +213,18 @@
 			<GroupItem label="Security" href="/settings/security" />
 			<GroupItem label="Onboarding" href="/onboarding" onboardingId="nav-onboarding" />
 			<GroupItem label="About" href="/settings/about" />
-			<GroupItem
-				label="Log Out"
-				href="/auth/logout"
-				onclick={(e) => {
-					e.preventDefault();
-					fetch('/auth/logout', { method: 'POST' }).then(() => {
-						window.location.href = '/auth/login';
-					});
-				}}
-			/>
+			{#if showLogout}
+				<GroupItem
+					label="Log Out"
+					href="/auth/logout"
+					onclick={(e) => {
+						e.preventDefault();
+						fetch('/auth/logout', { method: 'POST' }).then(() => {
+							window.location.href = '/auth/login';
+						});
+					}}
+				/>
+			{/if}
 		</Group>
 
 		<!-- Version scrolls with content on mobile (job status shown in bottom nav) -->

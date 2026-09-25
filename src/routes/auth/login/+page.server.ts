@@ -17,6 +17,11 @@ import { getLoginOptions, isOidcUsername, needsSetup } from '$auth/loginOptions.
 import { logger } from '$logger/logger.ts';
 
 export const load: ServerLoad = () => {
+	// AUTH=off: nothing to sign in to, e.g. an old bookmark to /auth/login
+	if (config.authMode === 'off') {
+		throw redirect(303, '/');
+	}
+
 	const hasLocalAccount = usersQueries.existsLocal();
 
 	// Fresh install without SSO: create the first account instead
