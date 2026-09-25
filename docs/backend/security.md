@@ -74,12 +74,16 @@ work through the `X-Api-Key` header.
 | `OIDC_CLIENT_SECRET` | -       | OIDC client secret. Set all three to enable SSO               | `your-secret`                                                |
 
 The settings are parsed at startup by `parseAuthConfig()` in
-`src/lib/server/utils/config/auth.ts`. Profilarr refuses to start, naming the
-missing settings, when:
+`src/lib/server/utils/config/auth.ts`. Profilarr refuses to start, with an
+error log line naming the problem, when:
 
 - some but not all of the `OIDC_*` settings are set (unless `AUTH=off`), so a
   typo can't silently turn SSO off and open first-run setup
 - `AUTH=oidc` is set without any `OIDC_*` settings
+- SSO accounts exist, SSO is not enabled, and there's no password account
+  (`getStartupAuthError()`, checked once the database is open). Without this,
+  losing the `OIDC_*` settings would open first-run setup on an instance that
+  was in use. To stop using SSO, create a password account first.
 
 The login decisions live in `src/lib/server/utils/auth/loginOptions.ts`:
 
@@ -199,20 +203,20 @@ the provider. There is no way to delete a password account from the app.
 
 ### Login Scenarios
 
-| Scenario                                      | What happens                                                                                                                                 |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| New install, no SSO                           | First visit goes to setup to create the password account. The login page then shows the password form.                                       |
-| New install with SSO                          | No setup page. The login page shows only the SSO button. A password account can be added later from Settings > Security.                     |
-| Password account, no SSO                      | The login page shows only the password form.                                                                                                 |
-| SSO only                                      | The login page shows only the SSO button.                                                                                                    |
-| SSO and a password account                    | The login page shows both. Either one signs in.                                                                                              |
-| `AUTH=oidc` (deprecated), no password account | Same as SSO only, plus the startup deprecation warning.                                                                                      |
-| `AUTH=oidc` with a leftover password account  | Same as SSO and a password account. The startup warning points out that the password form is now shown.                                      |
-| `AUTH=on` with leftover `OIDC_*` settings     | All three set: the SSO button appears. Only some set: Profilarr won't start until they're fixed or removed.                                  |
-| `AUTH=off`                                    | No login. The `OIDC_*` settings are ignored.                                                                                                 |
-| SSO removed, no password account              | First-run setup opens, and anyone who can reach Profilarr can create the account. Do this while Profilarr isn't reachable from the internet. |
-| SSO provider down                             | Sign in with the password account if one exists. Otherwise there's no way in until the provider is back.                                     |
-| Typo in the `OIDC_*` settings                 | Profilarr won't start, and the error names the missing setting.                                                                              |
+| Scenario                                      | What happens                                                                                                                                    |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| New install, no SSO                           | First visit goes to setup to create the password account. The login page then shows the password form.                                          |
+| New install with SSO                          | No setup page. The login page shows only the SSO button. A password account can be added later from Settings > Security.                        |
+| Password account, no SSO                      | The login page shows only the password form.                                                                                                    |
+| SSO only                                      | The login page shows only the SSO button.                                                                                                       |
+| SSO and a password account                    | The login page shows both. Either one signs in.                                                                                                 |
+| `AUTH=oidc` (deprecated), no password account | Same as SSO only, plus the startup deprecation warning.                                                                                         |
+| `AUTH=oidc` with a leftover password account  | Same as SSO and a password account. The startup warning points out that the password form is now shown.                                         |
+| `AUTH=on` with leftover `OIDC_*` settings     | All three set: the SSO button appears. Only some set: Profilarr won't start until they're fixed or removed.                                     |
+| `AUTH=off`                                    | No login. The `OIDC_*` settings are ignored.                                                                                                    |
+| SSO removed, no password account              | Profilarr refuses to start until the `OIDC_*` settings are restored. To stop using SSO, create a password account in Settings > Security first. |
+| SSO provider down                             | Sign in with the password account if one exists. Otherwise there's no way in until the provider is back.                                        |
+| Typo in the `OIDC_*` settings                 | Profilarr won't start, and the error names the missing setting.                                                                                 |
 
 ### API Keys
 
@@ -571,7 +575,7 @@ needed.
 | `apiPermissions.test.ts`    | Route id to spec path mapping, permission lookup, read/write/area checks, area list      |
 | `authConfig.test.ts`        | `AUTH` parsing, `oidc` alias, SSO enablement, partial `OIDC_*` settings refused          |
 | `oidcConfigStartup.test.ts` | Partial `OIDC_*` settings stop `config.ts` from loading; ignored with `AUTH=off`         |
-| `loginOptions.test.ts`      | Login page options and first-run setup for every mode, SSO, and password account combo   |
+| `loginOptions.test.ts`      | Login page options, first-run setup, and the startup lockout for every combination       |
 | `accountValidation.test.ts` | Password account rules, reserved `oidc:` prefix, prefix check matches the SQL in queries |
 
 **Sanitize tests** (`tests/unit/sanitize/`):
@@ -597,7 +601,7 @@ and run in parallel via `deno task test integration`.
 | `envApiKey.test.ts`         | 7018             | Env key works alongside stored keys, "Environment" name reserved                                    |
 | `session.test.ts`           | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection      |
 | `oidc.test.ts`              | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                  |
-| `loginMethods.test.ts`      | 7021-7027        | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning             |
+| `loginMethods.test.ts`      | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout    |
 | `localAccount.test.ts`      | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts |
 | `rateLimit.test.ts`         | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                  |
 | `proxy.test.ts`             | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                          |

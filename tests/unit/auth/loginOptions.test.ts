@@ -4,7 +4,7 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { getLoginOptions, needsSetup } from '$auth/loginOptions.ts';
+import { getLoginOptions, getStartupAuthError, needsSetup } from '$auth/loginOptions.ts';
 
 // --- getLoginOptions ---
 
@@ -62,4 +62,65 @@ for (const { authMode, oidcEnabled, hasLocalAccount, expected } of cases) {
 			assertEquals(needsSetup({ authMode, oidcEnabled, hasLocalAccount }), expected);
 		}
 	);
+}
+
+// --- getStartupAuthError ---
+
+const LOCKED_OUT =
+	"SSO accounts exist but the OIDC_* settings are missing, and there's no local password account.";
+
+Deno.test(
+	'getStartupAuthError: SSO accounts, SSO removed, no password account refuses startup',
+	() => {
+		const error = getStartupAuthError({
+			authMode: 'on',
+			oidcEnabled: false,
+			hasLocalAccount: false,
+			hasSsoAccounts: true
+		});
+		assertEquals(error?.startsWith(LOCKED_OUT), true, String(error));
+	}
+);
+
+const startupOkCases: {
+	name: string;
+	authMode: 'on' | 'off';
+	oidcEnabled: boolean;
+	hasLocalAccount: boolean;
+	hasSsoAccounts: boolean;
+}[] = [
+	{
+		name: 'fresh install',
+		authMode: 'on',
+		oidcEnabled: false,
+		hasLocalAccount: false,
+		hasSsoAccounts: false
+	},
+	{
+		name: 'SSO enabled',
+		authMode: 'on',
+		oidcEnabled: true,
+		hasLocalAccount: false,
+		hasSsoAccounts: true
+	},
+	{
+		name: 'password account to fall back on',
+		authMode: 'on',
+		oidcEnabled: false,
+		hasLocalAccount: true,
+		hasSsoAccounts: true
+	},
+	{
+		name: 'AUTH=off',
+		authMode: 'off',
+		oidcEnabled: false,
+		hasLocalAccount: false,
+		hasSsoAccounts: true
+	}
+];
+
+for (const { name, ...opts } of startupOkCases) {
+	Deno.test(`getStartupAuthError: ${name} starts normally`, () => {
+		assertEquals(getStartupAuthError(opts), null);
+	});
 }

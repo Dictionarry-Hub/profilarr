@@ -36,6 +36,16 @@ export const usersQueries = {
 	},
 
 	/**
+	 * Check if any SSO (OIDC) users exist
+	 */
+	existsOidc(): boolean {
+		const result = db.queryFirst<{ count: number }>(
+			"SELECT COUNT(*) as count FROM users WHERE username LIKE 'oidc:%'"
+		);
+		return (result?.count ?? 0) > 0;
+	},
+
+	/**
 	 * Get user by ID
 	 */
 	getById(id: number): User | undefined {

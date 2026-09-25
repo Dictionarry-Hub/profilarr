@@ -14,6 +14,7 @@
  * | E      | AUTH=oidc + SSO | nothing          |
  * | F      | AUTH=oidc + SSO | password account |
  * | G      | AUTH=off + SSO  | nothing          |
+ * | H      | AUTH=on         | SSO account only (SSO settings removed) |
  */
 
 import { assert, assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
@@ -31,10 +32,12 @@ const D = PORTS.auth.loginBoth;
 const E = PORTS.auth.loginLegacySsoOnly;
 const F = PORTS.auth.loginLegacyBoth;
 const G = PORTS.auth.loginOff;
+const H = PORTS.auth.loginSsoRemoved;
 
 const origin = (port: number) => `http://localhost:${port}`;
 
 const DEPRECATION_WARNING = 'AUTH=oidc is deprecated';
+const LOCKED_OUT_ERROR = 'SSO accounts exist but the OIDC_* settings are missing';
 const LEFTOVER_ACCOUNT_WARNING = 'local password account exists';
 
 /**
@@ -90,10 +93,17 @@ setup(async () => {
 	await createUserDirect(getDbPath(F), 'admin', 'password123');
 	await stopServer(F, { keepData: true });
 	await startServer(F, { AUTH: 'oidc', ORIGIN: origin(F), ...OIDC_SETTINGS }, 'preview');
+
+	// H simulates an SSO-only instance whose OIDC settings went missing: sign in
+	// once so an SSO account exists, then restart without the settings. The
+	// restart is expected to fail, so it happens in the test below.
+	await startServer(H, { AUTH: 'on', ORIGIN: origin(H), ...OIDC_SETTINGS }, 'preview');
+	await completeOidcLogin(new TestClient(origin(H)), 'hank');
+	await stopServer(H, { keepData: true });
 });
 
 teardown(async () => {
-	await Promise.all([A, B, C, D, E, F, G].map((port) => stopServer(port)));
+	await Promise.all([A, B, C, D, E, F, G, H].map((port) => stopServer(port)));
 });
 
 // --- A: AUTH=on, no SSO, no accounts ---
@@ -339,6 +349,20 @@ test('G: SSO settings are ignored', async () => {
 	const client = new TestClient(origin(G));
 	const res = await client.get('/auth/oidc/login');
 	assertEquals(res.status, 400);
+});
+
+// --- H: AUTH=on, SSO settings removed, only SSO accounts ---
+
+test('H: refuses to start instead of opening setup', async () => {
+	let started = false;
+	try {
+		await startServer(H, { AUTH: 'on', ORIGIN: origin(H) }, 'preview');
+		started = true;
+	} catch {
+		// Expected: the process exits before its health check passes
+	}
+	assert(!started, 'Server should refuse to start');
+	assertStringIncludes(getServerOutput(H), LOCKED_OUT_ERROR);
 });
 
 await run();

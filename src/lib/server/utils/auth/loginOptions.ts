@@ -37,6 +37,28 @@ export function needsSetup(opts: {
 }
 
 /**
+ * Why startup must stop, or null to start normally. SSO accounts exist but SSO
+ * is no longer configured and there's no password account: nobody could sign
+ * in, and opening first-run setup would let whoever reaches it first take over
+ * an instance that was in use. Refuse to start until the OIDC settings are
+ * restored, so a lost env file fails closed.
+ */
+export function getStartupAuthError(opts: {
+	authMode: AuthMode;
+	oidcEnabled: boolean;
+	hasLocalAccount: boolean;
+	hasSsoAccounts: boolean;
+}): string | null {
+	if (opts.authMode !== 'on' || opts.oidcEnabled || opts.hasLocalAccount || !opts.hasSsoAccounts) {
+		return null;
+	}
+	return (
+		"SSO accounts exist but the OIDC_* settings are missing, and there's no local password account. " +
+		'Restore the OIDC settings, or create a local account in Settings > Security before removing SSO.'
+	);
+}
+
+/**
  * Validate a new password account. Returns an error message, or null if valid.
  * Expects a trimmed username.
  */
