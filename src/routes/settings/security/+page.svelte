@@ -143,7 +143,7 @@
 	}
 
 	interface SessionRow {
-		id: string;
+		handle: string;
 		created_at: string;
 		expires_at: string;
 		last_active_at: string | null;
@@ -522,7 +522,7 @@
 										};
 									}}
 								>
-									<input type="hidden" name="sessionId" value={row.id} />
+									<input type="hidden" name="session" value={row.handle} />
 									<Button
 										icon={LogOut}
 										title="Revoke session"

@@ -9,7 +9,8 @@
  * 3. Creating the account works and does not switch the current session
  * 4. Once it exists: create form gone and refused, password sign-in works
  * 5. Signed in with the password: change password shown, create refused
- * 6. Sessions list covers both accounts; revoke others signs out both
+ * 6. Sessions list covers both accounts without raw session IDs; revoking
+ *    one by its stand-in; revoke others signs out both
  * 7. Separate server: two create submissions at once make only one account
  */
 
@@ -198,12 +199,60 @@ test('password user can still change their password', async () => {
 
 // --- 6. Sessions across both accounts ---
 
-test('sessions list includes sessions from both accounts', async () => {
+/** The stand-in the security page uses instead of a raw session ID */
+async function sessionHandle(sessionId: string): Promise<string> {
+	const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(sessionId));
+	return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function revokeSession(client: TestClient, session: string): Promise<Response> {
+	return client.postForm(
+		'/settings/security?/revokeSession',
+		{ session },
+		{ headers: { Origin: ORIGIN } }
+	);
+}
+
+test('sessions list shows both accounts without exposing session IDs', async () => {
 	const res = await ssoClient.get('/settings/security/__data.json');
 	assertEquals(res.status, 200);
 	const data = await res.text();
-	assert(data.includes(ssoClient.getCookie('session')!), 'SSO session should be listed');
-	assert(data.includes(passwordClient.getCookie('session')!), 'Password session should be listed');
+
+	const ssoSession = ssoClient.getCookie('session')!;
+	const passwordSession = passwordClient.getCookie('session')!;
+	assert(data.includes(await sessionHandle(ssoSession)), 'SSO session should be listed');
+	assert(data.includes(await sessionHandle(passwordSession)), 'Password session should be listed');
+	assert(!data.includes(ssoSession), 'Raw SSO session ID must not reach the page');
+	assert(!data.includes(passwordSession), 'Raw password session ID must not reach the page');
+});
+
+test('a raw session ID is not accepted for revoking', async () => {
+	const res = await revokeSession(ssoClient, passwordClient.getCookie('session')!);
+	assertEquals((await formResult(res)).status, 404);
+	const page = await passwordClient.get('/databases');
+	assertNotEquals(page.status, 303, 'Password session should still be valid');
+});
+
+test('the current session cannot be revoked from the list', async () => {
+	const res = await revokeSession(ssoClient, await sessionHandle(ssoClient.getCookie('session')!));
+	assertEquals((await formResult(res)).status, 400);
+	const page = await ssoClient.get('/databases');
+	assertNotEquals(page.status, 303, 'SSO session should still be valid');
+});
+
+test('a single session can be revoked by its handle', async () => {
+	const res = await revokeSession(
+		ssoClient,
+		await sessionHandle(passwordClient.getCookie('session')!)
+	);
+	assertEquals((await formResult(res)).status, 200);
+
+	const page = await passwordClient.get('/databases');
+	assertEquals(page.status, 303, 'Password session should be signed out');
+
+	// Sign back in for the revoke-others test
+	const again = await login(passwordClient, 'admin', 'password456', ORIGIN);
+	assertEquals((await formResult(again)).status, 303);
 });
 
 test('revoke others from the SSO session signs out the password session', async () => {

@@ -112,7 +112,9 @@ device type, last active. Duration is configured in
 extends the session when less than half the duration remains. Expired sessions
 are cleaned up on startup. Password and SSO sign-ins create the same kind of
 session. Settings > Security lists sessions from every account, and can revoke
-one session or every session except the current one.
+one session or every session except the current one. The page gets a SHA-256
+handle for each session, never its ID: the ID is the cookie value, so exposing
+it would let a script in the page read what the `httpOnly` cookie hides.
 
 Cookie properties:
 

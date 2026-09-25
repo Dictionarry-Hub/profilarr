@@ -5,6 +5,7 @@ import { sessionsQueries } from '$db/queries/sessions.ts';
 import { apiKeysQueries } from '$db/queries/apiKeys.ts';
 import { hashPassword, verifyPassword } from '$auth/password.ts';
 import { isOidcUsername, validateNewLocalAccount } from '$auth/loginOptions.ts';
+import { sha256Hex } from '$auth/hash.ts';
 import { API_AREAS } from '$auth/apiPermissions.ts';
 import { config } from '$config';
 import { isApiKeyExpired } from '$shared/apiKeys.ts';
@@ -24,12 +25,12 @@ function loadApiKeys() {
 export const load: ServerLoad = async ({ cookies, locals }) => {
 	const currentSessionId = cookies.get('session');
 
-	// Every account is an admin, so list sessions from password and SSO accounts
-	const sessions = sessionsQueries.getAll();
-
-	return {
-		sessions: sessions.map((s) => ({
-			id: s.id,
+	// Every account is an admin, so list sessions from password and SSO accounts.
+	// Each session is sent as a SHA-256 handle, never its ID: the ID is the
+	// cookie value, and the httpOnly cookie shouldn't be readable from the page.
+	const sessions = await Promise.all(
+		sessionsQueries.getAll().map(async (s) => ({
+			handle: await sha256Hex(s.id),
 			created_at: s.created_at,
 			expires_at: s.expires_at,
 			last_active_at: s.last_active_at,
@@ -38,9 +39,12 @@ export const load: ServerLoad = async ({ cookies, locals }) => {
 			os: s.os,
 			device_type: s.device_type,
 			isCurrent: s.id === currentSessionId
-		})),
+		}))
+	);
+
+	return {
+		sessions,
 		...loadApiKeys(),
-		currentSessionId: currentSessionId ?? null,
 		signedInWithSso: locals.user ? isOidcUsername(locals.user.username) : false,
 		hasLocalAccount: usersQueries.existsLocal()
 	};
@@ -165,22 +169,35 @@ export const actions: Actions = {
 
 	revokeSession: async ({ request, cookies }) => {
 		const formData = await request.formData();
-		const sessionId = formData.get('sessionId') as string;
+		const handle = formData.get('session') as string;
 		const currentSessionId = cookies.get('session');
 
-		if (!sessionId) {
-			return fail(400, { sessionError: 'Session ID required' });
+		if (!handle) {
+			return fail(400, { sessionError: 'Session required' });
 		}
 
-		if (sessionId === currentSessionId) {
+		// Find the session by its handle (see load)
+		let session: { id: string } | undefined;
+		for (const s of sessionsQueries.getAll()) {
+			if ((await sha256Hex(s.id)) === handle) {
+				session = s;
+				break;
+			}
+		}
+
+		if (!session) {
+			return fail(404, { sessionError: 'Session not found' });
+		}
+
+		if (session.id === currentSessionId) {
 			return fail(400, { sessionError: 'Cannot revoke current session' });
 		}
 
-		sessionsQueries.deleteById(sessionId);
+		sessionsQueries.deleteById(session.id);
 
 		await logger.info('Session revoked', {
 			source: 'Auth:Session',
-			meta: { revokedSessionId: sessionId.slice(0, 8) + '...' }
+			meta: { revokedSession: handle.slice(0, 8) + '...' }
 		});
 
 		return { sessionRevoked: true };
