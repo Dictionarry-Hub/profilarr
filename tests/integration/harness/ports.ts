@@ -54,7 +54,9 @@ export const PORTS = {
 		loginLegacyBoth: 7026,
 		loginOff: 7027,
 		localAccount: 7028,
-		loginSsoRemoved: 7029
+		loginSsoRemoved: 7029,
+		localAccountRace: 7030,
+		setupRace: 7031
 	},
 	api: {
 		arr: 7100,

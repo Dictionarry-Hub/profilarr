@@ -15,6 +15,7 @@
  * | F      | AUTH=oidc + SSO | password account |
  * | G      | AUTH=off + SSO  | nothing          |
  * | H      | AUTH=on         | SSO account only (SSO settings removed) |
+ * | I      | AUTH=on         | nothing (concurrent setup submissions) |
  */
 
 import { assert, assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
@@ -33,6 +34,7 @@ const E = PORTS.auth.loginLegacySsoOnly;
 const F = PORTS.auth.loginLegacyBoth;
 const G = PORTS.auth.loginOff;
 const H = PORTS.auth.loginSsoRemoved;
+const I = PORTS.auth.setupRace;
 
 const origin = (port: number) => `http://localhost:${port}`;
 
@@ -82,7 +84,8 @@ setup(async () => {
 		startServer(D, { AUTH: 'on', ORIGIN: origin(D), ...OIDC_SETTINGS }, 'preview'),
 		startServer(E, { AUTH: 'oidc', ORIGIN: origin(E), ...OIDC_SETTINGS }, 'preview'),
 		startServer(F, { AUTH: 'oidc', ORIGIN: origin(F), ...OIDC_SETTINGS }, 'preview'),
-		startServer(G, { AUTH: 'off', ORIGIN: origin(G), ...OIDC_SETTINGS }, 'preview')
+		startServer(G, { AUTH: 'off', ORIGIN: origin(G), ...OIDC_SETTINGS }, 'preview'),
+		startServer(I, { AUTH: 'on', ORIGIN: origin(I) }, 'preview')
 	]);
 
 	await createUserDirect(getDbPath(B), 'admin', 'password123');
@@ -104,7 +107,7 @@ setup(async () => {
 });
 
 teardown(async () => {
-	await Promise.all([A, B, C, D, E, F, G, H].map((port) => stopServer(port)));
+	await Promise.all([A, B, C, D, E, F, G, H, I].map((port) => stopServer(port)));
 });
 
 // --- A: AUTH=on, no SSO, no accounts ---
@@ -387,6 +390,21 @@ test('H: refuses to start instead of opening setup', async () => {
 	}
 	assert(!started, 'Server should refuse to start');
 	assertStringIncludes(getServerOutput(H), LOCKED_OUT_ERROR);
+});
+
+// --- I: concurrent first-run setup submissions ---
+
+test('I: two setup submissions at once create only one account', async () => {
+	// Password hashing is slow, so both requests are in flight together
+	const clients = [new TestClient(origin(I)), new TestClient(origin(I))];
+	await Promise.all([
+		createUser(clients[0], 'first', 'password123', origin(I)),
+		createUser(clients[1], 'second', 'password123', origin(I))
+	]);
+
+	assertEquals(localAccountCount(I), 1, 'Only one password account may exist');
+	const signedIn = clients.filter((c) => c.getCookie('session') !== undefined);
+	assertEquals(signedIn.length, 1, 'Only the winning submission should be signed in');
 });
 
 await run();

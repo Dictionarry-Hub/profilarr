@@ -10,6 +10,7 @@
  * 4. Once it exists: create form gone and refused, password sign-in works
  * 5. Signed in with the password: change password shown, create refused
  * 6. Sessions list covers both accounts; revoke others signs out both
+ * 7. Separate server: two create submissions at once make only one account
  */
 
 import { assert, assertEquals, assertNotEquals } from '@std/assert';
@@ -22,6 +23,8 @@ import { PORTS } from '$test-harness/ports.ts';
 
 const PORT = PORTS.auth.localAccount;
 const ORIGIN = `http://localhost:${PORT}`;
+const RACE_PORT = PORTS.auth.localAccountRace;
+const RACE_ORIGIN = `http://localhost:${RACE_PORT}`;
 const API_KEY = 'local-account-test-key-0123456789abcdef';
 
 const CREATE_FORM = 'action="?/createLocalAccount"';
@@ -78,10 +81,13 @@ setup(async () => {
 
 	const { callbackRes } = await completeOidcLogin(ssoClient, 'sam');
 	assertEquals(callbackRes.status, 303, 'SSO sign-in should succeed');
+
+	await startServer(RACE_PORT, { AUTH: 'on', ORIGIN: RACE_ORIGIN, ...OIDC_SETTINGS }, 'preview');
 });
 
 teardown(async () => {
 	await stopServer(PORT);
+	await stopServer(RACE_PORT);
 });
 
 // --- 1. Signed in with SSO, no password account ---
@@ -218,6 +224,31 @@ test('revoke others from the SSO session signs out the password session', async 
 		count: number;
 	}[];
 	assertEquals(rows[0].count, 1);
+});
+
+// --- 7. Concurrent create submissions ---
+
+test('two create submissions at once make only one local account', async () => {
+	const clients = [new TestClient(RACE_ORIGIN), new TestClient(RACE_ORIGIN)];
+	await completeOidcLogin(clients[0], 'racer-one');
+	await completeOidcLogin(clients[1], 'racer-two');
+
+	// Password hashing is slow, so both requests are in flight together
+	const post = (client: TestClient, username: string) =>
+		client.postForm(
+			'/settings/security?/createLocalAccount',
+			{ username, password: 'password123', confirmPassword: 'password123' },
+			{ headers: { Origin: RACE_ORIGIN } }
+		);
+	const results = await Promise.all([post(clients[0], 'first'), post(clients[1], 'second')]);
+	const statuses = (await Promise.all(results.map((r) => formResult(r)))).map((r) => r.status);
+
+	const rows = queryDb(
+		getDbPath(RACE_PORT),
+		"SELECT COUNT(*) as count FROM users WHERE username NOT LIKE 'oidc:%'"
+	) as { count: number }[];
+	assertEquals(rows[0].count, 1, 'Only one password account may exist');
+	assertEquals(statuses.sort(), [200, 409]);
 });
 
 await run();

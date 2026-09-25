@@ -126,9 +126,10 @@ export const actions: Actions = {
 		}
 
 		const passwordHash = await hashPassword(password);
-		const userId = usersQueries.create(username, passwordHash);
+		const userId = usersQueries.createLocalIfNone(username, passwordHash);
 		if (!userId) {
-			return fail(500, { localAccountError: 'Failed to create account', username });
+			// Another request created it while this one was hashing
+			return fail(409, { localAccountError: 'A local account already exists' });
 		}
 
 		await logger.info(`Local account '${username}' created by SSO user`, {

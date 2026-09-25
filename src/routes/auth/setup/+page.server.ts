@@ -58,10 +58,15 @@ export const actions: Actions = {
 		try {
 			// Hash password and create user
 			const passwordHash = await hashPassword(password);
-			const userId = usersQueries.create(username, passwordHash);
+			const userId = usersQueries.createLocalIfNone(username, passwordHash);
 
+			// Another request created the account while this one was hashing
 			if (!userId) {
-				return fail(500, { error: 'Failed to create account', username });
+				void logger.warn('Setup attempt while setup is closed', {
+					source: 'Auth:Setup',
+					meta: { ip: getClientIp(event, false) }
+				});
+				throw redirect(303, '/');
 			}
 
 			// Capture session metadata
