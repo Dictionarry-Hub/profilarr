@@ -16,7 +16,7 @@ export const settingsSecurityStage: Stage = {
 			id: 'settings-security-password',
 			target: 'security-password',
 			title: 'Your Account',
-			body: 'Signed in with a password, this is where you change it: current password, new password, and confirm. Signed in with SSO, you can instead create a local account here, so you can still sign in if your identity provider is unavailable. Only one local account can exist.',
+			body: "This is where your password lives. You can change it here, or if you use SSO, add one as a backup for when SSO is down. If you signed in with SSO and already have a password, there's nothing here to change; sign in with the password instead.",
 			position: 'below',
 			freeInteract: true,
 			completion: { type: 'manual' }
@@ -26,7 +26,7 @@ export const settingsSecurityStage: Stage = {
 			target: 'security-api-key',
 			title: 'API Keys',
 			body: 'Named keys for scripts and integrations, sent via the `X-Api-Key` header. Each key has full access or read / read & write access per API area, and an optional expiry. Keys are bcrypt-hashed and shown once at creation, then cannot be changed. To rotate, create a new key, move your clients over, then delete the old one.',
-			position: 'above',
+			position: 'below',
 			freeInteract: true,
 			completion: { type: 'manual' }
 		},
@@ -34,7 +34,7 @@ export const settingsSecurityStage: Stage = {
 			id: 'settings-security-sessions',
 			target: 'security-sessions',
 			title: 'Active Sessions',
-			body: 'Browser sessions tied to the current Profilarr user. Each row shows browser, OS, device type, IP, and last active time, which is how you spot a session you do not recognize. Per-row Revoke ends that session specifically; "Revoke Others" in the section header ends every session except the one you are using right now.',
+			body: 'Browser sessions from every account, password and SSO alike. Each row shows browser, OS, device type, IP, and last active time, which is how you spot a session you do not recognize. Per-row Revoke ends that session specifically; "Revoke Others" in the section header ends every session except the one you are using right now.',
 			position: 'above',
 			freeInteract: true,
 			completion: { type: 'manual' }
