@@ -27,7 +27,9 @@ import {
 } from '$auth/middleware.ts';
 import { cleanupExpiredAttempts } from '$auth/rateLimit.ts';
 import { checkApiKeyAccess } from '$auth/apiPermissions.ts';
+import { getStartupAuthError } from '$auth/loginOptions.ts';
 import { setupStateQueries } from '$db/queries/setupState.ts';
+import { usersQueries } from '$db/queries/users.ts';
 
 if (!isReload) {
 	// Initialize configuration on server startup
@@ -46,6 +48,20 @@ if (!isReload) {
 
 	// Load log settings from database (must be after migrations)
 	logSettings.load();
+
+	// Refuse to start rather than open first-run setup on an instance whose
+	// SSO settings went missing (needs the database, so it runs here rather
+	// than with the other auth checks in config).
+	const startupAuthError = getStartupAuthError({
+		authMode: config.authMode,
+		oidcEnabled: config.oidcEnabled,
+		hasLocalAccount: usersQueries.existsLocal(),
+		hasSsoAccounts: usersQueries.existsOidc()
+	});
+	if (startupAuthError) {
+		await logger.error(startupAuthError, { source: 'Auth' });
+		Deno.exit(1);
+	}
 
 	// Log container config (if running in Docker)
 	await logContainerConfig();
@@ -101,6 +117,18 @@ if (!isReload) {
 				source: 'Auth:Session',
 				meta: { count: expiredCount }
 			}
+		);
+	}
+
+	// TODO(v3.0.0): Remove this warning along with the AUTH=oidc alias
+	// (see parseAuthConfig in $utils/config/auth.ts).
+	if (config.deprecatedOidcMode) {
+		const leftover = usersQueries.existsLocal()
+			? ' A local password account exists, so the login page now also shows the password form.'
+			: '';
+		await logger.warn(
+			`AUTH=oidc is deprecated and will stop working in v3.0.0. Set AUTH=on instead; SSO stays enabled while the OIDC_* settings are set.${leftover}`,
+			{ source: 'Auth' }
 		);
 	}
 

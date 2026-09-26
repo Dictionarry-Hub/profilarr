@@ -36,6 +36,16 @@ export const usersQueries = {
 	},
 
 	/**
+	 * Check if any SSO (OIDC) users exist
+	 */
+	existsOidc(): boolean {
+		const result = db.queryFirst<{ count: number }>(
+			"SELECT COUNT(*) as count FROM users WHERE username LIKE 'oidc:%'"
+		);
+		return (result?.count ?? 0) > 0;
+	},
+
+	/**
 	 * Get user by ID
 	 */
 	getById(id: number): User | undefined {
@@ -61,13 +71,21 @@ export const usersQueries = {
 	},
 
 	/**
-	 * Create a new user (should only be called once during setup)
+	 * Create the password account only if none exists. One statement, so two
+	 * requests that both passed an earlier check can't both create one.
+	 * Returns the new id, or null if a password account already exists.
 	 */
-	create(username: string, passwordHash: string): number {
-		db.execute('INSERT INTO users (username, password_hash) VALUES (?, ?)', username, passwordHash);
+	createLocalIfNone(username: string, passwordHash: string): number | null {
+		const affected = db.execute(
+			`INSERT INTO users (username, password_hash)
+			 SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM users WHERE username NOT LIKE 'oidc:%')`,
+			username,
+			passwordHash
+		);
+		if (affected === 0) return null;
 
 		const result = db.queryFirst<{ id: number }>('SELECT last_insert_rowid() as id');
-		return result?.id ?? 0;
+		return result?.id ?? null;
 	},
 
 	/**

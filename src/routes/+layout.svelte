@@ -66,6 +66,7 @@
 		databases={data.databases}
 		parserAvailable={data.parserAvailable}
 		unreadAnnouncements={data.unreadAnnouncements}
+		showLogout={data.showLogout}
 	/>
 	<BottomNav />
 	<HelpButton />

@@ -80,15 +80,16 @@ Deno) and reduces each proxy URL to `scheme://host:port`, masking any login as
 Singleton that reads environment variables and exposes application
 configuration. Key properties:
 
-| Property    | Source env         | Purpose                          |
-| ----------- | ------------------ | -------------------------------- |
-| `basePath`  | `APP_BASE_PATH`    | Data directory root              |
-| `port`      | `PORT`             | Server port                      |
-| `host`      | `HOST`             | Bind address                     |
-| `authMode`  | `AUTH`             | `'on'`, `'off'`, or `'oidc'`     |
-| `parserUrl` | `PARSER_HOST/PORT` | Parser microservice URL          |
-| `oidc`      | `OIDC_*`           | OIDC discovery URL, client creds |
-| `timezone`  | `TZ`               | Fallback to system timezone      |
+| Property      | Source env         | Purpose                          |
+| ------------- | ------------------ | -------------------------------- |
+| `basePath`    | `APP_BASE_PATH`    | Data directory root              |
+| `port`        | `PORT`             | Server port                      |
+| `host`        | `HOST`             | Bind address                     |
+| `authMode`    | `AUTH`             | `'on'` or `'off'`                |
+| `parserUrl`   | `PARSER_HOST/PORT` | Parser microservice URL          |
+| `oidc`        | `OIDC_*`           | OIDC discovery URL, client creds |
+| `oidcEnabled` | `OIDC_*`           | All three set and `AUTH=on`      |
+| `timezone`    | `TZ`               | Fallback to system timezone      |
 
 The `paths` object computes derived directories (logs, database, backups,
 data) from `basePath`. `init()` creates all required directories at startup

@@ -145,10 +145,10 @@ them on the same channel.
 | `TZ`                     | `Etc/UTC`                                                         | Timezone for scheduling                                                               |
 | `PORT`                   | `6868`                                                            | Web UI port                                                                           |
 | `HOST`                   | `0.0.0.0`                                                         | Bind address                                                                          |
-| `AUTH`                   | `on`                                                              | Auth mode (`on`, `oidc`, `off`)                                                       |
-| `OIDC_CLIENT_SECRET`     | -                                                                 | OIDC client secret (when `AUTH=oidc`)                                                 |
-| `OIDC_CLIENT_ID`         | -                                                                 | OIDC client ID (when `AUTH=oidc`)                                                     |
-| `OIDC_DISCOVERY_URL`     | -                                                                 | OIDC discovery URL (when `AUTH=oidc`)                                                 |
+| `AUTH`                   | `on`                                                              | Login `on` or `off` (`oidc` is a deprecated alias for `on`)                           |
+| `OIDC_CLIENT_SECRET`     | -                                                                 | OIDC client secret (set all three OIDC values to enable SSO)                          |
+| `OIDC_CLIENT_ID`         | -                                                                 | OIDC client ID (set all three OIDC values to enable SSO)                              |
+| `OIDC_DISCOVERY_URL`     | -                                                                 | OIDC discovery URL (set all three OIDC values to enable SSO)                          |
 | `ORIGIN`                 | -                                                                 | Public URL when running behind a reverse proxy (e.g. `https://profilarr.example.com`) |
 | `PARSER_HOST`            | `localhost`                                                       | Parser service host                                                                   |
 | `PARSER_PORT`            | `5000`                                                            | Parser service port                                                                   |

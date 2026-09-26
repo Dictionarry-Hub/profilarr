@@ -4,6 +4,8 @@ import { usersQueries } from '$db/queries/users.ts';
 import { sessionsQueries } from '$db/queries/sessions.ts';
 import { apiKeysQueries } from '$db/queries/apiKeys.ts';
 import { hashPassword, verifyPassword } from '$auth/password.ts';
+import { isOidcUsername, validateNewLocalAccount } from '$auth/loginOptions.ts';
+import { sha256Hex } from '$auth/hash.ts';
 import { API_AREAS } from '$auth/apiPermissions.ts';
 import { config } from '$config';
 import { isApiKeyExpired } from '$shared/apiKeys.ts';
@@ -20,23 +22,15 @@ function loadApiKeys() {
 	};
 }
 
-export const load: ServerLoad = async ({ cookies }) => {
+export const load: ServerLoad = async ({ cookies, locals }) => {
 	const currentSessionId = cookies.get('session');
-	const user = usersQueries.getByUsername('admin') ?? usersQueries.getById(1);
 
-	if (!user) {
-		return {
-			sessions: [],
-			...loadApiKeys(),
-			currentSessionId: null
-		};
-	}
-
-	const sessions = sessionsQueries.getByUserId(user.id);
-
-	return {
-		sessions: sessions.map((s) => ({
-			id: s.id,
+	// Every account is an admin, so list sessions from password and SSO accounts.
+	// Each session is sent as a SHA-256 handle, never its ID: the ID is the
+	// cookie value, and the httpOnly cookie shouldn't be readable from the page.
+	const sessions = await Promise.all(
+		sessionsQueries.getAll().map(async (s) => ({
+			handle: await sha256Hex(s.id),
 			created_at: s.created_at,
 			expires_at: s.expires_at,
 			last_active_at: s.last_active_at,
@@ -45,9 +39,14 @@ export const load: ServerLoad = async ({ cookies }) => {
 			os: s.os,
 			device_type: s.device_type,
 			isCurrent: s.id === currentSessionId
-		})),
+		}))
+	);
+
+	return {
+		sessions,
 		...loadApiKeys(),
-		currentSessionId
+		signedInWithSso: locals.user ? isOidcUsername(locals.user.username) : false,
+		hasLocalAccount: usersQueries.existsLocal()
 	};
 };
 
@@ -86,6 +85,11 @@ export const actions: Actions = {
 			return fail(401, { passwordError: 'User not found' });
 		}
 
+		// SSO accounts have no password; the identity provider owns the credential
+		if (isOidcUsername(user.username)) {
+			return fail(403, { passwordError: 'Signed in with SSO; there is no password to change' });
+		}
+
 		// Verify current password
 		const valid = await verifyPassword(currentPassword, user.password_hash);
 		if (!valid) {
@@ -102,6 +106,42 @@ export const actions: Actions = {
 		});
 
 		return { passwordSuccess: true };
+	},
+
+	createLocalAccount: async ({ request, locals }) => {
+		// Only an SSO user can add the backup password account. A password user
+		// already has one, and only one password account is allowed.
+		if (!locals.user || !isOidcUsername(locals.user.username)) {
+			return fail(403, { localAccountError: 'Only available when signed in with SSO' });
+		}
+
+		if (usersQueries.existsLocal()) {
+			return fail(409, { localAccountError: 'A local account already exists' });
+		}
+
+		const formData = await request.formData();
+		const username = (formData.get('username') as string)?.trim() ?? '';
+		const password = (formData.get('password') as string) ?? '';
+		const confirmPassword = (formData.get('confirmPassword') as string) ?? '';
+
+		const validationError = validateNewLocalAccount(username, password, confirmPassword);
+		if (validationError) {
+			return fail(400, { localAccountError: validationError, username });
+		}
+
+		const passwordHash = await hashPassword(password);
+		const userId = usersQueries.createLocalIfNone(username, passwordHash);
+		if (!userId) {
+			// Another request created it while this one was hashing
+			return fail(409, { localAccountError: 'A local account already exists' });
+		}
+
+		await logger.info(`Local account '${username}' created by SSO user`, {
+			source: 'Auth',
+			meta: { username, createdBy: locals.user.username }
+		});
+
+		return { localAccountCreated: username };
 	},
 
 	deleteApiKey: async ({ request }) => {
@@ -129,22 +169,35 @@ export const actions: Actions = {
 
 	revokeSession: async ({ request, cookies }) => {
 		const formData = await request.formData();
-		const sessionId = formData.get('sessionId') as string;
+		const handle = formData.get('session') as string;
 		const currentSessionId = cookies.get('session');
 
-		if (!sessionId) {
-			return fail(400, { sessionError: 'Session ID required' });
+		if (!handle) {
+			return fail(400, { sessionError: 'Session required' });
 		}
 
-		if (sessionId === currentSessionId) {
+		// Find the session by its handle (see load)
+		let session: { id: string } | undefined;
+		for (const s of sessionsQueries.getAll()) {
+			if ((await sha256Hex(s.id)) === handle) {
+				session = s;
+				break;
+			}
+		}
+
+		if (!session) {
+			return fail(404, { sessionError: 'Session not found' });
+		}
+
+		if (session.id === currentSessionId) {
 			return fail(400, { sessionError: 'Cannot revoke current session' });
 		}
 
-		sessionsQueries.deleteById(sessionId);
+		sessionsQueries.deleteById(session.id);
 
 		await logger.info('Session revoked', {
 			source: 'Auth:Session',
-			meta: { revokedSessionId: sessionId.slice(0, 8) + '...' }
+			meta: { revokedSession: handle.slice(0, 8) + '...' }
 		});
 
 		return { sessionRevoked: true };
@@ -161,7 +214,7 @@ export const actions: Actions = {
 			return fail(401, { sessionError: 'Invalid session' });
 		}
 
-		const count = sessionsQueries.deleteOthersByUserId(session.user_id, currentSessionId);
+		const count = sessionsQueries.deleteAllExcept(currentSessionId);
 
 		if (count > 0) {
 			await logger.info(`Revoked ${count} other session${count === 1 ? '' : 's'}`, {

@@ -45,7 +45,18 @@ export const PORTS = {
 		xForwardedFor: 7017,
 		envApiKey: 7018,
 		localBypass: 7019,
-		apiKeyPermissions: 7020
+		apiKeyPermissions: 7020,
+		loginPasswordSetup: 7021,
+		loginPasswordOnly: 7022,
+		loginSsoOnly: 7023,
+		loginBoth: 7024,
+		loginLegacySsoOnly: 7025,
+		loginLegacyBoth: 7026,
+		loginOff: 7027,
+		localAccount: 7028,
+		loginSsoRemoved: 7029,
+		localAccountRace: 7030,
+		setupRace: 7031
 	},
 	api: {
 		arr: 7100,

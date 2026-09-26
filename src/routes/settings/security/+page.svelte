@@ -47,6 +47,11 @@
 	let newPassword = '';
 	let confirmPassword = '';
 
+	let creatingLocalAccount = false;
+	let localUsername = '';
+	let localPassword = '';
+	let localConfirmPassword = '';
+
 	// Handle form responses
 	$: if (form?.passwordSuccess) {
 		alertStore.add('success', 'Password changed successfully');
@@ -56,6 +61,15 @@
 	}
 	$: if (form?.passwordError) {
 		alertStore.add('error', form.passwordError);
+	}
+	$: if (form?.localAccountCreated) {
+		alertStore.add('success', `Local account "${form.localAccountCreated}" created`);
+		localUsername = '';
+		localPassword = '';
+		localConfirmPassword = '';
+	}
+	$: if (form?.localAccountError) {
+		alertStore.add('error', form.localAccountError);
 	}
 	$: if (form?.apiKeyDeleted) {
 		alertStore.add('success', `API key "${form.apiKeyDeleted}" deleted`);
@@ -129,7 +143,7 @@
 	}
 
 	interface SessionRow {
-		id: string;
+		handle: string;
 		created_at: string;
 		expires_at: string;
 		last_active_at: string | null;
@@ -210,66 +224,129 @@
 	</div>
 
 	<div class="space-y-8">
-		<!-- Change Password -->
-		<ExpandableCard
-			title="Change Password"
-			description="Update your account password"
-			onboardingId="security-password"
-		>
-			<div class="p-6">
-				<form
-					method="POST"
-					action="?/changePassword"
-					class="space-y-4"
-					use:enhance={() => {
-						changingPassword = true;
-						return async ({ update }) => {
-							await update({ reset: false });
-							changingPassword = false;
-						};
-					}}
-				>
-					<FormInput
-						name="currentPassword"
-						label="Current Password"
-						type="password"
-						placeholder="Enter current password"
-						autocomplete="current-password"
-						private_
-						bind:value={currentPassword}
-					/>
-					<FormInput
-						name="newPassword"
-						label="New Password"
-						type="password"
-						placeholder="Minimum 8 characters"
-						autocomplete="new-password"
-						private_
-						bind:value={newPassword}
-					/>
-					<FormInput
-						name="confirmPassword"
-						label="Confirm New Password"
-						type="password"
-						placeholder="Re-enter new password"
-						autocomplete="new-password"
-						private_
-						bind:value={confirmPassword}
-					/>
-					<div class="flex justify-end">
-						<Button
-							type="submit"
-							variant="secondary"
-							size="sm"
-							icon={Check}
-							iconColor="text-accent-500"
-							text={changingPassword ? 'Saving...' : 'Change Password'}
-							disabled={changingPassword}
+		{#if data.signedInWithSso && !data.hasLocalAccount}
+			<!-- Create Local Account (SSO users only, until one exists) -->
+			<ExpandableCard
+				title="Create Local Account"
+				description="Add a username and password to sign in with if SSO is unavailable"
+				onboardingId="security-password"
+			>
+				<div class="p-6">
+					<form
+						method="POST"
+						action="?/createLocalAccount"
+						class="space-y-4"
+						use:enhance={() => {
+							creatingLocalAccount = true;
+							return async ({ update }) => {
+								await update({ reset: false });
+								creatingLocalAccount = false;
+							};
+						}}
+					>
+						<FormInput
+							name="username"
+							label="Username"
+							placeholder="Minimum 3 characters"
+							autocomplete="username"
+							bind:value={localUsername}
 						/>
-					</div>
-				</form>
-			</div>
-		</ExpandableCard>
+						<FormInput
+							name="password"
+							label="Password"
+							type="password"
+							placeholder="Minimum 8 characters"
+							autocomplete="new-password"
+							private_
+							bind:value={localPassword}
+						/>
+						<FormInput
+							name="confirmPassword"
+							label="Confirm Password"
+							type="password"
+							placeholder="Re-enter password"
+							autocomplete="new-password"
+							private_
+							bind:value={localConfirmPassword}
+						/>
+						<div class="flex justify-end">
+							<Button
+								type="submit"
+								variant="secondary"
+								size="sm"
+								icon={Plus}
+								iconColor="text-accent-500"
+								text={creatingLocalAccount ? 'Creating...' : 'Create Account'}
+								disabled={creatingLocalAccount}
+							/>
+						</div>
+					</form>
+				</div>
+			</ExpandableCard>
+		{/if}
+
+		{#if !data.signedInWithSso}
+			<!-- Change Password -->
+			<ExpandableCard
+				title="Change Password"
+				description="Update your account password"
+				onboardingId="security-password"
+			>
+				<div class="p-6">
+					<form
+						method="POST"
+						action="?/changePassword"
+						class="space-y-4"
+						use:enhance={() => {
+							changingPassword = true;
+							return async ({ update }) => {
+								await update({ reset: false });
+								changingPassword = false;
+							};
+						}}
+					>
+						<FormInput
+							name="currentPassword"
+							label="Current Password"
+							type="password"
+							placeholder="Enter current password"
+							autocomplete="current-password"
+							private_
+							bind:value={currentPassword}
+						/>
+						<FormInput
+							name="newPassword"
+							label="New Password"
+							type="password"
+							placeholder="Minimum 8 characters"
+							autocomplete="new-password"
+							private_
+							bind:value={newPassword}
+						/>
+						<FormInput
+							name="confirmPassword"
+							label="Confirm New Password"
+							type="password"
+							placeholder="Re-enter new password"
+							autocomplete="new-password"
+							private_
+							bind:value={confirmPassword}
+						/>
+						<div class="flex justify-end">
+							<Button
+								type="submit"
+								variant="secondary"
+								size="sm"
+								icon={Check}
+								iconColor="text-accent-500"
+								text={changingPassword ? 'Saving...' : 'Change Password'}
+								disabled={changingPassword}
+							/>
+						</div>
+					</form>
+				</div>
+			</ExpandableCard>
+		{/if}
 
 		<!-- API Keys -->
 		<ExpandableCard title="API Keys" onboardingId="security-api-key">
@@ -445,7 +522,7 @@
 										};
 									}}
 								>
-									<input type="hidden" name="sessionId" value={row.id} />
+									<input type="hidden" name="session" value={row.handle} />
 									<Button
 										icon={LogOut}
 										title="Revoke session"

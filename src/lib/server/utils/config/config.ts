@@ -2,9 +2,26 @@
  * Application configuration singleton
  */
 
-export type AuthMode = 'on' | 'off' | 'oidc';
+import { parseAuthConfig, type AuthMode, type OidcSettings } from './auth.ts';
+import { colors } from '$logger/colors.ts';
+
+export type { AuthMode };
 
 export const PROFILARR_API_KEY_MIN_LENGTH = 32;
+
+/**
+ * Stop startup on invalid settings. Config loads before the logger can run
+ * (the logger imports config and reads its settings from the database), so
+ * print a line in the logger's console format instead of throwing, which
+ * would show as an uncaught error with a stack trace.
+ */
+function failStartup(message: string): never {
+	const timestamp = `${colors.grey}${new Date().toISOString()}${colors.reset}`;
+	const level = `${colors.red}ERROR${colors.reset}`;
+	const source = `${colors.grey}[Config]${colors.reset}`;
+	console.error([timestamp, level, message, source].join(' | '));
+	Deno.exit(1);
+}
 
 class Config {
 	private basePath: string;
@@ -14,12 +31,10 @@ class Config {
 	public readonly host: string;
 	public readonly origin: string;
 	public readonly authMode: AuthMode;
+	public readonly deprecatedOidcMode: boolean;
+	public readonly oidcEnabled: boolean;
 	public readonly profilarrApiKey: string | null;
-	public readonly oidc: {
-		discoveryUrl: string | null;
-		clientId: string | null;
-		clientSecret: string | null;
-	};
+	public readonly oidc: OidcSettings;
 	public readonly bulletinUrl: string;
 
 	constructor() {
@@ -55,25 +70,31 @@ class Config {
 		// stripped so downstream concatenation (`${origin}/path`) doesn't double up.
 		this.origin = (Deno.env.get('ORIGIN') || this.serverUrl).replace(/\/+$/, '');
 
-		// Auth mode: 'on' (default), 'off', 'oidc'
-		const auth = (Deno.env.get('AUTH') || 'on').toLowerCase();
-		this.authMode = ['on', 'off', 'oidc'].includes(auth) ? (auth as AuthMode) : 'on';
+		// Auth mode ('on' default, 'off') and SSO, enabled by the OIDC_* settings
+		let auth: ReturnType<typeof parseAuthConfig>;
+		try {
+			auth = parseAuthConfig({
+				AUTH: Deno.env.get('AUTH'),
+				OIDC_DISCOVERY_URL: Deno.env.get('OIDC_DISCOVERY_URL'),
+				OIDC_CLIENT_ID: Deno.env.get('OIDC_CLIENT_ID'),
+				OIDC_CLIENT_SECRET: Deno.env.get('OIDC_CLIENT_SECRET')
+			});
+		} catch (err) {
+			failStartup(err instanceof Error ? err.message : String(err));
+		}
+		this.authMode = auth.authMode;
+		this.deprecatedOidcMode = auth.deprecatedOidcMode;
+		this.oidcEnabled = auth.oidcEnabled;
+		this.oidc = auth.oidc;
 
 		// Optional declarative internal API key for GitOps/container deployments.
 		const profilarrApiKey = Deno.env.get('PROFILARR_API_KEY') || null;
 		if (profilarrApiKey !== null && profilarrApiKey.length < PROFILARR_API_KEY_MIN_LENGTH) {
-			throw new Error(
+			failStartup(
 				`PROFILARR_API_KEY must be at least ${PROFILARR_API_KEY_MIN_LENGTH} characters long`
 			);
 		}
 		this.profilarrApiKey = profilarrApiKey;
-
-		// OIDC configuration (only used when AUTH=oidc)
-		this.oidc = {
-			discoveryUrl: Deno.env.get('OIDC_DISCOVERY_URL') || null,
-			clientId: Deno.env.get('OIDC_CLIENT_ID') || null,
-			clientSecret: Deno.env.get('OIDC_CLIENT_SECRET') || null
-		};
 
 		// Bulletin (announcement feed + release manifest) base URL. The default
 		// points at the live Dictionarry-Hub/bulletin repo served over GitHub's

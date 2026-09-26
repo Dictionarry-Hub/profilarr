@@ -34,6 +34,8 @@ export const load: LayoutServerLoad = async () => {
 		version: build.version,
 		versionStatus: getVersionStatus(),
 		timezone: config.timezone,
+		// Nothing to log out of when login is off
+		showLogout: config.authMode !== 'off',
 		dateFormat: generalSettingsQueries.get()?.date_format ?? 'auto',
 		arrInstances,
 		databases,

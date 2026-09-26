@@ -12,6 +12,11 @@ import { logger } from '$logger/logger.ts';
 export const GET: RequestHandler = async (event) => {
 	const { url, cookies, request } = event;
 
+	// SSO is enabled when all three OIDC settings are present (checked at startup)
+	if (!config.oidcEnabled) {
+		throw error(400, 'OIDC authentication is not enabled');
+	}
+
 	// Get code and state from query params
 	const code = url.searchParams.get('code');
 	const state = url.searchParams.get('state');

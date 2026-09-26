@@ -14,6 +14,7 @@ import { config } from '$config';
 import { apiKeysQueries } from '$db/queries/apiKeys.ts';
 import { ENV_API_KEY_NAME, isApiKeyExpired, type ApiKeyPermissions } from '$shared/apiKeys.ts';
 import { logger } from '$logger/logger.ts';
+import { sha256Hex } from './hash.ts';
 
 export interface ResolvedApiKey {
 	/** null for the env key, which has no row */
@@ -36,11 +37,6 @@ const matchedKeys = new Map<string, number>();
 
 /** Keys whose stored hash failed to parse, so the warning is logged once */
 const reportedBrokenHashes = new Set<number>();
-
-async function sha256Hex(value: string): Promise<string> {
-	const digest = await crypto.subtle.digest('SHA-256', encoder.encode(value));
-	return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
-}
 
 async function timingSafeStringEquals(left: string, right: string): Promise<boolean> {
 	const [leftHash, rightHash] = await Promise.all([

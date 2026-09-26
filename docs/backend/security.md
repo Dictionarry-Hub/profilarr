@@ -5,8 +5,10 @@
 - [Overview](#overview)
 - [Auth Modes](#auth-modes)
   - [AUTH=on](#authon-default)
-  - [AUTH=oidc](#authoidc)
+  - [SSO (OIDC)](#sso-oidc)
   - [AUTH=off](#authoff)
+  - [Accounts](#accounts)
+  - [Login Scenarios](#login-scenarios)
   - [API Keys](#api-keys)
     - [Permissions](#permissions)
 - [Request Flow](#request-flow)
@@ -59,26 +61,48 @@ say - It's _stupidity mitigation_. Patent Pending.
 
 ## Auth Modes
 
-Set via `AUTH` env var. All modes except `off` also support API key auth via
-`X-Api-Key` header.
+`AUTH` turns login on or off. SSO through OIDC is an add-on to `AUTH=on`: it is
+enabled by setting all three `OIDC_*` settings. When login is on, API keys also
+work through the `X-Api-Key` header.
 
-| Variable             | Default | Description                                           | Example                                                      |
-| -------------------- | ------- | ----------------------------------------------------- | ------------------------------------------------------------ |
-| `AUTH`               | `on`    | Auth mode: `on`, `off`, `oidc`                        | `oidc`                                                       |
-| `ORIGIN`             | -       | Scheme + host for reverse proxy (CSRF, cookies, OIDC) | `https://profilarr.mydomain.com`                             |
-| `OIDC_DISCOVERY_URL` | -       | OIDC provider discovery endpoint (AUTH=oidc only)     | `https://auth.mydomain.com/.well-known/openid-configuration` |
-| `OIDC_CLIENT_ID`     | -       | OIDC client ID (AUTH=oidc only)                       | `profilarr`                                                  |
-| `OIDC_CLIENT_SECRET` | -       | OIDC client secret (AUTH=oidc only)                   | `your-secret`                                                |
+| Variable             | Default | Description                                                   | Example                                                      |
+| -------------------- | ------- | ------------------------------------------------------------- | ------------------------------------------------------------ |
+| `AUTH`               | `on`    | Login: `on` or `off`. `oidc` is a deprecated alias for `on`   | `on`                                                         |
+| `ORIGIN`             | -       | Scheme + host for reverse proxy (CSRF, cookies, OIDC)         | `https://profilarr.mydomain.com`                             |
+| `OIDC_DISCOVERY_URL` | -       | OIDC provider discovery endpoint. Set all three to enable SSO | `https://auth.mydomain.com/.well-known/openid-configuration` |
+| `OIDC_CLIENT_ID`     | -       | OIDC client ID. Set all three to enable SSO                   | `profilarr`                                                  |
+| `OIDC_CLIENT_SECRET` | -       | OIDC client secret. Set all three to enable SSO               | `your-secret`                                                |
+
+The settings are parsed at startup by `parseAuthConfig()` in
+`src/lib/server/utils/config/auth.ts`. Profilarr refuses to start, with an
+error log line naming the problem, when:
+
+- some but not all of the `OIDC_*` settings are set (unless `AUTH=off`), so a
+  typo can't silently turn SSO off and open first-run setup
+- `AUTH=oidc` is set without any `OIDC_*` settings
+- SSO accounts exist, SSO is not enabled, and there's no password account
+  (`getStartupAuthError()`, checked once the database is open). Without this,
+  losing the `OIDC_*` settings would open first-run setup on an instance that
+  was in use. To stop using SSO, create a password account first.
+
+The login decisions live in `src/lib/server/utils/auth/loginOptions.ts`:
+
+- The login page shows the password form when a password account exists, and
+  the SSO button when SSO is enabled. If both are true, it shows both.
+- First-run setup (`/auth/setup`) is only open when `AUTH=on`, SSO is not
+  enabled, and no password account exists. With SSO enabled, the first user
+  signs in with SSO instead, so setup is never left open to whoever reaches it
+  first.
 
 ### AUTH=on (default)
 
-Username/password login with session-based auth. On first run, the user is
-redirected to `/auth/setup` to create an admin account. Passwords are
-bcrypt-hashed. Sessions default to 7 days with sliding expiration - matching
-Sonarr's approach (ASP.NET's `SlidingExpiration`), which re-issues when more
-than halfway through the expiration window. Sonarr uses ASP.NET's built-in
-cookie middleware for this; we implement it manually against SQLite in
-`maybeExtendSession()`.
+Username/password login with session-based auth. Without SSO, the first visit
+is redirected to `/auth/setup` to create the password account. Only one password
+account can exist. Passwords are bcrypt-hashed. Sessions default to 7 days with
+sliding expiration - matching Sonarr's approach (ASP.NET's `SlidingExpiration`),
+which re-issues when more than halfway through the expiration window. Sonarr
+uses ASP.NET's built-in cookie middleware for this; we implement it manually
+against SQLite in `maybeExtendSession()`.
 
 #### Sessions
 
@@ -86,8 +110,11 @@ Stored in the `sessions` table with metadata: IP, user agent, browser, OS,
 device type, last active. Duration is configured in
 `auth_settings.session_duration_hours` (default 7 days). Sliding expiration
 extends the session when less than half the duration remains. Expired sessions
-are cleaned up on startup. Users can view active sessions, revoke individual
-sessions, or revoke all others via Settings > Security.
+are cleaned up on startup. Password and SSO sign-ins create the same kind of
+session. Settings > Security lists sessions from every account, and can revoke
+one session or every session except the current one. The page gets a SHA-256
+handle for each session, never its ID: the ID is the cookie value, so exposing
+it would let a script in the page read what the `httpOnly` cookie hides.
 
 Cookie properties:
 
@@ -98,14 +125,15 @@ Cookie properties:
 | `secure`   | `true` when `ORIGIN` starts with `https://` |
 | `path`     | `/`                                         |
 
-### AUTH=oidc
+### SSO (OIDC)
 
-Delegates authentication to an external OIDC provider (Authentik, Keycloak,
-Google, etc.). The login page shows a "Sign in with SSO" button instead of a
-password form. The flow uses state cookies for CSRF protection, nonce cookies
-for token replay prevention, and verifies JWT signatures via the provider's JWKS
-endpoint using the `jose` library. OIDC users are stored with an `oidc:`
-username prefix. Sessions work the same as AUTH=on.
+Delegates sign-in to an external OIDC provider (Authentik, Keycloak, Google,
+etc.). Enabled with `AUTH=on` and all three `OIDC_*` settings. Both
+`/auth/oidc/login` and `/auth/oidc/callback` return 400 when SSO is not
+enabled. The flow uses state cookies for CSRF protection, nonce cookies for
+token replay prevention, and verifies JWT signatures via the provider's JWKS
+endpoint using the `jose` library. Any user the provider authenticates for the
+client gets in; Profilarr has no allowlist of its own.
 
 ```mermaid
 sequenceDiagram
@@ -114,6 +142,7 @@ sequenceDiagram
     participant IDP as OIDC Provider
 
     B->>P: GET /auth/oidc/login
+    P->>P: SSO enabled? (400 if not)
     P->>P: Generate state + nonce
     P->>P: Store in cookies (10min TTL)
     P->>B: 302 to IDP authorization URL
@@ -122,22 +151,75 @@ sequenceDiagram
     IDP->>B: 302 to /auth/oidc/callback?code=...&state=...
 
     B->>P: GET /auth/oidc/callback
+    P->>P: SSO enabled? (400 if not)
     P->>P: Verify state matches cookie (CSRF)
     P->>IDP: Exchange code for tokens
     IDP->>P: id_token + access_token
     P->>P: Verify JWT signature via JWKS (jose)
     P->>P: Verify issuer, audience, expiry
     P->>P: Verify nonce matches cookie (replay)
-    P->>P: Get or create OIDC user (sub)
+    P->>P: Get or create SSO account (oidc:<sub>)
     P->>P: Create session
     P->>B: Set session cookie, redirect /
 ```
+
+`AUTH=oidc` is a deprecated alias for `AUTH=on`. Startup logs a warning asking
+for `AUTH=on`; if a password account exists, the warning also says the login
+page now shows the password form. The alias is marked for removal in v3.0.0.
+Removing it is a breaking change: an instance still on `AUTH=oidc` without a
+password account would fall back to `AUTH=on` and open first-run setup.
 
 ### AUTH=off
 
 No auth checks. All requests are allowed through. Intended for deployments
 behind an authenticating reverse proxy like Authelia or Authentik. The setup
-page is blocked in this mode since there's no local user to create.
+and login pages redirect to `/`, Log Out is hidden, and the `OIDC_*` settings
+are ignored.
+
+### Accounts
+
+Password and SSO accounts share the `users` table. Every account is a full
+admin. An SSO account's username is `oidc:` plus the provider's `sub` claim, and
+its password hash is the placeholder `OIDC_NO_PASSWORD`, so it can never sign in
+with a password. The `oidc:` prefix, compared ignoring case, is the only thing
+that tells the two apart (`isOidcUsername()`, and `NOT LIKE 'oidc:%'` in
+`usersQueries`). For that reason, usernames starting with `oidc:` are refused
+wherever a password account is created.
+
+| State         | `users` rows                                                              |
+| ------------- | ------------------------------------------------------------------------- |
+| Password only | One row, e.g. `admin` with a bcrypt hash                                  |
+| SSO only      | One `oidc:<sub>` row per person who has signed in with SSO                |
+| Both          | The password row alongside the SSO rows. They aren't linked to each other |
+
+On Settings > Security, the page adapts to how the current session signed in:
+
+- **Password session:** Change Password, as before.
+- **SSO session, no password account:** Create Local Account, which adds the
+  one password account as a fallback for when the provider is unavailable. It
+  does not switch the current session.
+- **SSO session, password account exists:** neither form. The password is
+  changed by signing in with it.
+
+A password account keeps working after the person's SSO access is revoked at
+the provider. There is no way to delete a password account from the app.
+
+### Login Scenarios
+
+| Scenario                                      | What happens                                                                                                                                    |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| New install, no SSO                           | First visit goes to setup to create the password account. The login page then shows the password form.                                          |
+| New install with SSO                          | No setup page. The login page shows only the SSO button. A password account can be added later from Settings > Security.                        |
+| Password account, no SSO                      | The login page shows only the password form.                                                                                                    |
+| SSO only                                      | The login page shows only the SSO button.                                                                                                       |
+| SSO and a password account                    | The login page shows both. Either one signs in.                                                                                                 |
+| `AUTH=oidc` (deprecated), no password account | Same as SSO only, plus the startup deprecation warning.                                                                                         |
+| `AUTH=oidc` with a leftover password account  | Same as SSO and a password account. The startup warning points out that the password form is now shown.                                         |
+| `AUTH=on` with leftover `OIDC_*` settings     | All three set: the SSO button appears. Only some set: Profilarr won't start until they're fixed or removed.                                     |
+| `AUTH=off`                                    | No login. The `OIDC_*` settings are ignored.                                                                                                    |
+| SSO removed, no password account              | Profilarr refuses to start until the `OIDC_*` settings are restored. To stop using SSO, create a password account in Settings > Security first. |
+| SSO provider down                             | Sign in with the password account if one exists. Otherwise there's no way in until the provider is back.                                        |
+| Typo in the `OIDC_*` settings                 | Profilarr won't start, and the error names the missing setting.                                                                                 |
 
 ### API Keys
 
@@ -204,22 +286,17 @@ flowchart TD
     APIKEY -->|Valid| S_API["skipAuth=false
     needsSetup=false
     user=api"]
-    APIKEY -->|Invalid| LOG_BAD[Log warning] --> OIDC
-    APIKEY -->|No header| OIDC
+    APIKEY -->|Invalid or expired| LOG_BAD[Log warning] --> SESS
+    APIKEY -->|No header| SESS
 
-    OIDC{AUTH=oidc?}
-    OIDC -->|Yes| SESS_OIDC[Check session cookie] --> S_OIDC["skipAuth=false
-    needsSetup=false
-    user=session user or null"]
-
-    OIDC -->|No| SESS_ON["Check session cookie
-    AUTH=on"] --> S_ON["skipAuth=false
-    needsSetup=!hasLocalUsers
+    SESS["Check session cookie
+    (password and SSO sessions)"] --> S_ON["skipAuth=false
+    needsSetup = no password account
+    and SSO not enabled
     user=session user or null"]
 
     S_OFF --> HOOK
     S_API --> HOOK
-    S_OIDC --> HOOK
     S_ON --> HOOK
 
     HOOK[handle hook]
@@ -238,9 +315,16 @@ flowchart TD
     BLOCK_SETUP -->|No| PUBLIC{Public path?}
     PUBLIC -->|Yes| RESOLVE
 
-    PUBLIC -->|No| HAS_USER{auth.user?}
-    HAS_USER -->|Yes + session| EXTEND[Sliding expiration] --> ATTACH[Attach to locals] --> RESOLVE
-    HAS_USER -->|Yes, API key| ATTACH
+    PUBLIC -->|No| IS_KEY{API key auth?}
+    IS_KEY -->|Yes| V1{/api/v1 path?}
+    V1 -->|No| RESP_403[403 JSON]
+    V1 -->|Yes| PERM{"Key has the operation's
+    x-permission?"}
+    PERM -->|No| RESP_403
+    PERM -->|Yes| ATTACH
+
+    IS_KEY -->|No| HAS_USER{auth.user?}
+    HAS_USER -->|Yes| EXTEND[Sliding expiration] --> ATTACH[Attach to locals] --> RESOLVE
 
     HAS_USER -->|No| IS_API{/api path?}
     IS_API -->|Yes| RESP_401[401 JSON]
@@ -248,6 +332,7 @@ flowchart TD
 
     style RESOLVE fill:#059669,color:#fff
     style RESP_401 fill:#dc2626,color:#fff
+    style RESP_403 fill:#dc2626,color:#fff
     style R_SETUP fill:#d97706,color:#fff
     style R_HOME fill:#d97706,color:#fff
     style R_LOGIN fill:#d97706,color:#fff
@@ -361,9 +446,11 @@ Everything else requires a valid session or API key.
 
 Page-level guards add further restrictions on top:
 
-- `/auth/setup` redirects to `/` if AUTH=off or a local user already exists
-- `/auth/login` redirects to `/auth/setup` if no local users exist (AUTH=on), or
-  shows SSO button (AUTH=oidc)
+- `/auth/setup` redirects to `/` unless first-run setup is open (`AUTH=on`, SSO
+  not enabled, no password account)
+- `/auth/login` redirects to `/` with `AUTH=off`, and to `/auth/setup` while
+  setup is open; otherwise it shows the password form, the SSO button, or both
+- `/auth/oidc/login` and `/auth/oidc/callback` return 400 unless SSO is enabled
 
 ### Secret Stripping
 
@@ -483,12 +570,16 @@ Pure function tests for the core auth utilities - IP classification, path
 allowlisting, and login failure analysis. No server instances or network calls
 needed.
 
-| File                     | Tests                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `network.test.ts`        | `getClientIp` proxy header handling with trustProxy on/off                               |
-| `publicPaths.test.ts`    | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
-| `loginAnalysis.test.ts`  | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
-| `apiPermissions.test.ts` | Route id to spec path mapping, permission lookup, read/write/area checks, area list      |
+| File                        | Tests                                                                                    |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| `network.test.ts`           | `getClientIp` proxy header handling with trustProxy on/off                               |
+| `publicPaths.test.ts`       | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
+| `loginAnalysis.test.ts`     | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
+| `apiPermissions.test.ts`    | Route id to spec path mapping, permission lookup, read/write/area checks, area list      |
+| `authConfig.test.ts`        | `AUTH` parsing, `oidc` alias, SSO enablement, partial `OIDC_*` settings refused          |
+| `oidcConfigStartup.test.ts` | Partial `OIDC_*` settings stop `config.ts` from loading; ignored with `AUTH=off`         |
+| `loginOptions.test.ts`      | Login page options, first-run setup, and the startup lockout for every combination       |
+| `accountValidation.test.ts` | Password account rules, reserved `oidc:` prefix, prefix check matches the SQL in queries |
 
 **Sanitize tests** (`tests/unit/sanitize/`):
 
@@ -503,23 +594,25 @@ end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
 `ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
 and run in parallel via `deno task test integration`.
 
-| File                        | Port             | Tests                                                                                          |
-| --------------------------- | ---------------- | ---------------------------------------------------------------------------------------------- |
-| `health.test.ts`            | 7001             | Public health vs authenticated diagnostics, no info disclosure                                 |
-| `csrf.test.ts`              | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                   |
-| `cookie.test.ts`            | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                              |
-| `apiKey.test.ts`            | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management       |
-| `apiKeyPermissions.test.ts` | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at          |
-| `envApiKey.test.ts`         | 7018             | Env key works alongside stored keys, "Environment" name reserved                               |
-| `session.test.ts`           | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection |
-| `oidc.test.ts`              | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, AUTH=on rejection, proxy flow                           |
-| `rateLimit.test.ts`         | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                             |
-| `proxy.test.ts`             | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                     |
-| `xForwardedFor.test.ts`     | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                     |
-| `secretExposure.test.ts`    | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                 |
-| `backupSecrets.test.ts`     | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                        |
-| `pathTraversal.test.ts`     | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints               |
-| `localBypass.test.ts`       | 7019             | Local bypass removal: requests from local addresses require auth                               |
+| File                        | Port             | Tests                                                                                               |
+| --------------------------- | ---------------- | --------------------------------------------------------------------------------------------------- |
+| `health.test.ts`            | 7001             | Public health vs authenticated diagnostics, no info disclosure                                      |
+| `csrf.test.ts`              | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                        |
+| `cookie.test.ts`            | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                   |
+| `apiKey.test.ts`            | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management            |
+| `apiKeyPermissions.test.ts` | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at               |
+| `envApiKey.test.ts`         | 7018             | Env key works alongside stored keys, "Environment" name reserved                                    |
+| `session.test.ts`           | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection      |
+| `oidc.test.ts`              | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                  |
+| `loginMethods.test.ts`      | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout    |
+| `localAccount.test.ts`      | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts |
+| `rateLimit.test.ts`         | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                  |
+| `proxy.test.ts`             | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                          |
+| `xForwardedFor.test.ts`     | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                          |
+| `secretExposure.test.ts`    | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                      |
+| `backupSecrets.test.ts`     | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                             |
+| `pathTraversal.test.ts`     | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                    |
+| `localBypass.test.ts`       | 7019             | Local bypass removal: requests from local addresses require auth                                    |
 
 ### E2E Tests (`tests/e2e/auth/`)
 
