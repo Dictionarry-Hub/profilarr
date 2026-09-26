@@ -196,6 +196,10 @@ issue or reach out on [Discord](https://discord.gg/2A89tXZMgA) first so we
 can discuss the approach. See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for the
 full development workflow.
 
+## ☁️ One-Click Deploy
+
+[![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploylobe.svg)](https://repocloud.io/details/profilarr/)
+
 ## ❤️ Support
 
 Every feature in Profilarr is free for everyone, and development will continue
