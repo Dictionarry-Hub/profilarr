@@ -2,6 +2,11 @@ import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { pcdManager } from '$pcd/core/manager.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
+import {
+	qualityProfileScoringLocalChanges,
+	type QualityProfileScoringLocalChanges
+} from '$pcd/history/localChanges.ts';
+import { logger } from '$logger/logger.ts';
 
 export const load: LayoutServerLoad = async ({ params }) => {
 	const databaseId = parseInt(params.databaseId, 10);
@@ -23,6 +28,30 @@ export const load: LayoutServerLoad = async ({ params }) => {
 
 	return {
 		databaseName: database.name,
-		profileName: profile.name
+		profileName: profile.name,
+		localChanges: await loadLocalChanges(cache, databaseId, profile.name)
 	};
 };
+
+// Every profile tab loads this layout: a failure here must not take the tabs down.
+async function loadLocalChanges(
+	cache: Parameters<typeof qualityProfileScoringLocalChanges>[0],
+	databaseId: number,
+	profileName: string
+): Promise<QualityProfileScoringLocalChanges> {
+	try {
+		return await qualityProfileScoringLocalChanges(cache, databaseId, profileName);
+	} catch (error) {
+		await logger.warn('Failed to load local changes for quality profile', {
+			source: 'QualityProfileLayout',
+			meta: { databaseId, profileName, error: String(error) }
+		});
+		return {
+			snapshot: 'unavailable',
+			upstreamName: null,
+			customFormatRenames: {},
+			status: 'unchanged',
+			rows: []
+		};
+	}
+}
