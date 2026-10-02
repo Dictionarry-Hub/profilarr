@@ -3,7 +3,9 @@
  * Writes operations to pcd_ops instead of filesystem layers.
  */
 
+import { db } from '$db/db.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
+import { pcdOpEntitiesQueries } from '$db/queries/pcdOpEntities.ts';
 import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
 import type { PcdOpOrigin } from '$db/queries/pcdOps.ts';
 import { logger } from '$logger/logger.ts';
@@ -11,43 +13,8 @@ import { compiledQueryToSql } from '../utils/sql.ts';
 import { compile } from '../database/compiler.ts';
 import { getCache } from '../database/registry.ts';
 import type { OperationMetadata, OperationType, WriteOptions, WriteResult } from '../core/types.ts';
-
-function buildMetadataJson(metadata?: OperationMetadata): string | null {
-	if (!metadata) return null;
-	const payload: Record<string, unknown> = {
-		operation: metadata.operation,
-		entity: metadata.entity,
-		name: metadata.name
-	};
-	if (metadata.previousName) {
-		payload.previousName = metadata.previousName;
-	}
-	if (metadata.qualityName) {
-		payload.qualityName = metadata.qualityName;
-	}
-	if (metadata.summary) {
-		payload.summary = metadata.summary;
-	}
-	if (metadata.title) {
-		payload.title = metadata.title;
-	}
-	if (metadata.changedFields && metadata.changedFields.length > 0) {
-		payload.changed_fields = metadata.changedFields;
-	}
-	if (metadata.stableKey) {
-		payload.stable_key = metadata.stableKey;
-	}
-	if (metadata.groupId) {
-		payload.group_id = metadata.groupId;
-	}
-	if (metadata.generated) {
-		payload.generated = true;
-	}
-	if (metadata.dependsOn && metadata.dependsOn.length > 0) {
-		payload.depends_on = metadata.dependsOn;
-	}
-	return JSON.stringify(payload);
-}
+import { entityRowsFromMetadata } from '../history/opEntities.ts';
+import { buildMetadataJson } from './metadataJson.ts';
 
 function serializeDesiredState(desiredState?: Record<string, unknown> | null): string | null {
 	if (!desiredState) return null;
@@ -219,6 +186,18 @@ export async function writeOperation(options: WriteOptions): Promise<WriteResult
 			};
 		}
 
+		// Ops without an entity and name can't be placed in local changes history.
+		if (layer === 'user' && (!metadata?.entity || !metadata?.name)) {
+			await logger.error('User-layer write without entity metadata - refusing to write', {
+				source: 'PCDWriter',
+				meta: { databaseId, description, entity: metadata?.entity, name: metadata?.name }
+			});
+			return {
+				success: false,
+				error: 'User-layer writes require metadata with an entity and a name'
+			};
+		}
+
 		// Convert queries to SQL first (needed for validation)
 		const sqlStatements = queries.map(compiledQueryToSql);
 
@@ -264,15 +243,22 @@ export async function writeOperation(options: WriteOptions): Promise<WriteResult
 		const origin: PcdOpOrigin = layer === 'base' ? 'base' : 'user';
 		const state = layer === 'base' ? 'draft' : 'published';
 
-		const opId = pcdOpsQueries.create({
-			databaseId,
-			origin,
-			state,
-			source: 'local',
-			sql: sqlContent,
-			metadata: metadataJson,
-			desiredState: desiredStateJson,
-			contentHash
+		// The op and its entity rows land together or not at all.
+		const opId = await db.transaction(() => {
+			const id = pcdOpsQueries.create({
+				databaseId,
+				origin,
+				state,
+				source: 'local',
+				sql: sqlContent,
+				metadata: metadataJson,
+				desiredState: desiredStateJson,
+				contentHash
+			});
+			if (origin === 'user' && metadata) {
+				pcdOpEntitiesQueries.insertForOp(id, databaseId, entityRowsFromMetadata(metadata));
+			}
+			return id;
 		});
 
 		const opType = metadata?.operation ?? 'write';
