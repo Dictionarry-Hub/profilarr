@@ -15,6 +15,13 @@ import {
 } from '$db/queries/databaseInstances.ts';
 import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
 import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
+import { pcdOpEntitiesQueries } from '$db/queries/pcdOpEntities.ts';
+import {
+	captureUpstream,
+	emptySnapshot,
+	sqliteReaders,
+	type UpstreamSnapshot
+} from '../history/capture.ts';
 import type { PCDDatabase } from '$shared/pcd/types.ts';
 import type { CacheBuildStats, ValidationResult } from '../core/types.ts';
 import { uuid } from '$shared/utils/uuid.ts';
@@ -26,6 +33,9 @@ import {
 } from '$pcd/conflicts/autoAlign/index.ts';
 import { checkFullListConflict } from '$pcd/conflicts/fullListCheck.ts';
 
+/** Last incomplete-snapshot warning per database, so it only re-fires on change. */
+const lastIncompleteSnapshotWarning = new Map<number, string>();
+
 /**
  * PCDCache - Manages an in-memory compiled database for a single PCD
  */
@@ -35,6 +45,7 @@ export class PCDCache {
 	private pcdPath: string;
 	private databaseInstanceId: number;
 	private built = false;
+	private upstream: UpstreamSnapshot = emptySnapshot();
 
 	constructor(pcdPath: string, databaseInstanceId: number) {
 		this.pcdPath = pcdPath;
@@ -106,7 +117,14 @@ export class PCDCache {
 			};
 
 			// 4. Execute operations in order
+			this.upstream = emptySnapshot();
+			let upstreamCaptured = false;
 			for (const operation of operations) {
+				// Before the first user op, the DB holds upstream (base drafts included).
+				if (!upstreamCaptured && operation.layer === 'user') {
+					upstreamCaptured = true;
+					this.upstream = await this.captureUpstream();
+				}
 				const opId = parseOpId(operation.filepath);
 				const trackHistory = opId !== null;
 				const userOp = trackHistory ? userOpsById.get(opId) : undefined;
@@ -356,6 +374,76 @@ export class PCDCache {
 		}
 	}
 
+	/** Runs mid-build, so it reads this.db directly: query() refuses until built. */
+	private async captureUpstream(): Promise<UpstreamSnapshot> {
+		const databaseId = this.databaseInstanceId;
+		const startedAt = performance.now();
+		const snapshot = await captureUpstream({
+			...sqliteReaders(this.db!),
+			listLive: () => pcdOpEntitiesQueries.listLive(databaseId),
+			countUnplaced: () => pcdOpEntitiesQueries.countUnplaced(databaseId),
+			serialize: async (entity, name) => {
+				// Dynamic: a static import would close a cycle through the $pcd barrel.
+				const { midBuildCacheView, serializeForSnapshot } =
+					await import('$pcd/history/serializers.ts');
+				return serializeForSnapshot(midBuildCacheView(this.db!, this.kysely!), entity, name);
+			}
+		});
+
+		const durationMs = Math.round(performance.now() - startedAt);
+
+		const incomplete =
+			snapshot.status === 'unavailable' || snapshot.failures.length > 0 || snapshot.unplaced > 0;
+		if (incomplete) {
+			const signature = JSON.stringify({
+				status: snapshot.status,
+				error: snapshot.error,
+				failures: snapshot.failures.map((f) => `${f.entity}:${f.name}`),
+				unplaced: snapshot.unplaced
+			});
+			const meta = {
+				databaseInstanceId: databaseId,
+				status: snapshot.status,
+				error: snapshot.error,
+				failures: snapshot.failures,
+				unplaced: snapshot.unplaced,
+				durationMs
+			};
+			if (lastIncompleteSnapshotWarning.get(databaseId) !== signature) {
+				lastIncompleteSnapshotWarning.set(databaseId, signature);
+				await logger.warn('Local changes history snapshot is incomplete', {
+					source: 'PCDCache',
+					meta
+				});
+			} else {
+				await logger.debug('Local changes history snapshot still incomplete', {
+					source: 'PCDCache',
+					meta
+				});
+			}
+		} else {
+			lastIncompleteSnapshotWarning.delete(databaseId);
+			if (snapshot.status === 'captured') {
+				await logger.debug('Captured upstream snapshot for local changes history', {
+					source: 'PCDCache',
+					meta: {
+						databaseInstanceId: databaseId,
+						entities: snapshot.entities.size,
+						notInUpstream: [...snapshot.entities.values()].filter((v) => v === null).length,
+						edges: snapshot.edges.length,
+						durationMs
+					}
+				});
+			}
+		}
+		return snapshot;
+	}
+
+	/** Upstream state of every entity the user layer touches, from the last build. */
+	getUpstreamSnapshot(): UpstreamSnapshot {
+		return this.upstream;
+	}
+
 	/**
 	 * Register SQL helper functions (qp, cf, dp, tag)
 	 */
@@ -424,6 +512,7 @@ export class PCDCache {
 			this.db = null;
 		}
 		this.built = false;
+		this.upstream = emptySnapshot();
 	}
 
 	/**
