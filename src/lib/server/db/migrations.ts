@@ -78,6 +78,7 @@ import { migration as migration073 } from './migrations/073_add_landing_page_set
 import { migration as migration074 } from './migrations/074_add_session_confirmed_at.ts';
 import { migration as migration075 } from './migrations/075_add_detected_version_to_arr_instances.ts';
 import { migration as migration076 } from './migrations/076_add_quality_definitions_override_to_arr_sync_quality_profiles.ts';
+import { migration as migration077 } from './migrations/077_create_pcd_op_entities.ts';
 
 export interface Migration {
 	version: number;
@@ -374,7 +375,8 @@ export function loadMigrations(): Migration[] {
 		migration073,
 		migration074,
 		migration075,
-		migration076
+		migration076,
+		migration077
 	];
 
 	// Sort by version number

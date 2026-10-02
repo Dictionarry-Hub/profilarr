@@ -389,6 +389,26 @@ CREATE INDEX idx_pcd_op_history_op
     ON pcd_op_history(op_id, applied_at);
 
 -- ==============================================================================
+-- TABLE: pcd_op_entities
+-- Purpose: Entities each user op targets or depends on
+-- Migration: 077_create_pcd_op_entities.ts
+-- ==============================================================================
+
+CREATE TABLE pcd_op_entities (
+    op_id INTEGER NOT NULL,
+    database_id INTEGER NOT NULL,
+    entity TEXT NOT NULL,
+    name TEXT NOT NULL,
+    previous_name TEXT,
+    role TEXT NOT NULL CHECK (role IN ('target', 'prerequisite')),
+    PRIMARY KEY (op_id, entity, name, role),
+    FOREIGN KEY (op_id) REFERENCES pcd_ops(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_pcd_op_entities_lookup
+    ON pcd_op_entities(database_id, entity, name);
+
+-- ==============================================================================
 -- TABLE: ai_settings
 -- Purpose: Store AI/LLM configuration for commit message generation
 -- Migration: 014_create_ai_settings.ts
