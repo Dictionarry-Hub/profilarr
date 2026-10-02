@@ -3,6 +3,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import type { Column } from '$ui/table/types';
 	import NumberInput from '$ui/form/NumberInput.svelte';
+	import { markerText, markerTextClass, type ScoreMarkers } from './scoreMarkers.ts';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Check from '@lucide/svelte/icons/check';
 	import InlineLink from '$ui/link/InlineLink.svelte';
@@ -13,6 +14,8 @@
 	export let customFormatScores: Record<string, Record<string, number | null>>;
 	export let customFormatEnabled: Record<string, Record<string, boolean>>;
 	export let disabled: boolean = false;
+	export let scoreMarkers: ScoreMarkers = {};
+	export let customFormatRenames: Record<string, string> = {};
 	type IconCheckboxColor =
 		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})`;
 	export let getArrTypeColor: (arrType: string) => IconCheckboxColor;
@@ -74,29 +77,42 @@
 >
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
-			<InlineLink href="/custom-formats/{databaseId}/{row.id}/general" text={row.name} external />
+			<div class="flex flex-col gap-1">
+				<InlineLink href="/custom-formats/{databaseId}/{row.id}/general" text={row.name} external />
+				{#if customFormatRenames[row.name]}
+					<span class="text-xs {markerTextClass.applied}">
+						Upstream {customFormatRenames[row.name]}
+					</span>
+				{/if}
+			</div>
 		{:else}
 			{@const arrType = column.key}
-			<div class="flex items-center justify-center gap-2">
-				<IconCheckbox
-					checked={customFormatEnabled[row.name]?.[arrType] ?? false}
-					icon={Check}
-					color={getArrTypeColor(arrType)}
-					shape="circle"
-					{disabled}
-					on:click={() => handleToggleEnabled(row.name, arrType)}
-				/>
-				{#if customFormatScores[row.name]}
-					<div class="w-48">
-						<NumberInput
-							name="score-{row.name}-{arrType}"
-							value={customFormatScores[row.name][arrType] ?? 0}
-							onchange={(newValue) => handleScoreChange(row.name, arrType, newValue)}
-							step={1}
-							disabled={disabled || !customFormatEnabled[row.name]?.[arrType]}
-							font="mono"
-						/>
-					</div>
+			{@const marker = scoreMarkers[row.name]?.[arrType]}
+			<div class="flex flex-col items-center gap-1">
+				<div class="flex items-center justify-center gap-2">
+					<IconCheckbox
+						checked={customFormatEnabled[row.name]?.[arrType] ?? false}
+						icon={Check}
+						color={getArrTypeColor(arrType)}
+						shape="circle"
+						{disabled}
+						on:click={() => handleToggleEnabled(row.name, arrType)}
+					/>
+					{#if customFormatScores[row.name]}
+						<div class="w-48">
+							<NumberInput
+								name="score-{row.name}-{arrType}"
+								value={customFormatScores[row.name][arrType] ?? 0}
+								onchange={(newValue) => handleScoreChange(row.name, arrType, newValue)}
+								step={1}
+								disabled={disabled || !customFormatEnabled[row.name]?.[arrType]}
+								font="mono"
+							/>
+						</div>
+					{/if}
+				</div>
+				{#if marker}
+					<span class="text-xs {markerTextClass[marker.status]}">{markerText(marker)}</span>
 				{/if}
 			</div>
 		{/if}

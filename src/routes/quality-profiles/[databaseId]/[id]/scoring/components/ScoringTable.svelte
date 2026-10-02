@@ -7,12 +7,15 @@
 	export let customFormatScores: Record<string, Record<string, number | null>>;
 	export let customFormatEnabled: Record<string, Record<string, boolean>>;
 	export let disabled: boolean = false;
+	export let scoreMarkers: ScoreMarkers = {};
+	export let customFormatRenames: Record<string, string> = {};
 	type IconCheckboxColor =
 		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})`;
 	export let getArrTypeColor: (arrType: string) => IconCheckboxColor;
 	export let title: string | null = null;
 	export let firstRowOnboarding: string | undefined = undefined;
 
+	import type { ScoreMarkers } from './scoreMarkers.ts';
 	import ScoringTableDesktop from './ScoringTableDesktop.svelte';
 	import ScoringTableMobile from './ScoringTableMobile.svelte';
 
@@ -51,6 +54,8 @@
 		{arrTypes}
 		{customFormatScores}
 		{customFormatEnabled}
+		{scoreMarkers}
+		{customFormatRenames}
 		{disabled}
 		{getArrTypeColor}
 		{firstRowOnboarding}
@@ -64,6 +69,8 @@
 		{arrTypes}
 		{customFormatScores}
 		{customFormatEnabled}
+		{scoreMarkers}
+		{customFormatRenames}
 		{disabled}
 		{getArrTypeColor}
 		{firstRowOnboarding}
