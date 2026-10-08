@@ -124,6 +124,27 @@ Then open a PR on GitHub targeting `develop`. A template will pre-fill the
 description: fill in what the PR does, link any related issues, and check off
 the checklist items.
 
+The PR description check requires `Description`, `User-facing docs`,
+`Technical docs`, `Testing`, and `Confirmation`. Answer each section and check
+all three contribution confirmations. For either docs section, link the updates
+or explain why none are needed. User-facing docs live in the separate
+[profilarr.com repository](https://github.com/Dictionarry-Hub/profilarr.com).
+For testing, describe coverage in the existing CI suites or explain why automated
+tests aren't applicable and how you verified the change manually. State plainly
+if you haven't verified it.
+
+`Related issue` and `Upgrade impact` are optional. Keep the template's `##`
+headings; use `###` subheadings within sections if useful. Missing or unanswered
+required sections, duplicate or unexpected sections, and incomplete confirmations
+fail the check.
+Descriptions over 150 words or bodies over 400 words (excluding confirmations)
+receive a warning. Keep simple changes to a sentence or a few short bullets.
+
+The description workflow runs trusted base-branch code automatically, including
+for fork PRs; approval requirements for the normal CI workflow still apply.
+Maintainers must make `Validate PR Description` a required check on `develop`
+to block merging when it fails.
+
 **The PR title is the commit message.** Since we squash merge, the PR title
 becomes the single commit on `develop`. It must follow conventional commit
 format:
