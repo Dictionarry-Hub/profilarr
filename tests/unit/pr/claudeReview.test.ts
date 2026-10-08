@@ -129,3 +129,58 @@ Deno.test('links point at the PR head or the reviewed website commit', () => {
 		'[app.ts#L7](https://github.com/Dictionarry-Hub/profilarr/blob/abc1234def/src/app.ts#L7 "src/app.ts")'
 	);
 });
+
+Deno.test('CLI reads result files and environment, and fails rows it cannot read', async () => {
+	const directory = await Deno.makeTempDir();
+	const decode = (bytes: Uint8Array) => new TextDecoder().decode(bytes);
+	try {
+		const write = async (review: string, file: string, content: string) => {
+			await Deno.mkdir(`${directory}/claude-review-${review}`, { recursive: true });
+			await Deno.writeTextFile(`${directory}/claude-review-${review}/${file}`, content);
+		};
+		await write(
+			'user-docs',
+			'result.json',
+			JSON.stringify({ status: 'needs_update', findings: [finding({ file: 'src/a.svx' })] })
+		);
+		await write('user-docs', 'meta.json', JSON.stringify({ website_sha: 'site123' }));
+		await write('technical-docs', 'result.json', JSON.stringify(passing['technical-docs']));
+		await write('tests', 'result.json', '{ not json');
+		// No result directory for code: its job didn't upload anything.
+
+		const run = (args: string[]) =>
+			new Deno.Command(Deno.execPath(), {
+				args: [
+					'run',
+					'--no-config',
+					`--allow-read=${directory}`,
+					'--allow-env=REPO,HEAD_SHA,RUN_URL',
+					'.github/claude-review/render.ts',
+					...args
+				],
+				env: { REPO: env.repo, HEAD_SHA: env.headSha, RUN_URL: env.runUrl },
+				stdout: 'piped',
+				stderr: 'piped'
+			}).output();
+
+		const output = await run([directory]);
+		assertEquals(output.code, 0, decode(output.stderr));
+		const comment = decode(output.stdout);
+		assertStringIncludes(row(comment, 'User-facing docs'), '| Warning |');
+		assertStringIncludes(
+			row(comment, 'User-facing docs'),
+			'https://github.com/Dictionarry-Hub/profilarr.com/blob/site123/src/a.svx#L42'
+		);
+		assertStringIncludes(row(comment, 'Technical docs'), '| Passed | N/A |');
+		for (const title of ['Tests', 'Code']) {
+			assertStringIncludes(row(comment, title), '| Failed |');
+			assertStringIncludes(row(comment, title), '[workflow run](https://run)');
+		}
+
+		const usage = await run([]);
+		assertEquals(usage.code, 1);
+		assertStringIncludes(decode(usage.stderr), 'Usage: render.ts <results-dir>');
+	} finally {
+		await Deno.remove(directory, { recursive: true });
+	}
+});
