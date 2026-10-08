@@ -60,6 +60,28 @@ export function formatDuration(value: number, unit: DurationUnit): string {
 	return `${value} ${value === 1 ? unit.slice(0, -1) : unit}`;
 }
 
+/**
+ * Break minutes into days, hours, and minutes, skipping empty parts.
+ *
+ * @example
+ * formatMinutes(1800)          // "1 day 6 hours"
+ * formatMinutes(1800, 'short') // "1d 6h"
+ */
+export function formatMinutes(minutes: number, style: 'long' | 'short' = 'long'): string {
+	const parts: string[] = [];
+	let remaining = minutes;
+
+	for (const unit of [...DURATION_UNITS].reverse()) {
+		const value = Math.floor(remaining / MINUTES_PER_UNIT[unit]);
+		remaining -= value * MINUTES_PER_UNIT[unit];
+		if (value === 0) continue;
+		parts.push(style === 'short' ? `${value}${unit[0]}` : formatDuration(value, unit));
+	}
+
+	if (parts.length === 0) return style === 'short' ? '0m' : formatDuration(0, 'minutes');
+	return parts.join(' ');
+}
+
 export interface DurationFieldInfo {
 	label: string;
 	/** Disabled fields still convert but are left out of the rounding message. */

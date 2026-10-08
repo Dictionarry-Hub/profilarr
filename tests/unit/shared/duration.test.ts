@@ -5,6 +5,7 @@ import {
 	clearOriginals,
 	enterValue,
 	formatDuration,
+	formatMinutes,
 	fromMinutes,
 	largestEvenUnit,
 	switchUnit,
@@ -202,6 +203,28 @@ class DurationTest extends BaseTest {
 			assertEquals(formatDuration(2, 'hours'), '2 hours');
 			assertEquals(formatDuration(30, 'minutes'), '30 minutes');
 			assertEquals(formatDuration(0, 'days'), '0 days');
+		});
+
+		this.test('formats minutes as days, hours, and minutes', () => {
+			assertEquals(formatMinutes(20160), '14 days');
+			assertEquals(formatMinutes(1440), '1 day');
+			assertEquals(formatMinutes(1800), '1 day 6 hours');
+			assertEquals(formatMinutes(1501), '1 day 1 hour 1 minute');
+			assertEquals(formatMinutes(1450), '1 day 10 minutes');
+			assertEquals(formatMinutes(90), '1 hour 30 minutes');
+			assertEquals(formatMinutes(45), '45 minutes');
+			assertEquals(formatMinutes(0), '0 minutes');
+		});
+
+		this.test('formats minutes in short form', () => {
+			assertEquals(formatMinutes(20160, 'short'), '14d');
+			assertEquals(formatMinutes(1800, 'short'), '1d 6h');
+			assertEquals(formatMinutes(1501, 'short'), '1d 1h 1m');
+			assertEquals(formatMinutes(1450, 'short'), '1d 10m');
+			assertEquals(formatMinutes(90, 'short'), '1h 30m');
+			assertEquals(formatMinutes(60, 'short'), '1h');
+			assertEquals(formatMinutes(45, 'short'), '45m');
+			assertEquals(formatMinutes(0, 'short'), '0m');
 		});
 	}
 }
