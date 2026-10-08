@@ -1,0 +1,191 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Settings not listed here use CodeRabbit's built-in defaults; the dashboard is not inherited.
+tone_instructions: >-
+  Be brief and specific. Report bugs, regressions, data loss, security issues and
+  docs that no longer match behavior, citing file and line. Don't restate the diff
+  or repeat what CI already checks (e.g. lint, formatting, type checks).
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  allow_author_approval: false
+
+  high_level_summary: false
+  review_details: true
+  changed_files_summary: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false
+  related_issues: false
+  related_prs: false
+  suggested_labels: false
+  suggested_reviewers: false
+  in_progress_fortune: false
+
+  auto_review:
+    enabled: true
+    ignore_usernames:
+      - 'dependabot[bot]'
+
+  # Generated from docs/api/v1 by `deno task generate:api-types`.
+  path_filters:
+    - '!src/lib/api/v1.d.ts'
+    - '!src/lib/api/v1.openapi.json'
+
+  tools:
+    # CI owns style and linting (e.g. Deno lint, Prettier); generic rule sets conflict with it.
+    eslint:
+      enabled: false
+    biome:
+      enabled: false
+    oxc:
+      enabled: false
+    markdownlint:
+      enabled: false
+    yamllint:
+      enabled: false
+    stylelint:
+      enabled: false
+    sqlfluff:
+      enabled: false
+    # Prose linters; too noisy for docs and comments.
+    languagetool:
+      enabled: false
+    vale:
+      enabled: false
+    # CI already runs Semgrep with the project's rules.
+    semgrep:
+      enabled: false
+    opengrep:
+      enabled: false
+
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+    autofix:
+      enabled: false
+    fix_ci:
+      enabled: false
+    resolve_merge_conflict:
+      enabled: false
+
+  pre_merge_checks:
+    # CI already validates the title and description.
+    title:
+      mode: 'off'
+    description:
+      mode: 'off'
+    docstrings:
+      mode: 'off'
+    issue_assessment:
+      mode: 'off'
+    custom_checks:
+      - name: User-facing docs
+        mode: warning
+        instructions: |
+          Assess the PR description's "User-facing docs" section against the
+          change and the linked Dictionarry-Hub/profilarr.com repository.
+
+          A change is user-visible when it alters what users see, configure or
+          need to do (e.g. settings, environment variables, defaults, setup or
+          upgrade steps, UI workflows). Refactors, tests, CI and internal changes
+          with no visible effect are not.
+
+          Pass when:
+          - the change isn't user-visible and the section says no update is needed;
+          - the section links a profilarr.com PR or branch whose relevant pages
+            match the change (it doesn't need to be merged yet);
+          - the section says no update is needed and the current pages already
+            match the change; or
+          - the change only affects the public API spec, since the API reference
+            is generated from it.
+
+          Fail when a profilarr.com page contradicts the change or omits
+          something users now need to know (e.g. a new required environment
+          variable missing from the install guide). Cite the page path, the
+          passage, and the code that shows the mismatch.
+
+          Inconclusive when the linked docs PR or relevant pages can't be read.
+          Don't judge the section's length or wording; CI checks its presence.
+      - name: Technical docs
+        mode: warning
+        instructions: |
+          Assess the PR description's "Technical docs" section against the
+          change and this repository's docs/ folder (indexed by
+          docs/ARCHITECTURE.md).
+
+          A change affects technical docs when it alters something a docs/ file
+          describes (e.g. a subsystem's behavior, data flow, schema, API
+          workflow, code conventions, or CI and release process).
+
+          Pass when:
+          - no docs/ file describes the changed behavior and the section says
+            no update is needed;
+          - the PR updates the affected docs/ files and they match the change; or
+          - the section says no update is needed and the existing docs already
+            match the change.
+
+          Fail when a docs/ file contradicts the change, or covers that area
+          but omits something the change adds (e.g. a new job type missing from
+          the jobs doc). Cite the doc path, the passage, and the code that shows
+          the mismatch.
+
+          Don't fail for inaccuracies the PR didn't cause, don't request new
+          docs for areas no doc covers, and don't treat documented planned
+          work as a requirement. Don't judge the section's length or wording.
+      - name: Testing
+        mode: warning
+        instructions: |
+          Assess the PR description's "Testing" section against the change,
+          the test suites under tests/, and the CI workflows in .github/workflows/.
+
+          Pass when:
+          - the section names existing or updated tests, and they exercise the
+            changed behavior;
+          - automated tests don't apply (e.g. docs-only, purely visual or copy
+            changes), the section says why, and it describes the manual
+            verification done, with evidence where possible (e.g. a screenshot);
+          - the section identifies a real coverage gap and leaves it for
+            maintainer follow-up; or
+          - the section plainly says the change hasn't been verified. Pass, but
+            state in the result that it is unverified.
+
+          Fail when:
+          - claimed coverage doesn't exist (e.g. a named test doesn't exercise
+            the changed code, or no workflow runs the claimed suite);
+          - the section says tests don't apply to a change in behavior or
+            interactions; or
+          - changed behavior has neither test coverage nor manual verification,
+            and the section doesn't mention it.
+          Cite the code, test or workflow path.
+
+          Judge coverage only against the project's existing suites. Never
+          suggest one-off scripts, new frameworks or other tools, and never claim
+          to have run tests. You can't see CI results, so judge whether tests
+          exist rather than whether they passed. Contributors aren't required
+          to add tests. Don't judge the section's length or wording.
+
+knowledge_base:
+  code_guidelines:
+    filePatterns:
+      - files: 'docs/ARCHITECTURE.md,docs/CONTRIBUTING.md'
+        applyTo: '**/*'
+      - files: 'docs/DEVELOPMENT.md'
+        applyTo: '.github/**'
+      - files: 'docs/backend/*.md'
+        applyTo: 'src/lib/server/**,src/lib/shared/**,src/routes/**,tests/**'
+      - files: 'docs/frontend/*.md'
+        applyTo: 'src/lib/client/**,src/routes/**'
+  linked_repositories:
+    - repository: Dictionarry-Hub/profilarr.com
+      instructions: >-
+        Profilarr's user-facing documentation site. Guides are SvelteKit pages
+        under src/routes/(docs)/, usually +page.svx with an occasional adjacent
+        data.ts; folder names match the site's sections. The API reference is
+        generated at build time from this repo's src/lib/api/v1.openapi.json on
+        develop, so it doesn't need hand-written updates.
+
+chat:
+  art: false
+  auto_reply: false
