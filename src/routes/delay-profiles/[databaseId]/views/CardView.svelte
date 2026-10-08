@@ -9,6 +9,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
 	import { FEATURES } from '$shared/features.ts';
+	import { formatMinutes } from '$shared/utils/duration.ts';
 
 	export let profiles: DelayProfilesRow[];
 
@@ -45,10 +46,7 @@
 	function formatDelay(minutes: number | null): string {
 		if (minutes === null) return '-';
 		if (minutes === 0) return 'No delay';
-		if (minutes < 60) return `${minutes}m`;
-		const hours = Math.floor(minutes / 60);
-		const mins = minutes % 60;
-		return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+		return formatMinutes(minutes, 'short');
 	}
 
 	function getProfileHref(profile: DelayProfilesRow): string {

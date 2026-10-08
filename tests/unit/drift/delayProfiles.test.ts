@@ -5,6 +5,7 @@ import {
 	type DelayProfileDriftDiff,
 	type DelayProfileDriftExpected
 } from '$drift/delayProfiles.ts';
+import { buildDriftDisplayEntities } from '$drift/display.ts';
 import { hashDriftDiff } from '$drift/hash.ts';
 import type { ArrDelayProfile } from '$arr/types.ts';
 
@@ -120,6 +121,27 @@ class DelayProfileDriftTest extends BaseTest {
 
 			assertEquals(result.count, 0);
 			assertEquals(result.diff, { missing: [], modified: [] });
+		});
+
+		this.test('displays delay drift in days, hours, and minutes', () => {
+			const result = compareDelayProfileDrift(
+				expectedDelayProfile({ usenetDelay: 20160, torrentDelay: 1800 }),
+				[arrDelayProfile({ usenetDelay: 30, torrentDelay: 0 })]
+			);
+			const entities = buildDriftDisplayEntities({ delay_profiles: result.diff }, 'radarr');
+
+			assertEquals(entities.length, 1);
+			assertEquals(
+				entities[0].changes.map((change) => ({
+					label: change.label,
+					expected: change.expected?.text,
+					actual: change.actual?.text
+				})),
+				[
+					{ label: 'Usenet Delay', expected: '14 days', actual: '30 minutes' },
+					{ label: 'Torrent Delay', expected: '1 day 6 hours', actual: '0 minutes' }
+				]
+			);
 		});
 
 		this.test('hash is stable for equivalent object key order', async () => {
