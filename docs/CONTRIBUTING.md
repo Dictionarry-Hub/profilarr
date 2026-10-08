@@ -145,6 +145,13 @@ for fork PRs; approval requirements for the normal CI workflow still apply.
 Maintainers must make `Validate PR Description` a required check on `develop`
 to block merging when it fails.
 
+CodeRabbit provides advisory code review and checks whether the docs-impact and
+testing explanations match the change. Its configuration is versioned in
+`.coderabbit.yaml` and uses the shared project docs as review guidance. The bot
+needs access to both this repository and `profilarr.com` to inspect user docs.
+Missing evidence is reported as inconclusive; a passed review does not replace
+CI or maintainer judgment.
+
 **The PR title is the commit message.** Since we squash merge, the PR title
 becomes the single commit on `develop`. It must follow conventional commit
 format:
