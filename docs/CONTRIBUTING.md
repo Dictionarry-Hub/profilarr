@@ -145,6 +145,11 @@ for fork PRs; approval requirements for the normal CI workflow still apply.
 Maintainers must make `Validate PR Description` a required check on `develop`
 to block merging when it fails.
 
+The maintainer can run Claude reviews on a PR by commenting `@claude review`.
+Four reviews run in parallel (user-facing docs, technical docs, tests, and code)
+and each posts one comment. Their prompts live in `.github/claude-review/`. The
+reviews are advisory and don't replace CI or maintainer judgment.
+
 **The PR title is the commit message.** Since we squash merge, the PR title
 becomes the single commit on `develop`. It must follow conventional commit
 format:

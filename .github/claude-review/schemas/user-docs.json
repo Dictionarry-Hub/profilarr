@@ -1,0 +1,40 @@
+{
+	"type": "object",
+	"additionalProperties": false,
+	"required": ["status", "findings"],
+	"properties": {
+		"status": {
+			"type": "string",
+			"enum": ["not_affected", "up_to_date", "needs_update", "could_not_check"]
+		},
+		"findings": {
+			"type": "array",
+			"maxItems": 5,
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": ["file", "line", "title", "problem"],
+				"properties": {
+					"file": {
+						"type": "string",
+						"description": "Path relative to website/, e.g. src/routes/(docs)/deploy/sync/+page.svx"
+					},
+					"line": {
+						"type": "integer",
+						"minimum": 1
+					},
+					"title": {
+						"type": "string",
+						"maxLength": 60,
+						"description": "A few words naming the problem"
+					},
+					"problem": {
+						"type": "string",
+						"maxLength": 300,
+						"description": "One sentence: what is wrong and why it matters"
+					}
+				}
+			}
+		}
+	}
+}
