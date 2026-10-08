@@ -142,13 +142,12 @@ receive a warning. Keep simple changes to a sentence or a few short bullets.
 
 The description workflow runs trusted base-branch code automatically, including
 for fork PRs; approval requirements for the normal CI workflow still apply.
-Maintainers must make `Validate PR Description` a required check on `develop`
-to block merging when it fails.
+Dependabot PRs skip the check. Maintainers must make `Validate PR Description` a
+required check on `develop` to block merging when it fails.
 
 Claude reviews run automatically on the maintainer's own PRs, and on any PR when
-the maintainer comments `@claude review`. Four reviews run in parallel
-(user-facing docs, technical docs, tests, and code) and post one combined
-comment. Their prompts live in `.github/claude-review/`. The reviews are
+the maintainer comments `@claude review`. The reviews run in parallel and post
+one combined comment; their prompts live in `.github/claude-review/`. They are
 advisory and don't replace CI or maintainer judgment.
 
 **The PR title is the commit message.** Since we squash merge, the PR title

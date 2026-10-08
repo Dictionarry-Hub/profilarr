@@ -1,14 +1,13 @@
 /**
- * Renders the four Claude review results as one PR comment.
+ * Renders the Claude review results as one PR comment.
  *
  * Usage: render.ts <results-dir>
  * Reads claude-review-<review>/result.json and meta.json from <results-dir>, plus REPO, HEAD_SHA
  * and RUN_URL from the environment. A missing or invalid result renders as a failed review.
+ * To add a review, add it to REVIEWS and to the workflow matrix.
  */
 
-type Review = 'user-docs' | 'technical-docs' | 'tests' | 'code';
-
-interface Finding {
+export interface Finding {
 	category?: string;
 	file: string;
 	line: number;
@@ -16,15 +15,13 @@ interface Finding {
 	problem: string;
 }
 
-interface Result {
+export interface Result {
 	status: string;
 	findings: Finding[];
-	covered_by?: string[];
 }
 
-interface Meta {
+export interface Meta {
 	website_sha?: string;
-	website_label?: string;
 }
 
 export interface Env {
@@ -33,44 +30,34 @@ export interface Env {
 	runUrl: string;
 }
 
+type Outcome = 'Passed' | 'Warning' | 'Failed';
+
 export const MARKER = '<!-- claude-review -->';
 
-const REVIEWS: Record<Review, { title: string; statuses: Record<string, string> }> = {
+/** Each review's form statuses, mapped to the outcome shown in the comment. */
+export const REVIEWS: Record<string, { title: string; outcomes: Record<string, Outcome> }> = {
 	'user-docs': {
 		title: 'User-facing docs',
-		statuses: {
-			not_affected: '➖ Not affected',
-			up_to_date: '✅ Up to date',
-			needs_update: '⚠️ Needs update',
-			could_not_check: "❔ Couldn't check"
+		outcomes: {
+			not_affected: 'Passed',
+			up_to_date: 'Passed',
+			needs_update: 'Warning',
+			could_not_check: 'Warning'
 		}
 	},
 	'technical-docs': {
 		title: 'Technical docs',
-		statuses: {
-			not_affected: '➖ Not affected',
-			up_to_date: '✅ Up to date',
-			needs_update: '⚠️ Needs update'
-		}
+		outcomes: { not_affected: 'Passed', up_to_date: 'Passed', needs_update: 'Warning' }
 	},
 	tests: {
 		title: 'Tests',
-		statuses: {
-			not_applicable: '➖ Not applicable',
-			covered: '✅ Covered',
-			gaps: '⚠️ Gaps'
-		}
+		outcomes: { not_applicable: 'Passed', covered: 'Passed', gaps: 'Warning' }
 	},
 	code: {
 		title: 'Code',
-		statuses: {
-			no_issues: '✅ No issues',
-			issues: '⚠️ Issues'
-		}
+		outcomes: { no_issues: 'Passed', issues: 'Failed' }
 	}
 };
-
-const ORDER: Review[] = ['user-docs', 'technical-docs', 'tests', 'code'];
 
 const CATEGORIES: Record<string, string> = {
 	bug: 'Bug',
@@ -99,69 +86,41 @@ function fileLink(finding: Finding, blobBase: string): string {
 	return `[${clean(name)}#L${finding.line}](${blobBase}/${encoded}#L${finding.line} "${tooltip}")`;
 }
 
-function renderRow(review: Review, result: Result | undefined, meta: Meta, env: Env): string {
+function renderRow(review: string, result: Result | undefined, meta: Meta, env: Env): string {
 	const config = REVIEWS[review];
-	const status = result ? config.statuses[result.status] : undefined;
-	if (!result || !status) {
-		return `| ${config.title} | ❔ Failed | [Workflow run](${env.runUrl}) |`;
+	const outcome = result ? config.outcomes[result.status] : undefined;
+	if (!result || !outcome) {
+		return `| ${config.title} | Failed | <ul><li>**Review didn't run.** See the [workflow run](${env.runUrl}).</li></ul> |`;
 	}
-
-	const findings = (result.findings ?? []).slice(0, 5);
-	const label =
-		review === 'code' && findings.length
-			? `⚠️ ${findings.length} issue${findings.length === 1 ? '' : 's'}`
-			: status;
 
 	const blobBase =
 		review === 'user-docs'
 			? `https://github.com/Dictionarry-Hub/profilarr.com/blob/${meta.website_sha || 'develop'}`
 			: `https://github.com/${env.repo}/blob/${env.headSha}`;
 
-	let details = '—';
-	if (findings.length) {
-		const items = findings.map((finding) => {
-			const category = finding.category ? `${CATEGORIES[finding.category] ?? 'Issue'}: ` : '';
-			const title = `**${category}${clean(finding.title).replace(/\.$/, '')}.**`;
-			return `<li>${title} ${clean(finding.problem)} ${fileLink(finding, blobBase)}</li>`;
-		});
-		details = `<ul>${items.join('')}</ul>`;
-	} else if (review === 'tests' && result.covered_by?.length) {
-		const tests = result.covered_by
-			.slice(0, 10)
-			.map((file) => `\`${clean(file.split('/').pop() ?? file)}\``);
-		details = `Covered by ${tests.join(', ')}`;
-	}
+	const findings = (result.findings ?? []).slice(0, 5).map((finding) => {
+		const category = finding.category ? `${CATEGORIES[finding.category] ?? 'Issue'}: ` : '';
+		const title = `**${category}${clean(finding.title).replace(/\.$/, '')}.**`;
+		return `<li>${title} ${clean(finding.problem)} ${fileLink(finding, blobBase)}</li>`;
+	});
 
-	return `| ${config.title} | ${label} | ${details} |`;
+	return `| ${config.title} | ${outcome} | ${findings.length ? `<ul>${findings.join('')}</ul>` : 'N/A'} |`;
 }
 
 export function renderComment(
-	results: Partial<Record<Review, Result>>,
-	metas: Partial<Record<Review, Meta>>,
+	results: Record<string, Result | undefined>,
+	metas: Record<string, Meta | undefined>,
 	env: Env
 ): string {
-	const website = metas['user-docs']?.website_label;
-	const footer = [
-		'🤖 Docs and tests: Sonnet 5.5',
-		'Code: Opus 5.5',
-		`reviewed <code>${env.headSha.slice(0, 7)}</code>`,
-		...(website ? [website] : []),
-		're-run with <code>@claude review</code>'
-	].join(' · ');
-
 	return [
 		MARKER,
-		'### Claude review',
-		'',
-		'---',
-		'',
 		'| Review | Result | Findings |',
 		'| :-- | :-- | :-- |',
-		...ORDER.map((review) => renderRow(review, results[review], metas[review] ?? {}, env)),
+		...Object.keys(REVIEWS).map((review) =>
+			renderRow(review, results[review], metas[review] ?? {}, env)
+		),
 		'',
-		'---',
-		'',
-		`<sub>${footer}</sub>`
+		'<sub>Re-run with <code>@claude review</code></sub>'
 	].join('\n');
 }
 
@@ -179,9 +138,9 @@ if (import.meta.main) {
 		console.error('Usage: render.ts <results-dir>');
 		Deno.exit(1);
 	}
-	const results: Partial<Record<Review, Result>> = {};
-	const metas: Partial<Record<Review, Meta>> = {};
-	for (const review of ORDER) {
+	const results: Record<string, Result | undefined> = {};
+	const metas: Record<string, Meta | undefined> = {};
+	for (const review of Object.keys(REVIEWS)) {
 		results[review] = readJson<Result>(`${dir}/claude-review-${review}/result.json`);
 		metas[review] = readJson<Meta>(`${dir}/claude-review-${review}/meta.json`);
 	}

@@ -1,8 +1,9 @@
 name: Claude Review
 
 # Runs only for the maintainer: on PRs they open, and when they comment `@claude review`.
-# Four reviews run in parallel; each returns a JSON form, and render.ts combines them into one
-# comment posted by the review GitHub App.
+# The reviews run in parallel; each returns a JSON form, and render.ts combines them into one
+# comment posted by the review GitHub App. To add a review, add a matrix entry, a prompt, a schema,
+# and an entry in render.ts.
 # Review config (prompts, schemas, renderer) comes from the PR branch for the maintainer's own
 # PRs, and from develop for comment triggers, which can run on contributor PRs.
 
@@ -166,14 +167,12 @@ jobs:
         if: always()
         env:
           RESULT: ${{ steps.claude.outputs.structured_output }}
-          WEBSITE_LABEL: ${{ needs.setup.outputs.website_label }}
         run: |
           mkdir -p "$RUNNER_TEMP/review"
           printf '%s' "$RESULT" > "$RUNNER_TEMP/review/result.json"
           website_sha=""
           if [ -d website/.git ]; then website_sha=$(git -C website rev-parse HEAD); fi
-          jq -n --arg sha "$website_sha" --arg label "$WEBSITE_LABEL" \
-            '{website_sha: $sha, website_label: $label}' > "$RUNNER_TEMP/review/meta.json"
+          jq -n --arg sha "$website_sha" '{website_sha: $sha}' > "$RUNNER_TEMP/review/meta.json"
 
       - name: Upload result
         if: always()
