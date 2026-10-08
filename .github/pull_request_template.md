@@ -41,7 +41,5 @@ Remove this section if not applicable. -->
 ## Confirmation
 
 - [ ] I have read and followed the [contribution guidelines](https://github.com/Dictionarry-Hub/profilarr/blob/develop/docs/CONTRIBUTING.md).
-- [ ] I have reviewed this contribution, including any AI-written code or text,
-      understand the changes, and can address review feedback.
-- [ ] The description and any claimed verification accurately reflect what
-      changed and what I actually checked.
+- [ ] I have reviewed this contribution, including any AI-written code or text, understand the changes, and can address review feedback.
+- [ ] The description and any claimed verification accurately reflect what changed and what I actually checked.
