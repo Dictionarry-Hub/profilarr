@@ -1,7 +1,8 @@
 name: Claude Review
 
 # Runs only for the maintainer: on PRs they open, and when they comment `@claude review`.
-# Four reviews run in parallel; each returns a JSON form that render.ts turns into one comment.
+# Four reviews run in parallel; each returns a JSON form, and render.ts combines them into one
+# comment posted by the review GitHub App.
 # Review config (prompts, schemas, renderer) comes from the PR branch for the maintainer's own
 # PRs, and from develop for comment triggers, which can run on contributor PRs.
 
@@ -183,14 +184,13 @@ jobs:
           retention-days: 7
 
   comment:
-    name: Post reviews
+    name: Post review
     needs: [setup, review]
     if: ${{ !cancelled() && needs.setup.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
-      pull-requests: write
     concurrency:
       group: claude-review-comment-${{ needs.setup.outputs.pr }}
     steps:
@@ -214,27 +214,33 @@ jobs:
           pattern: claude-review-*
           path: ${{ runner.temp }}/reviews
 
-      - name: Post or update comments
+      # Comments are posted by the review GitHub App, so they show its name and avatar.
+      - name: Get app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.CLAUDE_REVIEW_CLIENT_ID }}
+          private-key: ${{ secrets.CLAUDE_REVIEW_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
+          permission-pull-requests: write
+
+      - name: Post or update comment
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           REPO: ${{ github.repository }}
           PR: ${{ needs.setup.outputs.pr }}
           HEAD_SHA: ${{ needs.setup.outputs.head_sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          for review in user-docs technical-docs tests code; do
-            deno run --no-config \
-              --allow-read="$RUNNER_TEMP/reviews" --allow-env=REPO,HEAD_SHA,RUN_URL \
-              .github/claude-review/render.ts "$review" "$RUNNER_TEMP/reviews/claude-review-$review" \
-              > "$RUNNER_TEMP/body.md"
+          deno run --no-config \
+            --allow-read="$RUNNER_TEMP/reviews" --allow-env=REPO,HEAD_SHA,RUN_URL \
+            .github/claude-review/render.ts "$RUNNER_TEMP/reviews" > "$RUNNER_TEMP/body.md"
 
-            marker="<!-- claude-review:$review -->"
-            existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
-              --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" \
-              | head -n 1)
-            if [ -n "$existing" ]; then
-              gh api --method PATCH "repos/$REPO/issues/comments/$existing" -F "body=@$RUNNER_TEMP/body.md" > /dev/null
-            else
-              gh api "repos/$REPO/issues/$PR/comments" -F "body=@$RUNNER_TEMP/body.md" > /dev/null
-            fi
-          done
+          existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.type == "Bot" and (.body | startswith("<!-- claude-review -->"))) | .id' \
+            | head -n 1)
+          if [ -n "$existing" ]; then
+            gh api --method PATCH "repos/$REPO/issues/comments/$existing" -F "body=@$RUNNER_TEMP/body.md" > /dev/null
+          else
+            gh api "repos/$REPO/issues/$PR/comments" -F "body=@$RUNNER_TEMP/body.md" > /dev/null
+          fi

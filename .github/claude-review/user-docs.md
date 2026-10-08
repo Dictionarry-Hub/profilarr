@@ -10,6 +10,8 @@ The API reference is generated from the OpenAPI spec at build time, so spec chan
 
 Use the PR description's "User-facing docs" section as context, but judge the pages themselves.
 
+Before answering `not_affected` or `up_to_date`, search `website/` for pages related to what the PR changes, and read them.
+
 Status:
 
 - `not_affected`: the change doesn't affect user-facing docs.
