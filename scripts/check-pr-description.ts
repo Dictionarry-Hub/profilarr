@@ -162,7 +162,9 @@ export function validatePrDescription(body: string | null): ValidationResult {
 			.trim();
 		if (
 			!wordCount(answer) ||
-			/^(?:n\/?a|none|not applicable|todo|tbd|fill (?:this )?in|your (?:answer|description) here)[.!]?$/i.test(answer)
+			/^(?:n\/?a|none|not applicable|todo|tbd|fill (?:this )?in|your (?:answer|description) here)[.!]?$/i.test(
+				answer
+			)
 		) {
 			errors.push(`Answer "${title}" with actual content; explain why if it isn't applicable.`);
 		}

@@ -2,7 +2,8 @@ import { assert, assertEquals, assertStringIncludes } from '@std/assert';
 import { validatePrDescription } from '../../../scripts/check-pr-description.ts';
 
 // Fictional PR bodies exercise contributor-facing behavior, not GitHub API calls.
-const fixture = (name: string) => Deno.readTextFileSync(new URL(`./fixtures/${name}.md`, import.meta.url));
+const fixture = (name: string) =>
+	Deno.readTextFileSync(new URL(`./fixtures/${name}.md`, import.meta.url));
 const docs = fixture('docs');
 
 function replaceSection(body: string, title: string, content: string): string {
@@ -17,7 +18,13 @@ for (const name of ['docs', 'feature', 'visual']) {
 	});
 }
 
-for (const title of ['Description', 'User-facing docs', 'Technical docs', 'Testing', 'Confirmation']) {
+for (const title of [
+	'Description',
+	'User-facing docs',
+	'Technical docs',
+	'Testing',
+	'Confirmation'
+]) {
 	Deno.test(`PR description: requires ${title}`, () => {
 		const body = docs.replace(new RegExp(`## ${title}\\n[\\s\\S]*?(?=\\n## |$)`), '');
 		assert(validatePrDescription(body).errors.includes(`Add the "## ${title}" section.`));
@@ -38,7 +45,10 @@ Deno.test('PR description: absent body fails all required sections', () => {
 });
 
 Deno.test('PR description: optional sections can be absent or empty', () => {
-	assertEquals(validatePrDescription(`${docs}\n## Related issue\n\n## Upgrade impact\n`).errors, []);
+	assertEquals(
+		validatePrDescription(`${docs}\n## Related issue\n\n## Upgrade impact\n`).errors,
+		[]
+	);
 });
 
 Deno.test('PR description: honestly reporting missing verification is accepted', () => {
@@ -85,18 +95,22 @@ Deno.test('PR description: ignores multiline comments and preserves adjacent tex
 });
 
 for (const delimiter of ['```', '~~~~']) {
-	Deno.test(`PR description: ${delimiter} code samples cannot add headings or confirmations`, () => {
-		const example = `${delimiter}markdown\n## Generated summary\n${delimiter}`;
-		assertEquals(
-			validatePrDescription(replaceSection(docs, 'Description', `Clarify docs.\n${example}`)).errors,
-			[]
-		);
-		const checklist = docs.split('## Confirmation\n')[1];
-		const result = validatePrDescription(
-			replaceSection(docs, 'Confirmation', `${delimiter}markdown\n${checklist}${delimiter}`)
-		);
-		assertEquals(result.errors.length, 3);
-	});
+	Deno.test(
+		`PR description: ${delimiter} code samples cannot add headings or confirmations`,
+		() => {
+			const example = `${delimiter}markdown\n## Generated summary\n${delimiter}`;
+			assertEquals(
+				validatePrDescription(replaceSection(docs, 'Description', `Clarify docs.\n${example}`))
+					.errors,
+				[]
+			);
+			const checklist = docs.split('## Confirmation\n')[1];
+			const result = validatePrDescription(
+				replaceSection(docs, 'Confirmation', `${delimiter}markdown\n${checklist}${delimiter}`)
+			);
+			assertEquals(result.errors.length, 3);
+		}
+	);
 }
 
 Deno.test('PR description: HTML comment examples in code do not hide later sections', () => {
@@ -139,7 +153,8 @@ Deno.test('PR description: checked lookalikes elsewhere do not satisfy confirmat
 Deno.test('PR description: confirmations in comments cannot satisfy the checklist', () => {
 	const checklist = docs.split('## Confirmation\n')[1];
 	assertEquals(
-		validatePrDescription(replaceSection(docs, 'Confirmation', `<!--\n${checklist}\n-->`)).errors.length,
+		validatePrDescription(replaceSection(docs, 'Confirmation', `<!--\n${checklist}\n-->`)).errors
+			.length,
 		3
 	);
 });
@@ -154,18 +169,23 @@ Deno.test('PR description: uppercase checks and unwrapped confirmation text are 
 	assertEquals(validatePrDescription(body).errors, []);
 });
 
-Deno.test('PR description: untouched repository template fails for empty answers and unchecked boxes', () => {
-	const template = Deno.readTextFileSync(
-		new URL('../../../.github/pull_request_template.md', import.meta.url)
-	);
-	const result = validatePrDescription(template);
-	assertEquals(result.errors.length, 7);
-	assertEquals(result.wordCounts, { description: 0, body: 0 });
-});
+Deno.test(
+	'PR description: untouched repository template fails for empty answers and unchecked boxes',
+	() => {
+		const template = Deno.readTextFileSync(
+			new URL('../../../.github/pull_request_template.md', import.meta.url)
+		);
+		const result = validatePrDescription(template);
+		assertEquals(result.errors.length, 7);
+		assertEquals(result.wordCounts, { description: 0, body: 0 });
+	}
+);
 
 Deno.test('PR description: description warning starts above 150 words and does not fail', () => {
 	for (const count of [150, 151]) {
-		const result = validatePrDescription(replaceSection(docs, 'Description', 'word '.repeat(count)));
+		const result = validatePrDescription(
+			replaceSection(docs, 'Description', 'word '.repeat(count))
+		);
 		assertEquals(result.errors, []);
 		assertEquals(result.wordCounts.description, count);
 		assertEquals(result.warnings.length, count > 150 ? 1 : 0);
@@ -184,37 +204,49 @@ Deno.test('PR description: total warning starts above 400 words and excludes con
 	}
 });
 
-Deno.test('PR description: long hidden instructions and link destinations do not inflate word counts', () => {
-	const baseline = validatePrDescription(docs).wordCounts;
-	const body = docs
-		.replace('which OIDC settings', `which <!-- ${'word '.repeat(500)} -->OIDC settings`)
-		.replace('required for SSO.', 'required for [SSO](https://example.com/a/very/long/link).');
-	assertEquals(validatePrDescription(body).wordCounts, baseline);
-});
-
-Deno.test('PR description CLI: valid input succeeds, warnings succeed, invalid input fails', async () => {
-	const directory = await Deno.makeTempDir();
-	try {
-		const path = `${directory}/body.md`;
-		for (const sample of [
-			{ body: docs, code: 0, message: 'meets the template requirements' },
-			{
-				body: replaceSection(docs, 'Description', 'word '.repeat(151)),
-				code: 0,
-				message: '::warning'
-			},
-			{ body: '', code: 1, message: '::error' }
-		]) {
-			await Deno.writeTextFile(path, sample.body);
-			const output = await new Deno.Command(Deno.execPath(), {
-				args: ['run', '--no-config', `--allow-read=${path}`, 'scripts/check-pr-description.ts', path],
-				stdout: 'piped',
-				stderr: 'piped'
-			}).output();
-			assertEquals(output.code, sample.code, new TextDecoder().decode(output.stderr));
-			assertStringIncludes(new TextDecoder().decode(output.stdout), sample.message);
-		}
-	} finally {
-		await Deno.remove(directory, { recursive: true });
+Deno.test(
+	'PR description: long hidden instructions and link destinations do not inflate word counts',
+	() => {
+		const baseline = validatePrDescription(docs).wordCounts;
+		const body = docs
+			.replace('which OIDC settings', `which <!-- ${'word '.repeat(500)} -->OIDC settings`)
+			.replace('required for SSO.', 'required for [SSO](https://example.com/a/very/long/link).');
+		assertEquals(validatePrDescription(body).wordCounts, baseline);
 	}
-});
+);
+
+Deno.test(
+	'PR description CLI: valid input succeeds, warnings succeed, invalid input fails',
+	async () => {
+		const directory = await Deno.makeTempDir();
+		try {
+			const path = `${directory}/body.md`;
+			for (const sample of [
+				{ body: docs, code: 0, message: 'meets the template requirements' },
+				{
+					body: replaceSection(docs, 'Description', 'word '.repeat(151)),
+					code: 0,
+					message: '::warning'
+				},
+				{ body: '', code: 1, message: '::error' }
+			]) {
+				await Deno.writeTextFile(path, sample.body);
+				const output = await new Deno.Command(Deno.execPath(), {
+					args: [
+						'run',
+						'--no-config',
+						`--allow-read=${path}`,
+						'scripts/check-pr-description.ts',
+						path
+					],
+					stdout: 'piped',
+					stderr: 'piped'
+				}).output();
+				assertEquals(output.code, sample.code, new TextDecoder().decode(output.stderr));
+				assertStringIncludes(new TextDecoder().decode(output.stdout), sample.message);
+			}
+		} finally {
+			await Deno.remove(directory, { recursive: true });
+		}
+	}
+);
