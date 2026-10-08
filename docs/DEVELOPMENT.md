@@ -162,15 +162,19 @@ maintainer tests the fix locally before tagging; hotfixes don't go through the
 full beta testing cycle. If the fix isn't something you can confidently verify
 yourself, it's not a hotfix.
 
-Then the fix is brought into `develop`:
+Then bring the fix into `develop` through a normal PR. Nothing does this
+automatically; if it's skipped, the next release ships without the fix.
 
 ```bash
-git checkout develop
+git fetch origin
+git checkout -b fix/sync-crash origin/develop
 git cherry-pick <commit-hash>
 # If the cherry-pick conflicts, resolve and continue:
 #   git add <resolved-file>
 #   git cherry-pick --continue
-git push
+git push -u origin fix/sync-crash
+# Open a PR against develop; add `changelog: ignore` when squash merging,
+# since the fix is already in the hotfix release notes.
 
 # Clean up
 git branch -d hotfix/v2.2.0-sync-crash
@@ -344,16 +348,18 @@ git push origin hotfix/v2.4.0-sync-crash --tags
 
 `:latest` rebuilds from the fix. Stable users get `v2.4.1`.
 
-Now bring the fix into `develop` and clean up:
+Now bring the fix into `develop` through a PR and clean up:
 
 ```bash
-git checkout develop
+git fetch origin
+git checkout -b fix/sync-crash origin/develop
 git cherry-pick <commit-hash>
-git push
+git push -u origin fix/sync-crash
+# Open a PR against develop and squash merge it with `changelog: ignore`
 git branch -d hotfix/v2.4.0-sync-crash
 ```
 
-Then go back to your feature and rebase to pick up the fix:
+Once that PR merges, go back to your feature and rebase to pick up the fix:
 
 ```bash
 git checkout feat/notifications
