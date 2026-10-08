@@ -223,7 +223,7 @@ jobs:
           repositories: ${{ github.event.repository.name }}
           permission-pull-requests: write
 
-      - name: Post or update comment
+      - name: Post comment
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           REPO: ${{ github.repository }}
@@ -235,11 +235,13 @@ jobs:
             --allow-read="$RUNNER_TEMP/reviews" --allow-env=REPO,HEAD_SHA,RUN_URL \
             .github/claude-review/render.ts "$RUNNER_TEMP/reviews" > "$RUNNER_TEMP/body.md"
 
-          existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
-            --jq '.[] | select(.user.type == "Bot" and (.body | startswith("<!-- claude-review -->"))) | .id' \
-            | head -n 1)
-          if [ -n "$existing" ]; then
-            gh api --method PATCH "repos/$REPO/issues/comments/$existing" -F "body=@$RUNNER_TEMP/body.md" > /dev/null
-          else
-            gh api "repos/$REPO/issues/$PR/comments" -F "body=@$RUNNER_TEMP/body.md" > /dev/null
-          fi
+          # Hide earlier reviews as outdated, so the timeline keeps them collapsed.
+          previous=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.type == "Bot" and (.body | startswith("<!-- claude-review -->"))) | .node_id')
+          for id in $previous; do
+            gh api graphql -f id="$id" \
+              -f query='mutation($id: ID!) { minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) { clientMutationId } }' \
+              > /dev/null || echo "::warning::Could not hide earlier review comment $id"
+          done
+
+          gh api "repos/$REPO/issues/$PR/comments" -F "body=@$RUNNER_TEMP/body.md" > /dev/null
