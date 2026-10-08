@@ -1,0 +1,48 @@
+{
+	"type": "object",
+	"additionalProperties": false,
+	"required": ["status", "covered_by", "findings"],
+	"properties": {
+		"status": {
+			"type": "string",
+			"enum": ["not_applicable", "covered", "gaps"]
+		},
+		"covered_by": {
+			"type": "array",
+			"maxItems": 10,
+			"items": {
+				"type": "string"
+			},
+			"description": "Test files that exercise the change, relative to the repository root"
+		},
+		"findings": {
+			"type": "array",
+			"maxItems": 5,
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": ["file", "line", "title", "problem"],
+				"properties": {
+					"file": {
+						"type": "string",
+						"description": "Path of the untested code, relative to the repository root"
+					},
+					"line": {
+						"type": "integer",
+						"minimum": 1
+					},
+					"title": {
+						"type": "string",
+						"maxLength": 60,
+						"description": "A few words naming the problem"
+					},
+					"problem": {
+						"type": "string",
+						"maxLength": 300,
+						"description": "One sentence: what is wrong and why it matters"
+					}
+				}
+			}
+		}
+	}
+}

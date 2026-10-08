@@ -1,0 +1,41 @@
+name: PR Description
+
+on:
+  pull_request_target:
+    branches: [develop]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: pr-description-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate:
+    name: Validate PR Description
+    # Dependabot PRs don't use the template. A skipped required check still counts as passing.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # On pull_request_target, checkout uses the default branch, so this runs
+      # trusted code only. Never check out the PR head here.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version-file: .tool-versions
+
+      - name: Fetch current description
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq '.body // ""' > "$RUNNER_TEMP/pr-body.md"
+
+      - name: Validate description
+        run: deno run --no-config --allow-read="$RUNNER_TEMP/pr-body.md" scripts/check-pr-description.ts "$RUNNER_TEMP/pr-body.md"
