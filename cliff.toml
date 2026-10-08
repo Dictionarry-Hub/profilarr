@@ -38,7 +38,9 @@ split_commits = false
 protect_breaking_commits = true
 filter_commits = true
 fail_on_unmatched_commit = true
-tag_pattern = "v[0-9]+\\.[0-9]+\\.[0-9]+"
+# v2 and later only: tags sort by date, so a legacy v1.x tag cut between two v2
+# releases would otherwise become the previous tag and pull in all of v2.
+tag_pattern = "v[2-9]\\.[0-9]+\\.[0-9]+"
 topo_order = false
 topo_order_commits = true
 sort_commits = "oldest"
