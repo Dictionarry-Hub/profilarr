@@ -37,7 +37,8 @@ interface Violation {
 	file: string;
 	line: number;
 	column: number;
-	kind: 'bare-timestamp' | 'sql-datetime-compare' | 'raw-locale' | 'raw-date-display' | 'read-error';
+	kind:
+		'bare-timestamp' | 'sql-datetime-compare' | 'raw-locale' | 'raw-date-display' | 'read-error';
 	message: string;
 	suggestion?: string;
 }
@@ -52,8 +53,7 @@ const BARE_TIMESTAMP_RE = /(\w+(?:At|_at))\s*:\s*(?:row|r)\.(\w+_at)\b(?!.*toUTC
 
 // A `<`, `<=`, `>` or `>=` comparison with `datetime(...)` on either side.
 // Writes like `datetime('now', '+5 minutes')` aren't comparisons and pass.
-const SQL_DATETIME_COMPARE_RE =
-	/\bdatetime\((?:[^()]|\([^()]*\))*\)\s*[<>]=?|[<>]=?\s*datetime\(/;
+const SQL_DATETIME_COMPARE_RE = /\bdatetime\((?:[^()]|\([^()]*\))*\)\s*[<>]=?|[<>]=?\s*datetime\(/;
 
 // Lines that are comments or contain toUTC already are safe.
 const COMMENT_LINE_RE = /^\s*(?:\/\/|\/\*|\*)/;
