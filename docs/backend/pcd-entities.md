@@ -241,6 +241,10 @@ Delay profiles control release delay rules and minimum CF score gates.
 bypass_if_highest_quality, bypass_if_above_custom_format_score,
 minimum_custom_format_score
 
+Delays are stored and synced as whole minutes, matching the Arr API. The
+form's unit picker (minutes, hours, days) only changes the display; values
+are converted with `$shared/utils/duration.ts` and always posted as minutes.
+
 The schema enforces protocol constraints via CHECK clauses:
 
 - `only_torrent` -- `usenet_delay` must be NULL

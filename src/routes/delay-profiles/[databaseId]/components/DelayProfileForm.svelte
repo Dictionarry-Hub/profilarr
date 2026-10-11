@@ -16,6 +16,16 @@
 	import type { PreferredProtocol } from '$shared/pcd/display.ts';
 	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
 	import type { AffectedArr } from '$shared/sync/types.ts';
+	import {
+		changeUnit,
+		clearOriginals,
+		DURATION_UNITS,
+		enterValue,
+		fromMinutes,
+		largestEvenUnit,
+		type DurationField,
+		type DurationUnit
+	} from '$shared/utils/duration.ts';
 
 	// Form data shape
 	interface DelayProfileFormData {
@@ -59,6 +69,56 @@
 
 	// Typed accessor for current form data
 	$: formData = $current as DelayProfileFormData;
+
+	// Delays are stored in minutes; the unit only changes how they're shown
+	type DelayField = 'usenetDelay' | 'torrentDelay';
+	const startData = initialData ?? defaults;
+	let delayUnit: DurationUnit = largestEvenUnit([startData.usenetDelay, startData.torrentDelay]);
+	let originalMinutes: Record<DelayField, number | null> = {
+		usenetDelay: null,
+		torrentDelay: null
+	};
+
+	const delayUnitOptions = DURATION_UNITS.map((unit) => ({
+		value: unit,
+		label: unit.charAt(0).toUpperCase() + unit.slice(1),
+		shortLabel: `Show in ${unit}`
+	}));
+
+	function delayState(): Record<DelayField, DurationField> {
+		return {
+			usenetDelay: { minutes: formData.usenetDelay, originalMinutes: originalMinutes.usenetDelay },
+			torrentDelay: {
+				minutes: formData.torrentDelay,
+				originalMinutes: originalMinutes.torrentDelay
+			}
+		};
+	}
+
+	function applyDelayState(state: Record<DelayField, DurationField>) {
+		for (const field of ['usenetDelay', 'torrentDelay'] as DelayField[]) {
+			originalMinutes[field] = state[field].originalMinutes;
+			updateField(field, state[field].minutes);
+		}
+	}
+
+	function handleDelayUnitChange(unit: DurationUnit) {
+		const { state, message } = changeUnit(
+			delayState(),
+			{
+				usenetDelay: { label: 'Usenet delay', enabled: usenetEnabled },
+				torrentDelay: { label: 'Torrent delay', enabled: torrentEnabled }
+			},
+			unit
+		);
+		applyDelayState(state);
+		delayUnit = unit;
+		if (message) alertStore.add('info', message);
+	}
+
+	function handleDelayInput(field: DelayField, value: number) {
+		applyDelayState(enterValue(delayState(), field, value, delayUnit));
+	}
 
 	// Loading states
 	let saving = false;
@@ -192,6 +252,7 @@
 							'success',
 							mode === 'create' ? 'Delay profile created!' : 'Delay profile updated!'
 						);
+						applyDelayState(clearOriginals(delayState()));
 						initEdit(formData);
 						if (data.affectedArrs && data.affectedArrs.length > 0) {
 							pendingRedirectTo = data.redirectTo || '';
@@ -208,6 +269,7 @@
 						'success',
 						mode === 'create' ? 'Delay profile created!' : 'Delay profile updated!'
 					);
+					applyDelayState(clearOriginals(delayState()));
 					initEdit(formData);
 				}
 				await formUpdate();
@@ -257,24 +319,37 @@
 
 			<!-- Delays -->
 			<div data-onboarding="delay-general-delays">
-				<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Delays</h3>
-				<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-					Time to wait before downloading from each source. Set to 0 for no delay.
-				</p>
+				<div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
+					<div>
+						<h3 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Delays</h3>
+						<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+							Time to wait before downloading from each source. Set to 0 for no delay.
+						</p>
+					</div>
+					<DropdownSelect
+						value={delayUnit}
+						options={delayUnitOptions}
+						fullWidth
+						width="w-full md:w-auto"
+						position="right"
+						mobilePosition="left"
+						on:change={(e) => handleDelayUnitChange(e.detail as DurationUnit)}
+					/>
+				</div>
 				<div class="mt-3 grid gap-4 sm:grid-cols-2">
 					<div>
 						<label
 							for="usenet-delay"
 							class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
 						>
-							Usenet Delay (minutes)
+							Usenet Delay ({delayUnit})
 						</label>
 						<div class="mt-1">
 							<NumberInput
 								name="usenet-delay"
 								id="usenet-delay"
-								value={formData.usenetDelay}
-								onchange={(v) => updateField('usenetDelay', v)}
+								value={fromMinutes(formData.usenetDelay, delayUnit)}
+								onchange={(v) => handleDelayInput('usenetDelay', v)}
 								min={0}
 								font="mono"
 								disabled={!usenetEnabled}
@@ -287,14 +362,14 @@
 							for="torrent-delay"
 							class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
 						>
-							Torrent Delay (minutes)
+							Torrent Delay ({delayUnit})
 						</label>
 						<div class="mt-1">
 							<NumberInput
 								name="torrent-delay"
 								id="torrent-delay"
-								value={formData.torrentDelay}
-								onchange={(v) => updateField('torrentDelay', v)}
+								value={fromMinutes(formData.torrentDelay, delayUnit)}
+								onchange={(v) => handleDelayInput('torrentDelay', v)}
 								min={0}
 								font="mono"
 								disabled={!torrentEnabled}

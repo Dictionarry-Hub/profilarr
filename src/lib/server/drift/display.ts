@@ -18,6 +18,7 @@ import type {
 } from '$shared/drift.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
+import { formatMinutes } from '$shared/utils/duration.ts';
 import { buildExpectedCustomFormatsPerDatabase } from './customFormats.ts';
 
 interface CustomFormatDiff {
@@ -1324,7 +1325,7 @@ function formatQualityDefinitionValue(field: string, raw: unknown): DriftDisplay
 function formatMinutesValue(raw: unknown): DriftDisplayValue {
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
 	if (typeof raw !== 'number') return formatGenericValue(raw);
-	return value(`${raw} ${raw === 1 ? 'minute' : 'minutes'}`, { mono: true });
+	return value(formatMinutes(raw), { mono: true });
 }
 
 function formatTagIdsValue(raw: unknown): DriftDisplayValue {
