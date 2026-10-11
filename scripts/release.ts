@@ -1,6 +1,3 @@
-const mode = Deno.args[0];
-const version = Deno.args[1];
-const notesPath = Deno.args[2];
 const versionPattern = /^v\d+\.\d+\.\d+$/;
 
 const IMAGES = ['profilarr:alpine', 'profilarr-parser:alpine'];
@@ -26,7 +23,7 @@ function assertVersion(value: string | undefined): string {
  * Reads the optional release notes intro. It becomes the annotated tag message,
  * which git-cliff renders above the generated changelog.
  */
-async function readNotes(path: string | undefined): Promise<string | null> {
+export async function readNotes(path: string | undefined): Promise<string | null> {
 	if (!path) {
 		return null;
 	}
@@ -36,19 +33,36 @@ async function readNotes(path: string | undefined): Promise<string | null> {
 		text = (await Deno.readTextFile(path)).trim();
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
-			console.error(`Release notes file ${path} was not found.`);
-			Deno.exit(1);
+			throw new Error(`Release notes file ${path} was not found.`);
 		}
 
 		throw error;
 	}
 
 	if (!text) {
-		console.error(`Release notes file ${path} is empty.`);
-		Deno.exit(1);
+		throw new Error(`Release notes file ${path} is empty.`);
 	}
 
 	return text;
+}
+
+export function cliffArgs(tag: string, notes: string | null): string[] {
+	const args = ['--config', 'cliff.toml', '--unreleased', '--tag', tag];
+	return notes ? [...args, '--with-tag-message', notes] : args;
+}
+
+export function tagArgs(tag: string, notes: string | null): string[] {
+	// The default strip cleanup drops lines starting with #, including markdown headings
+	return notes ? ['tag', '-a', '--cleanup=whitespace', '-m', notes, tag] : ['tag', tag];
+}
+
+async function readNotesOrExit(path: string | undefined): Promise<string | null> {
+	try {
+		return await readNotes(path);
+	} catch (error) {
+		console.error(error instanceof Error ? error.message : error);
+		Deno.exit(1);
+	}
 }
 
 async function run(command: string, args: string[]) {
@@ -86,45 +100,37 @@ async function scanImages() {
 	}
 }
 
-if (mode === 'scan') {
-	await buildImages();
-	await scanImages();
-	console.log('All images clean.');
-} else if (mode === 'dry') {
-	const tag = assertVersion(version);
-	const notes = await readNotes(notesPath);
-	const args = ['--config', 'cliff.toml', '--unreleased', '--tag', tag];
+if (import.meta.main) {
+	const [mode, version, notesPath] = Deno.args;
 
-	if (notes) {
-		args.push('--with-tag-message', notes);
-	}
+	if (mode === 'scan') {
+		await buildImages();
+		await scanImages();
+		console.log('All images clean.');
+	} else if (mode === 'dry') {
+		const tag = assertVersion(version);
+		const notes = await readNotesOrExit(notesPath);
+		await run('git-cliff', cliffArgs(tag, notes));
+	} else if (mode === 'tag') {
+		const tag = assertVersion(version);
+		// Read before the slow image build so a bad path fails fast
+		const notes = await readNotesOrExit(notesPath);
+		await buildImages();
+		await scanImages();
 
-	await run('git-cliff', args);
-} else if (mode === 'tag') {
-	const tag = assertVersion(version);
-	// Read before the slow image build so a bad path fails fast
-	const notes = await readNotes(notesPath);
-	await buildImages();
-	await scanImages();
+		const kind = notes
+			? `annotated tag ${tag} with notes from ${notesPath}`
+			: `plain tag ${tag} (no release notes)`;
+		const answer = prompt(`Create and push ${kind}? Type ${tag} to confirm:`);
 
-	const kind = notes
-		? `annotated tag ${tag} with notes from ${notesPath}`
-		: `plain tag ${tag} (no release notes)`;
-	const answer = prompt(`Create and push ${kind}? Type ${tag} to confirm:`);
+		if (answer !== tag) {
+			console.error('Release cancelled.');
+			Deno.exit(1);
+		}
 
-	if (answer !== tag) {
-		console.error('Release cancelled.');
-		Deno.exit(1);
-	}
-
-	if (notes) {
-		// The default strip cleanup drops lines starting with #, including markdown headings
-		await run('git', ['tag', '-a', '--cleanup=whitespace', '-m', notes, tag]);
+		await run('git', tagArgs(tag, notes));
+		await run('git', ['push', 'origin', tag]);
 	} else {
-		await run('git', ['tag', tag]);
+		usage();
 	}
-
-	await run('git', ['push', 'origin', tag]);
-} else {
-	usage();
 }
