@@ -24,7 +24,7 @@ export const loginAttemptsQueries = {
 	countRecent(ip: string, endpoint: string, windowMinutes: number): number {
 		const result = db.queryFirst<{ count: number }>(
 			`SELECT COUNT(*) as count FROM login_attempts
-			 WHERE ip = ? AND endpoint = ? AND datetime(failed_at) > datetime('now', ?)`,
+			 WHERE ip = ? AND endpoint = ? AND julianday(failed_at) > julianday('now', ?)`,
 			ip,
 			endpoint,
 			`-${windowMinutes} minutes`
@@ -43,7 +43,7 @@ export const loginAttemptsQueries = {
 	): number {
 		const result = db.queryFirst<{ count: number }>(
 			`SELECT COUNT(*) as count FROM login_attempts
-			 WHERE ip = ? AND endpoint = ? AND category = ? AND datetime(failed_at) > datetime('now', ?)`,
+			 WHERE ip = ? AND endpoint = ? AND category = ? AND julianday(failed_at) > julianday('now', ?)`,
 			ip,
 			endpoint,
 			category,
@@ -64,7 +64,7 @@ export const loginAttemptsQueries = {
 	 */
 	deleteExpired(windowMinutes: number): number {
 		return db.execute(
-			`DELETE FROM login_attempts WHERE datetime(failed_at) <= datetime('now', ?)`,
+			`DELETE FROM login_attempts WHERE julianday(failed_at) <= julianday('now', ?)`,
 			`-${windowMinutes} minutes`
 		);
 	}

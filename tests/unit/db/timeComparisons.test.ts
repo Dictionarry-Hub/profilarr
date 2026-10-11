@@ -4,18 +4,22 @@
  * then claimed jobs early and looped (#948).
  *
  * Every check uses a time later in the current second, which must not count as
- * reached yet, and one a second ago, which must.
+ * reached yet, and one a second ago, which must. Retention deletes also check a
+ * time just before the cutoff in the same second, which must count as older.
  */
 
 import { assertEquals, assertExists } from '@std/assert';
 
-/** Waits until just after a wall-clock second starts and returns that second in ms. */
+/**
+ * Waits until 5-50ms into a wall-clock second and returns that second in ms.
+ * The 5ms floor keeps `now` strictly after the second's start.
+ */
 async function startOfSecond(): Promise<number> {
 	while (true) {
 		const now = Date.now();
 		const into = now % 1000;
-		if (into < 50) return now - into;
-		await new Promise((resolve) => setTimeout(resolve, 1000 - into));
+		if (into >= 5 && into < 50) return now - into;
+		await new Promise((resolve) => setTimeout(resolve, into < 5 ? 5 - into : 1005 - into));
 	}
 }
 
@@ -40,6 +44,10 @@ Deno.test('SQL time comparisons keep milliseconds', async (t) => {
 	const { arrRenameSettingsQueries } = await import('$db/queries/arrRenameSettings.ts');
 	const { arrCleanupSettingsQueries } = await import('$db/queries/arrCleanupSettings.ts');
 	const { arrDriftSettingsQueries } = await import('$db/queries/arrDriftSettings.ts');
+	const { loginAttemptsQueries } = await import('$db/queries/loginAttempts.ts');
+	const { notificationHistoryQueries } = await import('$db/queries/notificationHistory.ts');
+	const { renameRunsQueries } = await import('$db/queries/renameRuns.ts');
+	const { upgradeRunsQueries } = await import('$db/queries/upgradeRuns.ts');
 
 	const lastId = () => db.queryFirst<{ id: number }>('SELECT last_insert_rowid() AS id')!.id;
 
@@ -130,6 +138,66 @@ Deno.test('SQL time comparisons keep milliseconds', async (t) => {
 				arrDriftSettingsQueries.getDueConfigs()
 			].map((configs) => configs.map((config) => config.arrInstanceId));
 			assertEquals(dueIds, [[earlierArr], [earlierArr], [earlierArr], [earlierArr]]);
+		});
+
+		await t.step('login attempts stay in the rate-limit window until they leave it', async () => {
+			const { at } = await times();
+			const insert = `INSERT INTO login_attempts (ip, endpoint, category, failed_at)
+				VALUES ('10.0.0.1', '/auth/login', 'typo', ?)`;
+			// A one-minute window: one attempt still inside it, one just outside
+			db.execute(insert, at(900 - 60_000));
+			db.execute(insert, at(-1000 - 60_000));
+
+			assertEquals(loginAttemptsQueries.countRecent('10.0.0.1', '/auth/login', 1), 1);
+			assertEquals(
+				loginAttemptsQueries.countRecentByCategory('10.0.0.1', '/auth/login', 'typo', 1),
+				1
+			);
+			assertEquals(loginAttemptsQueries.deleteExpired(1), 1);
+		});
+
+		await t.step('history is deleted once it passes the retention period', async () => {
+			db.execute(
+				`INSERT INTO arr_instances (name, type, url, api_key) VALUES ('history', 'radarr', 'http://localhost:7878', 'key')`
+			);
+			const arrId = lastId();
+			db.execute(
+				`INSERT INTO notification_services (id, name, service_type, config, enabled_types)
+				 VALUES ('service', 'Test', 'discord', '{}', '[]')`
+			);
+
+			const day = 24 * 60 * 60 * 1000;
+			const { at } = await times();
+			// One-day retention: one row just past the cutoff this second, one still inside it
+			for (const timestamp of [at(-day), at(900 - day)]) {
+				db.execute(
+					`INSERT INTO notification_history (service_id, notification_type, title, message, status, sent_at)
+					 VALUES ('service', 'test', 'Title', 'Message', 'success', ?)`,
+					timestamp
+				);
+				db.execute(
+					`INSERT INTO rename_runs (instance_id, started_at, completed_at, status, library_total,
+						library_fetch_ms, after_ignore_tag, skipped_by_tag, files_needing_rename, files_renamed,
+						folders_renamed, commands_triggered, commands_completed, commands_failed)
+					 VALUES (?, ?, ?, 'success', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)`,
+					arrId,
+					timestamp,
+					timestamp
+				);
+				db.execute(
+					`INSERT INTO upgrade_runs (instance_id, started_at, completed_at, status, cron, filter_mode,
+						filter_name, library_total, library_fetch_ms, matched_count, after_cooldown, cooldown_hours,
+						selection_method, selection_requested, selected_count, searches_triggered, successful, failed)
+					 VALUES (?, ?, ?, 'success', '0 * * * *', 'round_robin', 'Filter', 0, 0, 0, 0, 0, 'random', 0, 0, 0, 0, 0)`,
+					arrId,
+					timestamp,
+					timestamp
+				);
+			}
+
+			assertEquals(notificationHistoryQueries.deleteOlderThan(1), 1);
+			assertEquals(renameRunsQueries.deleteOlderThan(1), 1);
+			assertEquals(upgradeRunsQueries.deleteOlderThan(1), 1);
 		});
 	} finally {
 		db.close();
