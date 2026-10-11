@@ -140,7 +140,7 @@ export const arrCleanupSettingsQueries = {
 			WHERE enabled = 1
 			AND (
 				next_run_at IS NULL
-				OR datetime('now') >= datetime(replace(replace(next_run_at, 'T', ' '), 'Z', ''))
+				OR julianday('now') >= julianday(next_run_at)
 			)
 		`);
 		return rows.map(rowToSettings);

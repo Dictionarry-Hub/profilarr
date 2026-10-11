@@ -54,11 +54,12 @@ normalizes timestamps on the way out. New code should use
 `new Date().toISOString()` for writes. `CURRENT_TIMESTAMP` is not banned
 but is discouraged for new work.
 
-When comparing timestamps in SQL, normalize with `replace()` so both
-formats work with `datetime()`:
+When comparing timestamps in SQL, use `julianday()`. It reads both formats
+and keeps fractional seconds. `datetime()` drops them, so a time later in the
+current second compares as already reached:
 
 ```sql
-datetime(replace(replace(run_at, 'T', ' '), 'Z', '')) <= datetime('now')
+julianday(run_at) <= julianday('now')
 ```
 
 ### Query Layer
