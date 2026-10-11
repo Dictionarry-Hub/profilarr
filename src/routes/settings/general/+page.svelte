@@ -118,16 +118,9 @@
 	];
 
 	const landingPageOptions = [
-		{
-			value: '',
-			label: 'Automatic',
-			description: 'Opens Quality Profiles once a database is linked, otherwise Databases.'
-		},
+		{ value: '', label: 'Automatic' },
 		...LANDING_PAGES.map((page) => ({ value: page.id, label: page.label }))
 	];
-
-	$: landingPageDescription =
-		landingPageOptions.find((o) => o.value === landingPage)?.description ?? '';
 
 	// --- Logging defaults ---
 
@@ -451,28 +444,6 @@
 								}}
 							/>
 						</div>
-
-						<div class="xl:col-span-2">
-							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
-								Landing Page
-							</span>
-							<DropdownSelect
-								value={landingPage}
-								options={landingPageOptions}
-								fullWidth
-								fixed
-								on:change={(e) => {
-									landingPage = e.detail;
-									update('landing_page', landingPage);
-								}}
-							/>
-							<input type="hidden" name="landing_page" value={landingPage} />
-							{#if landingPageDescription}
-								<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-									{landingPageDescription}
-								</p>
-							{/if}
-						</div>
 					</div>
 				</div>
 			</ExpandableCard>
@@ -484,39 +455,71 @@
 				onboardingId="general-behavior"
 			>
 				<div class="grid gap-4 px-6 py-4 sm:grid-cols-2 xl:grid-cols-5">
-					<Toggle
-						label="Apply Default Delay Profile"
-						checked={arrApplyDefaultDelayProfiles}
-						infoHeader="Apply Default Delay Profile"
-						infoBody="When enabled, Profilarr applies a default delay profile when adding a new Radarr or Sonarr instance. Disable this if you want new instances to keep their existing delay profile setup."
-						fullWidth
-						on:change={(e) => {
-							arrApplyDefaultDelayProfiles = e.detail;
-							update('arr_apply_default_delay_profiles', e.detail);
-						}}
-					/>
-					<Toggle
-						label="Block Referenced Deletes"
-						checked={failOnReferencedDelete}
-						infoHeader="Block Referenced Deletes"
-						infoBody="When enabled, Profilarr blocks deleting custom formats and regular expressions that are still referenced by other PCD entities. Disable this to allow deletes to generate cleanup operations for those references."
-						fullWidth
-						on:change={(e) => {
-							failOnReferencedDelete = e.detail;
-							update('fail_on_referenced_delete', e.detail);
-						}}
-					/>
-					<Toggle
-						label="Prompt to Sync Changes"
-						checked={syncPromptEnabled}
-						infoHeader="Prompt to Sync Changes"
-						infoBody="When enabled, Profilarr prompts you to sync affected Arr instances after saving an entity. Disable this to return normally without offering an immediate sync."
-						fullWidth
-						on:change={(e) => {
-							syncPromptEnabled = e.detail;
-							update('sync_prompt_enabled', e.detail);
-						}}
-					/>
+					<div>
+						<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+							Apply Default Delay Profile
+						</span>
+						<Toggle
+							label={arrApplyDefaultDelayProfiles ? 'Enabled' : 'Disabled'}
+							checked={arrApplyDefaultDelayProfiles}
+							infoHeader="Apply Default Delay Profile"
+							infoBody="When enabled, Profilarr applies a default delay profile when adding a new Radarr or Sonarr instance. Disable this if you want new instances to keep their existing delay profile setup."
+							fullWidth
+							on:change={(e) => {
+								arrApplyDefaultDelayProfiles = e.detail;
+								update('arr_apply_default_delay_profiles', e.detail);
+							}}
+						/>
+					</div>
+					<div>
+						<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+							Block Referenced Deletes
+						</span>
+						<Toggle
+							label={failOnReferencedDelete ? 'Enabled' : 'Disabled'}
+							checked={failOnReferencedDelete}
+							infoHeader="Block Referenced Deletes"
+							infoBody="When enabled, Profilarr blocks deleting custom formats and regular expressions that are still referenced by other PCD entities. Disable this to allow deletes to generate cleanup operations for those references."
+							fullWidth
+							on:change={(e) => {
+								failOnReferencedDelete = e.detail;
+								update('fail_on_referenced_delete', e.detail);
+							}}
+						/>
+					</div>
+					<div>
+						<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+							Prompt to Sync Changes
+						</span>
+						<Toggle
+							label={syncPromptEnabled ? 'Enabled' : 'Disabled'}
+							checked={syncPromptEnabled}
+							infoHeader="Prompt to Sync Changes"
+							infoBody="When enabled, Profilarr prompts you to sync affected Arr instances after saving an entity. Disable this to return normally without offering an immediate sync."
+							fullWidth
+							on:change={(e) => {
+								syncPromptEnabled = e.detail;
+								update('sync_prompt_enabled', e.detail);
+							}}
+						/>
+					</div>
+					<div class="xl:col-span-2">
+						<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+							Landing Page
+						</span>
+						<DropdownSelect
+							value={landingPage}
+							options={landingPageOptions}
+							header="The page Profilarr opens on"
+							headerDescription="Automatic opens Quality Profiles once a database is linked, otherwise Databases."
+							fullWidth
+							fixed
+							on:change={(e) => {
+								landingPage = e.detail;
+								update('landing_page', landingPage);
+							}}
+						/>
+					</div>
 					<input
 						type="hidden"
 						name="arr_apply_default_delay_profiles"
@@ -528,6 +531,7 @@
 						value={failOnReferencedDelete ? 'on' : ''}
 					/>
 					<input type="hidden" name="sync_prompt_enabled" value={syncPromptEnabled ? 'on' : ''} />
+					<input type="hidden" name="landing_page" value={landingPage} />
 				</div>
 			</ExpandableCard>
 

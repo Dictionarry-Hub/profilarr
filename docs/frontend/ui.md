@@ -171,7 +171,8 @@ Two related components:
   fixed positioning, compact modes, item slots, and matching menu width to the
   trigger.
 - **`$ui/dropdown/DropdownSelect.svelte`** is the plain `<select>` replacement:
-  no search box, just click and pick.
+  no search box, just click and pick. `header` and `headerDescription` add a
+  `DropdownHeader` above the options, for explaining the choice in the menu.
 
 `DropdownSelect` for a small fixed option list:
 
@@ -423,7 +424,8 @@ Sub-components for building custom menu UIs:
 - **`DropdownHeader.svelte`**, **`DropdownFooter.svelte`**,
   **`DropdownItem.svelte`**: styled section header, footer, and menu item.
   `DropdownItem` supports optional inline secondary text and a muted description
-  rendered below the main label.
+  rendered below the main label. `DropdownHeader` takes an optional
+  `description`, which wraps at a capped width instead of widening the menu.
   `DropdownFooter` mirrors `DropdownHeader` but uses `border-top` instead
   of `border-bottom` and sits at the end of a menu (e.g. "and 12 more").
 - **`DropdownSelect.svelte`**: the `<select>` replacement (covered under
