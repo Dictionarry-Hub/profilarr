@@ -16,7 +16,7 @@
  *   7600-7699  pcd writes
  *   7700-7799  pcd conflicts
  *   7800-7899  pcd reserved (future write/conflict expansion)
- *   7900-7999  reserved for future suites
+ *   7900-7999  settings
  *
  * Each suite gets 100 ports of headroom. From a port number alone you can tell
  * which suite it belongs to. New specs claim the next free slot in their
@@ -134,6 +134,9 @@ export const PORTS = {
 		conflictsQualityProfilesQualities: 7712,
 		conflictsQualityProfilesFull: 7713,
 		conflictsEngineRegressions: 7714
+	},
+	settings: {
+		landingPage: 7900
 	}
 } as const;
 

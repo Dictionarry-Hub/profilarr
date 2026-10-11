@@ -26,7 +26,8 @@
 
 	function parseMarkdown(text: string | null): string {
 		if (!text) return '';
-		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
+		// The card is a link, so unwrap links in the description
+		return sanitizeHtml(marked.parse(text) as string, { links: false }); // nosemgrep: profilarr.xss.marked-unsanitized
 	}
 
 	function getConditionVariant(

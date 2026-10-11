@@ -6,6 +6,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import Dropdown from './Dropdown.svelte';
 	import DropdownItem from './DropdownItem.svelte';
+	import DropdownHeader from './DropdownHeader.svelte';
 
 	export let label: string | undefined = undefined;
 	export let value: string;
@@ -17,6 +18,9 @@
 		icon?: Component | { path: string };
 	}[];
 	export let placeholder: string = 'Select...';
+	/** Optional header shown above the options, with a muted description below it */
+	export let header: string = '';
+	export let headerDescription: string = '';
 	export let minWidth: string = '8rem';
 	export let position: 'left' | 'right' | 'middle' = 'left';
 	export let mobilePosition: 'left' | 'right' | 'middle' | null = null;
@@ -139,6 +143,13 @@
 				onboarding={menuOnboarding}
 				on:placementchange={(e) => (resolvedPlacement = e.detail)}
 			>
+				{#if header}
+					<DropdownHeader
+						label={header}
+						description={headerDescription}
+						compact={isCompactDropdown}
+					/>
+				{/if}
 				{#each options as option}
 					<DropdownItem
 						label={getDropdownLabel(option)}

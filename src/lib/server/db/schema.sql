@@ -856,7 +856,7 @@ CREATE INDEX idx_rename_runs_status ON rename_runs(status);
 -- ==============================================================================
 -- TABLE: general_settings
 -- Purpose: Store general app-wide settings (singleton pattern with id=1)
--- Migration: 030_create_general_settings.ts, 064_add_fail_on_referenced_delete.ts, 066_add_date_format_setting.ts, 070_add_sync_prompt_setting.ts
+-- Migration: 030_create_general_settings.ts, 064_add_fail_on_referenced_delete.ts, 066_add_date_format_setting.ts, 070_add_sync_prompt_setting.ts, 073_add_landing_page_setting.ts
 -- ==============================================================================
 
 CREATE TABLE general_settings (
@@ -864,6 +864,7 @@ CREATE TABLE general_settings (
 
     -- Interface settings
     date_format TEXT NOT NULL DEFAULT 'auto' CHECK (date_format IN ('auto', 'mdy', 'dmy', 'ymd')),
+    landing_page TEXT,                                         -- page `/` opens (LANDING_PAGES id), NULL=automatic
 
     -- Default delay profile settings
     apply_default_delay_profiles INTEGER NOT NULL DEFAULT 1,  -- 1=apply defaults when adding arr, 0=don't

@@ -51,8 +51,11 @@ function isSafeUrl(raw: string): boolean {
 /**
  * HTML sanitizer — works in both server and client contexts.
  * Strips disallowed tags, attributes, event handlers, and dangerous URLs.
+ *
+ * `links: false` unwraps links to plain text, for content shown inside an
+ * element that is itself a link (nested links break server-rendered HTML).
  */
-export function sanitizeHtml(html: string): string {
+export function sanitizeHtml(html: string, options: { links?: boolean } = {}): string {
 	const allowedTags = new Set([
 		'p',
 		'br',
@@ -83,6 +86,10 @@ export function sanitizeHtml(html: string): string {
 		'del',
 		'ins'
 	]);
+
+	if (options.links === false) {
+		allowedTags.delete('a');
+	}
 
 	const allowedAttrs: Record<string, Set<string>> = {
 		a: new Set(['href', 'title']),

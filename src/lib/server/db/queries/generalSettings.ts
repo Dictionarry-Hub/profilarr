@@ -1,5 +1,6 @@
 import { db } from '../db.ts';
 import type { DateFormat } from '$shared/utils/dates.ts';
+import type { LandingPage } from '$shared/landingPages.ts';
 
 export type { DateFormat } from '$shared/utils/dates.ts';
 
@@ -9,6 +10,7 @@ export type { DateFormat } from '$shared/utils/dates.ts';
 export interface GeneralSettings {
 	id: number;
 	date_format: DateFormat;
+	landing_page: string | null; // LANDING_PAGES id, null=automatic
 	apply_default_delay_profiles: number; // 1=true, 0=false
 	fail_on_referenced_delete: number; // 1=true, 0=false
 	sync_prompt_enabled: number; // 1=true, 0=false
@@ -18,6 +20,7 @@ export interface GeneralSettings {
 
 export interface UpdateGeneralSettingsInput {
 	dateFormat?: DateFormat;
+	landingPage?: LandingPage | null;
 	applyDefaultDelayProfiles?: boolean;
 	failOnReferencedDelete?: boolean;
 	syncPromptEnabled?: boolean;
@@ -64,11 +67,16 @@ export const generalSettingsQueries = {
 	 */
 	update(input: UpdateGeneralSettingsInput): boolean {
 		const updates: string[] = [];
-		const params: (string | number)[] = [];
+		const params: (string | number | null)[] = [];
 
 		if (input.dateFormat !== undefined) {
 			updates.push('date_format = ?');
 			params.push(input.dateFormat);
+		}
+
+		if (input.landingPage !== undefined) {
+			updates.push('landing_page = ?');
+			params.push(input.landingPage);
 		}
 
 		if (input.applyDefaultDelayProfiles !== undefined) {
