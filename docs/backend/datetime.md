@@ -183,7 +183,9 @@ A standalone lint script with two scopes:
 in the schema follows the `_at` suffix convention (see `schema.sql`). The
 linter checks that `_at` fields in row-to-record mappings are wrapped in
 `toUTC()`. A bare assignment like `createdAt: row.created_at` is a
-violation; `createdAt: toUTC(row.created_at)` passes.
+violation; `createdAt: toUTC(row.created_at)` passes. It also flags SQL
+comparisons (`<`, `<=`, `>`, `>=`) against `datetime()`, which drops
+fractional seconds; compare with `julianday()` instead.
 
 **Svelte files** (`src/routes/**/*.svelte`). Two rules:
 
