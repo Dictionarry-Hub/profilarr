@@ -73,6 +73,7 @@ import { migration as migration069 } from './migrations/069_create_arr_sync_data
 import { migration as migration070 } from './migrations/070_add_sync_prompt_setting.ts';
 import { migration as migration071 } from './migrations/071_remove_local_bypass.ts';
 import { migration as migration072 } from './migrations/072_create_api_keys.ts';
+import { migration as migration073 } from './migrations/073_add_landing_page_setting.ts';
 
 export interface Migration {
 	version: number;
@@ -364,7 +365,8 @@ export function loadMigrations(): Migration[] {
 		migration069,
 		migration070,
 		migration071,
-		migration072
+		migration072,
+		migration073
 	];
 
 	// Sort by version number

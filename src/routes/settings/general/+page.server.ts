@@ -9,6 +9,7 @@ import { logSettings } from '$logger/settings.ts';
 import { logger } from '$logger/logger.ts';
 import { scheduleBackupJobs, scheduleLogCleanup } from '$lib/server/jobs/init.ts';
 import { FEATURES } from '$shared/features.ts';
+import { isLandingPage } from '$shared/landingPages.ts';
 
 const DATE_FORMATS = ['auto', 'mdy', 'dmy', 'ymd'] as const;
 
@@ -69,6 +70,7 @@ export const load = () => {
 		},
 		generalSettings: {
 			date_format: generalSetting.date_format,
+			landing_page: generalSetting.landing_page,
 			apply_default_delay_profiles: generalSetting.apply_default_delay_profiles === 1,
 			fail_on_referenced_delete: generalSetting.fail_on_referenced_delete === 1,
 			sync_prompt_enabled: generalSetting.sync_prompt_enabled === 1
@@ -147,6 +149,13 @@ export const actions: Actions = {
 			return fail(400, { error: 'Invalid date format' });
 		}
 
+		// Empty means automatic
+		const landingPage = formData.get('landing_page') || null;
+
+		if (landingPage !== null && !isLandingPage(landingPage)) {
+			return fail(400, { error: 'Invalid landing page' });
+		}
+
 		// --- Behavior ---
 		const arrApplyDefaultDelayProfiles = formData.get('arr_apply_default_delay_profiles') === 'on';
 		const failOnReferencedDelete = formData.get('fail_on_referenced_delete') === 'on';
@@ -210,6 +219,7 @@ export const actions: Actions = {
 
 		const arrUpdated = generalSettingsQueries.update({
 			dateFormat,
+			landingPage,
 			applyDefaultDelayProfiles: arrApplyDefaultDelayProfiles,
 			failOnReferencedDelete,
 			syncPromptEnabled
@@ -240,6 +250,7 @@ export const actions: Actions = {
 				aiApiUrl,
 				aiModel,
 				dateFormat,
+				landingPage,
 				arrApplyDefaultDelayProfiles,
 				failOnReferencedDelete,
 				syncPromptEnabled

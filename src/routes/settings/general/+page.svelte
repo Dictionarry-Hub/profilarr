@@ -15,6 +15,7 @@
 	} from '$stores/font';
 	import { initEdit, update, isDirty, resetFromServer, clear } from '$stores/dirty';
 	import { FEATURES } from '$shared/features.ts';
+	import { LANDING_PAGES } from '$shared/landingPages.ts';
 	import {
 		Save,
 		Loader2,
@@ -77,6 +78,8 @@
 		DEFAULT_ALERT_SETTINGS.durationMs / 1000
 	);
 	let dateFormat: DateFormat = data.generalSettings.date_format;
+	// Empty means automatic
+	let landingPage = data.generalSettings.landing_page ?? '';
 	let uiFontSans: SansFont = 'dm-sans';
 	let uiFontMono: MonoFont = 'geist-mono';
 
@@ -113,6 +116,18 @@
 		{ value: 'dmy', label: 'DD/MM/YYYY' },
 		{ value: 'ymd', label: 'YYYY-MM-DD' }
 	];
+
+	const landingPageOptions = [
+		{
+			value: '',
+			label: 'Automatic',
+			description: 'Opens Quality Profiles once a database is linked, otherwise Databases.'
+		},
+		...LANDING_PAGES.map((page) => ({ value: page.id, label: page.label }))
+	];
+
+	$: landingPageDescription =
+		landingPageOptions.find((o) => o.value === landingPage)?.description ?? '';
 
 	// --- Logging defaults ---
 
@@ -159,6 +174,7 @@
 			ui_alert_position: uiAlertPosition,
 			ui_alert_duration_seconds: uiAlertDurationSeconds,
 			date_format: dateFormat,
+			landing_page: landingPage,
 			ui_font_sans: uiFontSans,
 			ui_font_mono: uiFontMono
 		};
@@ -434,6 +450,28 @@
 									update('ui_font_mono', uiFontMono);
 								}}
 							/>
+						</div>
+
+						<div class="xl:col-span-2">
+							<span class="mb-1 block text-sm font-medium text-neutral-900 dark:text-neutral-50">
+								Landing Page
+							</span>
+							<DropdownSelect
+								value={landingPage}
+								options={landingPageOptions}
+								fullWidth
+								fixed
+								on:change={(e) => {
+									landingPage = e.detail;
+									update('landing_page', landingPage);
+								}}
+							/>
+							<input type="hidden" name="landing_page" value={landingPage} />
+							{#if landingPageDescription}
+								<p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+									{landingPageDescription}
+								</p>
+							{/if}
 						</div>
 					</div>
 				</div>
