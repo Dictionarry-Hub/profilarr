@@ -185,7 +185,7 @@ export const renameRunsQueries = {
 	deleteOlderThan(days: number): number {
 		return db.execute(
 			`DELETE FROM rename_runs
-			WHERE datetime(started_at) < datetime('now', '-' || ? || ' days')`,
+			WHERE julianday(started_at) < julianday('now', '-' || ? || ' days')`,
 			days
 		);
 	},

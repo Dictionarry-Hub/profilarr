@@ -188,7 +188,7 @@ export const databaseInstancesQueries = {
        AND sync_strategy > 0
        AND (
          last_synced_at IS NULL
-         OR datetime(replace(replace(last_synced_at, 'T', ' '), 'Z', ''), '+' || sync_strategy || ' minutes') <= datetime('now')
+         OR julianday(last_synced_at, '+' || sync_strategy || ' minutes') <= julianday('now')
        )
        ORDER BY last_synced_at ASC NULLS FIRST`
 			)

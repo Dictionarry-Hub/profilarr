@@ -182,7 +182,7 @@ export const jobQueueQueries = {
 		const row = db.queryFirst<JobQueueRow>(
 			`SELECT * FROM job_queue
 			 WHERE status = 'queued'
-			 AND datetime(replace(replace(run_at, 'T', ' '), 'Z', '')) <= datetime('now')
+			 AND julianday(run_at) <= julianday('now')
 			 ORDER BY run_at ASC
 			 LIMIT 1`
 		);

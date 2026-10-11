@@ -5,7 +5,9 @@
  *
  * 1. Query layer (src/lib/server/db/queries/*.ts): timestamp columns (fields
  *    ending in `_at`) must be wrapped in `toUTC()` when mapped to return
- *    values. A bare `createdAt: row.created_at` is a violation.
+ *    values. A bare `createdAt: row.created_at` is a violation. SQL time
+ *    comparisons must use `julianday()`: `datetime()` drops fractional
+ *    seconds, so a time later in the current second compares as reached.
  *
  * 2. Svelte files (src/routes/ *.svelte): raw locale date methods and raw
  *    `new Date(x)` for display are banned. Use the display functions from
@@ -35,7 +37,8 @@ interface Violation {
 	file: string;
 	line: number;
 	column: number;
-	kind: 'bare-timestamp' | 'raw-locale' | 'raw-date-display' | 'read-error';
+	kind:
+		'bare-timestamp' | 'sql-datetime-compare' | 'raw-locale' | 'raw-date-display' | 'read-error';
 	message: string;
 	suggestion?: string;
 }
@@ -47,6 +50,10 @@ interface Violation {
 // Matches lines like `somethingAt: row.something_at` without toUTC() wrapping.
 // Captures the property name and the row field for the error message.
 const BARE_TIMESTAMP_RE = /(\w+(?:At|_at))\s*:\s*(?:row|r)\.(\w+_at)\b(?!.*toUTC)/;
+
+// A `<`, `<=`, `>` or `>=` comparison with `datetime(...)` on either side.
+// Writes like `datetime('now', '+5 minutes')` aren't comparisons and pass.
+const SQL_DATETIME_COMPARE_RE = /\bdatetime\((?:[^()]|\([^()]*\))*\)\s*[<>]=?|[<>]=?\s*datetime\(/;
 
 // Lines that are comments or contain toUTC already are safe.
 const COMMENT_LINE_RE = /^\s*(?:\/\/|\/\*|\*)/;
@@ -88,6 +95,18 @@ async function lintQueryFiles(): Promise<Violation[]> {
 					kind: 'bare-timestamp',
 					message: `${match[1]}: ${match[2]} not wrapped in toUTC()`,
 					suggestion: `${match[1]}: toUTC(${match[2]})`
+				});
+			}
+
+			const compareMatch = SQL_DATETIME_COMPARE_RE.exec(line);
+			if (compareMatch) {
+				violations.push({
+					file,
+					line: i + 1,
+					column: compareMatch.index + 1,
+					kind: 'sql-datetime-compare',
+					message: 'datetime() comparison drops fractional seconds',
+					suggestion: "julianday(column) <= julianday('now')"
 				});
 			}
 		}

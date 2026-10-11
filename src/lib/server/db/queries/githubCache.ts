@@ -23,7 +23,7 @@ export const githubCacheQueries = {
 	get(cacheKey: string): GitHubCache | null {
 		const result = db.queryFirst<GitHubCache>(
 			`SELECT * FROM github_cache
-			 WHERE cache_key = ? AND expires_at > datetime('now')`,
+			 WHERE cache_key = ? AND julianday(expires_at) > julianday('now')`,
 			cacheKey
 		);
 		return result ?? null;
@@ -45,7 +45,7 @@ export const githubCacheQueries = {
 	 */
 	isExpired(cacheKey: string): boolean {
 		const result = db.queryFirst<{ expired: number }>(
-			`SELECT CASE WHEN expires_at <= datetime('now') THEN 1 ELSE 0 END as expired
+			`SELECT CASE WHEN julianday(expires_at) <= julianday('now') THEN 1 ELSE 0 END as expired
 			 FROM github_cache WHERE cache_key = ?`,
 			cacheKey
 		);
@@ -78,7 +78,7 @@ export const githubCacheQueries = {
 	 * Delete all expired entries
 	 */
 	deleteExpired(): number {
-		return db.execute("DELETE FROM github_cache WHERE expires_at <= datetime('now')");
+		return db.execute("DELETE FROM github_cache WHERE julianday(expires_at) <= julianday('now')");
 	},
 
 	/**

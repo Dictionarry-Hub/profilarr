@@ -209,7 +209,7 @@ export const notificationHistoryQueries = {
 	deleteOlderThan(days: number): number {
 		const affected = db.execute(
 			`DELETE FROM notification_history
-			WHERE sent_at < datetime('now', '-' || ? || ' days')`,
+			WHERE julianday(sent_at) < julianday('now', '-' || ? || ' days')`,
 			days
 		);
 

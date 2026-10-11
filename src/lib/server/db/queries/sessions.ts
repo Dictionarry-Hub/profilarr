@@ -82,7 +82,7 @@ export const sessionsQueries = {
 	getValidById(id: string): Session | undefined {
 		const row = db.queryFirst<SessionRow>(
 			`SELECT * FROM sessions
-			 WHERE id = ? AND datetime(expires_at) > datetime('now')`,
+			 WHERE id = ? AND julianday(expires_at) > julianday('now')`,
 			id
 		);
 		return row ? rowToSession(row) : undefined;
@@ -123,7 +123,7 @@ export const sessionsQueries = {
 	 * Delete all expired sessions (cleanup)
 	 */
 	deleteExpired(): number {
-		return db.execute(`DELETE FROM sessions WHERE datetime(expires_at) <= datetime('now')`);
+		return db.execute(`DELETE FROM sessions WHERE julianday(expires_at) <= julianday('now')`);
 	},
 
 	/**
@@ -146,7 +146,7 @@ export const sessionsQueries = {
 	countByUserId(userId: number): number {
 		const result = db.queryFirst<{ count: number }>(
 			`SELECT COUNT(*) as count FROM sessions
-			 WHERE user_id = ? AND datetime(expires_at) > datetime('now')`,
+			 WHERE user_id = ? AND julianday(expires_at) > julianday('now')`,
 			userId
 		);
 		return result?.count ?? 0;
