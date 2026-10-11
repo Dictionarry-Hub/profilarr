@@ -8,6 +8,10 @@ body = """
 {%- else -%}
 ## Unreleased
 {%- endif %}
+{%- if message %}
+
+{{ message | trim }}
+{%- endif %}
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | striptags | trim }}
 

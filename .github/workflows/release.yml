@@ -201,6 +201,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Checkout can replace the triggering annotated tag with a lightweight
+      # one, which drops the tag message git-cliff renders as the intro.
+      - name: Restore annotated tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: git fetch --force origin "refs/tags/${TAG}:refs/tags/${TAG}"
+
       - name: Generate release notes
         uses: orhun/git-cliff-action@3d96a18cc4ec17e9dc69ddcc424ccafaf1f78ce2 # v4.9.0
         with:

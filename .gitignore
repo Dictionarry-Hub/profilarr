@@ -41,6 +41,7 @@ tests/integration/notifications/.env
 
 # Local release planning
 .release-plan.md
+.release-notes.md
 
 # Vite
 .vite/
