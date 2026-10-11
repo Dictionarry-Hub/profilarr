@@ -132,6 +132,26 @@ changelog: ignore
 For a commit that has already been merged without the footer, add its full SHA
 to `.cliffignore`.
 
+#### Release Notes Intro
+
+To open a release with custom text (upgrade notes, deprecations, highlights),
+write it as markdown in `.release-notes.md` (ignored by git) and pass the path
+to both release tasks:
+
+```bash
+deno task release:dry v2.3.0 .release-notes.md
+deno task release v2.3.0 .release-notes.md
+```
+
+The text becomes the annotated tag's message, and git-cliff renders it between
+the version heading and the change list. Without a file, the release gets a
+plain tag and no intro. The message is fixed once the tag is pushed; correct it
+by editing the GitHub release by hand.
+
+When tagging by hand (for example a hotfix), use
+`git tag -a --cleanup=whitespace -F .release-notes.md v2.2.1`. The default
+cleanup mode strips lines starting with `#`, including markdown headings.
+
 #### Hotfixes
 
 If a core feature is broken in a stable release and it can't wait for the next
