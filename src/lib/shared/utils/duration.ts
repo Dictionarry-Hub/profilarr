@@ -82,6 +82,13 @@ export function formatMinutes(minutes: number, style: 'long' | 'short' = 'long')
 	return parts.join(' ');
 }
 
+/** Short delay label for list views: "-" when unset, "No delay" for 0. */
+export function formatDelay(minutes: number | null): string {
+	if (minutes === null) return '-';
+	if (minutes === 0) return 'No delay';
+	return formatMinutes(minutes, 'short');
+}
+
 export interface DurationFieldInfo {
 	label: string;
 	/** Disabled fields still convert but are left out of the rounding message. */

@@ -4,6 +4,7 @@ import {
 	changeUnit,
 	clearOriginals,
 	enterValue,
+	formatDelay,
 	formatDuration,
 	formatMinutes,
 	fromMinutes,
@@ -225,6 +226,14 @@ class DurationTest extends BaseTest {
 			assertEquals(formatMinutes(60, 'short'), '1h');
 			assertEquals(formatMinutes(45, 'short'), '45m');
 			assertEquals(formatMinutes(0, 'short'), '0m');
+		});
+
+		this.test('formats delays for list views', () => {
+			assertEquals(formatDelay(null), '-');
+			assertEquals(formatDelay(0), 'No delay');
+			assertEquals(formatDelay(30), '30m');
+			assertEquals(formatDelay(1800), '1d 6h');
+			assertEquals(formatDelay(20160), '14d');
 		});
 	}
 }

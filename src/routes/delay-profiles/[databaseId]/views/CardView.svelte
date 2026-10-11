@@ -9,7 +9,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
 	import { FEATURES } from '$shared/features.ts';
-	import { formatMinutes } from '$shared/utils/duration.ts';
+	import { formatDelay } from '$shared/utils/duration.ts';
 
 	export let profiles: DelayProfilesRow[];
 
@@ -41,12 +41,6 @@
 		if (protocol.startsWith('prefer_')) return 'info';
 		if (protocol.startsWith('only_')) return 'warning';
 		return 'secondary';
-	}
-
-	function formatDelay(minutes: number | null): string {
-		if (minutes === null) return '-';
-		if (minutes === 0) return 'No delay';
-		return formatMinutes(minutes, 'short');
 	}
 
 	function getProfileHref(profile: DelayProfilesRow): string {
