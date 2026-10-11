@@ -134,14 +134,25 @@ to `.cliffignore`.
 
 #### Release Notes Intro
 
-To open a release with custom text (upgrade notes, deprecations, highlights),
-write it as markdown in `.release-notes.md` (ignored by git) and pass the path
-to both release tasks:
+Every release opens with a short intro, written as markdown in
+`.release-notes.md` (ignored by git) and passed to both release tasks:
 
 ```bash
 deno task release:dry v2.3.0 .release-notes.md
 deno task release v2.3.0 .release-notes.md
 ```
+
+The intro always starts with a summary; the other two parts are only included
+when they apply:
+
+1. **Summary**: one or two sentences on what the release is about, with no
+   heading.
+2. **`### Upgrade notes`**: anything users must do, or will notice, after
+   upgrading. Add these as PRs merge.
+3. **`### Security`**: security fixes, linking the advisory.
+
+Use `###` headings, since the version heading is `##`. Don't repeat the change
+list; git-cliff generates it below the intro.
 
 The text becomes the annotated tag's message, and git-cliff renders it between
 the version heading and the change list. Without a file, the release gets a
