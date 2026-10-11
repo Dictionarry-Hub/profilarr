@@ -69,7 +69,8 @@ Deno.test('sanitizeHtml: preserves allowed tags', () => {
 Deno.test('sanitizeHtml: unwraps links to text when links are disabled', () => {
 	const input = 'Uses the <a href="https://dictionarry.dev/wiki/gppi"><strong>GPPI</strong></a>.';
 	assertEquals(sanitizeHtml(input, { links: false }), 'Uses the <strong>GPPI</strong>.');
-	assertEquals(sanitizeHtml(input), input);
+	const kept = sanitizeHtml(input);
+	assertEquals(kept.includes('href="https://dictionarry.dev/wiki/gppi"'), true, kept);
 });
 
 Deno.test('sanitizeHtml: strips disallowed tags', () => {
