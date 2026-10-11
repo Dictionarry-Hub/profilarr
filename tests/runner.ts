@@ -68,6 +68,7 @@ const INTEGRATION_NOTIFICATION_SPEC_DIR = 'tests/integration/notifications/specs
 const INTEGRATION_BACKUP_SPEC_DIR = 'tests/integration/backups/specs';
 const INTEGRATION_ARR_SPEC_DIR = 'tests/integration/arr/specs';
 const INTEGRATION_ANNOUNCEMENTS_SPEC_DIR = 'tests/integration/announcements/specs';
+const INTEGRATION_SETTINGS_SPEC_DIR = 'tests/integration/settings/specs';
 const INTEGRATION_SPEC_DIR = INTEGRATION_AUTH_SPEC_DIR; // backward compat
 const INTEGRATION_SUITES = new Set([
 	'auth',
@@ -76,7 +77,8 @@ const INTEGRATION_SUITES = new Set([
 	'arr',
 	'notifications',
 	'backups',
-	'announcements'
+	'announcements',
+	'settings'
 ]);
 
 const E2E_AUTH_CONFIG = 'tests/e2e/auth/playwright.config.ts';
@@ -247,13 +249,14 @@ async function runIntegration(target?: string): Promise<number> {
 		if (s === 'notifications') return INTEGRATION_NOTIFICATION_SPEC_DIR;
 		if (s === 'backups') return INTEGRATION_BACKUP_SPEC_DIR;
 		if (s === 'announcements') return INTEGRATION_ANNOUNCEMENTS_SPEC_DIR;
+		if (s === 'settings') return INTEGRATION_SETTINGS_SPEC_DIR;
 		return INTEGRATION_AUTH_SPEC_DIR;
 	}
 
 	// Determine which suites to run
 	const suitesToRun = suite
 		? [suite]
-		: ['auth', 'api', 'arr', 'notifications', 'announcements', 'backups', 'pcd'];
+		: ['auth', 'api', 'arr', 'notifications', 'announcements', 'backups', 'settings', 'pcd'];
 
 	// Docker is needed when running auth specs (all or specific ones that need it)
 	const runningAuthSpecs = suitesToRun.includes('auth');
@@ -539,6 +542,7 @@ async function runIntegrationSpec(
 		.replace(`${INTEGRATION_NOTIFICATION_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_BACKUP_SPEC_DIR}/`, '')
 		.replace(`${INTEGRATION_ANNOUNCEMENTS_SPEC_DIR}/`, '')
+		.replace(`${INTEGRATION_SETTINGS_SPEC_DIR}/`, '')
 		.replace('.test.ts', '');
 	const args = ['run', '--allow-all', '--no-check'];
 	if (INTEGRATION_NEEDS_TLS_INSECURE.has(specName)) {
@@ -901,6 +905,7 @@ function printHelp(): void {
 		'  pcd <a> <b>...  Scope by nested directory, e.g. pcd write regex',
 		'  backups         Backup specs only',
 		'  backups <name>  Single backup spec',
+		'  settings        Settings specs only',
 		'  <name>          Legacy: treated as auth spec name',
 		'',
 		'E2E targets:',
