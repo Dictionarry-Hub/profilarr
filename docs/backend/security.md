@@ -655,10 +655,10 @@ to escape the repository boundary and read or copy arbitrary files.
 **The attack**: An authenticated user sends a POST to
 `/api/databases/[id]/generate-commit-message` with
 `{ "files": ["../../etc/passwd"] }`. The server resolves this relative to the
-database's `local_path`, reads the file content via `Deno.readTextFile`, and
+database's `local_path`, reads the file content via `fs.readFile`, and
 sends it to the configured AI provider. The attacker exfiltrates arbitrary
 server files through the AI proxy. The commit and preview endpoints have similar
-vectors via `Deno.copyFile` and `getDiff()`.
+vectors via `fs.copyFile` and `getDiff()`.
 
 A subtler variant uses symlinks. A malicious PCD database maintainer commits a
 symlink (`evil -> /etc`) into their repo. Git tracks symlinks as blob entries,
@@ -672,7 +672,7 @@ client-supplied path before any filesystem operation:
 1. Rejects absolute paths (`/etc/passwd`)
 2. Resolves relative paths against the repo root and verifies the result stays
    within the boundary (lexical `startsWith` check)
-3. Follows symlinks via `Deno.realPathSync()` and verifies the real path is
+3. Follows symlinks via `realpathSync()` and verifies the real path is
    still within the boundary (catches symlink escapes)
 
 **Known limitation**: The boundary check uses POSIX path separators (`/`). If
