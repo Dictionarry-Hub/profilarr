@@ -4,6 +4,7 @@
  * Supports reading from multiple files (for daily rotation)
  */
 
+import * as fs from 'node:fs/promises';
 import { config } from '$config';
 import type { LogEntry } from './types.ts';
 
@@ -15,11 +16,11 @@ async function getLogFiles(): Promise<string[]> {
 	const logFiles: Array<{ path: string; mtime: Date }> = [];
 
 	try {
-		for await (const entry of Deno.readDir(logsDir)) {
-			if (entry.isFile && entry.name.endsWith('.log')) {
+		for (const entry of await fs.readdir(logsDir, { withFileTypes: true })) {
+			if (entry.isFile() && entry.name.endsWith('.log')) {
 				const filePath = `${logsDir}/${entry.name}`;
 				try {
-					const stat = await Deno.stat(filePath);
+					const stat = await fs.stat(filePath);
 					if (stat.mtime) {
 						logFiles.push({ path: filePath, mtime: stat.mtime });
 					}
@@ -49,11 +50,11 @@ export async function getLogFilesList(): Promise<
 	const logFiles: Array<{ filename: string; path: string; size: number; modified: Date }> = [];
 
 	try {
-		for await (const entry of Deno.readDir(logsDir)) {
-			if (entry.isFile && entry.name.endsWith('.log')) {
+		for (const entry of await fs.readdir(logsDir, { withFileTypes: true })) {
+			if (entry.isFile() && entry.name.endsWith('.log')) {
 				const filePath = `${logsDir}/${entry.name}`;
 				try {
-					const stat = await Deno.stat(filePath);
+					const stat = await fs.stat(filePath);
 					if (stat.mtime) {
 						logFiles.push({
 							filename: entry.name,
@@ -89,7 +90,7 @@ export async function readLogsFromFile(filename: string): Promise<LogEntry[]> {
 		const filePath = `${logsDir}/${filename}`;
 		const logs: LogEntry[] = [];
 
-		const content = await Deno.readTextFile(filePath);
+		const content = await fs.readFile(filePath, 'utf8');
 		const lines = content.split('\n').filter((line) => line.trim());
 
 		// Parse each line as JSON
@@ -124,7 +125,7 @@ export async function readLastLogs(): Promise<LogEntry[]> {
 		// Read from all log files
 		for (const filePath of logFiles) {
 			try {
-				const content = await Deno.readTextFile(filePath);
+				const content = await fs.readFile(filePath, 'utf8');
 				const lines = content.split('\n').filter((line) => line.trim());
 
 				// Parse each line as JSON
@@ -189,7 +190,7 @@ export async function readFilteredLogs(options: LogFilterOptions = {}): Promise<
 		// Read from all log files
 		for (const filePath of logFiles) {
 			try {
-				const content = await Deno.readTextFile(filePath);
+				const content = await fs.readFile(filePath, 'utf8');
 				const lines = content.split('\n').filter((line) => line.trim());
 
 				// Parse each line as JSON

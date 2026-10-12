@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
@@ -43,7 +44,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// Check for duplicate
 	try {
-		await Deno.stat(backupPath);
+		await fs.stat(backupPath);
 		const error: ErrorResponse = { error: 'A backup with this name already exists' };
 		return json(error, { status: 400 });
 	} catch {
@@ -56,12 +57,12 @@ export const POST: RequestHandler = async ({ request }) => {
 	const uint8Array = new Uint8Array(arrayBuffer);
 
 	try {
-		await Deno.writeFile(tmpPath, uint8Array);
+		await fs.writeFile(tmpPath, uint8Array);
 
 		// Validate archive contents (zip slip protection)
 		const validation = await validateArchiveEntries(tmpPath);
 		if (!validation.valid) {
-			await Deno.remove(tmpPath);
+			await fs.rm(tmpPath);
 			const error: ErrorResponse = {
 				error: 'Archive contains path traversal entries and was rejected'
 			};
@@ -69,9 +70,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Move to final location
-		await Deno.rename(tmpPath, backupPath);
+		await fs.rename(tmpPath, backupPath);
 
-		const stat = await Deno.stat(backupPath);
+		const stat = await fs.stat(backupPath);
 		const response: BackupUploadResponse = {
 			filename,
 			size: stat.size,
@@ -81,7 +82,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	} catch (err) {
 		// Clean up temp file if it still exists
 		try {
-			await Deno.remove(tmpPath);
+			await fs.rm(tmpPath);
 		} catch {
 			// Already cleaned up or never written
 		}

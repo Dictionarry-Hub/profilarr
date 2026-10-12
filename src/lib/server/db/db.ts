@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import { Database } from '@db/sqlite';
 import type { RestBindParameters } from '@db/sqlite';
 import { config } from '$config';
@@ -48,10 +49,11 @@ class DatabaseManager {
 
 		try {
 			// Ensure data directory exists
-			await Deno.mkdir(config.paths.data, { recursive: true });
+			await fs.mkdir(config.paths.data, { recursive: true });
 
 			// Check if database exists before opening
-			const dbExists = await Deno.stat(config.paths.database)
+			const dbExists = await fs
+				.stat(config.paths.database)
 				.then(() => true)
 				.catch(() => false);
 

@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { config } from '$config';
@@ -7,6 +8,7 @@ import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
 import { listBackups } from '$utils/backup/list.ts';
 import { isValidBackupFilename, resolveBackupPath } from '$utils/backup/validation.ts';
 import { SANITIZED_CATEGORIES } from '$utils/backup/sanitize.ts';
+import { isNotFound } from '$utils/fs.ts';
 
 export const load = async () => {
 	const backups = await listBackups(config.paths.backups);
@@ -64,14 +66,14 @@ export const actions: Actions = {
 
 		try {
 			// Verify backup exists
-			await Deno.stat(backupPath);
+			await fs.stat(backupPath);
 
 			// Stage a pending restore. The sentinel sits at the base level
 			// (outside `data/`) so a backup taken while a restore is staged
 			// won't carry the sentinel into its archive. The actual swap
 			// happens at next boot via applyPendingRestore().
 			const sentinelPath = `${config.paths.base}/.restore-pending`;
-			await Deno.writeTextFile(sentinelPath, backupPath);
+			await fs.writeFile(sentinelPath, backupPath);
 
 			await logger.warn(`Restore staged: ${filename}`, {
 				source: 'settings/backups',
@@ -95,13 +97,13 @@ export const actions: Actions = {
 	cancelRestore: async () => {
 		const sentinelPath = `${config.paths.base}/.restore-pending`;
 		try {
-			await Deno.remove(sentinelPath);
+			await fs.rm(sentinelPath);
 			await logger.info('Pending restore cancelled', {
 				source: 'settings/backups'
 			});
 			return { success: true, message: 'Pending restore cancelled.' };
 		} catch (err) {
-			if (err instanceof Deno.errors.NotFound) {
+			if (isNotFound(err)) {
 				return { success: true, message: 'No pending restore to cancel.' };
 			}
 			await logger.error('Failed to cancel pending restore', {

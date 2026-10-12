@@ -2,6 +2,7 @@
  * PCD Manager - High-level orchestration for PCD lifecycle
  */
 
+import * as fs from 'node:fs/promises';
 import {
 	checkForUpdates,
 	checkout,
@@ -33,7 +34,7 @@ import { notifications } from '$notifications/definitions/index.ts';
 
 async function readSchemaVersion(pcdPath: string): Promise<string | null> {
 	try {
-		const content = await Deno.readTextFile(`${pcdPath}/deps/schema/pcd.json`);
+		const content = await fs.readFile(`${pcdPath}/deps/schema/pcd.json`, 'utf8');
 		const manifest = JSON.parse(content);
 		return manifest.version ?? null;
 	} catch {
@@ -151,7 +152,7 @@ class PCDManager {
 		} catch (error) {
 			// Cleanup on failure - remove cloned directory
 			try {
-				await Deno.remove(localPath, { recursive: true });
+				await fs.rm(localPath, { recursive: true });
 			} catch {
 				// Ignore cleanup errors
 			}
@@ -179,7 +180,7 @@ class PCDManager {
 
 		// Then cleanup filesystem
 		try {
-			await Deno.remove(instance.local_path, { recursive: true });
+			await fs.rm(instance.local_path, { recursive: true });
 		} catch (error) {
 			// Log but don't throw - database entry is already deleted
 			// nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring — JS template literals don't interpret format specifiers

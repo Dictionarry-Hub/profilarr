@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import { logger } from '$logger/logger.ts';
 import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
 import { extractOrderFromFilename, getBaseOpsPath } from '../utils/operations.ts';
@@ -6,7 +7,7 @@ const UNPREFIXED_SEQUENCE_BASE = 2_000_000_000;
 
 async function pathExists(path: string): Promise<boolean> {
 	try {
-		await Deno.stat(path);
+		await fs.stat(path);
 		return true;
 	} catch {
 		return false;
@@ -58,8 +59,8 @@ export async function importBaseOps(
 	}
 
 	const entries: Array<{ name: string; filepath: string; order: number }> = [];
-	for await (const entry of Deno.readDir(basePath)) {
-		if (!entry.isFile || !entry.name.endsWith('.sql')) continue;
+	for (const entry of await fs.readdir(basePath, { withFileTypes: true })) {
+		if (!entry.isFile() || !entry.name.endsWith('.sql')) continue;
 		const filepath = `${basePath}/${entry.name}`;
 		entries.push({ name: entry.name, filepath, order: extractOrderFromFilename(entry.name) });
 	}
@@ -77,7 +78,7 @@ export async function importBaseOps(
 	for (const entry of entries) {
 		const opNumber = entry.order === Infinity ? null : entry.order;
 		const sequence = opNumber === null ? UNPREFIXED_SEQUENCE_BASE + unprefixedIndex++ : opNumber;
-		const rawSql = await Deno.readTextFile(entry.filepath);
+		const rawSql = await fs.readFile(entry.filepath, 'utf8');
 		const { metadataJson, cleanedSql } = parseMetadata(rawSql);
 		const contentHash = await hashContent(cleanedSql, metadataJson);
 
