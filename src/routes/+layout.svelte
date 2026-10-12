@@ -109,7 +109,8 @@
 								(result.data as { error?: string }).error || 'Failed to cancel'
 							);
 						}
-						await update();
+						// Stay on the current page instead of navigating to the action's page
+						await update({ navigate: false });
 					};
 				}}
 			>
