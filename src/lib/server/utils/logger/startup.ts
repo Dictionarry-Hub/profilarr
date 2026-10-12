@@ -2,6 +2,8 @@
  * Startup banner and logging
  */
 
+import { hostname } from 'node:os';
+import process from 'node:process';
 import { config } from '$config';
 import { build } from '$lib/shared/build.ts';
 import { getProxyEnv } from '$http/proxy.ts';
@@ -44,10 +46,10 @@ export async function logContainerConfig(): Promise<void> {
 	await logger.info('Container initialized', {
 		source: 'Docker',
 		meta: {
-			puid: Deno.env.get('PUID') || '1000',
-			pgid: Deno.env.get('PGID') || '1000',
-			umask: Deno.env.get('UMASK') || '022',
-			tz: Deno.env.get('TZ') || 'UTC'
+			puid: process.env.PUID || '1000',
+			pgid: process.env.PGID || '1000',
+			umask: process.env.UMASK || '022',
+			tz: process.env.TZ || 'UTC'
 		}
 	});
 }
@@ -100,9 +102,9 @@ export interface ServerInfo {
 export function getServerInfo(): ServerInfo {
 	return {
 		version: build.version,
-		env: Deno.env.get('DENO_ENV') || 'production',
+		env: process.env.DENO_ENV || 'production',
 		timezone: config.timezone,
 		basePath: config.paths.base,
-		hostname: typeof Deno !== 'undefined' ? Deno.hostname() : 'unknown'
+		hostname: hostname()
 	};
 }
