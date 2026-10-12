@@ -3,7 +3,6 @@
 	"minimumDependencyAge": "P7D",
 	"imports": {
 		// Path aliases
-		"$lib/": "./src/lib/",
 		"$api/": "./src/lib/api/",
 		"$config": "./src/lib/server/utils/config/config.ts",
 		"$logger/": "./src/lib/server/utils/logger/",
