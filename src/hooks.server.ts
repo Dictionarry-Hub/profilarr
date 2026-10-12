@@ -2,11 +2,6 @@
 const isReload = (globalThis as Record<string, unknown>).__profilarr_initialized__ === true;
 (globalThis as Record<string, unknown>).__profilarr_initialized__ = true;
 
-if (!isReload) {
-	// Auto-spawn parser binary for standalone builds (must run before config import)
-	await import('$lib/server/utils/parser/spawn.ts');
-}
-
 import process from 'node:process';
 import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
