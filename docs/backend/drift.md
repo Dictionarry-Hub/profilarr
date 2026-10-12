@@ -315,7 +315,7 @@ instead of waiting for the next scheduled drift run. The chain is gated on
 `FEATURES.drift` and per-instance `arr_drift_settings.enabled`.
 
 The sync page subscribes to job-finished events via
-`jobStatus.onJobFinished` and calls `invalidateAll()` whenever an `arr.drift`
+`jobStatus.onJobFinished` and calls `refreshAll()` whenever an `arr.drift`
 job completes. The raw hook is used (not the store's state machine) because
 the state machine drops finished events for jobs it is not actively tracking,
 including a drift job chained right after a sync's completion holdoff window.
