@@ -89,6 +89,8 @@ export class TestClient {
 
 	/**
 	 * DELETE request.
+	 * Sends a JSON Content-Type: SvelteKit rejects mutating requests without one
+	 * unless the Origin header matches.
 	 */
 	async delete(
 		path: string,
@@ -96,7 +98,10 @@ export class TestClient {
 	): Promise<Response> {
 		return this.request(path, {
 			method: 'DELETE',
-			headers: options.headers
+			headers: {
+				'Content-Type': 'application/json',
+				...options.headers
+			}
 		});
 	}
 

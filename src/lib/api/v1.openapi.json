@@ -11,7 +11,7 @@
 			"name": "Profilarr",
 			"url": "https://github.com/Dictionarry-Hub/profilarr"
 		},
-		"description": "Profilarr manages configuration for Radarr and Sonarr by syncing\ncurated configuration databases into Arr instances.\n"
+		"description": "Profilarr manages configuration for Radarr and Sonarr by syncing\ncurated configuration databases into Arr instances.\n\n`POST`, `PUT`, `PATCH`, and `DELETE` requests without a body must still\nsend `Content-Type: application/json`. Requests with no `Content-Type`\nare rejected with `403` as cross-site form submissions.\n"
 	},
 	"servers": [
 		{
