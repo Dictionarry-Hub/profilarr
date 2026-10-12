@@ -6,11 +6,6 @@ import { redirect } from '@sveltejs/kit';
 const isReload = (globalThis as Record<string, unknown>).__profilarr_initialized__ === true;
 (globalThis as Record<string, unknown>).__profilarr_initialized__ = true;
 
-if (!isReload) {
-	// Auto-spawn parser binary for standalone builds (must run before config import)
-	await import('#lib/server/utils/parser/spawn.ts');
-}
-
 import { config } from '$config';
 import { printBanner, getServerInfo, logContainerConfig, logProxyConfig } from '$logger/startup.ts';
 import { logSettings } from '$logger/settings.ts';
