@@ -92,7 +92,7 @@ test('same normalized target is blocked', async () => {
 		url: 'http://localhost:7878/',
 		apiKey: 'different-api-key'
 	});
-	assertEquals(second.status, 200);
+	assertEquals(second.status, 400);
 	const body = await second.text();
 	assert(body.includes('"status":400'));
 	assert(body.includes('This instance target is already configured'));
