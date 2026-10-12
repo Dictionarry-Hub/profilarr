@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import {
 		Download,
@@ -91,7 +91,7 @@
 
 			if (res.ok) {
 				alertStore.add('success', 'Backup uploaded successfully');
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				const body = await res.json();
 				alertStore.add('error', body.error || 'Failed to upload backup');
@@ -134,7 +134,7 @@
 				status.state === 'completed' &&
 				status.jobType.startsWith('backup.')
 			) {
-				invalidateAll();
+				refreshAll();
 			}
 			prevState = status.state;
 		});
@@ -159,7 +159,7 @@
 
 			if (res.ok) {
 				alertStore.add('success', 'Backup deleted successfully');
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				const body = await res.json();
 				alertStore.add('error', body.error || 'Failed to delete backup');

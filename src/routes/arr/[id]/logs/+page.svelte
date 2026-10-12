@@ -171,7 +171,7 @@
 				url.searchParams.set(key, String(value));
 			}
 		}
-		goto(url.toString(), { invalidateAll: true });
+		goto(url.toString(), { refreshAll: true });
 	}
 
 	// Refresh logs

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import type { ActionData, PageData } from './$types';
 	import { onDestroy, onMount } from 'svelte';
 	import { alertStore } from '#lib/client/alerts/store.js';
@@ -69,7 +69,7 @@
 				status.state === 'completed' &&
 				status.jobType === 'arr.drift'
 			) {
-				invalidateAll();
+				refreshAll();
 			}
 			previousJobState = status.state;
 		});

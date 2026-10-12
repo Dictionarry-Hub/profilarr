@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { onDestroy, onMount } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { Info } from '@lucide/svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
@@ -77,7 +77,7 @@
 	// including the drift job chained right after a sync.
 	const unsubscribeDriftFinished = jobStatus.onJobFinished((data) => {
 		if (data.jobType === 'arr.drift') {
-			invalidateAll();
+			refreshAll();
 		}
 	});
 	onDestroy(unsubscribeDriftFinished);

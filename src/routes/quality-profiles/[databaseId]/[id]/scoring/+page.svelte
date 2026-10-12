@@ -33,7 +33,7 @@
 	import { onMount, tick } from 'svelte';
 	import { page } from '$stores/page';
 	import { enhance } from '$app/forms';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { current, isDirty, initEdit, update } from '#lib/client/stores/dirty.js';
 	import { alertStore } from '$alerts/store';
 	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';

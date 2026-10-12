@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import {
 		LogOut,
 		Check,
@@ -482,7 +482,7 @@
 						use:enhance={() => {
 							return async ({ update }) => {
 								await update();
-								await invalidateAll();
+								await refreshAll();
 							};
 						}}
 					>
@@ -518,7 +518,7 @@
 									use:enhance={() => {
 										return async ({ update }) => {
 											await update();
-											await invalidateAll();
+											await refreshAll();
 										};
 									}}
 								>

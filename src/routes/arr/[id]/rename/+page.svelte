@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { alertStore } from '#lib/client/alerts/store.js';
 	import { isDirty, initEdit, update, current, clear } from '#lib/client/stores/dirty.js';
@@ -36,7 +36,7 @@
 				status.state === 'completed' &&
 				status.jobType === 'arr.rename'
 			) {
-				invalidateAll();
+				refreshAll();
 			}
 			previousJobState = status.state;
 		});

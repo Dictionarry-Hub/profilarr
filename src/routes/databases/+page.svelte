@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Database, Plus, Info } from '@lucide/svelte';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import EmptyState from '$ui/state/EmptyState.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -52,7 +52,7 @@
 				state.jobType === 'pcd.link' &&
 				state.status === 'success'
 			) {
-				invalidateAll();
+				refreshAll();
 			}
 		});
 	});
