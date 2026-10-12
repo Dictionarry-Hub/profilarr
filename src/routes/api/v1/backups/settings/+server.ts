@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
@@ -18,7 +17,7 @@ export const GET: RequestHandler = async () => {
 	const settings = backupSettingsQueries.get();
 	if (!settings) {
 		const error: ErrorResponse = { error: 'Backup settings not found' };
-		return json(error, { status: 500 });
+		return Response.json(error, { status: 500 });
 	}
 
 	const response: BackupSettings = {
@@ -29,7 +28,7 @@ export const GET: RequestHandler = async () => {
 		compressionEnabled: settings.compression_enabled === 1
 	};
 
-	return json(response);
+	return Response.json(response);
 };
 
 /**
@@ -45,7 +44,7 @@ export const PATCH: RequestHandler = async ({ request }) => {
 	// Must have at least one field
 	if (schedule === undefined && retentionDays === undefined && enabled === undefined) {
 		const error: ErrorResponse = { error: 'No fields to update' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	// Validate schedule
@@ -53,27 +52,27 @@ export const PATCH: RequestHandler = async ({ request }) => {
 		const error: ErrorResponse = {
 			error: `Invalid schedule. Must be one of: ${[...VALID_SCHEDULES].join(', ')}`
 		};
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	// Validate retentionDays
 	if (retentionDays !== undefined) {
 		if (typeof retentionDays !== 'number' || retentionDays < 1 || retentionDays > 365) {
 			const error: ErrorResponse = { error: 'retentionDays must be between 1 and 365' };
-			return json(error, { status: 400 });
+			return Response.json(error, { status: 400 });
 		}
 	}
 
 	// Validate enabled
 	if (enabled !== undefined && typeof enabled !== 'boolean') {
 		const error: ErrorResponse = { error: 'enabled must be a boolean' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	const current = backupSettingsQueries.get();
 	if (!current) {
 		const error: ErrorResponse = { error: 'Backup settings not found' };
-		return json(error, { status: 500 });
+		return Response.json(error, { status: 500 });
 	}
 	const scheduleChanged = schedule !== undefined && schedule !== current.schedule;
 
@@ -101,5 +100,5 @@ export const PATCH: RequestHandler = async ({ request }) => {
 		compressionEnabled: updated.compression_enabled === 1
 	};
 
-	return json(response);
+	return Response.json(response);
 };

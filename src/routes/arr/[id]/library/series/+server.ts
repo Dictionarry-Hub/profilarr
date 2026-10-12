@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { cache } from '$cache/cache.ts';
@@ -23,21 +22,24 @@ function stripSeasons(items: SonarrLibraryItem[]): SonarrSeriesItem[] {
 export const GET: RequestHandler = async ({ params }) => {
 	const instanceId = parseInt(params.id ?? '', 10);
 	if (!Number.isFinite(instanceId)) {
-		return json({ error: 'Invalid instance ID' }, { status: 400 });
+		return Response.json({ error: 'Invalid instance ID' }, { status: 400 });
 	}
 
 	const instance = arrInstancesQueries.getById(instanceId);
 	if (!instance) {
-		return json({ error: 'Instance not found' }, { status: 404 });
+		return Response.json({ error: 'Instance not found' }, { status: 404 });
 	}
 	if (instance.type !== 'sonarr') {
-		return json({ error: `Series are only available for Sonarr instances` }, { status: 400 });
+		return Response.json(
+			{ error: `Series are only available for Sonarr instances` },
+			{ status: 400 }
+		);
 	}
 
 	const cacheKey = `library:${instanceId}`;
 	const cached = cache.get<SonarrLibraryItem[]>(cacheKey);
 	if (cached) {
-		return json({
+		return Response.json({
 			items: stripSeasons(cached),
 			refreshedAt: instance.library_last_refreshed_at,
 			nextRefreshAt: getNextRefreshAt(instanceId)
@@ -65,7 +67,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			meta: { instanceId, seriesCount: items.length }
 		});
 
-		return json({
+		return Response.json({
 			items: stripSeasons(items),
 			refreshedAt,
 			nextRefreshAt: getNextRefreshAt(instanceId)
@@ -76,7 +78,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			source: 'arr/library/series',
 			meta: { instanceId, error: message }
 		});
-		return json({ error: message }, { status: 500 });
+		return Response.json({ error: message }, { status: 500 });
 	} finally {
 		client.close();
 	}

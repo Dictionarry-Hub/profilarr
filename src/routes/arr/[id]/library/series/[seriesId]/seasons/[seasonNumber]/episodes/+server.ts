@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { cache } from '$cache/cache.ts';
@@ -41,15 +40,18 @@ export const GET: RequestHandler = async ({ params }) => {
 		!Number.isFinite(seriesId) ||
 		!Number.isFinite(seasonNumber)
 	) {
-		return json({ error: 'Invalid instance, series, or season number' }, { status: 400 });
+		return Response.json({ error: 'Invalid instance, series, or season number' }, { status: 400 });
 	}
 
 	const instance = arrInstancesQueries.getById(instanceId);
 	if (!instance) {
-		return json({ error: 'Instance not found' }, { status: 404 });
+		return Response.json({ error: 'Instance not found' }, { status: 404 });
 	}
 	if (instance.type !== 'sonarr') {
-		return json({ error: 'Episodes are only available for Sonarr instances' }, { status: 400 });
+		return Response.json(
+			{ error: 'Episodes are only available for Sonarr instances' },
+			{ status: 400 }
+		);
 	}
 
 	try {
@@ -61,13 +63,13 @@ export const GET: RequestHandler = async ({ params }) => {
 			meta: { instanceId, seriesId, seasonNumber, episodeCount: episodes.length }
 		});
 
-		return json({ episodes });
+		return Response.json({ episodes });
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Failed to fetch episodes';
 		await logger.error(`Failed to fetch episodes for series ${seriesId} season ${seasonNumber}`, {
 			source: 'arr/library/episodes',
 			meta: { instanceId, seriesId, seasonNumber, error: message }
 		});
-		return json({ error: message }, { status: 500 });
+		return Response.json({ error: message }, { status: 500 });
 	}
 };

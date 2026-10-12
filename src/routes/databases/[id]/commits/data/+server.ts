@@ -1,4 +1,4 @@
-import { json, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { countCommits, getCommits, getStatus } from '$utils/git/index.ts';
@@ -66,7 +66,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 		commits.push(...installedSlice);
 	}
 
-	return json({
+	return Response.json({
 		commits,
 		totalCount,
 		page,

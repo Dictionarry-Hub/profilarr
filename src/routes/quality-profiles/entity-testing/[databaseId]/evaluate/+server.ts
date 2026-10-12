@@ -1,4 +1,4 @@
-import { json, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { pcdManager } from '$pcd/core/manager.ts';
 import {
@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
 	const parserAvailable = await isParserHealthy();
 	if (!parserAvailable) {
-		return json({
+		return Response.json({
 			parserAvailable: false,
 			evaluations: releases.map((r) => ({
 				releaseId: r.id,
@@ -146,7 +146,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		};
 	});
 
-	return json({
+	return Response.json({
 		parserAvailable: true,
 		evaluations
 	} satisfies EvaluateResponse);

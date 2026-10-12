@@ -1,4 +1,4 @@
-import { error, json } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { pcdManager } from '$pcd/core/manager.ts';
 import * as regularExpressionQueries from '$pcd/entities/regularExpressions/index.ts';
@@ -14,5 +14,5 @@ export const GET: RequestHandler = async ({ params }) => {
 	const path = regexes.length
 		? `/regular-expressions/${dbId}/${regexes[0].id}`
 		: `/regular-expressions/${dbId}`;
-	return json({ path });
+	return Response.json({ path });
 };

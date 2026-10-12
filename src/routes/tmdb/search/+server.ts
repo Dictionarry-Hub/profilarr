@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { TMDBClient } from '#lib/server/utils/tmdb/client.ts';
 import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
@@ -10,12 +9,12 @@ export const GET: RequestHandler = async ({ url }) => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 
 	if (!query) {
-		return json({ error: 'Query is required' }, { status: 400 });
+		return Response.json({ error: 'Query is required' }, { status: 400 });
 	}
 
 	const settings = tmdbSettingsQueries.get();
 	if (!settings?.api_key) {
-		return json({ error: 'TMDB API key not configured' }, { status: 400 });
+		return Response.json({ error: 'TMDB API key not configured' }, { status: 400 });
 	}
 
 	try {
@@ -23,7 +22,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		if (type === 'movie') {
 			const result = await client.searchMovies(query, page);
-			return json({
+			return Response.json({
 				results: result.results.map((m) => ({
 					id: m.id,
 					type: 'movie' as const,
@@ -40,7 +39,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			});
 		} else if (type === 'tv') {
 			const result = await client.searchTVShows(query, page);
-			return json({
+			return Response.json({
 				results: result.results.map((t) => ({
 					id: t.id,
 					type: 'series' as const,
@@ -85,7 +84,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				}))
 			].sort((a, b) => b.popularity - a.popularity);
 
-			return json({
+			return Response.json({
 				results: combined,
 				totalPages: Math.max(movies.total_pages, tvShows.total_pages),
 				totalResults: movies.total_results + tvShows.total_results,
@@ -97,7 +96,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			`TMDB search failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			{ source: 'TMDB' }
 		);
-		return json(
+		return Response.json(
 			{
 				error: error instanceof Error ? error.message : 'Search failed'
 			},

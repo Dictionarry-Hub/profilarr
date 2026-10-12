@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { createArrClient } from '$utils/arr/factory.ts';
@@ -26,16 +25,16 @@ export interface CleanupPreviewResponse {
 export const GET: RequestHandler = async ({ params }) => {
 	const instanceId = parseInt(params.id ?? '', 10);
 	if (!Number.isFinite(instanceId)) {
-		return json({ error: 'Invalid instance ID' }, { status: 400 });
+		return Response.json({ error: 'Invalid instance ID' }, { status: 400 });
 	}
 
 	const instance = arrInstancesQueries.getById(instanceId);
 	if (!instance) {
-		return json({ error: 'Instance not found' }, { status: 404 });
+		return Response.json({ error: 'Instance not found' }, { status: 404 });
 	}
 
 	if (instance.type !== 'radarr' && instance.type !== 'sonarr') {
-		return json({ error: `Cleanup not supported for ${instance.type}` }, { status: 400 });
+		return Response.json({ error: `Cleanup not supported for ${instance.type}` }, { status: 400 });
 	}
 
 	const instanceType = instance.type as 'radarr' | 'sonarr';
@@ -60,7 +59,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		]);
 
 		const response: CleanupPreviewResponse = { configs, entities };
-		return json(response);
+		return Response.json(response);
 	} finally {
 		client.close();
 	}

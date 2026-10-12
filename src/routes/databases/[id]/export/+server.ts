@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { pcdManager } from '$pcd/core/manager.ts';
 import { ENTITY_TYPES } from '$shared/pcd/portable.ts';
@@ -15,39 +14,39 @@ const VALID_ENTITY_TYPES: ReadonlySet<string> = new Set(ENTITY_TYPES);
 export const GET: RequestHandler = async ({ params, url }) => {
 	const databaseId = parseInt(params.id ?? '', 10);
 	if (isNaN(databaseId)) {
-		return json({ error: 'Invalid database ID' } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: 'Invalid database ID' } satisfies ErrorResponse, { status: 400 });
 	}
 
 	const entityType = url.searchParams.get('entityType');
 	const name = url.searchParams.get('name');
 
 	if (!entityType || !name) {
-		return json(
+		return Response.json(
 			{ error: 'Missing required parameters: entityType, name' } satisfies ErrorResponse,
 			{ status: 400 }
 		);
 	}
 
 	if (!VALID_ENTITY_TYPES.has(entityType)) {
-		return json({ error: `Invalid entityType: ${entityType}` } satisfies ErrorResponse, {
+		return Response.json({ error: `Invalid entityType: ${entityType}` } satisfies ErrorResponse, {
 			status: 400
 		});
 	}
 
 	const cache = pcdManager.getCache(databaseId);
 	if (!cache) {
-		return json({ error: 'Database not found' } satisfies ErrorResponse, { status: 404 });
+		return Response.json({ error: 'Database not found' } satisfies ErrorResponse, { status: 404 });
 	}
 
 	try {
 		const data = await serializeEntity(cache, entityType as EntityType, name);
-		return json({ entityType, data });
+		return Response.json({ entityType, data });
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Export failed';
 		if (message.includes('not found')) {
-			return json({ error: message } satisfies ErrorResponse, { status: 404 });
+			return Response.json({ error: message } satisfies ErrorResponse, { status: 404 });
 		}
-		return json({ error: message } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: message } satisfies ErrorResponse, { status: 400 });
 	}
 };
 
