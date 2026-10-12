@@ -22,7 +22,7 @@
 	} from '@lucide/svelte';
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import { sidebarCollapsed } from '$stores/sidebar';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import logo from '$assets/logo-512.png';
 	import radarrLogo from '$assets/Radarr.svg';
 	import sonarrLogo from '$assets/Sonarr.svg';

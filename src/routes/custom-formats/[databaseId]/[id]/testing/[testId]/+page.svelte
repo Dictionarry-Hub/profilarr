@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import TestForm from '../components/TestForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';

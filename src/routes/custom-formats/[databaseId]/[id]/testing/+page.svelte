@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { enhance } from '$app/forms';
 	import { Plus, AlertTriangle, Check, X, Pencil, Trash2 } from '@lucide/svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';

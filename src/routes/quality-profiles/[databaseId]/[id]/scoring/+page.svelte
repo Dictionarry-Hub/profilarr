@@ -31,7 +31,7 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { getPersistentSearchStore, type SearchStore } from '#lib/client/stores/search.js';
 	import { onMount, tick } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { current, isDirty, initEdit, update } from '#lib/client/stores/dirty.js';

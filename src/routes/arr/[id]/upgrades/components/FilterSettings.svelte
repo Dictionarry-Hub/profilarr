@@ -30,7 +30,7 @@
 		type SearchStore
 	} from '#lib/client/stores/search.js';
 	import type { Readable } from 'svelte/store';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import FilterGroupComponent from './FilterGroup.svelte';
 	import FilterPreviewModal from './FilterPreviewModal.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';

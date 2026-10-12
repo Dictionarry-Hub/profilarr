@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { Clock, Zap, Copy, Download } from '@lucide/svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';

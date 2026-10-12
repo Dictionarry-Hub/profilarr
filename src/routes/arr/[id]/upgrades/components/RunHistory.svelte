@@ -23,7 +23,7 @@
 		type SearchStore
 	} from '#lib/client/stores/search.js';
 	import type { Readable } from 'svelte/store';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';

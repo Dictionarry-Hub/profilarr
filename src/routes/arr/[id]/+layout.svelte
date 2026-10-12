@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import {
 		Library,
 		RefreshCw,

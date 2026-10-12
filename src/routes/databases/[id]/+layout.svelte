@@ -9,7 +9,7 @@
 		FileCog,
 		Megaphone
 	} from '@lucide/svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { FEATURES } from '#lib/shared/features.js';
 
 	$: database = $page.data.database;

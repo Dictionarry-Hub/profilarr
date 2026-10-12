@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { browser } from '$app/env';
 	import { Copy, RefreshCw, Filter, Rows3, Loader2, AlertTriangle } from '@lucide/svelte';
 	import { alertStore } from '$alerts/store';
@@ -163,7 +163,7 @@
 	// Navigate with updated params — triggers server load which updates
 	// data.filters, which triggers the reactive fetchLogs call above.
 	function updateParams(params: Record<string, string | number | undefined>) {
-		const url = new URL($page.url);
+		const url = new URL($page.url.href);
 		for (const [key, value] of Object.entries(params)) {
 			if (value === undefined || value === 'ALL') {
 				url.searchParams.delete(key);

@@ -17,7 +17,7 @@
 	import { getPersistentSearchStore, type SearchStore } from '$stores/search';
 	import { alertStore } from '$alerts/store';
 	import type { TestEntity } from '$shared/pcd/display.ts';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 
 	export let open = false;
 	export let entity: TestEntity | null = null;

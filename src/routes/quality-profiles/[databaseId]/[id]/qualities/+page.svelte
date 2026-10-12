@@ -23,7 +23,7 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '#lib/client/alerts/store.js';
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { goto } from '$app/navigation';
 	import { current, isDirty, initEdit, update } from '#lib/client/stores/dirty.js';
 	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';

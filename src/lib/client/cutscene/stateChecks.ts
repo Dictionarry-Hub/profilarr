@@ -4,7 +4,7 @@
  * Add new checks here as stages require them.
  */
 import { get } from 'svelte/store';
-import { page } from '$app/stores';
+import { page } from '$stores/page';
 
 export const stateChecks: Record<string, () => Promise<boolean>> = {
 	hasDatabase: async () => {

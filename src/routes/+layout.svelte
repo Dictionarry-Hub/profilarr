@@ -16,7 +16,7 @@
 	import { serverTimezone } from '$stores/timezone';
 	import { FEATURES } from '#lib/shared/features.js';
 	import { dev } from '$app/env';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';

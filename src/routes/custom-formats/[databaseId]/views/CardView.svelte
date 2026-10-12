@@ -4,7 +4,7 @@
 	import { FlaskConical, Copy, Download } from '@lucide/svelte';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { sortConditions } from '$shared/pcd/conditions';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';

@@ -7,7 +7,7 @@
 	import { Tag, Code, FileText, Link, Copy, Download } from '@lucide/svelte';
 	import { marked } from 'marked';
 	import { sanitizeHtml } from '$shared/utils/sanitize';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let expressions: RegularExpressionWithTags[];
