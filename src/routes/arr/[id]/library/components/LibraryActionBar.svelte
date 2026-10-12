@@ -23,7 +23,7 @@
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import type { SearchStore } from '$stores/search';
 	import { filterMode } from '$stores/filterMode';
-	import type { ViewMode } from '$lib/client/stores/dataPage';
+	import type { ViewMode } from '#lib/client/stores/dataPage.js';
 
 	export let fields: FilterFieldDef[] = [];
 	export let items: any[] = [];

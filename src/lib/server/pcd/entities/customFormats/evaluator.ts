@@ -3,14 +3,14 @@
  * Evaluates conditions against parsed release titles
  */
 
-import type { ParseResult } from '$lib/server/utils/arr/parser/types.ts';
+import type { ParseResult } from '#lib/server/utils/arr/parser/types.ts';
 import {
 	QualitySource,
 	QualityModifier,
 	Resolution,
 	ReleaseType,
 	Language
-} from '$lib/server/utils/arr/parser/types.ts';
+} from '#lib/server/utils/arr/parser/types.ts';
 import type {
 	ConditionData,
 	ConditionResult,

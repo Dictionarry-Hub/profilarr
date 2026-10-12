@@ -7,7 +7,7 @@ import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { logger } from '$logger/logger.ts';
 
 // Re-export from shared schedule utils
-export { calculateNextRun } from '$lib/server/jobs/scheduleUtils.ts';
+export { calculateNextRun } from '#lib/server/jobs/scheduleUtils.ts';
 
 // =============================================================================
 // Startup recovery

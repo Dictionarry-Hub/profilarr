@@ -16,7 +16,7 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$alerts/store';
 	import { sortConditions } from '$shared/pcd/conditions';
-	import { current, isDirty, initEdit, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, update } from '#lib/client/stores/dirty.js';
 	import type { PageData } from './$types';
 	import type { ConditionData } from '$shared/pcd/display.ts';
 	import type { AffectedArr } from '$shared/sync/types.ts';
@@ -383,17 +383,20 @@
 		<section>
 			<h3 class="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">How Conditions Work</h3>
 			<p>
-				Conditions are grouped by type. Between types, logic is <strong>AND</strong> &mdash; every
-				type must pass. Within a type, logic is <strong>OR</strong> &mdash; any condition can satisfy
-				it. Two modifiers change this:
+				Conditions are grouped by type. Between types, logic is
+				<strong>AND</strong>
+				— every type must pass. Within a type, logic is
+				<strong>OR</strong>
+				— any condition can satisfy it. Two modifiers change this:
 			</p>
 			<ul class="mt-2 list-inside list-disc space-y-1">
 				<li>
-					<strong>Required</strong> &mdash; Changes the type's logic from OR to AND. All required conditions
-					in that type must match.
+					<strong>Required</strong>
+					— Changes the type's logic from OR to AND. All required conditions in that type must match.
 				</li>
 				<li>
-					<strong>Negate</strong> &mdash; Inverts the condition so it matches when the pattern is absent.
+					<strong>Negate</strong>
+					— Inverts the condition so it matches when the pattern is absent.
 				</li>
 			</ul>
 		</section>
@@ -431,7 +434,7 @@
 				<div>
 					<div class="font-medium text-neutral-800 dark:text-neutral-200">Source</div>
 					<p class="mt-0.5">
-						Matches the release source &mdash; where the content was captured from (BluRay, WEB-DL,
+						Matches the release source — where the content was captured from (BluRay, WEB-DL,
 						WEBRip, DVD, Television, etc.).
 					</p>
 				</div>

@@ -15,7 +15,7 @@ import { Database } from '@db/sqlite';
 import { db } from '$db/db.ts';
 import { migrationRunner } from '$db/migrations.ts';
 import { logger } from '$logger/logger.ts';
-import { build } from '$lib/shared/build.ts';
+import { build } from '#lib/shared/build.ts';
 
 export interface CreateBackupResult {
 	success: boolean;

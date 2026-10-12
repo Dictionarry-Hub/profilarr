@@ -32,7 +32,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import TableActionButton from '$ui/table/TableActionButton.svelte';
-	import { createSearchStore } from '$lib/client/stores/search';
+	import { createSearchStore } from '#lib/client/stores/search.js';
 	import ComponentCard from './ComponentCard.svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Info from '@lucide/svelte/icons/info';
@@ -42,7 +42,7 @@
 	import Check from '@lucide/svelte/icons/check';
 	import Star from '@lucide/svelte/icons/star';
 	import Settings from '@lucide/svelte/icons/settings';
-	import type { ViewMode } from '$lib/client/stores/dataPage';
+	import type { ViewMode } from '#lib/client/stores/dataPage.js';
 
 	const search = createSearchStore();
 	const debouncedQuery = search.debouncedQuery;

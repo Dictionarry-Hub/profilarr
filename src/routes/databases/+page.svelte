@@ -15,7 +15,7 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { createDataPageStore } from '$lib/client/stores/dataPage';
+	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
 	import { alertStore } from '$alerts/store';
 	import { jobStatus } from '$stores/jobStatus';
 	import type { PageData } from './$types';

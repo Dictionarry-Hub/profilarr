@@ -3,7 +3,7 @@ import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { config } from '$config';
 import { listBackups } from '$utils/backup/list.ts';
-import { enqueueJob } from '$lib/server/jobs/queueService.ts';
+import { enqueueJob } from '#lib/server/jobs/queueService.ts';
 
 type BackupFile = components['schemas']['BackupFile'];
 type BackupCreateResponse = components['schemas']['BackupCreateResponse'];

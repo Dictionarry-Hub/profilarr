@@ -7,11 +7,11 @@
 		getRunsPerHour
 	} from '$shared/upgrades/filters';
 	import { enhance } from '$app/forms';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { alertStore } from '$lib/client/alerts/store';
-	import { isDirty, initEdit, update, current, clear } from '$lib/client/stores/dirty';
+	import { alertStore } from '#lib/client/alerts/store.js';
+	import { isDirty, initEdit, update, current, clear } from '#lib/client/stores/dirty.js';
 	import { jobStatus } from '$stores/jobStatus';
 	import Info from '@lucide/svelte/icons/info';
 	import Save from '@lucide/svelte/icons/save';

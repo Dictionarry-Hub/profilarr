@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import Filter from '@lucide/svelte/icons/funnel';
 	import FilterTagComponent from './FilterTag.svelte';
 	import Label from '$ui/label/Label.svelte';

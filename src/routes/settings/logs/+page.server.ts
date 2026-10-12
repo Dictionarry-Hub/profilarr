@@ -1,8 +1,8 @@
 import { readLastLogs, readLogsFromFile, getLogFilesList } from '$logger/reader.ts';
 import type { Actions } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
-import { enqueueJob } from '$lib/server/jobs/queueService.ts';
-import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
+import { enqueueJob } from '#lib/server/jobs/queueService.ts';
+import { buildJobDisplayName } from '#lib/server/jobs/display.ts';
 import { logger } from '$logger/logger.ts';
 
 export const load = async ({ url }: { url: URL }) => {

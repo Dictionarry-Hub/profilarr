@@ -5,7 +5,7 @@
  * The main processor (processor.ts) imports and re-exports from here.
  */
 
-import type { ArrCommand, ArrTag, RenamePreviewItem } from '$lib/server/utils/arr/types.ts';
+import type { ArrCommand, ArrTag, RenamePreviewItem } from '#lib/server/utils/arr/types.ts';
 import type { RenameSettings } from '$db/queries/arrRenameSettings.ts';
 import type { ArrInstance } from '$db/queries/arrInstances.ts';
 import type { RenameJobLog, LibrarySnapshot } from './types.ts';

@@ -5,8 +5,8 @@
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import DraggableCard from '$ui/list/DraggableCard.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
-	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
-	import FormInput from '$lib/client/ui/form/FormInput.svelte';
+	import IconCheckbox from '#lib/client/ui/form/IconCheckbox.svelte';
+	import FormInput from '#lib/client/ui/form/FormInput.svelte';
 	import Button from '$ui/button/Button.svelte';
 
 	type GroupModalItem = {

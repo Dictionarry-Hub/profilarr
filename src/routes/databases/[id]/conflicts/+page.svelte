@@ -19,7 +19,7 @@
 	import HeartHandshake from '@lucide/svelte/icons/heart-handshake';
 	import HandMetal from '@lucide/svelte/icons/hand-metal';
 	import Info from '@lucide/svelte/icons/info';
-	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
+	import { getPersistentSearchStore, type SearchStore } from '#lib/client/stores/search.js';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -275,6 +275,7 @@
 
 <ActionsBar className="justify-end mt-6">
 	<SearchAction {searchStore} placeholder="Search conflicts..." />
+
 	<ActionButton
 		icon={Fingerprint}
 		tooltip="Filter entity"
@@ -375,7 +376,7 @@
 								</div>
 								{#if row.complex}
 									<p class="text-xs text-neutral-500 dark:text-neutral-400">
-										Complex change &middot; {row.summary ?? row.title}
+										Complex change · {row.summary ?? row.title}
 									</p>
 								{:else if row.fields.length === 0}
 									<p class="text-xs text-neutral-500 dark:text-neutral-400">

@@ -7,12 +7,12 @@
 	import Check from '@lucide/svelte/icons/check';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';
 	import Play from '@lucide/svelte/icons/play';
-	import type { RenameJobLog } from '$lib/server/rename/types.ts';
+	import type { RenameJobLog } from '#lib/server/rename/types.ts';
 	import {
 		createSearchStore,
 		getPersistentSearchStore,
 		type SearchStore
-	} from '$lib/client/stores/search';
+	} from '#lib/client/stores/search.js';
 	import type { Readable } from 'svelte/store';
 	import { page } from '$app/stores';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
@@ -26,8 +26,8 @@
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
 	import { formatSmartDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat';
-	import { serverTimezone } from '$lib/client/stores/timezone';
+	import { dateFormat } from '#lib/client/stores/dateFormat.js';
+	import { serverTimezone } from '#lib/client/stores/timezone.js';
 
 	let searchStore: SearchStore = createSearchStore();
 	let debouncedQuery: Readable<string> = searchStore.debouncedQuery;
@@ -228,8 +228,11 @@
 				</Label>
 			{:else if column.key === 'summary'}
 				<span class="text-sm text-neutral-600 dark:text-neutral-400">
-					<span class="font-mono">{row.library.totalItems.toLocaleString()}</span> scanned
-					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
+					<span class="font-mono">{row.library.totalItems.toLocaleString()}</span>
+					scanned
+
+					<span class="mx-1 text-neutral-300 dark:text-neutral-600">→</span>
+
 					{#if row.config.dryRun}
 						<span class="font-mono">{row.results.filesNeedingRename}</span> would rename
 					{:else}
@@ -264,8 +267,14 @@
 					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
 						>Config</span
 					>
+
 					<span class="text-sm text-neutral-900 dark:text-neutral-100">
-						{#if row.config.renameFolders}Folders enabled{:else}Files only{/if}
+						{#if row.config.renameFolders}
+							Folders enabled
+						{:else}
+							Files only
+						{/if}
+
 						{#if row.config.ignoreTag}
 							| Ignore tag: "{row.config.ignoreTag}"
 						{/if}
@@ -277,11 +286,14 @@
 					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
 						>Library</span
 					>
+
 					<span class="text-sm text-neutral-900 dark:text-neutral-100">
-						<span class="font-mono">{row.library.totalItems.toLocaleString()}</span> items
-						<span class="ml-1 font-mono text-xs text-neutral-500 dark:text-neutral-400">
-							({row.library.fetchDurationMs}ms)
-						</span>
+						<span class="font-mono">{row.library.totalItems.toLocaleString()}</span>
+						items
+
+						<span class="ml-1 font-mono text-xs text-neutral-500 dark:text-neutral-400"
+							>({row.library.fetchDurationMs}ms)</span
+						>
 					</span>
 				</div>
 
@@ -291,10 +303,13 @@
 						<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
 							>Filtered</span
 						>
+
 						<span class="text-sm text-neutral-900 dark:text-neutral-100">
-							<span class="font-mono">{row.filtering.skippedByTag}</span> skipped by tag
-							<span class="mx-1 text-neutral-400">&rarr;</span>
-							<span class="font-mono font-medium">{row.filtering.afterIgnoreTag}</span> remaining
+							<span class="font-mono">{row.filtering.skippedByTag}</span>
+							skipped by tag
+							<span class="mx-1 text-neutral-400">→</span>
+							<span class="font-mono font-medium">{row.filtering.afterIgnoreTag}</span>
+							remaining
 						</span>
 					</div>
 				{/if}
@@ -304,6 +319,7 @@
 					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
 						>Results</span
 					>
+
 					<span class="text-sm text-neutral-900 dark:text-neutral-100">
 						{#if row.config.dryRun}
 							<span class="font-mono">{row.results.filesNeedingRename}</span> files would be renamed

@@ -3,7 +3,7 @@
  */
 
 import { config } from '$config';
-import { build } from '$lib/shared/build.ts';
+import { build } from '#lib/shared/build.ts';
 import { getProxyEnv } from '$http/proxy.ts';
 import { logger } from './logger.ts';
 

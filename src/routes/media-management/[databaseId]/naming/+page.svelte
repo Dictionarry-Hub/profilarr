@@ -10,13 +10,13 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { createDataPageStore } from '$lib/client/stores/dataPage';
+	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import Plus from '@lucide/svelte/icons/plus';
 	import type { EntityType } from '$shared/pcd/portable.ts';
 	import type { PageData } from './$types';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
 
 	export let data: PageData;
 

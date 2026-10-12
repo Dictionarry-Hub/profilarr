@@ -18,8 +18,8 @@
 	import ConfirmIdentityModal from '../../components/ConfirmIdentityModal.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
-	import { current, initCreate, update, clear } from '$lib/client/stores/dirty';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import { current, initCreate, update, clear } from '#lib/client/stores/dirty.js';
 	import {
 		API_KEY_EXPIRY_OPTIONS,
 		DEFAULT_API_KEY_EXPIRY,
@@ -101,6 +101,7 @@
 	let allowLeave = false;
 
 	beforeNavigate((navigation) => {
+		if (navigation.shallow && navigation.type === 'goto') return;
 		if (!created || copied || allowLeave) return;
 		navigation.cancel();
 		// Refresh and tab close fall back to the browser's own prompt
@@ -209,6 +210,7 @@
 				<svelte:fragment slot="right">
 					<div class="flex items-center gap-2">
 						<Button text="Cancel" variant="secondary" href="/settings/security" />
+
 						<Button
 							text={saving ? 'Creating...' : 'Create'}
 							icon={Plus}

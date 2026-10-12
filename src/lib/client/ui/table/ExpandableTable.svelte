@@ -7,7 +7,7 @@
 	import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
 	import type { Column, SortState } from './types';
 	import Button from '$ui/button/Button.svelte';
-	import { createProgressiveList } from '$lib/client/utils/progressiveList';
+	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
 
 	export let columns: Column<T>[];
 	export let data: T[];

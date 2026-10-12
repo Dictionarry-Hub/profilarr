@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { tokenize } from '$lib/client/utils/tokenize';
+	import { tokenize } from '#lib/client/utils/tokenize.js';
 	import { themes, getTheme, type ThemeVariant } from './themes';
-	import { themeStore } from '$lib/client/stores/theme';
-	import { browser } from '$app/environment';
+	import { themeStore } from '#lib/client/stores/theme.js';
+	import { browser } from '$app/env';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Check from '@lucide/svelte/icons/check';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
 
 	export let code: string = '';
 	export let language: string = 'sql';
@@ -23,6 +23,7 @@
 	$: tokens = tokenize(code, language);
 	$: langLabel = language === 'sql' ? 'SQL' : language === 'json' ? 'JSON' : language;
 	$: langVariant = language === 'sql' ? ('info' as const) : ('secondary' as const);
+
 	$: langCustomVariant =
 		language === 'json'
 			? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
@@ -58,7 +59,9 @@
 		<Label variant={langVariant} customVariant={langCustomVariant} size="sm" rounded="md" mono
 			>{langLabel}</Label
 		>
-		<slot name="header" />
+
+		<slot name="header"></slot>
+
 		<div class="ml-auto flex items-center gap-2">
 			{#if themes.length > 1}
 				<div class="relative">

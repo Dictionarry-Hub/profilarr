@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Column } from '$lib/client/ui/table/types';
-	import Table from '$lib/client/ui/table/Table.svelte';
-	import Badge from '$lib/client/ui/badge/Badge.svelte';
-	import Toggle from '$lib/client/ui/toggle/Toggle.svelte';
+	import type { Column } from '#lib/client/ui/table/types.js';
+	import Table from '#lib/client/ui/table/Table.svelte';
+	import Badge from '#lib/client/ui/badge/Badge.svelte';
+	import Toggle from '#lib/client/ui/toggle/Toggle.svelte';
 	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
 	import XCircle from '@lucide/svelte/icons/circle-x';
 	import Clock from '@lucide/svelte/icons/clock';

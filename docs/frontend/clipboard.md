@@ -12,7 +12,7 @@ when the same action works during local development.
 ## Rules
 
 Do not call `navigator.clipboard.writeText()` directly. Use
-`copyToClipboard()` from `$lib/client/utils/clipboard`. The helper first tries
+`copyToClipboard()` from `#lib/client/utils/clipboard.js`. The helper first tries
 the Clipboard API, then falls back to a temporary textarea copy path for
 non-secure HTTP origins.
 

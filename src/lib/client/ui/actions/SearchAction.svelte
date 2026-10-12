@@ -4,7 +4,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import Search from '@lucide/svelte/icons/search';
 	import X from '@lucide/svelte/icons/x';
-	import type { SearchStore } from '$lib/client/stores/search';
+	import type { SearchStore } from '#lib/client/stores/search.js';
 	import Badge from '$ui/badge/Badge.svelte';
 
 	export let searchStore: SearchStore;

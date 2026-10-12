@@ -15,7 +15,7 @@
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Info from '@lucide/svelte/icons/info';
-	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { RadarrNamingRow } from '$shared/pcd/display.ts';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 	import {

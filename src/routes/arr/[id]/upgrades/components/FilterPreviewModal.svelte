@@ -4,8 +4,8 @@
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import type { FilterConfig } from '$shared/upgrades/filters';
 	import { selectors } from '$shared/upgrades/selectors';
-	import { createSearchStore, type SearchStore } from '$lib/client/stores/search';
-	import { serverTimezone } from '$lib/client/stores/timezone';
+	import { createSearchStore, type SearchStore } from '#lib/client/stores/search.js';
+	import { serverTimezone } from '#lib/client/stores/timezone.js';
 	import { formatDate } from '$shared/utils/dates';
 	import type { Readable } from 'svelte/store';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';

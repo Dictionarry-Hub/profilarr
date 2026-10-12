@@ -3,8 +3,8 @@
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import { createEventDispatcher } from 'svelte';
-	import RadarrIcon from '$lib/client/assets/Radarr.svg';
-	import SonarrIcon from '$lib/client/assets/Sonarr.svg';
+	import RadarrIcon from '#lib/client/assets/Radarr.svg';
+	import SonarrIcon from '#lib/client/assets/Sonarr.svg';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';

@@ -43,7 +43,6 @@
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
-
 <!-- Mobile backdrop -->
 {#if $mobileNavOpen}
 	<button

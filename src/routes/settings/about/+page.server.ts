@@ -1,6 +1,6 @@
 import { migrationRunner } from '$db/migrations.ts';
 import { config } from '$config';
-import { build } from '$lib/shared/build.ts';
+import { build } from '#lib/shared/build.ts';
 import { getVersionsSnapshot } from '$announcements/index.ts';
 
 interface ReleaseRow {

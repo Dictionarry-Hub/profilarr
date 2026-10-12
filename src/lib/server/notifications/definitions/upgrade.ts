@@ -8,7 +8,7 @@ import type {
 	UpgradeSelectionItem,
 	UpgradeOriginalEpisode,
 	UpgradeNewRelease
-} from '$lib/server/upgrades/types.ts';
+} from '#lib/server/upgrades/types.ts';
 
 interface UpgradeNotificationParams {
 	log: UpgradeJobLog;

@@ -1,14 +1,15 @@
+import type { Handle } from '@sveltejs/kit/hooks';
+import { redirect } from '@sveltejs/kit';
+
 // HMR guard: skip heavy initialization on Vite hot reloads
 const isReload = (globalThis as Record<string, unknown>).__profilarr_initialized__ === true;
 (globalThis as Record<string, unknown>).__profilarr_initialized__ = true;
 
 if (!isReload) {
 	// Auto-spawn parser binary for standalone builds (must run before config import)
-	await import('$lib/server/utils/parser/spawn.ts');
+	await import('#lib/server/utils/parser/spawn.ts');
 }
 
-import type { Handle } from '@sveltejs/kit';
-import { redirect } from '@sveltejs/kit';
 import { config } from '$config';
 import { printBanner, getServerInfo, logContainerConfig, logProxyConfig } from '$logger/startup.ts';
 import { logSettings } from '$logger/settings.ts';
@@ -17,7 +18,7 @@ import { db } from '$db/db.ts';
 import { runMigrations } from '$db/migrations.ts';
 import { applyPendingRestore } from '$utils/backup/applyPending.ts';
 import { initializeJobs } from '$jobs/init.ts';
-import { recoverInterruptedSyncs } from '$lib/server/sync/utils.ts';
+import { recoverInterruptedSyncs } from '#lib/server/sync/utils.ts';
 import { pcdManager } from '$pcd/core/manager.ts';
 import {
 	getAuthState,

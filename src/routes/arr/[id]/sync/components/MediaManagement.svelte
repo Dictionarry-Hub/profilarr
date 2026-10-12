@@ -1,9 +1,9 @@
 <script lang="ts">
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
-	import { balancedGrid } from '$lib/client/utils/balancedGrid.ts';
+	import { balancedGrid } from '#lib/client/utils/balancedGrid.ts';
 	import SyncFooter from './SyncFooter.svelte';
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
-	import { alertStore } from '$lib/client/alerts/store.ts';
+	import { alertStore } from '#lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
 

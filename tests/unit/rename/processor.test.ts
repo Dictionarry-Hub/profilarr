@@ -6,10 +6,10 @@
 
 import { BaseTest } from '../base/BaseTest.ts';
 import { assertEquals } from '@std/assert';
-import type { ArrCommand, ArrTag, RenamePreviewItem } from '$lib/server/utils/arr/types.ts';
+import type { ArrCommand, ArrTag, RenamePreviewItem } from '#lib/server/utils/arr/types.ts';
 import type { RenameSettings } from '$db/queries/arrRenameSettings.ts';
 import type { ArrInstance } from '$db/queries/arrInstances.ts';
-import type { LibrarySnapshot } from '$lib/server/rename/types.ts';
+import type { LibrarySnapshot } from '#lib/server/rename/types.ts';
 import {
 	parseRenamedCount,
 	groupByRootFolder,
@@ -18,8 +18,8 @@ import {
 	processFileRename,
 	processFolderRename,
 	diffSnapshots
-} from '$lib/server/rename/core.ts';
-import type { RenameAdapter, LibraryItem } from '$lib/server/rename/core.ts';
+} from '#lib/server/rename/core.ts';
+import type { RenameAdapter, LibraryItem } from '#lib/server/rename/core.ts';
 
 // =========================================================================
 // Test fixtures — hardcoded from Bruno API testing

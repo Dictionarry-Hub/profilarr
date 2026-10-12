@@ -5,8 +5,8 @@ import {
 	QualitySource,
 	QualityModifier,
 	Resolution
-} from '$lib/server/utils/arr/parser/types.ts';
-import type { ParseResult } from '$lib/server/utils/arr/parser/types.ts';
+} from '#lib/server/utils/arr/parser/types.ts';
+import type { ParseResult } from '#lib/server/utils/arr/parser/types.ts';
 import type { ConditionData } from '$shared/pcd/display.ts';
 
 function parsed(languages: Language[]): ParseResult {

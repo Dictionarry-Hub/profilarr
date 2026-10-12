@@ -6,9 +6,9 @@ import { RadarrClient } from '$utils/arr/clients/radarr.ts';
 import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
 import { LIBRARY_REQUEST_TIMEOUT_MS } from '$utils/arr/base.ts';
 import type { RadarrLibraryItem } from '$utils/arr/types.ts';
-import { getProfilarrProfileNames } from '$lib/server/sync/libraryHelpers.ts';
+import { getProfilarrProfileNames } from '#lib/server/sync/libraryHelpers.ts';
 import { jobQueueQueries } from '$db/queries/jobQueue.ts';
-import { scheduleLibraryRefreshForInstance } from '$lib/server/jobs/schedule.ts';
+import { scheduleLibraryRefreshForInstance } from '#lib/server/jobs/schedule.ts';
 import { logger } from '$logger/logger.ts';
 
 const MANUAL_CACHE_TTL = 86400;

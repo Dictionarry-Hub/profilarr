@@ -5,8 +5,8 @@ import { canWriteToBase } from '$pcd/ops/writer.ts';
 import * as regularExpressionQueries from '$pcd/entities/regularExpressions/index.ts';
 import type { OperationLayer } from '$pcd/core/types.ts';
 import { logger } from '$logger/logger.ts';
-import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
-import { validateRegex } from '$lib/server/utils/arr/parser/index.ts';
+import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
+import { validateRegex } from '#lib/server/utils/arr/parser/index.ts';
 import { getConditionRefsForRegex } from '$pcd/references.ts';
 import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
 

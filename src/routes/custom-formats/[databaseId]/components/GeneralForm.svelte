@@ -15,7 +15,7 @@
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import { alertStore } from '$alerts/store';
-	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 
 	// Form data shape
@@ -248,9 +248,11 @@
 				<!-- Tags -->
 				<div class="space-y-2">
 					<div class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Tags</div>
+
 					<p class="text-xs text-neutral-600 dark:text-neutral-400">
 						Add tags to organize and categorize this custom format.
 					</p>
+
 					<TagInput {tags} onchange={(newTags) => update('tags', newTags)} />
 				</div>
 			</div>

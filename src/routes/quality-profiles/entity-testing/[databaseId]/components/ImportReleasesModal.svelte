@@ -431,6 +431,7 @@
 			{:else}
 				<ActionsBar>
 					<SearchAction {searchStore} placeholder="Search library..." />
+
 					<ActionButton
 						icon={Server}
 						hasDropdown={true}

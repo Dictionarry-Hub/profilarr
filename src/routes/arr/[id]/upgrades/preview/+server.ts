@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import type { FilterConfig } from '$shared/upgrades/filters.ts';
-import { previewUpgradeFilter } from '$lib/server/upgrades/preview.ts';
+import { previewUpgradeFilter } from '#lib/server/upgrades/preview.ts';
 
 function isFilterConfig(value: unknown): value is FilterConfig {
 	if (!value || typeof value !== 'object') {

@@ -5,7 +5,7 @@ import {
 	parseWithCacheBatch,
 	isParserHealthy,
 	matchPatternsBatch
-} from '$lib/server/utils/arr/parser/index.ts';
+} from '#lib/server/utils/arr/parser/index.ts';
 import {
 	getAllConditionsForEvaluation,
 	evaluateCustomFormat,

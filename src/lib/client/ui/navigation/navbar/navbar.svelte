@@ -22,7 +22,7 @@
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import { sidebarCollapsed } from '$stores/sidebar';
 	import { navIconStore } from '$stores/navIcons';
-	import { cutscene } from '$lib/client/cutscene/store';
+	import { cutscene } from '#lib/client/cutscene/store.js';
 	import { page } from '$app/stores';
 	import logo from '$assets/logo-512.png';
 
@@ -45,7 +45,14 @@
 	$: outOfDate = versionStatus?.status === 'out-of-date' && versionStatus.latestVersion;
 
 	$: railLinks = [
-		{ label: 'Dev', href: '/dev', icon: Wrench, emoji: '🛠️', devOnly: true },
+		{
+			label: 'Dev',
+			href: '/dev',
+			icon: Wrench,
+			emoji: '🛠️',
+			devOnly: true
+		},
+
 		{
 			label: 'Announcements',
 			href: '/announcements',

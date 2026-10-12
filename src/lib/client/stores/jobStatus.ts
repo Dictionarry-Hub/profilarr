@@ -21,7 +21,7 @@
  */
 
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 
 export type JobStatusState =
 	| { state: 'idle' }
@@ -39,7 +39,6 @@ interface StartedPayload {
 	jobType: string;
 	displayLabel: string;
 }
-
 interface ProgressPayload {
 	jobId: number;
 	jobType: string;

@@ -9,7 +9,7 @@ import {
 	removeSonarrNaming
 } from '$pcd/entities/mediaManagement/naming/index.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
 import type { SonarrNamingRow } from '$shared/pcd/display.ts';
 import { validateNamingFormat } from '$shared/pcd/namingTokens.ts';
 

@@ -4,7 +4,7 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { chooseColumns } from '$lib/client/utils/balancedGrid.ts';
+import { chooseColumns } from '#lib/client/utils/balancedGrid.ts';
 
 const opts = (count: number) => ({ count, minWidth: 224, gap: 8 });
 

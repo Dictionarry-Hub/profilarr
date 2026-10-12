@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import Copy from '@lucide/svelte/icons/copy';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import Filter from '@lucide/svelte/icons/funnel';
@@ -23,11 +23,11 @@
 	import LogLevelCell from '$ui/table/LogLevelCell.svelte';
 	import LogSourceCell from '$ui/table/LogSourceCell.svelte';
 	import type { Column } from '$ui/table/types';
-	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
+	import { getPersistentSearchStore, type SearchStore } from '#lib/client/stores/search.js';
 	import { formatDateTime } from '$shared/utils/dates.ts';
-	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '$lib/client/stores/timezone.ts';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
+	import { serverTimezone } from '#lib/client/stores/timezone.ts';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
 	import type { PageData } from './$types';
 	import type { Component } from 'svelte';
 
@@ -208,6 +208,7 @@
 				if (!query) return true;
 
 				const searchLower = query.toLowerCase();
+
 				return (
 					log.message.toLowerCase().includes(searchLower) ||
 					log.logger.toLowerCase().includes(searchLower)

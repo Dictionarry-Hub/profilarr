@@ -2,7 +2,7 @@
  * Types for the rename processing system
  */
 
-import type { RenamePreviewItem } from '$lib/server/utils/arr/types.ts';
+import type { RenamePreviewItem } from '#lib/server/utils/arr/types.ts';
 
 /**
  * Item that needs to be renamed

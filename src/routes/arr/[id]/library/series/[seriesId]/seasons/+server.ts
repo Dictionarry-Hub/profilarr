@@ -5,7 +5,7 @@ import { cache } from '$cache/cache.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
 import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
 import type { SonarrLibraryItem } from '$utils/arr/types.ts';
-import { getProfilarrProfileNames } from '$lib/server/sync/libraryHelpers.ts';
+import { getProfilarrProfileNames } from '#lib/server/sync/libraryHelpers.ts';
 import { logger } from '$logger/logger.ts';
 
 const MANUAL_CACHE_TTL = 86400;

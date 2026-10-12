@@ -3,10 +3,10 @@ import type { ServerLoad, Actions } from '@sveltejs/kit';
 import { pcdManager } from '$pcd/core/manager.ts';
 import { canWriteToBase } from '$pcd/ops/writer.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
-import { getRadarrLanguages } from '$lib/server/sync/mappings.ts';
+import { getRadarrLanguages } from '#lib/server/sync/mappings.ts';
 import type { OperationLayer } from '$pcd/core/types.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
 
 export const load: ServerLoad = async ({ params }) => {
 	const { databaseId, id } = params;

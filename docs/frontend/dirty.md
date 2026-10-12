@@ -266,7 +266,7 @@ import {
 	update as dirtyUpdate,
 	resetFromServer,
 	clear as clearDirty
-} from '$lib/client/stores/dirty';
+} from '#lib/client/stores/dirty.js';
 
 onMount(() => {
 	if (manifest) initEdit({ manifest, readme });

@@ -26,7 +26,7 @@
 		createSearchStore,
 		getPersistentSearchStore,
 		type SearchStore
-	} from '$lib/client/stores/search';
+	} from '#lib/client/stores/search.js';
 	import type { Readable } from 'svelte/store';
 	import { page } from '$app/stores';
 	import FilterGroupComponent from './FilterGroup.svelte';
@@ -46,7 +46,7 @@
 	import PasteModal from '$ui/modal/PasteModal.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
 
 	let searchStore: SearchStore = createSearchStore();
 	let debouncedQuery: Readable<string> = searchStore.debouncedQuery;
@@ -367,6 +367,7 @@
 	<div class="mb-4">
 		<ActionsBar>
 			<SearchAction {searchStore} placeholder="Search filters..." />
+
 			<ActionButton
 				icon={Plus}
 				tooltip="Add filter"
@@ -379,7 +380,9 @@
 				<svelte:fragment slot="dropdown">
 					<Dropdown position="right" minWidth="12rem">
 						<DropdownHeader label="New filter" />
+
 						<DropdownItem icon={FileText} label="Default" on:click={addFilter} />
+
 						<DropdownItem icon={FileJson} label="Import" on:click={() => (pasteModalOpen = true)} />
 					</Dropdown>
 				</svelte:fragment>

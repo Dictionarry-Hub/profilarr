@@ -13,7 +13,7 @@
 	import { alertStore } from '$alerts/store';
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash';
-	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { RadarrMediaSettingsRow } from '$shared/pcd/display.ts';
 	import type { ArrType } from '$shared/pcd/types.ts';
 	import { PROPERS_REPACKS_OPTIONS, type PropersRepacks } from '$shared/pcd/mediaManagement.ts';

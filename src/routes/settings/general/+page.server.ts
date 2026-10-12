@@ -8,7 +8,7 @@ import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
 import { generalSettingsQueries, type DateFormat } from '$db/queries/generalSettings.ts';
 import { logSettings } from '$logger/settings.ts';
 import { logger } from '$logger/logger.ts';
-import { scheduleBackupJobs, scheduleLogCleanup } from '$lib/server/jobs/init.ts';
+import { scheduleBackupJobs, scheduleLogCleanup } from '#lib/server/jobs/init.ts';
 import { FEATURES } from '$shared/features.ts';
 import { isLandingPage } from '$shared/landingPages.ts';
 

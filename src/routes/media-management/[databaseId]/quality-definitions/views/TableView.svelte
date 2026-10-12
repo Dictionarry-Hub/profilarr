@@ -7,8 +7,8 @@
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
 	import type { QualityDefinitionListItem } from '$shared/pcd/display.ts';
-	import radarrLogo from '$lib/client/assets/Radarr.svg';
-	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
+	import radarrLogo from '#lib/client/assets/Radarr.svg';
+	import sonarrLogo from '#lib/client/assets/Sonarr.svg';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let configs: QualityDefinitionListItem[];

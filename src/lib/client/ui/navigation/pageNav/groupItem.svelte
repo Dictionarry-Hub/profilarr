@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { Component } from 'svelte';
 	import Label from '$ui/label/Label.svelte';
 
@@ -32,7 +32,7 @@
 	}: Props = $props();
 
 	const isActive = $derived.by(() => {
-		const pathname = $page.url.pathname;
+		const pathname = page.url.pathname;
 
 		// Use custom pattern if provided
 		if (activePattern) {

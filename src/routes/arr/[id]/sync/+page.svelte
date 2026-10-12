@@ -12,7 +12,7 @@
 	import DelayProfiles from './components/DelayProfiles.svelte';
 	import MediaManagement from './components/MediaManagement.svelte';
 	import type { SyncTrigger } from '$db/queries/arrSync.ts';
-	import { initEdit, update, clear } from '$lib/client/stores/dirty';
+	import { initEdit, update, clear } from '#lib/client/stores/dirty.js';
 	import { jobStatus } from '$stores/jobStatus';
 	import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
 	import type { ProfileSyncState } from './components/QualityProfiles.svelte';

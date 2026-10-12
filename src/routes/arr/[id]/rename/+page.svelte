@@ -3,8 +3,8 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { alertStore } from '$lib/client/alerts/store';
-	import { isDirty, initEdit, update, current, clear } from '$lib/client/stores/dirty';
+	import { alertStore } from '#lib/client/alerts/store.js';
+	import { isDirty, initEdit, update, current, clear } from '#lib/client/stores/dirty.js';
 	import { jobStatus } from '$stores/jobStatus';
 	import Info from '@lucide/svelte/icons/info';
 	import Save from '@lucide/svelte/icons/save';
@@ -13,7 +13,7 @@
 	import RenameSettings from './components/RenameSettings.svelte';
 	import RenameRunHistory from './components/RenameRunHistory.svelte';
 	import RenameInfoModal from './components/RenameInfoModal.svelte';
-	import DirtyModal from '$lib/client/ui/modal/DirtyModal.svelte';
+	import DirtyModal from '#lib/client/ui/modal/DirtyModal.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';

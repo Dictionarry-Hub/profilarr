@@ -19,7 +19,7 @@
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import type { Column } from '$ui/table/types';
-	import { createDataPageStore } from '$lib/client/stores/dataPage';
+	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
 
 	export let unitTests: Regex101UnitTest[] = [];
 	export let loading: boolean = false;
