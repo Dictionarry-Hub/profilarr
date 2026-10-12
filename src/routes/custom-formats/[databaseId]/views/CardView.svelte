@@ -5,7 +5,7 @@
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
 	import { renderMarkdown } from '$shared/utils/markdown';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { sortConditions } from '$shared/pcd/conditions';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';

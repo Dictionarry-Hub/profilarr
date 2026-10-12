@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import FolderTree from '@lucide/svelte/icons/folder-tree';
 	import Link from '@lucide/svelte/icons/link';
 	import Sliders from '@lucide/svelte/icons/sliders-vertical';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import gif404 from '$assets/404.gif';
 
 	$: statusCode = $page.status;

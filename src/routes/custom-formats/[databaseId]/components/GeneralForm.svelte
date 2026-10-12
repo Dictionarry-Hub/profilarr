@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { tick } from 'svelte';
 	import Save from '@lucide/svelte/icons/save';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';

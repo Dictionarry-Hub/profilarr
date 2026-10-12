@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import ArrowUp from '@lucide/svelte/icons/arrow-up';
 	import { getPlatformLabel } from '$shared/utils/version.ts';
 	import { build } from '#lib/shared/build.ts';

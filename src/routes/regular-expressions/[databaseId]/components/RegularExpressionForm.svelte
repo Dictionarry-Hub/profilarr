@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { browser } from '$app/env';
 	import { tick } from 'svelte';
 	import TagInput from '$ui/form/TagInput.svelte';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import Library from '@lucide/svelte/icons/library';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import ArrowLeftRight from '@lucide/svelte/icons/arrow-left-right';

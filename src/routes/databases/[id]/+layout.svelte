@@ -7,7 +7,7 @@
 	import Settings from '@lucide/svelte/icons/settings';
 	import FileCog from '@lucide/svelte/icons/file-cog';
 	import Megaphone from '@lucide/svelte/icons/megaphone';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { FEATURES } from '#lib/shared/features.js';
 
 	$: database = $page.data.database;

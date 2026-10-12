@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import type { Component } from 'svelte';
 	import Label from '$ui/label/Label.svelte';
 

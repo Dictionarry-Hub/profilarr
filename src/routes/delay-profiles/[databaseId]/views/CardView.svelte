@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import Clock from '@lucide/svelte/icons/clock';
 	import Zap from '@lucide/svelte/icons/zap';
 	import Copy from '@lucide/svelte/icons/copy';
