@@ -86,9 +86,6 @@ function getClient(): AIClient | null {
 
 	// Recreate client if settings changed
 	if (!cachedClient || cachedApiUrl !== settings.api_url || cachedApiKey !== settings.api_key) {
-		if (cachedClient) {
-			cachedClient.close();
-		}
 		cachedClient = new AIClient(settings.api_url, settings.api_key || undefined);
 		cachedApiUrl = settings.api_url;
 		cachedApiKey = settings.api_key;

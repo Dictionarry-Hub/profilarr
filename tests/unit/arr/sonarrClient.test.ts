@@ -64,24 +64,20 @@ class SonarrClientTest extends BaseTest {
 				]
 			);
 
-			try {
-				const library = await client.getLibrary(new Set(['HD']));
+			const library = await client.getLibrary(new Set(['HD']));
 
-				assertEquals(library[0].qualityProfileName, 'HD');
-				assertEquals(library[0].isProfilarrProfile, true);
-				assertEquals(library[0].seasons[0], {
-					seasonNumber: 1,
-					monitored: true,
-					episodeCount: 0,
-					episodeFileCount: 0,
-					totalEpisodeCount: 0,
-					sizeOnDisk: 0,
-					percentOfEpisodes: 0
-				});
-				assertEquals(library[0].seasons[1].episodeCount, 8);
-			} finally {
-				client.close();
-			}
+			assertEquals(library[0].qualityProfileName, 'HD');
+			assertEquals(library[0].isProfilarrProfile, true);
+			assertEquals(library[0].seasons[0], {
+				seasonNumber: 1,
+				monitored: true,
+				episodeCount: 0,
+				episodeFileCount: 0,
+				totalEpisodeCount: 0,
+				sizeOnDisk: 0,
+				percentOfEpisodes: 0
+			});
+			assertEquals(library[0].seasons[1].episodeCount, 8);
 		});
 	}
 }

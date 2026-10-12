@@ -1,9 +1,9 @@
 /**
  * Outbound proxy settings from the environment.
  *
- * Profilarr doesn't configure a proxy itself: Deno's fetch (including
- * Deno.createHttpClient clients) and git both read the standard proxy
- * variables directly. This only reports what they will pick up.
+ * Profilarr doesn't configure a proxy itself: Deno's fetch and git both read
+ * the standard proxy variables directly. This only reports what they will
+ * pick up.
  */
 
 import process from 'node:process';

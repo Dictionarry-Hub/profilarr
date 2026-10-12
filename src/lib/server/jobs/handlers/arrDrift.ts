@@ -160,8 +160,6 @@ const driftHandler: JobHandler = async (job) => {
 			error: message,
 			rescheduleAt: job.source === 'schedule' ? (nextRunAt ?? undefined) : undefined
 		};
-	} finally {
-		client.close();
 	}
 };
 

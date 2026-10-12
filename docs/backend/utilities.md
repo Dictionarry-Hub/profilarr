@@ -26,8 +26,11 @@ Git, and TMDB utilities.
 
 `BaseHttpClient` is the generic HTTP foundation. It provides typed methods
 (`get`, `post`, `put`, `delete`, `patch`) with automatic JSON
-serialization/parsing, connection pooling via `Deno.createHttpClient`, and
-request timeouts using `AbortController`.
+serialization/parsing and request timeouts using `AbortController`.
+
+Connections are pooled by `fetch` itself, in one pool shared by every client,
+so requests sent one after another (such as a sync) reuse the same connection.
+Clients hold no connections of their own and need no cleanup.
 
 Retry logic uses exponential backoff for transient failures (5xx status codes
 by default, configurable). Each subclass can override the retry status codes,
@@ -108,7 +111,7 @@ later).
 
 Profilarr has no proxy setting of its own. Deno applies the standard
 `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, and `NO_PROXY` variables to every
-fetch, including `Deno.createHttpClient` clients, and git reads them too. That
+fetch, and git reads them too. That
 covers GitHub, PCD operations, notifications, and TMDB.
 
 ```yaml

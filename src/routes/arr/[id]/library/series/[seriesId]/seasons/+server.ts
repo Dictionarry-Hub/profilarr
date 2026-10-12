@@ -28,13 +28,9 @@ async function getLibraryCached(instanceId: number): Promise<SonarrLibraryItem[]
 		instance.api_key,
 		arrClientOptionsFromInstance(instance)
 	);
-	try {
-		const items = await client.getLibrary(profilarrProfileNames);
-		cache.set(cacheKey, items, ttl);
-		return items;
-	} finally {
-		client.close();
-	}
+	const items = await client.getLibrary(profilarrProfileNames);
+	cache.set(cacheKey, items, ttl);
+	return items;
 }
 
 export const GET: RequestHandler = async ({ params }) => {

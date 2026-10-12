@@ -33,29 +33,25 @@ const arrVersionCheckHandler: JobHandler = async (job) => {
 		arrClientOptionsFromInstance(instance, { timeout: 10000, retries: 0 })
 	);
 
-	try {
-		const info = await probeAndRecordVersion(instance, client, 'ArrVersionCheckJob');
-		if (info) {
-			return {
-				status: 'success',
-				output: JSON.stringify({
-					appName: info.appName,
-					version: info.version,
-					api: info.currentApi
-				})
-			};
-		}
-
-		const rescheduleAt =
-			job.attempts < MAX_ATTEMPTS ? new Date(Date.now() + RETRY_DELAY_MS).toISOString() : null;
+	const info = await probeAndRecordVersion(instance, client, 'ArrVersionCheckJob');
+	if (info) {
 		return {
-			status: 'failure',
-			error: `${instance.name} did not answer the version check`,
-			rescheduleAt
+			status: 'success',
+			output: JSON.stringify({
+				appName: info.appName,
+				version: info.version,
+				api: info.currentApi
+			})
 		};
-	} finally {
-		client.close();
 	}
+
+	const rescheduleAt =
+		job.attempts < MAX_ATTEMPTS ? new Date(Date.now() + RETRY_DELAY_MS).toISOString() : null;
+	return {
+		status: 'failure',
+		error: `${instance.name} did not answer the version check`,
+		rescheduleAt
+	};
 };
 
 jobQueueRegistry.register('arr.version.check', arrVersionCheckHandler);

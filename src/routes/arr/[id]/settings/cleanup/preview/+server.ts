@@ -45,25 +45,21 @@ export const GET: RequestHandler = async ({ params }) => {
 		arrClientOptionsFromInstance(instance, { retries: 0 })
 	);
 
-	try {
-		const [configs, entities] = await Promise.all([
-			scanForStaleItems(client, instanceId)
-				.then<PreviewSection<CleanupScanResult>>((data) => ({ ok: true, data }))
-				.catch<PreviewSection<CleanupScanResult>>((err) => ({
-					ok: false,
-					error: err instanceof Error ? err.message : 'Config scan failed'
-				})),
-			scanForRemovedEntities(client, instanceType)
-				.then<PreviewSection<EntityScanResult>>((data) => ({ ok: true, data }))
-				.catch<PreviewSection<EntityScanResult>>((err) => ({
-					ok: false,
-					error: err instanceof Error ? err.message : 'Entity scan failed'
-				}))
-		]);
+	const [configs, entities] = await Promise.all([
+		scanForStaleItems(client, instanceId)
+			.then<PreviewSection<CleanupScanResult>>((data) => ({ ok: true, data }))
+			.catch<PreviewSection<CleanupScanResult>>((err) => ({
+				ok: false,
+				error: err instanceof Error ? err.message : 'Config scan failed'
+			})),
+		scanForRemovedEntities(client, instanceType)
+			.then<PreviewSection<EntityScanResult>>((data) => ({ ok: true, data }))
+			.catch<PreviewSection<EntityScanResult>>((err) => ({
+				ok: false,
+				error: err instanceof Error ? err.message : 'Entity scan failed'
+			}))
+	]);
 
-		const response: CleanupPreviewResponse = { configs, entities };
-		return Response.json(response);
-	} finally {
-		client.close();
-	}
+	const response: CleanupPreviewResponse = { configs, entities };
+	return Response.json(response);
 };

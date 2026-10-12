@@ -36,11 +36,7 @@ const status = (appName: string, version: string) => ({ appName, version, osName
 
 async function detect(routes: Routes) {
 	const client = new FakeArrClient(routes);
-	try {
-		return await client.detectVersion();
-	} finally {
-		client.close();
-	}
+	return await client.detectVersion();
 }
 
 Deno.test('detectVersion', async (t) => {
