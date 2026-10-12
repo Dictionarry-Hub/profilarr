@@ -5,6 +5,8 @@
  * the intended directory.
  */
 
+import { runCommand } from '../command.ts';
+
 /**
  * Validate that a tar.gz archive contains no dangerous paths.
  *
@@ -17,15 +19,9 @@
 export async function validateArchiveEntries(
 	filePath: string
 ): Promise<{ valid: boolean; error?: string }> {
-	const cmd = new Deno.Command('tar', {
-		args: ['-tzf', filePath],
-		stdout: 'piped',
-		stderr: 'piped'
-	});
+	const result = await runCommand('tar', ['-tzf', filePath]);
 
-	const result = await cmd.output();
-
-	if (!result.success) {
+	if (result.code !== 0) {
 		const stderr = new TextDecoder().decode(result.stderr);
 		return { valid: false, error: `Failed to read archive: ${stderr.trim()}` };
 	}

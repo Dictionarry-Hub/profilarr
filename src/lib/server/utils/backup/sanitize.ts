@@ -31,6 +31,7 @@
  */
 
 import { Database } from '@db/sqlite';
+import { runCommand } from '../command.ts';
 
 /**
  * SQL applied to a backup database copy at download time. Order matters
@@ -166,12 +167,7 @@ export async function buildSanitizedArchive(archivePath: string): Promise<Uint8A
 	const tmpDir = await Deno.makeTempDir({ prefix: 'profilarr-backup-egress-' });
 	try {
 		// Extract.
-		const extract = new Deno.Command('tar', {
-			args: ['-xzf', archivePath, '-C', tmpDir],
-			stdout: 'piped',
-			stderr: 'piped'
-		});
-		const extractResult = await extract.output();
+		const extractResult = await runCommand('tar', ['-xzf', archivePath, '-C', tmpDir]);
 		if (extractResult.code !== 0) {
 			const stderr = new TextDecoder().decode(extractResult.stderr).trim();
 			throw new Error(`Failed to extract archive: ${stderr}`);
@@ -215,12 +211,7 @@ export async function buildSanitizedArchive(archivePath: string): Promise<Uint8A
 
 		// Re-tar the (now sanitized) data dir.
 		const archive = `${tmpDir}/sanitized.tar.gz`;
-		const tar = new Deno.Command('tar', {
-			args: ['-czf', archive, '-C', tmpDir, 'data'],
-			stdout: 'piped',
-			stderr: 'piped'
-		});
-		const tarResult = await tar.output();
+		const tarResult = await runCommand('tar', ['-czf', archive, '-C', tmpDir, 'data']);
 		if (tarResult.code !== 0) {
 			const stderr = new TextDecoder().decode(tarResult.stderr).trim();
 			throw new Error(`Failed to re-archive after sanitize: ${stderr}`);

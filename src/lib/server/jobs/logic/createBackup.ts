@@ -15,6 +15,7 @@ import { Database } from '@db/sqlite';
 import { db } from '$db/db.ts';
 import { migrationRunner } from '$db/migrations.ts';
 import { logger } from '$logger/logger.ts';
+import { runCommand } from '$utils/command.ts';
 import { build } from '$lib/shared/build.ts';
 
 export interface CreateBackupResult {
@@ -70,12 +71,7 @@ export async function createBackup(
 		tmpDir = await Deno.makeTempDir({ prefix: 'profilarr-backup-' });
 		const tmpDataDir = `${tmpDir}/data`;
 
-		const cp = new Deno.Command('cp', {
-			args: ['-a', sourceDir, tmpDataDir],
-			stdout: 'piped',
-			stderr: 'piped'
-		});
-		const cpResult = await cp.output();
+		const cpResult = await runCommand('cp', ['-a', sourceDir, tmpDataDir]);
 		if (cpResult.code !== 0) {
 			const errorMessage = new TextDecoder().decode(cpResult.stderr);
 			return {
@@ -152,13 +148,7 @@ export async function createBackup(
 		}
 
 		// Create tar.gz archive from the temp copy
-		const command = new Deno.Command('tar', {
-			args: ['-czf', backupPath, '-C', tmpDir, 'data'],
-			stdout: 'piped',
-			stderr: 'piped'
-		});
-
-		const { code, stderr } = await command.output();
+		const { code, stderr } = await runCommand('tar', ['-czf', backupPath, '-C', tmpDir, 'data']);
 
 		if (code !== 0) {
 			const errorMessage = new TextDecoder().decode(stderr);
