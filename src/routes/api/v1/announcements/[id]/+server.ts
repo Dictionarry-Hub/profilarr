@@ -6,7 +6,6 @@
  * Returns 404 if the id is unknown or has not yet been ingested.
  */
 
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
 import { getDetail } from '$announcements/index.ts';
@@ -33,13 +32,15 @@ function toDetail(a: AnnouncementRecord): AnnouncementDetail {
 export const GET: RequestHandler = async ({ params }) => {
 	const id = params.id;
 	if (!id) {
-		return json({ error: 'id is required' } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: 'id is required' } satisfies ErrorResponse, { status: 400 });
 	}
 
 	const record = await getDetail(id, { loadBody: true });
 	if (!record) {
-		return json({ error: 'Announcement not found' } satisfies ErrorResponse, { status: 404 });
+		return Response.json({ error: 'Announcement not found' } satisfies ErrorResponse, {
+			status: 404
+		});
 	}
 
-	return json(toDetail(record));
+	return Response.json(toDetail(record));
 };

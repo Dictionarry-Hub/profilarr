@@ -1,4 +1,4 @@
-import { error, json } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { pcdManager } from '$pcd/core/manager.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
@@ -17,5 +17,5 @@ export const GET: RequestHandler = async ({ params }) => {
 	const path = profiles.length
 		? `/quality-profiles/${dbId}/${profiles[0].id}/${params.tab}`
 		: `/quality-profiles/${dbId}`;
-	return json({ path });
+	return Response.json({ path });
 };

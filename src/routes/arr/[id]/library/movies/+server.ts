@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { cache } from '$cache/cache.ts';
@@ -20,21 +19,24 @@ function getNextRefreshAt(instanceId: number): string | null {
 export const GET: RequestHandler = async ({ params }) => {
 	const instanceId = parseInt(params.id ?? '', 10);
 	if (!Number.isFinite(instanceId)) {
-		return json({ error: 'Invalid instance ID' }, { status: 400 });
+		return Response.json({ error: 'Invalid instance ID' }, { status: 400 });
 	}
 
 	const instance = arrInstancesQueries.getById(instanceId);
 	if (!instance) {
-		return json({ error: 'Instance not found' }, { status: 404 });
+		return Response.json({ error: 'Instance not found' }, { status: 404 });
 	}
 	if (instance.type !== 'radarr') {
-		return json({ error: `Movies are only available for Radarr instances` }, { status: 400 });
+		return Response.json(
+			{ error: `Movies are only available for Radarr instances` },
+			{ status: 400 }
+		);
 	}
 
 	const cacheKey = `library:${instanceId}`;
 	const cached = cache.get<RadarrLibraryItem[]>(cacheKey);
 	if (cached) {
-		return json({
+		return Response.json({
 			items: cached,
 			refreshedAt: instance.library_last_refreshed_at,
 			nextRefreshAt: getNextRefreshAt(instanceId)
@@ -66,7 +68,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			meta: { instanceId, movieCount: items.length }
 		});
 
-		return json({
+		return Response.json({
 			items,
 			refreshedAt,
 			nextRefreshAt: getNextRefreshAt(instanceId)
@@ -77,7 +79,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			source: 'arr/library/movies',
 			meta: { instanceId, error: message }
 		});
-		return json({ error: message }, { status: 500 });
+		return Response.json({ error: message }, { status: 500 });
 	} finally {
 		client.close();
 	}

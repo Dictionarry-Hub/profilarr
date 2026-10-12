@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
 import { pcdManager } from '$pcd/core/manager.ts';
@@ -13,7 +12,7 @@ export const GET: RequestHandler = async () => {
 	const databases: DatabaseInstance[] = pcdManager
 		.getAllPublic()
 		.map(({ local_path, ...rest }) => rest);
-	return json(databases);
+	return Response.json(databases);
 };
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -21,20 +20,23 @@ export const POST: RequestHandler = async ({ request }) => {
 	try {
 		body = await request.json();
 	} catch {
-		return json({ error: 'Invalid JSON body' } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: 'Invalid JSON body' } satisfies ErrorResponse, { status: 400 });
 	}
 
 	const result = validateLinkInput(body);
 	if (!result.ok) {
-		return json({ error: result.error } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: result.error } satisfies ErrorResponse, { status: 400 });
 	}
 
 	const { input } = result;
 
 	if (checkNameConflict(input.name)) {
-		return json({ error: 'A database with this name already exists' } satisfies ErrorResponse, {
-			status: 409
-		});
+		return Response.json(
+			{ error: 'A database with this name already exists' } satisfies ErrorResponse,
+			{
+				status: 409
+			}
+		);
 	}
 
 	try {
@@ -46,7 +48,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			...safe,
 			hasPat: personal_access_token !== null
 		};
-		return json(response, { status: 201 });
+		return Response.json(response, { status: 201 });
 	} catch (error) {
 		await logger.error('Failed to link database', {
 			source: 'POST /api/v1/databases',
@@ -57,7 +59,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 		});
 
-		return json(
+		return Response.json(
 			{
 				error: error instanceof Error ? error.message : 'Failed to link database'
 			} satisfies ErrorResponse,

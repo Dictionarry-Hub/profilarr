@@ -6,7 +6,6 @@
  * backup status.
  */
 
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
 import { db } from '$db/db.ts';
@@ -35,7 +34,7 @@ export const GET: RequestHandler = async () => {
 		announcements: { unread: getUnreadCount() }
 	};
 
-	return json(response);
+	return Response.json(response);
 };
 
 function buildDatabases(): StatusResponse['databases'] {

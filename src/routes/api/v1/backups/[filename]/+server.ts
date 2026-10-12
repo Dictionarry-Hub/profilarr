@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { config } from '$config';
@@ -22,20 +21,20 @@ export const GET: RequestHandler = async ({ params }) => {
 
 	if (!filename || !isValidBackupFilename(filename)) {
 		const error: ErrorResponse = { error: 'Invalid filename' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	const backupPath = resolveBackupPath(filename, config.paths.backups);
 	if (!backupPath) {
 		const error: ErrorResponse = { error: 'Invalid filename' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	try {
 		await Deno.stat(backupPath);
 	} catch {
 		const error: ErrorResponse = { error: 'Backup file not found' };
-		return json(error, { status: 404 });
+		return Response.json(error, { status: 404 });
 	}
 
 	let bytes: Uint8Array;
@@ -48,7 +47,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			meta: { filename, error: message }
 		});
 		const error: ErrorResponse = { error: 'Failed to prepare backup for download' };
-		return json(error, { status: 500 });
+		return Response.json(error, { status: 500 });
 	}
 
 	return new Response(bytes as BlobPart, {
@@ -69,22 +68,22 @@ export const DELETE: RequestHandler = async ({ params }) => {
 
 	if (!filename || !isValidBackupFilename(filename)) {
 		const error: ErrorResponse = { error: 'Invalid filename' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	const backupPath = resolveBackupPath(filename, config.paths.backups);
 	if (!backupPath) {
 		const error: ErrorResponse = { error: 'Invalid filename' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	try {
 		await Deno.stat(backupPath);
 	} catch {
 		const error: ErrorResponse = { error: 'Backup file not found' };
-		return json(error, { status: 404 });
+		return Response.json(error, { status: 404 });
 	}
 
 	await Deno.remove(backupPath);
-	return json({ success: true });
+	return Response.json({ success: true });
 };

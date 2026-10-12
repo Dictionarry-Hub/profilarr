@@ -6,7 +6,6 @@
  * Used by uptime monitors and load balancers.
  */
 
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
 import { db } from '$db/db.ts';
@@ -25,7 +24,7 @@ export const GET: RequestHandler = async () => {
 	};
 
 	const httpStatus = status === 'unhealthy' ? 503 : 200;
-	return json(response, { status: httpStatus });
+	return Response.json(response, { status: httpStatus });
 };
 
 /**

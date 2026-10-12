@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { TMDBClient } from '#lib/server/utils/tmdb/client.ts';
 import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
@@ -8,7 +7,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const apiKey = providedKey || tmdbSettingsQueries.get()?.api_key;
 
 	if (!apiKey) {
-		return json({ success: false, error: 'API key is required' }, { status: 400 });
+		return Response.json({ success: false, error: 'API key is required' }, { status: 400 });
 	}
 
 	try {
@@ -16,12 +15,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		const result = await client.validateKey();
 
 		if (result.success) {
-			return json({ success: true });
+			return Response.json({ success: true });
 		} else {
-			return json({ success: false, error: result.status_message }, { status: 400 });
+			return Response.json({ success: false, error: result.status_message }, { status: 400 });
 		}
 	} catch (error) {
-		return json(
+		return Response.json(
 			{
 				success: false,
 				error: error instanceof Error ? error.message : 'Connection failed'

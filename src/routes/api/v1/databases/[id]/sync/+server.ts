@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
@@ -10,16 +9,18 @@ type ErrorResponse = components['schemas']['ErrorResponse'];
 export const POST: RequestHandler = async ({ params }) => {
 	const id = parseInt(params.id || '', 10);
 	if (!Number.isFinite(id)) {
-		return json({ error: 'Invalid database ID' } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: 'Invalid database ID' } satisfies ErrorResponse, { status: 400 });
 	}
 
 	const instance = databaseInstancesQueries.getById(id);
 	if (!instance) {
-		return json({ error: 'Database not found' } satisfies ErrorResponse, { status: 404 });
+		return Response.json({ error: 'Database not found' } satisfies ErrorResponse, { status: 404 });
 	}
 
 	if (instance.enabled === 0) {
-		return json({ error: 'Database is disabled' } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: 'Database is disabled' } satisfies ErrorResponse, {
+			status: 400
+		});
 	}
 
 	const queued = enqueueJob({
@@ -30,5 +31,5 @@ export const POST: RequestHandler = async ({ params }) => {
 	});
 
 	const response: SyncTriggerResponse = { jobId: queued.id };
-	return json(response, { status: 202 });
+	return Response.json(response, { status: 202 });
 };

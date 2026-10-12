@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { config } from '$config';
@@ -15,7 +14,7 @@ type BackupCreateResponse = components['schemas']['BackupCreateResponse'];
  */
 export const GET: RequestHandler = async () => {
 	const backups: BackupFile[] = await listBackups(config.paths.backups);
-	return json(backups);
+	return Response.json(backups);
 };
 
 /**
@@ -33,5 +32,5 @@ export const POST: RequestHandler = async () => {
 	});
 
 	const response: BackupCreateResponse = { jobId: queued.id };
-	return json(response, { status: 202 });
+	return Response.json(response, { status: 202 });
 };
