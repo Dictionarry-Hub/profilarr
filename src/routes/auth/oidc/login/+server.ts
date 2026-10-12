@@ -67,5 +67,7 @@ export const GET: RequestHandler = async (event) => {
 		reauth
 	});
 
-	throw redirect(302, authUrl);
+	// External is safe here: the destination comes from the configured
+	// provider's discovery document, never from request input
+	throw redirect(302, authUrl, { external: true });
 };
