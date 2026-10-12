@@ -18,7 +18,7 @@
 	onMount(() => {
 		if (!selectedArrType) {
 			goto(`/media-management/${data.currentDatabase.id}/quality-definitions`, {
-				replaceState: true
+				replace: true
 			});
 		}
 	});

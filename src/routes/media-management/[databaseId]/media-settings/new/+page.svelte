@@ -14,7 +14,7 @@
 
 	onMount(() => {
 		if (!selectedArrType) {
-			goto(`/media-management/${data.currentDatabase.id}/media-settings`, { replaceState: true });
+			goto(`/media-management/${data.currentDatabase.id}/media-settings`, { replace: true });
 		}
 	});
 </script>

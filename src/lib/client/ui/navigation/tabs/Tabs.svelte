@@ -69,7 +69,7 @@
 
 	function handleTabSelect(href: string) {
 		dropdownOpen = false;
-		goto(href, { replaceState: true });
+		goto(href, { replace: true });
 	}
 </script>
 
