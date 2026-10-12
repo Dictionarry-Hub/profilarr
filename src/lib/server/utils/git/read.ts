@@ -5,6 +5,7 @@
 import { execGit, execGitSafe } from './exec.ts';
 import { fetch } from './write.ts';
 import { validateFilePaths } from '../paths.ts';
+import { runCommand } from '../command.ts';
 import type { GitStatus, UpdateInfo, Commit, CommitStatus, IncomingChanges } from './types.ts';
 
 function normalizeAuthorName(name: string): string {
@@ -57,13 +58,9 @@ export async function getStatus(
 	}
 
 	// Get file status — use raw output to preserve leading spaces in porcelain format
-	const statusCmd = new Deno.Command('git', {
-		args: ['status', '--porcelain', '--untracked-files=all'],
-		cwd: repoPath,
-		stdout: 'piped',
-		stderr: 'piped'
+	const statusResult = await runCommand('git', ['status', '--porcelain', '--untracked-files=all'], {
+		cwd: repoPath
 	});
-	const statusResult = await statusCmd.output();
 	const statusOutput = new TextDecoder().decode(statusResult.stdout);
 	const untracked: string[] = [];
 	const modified: string[] = [];

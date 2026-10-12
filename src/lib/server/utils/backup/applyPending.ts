@@ -25,6 +25,7 @@
 import { config } from '$config';
 import { logger } from '$logger/logger.ts';
 import { Database } from '@db/sqlite';
+import { runCommand } from '../command.ts';
 
 const SENTINEL_NAME = '.restore-pending';
 const STAGING_NAME = '.restoring';
@@ -112,12 +113,7 @@ export async function applyPendingRestore(): Promise<void> {
 	await Deno.mkdir(stagingPath, { recursive: true });
 
 	// Extract into the staging dir. Live `data/` untouched at this point.
-	const tar = new Deno.Command('tar', {
-		args: ['-xzf', archivePath, '-C', stagingPath],
-		stdout: 'piped',
-		stderr: 'piped'
-	});
-	const tarResult = await tar.output();
+	const tarResult = await runCommand('tar', ['-xzf', archivePath, '-C', stagingPath]);
 	if (tarResult.code !== 0) {
 		const stderr = new TextDecoder().decode(tarResult.stderr).trim();
 		await logger.error('Pending restore extraction failed; live data left untouched', {
