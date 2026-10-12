@@ -2,6 +2,7 @@
  * Application configuration singleton
  */
 
+import * as fs from 'node:fs/promises';
 import process from 'node:process';
 import { parseAuthConfig, type AuthMode, type OidcSettings } from './auth.ts';
 import { colors } from '$logger/colors.ts';
@@ -120,10 +121,10 @@ class Config {
 	 * Must be called before using the config
 	 */
 	async init(): Promise<void> {
-		await Deno.mkdir(this.paths.logs, { recursive: true });
-		await Deno.mkdir(this.paths.data, { recursive: true });
-		await Deno.mkdir(this.paths.backups, { recursive: true });
-		await Deno.mkdir(this.paths.databases, { recursive: true });
+		await fs.mkdir(this.paths.logs, { recursive: true });
+		await fs.mkdir(this.paths.data, { recursive: true });
+		await fs.mkdir(this.paths.backups, { recursive: true });
+		await fs.mkdir(this.paths.databases, { recursive: true });
 	}
 
 	/**

@@ -6,6 +6,7 @@
  * backup status.
  */
 
+import * as fs from 'node:fs/promises';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
 import { db } from '$db/db.ts';
@@ -142,9 +143,9 @@ async function buildBackups(): Promise<StatusResponse['backups']> {
 		let latestTime: number | null = null;
 
 		try {
-			for await (const entry of Deno.readDir(backupPath)) {
-				if (entry.isFile && entry.name.startsWith('backup-') && entry.name.endsWith('.tar.gz')) {
-					const stat = await Deno.stat(`${backupPath}/${entry.name}`);
+			for (const entry of await fs.readdir(backupPath, { withFileTypes: true })) {
+				if (entry.isFile() && entry.name.startsWith('backup-') && entry.name.endsWith('.tar.gz')) {
+					const stat = await fs.stat(`${backupPath}/${entry.name}`);
 					if (!latestTime || stat.mtime!.getTime() > latestTime) {
 						latestTime = stat.mtime!.getTime();
 						lastBackupAt = stat.mtime!.toISOString();

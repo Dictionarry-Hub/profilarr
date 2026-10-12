@@ -30,8 +30,12 @@
  * being deleted.
  */
 
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import * as fs from 'node:fs/promises';
 import { Database } from '@db/sqlite';
 import { runCommand } from '../command.ts';
+import { isNotFound } from '../fs.ts';
 
 /**
  * SQL applied to a backup database copy at download time. Order matters
@@ -80,20 +84,20 @@ function sanitizeGitConfigContent(content: string): string {
 
 async function sanitizeGitConfigs(rootDir: string): Promise<void> {
 	async function walk(dir: string): Promise<void> {
-		for await (const entry of Deno.readDir(dir)) {
+		for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
 			const path = `${dir}/${entry.name}`;
 
-			if (entry.isDirectory) {
+			if (entry.isDirectory()) {
 				if (entry.name === '.git') {
 					const configPath = `${path}/config`;
 					try {
-						const content = await Deno.readTextFile(configPath);
+						const content = await fs.readFile(configPath, 'utf8');
 						const sanitized = sanitizeGitConfigContent(content);
 						if (sanitized !== content) {
-							await Deno.writeTextFile(configPath, sanitized);
+							await fs.writeFile(configPath, sanitized);
 						}
 					} catch (err) {
-						if (!(err instanceof Deno.errors.NotFound)) throw err;
+						if (!isNotFound(err)) throw err;
 					}
 					continue;
 				}
@@ -106,7 +110,7 @@ async function sanitizeGitConfigs(rootDir: string): Promise<void> {
 	try {
 		await walk(rootDir);
 	} catch (err) {
-		if (!(err instanceof Deno.errors.NotFound)) throw err;
+		if (!isNotFound(err)) throw err;
 	}
 }
 
@@ -164,7 +168,7 @@ interface ArchiveInfo {
  * The local archive on disk is not modified.
  */
 export async function buildSanitizedArchive(archivePath: string): Promise<Uint8Array> {
-	const tmpDir = await Deno.makeTempDir({ prefix: 'profilarr-backup-egress-' });
+	const tmpDir = await fs.mkdtemp(join(tmpdir(), 'profilarr-backup-egress-'));
 	try {
 		// Extract.
 		const extractResult = await runCommand('tar', ['-xzf', archivePath, '-C', tmpDir]);
@@ -177,10 +181,10 @@ export async function buildSanitizedArchive(archivePath: string): Promise<Uint8A
 		const dbPath = `${dataDir}/profilarr.db`;
 
 		// Sanitize the DB copy in place.
-		const dbExists = await Deno.stat(dbPath).then(
+		const dbExists = await fs.stat(dbPath).then(
 			() => true,
 			(err) => {
-				if (err instanceof Deno.errors.NotFound) return false;
+				if (isNotFound(err)) return false;
 				throw err;
 			}
 		);
@@ -200,12 +204,12 @@ export async function buildSanitizedArchive(archivePath: string): Promise<Uint8A
 		// Flip INFO.json's sanitized flag.
 		const infoPath = `${dataDir}/INFO.json`;
 		try {
-			const raw = await Deno.readTextFile(infoPath);
+			const raw = await fs.readFile(infoPath, 'utf8');
 			const info = JSON.parse(raw) as ArchiveInfo;
 			info.sanitized = true;
-			await Deno.writeTextFile(infoPath, JSON.stringify(info, null, 2));
+			await fs.writeFile(infoPath, JSON.stringify(info, null, 2));
 		} catch (err) {
-			if (!(err instanceof Deno.errors.NotFound)) throw err;
+			if (!isNotFound(err)) throw err;
 			// Older archives may not have INFO.json. Not fatal.
 		}
 
@@ -217,10 +221,10 @@ export async function buildSanitizedArchive(archivePath: string): Promise<Uint8A
 			throw new Error(`Failed to re-archive after sanitize: ${stderr}`);
 		}
 
-		return await Deno.readFile(archive);
+		return await fs.readFile(archive);
 	} finally {
 		try {
-			await Deno.remove(tmpDir, { recursive: true });
+			await fs.rm(tmpDir, { recursive: true });
 		} catch {
 			// Best-effort cleanup.
 		}

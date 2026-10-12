@@ -3,8 +3,10 @@
  * Handles reading and validating pcd.json files
  */
 
+import * as fs from 'node:fs/promises';
 import { logger } from '$logger/logger.ts';
 import { ManifestValidationError } from '../core/errors.ts';
+import { isNotFound } from '$utils/fs.ts';
 
 export interface Manifest {
 	name: string;
@@ -33,11 +35,11 @@ export async function readManifest(pcdPath: string): Promise<Manifest> {
 	const manifestPath = `${pcdPath}/pcd.json`;
 
 	try {
-		const manifestContent = await Deno.readTextFile(manifestPath);
+		const manifestContent = await fs.readFile(manifestPath, 'utf8');
 		const manifest = JSON.parse(manifestContent);
 		return manifest;
 	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) {
+		if (isNotFound(error)) {
 			throw new ManifestValidationError('pcd.json not found in repository');
 		}
 		if (error instanceof SyntaxError) {
@@ -153,7 +155,7 @@ export async function loadManifest(pcdPath: string): Promise<Manifest> {
 export async function writeManifest(pcdPath: string, manifest: Manifest): Promise<void> {
 	validateManifest(manifest);
 	const manifestPath = `${pcdPath}/pcd.json`;
-	await Deno.writeTextFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+	await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 	await logger.info(`Wrote manifest: ${manifest.name}`, {
 		source: 'PCDManifest',
 		meta: { path: pcdPath, manifest }
@@ -169,7 +171,7 @@ export async function writeManifest(pcdPath: string, manifest: Manifest): Promis
  */
 export async function readReadme(pcdPath: string): Promise<string | null> {
 	try {
-		return await Deno.readTextFile(`${pcdPath}/README.md`);
+		return await fs.readFile(`${pcdPath}/README.md`, 'utf8');
 	} catch {
 		return null;
 	}
@@ -179,7 +181,7 @@ export async function readReadme(pcdPath: string): Promise<string | null> {
  * Write README to a PCD repository
  */
 export async function writeReadme(pcdPath: string, content: string): Promise<void> {
-	await Deno.writeTextFile(`${pcdPath}/README.md`, content);
+	await fs.writeFile(`${pcdPath}/README.md`, content);
 	await logger.info('Wrote README', {
 		source: 'PCDManifest',
 		meta: { path: pcdPath, content }

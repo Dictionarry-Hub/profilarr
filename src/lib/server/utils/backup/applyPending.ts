@@ -22,10 +22,12 @@
  * into `db.initialize()` against a broken `data/`.
  */
 
+import * as fs from 'node:fs/promises';
 import { config } from '$config';
 import { logger } from '$logger/logger.ts';
 import { Database } from '@db/sqlite';
 import { runCommand } from '../command.ts';
+import { isNotFound } from '../fs.ts';
 
 const SENTINEL_NAME = '.restore-pending';
 const STAGING_NAME = '.restoring';
@@ -40,15 +42,15 @@ interface ArchiveInfo {
 
 async function removeIfExists(path: string, opts?: { recursive?: boolean }): Promise<void> {
 	try {
-		await Deno.remove(path, opts);
+		await fs.rm(path, opts);
 	} catch (err) {
-		if (!(err instanceof Deno.errors.NotFound)) throw err;
+		if (!isNotFound(err)) throw err;
 	}
 }
 
 async function readArchiveInfo(stagingDataDir: string): Promise<ArchiveInfo> {
 	try {
-		const raw = await Deno.readTextFile(`${stagingDataDir}/INFO.json`);
+		const raw = await fs.readFile(`${stagingDataDir}/INFO.json`, 'utf8');
 		return JSON.parse(raw) as ArchiveInfo;
 	} catch {
 		// Older archives don't have INFO.json. Not fatal.
@@ -89,16 +91,16 @@ export async function applyPendingRestore(): Promise<void> {
 
 	let archivePath: string;
 	try {
-		archivePath = (await Deno.readTextFile(sentinelPath)).trim();
+		archivePath = (await fs.readFile(sentinelPath, 'utf8')).trim();
 	} catch (err) {
-		if (err instanceof Deno.errors.NotFound) return;
+		if (isNotFound(err)) return;
 		throw err;
 	}
 
 	// Verify archive still exists. If it's gone, drop the sentinel and
 	// continue boot with the existing data, destroying nothing.
 	try {
-		await Deno.stat(archivePath);
+		await fs.stat(archivePath);
 	} catch {
 		await logger.error('Pending restore archive missing; aborting and clearing sentinel', {
 			source: 'applyPendingRestore',
@@ -110,7 +112,7 @@ export async function applyPendingRestore(): Promise<void> {
 
 	// Wipe any leftover staging dir from a previously crashed apply.
 	await removeIfExists(stagingPath, { recursive: true });
-	await Deno.mkdir(stagingPath, { recursive: true });
+	await fs.mkdir(stagingPath, { recursive: true });
 
 	// Extract into the staging dir. Live `data/` untouched at this point.
 	const tarResult = await runCommand('tar', ['-xzf', archivePath, '-C', stagingPath]);
@@ -130,8 +132,8 @@ export async function applyPendingRestore(): Promise<void> {
 
 	// Sanity-check the archive shape before destroying anything.
 	try {
-		const stat = await Deno.stat(`${stagingDataDir}/profilarr.db`);
-		if (!stat.isFile) throw new Error('profilarr.db is not a file');
+		const stat = await fs.stat(`${stagingDataDir}/profilarr.db`);
+		if (!stat.isFile()) throw new Error('profilarr.db is not a file');
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
 		await logger.error('Staged archive missing profilarr.db; aborting', {
@@ -155,17 +157,17 @@ export async function applyPendingRestore(): Promise<void> {
 
 	// Move staged contents into place. Per-entry rename is atomic on the
 	// same filesystem (which staging and data both are, both under base).
-	for await (const entry of Deno.readDir(stagingDataDir)) {
+	for (const entry of await fs.readdir(stagingDataDir, { withFileTypes: true })) {
 		const src = `${stagingDataDir}/${entry.name}`;
 		const dst = `${dataDir}/${entry.name}`;
 		await removeIfExists(dst, { recursive: true });
-		await Deno.rename(src, dst);
+		await fs.rename(src, dst);
 	}
 
 	// Cleanup. Sentinel last so a crash anywhere above leaves it in place
 	// for the next boot to retry.
 	await removeIfExists(stagingPath, { recursive: true });
-	await Deno.remove(sentinelPath);
+	await fs.rm(sentinelPath);
 
 	await logger.info('Pending restore applied', {
 		source: 'applyPendingRestore',

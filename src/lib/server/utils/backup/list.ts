@@ -4,6 +4,7 @@
  * Used by both the API endpoint and the settings page load function.
  */
 
+import * as fs from 'node:fs/promises';
 import { formatFileSize } from './validation.ts';
 
 export interface BackupFile {
@@ -23,12 +24,12 @@ export async function listBackups(backupsDir: string): Promise<BackupFile[]> {
 	const backups: BackupFile[] = [];
 
 	try {
-		for await (const entry of Deno.readDir(backupsDir)) {
-			if (!entry.isFile) continue;
+		for (const entry of await fs.readdir(backupsDir, { withFileTypes: true })) {
+			if (!entry.isFile()) continue;
 			if (!entry.name.startsWith('backup-') || !entry.name.endsWith('.tar.gz')) continue;
 
 			const filePath = `${backupsDir}/${entry.name}`;
-			const stat = await Deno.stat(filePath);
+			const stat = await fs.stat(filePath);
 			const mtime = stat.mtime || new Date();
 
 			backups.push({

@@ -3,6 +3,8 @@
  * Separated from job definition to avoid database/config dependencies for testing
  */
 
+import * as fs from 'node:fs/promises';
+
 export interface CleanupLogsResult {
 	deletedCount: number;
 	errorCount: number;
@@ -11,7 +13,7 @@ export interface CleanupLogsResult {
 
 /**
  * Core cleanup logic - deletes log files older than retention period
- * Pure function that only depends on Deno APIs
+ * Pure function that only depends on filesystem APIs
  *
  * @param logsDir Directory containing log files
  * @param retentionDays Number of days to retain logs
@@ -34,8 +36,8 @@ export async function cleanupLogs(
 	const dateLogPattern = /^(\d{4}-\d{2}-\d{2})\.log$/;
 
 	try {
-		for await (const entry of Deno.readDir(logsDir)) {
-			if (!entry.isFile) continue;
+		for (const entry of await fs.readdir(logsDir, { withFileTypes: true })) {
+			if (!entry.isFile()) continue;
 
 			// Only process log files matching YYYY-MM-DD.log pattern
 			const match = entry.name.match(dateLogPattern);
@@ -47,7 +49,7 @@ export async function cleanupLogs(
 			try {
 				// Compare date strings directly (YYYY-MM-DD format sorts correctly)
 				if (logDate < cutoffDateStr) {
-					await Deno.remove(filePath);
+					await fs.rm(filePath);
 					deletedCount++;
 				}
 			} catch (error) {

@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { config } from '$config';
@@ -31,7 +32,7 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 
 	try {
-		await Deno.stat(backupPath);
+		await fs.stat(backupPath);
 	} catch {
 		const error: ErrorResponse = { error: 'Backup file not found' };
 		return Response.json(error, { status: 404 });
@@ -78,12 +79,12 @@ export const DELETE: RequestHandler = async ({ params }) => {
 	}
 
 	try {
-		await Deno.stat(backupPath);
+		await fs.stat(backupPath);
 	} catch {
 		const error: ErrorResponse = { error: 'Backup file not found' };
 		return Response.json(error, { status: 404 });
 	}
 
-	await Deno.remove(backupPath);
+	await fs.rm(backupPath);
 	return Response.json({ success: true });
 };

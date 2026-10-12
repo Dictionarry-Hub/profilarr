@@ -2,6 +2,7 @@
  * Startup banner and logging
  */
 
+import { readFileSync, statSync } from 'node:fs';
 import { hostname } from 'node:os';
 import process from 'node:process';
 import { config } from '$config';
@@ -24,12 +25,12 @@ _____________  _____/ ____\__|  | _____ ______________
 function isDocker(): boolean {
 	try {
 		// Check for .dockerenv file (most reliable)
-		Deno.statSync('/.dockerenv');
+		statSync('/.dockerenv');
 		return true;
 	} catch {
 		// Check for docker in cgroup (fallback)
 		try {
-			const cgroup = Deno.readTextFileSync('/proc/1/cgroup');
+			const cgroup = readFileSync('/proc/1/cgroup', 'utf8');
 			return cgroup.includes('docker');
 		} catch {
 			return false;

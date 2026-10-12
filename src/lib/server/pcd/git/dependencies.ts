@@ -3,6 +3,7 @@
  * Handles cloning and managing PCD dependencies using git tags
  */
 
+import * as fs from 'node:fs/promises';
 import { checkout, clone, fetchTags } from '$utils/git/index.ts';
 import { loadManifest } from '../manifest/manifest.ts';
 import { logger } from '$logger/logger.ts';
@@ -33,8 +34,8 @@ function getDependencyPath(pcdPath: string, repoName: string): string {
  */
 async function dirExists(path: string): Promise<boolean> {
 	try {
-		const stat = await Deno.stat(path);
-		return stat.isDirectory;
+		const stat = await fs.stat(path);
+		return stat.isDirectory();
 	} catch {
 		return false;
 	}
@@ -62,10 +63,10 @@ async function cloneDependency(
 	// Clean up dependency - keep only .git, ops folder and pcd.json
 	const keepItems = new Set(['.git', 'ops', 'pcd.json']);
 
-	for await (const entry of Deno.readDir(depPath)) {
+	for (const entry of await fs.readdir(depPath, { withFileTypes: true })) {
 		if (!keepItems.has(entry.name)) {
 			const itemPath = `${depPath}/${entry.name}`;
-			await Deno.remove(itemPath, { recursive: true });
+			await fs.rm(itemPath, { recursive: true });
 		}
 	}
 }
@@ -76,7 +77,7 @@ async function cloneDependency(
 async function getInstalledVersion(pcdPath: string, repoName: string): Promise<string | null> {
 	const depManifestPath = `${pcdPath}/deps/${repoName}/pcd.json`;
 	try {
-		const content = await Deno.readTextFile(depManifestPath);
+		const content = await fs.readFile(depManifestPath, 'utf8');
 		const manifest = JSON.parse(content);
 		return manifest.version ?? null;
 	} catch {
@@ -108,7 +109,7 @@ export async function processDependencies(
 
 	// Create deps directory
 	const depsDir = `${pcdPath}/deps`;
-	await Deno.mkdir(depsDir, { recursive: true });
+	await fs.mkdir(depsDir, { recursive: true });
 
 	for (const [repoUrl, version] of Object.entries(manifest.dependencies)) {
 		const repoName = getRepoName(repoUrl);
@@ -142,7 +143,7 @@ export async function syncDependencies(
 	}
 
 	const depsDir = `${pcdPath}/deps`;
-	await Deno.mkdir(depsDir, { recursive: true });
+	await fs.mkdir(depsDir, { recursive: true });
 	const changedRepositories: string[] = [];
 
 	for (const [repoUrl, requiredVersion] of Object.entries(manifest.dependencies)) {
@@ -172,7 +173,7 @@ export async function syncDependencies(
 		} else {
 			// No .git folder (legacy or corrupted) - re-clone
 			try {
-				await Deno.remove(depPath, { recursive: true });
+				await fs.rm(depPath, { recursive: true });
 			} catch {
 				// Didn't exist
 			}

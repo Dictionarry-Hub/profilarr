@@ -4,6 +4,7 @@
  * Can run independently with provided config or use system defaults
  */
 
+import * as fs from 'node:fs/promises';
 import { config } from '$config';
 import { colors } from './colors.ts';
 import { logSettings } from './settings.ts';
@@ -134,15 +135,13 @@ class Logger {
 
 				// Ensure logs directory exists
 				try {
-					await Deno.mkdir(this.config.logsDir, { recursive: true });
+					await fs.mkdir(this.config.logsDir, { recursive: true });
 				} catch {
 					// Directory might already exist
 				}
 
 				// Write to log file
-				await Deno.writeTextFile(filePath, JSON.stringify(logEntry) + '\n', {
-					append: true
-				});
+				await fs.appendFile(filePath, JSON.stringify(logEntry) + '\n');
 			} catch (error) {
 				// If file write fails, at least we have console output
 				console.error('Failed to write to log file:', error);
@@ -185,9 +184,7 @@ class Logger {
 
 			try {
 				const filePath = this.getLogFilePath();
-				await Deno.writeTextFile(filePath, JSON.stringify(traceEntry) + '\n', {
-					append: true
-				});
+				await fs.appendFile(filePath, JSON.stringify(traceEntry) + '\n');
 			} catch (writeError) {
 				console.error('Failed to write stack trace to log file:', writeError);
 			}
