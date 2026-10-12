@@ -21,7 +21,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Create client and test connection (3 second timeout, no retries for quick feedback)
 		const client = createArrClient(type as ArrType, url, apiKey, { timeout: 3000, retries: 0 });
 		const isConnected = await client.testConnection();
-		client.close();
 
 		if (isConnected) {
 			return json({ success: true });

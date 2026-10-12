@@ -187,8 +187,6 @@ const cleanupHandler: JobHandler = async (job) => {
 			status: 'failure',
 			error: errorMessage
 		};
-	} finally {
-		client.close();
 	}
 };
 

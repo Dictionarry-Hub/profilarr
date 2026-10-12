@@ -852,7 +852,5 @@ export async function processUpgradeConfig(
 		log.filter.name = filter?.name ?? '';
 
 		return log;
-	} finally {
-		client.close();
 	}
 }
