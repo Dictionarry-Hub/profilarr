@@ -7,7 +7,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import { ChevronUp, ChevronDown } from '@lucide/svelte';
-	import { alertStore } from '$lib/client/alerts/store.ts';
+	import { alertStore } from '#lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
 

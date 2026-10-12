@@ -3,9 +3,9 @@
  * Coordinates fetching, filtering, selection, and searching
  */
 
-import { RadarrClient } from '$lib/server/utils/arr/clients/radarr.ts';
-import { SonarrClient } from '$lib/server/utils/arr/clients/sonarr.ts';
-import type { ArrInstance } from '$lib/server/db/queries/arrInstances.ts';
+import { RadarrClient } from '#lib/server/utils/arr/clients/radarr.ts';
+import { SonarrClient } from '#lib/server/utils/arr/clients/sonarr.ts';
+import type { ArrInstance } from '#lib/server/db/queries/arrInstances.ts';
 import type { UpgradeConfig, FilterConfig } from '$shared/upgrades/filters.ts';
 import { evaluateGroup } from '$shared/upgrades/filters.ts';
 import { getSelector } from '$shared/upgrades/selectors.ts';
@@ -18,7 +18,7 @@ import type {
 	ArrCommand,
 	RadarrQueueItem,
 	SonarrQueueItem
-} from '$lib/server/utils/arr/types.ts';
+} from '#lib/server/utils/arr/types.ts';
 import { normalizeRadarrItems, normalizeSonarrItems } from './normalize.ts';
 import {
 	averageEpisodeFileScore,

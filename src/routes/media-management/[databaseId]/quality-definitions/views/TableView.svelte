@@ -5,8 +5,8 @@
 	import type { Column } from '$ui/table/types';
 	import { Tag, Copy, Download } from '@lucide/svelte';
 	import type { QualityDefinitionListItem } from '$shared/pcd/display.ts';
-	import radarrLogo from '$lib/client/assets/Radarr.svg';
-	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
+	import radarrLogo from '#lib/client/assets/Radarr.svg';
+	import sonarrLogo from '#lib/client/assets/Sonarr.svg';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let configs: QualityDefinitionListItem[];

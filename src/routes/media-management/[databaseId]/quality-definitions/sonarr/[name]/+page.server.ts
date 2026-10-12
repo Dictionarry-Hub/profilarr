@@ -12,7 +12,7 @@ import {
 	removeSonarrQualityDefinitions
 } from '$pcd/entities/mediaManagement/quality-definitions/index.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
 
 export const load: PageServerLoad = async ({ params, parent }) => {
 	const { databaseId, name } = params;

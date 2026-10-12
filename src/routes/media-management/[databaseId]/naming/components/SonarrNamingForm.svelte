@@ -13,7 +13,7 @@
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import { alertStore } from '$alerts/store';
 	import { Save, Trash2, Info } from '@lucide/svelte';
-	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { SonarrNamingRow } from '$shared/pcd/display.ts';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 	import {
@@ -429,14 +429,23 @@
 >
 	<input type="hidden" name="arrType" value="sonarr" />
 	<input type="hidden" name="name" value={formData.name} />
+
 	<input type="hidden" name="rename" value={formData.rename} />
+
 	<input type="hidden" name="standardEpisodeFormat" value={formData.standardEpisodeFormat} />
+
 	<input type="hidden" name="dailyEpisodeFormat" value={formData.dailyEpisodeFormat} />
+
 	<input type="hidden" name="animeEpisodeFormat" value={formData.animeEpisodeFormat} />
+
 	<input type="hidden" name="seriesFolderFormat" value={formData.seriesFolderFormat} />
+
 	<input type="hidden" name="seasonFolderFormat" value={formData.seasonFolderFormat} />
+
 	<input type="hidden" name="replaceIllegalCharacters" value={formData.replaceIllegalCharacters} />
+
 	<input type="hidden" name="colonReplacementFormat" value={formData.colonReplacementFormat} />
+
 	<input
 		type="hidden"
 		name="customColonReplacementFormat"

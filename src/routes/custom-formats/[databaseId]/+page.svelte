@@ -16,13 +16,13 @@
 	import { filterMode } from '$stores/filterMode';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
-	import { createViewModeStore } from '$lib/client/stores/dataPage';
+	import { createViewModeStore } from '#lib/client/stores/dataPage.js';
 	import { Info, Plus } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
-	import { customFormatSearchValues } from '$lib/client/utils/entitySearch';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import { customFormatSearchValues } from '#lib/client/utils/entitySearch.js';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

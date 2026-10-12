@@ -12,7 +12,7 @@ import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifie
 import { TelegramNotifier } from '$notifications/notifiers/telegram/TelegramNotifier.ts';
 import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { upgrade } from '$notifications/definitions/upgrade.ts';
-import type { UpgradeJobLog } from '$lib/server/upgrades/types.ts';
+import type { UpgradeJobLog } from '#lib/server/upgrades/types.ts';
 
 const MOCK_PORT = PORTS.notifications.upgrade;
 let captured: CapturedRequest[];

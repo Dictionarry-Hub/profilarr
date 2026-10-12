@@ -27,7 +27,7 @@ import { logger } from '$logger/logger.ts';
 import { triggerSyncs } from '$sync/processor.ts';
 import type { LinkOptions, SyncResult, SyncTrigger } from './types.ts';
 import { importBaseOps } from '../ops/importBaseOps.ts';
-import { cleanupJobsForDatabase } from '$lib/server/jobs/cleanup.ts';
+import { cleanupJobsForDatabase } from '#lib/server/jobs/cleanup.ts';
 import { notificationManager } from '$notifications/NotificationManager.ts';
 import { notifications } from '$notifications/definitions/index.ts';
 

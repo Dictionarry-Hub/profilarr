@@ -14,8 +14,8 @@
 	import Label from '$ui/label/Label.svelte';
 	import type { DatabaseInstanceSummary } from '../+page.server.ts';
 	import { formatDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat';
-	import { serverTimezone } from '$lib/client/stores/timezone';
+	import { dateFormat } from '#lib/client/stores/dateFormat.js';
+	import { serverTimezone } from '#lib/client/stores/timezone.js';
 	import { createEventDispatcher } from 'svelte';
 	import DatabaseAvatar from '../components/DatabaseAvatar.svelte';
 

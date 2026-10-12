@@ -9,7 +9,7 @@ import {
 	removeSonarrMediaSettings
 } from '$pcd/entities/mediaManagement/media-settings/index.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
 import type { PropersRepacks } from '$shared/pcd/mediaManagement.ts';
 
 export const load: PageServerLoad = async ({ params, parent }) => {

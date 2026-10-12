@@ -32,10 +32,10 @@
 	import Table from '$ui/table/Table.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import TableActionButton from '$ui/table/TableActionButton.svelte';
-	import { createSearchStore } from '$lib/client/stores/search';
+	import { createSearchStore } from '#lib/client/stores/search.js';
 	import ComponentCard from './ComponentCard.svelte';
 	import { Plus, Info, Trash2, FileText, Filter, Check, Star, Settings } from '@lucide/svelte';
-	import type { ViewMode } from '$lib/client/stores/dataPage';
+	import type { ViewMode } from '#lib/client/stores/dataPage.js';
 
 	const search = createSearchStore();
 	const debouncedQuery = search.debouncedQuery;

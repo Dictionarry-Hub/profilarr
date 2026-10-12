@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import {
 		Info,
 		Clapperboard,
@@ -27,8 +27,8 @@
 	import ImportReleasesModal from './components/ImportReleasesModal.svelte';
 	import EntityTable from './components/EntityTable.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { createDataPageStore } from '$lib/client/stores/dataPage';
-	import { alertStore } from '$lib/client/alerts/store';
+	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
+	import { alertStore } from '#lib/client/alerts/store.js';
 	import type { PageData } from './$types';
 	import type {
 		TestEntity,

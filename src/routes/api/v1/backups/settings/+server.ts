@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
-import { scheduleBackupJobs } from '$lib/server/jobs/schedule.ts';
+import { scheduleBackupJobs } from '#lib/server/jobs/schedule.ts';
 
 type BackupSettings = components['schemas']['BackupSettings'];
 type ErrorResponse = components['schemas']['ErrorResponse'];

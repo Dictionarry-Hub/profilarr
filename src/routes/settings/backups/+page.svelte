@@ -16,15 +16,15 @@
 	import Table from '$ui/table/Table.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
-	import ActionsBar from '$lib/client/ui/actions/ActionsBar.svelte';
-	import ActionButton from '$lib/client/ui/actions/ActionButton.svelte';
-	import SearchAction from '$lib/client/ui/actions/SearchAction.svelte';
-	import { getPersistentSearchStore } from '$lib/client/stores/search';
-	import { jobStatus } from '$lib/client/stores/jobStatus';
+	import ActionsBar from '#lib/client/ui/actions/ActionsBar.svelte';
+	import ActionButton from '#lib/client/ui/actions/ActionButton.svelte';
+	import SearchAction from '#lib/client/ui/actions/SearchAction.svelte';
+	import { getPersistentSearchStore } from '#lib/client/stores/search.js';
+	import { jobStatus } from '#lib/client/stores/jobStatus.js';
 	import { onMount } from 'svelte';
 	import { formatDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat';
-	import { serverTimezone } from '$lib/client/stores/timezone';
+	import { dateFormat } from '#lib/client/stores/dateFormat.js';
+	import { serverTimezone } from '#lib/client/stores/timezone.js';
 
 	export let data: PageData;
 

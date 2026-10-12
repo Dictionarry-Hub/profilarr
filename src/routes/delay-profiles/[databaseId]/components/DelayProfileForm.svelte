@@ -14,7 +14,7 @@
 	import { alertStore } from '$alerts/store';
 	import { Save, Trash2, Loader2 } from '@lucide/svelte';
 	import type { PreferredProtocol } from '$shared/pcd/display.ts';
-	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 	import {
 		changeUnit,

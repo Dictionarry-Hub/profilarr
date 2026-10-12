@@ -3,8 +3,8 @@
 	import Badge from '$ui/badge/Badge.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { CustomFormatScoreDiff, OperationType } from './types';
-	import radarrLogo from '$lib/client/assets/Radarr.svg';
-	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
+	import radarrLogo from '#lib/client/assets/Radarr.svg';
+	import sonarrLogo from '#lib/client/assets/Sonarr.svg';
 
 	export let rows: CustomFormatScoreDiff[] = [];
 	export let operation: OperationType = 'update';

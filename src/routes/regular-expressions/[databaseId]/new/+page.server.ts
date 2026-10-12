@@ -5,7 +5,7 @@ import { canWriteToBase } from '$pcd/ops/writer.ts';
 import * as regularExpressionQueries from '$pcd/entities/regularExpressions/index.ts';
 import type { OperationLayer } from '$pcd/core/types.ts';
 import { logger } from '$logger/logger.ts';
-import { validateRegex } from '$lib/server/utils/arr/parser/index.ts';
+import { validateRegex } from '#lib/server/utils/arr/parser/index.ts';
 
 export const load: ServerLoad = ({ params, url }) => {
 	const { databaseId } = params;

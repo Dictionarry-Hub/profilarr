@@ -12,8 +12,8 @@
 	import type { Column } from '$ui/table/types';
 	import type { PageData } from './$types';
 	import type { TestWithResult } from './+page.server';
-	import { clear } from '$lib/client/stores/dirty';
-	import { alertStore } from '$lib/client/alerts/store';
+	import { clear } from '#lib/client/stores/dirty.js';
+	import { alertStore } from '#lib/client/alerts/store.js';
 
 	export let data: PageData;
 	let readOnly = false;
@@ -31,11 +31,7 @@
 	type Condition = Test['conditions'][number];
 
 	const columns: Column<Test>[] = [
-		{
-			key: 'title',
-			header: 'Release Title',
-			sortable: true
-		},
+		{ key: 'title', header: 'Release Title', sortable: true },
 		{
 			key: 'should_match',
 			header: 'Expected',

@@ -2,13 +2,13 @@ import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrCleanupSettingsQueries } from '$db/queries/arrCleanupSettings.ts';
-import { cleanupJobsForArrInstance } from '$lib/server/jobs/cleanup.ts';
+import { cleanupJobsForArrInstance } from '#lib/server/jobs/cleanup.ts';
 import {
 	scheduleCleanupForInstance,
 	scheduleLibraryRefreshForInstance
-} from '$lib/server/jobs/init.ts';
-import { calculateNextRun } from '$lib/server/jobs/scheduleUtils.ts';
-import { enqueueJob } from '$lib/server/jobs/queueService.ts';
+} from '#lib/server/jobs/init.ts';
+import { calculateNextRun } from '#lib/server/jobs/scheduleUtils.ts';
+import { enqueueJob } from '#lib/server/jobs/queueService.ts';
 import { logger } from '$logger/logger.ts';
 
 export const load = ({ params }) => {

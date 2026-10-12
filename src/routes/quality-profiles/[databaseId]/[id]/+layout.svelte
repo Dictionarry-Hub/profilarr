@@ -40,7 +40,7 @@
 
 <div class="px-4 pb-4 md:px-8 md:pb-8">
 	<Tabs {tabs} {breadcrumb} responsive />
-	<slot />
+	<slot></slot>
 </div>
 
 <DirtyModal />

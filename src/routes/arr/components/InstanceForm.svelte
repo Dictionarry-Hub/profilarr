@@ -3,11 +3,18 @@
 	import { enhance } from '$app/forms';
 	import { Save, Wifi, Trash2, Eraser, Loader2 } from '@lucide/svelte';
 	import { formatSmartDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat';
-	import { serverTimezone } from '$lib/client/stores/timezone';
+	import { dateFormat } from '#lib/client/stores/dateFormat.js';
+	import { serverTimezone } from '#lib/client/stores/timezone.js';
 	import CleanupModal from './CleanupModal.svelte';
 	import { alertStore } from '$alerts/store';
-	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
+	import {
+		isDirty,
+		initEdit,
+		initCreate,
+		update,
+		current,
+		clear
+	} from '#lib/client/stores/dirty.js';
 	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
 	import type { CleanupSettings } from '$db/queries/arrCleanupSettings.ts';
 	import FormInput from '$ui/form/FormInput.svelte';

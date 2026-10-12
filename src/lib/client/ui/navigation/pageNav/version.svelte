@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { ArrowUp } from '@lucide/svelte';
 	import { getPlatformLabel } from '$shared/utils/version.ts';
-	import { build } from '$lib/shared/build.ts';
+	import { build } from '#lib/shared/build.ts';
 	import logo from '$assets/logo-512.png';
 	import Button from '$ui/button/Button.svelte';
 	import Card from '$ui/card/Card.svelte';

@@ -10,7 +10,7 @@ import {
 	syncNaming,
 	syncQualityDefinitions,
 	syncMediaSettings
-} from '$lib/server/sync/entitySync.ts';
+} from '#lib/server/sync/entitySync.ts';
 import { logger } from '$logger/logger.ts';
 
 /**

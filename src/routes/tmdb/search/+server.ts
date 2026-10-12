@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { TMDBClient } from '$lib/server/utils/tmdb/client.ts';
+import { TMDBClient } from '#lib/server/utils/tmdb/client.ts';
 import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
-import { logger } from '$lib/server/utils/logger/logger.ts';
+import { logger } from '#lib/server/utils/logger/logger.ts';
 
 export const GET: RequestHandler = async ({ url }) => {
 	const query = url.searchParams.get('query');

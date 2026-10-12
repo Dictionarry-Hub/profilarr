@@ -8,8 +8,8 @@
 	import type { Column } from '$ui/table/types';
 	import { primaryReleaseGroup } from './releaseGroups.ts';
 	import { formatDate } from '$shared/utils/dates.ts';
-	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '$lib/client/stores/timezone.ts';
+	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
+	import { serverTimezone } from '#lib/client/stores/timezone.ts';
 
 	export let row: SonarrSeriesItem;
 	export let column: Column<SonarrSeriesItem>;

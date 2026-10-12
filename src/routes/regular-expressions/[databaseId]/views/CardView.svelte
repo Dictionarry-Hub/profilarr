@@ -9,7 +9,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import CodeBlock from '$ui/display/CodeBlock.svelte';
 	import Markdown from '$ui/display/Markdown.svelte';
-	import { createProgressiveList } from '$lib/client/utils/progressiveList';
+	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let expressions: RegularExpressionWithTags[];

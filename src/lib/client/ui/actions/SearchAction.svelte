@@ -3,7 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { Search, X } from '@lucide/svelte';
-	import type { SearchStore } from '$lib/client/stores/search';
+	import type { SearchStore } from '#lib/client/stores/search.js';
 	import Badge from '$ui/badge/Badge.svelte';
 
 	export let searchStore: SearchStore;

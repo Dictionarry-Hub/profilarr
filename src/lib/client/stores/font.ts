@@ -3,7 +3,7 @@
  */
 
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 
 export type SansFont = 'dm-sans' | 'inter' | 'ibm-plex-sans';
 export type MonoFont = 'geist-mono' | 'jetbrains-mono' | 'ibm-plex-mono';
