@@ -1,3 +1,4 @@
+import process from 'node:process';
 import type { Handle } from '@sveltejs/kit/hooks';
 import { redirect } from '@sveltejs/kit';
 
@@ -61,7 +62,7 @@ if (!isReload) {
 	});
 	if (startupAuthError) {
 		await logger.error(startupAuthError, { source: 'Auth' });
-		Deno.exit(1);
+		process.exit(1);
 	}
 
 	// Log container config (if running in Docker)
@@ -74,7 +75,7 @@ if (!isReload) {
 	await pcdManager.initialize();
 
 	// Auto-link default database on first startup (only once)
-	if (!setupStateQueries.isDefaultDatabaseLinked() && !Deno.env.get('INTEGRATION_TEST')) {
+	if (!setupStateQueries.isDefaultDatabaseLinked() && !process.env.INTEGRATION_TEST) {
 		try {
 			await pcdManager.link({
 				name: 'Dictionarry',

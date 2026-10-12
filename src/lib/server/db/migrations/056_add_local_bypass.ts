@@ -1,3 +1,4 @@
+import process from 'node:process';
 import type { Migration } from '../migrations.ts';
 import { db } from '../db.ts';
 
@@ -21,7 +22,7 @@ export const migration: Migration = {
 	`,
 
 	afterUp() {
-		const authEnv = (Deno.env.get('AUTH') || '').toLowerCase();
+		const authEnv = (process.env.AUTH || '').toLowerCase();
 		if (authEnv === 'local') {
 			db.execute('UPDATE auth_settings SET local_bypass_enabled = 1 WHERE id = 1');
 		}
