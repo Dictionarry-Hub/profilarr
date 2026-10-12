@@ -7,7 +7,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import Score from '$ui/arr/Score.svelte';
 	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
-	import { alertStore } from '$lib/client/alerts/store';
+	import { alertStore } from '#lib/client/alerts/store.js';
 	import type { Column } from '$ui/table/types';
 	import type { TestRelease, ReleaseEvaluation } from '$shared/pcd/display.ts';
 

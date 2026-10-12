@@ -3,7 +3,6 @@
 	"minimumDependencyAge": "P7D",
 	"imports": {
 		// Path aliases
-		"$lib/": "./src/lib/",
 		"$api/": "./src/lib/api/",
 		"$config": "./src/lib/server/utils/config/config.ts",
 		"$logger/": "./src/lib/server/utils/logger/",
@@ -33,13 +32,13 @@
 		"@lucide/svelte": "npm:@lucide/svelte@^1.46.0",
 		"@soapbox/kysely-deno-sqlite": "jsr:@soapbox/kysely-deno-sqlite@^2.2.0",
 		"@std/yaml": "jsr:@std/yaml@^1.2.0",
-		"@sveltejs/kit": "npm:@sveltejs/kit@^2.70.3",
+		"@sveltejs/kit": "npm:@sveltejs/kit@^3.0.0",
 		"croner": "npm:croner@^10.0.1",
 		"jose": "npm:jose@^6.2.12",
 		"kysely": "npm:kysely@0.27.6",
 		"marked": "npm:marked@^18.0.13",
 		"simple-icons": "npm:simple-icons@^16.31.0",
-		"svelte": "npm:svelte@^5.57.0",
+		"svelte": "npm:svelte@^5.57.1",
 
 		// Tooling
 		"@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.3",

@@ -4,10 +4,10 @@ import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
 import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { logger } from '$logger/logger.ts';
-import { scheduleDriftForInstance } from '$lib/server/jobs/init.ts';
-import { enqueueJob } from '$lib/server/jobs/queueService.ts';
-import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
-import { calculateNextRun, validateCronExpression } from '$lib/server/jobs/scheduleUtils.ts';
+import { scheduleDriftForInstance } from '#lib/server/jobs/init.ts';
+import { enqueueJob } from '#lib/server/jobs/queueService.ts';
+import { buildJobDisplayName } from '#lib/server/jobs/display.ts';
+import { calculateNextRun, validateCronExpression } from '#lib/server/jobs/scheduleUtils.ts';
 import { FEATURES } from '$shared/features.ts';
 import { buildDriftDisplayEntitiesForInstance } from '$drift/display.ts';
 

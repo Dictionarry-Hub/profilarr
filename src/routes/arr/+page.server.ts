@@ -6,7 +6,7 @@ import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { upgradeConfigsQueries } from '$db/queries/upgradeConfigs.ts';
 import { arrRenameSettingsQueries } from '$db/queries/arrRenameSettings.ts';
 import { arrCleanupSettingsQueries } from '$db/queries/arrCleanupSettings.ts';
-import { cleanupJobsForArrInstance } from '$lib/server/jobs/cleanup.ts';
+import { cleanupJobsForArrInstance } from '#lib/server/jobs/cleanup.ts';
 import { logger } from '$logger/logger.ts';
 
 export type CompositeSyncStatus = 'idle' | 'pending' | 'in_progress' | 'failed' | 'not_configured';

@@ -1,4 +1,4 @@
-import { json, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { createArrClient } from '$arr/factory.ts';
@@ -32,7 +32,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 			level: level as 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal' | undefined
 		});
 
-		return json(logs);
+		return Response.json(logs);
 	} catch (err) {
 		error(502, `Failed to fetch logs: ${err instanceof Error ? err.message : 'Unknown error'}`);
 	} finally {

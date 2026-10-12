@@ -6,7 +6,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import ReleaseTable from './ReleaseTable.svelte';
-	import { alertStore } from '$lib/client/alerts/store';
+	import { alertStore } from '#lib/client/alerts/store.js';
 	import type { Column } from '$ui/table/types';
 	import type { TestEntity, TestRelease, ReleaseEvaluation } from '$shared/pcd/display.ts';
 

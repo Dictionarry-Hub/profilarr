@@ -9,7 +9,7 @@ import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
 import { logSettingsQueries } from '$db/queries/logSettings.ts';
 import { FEATURES } from '$shared/features.ts';
-import { calculateNextRun } from '$lib/server/sync/utils.ts';
+import { calculateNextRun } from '#lib/server/sync/utils.ts';
 import { calculateNextRunFromMinutes, calculateNextRunFromSchedule } from './scheduleUtils.ts';
 import { jobDispatcher } from './dispatcher.ts';
 

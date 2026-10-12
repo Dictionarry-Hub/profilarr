@@ -6,7 +6,7 @@
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
 	import { Tag, Clock, Zap, Shield, Copy, Download } from '@lucide/svelte';
 	import { escapeHtml } from '$shared/utils/sanitize.ts';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { FEATURES } from '$shared/features.ts';
 	import { formatDelay } from '$shared/utils/duration.ts';
 

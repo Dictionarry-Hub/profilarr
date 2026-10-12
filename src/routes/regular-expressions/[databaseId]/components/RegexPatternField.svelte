@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { AlertCircle, Check, X, Loader2 } from '@lucide/svelte';
 	import { alertStore } from '$alerts/store';
-	import { sanitizeRegex101Id } from '$lib/client/utils/regex101';
+	import { sanitizeRegex101Id } from '#lib/client/utils/regex101.js';
 	import Label from '$ui/label/Label.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 

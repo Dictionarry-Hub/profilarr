@@ -12,7 +12,7 @@ import type {
 	CustomFormatRef,
 	QualityProfileFormatItem,
 	ScoreBreakdownItem
-} from '$lib/server/utils/arr/types.ts';
+} from '#lib/server/utils/arr/types.ts';
 import type { UpgradeItem } from './types.ts';
 import { averageEpisodeFileScore } from './sonarrScores.ts';
 

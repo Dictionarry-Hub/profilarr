@@ -6,7 +6,7 @@
 	import Card from '$ui/card/Card.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import { createProgressiveList } from '$lib/client/utils/progressiveList';
+	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
 	import { sanitizeHtml } from '$shared/utils/sanitize';
 	import { FEATURES } from '$shared/features.ts';
 

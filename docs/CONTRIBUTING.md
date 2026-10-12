@@ -224,6 +224,7 @@ falls into.
 ### Code Conventions
 
 - **Svelte 5, no runes.** Use `onclick`, no `$state` / `$derived`.
+- **Page state from `$stores/page`.** `$app/state` doesn't update in components without runes.
 - **Alerts for feedback.** Use `alertStore.add(type, message)`.
 - **Dirty tracking.** Use the dirty store to block saves + warn on navigation.
 - **Routes > modals.** Only use modals for confirmations or rare one-off forms.

@@ -8,9 +8,9 @@
  * This file wires it together with client creation, logging, and notifications.
  */
 
-import { createArrClient } from '$lib/server/utils/arr/factory.ts';
-import type { RadarrClient } from '$lib/server/utils/arr/clients/radarr.ts';
-import type { SonarrClient } from '$lib/server/utils/arr/clients/sonarr.ts';
+import { createArrClient } from '#lib/server/utils/arr/factory.ts';
+import type { RadarrClient } from '#lib/server/utils/arr/clients/radarr.ts';
+import type { SonarrClient } from '#lib/server/utils/arr/clients/sonarr.ts';
 import type { RenameSettings } from '$db/queries/arrRenameSettings.ts';
 import type { ArrInstance } from '$db/queries/arrInstances.ts';
 import type { RenameJobLog, LibrarySnapshot } from './types.ts';

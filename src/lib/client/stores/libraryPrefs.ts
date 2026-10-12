@@ -6,7 +6,7 @@
  */
 
 import { writable, type Writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import {
 	DEFAULT_LIBRARY_SORT,
 	LIBRARY_DOWNLOAD_STATUSES,

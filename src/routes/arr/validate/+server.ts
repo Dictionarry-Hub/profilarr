@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { createArrClient } from '$arr/factory.ts';
 import type { ArrType } from '$arr/types.ts';
@@ -11,11 +10,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Validation
 		if (!type || !url || !apiKey) {
-			return json({ success: false, error: 'Missing required fields' }, { status: 400 });
+			return Response.json({ success: false, error: 'Missing required fields' }, { status: 400 });
 		}
 
 		if (!VALID_TYPES.includes(type)) {
-			return json({ success: false, error: 'Invalid arr type' }, { status: 400 });
+			return Response.json({ success: false, error: 'Invalid arr type' }, { status: 400 });
 		}
 
 		// Create client and test connection (3 second timeout, no retries for quick feedback)
@@ -24,12 +23,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		client.close();
 
 		if (isConnected) {
-			return json({ success: true });
+			return Response.json({ success: true });
 		} else {
-			return json({ success: false, error: 'Connection test failed' }, { status: 400 });
+			return Response.json({ success: false, error: 'Connection test failed' }, { status: 400 });
 		}
 	} catch (error) {
-		return json(
+		return Response.json(
 			{
 				success: false,
 				error: error instanceof Error ? error.message : 'Unknown error'

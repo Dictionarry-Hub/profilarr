@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { tick } from 'svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -21,8 +21,8 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import { clickOutside } from '$lib/client/utils/clickOutside';
-	import { isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { clickOutside } from '#lib/client/utils/clickOutside.js';
+	import { isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { ArrType } from '$shared/pcd/types.ts';
 	import type { QualityDefinitionsConfig, QualityDefinitionEntry } from '$shared/pcd/display.ts';
 	import type { AffectedArr } from '$shared/sync/types.ts';
@@ -231,11 +231,7 @@
 
 	// Table columns
 	const columns: Column<QualityGroup>[] = [
-		{
-			key: 'label',
-			header: 'Resolution',
-			sortable: false
-		},
+		{ key: 'label', header: 'Resolution', sortable: false },
 		{
 			key: 'count',
 			header: 'Qualities',
@@ -248,7 +244,13 @@
 	function createMarkers(entry: QualityDefinitionEntry): Marker[] {
 		const scaleMax = baseScaleMax;
 		return [
-			{ id: 'min', label: 'Min', color: 'blue', value: entry.min_size },
+			{
+				id: 'min',
+				label: 'Min',
+				color: 'blue',
+				value: entry.min_size
+			},
+
 			{
 				id: 'preferred',
 				label: 'Preferred',
@@ -344,6 +346,7 @@
 	</div>
 	<div slot="right" class="flex items-center gap-2">
 		<!-- Unit selector (hidden on mobile) -->
+
 		<div class="relative hidden qd:block" use:clickOutside={() => (showUnitDropdown = false)}>
 			<Button
 				text={selectedUnit.label}

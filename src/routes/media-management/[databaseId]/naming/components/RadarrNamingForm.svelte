@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { tick } from 'svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -13,7 +13,7 @@
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import { alertStore } from '$alerts/store';
 	import { Save, Trash2, Info } from '@lucide/svelte';
-	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { RadarrNamingRow } from '$shared/pcd/display.ts';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 	import {

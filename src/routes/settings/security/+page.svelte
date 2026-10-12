@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import {
 		LogOut,
 		Check,
@@ -18,8 +18,8 @@
 		ShieldCheck
 	} from '@lucide/svelte';
 	import { parseUTC, formatDateTime, formatDate } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '$lib/client/stores/timezone.ts';
+	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
+	import { serverTimezone } from '#lib/client/stores/timezone.ts';
 	import Button from '$ui/button/Button.svelte';
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
@@ -482,7 +482,7 @@
 						use:enhance={() => {
 							return async ({ update }) => {
 								await update();
-								await invalidateAll();
+								await refreshAll();
 							};
 						}}
 					>
@@ -518,7 +518,7 @@
 									use:enhance={() => {
 										return async ({ update }) => {
 											await update();
-											await invalidateAll();
+											await refreshAll();
 										};
 									}}
 								>

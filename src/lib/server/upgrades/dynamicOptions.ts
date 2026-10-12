@@ -1,6 +1,6 @@
-import type { ArrInstance } from '$lib/server/db/queries/arrInstances.ts';
-import { RadarrClient } from '$lib/server/utils/arr/clients/radarr.ts';
-import { SonarrClient } from '$lib/server/utils/arr/clients/sonarr.ts';
+import type { ArrInstance } from '#lib/server/db/queries/arrInstances.ts';
+import { RadarrClient } from '#lib/server/utils/arr/clients/radarr.ts';
+import { SonarrClient } from '#lib/server/utils/arr/clients/sonarr.ts';
 import type {
 	ArrCustomFormat,
 	ArrQualityProfile,
@@ -8,7 +8,7 @@ import type {
 	RadarrMovie,
 	RadarrMovieFile,
 	SonarrSeries
-} from '$lib/server/utils/arr/types.ts';
+} from '#lib/server/utils/arr/types.ts';
 import {
 	createEmptyDynamicFilterOptions,
 	type DynamicFilterOptions

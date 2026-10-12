@@ -4,7 +4,7 @@
 	import type { Component } from 'svelte';
 	import { ArrowLeft, ChevronRight, ChevronDown } from '@lucide/svelte';
 	import Breadcrumb from '$ui/navigation/breadcrumb/Breadcrumb.svelte';
-	import { clickOutside } from '$lib/client/utils/clickOutside';
+	import { clickOutside } from '#lib/client/utils/clickOutside.js';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
 
@@ -69,7 +69,7 @@
 
 	function handleTabSelect(href: string) {
 		dropdownOpen = false;
-		goto(href, { replaceState: true });
+		goto(href, { replace: true });
 	}
 </script>
 

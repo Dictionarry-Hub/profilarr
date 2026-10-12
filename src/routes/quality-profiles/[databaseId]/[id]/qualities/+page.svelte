@@ -14,18 +14,18 @@
 		Pencil
 	} from '@lucide/svelte';
 	import DraggableCard from '$ui/list/DraggableCard.svelte';
-	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
+	import IconCheckbox from '#lib/client/ui/form/IconCheckbox.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import GroupModal from './components/GroupModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { alertStore } from '$lib/client/alerts/store';
+	import { alertStore } from '#lib/client/alerts/store.js';
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { goto } from '$app/navigation';
-	import { current, isDirty, initEdit, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, update } from '#lib/client/stores/dirty.js';
 	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 	import type { PageData } from './$types';

@@ -2,7 +2,7 @@
 	import MediaSettingsForm from '../components/MediaSettingsForm.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
@@ -14,7 +14,7 @@
 
 	onMount(() => {
 		if (!selectedArrType) {
-			goto(`/media-management/${data.currentDatabase.id}/media-settings`, { replaceState: true });
+			goto(`/media-management/${data.currentDatabase.id}/media-settings`, { replace: true });
 		}
 	});
 </script>

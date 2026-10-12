@@ -1,10 +1,9 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { cache } from '$cache/cache.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
 import type { SonarrLibraryItem } from '$utils/arr/types.ts';
-import { getProfilarrProfileNames } from '$lib/server/sync/libraryHelpers.ts';
+import { getProfilarrProfileNames } from '#lib/server/sync/libraryHelpers.ts';
 import { logger } from '$logger/logger.ts';
 
 const MANUAL_CACHE_TTL = 86400;
@@ -37,30 +36,33 @@ export const GET: RequestHandler = async ({ params }) => {
 	const instanceId = parseInt(params.id ?? '', 10);
 	const seriesId = parseInt(params.seriesId ?? '', 10);
 	if (!Number.isFinite(instanceId) || !Number.isFinite(seriesId)) {
-		return json({ error: 'Invalid instance or series ID' }, { status: 400 });
+		return Response.json({ error: 'Invalid instance or series ID' }, { status: 400 });
 	}
 
 	const instance = arrInstancesQueries.getById(instanceId);
 	if (!instance) {
-		return json({ error: 'Instance not found' }, { status: 404 });
+		return Response.json({ error: 'Instance not found' }, { status: 404 });
 	}
 	if (instance.type !== 'sonarr') {
-		return json({ error: 'Seasons are only available for Sonarr instances' }, { status: 400 });
+		return Response.json(
+			{ error: 'Seasons are only available for Sonarr instances' },
+			{ status: 400 }
+		);
 	}
 
 	try {
 		const library = await getLibraryCached(instanceId);
 		const series = library.find((s) => s.id === seriesId);
 		if (!series) {
-			return json({ error: 'Series not found' }, { status: 404 });
+			return Response.json({ error: 'Series not found' }, { status: 404 });
 		}
-		return json({ seasons: series.seasons });
+		return Response.json({ seasons: series.seasons });
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Failed to fetch seasons';
 		await logger.error(`Failed to fetch seasons for series ${seriesId}`, {
 			source: 'arr/library/seasons',
 			meta: { instanceId, seriesId, error: message }
 		});
-		return json({ error: message }, { status: 500 });
+		return Response.json({ error: message }, { status: 500 });
 	}
 };

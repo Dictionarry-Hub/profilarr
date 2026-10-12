@@ -7,16 +7,16 @@
 	import BottomNav from '$ui/navigation/bottomNav/BottomNav.svelte';
 	import AlertContainer from '$alerts/AlertContainer.svelte';
 	import HelpButton from '$ui/help/HelpButton.svelte';
-	import CutsceneOverlay from '$lib/client/cutscene/CutsceneOverlay.svelte';
+	import CutsceneOverlay from '#lib/client/cutscene/CutsceneOverlay.svelte';
 
-	import CutsceneComplete from '$lib/client/cutscene/CutsceneComplete.svelte';
-	import { cutscene } from '$lib/client/cutscene/store';
+	import CutsceneComplete from '#lib/client/cutscene/CutsceneComplete.svelte';
+	import { cutscene } from '#lib/client/cutscene/store.js';
 	import { sidebarCollapsed } from '$stores/sidebar';
 	import { dateFormat } from '$stores/dateFormat';
 	import { serverTimezone } from '$stores/timezone';
-	import { FEATURES } from '$lib/shared/features';
-	import { dev } from '$app/environment';
-	import { page } from '$app/stores';
+	import { FEATURES } from '#lib/shared/features.js';
+	import { dev } from '$app/env';
+	import { page } from '$stores/page';
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
@@ -109,7 +109,8 @@
 								(result.data as { error?: string }).error || 'Failed to cancel'
 							);
 						}
-						await update();
+						// Stay on the current page instead of navigating to the action's page
+						await update({ navigate: false });
 					};
 				}}
 			>
@@ -124,5 +125,5 @@
 			</form>
 		</div>
 	{/if}
-	<slot />
+	<slot></slot>
 </main>

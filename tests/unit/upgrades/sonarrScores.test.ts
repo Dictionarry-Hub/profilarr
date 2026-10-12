@@ -7,7 +7,7 @@ import {
 	averageEpisodeFileScore,
 	filterNeedsSonarrScores,
 	loadSonarrEpisodeFiles
-} from '$lib/server/upgrades/sonarrScores.ts';
+} from '#lib/server/upgrades/sonarrScores.ts';
 
 class SonarrScoresTest extends BaseTest {
 	private createSeries(id: number, episodeFileCount: number): SonarrSeries {

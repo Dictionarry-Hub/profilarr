@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { browser } from '$app/environment';
+	import { page } from '$stores/page';
+	import { browser } from '$app/env';
 	import { Copy, RefreshCw, Filter, Rows3, Loader2, AlertTriangle } from '@lucide/svelte';
 	import { alertStore } from '$alerts/store';
 	import Table from '$ui/table/Table.svelte';
@@ -18,11 +18,11 @@
 	import LogLevelCell from '$ui/table/LogLevelCell.svelte';
 	import LogSourceCell from '$ui/table/LogSourceCell.svelte';
 	import type { Column } from '$ui/table/types';
-	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
+	import { getPersistentSearchStore, type SearchStore } from '#lib/client/stores/search.js';
 	import { formatDateTime } from '$shared/utils/dates.ts';
-	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '$lib/client/stores/timezone.ts';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
+	import { serverTimezone } from '#lib/client/stores/timezone.ts';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
 	import type { PageData } from './$types';
 	import type { Component } from 'svelte';
 
@@ -163,7 +163,7 @@
 	// Navigate with updated params — triggers server load which updates
 	// data.filters, which triggers the reactive fetchLogs call above.
 	function updateParams(params: Record<string, string | number | undefined>) {
-		const url = new URL($page.url);
+		const url = new URL($page.url.href);
 		for (const [key, value] of Object.entries(params)) {
 			if (value === undefined || value === 'ALL') {
 				url.searchParams.delete(key);
@@ -171,7 +171,7 @@
 				url.searchParams.set(key, String(value));
 			}
 		}
-		goto(url.toString(), { invalidateAll: true });
+		goto(url.toString(), { refreshAll: true });
 	}
 
 	// Refresh logs
@@ -203,6 +203,7 @@
 				if (!query) return true;
 
 				const searchLower = query.toLowerCase();
+
 				return (
 					log.message.toLowerCase().includes(searchLower) ||
 					log.logger.toLowerCase().includes(searchLower)

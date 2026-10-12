@@ -1,9 +1,9 @@
 import { writable, derived } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import type { CutsceneState } from './types.ts';
 import { STAGES } from './definitions/index.ts';
 import { checkPrerequisites } from './prerequisites.ts';
-import { alertStore } from '$lib/client/alerts/store';
+import { alertStore } from '#lib/client/alerts/store.js';
 
 const STORAGE_KEY = 'cutscene-progress';
 

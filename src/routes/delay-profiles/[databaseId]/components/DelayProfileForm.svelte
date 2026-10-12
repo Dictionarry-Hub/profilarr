@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { tick } from 'svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
@@ -14,7 +14,7 @@
 	import { alertStore } from '$alerts/store';
 	import { Save, Trash2, Loader2 } from '@lucide/svelte';
 	import type { PreferredProtocol } from '$shared/pcd/display.ts';
-	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 	import {
 		changeUnit,

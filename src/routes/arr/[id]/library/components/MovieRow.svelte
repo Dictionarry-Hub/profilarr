@@ -9,8 +9,8 @@
 	import type { RadarrLibraryItem } from '$utils/arr/types.ts';
 	import type { Column } from '$ui/table/types';
 	import { formatDate } from '$shared/utils/dates.ts';
-	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '$lib/client/stores/timezone.ts';
+	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
+	import { serverTimezone } from '#lib/client/stores/timezone.ts';
 	import MovieAvailabilityBadge from './MovieAvailabilityBadge.svelte';
 
 	export let row: RadarrLibraryItem;

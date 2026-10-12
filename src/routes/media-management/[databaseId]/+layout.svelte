@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
@@ -27,9 +27,8 @@
 	}));
 </script>
 
-<svelte:head>
-	<title>Media Management - {data.currentDatabase?.name} - Profilarr</title>
-</svelte:head>
+<svelte:head><title>Media Management - {data.currentDatabase?.name} - Profilarr</title></svelte:head
+>
 
 <div class="space-y-6 px-4 pb-8 md:px-8 {isNestedPage ? 'pt-3 md:pt-7' : ''}">
 	<!-- Database Tabs -->
@@ -38,5 +37,5 @@
 	{/if}
 
 	<!-- Page Content -->
-	<slot />
+	<slot></slot>
 </div>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import AnnouncementForm from '../components/AnnouncementForm.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 

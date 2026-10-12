@@ -6,8 +6,8 @@
 	import Button from '$ui/button/Button.svelte';
 	import { Copy, Download, Info, RefreshCw } from '@lucide/svelte';
 	import type { MediaSettingsListItem } from '$shared/pcd/display.ts';
-	import radarrLogo from '$lib/client/assets/Radarr.svg';
-	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
+	import radarrLogo from '#lib/client/assets/Radarr.svg';
+	import sonarrLogo from '#lib/client/assets/Sonarr.svg';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let configs: MediaSettingsListItem[];

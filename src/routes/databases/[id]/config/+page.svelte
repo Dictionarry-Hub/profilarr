@@ -12,14 +12,14 @@
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { alertStore } from '$lib/client/alerts/store';
+	import { alertStore } from '#lib/client/alerts/store.js';
 	import {
 		isDirty,
 		initEdit,
 		update as dirtyUpdate,
 		resetFromServer,
 		clear as clearDirty
-	} from '$lib/client/stores/dirty';
+	} from '#lib/client/stores/dirty.js';
 
 	export let data: PageData;
 

@@ -2,7 +2,7 @@
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 	import SyncFooter from './SyncFooter.svelte';
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
-	import { alertStore } from '$lib/client/alerts/store.ts';
+	import { alertStore } from '#lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
 

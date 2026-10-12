@@ -14,7 +14,7 @@
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { databaseAnnouncementQueries } from '$db/queries/databaseAnnouncements.ts';
 import { announcementQueries } from '$db/queries/announcements.ts';
-import { build } from '$lib/shared/build.ts';
+import { build } from '#lib/shared/build.ts';
 import { isVisibleBase } from './shared/filter.ts';
 import type { AnnouncementSeverity } from './shared/types.ts';
 import * as profilarr from './profilarr/index.ts';

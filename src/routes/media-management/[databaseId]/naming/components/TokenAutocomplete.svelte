@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { clickOutside } from '$lib/client/utils/clickOutside';
+	import { clickOutside } from '#lib/client/utils/clickOutside.js';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import type { TokenCategory } from '$shared/pcd/namingTokens.ts';
 

@@ -24,8 +24,8 @@
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import { sidebarCollapsed } from '$stores/sidebar';
 	import { navIconStore } from '$stores/navIcons';
-	import { cutscene } from '$lib/client/cutscene/store';
-	import { page } from '$app/stores';
+	import { cutscene } from '#lib/client/cutscene/store.js';
+	import { page } from '$stores/page';
 	import logo from '$assets/logo-512.png';
 
 	export let unreadAnnouncements: number = 0;
@@ -47,7 +47,14 @@
 	$: outOfDate = versionStatus?.status === 'out-of-date' && versionStatus.latestVersion;
 
 	$: railLinks = [
-		{ label: 'Dev', href: '/dev', icon: Wrench, emoji: '🛠️', devOnly: true },
+		{
+			label: 'Dev',
+			href: '/dev',
+			icon: Wrench,
+			emoji: '🛠️',
+			devOnly: true
+		},
+
 		{
 			label: 'Announcements',
 			href: '/announcements',

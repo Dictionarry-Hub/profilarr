@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { config } from '$config';
@@ -22,17 +21,17 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	if (!file) {
 		const error: ErrorResponse = { error: 'No file provided' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	if (!file.name.endsWith('.tar.gz')) {
 		const error: ErrorResponse = { error: 'Invalid file type. Only .tar.gz files are allowed.' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	if (file.size > MAX_SIZE) {
 		const error: ErrorResponse = { error: 'File too large. Maximum size is 1GB.' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	const backupsDir = config.paths.backups;
@@ -45,7 +44,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	try {
 		await Deno.stat(backupPath);
 		const error: ErrorResponse = { error: 'A backup with this name already exists' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	} catch {
 		// File doesn't exist — good
 	}
@@ -65,7 +64,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			const error: ErrorResponse = {
 				error: 'Archive contains path traversal entries and was rejected'
 			};
-			return json(error, { status: 400 });
+			return Response.json(error, { status: 400 });
 		}
 
 		// Move to final location
@@ -77,7 +76,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			size: stat.size,
 			sizeFormatted: formatFileSize(stat.size)
 		};
-		return json(response, { status: 201 });
+		return Response.json(response, { status: 201 });
 	} catch (err) {
 		// Clean up temp file if it still exists
 		try {
@@ -88,6 +87,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const message = err instanceof Error ? err.message : 'Upload failed';
 		const error: ErrorResponse = { error: message };
-		return json(error, { status: 500 });
+		return Response.json(error, { status: 500 });
 	}
 };

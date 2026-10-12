@@ -5,7 +5,7 @@ import { canWriteToBase } from '$pcd/ops/writer.ts';
 import * as customFormatQueries from '$pcd/entities/customFormats/index.ts';
 import { getProfileRefsForCustomFormat } from '$pcd/references.ts';
 import type { OperationLayer } from '$pcd/core/types.ts';
-import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
 import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
 
 export const load: ServerLoad = async ({ params }) => {

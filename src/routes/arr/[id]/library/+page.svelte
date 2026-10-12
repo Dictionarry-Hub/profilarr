@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { AlertTriangle, Film } from '@lucide/svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import type { PageData } from './$types';
 	import type { RadarrLibraryItem, SonarrSeriesItem } from '$utils/arr/types.ts';
 	import { compareOptionalDates, sortTitle } from '$shared/utils/sort.ts';
 	import { getPersistentSearchStore } from '$stores/search';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
-	import { createViewModeStore } from '$lib/client/stores/dataPage';
+	import { createViewModeStore } from '#lib/client/stores/dataPage.js';
 	import {
 		createLibraryCardFieldsPref,
 		createLibraryColumnsPref,
@@ -29,8 +29,8 @@
 		type SonarrCardField,
 		type SonarrToggleableColumn
 	} from '$shared/utils/libraryPrefs';
-	import { createProgressiveList } from '$lib/client/utils/progressiveList';
-	import { getDisplayUrl } from '$lib/client/utils/arrDisplayUrl.ts';
+	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
+	import { getDisplayUrl } from '#lib/client/utils/arrDisplayUrl.ts';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 
@@ -118,8 +118,21 @@
 			suggestions: (items) =>
 				[...new Set(items.flatMap((m) => m.scoreBreakdown.map((s) => s.name)))].sort()
 		},
-		{ key: 'score', label: 'Score', type: 'number', accessor: (m) => m.customFormatScore },
-		{ key: 'year', label: 'Year', type: 'number', accessor: (m) => m.year ?? 0 },
+
+		{
+			key: 'score',
+			label: 'Score',
+			type: 'number',
+			accessor: (m) => m.customFormatScore
+		},
+
+		{
+			key: 'year',
+			label: 'Year',
+			type: 'number',
+			accessor: (m) => m.year ?? 0
+		},
+
 		{
 			key: 'status',
 			label: 'Status',
@@ -189,7 +202,14 @@
 			suggestions: (items) =>
 				[...new Set(items.map((s) => s.network).filter(Boolean) as string[])].sort()
 		},
-		{ key: 'year', label: 'Year', type: 'number', accessor: (s) => s.year ?? 0 },
+
+		{
+			key: 'year',
+			label: 'Year',
+			type: 'number',
+			accessor: (s) => s.year ?? 0
+		},
+
 		{
 			key: 'status',
 			label: 'Status',

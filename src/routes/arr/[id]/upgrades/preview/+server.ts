@@ -1,8 +1,7 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import type { FilterConfig } from '$shared/upgrades/filters.ts';
-import { previewUpgradeFilter } from '$lib/server/upgrades/preview.ts';
+import { previewUpgradeFilter } from '#lib/server/upgrades/preview.ts';
 
 function isFilterConfig(value: unknown): value is FilterConfig {
 	if (!value || typeof value !== 'object') {
@@ -25,16 +24,16 @@ function isFilterConfig(value: unknown): value is FilterConfig {
 export const POST: RequestHandler = async ({ params, request }) => {
 	const instanceId = parseInt(params.id ?? '', 10);
 	if (!Number.isFinite(instanceId)) {
-		return json({ error: 'Invalid instance ID' }, { status: 400 });
+		return Response.json({ error: 'Invalid instance ID' }, { status: 400 });
 	}
 
 	const instance = arrInstancesQueries.getById(instanceId);
 	if (!instance) {
-		return json({ error: 'Instance not found' }, { status: 404 });
+		return Response.json({ error: 'Instance not found' }, { status: 404 });
 	}
 
 	if (instance.type !== 'radarr' && instance.type !== 'sonarr') {
-		return json(
+		return Response.json(
 			{ error: `Upgrade preview is not supported for ${instance.type}` },
 			{ status: 400 }
 		);
@@ -42,14 +41,14 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
 	const body = await request.json().catch(() => null);
 	if (!body || typeof body !== 'object' || !('filter' in body) || !isFilterConfig(body.filter)) {
-		return json({ error: 'Invalid filter' }, { status: 400 });
+		return Response.json({ error: 'Invalid filter' }, { status: 400 });
 	}
 
 	try {
 		const preview = await previewUpgradeFilter(instance, body.filter);
-		return json(preview);
+		return Response.json(preview);
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Failed to preview filter';
-		return json({ error: message }, { status: 500 });
+		return Response.json({ error: message }, { status: 500 });
 	}
 };

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { browser } from '$app/environment';
-	import { tokenize } from '$lib/client/utils/tokenize';
-	import { themeStore } from '$lib/client/stores/theme';
+	import { browser } from '$app/env';
+	import { tokenize } from '#lib/client/utils/tokenize.js';
+	import { themeStore } from '#lib/client/stores/theme.js';
 	import { getTheme, type ThemeVariant } from '$ui/code/themes';
 
 	export let label: string;

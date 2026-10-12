@@ -7,11 +7,13 @@
 		confirmNavigation,
 		confirmDiscard,
 		cancelDiscard
-	} from '$lib/client/stores/dirty';
+	} from '#lib/client/stores/dirty.js';
 
 	let pendingNavigationUrl: string | null = null;
 
 	beforeNavigate(async (navigation) => {
+		if (navigation.shallow && navigation.type === 'goto') return;
+
 		if ($isDirty) {
 			navigation.cancel();
 			pendingNavigationUrl = navigation.to?.url.pathname || null;

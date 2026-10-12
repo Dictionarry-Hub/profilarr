@@ -1,4 +1,4 @@
-import { json, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { databaseAnnouncementQueries } from '$db/queries/databaseAnnouncements.ts';
@@ -119,7 +119,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		}
 	}
 
-	return json({
+	return Response.json({
 		status,
 		incomingChanges,
 		branches,

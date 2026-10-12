@@ -13,12 +13,12 @@
 	import LogSourceCell from '$ui/table/LogSourceCell.svelte';
 	import type { Column, SortDirection, SortState } from '$ui/table/types';
 	import LogsActionsBar from './components/LogsActionsBar.svelte';
-	import { getPersistentSearchStore } from '$lib/client/stores/search';
+	import { getPersistentSearchStore } from '#lib/client/stores/search.js';
 	import { formatDateTime } from '$shared/utils/dates.ts';
-	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '$lib/client/stores/timezone.ts';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
-	import { invalidateAll } from '$app/navigation';
+	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
+	import { serverTimezone } from '#lib/client/stores/timezone.ts';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import { refreshAll } from '$app/navigation';
 	import type { PageData } from './$types';
 	import type { Component } from 'svelte';
 
@@ -136,7 +136,7 @@
 	// Refresh logs by refetching data
 	async function refreshLogs() {
 		isRefreshing = true;
-		await invalidateAll();
+		await refreshAll();
 		isRefreshing = false;
 	}
 

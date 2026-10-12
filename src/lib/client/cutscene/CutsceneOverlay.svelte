@@ -209,7 +209,9 @@
 		window.addEventListener('resize', updateDimensions);
 	}
 
-	afterNavigate(() => {
+	afterNavigate(({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
+
 		if (active) {
 			tick().then(() => requestAnimationFrame(findTarget));
 		}
@@ -385,7 +387,7 @@
 		<svg class="absolute inset-0 h-full w-full" style="pointer-events: none;">
 			<defs>
 				<mask id="cutscene-mask">
-					<rect width="100%" height="100%" fill="white" />
+					<rect width="100%" height="100%" fill="white"></rect>
 					{#if targetRect}
 						<rect
 							x={spotlightRect.x}
@@ -395,7 +397,7 @@
 							rx={RADIUS}
 							ry={RADIUS}
 							fill="black"
-						/>
+						></rect>
 					{/if}
 					{#each interactionSpotlightRects as rect}
 						<rect
@@ -406,7 +408,7 @@
 							rx={RADIUS}
 							ry={RADIUS}
 							fill="black"
-						/>
+						></rect>
 					{/each}
 				</mask>
 			</defs>
@@ -416,7 +418,7 @@
 				fill="rgba(0, 0, 0, 0.6)"
 				mask="url(#cutscene-mask)"
 				style="pointer-events: none;"
-			/>
+			></rect>
 		</svg>
 
 		<!-- Click-blocking overlay with holes for cutouts (disabled for free-interaction steps) -->

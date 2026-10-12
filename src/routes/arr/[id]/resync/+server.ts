@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
@@ -10,7 +9,7 @@ import {
 	syncNaming,
 	syncQualityDefinitions,
 	syncMediaSettings
-} from '$lib/server/sync/entitySync.ts';
+} from '#lib/server/sync/entitySync.ts';
 import { logger } from '$logger/logger.ts';
 
 /**
@@ -67,28 +66,28 @@ interface ResyncRequest {
 export const POST: RequestHandler = async ({ params, request }) => {
 	const instanceId = parseInt(params.id ?? '', 10);
 	if (!Number.isFinite(instanceId)) {
-		return json({ error: 'Invalid instance ID' }, { status: 400 });
+		return Response.json({ error: 'Invalid instance ID' }, { status: 400 });
 	}
 
 	const body = (await request.json()) as ResyncRequest;
 	const { databaseId, entityName, entityType } = body;
 
 	if (!entityType || !ENTITY_TYPE_TO_SECTION[entityType]) {
-		return json(
+		return Response.json(
 			{ error: `entityType must be one of: ${Object.keys(ENTITY_TYPE_TO_SECTION).join(', ')}` },
 			{ status: 400 }
 		);
 	}
 	if (!databaseId || typeof databaseId !== 'number') {
-		return json({ error: 'databaseId is required' }, { status: 400 });
+		return Response.json({ error: 'databaseId is required' }, { status: 400 });
 	}
 	if (!entityName || typeof entityName !== 'string') {
-		return json({ error: 'entityName is required' }, { status: 400 });
+		return Response.json({ error: 'entityName is required' }, { status: 400 });
 	}
 
 	const instance = arrInstancesQueries.getById(instanceId);
 	if (!instance) {
-		return json({ error: 'Instance not found' }, { status: 404 });
+		return Response.json({ error: 'Instance not found' }, { status: 404 });
 	}
 
 	const section = ENTITY_TYPE_TO_SECTION[entityType];
@@ -100,7 +99,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 				source: 'EntitySync:Cooldown',
 				meta: { instanceId, section, syncStatus: status.sync_status }
 			});
-			return json({ error: 'Sync already in progress' }, { status: 409 });
+			return Response.json({ error: 'Sync already in progress' }, { status: 409 });
 		}
 
 		if (status.last_synced_at) {
@@ -111,7 +110,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 					source: 'EntitySync:Cooldown',
 					meta: { instanceId, section, retryAfter, lastSyncedAt: status.last_synced_at }
 				});
-				return json({ error: 'Cooldown active', retryAfter }, { status: 409 });
+				return Response.json({ error: 'Cooldown active', retryAfter }, { status: 409 });
 			}
 		}
 	}
@@ -144,11 +143,11 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		}
 
 		if (result.success) {
-			return json({ success: true });
+			return Response.json({ success: true });
 		}
-		return json({ error: result.error ?? 'Sync failed' }, { status: 500 });
+		return Response.json({ error: result.error ?? 'Sync failed' }, { status: 500 });
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Sync failed';
-		return json({ error: message }, { status: 500 });
+		return Response.json({ error: message }, { status: 500 });
 	}
 };

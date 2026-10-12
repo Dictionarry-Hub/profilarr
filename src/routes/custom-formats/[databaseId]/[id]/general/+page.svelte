@@ -4,7 +4,7 @@
 	import Score from '$ui/arr/Score.svelte';
 	import InlineLink from '$ui/link/InlineLink.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

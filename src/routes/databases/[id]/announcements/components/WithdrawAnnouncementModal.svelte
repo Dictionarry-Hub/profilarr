@@ -41,7 +41,8 @@
 					const data = result.data as { error?: string };
 					alertStore.add('error', data?.error ?? 'Failed to withdraw');
 				}
-				await update();
+				// Stay on the current page on failure; a successful withdraw redirects
+				await update({ navigate: false });
 				withdrawing = false;
 			};
 		}}

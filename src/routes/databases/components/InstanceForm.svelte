@@ -13,7 +13,14 @@
 	} from '@lucide/svelte';
 	import { alertStore } from '$alerts/store';
 	import { jobStatus } from '$stores/jobStatus';
-	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
+	import {
+		isDirty,
+		initEdit,
+		initCreate,
+		update,
+		current,
+		clear
+	} from '#lib/client/stores/dirty.js';
 	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
 	import type { RepoInfo } from '$utils/git/types';
 	import FormInput from '$ui/form/FormInput.svelte';

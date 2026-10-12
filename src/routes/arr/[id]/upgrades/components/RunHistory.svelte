@@ -16,14 +16,14 @@
 		UpgradeSelectionItem,
 		UpgradeOriginalEpisode,
 		UpgradeNewRelease
-	} from '$lib/server/upgrades/types.ts';
+	} from '#lib/server/upgrades/types.ts';
 	import {
 		createSearchStore,
 		getPersistentSearchStore,
 		type SearchStore
-	} from '$lib/client/stores/search';
+	} from '#lib/client/stores/search.js';
 	import type { Readable } from 'svelte/store';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';
@@ -37,8 +37,8 @@
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import type { Column } from '$ui/table/types';
 	import { formatSmartDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat';
-	import { serverTimezone } from '$lib/client/stores/timezone';
+	import { dateFormat } from '#lib/client/stores/dateFormat.js';
+	import { serverTimezone } from '#lib/client/stores/timezone.js';
 
 	let searchStore: SearchStore = createSearchStore();
 	let debouncedQuery: Readable<string> = searchStore.debouncedQuery;
@@ -364,21 +364,34 @@
 								})
 								.join('\n\n')
 						: 'No upgrades'}
+
 				<span class="text-sm text-neutral-600 dark:text-neutral-400">
-					<span class="font-mono">{row.filter.matchedCount}</span> filtered
-					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
-					<span class="font-mono">{row.filter.afterCooldown}</span> after cooldown
-					<span class="mx-1 text-neutral-300 dark:text-neutral-600">&rarr;</span>
+					<span class="font-mono">{row.filter.matchedCount}</span>
+					filtered
+
+					<span class="mx-1 text-neutral-300 dark:text-neutral-600">→</span>
+
+					<span class="font-mono">{row.filter.afterCooldown}</span>
+					after cooldown
+
+					<span class="mx-1 text-neutral-300 dark:text-neutral-600">→</span>
+
 					<Tooltip text={tooltipText} mono>
 						<span
 							class="inline-flex items-center gap-1 font-mono {row.results.successful > 0
 								? 'cursor-help'
 								: ''}"
-							><span class={row.results.successful > 0 ? 'text-green-600 dark:text-green-400' : ''}
+						>
+							<span class={row.results.successful > 0 ? 'text-green-600 dark:text-green-400' : ''}
 								>{row.results.successful}</span
 							>
-							upgraded {#if row.results.successful > 0}<Info size={12} />{/if}</span
-						>
+
+							upgraded
+
+							{#if row.results.successful > 0}
+								<Info size={12} />
+							{/if}
+						</span>
 					</Tooltip>
 				</span>
 			{/if}
@@ -403,8 +416,10 @@
 					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
 						>Library</span
 					>
+
 					<span class="text-sm text-neutral-900 dark:text-neutral-100">
-						<span class="font-mono">{row.library.totalItems.toLocaleString()}</span> items
+						<span class="font-mono">{row.library.totalItems.toLocaleString()}</span>
+						items
 						{#if row.library.fetchedFromCache}
 							<span class="text-neutral-500 dark:text-neutral-400">(cached)</span>
 						{/if}
@@ -419,12 +434,15 @@
 					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
 						>Filter</span
 					>
+
 					<span class="text-sm text-neutral-900 dark:text-neutral-100">
 						"{row.filter.name}"
-						<span class="mx-1 text-neutral-400">&rarr;</span>
-						<span class="font-mono font-medium">{row.filter.matchedCount}</span> filtered
-						<span class="mx-1 text-neutral-400">&rarr;</span>
-						<span class="font-mono font-medium">{row.filter.afterCooldown}</span> after cooldown
+						<span class="mx-1 text-neutral-400">→</span>
+						<span class="font-mono font-medium">{row.filter.matchedCount}</span>
+						filtered
+						<span class="mx-1 text-neutral-400">→</span>
+						<span class="font-mono font-medium">{row.filter.afterCooldown}</span>
+						after cooldown
 					</span>
 				</div>
 
@@ -433,6 +451,7 @@
 					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
 						>Selection</span
 					>
+
 					<span class="text-sm text-neutral-900 dark:text-neutral-100">
 						{formatMethod(row.selection.method)}
 						<span class="font-mono font-medium">{row.selection.actualCount}</span> of
@@ -445,6 +464,7 @@
 					<span class="w-24 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400"
 						>Results</span
 					>
+
 					<span class="text-sm text-neutral-900 dark:text-neutral-100">
 						{#if row.config.dryRun}
 							<span class="font-mono">{row.results.searchesTriggered}</span> previewed,

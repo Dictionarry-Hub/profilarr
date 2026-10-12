@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { FileText, Filter, FlaskConical } from '@lucide/svelte';
 	import type { LayoutData } from './$types';
 
@@ -44,7 +44,7 @@
 
 <div class="px-4 pb-4 md:px-8 md:pb-8">
 	<Tabs {tabs} {breadcrumb} responsive />
-	<slot />
+	<slot></slot>
 </div>
 
 <DirtyModal />

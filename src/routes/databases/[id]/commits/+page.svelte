@@ -9,8 +9,8 @@
 	import type { PageData } from './$types';
 	import type { Commit } from '$utils/git/types';
 	import { parseUTC, formatDate } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '$lib/client/stores/timezone.ts';
+	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
+	import { serverTimezone } from '#lib/client/stores/timezone.ts';
 
 	export let data: PageData;
 
@@ -52,7 +52,9 @@
 		fetchCommits(page);
 	}
 
-	afterNavigate(() => {
+	afterNavigate(({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
+
 		currentPage = 1;
 		totalCount = 0;
 		fetchCommits(1);
@@ -97,25 +99,10 @@
 	}
 
 	const columns: Column<Commit>[] = [
-		{
-			key: 'shortHash',
-			header: 'Commit',
-			width: 'w-24'
-		},
-		{
-			key: 'status',
-			header: 'Status',
-			width: 'w-28'
-		},
-		{
-			key: 'message',
-			header: 'Message'
-		},
-		{
-			key: 'author',
-			header: 'Author',
-			width: 'w-40'
-		},
+		{ key: 'shortHash', header: 'Commit', width: 'w-24' },
+		{ key: 'status', header: 'Status', width: 'w-28' },
+		{ key: 'message', header: 'Message' },
+		{ key: 'author', header: 'Author', width: 'w-40' },
 		{
 			key: 'date',
 			header: 'Date',

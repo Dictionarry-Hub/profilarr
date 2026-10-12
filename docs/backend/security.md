@@ -388,6 +388,13 @@ SvelteKit's CSRF check compares the `Origin` request header against
 `new URL(request.url).origin`. The official `@sveltejs/adapter-node` rewrites
 `request.url` using the `ORIGIN` env var, so this works behind reverse proxies.
 
+The check covers `POST`, `PUT`, `PATCH`, and `DELETE` requests whose
+`Content-Type` is a form type (`application/x-www-form-urlencoded`,
+`multipart/form-data`, `text/plain`) or missing, and only runs in production
+builds. API clients that don't send an `Origin` header must send a non-form
+`Content-Type` such as `application/json`; multipart uploads still need a
+matching `Origin`.
+
 The Deno adapter (`sveltekit-adapter-deno`) does **not** do this. It passes
 `request.url` straight from `Deno.serve`, which is always the internal server
 URL (e.g. `http://localhost:6868`). Behind a reverse proxy:
@@ -421,7 +428,7 @@ Notes:
 - `adapter-node` isn't an option - it outputs JS for Node.js. Profilarr compiles
   to a single Deno binary via `deno compile`.
 - `csrf.trustedOrigins` isn't an option - it's build-time config in
-  `svelte.config.js`, so users can't set their own domain at deploy time.
+  `vite.config.ts`, so users can't set their own domain at deploy time.
 
 ### Protected Paths
 

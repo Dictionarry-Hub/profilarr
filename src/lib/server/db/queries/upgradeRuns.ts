@@ -1,6 +1,6 @@
 import { db } from '../db.ts';
 import { toUTC } from '$shared/utils/dates.ts';
-import type { UpgradeJobLog, UpgradeSelectionItem } from '$lib/server/upgrades/types.ts';
+import type { UpgradeJobLog, UpgradeSelectionItem } from '#lib/server/upgrades/types.ts';
 
 /**
  * Database row type for upgrade_runs table

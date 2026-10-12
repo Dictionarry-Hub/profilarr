@@ -8,7 +8,7 @@
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import { Trash2, Loader2, Save, X } from '@lucide/svelte';
-	import { isDirty, initEdit, initCreate, update, clear } from '$lib/client/stores/dirty';
+	import { isDirty, initEdit, initCreate, update, clear } from '#lib/client/stores/dirty.js';
 
 	// Props
 	export let mode: 'create' | 'edit';

@@ -19,13 +19,13 @@
 	import { filterMode } from '$stores/filterMode';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
-	import { createViewModeStore } from '$lib/client/stores/dataPage';
+	import { createViewModeStore } from '#lib/client/stores/dataPage.js';
 	import { Info, Plus, FileText, Users } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import type { RegularExpressionWithTags } from '$shared/pcd/display';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
-	import { regularExpressionSearchValues } from '$lib/client/utils/entitySearch';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import { regularExpressionSearchValues } from '#lib/client/utils/entitySearch.js';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

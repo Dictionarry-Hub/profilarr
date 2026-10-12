@@ -692,7 +692,7 @@ top of a list page:
   "fuzzy" vs. "exact").
 - **`ViewToggle.svelte`**: list / grid view switcher used on pages that
   support both layouts. Persist view state with `createViewModeStore` from
-  `$lib/client/stores/dataPage`; saved preferences win, mobile falls back to
+  `#lib/client/stores/dataPage.js`; saved preferences win, mobile falls back to
   cards, and the default no-preference view is cards unless the page opts into
   `defaultView: 'table'`.
 

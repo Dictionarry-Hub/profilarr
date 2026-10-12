@@ -1,27 +1,14 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
+	"extends": "$app/tsconfig",
 	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": true,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true,
-		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"moduleResolution": "bundler",
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
-		"types": ["deno"],
-		"allowImportingTsExtensions": true,
-		"noEmit": true,
+		"types": ["$app/types", "deno"],
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"noImplicitOverride": true
 	},
-	"exclude": ["tests/**", "src/adapter/**", "research/**"]
-	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
-	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
-	//
-	// To make changes to top-level options such as include and exclude, we recommend extending
-	// the generated config; see https://svelte.dev/docs/kit/configuration#typescript
+	"exclude": ["tests/**", "src/adapter/**", "research/**"],
+	"include": ["src", "vite.config.ts", "tests"]
 }

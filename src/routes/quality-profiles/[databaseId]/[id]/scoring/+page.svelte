@@ -29,12 +29,12 @@
 	import CustomGroupManager from '$ui/dropdown/CustomGroupManager.svelte';
 	import ScoringTable from './components/ScoringTable.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
+	import { getPersistentSearchStore, type SearchStore } from '#lib/client/stores/search.js';
 	import { onMount, tick } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { enhance } from '$app/forms';
-	import { goto, invalidateAll } from '$app/navigation';
-	import { current, isDirty, initEdit, update } from '$lib/client/stores/dirty';
+	import { goto } from '$app/navigation';
+	import { current, isDirty, initEdit, update } from '#lib/client/stores/dirty.js';
 	import { alertStore } from '$alerts/store';
 	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
 	import type { AffectedArr } from '$shared/sync/types.ts';
@@ -152,8 +152,20 @@
 
 	// Define built-in groups with their tags (order matters - first match wins)
 	const builtInGroups = [
-		{ name: 'Audio', key: 'audio' as const, tags: ['audio'], custom: false },
-		{ name: 'HDR', key: 'hdr' as const, tags: ['hdr'], custom: false },
+		{
+			name: 'Audio',
+			key: 'audio' as const,
+			tags: ['audio'],
+			custom: false
+		},
+
+		{
+			name: 'HDR',
+			key: 'hdr' as const,
+			tags: ['hdr'],
+			custom: false
+		},
+
 		{
 			name: 'Release Group',
 			key: 'release-group' as const,
@@ -172,17 +184,49 @@
 			tags: ['streaming service'],
 			custom: false
 		},
-		{ name: 'Codec', key: 'codec' as const, tags: ['codec'], custom: false },
-		{ name: 'Storage', key: 'storage' as const, tags: ['storage'], custom: false },
-		{ name: 'Source', key: 'source' as const, tags: ['source'], custom: false },
+
+		{
+			name: 'Codec',
+			key: 'codec' as const,
+			tags: ['codec'],
+			custom: false
+		},
+
+		{
+			name: 'Storage',
+			key: 'storage' as const,
+			tags: ['storage'],
+			custom: false
+		},
+
+		{
+			name: 'Source',
+			key: 'source' as const,
+			tags: ['source'],
+			custom: false
+		},
+
 		{
 			name: 'Resolution',
 			key: 'resolution' as const,
 			tags: ['sd', '480p', '576p', '720p', '1080p', '2160p', '4k', '8k', 'resolution'],
 			custom: false
 		},
-		{ name: 'Indexer Flag', key: 'indexer-flag' as const, tags: ['flag'], custom: false },
-		{ name: 'Edition', key: 'edition' as const, tags: ['edition', 'colour grade'], custom: false },
+
+		{
+			name: 'Indexer Flag',
+			key: 'indexer-flag' as const,
+			tags: ['flag'],
+			custom: false
+		},
+
+		{
+			name: 'Edition',
+			key: 'edition' as const,
+			tags: ['edition', 'colour grade'],
+			custom: false
+		},
+
 		{
 			name: 'Enhancement',
 			key: 'enhancement' as const,
@@ -621,7 +665,9 @@
 		<svelte:fragment slot="right">
 			<div class="flex items-center gap-2">
 				<Button text="Scoring" icon={Info} on:click={() => (showInfoModal = true)} />
+
 				<Button text="Options" icon={Info} on:click={() => (showOptionsInfoModal = true)} />
+
 				<Button
 					disabled={isSaving || !$isDirty}
 					icon={isSaving ? Loader2 : Save}
@@ -764,6 +810,7 @@
 
 		<ActionsBar className="md:w-full" onboarding="qp-scoring-actions">
 			<SearchAction {searchStore} placeholder="Search custom formats..." responsive />
+
 			<ActionButton icon={ArrowUpDown} hasDropdown={true} dropdownPosition="right">
 				<svelte:fragment slot="dropdown" let:dropdownPosition let:open>
 					<Dropdown position={dropdownPosition} mobilePosition="middle" minWidth="10rem">

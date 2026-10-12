@@ -1,4 +1,4 @@
-import { json, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { logger } from '$logger/logger.ts';
 import { regex101CacheQueries } from '$db/queries/regex101Cache.ts';
@@ -73,7 +73,7 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
 	// Check cache first
 	const cached = regex101CacheQueries.get(id);
 	if (cached) {
-		return json(JSON.parse(cached.response));
+		return Response.json(JSON.parse(cached.response));
 	}
 
 	// Handle ID with optional version (e.g., "ABC123" or "ABC123/1")
@@ -124,7 +124,7 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
 		// Cache the result
 		regex101CacheQueries.set(id, JSON.stringify(result));
 
-		return json(result);
+		return Response.json(result);
 	} catch (err) {
 		if (err && typeof err === 'object' && 'status' in err) {
 			throw err;
