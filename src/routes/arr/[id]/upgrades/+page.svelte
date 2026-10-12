@@ -8,7 +8,7 @@
 	} from '$shared/upgrades/filters';
 	import { enhance } from '$app/forms';
 	import { browser } from '$app/env';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { alertStore } from '#lib/client/alerts/store.js';
 	import { isDirty, initEdit, update, current, clear } from '#lib/client/stores/dirty.js';
@@ -67,7 +67,7 @@
 				status.state === 'completed' &&
 				status.jobType === 'arr.upgrade'
 			) {
-				invalidateAll();
+				refreshAll();
 			}
 			previousJobState = status.state;
 		});

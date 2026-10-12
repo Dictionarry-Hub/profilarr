@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import Modal from './Modal.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
@@ -61,7 +61,7 @@
 
 			open = false;
 			alertStore.add('success', `Cloned as "${newName.trim()}"`);
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			alertStore.add('error', 'Clone failed');
 		} finally {

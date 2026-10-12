@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import LogOut from '@lucide/svelte/icons/log-out';
 	import Check from '@lucide/svelte/icons/check';
 	import Globe from '@lucide/svelte/icons/globe';
@@ -491,7 +491,7 @@
 						use:enhance={() => {
 							return async ({ update }) => {
 								await update();
-								await invalidateAll();
+								await refreshAll();
 							};
 						}}
 					>
@@ -527,7 +527,7 @@
 									use:enhance={() => {
 										return async ({ update }) => {
 											await update();
-											await invalidateAll();
+											await refreshAll();
 										};
 									}}
 								>
