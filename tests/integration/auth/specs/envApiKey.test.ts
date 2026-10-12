@@ -61,7 +61,7 @@ test('session user cannot create a key named "Environment"', async () => {
 		{ headers: { Origin: ORIGIN } }
 	);
 	const body = await create.text();
-	assertEquals(create.status, 200);
+	assertEquals(create.status, 400);
 	assertEquals(
 		body.includes('"status":400'),
 		true,
