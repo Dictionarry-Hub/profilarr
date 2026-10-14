@@ -2,6 +2,7 @@ import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { logger } from '$logger/logger.ts';
 import { notificationServicesQueries } from '$db/queries/notificationServices.ts';
+import { stripNotificationSecrets } from '$notifications/secrets.ts';
 import { getAllNotificationTypeIds } from '$shared/notifications/types.ts';
 
 export const load = ({ params }: { params: { id: string } }) => {
@@ -17,18 +18,7 @@ export const load = ({ params }: { params: { id: string } }) => {
 		throw error(404, 'Notification service not found');
 	}
 
-	// Parse JSON fields for the component
-	const config = JSON.parse(service.config);
 	const enabledTypes = JSON.parse(service.enabled_types);
-
-	// Strip secrets from config before sending to frontend
-	const {
-		webhook_url: _webhookUrl,
-		access_token: _accessToken,
-		auth_header: _authHeader,
-		bot_token: _botToken,
-		...safeConfig
-	} = config;
 
 	return {
 		service: {
@@ -36,7 +26,8 @@ export const load = ({ params }: { params: { id: string } }) => {
 			name: service.name,
 			serviceType: service.service_type,
 			enabled: service.enabled === 1,
-			config: safeConfig,
+			// Secrets never reach the browser; the form keeps the stored value when the field is left blank
+			config: stripNotificationSecrets(JSON.parse(service.config)),
 			enabledTypes
 		}
 	};
