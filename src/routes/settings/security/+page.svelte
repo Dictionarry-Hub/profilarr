@@ -370,6 +370,7 @@
 					iconColor="text-accent-500"
 					text="New Key"
 					href="/settings/security/api-keys/new"
+					preload="tap"
 				/>
 			</svelte:fragment>
 			<div class="p-6">

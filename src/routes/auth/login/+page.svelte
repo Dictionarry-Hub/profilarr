@@ -91,6 +91,7 @@
 			<!-- OIDC login button -->
 			<Button
 				href="/auth/oidc/login"
+				reload
 				variant={data.password ? 'secondary' : 'primary'}
 				size="md"
 				fullWidth

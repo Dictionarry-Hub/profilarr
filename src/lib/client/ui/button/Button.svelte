@@ -24,6 +24,10 @@
 	export let href: string | undefined = undefined;
 	export let target: string | undefined = undefined;
 	export let rel: string | undefined = undefined;
+	// Let the browser load the href normally instead of the client router (server endpoints)
+	export let reload: boolean = false;
+	// When to fetch the href's page data; 'tap' for pages whose data must be fresh at click time
+	export let preload: 'hover' | 'tap' | 'off' | undefined = undefined;
 	// Alignment for content (center or between for dropdowns)
 	export let justify: 'center' | 'between' = 'center';
 	export let title: string = '';
@@ -113,6 +117,8 @@
 			aria-disabled={softDisabled || disabled ? 'true' : undefined}
 			class={classes}
 			data-onboarding={onboarding}
+			data-sveltekit-reload={reload ? '' : undefined}
+			data-sveltekit-preload-data={preload}
 			on:click
 		>
 			{#if effectiveIcon && iconPosition === 'left'}
