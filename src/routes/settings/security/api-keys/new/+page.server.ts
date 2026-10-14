@@ -3,7 +3,11 @@ import { fail } from '@sveltejs/kit';
 import { apiKeysQueries } from '$db/queries/apiKeys.ts';
 import { sessionsQueries } from '$db/queries/sessions.ts';
 import { API_AREAS } from '$auth/apiPermissions.ts';
-import { isRecentlyConfirmed, requiredConfirmation, REAUTH_RETURN_PATH } from '$auth/confirmation.ts';
+import {
+	isRecentlyConfirmed,
+	requiredConfirmation,
+	REAUTH_RETURN_PATH
+} from '$auth/confirmation.ts';
 import { isOidcUsername } from '$auth/loginOptions.ts';
 import { verifyPassword } from '$auth/password.ts';
 import { getClientIp } from '$auth/network.ts';

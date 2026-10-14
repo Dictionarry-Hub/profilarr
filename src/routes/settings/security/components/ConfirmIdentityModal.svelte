@@ -66,9 +66,9 @@
 		{:else}
 			{#if reauthFailed}
 				<p class="text-sm text-red-600 dark:text-red-400">
-					Your sign-in provider did not confirm it was you. To create API keys, sign in with a
-					local account and use its password. You can create one in the Create Local Account
-					section on this page.
+					Your sign-in provider did not confirm it was you. To create API keys, sign in with a local
+					account and use its password. You can create one in the Create Local Account section on
+					this page.
 				</p>
 			{/if}
 			<p class="text-sm text-neutral-600 dark:text-neutral-400">

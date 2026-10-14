@@ -83,7 +83,6 @@
 	let created: { name: string; key: string } | null = null;
 	let copied = false;
 
-
 	async function copyKey() {
 		if (!created) return;
 		const ok = await copyToClipboard(created.key);
