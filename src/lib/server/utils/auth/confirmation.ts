@@ -7,6 +7,8 @@
  * activity never touches it. See docs/backend/security.md, "Creating a Key".
  */
 
+import { isOidcUsername } from './loginOptions.ts';
+
 /** How long a confirmation is trusted, per session. */
 export const CONFIRMATION_WINDOW_MINUTES = 30;
 
@@ -18,6 +20,24 @@ export const REAUTH_SKEW_SECONDS = 60;
 
 /** Where an SSO re-authentication returns to. Fixed, so it can't be used as an open redirect. */
 export const REAUTH_RETURN_PATH = '/settings/security/api-keys/new';
+
+/** Where a failed SSO re-authentication returns to, with `?reauth=failed`. */
+export const REAUTH_FAILED_PATH = '/settings/security';
+
+/**
+ * How a session must confirm before creating a key: `none` when it confirmed
+ * recently (or there is no session, i.e. AUTH=off), `password` for password
+ * sessions, `sso` for SSO sessions.
+ */
+export type Confirmation = 'none' | 'password' | 'sso';
+
+export function requiredConfirmation(
+	session: { confirmed_at: string | null } | null | undefined,
+	user: { username: string } | null | undefined
+): Confirmation {
+	if (!session || !user || isRecentlyConfirmed(session.confirmed_at)) return 'none';
+	return isOidcUsername(user.username) ? 'sso' : 'password';
+}
 
 /**
  * True when `confirmedAt` is inside the confirmation window. A timestamp in

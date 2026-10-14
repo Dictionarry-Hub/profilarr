@@ -178,7 +178,8 @@ The callback then requires the ID token's `auth_time` claim to be newer than
 the moment the flow started and its `sub` to match the signed-in account. On
 success the existing session is marked confirmed and kept; no new session is
 created. A provider that returns no fresh `auth_time` (Google does not support
-the request) fails closed, and the page suggests creating a local account.
+the request) fails closed and returns to the Security page, which suggests
+creating a local account.
 
 `AUTH=oidc` is a deprecated alias for `AUTH=on`. Startup logs a warning asking
 for `AUTH=on`; if a password account exists, the warning also says the login
@@ -279,18 +280,19 @@ creating several keys in a row asks once. Signing in counts as a confirmation.
 
 The gate is enforced by the `create` action in
 `src/routes/settings/security/api-keys/new/+page.server.ts` using
-`isRecentlyConfirmed()` from `src/lib/server/utils/auth/confirmation.ts`. The
-page shows the key form only once the session is confirmed. The link to the
-page fetches its data on click rather than on hover, so that decision is
-current, and a submit refused because the confirmation lapsed brings the
-confirm step back.
+`isRecentlyConfirmed()` from `src/lib/server/utils/auth/confirmation.ts`. On
+the Security page, New Key opens a modal that asks for the confirmation and
+only then opens the form. The form page shows the same modal for direct links
+and for a confirmation that lapses while it is open; a refused submit brings
+it back. The New Key link is never preloaded, so the form page's data is
+fetched only when it actually opens, after the confirmation.
 
 Password session:
 
 ```mermaid
 flowchart TD
-    A[Create key form submitted] --> B{Session confirmed<br>in last 30 min?}
-    B -->|Yes| K[Create key, show plaintext once]
+    A[New Key clicked] --> B{Session confirmed<br>in last 30 min?}
+    B -->|Yes| K[Open the form; create key,<br>show plaintext once]
     B -->|No| C{Password field<br>filled in?}
     C -->|No| D[400: enter your password]
     C -->|Yes| E{Password matches<br>account hash?}
@@ -306,16 +308,16 @@ SSO session:
 
 ```mermaid
 flowchart TD
-    A[Create key form submitted] --> B{Session confirmed<br>in last 30 min?}
-    B -->|Yes| K[Create key, show plaintext once]
+    A[New Key clicked] --> B{Session confirmed<br>in last 30 min?}
+    B -->|Yes| K[Open the form; create key,<br>show plaintext once]
     B -->|No| C[Confirm with SSO:<br>/auth/oidc/login?reauth=1]
     C --> D[Redirect to provider with<br>prompt=login and max_age=60]
     D --> E[Provider re-authenticates the user]
     E --> F[Callback: usual token checks]
     F --> G{sub matches the session and<br>auth_time newer than when we started?}
-    G -->|No| H[Session stays unconfirmed.<br>Page: provider could not confirm you,<br>create a local account to use a password]
+    G -->|No| H[Session stays unconfirmed.<br>Back to Security: provider could not<br>confirm you, create a local account]
     G -->|Yes| I[Mark session confirmed now]
-    I --> J[Back to the key page]
+    I --> J[Back on the key form]
     J --> K
 ```
 

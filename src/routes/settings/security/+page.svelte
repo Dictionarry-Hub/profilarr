@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import {
 		LogOut,
 		Check,
@@ -27,6 +27,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
+	import ConfirmIdentityModal from './components/ConfirmIdentityModal.svelte';
 	import InlineCode from '$ui/code/InlineCode.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { alertStore } from '$alerts/store';
@@ -41,6 +42,10 @@
 
 	export let data: PageData;
 	export let form: ActionData;
+
+	// New Key asks the session to confirm its identity first, then opens the form
+	let confirmOpen = false;
+	$: if (data.reauthFailed) confirmOpen = true;
 
 	let changingPassword = false;
 	let currentPassword = '';
@@ -370,7 +375,12 @@
 					iconColor="text-accent-500"
 					text="New Key"
 					href="/settings/security/api-keys/new"
-					preload="tap"
+					preload="off"
+					on:click={(e) => {
+						if (data.confirmation === 'none') return;
+						e.preventDefault();
+						confirmOpen = true;
+					}}
 				/>
 			</svelte:fragment>
 			<div class="p-6">
@@ -554,4 +564,12 @@
 	confirmDanger
 	on:confirm={confirmDelete}
 	on:cancel={() => (pendingDelete = null)}
+/>
+
+<ConfirmIdentityModal
+	open={confirmOpen}
+	confirmation={data.confirmation === 'sso' ? 'sso' : 'password'}
+	reauthFailed={data.reauthFailed}
+	on:cancel={() => (confirmOpen = false)}
+	on:confirmed={() => goto('/settings/security/api-keys/new')}
 />

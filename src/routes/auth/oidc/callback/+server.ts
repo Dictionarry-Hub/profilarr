@@ -7,7 +7,7 @@ import { sessionsQueries } from '$db/queries/sessions.ts';
 import { authSettingsQueries } from '$db/queries/authSettings.ts';
 import { getClientIp } from '$auth/network.ts';
 import { parseUserAgent } from '$auth/userAgent.ts';
-import { evaluateReauth, REAUTH_RETURN_PATH } from '$auth/confirmation.ts';
+import { evaluateReauth, REAUTH_FAILED_PATH, REAUTH_RETURN_PATH } from '$auth/confirmation.ts';
 import { logger } from '$logger/logger.ts';
 
 export const GET: RequestHandler = async (event) => {
@@ -131,7 +131,7 @@ export const GET: RequestHandler = async (event) => {
 				source: 'Auth:OIDC',
 				meta: { ip, username: user.username, reason: result.reason }
 			});
-			throw redirect(303, `${REAUTH_RETURN_PATH}?reauth=failed`);
+			throw redirect(303, `${REAUTH_FAILED_PATH}?reauth=failed`);
 		}
 
 		sessionsQueries.markConfirmed(session.id);

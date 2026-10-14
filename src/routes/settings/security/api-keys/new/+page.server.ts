@@ -3,7 +3,7 @@ import { fail } from '@sveltejs/kit';
 import { apiKeysQueries } from '$db/queries/apiKeys.ts';
 import { sessionsQueries } from '$db/queries/sessions.ts';
 import { API_AREAS } from '$auth/apiPermissions.ts';
-import { isRecentlyConfirmed, REAUTH_RETURN_PATH } from '$auth/confirmation.ts';
+import { isRecentlyConfirmed, requiredConfirmation, REAUTH_RETURN_PATH } from '$auth/confirmation.ts';
 import { isOidcUsername } from '$auth/loginOptions.ts';
 import { verifyPassword } from '$auth/password.ts';
 import { getClientIp } from '$auth/network.ts';
@@ -19,24 +19,10 @@ import { logger } from '$logger/logger.ts';
 
 const MAX_NAME_LENGTH = 64;
 
-/**
- * How the current session must confirm its identity before the key form is
- * shown: `none` when it confirmed recently (or there is no session, i.e.
- * AUTH=off), `password` for password sessions, `sso` for SSO sessions.
- */
-export type Confirmation = 'none' | 'password' | 'sso';
-
-export const load: ServerLoad = ({ locals, url }) => {
-	let confirmation: Confirmation = 'none';
-	if (locals.session && locals.user && !isRecentlyConfirmed(locals.session.confirmed_at)) {
-		confirmation = isOidcUsername(locals.user.username) ? 'sso' : 'password';
-	}
-	return {
-		apiAreas: API_AREAS,
-		confirmation,
-		reauthFailed: url.searchParams.get('reauth') === 'failed'
-	};
-};
+export const load: ServerLoad = ({ locals }) => ({
+	apiAreas: API_AREAS,
+	confirmation: requiredConfirmation(locals.session, locals.user)
+});
 
 /**
  * Keep only known areas, and only grant write where the area has a write

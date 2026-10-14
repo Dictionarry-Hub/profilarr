@@ -2,7 +2,7 @@
 	import { onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { beforeNavigate, goto, invalidateAll } from '$app/navigation';
-	import { Plus, Copy, Check, KeyRound } from '@lucide/svelte';
+	import { Plus, Copy, Check } from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
@@ -13,7 +13,7 @@
 	import Modal from '$ui/modal/Modal.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import Table from '$ui/table/Table.svelte';
-	import InlineLink from '$ui/link/InlineLink.svelte';
+	import ConfirmIdentityModal from '../../components/ConfirmIdentityModal.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
@@ -83,9 +83,6 @@
 	let created: { name: string; key: string } | null = null;
 	let copied = false;
 
-	// Identity confirmation step, shown until the session has confirmed recently
-	let confirming = false;
-	let confirmPassword = '';
 
 	async function copyKey() {
 		if (!created) return;
@@ -165,85 +162,6 @@
 				</p>
 			</div>
 		</div>
-	{:else if data.confirmation !== 'none'}
-		<div class="space-y-6">
-			<StickyCard
-				position="top"
-				breadcrumbItems={[{ label: 'Security', href: '/settings/security' }]}
-				breadcrumbCurrent="New API Key"
-			>
-				<svelte:fragment slot="left">
-					<div>
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
-							Confirm it's you
-						</h2>
-						<p class="text-sm text-neutral-600 dark:text-neutral-400">
-							An API key is a long-lived credential, so creating one asks you to prove your identity
-							first
-						</p>
-					</div>
-				</svelte:fragment>
-				<svelte:fragment slot="right">
-					<Button text="Cancel" variant="secondary" href="/settings/security" />
-				</svelte:fragment>
-			</StickyCard>
-
-			<div class="space-y-4 md:px-4">
-				{#if data.confirmation === 'password'}
-					<form
-						method="POST"
-						action="?/confirm"
-						class="max-w-md space-y-4"
-						use:enhance={() => {
-							confirming = true;
-							return async ({ result, update }) => {
-								if (result.type === 'failure') {
-									alertStore.add(
-										'error',
-										(result.data as { confirmError?: string } | undefined)?.confirmError ??
-											'Could not confirm'
-									);
-								} else if (result.type === 'error') {
-									alertStore.add('error', 'Could not confirm');
-								}
-								await update({ reset: false });
-								confirming = false;
-							};
-						}}
-					>
-						<FormInput
-							label="Password"
-							name="password"
-							type="password"
-							autocomplete="current-password"
-							placeholder="Your password"
-							description="Asked again 30 minutes after your last confirmation"
-							private_
-							required
-							bind:value={confirmPassword}
-						/>
-						<Button
-							text={confirming ? 'Confirming...' : 'Confirm'}
-							icon={KeyRound}
-							type="submit"
-							disabled={confirming || !confirmPassword}
-						/>
-					</form>
-				{:else}
-					{#if data.reauthFailed}
-						<p class="text-sm text-red-600 dark:text-red-400">
-							Your sign-in provider did not confirm it was you. To create API keys, create a local
-							account under <InlineLink href="/settings/security" text="Security" /> and use its password.
-						</p>
-					{/if}
-					<p class="text-sm text-neutral-600 dark:text-neutral-400">
-						You signed in with SSO, so your provider has to confirm it's you. You'll be sent there
-						and brought straight back here.
-					</p>
-					<Button text="Confirm with SSO" icon={KeyRound} href="/auth/oidc/login?reauth=1" reload />
-				{/if}
-			</div>
-		</div>
 	{:else}
 		<form
 			method="POST"
@@ -262,11 +180,10 @@
 							(result.data as { error?: string } | undefined)?.error ?? 'Failed to create API key'
 						);
 						// Re-run load: the refusal may mean the session needs confirming again,
-						// in which case the confirm step replaces the form. (enhance's update()
-						// only reloads after a success.) A password confirmation stays on this
-						// page, so typed values survive it. An SSO confirmation leaves the page,
-						// so drop the dirty state rather than prompt about values that are lost
-						// either way.
+						// in which case the modal opens over the form. (enhance's update() only
+						// reloads after a success.) A password confirmation keeps typed values.
+						// An SSO confirmation leaves the page, so drop the dirty state rather
+						// than prompt about values that are lost either way.
 						await invalidateAll();
 						if (data.confirmation === 'sso') clear();
 					} else if (result.type === 'error') {
@@ -388,6 +305,14 @@
 </div>
 
 <DirtyModal />
+
+<!-- Direct links and lapsed confirmations: the same modal the Security page shows -->
+<ConfirmIdentityModal
+	open={!created && data.confirmation !== 'none'}
+	confirmation={data.confirmation === 'sso' ? 'sso' : 'password'}
+	on:cancel={() => goto('/settings/security')}
+	on:confirmed={() => invalidateAll()}
+/>
 
 <Modal
 	open={leaveModalOpen}

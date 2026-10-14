@@ -129,7 +129,7 @@ test('a provider without auth_time fails closed and the page is told', async () 
 
 	const { callbackRes } = await completeOidcLogin(client, 'test', { reauth: true });
 	assertEquals(callbackRes.status, 303);
-	assertStringIncludes(callbackRes.headers.get('location') ?? '', `${KEY_PAGE}?reauth=failed`);
+	assertStringIncludes(callbackRes.headers.get('location') ?? '', '/settings/security?reauth=failed');
 	assertEquals(getSessionConfirmedAt(getDbPath(STALE_PORT), sessionId), before);
 	assertEquals(await createKey(client, STALE_ORIGIN), 403);
 });
