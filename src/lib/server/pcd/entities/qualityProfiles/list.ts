@@ -12,7 +12,6 @@ import type {
 	CustomFormatCounts,
 	QualityProfileOption
 } from '$shared/pcd/display.ts';
-import { parseMarkdown } from '$utils/markdown/markdown.ts';
 
 /**
  * Get quality profiles with full data for table/card views
@@ -144,7 +143,7 @@ export async function list(cache: PCDCache): Promise<QualityProfileTableRow[]> {
 		const result: QualityProfileTableRow = {
 			id: profile.id,
 			name: profile.name,
-			description: parseMarkdown(profile.description),
+			description: profile.description ?? '',
 			tags: tagsMap.get(profile.name) || [],
 			upgrades_allowed: profile.upgrades_allowed === 1,
 			minimum_custom_format_score: profile.minimum_custom_format_score,

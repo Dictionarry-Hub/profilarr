@@ -288,7 +288,7 @@ export type QualityProfileTableRow = Omit<
 	QualityProfilesRow,
 	'description' | 'upgrade_until_score' | 'upgrade_score_increment' | 'created_at' | 'updated_at'
 > & {
-	description: string; // Parsed HTML from markdown (non-nullable)
+	description: string; // Raw markdown, empty when unset; views render it
 	tags: Tag[];
 	upgrade_until_score?: number; // Only if upgrades_allowed
 	upgrade_score_increment?: number; // Only if upgrades_allowed

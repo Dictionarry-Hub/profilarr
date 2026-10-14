@@ -5,8 +5,8 @@
 	import type { Column } from '$ui/table/types';
 	import type { RegularExpressionWithTags } from '$shared/pcd/display';
 	import { Tag, Code, FileText, Link, Copy, Download } from '@lucide/svelte';
-	import { marked } from 'marked';
-	import { sanitizeHtml } from '$shared/utils/sanitize';
+	import { renderMarkdown } from '$shared/utils/markdown';
+	import { escapeHtml } from '$shared/utils/sanitize';
 	import { page } from '$app/stores';
 	import { FEATURES } from '$shared/features.ts';
 
@@ -18,20 +18,6 @@
 
 	function getRowHref(row: RegularExpressionWithTags): string {
 		return `/regular-expressions/${databaseId}/${row.id}`;
-	}
-
-	function escapeHtml(text: string): string {
-		return text
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#039;');
-	}
-
-	function parseMarkdown(text: string | null): string {
-		if (!text) return '';
-		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
 	}
 
 	const columns: Column<RegularExpressionWithTags>[] = [
@@ -86,7 +72,7 @@
 			width: 'w-[30%]',
 			cell: (row: RegularExpressionWithTags) => ({
 				html: row.description
-					? `<span class="text-sm text-neutral-600 dark:text-neutral-400 prose-inline">${parseMarkdown(row.description)}</span>`
+					? `<span class="text-sm text-neutral-600 dark:text-neutral-400 prose-inline">${renderMarkdown(row.description)}</span>`
 					: `<span class="text-neutral-400">-</span>`
 			})
 		},

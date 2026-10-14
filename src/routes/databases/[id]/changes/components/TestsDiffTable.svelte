@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Table from '$ui/table/Table.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
-	import { marked } from 'marked';
-	import { sanitizeHtml } from '$shared/utils/sanitize.ts';
+	import { renderMarkdown } from '$shared/utils/markdown.ts';
 	import type { Column } from '$ui/table/types';
 	import type { TestDiff, TestSnapshot } from './types';
 
@@ -49,10 +48,6 @@
 			before: row.before?.[field],
 			after: row.after?.[field]
 		};
-	}
-
-	function parseMarkdown(text: string): string {
-		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
 	}
 
 	function changeBadgeVariant(change: TestDiff['change']): 'success' | 'danger' | 'neutral' {
@@ -111,21 +106,21 @@
 						<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Before</div>
 						<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
 							<!-- nosemgrep: profilarr.xss.at-html-usage -->
-							{@html parseMarkdown(String(change.before ?? ''))}
+							{@html renderMarkdown(String(change.before ?? ''))}
 						</div>
 					</div>
 					<div>
 						<div class="text-xs font-medium text-neutral-500 dark:text-neutral-400">After</div>
 						<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
 							<!-- nosemgrep: profilarr.xss.at-html-usage -->
-							{@html parseMarkdown(String(change.after ?? ''))}
+							{@html renderMarkdown(String(change.after ?? ''))}
 						</div>
 					</div>
 				</div>
 			{:else if change.after !== undefined || change.before !== undefined}
 				<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
 					<!-- nosemgrep: profilarr.xss.at-html-usage -->
-					{@html parseMarkdown(String(change.after ?? change.before ?? ''))}
+					{@html renderMarkdown(String(change.after ?? change.before ?? ''))}
 				</div>
 			{:else}
 				<span class="text-sm text-neutral-400">—</span>

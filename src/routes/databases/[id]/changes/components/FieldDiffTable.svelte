@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Table from '$ui/table/Table.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
-	import { marked } from 'marked';
-	import { sanitizeHtml } from '$shared/utils/sanitize.ts';
+	import { renderMarkdown } from '$shared/utils/markdown.ts';
 	import { ExternalLink } from '@lucide/svelte';
 	import {
 		getColonReplacementLabel,
@@ -15,10 +14,6 @@
 	export let operation: OperationType = 'update';
 
 	$: columns = getColumns(operation);
-
-	function parseMarkdown(text: string): string {
-		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
-	}
 
 	function isMarkdownField(field: string): boolean {
 		return ['description', 'readme', 'notes'].includes(field);
@@ -195,7 +190,7 @@
 				</Badge>
 			{:else if isMarkdownField(row.field) && typeof beforeValue === 'string'}
 				<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
-					{@html parseMarkdown(beforeValue)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
+					{@html renderMarkdown(beforeValue)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 				</div>
 			{:else if typeof beforeValue === 'number'}
 				<Badge variant="neutral" size="md" mono>
@@ -249,7 +244,7 @@
 				</Badge>
 			{:else if isMarkdownField(row.field) && typeof afterValue === 'string'}
 				<div class="prose prose-sm prose-neutral dark:prose-invert text-sm">
-					{@html parseMarkdown(afterValue)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
+					{@html renderMarkdown(afterValue)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
 				</div>
 			{:else if typeof afterValue === 'number'}
 				<Badge variant="neutral" size="md" mono>

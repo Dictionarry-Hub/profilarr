@@ -560,10 +560,13 @@ inline tags that don't need a badge's visual weight.
 - **`$ui/code/InlineCode.svelte`**: inline monospace span for references in
   prose.
 
-A second `CodeBlock` exists at `$ui/display/CodeBlock.svelte` alongside
-`$ui/display/Markdown.svelte`; the `display/` variants are used by the
-help / docs surface while `code/` is the general-purpose block. Treat the
+A second `CodeBlock` exists at `$ui/display/CodeBlock.svelte`; treat the
 `code/` pair as the canonical entry point for now.
+
+**`$ui/display/Markdown.svelte`** renders a markdown string through the shared
+`renderMarkdown()` helper (`$shared/utils/markdown`). Props: `content`,
+`inline` (default true), `maxLines` for a line clamp, and `links` (set false
+inside a card that is itself a link). The regex card view uses it.
 
 ### Navigation
 

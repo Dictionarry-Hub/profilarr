@@ -10,7 +10,6 @@ import {
 	writeReadme,
 	type Manifest
 } from '$pcd/manifest/manifest.ts';
-import { parseMarkdown } from '$utils/markdown/markdown.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { logger } from '$logger/logger.ts';
 
@@ -23,7 +22,6 @@ export const load: PageServerLoad = async ({ parent }) => {
 
 	let manifest: Manifest | null = null;
 	let readmeRaw: string | null = null;
-	let readmeHtml: string | null = null;
 
 	try {
 		manifest = await readManifest(database.local_path);
@@ -32,14 +30,10 @@ export const load: PageServerLoad = async ({ parent }) => {
 	}
 
 	readmeRaw = await readReadme(database.local_path);
-	if (readmeRaw) {
-		readmeHtml = parseMarkdown(readmeRaw);
-	}
 
 	return {
 		manifest,
-		readmeRaw,
-		readmeHtml
+		readmeRaw
 	};
 };
 

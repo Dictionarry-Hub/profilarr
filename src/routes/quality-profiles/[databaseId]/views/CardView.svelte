@@ -7,7 +7,7 @@
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import { createProgressiveList } from '$lib/client/utils/progressiveList';
-	import { sanitizeHtml } from '$shared/utils/sanitize';
+	import { renderMarkdown } from '$shared/utils/markdown';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let profiles: QualityProfileTableRow[];
@@ -73,8 +73,9 @@
 
 				{#if profile.description}
 					<div class="description text-xs text-neutral-600 dark:text-neutral-400">
+						<!-- The card is a link, so unwrap links in the description -->
 						<!-- nosemgrep: profilarr.xss.at-html-usage -->
-						{@html sanitizeHtml(profile.description, { links: false })}
+						{@html renderMarkdown(profile.description, { links: false })}
 					</div>
 				{/if}
 

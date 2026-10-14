@@ -2,8 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
 	import { FlaskConical, Copy, Download } from '@lucide/svelte';
-	import { marked } from 'marked';
-	import { sanitizeHtml } from '$shared/utils/sanitize';
+	import { renderMarkdown } from '$shared/utils/markdown';
 	import { page } from '$app/stores';
 	import { sortConditions } from '$shared/pcd/conditions';
 	import CardGrid from '$ui/card/CardGrid.svelte';
@@ -23,12 +22,6 @@
 	$: setTotalCount(formats.length);
 	$: (formats, reset());
 	$: visibleFormats = formats.slice(0, $visibleCount);
-
-	function parseMarkdown(text: string | null): string {
-		if (!text) return '';
-		// The card is a link, so unwrap links in the description
-		return sanitizeHtml(marked.parse(text) as string, { links: false }); // nosemgrep: profilarr.xss.marked-unsanitized
-	}
 
 	function getConditionVariant(
 		condition: CustomFormatTableRow['conditions'][number]
@@ -91,7 +84,9 @@
 				<!-- Description -->
 				{#if format.description}
 					<div class="prose-inline line-clamp-3 text-xs text-neutral-600 dark:text-neutral-400">
-						{@html parseMarkdown(format.description)}<!-- nosemgrep: profilarr.xss.at-html-usage -->
+						<!-- The card is a link, so unwrap links in the description -->
+						<!-- nosemgrep: profilarr.xss.at-html-usage -->
+						{@html renderMarkdown(format.description, { links: false })}
 					</div>
 				{:else}
 					<div class="text-xs text-neutral-400 italic dark:text-neutral-500">No description</div>

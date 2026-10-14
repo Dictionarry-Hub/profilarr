@@ -2,8 +2,7 @@
 	import type { PageData } from './$types';
 	import { Plus, AlertTriangle, ExternalLink, Edit3, Trash2 } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
-	import { marked } from 'marked';
-	import { sanitizeHtml } from '$shared/utils/sanitize.ts';
+	import { renderMarkdown } from '$shared/utils/markdown.ts';
 	import Button from '$ui/button/Button.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import Label from '$ui/label/Label.svelte';
@@ -14,10 +13,6 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import WithdrawAnnouncementModal from './components/WithdrawAnnouncementModal.svelte';
 	import type { Column } from '$ui/table/types';
-
-	function renderMarkdown(text: string): string {
-		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
-	}
 
 	export let data: PageData;
 

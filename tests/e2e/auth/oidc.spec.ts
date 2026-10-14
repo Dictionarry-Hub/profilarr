@@ -11,8 +11,8 @@
  */
 import { test, expect } from '@playwright/test';
 
-const DIRECT_URL = process.env.OIDC_DIRECT_URL || 'http://localhost:7007';
-const PROXY_URL = process.env.OIDC_PROXY_URL || 'https://localhost:7445';
+const DIRECT_URL = process.env.OIDC_DIRECT_URL || 'http://localhost:8000';
+const PROXY_URL = process.env.OIDC_PROXY_URL || 'https://localhost:8445';
 
 /**
  * Drive the full OIDC login flow in the browser.

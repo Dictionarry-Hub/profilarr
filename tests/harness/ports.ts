@@ -1,10 +1,10 @@
 /**
- * Integration test port registry.
+ * Test port registry.
  *
- * Single source of truth for port allocation across all integration specs.
- * Specs import from here instead of declaring their own PORT constants, so
- * collisions surface as a registry-time error at first import rather than as
- * parallel-run flakes.
+ * Single source of truth for port allocation across every suite that starts a
+ * server: integration specs and E2E suites. Specs and the runner import from
+ * here instead of declaring their own PORT constants, so collisions surface as
+ * a registry-time error at first import rather than as parallel-run flakes.
  *
  * Range strategy
  *   7000-7099  auth
@@ -17,6 +17,7 @@
  *   7700-7799  pcd conflicts
  *   7800-7899  pcd reserved (future write/conflict expansion)
  *   7900-7999  settings
+ *   8000-8099  e2e (browser suites)
  *
  * Each suite gets 100 ports of headroom. From a port number alone you can tell
  * which suite it belongs to. New specs claim the next free slot in their
@@ -56,7 +57,8 @@ export const PORTS = {
 		localAccount: 7028,
 		loginSsoRemoved: 7029,
 		localAccountRace: 7030,
-		setupRace: 7031
+		setupRace: 7031,
+		xss: 7032
 	},
 	api: {
 		arr: 7100,
@@ -137,6 +139,11 @@ export const PORTS = {
 	},
 	settings: {
 		landingPage: 7900
+	},
+	e2e: {
+		auth: 8000,
+		authProxy: 8001,
+		sanitize: 8002
 	}
 } as const;
 
