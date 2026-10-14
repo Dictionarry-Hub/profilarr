@@ -19,8 +19,8 @@
  * - databases/+page.server.ts → personal_access_token in database list
  * - settings/general/+page.server.ts → TMDB + AI api_key
  * - settings/security/+page.server.ts → Profilarr API key hashes
- * - settings/notifications/+page.server.ts → webhook_url in config JSON
- * - settings/notifications/edit/[id]/+page.server.ts → webhook_url in edit form
+ * - settings/notifications/+page.server.ts → service secrets in config JSON
+ * - settings/notifications/edit/[id]/+page.server.ts → service secrets in edit form
  * - 12 pages using pcdManager.getAll() → PATs (quality-profiles, custom-formats,
  *   delay-profiles, regular-expressions, media-management, arr/[id]/sync)
  *
@@ -39,14 +39,16 @@
  * 12. /settings/general does not expose TMDB API key
  * 13. /settings/general does not expose AI API key
  * 14. /settings/security does not expose Profilarr API key
- * 15. /settings/notifications list does not expose webhook URLs
- * 16. /settings/notifications/edit/[id] does not expose webhook URL
+ * 15. /settings/notifications list does not expose any service secret
+ * 16-19. /settings/notifications/edit/[id] does not expose the secret of each
+ *        service type (Discord webhook URL, Ntfy access token, webhook URL and
+ *        auth header, Telegram bot token)
  */
 
 import { assertEquals } from '@std/assert';
 import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUserDirect, login } from '$test-harness/setup.ts';
+import { createUserDirect, login, queryDb } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { PORTS } from '$test-harness/ports.ts';
 import { openDb } from '$test-harness/db.ts';
@@ -62,11 +64,29 @@ const TMDB_API_KEY = 'tmdb-secret-key-xyz789ghi012';
 const AI_API_KEY = 'sk-ai-secret-key-jkl345mno678';
 const PROFILARR_API_KEY = 'profilarr-secret-key-pqr901stu234';
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/secret-webhook-id/secret-webhook-token';
+const NTFY_ACCESS_TOKEN = 'tk_ntfy-secret-access-token-abc123';
+const GENERIC_WEBHOOK_URL = 'https://hooks.example.com/secret-generic-webhook-path';
+const WEBHOOK_AUTH_HEADER = 'Bearer secret-webhook-auth-header-def456';
+const TELEGRAM_BOT_TOKEN = '123456789:secret-telegram-bot-token-ghi789';
+
+/** Every notification secret, so the list page can be checked for all of them. */
+const NOTIFICATION_SECRETS: Array<[string, string]> = [
+	[WEBHOOK_URL, 'Discord webhook URL'],
+	[NTFY_ACCESS_TOKEN, 'Ntfy access token'],
+	[GENERIC_WEBHOOK_URL, 'webhook URL'],
+	[WEBHOOK_AUTH_HEADER, 'webhook auth header'],
+	[TELEGRAM_BOT_TOKEN, 'Telegram bot token']
+];
 
 let arrInstanceId: number;
 let databaseId: number;
 let pcdDatabaseId: number;
-let notificationServiceId: string;
+const notificationServiceIds: Record<'discord' | 'ntfy' | 'webhook' | 'telegram', string> = {
+	discord: '',
+	ntfy: '',
+	webhook: '',
+	telegram: ''
+};
 let profilarrApiKeyHash: string;
 
 async function seedSecrets(dbPath: string) {
@@ -129,13 +149,37 @@ async function seedSecrets(dbPath: string) {
 			pcdDatabaseId = databaseId;
 		}
 
-		// Notification service with webhook URL
-		notificationServiceId = crypto.randomUUID();
-		db.exec(
-			`INSERT INTO notification_services (id, name, service_type, enabled, config, enabled_types)
-			 VALUES (?, 'Test Discord', 'discord', 1, ?, '[]')`,
-			[notificationServiceId, JSON.stringify({ webhook_url: WEBHOOK_URL, username: 'Profilarr' })]
-		);
+		// One notification service per type, each with its secret
+		const services: Array<[keyof typeof notificationServiceIds, string, Record<string, unknown>]> =
+			[
+				['discord', 'Test Discord', { webhook_url: WEBHOOK_URL, username: 'Profilarr' }],
+				[
+					'ntfy',
+					'Test Ntfy',
+					{ server_url: 'https://ntfy.sh', topic: 'profilarr', access_token: NTFY_ACCESS_TOKEN }
+				],
+				[
+					'webhook',
+					'Test Webhook',
+					{ webhook_url: GENERIC_WEBHOOK_URL, auth_header: WEBHOOK_AUTH_HEADER }
+				],
+				[
+					'telegram',
+					'Test Telegram',
+					// Unreachable address, so a send fails at the network level and the
+					// error text, which can carry the request URL, is recorded in history
+					{ bot_token: TELEGRAM_BOT_TOKEN, chat_id: '42', api_base_url: 'http://127.0.0.1:1' }
+				]
+			];
+		for (const [type, name, config] of services) {
+			const id = crypto.randomUUID();
+			notificationServiceIds[type] = id;
+			db.exec(
+				`INSERT INTO notification_services (id, name, service_type, enabled, config, enabled_types)
+				 VALUES (?, ?, ?, 1, ?, '[]')`,
+				[id, name, type, JSON.stringify(config)]
+			);
+		}
 	} finally {
 		db.close();
 	}
@@ -243,16 +287,63 @@ test('/settings/security does not expose Profilarr API key', async () => {
 	assertNotExposed(body, profilarrApiKeyHash, 'Profilarr API key hash');
 });
 
-// --- Notification webhook URLs ---
+// --- Notification service secrets ---
 
-test('/settings/notifications does not expose webhook URLs', async () => {
+test('/settings/notifications does not expose any service secret', async () => {
 	const body = await fetchPage('/settings/notifications');
-	assertNotExposed(body, WEBHOOK_URL, 'webhook URL');
+	for (const [secret, label] of NOTIFICATION_SECRETS) {
+		assertNotExposed(body, secret, label);
+	}
 });
 
-test('/settings/notifications/edit/[id] does not expose webhook URL', async () => {
-	const body = await fetchPage(`/settings/notifications/edit/${notificationServiceId}`);
-	assertNotExposed(body, WEBHOOK_URL, 'webhook URL in edit page');
+test('/settings/notifications/edit/[id] does not expose Discord webhook URL', async () => {
+	const body = await fetchPage(`/settings/notifications/edit/${notificationServiceIds.discord}`);
+	assertNotExposed(body, WEBHOOK_URL, 'Discord webhook URL in edit page');
+});
+
+test('/settings/notifications/edit/[id] does not expose Ntfy access token', async () => {
+	const body = await fetchPage(`/settings/notifications/edit/${notificationServiceIds.ntfy}`);
+	assertNotExposed(body, NTFY_ACCESS_TOKEN, 'Ntfy access token in edit page');
+});
+
+test('/settings/notifications/edit/[id] does not expose webhook URL or auth header', async () => {
+	const body = await fetchPage(`/settings/notifications/edit/${notificationServiceIds.webhook}`);
+	assertNotExposed(body, GENERIC_WEBHOOK_URL, 'webhook URL in edit page');
+	assertNotExposed(body, WEBHOOK_AUTH_HEADER, 'webhook auth header in edit page');
+});
+
+test('/settings/notifications/edit/[id] does not expose Telegram bot token', async () => {
+	const body = await fetchPage(`/settings/notifications/edit/${notificationServiceIds.telegram}`);
+	assertNotExposed(body, TELEGRAM_BOT_TOKEN, 'Telegram bot token in edit page');
+});
+
+test('failed send history does not expose the Telegram bot token', async () => {
+	const client = new TestClient(ORIGIN);
+	await login(client, 'admin', 'password123', ORIGIN);
+	const res = await client.postForm(
+		'/settings/notifications?/testNotification',
+		{ id: notificationServiceIds.telegram },
+		{ headers: { Origin: ORIGIN } }
+	);
+	assertEquals(res.status, 200, 'test notification action should complete');
+
+	const rows = queryDb(
+		getDbPath(PORT),
+		'SELECT error FROM notification_history WHERE service_id = ? ORDER BY sent_at DESC',
+		[notificationServiceIds.telegram]
+	) as Array<{ error: string | null }>;
+	assertEquals(rows.length >= 1, true, 'a history row should be recorded for the failed send');
+	assertEquals(typeof rows[0].error, 'string', 'the failed send should record an error');
+	for (const row of rows) {
+		assertNotExposed(row.error ?? '', TELEGRAM_BOT_TOKEN, 'Telegram bot token in stored history');
+	}
+
+	const page = await client.get('/settings/notifications', { followRedirects: true });
+	assertNotExposed(
+		await page.text(),
+		TELEGRAM_BOT_TOKEN,
+		'Telegram bot token in notification history'
+	);
 });
 
 await run();

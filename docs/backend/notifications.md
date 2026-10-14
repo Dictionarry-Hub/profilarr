@@ -276,7 +276,8 @@ payload structure, block rendering per tier) and real send tests (skipped withou
 
 **3. Build the UI.** Config form component, add to type dropdown in
 `NotificationServiceForm.svelte`, add config parsing in `new/` and `edit/` page
-servers, strip secrets in load functions.
+servers, and add any secret config key to `NOTIFICATION_SECRET_KEYS` in
+`notifications/secrets.ts` so it is stripped before the edit page sees it.
 
 **4. Implement the backend.** Config interface in `types.ts`, notifier class in
 `notifiers/{service}/`, add case in `NotificationManager.createNotifier()`.

@@ -5,7 +5,7 @@ import { notificationServicesQueries } from '$db/queries/notificationServices.ts
 import { notificationHistoryQueries } from '$db/queries/notificationHistory.ts';
 import type { NotificationService } from '$db/queries/notificationServices.ts';
 
-interface NotificationServiceWithStats extends NotificationService {
+interface NotificationServiceWithStats extends Omit<NotificationService, 'config'> {
 	successCount: number;
 	failedCount: number;
 	successRate: number;
@@ -14,26 +14,18 @@ interface NotificationServiceWithStats extends NotificationService {
 export const load = () => {
 	const services = notificationServicesQueries.getAll();
 
-	// Get stats for each service
-	const servicesWithStats: NotificationServiceWithStats[] = services.map((service) => {
-		const stats = notificationHistoryQueries.getStats(service.id);
-		// Strip secrets from config JSON before sending to frontend
-		let safeConfig = service.config;
-		try {
-			const parsed = JSON.parse(service.config);
-			const { webhook_url: _, access_token: __, auth_header: ___, ...rest } = parsed;
-			safeConfig = JSON.stringify(rest);
-		} catch {
-			// If config isn't valid JSON, send as-is (no secret to strip)
+	// The list never shows config, and config holds secrets, so it stays on the server
+	const servicesWithStats: NotificationServiceWithStats[] = services.map(
+		({ config: _config, ...service }) => {
+			const stats = notificationHistoryQueries.getStats(service.id);
+			return {
+				...service,
+				successCount: stats.success,
+				failedCount: stats.failed,
+				successRate: stats.successRate
+			};
 		}
-		return {
-			...service,
-			config: safeConfig,
-			successCount: stats.success,
-			failedCount: stats.failed,
-			successRate: stats.successRate
-		};
-	});
+	);
 
 	// Get recent notification history (last 50)
 	const history = notificationHistoryQueries.getRecent(50);
