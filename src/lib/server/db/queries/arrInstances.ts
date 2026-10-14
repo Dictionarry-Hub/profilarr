@@ -1,5 +1,5 @@
 import { db } from '../db.ts';
-import { normalizeArrInstanceUrl } from '$arr/url.ts';
+import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
 import { arrSyncQueries } from './arrSync.ts';
 
 /**

@@ -277,7 +277,11 @@ payload structure, block rendering per tier) and real send tests (skipped withou
 **3. Build the UI.** Config form component, add to type dropdown in
 `NotificationServiceForm.svelte`, add config parsing in `new/` and `edit/` page
 servers, and add any secret config key to `NOTIFICATION_SECRET_KEYS` in
-`notifications/secrets.ts` so it is stripped before the edit page sees it.
+`notifications/secrets.ts` so it is stripped before the edit page sees it. If
+the service has a field that decides where the secret is sent (a server or
+webhook URL), the edit action must call `requireSecretForDestinationChange()`
+and the form must require the secret when that field changes; see
+[security.md](./security.md#secrets-follow-their-destination).
 
 **4. Implement the backend.** Config interface in `types.ts`, notifier class in
 `notifiers/{service}/`, add case in `NotificationManager.createNotifier()`.

@@ -13,6 +13,11 @@ export const NOTIFICATION_SECRET_KEYS: ReadonlySet<string> = new Set([
 	'bot_token'
 ]);
 
+/** Names of the secret keys that hold a value, so a form can require them without seeing them. */
+export function storedNotificationSecrets(config: NotificationServiceConfig): string[] {
+	return Object.keys(config).filter((key) => NOTIFICATION_SECRET_KEYS.has(key) && !!config[key]);
+}
+
 /** Copy of `config` without any secret key. */
 export function stripNotificationSecrets(
 	config: NotificationServiceConfig

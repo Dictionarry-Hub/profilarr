@@ -58,7 +58,8 @@ export const PORTS = {
 		loginSsoRemoved: 7029,
 		localAccountRace: 7030,
 		setupRace: 7031,
-		xss: 7032
+		xss: 7032,
+		secretDestinations: 7033
 	},
 	api: {
 		arr: 7100,

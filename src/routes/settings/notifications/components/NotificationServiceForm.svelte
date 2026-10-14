@@ -21,12 +21,16 @@
 		name?: string;
 		serviceType?: string;
 		config?: Record<string, unknown>;
+		/** Secret keys that hold a value; the type components require them again when their destination changes */
+		storedSecrets?: string[];
 		enabledTypes?: string[];
 	} = {};
 
 	let selectedType: 'discord' | 'ntfy' | 'webhook' | 'telegram' =
 		(initialData.serviceType as 'discord' | 'ntfy' | 'webhook' | 'telegram') || 'discord';
 	let serviceName = initialData.name || '';
+	// Set by the Ntfy and webhook components when a changed destination needs its secret re-entered
+	let requiredSecretMessage = '';
 
 	// Group notification types by category
 	const groupedTypes = groupNotificationTypesByCategory();
@@ -137,7 +141,9 @@
 					text={saving ? 'Saving...' : submitText}
 					icon={mode === 'create' ? Plus : Save}
 					iconColor="text-blue-600 dark:text-blue-400"
-					disabled={saving || !serviceName}
+					disabled={saving || !serviceName || !!requiredSecretMessage}
+					tooltip={requiredSecretMessage}
+					tooltipAlign="right"
 					type="submit"
 				/>
 			</div>
@@ -194,9 +200,19 @@
 		{#if selectedType === 'discord'}
 			<DiscordConfiguration config={initialData.config} {mode} />
 		{:else if selectedType === 'ntfy'}
-			<NtfyConfiguration config={initialData.config} {mode} />
+			<NtfyConfiguration
+				config={initialData.config}
+				storedSecrets={initialData.storedSecrets ?? []}
+				{mode}
+				bind:requiredSecretMessage
+			/>
 		{:else if selectedType === 'webhook'}
-			<WebhookConfiguration config={initialData.config} {mode} />
+			<WebhookConfiguration
+				config={initialData.config}
+				storedSecrets={initialData.storedSecrets ?? []}
+				{mode}
+				bind:requiredSecretMessage
+			/>
 		{:else if selectedType === 'telegram'}
 			<TelegramConfiguration config={initialData.config} {mode} />
 		{/if}

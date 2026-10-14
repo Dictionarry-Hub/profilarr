@@ -10,6 +10,8 @@ import {
 import { calculateNextRun } from '$lib/server/jobs/scheduleUtils.ts';
 import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { logger } from '$logger/logger.ts';
+import { requireSecretForDestinationChange } from '$utils/secretDestination.ts';
+import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
 
 export const load = ({ params }) => {
 	const id = parseInt(params.id || '', 10);
@@ -50,6 +52,18 @@ export const actions: Actions = {
 
 		if (!url) {
 			return fail(400, { error: 'URL is required' });
+		}
+
+		// The stored key is sent to the URL, so a new URL needs the key re-entered
+		const guardError = requireSecretForDestinationChange({
+			destinationChanged: normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url),
+			storedSecret: instance.api_key,
+			submittedSecret: formData.get('api_key')?.toString(),
+			secretLabel: 'API key',
+			destinationLabel: 'URL'
+		});
+		if (guardError) {
+			return fail(400, { error: guardError });
 		}
 
 		// Check for duplicate name

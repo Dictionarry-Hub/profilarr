@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { Save, Wifi, Trash2, Eraser, Loader2 } from '@lucide/svelte';
 	import { formatSmartDateTime } from '$shared/utils/dates';
+	import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl';
 	import { dateFormat } from '$lib/client/stores/dateFormat';
 	import { serverTimezone } from '$lib/client/stores/timezone';
 	import CleanupModal from './CleanupModal.svelte';
@@ -180,7 +181,14 @@
 		}
 	}
 
-	$: canSubmit = $isDirty && !!name && !!url && (mode === 'edit' || (!!apiKey && !!type));
+	// The stored key is sent to the URL, so a new URL needs the key re-entered
+	$: urlChanged =
+		mode === 'edit' &&
+		!!instance &&
+		normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url);
+	$: canSubmit =
+		$isDirty && !!name && !!url && (mode === 'edit' ? !urlChanged || !!apiKey : !!apiKey && !!type);
+	$: saveHint = urlChanged && !apiKey ? 'Enter the API key to change the URL' : '';
 
 	// Handle form response
 	let lastFormId: unknown = null;
@@ -275,6 +283,8 @@
 				icon={Save}
 				iconColor="text-blue-600 dark:text-blue-400"
 				disabled={saving || !canSubmit}
+				tooltip={saveHint}
+				tooltipAlign="right"
 				on:click={handleSave}
 			/>
 		</div>
@@ -353,8 +363,12 @@
 						name="api_key"
 						value={apiKey}
 						placeholder={mode === 'edit' ? '••••••••••••••••' : 'Enter API key'}
-						description={mode === 'edit' ? 'Leave blank to keep existing key' : ''}
-						required
+						description={mode === 'edit'
+							? urlChanged
+								? 'Required when the URL changes'
+								: 'Leave blank to keep existing key'
+							: ''}
+						required={mode === 'create' || urlChanged}
 						private_
 						on:input={(e) => update('apiKey', e.detail)}
 					/>
