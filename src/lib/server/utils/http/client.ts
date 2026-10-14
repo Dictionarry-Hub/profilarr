@@ -2,7 +2,8 @@ import type { HttpClientOptions, RequestOptions } from './types.ts';
 import { HttpError } from './types.ts';
 
 /**
- * Base HTTP client with connection pooling and generic request capabilities
+ * Base HTTP client with retries, timeouts and generic request capabilities.
+ * Connections are pooled and reused by fetch itself, shared across clients.
  */
 export class BaseHttpClient {
 	protected baseUrl: string;
@@ -11,7 +12,6 @@ export class BaseHttpClient {
 	protected retries: number;
 	protected retryDelay: number;
 	protected retryStatusCodes: number[];
-	protected httpClient: Deno.HttpClient;
 
 	constructor(baseUrl: string, options?: HttpClientOptions) {
 		// Ensure baseUrl doesn't have trailing slash
@@ -24,12 +24,6 @@ export class BaseHttpClient {
 			'Content-Type': 'application/json',
 			...options?.headers
 		};
-
-		// Create HTTP client with connection pooling
-		this.httpClient = Deno.createHttpClient({
-			poolMaxIdlePerHost: options?.poolMaxIdlePerHost ?? 5,
-			poolIdleTimeout: options?.poolIdleTimeout ?? 30000
-		});
 	}
 
 	/**
@@ -69,8 +63,7 @@ export class BaseHttpClient {
 						method,
 						headers,
 						body: options?.body ? JSON.stringify(options.body) : undefined,
-						signal: options?.signal ?? controller.signal,
-						client: this.httpClient
+						signal: options?.signal ?? controller.signal
 					});
 
 					clearTimeout(timeoutId);
@@ -168,12 +161,5 @@ export class BaseHttpClient {
 	 */
 	patch<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
 		return this.request<T>('PATCH', path, { ...options, body });
-	}
-
-	/**
-	 * Close the HTTP client and cleanup resources
-	 */
-	close(): void {
-		this.httpClient.close();
 	}
 }

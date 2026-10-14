@@ -1,3 +1,6 @@
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import * as fs from 'node:fs/promises';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
 import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
 import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
@@ -14,6 +17,7 @@ import { validateFilePaths } from '$utils/paths.ts';
 import { getMaxOpNumber } from '$pcd/utils/git.ts';
 import { loadManifest } from '$pcd/manifest/manifest.ts';
 import { loadOperationsFromDir } from '$pcd/utils/operations.ts';
+import { isNotFound } from '$utils/fs.ts';
 
 type ExportResult =
 	| {
@@ -309,7 +313,7 @@ async function runPreflight(databaseId: number): Promise<ExportPreflight> {
 	}
 
 	try {
-		await Deno.stat(database.local_path);
+		await fs.stat(database.local_path);
 		checks.repoExists = true;
 	} catch {
 		errors.push('Repository not found on disk.');
@@ -652,12 +656,12 @@ export async function exportDraftOps(
 	}
 
 	try {
-		const tempDir = await Deno.makeTempDir({ prefix: 'profilarr-export-' });
+		const tempDir = await fs.mkdtemp(join(tmpdir(), 'profilarr-export-'));
 		const repoDir = `${tempDir}/repo`;
 		const authUrl = buildRemoteUrl(database.repository_url, database.personal_access_token);
 		let sourcePath = database.local_path;
 		try {
-			sourcePath = await Deno.realPath(database.local_path);
+			sourcePath = await fs.realpath(database.local_path);
 		} catch {
 			// fall back to the stored path
 		}
@@ -671,8 +675,8 @@ export async function exportDraftOps(
 			// Write SQL file if there are ops
 			if (plan) {
 				const filepath = `${repoDir}/ops/${plan.filename}`;
-				await Deno.mkdir(`${repoDir}/ops`, { recursive: true });
-				await Deno.writeTextFile(filepath, plan.fileContent);
+				await fs.mkdir(`${repoDir}/ops`, { recursive: true });
+				await fs.writeFile(filepath, plan.fileContent);
 				toStage.push(filepath);
 			}
 
@@ -686,9 +690,9 @@ export async function exportDraftOps(
 					const dest = `${repoDir}/${fp}`;
 					let srcExists = true;
 					try {
-						await Deno.stat(src);
+						await fs.stat(src);
 					} catch (err) {
-						if (err instanceof Deno.errors.NotFound) {
+						if (isNotFound(err)) {
 							srcExists = false;
 						} else {
 							throw err;
@@ -697,14 +701,14 @@ export async function exportDraftOps(
 					if (srcExists) {
 						const destDir = dest.substring(0, dest.lastIndexOf('/'));
 						if (destDir !== repoDir) {
-							await Deno.mkdir(destDir, { recursive: true });
+							await fs.mkdir(destDir, { recursive: true });
 						}
-						await Deno.copyFile(src, dest);
+						await fs.copyFile(src, dest);
 					} else {
 						try {
-							await Deno.remove(dest);
+							await fs.rm(dest);
 						} catch (err) {
-							if (!(err instanceof Deno.errors.NotFound)) throw err;
+							if (!isNotFound(err)) throw err;
 						}
 					}
 					toStage.push(dest);
@@ -717,7 +721,7 @@ export async function exportDraftOps(
 			await pushHeadToBranch(repoDir, branch);
 		} finally {
 			try {
-				await Deno.remove(tempDir, { recursive: true });
+				await fs.rm(tempDir, { recursive: true });
 			} catch {
 				// ignore cleanup failure
 			}
@@ -743,7 +747,7 @@ export async function exportDraftOps(
 				}
 				for (const fp of untrackedFiles) {
 					try {
-						await Deno.remove(`${database.local_path}/${fp}`);
+						await fs.rm(`${database.local_path}/${fp}`);
 					} catch {
 						// ignore if already gone
 					}

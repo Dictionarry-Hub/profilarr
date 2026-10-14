@@ -2,6 +2,8 @@
  * Application configuration singleton
  */
 
+import * as fs from 'node:fs/promises';
+import process from 'node:process';
 import { parseAuthConfig, type AuthMode, type OidcSettings } from './auth.ts';
 import { colors } from '$logger/colors.ts';
 
@@ -20,7 +22,7 @@ function failStartup(message: string): never {
 	const level = `${colors.red}ERROR${colors.reset}`;
 	const source = `${colors.grey}[Config]${colors.reset}`;
 	console.error([timestamp, level, message, source].join(' | '));
-	Deno.exit(1);
+	process.exit(1);
 }
 
 class Config {
@@ -41,12 +43,12 @@ class Config {
 		// Default base path logic:
 		// 1. Check environment variable
 		// 2. Fall back to directory containing the executable
-		const envPath = Deno.env.get('APP_BASE_PATH');
+		const envPath = process.env.APP_BASE_PATH;
 		if (envPath) {
 			this.basePath = envPath;
 		} else {
 			// Use the directory where the executable is located
-			const execPath = Deno.execPath();
+			const execPath = process.execPath;
 			const lastSlash = Math.max(execPath.lastIndexOf('/'), execPath.lastIndexOf('\\'));
 			this.basePath = lastSlash > 0 ? execPath.substring(0, lastSlash) : '.';
 		}
@@ -54,30 +56,30 @@ class Config {
 		// Timezone configuration:
 		// 1. Check TZ environment variable
 		// 2. Fall back to system timezone
-		this.timezone = Deno.env.get('TZ') || Intl.DateTimeFormat().resolvedOptions().timeZone;
+		this.timezone = process.env.TZ || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 		// Parser service configuration
-		const parserHost = Deno.env.get('PARSER_HOST') || 'localhost';
-		const parserPort = Deno.env.get('PARSER_PORT') || '5000';
+		const parserHost = process.env.PARSER_HOST || 'localhost';
+		const parserPort = process.env.PARSER_PORT || '5000';
 		this.parserUrl = `http://${parserHost}:${parserPort}`;
 
 		// Server bind configuration
-		this.port = parseInt(Deno.env.get('PORT') || '6868', 10);
-		this.host = Deno.env.get('HOST') || '0.0.0.0';
+		this.port = parseInt(process.env.PORT || '6868', 10);
+		this.host = process.env.HOST || '0.0.0.0';
 
 		// External origin (scheme + host) for OIDC redirects and cookie security.
 		// Falls back to the local server URL when unset. Trailing slashes are
 		// stripped so downstream concatenation (`${origin}/path`) doesn't double up.
-		this.origin = (Deno.env.get('ORIGIN') || this.serverUrl).replace(/\/+$/, '');
+		this.origin = (process.env.ORIGIN || this.serverUrl).replace(/\/+$/, '');
 
 		// Auth mode ('on' default, 'off') and SSO, enabled by the OIDC_* settings
 		let auth: ReturnType<typeof parseAuthConfig>;
 		try {
 			auth = parseAuthConfig({
-				AUTH: Deno.env.get('AUTH'),
-				OIDC_DISCOVERY_URL: Deno.env.get('OIDC_DISCOVERY_URL'),
-				OIDC_CLIENT_ID: Deno.env.get('OIDC_CLIENT_ID'),
-				OIDC_CLIENT_SECRET: Deno.env.get('OIDC_CLIENT_SECRET')
+				AUTH: process.env.AUTH,
+				OIDC_DISCOVERY_URL: process.env.OIDC_DISCOVERY_URL,
+				OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID,
+				OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET
 			});
 		} catch (err) {
 			failStartup(err instanceof Error ? err.message : String(err));
@@ -88,7 +90,7 @@ class Config {
 		this.oidc = auth.oidc;
 
 		// Optional declarative internal API key for GitOps/container deployments.
-		const profilarrApiKey = Deno.env.get('PROFILARR_API_KEY') || null;
+		const profilarrApiKey = process.env.PROFILARR_API_KEY || null;
 		if (profilarrApiKey !== null && profilarrApiKey.length < PROFILARR_API_KEY_MIN_LENGTH) {
 			failStartup(
 				`PROFILARR_API_KEY must be at least ${PROFILARR_API_KEY_MIN_LENGTH} characters long`
@@ -101,7 +103,7 @@ class Config {
 		// raw content CDN. Override for testing against a fork, branch, or local
 		// file server.
 		this.bulletinUrl = (
-			Deno.env.get('PROFILARR_BULLETIN_URL') ||
+			process.env.PROFILARR_BULLETIN_URL ||
 			'https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main'
 		).replace(/\/+$/, '');
 	}
@@ -119,10 +121,10 @@ class Config {
 	 * Must be called before using the config
 	 */
 	async init(): Promise<void> {
-		await Deno.mkdir(this.paths.logs, { recursive: true });
-		await Deno.mkdir(this.paths.data, { recursive: true });
-		await Deno.mkdir(this.paths.backups, { recursive: true });
-		await Deno.mkdir(this.paths.databases, { recursive: true });
+		await fs.mkdir(this.paths.logs, { recursive: true });
+		await fs.mkdir(this.paths.data, { recursive: true });
+		await fs.mkdir(this.paths.backups, { recursive: true });
+		await fs.mkdir(this.paths.databases, { recursive: true });
 	}
 
 	/**

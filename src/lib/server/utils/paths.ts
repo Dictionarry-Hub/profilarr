@@ -2,7 +2,9 @@
  * Path validation utilities
  */
 
+import { realpathSync } from 'node:fs';
 import { resolve, isAbsolute } from 'node:path';
+import { isNotFound } from './fs.ts';
 
 /**
  * Validate that file paths don't escape the given root boundary.
@@ -13,7 +15,7 @@ export function validateFilePaths(rootPath: string, filePaths: string[]): void {
 	const root = resolve(rootPath);
 	let realRoot: string;
 	try {
-		realRoot = Deno.realPathSync(rootPath);
+		realRoot = realpathSync(rootPath);
 	} catch {
 		realRoot = root;
 	}
@@ -29,12 +31,12 @@ export function validateFilePaths(rootPath: string, filePaths: string[]): void {
 		}
 		// Symlink check (catches symlinks pointing outside the boundary)
 		try {
-			const real = Deno.realPathSync(resolved);
+			const real = realpathSync(resolved);
 			if (!real.startsWith(realRoot + '/')) {
 				throw new Error('Invalid file path: path escapes repository boundary');
 			}
 		} catch (e) {
-			if (e instanceof Deno.errors.NotFound) continue;
+			if (isNotFound(e)) continue;
 			throw e;
 		}
 	}

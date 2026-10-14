@@ -11,9 +11,11 @@
  * disk, git commit/push happens via the existing PCD git flow.
  */
 
+import * as fs from 'node:fs/promises';
 import { stringify as stringifyYaml } from '@std/yaml';
 import { generateUlid } from '$shared/utils/ulid.ts';
 import type { AnnouncementSeverity } from './types.ts';
+import { isNotFound } from '$utils/fs.ts';
 
 const ANNOUNCEMENTS_SUBDIR = 'announcements';
 
@@ -42,20 +44,20 @@ export async function writeAnnouncement(
 	input: AnnouncementFileInput
 ): Promise<void> {
 	const dir = `${pcdPath}/${ANNOUNCEMENTS_SUBDIR}`;
-	await Deno.mkdir(dir, { recursive: true });
+	await fs.mkdir(dir, { recursive: true });
 
 	const targetPath = `${dir}/${id}.md`;
 	const content = formatFile(input);
 
 	const tempPath = `${targetPath}.${crypto.randomUUID()}.tmp`;
 	try {
-		await Deno.writeTextFile(tempPath, content);
-		await Deno.rename(tempPath, targetPath);
+		await fs.writeFile(tempPath, content);
+		await fs.rename(tempPath, targetPath);
 	} catch (error) {
 		// Best-effort cleanup of the temp file. Swallow the cleanup error so
 		// the original failure surfaces to the caller.
 		try {
-			await Deno.remove(tempPath);
+			await fs.rm(tempPath);
 		} catch {
 			/* ignore */
 		}
@@ -70,10 +72,10 @@ export async function writeAnnouncement(
 export async function deleteAnnouncement(pcdPath: string, id: string): Promise<boolean> {
 	const path = `${pcdPath}/${ANNOUNCEMENTS_SUBDIR}/${id}.md`;
 	try {
-		await Deno.remove(path);
+		await fs.rm(path);
 		return true;
 	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) return false;
+		if (isNotFound(error)) return false;
 		throw error;
 	}
 }

@@ -128,8 +128,6 @@ export async function syncQualityProfile(
 			meta: { instanceId, databaseId, profileName, error: errorMsg }
 		});
 		return { success: false, error: errorMsg };
-	} finally {
-		client.close();
 	}
 }
 
@@ -187,8 +185,6 @@ export async function syncCustomFormat(
 			meta: { instanceId, databaseId, formatName, error: errorMsg }
 		});
 		return { success: false, error: errorMsg };
-	} finally {
-		client.close();
 	}
 }
 
@@ -252,8 +248,6 @@ export async function syncRegularExpression(
 			meta: { instanceId, databaseId, regexName, error: errorMsg }
 		});
 		return { success: false, error: errorMsg };
-	} finally {
-		client.close();
 	}
 }
 
@@ -297,8 +291,6 @@ export async function syncDelayProfile(
 			meta: { instanceId, databaseId, profileName, error: errorMsg }
 		});
 		return { success: false, error: errorMsg };
-	} finally {
-		client.close();
 	}
 }
 
@@ -357,8 +349,6 @@ export async function syncNaming(
 			meta: { instanceId, databaseId, configName, error: errorMsg }
 		});
 		return { success: false, error: errorMsg };
-	} finally {
-		client.close();
 	}
 }
 
@@ -429,8 +419,6 @@ export async function syncQualityDefinitions(
 			meta: { instanceId, databaseId, configName, error: errorMsg }
 		});
 		return { success: false, error: errorMsg };
-	} finally {
-		client.close();
 	}
 }
 
@@ -478,7 +466,5 @@ export async function syncMediaSettings(
 			meta: { instanceId, databaseId, configName, error: errorMsg }
 		});
 		return { success: false, error: errorMsg };
-	} finally {
-		client.close();
 	}
 }

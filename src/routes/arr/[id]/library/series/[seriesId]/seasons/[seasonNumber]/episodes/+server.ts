@@ -17,19 +17,15 @@ async function getSeriesEpisodesCached(
 	if (cached) return cached;
 
 	const client = new SonarrClient(instance.url, instance.api_key);
-	try {
-		const profiles = await client.getQualityProfiles();
-		const series = await client.getSeries(seriesId);
-		const profile = profiles.find((p) => p.id === series.qualityProfileId);
-		if (!profile) {
-			throw new Error(`Quality profile not found for series ${seriesId}`);
-		}
-		const episodes = await client.getSeriesEpisodeDetails(seriesId, profile);
-		cache.set(cacheKey, episodes, EPISODE_CACHE_TTL);
-		return episodes;
-	} finally {
-		client.close();
+	const profiles = await client.getQualityProfiles();
+	const series = await client.getSeries(seriesId);
+	const profile = profiles.find((p) => p.id === series.qualityProfileId);
+	if (!profile) {
+		throw new Error(`Quality profile not found for series ${seriesId}`);
 	}
+	const episodes = await client.getSeriesEpisodeDetails(seriesId, profile);
+	cache.set(cacheKey, episodes, EPISODE_CACHE_TTL);
+	return episodes;
 }
 
 export const GET: RequestHandler = async ({ params }) => {

@@ -65,6 +65,5 @@ export async function fetchBody(id: string): Promise<FetchResult<string>> {
 
 /** Used by tests to reset the singleton when swapping `config.bulletinUrl`. */
 export function resetBulletinClient(): void {
-	client?.close();
 	client = null;
 }

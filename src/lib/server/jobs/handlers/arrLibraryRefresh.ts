@@ -84,8 +84,6 @@ const libraryRefreshHandler: JobHandler = async (job) => {
 			error: error instanceof Error ? error.message : String(error),
 			rescheduleAt
 		};
-	} finally {
-		client.close();
 	}
 };
 

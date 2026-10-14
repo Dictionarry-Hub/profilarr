@@ -2,9 +2,11 @@
  * Git status queries (read-only)
  */
 
+import * as fs from 'node:fs/promises';
 import { execGit, execGitSafe } from './exec.ts';
 import { fetch } from './write.ts';
 import { validateFilePaths } from '../paths.ts';
+import { runCommand } from '../command.ts';
 import type { GitStatus, UpdateInfo, Commit, CommitStatus, IncomingChanges } from './types.ts';
 
 function normalizeAuthorName(name: string): string {
@@ -57,13 +59,9 @@ export async function getStatus(
 	}
 
 	// Get file status — use raw output to preserve leading spaces in porcelain format
-	const statusCmd = new Deno.Command('git', {
-		args: ['status', '--porcelain', '--untracked-files=all'],
-		cwd: repoPath,
-		stdout: 'piped',
-		stderr: 'piped'
+	const statusResult = await runCommand('git', ['status', '--porcelain', '--untracked-files=all'], {
+		cwd: repoPath
 	});
-	const statusResult = await statusCmd.output();
 	const statusOutput = new TextDecoder().decode(statusResult.stdout);
 	const untracked: string[] = [];
 	const modified: string[] = [];
@@ -173,7 +171,7 @@ export async function getDiff(repoPath: string, filepaths?: string[]): Promise<s
 			if (isUntracked) {
 				// For untracked files, show as new file diff
 				try {
-					const content = await Deno.readTextFile(`${repoPath}/${relativePath}`);
+					const content = await fs.readFile(`${repoPath}/${relativePath}`, 'utf8');
 					diffs.push(`diff --git a/${relativePath} b/${relativePath}
 new file mode 100644
 --- /dev/null

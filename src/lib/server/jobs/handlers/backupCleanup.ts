@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import { jobQueueRegistry } from '../queueRegistry.ts';
 import type { JobHandler } from '../queueTypes.ts';
 import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
@@ -21,17 +22,17 @@ const backupCleanupHandler: JobHandler = async (job) => {
 	let errorCount = 0;
 
 	try {
-		for await (const entry of Deno.readDir(backupsDir)) {
-			if (!entry.isFile) continue;
+		for (const entry of await fs.readdir(backupsDir, { withFileTypes: true })) {
+			if (!entry.isFile()) continue;
 			if (!entry.name.startsWith('backup-') || !entry.name.endsWith('.tar.gz')) {
 				continue;
 			}
 
 			const filePath = `${backupsDir}/${entry.name}`;
 			try {
-				const stat = await Deno.stat(filePath);
+				const stat = await fs.stat(filePath);
 				if (stat.mtime && stat.mtime < cutoffDate) {
-					await Deno.remove(filePath);
+					await fs.rm(filePath);
 					deletedCount++;
 				}
 			} catch (error) {

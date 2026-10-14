@@ -3,6 +3,7 @@
  * Utilities for loading and managing SQL operations from PCD layers
  */
 
+import * as fs from 'node:fs/promises';
 import { config } from '$config';
 import type { Operation } from '../core/types.ts';
 
@@ -11,7 +12,7 @@ import type { Operation } from '../core/types.ts';
  */
 async function pathExists(path: string): Promise<boolean> {
 	try {
-		await Deno.stat(path);
+		await fs.stat(path);
 		return true;
 	} catch {
 		return false;
@@ -32,13 +33,13 @@ export async function loadOperationsFromDir(
 	const operations: Operation[] = [];
 
 	try {
-		for await (const entry of Deno.readDir(dirPath)) {
-			if (!entry.isFile || !entry.name.endsWith('.sql')) {
+		for (const entry of await fs.readdir(dirPath, { withFileTypes: true })) {
+			if (!entry.isFile() || !entry.name.endsWith('.sql')) {
 				continue;
 			}
 
 			const filepath = `${dirPath}/${entry.name}`;
-			const sql = await Deno.readTextFile(filepath);
+			const sql = await fs.readFile(filepath, 'utf8');
 			const order = extractOrderFromFilename(entry.name);
 
 			operations.push({
