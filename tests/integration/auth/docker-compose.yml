@@ -22,6 +22,7 @@ services:
       - '7443:7443'
       - '7444:7444'
       - '7445:7445'
+      - '8445:8445'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     extra_hosts:

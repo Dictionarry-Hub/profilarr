@@ -17,6 +17,7 @@
  *   7700-7799  pcd conflicts
  *   7800-7899  pcd reserved (future write/conflict expansion)
  *   7900-7999  settings
+ *   8000-8099  e2e (browser suites)
  *
  * Each suite gets 100 ports of headroom. From a port number alone you can tell
  * which suite it belongs to. New specs claim the next free slot in their
@@ -138,6 +139,11 @@ export const PORTS = {
 	},
 	settings: {
 		landingPage: 7900
+	},
+	e2e: {
+		auth: 8000,
+		authProxy: 8001,
+		sanitize: 8002
 	}
 } as const;
 

@@ -583,9 +583,9 @@ needed.
 
 **Sanitize tests** (`tests/unit/sanitize/`):
 
-| File               | Tests                                                                                        |
-| ------------------ | -------------------------------------------------------------------------------------------- |
-| `sanitize.test.ts` | Entity-encoded/case-varied/whitespace-obfuscated javascript: bypass, allowed/disallowed tags |
+| File               | Tests                                                                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sanitize.test.ts` | Quoted and unquoted event handlers, obfuscated `javascript:` URLs, disallowed attributes and tags, markdown link syntax; each payload checked raw and after `marked.parse()`; allowed markup kept |
 
 ### Integration Tests (`tests/integration/auth/specs/`)
 
@@ -594,34 +594,42 @@ end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
 `ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
 and run in parallel via `deno task test integration`.
 
-| File                        | Port             | Tests                                                                                               |
-| --------------------------- | ---------------- | --------------------------------------------------------------------------------------------------- |
-| `health.test.ts`            | 7001             | Public health vs authenticated diagnostics, no info disclosure                                      |
-| `csrf.test.ts`              | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                        |
-| `cookie.test.ts`            | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                   |
-| `apiKey.test.ts`            | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management            |
-| `apiKeyPermissions.test.ts` | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at               |
-| `envApiKey.test.ts`         | 7018             | Env key works alongside stored keys, "Environment" name reserved                                    |
-| `session.test.ts`           | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection      |
-| `oidc.test.ts`              | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                  |
-| `loginMethods.test.ts`      | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout    |
-| `localAccount.test.ts`      | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts |
-| `rateLimit.test.ts`         | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                  |
-| `proxy.test.ts`             | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                          |
-| `xForwardedFor.test.ts`     | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                          |
-| `secretExposure.test.ts`    | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                      |
-| `backupSecrets.test.ts`     | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                             |
-| `pathTraversal.test.ts`     | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                    |
-| `localBypass.test.ts`       | 7019             | Local bypass removal: requests from local addresses require auth                                    |
+| File                        | Port             | Tests                                                                                                 |
+| --------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------- |
+| `health.test.ts`            | 7001             | Public health vs authenticated diagnostics, no info disclosure                                        |
+| `csrf.test.ts`              | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                          |
+| `cookie.test.ts`            | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                     |
+| `apiKey.test.ts`            | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management              |
+| `apiKeyPermissions.test.ts` | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                 |
+| `envApiKey.test.ts`         | 7018             | Env key works alongside stored keys, "Environment" name reserved                                      |
+| `session.test.ts`           | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection        |
+| `oidc.test.ts`              | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                    |
+| `loginMethods.test.ts`      | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout      |
+| `localAccount.test.ts`      | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts   |
+| `rateLimit.test.ts`         | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                    |
+| `proxy.test.ts`             | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                            |
+| `xForwardedFor.test.ts`     | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                            |
+| `secretExposure.test.ts`    | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                        |
+| `backupSecrets.test.ts`     | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                               |
+| `pathTraversal.test.ts`     | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                      |
+| `localBypass.test.ts`       | 7019             | Local bypass removal: requests from local addresses require auth                                      |
+| `xss.test.ts`               | 7032             | Seeded PCD descriptions with an unquoted event handler never reach custom format or profile page HTML |
 
-### E2E Tests (`tests/e2e/auth/`)
+### E2E Tests (`tests/e2e/`)
 
-Browser-level Playwright tests that drive the real user experience. Uses
-`deno task test e2e auth` with Docker Compose (mock-oauth2-server + Caddy).
+Browser-level Playwright tests that drive the real user experience.
+`deno task test e2e` runs every suite in parallel, each in its own runner
+process on its own `PORTS.e2e` ports, and prints one line per suite.
+`deno task test e2e auth` uses Docker Compose (mock-oauth2-server + Caddy).
+`deno task test e2e sanitize` starts one preview server with `AUTH=off`, seeds
+it through the shared harness, and needs no Docker. Pass `--debug` with a
+single target, and `--grep=<pattern>` to pick one test, since debug mode stops
+at the first failure.
 
-| File           | Tests                                                          |
-| -------------- | -------------------------------------------------------------- |
-| `oidc.spec.ts` | Full OIDC login flow in browser, both direct and through proxy |
+| File                   | Tests                                                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth/oidc.spec.ts`    | Full OIDC login flow in browser, both direct and through proxy                                                                          |
+| `sanitize/xss.spec.ts` | Seeded custom format and announcement markdown with an unquoted event handler never executes, on direct load and client-side navigation |
 
 ### Security Scans (`tests/scan/`)
 

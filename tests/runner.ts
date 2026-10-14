@@ -37,9 +37,13 @@
  *
  *   Auth OIDC tests (Docker + preview servers, auto-managed):
  *
+ *   deno task test e2e                      All suites, parallel
  *   deno task test e2e auth                 OIDC flow tests (headless)
  *   deno task test e2e auth --headed        Headed
  *   deno task test e2e auth --debug         Debug
+ *   deno task test e2e sanitize             Markdown XSS tests (no Docker)
+ *   deno task test e2e sanitize --debug     Debug
+ *   deno task test e2e sanitize --debug --grep=announce   Debug one test
  *
  * ─── Scans ──────────────────────────────────────────────────────────────
  *
@@ -53,6 +57,7 @@
  *
  *   --headed        E2E only. Show browser window.
  *   --debug         E2E only. Open Playwright inspector.
+ *   --grep=<re>     E2E only. Run only tests whose title matches.
  *   --help, -h      Show this help text.
  */
 
@@ -83,7 +88,9 @@ const INTEGRATION_SUITES = new Set([
 
 const E2E_AUTH_CONFIG = 'tests/e2e/auth/playwright.config.ts';
 const E2E_AUTH_COMPOSE = 'tests/integration/auth/docker-compose.yml';
-const E2E_AUTH_BINARY = './dist/build/profilarr';
+const E2E_SANITIZE_CONFIG = 'tests/e2e/sanitize/playwright.config.ts';
+const E2E_BINARY = './dist/build/profilarr';
+const E2E_SUITES = ['auth', 'sanitize'] as const;
 const PLAYWRIGHT_CLI = './node_modules/playwright/cli.js';
 
 // Integration specs that require Docker infrastructure
@@ -570,28 +577,201 @@ async function runIntegrationSpec(
 // ─── E2E Tests ───────────────────────────────────────────────────────────────
 
 async function runE2E(targets: string[], flags: string[]): Promise<number> {
-	// Forward --headed and --debug to Playwright
+	// Forward --headed, --debug and --grep=<pattern> to Playwright.
+	// --grep picks a single test, which debug mode needs since it stops after
+	// the first failure.
 	const playwrightFlags: string[] = [];
 	for (const flag of flags) {
 		if (flag === '--headed' || flag === '--debug') {
 			playwrightFlags.push(flag);
+		} else if (flag.startsWith('--grep=')) {
+			playwrightFlags.push('--grep', flag.slice('--grep='.length));
 		}
 	}
 
-	// Check if this is an auth E2E run
+	if (targets.length === 0) {
+		if (playwrightFlags.length > 0) {
+			console.error('Pick one E2E target when using --headed, --debug or --grep.');
+			return 1;
+		}
+		return runE2EAll();
+	}
 	if (targets.length === 1 && targets[0] === 'auth') {
 		return runE2EAuth(playwrightFlags);
 	}
+	if (targets.length === 1 && targets[0] === 'sanitize') {
+		return runE2ESanitize(playwrightFlags);
+	}
 
-	console.error('Unknown E2E target. Available target: auth');
+	console.error(`Unknown E2E target. Available targets: ${E2E_SUITES.join(', ')}`);
 	return 1;
+}
+
+/**
+ * Run every E2E suite at once, each as a child runner process with piped
+ * output, the same way integration specs run. Suites use their own ports
+ * (PORTS.e2e) and data directories, so they don't interfere.
+ */
+async function runE2EAll(): Promise<number> {
+	if (!(await ensureE2EBuild())) return 1;
+
+	const RESET = '\x1b[0m';
+	const GREEN = '\x1b[32m';
+	const RED = '\x1b[31m';
+	const NAME_WIDTH = Math.max(...E2E_SUITES.map((s) => s.length), 10);
+	const startMs = Date.now();
+	const decoder = new TextDecoder();
+
+	console.log(`Running ${E2E_SUITES.length} E2E suites in parallel...\n`);
+
+	const results = await Promise.all(
+		E2E_SUITES.map(async (suite) => {
+			const suiteStart = Date.now();
+			const cmd = new Deno.Command(Deno.execPath(), {
+				args: ['run', '--allow-all', '--no-check', 'tests/runner.ts', 'e2e', suite],
+				stdin: 'null',
+				stdout: 'piped',
+				stderr: 'piped'
+			});
+			const out = await cmd.output();
+			const durationMs = Date.now() - suiteStart;
+			const sym = out.code === 0 ? `${GREEN}✓${RESET}` : `${RED}✗${RESET}`;
+			const dur = `${(durationMs / 1000).toFixed(1)}s`;
+			console.log(`  ${sym} ${suite.padEnd(NAME_WIDTH)}  ${dur.padStart(7)}`);
+			return {
+				suite,
+				code: out.code,
+				stdout: decoder.decode(out.stdout),
+				stderr: decoder.decode(out.stderr)
+			};
+		})
+	);
+
+	const failures = results.filter((r) => r.code !== 0);
+
+	if (failures.length > 0) {
+		console.log('');
+		console.log('='.repeat(60));
+		console.log(` FAILURES (${failures.length})`);
+		console.log('='.repeat(60));
+		for (const f of failures) {
+			console.log('');
+			console.log(`${RED}✗ ${f.suite}${RESET}`);
+			console.log('');
+			console.log(f.stdout || '  (empty)');
+			if (f.stderr) {
+				console.log('  --- suite stderr ---');
+				console.log(f.stderr);
+			}
+		}
+	}
+
+	const totalSec = ((Date.now() - startMs) / 1000).toFixed(1);
+	console.log('');
+	console.log('='.repeat(60));
+	if (failures.length > 0) {
+		console.log(
+			` ${RED}${results.length} suites, ${failures.length} failed in ${totalSec}s${RESET}`
+		);
+	} else {
+		console.log(` ${GREEN}${results.length} suites passed in ${totalSec}s${RESET}`);
+	}
+	console.log('='.repeat(60));
+
+	return failures.length > 0 ? 1 : 0;
+}
+
+async function ensureE2EBuild(): Promise<boolean> {
+	try {
+		await Deno.stat(E2E_BINARY);
+		return true;
+	} catch {
+		console.error(`Build not found at ${E2E_BINARY}. Run "deno task build" first.`);
+		return false;
+	}
+}
+
+async function runPlaywright(
+	config: string,
+	playwrightFlags: string[],
+	env: Record<string, string>
+): Promise<number> {
+	const nodeBinary = await resolvePlaywrightNodeBinary();
+	if (!nodeBinary) {
+		return 1;
+	}
+
+	const cmd = new Deno.Command(nodeBinary, {
+		args: [PLAYWRIGHT_CLI, 'test', '--config', config, ...playwrightFlags],
+		env: { ...Deno.env.toObject(), ...env },
+		stdout: 'inherit',
+		stderr: 'inherit'
+	});
+
+	const result = await cmd.output();
+	return result.code;
+}
+
+/**
+ * Markdown XSS E2E: one preview server with AUTH=off, seeded through the
+ * integration harness with a custom format description and a database
+ * announcement body that carry an unquoted event handler. No Docker.
+ *
+ * Harness modules are imported lazily so the plain unit runner never loads
+ * the SQLite FFI library.
+ */
+async function runE2ESanitize(playwrightFlags: string[]): Promise<number> {
+	const PORT = PORTS.e2e.sanitize;
+	const URL = `http://localhost:${PORT}`;
+	const PAYLOAD = '<img src=x onerror=window.xssFired++>';
+	const CF_NAME = 'XSS Probe Format';
+	const ANNOUNCEMENT_TITLE = 'XSS Probe Announcement';
+
+	if (!(await ensureE2EBuild())) return 1;
+
+	const { startServer, stopServer } = await import('$test-harness/server.ts');
+	const { setupPcd, seedBase, compilePcd } = await import('./integration/pcd/harness/pcd.ts');
+	const { base } = await import('./integration/pcd/harness/fixtures.ts');
+	const { insertAnnouncement } = await import('./integration/announcements/harness/setup.ts');
+
+	let exitCode = 1;
+	try {
+		await startServer(PORT, { AUTH: 'off', ORIGIN: URL, INTEGRATION_TEST: '1' }, 'preview');
+
+		const ctx = await setupPcd({ port: PORT, name: 'xss-probe' });
+		seedBase(ctx, [
+			base.customFormat({ name: CF_NAME, description: `Benign intro ${PAYLOAD} trailing text` })
+		]);
+		await compilePcd(ctx);
+		insertAnnouncement(ctx.dbPath, {
+			id: 'xss-probe',
+			databaseId: ctx.dbId,
+			title: ANNOUNCEMENT_TITLE,
+			body: `Benign intro ${PAYLOAD} trailing text`
+		});
+
+		console.log('\nRunning Playwright tests...\n');
+		exitCode = await runPlaywright(E2E_SANITIZE_CONFIG, playwrightFlags, {
+			SANITIZE_URL: URL,
+			SANITIZE_DB_ID: String(ctx.dbId),
+			SANITIZE_CF_NAME: CF_NAME,
+			SANITIZE_ANNOUNCEMENT_TITLE: ANNOUNCEMENT_TITLE
+		});
+	} catch (error) {
+		console.error('E2E sanitize test error:', error);
+	} finally {
+		await stopServer(PORT);
+	}
+
+	return exitCode;
 }
 
 async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
 	const MOCK_OIDC_URL = 'http://localhost:9090/default/.well-known/openid-configuration';
-	const DIRECT_PORT = PORTS.auth.oidc;
-	const PROXY_PORT = PORTS.auth.oidcProxy;
-	const PROXY_ORIGIN = 'https://localhost:7445';
+	const DIRECT_PORT = PORTS.e2e.auth;
+	const PROXY_PORT = PORTS.e2e.authProxy;
+	// Caddy terminates TLS on :8445 and proxies to PORTS.e2e.authProxy.
+	const PROXY_ORIGIN = 'https://localhost:8445';
 
 	const OIDC_ENV = {
 		AUTH: 'on',
@@ -611,12 +791,7 @@ async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
 
 	try {
 		// 1. Check build exists
-		try {
-			await Deno.stat(E2E_AUTH_BINARY);
-		} catch {
-			console.error(`Build not found at ${E2E_AUTH_BINARY}. Run "deno task build" first.`);
-			return 1;
-		}
+		if (!(await ensureE2EBuild())) return 1;
 
 		// 2. Start Docker
 		console.log('Starting Docker infrastructure...');
@@ -632,7 +807,7 @@ async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
 			await Deno.mkdir(`${basePath}/logs`, { recursive: true });
 			await Deno.mkdir(`${basePath}/backups`, { recursive: true });
 
-			const cmd = new Deno.Command(E2E_AUTH_BINARY, {
+			const cmd = new Deno.Command(E2E_BINARY, {
 				env: {
 					...Deno.env.toObject(),
 					PORT: String(port),
@@ -666,24 +841,10 @@ async function runE2EAuth(playwrightFlags: string[]): Promise<number> {
 
 		// 4. Run Playwright
 		console.log('\nRunning Playwright tests...\n');
-		const nodeBinary = await resolvePlaywrightNodeBinary();
-		if (!nodeBinary) {
-			return 1;
-		}
-
-		const cmd = new Deno.Command(nodeBinary, {
-			args: [PLAYWRIGHT_CLI, 'test', '--config', E2E_AUTH_CONFIG, ...playwrightFlags],
-			env: {
-				...Deno.env.toObject(),
-				OIDC_DIRECT_URL: `http://localhost:${DIRECT_PORT}`,
-				OIDC_PROXY_URL: PROXY_ORIGIN
-			},
-			stdout: 'inherit',
-			stderr: 'inherit'
+		exitCode = await runPlaywright(E2E_AUTH_CONFIG, playwrightFlags, {
+			OIDC_DIRECT_URL: `http://localhost:${DIRECT_PORT}`,
+			OIDC_PROXY_URL: PROXY_ORIGIN
 		});
-
-		const result = await cmd.output();
-		exitCode = result.code;
 	} catch (error) {
 		console.error('E2E auth test error:', error);
 	} finally {
@@ -909,7 +1070,9 @@ function printHelp(): void {
 		'  <name>          Legacy: treated as auth spec name',
 		'',
 		'E2E targets:',
+		'  (none)          All E2E suites, parallel',
 		'  auth            OIDC auth tests (Docker + preview servers)',
+		'  sanitize        Markdown XSS tests (preview server, no Docker)',
 		'',
 		'Scans:',
 		'  zap --baseline  Passive scan (spider + check responses)',
@@ -920,13 +1083,15 @@ function printHelp(): void {
 		'',
 		'E2E flags:',
 		'  --headed        Show browser window',
-		'  --debug         Open Playwright inspector',
+		'  --debug         Open Playwright inspector (stops after first failure)',
+		'  --grep=<re>     Run only tests whose title matches',
 		'',
 		'Examples:',
 		'  deno task test                       All unit tests',
 		'  deno task test unit auth             Auth unit tests only',
 		'  deno task test integration health    Single integration spec',
-		'  deno task test e2e auth --debug      OIDC auth, debug mode'
+		'  deno task test e2e auth --debug      OIDC auth, debug mode',
+		'  deno task test e2e sanitize          Markdown XSS, headless'
 	];
 	console.log(lines.join('\n'));
 }
