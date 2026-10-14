@@ -72,7 +72,8 @@
 			<div class="space-y-3">
 				<CodeBlock code={expression.pattern} />
 				{#if expression.description}
-					<Markdown content={expression.description} inline={false} maxLines={3} />
+					<!-- The card is a link, so unwrap links in the description -->
+					<Markdown content={expression.description} inline={false} maxLines={3} links={false} />
 				{/if}
 			</div>
 		</Card>

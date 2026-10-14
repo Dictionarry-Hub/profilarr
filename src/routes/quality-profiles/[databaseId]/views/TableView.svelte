@@ -14,7 +14,8 @@
 		Copy,
 		Download
 	} from '@lucide/svelte';
-	import { sanitizeHtml, escapeHtml } from '$shared/utils/sanitize.ts';
+	import { renderMarkdown } from '$shared/utils/markdown.ts';
+	import { escapeHtml } from '$shared/utils/sanitize.ts';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let profiles: QualityProfileTableRow[];
@@ -76,7 +77,7 @@
 			align: 'left',
 			cell: (row: QualityProfileTableRow) => ({
 				html: row.description
-					? sanitizeHtml(row.description)
+					? renderMarkdown(row.description)
 					: '<span class="text-neutral-400">No description</span>'
 			})
 		},

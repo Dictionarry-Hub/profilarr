@@ -2,8 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 	import { Database, Eye, EyeOff, Info, ArrowDownUp, Filter, MailCheck } from '@lucide/svelte';
-	import { marked } from 'marked';
-	import { sanitizeHtml } from '$shared/utils/sanitize.ts';
+	import { renderMarkdown } from '$shared/utils/markdown.ts';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
@@ -21,10 +20,6 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { getPersistentSearchStore } from '$stores/search';
 	import { alertStore } from '$alerts/store';
-
-	function renderMarkdown(text: string): string {
-		return sanitizeHtml(marked.parse(text) as string); // nosemgrep: profilarr.xss.marked-unsanitized
-	}
 
 	export let data: PageData;
 

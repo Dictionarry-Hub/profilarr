@@ -3,10 +3,10 @@
  * live event handler.
  *
  * PCD authors control custom format and quality profile descriptions. Both
- * are rendered through sanitizeHtml() and end up in the server-rendered
- * HTML of the list pages. These tests seed a description carrying an
- * unquoted `onerror` attribute (which the sanitizer's quoted-only regexes
- * miss) and fetch the pages over HTTP.
+ * are rendered through the shared markdown renderer and end up in the
+ * server-rendered HTML of the list pages. These tests seed a description
+ * carrying an unquoted `onerror` attribute, the form the original regex
+ * sanitizer let through, and fetch the pages over HTTP.
  *
  * SvelteKit also embeds the raw load data in a <script> block with `<`
  * escaped as <, so the raw markdown text legitimately appears there.

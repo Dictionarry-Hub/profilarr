@@ -1,18 +1,13 @@
 <script lang="ts">
-	import { marked } from 'marked';
-	import { sanitizeHtml } from '$shared/utils/sanitize';
+	import { renderMarkdown } from '$shared/utils/markdown';
 
 	export let content: string | null = null;
 	export let inline: boolean = true;
 	export let maxLines: number | undefined = undefined;
+	/** Set false when the component sits inside an element that is itself a link. */
+	export let links: boolean = true;
 
-	$: html = content
-		? sanitizeHtml(
-				inline
-					? (marked.parseInline(content) as string) // nosemgrep: profilarr.xss.marked-unsanitized
-					: (marked.parse(content) as string) // nosemgrep: profilarr.xss.marked-unsanitized
-			)
-		: '';
+	$: html = renderMarkdown(content, { inline, links });
 </script>
 
 {#if html}

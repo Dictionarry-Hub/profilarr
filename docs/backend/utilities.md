@@ -112,16 +112,13 @@ timestamp-based expiration checked on access.
 
 ## Markdown
 
-**Source:** `utils/markdown/markdown.ts`
+**Source:** `src/lib/shared/utils/markdown.ts`
 
-Two functions wrapping the `marked` library:
-
-- `parseMarkdown(text)` -- converts Markdown to sanitized HTML. Sanitization
-  prevents XSS from user-generated content.
-- `stripMarkdown(text)` -- extracts plain text for previews and summaries.
-
-Used for entity descriptions (quality profiles, custom formats) where users
-can write Markdown.
+There is no server-only markdown helper. `renderMarkdown(text, { inline, links })`
+is shared code, imported by server load functions and components alike, so the
+server-rendered page and the browser produce the same HTML. It is the only
+place `marked` is imported; see
+[security.md](./security.md#xss-via-markdown--html) for what it enforces.
 
 ## Git
 
