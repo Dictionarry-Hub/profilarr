@@ -181,6 +181,37 @@ export function setSessionExpiry(dbPath: string, sessionId: string, minutesFromN
 }
 
 /**
+ * Set a session's confirmed_at to a number of minutes in the past.
+ * Used to age an identity confirmation past its window.
+ */
+export function setSessionConfirmedAt(dbPath: string, sessionId: string, minutesAgo: number): void {
+	log.setup(`Setting session ${sessionId.slice(0, 8)}... confirmed ${minutesAgo}m ago`);
+	const db = openDb(dbPath);
+	try {
+		db.exec("UPDATE sessions SET confirmed_at = datetime('now', ? || ' minutes') WHERE id = ?", [
+			String(-minutesAgo),
+			sessionId
+		]);
+	} finally {
+		db.close();
+	}
+}
+
+/**
+ * Get a session's confirmed_at timestamp from the database.
+ */
+export function getSessionConfirmedAt(dbPath: string, sessionId: string): string | null {
+	const db = openDb(dbPath);
+	try {
+		const stmt = db.prepare('SELECT confirmed_at FROM sessions WHERE id = ?');
+		const row = stmt.get(sessionId) as { confirmed_at: string | null } | undefined;
+		return row?.confirmed_at ?? null;
+	} finally {
+		db.close();
+	}
+}
+
+/**
  * Get a session's expires_at timestamp from the database.
  */
 export function getSessionExpiry(dbPath: string, sessionId: string): string | null {

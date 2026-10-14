@@ -16,6 +16,8 @@ export interface Session {
 	os: string | null;
 	device_type: string | null;
 	last_active_at: string | null;
+	// Identity confirmation (Migration 074): sign-in or an explicit confirmation
+	confirmed_at: string | null;
 }
 
 type SessionRow = Session;
@@ -25,7 +27,8 @@ function rowToSession(row: SessionRow): Session {
 		...row,
 		expires_at: toUTC(row.expires_at)!,
 		created_at: toUTC(row.created_at)!,
-		last_active_at: toUTC(row.last_active_at)
+		last_active_at: toUTC(row.last_active_at),
+		confirmed_at: toUTC(row.confirmed_at)
 	};
 }
 
@@ -46,15 +49,16 @@ export interface SessionMetadata {
  */
 export const sessionsQueries = {
 	/**
-	 * Create a new session with optional metadata
+	 * Create a new session with optional metadata. Signing in counts as an
+	 * identity confirmation, so confirmed_at starts at now.
 	 */
 	create(userId: number, durationHours: number, metadata?: SessionMetadata): string {
 		const id = crypto.randomUUID();
 		const expiresAt = new Date(Date.now() + durationHours * 60 * 60 * 1000);
 
 		db.execute(
-			`INSERT INTO sessions (id, user_id, expires_at, ip_address, user_agent, browser, os, device_type, last_active_at)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+			`INSERT INTO sessions (id, user_id, expires_at, ip_address, user_agent, browser, os, device_type, last_active_at, confirmed_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
 			id,
 			userId,
 			expiresAt.toISOString(),
@@ -138,6 +142,32 @@ export const sessionsQueries = {
 			id
 		);
 		return affected > 0;
+	},
+
+	/**
+	 * Record that the session's owner just proved their identity
+	 */
+	markConfirmed(id: string): boolean {
+		const affected = db.execute(
+			'UPDATE sessions SET confirmed_at = CURRENT_TIMESTAMP WHERE id = ?',
+			id
+		);
+		return affected > 0;
+	},
+
+	/**
+	 * Forget identity confirmations on a user's sessions, optionally keeping one
+	 * (the session that just proved itself by changing the password)
+	 */
+	clearConfirmationsForUser(userId: number, exceptSessionId?: string): number {
+		if (exceptSessionId) {
+			return db.execute(
+				'UPDATE sessions SET confirmed_at = NULL WHERE user_id = ? AND id != ?',
+				userId,
+				exceptSessionId
+			);
+		}
+		return db.execute('UPDATE sessions SET confirmed_at = NULL WHERE user_id = ?', userId);
 	},
 
 	/**

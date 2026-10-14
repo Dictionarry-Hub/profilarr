@@ -11,6 +11,7 @@
   - [Login Scenarios](#login-scenarios)
   - [API Keys](#api-keys)
     - [Permissions](#permissions)
+    - [Creating a Key](#creating-a-key)
 - [Request Flow](#request-flow)
 - [Security Features](#security-features)
   - [Hashing](#hashing)
@@ -112,7 +113,10 @@ device type, last active. Duration is configured in
 `auth_settings.session_duration_hours` (default 7 days). Sliding expiration
 extends the session when less than half the duration remains. Expired sessions
 are cleaned up on startup. Password and SSO sign-ins create the same kind of
-session. Settings > Security lists sessions from every account, and can revoke
+session. Each session also records `confirmed_at`, the last time the person
+proved who they are: set at sign-in, refreshed by an explicit confirmation (see
+[Creating a Key](#creating-a-key)), never by ordinary activity. Changing the
+password clears it on the account's other sessions. Settings > Security lists sessions from every account, and can revoke
 one session or every session except the current one. The page gets a SHA-256
 handle for each session, never its ID: the ID is the cookie value, so exposing
 it would let a script in the page read what the `httpOnly` cookie hides.
@@ -163,6 +167,19 @@ sequenceDiagram
     P->>P: Create session
     P->>B: Set session cookie, redirect /
 ```
+
+**Re-authentication.** Some actions need a recent proof of identity (see
+[Creating a Key](#creating-a-key)). For an SSO session, `/auth/oidc/login?reauth=1`
+runs the same flow with `prompt=login` and `max_age=60`, which asks the
+provider to authenticate the person again rather than reuse its own session.
+`max_age` is the same 60-second allowance the callback applies below; it is
+never sent as `0`, which Authelia can never satisfy.
+The callback then requires the ID token's `auth_time` claim to be newer than
+the moment the flow started and its `sub` to match the signed-in account. On
+success the existing session is marked confirmed and kept; no new session is
+created. A provider that returns no fresh `auth_time` (Google does not support
+the request) fails closed and returns to the Security page, which suggests
+creating a local account.
 
 `AUTH=oidc` is a deprecated alias for `AUTH=on`. Startup logs a warning asking
 for `AUTH=on`; if a password account exists, the warning also says the login
@@ -251,6 +268,62 @@ request flow.
   SQLite, and is not bcrypt-hashed. It always has full access and works
   alongside stored keys.
 - Invalid keys are logged with a masked value (`****` + last 4 chars)
+
+#### Creating a Key
+
+A new key is a long-lived credential, so creating one asks the person to
+confirm their identity first. A script running in a hijacked session cannot do
+that: it doesn't know the password, and it can't complete a sign-in at the
+provider. The check depends on how the current session signed in, and a
+confirmation is remembered on the session (`confirmed_at`) for 30 minutes, so
+creating several keys in a row asks once. Signing in counts as a confirmation.
+
+The gate is enforced by the `create` action in
+`src/routes/settings/security/api-keys/new/+page.server.ts` using
+`isRecentlyConfirmed()` from `src/lib/server/utils/auth/confirmation.ts`. On
+the Security page, New Key opens a modal that asks for the confirmation and
+only then opens the form. The form page shows the same modal for direct links
+and for a confirmation that lapses while it is open; a refused submit brings
+it back. The New Key link is never preloaded, so the form page's data is
+fetched only when it actually opens, after the confirmation.
+
+Password session:
+
+```mermaid
+flowchart TD
+    A[New Key clicked] --> B{Session confirmed<br>in last 30 min?}
+    B -->|Yes| K[Open the form; create key,<br>show plaintext once]
+    B -->|No| C{Password field<br>filled in?}
+    C -->|No| D[400: enter your password]
+    C -->|Yes| E{Password matches<br>account hash?}
+    E -->|No| F[400: wrong password]
+    E -->|Yes| G[Mark session confirmed now]
+    G --> K
+```
+
+The password check shares the login rate limiter, so guessing is throttled the
+same way as at the login page.
+
+SSO session:
+
+```mermaid
+flowchart TD
+    A[New Key clicked] --> B{Session confirmed<br>in last 30 min?}
+    B -->|Yes| K[Open the form; create key,<br>show plaintext once]
+    B -->|No| C[Confirm with SSO:<br>/auth/oidc/login?reauth=1]
+    C --> D[Redirect to provider with<br>prompt=login and max_age=60]
+    D --> E[Provider re-authenticates the user]
+    E --> F[Callback: usual token checks]
+    F --> G{sub matches the session and<br>auth_time newer than when we started?}
+    G -->|No| H[Session stays unconfirmed.<br>Back to Security: provider could not<br>confirm you, create a local account]
+    G -->|Yes| I[Mark session confirmed now]
+    I --> J[Back on the key form]
+    J --> K
+```
+
+An SSO session cannot confirm with a password, and a password session cannot
+confirm through the SSO route. With `AUTH=off` there is no session, so there is
+nothing to confirm; keys don't work in that mode anyway.
 
 #### Permissions
 
@@ -605,16 +678,17 @@ Pure function tests for the core auth utilities - IP classification, path
 allowlisting, and login failure analysis. No server instances or network calls
 needed.
 
-| File                        | Tests                                                                                    |
-| --------------------------- | ---------------------------------------------------------------------------------------- |
-| `network.test.ts`           | `getClientIp` proxy header handling with trustProxy on/off                               |
-| `publicPaths.test.ts`       | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries    |
-| `loginAnalysis.test.ts`     | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization |
-| `apiPermissions.test.ts`    | Route id to spec path mapping, permission lookup, read/write/area checks, area list      |
-| `authConfig.test.ts`        | `AUTH` parsing, `oidc` alias, SSO enablement, partial `OIDC_*` settings refused          |
-| `oidcConfigStartup.test.ts` | Partial `OIDC_*` settings stop `config.ts` from loading; ignored with `AUTH=off`         |
-| `loginOptions.test.ts`      | Login page options, first-run setup, and the startup lockout for every combination       |
-| `accountValidation.test.ts` | Password account rules, reserved `oidc:` prefix, prefix check matches the SQL in queries |
+| File                        | Tests                                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------------- |
+| `network.test.ts`           | `getClientIp` proxy header handling with trustProxy on/off                                  |
+| `publicPaths.test.ts`       | Public vs protected path matching, prefix vs exact, no overly broad allowlist entries       |
+| `loginAnalysis.test.ts`     | Attack username detection, Levenshtein typo matching (1-2 edits), failure categorization    |
+| `apiPermissions.test.ts`    | Route id to spec path mapping, permission lookup, read/write/area checks, area list         |
+| `authConfig.test.ts`        | `AUTH` parsing, `oidc` alias, SSO enablement, partial `OIDC_*` settings refused             |
+| `oidcConfigStartup.test.ts` | Partial `OIDC_*` settings stop `config.ts` from loading; ignored with `AUTH=off`            |
+| `loginOptions.test.ts`      | Login page options, first-run setup, and the startup lockout for every combination          |
+| `accountValidation.test.ts` | Password account rules, reserved `oidc:` prefix, prefix check matches the SQL in queries    |
+| `confirmation.test.ts`      | Confirmation window edges and the re-authentication claim checks (`sub`, `auth_time`, skew) |
 
 **Sanitize tests** (`tests/unit/sanitize/`):
 
@@ -630,27 +704,29 @@ end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
 `ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
 and run in parallel via `deno task test integration`.
 
-| File                         | Port             | Tests                                                                                                  |
-| ---------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
-| `health.test.ts`             | 7001             | Public health vs authenticated diagnostics, no info disclosure                                         |
-| `csrf.test.ts`               | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                           |
-| `cookie.test.ts`             | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                      |
-| `apiKey.test.ts`             | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management               |
-| `apiKeyPermissions.test.ts`  | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                  |
-| `envApiKey.test.ts`          | 7018             | Env key works alongside stored keys, "Environment" name reserved                                       |
-| `session.test.ts`            | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection         |
-| `oidc.test.ts`               | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                     |
-| `loginMethods.test.ts`       | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout       |
-| `localAccount.test.ts`       | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts    |
-| `rateLimit.test.ts`          | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                     |
-| `proxy.test.ts`              | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                             |
-| `xForwardedFor.test.ts`      | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                             |
-| `secretExposure.test.ts`     | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                         |
-| `backupSecrets.test.ts`      | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                                |
-| `pathTraversal.test.ts`      | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                       |
-| `localBypass.test.ts`        | 7019             | Local bypass removal: requests from local addresses require auth                                       |
-| `xss.test.ts`                | 7032             | Seeded PCD descriptions with an unquoted event handler never reach custom format or profile page HTML  |
-| `secretDestinations.test.ts` | 7033             | Arr, Ntfy and webhook updates that change the destination are rejected unless the secret is re-entered |
+| File                         | Port             | Tests                                                                                                                                     |
+| ---------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `health.test.ts`             | 7001             | Public health vs authenticated diagnostics, no info disclosure                                                                            |
+| `csrf.test.ts`               | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                                                              |
+| `cookie.test.ts`             | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                                                         |
+| `apiKey.test.ts`             | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management                                                  |
+| `apiKeyPermissions.test.ts`  | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                                                     |
+| `envApiKey.test.ts`          | 7018             | Env key works alongside stored keys, "Environment" name reserved                                                                          |
+| `session.test.ts`            | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection                                            |
+| `oidc.test.ts`               | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                                                        |
+| `loginMethods.test.ts`       | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout                                          |
+| `localAccount.test.ts`       | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts                                       |
+| `rateLimit.test.ts`          | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                                                        |
+| `proxy.test.ts`              | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                                                                |
+| `xForwardedFor.test.ts`      | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                                                                |
+| `secretExposure.test.ts`     | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                                                            |
+| `backupSecrets.test.ts`      | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                                                                   |
+| `pathTraversal.test.ts`      | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                                                          |
+| `localBypass.test.ts`        | 7019             | Local bypass removal: requests from local addresses require auth                                                                          |
+| `xss.test.ts`                | 7032             | Seeded PCD descriptions with an unquoted event handler never reach custom format or profile page HTML                                     |
+| `secretDestinations.test.ts` | 7033             | Arr, Ntfy and webhook updates that change the destination are rejected unless the secret is re-entered                                    |
+| `apiKeyConfirmation.test.ts` | 7034             | Key creation needs a confirmed session: window edges, wrong and right password, sessions stay separate, password change, rate limit       |
+| `oidcReauth.test.ts`         | 7035, 7036       | SSO re-authentication: `max_age` sent, same session kept and confirmed, wrong account rejected, provider without `auth_time` fails closed |
 
 ### E2E Tests (`tests/e2e/`)
 
@@ -665,7 +741,7 @@ at the first failure.
 
 | File                   | Tests                                                                                                                                   |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth/oidc.spec.ts`    | Full OIDC login flow in browser, both direct and through proxy                                                                          |
+| `auth/oidc.spec.ts`    | Full OIDC login flow in browser, both direct and through proxy; confirm with SSO and create an API key                                  |
 | `sanitize/xss.spec.ts` | Seeded custom format and announcement markdown with an unquoted event handler never executes, on direct load and client-side navigation |
 
 ### Security Scans (`tests/scan/`)

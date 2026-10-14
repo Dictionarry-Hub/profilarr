@@ -260,7 +260,11 @@ Minor but worth knowing:
 need: `text`, `icon` (a Lucide component), `variant`
 (`primary` / `secondary` / `danger` / `ghost` / others), `size`
 (`xs` / `sm` / `md` / `lg`), `loading`, `disabled`, `href` (renders as `<a>`),
-and `type` (for form submits). If a `tooltip` prop is provided, the button
+`reload` (with `href`: the browser loads the link itself, for server endpoints
+such as `/auth/oidc/login` that the client router cannot resolve), `preload`
+(with `href`: `tap` fetches the page data on click instead of on hover, `off`
+never preloads it; for pages whose data must be current when they open), and `type` (for form
+submits). If a `tooltip` prop is provided, the button
 wraps itself in a `Tooltip`; use `tooltipPosition="right"` for controls near
 the left edge of the viewport.
 

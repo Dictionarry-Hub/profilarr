@@ -59,7 +59,10 @@ export const PORTS = {
 		localAccountRace: 7030,
 		setupRace: 7031,
 		xss: 7032,
-		secretDestinations: 7033
+		secretDestinations: 7033,
+		apiKeyConfirmation: 7034,
+		oidcReauth: 7035,
+		oidcReauthStale: 7036
 	},
 	api: {
 		arr: 7100,

@@ -8,6 +8,12 @@ import type { TestClient } from './client.ts';
 
 export const MOCK_OIDC_URL = 'http://localhost:9090/default/.well-known/openid-configuration';
 
+/**
+ * A second issuer on the same mock server whose ID tokens carry no `auth_time`,
+ * standing in for a provider that cannot confirm a re-authentication.
+ */
+export const MOCK_OIDC_STALE_URL = 'http://localhost:9090/stale/.well-known/openid-configuration';
+
 /** The three settings that turn SSO on */
 export const OIDC_SETTINGS = {
 	OIDC_DISCOVERY_URL: MOCK_OIDC_URL,
@@ -28,13 +34,19 @@ export const OIDC_SETTINGS = {
  *
  * Returns the callback response. The client's cookie jar will have
  * the session cookie if the flow succeeded.
+ *
+ * With `reauth: true` the flow starts at `/auth/oidc/login?reauth=1`, which
+ * re-authenticates the client's existing session instead of signing in.
  */
 export async function completeOidcLogin(
 	client: TestClient,
-	username = 'test'
+	username = 'test',
+	options: { reauth?: boolean } = {}
 ): Promise<{ callbackRes: Response; authUrl: string }> {
 	// Step 1: Start OIDC flow
-	const loginRes = await client.get('/auth/oidc/login');
+	const loginRes = await client.get(
+		options.reauth ? '/auth/oidc/login?reauth=1' : '/auth/oidc/login'
+	);
 	assertEquals(loginRes.status, 302, 'OIDC login should redirect to provider');
 	const authUrl = loginRes.headers.get('location')!;
 

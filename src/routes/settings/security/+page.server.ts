@@ -5,6 +5,7 @@ import { sessionsQueries } from '$db/queries/sessions.ts';
 import { apiKeysQueries } from '$db/queries/apiKeys.ts';
 import { hashPassword, verifyPassword } from '$auth/password.ts';
 import { isOidcUsername, validateNewLocalAccount } from '$auth/loginOptions.ts';
+import { requiredConfirmation } from '$auth/confirmation.ts';
 import { sha256Hex } from '$auth/hash.ts';
 import { API_AREAS } from '$auth/apiPermissions.ts';
 import { config } from '$config';
@@ -22,7 +23,7 @@ function loadApiKeys() {
 	};
 }
 
-export const load: ServerLoad = async ({ cookies, locals }) => {
+export const load: ServerLoad = async ({ cookies, locals, url }) => {
 	const currentSessionId = cookies.get('session');
 
 	// Every account is an admin, so list sessions from password and SSO accounts.
@@ -46,7 +47,11 @@ export const load: ServerLoad = async ({ cookies, locals }) => {
 		sessions,
 		...loadApiKeys(),
 		signedInWithSso: locals.user ? isOidcUsername(locals.user.username) : false,
-		hasLocalAccount: usersQueries.existsLocal()
+		hasLocalAccount: usersQueries.existsLocal(),
+		// Creating a key asks the session to confirm its identity first; a failed
+		// SSO confirmation comes back here with ?reauth=failed
+		confirmation: requiredConfirmation(locals.session, locals.user),
+		reauthFailed: url.searchParams.get('reauth') === 'failed'
 	};
 };
 
@@ -99,6 +104,11 @@ export const actions: Actions = {
 		// Update password
 		const newHash = await hashPassword(newPassword);
 		usersQueries.updatePassword(user.id, newHash);
+
+		// Other sessions must prove themselves again with the new password; this
+		// one just did with the old one
+		sessionsQueries.clearConfirmationsForUser(user.id, session.id);
+		sessionsQueries.markConfirmed(session.id);
 
 		await logger.info(`Password changed for '${user.username}'`, {
 			source: 'Auth',

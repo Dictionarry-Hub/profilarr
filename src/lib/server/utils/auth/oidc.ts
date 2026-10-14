@@ -4,6 +4,7 @@
  */
 
 import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { REAUTH_SKEW_SECONDS } from './confirmation.ts';
 
 export interface DiscoveryDocument {
 	issuer: string;
@@ -31,6 +32,8 @@ export interface IdTokenClaims {
 	aud: string | string[];
 	exp: number;
 	iat: number;
+	/** When the provider last actively authenticated the person; required when we send max_age */
+	auth_time?: number;
 }
 
 // Cache discovery document (doesn't change often)
@@ -87,6 +90,14 @@ export function buildAuthorizationUrl(
 		state: string;
 		nonce: string;
 		scope?: string;
+		/**
+		 * Ask the provider to authenticate the person again rather than reuse its
+		 * session. `prompt=login` asks for that outright. `max_age` states the
+		 * freshness the callback accepts and obliges the provider to return
+		 * `auth_time`. It is never 0: Authelia treats `max_age=0` as a request it
+		 * can never satisfy and loops back to its password prompt.
+		 */
+		reauth?: boolean;
 	}
 ): string {
 	const params = new URLSearchParams({
@@ -97,6 +108,10 @@ export function buildAuthorizationUrl(
 		state: opts.state,
 		nonce: opts.nonce
 	});
+	if (opts.reauth) {
+		params.set('max_age', String(REAUTH_SKEW_SECONDS));
+		params.set('prompt', 'login');
+	}
 
 	return `${authorizationEndpoint}?${params.toString()}`;
 }

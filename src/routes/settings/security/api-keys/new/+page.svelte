@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { beforeNavigate, goto } from '$app/navigation';
+	import { beforeNavigate, goto, invalidateAll } from '$app/navigation';
 	import { Plus, Copy, Check } from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
@@ -13,6 +13,7 @@
 	import Modal from '$ui/modal/Modal.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import Table from '$ui/table/Table.svelte';
+	import ConfirmIdentityModal from '../../components/ConfirmIdentityModal.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
@@ -177,6 +178,13 @@
 							'error',
 							(result.data as { error?: string } | undefined)?.error ?? 'Failed to create API key'
 						);
+						// Re-run load: the refusal may mean the session needs confirming again,
+						// in which case the modal opens over the form. (enhance's update() only
+						// reloads after a success.) A password confirmation keeps typed values.
+						// An SSO confirmation leaves the page, so drop the dirty state rather
+						// than prompt about values that are lost either way.
+						await invalidateAll();
+						if (data.confirmation === 'sso') clear();
 					} else if (result.type === 'error') {
 						alertStore.add('error', 'Failed to create API key');
 					}
@@ -296,6 +304,14 @@
 </div>
 
 <DirtyModal />
+
+<!-- Direct links and lapsed confirmations: the same modal the Security page shows -->
+<ConfirmIdentityModal
+	open={!created && data.confirmation !== 'none'}
+	confirmation={data.confirmation === 'sso' ? 'sso' : 'password'}
+	on:cancel={() => goto('/settings/security')}
+	on:confirmed={() => invalidateAll()}
+/>
 
 <Modal
 	open={leaveModalOpen}
