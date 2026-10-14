@@ -114,6 +114,15 @@ Deno.test('evaluateReauth: a password account cannot be confirmed through SSO', 
 	);
 });
 
+Deno.test('evaluateReauth: a start time that is not a number fails closed', () => {
+	for (const startedAt of [Number.NaN, Number.POSITIVE_INFINITY]) {
+		assertEquals(evaluateReauth({ ...base, startedAt, authTime: secondsAfterStart(10) }), {
+			ok: false,
+			reason: 'invalid_start'
+		});
+	}
+});
+
 Deno.test('evaluateReauth: sub comparison is exact', () => {
 	assertEquals(evaluateReauth({ ...base, sub: 'Alice', authTime: secondsAfterStart(10) }), {
 		ok: false,

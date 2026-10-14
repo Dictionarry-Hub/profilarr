@@ -57,7 +57,7 @@ export function isRecentlyConfirmed(
 	return now - at <= CONFIRMATION_WINDOW_MINUTES * 60_000;
 }
 
-export type ReauthFailure = 'sub_mismatch' | 'no_auth_time' | 'stale_auth_time';
+export type ReauthFailure = 'sub_mismatch' | 'invalid_start' | 'no_auth_time' | 'stale_auth_time';
 
 export interface ReauthInput {
 	/** `sub` claim of the ID token the provider just issued */
@@ -74,13 +74,17 @@ export interface ReauthInput {
 /**
  * Decide whether a provider round trip counts as a fresh confirmation of the
  * signed-in account. Fails closed: a missing or non-numeric `auth_time`
- * means the provider gave no proof it re-authenticated anyone.
+ * means the provider gave no proof it re-authenticated anyone, and a start
+ * time that isn't a number can't anchor the comparison (NaN would pass it).
  */
 export function evaluateReauth(
 	input: ReauthInput
 ): { ok: true } | { ok: false; reason: ReauthFailure } {
 	if (input.sessionUsername !== `oidc:${input.sub}`) {
 		return { ok: false, reason: 'sub_mismatch' };
+	}
+	if (!Number.isFinite(input.startedAt)) {
+		return { ok: false, reason: 'invalid_start' };
 	}
 	if (typeof input.authTime !== 'number' || !Number.isFinite(input.authTime)) {
 		return { ok: false, reason: 'no_auth_time' };
