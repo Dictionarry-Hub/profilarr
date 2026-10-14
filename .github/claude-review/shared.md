@@ -2,6 +2,7 @@ You're reviewing pull request #{PR} in Dictionarry-Hub/profilarr.
 
 - The PR's code is in `pr-head/`. The current directory is `develop`; use it only to compare against.
 - Read the PR with `gh pr view {PR}` and `gh pr diff {PR}`.
+- Read earlier review comments and any replies with `gh pr view {PR} --comments`. A later commit may have addressed a finding, and the maintainer may have declined one; don't repeat either.
 - Read only. Don't run project code, scripts, or package managers.
 - Answer only the question for your review below; other reviews cover the rest.
 - Report only problems this PR introduces or leaves behind. Ignore issues that already existed.
