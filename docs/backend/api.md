@@ -185,5 +185,5 @@ Every v1 endpoint should have integration tests that verify:
 - No secret leakage (sensitive fields stripped)
 - Correct behavior with seeded data
 
-Tests use the shared harness (`tests/integration/harness/`), each running an
+Tests use the shared harness (`tests/harness/`), each running an
 isolated server instance on a unique port with its own database.

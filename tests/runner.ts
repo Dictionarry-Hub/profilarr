@@ -56,7 +56,7 @@
  *   --help, -h      Show this help text.
  */
 
-import { PORTS } from './integration/harness/ports.ts';
+import { PORTS } from '$test-harness/ports.ts';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 

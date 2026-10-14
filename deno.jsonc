@@ -25,7 +25,7 @@
 		"$sync/": "./src/lib/server/sync/",
 		"$cache/": "./src/lib/server/utils/cache/",
 		"$auth/": "./src/lib/server/utils/auth/",
-		"$test-harness/": "./tests/integration/harness/",
+		"$test-harness/": "./tests/harness/",
 
 		// Runtime
 		"@db/sqlite": "npm:@jsr/db__sqlite@0.12.0",

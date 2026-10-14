@@ -1,10 +1,10 @@
 /**
- * Integration test port registry.
+ * Test port registry.
  *
- * Single source of truth for port allocation across all integration specs.
- * Specs import from here instead of declaring their own PORT constants, so
- * collisions surface as a registry-time error at first import rather than as
- * parallel-run flakes.
+ * Single source of truth for port allocation across every suite that starts a
+ * server: integration specs and E2E suites. Specs and the runner import from
+ * here instead of declaring their own PORT constants, so collisions surface as
+ * a registry-time error at first import rather than as parallel-run flakes.
  *
  * Range strategy
  *   7000-7099  auth
