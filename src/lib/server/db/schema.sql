@@ -928,6 +928,9 @@ CREATE TABLE sessions (
     device_type TEXT,                       -- Device category (Desktop, Mobile, Tablet)
     last_active_at DATETIME,                            -- Updated on sliding expiration
 
+    -- Identity confirmation (Migration 074)
+    confirmed_at DATETIME,                              -- Set at sign-in and by explicit confirmation; gates API key creation
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

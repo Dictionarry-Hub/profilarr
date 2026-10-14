@@ -7,6 +7,7 @@ import { sessionsQueries } from '$db/queries/sessions.ts';
 import { authSettingsQueries } from '$db/queries/authSettings.ts';
 import { getClientIp } from '$auth/network.ts';
 import { parseUserAgent } from '$auth/userAgent.ts';
+import { evaluateReauth, REAUTH_RETURN_PATH } from '$auth/confirmation.ts';
 import { logger } from '$logger/logger.ts';
 
 export const GET: RequestHandler = async (event) => {
@@ -39,8 +40,11 @@ export const GET: RequestHandler = async (event) => {
 		throw error(400, 'Invalid state parameter');
 	}
 	const savedNonce = cookies.get('oidc_nonce');
+	// Only a value set by /auth/oidc/login?reauth=1 counts; a cleared cookie is not a re-auth
+	const reauthStartedAt = cookies.get('oidc_reauth') || undefined;
 	cookies.delete('oidc_state', { path: '/' });
 	cookies.delete('oidc_nonce', { path: '/' });
+	cookies.delete('oidc_reauth', { path: '/' });
 
 	// Verify we have a code
 	if (!code) {
@@ -94,6 +98,48 @@ export const GET: RequestHandler = async (event) => {
 			meta: { ip }
 		});
 		throw error(400, 'Invalid nonce parameter');
+	}
+
+	// Re-authentication: confirm the existing session instead of signing in.
+	// The session must still be valid, belong to the account the provider just
+	// authenticated, and the provider must say the authentication is fresh.
+	if (reauthStartedAt !== undefined) {
+		const sessionId = cookies.get('session');
+		const session = sessionId ? sessionsQueries.getValidById(sessionId) : undefined;
+		const user = session ? usersQueries.getById(session.user_id) : undefined;
+		if (!session || !user) {
+			throw error(400, 'Re-authentication needs a signed-in SSO session');
+		}
+
+		const result = evaluateReauth({
+			sub: claims.sub,
+			authTime: claims.auth_time,
+			sessionUsername: user.username,
+			startedAt: Number(reauthStartedAt)
+		});
+
+		if (!result.ok && result.reason === 'sub_mismatch') {
+			await logger.warn('OIDC re-authentication signed in a different account', {
+				source: 'Auth:OIDC',
+				meta: { ip, username: user.username }
+			});
+			throw error(400, 'Re-authentication did not match the signed-in account');
+		}
+
+		if (!result.ok) {
+			await logger.warn(`OIDC re-authentication could not be confirmed: ${result.reason}`, {
+				source: 'Auth:OIDC',
+				meta: { ip, username: user.username, reason: result.reason }
+			});
+			throw redirect(303, `${REAUTH_RETURN_PATH}?reauth=failed`);
+		}
+
+		sessionsQueries.markConfirmed(session.id);
+		await logger.info(`OIDC re-authentication confirmed '${claims.sub}'`, {
+			source: 'Auth:OIDC',
+			meta: { sub: claims.sub, ip }
+		});
+		throw redirect(303, REAUTH_RETURN_PATH);
 	}
 
 	// Get or create OIDC user (using 'sub' as unique identifier)

@@ -100,6 +100,11 @@ export const actions: Actions = {
 		const newHash = await hashPassword(newPassword);
 		usersQueries.updatePassword(user.id, newHash);
 
+		// Other sessions must prove themselves again with the new password; this
+		// one just did with the old one
+		sessionsQueries.clearConfirmationsForUser(user.id, session.id);
+		sessionsQueries.markConfirmed(session.id);
+
 		await logger.info(`Password changed for '${user.username}'`, {
 			source: 'Auth',
 			meta: { userId: user.id, username: user.username }
