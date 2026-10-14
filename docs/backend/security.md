@@ -18,6 +18,7 @@
   - [CSRF & Reverse Proxies](#csrf--reverse-proxies)
   - [Protected Paths](#protected-paths)
   - [Secret Stripping](#secret-stripping)
+  - [Secrets Follow Their Destination](#secrets-follow-their-destination)
   - [XSS via Markdown / {@html}](#xss-via-markdown--html)
   - [Path Traversal](#path-traversal)
 - [Test Coverage](#test-coverage)
