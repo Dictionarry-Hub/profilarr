@@ -65,3 +65,31 @@ test.describe('OIDC login', () => {
 		await expect(page).not.toHaveURL(/auth\/login/);
 	});
 });
+
+test.describe('API key confirmation', () => {
+	test('direct — confirm with SSO keeps the session and allows creating a key', async ({
+		page,
+		context
+	}) => {
+		await oidcLogin(page, DIRECT_URL);
+		const sessionBefore = (await context.cookies(DIRECT_URL)).find((c) => c.name === 'session');
+		expect(sessionBefore?.value).toBeTruthy();
+
+		// Re-authenticate at the provider; the mock server shows its login form again
+		await page.goto(`${DIRECT_URL}/auth/oidc/login?reauth=1`);
+		await page.waitForURL(/localhost:9090/);
+		await page.fill('input[name="username"]', 'e2e-user');
+		await page.locator('input[type="submit"]').click();
+		await page.waitForURL(/\/settings\/security\/api-keys\/new$/);
+
+		const sessionAfter = (await context.cookies(DIRECT_URL)).find((c) => c.name === 'session');
+		expect(sessionAfter?.value).toBe(sessionBefore?.value);
+
+		// Selectors from the page's accessibility snapshot: the name field exposes
+		// only its placeholder, the access toggle is a switch
+		await page.getByPlaceholder('e.g. Homepage widget').fill('e2e confirmed key');
+		await page.getByRole('switch', { name: 'Full access' }).click();
+		await page.getByRole('button', { name: 'Create' }).click();
+		await expect(page.getByText('This key is shown once')).toBeVisible();
+	});
+});

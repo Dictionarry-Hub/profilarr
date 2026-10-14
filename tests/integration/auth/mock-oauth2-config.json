@@ -6,10 +6,25 @@
 			"tokenExpiry": 3600,
 			"requestMappings": [
 				{
-					"requestParam": "scope",
-					"match": "openid",
+					"requestParam": "client_id",
+					"match": "*",
 					"claims": {
-						"sub": "test-user-sub",
+						"email": "test@example.com",
+						"name": "Test User",
+						"preferred_username": "test",
+						"auth_time": 4102444800
+					}
+				}
+			]
+		},
+		{
+			"issuerId": "stale",
+			"tokenExpiry": 3600,
+			"requestMappings": [
+				{
+					"requestParam": "client_id",
+					"match": "*",
+					"claims": {
 						"email": "test@example.com",
 						"name": "Test User",
 						"preferred_username": "test"
