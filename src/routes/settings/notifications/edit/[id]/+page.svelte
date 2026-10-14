@@ -15,6 +15,7 @@
 			name: data.service.name,
 			serviceType: data.service.serviceType,
 			config: data.service.config,
+			storedSecrets: data.service.storedSecrets,
 			enabledTypes: data.service.enabledTypes
 		}}
 	/>

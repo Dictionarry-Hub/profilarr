@@ -2,9 +2,22 @@
 	import FormInput from '$ui/form/FormInput.svelte';
 	export let config: Record<string, unknown> = {};
 	export let mode: 'create' | 'edit' = 'create';
+	/** Secret keys that hold a stored value (the values themselves never reach the browser) */
+	export let storedSecrets: string[] = [];
 
 	let webhookUrl = (config.webhook_url as string) || '';
 	let authHeader = (config.auth_header as string) || '';
+
+	// The stored header is sent to the URL. In edit mode the URL field starts blank (it is a
+	// secret too), so any value entered here is a new destination and needs the header re-entered.
+	$: urlChanged = mode === 'edit' && webhookUrl.trim() !== '';
+	$: headerRequired = urlChanged && storedSecrets.includes('auth_header');
+	/** Why saving is blocked, for the parent's Save button tooltip. Empty when it isn't. */
+	export let requiredSecretMessage = '';
+	$: requiredSecretMessage =
+		headerRequired && !authHeader.trim()
+			? 'Enter the authorization header to change the webhook URL'
+			: '';
 </script>
 
 <div class="space-y-4">
@@ -34,8 +47,11 @@
 		value={authHeader}
 		placeholder={mode === 'edit' ? '••••••••••••••••' : 'Bearer your-token'}
 		description={mode === 'edit'
-			? 'Leave blank to keep existing value'
+			? headerRequired
+				? 'Required when the webhook URL changes'
+				: 'Leave blank to keep existing value'
 			: 'Raw value for the Authorization header (e.g., Bearer token, Basic base64). Optional'}
+		required={headerRequired}
 		private_
 		on:input={(e) => (authHeader = e.detail)}
 	/>

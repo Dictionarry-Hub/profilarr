@@ -483,6 +483,38 @@ Secrets are stripped at two levels:
   never modified. See `src/lib/server/utils/backup/sanitize.ts`
   for the exact policy.
 
+### Secrets Follow Their Destination
+
+A stored secret must be re-entered whenever the place it is sent to changes.
+Update forms keep the stored secret when its field is left blank, so without
+this rule a request that changed only the destination would re-point the
+stored secret at a new host on its next use. Any re-entered value will do: a
+wrong one replaces the stored secret instead of exposing it.
+
+`requireSecretForDestinationChange()` in
+`src/lib/server/utils/secretDestination.ts` enforces it. It rejects a request
+when the destination changed, a secret is stored, and no secret was submitted.
+The forms covered, and the field that counts as the destination:
+
+| Form                      | Secret               | Destination field |
+| ------------------------- | -------------------- | ----------------- |
+| Arr instance settings     | API key              | URL               |
+| Ntfy notification service | Access token         | Server URL        |
+| Generic webhook service   | Authorization header | Webhook URL       |
+
+Arr URLs are compared after `normalizeArrInstanceUrl()`
+(`src/lib/shared/utils/arrUrl.ts`), so a trailing slash or default port is
+not a change. The forms mirror the rule: the secret field becomes required as
+soon as the destination field differs from the stored value. The notification
+edit page tells the form which secret keys exist (`storedSecrets`) without
+sending their values.
+
+`deno task lint:secret-destination` (`scripts/lint/secretDestination.ts`)
+keeps the decision explicit. Every `+page.server.ts` that reads a secret form
+field must import the guard or carry
+`// lint-disable-file secret-destination -- <reason>`, used by the create-only
+actions and by forms whose secret goes to a fixed host.
+
 ### XSS via Markdown / {@html}
 
 Svelte's `{@html}` directive renders raw HTML without escaping. Any content that
@@ -597,26 +629,27 @@ end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
 `ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
 and run in parallel via `deno task test integration`.
 
-| File                        | Port             | Tests                                                                                                 |
-| --------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------- |
-| `health.test.ts`            | 7001             | Public health vs authenticated diagnostics, no info disclosure                                        |
-| `csrf.test.ts`              | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                          |
-| `cookie.test.ts`            | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                     |
-| `apiKey.test.ts`            | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management              |
-| `apiKeyPermissions.test.ts` | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                 |
-| `envApiKey.test.ts`         | 7018             | Env key works alongside stored keys, "Environment" name reserved                                      |
-| `session.test.ts`           | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection        |
-| `oidc.test.ts`              | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                    |
-| `loginMethods.test.ts`      | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout      |
-| `localAccount.test.ts`      | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts   |
-| `rateLimit.test.ts`         | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                    |
-| `proxy.test.ts`             | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                            |
-| `xForwardedFor.test.ts`     | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                            |
-| `secretExposure.test.ts`    | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                        |
-| `backupSecrets.test.ts`     | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                               |
-| `pathTraversal.test.ts`     | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                      |
-| `localBypass.test.ts`       | 7019             | Local bypass removal: requests from local addresses require auth                                      |
-| `xss.test.ts`               | 7032             | Seeded PCD descriptions with an unquoted event handler never reach custom format or profile page HTML |
+| File                         | Port             | Tests                                                                                                  |
+| ---------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
+| `health.test.ts`             | 7001             | Public health vs authenticated diagnostics, no info disclosure                                         |
+| `csrf.test.ts`               | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                           |
+| `cookie.test.ts`             | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                      |
+| `apiKey.test.ts`             | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management               |
+| `apiKeyPermissions.test.ts`  | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                  |
+| `envApiKey.test.ts`          | 7018             | Env key works alongside stored keys, "Environment" name reserved                                       |
+| `session.test.ts`            | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection         |
+| `oidc.test.ts`               | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                     |
+| `loginMethods.test.ts`       | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout       |
+| `localAccount.test.ts`       | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts    |
+| `rateLimit.test.ts`          | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                     |
+| `proxy.test.ts`              | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                             |
+| `xForwardedFor.test.ts`      | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                             |
+| `secretExposure.test.ts`     | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                         |
+| `backupSecrets.test.ts`      | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                                |
+| `pathTraversal.test.ts`      | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                       |
+| `localBypass.test.ts`        | 7019             | Local bypass removal: requests from local addresses require auth                                       |
+| `xss.test.ts`                | 7032             | Seeded PCD descriptions with an unquoted event handler never reach custom format or profile page HTML  |
+| `secretDestinations.test.ts` | 7033             | Arr, Ntfy and webhook updates that change the destination are rejected unless the secret is re-entered |
 
 ### E2E Tests (`tests/e2e/`)
 

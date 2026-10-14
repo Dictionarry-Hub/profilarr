@@ -1,3 +1,4 @@
+// lint-disable-file secret-destination -- the TMDB key goes to a fixed host; the AI endpoint is unused
 import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { logSettingsQueries } from '$db/queries/logSettings.ts';

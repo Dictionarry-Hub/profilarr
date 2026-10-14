@@ -2,7 +2,8 @@ import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { logger } from '$logger/logger.ts';
 import { notificationServicesQueries } from '$db/queries/notificationServices.ts';
-import { stripNotificationSecrets } from '$notifications/secrets.ts';
+import { stripNotificationSecrets, storedNotificationSecrets } from '$notifications/secrets.ts';
+import { requireSecretForDestinationChange } from '$utils/secretDestination.ts';
 import { getAllNotificationTypeIds } from '$shared/notifications/types.ts';
 
 export const load = ({ params }: { params: { id: string } }) => {
@@ -18,6 +19,7 @@ export const load = ({ params }: { params: { id: string } }) => {
 		throw error(404, 'Notification service not found');
 	}
 
+	const config = JSON.parse(service.config);
 	const enabledTypes = JSON.parse(service.enabled_types);
 
 	return {
@@ -27,7 +29,9 @@ export const load = ({ params }: { params: { id: string } }) => {
 			serviceType: service.service_type,
 			enabled: service.enabled === 1,
 			// Secrets never reach the browser; the form keeps the stored value when the field is left blank
-			config: stripNotificationSecrets(JSON.parse(service.config)),
+			config: stripNotificationSecrets(config),
+			// Which secrets exist, so the form can require them again when their destination changes
+			storedSecrets: storedNotificationSecrets(config),
 			enabledTypes
 		}
 	};
@@ -89,6 +93,18 @@ export const actions: Actions = {
 				return fail(400, { error: 'Server URL and topic are required for Ntfy' });
 			}
 
+			// The stored token is sent to the server, so a new server needs the token re-entered
+			const guardError = requireSecretForDestinationChange({
+				destinationChanged: serverUrl.trim() !== String(existingConfig.server_url ?? '').trim(),
+				storedSecret: existingConfig.access_token,
+				submittedSecret: accessToken,
+				secretLabel: 'access token',
+				destinationLabel: 'server URL'
+			});
+			if (guardError) {
+				return fail(400, { error: guardError });
+			}
+
 			config = {
 				server_url: serverUrl,
 				topic,
@@ -102,6 +118,21 @@ export const actions: Actions = {
 		} else if (service.service_type === 'webhook') {
 			const webhookUrl = formData.get('webhook_url') as string;
 			const authHeader = formData.get('auth_header') as string;
+
+			// The stored header is sent to the URL, so a new URL needs the header re-entered.
+			// A blank URL keeps the stored one, so only a different non-blank value is a change.
+			const guardError = requireSecretForDestinationChange({
+				destinationChanged:
+					!!webhookUrl?.trim() &&
+					webhookUrl.trim() !== String(existingConfig.webhook_url ?? '').trim(),
+				storedSecret: existingConfig.auth_header,
+				submittedSecret: authHeader,
+				secretLabel: 'authorization header',
+				destinationLabel: 'webhook URL'
+			});
+			if (guardError) {
+				return fail(400, { error: guardError });
+			}
 
 			config = {
 				// Keep existing webhook_url if new one not provided
