@@ -217,9 +217,16 @@ function serializeTag(tag: ParsedTag): string {
 
 /** Index just past the closing tag for a raw-text element, or the end of input. */
 function skipRawText(html: string, name: string, from: number): number {
-	const close = new RegExp(`</${name}\\s*>`, 'ig');
-	close.lastIndex = from;
-	return close.exec(html) ? close.lastIndex : html.length;
+	const lower = html.toLowerCase();
+	const marker = `</${name}`;
+	let at = lower.indexOf(marker, from);
+	while (at !== -1) {
+		let i = at + marker.length;
+		while (i < html.length && /\s/.test(html[i])) i++;
+		if (html[i] === '>') return i + 1;
+		at = lower.indexOf(marker, at + 1);
+	}
+	return html.length;
 }
 
 /**
