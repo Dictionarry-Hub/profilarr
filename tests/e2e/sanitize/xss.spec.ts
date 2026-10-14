@@ -62,8 +62,14 @@ async function openAnnouncementsFromSidebar(page: Page) {
 }
 
 async function expandAnnouncement(page: Page) {
-	await page.getByRole('button', { name: 'Expand', description: 'Expand' }).click();
-	await expect(page.getByText(BENIGN_TEXT).first()).toBeVisible();
+	// On a direct load the row is in the server HTML before Svelte attaches its
+	// click handler, so an early click does nothing. Retry until the body shows.
+	// Once expanded the button is titled Collapse, so it is not clicked again.
+	await expect(async () => {
+		const expand = page.getByRole('button', { name: 'Expand', description: 'Expand' });
+		if (await expand.count()) await expand.click();
+		await expect(page.getByText(BENIGN_TEXT).first()).toBeVisible({ timeout: 1000 });
+	}).toPass({ timeout: 10_000 });
 }
 
 test.describe('Custom format descriptions', () => {

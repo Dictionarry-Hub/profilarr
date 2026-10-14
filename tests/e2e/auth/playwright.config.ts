@@ -2,6 +2,8 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
 	testDir: '.',
+	// Per-suite artifacts, so suites running in parallel don't share a folder.
+	outputDir: 'test-results',
 	timeout: 60_000,
 	expect: { timeout: 10_000 },
 	fullyParallel: false,
