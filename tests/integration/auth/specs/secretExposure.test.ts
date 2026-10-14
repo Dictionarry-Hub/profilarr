@@ -48,7 +48,7 @@
 import { assertEquals } from '@std/assert';
 import { TestClient } from '$test-harness/client.ts';
 import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUserDirect, login } from '$test-harness/setup.ts';
+import { createUserDirect, login, queryDb } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { PORTS } from '$test-harness/ports.ts';
 import { openDb } from '$test-harness/db.ts';
@@ -163,7 +163,13 @@ async function seedSecrets(dbPath: string) {
 					'Test Webhook',
 					{ webhook_url: GENERIC_WEBHOOK_URL, auth_header: WEBHOOK_AUTH_HEADER }
 				],
-				['telegram', 'Test Telegram', { bot_token: TELEGRAM_BOT_TOKEN, chat_id: '42' }]
+				[
+					'telegram',
+					'Test Telegram',
+					// Unreachable address, so a send fails at the network level and the
+					// error text, which can carry the request URL, is recorded in history
+					{ bot_token: TELEGRAM_BOT_TOKEN, chat_id: '42', api_base_url: 'http://127.0.0.1:1' }
+				]
 			];
 		for (const [type, name, config] of services) {
 			const id = crypto.randomUUID();
@@ -309,6 +315,35 @@ test('/settings/notifications/edit/[id] does not expose webhook URL or auth head
 test('/settings/notifications/edit/[id] does not expose Telegram bot token', async () => {
 	const body = await fetchPage(`/settings/notifications/edit/${notificationServiceIds.telegram}`);
 	assertNotExposed(body, TELEGRAM_BOT_TOKEN, 'Telegram bot token in edit page');
+});
+
+test('failed send history does not expose the Telegram bot token', async () => {
+	const client = new TestClient(ORIGIN);
+	await login(client, 'admin', 'password123', ORIGIN);
+	const res = await client.postForm(
+		'/settings/notifications?/testNotification',
+		{ id: notificationServiceIds.telegram },
+		{ headers: { Origin: ORIGIN } }
+	);
+	assertEquals(res.status, 200, 'test notification action should complete');
+
+	const rows = queryDb(
+		getDbPath(PORT),
+		'SELECT error FROM notification_history WHERE service_id = ? ORDER BY sent_at DESC',
+		[notificationServiceIds.telegram]
+	) as Array<{ error: string | null }>;
+	assertEquals(rows.length >= 1, true, 'a history row should be recorded for the failed send');
+	assertEquals(typeof rows[0].error, 'string', 'the failed send should record an error');
+	for (const row of rows) {
+		assertNotExposed(row.error ?? '', TELEGRAM_BOT_TOKEN, 'Telegram bot token in stored history');
+	}
+
+	const page = await client.get('/settings/notifications', { followRedirects: true });
+	assertNotExposed(
+		await page.text(),
+		TELEGRAM_BOT_TOKEN,
+		'Telegram bot token in notification history'
+	);
 });
 
 await run();
