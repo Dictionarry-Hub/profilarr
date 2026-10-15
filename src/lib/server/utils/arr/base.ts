@@ -302,6 +302,15 @@ export class BaseArrClient extends BaseHttpClient {
 	}
 
 	/**
+	 * Get the Arr's template for a new quality profile. On Sonarr v5 its items
+	 * carry the default size limits, which a profile created without any
+	 * would otherwise lack.
+	 */
+	getQualityProfileSchema(): Promise<ArrQualityProfile> {
+		return this.get<ArrQualityProfile>(`/api/${this.apiVersion}/qualityprofile/schema`);
+	}
+
+	/**
 	 * Create a new quality profile
 	 */
 	createQualityProfile(profile: ArrQualityProfilePayload): Promise<ArrQualityProfile> {

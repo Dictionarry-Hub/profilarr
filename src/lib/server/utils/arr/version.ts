@@ -65,3 +65,22 @@ export async function probeAndRecordVersion(
 
 	return info;
 }
+
+/**
+ * The instance as the probe just saw it. `probeAndRecordVersion` writes the
+ * row but does not touch the object the caller already holds, so code that
+ * branches on the version in the same request must use this copy. A failed
+ * probe (null) returns the instance unchanged.
+ */
+export function withDetectedVersion<T extends VersionProbeTarget>(
+	instance: T,
+	info: ArrVersionInfo | null
+): T {
+	if (!info) return instance;
+	return {
+		...instance,
+		detected_version: info.version,
+		detected_api: info.currentApi,
+		detected_at: new Date().toISOString()
+	};
+}
