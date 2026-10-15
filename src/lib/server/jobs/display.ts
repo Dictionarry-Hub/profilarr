@@ -27,6 +27,8 @@ export function formatJobTypeLabel(jobType: JobType): string {
 			return 'Arr Drift';
 		case 'arr.library.refresh':
 			return 'Library Refresh';
+		case 'arr.version.check':
+			return 'Arr Version Check';
 		case 'pcd.link':
 			return 'PCD Link';
 		case 'pcd.sync':
@@ -84,7 +86,8 @@ export function buildJobDisplayName(
 			jobType === 'arr.upgrade' ||
 			jobType === 'arr.cleanup' ||
 			jobType === 'arr.drift' ||
-			jobType === 'arr.library.refresh') &&
+			jobType === 'arr.library.refresh' ||
+			jobType === 'arr.version.check') &&
 		instanceId !== null
 	) {
 		const name =

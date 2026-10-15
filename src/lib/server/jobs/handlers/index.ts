@@ -3,6 +3,7 @@ import './arrRename.ts';
 import './arrCleanup.ts';
 import './arrDrift.ts';
 import './arrLibraryRefresh.ts';
+import './arrVersionCheck.ts';
 import './arrSync.ts';
 import './pcdLink.ts';
 import './pcdSync.ts';
