@@ -16,11 +16,20 @@ export interface ArrInstance {
 	enabled: number;
 	library_refresh_interval: number;
 	library_last_refreshed_at: string | null;
+	detected_version: string | null;
+	detected_api: string | null;
+	detected_at: string | null;
 	created_at: string;
 	updated_at: string;
 }
 
 export type ArrInstancePublic = Omit<ArrInstance, 'api_key'>;
+
+export interface DetectedVersionInput {
+	version: string;
+	api: string | null;
+	checkedAt?: string;
+}
 
 export interface CreateArrInstanceInput {
 	name: string;
@@ -191,6 +200,20 @@ export const arrInstancesQueries = {
 		db.execute(
 			'UPDATE arr_instances SET library_last_refreshed_at = ? WHERE id = ?',
 			refreshedAt,
+			id
+		);
+	},
+
+	/**
+	 * Store what the instance reported on the last successful version probe.
+	 * Leaves updated_at alone: the probe records state, it is not a user edit.
+	 */
+	updateDetectedVersion(id: number, input: DetectedVersionInput): void {
+		db.execute(
+			'UPDATE arr_instances SET detected_version = ?, detected_api = ?, detected_at = ? WHERE id = ?',
+			input.version,
+			input.api,
+			input.checkedAt ?? new Date().toISOString(),
 			id
 		);
 	},

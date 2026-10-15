@@ -1,7 +1,7 @@
 -- Profilarr Database Schema
 -- This file documents the current database schema after all migrations
 -- DO NOT execute this file directly - use migrations instead
--- Last updated: 2026-05-01
+-- Last updated: 2026-10-15
 
 -- ==============================================================================
 -- TABLE: migrations
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS migrations (
 -- ==============================================================================
 -- TABLE: arr_instances
 -- Purpose: Store configuration for *arr application instances (Radarr, Sonarr, etc.)
--- Migration: 001_create_arr_instances.ts, 053_add_library_refresh_to_arr_instances.ts, 059_add_external_url_to_arr_instances.ts, 067_enable_all_arr_instances.ts
+-- Migration: 001_create_arr_instances.ts, 053_add_library_refresh_to_arr_instances.ts, 059_add_external_url_to_arr_instances.ts, 067_enable_all_arr_instances.ts, 075_add_detected_version_to_arr_instances.ts
 -- ==============================================================================
 
 CREATE TABLE arr_instances (
@@ -40,6 +40,11 @@ CREATE TABLE arr_instances (
     -- Library refresh (Migration 053)
     library_refresh_interval INTEGER NOT NULL DEFAULT 0, -- 0=manual, >0=auto-refresh every X minutes
     library_last_refreshed_at TEXT,         -- When library cache was last refreshed
+
+    -- Detected version (Migration 075); NULL until the first probe
+    detected_version TEXT,                  -- App version from system/status (e.g., "5.0.0.2569")
+    detected_api TEXT,                      -- API generation GET /api reports as current (e.g., "v3", "v5")
+    detected_at TEXT,                       -- When the probe last succeeded
 
     -- Metadata
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
