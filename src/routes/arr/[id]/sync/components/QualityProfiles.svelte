@@ -20,6 +20,7 @@
 	import { alertStore } from '$lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
+	import { balancedGrid } from '$lib/client/utils/balancedGrid.ts';
 
 	interface DatabaseWithProfiles {
 		id: number;
@@ -448,7 +449,14 @@
 							{#if database.qualityProfiles.length === 0}
 								<p class="text-sm text-neutral-500 dark:text-neutral-400">No quality profiles</p>
 							{:else}
-								<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-5">
+								<div
+									class="grid gap-2"
+									use:balancedGrid={{
+										count: database.qualityProfiles.length,
+										minWidth: 224,
+										gap: 8
+									}}
+								>
 									{#each database.qualityProfiles as profile}
 										{@const entry = state[database.id]?.[profile.name]}
 										<!-- Where sizes live on profiles, every tile carries its size picker, joined below the toggle -->

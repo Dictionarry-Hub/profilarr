@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
+	import { balancedGrid } from '$lib/client/utils/balancedGrid.ts';
 	import SyncFooter from './SyncFooter.svelte';
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
 	import { alertStore } from '$lib/client/alerts/store.ts';
@@ -319,7 +320,10 @@
 
 	<!-- Content -->
 	<div class="p-6">
-		<div class="grid gap-6 {profileItemSizes ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}">
+		<div
+			class="grid gap-6"
+			use:balancedGrid={{ count: profileItemSizes ? 2 : 3, minWidth: 224, gap: 24 }}
+		>
 			<!-- Naming -->
 			<div class="space-y-2">
 				<div class="space-y-1">
