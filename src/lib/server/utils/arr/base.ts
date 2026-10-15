@@ -1,6 +1,8 @@
 import { BaseHttpClient } from '../http/client.ts';
 import type {
 	ArrSystemStatus,
+	ArrApiInfo,
+	ArrVersionInfo,
 	ArrHealthItem,
 	ArrDelayProfile,
 	ArrTag,
@@ -64,6 +66,27 @@ export class BaseArrClient extends BaseHttpClient {
 	}
 
 	/**
+	 * Ask the instance what it is: app name and version from system/status,
+	 * plus the API generation the unversioned /api route reports as current.
+	 * Throws if system/status is unreachable. A missing or non-JSON /api route
+	 * is not an error; `currentApi` is null and callers fall back to the
+	 * version major.
+	 */
+	async detectVersion(): Promise<ArrVersionInfo> {
+		const status = await this.get<ArrSystemStatus>(`/api/${this.apiVersion}/system/status`);
+
+		let currentApi: string | null = null;
+		try {
+			const info = await this.get<ArrApiInfo>('/api');
+			currentApi = typeof info?.current === 'string' && info.current !== '' ? info.current : null;
+		} catch {
+			// Older builds answer /api with 404 or the web UI; the version major decides then
+		}
+
+		return { appName: status.appName, version: status.version, currentApi };
+	}
+
+	/**
 	 * Test connection to the arr instance
 	 * Calls /api/{version}/system/status endpoint
 	 * Note: This method has built-in retry logic (3 attempts by default)
@@ -71,14 +94,14 @@ export class BaseArrClient extends BaseHttpClient {
 	 */
 	async testConnection(): Promise<boolean> {
 		try {
-			const status = await this.get<ArrSystemStatus>(`/api/${this.apiVersion}/system/status`);
+			const info = await this.detectVersion();
 
 			await logger.info(`Connection successful to ${this.baseUrl}`, {
 				source: 'BaseArrClient',
 				meta: {
-					appName: status.appName,
-					version: status.version,
-					osName: status.osName
+					appName: info.appName,
+					version: info.version,
+					currentApi: info.currentApi
 				}
 			});
 

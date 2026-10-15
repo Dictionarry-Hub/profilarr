@@ -893,6 +893,27 @@ export interface ArrSystemStatus {
 	packageUpdateMechanismMessage: string;
 }
 
+/**
+ * Response from the unversioned GET /api route. Sonarr, Radarr and Lidarr all
+ * answer it when the API key is sent; Sonarr v5 reports `current: "v5"` with
+ * `deprecated: ["v3"]`.
+ */
+export interface ArrApiInfo {
+	current: string;
+	deprecated: string[];
+}
+
+/**
+ * What a version probe learned about an instance. `currentApi` is null when
+ * the instance has no /api info route or answered it with something other
+ * than JSON; the version major is the fallback in that case.
+ */
+export interface ArrVersionInfo {
+	appName: string;
+	version: string;
+	currentApi: string | null;
+}
+
 // =============================================================================
 // Log Types
 // =============================================================================
