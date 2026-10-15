@@ -345,29 +345,8 @@
 				Select quality profiles to sync. Drag databases to set priority.
 			</p>
 		</div>
-		{#if profileItemSizes || qpProgress || cfProgress}
+		{#if qpProgress || cfProgress}
 			<div class="flex flex-col gap-3 md:flex-shrink-0 md:flex-row md:flex-wrap md:gap-5 md:pt-1">
-				{#if profileItemSizes}
-					<div class="min-w-[9rem] md:w-56">
-						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-							Global quality definition
-						</div>
-						<DropdownSelect
-							value={globalValue}
-							options={globalOptions}
-							header="Global quality definition"
-							placeholder={globalOptions.length === 0
-								? 'No quality definitions available'
-								: 'Select quality definition...'}
-							fullWidth
-							minWidth="0"
-							position="right"
-							fixed
-							disabled={globalOptions.length === 0}
-							on:change={(e) => selectGlobal(e.detail)}
-						/>
-					</div>
-				{/if}
 				{#if qpProgress}
 					<div class="min-w-[9rem]">
 						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
@@ -524,7 +503,30 @@
 		onWarning={(msg) => alertStore.add('warning', msg)}
 		on:save={handleSave}
 		on:sync={handleSync}
-	/>
+	>
+		<svelte:fragment slot="controls">
+			{#if profileItemSizes}
+				<div>
+					<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">
+						Global quality definition
+					</span>
+					<DropdownSelect
+						value={globalValue}
+						options={globalOptions}
+						header="Global quality definition"
+						placeholder={globalOptions.length === 0
+							? 'No quality definitions available'
+							: 'Select quality definition...'}
+						buttonSize="sm"
+						minWidth="12rem"
+						fixed
+						disabled={globalOptions.length === 0}
+						on:change={(e) => selectGlobal(e.detail)}
+					/>
+				</div>
+			{/if}
+		</svelte:fragment>
+	</SyncFooter>
 </div>
 
 <style>

@@ -38,18 +38,21 @@
 			</div>
 		{/if}
 
-		<!-- Row 1: Trigger + Warning + Buttons -->
+		<!-- Row 1: Trigger (+ section controls) + Warning + Buttons -->
 		<div class="flex items-center justify-between gap-2">
-			<div data-onboarding={onboardingId}>
-				<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Trigger</span>
-				<DropdownSelect
-					value={syncTrigger}
-					options={triggerOptions}
-					buttonSize="sm"
-					width="w-28"
-					justify="center"
-					on:change={(e) => (syncTrigger = e.detail as typeof syncTrigger)}
-				/>
+			<div class="flex items-end gap-2">
+				<div data-onboarding={onboardingId}>
+					<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Trigger</span>
+					<DropdownSelect
+						value={syncTrigger}
+						options={triggerOptions}
+						buttonSize="sm"
+						justify="center"
+						on:change={(e) => (syncTrigger = e.detail as typeof syncTrigger)}
+					/>
+				</div>
+				<!-- Section-specific controls that sit beside the trigger -->
+				<slot name="controls" />
 			</div>
 
 			<div>
