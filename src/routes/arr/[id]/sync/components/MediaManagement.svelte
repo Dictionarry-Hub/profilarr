@@ -319,7 +319,7 @@
 
 	<!-- Content -->
 	<div class="p-6">
-		<div class="grid gap-6 sm:grid-cols-3">
+		<div class="grid gap-6 {profileItemSizes ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}">
 			<!-- Naming -->
 			<div class="space-y-2">
 				<div class="space-y-1">
@@ -344,22 +344,17 @@
 				/>
 			</div>
 
-			<!-- Quality Definitions -->
-			<div class="space-y-2">
-				<div class="space-y-1">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Quality Definitions
-					</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						{#if profileItemSizes}
-							This Sonarr keeps size limits on each quality profile, so they are synced with the
-							profiles. Choose the default under Quality Profiles.
-						{:else}
+			<!-- Quality Definitions (not here on Arrs that keep sizes per profile; see Quality Profiles) -->
+			{#if !profileItemSizes}
+				<div class="space-y-2">
+					<div class="space-y-1">
+						<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+							Quality Definitions
+						</div>
+						<p class="text-xs text-neutral-600 dark:text-neutral-400">
 							Choose the quality definitions config to sync.
-						{/if}
-					</p>
-				</div>
-				{#if !profileItemSizes}
+						</p>
+					</div>
 					<DropdownCombobox
 						fullWidth
 						minWidth="0"
@@ -374,8 +369,8 @@
 						disabled={qualityDefinitionsOptions.length === 0}
 						on:change={(e) => selectQuality(e.detail)}
 					/>
-				{/if}
-			</div>
+				</div>
+			{/if}
 
 			<!-- Media Settings -->
 			<div class="space-y-2">
