@@ -685,6 +685,19 @@ function formatQualityProfileFieldDiff(
 		};
 	}
 
+	const sizeMatch = /^items\[(.+)\]\.(minSize|maxSize|preferredSize)$/.exec(field.path);
+	if (sizeMatch) {
+		const [, qualityName, sizeField] = sizeMatch;
+		return {
+			id: `quality-profile-item-size:${index}`,
+			label: qualityName,
+			detail: `${qualityDefinitionFieldLabel(sizeField)} changed`,
+			expected: formatQualityDefinitionValue(sizeField, field.expected),
+			actual: formatQualityDefinitionValue(sizeField, field.actual),
+			tone: 'warning'
+		};
+	}
+
 	if (field.path === 'items') {
 		return {
 			id: `quality-profile-items:${index}`,
@@ -1317,6 +1330,8 @@ function formatQualityDefinitionValue(field: string, raw: unknown): DriftDisplay
 	) {
 		return value('Unlimited');
 	}
+	// No minimum is a real setting, not an absence
+	if (field === 'minSize' && (raw === null || raw === undefined)) return value('None');
 	if (raw === null || raw === undefined) return value('Missing', { tone: 'danger' });
 	if (typeof raw === 'number') return value(String(raw), { mono: true });
 	return formatGenericValue(raw);

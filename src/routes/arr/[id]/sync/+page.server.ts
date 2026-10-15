@@ -1,4 +1,5 @@
 import { error, fail } from '@sveltejs/kit';
+import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries, type SyncTrigger, type ProfileSelection } from '$db/queries/arrSync.ts';
@@ -165,7 +166,8 @@ function buildCfMessage(cfNames: string[], affectedQpNames: string[]): string | 
 
 async function loadDriftProgress(
 	instanceId: number,
-	arrType: SyncArrType
+	arrType: SyncArrType,
+	profileItemSizes: boolean
 ): Promise<DriftProgress | null> {
 	if (!FEATURES.drift) return null;
 	if (!arrDriftSettingsQueries.getByInstanceId(instanceId)?.enabled) return null;
@@ -190,8 +192,13 @@ async function loadDriftProgress(
 	}
 
 	const namingTotal = mmSync.namingDatabaseId !== null && mmSync.namingConfigName ? 1 : 0;
+	// Where sizes live on profiles there is no global definitions check to report
 	const qualityDefinitionsTotal =
-		mmSync.qualityDefinitionsDatabaseId !== null && mmSync.qualityDefinitionsConfigName ? 1 : 0;
+		!profileItemSizes &&
+		mmSync.qualityDefinitionsDatabaseId !== null &&
+		mmSync.qualityDefinitionsConfigName
+			? 1
+			: 0;
 	const mediaSettingsTotal =
 		mmSync.mediaSettingsDatabaseId !== null && mmSync.mediaSettingsConfigName ? 1 : 0;
 
@@ -339,7 +346,7 @@ export const load: ServerLoad = async ({ params }) => {
 
 	// Load existing sync data
 	const syncData = arrSyncQueries.getFullSyncData(id);
-	const driftProgress = await loadDriftProgress(id, arrType);
+	const driftProgress = await loadDriftProgress(id, arrType, hasProfileItemSizes(instance));
 	const databasePriorities = arrSyncQueries.getDatabasePriorities(id);
 
 	const { api_key: _, ...safeInstance } = instance;

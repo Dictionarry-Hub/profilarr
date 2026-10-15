@@ -48,7 +48,7 @@ export interface ProfileSizeSource {
 }
 
 export function createProfileSizeSource(
-	client: BaseArrClient,
+	client: Pick<BaseArrClient, 'getQualityProfileSchema'>,
 	instanceId: number,
 	instanceType: SyncArrType,
 	source: string
@@ -108,12 +108,14 @@ export function createProfileSizeSource(
 			});
 		}
 
+		// Debug: sync and drift both read configs through here and only the sync
+		// writes anything, so this traces the resolution rather than an action
 		const scope =
 			role === 'default'
 				? 'every synced profile without a choice of its own'
 				: 'the profiles that chose them';
-		await logger.info(
-			`Applying quality definitions "${configName}" to ${scope}; this Arr keeps sizes on profiles`,
+		await logger.debug(
+			`Quality definitions "${configName}" set the sizes for ${scope}; this Arr keeps sizes on profiles`,
 			{
 				source,
 				meta: {
@@ -133,7 +135,7 @@ export function createProfileSizeSource(
 		const databaseId = config.qualityDefinitionsDatabaseId;
 		const configName = config.qualityDefinitionsConfigName;
 		if (!databaseId || !configName) {
-			await logger.info(
+			await logger.debug(
 				'No quality definitions selected; synced profiles without a choice of their own keep the sizes the Arr already has',
 				{ source, meta: { instanceId } }
 			);

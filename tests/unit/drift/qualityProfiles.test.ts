@@ -6,6 +6,7 @@ import {
 	type QualityProfileDriftExpected
 } from '$drift/qualityProfiles.ts';
 import { hashDriftDiff } from '$drift/hash.ts';
+import { buildDriftDisplayEntities } from '$drift/display.ts';
 import type {
 	ArrCustomFormat,
 	ArrLanguage,
@@ -94,8 +95,151 @@ function actualProfile(
 	};
 }
 
+const formats = [customFormat('Streaming Tier', 1), customFormat('HDR10', 2)];
+
+/** A quality row carrying the size limits Sonarr v5 keeps on profile items */
+const sizedItem = (
+	name: string,
+	id: number,
+	sizes: { minSize?: number | null; maxSize?: number | null; preferredSize?: number | null }
+): ArrQualityProfileItem => ({ ...qualityItem(name, id), ...sizes });
+
 class QualityProfileDriftTest extends BaseTest {
 	runTests(): void {
+		this.test(
+			'item sizes: clean when expected and actual sizes match, group members included',
+			() => {
+				const expected = expectedProfile({
+					items: [
+						sizedItem('WEBDL-1080p', 3, { minSize: 15, maxSize: null, preferredSize: 995 }),
+						groupItem('HD', 1001, [
+							sizedItem('HDTV-1080p', 9, { minSize: 4, maxSize: 125, preferredSize: 95 })
+						])
+					],
+					cutoff: 1001
+				});
+				const actual = actualProfile({
+					items: [
+						sizedItem('WEBDL-1080p', 3, { minSize: 15, preferredSize: 995 }),
+						groupItem('HD', 1001, [
+							sizedItem('HDTV-1080p', 9, { minSize: 4, maxSize: 125, preferredSize: 95 })
+						])
+					],
+					cutoff: 1001
+				});
+
+				assertEquals(compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count, 0);
+			}
+		);
+
+		this.test('item sizes: a changed size reports one row per field, by quality name', () => {
+			const expected = expectedProfile({
+				items: [
+					sizedItem('WEBDL-1080p', 3, { minSize: 15, maxSize: null, preferredSize: 995 }),
+					groupItem('HD', 1001, [
+						sizedItem('HDTV-1080p', 9, { minSize: 15, maxSize: null, preferredSize: 995 })
+					])
+				],
+				cutoff: 1001
+			});
+			const actual = actualProfile({
+				items: [
+					sizedItem('WEBDL-1080p', 3, { minSize: 15, preferredSize: 995 }),
+					groupItem('HD', 1001, [
+						sizedItem('HDTV-1080p', 9, { minSize: 7, maxSize: 232, preferredSize: 531.2 })
+					])
+				],
+				cutoff: 1001
+			});
+
+			const result = compareQualityProfileDrift([expected], [actual], formats, 'sonarr');
+
+			assertEquals(result.count, 1);
+			assertEquals(result.diff.modified[0].fields, [
+				{ path: 'items[HDTV-1080p].maxSize', expected: null, actual: 232 },
+				{ path: 'items[HDTV-1080p].minSize', expected: 15, actual: 7 },
+				{ path: 'items[HDTV-1080p].preferredSize', expected: 995, actual: 531.2 }
+			]);
+		});
+
+		this.test('item sizes: a key the Arr leaves out reads as null', () => {
+			const expected = expectedProfile({
+				items: [sizedItem('WEBDL-1080p', 3, { minSize: 15, maxSize: null, preferredSize: null })]
+			});
+			const actual = actualProfile({
+				items: [qualityItem('WEBDL-1080p', 3)]
+			});
+
+			const result = compareQualityProfileDrift([expected], [actual], formats, 'sonarr');
+
+			assertEquals(result.diff.modified[0].fields, [
+				{ path: 'items[WEBDL-1080p].minSize', expected: 15, actual: null }
+			]);
+		});
+
+		this.test('item sizes: an expected item without size keys is never compared', () => {
+			const expected = expectedProfile({
+				items: [qualityItem('WEBDL-1080p', 3), qualityItem('Bluray-1080p', 7)]
+			});
+			const actual = actualProfile({
+				items: [
+					sizedItem('WEBDL-1080p', 3, { minSize: 1, maxSize: 2, preferredSize: 1 }),
+					sizedItem('Bluray-1080p', 7, { minSize: 1, maxSize: 2, preferredSize: 1 })
+				]
+			});
+
+			assertEquals(compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count, 0);
+		});
+
+		this.test('item sizes: the Arr maximum at its unlimited cap equals an expected null', () => {
+			const expected = expectedProfile({
+				items: [sizedItem('WEBDL-1080p', 3, { minSize: 15, maxSize: null, preferredSize: 995 })]
+			});
+			const actual = actualProfile({
+				items: [sizedItem('WEBDL-1080p', 3, { minSize: 15, maxSize: 1000, preferredSize: 995 })]
+			});
+
+			assertEquals(compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count, 0);
+		});
+
+		this.test(
+			'item sizes: display rows are labelled by quality with the size field changed',
+			() => {
+				const entities = buildDriftDisplayEntities(
+					{
+						quality_profiles: [
+							{
+								databaseId: 1,
+								databaseName: 'Dictionarry',
+								diff: {
+									missing: [],
+									modified: [
+										{
+											name: '1080p Quality',
+											fields: [
+												{ path: 'items[HDTV-1080p].minSize', expected: 15, actual: null },
+												{ path: 'items[HDTV-1080p].maxSize', expected: null, actual: 232 }
+											]
+										}
+									]
+								}
+							}
+						]
+					},
+					'sonarr'
+				);
+
+				assertEquals(entities.length, 1);
+				assertEquals(entities[0].changes[0].label, 'HDTV-1080p');
+				assertEquals(entities[0].changes[0].detail, 'Minimum Size changed');
+				assertEquals(entities[0].changes[0].expected?.text, '15');
+				assertEquals(entities[0].changes[0].actual?.text, 'None');
+				assertEquals(entities[0].changes[1].detail, 'Maximum Size changed');
+				assertEquals(entities[0].changes[1].expected?.text, 'Unlimited');
+				assertEquals(entities[0].changes[1].actual?.text, '232');
+			}
+		);
+
 		this.test('clean when expected and actual quality profiles match', () => {
 			const result = compareQualityProfileDrift(
 				[expectedProfile({})],
