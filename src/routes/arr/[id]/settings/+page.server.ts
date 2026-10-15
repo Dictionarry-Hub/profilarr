@@ -110,11 +110,7 @@ export const actions: Actions = {
 					retries: 0
 				});
 				try {
-					await probeAndRecordVersion(
-						{ ...instance, name, url },
-						probeClient,
-						'arr/[id]/settings'
-					);
+					await probeAndRecordVersion({ ...instance, name }, probeClient, 'arr/[id]/settings');
 				} finally {
 					probeClient.close();
 				}

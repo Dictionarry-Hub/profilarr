@@ -58,7 +58,12 @@ function readInstance(name: string) {
 				'SELECT id, detected_version, detected_api, detected_at FROM arr_instances WHERE name = ?'
 			)
 			.get(name) as
-			| { id: number; detected_version: string | null; detected_api: string | null; detected_at: string | null }
+			| {
+					id: number;
+					detected_version: string | null;
+					detected_api: string | null;
+					detected_at: string | null;
+			  }
 			| undefined;
 	} finally {
 		db.close();

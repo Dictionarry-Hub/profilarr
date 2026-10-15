@@ -156,7 +156,11 @@ Deno.test('capabilities', async (t) => {
 			true
 		);
 		assertEquals(
-			isExperimentalVersion({ type: 'sonarr', detected_version: '4.0.20.3014', detected_api: 'v3' }),
+			isExperimentalVersion({
+				type: 'sonarr',
+				detected_version: '4.0.20.3014',
+				detected_api: 'v3'
+			}),
 			false
 		);
 	});

@@ -394,11 +394,12 @@
 			{#if mode === 'edit' && instance}
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					{#if instance.detected_version}
-						Last check found version {instance.detected_version}{#if instance.detected_api},
-							API {instance.detected_api}{/if}
+						Last check found version {instance.detected_version}{#if instance.detected_api}, API {instance.detected_api}{/if}
 						({formatSmartDateTime(instance.detected_at, $serverTimezone, $dateFormat)}).
 						{#if isExperimentalVersion(instance)}
-							<span class="text-blue-700 dark:text-blue-300">Sonarr v5 support is experimental.</span>
+							<span class="text-blue-700 dark:text-blue-300"
+								>Sonarr v5 support is experimental.</span
+							>
 						{/if}
 					{:else}
 						Version not checked yet. Test the connection or run a sync.

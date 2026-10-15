@@ -181,6 +181,9 @@ function makeInstance(overrides: Partial<ArrInstance> = {}): ArrInstance {
 		enabled: 1,
 		library_refresh_interval: 60,
 		library_last_refreshed_at: null,
+		detected_version: null,
+		detected_api: null,
+		detected_at: null,
 		created_at: '2025-01-01T00:00:00Z',
 		updated_at: '2025-01-01T00:00:00Z',
 		...overrides
