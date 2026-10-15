@@ -12,6 +12,7 @@ import {
 	buildExpectedQualityProfilesPerDatabase,
 	compareQualityProfileDriftPerDatabase
 } from './qualityProfiles.ts';
+import { createProfileSizeSource } from '$sync/qualityProfiles/sizeSource.ts';
 
 export interface DriftCheckResult {
 	status: 'clean' | 'drift_detected';
@@ -29,23 +30,40 @@ export async function checkArrDrift(
 		| 'getMediaManagementConfig'
 		| 'getNamingConfig'
 		| 'getQualityDefinitions'
+		| 'getQualityProfileSchema'
 	>,
 	instanceId: number,
-	arrType: SyncArrType
+	arrType: SyncArrType,
+	options: {
+		/** The Arr keeps size limits on each quality profile (Sonarr v5); see hasProfileItemSizes */
+		profileItemSizes?: boolean;
+	} = {}
 ): Promise<DriftCheckResult> {
-	const [expectedCfPerDb, actualCustomFormats, delayProfiles, mediaManagement] = await Promise.all([
-		buildExpectedCustomFormatsPerDatabase(instanceId, arrType),
-		client.getCustomFormats(),
-		checkDelayProfileDrift(client, instanceId),
-		checkMediaManagementDrift(client, instanceId, arrType)
-	]);
+	const [expectedCfPerDb, actualCustomFormats, actualProfiles, delayProfiles, mediaManagement] =
+		await Promise.all([
+			buildExpectedCustomFormatsPerDatabase(instanceId, arrType),
+			client.getCustomFormats(),
+			client.getQualityProfiles(),
+			checkDelayProfileDrift(client, instanceId),
+			checkMediaManagementDrift(client, instanceId, arrType, options)
+		]);
 
 	const customFormats = compareCustomFormatDriftPerDatabase(expectedCfPerDb, actualCustomFormats);
 
-	const [expectedQpPerDb, actualProfiles] = await Promise.all([
-		buildExpectedQualityProfilesPerDatabase(instanceId, arrType, actualCustomFormats),
-		client.getQualityProfiles()
-	]);
+	// Where sizes live on profiles, expected profiles carry the sizes the sync
+	// would write, resolved against what the Arr has now
+	const sizes = options.profileItemSizes
+		? {
+				source: createProfileSizeSource(client, instanceId, arrType, 'Drift:QualityProfiles'),
+				actualProfiles
+			}
+		: undefined;
+	const expectedQpPerDb = await buildExpectedQualityProfilesPerDatabase(
+		instanceId,
+		arrType,
+		actualCustomFormats,
+		sizes
+	);
 
 	const qualityProfiles = compareQualityProfileDriftPerDatabase(
 		expectedQpPerDb,

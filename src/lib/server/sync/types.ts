@@ -26,6 +26,8 @@ export interface SyncResult {
 	itemsSynced: number;
 	error?: string;
 	items?: SyncedItem[];
+	/** Things the sync chose not to do and why, shown in job output and notifications */
+	notes?: string[];
 }
 
 /**

@@ -16,6 +16,7 @@ import {
 	mapQualityName,
 	type SyncArrType
 } from '../mappings.ts';
+import { applySizesToItems, type QualitySizeMap } from './sizes.ts';
 
 // =============================================================================
 // PCD Data Types
@@ -73,12 +74,16 @@ function convertGroupId(_groupId: number, index: number): number {
  * @param formatIdMap - Maps PCD CF names → arr IDs.
  *                      Used to resolve explicit CF scores and to include every CF with score 0
  *                      (arr validation requirement).
+ * @param sizes - Size limits per API quality name, set on quality items (group members
+ *                included) when given. Only Sonarr v5 reads them; leave undefined elsewhere
+ *                so the payload carries no size keys.
  */
 export function transformQualityProfile(
 	profile: PcdQualityProfile,
 	arrType: SyncArrType,
 	qualityApiMappings: Map<string, string>,
-	formatIdMap: Map<string, number>
+	formatIdMap: Map<string, number>,
+	sizes?: QualitySizeMap
 ): ArrQualityProfilePayload {
 	const allQualities = getAllQualities(arrType);
 
@@ -178,6 +183,8 @@ export function transformQualityProfile(
 
 	// Reverse items to match arr expected order
 	items.reverse();
+
+	if (sizes) applySizesToItems(items, sizes);
 
 	// Build language config (Radarr only - Sonarr uses custom formats for language filtering)
 	const language =

@@ -10,6 +10,8 @@ export interface ArrSyncSectionResult {
 	success: boolean;
 	items?: SyncedItem[];
 	error?: string;
+	/** Things the sync chose not to do and why */
+	notes?: string[];
 }
 
 export interface ArrSyncNotificationParams {
@@ -47,8 +49,10 @@ function buildSectionSummaryLine(section: ArrSyncSectionResult): string {
 		return `${label}: Failed – ${section.error ?? 'Unknown error'}`;
 	}
 
+	const noteSuffix = section.notes?.length ? ` (${section.notes.join('; ')})` : '';
+
 	if (!section.items || section.items.length === 0) {
-		return `${label}: no changes`;
+		return `${label}: no changes${noteSuffix}`;
 	}
 
 	const created = section.items.filter((i) => i.action === 'created').length;
@@ -58,7 +62,7 @@ function buildSectionSummaryLine(section: ArrSyncSectionResult): string {
 	if (updated > 0) parts.push(`${updated} updated`);
 	if (created > 0) parts.push(`${created} created`);
 
-	return `${label}: ${parts.join(' · ')}`;
+	return `${label}: ${parts.join(' · ')}${noteSuffix}`;
 }
 
 /**

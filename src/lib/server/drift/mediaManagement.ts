@@ -125,7 +125,7 @@ const NAMING_FIELD_ORDER: Record<SyncArrType, string[]> = {
 	]
 };
 const QUALITY_DEFINITION_FIELD_ORDER = ['minSize', 'maxSize', 'preferredSize'] as const;
-const QUALITY_DEFINITION_UNLIMITED_MAX: Record<SyncArrType, number> = {
+export const QUALITY_DEFINITION_UNLIMITED_MAX: Record<SyncArrType, number> = {
 	radarr: 2000,
 	sonarr: 1000
 };
@@ -372,12 +372,22 @@ export async function checkMediaManagementDrift(
 		'getMediaManagementConfig' | 'getNamingConfig' | 'getQualityDefinitions'
 	>,
 	instanceId: number,
-	arrType: SyncArrType
+	arrType: SyncArrType,
+	options: {
+		/**
+		 * The Arr keeps size limits on each quality profile (Sonarr v5). Its
+		 * global quality definitions carry no sizes, so they are neither fetched
+		 * nor compared; quality profile drift covers the sizes instead.
+		 */
+		profileItemSizes?: boolean;
+	} = {}
 ): Promise<MediaManagementDriftResult> {
 	const [expectedMediaSettings, expectedNaming, expectedQualityDefinitions] = await Promise.all([
 		buildExpectedMediaSettings(instanceId, arrType),
 		buildExpectedNaming(instanceId, arrType),
-		buildExpectedQualityDefinitions(instanceId, arrType)
+		options.profileItemSizes
+			? Promise.resolve(null)
+			: buildExpectedQualityDefinitions(instanceId, arrType)
 	]);
 	if (!expectedMediaSettings && !expectedNaming && !expectedQualityDefinitions) {
 		return compareMediaManagementDrift(null, null);

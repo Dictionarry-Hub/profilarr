@@ -43,15 +43,19 @@ import { logger } from '$logger/logger.ts';
 
 export class MediaManagementSyncer extends BaseSyncer {
 	private instanceType: ArrType;
+	/** The Arr stores size limits on profile items (Sonarr v5); the global definitions push would overwrite every profile */
+	private profileItemSizes: boolean;
 
 	constructor(
 		client: ConstructorParameters<typeof BaseSyncer>[0],
 		instanceId: number,
 		instanceName: string,
-		instanceType: ArrType
+		instanceType: ArrType,
+		profileItemSizes: boolean = false
 	) {
 		super(client, instanceId, instanceName);
 		this.instanceType = instanceType;
+		this.profileItemSizes = profileItemSizes;
 	}
 
 	protected get syncType(): string {
@@ -66,6 +70,7 @@ export class MediaManagementSyncer extends BaseSyncer {
 		let totalSynced = 0;
 		const errors: string[] = [];
 		const items: SyncedItem[] = [];
+		const notes: string[] = [];
 
 		// Sync media settings if configured (both database and config name required)
 		if (syncConfig.mediaSettingsDatabaseId && syncConfig.mediaSettingsConfigName) {
@@ -111,22 +116,34 @@ export class MediaManagementSyncer extends BaseSyncer {
 
 		// Sync quality definitions if configured (both database and config name required)
 		if (syncConfig.qualityDefinitionsDatabaseId && syncConfig.qualityDefinitionsConfigName) {
-			try {
-				const synced = await this.syncQualityDefinitions(
-					syncConfig.qualityDefinitionsDatabaseId,
-					syncConfig.qualityDefinitionsConfigName
-				);
-				if (synced) {
-					totalSynced++;
-					items.push({ name: 'Quality Definitions', action: 'updated' });
-				}
-			} catch (error) {
-				const msg = error instanceof Error ? error.message : 'Unknown error';
-				errors.push(`Quality definitions: ${msg}`);
-				await logger.error(`Failed to sync quality definitions`, {
-					source: 'Sync:MediaManagement',
-					meta: { instanceId: this.instanceId, error: msg }
+			if (this.profileItemSizes) {
+				// The v3 definitions endpoint on Sonarr v5 writes the sizes into every
+				// profile on the instance, managed or not. The quality profile sync
+				// applies the same selection to the profiles Profilarr owns instead.
+				const note = `Quality definitions "${syncConfig.qualityDefinitionsConfigName}" not pushed: this Sonarr keeps sizes on each quality profile, so the quality profile sync applies them`;
+				notes.push(note);
+				await logger.info(note, {
+					source: 'Sync:QualityDefinitions',
+					meta: { instanceId: this.instanceId }
 				});
+			} else {
+				try {
+					const synced = await this.syncQualityDefinitions(
+						syncConfig.qualityDefinitionsDatabaseId,
+						syncConfig.qualityDefinitionsConfigName
+					);
+					if (synced) {
+						totalSynced++;
+						items.push({ name: 'Quality Definitions', action: 'updated' });
+					}
+				} catch (error) {
+					const msg = error instanceof Error ? error.message : 'Unknown error';
+					errors.push(`Quality definitions: ${msg}`);
+					await logger.error(`Failed to sync quality definitions`, {
+						source: 'Sync:MediaManagement',
+						meta: { instanceId: this.instanceId, error: msg }
+					});
+				}
 			}
 		}
 
@@ -135,7 +152,8 @@ export class MediaManagementSyncer extends BaseSyncer {
 			success,
 			itemsSynced: totalSynced,
 			error: errors.length > 0 ? errors.join('; ') : undefined,
-			items: items.length > 0 ? items : undefined
+			items: items.length > 0 ? items : undefined,
+			notes: notes.length > 0 ? notes : undefined
 		};
 
 		await logger.info(`Completed media management sync for "${this.instanceName}"`, {

@@ -299,6 +299,24 @@ export function scheduleAnnouncementsFetch(): void {
 	notify(job.runAt);
 }
 
+/**
+ * Ask every instance what version it runs, once per boot. Sonarr can be
+ * upgraded (or rolled back) while Profilarr is down, and the stored version
+ * drives the UI until the next sync re-checks it. The handler retries a few
+ * times for containers that are still starting.
+ */
+export function scheduleVersionCheckForInstance(instanceId: number): void {
+	const job = jobQueueQueries.upsertScheduled({
+		jobType: 'arr.version.check',
+		runAt: new Date().toISOString(),
+		payload: { instanceId },
+		source: 'schedule',
+		dedupeKey: `arr.version.check:${instanceId}`
+	});
+
+	notify(job.runAt);
+}
+
 export function scheduleAllJobs(): void {
 	const arrInstances = arrInstancesQueries.getAll();
 	for (const instance of arrInstances) {
@@ -308,6 +326,7 @@ export function scheduleAllJobs(): void {
 		scheduleCleanupForInstance(instance.id);
 		scheduleDriftForInstance(instance.id);
 		scheduleLibraryRefreshForInstance(instance.id);
+		scheduleVersionCheckForInstance(instance.id);
 	}
 
 	const databases = databaseInstancesQueries.getAll();

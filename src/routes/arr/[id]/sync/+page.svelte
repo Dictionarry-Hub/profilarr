@@ -14,21 +14,35 @@
 	import type { SyncTrigger } from '$db/queries/arrSync.ts';
 	import { initEdit, update, clear } from '$lib/client/stores/dirty';
 	import { jobStatus } from '$stores/jobStatus';
+	import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
+	import type { ProfileSyncState } from './components/QualityProfiles.svelte';
 
 	export let data: PageData;
 
 	let showInfoModal = false;
 
+	// Sonarr v5 keeps size limits on each quality profile. The quality profile
+	// section then owns the quality definitions pick and offers a per-profile
+	// choice; Media Management's definitions step is skipped.
+	$: profileItemSizes = hasProfileItemSizes(data.instance);
+
 	// Initialize state from loaded sync data
 	function buildProfileState(
-		selections: { databaseId: number; profileName: string }[]
-	): Record<number, Record<string, boolean>> {
-		const state: Record<number, Record<string, boolean>> = {};
+		selections: {
+			databaseId: number;
+			profileName: string;
+			qualityDefinitionsConfigName: string | null;
+		}[]
+	): ProfileSyncState {
+		const state: ProfileSyncState = {};
 		for (const sel of selections) {
 			if (!state[sel.databaseId]) {
 				state[sel.databaseId] = {};
 			}
-			state[sel.databaseId][sel.profileName] = true;
+			state[sel.databaseId][sel.profileName] = {
+				selected: true,
+				sizes: sel.qualityDefinitionsConfigName
+			};
 		}
 		return state;
 	}
@@ -88,14 +102,20 @@
 
 	// Validation: Quality profiles require both media management AND delay profiles (saved, not dirty)
 	$: hasQualityProfilesSelected = Object.values(qualityProfileState).some((db) =>
-		Object.values(db).some((selected) => selected)
+		Object.values(db).some((profile) => profile.selected)
 	);
+
+	// The quality definitions pick is always required. Where sizes live on
+	// profiles it is made in the quality profile section itself, so it is
+	// checked on its own there rather than as part of media management.
+	$: hasGlobalQualityDefinition =
+		typeof mediaManagementState.qualityDefinitionsDatabaseId === 'number' &&
+		typeof mediaManagementState.qualityDefinitionsConfigName === 'string';
 
 	$: hasMediaManagement =
 		typeof mediaManagementState.namingDatabaseId === 'number' &&
 		typeof mediaManagementState.namingConfigName === 'string' &&
-		typeof mediaManagementState.qualityDefinitionsDatabaseId === 'number' &&
-		typeof mediaManagementState.qualityDefinitionsConfigName === 'string' &&
+		(profileItemSizes || hasGlobalQualityDefinition) &&
 		typeof mediaManagementState.mediaSettingsDatabaseId === 'number' &&
 		typeof mediaManagementState.mediaSettingsConfigName === 'string';
 
@@ -105,7 +125,11 @@
 
 	$: qualityProfilesCanSave =
 		!hasQualityProfilesSelected ||
-		(hasMediaManagement && !mediaManagementDirty && hasDelayProfile && !delayProfilesDirty);
+		(hasMediaManagement &&
+			!mediaManagementDirty &&
+			hasDelayProfile &&
+			!delayProfilesDirty &&
+			(!profileItemSizes || hasGlobalQualityDefinition));
 
 	// Build warning message showing all missing requirements
 	$: qualityProfilesWarning = (() => {
@@ -123,6 +147,10 @@
 			issues.push('a delay profile');
 		} else if (delayProfilesDirty) {
 			issues.push('delay profile settings to be saved');
+		}
+
+		if (profileItemSizes && !hasGlobalQualityDefinition) {
+			issues.push('a global quality definition');
 		}
 
 		if (issues.length === 0) return null;
@@ -150,12 +178,15 @@
 	<div class="mt-4 space-y-6 pb-32">
 		<MediaManagement
 			databases={data.databases}
+			{profileItemSizes}
 			bind:state={mediaManagementState}
 			bind:syncTrigger={mediaManagementTrigger}
 			bind:cronExpression={mediaManagementCron}
 			bind:isDirty={mediaManagementDirty}
 			namingProgress={data.driftProgress?.naming}
-			qualityDefinitionsProgress={data.driftProgress?.qualityDefinitions}
+			qualityDefinitionsProgress={profileItemSizes
+				? undefined
+				: data.driftProgress?.qualityDefinitions}
 			mediaSettingsProgress={data.driftProgress?.mediaSettings}
 		/>
 		<DelayProfiles
@@ -169,6 +200,9 @@
 		<QualityProfiles
 			databases={data.databases}
 			databasePriorities={data.databasePriorities}
+			{profileItemSizes}
+			bind:globalQualityDefinitionsDatabaseId={mediaManagementState.qualityDefinitionsDatabaseId}
+			bind:globalQualityDefinitionsConfigName={mediaManagementState.qualityDefinitionsConfigName}
 			bind:state={qualityProfileState}
 			bind:syncTrigger={qualityProfileTrigger}
 			bind:cronExpression={qualityProfileCron}

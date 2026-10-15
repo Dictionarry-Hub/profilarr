@@ -6,6 +6,8 @@ import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { FEATURES } from '$shared/features.ts';
 import { calculateNextRun } from '../scheduleUtils.ts';
 import { createArrClient } from '$arr/factory.ts';
+import { probeAndRecordVersion, withDetectedVersion } from '$arr/version.ts';
+import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
 import type { ArrType } from '$arr/types.ts';
 import { checkArrDrift } from '$drift/check.ts';
 import { buildDriftDisplayEntities } from '$drift/display.ts';
@@ -44,10 +46,17 @@ const driftHandler: JobHandler = async (job) => {
 	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key, {
 		retries: 0
 	});
+	// Drift branches on the version, so it gets what the probe just saw, not the stored row
+	const liveInstance = withDetectedVersion(
+		instance,
+		await probeAndRecordVersion(instance, client, 'jobs.handlers.arrDrift')
+	);
 	const previousStatus = arrDriftStatusQueries.getByInstanceId(instanceId);
 
 	try {
-		const result = await checkArrDrift(client, instanceId, instance.type);
+		const result = await checkArrDrift(client, instanceId, instance.type, {
+			profileItemSizes: hasProfileItemSizes(liveInstance)
+		});
 		const now = new Date().toISOString();
 		const logMeta = {
 			jobId: job.id,

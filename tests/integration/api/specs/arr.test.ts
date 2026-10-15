@@ -6,6 +6,7 @@
  * 2. Returns 200 with empty array when no instances exist
  * 3. Returns populated array after seeding an instance
  * 4. Response does not contain api_key
+ * 5. Detected version fields are present and null until a probe runs
  */
 
 import { assertEquals, assertExists } from '@std/assert';
@@ -83,6 +84,18 @@ test('response does not contain api_key', async () => {
 	const body = await res.json();
 	assertEquals(body.length, 1);
 	assertEquals(body[0].api_key, undefined);
+});
+
+test('detected version fields are null until a probe runs', async () => {
+	const res = await client.get('/api/v1/arr', {
+		headers: { 'X-Api-Key': API_KEY }
+	});
+	const body = await res.json();
+	assertEquals(body.length, 1);
+	assertEquals('detected_version' in body[0], true);
+	assertEquals(body[0].detected_version, null);
+	assertEquals(body[0].detected_api, null);
+	assertEquals(body[0].detected_at, null);
 });
 
 await run();

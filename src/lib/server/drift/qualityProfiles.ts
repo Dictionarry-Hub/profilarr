@@ -5,9 +5,13 @@ import type {
 	ArrCustomFormat,
 	ArrLanguage,
 	ArrQualityProfile,
+	ArrQualityProfileItem,
 	ArrQualityProfilePayload,
 	QualityProfileFormatItem
 } from '$arr/types.ts';
+import { collectItemSizes, type QualitySizes } from '$sync/qualityProfiles/sizes.ts';
+import type { ProfileSizeSource } from '$sync/qualityProfiles/sizeSource.ts';
+import { QUALITY_DEFINITION_UNLIMITED_MAX } from './mediaManagement.ts';
 import { getCache } from '$pcd/index.ts';
 import { getCustomFormatsForProfile } from '$pcd/references.ts';
 import {
@@ -258,6 +262,79 @@ function formatItemDiffs(
 	return diffs;
 }
 
+const SIZE_FIELDS = ['minSize', 'preferredSize', 'maxSize'] as const;
+
+/**
+ * Expected sizes per quality, keyed by lowercase API name, from the quality
+ * rows (group members included) that carry size keys. A payload only carries
+ * them when a size map was applied, which happens only for an Arr that keeps
+ * sizes on profile items, so on other Arrs this is empty and nothing is
+ * compared.
+ */
+function expectedItemSizes(
+	items: ArrQualityProfileItem[]
+): Map<string, { name: string; sizes: QualitySizes }> {
+	const sizes = new Map<string, { name: string; sizes: QualitySizes }>();
+	for (const item of items) {
+		if (item.quality && SIZE_FIELDS.some((field) => field in item)) {
+			sizes.set(item.quality.name.toLowerCase(), {
+				name: item.quality.name,
+				sizes: {
+					minSize: item.minSize ?? null,
+					maxSize: item.maxSize ?? null,
+					preferredSize: item.preferredSize ?? null
+				}
+			});
+		}
+		if (item.items.length > 0) {
+			for (const [key, value] of expectedItemSizes(item.items)) sizes.set(key, value);
+		}
+	}
+	return sizes;
+}
+
+/**
+ * Size limit differences per quality on an Arr that keeps them on profile
+ * items (Sonarr v5). Expected comes from the sizes the sync would write;
+ * qualities the sync does not manage are expected to equal what the Arr has,
+ * so they never show up. A missing key on the Arr means null, and the Arr's
+ * unlimited cap on the maximum is read as null, as for global definitions.
+ */
+function sizeDiffs(
+	expected: ArrQualityProfilePayload,
+	actual: ActualQualityProfile,
+	arrType: SyncArrType
+): DriftFieldDiff[] {
+	const expectedSizes = expectedItemSizes(expected.items);
+	if (expectedSizes.size === 0) return [];
+
+	const actualSizes = collectItemSizes(actual.items);
+	const unlimitedMax = QUALITY_DEFINITION_UNLIMITED_MAX[arrType];
+	const diffs: DriftFieldDiff[] = [];
+
+	for (const [key, { name, sizes }] of expectedSizes) {
+		const actualValues = actualSizes.get(key) ?? {
+			minSize: null,
+			maxSize: null,
+			preferredSize: null
+		};
+		for (const field of SIZE_FIELDS) {
+			const expectedValue = sizes[field];
+			let actualValue = actualValues[field];
+			if (field === 'maxSize' && actualValue === unlimitedMax) actualValue = null;
+			if (expectedValue !== actualValue) {
+				diffs.push({
+					path: `items[${name}].${field}`,
+					expected: expectedValue,
+					actual: actualValue
+				});
+			}
+		}
+	}
+
+	return diffs;
+}
+
 function compareProfile(
 	expected: QualityProfileDriftExpected,
 	actual: ActualQualityProfile,
@@ -268,6 +345,7 @@ function compareProfile(
 	const diffs = [
 		...settingDiffs(expected.profile, actual, arrType),
 		...(items ? [items] : []),
+		...sizeDiffs(expected.profile, actual, arrType),
 		...formatItemDiffs(expected, actual, actualCustomFormats)
 	];
 
@@ -358,10 +436,18 @@ export interface PerDatabaseExpectedProfiles {
 	profiles: QualityProfileDriftExpected[];
 }
 
+export interface ExpectedProfileSizes {
+	/** The same size resolution the sync uses, for an Arr that keeps sizes on profile items */
+	source: ProfileSizeSource;
+	/** The Arr's current profiles; a profile's own sizes are the fallback for unmanaged qualities */
+	actualProfiles: ArrQualityProfile[];
+}
+
 export async function buildExpectedQualityProfilesPerDatabase(
 	instanceId: number,
 	arrType: SyncArrType,
-	actualCustomFormats: ArrCustomFormat[]
+	actualCustomFormats: ArrCustomFormat[],
+	sizes?: ExpectedProfileSizes
 ): Promise<Map<number, PerDatabaseExpectedProfiles>> {
 	const syncConfig = arrSyncQueries.getQualityProfilesSync(instanceId);
 	const result = new Map<number, PerDatabaseExpectedProfiles>();
@@ -402,7 +488,26 @@ export async function buildExpectedQualityProfilesPerDatabase(
 				getCustomFormatsForProfile(cache, selection.profileName, arrType)
 			]);
 
-			const profile = transformQualityProfile(pcdProfile, arrType, qualityMappings, formatIdMap);
+			// Only a profile that exists on the Arr gets expected sizes; a missing
+			// profile is reported as missing without comparing fields
+			const existing = sizes?.actualProfiles.find((p) => p.name === pcdProfile.name);
+			const sizeMap =
+				sizes && existing
+					? await sizes.source.forProfile(
+							existing,
+							selection.qualityDefinitionsConfigName
+								? { databaseId, configName: selection.qualityDefinitionsConfigName }
+								: null
+						)
+					: undefined;
+
+			const profile = transformQualityProfile(
+				pcdProfile,
+				arrType,
+				qualityMappings,
+				formatIdMap,
+				sizeMap
+			);
 			profile.name = pcdProfile.name;
 			profiles.push({
 				profile,

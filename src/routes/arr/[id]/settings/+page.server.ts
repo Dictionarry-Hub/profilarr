@@ -12,6 +12,9 @@ import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { logger } from '$logger/logger.ts';
 import { requireSecretForDestinationChange } from '$utils/secretDestination.ts';
 import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
+import { createArrClient } from '$arr/factory.ts';
+import { probeAndRecordVersion } from '$arr/version.ts';
+import type { ArrType } from '$arr/types.ts';
 
 export const load = ({ params }) => {
 	const id = parseInt(params.id || '', 10);
@@ -97,6 +100,21 @@ export const actions: Actions = {
 			});
 
 			scheduleLibraryRefreshForInstance(id);
+
+			// A new URL or key may point at a different server, so re-check what it runs
+			const urlChanged = normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url);
+			const keySubmitted = !!formData.get('api_key')?.toString().trim();
+			if (urlChanged || keySubmitted) {
+				const probeClient = createArrClient(instance.type as ArrType, url, apiKey, {
+					timeout: 5000,
+					retries: 0
+				});
+				try {
+					await probeAndRecordVersion({ ...instance, name }, probeClient, 'arr/[id]/settings');
+				} finally {
+					probeClient.close();
+				}
+			}
 
 			const cleanup = arrCleanupSettingsQueries.getByInstanceId(id);
 			await logger.info(`Updated arr instance: ${name}`, {

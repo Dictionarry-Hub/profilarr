@@ -75,6 +75,8 @@ import { migration as migration071 } from './migrations/071_remove_local_bypass.
 import { migration as migration072 } from './migrations/072_create_api_keys.ts';
 import { migration as migration073 } from './migrations/073_add_landing_page_setting.ts';
 import { migration as migration074 } from './migrations/074_add_session_confirmed_at.ts';
+import { migration as migration075 } from './migrations/075_add_detected_version_to_arr_instances.ts';
+import { migration as migration076 } from './migrations/076_add_quality_definitions_override_to_arr_sync_quality_profiles.ts';
 
 export interface Migration {
 	version: number;
@@ -368,7 +370,9 @@ export function loadMigrations(): Migration[] {
 		migration071,
 		migration072,
 		migration073,
-		migration074
+		migration074,
+		migration075,
+		migration076
 	];
 
 	// Sort by version number

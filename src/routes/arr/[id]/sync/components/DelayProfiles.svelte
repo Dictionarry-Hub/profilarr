@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
+	import { balancedGrid } from '$lib/client/utils/balancedGrid.ts';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import SyncFooter from './SyncFooter.svelte';
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
@@ -159,7 +160,10 @@
 						{#if database.delayProfiles.length === 0}
 							<p class="text-sm text-neutral-500 dark:text-neutral-400">No delay profiles</p>
 						{:else}
-							<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-5">
+							<div
+								class="grid gap-2"
+								use:balancedGrid={{ count: database.delayProfiles.length, minWidth: 224, gap: 8 }}
+							>
 								{#each database.delayProfiles as profile}
 									<Toggle
 										checked={selectedKey === `${database.id}-${profile.name}`}

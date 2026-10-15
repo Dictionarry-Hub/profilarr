@@ -5,6 +5,7 @@ import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
 import { createArrClient } from '$arr/factory.ts';
 import { getDefaultDelayProfile } from '$arr/defaults.ts';
+import { probeAndRecordVersion } from '$arr/version.ts';
 import type { ArrType } from '$arr/types.ts';
 import { logger } from '$logger/logger.ts';
 
@@ -105,6 +106,20 @@ export const actions = {
 				source: 'arr/new',
 				meta: { id, name, type, url, externalUrl }
 			});
+
+			// Record what the instance runs; a failed probe is logged, not fatal
+			const created = arrInstancesQueries.getById(id);
+			if (created) {
+				const probeClient = createArrClient(type as ArrType, url, apiKey, {
+					timeout: 5000,
+					retries: 0
+				});
+				try {
+					await probeAndRecordVersion(created, probeClient, 'arr/new');
+				} finally {
+					probeClient.close();
+				}
+			}
 
 			// Apply default delay profile if enabled
 			if (

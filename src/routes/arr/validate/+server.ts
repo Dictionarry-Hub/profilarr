@@ -1,13 +1,16 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { createArrClient } from '$arr/factory.ts';
-import type { ArrType } from '$arr/types.ts';
+import { probeAndRecordVersion } from '$arr/version.ts';
+import type { ArrType, ArrVersionInfo } from '$arr/types.ts';
+import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { logger } from '$logger/logger.ts';
 
 const VALID_TYPES = ['radarr', 'sonarr'];
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { type, url, apiKey } = await request.json();
+		const { type, url, apiKey, instanceId } = await request.json();
 
 		// Validation
 		if (!type || !url || !apiKey) {
@@ -18,16 +21,38 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ success: false, error: 'Invalid arr type' }, { status: 400 });
 		}
 
-		// Create client and test connection (3 second timeout, no retries for quick feedback)
-		const client = createArrClient(type as ArrType, url, apiKey, { timeout: 3000, retries: 0 });
-		const isConnected = await client.testConnection();
-		client.close();
+		// An existing instance (edit mode) gets the result stored on its row
+		const existing =
+			typeof instanceId === 'number' ? arrInstancesQueries.getById(instanceId) : undefined;
 
-		if (isConnected) {
-			return json({ success: true });
-		} else {
-			return json({ success: false, error: 'Connection test failed' }, { status: 400 });
+		// Create client and probe (3 second timeout, no retries for quick feedback)
+		const client = createArrClient(type as ArrType, url, apiKey, { timeout: 3000, retries: 0 });
+		let info: ArrVersionInfo | null;
+		try {
+			if (existing) {
+				info = await probeAndRecordVersion(existing, client, 'arr/validate');
+			} else {
+				info = await client.detectVersion();
+			}
+		} catch (error) {
+			await logger.error(`Connection failed to ${url}`, {
+				source: 'arr/validate',
+				meta: { error: error instanceof Error ? error.message : String(error) }
+			});
+			info = null;
+		} finally {
+			client.close();
 		}
+
+		if (info) {
+			return json({
+				success: true,
+				appName: info.appName,
+				version: info.version,
+				api: info.currentApi
+			});
+		}
+		return json({ success: false, error: 'Connection test failed' }, { status: 400 });
 	} catch (error) {
 		return json(
 			{

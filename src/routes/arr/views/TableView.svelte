@@ -3,6 +3,8 @@
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import { isExperimentalVersion } from '$shared/arr/capabilities.ts';
 	import { getDisplayUrl } from '$lib/client/utils/arrDisplayUrl.ts';
 	import type { Column } from '$ui/table/types';
 	import type { ArrInstanceSummary } from '../+page.server.ts';
@@ -80,6 +82,11 @@
 					/>
 				</div>
 				<span class="font-medium text-neutral-900 dark:text-neutral-50">{row.name}</span>
+				{#if isExperimentalVersion(row)}
+					<Tooltip text="Sonarr v5 support is experimental" position="top">
+						<Label variant="info" size="sm" rounded="md">Experimental</Label>
+					</Tooltip>
+				{/if}
 			</div>
 		{:else if column.key === 'qualityProfiles'}
 			{#if row.syncedProfileNames.length > 0}

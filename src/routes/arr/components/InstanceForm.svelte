@@ -11,6 +11,7 @@
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
 	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
 	import type { CleanupSettings } from '$db/queries/arrCleanupSettings.ts';
+	import { isExperimentalVersion } from '$shared/arr/capabilities.ts';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import TagInput from '$ui/form/TagInput.svelte';
@@ -123,7 +124,12 @@
 			const response = await fetch('/arr/validate', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ type, url, apiKey })
+				body: JSON.stringify({
+					type,
+					url,
+					apiKey,
+					instanceId: mode === 'edit' ? instance?.id : undefined
+				})
 			});
 
 			const result = await response.json();
@@ -132,7 +138,12 @@
 				throw new Error(result.error || result.message || 'Connection test failed');
 			}
 
-			alertStore.add('success', 'Connection successful!');
+			alertStore.add(
+				'success',
+				result.version
+					? `Connected to ${result.appName ?? typeOptions.find((o) => o.value === type)?.label ?? type} ${result.version}`
+					: 'Connection successful!'
+			);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Connection test failed';
 			alertStore.add('error', errorMessage);
@@ -380,6 +391,21 @@
 					on:click={testConnection}
 				/>
 			</div>
+			{#if mode === 'edit' && instance}
+				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+					{#if instance.detected_version}
+						Last check found version {instance.detected_version}{#if instance.detected_api}, API {instance.detected_api}{/if}
+						({formatSmartDateTime(instance.detected_at, $serverTimezone, $dateFormat)}).
+						{#if isExperimentalVersion(instance)}
+							<span class="text-blue-700 dark:text-blue-300"
+								>Sonarr v5 support is experimental.</span
+							>
+						{/if}
+					{:else}
+						Version not checked yet. Test the connection or run a sync.
+					{/if}
+				</p>
+			{/if}
 		</div>
 		<!-- Tags Row -->
 		<div class="space-y-2">

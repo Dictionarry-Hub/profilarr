@@ -70,7 +70,7 @@ Base client for all \*arr applications. Extends `BaseHttpClient`.
 
 - Automatically adds `X-Api-Key` header to all requests
 - Common arr API patterns (pagination, filtering)
-- Connection testing via `/api/v3/system/status`
+- Version detection via `/api/{version}/system/status` and the unversioned `/api` route
 
 **Constructor:**
 
@@ -80,7 +80,8 @@ new BaseArrClient(url: string, apiKey: string)
 
 **Methods:**
 
-- `testConnection(): Promise<boolean>` - Test connection to arr instance
+- `detectVersion(): Promise<ArrVersionInfo>` - App name and version from `system/status`, plus the API generation `GET /api` reports as current (`null` if that route is missing). Throws when `system/status` is unreachable.
+- `testConnection(): Promise<boolean>` - `detectVersion()` reduced to pass/fail, with a log line
 - All methods from `BaseHttpClient`
 
 ### Future Usage (when specific methods are implemented)

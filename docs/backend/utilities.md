@@ -10,6 +10,7 @@ utilities.
 ## Table of Contents
 
 - [HTTP Client](#http-client)
+- [Arr Version Detection](#arr-version-detection)
 - [Outbound Proxy](#outbound-proxy)
 - [Config](#config)
 - [Cache](#cache)
@@ -41,6 +42,33 @@ Extended by:
 | Parser client   | `utils/arr/parser/client.ts`    |
 | TMDB client     | `utils/tmdb/client.ts`          |
 | Webhook clients | `notifications/notifiers/base/` |
+
+## Arr Version Detection
+
+**Source:** `utils/arr/base.ts` (`detectVersion`), `utils/arr/version.ts`,
+`src/lib/shared/arr/capabilities.ts`
+
+Sonarr v5 keeps quality size limits on quality profile items instead of the
+global quality definitions, so sync and the UI need to know which generation
+an instance speaks. `BaseArrClient.detectVersion()` reads `appName` and
+`version` from `/api/{version}/system/status`, then asks the unversioned
+`GET /api` which generation is `current` (`v3` on Sonarr v4 and Radarr, `v5`
+on Sonarr v5). A missing or non-JSON `/api` answer is not an error; the
+version major is the fallback.
+
+`probeAndRecordVersion()` runs the probe and stores the answer in
+`arr_instances.detected_version`, `detected_api` and `detected_at`. It never
+throws: a failed probe is logged and the stored values keep their last good
+answer. It runs wherever a client is about to read or write config: instance
+create, the settings form when the URL or key changes, the Test button, every
+sync job and entity resync, drift, and the `arr.version.check` job at boot.
+Pages read the stored columns; writers trust the live probe.
+
+`hasProfileItemSizes()` and `isExperimentalVersion()` in
+`src/lib/shared/arr/capabilities.ts` derive capabilities from those columns
+for server and UI alike. Today both are true only for Sonarr whose current API
+is v5 or later (or, without an `/api` answer, whose version major is 5 or
+later).
 
 ## Outbound Proxy
 

@@ -188,6 +188,17 @@ Profile toggles are nested inside each database card. Users can select
 profiles from multiple databases simultaneously. Drag-and-drop reordering
 sets the priority, with the topmost card being highest priority.
 
+On an instance that keeps size limits per profile (Sonarr v5), the Quality
+Profiles section also shows the instance's global quality definition (the
+same value Media Management stores in `arr_sync_media_management`, saved
+through `saveQualityDefinitionsSelection` without touching the other media
+management columns) and a size picker under each selected profile, defaulting
+to Global. The picker lists the quality definitions configs of that profile's
+own database and is stored on the selection row
+(`arr_sync_quality_profiles.quality_definitions_config_name`, NULL for
+Global). On other instances the section is unchanged; a stored override shows
+as an ignored label.
+
 ### Open Questions
 
 - **On-demand entity sync and hierarchy.** Entity sync takes an explicit
@@ -273,6 +284,18 @@ Transformation details:
   (Sonarr uses custom formats for language filtering).
 - **Upgrade fields**: `cutoffFormatScore`, `minFormatScore`, and
   `minUpgradeFormatScore` (minimum 1) map directly.
+- **Size limits (Sonarr v5)**: an instance whose detected API generation is
+  v5 (see [utilities.md: Arr Version Detection](./utilities.md#arr-version-detection))
+  stores `minSize`, `maxSize` and `preferredSize` on each quality item instead
+  of in the global quality definitions. The syncer keeps the full profiles it
+  fetches and passes a size map into the transformer (`qualityProfiles/sizes.ts`,
+  `sizeSource.ts`). Per quality, first match wins: the profile's own quality
+  definitions config from its selection row, then the instance's selection
+  from Media Management, then the sizes the Arr already has (or the Arr's
+  profile schema defaults for a profile being created). Sizes land on quality
+  rows and group members, never on group rows.
+  A failed fetch of the existing profiles fails the section before any write.
+  On v4 and Radarr the payload carries no size keys.
 
 ### Delay Profiles
 
@@ -312,6 +335,12 @@ Quality definitions match PCD quality names to Arr API names via the same
 mapping table, then update `minSize`, `maxSize`, and `preferredSize` per tier.
 PCD stores 0 for "unlimited"; the transformer converts to null.
 
+On Sonarr v5 the definitions step is skipped: the v3 definitions endpoint
+there writes the sizes into every profile on the instance, managed or not.
+The selection is instead applied by the quality profile sync (see above). The
+skip is recorded as a note on the section result (`SyncResult.notes`), which
+appears in the job output line and the sync notification summary.
+
 ## Entity Sync
 
 **Source:** `entitySync.ts`
@@ -325,7 +354,12 @@ settings.
 Entity sync uses the same transform logic as batch sync but operates on a
 single entity. For quality profiles, targeted sync first syncs the profile's
 referenced CFs before creates and updates so newly scored formats have Arr IDs
-before the profile payload is built.
+before the profile payload is built. Quality profile pushes apply the same
+size rules as batch sync on Sonarr v5. A quality definitions push to a Sonarr
+v5 instance re-pushes every synced profile that takes its sizes from that
+config (its own choice, or no choice while the config is the instance's
+selection); with no such profile the push reports `skipped` with a reason,
+which the sync prompt shows as a neutral row.
 
 ## Cleanup
 

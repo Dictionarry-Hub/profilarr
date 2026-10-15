@@ -6,6 +6,11 @@
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { createArrClient } from '$utils/arr/factory.ts';
+import { probeAndRecordVersion, withDetectedVersion } from '$utils/arr/version.ts';
+import type { BaseArrClient } from '$utils/arr/base.ts';
+import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
+import { createProfileSizeSource } from './qualityProfiles/sizeSource.ts';
+import type { ArrInstance } from '$db/queries/arrInstances.ts';
 import { getCache } from '$pcd/index.ts';
 import { logger } from '$logger/logger.ts';
 import type { ArrType } from '$utils/arr/types.ts';
@@ -47,14 +52,94 @@ import {
 	transformQualityDefinitionsForArr
 } from './mediaManagement/transformer.ts';
 
-interface SyncResult {
-	success: boolean;
-	error?: string;
-}
+import type { EntitySyncResult as SyncResult } from '$shared/sync/types.ts';
 
 /**
  * Sync a single quality profile to an arr instance
  */
+/**
+ * Create the client for an instance and record what version it runs before
+ * anything is read or written. A failed probe is logged and does not block
+ * the sync; the stored version keeps its last good value.
+ */
+async function openInstanceClient(
+	instance: ArrInstance
+): Promise<{ client: BaseArrClient; instance: ArrInstance }> {
+	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const info = await probeAndRecordVersion(instance, client, 'EntitySync');
+	return { client, instance: withDetectedVersion(instance, info) };
+}
+
+/** The profile's own definitions config from its sync selection, if any. */
+function findSizeOverride(
+	instanceId: number,
+	databaseId: number,
+	profileName: string
+): { databaseId: number; configName: string } | null {
+	const selection = arrSyncQueries
+		.getQualityProfilesSync(instanceId)
+		.selections.find((s) => s.databaseId === databaseId && s.profileName === profileName);
+	return selection?.qualityDefinitionsConfigName
+		? { databaseId, configName: selection.qualityDefinitionsConfigName }
+		: null;
+}
+
+/**
+ * On an Arr that keeps sizes per profile, "push this quality definitions
+ * config" means re-pushing every synced profile whose sizes come from it:
+ * profiles that chose it, plus profiles with no choice when it is the
+ * instance's selection.
+ */
+async function pushProfilesUsingDefinitions(
+	instanceId: number,
+	databaseId: number,
+	configName: string
+): Promise<SyncResult> {
+	const selections = arrSyncQueries.getQualityProfilesSync(instanceId).selections;
+	const global = arrSyncQueries.getMediaManagementSync(instanceId);
+	const isGlobal =
+		global.qualityDefinitionsDatabaseId === databaseId &&
+		global.qualityDefinitionsConfigName === configName;
+	const targets = selections.filter((s) =>
+		s.qualityDefinitionsConfigName
+			? s.databaseId === databaseId && s.qualityDefinitionsConfigName === configName
+			: isGlobal
+	);
+
+	if (targets.length === 0) {
+		return {
+			success: true,
+			skipped:
+				'This Sonarr keeps sizes on each quality profile, and no synced profile here uses this definition'
+		};
+	}
+
+	const failures: string[] = [];
+	for (const target of targets) {
+		const result = await syncQualityProfile(instanceId, target.databaseId, target.profileName);
+		if (!result.success) failures.push(`${target.profileName}: ${result.error ?? 'failed'}`);
+	}
+
+	await logger.info(
+		`Entity sync: pushed ${targets.length - failures.length} of ${targets.length} quality profile(s) using quality definitions "${configName}"`,
+		{
+			source: 'EntitySync:QualityDefinitions',
+			meta: {
+				instanceId,
+				databaseId,
+				configName,
+				profiles: targets.map((t) => t.profileName),
+				failures
+			}
+		}
+	);
+
+	if (failures.length > 0) {
+		return { success: false, error: `Profiles not pushed: ${failures.join('; ')}` };
+	}
+	return { success: true };
+}
+
 export async function syncQualityProfile(
 	instanceId: number,
 	databaseId: number,
@@ -67,7 +152,7 @@ export async function syncQualityProfile(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const { client, instance: probed } = await openInstanceClient(instance);
 
 	try {
 		// Fetch the QP from PCD
@@ -93,12 +178,23 @@ export async function syncQualityProfile(
 		// Get quality API mappings
 		const qualityMappings = await getQualityApiMappings(cache, instanceType);
 
+		// On an Arr that keeps sizes on profile items, carry them in the payload
+		const sizes = hasProfileItemSizes(probed)
+			? await createProfileSizeSource(
+					client,
+					instanceId,
+					instanceType,
+					'EntitySync:QualityProfile'
+				).forProfile(existingProfile, findSizeOverride(instanceId, databaseId, profileName))
+			: undefined;
+
 		// Transform
 		const arrProfile = transformQualityProfile(
 			pcdProfile,
 			instanceType,
 			qualityMappings,
-			formatIdMap
+			formatIdMap,
+			sizes
 		);
 		arrProfile.name = profileName;
 
@@ -148,7 +244,7 @@ export async function syncCustomFormat(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		const pcdFormat = await fetchCustomFormatFromPcd(cache, formatName);
@@ -207,7 +303,7 @@ export async function syncRegularExpression(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		// Find all CFs that use this regex
@@ -271,7 +367,7 @@ export async function syncDelayProfile(
 	const cache = getCache(databaseId);
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		const profile = await getDelayProfileByName(cache, profileName);
@@ -317,7 +413,7 @@ export async function syncNaming(
 	const cache = getCache(databaseId);
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		if (instance.type === 'radarr') {
@@ -378,9 +474,16 @@ export async function syncQualityDefinitions(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const { client, instance: probed } = await openInstanceClient(instance);
 
 	try {
+		if (hasProfileItemSizes(probed)) {
+			// The v3 definitions endpoint would write these sizes into every profile
+			// on the instance. Push the synced profiles that take their sizes from
+			// this config instead; each push carries the sizes with it.
+			return await pushProfilesUsingDefinitions(instanceId, databaseId, configName);
+		}
+
 		const getByName = instanceType === 'radarr' ? getRadarrQualityDefs : getSonarrQualityDefs;
 		const qualityDefsConfig = await getByName(cache, configName);
 
@@ -449,7 +552,7 @@ export async function syncMediaSettings(
 	const cache = getCache(databaseId);
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		const getByName = instance.type === 'radarr' ? getRadarrMediaSettings : getSonarrMediaSettings;

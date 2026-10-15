@@ -154,13 +154,24 @@ export interface ArrQualityProfile {
 	cutoffFormatScore: number;
 	minFormatScore: number;
 	formatItems: QualityProfileFormatItem[];
-	items?: {
-		id?: number;
-		name?: string;
-		quality?: { id: number; name: string; source?: string; resolution?: number };
-		items?: unknown[];
-		allowed?: boolean;
-	}[];
+	items?: ArrQualityProfileReadItem[];
+}
+
+/**
+ * A quality item as the Arr returns it. Group rows have `id`, `name` and
+ * nested `items`; quality rows have `quality`. Sonarr v5 adds the three size
+ * fields on quality rows; it omits a field entirely when it is null, so a
+ * missing key means null.
+ */
+export interface ArrQualityProfileReadItem {
+	id?: number;
+	name?: string;
+	quality?: { id: number; name: string; source?: string; resolution?: number };
+	items?: ArrQualityProfileReadItem[];
+	allowed?: boolean;
+	minSize?: number | null;
+	maxSize?: number | null;
+	preferredSize?: number | null;
 }
 
 /** @deprecated Use ArrQualityProfile instead */
@@ -815,6 +826,14 @@ export interface ArrQualityProfileItem {
 	allowed: boolean;
 	id?: number;
 	name?: string;
+	/**
+	 * Size limits in MB per minute of runtime. Only meaningful on Sonarr v5,
+	 * which stores them per profile item; older versions ignore them. Left
+	 * undefined (and so omitted from the payload) when not managed.
+	 */
+	minSize?: number | null;
+	maxSize?: number | null;
+	preferredSize?: number | null;
 }
 
 /**
@@ -891,6 +910,27 @@ export interface ArrSystemStatus {
 	packageAuthor: string;
 	packageUpdateMechanism: 'builtIn' | string;
 	packageUpdateMechanismMessage: string;
+}
+
+/**
+ * Response from the unversioned GET /api route. Sonarr, Radarr and Lidarr all
+ * answer it when the API key is sent; Sonarr v5 reports `current: "v5"` with
+ * `deprecated: ["v3"]`.
+ */
+export interface ArrApiInfo {
+	current: string;
+	deprecated: string[];
+}
+
+/**
+ * What a version probe learned about an instance. `currentApi` is null when
+ * the instance has no /api info route or answered it with something other
+ * than JSON; the version major is the fallback in that case.
+ */
+export interface ArrVersionInfo {
+	appName: string;
+	version: string;
+	currentApi: string | null;
 }
 
 // =============================================================================

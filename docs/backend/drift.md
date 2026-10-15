@@ -48,6 +48,9 @@ Current handler behavior:
 - enabled jobs compare custom formats, quality profiles, delay profiles, media
   management media settings, media management naming, and media management
   quality definitions, store the latest result, and return success
+- the job probes the instance's version first (see
+  [utilities.md: Arr Version Detection](./utilities.md#arr-version-detection))
+  and branches on the live answer, not the stored row
 - drift-detected and failed runs notify subscribed services when the current
   drift or error hash has not already been notified
 - scheduled jobs calculate and store the next run before returning
@@ -118,6 +121,14 @@ Comparison rules:
   `cutoffFormatScore`, and `minUpgradeFormatScore`
 - compare Radarr language; ignore language for Sonarr
 - compare normalized quality item order, grouping, and allowed flags
+- on an Arr that keeps size limits on profile items (Sonarr v5), compare
+  `minSize`, `maxSize` and `preferredSize` per quality, group members
+  included, as `items[<quality>].<field>` rows. Expected sizes are the ones
+  sync would write, resolved by the same source (`sizeSource.ts`): the
+  profile's own definitions config, then the instance's selection, then the
+  sizes the Arr already has, so a quality no config covers never drifts. A
+  key the Arr leaves out reads as null, and a maximum at the Arr's unlimited
+  cap reads as null. Elsewhere item sizes are not compared.
 - compare custom format scores for custom formats managed by that profile,
   including explicit zero scores
 - report an expected managed custom format as missing from scoring if the custom
@@ -165,6 +176,10 @@ Comparison rules:
   maximum and preferred sizes
 - ignore unmapped PCD quality definitions, mapped definitions missing in Arr,
   extra Arr quality definitions, and unmanaged Arr fields
+- on an Arr that keeps size limits on profile items (Sonarr v5), neither fetch
+  nor compare quality definitions; the sizes are covered by quality profile
+  drift. A stored result from before an upgrade keeps its definitions entry
+  until the next run.
 
 ## Display Formatter
 
@@ -271,7 +286,8 @@ mobile). The Quality Profiles header carries two chips: one for QPs themselves
 and one for the custom formats referenced by those QPs. The Delay Profiles
 header carries one chip. The Media Management header carries up to three chips
 — one each for Naming, Quality Definitions, and Media Settings — corresponding
-to the three sub-configs the user selects in that section.
+to the three sub-configs the user selects in that section. On an Arr that keeps
+size limits on profile items (Sonarr v5) there is no Quality Definitions chip.
 
 Each chip shows `current / total` where:
 

@@ -53,22 +53,23 @@ concurrency and makes the system deterministic.
 
 ## Job Types
 
-| Job Type                   | Purpose                                | Payload          | Scheduled |
-| -------------------------- | -------------------------------------- | ---------------- | --------- |
-| `arr.sync`                 | Combined sync (legacy)                 | `{ instanceId }` | Yes       |
-| `arr.sync.qualityProfiles` | Sync quality profiles to Arr           | `{ instanceId }` | Yes       |
-| `arr.sync.delayProfiles`   | Sync delay profiles to Arr             | `{ instanceId }` | Yes       |
-| `arr.sync.mediaManagement` | Sync media management to Arr           | `{ instanceId }` | Yes       |
-| `arr.upgrade`              | Automated quality upgrades             | `{ instanceId }` | Yes       |
-| `arr.rename`               | Bulk file/folder rename                | `{ instanceId }` | Yes       |
-| `arr.cleanup`              | Remove stale configs from Arr          | `{ instanceId }` | Yes       |
-| `arr.drift`                | Check Arr config drift                 | `{ instanceId }` | Yes       |
-| `arr.library.refresh`      | Refresh cached library data            | `{ instanceId }` | Yes       |
-| `pcd.sync`                 | Check/pull PCD database updates        | `{ databaseId }` | Yes       |
-| `backup.create`            | Create backup archive                  | `{}`             | Yes       |
-| `backup.cleanup`           | Delete old backups past retention      | `{}`             | Yes       |
-| `logs.cleanup`             | Delete old log files past retention    | `{}`             | Yes       |
-| `announcements.fetch`      | Pull bulletin, reconcile announcements | `{}`             | Yes       |
+| Job Type                   | Purpose                                   | Payload          | Scheduled |
+| -------------------------- | ----------------------------------------- | ---------------- | --------- |
+| `arr.sync`                 | Combined sync (legacy)                    | `{ instanceId }` | Yes       |
+| `arr.sync.qualityProfiles` | Sync quality profiles to Arr              | `{ instanceId }` | Yes       |
+| `arr.sync.delayProfiles`   | Sync delay profiles to Arr                | `{ instanceId }` | Yes       |
+| `arr.sync.mediaManagement` | Sync media management to Arr              | `{ instanceId }` | Yes       |
+| `arr.upgrade`              | Automated quality upgrades                | `{ instanceId }` | Yes       |
+| `arr.rename`               | Bulk file/folder rename                   | `{ instanceId }` | Yes       |
+| `arr.cleanup`              | Remove stale configs from Arr             | `{ instanceId }` | Yes       |
+| `arr.drift`                | Check Arr config drift                    | `{ instanceId }` | Yes       |
+| `arr.library.refresh`      | Refresh cached library data               | `{ instanceId }` | Yes       |
+| `arr.version.check`        | Record the Arr version and API generation | `{ instanceId }` | At boot   |
+| `pcd.sync`                 | Check/pull PCD database updates           | `{ databaseId }` | Yes       |
+| `backup.create`            | Create backup archive                     | `{}`             | Yes       |
+| `backup.cleanup`           | Delete old backups past retention         | `{}`             | Yes       |
+| `logs.cleanup`             | Delete old log files past retention       | `{}`             | Yes       |
+| `announcements.fetch`      | Pull bulletin, reconcile announcements    | `{}`             | Yes       |
 
 ## Lifecycle
 
@@ -408,6 +409,18 @@ While `FEATURES.drift` is false, drift jobs exit without contacting Arr.
 Fetches the library from an Arr instance and caches it. Includes a "not due
 yet" guard to avoid unnecessary fetches when the scheduler fires early after a
 restart.
+
+### Arr Version Check
+
+**Handler:** `arrVersionCheck.ts`
+
+Probes one instance for its app version and current API generation and stores
+the result on `arr_instances` (see
+[utilities.md: Arr Version Detection](./utilities.md#arr-version-detection)).
+Scheduled once per instance at boot, so a Sonarr upgraded while Profilarr was
+down is noticed before the next sync. A failed probe leaves the stored values
+alone and reschedules 5 minutes out, up to three attempts, for containers that
+are still starting. Not surfaced through SSE.
 
 ### PCD Sync
 

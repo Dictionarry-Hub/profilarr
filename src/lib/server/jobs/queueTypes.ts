@@ -12,6 +12,7 @@ export type JobType =
 	| 'arr.cleanup'
 	| 'arr.drift'
 	| 'arr.library.refresh'
+	| 'arr.version.check'
 	| 'logs.cleanup'
 	| 'announcements.fetch';
 

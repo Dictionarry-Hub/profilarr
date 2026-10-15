@@ -7,6 +7,12 @@ export type SyncTrigger = 'manual' | 'on_pull' | 'schedule';
 export interface ProfileSelection {
 	databaseId: number;
 	profileName: string;
+	/**
+	 * Quality definitions config (same database) whose sizes this profile
+	 * takes on an Arr that keeps sizes per profile. Null means the instance's
+	 * selection in arr_sync_media_management.
+	 */
+	qualityDefinitionsConfigName: string | null;
 }
 
 export interface SyncConfig {
@@ -52,6 +58,7 @@ interface ProfileSelectionRow {
 	instance_id: number;
 	database_id: number;
 	profile_name: string;
+	quality_definitions_config_name: string | null;
 }
 
 interface ConfigRow {
@@ -104,7 +111,8 @@ export const arrSyncQueries = {
 		return {
 			selections: selectionRows.map((row) => ({
 				databaseId: row.database_id,
-				profileName: row.profile_name
+				profileName: row.profile_name,
+				qualityDefinitionsConfigName: row.quality_definitions_config_name ?? null
 			})),
 			config: {
 				trigger: (configRow?.trigger as SyncTrigger) ?? 'manual',
@@ -124,10 +132,11 @@ export const arrSyncQueries = {
 		// Insert new selections
 		for (const sel of selections) {
 			db.execute(
-				'INSERT INTO arr_sync_quality_profiles (instance_id, database_id, profile_name) VALUES (?, ?, ?)',
+				'INSERT INTO arr_sync_quality_profiles (instance_id, database_id, profile_name, quality_definitions_config_name) VALUES (?, ?, ?, ?)',
 				instanceId,
 				sel.databaseId,
-				sel.profileName
+				sel.profileName,
+				sel.qualityDefinitionsConfigName ?? null
 			);
 		}
 
@@ -298,10 +307,40 @@ export const arrSyncQueries = {
 	},
 
 	updateQualityDefinitionsConfigName(oldName: string, newName: string): number {
-		return db.execute(
-			'UPDATE arr_sync_media_management SET quality_definitions_config_name = ? WHERE quality_definitions_config_name = ?',
+		const overrides = db.execute(
+			'UPDATE arr_sync_quality_profiles SET quality_definitions_config_name = ? WHERE quality_definitions_config_name = ?',
 			newName,
 			oldName
+		);
+		return (
+			db.execute(
+				'UPDATE arr_sync_media_management SET quality_definitions_config_name = ? WHERE quality_definitions_config_name = ?',
+				newName,
+				oldName
+			) + overrides
+		);
+	},
+
+	/**
+	 * Set only the instance's quality definitions selection, leaving the rest
+	 * of its media management row alone. Used by the quality profile section on
+	 * Arrs that keep sizes per profile, where this selection is the default
+	 * every synced profile takes.
+	 */
+	saveQualityDefinitionsSelection(
+		instanceId: number,
+		databaseId: number | null,
+		configName: string | null
+	): void {
+		db.execute(
+			`INSERT INTO arr_sync_media_management (instance_id, quality_definitions_database_id, quality_definitions_config_name)
+			 VALUES (?, ?, ?)
+			 ON CONFLICT(instance_id) DO UPDATE SET
+			   quality_definitions_database_id = excluded.quality_definitions_database_id,
+			   quality_definitions_config_name = excluded.quality_definitions_config_name`,
+			instanceId,
+			databaseId,
+			configName
 		);
 	},
 
@@ -869,6 +908,39 @@ export const arrSyncQueries = {
 			FROM arr_sync_media_management mm
 			JOIN arr_instances ai ON ai.id = mm.instance_id
 			WHERE mm.media_settings_database_id = ? AND mm.media_settings_config_name = ? AND ai.enabled = 1`,
+			databaseId,
+			configName
+		);
+	},
+
+	/**
+	 * Arr instances with a synced quality profile that overrides its sizes
+	 * with this quality definitions config (same database).
+	 */
+	getInstancesForQualityDefinitionsOverride(
+		databaseId: number,
+		configName: string
+	): {
+		instance_id: number;
+		instance_name: string;
+		sync_status: string;
+		last_synced_at: string | null;
+	}[] {
+		return db.query<{
+			instance_id: number;
+			instance_name: string;
+			sync_status: string;
+			last_synced_at: string | null;
+		}>(
+			`SELECT DISTINCT
+				ai.id AS instance_id,
+				ai.name AS instance_name,
+				qpc.sync_status,
+				qpc.last_synced_at
+			FROM arr_sync_quality_profiles aqp
+			JOIN arr_instances ai ON ai.id = aqp.instance_id
+			JOIN arr_sync_quality_profiles_config qpc ON qpc.instance_id = aqp.instance_id
+			WHERE aqp.database_id = ? AND aqp.quality_definitions_config_name = ? AND ai.enabled = 1`,
 			databaseId,
 			configName
 		);

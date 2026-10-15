@@ -4,6 +4,7 @@ import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
 import { createArrClient } from '$arr/factory.ts';
+import { probeAndRecordVersion, withDetectedVersion } from '$arr/version.ts';
 import type { ArrType } from '$arr/types.ts';
 import { calculateNextRun } from '$lib/server/sync/utils.ts';
 import type { SectionType } from '$lib/server/sync/types.ts';
@@ -73,6 +74,11 @@ const arrSyncHandler: JobHandler = async (job) => {
 	}
 
 	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	// Syncers branch on the version, so they get what the probe just saw, not the stored row
+	const liveInstance = withDetectedVersion(
+		instance,
+		await probeAndRecordVersion(instance, client, 'ArrSyncJob')
+	);
 	const results: string[] = [];
 	const sectionResults: ArrSyncSectionResult[] = [];
 	let failures = 0;
@@ -101,13 +107,14 @@ const arrSyncHandler: JobHandler = async (job) => {
 
 		ranSections++;
 		try {
-			const syncer = handler.createSyncer(client, instance);
+			const syncer = handler.createSyncer(client, liveInstance);
 			const result = await syncer.sync();
 
 			if (result.success) {
 				handler.completeSync(instanceId);
-				results.push(`${section}: ${result.itemsSynced} item(s)`);
-				sectionResults.push({ section, success: true, items: result.items });
+				const noteSuffix = result.notes?.length ? ` (${result.notes.join('; ')})` : '';
+				results.push(`${section}: ${result.itemsSynced} item(s)${noteSuffix}`);
+				sectionResults.push({ section, success: true, items: result.items, notes: result.notes });
 			} else {
 				handler.failSync(instanceId, result.error ?? 'Unknown error');
 				results.push(`${section}: failed`);
