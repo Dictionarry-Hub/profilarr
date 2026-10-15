@@ -4,6 +4,8 @@
 	import Card from '$ui/card/Card.svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import { isExperimentalVersion } from '$shared/arr/capabilities.ts';
 	import { getDisplayUrl } from '$lib/client/utils/arrDisplayUrl.ts';
 	import type { ArrInstanceSummary } from '../+page.server.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
@@ -79,6 +81,11 @@
 						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 							{instance.name}
 						</h3>
+						{#if isExperimentalVersion(instance)}
+							<Tooltip text="Sonarr v5 support is experimental" position="top">
+								<Label variant="info" size="sm" rounded="md">Experimental</Label>
+							</Tooltip>
+						{/if}
 					</div>
 					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>
 						<Button

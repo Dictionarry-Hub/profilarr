@@ -621,6 +621,21 @@ export interface components {
 			library_refresh_interval: number;
 			/** @description Last library refresh timestamp */
 			library_last_refreshed_at?: string | null;
+			/**
+			 * @description App version the instance reported on the last successful version probe,
+			 *     e.g. `5.0.0.2569`. Null until Profilarr has probed it.
+			 * @example 5.0.0.2569
+			 */
+			detected_version?: string | null;
+			/**
+			 * @description API generation the instance's unversioned `/api` route reported as
+			 *     current on the last probe, e.g. `v3` or `v5`. Null when the instance
+			 *     has no such route or has not been probed.
+			 * @example v5
+			 */
+			detected_api?: string | null;
+			/** @description When the last successful version probe ran */
+			detected_at?: string | null;
 			/** @description Creation timestamp */
 			created_at: string;
 			/** @description Last update timestamp */
