@@ -20,6 +20,8 @@
 	// Hide text on mobile (show icon only)
 	export let hideTextOnMobile: boolean = false;
 	export let fullWidth: boolean = false;
+	/** Which corners are rounded; `top` or `bottom` let a button join another control edge to edge */
+	export let rounded: 'all' | 'top' | 'bottom' | 'none' = 'all';
 	// Optional href - renders as anchor instead of button
 	export let href: string | undefined = undefined;
 	export let target: string | undefined = undefined;
@@ -66,15 +68,21 @@
 	$: baseClasses = `inline-flex items-center ${justifyClass} font-medium transition-colors ${disabledClass}`;
 
 	const sizeClasses = {
-		xs: 'gap-1 rounded-lg px-2 py-1 text-xs',
-		sm: 'gap-1.5 rounded-xl px-3 py-1.5 text-sm md:py-2',
-		md: 'gap-2 rounded-xl px-4 py-2.5'
+		xs: 'gap-1 px-2 py-1 text-xs',
+		sm: 'gap-1.5 px-3 py-1.5 text-sm md:py-2',
+		md: 'gap-2 px-4 py-2.5'
 	};
 
 	const iconOnlySizeClasses = {
-		xs: 'rounded-lg p-1.5 text-xs',
-		sm: 'rounded-xl p-2 text-sm',
-		md: 'rounded-xl p-2.5'
+		xs: 'p-1.5 text-xs',
+		sm: 'p-2 text-sm',
+		md: 'p-2.5'
+	};
+
+	const radiusClasses = {
+		xs: { all: 'rounded-lg', top: 'rounded-t-lg', bottom: 'rounded-b-lg', none: '' },
+		sm: { all: 'rounded-xl', top: 'rounded-t-xl', bottom: 'rounded-b-xl', none: '' },
+		md: { all: 'rounded-xl', top: 'rounded-t-xl', bottom: 'rounded-b-xl', none: '' }
 	};
 
 	const variantClasses = {
@@ -102,7 +110,7 @@
 	$: isLeadingSvg = leadingIcon && typeof leadingIcon === 'object' && 'path' in leadingIcon;
 	$: isIconOnly = icon && !text && !leadingIcon;
 	$: activeSizeClasses = isIconOnly ? iconOnlySizeClasses : sizeClasses;
-	$: classes = `group ${baseClasses} ${activeSizeClasses[effectiveSize]} ${variantClasses[variant]} ${widthClass}`;
+	$: classes = `group ${baseClasses} ${activeSizeClasses[effectiveSize]} ${radiusClasses[effectiveSize][rounded]} ${variantClasses[variant]} ${widthClass}`;
 	$: iconSize = effectiveSize === 'xs' ? 12 : effectiveSize === 'sm' ? 14 : 16;
 </script>
 

@@ -36,6 +36,8 @@
 	export let responsiveDropdown: boolean = false;
 	export let mobileDropdownShortLabels: boolean = false;
 	export let fullWidth: boolean = false;
+	/** Which corners of the trigger are rounded; see Button */
+	export let rounded: 'all' | 'top' | 'bottom' | 'none' = 'all';
 	// Fixed positioning to escape overflow containers (e.g. tables)
 	export let fixed: boolean = false;
 	// Custom width class (overrides fullWidth if set)
@@ -126,6 +128,7 @@
 			leadingIcon={currentIcon}
 			size={resolvedButtonSize}
 			{fullWidth}
+			{rounded}
 			{disabled}
 			justify={resolvedJustify}
 			textColor={isPlaceholder ? 'text-neutral-400 dark:text-neutral-500' : ''}

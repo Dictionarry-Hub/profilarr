@@ -263,8 +263,9 @@ need: `text`, `icon` (a Lucide component), `variant`
 `reload` (with `href`: the browser loads the link itself, for server endpoints
 such as `/auth/oidc/login` that the client router cannot resolve), `preload`
 (with `href`: `tap` fetches the page data on click instead of on hover, `off`
-never preloads it; for pages whose data must be current when they open), and `type` (for form
-submits). If a `tooltip` prop is provided, the button
+never preloads it; for pages whose data must be current when they open), `type` (for form
+submits), and `rounded` (`all` / `top` / `bottom` / `none`, so a button can sit edge to edge
+with another control; `DropdownSelect` passes it through to its trigger). If a `tooltip` prop is provided, the button
 wraps itself in a `Tooltip`; use `tooltipPosition="right"` for controls near
 the left edge of the viewport.
 
@@ -314,7 +315,9 @@ square that shows only the check. Emits a `change` event with `detail`
 being the new boolean. Supports `fullWidth` for grid cells and `disabled`.
 `infoHeader` / `infoBody` show a large tooltip when the toggle is hovered;
 the body is also linked to the toggle with `aria-describedby` for screen
-readers.
+readers. `rounded` (`all` / `top` / `bottom` / `none`) squares the corners
+that meet another control, as the sync page does with a size picker joined
+under each profile toggle.
 
 ```svelte
 <!-- src/routes/settings/general/+page.svelte:322 -->

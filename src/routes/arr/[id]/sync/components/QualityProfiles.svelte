@@ -451,26 +451,38 @@
 								<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-5">
 									{#each database.qualityProfiles as profile}
 										{@const entry = state[database.id]?.[profile.name]}
-										<div class="flex flex-col gap-1">
+										<!-- Where sizes live on profiles, every tile carries its size picker, joined below the toggle -->
+										<!-- Joined tile: on press the whole block scales as one, in place of the toggle's own press scale -->
+										<div
+											class="flex flex-col [&>*+*]:-mt-px {profileItemSizes ? 'profile-tile' : ''}"
+										>
 											<Toggle
 												checked={isSelected(database.id, profile.name)}
 												label={profile.name}
 												fullWidth
+												rounded={profileItemSizes ? 'top' : 'all'}
 												ariaLabel={`Toggle quality profile ${profile.name} from ${database.name}`}
 												on:change={(e) => setProfile(database.id, profile.name, e.detail)}
 											/>
-											{#if entry?.selected && profileItemSizes}
-												<DropdownSelect
-													value={entry.sizes ?? ''}
-													options={sizeOptions(database)}
-													header="Size limits"
-													headerDescription="Quality definitions config this profile takes its sizes from"
-													compact
-													fixed
-													fullWidth
-													minWidth="0"
-													on:change={(e) => setSizes(database.id, profile.name, e.detail)}
-												/>
+											{#if profileItemSizes}
+												<!-- Locked until the profile is ticked: not-allowed cursor, grey italic text, no fading -->
+												<div
+													class="[&_button]:opacity-100 {entry?.selected
+														? ''
+														: '[&_button]:text-neutral-400 [&_button]:italic dark:[&_button]:text-neutral-500'}"
+												>
+													<DropdownSelect
+														value={entry?.sizes ?? ''}
+														options={sizeOptions(database)}
+														header="Quality definition"
+														fixed
+														fullWidth
+														rounded="bottom"
+														minWidth="0"
+														disabled={!entry?.selected}
+														on:change={(e) => setSizes(database.id, profile.name, e.detail)}
+													/>
+												</div>
 											{:else if entry?.sizes}
 												<Tooltip
 													text="Only Sonarr v5 keeps size limits per profile. This choice is ignored here."
@@ -506,3 +518,24 @@
 		on:sync={handleSync}
 	/>
 </div>
+
+<style>
+	/*
+	 * The joined tile scales as one when its toggle or its picker button is
+	 * pressed. Pressing an item inside the open menu must not scale it: the
+	 * menu is fixed-positioned inside the tile, and a scaled ancestor moves it
+	 * out from under the pointer before the click lands.
+	 */
+	.profile-tile {
+		transition: scale 150ms;
+	}
+	.profile-tile:has(> :global(:first-child:active)),
+	.profile-tile:has(> :global(div > div > div > button:active)) {
+		scale: 0.98;
+	}
+	/* The toggle's own press scale is cancelled inside the tile */
+	.profile-tile > :global(:first-child:active) {
+		scale: 1 !important;
+		transform: none !important;
+	}
+</style>

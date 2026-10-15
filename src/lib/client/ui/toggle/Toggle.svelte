@@ -18,6 +18,16 @@
 	export let checkboxColor:
 		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})` | '' = '';
 	export let fullWidth: boolean = false;
+	/** Which corners are rounded; `top` or `bottom` let the toggle join another control edge to edge */
+	export let rounded: 'all' | 'top' | 'bottom' | 'none' = 'all';
+
+	const radiusClasses = {
+		all: 'rounded-xl',
+		top: 'rounded-t-xl',
+		bottom: 'rounded-b-xl',
+		none: ''
+	};
+	$: radiusClass = radiusClasses[rounded];
 	export let infoHeader: string = '';
 	export let infoBody: string = '';
 
@@ -71,7 +81,7 @@
 	}}
 	class="relative flex {fullWidth
 		? 'w-full justify-between'
-		: 'w-fit'} items-center rounded-xl border border-neutral-300 bg-white text-sm transition-[background-color,color,transform] duration-150 select-none focus-visible:ring-2 focus-visible:ring-accent-500/50 focus-visible:outline-none dark:border-neutral-700/60 dark:bg-neutral-800/50 {label
+		: 'w-fit'} items-center {radiusClass} border border-neutral-300 bg-white text-sm transition-[background-color,color,transform] duration-150 select-none focus-visible:ring-2 focus-visible:ring-accent-500/50 focus-visible:outline-none dark:border-neutral-700/60 dark:bg-neutral-800/50 {label
 		? 'px-3 py-2'
 		: 'p-2'} {textClass} {disabled
 		? 'cursor-not-allowed opacity-50'
