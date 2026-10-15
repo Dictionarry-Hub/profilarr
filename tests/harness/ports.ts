@@ -81,7 +81,9 @@ export const PORTS = {
 		upload: 7208
 	},
 	arr: {
-		instanceTargets: 7300
+		instanceTargets: 7300,
+		versionDetection: 7301,
+		versionDetectionFakeArr: 7302
 	},
 	notifications: {
 		announcement: 7400,
