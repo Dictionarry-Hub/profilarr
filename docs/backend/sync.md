@@ -273,6 +273,17 @@ Transformation details:
   (Sonarr uses custom formats for language filtering).
 - **Upgrade fields**: `cutoffFormatScore`, `minFormatScore`, and
   `minUpgradeFormatScore` (minimum 1) map directly.
+- **Size limits (Sonarr v5)**: an instance whose detected API generation is
+  v5 (see [utilities.md: Arr Version Detection](./utilities.md#arr-version-detection))
+  stores `minSize`, `maxSize` and `preferredSize` on each quality item instead
+  of in the global quality definitions. The syncer keeps the full profiles it
+  fetches and passes a size map into the transformer (`qualityProfiles/sizes.ts`,
+  `sizeSource.ts`). Per quality, the instance's quality definitions selection
+  from Media Management wins; a quality it does not cover keeps the sizes the
+  Arr already has, or the Arr's profile schema defaults for a profile being
+  created. Sizes land on quality rows and group members, never on group rows.
+  A failed fetch of the existing profiles fails the section before any write.
+  On v4 and Radarr the payload carries no size keys.
 
 ### Delay Profiles
 
@@ -312,6 +323,12 @@ Quality definitions match PCD quality names to Arr API names via the same
 mapping table, then update `minSize`, `maxSize`, and `preferredSize` per tier.
 PCD stores 0 for "unlimited"; the transformer converts to null.
 
+On Sonarr v5 the definitions step is skipped: the v3 definitions endpoint
+there writes the sizes into every profile on the instance, managed or not.
+The selection is instead applied by the quality profile sync (see above). The
+skip is recorded as a note on the section result (`SyncResult.notes`), which
+appears in the job output line and the sync notification summary.
+
 ## Entity Sync
 
 **Source:** `entitySync.ts`
@@ -325,7 +342,10 @@ settings.
 Entity sync uses the same transform logic as batch sync but operates on a
 single entity. For quality profiles, targeted sync first syncs the profile's
 referenced CFs before creates and updates so newly scored formats have Arr IDs
-before the profile payload is built.
+before the profile payload is built. Quality profile pushes apply the same
+size rules as batch sync on Sonarr v5; a quality definitions push to a Sonarr
+v5 instance is refused with an error that says to sync the quality profiles
+instead.
 
 ## Cleanup
 
