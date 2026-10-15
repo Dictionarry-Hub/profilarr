@@ -80,8 +80,8 @@ drifts between instances. Profilarr tries to make that easier.
 - Docker host with Linux kernel `3.17+`. Older kernels, including Synology DSM
   installs on kernel `3.10`, are not supported by Profilarr v2.
 - Docker platform `linux/amd64` or `linux/arm64`
-- Sonarr `v4+`
-- Radarr `v5+`
+- Sonarr `v4` and `v5` (v5 is experimental while Sonarr v5 is in beta)
+- Radarr `v5` and `v6`
 
 ### Production
 
