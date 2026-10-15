@@ -12,6 +12,7 @@ import {
 	collectItemSizes,
 	definitionsToSizeMap,
 	mergeSizes,
+	resolveProfileSizes,
 	type QualitySizeMap
 } from '$sync/qualityProfiles/sizes.ts';
 
@@ -107,6 +108,31 @@ class QualityProfileSizesTest extends BaseTest {
 
 			assertEquals(merged.get('webdl-1080p'), sizes(15, null, 995));
 			assertEquals(merged.get('sdtv'), sizes(1, 10, 5));
+		});
+
+		this.test('resolveProfileSizes: override beats global beats fallback, per quality', () => {
+			const fallback: QualitySizeMap = new Map([
+				['webdl-1080p', sizes(1, 10, 5)],
+				['hdtv-1080p', sizes(1, 10, 5)],
+				['sdtv', sizes(1, 10, 5)]
+			]);
+			const global: QualitySizeMap = new Map([
+				['webdl-1080p', sizes(15, null, 995)],
+				['hdtv-1080p', sizes(15, null, 995)]
+			]);
+			const override: QualitySizeMap = new Map([['webdl-1080p', sizes(6, 60, 40)]]);
+
+			const resolved = resolveProfileSizes({ fallback, global, override });
+
+			assertEquals(resolved.get('webdl-1080p'), sizes(6, 60, 40), 'override wins');
+			assertEquals(resolved.get('hdtv-1080p'), sizes(15, null, 995), 'global fills the rest');
+			assertEquals(resolved.get('sdtv'), sizes(1, 10, 5), 'fallback keeps what neither covers');
+		});
+
+		this.test('resolveProfileSizes without global or override is the fallback', () => {
+			const fallback: QualitySizeMap = new Map([['sdtv', sizes(1, 10, 5)]]);
+			assertEquals(resolveProfileSizes({ fallback }), fallback);
+			assertEquals(resolveProfileSizes({ fallback, global: null, override: null }), fallback);
 		});
 
 		this.test('definitionsToSizeMap keys mapped definitions by lowercase API name', () => {
