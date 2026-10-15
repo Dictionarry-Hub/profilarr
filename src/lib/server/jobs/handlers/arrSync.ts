@@ -4,6 +4,7 @@ import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
 import { createArrClient } from '$arr/factory.ts';
+import { probeAndRecordVersion } from '$arr/version.ts';
 import type { ArrType } from '$arr/types.ts';
 import { calculateNextRun } from '$lib/server/sync/utils.ts';
 import type { SectionType } from '$lib/server/sync/types.ts';
@@ -73,6 +74,7 @@ const arrSyncHandler: JobHandler = async (job) => {
 	}
 
 	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	await probeAndRecordVersion(instance, client, 'ArrSyncJob');
 	const results: string[] = [];
 	const sectionResults: ArrSyncSectionResult[] = [];
 	let failures = 0;
