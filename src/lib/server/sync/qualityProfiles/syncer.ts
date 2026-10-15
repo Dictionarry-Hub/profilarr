@@ -39,6 +39,7 @@ import type { ArrQualityProfile, ArrQualityProfilePayload } from '$arr/types.ts'
 interface ProfileSyncData {
 	pcdProfile: PcdQualityProfile;
 	referencedFormatNames: string[];
+	selection: ProfileSelection;
 }
 
 interface SyncedProfileSummary {
@@ -287,7 +288,7 @@ export class QualityProfileSyncer extends BaseSyncer {
 				this.instanceType
 			);
 
-			profiles.push({ pcdProfile, referencedFormatNames });
+			profiles.push({ pcdProfile, referencedFormatNames, selection });
 
 			for (const formatName of referencedFormatNames) {
 				if (!customFormats.has(formatName)) {
@@ -314,12 +315,15 @@ export class QualityProfileSyncer extends BaseSyncer {
 	): Promise<SyncedProfileSummary[]> {
 		const syncedProfiles: SyncedProfileSummary[] = [];
 
-		for (const { pcdProfile } of profiles) {
+		for (const { pcdProfile, selection } of profiles) {
 			let arrProfile: ArrQualityProfilePayload | undefined;
 
 			try {
 				const existing = existingMap.get(pcdProfile.name);
-				const sizes = sizeSource ? await sizeSource.forProfile(existing) : undefined;
+				const override = selection.qualityDefinitionsConfigName
+					? { databaseId: selection.databaseId, configName: selection.qualityDefinitionsConfigName }
+					: null;
+				const sizes = sizeSource ? await sizeSource.forProfile(existing, override) : undefined;
 
 				arrProfile = transformQualityProfile(
 					pcdProfile,

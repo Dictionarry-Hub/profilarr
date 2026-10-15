@@ -169,19 +169,46 @@ function getAffectedArrsForQualityDefinitions(
 	databaseId: number,
 	configName: string
 ): AffectedArr[] {
-	const rows = arrSyncQueries.getInstancesForQualityDefinitions(databaseId, configName);
+	const byInstance = new Map<number, AffectedArr>();
 
-	return rows.map((row) => ({
-		instanceId: row.instance_id,
-		instanceName: row.instance_name,
-		sections: [
-			{
-				section: 'mediaManagement' as const,
-				syncStatus: row.sync_status,
-				lastSyncedAt: row.last_synced_at
-			}
-		]
-	}));
+	// Instances whose media management selection is this config
+	for (const row of arrSyncQueries.getInstancesForQualityDefinitions(databaseId, configName)) {
+		byInstance.set(row.instance_id, {
+			instanceId: row.instance_id,
+			instanceName: row.instance_name,
+			sections: [
+				{
+					section: 'mediaManagement' as const,
+					syncStatus: row.sync_status,
+					lastSyncedAt: row.last_synced_at
+				}
+			]
+		});
+	}
+
+	// Instances with a synced profile that takes its sizes from this config
+	for (const row of arrSyncQueries.getInstancesForQualityDefinitionsOverride(
+		databaseId,
+		configName
+	)) {
+		const section = {
+			section: 'qualityProfiles' as const,
+			syncStatus: row.sync_status,
+			lastSyncedAt: row.last_synced_at
+		};
+		const existing = byInstance.get(row.instance_id);
+		if (existing) {
+			existing.sections.push(section);
+		} else {
+			byInstance.set(row.instance_id, {
+				instanceId: row.instance_id,
+				instanceName: row.instance_name,
+				sections: [section]
+			});
+		}
+	}
+
+	return [...byInstance.values()];
 }
 
 /**

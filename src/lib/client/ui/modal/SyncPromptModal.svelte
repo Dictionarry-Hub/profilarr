@@ -20,7 +20,7 @@
 		| 'qualityDefinitions'
 		| 'mediaSettings' = 'qualityProfile';
 
-	type InstanceState = 'idle' | 'syncing' | 'done' | 'failed' | 'cooldown';
+	type InstanceState = 'idle' | 'syncing' | 'done' | 'skipped' | 'failed' | 'cooldown';
 
 	let instanceStates: Map<number, InstanceState> = new Map();
 	let instanceErrors: Map<number, string> = new Map();
@@ -36,7 +36,7 @@
 		affectedArrs.length > 0 &&
 		affectedArrs.every((a) => {
 			const state = instanceStates.get(a.instanceId);
-			return state === 'done' || state === 'failed' || state === 'cooldown';
+			return state === 'done' || state === 'skipped' || state === 'failed' || state === 'cooldown';
 		});
 
 	$: anySyncing = affectedArrs.some((a) => instanceStates.get(a.instanceId) === 'syncing');
@@ -53,7 +53,14 @@
 			});
 
 			if (res.ok) {
-				instanceStates.set(instanceId, 'done');
+				// A push can succeed by doing nothing; the body says why
+				const data = await res.json().catch(() => ({}));
+				if (typeof data.skipped === 'string' && data.skipped) {
+					instanceStates.set(instanceId, 'skipped');
+					instanceErrors.set(instanceId, data.skipped);
+				} else {
+					instanceStates.set(instanceId, 'done');
+				}
 			} else {
 				const data = await res.json();
 				if (res.status === 409) {
@@ -98,10 +105,14 @@
 		goto(redirectTo);
 	}
 
-	function getStateVariant(state: InstanceState): 'secondary' | 'success' | 'danger' | 'warning' {
+	function getStateVariant(
+		state: InstanceState
+	): 'secondary' | 'success' | 'danger' | 'warning' | 'ghost' {
 		switch (state) {
 			case 'done':
 				return 'success';
+			case 'skipped':
+				return 'ghost';
 			case 'failed':
 				return 'danger';
 			case 'cooldown':
@@ -117,6 +128,8 @@
 				return 'Syncing...';
 			case 'done':
 				return 'Synced';
+			case 'skipped':
+				return instanceErrors.get(instanceId) || 'Nothing to push';
 			case 'failed':
 				return instanceErrors.get(instanceId) || 'Failed';
 			case 'cooldown': {

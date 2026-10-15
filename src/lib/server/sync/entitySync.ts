@@ -52,10 +52,7 @@ import {
 	transformQualityDefinitionsForArr
 } from './mediaManagement/transformer.ts';
 
-interface SyncResult {
-	success: boolean;
-	error?: string;
-}
+import type { EntitySyncResult as SyncResult } from '$shared/sync/types.ts';
 
 /**
  * Sync a single quality profile to an arr instance
@@ -71,6 +68,76 @@ async function openInstanceClient(
 	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
 	const info = await probeAndRecordVersion(instance, client, 'EntitySync');
 	return { client, instance: withDetectedVersion(instance, info) };
+}
+
+/** The profile's own definitions config from its sync selection, if any. */
+function findSizeOverride(
+	instanceId: number,
+	databaseId: number,
+	profileName: string
+): { databaseId: number; configName: string } | null {
+	const selection = arrSyncQueries
+		.getQualityProfilesSync(instanceId)
+		.selections.find((s) => s.databaseId === databaseId && s.profileName === profileName);
+	return selection?.qualityDefinitionsConfigName
+		? { databaseId, configName: selection.qualityDefinitionsConfigName }
+		: null;
+}
+
+/**
+ * On an Arr that keeps sizes per profile, "push this quality definitions
+ * config" means re-pushing every synced profile whose sizes come from it:
+ * profiles that chose it, plus profiles with no choice when it is the
+ * instance's selection.
+ */
+async function pushProfilesUsingDefinitions(
+	instanceId: number,
+	databaseId: number,
+	configName: string
+): Promise<SyncResult> {
+	const selections = arrSyncQueries.getQualityProfilesSync(instanceId).selections;
+	const global = arrSyncQueries.getMediaManagementSync(instanceId);
+	const isGlobal =
+		global.qualityDefinitionsDatabaseId === databaseId &&
+		global.qualityDefinitionsConfigName === configName;
+	const targets = selections.filter((s) =>
+		s.qualityDefinitionsConfigName
+			? s.databaseId === databaseId && s.qualityDefinitionsConfigName === configName
+			: isGlobal
+	);
+
+	if (targets.length === 0) {
+		return {
+			success: true,
+			skipped:
+				'This Sonarr keeps sizes on each quality profile, and no synced profile here uses this definition'
+		};
+	}
+
+	const failures: string[] = [];
+	for (const target of targets) {
+		const result = await syncQualityProfile(instanceId, target.databaseId, target.profileName);
+		if (!result.success) failures.push(`${target.profileName}: ${result.error ?? 'failed'}`);
+	}
+
+	await logger.info(
+		`Entity sync: pushed ${targets.length - failures.length} of ${targets.length} quality profile(s) using quality definitions "${configName}"`,
+		{
+			source: 'EntitySync:QualityDefinitions',
+			meta: {
+				instanceId,
+				databaseId,
+				configName,
+				profiles: targets.map((t) => t.profileName),
+				failures
+			}
+		}
+	);
+
+	if (failures.length > 0) {
+		return { success: false, error: `Profiles not pushed: ${failures.join('; ')}` };
+	}
+	return { success: true };
 }
 
 export async function syncQualityProfile(
@@ -118,7 +185,7 @@ export async function syncQualityProfile(
 					instanceId,
 					instanceType,
 					'EntitySync:QualityProfile'
-				).forProfile(existingProfile)
+				).forProfile(existingProfile, findSizeOverride(instanceId, databaseId, profileName))
 			: undefined;
 
 		// Transform
@@ -412,13 +479,9 @@ export async function syncQualityDefinitions(
 	try {
 		if (hasProfileItemSizes(probed)) {
 			// The v3 definitions endpoint would write these sizes into every profile
-			// on the instance. The quality profile sync applies them to Profilarr's
-			// own profiles instead.
-			return {
-				success: false,
-				error:
-					'This Sonarr keeps quality sizes on each quality profile. Sync the quality profiles instead.'
-			};
+			// on the instance. Push the synced profiles that take their sizes from
+			// this config instead; each push carries the sizes with it.
+			return await pushProfilesUsingDefinitions(instanceId, databaseId, configName);
 		}
 
 		const getByName = instanceType === 'radarr' ? getRadarrQualityDefs : getSonarrQualityDefs;

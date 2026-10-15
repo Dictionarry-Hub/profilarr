@@ -1,6 +1,17 @@
+<script context="module" lang="ts">
+	/** Per database, per profile: whether it syncs and which quality definitions config sizes it (null = the instance's pick). */
+	export type ProfileSyncState = Record<
+		number,
+		Record<string, { selected: boolean; sizes: string | null }>
+	>;
+</script>
+
 <script lang="ts">
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import Toggle from '$ui/toggle/Toggle.svelte';
+	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
+	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import DraggableCard from '$ui/list/DraggableCard.svelte';
 	import SyncFooter from './SyncFooter.svelte';
 	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
@@ -15,6 +26,7 @@
 		id: number;
 		name: string;
 		qualityProfiles: QualityProfileTableRow[];
+		qualityDefinitionsConfigs: { name: string }[];
 	}
 
 	interface SectionProgress {
@@ -30,7 +42,16 @@
 
 	export let databases: DatabaseWithProfiles[];
 	export let databasePriorities: DatabasePriority[] = [];
-	export let state: Record<number, Record<string, boolean>> = {};
+	/**
+	 * The Arr keeps size limits on each quality profile (Sonarr v5). This
+	 * section then owns the instance's default quality definitions pick and
+	 * each synced profile may choose its own.
+	 */
+	export let profileItemSizes: boolean = false;
+	/** The instance's quality definitions pick, shared with Media Management's state */
+	export let globalQualityDefinitionsDatabaseId: number | null = null;
+	export let globalQualityDefinitionsConfigName: string | null = null;
+	export let state: ProfileSyncState = {};
 	export let syncTrigger: 'manual' | 'on_pull' | 'schedule' = 'manual';
 	export let cronExpression: string = '0 * * * *';
 	export let canSave: boolean = true;
@@ -41,11 +62,86 @@
 	let saving = false;
 	let syncing = false;
 
-	// Track saved state for dirty detection
-	let savedState = JSON.stringify({ state, syncTrigger, cronExpression, databasePriorities });
-	$: currentState = JSON.stringify({ state, syncTrigger, cronExpression, databasePriorities });
+	// Track saved state for dirty detection. The default definitions pick is
+	// only this section's concern where sizes live on profiles.
+	function snapshot(): string {
+		return JSON.stringify({
+			state,
+			syncTrigger,
+			cronExpression,
+			databasePriorities,
+			...(profileItemSizes
+				? {
+						globalQualityDefinitionsDatabaseId,
+						globalQualityDefinitionsConfigName
+					}
+				: {})
+		});
+	}
+	let savedState = snapshot();
+	$: currentState = (() => {
+		// Reactive on every tracked field
+		void state;
+		void syncTrigger;
+		void cronExpression;
+		void databasePriorities;
+		void globalQualityDefinitionsDatabaseId;
+		void globalQualityDefinitionsConfigName;
+		return snapshot();
+	})();
 	export let isDirty = false;
 	$: isDirty = currentState !== savedState;
+
+	// ── Quality definitions pick (sizes live on profiles) ───────────────
+
+	type SelectionOption = { value: string; label: string };
+
+	$: globalOptions = databases.flatMap((db) =>
+		db.qualityDefinitionsConfigs.map((config) => ({
+			value: JSON.stringify([db.id, config.name]),
+			label: `${db.name} / ${config.name}`
+		}))
+	) as SelectionOption[];
+
+	$: globalValue =
+		globalQualityDefinitionsDatabaseId !== null && globalQualityDefinitionsConfigName
+			? JSON.stringify([globalQualityDefinitionsDatabaseId, globalQualityDefinitionsConfigName])
+			: '';
+
+	function selectGlobal(value: string) {
+		try {
+			const parsed = value ? JSON.parse(value) : null;
+			if (Array.isArray(parsed) && parsed.length === 2) {
+				const databaseId = Number(parsed[0]);
+				const configName = String(parsed[1]);
+				if (!Number.isNaN(databaseId) && configName) {
+					globalQualityDefinitionsDatabaseId = databaseId;
+					globalQualityDefinitionsConfigName = configName;
+					return;
+				}
+			}
+		} catch {
+			// Malformed values clear the pick
+		}
+		globalQualityDefinitionsDatabaseId = null;
+		globalQualityDefinitionsConfigName = null;
+	}
+
+	function sizeOptions(database: DatabaseWithProfiles): SelectionOption[] {
+		return [
+			{ value: '', label: 'Global' },
+			...database.qualityDefinitionsConfigs.map((config) => ({
+				value: config.name,
+				label: config.name
+			}))
+		];
+	}
+
+	function setSizes(databaseId: number, profileName: string, value: string) {
+		const entry = state[databaseId]?.[profileName] ?? { selected: false, sizes: null };
+		state[databaseId][profileName] = { ...entry, sizes: value || null };
+		state = { ...state };
+	}
 
 	// Order databases by priority
 	$: orderedDatabases = [...databases].sort((a, b) => {
@@ -62,7 +158,7 @@
 			}
 			for (const profile of db.qualityProfiles) {
 				if (state[db.id][profile.name] === undefined) {
-					state[db.id][profile.name] = false;
+					state[db.id][profile.name] = { selected: false, sizes: null };
 				}
 			}
 		}
@@ -72,7 +168,7 @@
 	$: selectedKeys = new Set(
 		Object.entries(state).flatMap(([dbId, profiles]) =>
 			Object.entries(profiles)
-				.filter(([, selected]) => selected)
+				.filter(([, profile]) => profile.selected)
 				.map(([profileName]) => `${dbId}-${profileName}`)
 		)
 	);
@@ -82,20 +178,33 @@
 	}
 
 	$: hasAnySelection = Object.values(state).some((db) =>
-		Object.values(db).some((selected) => selected)
+		Object.values(db).some((profile) => profile.selected)
 	);
 
 	function setProfile(databaseId: number, profileName: string, checked: boolean) {
-		state[databaseId][profileName] = checked;
+		const entry = state[databaseId]?.[profileName] ?? { selected: false, sizes: null };
+		state[databaseId][profileName] = { ...entry, selected: checked };
 		state = { ...state };
 	}
 
-	function getSelections(): { databaseId: number; profileName: string }[] {
-		const selections: { databaseId: number; profileName: string }[] = [];
+	function getSelections(): {
+		databaseId: number;
+		profileName: string;
+		qualityDefinitionsConfigName: string | null;
+	}[] {
+		const selections: {
+			databaseId: number;
+			profileName: string;
+			qualityDefinitionsConfigName: string | null;
+		}[] = [];
 		for (const [dbId, profiles] of Object.entries(state)) {
-			for (const [profileName, selected] of Object.entries(profiles)) {
-				if (selected) {
-					selections.push({ databaseId: parseInt(dbId), profileName });
+			for (const [profileName, profile] of Object.entries(profiles)) {
+				if (profile.selected) {
+					selections.push({
+						databaseId: parseInt(dbId),
+						profileName,
+						qualityDefinitionsConfigName: profile.sizes
+					});
 				}
 			}
 		}
@@ -175,6 +284,13 @@
 			formData.set('priorities', JSON.stringify(databasePriorities));
 			formData.set('trigger', syncTrigger);
 			formData.set('cron', cronExpression);
+			if (profileItemSizes) {
+				formData.set(
+					'qualityDefinitionsDatabaseId',
+					globalQualityDefinitionsDatabaseId?.toString() ?? ''
+				);
+				formData.set('qualityDefinitionsConfigName', globalQualityDefinitionsConfigName ?? '');
+			}
 
 			const response = await fetch('?/saveQualityProfiles', {
 				method: 'POST',
@@ -183,7 +299,7 @@
 
 			if (response.ok) {
 				alertStore.add('success', 'Quality profiles sync config saved');
-				savedState = JSON.stringify({ state, syncTrigger, cronExpression, databasePriorities });
+				savedState = snapshot();
 			} else {
 				alertStore.add('error', 'Failed to save quality profiles sync config');
 			}
@@ -271,6 +387,33 @@
 
 	<!-- Content -->
 	<div class="p-6">
+		{#if profileItemSizes}
+			<div class="mb-6 space-y-2 sm:max-w-md">
+				<div class="space-y-1">
+					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+						Default quality definition
+					</div>
+					<p class="text-xs text-neutral-600 dark:text-neutral-400">
+						This Sonarr keeps size limits on each quality profile. Every synced profile takes them
+						from this config unless it picks its own below.
+					</p>
+				</div>
+				<DropdownCombobox
+					fullWidth
+					minWidth="0"
+					dropdownWidth="100%"
+					limit={6}
+					clearable
+					options={globalOptions}
+					value={globalValue}
+					placeholder={globalOptions.length === 0
+						? 'No quality definitions configs available'
+						: 'Keep the sizes each profile already has'}
+					disabled={globalOptions.length === 0}
+					on:change={(e) => selectGlobal(e.detail)}
+				/>
+			</div>
+		{/if}
 		{#if orderedDatabases.length === 0}
 			<p class="text-sm text-neutral-500 dark:text-neutral-400">No databases configured</p>
 		{:else}
@@ -314,13 +457,38 @@
 							{:else}
 								<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-5">
 									{#each database.qualityProfiles as profile}
-										<Toggle
-											checked={isSelected(database.id, profile.name)}
-											label={profile.name}
-											fullWidth
-											ariaLabel={`Toggle quality profile ${profile.name} from ${database.name}`}
-											on:change={(e) => setProfile(database.id, profile.name, e.detail)}
-										/>
+										{@const entry = state[database.id]?.[profile.name]}
+										<div class="flex flex-col gap-1">
+											<Toggle
+												checked={isSelected(database.id, profile.name)}
+												label={profile.name}
+												fullWidth
+												ariaLabel={`Toggle quality profile ${profile.name} from ${database.name}`}
+												on:change={(e) => setProfile(database.id, profile.name, e.detail)}
+											/>
+											{#if entry?.selected && profileItemSizes}
+												<DropdownSelect
+													value={entry.sizes ?? ''}
+													options={sizeOptions(database)}
+													header="Size limits"
+													headerDescription="Quality definitions config this profile takes its sizes from"
+													compact
+													fixed
+													fullWidth
+													minWidth="0"
+													on:change={(e) => setSizes(database.id, profile.name, e.detail)}
+												/>
+											{:else if entry?.sizes}
+												<Tooltip
+													text="Only Sonarr v5 keeps size limits per profile. This choice is ignored here."
+													position="top"
+												>
+													<Label variant="ghost" size="sm" rounded="md">
+														Sizes: {entry.sizes} (ignored)
+													</Label>
+												</Tooltip>
+											{/if}
+										</div>
 									{/each}
 								</div>
 							{/if}

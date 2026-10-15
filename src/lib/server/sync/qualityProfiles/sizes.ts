@@ -74,6 +74,22 @@ export function mergeSizes(fallback: QualitySizeMap, override: QualitySizeMap): 
 	return new Map([...fallback, ...override]);
 }
 
+/**
+ * One profile's sizes, first match per quality wins: the profile's own
+ * definitions config, then the instance's selection, then what the Arr
+ * already has (or its schema defaults for a new profile).
+ */
+export function resolveProfileSizes(input: {
+	fallback: QualitySizeMap;
+	global?: QualitySizeMap | null;
+	override?: QualitySizeMap | null;
+}): QualitySizeMap {
+	let sizes = input.fallback;
+	if (input.global) sizes = mergeSizes(sizes, input.global);
+	if (input.override) sizes = mergeSizes(sizes, input.override);
+	return sizes;
+}
+
 /** From `transformQualityDefinitionsForArr` output, which already maps PCD 0 to null. */
 export function definitionsToSizeMap(definitions: MappedQualityDefinition[]): QualitySizeMap {
 	const sizes: QualitySizeMap = new Map();

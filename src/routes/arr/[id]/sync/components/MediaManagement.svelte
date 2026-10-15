@@ -25,6 +25,13 @@
 	}
 
 	export let databases: Database[];
+	/**
+	 * The Arr keeps size limits on each quality profile (Sonarr v5). The
+	 * definitions pick is then made under Quality Profiles and this section's
+	 * definitions step is skipped, so it is left out of this section's config
+	 * and dirty tracking.
+	 */
+	export let profileItemSizes: boolean = false;
 	export let state: {
 		namingDatabaseId: number | null;
 		namingConfigName: string | null;
@@ -158,9 +165,28 @@
 	let saving = false;
 	let syncing = false;
 
-	// Track saved state for dirty detection
-	let savedState = JSON.stringify({ state, syncTrigger, cronExpression });
-	$: currentState = JSON.stringify({ state, syncTrigger, cronExpression });
+	// Track saved state for dirty detection. Where sizes live on profiles the
+	// definitions pick belongs to the quality profile section and is left out.
+	function snapshot(): string {
+		const tracked = profileItemSizes
+			? {
+					namingDatabaseId: state.namingDatabaseId,
+					namingConfigName: state.namingConfigName,
+					mediaSettingsDatabaseId: state.mediaSettingsDatabaseId,
+					mediaSettingsConfigName: state.mediaSettingsConfigName
+				}
+			: state;
+		return JSON.stringify({ state: tracked, syncTrigger, cronExpression });
+	}
+	let savedState = snapshot();
+	$: currentState = (() => {
+		// Reactive on every tracked field
+		void state;
+		void syncTrigger;
+		void cronExpression;
+		void profileItemSizes;
+		return snapshot();
+	})();
 	export let isDirty = false;
 	$: isDirty = currentState !== savedState;
 
@@ -188,7 +214,7 @@
 			if (response.ok) {
 				alertStore.add('success', 'Media management sync config saved');
 				// Update saved state to current
-				savedState = JSON.stringify({ state, syncTrigger, cronExpression });
+				savedState = snapshot();
 			} else {
 				alertStore.add('error', 'Failed to save media management sync config');
 			}
@@ -325,23 +351,30 @@
 						Quality Definitions
 					</div>
 					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						Choose the quality definitions config to sync.
+						{#if profileItemSizes}
+							This Sonarr keeps size limits on each quality profile, so they are synced with the
+							profiles. Choose the default under Quality Profiles.
+						{:else}
+							Choose the quality definitions config to sync.
+						{/if}
 					</p>
 				</div>
-				<DropdownCombobox
-					fullWidth
-					minWidth="0"
-					dropdownWidth="100%"
-					limit={6}
-					clearable
-					options={qualityDefinitionsOptions}
-					value={qualityDefinitionsValue}
-					placeholder={qualityDefinitionsOptions.length === 0
-						? 'No quality definitions configs available'
-						: 'Select quality definitions config...'}
-					disabled={qualityDefinitionsOptions.length === 0}
-					on:change={(e) => selectQuality(e.detail)}
-				/>
+				{#if !profileItemSizes}
+					<DropdownCombobox
+						fullWidth
+						minWidth="0"
+						dropdownWidth="100%"
+						limit={6}
+						clearable
+						options={qualityDefinitionsOptions}
+						value={qualityDefinitionsValue}
+						placeholder={qualityDefinitionsOptions.length === 0
+							? 'No quality definitions configs available'
+							: 'Select quality definitions config...'}
+						disabled={qualityDefinitionsOptions.length === 0}
+						on:change={(e) => selectQuality(e.detail)}
+					/>
+				{/if}
 			</div>
 
 			<!-- Media Settings -->
@@ -379,7 +412,7 @@
 		{syncing}
 		{isDirty}
 		hasConfig={state.namingDatabaseId !== null ||
-			state.qualityDefinitionsDatabaseId !== null ||
+			(!profileItemSizes && state.qualityDefinitionsDatabaseId !== null) ||
 			state.mediaSettingsDatabaseId !== null}
 		onboardingId="sync-trigger"
 		onWarning={(msg) => alertStore.add('warning', msg)}

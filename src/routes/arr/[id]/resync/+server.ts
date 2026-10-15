@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import type { EntitySyncResult } from '$shared/sync/types.ts';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
@@ -117,7 +118,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 	}
 
 	try {
-		let result: { success: boolean; error?: string };
+		let result: EntitySyncResult;
 
 		switch (entityType) {
 			case 'qualityProfile':
@@ -144,7 +145,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		}
 
 		if (result.success) {
-			return json({ success: true });
+			return json(result.skipped ? { success: true, skipped: result.skipped } : { success: true });
 		}
 		return json({ error: result.error ?? 'Sync failed' }, { status: 500 });
 	} catch (err) {

@@ -353,6 +353,34 @@ export const load: ServerLoad = async ({ params }) => {
 	};
 };
 
+/**
+ * Selections arrive as JSON from the sync page. Keep only well-formed rows so a
+ * malformed body cannot write junk into arr_sync_quality_profiles.
+ */
+function parseProfileSelections(raw: string | null): ProfileSelection[] {
+	const parsed: unknown = JSON.parse(raw || '[]');
+	if (!Array.isArray(parsed)) return [];
+	const selections: ProfileSelection[] = [];
+	for (const item of parsed) {
+		if (!item || typeof item !== 'object') continue;
+		const { databaseId, profileName, qualityDefinitionsConfigName } = item as Record<
+			string,
+			unknown
+		>;
+		if (typeof databaseId !== 'number' || !Number.isInteger(databaseId)) continue;
+		if (typeof profileName !== 'string' || profileName === '') continue;
+		selections.push({
+			databaseId,
+			profileName,
+			qualityDefinitionsConfigName:
+				typeof qualityDefinitionsConfigName === 'string' && qualityDefinitionsConfigName !== ''
+					? qualityDefinitionsConfigName
+					: null
+		});
+	}
+	return selections;
+}
+
 export const actions: Actions = {
 	saveQualityProfiles: async ({ params, request }) => {
 		const id = parseInt(params.id || '', 10);
@@ -368,7 +396,7 @@ export const actions: Actions = {
 		const cron = formData.get('cron') as string | null;
 
 		try {
-			const selections: ProfileSelection[] = JSON.parse(selectionsJson || '[]');
+			const selections = parseProfileSelections(selectionsJson);
 			const effectiveTrigger = trigger || 'manual';
 			const effectiveCron = cron || null;
 			arrSyncQueries.saveQualityProfilesSync(id, selections, {
@@ -382,6 +410,21 @@ export const actions: Actions = {
 			);
 			if (priorities.length > 0) {
 				await arrSyncQueries.saveDatabasePriorities(id, priorities);
+			}
+
+			// On an Arr that keeps sizes per profile, the quality profile section owns
+			// the instance's default quality definitions pick
+			if (formData.has('qualityDefinitionsConfigName')) {
+				const qdDatabaseId = parseInt(
+					formData.get('qualityDefinitionsDatabaseId')?.toString() ?? '',
+					10
+				);
+				const qdConfigName = formData.get('qualityDefinitionsConfigName')?.toString() || null;
+				arrSyncQueries.saveQualityDefinitionsSelection(
+					id,
+					Number.isNaN(qdDatabaseId) ? null : qdDatabaseId,
+					Number.isNaN(qdDatabaseId) ? null : qdConfigName
+				);
 			}
 
 			await logger.info(`Quality profiles sync config saved for "${instance?.name}"`, {
