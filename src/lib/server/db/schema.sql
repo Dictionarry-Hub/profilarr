@@ -411,13 +411,14 @@ CREATE TABLE ai_settings (
 -- ==============================================================================
 -- TABLE: arr_sync_quality_profiles
 -- Purpose: Store quality profile sync selections (many-to-many)
--- Migration: 015_create_arr_sync_tables.ts, 029_add_database_id_foreign_keys.ts
+-- Migration: 015_create_arr_sync_tables.ts, 029_add_database_id_foreign_keys.ts, 046_quality_profile_sync_use_name.ts, 048_fix_arr_sync_quality_profiles_fk.ts, 076_add_quality_definitions_override_to_arr_sync_quality_profiles.ts
 -- ==============================================================================
 
 CREATE TABLE arr_sync_quality_profiles (
     instance_id INTEGER NOT NULL,
     database_id INTEGER NOT NULL,
     profile_name TEXT NOT NULL,
+    quality_definitions_config_name TEXT,   -- Per-profile size source on Arrs that keep sizes per profile (Migration 076); same database as the profile; NULL = instance selection
     PRIMARY KEY (instance_id, database_id, profile_name),
     FOREIGN KEY (instance_id) REFERENCES arr_instances(id) ON DELETE CASCADE,
     FOREIGN KEY (database_id) REFERENCES database_instances(id) ON DELETE CASCADE
