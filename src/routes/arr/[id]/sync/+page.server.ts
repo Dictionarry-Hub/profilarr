@@ -413,7 +413,7 @@ export const actions: Actions = {
 			}
 
 			// On an Arr that keeps sizes per profile, the quality profile section owns
-			// the instance's default quality definitions pick
+			// the instance's global quality definitions pick
 			if (formData.has('qualityDefinitionsConfigName')) {
 				const qdDatabaseId = parseInt(
 					formData.get('qualityDefinitionsDatabaseId')?.toString() ?? '',

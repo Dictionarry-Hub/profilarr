@@ -189,7 +189,7 @@ profiles from multiple databases simultaneously. Drag-and-drop reordering
 sets the priority, with the topmost card being highest priority.
 
 On an instance that keeps size limits per profile (Sonarr v5), the Quality
-Profiles section also shows the instance's default quality definition (the
+Profiles section also shows the instance's global quality definition (the
 same value Media Management stores in `arr_sync_media_management`, saved
 through `saveQualityDefinitionsSelection` without touching the other media
 management columns) and a size picker under each selected profile, defaulting

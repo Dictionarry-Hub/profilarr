@@ -105,14 +105,17 @@
 		Object.values(db).some((profile) => profile.selected)
 	);
 
-	// Where sizes live on profiles, the definitions pick is made in the quality
-	// profile section, so it is not a prerequisite here
+	// The quality definitions pick is always required. Where sizes live on
+	// profiles it is made in the quality profile section itself, so it is
+	// checked on its own there rather than as part of media management.
+	$: hasGlobalQualityDefinition =
+		typeof mediaManagementState.qualityDefinitionsDatabaseId === 'number' &&
+		typeof mediaManagementState.qualityDefinitionsConfigName === 'string';
+
 	$: hasMediaManagement =
 		typeof mediaManagementState.namingDatabaseId === 'number' &&
 		typeof mediaManagementState.namingConfigName === 'string' &&
-		(profileItemSizes ||
-			(typeof mediaManagementState.qualityDefinitionsDatabaseId === 'number' &&
-				typeof mediaManagementState.qualityDefinitionsConfigName === 'string')) &&
+		(profileItemSizes || hasGlobalQualityDefinition) &&
 		typeof mediaManagementState.mediaSettingsDatabaseId === 'number' &&
 		typeof mediaManagementState.mediaSettingsConfigName === 'string';
 
@@ -122,7 +125,11 @@
 
 	$: qualityProfilesCanSave =
 		!hasQualityProfilesSelected ||
-		(hasMediaManagement && !mediaManagementDirty && hasDelayProfile && !delayProfilesDirty);
+		(hasMediaManagement &&
+			!mediaManagementDirty &&
+			hasDelayProfile &&
+			!delayProfilesDirty &&
+			(!profileItemSizes || hasGlobalQualityDefinition));
 
 	// Build warning message showing all missing requirements
 	$: qualityProfilesWarning = (() => {
@@ -140,6 +147,10 @@
 			issues.push('a delay profile');
 		} else if (delayProfilesDirty) {
 			issues.push('delay profile settings to be saved');
+		}
+
+		if (profileItemSizes && !hasGlobalQualityDefinition) {
+			issues.push('a global quality definition');
 		}
 
 		if (issues.length === 0) return null;

@@ -10,7 +10,6 @@
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import DraggableCard from '$ui/list/DraggableCard.svelte';
 	import SyncFooter from './SyncFooter.svelte';
@@ -44,7 +43,7 @@
 	export let databasePriorities: DatabasePriority[] = [];
 	/**
 	 * The Arr keeps size limits on each quality profile (Sonarr v5). This
-	 * section then owns the instance's default quality definitions pick and
+	 * section then owns the instance's global quality definitions pick and
 	 * each synced profile may choose its own.
 	 */
 	export let profileItemSizes: boolean = false;
@@ -345,8 +344,29 @@
 				Select quality profiles to sync. Drag databases to set priority.
 			</p>
 		</div>
-		{#if qpProgress || cfProgress}
+		{#if profileItemSizes || qpProgress || cfProgress}
 			<div class="flex flex-col gap-3 md:flex-shrink-0 md:flex-row md:flex-wrap md:gap-5 md:pt-1">
+				{#if profileItemSizes}
+					<div class="min-w-[9rem] md:w-56">
+						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+							Global quality definition
+						</div>
+						<DropdownSelect
+							value={globalValue}
+							options={globalOptions}
+							header="Global quality definition"
+							placeholder={globalOptions.length === 0
+								? 'No quality definitions available'
+								: 'Select quality definition...'}
+							fullWidth
+							minWidth="0"
+							position="right"
+							fixed
+							disabled={globalOptions.length === 0}
+							on:change={(e) => selectGlobal(e.detail)}
+						/>
+					</div>
+				{/if}
 				{#if qpProgress}
 					<div class="min-w-[9rem]">
 						<div class="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
@@ -387,33 +407,6 @@
 
 	<!-- Content -->
 	<div class="p-6">
-		{#if profileItemSizes}
-			<div class="mb-6 space-y-2 sm:max-w-md">
-				<div class="space-y-1">
-					<div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-						Default quality definition
-					</div>
-					<p class="text-xs text-neutral-600 dark:text-neutral-400">
-						This Sonarr keeps size limits on each quality profile. Every synced profile takes them
-						from this config unless it picks its own below.
-					</p>
-				</div>
-				<DropdownCombobox
-					fullWidth
-					minWidth="0"
-					dropdownWidth="100%"
-					limit={6}
-					clearable
-					options={globalOptions}
-					value={globalValue}
-					placeholder={globalOptions.length === 0
-						? 'No quality definitions configs available'
-						: 'Keep the sizes each profile already has'}
-					disabled={globalOptions.length === 0}
-					on:change={(e) => selectGlobal(e.detail)}
-				/>
-			</div>
-		{/if}
 		{#if orderedDatabases.length === 0}
 			<p class="text-sm text-neutral-500 dark:text-neutral-400">No databases configured</p>
 		{:else}
