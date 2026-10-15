@@ -32,6 +32,8 @@ import {
 	type PcdQualityProfile
 } from './transformer.ts';
 import { getCustomFormatsForProfile } from '$pcd/references.ts';
+import { createProfileSizeSource, type ProfileSizeSource } from './sizeSource.ts';
+import type { ArrQualityProfile, ArrQualityProfilePayload } from '$arr/types.ts';
 
 // Internal types for sync data
 interface ProfileSyncData {
@@ -50,15 +52,19 @@ interface SyncedProfileSummary {
 
 export class QualityProfileSyncer extends BaseSyncer {
 	private instanceType: SyncArrType;
+	/** The Arr stores size limits on profile items (Sonarr v5), so payloads must carry them */
+	private profileItemSizes: boolean;
 
 	constructor(
 		client: ConstructorParameters<typeof BaseSyncer>[0],
 		instanceId: number,
 		instanceName: string,
-		instanceType: SyncArrType
+		instanceType: SyncArrType,
+		profileItemSizes: boolean = false
 	) {
 		super(client, instanceId, instanceName);
 		this.instanceType = instanceType;
+		this.profileItemSizes = profileItemSizes;
 	}
 
 	protected get syncType(): string {
@@ -100,8 +106,22 @@ export class QualityProfileSyncer extends BaseSyncer {
 				return pb - pa;
 			});
 
+			// The full profiles are kept: on Sonarr v5 their current sizes are the
+			// fallback for every quality the PCD does not set. If this fetch fails
+			// the whole section fails before any write, so a profile is never sent
+			// without knowing what it would overwrite.
 			const existingProfiles = await this.client.getQualityProfiles();
-			const existingMap = new Map(existingProfiles.map((p) => [p.name, p.id]));
+			const existingMap = new Map<string, ArrQualityProfile>(
+				existingProfiles.map((p) => [p.name, p])
+			);
+			const sizeSource = this.profileItemSizes
+				? createProfileSizeSource(
+						this.client,
+						this.instanceId,
+						this.instanceType,
+						'Sync:QualityProfiles'
+					)
+				: undefined;
 
 			const allFormatIdMap = new Map<string, number>();
 			const allSyncedProfiles: SyncedProfileSummary[] = [];
@@ -134,7 +154,8 @@ export class QualityProfileSyncer extends BaseSyncer {
 						profiles,
 						allFormatIdMap,
 						qualityMappings,
-						existingMap
+						existingMap,
+						sizeSource
 					);
 					allSyncedProfiles.push(...synced);
 
@@ -288,42 +309,48 @@ export class QualityProfileSyncer extends BaseSyncer {
 		profiles: ProfileSyncData[],
 		formatIdMap: Map<string, number>,
 		qualityMappings: Map<string, string>,
-		existingMap: Map<string, number>
+		existingMap: Map<string, ArrQualityProfile>,
+		sizeSource?: ProfileSizeSource
 	): Promise<SyncedProfileSummary[]> {
 		const syncedProfiles: SyncedProfileSummary[] = [];
 
 		for (const { pcdProfile } of profiles) {
-			const arrProfile = transformQualityProfile(
-				pcdProfile,
-				this.instanceType,
-				qualityMappings,
-				formatIdMap
-			);
-
-			arrProfile.name = pcdProfile.name;
-
-			await logger.debug(`Compiled quality profile "${pcdProfile.name}"`, {
-				source: 'Compile:QualityProfile',
-				meta: {
-					instanceId: this.instanceId,
-					pcdName: pcdProfile.name,
-					profile: arrProfile
-				}
-			});
+			let arrProfile: ArrQualityProfilePayload | undefined;
 
 			try {
-				const isUpdate = existingMap.has(pcdProfile.name);
-				if (isUpdate) {
-					const existingId = existingMap.get(pcdProfile.name)!;
-					arrProfile.id = existingId;
-					await this.client.updateQualityProfile(existingId, arrProfile);
+				const existing = existingMap.get(pcdProfile.name);
+				const sizes = sizeSource ? await sizeSource.forProfile(existing) : undefined;
+
+				arrProfile = transformQualityProfile(
+					pcdProfile,
+					this.instanceType,
+					qualityMappings,
+					formatIdMap,
+					sizes
+				);
+
+				arrProfile.name = pcdProfile.name;
+
+				await logger.debug(`Compiled quality profile "${pcdProfile.name}"`, {
+					source: 'Compile:QualityProfile',
+					meta: {
+						instanceId: this.instanceId,
+						pcdName: pcdProfile.name,
+						profile: arrProfile
+					}
+				});
+
+				const isUpdate = existing !== undefined;
+				if (existing) {
+					arrProfile.id = existing.id;
+					await this.client.updateQualityProfile(existing.id, arrProfile);
 					await logger.debug(`Updated quality profile "${pcdProfile.name}"`, {
 						source: 'Sync:QualityProfiles',
-						meta: { instanceId: this.instanceId, profileId: existingId, pcdName: pcdProfile.name }
+						meta: { instanceId: this.instanceId, profileId: existing.id, pcdName: pcdProfile.name }
 					});
 				} else {
 					const response = await this.client.createQualityProfile(arrProfile);
-					existingMap.set(pcdProfile.name, response.id);
+					existingMap.set(pcdProfile.name, response);
 					await logger.debug(`Created quality profile "${pcdProfile.name}"`, {
 						source: 'Sync:QualityProfiles',
 						meta: { instanceId: this.instanceId, profileId: response.id, pcdName: pcdProfile.name }

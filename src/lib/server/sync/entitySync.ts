@@ -6,7 +6,10 @@
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { createArrClient } from '$utils/arr/factory.ts';
-import { probeAndRecordVersion } from '$utils/arr/version.ts';
+import { probeAndRecordVersion, withDetectedVersion } from '$utils/arr/version.ts';
+import type { BaseArrClient } from '$utils/arr/base.ts';
+import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
+import { createProfileSizeSource } from './qualityProfiles/sizeSource.ts';
 import type { ArrInstance } from '$db/queries/arrInstances.ts';
 import { getCache } from '$pcd/index.ts';
 import { logger } from '$logger/logger.ts';
@@ -62,10 +65,12 @@ interface SyncResult {
  * anything is read or written. A failed probe is logged and does not block
  * the sync; the stored version keeps its last good value.
  */
-async function openInstanceClient(instance: ArrInstance) {
+async function openInstanceClient(
+	instance: ArrInstance
+): Promise<{ client: BaseArrClient; instance: ArrInstance }> {
 	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
-	await probeAndRecordVersion(instance, client, 'EntitySync');
-	return client;
+	const info = await probeAndRecordVersion(instance, client, 'EntitySync');
+	return { client, instance: withDetectedVersion(instance, info) };
 }
 
 export async function syncQualityProfile(
@@ -80,7 +85,7 @@ export async function syncQualityProfile(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = await openInstanceClient(instance);
+	const { client, instance: probed } = await openInstanceClient(instance);
 
 	try {
 		// Fetch the QP from PCD
@@ -106,12 +111,23 @@ export async function syncQualityProfile(
 		// Get quality API mappings
 		const qualityMappings = await getQualityApiMappings(cache, instanceType);
 
+		// On an Arr that keeps sizes on profile items, carry them in the payload
+		const sizes = hasProfileItemSizes(probed)
+			? await createProfileSizeSource(
+					client,
+					instanceId,
+					instanceType,
+					'EntitySync:QualityProfile'
+				).forProfile(existingProfile)
+			: undefined;
+
 		// Transform
 		const arrProfile = transformQualityProfile(
 			pcdProfile,
 			instanceType,
 			qualityMappings,
-			formatIdMap
+			formatIdMap,
+			sizes
 		);
 		arrProfile.name = profileName;
 
@@ -161,7 +177,7 @@ export async function syncCustomFormat(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = await openInstanceClient(instance);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		const pcdFormat = await fetchCustomFormatFromPcd(cache, formatName);
@@ -220,7 +236,7 @@ export async function syncRegularExpression(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = await openInstanceClient(instance);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		// Find all CFs that use this regex
@@ -284,7 +300,7 @@ export async function syncDelayProfile(
 	const cache = getCache(databaseId);
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
-	const client = await openInstanceClient(instance);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		const profile = await getDelayProfileByName(cache, profileName);
@@ -330,7 +346,7 @@ export async function syncNaming(
 	const cache = getCache(databaseId);
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
-	const client = await openInstanceClient(instance);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		if (instance.type === 'radarr') {
@@ -391,9 +407,20 @@ export async function syncQualityDefinitions(
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
 	const instanceType = instance.type as SyncArrType;
-	const client = await openInstanceClient(instance);
+	const { client, instance: probed } = await openInstanceClient(instance);
 
 	try {
+		if (hasProfileItemSizes(probed)) {
+			// The v3 definitions endpoint would write these sizes into every profile
+			// on the instance. The quality profile sync applies them to Profilarr's
+			// own profiles instead.
+			return {
+				success: false,
+				error:
+					'This Sonarr keeps quality sizes on each quality profile. Sync the quality profiles instead.'
+			};
+		}
+
 		const getByName = instanceType === 'radarr' ? getRadarrQualityDefs : getSonarrQualityDefs;
 		const qualityDefsConfig = await getByName(cache, configName);
 
@@ -462,7 +489,7 @@ export async function syncMediaSettings(
 	const cache = getCache(databaseId);
 	if (!cache) return { success: false, error: `PCD cache not found for database ${databaseId}` };
 
-	const client = await openInstanceClient(instance);
+	const { client } = await openInstanceClient(instance);
 
 	try {
 		const getByName = instance.type === 'radarr' ? getRadarrMediaSettings : getSonarrMediaSettings;

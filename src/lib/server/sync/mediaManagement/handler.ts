@@ -3,6 +3,7 @@
  */
 
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
 import type { BaseArrClient } from '$arr/base.ts';
 import type { ArrInstance } from '$db/queries/arrInstances.ts';
 import { MediaManagementSyncer } from './syncer.ts';
@@ -45,7 +46,13 @@ export const mediaManagementHandler: SectionHandler = {
 	},
 
 	createSyncer(client: BaseArrClient, instance: ArrInstance) {
-		return new MediaManagementSyncer(client, instance.id, instance.name, instance.type as ArrType);
+		return new MediaManagementSyncer(
+			client,
+			instance.id,
+			instance.name,
+			instance.type as ArrType,
+			hasProfileItemSizes(instance)
+		);
 	},
 
 	hasConfig(instanceId: number): boolean {

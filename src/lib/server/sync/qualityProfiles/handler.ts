@@ -3,6 +3,7 @@
  */
 
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
 import type { BaseArrClient } from '$arr/base.ts';
 import type { ArrInstance } from '$db/queries/arrInstances.ts';
 import { QualityProfileSyncer } from './syncer.ts';
@@ -49,7 +50,8 @@ export const qualityProfilesHandler: SectionHandler = {
 			client,
 			instance.id,
 			instance.name,
-			instance.type as SyncArrType
+			instance.type as SyncArrType,
+			hasProfileItemSizes(instance)
 		);
 	},
 
