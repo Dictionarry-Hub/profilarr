@@ -14,7 +14,10 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
-	import { Save, Trash2, ChevronDown, Info } from '@lucide/svelte';
+	import Save from '@lucide/svelte/icons/save';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import Info from '@lucide/svelte/icons/info';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 
 	let showInfoModal = false;

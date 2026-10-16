@@ -1,18 +1,16 @@
 <script lang="ts">
 	import { tick, onMount, onDestroy } from 'svelte';
-	import {
-		X,
-		Check,
-		ArrowUp,
-		Info,
-		AlertTriangle,
-		Save,
-		Loader2,
-		Layers,
-		ChevronUp,
-		ChevronDown,
-		Pencil
-	} from '@lucide/svelte';
+	import X from '@lucide/svelte/icons/x';
+	import Check from '@lucide/svelte/icons/check';
+	import ArrowUp from '@lucide/svelte/icons/arrow-up';
+	import Info from '@lucide/svelte/icons/info';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import Save from '@lucide/svelte/icons/save';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
+	import Layers from '@lucide/svelte/icons/layers';
+	import ChevronUp from '@lucide/svelte/icons/chevron-up';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import Pencil from '@lucide/svelte/icons/pencil';
 	import DraggableCard from '$ui/list/DraggableCard.svelte';
 	import IconCheckbox from '$lib/client/ui/form/IconCheckbox.svelte';
 	import Label from '$ui/label/Label.svelte';

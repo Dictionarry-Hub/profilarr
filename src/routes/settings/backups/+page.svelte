@@ -2,14 +2,12 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
-	import {
-		Download,
-		Trash2,
-		RotateCcw,
-		Upload,
-		FolderArchive,
-		BrushCleaning
-	} from '@lucide/svelte';
+	import Download from '@lucide/svelte/icons/download';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
+	import Upload from '@lucide/svelte/icons/upload';
+	import FolderArchive from '@lucide/svelte/icons/folder-archive';
+	import BrushCleaning from '@lucide/svelte/icons/brush-cleaning';
 	import Modal from '$ui/modal/Modal.svelte';
 	import type { PageData } from './$types';
 	import Button from '$ui/button/Button.svelte';

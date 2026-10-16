@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { onMount, onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { Save } from '@lucide/svelte';
+	import Save from '@lucide/svelte/icons/save';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import KeyValueList from '$ui/form/KeyValueList.svelte';

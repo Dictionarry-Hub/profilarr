@@ -1,6 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Info, FolderOpen, Database, HelpCircle, Heart, Package } from '@lucide/svelte';
+	import Info from '@lucide/svelte/icons/info';
+	import FolderOpen from '@lucide/svelte/icons/folder-open';
+	import Database from '@lucide/svelte/icons/database';
+	import HelpCircle from '@lucide/svelte/icons/circle-question-mark';
+	import Heart from '@lucide/svelte/icons/heart';
+	import Package from '@lucide/svelte/icons/package';
 	import BuildIdentity from '$ui/version/BuildIdentity.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';

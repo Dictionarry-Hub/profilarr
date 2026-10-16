@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { Bug, Bird, Lightbulb } from '@lucide/svelte';
+	import Bug from '@lucide/svelte/icons/bug';
+	import Bird from '@lucide/svelte/icons/bird';
+	import Lightbulb from '@lucide/svelte/icons/lightbulb';
 	import { fly } from 'svelte/transition';
 	export let variant: 'fab' | 'navbar' = 'fab';
 

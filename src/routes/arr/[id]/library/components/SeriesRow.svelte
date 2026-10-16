@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { CircleAlert, Tv, Check, Play, Square, Clock } from '@lucide/svelte';
+	import CircleAlert from '@lucide/svelte/icons/circle-alert';
+	import Tv from '@lucide/svelte/icons/tv';
+	import Check from '@lucide/svelte/icons/check';
+	import Play from '@lucide/svelte/icons/play';
+	import Square from '@lucide/svelte/icons/square';
+	import Clock from '@lucide/svelte/icons/clock';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Badge from '$ui/badge/Badge.svelte';

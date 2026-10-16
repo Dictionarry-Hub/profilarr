@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { Save, Trash2, Loader2 } from '@lucide/svelte';
+	import Save from '@lucide/svelte/icons/save';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import { alertStore } from '$alerts/store';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
 	import type { AnnouncementSeverity } from '$announcements/database/types.ts';

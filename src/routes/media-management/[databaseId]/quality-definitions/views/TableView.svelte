@@ -3,7 +3,9 @@
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
-	import { Tag, Copy, Download } from '@lucide/svelte';
+	import Tag from '@lucide/svelte/icons/tag';
+	import Copy from '@lucide/svelte/icons/copy';
+	import Download from '@lucide/svelte/icons/download';
 	import type { QualityDefinitionListItem } from '$shared/pcd/display.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';

@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { ExternalLink, Unlink, ArrowUpCircle, Type, Trash2 } from '@lucide/svelte';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import Unlink from '@lucide/svelte/icons/unlink';
+	import ArrowUpCircle from '@lucide/svelte/icons/circle-arrow-up';
+	import Type from '@lucide/svelte/icons/type';
+	import Trash2 from '@lucide/svelte/icons/trash';
 	import Button from '$ui/button/Button.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';

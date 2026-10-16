@@ -8,7 +8,10 @@
 	import Badge from '$lib/client/ui/badge/Badge.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import JobHistory from './components/JobHistory.svelte';
-	import { CheckCircle, XCircle, AlertCircle, MinusCircle } from '@lucide/svelte';
+	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
+	import XCircle from '@lucide/svelte/icons/circle-x';
+	import AlertCircle from '@lucide/svelte/icons/circle-alert';
+	import MinusCircle from '@lucide/svelte/icons/circle-minus';
 
 	export let data: PageData;
 

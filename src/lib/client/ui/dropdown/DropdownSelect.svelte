@@ -2,7 +2,8 @@
 	import type { Component } from 'svelte';
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
-	import { ChevronDown, ChevronUp } from '@lucide/svelte';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 	import Button from '$ui/button/Button.svelte';
 	import Dropdown from './Dropdown.svelte';
 	import DropdownItem from './DropdownItem.svelte';

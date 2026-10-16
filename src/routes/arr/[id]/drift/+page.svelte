@@ -18,7 +18,9 @@
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
-	import { Loader2, Play, Save } from '@lucide/svelte';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
+	import Play from '@lucide/svelte/icons/play';
+	import Save from '@lucide/svelte/icons/save';
 	import type { DriftDisplayEntity, DriftDisplayTone } from '$shared/drift.ts';
 	import DriftFieldDiffTable from './components/DriftFieldDiffTable.svelte';
 

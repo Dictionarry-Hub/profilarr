@@ -2,7 +2,9 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import type { Component } from 'svelte';
-	import { ArrowLeft, ChevronRight, ChevronDown } from '@lucide/svelte';
+	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Breadcrumb from '$ui/navigation/breadcrumb/Breadcrumb.svelte';
 	import { clickOutside } from '$lib/client/utils/clickOutside';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';

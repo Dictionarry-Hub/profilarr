@@ -3,7 +3,9 @@
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import { Copy, Download, Layers } from '@lucide/svelte';
+	import Copy from '@lucide/svelte/icons/copy';
+	import Download from '@lucide/svelte/icons/download';
+	import Layers from '@lucide/svelte/icons/layers';
 	import type { QualityDefinitionListItem } from '$shared/pcd/display.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';

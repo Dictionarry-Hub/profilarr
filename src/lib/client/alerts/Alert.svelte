@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { CheckCircle, XCircle, AlertTriangle, Info } from '@lucide/svelte';
+	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
+	import XCircle from '@lucide/svelte/icons/circle-x';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import Info from '@lucide/svelte/icons/info';
 	import type { AlertType } from './store';
 	import { alertStore } from './store';
 	import { fade, fly } from 'svelte/transition';

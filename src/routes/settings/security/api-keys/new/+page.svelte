@@ -2,7 +2,9 @@
 	import { onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { beforeNavigate, goto, invalidateAll } from '$app/navigation';
-	import { Plus, Copy, Check } from '@lucide/svelte';
+	import Plus from '@lucide/svelte/icons/plus';
+	import Copy from '@lucide/svelte/icons/copy';
+	import Check from '@lucide/svelte/icons/check';
 	import type { PageData } from './$types';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';

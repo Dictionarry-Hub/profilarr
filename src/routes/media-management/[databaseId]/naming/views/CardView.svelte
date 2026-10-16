@@ -3,7 +3,12 @@
 	import CardGrid from '$ui/card/CardGrid.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import { Copy, Download, Pencil, Ban, Replace, List } from '@lucide/svelte';
+	import Copy from '@lucide/svelte/icons/copy';
+	import Download from '@lucide/svelte/icons/download';
+	import Pencil from '@lucide/svelte/icons/pencil';
+	import Ban from '@lucide/svelte/icons/ban';
+	import Replace from '@lucide/svelte/icons/replace';
+	import List from '@lucide/svelte/icons/list';
 	import type { NamingListItem } from '$shared/pcd/display.ts';
 	import {
 		getMultiEpisodeStyleLabel,

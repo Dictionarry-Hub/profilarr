@@ -1,15 +1,13 @@
 <script lang="ts">
-	import {
-		Plus,
-		Power,
-		Copy,
-		ClipboardCopy,
-		FileJson,
-		FileText,
-		Trash2,
-		Pencil,
-		Eye
-	} from '@lucide/svelte';
+	import Plus from '@lucide/svelte/icons/plus';
+	import Power from '@lucide/svelte/icons/power';
+	import Copy from '@lucide/svelte/icons/copy';
+	import ClipboardCopy from '@lucide/svelte/icons/clipboard-copy';
+	import FileJson from '@lucide/svelte/icons/file-braces';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import Pencil from '@lucide/svelte/icons/pencil';
+	import Eye from '@lucide/svelte/icons/eye';
 	import {
 		createEmptyFilterConfig,
 		calculateMaxCount,

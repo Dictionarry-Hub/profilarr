@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
-	import { Database, Eye, EyeOff, Info, ArrowDownUp, Filter, MailCheck } from '@lucide/svelte';
+	import Database from '@lucide/svelte/icons/database';
+	import Eye from '@lucide/svelte/icons/eye';
+	import EyeOff from '@lucide/svelte/icons/eye-off';
+	import Info from '@lucide/svelte/icons/info';
+	import ArrowDownUp from '@lucide/svelte/icons/arrow-down-up';
+	import Filter from '@lucide/svelte/icons/funnel';
+	import MailCheck from '@lucide/svelte/icons/mail-check';
 	import { renderMarkdown } from '$shared/utils/markdown.ts';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Label from '$ui/label/Label.svelte';

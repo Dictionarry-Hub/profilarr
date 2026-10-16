@@ -1,15 +1,13 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import { page } from '$app/stores';
-	import {
-		Library,
-		RefreshCw,
-		ArrowLeftRight,
-		ArrowUpCircle,
-		FileEdit,
-		ScrollText,
-		Settings
-	} from '@lucide/svelte';
+	import Library from '@lucide/svelte/icons/library';
+	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+	import ArrowLeftRight from '@lucide/svelte/icons/arrow-left-right';
+	import ArrowUpCircle from '@lucide/svelte/icons/circle-arrow-up';
+	import FileEdit from '@lucide/svelte/icons/file-pen';
+	import ScrollText from '@lucide/svelte/icons/scroll-text';
+	import Settings from '@lucide/svelte/icons/settings';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;

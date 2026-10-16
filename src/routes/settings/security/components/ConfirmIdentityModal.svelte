@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { X, Check, Loader2, KeyRound } from '@lucide/svelte';
+	import X from '@lucide/svelte/icons/x';
+	import Check from '@lucide/svelte/icons/check';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
+	import KeyRound from '@lucide/svelte/icons/key-round';
 	import Modal from '$ui/modal/Modal.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';

@@ -12,7 +12,9 @@
 	import Modal from '$ui/modal/Modal.svelte';
 	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
 	import { alertStore } from '$alerts/store';
-	import { Save, Trash2, Loader2 } from '@lucide/svelte';
+	import Save from '@lucide/svelte/icons/save';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import type { PreferredProtocol } from '$shared/pcd/display.ts';
 	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
 	import type { AffectedArr } from '$shared/sync/types.ts';

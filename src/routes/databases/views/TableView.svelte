@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { ExternalLink, Unlink, Lock, Code } from '@lucide/svelte';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import Unlink from '@lucide/svelte/icons/unlink';
+	import Lock from '@lucide/svelte/icons/lock';
+	import Code from '@lucide/svelte/icons/code';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Label from '$ui/label/Label.svelte';

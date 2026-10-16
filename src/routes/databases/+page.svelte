@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Database, Plus, Info } from '@lucide/svelte';
+	import Database from '@lucide/svelte/icons/database';
+	import Plus from '@lucide/svelte/icons/plus';
+	import Info from '@lucide/svelte/icons/info';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import EmptyState from '$ui/state/EmptyState.svelte';

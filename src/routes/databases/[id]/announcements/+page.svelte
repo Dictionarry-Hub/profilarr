@@ -1,6 +1,10 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Plus, AlertTriangle, ExternalLink, Edit3, Trash2 } from '@lucide/svelte';
+	import Plus from '@lucide/svelte/icons/plus';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import Edit3 from '@lucide/svelte/icons/pen-line';
+	import Trash2 from '@lucide/svelte/icons/trash';
 	import { goto } from '$app/navigation';
 	import { renderMarkdown } from '$shared/utils/markdown.ts';
 	import Button from '$ui/button/Button.svelte';

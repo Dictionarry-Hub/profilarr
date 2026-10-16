@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import {
-		TableProperties,
-		RefreshCw,
-		ExternalLink,
-		Info,
-		ArrowUpDown,
-		ArrowUp,
-		ArrowDown,
-		HardDrive,
-		ChevronsDownUp,
-		ChevronsUpDown
-	} from '@lucide/svelte';
+	import TableProperties from '@lucide/svelte/icons/table-properties';
+	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import Info from '@lucide/svelte/icons/info';
+	import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
+	import ArrowUp from '@lucide/svelte/icons/arrow-up';
+	import ArrowDown from '@lucide/svelte/icons/arrow-down';
+	import HardDrive from '@lucide/svelte/icons/hard-drive';
+	import ChevronsDownUp from '@lucide/svelte/icons/chevrons-down-up';
+	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
 	import { getLibrarySortOptions } from '$shared/utils/libraryPrefs';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';

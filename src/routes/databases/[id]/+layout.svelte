@@ -1,14 +1,12 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import {
-		GitBranch,
-		History,
-		GitPullRequestClosed,
-		Wrench,
-		Settings,
-		FileCog,
-		Megaphone
-	} from '@lucide/svelte';
+	import GitBranch from '@lucide/svelte/icons/git-branch';
+	import History from '@lucide/svelte/icons/rotate-ccw-clock';
+	import GitPullRequestClosed from '@lucide/svelte/icons/git-pull-request-closed';
+	import Wrench from '@lucide/svelte/icons/wrench';
+	import Settings from '@lucide/svelte/icons/settings';
+	import FileCog from '@lucide/svelte/icons/file-cog';
+	import Megaphone from '@lucide/svelte/icons/megaphone';
 	import { page } from '$app/stores';
 	import { FEATURES } from '$lib/shared/features';
 

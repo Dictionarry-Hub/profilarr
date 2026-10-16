@@ -34,7 +34,14 @@
 	import TableActionButton from '$ui/table/TableActionButton.svelte';
 	import { createSearchStore } from '$lib/client/stores/search';
 	import ComponentCard from './ComponentCard.svelte';
-	import { Plus, Info, Trash2, FileText, Filter, Check, Star, Settings } from '@lucide/svelte';
+	import Plus from '@lucide/svelte/icons/plus';
+	import Info from '@lucide/svelte/icons/info';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Filter from '@lucide/svelte/icons/funnel';
+	import Check from '@lucide/svelte/icons/check';
+	import Star from '@lucide/svelte/icons/star';
+	import Settings from '@lucide/svelte/icons/settings';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
 
 	const search = createSearchStore();

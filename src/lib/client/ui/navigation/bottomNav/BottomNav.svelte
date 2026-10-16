@@ -1,18 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import {
-		FolderTree,
-		Link,
-		Sliders,
-		Palette,
-		Settings,
-		Microscope,
-		Tag,
-		Clock,
-		Loader2,
-		CheckCircle2,
-		XCircle
-	} from '@lucide/svelte';
+	import FolderTree from '@lucide/svelte/icons/folder-tree';
+	import Link from '@lucide/svelte/icons/link';
+	import Sliders from '@lucide/svelte/icons/sliders-vertical';
+	import Palette from '@lucide/svelte/icons/palette';
+	import Settings from '@lucide/svelte/icons/settings';
+	import Microscope from '@lucide/svelte/icons/microscope';
+	import Tag from '@lucide/svelte/icons/tag';
+	import Clock from '@lucide/svelte/icons/clock';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
+	import CheckCircle2 from '@lucide/svelte/icons/circle-check';
+	import XCircle from '@lucide/svelte/icons/circle-x';
 	import { jobStatus } from '$stores/jobStatus';
 	import { slide } from 'svelte/transition';
 

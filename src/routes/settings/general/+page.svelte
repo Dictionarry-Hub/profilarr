@@ -16,16 +16,14 @@
 	import { initEdit, update, isDirty, resetFromServer, clear } from '$stores/dirty';
 	import { FEATURES } from '$shared/features.ts';
 	import { LANDING_PAGES } from '$shared/landingPages.ts';
-	import {
-		Save,
-		Loader2,
-		RotateCcw,
-		FlaskConical,
-		CheckCircle,
-		XCircle,
-		AlertTriangle,
-		Info
-	} from '@lucide/svelte';
+	import Save from '@lucide/svelte/icons/save';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
+	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
+	import FlaskConical from '@lucide/svelte/icons/flask-conical';
+	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
+	import XCircle from '@lucide/svelte/icons/circle-x';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import Info from '@lucide/svelte/icons/info';
 	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import Button from '$ui/button/Button.svelte';

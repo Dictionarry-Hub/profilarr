@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-	import { ChevronUp, ChevronDown, CircleAlert } from '@lucide/svelte';
+	import ChevronUp from '@lucide/svelte/icons/chevron-up';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 
 	type CorrectionReason = 'min' | 'max';

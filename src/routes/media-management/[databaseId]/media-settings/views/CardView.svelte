@@ -4,7 +4,10 @@
 	import Card from '$ui/card/Card.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
-	import { Copy, Download, Info, RefreshCw } from '@lucide/svelte';
+	import Copy from '@lucide/svelte/icons/copy';
+	import Download from '@lucide/svelte/icons/download';
+	import Info from '@lucide/svelte/icons/info';
+	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import type { MediaSettingsListItem } from '$shared/pcd/display.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';

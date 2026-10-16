@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { Bell, CheckCircle, XCircle } from '@lucide/svelte';
+	import Bell from '@lucide/svelte/icons/bell';
+	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
+	import XCircle from '@lucide/svelte/icons/circle-x';
 	import { formatRelative } from '$shared/utils/dates';
 	import type { NotificationHistoryRecord } from '$db/queries/notificationHistory.ts';
 	import Table from '$ui/table/Table.svelte';

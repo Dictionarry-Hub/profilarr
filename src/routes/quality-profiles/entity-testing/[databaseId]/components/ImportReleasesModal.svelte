@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
-	import { Film, Tv, Loader2, Server, CircuitBoard, ArrowDownAZ, ArrowUpAZ } from '@lucide/svelte';
+	import Film from '@lucide/svelte/icons/film';
+	import Tv from '@lucide/svelte/icons/tv';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
+	import Server from '@lucide/svelte/icons/server';
+	import CircuitBoard from '@lucide/svelte/icons/circuit-board';
+	import ArrowDownAZ from '@lucide/svelte/icons/arrow-down-a-z';
+	import ArrowUpAZ from '@lucide/svelte/icons/arrow-up-a-z';
 	import Modal from '$ui/modal/Modal.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';

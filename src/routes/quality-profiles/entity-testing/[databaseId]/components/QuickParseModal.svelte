@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import {
-		HardDrive,
-		Tag,
-		Users,
-		Bookmark,
-		Earth,
-		Layers,
-		AlertTriangle,
-		X,
-		Film,
-		Tv
-	} from '@lucide/svelte';
+	import HardDrive from '@lucide/svelte/icons/hard-drive';
+	import Tag from '@lucide/svelte/icons/tag';
+	import Users from '@lucide/svelte/icons/users';
+	import Bookmark from '@lucide/svelte/icons/bookmark';
+	import Earth from '@lucide/svelte/icons/earth';
+	import Layers from '@lucide/svelte/icons/layers';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import X from '@lucide/svelte/icons/x';
+	import Film from '@lucide/svelte/icons/film';
+	import Tv from '@lucide/svelte/icons/tv';
 	import Modal from '$ui/modal/Modal.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';

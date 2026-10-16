@@ -4,7 +4,12 @@
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
-	import { Tag, FileText, Layers, FlaskConical, Copy, Download } from '@lucide/svelte';
+	import Tag from '@lucide/svelte/icons/tag';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Layers from '@lucide/svelte/icons/layers';
+	import FlaskConical from '@lucide/svelte/icons/flask-conical';
+	import Copy from '@lucide/svelte/icons/copy';
+	import Download from '@lucide/svelte/icons/download';
 	import { renderMarkdown } from '$shared/utils/markdown';
 	import { escapeHtml } from '$shared/utils/sanitize';
 	import { page } from '$app/stores';

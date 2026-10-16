@@ -2,7 +2,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import { renderMarkdown } from '$shared/utils/markdown.ts';
-	import { ExternalLink } from '@lucide/svelte';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import {
 		getColonReplacementLabel,
 		getMultiEpisodeStyleLabel
