@@ -63,11 +63,16 @@
 	let saving = false;
 	let syncing = false;
 
-	// Track saved state for dirty detection. The default definitions pick is
-	// only this section's concern where sizes live on profiles.
+	// Track saved state for dirty detection. Compare what Save stores, the
+	// ticked profiles, so unticked entries filled in after load don't count.
+	// The default definitions pick is only this section's concern where sizes
+	// live on profiles.
 	function snapshot(): string {
+		const selections = getSelections().sort(
+			(a, b) => a.databaseId - b.databaseId || a.profileName.localeCompare(b.profileName)
+		);
 		return JSON.stringify({
-			state,
+			selections,
 			syncTrigger,
 			cronExpression,
 			databasePriorities,
