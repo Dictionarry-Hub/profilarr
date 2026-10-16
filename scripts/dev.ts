@@ -20,6 +20,9 @@ const colors = {
 	reset: '\x1b[0m'
 };
 
+const SERVER_PORT = 6969;
+const WARM_UP_TIMEOUT_MS = 5 * 60_000;
+
 async function streamOutput(
 	reader: ReadableStreamDefaultReader<Uint8Array>,
 	label: string,
@@ -62,7 +65,7 @@ async function runServer() {
 		env: {
 			...Deno.env.toObject(),
 			DENO_ENV: 'development',
-			PORT: '6969',
+			PORT: String(SERVER_PORT),
 			HOST: '0.0.0.0',
 			APP_BASE_PATH: './dist/dev',
 			PARSER_HOST: 'localhost',
@@ -84,8 +87,34 @@ async function runServer() {
 	return process.status;
 }
 
+/**
+ * SvelteKit only runs hooks.server.ts (migrations, PCD caches, job queue) on
+ * the first request, so request the app as soon as Vite is listening. The
+ * redirect to the login or setup page is followed so that page is compiled too.
+ */
+async function warmUp() {
+	const start = performance.now();
+	const label = `${colors.server}[server]${colors.reset}`;
+
+	while (performance.now() - start < WARM_UP_TIMEOUT_MS) {
+		try {
+			const response = await fetch(`http://localhost:${SERVER_PORT}/`);
+			await response.body?.cancel();
+			const seconds = ((performance.now() - start) / 1000).toFixed(1);
+			const path = new URL(response.url).pathname;
+			console.log(`${label} Warmed up in ${seconds}s (${response.status} ${path})`);
+			return;
+		} catch {
+			// Vite isn't listening yet
+			await new Promise((resolve) => setTimeout(resolve, 500));
+		}
+	}
+
+	console.log(`${label} Warm-up timed out; the app will start on the first page load`);
+}
+
 console.log(`${colors.parser}[parser]${colors.reset} Starting .NET parser service...`);
 console.log(`${colors.server}[server]${colors.reset} Starting Vite dev server...`);
 console.log('');
 
-await Promise.all([runParser(), runServer()]);
+await Promise.all([runParser(), runServer(), warmUp()]);
