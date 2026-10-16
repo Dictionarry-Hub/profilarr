@@ -14,8 +14,6 @@ export default defineConfig({
 		port: 6969,
 		host: true,
 		watch: {
-			usePolling: true,
-			interval: 100,
 			ignored: [
 				'**/data/**',
 				'.arr/**',
