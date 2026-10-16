@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Trash2, Pencil, HardDrive, Tag, Users, Bookmark, Earth, Layers } from '@lucide/svelte';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import Pencil from '@lucide/svelte/icons/pencil';
+	import HardDrive from '@lucide/svelte/icons/hard-drive';
+	import Tag from '@lucide/svelte/icons/tag';
+	import Users from '@lucide/svelte/icons/users';
+	import Bookmark from '@lucide/svelte/icons/bookmark';
+	import Earth from '@lucide/svelte/icons/earth';
+	import Layers from '@lucide/svelte/icons/layers';
 	import { createEventDispatcher } from 'svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Button from '$ui/button/Button.svelte';

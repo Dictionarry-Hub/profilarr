@@ -12,7 +12,8 @@
 	import { createDataPageStore } from '$lib/client/stores/dataPage';
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
-	import { Info, Plus } from '@lucide/svelte';
+	import Info from '@lucide/svelte/icons/info';
+	import Plus from '@lucide/svelte/icons/plus';
 	import type { PageData } from './$types';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';
 

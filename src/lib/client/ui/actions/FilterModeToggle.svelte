@@ -3,7 +3,9 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import { Filter, Search, SlidersHorizontal } from '@lucide/svelte';
+	import Filter from '@lucide/svelte/icons/funnel';
+	import Search from '@lucide/svelte/icons/search';
+	import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
 	import type { FilterMode } from '$stores/filterMode';
 
 	export let value: FilterMode = 'smart';

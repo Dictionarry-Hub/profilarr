@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
-	import {
-		Info,
-		Clapperboard,
-		Film,
-		Tv,
-		Plus,
-		AlertTriangle,
-		Sliders,
-		Check,
-		FlaskConical
-	} from '@lucide/svelte';
+	import Info from '@lucide/svelte/icons/info';
+	import Clapperboard from '@lucide/svelte/icons/clapperboard';
+	import Film from '@lucide/svelte/icons/film';
+	import Tv from '@lucide/svelte/icons/tv';
+	import Plus from '@lucide/svelte/icons/plus';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import Sliders from '@lucide/svelte/icons/sliders-vertical';
+	import Check from '@lucide/svelte/icons/check';
+	import FlaskConical from '@lucide/svelte/icons/flask-conical';
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';

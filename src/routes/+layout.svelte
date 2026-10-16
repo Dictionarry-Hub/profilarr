@@ -20,7 +20,8 @@
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
-	import { AlertTriangle, X } from '@lucide/svelte';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import X from '@lucide/svelte/icons/x';
 	import Button from '$ui/button/Button.svelte';
 
 	export let data;

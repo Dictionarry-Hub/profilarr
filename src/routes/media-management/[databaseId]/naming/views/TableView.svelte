@@ -4,7 +4,10 @@
 	import Badge from '$ui/badge/Badge.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
-	import { Tag, ToggleRight, Copy, Download } from '@lucide/svelte';
+	import Tag from '@lucide/svelte/icons/tag';
+	import ToggleRight from '@lucide/svelte/icons/toggle-right';
+	import Copy from '@lucide/svelte/icons/copy';
+	import Download from '@lucide/svelte/icons/download';
 	import type { NamingListItem } from '$shared/pcd/display.ts';
 	import radarrLogo from '$lib/client/assets/Radarr.svg';
 	import sonarrLogo from '$lib/client/assets/Sonarr.svg';

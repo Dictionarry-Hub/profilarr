@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { Check, X, AlertCircle, CircleCheck, CircleX, ExternalLink } from '@lucide/svelte';
+	import Check from '@lucide/svelte/icons/check';
+	import X from '@lucide/svelte/icons/x';
+	import AlertCircle from '@lucide/svelte/icons/circle-alert';
+	import CircleCheck from '@lucide/svelte/icons/circle-check';
+	import CircleX from '@lucide/svelte/icons/circle-x';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import { fly } from 'svelte/transition';
 	import type { Regex101UnitTest } from '../../regex101/types';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';

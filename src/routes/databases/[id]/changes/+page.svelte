@@ -10,30 +10,28 @@
 	import InlineCode from '$ui/code/InlineCode.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import {
-		Check,
-		Send,
-		Download,
-		ExternalLink,
-		FileText,
-		Loader2,
-		Upload,
-		Trash2,
-		FileCode,
-		Layers,
-		Files,
-		Clock,
-		User,
-		CheckCircle,
-		XCircle,
-		GitBranch,
-		Globe,
-		FileCheck,
-		UserCheck,
-		GitCommit,
-		GitPullRequestCreateArrow,
-		X
-	} from '@lucide/svelte';
+	import Check from '@lucide/svelte/icons/check';
+	import Send from '@lucide/svelte/icons/send';
+	import Download from '@lucide/svelte/icons/download';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
+	import Upload from '@lucide/svelte/icons/upload';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import FileCode from '@lucide/svelte/icons/file-code';
+	import Layers from '@lucide/svelte/icons/layers';
+	import Files from '@lucide/svelte/icons/files';
+	import Clock from '@lucide/svelte/icons/clock';
+	import User from '@lucide/svelte/icons/user';
+	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
+	import XCircle from '@lucide/svelte/icons/circle-x';
+	import GitBranch from '@lucide/svelte/icons/git-branch';
+	import Globe from '@lucide/svelte/icons/globe';
+	import FileCheck from '@lucide/svelte/icons/file-check';
+	import UserCheck from '@lucide/svelte/icons/user-check';
+	import GitCommit from '@lucide/svelte/icons/git-commit-horizontal';
+	import GitPullRequestCreateArrow from '@lucide/svelte/icons/git-pull-request-create-arrow';
+	import X from '@lucide/svelte/icons/x';
 	import goOnGit from '$assets/goOnGit.gif';
 	import Button from '$ui/button/Button.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';

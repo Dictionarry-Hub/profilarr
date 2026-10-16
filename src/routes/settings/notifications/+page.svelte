@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
-	import { Plus, Trash2, Bell, BellOff, Rss, Send, Pencil } from '@lucide/svelte';
+	import Plus from '@lucide/svelte/icons/plus';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import Bell from '@lucide/svelte/icons/bell';
+	import BellOff from '@lucide/svelte/icons/bell-off';
+	import Rss from '@lucide/svelte/icons/rss';
+	import Send from '@lucide/svelte/icons/send';
+	import Pencil from '@lucide/svelte/icons/pencil';
 	import Modal from '$ui/modal/Modal.svelte';
 	import NotificationHistory from './components/NotificationHistory.svelte';
 	import Table from '$ui/table/Table.svelte';

@@ -5,21 +5,19 @@
 	import JobStatus from './jobStatus.svelte';
 	import { jobStatus } from '$stores/jobStatus';
 	import { fade } from 'svelte/transition';
-	import {
-		FolderTree,
-		Link,
-		Sliders,
-		Palette,
-		Microscope,
-		Tag,
-		Clock,
-		Settings,
-		X,
-		Wrench,
-		Film,
-		Tv,
-		Megaphone
-	} from '@lucide/svelte';
+	import FolderTree from '@lucide/svelte/icons/folder-tree';
+	import Link from '@lucide/svelte/icons/link';
+	import Sliders from '@lucide/svelte/icons/sliders-vertical';
+	import Palette from '@lucide/svelte/icons/palette';
+	import Microscope from '@lucide/svelte/icons/microscope';
+	import Tag from '@lucide/svelte/icons/tag';
+	import Clock from '@lucide/svelte/icons/clock';
+	import Settings from '@lucide/svelte/icons/settings';
+	import X from '@lucide/svelte/icons/x';
+	import Wrench from '@lucide/svelte/icons/wrench';
+	import Film from '@lucide/svelte/icons/film';
+	import Tv from '@lucide/svelte/icons/tv';
+	import Megaphone from '@lucide/svelte/icons/megaphone';
 	import { mobileNavOpen } from '$stores/mobileNav';
 	import { sidebarCollapsed } from '$stores/sidebar';
 	import { page } from '$app/stores';

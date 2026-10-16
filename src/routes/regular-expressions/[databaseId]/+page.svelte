@@ -20,7 +20,10 @@
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
 	import { createViewModeStore } from '$lib/client/stores/dataPage';
-	import { Info, Plus, FileText, Users } from '@lucide/svelte';
+	import Info from '@lucide/svelte/icons/info';
+	import Plus from '@lucide/svelte/icons/plus';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Users from '@lucide/svelte/icons/users';
 	import { goto } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import type { RegularExpressionWithTags } from '$shared/pcd/display';

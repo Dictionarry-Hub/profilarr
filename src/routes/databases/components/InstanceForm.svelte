@@ -1,16 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
-	import {
-		Save,
-		Trash2,
-		Star,
-		GitFork,
-		CircleDot,
-		Database,
-		GitBranch,
-		ExternalLink
-	} from '@lucide/svelte';
+	import Save from '@lucide/svelte/icons/save';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import Star from '@lucide/svelte/icons/star';
+	import GitFork from '@lucide/svelte/icons/git-fork';
+	import CircleDot from '@lucide/svelte/icons/circle-dot';
+	import Database from '@lucide/svelte/icons/database';
+	import GitBranch from '@lucide/svelte/icons/git-branch';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import { alertStore } from '$alerts/store';
 	import { jobStatus } from '$stores/jobStatus';
 	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';

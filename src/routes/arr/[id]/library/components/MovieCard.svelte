@@ -1,18 +1,16 @@
 <script lang="ts">
-	import {
-		Film,
-		Check,
-		CircleAlert,
-		Info,
-		CheckCircle,
-		Megaphone,
-		Clapperboard,
-		Flame,
-		Users,
-		Clock,
-		Calendar,
-		Star
-	} from '@lucide/svelte';
+	import Film from '@lucide/svelte/icons/film';
+	import Check from '@lucide/svelte/icons/check';
+	import CircleAlert from '@lucide/svelte/icons/circle-alert';
+	import Info from '@lucide/svelte/icons/info';
+	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
+	import Megaphone from '@lucide/svelte/icons/megaphone';
+	import Clapperboard from '@lucide/svelte/icons/clapperboard';
+	import Flame from '@lucide/svelte/icons/flame';
+	import Users from '@lucide/svelte/icons/users';
+	import Clock from '@lucide/svelte/icons/clock';
+	import Calendar from '@lucide/svelte/icons/calendar';
+	import Star from '@lucide/svelte/icons/star';
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';

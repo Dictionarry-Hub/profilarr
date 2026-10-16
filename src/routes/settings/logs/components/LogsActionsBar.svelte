@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { Download, RefreshCw, FileText, Filter, Layers, BrushCleaning } from '@lucide/svelte';
+	import Download from '@lucide/svelte/icons/download';
+	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Filter from '@lucide/svelte/icons/funnel';
+	import Layers from '@lucide/svelte/icons/layers';
+	import BrushCleaning from '@lucide/svelte/icons/brush-cleaning';
 	import ActionsBar from '$ui/actions/ActionsBar.svelte';
 	import SearchAction from '$ui/actions/SearchAction.svelte';
 	import ActionButton from '$ui/actions/ActionButton.svelte';

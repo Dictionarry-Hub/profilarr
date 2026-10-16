@@ -4,16 +4,14 @@
 	import Button from '$ui/button/Button.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
-	import {
-		Tag,
-		FileText,
-		Layers,
-		BookOpenText,
-		Gauge,
-		Earth,
-		Copy,
-		Download
-	} from '@lucide/svelte';
+	import Tag from '@lucide/svelte/icons/tag';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Layers from '@lucide/svelte/icons/layers';
+	import BookOpenText from '@lucide/svelte/icons/book-open-text';
+	import Gauge from '@lucide/svelte/icons/gauge';
+	import Earth from '@lucide/svelte/icons/earth';
+	import Copy from '@lucide/svelte/icons/copy';
+	import Download from '@lucide/svelte/icons/download';
 	import { renderMarkdown } from '$shared/utils/markdown.ts';
 	import { escapeHtml } from '$shared/utils/sanitize.ts';
 	import { FEATURES } from '$shared/features.ts';

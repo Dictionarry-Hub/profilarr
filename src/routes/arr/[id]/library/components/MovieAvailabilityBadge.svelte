@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { CircleAlert, Clock3, FileQuestion } from '@lucide/svelte';
+	import CircleAlert from '@lucide/svelte/icons/circle-alert';
+	import Clock3 from '@lucide/svelte/icons/clock-3';
+	import FileQuestion from '@lucide/svelte/icons/file-question-mark';
 	import Badge from '$ui/badge/Badge.svelte';
 
 	export let hasFile: boolean;

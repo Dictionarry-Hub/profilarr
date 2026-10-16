@@ -14,6 +14,7 @@ flags banned tags.
 ## Table of Contents
 
 - [The `no-raw-ui` Lint Rule](#the-no-raw-ui-lint-rule)
+- [Icons](#icons)
 - [Component Catalog](#component-catalog)
   - [Inputs](#inputs)
   - [Buttons and Toggles](#buttons-and-toggles)
@@ -64,6 +65,23 @@ The directive format is strict:
 A **malformed** directive (missing `--`, empty reason, wrong rule name) is
 itself reported as a violation, so you cannot accidentally "pass" the linter
 by writing a broken directive.
+
+## Icons
+
+Icons come from Lucide. Import each icon from its own module:
+
+```svelte
+<script lang="ts">
+	import Clock from '@lucide/svelte/icons/clock';
+</script>
+```
+
+Root imports (`'@lucide/svelte'` or `'@lucide/svelte/icons'`) re-export every
+icon. The Vite dev server doesn't tree-shake, so a single root import makes the
+first page load compile every icon. `scripts/lint/lucideImports.ts`
+(`deno task lint:lucide`) rejects them; `import type` is allowed. Aliases such
+as `Loader2` should use the icon's canonical file (`loader-circle`), because
+alias modules ship no Svelte type declarations.
 
 ## Component Catalog
 

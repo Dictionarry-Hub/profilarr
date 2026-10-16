@@ -1,14 +1,12 @@
 <script lang="ts">
-	import {
-		Sliders,
-		ShieldCheck,
-		GraduationCap,
-		Bell,
-		Clock,
-		FileText,
-		Archive,
-		Info
-	} from '@lucide/svelte';
+	import Sliders from '@lucide/svelte/icons/sliders-vertical';
+	import ShieldCheck from '@lucide/svelte/icons/shield-check';
+	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
+	import Bell from '@lucide/svelte/icons/bell';
+	import Clock from '@lucide/svelte/icons/clock';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Archive from '@lucide/svelte/icons/archive';
+	import Info from '@lucide/svelte/icons/info';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 
 	const settingsItems = [

@@ -5,7 +5,8 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
 	import { afterNavigate } from '$app/navigation';
-	import { ExternalLink, FileText } from '@lucide/svelte';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import FileText from '@lucide/svelte/icons/file-text';
 	import type { PageData } from './$types';
 	import type { Commit } from '$utils/git/types';
 	import { parseUTC, formatDate } from '$shared/utils/dates';

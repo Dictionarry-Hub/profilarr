@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { Bold, Italic, List, ListOrdered, Link, Code, Eye, Edit3 } from '@lucide/svelte';
+	import Bold from '@lucide/svelte/icons/bold';
+	import Italic from '@lucide/svelte/icons/italic';
+	import List from '@lucide/svelte/icons/list';
+	import ListOrdered from '@lucide/svelte/icons/list-ordered';
+	import Link from '@lucide/svelte/icons/link';
+	import Code from '@lucide/svelte/icons/code';
+	import Eye from '@lucide/svelte/icons/eye';
+	import Edit3 from '@lucide/svelte/icons/pen-line';
 	import { renderMarkdown } from '$shared/utils/markdown';
 
 	// Props

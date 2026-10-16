@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RotateCcw } from '@lucide/svelte';
+	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 	import { alertStore } from '$alerts/store';
 	import { onMount } from 'svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';

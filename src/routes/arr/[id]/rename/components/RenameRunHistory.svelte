@@ -1,14 +1,12 @@
 <script lang="ts">
-	import {
-		AlertTriangle,
-		X,
-		FileText,
-		Calendar,
-		CircleDot,
-		Check,
-		FlaskConical,
-		Play
-	} from '@lucide/svelte';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import X from '@lucide/svelte/icons/x';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Calendar from '@lucide/svelte/icons/calendar';
+	import CircleDot from '@lucide/svelte/icons/circle-dot';
+	import Check from '@lucide/svelte/icons/check';
+	import FlaskConical from '@lucide/svelte/icons/flask-conical';
+	import Play from '@lucide/svelte/icons/play';
 	import type { RenameJobLog } from '$lib/server/rename/types.ts';
 	import {
 		createSearchStore,

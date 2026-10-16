@@ -1,13 +1,11 @@
 <script lang="ts">
-	import {
-		ExternalLink,
-		Unlink,
-		Lock,
-		Code,
-		RefreshCw,
-		Clock,
-		GitPullRequest
-	} from '@lucide/svelte';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import Unlink from '@lucide/svelte/icons/unlink';
+	import Lock from '@lucide/svelte/icons/lock';
+	import Code from '@lucide/svelte/icons/code';
+	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+	import Clock from '@lucide/svelte/icons/clock';
+	import GitPullRequest from '@lucide/svelte/icons/git-pull-request';
 	import Button from '$ui/button/Button.svelte';
 	import Card from '$ui/card/Card.svelte';
 	import CardGrid from '$ui/card/CardGrid.svelte';

@@ -1,7 +1,10 @@
 <script lang="ts">
 	import type { ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { UserPlus, Shield, KeyRound, ShieldOff } from '@lucide/svelte';
+	import UserPlus from '@lucide/svelte/icons/user-plus';
+	import Shield from '@lucide/svelte/icons/shield';
+	import KeyRound from '@lucide/svelte/icons/key-round';
+	import ShieldOff from '@lucide/svelte/icons/shield-off';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import Card from '$ui/card/Card.svelte';

@@ -1,14 +1,12 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
-	import {
-		X,
-		Info,
-		AlertTriangle,
-		AlertOctagon,
-		CheckCircle2,
-		MessageSquare
-	} from '@lucide/svelte';
+	import X from '@lucide/svelte/icons/x';
+	import Info from '@lucide/svelte/icons/info';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import AlertOctagon from '@lucide/svelte/icons/octagon-alert';
+	import CheckCircle2 from '@lucide/svelte/icons/circle-check';
+	import MessageSquare from '@lucide/svelte/icons/message-square';
 	import Button from '$ui/button/Button.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
 

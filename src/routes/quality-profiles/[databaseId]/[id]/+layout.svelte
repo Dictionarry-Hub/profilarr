@@ -2,7 +2,9 @@
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
 	import { page } from '$app/stores';
-	import { FileText, Scale, Layers } from '@lucide/svelte';
+	import FileText from '@lucide/svelte/icons/file-text';
+	import Scale from '@lucide/svelte/icons/scale';
+	import Layers from '@lucide/svelte/icons/layers';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;

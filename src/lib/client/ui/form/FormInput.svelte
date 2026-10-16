@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-	import { Eye, EyeOff } from '@lucide/svelte';
+	import Eye from '@lucide/svelte/icons/eye';
+	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import { alertStore } from '$alerts/store';
 
 	export let label: string;

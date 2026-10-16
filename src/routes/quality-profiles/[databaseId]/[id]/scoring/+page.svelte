@@ -2,21 +2,19 @@
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
-	import {
-		Info,
-		ArrowUpDown,
-		ArrowUp,
-		ArrowDown,
-		Layers,
-		LayoutGrid,
-		Settings,
-		User,
-		X,
-		Save,
-		Plus,
-		Loader2,
-		Eye
-	} from '@lucide/svelte';
+	import Info from '@lucide/svelte/icons/info';
+	import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
+	import ArrowUp from '@lucide/svelte/icons/arrow-up';
+	import ArrowDown from '@lucide/svelte/icons/arrow-down';
+	import Layers from '@lucide/svelte/icons/layers';
+	import LayoutGrid from '@lucide/svelte/icons/layout-grid';
+	import Settings from '@lucide/svelte/icons/settings';
+	import User from '@lucide/svelte/icons/user';
+	import X from '@lucide/svelte/icons/x';
+	import Save from '@lucide/svelte/icons/save';
+	import Plus from '@lucide/svelte/icons/plus';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
+	import Eye from '@lucide/svelte/icons/eye';
 	import InfoModal from '$ui/modal/InfoModal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';

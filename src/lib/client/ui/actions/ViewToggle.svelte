@@ -3,7 +3,9 @@
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import { Eye, LayoutGrid, Table } from '@lucide/svelte';
+	import Eye from '@lucide/svelte/icons/eye';
+	import LayoutGrid from '@lucide/svelte/icons/layout-grid';
+	import Table from '@lucide/svelte/icons/table';
 	import type { ViewMode } from '$lib/client/stores/dataPage';
 
 	export let value: ViewMode = 'cards';

@@ -3,7 +3,9 @@
 	import { themes, getTheme, type ThemeVariant } from './themes';
 	import { themeStore } from '$lib/client/stores/theme';
 	import { browser } from '$app/environment';
-	import { Copy, Check, ChevronDown } from '@lucide/svelte';
+	import Copy from '@lucide/svelte/icons/copy';
+	import Check from '@lucide/svelte/icons/check';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Label from '$ui/label/Label.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import { copyToClipboard } from '$lib/client/utils/clipboard';

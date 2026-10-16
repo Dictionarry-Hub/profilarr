@@ -1,16 +1,14 @@
 <script lang="ts">
-	import {
-		AlertTriangle,
-		X,
-		Search,
-		Calendar,
-		Filter,
-		CircleDot,
-		Check,
-		FlaskConical,
-		Play,
-		Info
-	} from '@lucide/svelte';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import X from '@lucide/svelte/icons/x';
+	import Search from '@lucide/svelte/icons/search';
+	import Calendar from '@lucide/svelte/icons/calendar';
+	import Filter from '@lucide/svelte/icons/funnel';
+	import CircleDot from '@lucide/svelte/icons/circle-dot';
+	import Check from '@lucide/svelte/icons/check';
+	import FlaskConical from '@lucide/svelte/icons/flask-conical';
+	import Play from '@lucide/svelte/icons/play';
+	import Info from '@lucide/svelte/icons/info';
 	import type {
 		UpgradeJobLog,
 		UpgradeSelectionItem,

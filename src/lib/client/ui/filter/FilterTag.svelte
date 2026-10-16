@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X } from '@lucide/svelte';
+	import X from '@lucide/svelte/icons/x';
 	import Label from '$ui/label/Label.svelte';
 	import type { FilterTag } from './types';
 

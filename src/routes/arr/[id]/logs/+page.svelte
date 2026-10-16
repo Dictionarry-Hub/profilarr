@@ -2,7 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
-	import { Copy, RefreshCw, Filter, Rows3, Loader2, AlertTriangle } from '@lucide/svelte';
+	import Copy from '@lucide/svelte/icons/copy';
+	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+	import Filter from '@lucide/svelte/icons/funnel';
+	import Rows3 from '@lucide/svelte/icons/rows-3';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 	import { alertStore } from '$alerts/store';
 	import Table from '$ui/table/Table.svelte';
 	import Button from '$ui/button/Button.svelte';

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { Save, Wifi, Trash2, Eraser, Loader2 } from '@lucide/svelte';
+	import Save from '@lucide/svelte/icons/save';
+	import Wifi from '@lucide/svelte/icons/wifi';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import Eraser from '@lucide/svelte/icons/eraser';
+	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import { formatSmartDateTime } from '$shared/utils/dates';
 	import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl';
 	import { dateFormat } from '$lib/client/stores/dateFormat';

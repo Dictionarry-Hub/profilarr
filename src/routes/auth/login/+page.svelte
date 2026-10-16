@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
-	import { LogIn, KeyRound } from '@lucide/svelte';
+	import LogIn from '@lucide/svelte/icons/log-in';
+	import KeyRound from '@lucide/svelte/icons/key-round';
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';

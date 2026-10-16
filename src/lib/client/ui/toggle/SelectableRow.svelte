@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
-	import { Check } from '@lucide/svelte';
+	import Check from '@lucide/svelte/icons/check';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 
 	export let checked: boolean = false;

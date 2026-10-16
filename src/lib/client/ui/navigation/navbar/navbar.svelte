@@ -2,22 +2,20 @@
 	import AccentPicker from './accentPicker.svelte';
 	import ThemeToggle from './themeToggle.svelte';
 	import HelpButton from '$ui/help/HelpButton.svelte';
-	import {
-		Menu,
-		ChevronLeft,
-		ChevronRight,
-		FolderTree,
-		Link,
-		Sliders,
-		Palette,
-		Microscope,
-		Tag,
-		Clock,
-		Settings,
-		Wrench,
-		Megaphone,
-		ArrowUp
-	} from '@lucide/svelte';
+	import Menu from '@lucide/svelte/icons/menu';
+	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import FolderTree from '@lucide/svelte/icons/folder-tree';
+	import Link from '@lucide/svelte/icons/link';
+	import Sliders from '@lucide/svelte/icons/sliders-vertical';
+	import Palette from '@lucide/svelte/icons/palette';
+	import Microscope from '@lucide/svelte/icons/microscope';
+	import Tag from '@lucide/svelte/icons/tag';
+	import Clock from '@lucide/svelte/icons/clock';
+	import Settings from '@lucide/svelte/icons/settings';
+	import Wrench from '@lucide/svelte/icons/wrench';
+	import Megaphone from '@lucide/svelte/icons/megaphone';
+	import ArrowUp from '@lucide/svelte/icons/arrow-up';
 	import type { Component } from 'svelte';
 	import Button from '$ui/button/Button.svelte';
 	import Tooltip from '$ui/tooltip/Tooltip.svelte';

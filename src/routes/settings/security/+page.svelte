@@ -2,21 +2,19 @@
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
-	import {
-		LogOut,
-		Check,
-		Globe,
-		Monitor,
-		Smartphone,
-		Network,
-		Clock,
-		Plus,
-		Trash2,
-		BookOpen,
-		Eye,
-		Pencil,
-		ShieldCheck
-	} from '@lucide/svelte';
+	import LogOut from '@lucide/svelte/icons/log-out';
+	import Check from '@lucide/svelte/icons/check';
+	import Globe from '@lucide/svelte/icons/globe';
+	import Monitor from '@lucide/svelte/icons/monitor';
+	import Smartphone from '@lucide/svelte/icons/smartphone';
+	import Network from '@lucide/svelte/icons/network';
+	import Clock from '@lucide/svelte/icons/clock';
+	import Plus from '@lucide/svelte/icons/plus';
+	import Trash2 from '@lucide/svelte/icons/trash';
+	import BookOpen from '@lucide/svelte/icons/book-open';
+	import Eye from '@lucide/svelte/icons/eye';
+	import Pencil from '@lucide/svelte/icons/pencil';
+	import ShieldCheck from '@lucide/svelte/icons/shield-check';
 	import { parseUTC, formatDateTime, formatDate } from '$shared/utils/dates';
 	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
 	import { serverTimezone } from '$lib/client/stores/timezone.ts';

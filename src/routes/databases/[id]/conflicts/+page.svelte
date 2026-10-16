@@ -14,7 +14,11 @@
 	import ConflictField from './ConflictField.svelte';
 	import { enhance } from '$app/forms';
 	import { alertStore } from '$alerts/store';
-	import { Fingerprint, AlertTriangle, HeartHandshake, HandMetal, Info } from '@lucide/svelte';
+	import Fingerprint from '@lucide/svelte/icons/fingerprint-pattern';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
+	import HeartHandshake from '@lucide/svelte/icons/heart-handshake';
+	import HandMetal from '@lucide/svelte/icons/hand-metal';
+	import Info from '@lucide/svelte/icons/info';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import type { PageData } from './$types';
 

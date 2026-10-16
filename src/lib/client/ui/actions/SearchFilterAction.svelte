@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Binoculars, Check } from '@lucide/svelte';
+	import Binoculars from '@lucide/svelte/icons/binoculars';
+	import Check from '@lucide/svelte/icons/check';
 	import { fly } from 'svelte/transition';
 	import { createEventDispatcher } from 'svelte';
 
