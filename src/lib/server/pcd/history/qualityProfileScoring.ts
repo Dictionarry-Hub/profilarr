@@ -34,7 +34,6 @@ export interface ScoreCustomFormat {
 export type RowStatus = 'applied' | 'pending' | 'overridden' | 'related';
 
 export interface ScoringChangeRow {
-	key: string;
 	field: ScoringField | 'custom_format_score';
 	customFormat?: ScoreCustomFormat;
 	arrType?: string;
@@ -44,6 +43,8 @@ export interface ScoringChangeRow {
 	current: Value;
 	status: RowStatus;
 	pendingValue?: Value;
+	/** A generated op on this row conflicted, but what it wanted already holds. */
+	inEffect?: boolean;
 	opIds: number[];
 }
 
@@ -157,6 +158,29 @@ function opTargets(op: ScoringOp): OpTarget[] {
 	return targets;
 }
 
+interface ScoreEntry {
+	name: string;
+	arrType: string;
+	to: Value;
+}
+
+function scoreEntries(op: ScoringOp): ScoreEntry[] {
+	const raw = op.desiredState?.custom_format_scores;
+	if (!Array.isArray(raw)) return [];
+	return raw.flatMap((e) =>
+		e && typeof e.custom_format_name === 'string' && typeof e.arr_type === 'string'
+			? [{ name: e.custom_format_name, arrType: e.arr_type, to: e.to ?? null }]
+			: []
+	);
+}
+
+function rawScore(p: PortableQualityProfile | null, name: string, arrType: string): Value {
+	return (
+		p?.customFormatScores.find((s) => s.customFormatName === name && s.arrType === arrType)
+			?.score ?? null
+	);
+}
+
 function statusOf(op: ScoringOp): RowStatus {
 	if (op.status === 'conflicted_pending' || op.status === 'conflicted' || op.status === 'error') {
 		return 'pending';
@@ -197,7 +221,6 @@ export function qualityProfileScoringChanges(input: {
 		const cell = nowCells.get(key) ?? upCells.get(key);
 		const row: ScoringChangeRow = key.startsWith(SCORE_PREFIX)
 			? {
-					key,
 					field: 'custom_format_score',
 					customFormat: {
 						upstreamName:
@@ -210,7 +233,7 @@ export function qualityProfileScoringChanges(input: {
 					status: 'related',
 					opIds: []
 				}
-			: { key, field: key as ScoringField, ...valueAt(key), status: 'related', opIds: [] };
+			: { field: key as ScoringField, ...valueAt(key), status: 'related', opIds: [] };
 		rows.set(key, row);
 		return row;
 	};
@@ -223,18 +246,50 @@ export function qualityProfileScoringChanges(input: {
 		if (v.upstream !== v.current) ensureRow(key);
 	}
 
+	// Generated ops (a CF rename or delete) only matter when they conflict. Their
+	// guards often miss because a cascade already did the work, so a conflict
+	// whose wanted state holds reads as already in effect, not as not applied.
+	const overlayGeneratedConflict = (op: ScoringOp) => {
+		const entries = scoreEntries(op);
+		const holds = entries.every((e) => rawScore(current, e.name, e.arrType) === e.to);
+		for (const e of entries) {
+			const upstreamName = cfUpstreamNameOf(e.name);
+			if (upstreamName === null) continue;
+			const customFormat = { upstreamName, currentName: null };
+			for (const arrType of e.arrType === 'all' ? ARR_TYPES : [e.arrType]) {
+				const key = scoreKey(customFormat, arrType);
+				if (holds) {
+					const row = rows.get(key);
+					if (!row) continue;
+					row.opIds.push(op.opId);
+					row.inEffect = true;
+					continue;
+				}
+				if (!rows.has(key) && e.to === null && e.arrType === 'all') continue;
+				const row = ensureRow(key, { key, wanted: e.to, customFormat, arrType });
+				row.opIds.push(op.opId);
+				row.status = 'pending';
+				row.pendingValue = e.to;
+			}
+		}
+	};
+
 	// Op overlay, oldest first so the latest op on a row decides its status.
 	// A pending op adds its row even when current still equals upstream, unless
 	// it only removes a shared row: alone, that says nothing about the result.
 	for (const op of [...input.ops].sort((a, b) => a.opId - b.opId)) {
-		if (op.generated) continue;
 		const status = statusOf(op);
+		if (op.generated) {
+			if (status === 'pending') overlayGeneratedConflict(op);
+			continue;
+		}
 		for (const target of opTargets(op)) {
 			const { key, wanted } = target;
 			if (!rows.has(key) && (status !== 'pending' || target.sharedRemoval)) continue;
 			const row = ensureRow(key, target);
 			row.opIds.push(op.opId);
 			row.status = status;
+			delete row.inEffect;
 			if (status === 'pending') row.pendingValue = wanted;
 			else delete row.pendingValue;
 		}
