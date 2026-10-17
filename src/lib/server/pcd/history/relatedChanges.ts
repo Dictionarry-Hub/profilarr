@@ -74,7 +74,7 @@ export function relatedChanges(input: {
 	const scored = new Set(reached.filter((r) => r.entity === 'custom_format').map((r) => r.name));
 	// A name with no upstream identity can only match rows written under it.
 	const identity = (entity: string, upstream: string | null, name: string) =>
-		upstream === null ? `${entity}:local:${name}` : `${entity}:${upstream}`;
+		upstream === null ? `${entity}:l:${name}` : `${entity}:u:${upstream}`;
 
 	const byIdentity = new Map(
 		reached.map((r) => [identity(r.entity, upstreamNameOf(r.entity, r.name), r.name), r])

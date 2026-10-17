@@ -58,14 +58,15 @@ const sorted = (values: string[] | undefined) => [...(values ?? [])].sort();
 
 export function normalizeCondition(
 	c: ConditionData,
-	regexUpstreamName: (name: string) => string
+	regexUpstreamName: (name: string) => string | null
 ): NormalizedCondition {
 	return {
 		type: c.type,
 		arrType: c.arrType || 'all',
 		negate: c.negate,
 		required: c.required,
-		patterns: sorted(c.patterns?.map((p) => regexUpstreamName(p.name))),
+		// A regex with no default identity must never match a default regex's name.
+		patterns: sorted(c.patterns?.map((p) => regexUpstreamName(p.name) ?? `\u0000local:${p.name}`)),
 		languages: sorted(c.languages?.map((l) => (l.except ? `${l.name} (except)` : l.name))),
 		sources: sorted(c.sources),
 		resolutions: sorted(c.resolutions),
@@ -87,7 +88,7 @@ export function customFormatConditionDefaults(input: {
 	/** undefined: not captured. null: not in the defaults (created locally). */
 	upstream: PortableCustomFormat | null | undefined;
 	current: ConditionData[];
-	regexUpstreamName: (name: string) => string;
+	regexUpstreamName: (name: string) => string | null;
 	/** Condition names with a change that conflicted. */
 	pendingConditions: Set<string>;
 }): CustomFormatDefaults {
@@ -193,7 +194,7 @@ export async function customFormatDefaults(
 	return customFormatConditionDefaults({
 		upstream: ctx.upstream as PortableCustomFormat | null | undefined,
 		current: await getConditionsForEvaluation(cache, formatName),
-		regexUpstreamName: (name) => ctx.upstreamNameOf('regular_expression', name) ?? name,
+		regexUpstreamName: (name) => ctx.upstreamNameOf('regular_expression', name),
 		pendingConditions
 	});
 }
