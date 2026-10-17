@@ -467,7 +467,7 @@
 													<DropdownSelect
 														value={entry?.sizes ?? ''}
 														options={sizeOptions(database)}
-														header="Quality definition"
+														header="Quality Definition"
 														fixed
 														fullWidth
 														rounded="bottom"
@@ -514,12 +514,12 @@
 			{#if profileItemSizes}
 				<div>
 					<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">
-						Global quality definition
+						Global Quality Definition
 					</span>
 					<DropdownSelect
 						value={globalValue}
 						options={globalOptions}
-						header="Global quality definition"
+						header="Global Quality Definition"
 						placeholder={globalOptions.length === 0
 							? 'No quality definitions available'
 							: 'Select quality definition...'}
