@@ -174,13 +174,6 @@ function scoreEntries(op: ScoringOp): ScoreEntry[] {
 	);
 }
 
-function rawScore(p: PortableQualityProfile | null, name: string, arrType: string): Value {
-	return (
-		p?.customFormatScores.find((s) => s.customFormatName === name && s.arrType === arrType)
-			?.score ?? null
-	);
-}
-
 function statusOf(op: ScoringOp): RowStatus {
 	if (op.status === 'conflicted_pending' || op.status === 'conflicted' || op.status === 'error') {
 		return 'pending';
@@ -194,9 +187,12 @@ export function qualityProfileScoringChanges(input: {
 	upstream: PortableQualityProfile | null | undefined;
 	current: PortableQualityProfile | null;
 	cfUpstreamNameOf: (currentName: string) => string | null;
+	/** A CF name as a generated op wrote it, resolved as of that op. Defaults to cfUpstreamNameOf. */
+	cfUpstreamNameBefore?: (name: string, opId: number) => string | null;
 	ops: ScoringOp[];
 }): ScoringChanges {
 	const { current, cfUpstreamNameOf } = input;
+	const cfUpstreamNameBefore = input.cfUpstreamNameBefore ?? ((name) => cfUpstreamNameOf(name));
 	if (input.upstream === undefined) return { status: 'unchanged', rows: [] };
 	const upstream = input.upstream;
 
@@ -250,27 +246,34 @@ export function qualityProfileScoringChanges(input: {
 	// guards often miss because a cascade already did the work, so a conflict
 	// whose wanted state holds reads as already in effect, not as not applied.
 	const overlayGeneratedConflict = (op: ScoringOp) => {
-		const entries = scoreEntries(op);
-		const holds = entries.every((e) => rawScore(current, e.name, e.arrType) === e.to);
-		for (const e of entries) {
-			const upstreamName = cfUpstreamNameOf(e.name);
-			if (upstreamName === null) continue;
+		// Names resolve as of the op and the check compares by default identity, so a
+		// later rename or reuse of a name can't point the op at the wrong row.
+		const targets = scoreEntries(op).flatMap((e) => {
+			const upstreamName = cfUpstreamNameBefore(e.name, op.opId);
+			if (upstreamName === null) return [];
 			const customFormat = { upstreamName, currentName: null };
-			for (const arrType of e.arrType === 'all' ? ARR_TYPES : [e.arrType]) {
-				const key = scoreKey(customFormat, arrType);
-				if (holds) {
-					const row = rows.get(key);
-					if (!row) continue;
-					row.opIds.push(op.opId);
-					row.inEffect = true;
-					continue;
-				}
-				if (!rows.has(key) && e.to === null && e.arrType === 'all') continue;
-				const row = ensureRow(key, { key, wanted: e.to, customFormat, arrType });
+			return (e.arrType === 'all' ? ARR_TYPES : [e.arrType]).map((arrType) => ({
+				key: scoreKey(customFormat, arrType),
+				wanted: e.to,
+				customFormat,
+				arrType,
+				shared: e.arrType === 'all'
+			}));
+		});
+		const holds = targets.every((t) => (nowCells.get(t.key)?.score ?? null) === t.wanted);
+		for (const target of targets) {
+			if (holds) {
+				const row = rows.get(target.key);
+				if (!row) continue;
 				row.opIds.push(op.opId);
-				row.status = 'pending';
-				row.pendingValue = e.to;
+				row.inEffect = true;
+				continue;
 			}
+			if (!rows.has(target.key) && target.wanted === null && target.shared) continue;
+			const row = ensureRow(target.key, target);
+			row.opIds.push(op.opId);
+			row.status = 'pending';
+			row.pendingValue = target.wanted;
 		}
 	};
 

@@ -15,6 +15,8 @@ export interface AliasResolution {
 	upstreamNameOf: (entity: string, name: string) => string | null;
 	/** Upstream name a row referred to, as of its own op. */
 	rowUpstreamName: (row: LiveOpEntityRow) => string | null;
+	/** Upstream name `name` referred to just before op `opId`; null if renamed away by then. */
+	upstreamNameBefore: (entity: string, name: string, opId: number) => string | null;
 }
 
 /**
@@ -26,9 +28,24 @@ export interface AliasResolution {
 export function resolveAliases(rows: LiveOpEntityRow[]): AliasResolution {
 	// Names a rename has touched: carried name -> upstream name (null = vacated).
 	const state = new Map<string, string | null>();
+	// Every change to a name's state, in op order, for lookups as of an earlier op.
+	const history = new Map<string, Array<[number, string | null]>>();
 	const lookup = (entity: string, name: string): string | null => {
 		const key = entityKey(entity, name);
 		return state.has(key) ? (state.get(key) as string | null) : name;
+	};
+	const assign = (key: string, value: string | null, opId: number) => {
+		state.set(key, value);
+		if (!history.has(key)) history.set(key, []);
+		history.get(key)!.push([opId, value]);
+	};
+	const upstreamNameBefore = (entity: string, name: string, opId: number): string | null => {
+		let value: string | null = name;
+		for (const [at, v] of history.get(entityKey(entity, name)) ?? []) {
+			if (at >= opId) break;
+			value = v;
+		}
+		return value;
 	};
 	const perRow = new Map<LiveOpEntityRow, string | null>();
 	const isRename = (r: LiveOpEntityRow) => r.role === 'target' && !!r.previousName;
@@ -54,14 +71,15 @@ export function resolveAliases(rows: LiveOpEntityRow[]): AliasResolution {
 		for (const row of group) {
 			if (!isRename(row)) continue;
 			const origin = lookup(row.entity, row.previousName as string);
-			state.set(entityKey(row.entity, row.previousName as string), null);
-			state.set(entityKey(row.entity, row.name), origin);
+			assign(entityKey(row.entity, row.previousName as string), null, opId);
+			assign(entityKey(row.entity, row.name), origin, opId);
 		}
 	}
 
 	return {
 		upstreamNameOf: lookup,
-		rowUpstreamName: (row) => (perRow.has(row) ? (perRow.get(row) as string | null) : row.name)
+		rowUpstreamName: (row) => (perRow.has(row) ? (perRow.get(row) as string | null) : row.name),
+		upstreamNameBefore
 	};
 }
 

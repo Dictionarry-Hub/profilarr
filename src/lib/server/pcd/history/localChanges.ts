@@ -68,7 +68,7 @@ export function assembleQualityProfileScoringChanges(input: {
 	edges: EntityEdge[];
 }): QualityProfileScoringLocalChanges {
 	const { snapshot, live, current, profileName } = input;
-	const { upstreamNameOf, rowUpstreamName } = resolveAliases(live);
+	const { upstreamNameOf, rowUpstreamName, upstreamNameBefore } = resolveAliases(live);
 	const upstreamName = upstreamNameOf('quality_profile', profileName);
 	const related = relatedChanges({
 		profileName,
@@ -155,6 +155,7 @@ export function assembleQualityProfileScoringChanges(input: {
 			upstream,
 			current,
 			cfUpstreamNameOf: (name) => upstreamNameOf('custom_format', name),
+			cfUpstreamNameBefore: (name, opId) => upstreamNameBefore('custom_format', name, opId),
 			ops
 		})
 	};
@@ -181,14 +182,20 @@ export async function qualityProfileScoringLocalChanges(
 		edges: cache.query<EntityEdge>(ENTITY_EDGES_SQL)
 	});
 
-	for (const change of changes.relatedChanges) {
-		const table = change.entity === 'custom_format' ? 'custom_formats' : 'regular_expressions';
-		const row = await cache.kb
-			.selectFrom(table)
-			.select('id')
-			.where('name', '=', change.name)
-			.executeTakeFirst();
-		change.id = row?.id ?? null;
+	for (const entity of ['custom_format', 'regular_expression'] as const) {
+		const related = changes.relatedChanges.filter((c) => c.entity === entity);
+		if (related.length === 0) continue;
+		const rows = await cache.kb
+			.selectFrom(entity === 'custom_format' ? 'custom_formats' : 'regular_expressions')
+			.select(['id', 'name'])
+			.where(
+				'name',
+				'in',
+				related.map((c) => c.name)
+			)
+			.execute();
+		const ids = new Map(rows.map((r) => [r.name, r.id]));
+		for (const change of related) change.id = ids.get(change.name) ?? null;
 	}
 	return changes;
 }
