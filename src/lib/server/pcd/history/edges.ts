@@ -36,13 +36,6 @@ export interface EntityRef {
 	name: string;
 }
 
-export interface ReachedEntity extends EntityRef {
-	/** Hops from the nearest start entity (1 = direct parent or child). */
-	depth: number;
-	/** The start entity this was reached from (nearest one, first found on ties). */
-	via: EntityRef;
-}
-
 type Direction = 'down' | 'up';
 
 function indexEdges(edges: EntityEdge[], direction: Direction): Map<string, EntityRef[]> {
@@ -72,20 +65,20 @@ export function reach(
 	edges: EntityEdge[],
 	direction: Direction,
 	maxDepth = Number.POSITIVE_INFINITY
-): ReachedEntity[] {
+): EntityRef[] {
 	const index = indexEdges(edges, direction);
 	const startKeys = new Set(start.map((s) => entityKey(s.entity, s.name)));
-	const found = new Map<string, ReachedEntity>();
-	let frontier: Array<{ ref: EntityRef; via: EntityRef }> = start.map((ref) => ({ ref, via: ref }));
+	const found = new Map<string, EntityRef>();
+	let frontier = start;
 
 	for (let depth = 1; frontier.length > 0 && depth <= maxDepth; depth++) {
-		const next: typeof frontier = [];
-		for (const { ref, via } of frontier) {
+		const next: EntityRef[] = [];
+		for (const ref of frontier) {
 			for (const to of index.get(entityKey(ref.entity, ref.name)) ?? []) {
 				const key = entityKey(to.entity, to.name);
 				if (startKeys.has(key) || found.has(key)) continue;
-				found.set(key, { ...to, depth, via });
-				next.push({ ref: to, via });
+				found.set(key, to);
+				next.push(to);
 			}
 		}
 		frontier = next;
@@ -95,5 +88,5 @@ export function reach(
 
 /** One hop down: entities whose own rows change when a start entity changes. */
 export function expandOneHop(start: EntityRef[], edges: EntityEdge[]): EntityRef[] {
-	return reach(start, edges, 'down', 1).map(({ entity, name }) => ({ entity, name }));
+	return reach(start, edges, 'down', 1);
 }

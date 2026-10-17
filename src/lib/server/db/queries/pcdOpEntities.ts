@@ -19,7 +19,6 @@ export interface OpDetails {
 	desiredState: string | null;
 	/** Latest op history status. */
 	status: string | null;
-	conflictReason: string | null;
 	/** The op this one superseded through override, if any. */
 	replacesOpId: number | null;
 }
@@ -91,7 +90,6 @@ export const pcdOpEntitiesQueries = {
 				metadata: string | null;
 				desired_state: string | null;
 				status: string | null;
-				conflict_reason: string | null;
 				replaces_op_id: number | null;
 			}>(
 				`SELECT
@@ -99,7 +97,6 @@ export const pcdOpEntitiesQueries = {
 					o.metadata,
 					o.desired_state,
 					(SELECT h.status FROM pcd_op_history h WHERE h.op_id = o.id ORDER BY h.id DESC LIMIT 1) AS status,
-					(SELECT h.conflict_reason FROM pcd_op_history h WHERE h.op_id = o.id ORDER BY h.id DESC LIMIT 1) AS conflict_reason,
 					(SELECT s.id FROM pcd_ops s WHERE s.superseded_by_op_id = o.id ORDER BY s.id DESC LIMIT 1) AS replaces_op_id
 				 FROM pcd_ops o
 				 WHERE o.id IN (${placeholders})
@@ -111,7 +108,6 @@ export const pcdOpEntitiesQueries = {
 				metadata: r.metadata,
 				desiredState: r.desired_state,
 				status: r.status,
-				conflictReason: r.conflict_reason,
 				replacesOpId: r.replaces_op_id
 			}));
 	}

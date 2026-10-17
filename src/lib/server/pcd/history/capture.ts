@@ -10,7 +10,7 @@
 import type { LiveOpEntityRow } from '$db/queries/pcdOpEntities.ts';
 import { ENTITY_EDGES_SQL, type EntityEdge } from './edges.ts';
 import { entityKey } from './opEntities.ts';
-import { computeTouchedSet, type TouchedSet } from './touched.ts';
+import { computeTouchedSet } from './touched.ts';
 
 /** Entity types with a snapshot serializer. */
 export const SNAPSHOT_ENTITIES = [
@@ -45,8 +45,6 @@ export interface UpstreamSnapshot {
 	status: 'none' | 'captured' | 'unavailable';
 	/** Keyed by entityKey(entity, upstreamName). null = not in upstream. */
 	entities: ReadonlyMap<string, unknown>;
-	edges: readonly EntityEdge[];
-	touched: TouchedSet | null;
 	failures: readonly SnapshotFailure[];
 	unplaced: number;
 	error: string | null;
@@ -56,8 +54,6 @@ export function emptySnapshot(): UpstreamSnapshot {
 	return {
 		status: 'none',
 		entities: new Map(),
-		edges: [],
-		touched: null,
 		failures: [],
 		unplaced: 0,
 		error: null
@@ -94,12 +90,11 @@ export async function captureUpstream(deps: CaptureDeps): Promise<UpstreamSnapsh
 		const unplaced = deps.countUnplaced();
 		if (live.length === 0) return { ...emptySnapshot(), unplaced };
 
-		const edges = deps.readEdges();
-		const touched = computeTouchedSet(live, edges);
+		const touched = computeTouchedSet(live, deps.readEdges());
 		const entities = new Map<string, unknown>();
 		const failures: SnapshotFailure[] = [];
 
-		for (const ref of touched.all) {
+		for (const ref of touched) {
 			if (!isSnapshotEntity(ref.entity)) continue;
 			const key = entityKey(ref.entity, ref.name);
 			try {
@@ -115,7 +110,7 @@ export async function captureUpstream(deps: CaptureDeps): Promise<UpstreamSnapsh
 			}
 		}
 
-		return { status: 'captured', entities, edges, touched, failures, unplaced, error: null };
+		return { status: 'captured', entities, failures, unplaced, error: null };
 	} catch (error) {
 		return { ...emptySnapshot(), status: 'unavailable', error: String(error) };
 	}

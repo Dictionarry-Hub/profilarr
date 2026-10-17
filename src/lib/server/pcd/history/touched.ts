@@ -10,20 +10,11 @@ import { entityKey } from './opEntities.ts';
 
 export type { LiveOpEntityRow } from '$db/queries/pcdOpEntities.ts';
 
-export interface TouchedSet {
-	/** Entities user ops target directly, by upstream name. */
-	direct: EntityRef[];
-	/** `direct` plus one hop down the upstream tree. */
-	all: EntityRef[];
+export interface AliasResolution {
 	/** Current upstream name for `name`; null if it was renamed away. */
 	upstreamNameOf: (entity: string, name: string) => string | null;
-	/** Upstream name a row referred to, as of its own op (see resolveAliases). */
+	/** Upstream name a row referred to, as of its own op. */
 	rowUpstreamName: (row: LiveOpEntityRow) => string | null;
-}
-
-export interface AliasResolution {
-	upstreamNameOf: TouchedSet['upstreamNameOf'];
-	rowUpstreamName: TouchedSet['rowUpstreamName'];
 }
 
 /**
@@ -74,11 +65,12 @@ export function resolveAliases(rows: LiveOpEntityRow[]): AliasResolution {
 	};
 }
 
+/** Entities user ops target directly, by upstream name, plus one hop down the upstream tree. */
 export function computeTouchedSet(
 	rows: LiveOpEntityRow[],
 	upstreamEdges: EntityEdge[]
-): TouchedSet {
-	const { upstreamNameOf, rowUpstreamName } = resolveAliases(rows);
+): EntityRef[] {
+	const { rowUpstreamName } = resolveAliases(rows);
 
 	const direct = new Map<string, EntityRef>();
 	for (const r of rows) {
@@ -94,10 +86,5 @@ export function computeTouchedSet(
 		all.set(entityKey(ref.entity, ref.name), ref);
 	}
 
-	return {
-		direct: [...direct.values()],
-		all: [...all.values()],
-		upstreamNameOf,
-		rowUpstreamName
-	};
+	return [...all.values()];
 }

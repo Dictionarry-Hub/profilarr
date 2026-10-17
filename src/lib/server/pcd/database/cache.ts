@@ -430,7 +430,6 @@ export class PCDCache {
 						databaseInstanceId: databaseId,
 						entities: snapshot.entities.size,
 						notInUpstream: [...snapshot.entities.values()].filter((v) => v === null).length,
-						edges: snapshot.edges.length,
 						durationMs
 					}
 				});
