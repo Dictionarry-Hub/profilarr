@@ -25,6 +25,7 @@
   - [Override Flow](#override-flow)
   - [Full-List Conflicts](#full-list-conflicts)
 - [Op Lifecycle](#op-lifecycle)
+- [Local Changes](#local-changes)
 - [Type Generation](#type-generation)
 - [Open Work](#open-work)
 
@@ -161,7 +162,9 @@ process:
 2. Register helper functions -- `qp()`, `cf()`, `dp()`, `tag()` -- that
    resolve entity names to auto-increment IDs at execution time.
 3. Execute each op via `db.exec(sql)`, tracking `db.totalChanges` before
-   and after to get the rowcount.
+   and after to get the rowcount. Just before the first user op, capture
+   the upstream state of everything user ops touch (see
+   [Local Changes](#local-changes)).
 4. For user ops: record the result in `pcd_op_history` (applied, conflicted,
    dropped, or error) and run conflict detection (see [Conflicts](#conflicts)).
 5. Return stats: ops per layer, build timing, and a `needsRebuild` flag
@@ -232,6 +235,13 @@ Each op stores two JSON blobs alongside its SQL:
 This is used by the conflict system to determine whether the user's goal
 was already achieved (auto-align) or to regenerate the op against a clean
 cache state (override).
+
+User-layer writes must set `entity` and `name`; the writer refuses them
+otherwise. In the same transaction as the op, it records what the op touches
+in `pcd_op_entities`: one `target` row for the entity it changes (a rename
+keeps the old name in `previous_name`) and one `prerequisite` row per
+`dependsOn` entry. Names are stored as written. See
+[Local Changes](#local-changes).
 
 A SHA-256 **content hash** of `sql + metadata` is stored for
 deduplication.
@@ -423,6 +433,54 @@ stateDiagram-v2
 The `pcd_op_history` table records one row per op per compile, tracking
 status, rowcount, conflict reason, and error details. This powers the
 conflict UI and provides an audit trail.
+
+`pcd_op_entities` rows stay with dropped and superseded ops, so anything
+reading live changes joins `pcd_ops` on `state = 'published'`.
+
+## Local Changes
+
+**Source:** `src/lib/server/pcd/history/`
+
+Local changes compare what the user layer produces against what upstream
+alone produces. The UI calls upstream values **defaults**.
+
+**Capture.** During compile, the cache holds pure upstream (schema, base and
+tweaks) until the first user op runs. At that point `captureUpstream()`
+serializes every entity live user ops target, plus one hop down the
+relationship tree (a regex's custom formats, a custom format's quality
+profiles), and keeps the snapshot on the cache. Capture never throws: a
+failing entity is recorded in `failures`, anything worse makes the snapshot
+`unavailable`, and the build carries on.
+
+**Names.** `pcd_op_entities` stores names as written, so renames resolve at
+read time over live ops (`resolveAliases()` in `touched.ts`). Each row
+resolves as of its own op, and a rename vacates its old name, so a reused
+name maps to the right entity. Dropping a rename op un-resolves it.
+
+**Relationships.** `ENTITY_EDGES_SQL` in `edges.ts` derives the tree from the
+cache: regex to custom format (`condition_patterns`) and custom format to
+quality profile (`quality_profile_custom_formats`). It's a query, not a view,
+so the cache schema matches the PCD schema.
+
+**Surfaces:**
+
+| Page                             | Shows                                                                                           |
+| -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Quality profile **Changes** tab  | Scoring rows that differ from their defaults, each with its op status, plus related changes     |
+| Quality profile **Scoring** tab  | A default hint on each changed score and scoring setting                                        |
+| Custom format **Conditions** tab | A default hint on each changed or added condition, and on the list when conditions were removed |
+| Regular expression page          | A default hint on a changed pattern                                                             |
+
+Scores compare per arr type as sync resolves them (an arr type's own row, else
+the shared `all` row), and custom format names compare by upstream name, so a
+rename alone isn't a change. Generated ops (a custom format rename or delete)
+only show when they conflict, and a conflict whose wanted state already holds
+reads as already in effect.
+
+**Related changes** are local changes to what a profile depends on: custom
+formats it scores whose conditions changed, and regexes they use whose pattern
+changed. Renames, descriptions and tags don't count, and neither do the
+condition updates a regex rename generates.
 
 ## Type Generation
 

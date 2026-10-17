@@ -663,6 +663,20 @@ Empty `text` disables the tooltip without an `{#if}` wrapper. The tooltip
 is also baked into `Button` via the `tooltip` prop; prefer that over
 manually wrapping a `<Button>`.
 
+#### DefaultHint
+
+**`$ui/tooltip/DefaultHint.svelte`** is a small history icon that shows a
+field's default (upstream) value in a `Tooltip` on hover. `pending` turns it
+amber for a local change that didn't apply; `mono` suits regex patterns.
+
+```svelte
+<!-- src/routes/quality-profiles/[databaseId]/[id]/scoring/components/ScoringTableDesktop.svelte:116 -->
+<DefaultHint text={markerText(marker)} pending={marker.status === 'pending'} />
+```
+
+It's hover-only, so it's hidden below `md`: default hints are desktop only.
+On phones, quality profiles show their local changes on the Changes tab.
+
 #### EmptyState
 
 **`$ui/state/EmptyState.svelte`** is the "no data yet" empty-view surface:
