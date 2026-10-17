@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import History from '@lucide/svelte/icons/history';
 	import Badge from '$ui/badge/Badge.svelte';
+	import InlineLink from '$ui/link/InlineLink.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
 	import Table from '$ui/table/Table.svelte';
@@ -32,10 +33,33 @@
 	const columns: Column<Row>[] = [
 		{ key: 'setting', header: 'Setting', align: 'left' },
 		{ key: 'arr', header: 'App', align: 'left', width: 'w-28' },
-		{ key: 'upstream', header: 'Upstream', align: 'right', width: 'w-32' },
+		{ key: 'upstream', header: 'Default', align: 'right', width: 'w-32' },
 		{ key: 'current', header: 'Yours', align: 'right', width: 'w-32' },
 		{ key: 'status', header: 'Status', align: 'left', width: 'w-64' }
 	];
+
+	const UNAVAILABLE = {
+		database:
+			"Local changes can't be shown right now: the last compile couldn't read the defaults for this database. The logs have the details.",
+		profile:
+			"Local changes can't be shown right now: the last compile couldn't read this profile's defaults. The logs have the details.",
+		load: "Local changes couldn't be loaded. The logs have the details."
+	};
+
+	type Related = PageData['localChanges']['relatedChanges'][number];
+
+	function relatedHref(change: Related): string | null {
+		if (change.id === null) return null;
+		const databaseId = $page.params.databaseId;
+		return change.entity === 'custom_format'
+			? `/custom-formats/${databaseId}/${change.id}/conditions`
+			: `/regular-expressions/${databaseId}/${change.id}`;
+	}
+
+	function relatedContext(change: Related): string {
+		if (change.entity === 'custom_format') return 'Custom format this profile scores';
+		return `Regex used by ${change.via.join(', ')}`;
+	}
 
 	$: changes = data.localChanges;
 	$: pendingCount = changes.rows.filter((r) => r.status === 'pending').length;
@@ -46,7 +70,7 @@
 		return row.customFormat?.currentName ?? row.customFormat?.upstreamName ?? '';
 	}
 
-	/** Shown under a renamed custom format: the name upstream knows it by. */
+	/** Shown under a renamed custom format: the name it has in the defaults. */
 	function renamedFrom(row: Row): string | null {
 		const cf = row.customFormat;
 		if (!cf?.upstreamName || !cf.currentName || cf.upstreamName === cf.currentName) return null;
@@ -67,27 +91,26 @@
 		<div
 			class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
 		>
-			Local changes can't be shown right now: the upstream snapshot for this profile failed during
-			the last compile. The logs have the details.
+			{UNAVAILABLE[changes.unavailableReason ?? 'database']}
 		</div>
-	{:else if changes.rows.length === 0}
+	{:else if changes.rows.length === 0 && changes.relatedChanges.length === 0}
 		<EmptyState
 			icon={History}
 			title="No local changes"
-			description="This profile matches the database."
+			description="This profile matches its defaults."
 			buttonText="Back to Scoring"
 			buttonHref={scoringHref}
 		/>
-	{:else}
+	{:else if changes.rows.length > 0}
 		<p class="text-sm text-neutral-600 dark:text-neutral-400">
-			{changes.rows.length} local change{changes.rows.length === 1 ? '' : 's'} compared with the database
+			{changes.rows.length} local change{changes.rows.length === 1 ? '' : 's'} compared with the defaults
 			{#if pendingCount > 0}
 				· <span class="font-medium text-amber-700 dark:text-amber-400"
 					>{pendingCount} not applied</span
 				>
 			{/if}
 			{#if changes.status === 'created'}
-				· created locally, not in the database
+				· created locally, not in the defaults
 			{/if}
 		</p>
 
@@ -119,10 +142,45 @@
 							<span class="text-xs text-neutral-500 dark:text-neutral-400">
 								wanted {display(row.pendingValue ?? null)}
 							</span>
+						{:else if row.inEffect}
+							<span class="text-xs text-neutral-500 dark:text-neutral-400">already in effect</span>
 						{/if}
 					</div>
 				{/if}
 			</svelte:fragment>
 		</Table>
+	{/if}
+
+	{#if changes.relatedChanges.length > 0}
+		<section class="space-y-2">
+			<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Related changes</h2>
+			<p class="text-sm text-neutral-600 dark:text-neutral-400">
+				Your changes to what this profile depends on. Its own settings are unchanged by these.
+			</p>
+			<ul
+				class="divide-y divide-neutral-200 rounded-lg border border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800"
+			>
+				{#each changes.relatedChanges as change (change.entity + ':' + change.name)}
+					{@const href = relatedHref(change)}
+					<li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+						<div>
+							<div class="font-medium">
+								{#if href}
+									<InlineLink {href} text={change.name} />
+								{:else}
+									{change.name}
+								{/if}
+							</div>
+							<div class="text-xs text-neutral-500 dark:text-neutral-400">
+								{relatedContext(change)} · {change.changed.join(', ')} changed
+							</div>
+						</div>
+						{#if change.pending}
+							<Badge variant="warning">Not applied</Badge>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		</section>
 	{/if}
 </div>

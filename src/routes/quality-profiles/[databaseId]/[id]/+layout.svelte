@@ -14,7 +14,7 @@
 	$: profileId = $page.params.id;
 	$: currentPath = $page.url.pathname;
 	$: onChanges = currentPath.includes('/changes');
-	$: changeCount = data.localChanges.rows.length;
+	$: changeCount = data.localChanges.rows.length + data.localChanges.relatedChanges.length;
 
 	$: tabs = [
 		{

@@ -48,8 +48,9 @@ async function loadLocalChanges(
 		});
 		return {
 			snapshot: 'unavailable',
-			upstreamName: null,
+			unavailableReason: 'load',
 			customFormatRenames: {},
+			relatedChanges: [],
 			status: 'unchanged',
 			rows: []
 		};

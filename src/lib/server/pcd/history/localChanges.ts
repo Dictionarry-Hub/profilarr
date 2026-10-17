@@ -10,21 +10,24 @@ import type { PCDCache } from '$pcd/index.ts';
 import type { PortableQualityProfile } from '$shared/pcd/portable.ts';
 import { serializeQualityProfile } from '../entities/serialize.ts';
 import type { UpstreamSnapshot } from './capture.ts';
+import { ENTITY_EDGES_SQL, type EntityEdge } from './edges.ts';
 import { entityKey } from './opEntities.ts';
 import {
 	qualityProfileScoringChanges,
 	type ScoringChanges,
 	type ScoringOp
 } from './qualityProfileScoring.ts';
+import { relatedChanges, type RelatedChange } from './relatedChanges.ts';
 import { resolveAliases } from './touched.ts';
 
 export interface QualityProfileScoringLocalChanges extends ScoringChanges {
 	/** none: no local changes anywhere. unavailable: capture failed for this profile; rows are empty. */
 	snapshot: UpstreamSnapshot['status'];
-	/** null: no upstream identity (created locally under a renamed-away name). */
-	upstreamName: string | null;
+	/** database: capture failed as a whole. profile: only this profile's. load: reading failed. */
+	unavailableReason: 'database' | 'profile' | 'load' | null;
 	/** Current name -> upstream name, for local renames of custom formats upstream has. */
 	customFormatRenames: Record<string, string>;
+	relatedChanges: RelatedChange[];
 }
 
 function parseJson(raw: string | null): Record<string, unknown> | null {
@@ -61,16 +64,27 @@ export function assembleQualityProfileScoringChanges(input: {
 	opDetails: (opIds: number[]) => OpDetails[];
 	current: PortableQualityProfile | null;
 	profileName: string;
+	/** Edges of the finished cache. */
+	edges: EntityEdge[];
 }): QualityProfileScoringLocalChanges {
 	const { snapshot, live, current, profileName } = input;
 	const { upstreamNameOf, rowUpstreamName } = resolveAliases(live);
 	const upstreamName = upstreamNameOf('quality_profile', profileName);
+	const related = relatedChanges({
+		profileName,
+		edges: input.edges,
+		live,
+		upstreamNameOf,
+		rowUpstreamName,
+		opDetails: input.opDetails
+	});
 
 	if (snapshot.status !== 'captured') {
 		return {
 			snapshot: snapshot.status,
-			upstreamName,
+			unavailableReason: snapshot.status === 'unavailable' ? 'database' : null,
 			customFormatRenames: {},
+			relatedChanges: related,
 			status: 'unchanged',
 			rows: []
 		};
@@ -83,8 +97,9 @@ export function assembleQualityProfileScoringChanges(input: {
 	if (failed) {
 		return {
 			snapshot: 'unavailable',
-			upstreamName,
+			unavailableReason: 'profile',
 			customFormatRenames: renames,
+			relatedChanges: related,
 			status: 'unchanged',
 			rows: []
 		};
@@ -133,8 +148,9 @@ export function assembleQualityProfileScoringChanges(input: {
 
 	return {
 		snapshot: snapshot.status,
-		upstreamName,
+		unavailableReason: null,
 		customFormatRenames: renames,
+		relatedChanges: related,
 		...qualityProfileScoringChanges({
 			upstream,
 			current,
@@ -156,11 +172,23 @@ export async function qualityProfileScoringLocalChanges(
 		.where('name', '=', profileName)
 		.executeTakeFirst();
 
-	return assembleQualityProfileScoringChanges({
+	const changes = assembleQualityProfileScoringChanges({
 		snapshot: cache.getUpstreamSnapshot(),
 		live: pcdOpEntitiesQueries.listLive(databaseId),
 		opDetails: (ids) => pcdOpEntitiesQueries.listOpDetails(ids),
 		current: exists ? await serializeQualityProfile(cache, profileName) : null,
-		profileName
+		profileName,
+		edges: cache.query<EntityEdge>(ENTITY_EDGES_SQL)
 	});
+
+	for (const change of changes.relatedChanges) {
+		const table = change.entity === 'custom_format' ? 'custom_formats' : 'regular_expressions';
+		const row = await cache.kb
+			.selectFrom(table)
+			.select('id')
+			.where('name', '=', change.name)
+			.executeTakeFirst();
+		change.id = row?.id ?? null;
+	}
+	return changes;
 }
