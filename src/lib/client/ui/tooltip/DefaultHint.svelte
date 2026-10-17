@@ -8,7 +8,7 @@
 	export let mono: boolean = false;
 </script>
 
-<!-- Hover-only, so hidden below md: phones read local changes on the Changes tab. -->
+<!-- Hover-only, so desktop only: hidden below md. -->
 <span class="hidden md:inline-flex">
 	<Tooltip {text} position="top" {mono} size="lg">
 		<span
