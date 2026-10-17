@@ -39,6 +39,10 @@
 	export let initialData: RegularExpressionFormData;
 	export let failOnReferencedDelete: boolean = false;
 	export let referenceCount: number = 0;
+	export let patternDefault: { pattern: string | null; pending: boolean } = {
+		pattern: null,
+		pending: false
+	};
 
 	// Breadcrumb (optional)
 	export let breadcrumbItems: { label: string; href: string }[] = [];
@@ -293,6 +297,14 @@
 				onPatternChange={(v) => update('pattern', v)}
 				onRegex101IdChange={(v) => update('regex101Id', v)}
 				onValidationStateChange={(s) => (patternValidationState = s)}
+				defaultHint={patternDefault.pattern === null
+					? null
+					: {
+							text: patternDefault.pending
+								? `Default: ${patternDefault.pattern}\nYour change didn't apply.`
+								: `Default: ${patternDefault.pattern}`,
+							pending: patternDefault.pending
+						}}
 			/>
 		</div>
 	</form>

@@ -36,6 +36,7 @@
 <div class="p-4 md:p-8">
 	<RegularExpressionForm
 		mode="edit"
+		patternDefault={data.defaults}
 		databaseName={data.currentDatabase?.name}
 		canWriteToBase={data.canWriteToBase}
 		actionUrl="?/update"

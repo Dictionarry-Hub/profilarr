@@ -8,6 +8,8 @@
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import Info from '@lucide/svelte/icons/info';
 	import ConditionCard from './components/ConditionCard.svelte';
+	import { describeConditionDefault } from './components/conditionDefaults.ts';
+	import DefaultHint from '$ui/tooltip/DefaultHint.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
@@ -352,6 +354,11 @@
 				<div class="flex items-center gap-2 px-3">
 					<span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">Conditions</span>
 					<Badge variant="neutral" size="sm">{conditions.length}</Badge>
+					{#if data.defaults.removed.length > 0}
+						<DefaultHint
+							text={`Removed here, still in the defaults: ${data.defaults.removed.map((r) => r.name).join(', ')}`}
+						/>
+					{/if}
 				</div>
 				<div
 					class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-neutral-200 wide:dark:divide-neutral-800"
@@ -367,6 +374,12 @@
 								nameConflict={hasNameConflict(condition)}
 								on:remove={() => handleRemove(condition._key)}
 								on:change={(e) => handleConditionChange(e.detail, condition._key)}
+								defaultHint={data.defaults.conditions[condition.name]
+									? {
+											text: describeConditionDefault(data.defaults.conditions[condition.name]),
+											pending: data.defaults.conditions[condition.name].pending
+										}
+									: null}
 							/>
 						</div>
 					{/each}

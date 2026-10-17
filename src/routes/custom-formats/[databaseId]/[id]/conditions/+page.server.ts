@@ -8,6 +8,8 @@ import { getLanguagesWithSupport } from '$lib/server/sync/mappings.ts';
 import type { OperationLayer } from '$pcd/core/types.ts';
 import type { ConditionData } from '$shared/pcd/display.ts';
 import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import { customFormatDefaults, type CustomFormatDefaults } from '$pcd/history/entityDefaults.ts';
+import { logger } from '$logger/logger.ts';
 
 export const load: ServerLoad = async ({ params }) => {
 	const { databaseId, id } = params;
@@ -63,9 +65,27 @@ export const load: ServerLoad = async ({ params }) => {
 		conditions,
 		availablePatterns: patterns.map((p) => ({ id: p.id, name: p.name, pattern: p.pattern })),
 		availableLanguages,
-		canWriteToBase: canWriteToBase(currentDatabaseId)
+		canWriteToBase: canWriteToBase(currentDatabaseId),
+		defaults: await loadDefaults(cache, currentDatabaseId, format.name)
 	};
 };
+
+// Defaults are a hint: a failure here must not take the conditions page down.
+async function loadDefaults(
+	cache: Parameters<typeof customFormatDefaults>[0],
+	databaseId: number,
+	formatName: string
+): Promise<CustomFormatDefaults> {
+	try {
+		return await customFormatDefaults(cache, databaseId, formatName);
+	} catch (error) {
+		await logger.warn('Failed to load condition defaults for custom format', {
+			source: 'CustomFormatConditions',
+			meta: { databaseId, formatName, error: String(error) }
+		});
+		return { conditions: {}, removed: [] };
+	}
+}
 
 export const actions: Actions = {
 	update: async ({ request, params }) => {

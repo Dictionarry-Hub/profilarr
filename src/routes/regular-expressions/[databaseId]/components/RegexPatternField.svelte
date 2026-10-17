@@ -6,6 +6,7 @@
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import { alertStore } from '$alerts/store';
 	import { sanitizeRegex101Id } from '$lib/client/utils/regex101';
+	import DefaultHint from '$ui/tooltip/DefaultHint.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 
@@ -14,6 +15,8 @@
 	export let regex101Id: string = '';
 	export let onPatternChange: ((value: string) => void) | undefined = undefined;
 	export let onRegex101IdChange: ((value: string) => void) | undefined = undefined;
+	/** The default pattern, shown in a hover hint beside the label. */
+	export let defaultHint: { text: string; pending: boolean } | null = null;
 	export let onValidationStateChange:
 		((state: 'idle' | 'checking' | 'valid' | 'invalid' | 'unavailable') => void) | undefined =
 		undefined;
@@ -82,8 +85,14 @@
 	<!-- Regex Pattern -->
 	<div data-onboarding="regex-pattern" class="space-y-2">
 		<div class="flex items-center justify-between gap-2">
-			<label for="pattern" class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
-				Regular Expression<span class="text-red-500">*</span>
+			<label
+				for="pattern"
+				class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
+			>
+				<span>Regular Expression<span class="text-red-500">*</span></span>
+				{#if defaultHint}
+					<DefaultHint text={defaultHint.text} pending={defaultHint.pending} mono />
+				{/if}
 			</label>
 			{#if validationState === 'checking'}
 				<Label variant="secondary" size="sm" rounded="md">

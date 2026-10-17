@@ -7,6 +7,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
+	import DefaultHint from '$ui/tooltip/DefaultHint.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
 	import {
@@ -31,6 +32,8 @@
 	export let mode: 'normal' | 'draft' = 'normal';
 	export let condition: ConditionData;
 	export let nameConflict = false;
+	/** The condition's default, shown in a hover hint beside its name. */
+	export let defaultHint: { text: string; pending: boolean } | null = null;
 
 	// Available patterns and languages from database (passed in)
 	export let availablePatterns: { id: number; name: string; pattern: string }[] = [];
@@ -305,19 +308,33 @@
 		</div>
 		<div class="grid gap-2 wide:contents">
 			<div
-				class="w-full min-w-0 shrink-0 wide:w-48"
+				class="flex w-full min-w-0 shrink-0 items-center gap-1.5 wide:w-48"
 				title={nameConflict ? 'Duplicate condition name' : ''}
 				data-onboarding="cf-cond-name"
 			>
-				<FormInput
-					label="Name"
-					hideLabel
-					name={conditionNameId}
-					value={condition.name}
-					placeholder="Condition name"
-					description={nameError}
-					on:input={(e) => handleNameChange(e.detail)}
-				/>
+				<div class="min-w-0 flex-1">
+					<FormInput
+						label="Name"
+						hideLabel
+						name={conditionNameId}
+						value={condition.name}
+						placeholder="Condition name"
+						description={nameError}
+						on:input={(e) => handleNameChange(e.detail)}
+					/>
+				</div>
+				{#if defaultHint}
+					<!-- Stacked layout: beside the name. Row layout uses the slot below. -->
+					<div class="wide:hidden">
+						<DefaultHint text={defaultHint.text} pending={defaultHint.pending} />
+					</div>
+				{/if}
+			</div>
+			<!-- Always present in the row layout, so names and types line up across rows. -->
+			<div class="hidden w-4 shrink-0 items-center justify-center wide:-mx-1 wide:flex">
+				{#if defaultHint}
+					<DefaultHint text={defaultHint.text} pending={defaultHint.pending} />
+				{/if}
 			</div>
 			<div class="w-full min-w-0 shrink-0 wide:w-52" data-onboarding="cf-cond-type">
 				<DropdownCombobox
