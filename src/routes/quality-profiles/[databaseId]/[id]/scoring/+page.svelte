@@ -26,7 +26,8 @@
 	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import CustomGroupManager from '$ui/dropdown/CustomGroupManager.svelte';
 	import ScoringTable from './components/ScoringTable.svelte';
-	import { buildScoreMarkers } from './components/scoreMarkers.ts';
+	import { buildScoreMarkers, buildSettingMarkers, markerText } from './components/scoreMarkers.ts';
+	import DefaultHint from '$ui/tooltip/DefaultHint.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import { getPersistentSearchStore, type SearchStore } from '$lib/client/stores/search';
 	import { onMount, tick } from 'svelte';
@@ -42,6 +43,7 @@
 	export let data: PageData;
 
 	$: scoreMarkers = buildScoreMarkers(data.localChanges.rows);
+	$: settingMarkers = buildSettingMarkers(data.localChanges.rows);
 
 	$: databaseId = parseInt($page.params.databaseId ?? '0', 10);
 
@@ -685,9 +687,15 @@
 			<div class="space-y-2" data-onboarding="qp-scoring-upgrades-allowed">
 				<label
 					for="upgradesAllowed"
-					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+					class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
 				>
 					Upgrades Allowed
+					{#if settingMarkers.upgrades_allowed}
+						<DefaultHint
+							text={markerText(settingMarkers.upgrades_allowed)}
+							pending={settingMarkers.upgrades_allowed.status === 'pending'}
+						/>
+					{/if}
 				</label>
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Allow this profile to upgrade existing media
@@ -704,9 +712,15 @@
 			<div class="space-y-2" data-onboarding="qp-scoring-minimum">
 				<label
 					for="minimumScore"
-					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+					class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
 				>
 					Minimum Score
+					{#if settingMarkers.minimum_custom_format_score}
+						<DefaultHint
+							text={markerText(settingMarkers.minimum_custom_format_score)}
+							pending={settingMarkers.minimum_custom_format_score.status === 'pending'}
+						/>
+					{/if}
 				</label>
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Minimum custom format score required to download
@@ -723,9 +737,15 @@
 			<div class="space-y-2" data-onboarding="qp-scoring-upgrade-until">
 				<label
 					for="upgradeUntilScore"
-					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+					class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
 				>
 					Upgrade Until Score
+					{#if settingMarkers.upgrade_until_score}
+						<DefaultHint
+							text={markerText(settingMarkers.upgrade_until_score)}
+							pending={settingMarkers.upgrade_until_score.status === 'pending'}
+						/>
+					{/if}
 				</label>
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Stop upgrading when this score is reached
@@ -743,9 +763,15 @@
 			<div class="space-y-2" data-onboarding="qp-scoring-increment">
 				<label
 					for="upgradeScoreIncrement"
-					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+					class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
 				>
 					Upgrade Score Increment
+					{#if settingMarkers.upgrade_score_increment}
+						<DefaultHint
+							text={markerText(settingMarkers.upgrade_score_increment)}
+							pending={settingMarkers.upgrade_score_increment.status === 'pending'}
+						/>
+					{/if}
 				</label>
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Minimum score improvement needed to upgrade

@@ -3,7 +3,8 @@
 	import Table from '$ui/table/Table.svelte';
 	import type { Column } from '$ui/table/types';
 	import NumberInput from '$ui/form/NumberInput.svelte';
-	import { markerText, markerTextClass, type ScoreMarkers } from './scoreMarkers.ts';
+	import { markerText, type ScoreMarkers } from './scoreMarkers.ts';
+	import DefaultHint from '$ui/tooltip/DefaultHint.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Check from '@lucide/svelte/icons/check';
 	import InlineLink from '$ui/link/InlineLink.svelte';
@@ -80,40 +81,41 @@
 			<div class="flex flex-col gap-1">
 				<InlineLink href="/custom-formats/{databaseId}/{row.id}/general" text={row.name} external />
 				{#if customFormatRenames[row.name]}
-					<span class="text-xs {markerTextClass.applied}">
-						Upstream {customFormatRenames[row.name]}
+					<span class="text-xs text-neutral-500 dark:text-neutral-400">
+						Renamed from {customFormatRenames[row.name]}
 					</span>
 				{/if}
 			</div>
 		{:else}
 			{@const arrType = column.key}
 			{@const marker = scoreMarkers[row.name]?.[arrType]}
-			<div class="flex flex-col items-center gap-1">
-				<div class="flex items-center justify-center gap-2">
-					<IconCheckbox
-						checked={customFormatEnabled[row.name]?.[arrType] ?? false}
-						icon={Check}
-						color={getArrTypeColor(arrType)}
-						shape="circle"
-						{disabled}
-						on:click={() => handleToggleEnabled(row.name, arrType)}
-					/>
-					{#if customFormatScores[row.name]}
-						<div class="w-48">
-							<NumberInput
-								name="score-{row.name}-{arrType}"
-								value={customFormatScores[row.name][arrType] ?? 0}
-								onchange={(newValue) => handleScoreChange(row.name, arrType, newValue)}
-								step={1}
-								disabled={disabled || !customFormatEnabled[row.name]?.[arrType]}
-								font="mono"
-							/>
-						</div>
-					{/if}
-				</div>
-				{#if marker}
-					<span class="text-xs {markerTextClass[marker.status]}">{markerText(marker)}</span>
+			<div class="flex items-center justify-center gap-2">
+				<IconCheckbox
+					checked={customFormatEnabled[row.name]?.[arrType] ?? false}
+					icon={Check}
+					color={getArrTypeColor(arrType)}
+					shape="circle"
+					{disabled}
+					on:click={() => handleToggleEnabled(row.name, arrType)}
+				/>
+				{#if customFormatScores[row.name]}
+					<div class="w-48">
+						<NumberInput
+							name="score-{row.name}-{arrType}"
+							value={customFormatScores[row.name][arrType] ?? 0}
+							onchange={(newValue) => handleScoreChange(row.name, arrType, newValue)}
+							step={1}
+							disabled={disabled || !customFormatEnabled[row.name]?.[arrType]}
+							font="mono"
+						/>
+					</div>
 				{/if}
+				<!-- Fixed width keeps inputs aligned whether or not a cell has a hint. -->
+				<span class="inline-flex w-4">
+					{#if marker}
+						<DefaultHint text={markerText(marker)} pending={marker.status === 'pending'} />
+					{/if}
+				</span>
 			</div>
 		{/if}
 	</svelte:fragment>

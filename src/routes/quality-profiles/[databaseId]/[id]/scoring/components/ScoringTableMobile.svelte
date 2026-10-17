@@ -1,12 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import NumberInput from '$ui/form/NumberInput.svelte';
-	import {
-		markerShortText,
-		markerText,
-		markerTextClass,
-		type ScoreMarkers
-	} from './scoreMarkers.ts';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Check from '@lucide/svelte/icons/check';
 	import { createVirtualList } from '$lib/client/utils/virtualList';
@@ -21,7 +15,6 @@
 	type IconCheckboxColor =
 		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})`;
 	export let getArrTypeColor: (arrType: string) => IconCheckboxColor;
-	export let scoreMarkers: ScoreMarkers = {};
 	export let customFormatRenames: Record<string, string> = {};
 	export let firstRowOnboarding: string | undefined = undefined;
 
@@ -86,10 +79,10 @@
 					/>
 					{#if customFormatRenames[format.name]}
 						<span
-							class="truncate text-xs font-normal {markerTextClass.applied}"
-							title="Upstream {customFormatRenames[format.name]}"
+							class="truncate text-xs font-normal text-neutral-500 dark:text-neutral-400"
+							title="Renamed from {customFormatRenames[format.name]}"
 						>
-							Upstream {customFormatRenames[format.name]}
+							Renamed from {customFormatRenames[format.name]}
 						</span>
 					{/if}
 				</div>
@@ -98,7 +91,7 @@
 				<div class="divide-y divide-neutral-100 px-4 dark:divide-neutral-800">
 					{#each arrTypes as arrType}
 						<div class="flex items-center justify-between gap-3 py-2.5">
-							<div class="flex min-w-0 items-center gap-2">
+							<div class="flex items-center gap-2">
 								<IconCheckbox
 									checked={customFormatEnabled[format.name]?.[arrType] ?? false}
 									icon={Check}
@@ -107,25 +100,12 @@
 									{disabled}
 									on:click={() => handleToggleEnabled(format.name, arrType)}
 								/>
-								<span
-									class="shrink-0 text-xs font-medium text-neutral-600 capitalize dark:text-neutral-400"
-								>
+								<span class="text-xs font-medium text-neutral-600 capitalize dark:text-neutral-400">
 									{arrType}
 								</span>
-								<!-- One line, short form: rows are fixed-height for the virtual list, and a
-									compact phone input leaves no room for a second line. -->
-								{#if scoreMarkers[format.name]?.[arrType]}
-									{@const marker = scoreMarkers[format.name][arrType]}
-									<span
-										class="min-w-0 truncate text-xs {markerTextClass[marker.status]}"
-										title={markerText(marker)}
-									>
-										{markerShortText(marker)}
-									</span>
-								{/if}
 							</div>
 							{#if customFormatScores[format.name]}
-								<div class="w-28 shrink-0">
+								<div class="w-28">
 									<NumberInput
 										name="score-{format.name}-{arrType}"
 										value={customFormatScores[format.name][arrType] ?? 0}

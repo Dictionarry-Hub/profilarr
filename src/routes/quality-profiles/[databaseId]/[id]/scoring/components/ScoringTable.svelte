@@ -69,7 +69,6 @@
 		{arrTypes}
 		{customFormatScores}
 		{customFormatEnabled}
-		{scoreMarkers}
 		{customFormatRenames}
 		{disabled}
 		{getArrTypeColor}

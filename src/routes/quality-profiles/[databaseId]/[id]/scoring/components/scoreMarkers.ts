@@ -38,37 +38,38 @@ export function buildScoreMarkers(rows: ChangeRow[]): ScoreMarkers {
 	return markers;
 }
 
+/** Markers for the profile-level scoring settings, keyed by field. */
+export function buildSettingMarkers(rows: ChangeRow[]): Record<string, ScoreMarker> {
+	const markers: Record<string, ScoreMarker> = {};
+	for (const row of rows) {
+		if (row.field === 'custom_format_score') continue;
+		markers[row.field] = {
+			status: row.status,
+			upstream: row.upstream,
+			pendingValue: row.pendingValue
+		};
+	}
+	return markers;
+}
+
 const show = (value: Value | undefined) =>
-	value === null || value === undefined ? 'unset' : String(value);
+	value === null || value === undefined
+		? 'unset'
+		: typeof value === 'boolean'
+			? value
+				? 'enabled'
+				: 'disabled'
+			: String(value);
 
 export function markerText(marker: ScoreMarker): string {
 	switch (marker.status) {
 		case 'pending':
 			return `Yours ${show(marker.pendingValue)} not applied`;
 		case 'overridden':
-			return `Re-applied · upstream ${show(marker.upstream)}`;
+			return `Re-applied · default ${show(marker.upstream)}`;
 		case 'related':
-			return `Upstream ${show(marker.upstream)} · related change`;
+			return `Default ${show(marker.upstream)} · related change`;
 		default:
-			return `Upstream ${show(marker.upstream)}`;
+			return `Default ${show(marker.upstream)}`;
 	}
 }
-
-/** Fits one line beside a compact phone input; the number comes first or right after one word. */
-export function markerShortText(marker: ScoreMarker): string {
-	switch (marker.status) {
-		case 'pending':
-			return `${show(marker.pendingValue)} not applied`;
-		case 'overridden':
-			return `re-applied, was ${show(marker.upstream)}`;
-		default:
-			return `was ${show(marker.upstream)}`;
-	}
-}
-
-export const markerTextClass: Record<ScoreMarkerStatus, string> = {
-	applied: 'text-neutral-500 dark:text-neutral-400',
-	pending: 'text-amber-600 dark:text-amber-400',
-	overridden: 'text-sky-600 dark:text-sky-400',
-	related: 'text-neutral-500 dark:text-neutral-400'
-};
