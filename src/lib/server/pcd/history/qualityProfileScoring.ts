@@ -46,8 +46,6 @@ export interface ScoringChangeRow {
 	current: Value;
 	status: RowStatus;
 	pendingValue?: Value;
-	/** A generated op on this row conflicted, but what it wanted already holds. */
-	inEffect?: boolean;
 	/** Ops that changed this row; a revert must widen them to their change sets. */
 	opIds: number[];
 }
@@ -313,7 +311,6 @@ export function qualityProfileScoringChanges(input: {
 					row.opIds.push(op.opId);
 					row.status = 'related';
 					delete row.pendingValue;
-					delete row.inEffect;
 				}
 				continue;
 			}
@@ -332,7 +329,6 @@ export function qualityProfileScoringChanges(input: {
 					// A difference no other op claims is this related change's.
 					if (row.opIds.length === 0) row.status = 'related';
 					row.opIds.push(op.opId);
-					row.inEffect = true;
 					continue;
 				}
 				const row = ensureRow(target.key, target);
@@ -355,7 +351,6 @@ export function qualityProfileScoringChanges(input: {
 			const row = ensureRow(target.key, target);
 			row.opIds.push(op.opId);
 			row.status = status;
-			delete row.inEffect;
 			if (status === 'pending') row.pendingValue = target.wanted;
 			else delete row.pendingValue;
 		}
