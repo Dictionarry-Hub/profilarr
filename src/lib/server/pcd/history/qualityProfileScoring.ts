@@ -48,6 +48,7 @@ export interface ScoringChangeRow {
 	pendingValue?: Value;
 	/** A generated op on this row conflicted, but what it wanted already holds. */
 	inEffect?: boolean;
+	/** Ops that changed this row; a revert must widen them to their change sets. */
 	opIds: number[];
 }
 
