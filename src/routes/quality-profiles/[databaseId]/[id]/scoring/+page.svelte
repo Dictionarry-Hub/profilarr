@@ -687,18 +687,20 @@
 		<!-- Profile-level Score Settings -->
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 			<div class="space-y-2" data-onboarding="qp-scoring-upgrades-allowed">
-				<label
-					for="upgradesAllowed"
-					class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
-				>
-					Upgrades Allowed
+				<div class="flex items-center gap-1.5">
+					<label
+						for="upgradesAllowed"
+						class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+					>
+						Upgrades Allowed
+					</label>
 					{#if settingMarkers.upgrades_allowed}
 						<DefaultHint
 							text={markerText(settingMarkers.upgrades_allowed)}
 							pending={settingMarkers.upgrades_allowed.status === 'pending'}
 						/>
 					{/if}
-				</label>
+				</div>
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Allow this profile to upgrade existing media
 				</p>
@@ -712,18 +714,20 @@
 			</div>
 
 			<div class="space-y-2" data-onboarding="qp-scoring-minimum">
-				<label
-					for="minimumScore"
-					class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
-				>
-					Minimum Score
+				<div class="flex items-center gap-1.5">
+					<label
+						for="minimumScore"
+						class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+					>
+						Minimum Score
+					</label>
 					{#if settingMarkers.minimum_custom_format_score}
 						<DefaultHint
 							text={markerText(settingMarkers.minimum_custom_format_score)}
 							pending={settingMarkers.minimum_custom_format_score.status === 'pending'}
 						/>
 					{/if}
-				</label>
+				</div>
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Minimum custom format score required to download
 				</p>
@@ -737,18 +741,20 @@
 			</div>
 
 			<div class="space-y-2" data-onboarding="qp-scoring-upgrade-until">
-				<label
-					for="upgradeUntilScore"
-					class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
-				>
-					Upgrade Until Score
+				<div class="flex items-center gap-1.5">
+					<label
+						for="upgradeUntilScore"
+						class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+					>
+						Upgrade Until Score
+					</label>
 					{#if settingMarkers.upgrade_until_score}
 						<DefaultHint
 							text={markerText(settingMarkers.upgrade_until_score)}
 							pending={settingMarkers.upgrade_until_score.status === 'pending'}
 						/>
 					{/if}
-				</label>
+				</div>
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Stop upgrading when this score is reached
 				</p>
@@ -763,18 +769,20 @@
 			</div>
 
 			<div class="space-y-2" data-onboarding="qp-scoring-increment">
-				<label
-					for="upgradeScoreIncrement"
-					class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
-				>
-					Upgrade Score Increment
+				<div class="flex items-center gap-1.5">
+					<label
+						for="upgradeScoreIncrement"
+						class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+					>
+						Upgrade Score Increment
+					</label>
 					{#if settingMarkers.upgrade_score_increment}
 						<DefaultHint
 							text={markerText(settingMarkers.upgrade_score_increment)}
 							pending={settingMarkers.upgrade_score_increment.status === 'pending'}
 						/>
 					{/if}
-				</label>
+				</div>
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Minimum score improvement needed to upgrade
 				</p>

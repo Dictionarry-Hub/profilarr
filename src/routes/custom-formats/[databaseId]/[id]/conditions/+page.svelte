@@ -359,11 +359,11 @@
 
 		<!-- Existing conditions sorted by status, type, then name -->
 		{#if conditions.length === 0 && draftConditions.length === 0}
-			<p class="flex items-center gap-2 px-3 text-sm text-neutral-500 dark:text-neutral-400">
+			<div class="flex items-center gap-2 px-3 text-sm text-neutral-500 dark:text-neutral-400">
 				No conditions defined
 				{#if removedHint}<DefaultHint text={removedHint} />{/if}
 				{#if notAppliedHint}<DefaultHint text={notAppliedHint} pending />{/if}
-			</p>
+			</div>
 		{:else if conditions.length > 0}
 			<div class="space-y-2">
 				<div class="flex items-center gap-2 px-3">

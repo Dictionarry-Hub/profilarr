@@ -85,15 +85,17 @@
 	<!-- Regex Pattern -->
 	<div data-onboarding="regex-pattern" class="space-y-2">
 		<div class="flex items-center justify-between gap-2">
-			<label
-				for="pattern"
-				class="flex items-center gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100"
-			>
-				<span>Regular Expression<span class="text-red-500">*</span></span>
+			<div class="flex items-center gap-1.5">
+				<label
+					for="pattern"
+					class="block text-sm font-medium text-neutral-900 dark:text-neutral-100"
+				>
+					Regular Expression<span class="text-red-500">*</span>
+				</label>
 				{#if defaultHint}
 					<DefaultHint text={defaultHint.text} pending={defaultHint.pending} mono />
 				{/if}
-			</label>
+			</div>
 			{#if validationState === 'checking'}
 				<Label variant="secondary" size="sm" rounded="md">
 					<Loader2 size={10} class="animate-spin text-neutral-500 dark:text-neutral-400" />
