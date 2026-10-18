@@ -6,13 +6,53 @@ updates:
       interval: monthly
       time: '14:00'
       timezone: 'Australia/Adelaide'
+    # Minor and patch updates share one PR. Each major gets its own, so one
+    # breaking upgrade can't hold back the rest, except for packages that
+    # require each other's majors, which move together. Dependabot uses the
+    # first group that matches, so the major groups come before `deno`.
     groups:
+      # @tailwindcss/vite pins tailwindcss to its exact version.
+      tailwind-major:
+        patterns:
+          - 'tailwindcss'
+          - '@tailwindcss/*'
+          - 'prettier-plugin-tailwindcss'
+        update-types: ['major']
+      # SvelteKit needs matching vite and vite-plugin-svelte majors, and the
+      # Vite plugins list each Vite major they support.
+      svelte-vite-major:
+        patterns:
+          - 'svelte'
+          - 'svelte-check'
+          - '@sveltejs/*'
+          - 'vite'
+          - '@deno/vite-plugin'
+          - 'esbuild'
+          - '@lucide/svelte'
+        update-types: ['major']
+      # @playwright/test pins playwright to its exact version.
+      playwright-major:
+        patterns:
+          - 'playwright'
+          - '@playwright/test'
+        update-types: ['major']
+      prettier-major:
+        patterns:
+          - 'prettier'
+          - 'prettier-plugin-svelte'
+        update-types: ['major']
       deno:
         patterns:
           - '*'
+        update-types: ['minor', 'patch']
     cooldown:
       default-days: 7
+      semver-major-days: 30
     ignore:
+      # The SvelteKit 3 upgrade needs code changes and is done by hand in #970.
+      # Remove this once #970 merges.
+      - dependency-name: '@sveltejs/kit'
+        update-types: ['version-update:semver-major']
       # @db/sqlite is pinned to the npm-compat package at 0.12.0; 0.13.0's
       # npm.jsr.io tarball has a broken checksum, so any bump fails CI.
       # Remove once the upstream tarball is fixed (see deno#31749).
@@ -41,5 +81,6 @@ updates:
       github:
         patterns:
           - '*'
+        update-types: ['minor', 'patch']
     cooldown:
       default-days: 7
