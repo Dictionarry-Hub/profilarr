@@ -56,18 +56,29 @@ export const actions: Actions = {
 			formData.get('basic_auth_username_touched')?.toString() === '1';
 		const basicAuthPasswordTouched =
 			formData.get('basic_auth_password_touched')?.toString() === '1';
+		// Saved Basic Auth is sent to the URL, so a new URL drops it unless it is re-entered
+		const urlChanged =
+			!!url && normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url);
 		const basicAuthUsername =
 			basicAuthUsernameTouched && basicAuthUsernameRaw !== undefined
 				? basicAuthUsernameRaw === ''
 					? null
 					: basicAuthUsernameRaw
-				: instance.basic_auth_username;
+				: urlChanged
+					? null
+					: instance.basic_auth_username;
 		const basicAuthPassword =
 			basicAuthPasswordTouched && basicAuthPasswordRaw !== undefined
 				? basicAuthPasswordRaw === ''
 					? null
 					: basicAuthPasswordRaw
-				: instance.basic_auth_password;
+				: urlChanged
+					? null
+					: instance.basic_auth_password;
+		const basicAuthCleared =
+			!!(instance.basic_auth_username || instance.basic_auth_password) &&
+			!basicAuthUsername &&
+			!basicAuthPassword;
 		const tagsJson = formData.get('tags')?.toString() || '';
 		const libraryRefreshInterval =
 			parseInt(formData.get('library_refresh_interval')?.toString() || '0', 10) || 0;
@@ -88,7 +99,7 @@ export const actions: Actions = {
 
 		// The stored key is sent to the URL, so a new URL needs the key re-entered
 		const guardError = requireSecretForDestinationChange({
-			destinationChanged: normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url),
+			destinationChanged: urlChanged,
 			storedSecret: instance.api_key,
 			submittedSecret: formData.get('api_key')?.toString(),
 			secretLabel: 'API key',
@@ -133,7 +144,6 @@ export const actions: Actions = {
 			scheduleLibraryRefreshForInstance(id);
 
 			// A new URL or key may point at a different server, so re-check what it runs
-			const urlChanged = normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url);
 			const keySubmitted = !!formData.get('api_key')?.toString().trim();
 			if (urlChanged || keySubmitted) {
 				const probeClient = createArrClient(instance.type as ArrType, url, apiKey, {
@@ -159,11 +169,12 @@ export const actions: Actions = {
 					url,
 					externalUrl,
 					libraryRefreshInterval,
-					cleanup: cleanup ? { enabled: cleanup.enabled, cron: cleanup.cron } : null
+					cleanup: cleanup ? { enabled: cleanup.enabled, cron: cleanup.cron } : null,
+					basicAuthCleared
 				}
 			});
 
-			return { success: true };
+			return { success: true, basicAuthCleared };
 		} catch (err) {
 			await logger.error('Failed to update arr instance', {
 				source: 'arr/[id]/settings',

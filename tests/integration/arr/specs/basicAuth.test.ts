@@ -245,4 +245,61 @@ test('editing only the password keeps the saved username', async () => {
 	assertEquals(after?.basic_auth_password, 'new-proxy-password');
 });
 
+/** Create an instance with saved Basic Auth at a URL nothing answers on */
+async function createSavedInstance(name: string, host: string): Promise<number> {
+	const result = await createInstance(name, {
+		url: `http://${host}.invalid`,
+		basic_auth_username: PROXY_USER,
+		basic_auth_password: PROXY_PASSWORD
+	});
+	// A successful create redirects to the instance list
+	assertEquals(result.status, 303);
+	return readInstance(name)!.id;
+}
+
+test('changing the URL clears saved credentials left blank', async () => {
+	const id = await createSavedInstance('Moved Blank', 'moved-blank');
+	const result = await updateInstance(id, 'Moved Blank', {
+		url: 'http://moved-blank-new.invalid',
+		api_key: FAKE_KEY
+	});
+	assertEquals(result.status, 200);
+
+	const after = readInstance('Moved Blank');
+	assertEquals(after?.basic_auth_username, null);
+	assertEquals(after?.basic_auth_password, null);
+});
+
+test('changing the URL saves re-entered credentials', async () => {
+	const id = await createSavedInstance('Moved Reentered', 'moved-reentered');
+	const result = await updateInstance(id, 'Moved Reentered', {
+		url: 'http://moved-reentered-new.invalid',
+		api_key: FAKE_KEY,
+		basic_auth_username: 'new-user',
+		basic_auth_password: 'new-password',
+		basic_auth_username_touched: '1',
+		basic_auth_password_touched: '1'
+	});
+	assertEquals(result.status, 200);
+
+	const after = readInstance('Moved Reentered');
+	assertEquals(after?.basic_auth_username, 'new-user');
+	assertEquals(after?.basic_auth_password, 'new-password');
+});
+
+test('changing the URL rejects re-entering only the username', async () => {
+	const id = await createSavedInstance('Moved Partial', 'moved-partial');
+	const result = await updateInstance(id, 'Moved Partial', {
+		url: 'http://moved-partial-new.invalid',
+		api_key: FAKE_KEY,
+		basic_auth_username: PROXY_USER,
+		basic_auth_username_touched: '1'
+	});
+	assertEquals(result.status, 400);
+
+	const after = readInstance('Moved Partial');
+	assertEquals(after?.basic_auth_username, PROXY_USER);
+	assertEquals(after?.basic_auth_password, PROXY_PASSWORD);
+});
+
 await run();

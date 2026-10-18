@@ -247,10 +247,17 @@
 		!!instance &&
 		normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url);
 	// Untouched fields in edit mode keep what is saved, so check the pair the save would leave
+	// A new URL drops saved Basic Auth unless it is re-entered, as the server does
 	$: basicAuthUsernameSet =
-		mode === 'create' || basicAuthUsernameTouched ? !!basicAuthUsername.trim() : hasBasicAuth;
+		mode === 'create' || basicAuthUsernameTouched
+			? !!basicAuthUsername.trim()
+			: hasBasicAuth && !urlChanged;
 	$: basicAuthPasswordSet =
-		mode === 'create' || basicAuthPasswordTouched ? !!basicAuthPassword : hasBasicAuth;
+		mode === 'create' || basicAuthPasswordTouched
+			? !!basicAuthPassword
+			: hasBasicAuth && !urlChanged;
+	$: basicAuthWillClear =
+		hasBasicAuth && urlChanged && !basicAuthUsernameSet && !basicAuthPasswordSet;
 	$: basicAuthError = basicAuthPairError(basicAuthUsernameSet, basicAuthPasswordSet);
 	$: canSubmit =
 		$isDirty &&
@@ -267,6 +274,12 @@
 		lastFormId = form;
 		if (form.success) {
 			alertStore.add('success', 'Settings saved successfully');
+			if (form.basicAuthCleared) {
+				alertStore.add(
+					'warning',
+					'Saved Basic Auth credentials were removed because the URL changed'
+				);
+			}
 			// Reset dirty state with new values (keep apiKey empty)
 			initEdit({
 				name,
@@ -498,6 +511,12 @@
 						}}
 					/>
 				</div>
+				{#if basicAuthWillClear}
+					<p class="text-xs text-amber-600 dark:text-amber-400">
+						Changing the URL removes the saved Basic Auth credentials. Re-enter them to keep using
+						Basic Auth.
+					</p>
+				{/if}
 			</div>
 		</div>
 		<!-- Tags Row -->
