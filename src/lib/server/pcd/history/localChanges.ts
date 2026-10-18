@@ -24,7 +24,7 @@ import {
 	type ScoringOp
 } from './qualityProfileScoring.ts';
 import { relatedChanges, remainingRelatedChanges, type RelatedChange } from './relatedChanges.ts';
-import { resolveAliases } from './touched.ts';
+import { resolveAliases, type AliasResolution } from './touched.ts';
 
 export interface QualityProfileScoringLocalChanges extends ScoringChanges {
 	/** none: no local changes anywhere. unavailable: capture failed for this profile; rows are empty. */
@@ -52,9 +52,12 @@ export function assembleQualityProfileScoringChanges(input: {
 	profileName: string;
 	/** Edges of the finished cache. */
 	edges: EntityEdge[];
+	/** Name resolution over `live`; resolved here when the caller hasn't already. */
+	aliases?: AliasResolution;
 }): QualityProfileScoringLocalChanges {
 	const { snapshot, live, current, profileName } = input;
-	const { upstreamNameOf, rowUpstreamName, upstreamNameBefore } = resolveAliases(live);
+	const { upstreamNameOf, rowUpstreamName, upstreamNameBefore } =
+		input.aliases ?? resolveAliases(live);
 	const upstreamName = upstreamNameOf('quality_profile', profileName);
 	const related = relatedChanges({
 		profileName,
@@ -148,20 +151,29 @@ export async function qualityProfileScoringLocalChanges(
 	databaseId: number,
 	profileName: string
 ): Promise<QualityProfileScoringLocalChanges> {
+	// One request context: names resolve once, and each op is read at most once.
 	const snapshot = cache.getUpstreamSnapshot();
 	const live = pcdOpEntitiesQueries.listLive(databaseId);
+	const aliases = resolveAliases(live);
+	const opDetailsRead = new Map<number, OpDetails>();
+	const opDetails = (ids: number[]) => {
+		const missing = ids.filter((id) => !opDetailsRead.has(id));
+		for (const d of pcdOpEntitiesQueries.listOpDetails(missing)) opDetailsRead.set(d.opId, d);
+		return ids.flatMap((id) => opDetailsRead.get(id) ?? []);
+	};
 	const changes = assembleQualityProfileScoringChanges({
 		snapshot,
 		live,
-		opDetails: (ids) => pcdOpEntitiesQueries.listOpDetails(ids),
+		opDetails,
 		current: await serializeQualityProfile(cache, profileName),
 		profileName,
-		edges: cache.query<EntityEdge>(ENTITY_EDGES_SQL)
+		edges: cache.query<EntityEdge>(ENTITY_EDGES_SQL),
+		aliases
 	});
 
 	// Related changes come from op history; keep only what still differs from its default.
 	if (snapshot.status === 'captured') {
-		const { upstreamNameOf } = resolveAliases(live);
+		const { upstreamNameOf } = aliases;
 		const differs = new Map<RelatedChange, boolean>();
 		for (const change of changes.relatedChanges) {
 			const upstreamName = upstreamNameOf(change.entity, change.name);
