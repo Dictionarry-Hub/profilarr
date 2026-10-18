@@ -195,10 +195,11 @@ export async function qualityProfileScoringLocalChanges(
 		changes.relatedChanges = remainingRelatedChanges({
 			changes: changes.relatedChanges,
 			defaultOf: (change) => {
+				// A vacated name taken again belongs to an entity created locally.
 				const upstreamName = upstreamNameOf(change.entity, change.name);
-				if (upstreamName === null) return undefined;
-				return (snapshot.entities.get(entityKey(change.entity, upstreamName)) ?? undefined) as
-					PortableCustomFormat | PortableRegularExpression | undefined;
+				if (upstreamName === null) return null;
+				return snapshot.entities.get(entityKey(change.entity, upstreamName)) as
+					PortableCustomFormat | PortableRegularExpression | null | undefined;
 			},
 			currentPatterns: new Map(patterns.map((p) => [p.name, p.pattern])),
 			currentConditions,

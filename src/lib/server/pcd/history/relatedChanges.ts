@@ -241,14 +241,15 @@ function conditionDifferences(
 
 /**
  * Keeps the related changes that still differ from their defaults, with what
- * differs. A change with no default to compare against stays as it is, and so
- * does one that didn't apply.
+ * differs, and any that didn't apply. One whose default wasn't captured stays as
+ * it is; one created locally has no default and isn't a related change.
  */
 export function remainingRelatedChanges(input: {
 	changes: RelatedChange[];
+	/** null: not in upstream. undefined: not captured. */
 	defaultOf: (
 		change: RelatedChange
-	) => PortableCustomFormat | PortableRegularExpression | undefined;
+	) => PortableCustomFormat | PortableRegularExpression | null | undefined;
 	/** Current pattern by regex name, and current conditions by custom format name. */
 	currentPatterns: Map<string, string>;
 	currentConditions: Map<string, ConditionData[]>;
@@ -257,10 +258,11 @@ export function remainingRelatedChanges(input: {
 	const kept: RelatedChange[] = [];
 	for (const change of input.changes) {
 		const def = input.defaultOf(change);
-		if (!def || change.changed.includes('deleted')) {
+		if (def === undefined || change.changed.includes('deleted')) {
 			kept.push(change);
 			continue;
 		}
+		if (def === null) continue;
 		if (change.entity === 'regular_expression') {
 			const pattern = (def as PortableRegularExpression).pattern;
 			const current = input.currentPatterns.get(change.name);

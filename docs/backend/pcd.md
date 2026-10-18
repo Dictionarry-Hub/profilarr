@@ -484,7 +484,9 @@ reads as already in effect.
 formats it scores whose conditions changed, regexes they use whose pattern
 changed, and custom formats its defaults score that were deleted. Renames,
 descriptions and tags don't count, and neither do the condition updates a regex
-rename generates. Only changes that still differ from their defaults are listed.
+rename generates. Only changes that still differ from their defaults are listed,
+and custom formats and regexes created locally have no defaults, so they aren't.
+A profile created locally has no defaults either, so its scoring isn't compared.
 
 ## Type Generation
 

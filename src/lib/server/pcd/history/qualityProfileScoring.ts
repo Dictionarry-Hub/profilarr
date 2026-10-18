@@ -27,9 +27,10 @@ export interface ScoreCustomFormat {
 }
 
 /**
- * applied: the user's op applied. pending: it didn't (conflict or error);
- * pendingValue is what it wanted. overridden: re-applied over an upstream change.
- * related: changed by another entity's change (a CF rename or delete).
+ * applied: in effect; every difference from upstream came from a local op, though
+ * not always one this profile can name. pending: the op didn't apply (conflict or
+ * error); pendingValue is what it wanted. overridden: re-applied over an upstream
+ * change. related: changed by another entity's change (a CF rename or delete).
  */
 export type RowStatus = 'applied' | 'pending' | 'overridden' | 'related';
 
@@ -60,7 +61,7 @@ export interface ScoringOp {
 }
 
 export interface ScoringChanges {
-	/** created: not in upstream. */
+	/** created: not in upstream, so there's nothing to compare and rows are empty. */
 	status: 'modified' | 'created' | 'unchanged';
 	rows: ScoringChangeRow[];
 }
@@ -171,6 +172,7 @@ export function qualityProfileScoringChanges(input: {
 	const { current, cfUpstreamNameOf } = input;
 	const cfUpstreamNameBefore = input.cfUpstreamNameBefore ?? ((name) => cfUpstreamNameOf(name));
 	if (input.upstream === undefined) return { status: 'unchanged', rows: [] };
+	if (input.upstream === null) return { status: 'created', rows: [] };
 	const upstream = input.upstream;
 
 	const rows = new Map<string, ScoringChangeRow>();
@@ -250,10 +252,10 @@ export function qualityProfileScoringChanges(input: {
 					},
 					arrType: cell?.arrType ?? hint?.arrType,
 					...valueAt(key),
-					status: 'related',
+					status: 'applied',
 					opIds: []
 				}
-			: { field: key as ScoringField, ...valueAt(key), status: 'related', opIds: [] };
+			: { field: key as ScoringField, ...valueAt(key), status: 'applied', opIds: [] };
 		rows.set(key, row);
 		return row;
 	};
@@ -311,6 +313,8 @@ export function qualityProfileScoringChanges(input: {
 				if (holds) {
 					const row = rows.get(target.key);
 					if (!row) continue;
+					// A difference no other op claims is this related change's.
+					if (row.opIds.length === 0) row.status = 'related';
 					row.opIds.push(op.opId);
 					row.inEffect = true;
 					continue;
@@ -348,8 +352,7 @@ export function qualityProfileScoringChanges(input: {
 		}
 	}
 
-	const status = upstream === null ? 'created' : rows.size > 0 ? 'modified' : 'unchanged';
-	return { status, rows: sortRows([...rows.values()]) };
+	return { status: rows.size > 0 ? 'modified' : 'unchanged', rows: sortRows([...rows.values()]) };
 }
 
 function sortRows(rows: ScoringChangeRow[]): ScoringChangeRow[] {

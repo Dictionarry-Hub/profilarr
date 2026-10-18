@@ -43,6 +43,9 @@
 		{ key: 'status', header: 'Status', align: 'left', width: 'w-64' }
 	];
 
+	const CREATED =
+		'This profile was created locally, so its scoring has no defaults to compare against.';
+
 	const UNAVAILABLE = {
 		database:
 			"Local changes can't be shown right now: the last compile couldn't read the defaults for this database. The logs have the details.",
@@ -103,6 +106,16 @@
 		>
 			{UNAVAILABLE[changes.unavailableReason ?? 'database']}
 		</div>
+	{:else if changes.status === 'created' && changes.relatedChanges.length === 0}
+		<EmptyState
+			icon={History}
+			title="Created Locally"
+			description={CREATED}
+			buttonText="Back to Scoring"
+			buttonHref={scoringHref}
+		/>
+	{:else if changes.status === 'created'}
+		<p class="text-sm text-neutral-600 dark:text-neutral-400">{CREATED}</p>
 	{:else if changes.rows.length === 0 && changes.relatedChanges.length === 0}
 		<EmptyState
 			icon={History}
@@ -118,9 +131,6 @@
 				· <span class="font-medium text-amber-700 dark:text-amber-400"
 					>{pendingCount} not applied</span
 				>
-			{/if}
-			{#if changes.status === 'created'}
-				· created locally, not in the defaults
 			{/if}
 		</p>
 
