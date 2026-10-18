@@ -10,6 +10,7 @@ utilities.
 ## Table of Contents
 
 - [HTTP Client](#http-client)
+- [Arr Basic Auth](#arr-basic-auth)
 - [Arr Version Detection](#arr-version-detection)
 - [Outbound Proxy](#outbound-proxy)
 - [Config](#config)
@@ -42,6 +43,27 @@ Extended by:
 | Parser client   | `utils/arr/parser/client.ts`    |
 | TMDB client     | `utils/tmdb/client.ts`          |
 | Webhook clients | `notifications/notifiers/base/` |
+
+## Arr Basic Auth
+
+**Source:** `utils/arr/base.ts`, `utils/arr/factory.ts`,
+`src/lib/shared/arr/basicAuth.ts`
+
+An Arr instance behind a reverse proxy can store a Basic Auth username and
+password. `BaseArrClient` then sends an `Authorization: Basic` header alongside
+`X-Api-Key` on every request, so the proxy lets the request through and the
+Arr still checks its key.
+
+Every client built from a stored instance must take its options from
+`arrClientOptionsFromInstance()`, passing any timeout or retry overrides
+through it. A client built without it reaches an unproxied instance but fails
+behind the proxy.
+
+The credentials are saved as a pair. `basicAuthPairError()` rejects a username
+without a password or the reverse, and the query layer, both instance form
+actions and the instance form all use it. See
+[security.md](./security.md#secrets-follow-their-destination) for what happens
+to them when the URL changes.
 
 ## Arr Version Detection
 
