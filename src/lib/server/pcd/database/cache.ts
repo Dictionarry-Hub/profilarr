@@ -511,7 +511,6 @@ export class PCDCache {
 			this.db = null;
 		}
 		this.built = false;
-		this.upstream = emptySnapshot();
 	}
 
 	/**
