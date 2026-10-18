@@ -12,6 +12,6 @@
 
 <PageMeta title="Arr Instance · New" />
 
-<div class="p-8">
+<div class="px-4 pb-4 md:px-8 md:pb-8">
 	<InstanceForm mode="create" {form} initialType={typeFromUrl} />
 </div>
