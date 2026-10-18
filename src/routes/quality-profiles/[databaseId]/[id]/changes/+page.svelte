@@ -172,7 +172,16 @@
 					<svelte:fragment slot="cell" let:row let:column>
 						{#if column.key === 'format'}
 							<div class="flex items-center gap-1.5">
-								<span class="font-medium">{settingName(row)}</span>
+								<span class="font-medium">
+									{#if row.customFormatId != null}
+										<InlineLink
+											href={`/custom-formats/${$page.params.databaseId}/${row.customFormatId}/conditions`}
+											text={settingName(row)}
+										/>
+									{:else}
+										{settingName(row)}
+									{/if}
+								</span>
 								{#if renamedFrom(row)}
 									<DefaultHint text={`Default name: ${renamedFrom(row)}`} />
 								{/if}

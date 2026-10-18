@@ -202,20 +202,30 @@ export async function qualityProfileScoringLocalChanges(
 		});
 	}
 
+	// Row ids for links; a deleted entity has none.
+	const scoreName = (row: (typeof changes.rows)[number]) =>
+		row.customFormat?.currentName ?? row.customFormat?.upstreamName ?? null;
+	const scoreRows = changes.rows.filter((r) => r.field === 'custom_format_score');
 	for (const entity of ['custom_format', 'regular_expression'] as const) {
 		const related = changes.relatedChanges.filter((c) => c.entity === entity);
-		if (related.length === 0) continue;
+		const names = new Set(related.map((c) => c.name));
+		if (entity === 'custom_format') {
+			for (const row of scoreRows) {
+				const name = scoreName(row);
+				if (name) names.add(name);
+			}
+		}
+		if (names.size === 0) continue;
 		const rows = await cache.kb
 			.selectFrom(entity === 'custom_format' ? 'custom_formats' : 'regular_expressions')
 			.select(['id', 'name'])
-			.where(
-				'name',
-				'in',
-				related.map((c) => c.name)
-			)
+			.where('name', 'in', [...names])
 			.execute();
 		const ids = new Map(rows.map((r) => [r.name, r.id]));
 		for (const change of related) change.id = ids.get(change.name) ?? null;
+		if (entity === 'custom_format') {
+			for (const row of scoreRows) row.customFormatId = ids.get(scoreName(row) ?? '') ?? null;
+		}
 	}
 	return changes;
 }

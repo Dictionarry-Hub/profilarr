@@ -39,6 +39,8 @@ export type RowStatus = 'applied' | 'pending' | 'overridden' | 'related';
 export interface ScoringChangeRow {
 	field: ScoringField | 'custom_format_score';
 	customFormat?: ScoreCustomFormat;
+	/** The custom format's row id in the cache, for linking; filled in by the caller. */
+	customFormatId?: number | null;
 	arrType?: string;
 	/** null: absent upstream. */
 	upstream: Value;
