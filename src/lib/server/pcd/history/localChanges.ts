@@ -165,7 +165,8 @@ export async function qualityProfileScoringLocalChanges(
 			undefined
 	});
 
-	// Related changes come from op history; keep only what still differs from its default.
+	// Related changes come from op history; keep only what still differs from its default,
+	// or didn't apply.
 	if (changes.relatedChanges.length > 0) {
 		const { upstreamNameOf } = aliases;
 		const named = (entity: RelatedChange['entity']) =>

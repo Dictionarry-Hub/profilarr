@@ -1,7 +1,7 @@
 /**
  * Local changes to the custom formats and regexes a profile depends on: they
- * change what the profile does without changing its own rows. Only condition,
- * pattern and deletion changes count; a rename's knock-on condition updates don't.
+ * change what the profile does. Only condition, pattern and deletion changes
+ * count; a rename's knock-on condition updates don't.
  */
 
 import type { LiveOpEntityRow, OpDetails } from '$db/queries/pcdOpEntities.ts';

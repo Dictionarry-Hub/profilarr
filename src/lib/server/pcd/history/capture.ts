@@ -1,6 +1,7 @@
 /**
- * Snapshots every entity the user layer touches, just before the user layer
- * replays, so local changes can be diffed against upstream.
+ * Snapshots the quality profiles, custom formats and regexes the user layer
+ * touches, just before it replays, so local changes can be diffed against
+ * upstream. A name upstream doesn't have is stored as null.
  *
  * Never throws: a failed build disables the database, so capture problems
  * only degrade history. A failing entity lands in `failures`; anything

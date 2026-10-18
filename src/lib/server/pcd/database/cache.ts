@@ -438,7 +438,10 @@ export class PCDCache {
 		return snapshot;
 	}
 
-	/** Upstream state of every entity the user layer touches, from the last build. */
+	/**
+	 * Upstream state of the profiles, custom formats and regexes the user layer
+	 * touches, from the last build.
+	 */
 	getUpstreamSnapshot(): UpstreamSnapshot {
 		return this.upstream;
 	}

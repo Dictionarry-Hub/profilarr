@@ -86,7 +86,10 @@ export function reach(
 	return [...found.values()];
 }
 
-/** One hop down: entities whose own rows change when a start entity changes. */
+/**
+ * One hop down: entities whose own rows name a start entity, so its rename or
+ * delete cascades into them.
+ */
 export function expandOneHop(start: EntityRef[], edges: EntityEdge[]): EntityRef[] {
 	return reach(start, edges, 'down', 1);
 }

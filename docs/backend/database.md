@@ -119,6 +119,7 @@ All use raw SQL with `?` parameter binding and typed input/output interfaces.
 | `jobRunHistory`         | Job execution history                                               |
 | `pcdOps`                | PCD operation CRUD and filtering                                    |
 | `pcdOpHistory`          | Per-compile op application results                                  |
+| `pcdOpEntities`         | Entities each user op targets or depends on, for local changes      |
 | `notificationServices`  | Notification service config                                         |
 | `logSettings`           | Log level and output settings                                       |
 | `renameRuns`            | Rename job run history                                              |
