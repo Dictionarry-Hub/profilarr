@@ -218,6 +218,8 @@
 						type,
 						url,
 						apiKey,
+						// Lets the server use saved Basic Auth; never sent for a new URL
+						instanceId: mode === 'edit' && !urlChanged ? instance?.id : undefined,
 						basicAuthUsername,
 						basicAuthPassword
 					})

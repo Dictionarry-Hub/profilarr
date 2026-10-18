@@ -302,4 +302,37 @@ test('changing the URL rejects re-entering only the username', async () => {
 	assertEquals(after?.basic_auth_password, PROXY_PASSWORD);
 });
 
+/** The fake under its IP, so an instance there is not a duplicate of FAKE_URL */
+const FAKE_IP_URL = `http://127.0.0.1:${FAKE_PORT}`;
+
+test('Test Connection uses the saved Basic Auth of an existing instance', async () => {
+	const created = await createInstance('Saved Test', {
+		url: FAKE_IP_URL,
+		basic_auth_username: PROXY_USER,
+		basic_auth_password: PROXY_PASSWORD
+	});
+	assertEquals(created.status, 303);
+	const row = readInstance('Saved Test')!;
+
+	const res = await client.post(
+		'/arr/validate',
+		{ type: 'sonarr', url: FAKE_IP_URL, apiKey: FAKE_KEY, instanceId: row.id },
+		{ headers: { Origin: ORIGIN } }
+	);
+	assertEquals(res.status, 200);
+	assertEquals((await res.json()).version, FAKE_VERSION);
+});
+
+test('Test Connection never sends saved Basic Auth to a different URL', async () => {
+	const row = readInstance('Saved Test')!;
+
+	// Same fake, different URL: it only answers if the saved credentials were sent
+	const res = await client.post(
+		'/arr/validate',
+		{ type: 'sonarr', url: FAKE_URL, apiKey: FAKE_KEY, instanceId: row.id },
+		{ headers: { Origin: ORIGIN } }
+	);
+	assertEquals(res.status, 400);
+});
+
 await run();

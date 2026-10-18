@@ -5,6 +5,7 @@ import { probeAndRecordVersion } from '$arr/version.ts';
 import type { ArrType, ArrVersionInfo } from '$arr/types.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { logger } from '$logger/logger.ts';
+import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
 
 const VALID_TYPES = ['radarr', 'sonarr'];
 
@@ -27,11 +28,18 @@ export const POST: RequestHandler = async ({ request }) => {
 			typeof instanceId === 'number' ? arrInstancesQueries.getById(instanceId) : undefined;
 
 		// Create client and probe (3 second timeout, no retries for quick feedback)
+		// Blank Basic Auth fields keep what an existing instance has saved, but only for
+		// its own URL, so saved credentials never go to a new address
+		const useSavedBasicAuth =
+			!!existing &&
+			!basicAuthUsername &&
+			!basicAuthPassword &&
+			normalizeArrInstanceUrl(url) === normalizeArrInstanceUrl(existing.url);
 		const client = createArrClient(type as ArrType, url, apiKey, {
 			timeout: 3000,
 			retries: 0,
-			basicAuthUsername,
-			basicAuthPassword
+			basicAuthUsername: useSavedBasicAuth ? existing.basic_auth_username : basicAuthUsername,
+			basicAuthPassword: useSavedBasicAuth ? existing.basic_auth_password : basicAuthPassword
 		});
 		let info: ArrVersionInfo | null;
 		try {
