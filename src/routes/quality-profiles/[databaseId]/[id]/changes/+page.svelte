@@ -9,6 +9,7 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
 	import Label from '$ui/label/Label.svelte';
+	import DefaultHint from '$ui/tooltip/DefaultHint.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import FieldDiffTable from '$ui/table/FieldDiffTable.svelte';
 	import Table from '$ui/table/Table.svelte';
@@ -168,12 +169,12 @@
 				<Table columns={scoreColumns} data={scoreRows} hoverable={false} responsive>
 					<svelte:fragment slot="cell" let:row let:column>
 						{#if column.key === 'format'}
-							<div class="font-medium">{settingName(row)}</div>
-							{#if renamedFrom(row)}
-								<div class="text-xs text-neutral-500 dark:text-neutral-400">
-									renamed from {renamedFrom(row)}
-								</div>
-							{/if}
+							<div class="flex items-center gap-1.5">
+								<span class="font-medium">{settingName(row)}</span>
+								{#if renamedFrom(row)}
+									<DefaultHint text={`Default name: ${renamedFrom(row)}`} />
+								{/if}
+							</div>
 						{:else if column.key === 'arr'}
 							{#if row.arrType === 'radarr' || row.arrType === 'sonarr'}
 								<Label customVariant={ARR_COLORS[row.arrType]} size="md" rounded="md">
