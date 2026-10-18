@@ -18,9 +18,9 @@ export interface AliasResolution {
 }
 
 /**
- * Resolves names through live renames that applied, in op order. Each row resolves as of
- * its own op, and a rename vacates its old name (null) until a later rename
- * takes it again, so reused names map to the right entity.
+ * Resolves names through live renames that applied, in op order. Each row
+ * resolves as of its own op, and a rename vacates its old name (null) until a
+ * later rename takes it again, so reused names map to the right entity.
  * Chains (A -> B -> C) resolve C to A; cycles (A -> B -> A) resolve A to A.
  */
 export function resolveAliases(rows: LiveOpEntityRow[]): AliasResolution {
@@ -87,7 +87,7 @@ export function resolveAliases(rows: LiveOpEntityRow[]): AliasResolution {
  * upstream tree. Capture runs before replay, so which of those names an
  * upstream entity carries this compile isn't settled yet (a rename that applied
  * last time can fail now); collecting them all covers every outcome, and
- * capture's existence check drops the ones upstream doesn't have.
+ * capture records the ones upstream doesn't have as null.
  */
 export function computeTouchedSet(
 	rows: LiveOpEntityRow[],

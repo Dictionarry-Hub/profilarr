@@ -1,7 +1,7 @@
 /**
  * Local changes to the custom formats and regexes a profile depends on: they
- * change what the profile does without changing its own rows. Only conditions
- * and patterns count, and a rename's knock-on condition updates don't.
+ * change what the profile does without changing its own rows. Only condition,
+ * pattern and deletion changes count; a rename's knock-on condition updates don't.
  */
 
 import type { LiveOpEntityRow, OpDetails } from '$db/queries/pcdOpEntities.ts';
@@ -36,7 +36,7 @@ export interface RelatedChange {
 	summary: string;
 	/** Default against yours, one row per difference; empty when there's nothing to compare. */
 	details: DriftDisplayChange[];
-	/** At least one of its changes conflicted and didn't apply. */
+	/** At least one of its changes didn't apply. */
 	pending: boolean;
 	opIds: number[];
 }

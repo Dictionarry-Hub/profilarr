@@ -1,6 +1,6 @@
 import type { OperationMetadata } from '../core/types.ts';
 
-/** Stored JSON form of op metadata. Migration 077's backfill reads this format. */
+/** Stored JSON form of op metadata. */
 export function buildMetadataJson(metadata?: OperationMetadata): string | null {
 	if (!metadata) return null;
 	const payload: Record<string, unknown> = {

@@ -9,7 +9,8 @@ import type { Migration } from '../migrations.ts';
  * superseded ops, so live lookups must join pcd_ops on state = 'published'.
  *
  * Backfills existing user ops from their metadata using the same rules as
- * entityRowsFromMetadata, skipping any without an entity or name.
+ * entityRowsFromMetadata: an op without an entity or name gets no target row,
+ * but its dependencies are still recorded.
  */
 
 export const migration: Migration = {

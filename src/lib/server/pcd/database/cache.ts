@@ -120,7 +120,7 @@ export class PCDCache {
 			this.upstream = emptySnapshot();
 			let upstreamCaptured = false;
 			for (const operation of operations) {
-				// Before the first user op, the DB holds upstream (base drafts included).
+				// Before the first user op, the DB holds upstream (tweaks and base drafts included).
 				if (!upstreamCaptured && operation.layer === 'user') {
 					upstreamCaptured = true;
 					this.upstream = await this.captureUpstream();

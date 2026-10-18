@@ -1,5 +1,3 @@
-/** Per-cell local change markers for the scoring tables, keyed by CF name, then arr type. */
-
 import type { PageData } from '../$types';
 
 type ChangeRow = PageData['localChanges']['rows'][number];
@@ -15,11 +13,13 @@ export interface ScoreMarker {
 
 export type ScoreMarkers = Record<string, Record<string, ScoreMarker>>;
 
+/** Per-cell local change markers for the scoring tables, keyed by CF name, then arr type. */
 export function buildScoreMarkers(rows: ChangeRow[]): ScoreMarkers {
 	const markers: ScoreMarkers = {};
 	for (const row of rows) {
 		if (row.field !== 'custom_format_score' || !row.arrType) continue;
-		// The table lists CFs by current name; a row removed from this profile has none.
+		// The table lists CFs by current name. A removed row has none, so this falls back to
+		// the default name, which differs only if the CF was renamed.
 		const name = row.customFormat?.currentName ?? row.customFormat?.upstreamName;
 		if (!name) continue;
 		markers[name] ??= {};

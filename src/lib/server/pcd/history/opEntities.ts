@@ -1,7 +1,7 @@
 /**
- * Builds pcd_op_entities rows from op metadata. Migration 077's backfill
- * applies the same rules in SQL, including empty string = absent, so a
- * change here needs the same change there.
+ * Builds pcd_op_entities rows from op metadata, with empty string = absent.
+ * Migration 077 backfilled existing ops with these rules, so changing them
+ * needs a new migration to rebuild the rows.
  */
 
 import type { OpEntityRow } from '$db/queries/pcdOpEntities.ts';

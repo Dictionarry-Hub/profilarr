@@ -19,7 +19,7 @@ export interface ConditionDefault {
 	status: 'modified' | 'added' | 'unchanged';
 	default: NormalizedCondition | null;
 	changed: ConditionField[];
-	/** A change you made to this condition conflicted and didn't apply. */
+	/** A change you made to this condition didn't apply. */
 	pending: boolean;
 }
 
@@ -73,7 +73,7 @@ export function customFormatConditionDefaults(input: {
 	upstream: PortableCustomFormat | null | undefined;
 	current: ConditionData[];
 	regexUpstreamName: (name: string) => string | null;
-	/** Condition names with a change that conflicted. */
+	/** Condition names with a change that didn't apply. */
 	pendingConditions: Set<string>;
 }): CustomFormatDefaults {
 	const currentNames = new Set(input.current.map((c) => c.name));

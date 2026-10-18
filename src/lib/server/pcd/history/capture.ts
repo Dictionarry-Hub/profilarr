@@ -1,6 +1,6 @@
 /**
- * Snapshots every entity the user layer touches at the base/user boundary
- * of a compile, so local changes can be diffed against upstream.
+ * Snapshots every entity the user layer touches, just before the user layer
+ * replays, so local changes can be diffed against upstream.
  *
  * Never throws: a failed build disables the database, so capture problems
  * only degrade history. A failing entity lands in `failures`; anything
@@ -39,7 +39,7 @@ export interface SnapshotFailure {
 export interface UpstreamSnapshot {
 	/**
 	 * none: no live user changes, nothing captured.
-	 * captured: entities holds every touched snapshot entity.
+	 * captured: entities holds every touched snapshot entity, except those in failures.
 	 * unavailable: capture failed as a whole; see error.
 	 */
 	status: 'none' | 'captured' | 'unavailable';

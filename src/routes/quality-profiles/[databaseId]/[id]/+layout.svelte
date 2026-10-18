@@ -35,7 +35,8 @@
 			active: currentPath.includes('/qualities'),
 			icon: Layers
 		},
-		// Only after a local change; also while on it, so it doesn't vanish underfoot.
+		// Only after a local change or when they can't be read; also while on it, so it
+		// doesn't vanish underfoot.
 		...(changeCount > 0 || data.localChanges.snapshot === 'unavailable' || onChanges
 			? [
 					{
