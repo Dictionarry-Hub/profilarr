@@ -8,29 +8,14 @@ import type { LiveOpEntityRow, OpDetails } from '$db/queries/pcdOpEntities.ts';
 import { pcdOpEntitiesQueries } from '$db/queries/pcdOpEntities.ts';
 import type { PCDCache } from '$pcd/index.ts';
 import type { ConditionData } from '$shared/pcd/display.ts';
+import type { ConditionField, NormalizedCondition } from '$shared/pcd/conditionFormat.ts';
 import type { PortableCustomFormat, PortableRegularExpression } from '$shared/pcd/portable.ts';
 import { getConditionsForEvaluation } from '../entities/customFormats/conditions/read.ts';
 import type { UpstreamSnapshot } from './capture.ts';
 import { entityKey } from './opEntities.ts';
 import { resolveAliases } from './touched.ts';
 
-export interface NormalizedCondition {
-	type: string;
-	arrType: string;
-	negate: boolean;
-	required: boolean;
-	patterns: string[];
-	languages: string[];
-	sources: string[];
-	resolutions: string[];
-	qualityModifiers: string[];
-	releaseTypes: string[];
-	indexerFlags: string[];
-	size: { minBytes: number | null; maxBytes: number | null } | null;
-	years: { minYear: number | null; maxYear: number | null } | null;
-}
-
-export type ConditionField = keyof NormalizedCondition;
+export type { ConditionField, NormalizedCondition };
 
 export interface ConditionDefault {
 	/** modified: differs from its default. added: not in the defaults. */

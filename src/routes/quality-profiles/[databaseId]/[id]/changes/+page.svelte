@@ -5,6 +5,9 @@
 	import InlineLink from '$ui/link/InlineLink.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
+	import Label from '$ui/label/Label.svelte';
+	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
+	import FieldDiffTable from '$ui/table/FieldDiffTable.svelte';
 	import Table from '$ui/table/Table.svelte';
 	import type { Column } from '$ui/table/types.ts';
 	import type { PageData } from './$types';
@@ -56,15 +59,13 @@
 			: `/regular-expressions/${databaseId}/${change.id}`;
 	}
 
-	function relatedChange(change: Related): string {
-		return change.changed.includes('deleted') ? 'deleted' : `${change.changed.join(', ')} changed`;
-	}
+	const relatedColumns: Column<Related>[] = [
+		{ key: 'name', header: 'Name' },
+		{ key: 'entity', header: 'Entity', width: 'w-44' },
+		{ key: 'change', header: 'Change', width: 'w-64' }
+	];
 
-	function relatedContext(change: Related): string {
-		if (change.changed.includes('deleted')) return 'Custom format this profile scored';
-		if (change.entity === 'custom_format') return 'Custom format this profile scores';
-		return `Regex used by ${change.via.join(', ')}`;
-	}
+	const isDeleted = (change: Related) => change.changed.includes('deleted');
 
 	$: changes = data.localChanges;
 	$: pendingCount = changes.rows.filter((r) => r.status === 'pending').length;
@@ -160,38 +161,61 @@
 		<section class="space-y-2">
 			<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Related Changes</h2>
 			<p class="text-sm text-neutral-600 dark:text-neutral-400">
-				Your changes to what this profile depends on. Its own settings are unchanged by these.
+				Changes to custom formats and regexes this profile uses. They change which releases it
+				matches, even where its own scores haven't changed.
 			</p>
-			<ul
-				class="divide-y divide-neutral-200 rounded-lg border border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800"
+			<ExpandableTable
+				columns={relatedColumns}
+				data={changes.relatedChanges}
+				getRowId={(row) => `${row.entity}:${row.name}`}
+				responsive
+				chevronPosition="right"
+				primaryColumnKey="name"
+				flushExpanded
+				disableExpandWhen={(row) => row.details.length === 0}
 			>
-				{#each changes.relatedChanges as change (change.entity + ':' + change.name)}
-					{@const href = relatedHref(change)}
-					<li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
-						<div>
-							<div class="font-medium">
+				<svelte:fragment slot="cell" let:row let:column>
+					{#if column.key === 'name'}
+						{@const href = relatedHref(row)}
+						<div class="flex flex-col gap-0.5">
+							<span class="text-sm font-medium">
 								{#if href}
-									<InlineLink {href} text={change.name} />
+									<InlineLink {href} text={row.name} />
 								{:else}
 									<span
-										class="text-neutral-900 dark:text-neutral-100 {change.changed.includes(
-											'deleted'
-										)
+										class="text-neutral-900 dark:text-neutral-100 {isDeleted(row)
 											? 'line-through'
-											: ''}">{change.name}</span
+											: ''}">{row.name}</span
 									>
 								{/if}
-							</div>
-							<div class="text-xs text-neutral-500 dark:text-neutral-400">
-								{relatedContext(change)} · {relatedChange(change)}
-							</div>
+							</span>
+							{#if row.entity === 'regular_expression'}
+								<span class="text-xs text-neutral-500 dark:text-neutral-400">
+									Used by {row.via.join(', ')}
+								</span>
+							{/if}
 						</div>
-						{#if change.pending}
-							<Badge variant="warning">Not Applied</Badge>
-						{/if}
-					</li>
-				{/each}
-			</ul>
+					{:else if column.key === 'entity'}
+						<Label variant="secondary" size="md" rounded="md">
+							{row.entity === 'custom_format' ? 'Custom Format' : 'Regular Expression'}
+						</Label>
+					{:else if column.key === 'change'}
+						<div class="flex flex-wrap items-center gap-1.5">
+							<Label variant={isDeleted(row) ? 'danger' : 'secondary'} size="md" rounded="md">
+								{row.summary}
+							</Label>
+							{#if row.pending}
+								<Label variant="warning" size="md" rounded="md">Not Applied</Label>
+							{/if}
+						</div>
+					{/if}
+				</svelte:fragment>
+				<svelte:fragment slot="expanded" let:row>
+					<div class="px-4 py-3 md:px-6 md:py-4">
+						<FieldDiffTable changes={row.details} expectedLabel="Default" actualLabel="Yours" />
+					</div>
+				</svelte:fragment>
+			</ExpandableTable>
 		</section>
 	{/if}
 </div>

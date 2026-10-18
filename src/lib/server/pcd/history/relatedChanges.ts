@@ -5,10 +5,20 @@
  */
 
 import type { LiveOpEntityRow, OpDetails } from '$db/queries/pcdOpEntities.ts';
+import type { DriftDisplayChange } from '$shared/drift.ts';
+import {
+	CONDITION_FIELD_LABELS,
+	conditionFieldValue,
+	conditionSummary
+} from '$shared/pcd/conditionFormat.ts';
 import type { ConditionData } from '$shared/pcd/display.ts';
 import type { PortableCustomFormat, PortableRegularExpression } from '$shared/pcd/portable.ts';
 import { reach, type EntityEdge } from './edges.ts';
-import { customFormatConditionDefaults } from './entityDefaults.ts';
+import {
+	customFormatConditionDefaults,
+	normalizeCondition,
+	type CustomFormatDefaults
+} from './entityDefaults.ts';
 
 export type RelatedChangeField = 'conditions' | 'pattern' | 'deleted';
 
@@ -21,6 +31,10 @@ export interface RelatedChange {
 	/** For a regex: the custom formats this profile scores that use it. */
 	via: string[];
 	changed: RelatedChangeField[];
+	/** One line on what changed, e.g. "2 conditions changed". */
+	summary: string;
+	/** Default against yours, one row per difference; empty when there's nothing to compare. */
+	details: DriftDisplayChange[];
 	/** At least one of its changes conflicted and didn't apply. */
 	pending: boolean;
 	opIds: number[];
@@ -148,6 +162,8 @@ export function relatedChanges(input: {
 							.sort()
 					: [],
 			changed: [...changed],
+			summary: changed.has('deleted') ? 'deleted' : `${[...changed].join(', ')} changed`,
+			details: [],
 			pending,
 			opIds
 		});
@@ -155,9 +171,67 @@ export function relatedChanges(input: {
 	return changes.sort((a, b) => a.entity.localeCompare(b.entity) || a.name.localeCompare(b.name));
 }
 
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+/** A custom format's condition differences as diff rows, plus a one-line summary. */
+function conditionDifferences(
+	d: CustomFormatDefaults,
+	current: ConditionData[]
+): { summary: string; details: DriftDisplayChange[] } {
+	// Yours shows regexes by their current names.
+	const mine = new Map(current.map((c) => [c.name, normalizeCondition(c, (name) => name)]));
+	const details: DriftDisplayChange[] = [];
+	let modified = 0;
+	let added = 0;
+	for (const [name, cd] of Object.entries(d.conditions)) {
+		const now = mine.get(name);
+		if (!now) continue;
+		if (cd.status === 'added') {
+			added++;
+			details.push({
+				id: `${name}:added`,
+				label: name,
+				detail: 'Added',
+				actual: { text: conditionSummary(now) },
+				tone: 'success'
+			});
+		} else if (cd.status === 'modified' && cd.default) {
+			modified++;
+			for (const field of cd.changed) {
+				details.push({
+					id: `${name}:${field}`,
+					label: name,
+					detail: CONDITION_FIELD_LABELS[field],
+					expected: { text: conditionFieldValue(field, cd.default) },
+					actual: { text: conditionFieldValue(field, now) },
+					tone: 'warning'
+				});
+			}
+		}
+	}
+	for (const r of d.removed) {
+		details.push({
+			id: `${r.name}:removed`,
+			label: r.name,
+			detail: 'Removed',
+			expected: { text: conditionSummary(r.condition) },
+			tone: 'danger'
+		});
+	}
+	const summary = [
+		modified && `${plural(modified, 'condition')} changed`,
+		added && `${plural(added, 'condition')} added`,
+		d.removed.length && `${plural(d.removed.length, 'condition')} removed`
+	]
+		.filter(Boolean)
+		.join(', ');
+	return { summary, details };
+}
+
 /**
- * Keeps the related changes that still differ from their defaults. A change
- * with no default to compare against stays, and so does one that didn't apply.
+ * Keeps the related changes that still differ from their defaults, with what
+ * differs. A change with no default to compare against stays as it is, and so
+ * does one that didn't apply.
  */
 export function remainingRelatedChanges(input: {
 	changes: RelatedChange[];
@@ -169,18 +243,49 @@ export function remainingRelatedChanges(input: {
 	currentConditions: Map<string, ConditionData[]>;
 	regexUpstreamName: (name: string) => string | null;
 }): RelatedChange[] {
-	return input.changes.filter((change) => {
+	const kept: RelatedChange[] = [];
+	for (const change of input.changes) {
 		const def = input.defaultOf(change);
-		if (change.pending || !def || change.changed.includes('deleted')) return true;
-		if (change.entity === 'regular_expression') {
-			return input.currentPatterns.get(change.name) !== (def as PortableRegularExpression).pattern;
+		if (!def || change.changed.includes('deleted')) {
+			kept.push(change);
+			continue;
 		}
-		const d = customFormatConditionDefaults({
-			upstream: def as PortableCustomFormat,
-			current: input.currentConditions.get(change.name) ?? [],
-			regexUpstreamName: input.regexUpstreamName,
-			pendingConditions: new Set()
-		});
-		return Object.keys(d.conditions).length > 0 || d.removed.length > 0;
-	});
+		if (change.entity === 'regular_expression') {
+			const pattern = (def as PortableRegularExpression).pattern;
+			const current = input.currentPatterns.get(change.name);
+			if (current === pattern) {
+				if (change.pending) kept.push(change);
+				continue;
+			}
+			kept.push({
+				...change,
+				details: [
+					{
+						id: 'pattern',
+						label: 'Pattern',
+						expected: { text: pattern, mono: true },
+						actual: current === undefined ? undefined : { text: current, mono: true },
+						tone: 'warning'
+					}
+				]
+			});
+			continue;
+		}
+		const current = input.currentConditions.get(change.name) ?? [];
+		const { summary, details } = conditionDifferences(
+			customFormatConditionDefaults({
+				upstream: def as PortableCustomFormat,
+				current,
+				regexUpstreamName: input.regexUpstreamName,
+				pendingConditions: new Set()
+			}),
+			current
+		);
+		if (details.length === 0) {
+			if (change.pending) kept.push(change);
+			continue;
+		}
+		kept.push({ ...change, summary, details });
+	}
+	return kept;
 }
