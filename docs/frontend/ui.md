@@ -562,6 +562,13 @@ Additional call sites worth skimming:
 expand region (click a chevron, get a nested detail view). Used in
 entity-testing tables where each row has nested per-release detail.
 
+**`$ui/table/FieldDiffTable.svelte`** compares two sides of a set of fields,
+one row per difference, with values as labels. It takes the shared
+`DriftDisplayChange` rows from `$shared/drift.ts`; `expectedLabel` and
+`actualLabel` name the two columns. Arr drift uses it for Profilarr against
+the arr, and a profile's Changes tab for defaults against yours, both inside an
+`ExpandableTable` row.
+
 **`$ui/table/TableActionButton.svelte`** is a button styled to match the
 dense vertical rhythm of table action cells; prefer it over `Button` when
 the button lives in a table column.

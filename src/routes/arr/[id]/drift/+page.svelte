@@ -22,7 +22,7 @@
 	import Play from '@lucide/svelte/icons/play';
 	import Save from '@lucide/svelte/icons/save';
 	import type { DriftDisplayEntity, DriftDisplayTone } from '$shared/drift.ts';
-	import DriftFieldDiffTable from './components/DriftFieldDiffTable.svelte';
+	import FieldDiffTable from '$ui/table/FieldDiffTable.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -317,7 +317,7 @@
 
 						<svelte:fragment slot="expanded" let:row>
 							<div class="px-4 py-3 md:px-6 md:py-4">
-								<DriftFieldDiffTable changes={row.changes} arrLabel={driftArrLabel} />
+								<FieldDiffTable changes={row.changes} actualLabel={driftArrLabel} />
 							</div>
 						</svelte:fragment>
 					</ExpandableTable>

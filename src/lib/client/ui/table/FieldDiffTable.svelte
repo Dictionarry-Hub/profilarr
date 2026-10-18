@@ -6,7 +6,9 @@
 	import QualityListDiff from './QualityListDiff.svelte';
 
 	export let changes: DriftDisplayChange[];
-	export let arrLabel = 'Arr';
+	/** Headers for the two sides being compared. */
+	export let expectedLabel = 'Profilarr';
+	export let actualLabel = 'Arr';
 
 	type LabelVariant = 'default' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -24,8 +26,8 @@
 
 	$: columns = [
 		{ key: 'label', header: 'Field' },
-		{ key: 'expected', header: 'Profilarr' },
-		{ key: 'actual', header: arrLabel }
+		{ key: 'expected', header: expectedLabel },
+		{ key: 'actual', header: actualLabel }
 	] satisfies Column<DriftDisplayChange>[];
 </script>
 
