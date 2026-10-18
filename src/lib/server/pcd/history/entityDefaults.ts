@@ -24,8 +24,11 @@ export interface ConditionDefault {
 }
 
 export interface CustomFormatDefaults {
-	/** Keyed by current condition name; only conditions with something to show. */
-	conditions: Record<string, ConditionDefault>;
+	/**
+	 * Keyed by current condition name; only conditions with something to show. A Map,
+	 * because a name can be anything, including __proto__.
+	 */
+	conditions: Map<string, ConditionDefault>;
 	/** In the defaults, but removed locally. */
 	removed: Array<{ name: string; condition: NormalizedCondition }>;
 	/** Conditions whose change didn't apply and that aren't here now, like a failed addition. */
@@ -78,7 +81,7 @@ export function customFormatConditionDefaults(input: {
 }): CustomFormatDefaults {
 	const currentNames = new Set(input.current.map((c) => c.name));
 	const result: CustomFormatDefaults = {
-		conditions: {},
+		conditions: new Map(),
 		removed: [],
 		notApplied: [...input.pendingConditions].filter((name) => !currentNames.has(name)).sort()
 	};
@@ -94,7 +97,7 @@ export function customFormatConditionDefaults(input: {
 		const status = def === null ? 'added' : changed.length > 0 ? 'modified' : 'unchanged';
 		const pending = input.pendingConditions.has(c.name);
 		if (status === 'unchanged' && !pending) continue;
-		result.conditions[c.name] = { status, default: def, changed, pending };
+		result.conditions.set(c.name, { status, default: def, changed, pending });
 	}
 	for (const [name, condition] of defaults) {
 		if (!currentNames.has(name)) result.removed.push({ name, condition });
@@ -156,7 +159,7 @@ export function customFormatDefaults(
 	current: ConditionData[]
 ): CustomFormatDefaults {
 	const snapshot = cache.getUpstreamSnapshot();
-	if (snapshot.status !== 'captured') return { conditions: {}, removed: [], notApplied: [] };
+	if (snapshot.status !== 'captured') return { conditions: new Map(), removed: [], notApplied: [] };
 	const ctx = entityContext(
 		snapshot,
 		pcdOpEntitiesQueries.listLive(databaseId),
@@ -164,7 +167,7 @@ export function customFormatDefaults(
 		'custom_format',
 		formatName
 	);
-	if (!ctx) return { conditions: {}, removed: [], notApplied: [] };
+	if (!ctx) return { conditions: new Map(), removed: [], notApplied: [] };
 	const pendingConditions = new Set(
 		[...ctx.pendingFields]
 			.filter((f) => f.startsWith('condition:'))

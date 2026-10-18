@@ -234,6 +234,11 @@
 		mainFormElement?.requestSubmit();
 	}
 
+	function hintFor(defaults: PageData['defaults'], name: string) {
+		const d = defaults.conditions.get(name);
+		return d ? { text: describeConditionDefault(d), pending: d.pending } : null;
+	}
+
 	$: removedHint =
 		data.defaults.removed.length > 0
 			? `Removed here, still in the defaults: ${data.defaults.removed.map((r) => r.name).join(', ')}`
@@ -386,12 +391,7 @@
 								nameConflict={hasNameConflict(condition)}
 								on:remove={() => handleRemove(condition._key)}
 								on:change={(e) => handleConditionChange(e.detail, condition._key)}
-								defaultHint={data.defaults.conditions[condition.name]
-									? {
-											text: describeConditionDefault(data.defaults.conditions[condition.name]),
-											pending: data.defaults.conditions[condition.name].pending
-										}
-									: null}
+								defaultHint={hintFor(data.defaults, condition.name)}
 							/>
 						</div>
 					{/each}

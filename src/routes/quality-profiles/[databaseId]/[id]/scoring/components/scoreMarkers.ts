@@ -15,7 +15,8 @@ export type ScoreMarkers = Record<string, Record<string, ScoreMarker>>;
 
 /** Per-cell local change markers for the scoring tables, keyed by CF name, then arr type. */
 export function buildScoreMarkers(rows: ChangeRow[]): ScoreMarkers {
-	const markers: ScoreMarkers = {};
+	// No prototype: a custom format can be named __proto__.
+	const markers: ScoreMarkers = Object.create(null);
 	for (const row of rows) {
 		if (row.field !== 'custom_format_score' || !row.arrType) continue;
 		// The table lists CFs by current name. A removed row has none, so this falls back to

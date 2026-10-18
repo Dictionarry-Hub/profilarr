@@ -206,7 +206,7 @@ function conditionDifferences(
 	const details: DriftDisplayChange[] = [];
 	let modified = 0;
 	let added = 0;
-	for (const [name, cd] of Object.entries(d.conditions)) {
+	for (const [name, cd] of d.conditions) {
 		const now = mine.get(name);
 		if (!now) continue;
 		if (cd.status === 'added') {

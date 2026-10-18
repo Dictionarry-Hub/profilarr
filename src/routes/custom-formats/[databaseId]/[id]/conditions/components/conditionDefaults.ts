@@ -3,7 +3,7 @@
 import { CONDITION_FIELD_LABELS, conditionFieldValue } from '$shared/pcd/conditionFormat.ts';
 import type { PageData } from '../$types';
 
-type ConditionDefault = PageData['defaults']['conditions'][string];
+type ConditionDefault = PageData['defaults']['conditions'] extends Map<string, infer D> ? D : never;
 type Normalized = NonNullable<ConditionDefault['default']>;
 type Field = ConditionDefault['changed'][number];
 
