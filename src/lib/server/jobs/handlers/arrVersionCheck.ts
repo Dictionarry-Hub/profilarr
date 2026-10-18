@@ -1,7 +1,7 @@
 import { jobQueueRegistry } from '../queueRegistry.ts';
 import type { JobHandler } from '../queueTypes.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { createArrClient } from '$arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
 import { probeAndRecordVersion } from '$arr/version.ts';
 import type { ArrType } from '$arr/types.ts';
 
@@ -26,10 +26,12 @@ const arrVersionCheckHandler: JobHandler = async (job) => {
 		return { status: 'cancelled', output: 'Arr instance not found' };
 	}
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key, {
-		timeout: 10000,
-		retries: 0
-	});
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance, { timeout: 10000, retries: 0 })
+	);
 
 	try {
 		const info = await probeAndRecordVersion(instance, client, 'ArrVersionCheckJob');

@@ -118,7 +118,9 @@ export const actions = {
 			if (created) {
 				const probeClient = createArrClient(type as ArrType, url, apiKey, {
 					timeout: 5000,
-					retries: 0
+					retries: 0,
+					basicAuthUsername,
+					basicAuthPassword
 				});
 				try {
 					await probeAndRecordVersion(created, probeClient, 'arr/new');

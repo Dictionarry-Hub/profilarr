@@ -29,6 +29,7 @@
  * 2. /arr/[id]/upgrades does not expose arr credentials
  * 3. /arr/[id]/rename does not expose arr credentials
  * 4. /arr/[id]/sync does not expose arr credentials
+ * 4b. /arr/[id]/logs does not expose arr credentials
  * 5. /databases list does not expose PATs
  * 6. /databases/[id]/tweaks does not expose PAT
  * 7. /quality-profiles/[databaseId] list does not expose PATs
@@ -189,11 +190,15 @@ async function seedSecrets(dbPath: string) {
 	}
 }
 
-/** Login and fetch a page, return the body text */
+/**
+ * Login and fetch a page, return the body text. Accept HTML like a browser
+ * does, so routes that also have a JSON endpoint (such as /arr/[id]/logs)
+ * render the page.
+ */
 async function fetchPage(path: string): Promise<string> {
 	const client = new TestClient(ORIGIN);
 	await login(client, 'admin', 'password123', ORIGIN);
-	const res = await client.get(path, { followRedirects: true });
+	const res = await client.get(path, { followRedirects: true, headers: { Accept: 'text/html' } });
 	return await res.text();
 }
 
@@ -236,6 +241,11 @@ test('/arr/[id]/rename does not expose arr credentials', async () => {
 
 test('/arr/[id]/sync does not expose arr credentials', async () => {
 	const body = await fetchPage(`/arr/${arrInstanceId}/sync`);
+	assertArrCredentialsNotExposed(body);
+});
+
+test('/arr/[id]/logs does not expose arr credentials', async () => {
+	const body = await fetchPage(`/arr/${arrInstanceId}/logs`);
 	assertArrCredentialsNotExposed(body);
 });
 

@@ -31,19 +31,13 @@ export type ArrInstancePublic = Omit<
 >;
 
 export function toPublicArrInstance(instance: ArrInstance): ArrInstancePublic {
-	return {
-		id: instance.id,
-		name: instance.name,
-		type: instance.type,
-		url: instance.url,
-		external_url: instance.external_url,
-		tags: instance.tags,
-		enabled: instance.enabled,
-		library_refresh_interval: instance.library_refresh_interval,
-		library_last_refreshed_at: instance.library_last_refreshed_at,
-		created_at: instance.created_at,
-		updated_at: instance.updated_at
-	};
+	const {
+		api_key: _apiKey,
+		basic_auth_username: _basicAuthUsername,
+		basic_auth_password: _basicAuthPassword,
+		...rest
+	} = instance;
+	return rest;
 }
 
 export interface DetectedVersionInput {
