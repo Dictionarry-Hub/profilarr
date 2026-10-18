@@ -1,8 +1,11 @@
 /** Per-cell local change markers for the scoring tables, keyed by CF name, then arr type. */
 
-type Value = number | boolean | null;
+import type { PageData } from '../$types';
 
-export type ScoreMarkerStatus = 'applied' | 'pending' | 'overridden' | 'related';
+type ChangeRow = PageData['localChanges']['rows'][number];
+type Value = ChangeRow['upstream'];
+
+export type ScoreMarkerStatus = ChangeRow['status'];
 
 export interface ScoreMarker {
 	status: ScoreMarkerStatus;
@@ -11,15 +14,6 @@ export interface ScoreMarker {
 }
 
 export type ScoreMarkers = Record<string, Record<string, ScoreMarker>>;
-
-interface ChangeRow {
-	field: string;
-	customFormat?: { upstreamName: string | null; currentName: string | null };
-	arrType?: string;
-	upstream: Value;
-	status: ScoreMarkerStatus;
-	pendingValue?: Value;
-}
 
 export function buildScoreMarkers(rows: ChangeRow[]): ScoreMarkers {
 	const markers: ScoreMarkers = {};
