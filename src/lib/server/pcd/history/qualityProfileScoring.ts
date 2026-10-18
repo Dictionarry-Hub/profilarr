@@ -69,10 +69,18 @@ export interface ScoringChanges {
 
 const SCORE_PREFIX = 'custom_format_score:';
 
+const cfKey = (cf: ScoreCustomFormat) =>
+	cf.upstreamName !== null ? `u:${cf.upstreamName}` : `l:${cf.currentName}`;
+
 const scoreKey = (cf: ScoreCustomFormat, arrType: string) =>
-	cf.upstreamName !== null
-		? `${SCORE_PREFIX}u:${cf.upstreamName}:${arrType}`
-		: `${SCORE_PREFIX}l:${cf.currentName}:${arrType}`;
+	`${SCORE_PREFIX}${cfKey(cf)}:${arrType}`;
+
+/** Raw score rows by custom format (cfKey), then arr type ('all' is the shared row). */
+type RawScores = Map<string, Map<string, number>>;
+
+/** As sync resolves it: the arr type's own row, else the shared row. */
+const effective = (cfRows: Map<string, number> | undefined, arrType: string): Value =>
+	cfRows?.get(arrType) ?? cfRows?.get('all') ?? null;
 
 function scalars(p: PortableQualityProfile | null): Record<ScoringField, Value> {
 	return {
@@ -179,40 +187,48 @@ export function qualityProfileScoringChanges(input: {
 		upstreamName: cfUpstreamNameOf(name),
 		currentName: name
 	});
-	// Raw score rows (shared 'all' included) as the overlay sees them: current,
-	// plus the intended changes of pending ops replayed so far.
-	let intended = new Map(
-		current.customFormatScores.map((s) => [
-			scoreKey(currentCustomFormat(s.customFormatName), s.arrType),
-			s.score
-		])
-	);
-	// One resolver for every effective score, as sync resolves it: the arr type's own row, else the shared row.
-	const effective = (rawRows: Map<string, number>, cf: ScoreCustomFormat, arrType: string) =>
-		rawRows.get(scoreKey(cf, arrType)) ?? rawRows.get(scoreKey(cf, 'all')) ?? null;
-	/** Applies an op's score rows; returns each arr type cell they reach, with its effective value after. */
-	const applyScores = (entries: ScoreEntry[]) => {
-		const after = new Map(intended);
+	// actual: the database now. intended: actual plus pending ops' changes, with
+	// later applied writes taking precedence over earlier pending ones.
+	const actual: RawScores = new Map();
+	for (const s of current.customFormatScores) {
+		const key = cfKey(currentCustomFormat(s.customFormatName));
+		if (!actual.has(key)) actual.set(key, new Map());
+		actual.get(key)!.set(s.arrType, s.score);
+	}
+	const intended: RawScores = new Map(actual);
+	/**
+	 * Applies an op's score rows to `base` without changing it, copying only the
+	 * custom formats they touch. Returns those formats' rows after, and each arr
+	 * type cell the rows reach with its effective value after.
+	 */
+	const applyScores = (base: RawScores, entries: ScoreEntry[]) => {
+		const touched = new Map<string, Map<string, number>>();
 		for (const e of entries) {
-			const key = scoreKey(e.customFormat, e.arrType);
-			if (e.to === null) after.delete(key);
-			else after.set(key, e.to as number);
+			const key = cfKey(e.customFormat);
+			if (!touched.has(key)) touched.set(key, new Map(base.get(key)));
+			if (e.to === null) touched.get(key)!.delete(e.arrType);
+			else touched.get(key)!.set(e.arrType, e.to as number);
 		}
 		const reached = new Map<string, OpTarget>();
 		for (const e of entries) {
+			const before = base.get(cfKey(e.customFormat));
+			const after = touched.get(cfKey(e.customFormat))!;
 			for (const arrType of e.arrType === 'all' ? ARR_TYPES : [e.arrType]) {
-				const own = scoreKey(e.customFormat, arrType);
 				// A shared row doesn't reach an arr type whose own row decides it throughout.
-				if (e.arrType === 'all' && intended.has(own) && after.has(own)) continue;
-				reached.set(own, {
-					key: own,
-					wanted: effective(after, e.customFormat, arrType),
+				if (e.arrType === 'all' && before?.has(arrType) && after.has(arrType)) continue;
+				const key = scoreKey(e.customFormat, arrType);
+				reached.set(key, {
+					key,
+					wanted: effective(after, arrType),
 					customFormat: e.customFormat,
 					arrType
 				});
 			}
 		}
-		return { after, reached: [...reached.values()] };
+		return { touched, reached: [...reached.values()] };
+	};
+	const commit = (touched: Map<string, Map<string, number>>) => {
+		for (const [key, cfRows] of touched) intended.set(key, cfRows);
 	};
 
 	const valueAt = (key: string): { upstream: Value; current: Value } =>
@@ -267,16 +283,29 @@ export function qualityProfileScoringChanges(input: {
 	// A pending op adds its row even when current still equals upstream.
 	for (const op of [...input.ops].sort((a, b) => a.opId - b.opId)) {
 		const status = statusOf(op);
-		const { after, reached } = applyScores(
-			scoreEntries(op, op.generated ? generatedIdentity(op) : userIdentity(op))
-		);
+		const entries = scoreEntries(op, op.generated ? generatedIdentity(op) : userIdentity(op));
+
 		if (op.generated) {
-			// Generated ops (a CF rename or delete) only matter when they conflict. Their
-			// guards often miss because a cascade already did the work, so a conflict
-			// whose wanted state holds reads as already in effect, not as not applied.
-			if (status !== 'pending') continue;
+			if (entries.length === 0) continue;
+			const { touched, reached } = applyScores(intended, entries);
+			commit(touched);
+			if (status !== 'pending') {
+				// Applied, it's the latest word on the cells it changed: a related change,
+				// whatever an earlier op wanted there.
+				for (const target of applyScores(actual, entries).reached) {
+					const row = rows.get(target.key);
+					if (!row) continue;
+					row.opIds.push(op.opId);
+					row.status = 'related';
+					delete row.pendingValue;
+					delete row.inEffect;
+				}
+				continue;
+			}
+			// A conflicted generated op (a CF rename or delete) often only missed because a
+			// cascade already did the work, so one whose wanted state holds is in effect.
 			const holds = reached.every(
-				(t) => effective(intended, t.customFormat!, t.arrType!) === t.wanted
+				(t) => effective(actual.get(cfKey(t.customFormat!)), t.arrType!) === t.wanted
 			);
 			for (const target of reached) {
 				if (holds) {
@@ -289,21 +318,34 @@ export function qualityProfileScoringChanges(input: {
 				const row = ensureRow(target.key, target);
 				row.opIds.push(op.opId);
 				row.status = 'pending';
-				row.pendingValue = target.wanted;
 			}
-		} else {
-			for (const target of [...scalarTargets(op), ...reached]) {
-				if (!rows.has(target.key) && status !== 'pending') continue;
-				const row = ensureRow(target.key, target);
-				row.opIds.push(op.opId);
-				row.status = status;
-				delete row.inEffect;
-				if (status === 'pending') row.pendingValue = target.wanted;
-				else delete row.pendingValue;
-			}
+			continue;
 		}
-		// A pending op's rows aren't in the database, but later ops build on them.
-		if (status === 'pending') intended = after;
+
+		// A pending op is judged against the intended state; an applied one against
+		// the database it actually changed.
+		let reached: OpTarget[] = [];
+		if (entries.length > 0) {
+			const onIntended = applyScores(intended, entries);
+			reached = status === 'pending' ? onIntended.reached : applyScores(actual, entries).reached;
+			commit(onIntended.touched);
+		}
+		for (const target of [...scalarTargets(op), ...reached]) {
+			if (!rows.has(target.key) && status !== 'pending') continue;
+			const row = ensureRow(target.key, target);
+			row.opIds.push(op.opId);
+			row.status = status;
+			delete row.inEffect;
+			if (status === 'pending') row.pendingValue = target.wanted;
+			else delete row.pendingValue;
+		}
+	}
+
+	// A pending score shows what it would be if every pending change applied now.
+	for (const row of rows.values()) {
+		if (row.status === 'pending' && row.customFormat && row.arrType) {
+			row.pendingValue = effective(intended.get(cfKey(row.customFormat)), row.arrType);
+		}
 	}
 
 	const status = upstream === null ? 'created' : rows.size > 0 ? 'modified' : 'unchanged';
