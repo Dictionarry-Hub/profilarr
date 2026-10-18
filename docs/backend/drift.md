@@ -11,7 +11,7 @@
 `src/lib/server/drift/display.ts`,
 `src/routes/arr/[id]/drift/+page.svelte`,
 `src/routes/arr/[id]/drift/+page.server.ts`,
-`src/routes/arr/[id]/drift/components/DriftFieldDiffTable.svelte`,
+`src/lib/client/ui/table/FieldDiffTable.svelte`,
 `src/routes/arr/[id]/sync/+page.server.ts`,
 `src/routes/arr/[id]/sync/components/QualityProfiles.svelte`,
 `src/routes/arr/[id]/sync/components/DelayProfiles.svelte`
@@ -256,7 +256,7 @@ Layout:
   (`Paused` / `Ready` / `Next ...` / `Last ...`).
 - Entities section: an `ExpandableTable` with `Name` / `Entity` / `State`
   columns, mirroring the dev changes-page diff idiom. Each drifted entity is
-  one row; expanding shows a `DriftFieldDiffTable` with `Field` / `Profilarr`
+  one row; expanding shows a `FieldDiffTable` with `Field` / `Profilarr`
   / `<Arr type> - <Arr name>` columns rendering the entity's `changes[]`.
 - Lower-priority duplicate drift rows are labelled with the duplicate marker
   and the winning database name. They remain visible in the table.
