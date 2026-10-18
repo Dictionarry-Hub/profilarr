@@ -301,7 +301,7 @@
 					? null
 					: {
 							text: patternDefault.pending
-								? `Default: ${patternDefault.pattern}\nYour change didn't apply.`
+								? `Default: ${patternDefault.pattern}\nYour change didn't apply`
 								: `Default: ${patternDefault.pattern}`,
 							pending: patternDefault.pending
 						}}

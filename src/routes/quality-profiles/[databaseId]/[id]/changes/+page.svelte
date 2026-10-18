@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import History from '@lucide/svelte/icons/history';
+	import Admonition from '$ui/admonition/Admonition.svelte';
 	import InlineLink from '$ui/link/InlineLink.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
@@ -37,7 +39,7 @@
 
 	const scoreColumns: Column<Row>[] = [
 		{ key: 'format', header: 'Custom Format', align: 'left' },
-		{ key: 'arr', header: 'App', align: 'left', width: 'w-28' },
+		{ key: 'arr', header: 'Arr', align: 'left', width: 'w-28' },
 		{ key: 'upstream', header: 'Default', align: 'right', width: 'w-32' },
 		{ key: 'current', header: 'Yours', align: 'right', width: 'w-32' },
 		{ key: 'status', header: 'Status', align: 'left', width: 'w-64' }
@@ -48,9 +50,8 @@
 
 	const UNAVAILABLE = {
 		database:
-			"Local changes can't be shown right now: the last compile couldn't read the defaults for this database. The logs have the details.",
-		profile:
-			"Local changes can't be shown right now: the last compile couldn't read this profile's defaults. The logs have the details.",
+			"The last compile couldn't read the defaults for this database. The logs have the details.",
+		profile: "The last compile couldn't read this profile's defaults. The logs have the details.",
 		load: "Local changes couldn't be loaded. The logs have the details."
 	};
 
@@ -92,7 +93,7 @@
 
 	function display(value: Row['upstream']): string {
 		if (value === null || value === undefined) return '—';
-		if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+		if (typeof value === 'boolean') return value ? 'Enabled' : 'Disabled';
 		return String(value);
 	}
 </script>
@@ -101,11 +102,9 @@
 
 <div class="mt-6 space-y-4">
 	{#if changes.snapshot === 'unavailable'}
-		<div
-			class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
-		>
+		<Admonition variant="warning" title="Local Changes Unavailable">
 			{UNAVAILABLE[changes.unavailableReason ?? 'database']}
-		</div>
+		</Admonition>
 	{:else if changes.status === 'created' && changes.relatedChanges.length === 0}
 		<EmptyState
 			icon={History}
@@ -113,6 +112,7 @@
 			description={CREATED}
 			buttonText="Back to Scoring"
 			buttonHref={scoringHref}
+			buttonIcon={ArrowLeft}
 		/>
 	{:else if changes.status === 'created'}
 		<p class="text-sm text-neutral-600 dark:text-neutral-400">{CREATED}</p>
@@ -123,6 +123,7 @@
 			description="Scoring matches its defaults."
 			buttonText="Back to Scoring"
 			buttonHref={scoringHref}
+			buttonIcon={ArrowLeft}
 		/>
 	{:else if changes.rows.length > 0}
 		<p class="text-sm text-neutral-600 dark:text-neutral-400">

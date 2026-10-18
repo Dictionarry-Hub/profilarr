@@ -9,12 +9,12 @@
 
 	const STATUS: Record<
 		Row['status'],
-		{ label: string; variant: 'secondary' | 'warning' | 'info' | 'default' }
+		{ label: string; variant: 'secondary' | 'warning' | 'info' | 'outline' }
 	> = {
 		applied: { label: 'Applied', variant: 'secondary' },
 		pending: { label: 'Not Applied', variant: 'warning' },
 		overridden: { label: 'Re-Applied', variant: 'info' },
-		related: { label: 'Related Change', variant: 'default' }
+		related: { label: 'Related Change', variant: 'outline' }
 	};
 </script>
 

@@ -58,12 +58,12 @@ const show = (value: Value | undefined) =>
 export function markerText(marker: ScoreMarker): string {
 	switch (marker.status) {
 		case 'pending':
-			return `Yours ${show(marker.pendingValue)} not applied`;
+			return `Default: ${show(marker.upstream)} · yours ${show(marker.pendingValue)} didn't apply`;
 		case 'overridden':
-			return `Re-applied · default ${show(marker.upstream)}`;
+			return `Default: ${show(marker.upstream)} · re-applied`;
 		case 'related':
-			return `Default ${show(marker.upstream)} · related change`;
+			return `Default: ${show(marker.upstream)} · related change`;
 		default:
-			return `Default ${show(marker.upstream)}`;
+			return `Default: ${show(marker.upstream)}`;
 	}
 }
