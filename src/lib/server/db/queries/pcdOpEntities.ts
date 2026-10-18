@@ -56,7 +56,7 @@ export const pcdOpEntitiesQueries = {
 		return db
 			.query<RawRow>(
 				`SELECT e.op_id, e.entity, e.name, e.previous_name, e.role,
-					(SELECT h.status FROM pcd_op_history h WHERE h.op_id = o.id ORDER BY h.id DESC LIMIT 1)
+					(SELECT h.status FROM pcd_op_history h WHERE h.op_id = o.id ORDER BY h.applied_at DESC, h.id DESC LIMIT 1)
 						IN ('conflicted', 'conflicted_pending', 'error') AS failed
 				 FROM pcd_op_entities e
 				 JOIN pcd_ops o ON o.id = e.op_id
@@ -102,7 +102,7 @@ export const pcdOpEntitiesQueries = {
 					o.id,
 					o.metadata,
 					o.desired_state,
-					(SELECT h.status FROM pcd_op_history h WHERE h.op_id = o.id ORDER BY h.id DESC LIMIT 1) AS status,
+					(SELECT h.status FROM pcd_op_history h WHERE h.op_id = o.id ORDER BY h.applied_at DESC, h.id DESC LIMIT 1) AS status,
 					(SELECT s.id FROM pcd_ops s WHERE s.superseded_by_op_id = o.id ORDER BY s.id DESC LIMIT 1) AS replaces_op_id
 				 FROM pcd_ops o
 				 WHERE o.id IN (${placeholders})
