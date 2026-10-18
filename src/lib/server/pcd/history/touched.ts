@@ -84,30 +84,22 @@ export function resolveAliases(rows: LiveOpEntityRow[]): AliasResolution {
 	};
 }
 
-/** Entities user ops target directly, by upstream name, plus one hop down the upstream tree. */
+/**
+ * Every name a target was written with or renamed from, plus one hop down the
+ * upstream tree. Capture runs before replay, so which of those names an
+ * upstream entity carries this compile isn't settled yet (a rename that applied
+ * last time can fail now); collecting them all covers every outcome, and
+ * capture's existence check drops the ones upstream doesn't have.
+ */
 export function computeTouchedSet(
 	rows: LiveOpEntityRow[],
 	upstreamEdges: EntityEdge[]
 ): EntityRef[] {
 	const direct = new Map<string, EntityRef>();
-	// No upstream identity: nothing upstream to snapshot for it.
-	const add = (entity: string, name: string | null) => {
-		if (name !== null) direct.set(entityKey(entity, name), { entity, name });
-	};
-	// Capture runs before replay, so a rename's outcome here is the last compile's,
-	// and it can change (upstream may have taken the new name since). Cover both.
-	const variants = [
-		rows,
-		rows.map((r) => ({ ...r, failed: false })),
-		rows.map((r) => ({ ...r, failed: true }))
-	];
-	for (const variant of variants) {
-		const { rowUpstreamName, upstreamNameOf } = resolveAliases(variant);
-		for (const r of variant) {
-			if (r.role !== 'target') continue;
-			add(r.entity, rowUpstreamName(r));
-			// A rename that fails leaves its new name to whatever upstream has under it.
-			if (r.previousName && r.failed) add(r.entity, upstreamNameOf(r.entity, r.name));
+	for (const r of rows) {
+		if (r.role !== 'target') continue;
+		for (const name of [r.name, r.previousName]) {
+			if (name) direct.set(entityKey(r.entity, name), { entity: r.entity, name });
 		}
 	}
 

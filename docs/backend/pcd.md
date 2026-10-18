@@ -448,11 +448,12 @@ alone produces. The UI calls upstream values **defaults**.
 tweaks) until the first user op runs. At that point `captureUpstream()`
 serializes every entity live user ops target, plus one hop down the
 relationship tree (a regex's custom formats, a custom format's quality
-profiles), and keeps the snapshot on the cache. Rename outcomes known at that
-point are the last compile's, so for each rename it captures both the old
-name's entity and anything upstream has under the new name. Capture never
-throws: a failing entity is recorded in `failures`, anything worse makes the
-snapshot `unavailable`, and the build carries on.
+profiles), and keeps the snapshot on the cache. Which names upstream carries
+isn't settled before replay (a rename that applied last time can fail now), so
+it collects every name a target was written with or renamed from and keeps
+whichever upstream has. Capture never throws: a failing entity is recorded in
+`failures`, anything worse makes the snapshot `unavailable`, and the build
+carries on.
 
 **Names.** `pcd_op_entities` stores names as written, so renames resolve at
 read time over live ops (`resolveAliases()` in `touched.ts`). Each row
