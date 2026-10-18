@@ -15,8 +15,6 @@ import type { UpstreamSnapshot } from './capture.ts';
 import { entityKey } from './opEntities.ts';
 import { resolveAliases } from './touched.ts';
 
-export type { ConditionField, NormalizedCondition };
-
 export interface ConditionDefault {
 	/** modified: differs from its default. added: not in the defaults. */
 	status: 'modified' | 'added' | 'unchanged';

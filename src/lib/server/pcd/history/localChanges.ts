@@ -27,7 +27,7 @@ import { relatedChanges, remainingRelatedChanges, type RelatedChange } from './r
 import { resolveAliases, type AliasResolution } from './touched.ts';
 
 export interface QualityProfileScoringLocalChanges extends ScoringChanges {
-	/** none: no local changes anywhere. unavailable: capture failed for this profile; rows are empty. */
+	/** none: no local changes anywhere. unavailable: rows are empty; unavailableReason says why. */
 	snapshot: UpstreamSnapshot['status'];
 	/** database: capture failed as a whole. profile: only this profile's. load: reading failed. */
 	unavailableReason: 'database' | 'profile' | 'load' | null;
