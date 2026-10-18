@@ -353,6 +353,11 @@ export function qualityProfileScoringChanges(input: {
 		}
 	}
 
+	// A pending op can add a row that later edits put back to its default.
+	for (const [key, row] of rows) {
+		if (row.status !== 'pending' && row.upstream === row.current) rows.delete(key);
+	}
+
 	return { status: rows.size > 0 ? 'modified' : 'unchanged', rows: sortRows([...rows.values()]) };
 }
 
