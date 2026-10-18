@@ -144,16 +144,22 @@ export function relatedChanges(input: {
 			if (fields.length === 0) continue;
 			fields.forEach((f) => changed.add(f));
 			opIds.push(id);
+			if (fields.includes('deleted')) {
+				deletionFailed = op.pending;
+				// Ops before a deletion that applied were on the entity it removed.
+				if (!op.pending) pending = false;
+			}
 			pending ||= op.pending;
-			if (fields.includes('deleted')) deletionFailed = op.pending;
 		}
 		if (changed.has('deleted')) {
 			const entity = ref.entity as RelatedChange['entity'];
-			// Recreated since: compare it like any other change.
-			changed =
-				deletionFailed || !input.exists?.(entity, ref.name)
-					? new Set(['deleted'])
-					: new Set([entity === 'custom_format' ? 'conditions' : 'pattern']);
+			if (deletionFailed || !input.exists?.(entity, ref.name)) {
+				changed = new Set(['deleted']);
+				pending = deletionFailed;
+			} else {
+				// Recreated since: compare it like any other change.
+				changed = new Set([entity === 'custom_format' ? 'conditions' : 'pattern']);
+			}
 		}
 		if (changed.size === 0 || (onlyInDefaults.has(key) && !changed.has('deleted'))) continue;
 		changes.push({
