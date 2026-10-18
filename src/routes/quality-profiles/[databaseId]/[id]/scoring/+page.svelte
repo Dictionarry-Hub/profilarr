@@ -657,6 +657,8 @@
 						alertStore.add('success', 'Scoring saved!');
 						initEdit($current);
 						if (resData.affectedArrs && resData.affectedArrs.length > 0) {
+							// The sync prompt skips formUpdate; reload so local changes show the save.
+							await invalidateAll();
 							pendingRedirectTo = resData.redirectTo || '';
 							pendingAffectedArrs = resData.affectedArrs;
 							showSyncModal = true;

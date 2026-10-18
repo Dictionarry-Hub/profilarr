@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { tick } from 'svelte';
 	import Plus from '@lucide/svelte/icons/plus';
@@ -264,6 +264,8 @@
 				if (resData.success) {
 					alertStore.add('success', 'Conditions updated!');
 					initEdit($current);
+					// Neither path below reloads this page's data, and the defaults hints depend on it.
+					await invalidateAll();
 					if (resData.affectedArrs && resData.affectedArrs.length > 0) {
 						pendingRedirectTo = resData.redirectTo || '';
 						pendingAffectedArrs = resData.affectedArrs;
