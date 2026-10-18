@@ -30,7 +30,8 @@ const SECRET_FIELDS = [
 	'webhook_url',
 	'bot_token',
 	'personal_access_token',
-	'ai_api_key'
+	'ai_api_key',
+	'basic_auth_password'
 ];
 
 const SECRET_READ_RE = new RegExp(
