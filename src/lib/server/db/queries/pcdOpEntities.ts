@@ -11,6 +11,8 @@ export interface OpEntityRow {
 
 export interface LiveOpEntityRow extends OpEntityRow {
 	opId: number;
+	/** Its op's latest compile conflicted or errored, so it didn't apply. */
+	failed?: boolean;
 }
 
 export interface OpDetails {
@@ -29,6 +31,7 @@ interface RawRow {
 	name: string;
 	previous_name: string | null;
 	role: OpEntityRole;
+	failed: number | null;
 }
 
 export const pcdOpEntitiesQueries = {
@@ -52,7 +55,9 @@ export const pcdOpEntitiesQueries = {
 	listLive(databaseId: number): LiveOpEntityRow[] {
 		return db
 			.query<RawRow>(
-				`SELECT e.op_id, e.entity, e.name, e.previous_name, e.role
+				`SELECT e.op_id, e.entity, e.name, e.previous_name, e.role,
+					(SELECT h.status FROM pcd_op_history h WHERE h.op_id = o.id ORDER BY h.id DESC LIMIT 1)
+						IN ('conflicted', 'conflicted_pending', 'error') AS failed
 				 FROM pcd_op_entities e
 				 JOIN pcd_ops o ON o.id = e.op_id
 				 WHERE e.database_id = ? AND o.origin = 'user' AND o.state = 'published'
@@ -64,7 +69,8 @@ export const pcdOpEntitiesQueries = {
 				entity: r.entity,
 				name: r.name,
 				previousName: r.previous_name,
-				role: r.role
+				role: r.role,
+				failed: r.failed === 1
 			}));
 	},
 

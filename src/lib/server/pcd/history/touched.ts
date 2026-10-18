@@ -20,7 +20,7 @@ export interface AliasResolution {
 }
 
 /**
- * Resolves names through live renames in op order. Each row resolves as of
+ * Resolves names through live renames that applied, in op order. Each row resolves as of
  * its own op, and a rename vacates its old name (null) until a later rename
  * takes it again, so reused names map to the right entity.
  * Chains (A -> B -> C) resolve C to A; cycles (A -> B -> A) resolve A to A.
@@ -68,8 +68,9 @@ export function resolveAliases(rows: LiveOpEntityRow[]): AliasResolution {
 					: lookup(row.entity, row.name)
 			);
 		}
+		// A rename that didn't apply still aims at its old name, but moves nothing.
 		for (const row of group) {
-			if (!isRename(row)) continue;
+			if (!isRename(row) || row.failed) continue;
 			const origin = lookup(row.entity, row.previousName as string);
 			assign(entityKey(row.entity, row.previousName as string), null, opId);
 			assign(entityKey(row.entity, row.name), origin, opId);
