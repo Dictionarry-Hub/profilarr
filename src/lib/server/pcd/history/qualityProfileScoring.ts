@@ -285,8 +285,8 @@ export function qualityProfileScoringChanges(input: {
 		if (op.generated) {
 			if (entries.length === 0) continue;
 			const { touched, reached } = applyScores(intended, entries);
-			commit(touched);
 			if (status !== 'pending') {
+				commit(touched);
 				// Applied, it's the latest word on the cells it changed: a related change,
 				// whatever an earlier op wanted there.
 				for (const target of applyScores(actual, entries).reached) {
@@ -304,6 +304,9 @@ export function qualityProfileScoringChanges(input: {
 			const holds = reached.every(
 				(t) => effective(actual.get(cfKey(t.customFormat!)), t.arrType!) === t.wanted
 			);
+			// Its values are from when it was written, so one in effect mustn't
+			// overwrite what a pending op still wants.
+			if (!holds) commit(touched);
 			for (const target of reached) {
 				if (holds) {
 					const row = rows.get(target.key);
