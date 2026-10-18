@@ -131,6 +131,7 @@ export function assembleQualityProfileScoringChanges(input: {
 			current,
 			cfUpstreamNameOf: (name) => upstreamNameOf('custom_format', name),
 			cfUpstreamNameBefore: (name, opId) => upstreamNameBefore('custom_format', name, opId),
+			cfExists: input.exists && ((name) => input.exists!('custom_format', name)),
 			ops
 		})
 	};

@@ -168,6 +168,8 @@ export function qualityProfileScoringChanges(input: {
 	cfUpstreamNameOf: (currentName: string) => string | null;
 	/** A CF name as an op wrote it, resolved as of that op. Defaults to cfUpstreamNameOf. */
 	cfUpstreamNameBefore?: (name: string, opId: number) => string | null;
+	/** Whether a custom format exists now, by name; without it, every deletion still holds. */
+	cfExists?: (name: string) => boolean;
 	ops: ScoringOp[];
 }): ScoringChanges {
 	const { current, cfUpstreamNameOf } = input;
@@ -279,13 +281,26 @@ export function qualityProfileScoringChanges(input: {
 			return { upstreamName, currentName: upstreamName === null ? writtenName : null };
 		};
 
+	// A CF delete's score removals stop being its doing once the CF is re-created; the
+	// removals still hold, so they read as any other applied change.
+	const deletionUndone = (op: ScoringOp) => {
+		const raw = op.desiredState?.custom_format_scores;
+		if (!input.cfExists || !Array.isArray(raw) || raw.length === 0) return false;
+		return raw.every(
+			(e) =>
+				e?.to == null &&
+				typeof e?.custom_format_name === 'string' &&
+				input.cfExists!(e.custom_format_name)
+		);
+	};
+
 	// Op overlay, oldest first so the latest op on a row decides its status.
 	// A pending op adds its row even when current still equals upstream.
 	for (const op of [...input.ops].sort((a, b) => a.opId - b.opId)) {
 		const status = statusOf(op);
 		const entries = scoreEntries(op, identity(op));
 
-		if (op.generated) {
+		if (op.generated && !(status !== 'pending' && deletionUndone(op))) {
 			if (entries.length === 0) continue;
 			const { touched, reached } = applyScores(intended, entries);
 			if (status !== 'pending') {
