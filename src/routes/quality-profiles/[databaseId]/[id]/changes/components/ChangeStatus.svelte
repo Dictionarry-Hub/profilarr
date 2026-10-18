@@ -26,7 +26,5 @@
 		<span class="text-xs text-neutral-500 dark:text-neutral-400">
 			wanted {row.pendingValue == null ? 'unset' : display(row.pendingValue)}
 		</span>
-	{:else if row.inEffect}
-		<span class="text-xs text-neutral-500 dark:text-neutral-400">already in effect</span>
 	{/if}
 </div>

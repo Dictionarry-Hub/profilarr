@@ -479,7 +479,7 @@ Scores compare per arr type as sync resolves them (an arr type's own row, else
 the shared `all` row), and custom format names compare by upstream name, so a
 rename alone isn't a change. Generated ops (a custom format rename or delete)
 only add rows when they conflict, and a conflict whose wanted state already
-holds reads as already in effect. Applied ones mark the rows they changed as
+holds doesn't count as not applied. Applied ones mark the rows they changed as
 related, except a delete's score removals once that custom format is re-created:
 those read as applied.
 
