@@ -140,8 +140,9 @@ export async function qualityProfileScoringLocalChanges(
 	databaseId: number,
 	profileName: string
 ): Promise<QualityProfileScoringLocalChanges> {
-	// One request context: names resolve once, and each op is read at most once.
 	const snapshot = cache.getUpstreamSnapshot();
+	if (snapshot.status !== 'captured') return uncaptured(snapshot.status);
+	// One request context: names resolve once, and each op is read at most once.
 	const live = pcdOpEntitiesQueries.listLive(databaseId);
 	const aliases = resolveAliases(live);
 	const opDetailsRead = new Map<number, OpDetails>();
@@ -164,7 +165,7 @@ export async function qualityProfileScoringLocalChanges(
 	});
 
 	// Related changes come from op history; keep only what still differs from its default.
-	if (snapshot.status === 'captured' && changes.relatedChanges.length > 0) {
+	if (changes.relatedChanges.length > 0) {
 		const { upstreamNameOf } = aliases;
 		const named = (entity: RelatedChange['entity']) =>
 			changes.relatedChanges

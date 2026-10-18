@@ -67,7 +67,7 @@ export const load: ServerLoad = async ({ params }) => {
 		availablePatterns: patterns.map((p) => ({ id: p.id, name: p.name, pattern: p.pattern })),
 		availableLanguages,
 		canWriteToBase: canWriteToBase(currentDatabaseId),
-		defaults: await loadDefaults(cache, currentDatabaseId, format.name)
+		defaults: await loadDefaults(cache, currentDatabaseId, format.name, conditions)
 	};
 };
 
@@ -75,10 +75,11 @@ export const load: ServerLoad = async ({ params }) => {
 async function loadDefaults(
 	cache: PCDCache,
 	databaseId: number,
-	formatName: string
+	formatName: string,
+	conditions: ConditionData[]
 ): Promise<CustomFormatDefaults> {
 	try {
-		return await customFormatDefaults(cache, databaseId, formatName);
+		return customFormatDefaults(cache, databaseId, formatName, conditions);
 	} catch (error) {
 		await logger.warn('Failed to load condition defaults for custom format', {
 			source: 'CustomFormatConditions',

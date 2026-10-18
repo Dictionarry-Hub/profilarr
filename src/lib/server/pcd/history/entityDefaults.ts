@@ -10,7 +10,6 @@ import type { PCDCache } from '$pcd/index.ts';
 import type { ConditionData } from '$shared/pcd/display.ts';
 import type { ConditionField, NormalizedCondition } from '$shared/pcd/conditionFormat.ts';
 import type { PortableCustomFormat, PortableRegularExpression } from '$shared/pcd/portable.ts';
-import { getConditionsForEvaluation } from '../entities/customFormats/conditions/read.ts';
 import type { UpstreamSnapshot } from './capture.ts';
 import { didNotApply, entityKey } from './opEntities.ts';
 import { resolveAliases } from './touched.ts';
@@ -139,7 +138,6 @@ function entityContext(
 	entity: string,
 	name: string
 ): EntityContext | null {
-	if (snapshot.status !== 'captured') return null;
 	const { upstreamNameOf, rowUpstreamName } = resolveAliases(live);
 	const upstreamName = upstreamNameOf(entity, name);
 	if (upstreamName === null) return null;
@@ -160,13 +158,16 @@ function entityContext(
 	};
 }
 
-export async function customFormatDefaults(
+export function customFormatDefaults(
 	cache: PCDCache,
 	databaseId: number,
-	formatName: string
-): Promise<CustomFormatDefaults> {
+	formatName: string,
+	current: ConditionData[]
+): CustomFormatDefaults {
+	const snapshot = cache.getUpstreamSnapshot();
+	if (snapshot.status !== 'captured') return { conditions: {}, removed: [], notApplied: [] };
 	const ctx = entityContext(
-		cache.getUpstreamSnapshot(),
+		snapshot,
 		pcdOpEntitiesQueries.listLive(databaseId),
 		(ids) => pcdOpEntitiesQueries.listOpDetails(ids),
 		'custom_format',
@@ -180,7 +181,7 @@ export async function customFormatDefaults(
 	);
 	return customFormatConditionDefaults({
 		upstream: ctx.upstream as PortableCustomFormat | null | undefined,
-		current: await getConditionsForEvaluation(cache, formatName),
+		current,
 		regexUpstreamName: (name) => ctx.upstreamNameOf('regular_expression', name),
 		pendingConditions
 	});
@@ -192,8 +193,10 @@ export function regexDefaults(
 	regexName: string,
 	currentPattern: string
 ): RegexDefaults {
+	const snapshot = cache.getUpstreamSnapshot();
+	if (snapshot.status !== 'captured') return { pattern: null, pending: false };
 	const ctx = entityContext(
-		cache.getUpstreamSnapshot(),
+		snapshot,
 		pcdOpEntitiesQueries.listLive(databaseId),
 		(ids) => pcdOpEntitiesQueries.listOpDetails(ids),
 		'regular_expression',
