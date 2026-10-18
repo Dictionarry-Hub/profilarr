@@ -7,6 +7,7 @@ import {
 } from '$drift/qualityProfiles.ts';
 import { hashDriftDiff } from '$drift/hash.ts';
 import { buildDriftDisplayEntities } from '$drift/display.ts';
+import { applySizesToItems, resolveDefinitionSizes } from '$sync/qualityProfiles/sizes.ts';
 import type {
 	ArrCustomFormat,
 	ArrLanguage,
@@ -201,6 +202,30 @@ class QualityProfileDriftTest extends BaseTest {
 
 			assertEquals(compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count, 0);
 		});
+
+		this.test(
+			'item sizes: a quality no definition sets is not compared, even at the unlimited cap',
+			() => {
+				// #984: the definitions set WEBDL-1080p only. Raw-HD sits at the Arr's
+				// unlimited cap and must not show as 1000 against Unlimited
+				const items = [qualityItem('WEBDL-1080p', 3), qualityItem('Raw-HD', 10)];
+				applySizesToItems(
+					items,
+					resolveDefinitionSizes({
+						global: new Map([['webdl-1080p', { minSize: 15, maxSize: null, preferredSize: 995 }]])
+					})
+				);
+				const expected = expectedProfile({ items });
+				const actual = actualProfile({
+					items: [
+						sizedItem('WEBDL-1080p', 3, { minSize: 15, maxSize: 1000, preferredSize: 995 }),
+						sizedItem('Raw-HD', 10, { minSize: 0, maxSize: 1000, preferredSize: 990 })
+					]
+				});
+
+				assertEquals(compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count, 0);
+			}
+		);
 
 		this.test(
 			'item sizes: display rows are labelled by quality with the size field changed',

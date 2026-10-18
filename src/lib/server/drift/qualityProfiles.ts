@@ -295,9 +295,9 @@ function expectedItemSizes(
 
 /**
  * Size limit differences per quality on an Arr that keeps them on profile
- * items (Sonarr v5). Expected comes from the sizes the sync would write;
- * qualities the sync does not manage are expected to equal what the Arr has,
- * so they never show up. A missing key on the Arr means null, and the Arr's
+ * items (Sonarr v5). Expected comes from the sizes definitions set; qualities
+ * no definition covers carry no sizes and are not compared. A missing key on
+ * the Arr means null, and the Arr's
  * unlimited cap on the maximum is read as null, as for global definitions.
  */
 function sizeDiffs(
@@ -439,7 +439,7 @@ export interface PerDatabaseExpectedProfiles {
 export interface ExpectedProfileSizes {
 	/** The same size resolution the sync uses, for an Arr that keeps sizes on profile items */
 	source: ProfileSizeSource;
-	/** The Arr's current profiles; a profile's own sizes are the fallback for unmanaged qualities */
+	/** The Arr's current profiles; only a profile that exists gets expected sizes */
 	actualProfiles: ArrQualityProfile[];
 }
 
@@ -489,12 +489,13 @@ export async function buildExpectedQualityProfilesPerDatabase(
 			]);
 
 			// Only a profile that exists on the Arr gets expected sizes; a missing
-			// profile is reported as missing without comparing fields
+			// profile is reported as missing without comparing fields. Only the
+			// sizes definitions set are expected: the sync copies the Arr's own
+			// sizes for the rest, which Profilarr does not manage
 			const existing = sizes?.actualProfiles.find((p) => p.name === pcdProfile.name);
 			const sizeMap =
 				sizes && existing
-					? await sizes.source.forProfile(
-							existing,
+					? await sizes.source.definitionSizes(
 							selection.qualityDefinitionsConfigName
 								? { databaseId, configName: selection.qualityDefinitionsConfigName }
 								: null

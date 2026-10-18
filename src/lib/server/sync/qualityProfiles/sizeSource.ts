@@ -8,7 +8,9 @@
  * 3. what the profile already has on the Arr, or the Arr's profile schema
  *    defaults for a profile that does not exist yet
  *
- * Shared by the quality profile syncer and entity sync so the rule lives once.
+ * Shared by the quality profile syncer, entity sync and drift so the rule
+ * lives once. Drift reads only steps 1 and 2: step 3 exists because Sonarr
+ * wipes sizes a profile save leaves out, not because Profilarr manages them.
  * Each definitions config is read once per source; the schema is fetched only
  * when a profile has to be created.
  */
@@ -28,6 +30,7 @@ import { getQualityApiMappings } from './transformer.ts';
 import {
 	collectItemSizes,
 	definitionsToSizeMap,
+	resolveDefinitionSizes,
 	resolveProfileSizes,
 	type QualitySizeMap
 } from './sizes.ts';
@@ -45,6 +48,11 @@ export interface ProfileSizeSource {
 	 * sizes by accident.
 	 */
 	forProfile(existing?: ArrQualityProfile, override?: SizeOverride | null): Promise<QualitySizeMap>;
+	/**
+	 * Only the sizes definitions set for one profile (steps 1 and 2), for
+	 * drift. Qualities no definition covers are absent.
+	 */
+	definitionSizes(override?: SizeOverride | null): Promise<QualitySizeMap>;
 }
 
 export function createProfileSizeSource(
@@ -149,17 +157,29 @@ export function createProfileSizeSource(
 		return collectItemSizes(schema.items);
 	}
 
+	/** The instance's selection and the profile's own config, loaded once each. */
+	function loadDefinitionSizes(
+		override: SizeOverride | null | undefined
+	): Promise<[QualitySizeMap | null, QualitySizeMap | null]> {
+		globalSizes ??= loadGlobalSizes();
+		return Promise.all([
+			globalSizes,
+			override ? loadSizes(override.databaseId, override.configName, 'override') : null
+		]);
+	}
+
 	return {
 		async forProfile(existing, override) {
-			globalSizes ??= loadGlobalSizes();
+			const definitions = loadDefinitionSizes(override);
 			const fallback = existing
 				? collectItemSizes(existing.items)
 				: await (schemaSizes ??= loadSchemaSizes());
-			const [global, overrideSizes] = await Promise.all([
-				globalSizes,
-				override ? loadSizes(override.databaseId, override.configName, 'override') : null
-			]);
+			const [global, overrideSizes] = await definitions;
 			return resolveProfileSizes({ fallback, global, override: overrideSizes });
+		},
+		async definitionSizes(override) {
+			const [global, overrideSizes] = await loadDefinitionSizes(override);
+			return resolveDefinitionSizes({ global, override: overrideSizes });
 		}
 	};
 }
