@@ -123,7 +123,7 @@ export class PCDCache {
 				// Before the first user op, the DB holds upstream (tweaks and base drafts included).
 				if (!upstreamCaptured && operation.layer === 'user') {
 					upstreamCaptured = true;
-					this.upstream = await this.captureUpstream();
+					this.upstream = await this.snapshotUpstream();
 				}
 				const opId = parseOpId(operation.filepath);
 				const trackHistory = opId !== null;
@@ -375,7 +375,7 @@ export class PCDCache {
 	}
 
 	/** Runs mid-build, so it reads this.db directly: query() refuses until built. */
-	private async captureUpstream(): Promise<UpstreamSnapshot> {
+	private async snapshotUpstream(): Promise<UpstreamSnapshot> {
 		const databaseId = this.databaseInstanceId;
 		const startedAt = performance.now();
 		const snapshot = await captureUpstream({
