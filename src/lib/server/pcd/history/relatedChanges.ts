@@ -48,6 +48,15 @@ interface OpInfo {
 	pending: boolean;
 }
 
+function isTestDeletion(d: OpDetails): boolean {
+	try {
+		const state = JSON.parse(d.desiredState ?? 'null');
+		return !!state && typeof state === 'object' && 'test_title' in state;
+	} catch {
+		return false;
+	}
+}
+
 function parseOp(d: OpDetails): OpInfo {
 	let metadata: Record<string, unknown> = {};
 	try {
@@ -57,8 +66,10 @@ function parseOp(d: OpDetails): OpInfo {
 		// Malformed metadata contributes nothing.
 	}
 	const changed = metadata.changed_fields;
+	const changedFields = Array.isArray(changed) ? changed.filter((f) => typeof f === 'string') : [];
 	return {
-		changedFields: Array.isArray(changed) ? changed.filter((f) => typeof f === 'string') : [],
+		// Deleting a custom format test is written as a 'deleted' change on its format.
+		changedFields: isTestDeletion(d) ? changedFields.filter((f) => f !== 'deleted') : changedFields,
 		generated: metadata.generated === true,
 		groupId: typeof metadata.group_id === 'string' ? metadata.group_id : null,
 		pending: didNotApply(d.status)
