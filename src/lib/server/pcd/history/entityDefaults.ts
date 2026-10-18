@@ -12,7 +12,7 @@ import type { ConditionField, NormalizedCondition } from '$shared/pcd/conditionF
 import type { PortableCustomFormat, PortableRegularExpression } from '$shared/pcd/portable.ts';
 import { getConditionsForEvaluation } from '../entities/customFormats/conditions/read.ts';
 import type { UpstreamSnapshot } from './capture.ts';
-import { entityKey } from './opEntities.ts';
+import { didNotApply, entityKey } from './opEntities.ts';
 import { resolveAliases } from './touched.ts';
 
 export interface ConditionDefault {
@@ -116,8 +116,6 @@ export function regexPatternDefaults(input: {
 	};
 }
 
-const PENDING = new Set(['conflicted_pending', 'conflicted', 'error']);
-
 function changedFieldsOf(d: OpDetails): string[] {
 	try {
 		const value = JSON.parse(d.metadata ?? '{}')?.changed_fields;
@@ -152,7 +150,7 @@ function entityContext(
 		.map((r) => r.opId);
 	const pendingFields = new Set(
 		opDetails([...new Set(ids)])
-			.filter((d) => d.status !== null && PENDING.has(d.status))
+			.filter((d) => didNotApply(d.status))
 			.flatMap(changedFieldsOf)
 	);
 	return {

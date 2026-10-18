@@ -119,7 +119,7 @@ export function assembleQualityProfileScoringChanges(input: {
 		return {
 			opId: d.opId,
 			changedFields: Array.isArray(metadata?.changed_fields)
-				? (metadata.changed_fields as string[])
+				? metadata.changed_fields.filter((f): f is string => typeof f === 'string')
 				: [],
 			generated: metadata?.generated === true,
 			desiredState: parseJson(d.desiredState),

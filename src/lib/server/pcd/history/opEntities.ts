@@ -5,6 +5,7 @@
  */
 
 import type { OpEntityRow } from '$db/queries/pcdOpEntities.ts';
+import type { PcdOpHistoryStatus } from '$db/queries/pcdOpHistory.ts';
 import type { OperationMetadata } from '../core/types.ts';
 
 export type { OpEntityRole, OpEntityRow } from '$db/queries/pcdOpEntities.ts';
@@ -60,3 +61,13 @@ export function entityRowsFromMetadata(metadata: OperationMetadata): OpEntityRow
 export function entityKey(entity: string, name: string): string {
 	return `${entity}:${name}`;
 }
+
+const NOT_APPLIED: ReadonlySet<string> = new Set<PcdOpHistoryStatus>([
+	'conflicted',
+	'conflicted_pending',
+	'error'
+]);
+
+/** An op whose latest compile left it in one of these didn't apply. */
+export const didNotApply = (status: PcdOpHistoryStatus | null) =>
+	status !== null && NOT_APPLIED.has(status);

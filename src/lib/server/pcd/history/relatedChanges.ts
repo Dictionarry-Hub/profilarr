@@ -14,6 +14,7 @@ import {
 import type { ConditionData } from '$shared/pcd/display.ts';
 import type { PortableCustomFormat, PortableRegularExpression } from '$shared/pcd/portable.ts';
 import { reach, type EntityEdge } from './edges.ts';
+import { didNotApply } from './opEntities.ts';
 import {
 	customFormatConditionDefaults,
 	normalizeCondition,
@@ -60,7 +61,7 @@ function parseOp(d: OpDetails): OpInfo {
 		changedFields: Array.isArray(changed) ? changed.filter((f) => typeof f === 'string') : [],
 		generated: metadata.generated === true,
 		groupId: typeof metadata.group_id === 'string' ? metadata.group_id : null,
-		pending: d.status === 'conflicted_pending' || d.status === 'conflicted' || d.status === 'error'
+		pending: didNotApply(d.status)
 	};
 }
 

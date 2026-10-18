@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import type { PcdOpHistoryStatus } from './pcdOpHistory.ts';
 
 export type OpEntityRole = 'target' | 'prerequisite';
 
@@ -20,7 +21,7 @@ export interface OpDetails {
 	metadata: string | null;
 	desiredState: string | null;
 	/** Latest op history status. */
-	status: string | null;
+	status: PcdOpHistoryStatus | null;
 	/** The op this one superseded through override, if any. */
 	replacesOpId: number | null;
 }
@@ -95,7 +96,7 @@ export const pcdOpEntitiesQueries = {
 				id: number;
 				metadata: string | null;
 				desired_state: string | null;
-				status: string | null;
+				status: PcdOpHistoryStatus | null;
 				replaces_op_id: number | null;
 			}>(
 				`SELECT

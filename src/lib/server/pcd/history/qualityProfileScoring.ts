@@ -6,7 +6,9 @@
  * shared 'all' row, so expanding a shared score isn't a change either.
  */
 
+import type { PcdOpHistoryStatus } from '$db/queries/pcdOpHistory.ts';
 import type { PortableQualityProfile } from '$shared/pcd/portable.ts';
+import { didNotApply } from './opEntities.ts';
 
 export const SCORING_FIELDS = [
 	'upgrades_allowed',
@@ -55,7 +57,7 @@ export interface ScoringOp {
 	generated: boolean;
 	desiredState: Record<string, unknown> | null;
 	/** Latest op history status. */
-	status: string | null;
+	status: PcdOpHistoryStatus | null;
 	/** Set when this op replaced another through override. */
 	replacesOpId: number | null;
 }
@@ -153,9 +155,7 @@ function scoreEntries(
 }
 
 function statusOf(op: ScoringOp): RowStatus {
-	if (op.status === 'conflicted_pending' || op.status === 'conflicted' || op.status === 'error') {
-		return 'pending';
-	}
+	if (didNotApply(op.status)) return 'pending';
 	if (op.replacesOpId !== null) return 'overridden';
 	return 'applied';
 }
