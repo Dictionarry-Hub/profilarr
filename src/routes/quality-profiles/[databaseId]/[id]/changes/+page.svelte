@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import History from '@lucide/svelte/icons/history';
+	import Link from '@lucide/svelte/icons/link';
 	import Admonition from '$ui/admonition/Admonition.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import InlineLink from '$ui/link/InlineLink.svelte';
@@ -10,6 +11,7 @@
 	import EmptyState from '$ui/state/EmptyState.svelte';
 	import Label from '$ui/label/Label.svelte';
 	import DefaultHint from '$ui/tooltip/DefaultHint.svelte';
+	import Tooltip from '$ui/tooltip/Tooltip.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import FieldDiffTable from '$ui/table/FieldDiffTable.svelte';
 	import Table from '$ui/table/Table.svelte';
@@ -217,7 +219,7 @@
 				<svelte:fragment slot="cell" let:row let:column>
 					{#if column.key === 'name'}
 						{@const href = relatedHref(row)}
-						<div class="flex flex-col gap-0.5">
+						<div class="flex items-center gap-1.5">
 							<span class="text-sm font-medium">
 								{#if href}
 									<InlineLink {href} text={row.name} />
@@ -229,9 +231,19 @@
 									>
 								{/if}
 							</span>
-							{#if row.entity === 'regular_expression'}
-								<span class="text-xs text-neutral-500 dark:text-neutral-400">
-									Used by {row.via.join(', ')}
+							{#if row.entity === 'regular_expression' && row.via.length > 0}
+								{@const usedBy = `Used by ${row.via.join(', ')}`}
+								<!-- Hover-only like the default hints, so desktop only. -->
+								<span class="hidden md:inline-flex">
+									<Tooltip text={usedBy} position="top" size="lg">
+										<span
+											role="img"
+											aria-label={usedBy}
+											class="inline-flex h-4 w-4 items-center justify-center text-neutral-400 dark:text-neutral-500"
+										>
+											<Link size={14} />
+										</span>
+									</Tooltip>
 								</span>
 							{/if}
 						</div>
