@@ -483,14 +483,18 @@
 					{/if}
 				</p>
 			{/if}
+			<!-- Basic Auth Row -->
 			<div class="space-y-2">
-				<p class="text-xs text-neutral-600 dark:text-neutral-400">
+				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Basic Auth
+				</span>
+				<p class="text-xs text-neutral-500 dark:text-neutral-400">
 					Optional. Use when a reverse proxy protects this Arr instance with Basic Auth.
 					{#if mode === 'edit'}Leave blank to keep existing credentials.{/if}
 				</p>
 				<div class="grid gap-4 md:grid-cols-2">
 					<FormInput
-						label="Basic Auth Username"
+						label="Username"
 						name="basic_auth_username"
 						value={basicAuthUsername}
 						placeholder={mode === 'edit' ? 'Leave blank to keep existing username' : 'Optional'}
@@ -500,7 +504,7 @@
 						}}
 					/>
 					<FormInput
-						label="Basic Auth Password"
+						label="Password"
 						name="basic_auth_password"
 						value={basicAuthPassword}
 						placeholder={mode === 'edit' ? '••••••••••••••••' : 'Optional'}
