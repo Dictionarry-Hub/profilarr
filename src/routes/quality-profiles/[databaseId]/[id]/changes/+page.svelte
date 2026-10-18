@@ -83,7 +83,6 @@
 	$: changes = data.localChanges;
 	$: settingRows = changes.rows.filter((r) => r.field !== 'custom_format_score');
 	$: scoreRows = changes.rows.filter((r) => r.field === 'custom_format_score');
-	$: pendingCount = changes.rows.filter((r) => r.status === 'pending').length;
 	$: scoringHref = `/quality-profiles/${$page.params.databaseId}/${$page.params.id}/scoring`;
 
 	function settingName(row: Row): string {
@@ -140,15 +139,6 @@
 			buttonIcon={ArrowLeft}
 		/>
 	{:else if changes.rows.length > 0}
-		<p class="text-sm text-neutral-600 dark:text-neutral-400">
-			{changes.rows.length} scoring change{changes.rows.length === 1 ? '' : 's'} compared with the defaults
-			{#if pendingCount > 0}
-				· <span class="font-medium text-amber-700 dark:text-amber-400"
-					>{pendingCount} not applied</span
-				>
-			{/if}
-		</p>
-
 		{#if settingRows.length > 0}
 			<section class="space-y-2">
 				<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Settings</h2>
