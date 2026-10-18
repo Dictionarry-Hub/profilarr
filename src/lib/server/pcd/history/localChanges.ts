@@ -15,7 +15,7 @@ import type {
 } from '$shared/pcd/portable.ts';
 import { getConditionsForEvaluation } from '../entities/customFormats/conditions/read.ts';
 import { serializeQualityProfile } from '../entities/serialize.ts';
-import type { UpstreamSnapshot } from './capture.ts';
+import { SNAPSHOT_TABLES, type UpstreamSnapshot } from './capture.ts';
 import { ENTITY_EDGES_SQL, type EntityEdge } from './edges.ts';
 import { entityKey } from './opEntities.ts';
 import {
@@ -166,10 +166,8 @@ export async function qualityProfileScoringLocalChanges(
 		edges: cache.query<EntityEdge>(ENTITY_EDGES_SQL),
 		aliases,
 		exists: (entity, name) =>
-			cache.queryOne(
-				`SELECT 1 FROM ${entity === 'custom_format' ? 'custom_formats' : 'regular_expressions'} WHERE name = ?`,
-				name
-			) !== undefined
+			cache.queryOne(`SELECT 1 FROM ${SNAPSHOT_TABLES[entity]} WHERE name = ? LIMIT 1`, name) !==
+			undefined
 	});
 
 	// Related changes come from op history; keep only what still differs from its default.

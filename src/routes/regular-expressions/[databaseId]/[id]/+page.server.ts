@@ -6,6 +6,7 @@ import * as regularExpressionQueries from '$pcd/entities/regularExpressions/inde
 import type { OperationLayer } from '$pcd/core/types.ts';
 import { logger } from '$logger/logger.ts';
 import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import type { PCDCache } from '$pcd/database/cache.ts';
 import { regexDefaults, type RegexDefaults } from '$pcd/history/entityDefaults.ts';
 import { validateRegex } from '$lib/server/utils/arr/parser/index.ts';
 import { getConditionRefsForRegex } from '$pcd/references.ts';
@@ -54,7 +55,7 @@ export const load: ServerLoad = async ({ params }) => {
 
 // Defaults are a hint: a failure here must not take the regex page down.
 async function loadDefaults(
-	cache: Parameters<typeof regexDefaults>[0],
+	cache: PCDCache,
 	databaseId: number,
 	regex: { name: string; pattern: string }
 ): Promise<RegexDefaults> {

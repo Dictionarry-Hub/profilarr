@@ -8,8 +8,6 @@ import type { LiveOpEntityRow } from '$db/queries/pcdOpEntities.ts';
 import { expandOneHop, type EntityEdge, type EntityRef } from './edges.ts';
 import { entityKey } from './opEntities.ts';
 
-export type { LiveOpEntityRow } from '$db/queries/pcdOpEntities.ts';
-
 export interface AliasResolution {
 	/** Current upstream name for `name`; null if it was renamed away. */
 	upstreamNameOf: (entity: string, name: string) => string | null;

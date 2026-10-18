@@ -8,6 +8,7 @@ import { getLanguagesWithSupport } from '$lib/server/sync/mappings.ts';
 import type { OperationLayer } from '$pcd/core/types.ts';
 import type { ConditionData } from '$shared/pcd/display.ts';
 import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import type { PCDCache } from '$pcd/database/cache.ts';
 import { customFormatDefaults, type CustomFormatDefaults } from '$pcd/history/entityDefaults.ts';
 import { logger } from '$logger/logger.ts';
 
@@ -72,7 +73,7 @@ export const load: ServerLoad = async ({ params }) => {
 
 // Defaults are a hint: a failure here must not take the conditions page down.
 async function loadDefaults(
-	cache: Parameters<typeof customFormatDefaults>[0],
+	cache: PCDCache,
 	databaseId: number,
 	formatName: string
 ): Promise<CustomFormatDefaults> {

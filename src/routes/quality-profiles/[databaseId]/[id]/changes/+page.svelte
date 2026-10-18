@@ -8,7 +8,7 @@
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import FieldDiffTable from '$ui/table/FieldDiffTable.svelte';
 	import Table from '$ui/table/Table.svelte';
-	import type { Column } from '$ui/table/types.ts';
+	import type { Column } from '$ui/table/types';
 	import type { PageData } from './$types';
 	import ChangeStatus from './components/ChangeStatus.svelte';
 

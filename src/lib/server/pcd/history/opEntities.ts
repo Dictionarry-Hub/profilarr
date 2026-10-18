@@ -8,10 +8,8 @@ import type { OpEntityRow } from '$db/queries/pcdOpEntities.ts';
 import type { PcdOpHistoryStatus } from '$db/queries/pcdOpHistory.ts';
 import type { OperationMetadata } from '../core/types.ts';
 
-export type { OpEntityRole, OpEntityRow } from '$db/queries/pcdOpEntities.ts';
-
 /** Stable-key names whose entity is implied when a dependency omits it. */
-export const ENTITY_BY_STABLE_KEY: Readonly<Record<string, string>> = {
+const ENTITY_BY_STABLE_KEY: Readonly<Record<string, string>> = {
 	custom_format_name: 'custom_format',
 	quality_profile_name: 'quality_profile',
 	regular_expression_name: 'regular_expression'

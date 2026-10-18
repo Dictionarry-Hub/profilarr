@@ -5,7 +5,7 @@ import type { PageData } from '../$types';
 type ChangeRow = PageData['localChanges']['rows'][number];
 type Value = ChangeRow['upstream'];
 
-export type ScoreMarkerStatus = ChangeRow['status'];
+type ScoreMarkerStatus = ChangeRow['status'];
 
 export interface ScoreMarker {
 	status: ScoreMarkerStatus;

@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { pcdManager } from '$pcd/core/manager.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
+import type { PCDCache } from '$pcd/database/cache.ts';
 import {
 	qualityProfileScoringLocalChanges,
 	type QualityProfileScoringLocalChanges
@@ -35,7 +36,7 @@ export const load: LayoutServerLoad = async ({ params }) => {
 
 // Every profile tab loads this layout: a failure here must not take the tabs down.
 async function loadLocalChanges(
-	cache: Parameters<typeof qualityProfileScoringLocalChanges>[0],
+	cache: PCDCache,
 	databaseId: number,
 	profileName: string
 ): Promise<QualityProfileScoringLocalChanges> {
