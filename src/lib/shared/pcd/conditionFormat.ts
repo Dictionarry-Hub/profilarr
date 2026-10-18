@@ -1,4 +1,16 @@
-/** Display wording for custom format condition fields, shared by default hints and related changes. */
+/**
+ * Display wording for custom format condition fields, shared by default hints
+ * and related changes. Values read as the condition editor shows them.
+ */
+
+import {
+	CONDITION_TYPES,
+	INDEXER_FLAG_VALUES,
+	QUALITY_MODIFIER_VALUES,
+	RELEASE_TYPE_VALUES,
+	RESOLUTION_VALUES,
+	SOURCE_VALUES
+} from './conditions.ts';
 
 /** A condition reduced to what decides matching, with lists sorted. */
 export interface NormalizedCondition {
@@ -51,7 +63,28 @@ const LISTS = [
 	'indexerFlags'
 ] as const;
 
-const gb = (bytes: number | null) => (bytes === null ? 'any' : `${+(bytes / 1e9).toFixed(2)} GB`);
+type ListField = (typeof LISTS)[number];
+
+const labelsOf = (values: ReadonlyArray<{ value: string; label: string }>) =>
+	new Map(values.map((v) => [v.value, v.label]));
+
+const TYPE_LABELS = labelsOf(CONDITION_TYPES);
+
+const VALUE_LABELS: Partial<Record<ListField, Map<string, string>>> = {
+	sources: labelsOf(SOURCE_VALUES),
+	resolutions: labelsOf(RESOLUTION_VALUES),
+	qualityModifiers: labelsOf(QUALITY_MODIFIER_VALUES),
+	releaseTypes: labelsOf(RELEASE_TYPE_VALUES),
+	indexerFlags: labelsOf(INDEXER_FLAG_VALUES)
+};
+
+const listValues = (field: ListField, c: NormalizedCondition) =>
+	c[field].map((v) => VALUE_LABELS[field]?.get(v) ?? v).join(', ');
+
+// The condition editor and sync count a GB as 1024³ bytes.
+const BYTES_PER_GB = 1024 ** 3;
+const gb = (bytes: number | null) =>
+	bytes === null ? 'any' : `${+(bytes / BYTES_PER_GB).toFixed(2)} GB`;
 
 /** A field's value as display text. */
 export function conditionFieldValue(field: ConditionField, c: NormalizedCondition): string {
@@ -62,13 +95,13 @@ export function conditionFieldValue(field: ConditionField, c: NormalizedConditio
 		case 'arrType':
 			return ARR_LABELS[c.arrType] ?? c.arrType;
 		case 'type':
-			return c.type.replaceAll('_', ' ');
+			return TYPE_LABELS.get(c.type) ?? c.type.replaceAll('_', ' ');
 		case 'size':
-			return `${gb(c.size?.minBytes ?? null)} to ${gb(c.size?.maxBytes ?? null)}`;
+			return c.size ? `${gb(c.size.minBytes)} to ${gb(c.size.maxBytes)}` : 'None';
 		case 'years':
-			return `${c.years?.minYear ?? 'any'} to ${c.years?.maxYear ?? 'any'}`;
+			return c.years ? `${c.years.minYear ?? 'any'} to ${c.years.maxYear ?? 'any'}` : 'None';
 		default:
-			return c[field].length > 0 ? c[field].join(', ') : 'None';
+			return c[field].length > 0 ? listValues(field, c) : 'None';
 	}
 }
 
@@ -76,7 +109,7 @@ export function conditionFieldValue(field: ConditionField, c: NormalizedConditio
 export function conditionSummary(c: NormalizedCondition): string {
 	const list = LISTS.find((field) => c[field].length > 0);
 	const values = list
-		? c[list].join(', ')
+		? listValues(list, c)
 		: c.size
 			? conditionFieldValue('size', c)
 			: c.years
