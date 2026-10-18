@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import History from '@lucide/svelte/icons/history';
 	import Admonition from '$ui/admonition/Admonition.svelte';
@@ -13,9 +14,14 @@
 	import Table from '$ui/table/Table.svelte';
 	import type { Column } from '$ui/table/types';
 	import type { PageData } from './$types';
+	import { clear } from '$lib/client/stores/dirty';
 	import ChangeStatus from './components/ChangeStatus.svelte';
 
 	export let data: PageData;
+
+	// Nothing here is editable, but the layout's unsaved-changes guard reads the shared
+	// dirty store, which reads as dirty until a page initialises it (as on a fresh load).
+	onMount(clear);
 
 	type Row = PageData['localChanges']['rows'][number];
 
