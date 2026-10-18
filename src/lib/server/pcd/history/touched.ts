@@ -89,15 +89,26 @@ export function computeTouchedSet(
 	rows: LiveOpEntityRow[],
 	upstreamEdges: EntityEdge[]
 ): EntityRef[] {
-	const { rowUpstreamName } = resolveAliases(rows);
-
 	const direct = new Map<string, EntityRef>();
-	for (const r of rows) {
-		if (r.role !== 'target') continue;
-		const name = rowUpstreamName(r);
-		// No upstream identity: nothing upstream to snapshot for this row.
-		if (name === null) continue;
-		direct.set(entityKey(r.entity, name), { entity: r.entity, name });
+	// No upstream identity: nothing upstream to snapshot for it.
+	const add = (entity: string, name: string | null) => {
+		if (name !== null) direct.set(entityKey(entity, name), { entity, name });
+	};
+	// Capture runs before replay, so a rename's outcome here is the last compile's,
+	// and it can change (upstream may have taken the new name since). Cover both.
+	const variants = [
+		rows,
+		rows.map((r) => ({ ...r, failed: false })),
+		rows.map((r) => ({ ...r, failed: true }))
+	];
+	for (const variant of variants) {
+		const { rowUpstreamName, upstreamNameOf } = resolveAliases(variant);
+		for (const r of variant) {
+			if (r.role !== 'target') continue;
+			add(r.entity, rowUpstreamName(r));
+			// A rename that fails leaves its new name to whatever upstream has under it.
+			if (r.previousName && r.failed) add(r.entity, upstreamNameOf(r.entity, r.name));
+		}
 	}
 
 	const all = new Map(direct);
