@@ -104,7 +104,10 @@ export const pcdOpEntitiesQueries = {
 					o.metadata,
 					o.desired_state,
 					(SELECT h.status FROM pcd_op_history h WHERE h.op_id = o.id ORDER BY h.applied_at DESC, h.id DESC LIMIT 1) AS status,
-					(SELECT s.id FROM pcd_ops s WHERE s.superseded_by_op_id = o.id ORDER BY s.id DESC LIMIT 1) AS replaces_op_id
+					(SELECT s.id FROM pcd_ops s
+					 WHERE s.database_id = o.database_id AND s.origin = 'user' AND s.state = 'superseded'
+					   AND s.superseded_by_op_id = o.id
+					 ORDER BY s.id DESC LIMIT 1) AS replaces_op_id
 				 FROM pcd_ops o
 				 WHERE o.id IN (${placeholders})
 				 ORDER BY o.id`,
