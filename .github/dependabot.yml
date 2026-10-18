@@ -7,8 +7,40 @@ updates:
       time: '14:00'
       timezone: 'Australia/Adelaide'
     # Minor and patch updates share one PR. Each major gets its own, so one
-    # breaking upgrade can't hold back the rest.
+    # breaking upgrade can't hold back the rest, except for packages that
+    # require each other's majors, which move together. Dependabot uses the
+    # first group that matches, so the major groups come before `deno`.
     groups:
+      # @tailwindcss/vite pins tailwindcss to its exact version.
+      tailwind-major:
+        patterns:
+          - 'tailwindcss'
+          - '@tailwindcss/*'
+          - 'prettier-plugin-tailwindcss'
+        update-types: ['major']
+      # SvelteKit needs matching vite and vite-plugin-svelte majors, and the
+      # Vite plugins list each Vite major they support.
+      svelte-vite-major:
+        patterns:
+          - 'svelte'
+          - 'svelte-check'
+          - '@sveltejs/*'
+          - 'vite'
+          - '@deno/vite-plugin'
+          - 'esbuild'
+          - '@lucide/svelte'
+        update-types: ['major']
+      # @playwright/test pins playwright to its exact version.
+      playwright-major:
+        patterns:
+          - 'playwright'
+          - '@playwright/test'
+        update-types: ['major']
+      prettier-major:
+        patterns:
+          - 'prettier'
+          - 'prettier-plugin-svelte'
+        update-types: ['major']
       deno:
         patterns:
           - '*'
