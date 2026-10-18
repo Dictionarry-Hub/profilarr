@@ -32,7 +32,7 @@ export interface RelatedChange {
 	/** For a regex: the custom formats this profile scores that use it. */
 	via: string[];
 	changed: RelatedChangeField[];
-	/** One line on what changed, e.g. "2 Conditions Changed". */
+	/** One line on what changed, e.g. "2 Conditions Edited". */
 	summary: string;
 	/** Default against yours, one row per difference; empty when there's nothing to compare. */
 	details: DriftDisplayChange[];
@@ -185,7 +185,7 @@ export function relatedChanges(input: {
 			changed: [...changed],
 			summary: changed.has('deleted')
 				? 'Deleted'
-				: `${[...changed].map((f) => f[0].toUpperCase() + f.slice(1)).join(', ')} Changed`,
+				: `${[...changed].map((f) => f[0].toUpperCase() + f.slice(1)).join(', ')} Edited`,
 			details: [],
 			pending,
 			opIds
@@ -242,7 +242,7 @@ function conditionDifferences(
 		});
 	}
 	const summary = [
-		modified && `${plural(modified, 'Condition')} Changed`,
+		modified && `${plural(modified, 'Condition')} Edited`,
 		added && `${plural(added, 'Condition')} Added`,
 		d.removed.length && `${plural(d.removed.length, 'Condition')} Removed`
 	]

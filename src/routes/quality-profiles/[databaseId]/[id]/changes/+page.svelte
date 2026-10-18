@@ -75,7 +75,7 @@
 	const relatedColumns: Column<Related>[] = [
 		{ key: 'name', header: 'Name' },
 		{ key: 'entity', header: 'Entity', width: 'w-44' },
-		{ key: 'change', header: 'Change', width: 'w-64' }
+		{ key: 'change', header: 'Difference', width: 'w-64' }
 	];
 
 	const isDeleted = (change: Related) => change.changed.includes('deleted');
@@ -109,7 +109,9 @@
 <StickyCard position="top">
 	<svelte:fragment slot="left">
 		<h1 class="text-neutral-900 dark:text-neutral-50">Changes</h1>
-		<p class="text-neutral-600 dark:text-neutral-400">Local changes compared with the defaults</p>
+		<p class="text-neutral-600 dark:text-neutral-400">
+			Where this profile differs from its defaults
+		</p>
 	</svelte:fragment>
 </StickyCard>
 
@@ -132,7 +134,7 @@
 	{:else if changes.rows.length === 0 && changes.relatedChanges.length === 0}
 		<EmptyState
 			icon={History}
-			title="No Scoring Changes"
+			title="Scoring Matches the Defaults"
 			description="Scoring matches its defaults."
 			buttonText="Back to Scoring"
 			buttonHref={scoringHref}
@@ -195,9 +197,11 @@
 
 	{#if changes.relatedChanges.length > 0}
 		<section class="space-y-2">
-			<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Related Changes</h2>
+			<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+				Custom Formats & Regex
+			</h2>
 			<p class="text-sm text-neutral-600 dark:text-neutral-400">
-				Changes to custom formats and regexes this profile uses.
+				Edits to the custom formats and regex this profile uses.
 			</p>
 			<ExpandableTable
 				columns={relatedColumns}

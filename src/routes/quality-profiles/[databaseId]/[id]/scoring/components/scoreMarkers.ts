@@ -63,7 +63,7 @@ export function markerText(marker: ScoreMarker): string {
 		case 'overridden':
 			return `Default: ${show(marker.upstream)} · re-applied`;
 		case 'related':
-			return `Default: ${show(marker.upstream)} · related change`;
+			return `Default: ${show(marker.upstream)} · format deleted`;
 		default:
 			return `Default: ${show(marker.upstream)}`;
 	}

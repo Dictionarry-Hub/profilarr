@@ -14,7 +14,7 @@
 		applied: { label: 'Applied', variant: 'secondary' },
 		pending: { label: 'Not Applied', variant: 'warning' },
 		overridden: { label: 'Re-Applied', variant: 'info' },
-		related: { label: 'Related Change', variant: 'outline' }
+		related: { label: 'Format Deleted', variant: 'outline' }
 	};
 </script>
 
