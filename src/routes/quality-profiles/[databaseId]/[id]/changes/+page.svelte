@@ -120,13 +120,13 @@
 		<EmptyState
 			icon={History}
 			title="No Local Changes"
-			description="This profile matches its defaults."
+			description="Scoring matches its defaults."
 			buttonText="Back to Scoring"
 			buttonHref={scoringHref}
 		/>
 	{:else if changes.rows.length > 0}
 		<p class="text-sm text-neutral-600 dark:text-neutral-400">
-			{changes.rows.length} local change{changes.rows.length === 1 ? '' : 's'} compared with the defaults
+			{changes.rows.length} scoring change{changes.rows.length === 1 ? '' : 's'} compared with the defaults
 			{#if pendingCount > 0}
 				· <span class="font-medium text-amber-700 dark:text-amber-400"
 					>{pendingCount} not applied</span
