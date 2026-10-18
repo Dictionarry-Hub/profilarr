@@ -114,14 +114,6 @@ export function assembleQualityProfileScoringChanges(input: {
 		}
 	}
 
-	// A score op depends on its CF; that row resolves the CF's name as of the op.
-	const cfUpstreamNameByOp = new Map<number, string | null>();
-	for (const row of live) {
-		if (opIds.has(row.opId) && row.role === 'prerequisite' && row.entity === 'custom_format') {
-			cfUpstreamNameByOp.set(row.opId, rowUpstreamName(row));
-		}
-	}
-
 	const ops: ScoringOp[] = input.opDetails([...opIds]).map((d) => {
 		const metadata = parseJson(d.metadata);
 		return {
@@ -132,8 +124,7 @@ export function assembleQualityProfileScoringChanges(input: {
 			generated: metadata?.generated === true,
 			desiredState: parseJson(d.desiredState),
 			status: d.status,
-			replacesOpId: d.replacesOpId,
-			cfUpstreamName: cfUpstreamNameByOp.get(d.opId) ?? null
+			replacesOpId: d.replacesOpId
 		};
 	});
 

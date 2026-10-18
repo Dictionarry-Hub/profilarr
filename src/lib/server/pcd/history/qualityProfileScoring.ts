@@ -57,8 +57,6 @@ export interface ScoringOp {
 	status: string | null;
 	/** Set when this op replaced another through override. */
 	replacesOpId: number | null;
-	/** For score ops: the custom format's upstream name as of this op. */
-	cfUpstreamName: string | null;
 }
 
 export interface ScoringChanges {
@@ -166,7 +164,7 @@ export function qualityProfileScoringChanges(input: {
 	upstream: PortableQualityProfile | null | undefined;
 	current: PortableQualityProfile;
 	cfUpstreamNameOf: (currentName: string) => string | null;
-	/** A CF name as a generated op wrote it, resolved as of that op. Defaults to cfUpstreamNameOf. */
+	/** A CF name as an op wrote it, resolved as of that op. Defaults to cfUpstreamNameOf. */
 	cfUpstreamNameBefore?: (name: string, opId: number) => string | null;
 	ops: ScoringOp[];
 }): ScoringChanges {
@@ -268,22 +266,21 @@ export function qualityProfileScoringChanges(input: {
 		if (v.upstream !== v.current) ensureRow(key);
 	}
 
-	const userIdentity = (op: ScoringOp) => (writtenName: string) => ({
-		upstreamName: op.cfUpstreamName,
-		currentName: op.cfUpstreamName === null ? writtenName : null
-	});
-	// Generated ops resolve each name as of the op, so a later rename or reuse of a
-	// name can't point them at the wrong row.
-	const generatedIdentity = (op: ScoringOp) => (writtenName: string) => {
-		const upstreamName = cfUpstreamNameBefore(writtenName, op.opId);
-		return upstreamName === null ? null : { upstreamName, currentName: null };
-	};
+	// Each name resolves as of its op, so a later rename or reuse of a name can't
+	// point an op at the wrong row. A generated op's vacated name has nothing to change.
+	const identity =
+		(op: ScoringOp) =>
+		(writtenName: string): ScoreCustomFormat | null => {
+			const upstreamName = cfUpstreamNameBefore(writtenName, op.opId);
+			if (upstreamName === null && op.generated) return null;
+			return { upstreamName, currentName: upstreamName === null ? writtenName : null };
+		};
 
 	// Op overlay, oldest first so the latest op on a row decides its status.
 	// A pending op adds its row even when current still equals upstream.
 	for (const op of [...input.ops].sort((a, b) => a.opId - b.opId)) {
 		const status = statusOf(op);
-		const entries = scoreEntries(op, op.generated ? generatedIdentity(op) : userIdentity(op));
+		const entries = scoreEntries(op, identity(op));
 
 		if (op.generated) {
 			if (entries.length === 0) continue;
