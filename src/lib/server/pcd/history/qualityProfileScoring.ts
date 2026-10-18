@@ -112,66 +112,37 @@ interface OpTarget {
 	wanted: Value;
 	customFormat?: ScoreCustomFormat;
 	arrType?: string;
-	/** Expanded from a shared 'all' row, which an arr type's own row overrides. */
-	shared?: boolean;
 }
 
-/** Row keys an op's changed fields address, with the value each wanted. */
-function opTargets(op: ScoringOp): OpTarget[] {
-	const targets: OpTarget[] = [];
-	for (const field of op.changedFields) {
-		if ((SCORING_FIELDS as readonly string[]).includes(field)) {
-			const entry = op.desiredState?.[field] as { to?: Value } | undefined;
-			targets.push({ key: field, wanted: entry?.to ?? null });
-			continue;
-		}
-		if (!field.startsWith(SCORE_PREFIX)) continue;
-		// custom_format_score:<cf>:<arr>; the CF name itself may contain colons.
-		const rest = field.slice(SCORE_PREFIX.length);
-		const cut = rest.lastIndexOf(':');
-		if (cut <= 0) continue;
-		const writtenName = rest.slice(0, cut);
-		const arrType = rest.slice(cut + 1);
-		const customFormat = {
-			upstreamName: op.cfUpstreamName,
-			currentName: op.cfUpstreamName === null ? writtenName : null
-		};
-		const entries = (op.desiredState?.custom_format_scores ?? []) as Array<{
-			custom_format_name?: string;
-			arr_type?: string;
-			to?: Value;
-		}>;
-		const entry = entries.find(
-			(e) => e.arr_type === arrType && e.custom_format_name === writtenName
-		);
-		const wanted = entry?.to ?? null;
-		for (const effectiveArrType of arrType === 'all' ? ARR_TYPES : [arrType]) {
-			targets.push({
-				key: scoreKey(customFormat, effectiveArrType),
-				wanted,
-				customFormat,
-				arrType: effectiveArrType,
-				shared: arrType === 'all'
-			});
-		}
-	}
-	return targets;
+/** Scoring settings an op changes, with the value each wanted. */
+function scalarTargets(op: ScoringOp): OpTarget[] {
+	return op.changedFields
+		.filter((field) => (SCORING_FIELDS as readonly string[]).includes(field))
+		.map((field) => ({
+			key: field,
+			wanted: (op.desiredState?.[field] as { to?: Value } | undefined)?.to ?? null
+		}));
 }
 
 interface ScoreEntry {
-	name: string;
+	customFormat: ScoreCustomFormat;
+	/** A database row's arr type: 'all' is the shared row. */
 	arrType: string;
 	to: Value;
 }
 
-function scoreEntries(op: ScoringOp): ScoreEntry[] {
+/** The score rows an op writes, each with its custom format's identity. */
+function scoreEntries(
+	op: ScoringOp,
+	identify: (writtenName: string) => ScoreCustomFormat | null
+): ScoreEntry[] {
 	const raw = op.desiredState?.custom_format_scores;
 	if (!Array.isArray(raw)) return [];
-	return raw.flatMap((e) =>
-		e && typeof e.custom_format_name === 'string' && typeof e.arr_type === 'string'
-			? [{ name: e.custom_format_name, arrType: e.arr_type, to: e.to ?? null }]
-			: []
-	);
+	return raw.flatMap((e) => {
+		if (!e || typeof e.custom_format_name !== 'string' || typeof e.arr_type !== 'string') return [];
+		const customFormat = identify(e.custom_format_name);
+		return customFormat ? [{ customFormat, arrType: e.arr_type, to: e.to ?? null }] : [];
+	});
 }
 
 function statusOf(op: ScoringOp): RowStatus {
@@ -208,21 +179,41 @@ export function qualityProfileScoringChanges(input: {
 		upstreamName: cfUpstreamNameOf(name),
 		currentName: name
 	});
-	// Score cells an arr type's own row decides: a shared 'all' change doesn't reach them.
-	const ownRows = new Set(
-		current.customFormatScores
-			.filter((s) => s.arrType !== 'all')
-			.map((s) => scoreKey(currentCustomFormat(s.customFormatName), s.arrType))
+	// Raw score rows (shared 'all' included) as the overlay sees them: current,
+	// plus the intended changes of pending ops replayed so far.
+	let intended = new Map(
+		current.customFormatScores.map((s) => [
+			scoreKey(currentCustomFormat(s.customFormatName), s.arrType),
+			s.score
+		])
 	);
-	// Each arr type's shared score: what it falls back to once its own row is removed.
-	const sharedScores = new Map<string, number>();
-	for (const s of current.customFormatScores.filter((s) => s.arrType === 'all')) {
-		for (const arrType of ARR_TYPES) {
-			sharedScores.set(scoreKey(currentCustomFormat(s.customFormatName), arrType), s.score);
+	// One resolver for every effective score, as sync resolves it: the arr type's own row, else the shared row.
+	const effective = (rawRows: Map<string, number>, cf: ScoreCustomFormat, arrType: string) =>
+		rawRows.get(scoreKey(cf, arrType)) ?? rawRows.get(scoreKey(cf, 'all')) ?? null;
+	/** Applies an op's score rows; returns each arr type cell they reach, with its effective value after. */
+	const applyScores = (entries: ScoreEntry[]) => {
+		const after = new Map(intended);
+		for (const e of entries) {
+			const key = scoreKey(e.customFormat, e.arrType);
+			if (e.to === null) after.delete(key);
+			else after.set(key, e.to as number);
 		}
-	}
-	const effectiveWanted = (t: { key: string; wanted: Value; shared?: boolean }): Value =>
-		t.wanted === null && !t.shared ? (sharedScores.get(t.key) ?? null) : t.wanted;
+		const reached = new Map<string, OpTarget>();
+		for (const e of entries) {
+			for (const arrType of e.arrType === 'all' ? ARR_TYPES : [e.arrType]) {
+				const own = scoreKey(e.customFormat, arrType);
+				// A shared row doesn't reach an arr type whose own row decides it throughout.
+				if (e.arrType === 'all' && intended.has(own) && after.has(own)) continue;
+				reached.set(own, {
+					key: own,
+					wanted: effective(after, e.customFormat, arrType),
+					customFormat: e.customFormat,
+					arrType
+				});
+			}
+		}
+		return { after, reached: [...reached.values()] };
+	};
 
 	const valueAt = (key: string): { upstream: Value; current: Value } =>
 		key.startsWith(SCORE_PREFIX)
@@ -261,67 +252,58 @@ export function qualityProfileScoringChanges(input: {
 		if (v.upstream !== v.current) ensureRow(key);
 	}
 
-	// Generated ops (a CF rename or delete) only matter when they conflict. Their
-	// guards often miss because a cascade already did the work, so a conflict
-	// whose wanted state holds reads as already in effect, not as not applied.
-	const overlayGeneratedConflict = (op: ScoringOp) => {
-		// Names resolve as of the op and the check compares by default identity, so a
-		// later rename or reuse of a name can't point the op at the wrong row.
-		const targets = scoreEntries(op)
-			.flatMap((e) => {
-				const upstreamName = cfUpstreamNameBefore(e.name, op.opId);
-				if (upstreamName === null) return [];
-				const customFormat = { upstreamName, currentName: null };
-				return (e.arrType === 'all' ? ARR_TYPES : [e.arrType]).map((arrType) => ({
-					key: scoreKey(customFormat, arrType),
-					wanted: e.to,
-					customFormat,
-					arrType,
-					shared: e.arrType === 'all'
-				}));
-			})
-			.filter((t) => !(t.shared && ownRows.has(t.key)));
-		const holds = targets.every((t) => (nowCells.get(t.key)?.score ?? null) === effectiveWanted(t));
-		for (const target of targets) {
-			if (holds) {
-				const row = rows.get(target.key);
-				if (!row) continue;
-				row.opIds.push(op.opId);
-				row.inEffect = true;
-				continue;
-			}
-			const row = ensureRow(target.key, target);
-			row.opIds.push(op.opId);
-			row.status = 'pending';
-			row.pendingValue = effectiveWanted(target);
-		}
+	const userIdentity = (op: ScoringOp) => (writtenName: string) => ({
+		upstreamName: op.cfUpstreamName,
+		currentName: op.cfUpstreamName === null ? writtenName : null
+	});
+	// Generated ops resolve each name as of the op, so a later rename or reuse of a
+	// name can't point them at the wrong row.
+	const generatedIdentity = (op: ScoringOp) => (writtenName: string) => {
+		const upstreamName = cfUpstreamNameBefore(writtenName, op.opId);
+		return upstreamName === null ? null : { upstreamName, currentName: null };
 	};
 
 	// Op overlay, oldest first so the latest op on a row decides its status.
 	// A pending op adds its row even when current still equals upstream.
 	for (const op of [...input.ops].sort((a, b) => a.opId - b.opId)) {
 		const status = statusOf(op);
+		const { after, reached } = applyScores(
+			scoreEntries(op, op.generated ? generatedIdentity(op) : userIdentity(op))
+		);
 		if (op.generated) {
-			if (status === 'pending') overlayGeneratedConflict(op);
-			continue;
-		}
-		for (const target of opTargets(op)) {
-			const { key } = target;
-			if (target.shared && ownRows.has(key)) continue;
-			// A pending own row isn't in the database yet, but later shared changes
-			// still don't reach it (the writer expands a shared score this way).
-			if (status === 'pending' && !target.shared) {
-				if (target.wanted === null) ownRows.delete(key);
-				else ownRows.add(key);
+			// Generated ops (a CF rename or delete) only matter when they conflict. Their
+			// guards often miss because a cascade already did the work, so a conflict
+			// whose wanted state holds reads as already in effect, not as not applied.
+			if (status !== 'pending') continue;
+			const holds = reached.every(
+				(t) => effective(intended, t.customFormat!, t.arrType!) === t.wanted
+			);
+			for (const target of reached) {
+				if (holds) {
+					const row = rows.get(target.key);
+					if (!row) continue;
+					row.opIds.push(op.opId);
+					row.inEffect = true;
+					continue;
+				}
+				const row = ensureRow(target.key, target);
+				row.opIds.push(op.opId);
+				row.status = 'pending';
+				row.pendingValue = target.wanted;
 			}
-			if (!rows.has(key) && status !== 'pending') continue;
-			const row = ensureRow(key, target);
-			row.opIds.push(op.opId);
-			row.status = status;
-			delete row.inEffect;
-			if (status === 'pending') row.pendingValue = effectiveWanted(target);
-			else delete row.pendingValue;
+		} else {
+			for (const target of [...scalarTargets(op), ...reached]) {
+				if (!rows.has(target.key) && status !== 'pending') continue;
+				const row = ensureRow(target.key, target);
+				row.opIds.push(op.opId);
+				row.status = status;
+				delete row.inEffect;
+				if (status === 'pending') row.pendingValue = target.wanted;
+				else delete row.pendingValue;
+			}
 		}
+		// A pending op's rows aren't in the database, but later ops build on them.
+		if (status === 'pending') intended = after;
 	}
 
 	const status = upstream === null ? 'created' : rows.size > 0 ? 'modified' : 'unchanged';
