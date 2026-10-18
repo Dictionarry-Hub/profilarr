@@ -54,6 +54,7 @@ export function assembleQualityProfileScoringChanges(input: {
 	edges: EntityEdge[];
 	/** Name resolution over `live`; resolved here when the caller hasn't already. */
 	aliases?: AliasResolution;
+	exists?: (entity: RelatedChange['entity'], name: string) => boolean;
 }): QualityProfileScoringLocalChanges {
 	const { snapshot, live, current, profileName } = input;
 	const { upstreamNameOf, rowUpstreamName, upstreamNameBefore } =
@@ -74,7 +75,8 @@ export function assembleQualityProfileScoringChanges(input: {
 		upstreamNameOf,
 		rowUpstreamName,
 		opDetails: input.opDetails,
-		defaultScored
+		defaultScored,
+		exists: input.exists
 	});
 
 	if (snapshot.status !== 'captured') {
@@ -171,7 +173,12 @@ export async function qualityProfileScoringLocalChanges(
 		current: await serializeQualityProfile(cache, profileName),
 		profileName,
 		edges: cache.query<EntityEdge>(ENTITY_EDGES_SQL),
-		aliases
+		aliases,
+		exists: (entity, name) =>
+			cache.queryOne(
+				`SELECT 1 FROM ${entity === 'custom_format' ? 'custom_formats' : 'regular_expressions'} WHERE name = ?`,
+				name
+			) !== undefined
 	});
 
 	// Related changes come from op history; keep only what still differs from its default.

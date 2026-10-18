@@ -86,6 +86,8 @@ export function relatedChanges(input: {
 	opDetails: (opIds: number[]) => OpDetails[];
 	/** Custom formats the profile scores in its defaults, by default name. */
 	defaultScored?: string[];
+	/** Whether an entity exists now; without it, every deletion is taken as current. */
+	exists?: (entity: RelatedChange['entity'], name: string) => boolean;
 }): RelatedChange[] {
 	const { edges, live, upstreamNameOf, rowUpstreamName } = input;
 	const reached = reach([{ entity: 'quality_profile', name: input.profileName }], edges, 'up');
@@ -133,6 +135,7 @@ export function relatedChanges(input: {
 		let changed = new Set<RelatedChangeField>();
 		const opIds: number[] = [];
 		let pending = false;
+		let deletionFailed = false;
 		for (const id of [...ids].sort((a, b) => a - b)) {
 			const op = details.get(id);
 			if (!op) continue;
@@ -142,9 +145,17 @@ export function relatedChanges(input: {
 			fields.forEach((f) => changed.add(f));
 			opIds.push(id);
 			pending ||= op.pending;
+			if (fields.includes('deleted')) deletionFailed = op.pending;
+		}
+		if (changed.has('deleted')) {
+			const entity = ref.entity as RelatedChange['entity'];
+			// Recreated since: compare it like any other change.
+			changed =
+				deletionFailed || !input.exists?.(entity, ref.name)
+					? new Set(['deleted'])
+					: new Set([entity === 'custom_format' ? 'conditions' : 'pattern']);
 		}
 		if (changed.size === 0 || (onlyInDefaults.has(key) && !changed.has('deleted'))) continue;
-		if (changed.has('deleted')) changed = new Set(['deleted']);
 		changes.push({
 			entity: ref.entity as RelatedChange['entity'],
 			name: ref.name,
