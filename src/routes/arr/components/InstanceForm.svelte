@@ -16,6 +16,7 @@
 	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
 	import type { CleanupSettings } from '$db/queries/arrCleanupSettings.ts';
 	import { isExperimentalVersion } from '$shared/arr/capabilities.ts';
+	import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import TagInput from '$ui/form/TagInput.svelte';
@@ -33,6 +34,8 @@
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let form: any = undefined;
 	export let cleanupSettings: CleanupSettings | null = null;
+	/** Edit mode: whether Basic Auth is saved. The values never reach the browser. */
+	export let hasBasicAuth = false;
 
 	type FormSnapshot = {
 		name: string;
@@ -243,9 +246,20 @@
 		mode === 'edit' &&
 		!!instance &&
 		normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url);
+	// Untouched fields in edit mode keep what is saved, so check the pair the save would leave
+	$: basicAuthUsernameSet =
+		mode === 'create' || basicAuthUsernameTouched ? !!basicAuthUsername.trim() : hasBasicAuth;
+	$: basicAuthPasswordSet =
+		mode === 'create' || basicAuthPasswordTouched ? !!basicAuthPassword : hasBasicAuth;
+	$: basicAuthError = basicAuthPairError(basicAuthUsernameSet, basicAuthPasswordSet);
 	$: canSubmit =
-		$isDirty && !!name && !!url && (mode === 'edit' ? !urlChanged || !!apiKey : !!apiKey && !!type);
-	$: saveHint = urlChanged && !apiKey ? 'Enter the API key to change the URL' : '';
+		$isDirty &&
+		!!name &&
+		!!url &&
+		!basicAuthError &&
+		(mode === 'edit' ? !urlChanged || !!apiKey : !!apiKey && !!type);
+	$: saveHint =
+		basicAuthError ?? (urlChanged && !apiKey ? 'Enter the API key to change the URL' : '');
 
 	// Handle form response
 	let lastFormId: unknown = null;

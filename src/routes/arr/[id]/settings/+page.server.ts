@@ -12,6 +12,7 @@ import { enqueueJob } from '$lib/server/jobs/queueService.ts';
 import { logger } from '$logger/logger.ts';
 import { requireSecretForDestinationChange } from '$utils/secretDestination.ts';
 import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
+import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
 import { createArrClient } from '$arr/factory.ts';
 import { probeAndRecordVersion } from '$arr/version.ts';
 import type { ArrType } from '$arr/types.ts';
@@ -19,7 +20,12 @@ import type { ArrType } from '$arr/types.ts';
 export const load = ({ params }) => {
 	const id = parseInt(params.id || '', 10);
 	const cleanupSettings = arrCleanupSettingsQueries.getByInstanceId(id);
-	return { cleanupSettings: cleanupSettings ?? null };
+	const instance = arrInstancesQueries.getById(id);
+	return {
+		cleanupSettings: cleanupSettings ?? null,
+		// Whether Basic Auth is saved, never the values themselves
+		hasBasicAuth: !!instance?.basic_auth_username && !!instance?.basic_auth_password
+	};
 };
 
 export const actions: Actions = {
@@ -73,6 +79,11 @@ export const actions: Actions = {
 
 		if (!url) {
 			return fail(400, { error: 'URL is required' });
+		}
+
+		const basicAuthError = basicAuthPairError(!!basicAuthUsername, !!basicAuthPassword);
+		if (basicAuthError) {
+			return fail(400, { error: basicAuthError });
 		}
 
 		// The stored key is sent to the URL, so a new URL needs the key re-entered

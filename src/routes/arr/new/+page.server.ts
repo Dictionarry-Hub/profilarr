@@ -2,6 +2,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
 import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
 import { createArrClient } from '$arr/factory.ts';
 import { getDefaultDelayProfile } from '$arr/defaults.ts';
@@ -38,6 +39,11 @@ export const actions = {
 				error: 'Name, type, URL, and API key are required',
 				values: { name, type, url }
 			});
+		}
+
+		const basicAuthError = basicAuthPairError(!!basicAuthUsername, !!basicAuthPassword);
+		if (basicAuthError) {
+			return fail(400, { error: basicAuthError, values: { name, type, url } });
 		}
 
 		if (!VALID_TYPES.includes(type)) {

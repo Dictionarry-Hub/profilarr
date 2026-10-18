@@ -12,6 +12,7 @@ import { openDb } from '$test-harness/db.ts';
 import { PORTS } from '$test-harness/ports.ts';
 import { run, setup, teardown, test } from '$test-harness/runner.ts';
 import { getDbPath, startServer, stopServer } from '$test-harness/server.ts';
+import { formResult } from '$test-harness/setup.ts';
 
 const PORT = PORTS.arr.basicAuth;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -66,6 +67,45 @@ function startFakeArr(): Deno.HttpServer {
 		}
 		return new Response(null, { status: 404 });
 	});
+}
+
+async function createInstance(name: string, fields: Record<string, string>) {
+	const res = await client.postForm(
+		'/arr/new',
+		{
+			name,
+			type: 'sonarr',
+			url: FAKE_URL,
+			external_url: '',
+			api_key: FAKE_KEY,
+			tags: '[]',
+			...fields
+		},
+		{ headers: { Origin: ORIGIN } }
+	);
+	return await formResult(res);
+}
+
+async function updateInstance(id: number, name: string, fields: Record<string, string>) {
+	const res = await client.postForm(
+		`/arr/${id}/settings?/update`,
+		{
+			name,
+			type: 'sonarr',
+			url: FAKE_URL,
+			external_url: '',
+			api_key: '',
+			tags: '[]',
+			library_refresh_interval: '0',
+			basic_auth_username: '',
+			basic_auth_password: '',
+			basic_auth_username_touched: '0',
+			basic_auth_password_touched: '0',
+			...fields
+		},
+		{ headers: { Origin: ORIGIN } }
+	);
+	return await formResult(res);
 }
 
 function readInstance(name: string) {
@@ -160,6 +200,49 @@ test('logs load through Basic Auth', async () => {
 	assertEquals(res.status, 200);
 	const body = await res.json();
 	assertEquals(body.records[0].message, 'hello');
+});
+
+test('creating an instance rejects a password without a username', async () => {
+	const result = await createInstance('Password Only', {
+		url: 'http://password-only.invalid',
+		basic_auth_password: PROXY_PASSWORD
+	});
+	assertEquals(result.status, 400);
+	assertEquals(readInstance('Password Only'), undefined);
+});
+
+test('creating an instance rejects a username without a password', async () => {
+	const result = await createInstance('Username Only', {
+		url: 'http://username-only.invalid',
+		basic_auth_username: PROXY_USER
+	});
+	assertEquals(result.status, 400);
+	assertEquals(readInstance('Username Only'), undefined);
+});
+
+test('editing rejects clearing only the username', async () => {
+	const row = readInstance('Proxied Sonarr')!;
+	const result = await updateInstance(row.id, 'Proxied Sonarr', {
+		basic_auth_username_touched: '1'
+	});
+	assertEquals(result.status, 400);
+
+	const after = readInstance('Proxied Sonarr');
+	assertEquals(after?.basic_auth_username, PROXY_USER);
+	assertEquals(after?.basic_auth_password, PROXY_PASSWORD);
+});
+
+test('editing only the password keeps the saved username', async () => {
+	const row = readInstance('Proxied Sonarr')!;
+	const result = await updateInstance(row.id, 'Proxied Sonarr', {
+		basic_auth_password: 'new-proxy-password',
+		basic_auth_password_touched: '1'
+	});
+	assertEquals(result.status, 200);
+
+	const after = readInstance('Proxied Sonarr');
+	assertEquals(after?.basic_auth_username, PROXY_USER);
+	assertEquals(after?.basic_auth_password, 'new-proxy-password');
 });
 
 await run();

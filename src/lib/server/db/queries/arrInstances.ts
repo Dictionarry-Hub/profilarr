@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
 import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
 import { arrSyncQueries } from './arrSync.ts';
 
@@ -77,6 +78,9 @@ export const arrInstancesQueries = {
 	 * Create a new arr instance
 	 */
 	create(input: CreateArrInstanceInput): number {
+		const pairError = basicAuthPairError(!!input.basicAuthUsername, !!input.basicAuthPassword);
+		if (pairError) throw new Error(pairError);
+
 		const tagsJson = input.tags && input.tags.length > 0 ? JSON.stringify(input.tags) : null;
 
 		db.execute(
@@ -140,6 +144,21 @@ export const arrInstancesQueries = {
 	 * Update an arr instance
 	 */
 	update(id: number, input: UpdateArrInstanceInput): boolean {
+		// Check the pair the row will end up with, since either field may be left as it is
+		if (input.basicAuthUsername !== undefined || input.basicAuthPassword !== undefined) {
+			const current = arrInstancesQueries.getById(id);
+			const username =
+				input.basicAuthUsername !== undefined
+					? input.basicAuthUsername
+					: (current?.basic_auth_username ?? null);
+			const password =
+				input.basicAuthPassword !== undefined
+					? input.basicAuthPassword
+					: (current?.basic_auth_password ?? null);
+			const pairError = basicAuthPairError(!!username, !!password);
+			if (pairError) throw new Error(pairError);
+		}
+
 		const updates: string[] = [];
 		const params: (string | number | null)[] = [];
 
