@@ -15,7 +15,6 @@
 	type IconCheckboxColor =
 		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})`;
 	export let getArrTypeColor: (arrType: string) => IconCheckboxColor;
-	export let customFormatRenames: Record<string, string> = {};
 	export let firstRowOnboarding: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher<{
@@ -68,23 +67,14 @@
 				data-onboarding={start + i === 0 ? firstRowOnboarding : undefined}
 			>
 				<!-- Format name -->
-				<!-- One line: cards are fixed-height for the virtual list. -->
 				<div
-					class="flex min-w-0 items-baseline gap-2 border-b border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-900 dark:border-neutral-800 dark:text-neutral-100"
+					class="border-b border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-900 dark:border-neutral-800 dark:text-neutral-100"
 				>
 					<InlineLink
 						href="/custom-formats/{databaseId}/{format.id}/general"
 						text={format.name}
 						external
 					/>
-					{#if customFormatRenames[format.name]}
-						<span
-							class="truncate text-xs font-normal text-neutral-500 dark:text-neutral-400"
-							title="Renamed from {customFormatRenames[format.name]}"
-						>
-							Renamed from {customFormatRenames[format.name]}
-						</span>
-					{/if}
 				</div>
 
 				<!-- Arr type scores -->

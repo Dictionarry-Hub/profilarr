@@ -25,8 +25,6 @@ export interface QualityProfileScoringLocalChanges extends ScoringChanges {
 	snapshot: UpstreamSnapshot['status'];
 	/** database: capture failed as a whole. profile: only this profile's. load: reading failed. */
 	unavailableReason: 'database' | 'profile' | 'load' | null;
-	/** Current name -> upstream name, for local renames of custom formats upstream has. */
-	customFormatRenames: Record<string, string>;
 	relatedChanges: RelatedChange[];
 }
 
@@ -38,24 +36,6 @@ function parseJson(raw: string | null): Record<string, unknown> | null {
 	} catch {
 		return null;
 	}
-}
-
-function customFormatRenames(
-	snapshot: UpstreamSnapshot,
-	live: LiveOpEntityRow[],
-	upstreamNameOf: (entity: string, name: string) => string | null
-): Record<string, string> {
-	const renames: Record<string, string> = {};
-	for (const row of live) {
-		if (row.role !== 'target' || row.entity !== 'custom_format' || !row.previousName) continue;
-		// Intermediate names resolve to null; a rename back resolves to itself.
-		const upstream = upstreamNameOf('custom_format', row.name);
-		if (upstream === null || upstream === row.name) continue;
-		// Created locally, then renamed: its earliest name was never upstream.
-		if (!snapshot.entities.get(entityKey('custom_format', upstream))) continue;
-		renames[row.name] = upstream;
-	}
-	return renames;
 }
 
 export function assembleQualityProfileScoringChanges(input: {
@@ -83,13 +63,11 @@ export function assembleQualityProfileScoringChanges(input: {
 		return {
 			snapshot: snapshot.status,
 			unavailableReason: snapshot.status === 'unavailable' ? 'database' : null,
-			customFormatRenames: {},
 			relatedChanges: related,
 			status: 'unchanged',
 			rows: []
 		};
 	}
-	const renames = customFormatRenames(snapshot, live, upstreamNameOf);
 	// Its upstream failed to serialize: without it, every row would be a guess.
 	const failed = snapshot.failures.some(
 		(f) => f.entity === 'quality_profile' && f.name === upstreamName
@@ -98,7 +76,6 @@ export function assembleQualityProfileScoringChanges(input: {
 		return {
 			snapshot: 'unavailable',
 			unavailableReason: 'profile',
-			customFormatRenames: renames,
 			relatedChanges: related,
 			status: 'unchanged',
 			rows: []
@@ -149,7 +126,6 @@ export function assembleQualityProfileScoringChanges(input: {
 	return {
 		snapshot: snapshot.status,
 		unavailableReason: null,
-		customFormatRenames: renames,
 		relatedChanges: related,
 		...qualityProfileScoringChanges({
 			upstream,

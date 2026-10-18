@@ -16,7 +16,6 @@
 	export let customFormatEnabled: Record<string, Record<string, boolean>>;
 	export let disabled: boolean = false;
 	export let scoreMarkers: ScoreMarkers = {};
-	export let customFormatRenames: Record<string, string> = {};
 	type IconCheckboxColor =
 		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})`;
 	export let getArrTypeColor: (arrType: string) => IconCheckboxColor;
@@ -78,14 +77,7 @@
 >
 	<svelte:fragment slot="cell" let:row let:column>
 		{#if column.key === 'name'}
-			<div class="flex flex-col gap-1">
-				<InlineLink href="/custom-formats/{databaseId}/{row.id}/general" text={row.name} external />
-				{#if customFormatRenames[row.name]}
-					<span class="text-xs text-neutral-500 dark:text-neutral-400">
-						Renamed from {customFormatRenames[row.name]}
-					</span>
-				{/if}
-			</div>
+			<InlineLink href="/custom-formats/{databaseId}/{row.id}/general" text={row.name} external />
 		{:else}
 			{@const arrType = column.key}
 			{@const marker = scoreMarkers[row.name]?.[arrType]}

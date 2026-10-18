@@ -1006,7 +1006,6 @@
 								{customFormatScores}
 								{customFormatEnabled}
 								{scoreMarkers}
-								customFormatRenames={data.localChanges.customFormatRenames}
 								{getArrTypeColor}
 								title={group.name}
 								firstRowOnboarding={groupIndex === 0 ? 'qp-scoring-row' : undefined}

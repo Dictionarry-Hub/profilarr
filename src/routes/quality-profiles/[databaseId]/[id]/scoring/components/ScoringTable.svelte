@@ -8,7 +8,6 @@
 	export let customFormatEnabled: Record<string, Record<string, boolean>>;
 	export let disabled: boolean = false;
 	export let scoreMarkers: ScoreMarkers = {};
-	export let customFormatRenames: Record<string, string> = {};
 	type IconCheckboxColor =
 		'accent' | 'blue' | 'green' | 'red' | 'neutral' | `#${string}` | `var(--${string})`;
 	export let getArrTypeColor: (arrType: string) => IconCheckboxColor;
@@ -55,7 +54,6 @@
 		{customFormatScores}
 		{customFormatEnabled}
 		{scoreMarkers}
-		{customFormatRenames}
 		{disabled}
 		{getArrTypeColor}
 		{firstRowOnboarding}
@@ -69,7 +67,6 @@
 		{arrTypes}
 		{customFormatScores}
 		{customFormatEnabled}
-		{customFormatRenames}
 		{disabled}
 		{getArrTypeColor}
 		{firstRowOnboarding}
