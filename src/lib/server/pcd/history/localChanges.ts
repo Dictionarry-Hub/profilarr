@@ -107,17 +107,20 @@ export function assembleQualityProfileScoringChanges(input: {
 		}
 	}
 
-	const ops: ScoringOp[] = input.opDetails([...opIds]).map((d) => {
-		const { changedFields, generated } = parseOpMetadata(d.metadata);
-		return {
-			opId: d.opId,
-			changedFields,
-			generated,
-			desiredState: parseJson(d.desiredState),
-			status: d.status,
-			replacesOpId: d.replacesOpId
-		};
-	});
+	// Without defaults to compare against, its ops have nothing to explain.
+	const ops: ScoringOp[] = upstreamProfile
+		? input.opDetails([...opIds]).map((d) => {
+				const { changedFields, generated } = parseOpMetadata(d.metadata);
+				return {
+					opId: d.opId,
+					changedFields,
+					generated,
+					desiredState: parseJson(d.desiredState),
+					status: d.status,
+					replacesOpId: d.replacesOpId
+				};
+			})
+		: [];
 
 	return {
 		snapshot: snapshot.status,
