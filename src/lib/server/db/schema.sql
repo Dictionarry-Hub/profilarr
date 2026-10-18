@@ -402,7 +402,8 @@ CREATE TABLE pcd_op_entities (
     previous_name TEXT,
     role TEXT NOT NULL CHECK (role IN ('target', 'prerequisite')),
     PRIMARY KEY (op_id, entity, name, role),
-    FOREIGN KEY (op_id) REFERENCES pcd_ops(id) ON DELETE CASCADE
+    FOREIGN KEY (op_id) REFERENCES pcd_ops(id) ON DELETE CASCADE,
+    FOREIGN KEY (database_id) REFERENCES database_instances(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_pcd_op_entities_lookup
