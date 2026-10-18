@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import History from '@lucide/svelte/icons/history';
-	import Badge from '$ui/badge/Badge.svelte';
 	import InlineLink from '$ui/link/InlineLink.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
@@ -11,6 +10,7 @@
 	import Table from '$ui/table/Table.svelte';
 	import type { Column } from '$ui/table/types.ts';
 	import type { PageData } from './$types';
+	import ChangeStatus from './components/ChangeStatus.svelte';
 
 	export let data: PageData;
 
@@ -23,18 +23,20 @@
 		upgrade_score_increment: 'Upgrade Score Increment'
 	};
 
-	const STATUS: Record<
-		Row['status'],
-		{ label: string; variant: 'neutral' | 'warning' | 'info' | 'accent' }
-	> = {
-		applied: { label: 'Applied', variant: 'neutral' },
-		pending: { label: 'Not Applied', variant: 'warning' },
-		overridden: { label: 'Re-Applied', variant: 'info' },
-		related: { label: 'Related Change', variant: 'accent' }
+	const ARR_COLORS: Record<string, string> = {
+		radarr: 'bg-[var(--arr-radarr-color)] text-neutral-900',
+		sonarr: 'bg-[var(--arr-sonarr-color)] text-neutral-900'
 	};
 
-	const columns: Column<Row>[] = [
+	const settingColumns: Column<Row>[] = [
 		{ key: 'setting', header: 'Setting', align: 'left' },
+		{ key: 'upstream', header: 'Default', align: 'right', width: 'w-32' },
+		{ key: 'current', header: 'Yours', align: 'right', width: 'w-32' },
+		{ key: 'status', header: 'Status', align: 'left', width: 'w-64' }
+	];
+
+	const scoreColumns: Column<Row>[] = [
+		{ key: 'format', header: 'Custom Format', align: 'left' },
 		{ key: 'arr', header: 'App', align: 'left', width: 'w-28' },
 		{ key: 'upstream', header: 'Default', align: 'right', width: 'w-32' },
 		{ key: 'current', header: 'Yours', align: 'right', width: 'w-32' },
@@ -68,6 +70,8 @@
 	const isDeleted = (change: Related) => change.changed.includes('deleted');
 
 	$: changes = data.localChanges;
+	$: settingRows = changes.rows.filter((r) => r.field !== 'custom_format_score');
+	$: scoreRows = changes.rows.filter((r) => r.field === 'custom_format_score');
 	$: pendingCount = changes.rows.filter((r) => r.status === 'pending').length;
 	$: scoringHref = `/quality-profiles/${$page.params.databaseId}/${$page.params.id}/scoring`;
 
@@ -120,49 +124,65 @@
 			{/if}
 		</p>
 
-		<Table {columns} data={changes.rows} hoverable={false}>
-			<svelte:fragment slot="cell" let:row let:column>
-				{#if column.key === 'setting'}
-					<div class="font-medium">{settingName(row)}</div>
-					{#if renamedFrom(row)}
-						<div class="text-xs text-neutral-500 dark:text-neutral-400">
-							renamed from {renamedFrom(row)}
-						</div>
-					{/if}
-				{:else if column.key === 'arr'}
-					{#if row.arrType === 'radarr' || row.arrType === 'sonarr'}
-						<Badge variant={row.arrType}>{row.arrType === 'radarr' ? 'Radarr' : 'Sonarr'}</Badge>
-					{:else}
-						<span class="text-neutral-500 dark:text-neutral-400">—</span>
-					{/if}
-				{:else if column.key === 'upstream'}
-					<span class="font-mono text-neutral-600 dark:text-neutral-400"
-						>{display(row.upstream)}</span
-					>
-				{:else if column.key === 'current'}
-					<span class="font-mono font-semibold">{display(row.current)}</span>
-				{:else if column.key === 'status'}
-					<div class="flex flex-col items-start gap-1">
-						<Badge variant={STATUS[row.status].variant}>{STATUS[row.status].label}</Badge>
-						{#if row.status === 'pending'}
-							<span class="text-xs text-neutral-500 dark:text-neutral-400">
-								wanted {display(row.pendingValue ?? null)}
-							</span>
-						{:else if row.inEffect}
-							<span class="text-xs text-neutral-500 dark:text-neutral-400">already in effect</span>
+		{#if settingRows.length > 0}
+			<section class="space-y-2">
+				<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Settings</h2>
+				<Table columns={settingColumns} data={settingRows} hoverable={false} responsive>
+					<svelte:fragment slot="cell" let:row let:column>
+						{#if column.key === 'setting'}
+							<span class="font-medium">{settingName(row)}</span>
+						{:else if column.key === 'upstream'}
+							<span class="font-mono text-neutral-600 dark:text-neutral-400"
+								>{display(row.upstream)}</span
+							>
+						{:else if column.key === 'current'}
+							<span class="font-mono font-semibold">{display(row.current)}</span>
+						{:else if column.key === 'status'}
+							<ChangeStatus {row} {display} />
 						{/if}
-					</div>
-				{/if}
-			</svelte:fragment>
-		</Table>
+					</svelte:fragment>
+				</Table>
+			</section>
+		{/if}
+
+		{#if scoreRows.length > 0}
+			<section class="space-y-2">
+				<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Scores</h2>
+				<Table columns={scoreColumns} data={scoreRows} hoverable={false} responsive>
+					<svelte:fragment slot="cell" let:row let:column>
+						{#if column.key === 'format'}
+							<div class="font-medium">{settingName(row)}</div>
+							{#if renamedFrom(row)}
+								<div class="text-xs text-neutral-500 dark:text-neutral-400">
+									renamed from {renamedFrom(row)}
+								</div>
+							{/if}
+						{:else if column.key === 'arr'}
+							{#if row.arrType === 'radarr' || row.arrType === 'sonarr'}
+								<Label customVariant={ARR_COLORS[row.arrType]} size="md" rounded="md">
+									{row.arrType === 'radarr' ? 'Radarr' : 'Sonarr'}
+								</Label>
+							{/if}
+						{:else if column.key === 'upstream'}
+							<span class="font-mono text-neutral-600 dark:text-neutral-400"
+								>{display(row.upstream)}</span
+							>
+						{:else if column.key === 'current'}
+							<span class="font-mono font-semibold">{display(row.current)}</span>
+						{:else if column.key === 'status'}
+							<ChangeStatus {row} {display} />
+						{/if}
+					</svelte:fragment>
+				</Table>
+			</section>
+		{/if}
 	{/if}
 
 	{#if changes.relatedChanges.length > 0}
 		<section class="space-y-2">
 			<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Related Changes</h2>
 			<p class="text-sm text-neutral-600 dark:text-neutral-400">
-				Changes to custom formats and regexes this profile uses. They change which releases it
-				matches, even where its own scores haven't changed.
+				Changes to custom formats and regexes this profile uses.
 			</p>
 			<ExpandableTable
 				columns={relatedColumns}
