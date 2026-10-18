@@ -11,10 +11,18 @@
 	export let hasItems: boolean;
 	export let onToggle: () => void;
 	export let alert: number = 0;
+	/** Replaces the default active check (string includes or regex) */
+	export let activePattern: string | RegExp | undefined = undefined;
 
-	$: isActive = hasItems
-		? $page.url.pathname === href
-		: $page.url.pathname === href || $page.url.pathname.startsWith(href + '/');
+	$: isActive = activePattern
+		? matchesPattern($page.url.pathname, activePattern)
+		: hasItems
+			? $page.url.pathname === href
+			: $page.url.pathname === href || $page.url.pathname.startsWith(href + '/');
+
+	function matchesPattern(pathname: string, pattern: string | RegExp): boolean {
+		return typeof pattern === 'string' ? pathname.includes(pattern) : pattern.test(pathname);
+	}
 </script>
 
 <div class="group/header flex items-center">

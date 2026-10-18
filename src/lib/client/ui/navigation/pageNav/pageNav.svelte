@@ -31,6 +31,9 @@
 	export let unreadAnnouncements: number = 0;
 	export let showLogout: boolean = true;
 
+	// With the Testing item shown, the header covers every other Quality Profiles page
+	const qualityProfilesPattern = /^\/quality-profiles(?!\/entity-testing(\/|$))(\/|$)/;
+
 	// Close mobile nav when page changes
 	$: ($page.url.pathname, mobileNavOpen.close());
 
@@ -133,6 +136,7 @@
 				icon={Sliders}
 				initialOpen={true}
 				hasItems={parserAvailable}
+				activePattern={parserAvailable ? qualityProfilesPattern : undefined}
 				onboardingId="nav-quality-profiles"
 			>
 				{#if parserAvailable}

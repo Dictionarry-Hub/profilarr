@@ -9,6 +9,6 @@
 
 <PageMeta title="Database · New" />
 
-<div class="p-4 md:p-8">
+<div class="px-4 pb-4 md:px-8 md:pb-8">
 	<InstanceForm mode="create" {form} {data} />
 </div>
