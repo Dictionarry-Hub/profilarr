@@ -670,7 +670,7 @@ field's default (upstream) value in a `Tooltip` on hover. `pending` turns it
 amber for a local change that didn't apply; `mono` suits regex patterns.
 
 ```svelte
-<!-- src/routes/quality-profiles/[databaseId]/[id]/scoring/components/ScoringTableDesktop.svelte:116 -->
+<!-- src/routes/quality-profiles/[databaseId]/[id]/scoring/components/ScoringTableDesktop.svelte:108 -->
 <DefaultHint text={markerText(marker)} pending={marker.status === 'pending'} />
 ```
 
