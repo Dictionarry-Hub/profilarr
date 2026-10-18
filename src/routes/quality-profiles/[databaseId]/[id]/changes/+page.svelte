@@ -3,6 +3,7 @@
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import History from '@lucide/svelte/icons/history';
 	import Admonition from '$ui/admonition/Admonition.svelte';
+	import StickyCard from '$ui/card/StickyCard.svelte';
 	import InlineLink from '$ui/link/InlineLink.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import EmptyState from '$ui/state/EmptyState.svelte';
@@ -100,7 +101,14 @@
 
 <PageMeta title={`${data.profileName} · Changes`} />
 
-<div class="mt-6 space-y-4">
+<StickyCard position="top">
+	<svelte:fragment slot="left">
+		<h1 class="text-neutral-900 dark:text-neutral-50">Changes</h1>
+		<p class="text-neutral-600 dark:text-neutral-400">Local changes compared with the defaults</p>
+	</svelte:fragment>
+</StickyCard>
+
+<div class="mt-6 space-y-4 md:px-4">
 	{#if changes.snapshot === 'unavailable'}
 		<Admonition variant="warning" title="Local Changes Unavailable">
 			{UNAVAILABLE[changes.unavailableReason ?? 'database']}
@@ -119,7 +127,7 @@
 	{:else if changes.rows.length === 0 && changes.relatedChanges.length === 0}
 		<EmptyState
 			icon={History}
-			title="No Local Changes"
+			title="No Scoring Changes"
 			description="Scoring matches its defaults."
 			buttonText="Back to Scoring"
 			buttonHref={scoringHref}

@@ -24,7 +24,7 @@
 	</Label>
 	{#if row.status === 'pending'}
 		<span class="text-xs text-neutral-500 dark:text-neutral-400">
-			wanted {display(row.pendingValue ?? null)}
+			wanted {row.pendingValue == null ? 'unset' : display(row.pendingValue)}
 		</span>
 	{:else if row.inEffect}
 		<span class="text-xs text-neutral-500 dark:text-neutral-400">already in effect</span>
