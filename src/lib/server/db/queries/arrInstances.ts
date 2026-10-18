@@ -1,4 +1,5 @@
 import { db } from '../db.ts';
+import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
 import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
 import { arrSyncQueries } from './arrSync.ts';
 
@@ -12,6 +13,8 @@ export interface ArrInstance {
 	url: string;
 	external_url: string | null;
 	api_key: string;
+	basic_auth_username: string | null;
+	basic_auth_password: string | null;
 	tags: string | null;
 	enabled: number;
 	library_refresh_interval: number;
@@ -23,7 +26,20 @@ export interface ArrInstance {
 	updated_at: string;
 }
 
-export type ArrInstancePublic = Omit<ArrInstance, 'api_key'>;
+export type ArrInstancePublic = Omit<
+	ArrInstance,
+	'api_key' | 'basic_auth_username' | 'basic_auth_password'
+>;
+
+export function toPublicArrInstance(instance: ArrInstance): ArrInstancePublic {
+	const {
+		api_key: _apiKey,
+		basic_auth_username: _basicAuthUsername,
+		basic_auth_password: _basicAuthPassword,
+		...rest
+	} = instance;
+	return rest;
+}
 
 export interface DetectedVersionInput {
 	version: string;
@@ -37,6 +53,8 @@ export interface CreateArrInstanceInput {
 	url: string;
 	externalUrl?: string | null;
 	apiKey: string;
+	basicAuthUsername?: string | null;
+	basicAuthPassword?: string | null;
 	tags?: string[];
 }
 
@@ -46,6 +64,8 @@ export interface UpdateArrInstanceInput {
 	url?: string;
 	externalUrl?: string | null;
 	apiKey?: string;
+	basicAuthUsername?: string | null;
+	basicAuthPassword?: string | null;
 	tags?: string[];
 	libraryRefreshInterval?: number;
 }
@@ -58,16 +78,23 @@ export const arrInstancesQueries = {
 	 * Create a new arr instance
 	 */
 	create(input: CreateArrInstanceInput): number {
+		const pairError = basicAuthPairError(!!input.basicAuthUsername, !!input.basicAuthPassword);
+		if (pairError) throw new Error(pairError);
+
 		const tagsJson = input.tags && input.tags.length > 0 ? JSON.stringify(input.tags) : null;
 
 		db.execute(
-			`INSERT INTO arr_instances (name, type, url, external_url, api_key, tags, enabled)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO arr_instances (
+				name, type, url, external_url, api_key, basic_auth_username, basic_auth_password, tags, enabled
+			)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			input.name,
 			input.type,
 			input.url,
 			input.externalUrl ?? null,
 			input.apiKey,
+			input.basicAuthUsername ?? null,
+			input.basicAuthPassword ?? null,
 			tagsJson,
 			1
 		);
@@ -117,6 +144,21 @@ export const arrInstancesQueries = {
 	 * Update an arr instance
 	 */
 	update(id: number, input: UpdateArrInstanceInput): boolean {
+		// Check the pair the row will end up with, since either field may be left as it is
+		if (input.basicAuthUsername !== undefined || input.basicAuthPassword !== undefined) {
+			const current = arrInstancesQueries.getById(id);
+			const username =
+				input.basicAuthUsername !== undefined
+					? input.basicAuthUsername
+					: (current?.basic_auth_username ?? null);
+			const password =
+				input.basicAuthPassword !== undefined
+					? input.basicAuthPassword
+					: (current?.basic_auth_password ?? null);
+			const pairError = basicAuthPairError(!!username, !!password);
+			if (pairError) throw new Error(pairError);
+		}
+
 		const updates: string[] = [];
 		const params: (string | number | null)[] = [];
 
@@ -139,6 +181,14 @@ export const arrInstancesQueries = {
 		if (input.apiKey !== undefined) {
 			updates.push('api_key = ?');
 			params.push(input.apiKey);
+		}
+		if (input.basicAuthUsername !== undefined) {
+			updates.push('basic_auth_username = ?');
+			params.push(input.basicAuthUsername);
+		}
+		if (input.basicAuthPassword !== undefined) {
+			updates.push('basic_auth_password = ?');
+			params.push(input.basicAuthPassword);
 		}
 		if (input.tags !== undefined) {
 			updates.push('tags = ?');

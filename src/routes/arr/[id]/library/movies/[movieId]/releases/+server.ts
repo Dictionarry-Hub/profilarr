@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { RadarrClient } from '$utils/arr/clients/radarr.ts';
+import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
 import { groupRadarrReleases } from '$utils/arr/releaseImport.ts';
 import { logger } from '$logger/logger.ts';
 
@@ -25,7 +26,11 @@ export const GET: RequestHandler = async ({ params }) => {
 		);
 	}
 
-	const client = new RadarrClient(instance.url, instance.api_key);
+	const client = new RadarrClient(
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 	try {
 		const releases = await client.getReleases(movieId);
 		const grouped = groupRadarrReleases(releases);

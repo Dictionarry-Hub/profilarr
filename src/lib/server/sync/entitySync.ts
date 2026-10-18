@@ -5,7 +5,7 @@
 
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { createArrClient } from '$utils/arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$utils/arr/factory.ts';
 import { probeAndRecordVersion, withDetectedVersion } from '$utils/arr/version.ts';
 import type { BaseArrClient } from '$utils/arr/base.ts';
 import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
@@ -65,7 +65,12 @@ import type { EntitySyncResult as SyncResult } from '$shared/sync/types.ts';
 async function openInstanceClient(
 	instance: ArrInstance
 ): Promise<{ client: BaseArrClient; instance: ArrInstance }> {
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 	const info = await probeAndRecordVersion(instance, client, 'EntitySync');
 	return { client, instance: withDetectedVersion(instance, info) };
 }

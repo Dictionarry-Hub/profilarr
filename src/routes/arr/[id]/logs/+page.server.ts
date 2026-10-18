@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
 
 export const load: ServerLoad = ({ params, url }) => {
 	const id = parseInt(params.id || '', 10);
@@ -15,7 +15,7 @@ export const load: ServerLoad = ({ params, url }) => {
 		error(404, `Instance not found: ${id}`);
 	}
 
-	const { api_key: _, ...safeInstance } = instance;
+	const safeInstance = toPublicArrInstance(instance);
 
 	return {
 		instance: safeInstance,

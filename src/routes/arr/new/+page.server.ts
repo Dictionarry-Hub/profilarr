@@ -2,6 +2,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
 import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
 import { createArrClient } from '$arr/factory.ts';
 import { getDefaultDelayProfile } from '$arr/defaults.ts';
@@ -21,6 +22,10 @@ export const actions = {
 		const externalUrlRaw = formData.get('external_url')?.toString().trim() ?? '';
 		const externalUrl = externalUrlRaw === '' ? null : externalUrlRaw;
 		const apiKey = formData.get('api_key')?.toString().trim();
+		const basicAuthUsernameRaw = formData.get('basic_auth_username')?.toString().trim() ?? '';
+		const basicAuthPasswordRaw = formData.get('basic_auth_password')?.toString() ?? '';
+		const basicAuthUsername = basicAuthUsernameRaw === '' ? null : basicAuthUsernameRaw;
+		const basicAuthPassword = basicAuthPasswordRaw === '' ? null : basicAuthPasswordRaw;
 		const tagsJson = formData.get('tags')?.toString().trim();
 
 		// Validation
@@ -34,6 +39,11 @@ export const actions = {
 				error: 'Name, type, URL, and API key are required',
 				values: { name, type, url }
 			});
+		}
+
+		const basicAuthError = basicAuthPairError(!!basicAuthUsername, !!basicAuthPassword);
+		if (basicAuthError) {
+			return fail(400, { error: basicAuthError, values: { name, type, url } });
 		}
 
 		if (!VALID_TYPES.includes(type)) {
@@ -99,6 +109,8 @@ export const actions = {
 				url,
 				externalUrl,
 				apiKey,
+				basicAuthUsername,
+				basicAuthPassword,
 				tags
 			});
 
@@ -112,7 +124,9 @@ export const actions = {
 			if (created) {
 				const probeClient = createArrClient(type as ArrType, url, apiKey, {
 					timeout: 5000,
-					retries: 0
+					retries: 0,
+					basicAuthUsername,
+					basicAuthPassword
 				});
 				try {
 					await probeAndRecordVersion(created, probeClient, 'arr/new');
@@ -127,7 +141,10 @@ export const actions = {
 				generalSettingsQueries.shouldApplyDefaultDelayProfiles()
 			) {
 				try {
-					const client = createArrClient(type as ArrType, url, apiKey);
+					const client = createArrClient(type as ArrType, url, apiKey, {
+						basicAuthUsername,
+						basicAuthPassword
+					});
 					const defaultProfile = getDefaultDelayProfile(type);
 
 					// Update the default delay profile (id=1)

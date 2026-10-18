@@ -1,6 +1,7 @@
 import type { ArrInstance } from '$db/queries/arrInstances.ts';
 import { RadarrClient } from '$utils/arr/clients/radarr.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
 import type {
 	ArrQualityProfile,
 	ArrTag,
@@ -406,10 +407,11 @@ export async function previewUpgradeFilter(
 	}
 
 	const appType = instance.type as UpgradeAppType;
+	const clientOpts = arrClientOptionsFromInstance(instance, { timeout: 120000 });
 	const client =
 		instance.type === 'radarr'
-			? new RadarrClient(instance.url, instance.api_key, { timeout: 120000 })
-			: new SonarrClient(instance.url, instance.api_key, { timeout: 120000 });
+			? new RadarrClient(instance.url, instance.api_key, clientOpts)
+			: new SonarrClient(instance.url, instance.api_key, clientOpts);
 
 	try {
 		const { items, tags } =

@@ -21,6 +21,7 @@ import type {
 	ScoreBreakdownItem
 } from './types.ts';
 import { logger } from '$logger/logger.ts';
+import { Buffer } from 'node:buffer';
 
 /**
  * Base client for all *arr applications
@@ -29,20 +30,35 @@ import { logger } from '$logger/logger.ts';
 export interface ArrClientOptions {
 	timeout?: number;
 	retries?: number;
+	basicAuthUsername?: string | null;
+	basicAuthPassword?: string | null;
 }
 
 export const INTERACTIVE_SEARCH_TIMEOUT_MS = 120000;
 export const LIBRARY_REQUEST_TIMEOUT_MS = 300000;
+
+/** Basic Auth header value, with the credentials encoded as UTF-8 as proxies expect. */
+export function basicAuthHeader(username: string, password: string): string {
+	return `Basic ${Buffer.from(`${username}:${password}`, 'utf8').toString('base64')}`;
+}
 
 export class BaseArrClient extends BaseHttpClient {
 	private apiKey: string;
 	protected apiVersion: string = 'v3'; // Default to v3, can be overridden by subclasses
 
 	constructor(url: string, apiKey: string, options?: ArrClientOptions) {
+		const headers: Record<string, string> = {
+			'X-Api-Key': apiKey
+		};
+		if (options?.basicAuthUsername) {
+			headers.Authorization = basicAuthHeader(
+				options.basicAuthUsername,
+				options.basicAuthPassword ?? ''
+			);
+		}
+
 		super(url, {
-			headers: {
-				'X-Api-Key': apiKey
-			},
+			headers,
 			timeout: options?.timeout,
 			retries: options?.retries
 		});

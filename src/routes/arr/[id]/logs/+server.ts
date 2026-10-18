@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { createArrClient } from '$arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
 import type { ArrType } from '$arr/types.ts';
 
 export const GET: RequestHandler = async ({ params, url }) => {
@@ -21,7 +21,12 @@ export const GET: RequestHandler = async ({ params, url }) => {
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '50', 10);
 	const level = url.searchParams.get('level') || undefined;
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 
 	try {
 		const logs = await client.getLogs({

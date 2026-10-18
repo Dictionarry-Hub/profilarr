@@ -83,7 +83,9 @@ export const PORTS = {
 	arr: {
 		instanceTargets: 7300,
 		versionDetection: 7301,
-		versionDetectionFakeArr: 7302
+		versionDetectionFakeArr: 7302,
+		basicAuth: 7303,
+		basicAuthFakeArr: 7304
 	},
 	notifications: {
 		announcement: 7400,

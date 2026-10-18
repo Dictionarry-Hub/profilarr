@@ -3,7 +3,7 @@ import type { JobHandler, JobType } from '../queueTypes.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
-import { createArrClient } from '$arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
 import { probeAndRecordVersion, withDetectedVersion } from '$arr/version.ts';
 import type { ArrType } from '$arr/types.ts';
 import { calculateNextRun } from '$lib/server/sync/utils.ts';
@@ -73,7 +73,12 @@ const arrSyncHandler: JobHandler = async (job) => {
 		return { status: 'skipped', output: 'No sync sections specified' };
 	}
 
-	const client = createArrClient(instance.type as ArrType, instance.url, instance.api_key);
+	const client = createArrClient(
+		instance.type as ArrType,
+		instance.url,
+		instance.api_key,
+		arrClientOptionsFromInstance(instance)
+	);
 	// Syncers branch on the version, so they get what the probe just saw, not the stored row
 	const liveInstance = withDetectedVersion(
 		instance,

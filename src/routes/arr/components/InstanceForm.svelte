@@ -16,6 +16,7 @@
 	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
 	import type { CleanupSettings } from '$db/queries/arrCleanupSettings.ts';
 	import { isExperimentalVersion } from '$shared/arr/capabilities.ts';
+	import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
 	import TagInput from '$ui/form/TagInput.svelte';
@@ -33,6 +34,8 @@
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let form: any = undefined;
 	export let cleanupSettings: CleanupSettings | null = null;
+	/** Edit mode: whether Basic Auth is saved. The values never reach the browser. */
+	export let hasBasicAuth = false;
 
 	type FormSnapshot = {
 		name: string;
@@ -40,6 +43,8 @@
 		url: string;
 		externalUrl: string;
 		apiKey: string;
+		basicAuthUsername: string;
+		basicAuthPassword: string;
 		tags: string;
 		libraryRefreshInterval: string;
 		cleanupEnabled: boolean;
@@ -65,6 +70,8 @@
 				url: instance.url,
 				externalUrl: instance.external_url ?? '',
 				apiKey: '', // Never pre-populate for security
+				basicAuthUsername: '',
+				basicAuthPassword: '',
 				tags: JSON.stringify(parseTags(instance.tags)),
 				libraryRefreshInterval: String(instance.library_refresh_interval ?? 0),
 				cleanupEnabled: cleanupSettings?.enabled ?? false,
@@ -78,6 +85,8 @@
 			url: '',
 			externalUrl: '',
 			apiKey: '',
+			basicAuthUsername: '',
+			basicAuthPassword: '',
 			tags: '[]',
 			libraryRefreshInterval: '0',
 			cleanupEnabled: false,
@@ -104,6 +113,8 @@
 	$: url = (values.url ?? '') as string;
 	$: externalUrl = (values.externalUrl ?? '') as string;
 	$: apiKey = (values.apiKey ?? '') as string;
+	$: basicAuthUsername = (values.basicAuthUsername ?? '') as string;
+	$: basicAuthPassword = (values.basicAuthPassword ?? '') as string;
 	$: tags = parseTags(values.tags);
 	$: libraryRefreshInterval = (values.libraryRefreshInterval ?? '0') as string;
 	$: cleanupEnabled = (values.cleanupEnabled ?? false) as boolean;
@@ -122,6 +133,8 @@
 	let deleting = false;
 	let showDeleteModal = false;
 	let showCleanupModal = false;
+	let basicAuthUsernameTouched = false;
+	let basicAuthPasswordTouched = false;
 
 	// Options for dropdowns
 	const typeOptions = [
@@ -156,7 +169,9 @@
 					type,
 					url,
 					apiKey,
-					instanceId: mode === 'edit' ? instance?.id : undefined
+					instanceId: mode === 'edit' ? instance?.id : undefined,
+					basicAuthUsername,
+					basicAuthPassword
 				})
 			});
 
@@ -199,7 +214,15 @@
 				const response = await fetch('/arr/validate', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ type, url, apiKey })
+					body: JSON.stringify({
+						type,
+						url,
+						apiKey,
+						// Lets the server use saved Basic Auth; never sent for a new URL
+						instanceId: mode === 'edit' && !urlChanged ? instance?.id : undefined,
+						basicAuthUsername,
+						basicAuthPassword
+					})
 				});
 
 				const result = await response.json();
@@ -225,9 +248,27 @@
 		mode === 'edit' &&
 		!!instance &&
 		normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url);
+	// Untouched fields in edit mode keep what is saved, so check the pair the save would leave
+	// A new URL drops saved Basic Auth unless it is re-entered, as the server does
+	$: basicAuthUsernameSet =
+		mode === 'create' || basicAuthUsernameTouched
+			? !!basicAuthUsername.trim()
+			: hasBasicAuth && !urlChanged;
+	$: basicAuthPasswordSet =
+		mode === 'create' || basicAuthPasswordTouched
+			? !!basicAuthPassword
+			: hasBasicAuth && !urlChanged;
+	$: basicAuthWillClear =
+		hasBasicAuth && urlChanged && !basicAuthUsernameSet && !basicAuthPasswordSet;
+	$: basicAuthError = basicAuthPairError(basicAuthUsernameSet, basicAuthPasswordSet);
 	$: canSubmit =
-		$isDirty && !!name && !!url && (mode === 'edit' ? !urlChanged || !!apiKey : !!apiKey && !!type);
-	$: saveHint = urlChanged && !apiKey ? 'Enter the API key to change the URL' : '';
+		$isDirty &&
+		!!name &&
+		!!url &&
+		!basicAuthError &&
+		(mode === 'edit' ? !urlChanged || !!apiKey : !!apiKey && !!type);
+	$: saveHint =
+		basicAuthError ?? (urlChanged && !apiKey ? 'Enter the API key to change the URL' : '');
 
 	// Handle form response
 	let lastFormId: unknown = null;
@@ -235,6 +276,12 @@
 		lastFormId = form;
 		if (form.success) {
 			alertStore.add('success', 'Settings saved successfully');
+			if (form.basicAuthCleared) {
+				alertStore.add(
+					'warning',
+					'Saved Basic Auth credentials were removed because the URL changed'
+				);
+			}
 			// Reset dirty state with new values (keep apiKey empty)
 			initEdit({
 				name,
@@ -242,11 +289,15 @@
 				url,
 				externalUrl,
 				apiKey: '',
+				basicAuthUsername: '',
+				basicAuthPassword: '',
 				tags: JSON.stringify(tags),
 				libraryRefreshInterval,
 				cleanupEnabled,
 				cleanupCron
 			});
+			basicAuthUsernameTouched = false;
+			basicAuthPasswordTouched = false;
 		}
 		if (form.error) {
 			alertStore.add('error', form.error);
@@ -434,6 +485,45 @@
 					{/if}
 				</p>
 			{/if}
+			<!-- Basic Auth Row -->
+			<div class="space-y-2">
+				<span class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					Basic Auth
+				</span>
+				<p class="text-xs text-neutral-500 dark:text-neutral-400">
+					Optional. Use when a reverse proxy protects this Arr instance with Basic Auth.
+					{#if mode === 'edit'}Leave blank to keep existing credentials.{/if}
+				</p>
+				<div class="grid gap-4 md:grid-cols-2">
+					<FormInput
+						label="Username"
+						name="basic_auth_username"
+						value={basicAuthUsername}
+						placeholder={mode === 'edit' ? 'Leave blank to keep existing username' : 'Optional'}
+						on:input={(e) => {
+							basicAuthUsernameTouched = true;
+							update('basicAuthUsername', e.detail);
+						}}
+					/>
+					<FormInput
+						label="Password"
+						name="basic_auth_password"
+						value={basicAuthPassword}
+						placeholder={mode === 'edit' ? '••••••••••••••••' : 'Optional'}
+						private_
+						on:input={(e) => {
+							basicAuthPasswordTouched = true;
+							update('basicAuthPassword', e.detail);
+						}}
+					/>
+				</div>
+				{#if basicAuthWillClear}
+					<p class="text-xs text-amber-600 dark:text-amber-400">
+						Changing the URL removes the saved Basic Auth credentials. Re-enter them to keep using
+						Basic Auth.
+					</p>
+				{/if}
+			</div>
 		</div>
 		<!-- Tags Row -->
 		<div class="space-y-2">
@@ -572,6 +662,18 @@
 	<input type="hidden" name="url" value={url} />
 	<input type="hidden" name="external_url" value={externalUrl} />
 	<input type="hidden" name="api_key" value={apiKey} />
+	<input type="hidden" name="basic_auth_username" value={basicAuthUsername} />
+	<input type="hidden" name="basic_auth_password" value={basicAuthPassword} />
+	<input
+		type="hidden"
+		name="basic_auth_username_touched"
+		value={basicAuthUsernameTouched ? '1' : '0'}
+	/>
+	<input
+		type="hidden"
+		name="basic_auth_password_touched"
+		value={basicAuthPasswordTouched ? '1' : '0'}
+	/>
 	<input type="hidden" name="tags" value={JSON.stringify(tags)} />
 	<input type="hidden" name="library_refresh_interval" value={libraryRefreshInterval} />
 </form>

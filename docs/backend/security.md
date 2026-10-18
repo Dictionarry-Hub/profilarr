@@ -36,8 +36,9 @@
 
 ### Why security matters
 
-Profilarr stores credentials for connected services: arr API keys, GitHub PATs,
-AI API keys, TMDB keys, and notification webhooks.
+Profilarr stores credentials for connected services: arr API keys, arr Basic
+Auth credentials for reverse proxies, GitHub PATs, AI API keys, TMDB keys, and
+notification webhooks.
 
 The arr keys are the biggest risk. Sonarr/Radarr store indexer and tracker API
 keys internally - exposing an arr API key gives access to the arr's full API,
@@ -54,8 +55,8 @@ say - It's _stupidity mitigation_. Patent Pending.
 1. **Authentication** - gate access via username/password, OIDC, or API key.
    Enforced by `getAuthState()` in middleware and `handle()` in the server hook.
 2. **Data exposure controls** - authenticated users never see raw secrets. The
-   frontend receives boolean flags (`hasApiKey`, `hasPat`) instead of actual
-   values. Secrets are also stripped from backup downloads.
+   frontend receives boolean flags (`hasApiKey`, `hasPat`, `hasBasicAuth`)
+   instead of actual values. Secrets are also stripped from backup downloads.
 3. **Filesystem is the trust boundary** - encrypting secrets at rest would be
    theatre since the decryption key would also be on disk. Filesystem security
    (containers, unprivileged users, volume permissions) is the user's
@@ -531,11 +532,13 @@ Page-level guards add further restrictions on top:
 Secrets are stripped at two levels:
 
 - **Frontend responses** - server-side load functions replace sensitive fields
-  with boolean flags (`hasApiKey`, `hasPat`). Notification service secrets
-  (webhook URLs, tokens, auth headers) are removed by
+  with boolean flags (`hasApiKey`, `hasPat`, `hasBasicAuth`). Notification
+  service secrets (webhook URLs, tokens, auth headers) are removed by
   `stripNotificationSecrets()` in `src/lib/server/notifications/secrets.ts`
   before the edit page receives a config, and the list page receives no config
-  at all. Password hashes never leave the server.
+  at all. Arr instances pass through `toPublicArrInstance()` in
+  `src/lib/server/db/queries/arrInstances.ts`, which removes the API key and the
+  Basic Auth username and password. Password hashes never leave the server.
 - **Backup downloads** - local backup archives on disk are full-fidelity; the
   filesystem is the documented trust boundary, so a backup file sitting next
   to the live database does not need to be sanitized. The download endpoint
@@ -582,6 +585,13 @@ not a change. The forms mirror the rule: the secret field becomes required as
 soon as the destination field differs from the stored value. The notification
 edit page tells the form which secret keys exist (`storedSecrets`) without
 sending their values.
+
+Arr Basic Auth is optional, so a URL change clears it instead of requiring it.
+Once the URL differs, blank Basic Auth fields count as empty rather than as
+the stored values, so the credentials are removed unless both are re-entered.
+The form warns under the fields before saving, and an alert confirms the
+removal. Test Connection falls back to an instance's saved credentials only
+while its URL is unchanged.
 
 `deno task lint:secret-destination` (`scripts/lint/secretDestination.ts`)
 keeps the decision explicit. Every `+page.server.ts` that reads a secret form

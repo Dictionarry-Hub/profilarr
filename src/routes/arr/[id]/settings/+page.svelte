@@ -9,4 +9,10 @@
 
 <PageMeta title={`${data.instance.name} · Settings`} />
 
-<InstanceForm mode="edit" {form} instance={data.instance} cleanupSettings={data.cleanupSettings} />
+<InstanceForm
+	mode="edit"
+	{form}
+	instance={data.instance}
+	cleanupSettings={data.cleanupSettings}
+	hasBasicAuth={data.hasBasicAuth}
+/>

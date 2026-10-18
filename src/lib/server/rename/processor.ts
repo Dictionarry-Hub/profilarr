@@ -8,7 +8,7 @@
  * This file wires it together with client creation, logging, and notifications.
  */
 
-import { createArrClient } from '$lib/server/utils/arr/factory.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '$lib/server/utils/arr/factory.ts';
 import type { RadarrClient } from '$lib/server/utils/arr/clients/radarr.ts';
 import type { SonarrClient } from '$lib/server/utils/arr/clients/sonarr.ts';
 import type { RenameSettings } from '$db/queries/arrRenameSettings.ts';
@@ -254,7 +254,8 @@ export async function processRenameConfig(
 		const client = createArrClient(
 			instance.type as 'radarr' | 'sonarr',
 			instance.url,
-			instance.api_key
+			instance.api_key,
+			arrClientOptionsFromInstance(instance)
 		);
 
 		let adapter: RenameAdapter;
