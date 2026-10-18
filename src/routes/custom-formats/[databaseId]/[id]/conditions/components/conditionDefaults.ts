@@ -1,4 +1,4 @@
-/** Wording for a condition's default, printed under its card. */
+/** Wording for a condition's default, shown in its hover hint. */
 
 import type { PageData } from '../$types';
 

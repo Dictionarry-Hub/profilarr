@@ -1,6 +1,6 @@
 /**
  * Defaults (upstream values) for a custom format's conditions and a regex's
- * pattern, for printing under the edited field. Regex names inside condition
+ * pattern, for the hint beside the edited field. Regex names inside condition
  * patterns compare by upstream name, so a regex rename alone isn't a change.
  */
 
@@ -46,6 +46,8 @@ export interface CustomFormatDefaults {
 	conditions: Record<string, ConditionDefault>;
 	/** In the defaults, but removed locally. */
 	removed: Array<{ name: string; condition: NormalizedCondition }>;
+	/** Conditions whose change didn't apply and that aren't here now, like a failed addition. */
+	notApplied: string[];
 }
 
 export interface RegexDefaults {
@@ -92,7 +94,12 @@ export function customFormatConditionDefaults(input: {
 	/** Condition names with a change that conflicted. */
 	pendingConditions: Set<string>;
 }): CustomFormatDefaults {
-	const result: CustomFormatDefaults = { conditions: {}, removed: [] };
+	const currentNames = new Set(input.current.map((c) => c.name));
+	const result: CustomFormatDefaults = {
+		conditions: {},
+		removed: [],
+		notApplied: [...input.pendingConditions].filter((name) => !currentNames.has(name)).sort()
+	};
 	if (!input.upstream) return result;
 
 	const defaults = new Map(
@@ -107,7 +114,6 @@ export function customFormatConditionDefaults(input: {
 		if (status === 'unchanged' && !pending) continue;
 		result.conditions[c.name] = { status, default: def, changed, pending };
 	}
-	const currentNames = new Set(input.current.map((c) => c.name));
 	for (const [name, condition] of defaults) {
 		if (!currentNames.has(name)) result.removed.push({ name, condition });
 	}
@@ -185,7 +191,7 @@ export async function customFormatDefaults(
 		'custom_format',
 		formatName
 	);
-	if (!ctx) return { conditions: {}, removed: [] };
+	if (!ctx) return { conditions: {}, removed: [], notApplied: [] };
 	const pendingConditions = new Set(
 		[...ctx.pendingFields]
 			.filter((f) => f.startsWith('condition:'))

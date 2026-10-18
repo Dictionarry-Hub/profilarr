@@ -83,7 +83,7 @@ async function loadDefaults(
 			source: 'CustomFormatConditions',
 			meta: { databaseId, formatName, error: String(error) }
 		});
-		return { conditions: {}, removed: [] };
+		return { conditions: {}, removed: [], notApplied: [] };
 	}
 }
 

@@ -233,6 +233,15 @@
 		await tick();
 		mainFormElement?.requestSubmit();
 	}
+
+	$: removedHint =
+		data.defaults.removed.length > 0
+			? `Removed here, still in the defaults: ${data.defaults.removed.map((r) => r.name).join(', ')}`
+			: '';
+	$: notAppliedHint =
+		data.defaults.notApplied.length > 0
+			? `Your changes to ${data.defaults.notApplied.join(', ')} didn't apply`
+			: '';
 </script>
 
 <PageMeta title={`${data.format.name} · Conditions`} />
@@ -348,17 +357,18 @@
 
 		<!-- Existing conditions sorted by status, type, then name -->
 		{#if conditions.length === 0 && draftConditions.length === 0}
-			<p class="px-3 text-sm text-neutral-500 dark:text-neutral-400">No conditions defined</p>
+			<p class="flex items-center gap-2 px-3 text-sm text-neutral-500 dark:text-neutral-400">
+				No conditions defined
+				{#if removedHint}<DefaultHint text={removedHint} />{/if}
+				{#if notAppliedHint}<DefaultHint text={notAppliedHint} pending />{/if}
+			</p>
 		{:else if conditions.length > 0}
 			<div class="space-y-2">
 				<div class="flex items-center gap-2 px-3">
 					<span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">Conditions</span>
 					<Badge variant="neutral" size="sm">{conditions.length}</Badge>
-					{#if data.defaults.removed.length > 0}
-						<DefaultHint
-							text={`Removed here, still in the defaults: ${data.defaults.removed.map((r) => r.name).join(', ')}`}
-						/>
-					{/if}
+					{#if removedHint}<DefaultHint text={removedHint} />{/if}
+					{#if notAppliedHint}<DefaultHint text={notAppliedHint} pending />{/if}
 				</div>
 				<div
 					class="space-y-2 wide:space-y-0 wide:divide-y wide:divide-neutral-200 wide:dark:divide-neutral-800"
