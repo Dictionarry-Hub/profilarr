@@ -14,7 +14,7 @@ import {
 import type { ConditionData } from '$shared/pcd/display.ts';
 import type { PortableCustomFormat, PortableRegularExpression } from '$shared/pcd/portable.ts';
 import { reach, type EntityEdge } from './edges.ts';
-import { didNotApply } from './opEntities.ts';
+import { didNotApply, parseOpMetadata } from './opEntities.ts';
 import {
 	customFormatConditionDefaults,
 	normalizeCondition,
@@ -58,20 +58,12 @@ function isTestDeletion(d: OpDetails): boolean {
 }
 
 function parseOp(d: OpDetails): OpInfo {
-	let metadata: Record<string, unknown> = {};
-	try {
-		const value = JSON.parse(d.metadata ?? '{}');
-		if (value && typeof value === 'object') metadata = value;
-	} catch {
-		// Malformed metadata contributes nothing.
-	}
-	const changed = metadata.changed_fields;
-	const changedFields = Array.isArray(changed) ? changed.filter((f) => typeof f === 'string') : [];
+	const { changedFields, generated, groupId } = parseOpMetadata(d.metadata);
 	return {
 		// Deleting a custom format test is written as a 'deleted' change on its format.
 		changedFields: isTestDeletion(d) ? changedFields.filter((f) => f !== 'deleted') : changedFields,
-		generated: metadata.generated === true,
-		groupId: typeof metadata.group_id === 'string' ? metadata.group_id : null,
+		generated,
+		groupId,
 		pending: didNotApply(d.status)
 	};
 }

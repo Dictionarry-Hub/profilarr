@@ -69,3 +69,28 @@ const NOT_APPLIED: ReadonlySet<string> = new Set<PcdOpHistoryStatus>([
 /** An op whose latest compile left it in one of these didn't apply. */
 export const didNotApply = (status: PcdOpHistoryStatus | null) =>
 	status !== null && NOT_APPLIED.has(status);
+
+export interface OpMetadata {
+	changedFields: string[];
+	generated: boolean;
+	groupId: string | null;
+}
+
+/** The parts of an op's stored metadata history reads; malformed metadata reads as empty. */
+export function parseOpMetadata(raw: string | null): OpMetadata {
+	let value: unknown = null;
+	try {
+		value = JSON.parse(raw ?? 'null');
+	} catch {
+		// Malformed metadata contributes nothing.
+	}
+	const metadata = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+	const changed = metadata.changed_fields;
+	return {
+		changedFields: Array.isArray(changed)
+			? changed.filter((f): f is string => typeof f === 'string')
+			: [],
+		generated: metadata.generated === true,
+		groupId: typeof metadata.group_id === 'string' ? metadata.group_id : null
+	};
+}

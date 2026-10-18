@@ -11,7 +11,7 @@ import type { ConditionData } from '$shared/pcd/display.ts';
 import type { ConditionField, NormalizedCondition } from '$shared/pcd/conditionFormat.ts';
 import type { PortableCustomFormat, PortableRegularExpression } from '$shared/pcd/portable.ts';
 import type { UpstreamSnapshot } from './capture.ts';
-import { didNotApply, entityKey } from './opEntities.ts';
+import { didNotApply, entityKey, parseOpMetadata } from './opEntities.ts';
 import { resolveAliases } from './touched.ts';
 
 export interface ConditionDefault {
@@ -115,15 +115,6 @@ export function regexPatternDefaults(input: {
 	};
 }
 
-function changedFieldsOf(d: OpDetails): string[] {
-	try {
-		const value = JSON.parse(d.metadata ?? '{}')?.changed_fields;
-		return Array.isArray(value) ? value.filter((f) => typeof f === 'string') : [];
-	} catch {
-		return [];
-	}
-}
-
 interface EntityContext {
 	upstream: unknown;
 	upstreamNameOf: (entity: string, name: string) => string | null;
@@ -149,7 +140,7 @@ function entityContext(
 	const pendingFields = new Set(
 		opDetails([...new Set(ids)])
 			.filter((d) => didNotApply(d.status))
-			.flatMap(changedFieldsOf)
+			.flatMap((d) => parseOpMetadata(d.metadata).changedFields)
 	);
 	return {
 		upstream: snapshot.entities.get(entityKey(entity, upstreamName)),

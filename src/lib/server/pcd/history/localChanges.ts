@@ -17,7 +17,7 @@ import { getConditionsForEvaluation } from '../entities/customFormats/conditions
 import { serializeQualityProfile } from '../entities/serialize.ts';
 import { SNAPSHOT_TABLES, type UpstreamSnapshot } from './capture.ts';
 import { ENTITY_EDGES_SQL, type EntityEdge } from './edges.ts';
-import { entityKey } from './opEntities.ts';
+import { entityKey, parseOpMetadata } from './opEntities.ts';
 import {
 	qualityProfileScoringChanges,
 	type ScoringChanges,
@@ -108,13 +108,11 @@ export function assembleQualityProfileScoringChanges(input: {
 	}
 
 	const ops: ScoringOp[] = input.opDetails([...opIds]).map((d) => {
-		const metadata = parseJson(d.metadata);
+		const { changedFields, generated } = parseOpMetadata(d.metadata);
 		return {
 			opId: d.opId,
-			changedFields: Array.isArray(metadata?.changed_fields)
-				? metadata.changed_fields.filter((f): f is string => typeof f === 'string')
-				: [],
-			generated: metadata?.generated === true,
+			changedFields,
+			generated,
 			desiredState: parseJson(d.desiredState),
 			status: d.status,
 			replacesOpId: d.replacesOpId
