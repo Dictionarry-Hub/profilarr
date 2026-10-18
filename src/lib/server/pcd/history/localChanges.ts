@@ -44,6 +44,17 @@ function parseJson(raw: string | null): Record<string, unknown> | null {
 	}
 }
 
+/** Nothing to compare against: no snapshot, or not this profile's. */
+function nothingToShow(
+	snapshot: UpstreamSnapshot['status'],
+	unavailableReason: QualityProfileScoringLocalChanges['unavailableReason']
+): QualityProfileScoringLocalChanges {
+	return { snapshot, unavailableReason, relatedChanges: [], status: 'unchanged', rows: [] };
+}
+
+const uncaptured = (status: UpstreamSnapshot['status']) =>
+	nothingToShow(status, status === 'unavailable' ? 'database' : null);
+
 export function assembleQualityProfileScoringChanges(input: {
 	snapshot: UpstreamSnapshot;
 	live: LiveOpEntityRow[];
@@ -57,9 +68,14 @@ export function assembleQualityProfileScoringChanges(input: {
 	exists?: (entity: RelatedChange['entity'], name: string) => boolean;
 }): QualityProfileScoringLocalChanges {
 	const { snapshot, live, current, profileName } = input;
+	if (snapshot.status !== 'captured') return uncaptured(snapshot.status);
 	const { upstreamNameOf, rowUpstreamName, upstreamNameBefore } =
 		input.aliases ?? resolveAliases(live);
 	const upstreamName = upstreamNameOf('quality_profile', profileName);
+	// Its upstream failed to serialize: without it, every row would be a guess.
+	if (snapshot.failures.some((f) => f.entity === 'quality_profile' && f.name === upstreamName)) {
+		return nothingToShow('unavailable', 'profile');
+	}
 	const upstreamProfile =
 		upstreamName === null
 			? null
@@ -78,29 +94,6 @@ export function assembleQualityProfileScoringChanges(input: {
 		defaultScored,
 		exists: input.exists
 	});
-
-	if (snapshot.status !== 'captured') {
-		return {
-			snapshot: snapshot.status,
-			unavailableReason: snapshot.status === 'unavailable' ? 'database' : null,
-			relatedChanges: related,
-			status: 'unchanged',
-			rows: []
-		};
-	}
-	// Its upstream failed to serialize: without it, every row would be a guess.
-	const failed = snapshot.failures.some(
-		(f) => f.entity === 'quality_profile' && f.name === upstreamName
-	);
-	if (failed) {
-		return {
-			snapshot: 'unavailable',
-			unavailableReason: 'profile',
-			relatedChanges: related,
-			status: 'unchanged',
-			rows: []
-		};
-	}
 
 	const identity = (row: LiveOpEntityRow) =>
 		upstreamName !== null
