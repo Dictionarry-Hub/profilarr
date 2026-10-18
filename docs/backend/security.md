@@ -532,13 +532,13 @@ Page-level guards add further restrictions on top:
 Secrets are stripped at two levels:
 
 - **Frontend responses** - server-side load functions replace sensitive fields
-  with boolean flags (`hasApiKey`, `hasPat`). Notification service secrets
-  (webhook URLs, tokens, auth headers) are removed by
+  with boolean flags (`hasApiKey`, `hasPat`, `hasBasicAuth`). Notification
+  service secrets (webhook URLs, tokens, auth headers) are removed by
   `stripNotificationSecrets()` in `src/lib/server/notifications/secrets.ts`
   before the edit page receives a config, and the list page receives no config
   at all. Arr instances pass through `toPublicArrInstance()` in
-  `src/lib/server/db/queries/arrInstances.ts`, which removes the API key and
-  the Basic Auth username and password. Password hashes never leave the server.
+  `src/lib/server/db/queries/arrInstances.ts`, which removes the API key and the
+  Basic Auth username and password. Password hashes never leave the server.
 - **Backup downloads** - local backup archives on disk are full-fidelity; the
   filesystem is the documented trust boundary, so a backup file sitting next
   to the live database does not need to be sanitized. The download endpoint
