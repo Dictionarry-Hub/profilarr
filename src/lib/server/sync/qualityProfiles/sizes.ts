@@ -75,6 +75,18 @@ export function mergeSizes(fallback: QualitySizeMap, override: QualitySizeMap): 
 }
 
 /**
+ * The sizes definitions set for one profile, first match per quality wins:
+ * the profile's own definitions config, then the instance's selection.
+ * Qualities neither covers are absent; Profilarr does not manage them.
+ */
+export function resolveDefinitionSizes(input: {
+	global?: QualitySizeMap | null;
+	override?: QualitySizeMap | null;
+}): QualitySizeMap {
+	return mergeSizes(input.global ?? new Map(), input.override ?? new Map());
+}
+
+/**
  * One profile's sizes, first match per quality wins: the profile's own
  * definitions config, then the instance's selection, then what the Arr
  * already has (or its schema defaults for a new profile).
@@ -84,10 +96,7 @@ export function resolveProfileSizes(input: {
 	global?: QualitySizeMap | null;
 	override?: QualitySizeMap | null;
 }): QualitySizeMap {
-	let sizes = input.fallback;
-	if (input.global) sizes = mergeSizes(sizes, input.global);
-	if (input.override) sizes = mergeSizes(sizes, input.override);
-	return sizes;
+	return mergeSizes(input.fallback, resolveDefinitionSizes(input));
 }
 
 /** From `transformQualityDefinitionsForArr` output, which already maps PCD 0 to null. */

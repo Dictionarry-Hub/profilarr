@@ -123,12 +123,14 @@ Comparison rules:
 - compare normalized quality item order, grouping, and allowed flags
 - on an Arr that keeps size limits on profile items (Sonarr v5), compare
   `minSize`, `maxSize` and `preferredSize` per quality, group members
-  included, as `items[<quality>].<field>` rows. Expected sizes are the ones
-  sync would write, resolved by the same source (`sizeSource.ts`): the
-  profile's own definitions config, then the instance's selection, then the
-  sizes the Arr already has, so a quality no config covers never drifts. A
-  key the Arr leaves out reads as null, and a maximum at the Arr's unlimited
-  cap reads as null. Elsewhere item sizes are not compared.
+  included, as `items[<quality>].<field>` rows. Expected sizes come from the
+  same source as sync (`sizeSource.ts`): the profile's own definitions
+  config, then the instance's selection. Sync also copies the sizes the Arr
+  already has for qualities neither covers, because Sonarr wipes sizes a
+  profile save leaves out. Drift does not compare those qualities, so a
+  quality no config covers never drifts. A key the Arr leaves out reads as
+  null, and a maximum at the Arr's unlimited cap reads as null. Elsewhere
+  item sizes are not compared.
 - compare custom format scores for custom formats managed by that profile,
   including explicit zero scores
 - report an expected managed custom format as missing from scoring if the custom

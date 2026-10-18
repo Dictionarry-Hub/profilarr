@@ -12,6 +12,7 @@ import {
 	collectItemSizes,
 	definitionsToSizeMap,
 	mergeSizes,
+	resolveDefinitionSizes,
 	resolveProfileSizes,
 	type QualitySizeMap
 } from '$sync/qualityProfiles/sizes.ts';
@@ -134,6 +135,24 @@ class QualityProfileSizesTest extends BaseTest {
 			assertEquals(resolveProfileSizes({ fallback }), fallback);
 			assertEquals(resolveProfileSizes({ fallback, global: null, override: null }), fallback);
 		});
+
+		this.test(
+			'resolveDefinitionSizes: override beats global, and qualities neither sets are absent',
+			() => {
+				const global: QualitySizeMap = new Map([
+					['webdl-1080p', sizes(15, null, 995)],
+					['hdtv-1080p', sizes(15, null, 995)]
+				]);
+				const override: QualitySizeMap = new Map([['webdl-1080p', sizes(6, 60, 40)]]);
+
+				const resolved = resolveDefinitionSizes({ global, override });
+
+				assertEquals(resolved.get('webdl-1080p'), sizes(6, 60, 40), 'override wins');
+				assertEquals(resolved.get('hdtv-1080p'), sizes(15, null, 995), 'global fills the rest');
+				assertEquals(resolved.has('sdtv'), false, 'no definition sets SDTV');
+				assertEquals(resolveDefinitionSizes({}).size, 0);
+			}
+		);
 
 		this.test('definitionsToSizeMap keys mapped definitions by lowercase API name', () => {
 			const map = definitionsToSizeMap([
