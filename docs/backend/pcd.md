@@ -481,9 +481,10 @@ only show when they conflict, and a conflict whose wanted state already holds
 reads as already in effect.
 
 **Related changes** are local changes to what a profile depends on: custom
-formats it scores whose conditions changed, and regexes they use whose pattern
-changed. Renames, descriptions and tags don't count, and neither do the
-condition updates a regex rename generates.
+formats it scores whose conditions changed, regexes they use whose pattern
+changed, and custom formats its defaults score that were deleted. Renames,
+descriptions and tags don't count, and neither do the condition updates a regex
+rename generates. Only changes that still differ from their defaults are listed.
 
 ## Type Generation
 

@@ -14,10 +14,10 @@
 	type Row = PageData['localChanges']['rows'][number];
 
 	const FIELD_LABELS: Record<string, string> = {
-		upgrades_allowed: 'Upgrades allowed',
-		minimum_custom_format_score: 'Minimum custom format score',
-		upgrade_until_score: 'Upgrade until score',
-		upgrade_score_increment: 'Upgrade score increment'
+		upgrades_allowed: 'Upgrades Allowed',
+		minimum_custom_format_score: 'Minimum Score',
+		upgrade_until_score: 'Upgrade Until Score',
+		upgrade_score_increment: 'Upgrade Score Increment'
 	};
 
 	const STATUS: Record<
@@ -25,9 +25,9 @@
 		{ label: string; variant: 'neutral' | 'warning' | 'info' | 'accent' }
 	> = {
 		applied: { label: 'Applied', variant: 'neutral' },
-		pending: { label: 'Not applied', variant: 'warning' },
-		overridden: { label: 'Re-applied', variant: 'info' },
-		related: { label: 'Related change', variant: 'accent' }
+		pending: { label: 'Not Applied', variant: 'warning' },
+		overridden: { label: 'Re-Applied', variant: 'info' },
+		related: { label: 'Related Change', variant: 'accent' }
 	};
 
 	const columns: Column<Row>[] = [
@@ -56,7 +56,12 @@
 			: `/regular-expressions/${databaseId}/${change.id}`;
 	}
 
+	function relatedChange(change: Related): string {
+		return change.changed.includes('deleted') ? 'deleted' : `${change.changed.join(', ')} changed`;
+	}
+
 	function relatedContext(change: Related): string {
+		if (change.changed.includes('deleted')) return 'Custom format this profile scored';
 		if (change.entity === 'custom_format') return 'Custom format this profile scores';
 		return `Regex used by ${change.via.join(', ')}`;
 	}
@@ -96,7 +101,7 @@
 	{:else if changes.rows.length === 0 && changes.relatedChanges.length === 0}
 		<EmptyState
 			icon={History}
-			title="No local changes"
+			title="No Local Changes"
 			description="This profile matches its defaults."
 			buttonText="Back to Scoring"
 			buttonHref={scoringHref}
@@ -153,7 +158,7 @@
 
 	{#if changes.relatedChanges.length > 0}
 		<section class="space-y-2">
-			<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Related changes</h2>
+			<h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Related Changes</h2>
 			<p class="text-sm text-neutral-600 dark:text-neutral-400">
 				Your changes to what this profile depends on. Its own settings are unchanged by these.
 			</p>
@@ -168,15 +173,21 @@
 								{#if href}
 									<InlineLink {href} text={change.name} />
 								{:else}
-									{change.name}
+									<span
+										class="text-neutral-900 dark:text-neutral-100 {change.changed.includes(
+											'deleted'
+										)
+											? 'line-through'
+											: ''}">{change.name}</span
+									>
 								{/if}
 							</div>
 							<div class="text-xs text-neutral-500 dark:text-neutral-400">
-								{relatedContext(change)} · {change.changed.join(', ')} changed
+								{relatedContext(change)} · {relatedChange(change)}
 							</div>
 						</div>
 						{#if change.pending}
-							<Badge variant="warning">Not applied</Badge>
+							<Badge variant="warning">Not Applied</Badge>
 						{/if}
 					</li>
 				{/each}

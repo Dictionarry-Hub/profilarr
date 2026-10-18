@@ -5,6 +5,7 @@
  */
 
 import type { LiveOpEntityRow, OpDetails } from '$db/queries/pcdOpEntities.ts';
+import type { ConditionData } from '$shared/pcd/display.ts';
 import { pcdOpEntitiesQueries } from '$db/queries/pcdOpEntities.ts';
 import type { PCDCache } from '$pcd/index.ts';
 import type {
@@ -16,7 +17,6 @@ import { getConditionsForEvaluation } from '../entities/customFormats/conditions
 import { serializeQualityProfile } from '../entities/serialize.ts';
 import type { UpstreamSnapshot } from './capture.ts';
 import { ENTITY_EDGES_SQL, type EntityEdge } from './edges.ts';
-import { customFormatConditionDefaults } from './entityDefaults.ts';
 import { entityKey } from './opEntities.ts';
 import {
 	qualityProfileScoringChanges,
@@ -59,13 +59,22 @@ export function assembleQualityProfileScoringChanges(input: {
 	const { upstreamNameOf, rowUpstreamName, upstreamNameBefore } =
 		input.aliases ?? resolveAliases(live);
 	const upstreamName = upstreamNameOf('quality_profile', profileName);
+	const upstreamProfile =
+		upstreamName === null
+			? null
+			: (snapshot.entities.get(entityKey('quality_profile', upstreamName)) as
+					PortableQualityProfile | null | undefined);
+	const defaultScored = [
+		...new Set((upstreamProfile?.customFormatScores ?? []).map((s) => s.customFormatName))
+	];
 	const related = relatedChanges({
 		profileName,
 		edges: input.edges,
 		live,
 		upstreamNameOf,
 		rowUpstreamName,
-		opDetails: input.opDetails
+		opDetails: input.opDetails,
+		defaultScored
 	});
 
 	if (snapshot.status !== 'captured') {
@@ -126,18 +135,12 @@ export function assembleQualityProfileScoringChanges(input: {
 		};
 	});
 
-	const upstream =
-		upstreamName === null
-			? null
-			: (snapshot.entities.get(entityKey('quality_profile', upstreamName)) as
-					PortableQualityProfile | null | undefined);
-
 	return {
 		snapshot: snapshot.status,
 		unavailableReason: null,
 		relatedChanges: related,
 		...qualityProfileScoringChanges({
-			upstream,
+			upstream: upstreamProfile,
 			current,
 			cfUpstreamNameOf: (name) => upstreamNameOf('custom_format', name),
 			cfUpstreamNameBefore: (name, opId) => upstreamNameBefore('custom_format', name, opId),
@@ -172,34 +175,37 @@ export async function qualityProfileScoringLocalChanges(
 	});
 
 	// Related changes come from op history; keep only what still differs from its default.
-	if (snapshot.status === 'captured') {
+	if (snapshot.status === 'captured' && changes.relatedChanges.length > 0) {
 		const { upstreamNameOf } = aliases;
-		const differs = new Map<RelatedChange, boolean>();
-		for (const change of changes.relatedChanges) {
-			const upstreamName = upstreamNameOf(change.entity, change.name);
-			const upstream =
-				upstreamName === null
-					? undefined
-					: snapshot.entities.get(entityKey(change.entity, upstreamName));
-			if (!upstream) continue;
-			if (change.entity === 'regular_expression') {
-				const row = await cache.kb
-					.selectFrom('regular_expressions')
-					.select('pattern')
-					.where('name', '=', change.name)
-					.executeTakeFirst();
-				differs.set(change, row?.pattern !== (upstream as PortableRegularExpression).pattern);
-			} else {
-				const d = customFormatConditionDefaults({
-					upstream: upstream as PortableCustomFormat,
-					current: await getConditionsForEvaluation(cache, change.name),
-					regexUpstreamName: (name) => upstreamNameOf('regular_expression', name),
-					pendingConditions: new Set()
-				});
-				differs.set(change, Object.keys(d.conditions).length > 0 || d.removed.length > 0);
-			}
+		const named = (entity: RelatedChange['entity']) =>
+			changes.relatedChanges
+				.filter((c) => c.entity === entity && !c.changed.includes('deleted'))
+				.map((c) => c.name);
+		const regexNames = named('regular_expression');
+		const patterns =
+			regexNames.length === 0
+				? []
+				: await cache.kb
+						.selectFrom('regular_expressions')
+						.select(['name', 'pattern'])
+						.where('name', 'in', regexNames)
+						.execute();
+		const currentConditions = new Map<string, ConditionData[]>();
+		for (const name of named('custom_format')) {
+			currentConditions.set(name, await getConditionsForEvaluation(cache, name));
 		}
-		changes.relatedChanges = remainingRelatedChanges(changes.relatedChanges, (c) => differs.get(c));
+		changes.relatedChanges = remainingRelatedChanges({
+			changes: changes.relatedChanges,
+			defaultOf: (change) => {
+				const upstreamName = upstreamNameOf(change.entity, change.name);
+				if (upstreamName === null) return undefined;
+				return (snapshot.entities.get(entityKey(change.entity, upstreamName)) ?? undefined) as
+					PortableCustomFormat | PortableRegularExpression | undefined;
+			},
+			currentPatterns: new Map(patterns.map((p) => [p.name, p.pattern])),
+			currentConditions,
+			regexUpstreamName: (name) => upstreamNameOf('regular_expression', name)
+		});
 	}
 
 	for (const entity of ['custom_format', 'regular_expression'] as const) {

@@ -5,13 +5,16 @@
  */
 
 import type { LiveOpEntityRow, OpDetails } from '$db/queries/pcdOpEntities.ts';
+import type { ConditionData } from '$shared/pcd/display.ts';
+import type { PortableCustomFormat, PortableRegularExpression } from '$shared/pcd/portable.ts';
 import { reach, type EntityEdge } from './edges.ts';
+import { customFormatConditionDefaults } from './entityDefaults.ts';
 
-export type RelatedChangeField = 'conditions' | 'pattern';
+export type RelatedChangeField = 'conditions' | 'pattern' | 'deleted';
 
 export interface RelatedChange {
 	entity: 'custom_format' | 'regular_expression';
-	/** Current name. */
+	/** Current name; for a deleted custom format, its name in the defaults. */
 	name: string;
 	/** Row id in the cache, for linking; filled in by the caller. */
 	id: number | null;
@@ -48,6 +51,7 @@ function parseOp(d: OpDetails): OpInfo {
 }
 
 function fieldsOf(entity: string, changedFields: string[]): RelatedChangeField[] {
+	if (changedFields.includes('deleted')) return ['deleted'];
 	if (entity === 'custom_format') {
 		return changedFields.some((f) => f === 'conditions' || f.startsWith('condition:'))
 			? ['conditions']
@@ -66,10 +70,11 @@ export function relatedChanges(input: {
 	/** Upstream identity of a live row, as of its own op. */
 	rowUpstreamName: (row: LiveOpEntityRow) => string | null;
 	opDetails: (opIds: number[]) => OpDetails[];
+	/** Custom formats the profile scores in its defaults, by default name. */
+	defaultScored?: string[];
 }): RelatedChange[] {
 	const { edges, live, upstreamNameOf, rowUpstreamName } = input;
 	const reached = reach([{ entity: 'quality_profile', name: input.profileName }], edges, 'up');
-	if (reached.length === 0) return [];
 
 	const scored = new Set(reached.filter((r) => r.entity === 'custom_format').map((r) => r.name));
 	// A name with no upstream identity can only match rows written under it.
@@ -79,6 +84,15 @@ export function relatedChanges(input: {
 	const byIdentity = new Map(
 		reached.map((r) => [identity(r.entity, upstreamNameOf(r.entity, r.name), r.name), r])
 	);
+	// A custom format the defaults score but nothing reaches now may have been
+	// deleted: only a deletion makes it a related change.
+	const onlyInDefaults = new Set<string>();
+	for (const name of input.defaultScored ?? []) {
+		const key = identity('custom_format', name, name);
+		if (byIdentity.has(key)) continue;
+		byIdentity.set(key, { entity: 'custom_format', name });
+		onlyInDefaults.add(key);
+	}
 	const opsByEntity = new Map<string, Set<number>>();
 	const renameOps = new Set<number>();
 	for (const row of live) {
@@ -102,7 +116,7 @@ export function relatedChanges(input: {
 	const changes: RelatedChange[] = [];
 	for (const [key, ids] of opsByEntity) {
 		const ref = byIdentity.get(key)!;
-		const changed = new Set<RelatedChangeField>();
+		let changed = new Set<RelatedChangeField>();
 		const opIds: number[] = [];
 		let pending = false;
 		for (const id of [...ids].sort((a, b) => a - b)) {
@@ -115,7 +129,8 @@ export function relatedChanges(input: {
 			opIds.push(id);
 			pending ||= op.pending;
 		}
-		if (changed.size === 0) continue;
+		if (changed.size === 0 || (onlyInDefaults.has(key) && !changed.has('deleted'))) continue;
+		if (changed.has('deleted')) changed = new Set(['deleted']);
 		changes.push({
 			entity: ref.entity as RelatedChange['entity'],
 			name: ref.name,
@@ -141,13 +156,31 @@ export function relatedChanges(input: {
 }
 
 /**
- * Keeps the related changes that still differ from their defaults. `differs`
- * returns undefined when there's no default to compare against: those stay, and
- * so does anything that didn't apply.
+ * Keeps the related changes that still differ from their defaults. A change
+ * with no default to compare against stays, and so does one that didn't apply.
  */
-export function remainingRelatedChanges(
-	changes: RelatedChange[],
-	differs: (change: RelatedChange) => boolean | undefined
-): RelatedChange[] {
-	return changes.filter((c) => c.pending || differs(c) !== false);
+export function remainingRelatedChanges(input: {
+	changes: RelatedChange[];
+	defaultOf: (
+		change: RelatedChange
+	) => PortableCustomFormat | PortableRegularExpression | undefined;
+	/** Current pattern by regex name, and current conditions by custom format name. */
+	currentPatterns: Map<string, string>;
+	currentConditions: Map<string, ConditionData[]>;
+	regexUpstreamName: (name: string) => string | null;
+}): RelatedChange[] {
+	return input.changes.filter((change) => {
+		const def = input.defaultOf(change);
+		if (change.pending || !def || change.changed.includes('deleted')) return true;
+		if (change.entity === 'regular_expression') {
+			return input.currentPatterns.get(change.name) !== (def as PortableRegularExpression).pattern;
+		}
+		const d = customFormatConditionDefaults({
+			upstream: def as PortableCustomFormat,
+			current: input.currentConditions.get(change.name) ?? [],
+			regexUpstreamName: input.regexUpstreamName,
+			pendingConditions: new Set()
+		});
+		return Object.keys(d.conditions).length > 0 || d.removed.length > 0;
+	});
 }
