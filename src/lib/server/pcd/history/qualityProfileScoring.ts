@@ -204,17 +204,25 @@ export function qualityProfileScoringChanges(input: {
 		upstreamName: cfUpstreamNameOf(name),
 		currentName: name
 	}));
+	const currentCustomFormat = (name: string) => ({
+		upstreamName: cfUpstreamNameOf(name),
+		currentName: name
+	});
 	// Score cells an arr type's own row decides: a shared 'all' change doesn't reach them.
 	const ownRows = new Set(
 		current.customFormatScores
 			.filter((s) => s.arrType !== 'all')
-			.map((s) =>
-				scoreKey(
-					{ upstreamName: cfUpstreamNameOf(s.customFormatName), currentName: s.customFormatName },
-					s.arrType
-				)
-			)
+			.map((s) => scoreKey(currentCustomFormat(s.customFormatName), s.arrType))
 	);
+	// Each arr type's shared score: what it falls back to once its own row is removed.
+	const sharedScores = new Map<string, number>();
+	for (const s of current.customFormatScores.filter((s) => s.arrType === 'all')) {
+		for (const arrType of ARR_TYPES) {
+			sharedScores.set(scoreKey(currentCustomFormat(s.customFormatName), arrType), s.score);
+		}
+	}
+	const effectiveWanted = (t: { key: string; wanted: Value; shared?: boolean }): Value =>
+		t.wanted === null && !t.shared ? (sharedScores.get(t.key) ?? null) : t.wanted;
 
 	const valueAt = (key: string): { upstream: Value; current: Value } =>
 		key.startsWith(SCORE_PREFIX)
@@ -273,7 +281,7 @@ export function qualityProfileScoringChanges(input: {
 				}));
 			})
 			.filter((t) => !(t.shared && ownRows.has(t.key)));
-		const holds = targets.every((t) => (nowCells.get(t.key)?.score ?? null) === t.wanted);
+		const holds = targets.every((t) => (nowCells.get(t.key)?.score ?? null) === effectiveWanted(t));
 		for (const target of targets) {
 			if (holds) {
 				const row = rows.get(target.key);
@@ -282,17 +290,15 @@ export function qualityProfileScoringChanges(input: {
 				row.inEffect = true;
 				continue;
 			}
-			if (!rows.has(target.key) && target.wanted === null && target.shared) continue;
 			const row = ensureRow(target.key, target);
 			row.opIds.push(op.opId);
 			row.status = 'pending';
-			row.pendingValue = target.wanted;
+			row.pendingValue = effectiveWanted(target);
 		}
 	};
 
 	// Op overlay, oldest first so the latest op on a row decides its status.
-	// A pending op adds its row even when current still equals upstream, unless
-	// it only removes a shared row: alone, that says nothing about the result.
+	// A pending op adds its row even when current still equals upstream.
 	for (const op of [...input.ops].sort((a, b) => a.opId - b.opId)) {
 		const status = statusOf(op);
 		if (op.generated) {
@@ -300,14 +306,20 @@ export function qualityProfileScoringChanges(input: {
 			continue;
 		}
 		for (const target of opTargets(op)) {
-			const { key, wanted } = target;
+			const { key } = target;
 			if (target.shared && ownRows.has(key)) continue;
-			if (!rows.has(key) && (status !== 'pending' || (target.shared && wanted === null))) continue;
+			// A pending own row isn't in the database yet, but later shared changes
+			// still don't reach it (the writer expands a shared score this way).
+			if (status === 'pending' && !target.shared) {
+				if (target.wanted === null) ownRows.delete(key);
+				else ownRows.add(key);
+			}
+			if (!rows.has(key) && status !== 'pending') continue;
 			const row = ensureRow(key, target);
 			row.opIds.push(op.opId);
 			row.status = status;
 			delete row.inEffect;
-			if (status === 'pending') row.pendingValue = wanted;
+			if (status === 'pending') row.pendingValue = effectiveWanted(target);
 			else delete row.pendingValue;
 		}
 	}
