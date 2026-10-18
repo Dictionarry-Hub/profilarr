@@ -243,9 +243,12 @@ export async function writeOperation(options: WriteOptions): Promise<WriteResult
 		const origin: PcdOpOrigin = layer === 'base' ? 'base' : 'user';
 		const state = layer === 'base' ? 'draft' : 'published';
 
-		// The op and its entity rows land together or not at all.
-		const opId = await db.transaction(() => {
-			const id = pcdOpsQueries.create({
+		// The op and its entity rows land together or not at all. Kept synchronous:
+		// db.transaction awaits its callback, which would let another write in mid-transaction.
+		let opId: number;
+		db.beginTransaction();
+		try {
+			opId = pcdOpsQueries.create({
 				databaseId,
 				origin,
 				state,
@@ -256,10 +259,13 @@ export async function writeOperation(options: WriteOptions): Promise<WriteResult
 				contentHash
 			});
 			if (origin === 'user' && metadata) {
-				pcdOpEntitiesQueries.insertForOp(id, databaseId, entityRowsFromMetadata(metadata));
+				pcdOpEntitiesQueries.insertForOp(opId, databaseId, entityRowsFromMetadata(metadata));
 			}
-			return id;
-		});
+			db.commit();
+		} catch (error) {
+			db.rollback();
+			throw error;
+		}
 
 		const opType = metadata?.operation ?? 'write';
 		const entity = metadata?.entity?.replace(/_/g, ' ') ?? 'operation';
