@@ -139,3 +139,15 @@ export function relatedChanges(input: {
 	}
 	return changes.sort((a, b) => a.entity.localeCompare(b.entity) || a.name.localeCompare(b.name));
 }
+
+/**
+ * Keeps the related changes that still differ from their defaults. `differs`
+ * returns undefined when there's no default to compare against: those stay, and
+ * so does anything that didn't apply.
+ */
+export function remainingRelatedChanges(
+	changes: RelatedChange[],
+	differs: (change: RelatedChange) => boolean | undefined
+): RelatedChange[] {
+	return changes.filter((c) => c.pending || differs(c) !== false);
+}

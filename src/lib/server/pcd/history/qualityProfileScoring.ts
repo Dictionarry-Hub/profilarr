@@ -62,8 +62,8 @@ export interface ScoringOp {
 }
 
 export interface ScoringChanges {
-	/** created: not in upstream. deleted: not in current. */
-	status: 'modified' | 'created' | 'deleted' | 'unchanged';
+	/** created: not in upstream. */
+	status: 'modified' | 'created' | 'unchanged';
 	rows: ScoringChangeRow[];
 }
 
@@ -112,8 +112,8 @@ interface OpTarget {
 	wanted: Value;
 	customFormat?: ScoreCustomFormat;
 	arrType?: string;
-	/** Removes a shared 'all' row: what each arr type ends up with depends on its own row. */
-	sharedRemoval?: boolean;
+	/** Expanded from a shared 'all' row, which an arr type's own row overrides. */
+	shared?: boolean;
 }
 
 /** Row keys an op's changed fields address, with the value each wanted. */
@@ -151,7 +151,7 @@ function opTargets(op: ScoringOp): OpTarget[] {
 				wanted,
 				customFormat,
 				arrType: effectiveArrType,
-				sharedRemoval: arrType === 'all' && wanted === null
+				shared: arrType === 'all'
 			});
 		}
 	}
@@ -185,7 +185,7 @@ function statusOf(op: ScoringOp): RowStatus {
 export function qualityProfileScoringChanges(input: {
 	/** undefined: not captured (no local changes reach it). null: not in upstream. */
 	upstream: PortableQualityProfile | null | undefined;
-	current: PortableQualityProfile | null;
+	current: PortableQualityProfile;
 	cfUpstreamNameOf: (currentName: string) => string | null;
 	/** A CF name as a generated op wrote it, resolved as of that op. Defaults to cfUpstreamNameOf. */
 	cfUpstreamNameBefore?: (name: string, opId: number) => string | null;
@@ -204,6 +204,17 @@ export function qualityProfileScoringChanges(input: {
 		upstreamName: cfUpstreamNameOf(name),
 		currentName: name
 	}));
+	// Score cells an arr type's own row decides: a shared 'all' change doesn't reach them.
+	const ownRows = new Set(
+		current.customFormatScores
+			.filter((s) => s.arrType !== 'all')
+			.map((s) =>
+				scoreKey(
+					{ upstreamName: cfUpstreamNameOf(s.customFormatName), currentName: s.customFormatName },
+					s.arrType
+				)
+			)
+	);
 
 	const valueAt = (key: string): { upstream: Value; current: Value } =>
 		key.startsWith(SCORE_PREFIX)
@@ -248,18 +259,20 @@ export function qualityProfileScoringChanges(input: {
 	const overlayGeneratedConflict = (op: ScoringOp) => {
 		// Names resolve as of the op and the check compares by default identity, so a
 		// later rename or reuse of a name can't point the op at the wrong row.
-		const targets = scoreEntries(op).flatMap((e) => {
-			const upstreamName = cfUpstreamNameBefore(e.name, op.opId);
-			if (upstreamName === null) return [];
-			const customFormat = { upstreamName, currentName: null };
-			return (e.arrType === 'all' ? ARR_TYPES : [e.arrType]).map((arrType) => ({
-				key: scoreKey(customFormat, arrType),
-				wanted: e.to,
-				customFormat,
-				arrType,
-				shared: e.arrType === 'all'
-			}));
-		});
+		const targets = scoreEntries(op)
+			.flatMap((e) => {
+				const upstreamName = cfUpstreamNameBefore(e.name, op.opId);
+				if (upstreamName === null) return [];
+				const customFormat = { upstreamName, currentName: null };
+				return (e.arrType === 'all' ? ARR_TYPES : [e.arrType]).map((arrType) => ({
+					key: scoreKey(customFormat, arrType),
+					wanted: e.to,
+					customFormat,
+					arrType,
+					shared: e.arrType === 'all'
+				}));
+			})
+			.filter((t) => !(t.shared && ownRows.has(t.key)));
 		const holds = targets.every((t) => (nowCells.get(t.key)?.score ?? null) === t.wanted);
 		for (const target of targets) {
 			if (holds) {
@@ -288,7 +301,8 @@ export function qualityProfileScoringChanges(input: {
 		}
 		for (const target of opTargets(op)) {
 			const { key, wanted } = target;
-			if (!rows.has(key) && (status !== 'pending' || target.sharedRemoval)) continue;
+			if (target.shared && ownRows.has(key)) continue;
+			if (!rows.has(key) && (status !== 'pending' || (target.shared && wanted === null))) continue;
 			const row = ensureRow(key, target);
 			row.opIds.push(op.opId);
 			row.status = status;
@@ -298,14 +312,7 @@ export function qualityProfileScoringChanges(input: {
 		}
 	}
 
-	const status =
-		upstream === null
-			? 'created'
-			: current === null
-				? 'deleted'
-				: rows.size > 0
-					? 'modified'
-					: 'unchanged';
+	const status = upstream === null ? 'created' : rows.size > 0 ? 'modified' : 'unchanged';
 	return { status, rows: sortRows([...rows.values()]) };
 }
 

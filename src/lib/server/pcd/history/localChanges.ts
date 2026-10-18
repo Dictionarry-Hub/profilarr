@@ -7,17 +7,23 @@
 import type { LiveOpEntityRow, OpDetails } from '$db/queries/pcdOpEntities.ts';
 import { pcdOpEntitiesQueries } from '$db/queries/pcdOpEntities.ts';
 import type { PCDCache } from '$pcd/index.ts';
-import type { PortableQualityProfile } from '$shared/pcd/portable.ts';
+import type {
+	PortableCustomFormat,
+	PortableQualityProfile,
+	PortableRegularExpression
+} from '$shared/pcd/portable.ts';
+import { getConditionsForEvaluation } from '../entities/customFormats/conditions/read.ts';
 import { serializeQualityProfile } from '../entities/serialize.ts';
 import type { UpstreamSnapshot } from './capture.ts';
 import { ENTITY_EDGES_SQL, type EntityEdge } from './edges.ts';
+import { customFormatConditionDefaults } from './entityDefaults.ts';
 import { entityKey } from './opEntities.ts';
 import {
 	qualityProfileScoringChanges,
 	type ScoringChanges,
 	type ScoringOp
 } from './qualityProfileScoring.ts';
-import { relatedChanges, type RelatedChange } from './relatedChanges.ts';
+import { relatedChanges, remainingRelatedChanges, type RelatedChange } from './relatedChanges.ts';
 import { resolveAliases } from './touched.ts';
 
 export interface QualityProfileScoringLocalChanges extends ScoringChanges {
@@ -42,7 +48,7 @@ export function assembleQualityProfileScoringChanges(input: {
 	snapshot: UpstreamSnapshot;
 	live: LiveOpEntityRow[];
 	opDetails: (opIds: number[]) => OpDetails[];
-	current: PortableQualityProfile | null;
+	current: PortableQualityProfile;
 	profileName: string;
 	/** Edges of the finished cache. */
 	edges: EntityEdge[];
@@ -142,21 +148,47 @@ export async function qualityProfileScoringLocalChanges(
 	databaseId: number,
 	profileName: string
 ): Promise<QualityProfileScoringLocalChanges> {
-	// Serializers throw on a missing entity; only that case means "deleted".
-	const exists = await cache.kb
-		.selectFrom('quality_profiles')
-		.select('name')
-		.where('name', '=', profileName)
-		.executeTakeFirst();
-
+	const snapshot = cache.getUpstreamSnapshot();
+	const live = pcdOpEntitiesQueries.listLive(databaseId);
 	const changes = assembleQualityProfileScoringChanges({
-		snapshot: cache.getUpstreamSnapshot(),
-		live: pcdOpEntitiesQueries.listLive(databaseId),
+		snapshot,
+		live,
 		opDetails: (ids) => pcdOpEntitiesQueries.listOpDetails(ids),
-		current: exists ? await serializeQualityProfile(cache, profileName) : null,
+		current: await serializeQualityProfile(cache, profileName),
 		profileName,
 		edges: cache.query<EntityEdge>(ENTITY_EDGES_SQL)
 	});
+
+	// Related changes come from op history; keep only what still differs from its default.
+	if (snapshot.status === 'captured') {
+		const { upstreamNameOf } = resolveAliases(live);
+		const differs = new Map<RelatedChange, boolean>();
+		for (const change of changes.relatedChanges) {
+			const upstreamName = upstreamNameOf(change.entity, change.name);
+			const upstream =
+				upstreamName === null
+					? undefined
+					: snapshot.entities.get(entityKey(change.entity, upstreamName));
+			if (!upstream) continue;
+			if (change.entity === 'regular_expression') {
+				const row = await cache.kb
+					.selectFrom('regular_expressions')
+					.select('pattern')
+					.where('name', '=', change.name)
+					.executeTakeFirst();
+				differs.set(change, row?.pattern !== (upstream as PortableRegularExpression).pattern);
+			} else {
+				const d = customFormatConditionDefaults({
+					upstream: upstream as PortableCustomFormat,
+					current: await getConditionsForEvaluation(cache, change.name),
+					regexUpstreamName: (name) => upstreamNameOf('regular_expression', name),
+					pendingConditions: new Set()
+				});
+				differs.set(change, Object.keys(d.conditions).length > 0 || d.removed.length > 0);
+			}
+		}
+		changes.relatedChanges = remainingRelatedChanges(changes.relatedChanges, (c) => differs.get(c));
+	}
 
 	for (const entity of ['custom_format', 'regular_expression'] as const) {
 		const related = changes.relatedChanges.filter((c) => c.entity === entity);
