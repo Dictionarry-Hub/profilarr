@@ -68,6 +68,13 @@ after filtering.
 _would_ change without issuing any rename commands. Useful for auditing before
 enabling live runs.
 
+`enabled` is the schedule toggle and only controls automatic runs. The job
+handler cancels a scheduled run while it is off, but manual runs, dry or live,
+always go through. The rename page asks for confirmation before a manual live
+run. `renameRunBlockReason()` in `src/lib/shared/rename/runBlock.ts` holds the
+rules for when a manual run can start, and the page shows its reason as the
+tooltip on a blocked button.
+
 **Live** follows a longer path:
 
 1. **Preview filter** -- calls the preview endpoint (concurrency 10) to find
