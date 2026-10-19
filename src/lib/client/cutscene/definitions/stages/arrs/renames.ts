@@ -45,7 +45,7 @@ export const arrRenameStage: Stage = {
 			id: 'rename-schedule',
 			target: 'rename-schedule',
 			title: 'Schedule',
-			body: 'How often renames run automatically. The default is daily at midnight. Like upgrades, this uses a cron expression.',
+			body: 'Turn the schedule on to rename automatically, then pick how often. The default is daily at midnight. Like upgrades, this uses a cron expression. Dry Run and Run Now work whether or not the schedule is on.',
 			position: 'below',
 			completion: { type: 'manual' }
 		},

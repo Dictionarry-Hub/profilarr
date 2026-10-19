@@ -12,15 +12,13 @@ const renameRunHandler: JobHandler = async (job) => {
 		return { status: 'failure', error: 'Invalid instance ID' };
 	}
 
-	const dryRun = Boolean(job.payload.dryRun);
-
-	// A dry run only previews, so it runs while renaming is disabled
+	// The schedule toggle only controls automatic runs; manual runs go through
 	const settings = arrRenameSettingsQueries.getByInstanceId(instanceId);
 	if (!settings) {
 		return { status: 'cancelled', output: 'Rename config not found' };
 	}
-	if (!settings.enabled && !dryRun) {
-		return { status: 'cancelled', output: 'Rename config disabled' };
+	if (!settings.enabled && job.source !== 'manual') {
+		return { status: 'cancelled', output: 'Rename schedule off' };
 	}
 
 	const instance = arrInstancesQueries.getById(instanceId);
@@ -31,6 +29,8 @@ const renameRunHandler: JobHandler = async (job) => {
 	if (instance.type !== 'radarr' && instance.type !== 'sonarr') {
 		return { status: 'skipped', output: `Rename not supported for ${instance.type}` };
 	}
+
+	const dryRun = Boolean(job.payload.dryRun);
 
 	try {
 		const log = await processRenameConfig(settings, instance, job.source === 'manual', dryRun);

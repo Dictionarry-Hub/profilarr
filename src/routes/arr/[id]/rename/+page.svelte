@@ -14,6 +14,7 @@
 	import RenameRunHistory from './components/RenameRunHistory.svelte';
 	import RenameInfoModal from './components/RenameInfoModal.svelte';
 	import DirtyModal from '$lib/client/ui/modal/DirtyModal.svelte';
+	import Modal from '$ui/modal/Modal.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
@@ -63,14 +64,20 @@
 	$: summaryNotifications = ($current.summaryNotifications ?? true) as boolean;
 
 	// A blocked button stays hoverable so its tooltip can say why
-	$: runState = {
-		hasConfig: !isNewConfig,
-		dirty: $isDirty,
-		running,
-		enabled: data.settings?.enabled ?? false
-	};
-	$: dryRunBlocked = renameRunBlockReason({ ...runState, dryRun: true });
-	$: liveRunBlocked = renameRunBlockReason({ ...runState, dryRun: false });
+	$: runBlocked = renameRunBlockReason({ hasConfig: !isNewConfig, dirty: $isDirty, running });
+
+	let showRunNowModal = false;
+
+	function submitRun(formId: string) {
+		jobStatus.connect();
+		jobStatus.setRunning('arr.rename', 'Renaming files...');
+		const f = document.getElementById(formId);
+		if (f instanceof HTMLFormElement) {
+			f.requestSubmit();
+		} else {
+			jobStatus.cancelOptimistic();
+		}
+	}
 
 	let lastFormId: unknown = null;
 	$: if (form && form !== lastFormId) {
@@ -105,41 +112,25 @@
 				text={running ? 'Running...' : 'Dry Run'}
 				icon={FlaskConical}
 				iconColor="text-amber-600 dark:text-amber-400"
-				softDisabled={!!dryRunBlocked}
-				tooltip={dryRunBlocked ??
+				softDisabled={!!runBlocked}
+				tooltip={runBlocked ??
 					'Preview which files would be renamed without making changes. Folder renames cannot be previewed.'}
 				tooltipPosition="bottom"
 				tooltipAlign="right"
 				on:click={() => {
-					if (dryRunBlocked) return;
-					jobStatus.connect();
-					jobStatus.setRunning('arr.rename', 'Renaming files...');
-					const f = document.getElementById('dry-run-form');
-					if (f instanceof HTMLFormElement) {
-						f.requestSubmit();
-					} else {
-						jobStatus.cancelOptimistic();
-					}
+					if (!runBlocked) submitRun('dry-run-form');
 				}}
 			/>
 			<Button
 				text={running ? 'Running...' : 'Run Now'}
 				icon={Play}
 				iconColor="text-green-600 dark:text-green-400"
-				softDisabled={!!liveRunBlocked}
-				tooltip={liveRunBlocked ?? 'Rename files and folders now'}
+				softDisabled={!!runBlocked}
+				tooltip={runBlocked ?? 'Rename files and folders now, whether or not the schedule is on'}
 				tooltipPosition="bottom"
 				tooltipAlign="right"
 				on:click={() => {
-					if (liveRunBlocked) return;
-					jobStatus.connect();
-					jobStatus.setRunning('arr.rename', 'Renaming files...');
-					const f = document.getElementById('live-run-form');
-					if (f instanceof HTMLFormElement) {
-						f.requestSubmit();
-					} else {
-						jobStatus.cancelOptimistic();
-					}
+					if (!runBlocked) showRunNowModal = true;
 				}}
 			/>
 			<Button
@@ -234,6 +225,19 @@
 		</form>
 	{/if}
 
+	<Modal
+		open={showRunNowModal}
+		header="Rename Now"
+		bodyMessage={`Rename files in ${data.instance.name} now to match its naming format?${data.settings?.renameFolders ? ' Folders will be renamed too.' : ''} This can't be undone from Profilarr.`}
+		confirmText="Rename"
+		cancelText="Cancel"
+		confirmDanger
+		on:confirm={() => {
+			showRunNowModal = false;
+			submitRun('live-run-form');
+		}}
+		on:cancel={() => (showRunNowModal = false)}
+	/>
 	<RenameInfoModal bind:open={showInfoModal} />
 	<DirtyModal />
 {/key}

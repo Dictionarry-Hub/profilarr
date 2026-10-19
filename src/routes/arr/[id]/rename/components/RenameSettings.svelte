@@ -65,20 +65,6 @@
 </script>
 
 <div class="flex flex-wrap gap-4 md:items-end md:gap-x-5 md:gap-y-3 md:px-4">
-	<div>
-		<span
-			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
-		>
-			Status
-		</span>
-		<Toggle
-			checked={enabled}
-			label={enabled ? 'Enabled' : 'Disabled'}
-			color="green"
-			on:change={(e) => onEnabledChange?.(e.detail)}
-		/>
-	</div>
-
 	<div data-onboarding="rename-folders">
 		<span
 			class="mb-1 block text-[10px] font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-500"
@@ -113,7 +99,16 @@
 		>
 			Schedule
 		</span>
-		<CronInput bind:value={cronValue} disabled={!enabled} {minIntervalMinutes} {onWarning} />
+		<!-- The toggle turns automatic runs on or off; manual runs work either way -->
+		<div class="flex flex-wrap items-center gap-1.5 md:flex-nowrap">
+			<Toggle
+				checked={enabled}
+				label={enabled ? 'On' : 'Off'}
+				color="green"
+				on:change={(e) => onEnabledChange?.(e.detail)}
+			/>
+			<CronInput bind:value={cronValue} disabled={!enabled} {minIntervalMinutes} {onWarning} />
+		</div>
 	</div>
 
 	<div data-onboarding="rename-ignore-tag">
