@@ -1,5 +1,5 @@
 import type { HttpClientOptions, RequestOptions } from './types.ts';
-import { HttpError } from './types.ts';
+import { HtmlResponseError, HttpError } from './types.ts';
 
 /**
  * Base HTTP client with connection pooling and generic request capabilities
@@ -37,6 +37,30 @@ export class BaseHttpClient {
 	 */
 	private sleep(ms: number): Promise<void> {
 		return new Promise((resolve) => setTimeout(resolve, ms));
+	}
+
+	/**
+	 * Parse a JSON body. A body that isn't JSON is kept as text on an error
+	 * status, so the status error is thrown, and is reported as a web page when
+	 * a successful response is HTML.
+	 */
+	private parseJson(text: string, response: Response): unknown {
+		if (!text) return null;
+		try {
+			return JSON.parse(text);
+		} catch (error) {
+			if (!response.ok) return text;
+			const contentType = response.headers.get('content-type') ?? '';
+			if (contentType.toLowerCase().includes('text/html')) {
+				throw new HtmlResponseError(
+					response.status,
+					response.url ? new URL(response.url).host : null,
+					response.redirected,
+					text
+				);
+			}
+			throw error;
+		}
 	}
 
 	/**
@@ -78,7 +102,7 @@ export class BaseHttpClient {
 					// Parse response based on responseType
 					const text = await response.text();
 					const responseType = options?.responseType ?? 'json';
-					const data = responseType === 'text' ? text : text ? JSON.parse(text) : null;
+					const data = responseType === 'text' ? text : this.parseJson(text, response);
 
 					// Check for HTTP errors
 					if (!response.ok) {

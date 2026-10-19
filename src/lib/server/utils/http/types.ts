@@ -29,3 +29,20 @@ export class HttpError extends Error {
 		this.name = 'HttpError';
 	}
 }
+
+/**
+ * A request expecting JSON got an HTML page back, usually a reverse proxy's
+ * login page. The message names the host that answered and is safe to show.
+ */
+export class HtmlResponseError extends HttpError {
+	constructor(status: number, host: string | null, redirected: boolean, body: string) {
+		const from = host ? ` from ${host}` : '';
+		const via = redirected ? ' after a redirect' : '';
+		super(
+			`Expected JSON but got a web page${from}${via}. A reverse proxy may be asking for a login.`,
+			status,
+			body
+		);
+		this.name = 'HtmlResponseError';
+	}
+}
