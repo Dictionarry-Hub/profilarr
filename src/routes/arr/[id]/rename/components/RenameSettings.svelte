@@ -89,7 +89,6 @@
 			checked={renameFolders}
 			label={renameFolders ? 'On' : 'Off'}
 			color={renameFolders ? 'accent' : 'neutral'}
-			disabled={!enabled}
 			on:change={(e) => onRenameFoldersChange?.(e.detail)}
 		/>
 	</div>
@@ -104,7 +103,6 @@
 			checked={summaryNotifications}
 			label={summaryNotifications ? 'On' : 'Off'}
 			color={summaryNotifications ? 'accent' : 'neutral'}
-			disabled={!enabled}
 			on:change={(e) => onSummaryNotificationsChange?.(e.detail)}
 		/>
 	</div>
@@ -132,7 +130,6 @@
 			size="md"
 			value={ignoreTag}
 			placeholder="no-rename"
-			disabled={!enabled}
 			on:input={(e) => onIgnoreTagChange?.(e.detail)}
 		/>
 	</div>

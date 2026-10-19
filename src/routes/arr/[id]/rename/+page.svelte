@@ -17,6 +17,7 @@
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import Button from '$ui/button/Button.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import { renameRunBlockReason } from '$shared/rename/runBlock.ts';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -61,6 +62,16 @@
 	$: cron = ($current.cron ?? '0 0 * * *') as string;
 	$: summaryNotifications = ($current.summaryNotifications ?? true) as boolean;
 
+	// A blocked button stays hoverable so its tooltip can say why
+	$: runState = {
+		hasConfig: !isNewConfig,
+		dirty: $isDirty,
+		running,
+		enabled: data.settings?.enabled ?? false
+	};
+	$: dryRunBlocked = renameRunBlockReason({ ...runState, dryRun: true });
+	$: liveRunBlocked = renameRunBlockReason({ ...runState, dryRun: false });
+
 	let lastFormId: unknown = null;
 	$: if (form && form !== lastFormId) {
 		lastFormId = form;
@@ -94,11 +105,13 @@
 				text={running ? 'Running...' : 'Dry Run'}
 				icon={FlaskConical}
 				iconColor="text-amber-600 dark:text-amber-400"
-				disabled={isNewConfig || !enabled || running || saving || $isDirty}
-				tooltip="Preview which files would be renamed without making changes. Folder renames cannot be previewed."
+				softDisabled={!!dryRunBlocked}
+				tooltip={dryRunBlocked ??
+					'Preview which files would be renamed without making changes. Folder renames cannot be previewed.'}
 				tooltipPosition="bottom"
 				tooltipAlign="right"
 				on:click={() => {
+					if (dryRunBlocked) return;
 					jobStatus.connect();
 					jobStatus.setRunning('arr.rename', 'Renaming files...');
 					const f = document.getElementById('dry-run-form');
@@ -113,11 +126,12 @@
 				text={running ? 'Running...' : 'Run Now'}
 				icon={Play}
 				iconColor="text-green-600 dark:text-green-400"
-				disabled={isNewConfig || !enabled || running || saving || $isDirty}
-				tooltip="Rename files and folders now"
+				softDisabled={!!liveRunBlocked}
+				tooltip={liveRunBlocked ?? 'Rename files and folders now'}
 				tooltipPosition="bottom"
 				tooltipAlign="right"
 				on:click={() => {
+					if (liveRunBlocked) return;
 					jobStatus.connect();
 					jobStatus.setRunning('arr.rename', 'Renaming files...');
 					const f = document.getElementById('live-run-form');
@@ -162,19 +176,9 @@
 			/>
 		</section>
 
-		{#if enabled}
-			<section class="md:px-4">
-				<RenameRunHistory runs={data.renameRuns} />
-			</section>
-		{:else}
-			<section class="md:px-4">
-				<div class="rounded-xl border border-neutral-300 dark:border-neutral-700/60">
-					<p class="px-4 py-4 text-center text-sm text-neutral-600 dark:text-neutral-400">
-						Enable rename to view run history.
-					</p>
-				</div>
-			</section>
-		{/if}
+		<section class="md:px-4">
+			<RenameRunHistory runs={data.renameRuns} />
+		</section>
 	</div>
 
 	<!-- Hidden forms -->

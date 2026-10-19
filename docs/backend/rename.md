@@ -66,7 +66,14 @@ after filtering.
 
 **Dry run** calls the Arr preview endpoint for every item and records what
 _would_ change without issuing any rename commands. Useful for auditing before
-enabling live runs.
+enabling live runs. It runs whether or not renaming is enabled, so a preview
+never needs the live schedule turned on.
+
+A live run, scheduled or manual, needs renaming enabled. The job handler
+cancels a disabled live run, and the run action rejects one before queueing it.
+`renameRunBlockReason()` in `src/lib/shared/rename/runBlock.ts` holds the rules
+for manual runs, and the rename page shows its reason as the tooltip on a
+blocked button.
 
 **Live** follows a longer path:
 
@@ -103,7 +110,7 @@ instance):
 
 | Column                  | Type    | Default     | Purpose                           |
 | ----------------------- | ------- | ----------- | --------------------------------- |
-| `enabled`               | boolean | false       | Enable scheduled runs             |
+| `enabled`               | boolean | false       | Enable scheduled and live runs    |
 | `cron`                  | text    | `0 0 * * *` | Cron schedule (10-minute minimum) |
 | `rename_folders`        | boolean | false       | Also rename folder names          |
 | `ignore_tag`            | text    | null        | Skip items with this Arr tag      |
