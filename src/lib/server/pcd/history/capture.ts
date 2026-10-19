@@ -21,10 +21,11 @@ export const SNAPSHOT_ENTITIES = [
 ] as const;
 export type SnapshotEntity = (typeof SNAPSHOT_ENTITIES)[number];
 
-export const SNAPSHOT_TABLES: Readonly<Record<SnapshotEntity, string>> = {
-	quality_profile: 'quality_profiles',
-	custom_format: 'custom_formats',
-	regular_expression: 'regular_expressions'
+/** Whether an entity exists, by name; whole statements so no SQL is built from values. */
+export const EXISTS_SQL: Readonly<Record<SnapshotEntity, string>> = {
+	quality_profile: 'SELECT 1 FROM quality_profiles WHERE name = ? LIMIT 1',
+	custom_format: 'SELECT 1 FROM custom_formats WHERE name = ? LIMIT 1',
+	regular_expression: 'SELECT 1 FROM regular_expressions WHERE name = ? LIMIT 1'
 };
 
 export function isSnapshotEntity(entity: string): entity is SnapshotEntity {
@@ -79,9 +80,7 @@ export interface RawSqlite {
 export function sqliteReaders(db: RawSqlite): Pick<CaptureDeps, 'readEdges' | 'exists'> {
 	return {
 		readEdges: () => db.prepare(ENTITY_EDGES_SQL).all() as EntityEdge[],
-		exists: (entity, name) =>
-			db.prepare(`SELECT 1 FROM ${SNAPSHOT_TABLES[entity]} WHERE name = ? LIMIT 1`).get(name) !==
-			undefined
+		exists: (entity, name) => db.prepare(EXISTS_SQL[entity]).get(name) !== undefined
 	};
 }
 
