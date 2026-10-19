@@ -38,6 +38,19 @@ export async function probeAndRecordVersion(
 		return null;
 	}
 
+	await recordDetectedVersion(instance, info, source);
+	return info;
+}
+
+/**
+ * Store what a successful probe learned on the instance's row, logging when
+ * the version or API generation changed.
+ */
+export async function recordDetectedVersion(
+	instance: VersionProbeTarget,
+	info: ArrVersionInfo,
+	source: string
+): Promise<void> {
 	const changed =
 		info.version !== instance.detected_version || info.currentApi !== instance.detected_api;
 
@@ -62,8 +75,6 @@ export async function probeAndRecordVersion(
 			}
 		);
 	}
-
-	return info;
 }
 
 /**

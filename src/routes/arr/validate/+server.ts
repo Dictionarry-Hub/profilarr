@@ -1,9 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { createArrClient } from '$arr/factory.ts';
-import { probeAndRecordVersion } from '$arr/version.ts';
+import { recordDetectedVersion } from '$arr/version.ts';
 import type { ArrType, ArrVersionInfo } from '$arr/types.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { HtmlResponseError } from '$http/types.ts';
 import { logger } from '$logger/logger.ts';
 import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
 
@@ -41,24 +42,23 @@ export const POST: RequestHandler = async ({ request }) => {
 			basicAuthUsername: useSavedBasicAuth ? existing.basic_auth_username : basicAuthUsername,
 			basicAuthPassword: useSavedBasicAuth ? existing.basic_auth_password : basicAuthPassword
 		});
-		let info: ArrVersionInfo | null;
+		let info: ArrVersionInfo | null = null;
+		let failure = 'Connection test failed';
 		try {
-			if (existing) {
-				info = await probeAndRecordVersion(existing, client, 'arr/validate');
-			} else {
-				info = await client.detectVersion();
-			}
+			info = await client.detectVersion();
 		} catch (error) {
 			await logger.error(`Connection failed to ${url}`, {
 				source: 'arr/validate',
 				meta: { error: error instanceof Error ? error.message : String(error) }
 			});
-			info = null;
+			// A web page instead of the API is worth naming; other failures stay generic
+			if (error instanceof HtmlResponseError) failure = error.message;
 		} finally {
 			client.close();
 		}
 
 		if (info) {
+			if (existing) await recordDetectedVersion(existing, info, 'arr/validate');
 			return json({
 				success: true,
 				appName: info.appName,
@@ -66,7 +66,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				api: info.currentApi
 			});
 		}
-		return json({ success: false, error: 'Connection test failed' }, { status: 400 });
+		return json({ success: false, error: failure }, { status: 400 });
 	} catch (error) {
 		return json(
 			{

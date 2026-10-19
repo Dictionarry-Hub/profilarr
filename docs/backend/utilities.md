@@ -35,6 +35,13 @@ delay, and max attempts.
 `HttpError` standardizes failures with status code, response body, and cause
 chain.
 
+A body that isn't JSON on an error status is kept as text, so the status error
+is what callers see. A successful `text/html` answer to a JSON request throws
+`HtmlResponseError`, which names the host that answered and whether a redirect
+led there. This is usually a reverse proxy login page, such as Authelia
+redirecting an unauthenticated request to its portal. Its message is safe to
+show, and the Arr connection test returns it to the UI.
+
 Extended by:
 
 | Client          | Source                          |
@@ -79,11 +86,13 @@ on Sonarr v5). A missing or non-JSON `/api` answer is not an error; the
 version major is the fallback.
 
 `probeAndRecordVersion()` runs the probe and stores the answer in
-`arr_instances.detected_version`, `detected_api` and `detected_at`. It never
-throws: a failed probe is logged and the stored values keep their last good
-answer. It runs wherever a client is about to read or write config: instance
-create, the settings form when the URL or key changes, the Test button, every
-sync job and entity resync, drift, and the `arr.version.check` job at boot.
+`arr_instances.detected_version`, `detected_api` and `detected_at` through
+`recordDetectedVersion()`. It never throws: a failed probe is logged and the
+stored values keep their last good answer. It runs wherever a client is about
+to read or write config: instance create, the settings form when the URL or key
+changes, every sync job and entity resync, drift, and the `arr.version.check`
+job at boot. The Test button calls `detectVersion()` and
+`recordDetectedVersion()` itself, so it can report why a probe failed.
 Pages read the stored columns; writers trust the live probe.
 
 `hasProfileItemSizes()` and `isExperimentalVersion()` in
