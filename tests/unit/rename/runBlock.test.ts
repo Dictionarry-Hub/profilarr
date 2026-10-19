@@ -22,7 +22,10 @@ class RenameRunBlockTest extends BaseTest {
 		});
 
 		this.test('blocks a run while one is in progress', () => {
-			assertEquals(renameRunBlockReason({ ...ready, running: true }), 'A rename is already running');
+			assertEquals(
+				renameRunBlockReason({ ...ready, running: true }),
+				'A rename is already running'
+			);
 		});
 
 		this.test('reports the first reason that applies', () => {
