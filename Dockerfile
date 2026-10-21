@@ -9,7 +9,7 @@
 # -----------------------------------------------------------------------------
 # Stage 1: Build
 # -----------------------------------------------------------------------------
-ARG DENO_VERSION=2.9.7
+ARG DENO_VERSION=2.9.8
 FROM denoland/deno:${DENO_VERSION} AS builder
 
 WORKDIR /build
