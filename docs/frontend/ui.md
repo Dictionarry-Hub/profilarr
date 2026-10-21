@@ -187,7 +187,8 @@ Two related components:
 - **`$ui/dropdown/DropdownCombobox.svelte`** is the searchable dropdown. The
   user types to filter, keyboard arrows navigate, Enter selects. It supports
   fixed positioning, compact modes, item slots, and matching menu width to the
-  trigger.
+  trigger. A `selected` slot replaces the closed picker's text once an option
+  is chosen.
 - **`$ui/dropdown/DropdownSelect.svelte`** is the plain `<select>` replacement:
   no search box, just click and pick. `header` and `headerDescription` add a
   `DropdownHeader` above the options, for explaining the choice in the menu.
@@ -583,7 +584,8 @@ inline tags that don't need a badge's visual weight.
 - **`$ui/code/CodeBlock.svelte`**: syntax-highlighted multi-line code with
   theme selection and a copy button.
 - **`$ui/code/InlineCode.svelte`**: inline monospace span for references in
-  prose.
+  prose. `surface="raised"` gives the chip a resting button's background, so it
+  stands out on a hovered button.
 
 A second `CodeBlock` exists at `$ui/display/CodeBlock.svelte`; treat the
 `code/` pair as the canonical entry point for now.

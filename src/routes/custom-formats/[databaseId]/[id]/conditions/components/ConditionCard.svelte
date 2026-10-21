@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import { createEventDispatcher } from 'svelte';
 	import RadarrIcon from '$lib/client/assets/Radarr.svg';
@@ -9,6 +10,7 @@
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
+	import InlineCode from '$ui/code/InlineCode.svelte';
 	import {
 		CONDITION_TYPES,
 		PATTERN_TYPES,
@@ -31,6 +33,7 @@
 	export let mode: 'normal' | 'draft' = 'normal';
 	export let condition: ConditionData;
 	export let nameConflict = false;
+	export let databaseId: number;
 
 	// Available patterns and languages from database (passed in)
 	export let availablePatterns: { id: number; name: string; pattern: string }[] = [];
@@ -96,8 +99,25 @@
 	// Check if type is pattern-based
 	$: isPatternType = PATTERN_TYPES.includes(condition.type as (typeof PATTERN_TYPES)[number]);
 
-	// DropdownCombobox options for patterns
-	$: patternOptions = availablePatterns.map((p) => ({ value: p.name, label: p.name }));
+	// DropdownCombobox options for patterns. Hovering the closed picker reveals the regex as inline code.
+	const PATTERN_PREVIEW_LENGTH = 60;
+
+	function patternPreview(pattern: string): string {
+		return pattern.length > PATTERN_PREVIEW_LENGTH
+			? `${pattern.slice(0, PATTERN_PREVIEW_LENGTH)}…`
+			: pattern;
+	}
+
+	// The selected pattern's ID, for the link to its regex page
+	$: selectedPatternId = isPatternType
+		? (availablePatterns.find((p) => p.name === condition.patterns?.[0]?.name)?.id ?? null)
+		: null;
+
+	$: patternOptions = availablePatterns.map((p) => ({
+		value: p.name,
+		label: p.name,
+		preview: patternPreview(p.pattern)
+	}));
 
 	function handlePatternChange(value: string) {
 		if (!value) {
@@ -345,16 +365,46 @@
 		</div>
 		<div class="min-w-0 wide:flex-1" data-onboarding="cf-cond-value">
 			{#if isPatternType}
-				<DropdownCombobox
-					fullWidth
-					minWidth="0"
-					dropdownWidth="100%"
-					limit={6}
-					options={patternOptions}
-					value={selectedValue}
-					placeholder="Select pattern..."
-					on:change={(e) => handlePatternChange(e.detail)}
-				/>
+				<div class="flex items-center gap-2">
+					<div class="min-w-0 flex-1">
+						<DropdownCombobox
+							fullWidth
+							minWidth="0"
+							dropdownWidth="100%"
+							limit={6}
+							options={patternOptions}
+							value={selectedValue}
+							placeholder="Select pattern..."
+							on:change={(e) => handlePatternChange(e.detail)}
+						>
+							<svelte:fragment slot="selected" let:option>
+								{#if option}
+									<span class="flex min-w-0 flex-1 items-center gap-2">
+										<span class="truncate">{option.label}</span>
+										<!-- Shown only while the closed picker is hovered -->
+										<span class="hidden min-w-0 overflow-hidden [button:hover_&]:inline-flex">
+											<InlineCode text={String(option.preview)} rounded="md" surface="raised" />
+										</span>
+									</span>
+								{/if}
+							</svelte:fragment>
+						</DropdownCombobox>
+					</div>
+					{#if selectedPatternId !== null}
+						<!-- New tab, so unsaved condition edits aren't lost. Icon-only md matches the row's text buttons. -->
+						<Button
+							icon={ExternalLink}
+							size="md"
+							href="/regular-expressions/{databaseId}/{selectedPatternId}"
+							target="_blank"
+							rel="noopener noreferrer"
+							preload="off"
+							tooltip="Open regex"
+							tooltipPosition="top"
+							ariaLabel="Open regex"
+						/>
+					{/if}
+				</div>
 			{:else if condition.type === 'language'}
 				<div class="flex flex-col gap-2 wide:flex-row wide:items-center">
 					<div class="min-w-0 flex-1">
