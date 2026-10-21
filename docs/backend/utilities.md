@@ -4,8 +4,8 @@
 
 Shared backend infrastructure used across the codebase. Each module is small
 but foundational -- other subsystems extend or import these. This doc covers
-the HTTP client, outbound proxy, config, cache, markdown, Git, and TMDB
-utilities.
+the HTTP client, outbound proxy, trusted certificates, config, cache, markdown,
+Git, and TMDB utilities.
 
 ## Table of Contents
 
@@ -13,6 +13,7 @@ utilities.
 - [Arr Basic Auth](#arr-basic-auth)
 - [Arr Version Detection](#arr-version-detection)
 - [Outbound Proxy](#outbound-proxy)
+- [Trusted Certificates](#trusted-certificates)
 - [Config](#config)
 - [Cache](#cache)
 - [Markdown](#markdown)
@@ -131,6 +132,37 @@ Deno) and reduces each proxy URL to `scheme://host:port`, masking any login as
 `***@`. At startup,
 `logProxyConfig()` logs the result and warns when a URL can't be parsed or
 `NO_PROXY` is empty. Credentials are never logged.
+
+## Trusted Certificates
+
+Profilarr has no certificate setting of its own. The runtime reads the standard
+`NODE_EXTRA_CA_CERTS` variable and trusts the certificates in the PEM file it
+names, on top of its built-in public roots. Plain `fetch` and `BaseHttpClient`
+both use them, so the variable covers Arr instances, OIDC discovery,
+notifications, and TMDB.
+
+```yaml
+environment:
+  - NODE_EXTRA_CA_CERTS=/certs/ca.pem
+volumes:
+  - ./certs/ca.pem:/certs/ca.pem:ro
+```
+
+- For a private CA, the file holds the CA's certificate. For a self-signed
+  server, it holds the server's own certificate. Several certificates can share
+  one file.
+- If the path is wrong, the runtime logs a warning to the container output and
+  Profilarr starts without the extra certificates.
+- The entrypoint isn't involved, so root and non-root containers behave the
+  same.
+- Deno rejects a self-signed certificate marked as a CA (`CA:TRUE`, the
+  `openssl req -x509` default) with `CaUsedAsEndEntity`, even when
+  `NODE_EXTRA_CA_CERTS` includes it. Node and OpenSSL clients such as curl
+  accept it. Users have to recreate the certificate with `CA:FALSE`.
+- Git doesn't read the variable. PCD repositories must be on GitHub, which uses
+  a public CA.
+- There is no option to skip certificate verification. Skipping it would send
+  Arr API keys to whatever answers at the address.
 
 ## Config
 

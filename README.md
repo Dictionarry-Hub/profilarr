@@ -158,6 +158,7 @@ them on the same channel.
 | `HTTP_PROXY`             | -                                                                 | Proxy for outbound `http://` requests                                                 |
 | `ALL_PROXY`              | -                                                                 | Proxy for both `http://` and `https://` requests                                      |
 | `NO_PROXY`               | -                                                                 | Comma-separated hosts, IPs or ranges that bypass the proxy                            |
+| `NODE_EXTRA_CA_CERTS`    | -                                                                 | PEM file of extra certificates to trust (self-signed or private CA)                   |
 
 `PROFILARR_API_KEY` must be at least 32 characters long. It is not persisted to
 SQLite or bcrypt-hashed. It always has full access and works alongside any keys
@@ -171,6 +172,9 @@ created in Settings > Security.
 
 To route outbound requests through an HTTP or SOCKS5 proxy, see
 [Outbound Proxy](docs/backend/utilities.md#outbound-proxy).
+
+To trust self-signed or private CA certificates, see
+[Trusted Certificates](docs/backend/utilities.md#trusted-certificates).
 
 See the [documentation](https://dictionarry.dev/) for full setup and
 configuration guides.
