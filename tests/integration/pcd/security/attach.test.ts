@@ -84,18 +84,41 @@ const ATTACH_FORMS: AttachForm[] = [
  *   Empty PCD (only schema seeded).
  *
  * Op (base layer)
+ *   INSERT INTO tags (name) VALUES ('control tag');
+ *
+ * Expect
+ *   - latest op history status === 'applied'
+ *
+ * Control: proves ordinary ops still compile on a hardened connection, so the
+ * other specs can't pass just because nothing ran.
+ */
+test('ordinary base op still applies', async () => {
+	const s = await scenario('control');
+	const [opId] = seedBase(s.ctx, [`INSERT INTO tags (name) VALUES ('control tag');`]);
+	await compilePcd(s.ctx);
+
+	assertEquals(latestOpHistory(s, opId)?.status, 'applied');
+});
+
+/**
+ * Context
+ *   Empty PCD (only schema seeded).
+ *
+ * Op (base layer)
  *   Attaches the app database with the given form, then creates a marker
  *   table in it.
  *
  * Expect
+ *   - the op is recorded as an error from the attach limit
  *   - the marker table does not exist in the app database
  */
 for (const form of ATTACH_FORMS) {
 	test(`base op: ${form.name} cannot write to the app database`, async () => {
 		const s = await scenario('form');
-		seedBase(s.ctx, [form.sql(s)]);
+		const [opId] = seedBase(s.ctx, [form.sql(s)]);
 		await compilePcd(s.ctx);
 
+		assertBlockedByAttachLimit(s, opId);
 		assertEquals(
 			appTableExists(s, s.marker),
 			false,
@@ -113,12 +136,13 @@ for (const form of ATTACH_FORMS) {
  *   description: 'leaked-<uuid>'.
  *
  * Expect
+ *   - the op is recorded as an error from the attach limit
  *   - the regex list page does not contain 'leaked-<uuid>'
  */
 test('base op cannot copy app database values into the cache', async () => {
 	const uuid = crypto.randomUUID();
 	const s = await scenario('read', uuid);
-	seedBase(s.ctx, [
+	const [opId] = seedBase(s.ctx, [
 		[
 			`ATTACH ${sqlString(s.appDb)} AS app;`,
 			`INSERT INTO regular_expressions (name, pattern, description)`,
@@ -128,6 +152,7 @@ test('base op cannot copy app database values into the cache', async () => {
 	]);
 	await compilePcd(s.ctx);
 
+	assertBlockedByAttachLimit(s, opId);
 	const response = await s.ctx.client.get(`/regular-expressions/${s.ctx.dbId}`);
 	const body = await response.text();
 	assert(
@@ -144,16 +169,18 @@ test('base op cannot copy app database values into the cache', async () => {
  *   Attaches a file that does not exist yet and creates a table in it.
  *
  * Expect
+ *   - the op is recorded as an error from the attach limit
  *   - the file does not exist on disk
  */
 test('base op cannot create a new database file with ATTACH', async () => {
 	const s = await scenario('new-file');
 	const target = `${s.baseDir}/attach-created-${counter}.db`;
-	seedBase(s.ctx, [
+	const [opId] = seedBase(s.ctx, [
 		`ATTACH ${sqlString(target)} AS created;\nCREATE TABLE created.probe (x INTEGER);`
 	]);
 	await compilePcd(s.ctx);
 
+	assertBlockedByAttachLimit(s, opId);
 	assertEquals(await fileExists(target), false, `ATTACH created ${target}`);
 });
 
@@ -165,14 +192,16 @@ test('base op cannot create a new database file with ATTACH', async () => {
  *   VACUUM INTO a new file, which writes a copy of the cache to disk.
  *
  * Expect
+ *   - the op is recorded as an error from the attach limit
  *   - the file does not exist on disk
  */
 test('base op cannot write a copy of the cache with VACUUM INTO', async () => {
 	const s = await scenario('vacuum');
 	const target = `${s.baseDir}/vacuum-into-${counter}.db`;
-	seedBase(s.ctx, [`VACUUM INTO ${sqlString(target)};`]);
+	const [opId] = seedBase(s.ctx, [`VACUUM INTO ${sqlString(target)};`]);
 	await compilePcd(s.ctx);
 
+	assertBlockedByAttachLimit(s, opId);
 	assertEquals(await fileExists(target), false, `VACUUM INTO wrote ${target}`);
 });
 
@@ -185,20 +214,14 @@ test('base op cannot write a copy of the cache with VACUUM INTO', async () => {
  *   ATTACH '' AS tmp;
  *
  * Expect
- *   - latest op history status === 'error'
- *   - the error mentions 'too many attached databases'
+ *   - the op is recorded as an error from the attach limit
  */
 test('base op cannot attach in-memory or temporary databases', async () => {
 	const s = await scenario('any');
 	const [opId] = seedBase(s.ctx, [`ATTACH ':memory:' AS mem;\nATTACH '' AS tmp;`]);
 	await compilePcd(s.ctx);
 
-	const history = latestOpHistory(s, opId);
-	assertEquals(history?.status, 'error');
-	assert(
-		history?.error?.includes('too many attached databases'),
-		`Expected the attach limit error, got ${history?.error ?? 'no error'}`
-	);
+	assertBlockedByAttachLimit(s, opId);
 });
 
 /**
@@ -246,13 +269,15 @@ test('tweak file cannot write to the app database', async () => {
  *   Plain ATTACH of the app database, then a marker table.
  *
  * Expect
+ *   - the op is recorded as an error from the attach limit
  *   - the marker table does not exist in the app database
  */
 test('user op cannot write to the app database', async () => {
 	const s = await scenario('user');
-	insertOp(s.ctx, { origin: 'user', sql: plainAttach(s) });
+	const opId = insertOp(s.ctx, { origin: 'user', sql: plainAttach(s) });
 	await compilePcd(s.ctx);
 
+	assertBlockedByAttachLimit(s, opId);
 	assertEquals(appTableExists(s, s.marker), false, `user op created ${s.marker}`);
 });
 
@@ -299,6 +324,16 @@ async function fileExists(path: string): Promise<boolean> {
 		if (error instanceof Deno.errors.NotFound) return false;
 		throw error;
 	}
+}
+
+/** Proves the op ran and SQLite refused the attach, rather than the op never running. */
+function assertBlockedByAttachLimit(s: Scenario, opId: number): void {
+	const history = latestOpHistory(s, opId);
+	assertEquals(history?.status, 'error', `Expected op ${opId} to be recorded as an error`);
+	assert(
+		history?.error?.includes('too many attached databases'),
+		`Expected the attach limit error, got ${history?.error ?? 'no error'}`
+	);
 }
 
 function latestOpHistory(
