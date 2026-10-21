@@ -378,13 +378,15 @@
 							on:change={(e) => handlePatternChange(e.detail)}
 						>
 							<svelte:fragment slot="selected" let:option>
-								<span class="flex min-w-0 flex-1 items-center gap-2">
-									<span class="truncate">{option.label}</span>
-									<!-- Shown only while the closed picker is hovered -->
-									<span class="hidden min-w-0 overflow-hidden [button:hover_&]:inline-flex">
-										<InlineCode text={String(option.preview)} rounded="md" surface="raised" />
+								{#if option}
+									<span class="flex min-w-0 flex-1 items-center gap-2">
+										<span class="truncate">{option.label}</span>
+										<!-- Shown only while the closed picker is hovered -->
+										<span class="hidden min-w-0 overflow-hidden [button:hover_&]:inline-flex">
+											<InlineCode text={String(option.preview)} rounded="md" surface="raised" />
+										</span>
 									</span>
-								</span>
+								{/if}
 							</svelte:fragment>
 						</DropdownCombobox>
 					</div>
