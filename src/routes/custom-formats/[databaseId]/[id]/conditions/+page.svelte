@@ -332,6 +332,7 @@
 							<ConditionCard
 								mode="draft"
 								condition={draft}
+								databaseId={data.currentDatabase.id}
 								availablePatterns={data.availablePatterns}
 								availableLanguages={data.availableLanguages}
 								on:confirm={() => confirmDraft(draft)}
@@ -362,6 +363,7 @@
 						>
 							<ConditionCard
 								{condition}
+								databaseId={data.currentDatabase.id}
 								availablePatterns={data.availablePatterns}
 								availableLanguages={data.availableLanguages}
 								nameConflict={hasNameConflict(condition)}
