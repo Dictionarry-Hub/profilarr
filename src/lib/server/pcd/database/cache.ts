@@ -25,6 +25,7 @@ import {
 	parseOpMetadata
 } from '$pcd/conflicts/autoAlign/index.ts';
 import { checkFullListConflict } from '$pcd/conflicts/fullListCheck.ts';
+import { hardenConnection } from './hardening.ts';
 
 /**
  * PCDCache - Manages an in-memory compiled database for a single PCD
@@ -78,6 +79,9 @@ export class PCDCache {
 			// 1. Create in-memory database
 			// Enable int64 mode to properly handle large integers (e.g., file sizes in bytes)
 			this.db = new Database(':memory:', { int64: true });
+
+			// Block ATTACH so op SQL can't open other database files
+			await hardenConnection(this.db);
 
 			// Enable foreign keys
 			this.db.exec('PRAGMA foreign_keys = ON');
