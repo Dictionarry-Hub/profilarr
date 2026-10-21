@@ -737,7 +737,18 @@ async function runE2ESanitize(playwrightFlags: string[]): Promise<number> {
 
 	let exitCode = 1;
 	try {
-		await startServer(PORT, { AUTH: 'off', ORIGIN: URL, INTEGRATION_TEST: '1' }, 'preview');
+		// Point the bulletin at a dead local port so live announcements can't join the
+		// inbox; the specs expect only the seeded announcement.
+		await startServer(
+			PORT,
+			{
+				AUTH: 'off',
+				ORIGIN: URL,
+				INTEGRATION_TEST: '1',
+				PROFILARR_BULLETIN_URL: 'http://127.0.0.1:9'
+			},
+			'preview'
+		);
 
 		const ctx = await setupPcd({ port: PORT, name: 'xss-probe' });
 		seedBase(ctx, [
