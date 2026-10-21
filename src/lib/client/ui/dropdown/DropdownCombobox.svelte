@@ -236,9 +236,8 @@
 				/>
 			</div>
 		{:else}
-			<!-- A `selected` slot replaces the closed picker's text once an option is chosen -->
 			<Button
-				text={$$slots.selected && matchedOption ? '' : currentLabel}
+				text={currentLabel}
 				icon={chevronIcon}
 				iconPosition="right"
 				leadingIcon={currentIcon}
@@ -248,11 +247,7 @@
 				justify={resolvedJustify}
 				textColor={isPlaceholder ? 'text-neutral-400 dark:text-neutral-500' : ''}
 				on:click={toggleCombobox}
-			>
-				{#if $$slots.selected && matchedOption}
-					<slot name="selected" option={matchedOption} />
-				{/if}
-			</Button>
+			/>
 		{/if}
 		{#if open}
 			<Dropdown

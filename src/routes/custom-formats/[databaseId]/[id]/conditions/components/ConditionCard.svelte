@@ -10,7 +10,6 @@
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
-	import InlineCode from '$ui/code/InlineCode.svelte';
 	import {
 		CONDITION_TYPES,
 		PATTERN_TYPES,
@@ -99,25 +98,13 @@
 	// Check if type is pattern-based
 	$: isPatternType = PATTERN_TYPES.includes(condition.type as (typeof PATTERN_TYPES)[number]);
 
-	// DropdownCombobox options for patterns. Hovering the closed picker reveals the regex as inline code.
-	const PATTERN_PREVIEW_LENGTH = 60;
-
-	function patternPreview(pattern: string): string {
-		return pattern.length > PATTERN_PREVIEW_LENGTH
-			? `${pattern.slice(0, PATTERN_PREVIEW_LENGTH)}…`
-			: pattern;
-	}
-
 	// The selected pattern's ID, for the link to its regex page
 	$: selectedPatternId = isPatternType
 		? (availablePatterns.find((p) => p.name === condition.patterns?.[0]?.name)?.id ?? null)
 		: null;
 
-	$: patternOptions = availablePatterns.map((p) => ({
-		value: p.name,
-		label: p.name,
-		preview: patternPreview(p.pattern)
-	}));
+	// DropdownCombobox options for patterns
+	$: patternOptions = availablePatterns.map((p) => ({ value: p.name, label: p.name }));
 
 	function handlePatternChange(value: string) {
 		if (!value) {
@@ -376,19 +363,7 @@
 							value={selectedValue}
 							placeholder="Select pattern..."
 							on:change={(e) => handlePatternChange(e.detail)}
-						>
-							<svelte:fragment slot="selected" let:option>
-								{#if option}
-									<span class="flex min-w-0 flex-1 items-center gap-2">
-										<span class="truncate">{option.label}</span>
-										<!-- Shown only while the closed picker is hovered -->
-										<span class="hidden min-w-0 overflow-hidden [button:hover_&]:inline-flex">
-											<InlineCode text={String(option.preview)} rounded="md" surface="raised" />
-										</span>
-									</span>
-								{/if}
-							</svelte:fragment>
-						</DropdownCombobox>
+						/>
 					</div>
 					{#if selectedPatternId !== null}
 						<!-- New tab, so unsaved condition edits aren't lost. Icon-only md matches the row's text buttons. -->
