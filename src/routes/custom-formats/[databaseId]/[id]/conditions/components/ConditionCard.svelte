@@ -9,6 +9,7 @@
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import Toggle from '$ui/toggle/Toggle.svelte';
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
+	import InlineCode from '$ui/code/InlineCode.svelte';
 	import {
 		CONDITION_TYPES,
 		PATTERN_TYPES,
@@ -96,8 +97,20 @@
 	// Check if type is pattern-based
 	$: isPatternType = PATTERN_TYPES.includes(condition.type as (typeof PATTERN_TYPES)[number]);
 
-	// DropdownCombobox options for patterns
-	$: patternOptions = availablePatterns.map((p) => ({ value: p.name, label: p.name }));
+	// DropdownCombobox options for patterns. Hovering the closed picker reveals the regex as inline code.
+	const PATTERN_PREVIEW_LENGTH = 60;
+
+	function patternPreview(pattern: string): string {
+		return pattern.length > PATTERN_PREVIEW_LENGTH
+			? `${pattern.slice(0, PATTERN_PREVIEW_LENGTH)}…`
+			: pattern;
+	}
+
+	$: patternOptions = availablePatterns.map((p) => ({
+		value: p.name,
+		label: p.name,
+		preview: patternPreview(p.pattern)
+	}));
 
 	function handlePatternChange(value: string) {
 		if (!value) {
@@ -354,7 +367,17 @@
 					value={selectedValue}
 					placeholder="Select pattern..."
 					on:change={(e) => handlePatternChange(e.detail)}
-				/>
+				>
+					<svelte:fragment slot="selected" let:option>
+						<span class="flex min-w-0 flex-1 items-center gap-2">
+							<span class="truncate">{option.label}</span>
+							<!-- Shown only while the closed picker is hovered -->
+							<span class="hidden min-w-0 overflow-hidden [button:hover_&]:inline-flex">
+								<InlineCode text={String(option.preview)} rounded="md" surface="raised" />
+							</span>
+						</span>
+					</svelte:fragment>
+				</DropdownCombobox>
 			{:else if condition.type === 'language'}
 				<div class="flex flex-col gap-2 wide:flex-row wide:items-center">
 					<div class="min-w-0 flex-1">
