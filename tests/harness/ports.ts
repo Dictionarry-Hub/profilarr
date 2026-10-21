@@ -15,7 +15,7 @@
  *   7500-7599  announcements
  *   7600-7699  pcd writes
  *   7700-7799  pcd conflicts
- *   7800-7899  pcd reserved (future write/conflict expansion)
+ *   7800-7899  pcd security, plus reserved for future write/conflict expansion
  *   7900-7999  settings
  *   8000-8099  e2e (browser suites)
  *
@@ -143,7 +143,8 @@ export const PORTS = {
 		conflictsQualityProfilesScoring: 7711,
 		conflictsQualityProfilesQualities: 7712,
 		conflictsQualityProfilesFull: 7713,
-		conflictsEngineRegressions: 7714
+		conflictsEngineRegressions: 7714,
+		securityAttach: 7800
 	},
 	settings: {
 		landingPage: 7900
