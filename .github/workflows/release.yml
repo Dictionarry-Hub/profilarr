@@ -110,8 +110,6 @@ jobs:
             PROFILARR_BUILT_AT=${{ steps.builtat.outputs.value }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.IMAGE_BASE }}/${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=registry,ref=${{ env.IMAGE_BASE }}/${{ matrix.image }}:buildcache-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
-          cache-to: type=registry,ref=${{ env.IMAGE_BASE }}/${{ matrix.image }}:buildcache-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }},mode=max
 
       - name: Export digest
         id: digest
