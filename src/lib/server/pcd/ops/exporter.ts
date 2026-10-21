@@ -7,6 +7,7 @@ import { execGit } from '$utils/git/exec.ts';
 import { Database } from '@db/sqlite';
 import { getBranch, getStatus } from '$utils/git/read.ts';
 import { compile } from '../database/compiler.ts';
+import { hardenConnection } from '../database/hardening.ts';
 import { canWriteToBase } from './writer.ts';
 import { listDraftEntityChanges } from './draftChanges.ts';
 import { uuid } from '$shared/utils/uuid.ts';
@@ -152,6 +153,16 @@ async function validateExportPlan(
 	const validationDb = new Database(':memory:', { int64: true });
 
 	try {
+		// Block ATTACH so op SQL can't open other database files
+		try {
+			await hardenConnection(validationDb);
+		} catch (error) {
+			return {
+				valid: false,
+				error: `Could not secure the validation database: ${String(error)}`
+			};
+		}
+
 		validationDb.exec('PRAGMA foreign_keys = ON');
 
 		const schemaOps = await loadOperationsFromDir(`${repoPath}/deps/schema/ops`, 'schema');

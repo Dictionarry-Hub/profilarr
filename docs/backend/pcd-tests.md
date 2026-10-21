@@ -18,7 +18,7 @@ For the PCD system itself, see [pcd.md](./pcd.md). For entity behavior, see
 ## Purpose
 
 PCD correctness is tested below the browser because the source of truth is the
-compiled cache, not the UI. The suite verifies four contracts:
+compiled cache, not the UI. The suite verifies five contracts:
 
 - Writer calls persist the expected `pcd_ops` rows.
 - Compile replays schema, base, tweaks, and user layers into the expected cache
@@ -27,6 +27,7 @@ compiled cache, not the UI. The suite verifies four contracts:
   conflict strategy.
 - Align and override resolution leave the compiled cache in the expected final
   state.
+- Op SQL can't open database files outside the cache.
 
 ## Suite Layout
 
@@ -37,6 +38,7 @@ tests/integration/pcd/
   harness/
   write/
   conflicts/
+  security/
 ```
 
 The suite uses the shared integration harness for server lifecycle, HTTP
@@ -51,6 +53,12 @@ writer.
 
 **Conflict tests** seed complete op histories and assert conflict history plus
 final compiled cache state.
+
+**Security tests** seed ops in every layer that try to reach files outside the
+cache. They assert that the app database and the disk stay untouched. Ops
+recorded in op history must also fail on the attach limit. A control op
+confirms that ordinary ops still apply. Without it, a connection that runs
+nothing would pass every security test.
 
 ## Harness
 
