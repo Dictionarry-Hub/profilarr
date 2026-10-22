@@ -9,4 +9,4 @@ bun.lockb
 /static/
 
 # Vendored flow test fixtures, kept byte-for-byte as upstream (deno task fixtures:update)
-/tests/e2e/flows/data/
+/tests/flows/data/

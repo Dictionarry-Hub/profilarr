@@ -1,8 +1,8 @@
 /**
  * Refresh the flow test fixtures from GitHub.
  *
- * Replaces tests/e2e/flows/data/fixtures with a fresh copy of the
- * Dictionarry-Hub/fixtures database, and tests/e2e/flows/data/schema with the
+ * Replaces tests/flows/data/fixtures with a fresh copy of the
+ * Dictionarry-Hub/fixtures database, and tests/flows/data/schema with the
  * schema version that database depends on. Both are committed, so the flow
  * tests never clone from GitHub. Run after changing the fixtures database:
  *
@@ -17,7 +17,7 @@ import { join } from 'node:path';
 import process from 'node:process';
 
 const FIXTURES_REPO = 'https://github.com/Dictionarry-Hub/fixtures';
-const DATA_DIR = 'tests/e2e/flows/data';
+const DATA_DIR = 'tests/flows/data';
 // Repo files the tests don't need
 const SKIP = new Set(['.git', '.github', '.gitignore']);
 
