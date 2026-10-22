@@ -3,6 +3,9 @@ import { defineConfig } from '@playwright/test';
 const workersOverride = process.env.FLOWS_WORKERS;
 
 export default defineConfig({
+	// Resolves the $flows/ import alias.
+	tsconfig: './tsconfig.json',
+
 	// Every *.spec.ts under scenarios/ is a test file. Folders group the output.
 	testDir: './scenarios',
 

@@ -5,7 +5,7 @@
  */
 
 import { test as base, expect } from '@playwright/test';
-import { startApp, type App } from './app.ts';
+import { startApp, type App } from '$flows/helpers/app.ts';
 
 export const test = base.extend<{ app: App }>({
 	app: async ({}, use, testInfo) => {

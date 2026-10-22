@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { FIXTURES_DIR, SCHEMA_DIR, SOURCE_FILE } from './paths.ts';
+import { FIXTURES_DIR, SCHEMA_DIR, SOURCE_FILE } from '$flows/helpers/paths.ts';
 
 export const FIXTURES_NAME = 'Fixtures';
 const FIXTURES_UUID = 'fixtures';

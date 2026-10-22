@@ -4,9 +4,9 @@
  */
 
 import * as fs from 'node:fs/promises';
-import { startApp } from './helpers/app.ts';
-import { GOLDEN_DIR } from './helpers/paths.ts';
-import { FIXTURES_NAME, seedFixtures } from './helpers/seed.ts';
+import { startApp } from '$flows/helpers/app.ts';
+import { GOLDEN_DIR } from '$flows/helpers/paths.ts';
+import { FIXTURES_NAME, seedFixtures } from '$flows/helpers/seed.ts';
 
 export default async function globalSetup(): Promise<() => Promise<void>> {
 	await fs.rm(GOLDEN_DIR, { recursive: true, force: true });
