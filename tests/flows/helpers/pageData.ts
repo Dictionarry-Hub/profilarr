@@ -125,7 +125,9 @@ export async function pageData<T = Json>(page: Page, path?: string): Promise<T> 
 		async () => {
 			const url = new URL(path ?? page.url(), page.url());
 			const dataPath = `${url.pathname.replace(/\/$/, '')}/__data.json${url.search}`;
-			const response = await page.request.get(dataPath);
+			// Keep the origin: a path alone would resolve against baseURL, the test's
+			// own app, even when the page or `path` points at another one
+			const response = await page.request.get(`${url.origin}${dataPath}`);
 			expect(response.ok(), `${dataPath} should answer`).toBe(true);
 
 			const body = (await response.json()) as DataResponse;
