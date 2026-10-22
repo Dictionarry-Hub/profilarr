@@ -10,8 +10,8 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { APP_BINARY, goldenDir } from '$flows/helpers/paths.ts';
-import { freePort } from '$flows/helpers/ports.ts';
+import { APP_BINARY, goldenDir } from '$flows/harness/paths.ts';
+import { freePort } from '$flows/harness/ports.ts';
 
 export interface App {
 	url: string;

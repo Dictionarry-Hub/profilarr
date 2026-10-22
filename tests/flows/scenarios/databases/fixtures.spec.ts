@@ -1,4 +1,4 @@
-import { test, expect } from '$flows/helpers/fixtures.ts';
+import { test, expect } from '$flows/helpers/test.ts';
 
 test('the fixtures database is linked and compiled', async ({ page, request }) => {
 	const status = await request.get('/api/v1/status');

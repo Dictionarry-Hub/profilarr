@@ -6,9 +6,9 @@
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { startApp } from '$flows/helpers/app.ts';
-import { GOLDEN_DIR_ENV } from '$flows/helpers/paths.ts';
-import { FIXTURES_NAME, seedFixtures } from '$flows/helpers/seed.ts';
+import { startApp } from '$flows/harness/app.ts';
+import { GOLDEN_DIR_ENV } from '$flows/harness/paths.ts';
+import { FIXTURES_NAME, seedFixtures } from '$flows/harness/seed.ts';
 
 export default async function globalSetup(): Promise<() => Promise<void>> {
 	// A fresh folder per run; workers read its path from the environment

@@ -11,8 +11,8 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ARR_DATA_DIR } from '$flows/helpers/paths.ts';
-import { freePort } from '$flows/helpers/ports.ts';
+import { ARR_DATA_DIR } from '$flows/harness/paths.ts';
+import { freePort } from '$flows/harness/ports.ts';
 
 export type ArrType = 'radarr' | 'sonarr';
 
