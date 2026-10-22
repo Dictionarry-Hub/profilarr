@@ -42,10 +42,12 @@
 	}
 </script>
 
+<!-- A status message first (errors interrupt as alerts); clicking or Enter still dismisses it -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	in:fly={{ y: -12, duration: 200 }}
 	out:fade={{ duration: 150 }}
-	role="button"
+	role={type === 'error' ? 'alert' : 'status'}
 	tabindex="0"
 	on:click={dismiss}
 	on:keydown={(e) => {
