@@ -66,6 +66,7 @@ tests/e2e/auth/realm-export.json
 
 # Playwright
 test-results/
+test-results-ui/
 playwright-report/
 tests/e2e/*/test-results/
 tests/e2e/*/playwright-report/

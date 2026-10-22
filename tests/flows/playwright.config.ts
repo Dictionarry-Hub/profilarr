@@ -1,6 +1,9 @@
 import { defineConfig } from '@playwright/test';
 
 const workersOverride = process.env.FLOWS_WORKERS;
+// Playwright empties the results folder at the start of every run, so UI mode
+// gets its own and command-line runs can't wipe the traces it shows.
+const outputDir = process.env.FLOWS_UI ? 'test-results-ui' : 'test-results';
 
 export default defineConfig({
 	// Resolves the $flows/ import alias.
@@ -29,7 +32,7 @@ export default defineConfig({
 	forbidOnly: !!process.env.CI,
 
 	reporter: [['./reporter.ts'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
-	outputDir: 'test-results',
+	outputDir,
 
 	use: {
 		headless: true,

@@ -10,7 +10,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { APP_BINARY, GOLDEN_DIR } from '$flows/helpers/paths.ts';
+import { APP_BINARY, goldenDir } from '$flows/helpers/paths.ts';
 import { freePort } from '$flows/helpers/ports.ts';
 
 export interface App {
@@ -43,7 +43,7 @@ const BASE_ENV = {
 export async function startApp(dataDir?: string): Promise<App> {
 	const ownsDir = !dataDir;
 	const dir = dataDir ?? (await fs.mkdtemp(join(tmpdir(), 'profilarr-flow-')));
-	if (ownsDir) await fs.cp(GOLDEN_DIR, dir, { recursive: true });
+	if (ownsDir) await fs.cp(goldenDir(), dir, { recursive: true });
 
 	const port = await freePort();
 	const url = `http://127.0.0.1:${port}`;

@@ -4,22 +4,25 @@
  */
 
 import * as fs from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { startApp } from '$flows/helpers/app.ts';
-import { GOLDEN_DIR } from '$flows/helpers/paths.ts';
+import { GOLDEN_DIR_ENV } from '$flows/helpers/paths.ts';
 import { FIXTURES_NAME, seedFixtures } from '$flows/helpers/seed.ts';
 
 export default async function globalSetup(): Promise<() => Promise<void>> {
-	await fs.rm(GOLDEN_DIR, { recursive: true, force: true });
-	await fs.mkdir(GOLDEN_DIR, { recursive: true });
+	// A fresh folder per run; workers read its path from the environment
+	const goldenDir = await fs.mkdtemp(join(tmpdir(), 'profilarr-flow-golden-'));
+	process.env[GOLDEN_DIR_ENV] = goldenDir;
 
 	// First start creates and migrates the app database
-	let app = await startApp(GOLDEN_DIR);
+	let app = await startApp(goldenDir);
 	await app.stop();
 
-	await seedFixtures(GOLDEN_DIR);
+	await seedFixtures(goldenDir);
 
 	// Second start imports and compiles the fixtures
-	app = await startApp(GOLDEN_DIR);
+	app = await startApp(goldenDir);
 	try {
 		const status = (await (await fetch(`${app.url}/api/v1/status`)).json()) as {
 			databases: { name: string; counts: Record<string, number> }[];
@@ -34,6 +37,6 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
 	}
 
 	return async () => {
-		await fs.rm(GOLDEN_DIR, { recursive: true, force: true });
+		await fs.rm(goldenDir, { recursive: true, force: true });
 	};
 }

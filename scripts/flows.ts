@@ -53,12 +53,14 @@ const docker = [
 	'CI',
 	'-e',
 	'FLOWS_WORKERS',
+	'-e',
+	'FLOWS_UI',
 	'-v',
 	`${process.cwd()}:/work`,
 	'-w',
 	'/work'
 ];
-if (ui) docker.push('-p', `${UI_PORT}:${UI_PORT}`);
+if (ui) docker.push('-p', `${UI_PORT}:${UI_PORT}`, '-e', 'FLOWS_UI=1');
 if (process.stdout.isTTY) docker.push('-t');
 
 const playwright = ['node', 'node_modules/playwright/cli.js', 'test', '-c', CONFIG];

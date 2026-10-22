@@ -15,5 +15,15 @@ export const FIXTURES_DIR = resolve(ROOT, 'tests/flows/data/fixtures');
 export const SCHEMA_DIR = resolve(ROOT, 'tests/flows/data/schema');
 export const SOURCE_FILE = resolve(ROOT, 'tests/flows/data/source.json');
 
-/** App data folder with the fixtures seeded and compiled, built once per run */
-export const GOLDEN_DIR = resolve(ROOT, 'tests/flows/test-results/.golden');
+/**
+ * Environment variable holding this run's golden data folder (fixtures seeded
+ * and compiled). Global setup creates a fresh temp folder per run and sets it,
+ * so parallel runs, like UI mode and the command line, never share one.
+ */
+export const GOLDEN_DIR_ENV = 'FLOWS_GOLDEN_DIR';
+
+export function goldenDir(): string {
+	const dir = process.env[GOLDEN_DIR_ENV];
+	if (!dir) throw new Error(`${GOLDEN_DIR_ENV} isn't set; global setup builds it`);
+	return dir;
+}
