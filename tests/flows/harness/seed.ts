@@ -61,3 +61,18 @@ export async function seedFixtures(dataDir: string): Promise<void> {
 		db.close();
 	}
 }
+
+/**
+ * Point a copied data folder's database rows at the copy's own repos. The
+ * paths are absolute, so a copy of the golden folder still points at the
+ * golden repos until this runs. The app does the same after a restore.
+ */
+export function relinkDatabases(dataDir: string): void {
+	const databasesDir = join(dataDir, 'data/databases');
+	const db = new DatabaseSync(join(dataDir, 'data/profilarr.db'));
+	try {
+		db.prepare(`UPDATE database_instances SET local_path = ? || '/' || uuid`).run(databasesDir);
+	} finally {
+		db.close();
+	}
+}

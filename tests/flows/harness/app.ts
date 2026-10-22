@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { APP_BINARY, goldenDir } from '$flows/harness/paths.ts';
 import { freePort } from '$flows/harness/ports.ts';
+import { relinkDatabases } from '$flows/harness/seed.ts';
 
 export interface App {
 	url: string;
@@ -43,7 +44,10 @@ const BASE_ENV = {
 export async function startApp(dataDir?: string): Promise<App> {
 	const ownsDir = !dataDir;
 	const dir = dataDir ?? (await fs.mkdtemp(join(tmpdir(), 'profilarr-flow-')));
-	if (ownsDir) await fs.cp(goldenDir(), dir, { recursive: true });
+	if (ownsDir) {
+		await fs.cp(goldenDir(), dir, { recursive: true });
+		relinkDatabases(dir);
+	}
 
 	const port = await freePort();
 	const url = `http://127.0.0.1:${port}`;
