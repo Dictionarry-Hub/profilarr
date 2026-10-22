@@ -8,8 +8,6 @@ export interface HttpClientOptions {
 	retries?: number; // Number of retries (default: 3)
 	retryDelay?: number; // Initial retry delay in ms (default: 500)
 	retryStatusCodes?: number[]; // Status codes to retry on (default: [500, 502, 503, 504])
-	poolMaxIdlePerHost?: number; // Max idle connections per host (default: 5)
-	poolIdleTimeout?: number; // Idle connection timeout in ms (default: 30000)
 }
 
 export interface RequestOptions {

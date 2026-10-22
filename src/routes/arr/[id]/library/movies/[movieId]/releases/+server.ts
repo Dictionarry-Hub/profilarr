@@ -41,7 +41,5 @@ export const GET: RequestHandler = async ({ params }) => {
 			meta: { instanceId, movieId, error: message }
 		});
 		return Response.json({ error: message }, { status: 500 });
-	} finally {
-		client.close();
 	}
 };

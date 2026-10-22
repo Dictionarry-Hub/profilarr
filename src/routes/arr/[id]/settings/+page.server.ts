@@ -152,11 +152,7 @@ export const actions: Actions = {
 					basicAuthUsername,
 					basicAuthPassword
 				});
-				try {
-					await probeAndRecordVersion({ ...instance, name }, probeClient, 'arr/[id]/settings');
-				} finally {
-					probeClient.close();
-				}
+				await probeAndRecordVersion({ ...instance, name }, probeClient, 'arr/[id]/settings');
 			}
 
 			const cleanup = arrCleanupSettingsQueries.getByInstanceId(id);

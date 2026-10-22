@@ -128,11 +128,7 @@ export const actions = {
 					basicAuthUsername,
 					basicAuthPassword
 				});
-				try {
-					await probeAndRecordVersion(created, probeClient, 'arr/new');
-				} finally {
-					probeClient.close();
-				}
+				await probeAndRecordVersion(created, probeClient, 'arr/new');
 			}
 
 			// Apply default delay profile if enabled

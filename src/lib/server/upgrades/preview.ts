@@ -413,13 +413,9 @@ export async function previewUpgradeFilter(
 			? new RadarrClient(instance.url, instance.api_key, clientOpts)
 			: new SonarrClient(instance.url, instance.api_key, clientOpts);
 
-	try {
-		const { items, tags } =
-			instance.type === 'radarr'
-				? await loadRadarrItems(instance.id, client as RadarrClient, filter)
-				: await loadSonarrItems(instance.id, client as SonarrClient, filter);
-		return buildPreview(filter, items, tags, appType);
-	} finally {
-		client.close();
-	}
+	const { items, tags } =
+		instance.type === 'radarr'
+			? await loadRadarrItems(instance.id, client as RadarrClient, filter)
+			: await loadSonarrItems(instance.id, client as SonarrClient, filter);
+	return buildPreview(filter, items, tags, appType);
 }

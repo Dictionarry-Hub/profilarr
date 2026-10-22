@@ -11,11 +11,16 @@
  * (notably `databases/` for cloned PCD repos) are copied as-is.
  */
 
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import * as fs from 'node:fs/promises';
 import { Database } from '@db/sqlite';
 import { db } from '$db/db.ts';
 import { migrationRunner } from '$db/migrations.ts';
 import { logger } from '$logger/logger.ts';
+import { runCommand } from '$utils/command.ts';
 import { build } from '#lib/shared/build.ts';
+import { isNotFound } from '$utils/fs.ts';
 
 export interface CreateBackupResult {
 	success: boolean;
@@ -41,7 +46,7 @@ export async function createBackup(
 
 		// Ensure backup directory exists
 		try {
-			await Deno.mkdir(backupDir, { recursive: true });
+			await fs.mkdir(backupDir, { recursive: true });
 		} catch (error) {
 			return {
 				success: false,
@@ -51,8 +56,8 @@ export async function createBackup(
 
 		// Verify source directory exists
 		try {
-			const stat = await Deno.stat(sourceDir);
-			if (!stat.isDirectory) {
+			const stat = await fs.stat(sourceDir);
+			if (!stat.isDirectory()) {
 				return {
 					success: false,
 					error: `Source path is not a directory: ${sourceDir}`
@@ -67,15 +72,10 @@ export async function createBackup(
 
 		// Copy source to a temp directory; the DB inside it gets replaced
 		// with a clean snapshot below.
-		tmpDir = await Deno.makeTempDir({ prefix: 'profilarr-backup-' });
+		tmpDir = await fs.mkdtemp(join(tmpdir(), 'profilarr-backup-'));
 		const tmpDataDir = `${tmpDir}/data`;
 
-		const cp = new Deno.Command('cp', {
-			args: ['-a', sourceDir, tmpDataDir],
-			stdout: 'piped',
-			stderr: 'piped'
-		});
-		const cpResult = await cp.output();
+		const cpResult = await runCommand('cp', ['-a', sourceDir, tmpDataDir]);
 		if (cpResult.code !== 0) {
 			const errorMessage = new TextDecoder().decode(cpResult.stderr);
 			return {
@@ -93,14 +93,14 @@ export async function createBackup(
 		const walPath = `${tmpDataDir}/profilarr.db-wal`;
 		const shmPath = `${tmpDataDir}/profilarr.db-shm`;
 		try {
-			const dbStat = await Deno.stat(dbPath);
-			if (dbStat.isFile) {
-				await Deno.remove(dbPath);
+			const dbStat = await fs.stat(dbPath);
+			if (dbStat.isFile()) {
+				await fs.rm(dbPath);
 				for (const sidecar of [walPath, shmPath]) {
 					try {
-						await Deno.remove(sidecar);
+						await fs.rm(sidecar);
 					} catch (err) {
-						if (!(err instanceof Deno.errors.NotFound)) throw err;
+						if (!isNotFound(err)) throw err;
 					}
 				}
 
@@ -138,10 +138,10 @@ export async function createBackup(
 					createdAt: now.toISOString(),
 					sanitized: false
 				};
-				await Deno.writeTextFile(`${tmpDataDir}/INFO.json`, JSON.stringify(info, null, 2));
+				await fs.writeFile(`${tmpDataDir}/INFO.json`, JSON.stringify(info, null, 2));
 			}
 		} catch (error) {
-			if (error instanceof Deno.errors.NotFound) {
+			if (isNotFound(error)) {
 				// No database in source; nothing to snapshot.
 			} else {
 				return {
@@ -152,13 +152,7 @@ export async function createBackup(
 		}
 
 		// Create tar.gz archive from the temp copy
-		const command = new Deno.Command('tar', {
-			args: ['-czf', backupPath, '-C', tmpDir, 'data'],
-			stdout: 'piped',
-			stderr: 'piped'
-		});
-
-		const { code, stderr } = await command.output();
+		const { code, stderr } = await runCommand('tar', ['-czf', backupPath, '-C', tmpDir, 'data']);
 
 		if (code !== 0) {
 			const errorMessage = new TextDecoder().decode(stderr);
@@ -169,7 +163,7 @@ export async function createBackup(
 		}
 
 		// Get backup file size
-		const stat = await Deno.stat(backupPath);
+		const stat = await fs.stat(backupPath);
 
 		return {
 			success: true,
@@ -185,7 +179,7 @@ export async function createBackup(
 		// Clean up temp directory
 		if (tmpDir) {
 			try {
-				await Deno.remove(tmpDir, { recursive: true });
+				await fs.rm(tmpDir, { recursive: true });
 			} catch {
 				// Best-effort cleanup
 			}

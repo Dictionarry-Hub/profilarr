@@ -1,10 +1,12 @@
 /**
  * Outbound proxy settings from the environment.
  *
- * Profilarr doesn't configure a proxy itself: Deno's fetch (including
- * Deno.createHttpClient clients) and git both read the standard proxy
- * variables directly. This only reports what they will pick up.
+ * Profilarr doesn't configure a proxy itself: Deno's fetch and git both read
+ * the standard proxy variables directly. This only reports what they will
+ * pick up.
  */
+
+import process from 'node:process';
 
 /** Checked uppercase first, then lowercase, matching Deno */
 const PROXY_VARS = ['HTTPS_PROXY', 'HTTP_PROXY', 'ALL_PROXY'];
@@ -45,7 +47,7 @@ function maskProxyUrl(value: string): string | null {
 	}
 }
 
-export function getProxyEnv(get: EnvGetter = (name) => Deno.env.get(name)): ProxyEnv {
+export function getProxyEnv(get: EnvGetter = (name) => process.env[name]): ProxyEnv {
 	const proxies: Record<string, string | null> = {};
 	for (const name of PROXY_VARS) {
 		const entry = readVar(get, name);

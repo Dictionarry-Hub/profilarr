@@ -1,14 +1,10 @@
+import process from 'node:process';
 import type { Handle } from '@sveltejs/kit/hooks';
 import { redirect } from '@sveltejs/kit';
 
 // HMR guard: skip heavy initialization on Vite hot reloads
 const isReload = (globalThis as Record<string, unknown>).__profilarr_initialized__ === true;
 (globalThis as Record<string, unknown>).__profilarr_initialized__ = true;
-
-if (!isReload) {
-	// Auto-spawn parser binary for standalone builds (must run before config import)
-	await import('#lib/server/utils/parser/spawn.ts');
-}
 
 import { config } from '$config';
 import { printBanner, getServerInfo, logContainerConfig, logProxyConfig } from '$logger/startup.ts';
@@ -61,7 +57,7 @@ if (!isReload) {
 	});
 	if (startupAuthError) {
 		await logger.error(startupAuthError, { source: 'Auth' });
-		Deno.exit(1);
+		process.exit(1);
 	}
 
 	// Log container config (if running in Docker)
@@ -74,7 +70,7 @@ if (!isReload) {
 	await pcdManager.initialize();
 
 	// Auto-link default database on first startup (only once)
-	if (!setupStateQueries.isDefaultDatabaseLinked() && !Deno.env.get('INTEGRATION_TEST')) {
+	if (!setupStateQueries.isDefaultDatabaseLinked() && !process.env.INTEGRATION_TEST) {
 		try {
 			await pcdManager.link({
 				name: 'Dictionarry',

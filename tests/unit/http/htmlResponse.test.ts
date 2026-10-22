@@ -28,11 +28,7 @@ async function withServer(
 }
 
 async function withClient<T extends BaseHttpClient>(client: T, fn: (client: T) => Promise<void>) {
-	try {
-		await fn(client);
-	} finally {
-		client.close();
-	}
+	await fn(client);
 }
 
 Deno.test('HTML responses to JSON requests', async (t) => {

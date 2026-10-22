@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
@@ -12,6 +13,7 @@ import { exportDraftOps, previewDraftOps } from '$pcd/ops/exporter.ts';
 import { uuid } from '$shared/utils/uuid.ts';
 import { validateFilePaths } from '$utils/paths.ts';
 import { getStatus, restorePathsToHead } from '$utils/git/index.ts';
+import { isNotFound } from '$utils/fs.ts';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { database } = await parent();
@@ -147,10 +149,10 @@ export const actions: Actions = {
 
 				for (const filepath of toDelete) {
 					try {
-						await Deno.remove(`${database.local_path}/${filepath}`);
+						await fs.rm(`${database.local_path}/${filepath}`);
 						droppedFiles += 1;
 					} catch (err) {
-						if (!(err instanceof Deno.errors.NotFound)) throw err;
+						if (!isNotFound(err)) throw err;
 					}
 				}
 

@@ -40,7 +40,5 @@ export const GET: RequestHandler = async ({ params, url }) => {
 		return Response.json(logs);
 	} catch (err) {
 		error(502, `Failed to fetch logs: ${err instanceof Error ? err.message : 'Unknown error'}`);
-	} finally {
-		client.close();
 	}
 };

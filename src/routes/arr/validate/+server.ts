@@ -52,8 +52,6 @@ export const POST: RequestHandler = async ({ request }) => {
 			});
 			// A web page instead of the API is worth naming; other failures stay generic
 			if (error instanceof HtmlResponseError) failure = error.message;
-		} finally {
-			client.close();
 		}
 
 		if (info) {

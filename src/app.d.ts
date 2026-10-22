@@ -16,11 +16,6 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
-
-	// Extend RequestInit to support Deno HttpClient
-	interface RequestInit {
-		client?: Deno.HttpClient;
-	}
 }
 
 export {};

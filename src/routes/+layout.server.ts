@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import type { LayoutServerLoad } from './$types';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
@@ -6,14 +7,15 @@ import { config } from '#lib/server/utils/config/config.ts';
 import { build } from '#lib/shared/build.ts';
 import { getVersionStatus, inbox } from '$announcements/index.ts';
 import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
+import { isNotFound } from '$utils/fs.ts';
 
 async function readPendingRestore(): Promise<{ filename: string } | null> {
 	try {
-		const path = (await Deno.readTextFile(`${config.paths.base}/.restore-pending`)).trim();
+		const path = (await fs.readFile(`${config.paths.base}/.restore-pending`, 'utf8')).trim();
 		const filename = path.split('/').pop() || path;
 		return { filename };
 	} catch (err) {
-		if (err instanceof Deno.errors.NotFound) return null;
+		if (isNotFound(err)) return null;
 		throw err;
 	}
 }

@@ -10,8 +10,11 @@
  * errors and proceeds with the parsed entries.
  */
 
+import type { Dirent } from 'node:fs';
+import * as fs from 'node:fs/promises';
 import { parse as parseYaml } from '@std/yaml';
 import type { AnnouncementSeverity, DatabaseAnnouncementParsed } from './types.ts';
+import { isNotFound } from '$utils/fs.ts';
 
 const ANNOUNCEMENTS_SUBDIR = 'announcements';
 const SEVERITIES: readonly AnnouncementSeverity[] = ['info', 'warning', 'critical'];
@@ -35,11 +38,11 @@ export interface ParseResult {
 export async function parseAnnouncementsDir(pcdPath: string): Promise<ParseResult> {
 	const dir = `${pcdPath}/${ANNOUNCEMENTS_SUBDIR}`;
 
-	let entries: Deno.DirEntry[];
+	let entries: Dirent[];
 	try {
-		entries = await collectDirEntries(dir);
+		entries = await fs.readdir(dir, { withFileTypes: true });
 	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) {
+		if (isNotFound(error)) {
 			return { parsed: [], errors: [] };
 		}
 		throw error;
@@ -49,12 +52,12 @@ export async function parseAnnouncementsDir(pcdPath: string): Promise<ParseResul
 	const errors: ParseError[] = [];
 
 	for (const entry of entries) {
-		if (!entry.isFile) continue;
+		if (!entry.isFile()) continue;
 		if (!entry.name.endsWith('.md')) continue;
 
 		const path = `${dir}/${entry.name}`;
 		try {
-			const content = await Deno.readTextFile(path);
+			const content = await fs.readFile(path, 'utf8');
 			const result = parseFile(entry.name, content);
 			if ('error' in result) {
 				errors.push({ filename: entry.name, reason: result.error });
@@ -83,9 +86,9 @@ export async function parseAnnouncementFile(
 
 	let content: string;
 	try {
-		content = await Deno.readTextFile(path);
+		content = await fs.readFile(path, 'utf8');
 	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) return null;
+		if (isNotFound(error)) return null;
 		return { filename, reason: describe(error) };
 	}
 
@@ -94,14 +97,6 @@ export async function parseAnnouncementFile(
 		return { filename, reason: result.error };
 	}
 	return result.parsed;
-}
-
-async function collectDirEntries(dir: string): Promise<Deno.DirEntry[]> {
-	const out: Deno.DirEntry[] = [];
-	for await (const entry of Deno.readDir(dir)) {
-		out.push(entry);
-	}
-	return out;
 }
 
 function parseFile(
