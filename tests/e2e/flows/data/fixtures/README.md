@@ -1,0 +1,1 @@
+Test data for Profilarr's flow tests. See `tests/e2e/flows` in the Profilarr repo.

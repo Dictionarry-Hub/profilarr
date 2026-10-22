@@ -92,6 +92,7 @@
 		"generate:api-json": "deno run --allow-read=docs/api/v1 --allow-write=src/lib/api/v1.openapi.json scripts/generate-openapi-json.ts",
 		"generate:api-types": "deno task generate:api-json && deno run -A openapi-typescript docs/api/v1/openapi.yaml -o src/lib/api/v1.d.ts && prettier --write src/lib/api/v1.d.ts src/lib/api/v1.openapi.json",
 		"generate:pcd-types": "deno run -A scripts/generate-pcd-types.ts",
+		"fixtures:update": "deno run --allow-run=git --allow-read --allow-write --allow-env scripts/fixtures-update.ts",
 		"stats": "deno run --allow-read --allow-env scripts/stats.ts",
 		"webhook": "deno run --allow-net scripts/webhook-listener.ts",
 		"docker:build": "docker compose -f compose.yml -f compose.dev.yml build",

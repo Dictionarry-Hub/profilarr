@@ -1,0 +1,11 @@
+{
+	"fixtures": {
+		"repository": "https://github.com/Dictionarry-Hub/fixtures",
+		"commit": "4771c0aefb869c149dc57d69f6323792bd88154e"
+	},
+	"schema": {
+		"repository": "https://github.com/Dictionarry-Hub/schema",
+		"version": "1.1.0",
+		"commit": "e1c2bd73d7003f254ad135eeefbbed7b47f095b1"
+	}
+}
