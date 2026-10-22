@@ -1,5 +1,6 @@
 import { test, expect } from '$flows/helpers/fixtures.ts';
-import { addArr } from '$flows/helpers/arrs.ts';
+import { addArr, openArr } from '$flows/helpers/arrs.ts';
+import { openTab } from '$flows/helpers/nav.ts';
 import type { FakeArr } from '$flows/helpers/fakeArr.ts';
 
 /** What adding an instance should have sent the fake */
@@ -30,4 +31,21 @@ test('addArr adds a second instance once the list has one', async ({
 	await addArr(page, { name: 'Fake Radarr', fake: fakeRadarr });
 	await addArr(page, { name: 'Fake Sonarr', fake: fakeSonarr });
 	await expect(page.getByRole('main').getByText('Fake Radarr', { exact: true })).toBeVisible();
+});
+
+test('openArr opens an instance and openTab walks its tabs', async ({ page, fakeRadarr }) => {
+	await addArr(page, { name: 'Fake Radarr', fake: fakeRadarr });
+	await openArr(page, 'Fake Radarr');
+	for (const tab of [
+		'Library',
+		'Drift',
+		'Upgrades',
+		'Renames',
+		'Logs',
+		'Settings',
+		'Sync'
+	] as const) {
+		await openTab(page, tab);
+	}
+	expect(fakeRadarr.unhandled, 'every tab only called endpoints the fake supports').toEqual([]);
 });

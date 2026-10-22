@@ -108,7 +108,7 @@ export async function openEntity(page: Page, section: EntitySection, name: strin
 }
 
 /**
- * Tabs on entity and database pages, with the path segment each one opens.
+ * Tabs on entity, database and Arr pages, with the path segment each one opens.
  * Custom format Testing only shows when the parser is running, which flow
  * tests don't start. Database Announcements and Config only show with a
  * personal access token, and Tweaks is behind a feature flag.
@@ -122,7 +122,13 @@ const TABS = {
 	Changes: 'changes',
 	Updates: 'commits',
 	Conflicts: 'conflicts',
-	Settings: 'settings'
+	Settings: 'settings',
+	Library: 'library',
+	Sync: 'sync',
+	Drift: 'drift',
+	Upgrades: 'upgrades',
+	Renames: 'rename',
+	Logs: 'logs'
 } as const;
 
 export type PageTab = keyof typeof TABS;

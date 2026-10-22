@@ -5,7 +5,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import type { FakeArr } from '$flows/helpers/fakeArr.ts';
-import { openSidebarPage } from '$flows/helpers/nav.ts';
+import { openSidebarPage, sidebar } from '$flows/helpers/nav.ts';
 
 const TYPE_LABELS = { radarr: 'Radarr', sonarr: 'Sonarr' } as const;
 
@@ -75,6 +75,30 @@ export async function addArr(page: Page, options: AddArrOptions): Promise<void> 
 					`The instance list should show ${name}`
 				).toBeVisible();
 			}
+		},
+		{ box: true }
+	);
+}
+
+/**
+ * Open an Arr instance from its link under Arrs in the sidebar. It opens on
+ * Sync until the instance has sync settings, then on Library.
+ */
+export async function openArr(page: Page, name: string): Promise<void> {
+	await test.step(
+		`Open Arr ${name}`,
+		async () => {
+			if (page.url() === 'about:blank') await page.goto('/');
+			const link = sidebar(page).getByRole('link', { name, exact: true });
+			await expect(link, `The sidebar should list Arr ${name}`).toBeVisible();
+			await link.click();
+			await expect(page, `${name} should open on its Sync or Library tab`).toHaveURL((url) =>
+				/^\/arr\/\d+\/(sync|library)$/.test(url.pathname)
+			);
+			await expect(
+				page.getByRole('navigation', { name: 'Tabs' }).locator('[aria-current="page"]'),
+				'A tab should be marked as the current page'
+			).toBeVisible();
 		},
 		{ box: true }
 	);
