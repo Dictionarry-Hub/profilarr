@@ -422,6 +422,7 @@
 					<DropdownSelect
 						value={type}
 						options={typeOptions}
+						ariaLabel="Type"
 						placeholder="Select type..."
 						disabled={mode === 'edit'}
 						fullWidth

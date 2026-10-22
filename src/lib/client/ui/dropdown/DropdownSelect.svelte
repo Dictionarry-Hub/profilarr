@@ -10,6 +10,8 @@
 	import DropdownHeader from './DropdownHeader.svelte';
 
 	export let label: string | undefined = undefined;
+	// Accessible name for the trigger when the visible label lives outside the component
+	export let ariaLabel: string | undefined = undefined;
 	export let value: string;
 	export let options: {
 		value: string;
@@ -132,6 +134,7 @@
 			{rounded}
 			{disabled}
 			justify={resolvedJustify}
+			ariaLabel={(ariaLabel ?? label) ? `${ariaLabel ?? label}: ${currentLabel}` : ''}
 			textColor={isPlaceholder ? 'text-neutral-400 dark:text-neutral-500' : ''}
 			on:click={() => !disabled && (open = !open)}
 		/>

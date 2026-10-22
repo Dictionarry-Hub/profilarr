@@ -191,6 +191,10 @@ Two related components:
 - **`$ui/dropdown/DropdownSelect.svelte`** is the plain `<select>` replacement:
   no search box, just click and pick. `header` and `headerDescription` add a
   `DropdownHeader` above the options, for explaining the choice in the menu.
+  `label` shows a label next to the button. When the field's label sits
+  outside the component, pass `ariaLabel` instead. Either prop names the button
+  for screen readers and tests as "Label: current value", for example
+  "Type: Radarr".
 
 `DropdownSelect` for a small fixed option list:
 
