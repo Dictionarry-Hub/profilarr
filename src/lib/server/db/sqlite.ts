@@ -190,3 +190,25 @@ export class Database {
 		if (this.#db.isOpen) this.#db.close();
 	}
 }
+
+/**
+ * Open an in-memory database that can't reach other database files.
+ *
+ * PCD op SQL comes from linked repos and runs as written. SQLite's ATTACH, and
+ * VACUUM INTO, which attaches internally, would let it open Profilarr's own
+ * database or write new files. An attach limit of 0 blocks both. A probe
+ * ATTACH must fail before the connection is returned, so a runtime that
+ * ignores the limit fails closed.
+ */
+export function openIsolatedDatabase(): Database {
+	const database = new Database(':memory:', { limits: { attach: 0 } });
+	try {
+		database.exec("ATTACH ':memory:' AS isolation_probe");
+	} catch (error) {
+		if (String(error).includes('too many attached databases')) return database;
+		database.close();
+		throw error;
+	}
+	database.close();
+	throw new Error('SQLite isolation: ATTACH is still allowed');
+}

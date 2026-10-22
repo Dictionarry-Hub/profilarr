@@ -2,10 +2,9 @@
  * PCD Cache - In-memory compiled view of PCD operations
  */
 
-import { Database } from '@db/sqlite';
+import { openIsolatedDatabase, type Database } from '$db/sqlite.ts';
+import { createSqliteDialect } from '$db/kyselyDialect.ts';
 import { Kysely } from 'kysely';
-// @ts-ignore - Deno JSR import not recognized by svelte-check
-import { DenoSqlite3Dialect } from '@soapbox/kysely-deno-sqlite';
 import { logger } from '$logger/logger.ts';
 import { loadAllOperations } from '../ops/loadOps.ts';
 import { validateOperations } from '../utils/operations.ts';
@@ -25,7 +24,6 @@ import {
 	parseOpMetadata
 } from '$pcd/conflicts/autoAlign/index.ts';
 import { checkFullListConflict } from '$pcd/conflicts/fullListCheck.ts';
-import { hardenConnection } from './hardening.ts';
 
 /**
  * PCDCache - Manages an in-memory compiled database for a single PCD
@@ -76,21 +74,16 @@ export class PCDCache {
 		}
 
 		try {
-			// 1. Create in-memory database
-			// Enable int64 mode to properly handle large integers (e.g., file sizes in bytes)
-			this.db = new Database(':memory:', { int64: true });
-
-			// Block ATTACH so op SQL can't open other database files
-			await hardenConnection(this.db);
+			// 1. Create in-memory database, with ATTACH blocked so op SQL can't
+			// open other database files
+			this.db = openIsolatedDatabase();
 
 			// Enable foreign keys
 			this.db.exec('PRAGMA foreign_keys = ON');
 
 			// Initialize Kysely query builder
 			this.kysely = new Kysely<PCDDatabase>({
-				dialect: new DenoSqlite3Dialect({
-					database: this.db
-				})
+				dialect: createSqliteDialect(this.db)
 			});
 
 			// 2. Register helper functions
