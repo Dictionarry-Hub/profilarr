@@ -158,6 +158,7 @@
 					<button
 						type="button"
 						on:click={() => handleTabSelect(tab.href)}
+						aria-current={tab.active ? 'page' : undefined}
 						data-onboarding={tab.onboarding || null}
 						class="flex cursor-pointer items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors {tab.active
 							? 'border-accent-600 text-accent-600 dark:border-accent-500 dark:text-accent-500'
