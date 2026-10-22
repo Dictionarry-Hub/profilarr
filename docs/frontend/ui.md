@@ -156,7 +156,9 @@ increment/decrement buttons with press-and-hold repeat, min/max validation,
 optional decimal precision, and a `compact` mode for dense form grids.
 Typical use: retention days, timeouts, thresholds. The visible value is draft
 text while focused, so decimal fields can accept in-progress values like `.`,
-`0.`, and `0.0` before they become final numbers.
+`0.`, and `0.0` before they become final numbers. A `<label for>` matching
+`id` names the input. Where no label exists, such as in a table cell, pass
+`ariaLabel`.
 
 Use `validateOn="blur"` when the field should allow free typing and only
 commit min/max validation after focus leaves the input. Use decimal `step`
@@ -261,7 +263,9 @@ release-title parser).
 
 **`$ui/form/IconCheckbox.svelte`** is a checkbox with an icon baked in and
 configurable colors (hex or CSS variable), plus filled / outline variants.
-Used for qualifiers like "exclude", "required", "boost".
+Used for qualifiers like "exclude", "required", "boost". It shows only an
+icon, so a standalone checkbox needs `ariaLabel` to have a name. Inside a
+button that already has a label, it can go without `ariaLabel`.
 
 #### KeyValueList, RangeScale, CronInput
 

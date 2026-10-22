@@ -83,6 +83,7 @@
 						<div class="flex items-center justify-between gap-3 py-2.5">
 							<div class="flex items-center gap-2">
 								<IconCheckbox
+									ariaLabel={`${format.name} ${arrType.charAt(0).toUpperCase()}${arrType.slice(1)} enabled`}
 									checked={customFormatEnabled[format.name]?.[arrType] ?? false}
 									icon={Check}
 									color={getArrTypeColor(arrType)}
@@ -97,6 +98,7 @@
 							{#if customFormatScores[format.name]}
 								<div class="w-28">
 									<NumberInput
+										ariaLabel={`${format.name} ${arrType.charAt(0).toUpperCase()}${arrType.slice(1)} score`}
 										name="score-{format.name}-{arrType}"
 										value={customFormatScores[format.name][arrType] ?? 0}
 										onchange={(newValue) => handleScoreChange(format.name, arrType, newValue)}

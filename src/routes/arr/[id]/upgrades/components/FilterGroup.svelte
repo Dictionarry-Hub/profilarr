@@ -327,6 +327,7 @@
 										{:else if field?.valueType === 'number'}
 											<div class={valueWidthClass}>
 												<NumberInput
+													ariaLabel="Value"
 													name="value-{childIndex}"
 													on:change={(e) => {
 														if (e.detail !== undefined) child.value = e.detail;
@@ -343,6 +344,7 @@
 												<div class="{valueWidthClass} flex items-center gap-2">
 													<div class="min-w-0 flex-1">
 														<NumberInput
+															ariaLabel="Value"
 															name="value-{childIndex}"
 															value={child.value as number}
 															on:change={(e) => {

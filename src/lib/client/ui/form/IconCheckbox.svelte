@@ -12,6 +12,8 @@
 	export let iconColor: string = '';
 	export let stopPropagation: boolean = false;
 	export let title: string | undefined = undefined;
+	// Accessible name; the box shows only an icon, so give one wherever it stands alone
+	export let ariaLabel: string | undefined = undefined;
 	export let compact: boolean = false;
 
 	const dispatch = createEventDispatcher<{ click: MouseEvent }>();
@@ -105,6 +107,7 @@
 	type="button"
 	role="checkbox"
 	aria-checked={checked}
+	aria-label={ariaLabel}
 	{disabled}
 	{title}
 	on:click={handleClick}

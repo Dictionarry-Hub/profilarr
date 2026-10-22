@@ -481,6 +481,7 @@
 										Min <span class="text-neutral-400 dark:text-neutral-500">(MB/m)</span>
 									</div>
 									<NumberInput
+										ariaLabel={`${entry.quality_name} Min`}
 										id="min-{entry.quality_name}"
 										name="min-{entry.quality_name}"
 										bind:value={markers[0].value}
@@ -501,6 +502,7 @@
 										Pref <span class="text-neutral-400 dark:text-neutral-500">(MB/m)</span>
 									</div>
 									<NumberInput
+										ariaLabel={`${entry.quality_name} Preferred`}
 										id="preferred-{entry.quality_name}"
 										name="preferred-{entry.quality_name}"
 										bind:value={markers[1].value}
@@ -521,6 +523,7 @@
 										Max <span class="text-neutral-400 dark:text-neutral-500">(MB/m)</span>
 									</div>
 									<NumberInput
+										ariaLabel={`${entry.quality_name} Max`}
 										id="max-{entry.quality_name}"
 										name="max-{entry.quality_name}"
 										bind:value={markers[2].value}

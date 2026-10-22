@@ -415,6 +415,7 @@
 									updateField('bypassIfAboveCfScore', !formData.bypassIfAboveCfScore)}
 							/>
 							<NumberInput
+								ariaLabel="Minimum Custom Format Score"
 								name="min-cf-score"
 								id="min-cf-score"
 								value={formData.minimumCfScore}

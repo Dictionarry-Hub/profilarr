@@ -159,6 +159,7 @@
 					<div class="mt-1 flex items-center gap-1">
 						<div class="w-20">
 							<NumberInput
+								ariaLabel="Version Major"
 								name="version-major"
 								value={vMajor}
 								min={1}
@@ -172,6 +173,7 @@
 						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
 						<div class="w-20">
 							<NumberInput
+								ariaLabel="Version Minor"
 								name="version-minor"
 								value={vMinor}
 								min={0}
@@ -183,6 +185,7 @@
 						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
 						<div class="w-20">
 							<NumberInput
+								ariaLabel="Version Patch"
 								name="version-patch"
 								value={vPatch}
 								min={0}
@@ -205,6 +208,7 @@
 					<div class="mt-1 flex items-center gap-1">
 						<div class="w-20">
 							<NumberInput
+								ariaLabel="Minimum Profilarr Version Major"
 								name="profilarr-version-major"
 								value={pvMajor}
 								min={2}
@@ -221,6 +225,7 @@
 						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
 						<div class="w-20">
 							<NumberInput
+								ariaLabel="Minimum Profilarr Version Minor"
 								name="profilarr-version-minor"
 								value={pvMinor}
 								min={0}
@@ -235,6 +240,7 @@
 						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
 						<div class="w-20">
 							<NumberInput
+								ariaLabel="Minimum Profilarr Version Patch"
 								name="profilarr-version-patch"
 								value={pvPatch}
 								min={0}

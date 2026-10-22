@@ -780,6 +780,7 @@
 								<span class="inline-block h-5 w-5"></span>
 							{:else}
 								<IconCheckbox
+									ariaLabel={`Select ${row.name}`}
 									checked={selected.has(row.key)}
 									icon={Check}
 									color={autoSelectedKeys.has(row.key) ? '#f59e0b' : 'blue'}

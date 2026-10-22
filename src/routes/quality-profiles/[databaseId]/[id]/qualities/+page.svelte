@@ -815,6 +815,7 @@
 							{/if}
 							<span data-onboarding={index === 0 ? 'qp-qualities-upgrade-until' : undefined}>
 								<IconCheckbox
+									ariaLabel={`${item.name} Upgrade Until`}
 									checked={item.upgradeUntil}
 									icon={ArrowUp}
 									color="#07CA07"
@@ -825,6 +826,7 @@
 							</span>
 							<span data-onboarding={index === 0 ? 'qp-qualities-enabled' : undefined}>
 								<IconCheckbox
+									ariaLabel={`${item.name} Enabled`}
 									checked={item.enabled}
 									icon={Check}
 									color="blue"

@@ -79,6 +79,7 @@
 			{@const arrType = column.key}
 			<div class="flex items-center justify-center gap-2">
 				<IconCheckbox
+					ariaLabel={`${row.name} ${arrType.charAt(0).toUpperCase()}${arrType.slice(1)} enabled`}
 					checked={customFormatEnabled[row.name]?.[arrType] ?? false}
 					icon={Check}
 					color={getArrTypeColor(arrType)}
@@ -89,6 +90,7 @@
 				{#if customFormatScores[row.name]}
 					<div class="w-48">
 						<NumberInput
+							ariaLabel={`${row.name} ${arrType.charAt(0).toUpperCase()}${arrType.slice(1)} score`}
 							name="score-{row.name}-{arrType}"
 							value={customFormatScores[row.name][arrType] ?? 0}
 							onchange={(newValue) => handleScoreChange(row.name, arrType, newValue)}

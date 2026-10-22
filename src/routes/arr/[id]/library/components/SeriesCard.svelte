@@ -149,6 +149,7 @@
 		{#if visibleFields.has('monitored')}
 			<div class="absolute top-2 left-2">
 				<IconCheckbox
+					ariaLabel="Monitored"
 					checked={monitoredState !== 'unmonitored'}
 					icon={Check}
 					color={monitoredState === 'monitored'
