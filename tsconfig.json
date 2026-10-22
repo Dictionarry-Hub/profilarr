@@ -10,5 +10,5 @@
 		"noImplicitOverride": true
 	},
 	"exclude": ["tests/**", "src/adapter/**", "research/**"],
-	"include": ["src", "vite.config.ts", "tests"]
+	"include": ["src", "src/**/*.svelte", "vite.config.ts", "tests"]
 }
