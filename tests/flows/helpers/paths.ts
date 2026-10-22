@@ -15,6 +15,9 @@ export const FIXTURES_DIR = resolve(ROOT, 'tests/flows/data/fixtures');
 export const SCHEMA_DIR = resolve(ROOT, 'tests/flows/data/schema');
 export const SOURCE_FILE = resolve(ROOT, 'tests/flows/data/source.json');
 
+/** What the fixtures contain, written by `deno task fixtures:update` */
+export const FIXTURES_SNAPSHOT = resolve(ROOT, 'tests/flows/data/fixtures.json');
+
 /** Fresh Radarr and Sonarr responses for the fake Arrs (`deno task fixtures:arr`) */
 export const ARR_DATA_DIR = resolve(ROOT, 'tests/flows/data/arr');
 

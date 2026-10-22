@@ -4,7 +4,9 @@
  * Replaces tests/flows/data/fixtures with a fresh copy of the
  * Dictionarry-Hub/fixtures database, and tests/flows/data/schema with the
  * schema version that database depends on. Both are committed, so the flow
- * tests never clone from GitHub. Run after changing the fixtures database:
+ * tests never clone from GitHub. It then compiles them and writes
+ * tests/flows/data/fixtures.json, the snapshot scenarios read expected names
+ * and values from. Run after changing the fixtures database:
  *
  *   deno task fixtures:update            latest default branch
  *   deno task fixtures:update <ref>      a branch, tag or commit
@@ -15,6 +17,7 @@ import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
+import { buildSnapshot } from './fixtures-snapshot.ts';
 
 const FIXTURES_REPO = 'https://github.com/Dictionarry-Hub/fixtures';
 const DATA_DIR = 'tests/flows/data';
@@ -79,6 +82,13 @@ try {
 		schema: { repository: schema.url, version: schema.version, commit: schemaCommit }
 	};
 	await fs.writeFile(join(DATA_DIR, 'source.json'), `${JSON.stringify(source, null, '\t')}\n`);
+
+	// Fails here if the ops no longer compile against the schema
+	const snapshot = await buildSnapshot(
+		join(DATA_DIR, 'schema/ops'),
+		join(DATA_DIR, 'fixtures/ops')
+	);
+	await fs.writeFile(join(DATA_DIR, 'fixtures.json'), `${JSON.stringify(snapshot, null, '\t')}\n`);
 
 	console.log(`fixtures  ${fixturesCommit.slice(0, 7)}  (${ref ?? 'default branch'})`);
 	console.log(`schema    ${schemaCommit.slice(0, 7)}  (${schema.version})`);
