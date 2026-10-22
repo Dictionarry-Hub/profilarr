@@ -21,6 +21,17 @@ export const test = base.extend<{ app: App; fakeRadarr: FakeArr; fakeSonarr: Fak
 	baseURL: async ({ app }, use) => {
 		await use(app.url);
 	},
+	// Alerts default to the top centre for 8 seconds, where they cover the tab
+	// bar and delay clicks on it. Tests put them at the bottom right instead.
+	page: async ({ page }, use) => {
+		await page.addInitScript(() => {
+			localStorage.setItem(
+				'alertSettings',
+				JSON.stringify({ position: 'bottom-right', durationMs: 8000 })
+			);
+		});
+		await use(page);
+	},
 	fakeRadarr: async ({}, use) => {
 		const fake = await startFakeArr('radarr');
 		await use(fake);
