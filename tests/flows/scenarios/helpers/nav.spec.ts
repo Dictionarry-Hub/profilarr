@@ -4,6 +4,7 @@
 import { test } from '$flows/helpers/test.ts';
 import {
 	SIDEBAR_PAGES,
+	newEntity,
 	openDatabase,
 	openEntity,
 	openSidebarPage,
@@ -37,6 +38,30 @@ test.describe('openEntity', () => {
 		test(`opens ${section} › ${name}`, async ({ page }) => {
 			await openEntity(page, section, name);
 		});
+	}
+});
+
+test.describe('newEntity', () => {
+	test('opens the new Quality Profile form', async ({ page }) => {
+		await newEntity(page, 'Quality Profiles');
+	});
+	test('opens the new Custom Format form', async ({ page }) => {
+		await newEntity(page, 'Custom Formats');
+	});
+	test('opens the new Delay Profile form', async ({ page }) => {
+		await newEntity(page, 'Delay Profiles');
+	});
+	for (const option of ['Blank', 'Release Group'] as const) {
+		test(`opens the new Regular Expression form › ${option}`, async ({ page }) => {
+			await newEntity(page, 'Regular Expressions', option);
+		});
+	}
+	for (const section of ['Naming Settings', 'Quality Definitions', 'Media Settings'] as const) {
+		for (const option of ['Radarr', 'Sonarr'] as const) {
+			test(`opens the new ${section} form › ${option}`, async ({ page }) => {
+				await newEntity(page, section, option);
+			});
+		}
 	}
 });
 

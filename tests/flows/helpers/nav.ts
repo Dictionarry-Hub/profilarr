@@ -108,6 +108,71 @@ export async function openEntity(page: Page, section: EntitySection, name: strin
 }
 
 /**
+ * What each section's New button offers. Sections with options open a menu;
+ * each option adds its query to the new form's URL. Sections without options
+ * go straight to the form.
+ */
+const NEW_ENTITY = {
+	'Quality Profiles': {},
+	'Custom Formats': {},
+	'Delay Profiles': {},
+	'Regular Expressions': { Blank: '', 'Release Group': '?preset=release-group' },
+	'Naming Settings': { Radarr: '?arrType=radarr', Sonarr: '?arrType=sonarr' },
+	'Quality Definitions': { Radarr: '?arrType=radarr', Sonarr: '?arrType=sonarr' },
+	'Media Settings': { Radarr: '?arrType=radarr', Sonarr: '?arrType=sonarr' }
+} as const satisfies Record<EntitySection, Record<string, string>>;
+
+export type NewEntityOption<S extends EntitySection> = keyof (typeof NEW_ENTITY)[S] & string;
+
+/** The option argument: required for sections with a menu, absent otherwise */
+type NewEntityArgs<S extends EntitySection> = [NewEntityOption<S>] extends [never]
+	? []
+	: [option: NewEntityOption<S>];
+
+/**
+ * Start a new entity from its section's list: click New, pick the menu option
+ * when the section has a menu, and wait until the empty form has loaded.
+ */
+export async function newEntity<S extends EntitySection>(
+	page: Page,
+	section: S,
+	...[option]: NewEntityArgs<S>
+): Promise<void> {
+	await test.step(
+		`Open the new ${section} form${option ? ` › ${option}` : ''}`,
+		async () => {
+			await openSidebarPage(page, section);
+			const listPath = new URL(page.url()).pathname;
+			const newButton = page.getByRole('button', { name: 'New', exact: true });
+			const button = page.getByRole('main').locator(newButton);
+			await expect(button, `${section} should have a New button`).toBeVisible();
+
+			const options: Record<string, string> = NEW_ENTITY[section];
+			if (option === undefined) {
+				await button.click();
+			} else {
+				// The menu opens on hover, inside the same toolbar group as the button
+				await button.hover();
+				// `has` searches inside each group, so it takes the button on its own, not under main
+				const menu = page.getByRole('main').getByRole('group').filter({ has: newButton });
+				await menu.getByRole('button', { name: option, exact: true }).click();
+			}
+
+			const query = option === undefined ? '' : options[option];
+			await expect(page, `New should open ${listPath}/new${query}`).toHaveURL(
+				(url) => url.pathname === `${listPath}/new` && url.search === query
+			);
+			// The URL can change before the form renders; wait for its heading
+			await expect(
+				page.getByRole('main').getByRole('heading', { level: 1, name: /^New / }),
+				`The new ${section} form should load`
+			).toBeVisible();
+		},
+		{ box: true }
+	);
+}
+
+/**
  * Tabs on entity, database and Arr pages, with the path segment each one opens.
  * Custom format Testing only shows when the parser is running, which flow
  * tests don't start. Database Announcements and Config only show with a
