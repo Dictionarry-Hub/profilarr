@@ -1,5 +1,5 @@
 import { test } from '$flows/helpers/fixtures.ts';
-import { openEntity, openTab, type EntitySection, type EntityTab } from '$flows/helpers/nav.ts';
+import { openEntity, openTab, type EntitySection, type PageTab } from '$flows/helpers/nav.ts';
 
 // One fixtures entity per section. Delay Profiles uses a name with a space,
 // which ends up in the URL.
@@ -19,7 +19,7 @@ for (const [section, name] of ENTITIES) {
 	});
 }
 
-const TABS: [EntitySection, string, EntityTab[]][] = [
+const TABS: [EntitySection, string, PageTab[]][] = [
 	['Quality Profiles', 'Radarr Profile', ['Scoring', 'Qualities', 'General']],
 	// Testing needs the parser, which flow tests don't run
 	['Custom Formats', 'Every Condition', ['Conditions', 'General']]

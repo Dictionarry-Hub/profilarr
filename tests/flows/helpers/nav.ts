@@ -108,14 +108,30 @@ export async function openEntity(page: Page, section: EntitySection, name: strin
 }
 
 /**
- * Tabs on entity pages, like a quality profile's Scoring or a custom format's
- * Conditions. Custom format Testing only shows when the parser is running,
- * which flow tests don't start.
+ * Tabs on entity and database pages, with the path segment each one opens.
+ * Custom format Testing only shows when the parser is running, which flow
+ * tests don't start. Database Announcements and Config only show with a
+ * personal access token, and Tweaks is behind a feature flag.
  */
-export type EntityTab = 'General' | 'Scoring' | 'Qualities' | 'Conditions' | 'Testing';
+const TABS = {
+	General: 'general',
+	Scoring: 'scoring',
+	Qualities: 'qualities',
+	Conditions: 'conditions',
+	Testing: 'testing',
+	Changes: 'changes',
+	Updates: 'commits',
+	Conflicts: 'conflicts',
+	Settings: 'settings'
+} as const;
 
-/** Switch to a tab on the current entity page and wait until it has loaded */
-export async function openTab(page: Page, tab: EntityTab): Promise<void> {
+export type PageTab = keyof typeof TABS;
+
+/**
+ * Switch to a tab on the current page and wait until the tab bar marks it as
+ * the current page, which only happens once its page has loaded.
+ */
+export async function openTab(page: Page, tab: PageTab): Promise<void> {
 	await test.step(
 		`Open the ${tab} tab`,
 		async () => {
@@ -124,16 +140,38 @@ export async function openTab(page: Page, tab: EntityTab): Promise<void> {
 				.getByRole('button', { name: tab });
 			await expect(button, `The ${tab} tab should be shown`).toBeVisible();
 			await button.click();
-			const segment = `/${tab.toLowerCase()}`;
+			const segment = `/${TABS[tab]}`;
 			await expect(page, `The ${tab} tab should end the URL in ${segment}`).toHaveURL((url) =>
 				url.pathname.endsWith(segment)
 			);
-			// Each tab's page opens with a heading of the same name. Levels differ
-			// between pages (Conditions uses h2), so any level counts.
+			await expect(button, `The ${tab} tab should become the current page`).toHaveAttribute(
+				'aria-current',
+				'page'
+			);
+		},
+		{ box: true }
+	);
+}
+
+/**
+ * Open a linked database from its link under Databases in the sidebar. The
+ * database page opens on its Changes tab.
+ */
+export async function openDatabase(page: Page, name: string): Promise<void> {
+	await test.step(
+		`Open database ${name}`,
+		async () => {
+			if (page.url() === 'about:blank') await page.goto('/');
+			const link = sidebar(page).getByRole('link', { name, exact: true });
+			await expect(link, `The sidebar should list database ${name}`).toBeVisible();
+			await link.click();
+			await expect(page, `${name} should open its Changes tab`).toHaveURL((url) =>
+				/^\/databases\/\d+\/changes$/.test(url.pathname)
+			);
 			await expect(
-				page.getByRole('main').getByRole('heading', { name: tab, exact: true }),
-				`The ${tab} tab should show its heading`
-			).toBeVisible();
+				page.getByRole('navigation', { name: 'Tabs' }).getByRole('button', { name: 'Changes' }),
+				'The Changes tab should be the current page'
+			).toHaveAttribute('aria-current', 'page');
 		},
 		{ box: true }
 	);
