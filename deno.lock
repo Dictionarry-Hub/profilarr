@@ -17,7 +17,7 @@
     "npm:@jsr/db__sqlite@0.12.0": "0.12.0",
     "npm:@lucide/svelte@^1.55.0": "1.55.0_svelte@5.57.2",
     "npm:@playwright/test@^1.64.0": "1.64.0",
-    "npm:@sveltejs/kit@3": "3.0.1_@sveltejs+vite-plugin-svelte@7.3.1_svelte@5.57.2_typescript@6.0.3_vite@8.3.4",
+    "npm:@sveltejs/kit@^3.1.0": "3.1.0_@sveltejs+vite-plugin-svelte@7.3.1_svelte@5.57.2_typescript@6.0.3_vite@8.3.4",
     "npm:@sveltejs/vite-plugin-svelte@^7.3.1": "7.3.1_svelte@5.57.2_vite@8.3.4_@types+node@22.20.5_esbuild@0.28.2",
     "npm:@tailwindcss/vite@^4.3.3": "4.3.3_vite@8.3.4_@types+node@22.20.5_esbuild@0.28.2",
     "npm:@types/deno@^2.7.0": "2.7.0",
@@ -495,8 +495,8 @@
         "acorn"
       ]
     },
-    "@sveltejs/kit@3.0.1_@sveltejs+vite-plugin-svelte@7.3.1_svelte@5.57.2_typescript@6.0.3_vite@8.3.4": {
-      "integrity": "sha512-8JMCCq7ZUJELi3hbhb0+c9Rs8qnbHW90vhOfM+t1FSF4fhIpG9/FOsH4IYgcITMhbdkSrrn+Kvd9G+q8A+UO6Q==",
+    "@sveltejs/kit@3.1.0_@sveltejs+vite-plugin-svelte@7.3.1_svelte@5.57.2_typescript@6.0.3_vite@8.3.4": {
+      "integrity": "sha512-JTWlq2HQlkqx6vIoxhC0R6sc4WVqbQoRyEmr5YlqKmiYbzY1U3awtSWTmjMLlS056a49AmkQR6rnNANXIE8B0Q==",
       "dependencies": [
         "@rolldown/pluginutils",
         "@standard-schema/spec",
@@ -1242,7 +1242,7 @@
       "npm:@jsr/db__sqlite@0.12.0",
       "npm:@lucide/svelte@^1.55.0",
       "npm:@playwright/test@^1.64.0",
-      "npm:@sveltejs/kit@3",
+      "npm:@sveltejs/kit@^3.1.0",
       "npm:@sveltejs/vite-plugin-svelte@^7.3.1",
       "npm:@tailwindcss/vite@^4.3.3",
       "npm:@types/deno@^2.7.0",
