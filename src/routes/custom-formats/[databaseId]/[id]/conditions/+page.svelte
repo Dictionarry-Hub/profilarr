@@ -279,7 +279,7 @@
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
 			<div>
-				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Conditions</h2>
+				<h1 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Conditions</h1>
 				<p class="text-sm text-neutral-600 dark:text-neutral-400">
 					Define the conditions that must be met for this custom format to match a release.
 				</p>

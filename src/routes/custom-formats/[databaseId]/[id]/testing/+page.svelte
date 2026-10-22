@@ -107,7 +107,7 @@
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
 			<div>
-				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Test Cases</h2>
+				<h1 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Test Cases</h1>
 				<p class="text-sm text-neutral-600 dark:text-neutral-400">
 					Test release titles against this custom format
 				</p>

@@ -110,7 +110,7 @@
 <div class="mt-6 space-y-6">
 	<StickyCard position="top">
 		<svelte:fragment slot="left">
-			<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{pageTitle}</h2>
+			<h1 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{pageTitle}</h1>
 			<p class="text-sm text-neutral-600 dark:text-neutral-400">{pageDescription}</p>
 		</svelte:fragment>
 		<svelte:fragment slot="right">

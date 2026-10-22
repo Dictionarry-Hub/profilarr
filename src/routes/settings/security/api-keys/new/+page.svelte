@@ -129,9 +129,9 @@
 			>
 				<svelte:fragment slot="left">
 					<div>
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
+						<h1 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
 							"{created.name}" created
-						</h2>
+						</h1>
 						<p class="text-sm text-neutral-600 dark:text-neutral-400">
 							Send it in the X-Api-Key header
 						</p>
@@ -201,7 +201,7 @@
 			>
 				<svelte:fragment slot="left">
 					<div>
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">New API Key</h2>
+						<h1 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">New API Key</h1>
 						<p class="text-sm text-neutral-600 dark:text-neutral-400">
 							Lets scripts and integrations use the Profilarr API
 						</p>
