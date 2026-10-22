@@ -9,6 +9,7 @@
  *   ✗ quality-profiles › a custom format score edit persists
  *     scenarios/quality-profiles/edit-score.spec.ts:12
  *     <error with expected/received and the failing line>
+ *     Output: <what the test printed, if anything>
  *     Trace: test-results/.../trace.zip
  */
 
@@ -119,6 +120,12 @@ export default class FlowReporter implements Reporter {
 				const where = testResult.errors.find((error) => error.location)?.location ?? test.location;
 				console.log(dim(`  ${relative(this.rootDir, where.file)}:${where.line}`));
 				for (const error of testResult.errors) console.log(indent(formatError(error)));
+				// What the test printed; hidden while running, shown only for failures
+				const output = [...testResult.stdout, ...testResult.stderr].map(String).join('').trimEnd();
+				if (output) {
+					console.log(`\n${dim('  Output:')}`);
+					console.log(output.replace(/^/gm, '    '));
+				}
 				for (const attachment of testResult.attachments) {
 					if (attachment.path && ['trace', 'screenshot'].includes(attachment.name)) {
 						const label = attachment.name === 'trace' ? 'Trace' : 'Screenshot';
