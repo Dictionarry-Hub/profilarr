@@ -55,7 +55,7 @@ export async function seedFixtures(dataDir: string): Promise<void> {
 				uuid, name, repository_url, local_path,
 				sync_strategy, auto_pull, enabled, is_private,
 				personal_access_token, local_ops_enabled, conflict_strategy
-			) VALUES (?, ?, ?, ?, 0, 0, 1, 0, NULL, 1, 'override')`
+			) VALUES (?, ?, ?, ?, 0, 0, 1, 0, NULL, 0, 'override')`
 		).run(FIXTURES_UUID, FIXTURES_NAME, source.fixtures.repository, pcdPath);
 	} finally {
 		db.close();
