@@ -22,6 +22,8 @@ export interface App {
 	logs(): string;
 	/** Stop the app. Deletes its data folder unless it was passed to startApp. */
 	stop(): Promise<void>;
+	/** Stop the app and start it again on the same folder and URL, e.g. to apply a restore */
+	restart(): Promise<void>;
 }
 
 const HEALTH_TIMEOUT_MS = 30_000;
@@ -52,27 +54,51 @@ export async function startApp(dataDir?: string): Promise<App> {
 	const port = await freePort();
 	const url = `http://127.0.0.1:${port}`;
 	const output: string[] = [];
+	const logs = () => output.join('');
 
-	const child = spawn(APP_BINARY, [], {
-		env: { ...process.env, ...BASE_ENV, PORT: String(port), APP_BASE_PATH: dir, ORIGIN: url },
-		stdio: ['ignore', 'pipe', 'pipe']
-	});
-	child.stdout?.on('data', (chunk) => output.push(String(chunk)));
-	child.stderr?.on('data', (chunk) => output.push(String(chunk)));
+	// Spawn the app and wait until it answers. Kills it if it never does.
+	const launch = async (): Promise<ChildProcess> => {
+		const child = spawn(APP_BINARY, [], {
+			env: { ...process.env, ...BASE_ENV, PORT: String(port), APP_BASE_PATH: dir, ORIGIN: url },
+			stdio: ['ignore', 'pipe', 'pipe']
+		});
+		child.stdout?.on('data', (chunk) => output.push(String(chunk)));
+		child.stderr?.on('data', (chunk) => output.push(String(chunk)));
+		try {
+			await waitForHealth(url, child, logs);
+		} catch (error) {
+			await kill(child);
+			throw error;
+		}
+		return child;
+	};
 
-	const stop = async () => {
-		await kill(child);
+	const removeDir = async () => {
 		if (ownsDir) await fs.rm(dir, { recursive: true, force: true });
 	};
 
+	let child: ChildProcess;
 	try {
-		await waitForHealth(url, child, () => output.join(''));
+		child = await launch();
 	} catch (error) {
-		await stop();
+		await removeDir();
 		throw error;
 	}
 
-	return { url, dir, logs: () => output.join(''), stop };
+	return {
+		url,
+		dir,
+		logs,
+		stop: async () => {
+			await kill(child);
+			await removeDir();
+		},
+		restart: async () => {
+			await kill(child);
+			output.push('\n--- restart ---\n');
+			child = await launch();
+		}
+	};
 }
 
 async function waitForHealth(url: string, child: ChildProcess, logs: () => string): Promise<void> {
