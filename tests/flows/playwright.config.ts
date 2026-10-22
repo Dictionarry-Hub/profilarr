@@ -39,7 +39,8 @@ export default defineConfig({
 		// Keep a step-by-step trace and a screenshot only when a test fails.
 		trace: 'retain-on-failure',
 		screenshot: 'only-on-failure',
-		viewport: { width: 1440, height: 900 }
+		// Above the app's widest breakpoint (`wide`, 1600px), so pages use their desktop layout
+		viewport: { width: 1920, height: 1080 }
 		// baseURL comes from each test's own app (helpers/fixtures.ts).
 	}
 });
