@@ -59,6 +59,7 @@
 				? 'h-10 w-10'
 				: 'h-10 px-4'} {disabled ? 'cursor-not-allowed opacity-50' : variantClasses[variant]}"
 			{disabled}
+			aria-label={square && tooltip ? tooltip : undefined}
 			on:click
 		>
 			{#if icon}
