@@ -54,6 +54,7 @@
 {/if}
 
 <nav
+	aria-label="Sidebar"
 	data-onboarding="sidebar"
 	class="fixed top-0 left-0 z-[70] flex h-full w-[90vw] flex-col border-r border-neutral-200 bg-neutral-50 transition-transform duration-200 ease-in-out dark:border-neutral-800 dark:bg-neutral-900
 		{$mobileNavOpen ? 'translate-x-0' : '-translate-x-full'}
