@@ -714,8 +714,10 @@ top of a list page:
   `tooltipPosition` (`top` / `bottom`) and `tooltipAlign`
   (`left` / `middle` / `right`), set explicitly per call site like
   `dropdownPosition`. Buttons at the right end of a bar use
-  `tooltipAlign="right"`; buttons with a hover dropdown use
-  `tooltipPosition="top"` so the tooltip doesn't cover the menu.
+  `tooltipAlign="right"`. A button with a hover dropdown gets no tooltip,
+  because the tooltip would cover the menu. A `DropdownHeader` inside the menu
+  explains the button instead, and `ariaLabel` names it for screen readers and
+  tests.
 - **`SearchAction.svelte`**: search field optimized for the bar (with
   clear / submit handling).
 - **`SearchFilterAction.svelte`**: filter button with an indicator for

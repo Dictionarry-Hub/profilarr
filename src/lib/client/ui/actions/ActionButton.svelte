@@ -10,6 +10,8 @@
 	export let dropdownPosition: 'left' | 'right' | 'middle' = 'left';
 	export let disabled: boolean = false;
 	export let tooltip: string = '';
+	// Accessible name when no tooltip shows it, e.g. a button whose dropdown header explains it
+	export let ariaLabel: string = '';
 	export let tooltipPosition: 'top' | 'bottom' = 'bottom';
 	export let tooltipAlign: 'left' | 'middle' | 'right' = 'middle';
 	export let type: 'button' | 'submit' = 'button';
@@ -59,7 +61,7 @@
 				? 'h-10 w-10'
 				: 'h-10 px-4'} {disabled ? 'cursor-not-allowed opacity-50' : variantClasses[variant]}"
 			{disabled}
-			aria-label={square && tooltip ? tooltip : undefined}
+			aria-label={ariaLabel || (square && tooltip ? tooltip : undefined)}
 			on:click
 		>
 			{#if icon}
