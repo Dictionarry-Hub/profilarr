@@ -74,13 +74,7 @@ RUN DENO_TARGET=$(case "${TARGETARCH}" in \
     --node-modules-dir=none \
     --exclude-unused-npm \
     --no-check \
-    --allow-net \
-    --allow-read \
-    --allow-write \
-    --allow-env \
-    --allow-ffi \
-    --allow-run \
-    --allow-sys \
+    --allow-all \
     --target "$DENO_TARGET" \
     --output dist/build/profilarr \
     dist/build/mod.ts
