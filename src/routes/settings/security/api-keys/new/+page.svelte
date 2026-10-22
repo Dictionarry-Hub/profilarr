@@ -249,6 +249,7 @@
 							This key stops working after:
 						</p>
 						<DropdownSelect
+							ariaLabel="Expires After"
 							value={formData.expiry}
 							options={expiryOptions}
 							fullWidth
@@ -285,6 +286,7 @@
 							{:else if column.key === 'access'}
 								<!-- With full access on, each area shows what full access grants it -->
 								<DropdownSelect
+									ariaLabel={`${row.name} Access`}
 									value={formData.fullAccess
 										? row.writable
 											? 'write'

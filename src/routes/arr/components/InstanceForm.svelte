@@ -551,6 +551,7 @@
 					How often to refresh cached library data in the background
 				</p>
 				<DropdownSelect
+					ariaLabel="Library Refresh"
 					value={libraryRefreshInterval}
 					options={libraryRefreshOptions}
 					fullWidth

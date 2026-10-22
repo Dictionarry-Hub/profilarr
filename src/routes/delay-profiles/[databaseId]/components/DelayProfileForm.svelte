@@ -307,6 +307,7 @@
 					Protocol Preference
 				</h3>
 				<DropdownSelect
+					ariaLabel="Protocol Preference"
 					value={formData.preferredProtocol}
 					options={protocolOptions}
 					fullWidth
@@ -329,6 +330,7 @@
 						</p>
 					</div>
 					<DropdownSelect
+						ariaLabel="Delay Unit"
 						value={delayUnit}
 						options={delayUnitOptions}
 						fullWidth

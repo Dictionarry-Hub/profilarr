@@ -364,6 +364,7 @@
 								Alert Position
 							</span>
 							<DropdownSelect
+								ariaLabel="Alert Position"
 								value={uiAlertPosition}
 								options={alertPositionOptions}
 								fullWidth
@@ -400,6 +401,7 @@
 								Date Format
 							</span>
 							<DropdownSelect
+								ariaLabel="Date Format"
 								value={dateFormat}
 								options={dateFormatOptions}
 								fullWidth
@@ -417,6 +419,7 @@
 								Sans Font
 							</span>
 							<DropdownSelect
+								ariaLabel="Sans Font"
 								value={uiFontSans}
 								options={sansFontOptions}
 								fullWidth
@@ -433,6 +436,7 @@
 								Mono Font
 							</span>
 							<DropdownSelect
+								ariaLabel="Mono Font"
 								value={uiFontMono}
 								options={monoFontOptions}
 								fullWidth
@@ -510,6 +514,7 @@
 							Landing Page
 						</span>
 						<DropdownSelect
+							ariaLabel="Landing Page"
 							value={landingPage}
 							options={landingPageOptions}
 							header="The page Profilarr opens on"
@@ -571,6 +576,7 @@
 								Schedule
 							</span>
 							<DropdownSelect
+								ariaLabel="Schedule"
 								value={backupSchedule}
 								options={backupScheduleOptions}
 								fullWidth
@@ -681,6 +687,7 @@
 								</span>
 								<div class="font-mono">
 									<DropdownSelect
+										ariaLabel="Minimum Level"
 										value={logMinLevel}
 										options={logLevelOptions}
 										fullWidth

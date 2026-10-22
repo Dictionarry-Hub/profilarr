@@ -174,6 +174,7 @@
 					{/if}
 				</p>
 				<DropdownSelect
+					ariaLabel="Service Type"
 					value={selectedType}
 					options={typeOptions}
 					disabled={mode === 'edit'}

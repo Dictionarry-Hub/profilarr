@@ -249,6 +249,7 @@
 	class:flex-wrap={scheduleType === 'weekly' || scheduleType === 'monthly'}
 >
 	<DropdownSelect
+		ariaLabel="Frequency"
 		value={scheduleType}
 		options={scheduleOptions}
 		{disabled}
@@ -318,6 +319,7 @@
 	{:else if scheduleType === 'weekly'}
 		<div class="basis-full md:hidden"></div>
 		<DropdownSelect
+			ariaLabel="Day of Week"
 			value={String(weeklyDay)}
 			options={weekdayOptions}
 			{disabled}

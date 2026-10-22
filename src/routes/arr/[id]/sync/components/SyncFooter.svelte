@@ -47,6 +47,7 @@
 				<div data-onboarding={onboardingId}>
 					<span class="mb-1 block text-xs text-neutral-500 dark:text-neutral-400">Trigger</span>
 					<DropdownSelect
+						ariaLabel="Trigger"
 						value={syncTrigger}
 						options={triggerOptions}
 						buttonSize="sm"

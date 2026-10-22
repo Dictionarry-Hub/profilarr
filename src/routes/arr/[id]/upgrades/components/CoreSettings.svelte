@@ -106,6 +106,7 @@
 			Mode
 		</span>
 		<DropdownSelect
+			ariaLabel="Mode"
 			value={filterMode}
 			options={modeOptions}
 			minWidth="10rem"

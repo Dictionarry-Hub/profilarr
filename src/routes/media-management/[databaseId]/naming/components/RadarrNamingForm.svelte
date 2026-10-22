@@ -273,6 +273,7 @@
 					Colon Replacement
 				</div>
 				<DropdownSelect
+					ariaLabel="Colon Replacement"
 					value={formData.colonReplacementFormat}
 					options={RADARR_COLON_REPLACEMENT_OPTIONS}
 					disabled={!formData.rename || !formData.replaceIllegalCharacters}

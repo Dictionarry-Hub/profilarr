@@ -177,6 +177,7 @@
 		<div class="flex items-center gap-2">
 			<span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Match</span>
 			<DropdownSelect
+				ariaLabel="Match"
 				value={group.match}
 				options={[
 					{ value: 'all', label: 'All (AND)' },
@@ -237,6 +238,7 @@
 							{#if field}
 								<div class="shrink-0">
 									<DropdownSelect
+										ariaLabel="Operator"
 										value={child.operator}
 										options={isDynamicString
 											? dynamicStringOperators
@@ -261,6 +263,7 @@
 										{#if field?.valueType === 'boolean' || field?.valueType === 'select'}
 											{#if field.values}
 												<DropdownSelect
+													ariaLabel="Value"
 													value={String(child.value)}
 													options={field.values.map((v) => ({
 														value: String(v.value),

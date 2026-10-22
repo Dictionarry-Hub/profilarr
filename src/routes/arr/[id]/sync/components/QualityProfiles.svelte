@@ -465,6 +465,7 @@
 														: '[&_button]:text-neutral-400 [&_button]:italic dark:[&_button]:text-neutral-500'}"
 												>
 													<DropdownSelect
+														ariaLabel={`${profile.name} Quality Definition`}
 														value={entry?.sizes ?? ''}
 														options={sizeOptions(database)}
 														header="Quality Definition"
@@ -517,6 +518,7 @@
 						Global Quality Definition
 					</span>
 					<DropdownSelect
+						ariaLabel="Global Quality Definition"
 						value={globalValue}
 						options={globalOptions}
 						header="Global Quality Definition"

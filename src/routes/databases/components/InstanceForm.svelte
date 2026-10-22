@@ -367,6 +367,7 @@
 					Force changes to save as local user ops even when a personal access token is set.
 				</p>
 				<DropdownSelect
+					ariaLabel="Local Ops Only"
 					value={localOpsEnabled}
 					options={localOpsOptions}
 					fullWidth
@@ -399,6 +400,7 @@
 					</li>
 				</ul>
 				<DropdownSelect
+					ariaLabel="Conflict Strategy"
 					value={conflictStrategy}
 					options={conflictStrategyOptions}
 					fullWidth
@@ -417,6 +419,7 @@
 					How often to check for updates from the remote repository
 				</p>
 				<DropdownSelect
+					ariaLabel="Sync Strategy"
 					value={syncStrategy}
 					options={syncStrategyOptions}
 					fullWidth
@@ -432,6 +435,7 @@
 					Automatically pull updates when available, or just receive notifications
 				</p>
 				<DropdownSelect
+					ariaLabel="Auto Pull"
 					value={autoPull}
 					options={autoPullOptions}
 					on:change={(e) => update('autoPull', e.detail)}
