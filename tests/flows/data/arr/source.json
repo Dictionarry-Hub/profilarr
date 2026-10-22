@@ -1,0 +1,12 @@
+{
+	"radarr": {
+		"image": "lscr.io/linuxserver/radarr:latest@sha256:facfc6ca07b7c93fbd0a7b9741d42896cf439082945fc1cf5fce44294508412d",
+		"version": "6.4.4.10685",
+		"recordedAt": "2026-10-22T11:54:21.929Z"
+	},
+	"sonarr": {
+		"image": "lscr.io/linuxserver/sonarr:latest@sha256:2144c68cad8cdd262d09cd9ffa4f63ae903760b4052c82b566fe149ca0394714",
+		"version": "4.0.16.2944",
+		"recordedAt": "2026-10-22T11:54:31.051Z"
+	}
+}
