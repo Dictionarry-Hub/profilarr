@@ -12,6 +12,10 @@ info:
     Profilarr manages configuration for Radarr and Sonarr by syncing
     curated configuration databases into Arr instances.
 
+    `POST`, `PUT`, `PATCH`, and `DELETE` requests without a body must still
+    send `Content-Type: application/json`. Requests with no `Content-Type`
+    are rejected with `403` as cross-site form submissions.
+
 servers:
   - url: /api/v1
     description: API v1

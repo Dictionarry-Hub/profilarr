@@ -12,7 +12,7 @@ import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifie
 import { TelegramNotifier } from '$notifications/notifiers/telegram/TelegramNotifier.ts';
 import { Colors } from '$notifications/notifiers/discord/embed.ts';
 import { rename } from '$notifications/definitions/rename.ts';
-import type { RenameJobLog } from '$lib/server/rename/types.ts';
+import type { RenameJobLog } from '#lib/server/rename/types.ts';
 
 const MOCK_PORT = PORTS.notifications.rename;
 let captured: CapturedRequest[];

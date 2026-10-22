@@ -11,7 +11,7 @@
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
 	import { escapeHtml } from '$shared/utils/sanitize.ts';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { FEATURES } from '$shared/features.ts';
 	import { formatDelay } from '$shared/utils/duration.ts';
 

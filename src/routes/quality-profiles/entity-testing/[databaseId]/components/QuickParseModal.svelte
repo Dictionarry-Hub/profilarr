@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import HardDrive from '@lucide/svelte/icons/hard-drive';
 	import Tag from '@lucide/svelte/icons/tag';
 	import Users from '@lucide/svelte/icons/users';
@@ -22,12 +22,10 @@
 		radarr: number | null;
 		sonarr: number | null;
 	}
-
 	interface ProfileCfScores {
 		profileName: string;
 		scores: Record<string, CfScore>;
 	}
-
 	interface CustomFormatInfo {
 		name: string;
 	}
@@ -257,6 +255,7 @@
 				{#if numericProfileId}
 					<div class="flex items-center gap-2 text-sm">
 						<span class="font-medium text-neutral-500 dark:text-neutral-400">Score</span>
+
 						<Score {score} />
 					</div>
 				{/if}
@@ -360,6 +359,7 @@
 
 	<svelte:fragment slot="footer">
 		<div></div>
+
 		<Button text="Close" icon={X} on:click={() => (open = false)} />
 	</svelte:fragment>
 </Modal>

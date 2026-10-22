@@ -6,7 +6,6 @@
  * use GET /api/v1/announcements/{id} for the full payload.
  */
 
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
 import { listVisible } from '$announcements/index.ts';
@@ -29,5 +28,5 @@ function toSummary(a: AnnouncementRecord): AnnouncementSummary {
 }
 
 export const GET: RequestHandler = () => {
-	return json(listVisible().map(toSummary));
+	return Response.json(listVisible().map(toSummary));
 };

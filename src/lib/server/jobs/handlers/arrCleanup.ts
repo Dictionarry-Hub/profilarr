@@ -8,12 +8,12 @@ import {
 	scanForStaleItems,
 	deleteStaleItems,
 	type CleanupScanResult
-} from '$lib/server/sync/cleanup.ts';
+} from '#lib/server/sync/cleanup.ts';
 import {
 	scanForRemovedEntities,
 	deleteRemovedEntities,
 	type EntityScanResult
-} from '$lib/server/sync/entityCleanup.ts';
+} from '#lib/server/sync/entityCleanup.ts';
 import { calculateNextRun } from '../scheduleUtils.ts';
 import { logger } from '$logger/logger.ts';
 import { notifications } from '$notifications/definitions/index.ts';

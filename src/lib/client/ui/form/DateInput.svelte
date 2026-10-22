@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
-	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
+	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
 	import { getDatePartOrder } from '$shared/utils/dates.ts';
 
 	export let label: string;

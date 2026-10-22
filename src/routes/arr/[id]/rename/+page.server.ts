@@ -4,10 +4,10 @@ import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstanc
 import { arrRenameSettingsQueries } from '$db/queries/arrRenameSettings.ts';
 import { renameRunsQueries } from '$db/queries/renameRuns.ts';
 import { logger } from '$logger/logger.ts';
-import { scheduleRenameForInstance } from '$lib/server/jobs/init.ts';
-import { enqueueJob } from '$lib/server/jobs/queueService.ts';
-import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
-import { validateCronExpression, calculateNextRun } from '$lib/server/jobs/scheduleUtils.ts';
+import { scheduleRenameForInstance } from '#lib/server/jobs/init.ts';
+import { enqueueJob } from '#lib/server/jobs/queueService.ts';
+import { buildJobDisplayName } from '#lib/server/jobs/display.ts';
+import { validateCronExpression, calculateNextRun } from '#lib/server/jobs/scheduleUtils.ts';
 
 export const load: ServerLoad = ({ params }) => {
 	const id = parseInt(params.id || '', 10);

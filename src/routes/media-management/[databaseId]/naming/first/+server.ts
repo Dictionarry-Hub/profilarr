@@ -1,4 +1,4 @@
-import { error, json } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { pcdManager } from '$pcd/core/manager.ts';
 import * as namingQueries from '$pcd/entities/mediaManagement/naming/index.ts';
@@ -14,5 +14,5 @@ export const GET: RequestHandler = async ({ params }) => {
 	const path = items.length
 		? `/media-management/${dbId}/naming/${items[0].arr_type}/${encodeURIComponent(items[0].name)}`
 		: `/media-management/${dbId}/naming`;
-	return json({ path });
+	return Response.json({ path });
 };

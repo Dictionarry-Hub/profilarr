@@ -43,8 +43,8 @@
 	import type { Column } from '$ui/table/types';
 	import type { DraftEntityChange } from './components/types';
 	import { parseUTC, formatDate, formatDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '$lib/client/stores/timezone.ts';
+	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
+	import { serverTimezone } from '#lib/client/stores/timezone.ts';
 
 	export let data: PageData;
 
@@ -149,7 +149,9 @@
 		}
 	}
 
-	afterNavigate(() => {
+	afterNavigate(({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
+
 		fetchChanges();
 	});
 
@@ -516,11 +518,13 @@
 			// Form actions returning `{success: false, error}` come back as
 			// result.type === 'success' -- check data.success explicitly.
 			const dataSuccess = result?.data?.success;
+
 			const isSuccess =
 				response.ok &&
 				(result?.type === 'redirect' ||
 					dataSuccess === true ||
 					(dataSuccess === undefined && result?.type === 'success'));
+
 			const droppedCount =
 				typeof result?.data?.dropped === 'number'
 					? result.data.dropped

@@ -6,13 +6,13 @@ import { upgradeRunsQueries } from '$db/queries/upgradeRuns.ts';
 import { logger } from '$logger/logger.ts';
 import type { FilterConfig, FilterMode } from '$shared/upgrades/filters.ts';
 import { searchRateLimits, getRunsPerHour, calculateMaxCount } from '$shared/upgrades/filters.ts';
-import { clearDryRunExclusions } from '$lib/server/upgrades/processor.ts';
-import { logDryRunCacheCleared } from '$lib/server/upgrades/logger.ts';
-import { scheduleUpgradeForInstance } from '$lib/server/jobs/init.ts';
-import { upsertScheduledJob } from '$lib/server/jobs/queueService.ts';
-import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
-import { validateCronExpression, calculateNextRun } from '$lib/server/jobs/scheduleUtils.ts';
-import { loadDynamicFilterOptions } from '$lib/server/upgrades/dynamicOptions.ts';
+import { clearDryRunExclusions } from '#lib/server/upgrades/processor.ts';
+import { logDryRunCacheCleared } from '#lib/server/upgrades/logger.ts';
+import { scheduleUpgradeForInstance } from '#lib/server/jobs/init.ts';
+import { upsertScheduledJob } from '#lib/server/jobs/queueService.ts';
+import { buildJobDisplayName } from '#lib/server/jobs/display.ts';
+import { validateCronExpression, calculateNextRun } from '#lib/server/jobs/scheduleUtils.ts';
+import { loadDynamicFilterOptions } from '#lib/server/upgrades/dynamicOptions.ts';
 
 /** In-memory rate limit for upgrade dry runs: Map<instanceId, lastDryRunTimestamp> */
 const dryRunTimestamps = new Map<number, number>();

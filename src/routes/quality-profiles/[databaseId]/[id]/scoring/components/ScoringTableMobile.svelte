@@ -3,7 +3,7 @@
 	import NumberInput from '$ui/form/NumberInput.svelte';
 	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
 	import Check from '@lucide/svelte/icons/check';
-	import { createVirtualList } from '$lib/client/utils/virtualList';
+	import { createVirtualList } from '#lib/client/utils/virtualList.js';
 	import InlineLink from '$ui/link/InlineLink.svelte';
 
 	export let databaseId: number;

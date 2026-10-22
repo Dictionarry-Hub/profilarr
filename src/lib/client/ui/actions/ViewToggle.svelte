@@ -6,7 +6,7 @@
 	import Eye from '@lucide/svelte/icons/eye';
 	import LayoutGrid from '@lucide/svelte/icons/layout-grid';
 	import Table from '@lucide/svelte/icons/table';
-	import type { ViewMode } from '$lib/client/stores/dataPage';
+	import type { ViewMode } from '#lib/client/stores/dataPage.js';
 
 	export let value: ViewMode = 'cards';
 	export let position: 'left' | 'right' | 'middle' = 'right';

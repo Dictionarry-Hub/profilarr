@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import FolderTree from '@lucide/svelte/icons/folder-tree';
 	import Link from '@lucide/svelte/icons/link';
 	import Sliders from '@lucide/svelte/icons/sliders-vertical';
@@ -30,8 +30,22 @@
 	};
 
 	const items: NavItem[] = [
-		{ href: '/databases', label: 'Databases', icon: FolderTree, emoji: '📦', priority: 'always' },
-		{ href: '/arr', label: 'Arrs', icon: Link, emoji: '🔗', priority: 'always' },
+		{
+			href: '/databases',
+			label: 'Databases',
+			icon: FolderTree,
+			emoji: '📦',
+			priority: 'always'
+		},
+
+		{
+			href: '/arr',
+			label: 'Arrs',
+			icon: Link,
+			emoji: '🔗',
+			priority: 'always'
+		},
+
 		{
 			href: '/quality-profiles',
 			label: 'Profiles',
@@ -39,8 +53,23 @@
 			emoji: '⚡',
 			priority: 'always'
 		},
-		{ href: '/custom-formats', label: 'Formats', icon: Palette, emoji: '🎨', priority: 'always' },
-		{ href: '/settings', label: 'Settings', icon: Settings, emoji: '⚙️', priority: 'always' },
+
+		{
+			href: '/custom-formats',
+			label: 'Formats',
+			icon: Palette,
+			emoji: '🎨',
+			priority: 'always'
+		},
+
+		{
+			href: '/settings',
+			label: 'Settings',
+			icon: Settings,
+			emoji: '⚙️',
+			priority: 'always'
+		},
+
 		{
 			href: '/regular-expressions',
 			label: 'Regex',

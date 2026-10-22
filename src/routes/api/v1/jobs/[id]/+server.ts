@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1.d.ts';
 import { jobQueueQueries } from '$db/queries/jobQueue.ts';
@@ -17,13 +16,13 @@ export const GET: RequestHandler = async ({ params }) => {
 	const id = parseInt(params.id!, 10);
 	if (isNaN(id) || id < 1) {
 		const error: ErrorResponse = { error: 'Invalid job ID' };
-		return json(error, { status: 400 });
+		return Response.json(error, { status: 400 });
 	}
 
 	const job = jobQueueQueries.getById(id);
 	if (!job) {
 		const error: ErrorResponse = { error: 'Job not found' };
-		return json(error, { status: 404 });
+		return Response.json(error, { status: 404 });
 	}
 
 	const runs = jobRunHistoryQueries.getByQueueId(id, 1);
@@ -47,5 +46,5 @@ export const GET: RequestHandler = async ({ params }) => {
 			: null
 	};
 
-	return json(response);
+	return Response.json(response);
 };

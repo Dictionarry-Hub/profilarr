@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import type { ActionData, PageData } from './$types';
 	import { onDestroy, onMount } from 'svelte';
-	import { alertStore } from '$lib/client/alerts/store';
-	import { initEdit, update as updateDirty, clear, isDirty } from '$lib/client/stores/dirty';
+	import { alertStore } from '#lib/client/alerts/store.js';
+	import { initEdit, update as updateDirty, clear, isDirty } from '#lib/client/stores/dirty.js';
 	import { jobStatus } from '$stores/jobStatus';
 	import { formatSmartDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat';
-	import { serverTimezone } from '$lib/client/stores/timezone';
+	import { dateFormat } from '#lib/client/stores/dateFormat.js';
+	import { serverTimezone } from '#lib/client/stores/timezone.js';
 	import Button from '$ui/button/Button.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import CronInput from '$ui/cron/CronInput.svelte';
@@ -71,7 +71,7 @@
 				status.state === 'completed' &&
 				status.jobType === 'arr.drift'
 			) {
-				invalidateAll();
+				refreshAll();
 			}
 			previousJobState = status.state;
 		});

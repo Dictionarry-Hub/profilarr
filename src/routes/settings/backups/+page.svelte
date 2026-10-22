@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { alertStore } from '$alerts/store';
 	import Download from '@lucide/svelte/icons/download';
 	import Trash2 from '@lucide/svelte/icons/trash';
@@ -14,15 +14,15 @@
 	import Table from '$ui/table/Table.svelte';
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import type { Column } from '$ui/table/types';
-	import ActionsBar from '$lib/client/ui/actions/ActionsBar.svelte';
-	import ActionButton from '$lib/client/ui/actions/ActionButton.svelte';
-	import SearchAction from '$lib/client/ui/actions/SearchAction.svelte';
-	import { getPersistentSearchStore } from '$lib/client/stores/search';
-	import { jobStatus } from '$lib/client/stores/jobStatus';
+	import ActionsBar from '#lib/client/ui/actions/ActionsBar.svelte';
+	import ActionButton from '#lib/client/ui/actions/ActionButton.svelte';
+	import SearchAction from '#lib/client/ui/actions/SearchAction.svelte';
+	import { getPersistentSearchStore } from '#lib/client/stores/search.js';
+	import { jobStatus } from '#lib/client/stores/jobStatus.js';
 	import { onMount } from 'svelte';
 	import { formatDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '$lib/client/stores/dateFormat';
-	import { serverTimezone } from '$lib/client/stores/timezone';
+	import { dateFormat } from '#lib/client/stores/dateFormat.js';
+	import { serverTimezone } from '#lib/client/stores/timezone.js';
 
 	export let data: PageData;
 
@@ -89,7 +89,7 @@
 
 			if (res.ok) {
 				alertStore.add('success', 'Backup uploaded successfully');
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				const body = await res.json();
 				alertStore.add('error', body.error || 'Failed to upload backup');
@@ -132,7 +132,7 @@
 				status.state === 'completed' &&
 				status.jobType.startsWith('backup.')
 			) {
-				invalidateAll();
+				refreshAll();
 			}
 			prevState = status.state;
 		});
@@ -157,7 +157,7 @@
 
 			if (res.ok) {
 				alertStore.add('success', 'Backup deleted successfully');
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				const body = await res.json();
 				alertStore.add('error', body.error || 'Failed to delete backup');

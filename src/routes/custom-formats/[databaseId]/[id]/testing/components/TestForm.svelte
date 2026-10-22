@@ -11,7 +11,7 @@
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import Save from '@lucide/svelte/icons/save';
 	import X from '@lucide/svelte/icons/x';
-	import { isDirty, initEdit, initCreate, update, clear } from '$lib/client/stores/dirty';
+	import { isDirty, initEdit, initCreate, update, clear } from '#lib/client/stores/dirty.js';
 
 	// Props
 	export let mode: 'create' | 'edit';

@@ -14,8 +14,8 @@
 		getMultiEpisodeStyleLabel,
 		type SonarrColonReplacementFormat
 	} from '$shared/pcd/mediaManagement.ts';
-	import radarrLogo from '$lib/client/assets/Radarr.svg';
-	import sonarrLogo from '$lib/client/assets/Sonarr.svg';
+	import radarrLogo from '#lib/client/assets/Radarr.svg';
+	import sonarrLogo from '#lib/client/assets/Sonarr.svg';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let configs: NamingListItem[];

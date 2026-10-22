@@ -6,7 +6,7 @@ import { RadarrClient } from '$utils/arr/clients/radarr.ts';
 import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
 import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
 import { LIBRARY_REQUEST_TIMEOUT_MS } from '$utils/arr/base.ts';
-import { getProfilarrProfileNames } from '$lib/server/sync/libraryHelpers.ts';
+import { getProfilarrProfileNames } from '#lib/server/sync/libraryHelpers.ts';
 import { calculateNextRunFromMinutes } from '../scheduleUtils.ts';
 import { logger } from '$logger/logger.ts';
 

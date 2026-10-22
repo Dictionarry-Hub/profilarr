@@ -12,10 +12,10 @@ import * as delayProfileQueries from '$pcd/entities/delayProfiles/index.ts';
 import * as namingQueries from '$pcd/entities/mediaManagement/naming/index.ts';
 import * as qualityDefinitionsQueries from '$pcd/entities/mediaManagement/quality-definitions/index.ts';
 import * as mediaSettingsQueries from '$pcd/entities/mediaManagement/media-settings/index.ts';
-import { calculateNextRun } from '$lib/server/sync/utils.ts';
-import { scheduleArrSyncForInstance } from '$lib/server/jobs/init.ts';
-import { enqueueJob } from '$lib/server/jobs/queueService.ts';
-import { buildJobDisplayName } from '$lib/server/jobs/display.ts';
+import { calculateNextRun } from '#lib/server/sync/utils.ts';
+import { scheduleArrSyncForInstance } from '#lib/server/jobs/init.ts';
+import { enqueueJob } from '#lib/server/jobs/queueService.ts';
+import { buildJobDisplayName } from '#lib/server/jobs/display.ts';
 import { buildExpectedCustomFormatsPerDatabase } from '$drift/customFormats.ts';
 import type { CustomFormatDriftDiff, DatabaseCustomFormatDriftDiff } from '$drift/customFormats.ts';
 import type {

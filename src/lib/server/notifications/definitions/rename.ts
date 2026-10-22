@@ -3,7 +3,7 @@
  */
 
 import type { Notification, NotificationBlock } from '../types.ts';
-import type { RenameJobLog } from '$lib/server/rename/types.ts';
+import type { RenameJobLog } from '#lib/server/rename/types.ts';
 
 interface RenameNotificationParams {
 	log: RenameJobLog;

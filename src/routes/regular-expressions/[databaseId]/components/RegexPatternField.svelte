@@ -5,7 +5,7 @@
 	import X from '@lucide/svelte/icons/x';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import { alertStore } from '$alerts/store';
-	import { sanitizeRegex101Id } from '$lib/client/utils/regex101';
+	import { sanitizeRegex101Id } from '#lib/client/utils/regex101.js';
 	import Label from '$ui/label/Label.svelte';
 	import FormInput from '$ui/form/FormInput.svelte';
 

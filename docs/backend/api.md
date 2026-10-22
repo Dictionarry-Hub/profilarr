@@ -130,11 +130,10 @@ type MyResponse = components['schemas']['MySchema'];
 Handlers live under `src/routes/api/v1/` and export named HTTP method functions:
 
 ```ts
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async () => {
-	return json(data);
+	return Response.json(data);
 };
 ```
 

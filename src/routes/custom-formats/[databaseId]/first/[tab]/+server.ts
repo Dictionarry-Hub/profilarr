@@ -1,4 +1,4 @@
-import { error, json } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { pcdManager } from '$pcd/core/manager.ts';
 import * as customFormatQueries from '$pcd/entities/customFormats/index.ts';
@@ -17,5 +17,5 @@ export const GET: RequestHandler = async ({ params }) => {
 	const path = cfs.length
 		? `/custom-formats/${dbId}/${cfs[0].id}/${params.tab}`
 		: `/custom-formats/${dbId}`;
-	return json({ path });
+	return Response.json({ path });
 };

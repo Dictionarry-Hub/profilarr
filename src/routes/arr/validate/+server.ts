@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { createArrClient } from '$arr/factory.ts';
 import { recordDetectedVersion } from '$arr/version.ts';
@@ -17,11 +16,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Validation
 		if (!type || !url || !apiKey) {
-			return json({ success: false, error: 'Missing required fields' }, { status: 400 });
+			return Response.json({ success: false, error: 'Missing required fields' }, { status: 400 });
 		}
 
 		if (!VALID_TYPES.includes(type)) {
-			return json({ success: false, error: 'Invalid arr type' }, { status: 400 });
+			return Response.json({ success: false, error: 'Invalid arr type' }, { status: 400 });
 		}
 
 		// An existing instance (edit mode) gets the result stored on its row
@@ -59,16 +58,16 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		if (info) {
 			if (existing) await recordDetectedVersion(existing, info, 'arr/validate');
-			return json({
+			return Response.json({
 				success: true,
 				appName: info.appName,
 				version: info.version,
 				api: info.currentApi
 			});
 		}
-		return json({ success: false, error: failure }, { status: 400 });
+		return Response.json({ success: false, error: failure }, { status: 400 });
 	} catch (error) {
-		return json(
+		return Response.json(
 			{
 				success: false,
 				error: error instanceof Error ? error.message : 'Unknown error'

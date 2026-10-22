@@ -7,8 +7,8 @@
 	import Settings from '@lucide/svelte/icons/settings';
 	import FileCog from '@lucide/svelte/icons/file-cog';
 	import Megaphone from '@lucide/svelte/icons/megaphone';
-	import { page } from '$app/stores';
-	import { FEATURES } from '$lib/shared/features';
+	import { page } from '$stores/page';
+	import { FEATURES } from '#lib/shared/features.js';
 
 	$: database = $page.data.database;
 	$: currentPath = $page.url.pathname;
@@ -81,5 +81,6 @@
 
 <div class="px-4 pb-4 md:px-8 md:pb-8">
 	<Tabs {tabs} {breadcrumb} responsive mobileBreakpoint={1400} />
-	<slot />
+
+	<slot></slot>
 </div>

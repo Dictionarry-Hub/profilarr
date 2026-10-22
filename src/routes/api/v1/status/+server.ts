@@ -6,7 +6,6 @@
  * backup status.
  */
 
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { components } from '$api/v1';
 import { db } from '$db/db.ts';
@@ -16,7 +15,7 @@ import { arrSyncQueries } from '$db/queries/arrSync.ts';
 import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
 import { getCache } from '$pcd/database/registry.ts';
 import { config } from '$config';
-import { build } from '$lib/shared/build.ts';
+import { build } from '#lib/shared/build.ts';
 import { getUnreadCount } from '$announcements/index.ts';
 
 type StatusResponse = components['schemas']['StatusResponse'];
@@ -35,7 +34,7 @@ export const GET: RequestHandler = async () => {
 		announcements: { unread: getUnreadCount() }
 	};
 
-	return json(response);
+	return Response.json(response);
 };
 
 function buildDatabases(): StatusResponse['databases'] {

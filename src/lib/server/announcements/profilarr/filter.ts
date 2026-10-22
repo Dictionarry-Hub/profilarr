@@ -9,7 +9,7 @@
 import { isVisibleBase } from '../shared/filter.ts';
 import type { AnnouncementSeverity } from '../shared/types.ts';
 import type { AnnouncementRecord } from './types.ts';
-import type { Channel } from '$lib/shared/build.ts';
+import type { Channel } from '#lib/shared/build.ts';
 
 export type { AnnouncementSeverity };
 

@@ -3,7 +3,7 @@
 	import Alert from './Alert.svelte';
 	import { alertSettingsStore, type AlertPosition } from './settings';
 	import { sidebarCollapsed } from '$stores/sidebar';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 
 	const positionClasses: Record<AlertPosition, string> = {
 		'top-left': 'top-4 left-4',

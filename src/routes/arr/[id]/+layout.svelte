@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import Library from '@lucide/svelte/icons/library';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import ArrowLeftRight from '@lucide/svelte/icons/arrow-left-right';
@@ -84,7 +84,8 @@
 
 <div class="overflow-x-clip px-4 pb-4 md:px-8 md:pb-8">
 	<Tabs {tabs} {breadcrumb} responsive mobileBreakpoint={1400} />
+
 	{#key data.instance.id}
-		<slot />
+		<slot></slot>
 	{/key}
 </div>

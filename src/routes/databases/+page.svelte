@@ -3,7 +3,7 @@
 	import Database from '@lucide/svelte/icons/database';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Info from '@lucide/svelte/icons/info';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import EmptyState from '$ui/state/EmptyState.svelte';
 	import Modal from '$ui/modal/Modal.svelte';
@@ -15,7 +15,7 @@
 	import PageMeta from '$ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { createDataPageStore } from '$lib/client/stores/dataPage';
+	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
 	import { alertStore } from '$alerts/store';
 	import { jobStatus } from '$stores/jobStatus';
 	import type { PageData } from './$types';
@@ -54,7 +54,7 @@
 				state.jobType === 'pcd.link' &&
 				state.status === 'success'
 			) {
-				invalidateAll();
+				refreshAll();
 			}
 		});
 	});

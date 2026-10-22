@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { browser } from '$app/environment';
+	import { page } from '$stores/page';
+	import { browser } from '$app/env';
 	import { tick } from 'svelte';
 	import TagInput from '$ui/form/TagInput.svelte';
 	import MarkdownInput from '$ui/form/MarkdownInput.svelte';
@@ -17,7 +17,7 @@
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
-	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 	import type { Regex101UnitTest } from '../../regex101/types';
 

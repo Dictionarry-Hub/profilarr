@@ -3,7 +3,7 @@ import type { JobHandler } from '../queueTypes.ts';
 import { upgradeConfigsQueries } from '$db/queries/upgradeConfigs.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import type { FilterConfig } from '$shared/upgrades/filters.ts';
-import { processUpgradeConfig } from '$lib/server/upgrades/processor.ts';
+import { processUpgradeConfig } from '#lib/server/upgrades/processor.ts';
 import { calculateNextRun } from '../scheduleUtils.ts';
 import { logger } from '$logger/logger.ts';
 

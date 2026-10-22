@@ -5,7 +5,14 @@
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import { alertStore } from '$alerts/store';
-	import { isDirty, initEdit, initCreate, update, current, clear } from '$lib/client/stores/dirty';
+	import {
+		isDirty,
+		initEdit,
+		initCreate,
+		update,
+		current,
+		clear
+	} from '#lib/client/stores/dirty.js';
 	import type { AnnouncementSeverity } from '$announcements/database/types.ts';
 	import FormInput from '$ui/form/FormInput.svelte';
 	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';

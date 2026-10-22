@@ -18,10 +18,10 @@
 	import Button from '$ui/button/Button.svelte';
 	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import { alertStore } from '$lib/client/alerts/store.ts';
+	import { alertStore } from '#lib/client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
 	import { jobStatus } from '$stores/jobStatus';
-	import { balancedGrid } from '$lib/client/utils/balancedGrid.ts';
+	import { balancedGrid } from '#lib/client/utils/balancedGrid.ts';
 
 	interface DatabaseWithProfiles {
 		id: number;

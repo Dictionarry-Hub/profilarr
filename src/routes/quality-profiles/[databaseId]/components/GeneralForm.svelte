@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { tick } from 'svelte';
 	import Save from '@lucide/svelte/icons/save';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
@@ -15,7 +15,7 @@
 	import Button from '$ui/button/Button.svelte';
 	import StickyCard from '$ui/card/StickyCard.svelte';
 	import { alertStore } from '$alerts/store';
-	import { current, isDirty, initEdit, initCreate, update } from '$lib/client/stores/dirty';
+	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
 	import type { AffectedArr } from '$shared/sync/types.ts';
 
 	// Form data shape
@@ -225,11 +225,14 @@
 			</div>
 
 			<!-- Tags -->
+
 			<div class="space-y-2" data-onboarding="qp-general-tags">
 				<div class="block text-sm font-medium text-neutral-900 dark:text-neutral-100">Tags</div>
+
 				<p class="text-xs text-neutral-600 dark:text-neutral-400">
 					Add tags to organize and categorize this quality profile.
 				</p>
+
 				<TagInput {tags} onchange={(newTags) => update('tags', newTags)} />
 			</div>
 

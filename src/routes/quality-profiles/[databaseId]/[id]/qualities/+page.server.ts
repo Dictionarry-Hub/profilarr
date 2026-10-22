@@ -4,7 +4,7 @@ import { pcdManager } from '$pcd/core/manager.ts';
 import { canWriteToBase } from '$pcd/ops/writer.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
 import type { OperationLayer } from '$pcd/core/types.ts';
-import { getAffectedArrs } from '$lib/server/sync/affectedArrs.ts';
+import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
 import { hasQualityGroupMembersPositionInCache } from '$pcd/entities/qualityProfiles/qualities/groupMembersSchema.ts';
 
 type OrderedItem = {

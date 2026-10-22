@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
 	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Scale from '@lucide/svelte/icons/scale';
 	import Layers from '@lucide/svelte/icons/layers';
@@ -42,7 +42,7 @@
 
 <div class="px-4 pb-4 md:px-8 md:pb-8">
 	<Tabs {tabs} {breadcrumb} responsive />
-	<slot />
+	<slot></slot>
 </div>
 
 <DirtyModal />

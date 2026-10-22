@@ -3,7 +3,7 @@
  * Handles text search, tag search, NOT: operator parsing, and persistent search field state.
  */
 
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 
 export type SearchMode = 'text' | 'tags';
 

@@ -12,7 +12,7 @@
 	import Download from '@lucide/svelte/icons/download';
 	import { renderMarkdown } from '$shared/utils/markdown';
 	import { escapeHtml } from '$shared/utils/sanitize';
-	import { page } from '$app/stores';
+	import { page } from '$stores/page';
 	import { FEATURES } from '$shared/features.ts';
 
 	export let expressions: RegularExpressionWithTags[];

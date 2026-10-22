@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import type { PageData } from './$types';
 	import Database from '@lucide/svelte/icons/database';
 	import Eye from '@lucide/svelte/icons/eye';
@@ -170,7 +170,7 @@
 				body,
 				headers: { 'x-sveltekit-action': 'true' }
 			});
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			actionLoading = { ...actionLoading, [key]: false };
 		}
@@ -195,7 +195,7 @@
 				body,
 				headers: { 'x-sveltekit-action': 'true' }
 			});
-			await invalidateAll();
+			await refreshAll();
 			alertStore.add('success', `Marked ${targets.length} as read`);
 		} finally {
 			markAllLoading = false;

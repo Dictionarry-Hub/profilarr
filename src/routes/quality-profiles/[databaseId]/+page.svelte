@@ -17,14 +17,14 @@
 	import { filterMode } from '$stores/filterMode';
 	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
 	import { applySmartFilters } from '$ui/filter/match';
-	import { createViewModeStore } from '$lib/client/stores/dataPage';
+	import { createViewModeStore } from '#lib/client/stores/dataPage.js';
 	import { alertStore } from '$alerts/store';
 	import type { QualityProfileTableRow } from '$shared/pcd/display';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
 	import {
 		qualityProfileLanguageLabel,
 		qualityProfileSearchValues
-	} from '$lib/client/utils/entitySearch';
+	} from '#lib/client/utils/entitySearch.js';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { beforeNavigate, goto, invalidateAll } from '$app/navigation';
+	import { beforeNavigate, goto, refreshAll } from '$app/navigation';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Check from '@lucide/svelte/icons/check';
@@ -18,8 +18,8 @@
 	import ConfirmIdentityModal from '../../components/ConfirmIdentityModal.svelte';
 	import type { Column } from '$ui/table/types';
 	import { alertStore } from '$alerts/store';
-	import { copyToClipboard } from '$lib/client/utils/clipboard';
-	import { current, initCreate, update, clear } from '$lib/client/stores/dirty';
+	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import { current, initCreate, update, clear } from '#lib/client/stores/dirty.js';
 	import {
 		API_KEY_EXPIRY_OPTIONS,
 		DEFAULT_API_KEY_EXPIRY,
@@ -101,6 +101,7 @@
 	let allowLeave = false;
 
 	beforeNavigate((navigation) => {
+		if (navigation.shallow && navigation.type === 'goto') return;
 		if (!created || copied || allowLeave) return;
 		navigation.cancel();
 		// Refresh and tab close fall back to the browser's own prompt
@@ -185,7 +186,7 @@
 						// reloads after a success.) A password confirmation keeps typed values.
 						// An SSO confirmation leaves the page, so drop the dirty state rather
 						// than prompt about values that are lost either way.
-						await invalidateAll();
+						await refreshAll();
 						if (data.confirmation === 'sso') clear();
 					} else if (result.type === 'error') {
 						alertStore.add('error', 'Failed to create API key');
@@ -209,6 +210,7 @@
 				<svelte:fragment slot="right">
 					<div class="flex items-center gap-2">
 						<Button text="Cancel" variant="secondary" href="/settings/security" />
+
 						<Button
 							text={saving ? 'Creating...' : 'Create'}
 							icon={Plus}
@@ -312,7 +314,7 @@
 	open={!created && data.confirmation !== 'none'}
 	confirmation={data.confirmation === 'sso' ? 'sso' : 'password'}
 	on:cancel={() => goto('/settings/security')}
-	on:confirmed={() => invalidateAll()}
+	on:confirmed={() => refreshAll()}
 />
 
 <Modal

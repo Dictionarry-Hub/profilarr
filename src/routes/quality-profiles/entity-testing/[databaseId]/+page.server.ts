@@ -6,7 +6,7 @@ import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import * as entityTestQueries from '$pcd/entities/qualityProfiles/entityTests/index.ts';
 import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
-import { isParserHealthy } from '$lib/server/utils/arr/parser/index.ts';
+import { isParserHealthy } from '#lib/server/utils/arr/parser/index.ts';
 import { setLastDatabase } from '$utils/redirect/lastDatabase.ts';
 
 export const load: ServerLoad = async ({ params, cookies }) => {

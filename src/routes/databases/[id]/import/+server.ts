@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { pcdManager } from '$pcd/core/manager.ts';
 import { canWriteToBase } from '$pcd/ops/writer.ts';
@@ -29,42 +28,46 @@ const VALID_LAYERS: Set<string> = new Set(['user', 'base']);
 export const POST: RequestHandler = async ({ params, request }) => {
 	const databaseId = parseInt(params.id ?? '', 10);
 	if (isNaN(databaseId)) {
-		return json({ error: 'Invalid database ID' } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: 'Invalid database ID' } satisfies ErrorResponse, { status: 400 });
 	}
 
 	let body: Record<string, unknown>;
 	try {
 		body = await request.json();
 	} catch {
-		return json({ error: 'Invalid JSON body' } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: 'Invalid JSON body' } satisfies ErrorResponse, { status: 400 });
 	}
 
 	const { layer, entityType, data } = body;
 
 	if (!layer || !entityType || !data) {
-		return json(
+		return Response.json(
 			{ error: 'Missing required fields: layer, entityType, data' } satisfies ErrorResponse,
 			{ status: 400 }
 		);
 	}
 
 	if (!VALID_LAYERS.has(layer as string)) {
-		return json({ error: `Invalid layer: ${layer}` } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: `Invalid layer: ${layer}` } satisfies ErrorResponse, {
+			status: 400
+		});
 	}
 
 	if (!VALID_ENTITY_TYPES.has(entityType as string)) {
-		return json({ error: `Invalid entityType: ${entityType}` } satisfies ErrorResponse, {
+		return Response.json({ error: `Invalid entityType: ${entityType}` } satisfies ErrorResponse, {
 			status: 400
 		});
 	}
 
 	if (layer === 'base' && !canWriteToBase(databaseId)) {
-		return json({ error: 'Cannot write to base layer' } satisfies ErrorResponse, { status: 403 });
+		return Response.json({ error: 'Cannot write to base layer' } satisfies ErrorResponse, {
+			status: 403
+		});
 	}
 
 	const cache = pcdManager.getCache(databaseId);
 	if (!cache) {
-		return json({ error: 'Database not found' } satisfies ErrorResponse, { status: 404 });
+		return Response.json({ error: 'Database not found' } satisfies ErrorResponse, { status: 404 });
 	}
 
 	const validationError = validatePortableData(
@@ -72,7 +75,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		data as Record<string, unknown>
 	);
 	if (validationError) {
-		return json({ error: validationError } satisfies ErrorResponse, { status: 400 });
+		return Response.json({ error: validationError } satisfies ErrorResponse, { status: 400 });
 	}
 
 	try {
@@ -83,11 +86,11 @@ export const POST: RequestHandler = async ({ params, request }) => {
 			entityType: entityType as EntityType,
 			data: data as Record<string, unknown>
 		});
-		return json({ success: true });
+		return Response.json({ success: true });
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Import failed';
 		const status = message.includes('already exists') ? 409 : 400;
-		return json({ error: message } satisfies ErrorResponse, { status });
+		return Response.json({ error: message } satisfies ErrorResponse, { status });
 	}
 };
 
