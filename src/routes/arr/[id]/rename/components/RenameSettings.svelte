@@ -74,6 +74,7 @@
 		<Toggle
 			checked={renameFolders}
 			label={renameFolders ? 'On' : 'Off'}
+			ariaLabel="Folders"
 			color={renameFolders ? 'accent' : 'neutral'}
 			on:change={(e) => onRenameFoldersChange?.(e.detail)}
 		/>
@@ -88,6 +89,7 @@
 		<Toggle
 			checked={summaryNotifications}
 			label={summaryNotifications ? 'On' : 'Off'}
+			ariaLabel="Summary"
 			color={summaryNotifications ? 'accent' : 'neutral'}
 			on:change={(e) => onSummaryNotificationsChange?.(e.detail)}
 		/>
@@ -104,6 +106,7 @@
 			<Toggle
 				checked={enabled}
 				label={enabled ? 'On' : 'Off'}
+				ariaLabel="Schedule"
 				color="green"
 				on:change={(e) => onEnabledChange?.(e.detail)}
 			/>

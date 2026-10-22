@@ -349,6 +349,7 @@
 							</span>
 							<Toggle
 								label={uiNavIconStyle === 'emoji' ? 'Enabled' : 'Disabled'}
+								ariaLabel="Emoji Icons"
 								checked={uiNavIconStyle === 'emoji'}
 								fullWidth
 								on:change={(e) => {
@@ -459,6 +460,7 @@
 						</span>
 						<Toggle
 							label={arrApplyDefaultDelayProfiles ? 'Enabled' : 'Disabled'}
+							ariaLabel="Apply Default Delay Profile"
 							checked={arrApplyDefaultDelayProfiles}
 							infoHeader="Apply Default Delay Profile"
 							infoBody="When enabled, Profilarr applies a default delay profile when adding a new Radarr or Sonarr instance. Disable this if you want new instances to keep their existing delay profile setup."
@@ -475,6 +477,7 @@
 						</span>
 						<Toggle
 							label={failOnReferencedDelete ? 'Enabled' : 'Disabled'}
+							ariaLabel="Block Referenced Deletes"
 							checked={failOnReferencedDelete}
 							infoHeader="Block Referenced Deletes"
 							infoBody="When enabled, Profilarr blocks deleting custom formats and regular expressions that are still referenced by other PCD entities. Disable this to allow deletes to generate cleanup operations for those references."
@@ -491,6 +494,7 @@
 						</span>
 						<Toggle
 							label={syncPromptEnabled ? 'Enabled' : 'Disabled'}
+							ariaLabel="Prompt to Sync Changes"
 							checked={syncPromptEnabled}
 							infoHeader="Prompt to Sync Changes"
 							infoBody="When enabled, Profilarr prompts you to sync affected Arr instances after saving an entity. Disable this to return normally without offering an immediate sync."
@@ -550,6 +554,7 @@
 						</span>
 						<Toggle
 							label={backupEnabled ? 'Enabled' : 'Disabled'}
+							ariaLabel="Automatic Backups"
 							checked={backupEnabled}
 							fullWidth={backupEnabled}
 							on:change={(e) => {
@@ -626,6 +631,7 @@
 							</span>
 							<Toggle
 								label={logEnabled ? 'Enabled' : 'Disabled'}
+								ariaLabel="Logging"
 								checked={logEnabled}
 								fullWidth={logEnabled}
 								on:change={(e) => {
@@ -643,6 +649,7 @@
 								</span>
 								<Toggle
 									label={logFileLogging ? 'Enabled' : 'Disabled'}
+									ariaLabel="File Logging"
 									checked={logFileLogging}
 									fullWidth
 									on:change={(e) => {
@@ -658,6 +665,7 @@
 								</span>
 								<Toggle
 									label={logConsoleLogging ? 'Enabled' : 'Disabled'}
+									ariaLabel="Console Logging"
 									checked={logConsoleLogging}
 									fullWidth
 									on:change={(e) => {

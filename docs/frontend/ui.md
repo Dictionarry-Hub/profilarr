@@ -333,7 +333,10 @@ strength and a check icon in `color` slides in on the right (pinned to the
 far edge with `fullWidth`). `color` accepts `accent` / `amber` / `green` / `red` / `neutral`;
 `checkboxColor` overrides it and also accepts a hex value or CSS variable
 (e.g. `var(--arr-radarr-color)`). Without a label it renders as a compact
-square that shows only the check. Emits a `change` event with `detail`
+square that shows only the check. The switch's accessible name is `ariaLabel`
+when set, otherwise `label`. A toggle whose `label` shows its state, such as
+"Enabled" or "Disabled", must pass `ariaLabel` with the setting it controls.
+Otherwise its name changes on every click. Emits a `change` event with `detail`
 being the new boolean. Supports `fullWidth` for grid cells and `disabled`.
 `infoHeader` / `infoBody` show a large tooltip when the toggle is hovered;
 the body is also linked to the toggle with `aria-describedby` for screen

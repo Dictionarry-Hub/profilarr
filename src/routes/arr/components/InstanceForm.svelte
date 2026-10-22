@@ -575,6 +575,7 @@
 						<Toggle
 							checked={cleanupEnabled}
 							label={cleanupEnabled ? 'Enabled' : 'Disabled'}
+							ariaLabel="Cleanup"
 							color="green"
 							on:change={(e) => update('cleanupEnabled', e.detail)}
 						/>

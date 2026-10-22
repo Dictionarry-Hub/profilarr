@@ -74,6 +74,7 @@
 		<Toggle
 			checked={enabled}
 			label={enabled ? 'Enabled' : 'Disabled'}
+			ariaLabel="Status"
 			color="green"
 			on:change={(e) => onEnabledChange?.(e.detail)}
 		/>
