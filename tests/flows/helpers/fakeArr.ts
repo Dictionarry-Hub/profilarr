@@ -249,6 +249,12 @@ export async function startFakeArr(
 			requests.filter((r) => r.method === method && r.path === path).map((r) => r.body),
 		reject: (collection, name, status = 400) => void rejections.push({ collection, name, status }),
 		fail: (method, path, status) => void failures.push({ method, path, status }),
-		stop: () => new Promise<void>((resolveStop) => server.close(() => resolveStop()))
+		stop: () =>
+			new Promise<void>((resolveStop) => {
+				server.close(() => resolveStop());
+				// The app keeps its connection open for reuse; without this, close()
+				// waits for it until the app goes away
+				server.closeAllConnections();
+			})
 	};
 }
