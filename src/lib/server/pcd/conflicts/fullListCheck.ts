@@ -10,7 +10,7 @@
  * after execution against the op's desired "to" state.
  */
 
-import type { Database } from '@db/sqlite';
+import type { Database } from '$db/sqlite.ts';
 import type { ParsedOpMetadata } from './autoAlign/types.ts';
 import { orderedItemsEqual } from './overrideUtils.ts';
 import { hasQualityGroupMembersPositionInDb } from '$pcd/entities/qualityProfiles/qualities/groupMembersSchema.ts';

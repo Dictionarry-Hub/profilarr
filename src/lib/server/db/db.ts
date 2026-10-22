@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
-import { Database } from '@db/sqlite';
-import type { RestBindParameters } from '@db/sqlite';
+import { Database } from '$db/sqlite.ts';
+import type { RestBindParameters } from '$db/sqlite.ts';
 import { config } from '$config';
 import { logger } from '$logger/logger.ts';
 

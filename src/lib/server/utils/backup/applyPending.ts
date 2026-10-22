@@ -25,7 +25,7 @@
 import * as fs from 'node:fs/promises';
 import { config } from '$config';
 import { logger } from '$logger/logger.ts';
-import { Database } from '@db/sqlite';
+import { Database } from '$db/sqlite.ts';
 import { runCommand } from '../command.ts';
 import { isNotFound } from '../fs.ts';
 
