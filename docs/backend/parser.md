@@ -116,9 +116,9 @@ air date, release type).
 
 **Source:** `src/lib/server/utils/arr/parser/client.ts`
 
-The TypeScript client is a singleton that extends `BaseHttpClient` with
-connection pooling, 30-second timeout, and 2 retries with 500ms delay. It wraps
-every parser endpoint and adds persistent caching for parse and match results.
+The TypeScript client is a singleton that extends `BaseHttpClient` with a
+30-second timeout and 2 retries with 500ms delay. It wraps every parser endpoint
+and adds persistent caching for parse and match results.
 
 ### Operations
 
