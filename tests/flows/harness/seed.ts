@@ -24,7 +24,8 @@ function git(args: string[], cwd: string): void {
 
 /**
  * Copy the fixtures and their schema into the data folder, commit them to a
- * fresh git repo (pages like Changes run git there), and add the database row.
+ * fresh git repo (pages like Changes run git there), add the database row, and
+ * turn off the post-save sync prompt.
  */
 export async function seedFixtures(dataDir: string): Promise<void> {
 	const pcdPath = join(dataDir, 'data/databases', FIXTURES_UUID);
@@ -57,6 +58,8 @@ export async function seedFixtures(dataDir: string): Promise<void> {
 				personal_access_token, local_ops_enabled, conflict_strategy
 			) VALUES (?, ?, ?, ?, 0, 0, 1, 0, NULL, 0, 'override')`
 		).run(FIXTURES_UUID, FIXTURES_NAME, source.fixtures.repository, pcdPath);
+		// No "sync now?" dialog after saves; tests that need it turn it back on
+		db.exec('UPDATE general_settings SET sync_prompt_enabled = 0');
 	} finally {
 		db.close();
 	}
