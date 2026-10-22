@@ -2,11 +2,15 @@ import { test, expect } from '$flows/helpers/test.ts';
 import { fixture } from '$flows/helpers/fixtureData.ts';
 import { openEntity, openSidebarPage } from '$flows/helpers/nav.ts';
 import { pageData } from '$flows/helpers/pageData.ts';
-import { saveForm } from '$flows/helpers/forms.ts';
+import { confirmDialog, deleteEntity, saveForm } from '$flows/helpers/forms.ts';
 import type { Page } from '@playwright/test';
 
 interface RegexPage {
 	regularExpression: { name: string; description: string | null };
+}
+
+interface RegexListPage {
+	regularExpressions: { name: string }[];
 }
 
 interface GeneralSettingsPage {
@@ -66,4 +70,30 @@ test('saveForm fails with the app message when the action fails', async ({ page 
 	await expect(saveForm(page, { button: 'Create' })).rejects.toThrow(
 		/failure \(400\).*already exists/
 	);
+});
+
+test('deleteEntity deletes and returns to the list', async ({ page }) => {
+	const regex = fixture.regularExpression('Unused Regex');
+	await openEntity(page, 'Regular Expressions', regex.name);
+
+	const listPath = new URL(page.url()).pathname.replace(/\/\d+$/, '');
+
+	await deleteEntity(page);
+
+	// Checked once, not retried: deleteEntity must only return once both are true
+	expect(new URL(page.url()).pathname, 'the delete returns to the list').toBe(listPath);
+	const data = await pageData<RegexListPage>(page, listPath);
+	expect(data.regularExpressions.map((r) => r.name)).not.toContain(regex.name);
+});
+
+test('confirmDialog clicks the named button', async ({ page }) => {
+	const regex = fixture.regularExpression('Unused Regex');
+	await openEntity(page, 'Regular Expressions', regex.name);
+	const entityPath = new URL(page.url()).pathname;
+	await page.getByRole('main').getByRole('button', { name: 'Delete', exact: true }).click();
+
+	await confirmDialog(page, 'Cancel');
+
+	await expect(page.getByRole('dialog')).toHaveCount(0);
+	expect(new URL(page.url()).pathname).toBe(entityPath);
 });
