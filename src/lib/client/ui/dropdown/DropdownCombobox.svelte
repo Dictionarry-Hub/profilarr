@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+	let nextId = 0;
+</script>
+
 <script lang="ts">
 	import type { Component } from 'svelte';
 	import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte';
@@ -17,6 +21,8 @@
 	};
 
 	export let label: string | undefined = undefined;
+	// Accessible name when the visible label lives outside the component
+	export let ariaLabel: string | undefined = undefined;
 	export let value: string | null = null;
 	export let options: Option[] = [];
 	export let placeholder: string = 'Select...';
@@ -41,6 +47,13 @@
 	export let clearable: boolean = false;
 
 	const dispatch = createEventDispatcher<{ change: string }>();
+
+	const listId = `combobox-${nextId++}`;
+	$: accessibleName = ariaLabel ?? label;
+	$: activeOptionId =
+		highlightedIndex >= 0 && highlightedIndex < filteredOptions.length
+			? `${listId}-${highlightedIndex}`
+			: undefined;
 
 	let open = false;
 	let inputValue = '';
@@ -225,6 +238,12 @@
 					{placeholder}
 					{disabled}
 					size="1"
+					role="combobox"
+					aria-label={accessibleName}
+					aria-expanded={open}
+					aria-controls={listId}
+					aria-autocomplete="list"
+					aria-activedescendant={activeOptionId}
 					class="min-w-0 flex-1 bg-transparent font-medium text-neutral-700 outline-none placeholder:text-neutral-400 dark:text-neutral-200 dark:placeholder:text-neutral-500"
 					on:input={handleInput}
 					on:keydown={handleKeyDown}
@@ -245,6 +264,7 @@
 				fullWidth={true}
 				{disabled}
 				justify={resolvedJustify}
+				ariaLabel={accessibleName ? `${accessibleName}: ${currentLabel}` : ''}
 				textColor={isPlaceholder ? 'text-neutral-400 dark:text-neutral-500' : ''}
 				on:click={toggleCombobox}
 			/>
@@ -261,9 +281,17 @@
 				{triggerEl}
 				on:placementchange={(e) => (resolvedPlacement = e.detail)}
 			>
-				<div class="overflow-y-auto" style={maxHeightStyle}>
+				<div
+					id={listId}
+					class="overflow-y-auto"
+					style={maxHeightStyle}
+					role="listbox"
+					aria-label={accessibleName}
+				>
 					{#each filteredOptions as option, i (option.value)}
 						<DropdownItem
+							listOption
+							id="{listId}-{i}"
 							label={option.label}
 							icon={option.icon}
 							selected={value === option.value}

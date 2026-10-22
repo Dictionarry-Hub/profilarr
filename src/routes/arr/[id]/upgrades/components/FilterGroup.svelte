@@ -216,6 +216,7 @@
 							<!-- Field -->
 							<div class="shrink-0">
 								<DropdownCombobox
+									ariaLabel="Field"
 									value={child.field}
 									options={fields.map((f) => ({
 										value: f.id,
@@ -288,6 +289,7 @@
 											{#if isDynamicField}
 												{#key `${field.id}:${childIndex}:${dynamicFilterOptionsVersion}`}
 													<DropdownCombobox
+														ariaLabel="Value"
 														value={String(child.value ?? '')}
 														options={getDynamicOptions(field.id, child.value, dynamicFilterOptions)}
 														placeholder={dynamicFilterOptionsLoading

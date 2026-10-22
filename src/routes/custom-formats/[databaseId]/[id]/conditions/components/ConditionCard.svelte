@@ -328,6 +328,7 @@
 			</div>
 			<div class="w-full min-w-0 shrink-0 wide:w-52" data-onboarding="cf-cond-type">
 				<DropdownCombobox
+					ariaLabel="Type"
 					fullWidth
 					minWidth="0"
 					dropdownWidth="100%"
@@ -355,6 +356,7 @@
 				<div class="flex items-center gap-2">
 					<div class="min-w-0 flex-1">
 						<DropdownCombobox
+							ariaLabel="Value"
 							fullWidth
 							minWidth="0"
 							dropdownWidth="100%"
@@ -384,6 +386,7 @@
 				<div class="flex flex-col gap-2 wide:flex-row wide:items-center">
 					<div class="min-w-0 flex-1">
 						<DropdownCombobox
+							ariaLabel="Value"
 							fullWidth
 							minWidth="0"
 							dropdownWidth="100%"
@@ -485,6 +488,7 @@
 				</div>
 			{:else}
 				<DropdownCombobox
+					ariaLabel="Value"
 					fullWidth
 					minWidth="0"
 					dropdownWidth="100%"

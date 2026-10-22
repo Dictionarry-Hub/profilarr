@@ -157,6 +157,7 @@
 		{#each datePartOrder as part (part)}
 			{#if part === 'month'}
 				<DropdownCombobox
+					ariaLabel={`${label} Month`}
 					value={month}
 					options={monthOptions}
 					placeholder="Month"
@@ -174,6 +175,7 @@
 				/>
 			{:else if part === 'day'}
 				<DropdownCombobox
+					ariaLabel={`${label} Day`}
 					value={day}
 					options={dayOptions}
 					placeholder="Day"
@@ -191,6 +193,7 @@
 				/>
 			{:else}
 				<DropdownCombobox
+					ariaLabel={`${label} Year`}
 					value={year}
 					options={yearOptions}
 					placeholder="Year"

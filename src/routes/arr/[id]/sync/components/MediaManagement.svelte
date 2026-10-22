@@ -333,6 +333,7 @@
 					</p>
 				</div>
 				<DropdownCombobox
+					ariaLabel="Naming"
 					fullWidth
 					minWidth="0"
 					dropdownWidth="100%"
@@ -360,6 +361,7 @@
 						</p>
 					</div>
 					<DropdownCombobox
+						ariaLabel="Quality Definitions"
 						fullWidth
 						minWidth="0"
 						dropdownWidth="100%"
@@ -387,6 +389,7 @@
 					</p>
 				</div>
 				<DropdownCombobox
+					ariaLabel="Media Settings"
 					fullWidth
 					minWidth="0"
 					dropdownWidth="100%"

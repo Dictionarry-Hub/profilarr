@@ -187,7 +187,9 @@ Two related components:
 - **`$ui/dropdown/DropdownCombobox.svelte`** is the searchable dropdown. The
   user types to filter, keyboard arrows navigate, Enter selects. It supports
   fixed positioning, compact modes, item slots, and matching menu width to the
-  trigger.
+  trigger. While open, the search field is a `combobox` and the options are a
+  `listbox` of `option`s. `label` or `ariaLabel` names it like `DropdownSelect`
+  does.
 - **`$ui/dropdown/DropdownSelect.svelte`** is the plain `<select>` replacement:
   no search box, just click and pick. `header` and `headerDescription` add a
   `DropdownHeader` above the options, for explaining the choice in the menu.

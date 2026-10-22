@@ -91,6 +91,7 @@
 	<div class="flex items-center gap-1.5">
 		<div class="shrink-0" style={fieldStyle}>
 			<DropdownCombobox
+				ariaLabel={`${label} Hour`}
 				value={hour}
 				options={hourOptions}
 				placeholder="Hour"
@@ -109,6 +110,7 @@
 		<span class="text-sm text-neutral-500 dark:text-neutral-400">:</span>
 		<div class="shrink-0" style={fieldStyle}>
 			<DropdownCombobox
+				ariaLabel={`${label} Minute`}
 				value={minute}
 				options={minuteOptions}
 				placeholder="Minute"
