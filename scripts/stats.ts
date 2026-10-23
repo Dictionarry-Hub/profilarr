@@ -198,7 +198,7 @@ const DOC_DIR_TO_GROUP: Readonly<Record<string, Group>> = {
 };
 
 const DOCS_ROOTS: readonly string[] = ['docs/backend', 'docs/frontend'];
-const TEST_ROOTS: readonly string[] = ['tests/unit', 'tests/integration', 'tests/e2e'];
+const TEST_ROOTS: readonly string[] = ['tests/unit', 'tests/integration', 'tests/flows'];
 
 // ============================================================================
 // PATH HELPERS

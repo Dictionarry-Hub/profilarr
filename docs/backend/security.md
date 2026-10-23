@@ -25,7 +25,7 @@
 - [Test Coverage](#test-coverage)
   - [Unit Tests](#unit-tests-srctestsauth)
   - [Integration Tests](#integration-tests-srctestsintegrationspecs)
-  - [E2E Tests](#e2e-tests-srctestse2especsauth)
+  - [Browser Tests](#browser-tests-testsflows)
   - [Security Scans](#security-scans)
     - [SAST - Semgrep](#sast--semgrep)
     - [Container Scanning - Trivy](#container-scanning--trivy)
@@ -745,21 +745,12 @@ and run in parallel via `deno task test integration`.
 | `apiKeyConfirmation.test.ts` | 7034             | Key creation needs a confirmed session: window edges, wrong and right password, sessions stay separate, password change, rate limit       |
 | `oidcReauth.test.ts`         | 7035, 7036       | SSO re-authentication: `max_age` sent, same session kept and confirmed, wrong account rejected, provider without `auth_time` fails closed |
 
-### E2E Tests (`tests/e2e/`)
+### Browser Tests (`tests/flows/`)
 
-Browser-level Playwright tests that drive the real user experience.
-`deno task test e2e` runs every suite in parallel, each in its own runner
-process on its own `PORTS.e2e` ports, and prints one line per suite.
-`deno task test e2e auth` uses Docker Compose (mock-oauth2-server + Caddy).
-`deno task test e2e sanitize` starts one preview server with `AUTH=off`, seeds
-it through the shared harness, and needs no Docker. Pass `--debug` with a
-single target, and `--grep=<pattern>` to pick one test, since debug mode stops
-at the first failure.
-
-| File                   | Tests                                                                                                                                   |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth/oidc.spec.ts`    | Full OIDC login flow in browser, both direct and through proxy; confirm with SSO and create an API key                                  |
-| `sanitize/xss.spec.ts` | Seeded custom format and announcement markdown with an unquoted event handler never executes, on direct load and client-side navigation |
+Browser-level security checks live in the flow suite, described in
+[flow-tests.md](./flow-tests.md). `scenarios/security/markdown.spec.ts` checks
+that custom format and announcement markdown with an unquoted event handler
+never runs, server-rendered and client-rendered.
 
 ### Security Scans (`tests/scan/`)
 
