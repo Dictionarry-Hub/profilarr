@@ -367,6 +367,27 @@ jobs:
       - name: Make binary executable
         run: chmod +x dist/build/profilarr
 
+      # The images real-service tests run, pinned in tests/flows/services.Dockerfile.
+      # scripts/flows.ts only pulls images missing from the host.
+      - name: Cache flow service images
+        id: flow-images
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /tmp/flow-images.tar
+          key: flow-images-${{ hashFiles('tests/flows/services.Dockerfile') }}
+
+      - name: Load cached flow service images
+        if: steps.flow-images.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/flow-images.tar
+
+      - name: Pull and save flow service images
+        if: steps.flow-images.outputs.cache-hit != 'true'
+        run: |
+          images=$(awk 'toupper($1) == "FROM" { print $2 }' tests/flows/services.Dockerfile)
+          for image in $images; do docker pull --quiet "$image"; done
+          # shellcheck disable=SC2086
+          docker save $images -o /tmp/flow-images.tar
+
       # Runs in the Playwright image matching the installed @playwright/test,
       # with 4 workers on CI (tests/flows/playwright.config.ts)
       - name: Run flow tests

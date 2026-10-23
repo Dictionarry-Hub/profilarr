@@ -24,6 +24,9 @@ export interface ProxyOptions {
 	maxResponseHeaderBytes?: number;
 }
 
+/** An option, or `fail`, that a proxy may or may not support */
+export type ProxyFeature = 'tls' | 'headers' | 'maxResponseHeaderBytes' | 'fail';
+
 export interface ProxiedRequest {
 	method: string;
 	path: string;
@@ -49,8 +52,10 @@ export interface RunningProxy {
 export interface ReverseProxy {
 	id: string;
 	label: string;
-	/** True for proxies that run in their own container */
+	/** True for proxies that run in a container, which needs the Docker socket */
 	needsDocker: boolean;
+	/** The options this proxy can honour; specs skip an option's tests on the others */
+	supports: ProxyFeature[];
 	start(options: ProxyOptions): Promise<RunningProxy>;
 }
 

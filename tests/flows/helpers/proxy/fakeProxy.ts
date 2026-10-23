@@ -120,5 +120,6 @@ export const fakeProxy: ReverseProxy = {
 	id: 'fake',
 	label: 'Fake reverse proxy',
 	needsDocker: false,
+	supports: ['tls', 'headers', 'maxResponseHeaderBytes', 'fail'],
 	start: startFakeProxy
 };

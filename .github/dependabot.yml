@@ -80,3 +80,18 @@ updates:
         update-types: ['minor', 'patch']
     cooldown:
       default-days: 7
+
+  # Every service image the flow suite runs (tests/flows/services.Dockerfile),
+  # in one PR
+  - package-ecosystem: docker
+    directory: /tests/flows
+    schedule:
+      interval: monthly
+      time: '14:00'
+      timezone: 'Australia/Adelaide'
+    groups:
+      flow-services:
+        patterns:
+          - '*'
+    cooldown:
+      default-days: 7

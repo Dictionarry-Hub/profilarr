@@ -91,10 +91,18 @@ test.use({
   (`helpers/auth/accounts.ts`).
 - **SSO providers.** `helpers/auth/sso/providers.ts` lists them. `fake` runs
   in the test process and can misbehave on purpose. Real providers join as
-  entries marked `needsNetwork`.
+  entries marked `needsDocker`.
 - **Reverse proxies.** `helpers/proxy/proxies.ts` lists them. `fake` can
   serve HTTPS, change request headers, cap response header size, or fail.
-  Real proxies join as entries marked `needsDocker`.
+  Each entry lists the options it `supports`. Real proxies join as entries
+  marked `needsDocker`.
+- **Real services.** Entries marked `needsDocker` run in a container that
+  shares the test container's network namespace. They stay offline and reach
+  the app on `127.0.0.1` (`harness/docker.ts`). `deno task flows` mounts the
+  Docker socket and pulls any missing images pinned in
+  `tests/flows/services.Dockerfile`, which Dependabot keeps current. Their
+  tests carry the `@docker` tag, and they're skipped when the host has no
+  Docker socket.
 
 ## Adding a Scenario
 

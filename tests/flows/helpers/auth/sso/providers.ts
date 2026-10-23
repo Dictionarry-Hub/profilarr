@@ -4,10 +4,10 @@
  * of an SSO sign-in is the app's and the same for every provider
  * (`signInWithSso` in helpers/auth/accounts.ts).
  *
- * `fake` runs in the test process and needs no network. Real providers, such
- * as Keycloak or Authentik in a container, join as more entries with
- * `needsNetwork: true`; SSO specs loop over `PROVIDERS`, so a new entry gets
- * the existing tests.
+ * `fake` runs in the test process. Real providers, such as Authelia, run in a
+ * container and join as entries with `needsDocker: true`
+ * (helpers/core/realServices.ts). SSO specs loop over `PROVIDERS`, so a new
+ * entry gets the existing tests.
  */
 
 import type { Page } from '@playwright/test';
@@ -53,8 +53,8 @@ export interface SsoProvider {
 	/** Picked with `test.use({ ssoProvider: '<id>' })` */
 	id: string;
 	label: string;
-	/** True for providers that run outside the test process and need a network */
-	needsNetwork: boolean;
+	/** True for providers that run in a container, which needs the Docker socket */
+	needsDocker: boolean;
 	start(): Promise<RunningSso>;
 }
 

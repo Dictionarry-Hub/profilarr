@@ -217,6 +217,6 @@ async function startFakeOidc(): Promise<RunningSso> {
 export const fakeOidc: SsoProvider = {
 	id: 'fake',
 	label: 'Fake OIDC',
-	needsNetwork: false,
+	needsDocker: false,
 	start: startFakeOidc
 };

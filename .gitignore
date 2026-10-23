@@ -64,6 +64,8 @@ bruno/environments/
 # Playwright
 test-results/
 test-results-ui/
+# Config folders for real services in flow tests
+tests/flows/.services/
 playwright-report/
 
 # Research repos

@@ -11,12 +11,14 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import process from 'node:process';
+import { SERVICE_IMAGES } from '$flows/harness/images.ts';
 
 const APP_BINARY = 'dist/build/profilarr';
 const CONFIG = 'tests/flows/playwright.config.ts';
 const UI_PORT = 8080;
+const DOCKER_SOCKET = '/var/run/docker.sock';
 
 function run(command: string, args: string[]): number {
 	const result = spawnSync(command, args, { stdio: 'inherit' });
@@ -27,7 +29,7 @@ function run(command: string, args: string[]): number {
 const args = process.argv.slice(2);
 const ui = args.includes('--ui');
 const rebuild = args.includes('--build');
-const playwrightArgs = args.filter((arg) => arg !== '--ui' && arg !== '--build');
+const playwrightArgs = args.filter((arg) => !['--ui', '--build'].includes(arg));
 
 if (rebuild || !existsSync(APP_BINARY)) {
 	console.log(rebuild ? 'Rebuilding the app...' : `${APP_BINARY} not found, building...`);
@@ -78,6 +80,30 @@ const docker = [
 ];
 // No network, so nothing reaches GitHub or anything else outside. UI mode
 // keeps it because the browser connects to the published port.
+// Real services, such as Traefik, run as sibling containers in this
+// container's network namespace (tests/flows/harness/docker.ts). They need the
+// Docker socket, and their images up front, since the test container has no
+// network. Images already present aren't pulled again, so offline runs work.
+if (existsSync(DOCKER_SOCKET)) {
+	for (const serviceImage of Object.values(SERVICE_IMAGES)) {
+		const present = spawnSync('docker', ['image', 'inspect', serviceImage], { stdio: 'ignore' });
+		if (present.status === 0) continue;
+		const code = run('docker', ['pull', '--quiet', serviceImage]);
+		if (code !== 0) process.exit(code);
+	}
+	docker.push(
+		'-v',
+		`${DOCKER_SOCKET}:${DOCKER_SOCKET}`,
+		'--group-add',
+		String(statSync(DOCKER_SOCKET).gid),
+		'-e',
+		'FLOWS_DOCKER=1',
+		'-e',
+		`FLOWS_HOST_ROOT=${process.cwd()}`
+	);
+} else {
+	console.log(`No Docker socket at ${DOCKER_SOCKET}; tests tagged @docker will be skipped`);
+}
 if (ui) docker.push('-p', `${UI_PORT}:${UI_PORT}`, '-e', 'FLOWS_UI=1');
 else docker.push('--network', 'none');
 if (process.stdout.isTTY) docker.push('-t');
