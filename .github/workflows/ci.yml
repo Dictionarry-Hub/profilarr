@@ -399,3 +399,75 @@ jobs:
 
       - name: Run E2E tests
         run: deno task test e2e
+
+  flows:
+    name: Flow Tests
+    needs: [ci-scope, build]
+    if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version-file: .tool-versions
+
+      - name: Cache deps
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/deno
+            node_modules
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
+
+      - run: deno ci
+
+      # Playwright strips types without checking them, and `deno task check`
+      # covers src/ only, so the flow suite is type-checked here.
+      - name: Type check the flow suite
+        run: deno check --quiet tests/flows
+
+      # The suite runs offline (`--network none`), so the app can't download
+      # its SQLite and bcrypt libraries itself. `deno task flows` mounts this
+      # cache into the test container.
+      - name: Cache FFI plug
+        id: plug-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/deno/plug
+          key: deno-plug-${{ runner.os }}-${{ hashFiles('deno.lock') }}-v1
+
+      - name: Pre-warm FFI plug
+        if: steps.plug-cache.outputs.cache-hit != 'true'
+        run: |
+          deno eval --ext=ts '
+            import { hash } from "@felix/bcrypt";
+            import { Database } from "@db/sqlite";
+            await hash("warmup");
+            new Database(":memory:").close();
+          '
+
+      - name: Download build artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: profilarr-build
+          path: dist/build
+
+      - name: Make binary executable
+        run: chmod +x dist/build/profilarr
+
+      # Runs in the Playwright image matching the installed @playwright/test,
+      # with 4 workers on CI (tests/flows/playwright.config.ts)
+      - name: Run flow tests
+        run: deno task flows
+
+      - name: Upload flow report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: flow-report
+          path: |
+            tests/flows/playwright-report/
+            tests/flows/test-results/
+          retention-days: 7
