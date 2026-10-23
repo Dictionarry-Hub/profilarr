@@ -295,7 +295,9 @@ never preloads it; for pages whose data must be current when they open), `type` 
 submits), and `rounded` (`all` / `top` / `bottom` / `none`, so a button can sit edge to edge
 with another control; `DropdownSelect` passes it through to its trigger). If a `tooltip` prop is provided, the button
 wraps itself in a `Tooltip`; use `tooltipPosition="right"` for controls near
-the left edge of the viewport.
+the left edge of the viewport. A button with visible text keeps that text as
+its accessible name, and the tooltip becomes its description. An icon-only
+button takes the tooltip as its name.
 
 A form-submit button with a loading spinner:
 
