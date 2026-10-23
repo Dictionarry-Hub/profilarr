@@ -116,6 +116,16 @@ Three handlers register themselves on import via `registerSection()`:
 | `delayProfiles`   | Single profile selection (or none)                                                               |
 | `mediaManagement` | Three independent configs (naming, media settings, quality definitions)                          |
 
+The sync page enforces a setup order. Once any quality profile is selected,
+the Quality Profiles section can only save after Media Management and Delay
+Profiles are both configured and saved. Media Management counts as configured
+when naming, media settings and quality definitions are all chosen. On Sonarr
+v5, the quality definitions choice moves into the Quality Profiles section
+instead. Until the order is met, the Quality Profiles section shows a warning
+naming what's missing, and its Save button stays disabled. The rule lives in
+`src/routes/arr/[id]/sync/+page.svelte`. The save actions on the server don't
+check it.
+
 ## Database Priority
 
 Quality profile sync supports multiple databases per Arr instance. A priority
