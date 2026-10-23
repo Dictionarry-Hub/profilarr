@@ -92,6 +92,8 @@ export interface FixtureSnapshot {
 	naming: Record<ArrType, FixtureConfig[]>;
 	mediaSettings: Record<ArrType, FixtureConfig[]>;
 	qualityDefinitions: Record<ArrType, FixtureQualityDefinitions[]>;
+	/** Profilarr quality name to the name the Arr's API uses, per Arr */
+	qualityApiNames: Record<ArrType, Record<string, string>>;
 }
 
 export const fixtures: FixtureSnapshot = JSON.parse(readFileSync(FIXTURES_SNAPSHOT, 'utf8'));
@@ -116,5 +118,12 @@ export const fixture = {
 	mediaSettings: (arr: ArrType, name: string) =>
 		find(fixtures.mediaSettings[arr], `${arr} media settings config`, name),
 	qualityDefinitions: (arr: ArrType, name: string) =>
-		find(fixtures.qualityDefinitions[arr], `${arr} quality definitions config`, name)
+		find(fixtures.qualityDefinitions[arr], `${arr} quality definitions config`, name),
+	/**
+	 * The name an Arr's API uses for a Profilarr quality, e.g. Sonarr calls
+	 * Remux-1080p "Bluray-1080p Remux". Undefined when that Arr has no such
+	 * quality, so sync leaves it out.
+	 */
+	arrQualityName: (arr: ArrType, name: string): string | undefined =>
+		fixtures.qualityApiNames[arr][name]
 };

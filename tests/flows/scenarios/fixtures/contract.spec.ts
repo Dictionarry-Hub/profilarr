@@ -259,3 +259,14 @@ test('quality definitions match the snapshot', async ({ page }) => {
 		}
 	}
 });
+
+test('quality names per Arr match the snapshot', async ({ page }) => {
+	for (const arr of ['radarr', 'sonarr'] as ArrType[]) {
+		// Each quality definitions page lists the qualities its Arr has
+		const data = await open(page, 'Quality Definitions', fixtures.qualityDefinitions[arr][0].name);
+		const available = [...(data.availableQualities as string[])].sort();
+		expect(available, `${arr} qualities`).toEqual(
+			Object.keys(fixtures.qualityApiNames[arr]).sort()
+		);
+	}
+});

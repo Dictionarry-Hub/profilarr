@@ -1105,5 +1105,63 @@
 				]
 			}
 		]
+	},
+	"qualityApiNames": {
+		"radarr": {
+			"BR-DISK": "BR-DISK",
+			"Bluray-1080p": "Bluray-1080p",
+			"Bluray-2160p": "Bluray-2160p",
+			"Bluray-480p": "Bluray-480p",
+			"Bluray-576p": "Bluray-576p",
+			"Bluray-720p": "Bluray-720p",
+			"CAM": "CAM",
+			"DVD": "DVD",
+			"DVD-R": "DVD-R",
+			"DVDSCR": "DVDSCR",
+			"HDTV-1080p": "HDTV-1080p",
+			"HDTV-2160p": "HDTV-2160p",
+			"HDTV-720p": "HDTV-720p",
+			"REGIONAL": "REGIONAL",
+			"Raw-HD": "Raw-HD",
+			"Remux-1080p": "Remux-1080p",
+			"Remux-2160p": "Remux-2160p",
+			"SDTV": "SDTV",
+			"TELECINE": "TELECINE",
+			"TELESYNC": "TELESYNC",
+			"Unknown": "Unknown",
+			"WEBDL-1080p": "WEBDL-1080p",
+			"WEBDL-2160p": "WEBDL-2160p",
+			"WEBDL-480p": "WEBDL-480p",
+			"WEBDL-720p": "WEBDL-720p",
+			"WEBRip-1080p": "WEBRip-1080p",
+			"WEBRip-2160p": "WEBRip-2160p",
+			"WEBRip-480p": "WEBRip-480p",
+			"WEBRip-720p": "WEBRip-720p",
+			"WORKPRINT": "WORKPRINT"
+		},
+		"sonarr": {
+			"Bluray-1080p": "Bluray-1080p",
+			"Bluray-2160p": "Bluray-2160p",
+			"Bluray-480p": "Bluray-480p",
+			"Bluray-576p": "Bluray-576p",
+			"Bluray-720p": "Bluray-720p",
+			"DVD": "DVD",
+			"HDTV-1080p": "HDTV-1080p",
+			"HDTV-2160p": "HDTV-2160p",
+			"HDTV-720p": "HDTV-720p",
+			"Raw-HD": "Raw-HD",
+			"Remux-1080p": "Bluray-1080p Remux",
+			"Remux-2160p": "Bluray-2160p Remux",
+			"SDTV": "SDTV",
+			"Unknown": "Unknown",
+			"WEBDL-1080p": "WEBDL-1080p",
+			"WEBDL-2160p": "WEBDL-2160p",
+			"WEBDL-480p": "WEBDL-480p",
+			"WEBDL-720p": "WEBDL-720p",
+			"WEBRip-1080p": "WEBRip-1080p",
+			"WEBRip-2160p": "WEBRip-2160p",
+			"WEBRip-480p": "WEBRip-480p",
+			"WEBRip-720p": "WEBRip-720p"
+		}
 	}
 }

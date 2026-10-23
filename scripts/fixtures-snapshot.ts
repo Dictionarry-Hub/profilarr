@@ -197,6 +197,15 @@ export async function buildSnapshot(schemaOpsDir: string, fixtureOpsDir: string)
 				).map((row) => clean(row))
 			}));
 
+		// Profilarr quality name -> the Arr's name; a quality missing here doesn't exist in that Arr
+		const qualityApiNames = (arr: 'radarr' | 'sonarr') =>
+			Object.fromEntries(
+				all(
+					'SELECT quality_name, api_name FROM quality_api_mappings WHERE arr_type = ? ORDER BY quality_name',
+					arr
+				).map((row) => [row.quality_name, row.api_name])
+			);
+
 		return {
 			regularExpressions,
 			customFormats,
@@ -204,7 +213,8 @@ export async function buildSnapshot(schemaOpsDir: string, fixtureOpsDir: string)
 			delayProfiles,
 			naming: perArr('naming'),
 			mediaSettings: perArr('media_settings'),
-			qualityDefinitions: { radarr: definitions('radarr'), sonarr: definitions('sonarr') }
+			qualityDefinitions: { radarr: definitions('radarr'), sonarr: definitions('sonarr') },
+			qualityApiNames: { radarr: qualityApiNames('radarr'), sonarr: qualityApiNames('sonarr') }
 		};
 	} finally {
 		db.close();
