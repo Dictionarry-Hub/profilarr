@@ -1,20 +1,23 @@
 /**
- * A fake Radarr or Sonarr for flow tests.
+ * A fake app for flow tests, serving any target in the registry (targets.ts),
+ * such as Radarr 6 or Sonarr 5.
  *
- * It starts from a fresh install's state, recorded from the real apps by
- * `deno task fixtures:arr` (tests/flows/data/arr), keeps changes in memory
- * like a real Arr, and records every request so a test can check what
- * Profilarr sent. Anything it doesn't support answers 404 and is listed in
- * `unhandled`, so a test can catch Profilarr calling something new.
+ * It starts from a fresh install's state, recorded from the real app by
+ * `deno task fixtures:arr` (tests/flows/data/arr/<target id>), keeps changes
+ * in memory like the real app, and records every request so a test can check
+ * what Profilarr sent. Each path behaves as its target's resources describe.
+ * Anything else answers 404 and is listed in `unhandled`, so a test can catch
+ * Profilarr calling something new.
  */
 
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ARR_DATA_DIR } from '$flows/harness/paths.ts';
 import { freePort } from '$flows/harness/ports.ts';
+import { recordingName, target as findTarget, type Target } from '$flows/helpers/sync/targets.ts';
 
-export type ArrType = 'radarr' | 'sonarr';
+export type ArrType = Target['app'];
 
 export interface RecordedRequest {
 	method: string;
@@ -34,15 +37,15 @@ export interface Resource {
 /** An exact path, or a pattern for paths with ids, e.g. /^\/api\/v3\/qualityprofile\/\d+$/ */
 export type PathMatch = string | RegExp;
 
-function matches(request: RecordedRequest, method: string, path: PathMatch): boolean {
+function matches(request: { method: string; path: string }, method: string, path: PathMatch) {
 	if (request.method !== method) return false;
 	return typeof path === 'string' ? request.path === path : path.test(request.path);
 }
 
-/** Collections that support list, get, create, update and delete */
-export type Collection = 'customformat' | 'qualityprofile' | 'delayprofile' | 'tag';
-
 export interface FakeArr {
+	/** The registry entry this fake serves */
+	target: Target;
+	/** The app, e.g. "sonarr" */
 	type: ArrType;
 	url: string;
 	apiKey: string;
@@ -50,11 +53,10 @@ export interface FakeArr {
 	requests: RecordedRequest[];
 	/** Requests the fake had no route for */
 	unhandled: RecordedRequest[];
-	/** Current state, changed by Profilarr's writes */
-	collections: Record<Collection, Resource[]>;
-	qualityDefinitions: Resource[];
-	naming: Resource;
-	mediaManagement: Resource;
+	/** A collection or bulk resource's current items, by its path, e.g. "customformat" */
+	collection(path: string): Resource[];
+	/** A singleton resource's current value, by its path, e.g. "config/naming" */
+	singleton(path: string): Resource;
 	/** Bodies of requests with this method and path, or a path matching a pattern */
 	sent(method: string, path: PathMatch): unknown[];
 	/**
@@ -62,19 +64,11 @@ export interface FakeArr {
 	 * it hasn't arrived yet. Fails after `timeoutMs`, listing what did arrive.
 	 */
 	waitFor(method: string, path: PathMatch, timeoutMs?: number): Promise<RecordedRequest>;
-	/** Answer creating or updating `name` in `collection` with a validation error */
-	reject(collection: Collection, name: string, status?: number): void;
-	/** Answer every request to this method and path with `status` */
-	fail(method: string, path: string, status: number): void;
+	/** Answer creating or updating `name` in a collection with a validation error */
+	reject(collection: string, name: string, status?: number): void;
+	/** Answer every request to this method and path, or paths matching a pattern, with `status` */
+	fail(method: string, path: PathMatch, status: number): void;
 	stop(): Promise<void>;
-}
-
-const API = '/api/v3';
-const COLLECTIONS: Collection[] = ['customformat', 'qualityprofile', 'delayprofile', 'tag'];
-const EMPTY_PAGE = { page: 1, pageSize: 200, totalRecords: 0, records: [] };
-
-function load<T>(type: ArrType, file: string): T {
-	return JSON.parse(readFileSync(join(ARR_DATA_DIR, type, file), 'utf8')) as T;
 }
 
 function readBody(req: IncomingMessage): Promise<unknown> {
@@ -93,118 +87,129 @@ function readBody(req: IncomingMessage): Promise<unknown> {
 	});
 }
 
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export async function startFakeArr(
-	type: ArrType,
+	targetId: string,
 	options: { apiKey?: string } = {}
 ): Promise<FakeArr> {
-	const apiKey = options.apiKey ?? `fake-${type}-key`;
+	const target = findTarget(targetId);
+	const apiKey = options.apiKey ?? `fake-${target.id}-key`;
 	const requests: RecordedRequest[] = [];
 	// Callers of waitFor, checked each time a request has been answered
 	const waiters: (() => void)[] = [];
 	const unhandled: RecordedRequest[] = [];
-	const rejections: { collection: Collection; name: string; status: number }[] = [];
-	const failures: { method: string; path: string; status: number }[] = [];
+	const rejections: { collection: string; name: string; status: number }[] = [];
+	const failures: { method: string; path: PathMatch; status: number }[] = [];
 
-	const collections = Object.fromEntries(
-		COLLECTIONS.map((name) => [name, load<Resource[]>(type, `${name}.json`)])
-	) as Record<Collection, Resource[]>;
-	const qualityDefinitions = load<Resource[]>(type, 'qualitydefinition.json');
-	const fake = {
-		naming: load<Resource>(type, 'config.naming.json'),
-		mediaManagement: load<Resource>(type, 'config.mediamanagement.json')
-	};
-	const staticResponses: Record<string, unknown> = {
-		'/api': load(type, 'api.json'),
-		[`${API}/system/status`]: load(type, 'system.status.json'),
-		[`${API}/health`]: load(type, 'health.json'),
-		[`${API}/qualityprofile/schema`]: load(type, 'qualityprofile.schema.json'),
-		// An empty library, so background jobs get valid answers
-		[`${API}/movie`]: [],
-		[`${API}/series`]: [],
-		[`${API}/episode`]: [],
-		[`${API}/rename`]: [],
-		[`${API}/release`]: [],
-		[`${API}/command`]: [],
-		[`${API}/log/file`]: [],
-		[`${API}/queue`]: EMPTY_PAGE,
-		[`${API}/log`]: EMPTY_PAGE
+	const apiPath = (path: string) => (path.startsWith('/') ? path : `${target.apiBase}/${path}`);
+	const recordingFile = (path: string) => join(ARR_DATA_DIR, target.id, recordingName(path));
+	const recorded = <T>(path: string, fallback: T): T => {
+		const file = recordingFile(path);
+		return existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as T) : fallback;
 	};
 
-	function nextId(store: Resource[]): number {
-		return store.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+	// Recorded paths that no resource claims, and the stubs, answer GET as recorded
+	const claimed = new Set(target.resources.map((resource) => resource.path));
+	const fixed = new Map<string, unknown>();
+	for (const path of target.record) {
+		if (!claimed.has(path) && existsSync(recordingFile(path))) {
+			fixed.set(apiPath(path), recorded(path, null));
+		}
+	}
+	for (const [path, value] of Object.entries(target.stubs)) fixed.set(apiPath(path), value);
+
+	// Current state of every stateful resource, starting from its recording
+	const lists = new Map<string, Resource[]>();
+	const objects = new Map<string, Resource>();
+	for (const resource of target.resources) {
+		if (resource.kind === 'collection' || resource.kind === 'bulk') {
+			lists.set(resource.path, recorded<Resource[]>(resource.path, []));
+		} else if (resource.kind === 'singleton') {
+			objects.set(resource.path, recorded<Resource>(resource.path, { id: 1 }));
+		}
 	}
 
-	function rejection(collection: Collection, body: unknown) {
+	const nextId = (store: Resource[]) => store.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+
+	function rejection(collection: string, body: unknown) {
 		const name = (body as Resource | null)?.name;
 		return rejections.find((r) => r.collection === collection && r.name === name);
 	}
 
+	const rejected = (collection: string, body: unknown): [number, unknown] | null => {
+		const found = rejection(collection, body);
+		return found
+			? [found.status, [{ propertyName: 'Name', errorMessage: 'Rejected by test' }]]
+			: null;
+	};
+
 	/** Route a request; null means no route */
 	function route(method: string, path: string, body: unknown): [number, unknown] | null {
-		if (method === 'GET' && path in staticResponses) return [200, staticResponses[path]];
+		if (method === 'GET' && fixed.has(path)) return [200, fixed.get(path)];
 
-		// Collections: /api/v3/<collection>[/<id>]
-		const match = path.match(
-			/^\/api\/v3\/(customformat|qualityprofile|delayprofile|tag)(?:\/(\d+))?$/
-		);
-		if (match) {
-			const collection = match[1] as Collection;
-			const store = collections[collection];
-			const id = match[2] ? Number(match[2]) : null;
-			if (id === null) {
-				if (method === 'GET') return [200, store];
-				if (method === 'POST') {
-					const rejected = rejection(collection, body);
-					if (rejected)
-						return [rejected.status, [{ propertyName: 'Name', errorMessage: 'Rejected by test' }]];
-					const created = { ...(body as Resource), id: nextId(store) };
-					store.push(created);
-					return [201, created];
+		for (const resource of target.resources) {
+			const base = apiPath(resource.path);
+			const withId = path.match(new RegExp(`^${escape(base)}/(\\d+)$`));
+
+			if (resource.kind === 'collection') {
+				const store = lists.get(resource.path) ?? [];
+				if (path === base) {
+					if (method === 'GET') return [200, store];
+					if (method === 'POST') {
+						const refused = rejected(resource.path, body);
+						if (refused) return refused;
+						const created = { ...(body as Resource), id: nextId(store) };
+						store.push(created);
+						return [201, created];
+					}
+					return null;
+				}
+				if (!withId) continue;
+				const id = Number(withId[1]);
+				const index = store.findIndex((item) => item.id === id);
+				if (index === -1) return [404, { message: 'NotFound' }];
+				if (method === 'GET') return [200, store[index]];
+				if (method === 'PUT') {
+					const refused = rejected(resource.path, body);
+					if (refused) return refused;
+					store[index] = { ...(body as Resource), id };
+					return [202, store[index]];
+				}
+				if (method === 'DELETE') {
+					store.splice(index, 1);
+					return [200, {}];
 				}
 				return null;
 			}
-			const index = store.findIndex((item) => item.id === id);
-			if (index === -1) return [404, { message: 'NotFound' }];
-			if (method === 'GET') return [200, store[index]];
-			if (method === 'PUT') {
-				const rejected = rejection(collection, body);
-				if (rejected)
-					return [rejected.status, [{ propertyName: 'Name', errorMessage: 'Rejected by test' }]];
-				store[index] = { ...(body as Resource), id };
-				return [202, store[index]];
-			}
-			if (method === 'DELETE') {
-				store.splice(index, 1);
-				return [200, {}];
-			}
-			return null;
-		}
 
-		if (path === `${API}/qualitydefinition`) {
-			return method === 'GET' ? [200, qualityDefinitions] : null;
-		}
-		if (method === 'PUT' && path === `${API}/qualitydefinition/update`) {
-			for (const update of (body as Resource[]) ?? []) {
-				const index = qualityDefinitions.findIndex((item) => item.id === update.id);
-				if (index !== -1) qualityDefinitions[index] = { ...qualityDefinitions[index], ...update };
+			if (resource.kind === 'singleton') {
+				if (method === 'GET' && path === base) return [200, objects.get(resource.path)];
+				if (method === 'PUT' && withId) {
+					const value = { ...(body as Resource), id: Number(withId[1]) };
+					objects.set(resource.path, value);
+					return [202, value];
+				}
+				if (path === base || withId) return null;
+				continue;
 			}
-			return [202, qualityDefinitions];
-		}
 
-		// Single-object settings: GET /config/<name>, PUT /config/<name>/<id>
-		const config = path.match(/^\/api\/v3\/config\/(naming|mediamanagement)(?:\/(\d+))?$/);
-		if (config) {
-			const key = config[1] === 'naming' ? 'naming' : 'mediaManagement';
-			if (method === 'GET' && !config[2]) return [200, fake[key]];
-			if (method === 'PUT' && config[2]) {
-				fake[key] = { ...(body as Resource), id: Number(config[2]) };
-				return [202, fake[key]];
+			if (resource.kind === 'bulk') {
+				const store = lists.get(resource.path) ?? [];
+				if (path === base) return method === 'GET' ? [200, store] : null;
+				if (method === 'PUT' && path === apiPath(resource.update)) {
+					for (const update of (body as Resource[]) ?? []) {
+						const index = store.findIndex((item) => item.id === update.id);
+						if (index !== -1) store[index] = { ...store[index], ...update };
+					}
+					return [202, store];
+				}
+				continue;
 			}
-			return null;
-		}
 
-		if (method === 'POST' && path === `${API}/command`) {
-			return [201, { id: 1, name: (body as Resource | null)?.name, status: 'completed' }];
+			if (resource.kind === 'command' && method === 'POST' && path === base) {
+				return [201, { id: 1, name: (body as Resource | null)?.name, status: 'completed' }];
+			}
 		}
 
 		return null;
@@ -225,8 +230,9 @@ export async function startFakeArr(
 
 		let status: number;
 		let payload: unknown;
-		const key = req.headers['x-api-key'] ?? url.searchParams.get('apikey');
-		const failure = failures.find((f) => f.method === method && f.path === url.pathname);
+		const key =
+			req.headers[target.auth.header.toLowerCase()] ?? url.searchParams.get(target.auth.query);
+		const failure = failures.find((f) => matches(entry, f.method, f.path));
 		const routed = key === apiKey && !failure ? route(method, url.pathname, body) : null;
 
 		if (key !== apiKey) [status, payload] = [401, { error: 'Unauthorized' }];
@@ -248,18 +254,21 @@ export async function startFakeArr(
 	await new Promise<void>((resolveListen) => server.listen(port, '127.0.0.1', resolveListen));
 
 	return {
-		type,
+		target,
+		type: target.app,
 		url: `http://127.0.0.1:${port}`,
 		apiKey,
 		requests,
 		unhandled,
-		collections,
-		qualityDefinitions,
-		get naming() {
-			return fake.naming;
+		collection: (path) => {
+			const store = lists.get(path);
+			if (!store) throw new Error(`${target.id} has no collection "${path}"`);
+			return store;
 		},
-		get mediaManagement() {
-			return fake.mediaManagement;
+		singleton: (path) => {
+			const value = objects.get(path);
+			if (!value) throw new Error(`${target.id} has no singleton "${path}"`);
+			return value;
 		},
 		sent: (method, path) => requests.filter((r) => matches(r, method, path)).map((r) => r.body),
 		waitFor: (method, path, timeoutMs = 10_000) =>
@@ -280,7 +289,7 @@ export async function startFakeArr(
 					const seen = requests.map((r) => `${r.method} ${r.path}`).join(', ') || 'none';
 					rejectWait(
 						new Error(
-							`The fake ${type} got no ${method} ${path} within ${timeoutMs}ms. Got: ${seen}`
+							`The fake ${target.id} got no ${method} ${path} within ${timeoutMs}ms. Got: ${seen}`
 						)
 					);
 				}, timeoutMs);

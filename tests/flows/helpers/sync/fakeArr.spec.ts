@@ -1,8 +1,11 @@
 /**
- * Checks for the fake Arr itself, over plain HTTP. These don't start the app.
+ * Checks for the fake itself, over plain HTTP. These don't start the app.
+ * Starting state is checked for every target; behaviour, which every target
+ * shares through its resource kinds, on the default Radarr.
  */
 import { test, expect } from '$flows/helpers/core/test.ts';
 import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+import { TARGETS, targetsWith } from '$flows/helpers/sync/targets.ts';
 
 function call(fake: FakeArr, method: string, path: string, body?: unknown, apiKey = fake.apiKey) {
 	return fetch(`${fake.url}${path}`, {
@@ -12,19 +15,38 @@ function call(fake: FakeArr, method: string, path: string, body?: unknown, apiKe
 	});
 }
 
-test('the fake Radarr starts like a fresh install', async ({ fakeRadarr }) => {
-	const status = await (await call(fakeRadarr, 'GET', '/api/v3/system/status')).json();
-	expect(status.appName).toBe('Radarr');
-	const profiles = await (await call(fakeRadarr, 'GET', '/api/v3/qualityprofile')).json();
-	expect(profiles.map((p: { name: string }) => p.name)).toContain('HD-1080p');
-});
+for (const target of TARGETS) {
+	test.describe(target.id, () => {
+		test('starts like a fresh install', async ({ startArr }) => {
+			const fake = await startArr(target.id);
+			const status = await (await call(fake, 'GET', `${target.apiBase}/system/status`)).json();
+			expect(status.appName).toBe(target.label);
+			expect(status.version, `the recording is ${target.label} ${target.major}`).toMatch(
+				new RegExp(`^${target.major}\\.`)
+			);
+			const profiles = await (await call(fake, 'GET', `${target.apiBase}/qualityprofile`)).json();
+			expect(profiles.length, 'a fresh install has default quality profiles').toBeGreaterThan(0);
+		});
 
-test('the fake Sonarr starts like a fresh install', async ({ fakeSonarr }) => {
-	const status = await (await call(fakeSonarr, 'GET', '/api/v3/system/status')).json();
-	expect(status.appName).toBe('Sonarr');
-});
+		test('rejects a wrong API key', async ({ startArr }) => {
+			const fake = await startArr(target.id);
+			const response = await call(fake, 'GET', `${target.apiBase}/system/status`, undefined, 'no');
+			expect(response.status).toBe(401);
+		});
+	});
+}
 
-test('the fake keeps what Profilarr creates and records it', async ({ fakeRadarr }) => {
+for (const target of targetsWith('profileSizes')) {
+	test(`${target.id} reports an API that keeps sizes on profiles`, async ({ startArr }) => {
+		const fake = await startArr(target.id);
+		const api = await (await call(fake, 'GET', '/api')).json();
+		expect(Number(api.current.replace(/^v/, ''))).toBeGreaterThanOrEqual(5);
+		const [profile] = await (await call(fake, 'GET', `${target.apiBase}/qualityprofile`)).json();
+		expect(profile.items[0]).toHaveProperty('maxSize');
+	});
+}
+
+test('a collection keeps what Profilarr creates and records it', async ({ fakeRadarr }) => {
 	const created = await call(fakeRadarr, 'POST', '/api/v3/customformat', { name: 'Title Match' });
 	expect(created.status).toBe(201);
 	const { id } = await created.json();
@@ -33,15 +55,27 @@ test('the fake keeps what Profilarr creates and records it', async ({ fakeRadarr
 		name: 'Title Match',
 		includeCustomFormatWhenRenaming: true
 	});
-	expect(fakeRadarr.collections.customformat).toEqual([
+	expect(fakeRadarr.collection('customformat')).toEqual([
 		{ id, name: 'Title Match', includeCustomFormatWhenRenaming: true }
 	]);
 	expect(fakeRadarr.sent('POST', '/api/v3/customformat')).toEqual([{ name: 'Title Match' }]);
 });
 
-test('the fake rejects a wrong API key', async ({ fakeRadarr }) => {
-	const response = await call(fakeRadarr, 'GET', '/api/v3/system/status', undefined, 'wrong');
-	expect(response.status).toBe(401);
+test('a singleton and a bulk resource keep their updates', async ({ fakeRadarr }) => {
+	const naming = fakeRadarr.singleton('config/naming');
+	await call(fakeRadarr, 'PUT', `/api/v3/config/naming/${naming.id}`, {
+		...naming,
+		renameMovies: true
+	});
+	expect(fakeRadarr.singleton('config/naming')).toMatchObject({ renameMovies: true });
+
+	const [first] = fakeRadarr.collection('qualitydefinition');
+	await call(fakeRadarr, 'PUT', '/api/v3/qualitydefinition/update', [{ id: first.id, maxSize: 7 }]);
+	expect(fakeRadarr.collection('qualitydefinition')[0]).toMatchObject({ id: first.id, maxSize: 7 });
+});
+
+test('naming an unknown resource fails with the target id', async ({ fakeRadarr }) => {
+	expect(() => fakeRadarr.collection('nothing')).toThrow('radarr-6 has no collection "nothing"');
 });
 
 test('the fake can reject or fail on purpose', async ({ fakeRadarr }) => {
@@ -52,6 +86,9 @@ test('the fake can reject or fail on purpose', async ({ fakeRadarr }) => {
 
 	fakeRadarr.fail('GET', '/api/v3/qualityprofile', 500);
 	expect((await call(fakeRadarr, 'GET', '/api/v3/qualityprofile')).status).toBe(500);
+
+	fakeRadarr.fail('PUT', /^\/api\/v3\/tag\/\d+$/, 503);
+	expect((await call(fakeRadarr, 'PUT', '/api/v3/tag/9', {})).status).toBe(503);
 });
 
 test('the fake lists requests it has no route for', async ({ fakeRadarr }) => {

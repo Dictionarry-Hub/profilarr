@@ -7,8 +7,6 @@ import { expect, test, type Page } from '@playwright/test';
 import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
 import { openSidebarPage, sidebar } from '$flows/helpers/core/nav.ts';
 
-const TYPE_LABELS = { radarr: 'Radarr', sonarr: 'Sonarr' } as const;
-
 export interface AddArrOptions {
 	/** Instance name shown in Profilarr */
 	name: string;
@@ -31,7 +29,7 @@ export interface AddArrOptions {
  */
 export async function addArr(page: Page, options: AddArrOptions): Promise<void> {
 	const { name, fake, testConnection = true, save = true } = options;
-	const typeLabel = TYPE_LABELS[fake.type];
+	const typeLabel = fake.target.label;
 
 	await test.step(
 		`Add ${typeLabel} instance ${name}`,

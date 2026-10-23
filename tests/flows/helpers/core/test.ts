@@ -1,19 +1,24 @@
 /**
  * The `test` every scenario imports. It adds an `app` fixture, a fresh
  * Profilarr per test, and points `baseURL` at it so `page.goto('/databases')`
- * reaches that test's own app. `fakeRadarr` and `fakeSonarr` start a fake Arr
- * for the test, and `consumer` starts a second app that shares the first one's
- * upstream. Like every fixture, they only start when a test asks for them.
+ * reaches that test's own app. `startArr` starts a fake for any target in
+ * helpers/sync/targets.ts, such as "sonarr-5"; `fakeRadarr` and `fakeSonarr`
+ * start each app's default target. `consumer` starts a second app that shares
+ * the first one's upstream. Like every fixture, they only start when a test
+ * asks for them.
  */
 
 import { test as base, expect } from '@playwright/test';
 import { startApp, type App } from '$flows/harness/app.ts';
 import { upstreamRepo } from '$flows/harness/seed.ts';
 import { startFakeArr, type FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+import { defaultTarget } from '$flows/helpers/sync/targets.ts';
 
 export const test = base.extend<{
 	app: App;
 	consumer: App;
+	/** Start a fake for a target id; every fake it started stops after the test */
+	startArr: (targetId: string) => Promise<FakeArr>;
 	fakeRadarr: FakeArr;
 	fakeSonarr: FakeArr;
 }>({
@@ -49,15 +54,20 @@ export const test = base.extend<{
 		});
 		await use(page);
 	},
-	fakeRadarr: async ({}, use) => {
-		const fake = await startFakeArr('radarr');
-		await use(fake);
-		await fake.stop();
+	startArr: async ({}, use) => {
+		const started: FakeArr[] = [];
+		await use(async (targetId) => {
+			const fake = await startFakeArr(targetId);
+			started.push(fake);
+			return fake;
+		});
+		await Promise.all(started.map((fake) => fake.stop()));
 	},
-	fakeSonarr: async ({}, use) => {
-		const fake = await startFakeArr('sonarr');
-		await use(fake);
-		await fake.stop();
+	fakeRadarr: async ({ startArr }, use) => {
+		await use(await startArr(defaultTarget('radarr').id));
+	},
+	fakeSonarr: async ({ startArr }, use) => {
+		await use(await startArr(defaultTarget('sonarr').id));
 	}
 });
 
