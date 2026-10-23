@@ -488,7 +488,9 @@ custom format conditions).
 
 **`$ui/modal/Modal.svelte`** is the `<dialog>` replacement. It owns
 overlay / backdrop handling, Escape-to-close, focus management, and
-scroll-lock on `<body>`. Body content is a slot; footer actions can be the
+scroll-lock on `<body>`. The `header` text is the dialog's accessible name,
+so a test can find it with `getByRole('dialog', { name: header })`. Body
+content is a slot; footer actions can be the
 built-in confirm / cancel pair (via `confirmText` / `cancelText` /
 `confirmDanger` props) or custom markup via the footer slot.
 
