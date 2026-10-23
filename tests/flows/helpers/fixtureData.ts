@@ -96,6 +96,26 @@ export interface FixtureSnapshot {
 	qualityApiNames: Record<ArrType, Record<string, string>>;
 }
 
+/** Sonarr naming fields the snapshot stores as numbers and the app shows as words */
+export const SONARR_WORDS: Record<string, Record<number, string>> = {
+	colonReplacementFormat: {
+		0: 'delete',
+		1: 'dash',
+		2: 'spaceDash',
+		3: 'spaceDashSpace',
+		4: 'smart',
+		5: 'custom'
+	},
+	multiEpisodeStyle: {
+		0: 'extend',
+		1: 'duplicate',
+		2: 'repeat',
+		3: 'scene',
+		4: 'range',
+		5: 'prefixedRange'
+	}
+};
+
 export const fixtures: FixtureSnapshot = JSON.parse(readFileSync(FIXTURES_SNAPSHOT, 'utf8'));
 
 function find<T extends { name: string }>(items: T[], kind: string, name: string): T {

@@ -1,7 +1,7 @@
 import { test, expect } from '$flows/helpers/test.ts';
 import { fixture } from '$flows/helpers/fixtureData.ts';
 import { openEntity, openTab } from '$flows/helpers/nav.ts';
-import { pageData, unflatten } from '$flows/helpers/pageData.ts';
+import { camelKeys, pageData, pick, unflatten } from '$flows/helpers/pageData.ts';
 
 interface ScoringData {
 	scoring: { customFormats: { name: string; scores: Record<string, number | null> }[] };
@@ -42,4 +42,25 @@ test('unflatten decodes devalue special values', () => {
 	expect(decoded.sizes.get('alpha')).toBe(10);
 	expect(decoded.missing).toBeUndefined();
 	expect(decoded.nothing).toBeNull();
+});
+
+// Doesn't start the app: plain functions for comparing page data with the snapshot
+test('camelKeys renames snake_case keys and keeps values', () => {
+	expect(camelKeys({ upgrade_until_score: 1000, name: 'Radarr Profile', min_size_mb: 5 })).toEqual({
+		upgradeUntilScore: 1000,
+		name: 'Radarr Profile',
+		minSizeMb: 5
+	});
+});
+
+test('pick keeps only the keys the expected object has', () => {
+	expect(pick({ name: 'Title Regex', pattern: 'x', id: 7 }, { name: '', pattern: '' })).toEqual({
+		name: 'Title Regex',
+		pattern: 'x'
+	});
+	// A key missing from the page shows up as undefined, so the comparison fails on it
+	expect(pick({ name: 'Title Regex' }, { name: '', pattern: '' })).toEqual({
+		name: 'Title Regex',
+		pattern: undefined
+	});
 });

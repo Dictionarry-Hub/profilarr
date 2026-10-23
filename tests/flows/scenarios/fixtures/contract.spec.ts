@@ -5,25 +5,17 @@
  * naming the entity and field.
  */
 import { test, expect } from '$flows/helpers/test.ts';
-import { fixtures, type ArrType, type FixtureCondition } from '$flows/helpers/fixtureData.ts';
+import {
+	fixtures,
+	SONARR_WORDS,
+	type ArrType,
+	type FixtureCondition
+} from '$flows/helpers/fixtureData.ts';
 import { openEntity, openTab, type EntitySection } from '$flows/helpers/nav.ts';
-import { pageData } from '$flows/helpers/pageData.ts';
+import { camelKeys, pageData, pick, type Json } from '$flows/helpers/pageData.ts';
 import type { Page } from '@playwright/test';
 
-type Json = Record<string, unknown>;
-
 const tagNames = (tags: { name: string }[]) => tags.map((tag) => tag.name).sort();
-const camel = (key: string) => key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
-
-/** A page object with camelCase keys, so it lines up with the snapshot */
-function camelKeys(row: Json): Json {
-	return Object.fromEntries(Object.entries(row).map(([key, value]) => [camel(key), value]));
-}
-
-/** Only the keys of `expected`, read from `actual` */
-function pick(actual: Json, expected: Json): Json {
-	return Object.fromEntries(Object.keys(expected).map((key) => [key, actual[key]]));
-}
 
 async function open(page: Page, section: EntitySection, name: string): Promise<Json> {
 	await openEntity(page, section, name);
@@ -189,26 +181,6 @@ test('delay profiles match the snapshot', async ({ page }) => {
 		expect(pick(camelKeys(data.delayProfile as Json), expected), expected.name).toEqual(expected);
 	}
 });
-
-// The app shows these Sonarr fields as words; the database stores numbers
-const SONARR_WORDS: Record<string, Record<number, string>> = {
-	colonReplacementFormat: {
-		0: 'delete',
-		1: 'dash',
-		2: 'spaceDash',
-		3: 'spaceDashSpace',
-		4: 'smart',
-		5: 'custom'
-	},
-	multiEpisodeStyle: {
-		0: 'extend',
-		1: 'duplicate',
-		2: 'repeat',
-		3: 'scene',
-		4: 'range',
-		5: 'prefixedRange'
-	}
-};
 
 test('naming configs match the snapshot', async ({ page }) => {
 	for (const arr of ['radarr', 'sonarr'] as ArrType[]) {

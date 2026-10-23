@@ -11,7 +11,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 
-type Json = Record<string, unknown>;
+export type Json = Record<string, unknown>;
 
 interface DataResponse {
 	type: 'data' | 'redirect' | 'error';
@@ -146,4 +146,16 @@ export async function pageData<T = Json>(page: Page, path?: string): Promise<T> 
 		},
 		{ box: true }
 	);
+}
+
+const camel = (key: string) => key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+
+/** Page data with camelCase keys, so it lines up with the fixtures snapshot */
+export function camelKeys(row: Json): Json {
+	return Object.fromEntries(Object.entries(row).map(([key, value]) => [camel(key), value]));
+}
+
+/** Only the keys of `expected`, read from `actual`, to compare just those */
+export function pick(actual: Json, expected: object): Json {
+	return Object.fromEntries(Object.keys(expected).map((key) => [key, actual[key]]));
 }
