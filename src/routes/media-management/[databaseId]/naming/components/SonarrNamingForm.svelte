@@ -322,6 +322,7 @@
 				</p>
 			</div>
 			<DropdownSelect
+				ariaLabel="Multi-Episode Style"
 				value={formData.multiEpisodeStyle}
 				options={MULTI_EPISODE_STYLE_OPTIONS}
 				disabled={!formData.rename}
@@ -362,6 +363,7 @@
 					Colon Replacement
 				</div>
 				<DropdownSelect
+					ariaLabel="Colon Replacement"
 					value={formData.colonReplacementFormat}
 					options={SONARR_COLON_REPLACEMENT_OPTIONS}
 					disabled={!formData.rename || !formData.replaceIllegalCharacters}

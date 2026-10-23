@@ -206,7 +206,7 @@
 	<StickyCard position="top" {breadcrumbItems} {breadcrumbCurrent} stickyBreadcrumb={false}>
 		<svelte:fragment slot="left">
 			<div>
-				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h2>
+				<h1 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h1>
 				<p class="text-sm text-neutral-600 dark:text-neutral-400">{description}</p>
 			</div>
 		</svelte:fragment>
@@ -307,6 +307,7 @@
 					Protocol Preference
 				</h3>
 				<DropdownSelect
+					ariaLabel="Protocol Preference"
 					value={formData.preferredProtocol}
 					options={protocolOptions}
 					fullWidth
@@ -329,6 +330,7 @@
 						</p>
 					</div>
 					<DropdownSelect
+						ariaLabel="Delay Unit"
 						value={delayUnit}
 						options={delayUnitOptions}
 						fullWidth
@@ -413,6 +415,7 @@
 									updateField('bypassIfAboveCfScore', !formData.bypassIfAboveCfScore)}
 							/>
 							<NumberInput
+								ariaLabel="Minimum Custom Format Score"
 								name="min-cf-score"
 								id="min-cf-score"
 								value={formData.minimumCfScore}

@@ -246,6 +246,7 @@
 										</div>
 									{/if}
 									<IconCheckbox
+										ariaLabel={`Select ${item.name}`}
 										checked={selectedNames.has(item.name)}
 										icon={Check}
 										color="blue"

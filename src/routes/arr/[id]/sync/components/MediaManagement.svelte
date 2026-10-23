@@ -249,6 +249,8 @@
 
 <div
 	data-onboarding="sync-media-management"
+	role="region"
+	aria-labelledby="sync-media-management-heading"
 	class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
 >
 	<!-- Header -->
@@ -256,7 +258,12 @@
 		class="flex flex-col gap-4 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between md:gap-6 dark:border-neutral-800"
 	>
 		<div class="min-w-0 md:flex-1">
-			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Media Management</h2>
+			<h2
+				id="sync-media-management-heading"
+				class="text-xl font-semibold text-neutral-900 dark:text-neutral-50"
+			>
+				Media Management
+			</h2>
 			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
 				Select which database config to use for each media management setting
 			</p>
@@ -333,6 +340,7 @@
 					</p>
 				</div>
 				<DropdownCombobox
+					ariaLabel="Naming"
 					fullWidth
 					minWidth="0"
 					dropdownWidth="100%"
@@ -360,6 +368,7 @@
 						</p>
 					</div>
 					<DropdownCombobox
+						ariaLabel="Quality Definitions"
 						fullWidth
 						minWidth="0"
 						dropdownWidth="100%"
@@ -387,6 +396,7 @@
 					</p>
 				</div>
 				<DropdownCombobox
+					ariaLabel="Media Settings"
 					fullWidth
 					minWidth="0"
 					dropdownWidth="100%"

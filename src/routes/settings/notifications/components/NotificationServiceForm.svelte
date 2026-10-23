@@ -135,7 +135,7 @@
 	>
 		<svelte:fragment slot="left">
 			<div>
-				<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h2>
+				<h1 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h1>
 				<p class="text-sm text-neutral-600 dark:text-neutral-400">{description}</p>
 			</div>
 		</svelte:fragment>
@@ -174,6 +174,7 @@
 					{/if}
 				</p>
 				<DropdownSelect
+					ariaLabel="Service Type"
 					value={selectedType}
 					options={typeOptions}
 					disabled={mode === 'edit'}

@@ -156,7 +156,9 @@ increment/decrement buttons with press-and-hold repeat, min/max validation,
 optional decimal precision, and a `compact` mode for dense form grids.
 Typical use: retention days, timeouts, thresholds. The visible value is draft
 text while focused, so decimal fields can accept in-progress values like `.`,
-`0.`, and `0.0` before they become final numbers.
+`0.`, and `0.0` before they become final numbers. A `<label for>` matching
+`id` names the input. Where no label exists, such as in a table cell, pass
+`ariaLabel`.
 
 Use `validateOn="blur"` when the field should allow free typing and only
 commit min/max validation after focus leaves the input. Use decimal `step`
@@ -187,10 +189,16 @@ Two related components:
 - **`$ui/dropdown/DropdownCombobox.svelte`** is the searchable dropdown. The
   user types to filter, keyboard arrows navigate, Enter selects. It supports
   fixed positioning, compact modes, item slots, and matching menu width to the
-  trigger.
+  trigger. While open, the search field is a `combobox` and the options are a
+  `listbox` of `option`s. `label` or `ariaLabel` names it like `DropdownSelect`
+  does.
 - **`$ui/dropdown/DropdownSelect.svelte`** is the plain `<select>` replacement:
   no search box, just click and pick. `header` and `headerDescription` add a
   `DropdownHeader` above the options, for explaining the choice in the menu.
+  `label` shows a label next to the button. When the field's label sits
+  outside the component, pass `ariaLabel` instead. Either prop names the button
+  for screen readers and tests as "Label: current value", for example
+  "Type: Radarr".
 
 `DropdownSelect` for a small fixed option list:
 
@@ -255,7 +263,9 @@ release-title parser).
 
 **`$ui/form/IconCheckbox.svelte`** is a checkbox with an icon baked in and
 configurable colors (hex or CSS variable), plus filled / outline variants.
-Used for qualifiers like "exclude", "required", "boost".
+Used for qualifiers like "exclude", "required", "boost". It shows only an
+icon, so a standalone checkbox needs `ariaLabel` to have a name. Inside a
+button that already has a label, it can go without `ariaLabel`.
 
 #### KeyValueList, RangeScale, CronInput
 
@@ -285,7 +295,9 @@ never preloads it; for pages whose data must be current when they open), `type` 
 submits), and `rounded` (`all` / `top` / `bottom` / `none`, so a button can sit edge to edge
 with another control; `DropdownSelect` passes it through to its trigger). If a `tooltip` prop is provided, the button
 wraps itself in a `Tooltip`; use `tooltipPosition="right"` for controls near
-the left edge of the viewport.
+the left edge of the viewport. A button with visible text keeps that text as
+its accessible name, and the tooltip becomes its description. An icon-only
+button takes the tooltip as its name.
 
 A form-submit button with a loading spinner:
 
@@ -329,7 +341,10 @@ strength and a check icon in `color` slides in on the right (pinned to the
 far edge with `fullWidth`). `color` accepts `accent` / `amber` / `green` / `red` / `neutral`;
 `checkboxColor` overrides it and also accepts a hex value or CSS variable
 (e.g. `var(--arr-radarr-color)`). Without a label it renders as a compact
-square that shows only the check. Emits a `change` event with `detail`
+square that shows only the check. The switch's accessible name is `ariaLabel`
+when set, otherwise `label`. A toggle whose `label` shows its state, such as
+"Enabled" or "Disabled", must pass `ariaLabel` with the setting it controls.
+Otherwise its name changes on every click. Emits a `change` event with `detail`
 being the new boolean. Supports `fullWidth` for grid cells and `disabled`.
 `infoHeader` / `infoBody` show a large tooltip when the toggle is hovered;
 the body is also linked to the toggle with `aria-describedby` for screen
@@ -473,7 +488,9 @@ custom format conditions).
 
 **`$ui/modal/Modal.svelte`** is the `<dialog>` replacement. It owns
 overlay / backdrop handling, Escape-to-close, focus management, and
-scroll-lock on `<body>`. Body content is a slot; footer actions can be the
+scroll-lock on `<body>`. The `header` text is the dialog's accessible name,
+so a test can find it with `getByRole('dialog', { name: header })`. Body
+content is a slot; footer actions can be the
 built-in confirm / cancel pair (via `confirmText` / `cancelText` /
 `confirmDanger` props) or custom markup via the footer slot.
 
@@ -710,8 +727,10 @@ top of a list page:
   `tooltipPosition` (`top` / `bottom`) and `tooltipAlign`
   (`left` / `middle` / `right`), set explicitly per call site like
   `dropdownPosition`. Buttons at the right end of a bar use
-  `tooltipAlign="right"`; buttons with a hover dropdown use
-  `tooltipPosition="top"` so the tooltip doesn't cover the menu.
+  `tooltipAlign="right"`. A button with a hover dropdown gets no tooltip,
+  because the tooltip would cover the menu. A `DropdownHeader` inside the menu
+  explains the button instead, and `ariaLabel` names it for screen readers and
+  tests.
 - **`SearchAction.svelte`**: search field optimized for the bar (with
   clear / submit handling).
 - **`SearchFilterAction.svelte`**: filter button with an indicator for

@@ -44,6 +44,7 @@
 {#if mode === 'cell'}
 	{#if column.key === 'monitored'}
 		<IconCheckbox
+			ariaLabel="Monitored"
 			checked={row.monitored}
 			icon={Check}
 			color={row.monitored ? 'accent' : 'neutral'}

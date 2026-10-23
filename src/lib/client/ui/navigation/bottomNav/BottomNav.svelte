@@ -90,6 +90,7 @@
 </script>
 
 <nav
+	aria-label="Bottom bar"
 	class="fixed right-0 bottom-0 left-0 z-50 border-t border-neutral-200 bg-neutral-50 pb-[env(safe-area-inset-bottom)] md:hidden dark:border-neutral-800 dark:bg-neutral-900"
 >
 	{#if $jobStatus.state !== 'idle'}

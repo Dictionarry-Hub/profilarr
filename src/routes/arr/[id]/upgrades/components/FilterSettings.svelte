@@ -548,6 +548,7 @@
 						</label>
 						<div class="mt-1">
 							<DropdownSelect
+								ariaLabel="Method"
 								value={row.selector}
 								options={selectors.map((s) => ({
 									value: s.id,

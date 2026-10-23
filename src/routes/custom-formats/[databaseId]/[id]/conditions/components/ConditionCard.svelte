@@ -299,6 +299,8 @@
 </script>
 
 <div
+	role="group"
+	aria-label={condition.name.trim() || 'New condition'}
 	class="relative flex flex-col gap-3 px-3 py-3 {rightPaddingClass} wide:flex-row wide:items-center"
 >
 	<!-- Identity -->
@@ -328,6 +330,7 @@
 			</div>
 			<div class="w-full min-w-0 shrink-0 wide:w-52" data-onboarding="cf-cond-type">
 				<DropdownCombobox
+					ariaLabel="Type"
 					fullWidth
 					minWidth="0"
 					dropdownWidth="100%"
@@ -355,6 +358,7 @@
 				<div class="flex items-center gap-2">
 					<div class="min-w-0 flex-1">
 						<DropdownCombobox
+							ariaLabel="Value"
 							fullWidth
 							minWidth="0"
 							dropdownWidth="100%"
@@ -384,6 +388,7 @@
 				<div class="flex flex-col gap-2 wide:flex-row wide:items-center">
 					<div class="min-w-0 flex-1">
 						<DropdownCombobox
+							ariaLabel="Value"
 							fullWidth
 							minWidth="0"
 							dropdownWidth="100%"
@@ -422,6 +427,7 @@
 					<div class="flex flex-col gap-2 wide:flex-row wide:items-center">
 						<div class="w-full flex-1">
 							<NumberInput
+								ariaLabel="Minimum Size in GB"
 								name="minSize"
 								value={minSizeGB}
 								min={0}
@@ -438,6 +444,7 @@
 						<span class="hidden text-sm text-neutral-500 wide:inline">-</span>
 						<div class="w-full flex-1">
 							<NumberInput
+								ariaLabel="Maximum Size in GB"
 								name="maxSize"
 								value={maxSizeGB}
 								min={0}
@@ -457,6 +464,7 @@
 				<div class="flex flex-col gap-2 wide:flex-row wide:items-center">
 					<div class="w-full flex-1">
 						<NumberInput
+							ariaLabel="Minimum Year"
 							name="minYear"
 							value={minYear}
 							min={1900}
@@ -471,6 +479,7 @@
 					<span class="hidden text-sm text-neutral-500 wide:inline">-</span>
 					<div class="w-full flex-1">
 						<NumberInput
+							ariaLabel="Maximum Year"
 							name="maxYear"
 							value={maxYear}
 							min={1900}
@@ -485,6 +494,7 @@
 				</div>
 			{:else}
 				<DropdownCombobox
+					ariaLabel="Value"
 					fullWidth
 					minWidth="0"
 					dropdownWidth="100%"

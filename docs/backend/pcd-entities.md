@@ -72,7 +72,11 @@ dependent ops are grouped with the rename op and marked `generated: true`.
 
 **Delete** first writes explicit ops to remove the CF from all QP scoring
 (one per profile), then deletes the CF itself. Foreign key cascades clean
-up conditions, tests, and tags.
+up conditions, tests, and tags. While the Block Referenced Deletes setting
+is on (`fail_on_referenced_delete`, the default), a CF that any quality
+profile scores can't be deleted. The delete fails with "Referenced by N
+quality profiles", and the General tab disables its Delete button with that
+text as the button's description.
 
 ### Conditions
 
@@ -137,8 +141,13 @@ preferences, and upgrade thresholds.
 minimum_custom_format_score, upgrade_until_score, upgrade_score_increment
 
 **Create** inserts the profile with defaults (`upgrades_allowed = 1`,
-scores at 0, increment at 1), then seeds all available qualities as
-enabled entries, inserts tags, groups, and a language if selected.
+scores at 0, increment at 1), then its qualities, tags, and a language if
+selected. A create that passes its own quality list, such as an import or a
+clone, uses that list. Otherwise the qualities follow a fixed default order, best first,
+with three groups: WEB 1080p, Pre-releases, and Unwanted. Qualities the order
+doesn't name come last. Only Remux-1080p and Bluray-1080p start enabled, and
+Bluray-1080p is the upgrade-until quality. A group whose members the schema
+doesn't all have is added as separate qualities instead.
 
 **General update** splits per-field: description, language (delete +
 re-insert), tags (delete + re-insert), name (rename).
@@ -228,7 +237,10 @@ row referencing the old name, grouped with the rename op.
 
 **Delete** first writes generated ops to remove all dependent condition
 references, then deletes tag links, then deletes the regex with guards on
-name and pattern. All grouped under a single `groupId`.
+name and pattern. All grouped under a single `groupId`. Like custom formats,
+a regex that any custom format condition uses can't be deleted while Block
+Referenced Deletes is on. The delete fails with "Referenced by N custom
+formats", and the regex page disables its Delete button.
 
 ## Delay Profiles
 

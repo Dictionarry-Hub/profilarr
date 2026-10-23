@@ -247,6 +247,7 @@
 						</p>
 					</div>
 					<DropdownCombobox
+						ariaLabel="Language"
 						fullWidth
 						minWidth="0"
 						dropdownWidth="100%"

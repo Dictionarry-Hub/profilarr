@@ -25,6 +25,8 @@
 	export let disabled: boolean = false;
 	export let warningTooltip: string = '';
 	export let placeholder: string = '';
+	// Accessible name when no <label for> points at the input, e.g. a table cell
+	export let ariaLabel: string | undefined = undefined;
 	export let font: 'mono' | 'sans' | undefined = undefined;
 	export let compact: boolean = false;
 	export let validateOn: 'input' | 'blur' = 'input';
@@ -424,6 +426,7 @@
 		{name}
 		inputmode={inputMode}
 		role="spinbutton"
+		aria-label={ariaLabel}
 		aria-valuemin={min}
 		aria-valuemax={max}
 		aria-valuenow={value}

@@ -114,7 +114,11 @@
 				Languages
 			</span>
 			<p class="text-xs text-neutral-500 dark:text-neutral-400">Press Enter to add languages</p>
-			<TagInput bind:tags={languages} placeholder="Type language and press Enter" />
+			<TagInput
+				ariaLabel="Languages"
+				bind:tags={languages}
+				placeholder="Type language and press Enter"
+			/>
 		</div>
 
 		<div class="space-y-1">
@@ -122,7 +126,11 @@
 				Indexers
 			</span>
 			<p class="text-xs text-neutral-500 dark:text-neutral-400">Press Enter to add indexers</p>
-			<TagInput bind:tags={indexers} placeholder="Type indexer and press Enter" />
+			<TagInput
+				ariaLabel="Indexers"
+				bind:tags={indexers}
+				placeholder="Type indexer and press Enter"
+			/>
 		</div>
 
 		<div class="space-y-1">
@@ -130,7 +138,7 @@
 			<p class="text-xs text-neutral-500 dark:text-neutral-400">
 				Press Enter to add flags (e.g., freeleech, scene)
 			</p>
-			<TagInput bind:tags={flags} placeholder="Type flag and press Enter" />
+			<TagInput ariaLabel="Flags" bind:tags={flags} placeholder="Type flag and press Enter" />
 		</div>
 
 		<form

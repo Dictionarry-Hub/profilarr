@@ -20,6 +20,9 @@
 	export let labelClass: string = '';
 	export let labelTransform: 'none' | 'capitalize' | 'uppercase' | 'lowercase' = 'none';
 	export let customContent: boolean = false;
+	/** Mark the row as a listbox option, for lists that have the listbox role */
+	export let listOption: boolean = false;
+	export let id: string | undefined = undefined;
 
 	$: sizeClasses = compact ? 'gap-2 px-2 py-1 text-xs' : 'gap-3 px-3 py-2';
 
@@ -49,6 +52,9 @@
 >
 	<button
 		class="flex min-w-0 flex-1 items-center text-left transition-colors {sizeClasses} {stateClasses}"
+		{id}
+		role={listOption ? 'option' : undefined}
+		aria-selected={listOption ? selected : undefined}
 		{disabled}
 		on:click
 		on:mouseenter

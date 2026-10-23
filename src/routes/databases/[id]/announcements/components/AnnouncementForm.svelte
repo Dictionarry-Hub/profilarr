@@ -212,6 +212,7 @@
 						Severity<span class="text-red-500">*</span>
 					</span>
 					<DropdownSelect
+						ariaLabel="Severity"
 						value={severity}
 						options={severityOptions}
 						fullWidth

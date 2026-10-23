@@ -85,7 +85,7 @@
 		<SearchAction searchStore={search} placeholder="Search delay profiles..." responsive />
 		<ViewToggle bind:value={$view} />
 		<ActionButton icon={Info} on:click={() => (showInfoModal = true)} />
-		<ActionButton icon={Plus} on:click={handleCreate} />
+		<ActionButton icon={Plus} tooltip="New" tooltipAlign="right" on:click={handleCreate} />
 	</ActionsBar>
 
 	<!-- Delay Profiles Content -->

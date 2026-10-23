@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+	let nextId = 0;
+</script>
+
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { cubicIn, cubicOut } from 'svelte/easing';
@@ -58,6 +62,8 @@
 			window.removeEventListener('keydown', handleKeydown);
 		};
 	});
+
+	const headerId = `modal-header-${nextId++}`;
 </script>
 
 {#if open}
@@ -70,6 +76,7 @@
 		out:fade={{ duration: 110 }}
 		role="dialog"
 		aria-modal="true"
+		aria-labelledby={headerId}
 		tabindex="-1"
 	>
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -89,7 +96,9 @@
 				<div
 					class="flex flex-shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-neutral-300 px-6 py-4 dark:border-neutral-700/60"
 				>
-					<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{header}</h2>
+					<h2 id={headerId} class="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
+						{header}
+					</h2>
 					<slot name="header-extra" />
 				</div>
 

@@ -70,7 +70,7 @@
 <!-- Actions Bar -->
 <ActionsBar>
 	<SearchAction searchStore={search} placeholder="Search media settings..." responsive />
-	<ActionButton icon={Plus} hasDropdown={true} dropdownPosition="right">
+	<ActionButton icon={Plus} ariaLabel="New" hasDropdown={true} dropdownPosition="right">
 		<svelte:fragment slot="dropdown" let:dropdownPosition>
 			<Dropdown position={dropdownPosition} minWidth="10rem">
 				<DropdownHeader label="New config" />

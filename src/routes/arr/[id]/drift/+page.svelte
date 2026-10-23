@@ -181,6 +181,7 @@
 						<Toggle
 							checked={enabled}
 							label={enabled ? 'Enabled' : 'Disabled'}
+							ariaLabel="Detection"
 							color="green"
 							on:change={(event) => (enabled = event.detail)}
 						/>

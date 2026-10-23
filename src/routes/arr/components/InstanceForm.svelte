@@ -422,6 +422,7 @@
 					<DropdownSelect
 						value={type}
 						options={typeOptions}
+						ariaLabel="Type"
 						placeholder="Select type..."
 						disabled={mode === 'edit'}
 						fullWidth
@@ -550,6 +551,7 @@
 					How often to refresh cached library data in the background
 				</p>
 				<DropdownSelect
+					ariaLabel="Library Refresh"
 					value={libraryRefreshInterval}
 					options={libraryRefreshOptions}
 					fullWidth
@@ -574,6 +576,7 @@
 						<Toggle
 							checked={cleanupEnabled}
 							label={cleanupEnabled ? 'Enabled' : 'Disabled'}
+							ariaLabel="Cleanup"
 							color="green"
 							on:change={(e) => update('cleanupEnabled', e.detail)}
 						/>

@@ -339,6 +339,8 @@
 
 <div
 	data-onboarding="sync-quality-profiles"
+	role="region"
+	aria-labelledby="sync-quality-profiles-heading"
 	class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
 >
 	<!-- Header -->
@@ -346,7 +348,12 @@
 		class="flex flex-col gap-4 border-b border-neutral-200 px-6 py-4 md:flex-row md:items-start md:justify-between md:gap-6 dark:border-neutral-800"
 	>
 		<div class="min-w-0 md:flex-1">
-			<h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-50">Quality Profiles</h2>
+			<h2
+				id="sync-quality-profiles-heading"
+				class="text-xl font-semibold text-neutral-900 dark:text-neutral-50"
+			>
+				Quality Profiles
+			</h2>
 			<p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
 				Select quality profiles to sync. Drag databases to set priority.
 			</p>
@@ -465,6 +472,7 @@
 														: '[&_button]:text-neutral-400 [&_button]:italic dark:[&_button]:text-neutral-500'}"
 												>
 													<DropdownSelect
+														ariaLabel={`${profile.name} Quality Definition`}
 														value={entry?.sizes ?? ''}
 														options={sizeOptions(database)}
 														header="Quality Definition"
@@ -517,6 +525,7 @@
 						Global Quality Definition
 					</span>
 					<DropdownSelect
+						ariaLabel="Global Quality Definition"
 						value={globalValue}
 						options={globalOptions}
 						header="Global Quality Definition"

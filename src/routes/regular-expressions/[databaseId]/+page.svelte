@@ -215,7 +215,7 @@
 				placeholder="Filter regular expressions..."
 			/>
 		{/if}
-		<ActionButton icon={Plus} hasDropdown={true} dropdownPosition="right">
+		<ActionButton icon={Plus} ariaLabel="New" hasDropdown={true} dropdownPosition="right">
 			<svelte:fragment slot="dropdown">
 				<Dropdown position="right" minWidth="14rem">
 					<DropdownHeader label="New expression" />

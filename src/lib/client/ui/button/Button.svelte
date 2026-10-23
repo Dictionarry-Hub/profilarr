@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+	let nextId = 0;
+</script>
+
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { Component } from 'svelte';
@@ -112,6 +116,13 @@
 	$: activeSizeClasses = isIconOnly ? iconOnlySizeClasses : sizeClasses;
 	$: classes = `group ${baseClasses} ${activeSizeClasses[effectiveSize]} ${radiusClasses[effectiveSize][rounded]} ${variantClasses[variant]} ${widthClass}`;
 	$: iconSize = effectiveSize === 'xs' ? 12 : effectiveSize === 'sm' ? 14 : 16;
+
+	// Visible text names the button; the tooltip then describes it. Without
+	// text, the tooltip is the only name an icon button has.
+	const descriptionId = `button-tooltip-${nextId++}`;
+	$: hasVisibleText = !!text || !!$$slots.default;
+	$: accessibleName = ariaLabel || (hasVisibleText ? undefined : tooltip || undefined);
+	$: describedBy = hasVisibleText && tooltip ? descriptionId : undefined;
 </script>
 
 <Tooltip text={tooltip} position={tooltipPosition} align={tooltipAlign} {fullWidth}>
@@ -121,7 +132,8 @@
 			{target}
 			{rel}
 			title={!tooltip && title ? title : undefined}
-			aria-label={ariaLabel || tooltip || undefined}
+			aria-label={accessibleName}
+			aria-describedby={describedBy}
 			aria-disabled={softDisabled || disabled ? 'true' : undefined}
 			class={classes}
 			data-onboarding={onboarding}
@@ -164,7 +176,8 @@
 			{type}
 			{disabled}
 			title={!tooltip && title ? title : undefined}
-			aria-label={ariaLabel || tooltip || undefined}
+			aria-label={accessibleName}
+			aria-describedby={describedBy}
 			aria-disabled={softDisabled || disabled ? 'true' : undefined}
 			class={classes}
 			data-onboarding={onboarding}
@@ -200,5 +213,8 @@
 				<svelte:component this={effectiveIcon} size={iconSize} class={effectiveIconColor} />
 			{/if}
 		</button>
+	{/if}
+	{#if describedBy}
+		<span id={descriptionId} class="sr-only">{tooltip}</span>
 	{/if}
 </Tooltip>

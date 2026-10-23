@@ -178,6 +178,7 @@
 					<div class="flex items-center gap-1">
 						<div class="w-16">
 							<NumberInput
+								ariaLabel={`${entry.key} Major`}
 								name="version-major-{index}-mobile"
 								value={vMajor}
 								min={isLocked && lockedFirst?.minMajor !== undefined
@@ -191,6 +192,7 @@
 						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
 						<div class="w-16">
 							<NumberInput
+								ariaLabel={`${entry.key} Minor`}
 								name="version-minor-{index}-mobile"
 								value={vMinor}
 								min={0}
@@ -201,6 +203,7 @@
 						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
 						<div class="w-16">
 							<NumberInput
+								ariaLabel={`${entry.key} Patch`}
 								name="version-patch-{index}-mobile"
 								value={vPatch}
 								min={0}
@@ -239,6 +242,7 @@
 					<div class="flex items-center gap-1">
 						<div class="w-16">
 							<NumberInput
+								ariaLabel={`${entry.key} Major`}
 								name="version-major-{index}"
 								value={vMajor}
 								min={isLocked && lockedFirst?.minMajor !== undefined
@@ -252,6 +256,7 @@
 						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
 						<div class="w-16">
 							<NumberInput
+								ariaLabel={`${entry.key} Minor`}
 								name="version-minor-{index}"
 								value={vMinor}
 								min={0}
@@ -262,6 +267,7 @@
 						<span class="text-lg font-medium text-neutral-400 dark:text-neutral-500">.</span>
 						<div class="w-16">
 							<NumberInput
+								ariaLabel={`${entry.key} Patch`}
 								name="version-patch-{index}"
 								value={vPatch}
 								min={0}

@@ -202,6 +202,7 @@
 	<svelte:fragment slot="header-extra">
 		<div class="ml-auto flex items-center gap-2">
 			<DropdownSelect
+				ariaLabel="Release Type"
 				value={selectedReleaseType}
 				options={releaseTypeOptions}
 				position="right"
@@ -209,6 +210,7 @@
 				on:change={(e) => setReleaseType(e.detail)}
 			/>
 			<DropdownSelect
+				ariaLabel="Quality Profile"
 				value={selectedProfileId}
 				options={profileOptions}
 				placeholder="No Profile"

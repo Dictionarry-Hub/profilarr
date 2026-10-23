@@ -12,7 +12,8 @@
 	export let checked: boolean = false;
 	export let disabled: boolean = false;
 	export let label: string = '';
-	export let ariaLabel: string = 'Toggle';
+	// Names the switch for screen readers and tests; wins over `label`, which may only show state
+	export let ariaLabel: string = '';
 	export let color: 'accent' | 'amber' | 'green' | 'red' | 'neutral' = 'accent';
 	// Overrides color; accepts a named color, hex (#FFC230), or CSS var (var(--arr-radarr-color))
 	export let checkboxColor:
@@ -44,7 +45,7 @@
 		blue: 'text-blue-600 dark:text-blue-400'
 	};
 
-	$: resolvedLabel = label || ariaLabel;
+	$: resolvedLabel = ariaLabel || label || 'Toggle';
 	$: resolvedColor = checkboxColor || color;
 	$: isCustomColor = resolvedColor.startsWith('#') || resolvedColor.startsWith('var(');
 	$: namedColor = (isCustomColor ? 'accent' : resolvedColor) as NamedColor;

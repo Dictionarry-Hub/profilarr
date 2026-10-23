@@ -74,6 +74,7 @@
 		<Toggle
 			checked={enabled}
 			label={enabled ? 'Enabled' : 'Disabled'}
+			ariaLabel="Status"
 			color="green"
 			on:change={(e) => onEnabledChange?.(e.detail)}
 		/>
@@ -105,6 +106,7 @@
 			Mode
 		</span>
 		<DropdownSelect
+			ariaLabel="Mode"
 			value={filterMode}
 			options={modeOptions}
 			minWidth="10rem"

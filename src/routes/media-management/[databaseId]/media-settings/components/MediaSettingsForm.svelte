@@ -208,6 +208,7 @@
 				</p>
 			</div>
 			<DropdownSelect
+				ariaLabel="Propers and Repacks"
 				value={formData.propersRepacks}
 				options={PROPERS_REPACKS_OPTIONS}
 				fullWidth

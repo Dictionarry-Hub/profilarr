@@ -249,6 +249,7 @@
 	class:flex-wrap={scheduleType === 'weekly' || scheduleType === 'monthly'}
 >
 	<DropdownSelect
+		ariaLabel="Frequency"
 		value={scheduleType}
 		options={scheduleOptions}
 		{disabled}
@@ -263,6 +264,7 @@
 	{#if scheduleType === 'every'}
 		<div class="w-24">
 			<NumberInput
+				ariaLabel="Interval in Minutes"
 				name="cron-interval-minutes"
 				value={intervalMinutes}
 				min={everyMin}
@@ -285,6 +287,7 @@
 		<span class="text-sm text-neutral-500 dark:text-neutral-400">at</span>
 		<div class="w-24">
 			<NumberInput
+				ariaLabel="Minute"
 				name="cron-hourly-minute"
 				value={hourlyMinute}
 				min={0}
@@ -318,6 +321,7 @@
 	{:else if scheduleType === 'weekly'}
 		<div class="basis-full md:hidden"></div>
 		<DropdownSelect
+			ariaLabel="Day of Week"
 			value={String(weeklyDay)}
 			options={weekdayOptions}
 			{disabled}
@@ -349,6 +353,7 @@
 		<span class="text-sm text-neutral-500 dark:text-neutral-400">day</span>
 		<div class="w-24">
 			<NumberInput
+				ariaLabel="Day of Month"
 				name="cron-monthly-day"
 				value={monthlyDay}
 				min={1}
