@@ -702,6 +702,7 @@
 					}}
 					className="cursor-pointer"
 					role="button"
+					aria-label={item.name}
 					tabindex="0"
 				>
 					{#if hoverTargetIndex === index && willCreateGroup}
