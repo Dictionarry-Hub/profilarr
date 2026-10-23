@@ -2,7 +2,7 @@ import { test, expect } from '$flows/helpers/core/test.ts';
 import { fixture } from '$flows/helpers/core/fixtureData.ts';
 import { openEntity, openSidebarPage } from '$flows/helpers/core/nav.ts';
 import { pageData } from '$flows/helpers/core/pageData.ts';
-import { confirmDialog, deleteEntity, saveForm } from '$flows/helpers/core/forms.ts';
+import { chooseOption, confirmDialog, deleteEntity, saveForm } from '$flows/helpers/core/forms.ts';
 import type { Page } from '@playwright/test';
 
 interface RegexPage {
@@ -96,4 +96,28 @@ test('confirmDialog clicks the named button', async ({ page }) => {
 
 	await expect(page.getByRole('dialog')).toHaveCount(0);
 	expect(new URL(page.url()).pathname).toBe(entityPath);
+});
+
+test.describe('chooseOption', () => {
+	test('picks from a plain dropdown whose options have descriptions', async ({ page }) => {
+		await openEntity(page, 'Delay Profiles', fixture.delayProfile('Prefer Usenet').name);
+		await chooseOption(page.getByRole('main'), 'Protocol Preference', 'Prefer Torrent');
+	});
+
+	test('waits for a short label when the button shows one', async ({ page }) => {
+		await openEntity(page, 'Delay Profiles', fixture.delayProfile('Prefer Usenet').name);
+		await chooseOption(page.getByRole('main'), 'Delay Unit', 'Hours', { shows: 'Show in hours' });
+	});
+
+	test('picks from a searchable dropdown', async ({ page }) => {
+		await openEntity(page, 'Quality Profiles', fixture.qualityProfile('Radarr Profile').name);
+		await chooseOption(page.getByRole('main'), 'Language', 'German');
+	});
+
+	test('fails when the dropdown has no such option', async ({ page }) => {
+		await openEntity(page, 'Delay Profiles', fixture.delayProfile('Prefer Usenet').name);
+		await expect(
+			chooseOption(page.getByRole('main'), 'Protocol Preference', 'Carrier Pigeon')
+		).rejects.toThrow('should offer Carrier Pigeon');
+	});
 });

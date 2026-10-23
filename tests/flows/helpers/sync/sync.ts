@@ -21,7 +21,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { FIXTURES_NAME } from '$flows/harness/seed.ts';
 import { fixtures } from '$flows/helpers/core/fixtureData.ts';
-import { saveForm, waitForAction } from '$flows/helpers/core/forms.ts';
+import { chooseOption, saveForm, waitForAction } from '$flows/helpers/core/forms.ts';
 import { openTab } from '$flows/helpers/core/nav.ts';
 import { addArr, openArr } from '$flows/helpers/sync/arrs.ts';
 import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
@@ -95,27 +95,6 @@ export function syncRegion(page: Page, section: SyncSection): Locator {
 	return page.getByRole('main').getByRole('region', { name: section, exact: true });
 }
 
-/** Pick a searchable dropdown's option: a button "<label>: <value>" that opens a listbox */
-async function pickCombobox(page: Page, scope: Locator, label: string, option: string) {
-	await scope.getByRole('button', { name: new RegExp(`^${label}:`) }).click();
-	await page
-		.getByRole('listbox', { name: label, exact: true })
-		.getByRole('option', { name: option, exact: true })
-		.click();
-	await expect(
-		scope.getByRole('button', { name: `${label}: ${option}`, exact: true })
-	).toBeVisible();
-}
-
-/** Pick a plain dropdown's option: a button "<label>: <value>" whose options are buttons */
-async function pickSelect(page: Page, scope: Locator, label: string, option: string) {
-	await scope.getByRole('button', { name: new RegExp(`^${label}:`) }).click();
-	await page.getByRole('button', { name: option, exact: true }).filter({ visible: true }).click();
-	await expect(
-		scope.getByRole('button', { name: `${label}: ${option}`, exact: true })
-	).toBeVisible();
-}
-
 /** How a fixtures config shows in the Sync page's dropdowns */
 const fromFixtures = (config: string) => `${FIXTURES_NAME} / ${config}`;
 
@@ -152,22 +131,19 @@ export async function chooseMediaManagement(
 		async () => {
 			const section = syncRegion(page, 'Media Management');
 			const app = fake.type;
-			await pickCombobox(
-				page,
+			await chooseOption(
 				section,
 				'Naming',
 				fromFixtures(choices.naming ?? fixtures.naming[app][0].name)
 			);
 			if (hasCapability(fake.target, 'qualityDefinitions')) {
-				await pickCombobox(
-					page,
+				await chooseOption(
 					section,
 					'Quality Definitions',
 					fromFixtures(choices.qualityDefinitions ?? fixtures.qualityDefinitions[app][0].name)
 				);
 			}
-			await pickCombobox(
-				page,
+			await chooseOption(
 				section,
 				'Media Settings',
 				fromFixtures(choices.mediaSettings ?? fixtures.mediaSettings[app][0].name)
@@ -228,9 +204,9 @@ export async function chooseQualityProfiles(
 
 			if (hasCapability(fake.target, 'profileSizes')) {
 				const global = choices.qualityDefinitions ?? fixtures.qualityDefinitions[fake.type][0].name;
-				await pickSelect(page, section, 'Global Quality Definition', fromFixtures(global));
+				await chooseOption(section, 'Global Quality Definition', fromFixtures(global));
 				for (const [profile, config] of Object.entries(choices.perProfile ?? {})) {
-					await pickSelect(page, section, `${profile} Quality Definition`, config);
+					await chooseOption(section, `${profile} Quality Definition`, config);
 				}
 			} else if (choices.perProfile) {
 				throw new Error(`${fake.target.id} has no per-profile quality definitions`);

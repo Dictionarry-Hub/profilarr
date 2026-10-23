@@ -157,3 +157,58 @@ export async function deleteEntity(page: Page, options: DeleteOptions = {}): Pro
 		{ box: true }
 	);
 }
+
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+export interface ChooseOptions {
+	/**
+	 * What the closed button shows once chosen, when it differs from the
+	 * option's label: an option with a `shortLabel`, such as the delay unit's
+	 * "Show in hours" for "Hours". Default the option's label.
+	 */
+	shows?: string;
+}
+
+/**
+ * Choose an option in the dropdown labelled `label` inside `scope`, then wait
+ * until its button shows the choice. Works for both dropdowns. Each one's
+ * button is named "<label>: <current value>". A searchable dropdown
+ * (`DropdownCombobox`) opens a listbox named `label` with option rows; a plain
+ * one (`DropdownSelect`) shows its options as buttons. An option's name can
+ * include its description, so an exact match wins, then a name starting with
+ * the option.
+ */
+export async function chooseOption(
+	scope: Locator,
+	label: string,
+	option: string,
+	options: ChooseOptions = {}
+): Promise<void> {
+	await test.step(
+		`Choose ${option} for ${label}`,
+		async () => {
+			const page = scope.page();
+			const button = scope.getByRole('button', { name: new RegExp(`^${escapeRegExp(label)}: `) });
+			await expect(button, `The ${label} dropdown should be shown`).toBeVisible();
+			await button.click();
+
+			const listbox = page.getByRole('listbox', { name: label, exact: true });
+			const byName = (name: string | RegExp) =>
+				listbox
+					.getByRole('option', { name, exact: typeof name === 'string' })
+					.or(page.getByRole('button', { name, exact: typeof name === 'string' }))
+					.filter({ visible: true });
+			const exact = byName(option);
+			const prefixed = byName(new RegExp(`^${escapeRegExp(option)}(\\s|$)`));
+			await expect(prefixed.first(), `The ${label} dropdown should offer ${option}`).toBeVisible();
+			await ((await exact.count()) > 0 ? exact : prefixed).first().click();
+
+			const shows = options.shows ?? option;
+			await expect(
+				scope.getByRole('button', { name: `${label}: ${shows}`, exact: true }),
+				`The ${label} dropdown should show ${shows}`
+			).toBeVisible();
+		},
+		{ box: true }
+	);
+}

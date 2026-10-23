@@ -4,6 +4,7 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
+import { chooseOption } from '$flows/helpers/core/forms.ts';
 import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
 import { openSidebarPage, sidebar } from '$flows/helpers/core/nav.ts';
 
@@ -46,9 +47,7 @@ export async function addArr(page: Page, options: AddArrOptions): Promise<void> 
 
 			const main = page.getByRole('main');
 			await main.getByRole('textbox', { name: /^Name/ }).fill(name);
-			await main.getByRole('button', { name: /^Type:/ }).click();
-			await page.getByRole('button', { name: typeLabel, exact: true }).click();
-			await expect(main.getByRole('button', { name: `Type: ${typeLabel}` })).toBeVisible();
+			await chooseOption(main, 'Type', typeLabel);
 			await main.getByRole('textbox', { name: /^URL/ }).fill(options.url ?? fake.url);
 			await main.getByLabel(/^API Key/).fill(options.apiKey ?? fake.apiKey);
 
