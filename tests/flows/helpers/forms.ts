@@ -19,7 +19,7 @@
  * "sync now?" dialog.
  */
 
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { unflatten } from '$flows/helpers/pageData.ts';
 
 export interface ActionResult {
@@ -59,6 +59,8 @@ export interface SaveOptions {
 	button?: string;
 	/** The form action's name, when the page has several */
 	action?: string;
+	/** Where the button is, when the page has several with the same name. Default main. */
+	within?: Locator;
 }
 
 /**
@@ -71,7 +73,8 @@ export async function saveForm(page: Page, options: SaveOptions = {}): Promise<A
 	return await test.step(
 		`Save with ${button}`,
 		async () => {
-			const save = page.getByRole('main').getByRole('button', { name: button, exact: true });
+			const scope = options.within ?? page.getByRole('main');
+			const save = scope.getByRole('button', { name: button, exact: true });
 			await expect(save, `${button} should be enabled once the form changed`).toBeEnabled();
 
 			const posted = waitForAction(page, options.action);
