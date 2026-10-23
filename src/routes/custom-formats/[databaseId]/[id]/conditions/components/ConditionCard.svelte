@@ -299,6 +299,8 @@
 </script>
 
 <div
+	role="group"
+	aria-label={condition.name.trim() || 'New condition'}
 	class="relative flex flex-col gap-3 px-3 py-3 {rightPaddingClass} wide:flex-row wide:items-center"
 >
 	<!-- Identity -->
