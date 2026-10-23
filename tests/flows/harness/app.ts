@@ -28,6 +28,10 @@ export interface App {
 }
 
 const HEALTH_TIMEOUT_MS = 30_000;
+// freePort only finds a port that is free right now. Another worker, or any
+// outgoing connection, can take it before the app listens, so a start that
+// fails on a taken port tries a new one.
+const START_ATTEMPTS = 3;
 
 // No auto-link, no announcements fetch, no parser: nothing reaches the network.
 const BASE_ENV = {
@@ -60,12 +64,12 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 		await relinkDatabases(dir, options.upstream);
 	}
 
-	const port = await freePort();
-	const url = `http://127.0.0.1:${port}`;
+	let port = 0;
+	let url = '';
 	const output: string[] = [];
 	const logs = () => output.join('');
 
-	// Spawn the app and wait until it answers. Kills it if it never does.
+	// Spawn the app on `port` and wait until it answers. Kills it if it never does.
 	const launch = async (): Promise<ChildProcess> => {
 		const child = spawn(APP_BINARY, [], {
 			env: {
@@ -79,10 +83,13 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 			},
 			stdio: ['ignore', 'pipe', 'pipe']
 		});
+		const from = output.length;
 		child.stdout?.on('data', (chunk) => output.push(String(chunk)));
 		child.stderr?.on('data', (chunk) => output.push(String(chunk)));
+		// Deno prints this once the app holds its port
+		const listening = () => output.slice(from).join('').includes(`Listening on ${url}/`);
 		try {
-			await waitForHealth(url, child, logs);
+			await waitForHealth(url, child, logs, listening);
 		} catch (error) {
 			await kill(child);
 			throw error;
@@ -94,9 +101,25 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 		if (ownsDir) await fs.rm(dir, { recursive: true, force: true });
 	};
 
+	// Launch on a free port, and on another one if that port gets taken first
+	const start = async (): Promise<ChildProcess> => {
+		for (let attempt = 1; ; attempt++) {
+			port = await freePort();
+			url = `http://127.0.0.1:${port}`;
+			const from = output.length;
+			try {
+				return await launch();
+			} catch (error) {
+				const portTaken = output.slice(from).join('').includes('AddrInUse');
+				if (!portTaken || attempt >= START_ATTEMPTS) throw error;
+				output.push(`\n--- port ${port} was taken, trying another ---\n`);
+			}
+		}
+	};
+
 	let child: ChildProcess;
 	try {
-		child = await launch();
+		child = await start();
 	} catch (error) {
 		await removeDir();
 		throw error;
@@ -110,6 +133,7 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 			await kill(child);
 			await removeDir();
 		},
+		// Keeps the port, because the test's URL depends on it
 		restart: async () => {
 			await kill(child);
 			output.push('\n--- restart ---\n');
@@ -118,17 +142,28 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 	};
 }
 
-async function waitForHealth(url: string, child: ChildProcess, logs: () => string): Promise<void> {
+async function waitForHealth(
+	url: string,
+	child: ChildProcess,
+	logs: () => string,
+	listening: () => boolean
+): Promise<void> {
 	const deadline = Date.now() + HEALTH_TIMEOUT_MS;
 	while (Date.now() < deadline) {
 		if (child.exitCode !== null) {
 			throw new Error(`App exited with code ${child.exitCode} before it was ready:\n${logs()}`);
 		}
-		try {
-			const response = await fetch(`${url}/api/v1/health`);
-			if (response.ok) return;
-		} catch {
-			// Not listening yet
+		// Until the app says it's listening, whatever answers on the port is
+		// something else that took it, so its answer means nothing
+		if (listening()) {
+			try {
+				const response = await fetch(`${url}/api/v1/health`, {
+					signal: AbortSignal.timeout(2_000)
+				});
+				if (response.ok) return;
+			} catch {
+				// Not answering yet
+			}
 		}
 		await new Promise((r) => setTimeout(r, 100));
 	}
