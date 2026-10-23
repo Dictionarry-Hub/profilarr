@@ -20,6 +20,7 @@
 	import ActionButton from '$ui/actions/ActionButton.svelte';
 	import Dropdown from '$ui/dropdown/Dropdown.svelte';
 	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
 	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
 	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
 	import Badge from '$ui/badge/Badge.svelte';
@@ -149,15 +150,9 @@
 			<SearchAction {searchStore} placeholder="Search runs..." />
 
 			<!-- Date Filter -->
-			<ActionButton
-				icon={Calendar}
-				hasDropdown
-				square
-				tooltip="Filter by date"
-				tooltipPosition="top"
-				tooltipAlign="right"
-			>
+			<ActionButton icon={Calendar} hasDropdown square ariaLabel="Filter by date">
 				<Dropdown slot="dropdown" position="right" mobilePosition="middle">
+					<DropdownHeader label="Date" />
 					{#each [{ value: 'all', label: 'All time' }, { value: 'today', label: 'Today' }, { value: 'yesterday', label: 'Yesterday' }, { value: 'week', label: 'Last 7 days' }, { value: 'month', label: 'Last 30 days' }] as const as option}
 						<DropdownItem
 							label={option.label}
@@ -169,15 +164,9 @@
 			</ActionButton>
 
 			<!-- Status Filter -->
-			<ActionButton
-				icon={CircleDot}
-				hasDropdown
-				square
-				tooltip="Filter by status"
-				tooltipPosition="top"
-				tooltipAlign="right"
-			>
+			<ActionButton icon={CircleDot} hasDropdown square ariaLabel="Filter by status">
 				<Dropdown slot="dropdown" position="right" mobilePosition="middle">
+					<DropdownHeader label="Status" />
 					{#each [{ value: 'all', label: 'All' }, { value: 'success', label: 'Success' }, { value: 'partial', label: 'Partial' }, { value: 'failed', label: 'Failed' }, { value: 'skipped', label: 'Skipped' }] as const as option}
 						<DropdownItem
 							label={option.label}

@@ -278,9 +278,7 @@
 
 	<ActionButton
 		icon={Fingerprint}
-		tooltip="Filter entity"
-		tooltipPosition="top"
-		tooltipAlign="right"
+		ariaLabel="Filter entity"
 		hasDropdown={true}
 		dropdownPosition="right"
 	>
@@ -306,9 +304,7 @@
 	</ActionButton>
 	<ActionButton
 		icon={AlertTriangle}
-		tooltip="Filter reason"
-		tooltipPosition="top"
-		tooltipAlign="right"
+		ariaLabel="Filter reason"
 		hasDropdown={true}
 		dropdownPosition="right"
 	>
