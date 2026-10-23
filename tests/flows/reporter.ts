@@ -1,13 +1,16 @@
 /**
- * Flow suite reporter: one line per scenario folder as it finishes, then
- * every failure in full at the end.
+ * Flow suite reporter: a tree of test folders, then every failure in full at
+ * the end. Each folder line counts every test beneath it, at any depth. A top
+ * folder prints its tree once its last test finishes.
  *
- *   ✓ databases          2/2   3.1s
- *   ✗ quality-profiles   3/4   6.0s
+ *   ✓ scenarios                 3/4    6.0s
+ *     ✓ entities                3/4    6.0s
+ *       ✗ quality-profiles      2/3    4.2s
+ *       ✓ custom-formats        1/1    1.8s
  *
  *   ──── 1 failure ────
- *   ✗ quality-profiles › a custom format score edit persists
- *     scenarios/quality-profiles/edit-score.spec.ts:12
+ *   ✗ scenarios › entities › quality-profiles › a custom format score edit persists
+ *     tests/flows/scenarios/entities/quality-profiles/edit-score.spec.ts:12
  *     <error with expected/received and the failing line>
  *     Output: <what the test printed, if anything>
  *     Trace: test-results/.../trace.zip
@@ -30,15 +33,29 @@ const green = color(32);
 const red = color(31);
 const dim = color(2);
 
-interface Group {
+/** A folder of tests, counting every test beneath it */
+interface Folder {
+	name: string;
+	children: Map<string, Folder>;
 	total: number;
 	done: number;
 	passed: number;
 	startedAt: number;
+	endedAt: number;
 }
 
+const newFolder = (name: string): Folder => ({
+	name,
+	children: new Map(),
+	total: 0,
+	done: 0,
+	passed: 0,
+	startedAt: 0,
+	endedAt: 0
+});
+
 interface Failure {
-	group: string;
+	path: string;
 	test: TestCase;
 	result: TestResult;
 }
@@ -46,7 +63,7 @@ interface Failure {
 export default class FlowReporter implements Reporter {
 	private rootDir = '';
 	private testDir = '';
-	private groups = new Map<string, Group>();
+	private root = newFolder('');
 	private failures: Failure[] = [];
 	private errors: TestError[] = [];
 	private startedAt = Date.now();
@@ -62,12 +79,15 @@ export default class FlowReporter implements Reporter {
 		this.testDir = config.projects[0]?.testDir ?? config.rootDir;
 		const tests = suite.allTests();
 		for (const test of tests) {
-			const name = this.groupOf(test);
-			const group = this.groups.get(name) ?? { total: 0, done: 0, passed: 0, startedAt: 0 };
-			group.total++;
-			this.groups.set(name, group);
+			let folder = this.root;
+			for (const name of this.foldersOf(test)) {
+				const child = folder.children.get(name) ?? newFolder(name);
+				folder.children.set(name, child);
+				folder = child;
+				folder.total++;
+			}
 		}
-		this.width = Math.max(10, ...[...this.groups.keys()].map((name) => name.length));
+		this.width = Math.max(10, labelWidth(this.root, 0));
 		// Playwright never starts more workers than there are tests
 		const workers = Math.min(config.workers, tests.length);
 		console.log(
@@ -76,28 +96,29 @@ export default class FlowReporter implements Reporter {
 	}
 
 	onTestBegin(test: TestCase): void {
-		const group = this.groups.get(this.groupOf(test));
-		if (group && group.startedAt === 0) group.startedAt = Date.now();
+		for (const folder of this.chainOf(test)) {
+			if (folder.startedAt === 0) folder.startedAt = Date.now();
+		}
 	}
 
 	onTestEnd(test: TestCase, result: TestResult): void {
 		// Only the final attempt counts when retries are on
 		if (result.status !== 'passed' && result.retry < test.retries) return;
 
-		const name = this.groupOf(test);
-		const group = this.groups.get(name);
-		if (!group) return;
-		group.done++;
-		if (test.outcome() === 'expected' || test.outcome() === 'flaky') group.passed++;
-		else if (test.outcome() === 'unexpected') this.failures.push({ group: name, test, result });
-
-		if (group.done === group.total) {
-			const ok = group.passed === group.total;
-			const time = `${((Date.now() - group.startedAt) / 1000).toFixed(1)}s`;
-			console.log(
-				`  ${ok ? green('✓') : red('✗')} ${name.padEnd(this.width)}  ${`${group.passed}/${group.total}`.padStart(5)}  ${time.padStart(6)}`
-			);
+		const chain = this.chainOf(test);
+		const passed = test.outcome() === 'expected' || test.outcome() === 'flaky';
+		for (const folder of chain) {
+			folder.done++;
+			if (passed) folder.passed++;
+			folder.endedAt = Date.now();
 		}
+		if (test.outcome() === 'unexpected') {
+			const path = this.foldersOf(test).join(' › ');
+			this.failures.push({ path, test, result });
+		}
+
+		const top = chain[0];
+		if (top && top.done === top.total) this.printTree(top, 0);
 	}
 
 	onError(error: TestError): void {
@@ -114,8 +135,8 @@ export default class FlowReporter implements Reporter {
 				console.log(`\n${red('✗')} Run error`);
 				console.log(indent(formatError(error)));
 			}
-			for (const { group, test, result: testResult } of this.failures) {
-				console.log(`\n${red('✗')} ${group} › ${test.title}`);
+			for (const { path, test, result: testResult } of this.failures) {
+				console.log(`\n${red('✗')} ${path} › ${test.title}`);
 				// Point at the failing line when Playwright knows it, else where the test starts
 				const where = testResult.errors.find((error) => error.location)?.location ?? test.location;
 				console.log(dim(`  ${relative(this.rootDir, where.file)}:${where.line}`));
@@ -135,18 +156,52 @@ export default class FlowReporter implements Reporter {
 			}
 		}
 
-		const passed = [...this.groups.values()].reduce((sum, group) => sum + group.passed, 0);
+		const passed = [...this.root.children.values()].reduce((sum, top) => sum + top.passed, 0);
 		const failed = this.failures.length;
 		const time = `${((Date.now() - this.startedAt) / 1000).toFixed(1)}s`;
 		const summary = `${passed} passed${failed ? `, ${failed} failed` : ''} in ${time}`;
 		console.log(`\n${result.status === 'passed' ? green(summary) : red(summary)}`);
 	}
 
-	/** The first folder under the test dir, or "(root)" for top-level files */
-	private groupOf(test: TestCase): string {
-		const parts = relative(this.testDir, test.location.file).split(sep);
-		return parts.length > 1 ? parts[0] : '(root)';
+	/** The test's folders under the test dir, outermost first, or "(root)" for top-level files */
+	private foldersOf(test: TestCase): string[] {
+		const folders = relative(this.testDir, test.location.file).split(sep).slice(0, -1);
+		return folders.length > 0 ? folders : ['(root)'];
 	}
+
+	/** The folder records for a test, outermost first */
+	private chainOf(test: TestCase): Folder[] {
+		const chain: Folder[] = [];
+		let folder = this.root;
+		for (const name of this.foldersOf(test)) {
+			const child = folder.children.get(name);
+			if (!child) break;
+			chain.push(child);
+			folder = child;
+		}
+		return chain;
+	}
+
+	/** Print a folder and everything beneath it, children in name order */
+	private printTree(folder: Folder, depth: number): void {
+		const ok = folder.passed === folder.total;
+		const label = `${'  '.repeat(depth)}${ok ? green('✓') : red('✗')} ${folder.name}`;
+		const pad = ' '.repeat(Math.max(0, this.width - depth * 2 - folder.name.length));
+		const count = `${folder.passed}/${folder.total}`.padStart(5);
+		const time = `${((folder.endedAt - folder.startedAt) / 1000).toFixed(1)}s`.padStart(6);
+		console.log(`  ${label}${pad}  ${count}  ${time}`);
+		const children = [...folder.children.values()].sort((a, b) => a.name.localeCompare(b.name));
+		for (const child of children) this.printTree(child, depth + 1);
+	}
+}
+
+/** The widest folder label: its indent plus its name */
+function labelWidth(folder: Folder, depth: number): number {
+	let widest = 0;
+	for (const child of folder.children.values()) {
+		widest = Math.max(widest, depth * 2 + child.name.length, labelWidth(child, depth + 1));
+	}
+	return widest;
 }
 
 function formatError(error: TestError): string {
