@@ -1,5 +1,16 @@
 /**
- * Run a sync from an Arr's Sync page and wait until it has finished.
+ * Set up an Arr's Sync page and run its syncs.
+ *
+ * The page enforces a setup order: Quality Profiles only save once Media
+ * Management and a delay profile are saved. `setUpProfileSync` does all of it
+ * in that order; the step helpers set up one section each, for tests that need
+ * only one or that check the order itself. Choices default to the first
+ * fixtures config of each kind.
+ *
+ * Where quality definitions are chosen depends on the target: in Media
+ * Management, or in Quality Profiles when the target stores sizes on each
+ * profile (`profileSizes`, Sonarr v5). The helpers follow the target's
+ * capabilities, so a scenario passes the same choices for every target.
  *
  * Clicking Sync only queues a job. The sync action marks the section as
  * pending before it answers, so once its answer arrives, the section's status
@@ -7,8 +18,14 @@
  * or failed. That status is the signal; the page itself shows no result.
  */
 
-import { expect, test, type Page } from '@playwright/test';
-import { waitForAction } from '$flows/helpers/core/forms.ts';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+import { FIXTURES_NAME } from '$flows/harness/seed.ts';
+import { fixtures } from '$flows/helpers/core/fixtureData.ts';
+import { saveForm, waitForAction } from '$flows/helpers/core/forms.ts';
+import { openTab } from '$flows/helpers/core/nav.ts';
+import { addArr, openArr } from '$flows/helpers/sync/arrs.ts';
+import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+import { hasCapability } from '$flows/helpers/sync/targets.ts';
 
 export const SYNC_SECTIONS = {
 	'Quality Profiles': { key: 'qualityProfiles', action: 'syncQualityProfiles' },
@@ -43,7 +60,7 @@ export async function syncSection(page: Page, section: SyncSection): Promise<Sec
 			if (!arrId) throw new Error(`syncSection needs an Arr's Sync page, not ${url.pathname}`);
 			const { key, action } = SYNC_SECTIONS[section];
 
-			const region = page.getByRole('main').getByRole('region', { name: section, exact: true });
+			const region = syncRegion(page, section);
 			const queued = waitForAction(page, action);
 			await region.getByRole('button', { name: 'Sync', exact: true }).click();
 			const result = await queued;
@@ -68,6 +85,194 @@ export async function syncSection(page: Page, section: SyncSection): Promise<Sec
 				)
 				.toMatch(/^(idle|failed)$/);
 			return finished as SectionSync;
+		},
+		{ box: true }
+	);
+}
+
+/** A section of the open Sync page */
+export function syncRegion(page: Page, section: SyncSection): Locator {
+	return page.getByRole('main').getByRole('region', { name: section, exact: true });
+}
+
+/** Pick a searchable dropdown's option: a button "<label>: <value>" that opens a listbox */
+async function pickCombobox(page: Page, scope: Locator, label: string, option: string) {
+	await scope.getByRole('button', { name: new RegExp(`^${label}:`) }).click();
+	await page
+		.getByRole('listbox', { name: label, exact: true })
+		.getByRole('option', { name: option, exact: true })
+		.click();
+	await expect(
+		scope.getByRole('button', { name: `${label}: ${option}`, exact: true })
+	).toBeVisible();
+}
+
+/** Pick a plain dropdown's option: a button "<label>: <value>" whose options are buttons */
+async function pickSelect(page: Page, scope: Locator, label: string, option: string) {
+	await scope.getByRole('button', { name: new RegExp(`^${label}:`) }).click();
+	await page.getByRole('button', { name: option, exact: true }).filter({ visible: true }).click();
+	await expect(
+		scope.getByRole('button', { name: `${label}: ${option}`, exact: true })
+	).toBeVisible();
+}
+
+/** How a fixtures config shows in the Sync page's dropdowns */
+const fromFixtures = (config: string) => `${FIXTURES_NAME} / ${config}`;
+
+/** Config names to choose; each defaults to the first fixtures config of its kind */
+export interface MediaManagementChoices {
+	naming?: string;
+	mediaSettings?: string;
+	/** Chosen here on targets with global quality definitions; ignored on `profileSizes` targets */
+	qualityDefinitions?: string;
+}
+
+/**
+ * Add the fake as an Arr instance and open its Sync tab. The name defaults to
+ * "Fake <label>", e.g. "Fake Sonarr".
+ */
+export async function addArrAndOpenSync(page: Page, fake: FakeArr, name?: string): Promise<void> {
+	const instance = name ?? `Fake ${fake.target.label}`;
+	await addArr(page, { name: instance, fake });
+	await openArr(page, instance);
+	await openTab(page, 'Sync');
+}
+
+/**
+ * Choose naming, media settings and, where the target sets them here,
+ * quality definitions in Media Management, then save the section.
+ */
+export async function chooseMediaManagement(
+	page: Page,
+	fake: FakeArr,
+	choices: MediaManagementChoices = {}
+): Promise<void> {
+	await test.step(
+		`Choose ${fake.target.id} media management`,
+		async () => {
+			const section = syncRegion(page, 'Media Management');
+			const app = fake.type;
+			await pickCombobox(
+				page,
+				section,
+				'Naming',
+				fromFixtures(choices.naming ?? fixtures.naming[app][0].name)
+			);
+			if (hasCapability(fake.target, 'qualityDefinitions')) {
+				await pickCombobox(
+					page,
+					section,
+					'Quality Definitions',
+					fromFixtures(choices.qualityDefinitions ?? fixtures.qualityDefinitions[app][0].name)
+				);
+			}
+			await pickCombobox(
+				page,
+				section,
+				'Media Settings',
+				fromFixtures(choices.mediaSettings ?? fixtures.mediaSettings[app][0].name)
+			);
+			await saveForm(page, { within: section, action: 'saveMediaManagement' });
+		},
+		{ box: true }
+	);
+}
+
+/** Turn on one delay profile, by default the first in the fixtures, and save the section */
+export async function chooseDelayProfile(page: Page, name?: string): Promise<void> {
+	const profile = name ?? fixtures.delayProfiles[0].name;
+	await test.step(
+		`Choose delay profile ${profile}`,
+		async () => {
+			const section = syncRegion(page, 'Delay Profiles');
+			await section
+				.getByRole('switch', { name: `Toggle delay profile ${profile} from ${FIXTURES_NAME}` })
+				.click();
+			await saveForm(page, { within: section, action: 'saveDelayProfiles' });
+		},
+		{ box: true }
+	);
+}
+
+export interface QualityProfileChoices {
+	/**
+	 * The global quality definitions config, on `profileSizes` targets. Defaults
+	 * to the first fixtures config; ignored on other targets, which choose it in
+	 * Media Management.
+	 */
+	qualityDefinitions?: string;
+	/** Per-profile quality definitions configs, or "Global", on `profileSizes` targets */
+	perProfile?: Record<string, string>;
+}
+
+/**
+ * Turn on quality profiles and save the section. On `profileSizes` targets,
+ * also choose the global quality definitions and any per-profile ones. Media
+ * Management and a delay profile must be saved first.
+ */
+export async function chooseQualityProfiles(
+	page: Page,
+	fake: FakeArr,
+	profiles: string[],
+	choices: QualityProfileChoices = {}
+): Promise<void> {
+	await test.step(
+		`Choose quality profiles ${profiles.join(', ')}`,
+		async () => {
+			const section = syncRegion(page, 'Quality Profiles');
+			for (const name of profiles) {
+				await section
+					.getByRole('switch', { name: `Toggle quality profile ${name} from ${FIXTURES_NAME}` })
+					.click();
+			}
+
+			if (hasCapability(fake.target, 'profileSizes')) {
+				const global = choices.qualityDefinitions ?? fixtures.qualityDefinitions[fake.type][0].name;
+				await pickSelect(page, section, 'Global Quality Definition', fromFixtures(global));
+				for (const [profile, config] of Object.entries(choices.perProfile ?? {})) {
+					await pickSelect(page, section, `${profile} Quality Definition`, config);
+				}
+			} else if (choices.perProfile) {
+				throw new Error(`${fake.target.id} has no per-profile quality definitions`);
+			}
+
+			await saveForm(page, { within: section, action: 'saveQualityProfiles' });
+		},
+		{ box: true }
+	);
+}
+
+export interface ProfileSyncOptions extends MediaManagementChoices {
+	/** Quality profiles to sync */
+	profiles: string[];
+	/** The Arr instance's name. Default "Fake <label>". */
+	name?: string;
+	delayProfile?: string;
+	/** Per-profile quality definitions, on `profileSizes` targets */
+	perProfile?: Record<string, string>;
+}
+
+/**
+ * Get an Arr ready to sync quality profiles: add the fake, open its Sync tab,
+ * and save Media Management, a delay profile and the quality profiles, in the
+ * page's order. `qualityDefinitions` lands in whichever section the target
+ * chooses it in.
+ */
+export async function setUpProfileSync(
+	page: Page,
+	fake: FakeArr,
+	options: ProfileSyncOptions
+): Promise<void> {
+	await test.step(
+		`Set up ${fake.target.id} to sync ${options.profiles.join(', ')}`,
+		async () => {
+			await addArrAndOpenSync(page, fake, options.name);
+			await chooseMediaManagement(page, fake, options);
+			await chooseDelayProfile(page, options.delayProfile);
+			await chooseQualityProfiles(page, fake, options.profiles, {
+				qualityDefinitions: options.qualityDefinitions,
+				perProfile: options.perProfile
+			});
 		},
 		{ box: true }
 	);
