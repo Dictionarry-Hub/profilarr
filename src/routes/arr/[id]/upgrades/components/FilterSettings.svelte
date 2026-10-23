@@ -370,9 +370,7 @@
 
 			<ActionButton
 				icon={Plus}
-				tooltip="Add filter"
-				tooltipPosition="top"
-				tooltipAlign="right"
+				ariaLabel="Add filter"
 				onboarding="upgrades-add-filter"
 				hasDropdown={true}
 				dropdownPosition="right"
