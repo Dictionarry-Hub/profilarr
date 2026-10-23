@@ -265,6 +265,7 @@
 					</p>
 					<div class="mt-1">
 						<TagInput
+							ariaLabel="Arr Types"
 							tags={manifest.arr_types ?? []}
 							placeholder="Add arr type (radarr, sonarr, etc.)"
 							onchange={(tags) => updateManifest('arr_types', tags)}

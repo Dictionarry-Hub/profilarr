@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+	let nextId = 0;
+</script>
+
 <script lang="ts">
 	import X from '@lucide/svelte/icons/x';
 	import Label from '$ui/label/Label.svelte';
@@ -6,6 +10,10 @@
 	export let tags: string[] = [];
 	export let placeholder = 'Type and press Enter to add tags';
 	export let onchange: ((tags: string[]) => void) | undefined = undefined;
+	// Names the typing box; pages with more than one tag box pass their own label
+	export let ariaLabel: string = 'Tags';
+
+	const inputId = `tags-input-${nextId++}`;
 
 	let inputValue = '';
 	let lastDuplicateTag: string | null = null;
@@ -71,7 +79,7 @@
 				type="button"
 				on:click={() => removeTag(index)}
 				class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
-				aria-label="Remove tag"
+				aria-label="Remove {displayName(tag)}"
 			>
 				<X size={14} />
 			</button>
@@ -80,7 +88,8 @@
 
 	<input
 		type="text"
-		id="tags-input"
+		id={inputId}
+		aria-label={ariaLabel}
 		bind:value={inputValue}
 		on:keydown={handleKeydown}
 		{placeholder}
