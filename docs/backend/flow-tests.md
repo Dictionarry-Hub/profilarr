@@ -12,6 +12,7 @@ linked. For PCD behavior below the browser, see [pcd-tests.md](./pcd-tests.md).
 - [Running](#running)
 - [Layout](#layout)
 - [How a Test Runs](#how-a-test-runs)
+- [Auth, SSO and Proxies](#auth-sso-and-proxies)
 - [Adding a Scenario](#adding-a-scenario)
 - [Adding a Helper](#adding-a-helper)
 - [Adding a Fake Target](#adding-a-fake-target)
@@ -45,6 +46,8 @@ tests/flows/
     entities/   typed page data readers per entity
     sync/       Arr instances, the fake Arr and its targets, Sync page setup
     git/        database pull and publish, the local upstream
+    auth/       local accounts, Settings › Security, SSO providers in sso/
+    proxy/      reverse proxies in front of an app
   scenarios/    real user flows, by area
     entities/<entity>/   sync/   git/   workflows/ (more than one area)
   data/         vendored fixtures, their snapshot, recorded Arr responses
@@ -60,12 +63,38 @@ these folders with a pass count for each.
    it.
 2. Each test's `app` fixture copies the golden folder and points the copy's
    database rows at its own repos. It then starts the app on a free port with
-   `AUTH=off`.
+   `AUTH=off`, unless the spec's options change it (see
+   [Auth, SSO and Proxies](#auth-sso-and-proxies)).
 3. The container has no network. A per-test `gitconfig` rewrites the fixtures
    database's GitHub URL to a local bare repo. Pulling and publishing reach
    that repo instead of GitHub.
 4. Arr instances point at a fake Arr (`helpers/sync/fakeArr.ts`). The fake
    serves recorded API responses and keeps changes in memory.
+
+## Auth, SSO and Proxies
+
+A spec changes how its app starts with options:
+
+```ts
+test.use({
+	appEnv: { AUTH: 'on' }, // environment over the defaults, applied last
+	ssoProvider: 'fake', // an SSO provider, reached as the `sso` fixture
+	appProxy: { tls: true } // a reverse proxy, reached as the `reverseProxy` fixture
+});
+```
+
+- **Start order.** The provider and the proxy start first. The app then gets
+  the provider's `OIDC_*` settings, and the proxy's address as `ORIGIN` and
+  `baseURL`.
+- **Accounts.** `createAccount` makes the first account through the setup
+  form. `signIn`, `signInWithSso` and `signOut` cover the rest
+  (`helpers/auth/accounts.ts`).
+- **SSO providers.** `helpers/auth/sso/providers.ts` lists them. `fake` runs
+  in the test process and can misbehave on purpose. Real providers join as
+  entries marked `needsNetwork`.
+- **Reverse proxies.** `helpers/proxy/proxies.ts` lists them. `fake` can
+  serve HTTPS, change request headers, cap response header size, or fail.
+  Real proxies join as entries marked `needsDocker`.
 
 ## Adding a Scenario
 
