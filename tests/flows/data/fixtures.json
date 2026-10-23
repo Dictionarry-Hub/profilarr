@@ -1,0 +1,1167 @@
+{
+	"regularExpressions": [
+		{
+			"name": "Group Regex",
+			"pattern": "\\bFXGRP\\b",
+			"regex101Id": null,
+			"description": "Matches the release group FXGRP.",
+			"tags": [
+				"beta"
+			]
+		},
+		{
+			"name": "Title Regex",
+			"pattern": "\\bFixtureTitle\\b",
+			"regex101Id": null,
+			"description": "Matches the word **FixtureTitle** in a release title.",
+			"tags": [
+				"alpha"
+			]
+		},
+		{
+			"name": "Unused Regex",
+			"pattern": "\\bUnusedPattern\\b",
+			"regex101Id": null,
+			"description": null,
+			"tags": []
+		}
+	],
+	"customFormats": [
+		{
+			"name": "Every Condition",
+			"description": "Has one condition of every type.",
+			"includeInRename": false,
+			"tags": [
+				"beta"
+			],
+			"conditions": [
+				{
+					"name": "Edition",
+					"type": "edition",
+					"arrType": "radarr",
+					"negate": false,
+					"required": false,
+					"value": {
+						"regularExpressionName": "Title Regex"
+					}
+				},
+				{
+					"name": "Group",
+					"type": "release_group",
+					"arrType": "all",
+					"negate": false,
+					"required": false,
+					"value": {
+						"regularExpressionName": "Group Regex"
+					}
+				},
+				{
+					"name": "Indexer Flag",
+					"type": "indexer_flag",
+					"arrType": "all",
+					"negate": false,
+					"required": false,
+					"value": {
+						"flag": "freeleech"
+					}
+				},
+				{
+					"name": "Language",
+					"type": "language",
+					"arrType": "all",
+					"negate": true,
+					"required": false,
+					"value": {
+						"languageName": "French",
+						"exceptLanguage": false
+					}
+				},
+				{
+					"name": "Modifier",
+					"type": "quality_modifier",
+					"arrType": "radarr",
+					"negate": false,
+					"required": false,
+					"value": {
+						"qualityModifier": "remux"
+					}
+				},
+				{
+					"name": "Release Type",
+					"type": "release_type",
+					"arrType": "sonarr",
+					"negate": false,
+					"required": false,
+					"value": {
+						"releaseType": "season_pack"
+					}
+				},
+				{
+					"name": "Resolution",
+					"type": "resolution",
+					"arrType": "all",
+					"negate": false,
+					"required": false,
+					"value": {
+						"resolution": "2160p"
+					}
+				},
+				{
+					"name": "Size",
+					"type": "size",
+					"arrType": "all",
+					"negate": false,
+					"required": false,
+					"value": {
+						"minBytes": 1073741824,
+						"maxBytes": 53687091200
+					}
+				},
+				{
+					"name": "Source",
+					"type": "source",
+					"arrType": "all",
+					"negate": false,
+					"required": false,
+					"value": {
+						"source": "bluray"
+					}
+				},
+				{
+					"name": "Title",
+					"type": "release_title",
+					"arrType": "all",
+					"negate": false,
+					"required": true,
+					"value": {
+						"regularExpressionName": "Title Regex"
+					}
+				},
+				{
+					"name": "Year",
+					"type": "year",
+					"arrType": "all",
+					"negate": false,
+					"required": false,
+					"value": {
+						"minYear": 2000,
+						"maxYear": 2030
+					}
+				}
+			],
+			"tests": []
+		},
+		{
+			"name": "Has Tests",
+			"description": "",
+			"includeInRename": false,
+			"tags": [],
+			"conditions": [
+				{
+					"name": "Title",
+					"type": "release_title",
+					"arrType": "all",
+					"negate": false,
+					"required": false,
+					"value": {
+						"regularExpressionName": "Title Regex"
+					}
+				}
+			],
+			"tests": [
+				{
+					"title": "Movie.FixtureTitle.2024.1080p.BluRay.x264-FXGRP",
+					"type": "movie",
+					"shouldMatch": true,
+					"description": "Title contains FixtureTitle."
+				},
+				{
+					"title": "Movie.Other.2024.1080p.BluRay.x264-FXGRP",
+					"type": "movie",
+					"shouldMatch": false,
+					"description": null
+				}
+			]
+		},
+		{
+			"name": "Title Match",
+			"description": "Scores releases whose title contains FixtureTitle.",
+			"includeInRename": true,
+			"tags": [
+				"alpha"
+			],
+			"conditions": [
+				{
+					"name": "Title",
+					"type": "release_title",
+					"arrType": "all",
+					"negate": false,
+					"required": false,
+					"value": {
+						"regularExpressionName": "Title Regex"
+					}
+				}
+			],
+			"tests": []
+		},
+		{
+			"name": "Unscored",
+			"description": "",
+			"includeInRename": false,
+			"tags": [],
+			"conditions": [
+				{
+					"name": "Resolution",
+					"type": "resolution",
+					"arrType": "all",
+					"negate": false,
+					"required": false,
+					"value": {
+						"resolution": "1080p"
+					}
+				}
+			],
+			"tests": []
+		}
+	],
+	"qualityProfiles": [
+		{
+			"name": "Radarr Profile",
+			"description": "Radarr scores, a quality group and non-default upgrade settings.",
+			"upgradesAllowed": true,
+			"minimumCustomFormatScore": 10,
+			"upgradeUntilScore": 1000,
+			"upgradeScoreIncrement": 5,
+			"tags": [
+				"alpha"
+			],
+			"language": {
+				"languageName": "English",
+				"type": "simple"
+			},
+			"scores": [
+				{
+					"customFormatName": "Every Condition",
+					"arrType": "radarr",
+					"score": 500
+				},
+				{
+					"customFormatName": "Has Tests",
+					"arrType": "radarr",
+					"score": -50
+				},
+				{
+					"customFormatName": "Title Match",
+					"arrType": "radarr",
+					"score": 100
+				}
+			],
+			"qualities": [
+				{
+					"name": "Remux-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBDL-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBRip-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "HDTV-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-1080p",
+					"enabled": true,
+					"upgradeUntil": true
+				},
+				{
+					"name": "Remux-1080p",
+					"enabled": true,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEB 1080p",
+					"enabled": true,
+					"upgradeUntil": false,
+					"members": [
+						"WEBDL-1080p",
+						"WEBRip-1080p"
+					]
+				},
+				{
+					"name": "HDTV-1080p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBDL-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBRip-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "HDTV-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-576p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBDL-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBRip-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "HDTV-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "DVD-R",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "DVD",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "SDTV",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Pre-releases",
+					"enabled": false,
+					"upgradeUntil": false,
+					"members": [
+						"REGIONAL",
+						"DVDSCR",
+						"TELECINE",
+						"TELESYNC",
+						"CAM",
+						"WORKPRINT"
+					]
+				},
+				{
+					"name": "Unwanted",
+					"enabled": false,
+					"upgradeUntil": false,
+					"members": [
+						"Unknown",
+						"Raw-HD",
+						"BR-DISK"
+					]
+				}
+			]
+		},
+		{
+			"name": "Shared Scores",
+			"description": null,
+			"upgradesAllowed": true,
+			"minimumCustomFormatScore": 0,
+			"upgradeUntilScore": 0,
+			"upgradeScoreIncrement": 1,
+			"tags": [],
+			"language": null,
+			"scores": [
+				{
+					"customFormatName": "Title Match",
+					"arrType": "radarr",
+					"score": 50
+				},
+				{
+					"customFormatName": "Title Match",
+					"arrType": "sonarr",
+					"score": 50
+				}
+			],
+			"qualities": [
+				{
+					"name": "Remux-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBDL-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBRip-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "HDTV-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Remux-1080p",
+					"enabled": true,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-1080p",
+					"enabled": true,
+					"upgradeUntil": true
+				},
+				{
+					"name": "WEB 1080p",
+					"enabled": false,
+					"upgradeUntil": false,
+					"members": [
+						"WEBDL-1080p",
+						"WEBRip-1080p"
+					]
+				},
+				{
+					"name": "HDTV-1080p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBDL-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBRip-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "HDTV-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-576p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBDL-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBRip-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "HDTV-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "DVD-R",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "DVD",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "SDTV",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Pre-releases",
+					"enabled": false,
+					"upgradeUntil": false,
+					"members": [
+						"REGIONAL",
+						"DVDSCR",
+						"TELECINE",
+						"TELESYNC",
+						"CAM",
+						"WORKPRINT"
+					]
+				},
+				{
+					"name": "Unwanted",
+					"enabled": false,
+					"upgradeUntil": false,
+					"members": [
+						"Unknown",
+						"Raw-HD",
+						"BR-DISK"
+					]
+				}
+			]
+		},
+		{
+			"name": "Sonarr Profile",
+			"description": null,
+			"upgradesAllowed": false,
+			"minimumCustomFormatScore": 0,
+			"upgradeUntilScore": 0,
+			"upgradeScoreIncrement": 1,
+			"tags": [
+				"beta"
+			],
+			"language": null,
+			"scores": [
+				{
+					"customFormatName": "Every Condition",
+					"arrType": "sonarr",
+					"score": 300
+				},
+				{
+					"customFormatName": "Title Match",
+					"arrType": "sonarr",
+					"score": 200
+				}
+			],
+			"qualities": [
+				{
+					"name": "Remux-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBDL-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBRip-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "HDTV-2160p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Remux-1080p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-1080p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEB 1080p",
+					"enabled": true,
+					"upgradeUntil": true,
+					"members": [
+						"WEBDL-1080p",
+						"WEBRip-1080p"
+					]
+				},
+				{
+					"name": "HDTV-1080p",
+					"enabled": true,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBDL-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBRip-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "HDTV-720p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-576p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Bluray-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBDL-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "WEBRip-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "HDTV-480p",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "DVD-R",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "DVD",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "SDTV",
+					"enabled": false,
+					"upgradeUntil": false
+				},
+				{
+					"name": "Pre-releases",
+					"enabled": false,
+					"upgradeUntil": false,
+					"members": [
+						"REGIONAL",
+						"DVDSCR",
+						"TELECINE",
+						"TELESYNC",
+						"CAM",
+						"WORKPRINT"
+					]
+				},
+				{
+					"name": "Unwanted",
+					"enabled": false,
+					"upgradeUntil": false,
+					"members": [
+						"Unknown",
+						"Raw-HD",
+						"BR-DISK"
+					]
+				}
+			]
+		}
+	],
+	"delayProfiles": [
+		{
+			"name": "Bypass Score",
+			"preferredProtocol": "prefer_torrent",
+			"usenetDelay": 30,
+			"torrentDelay": 30,
+			"bypassIfHighestQuality": false,
+			"bypassIfAboveCustomFormatScore": true,
+			"minimumCustomFormatScore": 500
+		},
+		{
+			"name": "Prefer Usenet",
+			"preferredProtocol": "prefer_usenet",
+			"usenetDelay": 60,
+			"torrentDelay": 120,
+			"bypassIfHighestQuality": true,
+			"bypassIfAboveCustomFormatScore": false,
+			"minimumCustomFormatScore": null
+		},
+		{
+			"name": "Torrent Only",
+			"preferredProtocol": "only_torrent",
+			"usenetDelay": null,
+			"torrentDelay": 1440,
+			"bypassIfHighestQuality": false,
+			"bypassIfAboveCustomFormatScore": false,
+			"minimumCustomFormatScore": null
+		}
+	],
+	"naming": {
+		"radarr": [
+			{
+				"name": "Fixture Radarr",
+				"rename": true,
+				"movieFormat": "{Movie CleanTitle} ({Release Year}) [{Quality Full}]",
+				"movieFolderFormat": "{Movie CleanTitle} ({Release Year}) {tmdb-{TmdbId}}",
+				"replaceIllegalCharacters": true,
+				"colonReplacementFormat": "spaceDashSpace"
+			}
+		],
+		"sonarr": [
+			{
+				"name": "Fixture Sonarr",
+				"rename": true,
+				"standardEpisodeFormat": "{Series TitleYear} - S{season:00}E{episode:00} - {Episode CleanTitle} [{Quality Full}]",
+				"dailyEpisodeFormat": "{Series TitleYear} - {Air-Date} - {Episode CleanTitle}",
+				"animeEpisodeFormat": "{Series TitleYear} - {absolute:000} - {Episode CleanTitle}",
+				"seriesFolderFormat": "{Series TitleYear}",
+				"seasonFolderFormat": "Season {season:00}",
+				"replaceIllegalCharacters": true,
+				"colonReplacementFormat": 4,
+				"customColonReplacementFormat": null,
+				"multiEpisodeStyle": 5
+			}
+		]
+	},
+	"mediaSettings": {
+		"radarr": [
+			{
+				"name": "Fixture Radarr",
+				"propersRepacks": "preferAndUpgrade",
+				"enableMediaInfo": true
+			}
+		],
+		"sonarr": [
+			{
+				"name": "Fixture Sonarr",
+				"propersRepacks": "doNotUpgradeAutomatically",
+				"enableMediaInfo": false
+			}
+		]
+	},
+	"qualityDefinitions": {
+		"radarr": [
+			{
+				"name": "Fixture Radarr",
+				"qualities": [
+					{
+						"qualityName": "BR-DISK",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Bluray-1080p",
+						"minSize": 20,
+						"maxSize": 100,
+						"preferredSize": 60
+					},
+					{
+						"qualityName": "Bluray-2160p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Bluray-480p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Bluray-576p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Bluray-720p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "CAM",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "DVD",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "DVD-R",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "DVDSCR",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "HDTV-1080p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "HDTV-2160p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "HDTV-720p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "REGIONAL",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Raw-HD",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Remux-1080p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Remux-2160p",
+						"minSize": 100,
+						"maxSize": 0,
+						"preferredSize": 1500
+					},
+					{
+						"qualityName": "SDTV",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "TELECINE",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "TELESYNC",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Unknown",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBDL-1080p",
+						"minSize": 11,
+						"maxSize": 80,
+						"preferredSize": 40
+					},
+					{
+						"qualityName": "WEBDL-2160p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBDL-480p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBDL-720p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBRip-1080p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBRip-2160p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBRip-480p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBRip-720p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WORKPRINT",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					}
+				]
+			}
+		],
+		"sonarr": [
+			{
+				"name": "Fixture Sonarr",
+				"qualities": [
+					{
+						"qualityName": "Bluray-1080p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Bluray-2160p",
+						"minSize": 50,
+						"maxSize": 0,
+						"preferredSize": 500
+					},
+					{
+						"qualityName": "Bluray-480p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Bluray-576p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Bluray-720p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "DVD",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "HDTV-1080p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "HDTV-2160p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "HDTV-720p",
+						"minSize": 3,
+						"maxSize": 30,
+						"preferredSize": 15
+					},
+					{
+						"qualityName": "Raw-HD",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Remux-1080p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Remux-2160p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "SDTV",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "Unknown",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBDL-1080p",
+						"minSize": 5,
+						"maxSize": 60,
+						"preferredSize": 30
+					},
+					{
+						"qualityName": "WEBDL-2160p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBDL-480p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBDL-720p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBRip-1080p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBRip-2160p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBRip-480p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					},
+					{
+						"qualityName": "WEBRip-720p",
+						"minSize": 0,
+						"maxSize": 0,
+						"preferredSize": 0
+					}
+				]
+			}
+		]
+	},
+	"qualityApiNames": {
+		"radarr": {
+			"BR-DISK": "BR-DISK",
+			"Bluray-1080p": "Bluray-1080p",
+			"Bluray-2160p": "Bluray-2160p",
+			"Bluray-480p": "Bluray-480p",
+			"Bluray-576p": "Bluray-576p",
+			"Bluray-720p": "Bluray-720p",
+			"CAM": "CAM",
+			"DVD": "DVD",
+			"DVD-R": "DVD-R",
+			"DVDSCR": "DVDSCR",
+			"HDTV-1080p": "HDTV-1080p",
+			"HDTV-2160p": "HDTV-2160p",
+			"HDTV-720p": "HDTV-720p",
+			"REGIONAL": "REGIONAL",
+			"Raw-HD": "Raw-HD",
+			"Remux-1080p": "Remux-1080p",
+			"Remux-2160p": "Remux-2160p",
+			"SDTV": "SDTV",
+			"TELECINE": "TELECINE",
+			"TELESYNC": "TELESYNC",
+			"Unknown": "Unknown",
+			"WEBDL-1080p": "WEBDL-1080p",
+			"WEBDL-2160p": "WEBDL-2160p",
+			"WEBDL-480p": "WEBDL-480p",
+			"WEBDL-720p": "WEBDL-720p",
+			"WEBRip-1080p": "WEBRip-1080p",
+			"WEBRip-2160p": "WEBRip-2160p",
+			"WEBRip-480p": "WEBRip-480p",
+			"WEBRip-720p": "WEBRip-720p",
+			"WORKPRINT": "WORKPRINT"
+		},
+		"sonarr": {
+			"Bluray-1080p": "Bluray-1080p",
+			"Bluray-2160p": "Bluray-2160p",
+			"Bluray-480p": "Bluray-480p",
+			"Bluray-576p": "Bluray-576p",
+			"Bluray-720p": "Bluray-720p",
+			"DVD": "DVD",
+			"HDTV-1080p": "HDTV-1080p",
+			"HDTV-2160p": "HDTV-2160p",
+			"HDTV-720p": "HDTV-720p",
+			"Raw-HD": "Raw-HD",
+			"Remux-1080p": "Bluray-1080p Remux",
+			"Remux-2160p": "Bluray-2160p Remux",
+			"SDTV": "SDTV",
+			"Unknown": "Unknown",
+			"WEBDL-1080p": "WEBDL-1080p",
+			"WEBDL-2160p": "WEBDL-2160p",
+			"WEBDL-480p": "WEBDL-480p",
+			"WEBDL-720p": "WEBDL-720p",
+			"WEBRip-1080p": "WEBRip-1080p",
+			"WEBRip-2160p": "WEBRip-2160p",
+			"WEBRip-480p": "WEBRip-480p",
+			"WEBRip-720p": "WEBRip-720p"
+		}
+	}
+}

@@ -1,0 +1,42 @@
+/**
+ * Build the golden data folder once per run: an app database with the
+ * fixtures seeded and compiled. Each test starts its app on a copy of it.
+ */
+
+import * as fs from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { startApp } from '$flows/harness/app.ts';
+import { GOLDEN_DIR_ENV } from '$flows/harness/paths.ts';
+import { FIXTURES_NAME, seedFixtures } from '$flows/harness/seed.ts';
+
+export default async function globalSetup(): Promise<() => Promise<void>> {
+	// A fresh folder per run; workers read its path from the environment
+	const goldenDir = await fs.mkdtemp(join(tmpdir(), 'profilarr-flow-golden-'));
+	process.env[GOLDEN_DIR_ENV] = goldenDir;
+
+	// First start creates and migrates the app database
+	let app = await startApp(goldenDir);
+	await app.stop();
+
+	await seedFixtures(goldenDir);
+
+	// Second start imports and compiles the fixtures
+	app = await startApp(goldenDir);
+	try {
+		const status = (await (await fetch(`${app.url}/api/v1/status`)).json()) as {
+			databases: { name: string; counts: Record<string, number> }[];
+		};
+		const fixtures = status.databases.find((db) => db.name === FIXTURES_NAME);
+		const compiled = Object.values(fixtures?.counts ?? {}).some((count) => count > 0);
+		if (!compiled) {
+			throw new Error(`Fixtures didn't compile. Status: ${JSON.stringify(status)}\n${app.logs()}`);
+		}
+	} finally {
+		await app.stop();
+	}
+
+	return async () => {
+		await fs.rm(goldenDir, { recursive: true, force: true });
+	};
+}

@@ -1,0 +1,244 @@
+[
+	{
+		"quality": {
+			"id": 0,
+			"name": "Unknown",
+			"source": "unknown",
+			"resolution": 0
+		},
+		"title": "Unknown",
+		"weight": 1,
+		"id": 1
+	},
+	{
+		"quality": {
+			"id": 1,
+			"name": "SDTV",
+			"source": "television",
+			"resolution": 480
+		},
+		"title": "SDTV",
+		"weight": 2,
+		"id": 2
+	},
+	{
+		"quality": {
+			"id": 12,
+			"name": "WEBRip-480p",
+			"source": "webRip",
+			"resolution": 480
+		},
+		"title": "WEBRip-480p",
+		"weight": 3,
+		"id": 3
+	},
+	{
+		"quality": {
+			"id": 8,
+			"name": "WEBDL-480p",
+			"source": "web",
+			"resolution": 480
+		},
+		"title": "WEBDL-480p",
+		"weight": 3,
+		"id": 4
+	},
+	{
+		"quality": {
+			"id": 2,
+			"name": "DVD",
+			"source": "dvd",
+			"resolution": 480
+		},
+		"title": "DVD",
+		"weight": 4,
+		"id": 5
+	},
+	{
+		"quality": {
+			"id": 13,
+			"name": "Bluray-480p",
+			"source": "bluray",
+			"resolution": 480
+		},
+		"title": "Bluray-480p",
+		"weight": 5,
+		"id": 6
+	},
+	{
+		"quality": {
+			"id": 22,
+			"name": "Bluray-576p",
+			"source": "bluray",
+			"resolution": 576
+		},
+		"title": "Bluray-576p",
+		"weight": 6,
+		"id": 7
+	},
+	{
+		"quality": {
+			"id": 4,
+			"name": "HDTV-720p",
+			"source": "television",
+			"resolution": 720
+		},
+		"title": "HDTV-720p",
+		"weight": 7,
+		"id": 8
+	},
+	{
+		"quality": {
+			"id": 9,
+			"name": "HDTV-1080p",
+			"source": "television",
+			"resolution": 1080
+		},
+		"title": "HDTV-1080p",
+		"weight": 8,
+		"id": 9
+	},
+	{
+		"quality": {
+			"id": 10,
+			"name": "Raw-HD",
+			"source": "televisionRaw",
+			"resolution": 1080
+		},
+		"title": "Raw-HD",
+		"weight": 9,
+		"id": 10
+	},
+	{
+		"quality": {
+			"id": 14,
+			"name": "WEBRip-720p",
+			"source": "webRip",
+			"resolution": 720
+		},
+		"title": "WEBRip-720p",
+		"weight": 10,
+		"id": 11
+	},
+	{
+		"quality": {
+			"id": 5,
+			"name": "WEBDL-720p",
+			"source": "web",
+			"resolution": 720
+		},
+		"title": "WEBDL-720p",
+		"weight": 10,
+		"id": 12
+	},
+	{
+		"quality": {
+			"id": 6,
+			"name": "Bluray-720p",
+			"source": "bluray",
+			"resolution": 720
+		},
+		"title": "Bluray-720p",
+		"weight": 11,
+		"id": 13
+	},
+	{
+		"quality": {
+			"id": 15,
+			"name": "WEBRip-1080p",
+			"source": "webRip",
+			"resolution": 1080
+		},
+		"title": "WEBRip-1080p",
+		"weight": 12,
+		"id": 14
+	},
+	{
+		"quality": {
+			"id": 3,
+			"name": "WEBDL-1080p",
+			"source": "web",
+			"resolution": 1080
+		},
+		"title": "WEBDL-1080p",
+		"weight": 12,
+		"id": 15
+	},
+	{
+		"quality": {
+			"id": 7,
+			"name": "Bluray-1080p",
+			"source": "bluray",
+			"resolution": 1080
+		},
+		"title": "Bluray-1080p",
+		"weight": 13,
+		"id": 16
+	},
+	{
+		"quality": {
+			"id": 20,
+			"name": "Bluray-1080p Remux",
+			"source": "blurayRaw",
+			"resolution": 1080
+		},
+		"title": "Bluray-1080p Remux",
+		"weight": 14,
+		"id": 17
+	},
+	{
+		"quality": {
+			"id": 16,
+			"name": "HDTV-2160p",
+			"source": "television",
+			"resolution": 2160
+		},
+		"title": "HDTV-2160p",
+		"weight": 15,
+		"id": 18
+	},
+	{
+		"quality": {
+			"id": 17,
+			"name": "WEBRip-2160p",
+			"source": "webRip",
+			"resolution": 2160
+		},
+		"title": "WEBRip-2160p",
+		"weight": 16,
+		"id": 19
+	},
+	{
+		"quality": {
+			"id": 18,
+			"name": "WEBDL-2160p",
+			"source": "web",
+			"resolution": 2160
+		},
+		"title": "WEBDL-2160p",
+		"weight": 16,
+		"id": 20
+	},
+	{
+		"quality": {
+			"id": 19,
+			"name": "Bluray-2160p",
+			"source": "bluray",
+			"resolution": 2160
+		},
+		"title": "Bluray-2160p",
+		"weight": 17,
+		"id": 21
+	},
+	{
+		"quality": {
+			"id": 21,
+			"name": "Bluray-2160p Remux",
+			"source": "blurayRaw",
+			"resolution": 2160
+		},
+		"title": "Bluray-2160p Remux",
+		"weight": 18,
+		"id": 22
+	}
+]

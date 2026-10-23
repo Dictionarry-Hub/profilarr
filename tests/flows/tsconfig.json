@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"strict": true,
+		"noEmit": true,
+		"allowImportingTsExtensions": true,
+		"types": ["node"],
+		"baseUrl": ".",
+		"paths": {
+			"$flows/*": ["./*"]
+		}
+	},
+	"include": ["**/*.ts"],
+	"exclude": ["data", "test-results", "playwright-report"]
+}

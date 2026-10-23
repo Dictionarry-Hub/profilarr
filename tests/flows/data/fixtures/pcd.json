@@ -1,0 +1,20 @@
+{
+  "name": "fixtures",
+  "version": "1.0.0",
+  "description": "Small, fixed test database for Profilarr's end-to-end flow tests. Each entity covers one case on purpose. Not for real use.",
+  "arr_types": [
+    "radarr",
+    "sonarr"
+  ],
+  "dependencies": {
+    "https://github.com/Dictionarry-Hub/schema": "1.1.0"
+  },
+  "profilarr": {
+    "minimum_version": "2.0.0"
+  },
+  "tags": [
+    "testing"
+  ],
+  "license": "MIT",
+  "repository": "https://github.com/Dictionarry-Hub/fixtures"
+}

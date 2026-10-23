@@ -114,6 +114,7 @@ Known improvement areas:
 - [backend/database.md](./backend/database.md): App database, migrations, query layer, schema reference
 - [backend/datetime.md](./backend/datetime.md): Date/time handling, UTC storage, query normalization, timezone display
 - [backend/drift.md](./backend/drift.md): Arr drift detection, latest status storage, comparison model
+- [backend/flow-tests.md](./backend/flow-tests.md): Browser flow test suite, harness, fake Arr targets, adding tests
 - [backend/jobs.md](./backend/jobs.md): Job queue, dispatcher, handlers, scheduling
 - [backend/logger.md](./backend/logger.md): Logger singleton, log levels, output formats, usage
 - [backend/notifications.md](./backend/notifications.md): Notification manager, definitions, notifiers
