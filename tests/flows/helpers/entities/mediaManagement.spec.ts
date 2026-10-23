@@ -1,14 +1,14 @@
 /**
- * Checks for the readers in helpers/mediaManagement.ts.
+ * Checks for the readers in helpers/entities/mediaManagement.ts.
  */
-import { test, expect } from '$flows/helpers/test.ts';
-import { fixture, fixtures, SONARR_WORDS } from '$flows/helpers/fixtureData.ts';
-import { openEntity, openSidebarPage } from '$flows/helpers/nav.ts';
+import { test, expect } from '$flows/helpers/core/test.ts';
+import { fixture, fixtures, SONARR_WORDS } from '$flows/helpers/core/fixtureData.ts';
+import { openEntity, openSidebarPage } from '$flows/helpers/core/nav.ts';
 import {
 	mediaSettingsPages,
 	namingPages,
 	qualityDefinitionsPages
-} from '$flows/helpers/mediaManagement.ts';
+} from '$flows/helpers/entities/mediaManagement.ts';
 
 const allNames = (configs: Record<'radarr' | 'sonarr', { name: string }[]>) =>
 	[...configs.radarr, ...configs.sonarr].map((config) => config.name).sort();

@@ -15,7 +15,7 @@ import type {
 	CustomFormatTableRow
 } from '$shared/pcd/display.ts';
 import type { ProfileRef } from '$pcd/references.ts';
-import { pageData } from '$flows/helpers/pageData.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
 
 /** A quality profile that scores the custom format */
 export type { ProfileRef };

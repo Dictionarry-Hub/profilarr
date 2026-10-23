@@ -1,7 +1,7 @@
-import { test, expect } from '$flows/helpers/test.ts';
-import { fixture } from '$flows/helpers/fixtureData.ts';
-import { openEntity, openTab } from '$flows/helpers/nav.ts';
-import { camelKeys, pageData, pick, unflatten } from '$flows/helpers/pageData.ts';
+import { test, expect } from '$flows/helpers/core/test.ts';
+import { fixture } from '$flows/helpers/core/fixtureData.ts';
+import { openEntity, openTab } from '$flows/helpers/core/nav.ts';
+import { camelKeys, pageData, pick, unflatten } from '$flows/helpers/core/pageData.ts';
 
 interface ScoringData {
 	scoring: { customFormats: { name: string; scores: Record<string, number | null> }[] };

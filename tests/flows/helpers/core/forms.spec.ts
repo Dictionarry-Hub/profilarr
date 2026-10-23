@@ -1,8 +1,8 @@
-import { test, expect } from '$flows/helpers/test.ts';
-import { fixture } from '$flows/helpers/fixtureData.ts';
-import { openEntity, openSidebarPage } from '$flows/helpers/nav.ts';
-import { pageData } from '$flows/helpers/pageData.ts';
-import { confirmDialog, deleteEntity, saveForm } from '$flows/helpers/forms.ts';
+import { test, expect } from '$flows/helpers/core/test.ts';
+import { fixture } from '$flows/helpers/core/fixtureData.ts';
+import { openEntity, openSidebarPage } from '$flows/helpers/core/nav.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
+import { confirmDialog, deleteEntity, saveForm } from '$flows/helpers/core/forms.ts';
 import type { Page } from '@playwright/test';
 
 interface RegexPage {

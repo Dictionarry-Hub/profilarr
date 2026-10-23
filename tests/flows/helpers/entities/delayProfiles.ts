@@ -7,7 +7,7 @@
 
 import type { Page } from '@playwright/test';
 import type { DelayProfilesRow } from '$shared/pcd/display.ts';
-import { pageData } from '$flows/helpers/pageData.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
 
 export const delayProfilePages = {
 	/** Every delay profile on a list page, `/delay-profiles/{databaseId}` */

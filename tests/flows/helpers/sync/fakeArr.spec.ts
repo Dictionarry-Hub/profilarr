@@ -1,8 +1,8 @@
 /**
  * Checks for the fake Arr itself, over plain HTTP. These don't start the app.
  */
-import { test, expect } from '$flows/helpers/test.ts';
-import type { FakeArr } from '$flows/helpers/fakeArr.ts';
+import { test, expect } from '$flows/helpers/core/test.ts';
+import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
 
 function call(fake: FakeArr, method: string, path: string, body?: unknown, apiKey = fake.apiKey) {
 	return fetch(`${fake.url}${path}`, {

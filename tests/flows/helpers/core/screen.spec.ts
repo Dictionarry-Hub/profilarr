@@ -1,9 +1,9 @@
 /**
- * Checks for the screen helper in helpers/screen.ts.
+ * Checks for the screen helper in helpers/core/screen.ts.
  */
-import { test, expect } from '$flows/helpers/test.ts';
-import { openSidebarPage } from '$flows/helpers/nav.ts';
-import { setScreen } from '$flows/helpers/screen.ts';
+import { test, expect } from '$flows/helpers/core/test.ts';
+import { openSidebarPage } from '$flows/helpers/core/nav.ts';
+import { setScreen } from '$flows/helpers/core/screen.ts';
 
 test('setScreen switches between the desktop and mobile layouts', async ({ page }) => {
 	await openSidebarPage(page, 'Quality Profiles');

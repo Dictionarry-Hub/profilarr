@@ -4,15 +4,15 @@
  * names and values, so a fixtures change that breaks them fails here first,
  * naming the entity and field.
  */
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/test.ts';
+import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
 import {
 	fixtures,
 	SONARR_WORDS,
 	type ArrType,
 	type FixtureCondition
-} from '$flows/helpers/fixtureData.ts';
-import { openEntity, openTab, type EntitySection } from '$flows/helpers/nav.ts';
-import { camelKeys, pageData, pick, type Json } from '$flows/helpers/pageData.ts';
+} from '$flows/helpers/core/fixtureData.ts';
+import { openEntity, openTab, type EntitySection } from '$flows/helpers/core/nav.ts';
+import { camelKeys, pageData, pick, type Json } from '$flows/helpers/core/pageData.ts';
 import type { Page } from '@playwright/test';
 
 const tagNames = (tags: { name: string }[]) => tags.map((tag) => tag.name).sort();

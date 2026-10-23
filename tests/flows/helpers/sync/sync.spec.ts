@@ -1,14 +1,14 @@
 /**
- * Checks for the sync helper in helpers/sync.ts, using the Delay Profiles
+ * Checks for the sync helper in helpers/sync/sync.ts, using the Delay Profiles
  * section: it needs only one selection, and a rejected delay profile fails
  * the whole section.
  */
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/test.ts';
-import { addArr, openArr } from '$flows/helpers/arrs.ts';
-import { saveForm } from '$flows/helpers/forms.ts';
-import { openTab } from '$flows/helpers/nav.ts';
-import { syncSection } from '$flows/helpers/sync.ts';
-import type { FakeArr } from '$flows/helpers/fakeArr.ts';
+import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
+import { addArr, openArr } from '$flows/helpers/sync/arrs.ts';
+import { saveForm } from '$flows/helpers/core/forms.ts';
+import { openTab } from '$flows/helpers/core/nav.ts';
+import { syncSection } from '$flows/helpers/sync/sync.ts';
+import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
 import type { Page } from '@playwright/test';
 
 /** Add the fake, pick a delay profile on its Sync page and save it */

@@ -8,7 +8,7 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
-import { waitForAction } from '$flows/helpers/forms.ts';
+import { waitForAction } from '$flows/helpers/core/forms.ts';
 
 export const SYNC_SECTIONS = {
 	'Quality Profiles': { key: 'qualityProfiles', action: 'syncQualityProfiles' },

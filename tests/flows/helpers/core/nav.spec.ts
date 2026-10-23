@@ -1,7 +1,7 @@
 /**
- * Checks for the navigation helpers in helpers/nav.ts.
+ * Checks for the navigation helpers in helpers/core/nav.ts.
  */
-import { test, FIXTURES_NAME } from '$flows/helpers/test.ts';
+import { test, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
 import {
 	SIDEBAR_PAGES,
 	newEntity,
@@ -11,7 +11,7 @@ import {
 	openTab,
 	type EntitySection,
 	type PageTab
-} from '$flows/helpers/nav.ts';
+} from '$flows/helpers/core/nav.ts';
 
 test.describe('openSidebarPage', () => {
 	// One test per sidebar link, so a broken page fails on its own line

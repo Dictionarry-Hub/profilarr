@@ -4,8 +4,8 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
-import type { FakeArr } from '$flows/helpers/fakeArr.ts';
-import { openSidebarPage, sidebar } from '$flows/helpers/nav.ts';
+import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+import { openSidebarPage, sidebar } from '$flows/helpers/core/nav.ts';
 
 const TYPE_LABELS = { radarr: 'Radarr', sonarr: 'Sonarr' } as const;
 

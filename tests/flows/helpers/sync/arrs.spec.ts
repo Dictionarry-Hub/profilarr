@@ -1,7 +1,7 @@
-import { test, expect } from '$flows/helpers/test.ts';
-import { addArr, openArr } from '$flows/helpers/arrs.ts';
-import { openTab } from '$flows/helpers/nav.ts';
-import type { FakeArr } from '$flows/helpers/fakeArr.ts';
+import { test, expect } from '$flows/helpers/core/test.ts';
+import { addArr, openArr } from '$flows/helpers/sync/arrs.ts';
+import { openTab } from '$flows/helpers/core/nav.ts';
+import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
 
 /** What adding an instance should have sent the fake */
 function expectAddedTo(fake: FakeArr) {

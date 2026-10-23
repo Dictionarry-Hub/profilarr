@@ -20,7 +20,7 @@ import type {
 	SonarrMediaSettingsRow,
 	SonarrNamingRow
 } from '$shared/pcd/display.ts';
-import { pageData } from '$flows/helpers/pageData.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
 
 export interface QualityDefinitionsPage {
 	config: QualityDefinitionsConfig;

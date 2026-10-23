@@ -1,10 +1,10 @@
 /**
- * Checks for the readers in helpers/regularExpressions.ts.
+ * Checks for the readers in helpers/entities/regularExpressions.ts.
  */
-import { test, expect } from '$flows/helpers/test.ts';
-import { fixture, fixtures } from '$flows/helpers/fixtureData.ts';
-import { openEntity, openSidebarPage } from '$flows/helpers/nav.ts';
-import { regularExpressionPages } from '$flows/helpers/regularExpressions.ts';
+import { test, expect } from '$flows/helpers/core/test.ts';
+import { fixture, fixtures } from '$flows/helpers/core/fixtureData.ts';
+import { openEntity, openSidebarPage } from '$flows/helpers/core/nav.ts';
+import { regularExpressionPages } from '$flows/helpers/entities/regularExpressions.ts';
 
 test('list reads every regular expression', async ({ page }) => {
 	await openSidebarPage(page, 'Regular Expressions');

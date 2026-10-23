@@ -1,6 +1,6 @@
 /**
  * Record a fresh Radarr and Sonarr's API responses for the flow suite's fake
- * Arrs (tests/flows/helpers/fakeArr.ts).
+ * Arrs (tests/flows/helpers/sync/fakeArr.ts).
  *
  * Starts each app's LinuxServer image in Docker, reads the API key the
  * container generates, saves the GET responses the fake serves as its

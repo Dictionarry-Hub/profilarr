@@ -8,7 +8,7 @@
 import type { Page } from '@playwright/test';
 import type { RegularExpressionWithTags } from '$shared/pcd/display.ts';
 import type { ConditionRef } from '$pcd/references.ts';
-import { pageData } from '$flows/helpers/pageData.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
 
 /** A custom format condition that uses the regular expression */
 export type { ConditionRef };

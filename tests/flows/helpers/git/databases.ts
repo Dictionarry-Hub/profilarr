@@ -3,13 +3,13 @@
  * works through the UI on the database's own pages and waits for the form
  * action behind it, so a scenario continues once the app has finished.
  *
- * Pulling and publishing reach the test's local upstream (helpers/upstream.ts).
+ * Pulling and publishing reach the test's local upstream (helpers/git/upstream.ts).
  */
 
 import { expect, test, type Page } from '@playwright/test';
 import { FIXTURES_NAME, FLOWS_TOKEN } from '$flows/harness/seed.ts';
-import { saveForm, waitForAction, type ActionResult } from '$flows/helpers/forms.ts';
-import { openDatabase, openTab } from '$flows/helpers/nav.ts';
+import { saveForm, waitForAction, type ActionResult } from '$flows/helpers/core/forms.ts';
+import { openDatabase, openTab } from '$flows/helpers/core/nav.ts';
 
 export interface DeveloperOptions {
 	/** The database to open. Default the fixtures database. */

@@ -9,7 +9,7 @@
 import { test as base, expect } from '@playwright/test';
 import { startApp, type App } from '$flows/harness/app.ts';
 import { upstreamRepo } from '$flows/harness/seed.ts';
-import { startFakeArr, type FakeArr } from '$flows/helpers/fakeArr.ts';
+import { startFakeArr, type FakeArr } from '$flows/helpers/sync/fakeArr.ts';
 
 export const test = base.extend<{
 	app: App;

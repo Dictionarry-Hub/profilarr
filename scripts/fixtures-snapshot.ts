@@ -4,7 +4,7 @@
  * Used by `deno task fixtures:update` to write tests/flows/data/fixtures.json,
  * which flow scenarios read their expected names and values from. The compile
  * mirrors the app's: schema ops, then the database's ops, with the same name
- * lookup functions. Its shape is typed in tests/flows/helpers/fixtureData.ts.
+ * lookup functions. Its shape is typed in tests/flows/helpers/core/fixtureData.ts.
  */
 
 import * as fs from 'node:fs/promises';

@@ -1,5 +1,5 @@
 import { defineConfig } from '@playwright/test';
-import { SCREENS } from '$flows/helpers/screen.ts';
+import { SCREENS } from '$flows/helpers/core/screen.ts';
 
 const workersOverride = process.env.FLOWS_WORKERS;
 // Playwright empties the results folder at the start of every run, so UI mode
@@ -10,8 +10,10 @@ export default defineConfig({
 	// Resolves the $flows/ import alias.
 	tsconfig: './tsconfig.json',
 
-	// Every *.spec.ts under scenarios/ is a test file. Folders group the output.
-	testDir: './scenarios',
+	// Every *.spec.ts is a test file: scenarios under scenarios/, and each
+	// helper's own spec next to it under helpers/. Folders group the output.
+	testDir: '.',
+	testIgnore: ['data/**', 'test-results*/**', 'playwright-report/**'],
 
 	// Builds the seeded "golden" data folder once, before any test runs.
 	globalSetup: './global-setup.ts',
@@ -41,6 +43,6 @@ export default defineConfig({
 		trace: 'retain-on-failure',
 		screenshot: 'only-on-failure',
 		viewport: SCREENS.desktop
-		// baseURL comes from each test's own app (helpers/test.ts).
+		// baseURL comes from each test's own app (helpers/core/test.ts).
 	}
 });

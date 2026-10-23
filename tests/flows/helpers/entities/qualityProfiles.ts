@@ -14,7 +14,7 @@ import type {
 	QualityProfileScoring,
 	QualityProfileTableRow
 } from '$shared/pcd/display.ts';
-import { pageData } from '$flows/helpers/pageData.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
 
 export const qualityProfilePages = {
 	/** Every quality profile on a list page, `/quality-profiles/{databaseId}` */

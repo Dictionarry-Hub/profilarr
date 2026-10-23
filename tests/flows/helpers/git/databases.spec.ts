@@ -1,12 +1,12 @@
 import type { Page } from '@playwright/test';
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/test.ts';
-import { fixture } from '$flows/helpers/fixtureData.ts';
-import { publishChanges, pullDatabase, setDeveloperAccess } from '$flows/helpers/databases.ts';
-import { saveForm } from '$flows/helpers/forms.ts';
-import { openDatabase, openEntity } from '$flows/helpers/nav.ts';
-import { pageData } from '$flows/helpers/pageData.ts';
-import { regularExpressionPages } from '$flows/helpers/regularExpressions.ts';
-import { upstream } from '$flows/helpers/upstream.ts';
+import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
+import { fixture } from '$flows/helpers/core/fixtureData.ts';
+import { publishChanges, pullDatabase, setDeveloperAccess } from '$flows/helpers/git/databases.ts';
+import { saveForm } from '$flows/helpers/core/forms.ts';
+import { openDatabase, openEntity } from '$flows/helpers/core/nav.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
+import { regularExpressionPages } from '$flows/helpers/entities/regularExpressions.ts';
+import { upstream } from '$flows/helpers/git/upstream.ts';
 
 interface DatabaseSettingsPage {
 	database: { hasPat: boolean; git_user_name: string | null; git_user_email: string | null };

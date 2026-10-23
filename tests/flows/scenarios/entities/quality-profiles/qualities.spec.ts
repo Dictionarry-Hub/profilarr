@@ -1,9 +1,9 @@
-import { test, expect } from '$flows/helpers/test.ts';
-import { fixture } from '$flows/helpers/fixtureData.ts';
-import { saveForm } from '$flows/helpers/forms.ts';
-import { openEntity, openTab } from '$flows/helpers/nav.ts';
-import { pageData } from '$flows/helpers/pageData.ts';
-import { setScreen } from '$flows/helpers/screen.ts';
+import { test, expect } from '$flows/helpers/core/test.ts';
+import { fixture } from '$flows/helpers/core/fixtureData.ts';
+import { saveForm } from '$flows/helpers/core/forms.ts';
+import { openEntity, openTab } from '$flows/helpers/core/nav.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
+import { setScreen } from '$flows/helpers/core/screen.ts';
 
 interface QualitiesPage {
 	qualities: { orderedItems: { name: string }[] };

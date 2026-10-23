@@ -20,7 +20,7 @@
  */
 
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { unflatten } from '$flows/helpers/pageData.ts';
+import { unflatten } from '$flows/helpers/core/pageData.ts';
 
 export interface ActionResult {
 	type: 'success' | 'failure' | 'redirect' | 'error';
