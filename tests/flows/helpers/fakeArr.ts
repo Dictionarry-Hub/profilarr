@@ -31,6 +31,14 @@ export interface Resource {
 	[key: string]: unknown;
 }
 
+/** An exact path, or a pattern for paths with ids, e.g. /^\/api\/v3\/qualityprofile\/\d+$/ */
+export type PathMatch = string | RegExp;
+
+function matches(request: RecordedRequest, method: string, path: PathMatch): boolean {
+	if (request.method !== method) return false;
+	return typeof path === 'string' ? request.path === path : path.test(request.path);
+}
+
 /** Collections that support list, get, create, update and delete */
 export type Collection = 'customformat' | 'qualityprofile' | 'delayprofile' | 'tag';
 
@@ -47,8 +55,13 @@ export interface FakeArr {
 	qualityDefinitions: Resource[];
 	naming: Resource;
 	mediaManagement: Resource;
-	/** Bodies of requests with this method and path */
-	sent(method: string, path: string): unknown[];
+	/** Bodies of requests with this method and path, or a path matching a pattern */
+	sent(method: string, path: PathMatch): unknown[];
+	/**
+	 * The first answered request with this method and path, waiting for it if
+	 * it hasn't arrived yet. Fails after `timeoutMs`, listing what did arrive.
+	 */
+	waitFor(method: string, path: PathMatch, timeoutMs?: number): Promise<RecordedRequest>;
 	/** Answer creating or updating `name` in `collection` with a validation error */
 	reject(collection: Collection, name: string, status?: number): void;
 	/** Answer every request to this method and path with `status` */
@@ -86,6 +99,8 @@ export async function startFakeArr(
 ): Promise<FakeArr> {
 	const apiKey = options.apiKey ?? `fake-${type}-key`;
 	const requests: RecordedRequest[] = [];
+	// Callers of waitFor, checked each time a request has been answered
+	const waiters: (() => void)[] = [];
 	const unhandled: RecordedRequest[] = [];
 	const rejections: { collection: Collection; name: string; status: number }[] = [];
 	const failures: { method: string; path: string; status: number }[] = [];
@@ -225,6 +240,7 @@ export async function startFakeArr(
 		entry.status = status;
 		res.writeHead(status, { 'Content-Type': 'application/json' });
 		res.end(JSON.stringify(payload));
+		for (const wake of [...waiters]) wake();
 	}
 
 	const port = await freePort();
@@ -245,8 +261,31 @@ export async function startFakeArr(
 		get mediaManagement() {
 			return fake.mediaManagement;
 		},
-		sent: (method, path) =>
-			requests.filter((r) => r.method === method && r.path === path).map((r) => r.body),
+		sent: (method, path) => requests.filter((r) => matches(r, method, path)).map((r) => r.body),
+		waitFor: (method, path, timeoutMs = 10_000) =>
+			new Promise<RecordedRequest>((resolveWait, rejectWait) => {
+				const answered = () => requests.find((r) => r.status !== 0 && matches(r, method, path));
+				const found = answered();
+				if (found) return resolveWait(found);
+
+				const wake = () => {
+					const request = answered();
+					if (!request) return;
+					clearTimeout(timer);
+					waiters.splice(waiters.indexOf(wake), 1);
+					resolveWait(request);
+				};
+				const timer = setTimeout(() => {
+					waiters.splice(waiters.indexOf(wake), 1);
+					const seen = requests.map((r) => `${r.method} ${r.path}`).join(', ') || 'none';
+					rejectWait(
+						new Error(
+							`The fake ${type} got no ${method} ${path} within ${timeoutMs}ms. Got: ${seen}`
+						)
+					);
+				}, timeoutMs);
+				waiters.push(wake);
+			}),
 		reject: (collection, name, status = 400) => void rejections.push({ collection, name, status }),
 		fail: (method, path, status) => void failures.push({ method, path, status }),
 		stop: () =>
