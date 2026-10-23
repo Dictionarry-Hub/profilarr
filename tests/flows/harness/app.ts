@@ -49,6 +49,11 @@ export interface StartOptions {
 	 * another app's, so this app plays a second install of the same database.
 	 */
 	upstream?: string;
+	/**
+	 * Environment applied over the defaults, e.g. `AUTH: 'on'`, SSO settings,
+	 * or an `ORIGIN` for a reverse proxy in front of the app. Kept on restart.
+	 */
+	env?: Record<string, string>;
 }
 
 /**
@@ -79,7 +84,8 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 				APP_BASE_PATH: dir,
 				ORIGIN: url,
 				// Sends the fixtures GitHub URL to the local upstream (harness/seed.ts)
-				GIT_CONFIG_GLOBAL: gitConfigPath(dir)
+				GIT_CONFIG_GLOBAL: gitConfigPath(dir),
+				...options.env
 			},
 			stdio: ['ignore', 'pipe', 'pipe']
 		});
