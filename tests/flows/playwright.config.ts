@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+import { SCREENS } from '$flows/helpers/screen.ts';
 
 const workersOverride = process.env.FLOWS_WORKERS;
 // Playwright empties the results folder at the start of every run, so UI mode
@@ -39,8 +40,7 @@ export default defineConfig({
 		// Keep a step-by-step trace and a screenshot only when a test fails.
 		trace: 'retain-on-failure',
 		screenshot: 'only-on-failure',
-		// Above the app's widest breakpoint (`wide`, 1600px), so pages use their desktop layout
-		viewport: { width: 1920, height: 1080 }
+		viewport: SCREENS.desktop
 		// baseURL comes from each test's own app (helpers/test.ts).
 	}
 });
