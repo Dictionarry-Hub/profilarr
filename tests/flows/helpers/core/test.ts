@@ -22,7 +22,10 @@
 import { test as base, expect } from '@playwright/test';
 import { startApp, type App } from '$flows/harness/app.ts';
 import { upstreamRepo } from '$flows/harness/seed.ts';
-import { ssoProvider as findSsoProvider, type RunningSso } from '$flows/helpers/auth/sso/providers.ts';
+import {
+	ssoProvider as findSsoProvider,
+	type RunningSso
+} from '$flows/helpers/auth/sso/providers.ts';
 import {
 	reverseProxy as findReverseProxy,
 	type ProxyOptions,
@@ -70,7 +73,8 @@ export const test = base.extend<{
 		await use(ssoServer);
 	},
 	reverseProxy: async ({ proxyServer }, use) => {
-		if (!proxyServer) throw new Error('The reverseProxy fixture needs test.use({ appProxy: { ... } })');
+		if (!proxyServer)
+			throw new Error('The reverseProxy fixture needs test.use({ appProxy: { ... } })');
 		await use(proxyServer);
 	},
 	// Order: the provider and proxy are already listening, so the app starts
