@@ -1,7 +1,7 @@
 /**
  * Checks for the navigation helpers in helpers/nav.ts.
  */
-import { test } from '$flows/helpers/test.ts';
+import { test, FIXTURES_NAME } from '$flows/helpers/test.ts';
 import {
 	SIDEBAR_PAGES,
 	newEntity,
@@ -67,7 +67,7 @@ test.describe('newEntity', () => {
 
 test.describe('openDatabase', () => {
 	test('opens Fixtures', async ({ page }) => {
-		await openDatabase(page, 'Fixtures');
+		await openDatabase(page, FIXTURES_NAME);
 	});
 });
 
@@ -87,7 +87,7 @@ test.describe('openTab', () => {
 
 	// Announcements and Config need a personal access token; Tweaks is behind a feature flag
 	test('walks every tab of the Fixtures database', async ({ page }) => {
-		await openDatabase(page, 'Fixtures');
+		await openDatabase(page, FIXTURES_NAME);
 		for (const tab of ['Updates', 'Conflicts', 'Settings', 'Changes'] as const) {
 			await openTab(page, tab);
 		}

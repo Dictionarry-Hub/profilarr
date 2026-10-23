@@ -3,7 +3,7 @@
  * section: it needs only one selection, and a rejected delay profile fails
  * the whole section.
  */
-import { test, expect } from '$flows/helpers/test.ts';
+import { test, expect, FIXTURES_NAME } from '$flows/helpers/test.ts';
 import { addArr, openArr } from '$flows/helpers/arrs.ts';
 import { saveForm } from '$flows/helpers/forms.ts';
 import { openTab } from '$flows/helpers/nav.ts';
@@ -18,7 +18,7 @@ async function chooseDelayProfile(page: Page, fake: FakeArr) {
 	await openTab(page, 'Sync');
 	const region = page.getByRole('main').getByRole('region', { name: 'Delay Profiles' });
 	await region
-		.getByRole('switch', { name: 'Toggle delay profile Prefer Usenet from Fixtures' })
+		.getByRole('switch', { name: `Toggle delay profile Prefer Usenet from ${FIXTURES_NAME}` })
 		.click();
 	await saveForm(page, { within: region, action: 'saveDelayProfiles' });
 }

@@ -45,3 +45,7 @@ export const test = base.extend<{ app: App; fakeRadarr: FakeArr; fakeSonarr: Fak
 });
 
 export { expect };
+
+/** The linked fixtures database's name, and the running app a test gets */
+export { FIXTURES_NAME } from '$flows/harness/seed.ts';
+export type { App };

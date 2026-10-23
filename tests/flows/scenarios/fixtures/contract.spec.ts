@@ -4,7 +4,7 @@
  * names and values, so a fixtures change that breaks them fails here first,
  * naming the entity and field.
  */
-import { test, expect } from '$flows/helpers/test.ts';
+import { test, expect, FIXTURES_NAME } from '$flows/helpers/test.ts';
 import {
 	fixtures,
 	SONARR_WORDS,
@@ -28,7 +28,7 @@ test('the fixtures database is linked and compiled', async ({ page, request }) =
 	const body = (await status.json()) as {
 		databases: { name: string; counts: Record<string, number> }[];
 	};
-	expect(body.databases.find((db) => db.name === 'Fixtures')?.counts).toEqual({
+	expect(body.databases.find((db) => db.name === FIXTURES_NAME)?.counts).toEqual({
 		customFormats: fixtures.customFormats.length,
 		qualityProfiles: fixtures.qualityProfiles.length,
 		regularExpressions: fixtures.regularExpressions.length,
@@ -37,7 +37,7 @@ test('the fixtures database is linked and compiled', async ({ page, request }) =
 
 	await page.goto('/databases');
 	await expect(
-		page.getByRole('main').getByRole('heading', { name: 'Fixtures', exact: true })
+		page.getByRole('main').getByRole('heading', { name: FIXTURES_NAME, exact: true })
 	).toBeVisible();
 });
 
