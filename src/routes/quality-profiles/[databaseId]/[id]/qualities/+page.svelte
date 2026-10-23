@@ -761,6 +761,7 @@
 								<Button
 									icon={ChevronUp}
 									size="xs"
+									ariaLabel={`Move ${item.name} up`}
 									disabled={index === 0}
 									on:click={(e) => {
 										e.stopPropagation();
@@ -770,6 +771,7 @@
 								<Button
 									icon={ChevronDown}
 									size="xs"
+									ariaLabel={`Move ${item.name} down`}
 									disabled={index === mainBucket.length - 1}
 									on:click={(e) => {
 										e.stopPropagation();
