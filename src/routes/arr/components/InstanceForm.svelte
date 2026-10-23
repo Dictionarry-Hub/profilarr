@@ -539,7 +539,7 @@
 			<p class="text-xs text-neutral-500 dark:text-neutral-400">
 				Press Enter to add a tag, Backspace to remove
 			</p>
-			<TagInput {tags} on:change={(e) => update('tags', JSON.stringify(e.detail))} />
+			<TagInput {tags} onchange={(newTags) => update('tags', JSON.stringify(newTags))} />
 		</div>
 		<!-- Library Refresh (edit mode only) -->
 		{#if mode === 'edit' && instance}
