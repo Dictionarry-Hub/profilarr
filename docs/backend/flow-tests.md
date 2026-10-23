@@ -79,6 +79,46 @@ these folders with a pass count for each.
   (`helpers/core/fixtureData.ts`), not literals.
 - Pin a known app bug with `test.fail()` and a one-line comment.
 
+### Describing a Test
+
+Every spec explains itself in its own file, so a reader never needs another
+document:
+
+- **File header.** A short bulleted list of what the file protects, such as
+  the threat and the defence for a security spec.
+- **Comment before each test.** A numbered **Flow** with the steps a user
+  takes, then a bulleted **Expects** with what must be true afterwards.
+- **Title.** Name the behaviour under test, not the steps that reach it. For
+  example, "when client-rendered" rather than "after a sidebar click".
+
+```ts
+/**
+ * Flow:
+ * 1. The developer commits a custom format description holding the payload.
+ * 2. The user pulls it on the Changes tab.
+ * 3. The user opens Custom Formats and reloads, so the server renders the
+ *    page (SSR).
+ *
+ * Expects:
+ * - the description renders
+ * - no <img onerror> reaches the page
+ * - the handler never runs
+ * - the payload shows as plain text
+ */
+test("don't run embedded HTML when server-rendered", async ({ app, page }) => {
+```
+
+### Making the Checks Count
+
+- Set up state the way a real user gets it. A database change arrives as an
+  upstream commit that the user pulls, not as a row written into the database.
+- Check that the page rendered what's under test before checking that
+  something is absent. Otherwise an empty page passes.
+- Order the checks so the most important check fails first. Give each check
+  an `expect` message that names it. A failure then says what broke.
+- For a security spec, confirm once that it fails with the defence switched
+  off. A spec that can't fail proves nothing.
+
 ## Adding a Helper
 
 Put the helper in the `helpers/` area it serves, with a header comment. Wrap
