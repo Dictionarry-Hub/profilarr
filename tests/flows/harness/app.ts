@@ -10,6 +10,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { gitConfigPath } from '$flows/harness/git.ts';
 import { APP_BINARY, goldenDir } from '$flows/harness/paths.ts';
 import { freePort } from '$flows/harness/ports.ts';
 import { relinkDatabases } from '$flows/harness/seed.ts';
@@ -38,17 +39,25 @@ const BASE_ENV = {
 	HOST: '127.0.0.1'
 };
 
+export interface StartOptions {
+	/**
+	 * Pull and publish against this upstream instead of the copy's own, e.g.
+	 * another app's, so this app plays a second install of the same database.
+	 */
+	upstream?: string;
+}
+
 /**
  * Start an app. Without `dataDir` it runs on a fresh copy of the golden
  * folder, deleted on stop. With `dataDir` it runs on that folder and leaves it
  * in place, which global setup uses to build the golden folder.
  */
-export async function startApp(dataDir?: string): Promise<App> {
+export async function startApp(dataDir?: string, options: StartOptions = {}): Promise<App> {
 	const ownsDir = !dataDir;
 	const dir = dataDir ?? (await fs.mkdtemp(join(tmpdir(), 'profilarr-flow-')));
 	if (ownsDir) {
 		await fs.cp(goldenDir(), dir, { recursive: true });
-		relinkDatabases(dir);
+		await relinkDatabases(dir, options.upstream);
 	}
 
 	const port = await freePort();
@@ -59,7 +68,15 @@ export async function startApp(dataDir?: string): Promise<App> {
 	// Spawn the app and wait until it answers. Kills it if it never does.
 	const launch = async (): Promise<ChildProcess> => {
 		const child = spawn(APP_BINARY, [], {
-			env: { ...process.env, ...BASE_ENV, PORT: String(port), APP_BASE_PATH: dir, ORIGIN: url },
+			env: {
+				...process.env,
+				...BASE_ENV,
+				PORT: String(port),
+				APP_BASE_PATH: dir,
+				ORIGIN: url,
+				// Sends the fixtures GitHub URL to the local upstream (harness/seed.ts)
+				GIT_CONFIG_GLOBAL: gitConfigPath(dir)
+			},
 			stdio: ['ignore', 'pipe', 'pipe']
 		});
 		child.stdout?.on('data', (chunk) => output.push(String(chunk)));
