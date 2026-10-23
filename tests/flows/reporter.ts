@@ -68,6 +68,7 @@ export default class FlowReporter implements Reporter {
 	private errors: TestError[] = [];
 	private startedAt = Date.now();
 	private width = 0;
+	private countWidth = 5;
 
 	printsToStdio(): boolean {
 		return true;
@@ -88,6 +89,8 @@ export default class FlowReporter implements Reporter {
 			}
 		}
 		this.width = Math.max(10, labelWidth(this.root, 0));
+		// Wide enough for the largest count, e.g. "113/113"
+		this.countWidth = Math.max(5, String(tests.length).length * 2 + 1);
 		// Playwright never starts more workers than there are tests
 		const workers = Math.min(config.workers, tests.length);
 		console.log(
@@ -187,7 +190,7 @@ export default class FlowReporter implements Reporter {
 		const ok = folder.passed === folder.total;
 		const label = `${'  '.repeat(depth)}${ok ? green('✓') : red('✗')} ${folder.name}`;
 		const pad = ' '.repeat(Math.max(0, this.width - depth * 2 - folder.name.length));
-		const count = `${folder.passed}/${folder.total}`.padStart(5);
+		const count = `${folder.passed}/${folder.total}`.padStart(this.countWidth);
 		const time = `${((folder.endedAt - folder.startedAt) / 1000).toFixed(1)}s`.padStart(6);
 		console.log(`  ${label}${pad}  ${count}  ${time}`);
 		const children = [...folder.children.values()].sort((a, b) => a.name.localeCompare(b.name));
