@@ -1,7 +1,7 @@
 /**
- * Database helpers: linking, developer access, pulling and publishing. Each
- * works through the UI the way a user would and waits for the app to finish,
- * so a scenario continues once the app has.
+ * Database helpers: linking, developer access, the conflict strategy,
+ * pulling and publishing. Each works through the UI the way a user would and
+ * waits for the app to finish, so a scenario continues once the app has.
  *
  * Git reaches the test's local upstream for the fixtures GitHub URL
  * (helpers/git/upstream.ts), unless the spec turns that rewrite off.
@@ -9,7 +9,12 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { FIXTURES_NAME, FLOWS_TOKEN } from '$flows/harness/seed.ts';
-import { saveForm, waitForAction, type ActionResult } from '$flows/helpers/core/forms.ts';
+import {
+	chooseOption,
+	saveForm,
+	waitForAction,
+	type ActionResult
+} from '$flows/helpers/core/forms.ts';
 import { openDatabase, openPage, openTab } from '$flows/helpers/core/nav.ts';
 
 /** How long a link job may take: a clone from GitHub, the import and the compile */
@@ -88,6 +93,32 @@ export async function setDeveloperAccess(
 			// The author fields only show once a token is typed
 			await main.getByLabel(/^Git Author Name/).fill(authorName);
 			await main.getByLabel(/^Git Author Email/).fill(authorEmail);
+			await saveForm(page, { action: 'update' });
+		},
+		{ box: true }
+	);
+}
+
+/** The Conflict Strategy dropdown's options, as the Settings tab labels them */
+export type ConflictStrategyOption = 'Override (default)' | 'Align' | 'Ask every time';
+
+/**
+ * Choose how a database resolves user ops that conflict with upstream, as a
+ * user would: pick the strategy on its Settings tab and save. The dropdown
+ * only shows while the database has no personal access token, or has local
+ * ops on; the seeded fixtures database has neither a token nor local ops.
+ */
+export async function setConflictStrategy(
+	page: Page,
+	strategy: ConflictStrategyOption,
+	database = FIXTURES_NAME
+): Promise<void> {
+	await test.step(
+		`Set ${database}'s conflict strategy to ${strategy}`,
+		async () => {
+			await openDatabase(page, database);
+			await openTab(page, 'Settings');
+			await chooseOption(page.getByRole('main'), 'Conflict Strategy', strategy);
 			await saveForm(page, { action: 'update' });
 		},
 		{ box: true }
