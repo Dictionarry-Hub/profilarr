@@ -25,6 +25,7 @@ deno task flows                    # every test
 deno task flows --grep "score"     # matching tests; any Playwright flag works
 deno task flows --ui               # Playwright UI mode at http://localhost:8080
 deno task flows --build            # rebuild the app first
+deno task flows --online           # give the container network, so @online tests run too
 ```
 
 The suite runs in the official Playwright Docker image, so no browsers are
@@ -33,7 +34,8 @@ need `--build`, and test changes don't. `FLOWS_WORKERS` overrides the worker
 count. By default it is half the CPU cores locally and 4 on CI.
 
 On CI, the `Flow Tests` job type-checks the suite with `deno check tests/flows`
-and runs it. When the job fails, it uploads the report and traces.
+and runs it with `--online`. When the job fails, it uploads the report and
+traces.
 
 ## Layout
 
@@ -49,7 +51,7 @@ tests/flows/
     auth/       local accounts, Settings › Security, SSO providers in sso/
     proxy/      reverse proxies in front of an app
   scenarios/    real user flows, by area
-    auth/   entities/<entity>/   sync/   git/   workflows/ (more than one area)
+    auth/   databases/   entities/<entity>/   sync/   git/   workflows/ (more than one area)
   data/         vendored fixtures, their snapshot, recorded Arr responses
 ```
 
@@ -65,9 +67,10 @@ these folders with a pass count for each.
    database rows at its own repos. It then starts the app on a free port with
    `AUTH=off`, unless the spec's options change it (see
    [Auth, SSO and Proxies](#auth-sso-and-proxies)).
-3. The container has no network. A per-test `gitconfig` rewrites the fixtures
-   database's GitHub URL to a local bare repo. Pulling and publishing reach
-   that repo instead of GitHub.
+3. The container has no network unless the run passes `--online`. Either
+   way, a per-test `gitconfig` rewrites the fixtures database's GitHub URL to
+   a local bare repo. Linking, pulling and publishing reach that repo instead
+   of GitHub.
 4. Arr instances point at a fake Arr (`helpers/sync/fakeArr.ts`). The fake
    serves recorded API responses and keeps changes in memory.
 
@@ -131,6 +134,12 @@ test.use({
 - To cover the ways users reach the app, loop over `proxySetups()`
   (`helpers/proxy/proxies.ts`): no proxy, then each real proxy over HTTPS. A
   new real proxy then joins every such scenario.
+- A test that reaches the internet carries `ONLINE_TAG` and calls
+  `skipWithoutNetwork()` (`helpers/core/realServices.ts`), so it only runs
+  with `--online`. To reach GitHub instead of the local bare repo, the spec
+  sets `appEnv: { GIT_CONFIG_GLOBAL: '/dev/null' }`. An empty config drops
+  the URL rewrite for that app. Keep such tests few. They depend on GitHub
+  and count against its rate limits.
 - Pin a known app bug with `test.fail()` and a one-line comment.
 
 ### Describing a Test

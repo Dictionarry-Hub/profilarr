@@ -1,15 +1,59 @@
 /**
- * Linked database helpers: developer access, pulling and publishing. Each
- * works through the UI on the database's own pages and waits for the form
- * action behind it, so a scenario continues once the app has finished.
+ * Database helpers: linking, developer access, pulling and publishing. Each
+ * works through the UI the way a user would and waits for the app to finish,
+ * so a scenario continues once the app has.
  *
- * Pulling and publishing reach the test's local upstream (helpers/git/upstream.ts).
+ * Git reaches the test's local upstream for the fixtures GitHub URL
+ * (helpers/git/upstream.ts), unless the spec turns that rewrite off.
  */
 
 import { expect, test, type Page } from '@playwright/test';
 import { FIXTURES_NAME, FLOWS_TOKEN } from '$flows/harness/seed.ts';
 import { saveForm, waitForAction, type ActionResult } from '$flows/helpers/core/forms.ts';
-import { openDatabase, openTab } from '$flows/helpers/core/nav.ts';
+import { openDatabase, openPage, openTab } from '$flows/helpers/core/nav.ts';
+
+/** How long a link job may take: a clone from GitHub, the import and the compile */
+const LINK_TIMEOUT_MS = 30_000;
+
+export interface LinkOptions {
+	/** The name the database gets in Profilarr */
+	name: string;
+	/** The repository URL to link */
+	url: string;
+	/** The branch to link. Default the repository's default branch. */
+	branch?: string;
+}
+
+/**
+ * Link a database the way a new user does: fill in the Link Database form,
+ * save, and wait on the Databases page until the link job has cloned,
+ * imported and compiled it and its card shows. Fails with the app's message
+ * if the form rejects the input.
+ */
+export async function linkDatabase(page: Page, options: LinkOptions): Promise<void> {
+	const { name, url, branch } = options;
+	await test.step(
+		`Link ${name} from ${url}`,
+		async () => {
+			await openPage(page, '/databases/new');
+			const main = page.getByRole('main');
+			await main.getByRole('textbox', { name: /^Name/ }).fill(name);
+			await main.getByRole('textbox', { name: /^Repository URL/ }).fill(url);
+			if (branch) await main.getByRole('textbox', { name: 'Branch' }).fill(branch);
+			// The action queues the link job and redirects to the Databases page,
+			// which refreshes its list when the job finishes
+			await saveForm(page);
+			const card = main
+				.getByRole('link')
+				.filter({ has: page.getByRole('heading', { name, exact: true }) });
+			await expect(
+				card,
+				`The Databases page should list ${name} once the link job finishes`
+			).toBeVisible({ timeout: LINK_TIMEOUT_MS });
+		},
+		{ box: true }
+	);
+}
 
 export interface DeveloperOptions {
 	/** The database to open. Default the fixtures database. */
