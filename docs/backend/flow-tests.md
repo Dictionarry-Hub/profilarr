@@ -57,7 +57,7 @@ tests/flows/
     proxy/      reverse proxies in front of an app
     settings/   Settings pages, such as Backups
   scenarios/    real user flows, by area
-    auth/   databases/   entities/<entity>/   sync/   git/   settings/   workflows/ (more than one area)
+    arrs/   auth/   databases/   entities/<entity>/   sync/   git/   settings/   workflows/ (more than one area)
   data/         vendored fixtures, their snapshot, recorded Arr responses
 ```
 
