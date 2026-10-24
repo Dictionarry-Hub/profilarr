@@ -1,6 +1,6 @@
 /**
- * Settings › Security: confirming identity before creating an API key, and
- * typed readers for what the page lists.
+ * Settings › Security: confirming identity before creating an API key,
+ * creating one, and typed readers for what the page lists.
  */
 
 import { expect, test, type Page } from '@playwright/test';
@@ -11,6 +11,7 @@ import type { RunningSso, SsoUser } from '$flows/helpers/auth/sso/providers.ts';
 /** How long the app trusts a confirmation (src/lib/server/utils/auth/confirmation.ts) */
 const CONFIRMATION_WINDOW_MINUTES = 30;
 import { pageData } from '$flows/helpers/core/pageData.ts';
+import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
 
 export interface SessionRow {
 	/** A hash of the session id; the id itself never reaches the page */
@@ -79,6 +80,7 @@ export async function confirmIdentity(page: Page, how: Confirmation): Promise<vo
 	await test.step(
 		`Confirm identity with ${'password' in how ? 'a password' : 'SSO'}`,
 		async () => {
+			await waitForHydration(page);
 			const dialog = page.getByRole('dialog', { name: "Confirm it's you" });
 			await expect(dialog, 'The confirm dialog should open').toBeVisible();
 
@@ -94,8 +96,54 @@ export async function confirmIdentity(page: Page, how: Confirmation): Promise<vo
 			} else {
 				await dialog.getByRole('link', { name: 'Confirm with SSO' }).click();
 				await how.sso.signIn(page, how.user);
+				await waitForHydration(page);
 			}
 			await expect(dialog, 'The dialog should close once confirmed').toBeHidden();
+		},
+		{ box: true }
+	);
+}
+
+/**
+ * Create an API key with full access the way a user does: open Settings ›
+ * Security from the sidebar, click New Key, confirm who they are, then fill
+ * in the form. Pass `confirm` when the app will ask, e.g. after
+ * `lapseConfirmation`; without it, New Key must open the form directly.
+ * Returns when the page shows the key, which it does only once.
+ */
+export async function createApiKey(
+	page: Page,
+	name: string,
+	confirm?: Confirmation
+): Promise<void> {
+	await test.step(
+		`Create the API key ${name}`,
+		async () => {
+			await openSidebarPage(page, 'Security');
+			const main = page.getByRole('main');
+			await main.getByRole('link', { name: 'New Key', exact: true }).click();
+
+			if (confirm) {
+				await expect(
+					page.getByRole('dialog', { name: "Confirm it's you" }),
+					'New Key should ask the user to confirm first'
+				).toBeVisible();
+				await expect(page, 'The dialog should open on the Security page').toHaveURL(
+					(url) => url.pathname === SECURITY_PATH
+				);
+				await confirmIdentity(page, confirm);
+			}
+			await expect(page, 'The new API key form should open').toHaveURL(
+				(url) => url.pathname === `${SECURITY_PATH}/api-keys/new`
+			);
+
+			await main.getByLabel(/^Name/).fill(name);
+			await main.getByRole('switch', { name: 'Full access' }).click();
+			await main.getByRole('button', { name: 'Create', exact: true }).click();
+			await expect(
+				main.getByText('This key is shown once'),
+				'The page should show the new key'
+			).toBeVisible();
 		},
 		{ box: true }
 	);

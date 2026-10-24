@@ -49,7 +49,7 @@ tests/flows/
     auth/       local accounts, Settings › Security, SSO providers in sso/
     proxy/      reverse proxies in front of an app
   scenarios/    real user flows, by area
-    entities/<entity>/   sync/   git/   workflows/ (more than one area)
+    auth/   entities/<entity>/   sync/   git/   workflows/ (more than one area)
   data/         vendored fixtures, their snapshot, recorded Arr responses
 ```
 
@@ -85,16 +85,33 @@ test.use({
 
 - **Start order.** The provider and the proxy start first. The app then gets
   the provider's `OIDC_*` settings, and the proxy's address as `ORIGIN` and
-  `baseURL`.
+  `baseURL`. Once the app is up, both get its address through `target`. The
+  provider then accepts sign-ins that return to the app, and the proxy
+  forwards to it.
 - **Accounts.** `createAccount` makes the first account through the setup
   form. `signIn`, `signInWithSso` and `signOut` cover the rest
   (`helpers/auth/accounts.ts`).
 - **SSO providers.** `helpers/auth/sso/providers.ts` lists them. `fake` runs
-  in the test process and can misbehave on purpose. Real providers join as
-  entries marked `needsNetwork`.
+  in the test process and can misbehave on purpose. `authelia` runs Authelia
+  in a container. Each entry lists the features it `supports`.
 - **Reverse proxies.** `helpers/proxy/proxies.ts` lists them. `fake` can
   serve HTTPS, change request headers, cap response header size, or fail.
-  Real proxies join as entries marked `needsDocker`.
+  `traefik` runs Traefik in a container. Each entry lists the options it
+  `supports`.
+- **Forward auth.** With `appProxy: { forwardAuth: true }`, the proxy asks
+  the SSO provider before it forwards each request, and sends a signed-out
+  browser to the provider's login page. Traefik and Authelia support it.
+- **HTTPS.** HTTPS services serve the run's self-signed certificate
+  (`harness/tls.ts`). It's a leaf certificate, because Deno rejects a
+  self-signed CA. A provider gives it to the app as `NODE_EXTRA_CA_CERTS`, and
+  the browser ignores certificate errors.
+- **Real services.** Entries marked `needsDocker` run in a container that
+  shares the test container's network namespace. They stay offline and reach
+  the app on `127.0.0.1` (`harness/docker.ts`). `deno task flows` mounts the
+  Docker socket and pulls any missing images pinned in
+  `tests/flows/services.Dockerfile`, which Dependabot keeps current. Their
+  tests carry the `@docker` tag, and they're skipped when the host has no
+  Docker socket. A failed test gets their logs attached.
 
 ## Adding a Scenario
 
@@ -102,10 +119,18 @@ test.use({
   areas.
 - Import with the `$flows/` alias only. Take `test` and `expect` from
   `$flows/helpers/core/test.ts`, and use helpers rather than the harness.
+- Use `openPage` from `helpers/core/nav.ts` for full loads of Profilarr pages
+  before interacting. It waits for the root layout's `data-hydrated` marker,
+  set in `onMount`, so hydration cannot clear typed values. After a reload,
+  call `waitForHydration`. Sidebar and account helpers already wait. These
+  waits are for Profilarr pages, not SSO provider pages or proxy error responses.
 - Check what the app stored through the typed readers or `pageData`, not only
   what an input shows.
 - Read expected names and values from `fixture` and `fixtures`
   (`helpers/core/fixtureData.ts`), not literals.
+- To cover the ways users reach the app, loop over `proxySetups()`
+  (`helpers/proxy/proxies.ts`): no proxy, then each real proxy over HTTPS. A
+  new real proxy then joins every such scenario.
 - Pin a known app bug with `test.fail()` and a one-line comment.
 
 ### Describing a Test
@@ -154,6 +179,9 @@ Put the helper in the `helpers/` area it serves, with a header comment. Wrap
 its body in `test.step(..., { box: true })`, so a failure points at the line
 that called it. Add a spec beside the helper that proves it works on a real
 page.
+
+Real services, such as `authelia` and `traefik`, have no spec beside them.
+The scenarios that run them are their tests.
 
 ## Adding a Fake Target
 

@@ -14,12 +14,15 @@
  *   test reaches it as the `sso` fixture.
  * - `appProxy`: a reverse proxy in front of the app (helpers/proxy/proxies.ts).
  *   The app's `ORIGIN` and `baseURL` become the proxy's address. The test
- *   reaches it as the `reverseProxy` fixture.
+ *   reaches it as the `reverseProxy` fixture. With `forwardAuth`, the proxy
+ *   asks the SSO provider before forwarding each request.
  *
- * `appEnv` applies last, so a test can override what the others set.
+ * Once the app is up, the provider and the proxy get its address (`target`).
+ * A failed test gets their logs attached. `appEnv` applies last, so a test
+ * can override what the others set.
  */
 
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, type TestInfo } from '@playwright/test';
 import { startApp, type App } from '$flows/harness/app.ts';
 import { upstreamRepo } from '$flows/harness/seed.ts';
 import {
@@ -33,6 +36,20 @@ import {
 } from '$flows/helpers/proxy/proxies.ts';
 import { startFakeArr, type FakeArr } from '$flows/helpers/sync/fakeArr.ts';
 import { defaultTarget } from '$flows/helpers/sync/targets.ts';
+
+/** Attach a service's logs to a test that didn't end as expected */
+async function attachServiceLogs(
+	testInfo: TestInfo,
+	name: string,
+	logs: (() => Promise<string>) | undefined
+): Promise<void> {
+	if (!logs || testInfo.status === testInfo.expectedStatus) return;
+	try {
+		await testInfo.attach(`${name}.log`, { body: await logs(), contentType: 'text/plain' });
+	} catch (error) {
+		await testInfo.attach(`${name}.log`, { body: `No logs: ${error}`, contentType: 'text/plain' });
+	}
+}
 
 export const test = base.extend<{
 	appEnv: Record<string, string>;
@@ -56,16 +73,31 @@ export const test = base.extend<{
 	appEnv: [{}, { option: true }],
 	ssoProvider: [undefined, { option: true }],
 	appProxy: [undefined, { option: true }],
-	ssoServer: async ({ ssoProvider }, use) => {
+	ssoServer: async ({ ssoProvider }, use, testInfo) => {
 		if (!ssoProvider) return await use(null);
 		const running = await findSsoProvider(ssoProvider).start();
 		await use(running);
+		await attachServiceLogs(testInfo, running.provider.id, running.logs);
 		await running.stop();
 	},
-	proxyServer: async ({ appProxy }, use) => {
+	proxyServer: async ({ appProxy, ssoServer }, use, testInfo) => {
 		if (!appProxy) return await use(null);
-		const running = await findReverseProxy(appProxy.id ?? 'fake').start(appProxy);
+		const proxy = findReverseProxy(appProxy.id ?? 'fake');
+		let forwardAuthUrl: string | undefined;
+		if (appProxy.forwardAuth) {
+			if (!proxy.supports.includes('forwardAuth')) {
+				throw new Error(`${proxy.label} doesn't support forward auth`);
+			}
+			forwardAuthUrl = ssoServer?.forwardAuthUrl;
+			if (!forwardAuthUrl) {
+				throw new Error(
+					'Forward auth needs test.use({ ssoProvider }) with a provider that supports it'
+				);
+			}
+		}
+		const running = await proxy.start(appProxy, forwardAuthUrl);
 		await use(running);
+		await attachServiceLogs(testInfo, running.proxy.id, running.logs);
 		await running.stop();
 	},
 	sso: async ({ ssoServer }, use) => {
@@ -77,8 +109,9 @@ export const test = base.extend<{
 			throw new Error('The reverseProxy fixture needs test.use({ appProxy: { ... } })');
 		await use(proxyServer);
 	},
-	// Order: the provider and proxy are already listening, so the app starts
-	// with their addresses; the proxy then forwards to the app
+	// Order: the provider and proxy have their addresses, so the app starts
+	// with them. The provider then accepts sign-ins for the app's origin, and
+	// the proxy forwards to the app.
 	app: async ({ appEnv, ssoServer, proxyServer }, use, testInfo) => {
 		const env = {
 			...(ssoServer?.env ?? {}),
@@ -86,7 +119,15 @@ export const test = base.extend<{
 			...appEnv
 		};
 		const app = await startApp(undefined, { env });
-		proxyServer?.target(app.url);
+		try {
+			await Promise.all([
+				ssoServer?.target(proxyServer?.url ?? app.url),
+				proxyServer?.target(app.url)
+			]);
+		} catch (error) {
+			await app.stop();
+			throw error;
+		}
 		await use(app);
 		if (testInfo.status !== testInfo.expectedStatus) {
 			await testInfo.attach('app.log', { body: app.logs(), contentType: 'text/plain' });
@@ -107,9 +148,10 @@ export const test = base.extend<{
 	baseURL: async ({ app, proxyServer }, use) => {
 		await use(proxyServer?.url ?? app.url);
 	},
-	// The proxy's certificate is self-signed
-	ignoreHTTPSErrors: async ({ appProxy }, use) => {
-		await use(appProxy?.tls === true);
+	// The run's certificate, which HTTPS proxies and providers serve, is self-signed
+	ignoreHTTPSErrors: async ({ appProxy, ssoProvider }, use) => {
+		const providerTls = ssoProvider !== undefined && findSsoProvider(ssoProvider).tls;
+		await use(appProxy?.tls === true || providerTls);
 	},
 	// Alerts default to the top centre for 8 seconds, where they cover the tab
 	// bar and delay clicks on it. Tests put them at the bottom right instead.

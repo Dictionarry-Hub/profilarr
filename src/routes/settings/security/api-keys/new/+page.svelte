@@ -233,6 +233,7 @@
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-8">
 					<div class="md:col-span-6">
 						<FormInput
+							name="api_key_name"
 							label="Name"
 							value={formData.name}
 							placeholder="e.g. Homepage widget"

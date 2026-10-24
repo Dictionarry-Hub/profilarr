@@ -61,15 +61,12 @@ obj/
 # Bruno environments (contain API keys)
 bruno/environments/
 
-# OIDC testing (local Keycloak config)
-tests/e2e/auth/realm-export.json
-
 # Playwright
 test-results/
 test-results-ui/
+# Config folders for real services in flow tests
+tests/flows/.services/
 playwright-report/
-tests/e2e/*/test-results/
-tests/e2e/*/playwright-report/
 
 # Research repos
 research/

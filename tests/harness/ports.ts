@@ -148,11 +148,6 @@ export const PORTS = {
 	},
 	settings: {
 		landingPage: 7900
-	},
-	e2e: {
-		auth: 8000,
-		authProxy: 8001,
-		sanitize: 8002
 	}
 } as const;
 

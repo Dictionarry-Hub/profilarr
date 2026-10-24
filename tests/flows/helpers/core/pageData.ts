@@ -7,6 +7,10 @@
  * each encoded with devalue: a flat array where values refer to each other by
  * index. `pageData` fetches it with the browser's session, decodes every node,
  * and merges them, page data over layout data.
+ *
+ * It also opens the page in a throwaway tab first, so the trace shows the page
+ * under the read. The test's own tab stays where it is, so a read never
+ * leaves a form or trips an unsaved-changes guard.
  */
 
 import { expect, test, type Page } from '@playwright/test';
@@ -115,6 +119,16 @@ export function unflatten(values: unknown[]): unknown {
 	return hydrate(0);
 }
 
+/** Open `url` in a new tab of the same browser session, then close it */
+async function showInTrace(page: Page, url: string): Promise<void> {
+	const tab = await page.context().newPage();
+	try {
+		await tab.goto(url);
+	} finally {
+		await tab.close();
+	}
+}
+
 /**
  * The current page's server data, decoded and merged across its layouts.
  * Pass a path to read another page's data without navigating.
@@ -127,6 +141,7 @@ export async function pageData<T = Json>(page: Page, path?: string): Promise<T> 
 			const dataPath = `${url.pathname.replace(/\/$/, '')}/__data.json${url.search}`;
 			// Keep the origin: a path alone would resolve against baseURL, the test's
 			// own app, even when the page or `path` points at another one
+			await showInTrace(page, `${url.origin}${url.pathname}${url.search}`);
 			const response = await page.request.get(`${url.origin}${dataPath}`);
 			expect(response.ok(), `${dataPath} should answer`).toBe(true);
 

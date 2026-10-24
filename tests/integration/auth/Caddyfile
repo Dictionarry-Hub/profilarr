@@ -15,9 +15,3 @@ localhost:7445 {
 	tls internal
 	reverse_proxy host.docker.internal:7008
 }
-
-# HTTPS termination for the OIDC E2E suite (PORTS.e2e.authProxy).
-localhost:8445 {
-	tls internal
-	reverse_proxy host.docker.internal:8001
-}

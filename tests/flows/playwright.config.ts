@@ -13,7 +13,7 @@ export default defineConfig({
 	// Every *.spec.ts is a test file: scenarios under scenarios/, and each
 	// helper's own spec next to it under helpers/. Folders group the output.
 	testDir: '.',
-	testIgnore: ['data/**', 'test-results*/**', 'playwright-report/**'],
+	testIgnore: ['data/**', 'test-results*/**', 'playwright-report/**', '.services/**'],
 
 	// Builds the seeded "golden" data folder once, before any test runs.
 	globalSetup: './global-setup.ts',

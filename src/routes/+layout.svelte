@@ -49,6 +49,7 @@
 	}
 
 	onMount(() => {
+		document.documentElement.dataset.hydrated = 'true';
 		if (!isAuthPage && cutsceneEnabled) cutscene.init();
 	});
 </script>
