@@ -1,6 +1,6 @@
 import { test, expect } from '$flows/helpers/core/test.ts';
 import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import { openEntity, openSidebarPage } from '$flows/helpers/core/nav.ts';
+import { openEntity, openPage, openSidebarPage } from '$flows/helpers/core/nav.ts';
 import { pageData } from '$flows/helpers/core/pageData.ts';
 import { chooseOption, confirmDialog, deleteEntity, saveForm } from '$flows/helpers/core/forms.ts';
 import type { Page } from '@playwright/test';
@@ -20,7 +20,7 @@ interface GeneralSettingsPage {
 /** Open the new regular expression form and fill in a name and pattern */
 async function startNewRegex(page: Page, name: string) {
 	await openSidebarPage(page, 'Regular Expressions');
-	await page.goto(`${new URL(page.url()).pathname}/new`);
+	await openPage(page, `${new URL(page.url()).pathname}/new`);
 	const main = page.getByRole('main');
 	await main.getByRole('textbox', { name: /^Name/ }).fill(name);
 	await main.getByRole('textbox', { name: /^Regular Expression/ }).fill('\\bProbe\\b');

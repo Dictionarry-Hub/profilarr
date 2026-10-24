@@ -9,7 +9,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import type { RunningSso, SsoUser } from '$flows/helpers/auth/sso/providers.ts';
-import { sidebar } from '$flows/helpers/core/nav.ts';
+import { openPage, sidebar, waitForHydration } from '$flows/helpers/core/nav.ts';
 
 export interface LocalUser {
 	username: string;
@@ -29,7 +29,7 @@ export async function createAccount(page: Page, user: LocalUser = FLOWS_USER): P
 	await test.step(
 		`Create the account ${user.username}`,
 		async () => {
-			await page.goto('/auth/setup');
+			await openPage(page, '/auth/setup');
 			const main = page.getByRole('main');
 			await main.getByLabel(/^Username/).fill(user.username);
 			await main.getByLabel(/^Password/).fill(user.password);
@@ -58,7 +58,7 @@ export async function signIn(
 	return await test.step(
 		`Sign in as ${user.username}${options.expectError ? ', expecting an error' : ''}`,
 		async () => {
-			await page.goto('/auth/login');
+			await openPage(page, '/auth/login');
 			const main = page.getByRole('main');
 			await main.getByLabel(/^Username/).fill(user.username);
 			await main.getByLabel(/^Password/).fill(user.password);
@@ -84,10 +84,11 @@ export async function signInWithSso(page: Page, sso: RunningSso, user?: SsoUser)
 	await test.step(
 		`Sign in with ${sso.provider.label}`,
 		async () => {
-			await page.goto('/auth/login');
+			await openPage(page, '/auth/login');
 			await page.getByRole('main').getByRole('link', { name: 'Sign in with SSO' }).click();
 			await sso.signIn(page, user);
 			await expect(page, 'SSO should leave the user signed in').toHaveURL(signedIn);
+			await waitForHydration(page);
 		},
 		{ box: true }
 	);
@@ -99,13 +100,15 @@ export async function signOut(page: Page): Promise<void> {
 		'Sign out',
 		async () => {
 			// The sidebar only shows outside the auth pages
-			if (new URL(page.url()).pathname.startsWith('/auth/')) await page.goto('/');
+			if (new URL(page.url()).pathname.startsWith('/auth/')) await openPage(page, '/');
+			else await waitForHydration(page);
 			const logOut = sidebar(page).getByRole('link', { name: 'Log Out', exact: true });
 			await expect(logOut, 'The sidebar should offer Log Out').toBeVisible();
 			await logOut.click();
 			await expect(page, 'Logging out should return to the login page').toHaveURL(
 				(url) => url.pathname === '/auth/login'
 			);
+			await waitForHydration(page);
 		},
 		{ box: true }
 	);

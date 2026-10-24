@@ -119,6 +119,11 @@ test.use({
   areas.
 - Import with the `$flows/` alias only. Take `test` and `expect` from
   `$flows/helpers/core/test.ts`, and use helpers rather than the harness.
+- Use `openPage` from `helpers/core/nav.ts` for full loads of Profilarr pages
+  before interacting. It waits for the root layout's `data-hydrated` marker,
+  set in `onMount`, so hydration cannot clear typed values. After a reload,
+  call `waitForHydration`. Sidebar and account helpers already wait. These
+  waits are for Profilarr pages, not SSO provider pages or proxy error responses.
 - Check what the app stored through the typed readers or `pageData`, not only
   what an input shows.
 - Read expected names and values from `fixture` and `fixtures`

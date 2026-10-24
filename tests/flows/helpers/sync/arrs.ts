@@ -6,7 +6,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { chooseOption } from '$flows/helpers/core/forms.ts';
 import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
-import { openSidebarPage, sidebar } from '$flows/helpers/core/nav.ts';
+import { openPage, openSidebarPage, sidebar, waitForHydration } from '$flows/helpers/core/nav.ts';
 
 export interface AddArrOptions {
 	/** Instance name shown in Profilarr */
@@ -85,7 +85,8 @@ export async function openArr(page: Page, name: string): Promise<void> {
 	await test.step(
 		`Open Arr ${name}`,
 		async () => {
-			if (page.url() === 'about:blank') await page.goto('/');
+			if (page.url() === 'about:blank') await openPage(page, '/');
+			else await waitForHydration(page);
 			const link = sidebar(page).getByRole('link', { name, exact: true });
 			await expect(link, `The sidebar should list Arr ${name}`).toBeVisible();
 			await link.click();

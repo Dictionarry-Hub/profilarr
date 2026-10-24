@@ -9,6 +9,32 @@
 
 import { expect, test, type Page } from '@playwright/test';
 
+/** Wait before interacting with server-rendered controls on a Profilarr page. */
+export async function waitForHydration(page: Page): Promise<void> {
+	await test.step(
+		'Wait for Profilarr to hydrate',
+		async () => {
+			await expect(page.locator('html'), 'Profilarr should finish hydrating').toHaveAttribute(
+				'data-hydrated',
+				'true'
+			);
+		},
+		{ box: true }
+	);
+}
+
+/** Load a Profilarr page and wait until its client-side handlers are attached. */
+export async function openPage(page: Page, url: string): Promise<void> {
+	await test.step(
+		`Open ${url}`,
+		async () => {
+			await page.goto(url);
+			await waitForHydration(page);
+		},
+		{ box: true }
+	);
+}
+
 /**
  * Every fixed sidebar link, keyed by its label, with the path it should land
  * on. Section pages redirect to the last-used database, so their paths allow
@@ -54,7 +80,8 @@ export async function openSidebarPage(page: Page, name: SidebarPage): Promise<vo
 	await test.step(
 		`Open ${name} from the sidebar`,
 		async () => {
-			if (page.url() === 'about:blank') await page.goto('/');
+			if (page.url() === 'about:blank') await openPage(page, '/');
+			else await waitForHydration(page);
 			const link = sidebar(page).getByRole('link', { name, exact: true });
 			await expect(link, `The sidebar should show ${name}`).toBeVisible();
 			await link.click();
@@ -206,6 +233,7 @@ export async function openTab(page: Page, tab: PageTab): Promise<void> {
 	await test.step(
 		`Open the ${tab} tab`,
 		async () => {
+			await waitForHydration(page);
 			const button = page
 				.getByRole('navigation', { name: 'Tabs' })
 				.getByRole('button', { name: tab });
@@ -232,7 +260,8 @@ export async function openDatabase(page: Page, name: string): Promise<void> {
 	await test.step(
 		`Open database ${name}`,
 		async () => {
-			if (page.url() === 'about:blank') await page.goto('/');
+			if (page.url() === 'about:blank') await openPage(page, '/');
+			else await waitForHydration(page);
 			const link = sidebar(page).getByRole('link', { name, exact: true });
 			await expect(link, `The sidebar should list database ${name}`).toBeVisible();
 			await link.click();

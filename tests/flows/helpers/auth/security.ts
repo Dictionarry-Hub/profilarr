@@ -11,7 +11,7 @@ import type { RunningSso, SsoUser } from '$flows/helpers/auth/sso/providers.ts';
 /** How long the app trusts a confirmation (src/lib/server/utils/auth/confirmation.ts) */
 const CONFIRMATION_WINDOW_MINUTES = 30;
 import { pageData } from '$flows/helpers/core/pageData.ts';
-import { openSidebarPage } from '$flows/helpers/core/nav.ts';
+import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
 
 export interface SessionRow {
 	/** A hash of the session id; the id itself never reaches the page */
@@ -80,6 +80,7 @@ export async function confirmIdentity(page: Page, how: Confirmation): Promise<vo
 	await test.step(
 		`Confirm identity with ${'password' in how ? 'a password' : 'SSO'}`,
 		async () => {
+			await waitForHydration(page);
 			const dialog = page.getByRole('dialog', { name: "Confirm it's you" });
 			await expect(dialog, 'The confirm dialog should open').toBeVisible();
 
@@ -95,6 +96,7 @@ export async function confirmIdentity(page: Page, how: Confirmation): Promise<vo
 			} else {
 				await dialog.getByRole('link', { name: 'Confirm with SSO' }).click();
 				await how.sso.signIn(page, how.user);
+				await waitForHydration(page);
 			}
 			await expect(dialog, 'The dialog should close once confirmed').toBeHidden();
 		},

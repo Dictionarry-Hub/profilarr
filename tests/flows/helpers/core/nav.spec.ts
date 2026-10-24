@@ -1,17 +1,34 @@
 /**
  * Checks for the navigation helpers in helpers/core/nav.ts.
  */
-import { test, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
+import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
 import {
 	SIDEBAR_PAGES,
 	newEntity,
 	openDatabase,
 	openEntity,
+	openPage,
 	openSidebarPage,
 	openTab,
 	type EntitySection,
 	type PageTab
 } from '$flows/helpers/core/nav.ts';
+
+/**
+ * Flow:
+ * 1. The browser cannot load the app's client entry script.
+ * 2. The user opens the Databases page, which still renders on the server.
+ *
+ * Expects:
+ * - openPage refuses to return a page whose controls have not hydrated
+ * - the Databases controls still render on the server
+ */
+test('openPage rejects a server-rendered page that cannot hydrate', async ({ page }) => {
+	await page.route('**/_app/immutable/entry/start.*.js', (route) => route.abort());
+
+	await expect(openPage(page, '/databases')).rejects.toThrow('Profilarr should finish hydrating');
+	await expect(page.getByRole('main').getByPlaceholder('Search databases...')).toBeVisible();
+});
 
 test.describe('openSidebarPage', () => {
 	// One test per sidebar link, so a broken page fails on its own line
