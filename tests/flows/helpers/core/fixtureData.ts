@@ -6,7 +6,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { FIXTURES_SNAPSHOT } from '$flows/harness/paths.ts';
+import { FIXTURES_SNAPSHOT, SOURCE_FILE } from '$flows/harness/paths.ts';
 
 export type ArrType = 'radarr' | 'sonarr';
 
@@ -117,6 +117,15 @@ export const SONARR_WORDS: Record<string, Record<number, string>> = {
 };
 
 export const fixtures: FixtureSnapshot = JSON.parse(readFileSync(FIXTURES_SNAPSHOT, 'utf8'));
+
+export interface FixtureSource {
+	/** The GitHub repository the fixtures and the snapshot came from, and its commit */
+	fixtures: { repository: string; commit: string };
+	schema: { repository: string; version: string; commit: string };
+}
+
+/** Where the vendored fixtures came from (tests/flows/data/source.json) */
+export const fixturesSource: FixtureSource = JSON.parse(readFileSync(SOURCE_FILE, 'utf8'));
 
 function find<T extends { name: string }>(items: T[], kind: string, name: string): T {
 	const item = items.find((candidate) => candidate.name === name);

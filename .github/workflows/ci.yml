@@ -338,9 +338,8 @@ jobs:
       - name: Type check the flow suite
         run: deno check --quiet tests/flows
 
-      # The suite runs offline (`--network none`), so the app can't download
-      # its SQLite and bcrypt libraries itself. `deno task flows` mounts this
-      # cache into the test container.
+      # `deno task flows` mounts this cache into the test container, so the
+      # app never downloads its SQLite and bcrypt libraries during a run.
       - name: Cache FFI plug
         id: plug-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -389,9 +388,11 @@ jobs:
           docker save $images -o /tmp/flow-images.tar
 
       # Runs in the Playwright image matching the installed @playwright/test,
-      # with 4 workers on CI (tests/flows/playwright.config.ts)
+      # with 4 workers on CI (tests/flows/playwright.config.ts). `--online`
+      # gives the container network, so the tests tagged @online, which link a
+      # real database from GitHub, run here too.
       - name: Run flow tests
-        run: deno task flows
+        run: deno task flows --online
 
       - name: Upload flow report
         if: failure()

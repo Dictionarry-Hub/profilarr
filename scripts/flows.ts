@@ -6,6 +6,7 @@
  *   deno task flows --grep "score"   run matching scenarios (any Playwright flag works)
  *   deno task flows --ui             Playwright UI mode at http://localhost:8080
  *   deno task flows --build          rebuild the app first (otherwise only when missing)
+ *   deno task flows --online         give the container network, so @online tests run too
  *
  * FLOWS_WORKERS overrides how many scenarios run at once.
  */
@@ -29,7 +30,8 @@ function run(command: string, args: string[]): number {
 const args = process.argv.slice(2);
 const ui = args.includes('--ui');
 const rebuild = args.includes('--build');
-const playwrightArgs = args.filter((arg) => !['--ui', '--build'].includes(arg));
+const online = args.includes('--online');
+const playwrightArgs = args.filter((arg) => !['--ui', '--build', '--online'].includes(arg));
 
 if (rebuild || !existsSync(APP_BINARY)) {
 	console.log(rebuild ? 'Rebuilding the app...' : `${APP_BINARY} not found, building...`);
@@ -79,7 +81,10 @@ const docker = [
 	'/work'
 ];
 // No network, so nothing reaches GitHub or anything else outside. UI mode
-// keeps it because the browser connects to the published port.
+// keeps it because the browser connects to the published port. `--online`
+// keeps it too, and tells the tests tagged @online, which reach GitHub, to
+// run instead of skipping. Every other test stays local either way: the app's
+// gitconfig rewrites the fixtures GitHub URL (tests/flows/harness/seed.ts).
 // Real services, such as Traefik, run as sibling containers in this
 // container's network namespace (tests/flows/harness/docker.ts). They need the
 // Docker socket, and their images up front, since the test container has no
@@ -105,7 +110,8 @@ if (existsSync(DOCKER_SOCKET)) {
 	console.log(`No Docker socket at ${DOCKER_SOCKET}; tests tagged @docker will be skipped`);
 }
 if (ui) docker.push('-p', `${UI_PORT}:${UI_PORT}`, '-e', 'FLOWS_UI=1');
-else docker.push('--network', 'none');
+if (online) docker.push('-e', 'FLOWS_ONLINE=1');
+else if (!ui) docker.push('--network', 'none');
 if (process.stdout.isTTY) docker.push('-t');
 
 const playwright = ['node', 'node_modules/playwright/cli.js', 'test', '-c', CONFIG];
