@@ -41,12 +41,16 @@
 				<slot name="header-actions" />
 			</div>
 		{/if}
-		<ChevronDown
-			size={18}
-			class="ml-4 shrink-0 text-neutral-400 transition-transform duration-200 {open
-				? ''
-				: '-rotate-90'}"
-		/>
+		<!-- The header's click handler toggles, so the button needs none of its own.
+		     It gives keyboard users a focusable control and names the toggle. -->
+		<button
+			type="button"
+			class="ml-4 flex shrink-0 items-center rounded text-neutral-400 focus-visible:outline-2 focus-visible:outline-offset-2"
+			aria-expanded={open}
+			aria-label="{open ? 'Collapse' : 'Expand'} {title}"
+		>
+			<ChevronDown size={18} class="transition-transform duration-200 {open ? '' : '-rotate-90'}" />
+		</button>
 	</div>
 	{#if open}
 		<div class="border-t border-neutral-200 dark:border-neutral-800">

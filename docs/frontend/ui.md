@@ -413,7 +413,9 @@ The card family is the primary content container:
   Its header has a `header-right` slot beside the title and a
   `header-actions` slot at the far right next to the chevron; clicks in
   `header-actions` don't collapse the card. A `description` slot overrides
-  the `description` prop when it needs markup such as inline code.
+  the `description` prop when it needs markup such as inline code. The
+  chevron is a button named "Collapse {title}" or "Expand {title}" with
+  `aria-expanded`. Keyboard users and tests toggle the card through it.
 - **`$ui/card/StickyCard.svelte`** is a card that pins to the bottom of
   the viewport, typically used as a save/discard action bar.
 

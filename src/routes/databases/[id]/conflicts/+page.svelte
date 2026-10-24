@@ -340,6 +340,7 @@
 <div class="mt-6 space-y-4">
 	{#if filteredGroups.length === 0}
 		<div
+			role="status"
 			class="rounded-lg border border-neutral-200 bg-white p-8 text-center text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
 		>
 			No conflicts detected
@@ -360,7 +361,11 @@
 				</svelte:fragment>
 				<div class="divide-y divide-neutral-200 dark:divide-neutral-800">
 					{#each group.conflicts as row (row.opId)}
+						<!-- Named by the op id and reason the row shows, so its Align and
+						     Override buttons can be found under that name -->
 						<div
+							role="group"
+							aria-label="#{row.opId} {reasonLabel(row.conflictReason)}"
 							class="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-start md:justify-between"
 						>
 							<div class="flex-1 space-y-3">
