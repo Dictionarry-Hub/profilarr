@@ -7,6 +7,7 @@
  *   deno task flows --ui             Playwright UI mode at http://localhost:8080
  *   deno task flows --build          rebuild the app first (otherwise only when missing)
  *   deno task flows --online         give the container network, so @online tests run too
+ *   deno task flows --quiet          print only the end-of-run summary, no line per test
  *
  * FLOWS_WORKERS overrides how many scenarios run at once. FLOWS_VIDEO=1 records
  * a full-size video of every test for the trace viewer to play.
@@ -32,7 +33,12 @@ const args = process.argv.slice(2);
 const ui = args.includes('--ui');
 const rebuild = args.includes('--build');
 const online = args.includes('--online');
-const playwrightArgs = args.filter((arg) => !['--ui', '--build', '--online'].includes(arg));
+const quiet = args.includes('--quiet');
+const playwrightArgs = args.filter(
+	(arg) => !['--ui', '--build', '--online', '--quiet'].includes(arg)
+);
+// The reporter reads FLOWS_QUIET, forwarded into the container below
+if (quiet) process.env.FLOWS_QUIET = '1';
 
 if (rebuild || !existsSync(APP_BINARY)) {
 	console.log(rebuild ? 'Rebuilding the app...' : `${APP_BINARY} not found, building...`);
@@ -76,6 +82,8 @@ const docker = [
 	'FLOWS_UI',
 	'-e',
 	'FLOWS_VIDEO',
+	'-e',
+	'FLOWS_QUIET',
 	'-v',
 	`${process.cwd()}:/work`,
 	'-v',
