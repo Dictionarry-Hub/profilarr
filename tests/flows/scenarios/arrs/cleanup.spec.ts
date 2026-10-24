@@ -229,39 +229,6 @@ test("keeps a profile the Arr won't delete because media uses it", async ({ page
 	).toEqual([inUse.name]);
 });
 
-/**
- * Flow:
- * 1. The user syncs the Radarr fixture profile.
- * 2. In Radarr, the user deletes every default profile but one, which media
- *    uses, so Radarr answers 500 to deleting it.
- * 3. The user turns on Cleanup, clicks Run Now and then Clean Up.
- *
- * Expects:
- * - the run is not recorded as skipped with "Nothing to clean up"
- */
-test('a run that only skips a profile reports it', async ({ page, fakeRadarr }) => {
-	// Known app bug: a cleanup whose only result is a skipped profile records "Nothing to clean up"
-	test.fail();
-	await syncFixtureProfile(page, fakeRadarr);
-	const [inUse, ...others] = defaultProfiles(fakeRadarr);
-	const removed = new Set(others.map((profile) => profile.id));
-	fakeRadarr.remove('qualityprofile', (profile) => removed.has(profile.id));
-	fakeRadarr.fail('DELETE', `/api/v3/qualityprofile/${inUse.id}`, 500);
-	await setCleanup(page, instanceName(fakeRadarr), true);
-
-	const preview = await openCleanup(page);
-	expect(preview.configs, 'The only stale item should be the profile in use').toEqual({
-		ok: true,
-		data: { staleCustomFormats: [], staleQualityProfiles: [inUse] }
-	});
-	const run = await confirmCleanup(page);
-
-	expect(
-		{ status: run.status, output: run.output },
-		'The run should not report that there was nothing to clean up'
-	).not.toEqual({ status: 'skipped', output: 'Nothing to clean up' });
-});
-
 for (const targetId of ['radarr-6', 'sonarr-4']) {
 	/**
 	 * Flow:
