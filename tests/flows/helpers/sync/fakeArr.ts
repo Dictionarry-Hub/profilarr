@@ -8,6 +8,13 @@
  * what Profilarr sent. Each path behaves as its target's resources describe.
  * Anything else answers 404 and is listed in `unhandled`, so a test can catch
  * Profilarr calling something new.
+ *
+ * A test can also:
+ * - put the fake behind Basic Auth, like a reverse proxy (`basicAuth`)
+ * - change, remove or add items the way a user would in the Arr itself
+ *   (`edit`, `remove`, `seed`), including the movie and series library
+ * - set a fixed answer for one path, e.g. health messages (`answer`)
+ * - make a path fail or reject one item (`fail`, `reject`)
  */
 
 import {
