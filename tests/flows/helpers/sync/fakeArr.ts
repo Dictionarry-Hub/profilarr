@@ -10,7 +10,12 @@
  * Profilarr calling something new.
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import {
+	createServer,
+	type IncomingHttpHeaders,
+	type IncomingMessage,
+	type ServerResponse
+} from 'node:http';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ARR_DATA_DIR } from '$flows/harness/paths.ts';
@@ -24,6 +29,8 @@ export interface RecordedRequest {
 	/** Path without the query string, e.g. /api/v3/customformat */
 	path: string;
 	query: URLSearchParams;
+	/** Request headers, with lowercase names, e.g. `authorization` */
+	headers: IncomingHttpHeaders;
 	body: unknown;
 	status: number;
 }
@@ -40,6 +47,54 @@ export type PathMatch = string | RegExp;
 function matches(request: { method: string; path: string }, method: string, path: PathMatch) {
 	if (request.method !== method) return false;
 	return typeof path === 'string' ? request.path === path : path.test(request.path);
+}
+
+/** Credentials a reverse proxy in front of the Arr would ask for */
+export interface BasicAuth {
+	username: string;
+	password: string;
+}
+
+/** The Authorization header a client sends for these credentials */
+export function basicAuthHeader({ username, password }: BasicAuth): string {
+	return `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+}
+
+/** One item of GET /health */
+export interface HealthItem {
+	source: string;
+	type: 'ok' | 'notice' | 'warning' | 'error';
+	message: string;
+	wikiUrl: string;
+}
+
+/** A library item to seed, e.g. { id: 1, title: 'A', tmdbId: 11 } */
+export interface LibraryItem {
+	id: number;
+	title: string;
+	tmdbId?: number;
+	tvdbId?: number;
+}
+
+/**
+ * The health message the app raises for media its metadata source removed,
+ * worded like the real check: Radarr's RemovedMovieCheck names the TMDb id,
+ * Sonarr's RemovedSeriesCheck the TVDB id.
+ */
+export function removedMediaHealth(type: ArrType, item: LibraryItem): HealthItem {
+	return type === 'radarr'
+		? {
+				source: 'RemovedMovieCheck',
+				type: 'error',
+				message: `Movie ${item.title} (tmdbid ${item.tmdbId}) was removed from TMDb`,
+				wikiUrl: 'https://wiki.servarr.com/radarr/system#movie-was-removed-from-tmdb'
+			}
+		: {
+				source: 'RemovedSeriesCheck',
+				type: 'error',
+				message: `Series ${item.title} (tvdbid ${item.tvdbId}) was removed from TheTVDB`,
+				wikiUrl: 'https://wiki.servarr.com/sonarr/system#series-removed-from-thetvdb'
+			};
 }
 
 export interface FakeArr {
@@ -68,6 +123,26 @@ export interface FakeArr {
 	reject(collection: string, name: string, status?: number): void;
 	/** Answer every request to this method and path, or paths matching a pattern, with `status` */
 	fail(method: string, path: PathMatch, status: number): void;
+	/**
+	 * Answer every request to this method and path with `value` and 200, e.g.
+	 * `answer('GET', 'health', items)`. A path without a leading slash is
+	 * relative to the API base.
+	 */
+	answer(method: string, path: PathMatch, value: unknown): void;
+	/**
+	 * Change items the way a user editing in the Arr would, without recording a
+	 * request. `select` picks items of a collection or bulk resource, or must
+	 * match a singleton. `patch` merges into each item, or changes it in place.
+	 */
+	edit(
+		path: string,
+		select: (item: Resource) => boolean,
+		patch: Record<string, unknown> | ((item: Resource) => void)
+	): void;
+	/** Delete the items `select` picks from a collection, like a user would in the Arr */
+	remove(path: string, select: (item: Resource) => boolean): void;
+	/** Add items to a collection, like a user would in the Arr; an item without an id gets the next one */
+	seed(path: string, items: Record<string, unknown>[]): void;
 	stop(): Promise<void>;
 }
 
@@ -89,18 +164,26 @@ function readBody(req: IncomingMessage): Promise<unknown> {
 
 const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+export interface FakeArrOptions {
+	apiKey?: string;
+	/** Answer 401 to every request without these Basic Auth credentials, like a reverse proxy */
+	basicAuth?: BasicAuth;
+}
+
 export async function startFakeArr(
 	targetId: string,
-	options: { apiKey?: string } = {}
+	options: FakeArrOptions = {}
 ): Promise<FakeArr> {
 	const target = findTarget(targetId);
 	const apiKey = options.apiKey ?? `fake-${target.id}-key`;
+	const authorization = options.basicAuth ? basicAuthHeader(options.basicAuth) : undefined;
 	const requests: RecordedRequest[] = [];
 	// Callers of waitFor, checked each time a request has been answered
 	const waiters: (() => void)[] = [];
 	const unhandled: RecordedRequest[] = [];
 	const rejections: { collection: string; name: string; status: number }[] = [];
 	const failures: { method: string; path: PathMatch; status: number }[] = [];
+	const answers: { method: string; path: PathMatch; value: unknown }[] = [];
 
 	const apiPath = (path: string) => (path.startsWith('/') ? path : `${target.apiBase}/${path}`);
 	const recordingFile = (path: string) => join(ARR_DATA_DIR, target.id, recordingName(path));
@@ -223,6 +306,7 @@ export async function startFakeArr(
 			method,
 			path: url.pathname,
 			query: url.searchParams,
+			headers: req.headers,
 			body,
 			status: 0
 		};
@@ -233,10 +317,15 @@ export async function startFakeArr(
 		const key =
 			req.headers[target.auth.header.toLowerCase()] ?? url.searchParams.get(target.auth.query);
 		const failure = failures.find((f) => matches(entry, f.method, f.path));
-		const routed = key === apiKey && !failure ? route(method, url.pathname, body) : null;
+		// The newest answer wins, so a test can replace one
+		const answered = [...answers].reverse().find((a) => matches(entry, a.method, a.path));
+		const allowed =
+			key === apiKey && (!authorization || req.headers.authorization === authorization);
+		const routed = allowed && !failure && !answered ? route(method, url.pathname, body) : null;
 
-		if (key !== apiKey) [status, payload] = [401, { error: 'Unauthorized' }];
+		if (!allowed) [status, payload] = [401, { error: 'Unauthorized' }];
 		else if (failure) [status, payload] = [failure.status, { message: 'Failed by test' }];
+		else if (answered) [status, payload] = [200, answered.value];
 		else if (routed) [status, payload] = routed;
 		else {
 			[status, payload] = [404, { message: 'NotFound' }];
@@ -249,6 +338,16 @@ export async function startFakeArr(
 		for (const wake of [...waiters]) wake();
 	}
 
+	/** A collection or bulk resource's items, failing with the target id when there is none */
+	function listOf(path: string): Resource[] {
+		const store = lists.get(path);
+		if (!store) throw new Error(`${target.id} has no collection "${path}"`);
+		return store;
+	}
+
+	const resolvePath = (path: PathMatch): PathMatch =>
+		typeof path === 'string' ? apiPath(path) : path;
+
 	const port = await freePort();
 	const server = createServer((req, res) => void handle(req, res));
 	await new Promise<void>((resolveListen) => server.listen(port, '127.0.0.1', resolveListen));
@@ -260,11 +359,7 @@ export async function startFakeArr(
 		apiKey,
 		requests,
 		unhandled,
-		collection: (path) => {
-			const store = lists.get(path);
-			if (!store) throw new Error(`${target.id} has no collection "${path}"`);
-			return store;
-		},
+		collection: listOf,
 		singleton: (path) => {
 			const value = objects.get(path);
 			if (!value) throw new Error(`${target.id} has no singleton "${path}"`);
@@ -297,6 +392,40 @@ export async function startFakeArr(
 			}),
 		reject: (collection, name, status = 400) => void rejections.push({ collection, name, status }),
 		fail: (method, path, status) => void failures.push({ method, path, status }),
+		answer: (method, path, value) => void answers.push({ method, path: resolvePath(path), value }),
+		edit: (path, select, patch) => {
+			const change = (item: Resource): Resource => {
+				if (typeof patch === 'function') {
+					patch(item);
+					return item;
+				}
+				return { ...item, ...patch };
+			};
+			const single = objects.get(path);
+			if (single) {
+				if (!select(single)) throw new Error(`${target.id} "${path}" doesn't match the selection`);
+				objects.set(path, change(single));
+				return;
+			}
+			const store = listOf(path);
+			const picked = store.filter(select);
+			if (picked.length === 0) throw new Error(`${target.id} "${path}" has no matching item`);
+			for (const item of picked) store[store.indexOf(item)] = change(item);
+		},
+		remove: (path, select) => {
+			const store = listOf(path);
+			const kept = store.filter((item) => !select(item));
+			if (kept.length === store.length) {
+				throw new Error(`${target.id} "${path}" has no matching item`);
+			}
+			store.splice(0, store.length, ...kept);
+		},
+		seed: (path, items) => {
+			const store = listOf(path);
+			for (const item of items) {
+				store.push({ ...item, id: typeof item.id === 'number' ? item.id : nextId(store) });
+			}
+		},
 		stop: () =>
 			new Promise<void>((resolveStop) => {
 				server.close(() => resolveStop());

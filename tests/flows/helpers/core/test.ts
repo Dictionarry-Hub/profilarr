@@ -34,7 +34,7 @@ import {
 	type ProxyOptions,
 	type RunningProxy
 } from '$flows/helpers/proxy/proxies.ts';
-import { startFakeArr, type FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+import { startFakeArr, type FakeArr, type FakeArrOptions } from '$flows/helpers/sync/fakeArr.ts';
 import { defaultTarget } from '$flows/helpers/sync/targets.ts';
 
 /** Attach a service's logs to a test that didn't end as expected */
@@ -65,8 +65,11 @@ export const test = base.extend<{
 	reverseProxy: RunningProxy;
 	app: App;
 	consumer: App;
-	/** Start a fake for a target id; every fake it started stops after the test */
-	startArr: (targetId: string) => Promise<FakeArr>;
+	/**
+	 * Start a fake for a target id, e.g. with `{ basicAuth }` to put it behind
+	 * Basic Auth; every fake it started stops after the test
+	 */
+	startArr: (targetId: string, options?: FakeArrOptions) => Promise<FakeArr>;
 	fakeRadarr: FakeArr;
 	fakeSonarr: FakeArr;
 }>({
@@ -166,8 +169,8 @@ export const test = base.extend<{
 	},
 	startArr: async ({}, use) => {
 		const started: FakeArr[] = [];
-		await use(async (targetId) => {
-			const fake = await startFakeArr(targetId);
+		await use(async (targetId, options) => {
+			const fake = await startFakeArr(targetId, options);
 			started.push(fake);
 			return fake;
 		});

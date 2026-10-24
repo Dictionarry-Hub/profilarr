@@ -87,15 +87,16 @@ const ARR_V3 = {
 		{ kind: 'collection', path: 'qualityprofile' },
 		{ kind: 'collection', path: 'delayprofile' },
 		{ kind: 'collection', path: 'tag' },
+		// The library, empty like a fresh install until a test seeds it
+		{ kind: 'collection', path: 'movie' },
+		{ kind: 'collection', path: 'series' },
 		{ kind: 'singleton', path: 'config/naming' },
 		{ kind: 'singleton', path: 'config/mediamanagement' },
 		{ kind: 'bulk', path: 'qualitydefinition', update: 'qualitydefinition/update' },
 		{ kind: 'command', path: 'command' }
 	],
-	// An empty library, so background jobs get valid answers
+	// Empty answers for the rest of the library, so background jobs get valid answers
 	stubs: {
-		movie: [],
-		series: [],
 		episode: [],
 		rename: [],
 		release: [],
