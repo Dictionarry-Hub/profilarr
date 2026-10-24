@@ -3,9 +3,10 @@
 **Source:** `tests/flows/`
 
 Flow tests drive the built app in a real browser, the way a user would. They
-check what the app stored, not only what the page shows. Each test runs
-offline against its own Profilarr instance, with a fixtures database already
-linked. For PCD behavior below the browser, see [pcd-tests.md](./pcd-tests.md).
+check what the app stored, not only what the page shows. Each test gets its
+own Profilarr instance with a fixtures database already linked. Tests run
+offline, except the few tagged `@online`. For PCD behavior below the browser,
+see [pcd-tests.md](./pcd-tests.md).
 
 ## Table of Contents
 
