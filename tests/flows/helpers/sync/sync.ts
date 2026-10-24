@@ -23,6 +23,7 @@ import { FIXTURES_NAME } from '$flows/harness/seed.ts';
 import { fixtures } from '$flows/helpers/core/fixtureData.ts';
 import { chooseOption, saveForm, waitForAction } from '$flows/helpers/core/forms.ts';
 import { openTab } from '$flows/helpers/core/nav.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
 import { addArr, openArr } from '$flows/helpers/sync/arrs.ts';
 import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
 import { hasCapability } from '$flows/helpers/sync/targets.ts';
@@ -42,8 +43,34 @@ export interface SectionSync {
 	lastSyncedAt: string | null;
 }
 
-interface StatusResponse {
-	arrs: { id: number; sync: Record<SectionKey, { status: string; lastSyncedAt: string | null }> }[];
+/** One section's sync state in `/api/v1/status` */
+export interface SectionStatus {
+	status: 'idle' | 'pending' | 'in_progress' | 'failed';
+	lastSyncedAt: string | null;
+	/** Quality Profiles: how many profiles are selected */
+	count?: number;
+	/** Delay Profiles and Media Management: whether anything is chosen */
+	configured?: boolean;
+}
+
+/** An Arr's entry in `/api/v1/status` */
+export interface ArrSyncStatus {
+	id: number;
+	name: string;
+	type: 'radarr' | 'sonarr';
+	sync: Record<SectionKey, SectionStatus>;
+	/** Always null; drift is read from the Drift tab instead */
+	drift: null;
+}
+
+/** An Arr's sync state as `/api/v1/status` reports it; fails when the Arr isn't listed */
+export async function arrSyncStatus(page: Page, arrId: number): Promise<ArrSyncStatus> {
+	const response = await page.request.get(`${new URL(page.url()).origin}/api/v1/status`);
+	expect(response.ok(), 'GET /api/v1/status should answer').toBe(true);
+	const status = (await response.json()) as { arrs: ArrSyncStatus[] };
+	const arr = status.arrs.find((candidate) => candidate.id === arrId);
+	if (!arr) throw new Error(`/api/v1/status lists no Arr with id ${arrId}`);
+	return arr;
 }
 
 /**
@@ -72,14 +99,11 @@ export async function syncSection(page: Page, section: SyncSection): Promise<Sec
 			await expect
 				.poll(
 					async () => {
-						const status = (await (
-							await page.request.get(`${url.origin}/api/v1/status`)
-						).json()) as StatusResponse;
-						const sync = status.arrs.find((arr) => arr.id === arrId)?.sync[key];
-						if (sync && (sync.status === 'idle' || sync.status === 'failed')) {
+						const sync = (await arrSyncStatus(page, arrId)).sync[key];
+						if (sync.status === 'idle' || sync.status === 'failed') {
 							finished = { status: sync.status, lastSyncedAt: sync.lastSyncedAt };
 						}
-						return sync?.status;
+						return sync.status;
 					},
 					{ message: `${section} sync should finish`, timeout: 15_000 }
 				)
@@ -93,6 +117,68 @@ export async function syncSection(page: Page, section: SyncSection): Promise<Sec
 /** A section of the open Sync page */
 export function syncRegion(page: Page, section: SyncSection): Locator {
 	return page.getByRole('main').getByRole('region', { name: section, exact: true });
+}
+
+/** Choose a section's "Trigger", e.g. "Schedule", on the open Sync page. Save it afterwards. */
+export async function setTrigger(page: Page, section: SyncSection, label: string): Promise<void> {
+	await chooseOption(syncRegion(page, section), 'Trigger', label);
+}
+
+/** One section's progress chip on the Sync page: how many synced items drifted */
+export interface SectionProgress {
+	total: number;
+	drifted: number;
+	message?: string;
+}
+
+/** What the Sync page stores for an Arr, and its drift chips */
+export interface SyncConfig {
+	syncData: {
+		qualityProfiles: {
+			selections: {
+				databaseId: number;
+				profileName: string;
+				qualityDefinitionsConfigName: string | null;
+			}[];
+			config: { trigger: string; cron: string | null; nextRunAt?: string | null };
+		};
+		delayProfiles: {
+			databaseId: number | null;
+			profileName: string | null;
+			trigger: string;
+			cron: string | null;
+			nextRunAt?: string | null;
+		};
+		mediaManagement: {
+			namingDatabaseId: number | null;
+			namingConfigName: string | null;
+			qualityDefinitionsDatabaseId: number | null;
+			qualityDefinitionsConfigName: string | null;
+			mediaSettingsDatabaseId: number | null;
+			mediaSettingsConfigName: string | null;
+			trigger: string;
+			cron: string | null;
+			nextRunAt?: string | null;
+		};
+	};
+	/** Null until drift is on and has a clean or drifted result */
+	driftProgress: Partial<
+		Record<
+			| 'customFormats'
+			| 'qualityProfiles'
+			| 'delayProfiles'
+			| 'naming'
+			| 'qualityDefinitions'
+			| 'mediaSettings',
+			SectionProgress
+		>
+	> | null;
+}
+
+/** The Sync page's stored choices (`syncData`) and drift chips (`driftProgress`) for an Arr */
+export async function syncConfig(page: Page, arrId: number): Promise<SyncConfig> {
+	const data = await pageData<SyncConfig>(page, `/arr/${arrId}/sync`);
+	return { syncData: data.syncData, driftProgress: data.driftProgress };
 }
 
 /** How a fixtures config shows in the Sync page's dropdowns */
