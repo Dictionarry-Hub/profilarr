@@ -29,6 +29,9 @@ const DEFAULT_USER: SsoUser = { username: 'authelia-user', password: 'flows-auth
 
 const secret = () => randomBytes(32).toString('hex');
 
+/** An Authelia page `signIn` handles, or `back` once Authelia sends the browser back */
+type AutheliaPage = 'login' | 'consent' | 'password' | 'back';
+
 /**
  * A password digest in the go-crypt format Authelia reads:
  * `$pbkdf2-sha512$<iterations>$<salt>$<key>`, both in unpadded base64 with
@@ -157,27 +160,53 @@ async function startAuthelia(): Promise<RunningSso> {
 				`Sign in as ${user.username} on Authelia`,
 				async () => {
 					const username = page.getByLabel(/^Username/);
+					const password = page.getByLabel(/^Password/);
 					const accept = page.getByRole('button', { name: 'Accept', exact: true });
+					const submit = page.getByRole('button', { name: 'Submit', exact: true });
 					await expect(
 						username.or(accept),
 						'The app should send the browser to Authelia'
 					).toBeVisible();
 					await expect(page).toHaveURL((current) => current.origin === issuer);
 
-					if (await accept.isVisible()) {
-						// Re-authentication (`prompt=login`) opens Authelia's consent page for
-						// the signed-in user. Accepting asks for the password again.
-						await accept.click();
-						await page.getByLabel(/^Password/).fill(user.password ?? '');
-						await page.getByRole('button', { name: 'Submit', exact: true }).click();
-					} else {
-						await username.fill(user.username);
-						await page.getByLabel(/^Password/).fill(user.password ?? '');
-						await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+					// Which pages Authelia shows depends on its own session. Without one,
+					// it shows its login page. Re-authentication (`prompt=login`) also
+					// shows its consent page, where Accept may ask for the password again.
+					// Each page is handled until Authelia sends the browser back.
+					const nextPage = async (): Promise<AutheliaPage> => {
+						let found: AutheliaPage = 'back';
+						await expect
+							.poll(
+								async () => {
+									if (new URL(page.url()).origin !== issuer) found = 'back';
+									else if (await username.isVisible()) found = 'login';
+									else if (await submit.isVisible()) found = 'password';
+									else if (await accept.isVisible()) found = 'consent';
+									else return false;
+									return true;
+								},
+								{ message: 'Authelia should show a page or send the browser back' }
+							)
+							.toBe(true);
+						return found;
+					};
+
+					for (let shown = 0, step = await nextPage(); step !== 'back'; step = await nextPage()) {
+						if (++shown > 4) throw new Error(`Authelia kept showing its ${step} page`);
+						if (step === 'login') {
+							await username.fill(user.username);
+							await password.fill(user.password ?? '');
+							await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+							await expect(username, 'Authelia should accept the sign-in').toBeHidden();
+						} else if (step === 'password') {
+							await password.fill(user.password ?? '');
+							await submit.click();
+							await expect(submit, 'Authelia should accept the password').toBeHidden();
+						} else {
+							await accept.click();
+							await expect(accept, 'Authelia should move on from consent').toBeHidden();
+						}
 					}
-					await expect(page, 'Authelia should send the browser back').not.toHaveURL(
-						(current) => current.origin === issuer
-					);
 				},
 				{ box: true }
 			);

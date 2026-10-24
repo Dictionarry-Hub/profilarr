@@ -134,5 +134,49 @@ for (const setup of proxySetups()) {
 				'Confirming should keep the same session'
 			).toEqual(before.map((session) => session.handle));
 		});
+
+		/**
+		 * Flow:
+		 * 1. The user signs in with SSO, and the app's confirmation lapses.
+		 * 2. Authelia's own session ends too, as it does after 5 minutes
+		 *    without activity by default.
+		 * 3. The user opens Settings › Security from the sidebar and clicks
+		 *    New Key.
+		 * 4. The user confirms with SSO. Authelia no longer knows the user, so
+		 *    it shows its login page for the username and password, then asks
+		 *    the user to accept Profilarr's request.
+		 * 5. The user creates an API key.
+		 *
+		 * Expects:
+		 * - Authelia had a session to end
+		 * - the key is listed, and the session is the same one as before
+		 */
+		test('confirms through SSO after the Authelia session ends', async ({
+			app,
+			context,
+			page,
+			sso
+		}) => {
+			await signInWithSso(page, sso);
+			const before = await securityPages.sessions(page);
+			lapseConfirmation(app);
+			const autheliaSession = (await context.cookies()).some(
+				(cookie) => cookie.name === 'authelia_session'
+			);
+			expect(autheliaSession, 'Authelia should have a session to end').toBe(true);
+			await context.clearCookies({ name: 'authelia_session' });
+
+			await createApiKey(page, 'authelia key', { sso });
+
+			const security = await securityPages.page(page);
+			expect(
+				security.apiKeys.map((key) => key.name),
+				'The new key should be listed'
+			).toEqual(['authelia key']);
+			expect(
+				security.sessions.map((session) => session.handle),
+				'Confirming should keep the same session'
+			).toEqual(before.map((session) => session.handle));
+		});
 	});
 }
