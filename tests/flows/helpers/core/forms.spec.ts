@@ -1,8 +1,16 @@
 import { test, expect } from '$flows/helpers/core/test.ts';
 import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import { openEntity, openPage, openSidebarPage } from '$flows/helpers/core/nav.ts';
+import { newEntity, openEntity, openPage, openSidebarPage } from '$flows/helpers/core/nav.ts';
 import { pageData } from '$flows/helpers/core/pageData.ts';
-import { chooseOption, confirmDialog, deleteEntity, saveForm } from '$flows/helpers/core/forms.ts';
+import {
+	chooseOption,
+	confirmDialog,
+	deleteEntity,
+	fillField,
+	saveForm
+} from '$flows/helpers/core/forms.ts';
+import { delayProfilePages } from '$flows/helpers/entities/delayProfiles.ts';
+import { regularExpressionPages } from '$flows/helpers/entities/regularExpressions.ts';
 import type { Page } from '@playwright/test';
 
 interface RegexPage {
@@ -119,5 +127,35 @@ test.describe('chooseOption', () => {
 		await expect(
 			chooseOption(page.getByRole('main'), 'Protocol Preference', 'Carrier Pigeon')
 		).rejects.toThrow('should offer Carrier Pigeon');
+	});
+});
+
+test.describe('fillField', () => {
+	test('finds a required field by its label without the star', async ({ page }) => {
+		await newEntity(page, 'Regular Expressions', 'Blank');
+		const main = page.getByRole('main');
+		await fillField(main, 'Name', 'Filled Regex');
+		await main.getByRole('textbox', { name: /^Regular Expression/ }).fill('\\bFilled\\b');
+		await saveForm(page, { button: 'Create' });
+
+		const names = (await regularExpressionPages.list(page)).map((regex) => regex.name);
+		expect(names, 'the filled name should be stored').toContain('Filled Regex');
+	});
+
+	test('commits a number field with Tab', async ({ page }) => {
+		const profile = fixture.delayProfile('Prefer Usenet');
+		await openEntity(page, 'Delay Profiles', profile.name);
+		await fillField(page.getByRole('main'), 'Torrent Delay (hours)', 3);
+		await saveForm(page, { button: 'Save Changes' });
+
+		const stored = (await delayProfilePages.list(page)).find((p) => p.name === profile.name);
+		expect(stored?.torrent_delay, 'the delay should be stored in minutes').toBe(180);
+	});
+
+	test('fails when no field has the label', async ({ page }) => {
+		await newEntity(page, 'Regular Expressions', 'Blank');
+		await expect(fillField(page.getByRole('main'), 'Carrier Pigeon', 'coo')).rejects.toThrow(
+			'The Carrier Pigeon field should be shown'
+		);
 	});
 });

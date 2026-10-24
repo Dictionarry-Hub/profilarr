@@ -257,7 +257,8 @@ nightmare on mobile.
 **`$ui/form/TagInput.svelte`** is a chips-style input. Enter adds a tag;
 Backspace on an empty field removes the last one. Supports a `NOT:` prefix
 convention for exclusions (used by custom-format language filters and the
-release-title parser).
+release-title parser). `ariaLabel` names the typing box. It defaults to
+"Tags".
 
 #### IconCheckbox
 

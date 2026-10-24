@@ -158,7 +158,50 @@ export async function deleteEntity(page: Page, options: DeleteOptions = {}): Pro
 	);
 }
 
+/**
+ * Check that the open entity can't be deleted: the main Delete button is
+ * disabled, and its accessible description, the tooltip, says why.
+ */
+export async function expectDeleteBlocked(page: Page, reason: string): Promise<void> {
+	await test.step(
+		`Check that Delete is blocked: ${reason}`,
+		async () => {
+			const remove = page.getByRole('main').getByRole('button', { name: 'Delete', exact: true });
+			await expect(remove, 'Delete should be disabled').toBeDisabled();
+			await expect(remove, `Delete should say "${reason}"`).toHaveAccessibleDescription(reason);
+		},
+		{ box: true }
+	);
+}
+
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Fill the text or number field labelled `label` inside `scope`, then press
+ * Tab and check the field kept the value. The label may carry a required
+ * "*", so "Name" finds "Name*". Number inputs only commit on blur, so the Tab
+ * is what saves a number into the form.
+ */
+export async function fillField(
+	scope: Locator,
+	label: string,
+	value: string | number
+): Promise<void> {
+	await test.step(
+		`Fill ${label} with ${value}`,
+		async () => {
+			const name = new RegExp(`^${escapeRegExp(label)}\\*?$`);
+			const field = scope
+				.getByRole('textbox', { name })
+				.or(scope.getByRole('spinbutton', { name }));
+			await expect(field, `The ${label} field should be shown`).toBeVisible();
+			await field.fill(String(value));
+			await field.press('Tab');
+			await expect(field, `${label} should hold ${value}`).toHaveValue(String(value));
+		},
+		{ box: true }
+	);
+}
 
 export interface ChooseOptions {
 	/**
