@@ -68,7 +68,6 @@ const INTEGRATION_SUITES = new Set([
 	'settings'
 ]);
 
-
 // Integration specs that require Docker infrastructure
 const INTEGRATION_NEEDS_DOCKER = new Set([
 	'oidc',

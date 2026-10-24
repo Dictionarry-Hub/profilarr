@@ -52,6 +52,9 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
 		await fs.rm(goldenDir, { recursive: true, force: true });
 		await fs.rm(tlsDir, { recursive: true, force: true });
 		await removeRunServices();
-		await fs.rm(join(process.cwd(), 'tests/flows/.services', runId), { recursive: true, force: true });
+		await fs.rm(join(process.cwd(), 'tests/flows/.services', runId), {
+			recursive: true,
+			force: true
+		});
 	};
 }
