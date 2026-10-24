@@ -42,7 +42,11 @@ export default defineConfig({
 		// Keep a step-by-step trace and a screenshot only when a test fails.
 		trace: 'retain-on-failure',
 		screenshot: 'only-on-failure',
-		viewport: SCREENS.desktop
+		viewport: SCREENS.desktop,
+		// A trace's film strip is made of small screencast frames. With
+		// FLOWS_VIDEO set, each test also records a full-size video, which the
+		// trace viewer plays instead. Recording slows runs, so it's opt-in.
+		video: process.env.FLOWS_VIDEO ? { mode: 'on', size: SCREENS.desktop } : 'off'
 		// baseURL comes from each test's own app (helpers/core/test.ts).
 	}
 });

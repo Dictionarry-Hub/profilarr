@@ -8,7 +8,8 @@
  *   deno task flows --build          rebuild the app first (otherwise only when missing)
  *   deno task flows --online         give the container network, so @online tests run too
  *
- * FLOWS_WORKERS overrides how many scenarios run at once.
+ * FLOWS_WORKERS overrides how many scenarios run at once. FLOWS_VIDEO=1 records
+ * a full-size video of every test for the trace viewer to play.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -73,6 +74,8 @@ const docker = [
 	'FLOWS_WORKERS',
 	'-e',
 	'FLOWS_UI',
+	'-e',
+	'FLOWS_VIDEO',
 	'-v',
 	`${process.cwd()}:/work`,
 	'-v',

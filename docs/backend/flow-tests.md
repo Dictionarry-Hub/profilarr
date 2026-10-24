@@ -32,7 +32,10 @@ deno task flows --online           # give the container network, so @online test
 The suite runs in the official Playwright Docker image, so no browsers are
 installed locally. The app binary is built only when it's missing. App changes
 need `--build`, and test changes don't. `FLOWS_WORKERS` overrides the worker
-count. By default it is half the CPU cores locally and 4 on CI.
+count. By default it is half the CPU cores locally and 4 on CI. `FLOWS_VIDEO=1`
+records a full-size video of each test. The trace viewer then plays the video
+in place of its small screencast frames. Recording slows runs, so leave it off
+unless you want to watch.
 
 On CI, the `Flow Tests` job type-checks the suite with `deno check tests/flows`
 and runs it with `--online`. When the job fails, it uploads the report and
