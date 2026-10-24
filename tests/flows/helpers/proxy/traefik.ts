@@ -8,6 +8,10 @@
  * the run's certificate as the default, because browsers send no server name
  * for an IP address. `requests` reads Traefik's JSON access log.
  *
+ * With `forwardAuth`, every request first goes to the SSO provider's
+ * forward-auth endpoint, as in Authelia's Traefik guide. Traefik trusts the
+ * run's certificate for that call.
+ *
  * The dynamic config is JSON, which Traefik reads as YAML.
  */
 
@@ -56,12 +60,15 @@ function readAccessLog(path: string): ProxiedRequest[] {
 		});
 }
 
-async function startTraefik(options: ProxyOptions): Promise<RunningProxy> {
+async function startTraefik(options: ProxyOptions, forwardAuthUrl?: string): Promise<RunningProxy> {
 	const unsupported = (['headers', 'maxResponseHeaderBytes'] as const).filter(
 		(option) => options[option] !== undefined
 	);
 	if (unsupported.length > 0) {
 		throw new Error(`Traefik doesn't support ${unsupported.join(', ')}; use the fake proxy`);
+	}
+	if (options.forwardAuth && !forwardAuthUrl) {
+		throw new Error("Forward auth needs the SSO provider's forward-auth endpoint");
 	}
 
 	const port = await freePort();
@@ -73,7 +80,7 @@ async function startTraefik(options: ProxyOptions): Promise<RunningProxy> {
 	async function launch(appUrl: string): Promise<void> {
 		const dir = await serviceDir();
 		await fs.mkdir(join(dir.path, 'dynamic'));
-		if (options.tls) {
+		if (options.tls || options.forwardAuth) {
 			const tls = certificatePaths();
 			await fs.copyFile(tls.cert, join(dir.path, 'cert.pem'));
 			await fs.copyFile(tls.key, join(dir.path, 'key.pem'));
@@ -85,9 +92,27 @@ async function startTraefik(options: ProxyOptions): Promise<RunningProxy> {
 						rule: 'PathPrefix(`/`)',
 						entryPoints: ['web'],
 						service: 'app',
+						middlewares: options.forwardAuth ? ['forward-auth'] : undefined,
 						tls: options.tls ? {} : undefined
 					}
 				},
+				middlewares: options.forwardAuth
+					? {
+							'forward-auth': {
+								forwardAuth: {
+									address: forwardAuthUrl,
+									trustForwardHeader: true,
+									authResponseHeaders: [
+										'Remote-User',
+										'Remote-Groups',
+										'Remote-Email',
+										'Remote-Name'
+									],
+									tls: { ca: '/data/cert.pem' }
+								}
+							}
+						}
+					: undefined,
 				services: { app: { loadBalancer: { servers: [{ url: appUrl }] } } }
 			},
 			tls: options.tls
@@ -122,8 +147,12 @@ async function startTraefik(options: ProxyOptions): Promise<RunningProxy> {
 		});
 		const health = `${url}/api/v1/health`;
 		await waitForService(service, 'Traefik', async () => {
-			const status = options.tls ? (await httpsGet(health)).status : (await fetch(health)).status;
-			return status === 200;
+			const status = options.tls
+				? (await httpsGet(health)).status
+				: (await fetch(health, { redirect: 'manual' })).status;
+			// With forward auth, a signed-out request gets the provider's answer, a
+			// redirect or 401, once Traefik and the provider are both up
+			return options.forwardAuth ? status !== 404 && status < 500 : status === 200;
 		});
 	}
 
@@ -151,6 +180,6 @@ export const traefik: ReverseProxy = {
 	id: 'traefik',
 	label: 'Traefik',
 	needsDocker: true,
-	supports: ['tls'],
+	supports: ['tls', 'forwardAuth'],
 	start: startTraefik
 };

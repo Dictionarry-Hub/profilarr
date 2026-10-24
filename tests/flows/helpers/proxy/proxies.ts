@@ -23,10 +23,16 @@ export interface ProxyOptions {
 	 * bytes, like nginx with a small `proxy_buffer_size`
 	 */
 	maxResponseHeaderBytes?: number;
+	/**
+	 * Ask the SSO provider before forwarding each request, and send the
+	 * browser to its login page when it says no (forward auth). Needs
+	 * `test.use({ ssoProvider })` with a provider that supports it.
+	 */
+	forwardAuth?: boolean;
 }
 
 /** An option, or `fail`, that a proxy may or may not support */
-export type ProxyFeature = 'tls' | 'headers' | 'maxResponseHeaderBytes' | 'fail';
+export type ProxyFeature = 'tls' | 'headers' | 'maxResponseHeaderBytes' | 'fail' | 'forwardAuth';
 
 export interface ProxiedRequest {
 	method: string;
@@ -59,7 +65,8 @@ export interface ReverseProxy {
 	needsDocker: boolean;
 	/** The options this proxy can honour; specs skip an option's tests on the others */
 	supports: ProxyFeature[];
-	start(options: ProxyOptions): Promise<RunningProxy>;
+	/** `forwardAuthUrl` is the SSO provider's forward-auth endpoint, set with `forwardAuth` */
+	start(options: ProxyOptions, forwardAuthUrl?: string): Promise<RunningProxy>;
 }
 
 export const PROXIES: ReverseProxy[] = [fakeProxy, traefik];

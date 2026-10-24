@@ -98,6 +98,9 @@ test.use({
   serve HTTPS, change request headers, cap response header size, or fail.
   `traefik` runs Traefik in a container. Each entry lists the options it
   `supports`.
+- **Forward auth.** With `appProxy: { forwardAuth: true }`, the proxy asks
+  the SSO provider before it forwards each request, and sends a signed-out
+  browser to the provider's login page. Traefik and Authelia support it.
 - **HTTPS.** HTTPS services serve the run's self-signed certificate
   (`harness/tls.ts`). It's a leaf certificate, because Deno rejects a
   self-signed CA. A provider gives it to the app as `NODE_EXTRA_CA_CERTS`, and

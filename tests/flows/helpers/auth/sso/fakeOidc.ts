@@ -180,6 +180,7 @@ async function startFakeOidc(): Promise<RunningSso> {
 
 	return {
 		provider: fakeOidc,
+		url: issuer,
 		env: {
 			OIDC_DISCOVERY_URL: `${issuer}/.well-known/openid-configuration`,
 			OIDC_CLIENT_ID: CLIENT_ID,

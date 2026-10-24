@@ -14,7 +14,8 @@
  *   test reaches it as the `sso` fixture.
  * - `appProxy`: a reverse proxy in front of the app (helpers/proxy/proxies.ts).
  *   The app's `ORIGIN` and `baseURL` become the proxy's address. The test
- *   reaches it as the `reverseProxy` fixture.
+ *   reaches it as the `reverseProxy` fixture. With `forwardAuth`, the proxy
+ *   asks the SSO provider before forwarding each request.
  *
  * Once the app is up, the provider and the proxy get its address (`target`).
  * A failed test gets their logs attached. `appEnv` applies last, so a test
@@ -79,9 +80,22 @@ export const test = base.extend<{
 		await attachServiceLogs(testInfo, running.provider.id, running.logs);
 		await running.stop();
 	},
-	proxyServer: async ({ appProxy }, use, testInfo) => {
+	proxyServer: async ({ appProxy, ssoServer }, use, testInfo) => {
 		if (!appProxy) return await use(null);
-		const running = await findReverseProxy(appProxy.id ?? 'fake').start(appProxy);
+		const proxy = findReverseProxy(appProxy.id ?? 'fake');
+		let forwardAuthUrl: string | undefined;
+		if (appProxy.forwardAuth) {
+			if (!proxy.supports.includes('forwardAuth')) {
+				throw new Error(`${proxy.label} doesn't support forward auth`);
+			}
+			forwardAuthUrl = ssoServer?.forwardAuthUrl;
+			if (!forwardAuthUrl) {
+				throw new Error(
+					'Forward auth needs test.use({ ssoProvider }) with a provider that supports it'
+				);
+			}
+		}
+		const running = await proxy.start(appProxy, forwardAuthUrl);
 		await use(running);
 		await attachServiceLogs(testInfo, running.proxy.id, running.logs);
 		await running.stop();

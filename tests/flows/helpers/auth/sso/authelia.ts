@@ -9,6 +9,10 @@
  * `target()` rather than `start()`. The app fetches discovery when a sign-in
  * starts, not at startup, so the order works.
  *
+ * Authelia also answers a reverse proxy's forward-auth checks
+ * (`forwardAuthUrl`). Its default policy asks for a sign-in on every address,
+ * so the proxied app needs no rule of its own.
+ *
  * Config files are JSON, which Authelia reads as YAML.
  */
 
@@ -139,6 +143,7 @@ async function startAuthelia(): Promise<RunningSso> {
 
 	return {
 		provider: authelia,
+		url: issuer,
 		env: {
 			OIDC_DISCOVERY_URL: `${issuer}/.well-known/openid-configuration`,
 			OIDC_CLIENT_ID: CLIENT_ID,
@@ -217,6 +222,7 @@ async function startAuthelia(): Promise<RunningSso> {
 		misbehave: () => {
 			throw new Error("Authelia can't misbehave on purpose; use the fake provider");
 		},
+		forwardAuthUrl: `${issuer}/api/authz/forward-auth`,
 		logs: async () => (service ? await service.logs() : 'Authelia never started'),
 		stop: async () => {
 			await service?.stop();
@@ -229,6 +235,6 @@ export const authelia: SsoProvider = {
 	label: 'Authelia',
 	needsDocker: true,
 	tls: true,
-	supports: [],
+	supports: ['forwardAuth'],
 	start: startAuthelia
 };

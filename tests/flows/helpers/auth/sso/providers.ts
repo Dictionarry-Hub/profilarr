@@ -30,7 +30,7 @@ export interface SsoUser {
 export type Misbehaviour = 'wrong-issuer' | 'expired-token' | 'wrong-nonce' | 'refuse-login';
 
 /** What a provider may or may not support; the others throw when it's used */
-export type SsoFeature = 'misbehave' | 'requests';
+export type SsoFeature = 'misbehave' | 'requests' | 'forwardAuth';
 
 export interface SsoRequest {
 	method: string;
@@ -42,6 +42,8 @@ export interface SsoRequest {
 
 export interface RunningSso {
 	provider: SsoProvider;
+	/** The provider's own address, where the browser signs in */
+	url: string;
 	/**
 	 * `OIDC_DISCOVERY_URL`, `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` for the
 	 * app, plus anything else it needs, such as a certificate to trust
@@ -56,14 +58,20 @@ export interface RunningSso {
 	 */
 	target(appOrigin: string): Promise<void>;
 	/**
-	 * Sign `user` in on the provider's own login page, which the app has just
-	 * sent the browser to. Returns once the provider has sent the browser back.
+	 * Sign `user` in on the provider's own login page, which the app or a
+	 * forward-auth proxy has just sent the browser to. Returns once the
+	 * provider has sent the browser back.
 	 */
 	signIn(page: Page, user?: SsoUser): Promise<void>;
 	/** Every request the provider received, oldest first. Needs `requests`. */
 	requests: SsoRequest[];
 	/** Break the next sign-ins in one way, or behave again with null. Needs `misbehave`. */
 	misbehave(kind: Misbehaviour | null): void;
+	/**
+	 * The endpoint a reverse proxy asks before forwarding each request
+	 * (forward auth). Needs `forwardAuth`.
+	 */
+	forwardAuthUrl?: string;
 	/** Everything the provider has printed, attached to a failed test */
 	logs?(): Promise<string>;
 	stop(): Promise<void>;
