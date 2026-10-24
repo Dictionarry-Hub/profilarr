@@ -871,4 +871,4 @@ scan - only errors do.
 - **Docker Compose**: mock-oauth2-server (port 9090) + Caddy (TLS termination)
   for OIDC and proxy tests
 - **Runner**: `tests/runner.ts` - unified CLI (`deno task test`) handles unit,
-  integration, e2e, and security scans with subcommands
+  integration, and security scans with subcommands
