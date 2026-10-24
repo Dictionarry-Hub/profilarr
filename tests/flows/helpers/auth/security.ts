@@ -1,6 +1,6 @@
 /**
- * Settings › Security: confirming identity before creating an API key, and
- * typed readers for what the page lists.
+ * Settings › Security: confirming identity before creating an API key,
+ * creating one, and typed readers for what the page lists.
  */
 
 import { expect, test, type Page } from '@playwright/test';
@@ -96,6 +96,27 @@ export async function confirmIdentity(page: Page, how: Confirmation): Promise<vo
 				await how.sso.signIn(page, how.user);
 			}
 			await expect(dialog, 'The dialog should close once confirmed').toBeHidden();
+		},
+		{ box: true }
+	);
+}
+
+/**
+ * Create an API key with full access on the new API key page, once the user
+ * is confirmed. Returns when the page shows the key, which it does only once.
+ */
+export async function createApiKey(page: Page, name: string): Promise<void> {
+	await test.step(
+		`Create the API key ${name}`,
+		async () => {
+			const main = page.getByRole('main');
+			await main.getByLabel(/^Name/).fill(name);
+			await main.getByRole('switch', { name: 'Full access' }).click();
+			await main.getByRole('button', { name: 'Create', exact: true }).click();
+			await expect(
+				main.getByText('This key is shown once'),
+				'The page should show the new key'
+			).toBeVisible();
 		},
 		{ box: true }
 	);
