@@ -4,7 +4,7 @@
 # them (.github/dependabot.yml). The stage name is the image's key.
 
 # A tiny HTTP server for the container harness's own spec
-FROM busybox:1.37 AS busybox
+FROM busybox:1.38 AS busybox
 
 # An SSO provider (helpers/auth/sso/authelia.ts)
 FROM authelia/authelia:4.39.28 AS authelia
