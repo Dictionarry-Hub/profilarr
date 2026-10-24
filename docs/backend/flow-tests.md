@@ -27,6 +27,7 @@ deno task flows --grep "score"     # matching tests; any Playwright flag works
 deno task flows --ui               # Playwright UI mode at http://localhost:8080
 deno task flows --build            # rebuild the app first
 deno task flows --online           # give the container network, so @online tests run too
+deno task flows --quiet            # print only the end-of-run summary, no line per test
 ```
 
 The suite runs in the official Playwright Docker image, so no browsers are

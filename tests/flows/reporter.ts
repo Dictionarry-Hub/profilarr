@@ -1,11 +1,19 @@
 /**
- * Flow suite reporter: a tree of test folders, then every failure in full at
- * the end. Each folder line counts every test beneath it, at any depth. A top
- * folder prints its tree once its last test finishes.
+ * Flow suite reporter: a line per test as it finishes, then a summary once the
+ * run ends: a tree of test folders, every failure in full, and the counts. Each
+ * folder line counts every test beneath it, at any depth, as passed out of the
+ * tests that ran. Skipped tests are noted on the folder that holds them.
+ * FLOWS_QUIET drops the per-test lines.
  *
- *   ✓ scenarios                 3/4    6.0s
- *     ✓ entities                3/4    6.0s
- *       ✗ quality-profiles      2/3    4.2s
+ *   ✓ entities › custom-formats     a custom format renames                  1.8s
+ *   ✗ entities › quality-profiles   a custom format score edit persists      4.2s
+ *   - databases                     a database links from GitHub             0.1s
+ *
+ *   ── Summary ────────────────────────────
+ *   ✗ scenarios                 3/4    6.0s
+ *     ✓ databases               1/1    0.1s  1 skipped
+ *     ✗ entities                2/3    6.0s
+ *       ✗ quality-profiles      1/2    4.2s
  *       ✓ custom-formats        1/1    1.8s
  *
  *   ──── 1 failure ────
@@ -40,6 +48,7 @@ interface Folder {
 	total: number;
 	done: number;
 	passed: number;
+	skipped: number;
 	startedAt: number;
 	endedAt: number;
 }
@@ -50,6 +59,7 @@ const newFolder = (name: string): Folder => ({
 	total: 0,
 	done: 0,
 	passed: 0,
+	skipped: 0,
 	startedAt: 0,
 	endedAt: 0
 });
@@ -69,6 +79,10 @@ export default class FlowReporter implements Reporter {
 	private startedAt = Date.now();
 	private width = 0;
 	private countWidth = 5;
+	// Per-test lines are on unless the run asks for the summary only
+	private quiet = !!process.env.FLOWS_QUIET;
+	private areaWidth = 0;
+	private titleWidth = 0;
 
 	printsToStdio(): boolean {
 		return true;
@@ -89,6 +103,9 @@ export default class FlowReporter implements Reporter {
 			}
 		}
 		this.width = Math.max(10, labelWidth(this.root, 0));
+		// Per-test columns fit in 120: "  ✓ " area, 2 spaces, title, 2 spaces, 6 for the time
+		this.areaWidth = Math.max(0, ...tests.map((test) => this.areaOf(test).length));
+		this.titleWidth = Math.max(20, 120 - 4 - this.areaWidth - 2 - 2 - 6);
 		// Wide enough for the largest count, e.g. "113/113"
 		this.countWidth = Math.max(5, String(tests.length).length * 2 + 1);
 		// Playwright never starts more workers than there are tests
@@ -106,13 +123,15 @@ export default class FlowReporter implements Reporter {
 
 	onTestEnd(test: TestCase, result: TestResult): void {
 		// Only the final attempt counts when retries are on
-		if (result.status !== 'passed' && result.retry < test.retries) return;
+		if (!['passed', 'skipped'].includes(result.status) && result.retry < test.retries) return;
 
 		const chain = this.chainOf(test);
 		const passed = test.outcome() === 'expected' || test.outcome() === 'flaky';
+		const skipped = test.outcome() === 'skipped';
 		for (const folder of chain) {
 			folder.done++;
 			if (passed) folder.passed++;
+			if (skipped) folder.skipped++;
 			folder.endedAt = Date.now();
 		}
 		if (test.outcome() === 'unexpected') {
@@ -120,8 +139,13 @@ export default class FlowReporter implements Reporter {
 			this.failures.push({ path, test, result });
 		}
 
-		const top = chain[0];
-		if (top && top.done === top.total) this.printTree(top, 0);
+		if (!this.quiet) {
+			const mark = skipped ? dim('-') : passed ? green('✓') : red('✗');
+			const area = this.areaOf(test).padEnd(this.areaWidth);
+			const title = truncate(test.title, this.titleWidth).padEnd(this.titleWidth);
+			const time = seconds(result.duration).padStart(6);
+			console.log(`  ${mark} ${dim(area)}  ${skipped ? dim(title) : title}  ${dim(time)}`);
+		}
 	}
 
 	onError(error: TestError): void {
@@ -129,6 +153,13 @@ export default class FlowReporter implements Reporter {
 	}
 
 	onEnd(result: FullResult): void {
+		// The rule ends where the tree's time column does. Quiet runs already
+		// have a blank line after the "Running" line.
+		const rule = `── Summary ${'─'.repeat(this.width + this.countWidth + 1)}`;
+		console.log(`${this.quiet ? '' : '\n'}  ${dim(rule)}`);
+		const tops = [...this.root.children.values()].sort((a, b) => a.name.localeCompare(b.name));
+		for (const top of tops) this.printTree(top, 0);
+
 		const issues = this.failures.length + this.errors.length;
 		if (issues > 0) {
 			console.log(
@@ -159,17 +190,25 @@ export default class FlowReporter implements Reporter {
 			}
 		}
 
-		const passed = [...this.root.children.values()].reduce((sum, top) => sum + top.passed, 0);
+		const passed = tops.reduce((sum, top) => sum + top.passed, 0);
+		const skipped = tops.reduce((sum, top) => sum + top.skipped, 0);
 		const failed = this.failures.length;
-		const time = `${((Date.now() - this.startedAt) / 1000).toFixed(1)}s`;
-		const summary = `${passed} passed${failed ? `, ${failed} failed` : ''} in ${time}`;
-		console.log(`\n${result.status === 'passed' ? green(summary) : red(summary)}`);
+		const time = seconds(Date.now() - this.startedAt);
+		const paint = result.status === 'passed' ? green : red;
+		const counts = paint(`${passed} passed${failed ? `, ${failed} failed` : ''}`);
+		console.log(`\n${counts}${skipped ? dim(`, ${skipped} skipped`) : ''}${paint(` in ${time}`)}`);
 	}
 
 	/** The test's folders under the test dir, outermost first, or "(root)" for top-level files */
 	private foldersOf(test: TestCase): string[] {
 		const folders = relative(this.testDir, test.location.file).split(sep).slice(0, -1);
 		return folders.length > 0 ? folders : ['(root)'];
+	}
+
+	/** The test's folders under scenarios/, e.g. "entities › custom-formats" */
+	private areaOf(test: TestCase): string {
+		const folders = this.foldersOf(test);
+		return (folders[0] === 'scenarios' ? folders.slice(1) : folders).join(' › ');
 	}
 
 	/** The folder records for a test, outermost first */
@@ -187,13 +226,19 @@ export default class FlowReporter implements Reporter {
 
 	/** Print a folder and everything beneath it, children in name order */
 	private printTree(folder: Folder, depth: number): void {
-		const ok = folder.passed === folder.total;
-		const label = `${'  '.repeat(depth)}${ok ? green('✓') : red('✗')} ${folder.name}`;
+		// Skipped tests neither pass nor fail: count passed out of those that ran
+		const ran = folder.total - folder.skipped;
+		const mark =
+			folder.passed < ran ? red('✗') : ran === 0 && folder.skipped > 0 ? dim('-') : green('✓');
+		const label = `${'  '.repeat(depth)}${mark} ${folder.name}`;
 		const pad = ' '.repeat(Math.max(0, this.width - depth * 2 - folder.name.length));
-		const count = `${folder.passed}/${folder.total}`.padStart(this.countWidth);
-		const time = `${((folder.endedAt - folder.startedAt) / 1000).toFixed(1)}s`.padStart(6);
-		console.log(`  ${label}${pad}  ${count}  ${time}`);
+		const count = `${folder.passed}/${ran}`.padStart(this.countWidth);
+		const time = seconds(folder.endedAt - folder.startedAt).padStart(6);
+		// Note skips only on the folder that holds the skipped tests, not its parents
 		const children = [...folder.children.values()].sort((a, b) => a.name.localeCompare(b.name));
+		const own = folder.skipped - children.reduce((sum, child) => sum + child.skipped, 0);
+		const skipped = own ? dim(`  ${own} skipped`) : '';
+		console.log(`  ${label}${pad}  ${count}  ${time}${skipped}`);
 		for (const child of children) this.printTree(child, depth + 1);
 	}
 }
@@ -205,6 +250,15 @@ function labelWidth(folder: Folder, depth: number): number {
 		widest = Math.max(widest, depth * 2 + child.name.length, labelWidth(child, depth + 1));
 	}
 	return widest;
+}
+
+function seconds(ms: number): string {
+	return `${(ms / 1000).toFixed(1)}s`;
+}
+
+/** Cut text to a width, ending it with "…" when it's too long */
+function truncate(text: string, width: number): string {
+	return text.length <= width ? text : `${text.slice(0, width - 1)}…`;
 }
 
 function formatError(error: TestError): string {
