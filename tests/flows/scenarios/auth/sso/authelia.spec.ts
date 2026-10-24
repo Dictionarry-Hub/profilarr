@@ -73,18 +73,18 @@ for (const setup of proxySetups()) {
 		 *    session, so it sends the user straight back without its login page.
 		 *
 		 * Expects:
-		 * - the user is signed in again
+		 * - Authelia sends the user straight back to the app, signed in
 		 * - the app has one session, a new one, because signing out ended the first
 		 */
-		test('signs back in after signing out', async ({ page, sso }) => {
+		test('signs back in after signing out', async ({ page, sso, baseURL }) => {
 			await signInWithSso(page, sso);
 			const [first] = await securityPages.sessions(page);
 			await signOut(page);
 
-			await page.goto('/auth/login');
 			await page.getByRole('main').getByRole('link', { name: 'Sign in with SSO' }).click();
+			const appOrigin = new URL(baseURL ?? '').origin;
 			await expect(page, 'Authelia should send the user straight back, signed in').toHaveURL(
-				(url) => !url.pathname.startsWith('/auth/')
+				(url) => url.origin === appOrigin && !url.pathname.startsWith('/auth/')
 			);
 
 			const sessions = await securityPages.sessions(page);
