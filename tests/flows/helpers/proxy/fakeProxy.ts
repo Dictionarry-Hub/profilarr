@@ -102,7 +102,7 @@ async function startFakeProxy(options: ProxyOptions): Promise<RunningProxy> {
 		proxy: fakeProxy,
 		url,
 		requests,
-		target: (next) => {
+		target: async (next) => {
 			appUrl = new URL(next);
 		},
 		fail: (status) => {

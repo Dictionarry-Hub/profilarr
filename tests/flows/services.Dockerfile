@@ -5,3 +5,9 @@
 
 # A tiny HTTP server for the container harness's own spec
 FROM busybox:1.37 AS busybox
+
+# An SSO provider (helpers/auth/sso/authelia.ts)
+FROM authelia/authelia:4.39.28 AS authelia
+
+# A reverse proxy (helpers/proxy/traefik.ts)
+FROM traefik:v3.7.16 AS traefik

@@ -93,7 +93,8 @@ function demultiplex(raw: Buffer): string {
  */
 export async function serviceDir(): Promise<{ path: string; hostPath: string }> {
 	const host = process.env.FLOWS_HOST_ROOT;
-	if (!host) throw new Error("FLOWS_HOST_ROOT isn't set; deno task flows sets it with the Docker socket");
+	if (!host)
+		throw new Error("FLOWS_HOST_ROOT isn't set; deno task flows sets it with the Docker socket");
 	const path = join(process.cwd(), SERVICES_DIR, runId(), randomUUID());
 	await fs.mkdir(path, { recursive: true });
 	return { path, hostPath: join(host, relative(process.cwd(), path)) };
@@ -114,8 +115,12 @@ export interface Service {
 	id: string;
 	/** Everything the container has printed so far */
 	logs(): Promise<string>;
+	/** False once the container has exited, e.g. on a config error */
+	running(): Promise<boolean>;
 	stop(): Promise<void>;
 }
+
+const READY_TIMEOUT_MS = 30_000;
 
 /** Start a service container in this test container's network namespace */
 export async function startService(spec: ServiceSpec): Promise<Service> {
@@ -139,10 +144,41 @@ export async function startService(spec: ServiceSpec): Promise<Service> {
 		id,
 		logs: async () =>
 			demultiplex((await api('GET', `/containers/${id}/logs?stdout=1&stderr=1`)).body),
+		running: async () => {
+			const inspected = await api('GET', `/containers/${id}/json`);
+			const { State } = JSON.parse(inspected.body.toString('utf8')) as {
+				State: { Running: boolean };
+			};
+			return State.Running;
+		},
 		stop: async () => {
 			await api('DELETE', `/containers/${id}?force=1`);
 		}
 	};
+}
+
+/**
+ * Wait until `check` answers true, polling. Fails as soon as the container
+ * exits, or after 30 seconds, with everything the container printed.
+ */
+export async function waitForService(
+	service: Service,
+	what: string,
+	check: () => Promise<boolean>
+): Promise<void> {
+	const deadline = Date.now() + READY_TIMEOUT_MS;
+	while (Date.now() < deadline) {
+		try {
+			if (await check()) return;
+		} catch {
+			// Not answering yet
+		}
+		if (!(await service.running())) {
+			throw new Error(`${what} exited before it was ready:\n${await service.logs()}`);
+		}
+		await new Promise((r) => setTimeout(r, 200));
+	}
+	throw new Error(`${what} wasn't ready after ${READY_TIMEOUT_MS}ms:\n${await service.logs()}`);
 }
 
 /** Remove every service container this run left behind */

@@ -97,7 +97,7 @@ async function startFakeOidc(): Promise<RunningSso> {
 			.setProtectedHeader({ alg: 'RS256', kid: KEY_ID })
 			.setIssuer(misbehaviour === 'wrong-issuer' ? `${issuer}/wrong` : issuer)
 			.setAudience(CLIENT_ID)
-			.setSubject(pending.user.sub)
+			.setSubject(pending.user.sub ?? pending.user.username)
 			.setIssuedAt(expired ? now - 7200 : now)
 			.setExpirationTime(expired ? now - 3600 : now + 300)
 			.sign(privateKey);
@@ -187,6 +187,9 @@ async function startFakeOidc(): Promise<RunningSso> {
 		},
 		users,
 		requests,
+		target: async () => {
+			// Accepts any redirect URI, so there's nothing to set up
+		},
 		misbehave: (kind) => {
 			misbehaviour = kind;
 		},
@@ -218,5 +221,7 @@ export const fakeOidc: SsoProvider = {
 	id: 'fake',
 	label: 'Fake OIDC',
 	needsDocker: false,
+	tls: false,
+	supports: ['misbehave', 'requests'],
 	start: startFakeOidc
 };
