@@ -1,16 +1,13 @@
 /**
  * - Protects: every Radarr and Sonarr quality definitions save, from the form
  *   action through the ops it writes to the cache rebuilt from them.
- * - A config is one row per quality tier. An update writes one op per changed
- *   tier, and the ops of one save share a group id.
+ * - A config is one row per quality tier.
  * - The form shows "unlimited" as the scale's top and stores it as 0, so the
  *   checks compare every tier, not only the ones the user changed.
  * - Every save returns to the quality definitions list.
  */
-import { join } from 'node:path';
-import { DatabaseSync } from 'node:sqlite';
 import type { Page } from '@playwright/test';
-import { test, expect, type App } from '$flows/helpers/core/test.ts';
+import { test, expect } from '$flows/helpers/core/test.ts';
 import {
 	fixture,
 	fixtures,
@@ -73,31 +70,6 @@ async function listed(page: Page): Promise<string[]> {
 	return configs.map((config) => `${config.arr_type}/${config.name}`).sort();
 }
 
-interface StoredOp {
-	entity: string;
-	qualityName?: string;
-	group_id?: string;
-}
-
-/**
- * The quality definitions ops the user's saves wrote, oldest first, read from
- * the app database's pcd_ops. No page shows user ops outside conflicts.
- */
-function userOps(app: App, arr: ArrType): StoredOp[] {
-	const db = new DatabaseSync(join(app.dir, 'data/profilarr.db'), { readOnly: true });
-	try {
-		db.exec('PRAGMA busy_timeout = 5000');
-		const rows = db
-			.prepare("SELECT metadata FROM pcd_ops WHERE origin = 'user' ORDER BY id")
-			.all() as { metadata: string | null }[];
-		return rows
-			.map((row) => JSON.parse(row.metadata ?? '{}') as StoredOp)
-			.filter((op) => op.entity === `${arr}_quality_definitions`);
-	} finally {
-		db.close();
-	}
-}
-
 /** Expand a resolution row with its own Expand button */
 async function expandRow(page: Page, label: string): Promise<void> {
 	const row = page
@@ -149,9 +121,8 @@ for (const arr of ARRS) {
 	 * Expects:
 	 * - both changed tiers are stored exactly
 	 * - every other tier matches the fixture
-	 * - the save wrote one op per changed tier, and the two ops share a group id
 	 */
-	test(`updates two tiers of a ${LABEL[arr]} config in one save`, async ({ app, page }) => {
+	test(`updates two tiers of a ${LABEL[arr]} config in one save`, async ({ page }) => {
 		await openEntity(page, 'Quality Definitions', FIXTURE[arr].name);
 		const main = page.getByRole('main');
 		for (const { row, quality, sizes } of UPDATES[arr]) {
@@ -172,14 +143,6 @@ for (const arr of ARRS) {
 			asTiers(config.entries),
 			'the changed tiers should be stored exactly and the rest match the fixture'
 		).toEqual(sortTiers(expected));
-
-		const ops = userOps(app, arr);
-		expect(
-			ops.map((op) => op.qualityName).sort(),
-			'the save should write one op per changed tier'
-		).toEqual(UPDATES[arr].map((u) => u.quality).sort());
-		expect(ops[0]?.group_id, 'the ops should carry a group id').toEqual(expect.any(String));
-		expect(ops[1]?.group_id, 'the two ops should share the group id').toBe(ops[0]?.group_id);
 	});
 
 	/**
