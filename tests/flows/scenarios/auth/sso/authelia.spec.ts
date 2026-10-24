@@ -8,12 +8,7 @@
  */
 import { test, expect } from '$flows/helpers/core/test.ts';
 import { signInWithSso, signOut } from '$flows/helpers/auth/accounts.ts';
-import {
-	confirmIdentity,
-	createApiKey,
-	lapseConfirmation,
-	securityPages
-} from '$flows/helpers/auth/security.ts';
+import { createApiKey, lapseConfirmation, securityPages } from '$flows/helpers/auth/security.ts';
 import { ssoProvider } from '$flows/helpers/auth/sso/providers.ts';
 import { skipWithoutDocker, tagsFor } from '$flows/helpers/core/realServices.ts';
 import { proxySetups } from '$flows/helpers/proxy/proxies.ts';
@@ -105,14 +100,17 @@ for (const setup of proxySetups()) {
 		/**
 		 * Flow:
 		 * 1. The user signs in with SSO, and the app's confirmation lapses.
-		 * 2. The user opens the new API key page and confirms with SSO. The app
-		 *    asks Authelia to authenticate the user again (`prompt=login`), so
-		 *    Authelia asks for the password before it sends the user back.
-		 * 3. The user creates an API key.
+		 * 2. The user opens Settings › Security from the sidebar and clicks
+		 *    New Key.
+		 * 3. The user confirms with SSO. The app asks Authelia to authenticate
+		 *    the user again (`prompt=login`), so Authelia asks for the password
+		 *    before it sends the user back.
+		 * 4. The user creates an API key.
 		 *
 		 * Expects:
 		 * - the app asks for SSO confirmation before the key
-		 * - confirming returns to the new API key page
+		 * - New Key opens the confirm dialog on the Security page
+		 * - confirming moves on to the new API key page
 		 * - the key is listed, and the session is the same one as before
 		 */
 		test('confirms through SSO before creating an API key', async ({ app, page, sso }) => {
@@ -124,12 +122,7 @@ for (const setup of proxySetups()) {
 				'The app should ask for SSO confirmation'
 			).toBe('sso');
 
-			await page.goto('/settings/security/api-keys/new');
-			await confirmIdentity(page, { sso });
-			await expect(page, 'Confirming should return to the new API key page').toHaveURL(
-				(url) => url.pathname === '/settings/security/api-keys/new'
-			);
-			await createApiKey(page, 'authelia key');
+			await createApiKey(page, 'authelia key', { sso });
 
 			const security = await securityPages.page(page);
 			expect(

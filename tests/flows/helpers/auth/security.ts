@@ -11,6 +11,7 @@ import type { RunningSso, SsoUser } from '$flows/helpers/auth/sso/providers.ts';
 /** How long the app trusts a confirmation (src/lib/server/utils/auth/confirmation.ts) */
 const CONFIRMATION_WINDOW_MINUTES = 30;
 import { pageData } from '$flows/helpers/core/pageData.ts';
+import { openSidebarPage } from '$flows/helpers/core/nav.ts';
 
 export interface SessionRow {
 	/** A hash of the session id; the id itself never reaches the page */
@@ -102,14 +103,38 @@ export async function confirmIdentity(page: Page, how: Confirmation): Promise<vo
 }
 
 /**
- * Create an API key with full access on the new API key page, once the user
- * is confirmed. Returns when the page shows the key, which it does only once.
+ * Create an API key with full access the way a user does: open Settings ›
+ * Security from the sidebar, click New Key, confirm who they are, then fill
+ * in the form. Pass `confirm` when the app will ask, e.g. after
+ * `lapseConfirmation`; without it, New Key must open the form directly.
+ * Returns when the page shows the key, which it does only once.
  */
-export async function createApiKey(page: Page, name: string): Promise<void> {
+export async function createApiKey(
+	page: Page,
+	name: string,
+	confirm?: Confirmation
+): Promise<void> {
 	await test.step(
 		`Create the API key ${name}`,
 		async () => {
+			await openSidebarPage(page, 'Security');
 			const main = page.getByRole('main');
+			await main.getByRole('link', { name: 'New Key', exact: true }).click();
+
+			if (confirm) {
+				await expect(
+					page.getByRole('dialog', { name: "Confirm it's you" }),
+					'New Key should ask the user to confirm first'
+				).toBeVisible();
+				await expect(page, 'The dialog should open on the Security page').toHaveURL(
+					(url) => url.pathname === SECURITY_PATH
+				);
+				await confirmIdentity(page, confirm);
+			}
+			await expect(page, 'The new API key form should open').toHaveURL(
+				(url) => url.pathname === `${SECURITY_PATH}/api-keys/new`
+			);
+
 			await main.getByLabel(/^Name/).fill(name);
 			await main.getByRole('switch', { name: 'Full access' }).click();
 			await main.getByRole('button', { name: 'Create', exact: true }).click();
