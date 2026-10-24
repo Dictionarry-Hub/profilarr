@@ -70,10 +70,11 @@ for (const setup of proxySetups()) {
 		 * Flow:
 		 * 1. The user signs in with SSO, then signs out of the app.
 		 * 2. The user clicks Sign in with SSO again. Authelia still has its own
-		 *    session, so it sends the user straight back without its login page.
+		 *    session, so it skips its login page and only asks the user to
+		 *    accept Profilarr's request.
 		 *
 		 * Expects:
-		 * - Authelia sends the user straight back to the app, signed in
+		 * - Authelia sends the user back to the app, signed in
 		 * - the app has one session, a new one, because signing out ended the first
 		 */
 		test('signs back in after signing out', async ({ page, sso, baseURL }) => {
@@ -82,8 +83,9 @@ for (const setup of proxySetups()) {
 			await signOut(page);
 
 			await page.getByRole('main').getByRole('link', { name: 'Sign in with SSO' }).click();
+			await sso.signIn(page);
 			const appOrigin = new URL(baseURL ?? '').origin;
-			await expect(page, 'Authelia should send the user straight back, signed in').toHaveURL(
+			await expect(page, 'Authelia should send the user back to the app, signed in').toHaveURL(
 				(url) => url.origin === appOrigin && !url.pathname.startsWith('/auth/')
 			);
 

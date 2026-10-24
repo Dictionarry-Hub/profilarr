@@ -99,8 +99,8 @@ async function startAuthelia(): Promise<RunningSso> {
 							client_secret: clientSecret,
 							public: false,
 							authorization_policy: 'one_factor',
-							// No consent page, as for a client the admin set up
-							consent_mode: 'implicit',
+							// Consent keeps Authelia's default, so each sign-in asks the user to
+							// accept Profilarr's request
 							redirect_uris: [`${origin}/auth/oidc/callback`],
 							// What src/lib/server/utils/auth/oidc.ts asks for and how it sends the secret
 							scopes: ['openid', 'email', 'profile'],
