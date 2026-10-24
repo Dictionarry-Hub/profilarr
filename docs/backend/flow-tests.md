@@ -45,14 +45,15 @@ tests/flows/
   playwright.config.ts   global-setup.ts   reporter.ts
   harness/      app processes, seeding, git, ports (helpers use it, specs don't)
   helpers/      what tests import, grouped by area, each with its spec beside it
-    core/       test fixtures, forms, navigation, page data, screen sizes
+    core/       test fixtures, forms, navigation, page data, screen sizes, job runs
     entities/   typed page data readers per entity
     sync/       Arr instances, the fake Arr and its targets, Sync page setup
     git/        database pull and publish, the local upstream
     auth/       local accounts, Settings › Security, SSO providers in sso/
     proxy/      reverse proxies in front of an app
+    settings/   Settings pages, such as Backups
   scenarios/    real user flows, by area
-    auth/   databases/   entities/<entity>/   sync/   git/   workflows/ (more than one area)
+    auth/   databases/   entities/<entity>/   sync/   git/   settings/   workflows/ (more than one area)
   data/         vendored fixtures, their snapshot, recorded Arr responses
 ```
 
