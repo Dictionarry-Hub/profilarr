@@ -306,6 +306,43 @@ for (const target of targetsWith('qualityProfiles')) {
 
 /**
  * Flow:
+ * 1. The user sets up the Sonarr fixture profile to sync to Radarr. Every
+ *    score in that profile is for Sonarr only.
+ * 2. The user syncs Quality Profiles.
+ *
+ * Expects:
+ * - the fake holds the profile by name
+ * - none of the formats the profile scores for Sonarr are on the fake
+ */
+test('radarr-6 gets none of the formats a profile scores only for Sonarr', async ({
+	page,
+	fakeRadarr
+}) => {
+	const profile = fixture.qualityProfile('Sonarr Profile');
+	const sonarrOnly = profile.scores
+		.filter((score) => score.arrType === 'sonarr')
+		.map((score) => score.customFormatName);
+	expect(sonarrOnly.length, 'The profile should score some formats for Sonarr').toBeGreaterThan(0);
+	expect(
+		expectedScores(profile, fakeRadarr.type),
+		'The profile should score nothing for Radarr'
+	).toEqual({});
+
+	await setUpProfileSync(page, fakeRadarr, { profiles: [profile.name] });
+	const result = await syncSection(page, 'Quality Profiles');
+	expect(result.status, 'The sync should succeed').toBe('idle');
+
+	expect(heldProfile(fakeRadarr, profile.name), 'The profile should be on the Arr').toBeDefined();
+	const formatNames = (fakeRadarr.collection('customformat') as { name: string }[]).map(
+		(cf) => cf.name
+	);
+	for (const name of sonarrOnly) {
+		expect(formatNames, `${name} is only scored for Sonarr`).not.toContain(name);
+	}
+});
+
+/**
+ * Flow:
  * 1. The user sets up the Radarr fixture profile to sync and syncs Quality
  *    Profiles.
  * 2. The user syncs Quality Profiles again.
