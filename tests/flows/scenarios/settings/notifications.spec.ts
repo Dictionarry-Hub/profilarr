@@ -100,7 +100,7 @@ async function expectNotOnPages(page: Page, paths: string[], secrets: string[]):
  *   as stored secrets
  * - neither secret is in either page's raw data or HTML
  */
-test('A test notification reaches the stored URL with the stored header', async ({
+test('a test notification reaches the stored URL with the stored header', async ({
 	page,
 	fakeWebhook
 }) => {
@@ -165,7 +165,7 @@ test('A test notification reaches the stored URL with the stored header', async 
  * - the success alert doesn't show
  * - history records the failure with the error
  */
-test('A failed test notification says so', async ({ page, fakeWebhook }) => {
+test('a failed test notification says so', async ({ page, fakeWebhook }) => {
 	fakeWebhook.failWith(PATH, 500);
 	const id = await createNotificationService(page, {
 		name: SERVICE,
@@ -208,7 +208,7 @@ test('A failed test notification says so', async ({ page, fakeWebhook }) => {
  * - the last test reaches the new path with the new header
  * - the list data has the new name
  */
-test('Blank fields keep the stored URL and header', async ({ page, fakeWebhook }) => {
+test('blank fields keep the stored URL and header', async ({ page, fakeWebhook }) => {
 	await createNotificationService(page, {
 		name: SERVICE,
 		url: fakeWebhook.url(PATH),
@@ -263,7 +263,7 @@ test('Blank fields keep the stored URL and header', async ({ page, fakeWebhook }
  * - B's path gets nothing
  * - history has one row, for A
  */
-test('A service only gets the types it turned on', async ({ page, fakeWebhook }) => {
+test('a service only gets the types it turned on', async ({ page, fakeWebhook }) => {
 	const idA = await createNotificationService(page, {
 		name: SERVICE_A,
 		url: fakeWebhook.url(PATH_A),
@@ -302,7 +302,7 @@ test('A service only gets the types it turned on', async ({ page, fakeWebhook })
  * - its history rows are gone
  * - the receiver gets no request after the delete
  */
-test('A deleted service gets nothing more', async ({ page, fakeWebhook }) => {
+test('a deleted service gets nothing more', async ({ page, fakeWebhook }) => {
 	const id = await createNotificationService(page, {
 		name: SERVICE,
 		url: fakeWebhook.url(PATH),

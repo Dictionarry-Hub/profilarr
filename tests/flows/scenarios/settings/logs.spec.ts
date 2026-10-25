@@ -38,7 +38,7 @@ const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&
  * - the run reports one file deleted
  * - file logging stays on, since the job cancels itself when it is off
  */
-test('Cleanup deletes log files past the saved retention', async ({ app, page }) => {
+test('cleanup deletes log files past the saved retention', async ({ app, page }) => {
 	await openSidebarPage(page, 'General');
 	const retention = retentionField(page, 'log');
 	await retention.fill(String(RETENTION_DAYS));

@@ -38,7 +38,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  * - the plain key isn't in the Security page data
  * - the key can list databases, and is refused the Arr list
  */
-test('The New Key form stores the access it shows', async ({ page, playwright, baseURL }) => {
+test('the New Key form stores the access it shows', async ({ page, playwright, baseURL }) => {
 	await createAccount(page);
 	const created = Date.now();
 	const key = await createApiKey(page, SCOPED_KEY, undefined, {
@@ -86,7 +86,7 @@ test('The New Key form stores the access it shows', async ({ page, playwright, b
  * - the key is gone from the list
  * - the same request is now refused as unauthenticated
  */
-test('Deleting a key from the Security page stops it at once', async ({
+test('deleting a key from the Security page stops it at once', async ({
 	page,
 	playwright,
 	baseURL

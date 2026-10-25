@@ -46,7 +46,7 @@ async function expectSignedOut(browser: Page, what: string): Promise<void> {
  * - the second browser is still signed in, and must confirm its identity
  *   again
  */
-test('Only the new password signs in after a change', async ({ page, browser, baseURL }) => {
+test('only the new password signs in after a change', async ({ page, browser, baseURL }) => {
 	await createAccount(page);
 	const other = await signInElsewhere(browser, baseURL ?? '');
 	try {
@@ -103,7 +103,7 @@ test('Only the new password signs in after a change', async ({ page, browser, ba
  * - after step 3, only the current session is listed, and the third
  *   browser's next page load lands on the login page
  */
-test('Revoking a session signs that browser out', async ({ page, browser, baseURL }) => {
+test('revoking a session signs that browser out', async ({ page, browser, baseURL }) => {
 	await createAccount(page);
 	const second = await signInElsewhere(browser, baseURL ?? '');
 	const third: Page[] = [];

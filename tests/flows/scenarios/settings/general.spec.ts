@@ -112,7 +112,7 @@ async function expectNotOnPage(page: Page, path: string, secret: string): Promis
  * - the layout's date format is the saved one
  * - `/` opens Delay Profiles
  */
-test('Keeps every setting after a reload', async ({ page }) => {
+test('keeps every setting after a reload', async ({ page }) => {
 	await openSidebarPage(page, 'General');
 	const before = await generalSettings(page);
 	const main = page.getByRole('main');
@@ -232,7 +232,7 @@ test('Keeps every setting after a reload', async ({ page }) => {
  * - the switch is off after the reload
  * - the stored schedule and retention are unchanged
  */
-test('Turning Automatic Backups off saves', async ({ page }) => {
+test('turning Automatic Backups off saves', async ({ page }) => {
 	await openSidebarPage(page, 'General');
 	const before = await generalSettings(page);
 	expect(before.backupSettings.enabled, 'control: backups should start on').toBe(true);
@@ -264,7 +264,7 @@ test('Turning Automatic Backups off saves', async ({ page }) => {
  * - the switch is off after the reload
  * - the stored retention and minimum level are unchanged
  */
-test('Turning Logging off saves', async ({ page }) => {
+test('turning Logging off saves', async ({ page }) => {
 	await openSidebarPage(page, 'General');
 	const before = await generalSettings(page);
 	expect(before.logSettings.enabled, 'control: logging should start on').toBe(true);
@@ -293,7 +293,7 @@ test('Turning Logging off saves', async ({ page }) => {
  * Expects:
  * - the stored minimum level is DEBUG, the level a fresh install stores
  */
-test("Logging's Reset sets the level to DEBUG", async ({ page }) => {
+test("logging's Reset sets the level to DEBUG", async ({ page }) => {
 	await openSidebarPage(page, 'General');
 	const main = page.getByRole('main');
 	await chooseOption(main, 'Minimum Level', LOG_LEVEL);
@@ -324,7 +324,7 @@ test("Logging's Reset sets the level to DEBUG", async ({ page }) => {
  * - after the reload the field is empty and says a blank keeps the key
  * - the stored token is the first after step 3 and the second after step 4
  */
-test('The TMDB token stays on the server', async ({ app, page }) => {
+test('the TMDB token stays on the server', async ({ app, page }) => {
 	await openSidebarPage(page, 'General');
 	await tmdbField(page).fill(TMDB_TOKEN);
 	await saveForm(page, { action: 'save' });
@@ -400,7 +400,7 @@ test('TMDB Reset removes a stored token', async ({ app, page }) => {
  * Expects:
  * - the Arr gets no request to replace its delay profile
  */
-test('A new Arr keeps its delay profile when the default is off', async ({ page, fakeRadarr }) => {
+test('a new Arr keeps its delay profile when the default is off', async ({ page, fakeRadarr }) => {
 	await openSidebarPage(page, 'General');
 	await setSwitch(page.getByRole('main'), 'Apply Default Delay Profile', false);
 	await saveForm(page, { action: 'save' });

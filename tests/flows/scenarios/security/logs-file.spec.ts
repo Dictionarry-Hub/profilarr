@@ -47,7 +47,7 @@ interface LogsPage {
  * - a warning alert shows one of the three messages
  * - a WARN log entry names the requested file
  */
-test('A file outside the logs list is refused', async ({ app, page }) => {
+test('a file outside the logs list is refused', async ({ app, page }) => {
 	// Control: the requested file exists and is the app database
 	expect(
 		readFileSync(join(app.dir, 'data', 'profilarr.db'))
