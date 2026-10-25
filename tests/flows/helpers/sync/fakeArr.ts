@@ -13,8 +13,12 @@
  * - put the fake behind Basic Auth, like a reverse proxy (`basicAuth`)
  * - change, remove or add items the way a user would in the Arr itself
  *   (`edit`, `remove`, `seed`), including the movie and series library
- * - set a fixed answer for one path, e.g. health messages (`answer`)
+ * - set a fixed answer for one path, e.g. health messages, or an answer per
+ *   request, e.g. releases per movie (`answer`)
  * - make a path fail or reject one item (`fail`, `reject`)
+ * - run commands: each is queued, then completes on its first status check,
+ *   or ends as the test set with `commandOutcome`, adding queue records the
+ *   way a search that grabbed releases does
  */
 
 import {
@@ -75,6 +79,18 @@ export interface HealthItem {
 	wikiUrl: string;
 }
 
+/** How a command ends, and the queue records it leaves, e.g. the releases a search grabbed */
+export interface CommandOutcome {
+	status: 'completed' | 'failed';
+	/** The command's message, e.g. "1 reports downloaded" or "Indexer unavailable" */
+	message?: string;
+	/** Records GET queue lists once the command has ended */
+	queue?: Record<string, unknown>[];
+}
+
+/** A fixed answer, or one worked out from each request, e.g. releases per movie */
+export type Answer = unknown | ((request: RecordedRequest) => unknown);
+
 /** A library item to seed, e.g. { id: 1, title: 'A', tmdbId: 11 } */
 export interface LibraryItem {
 	id: number;
@@ -132,10 +148,15 @@ export interface FakeArr {
 	fail(method: string, path: PathMatch, status: number): void;
 	/**
 	 * Answer every request to this method and path with `value` and 200, e.g.
-	 * `answer('GET', 'health', items)`. A path without a leading slash is
-	 * relative to the API base.
+	 * `answer('GET', 'health', items)`. `value` can be a function of the
+	 * request, to answer each item on its own, e.g. releases by `movieId`. A
+	 * path without a leading slash is relative to the API base.
 	 */
-	answer(method: string, path: PathMatch, value: unknown): void;
+	answer(method: string, path: PathMatch, value: Answer): void;
+	/** End every later command named `name` this way, e.g. `MoviesSearch` failing */
+	commandOutcome(name: string, outcome: CommandOutcome): void;
+	/** The bodies of every command posted, oldest first */
+	commands(): Record<string, unknown>[];
 	/**
 	 * Change items the way a user editing in the Arr would, without recording a
 	 * request. `select` picks items of a collection or bulk resource, or must
@@ -151,6 +172,13 @@ export interface FakeArr {
 	/** Add items to a collection, like a user would in the Arr; an item without an id gets the next one */
 	seed(path: string, items: Record<string, unknown>[]): void;
 	stop(): Promise<void>;
+}
+
+/** The value an answer gives this request */
+function answerFor(answer: Answer, request: RecordedRequest): unknown {
+	return typeof answer === 'function'
+		? (answer as (request: RecordedRequest) => unknown)(request)
+		: answer;
 }
 
 function readBody(req: IncomingMessage): Promise<unknown> {
@@ -190,7 +218,12 @@ export async function startFakeArr(
 	const unhandled: RecordedRequest[] = [];
 	const rejections: { collection: string; name: string; status: number }[] = [];
 	const failures: { method: string; path: PathMatch; status: number }[] = [];
-	const answers: { method: string; path: PathMatch; value: unknown }[] = [];
+	const answers: { method: string; path: PathMatch; value: Answer }[] = [];
+	const outcomes = new Map<string, CommandOutcome>();
+	// Commands as posted, and as GET command lists them
+	const posted: Record<string, unknown>[] = [];
+	const commandList: Resource[] = [];
+	const queue: Record<string, unknown>[] = [];
 
 	const apiPath = (path: string) => (path.startsWith('/') ? path : `${target.apiBase}/${path}`);
 	const recordingFile = (path: string) => join(ARR_DATA_DIR, target.id, recordingName(path));
@@ -234,8 +267,22 @@ export async function startFakeArr(
 			: null;
 	};
 
+	/** End a queued command with its outcome, adding the outcome's queue records */
+	function finish(command: Resource): void {
+		if (command.status !== 'queued') return;
+		const outcome = outcomes.get(String(command.name)) ?? { status: 'completed' };
+		command.status = outcome.status;
+		if (outcome.message !== undefined) command.message = outcome.message;
+		queue.push(...(outcome.queue ?? []));
+	}
+
 	/** Route a request; null means no route */
-	function route(method: string, path: string, body: unknown): [number, unknown] | null {
+	function route(
+		method: string,
+		path: string,
+		query: URLSearchParams,
+		body: unknown
+	): [number, unknown] | null {
 		if (method === 'GET' && fixed.has(path)) return [200, fixed.get(path)];
 
 		for (const resource of target.resources) {
@@ -245,7 +292,12 @@ export async function startFakeArr(
 			if (resource.kind === 'collection') {
 				const store = lists.get(resource.path) ?? [];
 				if (path === base) {
-					if (method === 'GET') return [200, store];
+					if (method === 'GET') {
+						const wanted = resource.filterBy ? query.getAll(resource.filterBy) : [];
+						if (wanted.length === 0) return [200, store];
+						const field = resource.filterBy ?? '';
+						return [200, store.filter((item) => wanted.includes(String(item[field])))];
+					}
 					if (method === 'POST') {
 						const refused = rejected(resource.path, body);
 						if (refused) return refused;
@@ -297,8 +349,49 @@ export async function startFakeArr(
 				continue;
 			}
 
-			if (resource.kind === 'command' && method === 'POST' && path === base) {
-				return [201, { id: 1, name: (body as Resource | null)?.name, status: 'completed' }];
+			if (resource.kind === 'command') {
+				if (method === 'GET' && path === apiPath(resource.queue)) {
+					return [200, { page: 1, pageSize: 200, totalRecords: queue.length, records: queue }];
+				}
+				if (path === base) {
+					if (method === 'GET') return [200, commandList];
+					if (method !== 'POST') return null;
+					const request = (body as Record<string, unknown> | null) ?? {};
+					posted.push(request);
+					const command: Resource = {
+						...request,
+						id: commandList.length + 1,
+						name: String(request.name ?? ''),
+						status: 'queued'
+					};
+					commandList.push(command);
+					return [201, { ...command }];
+				}
+				if (!withId) continue;
+				const command = commandList.find((item) => item.id === Number(withId[1]));
+				if (!command) return [404, { message: 'NotFound' }];
+				if (method !== 'GET') return null;
+				finish(command);
+				return [200, command];
+			}
+
+			if (resource.kind === 'editor' && path === base) {
+				if (method !== 'PUT') return null;
+				const edit = (body as Record<string, unknown> | null) ?? {};
+				const ids = new Set((edit[resource.ids] as number[] | undefined) ?? []);
+				const tags = (edit.tags as number[] | undefined) ?? [];
+				const store = lists.get(resource.collection) ?? [];
+				for (const item of store) {
+					if (!ids.has(item.id) || edit.tags === undefined) continue;
+					const current = (item.tags as number[] | undefined) ?? [];
+					item.tags =
+						edit.applyTags === 'remove'
+							? current.filter((tag) => !tags.includes(tag))
+							: edit.applyTags === 'replace'
+								? [...tags]
+								: [...current, ...tags.filter((tag) => !current.includes(tag))];
+				}
+				return [202, store.filter((item) => ids.has(item.id))];
 			}
 		}
 
@@ -328,11 +421,12 @@ export async function startFakeArr(
 		const answered = [...answers].reverse().find((a) => matches(entry, a.method, a.path));
 		const allowed =
 			key === apiKey && (!authorization || req.headers.authorization === authorization);
-		const routed = allowed && !failure && !answered ? route(method, url.pathname, body) : null;
+		const routed =
+			allowed && !failure && !answered ? route(method, url.pathname, url.searchParams, body) : null;
 
 		if (!allowed) [status, payload] = [401, { error: 'Unauthorized' }];
 		else if (failure) [status, payload] = [failure.status, { message: 'Failed by test' }];
-		else if (answered) [status, payload] = [200, answered.value];
+		else if (answered) [status, payload] = [200, answerFor(answered.value, entry)];
 		else if (routed) [status, payload] = routed;
 		else {
 			[status, payload] = [404, { message: 'NotFound' }];
@@ -400,6 +494,8 @@ export async function startFakeArr(
 		reject: (collection, name, status = 400) => void rejections.push({ collection, name, status }),
 		fail: (method, path, status) => void failures.push({ method, path, status }),
 		answer: (method, path, value) => void answers.push({ method, path: resolvePath(path), value }),
+		commandOutcome: (name, outcome) => void outcomes.set(name, outcome),
+		commands: () => [...posted],
 		edit: (path, select, patch) => {
 			const change = (item: Resource): Resource => {
 				if (typeof patch === 'function') {

@@ -23,14 +23,28 @@ export type Capability =
 
 /** How a path behaves in the fake. Paths are relative to the target's apiBase. */
 export type Resource =
-	/** A list with get, create, update and delete by id: `path`, `path/{id}` */
-	| { kind: 'collection'; path: string }
+	/**
+	 * A list with get, create, update and delete by id: `path`, `path/{id}`.
+	 * With `filterBy`, GET `path?{filterBy}=1&{filterBy}=2` lists only the
+	 * items whose `filterBy` field is one of the values.
+	 */
+	| { kind: 'collection'; path: string; filterBy?: string }
 	/** One settings object: GET `path`, PUT `path/{id}` */
 	| { kind: 'singleton'; path: string }
 	/** A list read whole and updated in bulk: GET `path`, PUT `update` merges by id */
 	| { kind: 'bulk'; path: string; update: string }
-	/** POST starts a command, answered as completed */
-	| { kind: 'command'; path: string };
+	/**
+	 * POST `path` stores a command with the next id and answers it as queued.
+	 * The first GET `path/{id}` answers it with its outcome, completed unless a
+	 * test set another, and adds the outcome's queue records to GET `queue`.
+	 * GET `path` lists every stored command.
+	 */
+	| { kind: 'command'; path: string; queue: string }
+	/**
+	 * A bulk editor: PUT `path` applies `applyTags` (add, remove or replace)
+	 * with `tags` to every item of `collection` whose id is in the body's `ids`
+	 */
+	| { kind: 'editor'; path: string; collection: string; ids: string };
 
 export interface Target {
 	/** App and API version, e.g. "sonarr-5"; also its folder under data/arr/ */
@@ -87,22 +101,23 @@ const ARR_V3 = {
 		{ kind: 'collection', path: 'qualityprofile' },
 		{ kind: 'collection', path: 'delayprofile' },
 		{ kind: 'collection', path: 'tag' },
-		// The library, empty like a fresh install until a test seeds it
+		// The library and its files, empty like a fresh install until a test seeds them
 		{ kind: 'collection', path: 'movie' },
 		{ kind: 'collection', path: 'series' },
+		{ kind: 'collection', path: 'moviefile', filterBy: 'movieId' },
+		{ kind: 'collection', path: 'episodefile', filterBy: 'seriesId' },
+		{ kind: 'editor', path: 'series/editor', collection: 'series', ids: 'seriesIds' },
 		{ kind: 'singleton', path: 'config/naming' },
 		{ kind: 'singleton', path: 'config/mediamanagement' },
 		{ kind: 'bulk', path: 'qualitydefinition', update: 'qualitydefinition/update' },
-		{ kind: 'command', path: 'command' }
+		{ kind: 'command', path: 'command', queue: 'queue' }
 	],
 	// Empty answers for the rest of the library, so background jobs get valid answers
 	stubs: {
 		episode: [],
 		rename: [],
 		release: [],
-		command: [],
 		'log/file': [],
-		queue: EMPTY_PAGE,
 		log: EMPTY_PAGE
 	}
 } satisfies Partial<Target>;
