@@ -58,12 +58,12 @@ immediately after command completion.
 
 ### Status
 
-| Status    | Meaning                                       |
-| --------- | --------------------------------------------- |
-| `success` | Searches triggered, no errors                 |
-| `partial` | Some searches succeeded, some failed          |
-| `failed`  | All searches failed or a fatal error occurred |
-| `skipped` | No items to search (filtered to zero)         |
+| Status    | Meaning                                                 |
+| --------- | ------------------------------------------------------- |
+| `success` | Searches triggered with no errors, or nothing to search |
+| `partial` | Some searches succeeded, some failed                    |
+| `failed`  | All searches failed or a fatal error occurred           |
+| `skipped` | No enabled filter to run; not stored in run history     |
 
 ## Filters
 
