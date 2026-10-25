@@ -8,6 +8,12 @@
  * index. `pageData` fetches it with the browser's session, decodes every node,
  * and merges them, page data over layout data.
  *
+ * A page whose load returns promises, such as Upgrades' filter options,
+ * answers as a stream (`text/sveltekit-data`): the nodes on the first line,
+ * then one line per promise as it settles. `pageData` reads the first line
+ * only and leaves each promise slot undecoded, as its raw `['Promise', …]`
+ * entry.
+ *
  * It also opens the page in a throwaway tab first, so the trace shows the page
  * under the read. The test's own tab stays where it is, so a read never
  * leaves a form or trips an unsaved-changes guard.
@@ -87,6 +93,10 @@ export function unflatten(values: unknown[]): unknown {
 					case 'URL':
 						out = new URL(rest[0] as string);
 						break;
+					// A streamed promise; its value arrives on a later line, which pageData skips
+					case 'Promise':
+						out = value;
+						break;
 					case 'null': {
 						const object = Object.create(null) as Json;
 						hydrated.set(index, object);
@@ -145,7 +155,10 @@ export async function pageData<T = Json>(page: Page, path?: string): Promise<T> 
 			const response = await page.request.get(`${url.origin}${dataPath}`);
 			expect(response.ok(), `${dataPath} should answer`).toBe(true);
 
-			const body = (await response.json()) as DataResponse;
+			const streamed = response.headers()['content-type']?.startsWith('text/sveltekit-data');
+			const body = (
+				streamed ? JSON.parse((await response.text()).split('\n')[0]) : await response.json()
+			) as DataResponse;
 			if (body.type !== 'data') {
 				throw new Error(
 					`${dataPath} answered ${body.type}: ${JSON.stringify(body.location ?? body.error)}`
