@@ -80,6 +80,65 @@ export async function waitForJobRun(
 	);
 }
 
+/** The id of the newest finished run of `jobType`, or 0 when it has none */
+export async function latestJobRunId(page: Page, jobType: string): Promise<number> {
+	return await test.step(
+		`Read the newest ${jobType} run`,
+		async () => {
+			const { jobRuns } = await pageData<JobsPageData>(page, '/settings/jobs');
+			const ids = jobRuns.filter((run) => run.jobType === jobType).map((run) => run.id);
+			return Math.max(0, ...ids);
+		},
+		{ box: true }
+	);
+}
+
+export interface WaitForNextJobRunOptions {
+	/** Only count a run with a higher id, as `latestJobRunId` read it before the job was queued */
+	afterId: number;
+	/** How long to wait, in ms. Default 30s. */
+	timeout?: number;
+}
+
+/**
+ * Wait until Settings › Jobs lists a finished run of `jobType` newer than
+ * `afterId`, and return it. Unlike `waitForJobRun`, two runs queued in the
+ * same second stay apart, so a test can wait for each of several runs.
+ */
+export async function waitForNextJobRun(
+	page: Page,
+	jobType: string,
+	options: WaitForNextJobRunOptions
+): Promise<JobRun> {
+	const { afterId, timeout = 30_000 } = options;
+	return await test.step(
+		`Wait for a ${jobType} run after #${afterId}`,
+		async () => {
+			let found: JobRun | undefined;
+			await expect
+				.poll(
+					async () => {
+						const { jobRuns } = await pageData<JobsPageData>(page, '/settings/jobs');
+						// Start times only have seconds, so the lowest id is the next run
+						found = jobRuns
+							.filter((run) => run.jobType === jobType && run.id > afterId)
+							.sort((a, b) => a.id - b.id)[0];
+						return found?.id ?? null;
+					},
+					{
+						message: `Settings › Jobs should list a ${jobType} run after #${afterId}`,
+						timeout,
+						intervals: [250, 500, 1000]
+					}
+				)
+				.not.toBeNull();
+			if (!found) throw new Error(`No ${jobType} run after #${afterId} was found`);
+			return found;
+		},
+		{ box: true }
+	);
+}
+
 /** One scheduled job on Settings › Jobs */
 export interface ScheduledJob {
 	id: number;
