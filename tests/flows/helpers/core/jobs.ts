@@ -79,3 +79,54 @@ export async function waitForJobRun(
 		{ box: true }
 	);
 }
+
+/** One scheduled job on Settings › Jobs */
+export interface ScheduledJob {
+	id: number;
+	/** The job type, e.g. "arr.cleanup" */
+	name: string;
+	displayName: string;
+	/** The dedupe key, e.g. "arr.cleanup:3", one per instance and job type */
+	description: string;
+	enabled: boolean;
+	status: 'queued' | 'running' | 'success' | 'failed' | 'cancelled';
+	/** ISO timestamp */
+	next_run_at: string;
+	last_run_at: string | null;
+}
+
+/** The scheduled jobs Settings › Jobs lists */
+export async function scheduledJobs(page: Page): Promise<ScheduledJob[]> {
+	return await test.step(
+		'Read the scheduled jobs',
+		async () => {
+			const { jobs } = await pageData<{ jobs: ScheduledJob[] }>(page, '/settings/jobs');
+			return jobs;
+		},
+		{ box: true }
+	);
+}
+
+/**
+ * Wait until no job is running, as `/api/v1/status` reports it. Deleting an
+ * Arr instance while one of its jobs runs crashes the server, so a scenario
+ * waits for this before a delete.
+ */
+export async function waitForIdleJobs(page: Page, timeout = 30_000): Promise<void> {
+	await test.step(
+		'Wait until no job is running',
+		async () => {
+			await expect
+				.poll(
+					async () => {
+						const response = await page.request.get('/api/v1/status');
+						const status = (await response.json()) as { jobs: { active: number } };
+						return status.jobs.active;
+					},
+					{ message: '/api/v1/status should report no active jobs', timeout }
+				)
+				.toBe(0);
+		},
+		{ box: true }
+	);
+}

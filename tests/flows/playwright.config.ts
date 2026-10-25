@@ -13,7 +13,13 @@ export default defineConfig({
 	// Every *.spec.ts is a test file: scenarios under scenarios/, and each
 	// helper's own spec next to it under helpers/. Folders group the output.
 	testDir: '.',
-	testIgnore: ['data/**', 'test-results*/**', 'playwright-report/**', '.services/**'],
+	testIgnore: [
+		'data/**',
+		'test-results*/**',
+		'playwright-report/**',
+		'blob-report/**',
+		'.services/**'
+	],
 
 	// Builds the seeded "golden" data folder once, before any test runs.
 	globalSetup: './global-setup.ts',
@@ -34,7 +40,12 @@ export default defineConfig({
 	// Fail CI if a test.only() is left in.
 	forbidOnly: !!process.env.CI,
 
-	reporter: [['./reporter.ts'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
+	reporter: [
+		['./reporter.ts'],
+		['html', { open: 'never', outputFolder: 'playwright-report' }],
+		// Each CI shard saves a blob report. The Flow Tests job merges them into one.
+		...(process.env.CI ? [['blob', { outputDir: 'blob-report' }] as const] : [])
+	],
 	outputDir,
 
 	use: {
