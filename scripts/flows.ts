@@ -8,6 +8,7 @@
  *   deno task flows --build          rebuild the app first (otherwise only when missing)
  *   deno task flows --online         give the container network, so @online tests run too
  *   deno task flows --quiet          print only the end-of-run summary, no line per test
+ *   deno task flows --deal=2/4       run every 4th spec file from the 2nd, as CI shard 2 does
  *
  * FLOWS_WORKERS overrides how many scenarios run at once. FLOWS_VIDEO=1 records
  * a full-size video of every test for the trace viewer to play.
@@ -17,9 +18,11 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import process from 'node:process';
 import { SERVICE_IMAGES } from '$flows/harness/images.ts';
+import { dealSpecFiles, listSpecFiles } from '$flows/harness/specFiles.ts';
 
 const APP_BINARY = 'dist/build/profilarr';
-const CONFIG = 'tests/flows/playwright.config.ts';
+const FLOWS_DIR = 'tests/flows';
+const CONFIG = `${FLOWS_DIR}/playwright.config.ts`;
 const UI_PORT = 8080;
 const DOCKER_SOCKET = '/var/run/docker.sock';
 
@@ -34,11 +37,33 @@ const ui = args.includes('--ui');
 const rebuild = args.includes('--build');
 const online = args.includes('--online');
 const quiet = args.includes('--quiet');
+const deal = args.find((arg) => arg.startsWith('--deal='));
 const playwrightArgs = args.filter(
-	(arg) => !['--ui', '--build', '--online', '--quiet'].includes(arg)
+	(arg) => !['--ui', '--build', '--online', '--quiet'].includes(arg) && arg !== deal
 );
 // The reporter reads FLOWS_QUIET, forwarded into the container below
 if (quiet) process.env.FLOWS_QUIET = '1';
+
+// --deal=n/total runs every total-th spec file, starting at the n-th. Each CI
+// shard takes one deal, so a slow area's files spread across the shards
+// instead of filling one, as Playwright's --shard does with its even blocks.
+if (deal) {
+	const match = deal.match(/^--deal=(\d+)\/(\d+)$/);
+	const shard = Number(match?.[1]);
+	const total = Number(match?.[2]);
+	if (!match || shard < 1 || shard > total) {
+		console.error(`Invalid ${deal}: use --deal=n/total, with n from 1 to total`);
+		process.exit(2);
+	}
+	const files = dealSpecFiles(listSpecFiles(FLOWS_DIR), shard, total);
+	// Playwright given no file runs the whole suite, so an empty deal is an error
+	if (files.length === 0) {
+		console.error(`${deal} has no spec files`);
+		process.exit(2);
+	}
+	console.log(`Deal ${shard}/${total}: ${files.length} spec files`);
+	playwrightArgs.push(...files.map((file) => `${FLOWS_DIR}/${file}`));
+}
 
 if (rebuild || !existsSync(APP_BINARY)) {
 	console.log(rebuild ? 'Rebuilding the app...' : `${APP_BINARY} not found, building...`);
