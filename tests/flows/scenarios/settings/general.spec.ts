@@ -353,9 +353,7 @@ test('the TMDB token stays on the server', async ({ app, page }) => {
 
 	await tmdbField(page).fill(TMDB_TOKEN_2);
 	await saveForm(page, { action: 'save' });
-	expect(storedTmdbToken(app), 'A typed token should replace the stored one').toBe(
-		TMDB_TOKEN_2
-	);
+	expect(storedTmdbToken(app), 'A typed token should replace the stored one').toBe(TMDB_TOKEN_2);
 	await expectNotOnPage(page, '/settings/general', TMDB_TOKEN_2);
 });
 
